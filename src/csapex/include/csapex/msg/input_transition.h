@@ -8,7 +8,6 @@
 
 /// SYSTEM
 #include <unordered_map>
-#include <functional>
 
 namespace csapex
 {
@@ -16,7 +15,8 @@ namespace csapex
 class InputTransition : public Transition
 {
 public:
-    InputTransition(std::function<void()> activation_fn = [](){});
+    InputTransition(delegate::Delegate0<> activation_fn);
+    InputTransition();
 
     void addInput(InputPtr input);
     void removeInput(InputPtr input);

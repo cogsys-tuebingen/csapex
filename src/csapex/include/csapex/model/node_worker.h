@@ -9,7 +9,6 @@
 #include <csapex/param/parameter.h>
 #include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <map>
@@ -22,9 +21,7 @@
 
 namespace csapex {
 
-class NodeWorker :
-        public NodeHandle,
-        public ErrorState
+class NodeWorker : public ErrorState
 {
     friend class Node;
     friend class NodeBox;
@@ -39,8 +36,6 @@ public:
 public:
     typedef std::shared_ptr<NodeWorker> Ptr;
 
-    static const double DEFAULT_FREQUENCY;
-
     enum class State {
         IDLE,
         ENABLED,
@@ -49,14 +44,17 @@ public:
     };
 
 public:
-    NodeWorker(const std::string& type, const UUID& uuid, NodePtr node);
+    NodeWorker(NodeHandlePtr node_handle);
     ~NodeWorker();
 
+    NodeHandlePtr getNodeHandle();
+    NodePtr getNode() const;
+    UUID getUUID() const;
 
     void stop();
     void reset();
 
-    virtual void triggerCheckTransitions() override;
+    void triggerCheckTransitions();
     void triggerPanic();
 
     void setState(State state);
@@ -101,7 +99,7 @@ public:
     void startProcessingMessages();
     void finishProcessingMessages(bool was_executed);
 
-    void checkTransitions(bool try_fire = true);
+    void checkTransitions();
 
     void checkParameters();    
     void checkIO();
@@ -143,8 +141,6 @@ private:
     void publishParameter(csapex::param::Parameter *p);
     void publishParameterOn(const csapex::param::Parameter &p, Output *out);
 
-    void assertNotInGuiThread();
-
     void finishTimer(TimerPtr t);
 
     void updateTransitionConnections();
@@ -152,10 +148,14 @@ private:
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
 
 
-    virtual void connectConnector(Connectable *c) override;
+    void connectConnector(Connectable *c);
 
+    void checkTransitionsImpl(bool try_fire);
 
 private:
+    mutable std::recursive_mutex sync;
+
+    NodeHandlePtr node_handle_;
     NodeModifierPtr modifier_;
 
     bool is_setup_;

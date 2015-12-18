@@ -788,7 +788,7 @@ void model_updateAngleSpinParameter(param::AngleParameterWeakPtr angle_p, QDial*
     dial->setValue(angleToDial(p->as<double>()));
     dial->blockSignals(false);
 }
-void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, QDoubleSpinBox* spin)
+void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, QDoubleSpinBox* /*spin*/)
 {
     assertGuiThread();
     auto p = range_p.lock();

@@ -13,7 +13,8 @@ namespace csapex
 class OutputTransition : public Transition
 {
 public:
-    OutputTransition(std::function<void()> activation_fn = [](){});
+    OutputTransition(delegate::Delegate0<> activation_fn);
+    OutputTransition();
 
     void addOutput(OutputPtr output);
     void removeOutput(OutputPtr output);

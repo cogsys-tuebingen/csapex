@@ -14,8 +14,13 @@
 
 using namespace csapex;
 
-InputTransition::InputTransition(std::function<void()> activation_fn)
+InputTransition::InputTransition(delegate::Delegate0<> activation_fn)
     : Transition(activation_fn), one_input_is_dynamic_(false)
+{
+}
+
+InputTransition::InputTransition()
+    : Transition(), one_input_is_dynamic_(false)
 {
 }
 

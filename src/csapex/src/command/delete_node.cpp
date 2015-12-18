@@ -65,7 +65,7 @@ bool DeleteNode::doUndo()
 {
     NodeWorker::Ptr node = node_factory_->makeNode(type, uuid);
 
-    node->setNodeState(saved_state);
+    node->getNodeHandle()->setNodeState(saved_state);
 
     graph_->addNode(node);
 

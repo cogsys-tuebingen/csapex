@@ -9,16 +9,25 @@
 
 using namespace csapex;
 
-Transition::Transition(std::function<void ()> activation_fn)
+Transition::Transition(delegate::Delegate0<> activation_fn)
     : activation_fn_(activation_fn)
 {
+}
 
+Transition::Transition()
+{
 }
 
 Transition::~Transition()
 {
 
 }
+
+void Transition::setActivationFunction(delegate::Delegate0<> activation_fn)
+{
+    activation_fn_ = activation_fn;
+}
+
 void Transition::addConnection(ConnectionPtr connection)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -85,7 +94,9 @@ void Transition::updateConnections()
 void Transition::checkIfEnabled()
 {
 //    if(isEnabled()) { // TODO: check here if enabled
+    if(activation_fn_) {
         activation_fn_();
+    }
 //    }
 }
 

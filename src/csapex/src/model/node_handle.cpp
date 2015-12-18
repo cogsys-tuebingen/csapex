@@ -17,14 +17,15 @@
 
 using namespace csapex;
 
-NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node)
+NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
+                       InputTransitionPtr transition_in, OutputTransitionPtr transition_out)
     : Unique(uuid),
       node_(node),
       node_state_(std::make_shared<NodeState>(this)),
       node_type_(type),
 
-      transition_in_(std::make_shared<InputTransition>(std::bind(&NodeHandle::triggerCheckTransitions, this))),
-      transition_out_(std::make_shared<OutputTransition>(std::bind(&NodeHandle::triggerCheckTransitions, this))),
+      transition_in_(transition_in),
+      transition_out_(transition_out),
       next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0)
 {
     node_state_->setLabel(uuid);
@@ -210,6 +211,10 @@ void NodeHandle::makeParameterNotConnectable(csapex::param::ParameterPtr p)
 
     Input* cin = cin_ptr.get();
     Output* cout = cout_ptr.get();
+
+    if(!cin || !cout) {
+        return;
+    }
 
     disconnectConnector(cin);
     disconnectConnector(cout);
@@ -453,10 +458,10 @@ void NodeHandle::addOutput(OutputPtr out)
 
     connectConnector(out.get());
 
-    out->messageProcessed.connect([this](Connectable*) { triggerCheckTransitions(); });
-    out->connection_removed_to.connect([this](Connectable*) { triggerCheckTransitions(); });
-    out->connection_added_to.connect([this](Connectable*) { triggerCheckTransitions(); });
-    out->connectionEnabled.connect([this](bool) { triggerCheckTransitions(); });
+    out->messageProcessed.connect([this](Connectable*) { mightBeEnabled(); });
+    out->connection_removed_to.connect([this](Connectable*) { mightBeEnabled(); });
+    out->connection_added_to.connect([this](Connectable*) { mightBeEnabled(); });
+    out->connectionEnabled.connect([this](bool) { mightBeEnabled(); });
 
     connectorCreated(out);
     transition_out_->addOutput(out);
@@ -505,12 +510,12 @@ void NodeHandle::addTrigger(TriggerPtr t)
     //  TRIGGERs are done (not only this one!!!!!)
 
     auto connection_triggered = t->triggered.connect([this](){
-        triggerCheckTransitions();
+        mightBeEnabled();
     });
     trigger_triggered_connections_.insert(std::make_pair(t.get(), connection_triggered));
 
     auto connection_handled = t->all_signals_handled.connect([this](){
-        triggerCheckTransitions();
+        mightBeEnabled();
     });
     trigger_handled_connections_.insert(std::make_pair(t.get(), connection_handled));
 
@@ -644,6 +649,26 @@ std::vector<TriggerPtr> NodeHandle::getTriggers() const
     return triggers_;
 }
 
+
+std::map<std::string, InputWeakPtr>& NodeHandle::paramToInputMap()
+{
+    return param_2_input_;
+}
+
+std::map<std::string, OutputWeakPtr>& NodeHandle::paramToOutputMap()
+{
+    return param_2_output_;
+}
+
+std::map<Input*,csapex::param::Parameter*>& NodeHandle::inputToParamMap()
+{
+    return input_2_param_;
+}
+
+std::map<Output*,csapex::param::Parameter*>& NodeHandle::outputToParamMap()
+{
+    return output_2_param_;
+}
 
 
 void NodeHandle::connectConnector(Connectable *c)

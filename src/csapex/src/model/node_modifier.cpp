@@ -17,29 +17,29 @@ NodeModifier::NodeModifier(NodeWorker *node)
 
 Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional)
 {
-    return node_worker_->addInput(type, label, dynamic, optional);
+    return node_worker_->getNodeHandle()->addInput(type, label, dynamic, optional);
 }
 
 Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
 {
-    return node_worker_->addOutput(type, label, dynamic);
+    return node_worker_->getNodeHandle()->addOutput(type, label, dynamic);
 }
 
 
 Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback)
 {
-    return node_worker_->addSlot(label, callback, false);
+    return node_worker_->getNodeHandle()->addSlot(label, callback, false);
 }
 
 Slot* NodeModifier::addActiveSlot(const std::string& label, std::function<void()> callback)
 {
-    return node_worker_->addSlot(label, callback, true);
+    return node_worker_->getNodeHandle()->addSlot(label, callback, true);
 }
 
 
 Trigger* NodeModifier::addTrigger(const std::string& label)
 {
-    return node_worker_->addTrigger(label);
+    return node_worker_->getNodeHandle()->addTrigger(label);
 }
 
 
@@ -48,10 +48,10 @@ Trigger* NodeModifier::addTrigger(const std::string& label)
 std::vector<Input*> NodeModifier::getMessageInputs() const
 {
     // hide parameter inputs from the nodes
-    auto vec = node_worker_->getAllInputs();
+    auto vec = node_worker_->getNodeHandle()->getAllInputs();
     std::vector<Input*> result;
     for(auto entry : vec) {
-        if(!node_worker_->isParameterInput(entry.get()))  {
+        if(!node_worker_->getNodeHandle()->isParameterInput(entry.get()))  {
             result.push_back(entry.get());
         }
     }
@@ -60,10 +60,10 @@ std::vector<Input*> NodeModifier::getMessageInputs() const
 std::vector<Output*> NodeModifier::getMessageOutputs() const
 {
     // hide parameter outputs from the nodes
-    auto vec = node_worker_->getAllOutputs();
+    auto vec = node_worker_->getNodeHandle()->getAllOutputs();
     std::vector<Output*> result;
     for(auto entry : vec) {
-        if(!node_worker_->isParameterOutput(entry.get()))  {
+        if(!node_worker_->getNodeHandle()->isParameterOutput(entry.get()))  {
             result.push_back(entry.get());
         }
     }
@@ -71,7 +71,7 @@ std::vector<Output*> NodeModifier::getMessageOutputs() const
 }
 std::vector<Slot*> NodeModifier::getSlots() const
 {
-    auto vec = node_worker_->getSlots();
+    auto vec = node_worker_->getNodeHandle()->getSlots();
     std::vector<Slot*> result(vec.size());
     std::size_t i = 0;
     for(auto entry : vec) {
@@ -81,7 +81,7 @@ std::vector<Slot*> NodeModifier::getSlots() const
 }
 std::vector<Trigger*> NodeModifier::getTriggers() const
 {
-    auto vec = node_worker_->getTriggers();
+    auto vec = node_worker_->getNodeHandle()->getTriggers();
     std::vector<Trigger*> result(vec.size());
     std::size_t i = 0;
     for(auto entry : vec) {
@@ -93,22 +93,22 @@ std::vector<Trigger*> NodeModifier::getTriggers() const
 
 void NodeModifier::removeInput(const UUID &uuid)
 {
-    node_worker_->removeInput(uuid);
+    node_worker_->getNodeHandle()->removeInput(uuid);
 }
 
 void NodeModifier::removeOutput(const UUID &uuid)
 {
-    node_worker_->removeOutput(uuid);
+    node_worker_->getNodeHandle()->removeOutput(uuid);
 }
 
 void NodeModifier::removeSlot(const UUID &uuid)
 {
-    node_worker_->removeSlot(uuid);
+    node_worker_->getNodeHandle()->removeSlot(uuid);
 }
 
 void NodeModifier::removeTrigger(const UUID &uuid)
 {
-    node_worker_->removeTrigger(uuid);
+    node_worker_->getNodeHandle()->removeTrigger(uuid);
 }
 
 bool NodeModifier::isSource() const

@@ -19,7 +19,9 @@ namespace csapex
 class NodeHandle : public Unique
 {
 public:
-    NodeHandle(const std::string& type, const UUID &uuid, NodePtr node);
+    NodeHandle(const std::string& type, const UUID &uuid,
+               NodePtr node,
+               InputTransitionPtr transition_in, OutputTransitionPtr transition_out);
     virtual ~NodeHandle();    
 
     std::string getType() const;
@@ -74,8 +76,15 @@ public:
     std::vector<SlotPtr> getSlots() const;
     std::vector<TriggerPtr> getTriggers() const;
 
-    virtual void triggerCheckTransitions() = 0;
+    std::map<std::string, InputWeakPtr>& paramToInputMap();
+    std::map<std::string, OutputWeakPtr>& paramToOutputMap();
 
+    std::map<Input*,csapex::param::Parameter*>& inputToParamMap();
+    std::map<Output*,csapex::param::Parameter*>& outputToParamMap();
+
+public:
+    // TODO: get rid of
+    void updateParameterValue(Connectable* source);
 
 public:
     boost::signals2::signal<void (ConnectablePtr)> connectorCreated;
@@ -89,14 +98,15 @@ public:
 
     boost::signals2::signal<void()> nodeStateChanged;
 
+    boost::signals2::signal<void()> mightBeEnabled;
+
 
     // TODO: get rid of
     boost::signals2::signal<void(std::function<void()>)> executionRequested;
 
 protected:
-    void updateParameterValue(Connectable* source);
-    virtual void connectConnector(Connectable* c);
-    virtual void disconnectConnector(Connectable* c);
+    void connectConnector(Connectable* c);
+    void disconnectConnector(Connectable* c);
 
 private:
     void removeInput(Input *in);

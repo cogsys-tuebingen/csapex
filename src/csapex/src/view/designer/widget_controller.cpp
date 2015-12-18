@@ -147,8 +147,9 @@ void WidgetController::setStyleSheet(const QString &str)
 
 void WidgetController::startPlacingBox(QWidget *parent, const std::string &type, NodeStatePtr state, const QPoint &offset)
 {
-    NodeConstructor::Ptr c = node_factory_->getConstructor(type);
-    NodeWorker::Ptr content = c->makePrototype();
+    NodeConstructorPtr c = node_factory_->getConstructor(type);
+    NodeWorkerPtr worker = c->makePrototype();
+    NodeHandlePtr handle = worker->getNodeHandle();
 
     QDrag* drag = new QDrag(parent);
     QMimeData* mimeData = new QMimeData;
@@ -162,13 +163,13 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    NodeBox::Ptr object(new NodeBox(settings_, content,
-                                    NodeAdapter::Ptr(std::make_shared<DefaultNodeAdapter>(content, this)),
+    NodeBox::Ptr object(new NodeBox(settings_, worker,
+                                    NodeAdapter::Ptr(std::make_shared<DefaultNodeAdapter>(handle, this)),
                                     QIcon(QString::fromStdString(c->getIcon()))));
 
     object->setStyleSheet(pimpl->style_sheet_);
     object->construct();
-    object->setObjectName(content->getType().c_str());
+    object->setObjectName(handle->getType().c_str());
     object->setLabel(type);
 
     drag->setPixmap(object->grab());
@@ -189,43 +190,44 @@ DesignerScene* WidgetController::getDesignerScene()
 void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
 {
     if(designer_) {
-        std::string type = node_worker->getType();
+        NodeHandlePtr node_handle = node_worker->getNodeHandle();
+        std::string type = node_handle->getType();
 
-        NodeAdapter::Ptr adapter = node_adapter_factory_->makeNodeAdapter(node_worker, this);
+        NodeAdapter::Ptr adapter = node_adapter_factory_->makeNodeAdapter(node_handle, this);
 
         QIcon icon = QIcon(QString::fromStdString(node_factory_->getConstructor(type)->getIcon()));
 
         NodeBox* box = new NodeBox(settings_, node_worker, adapter, icon);
 
-        pimpl->box_map_[node_worker->getUUID()] = box;
-        pimpl->proxy_map_[node_worker->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
+        pimpl->box_map_[node_handle->getUUID()] = box;
+        pimpl->proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
 
         box->construct();
 
         designer_->addBox(box);
 
         // add existing connectors
-        for(auto input : node_worker->getAllInputs()) {
+        for(auto input : node_handle->getAllInputs()) {
             connectorMessageAdded(input);
         }
-        for(auto output : node_worker->getAllOutputs()) {
+        for(auto output : node_handle->getAllOutputs()) {
             connectorMessageAdded(output);
         }
-        for(auto slot : node_worker->getSlots()) {
+        for(auto slot : node_handle->getSlots()) {
             connectorSignalAdded(slot);
         }
-        for(auto trigger : node_worker->getTriggers()) {
+        for(auto trigger : node_handle->getTriggers()) {
             connectorSignalAdded(trigger);
         }
 
         // subscribe to coming connectors
-        auto c1 = node_worker->connectorCreated.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
+        auto c1 = node_handle->connectorCreated.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
         connections_.push_back(c1);
-        auto c2 = node_worker->connectorRemoved.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
+        auto c2 = node_handle->connectorRemoved.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
         connections_.push_back(c2);
 
 
-        UUID uuid = node_worker->getUUID();
+        UUID uuid = node_handle->getUUID();
         QObject::connect(box, &NodeBox::toggled, [this, uuid](bool checked) {
             dispatcher_.execute(std::make_shared<command::DisableNode>(uuid, !checked));
         });

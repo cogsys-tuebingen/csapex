@@ -71,7 +71,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
     }
 
     try {
-        deserializeNode(doc, node_worker.get());
+        deserializeNode(doc, node_worker->getNodeHandle().get());
 
     } catch(const std::exception& e) {
         std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;

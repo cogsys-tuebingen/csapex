@@ -10,10 +10,13 @@
 
 using namespace csapex;
 
-OutputTransition::OutputTransition(std::function<void ()> activation_fn)
+OutputTransition::OutputTransition(delegate::Delegate0<> activation_fn)
     : Transition(activation_fn), sequence_number_(-1)
 {
-
+}
+OutputTransition::OutputTransition()
+    : Transition(), sequence_number_(-1)
+{
 }
 
 void OutputTransition::reset()

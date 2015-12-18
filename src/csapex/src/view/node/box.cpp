@@ -35,8 +35,8 @@ NodeBox::NodeBox(Settings& settings, NodeWorker::Ptr worker, NodeAdapter::Ptr ad
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_worker_(worker), adapter_(adapter), icon_(icon),
       down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), is_placed_(false)
 {
-    worker->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::flipSides, this));
-    worker->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
+    worker->getNodeHandle()->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::flipSides, this));
+    worker->getNodeHandle()->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
 
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
 
@@ -58,7 +58,7 @@ void NodeBox::setupUi()
         return;
     }
 
-    auto node = worker->getNode().lock();
+    auto node = worker->getNode();
     if(!node) {
         return;
     }
@@ -115,20 +115,22 @@ void NodeBox::construct()
         return;
     }
 
+    NodeHandlePtr nh = worker->getNodeHandle();
+
     ui->setupUi(this);
 
     ui->input_layout->addSpacerItem(new QSpacerItem(16, 0));
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
     ui->enablebtn->setCheckable(true);
-    ui->enablebtn->setChecked(worker->getNodeState()->isEnabled());
+    ui->enablebtn->setChecked(nh->getNodeState()->isEnabled());
 
     QSize size(16, 16);
     ui->icon->setPixmap(icon_.pixmap(size));
 
     setFocusPolicy(Qt::ClickFocus);
 
-    const UUID& uuid = worker->getUUID();
+    const UUID& uuid = nh->getUUID();
     setToolTip(uuid.c_str());
 
     setObjectName(uuid.c_str());
@@ -136,30 +138,28 @@ void NodeBox::construct()
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
-    setLabel(worker->getNodeState()->getLabel());
+    setLabel(nh->getNodeState()->getLabel());
 
     QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
 
-    //QObject::connect(worker.get(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
-
-    worker->nodeStateChanged.connect([this]() { nodeStateChanged(); });
+    nh->nodeStateChanged.connect([this]() { nodeStateChanged(); });
     QObject::connect(this, SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChangedEvent()), Qt::QueuedConnection);
 
-    worker->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
-    worker->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
+    nh->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
+    nh->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
     enabledChangeEvent(worker->isProcessingEnabled());
-//    worker->enabled.connect([this](bool e){ enabledChange(e); });
+//    nh->enabled.connect([this](bool e){ enabledChange(e); });
     QObject::connect(this, SIGNAL(enabledChange(bool)), this, SLOT(enabledChangeEvent(bool)), Qt::QueuedConnection);
 
     worker->threadChanged.connect([this](){ updateThreadInformation(); });
     worker->errorHappened.connect([this](bool){ updateVisualsRequest(); });
 
 
-    for(auto input : worker->getAllInputs()) {
+    for(auto input : nh->getAllInputs()) {
         registerInputEvent(input.get());
     }
-    for(auto output : worker->getAllOutputs()) {
+    for(auto output : nh->getAllOutputs()) {
         registerOutputEvent(output.get());
     }
 
@@ -172,7 +172,7 @@ Node* NodeBox::getNode()
     if(!worker) {
         return nullptr;
     }
-    return worker->getNode().lock().get();
+    return worker->getNode().get();
 }
 
 NodeWorker* NodeBox::getNodeWorker()
@@ -190,7 +190,7 @@ NodeHandle* NodeBox::getNodeHandle()
     if(!worker) {
         return nullptr;
     }
-    return worker.get();
+    return worker->getNodeHandle().get();
 }
 
 NodeAdapter::Ptr NodeBox::getNodeAdapter()
@@ -264,7 +264,8 @@ void NodeBox::updateThreadInformation()
     }
 
     if(info_thread) {
-        int id = worker->getNodeState()->getThreadId();
+        NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+        int id = state->getThreadId();
         std::stringstream info;
         if(settings_.get<bool>("threadless")) {
             info << "<i><b><small>threadless</small></b></i>";
@@ -276,7 +277,7 @@ void NodeBox::updateThreadInformation()
             info << "<i><b><small>private</small></b></i>";
             info_thread->setStyleSheet("QLabel { background-color : rgb(255,255,255); color: rgb(0,0,0);}");
         } else {
-            info << worker->getNodeState()->getThreadName();
+            info << state->getThreadName();
             setStyleForId(info_thread, id);
         }
         info_thread->setText(info.str().c_str());
@@ -339,8 +340,10 @@ void NodeBox::setLabel(const std::string& label)
     if(!worker) {
         return;
     }
-    apex_assert_hard(worker->getNodeState());
-    worker->getNodeState()->setLabel(label);
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+
+    apex_assert_hard(state);
+    state->setLabel(label);
     ui->label->setText(label.c_str());
     ui->label->setToolTip(label.c_str());
 }
@@ -351,7 +354,8 @@ void NodeBox::setLabel(const QString &label)
     if(!worker) {
         return;
     }
-    worker->getNodeState()->setLabel(label.toStdString());
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    state->setLabel(label.toStdString());
     ui->label->setText(label);
 }
 
@@ -361,7 +365,8 @@ std::string NodeBox::getLabel() const
     if(!worker) {
         return "";
     }
-    return worker->getNodeState()->getLabel();
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    return state->getLabel();
 }
 
 void NodeBox::registerEvent(Connectable* c)
@@ -389,7 +394,7 @@ void NodeBox::registerOutputEvent(Output* out)
     Q_EMIT changed(this);
 }
 
-void NodeBox::resizeEvent(QResizeEvent *e)
+void NodeBox::resizeEvent(QResizeEvent */*e*/)
 {
     Q_EMIT changed(this);
 }
@@ -401,7 +406,8 @@ void NodeBox::init()
         return;
     }
 
-    Point pt = worker->getNodeState()->getPos();
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    Point pt = state->getPos();
     move(QPoint(pt.x, pt.y));
 }
 
@@ -511,7 +517,8 @@ void NodeBox::moveEvent(QMoveEvent* e)
 
     eventFilter(this, e);
 
-    worker->getNodeState()->setPos(Point(pos.x(), pos.y()));
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    state->setPos(Point(pos.x(), pos.y()));
 }
 
 void NodeBox::triggerPlaced()
@@ -574,7 +581,8 @@ void NodeBox::flipSides()
     }
     updateVisuals();
 
-    bool flip = worker->getNodeState()->isFlipped();
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    bool flip = state->isFlipped();
     Q_EMIT flipped(flip);
 }
 
@@ -586,7 +594,8 @@ void NodeBox::minimizeBox()
     }
     updateVisuals();
 
-    bool minimize = worker->getNodeState()->isMinimized();
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    bool minimize = state->isMinimized();
     Q_EMIT minimized(minimize);
 }
 
@@ -596,7 +605,8 @@ void NodeBox::updateVisuals()
     if(!worker) {
         return;
     }
-    bool flip = worker->getNodeState()->isFlipped();
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    bool flip = state->isFlipped();
 
     auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
     if(layout) {
@@ -634,7 +644,8 @@ bool NodeBox::isMinimizedSize() const
     if(!worker) {
         return false;
     }
-    return worker->getNodeState()->isMinimized();
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    return state->isMinimized();
 }
 
 bool NodeBox::isFlipped() const
@@ -643,7 +654,8 @@ bool NodeBox::isFlipped() const
     if(!worker) {
         return false;
     }
-    return worker->getNodeState()->isFlipped();
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    return state->isFlipped();
 }
 
 bool NodeBox::hasSubGraph()
@@ -664,18 +676,20 @@ void NodeBox::nodeStateChangedEvent()
     }
     minimizeBox();
 
-    bool enabled = worker->getNodeState()->isEnabled();
+    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+
+    bool enabled = state->isEnabled();
     worker->setProcessingEnabled(enabled);
     ui->label->setEnabled(enabled);
 
-    enabledChange(worker->getNodeState()->isEnabled());
+    enabledChange(state->isEnabled());
 
-    setLabel(worker->getNodeState()->getLabel());
+    setLabel(state->getLabel());
     ui->label->setToolTip(worker->getUUID().c_str());
 
     updateThreadInformation();
 
-    auto pt = worker->getNodeState()->getPos();
+    auto pt = state->getPos();
     move(QPoint(pt.x, pt.y));
 }
 /// MOC

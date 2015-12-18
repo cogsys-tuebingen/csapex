@@ -31,7 +31,7 @@ SignalConnection::SignalConnection(Trigger *from, Slot *to)
     from->connect(to);
 }
 
-SignalConnection::SignalConnection(Trigger *from, Slot *to, int id)
+SignalConnection::SignalConnection(Trigger *from, Slot *to, int /*id*/)
     : Connection(from, to)
 {
     from->connect(to);

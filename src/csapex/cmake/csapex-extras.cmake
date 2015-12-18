@@ -1,4 +1,5 @@
-add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function -Wno-deprecated-register)
+add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function -Wno-deprecated-register
+ -Wno-inconsistent-missing-override -Wno-deprecated-register)
 #add_definitions(-g -rdynamic)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

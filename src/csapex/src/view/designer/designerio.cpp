@@ -42,7 +42,7 @@ void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* wid
     for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
         NodeWorkerPtr nh = *it;
         YAML::Node adapters;
-        saveBox(nh.get(), widget_ctrl, adapters);
+        saveBox(nh->getNodeHandle().get(), widget_ctrl, adapters);
         yaml["adapters"] = adapters;
     }
 }

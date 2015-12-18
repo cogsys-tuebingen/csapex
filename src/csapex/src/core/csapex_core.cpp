@@ -138,7 +138,7 @@ void CsApexCore::init()
 
 CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
 {
-    assert(core_plugins_.find(plugin_name) != core_plugins_.end());
+    assert(core_plugins_.find(plugin_name) == core_plugins_.end());
 
     const PluginConstructor<CorePlugin>& constructor = core_plugin_manager->availableClasses(plugin_name);
 

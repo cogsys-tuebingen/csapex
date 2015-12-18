@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection.h>
+#include <csapex/utility/delegate.h>
 
 /// SYSTEM
 #include <mutex>
@@ -14,8 +15,12 @@ namespace csapex
 class Transition
 {
 public:
-    Transition(std::function<void()> activation_fn);
+    Transition(delegate::Delegate0<> activation_fn);
+    Transition();
+
     virtual ~Transition();
+
+    void setActivationFunction(delegate::Delegate0<> activation_fn);
 
     void addConnection(ConnectionPtr connection);
     void fadeConnection(ConnectionPtr connection);
@@ -49,7 +54,7 @@ protected:
     void trackConnection(Connection* connection, const boost::signals2::connection& c);
 
 protected:
-    std::function<void()> activation_fn_;
+    delegate::Delegate0<> activation_fn_;
 
     std::vector<ConnectionPtr> established_connections_;
     std::vector<ConnectionPtr> unestablished_connections_;

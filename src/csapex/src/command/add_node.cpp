@@ -48,7 +48,7 @@ bool AddNode::doExecute()
         return false;
     }
 
-    node->getNodeState()->setPos(pos_);
+    node->getNodeHandle()->getNodeState()->setPos(pos_);
 
     graph_->addNode(node);
 

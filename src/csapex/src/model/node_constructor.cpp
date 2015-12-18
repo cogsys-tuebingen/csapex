@@ -6,8 +6,11 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
+#include <csapex/msg/input_transition.h>
+#include <csapex/msg/output_transition.h>
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/utility/delegate_bind.h>
 
 using namespace csapex;
 
@@ -87,7 +90,16 @@ NodeWorker::Ptr NodeConstructor::makePrototype() const
 NodeWorker::Ptr NodeConstructor::makeNodeWorker(const UUID& uuid) const
 {
     try {
-        return std::make_shared<NodeWorker>(type_, uuid, makeNode());
+        OutputTransitionPtr ot = std::make_shared<OutputTransition>();
+        InputTransitionPtr it = std::make_shared<InputTransition>();
+        NodeHandlePtr node_handle = std::make_shared<NodeHandle>(type_, uuid, makeNode(), it, ot);
+        NodeWorkerPtr res = std::make_shared<NodeWorker>(node_handle);
+
+        auto af = delegate::bind(&NodeWorker::triggerCheckTransitions, res.get());
+        it->setActivationFunction(af);
+        ot->setActivationFunction(af);
+
+        return res;
     } catch(const std::exception& e) {
         std::cerr << "cannot construct node with UUID " << uuid.getFullName() << ": " << e.what() << std::endl;
         return nullptr;

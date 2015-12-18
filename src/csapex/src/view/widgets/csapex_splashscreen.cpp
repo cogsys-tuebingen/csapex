@@ -10,7 +10,7 @@
 
 using namespace csapex;
 
-CsApexSplashScreen::CsApexSplashScreen(QWidget *parent) :
+CsApexSplashScreen::CsApexSplashScreen(QWidget */*parent*/) :
     QSplashScreen(QPixmap(":/apex_splash.png"))
 
 {

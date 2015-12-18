@@ -21,7 +21,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
       paused_(false), ticking_(false), is_source_(false), stepping_(false), can_step_(false),
       tick_thread_running_(false)
 {
-    NodePtr node = worker_->getNode().lock();
+    NodePtr node = worker_->getNodeHandle()->getNode().lock();
     is_source_ = worker_->isSource();
     ticking_ = node && std::dynamic_pointer_cast<TickableNode>(node);
 
@@ -29,7 +29,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
                                                std::bind(&NodeWorker::checkParameters, worker),
                                                this);
     check_transitions_ = std::make_shared<Task>(std::string("check ") + worker->getUUID().getFullName(),
-                                                std::bind(&NodeWorker::checkTransitions, worker, true),
+                                                std::bind(&NodeWorker::checkTransitions, worker),
                                                 this);
 
     if(ticking_) {
@@ -78,7 +78,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     scheduler_ = scheduler;
 
     scheduler_->add(this, remaining_tasks_);
-    worker_->getNodeState()->setThread(scheduler->name(), scheduler->id());
+    worker_->getNodeHandle()->getNodeState()->setThread(scheduler->name(), scheduler->id());
 
     remaining_tasks_.clear();
 
@@ -94,7 +94,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     connections_.push_back(ctr);
 
     // parameter change
-    auto check = worker_->parametersChanged.connect([this]() {
+    auto check = worker_->getNodeHandle()->parametersChanged.connect([this]() {
         schedule(check_parameters_);
     });
     connections_.push_back(check);
@@ -103,7 +103,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
 
     // generic task
-    auto cg = worker_->executionRequested.connect([this](std::function<void()> cb) {
+    auto cg = worker_->getNodeHandle()->executionRequested.connect([this](std::function<void()> cb) {
             schedule(std::make_shared<Task>("anonymous", cb));
 });
     connections_.push_back(cg);
@@ -124,7 +124,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
 void NodeRunner::tickLoop()
 {
-    NodePtr node =  worker_->getNode().lock();
+    NodePtr node =  worker_->getNode();
     auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
 
     using std::chrono::system_clock;

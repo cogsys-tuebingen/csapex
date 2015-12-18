@@ -45,6 +45,9 @@ void GenericState::writeYaml(YAML::Node& out) const {
 void GenericState::readYaml(const YAML::Node& node) {
     if(node["params"].IsDefined()) {
         params = node["params"].as<std::map<std::string, csapex::param::Parameter::Ptr> >();
+        for(auto pair : params) {
+            legacy.insert(pair.first);
+        }
     }
     if(node["persistent_params"].IsDefined()) {
         std::vector<std::string> persistent_v = node["persistent_params"].as<std::vector<std::string> >();
@@ -62,20 +65,11 @@ void GenericState::initializePersistentParameters()
 
 void GenericState::addParameter(csapex::param::Parameter::Ptr param)
 {
-    if(param->name() == "playback/resend") {
-        std::cerr << "add parameter " << param->name() << " to " << (long) this << std::endl;
-
-        std::cerr << "already there: \n";
-        for(auto p : params) {
-            std::cerr << "- " << p.second->name() << "\n";
-        }
-        std::cerr << std::flush;
-    }
-    csapex::param::Parameter::Ptr old_value;
     if(params.find(param->name()) != params.end()) {
         throw std::logic_error(std::string("a parameter with the name ") + param->name() + " has already been added.");
     }
     apex_assert_hard(param->name() != "noname");
+    legacy.erase(param->name());
     if(std::find(order.begin(), order.end(), param->name()) == order.end()) {
         order.push_back(param->name());
     }
@@ -103,13 +97,12 @@ void GenericState::removeTemporaryParameters()
         std::string name(it->first);
         csapex::param::Parameter::Ptr p = getParameter(name);
 
-//        params.erase(params.find(name));
+        // don't erase the param itself, remember the value for future!
+        // don't -> params.erase(params.find(name));
         order.erase(std::find(order.begin(), order.end(), name));
 
         (*parameter_removed)(p);
     }
-
-    temporary.clear();
 
     triggerParameterSetChanged();
 }
@@ -123,14 +116,27 @@ void GenericState::triggerParameterSetChanged()
 
 void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
-    addParameter(param);
-    temporary[param->name()] = true;
+    // check if there is an old version of the parameter
+    csapex::param::Parameter::Ptr entry = param;
+    std::string name = param->name();
+    auto param_pos = params.find(name);
+    if(param_pos != params.end()) {
+        // the existing parameter should be temporary or legacy
+        if(temporary.find(name) == temporary.end() && legacy.find(name) == legacy.end()) {
+            throw std::runtime_error("trying to add a temporary parameter with the name "
+                                     "of an existing parameter '" + name + "'");
+        }
+        param::Parameter::Ptr p = param_pos->second;
+        entry->setValueFrom(*p);
+        removeParameter(p);
+    }
+    temporary[entry->name()] = true;
+    addParameter(entry);
 }
 
 void GenericState::removeTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
     removeParameter(param);
-    temporary.erase(param->name());
 }
 
 
@@ -170,6 +176,7 @@ void GenericState::setFrom(const GenericState &rhs)
             params[name]->setValueFrom(*p);
         } else {
             params[name] = csapex::param::ParameterFactory::clone(p);
+            legacy.insert(name);
         }
     }
 
@@ -210,9 +217,11 @@ std::vector<csapex::param::Parameter::Ptr> GenericState::getParameters() const
 std::vector<csapex::param::Parameter::Ptr> GenericState::getTemporaryParameters() const
 {
     std::vector<csapex::param::Parameter::Ptr> result;
-    typedef std::pair<const std::string&,bool> PAIR;
-    for(const PAIR& pair : temporary) {
-        result.push_back(params.at(pair.first));
+    for(const auto& pair : temporary) {
+        auto pos = params.find(pair.first);
+        if(pos != params.end()) {
+            result.push_back(pos->second);
+        }
     }
 
     return result;

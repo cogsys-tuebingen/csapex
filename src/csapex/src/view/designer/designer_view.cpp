@@ -455,10 +455,11 @@ void DesignerView::addBoxEvent(NodeBox *box)
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
     NodeWorker* worker = box->getNodeWorker();
+    NodeHandle* handle = worker->getNodeHandle().get();
 
-    connections_[worker].push_back(worker->connectionStart.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); }));
-    connections_[worker].push_back(worker->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
-    connections_[worker].push_back(worker->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    connections_[worker].push_back(handle->connectionStart.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); }));
+    connections_[worker].push_back(handle->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
+    connections_[worker].push_back(handle->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
     connections_[worker].push_back(graph_->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
 
@@ -477,7 +478,7 @@ void DesignerView::addBoxEvent(NodeBox *box)
 
     box->setStyleSheet(styleSheet());
 
-    foreach (QGraphicsItem *item, items()) {
+    for(QGraphicsItem *item : items()) {
         item->setFlag(QGraphicsItem::ItemIsMovable);
         item->setFlag(QGraphicsItem::ItemIsSelectable);
         item->setCacheMode(QGraphicsItem::DeviceCoordinateCache);

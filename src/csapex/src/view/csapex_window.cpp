@@ -239,7 +239,7 @@ void CsApexWindow::showHelp(NodeBox *box)
     }
 
 
-    std::string node_type = box->getNodeWorker()->getType();
+    std::string node_type = box->getNodeHandle()->getType();
 
     QTreeWidgetItemIterator it(ui->node_info_tree);
     while (*it) {
@@ -279,10 +279,10 @@ void CsApexWindow::updateDebugInfo()
 
     std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
 
-    foreach (NodeBox* box, selected) {
-        NodeWorker* worker = box->getNodeWorker();
-        worker->nodeStateChanged.connect([this](){ updateDebugInfo(); });
-        ui->box_info->addTopLevelItem(NodeStatistics(worker).createDebugInformation(widget_ctrl_->getNodeFactory()));
+    for(NodeBox* box : selected) {
+        NodeHandle* handle = box->getNodeHandle();
+        handle->nodeStateChanged.connect([this](){ updateDebugInfo(); });
+        ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(widget_ctrl_->getNodeFactory()));
     }
 
     QTreeWidgetItemIterator it(ui->box_info);
@@ -341,7 +341,7 @@ void CsApexWindow::updateNodeInfo()
             ss << "<h1>Parameters:</h1>";
 
 
-            auto node = n->makePrototype()->getNode().lock();
+            auto node = n->makePrototype()->getNode();
             if(node) {
                 std::vector<csapex::param::Parameter::Ptr> params = node->getParameters();
 

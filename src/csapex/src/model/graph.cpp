@@ -94,7 +94,7 @@ void Graph::deleteNode(const UUID& uuid)
     NodeWorker::Ptr removed;
 
     for(std::vector<NodeWorker::Ptr>::iterator it = nodes_.begin(); it != nodes_.end();) {
-        if((*it)->getUUID() == uuid) {
+        if((*it)->getNodeHandle()->getUUID() == uuid) {
             removed = *it;
             it = nodes_.erase(it);
 
@@ -284,7 +284,7 @@ void Graph::assignLevels()
         int max_dynamic_level = NO_LEVEL;
         bool has_dynamic_parent_output = false;
         bool has_dynamic_input = false;
-        for(const auto& input : current->getAllInputs()) {
+        for(const auto& input : current->getNodeHandle()->getAllInputs()) {
             if(input->isDynamic()) {
                 has_dynamic_input = true;
             }
@@ -328,7 +328,7 @@ void Graph::assignLevels()
     for(NodeWorker::Ptr node : nodes_) {
         node->setLevel(node_level[node.get()]);
 
-        for(auto output : node->getAllOutputs()) {
+        for(auto output : node->getNodeHandle()->getAllOutputs()) {
             if(output->isDynamic()) {
                 DynamicOutput* dout = dynamic_cast<DynamicOutput*>(output.get());
                 dout->clearCorrespondents();
@@ -348,7 +348,7 @@ void Graph::assignLevels()
             Q.pop_front();
             visited.insert(current);
 
-            for(auto input : current->getAllInputs()) {
+            for(auto input : current->getNodeHandle()->getAllInputs()) {
                 if(input->isConnected()) {
                     ConnectionPtr connection = input->getConnections().front();
                     Output* out = dynamic_cast<Output*>(connection->from());
@@ -370,7 +370,7 @@ void Graph::assignLevels()
         }
 
         if(correspondent) {
-            for(auto input : node->getAllInputs()) {
+            for(auto input : node->getNodeHandle()->getAllInputs()) {
                 if(input->isDynamic()) {
                     DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
                     di->setCorrespondent(correspondent);
@@ -438,7 +438,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
 {
     for(NodeWorker::Ptr worker : nodes_) {
         if(worker->getUUID() == uuid) {
-            auto node = worker->getNode().lock();
+            auto node = worker->getNodeHandle()->getNode().lock();
             if(node) {
                 return node.get();
             }
@@ -464,7 +464,7 @@ NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const
 {
     for(const NodeWorker::Ptr b : nodes_) {
         if(b->getUUID() == uuid) {
-            return b.get();
+            return b->getNodeHandle().get();
         }
     }
 
@@ -515,7 +515,7 @@ std::vector<NodeHandle*> Graph::getAllNodeHandles()
 {
     std::vector<NodeHandle*> node_handles;
     for(const NodeWorkerPtr& node : nodes_) {
-        node_handles.push_back(node.get());
+        node_handles.push_back(node->getNodeHandle().get());
     }
 
     return node_handles;
@@ -530,13 +530,13 @@ Connectable* Graph::findConnector(const UUID &uuid)
 
     Connectable* result;
     if(type == "in") {
-        result = owner->getInput(uuid);
+        result = owner->getNodeHandle()->getInput(uuid);
     } else if(type == "out") {
-        result = owner->getOutput(uuid);
+        result = owner->getNodeHandle()->getOutput(uuid);
     } else if(type == "slot") {
-        result = owner->getSlot(uuid);
+        result = owner->getNodeHandle()->getSlot(uuid);
     } else if(type == "trigger") {
-        result = owner->getTrigger(uuid);
+        result = owner->getNodeHandle()->getTrigger(uuid);
     } else {
         throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
     }

@@ -58,7 +58,8 @@ bool Meta::doExecute()
     for(Command::Ptr cmd : nested) {
         bool s = Access::executeCommand(graph_facade_, graph_, thread_pool_, node_factory_, cmd);
         if(!s) {
-            std::cerr << "command failed to execute! (" << typeid(*cmd).name() << ")" << std::endl;
+            auto& command = *cmd;
+            std::cerr << "command failed to execute! (" << typeid(command).name() << ")" << std::endl;
         }
         success &= s;
     }

@@ -54,7 +54,7 @@ void ActivityLegend::startTrackingNode(NodeWorkerPtr node)
     worker->stopProfiling.connect([this](NodeWorker* nw) { removeNode(nw); });
 }
 
-void ActivityLegend::stopTrackingNode(NodeWorkerPtr node)
+void ActivityLegend::stopTrackingNode(NodeWorkerPtr /*node*/)
 {
 }
 
@@ -65,7 +65,7 @@ void ActivityLegend::addNode(NodeWorker* node)
 
     QAbstractItemModel* m = model();
     m->insertRow(row);
-    m->setData(m->index(row, 0), QString::fromStdString(node->getNodeState()->getLabel()));
+    m->setData(m->index(row, 0), QString::fromStdString(node->getNodeHandle()->getNodeState()->getLabel()));
 
     resizeToFit();
 

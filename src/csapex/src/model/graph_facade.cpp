@@ -21,13 +21,13 @@ GraphFacade::GraphFacade(Executor &executor, Graph* graph)
 {
     connections_.push_back(graph->nodeAdded.connect([this](NodeWorkerPtr n) {
         TaskGeneratorPtr runner = std::make_shared<NodeRunner>(n);
-        generators_[n->getUUID()] = runner;
+        generators_[n->getNodeHandle()->getUUID()] = runner;
         executor_.add(runner.get());
         generatorAdded(runner);
     }));
     connections_.push_back(graph->nodeRemoved.connect([this](NodeWorkerPtr n) {
-        TaskGeneratorPtr runner = generators_[n->getUUID()];
-        generators_.erase(n->getUUID());
+        TaskGeneratorPtr runner = generators_[n->getNodeHandle()->getUUID()];
+        generators_.erase(n->getNodeHandle()->getUUID());
         executor_.remove(runner.get());
         generatorRemoved(runner);
     }));

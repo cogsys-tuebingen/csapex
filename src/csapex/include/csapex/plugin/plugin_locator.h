@@ -30,13 +30,9 @@ public:
 
     template <typename PluginType>
     std::vector<std::string> enumerateXmlFiles() {
-        std::map<std::type_index, std::vector<std::function<void(std::vector<std::string>&)> > >::iterator pos = locators_.find(std::type_index(typeid(PluginType)));
         std::vector<std::string> files;
-        if(pos != locators_.end()) {
-            std::vector<std::function<void(std::vector<std::string>&)> >& vec = pos->second;
-            for(std::size_t i = 0, total = vec.size(); i < total; ++i) {
-                vec.at(i)(files);
-            }
+        for(auto function : locators_[std::type_index(typeid(PluginType))]) {
+            function(files);
         }
         return files;
     }

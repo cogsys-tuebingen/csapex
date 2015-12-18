@@ -5,6 +5,7 @@
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/plugin/plugin_manager.hpp>
@@ -234,7 +235,7 @@ NodeWorkerPtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
         NodeWorkerPtr result = makeSingleNode(p, uuid);
 
         if(state) {
-            result->setNodeState(state);
+            result->getNodeHandle()->setNodeState(state);
         }
 
         reload_connections_[uuid] = p->unload_request.connect(std::bind(&NodeFactory::unloadNode, this, p, uuid));

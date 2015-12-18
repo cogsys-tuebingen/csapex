@@ -18,14 +18,14 @@ int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
 
 ThreadGroup::ThreadGroup(ExceptionHandler& handler, int id, std::string name)
     : handler_(handler),
-      id_(id), name_(name), running_(false), pause_(false)
+      id_(id), name_(name), running_(false), pause_(false), stepping_(false)
 {
     next_id_ = std::max(next_id_, id + 1);
     startThread();
 }
 ThreadGroup::ThreadGroup(ExceptionHandler &handler, std::string name)
     : handler_(handler),
-      id_(next_id_++), name_(name), running_(false), pause_(false)
+      id_(next_id_++), name_(name), running_(false), pause_(false), stepping_(false)
 {
     startThread();
 }
