@@ -7,7 +7,6 @@
 
 /// SYSTEM
 #include <string>
-#include <boost/type_traits/remove_reference.hpp>
 #include <type_traits>
 
 namespace csapex {
@@ -20,7 +19,7 @@ struct type;
 template <typename T>
 std::string serializationName()
 {
-    typedef typename boost::remove_const<T>::type TT;
+    typedef typename std::remove_const<T>::type TT;
     return type<TT>::name();
 }
 
@@ -60,10 +59,10 @@ std::shared_ptr<T> makeEmptyMessage(
     return makeEmpty<T>();
 }
 template <typename T>
-std::shared_ptr<typename boost::remove_const<T>::type > makeEmptyMessage(
+std::shared_ptr<typename std::remove_const<T>::type > makeEmptyMessage(
         typename std::enable_if<std::is_const<T>::value >::type* = 0)
 {
-    typedef typename boost::remove_const<T>::type TT;
+    typedef typename std::remove_const<T>::type TT;
     return makeEmpty<TT>();
 }
 
@@ -73,23 +72,19 @@ HAS_MEM_TYPE(element_type, has_elem_type_member);
 
 template <typename M>
 struct should_use_pointer_message {
-    static const bool value = boost::type_traits::ice_and<
-    boost::is_class<M>::value,
-    has_ptr_member<M>::value,
-    boost::type_traits::ice_not< std::is_same<std::string, M>::value >::value,
-    boost::type_traits::ice_not< std::is_base_of<ConnectionType, M>::value >::value
-    >::value;
+    static constexpr bool value =
+            std::is_class<M>::value &&
+            has_ptr_member<M>::value &&
+            !std::is_same<std::string, M>::value &&
+            !std::is_base_of<ConnectionType, M>::value;
 };
 
 template <typename M>
 struct should_use_value_message {
-    static const bool value = boost::type_traits::ice_and<
-    boost::type_traits::ice_not<
-            should_use_pointer_message<M>::value
-            >::value,
-    boost::type_traits::ice_not< has_elem_type_member<M>::value >::value, // reject shared_ptr
-    boost::type_traits::ice_not< std::is_base_of<ConnectionType, M>::value >::value
-    >::value;
+    static constexpr bool value =
+            !should_use_pointer_message<M>::value &&
+            !has_elem_type_member<M>::value && // reject shared_ptr
+            !std::is_base_of<ConnectionType, M>::value;
 };
 
 }

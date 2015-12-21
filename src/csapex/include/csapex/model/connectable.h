@@ -9,7 +9,9 @@
 
 /// SYSTEM
 #include <mutex>
+#include <vector>
 #include <atomic>
+#include <boost/signals2.hpp>
 
 namespace csapex
 {

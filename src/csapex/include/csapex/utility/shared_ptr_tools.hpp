@@ -1,28 +1,11 @@
 #ifndef SHARED_PTR_TOOLS_HPP
 #define SHARED_PTR_TOOLS_HPP
 
+#include <boost/shared_ptr.hpp>
+#include <memory>
+
 namespace shared_ptr_tools
 {
-//template<typename T>
-//std::shared_ptr<T> to_std_shared(boost::shared_ptr<T>& ptr)
-//{
-//    return std::shared_ptr<T>(ptr.get(), [ptr](T*) mutable {ptr.reset();});
-//}
-//template<typename T>
-//std::shared_ptr<T> to_std_shared(const std::shared_ptr<T>& ptr)
-//{
-//    return ptr;
-//}
-//template<typename T>
-//boost::shared_ptr<T> to_boost_shared(std::shared_ptr<T>& ptr)
-//{
-//    return boost::shared_ptr<T>(ptr.get(), [ptr](T*) mutable {ptr.reset();});
-//}
-//template<typename T>
-//boost::shared_ptr<T> to_boost_shared(const boost::shared_ptr<T>& ptr)
-//{
-//    return ptr;
-//}
 
 namespace detail
 {

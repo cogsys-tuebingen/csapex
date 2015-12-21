@@ -4,10 +4,11 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 
-/// SYSTE;
+/// SYSTEM
 #include <boost/mpl/begin_end.hpp>
 #include <boost/mpl/next_prior.hpp>
 #include <boost/mpl/vector.hpp>
+#include <vector>
 
 namespace csapex
 {
@@ -79,11 +80,11 @@ struct AddType
     }
 };
 
-template <typename Types>
+template <typename... Types>
 static ConnectionType::Ptr make()
 {
     std::vector<ConnectionType::Ptr> types;
-    detail::for_each< Types, AddType, std::vector<ConnectionType::Ptr> >(types);
+    detail::for_each< boost::mpl::vector<Types...>, AddType, std::vector<ConnectionType::Ptr> >(types);
     return MultiConnectionType::Ptr(new MultiConnectionType(types));
 }
 }

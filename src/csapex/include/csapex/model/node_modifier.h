@@ -12,10 +12,6 @@
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/utility/uuid.h>
 
-/// SYSTEM
-#include <boost/mpl/vector.hpp>
-#include <boost/type_traits.hpp>
-
 /// this is used for generating more readable warnings
 namespace warning
 {
@@ -39,7 +35,7 @@ namespace csapex
 class NodeModifier
 {
 public:
-    NodeModifier(NodeWorker* node);
+    NodeModifier(NodeWorker* node_worker, NodeHandle* node_handle);
 
     /*
      * MESSAGES
@@ -202,46 +198,14 @@ public:
 
 
     /// multiple input types allowed
-    template <typename Types>
+    template <typename... Types>
     Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make<Types>(), label, false, false);
-    }
-    template <typename A, typename B>
-    Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B> >(), label, false, false);
-    }
-    template <typename A, typename B, typename C>
-    Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C> >(), label, false, false);
-    }
-    template <typename A, typename B, typename C, typename D>
-    Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D> >(), label, false, false);
-    }
-    template <typename A, typename B, typename C, typename D, typename E>
-    Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D,E> >(), label, false, false);
+        return addInput(multi_type::make<Types...>(), label, false, false);
     }
 
-    template <typename Types>
+    template <typename... Types>
     Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make<Types>(), label, false, true);
-    }
-    template <typename A, typename B>
-    Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B> >(), label, false, true);
-    }
-    template <typename A, typename B, typename C>
-    Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C> >(), label, false, true);
-    }
-    template <typename A, typename B, typename C, typename D>
-    Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D> >(), label, false, true);
-    }
-    template <typename A, typename B, typename C, typename D, typename E>
-    Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make< boost::mpl::vector<A,B,C,D,E> >(), label, false, true);
+        return addInput(multi_type::make<Types...>(), label, false, true);
     }
 
 
@@ -285,6 +249,7 @@ private:
 
 private:
     NodeWorker* node_worker_;
+    NodeHandle* node_handle_;
 };
 
 }

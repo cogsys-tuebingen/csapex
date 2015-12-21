@@ -36,7 +36,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
       ticks_(0),
       profiling_(false)
 {
-    modifier_ = std::make_shared<NodeModifier>(this);
+    modifier_ = std::make_shared<NodeModifier>(this, node_handle.get());
     NodePtr node = node_handle_->getNode().lock();
 
     node->initialize(node_handle->getUUID(), modifier_.get());

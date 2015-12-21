@@ -9,37 +9,37 @@
 
 using namespace csapex;
 
-NodeModifier::NodeModifier(NodeWorker *node)
-    : node_worker_(node)
+NodeModifier::NodeModifier(NodeWorker *node_worker, NodeHandle *node_handle)
+    : node_worker_(node_worker), node_handle_(node_handle)
 {
 
 }
 
 Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional)
 {
-    return node_worker_->getNodeHandle()->addInput(type, label, dynamic, optional);
+    return node_handle_->addInput(type, label, dynamic, optional);
 }
 
 Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
 {
-    return node_worker_->getNodeHandle()->addOutput(type, label, dynamic);
+    return node_handle_->addOutput(type, label, dynamic);
 }
 
 
 Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback)
 {
-    return node_worker_->getNodeHandle()->addSlot(label, callback, false);
+    return node_handle_->addSlot(label, callback, false);
 }
 
 Slot* NodeModifier::addActiveSlot(const std::string& label, std::function<void()> callback)
 {
-    return node_worker_->getNodeHandle()->addSlot(label, callback, true);
+    return node_handle_->addSlot(label, callback, true);
 }
 
 
 Trigger* NodeModifier::addTrigger(const std::string& label)
 {
-    return node_worker_->getNodeHandle()->addTrigger(label);
+    return node_handle_->addTrigger(label);
 }
 
 
@@ -48,10 +48,10 @@ Trigger* NodeModifier::addTrigger(const std::string& label)
 std::vector<Input*> NodeModifier::getMessageInputs() const
 {
     // hide parameter inputs from the nodes
-    auto vec = node_worker_->getNodeHandle()->getAllInputs();
+    auto vec = node_handle_->getAllInputs();
     std::vector<Input*> result;
     for(auto entry : vec) {
-        if(!node_worker_->getNodeHandle()->isParameterInput(entry.get()))  {
+        if(!node_handle_->isParameterInput(entry.get()))  {
             result.push_back(entry.get());
         }
     }
@@ -60,10 +60,10 @@ std::vector<Input*> NodeModifier::getMessageInputs() const
 std::vector<Output*> NodeModifier::getMessageOutputs() const
 {
     // hide parameter outputs from the nodes
-    auto vec = node_worker_->getNodeHandle()->getAllOutputs();
+    auto vec = node_handle_->getAllOutputs();
     std::vector<Output*> result;
     for(auto entry : vec) {
-        if(!node_worker_->getNodeHandle()->isParameterOutput(entry.get()))  {
+        if(!node_handle_->isParameterOutput(entry.get()))  {
             result.push_back(entry.get());
         }
     }
@@ -71,7 +71,7 @@ std::vector<Output*> NodeModifier::getMessageOutputs() const
 }
 std::vector<Slot*> NodeModifier::getSlots() const
 {
-    auto vec = node_worker_->getNodeHandle()->getSlots();
+    auto vec = node_handle_->getSlots();
     std::vector<Slot*> result(vec.size());
     std::size_t i = 0;
     for(auto entry : vec) {
@@ -81,7 +81,7 @@ std::vector<Slot*> NodeModifier::getSlots() const
 }
 std::vector<Trigger*> NodeModifier::getTriggers() const
 {
-    auto vec = node_worker_->getNodeHandle()->getTriggers();
+    auto vec = node_handle_->getTriggers();
     std::vector<Trigger*> result(vec.size());
     std::size_t i = 0;
     for(auto entry : vec) {
@@ -93,40 +93,40 @@ std::vector<Trigger*> NodeModifier::getTriggers() const
 
 void NodeModifier::removeInput(const UUID &uuid)
 {
-    node_worker_->getNodeHandle()->removeInput(uuid);
+    node_handle_->removeInput(uuid);
 }
 
 void NodeModifier::removeOutput(const UUID &uuid)
 {
-    node_worker_->getNodeHandle()->removeOutput(uuid);
+    node_handle_->removeOutput(uuid);
 }
 
 void NodeModifier::removeSlot(const UUID &uuid)
 {
-    node_worker_->getNodeHandle()->removeSlot(uuid);
+    node_handle_->removeSlot(uuid);
 }
 
 void NodeModifier::removeTrigger(const UUID &uuid)
 {
-    node_worker_->getNodeHandle()->removeTrigger(uuid);
+    node_handle_->removeTrigger(uuid);
 }
 
 bool NodeModifier::isSource() const
 {
-    return node_worker_->getNodeHandle()->isSource();
+    return node_handle_->isSource();
 }
 void NodeModifier::setIsSource(bool source)
 {
-    node_worker_->getNodeHandle()->setIsSource(source);
+    node_handle_->setIsSource(source);
 }
 
 bool NodeModifier::isSink() const
 {
-    return node_worker_->getNodeHandle()->isSink();
+    return node_handle_->isSink();
 }
 void NodeModifier::setIsSink(bool sink)
 {
-    node_worker_->getNodeHandle()->setIsSink(sink);
+    node_handle_->setIsSink(sink);
 }
 
 bool NodeModifier::isError() const

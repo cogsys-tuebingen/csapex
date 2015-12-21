@@ -2,7 +2,6 @@
 #define CONNECTION_TYPE_H
 
 /// SYSTEM
-#include <boost/signals2.hpp>
 #include <memory>
 
 namespace csapex {
