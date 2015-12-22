@@ -5,9 +5,6 @@
 #include <csapex/core/settings.h>
 #include <csapex/factory/message_factory.h>
 
-/// SYSTEM
-#include <boost/assign.hpp>
-
 using namespace csapex;
 
 std::shared_ptr<MessageProvider> ApexMessageProvider::make()
@@ -42,7 +39,7 @@ std::string ApexMessageProvider::getLabel(std::size_t /*slot*/) const
 
 std::vector<std::string> ApexMessageProvider::getExtensions() const
 {
-    return boost::assign::list_of<std::string> (Settings::message_extension);
+    return { Settings::message_extension };
 }
 
 

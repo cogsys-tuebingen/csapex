@@ -395,6 +395,22 @@ add_custom_command(TARGET cfg POST_BUILD
 )
 
 #
+# Enable IWYU
+#
+#if(${CMAKE_VERSION} VERSION_GREATER 3.2)
+#  find_program(iwyu_path NAMES include-what-you-use iwyu)
+#  if(NOT iwyu_path)
+#    message(FATAL_ERROR "Could not find the program include-what-you-use")
+#  endif()
+#
+#  message("Using include-what-you-use from ${iwyu_path}")
+#
+#  set_property(TARGET csapex PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+#  set_property(TARGET csapex_qt PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+#endif()
+
+
+#
 # TESTS
 #
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests/CMakeLists.txt)

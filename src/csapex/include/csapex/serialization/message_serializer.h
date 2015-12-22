@@ -84,12 +84,11 @@ public:
 
 private:
     template <template <typename> class Wrapper, typename M>
-    struct HasYaml {
-        typedef typename boost::type_traits::ice_and<
-        boost::is_class<M>::value,
-        has_yaml_implementation< YAML::convert<M>, YAML::Node(YAML::convert<M>::*)(const M&) >::value
-        > type;
-    };
+    struct HasYaml : public std::integral_constant < bool,
+            std::is_class<M>::value &&
+            has_yaml_implementation< YAML::convert<M>, YAML::Node(YAML::convert<M>::*)(const M&) >::value
+    >
+    {};
 
     template <template <typename> class Wrapper, typename M>
     static void registerDirectMessageImpl(typename std::enable_if< !HasYaml<Wrapper,M>::type::value >::type* = 0)

@@ -15,12 +15,12 @@ namespace csapex
 namespace generic_node {
 struct DefaultInfo
 {
-    static std::string getName(int index) {
+    static std::string getName(int /*index*/) {
         return "";
     }
 
     template <typename P>
-    static csapex::param::ParameterPtr declareParameter(int index) {
+    static csapex::param::ParameterPtr declareParameter(int /*index*/) {
         return nullptr;
     }
 };
@@ -238,7 +238,7 @@ struct GenerateParameter
         typedef typename boost::mpl::at<Parameters, boost::mpl::int_<index> >::type type;
         typedef typename std::decay<type>::type decay_type;
 
-        typedef boost::reference_wrapper<typename boost::remove_reference<type>::type> message;
+        typedef std::reference_wrapper<typename boost::remove_reference<type>::type> message;
 
         enum IOType {
             is_const = std::is_const<typename message::type>::value
@@ -251,10 +251,8 @@ struct GenerateParameter
     typename Types<no>::message
     get(GenericNode<Parameters, Info>* instance,
         typename std::enable_if<
-            boost::type_traits::ice_and<
-                boost::is_reference<typename Types<no>::type>::value,
-                boost::type_traits::ice_not< Types<no>::is_const >::value
-            >::value
+        std::is_reference<typename Types<no>::type>::value &&
+        !Types<no>::is_const
         >::type* = 0)
     {
         typedef typename Types<no>::decay_type dt;
@@ -263,18 +261,17 @@ struct GenerateParameter
 
         msg_t& msg = dynamic_cast<msg_t&>(*instance->out_msg_[no]);
         auto& val = connection_types::MessageContainer<dt>::access(msg);
-        return boost::ref(static_cast<expected>(val));
+        return std::ref(static_cast<expected>(val));
     }
 
     template <int no>
     static
     const typename Types<no>::message
     get(GenericNode<Parameters, Info>* instance,
-        typename std::enable_if<
-            boost::type_traits::ice_and<
-                boost::is_reference<typename Types<no>::type>::value,
-                Types<no>::is_const
-            >::value
+        typename std::enable_if
+        <
+        std::is_reference<typename Types<no>::type>::value &&
+        Types<no>::is_const
         >::type* = 0)
     {
         typedef typename Types<no>::decay_type dt;
@@ -283,13 +280,13 @@ struct GenerateParameter
 
         const msg_t& msg = dynamic_cast<const msg_t&>(*instance->in_msg_[no]);
         auto& val = connection_types::MessageContainer<dt>::accessConst(msg);
-        return boost::ref(static_cast<expected const>(val));
+        return std::ref(static_cast<expected const>(val));
     }
 
     template <int no>
     static typename Types<no>::param
     get(GenericNode<Parameters, Info>* instance,
-        typename std::enable_if<!boost::is_reference<typename Types<no>::type>::value >::type* = 0)
+        typename std::enable_if<!std::is_reference<typename Types<no>::type>::value >::type* = 0)
     {
         return instance->template readParameter<typename Types<no>::decay_type>(instance->params_[no]);
     }

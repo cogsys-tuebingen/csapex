@@ -1,5 +1,5 @@
 /// PROJECT
-#include <csapex/model/generic_node.hpp>
+#include <csapex/factory//generic_node.hpp>
 #include <csapex/model/node_constructor.h>
 #include <csapex/msg/message_traits.h>
 
