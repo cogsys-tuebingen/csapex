@@ -14,6 +14,7 @@
 #include <csapex/signal/trigger.h>
 #include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/dynamic_output.h>
+#include <csapex/msg/no_message.h>
 
 using namespace csapex;
 

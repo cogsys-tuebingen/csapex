@@ -9,7 +9,6 @@
 
 /// SYSTEM
 #include <boost/signals2/signal.hpp>
-#include <yaml-cpp/yaml.h>
 
 namespace class_loader {
 class ClassLoader;

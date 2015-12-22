@@ -7,6 +7,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/msg/dynamic_input.h>
 #include <csapex/utility/assert.h>
+#include <csapex/msg/no_message.h>
 
 /// SYSTEM
 #include <iostream>

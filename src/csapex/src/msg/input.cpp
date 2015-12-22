@@ -5,6 +5,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/input_transition.h>
+#include <csapex/msg/no_message.h>
 
 /// SYSTEM
 #include <iostream>

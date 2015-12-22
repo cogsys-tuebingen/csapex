@@ -73,6 +73,14 @@ struct MessageConstructorRegistered
     }
 };
 
+template <template <typename> class Wrapper, typename T>
+struct DirectMessageConstructorRegistered
+{
+    DirectMessageConstructorRegistered() {
+        csapex::MessageFactory::registerDirectMessage<Wrapper, T>();
+    }
+};
+
 }
 
 #endif // MESSAGE_FACTORY_H

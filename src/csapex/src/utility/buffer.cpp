@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <mutex>
+#include <csapex/msg/no_message.h>
 
 using namespace csapex;
 

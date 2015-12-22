@@ -7,9 +7,7 @@
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/model/multi_connection_type.h>
 #include <csapex/msg/message.h>
-#include <csapex/factory/message_factory.h>
 #include <csapex/msg/message_traits.h>
-#include <csapex/serialization/message_serializer.h>
 #include <csapex/utility/uuid.h>
 
 /// this is used for generating more readable warnings
@@ -104,8 +102,6 @@ public:
         static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
                       "connection_types::GenericPointerMessage is not included: "
                       "#include <csapex/msg/generic_pointer_message.hpp>");
-        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
-        MessageSerializer::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, false);
     }
@@ -115,8 +111,6 @@ public:
         static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
                       "connection_types::GenericPointerMessage is not included: "
                       "#include <csapex/msg/generic_pointer_message.hpp>");
-        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
-        MessageSerializer::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, true);
     }
@@ -126,8 +120,6 @@ public:
         static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
                       "connection_types::GenericPointerMessage is not included: "
                       "#include <csapex/msg/generic_pointer_message.hpp>");
-        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
-        MessageSerializer::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
         return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true, false);
     }
@@ -137,8 +129,6 @@ public:
         static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
                       "connection_types::GenericPointerMessage is not included: "
                       "#include <csapex/msg/generic_pointer_message.hpp>");
-        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
-        MessageSerializer::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false);
     }
@@ -148,8 +138,6 @@ public:
         static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
                       "connection_types::GenericPointerMessage is not included: "
                       "#include <csapex/msg/generic_pointer_message.hpp>");
-        MessageFactory::registerDirectMessage<connection_types::GenericPointerMessage, T>();
-        MessageSerializer::registerDirectMessage<connection_types::GenericPointerMessage, T>();
         connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
         return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true);
     }

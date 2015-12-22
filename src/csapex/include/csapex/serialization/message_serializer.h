@@ -139,6 +139,13 @@ struct MessageSerializerRegistered
         csapex::MessageSerializer::registerMessage<T>();
     }
 };
+template <template <typename> class Wrapper, typename T>
+struct DirectMessageSerializerRegistered
+{
+    DirectMessageSerializerRegistered() {
+        csapex::MessageSerializer::registerDirectMessage<Wrapper, T>();
+    }
+};
 
 }
 

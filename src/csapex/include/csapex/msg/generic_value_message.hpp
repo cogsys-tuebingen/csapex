@@ -18,8 +18,8 @@ struct GenericValueMessage : public Message
     GenericValueMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp)
     {
-        static csapex::MessageConstructorRegistered<GenericValueMessage<Type> > reg_c;
-        static csapex::MessageSerializerRegistered<GenericValueMessage<Type> > reg_s;
+        static csapex::DirectMessageConstructorRegistered<connection_types::GenericValueMessage, Type> reg_c;
+        static csapex::DirectMessageSerializerRegistered<connection_types::GenericValueMessage, Type> reg_s;
     }
 
     virtual ConnectionType::Ptr clone() const override

@@ -18,8 +18,8 @@ struct GenericPointerMessage : public Message
     GenericPointerMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type<GenericPointerMessage<Type>>::name(), frame_id, stamp)
     {
-        static csapex::MessageConstructorRegistered<GenericPointerMessage<Type> > reg_c;
-        static csapex::MessageSerializerRegistered<GenericPointerMessage<Type> > reg_s;
+        static csapex::DirectMessageConstructorRegistered<connection_types::GenericPointerMessage, Type> reg_c;
+        static csapex::DirectMessageSerializerRegistered<connection_types::GenericPointerMessage, Type> reg_s;
 
         setDescriptiveName(type2name(typeid(Type)));
     }

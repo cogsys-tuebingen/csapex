@@ -233,6 +233,8 @@ add_library(csapex SHARED
     src/msg/input_transition.cpp
     src/msg/io.cpp
     src/msg/message.cpp
+    src/msg/any_message.cpp
+    src/msg/no_message.cpp
     src/msg/message_provider.cpp
     src/msg/output.cpp
     src/msg/output_transition.cpp

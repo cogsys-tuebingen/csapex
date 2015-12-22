@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connection.h>
 #include <csapex/msg/message.h>
+#include <csapex/msg/any_message.h>
 
 /// SYSTEM
 #include <iostream>
