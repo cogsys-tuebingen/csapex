@@ -41,11 +41,15 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
     node->initialize(node_handle->getUUID(), modifier_.get());
 
-    node_handle_->getOutputTransition()->messages_processed.connect([this](){
+    apex_assert_hard(!node->isSetup());
+
+    if(!node->isSetup()) {
+        node->doSetup();
+    }
+
+    handle_connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
         notifyMessagesProcessed();
-    });
-
-
+    }));
 
     node_handle_->addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
     node_handle_->addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
@@ -56,23 +60,23 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     }
     trigger_process_done_ = node_handle_->addTrigger("inputs\nprocessed");
 
-    apex_assert_hard(!node->isSetup());
-
-    if(!node->isSetup()) {
-        node->doSetup();
-    }
-
     apex_assert_hard(node->isSetup());
 
     is_setup_ = true;
 
-    node_handle_->mightBeEnabled.connect([this]() {
+    handle_connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
         triggerCheckTransitions();
-    });
+    }));
 
-    node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
+    for(const auto& c : node_handle_->getAllConnectors()) {
         connectConnector(c.get());
-    });
+    }
+    handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
+        connectConnector(c.get());
+    }));
+    handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
+        disconnectConnector(c.get());
+    }));
 
     auto af = delegate::bind(&NodeWorker::triggerCheckTransitions, this);
     node_handle_->getInputTransition()->setActivationFunction(af);
@@ -83,8 +87,15 @@ NodeWorker::~NodeWorker()
 {
     is_setup_ = false;
 
-    //    waitUntilFinished();
+    for(auto& connection : handle_connections_) {
+        connection.disconnect();
+    }
 
+    for(auto& pair : connections_) {
+        disconnectConnector(pair.first);
+    }
+
+    connections_.clear();
 }
 
 NodeHandlePtr NodeWorker::getNodeHandle()
@@ -717,11 +728,18 @@ void NodeWorker::checkParameters()
 
 void NodeWorker::connectConnector(Connectable *c)
 {
-    c->connection_added_to.connect([this](Connectable*) { checkIO(); });
-    c->connectionEnabled.connect([this](bool) { checkIO(); });
-    c->connection_removed_to.connect([this](Connectable*) { checkIO(); });
+    connections_[c].emplace_back(c->connection_added_to.connect([this](Connectable*) { checkIO(); }));
+    connections_[c].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
+    connections_[c].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
+    connections_[c].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
+}
 
-    c->enabled_changed.connect([this](bool) { checkIO(); });
+void NodeWorker::disconnectConnector(Connectable *c)
+{
+    for(auto& connection : connections_[c]) {
+        connection.disconnect();
+    }
+    connections_[c].clear();
 }
 
 void NodeWorker::checkIO()

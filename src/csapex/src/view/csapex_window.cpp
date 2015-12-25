@@ -67,14 +67,14 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, 
 
 CsApexWindow::~CsApexWindow()
 {
-    MessageRendererManager::instance().shutdown();
-
     for(auto connection : connections_) {
         connection.disconnect();
     }
     connections_.clear();
 
     delete ui;
+
+    MessageRendererManager::instance().shutdown();
 }
 
 

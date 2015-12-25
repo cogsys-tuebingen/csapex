@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/core/settings.h>
+#include <csapex/utility/assert.h>
 #include <csapex/msg/apex_message_provider.h>
 
 using namespace csapex;
@@ -33,6 +34,8 @@ void MessageRendererManager::loadPlugins()
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
+    apex_assert_hard(manager_);
+
     if(!manager_->pluginsLoaded()) {
         manager_->load(plugin_locator_.get());
     }
@@ -53,6 +56,10 @@ void MessageRendererManager::loadPlugins()
 MessageRendererPtr MessageRendererManager::createMessageRenderer(const ConnectionTypeConstPtr& message)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
+    if(!manager_) {
+        return nullptr;
+    }
+
     if(!manager_->pluginsLoaded() || renderers.empty()) {
         loadPlugins();
     }

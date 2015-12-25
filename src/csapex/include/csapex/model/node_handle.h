@@ -162,6 +162,8 @@ private:
     int next_trigger_id_;
     int next_slot_id_;
 
+    std::map<Connectable*, std::vector<boost::signals2::connection>> connections_;
+
     std::map<Slot*, boost::signals2::connection> slot_connections_;
     std::map<Trigger*, boost::signals2::connection> trigger_triggered_connections_;
     std::map<Trigger*, boost::signals2::connection> trigger_handled_connections_;

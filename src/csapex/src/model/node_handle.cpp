@@ -511,7 +511,6 @@ void NodeHandle::addInput(InputPtr in)
     inputs_.push_back(in);
 
     connectConnector(in.get());
-    //    QObject::connect(in, SIGNAL(connectionDone(Connectable*)), this, SLOT(trySendMessages()));
 
     connectorCreated(in);
     transition_in_->addInput(in);
@@ -523,10 +522,10 @@ void NodeHandle::addOutput(OutputPtr out)
 
     connectConnector(out.get());
 
-    out->messageProcessed.connect([this](Connectable*) { mightBeEnabled(); });
-    out->connection_removed_to.connect([this](Connectable*) { mightBeEnabled(); });
-    out->connection_added_to.connect([this](Connectable*) { mightBeEnabled(); });
-    out->connectionEnabled.connect([this](bool) { mightBeEnabled(); });
+    connections_[out.get()].emplace_back(out->messageProcessed.connect([this](Connectable*) { mightBeEnabled(); }));
+    connections_[out.get()].emplace_back(out->connection_removed_to.connect([this](Connectable*) { mightBeEnabled(); }));
+    connections_[out.get()].emplace_back(out->connection_added_to.connect([this](Connectable*) { mightBeEnabled(); }));
+    connections_[out.get()].emplace_back(out->connectionEnabled.connect([this](bool) { mightBeEnabled(); }));
 
     connectorCreated(out);
     transition_out_->addOutput(out);
@@ -738,13 +737,16 @@ std::map<Output*,csapex::param::Parameter*>& NodeHandle::outputToParamMap()
 
 void NodeHandle::connectConnector(Connectable *c)
 {
-    c->connectionInProgress.connect(connectionInProgress);
-    c->connectionStart.connect(connectionStart);
-    c->connection_added_to.connect(connectionDone);
+    connections_[c].emplace_back(c->connectionInProgress.connect(connectionInProgress));
+    connections_[c].emplace_back(c->connectionStart.connect(connectionStart));
+    connections_[c].emplace_back(c->connection_added_to.connect(connectionDone));
 }
 
 
-void NodeHandle::disconnectConnector(Connectable*)
+void NodeHandle::disconnectConnector(Connectable* c)
 {
-    //    disconnect(c);
+    for(auto& connection : connections_[c]) {
+        connection.disconnect();
+    }
+    connections_[c].clear();
 }

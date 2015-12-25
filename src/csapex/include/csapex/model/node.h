@@ -51,6 +51,8 @@ public:
 protected:
     NodeModifier* modifier_;
     bool setup_;
+
+    long guard_;
 };
 
 }

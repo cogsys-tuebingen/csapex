@@ -147,6 +147,8 @@ void ThreadGroup::stop()
 
             scheduler_thread_.join();
         }
+
+        generators_.clear();
     }
 }
 

@@ -18,12 +18,13 @@ using namespace csapex;
 
 Node::Node()
     : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
-      modifier_(nullptr), setup_(false)
+      modifier_(nullptr), setup_(false), guard_(0xDEADBEEF)
 {
 }
 
 Node::~Node()
 {
+    apex_assert_hard(guard_ == 0xDEADBEEF);
 }
 
 void Node::initialize(const UUID& uuid, NodeModifier *node_modifier)

@@ -44,6 +44,7 @@ void ThreadPool::performStep()
 
 void ThreadPool::stop()
 {
+    default_group_->stop();
     for(auto g : groups_) {
         g->stop();
     }

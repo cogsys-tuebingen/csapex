@@ -135,6 +135,7 @@ private:
 
 
     void connectConnector(Connectable *c);
+    void disconnectConnector(Connectable *c);
 
     void checkTransitionsImpl(bool try_fire);
 
@@ -151,7 +152,8 @@ private:
     Trigger* trigger_process_done_;
 
 
-    std::vector<boost::signals2::connection> connections;
+    std::vector<boost::signals2::connection> handle_connections_;
+    std::map<Connectable*, std::vector<boost::signals2::connection>> connections_;
 
     int ticks_;
 

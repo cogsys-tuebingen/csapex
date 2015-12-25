@@ -21,6 +21,7 @@
 #include <csapex/utility/shared_ptr_tools.hpp>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/utility/yaml_node_builder.h>
+#include <csapex/serialization/serialization.h>
 
 /// SYSTEM
 #include <fstream>
@@ -56,6 +57,7 @@ CsApexCore::~CsApexCore()
     StreamInterceptor::instance().stop();
 
     MessageProviderManager::instance().shutdown();
+    Serialization::instance().shutdown();
 
     for(std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
         it->second->shutdown();

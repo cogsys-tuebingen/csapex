@@ -25,3 +25,9 @@ void Serialization::deserialize(csapex::Node& node, const YAML::Node& doc)
         (fn->second)(node, doc);
     }
 }
+
+void Serialization::shutdown()
+{
+    serializers.clear();
+    deserializers.clear();
+}

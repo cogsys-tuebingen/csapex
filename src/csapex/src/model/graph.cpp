@@ -28,18 +28,21 @@ Graph::~Graph()
 
 void Graph::clear()
 {
-    for(ConnectionPtr c : getConnections()) {
+    auto connections = connections_;
+    for(ConnectionPtr c : connections) {
+        std::cerr << "delete connection " << (long) c.get() << std::endl;
         deleteConnection(c);
     }
+    apex_assert_hard(connections_.empty());
 
-    for(NodeHandle* node : getAllNodeHandles()) {
+    auto nodes = nodes_;
+    for(NodeHandlePtr node : nodes) {
         deleteNode(node->getUUID());
     }
+    apex_assert_hard(nodes_.empty());
 
     uuids_.clear();
-    connections_.clear();
 
-    nodes_.clear();
     node_component_.clear();
     node_level_.clear();
 
@@ -99,6 +102,8 @@ void Graph::deleteNode(const UUID& uuid)
         }
     }
 
+    apex_assert_hard(removed);
+
     if(removed) {
         nodeRemoved(removed);
         buildConnectedComponents();
@@ -113,6 +118,8 @@ int Graph::countNodes()
 
 bool Graph::addConnection(ConnectionPtr connection)
 {
+    apex_assert_hard(connection);
+
     NodeHandle* n_from = findNodeHandleForConnector(connection->from()->getUUID());
     NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
 
@@ -142,9 +149,8 @@ bool Graph::addConnection(ConnectionPtr connection)
 
 void Graph::deleteConnection(ConnectionPtr connection)
 {
-    if(!connection) {
-        return;
-    }
+    apex_assert_hard(connection);
+
     auto out = connection->from();
     auto in = connection->to();
 
@@ -175,6 +181,11 @@ void Graph::deleteConnection(ConnectionPtr connection)
             verify();
             connectionDeleted(connection.get());
             stateChanged();
+
+            for(const auto& c : connections_) {
+                apex_assert_hard(c);
+            }
+
             return;
 
         } else {
