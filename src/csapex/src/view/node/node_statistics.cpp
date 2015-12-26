@@ -9,6 +9,9 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node_handle.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace csapex;
 
 NodeStatistics::NodeStatistics(NodeHandle *node)

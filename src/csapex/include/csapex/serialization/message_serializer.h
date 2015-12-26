@@ -10,7 +10,6 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
-#include <iostream>
 
 HAS_MEM_FUNC(encode, has_yaml_implementation);
 

@@ -3,7 +3,6 @@
 
 /// SYSTEM
 #include <string>
-#include <ostream>
 #include <map>
 #include <mutex>
 
@@ -27,25 +26,14 @@ public:
     static const std::string namespace_separator;
 
 public:
-    friend std::ostream& operator << (std::ostream& out, const UUID& uuid_) {
-        out << uuid_.representation_;
-        return out;
-    }
+    friend std::ostream& operator << (std::ostream& out, const UUID& uuid_);
 
-    friend bool operator == (const std::string& str, const UUID& uuid_) {
-        return str == uuid_.representation_;
-    }
-    friend bool operator == (const UUID& uuid_, const std::string& str) {
-        return str == uuid_.representation_;
-    }
-    friend bool operator == (const UUID& a, const UUID& b) {
-        return a.representation_ == b.representation_;
-    }
+    friend bool operator == (const std::string& str, const UUID& uuid_);
+    friend bool operator == (const UUID& uuid_, const std::string& str);
+    friend bool operator == (const UUID& a, const UUID& b);
 
     struct Hasher {
-      std::size_t operator()(const UUID& k) const {
-        return k.hash();
-      }
+      std::size_t operator()(const UUID& k) const;
     };
 
 
@@ -67,9 +55,7 @@ public:
     operator std::string() const;
     const char* c_str() const;
 
-    bool empty() const {
-        return representation_.empty();
-    }
+    bool empty() const;
 
 private:
     explicit UUID(const std::string& representation);

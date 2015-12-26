@@ -36,14 +36,8 @@ struct type<Signal> {
 namespace YAML {
 template <>
 struct convert<csapex::connection_types::Signal> {
-  static Node encode(const csapex::connection_types::Signal&) {
-      Node node;
-      return node;
-  }
-
-  static bool decode(const Node&, csapex::connection_types::Signal&) {
-      return true;
-  }
+  static Node encode(const csapex::connection_types::Signal&);
+  static bool decode(const Node&, csapex::connection_types::Signal&);
 };
 }
 

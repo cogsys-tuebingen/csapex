@@ -8,6 +8,7 @@
 
 /// SYSTEM
 #include <fstream>
+#include <iostream>
 
 using namespace csapex;
 

@@ -18,6 +18,7 @@
 #include <csapex/utility/yaml_node_builder.h>
 #include <csapex/serialization/serialization.h>
 #include <csapex/signal/signal_connection.h>
+#include <csapex/utility/yaml_io.hpp>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>

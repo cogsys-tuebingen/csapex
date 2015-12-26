@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <boost/functional/hash.hpp>
-
+#include <ostream>
 
 using namespace csapex;
 
@@ -31,6 +31,15 @@ void split_first(const std::string& haystack, const std::string& needle,
 
 std::map<std::string, int> UUID::hash_;
 std::mutex UUID::hash_mutex_;
+
+std::size_t UUID::Hasher::operator()(const UUID& k) const {
+    return k.hash();
+}
+
+bool UUID::empty() const
+{
+    return representation_.empty();
+}
 
 void UUID::reset()
 {
@@ -156,4 +165,22 @@ std::string UUID::type() const
 void UUID::split(const std::string &separator, UUID &l, UUID &r) const
 {
     split_first(representation_, separator, l.representation_, r.representation_);
+}
+
+namespace csapex
+{
+bool operator == (const std::string& str, const UUID& uuid_) {
+    return str == uuid_.representation_;
+}
+bool operator == (const UUID& uuid_, const std::string& str) {
+    return str == uuid_.representation_;
+}
+bool operator == (const UUID& a, const UUID& b) {
+    return a.representation_ == b.representation_;
+}
+
+std::ostream& operator << (std::ostream& out, const UUID& uuid_) {
+    out << uuid_.representation_;
+    return out;
+}
 }

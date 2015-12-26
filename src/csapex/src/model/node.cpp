@@ -73,7 +73,7 @@ bool Node::isAsynchronous() const
     return false;
 }
 
-void Node::process(csapex::Parameterizable& parameters)
+void Node::process(csapex::Parameterizable& /*parameters*/)
 {
     // default to deprecated style
     process();

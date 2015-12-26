@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/utility/stream_relay.h>
 
+/// SYSTEM
+#include <sstream>
+
 using namespace csapex;
 
 StreamRelay::StreamRelay(std::ostream &stream, const std::string &prefix)
@@ -35,4 +38,12 @@ void StreamRelay::writePrefix()
 std::stringstream& StreamRelay::history() const
 {
     return *history_;
+}
+
+
+StreamRelay& StreamRelay::operator<<(std::ostream& (*pf)(std::ostream&))
+{
+    *history_ << pf;
+    s_ << pf;
+    return *continued_;
 }

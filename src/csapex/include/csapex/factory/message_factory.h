@@ -14,7 +14,6 @@
 #include <string>
 #include <functional>
 #include <boost/type_traits.hpp>
-#include <iostream>
 
 namespace csapex {
 

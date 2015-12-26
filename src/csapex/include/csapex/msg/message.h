@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connection_type.h>
 #include <csapex/utility/type.h>
-#include <csapex/utility/yaml_io.hpp> // TODO: get rid of this....
+//#include <csapex/utility/yaml_io.hpp> // TODO: get rid of this....
 #include <csapex/msg/message_traits.h>
 
 namespace csapex
@@ -33,6 +33,10 @@ public:
 
 /// YAML
 namespace YAML {
+class Node;
+template<class T>
+struct convert;
+
 template<>
 struct convert<csapex::connection_types::Message> {
   static Node encode(const csapex::connection_types::Message& rhs);

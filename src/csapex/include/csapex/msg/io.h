@@ -7,7 +7,6 @@
 #include <csapex/msg/message_traits.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
-#include <iostream>
 
 namespace csapex
 {

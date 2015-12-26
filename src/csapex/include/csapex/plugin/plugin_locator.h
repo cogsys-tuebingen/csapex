@@ -10,7 +10,6 @@
 #include <typeinfo>
 #include <vector>
 #include <functional>
-#include <iostream>
 #include <set>
 #include <boost/signals2.hpp>
 #include <typeindex>

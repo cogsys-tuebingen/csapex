@@ -3,12 +3,11 @@
 
 /// SYSTEM
 #include <string>
-#include <iostream>
-#include <sstream>
+#include <iosfwd>
 
 namespace csapex
 {
-class StreamRelay : public std::ostream
+class StreamRelay
 {
 public:
     StreamRelay(std::ostream& stream, const std::string& prefix);
@@ -29,12 +28,7 @@ public:
 
     typedef std::ostream& (*ostream_manipulator)(std::ostream&);
 
-    StreamRelay& operator<<(std::ostream& (*pf)(std::ostream&))
-    {
-        *history_ << pf;
-        s_ << pf;
-        return *continued_;
-    }
+    StreamRelay& operator<<(std::ostream& (*pf)(std::ostream&));
 
     std::stringstream& history() const;
 
