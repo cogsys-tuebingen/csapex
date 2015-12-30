@@ -11,7 +11,7 @@
 /// SYSTEM
 #include <vector>
 #include <string>
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
@@ -99,22 +99,22 @@ public:
     void updateParameterValue(Connectable* source);
 
 public:
-    boost::signals2::signal<void (ConnectablePtr)> connectorCreated;
-    boost::signals2::signal<void (ConnectablePtr)> connectorRemoved;
+    csapex::slim_signal::Signal<void (ConnectablePtr)> connectorCreated;
+    csapex::slim_signal::Signal<void (ConnectablePtr)> connectorRemoved;
 
-    boost::signals2::signal<void (Connectable*, Connectable*)> connectionInProgress;
-    boost::signals2::signal<void (Connectable*)> connectionDone;
-    boost::signals2::signal<void (Connectable*)> connectionStart;
+    csapex::slim_signal::Signal<void (Connectable*, Connectable*)> connectionInProgress;
+    csapex::slim_signal::Signal<void (Connectable*)> connectionDone;
+    csapex::slim_signal::Signal<void (Connectable*)> connectionStart;
 
-    boost::signals2::signal<void()> parametersChanged;
+    csapex::slim_signal::Signal<void()> parametersChanged;
 
-    boost::signals2::signal<void()> nodeStateChanged;
+    csapex::slim_signal::Signal<void()> nodeStateChanged;
 
-    boost::signals2::signal<void()> mightBeEnabled;
+    csapex::slim_signal::Signal<void()> mightBeEnabled;
 
 
     // TODO: get rid of
-    boost::signals2::signal<void(std::function<void()>)> executionRequested;
+    csapex::slim_signal::Signal<void(std::function<void()>)> executionRequested;
 
 protected:
     void connectConnector(Connectable* c);
@@ -162,11 +162,11 @@ private:
     int next_trigger_id_;
     int next_slot_id_;
 
-    std::map<Connectable*, std::vector<boost::signals2::connection>> connections_;
+    std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
 
-    std::map<Slot*, boost::signals2::connection> slot_connections_;
-    std::map<Trigger*, boost::signals2::connection> trigger_triggered_connections_;
-    std::map<Trigger*, boost::signals2::connection> trigger_handled_connections_;
+    std::map<Slot*, csapex::slim_signal::Connection> slot_connections_;
+    std::map<Trigger*, csapex::slim_signal::Connection> trigger_triggered_connections_;
+    std::map<Trigger*, csapex::slim_signal::Connection> trigger_handled_connections_;
 
     int level_;
 

@@ -120,7 +120,7 @@ private:
 
     std::vector<Row*> rows_;
     std::map<NodeWorker*, Row*> node2row;
-    std::map<NodeWorker*, std::vector<boost::signals2::connection>> node2connections_;
+    std::map<NodeWorker*, std::vector<csapex::slim_signal::Connection>> node2connections_;
 };
 
 }

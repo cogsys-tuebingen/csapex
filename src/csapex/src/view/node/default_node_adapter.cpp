@@ -50,8 +50,8 @@ using namespace csapex;
 using namespace boost::lambda;
 namespace bll = boost::lambda;
 
-boost::arg<1> __1;
-boost::arg<2> __2;
+//boost::arg<1> __1;
+//boost::arg<2> __2;
 
 namespace {
 
@@ -307,7 +307,7 @@ DefaultNodeAdapterBridge::~DefaultNodeAdapterBridge()
     disconnect();
 }
 
-void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (csapex::param::Parameter *)> &signal,
+void DefaultNodeAdapterBridge::connectInGuiThread(csapex::slim_signal::Signal<void (csapex::param::Parameter *)> &signal,
                                                   std::function<void ()> cb)
 {
     // cb should be executed in the gui thread
@@ -316,7 +316,7 @@ void DefaultNodeAdapterBridge::connectInGuiThread(boost::signals2::signal<void (
 
 void DefaultNodeAdapterBridge::disconnect()
 {
-    for(const boost::signals2::connection& c : connections) {
+    for(const csapex::slim_signal::Connection& c : connections) {
         c.disconnect();
     }
 
@@ -912,7 +912,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getParameterState());
     if(state) {
-        state->parameter_set_changed->disconnect_all_slots();
+        state->parameter_set_changed->disconnectAll();
         state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
     }
 

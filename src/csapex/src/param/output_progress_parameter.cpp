@@ -44,7 +44,7 @@ bool OutputProgressParameter::set_unsafe(const boost::any& v)
     return false;
 }
 
-void OutputProgressParameter::doSerialize(YAML::Node& n) const
+void OutputProgressParameter::doSerialize(YAML::Node& /*n*/) const
 {
 
 }

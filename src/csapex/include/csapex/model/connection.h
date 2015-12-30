@@ -6,12 +6,12 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/signal/signal_fwd.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <memory>
 #include <vector>
 #include <deque>
-#include <boost/signals2.hpp>
 #include <mutex>
 #include <condition_variable>
 
@@ -35,10 +35,7 @@ public:
     };
 
 public:
-    friend std::ostream& operator << (std::ostream& out, const Connection& c) {
-        out << "Connection: [" << c.from() << " / " << c.to() << "]";
-        return out;
-    }
+    friend std::ostream& operator << (std::ostream& out, const Connection& c);
 
 protected:
     Connection(Connectable* from, Connectable* to);
@@ -83,20 +80,20 @@ public:
     bool downLevel() const;
 
 public:
-    boost::signals2::signal<void()> new_message;
-    boost::signals2::signal<void()> endpoint_established;
-    boost::signals2::signal<void()> connection_established;
+    csapex::slim_signal::Signal<void()> new_message;
+    csapex::slim_signal::Signal<void()> endpoint_established;
+    csapex::slim_signal::Signal<void()> connection_established;
 
-    boost::signals2::signal<void()> deleted;
+    csapex::slim_signal::Signal<void()> deleted;
 
-    boost::signals2::signal<void(bool)> source_enable_changed;
-    boost::signals2::signal<void(bool)> sink_enabled_changed;
+    csapex::slim_signal::Signal<void(bool)> source_enable_changed;
+    csapex::slim_signal::Signal<void(bool)> sink_enabled_changed;
 
-    boost::signals2::signal<void(Fulcrum*)> fulcrum_added;
-    boost::signals2::signal<void(Fulcrum*,bool dropped)> fulcrum_moved;
-    boost::signals2::signal<void(Fulcrum*,bool dropped, int which)> fulcrum_moved_handle;
-    boost::signals2::signal<void(Fulcrum*,int type)> fulcrum_type_changed;
-    boost::signals2::signal<void(Fulcrum*)> fulcrum_deleted;
+    csapex::slim_signal::Signal<void(Fulcrum*)> fulcrum_added;
+    csapex::slim_signal::Signal<void(Fulcrum*,bool dropped)> fulcrum_moved;
+    csapex::slim_signal::Signal<void(Fulcrum*,bool dropped, int which)> fulcrum_moved_handle;
+    csapex::slim_signal::Signal<void(Fulcrum*,int type)> fulcrum_type_changed;
+    csapex::slim_signal::Signal<void(Fulcrum*)> fulcrum_deleted;
 
 public:
     bool operator == (const Connection& c) const;

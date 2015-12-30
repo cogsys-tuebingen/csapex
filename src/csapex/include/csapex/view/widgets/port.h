@@ -79,7 +79,7 @@ protected:
 
     Qt::MouseButtons buttons_down_;
 
-    std::vector<boost::signals2::connection> connections_;
+    std::vector<csapex::slim_signal::Connection> connections_;
 
     MessagePreviewWidget* preview_;
 };

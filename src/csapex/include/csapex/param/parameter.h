@@ -8,7 +8,7 @@
 /// SYSTEM
 #include <memory>
 #include <boost/any.hpp>
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/recursive_mutex.hpp>
@@ -32,11 +32,11 @@ public:
     typedef std::shared_ptr<boost::recursive_mutex::scoped_lock> Lock;
 
 public:
-    boost::signals2::signal<void(Parameter*)> parameter_changed;
-    boost::signals2::signal<void(Parameter*)> scope_changed;
-    boost::signals2::signal<void(Parameter*, bool)> interactive_changed;
-    boost::signals2::signal<void(Parameter*, bool)> parameter_enabled;
-    boost::signals2::signal<void(Parameter*)> destroyed;
+    csapex::slim_signal::Signal<void(Parameter*)> parameter_changed;
+    csapex::slim_signal::Signal<void(Parameter*)> scope_changed;
+    csapex::slim_signal::Signal<void(Parameter*, bool)> interactive_changed;
+    csapex::slim_signal::Signal<void(Parameter*, bool)> parameter_enabled;
+    csapex::slim_signal::Signal<void(Parameter*)> destroyed;
 
 public:
     virtual ~Parameter();

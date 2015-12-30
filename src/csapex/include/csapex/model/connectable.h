@@ -11,7 +11,7 @@
 #include <mutex>
 #include <vector>
 #include <atomic>
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
@@ -83,25 +83,25 @@ public:
     /*REFACTOR*/ virtual bool shouldCreate(bool left, bool right);
 
 public:
-    boost::signals2::signal<void(bool)> enabled_changed;
+    csapex::slim_signal::Signal<void(bool)> enabled_changed;
 
-    boost::signals2::signal<void(Connectable*)> disconnected;
-    boost::signals2::signal<void(Connectable*)> connectionStart;
-    boost::signals2::signal<void(Connectable*,Connectable*)> connectionInProgress;
+    csapex::slim_signal::Signal<void(Connectable*)> disconnected;
+    csapex::slim_signal::Signal<void(Connectable*)> connectionStart;
+    csapex::slim_signal::Signal<void(Connectable*,Connectable*)> connectionInProgress;
 
-    boost::signals2::signal<void(Connectable*)> connection_added_to;
-    boost::signals2::signal<void(Connectable*)> connection_removed_to;
+    csapex::slim_signal::Signal<void(Connectable*)> connection_added_to;
+    csapex::slim_signal::Signal<void(Connectable*)> connection_removed_to;
 
-    boost::signals2::signal<void(ConnectionPtr)> connection_added;
-    boost::signals2::signal<void(ConnectionPtr)> connection_faded;
+    csapex::slim_signal::Signal<void(ConnectionPtr)> connection_added;
+    csapex::slim_signal::Signal<void(ConnectionPtr)> connection_faded;
 
-    boost::signals2::signal<void(bool)> connectionEnabled;
-    boost::signals2::signal<void(Connectable*)> messageProcessed;
-    boost::signals2::signal<void(bool, std::string, int)> connectableError;
+    csapex::slim_signal::Signal<void(bool)> connectionEnabled;
+    csapex::slim_signal::Signal<void(Connectable*)> messageProcessed;
+    csapex::slim_signal::Signal<void(bool, std::string, int)> connectableError;
 
-    boost::signals2::signal<void(Connectable*)> messageSent;
-    boost::signals2::signal<void(Connectable*)> messageArrived;
-    boost::signals2::signal<void()> typeChanged;
+    csapex::slim_signal::Signal<void(Connectable*)> messageSent;
+    csapex::slim_signal::Signal<void(Connectable*)> messageArrived;
+    csapex::slim_signal::Signal<void()> typeChanged;
 
 public:
     /**

@@ -60,7 +60,7 @@ Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, C
 
 Port::~Port()
 {
-    for(auto c : connections_) {
+    for(auto& c : connections_) {
         c.disconnect();
     }
 }

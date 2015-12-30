@@ -91,7 +91,7 @@ void Connectable::disable()
 {
     if(enabled_) {
         enabled_ = false;
-        enabled_changed(enabled_);
+        enabled_changed((bool) enabled_);
     }
 }
 
@@ -99,7 +99,7 @@ void Connectable::enable()
 {
     if(!enabled_) {
         enabled_ = true;
-        enabled_changed(enabled_);
+        enabled_changed((bool) enabled_);
     }
 }
 

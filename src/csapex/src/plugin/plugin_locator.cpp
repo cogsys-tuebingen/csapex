@@ -42,37 +42,6 @@ std::vector<std::string> PluginLocator::enumerateLibraryPaths()
     return library_paths_;
 }
 
-void PluginLocator::reloadLibraryIfExists(const std::string &name, const std::string &abs_path)
-{
-    std::ifstream file(abs_path);
-    if(file.good()) {
-        reloadLibrary(name);
-    }
-}
-
-void PluginLocator::reloadLibrary(const std::string &name)
-{
-    std::cout << "WARNING: reloading plugin " << name << std::endl;
-    unload_library_request(name);
-
-    reload_library_request(name);
-
-    reload_done();
-}
-
-void PluginLocator::setAutoReload(bool autoreload)
-{
-    if(isAutoReload() != autoreload) {
-        settings_.set("auto_reload_libraries", autoreload);
-
-        // not implemented... does not work reliably...
-    }
-}
-
-bool PluginLocator::isAutoReload() const
-{
-    return settings_.get("auto_reload_libraries", false);
-}
 
 void PluginLocator::ignoreLibrary(const std::string &name, bool ignore)
 {
@@ -94,10 +63,6 @@ void PluginLocator::setLibraryLoaded(const std::string &name, const std::string&
 {
     loaded_libraries_.insert(name);
     library_file_[name] = file;
-
-    if(isAutoReload()) {
-        // not implemented yet
-    }
 }
 
 bool PluginLocator::isLibraryLoaded(const std::string &name) const

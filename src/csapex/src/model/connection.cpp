@@ -310,3 +310,8 @@ void Connection::deleteFulcrum(int fulcrum_id)
 
     fulcrums_.erase(index);
 }
+
+std::ostream& csapex::operator << (std::ostream& out, const Connection& c) {
+    out << "Connection: [" << c.from() << " / " << c.to() << "]";
+    return out;
+}

@@ -7,7 +7,7 @@
 
 /// SYSTEM
 #include <deque>
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.h>
 
 namespace csapex
 {
@@ -53,8 +53,8 @@ public:
     void clearSavepoints();
 
 public:
-    boost::signals2::signal<void()> stateChanged;
-    boost::signals2::signal<void(bool)> dirtyChanged;
+    csapex::slim_signal::Signal<void()> stateChanged;
+    csapex::slim_signal::Signal<void(bool)> dirtyChanged;
 
 private:
     void doExecute(Command::Ptr command);

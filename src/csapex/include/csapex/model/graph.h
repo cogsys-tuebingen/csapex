@@ -6,7 +6,7 @@
 #include <csapex/model/model_fwd.h>
 
 /// SYSTEM
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.hpp>
 #include <map>
 #include <functional>
 
@@ -88,14 +88,14 @@ private:
     void assignLevels();
 
 public:
-    boost::signals2::signal<void()> stateChanged;
-    boost::signals2::signal<void(Graph*)> structureChanged;
+    csapex::slim_signal::Signal<void()> stateChanged;
+    csapex::slim_signal::Signal<void(Graph*)> structureChanged;
 
-    boost::signals2::signal<void(Connection*)> connectionAdded;
-    boost::signals2::signal<void(Connection*)> connectionDeleted;
+    csapex::slim_signal::Signal<void(Connection*)> connectionAdded;
+    csapex::slim_signal::Signal<void(Connection*)> connectionDeleted;
 
-    boost::signals2::signal<void(NodeHandlePtr)> nodeAdded;
-    boost::signals2::signal<void(NodeHandlePtr)> nodeRemoved;
+    csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeAdded;
+    csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeRemoved;
 
 protected:
     std::vector<NodeHandlePtr> nodes_;

@@ -11,7 +11,7 @@
 #include <vector>
 #include <set>
 #include <yaml-cpp/yaml.h>
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {

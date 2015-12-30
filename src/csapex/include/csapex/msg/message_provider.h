@@ -42,11 +42,11 @@ public:
     std::vector<csapex::param::ParameterPtr> getParameters() const;
 
 public:
-    boost::signals2::signal<void(std::size_t)> slot_count_changed;
+    csapex::slim_signal::Signal<void(std::size_t)> slot_count_changed;
 
 
-    boost::signals2::signal<void()> begin;
-    boost::signals2::signal<void()> no_more_messages;
+    csapex::slim_signal::Signal<void()> begin;
+    csapex::slim_signal::Signal<void()> no_more_messages;
 
 protected:
     MessageProvider();

@@ -35,7 +35,7 @@ public:
     DefaultNodeAdapterBridge(DefaultNodeAdapter* parent);
     ~DefaultNodeAdapterBridge();
 
-    void connectInGuiThread(boost::signals2::signal<void(csapex::param::Parameter*)>& signal,
+    void connectInGuiThread(csapex::slim_signal::Signal<void(csapex::param::Parameter*)>& signal,
                  std::function<void()> cb);
     void disconnect();
 
@@ -56,7 +56,7 @@ public:
 
 private:
     DefaultNodeAdapter* parent_;
-    std::vector<boost::signals2::connection> connections;
+    std::vector<csapex::slim_signal::Connection> connections;
 };
 
 class DefaultNodeAdapter : public NodeAdapter
@@ -98,14 +98,14 @@ private:
     qt_helper::Call* makePausedUiCall(std::function<void()> cb);
 
 private:
-    std::vector<boost::signals2::scoped_connection> connections_;
+    std::vector<csapex::slim_signal::ScopedConnection> connections_;
 
     std::vector<QObject*> callbacks;
     std::map<std::string, QBoxLayout*> groups;
     std::map<std::string, bool> groups_enabled;
     std::map<std::string, QGroupBox*> groupsboxes;
 
-    std::map<Connectable*, boost::signals2::connection> parameter_connections_;
+    std::map<Connectable*, csapex::slim_signal::Connection> parameter_connections_;
 
     QBoxLayout* wrapper_layout_;
 };

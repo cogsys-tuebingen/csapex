@@ -41,13 +41,13 @@ public:
     void establishConnections() override;
 
 public:
-    boost::signals2::signal<void()> messages_processed;
+    csapex::slim_signal::Signal<void()> messages_processed;
 
 private:
     void fillConnections();
 
 private:
-    std::unordered_map<OutputPtr, std::vector<boost::signals2::connection>> output_signal_connections_;
+    std::unordered_map<OutputPtr, std::vector<csapex::slim_signal::Connection>> output_signal_connections_;
     std::unordered_map<UUID, OutputPtr, UUID::Hasher> outputs_;
 
     long sequence_number_;

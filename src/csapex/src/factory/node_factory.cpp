@@ -84,9 +84,6 @@ void NodeFactory::rebuildPrototypes()
 
         constructor->setDescription(p.second.getDescription()).setIcon(p.second.getIcon()).setTags(tags);
 
-        plugin_constructor.unload_request->connect(constructor->unload_request);
-        plugin_constructor.reload_request->connect(constructor->reload_request);
-
         registerNodeType(constructor, true);
     }
 }

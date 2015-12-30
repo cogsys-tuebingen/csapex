@@ -12,23 +12,26 @@
 
 /// SYSTEM
 #include <vector>
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.h>
 #include <unordered_map>
 
 namespace csapex
 {
 
-class NodeFactory : private boost::noncopyable
+class NodeFactory
 {
 public:
     typedef std::shared_ptr<NodeFactory> Ptr;
 
-    boost::signals2::signal<void(const UUID&)> unload_request;
-    boost::signals2::signal<void(const UUID&)> reload_request;
+    csapex::slim_signal::Signal<void(const UUID&)> unload_request;
+    csapex::slim_signal::Signal<void(const UUID&)> reload_request;
 
 public:
     NodeFactory(PluginLocator *locator);
     ~NodeFactory();
+
+    NodeFactory(const NodeFactory&) = delete;
+    NodeFactory& operator = (const NodeFactory&) = delete;
 
     void loadPlugins();
 
@@ -46,8 +49,8 @@ public:
     std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap();
 
 public:
-    boost::signals2::signal<void(const std::string&)> loaded;
-    boost::signals2::signal<void()> new_node_type;
+    csapex::slim_signal::Signal<void(const std::string&)> loaded;
+    csapex::slim_signal::Signal<void()> new_node_type;
 
 protected:
     void unloadNode(NodeConstructorPtr p, UUID uuid);
@@ -65,7 +68,7 @@ protected:
     std::map<std::string, std::vector<NodeConstructor::Ptr> > tag_map_;
     std::vector<NodeConstructor::Ptr> constructors_;
 
-    std::unordered_map<UUID, boost::signals2::connection, UUID::Hasher> reload_connections_;
+    std::unordered_map<UUID, csapex::slim_signal::Connection, UUID::Hasher> reload_connections_;
 
     std::shared_ptr<PluginManager<Node>> node_manager_;
 

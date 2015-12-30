@@ -50,7 +50,7 @@ GraphFacade::GraphFacade(Executor &executor, Graph* graph)
 
 GraphFacade::~GraphFacade()
 {
-    for(auto connection : connections_) {
+    for(auto& connection : connections_) {
         connection.disconnect();
     }
     connections_.clear();

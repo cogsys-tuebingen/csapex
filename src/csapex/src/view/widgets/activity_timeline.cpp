@@ -180,7 +180,7 @@ void ActivityTimeline::removeNode(NodeWorker* node)
         node2row.erase(node);
         rows_.pop_back();
 
-        for(boost::signals2::connection& c : node2connections_[node]) {
+        for(csapex::slim_signal::Connection& c : node2connections_[node]) {
             c.disconnect();
         }
         node2connections_.erase(node);

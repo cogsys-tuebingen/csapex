@@ -196,7 +196,7 @@ void Transition::connectionRemoved(Connection *connection)
     signal_connections_.erase(connection);
 }
 
-void Transition::trackConnection(Connection *connection, const boost::signals2::connection &c)
+void Transition::trackConnection(Connection *connection, const csapex::slim_signal::Connection &c)
 {
     signal_connections_[connection].push_back(c);
 }

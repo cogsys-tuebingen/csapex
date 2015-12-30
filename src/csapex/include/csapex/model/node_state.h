@@ -7,7 +7,7 @@
 #include <csapex/model/model_fwd.h>
 
 /// SYSTEM
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.h>
 
 namespace csapex
 {
@@ -16,7 +16,7 @@ class NodeState : public Memento
 {
 public:
     typedef std::shared_ptr<NodeState> Ptr;
-    typedef boost::signals2::signal<void()> SignalImpl;
+    typedef csapex::slim_signal::Signal<void()> SignalImpl;
     typedef std::shared_ptr< SignalImpl > Signal;
 
     NodeState(const NodeHandle *parent);

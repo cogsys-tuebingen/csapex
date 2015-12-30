@@ -11,18 +11,13 @@
 #include <vector>
 #include <functional>
 #include <set>
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.hpp>
 #include <typeindex>
 
 namespace csapex
 {
 class PluginLocator : private boost::noncopyable
 {
-public:
-    boost::signals2::signal<void(std::string)> unload_library_request;
-    boost::signals2::signal<void(std::string)> reload_library_request;
-    boost::signals2::signal<void()> reload_done;
-
 public:
     PluginLocator(Settings& settings);
     ~PluginLocator();
@@ -44,9 +39,6 @@ public:
         locators_[std::type_index(typeid(PluginType))].push_back(fn);
     }
 
-    void reloadLibraryIfExists(const std::string& name, const std::string& abs_path);
-    void reloadLibrary(const std::string& name);
-
     void ignoreLibrary(const std::string& name, bool ignore);
     bool isLibraryIgnored(const std::string& name) const;
 
@@ -56,9 +48,6 @@ public:
 
     void setLibraryLoaded(const std::string& name, const std::string &file);
     bool isLibraryLoaded(const std::string& name) const;
-
-    void setAutoReload(bool autoreload);
-    bool isAutoReload() const;
 
     std::vector<std::string> getAllLibraries() const;
 

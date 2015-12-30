@@ -7,7 +7,7 @@
 #include <csapex/plugin/plugin_constructor.hpp>
 
 /// SYSTEM
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.hpp>
 #include <class_loader/class_loader.h>
 #include <set>
 #include <tinyxml.h>
@@ -222,7 +222,7 @@ protected:
     }
 
 protected:
-    boost::signals2::signal<void(const std::string&)> loaded;
+    csapex::slim_signal::Signal<void(const std::string&)> loaded;
 
 protected:
     bool plugins_loaded_;
@@ -297,20 +297,7 @@ public:
     virtual void load(csapex::PluginLocator* locator) {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
 
-        locator->unload_library_request.connect(PluginManagerGroup<M>::value, std::bind(&PluginManager<M>::unload, this, std::placeholders::_1), boost::signals2::at_front);
-        locator->reload_library_request.connect(-PluginManagerGroup<M>::value, std::bind(&PluginManager<M>::reload, this, std::placeholders::_1), boost::signals2::at_back);
-
         instance->load(locator);
-    }
-
-    void unload(const std::string& library) {
-        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
-        instance->unload(library);
-    }
-
-    void reload(const std::string& library) {
-        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
-        instance->reload(library);
     }
 
     const Constructors& availableClasses() const {
@@ -333,7 +320,7 @@ public:
     }
 
 public:
-    boost::signals2::signal<void(const std::string&)> loaded;
+    csapex::slim_signal::Signal<void(const std::string&)> loaded;
 
 protected:
     static int i_count;

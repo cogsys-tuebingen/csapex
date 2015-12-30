@@ -8,13 +8,13 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <QMainWindow>
 #include <QTimer>
 #include <QFileSystemWatcher>
 #include <QBoxLayout>
-#include <boost/signals2/connection.hpp>
 
 namespace Ui
 {
@@ -62,8 +62,6 @@ private Q_SLOTS:
     void showHowToInstall();
 
     void updatePluginIgnored(const QObject *&action);
-    void reloadPlugin(const QObject *&action);
-    void updatePluginAutoReload(bool autoreload);
 
 public Q_SLOTS:
     void save();
@@ -128,7 +126,7 @@ private:
     QFileSystemWatcher* style_sheet_watcher_;
     PluginLocatorPtr plugin_locator_;
 
-    std::vector<boost::signals2::connection> connections_;
+    std::vector<csapex::slim_signal::Connection> connections_;
 };
 
 } /// NAMESPACE

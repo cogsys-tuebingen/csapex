@@ -30,7 +30,6 @@ void Graph::clear()
 {
     auto connections = connections_;
     for(ConnectionPtr c : connections) {
-        std::cerr << "delete connection " << (long) c.get() << std::endl;
         deleteConnection(c);
     }
     apex_assert_hard(connections_.empty());

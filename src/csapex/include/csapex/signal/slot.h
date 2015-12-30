@@ -53,7 +53,7 @@ public:
     void handleTrigger();
 
 public:
-    boost::signals2::signal<void(Trigger*)> triggered;
+    csapex::slim_signal::Signal<void(Trigger*)> triggered;
 
 protected:
     bool acknowledgeConnection(Connectable* other_side);

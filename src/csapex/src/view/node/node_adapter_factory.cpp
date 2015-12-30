@@ -55,11 +55,6 @@ void NodeAdapterFactory::rebuildPrototypes()
             NodeAdapterBuilder::Ptr builder = constructor.construct();
             node_adapter_builders_[builder->getWrappedType()] = builder;
 
-            constructor.unload_request->disconnect_all_slots();
-            constructor.unload_request->connect(std::bind(&NodeAdapterFactory::unload, this));
-            constructor.reload_request->disconnect_all_slots();
-            constructor.reload_request->connect(std::bind(&NodeAdapterFactory::loadPlugins, this));
-
         } catch(const std::exception& e) {
             std::cerr << "adapter " << p.first << " cannot be built: " << e.what() << std::endl;
         }

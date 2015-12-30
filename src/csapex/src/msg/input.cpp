@@ -157,7 +157,7 @@ void Input::validateConnections()
 
 Connectable *Input::getSource() const
 {
-    assert(connections_.size() <= 1);
+    apex_assert_hard(connections_.size() <= 1);
     if(connections_.empty()) {
         return nullptr;
     } else {

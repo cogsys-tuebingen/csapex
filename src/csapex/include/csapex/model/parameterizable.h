@@ -8,7 +8,7 @@
 #include <csapex/model/generic_state.h>
 
 /// SYSTEM
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.hpp>
 #include <mutex>
 
 namespace csapex
@@ -20,7 +20,7 @@ public:
     typedef std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > ChangedParameterList;
 
 public:
-    boost::signals2::signal<void()> parameters_changed;
+    csapex::slim_signal::Signal<void()> parameters_changed;
 
 public:
     Parameterizable();
@@ -120,7 +120,7 @@ private:
     void parameterEnabled(csapex::param::Parameter* param, bool enabled);
 
 private:
-    std::map<csapex::param::Parameter*, std::vector<boost::signals2::connection> > connections_;
+    std::map<csapex::param::Parameter*, std::vector<csapex::slim_signal::Connection> > connections_;
     std::map<csapex::param::Parameter*, std::function<bool()> > conditions_;
 
     mutable std::mutex changed_params_mutex_;

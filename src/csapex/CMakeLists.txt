@@ -15,6 +15,9 @@ include(cmake/csapex-extras.cmake)
 ## Enable warnings
 add_definitions(-W -Wall)
 
+## Enable Profiling
+#add_definitions(-ftime-report)
+
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED)
 find_package(class_loader REQUIRED)
@@ -164,6 +167,7 @@ list(APPEND csapex_LIBRARIES csapex_param)
 
 
 add_library(csapex_util SHARED
+    src/utility/slim_signal.cpp
     src/utility/assert.cpp
     src/utility/exceptions.cpp
     src/utility/bash_parser.cpp
@@ -188,6 +192,8 @@ list(APPEND csapex_LIBRARIES csapex_util)
 
 
 add_library(csapex SHARED
+    src/utility/slim_signal_implementations.cpp
+
     src/model/node_handle.cpp
     src/model/node_worker.cpp
 
@@ -275,7 +281,6 @@ list(APPEND csapex_LIBRARIES csapex)
 
 # Library for the app itself
 add_library(csapex_qt SHARED
-
     src/command/command.cpp
     src/command/dispatcher.cpp
     src/command/meta.cpp

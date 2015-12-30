@@ -8,7 +8,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.h>
 
 namespace class_loader {
 class ClassLoader;
@@ -50,26 +50,26 @@ public:
     void setStatusMessage(const std::string& msg);
 
 public:
-    boost::signals2::signal<void ()> configChanged;
-    boost::signals2::signal<void (const std::string& msg)> showStatusMessage;
-    boost::signals2::signal<void ()> newNodeType;
+    csapex::slim_signal::Signal<void ()> configChanged;
+    csapex::slim_signal::Signal<void (const std::string& msg)> showStatusMessage;
+    csapex::slim_signal::Signal<void ()> newNodeType;
 
-    boost::signals2::signal<void ()> resetRequest;
-    boost::signals2::signal<void ()> resetDone;
+    csapex::slim_signal::Signal<void ()> resetRequest;
+    csapex::slim_signal::Signal<void ()> resetDone;
 
-    boost::signals2::signal<void ()> saved;
-    boost::signals2::signal<void ()> loaded;
+    csapex::slim_signal::Signal<void ()> saved;
+    csapex::slim_signal::Signal<void ()> loaded;
 
-    boost::signals2::signal<void (YAML::Node& e)> saveSettingsRequest;
-    boost::signals2::signal<void (YAML::Node& n)> loadSettingsRequest;
+    csapex::slim_signal::Signal<void (YAML::Node& e)> saveSettingsRequest;
+    csapex::slim_signal::Signal<void (YAML::Node& n)> loadSettingsRequest;
 
-    boost::signals2::signal<void (YAML::Node& e)> saveViewRequest;
-    boost::signals2::signal<void (YAML::Node& n)> loadViewRequest;
+    csapex::slim_signal::Signal<void (YAML::Node& e)> saveViewRequest;
+    csapex::slim_signal::Signal<void (YAML::Node& n)> loadViewRequest;
 
-    boost::signals2::signal<void (bool)> paused;
+    csapex::slim_signal::Signal<void (bool)> paused;
 
-    boost::signals2::signal<void ()> begin_step;
-    boost::signals2::signal<void ()> end_step;
+    csapex::slim_signal::Signal<void ()> begin_step;
+    csapex::slim_signal::Signal<void ()> end_step;
 
 private:
     CorePluginPtr makeCorePlugin(const std::string& name);

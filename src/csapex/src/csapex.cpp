@@ -172,7 +172,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
         CommandDispatcher dispatcher(settings, graph_facade, graph, &thread_pool, node_factory.get());
-        boost::signals2::scoped_connection saved_connection(core->saved.connect([&](){
+        csapex::slim_signal::ScopedConnection saved_connection(core->saved.connect([&](){
             dispatcher.setClean();
             dispatcher.resetDirtyPoint();
 
@@ -187,15 +187,15 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
                 }
             }
         }));
-        boost::signals2::scoped_connection loaded_connection(core->loaded.connect([&](){
+        csapex::slim_signal::ScopedConnection loaded_connection(core->loaded.connect([&](){
             dispatcher.setClean();
             dispatcher.resetDirtyPoint();
         }));
-        boost::signals2::scoped_connection reset(core->resetRequest.connect([&](){
+        csapex::slim_signal::ScopedConnection reset(core->resetRequest.connect([&](){
             dispatcher.reset();
             settings.set("config_recovery", false);
         }));
-        boost::signals2::scoped_connection change(dispatcher.stateChanged.connect([&](){
+        csapex::slim_signal::ScopedConnection change(dispatcher.stateChanged.connect([&](){
             std::string temp_file_name = settings.get("config")->as<std::string>() + ".recover";
             core->saveAs(temp_file_name, true);
         }));
@@ -217,9 +217,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         QObject::connect(legend, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
-        boost::signals2::scoped_connection add_connection
+        csapex::slim_signal::ScopedConnection add_connection
                 (graph_facade->nodeWorkerAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); }));
-        boost::signals2::scoped_connection remove_connection
+        csapex::slim_signal::ScopedConnection remove_connection
                 (graph_facade->nodeRemoved.connect([legend](NodeHandlePtr n) { legend->stopTrackingNode(n); }));
 
         QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
@@ -310,7 +310,7 @@ void Main::showMessage(const QString& msg)
 int main(int argc, char** argv)
 {
     //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
-
+    int effective_argc = argc;
     std::string path_to_bin(argv[0]);
 
     po::options_description desc("Allowed options");
@@ -333,7 +333,7 @@ int main(int argc, char** argv)
     // has to be done before parameters can be read.
     bool headless = false;
     bool fatal_exceptions = false;
-    for(int i = 1; i < argc; ++i) {
+    for(int i = 1; i < effective_argc; ++i) {
         std::string arg(argv[i]);
         if(arg == "--headless") {
             headless = true;
@@ -358,12 +358,12 @@ int main(int argc, char** argv)
     std::unique_ptr<QCoreApplication> app;
     if(headless) {
         handler.reset(new ExceptionHandler(fatal_exceptions));
-        app.reset(new CsApexCoreApp(argc, argv, *handler));
+        app.reset(new CsApexCoreApp(effective_argc, argv, *handler));
     } else {
         std::shared_ptr<GuiExceptionHandler> h(new GuiExceptionHandler(fatal_exceptions));
 
         handler = h;
-        app.reset(new CsApexGuiApp(argc, argv, *handler));
+        app.reset(new CsApexGuiApp(effective_argc, argv, *handler));
 
         h->moveToThread(app->thread());
     }
@@ -371,7 +371,7 @@ int main(int argc, char** argv)
     // filters ros remappings
     std::vector<std::string> remapping_args;
     std::vector<std::string> rest_args;
-    for(int i = 1; i < argc; ++i) {
+    for(int i = 1; i < effective_argc; ++i) {
         std::string arg(argv[i]);
         if(arg.find(":=") != std::string::npos)  {
             remapping_args.push_back(arg);

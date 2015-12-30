@@ -7,7 +7,7 @@
 
 /// SYSTEM
 #include <string>
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.h>
 
 namespace csapex
 {
@@ -81,7 +81,7 @@ public:
     void load();
 
 public:
-    boost::signals2::signal<void()> settingsChanged;
+    csapex::slim_signal::Signal<void()> settingsChanged;
 
 private:
     std::map<std::string, csapex::param::Parameter::Ptr> settings_;

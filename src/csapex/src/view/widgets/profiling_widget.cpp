@@ -9,6 +9,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/view/designer/designer_view.h>
 #include <csapex/view/utility/color.hpp>
+#include <csapex/utility/delegate_bind.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -18,6 +19,7 @@
 #include <QFileDialog>
 #include <fstream>
 #include <QSizeGrip>
+#include <functional>
 
 using namespace csapex;
 
@@ -63,7 +65,7 @@ ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *
     connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
-    connection_ = node_worker_->messages_processed.connect(boost::bind(&ProfilingWidget::update, this));
+    connection_ = node_worker_->messages_processed.connect(delegate::Delegate0<>(this, &ProfilingWidget::update));
 }
 
 ProfilingWidget::~ProfilingWidget()

@@ -10,7 +10,6 @@
 #include <mutex>
 #include <atomic>
 #include <thread>
-#include <boost/signals2/connection.hpp>
 
 namespace csapex
 {
@@ -61,7 +60,7 @@ private:
 
     std::thread ticking_thread_;
 
-    std::vector<boost::signals2::connection> connections_;
+    std::vector<csapex::slim_signal::Connection> connections_;
 
     std::atomic<bool> tick_thread_running_;
     std::atomic<bool> tick_thread_stop_;

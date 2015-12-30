@@ -8,7 +8,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.hpp>
 #include <unordered_map>
 
 namespace csapex
@@ -44,25 +44,25 @@ public:
     void reset();
 
 public:
-    boost::signals2::signal<void (bool)> paused;
-    boost::signals2::signal<void ()> stopped;
+    csapex::slim_signal::Signal<void (bool)> paused;
+    csapex::slim_signal::Signal<void ()> stopped;
 
-    boost::signals2::signal<void(NodeHandlePtr)> nodeAdded;
-    boost::signals2::signal<void(NodeHandlePtr)> nodeRemoved;
+    csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeAdded;
+    csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeRemoved;
 
-    boost::signals2::signal<void(NodeWorkerPtr)> nodeWorkerAdded;
-    boost::signals2::signal<void(NodeWorkerPtr)> nodeWorkerRemoved;
+    csapex::slim_signal::Signal<void(NodeWorkerPtr)> nodeWorkerAdded;
+    csapex::slim_signal::Signal<void(NodeWorkerPtr)> nodeWorkerRemoved;
 
-    boost::signals2::signal<void(TaskGeneratorPtr)> generatorAdded;
-    boost::signals2::signal<void(TaskGeneratorPtr)> generatorRemoved;
+    csapex::slim_signal::Signal<void(TaskGeneratorPtr)> generatorAdded;
+    csapex::slim_signal::Signal<void(TaskGeneratorPtr)> generatorRemoved;
 
-    boost::signals2::signal<void()> panic;
+    csapex::slim_signal::Signal<void()> panic;
 
 private:
     Graph* graph_;
     Executor& executor_;
 
-    std::vector<boost::signals2::connection> connections_;
+    std::vector<csapex::slim_signal::Connection> connections_;
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
 
     std::map<NodeHandle*, NodeWorkerPtr> node_workers_;

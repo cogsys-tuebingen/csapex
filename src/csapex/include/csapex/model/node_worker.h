@@ -16,7 +16,7 @@
 #include <mutex>
 #include <vector>
 #include <atomic>
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex {
 
@@ -104,23 +104,23 @@ public:
     void notifyMessagesProcessed();
 
 public:
-    boost::signals2::signal<void()> panic;
+    csapex::slim_signal::Signal<void()> panic;
 
-    boost::signals2::signal<void()> ticked;
-    boost::signals2::signal<void(bool)> enabled;
+    csapex::slim_signal::Signal<void()> ticked;
+    csapex::slim_signal::Signal<void(bool)> enabled;
 
-    boost::signals2::signal<void(NodeWorker* worker, int type, long stamp)> timerStarted;
-    boost::signals2::signal<void(NodeWorker* worker, long stamp)> timerStopped;
+    csapex::slim_signal::Signal<void(NodeWorker* worker, int type, long stamp)> timerStarted;
+    csapex::slim_signal::Signal<void(NodeWorker* worker, long stamp)> timerStopped;
 
-    boost::signals2::signal<void(NodeWorker* worker)> startProfiling;
-    boost::signals2::signal<void(NodeWorker* worker)> stopProfiling;
+    csapex::slim_signal::Signal<void(NodeWorker* worker)> startProfiling;
+    csapex::slim_signal::Signal<void(NodeWorker* worker)> stopProfiling;
 
-    boost::signals2::signal<void()> threadChanged;
-    boost::signals2::signal<void(bool)> errorHappened;
+    csapex::slim_signal::Signal<void()> threadChanged;
+    csapex::slim_signal::Signal<void(bool)> errorHappened;
 
-    boost::signals2::signal<void()> messages_processed;
-    boost::signals2::signal<void()> processRequested;
-    boost::signals2::signal<void()> checkTransitionsRequested;
+    csapex::slim_signal::Signal<void()> messages_processed;
+    csapex::slim_signal::Signal<void()> processRequested;
+    csapex::slim_signal::Signal<void()> checkTransitionsRequested;
 
 private:
     void publishParameters();
@@ -152,8 +152,8 @@ private:
     Trigger* trigger_process_done_;
 
 
-    std::vector<boost::signals2::connection> handle_connections_;
-    std::map<Connectable*, std::vector<boost::signals2::connection>> connections_;
+    std::vector<csapex::slim_signal::Connection> handle_connections_;
+    std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
 
     int ticks_;
 

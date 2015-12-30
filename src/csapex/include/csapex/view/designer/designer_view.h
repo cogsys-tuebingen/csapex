@@ -8,12 +8,12 @@
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/designer/designer_styleable.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <QGraphicsView>
 #include <map>
 #include <QTimer>
-#include <boost/signals2/connection.hpp>
 
 namespace csapex
 {
@@ -132,11 +132,11 @@ private:
     WidgetControllerPtr widget_ctrl_;
     DragIO& drag_io_;
 
-    std::map<NodeWorker*, std::vector<boost::signals2::connection>> connections_;
+    std::map<NodeWorker*, std::vector<csapex::slim_signal::Connection>> connections_;
 
     std::vector<NodeBox*> boxes_;
     std::map<NodeBox*, ProfilingWidget*> profiling_;
-    std::map<NodeBox*, std::vector<boost::signals2::connection>> profiling_connections_;
+    std::map<NodeBox*, std::vector<csapex::slim_signal::Connection>> profiling_connections_;
 
     int scalings_to_perform_;
     QTimer scalings_animation_timer_;

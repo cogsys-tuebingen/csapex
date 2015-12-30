@@ -1619,7 +1619,7 @@ private:	// Invoker for static functions
 //						Fast Delegates, part 4:
 // 
 //				Delegate<> class (Original author: Jody Hagins)
-//	Allows boost::function style syntax like:
+//	Allows std::function style syntax like:
 //			Delegate< double (int, long) >
 // instead of:
 //			Delegate2< int, long, double >

@@ -45,7 +45,7 @@ private:
 private:
     bool one_input_is_dynamic_;
 
-    std::map<InputPtr, std::vector<boost::signals2::connection>> input_signal_connections_;
+    std::map<InputPtr, std::vector<csapex::slim_signal::Connection>> input_signal_connections_;
 
     std::unordered_map<UUID, InputPtr, UUID::Hasher> inputs_;
 };

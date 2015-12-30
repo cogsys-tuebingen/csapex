@@ -5,7 +5,7 @@
 #include <csapex/scheduling/scheduling_fwd.h>
 
 /// SYSTEM
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
@@ -34,10 +34,10 @@ protected:
     virtual void performStep() = 0;
 
 public:
-    boost::signals2::signal<void (bool)> paused;
+    csapex::slim_signal::Signal<void (bool)> paused;
 
-    boost::signals2::signal<void ()> begin_step;
-    boost::signals2::signal<void ()> end_step;
+    csapex::slim_signal::Signal<void ()> begin_step;
+    csapex::slim_signal::Signal<void ()> end_step;
 
 private:
     bool paused_;

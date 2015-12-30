@@ -9,6 +9,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/factory/factory_fwd.h>
 #include <csapex/param/param_fwd.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <memory>
@@ -16,7 +17,6 @@
 #include <QPoint>
 #include <QLayout>
 #include <QGraphicsView>
-#include <boost/signals2/connection.hpp>
 
 namespace csapex
 {
@@ -92,7 +92,7 @@ private:
     NodeAdapterFactory* node_adapter_factory_;
     Designer* designer_;
 
-    std::vector<boost::signals2::connection> connections_;
+    std::vector<csapex::slim_signal::Connection> connections_;
 
     class Impl;
     std::unique_ptr<Impl> pimpl;

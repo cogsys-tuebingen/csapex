@@ -77,7 +77,7 @@ public:
     virtual void removeAllConnectionsNotUndoable() override;
 
 public:
-    boost::signals2::signal<void()> message_processed;
+    csapex::slim_signal::Signal<void()> message_processed;
 
 
 protected:

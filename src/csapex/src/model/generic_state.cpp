@@ -13,9 +13,9 @@ using namespace csapex;
 
 GenericState::GenericState()
     : silent_(false),
-      parameter_set_changed(new boost::signals2::signal<void()>),
-      parameter_added(new boost::signals2::signal<void(csapex::param::ParameterPtr)>),
-      parameter_removed(new boost::signals2::signal<void(csapex::param::ParameterPtr)>)
+      parameter_set_changed(new csapex::slim_signal::Signal<void()>),
+      parameter_added(new csapex::slim_signal::Signal<void(csapex::param::ParameterPtr)>),
+      parameter_removed(new csapex::slim_signal::Signal<void(csapex::param::ParameterPtr)>)
 {
 
 }

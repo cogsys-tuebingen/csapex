@@ -10,7 +10,7 @@
 /// SYSTEM
 #include <typeinfo>
 #include <functional>
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.h>
 
 namespace csapex
 {
@@ -33,8 +33,8 @@ public:
     typedef std::shared_ptr<NodeConstructor> Ptr;
 
 public:
-    boost::signals2::signal<void()> unload_request;
-    boost::signals2::signal<void()> reload_request;
+    csapex::slim_signal::Signal<void()> unload_request;
+    csapex::slim_signal::Signal<void()> reload_request;
 
 
 public:

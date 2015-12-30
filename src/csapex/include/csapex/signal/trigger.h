@@ -54,8 +54,8 @@ public:
     bool connect(Slot* other_side);
 
 public:
-    boost::signals2::signal<void()> triggered;
-    boost::signals2::signal<void()> all_signals_handled;
+    csapex::slim_signal::Signal<void()> triggered;
+    csapex::slim_signal::Signal<void()> all_signals_handled;
 
 protected:
     std::vector<Slot*> targets_;

@@ -174,9 +174,6 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->node_info_tree, SIGNAL(itemSelectionChanged()), this, SLOT(updateNodeInfo()));
 
-    QObject::connect(ui->actionAuto_Reload, SIGNAL(toggled(bool)), this, SLOT(updatePluginAutoReload(bool)));
-    ui->actionAuto_Reload->setChecked(plugin_locator_->isAutoReload());
-
     connections_.push_back(core_.resetDone.connect([this](){ designer_->reset(); }));
     connections_.push_back(core_.configChanged.connect([this](){ updateTitle(); }));
     connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
@@ -573,19 +570,6 @@ void CsApexWindow::createPluginsMenu()
         enable_ignore_mapper->setMapping(enable_ignore, enable_ignore);
 
         QObject::connect(enable_ignore_mapper, SIGNAL(mapped(QObject*)), this, SLOT(updatePluginIgnored(QObject*)));
-
-
-        /// reload plugin
-        QAction* reload = new QAction(QString::fromStdString(library), ui->menu_Reload_Plugin);
-        reload->setObjectName(QString::fromStdString(library));
-        reload->setIcon(QIcon(":/plugin.png"));
-        ui->menu_Reload_Plugin->addAction(reload);
-
-        QSignalMapper* reload_mapper = new QSignalMapper(this);
-        QObject::connect(reload, SIGNAL(triggered()), reload_mapper, SLOT(map()));
-        reload_mapper->setMapping(reload, reload);
-
-        QObject::connect(reload_mapper, SIGNAL(mapped(QObject*)), this, SLOT(reloadPlugin(QObject*)));
     }
 }
 
@@ -596,19 +580,6 @@ void CsApexWindow::updatePluginIgnored(const QObject* &action)
     plugin_locator_->ignoreLibrary(a->objectName().toStdString(), !a->isChecked());
 }
 
-void CsApexWindow::reloadPlugin(const QObject* &action)
-{
-    const QAction* a = dynamic_cast<const QAction*>(action);
-
-    core_.setPause(true);
-    plugin_locator_->reloadLibrary(a->objectName().toStdString());
-    core_.setPause(false);
-}
-
-void CsApexWindow::updatePluginAutoReload(bool autoreload)
-{
-    plugin_locator_->setAutoReload(autoreload);
-}
 
 void CsApexWindow::tick()
 {

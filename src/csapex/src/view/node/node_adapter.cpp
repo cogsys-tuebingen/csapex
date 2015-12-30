@@ -56,7 +56,7 @@ void NodeAdapter::setParameterState(Memento::Ptr)
 
 }
 
-void NodeAdapter::trackConnection(const boost::signals2::connection &c)
+void NodeAdapter::trackConnection(const csapex::slim_signal::Connection &c)
 {
     connections_.push_back(c);
 }

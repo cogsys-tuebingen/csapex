@@ -5,7 +5,7 @@
 #include <csapex/utility/constructor.hpp>
 
 /// SYSTEM
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
@@ -15,16 +15,10 @@ struct PluginConstructor : public ConstructorInterface {
 public:
     typedef std::function<typename std::shared_ptr<M>()> Call;
 
-public:
-    std::shared_ptr< boost::signals2::signal<void()> > unload_request;
-    std::shared_ptr< boost::signals2::signal<void()> > reload_request;
 
 public:
     PluginConstructor()
-        : unload_request(new boost::signals2::signal<void()>),
-          reload_request(new boost::signals2::signal<void()>)
     {
-
     }
 
     typename std::shared_ptr<M> operator()() const {
@@ -59,14 +53,6 @@ public:
 
     std::vector< std::weak_ptr<M> > getInstances() {
         return instances_;
-    }
-
-    void unload() {
-        (*unload_request)();
-    }
-
-    void reload() {
-        (*reload_request)();
     }
 
 private:

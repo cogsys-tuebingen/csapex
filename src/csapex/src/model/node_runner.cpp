@@ -50,7 +50,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
 
 NodeRunner::~NodeRunner()
 {
-    for(boost::signals2::connection& c : connections_) {
+    for(csapex::slim_signal::Connection& c : connections_) {
         c.disconnect();
     }
     connections_.clear();
@@ -83,7 +83,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
     remaining_tasks_.clear();
 
-    for(boost::signals2::connection& c : connections_) {
+    for(csapex::slim_signal::Connection& c : connections_) {
         c.disconnect();
     }
     connections_.clear();

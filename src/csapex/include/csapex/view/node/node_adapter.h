@@ -8,7 +8,7 @@
 /// SYSTEM
 #include <QLayout>
 #include <memory>
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.hpp>
 #include <vector>
 
 class QListView;
@@ -35,7 +35,7 @@ public:
 
 protected:
     virtual void setupUi(QBoxLayout* layout) = 0;
-    void trackConnection(const boost::signals2::connection &c);
+    void trackConnection(const csapex::slim_signal::Connection &c);
 
 protected:
     QBoxLayout *layout_;
@@ -48,7 +48,7 @@ protected:
     NodeHandleWeakPtr node_;
     WidgetController* widget_ctrl_;
 
-    std::vector<boost::signals2::connection> connections_;
+    std::vector<csapex::slim_signal::Connection> connections_;
 };
 
 }

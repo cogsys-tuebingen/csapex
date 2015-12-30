@@ -6,6 +6,7 @@
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/utility_fwd.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <QWidget>
@@ -13,7 +14,6 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
-#include <boost/signals2/connection.hpp>
 
 class QSpacerItem;
 class QVBoxLayout;
@@ -44,7 +44,7 @@ private:
     NodeBox* box_;
     NodeWorker* node_worker_;
 
-    boost::signals2::connection connection_;
+    csapex::slim_signal::Connection connection_;
 
     QVBoxLayout* layout_;
     QSpacerItem* space_for_painting_;

@@ -7,7 +7,7 @@
 
 /// SYSTEM
 #include <memory>
-#include <boost/signals2/signal.hpp>
+#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
@@ -55,9 +55,9 @@ public:
     Connection* connection() const;
 
 public:
-    boost::signals2::signal<void (Fulcrum*, bool dropped)> moved;
-    boost::signals2::signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
-    boost::signals2::signal<void (Fulcrum*, int type)> typeChanged;
+    csapex::slim_signal::Signal<void (Fulcrum*, bool dropped)> moved;
+    csapex::slim_signal::Signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
+    csapex::slim_signal::Signal<void (Fulcrum*, int type)> typeChanged;
 
 private:
     Connection* parent_;

@@ -9,7 +9,7 @@
 #include <csapex/param/param_fwd.h>
 
 /// SYSTEM
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.h>
 #include <set>
 
 namespace csapex
@@ -70,9 +70,9 @@ public:
 
     bool silent_;
 
-    std::shared_ptr<boost::signals2::signal<void()> > parameter_set_changed;
-    std::shared_ptr<boost::signals2::signal<void(csapex::param::ParameterPtr)> > parameter_added;
-    std::shared_ptr<boost::signals2::signal<void(csapex::param::ParameterPtr)> > parameter_removed;
+    std::shared_ptr<csapex::slim_signal::Signal<void()> > parameter_set_changed;
+    std::shared_ptr<csapex::slim_signal::Signal<void(csapex::param::ParameterPtr)> > parameter_added;
+    std::shared_ptr<csapex::slim_signal::Signal<void(csapex::param::ParameterPtr)> > parameter_removed;
 };
 
 }

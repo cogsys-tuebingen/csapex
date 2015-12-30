@@ -3,7 +3,8 @@
 
 /// SYSTEM
 #include <csignal>
-#include <boost/signals2.hpp>
+#include <csapex/utility/slim_signal.hpp>
+
 
 namespace csapex
 {
@@ -17,9 +18,9 @@ void sigsegvhandler(int sig_num, siginfo_t * info, void * ucontext);
 void stop();
 void kill();
 
-boost::signals2::signal<void()>& stop_request()
+csapex::slim_signal::Signal<void()>& stop_request()
 {
-    static boost::signals2::signal<void()> s;
+    static csapex::slim_signal::Signal<void()> s;
     return s;
 }
 

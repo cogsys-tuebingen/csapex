@@ -150,9 +150,6 @@ CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
     core_plugins_[plugin_name] = plugin;
 
     if(!core_plugins_connected_[plugin_name]) {
-        constructor.unload_request->connect(std::bind(&CsApexCore::unloadCorePlugin, this, plugin_name));
-        constructor.reload_request->connect(std::bind(&CsApexCore::reloadCorePlugin, this, plugin_name));
-
         core_plugins_connected_[plugin_name] = true;
     }
 
