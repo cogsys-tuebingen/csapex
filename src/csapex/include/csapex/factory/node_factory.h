@@ -34,6 +34,7 @@ public:
     NodeFactory& operator = (const NodeFactory&) = delete;
 
     void loadPlugins();
+    void shutdown();
 
 public:
     void registerNodeType(NodeConstructor::Ptr provider, bool suppress_signals = false);

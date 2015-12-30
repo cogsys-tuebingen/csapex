@@ -56,6 +56,12 @@ void NodeFactory::loadPlugins()
     rebuildMap();
 }
 
+void NodeFactory::shutdown()
+{
+    tag_map_.clear();
+    constructors_.clear();
+}
+
 void NodeFactory::rebuildPrototypes()
 {
     //    available_elements_prototypes.clear();

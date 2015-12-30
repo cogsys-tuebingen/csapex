@@ -257,8 +257,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         res = run();
     }
 
-    graph->clear();
-//    graph.reset();
+    graph->clear();  // TODO: this should not be necessary...
+    node_factory->shutdown(); // TODO: this should not be necessary... but must be destroyed before core
 
     return res;
 }
