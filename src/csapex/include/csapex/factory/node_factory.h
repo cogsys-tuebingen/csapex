@@ -23,9 +23,6 @@ class NodeFactory
 public:
     typedef std::shared_ptr<NodeFactory> Ptr;
 
-    csapex::slim_signal::Signal<void(const UUID&)> unload_request;
-    csapex::slim_signal::Signal<void(const UUID&)> reload_request;
-
 public:
     NodeFactory(PluginLocator *locator);
     ~NodeFactory();
@@ -54,9 +51,6 @@ public:
     csapex::slim_signal::Signal<void()> new_node_type;
 
 protected:
-    void unloadNode(NodeConstructorPtr p, UUID uuid);
-    void reloadNode(NodeConstructorPtr p, UUID uuid);
-
     void ensureLoaded();
     void rebuildPrototypes();
     void rebuildMap();
@@ -68,8 +62,6 @@ protected:
 
     std::map<std::string, std::vector<NodeConstructor::Ptr> > tag_map_;
     std::vector<NodeConstructor::Ptr> constructors_;
-
-    std::unordered_map<UUID, csapex::slim_signal::Connection, UUID::Hasher> reload_connections_;
 
     std::shared_ptr<PluginManager<Node>> node_manager_;
 

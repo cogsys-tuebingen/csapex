@@ -42,7 +42,7 @@ void MessageRendererManager::loadPlugins()
 
     renderers.clear();
 
-    for(auto pair : manager_->availableClasses()) {
+    for(const auto& pair : manager_->getConstructors()) {
         try {
             MessageRenderer::Ptr renderer(pair.second());
             renderers[renderer->messageType()] = renderer;

@@ -47,8 +47,7 @@ void NodeAdapterFactory::loadPlugins()
 
 void NodeAdapterFactory::rebuildPrototypes()
 {
-    typedef std::pair<std::string, PluginConstructor<NodeAdapterBuilder> > ADAPTER_PAIR;
-    for(const ADAPTER_PAIR& p : node_adapter_manager_->availableClasses()) {
+    for(const auto& p : node_adapter_manager_->getConstructors()) {
         const PluginConstructor<NodeAdapterBuilder>& constructor = p.second;
 
         try {
@@ -59,11 +58,6 @@ void NodeAdapterFactory::rebuildPrototypes()
             std::cerr << "adapter " << p.first << " cannot be built: " << e.what() << std::endl;
         }
     }
-}
-
-void NodeAdapterFactory::unload()
-{
-    node_adapter_builders_.clear();
 }
 
 void NodeAdapterFactory::ensureLoaded()

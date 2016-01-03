@@ -29,7 +29,6 @@ public:
     void loadPlugins();
 
 private:
-    void unload();
     void ensureLoaded();
     void rebuildPrototypes();
 

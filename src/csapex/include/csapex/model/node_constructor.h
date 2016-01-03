@@ -33,11 +33,6 @@ public:
     typedef std::shared_ptr<NodeConstructor> Ptr;
 
 public:
-    csapex::slim_signal::Signal<void()> unload_request;
-    csapex::slim_signal::Signal<void()> reload_request;
-
-
-public:
     NodeConstructor(const std::string& type, std::function<NodePtr()> c);
 
     virtual ~NodeConstructor();

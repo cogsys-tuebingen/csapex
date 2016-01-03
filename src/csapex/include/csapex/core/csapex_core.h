@@ -73,8 +73,6 @@ public:
 
 private:
     CorePluginPtr makeCorePlugin(const std::string& name);
-    void unloadCorePlugin(const std::string& plugin);
-    void reloadCorePlugin(const std::string& plugin);
 
 private:
     Settings& settings_;

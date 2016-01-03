@@ -61,48 +61,6 @@ protected:
         plugins_loaded_ = true;
     }
 
-    void unload(const std::string& library) {
-        // unload all matching classes
-        for(typename Constructors::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
-            PluginConstructorM& c = it->second;
-            if(c.getLibraryName() == library) {
-                c.unload();
-            }
-        }
-
-        std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
-        assert(!loader->isOnDemandLoadUnloadEnabled());
-
-        //        std::cerr << "unloading " << library << " for " << full_name_ << std::endl;
-        int retries = 1;
-        while(retries != 0) {
-            retries = loader->unloadLibrary();
-            if(retries != 0) {
-                //                std::cerr << "there are still " << retries << " unloads necessary to unload " << full_name_ << std::endl;
-            }
-        }
-        if(loader->isLibraryLoadedByAnyClassloader()) {
-            //            std::cerr << "there still instances of " << library << std::endl;
-        } else {
-            //            std::cerr << "there no more instances of " << library << std::endl;
-        }
-    }
-
-    void reload(const std::string& library) {
-        std::shared_ptr<class_loader::ClassLoader> loader = loaders_[library];
-        //        std::cerr << "loading " << library  << " for " << full_name_ << std::endl;
-        loader->loadLibrary();
-
-        // reload all matching classes
-        for(typename Constructors::iterator it = available_classes.begin(); it != available_classes.end(); ++it) {
-            PluginConstructorM& c = it->second;
-            if(c.getLibraryName() == library) {
-                c.reload();
-            }
-        }
-
-    }
-
     bool processManifest(csapex::PluginLocator* locator, const std::string& xml_file)
     {
         TiXmlDocument document;
@@ -300,21 +258,21 @@ public:
         instance->load(locator);
     }
 
-    const Constructors& availableClasses() const {
+    const Constructors& getConstructors() const {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes;
     }
-    const Constructor& availableClasses(unsigned index) const {
+    const Constructor& getConstructor(unsigned index) const {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         typename Constructors::iterator it = instance->available_classes.begin();
         std::advance(it, index);
         return it->second;
     }
-    const Constructor& availableClasses(const std::string& key) const {
+    const Constructor& getConstructor(const std::string& key) const {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes[key];
     }
-    Constructor& availableClasses(const std::string& key) {
+    Constructor& getConstructor(const std::string& key) {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes[key];
     }

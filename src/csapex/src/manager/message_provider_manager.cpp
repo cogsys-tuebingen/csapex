@@ -41,8 +41,7 @@ void MessageProviderManager::loadPlugins()
     supported_types_ = std::string("*") + Settings::message_extension + " ";
     registerMessageProvider(Settings::message_extension, std::bind(&ApexMessageProvider::make));
 
-    typedef std::pair<std::string, PluginManager<csapex::MessageProvider>::Constructor> PAIR;
-    for(PAIR pair : manager_->availableClasses()) {
+    for(const auto& pair : manager_->getConstructors()) {
         try {
             MessageProvider::Ptr prov(pair.second());
             for(const std::string& extension : prov->getExtensions()) {

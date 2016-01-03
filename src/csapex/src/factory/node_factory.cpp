@@ -67,8 +67,7 @@ void NodeFactory::rebuildPrototypes()
     //    available_elements_prototypes.clear();
     //    node_adapter_builders_.clear();
     
-    typedef std::pair<std::string, PluginConstructor<Node> > NODE_PAIR;
-    for(const NODE_PAIR& p : node_manager_->availableClasses()) {
+    for(const auto& p : node_manager_->getConstructors()) {
         const PluginConstructor<Node>& plugin_constructor = p.second;
 
         // convert tag list into vector
@@ -241,28 +240,10 @@ NodeHandlePtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
             result->setNodeState(state);
         }
 
-        reload_connections_[uuid] = p->unload_request.connect(std::bind(&NodeFactory::unloadNode, this, p, uuid));
-
         return result;
 
     } else {
         std::cerr << "error: cannot make node, type '" << target_type << "' is unknown" << std::endl;
         return nullptr;
     }
-}
-
-void NodeFactory::unloadNode(NodeConstructorPtr p, UUID uuid)
-{
-    reload_connections_[uuid].disconnect();
-    reload_connections_[uuid] = p->reload_request.connect(std::bind(&NodeFactory::reloadNode, this, p, uuid));
-
-    unload_request(uuid);
-}
-
-
-void NodeFactory::reloadNode(NodeConstructorPtr /*p*/, UUID uuid)
-{
-    reload_connections_[uuid].disconnect();
-
-    reload_request(uuid);
 }

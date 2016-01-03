@@ -118,8 +118,7 @@ void CsApexCore::init()
         showStatusMessage("loading core plugins");
         core_plugin_manager->load(plugin_locator_.get());
 
-        typedef const std::pair<std::string, PluginConstructor<CorePlugin> > CONSTRUCTORPAIR;
-        for(CONSTRUCTORPAIR cp : core_plugin_manager->availableClasses()) {
+        for(const auto& cp : core_plugin_manager->getConstructors()) {
             makeCorePlugin(cp.first);
         }
 
@@ -142,7 +141,7 @@ CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
 {
     assert(core_plugins_.find(plugin_name) == core_plugins_.end());
 
-    const PluginConstructor<CorePlugin>& constructor = core_plugin_manager->availableClasses(plugin_name);
+    const PluginConstructor<CorePlugin>& constructor = core_plugin_manager->getConstructor(plugin_name);
 
     CorePlugin::Ptr plugin = constructor();
     plugin->setName(plugin_name);
@@ -154,24 +153,6 @@ CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
     }
 
     return plugin;
-}
-
-void CsApexCore::unloadCorePlugin(const std::string& plugin_name)
-{
-    CorePlugin::Ptr plugin = core_plugins_[plugin_name];
-    core_plugins_.erase(plugin_name);
-
-    plugin->shutdown();
-}
-
-void CsApexCore::reloadCorePlugin(const std::string& plugin_name)
-{
-    std::cerr << "reload core plugin " << plugin_name << std::endl;
-
-    CorePlugin::Ptr plugin =  makeCorePlugin(plugin_name);
-
-    plugin->prepare(getSettings());
-    plugin->init(*this);
 }
 
 void CsApexCore::boot()

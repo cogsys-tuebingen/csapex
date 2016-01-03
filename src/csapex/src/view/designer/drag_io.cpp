@@ -43,7 +43,7 @@ void DragIO::load()
 
     manager_->load(plugin_locator_.get());
 
-    for(auto pair : manager_->availableClasses()) {
+    for(const auto& pair : manager_->getConstructors()) {
         try {
             DragIOHandler::Ptr handler(pair.second());
             registerHandler(handler);
