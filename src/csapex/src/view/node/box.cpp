@@ -33,7 +33,7 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(adapter), icon_(icon),
-      down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), is_placed_(false)
+      down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr)
 {
     handle->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::flipSides, this));
     handle->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
@@ -404,6 +404,7 @@ void NodeBox::init()
     NodeStatePtr state = nh->getNodeState();
     Point pt = state->getPos();
     move(QPoint(pt.x, pt.y));
+    (*state->pos_changed)();
 }
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
@@ -504,28 +505,25 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
 }
 
 void NodeBox::moveEvent(QMoveEvent* e)
-{    
+{
     NodeHandlePtr nh = node_handle_.lock();
     if(!nh) {
         return;
     }
 
-    if(!is_placed_) {
-        is_placed_ = true;
-        return;
-    }
-
-    QPoint pos = e->pos();
-
     eventFilter(this, e);
-
-    NodeStatePtr state = nh->getNodeState();
-    state->setPos(Point(pos.x(), pos.y()));
 }
 
 void NodeBox::triggerPlaced()
 {
-    Q_EMIT placed();
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return;
+    }
+    Point p;
+    p.x = pos().x();
+    p.y = pos().y();
+    nh->getNodeState()->setPos(p);
 }
 
 void NodeBox::setSelected(bool selected)

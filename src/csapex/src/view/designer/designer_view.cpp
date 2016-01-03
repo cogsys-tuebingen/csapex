@@ -486,8 +486,8 @@ void DesignerView::addBoxEvent(NodeBox *box)
     }
 
     box->init();
-    box->triggerPlaced();
     box->show();
+    box->triggerPlaced();
 
     box->updateBoxInformation(graph_.get());
 }

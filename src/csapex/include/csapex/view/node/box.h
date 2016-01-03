@@ -121,7 +121,6 @@ public Q_SLOTS:
     void updateVisuals();
 
 Q_SIGNALS:
-    void placed();
     void toggled(bool);
     void flipped(bool);
     void minimized(bool);
@@ -173,7 +172,6 @@ protected:
     QLabel* info_error;
 
     bool moved_;
-    bool is_placed_;
 };
 
 }
