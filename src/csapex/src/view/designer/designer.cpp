@@ -175,7 +175,7 @@ bool Designer::areSignalConnectionsVisible() const
 }
 bool Designer::isDebug() const
 {
-    return settings_.get<bool>("debug", true);
+    return settings_.get<bool>("debug", false);
 }
 
 bool Designer::hasSelection() const

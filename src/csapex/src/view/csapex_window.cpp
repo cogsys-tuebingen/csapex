@@ -645,6 +645,10 @@ void CsApexWindow::init()
     if(settings.knows("uistate")) {
         std::string uistate = settings.get<std::string>("uistate");
         restoreState(QByteArray::fromBase64(uistate.data()));
+    } else {
+        for(auto dw : findChildren<QDockWidget*>()) {
+            dw->hide();
+        }
     }
     if(settings.knows("geometry")) {
         std::string geometry = settings.get<std::string>("geometry");
