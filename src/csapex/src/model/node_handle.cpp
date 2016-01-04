@@ -328,7 +328,7 @@ void NodeHandle::updateParameterValue(Connectable *s)
     }
 }
 
-Input* NodeHandle::addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional)
+Input* NodeHandle::addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional)
 {
     int id = next_input_id_++;
     InputPtr c;
@@ -346,7 +346,7 @@ Input* NodeHandle::addInput(ConnectionTypePtr type, const std::string& label, bo
     return c.get();
 }
 
-Output* NodeHandle::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
+Output* NodeHandle::addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     int id = next_output_id_++;

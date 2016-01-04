@@ -17,8 +17,8 @@ HardAssertionFailure::HardAssertionFailure()
 
 }
 
-HardAssertionFailure::HardAssertionFailure(const char* code, const char* file, int line)
-    : code(code), file(file), line(line), thread(csapex::thread::get_name())
+HardAssertionFailure::HardAssertionFailure(const char *msg, const char* code, const char* file, int line)
+    : msg(msg), code(code), file(file), line(line), thread(csapex::thread::get_name())
 {
     void *stack_addrs[max_depth];
 
@@ -46,6 +46,9 @@ void HardAssertionFailure::printStackTrace() const
 std::string HardAssertionFailure::what() const
 {
     std::stringstream ss;
+    if(!msg.empty()) {
+        ss << msg << " - ";
+    }
     ss << "assertion \"" << code << "\" failed in " << file << ", line " << line << ", thread \"" << csapex::thread::get_name() << "\"" << std::endl;
 
     ss << stackTrace();

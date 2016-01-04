@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid.h>
+#include <csapex/model/node.h>
 #include <csapex/model/model_fwd.h>
 
 /// SYSTEM
@@ -12,7 +13,7 @@
 
 namespace csapex {
 
-class Graph
+class Graph : public Node
 {
     friend class GraphIO;
     friend class GraphFacade;
@@ -44,12 +45,13 @@ public:
     void clear();
 
     Node* findNode(const UUID& uuid) const;
-    Node* findNodeNoThrow(const UUID& uuid) const;
+    Node* findNodeNoThrow(const UUID& uuid) const noexcept;
     Node* findNodeForConnector(const UUID &uuid) const;
 
     NodeHandle* findNodeHandle(const UUID& uuid) const;
-    NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const;
+    NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept;
     NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
+    NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept;
 
     std::vector<NodeHandle*> getAllNodeHandles();
 
@@ -82,6 +84,16 @@ public:
     node_iterator endNodes();
     const node_const_iterator endNodes() const;
 
+    // Node interface
+    virtual void setup(csapex::NodeModifier& modifier) override;
+    virtual void process(csapex::Parameterizable& params,
+                         std::function<void (std::function<void ()>)> continuation) override;
+
+    virtual bool isAsynchronous() const override;
+
+    Input* passOutInput(Input* internal);
+    Output* passOutOutput(Output* internal);
+
 private:
    /*rename*/ void verify();
     void buildConnectedComponents();
@@ -108,6 +120,12 @@ protected:
     std::vector<ConnectionPtr> connections_;
 
     std::map<std::string, int> uuids_;
+
+    std::function<void (std::function<void ()>)> continuation_;
+
+    std::map<Input*, OutputPtr> pass_on_inputs_;
+    std::map<Output*, Output*> pass_on_outputs_;
+    std::map<Output*, bool> received_;
 };
 
 }

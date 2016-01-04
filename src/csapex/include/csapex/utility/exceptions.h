@@ -12,7 +12,7 @@ class HardAssertionFailure
 {
 public:
     HardAssertionFailure();
-    HardAssertionFailure(const char* code, const char* file, int line);
+    HardAssertionFailure(const char* msg, const char* code, const char* file, int line);
     ~HardAssertionFailure();
 
     std::string what() const;
@@ -21,6 +21,7 @@ public:
     void printStackTrace() const;
 
 public:
+    std::string msg;
     std::string code;
     std::string file;
     int line;

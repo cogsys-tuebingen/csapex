@@ -55,8 +55,6 @@ protected:
     void rebuildPrototypes();
     void rebuildMap();
 
-    NodeHandlePtr makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid);
-
 protected:
     csapex::PluginLocator* plugin_locator_;
 

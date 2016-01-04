@@ -40,12 +40,17 @@ void GuiExceptionHandler::showErrorDialog(const HardAssertionFailure &assertion)
     auto window = QApplication::activeWindow();
 
     std::stringstream msg;
+    if(!assertion.msg.empty()) {
+        msg << assertion.msg << "\n";
+    }
     msg << "assertion \"" << assertion.code << "\" failed in "
         << assertion.file << ", line " << assertion.line << ", thread \"" << assertion.thread << "\"" << std::endl;
 
     msg << "\n\n" << assertion.stackTrace(12);
 
-    int reply = QMessageBox::critical(window, QString::fromStdString(assertion.code),
+    std::string title = assertion.msg.empty() ? assertion.code : assertion.msg;
+
+    int reply = QMessageBox::critical(window, QString::fromStdString(title),
                                       QString::fromStdString(msg.str()), "&Ignore", "&Report (Email)", "&Create Issue on GitLab");
 
     switch(reply) {

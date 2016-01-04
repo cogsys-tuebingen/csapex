@@ -28,8 +28,20 @@ public:
 
     void addNode(NodeHandlePtr node);
 
+    ConnectionPtr connect(OutputPtr output, InputPtr input,
+                          OutputTransition* ot, InputTransition* it);
     ConnectionPtr connect(Output* output, Input* input,
                           OutputTransition* ot, InputTransition* it);
+
+    ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name,
+                          NodeHandlePtr input, const std::string& inputput_name);
+    ConnectionPtr connect(NodeHandle* output, const std::string& output_name,
+                          NodeHandle* input, const std::string& input_name);
+
+    ConnectionPtr connect(const UUID& output_id, const UUID& input_id);
+
+    ConnectionPtr connect(NodeHandlePtr output, int output_id,
+                          NodeHandlePtr input, int input_id);
     ConnectionPtr connect(NodeHandle* output, int output_id,
                           NodeHandle* input, int input_id);
 

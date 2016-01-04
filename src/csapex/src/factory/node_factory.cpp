@@ -179,11 +179,6 @@ bool NodeFactory::isValidType(const std::string &type) const
     return false;
 }
 
-NodeHandlePtr NodeFactory::makeSingleNode(NodeConstructor::Ptr content, const UUID& uuid)
-{
-    return content->makeNodeHandle(uuid);
-}
-
 NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
 {
     ensureLoaded();
@@ -234,7 +229,7 @@ NodeHandlePtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
 
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {
-        NodeHandlePtr result = makeSingleNode(p, uuid);
+        NodeHandlePtr result = p->makeNodeHandle(uuid);
 
         if(state) {
             result->setNodeState(state);

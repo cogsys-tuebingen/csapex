@@ -231,9 +231,13 @@ public:
     void setError(const std::string& msg);
     void setWarning(const std::string& msg);
 
-private:
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional);
-    Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
+    UUID getUUID() const;
+
+    /**
+     * Raw construction, handle with care!
+     */
+    Input* addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional);
+    Output* addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic);
 
 private:
     NodeWorker* node_worker_;

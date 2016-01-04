@@ -13,7 +13,12 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node_modifier.h>
 #include <csapex/utility/timer.h>
+#include <csapex/msg/io.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/static_output.h>
+#include <csapex/msg/bundled_connection.h>
 
 using namespace csapex;
 
@@ -62,6 +67,7 @@ std::string Graph::makeUUIDPrefix(const std::string& name)
 
 void Graph::addNode(NodeHandlePtr nh)
 {
+    apex_assert_hard_msg(nh, "NodeHandle added is not null");
     nodes_.push_back(nh);
 
     node_parents_[nh.get()] = std::vector<NodeHandle*>();
@@ -432,7 +438,7 @@ NodeHandle* Graph::findNodeHandle(const UUID& uuid) const
     throw NodeHandleNotFoundException(uuid.getFullName());
 }
 
-Node* Graph::findNodeNoThrow(const UUID& uuid) const
+Node* Graph::findNodeNoThrow(const UUID& uuid) const noexcept
 {
     for(auto nh : nodes_) {
         if(nh->getUUID() == uuid) {
@@ -447,7 +453,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const
 }
 
 
-NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const
+NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
     for(const auto b : nodes_) {
         if(b->getUUID() == uuid) {
@@ -477,6 +483,11 @@ NodeHandle* Graph::findNodeHandleForConnector(const UUID &uuid) const
     } catch(const std::exception& e) {
         throw std::runtime_error(std::string("cannot find handle of connector \"") + uuid.getFullName());
     }
+}
+
+NodeHandle* Graph::findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept
+{
+    return findNodeHandleNoThrow(uuid.parentUUID());
 }
 
 std::vector<NodeHandle*> Graph::getAllNodeHandles()
@@ -579,4 +590,72 @@ Graph::node_iterator Graph::endNodes()
 const Graph::node_const_iterator Graph::endNodes() const
 {
     return nodes_.cend();
+}
+
+void Graph::setup(NodeModifier &/*modifier*/)
+{
+
+}
+
+void Graph::process(Parameterizable &params,  std::function<void (std::function<void ()>)> continuation)
+{
+    continuation_ = continuation;
+
+    received_.clear();
+    for(Output* o : modifier_->getMessageOutputs()) {
+        received_[o] = false;
+    }
+
+    for(Input* i : modifier_->getMessageInputs()) {
+        ConnectionTypeConstPtr m = msg::getMessage(i);
+        OutputPtr o = pass_on_inputs_[i];
+
+        msg::publish(o.get(), m);
+        o->commitMessages();
+        o->publish();
+    }
+}
+
+bool Graph::isAsynchronous() const
+{
+    return true;
+}
+
+Input* Graph::passOutInput(Input *internal)
+{
+    Input* parent = modifier_->addInput(internal->getType(), internal->getLabel(), false, false);
+
+    std::string name = "relay" + std::to_string(pass_on_inputs_.size());
+    OutputPtr relay = std::make_shared<StaticOutput>(UUID::make_sub(modifier_->getUUID(),name));
+    relay->setType(internal->getType());
+    relay->setLabel(internal->getLabel());
+
+    NodeHandle* nh = findNodeHandleForConnector(internal->getUUID());
+    BundledConnection::connect(relay.get(), internal, nh->getInputTransition());
+    pass_on_inputs_[parent] = relay;
+
+    return parent;
+}
+
+
+Output* Graph::passOutOutput(Output *internal)
+{
+    Output* parent = modifier_->addOutput(internal->getType(), internal->getLabel(), false);
+
+    pass_on_outputs_[internal] = parent;
+
+    internal->messageSent.connect([this, parent, internal](Connectable*) {
+        msg::publish(parent, internal->getMessage());
+        received_[parent] = true;
+
+        for(auto pair : received_) {
+            if(!pair.second) {
+                return;
+            }
+        }
+
+        continuation_([](){});
+    });
+
+    return parent;
 }

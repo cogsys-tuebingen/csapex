@@ -15,12 +15,12 @@ NodeModifier::NodeModifier(NodeWorker *node_worker, NodeHandle *node_handle)
 
 }
 
-Input* NodeModifier::addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional)
+Input* NodeModifier::addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional)
 {
     return node_handle_->addInput(type, label, dynamic, optional);
 }
 
-Output* NodeModifier::addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic)
+Output* NodeModifier::addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic)
 {
     return node_handle_->addOutput(type, label, dynamic);
 }
@@ -144,4 +144,9 @@ void NodeModifier::setError(const std::string &msg)
 void NodeModifier::setWarning(const std::string &msg)
 {
     node_worker_->setError(true, msg, ErrorState::ErrorLevel::WARNING);
+}
+
+UUID NodeModifier::getUUID() const
+{
+    return node_handle_->getUUID();
 }

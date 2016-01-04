@@ -40,11 +40,11 @@ public:
     void setLevel(int level);
 
 
-    Input* addInput(ConnectionTypePtr type, const std::string& label, bool dynamic, bool optional);
+    Input* addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional);
     void addInput(InputPtr in);
     bool isParameterInput(Input* in) const;
 
-    Output* addOutput(ConnectionTypePtr type, const std::string& label, bool dynamic);
+    Output* addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic);
     void addOutput(OutputPtr out);
     bool isParameterOutput(Output* out) const;
 
