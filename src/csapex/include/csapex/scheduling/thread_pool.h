@@ -22,6 +22,10 @@ class ThreadPool : public Executor
 {
 public:
     ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
+    ThreadPool(Executor* parent, csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
+
+    bool isThreadingEnabled() const;
+    bool isGroupingEnabled() const;
 
     virtual void performStep() override;
 
@@ -51,13 +55,14 @@ protected:
     void pauseChanged(bool pause) override;
     void steppingChanged(bool performStep) override;
 
+    bool isStepDone() override;
+
 private:
     void assignGeneratorToGroup(TaskGenerator* task, ThreadGroup* group);
 
     bool isInPrivateThread(TaskGenerator* task) const;
     bool isInGroup(TaskGenerator* task, int id) const;
 
-    void checkIfStepIsDone();
 //    void clearGroup(ThreadGroup *group);
 
 private:

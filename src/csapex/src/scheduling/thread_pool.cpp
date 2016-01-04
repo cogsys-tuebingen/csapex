@@ -18,8 +18,6 @@ using namespace csapex;
 ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool grouping)
     : handler_(handler), enable_threading_(enable_threading), grouping_(grouping)
 {
-    setPause(false);
-    setSteppingMode(false);
 
     default_group_ = std::make_shared<ThreadGroup>(handler_,
                                                    ThreadGroup::DEFAULT_GROUP_ID, "default");
@@ -27,6 +25,31 @@ ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool gr
         checkIfStepIsDone();
     });
 
+    setPause(false);
+    setSteppingMode(false);
+}
+ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_threading, bool grouping)
+    : handler_(handler), enable_threading_(enable_threading), grouping_(grouping)
+{
+
+    default_group_ = std::make_shared<ThreadGroup>(handler_,
+                                                   ThreadGroup::DEFAULT_GROUP_ID, "default");
+    default_group_->end_step.connect([this]() {
+        checkIfStepIsDone();
+    });
+
+    //parent->begin_step.connect(delegate::Delegate<void()>(this, &ThreadPool::step));
+    parent->addChild(this);
+}
+
+
+bool ThreadPool::isThreadingEnabled() const
+{
+    return enable_threading_;
+}
+bool ThreadPool::isGroupingEnabled() const
+{
+    return grouping_;
 }
 
 void ThreadPool::performStep()
@@ -36,9 +59,6 @@ void ThreadPool::performStep()
         for(auto g : groups_) {
             g->step();
         }
-
-    } else {
-        end_step();
     }
 }
 
@@ -217,17 +237,19 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
     return group->id();
 }
 
-void ThreadPool::checkIfStepIsDone()
+bool ThreadPool::isStepDone()
 {
+    if(!default_group_->isStepDone()) {
+        return false;
+    }
+
     for(auto group : groups_) {
         if(!group->isStepDone()) {
-            return;
+            return false;
         }
     }
 
-    // step is done
-    end_step();
-    return;
+    return true;
 }
 
 //void ThreadPool::clearGroup(ThreadGroup* g)

@@ -18,6 +18,8 @@ public:
     virtual void add(TaskGenerator*) = 0;
     virtual void remove(TaskGenerator *) = 0;
 
+    void addChild(Executor* e);
+
     bool isPaused() const;
     void setPause(bool pause);
 
@@ -28,10 +30,15 @@ public:
     virtual void stop() = 0;
     virtual void clear() = 0;
 
+
 protected:
     virtual void pauseChanged(bool pause) = 0;
     virtual void steppingChanged(bool performStep) = 0;
     virtual void performStep() = 0;
+
+    virtual bool isStepDone() = 0;
+
+    void checkIfStepIsDone();
 
 public:
     csapex::slim_signal::Signal<void (bool)> paused;
@@ -42,6 +49,8 @@ public:
 private:
     bool paused_;
     bool stepping_;
+
+    std::vector<Executor*> children_;
 };
 }
 
