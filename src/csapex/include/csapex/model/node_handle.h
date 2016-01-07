@@ -94,6 +94,8 @@ public:
     bool isSink() const;
     void setIsSink(bool sink);
 
+    void triggerNodeStateChanged();
+
 public:
     // TODO: get rid of
     void updateParameterValue(Connectable* source);
@@ -127,7 +129,6 @@ private:
     void removeTrigger(Trigger *out);
 
 
-    void triggerNodeStateChanged();
 
 
     template <typename T>

@@ -32,14 +32,14 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, DesignerVie
 
 QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    if (change == ItemPositionChange) {
-        QPointF newPos = value.toPointF();
-        if(QApplication::mouseButtons() == Qt::LeftButton){
-            if(widget_ctrl_->isGridLockEnabled()) {
-                newPos.setX(round(newPos.x() / 10.0) * 10.0);
-                newPos.setY(round(newPos.y() / 10.0) * 10.0);
-            }
-        }
+    if (QApplication::mouseButtons() == Qt::LeftButton &&
+            change == ItemPositionChange &&
+            widget_ctrl_->isGridLockEnabled()) {
+
+        QVariant value_p = QGraphicsProxyWidget::itemChange(change, value);
+        QPointF newPos = value_p.toPointF();
+        newPos.setX(round(newPos.x() / 10.0) * 10.0);
+        newPos.setY(round(newPos.y() / 10.0) * 10.0);
         return newPos;
     }
     else
@@ -65,7 +65,9 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
         setZValue(nextz++);
     }
 
-    bool do_relay = !ctrl && child && child->objectName() != "boxframe" && strcmp(child->metaObject()->className(), "QLabel");
+    bool do_relay = !ctrl && child && child->objectName() != "boxframe" &&
+            (child->parent()->objectName() != "boxframe" || strcmp(child->metaObject()->className(), "QFrame")) &&
+            (child->parent()->objectName() != "header_frame" || strcmp(child->metaObject()->className(), "QLabel"));
 
     before_ = pos();
     if(do_relay) {

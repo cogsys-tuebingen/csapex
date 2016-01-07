@@ -102,10 +102,10 @@ public Q_SLOTS:
 
 
     void getInformation();
-    void minimizeBox();
+    void triggerMinimized();
     void refreshStylesheet();
     void killContent();
-    void flipSides();
+    void triggerFlipSides();
     void showProfiling(bool show);
 
     void updateComponentInformation(Graph* graph);
@@ -171,6 +171,7 @@ protected:
     QLabel* info_thread;
     QLabel* info_error;
 
+    bool initialized_;
     bool moved_;
 };
 

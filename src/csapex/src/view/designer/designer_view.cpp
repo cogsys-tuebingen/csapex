@@ -9,6 +9,7 @@
 #include <csapex/command/minimize.h>
 #include <csapex/command/create_thread.h>
 #include <csapex/command/switch_thread.h>
+#include <csapex/command/group_nodes.h>
 #include <csapex/view/widgets/box_dialog.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
@@ -568,7 +569,6 @@ void DesignerView::stopProfiling(NodeWorker *node)
 void DesignerView::movedBoxes(double dx, double dy)
 {
     QPointF delta(dx, dy);
-
     command::Meta::Ptr meta(new command::Meta("move boxes"));
     for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
@@ -581,7 +581,6 @@ void DesignerView::movedBoxes(double dx, double dy)
                                                         *widget_ctrl_)));
         }
     }
-
     dispatcher_->execute(meta);
 
     scene_->invalidateSchema();
@@ -756,6 +755,14 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 
     menu.addSeparator();
 
+    QAction* grp = new QAction("group into subgraph", &menu);
+    grp->setIcon(QIcon(":/group.png"));
+    grp->setIconVisibleInMenu(true);
+    handler[grp] = std::bind(&DesignerView::groupBox, this, selected_boxes);
+    menu.addAction(grp);
+
+    menu.addSeparator();
+
     QAction* del = new QAction("delete", &menu);
     del->setIcon(QIcon(":/close.png"));
     del->setIconVisibleInMenu(true);
@@ -833,6 +840,17 @@ void DesignerView::deleteBox(const std::vector<NodeBox *>& boxes)
     for(NodeBox* box : boxes) {
         cmd->add(Command::Ptr(new command::DeleteNode(box->getNodeWorker()->getUUID())));
     }
+    dispatcher_->execute(cmd);
+}
+
+void DesignerView::groupBox(const std::vector<NodeBox *>& boxes)
+{
+    std::vector<UUID> uuids;
+    uuids.reserve(boxes.size());
+    for(NodeBox* box : boxes) {
+        uuids.push_back(box->getNodeHandle()->getUUID());
+    }
+    CommandPtr cmd(new command::GroupNodes(uuids));
     dispatcher_->execute(cmd);
 }
 

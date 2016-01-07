@@ -38,12 +38,12 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 
 void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* widget_ctrl)
 {
+    YAML::Node adapters(YAML::NodeType::Sequence);
     for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
         NodeHandlePtr nh = *it;
-        YAML::Node adapters;
         saveBox(nh.get(), widget_ctrl, adapters);
-        yaml["adapters"] = adapters;
     }
+    yaml["adapters"] = adapters;
 }
 
 void DesignerIO::saveBox(NodeHandle *node, WidgetController* widget_ctrl, YAML::Node &yaml)

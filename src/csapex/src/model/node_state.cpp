@@ -23,6 +23,10 @@ NodeState::NodeState(const NodeHandle *parent)
     }
 }
 
+NodeState::~NodeState()
+{
+}
+
 NodeState& NodeState::operator = (const NodeState& rhs)
 {
     setPos(rhs.pos_);

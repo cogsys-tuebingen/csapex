@@ -1062,7 +1062,7 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
         int dx = 160;
         int dy = lines * metrics.height();
 
-        QPointF pos = box->pos() + p->centerPoint();
+        QPointF pos = centerPoint(p);
         QRectF rect;
         QTextOption opt;
         if(is_message) {

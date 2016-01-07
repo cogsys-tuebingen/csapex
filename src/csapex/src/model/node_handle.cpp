@@ -32,6 +32,31 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       source_(false), sink_(false)
 {
     node_state_->setLabel(uuid);
+    node_state_->setParent(this);
+
+    node_state_->enabled_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->flipped_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->label_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->minimized_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->parent_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->pos_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->thread_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+
+    node_state_->label_changed->connect([this]() {
+        std::string label = node_state_->getLabel();
+        if(label.empty()) {
+            label = getUUID().getShortName();
+        }
+
+        node_->adebug.setPrefix(label);
+        node_->ainfo.setPrefix(label);
+        node_->awarn.setPrefix(label);
+        node_->aerr.setPrefix(label);
+    });
+
+    triggerNodeStateChanged();
+
+    node_->stateChanged();
 
     node_->parameters_changed.connect(parametersChanged);
     node_->getParameterState()->parameter_set_changed->connect(parametersChanged);
@@ -144,31 +169,10 @@ void NodeHandle::setNodeState(NodeStatePtr memento)
 
     *node_state_ = *memento;
 
-    node_state_->setParent(this);
 
     if(memento->getParameterState()) {
         node_->setParameterState(memento->getParameterState());
     }
-
-    node_state_->enabled_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->flipped_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->label_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->minimized_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->parent_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->pos_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->thread_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-
-    node_state_->label_changed->connect([this]() {
-        std::string label = node_state_->getLabel();
-        if(label.empty()) {
-            label = getUUID().getShortName();
-        }
-
-        node_->adebug.setPrefix(label);
-        node_->ainfo.setPrefix(label);
-        node_->awarn.setPrefix(label);
-        node_->aerr.setPrefix(label);
-    });
 
     triggerNodeStateChanged();
 

@@ -113,6 +113,7 @@ private:
     void flipBox(const std::vector<NodeBox *>& boxes);
     void minimizeBox(const std::vector<NodeBox *>& boxes, bool mini);
     void deleteBox(const std::vector<NodeBox *>& boxes);
+    void groupBox(const std::vector<NodeBox *>& boxes);
 
     void usePrivateThreadFor(const std::vector<NodeBox *>& boxes);
     void switchToThread(const std::vector<NodeBox *>& boxes, int group_id);

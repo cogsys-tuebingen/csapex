@@ -33,14 +33,19 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
     : QWidget(parent), ui(new Ui::Box), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(adapter), icon_(icon),
-      down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr)
+      down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), initialized_(false)
 {
-    handle->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::flipSides, this));
-    handle->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::minimizeBox, this));
+    handle->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this));
+    handle->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::triggerMinimized, this));
 
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
 
-    grip_ = new QSizeGrip(this);
+    if(adapter->isResizable()) {
+        grip_ = new QSizeGrip(this);
+        grip_->installEventFilter(this);
+    } else {
+        grip_ = nullptr;
+    }
 
     setVisible(false);
 }
@@ -91,8 +96,10 @@ void NodeBox::setupUi()
 
 void NodeBox::setupUiAgain()
 {
-    adapter_->doSetupUi(ui->content);
+    ui->header->setAlignment(Qt::AlignTop);
+    ui->content->setAlignment(Qt::AlignTop);
 
+    adapter_->doSetupUi(ui->content);
     setAutoFillBackground(false);
 
     setAttribute( Qt::WA_TranslucentBackground, true );
@@ -409,14 +416,19 @@ void NodeBox::init()
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
 {
-    QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
-
     if(o == ui->label) {
+        QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
         if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
             Q_EMIT renameRequest(this);
             e->accept();
 
             return true;
+        }
+    } else if(grip_ && o == grip_) {
+        if(e->type() == QEvent::MouseButtonPress) {
+            adapter_->setManualResize(true);
+        } else if(e->type() == QEvent::MouseButtonRelease) {
+            adapter_->setManualResize(false);
         }
     }
 
@@ -464,9 +476,6 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     if(!adapter_) {
         return;
     }
-
-    info_exec->setVisible(true);
-
     QString state = getNodeState();
     info_exec->setText(QString("<img src=\":/node_") + state + ".png\" /> ");
     info_exec->setToolTip(state);
@@ -502,6 +511,11 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
 
         refreshStylesheet();
     }
+
+    if(!initialized_) {
+        adjustSize();
+        initialized_ = true;
+    }
 }
 
 void NodeBox::moveEvent(QMoveEvent* e)
@@ -520,6 +534,7 @@ void NodeBox::triggerPlaced()
     if(!nh) {
         return;
     }
+
     Point p;
     p.x = pos().x();
     p.y = pos().y();
@@ -573,28 +588,24 @@ void NodeBox::killContent()
     worker->killExecution();
 }
 
-void NodeBox::flipSides()
+void NodeBox::triggerFlipSides()
 {
     NodeHandlePtr nh = node_handle_.lock();
     if(!nh) {
         return;
     }
-
-    updateVisuals();
 
     NodeStatePtr state = nh->getNodeState();
     bool flip = state->isFlipped();
     Q_EMIT flipped(flip);
 }
 
-void NodeBox::minimizeBox()
+void NodeBox::triggerMinimized()
 {
     NodeHandlePtr nh = node_handle_.lock();
     if(!nh) {
         return;
     }
-
-    updateVisuals();
 
     NodeStatePtr state = nh->getNodeState();
     bool minimize = state->isMinimized();
@@ -610,13 +621,14 @@ void NodeBox::updateVisuals()
     NodeStatePtr state = nh->getNodeState();
     bool flip = state->isFlipped();
 
-    auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
-    if(layout) {
-        if(flip) {
-            layout->addWidget(grip_, 3, 0, Qt::AlignBottom | Qt::AlignLeft);
-
-        } else {
-            layout->addWidget(grip_, 3, 2, Qt::AlignBottom | Qt::AlignRight);
+    if(grip_) {
+        auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
+        if(layout) {
+            if(flip) {
+                layout->addWidget(grip_, 3, 0, Qt::AlignBottom | Qt::AlignLeft);
+            } else {
+                layout->addWidget(grip_, 3, 2, Qt::AlignBottom | Qt::AlignRight);
+            }
         }
     }
 
@@ -624,20 +636,58 @@ void NodeBox::updateVisuals()
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 
-    if(isMinimizedSize()) {
-        ui->frame->hide();
-        ui->label->hide();
-        ui->boxframe->setProperty("content_minimized", true);
+    bool flag_set = ui->boxframe->property("content_minimized").toBool();
+    bool minimized = isMinimizedSize();
 
-    } else {
-        ui->frame->show();
-        ui->label->show();
-        ui->boxframe->setProperty("content_minimized", false);
+    if(minimized != flag_set) {
+        ui->boxframe->setProperty("content_minimized", minimized);
+
+        if(minimized) {
+            ui->frame->hide();
+            info_exec->hide();
+            ui->input_panel->hide();
+            ui->output_panel->hide();
+            ui->slot_panel->hide();
+            ui->trigger_panel->hide();
+
+            if(grip_) {
+                grip_->hide();
+            }
+
+            ui->gridLayout->removeWidget(ui->enablebtn);
+            ui->gridLayout->addWidget(ui->enablebtn, 2, 0);
+
+            ui->header_spacer->changeSize(0, 0);
+
+        } else {
+            ui->header_spacer->changeSize(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
+            ui->header_spacer->invalidate();
+
+            ui->gridLayout->removeWidget(ui->enablebtn);
+            ui->gridLayout->addWidget(ui->enablebtn, 1, 0);
+
+            ui->frame->show();
+            info_exec->show();
+            ui->output_panel->show();
+            ui->input_panel->show();
+            ui->output_panel->show();
+            ui->slot_panel->show();
+            ui->trigger_panel->show();
+
+            if(grip_) {
+                grip_->show();
+            }
+
+        }
+        layout()->invalidate();
+        QApplication::processEvents();
+        adjustSize();
     }
 
     refreshStylesheet();
 
-    resize(sizeHint());
+    QApplication::processEvents();
+    adjustSize();
 }
 
 bool NodeBox::isMinimizedSize() const
@@ -676,20 +726,22 @@ void NodeBox::nodeStateChangedEvent()
     if(!worker) {
         return;
     }
-    minimizeBox();
-
     NodeStatePtr state = worker->getNodeHandle()->getNodeState();
 
-    bool enabled = state->isEnabled();
-    worker->setProcessingEnabled(enabled);
-    ui->label->setEnabled(enabled);
-
-    enabledChange(state->isEnabled());
+    bool state_enabled = state->isEnabled();
+    bool worker_enabled = worker->isProcessingEnabled();
+    if(state_enabled != worker_enabled) {
+        worker->setProcessingEnabled(state_enabled);
+        ui->label->setEnabled(state_enabled);
+        enabledChange(state_enabled);
+    }
 
     setLabel(state->getLabel());
     ui->label->setToolTip(worker->getUUID().c_str());
 
     updateThreadInformation();
+
+    updateVisuals();
 
     auto pt = state->getPos();
     move(QPoint(pt.x, pt.y));

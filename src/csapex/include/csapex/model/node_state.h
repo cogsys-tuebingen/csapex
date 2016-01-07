@@ -20,6 +20,7 @@ public:
     typedef std::shared_ptr< SignalImpl > Signal;
 
     NodeState(const NodeHandle *parent);
+    ~NodeState();
 
     NodeState& operator = (const NodeState& rhs);
 

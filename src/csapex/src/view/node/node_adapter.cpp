@@ -8,6 +8,7 @@
 
 /// SYSTEM
 #include <QLayout>
+#include <QWidget>
 
 using namespace csapex;
 
@@ -41,6 +42,11 @@ void NodeAdapter::doSetupUi(QBoxLayout *layout)
     }
 }
 
+void NodeAdapter::invalidate()
+{
+    layout_->invalidate();
+}
+
 void NodeAdapter::stop()
 {
 }
@@ -54,6 +60,16 @@ Memento::Ptr NodeAdapter::getState() const
 void NodeAdapter::setParameterState(Memento::Ptr)
 {
 
+}
+
+void NodeAdapter::setManualResize(bool manual)
+{
+
+}
+
+bool NodeAdapter::isResizable() const
+{
+    return false;
 }
 
 void NodeAdapter::trackConnection(const csapex::slim_signal::Connection &c)

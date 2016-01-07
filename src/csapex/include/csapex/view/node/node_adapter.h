@@ -33,8 +33,13 @@ public:
     virtual MementoPtr getState() const;
     virtual void setParameterState(MementoPtr memento);
 
+    virtual bool isResizable() const;
+    virtual void setManualResize(bool manual);
+
 protected:
     virtual void setupUi(QBoxLayout* layout) = 0;
+    void invalidate();
+
     void trackConnection(const csapex::slim_signal::Connection &c);
 
 protected:

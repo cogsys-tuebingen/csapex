@@ -966,11 +966,12 @@ void DefaultNodeAdapter::setupAdaptiveUi()
                 QFrame* hider = new QFrame;
                 hider->setLayout(group_layout);
                 hider->setContentsMargins(0,0,0,0);
+                hider->setHidden(hidden);
+
                 gb_layout->addWidget(hider);
 
                 wrapper_layout_->addWidget(gb);
 
-                hider->setHidden(hidden);
 
 
                 qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&DefaultNodeAdapterBridge::enableGroup, &bridge, std::bind(&QGroupBox::isChecked, gb), group));
