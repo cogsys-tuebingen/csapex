@@ -88,7 +88,10 @@ void GenericState::removeParameter(csapex::param::ParameterPtr param)
 {
     params.erase(param->name());
 
-    order.erase(std::find(order.begin(), order.end(), param->name()));
+    auto pos = std::find(order.begin(), order.end(), param->name());
+    if(pos != order.end()) {
+        order.erase(pos);
+    }
 
     unregisterParameter(param);
 }
