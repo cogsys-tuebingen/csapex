@@ -18,40 +18,9 @@ const std::string Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_
 
 //bool Connectable::allow_processing = true;
 
-namespace {
-template <typename Fn>
-UUID makeUUID_impl(Fn constructor, const UUID &box_uuid, const std::string& type, int sub_id)
-{
-    if(box_uuid.empty()) {
-        return UUID::NONE;
-    }
-
-    std::stringstream ss;
-    ss << box_uuid << UUID::namespace_separator << type << "_" << sub_id;
-    return constructor(ss.str());
-}
-}
-
-UUID Connectable::makeUUID(const UUID &box_uuid, const std::string& type, int sub_id)
-{
-    return makeUUID_impl(UUID::make, box_uuid, type, sub_id);
-}
-
-UUID Connectable::makeUUID_forced(const UUID &box_uuid, const std::string& type, int sub_id)
-{
-    return makeUUID_impl(UUID::make_forced, box_uuid, type, sub_id);
-}
-
 
 Connectable::Connectable(const UUID& uuid)
     : Unique(uuid),
-      count_(0), seq_no_(-1), enabled_(true), dynamic_(false), level_(0)
-{
-    init();
-}
-
-Connectable::Connectable(Unique* parent, int sub_id, const std::string& type)
-    : Unique(makeUUID(parent->getUUID(), type, sub_id)),
       count_(0), seq_no_(-1), enabled_(true), dynamic_(false), level_(0)
 {
     init();

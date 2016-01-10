@@ -444,7 +444,7 @@ void DesignerView::showBoxDialog()
         std::string type = diag.getName();
 
         if(!type.empty() && widget_ctrl_->getNodeFactory()->isValidType(type)) {
-            UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
+            UUID uuid = graph_->generateUUID(type);
             QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
             dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, Point(pos.x(), pos.y()), UUID::NONE, uuid, nullptr)));
         }

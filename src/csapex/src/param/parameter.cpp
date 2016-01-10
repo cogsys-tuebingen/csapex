@@ -17,12 +17,12 @@ Parameter::~Parameter()
     destroyed(this);
 }
 
-void Parameter::setUUID(const std::string& uuid)
+void Parameter::setUUID(const UUID& uuid)
 {
     uuid_ = uuid;
 }
 
-std::string Parameter::UUID() const
+UUID Parameter::getUUID() const
 {
     return uuid_;
 }

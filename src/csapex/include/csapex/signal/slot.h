@@ -18,7 +18,6 @@ class Slot : public Connectable
 
 public:
     Slot(std::function<void()> callback, const UUID &uuid, bool active);
-    Slot(std::function<void()> callback, Unique *parent, int sub_id, bool active);
     virtual ~Slot();
 
     virtual void trigger(Trigger *source);

@@ -19,12 +19,6 @@ Output::Output(const UUID& uuid)
 {
 }
 
-Output::Output(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "out"),
-      state_(State::IDLE)
-{
-}
-
 Output::~Output()
 {
 }

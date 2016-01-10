@@ -17,12 +17,6 @@ Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active)
     setType(connection_types::makeEmpty<connection_types::Signal>());
 }
 
-Slot::Slot(std::function<void()> callback, Unique* parent, int sub_id, bool active)
-    : Connectable(parent, sub_id, "slot"), callback_(callback), active_(active)
-{
-    setType(connection_types::makeEmpty<connection_types::Signal>());
-}
-
 Slot::~Slot()
 {
 }

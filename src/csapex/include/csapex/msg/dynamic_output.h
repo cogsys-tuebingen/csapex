@@ -15,7 +15,6 @@ class DynamicOutput : public Output
 {
 public:
     DynamicOutput(const UUID &uuid);
-    DynamicOutput(Unique *parent, int sub_id);
 
     void clearCorrespondents();
     void addCorrespondent(DynamicInput* input);

@@ -15,10 +15,12 @@
 #include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/dynamic_output.h>
 #include <csapex/msg/no_message.h>
+#include <csapex/utility/uuid_provider.h>
 
 using namespace csapex;
 
 NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
+                       UUIDProvider *uuid_provider,
                        InputTransitionPtr transition_in, OutputTransitionPtr transition_out)
     : Unique(uuid),
       node_(node),
@@ -27,11 +29,13 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
       transition_in_(transition_in),
       transition_out_(transition_out),
+
+      uuid_provider_(uuid_provider),
       next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0),
       level_(0),
       source_(false), sink_(false)
 {
-    node_state_->setLabel(uuid);
+    node_state_->setLabel(uuid.getFullName());
     node_state_->setParent(this);
 
     node_state_->enabled_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
@@ -215,6 +219,7 @@ NodeState::Ptr NodeHandle::getNodeState()
 template <typename T>
 void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
 {
+    apex_assert_hard(uuid_provider_);
     csapex::param::Parameter* p = param.get();
 
     if(param_2_input_.find(p->name()) != param_2_input_.end()) {
@@ -222,7 +227,7 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
     }
 
     {
-        InputPtr cin = std::make_shared<Input>(UUID::make_sub(getUUID(), std::string("in_") + p->name()));
+        InputPtr cin = std::make_shared<Input>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("in_") + p->name()));
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cin->setOptional(true);
         cin->setLabel(p->name());
@@ -233,7 +238,7 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
         input_2_param_[cin.get()] = p;
     }
     {
-        OutputPtr cout = std::make_shared<StaticOutput>(UUID::make_sub(getUUID(), std::string("out_") + p->name()));
+        OutputPtr cout = std::make_shared<StaticOutput>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("out_") + p->name()));
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cout->setLabel(p->name());
 
@@ -334,12 +339,13 @@ void NodeHandle::updateParameterValue(Connectable *s)
 
 Input* NodeHandle::addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional)
 {
-    int id = next_input_id_++;
+    apex_assert_hard(uuid_provider_);
+    UUID uuid = uuid_provider_->makeConnectableUUID(getUUID(), "in", next_input_id_++);
     InputPtr c;
     if(dynamic) {
-        c = std::make_shared<DynamicInput>(this, id);
+        c = std::make_shared<DynamicInput>(uuid);
     } else {
-        c = std::make_shared<Input>(this, id);
+        c = std::make_shared<Input>(uuid);
     }
     c->setLabel(label);
     c->setOptional(optional);
@@ -352,13 +358,13 @@ Input* NodeHandle::addInput(ConnectionTypeConstPtr type, const std::string& labe
 
 Output* NodeHandle::addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic)
 {
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    int id = next_output_id_++;
+    apex_assert_hard(uuid_provider_);
+    UUID uuid = uuid_provider_->makeConnectableUUID(getUUID(), "out", next_output_id_++);
     OutputPtr c;
     if(dynamic) {
-        c = std::make_shared<DynamicOutput>(this, id);
+        c = std::make_shared<DynamicOutput>(uuid);
     } else {
-        c = std::make_shared<StaticOutput>(this, id);
+        c = std::make_shared<StaticOutput>(uuid);
     }
     c->setLabel(label);
     c->setType(type);
@@ -369,8 +375,9 @@ Output* NodeHandle::addOutput(ConnectionTypeConstPtr type, const std::string& la
 
 Slot* NodeHandle::addSlot(const std::string& label, std::function<void()> callback, bool active)
 {
-    int id = next_slot_id_++;
-    SlotPtr slot = std::make_shared<Slot>(callback, this, id, active);
+    apex_assert_hard(uuid_provider_);
+    UUID uuid = uuid_provider_->makeConnectableUUID(getUUID(), "slot", next_slot_id_++);
+    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active);
     slot->setLabel(label);
 
     addSlot(slot);
@@ -380,8 +387,9 @@ Slot* NodeHandle::addSlot(const std::string& label, std::function<void()> callba
 
 Trigger* NodeHandle::addTrigger(const std::string& label)
 {
-    int id = next_trigger_id_++;
-    TriggerPtr trigger = std::make_shared<Trigger>(this, id);
+    apex_assert_hard(uuid_provider_);
+    UUID uuid = uuid_provider_->makeConnectableUUID(getUUID(), "trigger", next_trigger_id_++);
+    TriggerPtr trigger = std::make_shared<Trigger>(uuid);
     trigger->setLabel(label);
 
     addTrigger(trigger);

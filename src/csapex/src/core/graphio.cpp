@@ -66,7 +66,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
     std::string type = doc["type"].as<std::string>();
     UUID uuid = doc["uuid"].as<UUID>();
 
-    NodeHandlePtr node_handle = node_factory_->makeNode(type, uuid);
+    NodeHandlePtr node_handle = node_factory_->makeNode(type, uuid, graph_);
     if(!node_handle) {
         return;
     }
@@ -163,7 +163,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                 from_uuid_tmp.replace(from_uuid_tmp.find("_out_"), 1, UUID::namespace_separator);
             }
 
-            UUID from_uuid = UUID::make_forced(from_uuid_tmp);
+            UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
 
             NodeHandle* parent = nullptr;
             try {
@@ -190,7 +190,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
                     to_uuid_tmp.replace(to_uuid_tmp.find("_in_"), 1, UUID::namespace_separator);
                 }
 
-                UUID to_uuid = UUID::make_forced(to_uuid_tmp);
+                UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
 
                 Connectable* from = parent->getOutput(from_uuid);
                 if(from != nullptr) {
@@ -223,8 +223,8 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             std::string from_uuid_tmp = fulcrum["from"].as<std::string>();
             std::string to_uuid_tmp = fulcrum["to"].as<std::string>();
 
-            UUID from_uuid = UUID::make_forced(from_uuid_tmp);
-            UUID to_uuid = UUID::make_forced(to_uuid_tmp);
+            UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
+            UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
 
             Output* from = dynamic_cast<Output*>(graph_->findConnector(from_uuid));
             if(from == nullptr) {

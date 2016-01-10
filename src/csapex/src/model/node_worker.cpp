@@ -357,7 +357,7 @@ void NodeWorker::startProcessingMessages()
     current_process_timer_.reset();
 
     if(profiling_) {
-        current_process_timer_.reset(new Timer(getUUID()));
+        current_process_timer_.reset(new Timer(getUUID().getFullName()));
         timerStarted(this, PROCESS, current_process_timer_->startTimeMs());
     }
 
@@ -644,7 +644,7 @@ bool NodeWorker::tick()
 
                     TimerPtr t = nullptr;
                     if(profiling_) {
-                        t.reset(new Timer(getUUID()));
+                        t.reset(new Timer(getUUID().getFullName()));
                         timerStarted(this, TICK, t->startTimeMs());
                     }
                     node->useTimer(t.get());

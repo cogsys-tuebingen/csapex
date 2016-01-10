@@ -12,7 +12,6 @@ class DynamicInput : public Input
 {
 public:
     DynamicInput(const UUID &uuid);
-    DynamicInput(Unique *parent, int sub_id);
 
     void setCorrespondent(DynamicOutput* output);
 

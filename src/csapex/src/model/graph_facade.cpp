@@ -89,13 +89,13 @@ ConnectionPtr GraphFacade::connect(NodeHandlePtr output, int output_id,
 ConnectionPtr GraphFacade::connect(NodeHandle *output, int output_id,
                                    NodeHandle *input, int input_id)
 {
-    Output* o = output->getOutput(Connectable::makeUUID_forced(output->getUUID(), "out", output_id));
+    Output* o = output->getOutput(graph_->makeConnectableUUID_forced(output->getUUID(), "out", output_id));
     if(!o) {
         throw std::logic_error(output->getUUID().getFullName() +
                                " does not have an output with the index " +
                                std::to_string(output_id));
     }
-    Input* i = input->getInput(Connectable::makeUUID_forced(input->getUUID(), "in", input_id));
+    Input* i = input->getInput(graph_->makeConnectableUUID_forced(input->getUUID(), "in", input_id));
     if(!i) {
         throw std::logic_error(input->getUUID().getFullName() +
                                " does not have an input with the label " +

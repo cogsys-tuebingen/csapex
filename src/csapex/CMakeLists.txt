@@ -180,6 +180,7 @@ add_library(csapex_util SHARED
     src/utility/timer.cpp
     src/utility/type.cpp
     src/utility/uuid.cpp
+    src/utility/uuid_provider.cpp
     src/utility/yaml_node_builder.cpp
 )
 

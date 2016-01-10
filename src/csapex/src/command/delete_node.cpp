@@ -63,7 +63,7 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    NodeHandlePtr node = node_factory_->makeNode(type, uuid);
+    NodeHandlePtr node = node_factory_->makeNode(type, uuid, graph_);
 
     node->setNodeState(saved_state);
 

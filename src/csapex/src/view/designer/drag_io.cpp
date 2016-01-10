@@ -211,7 +211,7 @@ void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_po
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        UUID uuid = UUID::make(graph_->makeUUIDPrefix(type));
+        UUID uuid = graph_->generateUUID(type);
 
         NodeStatePtr state;
 

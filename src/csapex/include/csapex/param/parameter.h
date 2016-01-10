@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/param/param_fwd.h>
 #include <csapex/param/parameter_description.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <memory>
@@ -57,8 +58,8 @@ protected:
 public:
     std::string name() const;
 
-    void setUUID(const std::string& uuid);
-    std::string UUID() const;
+    void setUUID(const UUID& uuid);
+    UUID getUUID() const;
 
     virtual int ID() const = 0;
     virtual std::string TYPE() const = 0;
@@ -151,7 +152,7 @@ private:
 
 protected:
     std::string name_;
-    std::string uuid_;
+    UUID uuid_;
 
     ParameterDescription description_;
     bool enabled_;

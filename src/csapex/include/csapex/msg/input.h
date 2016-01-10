@@ -15,7 +15,6 @@ class Input : public Connectable
 
 public:
     Input(const UUID &uuid);
-    Input(Unique *parent, int sub_id);
     virtual ~Input();
 
     virtual bool canInput() const override {

@@ -20,12 +20,6 @@ Trigger::Trigger(const UUID& uuid)
     setType(connection_types::makeEmpty<connection_types::Signal>());
 }
 
-Trigger::Trigger(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "trigger")
-{
-    setType(connection_types::makeEmpty<connection_types::Signal>());
-}
-
 Trigger::~Trigger()
 {
 }

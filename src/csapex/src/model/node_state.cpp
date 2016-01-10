@@ -57,7 +57,7 @@ void NodeState::readYaml(const YAML::Node &node)
     if(node["label"].IsDefined()) {
         setLabel(node["label"].as<std::string>());
         if(label_.empty()) {
-            setLabel(parent_->getUUID());
+            setLabel(parent_->getUUID().getFullName());
         }
     }
 

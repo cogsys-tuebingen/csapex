@@ -25,9 +25,6 @@ public:
     static const std::string MIME_CREATE_CONNECTION;
     static const std::string MIME_MOVE_CONNECTIONS;
 
-    static UUID makeUUID(const UUID &box_uuid, const std::string &type, int sub_id);
-    static UUID makeUUID_forced(const UUID &box_uuid, const std::string &type, int sub_id);
-
 public:
     virtual ~Connectable();
 
@@ -118,7 +115,6 @@ protected:
 
 protected:
     Connectable(const UUID &uuid);
-    Connectable(Unique *parent, int sub_id, const std::string &type);
 
     void setDynamic(bool dynamic);
 

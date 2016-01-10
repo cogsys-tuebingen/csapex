@@ -8,7 +8,7 @@
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/model/tag.h>
-#include <csapex/utility/uuid.h>
+#include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/delegate_bind.h>
 
 using namespace csapex;
@@ -83,15 +83,15 @@ std::string NodeConstructor::getDescription() const
 
 NodeHandlePtr NodeConstructor::makePrototype() const
 {
-    return makeNodeHandle(UUID::make("prototype"));
+    return makeNodeHandle(UUIDProvider::makeUUID_forced("prototype"), nullptr);
 }
 
-NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid) const
+NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, csapex::UUIDProvider *uuid_provider) const
 {
     try {
         OutputTransitionPtr ot = std::make_shared<OutputTransition>();
         InputTransitionPtr it = std::make_shared<InputTransition>();
-        NodeHandlePtr node_handle = std::make_shared<NodeHandle>(type_, uuid, makeNode(), it, ot);
+        NodeHandlePtr node_handle = std::make_shared<NodeHandle>(type_, uuid, makeNode(), uuid_provider, it, ot);
         return node_handle;
 
     } catch(const std::exception& e) {

@@ -45,24 +45,11 @@ void Graph::clear()
     }
     apex_assert_hard(nodes_.empty());
 
-    uuids_.clear();
-
     node_component_.clear();
     node_level_.clear();
 
     node_parents_.clear();
     node_children_.clear();
-}
-
-std::string Graph::makeUUIDPrefix(const std::string& name)
-{
-    int& last_id = uuids_[name];
-    ++last_id;
-
-    std::stringstream ss;
-    ss << name << "_" << last_id;
-
-    return ss.str();
 }
 
 void Graph::addNode(NodeHandlePtr nh)
@@ -626,7 +613,7 @@ Input* Graph::passOutInput(Input *internal)
     Input* parent = modifier_->addInput(internal->getType(), internal->getLabel(), false, false);
 
     std::string name = "relay" + std::to_string(pass_on_inputs_.size());
-    OutputPtr relay = std::make_shared<StaticOutput>(UUID::make_sub(modifier_->getUUID(),name));
+    OutputPtr relay = std::make_shared<StaticOutput>(makeDerivedUUID(modifier_->getUUID(),name));
     relay->setType(internal->getType());
     relay->setLabel(internal->getLabel());
 

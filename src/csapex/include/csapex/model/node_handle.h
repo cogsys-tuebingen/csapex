@@ -20,7 +20,7 @@ class NodeHandle : public Unique
 {
 public:
     NodeHandle(const std::string& type, const UUID &uuid,
-               NodePtr node,
+               NodePtr node, UUIDProvider *uuid_provider,
                InputTransitionPtr transition_in, OutputTransitionPtr transition_out);
     virtual ~NodeHandle();    
 
@@ -158,6 +158,8 @@ protected:
     std::map<Output*,csapex::param::Parameter*> output_2_param_;
 
 private:
+    UUIDProvider* uuid_provider_;
+
     int next_input_id_;
     int next_output_id_;
     int next_trigger_id_;

@@ -130,9 +130,9 @@ void NodeBox::construct()
     setFocusPolicy(Qt::ClickFocus);
 
     const UUID& uuid = nh->getUUID();
-    setToolTip(uuid.c_str());
+    setToolTip(QString::fromStdString(uuid.getFullName()));
 
-    setObjectName(uuid.c_str());
+    setObjectName(QString::fromStdString(uuid.getFullName()));
 
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
@@ -737,7 +737,7 @@ void NodeBox::nodeStateChangedEvent()
     }
 
     setLabel(state->getLabel());
-    ui->label->setToolTip(worker->getUUID().c_str());
+    ui->label->setToolTip(QString::fromStdString(worker->getUUID().getFullName()));
 
     updateThreadInformation();
 

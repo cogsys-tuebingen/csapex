@@ -39,10 +39,10 @@ std::string AddNode::getDescription() const
 bool AddNode::doExecute()
 {
     if(uuid_.empty()) {
-        uuid_ = UUID::make(graph_->makeUUIDPrefix(type_));
+        uuid_ = graph_->generateUUID(type_);
     }
 
-    NodeHandlePtr node = node_factory_->makeNode(type_, uuid_, saved_state_);
+    NodeHandlePtr node = node_factory_->makeNode(type_, uuid_, graph_, saved_state_);
 
     if(!node) {
         return false;

@@ -11,7 +11,7 @@ Unique::Unique(const UUID &uuid)
 
 Unique::~Unique()
 {
-    UUID::free(uuid_);
+    uuid_.free();
 }
 
 void Unique::setUUID(const UUID &uuid)

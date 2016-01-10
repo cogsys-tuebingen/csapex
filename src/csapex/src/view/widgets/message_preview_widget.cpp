@@ -7,6 +7,7 @@
 #include <csapex/msg/io.h>
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/any_message.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -15,7 +16,7 @@ using namespace csapex;
 using namespace csapex::impl;
 
 PreviewInput::PreviewInput(MessagePreviewWidget *parent)
-    : Input(UUID::make_forced("message_preview_in")),
+    : Input(UUIDProvider::makeUUID_forced("message_preview_in")),
       parent_(parent)
 {
     setType(std::make_shared<connection_types::AnyMessage>());

@@ -17,11 +17,6 @@ Input::Input(const UUID &uuid)
 {
 }
 
-Input::Input(Unique* parent, int sub_id)
-    : Connectable(parent, sub_id, "in"), optional_(false)
-{
-}
-
 Input::~Input()
 {
     free();

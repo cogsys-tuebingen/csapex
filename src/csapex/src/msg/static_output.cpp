@@ -20,12 +20,6 @@ StaticOutput::StaticOutput(const UUID &uuid)
 
 }
 
-StaticOutput::StaticOutput(Unique *parent, int sub_id)
-    : Output(parent, sub_id), message_flags_(0)
-{
-
-}
-
 void StaticOutput::addMessage(ConnectionType::ConstPtr message)
 {
     setType(message->toType());

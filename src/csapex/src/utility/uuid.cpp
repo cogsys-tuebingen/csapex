@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/utility/uuid.h>
 
+/// COMPONENT
+#include <csapex/utility/uuid_provider.h>
+
 /// SYSTEM
 #include <stdexcept>
 #include <iostream>
@@ -9,7 +12,7 @@
 
 using namespace csapex;
 
-UUID UUID::NONE("");
+UUID UUID::NONE(nullptr, "");
 const std::string UUID::namespace_separator = ":|:";
 
 
@@ -29,9 +32,6 @@ void split_first(const std::string& haystack, const std::string& needle,
 
 }
 
-std::map<std::string, int> UUID::hash_;
-std::mutex UUID::hash_mutex_;
-
 std::size_t UUID::Hasher::operator()(const UUID& k) const {
     return k.hash();
 }
@@ -41,77 +41,28 @@ bool UUID::empty() const
     return representation_.empty();
 }
 
-void UUID::reset()
-{
-    std::unique_lock<std::mutex> lock(hash_mutex_);
-    hash_.clear();
-}
-
 std::string UUID::stripNamespace(const std::string &name)
 {
     size_t from = name.rfind("::");
     return name.substr(from != name.npos ? from + 2 : 0);
 }
 
-UUID UUID::make(const std::string &prefix)
-{
-    std::unique_lock<std::mutex> lock(hash_mutex_);
-
-    // ensure uniqueness
-    std::string rep = prefix;
-    if(hash_.find(rep) != hash_.end()) {
-        throw std::runtime_error("the UUID " + prefix + " is already taken");
-    }
-
-    UUID r(rep);
-    hash_[r.representation_]++;
-    return r;
-}
-
-UUID UUID::make_sub(const UUID &parent, const std::string &prefix)
-{
-    return make(parent.getFullName() + UUID::namespace_separator + prefix);
-}
-
-UUID UUID::make_sub_forced(const UUID &parent, const std::string &prefix)
-{
-    return make_forced( parent.getFullName() + UUID::namespace_separator + prefix);
-}
-
-void UUID::free(const UUID &uuid)
-{
-    std::unique_lock<std::mutex> lock(hash_mutex_);
-
-    std::map<std::string, int>::iterator it = hash_.find(uuid.representation_);
-    if(it != hash_.end()) {
-        hash_.erase(it);
-    }
-}
-
-UUID UUID::make_forced(const std::string &representation)
-{
-    UUID r(representation);
-    return r;
-}
 
 UUID::UUID()
+    : parent_(nullptr), representation_("invalid_uuid")
 {
-    representation_ = "invalid_uuid";
 }
 
-UUID::UUID(const std::string &representation)
+UUID::UUID(UUIDProvider* parent, const std::string &representation)
+    : parent_(parent), representation_(representation)
 {
-    representation_ = representation;
 }
 
-UUID::operator std::string() const
+void UUID::free()
 {
-    return representation_;
-}
-
-const char* UUID::c_str() const
-{
-    return representation_.c_str();
+    if(parent_) {
+        parent_->free(*this);
+    }
 }
 
 std::string UUID::getFullName() const
@@ -135,14 +86,6 @@ bool UUID::contains(const std::string &sub) const
     return pos != representation_.npos;
 }
 
-UUID UUID::replace(const std::string &needle, const UUID &replacement) const
-{
-    size_t pos = representation_.find(needle);
-    std::string tmp = representation_;
-    tmp.replace(pos, needle.length(), replacement);
-    return UUID::make(tmp);
-}
-
 UUID UUID::parentUUID() const
 {
     UUID l = UUID::NONE;
@@ -158,7 +101,7 @@ std::string UUID::type() const
     UUID r = UUID::NONE;
     split(UUID::namespace_separator, l, r);
 
-    std::string t = r;
+    std::string t = r.getFullName();
     return t.substr(0, t.find_first_of("_"));
 }
 

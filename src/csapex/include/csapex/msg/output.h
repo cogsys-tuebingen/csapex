@@ -28,7 +28,6 @@ public:
 
 public:
     Output(const UUID &uuid);
-    Output(Unique *parent, int sub_id);
     ~Output();
 
     void setMessageProcessed();

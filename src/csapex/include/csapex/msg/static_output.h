@@ -10,7 +10,6 @@ class StaticOutput : public Output
 {
 public:
     StaticOutput(const UUID &uuid);
-    StaticOutput(Unique *parent, int sub_id);
 
     virtual void addMessage(ConnectionType::ConstPtr message) override;
 

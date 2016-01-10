@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/msg/message_traits.h>
-#include <csapex/utility/uuid.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <memory>
@@ -40,7 +40,7 @@ struct convert<csapex::UUID> {
     }
 
     static bool decode(const Node& node, csapex::UUID& rhs) {
-        rhs = csapex::UUID::make_forced(node.as<std::string>());
+        rhs = csapex::UUIDProvider::makeUUID_forced(node.as<std::string>());
         return true;
     }
 };

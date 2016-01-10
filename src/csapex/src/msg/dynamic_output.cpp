@@ -20,12 +20,6 @@ DynamicOutput::DynamicOutput(const UUID &uuid)
     setDynamic(true);
 }
 
-DynamicOutput::DynamicOutput(Unique *parent, int sub_id)
-    : Output(parent, sub_id)
-{
-    setDynamic(true);
-}
-
 void DynamicOutput::clearCorrespondents()
 {
     correspondents_.clear();

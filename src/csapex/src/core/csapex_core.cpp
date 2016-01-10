@@ -212,8 +212,6 @@ void CsApexCore::reset()
 {
     resetRequest();
 
-    UUID::reset();
-
     resetDone();
 }
 

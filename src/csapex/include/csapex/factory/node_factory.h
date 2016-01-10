@@ -41,8 +41,8 @@ public:
     NodeConstructorPtr getConstructor(const std::string& type);
     std::vector<NodeConstructorPtr> getConstructors();
 
-    NodeHandlePtr makeNode(const std::string& type, const UUID& uuid);
-    NodeHandlePtr makeNode(const std::string& type, const UUID& uuid, NodeStatePtr state);
+    NodeHandlePtr makeNode(const std::string& type, const UUID& uuid, UUIDProvider *uuid_provider);
+    NodeHandlePtr makeNode(const std::string& type, const UUID& uuid, UUIDProvider *uuid_provider, NodeStatePtr state);
 
     std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap();
 

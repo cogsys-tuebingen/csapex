@@ -161,7 +161,7 @@ void GenericState::registerParameter(const csapex::param::Parameter::Ptr &param)
 {
     params[param->name()] = param;
 
-    param->setUUID(parent_uuid_.getFullName());
+    param->setUUID(parent_uuid_);
 
     (*parameter_added)(param);
     triggerParameterSetChanged();

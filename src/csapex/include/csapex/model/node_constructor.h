@@ -6,6 +6,7 @@
 #include <csapex/param/param_fwd.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <typeinfo>
@@ -50,7 +51,7 @@ public:
     std::string getDescription() const;
 
     NodeHandlePtr makePrototype() const;
-    NodeHandlePtr makeNodeHandle(const UUID& uuid) const;
+    NodeHandlePtr makeNodeHandle(const UUID& uuid, UUIDProvider *uuid_provider) const;
 
     NodePtr makeNode() const;
 

@@ -12,12 +12,6 @@ DynamicInput::DynamicInput(const UUID &uuid)
     setDynamic(true);
 }
 
-DynamicInput::DynamicInput(Unique *parent, int sub_id)
-    : Input(parent, sub_id), correspondent_(nullptr)
-{
-    setDynamic(true);
-}
-
 void DynamicInput::setCorrespondent(DynamicOutput *output)
 {
     correspondent_ = output;

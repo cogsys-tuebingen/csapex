@@ -53,7 +53,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
     }
 
     QTreeWidgetItem* tl = new QTreeWidgetItem;
-    tl->setText(0, node_handle_->getUUID().c_str());
+    tl->setText(0, QString::fromStdString(node_handle_->getUUID().getFullName()));
 
     NodeConstructor::Ptr constructor = node_factory->getConstructor(node_handle_->getType());
 
@@ -72,7 +72,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
             QTreeWidgetItem* target_widget = new QTreeWidgetItem;
             if(input->isConnected()) {
                 Connectable* target = input->getSource();
-                target_widget->setText(0, target->getUUID().c_str());
+                target_widget->setText(0, QString::fromStdString(target->getUUID().getFullName()));
                 //target_widget->setIcon(1, target->getNode()->getIcon());
                 //target_widget->setText(1, target->getNode()->getType().c_str());
                 target_widget->setIcon(1, QIcon(":/connector.png"));
@@ -101,7 +101,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
             for(ConnectionPtr connection : output->getConnections()) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
                 Connectable* input = connection->to();
-                target_widget->setText(0, input->getUUID().c_str());
+                target_widget->setText(0, QString::fromStdString(input->getUUID().getFullName()));
                 //target_widget->setIcon(1, target->getNode()->getIcon());
                 //target_widget->setText(1, target->getNode()->getType().c_str());
                 target_widget->setIcon(1, QIcon(":/connector.png"));

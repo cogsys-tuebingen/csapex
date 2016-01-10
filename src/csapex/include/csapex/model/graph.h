@@ -5,6 +5,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/model/node.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
@@ -13,7 +14,7 @@
 
 namespace csapex {
 
-class Graph : public Node
+class Graph : public Node, public UUIDProvider
 {
     friend class GraphIO;
     friend class GraphFacade;
@@ -67,8 +68,6 @@ public:
 
     std::vector<ConnectionPtr> getConnections();
 
-    std::string makeUUIDPrefix(const std::string& name);
-
     int countNodes();
 
     void addNode(NodeHandlePtr node);
@@ -118,8 +117,6 @@ protected:
     std::map<NodeHandle*, std::vector<NodeHandle*> > node_children_;
 
     std::vector<ConnectionPtr> connections_;
-
-    std::map<std::string, int> uuids_;
 
     std::function<void (std::function<void ()>)> continuation_;
 

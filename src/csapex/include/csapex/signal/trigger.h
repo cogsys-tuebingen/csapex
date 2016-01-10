@@ -17,7 +17,6 @@ class Trigger : public Connectable
 
 public:
     Trigger(const UUID &uuid);
-    Trigger(Unique *parent, int sub_id);
     ~Trigger();
 
     virtual bool canOutput() const override {
