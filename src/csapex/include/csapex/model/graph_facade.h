@@ -24,7 +24,7 @@ public:
     ~GraphFacade();
 
     Graph* getGraph();
-
+    GraphFacade* getSubGraph(const UUID& uuid);
 
     void addNode(NodeHandlePtr node);
 
@@ -71,8 +71,14 @@ public:
     csapex::slim_signal::Signal<void()> panic;
 
 private:
+    void nodeAddedHandler(NodeHandlePtr node);
+    void nodeRemovedHandler(NodeHandlePtr node);
+
+private:
     Graph* graph_;
     Executor& executor_;
+
+    std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> children_;
 
     std::vector<csapex::slim_signal::Connection> connections_;
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;

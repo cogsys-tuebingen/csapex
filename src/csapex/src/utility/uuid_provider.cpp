@@ -77,9 +77,7 @@ UUID UUIDProvider::makeConnectableUUID(const UUID &parent, const std::string& ty
         return UUID::NONE;
     }
 
-    std::stringstream ss;
-    ss << parent << UUID::namespace_separator << type << "_" << sub_id;
-    return makeUUID(ss.str());
+    return makeDerivedUUID(parent, type + "_" + std::to_string(sub_id));
 }
 
 UUID UUIDProvider::makeConnectableUUID_forced(const UUID &parent, const std::string& type, int sub_id)
@@ -88,9 +86,7 @@ UUID UUIDProvider::makeConnectableUUID_forced(const UUID &parent, const std::str
         return UUID::NONE;
     }
 
-    std::stringstream ss;
-    ss << parent << UUID::namespace_separator << type << "_" << sub_id;
-    return makeUUID_forced(ss.str());
+    return makeDerivedUUID_forced(parent, type + "_" + std::to_string(sub_id));
 }
 
 

@@ -2,7 +2,7 @@
 #define GROUP_NODES_H
 
 /// COMPONENT
-#include "command.h"
+#include "meta.h"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-struct GroupNodes : public Command
+struct GroupNodes : public Meta
 {
     GroupNodes(const std::vector<UUID>& nodes);
 

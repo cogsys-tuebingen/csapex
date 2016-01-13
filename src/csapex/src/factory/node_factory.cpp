@@ -35,6 +35,7 @@ NodeFactory::NodeFactory(csapex::PluginLocator* locator)
       tag_map_has_to_be_rebuilt_(false)
 {
     NodeConstructorPtr provider = std::make_shared<NodeConstructor>("csapex::Graph", []{ return std::make_shared<Graph>(); });
+    provider->setIcon(":/group.png");
     registerNodeType(provider, true);
 }
 

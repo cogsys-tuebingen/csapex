@@ -31,11 +31,11 @@
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
-                       GraphFacadePtr graph_facade, GraphPtr graph,
+                       GraphPtr graph,
                        ThreadPool &thread_pool,
                        NodeFactory *node_factory)
     : settings_(settings), plugin_locator_(plugin_locator),
-      graph_facade_(graph_facade), graph_(graph),
+      graph_(graph),
       thread_pool_(thread_pool),
       node_factory_(node_factory),
       core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")),
@@ -250,14 +250,17 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     saveSettingsRequest(node_map);
 
     graphio.saveSettings(node_map);
-    graphio.saveConnections(node_map);
+//    graphio.saveConnections(node_map);
 
     saveViewRequest(node_map);
 
-    graphio.saveNodes(node_map);
+    graphio.saveGraph(node_map);
+//    graphio.saveNodes(node_map);
 
     YAML::Emitter yaml;
     yaml << node_map;
+
+    std::cerr << yaml.c_str() << std::endl;
 
     std::ofstream ofs(file.c_str());
     ofs << "#!" << settings_.get<std::string>("path_to_bin") << '\n';
@@ -295,31 +298,7 @@ void CsApexCore::load(const std::string &file)
         YAML::Node doc = builder.Root();
 
         graphio.loadSettings(doc);
-
-        YAML::Node nodes = doc["nodes"];
-        if(nodes.IsDefined()) {
-            for(std::size_t i = 0, total = nodes.size(); i < total; ++i) {
-                graphio.loadNode(doc["nodes"][i]);
-            }
-        }
-
-        // legacy nodes
-        while (parser.HandleNextDocument(builder)) {
-            YAML::Node doc = builder.Root();
-            graphio.loadNode(doc);
-        }
-    }
-    {
-        std::ifstream ifs(file.c_str());
-        YAML::Parser parser(ifs);
-
-        YAML::NodeBuilder builder;
-        if (!parser.HandleNextDocument(builder)) {
-            std::cerr << "cannot read the config" << std::endl;
-        }
-        YAML::Node doc = builder.Root();
-
-        graphio.loadConnections(doc);
+        graphio.loadGraph(doc);
 
         loadViewRequest(doc);
 

@@ -32,7 +32,7 @@ using namespace csapex;
 const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(adapter), icon_(icon),
+    : QWidget(parent), ui(new Ui::Box), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(adapter), icon_(icon),
       down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), initialized_(false)
 {
     handle->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this));
@@ -43,8 +43,6 @@ NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worke
     if(adapter->isResizable()) {
         grip_ = new QSizeGrip(this);
         grip_->installEventFilter(this);
-    } else {
-        grip_ = nullptr;
     }
 
     setVisible(false);

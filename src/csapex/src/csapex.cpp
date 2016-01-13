@@ -157,8 +157,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(plugin_locator.get());
 
     CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator,
-                                                      graph_facade, graph,
-                                                      thread_pool, node_factory.get());
+                                                      graph, thread_pool, node_factory.get());
 
     core->saveSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     core->loadSettingsRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });

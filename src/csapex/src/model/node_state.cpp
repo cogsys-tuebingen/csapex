@@ -33,7 +33,6 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     setEnabled(rhs.enabled_);
     setMinimized(rhs.minimized_);
     setFlipped(rhs.flipped_);
-    setParent(rhs.parent_);
     setLabel(rhs.label_);
     setThread(rhs.thread_name_, rhs.thread_id_);
 

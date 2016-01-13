@@ -95,13 +95,18 @@ UUID UUID::parentUUID() const
     return l;
 }
 
-std::string UUID::type() const
+std::string UUID::id() const
 {
     UUID l = UUID::NONE;
     UUID r = UUID::NONE;
     split(UUID::namespace_separator, l, r);
 
-    std::string t = r.getFullName();
+    return r.getFullName();
+}
+
+std::string UUID::type() const
+{
+    std::string t = id();
     return t.substr(0, t.find_first_of("_"));
 }
 

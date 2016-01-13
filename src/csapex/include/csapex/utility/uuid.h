@@ -47,6 +47,7 @@ public:
 
     UUID parentUUID() const;
     std::string type() const;
+    std::string id() const;
 
     bool empty() const;
 

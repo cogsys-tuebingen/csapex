@@ -47,6 +47,19 @@ void GraphIO::loadSettings(const YAML::Node &doc)
     }
 }
 
+void GraphIO::saveGraph(YAML::Node &yaml)
+{
+    saveNodes(yaml);
+    saveConnections(yaml);
+}
+
+void GraphIO::loadGraph(const YAML::Node& doc)
+{
+    loadNodes(doc);
+    loadConnections(doc);
+}
+
+
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
     for(NodeHandle* node : graph_->getAllNodeHandles()) {
@@ -57,6 +70,16 @@ void GraphIO::saveNodes(YAML::Node &yaml)
         } catch(const std::exception& e) {
             std::cerr << "cannot save state for node " << node->getUUID() << ": " << e.what() << std::endl;
             throw e;
+        }
+    }
+}
+
+void GraphIO::loadNodes(const YAML::Node& doc)
+{
+    YAML::Node nodes = doc["nodes"];
+    if(nodes.IsDefined()) {
+        for(std::size_t i = 0, total = nodes.size(); i < total; ++i) {
+            loadNode(nodes[i]);
         }
     }
 }
@@ -72,13 +95,11 @@ void GraphIO::loadNode(const YAML::Node& doc)
     }
 
     try {
-        deserializeNode(doc, node_handle.get());
+        deserializeNode(doc, node_handle);
 
     } catch(const std::exception& e) {
         std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
     }
-
-    graph_->addNode(node_handle);
 }
 
 void GraphIO::saveConnections(YAML::Node &yaml)
@@ -226,13 +247,13 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
             UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
 
-            Output* from = dynamic_cast<Output*>(graph_->findConnector(from_uuid));
+            Output* from = graph_->findConnector<Output>(from_uuid);
             if(from == nullptr) {
                 std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
                 continue;
             }
 
-            Input* to = dynamic_cast<Input*>(graph_->findConnector(to_uuid));
+            Input* to = graph_->findConnector<Input>(to_uuid);
             if(to == nullptr) {
                 std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
                 continue;
@@ -325,11 +346,34 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
     if(node) {
         // hook for nodes to serialize
         Serialization::instance().serialize(*node, doc);
+
+        GraphPtr subgraph = std::dynamic_pointer_cast<Graph>(node);
+        if(subgraph) {
+            YAML::Node subgraph_yaml;
+            GraphIO sub_graph_io(subgraph.get(), node_factory_);
+            sub_graph_io.saveGraph(subgraph_yaml);
+            doc["subgraph"] = subgraph_yaml;
+
+            // save forwarded inputs
+            YAML::Node fw_in(YAML::NodeType::Sequence);
+            for(const UUID& uuid : subgraph->passed_on_inputs_) {
+                fw_in.push_back(uuid);
+            }
+            doc["forward_in"] = fw_in;
+
+            // save forwarded outputs
+            YAML::Node fw_out(YAML::NodeType::Sequence);
+            for(const UUID& uuid : subgraph->passed_on_outputs_) {
+                fw_out.push_back(uuid);
+            }
+            doc["forward_out"] = fw_out;
+        }
     }
 }
 
-void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandle* node_handle)
+void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
 {
+
     NodeState::Ptr s = node_handle->getNodeState();
     s->readYaml(doc);
 
@@ -343,7 +387,28 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandle* node_handle)
 
     // hook for nodes to deserialize
     auto node = node_handle->getNode().lock();
-    if(node) {
-        Serialization::instance().deserialize(*node, doc);
+    apex_assert_hard(node);
+
+    Serialization::instance().deserialize(*node, doc);
+
+    graph_->addNode(node_handle);
+
+    GraphPtr subgraph = std::dynamic_pointer_cast<Graph>(node);
+    if(subgraph) {
+        GraphIO sub_graph_io(subgraph.get(), node_factory_);
+        sub_graph_io.loadGraph(doc["subgraph"]);
+
+        YAML::Node fw_in = doc["forward_in"];
+        if(fw_in.IsDefined()) {
+            for(std::size_t i = 0, total = fw_in.size(); i < total; ++i) {
+                subgraph->passOutInput(fw_in[i].as<UUID>());
+            }
+        }
+        YAML::Node fw_out = doc["forward_out"];
+        if(fw_out.IsDefined()) {
+            for(std::size_t i = 0, total = fw_out.size(); i < total; ++i) {
+                subgraph->passOutOutput(fw_out[i].as<UUID>());
+            }
+        }
     }
 }

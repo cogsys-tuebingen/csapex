@@ -608,8 +608,10 @@ bool Graph::isAsynchronous() const
     return true;
 }
 
-Input* Graph::passOutInput(Input *internal)
+UUID Graph::passOutInput(const UUID &internal_uuid)
 {
+    Input* internal = findConnector<Input>(internal_uuid);
+    apex_assert_hard(internal);
     Input* parent = modifier_->addInput(internal->getType(), internal->getLabel(), false, false);
 
     std::string name = "relay" + std::to_string(pass_on_inputs_.size());
@@ -620,13 +622,16 @@ Input* Graph::passOutInput(Input *internal)
     NodeHandle* nh = findNodeHandleForConnector(internal->getUUID());
     BundledConnection::connect(relay.get(), internal, nh->getInputTransition());
     pass_on_inputs_[parent] = relay;
+    passed_on_inputs_.push_back(internal_uuid);
 
-    return parent;
+    return parent->getUUID();
 }
 
 
-Output* Graph::passOutOutput(Output *internal)
+UUID Graph::passOutOutput(const UUID& internal_uuid)
 {
+    Output* internal = findConnector<Output>(internal_uuid);
+    apex_assert_hard(internal);
     Output* parent = modifier_->addOutput(internal->getType(), internal->getLabel(), false);
 
     pass_on_outputs_[internal] = parent;
@@ -644,5 +649,6 @@ Output* Graph::passOutOutput(Output *internal)
         continuation_([](){});
     });
 
-    return parent;
+    passed_on_outputs_.push_back(internal_uuid);
+    return parent->getUUID();
 }

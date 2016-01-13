@@ -21,33 +21,11 @@ using namespace csapex;
 GraphFacade::GraphFacade(Executor &executor, Graph* graph)
     : graph_(graph), executor_(executor)
 {
-    connections_.push_back(graph->nodeAdded.connect([this](NodeHandlePtr n) {
-                               NodeWorkerPtr nw = std::make_shared<NodeWorker>(n);
+    connections_.push_back(graph->nodeAdded.connect(
+                               delegate::Delegate<void(NodeHandlePtr)>(this, &GraphFacade::nodeAddedHandler)));
 
-                               TaskGeneratorPtr runner = std::make_shared<NodeRunner>(nw);
-                               generators_[n->getUUID()] = runner;
-                               executor_.add(runner.get());
-                               generatorAdded(runner);
-
-                               nodeAdded(n);
-                               nodeWorkerAdded(nw);
-
-                               nw->checkParameters();
-                               nw->panic.connect(panic);
-
-                           }));
-
-    connections_.push_back(graph->nodeRemoved.connect([this](NodeHandlePtr n) {
-                               TaskGeneratorPtr runner = generators_[n->getUUID()];
-                               generators_.erase(n->getUUID());
-                               executor_.remove(runner.get());
-                               generatorRemoved(runner);
-
-                               NodeWorkerPtr nw = node_workers_[n.get()];
-                               nodeWorkerRemoved(nw);
-                               node_workers_.erase(n.get());
-                               nodeRemoved(n);
-                           }));
+    connections_.push_back(graph->nodeRemoved.connect(
+                               delegate::Delegate<void(NodeHandlePtr)>(this, &GraphFacade::nodeRemovedHandler)));
 }
 
 GraphFacade::~GraphFacade()
@@ -58,14 +36,65 @@ GraphFacade::~GraphFacade()
     connections_.clear();
 }
 
+
+void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
+    std::cerr << nh->getUUID() << " has been added" << std::endl;
+
+    if(nh->getType() == "csapex::Graph") {
+        NodePtr node = nh->getNode().lock();
+        apex_assert_hard(node);
+        GraphPtr sub_graph = std::dynamic_pointer_cast<Graph>(node);
+        apex_assert_hard(sub_graph);
+
+        GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get());
+        children_[nh->getUUID()] = sub_graph_facade;
+    }
+
+    NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
+    TaskGeneratorPtr runner = std::make_shared<NodeRunner>(nw);
+    generators_[nh->getUUID()] = runner;
+    executor_.add(runner.get());
+    generatorAdded(runner);
+
+    nodeAdded(nh);
+    nodeWorkerAdded(nw);
+
+    nw->checkParameters();
+    nw->panic.connect(panic);
+
+}
+
+void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh) {
+    TaskGeneratorPtr runner = generators_[nh->getUUID()];
+    generators_.erase(nh->getUUID());
+    executor_.remove(runner.get());
+    generatorRemoved(runner);
+
+    NodeWorkerPtr nw = node_workers_[nh.get()];
+    nodeWorkerRemoved(nw);
+    node_workers_.erase(nh.get());
+    nodeRemoved(nh);
+
+    if(nh->getType() == "csapex::Graph") {
+        children_.erase(nh->getUUID());
+    }
+
+}
+
 Graph* GraphFacade::getGraph()
 {
     return graph_;
 }
 
-void GraphFacade::addNode(NodeHandlePtr node)
+void GraphFacade::addNode(NodeHandlePtr nh)
 {
-    graph_->addNode(node);
+    graph_->addNode(nh);
+}
+
+GraphFacade* GraphFacade::getSubGraph(const UUID &uuid)
+{
+    GraphFacadePtr facade = children_[uuid];
+    return facade.get();
 }
 
 ConnectionPtr GraphFacade::connect(OutputPtr output, InputPtr input, OutputTransition *ot, InputTransition *it)

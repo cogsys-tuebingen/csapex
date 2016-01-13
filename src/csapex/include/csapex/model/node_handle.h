@@ -101,6 +101,8 @@ public:
     void updateParameterValue(Connectable* source);
 
 public:
+    csapex::slim_signal::Signal<void ()> nodeRemoved;
+
     csapex::slim_signal::Signal<void (ConnectablePtr)> connectorCreated;
     csapex::slim_signal::Signal<void (ConnectablePtr)> connectorRemoved;
 

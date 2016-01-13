@@ -59,7 +59,12 @@ public:
     int getComponent(const UUID& node_uuid) const;
     int getLevel(const UUID& node_uuid) const;
 
-    Connectable *findConnector(const UUID &uuid);
+    Connectable* findConnector(const UUID &uuid);
+
+    template <typename T>
+    T *findConnector(const UUID &uuid) {
+        return dynamic_cast<T*>(findConnector(uuid));
+    }
 
     ConnectionPtr getConnectionWithId(int id);
     ConnectionPtr getConnection(const UUID& from, const UUID& to);
@@ -90,8 +95,8 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    Input* passOutInput(Input* internal);
-    Output* passOutOutput(Output* internal);
+    UUID passOutInput(const UUID& internal_uuid);
+    UUID passOutOutput(const UUID& internal_uuid);
 
 private:
    /*rename*/ void verify();
@@ -121,7 +126,11 @@ protected:
     std::function<void (std::function<void ()>)> continuation_;
 
     std::map<Input*, OutputPtr> pass_on_inputs_;
+    std::vector<UUID> passed_on_inputs_;
+
     std::map<Output*, Output*> pass_on_outputs_;
+    std::vector<UUID> passed_on_outputs_;
+
     std::map<Output*, bool> received_;
 };
 

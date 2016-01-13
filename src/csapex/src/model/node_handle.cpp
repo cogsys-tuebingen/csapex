@@ -82,6 +82,8 @@ NodeHandle::~NodeHandle()
     while(!triggers_.empty()) {
         removeTrigger(triggers_.begin()->get());
     }
+
+    nodeRemoved();
 }
 
 int NodeHandle::getLevel() const

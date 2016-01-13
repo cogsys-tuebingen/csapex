@@ -295,7 +295,8 @@ void ThreadPool::saveSettings(YAML::Node& node)
         it != group_assignment_.end(); ++it)
     {
         YAML::Node assignment;
-        assignment["uuid"] = it->first->getUUID();
+        TaskGenerator* tg = it->first;
+        assignment["uuid"] = tg->getUUID();
         assignment["id"] = it->second->id();
         assignments.push_back(assignment);
     }
