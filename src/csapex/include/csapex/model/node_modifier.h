@@ -226,6 +226,9 @@ public:
     bool isSink() const;
     void setIsSink(bool sink);
 
+    bool isProcessingEnabled() const;
+    void setProcessingEnabled(bool enabled);
+
     bool isError() const;
     void setNoError();
     void setError(const std::string& msg);

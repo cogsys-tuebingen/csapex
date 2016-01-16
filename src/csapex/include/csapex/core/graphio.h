@@ -25,15 +25,16 @@ public:
     void saveGraph(YAML::Node &yaml);
     void loadGraph(const YAML::Node &doc);
 
-
 private:
     void saveNodes(YAML::Node &yaml);
     void loadNodes(const YAML::Node& doc);
-
     void loadNode(const YAML::Node &doc);
+
 
     void saveConnections(YAML::Node &yaml);
     void loadConnections(const YAML::Node& doc);
+    void loadConnection(const YAML::Node& connection);
+    void loadFulcrum(const YAML::Node& fulcrum);
 
 protected:
     void serializeNode(YAML::Node& doc, NodeHandle* node_handle);

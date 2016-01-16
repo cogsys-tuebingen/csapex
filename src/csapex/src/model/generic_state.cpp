@@ -46,6 +46,7 @@ void GenericState::readYaml(const YAML::Node& node) {
     if(node["params"].IsDefined()) {
         params = node["params"].as<std::map<std::string, csapex::param::Parameter::Ptr> >();
         for(auto pair : params) {
+            apex_assert_hard(pair.first == pair.second->name());
             legacy.insert(pair.first);
         }
     }

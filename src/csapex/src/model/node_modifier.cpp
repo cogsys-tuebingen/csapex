@@ -129,6 +129,15 @@ void NodeModifier::setIsSink(bool sink)
     node_handle_->setIsSink(sink);
 }
 
+bool NodeModifier::isProcessingEnabled() const
+{
+    return node_worker_->isProcessingEnabled();
+}
+void NodeModifier::setProcessingEnabled(bool enabled)
+{
+    node_worker_->setProcessingEnabled(enabled);
+}
+
 bool NodeModifier::isError() const
 {
     return node_worker_->isError();

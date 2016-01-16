@@ -109,6 +109,8 @@ void IntervalParameter::doSetValueFrom(const Parameter &other)
         }
         if(change) {
             values_ = interval->values_;
+            max_ = interval->max_;
+            min_ = interval->min_;
             triggerChange();
         }
     } else {

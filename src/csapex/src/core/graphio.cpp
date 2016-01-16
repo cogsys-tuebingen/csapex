@@ -178,56 +178,10 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             const YAML::Node& connection = connections[i];
             apex_assert_hard(connection.Type() == YAML::NodeType::Map);
 
-            std::string from_uuid_tmp = connection["uuid"].as<std::string>();
-            if(from_uuid_tmp.find(UUID::namespace_separator) == from_uuid_tmp.npos) {
-                // legacy import
-                from_uuid_tmp.replace(from_uuid_tmp.find("_out_"), 1, UUID::namespace_separator);
-            }
-
-            UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
-
-            NodeHandle* parent = nullptr;
             try {
-                parent = graph_->findNodeHandleForConnector(from_uuid);
-
+                loadConnection(connection);
             } catch(const std::exception& e) {
-                std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
-                continue;
-            }
-
-            if(!parent) {
-                std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
-                continue;
-            }
-
-            const YAML::Node& targets = connection["targets"];
-            apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
-
-            for(unsigned j=0; j<targets.size(); ++j) {
-                std::string to_uuid_tmp = targets[j].as<std::string>();
-
-                if(to_uuid_tmp.find(UUID::namespace_separator) == to_uuid_tmp.npos) {
-                    // legacy import
-                    to_uuid_tmp.replace(to_uuid_tmp.find("_in_"), 1, UUID::namespace_separator);
-                }
-
-                UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
-
-                Connectable* from = parent->getOutput(from_uuid);
-                if(from != nullptr) {
-                    loadMessageConnection(from, parent, to_uuid);
-                    continue;
-
-                } else {
-                    from = parent->getTrigger(from_uuid);
-                    if(from != nullptr) {
-                        loadSignalConnection(from, to_uuid);
-                        continue;
-                    }
-                }
-
-                std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
-
+                std::cerr << "cannot load connection: " << e.what() << std::endl;
             }
         }
     }
@@ -241,50 +195,114 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             const YAML::Node& fulcrum = fulcrums[i];
             apex_assert_hard(fulcrum.Type() == YAML::NodeType::Map);
 
-            std::string from_uuid_tmp = fulcrum["from"].as<std::string>();
-            std::string to_uuid_tmp = fulcrum["to"].as<std::string>();
+            try {
+                loadFulcrum(fulcrum);
+            } catch(const std::exception& e) {
+                std::cerr << "cannot load fulcrum: " << e.what() << std::endl;
+            }
+        }
+    }
+}
 
-            UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
-            UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
+void GraphIO::loadConnection(const YAML::Node& connection)
+{
+    std::string from_uuid_tmp = connection["uuid"].as<std::string>();
+    if(from_uuid_tmp.find(UUID::namespace_separator) == from_uuid_tmp.npos) {
+        // legacy import
+        from_uuid_tmp.replace(from_uuid_tmp.find("_out_"), 1, UUID::namespace_separator);
+    }
 
-            Output* from = graph_->findConnector<Output>(from_uuid);
-            if(from == nullptr) {
-                std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
+    UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
+
+    NodeHandle* parent = nullptr;
+    try {
+        parent = graph_->findNodeHandleForConnector(from_uuid);
+
+    } catch(const std::exception& e) {
+        std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
+        return;
+    }
+
+    if(!parent) {
+        std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
+        return;
+    }
+
+    const YAML::Node& targets = connection["targets"];
+    apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
+
+    for(unsigned j=0; j<targets.size(); ++j) {
+        std::string to_uuid_tmp = targets[j].as<std::string>();
+
+        if(to_uuid_tmp.find(UUID::namespace_separator) == to_uuid_tmp.npos) {
+            // legacy import
+            to_uuid_tmp.replace(to_uuid_tmp.find("_in_"), 1, UUID::namespace_separator);
+        }
+
+        UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
+
+        Connectable* from = parent->getOutput(from_uuid);
+        if(from != nullptr) {
+            loadMessageConnection(from, parent, to_uuid);
+            continue;
+
+        } else {
+            from = parent->getTrigger(from_uuid);
+            if(from != nullptr) {
+                loadSignalConnection(from, to_uuid);
                 continue;
             }
+        }
 
-            Input* to = graph_->findConnector<Input>(to_uuid);
-            if(to == nullptr) {
-                std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
-                continue;
-            }
+        std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
 
-            ConnectionPtr connection = graph_->getConnection(from, to);
+    }
+}
 
-            std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
+void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
+{
+    std::string from_uuid_tmp = fulcrum["from"].as<std::string>();
+    std::string to_uuid_tmp = fulcrum["to"].as<std::string>();
 
-            std::vector< std::vector<double> > handles;
-            bool has_handle = fulcrum["handles"].IsDefined();
-            if(has_handle) {
-                handles = fulcrum["handles"].as<std::vector< std::vector<double> > >();
-            }
+    UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
+    UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
 
-            std::vector<int> types;
-            if(fulcrum["types"].IsDefined()) {
-                types = fulcrum["types"].as<std::vector<int> >();
-            }
+    Output* from = graph_->findConnector<Output>(from_uuid);
+    if(from == nullptr) {
+        std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
+        return;
+    }
 
-            int n = pts.size();
-            for(int i = 0; i < n; ++i) {
-                int type = (!types.empty()) ? types[i] : Fulcrum::CURVE;
-                if(has_handle) {
-                    Point in(handles[i][0], handles[i][1]);
-                    Point out(handles[i][2], handles[i][3]);
-                    connection->addFulcrum(i, Point(pts[i][0], pts[i][1]), type, in, out);
-                } else {
-                    connection->addFulcrum(i, Point(pts[i][0], pts[i][1]), type);
-                }
-            }
+    Input* to = graph_->findConnector<Input>(to_uuid);
+    if(to == nullptr) {
+        std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
+        return;
+    }
+
+    ConnectionPtr connection = graph_->getConnection(from, to);
+
+    std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
+
+    std::vector< std::vector<double> > handles;
+    bool has_handle = fulcrum["handles"].IsDefined();
+    if(has_handle) {
+        handles = fulcrum["handles"].as<std::vector< std::vector<double> > >();
+    }
+
+    std::vector<int> types;
+    if(fulcrum["types"].IsDefined()) {
+        types = fulcrum["types"].as<std::vector<int> >();
+    }
+
+    int n = pts.size();
+    for(int i = 0; i < n; ++i) {
+        int type = (!types.empty()) ? types[i] : Fulcrum::CURVE;
+        if(has_handle) {
+            Point in(handles[i][0], handles[i][1]);
+            Point out(handles[i][2], handles[i][3]);
+            connection->addFulcrum(i, Point(pts[i][0], pts[i][1]), type, in, out);
+        } else {
+            connection->addFulcrum(i, Point(pts[i][0], pts[i][1]), type);
         }
     }
 }

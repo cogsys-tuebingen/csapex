@@ -16,6 +16,8 @@ public:
     double doubleMinimum() const;
     double doubleMaximum() const;
 
+    void setRange(double min, double max);
+
 public Q_SLOTS:
     void setSpan(double lower, double upper);
 

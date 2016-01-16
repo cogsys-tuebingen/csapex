@@ -1,8 +1,10 @@
 /// HEADER
 #include <csapex/view/widgets/doublespanslider.h>
 
+/// PROJECT
+#include <csapex/utility/assert.h>
+
 /// SYSTEM
-#include <assert.h>
 #include <iostream>
 #include <cmath>
 
@@ -61,6 +63,10 @@ void DoubleSpanSlider::setDoubleRange(double min, double max)
     update(min, max);
 }
 
+void DoubleSpanSlider::setRange(double min, double max)
+{
+    update(min, max);
+}
 
 void DoubleSpanSlider::update(double min, double max)
 {
@@ -71,10 +77,13 @@ void DoubleSpanSlider::update(double min, double max)
         double low = int2double(lowerValue());
         double up = int2double(upperValue());
 
-        setRange(mini, maxi);
+        apex_assert_hard(int2double(maxi, min) == max);
+        apex_assert_hard(int2double(mini, min) == min);
 
         min_ = min;
         max_ = max;
+
+        QxtSpanSlider::setRange(mini, maxi);
 
         setLowerValue(double2int(low));
         setUpperValue(double2int(up));

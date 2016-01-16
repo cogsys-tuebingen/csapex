@@ -46,7 +46,7 @@ void Node::doSetup()
 
     try {
         setup(*modifier_);
-    } catch(std::runtime_error& e) {
+    } catch(const std::exception& e) {
         aerr << "setup failed: " << e.what() << std::endl;
     }
 

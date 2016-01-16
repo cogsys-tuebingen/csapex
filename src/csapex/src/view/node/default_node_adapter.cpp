@@ -224,6 +224,7 @@ QxtSpanSlider* makeSpanSlider(QBoxLayout* layout, const std::string& name, int l
         child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(interval_param.get()))));
     }
 
+    QObject::connect(slider,        SIGNAL(rangeChanged(int,int)),  displayLower,   SLOT(setRange(int,int)));
     QObject::connect(slider,        SIGNAL(rangeChanged(int,int)),  displayUpper,   SLOT(setRange(int,int)));
     QObject::connect(slider,        SIGNAL(lowerValueChanged(int)), displayLower,   SLOT(setValue(int)));
     QObject::connect(slider,        SIGNAL(upperValueChanged(int)), displayUpper,   SLOT(setValue(int)));
