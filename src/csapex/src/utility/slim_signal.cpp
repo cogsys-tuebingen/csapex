@@ -11,6 +11,7 @@ using namespace csapex;
 using namespace slim_signal;
 
 SignalBase::SignalBase()
+    : guard_(-1)
 {
 
 }
@@ -24,11 +25,14 @@ SignalBase::~SignalBase()
         apex_assert_hard(c->parent_ == this);
         c->detach();
     }
+
+    guard_ = 0xDEADBEEF;
 }
 
 void SignalBase::addConnection(Connection *connection)
 {
     apex_assert_hard(connection->parent_ == this);
+    apex_assert_hard(guard_ == -1);
 
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
@@ -38,6 +42,7 @@ void SignalBase::addConnection(Connection *connection)
 void SignalBase::removeConnection(const Connection *connection)
 {
     apex_assert_hard(connection->parent_ == this);
+    apex_assert_hard(guard_ == -1);
 
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
@@ -52,6 +57,7 @@ void SignalBase::removeConnection(const Connection *connection)
 
 void SignalBase::disconnectAll()
 {
+    apex_assert_hard(guard_ == -1);
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     for(Connection* c : connections_) {
@@ -72,6 +78,7 @@ Connection::Connection(const Connection& other)
     : parent_(other.parent_), deleter_(other.deleter_)
 {
     if(parent_) {
+        apex_assert_hard(parent_->guard_ == -1);
         parent_->addConnection(this);
     }
 }
@@ -97,8 +104,10 @@ void Connection::detach() const
 
 void Connection::disconnect() const
 {
-    if(parent_ && deleter_) {
-        deleter_();
+    if(parent_) {
+        if(deleter_) {
+            deleter_();
+        }
         parent_->removeConnection(this);
         parent_ = nullptr;
     }

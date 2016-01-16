@@ -47,6 +47,9 @@ protected:
 
 private:
     std::vector<Connection*> connections_;
+
+protected:
+    long guard_ = -1;
 };
 
 
@@ -158,8 +161,6 @@ private:
     std::vector<Signal<Signature>*> children_to_remove_;
 
     std::vector<Signal<Signature>*> parents_;
-
-    long guard_ = -1;
 };
 
 }

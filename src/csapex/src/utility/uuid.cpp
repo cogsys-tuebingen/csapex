@@ -65,6 +65,11 @@ void UUID::free()
     }
 }
 
+bool UUID::operator <(const UUID& other) const
+{
+    return representation_ < other.representation_;
+}
+
 std::string UUID::getFullName() const
 {
     return representation_;

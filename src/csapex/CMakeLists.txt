@@ -307,6 +307,7 @@ add_library(csapex_qt SHARED
     src/command/move_fulcrum.cpp
     src/command/switch_thread.cpp
     src/command/group_nodes.cpp
+    src/command/paste_graph.cpp
 
     src/view/csapex_window.cpp
     src/view/message_renderer.cpp

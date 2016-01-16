@@ -54,13 +54,13 @@ public:
     void init();
 
     /// ACCESSORS
-    Node* getNode();
-    NodeWorker* getNodeWorker();
-    NodeHandle* getNodeHandle();
-    NodeAdapterPtr getNodeAdapter();
+    Node* getNode() const;
+    NodeWorker* getNodeWorker() const;
+    NodeHandle* getNodeHandle() const;
+    NodeAdapterPtr getNodeAdapter() const;
 
-    virtual bool hasSubGraph();
-    virtual Graph::Ptr getSubGraph();
+    virtual bool hasSubGraph() const;
+    virtual Graph::Ptr getSubGraph() const;
 
     void setLabel(const std::string& label);
     void setLabel(const QString& label);

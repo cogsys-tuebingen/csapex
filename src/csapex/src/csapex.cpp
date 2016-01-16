@@ -429,7 +429,13 @@ int main(int argc, char** argv)
 
     // start the app
     Main m(std::move(app), *handler);
-    return m.main(headless, threadless, paused, thread_grouping, input, path_to_bin, additional_args);
+    try {
+        return m.main(headless, threadless, paused, thread_grouping, input, path_to_bin, additional_args);
+
+    } catch(const csapex::HardAssertionFailure& af) {
+        std::cerr << af.what() << std::endl;
+        return 42;
+    }
 }
 
 /// MOC

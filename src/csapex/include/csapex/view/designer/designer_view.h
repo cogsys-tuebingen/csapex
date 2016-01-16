@@ -48,6 +48,7 @@ public:
 
     DesignerScene* designerScene();
     std::vector<NodeBox*> boxes();
+    std::vector<NodeBox*> getSelectedBoxes();
     CommandPtr deleteSelected();
 
     void keyPressEvent(QKeyEvent* e);
@@ -66,10 +67,11 @@ public:
 
     void paintEvent(QPaintEvent* e);
 
-
 Q_SIGNALS:
-    void selectionChanged();    
+    void selectionChanged();
     void viewChanged();
+
+    void copyRequest();
 
     void startProfilingRequest(NodeWorker* box);
     void stopProfilingRequest(NodeWorker *box);
@@ -109,17 +111,18 @@ public Q_SLOTS:
     void updateSelection();
     void selectAll();
 
+    void copySelected();
+
 private:
-    void flipBox(const std::vector<NodeBox *>& boxes);
-    void minimizeBox(const std::vector<NodeBox *>& boxes, bool mini);
-    void deleteBox(const std::vector<NodeBox *>& boxes);
-    void groupBox(const std::vector<NodeBox *>& boxes);
+    void flipBox();
+    void minimizeBox(bool mini);
+    void deleteBox();
+    void groupBox();
+    void usePrivateThreadFor();
+    void switchToThread(int group_id);
+    void createNewThreadGroupFor();
 
-    void usePrivateThreadFor(const std::vector<NodeBox *>& boxes);
-    void switchToThread(const std::vector<NodeBox *>& boxes, int group_id);
-    void createNewThreadGroupFor(const std::vector<NodeBox *>& boxes);
-
-    void showProfiling(const std::vector<NodeBox *>& boxes, bool visible);
+    void showProfiling(bool visible);
 
 private:
     DesignerScene* scene_;
@@ -136,6 +139,8 @@ private:
     std::map<NodeWorker*, std::vector<csapex::slim_signal::Connection>> connections_;
 
     std::vector<NodeBox*> boxes_;
+    std::vector<NodeBox*> selected_boxes_;
+
     std::map<NodeBox*, ProfilingWidget*> profiling_;
     std::map<NodeBox*, std::vector<csapex::slim_signal::Connection>> profiling_connections_;
 

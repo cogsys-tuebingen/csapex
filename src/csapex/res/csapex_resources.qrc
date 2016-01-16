@@ -48,5 +48,7 @@
         <file>step.png</file>
         <file>step_next.png</file>
         <file>bug.png</file>
+        <file>copy.png</file>
+        <file>paste.png</file>
     </qresource>
 </RCC>

@@ -34,8 +34,6 @@ Signal<Signature>::~Signal()
     while(!children_.empty()) {
         removeChild(children_.front());
     }
-
-    guard_ = 0xDEADBEEF;
 }
 
 

@@ -57,9 +57,11 @@ private Q_SLOTS:
     void init();
     void reloadStyleSheet(const QString& path);
     void loadStyleSheet(const QString& path);
-    void updateDeleteAction();
     void showHelp(NodeBox* box);
     void showHowToInstall();
+
+    void updateSelectionActions();
+    void updateClipboardActions();
 
     void updatePluginIgnored(const QObject *&action);
 

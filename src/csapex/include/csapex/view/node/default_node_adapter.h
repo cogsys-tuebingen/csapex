@@ -105,7 +105,7 @@ private:
     std::map<std::string, bool> groups_enabled;
     std::map<std::string, QGroupBox*> groupsboxes;
 
-    std::map<Connectable*, csapex::slim_signal::Connection> parameter_connections_;
+    std::map<Connectable*, csapex::slim_signal::ScopedConnection> parameter_connections_;
 
     QBoxLayout* wrapper_layout_;
 };

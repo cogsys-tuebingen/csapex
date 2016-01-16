@@ -44,6 +44,8 @@
 #include <QSignalMapper>
 #include <thread>
 #include <QShortcut>
+#include <QClipboard>
+#include <QMimeData>
 
 using namespace csapex;
 
@@ -115,6 +117,8 @@ void CsApexWindow::construct()
     forceShortcut(ui->actionSelect_all);
     forceShortcut(ui->actionExit);
     forceShortcut(ui->actionDelete_Selected);
+    forceShortcut(ui->actionCopy);
+    forceShortcut(ui->actionPaste);
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
@@ -158,11 +162,17 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), widget_ctrl_.get(),  SLOT(enableGridLock(bool)));
     QObject::connect(widget_ctrl_.get(), SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
 
-    QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
-    QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDeleteAction()));
+    QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateSelectionActions()));
+    updateSelectionActions();
+    QObject::connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(updateClipboardActions()));
+
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateDebugInfo()));
     QObject::connect(designer_, SIGNAL(helpRequest(NodeBox*)), this, SLOT(showHelp(NodeBox*)));
     QObject::connect(ui->action_How_to_install, SIGNAL(triggered()), this, SLOT(showHowToInstall()));
+
+    QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
+    QObject::connect(ui->actionCopy, SIGNAL(triggered(bool)), designer_, SLOT(copySelected()));
+    QObject::connect(ui->actionPaste, SIGNAL(triggered(bool)), designer_, SLOT(paste()));
 
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));
@@ -224,9 +234,27 @@ void CsApexWindow::setupTimeline()
     QObject::connect(activity_timeline_, SIGNAL(scrollingChanged(bool)), ui->timeline_scroll, SLOT(setChecked(bool)));
 }
 
-void CsApexWindow::updateDeleteAction()
+void CsApexWindow::updateSelectionActions()
 {
-    ui->actionDelete_Selected->setEnabled(designer_->hasSelection());
+    bool enabled = designer_->hasSelection();
+    ui->actionDelete_Selected->setEnabled(enabled);
+    ui->actionCopy->setEnabled(enabled);
+    ui->actionClear_selection->setEnabled(enabled);
+}
+
+void CsApexWindow::updateClipboardActions()
+{
+    const QMimeData* data = QApplication::clipboard()->mimeData();
+
+    bool enable = false;
+    static QString valid_types[] { "text/plain", "text/yaml", "xcsapex/node-list" };
+    for(const auto& valid_type : valid_types) {
+        if(data->hasFormat(valid_type)) {
+            enable = true;
+        }
+    }
+
+    ui->actionPaste->setEnabled(enable);
 }
 
 void CsApexWindow::showHelp(NodeBox *box)

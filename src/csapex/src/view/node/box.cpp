@@ -166,7 +166,7 @@ void NodeBox::construct()
     setupUi();
 }
 
-Node* NodeBox::getNode()
+Node* NodeBox::getNode() const
 {
     NodeHandlePtr nh = node_handle_.lock();
     if(!nh) {
@@ -175,7 +175,7 @@ Node* NodeBox::getNode()
     return nh->getNode().lock().get();
 }
 
-NodeWorker* NodeBox::getNodeWorker()
+NodeWorker* NodeBox::getNodeWorker() const
 {
     NodeWorkerPtr worker = node_worker_.lock();
     if(!worker) {
@@ -184,7 +184,7 @@ NodeWorker* NodeBox::getNodeWorker()
     return worker.get();
 }
 
-NodeHandle* NodeBox::getNodeHandle()
+NodeHandle* NodeBox::getNodeHandle() const
 {
     NodeHandlePtr nh = node_handle_.lock();
     if(!nh) {
@@ -193,7 +193,7 @@ NodeHandle* NodeBox::getNodeHandle()
     return nh.get();
 }
 
-NodeAdapter::Ptr NodeBox::getNodeAdapter()
+NodeAdapter::Ptr NodeBox::getNodeAdapter() const
 {
     return adapter_;
 }
@@ -708,12 +708,12 @@ bool NodeBox::isFlipped() const
     return state->isFlipped();
 }
 
-bool NodeBox::hasSubGraph()
+bool NodeBox::hasSubGraph() const
 {
     return false;
 }
 
-Graph::Ptr NodeBox::getSubGraph()
+Graph::Ptr NodeBox::getSubGraph() const
 {
     throw std::runtime_error("cannot call getSubGraph() on Box! Check with hasSubGraph()!");
 }

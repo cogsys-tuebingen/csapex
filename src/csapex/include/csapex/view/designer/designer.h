@@ -82,6 +82,8 @@ public Q_SLOTS:
     void selectAll();
     void clearSelection();
     void deleteSelected();
+    void copySelected();
+    void paste();
 
 private:
     Ui::Designer* ui;

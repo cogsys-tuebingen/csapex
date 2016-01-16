@@ -30,7 +30,8 @@
 using namespace csapex;
 
 GraphIO::GraphIO(Graph *graph, NodeFactory* node_factory)
-    : graph_(graph), node_factory_(node_factory)
+    : graph_(graph), node_factory_(node_factory),
+      position_offset_x_(0.0), position_offset_y_(0.0)
 {
 }
 
@@ -60,9 +61,91 @@ void GraphIO::loadGraph(const YAML::Node& doc)
 }
 
 
+void GraphIO::saveSelectedGraph(YAML::Node &yaml, const std::vector<UUID> &uuids)
+{
+    std::set<UUID> node_set(uuids.begin(), uuids.end());
+
+    std::vector<NodeHandle*> nodes;
+    std::vector<ConnectionPtr> connections;
+
+    for(const UUID& uuid : uuids) {
+        NodeHandle* node = graph_->findNodeHandle(uuid);
+        nodes.push_back(node);
+
+        for(const ConnectablePtr& connectable : node->getAllConnectors()) {
+            if(connectable->isOutput()) {
+                for(const ConnectionPtr& connection : connectable->getConnections()) {
+                    auto target = graph_->findNodeHandleForConnector(connection->to()->getUUID());
+                    if(node_set.find(target->getUUID()) != node_set.end()) {
+                        connections.push_back(connection);
+                    }
+                }
+            }
+        }
+    }
+
+    saveNodes(yaml, nodes);
+    saveConnections(yaml, connections);
+}
+
+std::vector<UUID> GraphIO::loadIntoGraph(const YAML::Node &blueprint, const Point& position)
+{
+    double min_x = std::numeric_limits<double>::infinity();
+    double min_y = std::numeric_limits<double>::infinity();
+
+    std::vector<UUID> new_ids;
+
+    YAML::Node nodes = blueprint["nodes"];
+    if(nodes.IsDefined()) {
+        for(std::size_t i = 0, total = nodes.size(); i < total; ++i) {
+            const YAML::Node& n = nodes[i];
+
+            std::string type = n["type"].as<std::string>();
+            UUID new_uuid = graph_->generateUUID(type);
+            UUID blue_print_uuid = n["uuid"].as<UUID>();
+
+            old_node_uuid_to_new_[blue_print_uuid] = new_uuid;
+            new_ids.push_back(new_uuid);
+
+            if(n["pos"].IsDefined()) {
+                double x = n["pos"][0].as<double>();
+                double y = n["pos"][1].as<double>();
+
+                if(x < min_x) {
+                    min_x = x;
+                }
+                if(y < min_y) {
+                    min_y = y;
+                }
+            }
+        }
+    }
+
+    if(min_x != std::numeric_limits<double>::infinity() &&
+            min_y != std::numeric_limits<double>::infinity()) {
+        position_offset_x_ = position.x - min_x;
+        position_offset_y_ = position.y - min_y;
+    }
+
+    loadNodes(blueprint);
+    loadConnections(blueprint);
+
+    old_node_uuid_to_new_.clear();
+
+    position_offset_x_ = 0;
+    position_offset_y_ = 0;
+
+    return new_ids;
+}
+
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
-    for(NodeHandle* node : graph_->getAllNodeHandles()) {
+    saveNodes(yaml, graph_->getAllNodeHandles());
+}
+
+void GraphIO::saveNodes(YAML::Node &yaml, const std::vector<NodeHandle*>& nodes)
+{
+    for(NodeHandle* node : nodes) {
         try {
             YAML::Node yaml_node;
             serializeNode(yaml_node, node);
@@ -79,15 +162,48 @@ void GraphIO::loadNodes(const YAML::Node& doc)
     YAML::Node nodes = doc["nodes"];
     if(nodes.IsDefined()) {
         for(std::size_t i = 0, total = nodes.size(); i < total; ++i) {
-            loadNode(nodes[i]);
+            const YAML::Node& n = nodes[i];
+            loadNode(n);
         }
     }
 }
 
+UUID GraphIO::readNodeUUID(const YAML::Node& doc)
+{
+    UUID uuid = doc.as<UUID>();
+
+    if(!old_node_uuid_to_new_.empty()) {
+        auto pos = old_node_uuid_to_new_.find(uuid);
+        if(pos != old_node_uuid_to_new_.end()) {
+            uuid = old_node_uuid_to_new_[uuid];
+        }
+    }
+
+    return uuid;
+}
+
+UUID GraphIO::readConnectorUUID(const YAML::Node& doc)
+{
+    UUID uuid = doc.as<UUID>();
+
+    if(!old_node_uuid_to_new_.empty()) {
+        UUID parent = uuid.parentUUID();
+
+        auto pos = old_node_uuid_to_new_.find(parent);
+        if(pos != old_node_uuid_to_new_.end()) {
+            parent = old_node_uuid_to_new_[parent];
+
+            uuid = UUIDProvider::makeDerivedUUID_forced(parent, uuid.id());
+        }
+    }
+    return uuid;
+}
+
 void GraphIO::loadNode(const YAML::Node& doc)
 {
+    UUID uuid = readNodeUUID(doc["uuid"]);
+
     std::string type = doc["type"].as<std::string>();
-    UUID uuid = doc["uuid"].as<UUID>();
 
     NodeHandlePtr node_handle = node_factory_->makeNode(type, uuid, graph_);
     if(!node_handle) {
@@ -104,67 +220,31 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    for(NodeHandle* node : graph_->getAllNodeHandles()) {
-        if(!node->getAllOutputs().empty()) {
-            for(auto output : node->getAllOutputs()) {
-                if(output->countConnections() == 0) {
-                    continue;
-                }
-                YAML::Node connection;
-                connection["uuid"] = output->getUUID();
-                for(ConnectionPtr c : output->getConnections()) {
-                    connection["targets"].push_back(c->to()->getUUID());
-                }
+    saveConnections(yaml, graph_->getConnections());
+}
 
-                yaml["connections"].push_back(connection);
-            }
-            for(auto trigger : node->getTriggers()) {
-                if(trigger->noTargets() == 0) {
-                    continue;
-                }
-                YAML::Node connection;
-                connection["uuid"] = trigger->getUUID();
-                for(Slot* i : trigger->getTargets()) {
-                    connection["targets"].push_back(i->getUUID());
-                }
+void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>& connections)
+{
+    std::unordered_map<UUID, std::vector<UUID>, UUID::Hasher> connection_map;
 
-                yaml["connections"].push_back(connection);
-            }
+    for(const ConnectionPtr& connection : connections) {
+        connection_map[connection->from()->getUUID()].push_back(connection->to()->getUUID());
+
+        if(connection->getFulcrumCount() > 0) {
+            YAML::Node fulcrum;
+            saveFulcrums(fulcrum, connection.get());
+            yaml["fulcrums"].push_back(fulcrum);
         }
     }
 
-    for(const ConnectionPtr& connection : graph_->connections_) {
-        if(connection->getFulcrumCount() == 0) {
-            continue;
+    yaml["connections"] = YAML::Node(YAML::NodeType::Sequence);
+    for(const auto& pair : connection_map) {
+        YAML::Node entry(YAML::NodeType::Map);
+        entry["uuid"] = pair.first;
+        for(const auto& uuid : pair.second) {
+            entry["targets"].push_back(uuid);
         }
-
-        YAML::Node fulcrum;
-        fulcrum["from"] = connection->from()->getUUID();
-        fulcrum["to"] = connection->to()->getUUID();
-
-        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
-            YAML::Node pt;
-            pt.push_back(f->pos().x);
-            pt.push_back(f->pos().y);
-
-            fulcrum["pts"].push_back(pt);
-        }
-
-        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
-            YAML::Node handle;
-            handle.push_back(f->handleIn().x);
-            handle.push_back(f->handleIn().y);
-            handle.push_back(f->handleOut().x);
-            handle.push_back(f->handleOut().y);
-
-            fulcrum["handles"].push_back(handle);
-        }
-
-        for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
-            fulcrum["types"].push_back(f->type());
-        }
-
-        yaml["fulcrums"].push_back(fulcrum);
+        yaml["connections"].push_back(entry);
     }
 }
 
@@ -206,13 +286,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
 void GraphIO::loadConnection(const YAML::Node& connection)
 {
-    std::string from_uuid_tmp = connection["uuid"].as<std::string>();
-    if(from_uuid_tmp.find(UUID::namespace_separator) == from_uuid_tmp.npos) {
-        // legacy import
-        from_uuid_tmp.replace(from_uuid_tmp.find("_out_"), 1, UUID::namespace_separator);
-    }
-
-    UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
+    UUID from_uuid =  readConnectorUUID(connection["uuid"]);
 
     NodeHandle* parent = nullptr;
     try {
@@ -232,14 +306,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
     apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
 
     for(unsigned j=0; j<targets.size(); ++j) {
-        std::string to_uuid_tmp = targets[j].as<std::string>();
-
-        if(to_uuid_tmp.find(UUID::namespace_separator) == to_uuid_tmp.npos) {
-            // legacy import
-            to_uuid_tmp.replace(to_uuid_tmp.find("_in_"), 1, UUID::namespace_separator);
-        }
-
-        UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
+        UUID to_uuid = readConnectorUUID(targets[j]);
 
         Connectable* from = parent->getOutput(from_uuid);
         if(from != nullptr) {
@@ -257,6 +324,35 @@ void GraphIO::loadConnection(const YAML::Node& connection)
         std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
 
     }
+}
+
+void GraphIO::saveFulcrums(YAML::Node &fulcrum, const Connection *connection)
+{
+    fulcrum["from"] = connection->from()->getUUID();
+    fulcrum["to"] = connection->to()->getUUID();
+
+    for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
+        YAML::Node pt;
+        pt.push_back(f->pos().x);
+        pt.push_back(f->pos().y);
+
+        fulcrum["pts"].push_back(pt);
+    }
+
+    for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
+        YAML::Node handle;
+        handle.push_back(f->handleIn().x);
+        handle.push_back(f->handleIn().y);
+        handle.push_back(f->handleOut().x);
+        handle.push_back(f->handleOut().y);
+
+        fulcrum["handles"].push_back(handle);
+    }
+
+    for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
+        fulcrum["types"].push_back(f->type());
+    }
+
 }
 
 void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
@@ -395,8 +491,8 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
     NodeState::Ptr s = node_handle->getNodeState();
     s->readYaml(doc);
 
-    int x = doc["pos"][0].as<double>();
-    int y = doc["pos"][1].as<double>();
+    int x = doc["pos"][0].as<double>() + position_offset_x_;
+    int y = doc["pos"][1].as<double>() + position_offset_y_;
 
     if(x != 0 || y != 0) {
         s->setPos(Point(x,y));

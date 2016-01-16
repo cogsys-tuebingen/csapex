@@ -199,8 +199,15 @@ std::vector<NodeBox*> DesignerView::boxes()
     return boxes_;
 }
 
-void DesignerView::updateSelection()
+std::vector<NodeBox*> DesignerView::getSelectedBoxes()
 {
+    return selected_boxes_;
+}
+
+void DesignerView::updateSelection()
+{    
+    selected_boxes_ = scene_->getSelectedBoxes();
+
     QList<QGraphicsItem *> selected = scene_->items();
     for(QGraphicsItem* item : selected) {
         MovableGraphicsProxyWidget* m = dynamic_cast<MovableGraphicsProxyWidget*>(item);
@@ -592,7 +599,7 @@ void DesignerView::overwriteStyleSheet(QString &stylesheet)
 
     scene_->update();
 
-    foreach (NodeBox *box, boxes_) {
+    for (NodeBox *box : boxes_) {
         box->setStyleSheet(stylesheet);
     }
 }
@@ -616,21 +623,19 @@ void DesignerView::showContextMenuGlobal(const QPoint& global_pos)
 
 void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scene_pos)
 {
-    auto selected_boxes = scene_->getSelectedBoxes();
-
-    if(std::find(selected_boxes.begin(), selected_boxes.end(), box) == selected_boxes.end()) {
+    if(std::find(selected_boxes_.begin(), selected_boxes_.end(), box) == selected_boxes_.end()) {
         scene_->setSelection(box);
-        selected_boxes = scene_->getSelectedBoxes();
+        updateSelection();
 
-    } else if(selected_boxes.empty()) {
-        selected_boxes.push_back(box);
+    } else if(selected_boxes_.empty()) {
+        selected_boxes_.push_back(box);
     }
 
     std::stringstream title;
-    if(selected_boxes.size() == 1) {
-        title << "Node: " << selected_boxes.front()->getNodeWorker()->getUUID().getShortName();
+    if(selected_boxes_.size() == 1) {
+        title << "Node: " << selected_boxes_.front()->getNodeWorker()->getUUID().getShortName();
     } else {
-        title << selected_boxes.size() << " selected nodes";
+        title << selected_boxes_.size() << " selected nodes";
     }
 
     QMenu menu;
@@ -638,9 +643,18 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 
     ContextMenuHandler::addHeader(menu, title.str());
 
+
+    QAction* copy = new QAction("copy", &menu);
+    copy->setIcon(QIcon(":/copy.png"));
+    copy->setIconVisibleInMenu(true);
+    handler[copy] = std::bind(&DesignerView::copySelected, this);
+    menu.addAction(copy);
+
+    menu.addSeparator();
+
     bool has_minimized = false;
     bool has_maximized = false;
-    for(NodeBox* box : selected_boxes) {
+    for(NodeBox* box : selected_boxes_) {
         bool m = box->isMinimizedSize();
         has_minimized |= m;
         has_maximized |= !m;
@@ -649,21 +663,21 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         QAction* max = new QAction("maximize", &menu);
         max->setIcon(QIcon(":/maximize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = std::bind(&DesignerView::minimizeBox, this, selected_boxes, false);
+        handler[max] = std::bind(&DesignerView::minimizeBox, this, false);
         menu.addAction(max);
     }
     if(has_maximized){
         QAction* min = new QAction("minimize", &menu);
         min->setIcon(QIcon(":/minimize.png"));
         min->setIconVisibleInMenu(true);
-        handler[min] = std::bind(&DesignerView::minimizeBox, this, selected_boxes, true);
+        handler[min] = std::bind(&DesignerView::minimizeBox, this, true);
         menu.addAction(min);
     }
 
     QAction* flip = new QAction("flip sides", &menu);
     flip->setIcon(QIcon(":/flip.png"));
     flip->setIconVisibleInMenu(true);
-    handler[flip] = std::bind(&DesignerView::flipBox, this, selected_boxes);
+    handler[flip] = std::bind(&DesignerView::flipBox, this);
     menu.addAction(flip);
 
     menu.addSeparator();
@@ -677,7 +691,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         QAction* private_thread = new QAction("private thread", &menu);
         private_thread->setIcon(QIcon(":/thread_group_none.png"));
         private_thread->setIconVisibleInMenu(true);
-        handler[private_thread] = std::bind(&DesignerView::usePrivateThreadFor, this,  selected_boxes);
+        handler[private_thread] = std::bind(&DesignerView::usePrivateThreadFor, this);
         thread_menu.addAction(private_thread);
 
         thread_menu.addSeparator();
@@ -697,7 +711,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
             QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
             switch_thread->setIcon(QIcon(":/thread_group.png"));
             switch_thread->setIconVisibleInMenu(true);
-            handler[switch_thread] = std::bind(&DesignerView::switchToThread, this, selected_boxes, group.id());
+            handler[switch_thread] = std::bind(&DesignerView::switchToThread, this, group.id());
             choose_group_menu->addAction(switch_thread);
         }
 
@@ -707,7 +721,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         new_group->setIcon(QIcon(":/thread_group_add.png"));
         new_group->setIconVisibleInMenu(true);
         //        handler[new_group] = std::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
-        handler[new_group] = std::bind(&DesignerView::createNewThreadGroupFor, this,  selected_boxes);
+        handler[new_group] = std::bind(&DesignerView::createNewThreadGroupFor, this);
 
         choose_group_menu->addAction(new_group);
 
@@ -725,7 +739,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 
     bool has_profiling = false;
     bool has_not_profiling = false;
-    for(NodeBox* box : selected_boxes) {
+    for(NodeBox* box : selected_boxes_) {
         bool p = box->getNodeWorker()->isProfiling();
         has_profiling |= p;
         has_not_profiling |= !p;
@@ -734,22 +748,22 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         QAction* prof = new QAction("stop profiling", &menu);
         prof->setIcon(QIcon(":/stop_profiling.png"));
         prof->setIconVisibleInMenu(true);
-        handler[prof] = std::bind(&DesignerView::showProfiling, this, selected_boxes, false);
+        handler[prof] = std::bind(&DesignerView::showProfiling, this, false);
         menu.addAction(prof);
     }
     if(has_not_profiling){
         QAction* prof = new QAction("start profiling", &menu);
         prof->setIcon(QIcon(":/profiling.png"));
         prof->setIconVisibleInMenu(true);
-        handler[prof] = std::bind(&DesignerView::showProfiling, this, selected_boxes, true);
+        handler[prof] = std::bind(&DesignerView::showProfiling, this, true);
         menu.addAction(prof);
     }
 
-    if(selected_boxes.size() == 1) {
+    if(selected_boxes_.size() == 1) {
         QAction* info = new QAction("get information", &menu);
         info->setIcon(QIcon(":/help.png"));
         info->setIconVisibleInMenu(true);
-        handler[info] = std::bind(&NodeBox::getInformation, selected_boxes.front());
+        handler[info] = std::bind(&NodeBox::getInformation, selected_boxes_.front());
         menu.addAction(info);
     }
 
@@ -758,7 +772,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
     QAction* grp = new QAction("group into subgraph", &menu);
     grp->setIcon(QIcon(":/group.png"));
     grp->setIconVisibleInMenu(true);
-    handler[grp] = std::bind(&DesignerView::groupBox, this, selected_boxes);
+    handler[grp] = std::bind(&DesignerView::groupBox, this);
     menu.addAction(grp);
 
     menu.addSeparator();
@@ -766,7 +780,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
     QAction* del = new QAction("delete", &menu);
     del->setIcon(QIcon(":/close.png"));
     del->setIconVisibleInMenu(true);
-    handler[del] = std::bind(&DesignerView::deleteBox, this, selected_boxes);
+    handler[del] = std::bind(&DesignerView::deleteBox, this);
     menu.addAction(del);
 
     QAction* selectedItem = menu.exec(mapToGlobal(mapFromScene(scene_pos)));
@@ -777,81 +791,87 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 }
 
 
-void DesignerView::usePrivateThreadFor(const std::vector<NodeBox *>& boxes)
+void DesignerView::usePrivateThreadFor()
 {
     command::Meta::Ptr cmd(new command::Meta("use private thread"));
-    for(NodeBox* box : boxes) {
+    for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::SwitchThread(box->getNodeWorker()->getUUID(), 0)));
     }
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::switchToThread(const std::vector<NodeBox *>& boxes, int group_id)
+void DesignerView::switchToThread(int group_id)
 {
     command::Meta::Ptr cmd(new command::Meta("switch thread"));
-    for(NodeBox* box : boxes) {
+    for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::SwitchThread(box->getNodeWorker()->getUUID(), group_id)));
     }
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::createNewThreadGroupFor(const std::vector<NodeBox *>&boxes)
+void DesignerView::createNewThreadGroupFor()
 {
     bool ok;
     QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool_.nextName()), &ok);
 
     if(ok && !text.isEmpty()) {
         command::Meta::Ptr cmd(new command::Meta("create new thread group"));
-        for(NodeBox* box : boxes) {
+        for(NodeBox* box : selected_boxes_) {
             cmd->add(Command::Ptr(new command::CreateThread(box->getNodeWorker()->getUUID(), text.toStdString())));
         }
         dispatcher_->execute(cmd);
     }
 }
 
-void DesignerView::showProfiling(const std::vector<NodeBox *> &boxes, bool show)
+void DesignerView::showProfiling(bool show)
 {
-    for(NodeBox* box : boxes) {
+    for(NodeBox* box : selected_boxes_) {
         box->showProfiling(show);
     }
 }
 
-void DesignerView::flipBox(const std::vector<NodeBox *>& boxes)
+void DesignerView::flipBox()
 {
     command::Meta::Ptr cmd(new command::Meta("flip boxes"));
-    for(NodeBox* box : boxes) {
+    for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::FlipSides(box->getNodeWorker()->getUUID())));
     }
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::minimizeBox(const std::vector<NodeBox *>& boxes, bool mini)
+void DesignerView::minimizeBox(bool mini)
 {
     command::Meta::Ptr cmd(new command::Meta((mini ? std::string("minimize") : std::string("maximize")) + " boxes"));
-    for(NodeBox* box : boxes) {
+    for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::Minimize(box->getNodeWorker()->getUUID(), mini)));
     }
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::deleteBox(const std::vector<NodeBox *>& boxes)
+void DesignerView::deleteBox()
 {
     command::Meta::Ptr cmd(new command::Meta("delete boxes"));
-    for(NodeBox* box : boxes) {
+    for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::DeleteNode(box->getNodeWorker()->getUUID())));
     }
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::groupBox(const std::vector<NodeBox *>& boxes)
+void DesignerView::groupBox()
 {
     std::vector<UUID> uuids;
-    uuids.reserve(boxes.size());
-    for(NodeBox* box : boxes) {
+    uuids.reserve(selected_boxes_.size());
+    for(NodeBox* box : selected_boxes_) {
         uuids.push_back(box->getNodeHandle()->getUUID());
     }
     CommandPtr cmd(new command::GroupNodes(uuids));
     dispatcher_->execute(cmd);
+}
+
+
+void DesignerView::copySelected()
+{
+    Q_EMIT copyRequest();
 }
 
 void DesignerView::contextMenuEvent(QContextMenuEvent* event)

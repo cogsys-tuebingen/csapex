@@ -992,11 +992,6 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         if(param_in) {
             Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_handle->getUUID()), current_layout_);
 
-            auto pos = parameter_connections_.find(param_in.get());
-            if(pos != parameter_connections_.end()) {
-                pos->second.disconnect();
-            }
-
             port->setVisible(p->isInteractive());
             parameter_connections_[param_in.get()] = p->interactive_changed.connect([port](csapex::param::Parameter*, bool i) { return port->setVisible(i); });
         }
@@ -1013,11 +1008,6 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         OutputPtr param_out = node_handle->getParameterOutput(current_name_).lock();
         if(param_out) {
             Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_handle->getUUID()), current_layout_);
-
-            auto pos = parameter_connections_.find(param_out.get());
-            if(pos != parameter_connections_.end()) {
-                pos->second.disconnect();
-            }
 
             port->setVisible(p->isInteractive());
             parameter_connections_[param_out.get()] = p->interactive_changed.connect([port](csapex::param::Parameter*, bool i) { return port->setVisible(i); });
