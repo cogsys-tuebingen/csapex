@@ -37,7 +37,7 @@ void CommandDispatcher::execute(Command::Ptr command)
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
-    command->init(&settings_, graph_facade_.get(), graph_.get(), thread_pool_, node_factory_);
+    command->init(&settings_, graph_facade_.get(), thread_pool_, node_factory_);
     doExecute(command);
 }
 
@@ -47,7 +47,7 @@ void CommandDispatcher::executeLater(Command::Ptr command)
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
-    command->init(&settings_, graph_facade_.get(), graph_.get(), thread_pool_, node_factory_);
+    command->init(&settings_, graph_facade_.get(), thread_pool_, node_factory_);
     later.push_back(command);
 }
 
@@ -59,19 +59,6 @@ void CommandDispatcher::executeLater()
     later.clear();
 }
 
-void CommandDispatcher::executeNotUndoable(Command::Ptr command)
-{
-    command->init(&settings_, graph_facade_.get(), graph_.get(), thread_pool_, node_factory_);
-    Command::Access::executeCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, command);
-}
-
-void CommandDispatcher::undoNotRedoable(Command::Ptr command)
-{
-    command->init(&settings_, graph_facade_.get(), graph_.get(), thread_pool_, node_factory_);
-    Command::Access::undoCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, command);
-}
-
-
 void CommandDispatcher::doExecute(Command::Ptr command)
 {
     if(!command) {
@@ -82,7 +69,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
         command->setAfterSavepoint(true);
     }
 
-    bool success = Command::Access::executeCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, command);
+    bool success = Command::Access::executeCommand(command);
     done.push_back(command);
 
     while(!undone.empty()) {
@@ -170,7 +157,7 @@ void CommandDispatcher::undo()
     Command::Ptr last = done.back();
     done.pop_back();
 
-    bool ret = Command::Access::undoCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, last);
+    bool ret = Command::Access::undoCommand(last);
     apex_assert_hard(ret);
 
     setDirty(!last->isAfterSavepoint());
@@ -189,7 +176,7 @@ void CommandDispatcher::redo()
     Command::Ptr last = undone.back();
     undone.pop_back();
 
-    Command::Access::redoCommand(graph_facade_.get(), graph_.get(), thread_pool_, node_factory_, last);
+    Command::Access::redoCommand(last);
 
     done.push_back(last);
 

@@ -2,7 +2,7 @@
 #define PASTE_GRAPH_H
 
 /// COMPONENT
-#include "command.h"
+#include "meta.h"
 #include <csapex/model/model_fwd.h>
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/utility/uuid.h>
@@ -10,6 +10,7 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <unordered_map>
 
 namespace csapex
 {
@@ -18,10 +19,15 @@ namespace csapex
 namespace command
 {
 
-class PasteGraph : public Command
+class PasteGraph : public Meta
 {
 public:
-    PasteGraph(const YAML::Node& blueprint_, const Point &pos_);
+    PasteGraph(const UUID& graph_id, const YAML::Node& blueprint, const Point &pos);
+    PasteGraph(const UUID& graph_id, const YAML::Node& blueprint, const Point &pos,
+               const std::vector<std::pair<UUID,UUID>>& crossing_inputs,
+               const std::vector<std::pair<UUID,UUID>>& crossing_outputs);
+
+    std::unordered_map<UUID, UUID, UUID::Hasher> getMapping() const;
 
 protected:
     bool doExecute() override;
@@ -32,10 +38,14 @@ protected:
     virtual std::string getDescription() const override;
 
 protected:
+    UUID graph_id_;
     YAML::Node blueprint_;
     Point pos_;
 
-    std::vector<UUID> inserted_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> id_mapping_;
+
+    std::vector<std::pair<UUID,UUID>> crossing_inputs_;
+    std::vector<std::pair<UUID,UUID>> crossing_outputs_;
 };
 }
 }

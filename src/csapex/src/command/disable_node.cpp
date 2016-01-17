@@ -44,7 +44,7 @@ std::string DisableNode::getDescription() const
 
 bool DisableNode::doExecute()
 {
-    NodeHandle* node_handle = graph_->findNodeHandleForConnector(uuid);
+    NodeHandle* node_handle = getGraph()->findNodeHandleForConnector(uuid);
 
 //    node_handle->setProcessingEnabled(!disable_);
     node_handle->getNodeState()->setEnabled(!disable_);
@@ -54,7 +54,7 @@ bool DisableNode::doExecute()
 
 bool DisableNode::doUndo()
 {
-    NodeHandle* node_handle = graph_->findNodeHandleForConnector(uuid);
+    NodeHandle* node_handle = getGraph()->findNodeHandleForConnector(uuid);
 
 //    node_handle->setProcessingEnabled(disable_);
     node_handle->getNodeState()->setEnabled(disable_);

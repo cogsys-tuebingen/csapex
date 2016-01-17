@@ -143,7 +143,6 @@ private:
     mutable std::recursive_mutex sync;
 
     NodeHandlePtr node_handle_;
-    NodeModifierPtr modifier_;
 
     bool is_setup_;
     State state_;

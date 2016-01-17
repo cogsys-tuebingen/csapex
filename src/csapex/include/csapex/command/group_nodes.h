@@ -5,6 +5,9 @@
 #include "meta.h"
 #include <csapex/utility/uuid.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 namespace csapex
 {
 namespace command
@@ -24,6 +27,8 @@ protected:
 
 private:
     std::vector<UUID> uuids;
+
+    YAML::Node selection_yaml;
 };
 
 }

@@ -28,6 +28,8 @@ public:
     friend bool operator == (const UUID& uuid_, const std::string& str);
     friend bool operator == (const UUID& a, const UUID& b);
 
+    friend bool operator != (const UUID& a, const UUID& b);
+
     bool operator < (const UUID& rhs) const;
 
     struct Hasher {

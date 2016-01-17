@@ -381,14 +381,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw slots
-        for(auto slot : node_handle->getSlots()) {
+        for(auto slot : node_handle->getAllSlots()) {
             Port* p = widget_ctrl_->getPort(slot.get());
             if(p) {
                 drawPort(painter, box, p);
             }
         }
         // draw triggers
-        for(auto trigger : node_handle->getTriggers()) {
+        for(auto trigger : node_handle->getAllTriggers()) {
             Port* p = widget_ctrl_->getPort(trigger.get());
             if(p) {
                 drawPort(painter, box, p);
@@ -1114,6 +1114,8 @@ void DesignerScene::setSelection(const NodeBox *box)
             proxy->setSelected(true);
         }
     }
+
+    QApplication::processEvents();
 }
 
 std::vector<NodeBox*> DesignerScene::getSelectedBoxes() const

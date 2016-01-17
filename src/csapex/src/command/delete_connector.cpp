@@ -31,12 +31,12 @@ std::string DeleteConnector::getDescription() const
 
 bool DeleteConnector::doExecute()
 {
-    NodeHandle* node_worker = graph_->findNodeHandleForConnector(c_uuid);
+    NodeHandle* node_worker = getGraph()->findNodeHandleForConnector(c_uuid);
 
     if(c->isConnected()) {
-        delete_connections = CommandFactory(graph_).removeAllConnectionsCmd(c);
+        delete_connections = CommandFactory(getGraph()).removeAllConnectionsCmd(c);
 
-        Command::executeCommand(graph_facade_, graph_, thread_pool_, node_factory_, delete_connections);
+        Command::executeCommand(delete_connections);
     }
 
     if(in) {
@@ -64,7 +64,7 @@ bool DeleteConnector::doRedo()
 
 bool DeleteConnector::refresh()
 {
-    NodeHandle* node_handle = graph_->findNodeHandleForConnector(c_uuid);
+    NodeHandle* node_handle = getGraph()->findNodeHandleForConnector(c_uuid);
 
     if(!node_handle) {
         return false;

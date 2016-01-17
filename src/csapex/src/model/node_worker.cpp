@@ -36,15 +36,16 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
       ticks_(0),
       profiling_(false)
 {
-    modifier_ = std::make_shared<NodeModifier>(this, node_handle.get());
+    node_handle->setNodeWorker(this);
+
     NodePtr node = node_handle_->getNode().lock();
+    node->initialize(node_handle.get(), node_handle_->getUUID());
 
-    node->initialize(node_handle->getUUID(), modifier_.get());
-
-    apex_assert_hard(!node->isSetup());
-
-    if(!node->isSetup()) {
-        node->doSetup();
+    try {
+        node->setupParameters(*node);
+        node->setup(*node_handle);
+    } catch(const std::exception& e) {
+        node->aerr << "setup failed: " << e.what() << std::endl;
     }
 
     handle_connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
@@ -60,8 +61,6 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     }
     trigger_process_done_ = node_handle_->addTrigger("inputs\nprocessed");
 
-    apex_assert_hard(node->isSetup());
-
     is_setup_ = true;
 
     handle_connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
@@ -72,11 +71,11 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
         connectConnector(c.get());
     }
     handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
-        connectConnector(c.get());
-    }));
+                                         connectConnector(c.get());
+                                     }));
     handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
-        disconnectConnector(c.get());
-    }));
+                                         disconnectConnector(c.get());
+                                     }));
 
     auto af = delegate::bind(&NodeWorker::triggerCheckTransitions, this);
     node_handle_->getInputTransition()->setActivationFunction(af);
@@ -183,7 +182,7 @@ void NodeWorker::setProcessingEnabled(bool e)
 
 bool NodeWorker::isWaitingForTrigger() const
 {
-    for(TriggerPtr t : node_handle_->getTriggers()) {
+    for(TriggerPtr t : node_handle_->getAllTriggers()) {
         if(t->isBeingProcessed()) {
             return true;
         }
@@ -372,12 +371,12 @@ void NodeWorker::startProcessingMessages()
 
     try {
         if(sync) {
-            node->process(*node);
+            node->process(*node_handle_, *node);
 
         } else {
-            node->process(*node, [this](std::function<void()> f) {
-                node_handle_->executionRequested([this, f]() {
-                    f();
+            node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
+                node_handle_->executionRequested([this, f, node]() {
+                    f(*node_handle_, *node);
                     finishProcessingMessages(true);
                 });
             });
@@ -649,7 +648,7 @@ bool NodeWorker::tick()
                     }
                     node->useTimer(t.get());
 
-                    tickable->tick();
+                    tickable->tick(*node_handle_, *node);
 
                     has_ticked = true;
 
@@ -794,7 +793,7 @@ void NodeWorker::enableOutput (bool enable)
 
 void NodeWorker::enableSlots (bool enable)
 {
-    for(SlotPtr i : node_handle_->getSlots()) {
+    for(SlotPtr i : node_handle_->getAllSlots()) {
         if(enable) {
             i->enable();
         } else {
@@ -805,7 +804,7 @@ void NodeWorker::enableSlots (bool enable)
 
 void NodeWorker::enableTriggers (bool enable)
 {
-    for(TriggerPtr i : node_handle_->getTriggers()) {
+    for(TriggerPtr i : node_handle_->getAllTriggers()) {
         if(enable) {
             i->enable();
         } else {

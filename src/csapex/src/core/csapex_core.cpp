@@ -260,7 +260,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     YAML::Emitter yaml;
     yaml << node_map;
 
-    std::cerr << yaml.c_str() << std::endl;
+//    std::cerr << yaml.c_str() << std::endl;
 
     std::ofstream ofs(file.c_str());
     ofs << "#!" << settings_.get<std::string>("path_to_bin") << '\n';

@@ -40,9 +40,6 @@ public:
     Graph* getGraph();
     CommandFactory* getCommandFactory();
 
-    void executeNotUndoable(Command::Ptr command);
-    void undoNotRedoable(Command::Ptr command);
-
     void visitUndoCommands(std::function<void(int level, const Command& cmd)> callback) const;
     void visitRedoCommands(std::function<void(int level, const Command& cmd)> callback) const;
 

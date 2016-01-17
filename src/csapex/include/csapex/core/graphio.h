@@ -28,7 +28,9 @@ public:
     void loadGraph(const YAML::Node &doc);
 
     void saveSelectedGraph(YAML::Node &yaml, const std::vector<UUID>& nodes);
-    std::vector<UUID> loadIntoGraph(const YAML::Node &blueprint, const csapex::Point &position);
+
+    std::unordered_map<UUID, UUID, UUID::Hasher>
+    loadIntoGraph(const YAML::Node &blueprint, const csapex::Point &position);
 
 
 private:

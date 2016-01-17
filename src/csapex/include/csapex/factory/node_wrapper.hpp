@@ -20,9 +20,9 @@ class NodeWrapper : public Node, public Impl
         Impl::setupParameters(parameters);
     }
 
-    virtual void process(csapex::Parameterizable& parameters) override
+    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters) override
     {
-        Impl::process(parameters);
+        Impl::process(node_modifier, parameters);
     }
 };
 

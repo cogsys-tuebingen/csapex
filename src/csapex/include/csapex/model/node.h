@@ -20,27 +20,23 @@ public:
     Node();
     virtual ~Node();
 
-    void initialize(const UUID &uuid, NodeModifier *node_modifier);
-
-    void doSetup();
-    bool isSetup() const;
-
+    UUID getUUID() const;
+    void initialize(csapex::NodeModifier* node_modifier, const UUID &uuid);
 
 public: /* API */
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
 
     virtual void setupParameters(Parameterizable& parameters);
 
-    virtual void process(csapex::Parameterizable& parameters);
-    virtual void process(csapex::Parameterizable& parameters, std::function<void(std::function<void ()>)> continuation);
+    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters,
+                         std::function<void(std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation);
+    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
+    virtual void process();
 
     virtual void abort();
 
     virtual bool isAsynchronous() const;
     virtual void stateChanged();
-
-protected:
-    virtual void process(); /*deprecated*/
 
 public:
     StreamRelay adebug;
@@ -49,8 +45,9 @@ public:
     StreamRelay aerr;
 
 protected:
-    NodeModifier* modifier_;
-    bool setup_;
+    UUID uuid_;
+    csapex::NodeModifier* node_modifier_;
+    csapex::Parameterizable* parameters_;
 
     long guard_;
 };

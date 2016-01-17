@@ -717,12 +717,12 @@ std::vector<OutputPtr> NodeHandle::getAllOutputs() const
     return outputs_;
 }
 
-std::vector<SlotPtr> NodeHandle::getSlots() const
+std::vector<SlotPtr> NodeHandle::getAllSlots() const
 {
     return slots_;
 }
 
-std::vector<TriggerPtr> NodeHandle::getTriggers() const
+std::vector<TriggerPtr> NodeHandle::getAllTriggers() const
 {
     return triggers_;
 }

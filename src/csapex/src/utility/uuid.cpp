@@ -38,7 +38,7 @@ std::size_t UUID::Hasher::operator()(const UUID& k) const {
 
 bool UUID::empty() const
 {
-    return representation_.empty();
+    return representation_ == "invalid_uuid";
 }
 
 std::string UUID::stripNamespace(const std::string &name)
@@ -130,6 +130,10 @@ bool operator == (const UUID& uuid_, const std::string& str) {
 }
 bool operator == (const UUID& a, const UUID& b) {
     return a.representation_ == b.representation_;
+}
+
+bool operator != (const UUID& a, const UUID& b) {
+    return !(a == b);
 }
 
 std::ostream& operator << (std::ostream& out, const UUID& uuid_) {

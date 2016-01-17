@@ -212,10 +212,10 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         for(auto output : node_handle->getAllOutputs()) {
             connectorMessageAdded(output);
         }
-        for(auto slot : node_handle->getSlots()) {
+        for(auto slot : node_handle->getAllSlots()) {
             connectorSignalAdded(slot);
         }
-        for(auto trigger : node_handle->getTriggers()) {
+        for(auto trigger : node_handle->getAllTriggers()) {
             connectorSignalAdded(trigger);
         }
 

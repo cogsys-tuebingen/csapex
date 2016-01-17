@@ -10,13 +10,23 @@
 #include <csapex/utility/assert.h>
 #include <csapex/core/graphio.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/command/pass_out_connector.h>
+#include <csapex/command/add_msg_connection.h>
 
 using namespace csapex;
 using namespace csapex::command;
 
-PasteGraph::PasteGraph(const YAML::Node& blueprint, const Point& pos)
-    : blueprint_(blueprint), pos_(pos)
+PasteGraph::PasteGraph(const UUID &graph_id, const YAML::Node& blueprint, const Point& pos)
+    : Meta("PasteGraph"), graph_id_(graph_id), blueprint_(blueprint), pos_(pos)
 {
+}
+
+PasteGraph::PasteGraph(const UUID& graph_id, const YAML::Node& blueprint, const Point &pos,
+                       const std::vector<std::pair<UUID, UUID> > &crossing_inputs, const std::vector<std::pair<UUID, UUID> > &crossing_outputs)
+    : PasteGraph(graph_id, blueprint, pos)
+{
+    crossing_inputs_ = crossing_inputs;
+    crossing_outputs_ = crossing_outputs;
 }
 
 std::string PasteGraph::getType() const
@@ -31,31 +41,92 @@ std::string PasteGraph::getDescription() const
 
 bool PasteGraph::doExecute()
 {
-    bool paused = graph_facade_->isPaused();
-    graph_facade_->pauseRequest(true);
+    GraphFacade* graph_facade = graph_id_.empty() ? getGraphFacade() : getGraphFacade(graph_id_);
+    bool paused = graph_facade->isPaused();
+    graph_facade->pauseRequest(true);
 
-    GraphIO io(graph_, node_factory_);
+    GraphIO io(graph_facade->getGraph(), node_factory_);
 
-    inserted_ = io.loadIntoGraph(blueprint_, pos_);
+    id_mapping_ = io.loadIntoGraph(blueprint_, pos_);
 
-    graph_facade_->pauseRequest(paused);
+    graph_facade->pauseRequest(paused);
+
+    for(const std::pair<UUID,UUID>& in : crossing_inputs_) {
+        UUID parent_mapped = id_mapping_[in.second.parentUUID()];
+        std::string child = in.second.id();
+
+        UUID new_uuid = UUIDProvider::makeDerivedUUID_forced(parent_mapped, child);
+        CommandPtr pass_out = std::make_shared<command::PassOutConnector>(graph_id_, new_uuid);
+        pass_out->init(settings_, getGraphFacade(), getThreadPool(), node_factory_);
+        executeCommand(pass_out);
+        add(pass_out);
+    }
+
+    for(const std::pair<UUID,UUID>& out : crossing_outputs_) {
+        UUID parent_mapped = id_mapping_[out.first.parentUUID()];
+        std::string child = out.first.id();
+
+        UUID new_uuid = UUIDProvider::makeDerivedUUID_forced(parent_mapped, child);
+        CommandPtr pass_out = std::make_shared<command::PassOutConnector>(graph_id_, new_uuid);
+        pass_out->init(settings_, getGraphFacade(), getThreadPool(), node_factory_);
+        executeCommand(pass_out);
+        add(pass_out);
+    }
+
+
+    for(const std::pair<UUID,UUID>& in : crossing_inputs_) {
+        UUID parent_mapped = id_mapping_[in.second.parentUUID()];
+        std::string child = in.second.id();
+
+        UUID new_uuid = UUIDProvider::makeDerivedUUID_forced(parent_mapped, child);
+        UUID forwarding_uuid = graph_facade->getGraph()->getForwardingInput(new_uuid);
+
+        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(in.first, forwarding_uuid);
+        add_connection->init(settings_, getGraphFacade(), getThreadPool(), node_factory_);
+        executeCommand(add_connection);
+        add(add_connection);
+    }
+
+    for(const std::pair<UUID,UUID>& out : crossing_outputs_) {
+        UUID parent_mapped = id_mapping_[out.first.parentUUID()];
+        std::string child = out.first.id();
+
+        UUID new_uuid = UUIDProvider::makeDerivedUUID_forced(parent_mapped, child);
+        UUID forwarding_uuid = graph_facade->getGraph()->getForwardingOutput(new_uuid);
+
+        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(forwarding_uuid, out.second);
+        add_connection->init(settings_, getGraphFacade(), getThreadPool(), node_factory_);
+        executeCommand(add_connection);
+        add(add_connection);
+    }
+
 
     return true;
 }
 
 bool PasteGraph::doUndo()
 {
-    for(const UUID& id : inserted_) {
-        CommandPtr del(new command::DeleteNode(id));
-        del->executeCommand(graph_facade_, graph_, thread_pool_, node_factory_, del);
+    GraphFacade* graph_facade = graph_id_.empty() ? getGraphFacade() : getGraphFacade(graph_id_);
+    for(const auto& pair : id_mapping_) {
+        CommandPtr del(new command::DeleteNode(pair.second));
+        del->init(settings_, graph_facade, getThreadPool(), node_factory_);
+        executeCommand(del);
     }
 
-    inserted_.clear();
+    id_mapping_.clear();
+
+    Meta::doUndo();
 
     return true;
 }
 
 bool PasteGraph::doRedo()
 {
+    clear();
     return doExecute();
+}
+
+std::unordered_map<UUID, UUID, UUID::Hasher> PasteGraph::getMapping() const
+{
+    return id_mapping_;
 }

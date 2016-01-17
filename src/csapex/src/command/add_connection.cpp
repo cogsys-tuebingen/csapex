@@ -33,7 +33,7 @@ bool AddConnection::doUndo()
 {
     refresh();
 
-    const auto& graph = graph_;
+    const auto& graph = getGraph();
     graph->deleteConnection(graph->getConnection(from_uuid, to_uuid));
 
     return true;

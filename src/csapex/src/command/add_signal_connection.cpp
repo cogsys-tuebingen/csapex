@@ -24,13 +24,14 @@ bool AddSignalConnection::doExecute()
         refresh();
     }
 
-    return graph_->addConnection(SignalConnection::connect(from, to));
+    return getGraph()->addConnection(SignalConnection::connect(from, to));
 }
 
 void AddSignalConnection::refresh()
 {
-    Connectable* f = graph_->findConnector(from_uuid);
-    Connectable* t = graph_->findConnector(to_uuid);
+    Graph* graph = getGraph();
+    Connectable* f = graph->findConnector(from_uuid);
+    Connectable* t = graph->findConnector(to_uuid);
 
     if((f->isOutput() && t->isInput())) {
         from = dynamic_cast<Trigger*>(f);

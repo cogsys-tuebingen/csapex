@@ -18,18 +18,22 @@ using namespace csapex;
 
 Node::Node()
     : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
-      modifier_(nullptr), setup_(false), guard_(0xDEADBEEF)
+      guard_(-1)
 {
 }
 
 Node::~Node()
 {
-    apex_assert_hard(guard_ == 0xDEADBEEF);
+    apex_assert_hard(guard_ == -1);
+
+    guard_ = 0xDEADBEEF;
 }
 
-void Node::initialize(const UUID& uuid, NodeModifier *node_modifier)
+void Node::initialize(csapex::NodeModifier* node_modifier, const UUID& uuid)
 {
-    modifier_ = node_modifier;
+    uuid_ = uuid;
+    node_modifier_ = node_modifier;
+    parameters_ = this;
 
     parameter_state_->setParentUUID(uuid);
 
@@ -40,22 +44,9 @@ void Node::initialize(const UUID& uuid, NodeModifier *node_modifier)
     aerr.setPrefix(p);
 }
 
-void Node::doSetup()
+UUID Node::getUUID() const
 {
-    setupParameters(*this);
-
-    try {
-        setup(*modifier_);
-    } catch(const std::exception& e) {
-        aerr << "setup failed: " << e.what() << std::endl;
-    }
-
-    setup_ = true;
-}
-
-bool Node::isSetup() const
-{
-    return setup_;
+    return uuid_;
 }
 
 void Node::setupParameters(Parameterizable& )
@@ -73,18 +64,18 @@ bool Node::isAsynchronous() const
     return false;
 }
 
-void Node::process(csapex::Parameterizable& /*parameters*/)
+void Node::process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters,
+                   std::function<void(std::function<void (csapex::NodeModifier&, csapex::Parameterizable&)>)> continuation)
 {
-    // default to deprecated style
+    process(node_modifier, parameters);
+    continuation([](csapex::NodeModifier&, csapex::Parameterizable&){});
+}
+
+void Node::process(csapex::NodeModifier& /*node_modifier*/, csapex::Parameterizable& /*parameters*/)
+{
     process();
 }
 
-
-void Node::process(csapex::Parameterizable& parameters, std::function<void(std::function<void ()>)> continuation)
-{
-    process(parameters);
-    continuation([](){});
-}
 
 void Node::process()
 {

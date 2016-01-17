@@ -156,16 +156,25 @@ void Graph::deleteConnection(ConnectionPtr connection)
             Connectable* to = connection->to();
             to->setError(false);
 
-            NodeHandle* n_from = findNodeHandleForConnector(connection->from()->getUUID());
+            UUID from_uuid = connection->from()->getUUID();
+            NodeHandle* n_from = nullptr;
+            bool crossing = from_uuid.parentUUID() == getUUID();
+            if(crossing) {
+                n_from = dynamic_cast<NodeHandle*>(node_modifier_);
+            } else {
+                n_from = findNodeHandleForConnector(from_uuid);
+            }
             NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
 
             // erase pointer from TO to FROM
-            if(n_from != n_to) {
-                // if there are multiple edges, this only erases one entry
-                node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
+            if(!crossing) {
+                if(n_from != n_to) {
+                    // if there are multiple edges, this only erases one entry
+                    node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
 
-                // erase pointer from FROM to TO
-                node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+                    // erase pointer from FROM to TO
+                    node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+                }
             }
             connections_.erase(c);
 
@@ -427,12 +436,11 @@ NodeHandle* Graph::findNodeHandle(const UUID& uuid) const
 
 Node* Graph::findNodeNoThrow(const UUID& uuid) const noexcept
 {
-    for(auto nh : nodes_) {
-        if(nh->getUUID() == uuid) {
-            auto node = nh->getNode().lock();
-            if(node) {
-                return node.get();
-            }
+    NodeHandle* nh = findNodeHandleNoThrow(uuid);
+    if(nh) {
+        auto node = nh->getNode().lock();
+        if(node) {
+            return node.get();
         }
     }
 
@@ -442,6 +450,8 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const noexcept
 
 NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
+    apex_assert_hard(uuid != getUUID());
+
     for(const auto b : nodes_) {
         if(b->getUUID() == uuid) {
             return b.get();
@@ -525,21 +535,13 @@ ConnectionPtr Graph::getConnectionWithId(int id)
 
 ConnectionPtr Graph::getConnection(Connectable* from, Connectable* to)
 {
-    for(ConnectionPtr& connection : connections_) {
-        if(connection->from() == from && connection->to() == to) {
-            return connection;
-        }
-    }
-
-    std::cerr << "error: cannot get connection from " << from->getUUID() << " to " << to->getUUID() << std::endl;
-
-    return nullptr;
+    return getConnection(from->getUUID(), to->getUUID());
 }
 
 ConnectionPtr Graph::getConnection(const UUID &from, const UUID &to)
 {
     for(ConnectionPtr& connection : connections_) {
-        if(connection->from()->getUUID() == from && connection->to() ->getUUID()== to) {
+        if(connection->from()->getUUID() == from && connection->to()->getUUID() == to) {
             return connection;
         }
     }
@@ -584,16 +586,17 @@ void Graph::setup(NodeModifier &/*modifier*/)
 
 }
 
-void Graph::process(Parameterizable &params,  std::function<void (std::function<void ()>)> continuation)
+void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
+                    std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation)
 {
     continuation_ = continuation;
 
     received_.clear();
-    for(Output* o : modifier_->getMessageOutputs()) {
+    for(Output* o : node_modifier.getMessageOutputs()) {
         received_[o] = false;
     }
 
-    for(Input* i : modifier_->getMessageInputs()) {
+    for(Input* i : node_modifier.getMessageInputs()) {
         ConnectionTypeConstPtr m = msg::getMessage(i);
         OutputPtr o = pass_on_inputs_[i];
 
@@ -610,29 +613,40 @@ bool Graph::isAsynchronous() const
 
 UUID Graph::passOutInput(const UUID &internal_uuid)
 {
+    // FIXME: move out
+
     Input* internal = findConnector<Input>(internal_uuid);
     apex_assert_hard(internal);
-    Input* parent = modifier_->addInput(internal->getType(), internal->getLabel(), false, false);
+    Input* parent = node_modifier_->addInput(internal->getType(), internal->getLabel(), false, false);
 
     std::string name = "relay" + std::to_string(pass_on_inputs_.size());
-    OutputPtr relay = std::make_shared<StaticOutput>(makeDerivedUUID(modifier_->getUUID(),name));
+    OutputPtr relay = std::make_shared<StaticOutput>(makeDerivedUUID(getUUID(),name));
     relay->setType(internal->getType());
     relay->setLabel(internal->getLabel());
 
     NodeHandle* nh = findNodeHandleForConnector(internal->getUUID());
-    BundledConnection::connect(relay.get(), internal, nh->getInputTransition());
+    ConnectionPtr c = BundledConnection::connect(relay.get(), internal, nh->getInputTransition());
     pass_on_inputs_[parent] = relay;
-    passed_on_inputs_.push_back(internal_uuid);
+
+    connections_.push_back(c);
+
+    passed_on_inputs_[internal_uuid] = parent->getUUID();
 
     return parent->getUUID();
+}
+
+UUID Graph::getForwardingInput(const UUID& internal_uuid) const
+{
+    return passed_on_inputs_.at(internal_uuid);
 }
 
 
 UUID Graph::passOutOutput(const UUID& internal_uuid)
 {
+    // FIXME: move out
     Output* internal = findConnector<Output>(internal_uuid);
     apex_assert_hard(internal);
-    Output* parent = modifier_->addOutput(internal->getType(), internal->getLabel(), false);
+    Output* parent = node_modifier_->addOutput(internal->getType(), internal->getLabel(), false);
 
     pass_on_outputs_[internal] = parent;
 
@@ -646,9 +660,14 @@ UUID Graph::passOutOutput(const UUID& internal_uuid)
             }
         }
 
-        continuation_([](){});
+        continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
     });
 
-    passed_on_outputs_.push_back(internal_uuid);
+    passed_on_outputs_[internal_uuid] = parent->getUUID();
     return parent->getUUID();
+}
+
+UUID Graph::getForwardingOutput(const UUID& internal_uuid) const
+{
+    return passed_on_outputs_.at(internal_uuid);
 }

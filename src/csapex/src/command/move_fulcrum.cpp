@@ -36,12 +36,12 @@ bool MoveFulcrum::doExecute()
 
 bool MoveFulcrum::doUndo()
 {
-    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from, false);
+    getGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from, false);
     return true;
 }
 
 bool MoveFulcrum::doRedo()
 {
-    graph_->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to, false);
+    getGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to, false);
     return doExecute();
 }

@@ -38,7 +38,7 @@ GraphFacade::~GraphFacade()
 
 
 void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
-    std::cerr << nh->getUUID() << " has been added" << std::endl;
+    //std::cerr << nh->getUUID() << " has been added" << std::endl;
 
     if(nh->getType() == "csapex::Graph") {
         NodePtr node = nh->getNode().lock();
@@ -51,6 +51,7 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
     }
 
     NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
+
     TaskGeneratorPtr runner = std::make_shared<NodeRunner>(nw);
     generators_[nh->getUUID()] = runner;
     executor_.add(runner.get());

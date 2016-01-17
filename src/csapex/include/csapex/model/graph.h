@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
 #include <map>
+#include <unordered_map>
 #include <functional>
 
 namespace csapex {
@@ -90,13 +91,16 @@ public:
 
     // Node interface
     virtual void setup(csapex::NodeModifier& modifier) override;
-    virtual void process(csapex::Parameterizable& params,
-                         std::function<void (std::function<void ()>)> continuation) override;
+    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& params,
+                         std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation) override;
 
     virtual bool isAsynchronous() const override;
 
     UUID passOutInput(const UUID& internal_uuid);
     UUID passOutOutput(const UUID& internal_uuid);
+
+    UUID getForwardingInput(const UUID& internal_uuid) const;
+    UUID getForwardingOutput(const UUID& internal_uuid) const;
 
 private:
    /*rename*/ void verify();
@@ -123,13 +127,13 @@ protected:
 
     std::vector<ConnectionPtr> connections_;
 
-    std::function<void (std::function<void ()>)> continuation_;
+    std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation_;
 
     std::map<Input*, OutputPtr> pass_on_inputs_;
-    std::vector<UUID> passed_on_inputs_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> passed_on_inputs_;
 
     std::map<Output*, Output*> pass_on_outputs_;
-    std::vector<UUID> passed_on_outputs_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> passed_on_outputs_;
 
     std::map<Output*, bool> received_;
 };

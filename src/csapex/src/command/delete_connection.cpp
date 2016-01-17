@@ -40,7 +40,7 @@ std::string DeleteConnection::getDescription() const
 
 bool DeleteConnection::doExecute()
 {
-    const auto& graph = graph_;
+    const auto& graph = getGraph();
 
     ConnectionPtr connection = graph->getConnection(from_uuid, to_uuid);
 
@@ -48,7 +48,7 @@ bool DeleteConnection::doExecute()
 
     locked = false;
     clear();
-    add(CommandFactory(graph_).deleteAllConnectionFulcrumsCommand(connection));
+    add(CommandFactory(graph).deleteAllConnectionFulcrumsCommand(connection));
     locked = true;
 
     if(Meta::doExecute()) {

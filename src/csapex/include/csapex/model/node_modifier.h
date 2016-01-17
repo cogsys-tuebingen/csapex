@@ -33,7 +33,10 @@ namespace csapex
 class NodeModifier
 {
 public:
-    NodeModifier(NodeWorker* node_worker, NodeHandle* node_handle);
+    NodeModifier();
+    virtual ~NodeModifier();
+
+    void setNodeWorker(NodeWorker* worker);
 
     /*
      * MESSAGES
@@ -196,13 +199,18 @@ public:
         return addInput(multi_type::make<Types...>(), label, false, true);
     }
 
+    virtual bool isParameterInput(Input* in) const = 0;
+    virtual bool isParameterOutput(Output* in) const = 0;
+
 
     /*
      * SIGNALING
      */
     Slot* addActiveSlot(const std::string& label, std::function<void()> callback);
     Slot* addSlot(const std::string& label, std::function<void()> callback);
-    Trigger* addTrigger(const std::string& label);
+    virtual Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active) = 0;
+
+    virtual Trigger* addTrigger(const std::string& label) = 0;
 
 
     std::vector<Input*> getMessageInputs() const;
@@ -210,21 +218,21 @@ public:
     std::vector<Slot*> getSlots() const;
     std::vector<Trigger*> getTriggers() const;
 
-    void removeInput(const UUID& uuid);
-    void removeOutput(const UUID& uuid);
-    void removeTrigger(const UUID& uuid);
-    void removeSlot(const UUID& uuid);
+    virtual void removeInput(const UUID& uuid) = 0;
+    virtual void removeOutput(const UUID& uuid) = 0;
+    virtual void removeTrigger(const UUID& uuid) = 0;
+    virtual void removeSlot(const UUID& uuid) = 0;
 
 
     /*
      * MISCELLANEOUS
      */
 
-    bool isSource() const;
-    void setIsSource(bool source);
+    virtual bool isSource() const = 0;
+    virtual void setIsSource(bool source) = 0;
 
-    bool isSink() const;
-    void setIsSink(bool sink);
+    virtual bool isSink() const = 0;
+    virtual void setIsSink(bool sink) = 0;
 
     bool isProcessingEnabled() const;
     void setProcessingEnabled(bool enabled);
@@ -234,17 +242,23 @@ public:
     void setError(const std::string& msg);
     void setWarning(const std::string& msg);
 
-    UUID getUUID() const;
+    NodeWorker* getNodeWorker() const;
 
     /**
      * Raw construction, handle with care!
      */
-    Input* addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional);
-    Output* addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic);
+    virtual Input* addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional) = 0;
+    virtual Output* addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic) = 0;
+
+protected:
+    virtual std::vector<ConnectablePtr> getAllConnectors() const = 0;
+    virtual std::vector<InputPtr> getAllInputs() const = 0;
+    virtual std::vector<OutputPtr> getAllOutputs() const = 0;
+    virtual std::vector<SlotPtr> getAllSlots() const = 0;
+    virtual std::vector<TriggerPtr> getAllTriggers() const = 0;
 
 private:
-    NodeWorker* node_worker_;
-    NodeHandle* node_handle_;
+    mutable NodeWorker* node_worker_;
 };
 
 }

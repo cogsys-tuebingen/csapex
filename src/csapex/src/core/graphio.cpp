@@ -88,12 +88,11 @@ void GraphIO::saveSelectedGraph(YAML::Node &yaml, const std::vector<UUID> &uuids
     saveConnections(yaml, connections);
 }
 
-std::vector<UUID> GraphIO::loadIntoGraph(const YAML::Node &blueprint, const Point& position)
+std::unordered_map<UUID, UUID, UUID::Hasher>
+GraphIO::loadIntoGraph(const YAML::Node &blueprint, const Point& position)
 {
     double min_x = std::numeric_limits<double>::infinity();
     double min_y = std::numeric_limits<double>::infinity();
-
-    std::vector<UUID> new_ids;
 
     YAML::Node nodes = blueprint["nodes"];
     if(nodes.IsDefined()) {
@@ -105,7 +104,6 @@ std::vector<UUID> GraphIO::loadIntoGraph(const YAML::Node &blueprint, const Poin
             UUID blue_print_uuid = n["uuid"].as<UUID>();
 
             old_node_uuid_to_new_[blue_print_uuid] = new_uuid;
-            new_ids.push_back(new_uuid);
 
             if(n["pos"].IsDefined()) {
                 double x = n["pos"][0].as<double>();
@@ -130,12 +128,14 @@ std::vector<UUID> GraphIO::loadIntoGraph(const YAML::Node &blueprint, const Poin
     loadNodes(blueprint);
     loadConnections(blueprint);
 
+    auto res = old_node_uuid_to_new_;
+
     old_node_uuid_to_new_.clear();
 
     position_offset_x_ = 0;
     position_offset_y_ = 0;
 
-    return new_ids;
+    return res;
 }
 
 void GraphIO::saveNodes(YAML::Node &yaml)
@@ -470,15 +470,15 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
 
             // save forwarded inputs
             YAML::Node fw_in(YAML::NodeType::Sequence);
-            for(const UUID& uuid : subgraph->passed_on_inputs_) {
-                fw_in.push_back(uuid);
+            for(const auto& uuid : subgraph->passed_on_inputs_) {
+                fw_in.push_back(uuid.first);
             }
             doc["forward_in"] = fw_in;
 
             // save forwarded outputs
             YAML::Node fw_out(YAML::NodeType::Sequence);
-            for(const UUID& uuid : subgraph->passed_on_outputs_) {
-                fw_out.push_back(uuid);
+            for(const auto& uuid : subgraph->passed_on_outputs_) {
+                fw_out.push_back(uuid.first);
             }
             doc["forward_out"] = fw_out;
         }

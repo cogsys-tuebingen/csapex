@@ -14,6 +14,15 @@ Meta::Meta(const std::string &type)
 {
 }
 
+void Meta::init(Settings* settings, GraphFacade* graph_facade,
+                ThreadPool* thread_pool, NodeFactory *node_factory)
+{
+    Command::init(settings, graph_facade, thread_pool, node_factory);
+    for(Command::Ptr cmd : nested) {
+        cmd->init(settings, graph_facade, thread_pool, node_factory);
+    }
+}
+
 void Meta::accept(int level, std::function<void (int level, const Command &)> callback) const
 {
     callback(level, *this);
@@ -42,6 +51,11 @@ void Meta::add(Command::Ptr cmd)
 {
     apex_assert_hard(!locked);
     apex_assert_hard(cmd);
+
+    if(initialized_) {
+        cmd->init(settings_, graph_facade_, thread_pool_, node_factory_);
+    }
+
     nested.push_back(cmd);
 }
 
@@ -56,7 +70,7 @@ bool Meta::doExecute()
 
     bool success = true;
     for(Command::Ptr cmd : nested) {
-        bool s = Access::executeCommand(graph_facade_, graph_, thread_pool_, node_factory_, cmd);
+        bool s = Access::executeCommand(cmd);
         if(!s) {
             auto& command = *cmd;
             std::cerr << "command failed to execute! (" << typeid(command).name() << ")" << std::endl;
@@ -69,7 +83,7 @@ bool Meta::doExecute()
 bool Meta::doUndo()
 {
     for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
-        bool s = Access::undoCommand(graph_facade_, graph_, thread_pool_, node_factory_, *it);
+        bool s = Access::undoCommand(*it);
         if(!s) {
             undo_later.push_back(*it);
         }
@@ -82,7 +96,7 @@ bool Meta::doRedo()
 {
     bool success = true;
     for(Command::Ptr cmd : nested) {
-        bool s = Access::redoCommand(graph_facade_, graph_, thread_pool_, node_factory_, cmd);
+        bool s = Access::redoCommand(cmd);
         success &= s;
     }
     return success;

@@ -19,7 +19,7 @@ DeleteMessageConnection::DeleteMessageConnection(Output *a, Input *b)
 
 bool DeleteMessageConnection::doUndo()
 {
-    auto graph = graph_;
+    auto graph = getGraph();
     Connectable* from = graph->findConnector(from_uuid);
     Connectable* to = graph->findConnector(to_uuid);
 

@@ -76,7 +76,7 @@ public:
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this, params));
     }
 
-    void process()
+    void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& /*parameters*/)
     {
         createMsgs();
         call();
@@ -128,7 +128,7 @@ private:
             if(label.empty()) {
                 label = connection_types::serializationName<U>();
             }
-            instance_->input_[id++] = instance_->modifier_->template addInput<U>(label);
+            instance_->input_[id++] = instance_->node_modifier_->template addInput<U>(label);
         }
         template<typename U>
         void operator()(GenericOutput<U>) {
@@ -136,7 +136,7 @@ private:
             if(label.empty()) {
                 label = connection_types::serializationName<U>();
             }
-            instance_->output_[id++] = instance_->modifier_->template addOutput<U>(label);
+            instance_->output_[id++] = instance_->node_modifier_->template addOutput<U>(label);
 
         }
         template<typename U>

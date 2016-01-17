@@ -7,6 +7,7 @@
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/model/unique.h>
 #include <csapex/param/param_fwd.h>
+#include <csapex/model/node_modifier.h>
 
 /// SYSTEM
 #include <vector>
@@ -16,7 +17,7 @@
 namespace csapex
 {
 
-class NodeHandle : public Unique
+class NodeHandle : public Unique, public NodeModifier
 {
 public:
     NodeHandle(const std::string& type, const UUID &uuid,
@@ -40,18 +41,18 @@ public:
     void setLevel(int level);
 
 
-    Input* addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional);
+    Input* addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional) override;
     void addInput(InputPtr in);
-    bool isParameterInput(Input* in) const;
+    bool isParameterInput(Input* in) const override;
 
-    Output* addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic);
+    Output* addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic) override;
     void addOutput(OutputPtr out);
     bool isParameterOutput(Output* out) const;
 
-    Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active);
+    Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active) override;
     void addSlot(SlotPtr s);
 
-    Trigger* addTrigger(const std::string& label);
+    Trigger* addTrigger(const std::string& label) override;
     void addTrigger(TriggerPtr t);
 
 
@@ -62,10 +63,10 @@ public:
     Trigger* getTrigger(const UUID& uuid) const;
 
 
-    void removeInput(const UUID& uuid);
-    void removeOutput(const UUID& uuid);
-    void removeSlot(const UUID& uuid);
-    void removeTrigger(const UUID& uuid);
+    void removeInput(const UUID& uuid) override;
+    void removeOutput(const UUID& uuid) override;
+    void removeSlot(const UUID& uuid) override;
+    void removeTrigger(const UUID& uuid) override;
 
 
     void makeParameterConnectable(csapex::param::ParameterPtr);
@@ -74,12 +75,12 @@ public:
     OutputWeakPtr getParameterOutput(const std::string& name) const;
 
 
-    std::vector<ConnectablePtr> getAllConnectors() const;
-    std::vector<InputPtr> getAllInputs() const;
-    std::vector<OutputPtr> getAllOutputs() const;
+    std::vector<ConnectablePtr> getAllConnectors() const override;
+    std::vector<InputPtr> getAllInputs() const override;
+    std::vector<OutputPtr> getAllOutputs() const override;
 
-    std::vector<SlotPtr> getSlots() const;
-    std::vector<TriggerPtr> getTriggers() const;
+    std::vector<SlotPtr> getAllSlots() const override;
+    std::vector<TriggerPtr> getAllTriggers() const override;
 
     std::map<std::string, InputWeakPtr>& paramToInputMap();
     std::map<std::string, OutputWeakPtr>& paramToOutputMap();
@@ -88,11 +89,11 @@ public:
     std::map<Output*,csapex::param::Parameter*>& outputToParamMap();
 
 
-    bool isSource() const;
-    void setIsSource(bool source);
+    bool isSource() const override;
+    void setIsSource(bool source) override;
 
-    bool isSink() const;
-    void setIsSink(bool sink);
+    bool isSink() const override;
+    void setIsSink(bool sink) override;
 
     void triggerNodeStateChanged();
 

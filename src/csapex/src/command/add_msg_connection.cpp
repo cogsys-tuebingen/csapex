@@ -25,10 +25,12 @@ bool AddMessageConnection::doExecute()
         refresh();
     }
 
-    NodeHandle* from_nw = graph_->findNodeHandleForConnector(from_uuid);
-    NodeHandle* to_nw = graph_->findNodeHandleForConnector(to_uuid);
+    Graph* graph = getGraph();
 
-    return graph_->addConnection(BundledConnection::connect(
+    NodeHandle* from_nw = graph->findNodeHandleForConnector(from_uuid);
+    NodeHandle* to_nw = graph->findNodeHandleForConnector(to_uuid);
+
+    return graph->addConnection(BundledConnection::connect(
                                      from, to,
                                      from_nw->getOutputTransition(),
                                      to_nw->getInputTransition()));
@@ -36,8 +38,9 @@ bool AddMessageConnection::doExecute()
 
 void AddMessageConnection::refresh()
 {
-    Connectable* f = graph_->findConnector(from_uuid);
-    Connectable* t = graph_->findConnector(to_uuid);
+    Graph* graph = getGraph();
+    Connectable* f = graph->findConnector(from_uuid);
+    Connectable* t = graph->findConnector(to_uuid);
 
     apex_assert_hard((f->isOutput() && t->isInput()));
     from = dynamic_cast<Output*>(f);

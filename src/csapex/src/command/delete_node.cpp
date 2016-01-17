@@ -36,7 +36,8 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    NodeHandle* node_handle = graph_->findNodeHandleForConnector(uuid);
+    Graph* graph = getGraph();
+    NodeHandle* node_handle = graph->findNodeHandleForConnector(uuid);
 
     type = node_handle->getType();
 
@@ -45,7 +46,7 @@ bool DeleteNode::doExecute()
 
     for(auto connectable : node_handle->getAllConnectors()) {
         if(connectable->isConnected()) {
-            add(CommandFactory(graph_).removeAllConnectionsCmd(connectable));
+            add(CommandFactory(graph).removeAllConnectionsCmd(connectable));
         }
     }
 
@@ -54,7 +55,7 @@ bool DeleteNode::doExecute()
     if(Meta::doExecute()) {
         saved_state = node_handle->getNodeStateCopy();
 
-        graph_->deleteNode(node_handle->getUUID());
+        graph->deleteNode(node_handle->getUUID());
         return true;
     }
 
@@ -63,11 +64,12 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    NodeHandlePtr node = node_factory_->makeNode(type, uuid, graph_);
+    Graph* graph = getGraph();
+    NodeHandlePtr node = node_factory_->makeNode(type, uuid, graph);
 
     node->setNodeState(saved_state);
 
-    graph_->addNode(node);
+    graph->addNode(node);
 
     return Meta::doUndo();
 }
@@ -75,10 +77,11 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        NodeHandle* node_handle = graph_->findNodeHandle(uuid);
+        Graph* graph = getGraph();
+        NodeHandle* node_handle = graph->findNodeHandle(uuid);
         saved_state = node_handle->getNodeStateCopy();
 
-        graph_->deleteNode(node_handle->getUUID());
+        graph->deleteNode(node_handle->getUUID());
         return true;
     }
 

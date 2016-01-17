@@ -39,21 +39,23 @@ std::string CreateThread::getDescription() const
 
 bool CreateThread::doExecute()
 {
-    TaskGenerator* tg = graph_facade_->getTaskGenerator(uuid);
+    TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
 
-    auto group = thread_pool_->getGroupFor(tg);
+    ThreadPool* thread_pool = getThreadPool();
+
+    auto group = thread_pool->getGroupFor(tg);
 
     old_id = group->id();
-    new_id = thread_pool_->createNewGroupFor(tg, name);
+    new_id = thread_pool->createNewGroupFor(tg, name);
 
     return true;
 }
 
 bool CreateThread::doUndo()
 {
-    TaskGenerator* tg = graph_facade_->getTaskGenerator(uuid);
+    TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
 
-    thread_pool_->addToGroup(tg, old_id);
+    getThreadPool()->addToGroup(tg, old_id);
 
     return true;
 }

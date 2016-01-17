@@ -31,18 +31,18 @@ std::string DeleteFulcrum::getDescription() const
 
 bool DeleteFulcrum::doExecute()
 {
-    Fulcrum::Ptr f = graph_->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
+    Fulcrum::Ptr f = getGraph()->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
     pos = f->pos();
     type = f->type();
     in = f->handleIn();
     out = f->handleOut();
-    graph_->getConnectionWithId(connection_id)->deleteFulcrum(fulcrum_id);
+    getGraph()->getConnectionWithId(connection_id)->deleteFulcrum(fulcrum_id);
     return true;
 }
 
 bool DeleteFulcrum::doUndo()
 {
-    graph_->getConnectionWithId(connection_id)->addFulcrum(fulcrum_id, pos, type, in, out);
+    getGraph()->getConnectionWithId(connection_id)->addFulcrum(fulcrum_id, pos, type, in, out);
     return true;
 }
 

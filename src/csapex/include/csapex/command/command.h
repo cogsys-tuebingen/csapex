@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command_fwd.h>
 #include <csapex/core/core_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
@@ -27,10 +28,12 @@ public:
         friend class command::Meta;
 
     private:
-        static bool executeCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-        static bool undoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-        static bool redoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+        static bool executeCommand(CommandPtr cmd);
+        static bool undoCommand(CommandPtr cmd);
+        static bool redoCommand(CommandPtr cmd);
     };
+
+    friend class command::Meta;
 
 public:
     typedef std::shared_ptr<Command> Ptr;
@@ -38,7 +41,7 @@ public:
 public:
     Command();
 
-    void init(Settings* settings, GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory *node_factory);
+    virtual void init(Settings* settings, GraphFacade* graph_facade, ThreadPool* thread_pool, NodeFactory *node_factory);
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();
@@ -52,25 +55,33 @@ public:
     virtual std::string getDescription() const = 0;
 
 protected:
-    static bool executeCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-    static bool undoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
-    static bool redoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, CommandPtr cmd);
+    static bool executeCommand(CommandPtr cmd);
+    static bool undoCommand(CommandPtr cmd);
+    static bool redoCommand(CommandPtr cmd);
 
     virtual bool doExecute() = 0;
     virtual bool doUndo() = 0;
     virtual bool doRedo() = 0;
 
+    GraphFacade* getGraphFacade();
+    GraphFacade* getGraphFacade(const UUID& graph_id);
+    Graph* getGraph();
+    ThreadPool* getThreadPool();
+
 protected:
     Settings* settings_;
-    GraphFacade* graph_facade_;
-    Graph* graph_;
-    ThreadPool* thread_pool_;
     NodeFactory* node_factory_;
+
+private:
+    GraphFacade* graph_facade_;
+    ThreadPool* thread_pool_;
 
     static std::vector<Command::Ptr> undo_later;
 
     bool before_save_point_;
     bool after_save_point_;
+
+    bool initialized_;
 };
 
 }

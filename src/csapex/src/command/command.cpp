@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/utility/assert.h>
 
 using namespace csapex;
@@ -10,27 +11,29 @@ using namespace csapex;
 std::vector<Command::Ptr> Command::undo_later;
 
 Command::Command()
-    : settings_(nullptr), graph_facade_(nullptr), thread_pool_(nullptr), node_factory_(nullptr),
-      before_save_point_(false), after_save_point_(false)
+    : settings_(nullptr), node_factory_(nullptr),
+      graph_facade_(nullptr), thread_pool_(nullptr),
+      before_save_point_(false), after_save_point_(false),
+      initialized_(false)
 {
 }
 
-bool Command::Access::executeCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::executeCommand(Command::Ptr cmd)
 {
-    return Command::executeCommand(graph_facade, graph, thread_pool, node_factory, cmd);
+    return Command::executeCommand(cmd);
 }
 
-bool Command::Access::undoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::undoCommand(Command::Ptr cmd)
 {
-    return Command::undoCommand(graph_facade, graph, thread_pool, node_factory, cmd);
+    return Command::undoCommand(cmd);
 }
 
-bool Command::Access::redoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::Access::redoCommand(Command::Ptr cmd)
 {
-    return Command::redoCommand(graph_facade, graph, thread_pool, node_factory, cmd);
+    return Command::redoCommand(cmd);
 }
 
-void Command::init(Settings *settings, GraphFacade* graph_facade, Graph* graph, ThreadPool *thread_pool, NodeFactory* node_factory)
+void Command::init(Settings *settings, GraphFacade* graph_facade, ThreadPool *thread_pool, NodeFactory* node_factory)
 {
     apex_assert_hard(settings);
     apex_assert_hard(graph_facade);
@@ -39,34 +42,27 @@ void Command::init(Settings *settings, GraphFacade* graph_facade, Graph* graph, 
 
     settings_ = settings;
     graph_facade_ = graph_facade;
-    graph_ = graph;
     thread_pool_ = thread_pool;
     node_factory_ = node_factory;
+
+    initialized_ = true;
 }
 
-bool Command::executeCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::executeCommand(Command::Ptr cmd)
 {
-    apex_assert_hard(graph_facade);
-    apex_assert_hard(thread_pool);
-    apex_assert_hard(node_factory);
+    apex_assert_hard(cmd->graph_facade_);
+    apex_assert_hard(cmd->thread_pool_);
+    apex_assert_hard(cmd->node_factory_);
 
-    cmd->graph_facade_ = graph_facade;
-    cmd->graph_ = graph;
-    cmd->thread_pool_ = thread_pool;
-    cmd->node_factory_ = node_factory;
     return cmd->doExecute();
 }
 
-bool Command::undoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::undoCommand(Command::Ptr cmd)
 {
-    apex_assert_hard(graph_facade);
-    apex_assert_hard(thread_pool);
-    apex_assert_hard(node_factory);
+    apex_assert_hard(cmd->graph_facade_);
+    apex_assert_hard(cmd->thread_pool_);
+    apex_assert_hard(cmd->node_factory_);
 
-    cmd->graph_facade_ = graph_facade;
-    cmd->graph_ = graph;
-    cmd->thread_pool_ = thread_pool;
-    cmd->node_factory_ = node_factory;
     if(!cmd->doUndo()) {
         undo_later.push_back(cmd);
         return false;
@@ -75,16 +71,11 @@ bool Command::undoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* t
     return true;
 }
 
-bool Command::redoCommand(GraphFacade* graph_facade, Graph* graph, ThreadPool* thread_pool, NodeFactory* node_factory, Command::Ptr cmd)
+bool Command::redoCommand(Command::Ptr cmd)
 {
-    apex_assert_hard(graph_facade);
-    apex_assert_hard(thread_pool);
-    apex_assert_hard(node_factory);
-
-    cmd->graph_facade_ = graph_facade;
-    cmd->graph_ = graph;
-    cmd->thread_pool_ = thread_pool;
-    cmd->node_factory_ = node_factory;
+    apex_assert_hard(cmd->graph_facade_);
+    apex_assert_hard(cmd->thread_pool_);
+    apex_assert_hard(cmd->node_factory_);
 
     return cmd->doRedo();
 }
@@ -112,4 +103,21 @@ bool Command::isBeforeSavepoint()
 void Command::accept(int level, std::function<void (int level, const Command &)> callback) const
 {
     callback(level, *this);
+}
+
+GraphFacade* Command::getGraphFacade()
+{
+    return graph_facade_;
+}
+GraphFacade* Command::getGraphFacade(const UUID& graph_id)
+{
+    return graph_facade_->getSubGraph(graph_id);
+}
+Graph* Command::getGraph()
+{
+    return graph_facade_->getGraph();
+}
+ThreadPool* Command::getThreadPool()
+{
+    return thread_pool_;
 }

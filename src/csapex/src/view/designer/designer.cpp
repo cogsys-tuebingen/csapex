@@ -19,6 +19,7 @@
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/core/graphio.h>
+#include <csapex/model/node_modifier.h>
 
 /// SYSTEM
 #include <QScrollBar>
@@ -137,7 +138,9 @@ void Designer::paste()
     YAML::Node blueprint = YAML::Load(data.toStdString());
 
     QPointF pos = designer_view_->mapToScene(designer_view_->mapFromGlobal(QCursor::pos()));
-    CommandPtr cmd(new command::PasteGraph(blueprint, Point (pos.x(), pos.y())));
+
+    UUID graph_id = graph_->getUUID();
+    CommandPtr cmd(new command::PasteGraph(graph_id, blueprint, Point (pos.x(), pos.y())));
 
     dispatcher_->execute(cmd);
 }
