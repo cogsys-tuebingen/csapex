@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 
 /// COMPONENT
 #include <csapex/command/meta.h>
@@ -42,7 +42,7 @@
 
 using namespace csapex;
 
-DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
+GraphView::GraphView(DesignerScene *scene, csapex::GraphPtr graph,
                            Settings &settings, ThreadPool &thread_pool,
                            CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, DesignerStyleable *style,
                            QWidget *parent)
@@ -93,7 +93,7 @@ DesignerView::DesignerView(DesignerScene *scene, csapex::GraphPtr graph,
     setContextMenuPolicy(Qt::DefaultContextMenu);
 }
 
-DesignerView::~DesignerView()
+GraphView::~GraphView()
 {
     for(auto entry : connections_) {
         for(auto c : entry.second) {
@@ -105,14 +105,14 @@ DesignerView::~DesignerView()
     delete scene_;
 }
 
-void DesignerView::paintEvent(QPaintEvent *e)
+void GraphView::paintEvent(QPaintEvent *e)
 {
     QGraphicsView::paintEvent(e);
 
     Q_EMIT viewChanged();
 }
 
-void DesignerView::centerOnPoint(QPointF point)
+void GraphView::centerOnPoint(QPointF point)
 {
     centerOn(point);
     //    QScrollBar* h = horizontalScrollBar();
@@ -125,35 +125,35 @@ void DesignerView::centerOnPoint(QPointF point)
     //    v->setValue(y);
 }
 
-void DesignerView::reset()
+void GraphView::reset()
 {
     scene_->clear();
     update();
 }
 
-void DesignerView::resetZoom()
+void GraphView::resetZoom()
 {
     resetTransform();
     scene_->setScale(1.0);
 }
 
-void DesignerView::zoomIn()
+void GraphView::zoomIn()
 {
     zoom(5.0);
 }
 
-void DesignerView::zoomOut()
+void GraphView::zoomOut()
 {
     zoom(-5.0);
 }
 
-void DesignerView::zoomAt(QPointF point, double f)
+void GraphView::zoomAt(QPointF point, double f)
 {
     zoom(f);
     centerOn(point);
 }
 
-void DesignerView::zoom(double f)
+void GraphView::zoom(double f)
 {
     qreal factor = 1.0 + f / 25.0;
 
@@ -164,7 +164,7 @@ void DesignerView::zoom(double f)
     scene_->invalidateSchema();
 }
 
-void DesignerView::animateZoom()
+void GraphView::animateZoom()
 {
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
@@ -189,22 +189,22 @@ void DesignerView::animateZoom()
     }
 }
 
-DesignerScene* DesignerView::designerScene()
+DesignerScene* GraphView::designerScene()
 {
     return scene_;
 }
 
-std::vector<NodeBox*> DesignerView::boxes()
+std::vector<NodeBox*> GraphView::boxes()
 {
     return boxes_;
 }
 
-std::vector<NodeBox*> DesignerView::getSelectedBoxes()
+std::vector<NodeBox*> GraphView::getSelectedBoxes()
 {
     return selected_boxes_;
 }
 
-void DesignerView::updateSelection()
+void GraphView::updateSelection()
 {    
     selected_boxes_ = scene_->getSelectedBoxes();
 
@@ -220,7 +220,7 @@ void DesignerView::updateSelection()
     }
 }
 
-Command::Ptr DesignerView::deleteSelected()
+Command::Ptr GraphView::deleteSelected()
 {
     command::Meta::Ptr meta(new command::Meta("delete selected boxes"));
     for(QGraphicsItem* item : scene_->selectedItems()) {
@@ -232,7 +232,7 @@ Command::Ptr DesignerView::deleteSelected()
     return meta;
 }
 
-void DesignerView::keyPressEvent(QKeyEvent* e)
+void GraphView::keyPressEvent(QKeyEvent* e)
 {
     QGraphicsView::keyPressEvent(e);
 
@@ -245,7 +245,7 @@ void DesignerView::keyPressEvent(QKeyEvent* e)
     }
 }
 
-void DesignerView::keyReleaseEvent(QKeyEvent* e)
+void GraphView::keyReleaseEvent(QKeyEvent* e)
 {
     QGraphicsView::keyReleaseEvent(e);
 
@@ -256,7 +256,7 @@ void DesignerView::keyReleaseEvent(QKeyEvent* e)
     }
 }
 
-void DesignerView::mousePressEvent(QMouseEvent* e)
+void GraphView::mousePressEvent(QMouseEvent* e)
 {
     bool was_rubber_band = false;
     if(e->button() == Qt::MiddleButton) {
@@ -277,7 +277,7 @@ void DesignerView::mousePressEvent(QMouseEvent* e)
     }
 }
 
-void DesignerView::mouseReleaseEvent(QMouseEvent* e)
+void GraphView::mouseReleaseEvent(QMouseEvent* e)
 {
     QGraphicsView::mouseReleaseEvent(e);
 
@@ -294,7 +294,7 @@ void DesignerView::mouseReleaseEvent(QMouseEvent* e)
     }
 }
 
-void DesignerView::mouseMoveEvent(QMouseEvent *e)
+void GraphView::mouseMoveEvent(QMouseEvent *e)
 {
     if(middle_mouse_dragging_ && !middle_mouse_panning_) {
         auto delta = e->screenPos() - middle_mouse_drag_start_;
@@ -315,7 +315,7 @@ void DesignerView::mouseMoveEvent(QMouseEvent *e)
     setFocus();
 }
 
-void DesignerView::wheelEvent(QWheelEvent *we)
+void GraphView::wheelEvent(QWheelEvent *we)
 {
     bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
     bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
@@ -349,7 +349,7 @@ void DesignerView::wheelEvent(QWheelEvent *we)
     }
 }
 
-void DesignerView::dragEnterEvent(QDragEnterEvent* e)
+void GraphView::dragEnterEvent(QDragEnterEvent* e)
 {
     delete move_event_;
     move_event_ = nullptr;
@@ -358,7 +358,7 @@ void DesignerView::dragEnterEvent(QDragEnterEvent* e)
     drag_io_.dragEnterEvent(this, e);
 }
 
-void DesignerView::dragMoveEvent(QDragMoveEvent* e)
+void GraphView::dragMoveEvent(QDragMoveEvent* e)
 {
     delete move_event_;
     move_event_ = new QDragMoveEvent(*e);
@@ -405,7 +405,7 @@ void DesignerView::dragMoveEvent(QDragMoveEvent* e)
     }
 }
 
-void DesignerView::dropEvent(QDropEvent* e)
+void GraphView::dropEvent(QDropEvent* e)
 {
     delete move_event_;
     move_event_ = nullptr;
@@ -418,7 +418,7 @@ void DesignerView::dropEvent(QDropEvent* e)
     }
 }
 
-void DesignerView::dragLeaveEvent(QDragLeaveEvent* e)
+void GraphView::dragLeaveEvent(QDragLeaveEvent* e)
 {
     delete move_event_;
     move_event_ = nullptr;
@@ -430,7 +430,7 @@ void DesignerView::dragLeaveEvent(QDragLeaveEvent* e)
     }
 }
 
-void DesignerView::animateScroll()
+void GraphView::animateScroll()
 {
     QScrollBar* h = horizontalScrollBar();
     h->setValue(h->value() + scroll_offset_x_);
@@ -442,7 +442,7 @@ void DesignerView::animateScroll()
     }
 }
 
-void DesignerView::showBoxDialog()
+void GraphView::showBoxDialog()
 {
     BoxDialog diag(widget_ctrl_.get());
     int r = diag.exec();
@@ -458,7 +458,7 @@ void DesignerView::showBoxDialog()
     }
 }
 
-void DesignerView::addBoxEvent(NodeBox *box)
+void GraphView::addBoxEvent(NodeBox *box)
 {
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
@@ -500,7 +500,7 @@ void DesignerView::addBoxEvent(NodeBox *box)
     box->updateBoxInformation(graph_.get());
 }
 
-void DesignerView::renameBox(NodeBox *box)
+void GraphView::renameBox(NodeBox *box)
 {
     bool ok;
     QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, box->getLabel().c_str(), &ok);
@@ -510,7 +510,7 @@ void DesignerView::renameBox(NodeBox *box)
     }
 }
 
-void DesignerView::removeBoxEvent(NodeBox *box)
+void GraphView::removeBoxEvent(NodeBox *box)
 {
     for(auto connection : connections_[box->getNodeWorker()]) {
         connection.disconnect();
@@ -524,7 +524,7 @@ void DesignerView::removeBoxEvent(NodeBox *box)
     profiling_.erase(box);
 }
 
-void DesignerView::startProfiling(NodeWorker *node)
+void GraphView::startProfiling(NodeWorker *node)
 {
     NodeBox* box = widget_ctrl_->getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
@@ -556,7 +556,7 @@ void DesignerView::startProfiling(NodeWorker *node)
     profiling_connections_[box].push_back(ct);
 }
 
-void DesignerView::stopProfiling(NodeWorker *node)
+void GraphView::stopProfiling(NodeWorker *node)
 {
     NodeBox* box = widget_ctrl_->getBox(node->getUUID());
 
@@ -573,7 +573,7 @@ void DesignerView::stopProfiling(NodeWorker *node)
     profiling_.erase(pos);
 }
 
-void DesignerView::movedBoxes(double dx, double dy)
+void GraphView::movedBoxes(double dx, double dy)
 {
     QPointF delta(dx, dy);
     command::Meta::Ptr meta(new command::Meta("move boxes"));
@@ -593,7 +593,7 @@ void DesignerView::movedBoxes(double dx, double dy)
     scene_->invalidateSchema();
 }
 
-void DesignerView::overwriteStyleSheet(QString &stylesheet)
+void GraphView::overwriteStyleSheet(QString &stylesheet)
 {
     setStyleSheet(stylesheet);
 
@@ -604,7 +604,7 @@ void DesignerView::overwriteStyleSheet(QString &stylesheet)
     }
 }
 
-void DesignerView::updateBoxInformation()
+void GraphView::updateBoxInformation()
 {
     for(QGraphicsItem* item : scene_->items()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
@@ -615,13 +615,13 @@ void DesignerView::updateBoxInformation()
     }
 }
 
-void DesignerView::showContextMenuGlobal(const QPoint& global_pos)
+void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 {
     /// BOXES
     showContextMenuAddNode(global_pos);
 }
 
-void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scene_pos)
+void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scene_pos)
 {
     if(std::find(selected_boxes_.begin(), selected_boxes_.end(), box) == selected_boxes_.end()) {
         scene_->setSelection(box);
@@ -647,7 +647,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
     QAction* copy = new QAction("copy", &menu);
     copy->setIcon(QIcon(":/copy.png"));
     copy->setIconVisibleInMenu(true);
-    handler[copy] = std::bind(&DesignerView::copySelected, this);
+    handler[copy] = std::bind(&GraphView::copySelected, this);
     menu.addAction(copy);
 
     menu.addSeparator();
@@ -663,21 +663,21 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         QAction* max = new QAction("maximize", &menu);
         max->setIcon(QIcon(":/maximize.png"));
         max->setIconVisibleInMenu(true);
-        handler[max] = std::bind(&DesignerView::minimizeBox, this, false);
+        handler[max] = std::bind(&GraphView::minimizeBox, this, false);
         menu.addAction(max);
     }
     if(has_maximized){
         QAction* min = new QAction("minimize", &menu);
         min->setIcon(QIcon(":/minimize.png"));
         min->setIconVisibleInMenu(true);
-        handler[min] = std::bind(&DesignerView::minimizeBox, this, true);
+        handler[min] = std::bind(&GraphView::minimizeBox, this, true);
         menu.addAction(min);
     }
 
     QAction* flip = new QAction("flip sides", &menu);
     flip->setIcon(QIcon(":/flip.png"));
     flip->setIconVisibleInMenu(true);
-    handler[flip] = std::bind(&DesignerView::flipBox, this);
+    handler[flip] = std::bind(&GraphView::flipBox, this);
     menu.addAction(flip);
 
     menu.addSeparator();
@@ -691,7 +691,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         QAction* private_thread = new QAction("private thread", &menu);
         private_thread->setIcon(QIcon(":/thread_group_none.png"));
         private_thread->setIconVisibleInMenu(true);
-        handler[private_thread] = std::bind(&DesignerView::usePrivateThreadFor, this);
+        handler[private_thread] = std::bind(&GraphView::usePrivateThreadFor, this);
         thread_menu.addAction(private_thread);
 
         thread_menu.addSeparator();
@@ -711,7 +711,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
             QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
             switch_thread->setIcon(QIcon(":/thread_group.png"));
             switch_thread->setIconVisibleInMenu(true);
-            handler[switch_thread] = std::bind(&DesignerView::switchToThread, this, group.id());
+            handler[switch_thread] = std::bind(&GraphView::switchToThread, this, group.id());
             choose_group_menu->addAction(switch_thread);
         }
 
@@ -721,7 +721,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         new_group->setIcon(QIcon(":/thread_group_add.png"));
         new_group->setIconVisibleInMenu(true);
         //        handler[new_group] = std::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
-        handler[new_group] = std::bind(&DesignerView::createNewThreadGroupFor, this);
+        handler[new_group] = std::bind(&GraphView::createNewThreadGroupFor, this);
 
         choose_group_menu->addAction(new_group);
 
@@ -748,14 +748,14 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
         QAction* prof = new QAction("stop profiling", &menu);
         prof->setIcon(QIcon(":/stop_profiling.png"));
         prof->setIconVisibleInMenu(true);
-        handler[prof] = std::bind(&DesignerView::showProfiling, this, false);
+        handler[prof] = std::bind(&GraphView::showProfiling, this, false);
         menu.addAction(prof);
     }
     if(has_not_profiling){
         QAction* prof = new QAction("start profiling", &menu);
         prof->setIcon(QIcon(":/profiling.png"));
         prof->setIconVisibleInMenu(true);
-        handler[prof] = std::bind(&DesignerView::showProfiling, this, true);
+        handler[prof] = std::bind(&GraphView::showProfiling, this, true);
         menu.addAction(prof);
     }
 
@@ -772,7 +772,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
     QAction* grp = new QAction("group into subgraph", &menu);
     grp->setIcon(QIcon(":/group.png"));
     grp->setIconVisibleInMenu(true);
-    handler[grp] = std::bind(&DesignerView::groupBox, this);
+    handler[grp] = std::bind(&GraphView::groupBox, this);
     menu.addAction(grp);
 
     menu.addSeparator();
@@ -780,7 +780,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
     QAction* del = new QAction("delete", &menu);
     del->setIcon(QIcon(":/close.png"));
     del->setIconVisibleInMenu(true);
-    handler[del] = std::bind(&DesignerView::deleteBox, this);
+    handler[del] = std::bind(&GraphView::deleteBox, this);
     menu.addAction(del);
 
     QAction* selectedItem = menu.exec(mapToGlobal(mapFromScene(scene_pos)));
@@ -791,7 +791,7 @@ void DesignerView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &s
 }
 
 
-void DesignerView::usePrivateThreadFor()
+void GraphView::usePrivateThreadFor()
 {
     command::Meta::Ptr cmd(new command::Meta("use private thread"));
     for(NodeBox* box : selected_boxes_) {
@@ -800,7 +800,7 @@ void DesignerView::usePrivateThreadFor()
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::switchToThread(int group_id)
+void GraphView::switchToThread(int group_id)
 {
     command::Meta::Ptr cmd(new command::Meta("switch thread"));
     for(NodeBox* box : selected_boxes_) {
@@ -809,7 +809,7 @@ void DesignerView::switchToThread(int group_id)
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::createNewThreadGroupFor()
+void GraphView::createNewThreadGroupFor()
 {
     bool ok;
     QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool_.nextName()), &ok);
@@ -823,14 +823,14 @@ void DesignerView::createNewThreadGroupFor()
     }
 }
 
-void DesignerView::showProfiling(bool show)
+void GraphView::showProfiling(bool show)
 {
     for(NodeBox* box : selected_boxes_) {
         box->showProfiling(show);
     }
 }
 
-void DesignerView::flipBox()
+void GraphView::flipBox()
 {
     command::Meta::Ptr cmd(new command::Meta("flip boxes"));
     for(NodeBox* box : selected_boxes_) {
@@ -839,7 +839,7 @@ void DesignerView::flipBox()
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::minimizeBox(bool mini)
+void GraphView::minimizeBox(bool mini)
 {
     command::Meta::Ptr cmd(new command::Meta((mini ? std::string("minimize") : std::string("maximize")) + " boxes"));
     for(NodeBox* box : selected_boxes_) {
@@ -848,7 +848,7 @@ void DesignerView::minimizeBox(bool mini)
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::deleteBox()
+void GraphView::deleteBox()
 {
     command::Meta::Ptr cmd(new command::Meta("delete boxes"));
     for(NodeBox* box : selected_boxes_) {
@@ -857,7 +857,7 @@ void DesignerView::deleteBox()
     dispatcher_->execute(cmd);
 }
 
-void DesignerView::groupBox()
+void GraphView::groupBox()
 {
     std::vector<UUID> uuids;
     uuids.reserve(selected_boxes_.size());
@@ -869,12 +869,12 @@ void DesignerView::groupBox()
 }
 
 
-void DesignerView::copySelected()
+void GraphView::copySelected()
 {
     Q_EMIT copyRequest();
 }
 
-void DesignerView::contextMenuEvent(QContextMenuEvent* event)
+void GraphView::contextMenuEvent(QContextMenuEvent* event)
 {
     if(scene_->getHighlightedConnectionId() != -1) {
         scene_->showConnectionContextMenu();
@@ -888,7 +888,7 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
     }
 }
 
-void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
+void GraphView::showContextMenuAddNode(const QPoint &global_pos)
 {
     QMenu menu;
     NodeListGenerator generator(*widget_ctrl_->getNodeFactory());
@@ -902,11 +902,11 @@ void DesignerView::showContextMenuAddNode(const QPoint &global_pos)
     }
 }
 
-void DesignerView::selectAll()
+void GraphView::selectAll()
 {
     for(QGraphicsItem* item : scene_->items()) {
         item->setSelected(true);
     }
 }
 /// MOC
-#include "../../../include/csapex/view/designer/moc_designer_view.cpp"
+#include "../../../include/csapex/view/designer/moc_graph_view.cpp"

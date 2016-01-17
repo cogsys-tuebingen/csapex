@@ -39,7 +39,6 @@ qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
 qt5_wrap_ui(QT_UI
     ui/box.ui
     ui/csapex_window.ui
-    ui/design_board.ui
     ui/designer.ui)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -319,7 +318,7 @@ add_library(csapex_qt SHARED
     src/view/designer/designer.cpp
     src/view/designer/designer_scene.cpp
     src/view/designer/designer_styleable.cpp
-    src/view/designer/designer_view.cpp
+    src/view/designer/graph_view.cpp
     src/view/designer/designerio.cpp
     src/view/designer/drag_io.cpp
     src/view/designer/drag_io_handler.cpp

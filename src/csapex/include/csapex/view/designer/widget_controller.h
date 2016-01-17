@@ -34,7 +34,7 @@ public:
 
     void startPlacingBox(QWidget *parent, const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
 
-    DesignerView* getDesignerView();
+    GraphView* getGraphView();
     DesignerScene* getDesignerScene();
 
     NodeBox* getBox(const UUID& node_id);

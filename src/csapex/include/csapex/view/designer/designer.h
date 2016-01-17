@@ -28,14 +28,14 @@ class Designer : public QWidget
 
 public:
     Designer(Settings& settings, GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl,
-             DesignerView *view, DesignerScene* scene, MinimapWidget* minimap, QWidget* parent = 0);
+             GraphView *view, DesignerScene* scene, MinimapWidget* minimap, QWidget* parent = 0);
     virtual ~Designer();
 
     void setup();
 
     void setView(int x, int y);
 
-    DesignerView* getDesignerView();
+    GraphView* getGraphView();
 
     bool isGridEnabled() const;
     bool isSchematicsEnabled() const;
@@ -87,7 +87,7 @@ public Q_SLOTS:
 
 private:
     Ui::Designer* ui;
-    DesignerView* designer_view_;
+    GraphView* main_graph_view_;
     DesignerScene* designer_scene_;
     MinimapWidget* minimap_;
 

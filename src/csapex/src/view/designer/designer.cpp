@@ -12,7 +12,7 @@
 #include <csapex/model/node.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/node/box.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/designer/widget_controller.h>
 #include "ui_designer.h"
 #include <csapex/param/parameter_factory.h>
@@ -33,10 +33,10 @@
 using namespace csapex;
 
 Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl,
-                   DesignerView* view, DesignerScene* scene, MinimapWidget* minimap,
+                   GraphView* view, DesignerScene* scene, MinimapWidget* minimap,
                    QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer),
-      designer_view_(view), designer_scene_(scene), minimap_(minimap),
+      main_graph_view_(view), designer_scene_(scene), minimap_(minimap),
       settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
 {
     QObject::connect(view, SIGNAL(copyRequest()), this, SLOT(copySelected()));
@@ -51,9 +51,18 @@ void Designer::setup()
 {
     ui->setupUi(this);
 
-    ui->horizontalLayout->addWidget(designer_view_);
+    QLayout* main_layout = new QVBoxLayout;
+    main_layout->addWidget(main_graph_view_);
+    ui->tab_main_graph->setLayout(main_layout);
 
-    QObject::connect(designer_view_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
+
+    // main graph tab is not closable
+    QTabBar *tabBar = ui->tabWidget->findChild<QTabBar *>();
+    tabBar->setTabButton(0, QTabBar::RightSide, 0);
+    tabBar->setTabButton(0, QTabBar::LeftSide, 0);
+
+
+    QObject::connect(main_graph_view_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
 
     if(settings_.knows("grid")) {
         enableGrid(settings_.get<bool>("grid"));
@@ -77,7 +86,7 @@ void Designer::setup()
     setFocusPolicy(Qt::NoFocus);
 
 //    ui->horizontalLayout->addWidget(minimap_);
-    minimap_->setParent(designer_view_);
+    minimap_->setParent(main_graph_view_);
     minimap_->move(10, 10);
 }
 
@@ -88,19 +97,19 @@ std::vector<NodeBox*> Designer::getSelectedBoxes() const
 
 void Designer::clearSelection()
 {
-    designer_view_->scene()->clearSelection();
+    main_graph_view_->scene()->clearSelection();
 }
 
 void Designer::selectAll()
 {
-    designer_view_->selectAll();
+    main_graph_view_->selectAll();
 }
 
 void Designer::deleteSelected()
 {
     command::Meta::Ptr del(new command::Meta("delete selected"));
 
-    del->add(designer_view_->deleteSelected());
+    del->add(main_graph_view_->deleteSelected());
 
     if(del->commands() != 0) {
         dispatcher_->execute(del);
@@ -111,7 +120,7 @@ void Designer::copySelected()
     GraphIO io(graph_.get(), widget_ctrl_->getNodeFactory());
 
     std::vector<UUID> nodes;
-    for(const NodeBox* box : designer_view_->getSelectedBoxes()) {
+    for(const NodeBox* box : main_graph_view_->getSelectedBoxes()) {
         nodes.emplace_back(box->getNodeHandle()->getUUID());
     }
 
@@ -137,7 +146,7 @@ void Designer::paste()
 
     YAML::Node blueprint = YAML::Load(data.toStdString());
 
-    QPointF pos = designer_view_->mapToScene(designer_view_->mapFromGlobal(QCursor::pos()));
+    QPointF pos = main_graph_view_->mapToScene(main_graph_view_->mapFromGlobal(QCursor::pos()));
 
     UUID graph_id = graph_->getUUID();
     CommandPtr cmd(new command::PasteGraph(graph_id, blueprint, Point (pos.x(), pos.y())));
@@ -147,7 +156,7 @@ void Designer::paste()
 
 void Designer::overwriteStyleSheet(QString &stylesheet)
 {
-    designer_view_->overwriteStyleSheet(stylesheet);
+    main_graph_view_->overwriteStyleSheet(stylesheet);
 }
 
 void Designer::setView(int /*sx*/, int /*sy*/)
@@ -155,9 +164,9 @@ void Designer::setView(int /*sx*/, int /*sy*/)
     //designer_board->setView(sx, sy);
 }
 
-DesignerView* Designer::getDesignerView()
+GraphView* Designer::getGraphView()
 {
-    return designer_view_;
+    return main_graph_view_;
 }
 
 void Designer::refresh()
@@ -167,21 +176,21 @@ void Designer::refresh()
 
 void Designer::reset()
 {
-    designer_view_->reset();
+    main_graph_view_->reset();
 }
 
 void Designer::addBox(NodeBox *box)
 {
     QObject::connect(box, SIGNAL(helpRequest(NodeBox*)), this, SIGNAL(helpRequest(NodeBox*)));
 
-    designer_view_->addBoxEvent(box);
+    main_graph_view_->addBoxEvent(box);
 
     minimap_->update();
 }
 
 void Designer::removeBox(NodeBox *box)
 {
-    designer_view_->removeBoxEvent(box);
+    main_graph_view_->removeBoxEvent(box);
 
     minimap_->update();
 }
@@ -238,8 +247,8 @@ void Designer::enableGrid(bool grid)
 
     designer_scene_->enableGrid(grid);
 
-    designer_view_->setCacheMode(QGraphicsView::CacheNone);
-    designer_view_->setCacheMode(QGraphicsView::CacheBackground);
+    main_graph_view_->setCacheMode(QGraphicsView::CacheNone);
+    main_graph_view_->setCacheMode(QGraphicsView::CacheBackground);
 
     Q_EMIT gridEnabled(grid);
 
@@ -267,7 +276,7 @@ void Designer::displayGraphComponents(bool display)
 
     settings_.set("display-graph-components", display);
 
-    designer_view_->updateBoxInformation();
+    main_graph_view_->updateBoxInformation();
 
     Q_EMIT graphComponentsEnabled(display);
 }
@@ -280,7 +289,7 @@ void Designer::displayThreads(bool display)
 
     settings_.set("display-threads", display);
 
-    designer_view_->updateBoxInformation();
+    main_graph_view_->updateBoxInformation();
 
     Q_EMIT threadsEnabled(display);
 }

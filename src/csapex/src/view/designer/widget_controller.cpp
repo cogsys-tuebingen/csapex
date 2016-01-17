@@ -19,7 +19,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/view/designer/designer.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/default_node_adapter.h>
 #include <csapex/view/node/node_adapter_factory.h>
@@ -176,14 +176,14 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     drag->exec();
 }
 
-DesignerView* WidgetController::getDesignerView()
+GraphView* WidgetController::getGraphView()
 {
-    return designer_->getDesignerView();
+    return designer_->getGraphView();
 }
 
 DesignerScene* WidgetController::getDesignerScene()
 {
-    return designer_->getDesignerView()->designerScene();
+    return designer_->getGraphView()->designerScene();
 }
 
 void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
@@ -199,7 +199,7 @@ void WidgetController::nodeAdded(NodeWorkerPtr node_worker)
         NodeBox* box = new NodeBox(settings_, node_handle, node_worker, adapter, icon);
 
         pimpl->box_map_[node_handle->getUUID()] = box;
-        pimpl->proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getDesignerView(), this);
+        pimpl->proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, designer_->getGraphView(), this);
 
         box->construct();
 

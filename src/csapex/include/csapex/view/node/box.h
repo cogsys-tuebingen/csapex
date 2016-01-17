@@ -59,8 +59,8 @@ public:
     NodeHandle* getNodeHandle() const;
     NodeAdapterPtr getNodeAdapter() const;
 
-    virtual bool hasSubGraph() const;
-    virtual Graph::Ptr getSubGraph() const;
+    bool hasSubGraph() const;
+    Graph::Ptr getSubGraph() const;
 
     void setLabel(const std::string& label);
     void setLabel(const QString& label);
@@ -133,6 +133,8 @@ Q_SIGNALS:
     void moveSelectionToBox(NodeBox*);
 
     void showContextMenuForBox(NodeBox* box, const QPoint& pos);
+
+    void showSubGraphRequest(UUID graphid);
 
     void updateVisualsRequest();
 

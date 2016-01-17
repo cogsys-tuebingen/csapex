@@ -1,5 +1,5 @@
-#ifndef DESIGNER_VIEW_H
-#define DESIGNER_VIEW_H
+#ifndef GRAPH_VIEW_H
+#define GRAPH_VIEW_H
 
 /// COMPONENT
 #include <csapex/view/view_fwd.h>
@@ -18,7 +18,7 @@
 namespace csapex
 {
 
-class DesignerView : public QGraphicsView
+class GraphView : public QGraphicsView
 {
     Q_OBJECT
 
@@ -41,10 +41,10 @@ class DesignerView : public QGraphicsView
     int lineWidth() const { return style_->lineWidth(); }
 
 public:
-    DesignerView(DesignerScene* scene, csapex::GraphPtr graph,
-                 Settings& settings, ThreadPool& thread_pool, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio,
-                 DesignerStyleable* style, QWidget* parent = 0);
-    ~DesignerView();
+    GraphView(DesignerScene* scene, csapex::GraphPtr graph,
+              Settings& settings, ThreadPool& thread_pool, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio,
+              DesignerStyleable* style, QWidget* parent = 0);
+    ~GraphView();
 
     DesignerScene* designerScene();
     std::vector<NodeBox*> boxes();
@@ -159,4 +159,4 @@ private:
 };
 }
 
-#endif // DESIGNER_VIEW_H
+#endif // GRAPH_VIEW_H

@@ -15,7 +15,7 @@
 #include <csapex/view/node/box.h>
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/designer/designer_scene.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/plugin/plugin_manager.hpp>
 
 /// SYSTEM
@@ -61,7 +61,7 @@ void DragIO::registerHandler(DragIOHandler::Ptr h)
     handler_.push_back(h);
 }
 
-void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
+void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
 {
     if(!loaded_) {
         load();
@@ -125,7 +125,7 @@ void DragIO::dragEnterEvent(DesignerView* src, QDragEnterEvent* e)
 
 }
 
-void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
+void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
 {
     if(!loaded_) {
         load();
@@ -193,7 +193,7 @@ void DragIO::dragMoveEvent(DesignerView *src, QDragMoveEvent* e)
     }
 }
 
-void DragIO::dropEvent(DesignerView *src, QDropEvent* e, const QPointF& scene_pos)
+void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
 {
     if(!loaded_) {
         load();

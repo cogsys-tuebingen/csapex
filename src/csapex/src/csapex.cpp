@@ -21,7 +21,7 @@
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/designer/designer.h>
 #include <csapex/view/designer/designer_scene.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/designer/widget_controller.h>
@@ -206,7 +206,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         DesignerStyleable style;
         DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control, &style);
-        DesignerView* view = new DesignerView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io, &style);
+        GraphView* view = new GraphView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io, &style);
         MinimapWidget* minimap = new MinimapWidget(view, scene);
 
         Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene, minimap);

@@ -161,7 +161,7 @@ csapex--Port[blocked="true"]  {
 }
 
 /* connection */
-csapex--DesignerView  {
+csapex--GraphView  {
         qproperty-lineColor: rgb(0,0,0);
         qproperty-lineColorError: rgb(255,0,0);
         qproperty-lineColorBlocked: rgb(255,200,0);

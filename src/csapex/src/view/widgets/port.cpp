@@ -10,7 +10,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
 #include <csapex/view/designer/widget_controller.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/view/designer/designer_scene.h>
 
@@ -76,7 +76,7 @@ bool Port::event(QEvent *e)
 
         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
         QPoint global_pos = helpEvent->globalPos();
-        DesignerView* dview = widget_controller_->getDesignerView();
+        GraphView* dview = widget_controller_->getGraphView();
         QPointF pos = dview->mapToScene(dview->mapFromGlobal(global_pos));
         pos.setY(pos.y() + 50);
 

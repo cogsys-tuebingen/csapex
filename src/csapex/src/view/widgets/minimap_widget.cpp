@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/designer/designer_scene.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
 
 /// SYSTEM
@@ -12,7 +12,7 @@
 
 using namespace csapex;
 
-MinimapWidget::MinimapWidget(DesignerView *view, DesignerScene *scene)
+MinimapWidget::MinimapWidget(GraphView *view, DesignerScene *scene)
     : view_(view), scene_(scene), dragging_(false)
 {
     setMinimumSize(100, 100);

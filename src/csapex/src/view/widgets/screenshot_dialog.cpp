@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/utility/html_delegate.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/model/graph_facade.h>
 
 /// SYSTEM
@@ -80,7 +80,7 @@ void ScreenshotDialog::refreshScreenshot()
     if(rect_full_->isChecked()) {
         screenshot = widget_->grab();
     } else if(rect_scene_->isChecked()) {
-        auto view = widget_->findChild<DesignerView*>();
+        auto view = widget_->findChild<GraphView*>();
         if(view) {
             screenshot = view->grab();
         }

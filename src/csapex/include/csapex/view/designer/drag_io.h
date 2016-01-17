@@ -21,9 +21,9 @@ public:
     DragIO(PluginLocatorPtr locator, Graph* graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl);
     ~DragIO();
 
-    void dragEnterEvent(DesignerView *src, QDragEnterEvent* e);
-    void dragMoveEvent(DesignerView *src, QDragMoveEvent* e);
-    void dropEvent(DesignerView *src, QDropEvent* e, const QPointF &scene_pos);
+    void dragEnterEvent(GraphView *src, QDragEnterEvent* e);
+    void dragMoveEvent(GraphView *src, QDragMoveEvent* e);
+    void dropEvent(GraphView *src, QDropEvent* e, const QPointF &scene_pos);
 
 public:
     void registerHandler(DragIOHandler::Ptr h);

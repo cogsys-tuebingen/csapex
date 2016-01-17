@@ -7,7 +7,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/utility/timer.h>
 #include <csapex/core/settings.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/utility/color.hpp>
 #include <csapex/utility/delegate_bind.h>
 
@@ -23,7 +23,7 @@
 
 using namespace csapex;
 
-ProfilingWidget::ProfilingWidget(DesignerView */*view*/, NodeBox *box, QWidget *parent)
+ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *parent)
     : QWidget(parent), box_(box), node_worker_(box->getNodeWorker()),
       space_for_painting_(nullptr),
       timer_history_pos_(0),

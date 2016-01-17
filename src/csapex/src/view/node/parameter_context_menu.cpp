@@ -2,7 +2,7 @@
 #include <csapex/view/node/parameter_context_menu.h>
 
 /// COMPONENT
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 
 /// PROJECT
 #include <csapex/param/parameter.h>
@@ -30,7 +30,7 @@ void ParameterContextMenu::doShowContextMenu(const QPoint& pt)
         return;
     }
 
-    DesignerView* view = QApplication::activeWindow()->findChild<DesignerView*>();
+    GraphView* view = QApplication::activeWindow()->findChild<GraphView*>();
 
     QWidget* real_parent = w;
     while(real_parent->parentWidget()) {

@@ -15,7 +15,7 @@ class MovableGraphicsProxyWidget : public QGraphicsProxyWidget
     Q_OBJECT
 
 public:
-    MovableGraphicsProxyWidget(NodeBox* box, DesignerView* view, WidgetController *widget_ctrl, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    MovableGraphicsProxyWidget(NodeBox* box, GraphView* view, WidgetController *widget_ctrl, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
@@ -44,7 +44,7 @@ private:
     QPointF before_;
     QPointF last_signaled_;
     NodeBox* box_;
-    DesignerView* view_;
+    GraphView* view_;
     WidgetController* widget_ctrl_;
 
     bool relay_;

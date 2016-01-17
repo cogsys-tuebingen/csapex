@@ -26,7 +26,7 @@ class ProfilingWidget : public QWidget
     Q_OBJECT
 
 public:
-    ProfilingWidget(DesignerView *view, NodeBox* box, QWidget* parent=0);
+    ProfilingWidget(GraphView *view, NodeBox* box, QWidget* parent=0);
     ~ProfilingWidget();
 
 public Q_SLOTS:

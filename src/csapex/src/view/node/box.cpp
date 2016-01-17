@@ -132,6 +132,8 @@ void NodeBox::construct()
 
     setObjectName(QString::fromStdString(uuid.getFullName()));
 
+    //installEventFilter(this);
+
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
@@ -414,6 +416,16 @@ void NodeBox::init()
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
 {
+    if(o == this) {
+        if(e->type() == QEvent::MouseButtonDblClick) {
+            if(hasSubGraph()) {
+                Q_EMIT showSubGraphRequest(getSubGraph()->getUUID());
+                return true;
+            }
+        }
+        return false;
+    }
+
     if(o == ui->label) {
         QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
         if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
@@ -710,12 +722,27 @@ bool NodeBox::isFlipped() const
 
 bool NodeBox::hasSubGraph() const
 {
-    return false;
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return false;
+    }
+
+    Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(nh);
+    return graph != nullptr;
 }
 
 Graph::Ptr NodeBox::getSubGraph() const
 {
-    throw std::runtime_error("cannot call getSubGraph() on Box! Check with hasSubGraph()!");
+    NodeHandlePtr nh = node_handle_.lock();
+    if(nh) {
+        Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(nh);
+        if(graph) {
+            return graph;
+        }
+    }
+
+    throw std::logic_error("Called getSubGraph() on an invalid node. "
+                           "Check with hasSubGraph().");
 }
 
 void NodeBox::nodeStateChangedEvent()

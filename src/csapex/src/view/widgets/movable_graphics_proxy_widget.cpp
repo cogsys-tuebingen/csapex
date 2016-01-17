@@ -6,7 +6,7 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/view/designer/designer_view.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_state.h>
 
@@ -18,7 +18,7 @@
 
 using namespace csapex;
 
-MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, DesignerView *view, WidgetController* widget_ctrl, QGraphicsItem *parent, Qt::WindowFlags wFlags)
+MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *view, WidgetController* widget_ctrl, QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QGraphicsProxyWidget(parent, wFlags), box_(box), view_(view), widget_ctrl_(widget_ctrl), relay_(false), clone_p_(false)
 {
     setFlag(ItemIsMovable);

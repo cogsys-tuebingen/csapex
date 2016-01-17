@@ -15,7 +15,7 @@ class MinimapWidget : public QWidget
     Q_OBJECT
 
 public:
-    MinimapWidget(DesignerView* view, DesignerScene* scene);
+    MinimapWidget(GraphView* view, DesignerScene* scene);
 
 Q_SIGNALS:
     void resizeRequest(QSize);
@@ -38,7 +38,7 @@ private:
     void emitPositionRequest(QMouseEvent *me);
 
 private:
-    DesignerView* view_;
+    GraphView* view_;
     DesignerScene* scene_;
 
     bool dragging_;

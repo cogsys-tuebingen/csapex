@@ -27,9 +27,8 @@ FWD(WidgetController);
 
 
 class Designer;
-class DesignBoard;
 class DesignerScene;
-class DesignerView;
+class GraphView;
 class MinimapWidget;
 
 class MovableGraphicsProxyWidget;
