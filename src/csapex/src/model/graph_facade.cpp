@@ -10,7 +10,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/model/node_runner.h>
-#include <csapex/scheduling/executor.h>
+#include <csapex/scheduling/thread_pool.h>
 #include <csapex/msg/bundled_connection.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
@@ -18,7 +18,7 @@
 
 using namespace csapex;
 
-GraphFacade::GraphFacade(Executor &executor, Graph* graph)
+GraphFacade::GraphFacade(ThreadPool &executor, Graph* graph)
     : graph_(graph), executor_(executor)
 {
     connections_.push_back(graph->nodeAdded.connect(
@@ -85,6 +85,11 @@ void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh) {
 Graph* GraphFacade::getGraph()
 {
     return graph_;
+}
+
+ThreadPool* GraphFacade::getThreadPool()
+{
+    return &executor_;
 }
 
 void GraphFacade::addNode(NodeHandlePtr nh)

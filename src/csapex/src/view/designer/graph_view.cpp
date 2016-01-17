@@ -29,6 +29,7 @@
 #include <csapex/view/node/box.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/view/utility/node_list_generator.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #include <iostream>
@@ -42,12 +43,12 @@
 
 using namespace csapex;
 
-GraphView::GraphView(DesignerScene *scene, csapex::GraphPtr graph,
-                           Settings &settings, ThreadPool &thread_pool,
+GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph,
+                           Settings &settings,
                            CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, DesignerStyleable *style,
                            QWidget *parent)
     : QGraphicsView(parent), scene_(scene), style_(style), settings_(settings),
-      thread_pool_(thread_pool), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
+      graph_facade_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
       scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr)
 
 {
@@ -451,7 +452,7 @@ void GraphView::showBoxDialog()
         std::string type = diag.getName();
 
         if(!type.empty() && widget_ctrl_->getNodeFactory()->isValidType(type)) {
-            UUID uuid = graph_->generateUUID(type);
+            UUID uuid = graph_facade_->getGraph()->generateUUID(type);
             QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
             dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, Point(pos.x(), pos.y()), UUID::NONE, uuid, nullptr)));
         }
@@ -460,6 +461,8 @@ void GraphView::showBoxDialog()
 
 void GraphView::addBoxEvent(NodeBox *box)
 {
+    Graph* graph = graph_facade_->getGraph();
+
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
     NodeWorker* worker = box->getNodeWorker();
@@ -469,7 +472,7 @@ void GraphView::addBoxEvent(NodeBox *box)
     connections_[worker].push_back(handle->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
     connections_[worker].push_back(handle->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
-    connections_[worker].push_back(graph_->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
+    connections_[worker].push_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
 
@@ -497,7 +500,7 @@ void GraphView::addBoxEvent(NodeBox *box)
     box->show();
     box->triggerPlaced();
 
-    box->updateBoxInformation(graph_.get());
+    box->updateBoxInformation(graph);
 }
 
 void GraphView::renameBox(NodeBox *box)
@@ -610,7 +613,7 @@ void GraphView::updateBoxInformation()
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
             NodeBox* b = proxy->getBox();
-            b->updateBoxInformation(graph_.get());
+            b->updateBoxInformation(graph_facade_->getGraph());
         }
     }
 }
@@ -698,7 +701,10 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
         QMenu* choose_group_menu = new QMenu("thread group", &menu);
 
-        std::vector<ThreadGroupPtr> thread_groups = thread_pool_.getGroups();
+
+        ThreadPool* thread_pool = graph_facade_->getThreadPool();
+
+        std::vector<ThreadGroupPtr> thread_groups = thread_pool->getGroups();
         for(std::size_t i = 0; i < thread_groups.size(); ++i) {
             const ThreadGroup& group = *thread_groups[i];
 
@@ -812,7 +818,8 @@ void GraphView::switchToThread(int group_id)
 void GraphView::createNewThreadGroupFor()
 {
     bool ok;
-    QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool_.nextName()), &ok);
+    ThreadPool* thread_pool = graph_facade_->getThreadPool();
+    QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
 
     if(ok && !text.isEmpty()) {
         command::Meta::Ptr cmd(new command::Meta("create new thread group"));

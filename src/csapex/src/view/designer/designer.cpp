@@ -20,6 +20,7 @@
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/core/graphio.h>
 #include <csapex/model/node_modifier.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #include <QScrollBar>
@@ -32,14 +33,18 @@
 
 using namespace csapex;
 
-Designer::Designer(Settings& settings, Graph::Ptr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl,
-                   GraphView* view, DesignerScene* scene, MinimapWidget* minimap,
-                   QWidget* parent)
+Designer::Designer(Settings& settings, GraphFacadePtr main_graph_facade, MinimapWidget *minimap, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl,
+                   DragIO& dragio, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer),
-      main_graph_view_(view), designer_scene_(scene), minimap_(minimap),
-      settings_(settings), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
+      drag_io(dragio), minimap_(minimap),
+      settings_(settings), main_graph_facade_(main_graph_facade), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
 {
-    QObject::connect(view, SIGNAL(copyRequest()), this, SLOT(copySelected()));
+    designer_scene_ = new DesignerScene(main_graph_facade_, dispatcher_, widget_ctrl_, &style);
+    main_graph_view_ = new GraphView(designer_scene_, main_graph_facade_, settings_, dispatcher_, widget_ctrl_, drag_io, &style);
+
+    minimap->display(main_graph_view_);
+
+    QObject::connect(main_graph_view_, SIGNAL(copyRequest()), this, SLOT(copySelected()));
 }
 
 Designer::~Designer()
@@ -86,7 +91,7 @@ void Designer::setup()
     setFocusPolicy(Qt::NoFocus);
 
 //    ui->horizontalLayout->addWidget(minimap_);
-    minimap_->setParent(main_graph_view_);
+    minimap_->setParent(this);
     minimap_->move(10, 10);
 }
 
@@ -117,7 +122,7 @@ void Designer::deleteSelected()
 }
 void Designer::copySelected()
 {
-    GraphIO io(graph_.get(), widget_ctrl_->getNodeFactory());
+    GraphIO io(main_graph_facade_->getGraph(), widget_ctrl_->getNodeFactory());
 
     std::vector<UUID> nodes;
     for(const NodeBox* box : main_graph_view_->getSelectedBoxes()) {
@@ -148,7 +153,7 @@ void Designer::paste()
 
     QPointF pos = main_graph_view_->mapToScene(main_graph_view_->mapFromGlobal(QCursor::pos()));
 
-    UUID graph_id = graph_->getUUID();
+    UUID graph_id = main_graph_facade_->getGraph()->getUUID();
     CommandPtr cmd(new command::PasteGraph(graph_id, blueprint, Point (pos.x(), pos.y())));
 
     dispatcher_->execute(cmd);

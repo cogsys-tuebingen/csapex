@@ -20,11 +20,12 @@ public:
     typedef std::shared_ptr<GraphFacade> Ptr;
 
 public:
-    GraphFacade(Executor& executor, Graph* graph);
+    GraphFacade(ThreadPool& executor, Graph* graph);
     ~GraphFacade();
 
     Graph* getGraph();
     GraphFacade* getSubGraph(const UUID& uuid);
+    ThreadPool* getThreadPool();
 
     void addNode(NodeHandlePtr node);
 
@@ -76,7 +77,7 @@ private:
 
 private:
     Graph* graph_;
-    Executor& executor_;
+    ThreadPool& executor_;
 
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> children_;
 

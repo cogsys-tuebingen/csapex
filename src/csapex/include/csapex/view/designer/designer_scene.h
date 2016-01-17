@@ -25,7 +25,7 @@ private:
     static const float ARROW_LENGTH;
 
 public:
-    DesignerScene(csapex::GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable* style);
+    DesignerScene(csapex::GraphFacadePtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable* style);
     ~DesignerScene();
 
     void drawBackground(QPainter *painter, const QRectF &rect);
@@ -156,7 +156,7 @@ private:
     DesignerStyleable* style_;
     CurrentConnectionState ccs;
 
-    GraphPtr graph_;
+    GraphFacadePtr graph_facade_;
     CommandDispatcher* dispatcher_;
     WidgetControllerPtr widget_ctrl_;
 

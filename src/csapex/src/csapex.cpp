@@ -204,12 +204,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_facade, node_factory.get(), node_adapter_factory.get());
         DragIO drag_io(plugin_locator, graph.get(), &dispatcher, widget_control);
 
-        DesignerStyleable style;
-        DesignerScene* scene = new DesignerScene(graph, &dispatcher, widget_control, &style);
-        GraphView* view = new GraphView(scene, graph, settings, thread_pool, &dispatcher, widget_control, drag_io, &style);
-        MinimapWidget* minimap = new MinimapWidget(view, scene);
-
-        Designer* designer = new Designer(settings, graph, &dispatcher, widget_control, view, scene, minimap);
+        MinimapWidget* minimap = new MinimapWidget;
+        Designer* designer = new Designer(settings, graph_facade, minimap, &dispatcher, widget_control, drag_io);
 
         ActivityLegend* legend = new ActivityLegend;
         ActivityTimeline* timeline = new ActivityTimeline;

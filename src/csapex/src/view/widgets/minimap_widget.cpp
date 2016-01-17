@@ -12,17 +12,29 @@
 
 using namespace csapex;
 
-MinimapWidget::MinimapWidget(GraphView *view, DesignerScene *scene)
-    : view_(view), scene_(scene), dragging_(false)
+MinimapWidget::MinimapWidget()
+    : view_(nullptr), scene_(nullptr), dragging_(false)
 {
     setMinimumSize(100, 100);
     setMaximumSize(500, 500);
 
     QObject::connect(this, SIGNAL(resizeRequest(QSize)), this, SLOT(doResize()), Qt::QueuedConnection);
+}
+
+void MinimapWidget::display(GraphView *view)
+{
+    if(view_) {
+        QObject::disconnect(view_, SIGNAL(viewChanged()), this, SLOT(update()));
+        QObject::disconnect(this, SIGNAL(positionRequest(QPointF)), view_, SLOT(centerOnPoint(QPointF)));
+        QObject::disconnect(this, SIGNAL(zoomRequest(QPointF, double)), view_, SLOT(zoomAt(QPointF,double)));
+    }
 
     QObject::connect(view, SIGNAL(viewChanged()), this, SLOT(update()));
     QObject::connect(this, SIGNAL(positionRequest(QPointF)), view, SLOT(centerOnPoint(QPointF)));
     QObject::connect(this, SIGNAL(zoomRequest(QPointF, double)), view, SLOT(zoomAt(QPointF,double)));
+
+    view_ = view;
+    scene_ = view_->designerScene();
 }
 
 void MinimapWidget::doResize()
@@ -80,6 +92,10 @@ void MinimapWidget::emitPositionRequest(QMouseEvent *me)
 void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
 {
     QPainter painter(this);
+
+    if(!view_) {
+        return;
+    }
 
     auto boxes = view_->boxes();
 

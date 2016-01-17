@@ -41,8 +41,8 @@ class GraphView : public QGraphicsView
     int lineWidth() const { return style_->lineWidth(); }
 
 public:
-    GraphView(DesignerScene* scene, csapex::GraphPtr graph,
-              Settings& settings, ThreadPool& thread_pool, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio,
+    GraphView(DesignerScene* scene, csapex::GraphFacadePtr graph,
+              Settings& settings, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio,
               DesignerStyleable* style, QWidget* parent = 0);
     ~GraphView();
 
@@ -129,9 +129,8 @@ private:
     DesignerStyleable* style_;
 
     Settings& settings_;
-    ThreadPool& thread_pool_;
 
-    GraphPtr graph_;
+    GraphFacadePtr graph_facade_;
     CommandDispatcher* dispatcher_;
     WidgetControllerPtr widget_ctrl_;
     DragIO& drag_io_;

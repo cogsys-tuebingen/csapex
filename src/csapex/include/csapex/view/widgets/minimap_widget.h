@@ -15,7 +15,7 @@ class MinimapWidget : public QWidget
     Q_OBJECT
 
 public:
-    MinimapWidget(GraphView* view, DesignerScene* scene);
+    MinimapWidget();
 
 Q_SIGNALS:
     void resizeRequest(QSize);
@@ -24,6 +24,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void doResize();
+    void display(GraphView* view);
 
 protected:
     void mousePressEvent(QMouseEvent* me);

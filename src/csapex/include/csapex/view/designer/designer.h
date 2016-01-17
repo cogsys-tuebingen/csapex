@@ -6,6 +6,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/view/designer/designer_styleable.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -27,8 +28,8 @@ class Designer : public QWidget
     friend class DesignerIO;
 
 public:
-    Designer(Settings& settings, GraphPtr graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl,
-             GraphView *view, DesignerScene* scene, MinimapWidget* minimap, QWidget* parent = 0);
+    Designer(Settings& settings, GraphFacadePtr main_graph_facade, MinimapWidget* minimap, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl,
+             DragIO& dragio, QWidget* parent = 0);
     virtual ~Designer();
 
     void setup();
@@ -87,12 +88,16 @@ public Q_SLOTS:
 
 private:
     Ui::Designer* ui;
-    GraphView* main_graph_view_;
-    DesignerScene* designer_scene_;
+    DesignerStyleable style;
+
+    DragIO& drag_io;
     MinimapWidget* minimap_;
 
+    GraphView* main_graph_view_;
+    DesignerScene* designer_scene_;
+
     Settings& settings_;
-    GraphPtr graph_;
+    GraphFacadePtr main_graph_facade_;
     CommandDispatcher* dispatcher_;
     WidgetControllerPtr widget_ctrl_;
 

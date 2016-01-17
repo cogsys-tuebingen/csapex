@@ -25,6 +25,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/view/widgets/message_preview_widget.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #include <QtGui>
@@ -92,8 +93,8 @@ Point convert(const QPointF& p) {
 
 
 
-DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable *style)
-    : style_(style), graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
+DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable *style)
+    : style_(style), graph_facade_(graph_facade), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
       preview_(nullptr),
       draw_grid_(false), draw_schema_(false), display_messages_(true), display_signals_(true),
       scale_(1.0), overlay_threshold_(0.45),
@@ -111,8 +112,10 @@ DesignerScene::DesignerScene(GraphPtr graph, CommandDispatcher *dispatcher, Widg
 
     setBackgroundBrush(QBrush(Qt::white));
 
-    connections_.push_back(graph_->connectionAdded.connect([this](Connection* c) { connectionAdded(c); }));
-    connections_.push_back(graph_->connectionDeleted.connect([this](Connection* c) { connectionDeleted(c); }));
+    Graph* graph = graph_facade_->getGraph();
+
+    connections_.push_back(graph->connectionAdded.connect([this](Connection* c) { connectionAdded(c); }));
+    connections_.push_back(graph->connectionDeleted.connect([this](Connection* c) { connectionDeleted(c); }));
     //    QObject::connect(this, SIGNAL(eventConnectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
     //    QObject::connect(this, SIGNAL(eventConnectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
 }
@@ -317,7 +320,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         return false;
     };
 
-    for(ConnectionPtr connection : graph_->getConnections()) {
+    for(ConnectionPtr connection : graph_facade_->getGraph()->getConnections()) {
         auto pos = connection_bb_.find(connection.get());
         if(pos == connection_bb_.end() || intersects_any(pos->second, rect)) {
             drawConnection(painter, *connection);
@@ -325,7 +328,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     }
 
     // augment nodes
-    for(NodeHandle* node_handle : graph_->getAllNodeHandles()) {
+    for(NodeHandle* node_handle : graph_facade_->getGraph()->getAllNodeHandles()) {
         NodeBox* box = widget_ctrl_->getBox(node_handle->getUUID());
 
         if(!box || !rect.intersects(box->geometry())) {
@@ -470,7 +473,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             highlight_connection_sub_id_ = data.second;
         }
 
-        auto c = graph_->getConnectionWithId(highlight_connection_id_);
+        auto c = graph_facade_->getGraph()->getConnectionWithId(highlight_connection_id_);
         if(!c) {
             return;
         }
@@ -549,7 +552,7 @@ int DesignerScene::getHighlightedConnectionId() const
 
 bool DesignerScene::isEmpty() const
 {
-    return graph_->countNodes() == 0;
+    return graph_facade_->getGraph()->countNodes() == 0;
 }
 
 void DesignerScene::connectionAdded(Connection* c)
@@ -771,8 +774,10 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     ccs.hidden_from = !fromp->isVisible();
     ccs.hidden_to = !top->isVisible();
 
-    int lf = graph_->getLevel(graph_->findNodeHandleForConnector(from->getUUID())->getUUID());
-    int lt = graph_->getLevel(graph_->findNodeHandleForConnector(to->getUUID())->getUUID());
+    Graph* graph = graph_facade_->getGraph();
+
+    int lf = graph->getLevel(graph->findNodeHandleForConnector(from->getUUID())->getUUID());
+    int lt = graph->getLevel(graph->findNodeHandleForConnector(to->getUUID())->getUUID());
 
     if(from->isDynamic()) {
         ccs.level = lt;
@@ -838,7 +843,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
     std::vector<Fulcrum::Ptr> targets;
     if(id >= 0) {
-        ConnectionPtr connection = graph_->getConnectionWithId(id);
+        ConnectionPtr connection = graph_facade_->getGraph()->getConnectionWithId(id);
         targets = connection->getFulcrums();
     }
     targets.push_back(Fulcrum::Ptr(new Fulcrum(nullptr, convert(to), Fulcrum::IN, convert(to), convert(to))));
