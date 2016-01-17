@@ -450,11 +450,26 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const noexcept
 
 NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
-    apex_assert_hard(uuid != getUUID());
+    if(uuid.composite()) {
+        UUID parent = uuid.parentUUID();
+        UUID child = uuid.firstChildUUID();
 
-    for(const auto b : nodes_) {
-        if(b->getUUID() == uuid) {
-            return b.get();
+        NodeHandle* parent_nh = findNodeHandleNoThrow(parent);
+        if(parent_nh) {
+            NodePtr parent_node = parent_nh->getNode().lock();
+            if(parent_node) {
+                GraphPtr graph = std::dynamic_pointer_cast<Graph>(parent_node);
+                if(graph) {
+                    return graph->findNodeHandle(child);
+                }
+            }
+        }
+
+    } else {
+        for(const auto b : nodes_) {
+            if(b->getUUID() == uuid) {
+                return b.get();
+            }
         }
     }
 

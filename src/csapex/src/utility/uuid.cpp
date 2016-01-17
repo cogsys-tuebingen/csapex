@@ -85,6 +85,11 @@ std::string UUID::getShortName() const
     return stripNamespace(representation_);
 }
 
+bool UUID::composite() const
+{
+    return contains(UUID::namespace_separator);
+}
+
 bool UUID::contains(const std::string &sub) const
 {
     size_t pos = representation_.find(sub);
@@ -100,13 +105,18 @@ UUID UUID::parentUUID() const
     return l;
 }
 
-std::string UUID::id() const
+UUID UUID::firstChildUUID() const
 {
     UUID l = UUID::NONE;
     UUID r = UUID::NONE;
     split(UUID::namespace_separator, l, r);
 
-    return r.getFullName();
+    return r;
+}
+
+std::string UUID::id() const
+{
+    return firstChildUUID().getFullName();
 }
 
 std::string UUID::type() const

@@ -39,7 +39,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     node_handle->setNodeWorker(this);
 
     NodePtr node = node_handle_->getNode().lock();
-    node->initialize(node_handle.get(), node_handle_->getUUID());
+//    node->initialize(node_handle.get(), node_handle_->getUUID());
 
     try {
         node->setupParameters(*node);

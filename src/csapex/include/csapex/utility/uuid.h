@@ -47,9 +47,12 @@ public:
 
     std::size_t hash() const;
 
+    bool composite() const;
     bool contains(const std::string& sub) const;
 
     UUID parentUUID() const;
+    UUID firstChildUUID() const;
+
     std::string type() const;
     std::string id() const;
 
