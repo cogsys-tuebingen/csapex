@@ -141,7 +141,7 @@ void NodeBox::construct()
 
     setObjectName(QString::fromStdString(uuid.getFullName()));
 
-    //installEventFilter(this);
+    installEventFilter(this);
 
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
@@ -753,22 +753,19 @@ bool NodeBox::isFlipped() const
 
 bool NodeBox::hasSubGraph() const
 {
-    NodeHandlePtr nh = node_handle_.lock();
-    if(!nh) {
-        return false;
-    }
-
-    Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(nh);
-    return graph != nullptr;
+    return dynamic_cast<Graph*>(getNode()) != nullptr;
 }
 
 Graph::Ptr NodeBox::getSubGraph() const
 {
     NodeHandlePtr nh = node_handle_.lock();
     if(nh) {
-        Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(nh);
-        if(graph) {
-            return graph;
+        NodePtr node = nh->getNode().lock();
+        if(node) {
+            Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(node);
+            if(graph) {
+                return graph;
+            }
         }
     }
 

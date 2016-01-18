@@ -14,6 +14,7 @@
 #include <QWidget>
 #include <QTreeWidget>
 #include <yaml-cpp/yaml.h>
+#include <unordered_map>
 
 /// FORWARD DECLARATIONS
 namespace Ui
@@ -79,7 +80,9 @@ Q_SIGNALS:
     void helpRequest(NodeBox*);
 
 public Q_SLOTS:
-    void addGraph(UUID uuid);
+    void showGraph(UUID uuid);
+
+    void closeView(int page);
 
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
@@ -109,6 +112,7 @@ public Q_SLOTS:
 
 private:
     void observe(GraphFacadePtr graph);
+    void showGraph(GraphFacadePtr graph);
 
 private:
     Ui::Designer* ui;
@@ -120,10 +124,13 @@ private:
     Settings& settings_;
 
     GraphFacadePtr root_graph_facade_;
-    std::vector<GraphFacadePtr> graphs_;
-    std::map<Graph*, int> graph_tabs_;
+    std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> graphs_;
+
+    std::set<Graph*> visible_graphs_;
     std::map<Graph*, GraphView*> graph_views_;
     std::map<GraphView*, GraphFacade*> view_graphs_;
+
+    std::map<UUID, YAML::Node> states_for_invisible_graphs_;
 
     CommandDispatcher* dispatcher_;
     WidgetControllerPtr widget_ctrl_;

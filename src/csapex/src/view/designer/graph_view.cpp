@@ -120,7 +120,10 @@ GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph_facade,
 
     for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
         const NodeHandlePtr& nh = *it;
-        nodeAdded(graph_facade_->getNodeWorker(nh.get()));
+        apex_assert_hard(nh.get());
+        NodeWorkerPtr nw = graph_facade_->getNodeWorker(nh.get());
+        apex_assert_hard(nw);
+        nodeAdded(nw);
     }
 }
 

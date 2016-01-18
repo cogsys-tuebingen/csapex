@@ -65,6 +65,7 @@ void Designer::setup()
     minimap_->move(10, 10);
 
     QObject::connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(updateMinimap()));
+    QObject::connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeView(int)));
 
     updateMinimap();
 }
@@ -80,33 +81,44 @@ void Designer::observe(GraphFacadePtr graph)
     });
 }
 
-void Designer::addGraph(UUID uuid)
+void Designer::showGraph(UUID uuid)
 {
-
+    showGraph(graphs_.at(uuid));
 }
 
 void Designer::addGraph(GraphFacadePtr graph_facade)
 {
+    Graph* graph = graph_facade->getGraph();
+    UUID uuid = graph->getUUID();
+
+    graphs_[uuid] = graph_facade;
+
+    if(graph_facade == root_graph_facade_) {
+        showGraph(graph_facade);
+    }
+}
+
+
+void Designer::showGraph(GraphFacadePtr graph_facade)
+{
     // check if it is already displayed
     Graph* graph = graph_facade->getGraph();
-
-    auto pos = graph_tabs_.find(graph);
-    if(pos != graph_tabs_.end()) {
+    auto pos = visible_graphs_.find(graph);
+    if(pos != visible_graphs_.end()) {
+        // switch to view
+        GraphView* view = graph_views_.at(graph_facade->getGraph());
+        ui->tabWidget->setCurrentWidget(view);
         return;
     }
 
-
     UUID uuid = graph->getUUID();
-
-    graphs_.push_back(graph_facade);
-
     DesignerScene* designer_scene = new DesignerScene(graph_facade, dispatcher_, widget_ctrl_, &style);
     GraphView* graph_view = new GraphView(designer_scene, graph_facade, settings_, dispatcher_, widget_ctrl_, drag_io, &style, this);
     graph_views_[graph] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();
 
     int tab = 0;
-    if(graph_tabs_.empty()) {
+    if(visible_graphs_.empty()) {
         // root
         QTabWidget* tabs = ui->tabWidget;
         QIcon icon = tabs->tabIcon(0);
@@ -120,7 +132,9 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
     graph_view->overwriteStyleSheet(styleSheet());
 
 
-    graph_tabs_[graph] = tab;
+    visible_graphs_.insert(graph);
+
+    ui->tabWidget->setCurrentIndex(tab);
 
     QObject::connect(graph_view, SIGNAL(copyRequest()), this, SLOT(copySelected()));
     QObject::connect(graph_view, SIGNAL(boxAdded(NodeBox*)), this, SLOT(addBox(NodeBox*)));
@@ -156,6 +170,28 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
         designer_scene->enableDebug(settings_.get<bool>("debug"));
     }
     setFocusPolicy(Qt::NoFocus);
+}
+
+
+void Designer::closeView(int page)
+{
+    GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(page));
+    if(view) {
+        GraphFacade* graph_facade = view_graphs_.at(view);
+
+        Graph* graph = graph_facade->getGraph();
+
+        DesignerIO designerio;
+        YAML::Node doc;
+        designerio.saveBoxes(doc, graph, graph_views_[graph]);
+        states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
+
+        ui->tabWidget->removeTab(page);
+
+        visible_graphs_.erase(graph);
+        graph_views_.erase(graph);
+        view_graphs_.erase(view);
+    }
 }
 
 void Designer::removeGraph(GraphFacadePtr graph_facade)
@@ -279,8 +315,8 @@ void Designer::paste()
 void Designer::overwriteStyleSheet(QString &stylesheet)
 {
     setStyleSheet(stylesheet);
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->overwriteStyleSheet(stylesheet);
     }
 }
@@ -310,8 +346,8 @@ GraphView* Designer::getVisibleGraphView() const
 
 GraphView* Designer::getGraphView(const UUID &uuid) const
 {
-    for(GraphFacadePtr g : graphs_) {
-        Graph* graph = g->getGraph();
+    for(const auto& pair : graph_views_) {
+        Graph* graph = pair.first;
         if(graph->getUUID() == uuid) {
             return graph_views_.at(graph);
         }
@@ -338,8 +374,8 @@ void Designer::refresh()
 
 void Designer::reset()
 {
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->reset();
     }
 }
@@ -347,6 +383,8 @@ void Designer::reset()
 void Designer::addBox(NodeBox *box)
 {
     QObject::connect(box, SIGNAL(helpRequest(NodeBox*)), this, SIGNAL(helpRequest(NodeBox*)));
+    QObject::connect(box, SIGNAL(showSubGraphRequest(UUID)), this, SLOT(showGraph(UUID)));
+
     minimap_->update();
 }
 
@@ -410,8 +448,8 @@ void Designer::enableGrid(bool grid)
 
     settings_.set("grid", grid);
 
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->designerScene()->enableGrid(grid);
 
         view->setCacheMode(QGraphicsView::CacheNone);
@@ -430,8 +468,8 @@ void Designer::enableSchematics(bool schema)
 
     settings_.set("schematics", schema);
 
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->designerScene()->enableSchema(schema);
     }
 
@@ -447,8 +485,8 @@ void Designer::displayGraphComponents(bool display)
 
     settings_.set("display-graph-components", display);
 
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->updateBoxInformation();
     }
 
@@ -463,8 +501,8 @@ void Designer::displayThreads(bool display)
 
     settings_.set("display-threads", display);
 
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->updateBoxInformation();
     }
 
@@ -493,8 +531,8 @@ void Designer::displaySignalConnections(bool display)
 
     settings_.set("display-signals", display);
 
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->designerScene()->displaySignals(display);
     }
 
@@ -510,8 +548,8 @@ void Designer::displayMessageConnections(bool display)
 
     settings_.set("display-messages", display);
 
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->designerScene()->displayMessages(display);
     }
 
@@ -526,8 +564,8 @@ void Designer::enableDebug(bool debug)
 
     settings_.set("debug", debug);
 
-    for(const auto& facade : graphs_) {
-        GraphView* view = graph_views_[facade->getGraph()];
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
         view->designerScene()->enableDebug(debug);
     }
 
@@ -550,15 +588,25 @@ void Designer::loadSettings(YAML::Node &doc)
 void Designer::saveView(Graph* graph, YAML::Node &doc)
 {
     DesignerIO designerio;
-    GraphView *view = graph_views_[graph];
-    designerio.saveBoxes(doc, graph, view);
+
+    auto pos = graph_views_.find(graph);
+    if(pos != graph_views_.end()) {
+        designerio.saveBoxes(doc, graph, pos->second);
+        states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
+    } else {
+        doc["adapters"] = states_for_invisible_graphs_[graph->getUUID()];
+    }
 }
 
 void Designer::loadView(Graph* graph, YAML::Node &doc)
 {
     DesignerIO designerio;
-    GraphView *view = graph_views_[graph];
-    designerio.loadBoxes(doc, view);
+
+    auto pos = graph_views_.find(graph);
+    if(pos != graph_views_.end()) {
+        designerio.loadBoxes(doc, pos->second);
+    }
+    states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
 }
 /// MOC
 #include "../../../include/csapex/view/designer/moc_designer.cpp"

@@ -38,8 +38,6 @@ GraphFacade::~GraphFacade()
 
 
 void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
-    //std::cerr << nh->getUUID() << " has been added" << std::endl;
-
     if(nh->getType() == "csapex::Graph") {
         NodePtr node = nh->getNode().lock();
         apex_assert_hard(node);
@@ -53,6 +51,7 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
     }
 
     NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
+    node_workers_[nh.get()] = nw;
 
     TaskGeneratorPtr runner = std::make_shared<NodeRunner>(nw);
     generators_[nh->getUUID()] = runner;
@@ -67,7 +66,8 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
 
 }
 
-void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh) {
+void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh)
+{
     TaskGeneratorPtr runner = generators_[nh->getUUID()];
     generators_.erase(nh->getUUID());
     executor_.remove(runner.get());
