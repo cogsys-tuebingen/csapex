@@ -48,6 +48,8 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
 
         GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get());
         children_[nh->getUUID()] = sub_graph_facade;
+
+        childAdded(sub_graph_facade);
     }
 
     NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
@@ -77,7 +79,9 @@ void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh) {
     nodeRemoved(nh);
 
     if(nh->getType() == "csapex::Graph") {
-        children_.erase(nh->getUUID());
+        auto pos = children_.find(nh->getUUID());
+        childRemoved(pos->second);
+        children_.erase(pos);
     }
 
 }
@@ -90,6 +94,11 @@ Graph* GraphFacade::getGraph()
 ThreadPool* GraphFacade::getThreadPool()
 {
     return &executor_;
+}
+
+NodeWorkerPtr GraphFacade::getNodeWorker(const NodeHandle *handle)
+{
+    return node_workers_[handle];
 }
 
 void GraphFacade::addNode(NodeHandlePtr nh)

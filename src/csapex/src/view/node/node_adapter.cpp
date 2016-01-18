@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/param/parameter.h>
+#include <csapex/view/node/box.h>
 
 /// SYSTEM
 #include <QLayout>
@@ -12,8 +13,8 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter(NodeHandleWeakPtr adaptee, WidgetController* widget_ctrl)
-    : layout_(nullptr), is_gui_setup_(false), node_(adaptee), widget_ctrl_(widget_ctrl)
+NodeAdapter::NodeAdapter(NodeHandleWeakPtr adaptee, NodeBox* parent)
+    : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent), widget_ctrl_(nullptr)
 {
 }
 

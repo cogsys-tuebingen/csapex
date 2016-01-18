@@ -5,7 +5,7 @@
 #include "command.h"
 #include <csapex/utility/uuid.h>
 #include <csapex/data/point.h>
-#include <csapex/view/designer/widget_controller.h>
+#include <csapex/view/designer/designer.h>
 
 namespace csapex
 {
@@ -15,7 +15,7 @@ namespace command
 class MoveBox : public Command
 {
 public:
-    MoveBox(const UUID& node_uuid, Point from, Point to, WidgetController &widget_controller);
+    MoveBox(const UUID& node_uuid, const UUID &graph_uuid, Point from, Point to, Designer *designer);
 
 protected:
     bool doExecute();
@@ -26,12 +26,13 @@ protected:
     virtual std::string getDescription() const;
 
 protected:
-    WidgetController& widget_controller_;
+    Designer* view_;
 
     Point from;
     Point to;
 
-    UUID uuid;
+    UUID graph_uuid;
+    UUID box_uuid;
 };
 
 }

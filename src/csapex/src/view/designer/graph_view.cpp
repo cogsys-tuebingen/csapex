@@ -10,6 +10,10 @@
 #include <csapex/command/create_thread.h>
 #include <csapex/command/switch_thread.h>
 #include <csapex/command/group_nodes.h>
+#include <csapex/command/disable_node.h>
+#include <csapex/command/dispatcher.h>
+#include <csapex/command/command_factory.h>
+#include <csapex/command/move_connection.h>
 #include <csapex/view/widgets/box_dialog.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
@@ -30,6 +34,15 @@
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/view/utility/node_list_generator.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/view/node/node_adapter.h>
+#include <csapex/view/node/node_adapter_factory.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
+#include <csapex/signal/slot.h>
+#include <csapex/view/widgets/message_preview_widget.h>
+#include <csapex/view/widgets/port.h>
 
 /// SYSTEM
 #include <iostream>
@@ -43,13 +56,14 @@
 
 using namespace csapex;
 
-GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph,
-                           Settings &settings,
-                           CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, DesignerStyleable *style,
-                           QWidget *parent)
-    : QGraphicsView(parent), scene_(scene), style_(style), settings_(settings),
-      graph_facade_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
-      scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr)
+GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph_facade,
+                     Settings &settings,
+                     CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, DesignerStyleable *style,
+                     Designer *parent)
+    : QGraphicsView(parent), parent_(parent), scene_(scene), style_(style), settings_(settings),
+      graph_facade_(graph_facade), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
+      scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr),
+      preview_widget_(nullptr)
 
 {
     //    setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); // memory leak?
@@ -92,16 +106,28 @@ GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph,
     QObject::connect(this, SIGNAL(stopProfilingRequest(NodeWorker*)), this, SLOT(stopProfiling(NodeWorker*)));
 
     setContextMenuPolicy(Qt::DefaultContextMenu);
+
+
+    QObject::connect(this, SIGNAL(triggerConnectorCreated(ConnectablePtr)), this, SLOT(connectorCreated(ConnectablePtr)));
+    QObject::connect(this, SIGNAL(triggerConnectorRemoved(ConnectablePtr)), this, SLOT(connectorRemoved(ConnectablePtr)));
+
+    qRegisterMetaType < ConnectablePtr > ("ConnectablePtr");
+
+    scoped_connections_.emplace_back(graph_facade_->nodeWorkerAdded.connect([this](NodeWorkerPtr n) { nodeAdded(n); }));
+    scoped_connections_.emplace_back(graph_facade_->nodeRemoved.connect([this](NodeHandlePtr n) { nodeRemoved(n); }));
+
+    Graph* graph = graph_facade_->getGraph();
+
+    for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
+        const NodeHandlePtr& nh = *it;
+        nodeAdded(graph_facade_->getNodeWorker(nh.get()));
+    }
 }
 
 GraphView::~GraphView()
 {
-    for(auto entry : connections_) {
-        for(auto c : entry.second) {
-            c.disconnect();
-        }
-    }
-    connections_.clear();
+    handle_connections_.clear();
+    worker_connections_.clear();
 
     delete scene_;
 }
@@ -459,7 +485,144 @@ void GraphView::showBoxDialog()
     }
 }
 
-void GraphView::addBoxEvent(NodeBox *box)
+
+void GraphView::nodeAdded(NodeWorkerPtr node_worker)
+{
+    NodeHandlePtr node_handle = node_worker->getNodeHandle();
+    std::string type = node_handle->getType();
+
+    QIcon icon = QIcon(QString::fromStdString(widget_ctrl_->node_factory_->getConstructor(type)->getIcon()));
+    NodeBox* box = new NodeBox(settings_, node_handle, node_worker, icon);
+
+    QObject::connect(box, SIGNAL(portAdded(Port*)), this, SLOT(addPort(Port*)));
+    QObject::connect(box, SIGNAL(portRemoved(Port*)), this, SLOT(removePort(Port*)));
+
+    NodeAdapter::Ptr adapter = widget_ctrl_->node_adapter_factory_->makeNodeAdapter(node_handle, box);
+
+
+    box->setAdapter(adapter);
+
+    box_map_[node_handle->getUUID()] = box;
+    proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, this, widget_ctrl_.get());
+
+    box->construct();
+
+    addBox(box);
+
+    // add existing connectors
+    for(auto input : node_handle->getAllInputs()) {
+        connectorMessageAdded(input);
+    }
+    for(auto output : node_handle->getAllOutputs()) {
+        connectorMessageAdded(output);
+    }
+    for(auto slot : node_handle->getAllSlots()) {
+        connectorSignalAdded(slot);
+    }
+    for(auto trigger : node_handle->getAllTriggers()) {
+        connectorSignalAdded(trigger);
+    }
+
+    // subscribe to coming connectors
+    auto c1 = node_handle->connectorCreated.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
+    handle_connections_[node_handle.get()].emplace_back(c1);
+    auto c2 = node_handle->connectorRemoved.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
+    handle_connections_[node_handle.get()].emplace_back(c2);
+
+
+    UUID uuid = node_handle->getUUID();
+    QObject::connect(box, &NodeBox::toggled, [this, uuid](bool checked) {
+        dispatcher_->execute(std::make_shared<command::DisableNode>(uuid, !checked));
+    });
+
+    Q_EMIT boxAdded(box);
+}
+
+
+void GraphView::connectorCreated(ConnectablePtr connector)
+{
+    // TODO: dirty...
+    if(dynamic_cast<Slot*> (connector.get()) || dynamic_cast<Trigger*>(connector.get())) {
+        connectorSignalAdded(connector);
+    } else {
+        connectorMessageAdded(connector);
+    }
+}
+
+void GraphView::connectorRemoved(ConnectablePtr connector)
+{
+}
+
+
+void GraphView::connectorMessageAdded(ConnectablePtr connector)
+{
+    UUID parent_uuid = connector->getUUID().parentUUID();
+
+    Graph* g = graph_facade_->getGraph();
+    NodeHandle* node_worker = g->findNodeHandle(parent_uuid);
+    if(node_worker) {
+        Output* o = dynamic_cast<Output*>(connector.get());
+        if(o && node_worker->isParameterOutput(o)) {
+            return;
+        }
+
+        Input* i = dynamic_cast<Input*>(connector.get());
+        if(i && node_worker->isParameterInput(i)) {
+            return;
+        }
+
+        NodeBox* box = getBox(parent_uuid);
+        QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
+
+        box->createPort(connector, layout);
+    }
+}
+
+void GraphView::connectorSignalAdded(ConnectablePtr connector)
+{
+    UUID parent_uuid = connector->getUUID().parentUUID();
+    NodeBox* box = getBox(parent_uuid);
+    QBoxLayout* layout = dynamic_cast<Trigger*>(connector.get()) ? box->getTriggerLayout() : box->getSlotLayout();
+
+    box->createPort(connector, layout);
+}
+
+NodeBox* GraphView::getBox(const UUID &node_id)
+{
+    auto pos = box_map_.find(node_id);
+    if(pos == box_map_.end()) {
+        return nullptr;
+    }
+
+    return pos->second;
+}
+
+MovableGraphicsProxyWidget* GraphView::getProxy(const UUID &node_id)
+{
+    auto pos = proxy_map_.find(node_id);
+    if(pos == proxy_map_.end()) {
+        return nullptr;
+    }
+
+    return pos->second;
+}
+
+void GraphView::nodeRemoved(NodeHandlePtr node_handle)
+{
+    UUID node_uuid = node_handle->getUUID();
+    NodeBox* box = getBox(node_uuid);
+    box->stop();
+
+    box_map_.erase(box_map_.find(node_uuid));
+
+    removeBox(box);
+
+    box->deleteLater();
+
+    Q_EMIT boxRemoved(box);
+}
+
+void GraphView::addBox(NodeBox *box)
 {
     Graph* graph = graph_facade_->getGraph();
 
@@ -468,19 +631,19 @@ void GraphView::addBoxEvent(NodeBox *box)
     NodeWorker* worker = box->getNodeWorker();
     NodeHandle* handle = worker->getNodeHandle().get();
 
-    connections_[worker].push_back(handle->connectionStart.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); }));
-    connections_[worker].push_back(handle->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
-    connections_[worker].push_back(handle->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    worker_connections_[worker].emplace_back(handle->connectionStart.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); }));
+    worker_connections_[worker].emplace_back(handle->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
+    worker_connections_[worker].emplace_back(handle->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
-    connections_[worker].push_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
+    worker_connections_[worker].emplace_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
 
-    connections_[worker].push_back(worker->startProfiling.connect([this](NodeWorker* nw) { startProfilingRequest(nw); }));
-    connections_[worker].push_back(worker->stopProfiling.connect([this](NodeWorker* nw) { stopProfilingRequest(nw); }));
+    worker_connections_[worker].emplace_back(worker->startProfiling.connect([this](NodeWorker* nw) { startProfilingRequest(nw); }));
+    worker_connections_[worker].emplace_back(worker->stopProfiling.connect([this](NodeWorker* nw) { stopProfilingRequest(nw); }));
 
 
-    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
+    MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
     scene_->addItem(proxy);
 
     QObject::connect(proxy, SIGNAL(moved(double,double)), this, SLOT(movedBoxes(double,double)));
@@ -503,6 +666,57 @@ void GraphView::addBoxEvent(NodeBox *box)
     box->updateBoxInformation(graph);
 }
 
+void GraphView::removeBox(NodeBox *box)
+{
+    handle_connections_.erase(box->getNodeHandle());
+    worker_connections_.erase(box->getNodeWorker());
+
+    box->setVisible(false);
+    box->deleteLater();
+
+    boxes_.erase(std::find(boxes_.begin(), boxes_.end(), box));
+    profiling_.erase(box);
+}
+
+void GraphView::addPort(Port *port)
+{
+    scene_->addPort(port);
+
+    QObject::connect(port, SIGNAL(mouseOver(Port*)), this, SLOT(showPreview(Port*)));
+    QObject::connect(port, SIGNAL(mouseOut(Port*)), this, SLOT(stopPreview()));
+
+    QObject::connect(port, &Port::removeConnectionsRequest, [this, port]() {
+        ConnectablePtr adaptee = port->getAdaptee().lock();
+        if(!adaptee) {
+            return;
+        }
+        dispatcher_->execute(dispatcher_->getCommandFactory()->removeAllConnectionsCmd(adaptee));
+    });
+
+    QObject::connect(port, &Port::addConnectionRequest, [this, port](Connectable* from) {
+        ConnectablePtr adaptee = port->getAdaptee().lock();
+        if(!adaptee) {
+            return;
+        }
+        auto cmd = dispatcher_->getCommandFactory()->addConnection(adaptee->getUUID(), from->getUUID());
+        dispatcher_->execute(cmd);
+    });
+
+    QObject::connect(port, &Port::moveConnectionRequest, [this, port](Connectable* from) {
+        ConnectablePtr adaptee = port->getAdaptee().lock();
+        if(!adaptee) {
+            return;
+        }
+        Command::Ptr cmd(new command::MoveConnection(from, adaptee.get()));
+        dispatcher_->execute(cmd);
+    });
+}
+
+void GraphView::removePort(Port *port)
+{
+    scene_->removePort(port);
+}
+
 void GraphView::renameBox(NodeBox *box)
 {
     bool ok;
@@ -513,23 +727,10 @@ void GraphView::renameBox(NodeBox *box)
     }
 }
 
-void GraphView::removeBoxEvent(NodeBox *box)
-{
-    for(auto connection : connections_[box->getNodeWorker()]) {
-        connection.disconnect();
-    }
-    connections_.erase(box->getNodeWorker());
-
-    box->setVisible(false);
-    box->deleteLater();
-
-    boxes_.erase(std::find(boxes_.begin(), boxes_.end(), box));
-    profiling_.erase(box);
-}
 
 void GraphView::startProfiling(NodeWorker *node)
 {
-    NodeBox* box = widget_ctrl_->getBox(node->getUUID());
+    NodeBox* box = getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
     ProfilingWidget* prof = new ProfilingWidget(this, box);
@@ -547,7 +748,7 @@ void GraphView::startProfiling(NodeWorker *node)
         item->setScale(1.0);
     }
 
-    MovableGraphicsProxyWidget* proxy = widget_ctrl_->getProxy(box->getNodeWorker()->getUUID());
+    MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
     QObject::connect(proxy, SIGNAL(moving(double,double)), prof, SLOT(reposition(double,double)));
 
     auto nw = box->getNodeWorker();
@@ -561,7 +762,7 @@ void GraphView::startProfiling(NodeWorker *node)
 
 void GraphView::stopProfiling(NodeWorker *node)
 {
-    NodeBox* box = widget_ctrl_->getBox(node->getUUID());
+    NodeBox* box = getBox(node->getUUID());
 
     for(auto& connection : profiling_connections_[box]) {
         connection.disconnect();
@@ -587,8 +788,9 @@ void GraphView::movedBoxes(double dx, double dy)
             QPointF to = proxy->pos();
             QPointF from = to - delta;
             meta->add(Command::Ptr(new command::MoveBox(b->getNodeWorker()->getUUID(),
+                                                        graph_facade_->getGraph()->getUUID(),
                                                         Point(from.x(), from.y()), Point(to.x(), to.y()),
-                                                        *widget_ctrl_)));
+                                                        parent_)));
         }
     }
     dispatcher_->execute(meta);
@@ -596,7 +798,7 @@ void GraphView::movedBoxes(double dx, double dy)
     scene_->invalidateSchema();
 }
 
-void GraphView::overwriteStyleSheet(QString &stylesheet)
+void GraphView::overwriteStyleSheet(const QString &stylesheet)
 {
     setStyleSheet(stylesheet);
 
@@ -915,5 +1117,35 @@ void GraphView::selectAll()
         item->setSelected(true);
     }
 }
+
+void GraphView::showPreview(Port* port)
+{
+    QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
+    pos.setY(pos.y() + 50);
+
+    if(!preview_widget_) {
+        preview_widget_ = new MessagePreviewWidget;
+        preview_widget_->hide();
+    }
+
+    preview_widget_->setWindowTitle(QString::fromStdString("Output"));
+    preview_widget_->move(pos.toPoint());
+
+    if(!preview_widget_->isConnected()) {
+        preview_widget_->connectTo(port->getAdaptee().lock().get());
+        designerScene()->addWidget(preview_widget_);
+    }
+}
+
+void GraphView::stopPreview()
+{
+    if(preview_widget_) {
+        preview_widget_->disconnect();
+        preview_widget_->hide();
+        preview_widget_->deleteLater();
+        preview_widget_ = nullptr;
+    }
+}
+
 /// MOC
 #include "../../../include/csapex/view/designer/moc_graph_view.cpp"

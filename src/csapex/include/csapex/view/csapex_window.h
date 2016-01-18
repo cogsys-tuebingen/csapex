@@ -82,12 +82,6 @@ public Q_SLOTS:
     void showStatusMessage(const std::string& msg);
     void updateNodeTypes();
 
-    void saveSettings(YAML::Node& doc);
-    void loadSettings(YAML::Node& doc);
-
-    void saveView(YAML::Node &e);
-    void loadView(YAML::Node& doc);
-
     void updateDebugInfo();
     void updateUndoInfo();
     void updateNodeInfo();

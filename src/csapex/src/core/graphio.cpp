@@ -52,12 +52,16 @@ void GraphIO::saveGraph(YAML::Node &yaml)
 {
     saveNodes(yaml);
     saveConnections(yaml);
+
+    saveViewRequest(graph_, yaml);
 }
 
 void GraphIO::loadGraph(const YAML::Node& doc)
 {
     loadNodes(doc);
     loadConnections(doc);
+
+    loadViewRequest(graph_, doc);
 }
 
 
@@ -510,6 +514,8 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
     GraphPtr subgraph = std::dynamic_pointer_cast<Graph>(node);
     if(subgraph) {
         GraphIO sub_graph_io(subgraph.get(), node_factory_);
+        slim_signal::ScopedConnection connection = sub_graph_io.loadViewRequest.connect(loadViewRequest);
+
         sub_graph_io.loadGraph(doc["subgraph"]);
 
         YAML::Node fw_in = doc["forward_in"];

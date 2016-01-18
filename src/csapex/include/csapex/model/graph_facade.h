@@ -27,6 +27,8 @@ public:
     GraphFacade* getSubGraph(const UUID& uuid);
     ThreadPool* getThreadPool();
 
+    NodeWorkerPtr getNodeWorker(const NodeHandle* handle);
+
     void addNode(NodeHandlePtr node);
 
     ConnectionPtr connect(OutputPtr output, InputPtr input,
@@ -60,6 +62,9 @@ public:
     csapex::slim_signal::Signal<void (bool)> paused;
     csapex::slim_signal::Signal<void ()> stopped;
 
+    csapex::slim_signal::Signal<void(GraphFacadePtr)> childAdded;
+    csapex::slim_signal::Signal<void(GraphFacadePtr)> childRemoved;
+
     csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeAdded;
     csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeRemoved;
 
@@ -84,7 +89,7 @@ private:
     std::vector<csapex::slim_signal::Connection> connections_;
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
 
-    std::map<NodeHandle*, NodeWorkerPtr> node_workers_;
+    std::map<const NodeHandle*, NodeWorkerPtr> node_workers_;
 };
 
 }

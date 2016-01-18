@@ -59,12 +59,6 @@ public:
     csapex::slim_signal::Signal<void ()> saved;
     csapex::slim_signal::Signal<void ()> loaded;
 
-    csapex::slim_signal::Signal<void (YAML::Node& e)> saveSettingsRequest;
-    csapex::slim_signal::Signal<void (YAML::Node& n)> loadSettingsRequest;
-
-    csapex::slim_signal::Signal<void (YAML::Node& e)> saveViewRequest;
-    csapex::slim_signal::Signal<void (YAML::Node& n)> loadViewRequest;
-
     csapex::slim_signal::Signal<void (bool)> paused;
 
     csapex::slim_signal::Signal<void ()> begin_step;

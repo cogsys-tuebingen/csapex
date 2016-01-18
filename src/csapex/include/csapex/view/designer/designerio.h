@@ -24,11 +24,11 @@ public:
     void saveSettings(YAML::Node& yaml);
     void loadSettings(YAML::Node& doc);
 
-    void saveBoxes(YAML::Node &yaml, Graph* graph, WidgetController* widget_ctrl);
-    void loadBoxes(YAML::Node& doc, WidgetController* widget_ctrl);
+    void saveBoxes(YAML::Node &yaml, Graph* graph, GraphView *view);
+    void loadBoxes(YAML::Node& doc, GraphView *view);
 
 private:
-    void saveBox(NodeHandle *node, WidgetController* widget_ctrl, YAML::Node &yaml);
+    void saveBox(NodeHandle *node, GraphView *view, YAML::Node &yaml);
 };
 
 }

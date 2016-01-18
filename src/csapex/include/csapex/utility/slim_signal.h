@@ -94,14 +94,14 @@ class ScopedConnection : public Connection
 public:
     ScopedConnection();
     ScopedConnection(const Connection& c);
-    ScopedConnection(ScopedConnection&& c);
+    ScopedConnection(ScopedConnection&& c) noexcept;
     ScopedConnection(const ScopedConnection& c) = delete;
 
     ~ScopedConnection();
 
     void operator = (const Connection& c);
     void operator = (const ScopedConnection& c) = delete;
-    void operator = (ScopedConnection&& c);
+    void operator = (ScopedConnection&& c) noexcept;
 };
 
 /**

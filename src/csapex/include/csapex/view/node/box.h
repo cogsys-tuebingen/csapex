@@ -45,13 +45,19 @@ public:
     /// CONSTRUCTION
     NodeBox(Settings& settings,
             NodeHandlePtr handle, NodeWorkerPtr worker,
-            NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
+            QIcon icon, QWidget* parent = 0);
     NodeBox(Settings& settings,
             NodeHandlePtr handle,
-            NodeAdapterPtr adapter, QIcon icon, QWidget* parent = 0);
+            QIcon icon, QWidget* parent = 0);
+
+    void setAdapter(NodeAdapterPtr adapter);
+
     virtual ~NodeBox();
     void construct();
     void init();
+
+    /// MODIFIER
+    Port* createPort(ConnectableWeakPtr connector, QBoxLayout *layout);
 
     /// ACCESSORS
     Node* getNode() const;
@@ -140,6 +146,10 @@ Q_SIGNALS:
 
     void nodeStateChanged();
     void enabledChange(bool val);
+
+
+    void portAdded(Port*);
+    void portRemoved(Port*);
 
 protected:
     void resizeEvent(QResizeEvent * e);

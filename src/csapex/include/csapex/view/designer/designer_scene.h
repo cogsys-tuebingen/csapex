@@ -8,11 +8,13 @@
 #include <csapex/view/designer/fulcrum_widget.h>
 #include <csapex/view/designer/designer_styleable.h>
 #include <csapex/utility/slim_signal.hpp>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QGraphicsScene>
 #include <QLabel>
 #include <QTime>
+#include <unordered_map>
 
 namespace csapex
 {
@@ -41,6 +43,8 @@ public:
     void setSelection(const NodeBox* box);
     std::vector<NodeBox*> getSelectedBoxes() const;
 
+    void addPort(Port* port);
+    void removePort(Port* port);
 
 Q_SIGNALS:
     void eventFulcrumAdded(void *f);
@@ -148,7 +152,7 @@ private:
     std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
     void drawPort(QPainter *painter, NodeBox *box, Port* p);
-
+    Port* getPort(Connectable* c);
 
     QPointF offset(const QPointF& vector, Position position, double offset);
 
@@ -200,6 +204,8 @@ private:
     bool schema_dirty_;
 
     bool debug_;
+
+    std::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
 };
 
 }

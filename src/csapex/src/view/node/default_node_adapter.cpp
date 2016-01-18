@@ -14,6 +14,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/widgets/doublespanslider.h>
+#include <csapex/view/node/box.h>
 
 /// PROJECT
 #include <csapex/param/range_parameter.h>
@@ -350,8 +351,8 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 
 
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(NodeHandleWeakPtr adaptee, WidgetController *widget_ctrl)
-    : NodeAdapter(adaptee, widget_ctrl), bridge(this), wrapper_layout_(nullptr)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeHandleWeakPtr adaptee, NodeBox* parent)
+    : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
 {
 }
 
@@ -990,7 +991,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter input, if available
         InputPtr param_in = node_handle->getParameterInput(current_name_).lock();
         if(param_in) {
-            Port* port = widget_ctrl_->createPort(param_in, widget_ctrl_->getBox(node_handle->getUUID()), current_layout_);
+            Port* port = parent_->createPort(param_in, current_layout_);
 
             port->setVisible(p->isInteractive());
             parameter_connections_[param_in.get()] = p->interactive_changed.connect([port](csapex::param::Parameter*, bool i) { return port->setVisible(i); });
@@ -1007,7 +1008,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter output, if available
         OutputPtr param_out = node_handle->getParameterOutput(current_name_).lock();
         if(param_out) {
-            Port* port = widget_ctrl_->createPort(param_out, widget_ctrl_->getBox(node_handle->getUUID()), current_layout_);
+            Port* port = parent_->createPort(param_out, current_layout_);
 
             port->setVisible(p->isInteractive());
             parameter_connections_[param_out.get()] = p->interactive_changed.connect([port](csapex::param::Parameter*, bool i) { return port->setVisible(i); });

@@ -10,6 +10,7 @@
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/utility/assert.h>
 #include <csapex/utility/yaml_io.hpp>
+#include <csapex/view/designer/graph_view.h>
 
 /// SYSTEM
 #include <QMessageBox>
@@ -36,19 +37,19 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 {
 }
 
-void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, WidgetController* widget_ctrl)
+void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, GraphView *view)
 {
     YAML::Node adapters(YAML::NodeType::Sequence);
     for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
         NodeHandlePtr nh = *it;
-        saveBox(nh.get(), widget_ctrl, adapters);
+        saveBox(nh.get(), view, adapters);
     }
     yaml["adapters"] = adapters;
 }
 
-void DesignerIO::saveBox(NodeHandle *node, WidgetController* widget_ctrl, YAML::Node &yaml)
+void DesignerIO::saveBox(NodeHandle *node, GraphView *view, YAML::Node &yaml)
 {
-    NodeBox* box = widget_ctrl->getBox(node->getUUID());
+    NodeBox* box = view->getBox(node->getUUID());
     NodeAdapter::Ptr na = box->getNodeAdapter();
     Memento::Ptr m = na->getState();
     if(m) {
@@ -63,7 +64,7 @@ void DesignerIO::saveBox(NodeHandle *node, WidgetController* widget_ctrl, YAML::
     }
 }
 
-void DesignerIO::loadBoxes(YAML::Node &doc, WidgetController* widget_ctrl)
+void DesignerIO::loadBoxes(YAML::Node &doc, GraphView *view)
 {
     if(doc["adapters"].IsDefined()) {
         const YAML::Node& adapters = doc["adapters"];
@@ -72,7 +73,7 @@ void DesignerIO::loadBoxes(YAML::Node &doc, WidgetController* widget_ctrl)
 
             UUID uuid = e["uuid"].as<UUID>();
 
-            NodeBox* box = widget_ctrl->getBox(uuid);
+            NodeBox* box = view->getBox(uuid);
             if(box) {
                 NodeAdapter::Ptr na = box->getNodeAdapter();
                 Memento::Ptr m = na->getState();

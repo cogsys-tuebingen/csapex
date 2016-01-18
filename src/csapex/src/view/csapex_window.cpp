@@ -189,14 +189,7 @@ void CsApexWindow::construct()
     connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
     connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
 
-    connections_.push_back(core_.saveSettingsRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
-    connections_.push_back(core_.loadSettingsRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
-    connections_.push_back(core_.saveViewRequest.connect([this](YAML::Node& node){ saveView(node); }));
-    connections_.push_back(core_.loadViewRequest.connect([this](YAML::Node& node){ loadView(node); }));
-
     connections_.push_back(graph->stateChanged.connect([this]() { updateMenu(); }));
-    connections_.push_back(graph_facade_->nodeWorkerAdded.connect([this](NodeWorkerPtr n) { widget_ctrl_->nodeAdded(n); }));
-    connections_.push_back(graph_facade_->nodeRemoved.connect([this](NodeHandlePtr n) { widget_ctrl_->nodeRemoved(n); }));
     connections_.push_back(graph_facade_->panic.connect([this]() { clearBlock(); }));
 
     connections_.push_back(cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); }));
@@ -760,31 +753,6 @@ void CsApexWindow::load()
     if(QFile(filename).exists()) {
         core_.load(filename.toStdString());
     }
-}
-
-void CsApexWindow::saveSettings(YAML::Node& doc)
-{
-    DesignerIO designerio;
-    designerio.saveSettings(doc);
-}
-
-void CsApexWindow::loadSettings(YAML::Node &doc)
-{
-    DesignerIO designerio;
-    designerio.loadSettings(doc);
-}
-
-
-void CsApexWindow::saveView(YAML::Node &doc)
-{
-    DesignerIO designerio;
-    designerio.saveBoxes(doc, graph_facade_->getGraph(), widget_ctrl_.get());
-}
-
-void CsApexWindow::loadView(YAML::Node &doc)
-{
-    DesignerIO designerio;
-    designerio.loadBoxes(doc, widget_ctrl_.get());
 }
 
 /// MOC

@@ -16,10 +16,10 @@ public: \
     { \
         return #Adaptee; \
     } \
-    virtual csapex::NodeAdapterPtr build(csapex::NodeHandlePtr handle, csapex::WidgetController* widget_ctrl) const \
+    virtual csapex::NodeAdapterPtr build(csapex::NodeHandlePtr handle, NodeBox* parent) const \
     { \
         std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (handle->getNode().lock()); \
-        return std::make_shared<Adapter>(handle, adaptee, widget_ctrl); \
+        return std::make_shared<Adapter>(handle, parent, adaptee); \
     } \
 }; \
 }\

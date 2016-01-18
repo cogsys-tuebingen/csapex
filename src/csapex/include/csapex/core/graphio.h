@@ -32,6 +32,9 @@ public:
     std::unordered_map<UUID, UUID, UUID::Hasher>
     loadIntoGraph(const YAML::Node &blueprint, const csapex::Point &position);
 
+public:
+    csapex::slim_signal::Signal<void (Graph*, YAML::Node& e)> saveViewRequest;
+    csapex::slim_signal::Signal<void (Graph*, YAML::Node& n)> loadViewRequest;
 
 private:
     void saveNodes(YAML::Node &yaml);

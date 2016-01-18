@@ -21,6 +21,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/view/designer/designerio.h>
 
 /// SYSTEM
 #include <QScrollBar>
@@ -37,14 +38,15 @@ Designer::Designer(Settings& settings, GraphFacadePtr main_graph_facade, Minimap
                    DragIO& dragio, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer),
       drag_io(dragio), minimap_(minimap),
-      settings_(settings), main_graph_facade_(main_graph_facade), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
+      settings_(settings), root_graph_facade_(main_graph_facade), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
 {
-    designer_scene_ = new DesignerScene(main_graph_facade_, dispatcher_, widget_ctrl_, &style);
-    main_graph_view_ = new GraphView(designer_scene_, main_graph_facade_, settings_, dispatcher_, widget_ctrl_, drag_io, &style);
+    connections_.emplace_back(settings_.saveRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
+    connections_.emplace_back(settings_.loadRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
 
-    minimap->display(main_graph_view_);
+    connections_.emplace_back(settings_.saveDetailRequest.connect([this](Graph* graph, YAML::Node& node){ saveView(graph, node); }));
+    connections_.emplace_back(settings_.loadDetailRequest.connect([this](Graph* graph, YAML::Node& node){ loadView(graph, node); }));
 
-    QObject::connect(main_graph_view_, SIGNAL(copyRequest()), this, SLOT(copySelected()));
+    observe(main_graph_facade);
 }
 
 Designer::~Designer()
@@ -56,18 +58,83 @@ void Designer::setup()
 {
     ui->setupUi(this);
 
-    QLayout* main_layout = new QVBoxLayout;
-    main_layout->addWidget(main_graph_view_);
-    ui->tab_main_graph->setLayout(main_layout);
+    addGraph(root_graph_facade_);
 
+//    ui->horizontalLayout->addWidget(minimap_);
+    minimap_->setParent(this);
+    minimap_->move(10, 10);
+
+    QObject::connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(updateMinimap()));
+
+    updateMinimap();
+}
+
+void Designer::observe(GraphFacadePtr graph)
+{
+    graph->childAdded.connect([this](GraphFacadePtr child){
+        addGraph(child);
+        observe(child);
+    });
+    graph->childRemoved.connect([this](GraphFacadePtr child){
+        removeGraph(child);
+    });
+}
+
+void Designer::addGraph(UUID uuid)
+{
+
+}
+
+void Designer::addGraph(GraphFacadePtr graph_facade)
+{
+    // check if it is already displayed
+    Graph* graph = graph_facade->getGraph();
+
+    auto pos = graph_tabs_.find(graph);
+    if(pos != graph_tabs_.end()) {
+        return;
+    }
+
+
+    UUID uuid = graph->getUUID();
+
+    graphs_.push_back(graph_facade);
+
+    DesignerScene* designer_scene = new DesignerScene(graph_facade, dispatcher_, widget_ctrl_, &style);
+    GraphView* graph_view = new GraphView(designer_scene, graph_facade, settings_, dispatcher_, widget_ctrl_, drag_io, &style, this);
+    graph_views_[graph] = graph_view;
+    view_graphs_[graph_view] = graph_facade.get();
+
+    int tab = 0;
+    if(graph_tabs_.empty()) {
+        // root
+        QTabWidget* tabs = ui->tabWidget;
+        QIcon icon = tabs->tabIcon(0);
+        QString title = tabs->tabText(0);
+        tabs->removeTab(0);
+        tabs->insertTab(0, graph_view, icon, title);
+    } else {
+        tab = ui->tabWidget->addTab(graph_view, QString::fromStdString(uuid.getFullName()));
+    }
+
+    graph_view->overwriteStyleSheet(styleSheet());
+
+
+    graph_tabs_[graph] = tab;
+
+    QObject::connect(graph_view, SIGNAL(copyRequest()), this, SLOT(copySelected()));
+    QObject::connect(graph_view, SIGNAL(boxAdded(NodeBox*)), this, SLOT(addBox(NodeBox*)));
+    QObject::connect(graph_view, SIGNAL(boxRemoved(NodeBox*)), this, SLOT(removeBox(NodeBox*)));
 
     // main graph tab is not closable
-    QTabBar *tabBar = ui->tabWidget->findChild<QTabBar *>();
-    tabBar->setTabButton(0, QTabBar::RightSide, 0);
-    tabBar->setTabButton(0, QTabBar::LeftSide, 0);
+    if(tab == 0) {
+        QTabBar *tabBar = ui->tabWidget->findChild<QTabBar *>();
+        tabBar->setTabButton(0, QTabBar::RightSide, 0);
+        tabBar->setTabButton(0, QTabBar::LeftSide, 0);
+    }
 
 
-    QObject::connect(main_graph_view_, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
+    QObject::connect(graph_view, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
 
     if(settings_.knows("grid")) {
         enableGrid(settings_.get<bool>("grid"));
@@ -78,43 +145,81 @@ void Designer::setup()
     }
 
     if(settings_.knows("display-messages")) {
-        designer_scene_->displayMessages(settings_.get<bool>("display-messages"));
+        designer_scene->displayMessages(settings_.get<bool>("display-messages"));
     }
 
     if(settings_.knows("display-signals")) {
-        designer_scene_->displaySignals(settings_.get<bool>("display-signals"));
+        designer_scene->displaySignals(settings_.get<bool>("display-signals"));
     }
 
     if(settings_.knows("debug")) {
-        designer_scene_->enableDebug(settings_.get<bool>("debug"));
+        designer_scene->enableDebug(settings_.get<bool>("debug"));
     }
     setFocusPolicy(Qt::NoFocus);
+}
 
-//    ui->horizontalLayout->addWidget(minimap_);
-    minimap_->setParent(this);
-    minimap_->move(10, 10);
+void Designer::removeGraph(GraphFacadePtr graph_facade)
+{
+    std::vector<GraphFacadePtr> graphs_;
+    std::map<Graph*, int> graph_tabs_;
+    std::map<Graph*, GraphView*> graph_views_;
+    std::map<GraphView*, GraphFacade*> view_graphs_;
+
+    for(auto it = graphs_.begin(); it != graphs_.end(); ++it) {
+        if(*it == graph_facade) {
+            Graph* graph = graph_facade->getGraph();
+            GraphView* view = graph_views_[graph];
+            graph_tabs_.erase(graph);
+            graph_views_.erase(graph);
+            view_graphs_.erase(view);
+            graphs_.erase(it);
+            return;
+        }
+    }
+
+}
+
+void Designer::updateMinimap()
+{
+    GraphView* view = getVisibleGraphView();
+    minimap_->display(view);
 }
 
 std::vector<NodeBox*> Designer::getSelectedBoxes() const
 {
-    return designer_scene_->getSelectedBoxes();
+    DesignerScene* scene = getVisibleDesignerScene();
+    if(!scene) {
+        return {};
+    }
+    return scene->getSelectedBoxes();
 }
 
 void Designer::clearSelection()
 {
-    main_graph_view_->scene()->clearSelection();
+    DesignerScene* scene = getVisibleDesignerScene();
+    if(scene) {
+        scene->clearSelection();
+    }
 }
 
 void Designer::selectAll()
 {
-    main_graph_view_->selectAll();
+    GraphView* view = getVisibleGraphView();
+    if(!view) {
+        return;
+    }
+    view->selectAll();
 }
 
 void Designer::deleteSelected()
 {
-    command::Meta::Ptr del(new command::Meta("delete selected"));
+    GraphView* view = getVisibleGraphView();
+    if(!view) {
+        return;
+    }
 
-    del->add(main_graph_view_->deleteSelected());
+    command::Meta::Ptr del(new command::Meta("delete selected"));
+    del->add(view->deleteSelected());
 
     if(del->commands() != 0) {
         dispatcher_->execute(del);
@@ -122,10 +227,15 @@ void Designer::deleteSelected()
 }
 void Designer::copySelected()
 {
-    GraphIO io(main_graph_facade_->getGraph(), widget_ctrl_->getNodeFactory());
+    GraphView* view = getVisibleGraphView();
+    if(!view) {
+        return;
+    }
+
+    GraphIO io(getVisibleGraphFacade()->getGraph(), widget_ctrl_->getNodeFactory());
 
     std::vector<UUID> nodes;
-    for(const NodeBox* box : main_graph_view_->getSelectedBoxes()) {
+    for(const NodeBox* box : view->getSelectedBoxes()) {
         nodes.emplace_back(box->getNodeHandle()->getUUID());
     }
 
@@ -146,14 +256,21 @@ void Designer::copySelected()
 
 void Designer::paste()
 {
+    GraphView* view = getVisibleGraphView();
+    if(!view) {
+        return;
+    }
+
     const QMimeData* mime = QApplication::clipboard()->mimeData();
     QString data = mime->data("xcsapex/node-list");
 
     YAML::Node blueprint = YAML::Load(data.toStdString());
 
-    QPointF pos = main_graph_view_->mapToScene(main_graph_view_->mapFromGlobal(QCursor::pos()));
+    GraphFacade* graph_facade = getVisibleGraphFacade();
 
-    UUID graph_id = main_graph_facade_->getGraph()->getUUID();
+    QPointF pos = view->mapToScene(view->mapFromGlobal(QCursor::pos()));
+
+    UUID graph_id = graph_facade->getGraph()->getUUID();
     CommandPtr cmd(new command::PasteGraph(graph_id, blueprint, Point (pos.x(), pos.y())));
 
     dispatcher_->execute(cmd);
@@ -161,7 +278,11 @@ void Designer::paste()
 
 void Designer::overwriteStyleSheet(QString &stylesheet)
 {
-    main_graph_view_->overwriteStyleSheet(stylesheet);
+    setStyleSheet(stylesheet);
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->overwriteStyleSheet(stylesheet);
+    }
 }
 
 void Designer::setView(int /*sx*/, int /*sy*/)
@@ -169,34 +290,68 @@ void Designer::setView(int /*sx*/, int /*sy*/)
     //designer_board->setView(sx, sy);
 }
 
-GraphView* Designer::getGraphView()
+GraphFacade* Designer::getVisibleGraphFacade() const
 {
-    return main_graph_view_;
+    GraphView* view = getVisibleGraphView();
+    if(!view) {
+        return nullptr;
+    }
+    return view_graphs_.at(view);
+}
+
+GraphView* Designer::getVisibleGraphView() const
+{
+    GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
+    if(!current_view) {
+        return graph_views_.at(root_graph_facade_->getGraph());
+    }
+    return current_view;
+}
+
+GraphView* Designer::getGraphView(const UUID &uuid) const
+{
+    for(GraphFacadePtr g : graphs_) {
+        Graph* graph = g->getGraph();
+        if(graph->getUUID() == uuid) {
+            return graph_views_.at(graph);
+        }
+    }
+    return nullptr;
+}
+
+DesignerScene* Designer::getVisibleDesignerScene() const
+{
+    GraphView* view = getVisibleGraphView();
+    if(!view) {
+        return nullptr;
+    }
+    return view->designerScene();
 }
 
 void Designer::refresh()
 {
-    designer_scene_->invalidateSchema();
+    DesignerScene* scene = getVisibleDesignerScene();
+    if(scene) {
+        scene->invalidateSchema();
+    }
 }
 
 void Designer::reset()
 {
-    main_graph_view_->reset();
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->reset();
+    }
 }
 
 void Designer::addBox(NodeBox *box)
 {
     QObject::connect(box, SIGNAL(helpRequest(NodeBox*)), this, SIGNAL(helpRequest(NodeBox*)));
-
-    main_graph_view_->addBoxEvent(box);
-
     minimap_->update();
 }
 
 void Designer::removeBox(NodeBox *box)
 {
-    main_graph_view_->removeBoxEvent(box);
-
     minimap_->update();
 }
 
@@ -239,7 +394,12 @@ bool Designer::isDebug() const
 
 bool Designer::hasSelection() const
 {
-    return designer_scene_->selectedItems().size() > 0;
+    DesignerScene* scene = getVisibleDesignerScene();
+    if(!scene) {
+        return false;
+    }
+
+    return scene->selectedItems().size() > 0;
 }
 
 void Designer::enableGrid(bool grid)
@@ -250,10 +410,13 @@ void Designer::enableGrid(bool grid)
 
     settings_.set("grid", grid);
 
-    designer_scene_->enableGrid(grid);
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->designerScene()->enableGrid(grid);
 
-    main_graph_view_->setCacheMode(QGraphicsView::CacheNone);
-    main_graph_view_->setCacheMode(QGraphicsView::CacheBackground);
+        view->setCacheMode(QGraphicsView::CacheNone);
+        view->setCacheMode(QGraphicsView::CacheBackground);
+    }
 
     Q_EMIT gridEnabled(grid);
 
@@ -267,7 +430,10 @@ void Designer::enableSchematics(bool schema)
 
     settings_.set("schematics", schema);
 
-    designer_scene_->enableSchema(schema);
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->designerScene()->enableSchema(schema);
+    }
 
     Q_EMIT schematicsEnabled(schema);
 
@@ -281,7 +447,10 @@ void Designer::displayGraphComponents(bool display)
 
     settings_.set("display-graph-components", display);
 
-    main_graph_view_->updateBoxInformation();
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->updateBoxInformation();
+    }
 
     Q_EMIT graphComponentsEnabled(display);
 }
@@ -294,7 +463,10 @@ void Designer::displayThreads(bool display)
 
     settings_.set("display-threads", display);
 
-    main_graph_view_->updateBoxInformation();
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->updateBoxInformation();
+    }
 
     Q_EMIT threadsEnabled(display);
 }
@@ -321,7 +493,10 @@ void Designer::displaySignalConnections(bool display)
 
     settings_.set("display-signals", display);
 
-    designer_scene_->displaySignals(display);
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->designerScene()->displaySignals(display);
+    }
 
 
     Q_EMIT signalsEnabled(display);
@@ -335,7 +510,10 @@ void Designer::displayMessageConnections(bool display)
 
     settings_.set("display-messages", display);
 
-    designer_scene_->displayMessages(display);
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->designerScene()->displayMessages(display);
+    }
 
     Q_EMIT messagesEnabled(display);
 }
@@ -348,9 +526,39 @@ void Designer::enableDebug(bool debug)
 
     settings_.set("debug", debug);
 
-    designer_scene_->enableDebug(debug);
+    for(const auto& facade : graphs_) {
+        GraphView* view = graph_views_[facade->getGraph()];
+        view->designerScene()->enableDebug(debug);
+    }
 
     Q_EMIT debugEnabled(debug);
+}
+
+void Designer::saveSettings(YAML::Node& doc)
+{
+    DesignerIO designerio;
+    designerio.saveSettings(doc);
+}
+
+void Designer::loadSettings(YAML::Node &doc)
+{
+    DesignerIO designerio;
+    designerio.loadSettings(doc);
+}
+
+
+void Designer::saveView(Graph* graph, YAML::Node &doc)
+{
+    DesignerIO designerio;
+    GraphView *view = graph_views_[graph];
+    designerio.saveBoxes(doc, graph, view);
+}
+
+void Designer::loadView(Graph* graph, YAML::Node &doc)
+{
+    DesignerIO designerio;
+    GraphView *view = graph_views_[graph];
+    designerio.loadBoxes(doc, view);
 }
 /// MOC
 #include "../../../include/csapex/view/designer/moc_designer.cpp"

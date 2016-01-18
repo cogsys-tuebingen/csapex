@@ -7,10 +7,13 @@
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/designer/designer_styleable.h>
+#include <csapex/utility/uuid.h>
+#include <csapex/utility/slim_signal.h>
 
 /// SYSTEM
 #include <QWidget>
 #include <QTreeWidget>
+#include <yaml-cpp/yaml.h>
 
 /// FORWARD DECLARATIONS
 namespace Ui
@@ -36,7 +39,14 @@ public:
 
     void setView(int x, int y);
 
-    GraphView* getGraphView();
+    void addGraph(GraphFacadePtr graph);
+    void removeGraph(GraphFacadePtr graph);
+
+    GraphView* getVisibleGraphView() const;
+    GraphView* getGraphView(const UUID& uuid) const;
+
+    GraphFacade* getVisibleGraphFacade() const;
+    DesignerScene* getVisibleDesignerScene() const;
 
     bool isGridEnabled() const;
     bool isSchematicsEnabled() const;
@@ -48,6 +58,13 @@ public:
     bool isDebug() const;
 
     bool hasSelection() const;
+
+
+    void saveSettings(YAML::Node& doc);
+    void loadSettings(YAML::Node& doc);
+
+    void saveView(Graph *graph, YAML::Node &e);
+    void loadView(Graph* graph, YAML::Node& doc);
 
 Q_SIGNALS:
     void selectionChanged();
@@ -62,6 +79,8 @@ Q_SIGNALS:
     void helpRequest(NodeBox*);
 
 public Q_SLOTS:
+    void addGraph(UUID uuid);
+
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
 
@@ -76,6 +95,8 @@ public Q_SLOTS:
     void displayMessageConnections(bool);
     void enableDebug(bool);
 
+    void updateMinimap();
+
     void refresh();
     void reset();
 
@@ -87,17 +108,23 @@ public Q_SLOTS:
     void paste();
 
 private:
+    void observe(GraphFacadePtr graph);
+
+private:
     Ui::Designer* ui;
     DesignerStyleable style;
 
     DragIO& drag_io;
     MinimapWidget* minimap_;
 
-    GraphView* main_graph_view_;
-    DesignerScene* designer_scene_;
-
     Settings& settings_;
-    GraphFacadePtr main_graph_facade_;
+
+    GraphFacadePtr root_graph_facade_;
+    std::vector<GraphFacadePtr> graphs_;
+    std::map<Graph*, int> graph_tabs_;
+    std::map<Graph*, GraphView*> graph_views_;
+    std::map<GraphView*, GraphFacade*> view_graphs_;
+
     CommandDispatcher* dispatcher_;
     WidgetControllerPtr widget_ctrl_;
 
@@ -106,6 +133,8 @@ private:
     QPoint drag_start_pos_;
 
     bool is_init_;
+
+    std::vector<csapex::slim_signal::ScopedConnection> connections_;
 };
 
 }

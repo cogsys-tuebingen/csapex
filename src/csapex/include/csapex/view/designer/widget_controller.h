@@ -25,6 +25,9 @@ class WidgetController : public QObject
 {
     Q_OBJECT
 
+    // TODO: remove
+    friend class GraphView;
+
 public:
     typedef std::shared_ptr<WidgetController> Ptr;
 
@@ -36,17 +39,6 @@ public:
 
     GraphView* getGraphView();
     DesignerScene* getDesignerScene();
-
-    NodeBox* getBox(const UUID& node_id);
-
-    MovableGraphicsProxyWidget* getProxy(const UUID& node_id);
-
-
-    //** FACTORY ??? **//
-    Port *createPort(ConnectableWeakPtr connector, NodeBox *box, QBoxLayout *layout);
-
-    Port* getPort(const UUID& connector_id);
-    Port* getPort(const Connectable* connector_id);
 
     GraphFacadePtr getGraph();
     NodeFactory* getNodeFactory();
@@ -64,24 +56,8 @@ Q_SIGNALS:
 
     void boxAdded(NodeBox* box);
 
-    void triggerConnectorCreated(ConnectablePtr connector);
-    void triggerConnectorRemoved(ConnectablePtr connector);
-
 public Q_SLOTS:
-    void nodeAdded(NodeWorkerPtr node_worker);
-    void nodeRemoved(NodeHandlePtr node_handle);
-
-    void connectorCreated(ConnectablePtr connector);
-    void connectorRemoved(ConnectablePtr connector);
-
     void enableGridLock(bool enabled);
-
-private:
-    void insertPort(QLayout* layout, Port* port);
-
-    void connectorSignalAdded(ConnectablePtr connector);
-
-    void connectorMessageAdded(ConnectablePtr connector);
 
 private:
 

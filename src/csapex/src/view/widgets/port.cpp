@@ -26,10 +26,9 @@
 
 using namespace csapex;
 
-Port::Port(CommandDispatcher *dispatcher, WidgetController* widget_controller, ConnectableWeakPtr adaptee, QWidget *parent)
-    : QFrame(parent), dispatcher_(dispatcher), widget_controller_(widget_controller), adaptee_(adaptee),
-      refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0),
-      preview_(nullptr)
+Port::Port(ConnectableWeakPtr adaptee, QWidget *parent)
+    : QFrame(parent), adaptee_(adaptee),
+      refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0)
 {
     ConnectablePtr adaptee_ptr = adaptee_.lock();
     if(adaptee_ptr) {
@@ -72,26 +71,8 @@ bool Port::event(QEvent *e)
         if(!adaptee) {
             return false;
         }
+
         createToolTip();
-
-        QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
-        QPoint global_pos = helpEvent->globalPos();
-        GraphView* dview = widget_controller_->getGraphView();
-        QPointF pos = dview->mapToScene(dview->mapFromGlobal(global_pos));
-        pos.setY(pos.y() + 50);
-
-        if(!preview_) {
-            preview_ = new MessagePreviewWidget;
-            preview_->hide();
-        }
-
-        preview_->setWindowTitle(QString::fromStdString("Output"));
-        preview_->move(pos.toPoint());
-
-        if(!preview_->isConnected()) {
-            preview_->connectTo(adaptee.get());
-            dview->designerScene()->addWidget(preview_);
-        }
     }
 
     return QWidget::event(e);
@@ -302,11 +283,7 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
     buttons_down_ = e->buttons();
 
     if(e->button() == Qt::MiddleButton) {
-        ConnectablePtr adaptee = adaptee_.lock();
-        if(!adaptee) {
-            return;
-        }
-        dispatcher_->execute(dispatcher_->getCommandFactory()->removeAllConnectionsCmd(adaptee));
+        Q_EMIT removeConnectionsRequest();
     }
 
     e->accept();
@@ -365,17 +342,13 @@ void Port::dropEvent(QDropEvent* e)
     }
     if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-
         if(from && from != adaptee.get()) {
-            auto cmd = dispatcher_->getCommandFactory()->addConnection(adaptee->getUUID(), from->getUUID());
-            dispatcher_->execute(cmd);
+            addConnectionRequest(from);
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-
         if(from) {
-            Command::Ptr cmd(new command::MoveConnection(from, adaptee.get()));
-            dispatcher_->execute(cmd);
+            moveConnectionRequest(from);
             e->setDropAction(Qt::MoveAction);
         }
     }
@@ -383,17 +356,12 @@ void Port::dropEvent(QDropEvent* e)
 
 void Port::enterEvent(QEvent */*e*/)
 {
-
+    Q_EMIT mouseOver(this);
 }
 
 void Port::leaveEvent(QEvent */*e*/)
-{    
-    if(preview_) {
-        preview_->disconnect();
-        preview_->hide();
-        preview_->deleteLater();
-        preview_ = nullptr;
-    }
+{
+    Q_EMIT mouseOut(this);
 }
 
 void Port::mousePressEvent(QMouseEvent* e)

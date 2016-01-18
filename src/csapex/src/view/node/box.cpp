@@ -15,6 +15,7 @@
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/view/utility/color.hpp>
 #include <csapex/core/settings.h>
+#include <csapex/view/widgets/port.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -31,8 +32,8 @@ using namespace csapex;
 
 const QString NodeBox::MIME = "csapex/model/box";
 
-NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Box), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(adapter), icon_(icon),
+NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, QIcon icon, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Box), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(nullptr), icon_(icon),
       down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), initialized_(false)
 {
     handle->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this));
@@ -40,17 +41,23 @@ NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worke
 
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
 
-    if(adapter->isResizable()) {
-        grip_ = new QSizeGrip(this);
-        grip_->installEventFilter(this);
-    }
 
     setVisible(false);
 }
 
-NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeAdapter::Ptr adapter, QIcon icon, QWidget* parent)
-    : NodeBox(settings, handle, nullptr, adapter, icon, parent)
+NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, QIcon icon, QWidget* parent)
+    : NodeBox(settings, handle, nullptr, icon, parent)
 {
+}
+
+void NodeBox::setAdapter(NodeAdapter::Ptr adapter)
+{
+    adapter_ = adapter;
+
+    if(adapter->isResizable()) {
+        grip_ = new QSizeGrip(this);
+        grip_->installEventFilter(this);
+    }
 }
 
 NodeBox::~NodeBox()
@@ -97,7 +104,9 @@ void NodeBox::setupUiAgain()
     ui->header->setAlignment(Qt::AlignTop);
     ui->content->setAlignment(Qt::AlignTop);
 
-    adapter_->doSetupUi(ui->content);
+    if(adapter_) {
+        adapter_->doSetupUi(ui->content);
+    }
     setAutoFillBackground(false);
 
     setAttribute( Qt::WA_TranslucentBackground, true );
@@ -412,6 +421,28 @@ void NodeBox::init()
     Point pt = state->getPos();
     move(QPoint(pt.x, pt.y));
     (*state->pos_changed)();
+}
+
+Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
+{
+    apex_assert_hard(QApplication::instance()->thread() == QThread::currentThread());
+
+    Port* port = new Port(connector);
+
+    port->setFlipped(isFlipped());
+    port->setMinimizedSize(isMinimizedSize());
+
+    QObject::connect(this, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
+    QObject::connect(this, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
+
+    ConnectablePtr adaptee = port->getAdaptee().lock();
+    if(adaptee) {
+        layout->addWidget(port);
+    }
+
+    portAdded(port);
+
+    return port;
 }
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)

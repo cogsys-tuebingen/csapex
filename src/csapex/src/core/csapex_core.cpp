@@ -247,15 +247,13 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     GraphIO graphio(graph_.get(),  node_factory_);
 
-    saveSettingsRequest(node_map);
+    csapex::slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(settings_.saveDetailRequest);
+
+    settings_.saveRequest(node_map);
 
     graphio.saveSettings(node_map);
-//    graphio.saveConnections(node_map);
-
-    saveViewRequest(node_map);
 
     graphio.saveGraph(node_map);
-//    graphio.saveNodes(node_map);
 
     YAML::Emitter yaml;
     yaml << node_map;
@@ -286,6 +284,7 @@ void CsApexCore::load(const std::string &file)
     thread_pool_.setPause(true);
 
     GraphIO graphio(graph_.get(), node_factory_);
+    csapex::slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.loadDetailRequest);
 
     {
         std::ifstream ifs(file.c_str());
@@ -300,9 +299,7 @@ void CsApexCore::load(const std::string &file)
         graphio.loadSettings(doc);
         graphio.loadGraph(doc);
 
-        loadViewRequest(doc);
-
-        loadSettingsRequest(doc);
+        settings_.loadRequest(doc);
     }
 
     load_needs_reset_ = true;

@@ -27,13 +27,13 @@ NodeAdapterFactory::~NodeAdapterFactory()
     node_adapter_manager_ = nullptr;
 }
 
-NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeHandlePtr node, WidgetController* widget_controller)
+NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeHandlePtr node, NodeBox* parent)
 {
     std::string type = node->getType();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-        return node_adapter_builders_[type]->build(node, widget_controller);
+        return node_adapter_builders_[type]->build(node, parent);
     } else {
-        return NodeAdapter::Ptr(new DefaultNodeAdapter(node, widget_controller));
+        return NodeAdapter::Ptr(new DefaultNodeAdapter(node, parent));
     }
 }
 

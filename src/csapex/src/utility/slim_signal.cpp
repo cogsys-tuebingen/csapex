@@ -119,9 +119,11 @@ ScopedConnection::ScopedConnection(const Connection& c)
     : Connection(c)
 {
 }
-ScopedConnection::ScopedConnection(ScopedConnection&& c)
+ScopedConnection::ScopedConnection(ScopedConnection&& c) noexcept
     : Connection(c)
 {
+    c.parent_->removeConnection(&c);
+    c.parent_ = nullptr;
 }
 ScopedConnection::ScopedConnection()
 {
@@ -129,7 +131,9 @@ ScopedConnection::ScopedConnection()
 
 ScopedConnection::~ScopedConnection()
 {
-    disconnect();
+    if(parent_) {
+        disconnect();
+    }
 }
 
 
@@ -142,12 +146,14 @@ void ScopedConnection::operator = (const Connection& c)
     parent_->addConnection(this);
 }
 
-void ScopedConnection::operator = (ScopedConnection&& c)
+void ScopedConnection::operator = (ScopedConnection&& c) noexcept
 {
     apex_assert_hard(c.parent_ != nullptr);
     disconnect();
     deleter_ = c.deleter_;
-    c.parent_->removeConnection(&c);
     parent_ = c.parent_;
+    c.parent_->removeConnection(&c);
     parent_->addConnection(this);
+
+    c.parent_ = nullptr;
 }

@@ -19,7 +19,7 @@ class Port : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(CommandDispatcher* dispatcher, WidgetController *widget_controller, ConnectableWeakPtr adaptee, QWidget *parent = nullptr);
+    Port(ConnectableWeakPtr adaptee, QWidget *parent = nullptr);
     virtual ~Port();
 
     bool event(QEvent *e);
@@ -56,6 +56,14 @@ public:
 
     void refreshStylesheet();
 
+Q_SIGNALS:
+    void mouseOver(Port* port);
+    void mouseOut(Port* port);
+    void removeConnectionsRequest();
+
+    void addConnectionRequest(Connectable*);
+    void moveConnectionRequest(Connectable*);
+
 public Q_SLOTS:
     void setMinimizedSize(bool mini);
     void setFlipped(bool flipped);
@@ -70,8 +78,6 @@ protected:
     void paintEvent(QPaintEvent *);
 
 protected:
-    CommandDispatcher* dispatcher_;
-    WidgetController *widget_controller_;
     ConnectableWeakPtr adaptee_;
     bool refresh_style_sheet_;
     bool minimized_;
@@ -80,8 +86,6 @@ protected:
     Qt::MouseButtons buttons_down_;
 
     std::vector<csapex::slim_signal::Connection> connections_;
-
-    MessagePreviewWidget* preview_;
 };
 
 }

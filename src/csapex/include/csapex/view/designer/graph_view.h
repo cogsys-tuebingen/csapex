@@ -9,11 +9,13 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/designer/designer_styleable.h>
 #include <csapex/utility/slim_signal.hpp>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QGraphicsView>
 #include <map>
 #include <QTimer>
+#include <unordered_map>
 
 namespace csapex
 {
@@ -43,13 +45,17 @@ class GraphView : public QGraphicsView
 public:
     GraphView(DesignerScene* scene, csapex::GraphFacadePtr graph,
               Settings& settings, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio,
-              DesignerStyleable* style, QWidget* parent = 0);
+              DesignerStyleable* style, Designer *parent);
     ~GraphView();
 
     DesignerScene* designerScene();
     std::vector<NodeBox*> boxes();
     std::vector<NodeBox*> getSelectedBoxes();
     CommandPtr deleteSelected();
+
+    NodeBox* getBox(const UUID& node_id);
+    MovableGraphicsProxyWidget* getProxy(const UUID& node_id);
+
 
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);
@@ -67,26 +73,46 @@ public:
 
     void paintEvent(QPaintEvent* e);
 
+    void nodeAdded(NodeWorkerPtr node_worker);
+    void nodeRemoved(NodeHandlePtr node_handle);
+
 Q_SIGNALS:
     void selectionChanged();
     void viewChanged();
+
+    void boxAdded(NodeBox* box);
+    void boxRemoved(NodeBox* box);
 
     void copyRequest();
 
     void startProfilingRequest(NodeWorker* box);
     void stopProfilingRequest(NodeWorker *box);
 
+
+    void triggerConnectorCreated(ConnectablePtr connector);
+    void triggerConnectorRemoved(ConnectablePtr connector);
+
 public Q_SLOTS:
     void showBoxDialog();
-    void addBoxEvent(NodeBox* box);
-    void removeBoxEvent(NodeBox* box);
+
+    void addBox(NodeBox* box);
+    void removeBox(NodeBox* box);
+
+    void addPort(Port* port);
+    void removePort(Port* port);
+
     void renameBox(NodeBox* box);
+
+    void connectorCreated(ConnectablePtr connector);
+    void connectorRemoved(ConnectablePtr connector);
+    void connectorSignalAdded(ConnectablePtr connector);
+    void connectorMessageAdded(ConnectablePtr connector);
 
     void centerOnPoint(QPointF point);
 
     void movedBoxes(double dx, double dy);
 
-    void overwriteStyleSheet(QString& stylesheet);
+    void overwriteStyleSheet(const QString& stylesheet);
     void updateBoxInformation();
 
     void contextMenuEvent(QContextMenuEvent* e);
@@ -113,6 +139,9 @@ public Q_SLOTS:
 
     void copySelected();
 
+    void showPreview(Port* port);
+    void stopPreview();
+
 private:
     void flipBox();
     void minimizeBox(bool mini);
@@ -125,6 +154,7 @@ private:
     void showProfiling(bool visible);
 
 private:
+    Designer* parent_;
     DesignerScene* scene_;
     DesignerStyleable* style_;
 
@@ -135,7 +165,9 @@ private:
     WidgetControllerPtr widget_ctrl_;
     DragIO& drag_io_;
 
-    std::map<NodeWorker*, std::vector<csapex::slim_signal::Connection>> connections_;
+    std::map<NodeWorker*, std::vector<csapex::slim_signal::ScopedConnection>> worker_connections_;
+    std::map<NodeHandle*, std::vector<csapex::slim_signal::ScopedConnection>> handle_connections_;
+    std::vector<csapex::slim_signal::ScopedConnection> scoped_connections_;
 
     std::vector<NodeBox*> boxes_;
     std::vector<NodeBox*> selected_boxes_;
@@ -155,6 +187,12 @@ private:
     QPointF middle_mouse_drag_start_;
 
     QDragMoveEvent* move_event_;
+
+    std::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;
+    std::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher> proxy_map_;
+    std::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
+
+    MessagePreviewWidget* preview_widget_;
 };
 }
 
