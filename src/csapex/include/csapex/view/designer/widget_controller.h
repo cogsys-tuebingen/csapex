@@ -37,13 +37,7 @@ public:
 
     void startPlacingBox(QWidget *parent, const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
 
-    GraphView* getGraphView();
-    DesignerScene* getDesignerScene();
-
-    GraphFacadePtr getGraph();
     NodeFactory* getNodeFactory();
-
-    void setDesigner(Designer* designer);
 
     CommandDispatcher* getCommandDispatcher() const;
 
@@ -61,12 +55,10 @@ public Q_SLOTS:
 
 private:
 
-    GraphFacadePtr graph_;
     CommandDispatcher& dispatcher_;
     Settings& settings_;
     NodeFactory* node_factory_;
     NodeAdapterFactory* node_adapter_factory_;
-    Designer* designer_;
 
     std::vector<csapex::slim_signal::Connection> connections_;
 

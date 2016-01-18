@@ -54,7 +54,7 @@ public:
 };
 
 WidgetController::WidgetController(Settings& settings, CommandDispatcher& dispatcher, GraphFacade::Ptr graph, NodeFactory* node_factory, NodeAdapterFactory* node_adapter_factory)
-    : graph_(graph), dispatcher_(dispatcher), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory), designer_(nullptr),
+    : dispatcher_(dispatcher), settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
       pimpl(new Impl)
 {
     if(settings_.knows("grid-lock")) {
@@ -69,19 +69,9 @@ WidgetController::~WidgetController()
     }
 }
 
-GraphFacade::Ptr WidgetController::getGraph()
-{
-    return graph_;
-}
-
 NodeFactory* WidgetController::getNodeFactory()
 {
     return node_factory_;
-}
-
-void WidgetController::setDesigner(Designer *designer)
-{
-    designer_ = designer;
 }
 
 CommandDispatcher* WidgetController::getCommandDispatcher() const
@@ -92,7 +82,6 @@ CommandDispatcher* WidgetController::getCommandDispatcher() const
 void WidgetController::setStyleSheet(const QString &str)
 {
     pimpl->style_sheet_ = str;
-    designer_->overwriteStyleSheet(pimpl->style_sheet_);
 }
 
 void WidgetController::startPlacingBox(QWidget *parent, const std::string &type, NodeStatePtr state, const QPoint &offset)
@@ -124,16 +113,6 @@ void WidgetController::startPlacingBox(QWidget *parent, const std::string &type,
     drag->setPixmap(object->grab());
     drag->setHotSpot(-offset);
     drag->exec();
-}
-
-GraphView* WidgetController::getGraphView()
-{
-    return designer_->getVisibleGraphView();
-}
-
-DesignerScene* WidgetController::getDesignerScene()
-{
-    return designer_->getVisibleDesignerScene();
 }
 
 bool WidgetController::isGridLockEnabled() const

@@ -15,6 +15,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/widgets/doublespanslider.h>
 #include <csapex/view/node/box.h>
+#include <csapex/view/designer/graph_view.h>
 
 /// PROJECT
 #include <csapex/param/range_parameter.h>
@@ -1050,7 +1051,7 @@ qt_helper::Call * DefaultNodeAdapter::makeUiCall(std::function<void()> cb)
 qt_helper::Call * DefaultNodeAdapter::makePausedUiCall(std::function<void()> cb)
 {
     qt_helper::Call* call = new qt_helper::Call([this, cb](){
-        auto g = widget_ctrl_->getGraph();
+        GraphFacade* g = parent_->getGraphView()->getGraphFacade();
         bool paused = g->isPaused();
         g->pauseRequest(true);
         cb();

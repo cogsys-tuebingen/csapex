@@ -495,14 +495,13 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     std::string type = node_handle->getType();
 
     QIcon icon = QIcon(QString::fromStdString(widget_ctrl_->node_factory_->getConstructor(type)->getIcon()));
-    NodeBox* box = new NodeBox(settings_, node_handle, node_worker, icon);
+    NodeBox* box = new NodeBox(settings_, node_handle, node_worker, icon, this);
 
     QObject::connect(box, SIGNAL(portAdded(Port*)), this, SLOT(addPort(Port*)));
     QObject::connect(box, SIGNAL(portRemoved(Port*)), this, SLOT(removePort(Port*)));
 
     NodeAdapter::Ptr adapter = widget_ctrl_->node_adapter_factory_->makeNodeAdapter(node_handle, box);
-
-
+    adapter->executeCommand.connect(delegate::Delegate<void(CommandPtr)>(dispatcher_, &CommandDispatcher::execute));
     box->setAdapter(adapter);
 
     box_map_[node_handle->getUUID()] = box;
@@ -608,6 +607,11 @@ MovableGraphicsProxyWidget* GraphView::getProxy(const UUID &node_id)
     }
 
     return pos->second;
+}
+
+GraphFacade* GraphView::getGraphFacade() const
+{
+    return graph_facade_.get();
 }
 
 void GraphView::nodeRemoved(NodeHandlePtr node_handle)

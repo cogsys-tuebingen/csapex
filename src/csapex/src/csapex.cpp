@@ -220,8 +220,6 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
         QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorker*)), timeline, SLOT(removeNode(NodeWorker*)));
 
-        widget_control->setDesigner(designer);
-
         CsApexWindow w(*core, &dispatcher, widget_control,
                        graph_facade, graph,
                        thread_pool, designer, minimap, legend, timeline, plugin_locator);

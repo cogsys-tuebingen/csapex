@@ -56,6 +56,7 @@ public:
     NodeBox* getBox(const UUID& node_id);
     MovableGraphicsProxyWidget* getProxy(const UUID& node_id);
 
+    GraphFacade* getGraphFacade() const;
 
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);

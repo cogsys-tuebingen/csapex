@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/view_fwd.h>
+#include <csapex/command/command_fwd.h>
 
 /// SYSTEM
 #include <QLayout>
@@ -35,6 +36,9 @@ public:
 
     virtual bool isResizable() const;
     virtual void setManualResize(bool manual);
+
+public:
+    csapex::slim_signal::Signal<void(CommandPtr)> executeCommand;
 
 protected:
     virtual void setupUi(QBoxLayout* layout) = 0;

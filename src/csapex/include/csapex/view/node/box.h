@@ -45,10 +45,10 @@ public:
     /// CONSTRUCTION
     NodeBox(Settings& settings,
             NodeHandlePtr handle, NodeWorkerPtr worker,
-            QIcon icon, QWidget* parent = 0);
+            QIcon icon, GraphView* parent = 0);
     NodeBox(Settings& settings,
             NodeHandlePtr handle,
-            QIcon icon, QWidget* parent = 0);
+            QIcon icon, GraphView* parent = 0);
 
     void setAdapter(NodeAdapterPtr adapter);
 
@@ -64,6 +64,8 @@ public:
     NodeWorker* getNodeWorker() const;
     NodeHandle* getNodeHandle() const;
     NodeAdapterPtr getNodeAdapter() const;
+
+    GraphView* getGraphView() const;
 
     bool hasSubGraph() const;
     Graph::Ptr getSubGraph() const;
@@ -160,6 +162,8 @@ protected:
     QString getNodeState();
 
 protected:
+    GraphView* parent_;
+
     Ui::Box* ui;
     QSizeGrip* grip_;
 
