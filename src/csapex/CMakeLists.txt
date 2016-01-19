@@ -344,6 +344,7 @@ add_library(csapex_qt SHARED
     src/view/utility/qt_helper.cpp
     src/view/utility/qwrapper.cpp
     src/view/utility/widget_picker.cpp
+    src/view/utility/clipboard.cpp
 
     src/view/widgets/activity_legend.cpp
     src/view/widgets/activity_timeline.cpp

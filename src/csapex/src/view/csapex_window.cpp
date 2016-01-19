@@ -33,6 +33,7 @@
 #include <csapex/param/parameter_factory.h>
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/model/connection_type.h>
+#include <csapex/view/utility/clipboard.h>
 
 /// SYSTEM
 #include <iostream>
@@ -44,8 +45,8 @@
 #include <QSignalMapper>
 #include <thread>
 #include <QShortcut>
-#include <QClipboard>
 #include <QMimeData>
+#include <QClipboard>
 
 using namespace csapex;
 
@@ -237,17 +238,7 @@ void CsApexWindow::updateSelectionActions()
 
 void CsApexWindow::updateClipboardActions()
 {
-    const QMimeData* data = QApplication::clipboard()->mimeData();
-
-    bool enable = false;
-    static QString valid_types[] { "text/plain", "text/yaml", "xcsapex/node-list" };
-    for(const auto& valid_type : valid_types) {
-        if(data->hasFormat(valid_type)) {
-            enable = true;
-        }
-    }
-
-    ui->actionPaste->setEnabled(enable);
+    ui->actionPaste->setEnabled(ClipBoard::canPaste());
 }
 
 void CsApexWindow::showHelp(NodeBox *box)

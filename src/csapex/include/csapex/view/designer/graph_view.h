@@ -84,8 +84,6 @@ Q_SIGNALS:
     void boxAdded(NodeBox* box);
     void boxRemoved(NodeBox* box);
 
-    void copyRequest();
-
     void startProfilingRequest(NodeWorker* box);
     void stopProfilingRequest(NodeWorker *box);
 
@@ -119,7 +117,6 @@ public Q_SLOTS:
     void contextMenuEvent(QContextMenuEvent* e);
     void showContextMenuGlobal(const QPoint& pos);
     void showContextMenuForSelectedNodes(NodeBox *box, const QPoint& pos);
-    void showContextMenuAddNode(const QPoint& global_pos);
 
     void startProfiling(NodeWorker* box);
     void stopProfiling(NodeWorker *box);
@@ -139,6 +136,7 @@ public Q_SLOTS:
     void selectAll();
 
     void copySelected();
+    void paste();
 
     void showPreview(Port* port);
     void stopPreview();

@@ -471,6 +471,9 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
     if(item && item->type() == QGraphicsProxyWidget::Type) {
         QGraphicsProxyWidget* proxy = static_cast<QGraphicsProxyWidget*>(item);
         QWidget* widget = proxy->widget();
+        if(!widget) {
+            return;
+        }
         QPointF p = proxy->mapFromScene(e->scenePos());
         QWidget* child = widget->childAt(p.toPoint());
 

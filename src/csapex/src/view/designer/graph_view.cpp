@@ -14,6 +14,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/move_connection.h>
+#include <csapex/command/paste_graph.h>
 #include <csapex/view/widgets/box_dialog.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
@@ -43,6 +44,8 @@
 #include <csapex/signal/slot.h>
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/view/widgets/port.h>
+#include <csapex/view/utility/clipboard.h>
+#include <csapex/core/graphio.h>
 
 /// SYSTEM
 #include <iostream>
@@ -829,8 +832,42 @@ void GraphView::updateBoxInformation()
 
 void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 {
-    /// BOXES
-    showContextMenuAddNode(global_pos);
+    QMenu menu;
+
+    QAction* q_copy = new QAction("copy", &menu);
+    q_copy->setIcon(QIcon(":/copy.png"));
+    q_copy->setEnabled(!getSelectedBoxes().empty());
+    menu.addAction(q_copy);
+
+    QAction* q_paste = new QAction("paste", &menu);
+    q_paste->setIcon(QIcon(":/paste.png"));
+    q_paste->setEnabled(ClipBoard::canPaste());
+    menu.addAction(q_paste);
+
+    menu.addSeparator();
+
+    QMenu add_node("create node");
+    add_node.setIcon(QIcon(":/plugin.png"));
+    NodeListGenerator generator(*widget_ctrl_->getNodeFactory());
+    generator.insertAvailableNodeTypes(&add_node);
+
+    menu.addMenu(&add_node);
+
+    QAction* selectedItem = menu.exec(global_pos);
+
+    if(selectedItem) {
+        if(selectedItem == q_copy) {
+            copySelected();
+
+        } else if(selectedItem == q_paste) {
+            paste();
+
+        } else {
+            // else it must be an insertion
+            std::string selected = selectedItem->data().toString().toStdString();
+            widget_ctrl_->startPlacingBox(this, selected, nullptr);
+        }
+    }
 }
 
 void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scene_pos)
@@ -861,6 +898,11 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
     copy->setIconVisibleInMenu(true);
     handler[copy] = std::bind(&GraphView::copySelected, this);
     menu.addAction(copy);
+
+    QAction* paste = new QAction("paste", &menu);
+    paste->setIcon(QIcon(":/paste.png"));
+    paste->setEnabled(false);
+    menu.addAction(paste);
 
     menu.addSeparator();
 
@@ -1087,7 +1129,30 @@ void GraphView::groupBox()
 
 void GraphView::copySelected()
 {
-    Q_EMIT copyRequest();
+    GraphIO io(graph_facade_->getGraph(), widget_ctrl_->getNodeFactory());
+
+    std::vector<UUID> nodes;
+    for(const NodeBox* box : getSelectedBoxes()) {
+        nodes.emplace_back(box->getNodeHandle()->getUUID());
+    }
+
+    YAML::Node yaml;
+    io.saveSelectedGraph(yaml, nodes);
+
+    ClipBoard::set(yaml);
+}
+
+void GraphView::paste()
+{
+    apex_assert_hard(ClipBoard::canPaste());
+    YAML::Node blueprint = YAML::Load(ClipBoard::get());
+
+    QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
+
+    UUID graph_id = graph_facade_->getGraph()->getUUID();
+    CommandPtr cmd(new command::PasteGraph(graph_id, blueprint, Point (pos.x(), pos.y())));
+
+    dispatcher_->execute(cmd);
 }
 
 void GraphView::contextMenuEvent(QContextMenuEvent* event)
@@ -1101,20 +1166,6 @@ void GraphView::contextMenuEvent(QContextMenuEvent* event)
 
     if(!event->isAccepted()) {
         showContextMenuGlobal(event->globalPos());
-    }
-}
-
-void GraphView::showContextMenuAddNode(const QPoint &global_pos)
-{
-    QMenu menu;
-    NodeListGenerator generator(*widget_ctrl_->getNodeFactory());
-    generator.insertAvailableNodeTypes(&menu);
-
-    QAction* selectedItem = menu.exec(global_pos);
-
-    if(selectedItem) {
-        std::string selected = selectedItem->data().toString().toStdString();
-        widget_ctrl_->startPlacingBox(this, selected, nullptr);
     }
 }
 

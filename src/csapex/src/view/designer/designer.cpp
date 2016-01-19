@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
-#include <csapex/command/paste_graph.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/input.h>
@@ -22,6 +21,7 @@
 #include <csapex/model/node_modifier.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/designer/designerio.h>
+#include <csapex/view/utility/clipboard.h>
 
 /// SYSTEM
 #include <QScrollBar>
@@ -29,7 +29,6 @@
 #include <QGraphicsView>
 #include <QMessageBox>
 #include <QGraphicsSceneWheelEvent>
-#include <QClipboard>
 #include <QMimeData>
 
 using namespace csapex;
@@ -136,7 +135,6 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
 
     ui->tabWidget->setCurrentIndex(tab);
 
-    QObject::connect(graph_view, SIGNAL(copyRequest()), this, SLOT(copySelected()));
     QObject::connect(graph_view, SIGNAL(boxAdded(NodeBox*)), this, SLOT(addBox(NodeBox*)));
     QObject::connect(graph_view, SIGNAL(boxRemoved(NodeBox*)), this, SLOT(removeBox(NodeBox*)));
 
@@ -268,26 +266,7 @@ void Designer::copySelected()
         return;
     }
 
-    GraphIO io(getVisibleGraphFacade()->getGraph(), widget_ctrl_->getNodeFactory());
-
-    std::vector<UUID> nodes;
-    for(const NodeBox* box : view->getSelectedBoxes()) {
-        nodes.emplace_back(box->getNodeHandle()->getUUID());
-    }
-
-    YAML::Node yaml;
-    io.saveSelectedGraph(yaml, nodes);
-
-    QMimeData* mime = new QMimeData;
-    std::stringstream yaml_txt;
-    yaml_txt << yaml;
-
-    auto data = QString::fromStdString(yaml_txt.str()).toUtf8();
-    mime->setData("text/plain", data);
-    mime->setData("text/yaml", data);
-    mime->setData("xcsapex/node-list", data);
-
-    QApplication::clipboard()->setMimeData(mime, QClipboard::Clipboard);
+    view->copySelected();
 }
 
 void Designer::paste()
@@ -297,19 +276,7 @@ void Designer::paste()
         return;
     }
 
-    const QMimeData* mime = QApplication::clipboard()->mimeData();
-    QString data = mime->data("xcsapex/node-list");
-
-    YAML::Node blueprint = YAML::Load(data.toStdString());
-
-    GraphFacade* graph_facade = getVisibleGraphFacade();
-
-    QPointF pos = view->mapToScene(view->mapFromGlobal(QCursor::pos()));
-
-    UUID graph_id = graph_facade->getGraph()->getUUID();
-    CommandPtr cmd(new command::PasteGraph(graph_id, blueprint, Point (pos.x(), pos.y())));
-
-    dispatcher_->execute(cmd);
+    view->paste();
 }
 
 void Designer::overwriteStyleSheet(QString &stylesheet)
