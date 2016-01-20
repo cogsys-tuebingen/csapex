@@ -58,6 +58,9 @@ public:
 
     GraphFacade* getGraphFacade() const;
 
+    void resizeEvent(QResizeEvent *event);
+    void scrollContentsBy(int dx, int dy);
+
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);
 

@@ -145,17 +145,40 @@ void GraphView::paintEvent(QPaintEvent *e)
     Q_EMIT viewChanged();
 }
 
+void GraphView::resizeEvent(QResizeEvent *event)
+{
+    scene_->setSceneRect(scene_->itemsBoundingRect());
+
+    QGraphicsView::resizeEvent(event);
+}
+
+void GraphView::scrollContentsBy(int dx, int dy)
+{
+    QRectF min_r = scene_->itemsBoundingRect();
+
+    QPointF tl_view = mapToScene(QPoint(0, 0));
+    QPointF br_view = mapToScene(QPoint(width(), height()));
+
+    double mx = std::abs(dx * 5) + 10;
+    double my = std::abs(dy * 5) + 10;
+
+    QPointF tl(std::min(tl_view.x() - mx, min_r.x()),
+               std::min(tl_view.y() - my, min_r.y()));
+    QPointF br(std::max(br_view.x() + mx, min_r.x() + min_r.width()),
+               std::max(br_view.y() + my, min_r.y() + min_r.height()));
+
+    QRectF expanded(tl, br);
+
+    if(expanded != sceneRect()) {
+        scene_->setSceneRect(expanded);
+    }
+
+    QGraphicsView::scrollContentsBy(dx, dy);
+}
+
 void GraphView::centerOnPoint(QPointF point)
 {
     centerOn(point);
-    //    QScrollBar* h = horizontalScrollBar();
-    //    QScrollBar* v = verticalScrollBar();
-
-    //    int x = point.x();
-    //    int y = point.y();
-
-    //    h->setValue(x);
-    //    v->setValue(y);
 }
 
 void GraphView::reset()
