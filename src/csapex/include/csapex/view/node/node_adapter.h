@@ -56,7 +56,6 @@ protected:
 
     NodeHandleWeakPtr node_;
     NodeBox* parent_;
-    WidgetController* widget_ctrl_;
 
     std::vector<csapex::slim_signal::Connection> connections_;
 };

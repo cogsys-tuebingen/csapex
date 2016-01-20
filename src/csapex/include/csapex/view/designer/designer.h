@@ -9,10 +9,10 @@
 #include <csapex/view/designer/designer_styleable.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/slim_signal.h>
+#include <csapex/view/designer/designer_options.h>
 
 /// SYSTEM
 #include <QWidget>
-#include <QTreeWidget>
 #include <yaml-cpp/yaml.h>
 #include <unordered_map>
 
@@ -25,16 +25,21 @@ class Designer;
 namespace csapex
 {
 
+class NodeFactory;
+
 class Designer : public QWidget
 {
     Q_OBJECT
 
     friend class DesignerIO;
+    friend class DesignerOptions;
 
 public:
-    Designer(Settings& settings, GraphFacadePtr main_graph_facade, MinimapWidget* minimap, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl,
+    Designer(Settings& settings, NodeFactory& node_factory, NodeAdapterFactory &node_adapter_factory, GraphFacadePtr main_graph_facade, MinimapWidget* minimap, CommandDispatcher* dispatcher,
              DragIO& dragio, QWidget* parent = 0);
     virtual ~Designer();
+
+    DesignerOptions *options();
 
     void setup();
 
@@ -49,17 +54,7 @@ public:
     GraphFacade* getVisibleGraphFacade() const;
     DesignerScene* getVisibleDesignerScene() const;
 
-    bool isGridEnabled() const;
-    bool isSchematicsEnabled() const;
-    bool isGraphComponentsEnabled() const;
-    bool isThreadsEnabled() const;
-    bool isMinimapEnabled() const;
-    bool areSignalConnectionsVisible() const;
-    bool areMessageConnectionsVisibile() const;
-    bool isDebug() const;
-
     bool hasSelection() const;
-
 
     void saveSettings(YAML::Node& doc);
     void loadSettings(YAML::Node& doc);
@@ -69,14 +64,6 @@ public:
 
 Q_SIGNALS:
     void selectionChanged();
-    void gridEnabled(bool);
-    void minimapEnabled(bool);
-    void signalsEnabled(bool);
-    void messagesEnabled(bool);
-    void debugEnabled(bool);
-    void schematicsEnabled(bool);
-    void graphComponentsEnabled(bool);
-    void threadsEnabled(bool);
     void helpRequest(NodeBox*);
 
 public Q_SLOTS:
@@ -88,15 +75,6 @@ public Q_SLOTS:
     void removeBox(NodeBox* box);
 
     void overwriteStyleSheet(QString& stylesheet);
-
-    void enableGrid(bool);
-    void enableSchematics(bool);
-    void displayGraphComponents(bool);
-    void displayThreads(bool);
-    void displayMinimap(bool);
-    void displaySignalConnections(bool);
-    void displayMessageConnections(bool);
-    void enableDebug(bool);
 
     void updateMinimap();
 
@@ -118,10 +96,14 @@ private:
     Ui::Designer* ui;
     DesignerStyleable style;
 
+    DesignerOptions options_;
+
     DragIO& drag_io;
     MinimapWidget* minimap_;
 
     Settings& settings_;
+    NodeFactory& node_factory_;
+    NodeAdapterFactory& node_adapter_factory_;
 
     GraphFacadePtr root_graph_facade_;
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> graphs_;
@@ -133,7 +115,6 @@ private:
     std::map<UUID, YAML::Node> states_for_invisible_graphs_;
 
     CommandDispatcher* dispatcher_;
-    WidgetControllerPtr widget_ctrl_;
 
     bool space_;
     bool drag_;

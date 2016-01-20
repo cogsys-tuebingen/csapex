@@ -7,8 +7,8 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/view/designer/graph_view.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_state.h>
+#include <csapex/view/designer/designer_options.h>
 
 /// SYSTEM
 #include <QGraphicsSceneMouseEvent>
@@ -18,8 +18,8 @@
 
 using namespace csapex;
 
-MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *view, WidgetController* widget_ctrl, QGraphicsItem *parent, Qt::WindowFlags wFlags)
-    : QGraphicsProxyWidget(parent, wFlags), box_(box), view_(view), widget_ctrl_(widget_ctrl), relay_(false), clone_p_(false)
+MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *view, DesignerOptions *options, QGraphicsItem *parent, Qt::WindowFlags wFlags)
+    : QGraphicsProxyWidget(parent, wFlags), box_(box), view_(view), options_(options), relay_(false), clone_p_(false)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
@@ -34,7 +34,7 @@ QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const
 {
     if (QApplication::mouseButtons() == Qt::LeftButton &&
             change == ItemPositionChange &&
-            widget_ctrl_->isGridLockEnabled()) {
+            options_->isGridLockEnabled()) {
 
         QVariant value_p = QGraphicsProxyWidget::itemChange(change, value);
         QPointF newPos = value_p.toPointF();
@@ -120,7 +120,7 @@ void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         if(hypot(delta.x(), delta.y()) > 10) {
             NodeStatePtr state = box_->getNodeHandle()->getNodeStateCopy();
             state->setLabel("");
-            widget_ctrl_->startPlacingBox(view_, box_->getNodeHandle()->getType(), state);
+            view_->startPlacingBox(box_->getNodeHandle()->getType(), state);
         }
         return;
     }

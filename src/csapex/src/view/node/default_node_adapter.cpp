@@ -8,7 +8,6 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/view/widgets/port.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/view/node/parameter_context_menu.h>
 #include <csapex/model/node_state.h>

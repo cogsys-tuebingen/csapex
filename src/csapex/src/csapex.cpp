@@ -24,7 +24,6 @@
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/node/node_adapter_factory.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/view/gui_exception_handler.h>
@@ -201,11 +200,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
 
         NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
-        WidgetControllerPtr widget_control = std::make_shared<WidgetController>(settings, dispatcher, graph_facade, node_factory.get(), node_adapter_factory.get());
-        DragIO drag_io(plugin_locator, graph.get(), &dispatcher, widget_control);
+        DragIO drag_io(plugin_locator, graph.get(), &dispatcher);
 
         MinimapWidget* minimap = new MinimapWidget;
-        Designer* designer = new Designer(settings, graph_facade, minimap, &dispatcher, widget_control, drag_io);
+        Designer* designer = new Designer(settings, *node_factory, *node_adapter_factory,
+                                          graph_facade, minimap, &dispatcher, drag_io);
 
         ActivityLegend* legend = new ActivityLegend;
         ActivityTimeline* timeline = new ActivityTimeline;
@@ -220,8 +219,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
         QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorker*)), timeline, SLOT(removeNode(NodeWorker*)));
 
-        CsApexWindow w(*core, &dispatcher, widget_control,
-                       graph_facade, graph,
+        CsApexWindow w(*core, &dispatcher, graph_facade, graph,
                        thread_pool, designer, minimap, legend, timeline, plugin_locator);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 

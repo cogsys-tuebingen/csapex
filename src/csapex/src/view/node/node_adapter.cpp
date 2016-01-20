@@ -14,7 +14,7 @@
 using namespace csapex;
 
 NodeAdapter::NodeAdapter(NodeHandleWeakPtr adaptee, NodeBox* parent)
-    : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent), widget_ctrl_(nullptr)
+    : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent)
 {
 }
 

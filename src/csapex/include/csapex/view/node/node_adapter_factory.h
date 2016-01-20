@@ -15,8 +15,6 @@ namespace csapex
 
 class NodeAdapterFactory
 {
-    friend class WidgetController;
-
 public:
     typedef std::shared_ptr<NodeAdapterFactory> Ptr;
 

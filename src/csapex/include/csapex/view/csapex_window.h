@@ -41,7 +41,7 @@ public:
      * @brief CsApexWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher, WidgetControllerPtr widget_ctrl,
+    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher,
                           GraphFacadePtr graph_facade, GraphPtr graph, Executor &executor, Designer *designer, MinimapWidget* minimap, ActivityLegend *legend, ActivityTimeline* timeline,
                           PluginLocatorPtr locator, QWidget* parent = 0);
     virtual ~CsApexWindow();
@@ -95,6 +95,8 @@ Q_SIGNALS:
 
 private:
     void construct();
+    void setupDesigner();
+
     void createPluginsMenu();
     void loadStyleSheet();
 
@@ -103,7 +105,6 @@ private:
 private:
     CsApexCore& core_;
     CommandDispatcher* cmd_dispatcher_;
-    WidgetControllerPtr widget_ctrl_;
     GraphFacadePtr graph_facade_;
     GraphPtr graph_;
     Executor& executor_;

@@ -23,10 +23,9 @@ FWD(NodeAdapterBuilder);
 FWD(NodeAdapterFactory);
 FWD(Port);
 
-FWD(WidgetController);
-
 
 class Designer;
+class DesignerOptions;
 class DesignerScene;
 class GraphView;
 class MinimapWidget;

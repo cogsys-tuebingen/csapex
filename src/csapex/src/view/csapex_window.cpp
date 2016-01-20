@@ -24,7 +24,6 @@
 #include <csapex/view/designer/designerio.h>
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/screenshot_dialog.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/command/command.h>
 #include "ui_csapex_window.h"
 #include <csapex/view/utility/node_list_generator.h>
@@ -50,12 +49,12 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, WidgetControllerPtr widget_ctrl, GraphFacadePtr graph_facade,
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, GraphFacadePtr graph_facade,
                            GraphPtr graph, Executor& executor,
                            Designer* designer, MinimapWidget* minimap,
                            ActivityLegend *legend, ActivityTimeline *timeline,
                            PluginLocatorPtr locator, QWidget *parent)
-    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher), widget_ctrl_(widget_ctrl),
+    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher),
       graph_facade_(graph_facade), graph_(graph), executor_(executor),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
@@ -91,24 +90,12 @@ void CsApexWindow::construct()
 
     Graph* graph = graph_facade_->getGraph();
 
-    designer_->setup();
-    setCentralWidget(designer_);
+    setupDesigner();
 
-    ui->actionGrid->setChecked(designer_->isGridEnabled());
-    ui->actionSchematics->setChecked(designer_->isSchematicsEnabled());
-    ui->actionLock_to_Grid->setChecked(widget_ctrl_->isGridLockEnabled());
-    ui->actionDisplay_Graph_Components->setChecked(designer_->isGraphComponentsEnabled());
-    ui->actionDisplay_Threads->setChecked(designer_->isThreadsEnabled());
 
-    ui->actionSignal_Connections->setChecked(designer_->areSignalConnectionsVisible());
-    ui->actionMessage_Connections->setChecked(designer_->areMessageConnectionsVisibile());
 
-    ui->actionDebug->setChecked(designer_->isDebug());
 
     ui->actionPause->setChecked(executor_.isPaused());
-
-    minimap_->setVisible(designer_->isMinimapEnabled());
-    ui->actionDisplay_Minimap->setChecked(designer_->isMinimapEnabled());
 
     auto forceShortcut = [this](QAction* action) {
         QShortcut *shortcut = new QShortcut(action->shortcut(), this);
@@ -140,28 +127,6 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
 
-    QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), designer_,  SLOT(enableGrid(bool)));
-    QObject::connect(designer_, SIGNAL(gridEnabled(bool)), ui->actionGrid, SLOT(setChecked(bool)));
-    QObject::connect(ui->actionSchematics, SIGNAL(toggled(bool)), designer_,  SLOT(enableSchematics(bool)));
-    QObject::connect(designer_, SIGNAL(schematicsEnabled(bool)), ui->actionSchematics, SLOT(setChecked(bool)));
-    QObject::connect(ui->actionDisplay_Graph_Components, SIGNAL(toggled(bool)), designer_,  SLOT(displayGraphComponents(bool)));
-    QObject::connect(designer_, SIGNAL(graphComponentsEnabled(bool)), ui->actionDisplay_Graph_Components, SLOT(setChecked(bool)));
-    QObject::connect(ui->actionDisplay_Threads, SIGNAL(toggled(bool)), designer_,  SLOT(displayThreads(bool)));
-    QObject::connect(designer_, SIGNAL(threadsEnabled(bool)), ui->actionDisplay_Threads, SLOT(setChecked(bool)));
-    QObject::connect(ui->actionDisplay_Minimap, SIGNAL(toggled(bool)), designer_,  SLOT(displayMinimap(bool)));
-    QObject::connect(designer_, SIGNAL(minimapEnabled(bool)), ui->actionDisplay_Minimap, SLOT(setChecked(bool)));
-
-    QObject::connect(ui->actionSignal_Connections, SIGNAL(toggled(bool)), designer_, SLOT(displaySignalConnections(bool)));
-    QObject::connect(designer_, SIGNAL(signalsEnabled(bool)), ui->actionSignal_Connections, SLOT(setChecked(bool)));
-
-    QObject::connect(ui->actionMessage_Connections, SIGNAL(toggled(bool)), designer_, SLOT(displayMessageConnections(bool)));
-    QObject::connect(designer_, SIGNAL(messagesEnabled(bool)), ui->actionMessage_Connections, SLOT(setChecked(bool)));
-
-    QObject::connect(ui->actionDebug, SIGNAL(toggled(bool)), designer_, SLOT(enableDebug(bool)));
-    QObject::connect(designer_, SIGNAL(debugEnabled(bool)), ui->actionDebug, SLOT(setChecked(bool)));
-
-    QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)), widget_ctrl_.get(),  SLOT(enableGridLock(bool)));
-    QObject::connect(widget_ctrl_.get(), SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
 
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateSelectionActions()));
     updateSelectionActions();
@@ -212,6 +177,53 @@ void CsApexWindow::construct()
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
+
+
+void CsApexWindow::setupDesigner()
+{
+    designer_->setup();
+    setCentralWidget(designer_);
+
+    DesignerOptions* opt = designer_->options();
+
+    ui->actionGrid->setChecked(opt->isGridEnabled());
+    ui->actionSchematics->setChecked(opt->isSchematicsEnabled());
+    ui->actionLock_to_Grid->setChecked(opt->isGridLockEnabled());
+    ui->actionDisplay_Graph_Components->setChecked(opt->isGraphComponentsEnabled());
+    ui->actionDisplay_Threads->setChecked(opt->isThreadsEnabled());
+
+    ui->actionSignal_Connections->setChecked(opt->areSignalConnectionsVisible());
+    ui->actionMessage_Connections->setChecked(opt->areMessageConnectionsVisibile());
+
+    ui->actionDebug->setChecked(opt->isDebug());
+
+    minimap_->setVisible(opt->isMinimapEnabled());
+    ui->actionDisplay_Minimap->setChecked(opt->isMinimapEnabled());
+
+    QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), opt,  SLOT(enableGrid(bool)));
+    QObject::connect(opt, SIGNAL(gridEnabled(bool)), ui->actionGrid, SLOT(setChecked(bool)));
+    QObject::connect(ui->actionSchematics, SIGNAL(toggled(bool)), opt,  SLOT(enableSchematics(bool)));
+    QObject::connect(opt, SIGNAL(schematicsEnabled(bool)), ui->actionSchematics, SLOT(setChecked(bool)));
+    QObject::connect(ui->actionDisplay_Graph_Components, SIGNAL(toggled(bool)), opt,  SLOT(displayGraphComponents(bool)));
+    QObject::connect(opt, SIGNAL(graphComponentsEnabled(bool)), ui->actionDisplay_Graph_Components, SLOT(setChecked(bool)));
+    QObject::connect(ui->actionDisplay_Threads, SIGNAL(toggled(bool)), opt,  SLOT(displayThreads(bool)));
+    QObject::connect(opt, SIGNAL(threadsEnabled(bool)), ui->actionDisplay_Threads, SLOT(setChecked(bool)));
+    QObject::connect(ui->actionDisplay_Minimap, SIGNAL(toggled(bool)), opt,  SLOT(displayMinimap(bool)));
+    QObject::connect(opt, SIGNAL(minimapEnabled(bool)), ui->actionDisplay_Minimap, SLOT(setChecked(bool)));
+
+    QObject::connect(ui->actionSignal_Connections, SIGNAL(toggled(bool)), opt, SLOT(displaySignalConnections(bool)));
+    QObject::connect(opt, SIGNAL(signalsEnabled(bool)), ui->actionSignal_Connections, SLOT(setChecked(bool)));
+
+    QObject::connect(ui->actionMessage_Connections, SIGNAL(toggled(bool)), opt, SLOT(displayMessageConnections(bool)));
+    QObject::connect(opt, SIGNAL(messagesEnabled(bool)), ui->actionMessage_Connections, SLOT(setChecked(bool)));
+
+    QObject::connect(ui->actionDebug, SIGNAL(toggled(bool)), opt, SLOT(enableDebug(bool)));
+    QObject::connect(opt, SIGNAL(debugEnabled(bool)), ui->actionDebug, SLOT(setChecked(bool)));
+
+    QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)),opt,  SLOT(enableGridLock(bool)));
+    QObject::connect(opt, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
+}
+
 
 void CsApexWindow::setupTimeline()
 {
@@ -291,7 +303,7 @@ void CsApexWindow::updateDebugInfo()
     for(NodeBox* box : selected) {
         NodeHandle* handle = box->getNodeHandle();
         handle->nodeStateChanged.connect([this](){ updateDebugInfo(); });
-        ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(widget_ctrl_->getNodeFactory()));
+        ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(&core_.getNodeFactory()));
     }
 
     QTreeWidgetItemIterator it(ui->box_info);
@@ -327,7 +339,7 @@ void CsApexWindow::updateNodeInfo()
     for(QTreeWidgetItem* item : ui->node_info_tree->selectedItems()) {
         QString type = item->data(0, Qt::UserRole + 1).toString();
         if(!type.isEmpty()) {
-            NodeConstructor::Ptr n = widget_ctrl_->getNodeFactory()->getConstructor(type.toStdString());
+            NodeConstructor::Ptr n = core_.getNodeFactory().getConstructor(type.toStdString());
 
             QString icon = QString::fromStdString(n->getIcon());
             QImage image = QIcon(icon).pixmap(QSize(16,16)).toImage();
@@ -458,7 +470,7 @@ void CsApexWindow::updateNodeTypes()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    NodeListGenerator generator(*widget_ctrl_->getNodeFactory());
+    NodeListGenerator generator(core_.getNodeFactory());
 
     generator.insertAvailableNodeTypes(ui->boxes);
     generator.insertAvailableNodeTypes(ui->node_info_tree);
@@ -471,7 +483,6 @@ void CsApexWindow::loadStyleSheet(const QString& path)
     file.open(QFile::ReadOnly);
     QString style_sheet(file.readAll());
     QWidget::setStyleSheet(style_sheet);
-    widget_ctrl_->setStyleSheet(style_sheet);
 
     designer_->overwriteStyleSheet(style_sheet);
 

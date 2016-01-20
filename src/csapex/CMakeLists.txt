@@ -316,6 +316,7 @@ add_library(csapex_qt SHARED
     src/manager/message_renderer_manager.cpp
 
     src/view/designer/designer.cpp
+    src/view/designer/designer_options.cpp
     src/view/designer/designer_scene.cpp
     src/view/designer/designer_styleable.cpp
     src/view/designer/graph_view.cpp
@@ -324,7 +325,6 @@ add_library(csapex_qt SHARED
     src/view/designer/drag_io_handler.cpp
     src/view/designer/fulcrum_handle.cpp
     src/view/designer/fulcrum_widget.cpp
-    src/view/designer/widget_controller.cpp
 
     src/view/node/default_node_adapter.cpp
     src/view/node/node_adapter_builder.cpp

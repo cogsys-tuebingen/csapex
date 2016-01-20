@@ -9,7 +9,6 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/view/designer/designer_scene.h>

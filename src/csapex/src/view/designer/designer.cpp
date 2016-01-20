@@ -5,39 +5,28 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
 #include <csapex/core/settings.h>
-#include <csapex/factory/node_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/node/box.h>
 #include <csapex/view/designer/graph_view.h>
-#include <csapex/view/designer/widget_controller.h>
-#include "ui_designer.h"
-#include <csapex/param/parameter_factory.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/core/graphio.h>
-#include <csapex/model/node_modifier.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/designer/designerio.h>
-#include <csapex/view/utility/clipboard.h>
-
-/// SYSTEM
-#include <QScrollBar>
-#include <QGLWidget>
-#include <QGraphicsView>
-#include <QMessageBox>
-#include <QGraphicsSceneWheelEvent>
-#include <QMimeData>
+#include "ui_designer.h"
 
 using namespace csapex;
 
-Designer::Designer(Settings& settings, GraphFacadePtr main_graph_facade, MinimapWidget *minimap, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl,
+Designer::Designer(Settings& settings, NodeFactory &node_factory, NodeAdapterFactory& node_adapter_factory,
+                   GraphFacadePtr main_graph_facade, MinimapWidget *minimap, CommandDispatcher *dispatcher,
                    DragIO& dragio, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer),
-      drag_io(dragio), minimap_(minimap),
-      settings_(settings), root_graph_facade_(main_graph_facade), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), is_init_(false)
+      options_(settings, this), drag_io(dragio), minimap_(minimap),
+      settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
+      root_graph_facade_(main_graph_facade), dispatcher_(dispatcher), is_init_(false)
 {
     connections_.emplace_back(settings_.saveRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
     connections_.emplace_back(settings_.loadRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
@@ -51,6 +40,11 @@ Designer::Designer(Settings& settings, GraphFacadePtr main_graph_facade, Minimap
 Designer::~Designer()
 {
     delete ui;
+}
+
+DesignerOptions* Designer::options()
+{
+    return &options_;
 }
 
 void Designer::setup()
@@ -111,8 +105,10 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     }
 
     UUID uuid = graph->getUUID();
-    DesignerScene* designer_scene = new DesignerScene(graph_facade, dispatcher_, widget_ctrl_, &style);
-    GraphView* graph_view = new GraphView(designer_scene, graph_facade, settings_, dispatcher_, widget_ctrl_, drag_io, &style, this);
+    DesignerScene* designer_scene = new DesignerScene(graph_facade, dispatcher_, &style);
+    GraphView* graph_view = new GraphView(designer_scene, graph_facade,
+                                          settings_, node_factory_, node_adapter_factory_,
+                                          dispatcher_, drag_io, &style, this);
     graph_views_[graph] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();
 
@@ -148,25 +144,8 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
 
     QObject::connect(graph_view, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
 
-    if(settings_.knows("grid")) {
-        enableGrid(settings_.get<bool>("grid"));
-    }
+    options_.setup(graph_view);
 
-    if(settings_.knows("schematics")) {
-        enableSchematics(settings_.get<bool>("schematics"));
-    }
-
-    if(settings_.knows("display-messages")) {
-        designer_scene->displayMessages(settings_.get<bool>("display-messages"));
-    }
-
-    if(settings_.knows("display-signals")) {
-        designer_scene->displaySignals(settings_.get<bool>("display-signals"));
-    }
-
-    if(settings_.knows("debug")) {
-        designer_scene->enableDebug(settings_.get<bool>("debug"));
-    }
     setFocusPolicy(Qt::NoFocus);
 }
 
@@ -226,6 +205,16 @@ std::vector<NodeBox*> Designer::getSelectedBoxes() const
         return {};
     }
     return scene->getSelectedBoxes();
+}
+
+bool Designer::hasSelection() const
+{
+    DesignerScene* scene = getVisibleDesignerScene();
+    if(!scene) {
+        return false;
+    }
+
+    return scene->selectedItems().size() > 0;
 }
 
 void Designer::clearSelection()
@@ -360,184 +349,6 @@ void Designer::removeBox(NodeBox *box)
     minimap_->update();
 }
 
-bool Designer::isGridEnabled() const
-{
-    return settings_.get<bool>("grid", false);
-}
-bool Designer::isSchematicsEnabled() const
-{
-    return settings_.get<bool>("schematics", false);
-}
-
-bool Designer::isGraphComponentsEnabled() const
-{
-    return settings_.get<bool>("display-graph-components", false);
-}
-bool Designer::isThreadsEnabled() const
-{
-    return settings_.get<bool>("display-threads", false);
-}
-
-bool Designer::isMinimapEnabled() const
-{
-    return settings_.get<bool>("display-minimap", false);
-}
-
-bool Designer::areMessageConnectionsVisibile() const
-{
-    return settings_.get<bool>("display-messages", true);
-}
-
-bool Designer::areSignalConnectionsVisible() const
-{
-    return settings_.get<bool>("display-signals", true);
-}
-bool Designer::isDebug() const
-{
-    return settings_.get<bool>("debug", false);
-}
-
-bool Designer::hasSelection() const
-{
-    DesignerScene* scene = getVisibleDesignerScene();
-    if(!scene) {
-        return false;
-    }
-
-    return scene->selectedItems().size() > 0;
-}
-
-void Designer::enableGrid(bool grid)
-{
-    if(!settings_.knows("grid")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("grid", grid));
-    }
-
-    settings_.set("grid", grid);
-
-    for(const auto& pair : graph_views_) {
-        GraphView* view = pair.second;
-        view->designerScene()->enableGrid(grid);
-
-        view->setCacheMode(QGraphicsView::CacheNone);
-        view->setCacheMode(QGraphicsView::CacheBackground);
-    }
-
-    Q_EMIT gridEnabled(grid);
-
-}
-
-void Designer::enableSchematics(bool schema)
-{
-    if(!settings_.knows("schematics")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("schematics", schema));
-    }
-
-    settings_.set("schematics", schema);
-
-    for(const auto& pair : graph_views_) {
-        GraphView* view = pair.second;
-        view->designerScene()->enableSchema(schema);
-    }
-
-    Q_EMIT schematicsEnabled(schema);
-
-}
-
-void Designer::displayGraphComponents(bool display)
-{
-    if(!settings_.knows("display-graph-components")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-graph-components", display));
-    }
-
-    settings_.set("display-graph-components", display);
-
-    for(const auto& pair : graph_views_) {
-        GraphView* view = pair.second;
-        view->updateBoxInformation();
-    }
-
-    Q_EMIT graphComponentsEnabled(display);
-}
-
-void Designer::displayThreads(bool display)
-{
-    if(!settings_.knows("display-threads")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-threads", display));
-    }
-
-    settings_.set("display-threads", display);
-
-    for(const auto& pair : graph_views_) {
-        GraphView* view = pair.second;
-        view->updateBoxInformation();
-    }
-
-    Q_EMIT threadsEnabled(display);
-}
-
-
-void Designer::displayMinimap(bool display)
-{
-    if(!settings_.knows("display-minimap")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-minimap", display));
-    }
-
-    settings_.set("display-minimap", display);
-
-    minimap_->setVisible(display);
-
-    Q_EMIT minimapEnabled(display);
-}
-
-void Designer::displaySignalConnections(bool display)
-{
-    if(!settings_.knows("display-signals")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-signals", display));
-    }
-
-    settings_.set("display-signals", display);
-
-    for(const auto& pair : graph_views_) {
-        GraphView* view = pair.second;
-        view->designerScene()->displaySignals(display);
-    }
-
-
-    Q_EMIT signalsEnabled(display);
-}
-
-void Designer::displayMessageConnections(bool display)
-{
-    if(!settings_.knows("display-messages")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-messages", display));
-    }
-
-    settings_.set("display-messages", display);
-
-    for(const auto& pair : graph_views_) {
-        GraphView* view = pair.second;
-        view->designerScene()->displayMessages(display);
-    }
-
-    Q_EMIT messagesEnabled(display);
-}
-
-void Designer::enableDebug(bool debug)
-{
-    if(!settings_.knows("debug")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("debug", debug));
-    }
-
-    settings_.set("debug", debug);
-
-    for(const auto& pair : graph_views_) {
-        GraphView* view = pair.second;
-        view->designerScene()->enableDebug(debug);
-    }
-
-    Q_EMIT debugEnabled(debug);
-}
 
 void Designer::saveSettings(YAML::Node& doc)
 {

@@ -2,50 +2,48 @@
 #include <csapex/view/designer/graph_view.h>
 
 /// COMPONENT
-#include <csapex/command/meta.h>
-#include <csapex/command/move_box.h>
-#include <csapex/command/delete_node.h>
-#include <csapex/command/flip_sides.h>
-#include <csapex/command/minimize.h>
+#include <csapex/command/add_node.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/command/create_thread.h>
-#include <csapex/command/switch_thread.h>
-#include <csapex/command/group_nodes.h>
+#include <csapex/command/delete_node.h>
 #include <csapex/command/disable_node.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/command/command_factory.h>
+#include <csapex/command/flip_sides.h>
+#include <csapex/command/group_nodes.h>
+#include <csapex/command/meta.h>
+#include <csapex/command/minimize.h>
+#include <csapex/command/move_box.h>
 #include <csapex/command/move_connection.h>
 #include <csapex/command/paste_graph.h>
-#include <csapex/view/widgets/box_dialog.h>
-#include <csapex/factory/node_factory.h>
-#include <csapex/model/node.h>
-#include <csapex/model/graph.h>
-#include <csapex/command/dispatcher.h>
-#include <csapex/command/add_node.h>
-#include <csapex/view/designer/designer_scene.h>
-#include <csapex/view/node/box.h>
-#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
-#include <csapex/view/designer/drag_io.h>
-#include <csapex/view/designer/widget_controller.h>
-#include <csapex/view/widgets/profiling_widget.h>
-#include <csapex/model/node_worker.h>
-#include <csapex/view/utility/context_menu_handler.h>
+#include <csapex/command/switch_thread.h>
+#include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
-#include <csapex/scheduling/thread_pool.h>
-#include <csapex/view/node/box.h>
-#include <csapex/scheduling/thread_group.h>
-#include <csapex/view/utility/node_list_generator.h>
+#include <csapex/factory/node_factory.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/graph.h>
+#include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/view/node/node_adapter.h>
-#include <csapex/view/node/node_adapter_factory.h>
+#include <csapex/model/node_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/scheduling/thread_group.h>
+#include <csapex/scheduling/thread_pool.h>
 #include <csapex/signal/slot.h>
-#include <csapex/view/widgets/message_preview_widget.h>
-#include <csapex/view/widgets/port.h>
+#include <csapex/signal/trigger.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/designer/drag_io.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/node/default_node_adapter.h>
+#include <csapex/view/node/node_adapter_factory.h>
+#include <csapex/view/node/node_adapter.h>
 #include <csapex/view/utility/clipboard.h>
-#include <csapex/core/graphio.h>
+#include <csapex/view/utility/context_menu_handler.h>
+#include <csapex/view/utility/node_list_generator.h>
+#include <csapex/view/widgets/box_dialog.h>
+#include <csapex/view/widgets/message_preview_widget.h>
+#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
+#include <csapex/view/widgets/port.h>
+#include <csapex/view/widgets/profiling_widget.h>
 
 /// SYSTEM
 #include <iostream>
@@ -56,15 +54,18 @@
 #include <QGLWidget>
 #include <QInputDialog>
 #include <QScrollBar>
+#include <QDrag>
+#include <QMimeData>
 
 using namespace csapex;
 
 GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph_facade,
-                     Settings &settings,
-                     CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio, DesignerStyleable *style,
+                     Settings &settings, NodeFactory& node_factory, NodeAdapterFactory& node_adapter_factory,
+                     CommandDispatcher *dispatcher, DragIO& dragio, DesignerStyleable *style,
                      Designer *parent)
     : QGraphicsView(parent), parent_(parent), scene_(scene), style_(style), settings_(settings),
-      graph_facade_(graph_facade), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl), drag_io_(dragio),
+      node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
+      graph_facade_(graph_facade), dispatcher_(dispatcher), drag_io_(dragio),
       scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr),
       preview_widget_(nullptr)
 
@@ -500,13 +501,13 @@ void GraphView::animateScroll()
 
 void GraphView::showBoxDialog()
 {
-    BoxDialog diag(widget_ctrl_.get());
+    BoxDialog diag(node_factory_);
     int r = diag.exec();
 
     if(r) {
         std::string type = diag.getName();
 
-        if(!type.empty() && widget_ctrl_->getNodeFactory()->isValidType(type)) {
+        if(!type.empty() && node_factory_.isValidType(type)) {
             UUID uuid = graph_facade_->getGraph()->generateUUID(type);
             QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
             dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, Point(pos.x(), pos.y()), UUID::NONE, uuid, nullptr)));
@@ -515,23 +516,55 @@ void GraphView::showBoxDialog()
 }
 
 
+void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, const QPoint &offset)
+{
+    NodeConstructorPtr c = node_factory_.getConstructor(type);
+    NodeHandlePtr handle = c->makePrototype();
+
+    QDrag* drag = new QDrag(this);
+    QMimeData* mimeData = new QMimeData;
+
+    mimeData->setData(NodeBox::MIME, type.c_str());
+    if(state) {
+        QVariant payload = qVariantFromValue((void *) &state);
+        mimeData->setProperty("state", payload);
+    }
+    mimeData->setProperty("ox", offset.x());
+    mimeData->setProperty("oy", offset.y());
+    drag->setMimeData(mimeData);
+
+    NodeBox::Ptr object(new NodeBox(settings_, handle,
+                                    QIcon(QString::fromStdString(c->getIcon()))));
+    object->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, object.get()));
+
+    object->setStyleSheet(styleSheet());
+    object->construct();
+    object->setObjectName(handle->getType().c_str());
+    object->setLabel(type);
+
+    drag->setPixmap(object->grab());
+    drag->setHotSpot(-offset);
+    drag->exec();
+}
+
+
 void GraphView::nodeAdded(NodeWorkerPtr node_worker)
 {
     NodeHandlePtr node_handle = node_worker->getNodeHandle();
     std::string type = node_handle->getType();
 
-    QIcon icon = QIcon(QString::fromStdString(widget_ctrl_->node_factory_->getConstructor(type)->getIcon()));
+    QIcon icon = QIcon(QString::fromStdString(node_factory_.getConstructor(type)->getIcon()));
     NodeBox* box = new NodeBox(settings_, node_handle, node_worker, icon, this);
 
     QObject::connect(box, SIGNAL(portAdded(Port*)), this, SLOT(addPort(Port*)));
     QObject::connect(box, SIGNAL(portRemoved(Port*)), this, SLOT(removePort(Port*)));
 
-    NodeAdapter::Ptr adapter = widget_ctrl_->node_adapter_factory_->makeNodeAdapter(node_handle, box);
+    NodeAdapter::Ptr adapter = node_adapter_factory_.makeNodeAdapter(node_handle, box);
     adapter->executeCommand.connect(delegate::Delegate<void(CommandPtr)>(dispatcher_, &CommandDispatcher::execute));
     box->setAdapter(adapter);
 
     box_map_[node_handle->getUUID()] = box;
-    proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, this, widget_ctrl_.get());
+    proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, this, parent_->options());
 
     box->construct();
 
@@ -871,7 +904,7 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
-    NodeListGenerator generator(*widget_ctrl_->getNodeFactory());
+    NodeListGenerator generator(node_factory_);
     generator.insertAvailableNodeTypes(&add_node);
 
     menu.addMenu(&add_node);
@@ -888,7 +921,7 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
         } else {
             // else it must be an insertion
             std::string selected = selectedItem->data().toString().toStdString();
-            widget_ctrl_->startPlacingBox(this, selected, nullptr);
+            startPlacingBox(selected, nullptr);
         }
     }
 }
@@ -1152,7 +1185,7 @@ void GraphView::groupBox()
 
 void GraphView::copySelected()
 {
-    GraphIO io(graph_facade_->getGraph(), widget_ctrl_->getNodeFactory());
+    GraphIO io(graph_facade_->getGraph(), &node_factory_);
 
     std::vector<UUID> nodes;
     for(const NodeBox* box : getSelectedBoxes()) {

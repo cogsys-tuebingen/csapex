@@ -15,8 +15,10 @@ class QModelIndex;
 
 namespace csapex
 {
-class CompleteLineEdit : public QLineEdit {
+class NodeFactory;
 
+class CompleteLineEdit : public QLineEdit
+{
     Q_OBJECT
 
 public:
@@ -44,7 +46,7 @@ class BoxDialog : public QDialog
     Q_OBJECT
 
 public:
-    BoxDialog(WidgetController *widget_controller, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    BoxDialog(csapex::NodeFactory &node_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
     std::string getName();
 
@@ -56,7 +58,7 @@ private:
 
 private:
     CompleteLineEdit * name_edit_;
-    WidgetController* widget_controller_;
+    NodeFactory& node_factory_;
 };
 
 }

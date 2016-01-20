@@ -2,7 +2,6 @@
 #include <csapex/view/widgets/activity_legend.h>
 
 /// COMPONENT
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 

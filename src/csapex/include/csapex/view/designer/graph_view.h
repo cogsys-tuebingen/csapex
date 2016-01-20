@@ -20,6 +20,8 @@
 namespace csapex
 {
 
+class NodeFactory;
+
 class GraphView : public QGraphicsView
 {
     Q_OBJECT
@@ -44,7 +46,8 @@ class GraphView : public QGraphicsView
 
 public:
     GraphView(DesignerScene* scene, csapex::GraphFacadePtr graph,
-              Settings& settings, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DragIO& dragio,
+              Settings& settings, NodeFactory& node_factory, NodeAdapterFactory& node_adapter_factory,
+              CommandDispatcher *dispatcher, DragIO& dragio,
               DesignerStyleable* style, Designer *parent);
     ~GraphView();
 
@@ -79,6 +82,8 @@ public:
 
     void nodeAdded(NodeWorkerPtr node_worker);
     void nodeRemoved(NodeHandlePtr node_handle);
+
+    void startPlacingBox(const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
 
 Q_SIGNALS:
     void selectionChanged();
@@ -161,10 +166,11 @@ private:
     DesignerStyleable* style_;
 
     Settings& settings_;
+    NodeFactory& node_factory_;
+    NodeAdapterFactory& node_adapter_factory_;
 
     GraphFacadePtr graph_facade_;
     CommandDispatcher* dispatcher_;
-    WidgetControllerPtr widget_ctrl_;
     DragIO& drag_io_;
 
     std::map<NodeWorker*, std::vector<csapex::slim_signal::ScopedConnection>> worker_connections_;

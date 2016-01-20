@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/model/connectable.h>
 #include <csapex/model/graph.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
@@ -93,8 +92,8 @@ Point convert(const QPointF& p) {
 
 
 
-DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CommandDispatcher *dispatcher, WidgetControllerPtr widget_ctrl, DesignerStyleable *style)
-    : style_(style), graph_facade_(graph_facade), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl),
+DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CommandDispatcher *dispatcher, DesignerStyleable *style)
+    : style_(style), graph_facade_(graph_facade), dispatcher_(dispatcher),
       preview_(nullptr),
       draw_grid_(false), draw_schema_(false), display_messages_(true), display_signals_(true),
       scale_(1.0), overlay_threshold_(0.45),

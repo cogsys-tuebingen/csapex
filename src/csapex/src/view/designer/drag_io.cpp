@@ -13,7 +13,6 @@
 #include <csapex/signal/slot.h>
 #include <csapex/model/node.h>
 #include <csapex/view/node/box.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/plugin/plugin_manager.hpp>
@@ -23,9 +22,9 @@
 
 using namespace csapex;
 
-DragIO::DragIO(PluginLocatorPtr locator, Graph *graph, CommandDispatcher* dispatcher, WidgetControllerPtr widget_ctrl)
+DragIO::DragIO(PluginLocatorPtr locator, Graph *graph, CommandDispatcher* dispatcher)
     : loaded_(false), plugin_locator_(locator), manager_(new PluginManager<DragIOHandler>("csapex::DragIOHandler")),
-      graph_(graph), dispatcher_(dispatcher), widget_ctrl_(widget_ctrl)
+      graph_(graph), dispatcher_(dispatcher)
 {
 }
 
@@ -91,7 +90,7 @@ void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
                 e->accept();
 
                 std::string type = v[Qt::UserRole+1].toString().toStdString();
-                widget_ctrl_->startPlacingBox(src, type, nullptr, QPoint(0,0));
+                src->startPlacingBox(type, nullptr, QPoint(0,0));
             }
         }
     }

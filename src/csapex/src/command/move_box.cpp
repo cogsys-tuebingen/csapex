@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/view/node/box.h>
 #include <csapex/model/graph.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/movable_graphics_proxy_widget.h>
 

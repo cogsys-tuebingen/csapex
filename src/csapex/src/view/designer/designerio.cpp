@@ -5,7 +5,6 @@
 #include <csapex/view/designer/designer.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/utility/assert.h>

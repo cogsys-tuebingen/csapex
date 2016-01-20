@@ -2,7 +2,6 @@
 #include <csapex/view/utility/node_list_generator.h>
 
 /// COMPONENT
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/view/node/box.h>

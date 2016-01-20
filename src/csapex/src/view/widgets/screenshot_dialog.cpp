@@ -2,7 +2,6 @@
 #include <csapex/view/widgets/screenshot_dialog.h>
 
 /// COMPONENT
-#include <csapex/view/designer/widget_controller.h>
 #include <csapex/view/utility/html_delegate.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/graph_facade.h>
@@ -13,6 +12,7 @@
 #include <QButtonGroup>
 #include <QFileDialog>
 #include <QDialogButtonBox>
+#include <QVBoxLayout>
 
 using namespace csapex;
 
