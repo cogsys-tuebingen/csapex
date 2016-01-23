@@ -451,16 +451,15 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const noexcept
 NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.composite()) {
-        UUID parent = uuid.parentUUID();
-        UUID child = uuid.firstChildUUID();
+        UUID root = uuid.rootUUID();
 
-        NodeHandle* parent_nh = findNodeHandleNoThrow(parent);
-        if(parent_nh) {
-            NodePtr parent_node = parent_nh->getNode().lock();
-            if(parent_node) {
-                GraphPtr graph = std::dynamic_pointer_cast<Graph>(parent_node);
+        NodeHandle* root_nh = findNodeHandleNoThrow(root);
+        if(root_nh) {
+            NodePtr root_node = root_nh->getNode().lock();
+            if(root_node) {
+                GraphPtr graph = std::dynamic_pointer_cast<Graph>(root_node);
                 if(graph) {
-                    return graph->findNodeHandle(child);
+                    return graph->findNodeHandle(uuid.nestedUUID());
                 }
             }
         }

@@ -5,11 +5,22 @@
 #include <string>
 #include <map>
 #include <mutex>
+#include <vector>
 
 namespace csapex {
 
 class UUIDProvider;
 
+/**
+ * @brief The UUID class represents unique IDs
+ *
+ * The uniqueness is guaranteed in the whole graph structure recursively:
+ * Every UUID consists of multiple layers for each sub graph:
+ * Let ID be a vector of individual identifiers
+ *  - ID[0]    - the unique id of this instance
+ *  - ID[1]    - the unique id of the parent id
+ *  - ...
+ */
 class UUID
 {
     friend class UUIDProvider;
@@ -17,9 +28,9 @@ class UUID
 public:
     static std::string stripNamespace(const std::string& name);
 
-    static UUID NONE;
     static const std::string namespace_separator;
 
+    static UUID NONE;
 
 public:
     friend std::ostream& operator << (std::ostream& out, const UUID& uuid_);
@@ -48,10 +59,12 @@ public:
     std::size_t hash() const;
 
     bool composite() const;
+    UUID nestedUUID() const;
+    UUID rootUUID() const;
+
     bool contains(const std::string& sub) const;
 
     UUID parentUUID() const;
-    UUID firstChildUUID() const;
 
     std::string type() const;
     std::string id() const;
@@ -60,12 +73,11 @@ public:
 
 private:
     explicit UUID(UUIDProvider *parent, const std::string& representation);
-
-    void split(const std::string& separator, UUID& l, UUID& r) const;
+    explicit UUID(UUIDProvider *parent, const std::vector<std::string>& representation);
 
 private:
     UUIDProvider* parent_;
-    std::string representation_;
+    std::vector<std::string> representation_;
 };
 
 }

@@ -197,7 +197,7 @@ UUID GraphIO::readConnectorUUID(const YAML::Node& doc)
         if(pos != old_node_uuid_to_new_.end()) {
             parent = old_node_uuid_to_new_[parent];
 
-            uuid = UUIDProvider::makeDerivedUUID_forced(parent, uuid.id());
+            uuid = graph_->makeDerivedUUID(parent, uuid.id());
         }
     }
     return uuid;
@@ -364,8 +364,8 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     std::string from_uuid_tmp = fulcrum["from"].as<std::string>();
     std::string to_uuid_tmp = fulcrum["to"].as<std::string>();
 
-    UUID from_uuid = UUIDProvider::makeUUID_forced(from_uuid_tmp);
-    UUID to_uuid = UUIDProvider::makeUUID_forced(to_uuid_tmp);
+    UUID from_uuid = graph_->makeUUID(from_uuid_tmp);
+    UUID to_uuid = graph_->makeUUID(to_uuid_tmp);
 
     Output* from = graph_->findConnector<Output>(from_uuid);
     if(from == nullptr) {

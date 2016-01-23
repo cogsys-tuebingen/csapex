@@ -31,7 +31,6 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       transition_out_(transition_out),
 
       uuid_provider_(uuid_provider),
-      next_input_id_(0), next_output_id_(0), next_trigger_id_(0), next_slot_id_(0),
       level_(0),
       source_(false), sink_(false)
 {
@@ -344,7 +343,7 @@ void NodeHandle::updateParameterValue(Connectable *s)
 Input* NodeHandle::addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional)
 {
     apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->makeConnectableUUID(getUUID(), "in", next_input_id_++);
+    UUID uuid = uuid_provider_->generateConnectableUUID(getUUID(), "in");
     InputPtr c;
     if(dynamic) {
         c = std::make_shared<DynamicInput>(uuid);
@@ -363,7 +362,7 @@ Input* NodeHandle::addInput(ConnectionTypeConstPtr type, const std::string& labe
 Output* NodeHandle::addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic)
 {
     apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->makeConnectableUUID(getUUID(), "out", next_output_id_++);
+    UUID uuid = uuid_provider_->generateConnectableUUID(getUUID(), "out");
     OutputPtr c;
     if(dynamic) {
         c = std::make_shared<DynamicOutput>(uuid);
@@ -380,7 +379,7 @@ Output* NodeHandle::addOutput(ConnectionTypeConstPtr type, const std::string& la
 Slot* NodeHandle::addSlot(const std::string& label, std::function<void()> callback, bool active)
 {
     apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->makeConnectableUUID(getUUID(), "slot", next_slot_id_++);
+    UUID uuid = uuid_provider_->generateConnectableUUID(getUUID(), "slot");
     SlotPtr slot = std::make_shared<Slot>(callback, uuid, active);
     slot->setLabel(label);
 
@@ -392,7 +391,7 @@ Slot* NodeHandle::addSlot(const std::string& label, std::function<void()> callba
 Trigger* NodeHandle::addTrigger(const std::string& label)
 {
     apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->makeConnectableUUID(getUUID(), "trigger", next_trigger_id_++);
+    UUID uuid = uuid_provider_->generateConnectableUUID(getUUID(), "trigger");
     TriggerPtr trigger = std::make_shared<Trigger>(uuid);
     trigger->setLabel(label);
 

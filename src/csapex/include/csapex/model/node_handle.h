@@ -163,11 +163,6 @@ protected:
 private:
     UUIDProvider* uuid_provider_;
 
-    int next_input_id_;
-    int next_output_id_;
-    int next_trigger_id_;
-    int next_slot_id_;
-
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
 
     std::map<Slot*, csapex::slim_signal::Connection> slot_connections_;

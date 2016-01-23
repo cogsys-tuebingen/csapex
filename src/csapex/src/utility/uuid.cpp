@@ -12,25 +12,8 @@
 
 using namespace csapex;
 
-UUID UUID::NONE(nullptr, "");
 const std::string UUID::namespace_separator = ":|:";
-
-
-namespace {
-void split_first(const std::string& haystack, const std::string& needle,
-                 /* OUTPUTS: */ std::string& lhs, std::string& rhs)
-{
-    size_t pos = haystack.find(needle);
-    if(pos == haystack.npos) {
-        lhs = haystack;
-        return;
-    }
-
-    lhs = haystack.substr(0, pos);
-    rhs = haystack.substr(pos + needle.length());
-}
-
-}
+UUID UUID::NONE(nullptr, "");
 
 std::size_t UUID::Hasher::operator()(const UUID& k) const {
     return k.hash();
@@ -38,7 +21,7 @@ std::size_t UUID::Hasher::operator()(const UUID& k) const {
 
 bool UUID::empty() const
 {
-    return representation_.empty() || representation_ == "invalid_uuid";
+    return representation_.empty();
 }
 
 std::string UUID::stripNamespace(const std::string &name)
@@ -49,13 +32,57 @@ std::string UUID::stripNamespace(const std::string &name)
 
 
 UUID::UUID()
-    : parent_(nullptr), representation_("invalid_uuid")
+    : parent_(nullptr)
 {
 }
 
-UUID::UUID(UUIDProvider* parent, const std::string &representation)
+UUID::UUID(UUIDProvider* parent, const std::vector<std::string> &representation)
     : parent_(parent), representation_(representation)
 {
+
+}
+
+UUID::UUID(UUIDProvider* parent, const std::string &representation)
+    : parent_(parent)
+{
+    /**
+     *  UUIDs are built like this:
+     *
+     *   <-----> :|: <-------> :|: <--------->
+     *
+     *  Invariants while splitting:
+     *                         pos
+     *                         |
+     *   <-----> :|: <-------> :|: <--------->
+     *                             |         |
+     *                             begin     end
+     *
+     *  End condition:
+     *   pos
+     *   |
+     *   <-----> :|: <-------> :|: <--------->
+     *   |     |
+     *  begin  end
+     */
+
+    int end = representation.length();
+    while(end >= 0) {
+        std::size_t pos = representation.rfind(namespace_separator, end-1);
+        int begin = 0;
+        if(pos != std::string::npos) {
+            begin = pos + namespace_separator.length();
+        }
+
+        std::string sub_id = representation.substr(begin, end - begin);
+
+        representation_.push_back(sub_id);
+        end = pos;
+
+        if(begin == 0) {
+            return;
+        }
+
+    }
 }
 
 void UUID::free()
@@ -72,51 +99,77 @@ bool UUID::operator <(const UUID& other) const
 
 std::string UUID::getFullName() const
 {
-    return representation_;
+    if(empty()) {
+        return "~";
+    }
+
+
+    std::stringstream ss;
+    auto it = representation_.rbegin();
+    ss << *it;
+    for(++it; it != representation_.rend(); ++it) {
+        ss << namespace_separator;
+        ss << *it;
+    }
+    return ss.str();
 }
 
 std::size_t UUID::hash() const
 {
-    return boost::hash<std::string>()(representation_);
+    if(empty()) {
+        return 0;
+    } else {
+        return boost::hash<std::string>()(representation_.front());
+    }
 }
 
 std::string UUID::getShortName() const
 {
-    return stripNamespace(representation_);
+    return stripNamespace(representation_.front());
 }
 
 bool UUID::composite() const
 {
-    return contains(UUID::namespace_separator);
+    return representation_.size() > 1;
 }
 
 bool UUID::contains(const std::string &sub) const
 {
-    size_t pos = representation_.find(sub);
-    return pos != representation_.npos;
+    for(const std::string& s : representation_) {
+        if(s == sub) {
+            return true;
+        }
+    }
+    return false;
 }
 
 UUID UUID::parentUUID() const
 {
-    UUID l = UUID::NONE;
-    UUID r = UUID::NONE;
-    split(UUID::namespace_separator, l, r);
+    UUID parent = *this;
+    if(!representation_.empty()) {
+        parent.representation_.erase(parent.representation_.begin());
+    }
 
-    return l;
+    return parent;
 }
 
-UUID UUID::firstChildUUID() const
+UUID UUID::nestedUUID() const
 {
-    UUID l = UUID::NONE;
-    UUID r = UUID::NONE;
-    split(UUID::namespace_separator, l, r);
+    UUID parent = *this;
+    if(!representation_.empty()) {
+        parent.representation_.erase(--parent.representation_.end());
+    }
 
-    return r;
+    return parent;
+}
+UUID UUID::rootUUID() const
+{
+    return UUID(parent_, representation_.back());
 }
 
 std::string UUID::id() const
 {
-    return firstChildUUID().getFullName();
+    return representation_.front();
 }
 
 std::string UUID::type() const
@@ -125,21 +178,27 @@ std::string UUID::type() const
     return t.substr(0, t.find_first_of("_"));
 }
 
-void UUID::split(const std::string &separator, UUID &l, UUID &r) const
-{
-    split_first(representation_, separator, l.representation_, r.representation_);
-}
-
 namespace csapex
 {
 bool operator == (const std::string& str, const UUID& uuid_) {
-    return str == uuid_.representation_;
+    return str == uuid_.getFullName();
 }
 bool operator == (const UUID& uuid_, const std::string& str) {
-    return str == uuid_.representation_;
+    return str == uuid_.getFullName();
 }
 bool operator == (const UUID& a, const UUID& b) {
-    return a.representation_ == b.representation_;
+    if(a.representation_.size() != b.representation_.size()) {
+        return false;
+    }
+
+    for(auto ita = a.representation_.begin(), itb = b.representation_.begin();
+        ita != a.representation_.end(); ++ita, ++itb) {
+        if(*ita != *itb) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool operator != (const UUID& a, const UUID& b) {
@@ -147,7 +206,7 @@ bool operator != (const UUID& a, const UUID& b) {
 }
 
 std::ostream& operator << (std::ostream& out, const UUID& uuid_) {
-    out << uuid_.representation_;
+    out << uuid_.getFullName();
     return out;
 }
 }

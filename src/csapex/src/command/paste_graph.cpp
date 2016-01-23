@@ -45,7 +45,9 @@ bool PasteGraph::doExecute()
     bool paused = graph_facade->isPaused();
     graph_facade->pauseRequest(true);
 
-    GraphIO io(graph_facade->getGraph(), node_factory_);
+    Graph* graph = graph_facade->getGraph();
+
+    GraphIO io(graph, node_factory_);
 
     id_mapping_ = io.loadIntoGraph(blueprint_, pos_);
 
@@ -55,7 +57,7 @@ bool PasteGraph::doExecute()
         UUID parent_mapped = id_mapping_[in.second.parentUUID()];
         std::string child = in.second.id();
 
-        UUID new_uuid = UUIDProvider::makeDerivedUUID_forced(parent_mapped, child);
+        UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
         CommandPtr pass_out = std::make_shared<command::PassOutConnector>(graph_id_, new_uuid);
         pass_out->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
         executeCommand(pass_out);
@@ -66,7 +68,7 @@ bool PasteGraph::doExecute()
         UUID parent_mapped = id_mapping_[out.first.parentUUID()];
         std::string child = out.first.id();
 
-        UUID new_uuid = UUIDProvider::makeDerivedUUID_forced(parent_mapped, child);
+        UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
         CommandPtr pass_out = std::make_shared<command::PassOutConnector>(graph_id_, new_uuid);
         pass_out->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
         executeCommand(pass_out);
@@ -78,7 +80,7 @@ bool PasteGraph::doExecute()
         UUID parent_mapped = id_mapping_[in.second.parentUUID()];
         std::string child = in.second.id();
 
-        UUID new_uuid = UUIDProvider::makeDerivedUUID_forced(parent_mapped, child);
+        UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
         UUID forwarding_uuid = graph_facade->getGraph()->getForwardingInput(new_uuid);
 
         CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(in.first, forwarding_uuid);
@@ -91,7 +93,7 @@ bool PasteGraph::doExecute()
         UUID parent_mapped = id_mapping_[out.first.parentUUID()];
         std::string child = out.first.id();
 
-        UUID new_uuid = UUIDProvider::makeDerivedUUID_forced(parent_mapped, child);
+        UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
         UUID forwarding_uuid = graph_facade->getGraph()->getForwardingOutput(new_uuid);
 
         CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(forwarding_uuid, out.second);
