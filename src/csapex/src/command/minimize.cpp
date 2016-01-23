@@ -34,7 +34,7 @@ std::string Minimize::getDescription() const
 
 bool Minimize::doExecute()
 {
-    NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
+    NodeHandle* node_handle = getRootGraph()->findNodeHandle(uuid);
     apex_assert_hard(node_handle);
 
     bool is_mini = node_handle->getNodeState()->isMinimized();
@@ -52,7 +52,7 @@ bool Minimize::doExecute()
 bool Minimize::doUndo()
 {
     if(executed) {
-        NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
+        NodeHandle* node_handle = getRootGraph()->findNodeHandle(uuid);
         apex_assert_hard(node_handle);
 
         node_handle->getNodeState()->setMinimized(!mini);

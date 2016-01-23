@@ -34,13 +34,13 @@ std::string AddFulcrum::getDescription() const
 
 bool AddFulcrum::doExecute()
 {
-    getGraph()->getConnectionWithId(connection_id)->addFulcrum(sub_section_to_split, pos, type);
+    getRootGraph()->getConnectionWithId(connection_id)->addFulcrum(sub_section_to_split, pos, type);
     return true;
 }
 
 bool AddFulcrum::doUndo()
 {
-    getGraph()->getConnectionWithId(connection_id)->deleteFulcrum(sub_section_to_split);
+    getRootGraph()->getConnectionWithId(connection_id)->deleteFulcrum(sub_section_to_split);
     return true;
 }
 

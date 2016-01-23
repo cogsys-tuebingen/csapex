@@ -40,7 +40,7 @@ std::string DeleteConnection::getDescription() const
 
 bool DeleteConnection::doExecute()
 {
-    const auto& graph = getGraph();
+    const auto& graph = getRootGraph();
 
     ConnectionPtr connection = graph->getConnection(from_uuid, to_uuid);
 

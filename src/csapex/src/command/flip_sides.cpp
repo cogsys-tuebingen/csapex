@@ -34,7 +34,7 @@ std::string FlipSides::getDescription() const
 
 bool FlipSides::doExecute()
 {
-    NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
+    NodeHandle* node_handle = getRootGraph()->findNodeHandle(uuid);
     apex_assert_hard(node_handle);
 
     bool flip = !node_handle->getNodeState()->isFlipped();

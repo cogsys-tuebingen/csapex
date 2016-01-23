@@ -25,7 +25,7 @@ bool AddMessageConnection::doExecute()
         refresh();
     }
 
-    Graph* graph = getGraph();
+    Graph* graph = getRootGraph();
 
     NodeHandle* from_nw = graph->findNodeHandleForConnector(from_uuid);
     NodeHandle* to_nw = graph->findNodeHandleForConnector(to_uuid);
@@ -38,7 +38,7 @@ bool AddMessageConnection::doExecute()
 
 void AddMessageConnection::refresh()
 {
-    Graph* graph = getGraph();
+    Graph* graph = getRootGraph();
     Connectable* f = graph->findConnector(from_uuid);
     Connectable* t = graph->findConnector(to_uuid);
 

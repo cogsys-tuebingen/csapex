@@ -36,13 +36,13 @@ std::string ModifyFulcrum::getDescription() const
 
 bool ModifyFulcrum::doExecute()
 {
-    getGraph()->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, t_type, t_in, t_out);
+    getRootGraph()->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, t_type, t_in, t_out);
     return true;
 }
 
 bool ModifyFulcrum::doUndo()
 {
-    getGraph()->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, f_type, f_in, f_out);
+    getRootGraph()->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, f_type, f_in, f_out);
     return true;
 }
 

@@ -63,17 +63,17 @@ protected:
     virtual bool doUndo() = 0;
     virtual bool doRedo() = 0;
 
-    GraphFacade* getGraphFacade();
-    GraphFacade* getGraphFacade(const UUID& graph_id);
-    Graph* getGraph();
-    ThreadPool* getThreadPool();
+    GraphFacade* getRoot();
+    GraphFacade* getSubGraph(const UUID& graph_id);
+    Graph* getRootGraph();
+    ThreadPool* getRootThreadPool();
 
 protected:
     Settings* settings_;
     NodeFactory* node_factory_;
 
 private:
-    GraphFacade* graph_facade_;
+    GraphFacade* root_;
     ThreadPool* thread_pool_;
 
     static std::vector<Command::Ptr> undo_later;

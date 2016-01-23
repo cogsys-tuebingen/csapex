@@ -36,7 +36,7 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    Graph* graph = getGraph();
+    Graph* graph = getRootGraph();
     NodeHandle* node_handle = graph->findNodeHandleForConnector(uuid);
 
     type = node_handle->getType();
@@ -64,7 +64,7 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    Graph* graph = getGraph();
+    Graph* graph = getRootGraph();
     NodeHandlePtr node = node_factory_->makeNode(type, uuid, graph);
 
     node->setNodeState(saved_state);
@@ -77,7 +77,7 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        Graph* graph = getGraph();
+        Graph* graph = getRootGraph();
         NodeHandle* node_handle = graph->findNodeHandle(uuid);
         saved_state = node_handle->getNodeStateCopy();
 

@@ -24,12 +24,12 @@ bool AddSignalConnection::doExecute()
         refresh();
     }
 
-    return getGraph()->addConnection(SignalConnection::connect(from, to));
+    return getRootGraph()->addConnection(SignalConnection::connect(from, to));
 }
 
 void AddSignalConnection::refresh()
 {
-    Graph* graph = getGraph();
+    Graph* graph = getRootGraph();
     Connectable* f = graph->findConnector(from_uuid);
     Connectable* t = graph->findConnector(to_uuid);
 

@@ -53,7 +53,7 @@ void Meta::add(Command::Ptr cmd)
     apex_assert_hard(cmd);
 
     if(initialized_) {
-        cmd->init(settings_, graph_facade_, thread_pool_, node_factory_);
+        cmd->init(settings_, root_, thread_pool_, node_factory_);
     }
 
     nested.push_back(cmd);

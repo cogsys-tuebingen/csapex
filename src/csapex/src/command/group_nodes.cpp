@@ -43,7 +43,7 @@ std::string GroupNodes::getDescription() const
 
 bool GroupNodes::doExecute()
 {
-    Graph* graph = getGraph();
+    Graph* graph = getRootGraph();
     {
         GraphIO io(graph, node_factory_);
         selection_yaml = YAML::Node(YAML::NodeType::Map);

@@ -38,7 +38,7 @@ std::string AddNode::getDescription() const
 
 bool AddNode::doExecute()
 {
-    Graph* graph = getGraph();
+    Graph* graph = getRootGraph();
 
     if(uuid_.empty()) {
         uuid_ = graph->generateUUID(type_);
@@ -59,7 +59,7 @@ bool AddNode::doExecute()
 
 bool AddNode::doUndo()
 {
-    Graph* graph = getGraph();
+    Graph* graph = getRootGraph();
     NodeHandle* node_ = graph->findNodeHandle(uuid_);
 
     saved_state_ = node_->getNodeStateCopy();
@@ -75,7 +75,7 @@ bool AddNode::doUndo()
 bool AddNode::doRedo()
 {
     if(doExecute()) {
-        getGraph()->findNodeHandle(uuid_)->setNodeState(saved_state_);
+        getRootGraph()->findNodeHandle(uuid_)->setNodeState(saved_state_);
         return true;
     }
 

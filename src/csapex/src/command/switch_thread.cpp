@@ -42,24 +42,24 @@ std::string SwitchThread::getDescription() const
 
 bool SwitchThread::doExecute()
 {
-    TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
+    TaskGenerator* tg = getRoot()->getTaskGenerator(uuid);
 
-    auto group = getThreadPool()->getGroupFor(tg);
+    auto group = getRootThreadPool()->getGroupFor(tg);
     old_id = group->id();
 
     if(id != ThreadGroup::PRIVATE_THREAD) {
         name = group->name();
     }
-    getThreadPool()->addToGroup(tg, id);
+    getRootThreadPool()->addToGroup(tg, id);
 
     return true;
 }
 
 bool SwitchThread::doUndo()
 {
-    TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
+    TaskGenerator* tg = getRoot()->getTaskGenerator(uuid);
 
-    getThreadPool()->addToGroup(tg, old_id);
+    getRootThreadPool()->addToGroup(tg, old_id);
 
     return true;
 }

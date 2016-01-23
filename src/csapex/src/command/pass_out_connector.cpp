@@ -31,7 +31,7 @@ std::string PassOutConnector::getDescription() const
 
 bool PassOutConnector::doExecute()
 {
-    NodeHandle* node_handle = getGraph()->findNodeHandle(g_uuid);
+    NodeHandle* node_handle = getRootGraph()->findNodeHandle(g_uuid);
     apex_assert_hard(node_handle);
 
     NodePtr sub_graph_node = node_handle->getNode().lock();

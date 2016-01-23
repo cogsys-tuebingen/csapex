@@ -18,7 +18,7 @@ DeleteSignalConnection::DeleteSignalConnection(Trigger *a, Slot *b)
 
 bool DeleteSignalConnection::doUndo()
 {
-    auto graph = getGraph();
+    auto graph = getRootGraph();
     Connectable* from = graph->findConnector(from_uuid);
     Connectable* to = graph->findConnector(to_uuid);
 
