@@ -66,7 +66,7 @@ std::pair<int,int> rgb2id(QRgb rgb)
 
 QPointF centerPoint(Port* port)
 {
-
+    apex_assert_hard(port);
     QPointF pos;
     QWidget* widget = port;
     while (widget -> parentWidget()) {
@@ -296,14 +296,16 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             } else {
                 Port* fromp = getPort(temp.from);
 
-                ccs.start_pos = UNDEFINED;
-                ccs.end_pos = UNDEFINED;
+                if(fromp) {
+                    ccs.start_pos = UNDEFINED;
+                    ccs.end_pos = UNDEFINED;
 
 
-                if(temp.from->isInput()) {
-                    drawConnection(painter, temp.to_p, centerPoint(fromp), -1);
-                } else {
-                    drawConnection(painter, centerPoint(fromp), temp.to_p, -1);
+                    if(temp.from->isInput()) {
+                        drawConnection(painter, temp.to_p, centerPoint(fromp), -1);
+                    } else {
+                        drawConnection(painter, centerPoint(fromp), temp.to_p, -1);
+                    }
                 }
             }
         }
