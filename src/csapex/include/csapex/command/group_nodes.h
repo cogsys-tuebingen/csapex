@@ -15,7 +15,7 @@ namespace command
 
 struct GroupNodes : public Meta
 {
-    GroupNodes(const UUID &parent_uuid, const std::vector<UUID>& nodes);
+    GroupNodes(const AUUID &graph_uuid, const std::vector<UUID>& nodes);
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;

@@ -8,6 +8,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_state.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/node/box.h>
 #include <csapex/view/designer/graph_view.h>
@@ -81,8 +82,7 @@ void Designer::showGraph(UUID uuid)
 
 void Designer::addGraph(GraphFacadePtr graph_facade)
 {
-    Graph* graph = graph_facade->getGraph();
-    UUID uuid = graph->getUUID();
+    UUID uuid = graph_facade->getAbsoluteUUID();
 
     graphs_[uuid] = graph_facade;
 
@@ -104,13 +104,14 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
         return;
     }
 
-    UUID uuid = graph->getUUID();
+    UUID uuid = graph_facade->getAbsoluteUUID();
     DesignerScene* designer_scene = new DesignerScene(graph_facade, dispatcher_, &style);
     GraphView* graph_view = new GraphView(designer_scene, graph_facade,
                                           settings_, node_factory_, node_adapter_factory_,
                                           dispatcher_, drag_io, &style, this);
     graph_views_[graph] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();
+    auuid_views_[graph_facade->getAbsoluteUUID()] = graph_view;
 
     int tab = 0;
     if(visible_graphs_.empty()) {
@@ -121,7 +122,22 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
         tabs->removeTab(0);
         tabs->insertTab(0, graph_view, icon, title);
     } else {
-        tab = ui->tabWidget->addTab(graph_view, QString::fromStdString(uuid.getFullName()));
+        std::string title;
+        for(GraphFacade* parent = graph_facade.get(); parent != nullptr; parent = parent->getParent()) {
+            NodeHandle* nh = parent->getNodeHandle();
+            if(!nh) {
+                break;
+            }
+            std::string label = nh->getNodeState()->getLabel();
+            if(!title.empty()) {
+                title = label + " / " + title;
+
+            } else {
+                title = label;
+            }
+        }
+
+        tab = ui->tabWidget->addTab(graph_view, QString::fromStdString(title));
     }
 
     graph_view->overwriteStyleSheet(styleSheet());
@@ -133,6 +149,11 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
 
     QObject::connect(graph_view, SIGNAL(boxAdded(NodeBox*)), this, SLOT(addBox(NodeBox*)));
     QObject::connect(graph_view, SIGNAL(boxRemoved(NodeBox*)), this, SLOT(removeBox(NodeBox*)));
+
+    for(const auto& nh : graph->getAllNodeHandles()) {
+        NodeBox* box = graph_view->getBox(nh->getUUID());
+        addBox(box);
+    }
 
     // main graph tab is not closable
     if(tab == 0) {
@@ -168,6 +189,7 @@ void Designer::closeView(int page)
         visible_graphs_.erase(graph);
         graph_views_.erase(graph);
         view_graphs_.erase(view);
+        auuid_views_.erase(graph_facade->getAbsoluteUUID());
     }
 }
 
@@ -241,7 +263,7 @@ void Designer::deleteSelected()
         return;
     }
 
-    UUID id = view->getGraphFacade()->getUUID();
+    AUUID id = view->getGraphFacade()->getAbsoluteUUID();
     command::Meta::Ptr del(new command::Meta(id, "delete selected"));
     del->add(view->deleteSelected());
 
@@ -301,15 +323,9 @@ GraphView* Designer::getVisibleGraphView() const
     return current_view;
 }
 
-GraphView* Designer::getGraphView(const UUID &uuid) const
+GraphView* Designer::getGraphView(const AUUID &uuid) const
 {
-    for(const auto& pair : graph_views_) {
-        Graph* graph = pair.first;
-        if(graph->getUUID() == uuid) {
-            return graph_views_.at(graph);
-        }
-    }
-    return nullptr;
+    return auuid_views_.at(uuid);
 }
 
 DesignerScene* Designer::getVisibleDesignerScene() const

@@ -24,13 +24,13 @@
 
 using namespace csapex;
 
-CommandFactory::CommandFactory(GraphFacade *root, const UUID &graph_id)
+CommandFactory::CommandFactory(GraphFacade *root, const AUUID &graph_id)
     : root_(root), graph_uuid(graph_id)
 {
 
 }
 CommandFactory::CommandFactory(GraphFacade *root)
-    : root_(root), graph_uuid(root->getUUID())
+    : root_(root), graph_uuid(root->getAbsoluteUUID())
 {
 
 }
@@ -213,10 +213,10 @@ GraphFacade* CommandFactory::getGraphFacade() const
     if(graph_uuid.empty()) {
         return root_;
 
-    } else if(root_->getUUID() == graph_uuid) {
+    } else if(root_->getAbsoluteUUID() == graph_uuid) {
         return root_;
 
     } else {
-        root_->getSubGraph(graph_uuid);
+        return root_->getSubGraph(graph_uuid);
     }
 }

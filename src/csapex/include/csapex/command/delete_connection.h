@@ -14,7 +14,7 @@ namespace command
 class DeleteConnection : public Meta
 {
 protected:
-    DeleteConnection(const UUID& parent_uuid, Connectable* a, Connectable* b);
+    DeleteConnection(const AUUID& graph_uuid, Connectable* a, Connectable* b);
 
 protected:
     bool doExecute() override;

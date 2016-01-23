@@ -15,7 +15,7 @@
 
 using namespace csapex::command;
 
-FlipSides::FlipSides(const UUID& parent_uuid, const UUID &node)
+FlipSides::FlipSides(const AUUID& parent_uuid, const UUID &node)
     : Command(parent_uuid), uuid(node)
 {
 }

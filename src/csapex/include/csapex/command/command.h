@@ -39,7 +39,7 @@ public:
     typedef std::shared_ptr<Command> Ptr;
 
 public:
-    Command(const UUID& parent_uuid);
+    Command(const AUUID& graph_uuid);
 
     virtual void init(Settings* settings, GraphFacade* graph_facade, ThreadPool* thread_pool, NodeFactory *node_factory);
 
@@ -75,7 +75,7 @@ protected:
     Settings* settings_;
     NodeFactory* node_factory_;
 
-    UUID parent_uuid;
+    AUUID graph_uuid;
 
 private:
     GraphFacade* root_;

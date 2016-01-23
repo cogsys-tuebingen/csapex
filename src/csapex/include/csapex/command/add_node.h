@@ -15,7 +15,7 @@ namespace command
 class AddNode : public Command
 {
 public:
-    AddNode(const UUID &parent_uuid, const std::string& type, Point pos, const UUID& uuid_, NodeStatePtr state);
+    AddNode(const AUUID &graph_uuid, const std::string& type, Point pos, const UUID& uuid_, NodeStatePtr state);
 
 protected:
     bool doExecute() override;

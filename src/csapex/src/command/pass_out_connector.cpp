@@ -6,6 +6,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
@@ -13,7 +14,7 @@
 using namespace csapex;
 using namespace command;
 
-PassOutConnector::PassOutConnector(const UUID& graph_id, const UUID& connector_id)
+PassOutConnector::PassOutConnector(const AUUID& graph_id, const UUID& connector_id)
     : Command(graph_id), c_uuid(connector_id)
 {
 }
@@ -31,7 +32,7 @@ std::string PassOutConnector::getDescription() const
 
 bool PassOutConnector::doExecute()
 {
-    NodeHandle* node_handle = getGraph()->findNodeHandle(parent_uuid);
+    NodeHandle* node_handle = getRoot()->getGraph()->findNodeHandle(graph_uuid);
     apex_assert_hard(node_handle);
 
     NodePtr sub_graph_node = node_handle->getNode().lock();

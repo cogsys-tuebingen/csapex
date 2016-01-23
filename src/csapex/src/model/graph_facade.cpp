@@ -18,14 +18,25 @@
 
 using namespace csapex;
 
-GraphFacade::GraphFacade(ThreadPool &executor, Graph* graph)
-    : graph_(graph), executor_(executor)
+GraphFacade::GraphFacade(ThreadPool &executor, Graph* graph, GraphFacade *parent)
+    : parent_(parent), absolute_uuid_(graph->getUUID()), graph_(graph), graph_handle_(nullptr), executor_(executor)
 {
     connections_.push_back(graph->nodeAdded.connect(
                                delegate::Delegate<void(NodeHandlePtr)>(this, &GraphFacade::nodeAddedHandler)));
 
     connections_.push_back(graph->nodeRemoved.connect(
                                delegate::Delegate<void(NodeHandlePtr)>(this, &GraphFacade::nodeRemovedHandler)));
+
+    if(parent_) {
+        graph_handle_ = parent_->getGraph()->findNodeHandle(graph->getUUID());
+        apex_assert_hard(graph_handle_);
+
+        AUUID parent_auuid = parent_->getAbsoluteUUID();
+        if(!parent_auuid.empty()) {
+            absolute_uuid_ = AUUID(UUIDProvider::makeDerivedUUID_forced(parent_auuid,
+                                                                        absolute_uuid_.getFullName()));
+        }
+    }
 }
 
 GraphFacade::~GraphFacade()
@@ -36,6 +47,10 @@ GraphFacade::~GraphFacade()
     connections_.clear();
 }
 
+GraphFacade* GraphFacade::getParent() const
+{
+    return parent_;
+}
 
 void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
     if(nh->getType() == "csapex::Graph") {
@@ -44,7 +59,7 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
         GraphPtr sub_graph = std::dynamic_pointer_cast<Graph>(node);
         apex_assert_hard(sub_graph);
 
-        GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get());
+        GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get(), this);
         children_[nh->getUUID()] = sub_graph_facade;
 
         childAdded(sub_graph_facade);
@@ -86,9 +101,9 @@ void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh)
 
 }
 
-UUID GraphFacade::getUUID() const
+AUUID GraphFacade::getAbsoluteUUID() const
 {
-    return graph_->getUUID();
+    return absolute_uuid_;
 }
 
 Graph* GraphFacade::getGraph()
@@ -99,6 +114,11 @@ Graph* GraphFacade::getGraph()
 ThreadPool* GraphFacade::getThreadPool()
 {
     return &executor_;
+}
+
+NodeHandle* GraphFacade::getNodeHandle()
+{
+    return graph_handle_;
 }
 
 NodeWorkerPtr GraphFacade::getNodeWorker(const NodeHandle *handle)
@@ -117,8 +137,13 @@ GraphFacade* GraphFacade::getSubGraph(const UUID &uuid)
         throw std::logic_error("cannot get subgraph for empty UUID");
     }
 
-    GraphFacadePtr facade = children_[uuid];
-    return facade.get();
+    if(uuid.composite()) {
+        GraphFacadePtr facade = children_[uuid.rootUUID()];
+        return facade->getSubGraph(uuid.nestedUUID());
+    } else {
+        GraphFacadePtr facade = children_[uuid];
+        return facade.get();
+    }
 }
 
 ConnectionPtr GraphFacade::connect(OutputPtr output, InputPtr input, OutputTransition *ot, InputTransition *it)

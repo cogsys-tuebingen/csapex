@@ -16,7 +16,7 @@ namespace command
 class AddSignalConnection : public AddConnection
 {
 public:
-    AddSignalConnection(const UUID& parent_uuid, const UUID &from_uuid, const UUID &to_uuid);
+    AddSignalConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid);
 
 protected:
     bool doExecute() override;

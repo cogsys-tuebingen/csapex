@@ -13,7 +13,7 @@ namespace command
 
 struct PassOutConnector : public Command
 {
-    PassOutConnector(const UUID &graph_id, const UUID& connector_id);
+    PassOutConnector(const AUUID &graph_id, const UUID& connector_id);
 
 protected:
     bool doExecute() override;

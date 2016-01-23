@@ -211,7 +211,8 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        Graph* graph = src->getGraphFacade()->getGraph();
+        GraphFacade* gf = src->getGraphFacade();
+        Graph* graph = gf->getGraph();
         UUID uuid = graph->generateUUID(type);
 
         NodeStatePtr state;
@@ -221,7 +222,7 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
             state = *state_ptr;
         }
 
-        dispatcher_->executeLater(Command::Ptr(new command::AddNode(graph->getUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
+        dispatcher_->executeLater(Command::Ptr(new command::AddNode(gf->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         e->ignore();

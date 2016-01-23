@@ -13,7 +13,7 @@
 using namespace csapex;
 using namespace command;
 
-DeleteConnector::DeleteConnector(const UUID& parent_uuid, Connectable *_c)
+DeleteConnector::DeleteConnector(const AUUID& parent_uuid, Connectable *_c)
     : Command(parent_uuid), in(_c->canInput()), c(_c), c_uuid(c->getUUID())
 {
 }
@@ -34,7 +34,7 @@ bool DeleteConnector::doExecute()
     NodeHandle* node_worker = getGraph()->findNodeHandleForConnector(c_uuid);
 
     if(c->isConnected()) {
-        delete_connections = CommandFactory(getRoot(), parent_uuid).removeAllConnectionsCmd(c);
+        delete_connections = CommandFactory(getRoot(), graph_uuid).removeAllConnectionsCmd(c);
 
         Command::executeCommand(delete_connections);
     }

@@ -13,7 +13,7 @@ namespace command
 class DeleteNode : public Meta
 {
 public:
-    DeleteNode(const UUID &parent_uuid, const UUID &uuid);
+    DeleteNode(const AUUID &graph_uuid, const UUID &uuid);
 
 protected:
     bool doExecute() override;

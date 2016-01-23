@@ -13,7 +13,7 @@
 
 using namespace csapex::command;
 
-AddFulcrum::AddFulcrum(const UUID& parent_uuid, int connection_id, int sub_section_to_split, const Point &pos, int type)
+AddFulcrum::AddFulcrum(const AUUID& parent_uuid, int connection_id, int sub_section_to_split, const Point &pos, int type)
     : Command(parent_uuid), connection_id(connection_id), sub_section_to_split(sub_section_to_split), pos(pos), type(type)
 {
 

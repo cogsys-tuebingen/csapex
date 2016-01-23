@@ -20,7 +20,7 @@
 using namespace csapex::command;
 
 
-CreateThread::CreateThread(const UUID& parent_uuid, const UUID &node, const std::string& name)
+CreateThread::CreateThread(const AUUID& parent_uuid, const UUID &node, const std::string& name)
     : Command(parent_uuid), uuid(node), name(name), old_id(-1), new_id(-1)
 {
 }

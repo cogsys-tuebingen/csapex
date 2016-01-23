@@ -19,7 +19,7 @@
 
 using namespace csapex::command;
 
-SwitchThread::SwitchThread(const UUID& parent_uuid, const UUID &node, int thread_id)
+SwitchThread::SwitchThread(const AUUID& parent_uuid, const UUID &node, int thread_id)
     : Command(parent_uuid), uuid(node), old_id(-1), id(thread_id)
 {
 }

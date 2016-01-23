@@ -15,7 +15,7 @@ namespace command
 class MoveBox : public Command
 {
 public:
-    MoveBox(const UUID &graph_uuid, const UUID& node_uuid, Point from, Point to, Designer *designer);
+    MoveBox(const AUUID &graph_uuid, const UUID& node_uuid, Point from, Point to, Designer *designer);
 
 protected:
     bool doExecute();

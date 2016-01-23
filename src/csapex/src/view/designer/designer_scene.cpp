@@ -434,7 +434,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
     if(!e->isAccepted() && e->button() == Qt::LeftButton) {
         if(highlight_connection_id_ >= 0) {
             QPoint pos = e->scenePos().toPoint();
-            dispatcher_->execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getUUID(), highlight_connection_id_, highlight_connection_sub_id_, Point(pos.x(), pos.y()), 0)));
+            dispatcher_->execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(), highlight_connection_id_, highlight_connection_sub_id_, Point(pos.x(), pos.y()), 0)));
             e->accept();
 
             // allow moving the fulcrum directly
@@ -640,7 +640,7 @@ void DesignerScene::fulcrumMoved(void * fulcrum, bool dropped)
     Fulcrum* f = (Fulcrum*) fulcrum;
 
     if(dropped) {
-        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(graph_facade_->getUUID(), f->connectionId(), f->id(), fulcrum_last_pos_[f], f->pos())));
+        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(), fulcrum_last_pos_[f], f->pos())));
         fulcrum_last_pos_[f] = f->pos();
     }
     invalidateSchema();
@@ -651,7 +651,7 @@ void DesignerScene::fulcrumHandleMoved(void * fulcrum, bool dropped, int /*which
     Fulcrum* f = (Fulcrum*) fulcrum;
 
     if(dropped) {
-        dispatcher_->execute(Command::Ptr(new command::ModifyFulcrum(graph_facade_->getUUID(), f->connectionId(), f->id(),
+        dispatcher_->execute(Command::Ptr(new command::ModifyFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(),
                                                                      fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
                                                                      f->type(), f->handleIn(), f->handleOut())));
         fulcrum_last_type_[f] = f->type();

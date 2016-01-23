@@ -13,7 +13,7 @@
 
 using namespace csapex::command;
 
-MoveBox::MoveBox(const UUID& graph_uuid, const UUID& node_uuid, Point from, Point to, Designer *view)
+MoveBox::MoveBox(const AUUID& graph_uuid, const UUID& node_uuid, Point from, Point to, Designer *view)
     : Command(graph_uuid), view_(view), from(from), to(to), box_uuid(node_uuid)
 {
 }
@@ -34,14 +34,14 @@ std::string MoveBox::getDescription() const
 
 bool MoveBox::doExecute()
 {
-    MovableGraphicsProxyWidget* box = view_->getGraphView(parent_uuid)->getProxy(box_uuid);
+    MovableGraphicsProxyWidget* box = view_->getGraphView(graph_uuid)->getProxy(box_uuid);
     box->getBox()->triggerPlaced();
     return true;
 }
 
 bool MoveBox::doUndo()
 {
-    MovableGraphicsProxyWidget* box = view_->getGraphView(parent_uuid)->getProxy(box_uuid);
+    MovableGraphicsProxyWidget* box = view_->getGraphView(graph_uuid)->getProxy(box_uuid);
     box->setPos(QPoint(from.x, from.y));
     box->getBox()->triggerPlaced();
     return true;
@@ -49,7 +49,7 @@ bool MoveBox::doUndo()
 
 bool MoveBox::doRedo()
 {
-    MovableGraphicsProxyWidget* box = view_->getGraphView(parent_uuid)->getProxy(box_uuid);
+    MovableGraphicsProxyWidget* box = view_->getGraphView(graph_uuid)->getProxy(box_uuid);
     box->setPos(QPoint(to.x, to.y));
     box->getBox()->triggerPlaced();
     return true;

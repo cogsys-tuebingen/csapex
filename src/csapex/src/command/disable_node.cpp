@@ -18,7 +18,7 @@
 
 using namespace csapex::command;
 
-DisableNode::DisableNode(const UUID& parent_uuid, const UUID& uuid, bool disable)
+DisableNode::DisableNode(const AUUID& parent_uuid, const UUID& uuid, bool disable)
     : Command(parent_uuid), uuid(uuid), disable_(disable)
 {
 }

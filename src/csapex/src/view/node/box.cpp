@@ -17,6 +17,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/designer/graph_view.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #include <QDragMoveEvent>
@@ -456,7 +457,7 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
     if(o == this) {
         if(e->type() == QEvent::MouseButtonDblClick) {
             if(hasSubGraph()) {
-                Q_EMIT showSubGraphRequest(getSubGraph()->getUUID());
+                Q_EMIT showSubGraphRequest(getSubGraph()->getAbsoluteUUID());
                 return true;
             }
         }
@@ -762,16 +763,17 @@ bool NodeBox::hasSubGraph() const
     return dynamic_cast<Graph*>(getNode()) != nullptr;
 }
 
-Graph::Ptr NodeBox::getSubGraph() const
+GraphFacade* NodeBox::getSubGraph() const
 {
     NodeHandlePtr nh = node_handle_.lock();
     if(nh) {
         NodePtr node = nh->getNode().lock();
         if(node) {
-            Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(node);
-            if(graph) {
-                return graph;
-            }
+            return parent_->getGraphFacade()->getSubGraph(node->getUUID());
+//            Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(node);
+//            if(graph) {
+//                return graph;
+//            }
         }
     }
 

@@ -18,7 +18,7 @@
 
 using namespace csapex::command;
 
-DeleteNode::DeleteNode(const UUID& parent_uuid, const UUID& uuid)
+DeleteNode::DeleteNode(const AUUID& parent_uuid, const UUID& uuid)
     : Meta(parent_uuid, "delete node and connections"), uuid(uuid)
 {
 }
@@ -46,7 +46,7 @@ bool DeleteNode::doExecute()
 
     for(auto connectable : node_handle->getAllConnectors()) {
         if(connectable->isConnected()) {
-            add(CommandFactory(getRoot(), parent_uuid).removeAllConnectionsCmd(connectable));
+            add(CommandFactory(getRoot(), graph_uuid).removeAllConnectionsCmd(connectable));
         }
     }
 

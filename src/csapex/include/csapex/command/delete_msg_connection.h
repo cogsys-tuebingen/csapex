@@ -15,7 +15,7 @@ namespace command
 class DeleteMessageConnection : public DeleteConnection
 {
 public:
-    DeleteMessageConnection(const UUID& parent_uuid, Output* a, Input* b);
+    DeleteMessageConnection(const AUUID& graph_uuid, Output* a, Input* b);
 
     virtual bool doUndo() override;
 };

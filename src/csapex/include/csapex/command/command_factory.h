@@ -14,7 +14,7 @@ namespace csapex
 class CommandFactory
 {
 public:
-    CommandFactory(GraphFacade *root, const UUID& graph_id);
+    CommandFactory(GraphFacade *root, const AUUID& graph_id);
     CommandFactory(GraphFacade *root);
 
 public:
@@ -44,7 +44,7 @@ private:
 
 private:
     GraphFacade* root_;
-    UUID graph_uuid;
+    AUUID graph_uuid;
 };
 
 }

@@ -14,7 +14,7 @@ namespace command
 class MoveConnection : public Meta
 {
 public:
-    MoveConnection(const UUID& parent_uuid, Connectable* a, Connectable* b);
+    MoveConnection(const AUUID& graph_uuid, Connectable* a, Connectable* b);
 
 private:
     UUID from_uuid;

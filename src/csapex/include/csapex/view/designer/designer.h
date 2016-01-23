@@ -49,7 +49,7 @@ public:
     void removeGraph(GraphFacadePtr graph);
 
     GraphView* getVisibleGraphView() const;
-    GraphView* getGraphView(const UUID& uuid) const;
+    GraphView* getGraphView(const AUUID &uuid) const;
 
     GraphFacade* getVisibleGraphFacade() const;
     DesignerScene* getVisibleDesignerScene() const;
@@ -110,6 +110,7 @@ private:
 
     std::set<Graph*> visible_graphs_;
     std::map<Graph*, GraphView*> graph_views_;
+    std::map<AUUID, GraphView*> auuid_views_;
     std::map<GraphView*, GraphFacade*> view_graphs_;
 
     std::map<UUID, YAML::Node> states_for_invisible_graphs_;

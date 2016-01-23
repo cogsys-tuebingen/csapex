@@ -11,7 +11,7 @@
 using namespace csapex;
 using namespace csapex::command;
 
-DeleteSignalConnection::DeleteSignalConnection(const UUID& parent_uuid, Trigger *a, Slot *b)
+DeleteSignalConnection::DeleteSignalConnection(const AUUID& parent_uuid, Trigger *a, Slot *b)
     : DeleteConnection(parent_uuid, a, b)
 {
 

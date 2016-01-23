@@ -14,7 +14,7 @@
 using namespace csapex;
 using namespace csapex::command;
 
-AddConnection::AddConnection(const UUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid)
+AddConnection::AddConnection(const AUUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid)
     : Command(parent_uuid), from_uuid(from_uuid), to_uuid(to_uuid)
 {
 }

@@ -12,7 +12,7 @@
 using namespace csapex;
 using namespace csapex::command;
 
-DeleteMessageConnection::DeleteMessageConnection(const UUID &parent_uuid, Output *a, Input *b)
+DeleteMessageConnection::DeleteMessageConnection(const AUUID &parent_uuid, Output *a, Input *b)
     : DeleteConnection(parent_uuid, a, b)
 {
 

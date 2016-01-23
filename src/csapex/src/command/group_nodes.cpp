@@ -26,7 +26,7 @@
 
 using namespace csapex::command;
 
-GroupNodes::GroupNodes(const UUID& parent_uuid, const std::vector<UUID> &uuids)
+GroupNodes::GroupNodes(const AUUID& parent_uuid, const std::vector<UUID> &uuids)
     : Meta(parent_uuid, "GroupNodes"), uuids(uuids)
 {
 }
@@ -72,7 +72,13 @@ bool GroupNodes::doExecute()
     }
 
     UUID sub_graph_uuid = graph->generateUUID("csapex::Graph");
-    CommandPtr add_graph = std::make_shared<command::AddNode>(graph->getUUID(), "csapex::Graph", insert_pos, sub_graph_uuid, nullptr);
+
+    AUUID parent_auuid = getGraphFacade()->getAbsoluteUUID();
+    AUUID sub_graph_auuid(UUIDProvider::makeDerivedUUID_forced(
+                              parent_auuid,
+                              sub_graph_uuid.getFullName()));
+
+    CommandPtr add_graph = std::make_shared<command::AddNode>(parent_auuid, "csapex::Graph", insert_pos, sub_graph_uuid, nullptr);
     add(add_graph);
 
 //    NodeHandle* sub_graph_nh = graph_->findNodeHandle(sub_graph_uuid);
@@ -140,13 +146,13 @@ bool GroupNodes::doExecute()
 
     for(NodeHandle* nh : nodes) {
         UUID old_uuid = nh->getUUID();
-        CommandPtr del = std::make_shared<command::DeleteNode>(graph->getUUID(), old_uuid);
+        CommandPtr del = std::make_shared<command::DeleteNode>(getGraphFacade()->getAbsoluteUUID(), old_uuid);
         add(del);
     }
 
 
 
-    std::shared_ptr<PasteGraph> paste(new command::PasteGraph(sub_graph_uuid, selection_yaml, insert_pos,
+    std::shared_ptr<PasteGraph> paste(new command::PasteGraph(sub_graph_auuid, selection_yaml, insert_pos,
                                                               crossing_inputs, crossing_outputs));
   //  paste->init(settings_, getGraphFacade(sub_graph_uuid), getThreadPool(), node_factory_);
 //    executeCommand(paste);

@@ -37,8 +37,8 @@ public:
 
     friend bool operator == (const std::string& str, const UUID& uuid_);
     friend bool operator == (const UUID& uuid_, const std::string& str);
-    friend bool operator == (const UUID& a, const UUID& b);
 
+    friend bool operator == (const UUID& a, const UUID& b);
     friend bool operator != (const UUID& a, const UUID& b);
 
     bool operator < (const UUID& rhs) const;
@@ -78,6 +78,28 @@ private:
 private:
     UUIDProvider* parent_;
     std::vector<std::string> representation_;
+};
+
+/**
+ * @brief The AUUID class represents an *absolute* UUID
+ */
+class AUUID : public UUID
+{
+public:
+    AUUID() = default;
+    AUUID(const AUUID& uuid) = default;
+    explicit AUUID(const UUID& uuid);
+
+    AUUID& operator = (const AUUID& uuid) = default;
+    AUUID& operator = (const UUID& uuid);
+
+
+    bool operator < (const AUUID& rhs) const;
+
+    struct Hasher {
+      std::size_t operator()(const AUUID& k) const;
+    };
+
 };
 
 }

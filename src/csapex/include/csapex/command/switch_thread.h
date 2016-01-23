@@ -12,7 +12,7 @@ namespace command
 
 struct SwitchThread : public Command
 {
-    SwitchThread(const UUID& parent_uuid, const UUID& node, int thread_id);
+    SwitchThread(const AUUID& graph_uuid, const UUID& node, int thread_id);
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;

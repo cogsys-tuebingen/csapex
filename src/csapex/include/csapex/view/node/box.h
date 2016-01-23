@@ -68,7 +68,7 @@ public:
     GraphView* getGraphView() const;
 
     bool hasSubGraph() const;
-    Graph::Ptr getSubGraph() const;
+    GraphFacade *getSubGraph() const;
 
     void setLabel(const std::string& label);
     void setLabel(const QString& label);

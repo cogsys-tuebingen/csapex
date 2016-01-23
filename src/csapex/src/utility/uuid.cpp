@@ -210,3 +210,37 @@ std::ostream& operator << (std::ostream& out, const UUID& uuid_) {
     return out;
 }
 }
+
+
+/**
+ * AUUID
+ */
+
+AUUID::AUUID(const UUID &uuid)
+    : UUID(uuid)
+{
+
+}
+AUUID& AUUID::operator = (const UUID& uuid)
+{
+    UUID::operator = (uuid);
+    return *this;
+}
+
+std::size_t AUUID::Hasher::operator()(const AUUID& k) const {
+    return k.hash();
+}
+
+namespace csapex
+{
+
+std::ostream& operator << (std::ostream& out, const AUUID& uuid_) {
+    out << "*" << uuid_.getFullName() << "*";
+    return out;
+}
+}
+
+bool AUUID::operator <(const AUUID& other) const
+{
+    return UUID::operator <(other);
+}

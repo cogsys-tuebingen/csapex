@@ -16,12 +16,12 @@
 using namespace csapex;
 using namespace csapex::command;
 
-PasteGraph::PasteGraph(const UUID &graph_id, const YAML::Node& blueprint, const Point& pos)
+PasteGraph::PasteGraph(const AUUID &graph_id, const YAML::Node& blueprint, const Point& pos)
     : Meta(graph_id, "PasteGraph"), blueprint_(blueprint), pos_(pos)
 {
 }
 
-PasteGraph::PasteGraph(const UUID& graph_id, const YAML::Node& blueprint, const Point &pos,
+PasteGraph::PasteGraph(const AUUID& graph_id, const YAML::Node& blueprint, const Point &pos,
                        const std::vector<std::pair<UUID, UUID> > &crossing_inputs, const std::vector<std::pair<UUID, UUID> > &crossing_outputs)
     : PasteGraph(graph_id, blueprint, pos)
 {
@@ -41,9 +41,11 @@ std::string PasteGraph::getDescription() const
 
 bool PasteGraph::doExecute()
 {
-    GraphFacade* graph_facade = parent_uuid.empty() ? getRoot() : getGraphFacade();
+    GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
     bool paused = graph_facade->isPaused();
     graph_facade->pauseRequest(true);
+
+    AUUID parent_graph_auuid = graph_facade->getParent()->getAbsoluteUUID();
 
     Graph* graph = graph_facade->getGraph();
 
@@ -58,7 +60,7 @@ bool PasteGraph::doExecute()
         std::string child = in.second.id();
 
         UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
-        CommandPtr pass_out = std::make_shared<command::PassOutConnector>(parent_uuid, new_uuid);
+        CommandPtr pass_out = std::make_shared<command::PassOutConnector>(graph_uuid, new_uuid);
         pass_out->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
         executeCommand(pass_out);
         add(pass_out);
@@ -69,7 +71,7 @@ bool PasteGraph::doExecute()
         std::string child = out.first.id();
 
         UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
-        CommandPtr pass_out = std::make_shared<command::PassOutConnector>(parent_uuid, new_uuid);
+        CommandPtr pass_out = std::make_shared<command::PassOutConnector>(graph_uuid, new_uuid);
         pass_out->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
         executeCommand(pass_out);
         add(pass_out);
@@ -83,7 +85,7 @@ bool PasteGraph::doExecute()
         UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
         UUID forwarding_uuid = graph_facade->getGraph()->getForwardingInput(new_uuid);
 
-        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_uuid, in.first, forwarding_uuid);
+        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_graph_auuid, in.first, forwarding_uuid);
         add_connection->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
         executeCommand(add_connection);
         add(add_connection);
@@ -96,7 +98,7 @@ bool PasteGraph::doExecute()
         UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
         UUID forwarding_uuid = graph_facade->getGraph()->getForwardingOutput(new_uuid);
 
-        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_uuid, forwarding_uuid, out.second);
+        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_graph_auuid, forwarding_uuid, out.second);
         add_connection->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
         executeCommand(add_connection);
         add(add_connection);
@@ -108,9 +110,9 @@ bool PasteGraph::doExecute()
 
 bool PasteGraph::doUndo()
 {
-    GraphFacade* graph_facade = parent_uuid.empty() ? getRoot() : getGraphFacade();
+    GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
     for(const auto& pair : id_mapping_) {
-        CommandPtr del(new command::DeleteNode(parent_uuid, pair.second));
+        CommandPtr del(new command::DeleteNode(graph_uuid, pair.second));
         del->init(settings_, graph_facade, getRootThreadPool(), node_factory_);
         executeCommand(del);
     }

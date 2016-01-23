@@ -135,7 +135,7 @@ void FulcrumWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
     e->accept();
     QAction* selectedItem = menu.exec(QCursor::pos());
 
-    UUID parent_uuid;
+    AUUID parent_uuid;
 
     if(selectedItem == del) {
         cmd_dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(parent_uuid, fulcrum_->connectionId(), fulcrum_->id())));

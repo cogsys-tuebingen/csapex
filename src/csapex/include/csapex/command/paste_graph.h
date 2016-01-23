@@ -22,8 +22,8 @@ namespace command
 class PasteGraph : public Meta
 {
 public:
-    PasteGraph(const UUID& graph_id, const YAML::Node& blueprint, const Point &pos);
-    PasteGraph(const UUID& graph_id, const YAML::Node& blueprint, const Point &pos,
+    PasteGraph(const AUUID &graph_id, const YAML::Node& blueprint, const Point &pos);
+    PasteGraph(const AUUID &graph_id, const YAML::Node& blueprint, const Point &pos,
                const std::vector<std::pair<UUID,UUID>>& crossing_inputs,
                const std::vector<std::pair<UUID,UUID>>& crossing_outputs);
 

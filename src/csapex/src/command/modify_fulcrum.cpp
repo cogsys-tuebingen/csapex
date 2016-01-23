@@ -12,7 +12,7 @@
 
 using namespace csapex::command;
 
-ModifyFulcrum::ModifyFulcrum(const UUID& parent_uuid, int connection_id, int fulcrum_id,
+ModifyFulcrum::ModifyFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id,
                              int f_type, const Point &f_handle_in, const Point &f_handle_out,
                              int t_type, const Point &t_handle_in, const Point &t_handle_out)
     : Command(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id),

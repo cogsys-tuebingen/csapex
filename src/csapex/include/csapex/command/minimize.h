@@ -12,7 +12,7 @@ namespace command
 
 struct Minimize : public Command
 {
-    Minimize(const UUID &parent_uuid, const UUID& node, bool mini);
+    Minimize(const AUUID &graph_uuid, const UUID& node, bool mini);
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;

@@ -13,7 +13,7 @@ namespace command
 class DisableNode : public Command
 {
 public:
-    DisableNode(const UUID &parent_uuid, const UUID &uuid, bool disable = true);
+    DisableNode(const AUUID &graph_uuid, const UUID &uuid, bool disable = true);
 
 protected:
     bool doExecute() override;

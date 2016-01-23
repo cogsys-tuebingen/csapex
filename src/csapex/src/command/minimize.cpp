@@ -15,7 +15,7 @@
 
 using namespace csapex::command;
 
-Minimize::Minimize(const UUID& parent_uuid, const UUID &node, bool mini)
+Minimize::Minimize(const AUUID& parent_uuid, const UUID &node, bool mini)
     : Command(parent_uuid), uuid(node), mini(mini), executed(false)
 {
 }

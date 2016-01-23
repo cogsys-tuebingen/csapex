@@ -20,7 +20,7 @@
 
 using namespace csapex::command;
 
-MoveConnection::MoveConnection(const UUID& parent_uuid, Connectable *from, Connectable *to)
+MoveConnection::MoveConnection(const AUUID& parent_uuid, Connectable *from, Connectable *to)
     : Meta(parent_uuid, "MoveConnection"), from_uuid(from->getUUID()), to_uuid(to->getUUID())
 {
     apex_assert_hard(from);

@@ -14,7 +14,7 @@
 using namespace csapex;
 using namespace csapex::command;
 
-DeleteConnection::DeleteConnection(const UUID &parent_uuid, Connectable* a, Connectable* b)
+DeleteConnection::DeleteConnection(const AUUID &parent_uuid, Connectable* a, Connectable* b)
     : Meta(parent_uuid, "delete connection and fulcrums"), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
 {
     if((a->isOutput() && b->isInput())) {
@@ -48,7 +48,7 @@ bool DeleteConnection::doExecute()
 
     locked = false;
     clear();
-    add(CommandFactory(getRoot(), parent_uuid).deleteAllConnectionFulcrumsCommand(connection));
+    add(CommandFactory(getRoot(), graph_uuid).deleteAllConnectionFulcrumsCommand(connection));
     locked = true;
 
     if(Meta::doExecute()) {

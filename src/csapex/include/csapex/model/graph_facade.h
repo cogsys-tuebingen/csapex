@@ -20,11 +20,13 @@ public:
     typedef std::shared_ptr<GraphFacade> Ptr;
 
 public:
-    GraphFacade(ThreadPool& executor, Graph* graph);
+    GraphFacade(ThreadPool& executor, Graph* graph, GraphFacade* parent = nullptr);
     ~GraphFacade();
 
-    UUID getUUID() const;
+    AUUID getAbsoluteUUID() const;
     Graph* getGraph();
+    NodeHandle* getNodeHandle();
+    GraphFacade* getParent() const;
     GraphFacade* getSubGraph(const UUID& uuid);
     ThreadPool* getThreadPool();
 
@@ -82,7 +84,11 @@ private:
     void nodeRemovedHandler(NodeHandlePtr node);
 
 private:
+    GraphFacade* parent_;
+
+    AUUID absolute_uuid_;
     Graph* graph_;
+    NodeHandle* graph_handle_;
     ThreadPool& executor_;
 
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> children_;

@@ -279,11 +279,11 @@ void GraphView::updateSelection()
 
 Command::Ptr GraphView::deleteSelected()
 {
-    command::Meta::Ptr meta(new command::Meta(graph_facade_->getUUID(), "delete selected boxes"));
+    command::Meta::Ptr meta(new command::Meta(graph_facade_->getAbsoluteUUID(), "delete selected boxes"));
     for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
-            meta->add(Command::Ptr(new command::DeleteNode(graph_facade_->getUUID(), proxy->getBox()->getNodeHandle()->getUUID())));
+            meta->add(Command::Ptr(new command::DeleteNode(graph_facade_->getAbsoluteUUID(), proxy->getBox()->getNodeHandle()->getUUID())));
         }
     }
     return meta;
@@ -511,7 +511,7 @@ void GraphView::showBoxDialog()
             Graph* graph = graph_facade_->getGraph();
             UUID uuid = graph->generateUUID(type);
             QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
-            dispatcher_->executeLater(Command::Ptr(new command::AddNode(graph->getUUID(), type, Point(pos.x(), pos.y()), uuid, nullptr)));
+            dispatcher_->executeLater(Command::Ptr(new command::AddNode(graph_facade_->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, nullptr)));
         }
     }
 }
@@ -594,7 +594,7 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
 
     UUID uuid = node_handle->getUUID();
     QObject::connect(box, &NodeBox::toggled, [this, uuid](bool checked) {
-        dispatcher_->execute(std::make_shared<command::DisableNode>(graph_facade_->getUUID(), uuid, !checked));
+        dispatcher_->execute(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), uuid, !checked));
     });
 
     Q_EMIT boxAdded(box);
@@ -774,7 +774,7 @@ void GraphView::addPort(Port *port)
         if(!adaptee) {
             return;
         }
-        Command::Ptr cmd(new command::MoveConnection(graph_facade_->getUUID(), from, adaptee.get()));
+        Command::Ptr cmd(new command::MoveConnection(graph_facade_->getAbsoluteUUID(), from, adaptee.get()));
         dispatcher_->execute(cmd);
     });
 }
@@ -847,14 +847,14 @@ void GraphView::stopProfiling(NodeWorker *node)
 void GraphView::movedBoxes(double dx, double dy)
 {
     QPointF delta(dx, dy);
-    command::Meta::Ptr meta(new command::Meta(graph_facade_->getUUID(), "move boxes"));
+    command::Meta::Ptr meta(new command::Meta(graph_facade_->getAbsoluteUUID(), "move boxes"));
     for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
             NodeBox* b = proxy->getBox();
             QPointF to = proxy->pos();
             QPointF from = to - delta;
-            meta->add(Command::Ptr(new command::MoveBox(graph_facade_->getUUID(),
+            meta->add(Command::Ptr(new command::MoveBox(graph_facade_->getAbsoluteUUID(),
                                                         b->getNodeWorker()->getUUID(),
                                                         Point(from.x(), from.y()), Point(to.x(), to.y()),
                                                         parent_)));
@@ -1107,18 +1107,18 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
 void GraphView::usePrivateThreadFor()
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getUUID(),"use private thread"));
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"use private thread"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getUUID(),box->getNodeWorker()->getUUID(), 0)));
+        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), 0)));
     }
     dispatcher_->execute(cmd);
 }
 
 void GraphView::switchToThread(int group_id)
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getUUID(),"switch thread"));
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"switch thread"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getUUID(),box->getNodeWorker()->getUUID(), group_id)));
+        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), group_id)));
     }
     dispatcher_->execute(cmd);
 }
@@ -1130,9 +1130,9 @@ void GraphView::createNewThreadGroupFor()
     QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
 
     if(ok && !text.isEmpty()) {
-        command::Meta::Ptr cmd(new command::Meta(graph_facade_->getUUID(),"create new thread group"));
+        command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"create new thread group"));
         for(NodeBox* box : selected_boxes_) {
-            cmd->add(Command::Ptr(new command::CreateThread(graph_facade_->getUUID(),box->getNodeWorker()->getUUID(), text.toStdString())));
+            cmd->add(Command::Ptr(new command::CreateThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), text.toStdString())));
         }
         dispatcher_->execute(cmd);
     }
@@ -1147,27 +1147,27 @@ void GraphView::showProfiling(bool show)
 
 void GraphView::flipBox()
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getUUID(),"flip boxes"));
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"flip boxes"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::FlipSides(graph_facade_->getUUID(),box->getNodeWorker()->getUUID())));
+        cmd->add(Command::Ptr(new command::FlipSides(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID())));
     }
     dispatcher_->execute(cmd);
 }
 
 void GraphView::minimizeBox(bool mini)
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getUUID(),(mini ? std::string("minimize") : std::string("maximize")) + " boxes"));
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),(mini ? std::string("minimize") : std::string("maximize")) + " boxes"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::Minimize(graph_facade_->getUUID(),box->getNodeWorker()->getUUID(), mini)));
+        cmd->add(Command::Ptr(new command::Minimize(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), mini)));
     }
     dispatcher_->execute(cmd);
 }
 
 void GraphView::deleteBox()
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getUUID(),"delete boxes"));
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"delete boxes"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::DeleteNode(graph_facade_->getUUID(),box->getNodeWorker()->getUUID())));
+        cmd->add(Command::Ptr(new command::DeleteNode(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID())));
     }
     dispatcher_->execute(cmd);
 }
@@ -1179,7 +1179,7 @@ void GraphView::groupBox()
     for(NodeBox* box : selected_boxes_) {
         uuids.push_back(box->getNodeHandle()->getUUID());
     }
-    CommandPtr cmd(new command::GroupNodes(graph_facade_->getUUID(),uuids));
+    CommandPtr cmd(new command::GroupNodes(graph_facade_->getAbsoluteUUID(),uuids));
     dispatcher_->execute(cmd);
 }
 
@@ -1206,7 +1206,7 @@ void GraphView::paste()
 
     QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
 
-    UUID graph_id = graph_facade_->getUUID();
+    AUUID graph_id = graph_facade_->getAbsoluteUUID();
     CommandPtr cmd(new command::PasteGraph(graph_id, blueprint, Point (pos.x(), pos.y())));
 
     dispatcher_->execute(cmd);

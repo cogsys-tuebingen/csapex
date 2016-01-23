@@ -730,7 +730,7 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    CommandPtr cmd = CommandFactory(root_.get(), UUID::NONE).clearCommand();
+    CommandPtr cmd = CommandFactory(root_.get(), AUUID(UUID::NONE)).clearCommand();
     cmd_dispatcher_->execute(cmd);
 }
 
