@@ -24,7 +24,6 @@ protected:
     virtual std::string getDescription() const override;
 
 private:
-    UUID g_uuid;
     UUID c_uuid;
 };
 }

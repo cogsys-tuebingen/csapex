@@ -38,7 +38,6 @@ protected:
     virtual std::string getDescription() const override;
 
 protected:
-    UUID graph_id_;
     YAML::Node blueprint_;
     Point pos_;
 

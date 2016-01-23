@@ -11,6 +11,8 @@
 namespace csapex
 {
 
+class GraphView;
+
 class DragIOHandler
 {
 public:
@@ -18,9 +20,9 @@ public:
 
     virtual ~DragIOHandler();
 
-    virtual bool handleEnter(CommandDispatcher* dispatcher, QWidget *src, QDragEnterEvent* e);
-    virtual bool handleMove(CommandDispatcher* dispatcher, QWidget *src, QDragMoveEvent* e);
-    virtual bool handleDrop(CommandDispatcher* dispatcher, QWidget *src, QDropEvent* e, const QPointF& scene_pos);
+    virtual bool handleEnter(GraphView* view, CommandDispatcher* dispatcher, QDragEnterEvent* e);
+    virtual bool handleMove(GraphView* view, CommandDispatcher* dispatcher, QDragMoveEvent* e);
+    virtual bool handleDrop(GraphView* view, CommandDispatcher* dispatcher, QDropEvent* e, const QPointF& scene_pos);
 
 protected:
     DragIOHandler();

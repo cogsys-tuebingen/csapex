@@ -13,8 +13,8 @@
 
 using namespace csapex::command;
 
-AddFulcrum::AddFulcrum(int connection_id, int sub_section_to_split, const Point &pos, int type)
-    : connection_id(connection_id), sub_section_to_split(sub_section_to_split), pos(pos), type(type)
+AddFulcrum::AddFulcrum(const UUID& parent_uuid, int connection_id, int sub_section_to_split, const Point &pos, int type)
+    : Command(parent_uuid), connection_id(connection_id), sub_section_to_split(sub_section_to_split), pos(pos), type(type)
 {
 
 }
@@ -34,13 +34,13 @@ std::string AddFulcrum::getDescription() const
 
 bool AddFulcrum::doExecute()
 {
-    getRootGraph()->getConnectionWithId(connection_id)->addFulcrum(sub_section_to_split, pos, type);
+    getGraph()->getConnectionWithId(connection_id)->addFulcrum(sub_section_to_split, pos, type);
     return true;
 }
 
 bool AddFulcrum::doUndo()
 {
-    getRootGraph()->getConnectionWithId(connection_id)->deleteFulcrum(sub_section_to_split);
+    getGraph()->getConnectionWithId(connection_id)->deleteFulcrum(sub_section_to_split);
     return true;
 }
 

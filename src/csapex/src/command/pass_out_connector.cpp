@@ -14,7 +14,7 @@ using namespace csapex;
 using namespace command;
 
 PassOutConnector::PassOutConnector(const UUID& graph_id, const UUID& connector_id)
-    : g_uuid(graph_id), c_uuid(connector_id)
+    : Command(graph_id), c_uuid(connector_id)
 {
 }
 
@@ -31,7 +31,7 @@ std::string PassOutConnector::getDescription() const
 
 bool PassOutConnector::doExecute()
 {
-    NodeHandle* node_handle = getRootGraph()->findNodeHandle(g_uuid);
+    NodeHandle* node_handle = getGraph()->findNodeHandle(parent_uuid);
     apex_assert_hard(node_handle);
 
     NodePtr sub_graph_node = node_handle->getNode().lock();

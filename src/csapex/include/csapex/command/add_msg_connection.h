@@ -16,7 +16,7 @@ namespace command
 class AddMessageConnection : public AddConnection
 {
 public:
-    AddMessageConnection(const UUID &from_uuid, const UUID &to_uuid);
+    AddMessageConnection(const UUID& parent_uuid, const UUID &from_uuid, const UUID &to_uuid);
 
 protected:
     bool doExecute() override;

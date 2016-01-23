@@ -9,12 +9,13 @@
 #include <csapex/signal/signal_connection.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/signal/slot.h>
+#include <csapex/model/graph_facade.h>
 
 using namespace csapex;
 using namespace csapex::command;
 
-AddSignalConnection::AddSignalConnection(const UUID& from_uuid, const UUID& to_uuid)
-    : AddConnection(from_uuid, to_uuid), from(nullptr), to(nullptr)
+AddSignalConnection::AddSignalConnection(const UUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid)
+    : AddConnection(parent_uuid, from_uuid, to_uuid), from(nullptr), to(nullptr)
 {
 }
 
@@ -24,12 +25,15 @@ bool AddSignalConnection::doExecute()
         refresh();
     }
 
-    return getRootGraph()->addConnection(SignalConnection::connect(from, to));
+    Graph* graph = getGraph();
+
+    return graph->addConnection(SignalConnection::connect(from, to));
 }
 
 void AddSignalConnection::refresh()
 {
-    Graph* graph = getRootGraph();
+    Graph* graph = getGraph();
+
     Connectable* f = graph->findConnector(from_uuid);
     Connectable* t = graph->findConnector(to_uuid);
 

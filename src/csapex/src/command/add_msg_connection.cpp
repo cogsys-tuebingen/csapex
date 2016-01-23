@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/bundled_connection.h>
@@ -14,8 +15,8 @@
 using namespace csapex;
 using namespace csapex::command;
 
-AddMessageConnection::AddMessageConnection(const UUID& from_uuid, const UUID& to_uuid)
-    : AddConnection(from_uuid, to_uuid), from(nullptr), to(nullptr)
+AddMessageConnection::AddMessageConnection(const UUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid)
+    : AddConnection(parent_uuid, from_uuid, to_uuid), from(nullptr), to(nullptr)
 {
 }
 
@@ -25,7 +26,7 @@ bool AddMessageConnection::doExecute()
         refresh();
     }
 
-    Graph* graph = getRootGraph();
+    Graph* graph = getGraph();
 
     NodeHandle* from_nw = graph->findNodeHandleForConnector(from_uuid);
     NodeHandle* to_nw = graph->findNodeHandleForConnector(to_uuid);
@@ -38,7 +39,8 @@ bool AddMessageConnection::doExecute()
 
 void AddMessageConnection::refresh()
 {
-    Graph* graph = getRootGraph();
+    Graph* graph = getGraph();
+
     Connectable* f = graph->findConnector(from_uuid);
     Connectable* t = graph->findConnector(to_uuid);
 

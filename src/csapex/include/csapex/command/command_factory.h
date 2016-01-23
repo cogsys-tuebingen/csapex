@@ -14,7 +14,8 @@ namespace csapex
 class CommandFactory
 {
 public:
-    CommandFactory(Graph* graph);
+    CommandFactory(GraphFacade *root, const UUID& graph_id);
+    CommandFactory(GraphFacade *root);
 
 public:
     CommandPtr addConnection(const UUID& from, const UUID& to);
@@ -39,7 +40,11 @@ public:
     CommandPtr clearCommand();
 
 private:
-    Graph* graph_;
+    GraphFacade* getGraphFacade() const;
+
+private:
+    GraphFacade* root_;
+    UUID graph_uuid;
 };
 
 }

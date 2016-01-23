@@ -13,7 +13,7 @@ namespace command
 class DeleteFulcrum : public Command
 {
 public:
-    DeleteFulcrum(int connection_id, int fulcrum_id);
+    DeleteFulcrum(const UUID &parent_uuid, int connection_id, int fulcrum_id);
 
 protected:
     bool doExecute() override;

@@ -23,6 +23,7 @@ public:
     GraphFacade(ThreadPool& executor, Graph* graph);
     ~GraphFacade();
 
+    UUID getUUID() const;
     Graph* getGraph();
     GraphFacade* getSubGraph(const UUID& uuid);
     ThreadPool* getThreadPool();

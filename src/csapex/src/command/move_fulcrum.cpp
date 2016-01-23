@@ -12,8 +12,8 @@
 
 using namespace csapex::command;
 
-MoveFulcrum::MoveFulcrum(int connection_id, int fulcrum_id, const Point &from, const Point &to)
-    : connection_id(connection_id), fulcrum_id(fulcrum_id), from(from), to(to)
+MoveFulcrum::MoveFulcrum(const UUID& parent_uuid, int connection_id, int fulcrum_id, const Point &from, const Point &to)
+    : Command(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id), from(from), to(to)
 {
 }
 
@@ -36,12 +36,12 @@ bool MoveFulcrum::doExecute()
 
 bool MoveFulcrum::doUndo()
 {
-    getRootGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from, false);
+    getGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, from, false);
     return true;
 }
 
 bool MoveFulcrum::doRedo()
 {
-    getRootGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to, false);
+    getGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to, false);
     return doExecute();
 }

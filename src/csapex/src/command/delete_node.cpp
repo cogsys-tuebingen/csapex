@@ -18,8 +18,8 @@
 
 using namespace csapex::command;
 
-DeleteNode::DeleteNode(const UUID& uuid)
-    : Meta("delete node and connections"), uuid(uuid)
+DeleteNode::DeleteNode(const UUID& parent_uuid, const UUID& uuid)
+    : Meta(parent_uuid, "delete node and connections"), uuid(uuid)
 {
 }
 
@@ -36,8 +36,8 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    Graph* graph = getRootGraph();
-    NodeHandle* node_handle = graph->findNodeHandleForConnector(uuid);
+    Graph* graph = getGraph();
+    NodeHandle* node_handle = graph->findNodeHandle(uuid);
 
     type = node_handle->getType();
 
@@ -46,7 +46,7 @@ bool DeleteNode::doExecute()
 
     for(auto connectable : node_handle->getAllConnectors()) {
         if(connectable->isConnected()) {
-            add(CommandFactory(graph).removeAllConnectionsCmd(connectable));
+            add(CommandFactory(getRoot(), parent_uuid).removeAllConnectionsCmd(connectable));
         }
     }
 
@@ -64,7 +64,7 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    Graph* graph = getRootGraph();
+    Graph* graph = getGraph();
     NodeHandlePtr node = node_factory_->makeNode(type, uuid, graph);
 
     node->setNodeState(saved_state);
@@ -77,7 +77,7 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        Graph* graph = getRootGraph();
+        Graph* graph = getGraph();
         NodeHandle* node_handle = graph->findNodeHandle(uuid);
         saved_state = node_handle->getNodeStateCopy();
 

@@ -6,6 +6,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/connectable.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
@@ -22,9 +23,9 @@
 
 using namespace csapex;
 
-DragIO::DragIO(PluginLocatorPtr locator, Graph *graph, CommandDispatcher* dispatcher)
+DragIO::DragIO(PluginLocatorPtr locator, CommandDispatcher* dispatcher)
     : loaded_(false), plugin_locator_(locator), manager_(new PluginManager<DragIOHandler>("csapex::DragIOHandler")),
-      graph_(graph), dispatcher_(dispatcher)
+      dispatcher_(dispatcher)
 {
 }
 
@@ -97,7 +98,7 @@ void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
 
 
     for(auto h : handler_) {
-        if(h->handleEnter(dispatcher_, src, e)) {
+        if(h->handleEnter(src, dispatcher_, e)) {
             return;
         }
     }
@@ -185,7 +186,7 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
 
     } else {
         for(auto h : handler_) {
-            if(h->handleMove(dispatcher_, src, e)) {
+            if(h->handleMove(src, dispatcher_, e)) {
                 return;
             }
         }
@@ -210,7 +211,8 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        UUID uuid = graph_->generateUUID(type);
+        Graph* graph = src->getGraphFacade()->getGraph();
+        UUID uuid = graph->generateUUID(type);
 
         NodeStatePtr state;
 
@@ -219,7 +221,7 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
             state = *state_ptr;
         }
 
-        dispatcher_->executeLater(Command::Ptr(new command::AddNode(type, Point(pos.x(), pos.y()), UUID::NONE, uuid, state)));
+        dispatcher_->executeLater(Command::Ptr(new command::AddNode(graph->getUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
         e->ignore();
@@ -233,7 +235,7 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
 
     } else {
         for(auto h : handler_) {
-            if(h->handleDrop(dispatcher_, src, e, scene_pos)) {
+            if(h->handleDrop(src, dispatcher_, e, scene_pos)) {
                 return;
             }
         }

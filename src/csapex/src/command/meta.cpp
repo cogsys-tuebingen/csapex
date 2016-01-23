@@ -9,8 +9,8 @@
 
 using namespace csapex::command;
 
-Meta::Meta(const std::string &type)
-    : locked(false), type(type)
+Meta::Meta(const UUID &parent_uuid, const std::string &type)
+    : Command(parent_uuid), locked(false), type(type)
 {
 }
 

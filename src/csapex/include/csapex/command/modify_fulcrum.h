@@ -13,7 +13,7 @@ namespace command
 class ModifyFulcrum : public Command
 {
 public:
-    ModifyFulcrum(int connection_id, int fulcrum_id,
+    ModifyFulcrum(const UUID &parent_uuid, int connection_id, int fulcrum_id,
                   int f_type, const Point& f_handle_in, const Point& f_handle_out,
                   int t_type, const Point &t_handle_in, const Point &t_handle_out);
 

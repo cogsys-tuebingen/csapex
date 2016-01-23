@@ -42,7 +42,8 @@ public:
      * @param parent
      */
     explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher,
-                          GraphFacadePtr graph_facade, GraphPtr graph, Executor &executor, Designer *designer, MinimapWidget* minimap, ActivityLegend *legend, ActivityTimeline* timeline,
+                          GraphFacadePtr graph_facade, Executor &executor,
+                          Designer *designer, MinimapWidget* minimap, ActivityLegend *legend, ActivityTimeline* timeline,
                           PluginLocatorPtr locator, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
@@ -105,8 +106,7 @@ private:
 private:
     CsApexCore& core_;
     CommandDispatcher* cmd_dispatcher_;
-    GraphFacadePtr graph_facade_;
-    GraphPtr graph_;
+    GraphFacadePtr root_;
     Executor& executor_;
 
     Ui::CsApexWindow* ui;

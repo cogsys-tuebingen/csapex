@@ -20,8 +20,8 @@
 
 using namespace csapex::command;
 
-MoveConnection::MoveConnection(Connectable *from, Connectable *to)
-    : Meta("MoveConnection"), from_uuid(from->getUUID()), to_uuid(to->getUUID())
+MoveConnection::MoveConnection(const UUID& parent_uuid, Connectable *from, Connectable *to)
+    : Meta(parent_uuid, "MoveConnection"), from_uuid(from->getUUID()), to_uuid(to->getUUID())
 {
     apex_assert_hard(from);
     apex_assert_hard(to);
@@ -42,16 +42,16 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
                 }
                 Input* input = dynamic_cast<Input*>(c->to());
                 if(input) {
-                    add(Command::Ptr(new DeleteMessageConnection(out, input)));
-                    add(Command::Ptr(new AddMessageConnection(to_uuid, input->getUUID())));
+                    add(Command::Ptr(new DeleteMessageConnection(parent_uuid, out, input)));
+                    add(Command::Ptr(new AddMessageConnection(parent_uuid, to_uuid, input->getUUID())));
                 }
             }
         } else {
             Trigger* trigger = dynamic_cast<Trigger*>(from);
             if(trigger) {
                 for(Slot* slot : trigger->getTargets()) {
-                    add(Command::Ptr(new DeleteSignalConnection(trigger, slot)));
-                    add(Command::Ptr(new AddSignalConnection(to_uuid, slot->getUUID())));
+                    add(Command::Ptr(new DeleteSignalConnection(parent_uuid, trigger, slot)));
+                    add(Command::Ptr(new AddSignalConnection(parent_uuid, to_uuid, slot->getUUID())));
                 }
             }
         }
@@ -61,15 +61,15 @@ MoveConnection::MoveConnection(Connectable *from, Connectable *to)
 
         if(in) {
             Output* target = dynamic_cast<Output*>(in->getSource());
-            add(Command::Ptr(new DeleteMessageConnection(target, in)));
-            add(Command::Ptr(new AddMessageConnection(target->getUUID(), to_uuid)));
+            add(Command::Ptr(new DeleteMessageConnection(parent_uuid, target, in)));
+            add(Command::Ptr(new AddMessageConnection(parent_uuid, target->getUUID(), to_uuid)));
         } else {
             Slot* in = dynamic_cast<Slot*>(from);
 
             if(in) {
                 for(Trigger* target : in->getSources()) {
-                    add(Command::Ptr(new DeleteSignalConnection(target, in)));
-                    add(Command::Ptr(new AddSignalConnection(target->getUUID(), to_uuid)));
+                    add(Command::Ptr(new DeleteSignalConnection(parent_uuid, target, in)));
+                    add(Command::Ptr(new AddSignalConnection(parent_uuid, target->getUUID(), to_uuid)));
                 }
             }
         }

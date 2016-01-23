@@ -39,7 +39,7 @@ public:
     typedef std::shared_ptr<Command> Ptr;
 
 public:
-    Command();
+    Command(const UUID& parent_uuid);
 
     virtual void init(Settings* settings, GraphFacade* graph_facade, ThreadPool* thread_pool, NodeFactory *node_factory);
 
@@ -64,13 +64,18 @@ protected:
     virtual bool doRedo() = 0;
 
     GraphFacade* getRoot();
+
+    GraphFacade* getGraphFacade();
+    Graph* getGraph();
+
     GraphFacade* getSubGraph(const UUID& graph_id);
-    Graph* getRootGraph();
     ThreadPool* getRootThreadPool();
 
 protected:
     Settings* settings_;
     NodeFactory* node_factory_;
+
+    UUID parent_uuid;
 
 private:
     GraphFacade* root_;

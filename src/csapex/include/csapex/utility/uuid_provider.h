@@ -4,6 +4,9 @@
 /// COMPONENT
 #include <csapex/utility/uuid.h>
 
+/// SYSTEM
+#include <unordered_map>
+
 namespace csapex
 {
 
@@ -32,16 +35,20 @@ public:
 
     void registerUUID(const UUID& uuid);
 
+    std::map<std::string, int> getUUIDMap() const;
+
 protected:
     void reset();
     void free(const UUID& uuid);
     std::string generateNextName(const std::string& name);
+    std::string generateNextSubName(const UUID& parent, const std::string& name);
 
-private:
+protected:
     std::recursive_mutex hash_mutex_;
     std::map<std::string, int> hash_;
 
     std::map<std::string, int> uuids_;
+    std::unordered_map<UUID, std::map<std::string, int>, UUID::Hasher> sub_uuids_;
 };
 
 }

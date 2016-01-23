@@ -38,7 +38,7 @@ GraphIO::GraphIO(Graph *graph, NodeFactory* node_factory)
 
 void GraphIO::saveSettings(YAML::Node& doc)
 {
-    doc["uuid_map"] = graph_->uuids_;
+    doc["uuid_map"] = graph_->getUUIDMap();
 }
 
 void GraphIO::loadSettings(const YAML::Node &doc)

@@ -13,7 +13,7 @@ namespace command
 
 struct DeleteConnector : public Command
 {
-    DeleteConnector(Connectable *_c);
+    DeleteConnector(const UUID &parent_uuid, Connectable *_c);
 
 protected:
     bool doExecute() override;

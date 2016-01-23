@@ -15,8 +15,8 @@
 
 using namespace csapex::command;
 
-FlipSides::FlipSides(const UUID &node)
-    : uuid(node)
+FlipSides::FlipSides(const UUID& parent_uuid, const UUID &node)
+    : Command(parent_uuid), uuid(node)
 {
 }
 
@@ -34,7 +34,7 @@ std::string FlipSides::getDescription() const
 
 bool FlipSides::doExecute()
 {
-    NodeHandle* node_handle = getRootGraph()->findNodeHandle(uuid);
+    NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
     apex_assert_hard(node_handle);
 
     bool flip = !node_handle->getNodeState()->isFlipped();

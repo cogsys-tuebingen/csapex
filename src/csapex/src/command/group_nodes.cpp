@@ -26,8 +26,8 @@
 
 using namespace csapex::command;
 
-GroupNodes::GroupNodes(const std::vector<UUID> &uuids)
-    : Meta("GroupNodes"), uuids(uuids)
+GroupNodes::GroupNodes(const UUID& parent_uuid, const std::vector<UUID> &uuids)
+    : Meta(parent_uuid, "GroupNodes"), uuids(uuids)
 {
 }
 
@@ -43,7 +43,7 @@ std::string GroupNodes::getDescription() const
 
 bool GroupNodes::doExecute()
 {
-    Graph* graph = getRootGraph();
+    Graph* graph = getGraph();
     {
         GraphIO io(graph, node_factory_);
         selection_yaml = YAML::Node(YAML::NodeType::Map);
@@ -72,7 +72,7 @@ bool GroupNodes::doExecute()
     }
 
     UUID sub_graph_uuid = graph->generateUUID("csapex::Graph");
-    CommandPtr add_graph = std::make_shared<command::AddNode>("csapex::Graph", insert_pos, UUID::NONE, sub_graph_uuid, nullptr);
+    CommandPtr add_graph = std::make_shared<command::AddNode>(graph->getUUID(), "csapex::Graph", insert_pos, sub_graph_uuid, nullptr);
     add(add_graph);
 
 //    NodeHandle* sub_graph_nh = graph_->findNodeHandle(sub_graph_uuid);
@@ -140,7 +140,7 @@ bool GroupNodes::doExecute()
 
     for(NodeHandle* nh : nodes) {
         UUID old_uuid = nh->getUUID();
-        CommandPtr del = std::make_shared<command::DeleteNode>(old_uuid);
+        CommandPtr del = std::make_shared<command::DeleteNode>(graph->getUUID(), old_uuid);
         add(del);
     }
 

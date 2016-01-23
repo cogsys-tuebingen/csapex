@@ -14,8 +14,8 @@
 using namespace csapex;
 using namespace csapex::command;
 
-AddConnection::AddConnection(const UUID& from_uuid, const UUID& to_uuid)
-    : from_uuid(from_uuid), to_uuid(to_uuid)
+AddConnection::AddConnection(const UUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid)
+    : Command(parent_uuid), from_uuid(from_uuid), to_uuid(to_uuid)
 {
 }
 
@@ -33,7 +33,7 @@ bool AddConnection::doUndo()
 {
     refresh();
 
-    const auto& graph = getRootGraph();
+    Graph* graph = getGraph();
     graph->deleteConnection(graph->getConnection(from_uuid, to_uuid));
 
     return true;

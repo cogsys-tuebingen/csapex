@@ -17,7 +17,7 @@ namespace command
 class AddConnection : public Command
 {
 public:
-    AddConnection(const UUID &from_uuid, const UUID &to_uuid);
+    AddConnection(const UUID& parent_uuid, const UUID &from_uuid, const UUID &to_uuid);
 
 protected:
     bool doUndo() override;

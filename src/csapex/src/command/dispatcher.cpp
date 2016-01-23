@@ -12,19 +12,17 @@
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(Settings& settings, GraphFacade::Ptr graph_facade,
-                                     GraphPtr graph,
+CommandDispatcher::CommandDispatcher(Settings& settings, GraphFacade::Ptr root,
                                      ThreadPool* thread_pool, NodeFactory* node_factory)
-    : settings_(settings), graph_facade_(graph_facade), graph_(graph), thread_pool_(thread_pool), node_factory_(node_factory),
-      cmd_factory_(std::make_shared<CommandFactory>(graph.get())),
+    : settings_(settings), root_(root), thread_pool_(thread_pool), node_factory_(node_factory),
       dirty_(false)
 {
-    stateChanged.connect([this](){ graph_->stateChanged(); });
+    stateChanged.connect([this](){ root_->getGraph()->stateChanged(); });
 }
 
 void CommandDispatcher::reset()
 {
-    graph_facade_->reset();
+    root_->reset();
     later.clear();
     done.clear();
     undone.clear();
@@ -37,7 +35,7 @@ void CommandDispatcher::execute(Command::Ptr command)
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
-    command->init(&settings_, graph_facade_.get(), thread_pool_, node_factory_);
+    command->init(&settings_, root_.get(), thread_pool_, node_factory_);
     doExecute(command);
 }
 
@@ -47,7 +45,7 @@ void CommandDispatcher::executeLater(Command::Ptr command)
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
-    command->init(&settings_, graph_facade_.get(), thread_pool_, node_factory_);
+    command->init(&settings_, root_.get(), thread_pool_, node_factory_);
     later.push_back(command);
 }
 
@@ -201,16 +199,6 @@ CommandConstPtr CommandDispatcher::getNextRedoCommand() const
     } else {
         return nullptr;
     }
-}
-
-Graph* CommandDispatcher::getGraph()
-{
-    return graph_.get();
-}
-
-CommandFactory* CommandDispatcher::getCommandFactory()
-{
-    return cmd_factory_.get();
 }
 
 void CommandDispatcher::visitUndoCommands(std::function<void (int level, const Command &)> callback) const

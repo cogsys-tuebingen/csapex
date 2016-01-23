@@ -12,10 +12,10 @@
 
 using namespace csapex::command;
 
-ModifyFulcrum::ModifyFulcrum(int connection_id, int fulcrum_id,
+ModifyFulcrum::ModifyFulcrum(const UUID& parent_uuid, int connection_id, int fulcrum_id,
                              int f_type, const Point &f_handle_in, const Point &f_handle_out,
                              int t_type, const Point &t_handle_in, const Point &t_handle_out)
-    : connection_id(connection_id), fulcrum_id(fulcrum_id),
+    : Command(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id),
       f_type(f_type), f_in(f_handle_in), f_out(f_handle_out),
       t_type(t_type), t_in(t_handle_in), t_out(t_handle_out)
 {
@@ -36,13 +36,13 @@ std::string ModifyFulcrum::getDescription() const
 
 bool ModifyFulcrum::doExecute()
 {
-    getRootGraph()->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, t_type, t_in, t_out);
+    getGraph()->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, t_type, t_in, t_out);
     return true;
 }
 
 bool ModifyFulcrum::doUndo()
 {
-    getRootGraph()->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, f_type, f_in, f_out);
+    getGraph()->getConnectionWithId(connection_id)->modifyFulcrum(fulcrum_id, f_type, f_in, f_out);
     return true;
 }
 

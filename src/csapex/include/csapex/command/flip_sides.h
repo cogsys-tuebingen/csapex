@@ -12,7 +12,7 @@ namespace command
 
 struct FlipSides : public Command
 {
-    FlipSides(const UUID& node);
+    FlipSides(const UUID &parent_uuid, const UUID& node);
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;

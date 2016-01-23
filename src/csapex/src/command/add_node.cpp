@@ -6,6 +6,7 @@
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/graph.h>
@@ -14,8 +15,8 @@
 
 using namespace csapex::command;
 
-AddNode::AddNode(const std::string &type, Point pos, const UUID &parent_uuid, const UUID& uuid, NodeState::Ptr state)
-    : type_(type), pos_(pos), parent_uuid_(parent_uuid), uuid_(uuid)
+AddNode::AddNode(const UUID &parent_uuid, const std::string &type, Point pos, const UUID& uuid, NodeState::Ptr state)
+    : Command(parent_uuid), type_(type), pos_(pos), uuid_(uuid)
 {
     apex_assert_hard(!uuid.empty());
 
@@ -38,7 +39,7 @@ std::string AddNode::getDescription() const
 
 bool AddNode::doExecute()
 {
-    Graph* graph = getRootGraph();
+    Graph* graph = getGraph();
 
     if(uuid_.empty()) {
         uuid_ = graph->generateUUID(type_);
@@ -59,15 +60,12 @@ bool AddNode::doExecute()
 
 bool AddNode::doUndo()
 {
-    Graph* graph = getRootGraph();
+    Graph* graph = getGraph();
     NodeHandle* node_ = graph->findNodeHandle(uuid_);
 
     saved_state_ = node_->getNodeStateCopy();
 
-
-    if(parent_uuid_.empty()) {
-        graph->deleteNode(node_->getUUID());
-    }
+    graph->deleteNode(node_->getUUID());
 
     return true;
 }
@@ -75,7 +73,7 @@ bool AddNode::doUndo()
 bool AddNode::doRedo()
 {
     if(doExecute()) {
-        getRootGraph()->findNodeHandle(uuid_)->setNodeState(saved_state_);
+        getGraph()->findNodeHandle(uuid_)->setNodeState(saved_state_);
         return true;
     }
 

@@ -7,19 +7,21 @@
 #include <csapex/msg/input.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/graph_facade.h>
 
 using namespace csapex;
 using namespace csapex::command;
 
-DeleteMessageConnection::DeleteMessageConnection(Output *a, Input *b)
-    : DeleteConnection(a, b)
+DeleteMessageConnection::DeleteMessageConnection(const UUID &parent_uuid, Output *a, Input *b)
+    : DeleteConnection(parent_uuid, a, b)
 {
 
 }
 
 bool DeleteMessageConnection::doUndo()
 {
-    auto graph = getRootGraph();
+    Graph* graph = getGraph();
+
     Connectable* from = graph->findConnector(from_uuid);
     Connectable* to = graph->findConnector(to_uuid);
 

@@ -18,8 +18,7 @@ public:
     typedef std::shared_ptr<CommandDispatcher> Ptr;
 
 public:
-    CommandDispatcher(Settings& settings, GraphFacadePtr graph_facade,
-                      GraphPtr graph,
+    CommandDispatcher(Settings& settings, GraphFacadePtr root,
                       ThreadPool* thread_pool, NodeFactory* node_factory);
 
     void execute(Command::Ptr command);
@@ -36,9 +35,6 @@ public:
 
     CommandConstPtr getNextUndoCommand() const;
     CommandConstPtr getNextRedoCommand() const;
-
-    Graph* getGraph();
-    CommandFactory* getCommandFactory();
 
     void visitUndoCommands(std::function<void(int level, const Command& cmd)> callback) const;
     void visitRedoCommands(std::function<void(int level, const Command& cmd)> callback) const;
@@ -63,12 +59,9 @@ protected:
 
 private:
     Settings& settings_;
-    GraphFacadePtr graph_facade_;
-    GraphPtr graph_;
+    GraphFacadePtr root_;
     ThreadPool* thread_pool_;
     NodeFactory* node_factory_;
-
-    CommandFactoryPtr cmd_factory_;
 
     std::vector<Command::Ptr> later;
 

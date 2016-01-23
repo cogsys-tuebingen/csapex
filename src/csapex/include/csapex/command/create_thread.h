@@ -12,7 +12,7 @@ namespace command
 
 struct CreateThread : public Command
 {
-    CreateThread(const UUID& node, const std::string &name);
+    CreateThread(const UUID &parent_uuid, const UUID& node, const std::string &name);
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;

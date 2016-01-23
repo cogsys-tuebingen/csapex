@@ -31,11 +31,11 @@
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
-                       GraphPtr graph,
+                       GraphFacadePtr root,
                        ThreadPool &thread_pool,
                        NodeFactory *node_factory)
     : settings_(settings), plugin_locator_(plugin_locator),
-      graph_(graph),
+      root_(root),
       thread_pool_(thread_pool),
       node_factory_(node_factory),
       core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")),
@@ -245,7 +245,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     YAML::Node node_map(YAML::NodeType::Map);
 
-    GraphIO graphio(graph_.get(),  node_factory_);
+    GraphIO graphio(root_->getGraph(),  node_factory_);
 
     csapex::slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(settings_.saveDetailRequest);
 
@@ -278,12 +278,12 @@ void CsApexCore::load(const std::string &file)
         reset();
     }
 
-    apex_assert_hard(graph_->countNodes() == 0);
+    apex_assert_hard(root_->getGraph()->countNodes() == 0);
 
     bool paused = thread_pool_.isPaused();
     thread_pool_.setPause(true);
 
-    GraphIO graphio(graph_.get(), node_factory_);
+    GraphIO graphio(root_->getGraph(), node_factory_);
     csapex::slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.loadDetailRequest);
 
     {

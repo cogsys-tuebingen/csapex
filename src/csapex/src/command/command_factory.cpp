@@ -20,11 +20,17 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/assert.h>
+#include <csapex/model/graph_facade.h>
 
 using namespace csapex;
 
-CommandFactory::CommandFactory(Graph *graph)
-    : graph_(graph)
+CommandFactory::CommandFactory(GraphFacade *root, const UUID &graph_id)
+    : root_(root), graph_uuid(graph_id)
+{
+
+}
+CommandFactory::CommandFactory(GraphFacade *root)
+    : root_(root), graph_uuid(root->getUUID())
 {
 
 }
@@ -35,17 +41,20 @@ CommandFactory::CommandFactory(Graph *graph)
 
 Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to)
 {
-    auto from_c = graph_->findConnector(from);
+    GraphFacade* graph_facade = getGraphFacade();
+    Graph* graph = graph_facade->getGraph();
+
+    auto from_c = graph->findConnector(from);
 
     if(dynamic_cast<Output*>(from_c)) {
-        return std::make_shared<command::AddMessageConnection>(from, to);
+        return std::make_shared<command::AddMessageConnection>(graph_uuid, from, to);
     } else if(dynamic_cast<Input*>(from_c)) {
-        return std::make_shared<command::AddMessageConnection>(to, from);
+        return std::make_shared<command::AddMessageConnection>(graph_uuid, to, from);
     }
     if(dynamic_cast<Trigger*>(from_c)) {
-        return std::make_shared<command::AddSignalConnection>(from, to);
+        return std::make_shared<command::AddSignalConnection>(graph_uuid, from, to);
     } else if(dynamic_cast<Slot*>(from_c)) {
-        return std::make_shared<command::AddSignalConnection>(to, from);
+        return std::make_shared<command::AddSignalConnection>(graph_uuid, to, from);
     }
     return nullptr;
 }
@@ -81,22 +90,22 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
     }
     apex_assert_hard(connections.size() == 1);
     Output* output = dynamic_cast<Output*>(input->getSource());
-    Command::Ptr cmd(new command::DeleteMessageConnection(output, input));
+    Command::Ptr cmd(new command::DeleteMessageConnection(graph_uuid, output, input));
     return cmd;
 }
 
 Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* connection) {
     Input* input = dynamic_cast<Input*>(connection->to());
-    return Command::Ptr (new command::DeleteMessageConnection(output, input));
+    return Command::Ptr (new command::DeleteMessageConnection(graph_uuid, output, input));
 }
 
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 {
-    command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
+    command::Meta::Ptr removeAll(new command::Meta(graph_uuid, "Remove All Connections"));
 
     for(ConnectionPtr connection : output->getConnections()) {
         Input* input = dynamic_cast<Input*>(connection->to());
-        Command::Ptr removeThis(new command::DeleteMessageConnection(output, input));
+        Command::Ptr removeThis(new command::DeleteMessageConnection(graph_uuid, output, input));
         removeAll->add(removeThis);
     }
 
@@ -106,24 +115,24 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Slot* slot)
 {
-    command::Meta::Ptr cmd(new command::Meta("Delete sources"));
+    command::Meta::Ptr cmd(new command::Meta(graph_uuid, "Delete sources"));
     for(Trigger* source : slot->getSources()) {
-        cmd->add(Command::Ptr(new command::DeleteSignalConnection(source, slot)));
+        cmd->add(Command::Ptr(new command::DeleteSignalConnection(graph_uuid, source, slot)));
     }
     return cmd;
 }
 
 Command::Ptr CommandFactory::removeConnectionCmd(Trigger* trigger, Slot* other_side)
 {
-    return Command::Ptr (new command::DeleteSignalConnection(trigger, other_side));
+    return Command::Ptr (new command::DeleteSignalConnection(graph_uuid, trigger, other_side));
 }
 
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Trigger* trigger)
 {
-    command::Meta::Ptr removeAll(new command::Meta("Remove All Connections"));
+    command::Meta::Ptr removeAll(new command::Meta(graph_uuid, "Remove All Connections"));
 
     for(Slot* target : trigger->getTargets()) {
-        Command::Ptr removeThis(new command::DeleteSignalConnection(trigger, target));
+        Command::Ptr removeThis(new command::DeleteSignalConnection(graph_uuid, trigger, target));
         removeAll->add(removeThis);
     }
 
@@ -139,10 +148,10 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Trigger* trigger)
 
 Command::Ptr CommandFactory::clearCommand()
 {
-    command::Meta::Ptr clear(new command::Meta("Clear graph_"));
+    command::Meta::Ptr clear(new command::Meta(graph_uuid, "Clear graph_"));
 
-    for(auto node : graph_->getAllNodeHandles()) {
-        clear->add(Command::Ptr (new command::DeleteNode(node->getUUID())));
+    for(auto node : root_->getGraph()->getAllNodeHandles()) {
+        clear->add(Command::Ptr (new command::DeleteNode(graph_uuid, node->getUUID())));
     }
 
     return clear;
@@ -150,18 +159,20 @@ Command::Ptr CommandFactory::clearCommand()
 
 Command::Ptr CommandFactory::deleteConnectionByIdCommand(int id)
 {
-    for(const auto& connection : graph_->getConnections()) {
+    GraphFacade* graph_facade = getGraphFacade();
+    Graph* graph = graph_facade->getGraph();
+    for(const auto& connection : graph->getConnections()) {
         if(connection->id() == id) {
             auto* f = connection->from();
             auto* t = connection->to();
 
             if(Output* output = dynamic_cast<Output*>(f)) {
                 Input* input = dynamic_cast<Input*>(t);
-                return Command::Ptr(new command::DeleteMessageConnection(output, input));
+                return Command::Ptr(new command::DeleteMessageConnection(graph_uuid, output, input));
 
             } else if(Trigger* trigger = dynamic_cast<Trigger*>(f)) {
                 Slot* slot = dynamic_cast<Slot*>(t);
-                return Command::Ptr(new command::DeleteSignalConnection(trigger, slot));
+                return Command::Ptr(new command::DeleteSignalConnection(graph_uuid, trigger, slot));
             }
 
         }
@@ -172,15 +183,18 @@ Command::Ptr CommandFactory::deleteConnectionByIdCommand(int id)
 
 Command::Ptr CommandFactory::deleteConnectionFulcrumCommand(int connection, int fulcrum)
 {
-    return Command::Ptr(new command::DeleteFulcrum(connection, fulcrum));
+    return Command::Ptr(new command::DeleteFulcrum(graph_uuid, connection, fulcrum));
 }
 
 Command::Ptr CommandFactory::deleteAllConnectionFulcrumsCommand(int connection)
 {
-    command::Meta::Ptr meta(new command::Meta("Delete All Connection Fulcrums"));
+    command::Meta::Ptr meta(new command::Meta(graph_uuid, "Delete All Connection Fulcrums"));
 
     if(connection >= 0) {
-        int n = graph_->getConnectionWithId(connection)->getFulcrumCount();
+        GraphFacade* graph_facade = getGraphFacade();
+        Graph* graph = graph_facade->getGraph();
+
+        int n = graph->getConnectionWithId(connection)->getFulcrumCount();
         for(int i = n - 1; i >= 0; --i) {
             meta->add(deleteConnectionFulcrumCommand(connection, i));
         }
@@ -191,5 +205,18 @@ Command::Ptr CommandFactory::deleteAllConnectionFulcrumsCommand(int connection)
 
 Command::Ptr CommandFactory::deleteAllConnectionFulcrumsCommand(ConnectionPtr connection)
 {
-    return deleteAllConnectionFulcrumsCommand(graph_->getConnectionId(connection));
+    return deleteAllConnectionFulcrumsCommand(root_->getGraph()->getConnectionId(connection));
+}
+
+GraphFacade* CommandFactory::getGraphFacade() const
+{
+    if(graph_uuid.empty()) {
+        return root_;
+
+    } else if(root_->getUUID() == graph_uuid) {
+        return root_;
+
+    } else {
+        root_->getSubGraph(graph_uuid);
+    }
 }

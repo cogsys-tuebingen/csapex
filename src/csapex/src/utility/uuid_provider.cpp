@@ -26,6 +26,7 @@ void UUIDProvider::reset()
     hash_.clear();
 
     uuids_.clear();
+    sub_uuids_.clear();
 }
 
 UUID UUIDProvider::makeUUID(const std::string &name)
@@ -71,9 +72,18 @@ UUID UUIDProvider::makeDerivedUUID(const UUID &parent, const std::string &name)
     return makeUUID(parent.getFullName() + UUID::namespace_separator + name);
 }
 
-UUID UUIDProvider::generateDerivedUUID(const UUID &parent, const std::string &name)
+UUID UUIDProvider::generateDerivedUUID(const UUID &parent, const std::string &prefix)
 {
-    return generateUUID(parent.getFullName() + UUID::namespace_separator + name);
+    //return generateUUID(parent.getFullName() + UUID::namespace_separator + name);
+
+    std::unique_lock<std::recursive_mutex > lock(hash_mutex_);
+
+    std::string name = generateNextSubName(parent, prefix);
+
+    UUID r(this, parent.getFullName() + UUID::namespace_separator + name);
+    registerUUID(r);
+    return r;
+
 }
 
 UUID UUIDProvider::makeDerivedUUID_forced(const UUID &parent, const std::string &name)
@@ -89,6 +99,11 @@ void UUIDProvider::free(const UUID &uuid)
     std::map<std::string, int>::iterator it = hash_.find(uuid.representation_.front());
     if(it != hash_.end()) {
         hash_.erase(it);
+    }
+
+    auto sub_it = sub_uuids_.find(uuid.parentUUID());
+    if(sub_it != sub_uuids_.end()) {
+        sub_uuids_.erase(sub_it);
     }
 }
 
@@ -135,4 +150,21 @@ std::string UUIDProvider::generateNextName(const std::string& name)
 
     ++next_id;
     return ss.str();
+}
+
+std::string UUIDProvider::generateNextSubName(const UUID& parent, const std::string& name)
+{
+    int& next_id = sub_uuids_[parent][name];
+
+    std::stringstream ss;
+    ss << name << "_" << next_id;
+
+    ++next_id;
+    return ss.str();
+}
+
+
+std::map<std::string, int> UUIDProvider::getUUIDMap() const
+{
+    return uuids_;
 }

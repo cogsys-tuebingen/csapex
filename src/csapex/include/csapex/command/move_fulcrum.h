@@ -13,7 +13,7 @@ namespace command
 class MoveFulcrum : public Command
 {
 public:
-    MoveFulcrum(int connection_id, int fulcrum_id, const Point& from, const Point& to);
+    MoveFulcrum(const UUID& parent_uuid, int connection_id, int fulcrum_id, const Point& from, const Point& to);
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;

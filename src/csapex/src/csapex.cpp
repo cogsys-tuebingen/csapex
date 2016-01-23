@@ -151,12 +151,12 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     GraphPtr graph = std::make_shared<Graph>();
     ThreadPool thread_pool(handler, !threadless, thread_grouping);
     thread_pool.setPause(paused);
-    GraphFacadePtr graph_facade = std::make_shared<GraphFacade>(thread_pool, graph.get());
+    GraphFacadePtr root = std::make_shared<GraphFacade>(thread_pool, graph.get());
 
     NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(plugin_locator.get());
 
     CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator,
-                                                      graph, thread_pool, node_factory.get());
+                                                      root, thread_pool, node_factory.get());
 
     settings.saveRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     settings.loadRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
@@ -169,7 +169,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
-        CommandDispatcher dispatcher(settings, graph_facade, graph, &thread_pool, node_factory.get());
+        CommandDispatcher dispatcher(settings, root, &thread_pool, node_factory.get());
         csapex::slim_signal::ScopedConnection saved_connection(core->saved.connect([&](){
             dispatcher.setClean();
             dispatcher.resetDirtyPoint();
@@ -200,11 +200,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
 
         NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
-        DragIO drag_io(plugin_locator, graph.get(), &dispatcher);
+        DragIO drag_io(plugin_locator, &dispatcher);
 
         MinimapWidget* minimap = new MinimapWidget;
         Designer* designer = new Designer(settings, *node_factory, *node_adapter_factory,
-                                          graph_facade, minimap, &dispatcher, drag_io);
+                                          root, minimap, &dispatcher, drag_io);
 
         ActivityLegend* legend = new ActivityLegend;
         ActivityTimeline* timeline = new ActivityTimeline;
@@ -212,15 +212,14 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         QObject::connect(legend, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), timeline, SLOT(setSelection(QList<NodeWorker*>)));
 
         csapex::slim_signal::ScopedConnection add_connection
-                (graph_facade->nodeWorkerAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); }));
+                (root->nodeWorkerAdded.connect([legend](NodeWorkerPtr n) { legend->startTrackingNode(n); }));
         csapex::slim_signal::ScopedConnection remove_connection
-                (graph_facade->nodeRemoved.connect([legend](NodeHandlePtr n) { legend->stopTrackingNode(n); }));
+                (root->nodeRemoved.connect([legend](NodeHandlePtr n) { legend->stopTrackingNode(n); }));
 
         QObject::connect(legend, SIGNAL(nodeAdded(NodeWorker*)), timeline, SLOT(addNode(NodeWorker*)));
         QObject::connect(legend, SIGNAL(nodeRemoved(NodeWorker*)), timeline, SLOT(removeNode(NodeWorker*)));
 
-        CsApexWindow w(*core, &dispatcher, graph_facade, graph,
-                       thread_pool, designer, minimap, legend, timeline, plugin_locator);
+        CsApexWindow w(*core, &dispatcher, root, thread_pool, designer, minimap, legend, timeline, plugin_locator);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));

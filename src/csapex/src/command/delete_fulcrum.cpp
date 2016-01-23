@@ -12,8 +12,8 @@
 
 using namespace csapex::command;
 
-DeleteFulcrum::DeleteFulcrum(int connection_id, int fulcrum_id)
-    : connection_id(connection_id), fulcrum_id(fulcrum_id)
+DeleteFulcrum::DeleteFulcrum(const UUID& parent_uuid, int connection_id, int fulcrum_id)
+    : Command(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id)
 {
 }
 
@@ -31,18 +31,18 @@ std::string DeleteFulcrum::getDescription() const
 
 bool DeleteFulcrum::doExecute()
 {
-    Fulcrum::Ptr f = getRootGraph()->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
+    Fulcrum::Ptr f = getGraph()->getConnectionWithId(connection_id)->getFulcrum(fulcrum_id);
     pos = f->pos();
     type = f->type();
     in = f->handleIn();
     out = f->handleOut();
-    getRootGraph()->getConnectionWithId(connection_id)->deleteFulcrum(fulcrum_id);
+    getGraph()->getConnectionWithId(connection_id)->deleteFulcrum(fulcrum_id);
     return true;
 }
 
 bool DeleteFulcrum::doUndo()
 {
-    getRootGraph()->getConnectionWithId(connection_id)->addFulcrum(fulcrum_id, pos, type, in, out);
+    getGraph()->getConnectionWithId(connection_id)->addFulcrum(fulcrum_id, pos, type, in, out);
     return true;
 }
 

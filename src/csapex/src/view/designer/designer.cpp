@@ -241,7 +241,8 @@ void Designer::deleteSelected()
         return;
     }
 
-    command::Meta::Ptr del(new command::Meta("delete selected"));
+    UUID id = view->getGraphFacade()->getUUID();
+    command::Meta::Ptr del(new command::Meta(id, "delete selected"));
     del->add(view->deleteSelected());
 
     if(del->commands() != 0) {

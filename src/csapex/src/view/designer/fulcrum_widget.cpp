@@ -135,8 +135,10 @@ void FulcrumWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
     e->accept();
     QAction* selectedItem = menu.exec(QCursor::pos());
 
+    UUID parent_uuid;
+
     if(selectedItem == del) {
-        cmd_dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(fulcrum_->connectionId(), fulcrum_->id())));
+        cmd_dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(parent_uuid, fulcrum_->connectionId(), fulcrum_->id())));
 
     } else if(selectedItem == curve || selectedItem == linear) {
         int type = 0;
@@ -152,6 +154,7 @@ void FulcrumWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 
         Fulcrum* f = fulcrum_;
         command::ModifyFulcrum::Ptr cmd(new command::ModifyFulcrum(
+                                            parent_uuid,
                                             f->connectionId(), f->id(),
                                             f->type(), f->handleIn(), f->handleOut(),
                                             type, f->handleIn(), f->handleOut()));

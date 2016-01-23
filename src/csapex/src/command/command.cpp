@@ -10,8 +10,9 @@ using namespace csapex;
 
 std::vector<Command::Ptr> Command::undo_later;
 
-Command::Command()
+Command::Command(const UUID &parent_uuid)
     : settings_(nullptr), node_factory_(nullptr),
+      parent_uuid(parent_uuid),
       root_(nullptr), thread_pool_(nullptr),
       before_save_point_(false), after_save_point_(false),
       initialized_(false)
@@ -109,14 +110,31 @@ GraphFacade* Command::getRoot()
 {
     return root_;
 }
+GraphFacade* Command::getGraphFacade()
+{
+    return getSubGraph(parent_uuid);
+}
+Graph* Command::getGraph()
+{
+    GraphFacade* gf = nullptr;
+
+    if(parent_uuid.empty()) {
+        gf = root_;
+
+    } else if(root_->getUUID() == parent_uuid) {
+        gf = root_;
+
+    } else {
+        gf = root_->getSubGraph(parent_uuid);
+    }
+    apex_assert_hard(gf);
+    return gf->getGraph();
+}
 GraphFacade* Command::getSubGraph(const UUID& graph_id)
 {
     return root_->getSubGraph(graph_id);
 }
-Graph* Command::getRootGraph()
-{
-    return root_->getGraph();
-}
+
 ThreadPool* Command::getRootThreadPool()
 {
     return thread_pool_;

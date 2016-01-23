@@ -18,8 +18,8 @@
 
 using namespace csapex::command;
 
-DisableNode::DisableNode(const UUID& uuid, bool disable)
-    : uuid(uuid), disable_(disable)
+DisableNode::DisableNode(const UUID& parent_uuid, const UUID& uuid, bool disable)
+    : Command(parent_uuid), uuid(uuid), disable_(disable)
 {
 }
 
@@ -44,7 +44,7 @@ std::string DisableNode::getDescription() const
 
 bool DisableNode::doExecute()
 {
-    NodeHandle* node_handle = getRootGraph()->findNodeHandleForConnector(uuid);
+    NodeHandle* node_handle = getGraph()->findNodeHandleForConnector(uuid);
 
 //    node_handle->setProcessingEnabled(!disable_);
     node_handle->getNodeState()->setEnabled(!disable_);
@@ -54,7 +54,7 @@ bool DisableNode::doExecute()
 
 bool DisableNode::doUndo()
 {
-    NodeHandle* node_handle = getRootGraph()->findNodeHandleForConnector(uuid);
+    NodeHandle* node_handle = getGraph()->findNodeHandleForConnector(uuid);
 
 //    node_handle->setProcessingEnabled(disable_);
     node_handle->getNodeState()->setEnabled(disable_);

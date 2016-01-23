@@ -49,13 +49,13 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher, GraphFacadePtr graph_facade,
-                           GraphPtr graph, Executor& executor,
+CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
+                           GraphFacadePtr graph_facade, Executor& executor,
                            Designer* designer, MinimapWidget* minimap,
                            ActivityLegend *legend, ActivityTimeline *timeline,
                            PluginLocatorPtr locator, QWidget *parent)
     : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher),
-      graph_facade_(graph_facade), graph_(graph), executor_(executor),
+      root_(graph_facade), executor_(executor),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
 {    
@@ -88,7 +88,7 @@ void CsApexWindow::construct()
 
     setupTimeline();
 
-    Graph* graph = graph_facade_->getGraph();
+    Graph* graph = root_->getGraph();
 
     setupDesigner();
 
@@ -156,7 +156,7 @@ void CsApexWindow::construct()
     connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
 
     connections_.push_back(graph->stateChanged.connect([this]() { updateMenu(); }));
-    connections_.push_back(graph_facade_->panic.connect([this]() { clearBlock(); }));
+    connections_.push_back(root_->panic.connect([this]() { clearBlock(); }));
 
     connections_.push_back(cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); }));
     connections_.push_back(cmd_dispatcher_->dirtyChanged.connect([this](bool) { updateTitle(); }));
@@ -454,7 +454,7 @@ void CsApexWindow::copyRight()
 void CsApexWindow::clearBlock()
 {
     std::cerr << "clearing blocking connections" << std::endl;
-    graph_facade_->clearBlock();
+    root_->clearBlock();
 }
 
 void CsApexWindow::updateNodeTypes()
@@ -644,7 +644,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     core_.settingsChanged();
 
     try {
-        graph_facade_->stop();
+        root_->stop();
     } catch(const std::exception& e) {
         std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
     } catch(...) {
@@ -730,7 +730,8 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    cmd_dispatcher_->execute(cmd_dispatcher_->getCommandFactory()->clearCommand());
+    CommandPtr cmd = CommandFactory(root_.get(), UUID::NONE).clearCommand();
+    cmd_dispatcher_->execute(cmd);
 }
 
 void CsApexWindow::undo()
@@ -745,7 +746,7 @@ void CsApexWindow::redo()
 
 void CsApexWindow::makeScreenshot()
 {
-    ScreenshotDialog diag(graph_facade_, this);
+    ScreenshotDialog diag(root_, this);
     diag.exec();
 }
 

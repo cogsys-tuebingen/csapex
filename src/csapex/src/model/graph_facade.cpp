@@ -86,6 +86,11 @@ void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh)
 
 }
 
+UUID GraphFacade::getUUID() const
+{
+    return graph_->getUUID();
+}
+
 Graph* GraphFacade::getGraph()
 {
     return graph_;
@@ -108,6 +113,10 @@ void GraphFacade::addNode(NodeHandlePtr nh)
 
 GraphFacade* GraphFacade::getSubGraph(const UUID &uuid)
 {
+    if(uuid.empty()) {
+        throw std::logic_error("cannot get subgraph for empty UUID");
+    }
+
     GraphFacadePtr facade = children_[uuid];
     return facade.get();
 }

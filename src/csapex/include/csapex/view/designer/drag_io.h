@@ -18,7 +18,7 @@ namespace csapex
 class DragIO
 {
 public:
-    DragIO(PluginLocatorPtr locator, Graph* graph, CommandDispatcher* dispatcher);
+    DragIO(PluginLocatorPtr locator, CommandDispatcher* dispatcher);
     ~DragIO();
 
     void dragEnterEvent(GraphView *src, QDragEnterEvent* e);
@@ -38,7 +38,6 @@ private:
     csapex::PluginLocatorPtr plugin_locator_;
     PluginManager<DragIOHandler>* manager_;
 
-    Graph* graph_;
     CommandDispatcher* dispatcher_;
 };
 

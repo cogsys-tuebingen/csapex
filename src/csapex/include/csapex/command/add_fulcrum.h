@@ -14,7 +14,7 @@ namespace command
 class AddFulcrum : public Command
 {
 public:
-    AddFulcrum(int connection_id, int sub_section_to_split, const Point& pos, int type);
+    AddFulcrum(const UUID& parent_uuid, int connection_id, int sub_section_to_split, const Point& pos, int type);
 
 protected:
     bool doExecute() override;
