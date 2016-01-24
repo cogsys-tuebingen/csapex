@@ -164,6 +164,112 @@ ConnectionPtr GraphFacade::connect(NodeHandlePtr output, int output_id,
     return GraphFacade::connect(output.get(), output_id, input.get(), input_id);
 }
 
+ConnectionPtr GraphFacade::connect(const UUID& output_id,
+                                   NodeHandlePtr input, int input_id)
+{
+    NodeHandle* output = graph_->findNodeHandleForConnector(output_id);
+    apex_assert_hard(output);
+    Output* o = output->getOutput(output_id);
+    apex_assert_hard(o);
+    Input* i = input->getInput(graph_->makeConnectableUUID_forced(input->getUUID(), "in", input_id));
+    if(!i) {
+        throw std::logic_error(input->getUUID().getFullName() +
+                               " does not have an input with the label " +
+                               std::to_string(input_id));
+    }
+    apex_assert_hard(i);
+
+    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    graph_->addConnection(c);
+    return c;
+}
+
+ConnectionPtr GraphFacade::connect(NodeHandlePtr output, int output_id,
+                                   const UUID& input_id)
+{
+    Output* o = output->getOutput(graph_->makeConnectableUUID_forced(output->getUUID(), "out", output_id));
+    if(!o) {
+        throw std::logic_error(output->getUUID().getFullName() +
+                               " does not have an output with the index " +
+                               std::to_string(output_id));
+    }
+    apex_assert_hard(o);
+    NodeHandle* input = graph_->findNodeHandleForConnector(input_id);
+    apex_assert_hard(input);
+    Input* i = input->getInput(input_id);
+    apex_assert_hard(i);
+
+    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    graph_->addConnection(c);
+    return c;
+}
+
+ConnectionPtr GraphFacade::connect(const UUID& output_id,
+                                   NodeHandlePtr input, const std::string& input_id)
+{
+    return connect(output_id, input.get(), input_id);
+}
+
+ConnectionPtr GraphFacade::connect(const UUID& output_id,
+                                   NodeHandle* input, const std::string& input_id)
+{
+    NodeHandle* output = graph_->findNodeHandleForConnector(output_id);
+    apex_assert_hard(output);
+    Output* o = output->getOutput(output_id);
+    apex_assert_hard(o);
+
+    Input* i = nullptr;
+    for(auto in : input->getAllInputs()) {
+        Input* in_ptr = in.get();
+        if(in_ptr->getLabel() == input_id) {
+            i = in_ptr;
+            break;
+        }
+    }
+    if(!i) {
+        throw std::logic_error(input->getUUID().getFullName() +
+                               " does not have an input with the label " +
+                               input_id);
+    }
+
+    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    graph_->addConnection(c);
+    return c;
+}
+
+ConnectionPtr GraphFacade::connect(NodeHandlePtr output, const std::string& output_id,
+                                   const UUID& input_id)
+{
+    return connect(output.get(), output_id, input_id);
+}
+
+ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output_id,
+                                   const UUID& input_id)
+{
+    Output* o = nullptr;
+    for(auto out : output->getAllOutputs()) {
+        Output* out_ptr = out.get();
+        if(out_ptr->getLabel() == output_id) {
+            o = out_ptr;
+            break;
+        }
+    }
+    if(!o) {
+        throw std::logic_error(output->getUUID().getFullName() +
+                               " does not have an output with the label " +
+                               output_id);
+    }
+
+    NodeHandle* input = graph_->findNodeHandleForConnector(input_id);
+    apex_assert_hard(input);
+    Input* i = input->getInput(input_id);
+    apex_assert_hard(i);
+
+    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    graph_->addConnection(c);
+    return c;
+}
+
 ConnectionPtr GraphFacade::connect(NodeHandle *output, int output_id,
                                    NodeHandle *input, int input_id)
 {
@@ -220,6 +326,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output
                                " does not have an input with the label " +
                                input_id);
     }
+
     auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
     graph_->addConnection(c);
     return c;
@@ -235,6 +342,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id, const UUID& input_id)
     Input* i = input->getInput(input_id);
     apex_assert_hard(o);
     apex_assert_hard(i);
+
     auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
     graph_->addConnection(c);
     return c;

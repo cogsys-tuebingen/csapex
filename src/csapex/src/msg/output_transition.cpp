@@ -31,6 +31,11 @@ void OutputTransition::reset()
     }
 }
 
+OutputPtr OutputTransition::getOutput(const UUID& id) const
+{
+    return outputs_.at(id);
+}
+
 void OutputTransition::addOutput(OutputPtr output)
 {
     // remember the output
@@ -96,6 +101,15 @@ void OutputTransition::connectionRemoved(Connection *connection)
     }
 }
 
+void OutputTransition::connectionAdded(Connection *connection)
+{
+    Transition::connectionAdded(connection);
+
+    if(isEnabled()) {
+       updateConnections();
+    }
+}
+
 void OutputTransition::establishConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -107,9 +121,8 @@ void OutputTransition::establishConnections()
             if(!c->isSourceEstablished()) {
                 c->establishSource();
             }
-            if(c->isSourceEstablished() && c->isSinkEstablished()) {
-                establishConnection(c);
-            }
+
+            establishConnection(c);
         }
     }
 
@@ -144,7 +157,7 @@ void OutputTransition::sendMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-//    updateConnections();
+    updateConnections();
 
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
 
@@ -191,9 +204,7 @@ void OutputTransition::publishNextMessage()
     }
     if(areOutputsIdle()) {
         if(areAllConnections(Connection::State::DONE)) {
-            if(hasFadingConnection()) {
-                removeFadingConnections();
-            }
+            updateConnections();
 
             messages_processed();
         }

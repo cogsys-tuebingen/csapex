@@ -21,7 +21,7 @@ std::size_t UUID::Hasher::operator()(const UUID& k) const {
 
 bool UUID::empty() const
 {
-    return representation_.empty();
+    return representation_.empty() || (representation_.size() == 1 && representation_.front() == "~");
 }
 
 std::string UUID::stripNamespace(const std::string &name)
@@ -175,7 +175,7 @@ std::string UUID::id() const
 std::string UUID::type() const
 {
     std::string t = id();
-    return t.substr(0, t.find_first_of("_"));
+    return t.substr(0, t.rfind("_"));
 }
 
 namespace csapex

@@ -21,7 +21,7 @@ public:
     virtual ~Node();
 
     UUID getUUID() const;
-    void initialize(csapex::NodeModifier* node_modifier, const UUID &uuid);
+    void initialize(csapex::NodeHandle* node_handle, const UUID &uuid);
 
 public: /* API */
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
@@ -48,6 +48,8 @@ protected:
     UUID uuid_;
     csapex::NodeModifier* node_modifier_;
     csapex::Parameterizable* parameters_;
+
+    csapex::NodeHandle* node_handle_;
 
     long guard_;
 };

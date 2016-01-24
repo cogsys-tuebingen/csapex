@@ -25,6 +25,11 @@ InputTransition::InputTransition()
 {
 }
 
+InputPtr InputTransition::getInput(const UUID& id) const
+{
+    return inputs_.at(id);
+}
+
 void InputTransition::addInput(InputPtr input)
 {
     // remember the input
@@ -65,9 +70,8 @@ void InputTransition::establishConnections()
             if(!c->isSinkEstablished()) {
                 c->establishSink();
             }
-            if(c->isSourceEstablished() && c->isSinkEstablished()) {
-                establishConnection(c);
-            }
+
+            establishConnection(c);
         }
     }
 
@@ -95,6 +99,8 @@ void InputTransition::connectionAdded(Connection *connection)
 {
     Transition::connectionAdded(connection);
 
+    connection->new_message.connect(delegate::Delegate0<>(this, &InputTransition::checkIfEnabled));
+
     one_input_is_dynamic_ = false;
     for(auto pair : inputs_) {
         InputPtr input = pair.second;
@@ -103,6 +109,8 @@ void InputTransition::connectionAdded(Connection *connection)
             break;
         }
     }
+
+    updateConnections();
 }
 
 bool InputTransition::isEnabled() const
@@ -231,6 +239,8 @@ void InputTransition::forwardMessages()
 {
     apex_assert_hard(!isOneConnection(Connection::State::DONE));
     apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
+
+    updateConnections();
     apex_assert_hard(established_connections_.empty() || !areAllConnections(Connection::State::READ));
 
     for(auto pair : inputs_) {
@@ -259,7 +269,7 @@ void InputTransition::forwardMessages()
 
     for(auto& c : established_connections_) {
         auto s = c->getState();
-        apex_assert_hard(c->isEstablished());
+//        apex_assert_hard(c->isEstablished());
         apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
         apex_assert_hard(s == Connection::State::UNREAD ||
                          s == Connection::State::READ);

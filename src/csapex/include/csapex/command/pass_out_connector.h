@@ -11,9 +11,11 @@ namespace csapex
 namespace command
 {
 
-struct PassOutConnector : public Command
+class PassOutConnector : public Command
 {
-    PassOutConnector(const AUUID &graph_id, const UUID& connector_id);
+public:
+    PassOutConnector(const AUUID &graph_id, const std::string &connector_type, const ConnectionTypeConstPtr& type);
+    std::pair<UUID, UUID> getMap() const;
 
 protected:
     bool doExecute() override;
@@ -23,8 +25,11 @@ protected:
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
+
 private:
-    UUID c_uuid;
+    std::string connector_type;
+    ConnectionTypeConstPtr token_type;
+    std::pair<UUID, UUID> map;
 };
 }
 }

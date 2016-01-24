@@ -21,14 +21,6 @@ PasteGraph::PasteGraph(const AUUID &graph_id, const YAML::Node& blueprint, const
 {
 }
 
-PasteGraph::PasteGraph(const AUUID& graph_id, const YAML::Node& blueprint, const Point &pos,
-                       const std::vector<std::pair<UUID, UUID> > &crossing_inputs, const std::vector<std::pair<UUID, UUID> > &crossing_outputs)
-    : PasteGraph(graph_id, blueprint, pos)
-{
-    crossing_inputs_ = crossing_inputs;
-    crossing_outputs_ = crossing_outputs;
-}
-
 std::string PasteGraph::getType() const
 {
     return "PasteGraph";
@@ -45,8 +37,6 @@ bool PasteGraph::doExecute()
     bool paused = graph_facade->isPaused();
     graph_facade->pauseRequest(true);
 
-    AUUID parent_graph_auuid = graph_facade->getParent()->getAbsoluteUUID();
-
     Graph* graph = graph_facade->getGraph();
 
     GraphIO io(graph, node_factory_);
@@ -54,56 +44,6 @@ bool PasteGraph::doExecute()
     id_mapping_ = io.loadIntoGraph(blueprint_, pos_);
 
     graph_facade->pauseRequest(paused);
-
-    for(const std::pair<UUID,UUID>& in : crossing_inputs_) {
-        UUID parent_mapped = id_mapping_[in.second.parentUUID()];
-        std::string child = in.second.id();
-
-        UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
-        CommandPtr pass_out = std::make_shared<command::PassOutConnector>(graph_uuid, new_uuid);
-        pass_out->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
-        executeCommand(pass_out);
-        add(pass_out);
-    }
-
-    for(const std::pair<UUID,UUID>& out : crossing_outputs_) {
-        UUID parent_mapped = id_mapping_[out.first.parentUUID()];
-        std::string child = out.first.id();
-
-        UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
-        CommandPtr pass_out = std::make_shared<command::PassOutConnector>(graph_uuid, new_uuid);
-        pass_out->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
-        executeCommand(pass_out);
-        add(pass_out);
-    }
-
-
-    for(const std::pair<UUID,UUID>& in : crossing_inputs_) {
-        UUID parent_mapped = id_mapping_[in.second.parentUUID()];
-        std::string child = in.second.id();
-
-        UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
-        UUID forwarding_uuid = graph_facade->getGraph()->getForwardingInput(new_uuid);
-
-        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_graph_auuid, in.first, forwarding_uuid);
-        add_connection->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
-        executeCommand(add_connection);
-        add(add_connection);
-    }
-
-    for(const std::pair<UUID,UUID>& out : crossing_outputs_) {
-        UUID parent_mapped = id_mapping_[out.first.parentUUID()];
-        std::string child = out.first.id();
-
-        UUID new_uuid = graph->makeDerivedUUID(parent_mapped, child);
-        UUID forwarding_uuid = graph_facade->getGraph()->getForwardingOutput(new_uuid);
-
-        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_graph_auuid, forwarding_uuid, out.second);
-        add_connection->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
-        executeCommand(add_connection);
-        add(add_connection);
-    }
-
 
     return true;
 }

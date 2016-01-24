@@ -14,8 +14,9 @@
 using namespace csapex;
 using namespace command;
 
-PassOutConnector::PassOutConnector(const AUUID& graph_id, const UUID& connector_id)
-    : Command(graph_id), c_uuid(connector_id)
+PassOutConnector::PassOutConnector(const AUUID& graph_id, const std::string& connector_type,
+                                   const ConnectionTypeConstPtr& type)
+    : Command(graph_id), connector_type(connector_type), token_type(type)
 {
 }
 
@@ -26,25 +27,18 @@ std::string PassOutConnector::getType() const
 
 std::string PassOutConnector::getDescription() const
 {
-    return std::string("deleted connector with UUID ") + c_uuid.getFullName();
+    return std::string("create forwarding connector with type ") + connector_type;
 }
 
 
 bool PassOutConnector::doExecute()
 {
-    NodeHandle* node_handle = getRoot()->getGraph()->findNodeHandle(graph_uuid);
-    apex_assert_hard(node_handle);
+    Graph* graph = getGraph();
 
-    NodePtr sub_graph_node = node_handle->getNode().lock();
-    apex_assert_hard(sub_graph_node);
-
-    GraphPtr sub_graph = std::dynamic_pointer_cast<Graph>(sub_graph_node);
-    apex_assert_hard(sub_graph);
-
-    if(c_uuid.type() == "in") {
-        UUID relay_input = sub_graph->passOutInput(c_uuid);
+    if(connector_type == "in") {
+        map = graph->addForwardingInput(token_type, "forwarding", false);
     } else {
-        UUID relay_output = sub_graph->passOutOutput(c_uuid);
+        map = graph->addForwardingOutput(token_type, "forwarding");
     }
 
     return true;
@@ -60,4 +54,7 @@ bool PassOutConnector::doRedo()
     return doExecute();
 }
 
-
+std::pair<UUID, UUID> PassOutConnector::getMap() const
+{
+    return map;
+}

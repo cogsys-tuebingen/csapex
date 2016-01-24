@@ -96,16 +96,23 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    UUID passOutInput(const UUID& internal_uuid);
-    UUID passOutOutput(const UUID& internal_uuid);
+    std::pair<UUID, UUID> addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
+    std::pair<UUID, UUID> addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);
 
-    UUID getForwardingInput(const UUID& internal_uuid) const;
-    UUID getForwardingOutput(const UUID& internal_uuid) const;
+    Input* getForwardedInput(const UUID& internal_uuid) const;
+    Output* getForwardedOutput(const UUID& internal_uuid) const;
 
 private:
+    std::pair<UUID, UUID> addForwardingInput(const UUID& uuid, const UUID &external_uuid, const ConnectionTypeConstPtr& type,
+                                             const std::string& label, bool optional);
+    std::pair<UUID, UUID> addForwardingOutput(const UUID& uuid, const UUID& external_uuid, const ConnectionTypeConstPtr& type,
+                                              const std::string& label);
+
    /*rename*/ void verify();
     void buildConnectedComponents();
     void assignLevels();
+
+    void outputActivation();
 
 public:
     csapex::slim_signal::Signal<void()> stateChanged;
@@ -129,13 +136,14 @@ protected:
 
     std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation_;
 
-    std::map<Input*, OutputPtr> pass_on_inputs_;
-    std::unordered_map<UUID, UUID, UUID::Hasher> passed_on_inputs_;
+    InputTransitionPtr transition_relay_in_;
+    OutputTransitionPtr transition_relay_out_;
 
-    std::map<Output*, Output*> pass_on_outputs_;
-    std::unordered_map<UUID, UUID, UUID::Hasher> passed_on_outputs_;
+    std::map<Input*, OutputPtr> forward_inputs_;
+    std::map<Output*, InputPtr> forward_outputs_;
 
-    std::map<Output*, bool> received_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_output_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
 };
 
 }

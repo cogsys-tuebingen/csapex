@@ -282,7 +282,7 @@ void NodeWorker::startProcessingMessages()
 
     apex_assert_hard(state_ == State::FIRED);
     apex_assert_hard(!node_handle_->getInputTransition()->hasUnestablishedConnection());
-    apex_assert_hard(!node_handle_->getOutputTransition()->hasUnestablishedConnection());
+    //apex_assert_hard(!node_handle_->getOutputTransition()->hasUnestablishedConnection());
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
     apex_assert_hard(isProcessingEnabled());
     apex_assert_hard(canProcess());
@@ -483,8 +483,8 @@ void NodeWorker::updateTransitionConnections()
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     if(state_ == State::IDLE || state_ == State::ENABLED) {
-        node_handle_->getInputTransition()->updateConnections();
-        node_handle_->getOutputTransition()->updateConnections();
+//        node_handle_->getInputTransition()->updateConnections();
+//        node_handle_->getOutputTransition()->updateConnections();
     }
 }
 
@@ -507,7 +507,7 @@ void NodeWorker::checkTransitionsImpl(bool try_fire)
     InputTransition* transition_in_ = node_handle_->getInputTransition();
     OutputTransition* transition_out_ = node_handle_->getOutputTransition();
 
-    if(transition_in_->hasUnestablishedConnection() || transition_out_->hasUnestablishedConnection()) {
+    if(transition_in_->hasUnestablishedConnection()/* || transition_out_->hasUnestablishedConnection()*/) {
         if(state_ == State::ENABLED) {
             setState(State::IDLE);
         }

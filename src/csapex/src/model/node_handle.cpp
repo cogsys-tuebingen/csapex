@@ -6,6 +6,7 @@
 #include <csapex/msg/output_transition.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node.h>
+#include <csapex/model/graph.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/static_output.h>
@@ -607,9 +608,9 @@ Connectable* NodeHandle::getConnector(const UUID &uuid) const
 {
     std::string type = uuid.type();
 
-    if(type == "in") {
+    if(type == "in" || type == "relay_in") {
         return getInput(uuid);
-    } else if(type == "out") {
+    } else if(type == "out" || type == "relay_out") {
         return getOutput(uuid);
     } else if(type == "slot") {
         return getSlot(uuid);
@@ -628,6 +629,11 @@ Input* NodeHandle::getInput(const UUID& uuid) const
         }
     }
 
+    GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
+    if(graph) {
+        return graph->getForwardedInput(uuid);
+    }
+
     return nullptr;
 }
 
@@ -637,6 +643,11 @@ Output* NodeHandle::getOutput(const UUID& uuid) const
         if(out->getUUID() == uuid) {
             return out.get();
         }
+    }
+
+    GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
+    if(graph) {
+        return graph->getForwardedOutput(uuid);
     }
 
     return nullptr;

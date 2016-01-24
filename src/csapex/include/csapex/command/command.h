@@ -55,9 +55,9 @@ public:
     virtual std::string getDescription() const = 0;
 
 protected:
-    static bool executeCommand(CommandPtr cmd);
-    static bool undoCommand(CommandPtr cmd);
-    static bool redoCommand(CommandPtr cmd);
+    bool executeCommand(CommandPtr cmd);
+    bool undoCommand(CommandPtr cmd);
+    bool redoCommand(CommandPtr cmd);
 
     virtual bool doExecute() = 0;
     virtual bool doUndo() = 0;

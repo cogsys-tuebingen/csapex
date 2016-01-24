@@ -21,17 +21,17 @@ Command::Command(const AUUID &parent_uuid)
 
 bool Command::Access::executeCommand(Command::Ptr cmd)
 {
-    return Command::executeCommand(cmd);
+    return cmd->executeCommand(cmd);
 }
 
 bool Command::Access::undoCommand(Command::Ptr cmd)
 {
-    return Command::undoCommand(cmd);
+    return cmd->undoCommand(cmd);
 }
 
 bool Command::Access::redoCommand(Command::Ptr cmd)
 {
-    return Command::redoCommand(cmd);
+    return cmd->redoCommand(cmd);
 }
 
 void Command::init(Settings *settings, GraphFacade* root, ThreadPool *thread_pool, NodeFactory* node_factory)
@@ -51,9 +51,7 @@ void Command::init(Settings *settings, GraphFacade* root, ThreadPool *thread_poo
 
 bool Command::executeCommand(Command::Ptr cmd)
 {
-    apex_assert_hard(cmd->root_);
-    apex_assert_hard(cmd->thread_pool_);
-    apex_assert_hard(cmd->node_factory_);
+    cmd->init(settings_, getRoot(), getRootThreadPool(), node_factory_);
 
     return cmd->doExecute();
 }

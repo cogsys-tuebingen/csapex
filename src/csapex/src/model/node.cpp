@@ -7,7 +7,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/trigger.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_modifier.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/settings.h>
 
@@ -29,10 +29,11 @@ Node::~Node()
     guard_ = 0xDEADBEEF;
 }
 
-void Node::initialize(csapex::NodeModifier* node_modifier, const UUID& uuid)
+void Node::initialize(NodeHandle *node_handle, const UUID& uuid)
 {
     uuid_ = uuid;
-    node_modifier_ = node_modifier;
+    node_modifier_ = node_handle;
+    node_handle_ = node_handle;
     parameters_ = this;
 
     parameter_state_->setParentUUID(uuid);

@@ -43,9 +43,21 @@ public:
                           NodeHandlePtr input, const std::string& inputput_name);
     ConnectionPtr connect(NodeHandle* output, const std::string& output_name,
                           NodeHandle* input, const std::string& input_name);
+    ConnectionPtr connect(const UUID& output_id,
+                          NodeHandle* input, const std::string& input_name);
+    ConnectionPtr connect(NodeHandle* output, const std::string& output_name,
+                          const UUID& input_id);
+    ConnectionPtr connect(const UUID& output_id,
+                          NodeHandlePtr input, const std::string& input_name);
+    ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name,
+                          const UUID& input_id);
 
     ConnectionPtr connect(const UUID& output_id, const UUID& input_id);
 
+    ConnectionPtr connect(const UUID& output_id,
+                          NodeHandlePtr input, int input_id);
+    ConnectionPtr connect(NodeHandlePtr output, int output_id,
+                          const UUID& input_id);
     ConnectionPtr connect(NodeHandlePtr output, int output_id,
                           NodeHandlePtr input, int input_id);
     ConnectionPtr connect(NodeHandle* output, int output_id,

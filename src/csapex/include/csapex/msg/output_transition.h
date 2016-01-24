@@ -16,12 +16,15 @@ public:
     OutputTransition(delegate::Delegate0<> activation_fn);
     OutputTransition();
 
+    OutputPtr getOutput(const UUID& id) const;
+
     void addOutput(OutputPtr output);
     void removeOutput(OutputPtr output);
 
     void setSequenceNumber(long seq_no);
     long getSequenceNumber() const;
 
+    void connectionAdded(Connection* connection) override;
     void connectionRemoved(Connection *connection) override;
 
     bool isSink() const;

@@ -105,9 +105,11 @@ void Transition::establishConnection(ConnectionPtr connection)
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(auto it = unestablished_connections_.begin(); it != unestablished_connections_.end(); ) {
         ConnectionPtr c = *it;
-        if(connection == c) {
-            if(!c->isEstablished()) {
-                c->establish();
+        if(connection == c) {            
+            if(c->isSourceEstablished() && c->isSinkEstablished()) {
+                if(!c->isEstablished()) {
+                    c->establish();
+                }
             }
 
             it = unestablished_connections_.erase(it);

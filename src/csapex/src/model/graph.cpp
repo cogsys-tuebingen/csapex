@@ -6,6 +6,8 @@
 #include <csapex/model/connection.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/msg/input_transition.h>
+#include <csapex/msg/output_transition.h>
 #include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/dynamic_output.h>
 #include <csapex/signal/slot.h>
@@ -23,7 +25,10 @@
 using namespace csapex;
 
 Graph::Graph()
+    : transition_relay_in_(new InputTransition),
+      transition_relay_out_(new OutputTransition)
 {
+    transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
 }
 
 Graph::~Graph()
@@ -427,6 +432,11 @@ Node* Graph::findNode(const UUID& uuid) const
 
 NodeHandle* Graph::findNodeHandle(const UUID& uuid) const
 {
+//    if(uuid == getUUID()) {
+    if(uuid.empty()) {
+        return node_handle_;
+    }
+
     NodeHandle* node_handle = findNodeHandleNoThrow(uuid);
     if(node_handle) {
         return node_handle;
@@ -518,19 +528,7 @@ Connectable* Graph::findConnector(const UUID &uuid)
 
     std::string type = uuid.type();
 
-    Connectable* result;
-    if(type == "in") {
-        result = owner->getInput(uuid);
-    } else if(type == "out") {
-        result = owner->getOutput(uuid);
-    } else if(type == "slot") {
-        result = owner->getSlot(uuid);
-    } else if(type == "trigger") {
-        result = owner->getTrigger(uuid);
-    } else {
-        throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
-    }
-
+    Connectable* result = owner->getConnector(uuid);
     apex_assert_hard(result);
 
     return result;
@@ -605,19 +603,30 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
 {
     continuation_ = continuation;
 
-    received_.clear();
-    for(Output* o : node_modifier.getMessageOutputs()) {
-        received_[o] = false;
-    }
-
+    apex_assert_hard(transition_relay_out_->canStartSendingMessages());
     for(Input* i : node_modifier.getMessageInputs()) {
         ConnectionTypeConstPtr m = msg::getMessage(i);
-        OutputPtr o = pass_on_inputs_[i];
+        OutputPtr o = forward_inputs_.at(i);
 
         msg::publish(o.get(), m);
-        o->commitMessages();
-        o->publish();
     }
+    transition_relay_out_->sendMessages();
+
+    //    continuation_ = continuation;
+
+    //    received_.clear();
+    //    for(Output* o : node_modifier.getMessageOutputs()) {
+    //        received_[o] = false;
+    //    }
+
+    //    for(Input* i : node_modifier.getMessageInputs()) {
+    //        ConnectionTypeConstPtr m = msg::getMessage(i);
+    //        OutputPtr o = pass_on_inputs_[i];
+
+    //        msg::publish(o.get(), m);
+    //        o->commitMessages();
+    //        o->publish();
+    //    }
 }
 
 bool Graph::isAsynchronous() const
@@ -625,63 +634,91 @@ bool Graph::isAsynchronous() const
     return true;
 }
 
-UUID Graph::passOutInput(const UUID &internal_uuid)
+std::pair<UUID, UUID> Graph::addForwardingInput(const ConnectionTypeConstPtr& type,
+                                                const std::string& label, bool optional)
 {
-    // FIXME: move out
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relay_out");
+    UUID external_uuid = generateDerivedUUID(getUUID(), "in");
 
-    Input* internal = findConnector<Input>(internal_uuid);
-    apex_assert_hard(internal);
-    Input* parent = node_modifier_->addInput(internal->getType(), internal->getLabel(), false, false);
-
-    std::string name = "relay" + std::to_string(pass_on_inputs_.size());
-    OutputPtr relay = std::make_shared<StaticOutput>(makeDerivedUUID(getUUID(),name));
-    relay->setType(internal->getType());
-    relay->setLabel(internal->getLabel());
-
-    NodeHandle* nh = findNodeHandleForConnector(internal->getUUID());
-    ConnectionPtr c = BundledConnection::connect(relay.get(), internal, nh->getInputTransition());
-    pass_on_inputs_[parent] = relay;
-
-    connections_.push_back(c);
-
-    passed_on_inputs_[internal_uuid] = parent->getUUID();
-
-    return parent->getUUID();
+    return addForwardingInput(internal_uuid, external_uuid, type, label, optional);
 }
 
-UUID Graph::getForwardingInput(const UUID& internal_uuid) const
+std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const UUID& external_uuid,
+                                                const ConnectionTypeConstPtr& type,
+                                                const std::string& label, bool optional)
 {
-    return passed_on_inputs_.at(internal_uuid);
+    InputPtr external_input = std::make_shared<Input>(external_uuid);
+    external_input->setLabel(label);
+    external_input->setOptional(optional);
+    external_input->setType(type);
+
+    node_handle_->addInput(external_input);
+
+    OutputPtr relay = std::make_shared<StaticOutput>(internal_uuid);
+    relay->setType(type);
+    relay->setLabel(label);
+
+    transition_relay_out_->addOutput(relay);
+
+    forward_inputs_[external_input.get()] = relay;
+
+    relay_to_external_input_[internal_uuid] = internal_uuid;
+
+    return {external_uuid, internal_uuid};
 }
 
-
-UUID Graph::passOutOutput(const UUID& internal_uuid)
+std::pair<UUID, UUID> Graph::addForwardingOutput(const ConnectionTypeConstPtr& type,
+                                                 const std::string& label)
 {
-    // FIXME: move out
-    Output* internal = findConnector<Output>(internal_uuid);
-    apex_assert_hard(internal);
-    Output* parent = node_modifier_->addOutput(internal->getType(), internal->getLabel(), false);
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relay_in");
+    UUID external_uuid = generateDerivedUUID(getUUID(), "out");
 
-    pass_on_outputs_[internal] = parent;
+    return addForwardingOutput(internal_uuid, external_uuid, type, label);
+}
 
-    internal->messageSent.connect([this, parent, internal](Connectable*) {
-        msg::publish(parent, internal->getMessage());
-        received_[parent] = true;
+std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, const UUID& external_uuid,
+                                                 const ConnectionTypeConstPtr& type,
+                                                 const std::string& label)
+{
+    OutputPtr external_output = std::make_shared<StaticOutput>(external_uuid);
+    external_output->setLabel(label);
+    external_output->setType(type);
 
-        for(auto pair : received_) {
-            if(!pair.second) {
-                return;
-            }
-        }
+    node_handle_->addOutput(external_output);
 
-        continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+    InputPtr relay = std::make_shared<Input>(internal_uuid);
+    relay->setType(type);
+    relay->setLabel(label);
+
+    forward_outputs_[external_output.get()] = relay;
+
+    transition_relay_in_->addInput(relay);
+
+    relay_to_external_output_[internal_uuid] = external_uuid;
+
+    relay->messageArrived.connect([this, external_output, relay](Connectable*) {
+        msg::publish(external_output.get(), relay->getMessage());
     });
 
-    passed_on_outputs_[internal_uuid] = parent->getUUID();
-    return parent->getUUID();
+    return {external_uuid, internal_uuid};
 }
 
-UUID Graph::getForwardingOutput(const UUID& internal_uuid) const
+Input* Graph::getForwardedInput(const UUID &internal_uuid) const
 {
-    return passed_on_outputs_.at(internal_uuid);
+    return transition_relay_in_->getInput(internal_uuid).get();
+}
+
+Output* Graph::getForwardedOutput(const UUID &internal_uuid) const
+{
+    return transition_relay_out_->getOutput(internal_uuid).get();
+}
+
+void Graph::outputActivation()
+{
+    if(transition_relay_in_->isEnabled()) {
+        transition_relay_in_->forwardMessages();
+        transition_relay_in_->notifyMessageProcessed();
+
+        continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+    }
 }

@@ -497,37 +497,45 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             return;
         }
         auto m = c->getMessage();
+        if(debug_){
+            QString descr("Connection #");
+            descr += QString::number(c->id());
+            descr += " (";
+            descr += QString::fromStdString(c->from()->getUUID().getShortName());
+            descr += " -> ";
+            descr += QString::fromStdString(c->to()->getUUID().getShortName());
+            descr += "), state: ";
 
-        QString descr("Connection #");
-        descr += QString::number(c->id());
-        descr += " (";
-        descr += QString::fromStdString(c->from()->getUUID().getShortName());
-        descr += " -> ";
-        descr += QString::fromStdString(c->to()->getUUID().getShortName());
-        descr += "), state: ";
+            switch (c->getState()) {
+            case Connection::State::DONE:
+                descr += "NOT_INITIALIZED / DONE";
+                break;
+            case Connection::State::UNREAD:
+                descr += "UNREAD";
+                break;
+            case Connection::State::READ:
+                descr += "READ";
+                break;
+            default:
+                break;
+            }
 
-        switch (c->getState()) {
-        case Connection::State::DONE:
-            descr += "NOT_INITIALIZED / DONE";
-            break;
-        case Connection::State::UNREAD:
-            descr += "UNREAD";
-            break;
-        case Connection::State::READ:
-            descr += "READ";
-            break;
-        default:
-            break;
-        }
+            if(m) {
+                descr += ", Message: ";
+                descr += QString::fromStdString(m->descriptiveName());
+                descr += ", # " + QString::number(m->sequenceNumber());
+            }
 
-        if(m) {
-            descr += ", Message: ";
-            descr += QString::fromStdString(m->descriptiveName());
-            descr += ", # " + QString::number(m->sequenceNumber());
-        }
+            descr += ", " + c->isEstablished() ? "established" : "not established";
+            descr += " (";
+            descr += c->isSourceEstablished() ? "source established" : "source not established";
+            descr += ", ";
+            descr += c->isSinkEstablished() ? "sink established" : "sink not established";
+            descr += ")";
 
-        for(auto v : views()) {
-            v->setToolTip(descr);
+            for(auto v : views()) {
+                v->setToolTip(descr);
+            }
         }
 
         QPointF preview_pos = e->scenePos();

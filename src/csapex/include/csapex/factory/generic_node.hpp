@@ -56,7 +56,6 @@ public:
     GenericNode(Callback cb)
         : cb_(cb)
     {
-        std::cerr << "construct node " << std::endl;
         input_.resize(N);
         output_.resize(N);
         params_.resize(N);
@@ -67,7 +66,6 @@ public:
 
     virtual void setup(csapex::NodeModifier& modifier) override
     {
-        std::cerr << "setup called " << std::endl;
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeSetup(this, modifier));
     }
 
@@ -115,7 +113,6 @@ private:
         GenericNodeSetup(GenericNode<Parameters, Info>* instance, csapex::NodeModifier& modifier)
             : instance_(instance), modifier_(modifier), id(0)
         {
-            std::cerr << "setup node " << std::endl;
             instance_->in_msg_.clear();
             instance_->in_msg_.resize(instance_->N);
             instance_->out_msg_.clear();

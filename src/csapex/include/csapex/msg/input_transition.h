@@ -18,6 +18,8 @@ public:
     InputTransition(delegate::Delegate0<> activation_fn);
     InputTransition();
 
+    InputPtr getInput(const UUID& id) const;
+
     void addInput(InputPtr input);
     void removeInput(InputPtr input);
 
