@@ -88,7 +88,11 @@ UUID UUIDProvider::generateDerivedUUID(const UUID &parent, const std::string &pr
 
 UUID UUIDProvider::makeDerivedUUID_forced(const UUID &parent, const std::string &name)
 {
-    return makeUUID_forced( parent.getFullName() + UUID::namespace_separator + name);
+    if(!parent.empty()) {
+        return makeUUID_forced(parent.getFullName()  + UUID::namespace_separator + name);
+    } else {
+        return makeUUID_forced(name);
+    }
 }
 
 void UUIDProvider::free(const UUID &uuid)

@@ -47,17 +47,11 @@ public:
     void removePort(Port* port);
 
 Q_SIGNALS:
-    void eventFulcrumAdded(void *f);
-    void eventFulcrumMoved(void *f, bool dropped);
-    void eventFulcrumTypeChanged(void *f, int type);
-    void eventFulcrumHandleMoved(void *f, bool dropped, int which);
-    void eventFulcrumDeleted(void *);
-
     void eventConnectionAdded(Connection*);
     void evetnConnectionDeleted(Connection*);
 
 public Q_SLOTS:
-    void fulcrumAdded(void *f);
+    void fulcrumAdded(Fulcrum *f);
     void fulcrumMoved(void *f, bool dropped);
     void fulcrumTypeChanged(void *f, int type);
     void fulcrumHandleMoved(void *f, bool dropped, int which);

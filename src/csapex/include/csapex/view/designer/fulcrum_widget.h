@@ -2,7 +2,6 @@
 #define FULCRUM_WIDGET_H
 
 /// PROJECT
-#include <csapex/command/command_fwd.h>
 #include <csapex/model/model_fwd.h>
 
 /// SYSTEM
@@ -18,7 +17,7 @@ class FulcrumWidget : public QObject, public QGraphicsEllipseItem
     Q_OBJECT
 
 public:
-    FulcrumWidget(Fulcrum* fulcrum, CommandDispatcher *dispatcher, QGraphicsItem *parent = 0);
+    FulcrumWidget(Fulcrum* fulcrum, QGraphicsItem *parent = 0);
 
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* e);
     bool sceneEvent(QEvent *event);
@@ -26,6 +25,9 @@ public:
 Q_SIGNALS:
     void movedEvent();
     void movedHandlesEvent(Fulcrum* f, bool dropped, int which);
+
+    void deleteRequest(Fulcrum* f);
+    void modifyRequest(Fulcrum* f, int type);
 
 public Q_SLOTS:
     void moved();
@@ -40,7 +42,6 @@ private:
 
 private:
     Fulcrum* fulcrum_;
-    CommandDispatcher* cmd_dispatcher_;
 
     QPointF half_size_;
 

@@ -36,8 +36,8 @@ DirectConnection::DirectConnection(Output *from, Input *to)
 
 }
 
-DirectConnection::DirectConnection(Output *from, Input *to, int /*id*/)
-    : Connection(from, to)
+DirectConnection::DirectConnection(Output *from, Input *to, int id)
+    : Connection(from, to, id)
 {
 
 }

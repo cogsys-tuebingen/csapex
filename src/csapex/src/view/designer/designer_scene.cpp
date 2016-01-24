@@ -25,6 +25,7 @@
 #include <csapex/model/fulcrum.h>
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/command/delete_fulcrum.h>
 
 /// SYSTEM
 #include <QtGui>
@@ -115,8 +116,10 @@ DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CommandDispatcher *dis
 
     connections_.push_back(graph->connectionAdded.connect([this](Connection* c) { connectionAdded(c); }));
     connections_.push_back(graph->connectionDeleted.connect([this](Connection* c) { connectionDeleted(c); }));
-    //    QObject::connect(this, SIGNAL(eventConnectionAdded(Connection*)), this, SLOT(connectionAdded(Connection*)), Qt::QueuedConnection);
-    //    QObject::connect(this, SIGNAL(eventConnectionDeleted(Connection*)), this, SLOT(connectionDeleted(Connection*)), Qt::QueuedConnection);
+
+    for(const auto& connection : graph->getConnections()) {
+        connectionAdded(connection.get());
+    }
 }
 
 DesignerScene::~DesignerScene()
@@ -434,7 +437,9 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
     if(!e->isAccepted() && e->button() == Qt::LeftButton) {
         if(highlight_connection_id_ >= 0) {
             QPoint pos = e->scenePos().toPoint();
-            dispatcher_->execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(), highlight_connection_id_, highlight_connection_sub_id_, Point(pos.x(), pos.y()), 0)));
+            dispatcher_->execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
+                                                                      highlight_connection_id_, highlight_connection_sub_id_,
+                                                                      Point(pos.x(), pos.y()), 0)));
             e->accept();
 
             // allow moving the fulcrum directly
@@ -581,12 +586,6 @@ void DesignerScene::connectionAdded(Connection* c)
     c->fulcrum_moved_handle.connect(std::bind(&DesignerScene::fulcrumHandleMoved, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     c->fulcrum_type_changed.connect(std::bind(&DesignerScene::fulcrumTypeChanged, this, std::placeholders::_1, std::placeholders::_2));
 
-    QObject::connect(this, SIGNAL(eventFulcrumAdded(void*)), this, SLOT(fulcrumAdded(void *)));
-    QObject::connect(this, SIGNAL(eventFulcrumDeleted(void*)), this, SLOT(fulcrumDeleted(void*)), Qt::DirectConnection);
-    QObject::connect(this, SIGNAL(eventFulcrumMoved(void*,bool)), this, SLOT(fulcrumMoved(void *, bool)));
-    QObject::connect(this, SIGNAL(eventFulcrumHandleMoved(void*,bool,int)), this, SLOT(fulcrumHandleMoved(void *, bool, int)));
-    QObject::connect(this, SIGNAL(eventFulcrumTypeChanged(void*,int)), this, SLOT(fulcrumTypeChanged(void*,int)));
-
     invalidateSchema();
 }
 
@@ -595,22 +594,35 @@ void DesignerScene::connectionDeleted(Connection*)
     invalidateSchema();
 }
 
-void DesignerScene::fulcrumAdded(void * fulcrum)
+void DesignerScene::fulcrumAdded(Fulcrum * f)
 {
-    Fulcrum* f = (Fulcrum*) fulcrum;
-
     std::map<Fulcrum*, FulcrumWidget*>::iterator pos = fulcrum_2_widget_.find(f);
     if(pos != fulcrum_2_widget_.end()) {
         return;
     }
 
-    FulcrumWidget* w = new FulcrumWidget(f, dispatcher_);
+    FulcrumWidget* w = new FulcrumWidget(f);
     addItem(w);
     fulcrum_2_widget_[f] = w;
     fulcrum_last_pos_[f] = f->pos();
     fulcrum_last_type_[f] = f->type();
     fulcrum_last_hin_[f] = f->handleIn();
     fulcrum_last_hout_[f] = f->handleOut();
+
+    QObject::connect(w, &FulcrumWidget::deleteRequest, [this](Fulcrum* f){
+        dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id())));
+    });
+
+
+
+    QObject::connect(w, &FulcrumWidget::modifyRequest, [this](Fulcrum* f, int type){
+        command::ModifyFulcrum::Ptr cmd(new command::ModifyFulcrum(
+                                            graph_facade_->getAbsoluteUUID(),
+                                            f->connectionId(), f->id(),
+                                            f->type(), f->handleIn(), f->handleOut(),
+                                            type, f->handleIn(), f->handleOut()));
+        dispatcher_->execute(cmd);
+    });
 
     clearSelection();
     w->setSelected(true);

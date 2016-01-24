@@ -4,9 +4,6 @@
 /// COMPONENT
 #include <csapex/model/fulcrum.h>
 #include <csapex/view/designer/fulcrum_handle.h>
-#include <csapex/command/dispatcher.h>
-#include <csapex/command/delete_fulcrum.h>
-#include <csapex/command/modify_fulcrum.h>
 
 /// SYSTEM
 #include <QEvent>
@@ -28,8 +25,8 @@ Point convert(const QPointF& p) {
 }
 }
 
-FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, CommandDispatcher* dispatcher, QGraphicsItem *parent)
-    : QGraphicsEllipseItem(parent), fulcrum_(fulcrum), cmd_dispatcher_(dispatcher)
+FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, QGraphicsItem *parent)
+    : QGraphicsEllipseItem(parent), fulcrum_(fulcrum)
 {
     half_size_ = QPointF(10, 10);
 
@@ -135,10 +132,8 @@ void FulcrumWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
     e->accept();
     QAction* selectedItem = menu.exec(QCursor::pos());
 
-    AUUID parent_uuid;
-
     if(selectedItem == del) {
-        cmd_dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(parent_uuid, fulcrum_->connectionId(), fulcrum_->id())));
+        Q_EMIT deleteRequest(fulcrum_);
 
     } else if(selectedItem == curve || selectedItem == linear) {
         int type = 0;
@@ -152,13 +147,7 @@ void FulcrumWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
             return;
         }
 
-        Fulcrum* f = fulcrum_;
-        command::ModifyFulcrum::Ptr cmd(new command::ModifyFulcrum(
-                                            parent_uuid,
-                                            f->connectionId(), f->id(),
-                                            f->type(), f->handleIn(), f->handleOut(),
-                                            type, f->handleIn(), f->handleOut()));
-        cmd_dispatcher_->execute(cmd);
+        Q_EMIT modifyRequest(fulcrum_, (int) type);
     }
 }
 
