@@ -44,13 +44,10 @@ public:
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
 
-    virtual QPoint topLeft();
-    virtual QPoint centerPoint();
-
-    virtual bool canOutput() const;
-    virtual bool canInput() const;
-    virtual bool isOutput() const;
-    virtual bool isInput() const;
+    bool canOutput() const;
+    bool canInput() const;
+    bool isOutput() const;
+    bool isInput() const;
 
     ConnectableWeakPtr getAdaptee() const;
 

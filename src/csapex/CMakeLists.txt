@@ -353,6 +353,7 @@ add_library(csapex_qt SHARED
     src/view/widgets/doublespanslider.cpp
     src/view/widgets/minimap_widget.cpp
     src/view/widgets/port.cpp
+    src/view/widgets/port_panel.cpp
     src/view/widgets/profiling_widget.cpp
     src/view/widgets/qdouble_slider.cpp
     src/view/widgets/qint_slider.cpp

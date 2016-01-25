@@ -70,16 +70,25 @@ QPointF centerPoint(Port* port)
     apex_assert_hard(port);
     QPointF pos;
     QWidget* widget = port;
-    while (widget -> parentWidget()) {
-        widget = widget -> parentWidget();
-        pos += widget->pos();
+    QWidget* parent = nullptr;
+    while (widget) {
+        QGraphicsProxyWidget* proxy = widget->graphicsProxyWidget();
+        if(proxy) {
+            pos += proxy->pos();
+        } else {
+            pos += widget->pos();
+        }
+        parent = widget;
+        widget = widget->parentWidget();
     }
 
+
     if(!port->isVisible()) {
-        QSizeF s = widget->geometry().size() * 0.5;
-        return widget->pos() + QPointF(s.width(), s.height());
+        QSizeF s = 0.5 * QSizeF(parent->geometry().size());
+        return parent->pos() + QPointF(s.width(), s.height());
     } else {
-        return pos + port->centerPoint();
+        QSizeF s = 0.5 * QSizeF(port->size());
+        return pos + QPointF(s.width(), s.height());
     }
 }
 

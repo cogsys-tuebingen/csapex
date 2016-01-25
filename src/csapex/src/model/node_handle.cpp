@@ -631,7 +631,7 @@ Input* NodeHandle::getInput(const UUID& uuid) const
 
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
-        return graph->getForwardedInput(uuid);
+        return graph->getForwardedInput(uuid).get();
     }
 
     return nullptr;
@@ -647,7 +647,7 @@ Output* NodeHandle::getOutput(const UUID& uuid) const
 
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
-        return graph->getForwardedOutput(uuid);
+        return graph->getForwardedOutput(uuid).get();
     }
 
     return nullptr;
@@ -775,4 +775,9 @@ void NodeHandle::disconnectConnector(Connectable* c)
         connection.disconnect();
     }
     connections_[c].clear();
+}
+
+UUIDProvider* NodeHandle::getUUIDProvider()
+{
+    return uuid_provider_;
 }

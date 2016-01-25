@@ -638,7 +638,7 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const ConnectionTypeConstPtr& ty
                                                 const std::string& label, bool optional)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relay_out");
-    UUID external_uuid = generateDerivedUUID(getUUID(), "in");
+    UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "in");
 
     return addForwardingInput(internal_uuid, external_uuid, type, label, optional);
 }
@@ -647,6 +647,9 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
                                                 const ConnectionTypeConstPtr& type,
                                                 const std::string& label, bool optional)
 {
+    registerUUID(internal_uuid);
+    node_handle_->getUUIDProvider()->registerUUID(external_uuid);
+
     InputPtr external_input = std::make_shared<Input>(external_uuid);
     external_input->setLabel(label);
     external_input->setOptional(optional);
@@ -664,6 +667,8 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
 
     relay_to_external_input_[internal_uuid] = internal_uuid;
 
+    forwardingAdded(relay);
+
     return {external_uuid, internal_uuid};
 }
 
@@ -671,7 +676,7 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const ConnectionTypeConstPtr& t
                                                  const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relay_in");
-    UUID external_uuid = generateDerivedUUID(getUUID(), "out");
+    UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "out");
 
     return addForwardingOutput(internal_uuid, external_uuid, type, label);
 }
@@ -680,6 +685,9 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
                                                  const ConnectionTypeConstPtr& type,
                                                  const std::string& label)
 {
+    registerUUID(internal_uuid);
+    node_handle_->getUUIDProvider()->registerUUID(external_uuid);
+
     OutputPtr external_output = std::make_shared<StaticOutput>(external_uuid);
     external_output->setLabel(label);
     external_output->setType(type);
@@ -696,6 +704,8 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
 
     relay_to_external_output_[internal_uuid] = external_uuid;
 
+    forwardingAdded(relay);
+
     relay->messageArrived.connect([this, external_output, relay](Connectable*) {
         msg::publish(external_output.get(), relay->getMessage());
     });
@@ -703,14 +713,31 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
     return {external_uuid, internal_uuid};
 }
 
-Input* Graph::getForwardedInput(const UUID &internal_uuid) const
+InputPtr Graph::getForwardedInput(const UUID &internal_uuid) const
 {
-    return transition_relay_in_->getInput(internal_uuid).get();
+    return transition_relay_in_->getInput(internal_uuid);
 }
 
-Output* Graph::getForwardedOutput(const UUID &internal_uuid) const
+OutputPtr Graph::getForwardedOutput(const UUID &internal_uuid) const
 {
-    return transition_relay_out_->getOutput(internal_uuid).get();
+    return transition_relay_out_->getOutput(internal_uuid);
+}
+
+std::vector<UUID> Graph::getRelayOutputs() const
+{
+    std::vector<UUID> res;
+    for(const auto& pair : forward_inputs_) {
+        res.push_back(pair.second->getUUID());
+    }
+    return res;
+}
+std::vector<UUID> Graph::getRelayInputs() const
+{
+    std::vector<UUID> res;
+    for(const auto& pair : forward_outputs_) {
+        res.push_back(pair.second->getUUID());
+    }
+    return res;
 }
 
 void Graph::outputActivation()

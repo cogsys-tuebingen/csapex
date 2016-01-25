@@ -44,6 +44,7 @@
 #include <csapex/view/widgets/movable_graphics_proxy_widget.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/widgets/profiling_widget.h>
+#include <csapex/view/widgets/port_panel.h>
 
 /// SYSTEM
 #include <iostream>
@@ -129,6 +130,12 @@ GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph_facade,
         apex_assert_hard(nw);
         nodeAdded(nw);
     }
+
+    relayed_outputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::OUTPUT, scene_);
+    relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
+
+    relayed_inputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::INPUT, scene_);
+    relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
 }
 
 GraphView::~GraphView()
@@ -141,6 +148,27 @@ GraphView::~GraphView()
 
 void GraphView::paintEvent(QPaintEvent *e)
 {
+
+    QPointF tl_view = mapToScene(QPoint(0, 0));
+    QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
+
+    QPointF mid = 0.5 * (tl_view + br_view);
+
+    {
+        QPointF pos(tl_view.x(),
+                   mid.y() - relayed_outputs_widget_->height() / 2.0);
+        if(pos != relayed_outputs_widget_proxy_->pos()) {
+            relayed_outputs_widget_proxy_->setPos(pos);
+        }
+    }
+    {
+        QPointF pos(br_view.x()-relayed_inputs_widget_->width(),
+                   mid.y() - relayed_inputs_widget_->height() / 2.0);
+        if(pos != relayed_inputs_widget_proxy_->pos()) {
+            relayed_inputs_widget_proxy_->setPos(pos);
+        }
+    }
+
     QGraphicsView::paintEvent(e);
 
     Q_EMIT viewChanged();
@@ -874,6 +902,9 @@ void GraphView::overwriteStyleSheet(const QString &stylesheet)
     for (NodeBox *box : boxes_) {
         box->setStyleSheet(stylesheet);
     }
+
+    relayed_outputs_widget_->setStyleSheet(stylesheet);
+    relayed_inputs_widget_->setStyleSheet(stylesheet);
 }
 
 void GraphView::updateBoxInformation()

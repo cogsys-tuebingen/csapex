@@ -368,17 +368,5 @@ void Port::mousePressEvent(QMouseEvent* e)
     buttons_down_ = e->buttons();
 }
 
-
-QPoint Port::topLeft()
-{
-    QWidget* parent = parentWidget();
-    return mapTo(parent,  QPoint(0,0));
-}
-
-QPoint Port::centerPoint()
-{
-    QPoint offset = 0.5 * (geometry().bottomRight() - geometry().topLeft());
-    return topLeft() + offset;
-}
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_port.cpp"

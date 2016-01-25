@@ -97,6 +97,8 @@ public:
 
     void triggerNodeStateChanged();
 
+    UUIDProvider* getUUIDProvider();
+
 public:
     // TODO: get rid of
     void updateParameterValue(Connectable* source);

@@ -23,6 +23,7 @@ FWD(NodeAdapterBuilder);
 FWD(NodeAdapterFactory);
 FWD(Port);
 
+class PortPanel;
 
 class Designer;
 class DesignerOptions;

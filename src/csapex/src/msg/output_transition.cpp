@@ -38,6 +38,8 @@ OutputPtr OutputTransition::getOutput(const UUID& id) const
 
 void OutputTransition::addOutput(OutputPtr output)
 {
+    output->setSequenceNumber(sequence_number_);
+
     // remember the output
     outputs_[output->getUUID()] = output;
 

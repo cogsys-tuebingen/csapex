@@ -99,13 +99,16 @@ public:
     std::pair<UUID, UUID> addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
     std::pair<UUID, UUID> addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);
 
-    Input* getForwardedInput(const UUID& internal_uuid) const;
-    Output* getForwardedOutput(const UUID& internal_uuid) const;
+    InputPtr getForwardedInput(const UUID& internal_uuid) const;
+    OutputPtr getForwardedOutput(const UUID& internal_uuid) const;
+
+    std::vector<UUID> getRelayOutputs() const;
+    std::vector<UUID> getRelayInputs() const;
 
 private:
-    std::pair<UUID, UUID> addForwardingInput(const UUID& uuid, const UUID &external_uuid, const ConnectionTypeConstPtr& type,
+    std::pair<UUID, UUID> addForwardingInput(const UUID& internal_uuid, const UUID &external_uuid, const ConnectionTypeConstPtr& type,
                                              const std::string& label, bool optional);
-    std::pair<UUID, UUID> addForwardingOutput(const UUID& uuid, const UUID& external_uuid, const ConnectionTypeConstPtr& type,
+    std::pair<UUID, UUID> addForwardingOutput(const UUID& internal_uuid, const UUID& external_uuid, const ConnectionTypeConstPtr& type,
                                               const std::string& label);
 
    /*rename*/ void verify();
@@ -123,6 +126,9 @@ public:
 
     csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeAdded;
     csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeRemoved;
+
+    csapex::slim_signal::Signal<void(ConnectablePtr)> forwardingAdded;
+    csapex::slim_signal::Signal<void(ConnectablePtr)> forwardingRemoved;
 
 protected:
     std::vector<NodeHandlePtr> nodes_;

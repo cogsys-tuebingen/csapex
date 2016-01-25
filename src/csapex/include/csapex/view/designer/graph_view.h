@@ -173,6 +173,11 @@ private:
     CommandDispatcher* dispatcher_;
     DragIO& drag_io_;
 
+    PortPanel* relayed_inputs_widget_;
+    QGraphicsProxyWidget* relayed_inputs_widget_proxy_;
+    PortPanel* relayed_outputs_widget_;
+    QGraphicsProxyWidget* relayed_outputs_widget_proxy_;
+
     std::map<NodeWorker*, std::vector<csapex::slim_signal::ScopedConnection>> worker_connections_;
     std::map<NodeHandle*, std::vector<csapex::slim_signal::ScopedConnection>> handle_connections_;
     std::vector<csapex::slim_signal::ScopedConnection> scoped_connections_;

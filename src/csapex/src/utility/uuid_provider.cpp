@@ -6,6 +6,7 @@
 
 /// SYSTEM
 #include <sstream>
+#include <iostream>
 
 using namespace csapex;
 
@@ -48,21 +49,26 @@ void UUIDProvider::registerUUID(const UUID& id)
 {
     std::unique_lock<std::recursive_mutex > lock(hash_mutex_);
     apex_assert_hard(!id.representation_.empty());
-    hash_[id.representation_.front()]++;
+    hash_[id.getFullName()]++;
+}
+
+bool UUIDProvider::exists(const UUID &uuid)
+{
+     return hash_.find(uuid.getFullName()) != hash_.end();
 }
 
 UUID UUIDProvider::generateUUID(const std::string &prefix)
 {
     std::unique_lock<std::recursive_mutex > lock(hash_mutex_);
 
-    std::string name = generateNextName(prefix);
-
+    UUID r;
     // ensure uniqueness
-    while(hash_.find(name) != hash_.end()) {
-        name = generateNextName(prefix);
-    }
+    do {
+        std::string name = generateNextName(prefix);
+        r = UUID(this, name);
 
-    UUID r(this, name);
+    } while(exists(r));
+
     registerUUID(r);
     return r;
 }
@@ -78,9 +84,12 @@ UUID UUIDProvider::generateDerivedUUID(const UUID &parent, const std::string &pr
 
     std::unique_lock<std::recursive_mutex > lock(hash_mutex_);
 
-    std::string name = generateNextSubName(parent, prefix);
+    UUID r;
+    do {
+        std::string name = generateNextSubName(parent, prefix);
+        r = UUID (this, parent.getFullName() + UUID::namespace_separator + name);
+    } while(exists(r));
 
-    UUID r(this, parent.getFullName() + UUID::namespace_separator + name);
     registerUUID(r);
     return r;
 
@@ -100,7 +109,7 @@ void UUIDProvider::free(const UUID &uuid)
     std::unique_lock<std::recursive_mutex > lock(hash_mutex_);
 
     apex_assert_hard(!uuid.representation_.empty());;
-    std::map<std::string, int>::iterator it = hash_.find(uuid.representation_.front());
+    std::map<std::string, int>::iterator it = hash_.find(uuid.getFullName());
     if(it != hash_.end()) {
         hash_.erase(it);
     }

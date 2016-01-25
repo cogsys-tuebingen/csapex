@@ -483,8 +483,8 @@ void NodeWorker::updateTransitionConnections()
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     if(state_ == State::IDLE || state_ == State::ENABLED) {
-//        node_handle_->getInputTransition()->updateConnections();
-//        node_handle_->getOutputTransition()->updateConnections();
+        node_handle_->getInputTransition()->updateConnections();
+        node_handle_->getOutputTransition()->updateConnections();
     }
 }
 

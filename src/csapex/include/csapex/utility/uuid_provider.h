@@ -34,6 +34,7 @@ public:
 
 
     void registerUUID(const UUID& uuid);
+    bool exists(const UUID& uuid);
 
     std::map<std::string, int> getUUIDMap() const;
 
