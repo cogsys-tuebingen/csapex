@@ -1139,7 +1139,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
         QCheckBox* box = new QCheckBox;
         box->setChecked(value_p->as<bool>());
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p), value_p.get()));
 
         // ui change -> model
         qt_helper::Call* call = makeModelCall(std::bind(&model_updateBoolValueParameter, value_p, box));
@@ -1156,7 +1156,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
         box->setMinimum(-1e12);
         box->setValue(value_p->as<double>());
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p), value_p.get()));
 
         // ui change -> model
         qt_helper::Call* call = makeModelCall(std::bind(&model_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
@@ -1171,7 +1171,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
         box->setMinimum(std::numeric_limits<int>::min());
         box->setValue(value_p->as<int>());
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p)));
+        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p),  value_p.get()));
 
         // ui change -> model
         qt_helper::Call* call = makeModelCall(std::bind(&model_updateValueParameter<int, QSpinBox>, value_p, box));

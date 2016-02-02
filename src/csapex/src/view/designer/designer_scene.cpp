@@ -1119,14 +1119,17 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
             text += QString::number(c->getCount());
 
         } else {
-            text = c->getLabel().c_str();
+            text = QString::fromStdString(c->getLabel());
 
             if(is_message) {
-                if(text.length() != 0) {
-                    text += "\n";
+                QString descr = QString::fromStdString(c->getType()->descriptiveName());
+                if(!descr.isEmpty()) {
+                    if(text.length() != 0) {
+                        text += "\n";
+                    }
+                    text += descr + " "; // TODO: why does the space somehow fix the qt render error???
+                    ++lines;
                 }
-                text += c->getType()->descriptiveName().c_str();
-                ++lines;
             }
         }
 
@@ -1146,7 +1149,7 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
         } else {
             bool bottom = c->isOutput();
             rect = QRectF(pos + QPointF(-dx/2.0, bottom ? connector_radius_ : -connector_radius_-dy), QSize(dx, dy));
-            opt = QTextOption(Qt::AlignVCenter | Qt::AlignCenter);
+            opt = QTextOption(Qt::AlignHCenter);
         }
 
         QColor color = style_->lineColor();

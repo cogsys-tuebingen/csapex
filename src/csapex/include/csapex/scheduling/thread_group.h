@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/scheduling/scheduler.h>
+#include <csapex/scheduling/task.h>
 #include <csapex/core/core_fwd.h>
 
 /// SYSTEM
@@ -12,6 +13,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <deque>
+#include <set>
 
 namespace csapex
 {
@@ -86,7 +88,14 @@ private:
     std::condition_variable_any pause_changed_;
 
     std::recursive_mutex tasks_mtx_;
-    std::deque<TaskPtr> tasks_;
+    struct greater
+    {
+        bool operator () (const TaskPtr& a, const TaskPtr& b) {
+            return a->getPriority() > b->getPriority();
+        }
+    };
+
+    std::multiset<TaskPtr, greater> tasks_;
 
     std::recursive_mutex state_mtx_;
     std::atomic<bool> running_;

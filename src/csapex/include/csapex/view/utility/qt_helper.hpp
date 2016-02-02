@@ -13,6 +13,7 @@
 #include <csapex/view/widgets/qint_slider.h>
 #include <csapex/view/utility/qwrapper.h>
 #include <csapex/view/utility/context_menu_handler.h>
+#include <csapex/param/param_fwd.h>
 
 /// SYSTEM
 #include <QBoxLayout>
@@ -33,10 +34,12 @@ public:
     static QWidget* wrapLayout(QBoxLayout *l, QWidget *parent = 0);
 
     static QHBoxLayout* wrap(const std::string& label, QWidget* widget,
-                             csapex::ContextMenuHandler *context_handler = 0);
+                             csapex::ContextMenuHandler *context_handler = nullptr,
+                             csapex::param::Parameter* p = nullptr);
 
     static QHBoxLayout* wrap(const std::string& label, QLayout* layout,
-                             csapex::ContextMenuHandler *context_handler = 0);
+                             csapex::ContextMenuHandler *context_handler = nullptr,
+                             csapex::param::Parameter* p = nullptr);
 
     static void clearLayout(QLayout* layout);
 };

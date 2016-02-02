@@ -107,6 +107,11 @@ UUID NodeWorker::getUUID() const
     return node_handle_->getUUID();
 }
 
+long NodeWorker::getSequenceNumber() const
+{
+    return node_handle_->getOutputTransition()->getSequenceNumber();
+}
+
 NodePtr NodeWorker::getNode() const
 {
     return node_handle_->getNode().lock();

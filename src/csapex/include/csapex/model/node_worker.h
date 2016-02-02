@@ -47,6 +47,8 @@ public:
     NodePtr getNode() const;
     UUID getUUID() const;
 
+    long getSequenceNumber() const;
+
     void reset();
 
     void triggerCheckTransitions();

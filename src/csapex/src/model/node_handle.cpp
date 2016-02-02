@@ -226,9 +226,11 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
     apex_assert_hard(uuid_provider_);
     csapex::param::Parameter* p = param.get();
 
-    if(param_2_input_.find(p->name()) != param_2_input_.end()) {
+    auto pos = param_2_input_.find(p->name());
+    if(pos != param_2_input_.end() && pos->second.lock()) {
         return;
     }
+
 
     {
         InputPtr cin = std::make_shared<Input>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("in_") + p->name()));
@@ -236,24 +238,20 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
         cin->setOptional(true);
         cin->setLabel(p->name());
 
-        addInput(cin);
-
         param_2_input_[p->name()] = cin;
         input_2_param_[cin.get()] = p;
+
+        addInput(cin);
     }
     {
         OutputPtr cout = std::make_shared<StaticOutput>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("out_") + p->name()));
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cout->setLabel(p->name());
 
-//        if(getState() == State::PROCESSING) {
-//            cout->startReceiving();
-//        }
-
-        addOutput(cout);
-
         param_2_output_[p->name()] = cout;
         output_2_param_[cout.get()] = p;
+
+        addOutput(cout);
     }
 }
 
@@ -284,8 +282,15 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
 
 void NodeHandle::makeParameterNotConnectable(csapex::param::ParameterPtr p)
 {
-    InputPtr cin_ptr = param_2_input_[p->name()].lock();
-    OutputPtr cout_ptr = param_2_output_[p->name()].lock();
+    auto pin = param_2_input_.find(p->name());
+    auto pout = param_2_output_.find(p->name());
+
+    if(pin == param_2_input_.end() || pout == param_2_output_.end()) {
+        return;
+    }
+
+    InputPtr cin_ptr = pin->second.lock();
+    OutputPtr cout_ptr = pout->second.lock();
 
     Input* cin = cin_ptr.get();
     Output* cout = cout_ptr.get();
@@ -549,7 +554,7 @@ void NodeHandle::addOutput(OutputPtr out)
 
 bool NodeHandle::isParameterInput(Input *in) const
 {
-    return input_2_param_.find(in) != input_2_param_.end();
+    return  input_2_param_.find(in) != input_2_param_.end();
 }
 
 bool NodeHandle::isParameterOutput(Output *out) const
@@ -608,9 +613,9 @@ Connectable* NodeHandle::getConnector(const UUID &uuid) const
 {
     std::string type = uuid.type();
 
-    if(type == "in" || type == "relay_in") {
+    if(type == "in" || type == "relayin") {
         return getInput(uuid);
-    } else if(type == "out" || type == "relay_out") {
+    } else if(type == "out" || type == "relayout") {
         return getOutput(uuid);
     } else if(type == "slot") {
         return getSlot(uuid);

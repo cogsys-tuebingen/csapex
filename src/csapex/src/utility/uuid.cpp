@@ -175,7 +175,7 @@ std::string UUID::id() const
 std::string UUID::type() const
 {
     std::string t = id();
-    return t.substr(0, t.rfind("_"));
+    return t.substr(0, t.find("_"));
 }
 
 namespace csapex

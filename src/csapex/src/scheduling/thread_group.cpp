@@ -243,7 +243,7 @@ void ThreadGroup::schedule(TaskPtr task)
         }
     }
 
-    tasks_.push_back(task);
+    tasks_.insert(task);
 
     work_available_.notify_all();
 }
@@ -305,8 +305,8 @@ bool ThreadGroup::executeNextTask()
 {
     std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
     if(!tasks_.empty()) {
-        auto task = tasks_.front();
-        tasks_.pop_front();
+        auto task = *tasks_.begin();
+        tasks_.erase(tasks_.begin());
 
         tasks_lock.unlock();
 

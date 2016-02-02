@@ -23,7 +23,8 @@ QWidget* QtHelper::wrapLayout(QBoxLayout *l, QWidget *parent)
 }
 
 QHBoxLayout* QtHelper::wrap(const std::string& txt, QWidget* widget,
-                            csapex::ContextMenuHandler *context_handler) {
+                            csapex::ContextMenuHandler *context_handler,
+                            csapex::param::Parameter* p) {
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
@@ -36,11 +37,19 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QWidget* widget,
     internal_layout->addWidget(label);
     internal_layout->addWidget(widget);
 
+    if(p) {
+        for(int i = 0; i < internal_layout->count(); ++i) {
+            QWidget* child = internal_layout->itemAt(i)->widget();
+            child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(p))));
+        }
+    }
+
     return internal_layout;
 }
 
 QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout,
-                            csapex::ContextMenuHandler *context_handler ) {
+                            csapex::ContextMenuHandler *context_handler,
+                            csapex::param::Parameter* p) {
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
@@ -52,6 +61,13 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout,
     }
     internal_layout->addWidget(label);
     internal_layout->addLayout(layout);
+
+    if(p) {
+        for(int i = 0; i < internal_layout->count(); ++i) {
+            QWidget* child = internal_layout->itemAt(i)->widget();
+            child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(p))));
+        }
+    }
 
     return internal_layout;
 }

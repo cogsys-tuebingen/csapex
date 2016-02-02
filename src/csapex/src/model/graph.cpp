@@ -637,7 +637,7 @@ bool Graph::isAsynchronous() const
 std::pair<UUID, UUID> Graph::addForwardingInput(const ConnectionTypeConstPtr& type,
                                                 const std::string& label, bool optional)
 {
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relay_out");
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relayout");
     UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "in");
 
     return addForwardingInput(internal_uuid, external_uuid, type, label, optional);
@@ -675,7 +675,7 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
 std::pair<UUID, UUID> Graph::addForwardingOutput(const ConnectionTypeConstPtr& type,
                                                  const std::string& label)
 {
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relay_in");
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
     UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "out");
 
     return addForwardingOutput(internal_uuid, external_uuid, type, label);
