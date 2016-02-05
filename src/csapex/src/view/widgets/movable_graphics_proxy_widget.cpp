@@ -65,7 +65,7 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
         setZValue(nextz++);
     }
 
-    bool do_relay = !ctrl && child && child->objectName() != "boxframe" &&
+    bool do_relay = child && child->objectName() != "boxframe" &&
             (child->parent()->objectName() != "boxframe" || strcmp(child->metaObject()->className(), "QFrame")) &&
             (child->parent()->objectName() != "header_frame" || strcmp(child->metaObject()->className(), "QLabel"));
 

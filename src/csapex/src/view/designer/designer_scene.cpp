@@ -144,7 +144,7 @@ void DesignerScene::enableGrid(bool draw)
     if(draw != draw_grid_) {
         draw_grid_ = draw;
 
-        update();
+        invalidate();
     }
 }
 
@@ -152,7 +152,8 @@ void DesignerScene::enableSchema(bool draw)
 {
     if(draw != draw_schema_) {
         draw_schema_ = draw;
-        update();
+
+        invalidate();
     }
 }
 
@@ -161,7 +162,9 @@ void DesignerScene::displayMessages(bool display)
     if(display != display_messages_) {
         display_messages_ = display;
 
-        update();
+        connection_bb_.clear();
+
+        invalidate();
     }
 }
 
@@ -170,7 +173,7 @@ void DesignerScene::enableDebug(bool debug)
     if(debug != debug_) {
         debug_ = debug;
 
-        update();
+        invalidate();
     }
 }
 
@@ -180,7 +183,9 @@ void DesignerScene::displaySignals(bool display)
     if(display != display_signals_) {
         display_signals_ = display;
 
-        update();
+        connection_bb_.clear();
+
+        invalidate();
     }
 }
 
@@ -869,6 +874,10 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     double scale_factor = 1.0 / scale_;
     if(scale_factor < 1.0) {
         scale_factor = 1.0;
+    }
+
+    if(ccs.type == ConnectionType::SIG) {
+        scale_factor *= 0.5;
     }
 
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;

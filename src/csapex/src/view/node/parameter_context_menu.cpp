@@ -18,6 +18,11 @@ ParameterContextMenu::ParameterContextMenu(csapex::param::ParameterWeakPtr p)
 
 }
 
+void ParameterContextMenu::addAction(QAction *action, const std::function<void()>& callback)
+{
+    actions_[action] = callback;
+}
+
 void ParameterContextMenu::doShowContextMenu(const QPoint& pt)
 {
     auto param = param_.lock();
@@ -42,6 +47,14 @@ void ParameterContextMenu::doShowContextMenu(const QPoint& pt)
     QMenu menu;
     ContextMenuHandler::addHeader(menu, std::string("Parameter: ") + param->name());
 
+    if(!actions_.empty()) {
+        for(auto pair : actions_) {
+            menu.addAction(pair.first);
+        }
+
+        menu.addSeparator();
+    }
+
     QAction* connectable = new QAction("connectable", &menu);
     connectable->setCheckable(true);
     connectable->setChecked(param->isInteractive());
@@ -54,6 +67,8 @@ void ParameterContextMenu::doShowContextMenu(const QPoint& pt)
     if (selectedItem) {
         if(selectedItem == connectable) {
             param->setInteractive(!param->isInteractive());
+        } else {
+            actions_[selectedItem]();
         }
     }
 }

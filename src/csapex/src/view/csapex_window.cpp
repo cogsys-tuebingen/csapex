@@ -46,6 +46,7 @@
 #include <QShortcut>
 #include <QMimeData>
 #include <QClipboard>
+#include <QTextCodec>
 
 using namespace csapex;
 
@@ -63,6 +64,9 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
     qRegisterMetaType < ConnectionType::Ptr > ("ConnectionType::Ptr");
     qRegisterMetaType < ConnectionType::ConstPtr > ("ConnectionType::ConstPtr");
     qRegisterMetaType < std::string > ("std::string");
+
+    QTextCodec *utfCodec = QTextCodec::codecForName("UTF-8");
+    QTextCodec::setCodecForLocale(utfCodec);
 
     MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 }

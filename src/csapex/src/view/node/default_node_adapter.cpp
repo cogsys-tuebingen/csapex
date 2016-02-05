@@ -1315,8 +1315,24 @@ void DefaultNodeAdapter::setupParameter(param::AngleParameterPtr angle_p)
     QLabel* label = new QLabel(angle_p->name().c_str());
 
     ParameterContextMenu* context_handler = new ParameterContextMenu(angle_p);
-    label->setContextMenuPolicy(Qt::CustomContextMenu);
+    context_handler->addAction(new QAction("set -π", context_handler), [angle_p](){
+        angle_p->set(-M_PI);
+    });
+    context_handler->addAction(new QAction("set -π/2", context_handler), [angle_p](){
+        angle_p->set(-M_PI_2);
+    });
+    context_handler->addAction(new QAction("set 0", context_handler), [angle_p](){
+        angle_p->set(0.0);
+    });
+    context_handler->addAction(new QAction("set +π/2", context_handler), [angle_p](){
+        angle_p->set(M_PI_2);
+    });
+    context_handler->addAction(new QAction("set +π", context_handler), [angle_p](){
+        angle_p->set(M_PI-1e-9);
+    });
     context_handler->setParent(label);
+
+    label->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
 
     current_layout_->addWidget(label);
@@ -1326,6 +1342,9 @@ void DefaultNodeAdapter::setupParameter(param::AngleParameterPtr angle_p)
     dial->setMaximum(360.0 * 4);
     dial->setWrapping(true);
     dial->setValue(angleToDial(angle_p->as<double>()));
+
+    dial->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(dial, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
 
     current_layout_->addWidget(dial);
 

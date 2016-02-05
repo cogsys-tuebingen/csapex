@@ -6,6 +6,10 @@
 
 /// PROJECT
 #include <csapex/param/param_fwd.h>
+#include <csapex/utility/delegate.h>
+
+/// SYSTEM
+#include <functional>
 
 namespace csapex
 {
@@ -17,8 +21,12 @@ public:
 
     void doShowContextMenu(const QPoint& pt);
 
+    void addAction(QAction* action, const std::function<void()>& callback);
+
 private:
     csapex::param::ParameterWeakPtr param_;
+
+    std::map<QAction*, std::function<void()>> actions_;
 };
 }
 

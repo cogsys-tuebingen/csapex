@@ -196,6 +196,8 @@ void Transition::connectionRemoved(Connection *connection)
         c.disconnect();
     }
     signal_connections_.erase(connection);
+
+    checkIfEnabled();
 }
 
 void Transition::trackConnection(Connection *connection, const csapex::slim_signal::Connection &c)

@@ -29,11 +29,15 @@ SignalConnection::SignalConnection(Trigger *from, Slot *to)
     : Connection(from, to)
 {
     from->connect(to);
+    establishSource();
+    establishSink();
 }
 
 SignalConnection::SignalConnection(Trigger *from, Slot *to, int /*id*/)
     : Connection(from, to)
 {
     from->connect(to);
+    establishSource();
+    establishSink();
 }
 

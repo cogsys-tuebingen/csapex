@@ -10,6 +10,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
+#include <csapex/msg/input_transition.h>
+#include <csapex/msg/output_transition.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/view/node/node_adapter.h>
@@ -525,8 +527,20 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         return;
     }
     QString state = getNodeState();
-    info_exec->setText(QString("<img src=\":/node_") + state + ".png\" /> ");
-    info_exec->setToolTip(state);
+
+    QString transition_state;
+    if(worker) {
+        NodeHandlePtr handle = worker->getNodeHandle();
+        OutputTransition* ot = handle->getOutputTransition();
+        InputTransition* it = handle->getInputTransition();
+
+        transition_state += ", it: ";
+        transition_state += it->isEnabled() ? "enabled" : "disabled";
+        transition_state += ", ot: ";
+        transition_state += ot->isEnabled() ? "enabled" : "disabled";
+    }
+    info_exec->setText(QString("<img src=\":/node_") + state + ".png\" />");
+    info_exec->setToolTip(state + transition_state);
 
     bool is_error = false;
     bool is_warn = false;
@@ -770,10 +784,10 @@ GraphFacade* NodeBox::getSubGraph() const
         NodePtr node = nh->getNode().lock();
         if(node) {
             return parent_->getGraphFacade()->getSubGraph(node->getUUID());
-//            Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(node);
-//            if(graph) {
-//                return graph;
-//            }
+            //            Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(node);
+            //            if(graph) {
+            //                return graph;
+            //            }
         }
     }
 

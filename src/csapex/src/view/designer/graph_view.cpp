@@ -402,10 +402,9 @@ void GraphView::mouseMoveEvent(QMouseEvent *e)
 
 void GraphView::wheelEvent(QWheelEvent *we)
 {
-    bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
     bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
 
-    if(shift || ctrl) {
+    if(ctrl) {
         if(scene_->isEmpty()) {
             resetZoom();
             return;
@@ -413,7 +412,7 @@ void GraphView::wheelEvent(QWheelEvent *we)
 
         we->accept();
 
-        int scaleFactor = shift ? 1 : 4;
+        int scaleFactor = 4;
         int direction = (we->delta() > 0) ? 1 : -1;
 
         //        if((direction > 0) != (scalings_to_perform_ > 0)) {

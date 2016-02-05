@@ -414,16 +414,16 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     std::string from_uuid_tmp = fulcrum["from"].as<std::string>();
     std::string to_uuid_tmp = fulcrum["to"].as<std::string>();
 
-    UUID from_uuid = graph_->makeUUID(from_uuid_tmp);
-    UUID to_uuid = graph_->makeUUID(to_uuid_tmp);
+    UUID from_uuid = graph_->makeUUID_forced(from_uuid_tmp);
+    UUID to_uuid = graph_->makeUUID_forced(to_uuid_tmp);
 
-    Output* from = graph_->findConnector<Output>(from_uuid);
+    Connectable* from = graph_->findConnector(from_uuid);
     if(from == nullptr) {
         std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
         return;
     }
 
-    Input* to = graph_->findConnector<Input>(to_uuid);
+    Connectable* to = graph_->findConnector(to_uuid);
     if(to == nullptr) {
         std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
         return;

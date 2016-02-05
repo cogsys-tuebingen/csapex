@@ -79,8 +79,6 @@ void ThreadGroup::setPause(bool pause)
 
 void ThreadGroup::setSteppingMode(bool stepping)
 {
-    std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
-
     if(stepping != stepping_) {
         stepping_ = stepping;
     }

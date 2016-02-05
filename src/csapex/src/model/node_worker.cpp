@@ -67,6 +67,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
         triggerCheckTransitions();
     }));
 
+    handle_connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
+        setProcessingEnabled(isProcessingEnabled());
+    }));
+
     for(const auto& c : node_handle_->getAllConnectors()) {
         connectConnector(c.get());
     }
@@ -281,6 +285,7 @@ void NodeWorker::startProcessingMessages()
     setState(State::FIRED);
 
     if(!isProcessingEnabled()) {
+        finishProcessingMessages(true);
         return;
     }
 
@@ -611,10 +616,8 @@ bool NodeWorker::tick()
     auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
     apex_assert_hard(tickable);
 
-    {
-        if(!isProcessingEnabled()) {
-            return false;
-        }
+    if(!isProcessingEnabled()) {
+        return false;
     }
 
     bool has_ticked = false;
