@@ -49,6 +49,8 @@ bool SetColor::doUndo()
     apex_assert_hard(node_handle);
 
     node_handle->getNodeState()->setColor(r_orig, g_orig, b_orig);
+
+    return true;
 }
 
 bool SetColor::doRedo()
