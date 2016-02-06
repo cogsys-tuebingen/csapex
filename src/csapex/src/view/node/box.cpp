@@ -761,7 +761,7 @@ void NodeBox::updateVisuals()
     int r, g, b;
     state->getColor(r, g, b);
 
-    QString style = parent_->styleSheet();
+    QString style = parent_ ? parent_->styleSheet() : styleSheet();
 
     if(r >= 0 && g >= 0 && b >= 0) {
         QColor background(r,g,b);

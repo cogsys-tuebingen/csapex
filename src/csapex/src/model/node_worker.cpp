@@ -430,6 +430,10 @@ void NodeWorker::finishProcessingMessages(bool was_executed)
 
         messages_processed();
     }
+
+    if(was_executed) {
+        triggerCheckTransitions();
+    }
 }
 
 bool NodeWorker::areAllInputsAvailable() const

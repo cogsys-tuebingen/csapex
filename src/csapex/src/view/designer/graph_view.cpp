@@ -566,20 +566,28 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
     NodeBox* box = nullptr;
 
-    if(type == "csapex::Note") {
+    bool is_note = type == "csapex::Note";
+
+    if(is_note) {
         box = new NoteBox(settings_, handle,
                           QIcon(QString::fromStdString(c->getIcon())));
 
     } else {
         box = new NodeBox(settings_, handle,
                           QIcon(QString::fromStdString(c->getIcon())));
-        box->setLabel(type);
     }
     box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));
 
+    if(state) {
+        handle->setNodeState(state);
+    }
     box->setStyleSheet(styleSheet());
     box->construct();
     box->setObjectName(handle->getType().c_str());
+
+    if(!is_note) {
+        box->setLabel(type);
+    }
 
     drag->setPixmap(box->grab());
     drag->setHotSpot(-offset);
