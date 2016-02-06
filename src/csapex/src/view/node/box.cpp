@@ -487,7 +487,7 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
 
 void NodeBox::enabledChangeEvent(bool val)
 {
-    ui->boxframe->setProperty("disabled", !val);
+    setProperty("disabled", !val);
 
     ui->enablebtn->blockSignals(true);
     ui->enablebtn->setChecked(val);
@@ -552,8 +552,8 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     bool error_change = ui->boxframe->property("error").toBool() != is_error;
     bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;
 
-    ui->boxframe->setProperty("error", is_error);
-    ui->boxframe->setProperty("warning", is_warn);
+    setProperty("error", is_error);
+    setProperty("warning", is_warn);
 
     if(error_change || warning_change) {
         if(is_error) {
@@ -605,7 +605,7 @@ void NodeBox::triggerPlaced()
 
 void NodeBox::setSelected(bool selected)
 {
-    ui->boxframe->setProperty("focused",selected);
+    setProperty("focused",selected);
     refreshStylesheet();
 }
 
@@ -628,9 +628,17 @@ void NodeBox::getInformation()
 void NodeBox::refreshStylesheet()
 {
     apex_assert_hard(QThread::currentThread() == QApplication::instance()->thread());
-    ui->boxframe->style()->unpolish(ui->boxframe);
-    ui->boxframe->style()->polish(ui->boxframe);
-    ui->boxframe->update();
+    for(auto* child : children()) {
+        if(QWidget* widget = dynamic_cast<QWidget*>(child)) {
+            widget->style()->unpolish(widget);
+            widget->style()->polish(widget);
+            widget->update();
+        }
+    }
+
+    style()->unpolish(this);
+    style()->polish(this);
+    update();
 }
 
 void NodeBox::showProfiling(bool show)
@@ -683,6 +691,7 @@ void NodeBox::updateVisuals()
     NodeStatePtr state = nh->getNodeState();
     bool flip = state->isFlipped();
 
+
     if(grip_) {
         auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
         if(layout) {
@@ -694,7 +703,7 @@ void NodeBox::updateVisuals()
         }
     }
 
-    ui->boxframe->setProperty("flipped", flip);
+    setProperty("flipped", flip);
     ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
     ui->frame->setLayoutDirection(Qt::LeftToRight);
 
@@ -702,7 +711,7 @@ void NodeBox::updateVisuals()
     bool minimized = isMinimizedSize();
 
     if(minimized != flag_set) {
-        ui->boxframe->setProperty("content_minimized", minimized);
+        setProperty("content_minimized", minimized);
 
         if(minimized) {
             ui->frame->hide();
@@ -745,6 +754,50 @@ void NodeBox::updateVisuals()
         QApplication::processEvents();
         adjustSize();
     }
+
+
+    QColor text_color = Qt::black;
+
+    int r, g, b;
+    state->getColor(r, g, b);
+
+    QString style = parent_->styleSheet();
+
+    if(r >= 0 && g >= 0 && b >= 0) {
+        QColor background(r,g,b);
+
+        bool light = (background.lightness() > 128);
+
+        QColor border = light ? background.darker(160) : background.lighter(160);
+        QColor background_selected = light ? background.darker(140) : background.lighter(140);
+        QColor border_selected = light ? border.darker(140) : border.lighter(140);
+        text_color = light ? Qt::black: Qt::white;
+
+        style += "csapex--NodeBox QFrame#boxframe { ";
+        style += "background-color: rgb(" + QString::number(background.red()) + ", " +
+                QString::number(background.green()) + ", " +
+                QString::number(background.blue()) + ");";
+        style += "border-color: rgb(" + QString::number(border.red()) + ", " +
+                QString::number(border.green()) + ", " +
+                QString::number(border.blue()) + ");";
+        style += "}";
+        style += "csapex--NodeBox[focused=\"true\"] QFrame#boxframe { ";
+        style += "background-color: rgb(" + QString::number(background.red()) + ", " +
+                QString::number(background_selected.green()) + ", " +
+                QString::number(background_selected.blue()) + ");";
+        style += "border-color: rgb(" + QString::number(border.red()) + ", " +
+                QString::number(border_selected.green()) + ", " +
+                QString::number(border_selected.blue()) + ");";
+        style += "}";
+    }
+
+    style += "csapex--NodeBox QLabel, csapex--NodeBox QGroupBox { ";
+    style += "color: rgb(" + QString::number(text_color.red()) + ", " +
+            QString::number(text_color.green()) + ", " +
+            QString::number(text_color.blue()) + ") !important;";
+    style += "}";
+
+    setStyleSheet(style);
 
     refreshStylesheet();
 

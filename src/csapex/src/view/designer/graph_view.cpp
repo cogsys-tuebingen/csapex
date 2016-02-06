@@ -16,6 +16,7 @@
 #include <csapex/command/move_connection.h>
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/switch_thread.h>
+#include <csapex/command/set_color.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
@@ -33,6 +34,7 @@
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/view/node/box.h>
+#include <csapex/view/node/note_box.h>
 #include <csapex/view/node/default_node_adapter.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/node/node_adapter.h>
@@ -57,6 +59,7 @@
 #include <QScrollBar>
 #include <QDrag>
 #include <QMimeData>
+#include <QColorDialog>
 
 using namespace csapex;
 
@@ -156,14 +159,14 @@ void GraphView::paintEvent(QPaintEvent *e)
 
     {
         QPointF pos(tl_view.x(),
-                   mid.y() - relayed_outputs_widget_->height() / 2.0);
+                    mid.y() - relayed_outputs_widget_->height() / 2.0);
         if(pos != relayed_outputs_widget_proxy_->pos()) {
             relayed_outputs_widget_proxy_->setPos(pos);
         }
     }
     {
         QPointF pos(br_view.x()-relayed_inputs_widget_->width(),
-                   mid.y() - relayed_inputs_widget_->height() / 2.0);
+                    mid.y() - relayed_inputs_widget_->height() / 2.0);
         if(pos != relayed_inputs_widget_proxy_->pos()) {
             relayed_inputs_widget_proxy_->setPos(pos);
         }
@@ -561,18 +564,28 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
     mimeData->setProperty("oy", offset.y());
     drag->setMimeData(mimeData);
 
-    NodeBox::Ptr object(new NodeBox(settings_, handle,
-                                    QIcon(QString::fromStdString(c->getIcon()))));
-    object->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, object.get()));
+    NodeBox* box = nullptr;
 
-    object->setStyleSheet(styleSheet());
-    object->construct();
-    object->setObjectName(handle->getType().c_str());
-    object->setLabel(type);
+    if(type == "csapex::Note") {
+        box = new NoteBox(settings_, handle,
+                          QIcon(QString::fromStdString(c->getIcon())));
 
-    drag->setPixmap(object->grab());
+    } else {
+        box = new NodeBox(settings_, handle,
+                          QIcon(QString::fromStdString(c->getIcon())));
+        box->setLabel(type);
+    }
+    box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));
+
+    box->setStyleSheet(styleSheet());
+    box->construct();
+    box->setObjectName(handle->getType().c_str());
+
+    drag->setPixmap(box->grab());
     drag->setHotSpot(-offset);
     drag->exec();
+
+    delete box;
 }
 
 
@@ -582,7 +595,13 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     std::string type = node_handle->getType();
 
     QIcon icon = QIcon(QString::fromStdString(node_factory_.getConstructor(type)->getIcon()));
-    NodeBox* box = new NodeBox(settings_, node_handle, node_worker, icon, this);
+
+    NodeBox* box = nullptr;
+    if(type == "csapex::Note") {
+        box = new NoteBox(settings_, node_handle, node_worker, icon, this);
+    } else {
+        box = new NodeBox(settings_, node_handle, node_worker, icon, this);
+    }
 
     QObject::connect(box, SIGNAL(portAdded(Port*)), this, SLOT(addPort(Port*)));
     QObject::connect(box, SIGNAL(portRemoved(Port*)), this, SLOT(removePort(Port*)));
@@ -900,6 +919,7 @@ void GraphView::overwriteStyleSheet(const QString &stylesheet)
 
     for (NodeBox *box : boxes_) {
         box->setStyleSheet(stylesheet);
+        box->updateVisuals();
     }
 
     relayed_outputs_widget_->setStyleSheet(stylesheet);
@@ -921,33 +941,39 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 {
     QMenu menu;
 
-    QAction* q_copy = new QAction("copy", &menu);
-    q_copy->setIcon(QIcon(":/copy.png"));
-    q_copy->setEnabled(!getSelectedBoxes().empty());
-    menu.addAction(q_copy);
+    QAction q_copy("copy", &menu);
+    q_copy.setIcon(QIcon(":/copy.png"));
+    q_copy.setEnabled(!getSelectedBoxes().empty());
+    menu.addAction(&q_copy);
 
-    QAction* q_paste = new QAction("paste", &menu);
-    q_paste->setIcon(QIcon(":/paste.png"));
-    q_paste->setEnabled(ClipBoard::canPaste());
-    menu.addAction(q_paste);
+    QAction q_paste("paste", &menu);
+    q_paste.setIcon(QIcon(":/paste.png"));
+    q_paste.setEnabled(ClipBoard::canPaste());
+    menu.addAction(&q_paste);
 
     menu.addSeparator();
+
+    QAction add_note("create sticky note", &menu);
+    add_note.setIcon(QIcon(":/note.png"));
+    menu.addAction(&add_note);
 
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
     NodeListGenerator generator(node_factory_);
     generator.insertAvailableNodeTypes(&add_node);
-
     menu.addMenu(&add_node);
 
     QAction* selectedItem = menu.exec(global_pos);
 
     if(selectedItem) {
-        if(selectedItem == q_copy) {
+        if(selectedItem == &q_copy) {
             copySelected();
 
-        } else if(selectedItem == q_paste) {
+        } else if(selectedItem == &q_paste) {
             paste();
+
+        } else if(selectedItem == &add_note) {
+            startPlacingBox("csapex::Note", nullptr);
 
         } else {
             // else it must be an insertion
@@ -995,123 +1021,140 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
     bool has_minimized = false;
     bool has_maximized = false;
+    bool has_box = false;
+    bool has_note = false;
     for(NodeBox* box : selected_boxes_) {
         bool m = box->isMinimizedSize();
         has_minimized |= m;
         has_maximized |= !m;
-    }
-    if(has_minimized) {
-        QAction* max = new QAction("maximize", &menu);
-        max->setIcon(QIcon(":/maximize.png"));
-        max->setIconVisibleInMenu(true);
-        handler[max] = std::bind(&GraphView::minimizeBox, this, false);
-        menu.addAction(max);
-    }
-    if(has_maximized){
-        QAction* min = new QAction("minimize", &menu);
-        min->setIcon(QIcon(":/minimize.png"));
-        min->setIconVisibleInMenu(true);
-        handler[min] = std::bind(&GraphView::minimizeBox, this, true);
-        menu.addAction(min);
+
+        bool is_note = dynamic_cast<NoteBox*>(box);
+        has_note |= is_note;
+        has_box |= !is_note;
     }
 
-    QAction* flip = new QAction("flip sides", &menu);
-    flip->setIcon(QIcon(":/flip.png"));
-    flip->setIconVisibleInMenu(true);
-    handler[flip] = std::bind(&GraphView::flipBox, this);
-    menu.addAction(flip);
 
-    menu.addSeparator();
-
-    bool threading = !settings_.get("threadless", false);
-    QMenu thread_menu("thread grouping", &menu);
-    thread_menu.setEnabled(threading);
-    menu.addMenu(&thread_menu);
-
-    if(thread_menu.isEnabled()) {
-        QAction* private_thread = new QAction("private thread", &menu);
-        private_thread->setIcon(QIcon(":/thread_group_none.png"));
-        private_thread->setIconVisibleInMenu(true);
-        handler[private_thread] = std::bind(&GraphView::usePrivateThreadFor, this);
-        thread_menu.addAction(private_thread);
-
-        thread_menu.addSeparator();
-
-        QMenu* choose_group_menu = new QMenu("thread group", &menu);
-
-
-        ThreadPool* thread_pool = graph_facade_->getThreadPool();
-
-        std::vector<ThreadGroupPtr> thread_groups = thread_pool->getGroups();
-        for(std::size_t i = 0; i < thread_groups.size(); ++i) {
-            const ThreadGroup& group = *thread_groups[i];
-
-            if(group.id() == ThreadGroup::PRIVATE_THREAD) {
-                continue;
-            }
-
-            std::stringstream ss;
-            ss << "(" << group.id() << ") " << group.name();
-            QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
-            switch_thread->setIcon(QIcon(":/thread_group.png"));
-            switch_thread->setIconVisibleInMenu(true);
-            handler[switch_thread] = std::bind(&GraphView::switchToThread, this, group.id());
-            choose_group_menu->addAction(switch_thread);
+    if(has_box) {
+        if(has_minimized) {
+            QAction* max = new QAction("maximize", &menu);
+            max->setIcon(QIcon(":/maximize.png"));
+            max->setIconVisibleInMenu(true);
+            handler[max] = std::bind(&GraphView::minimizeBox, this, false);
+            menu.addAction(max);
+        }
+        if(has_maximized){
+            QAction* min = new QAction("minimize", &menu);
+            min->setIcon(QIcon(":/minimize.png"));
+            min->setIconVisibleInMenu(true);
+            handler[min] = std::bind(&GraphView::minimizeBox, this, true);
+            menu.addAction(min);
         }
 
-        choose_group_menu->addSeparator();
+        QAction* flip = new QAction("flip sides", &menu);
+        flip->setIcon(QIcon(":/flip.png"));
+        flip->setIconVisibleInMenu(true);
+        handler[flip] = std::bind(&GraphView::flipBox, this);
+        menu.addAction(flip);
 
-        QAction* new_group = new QAction("new thread group", &menu);
-        new_group->setIcon(QIcon(":/thread_group_add.png"));
-        new_group->setIconVisibleInMenu(true);
-        //        handler[new_group] = std::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
-        handler[new_group] = std::bind(&GraphView::createNewThreadGroupFor, this);
+        menu.addSeparator();
 
-        choose_group_menu->addAction(new_group);
+        bool threading = !settings_.get("threadless", false);
+        QMenu thread_menu("thread grouping", &menu);
+        thread_menu.setEnabled(threading);
+        menu.addMenu(&thread_menu);
 
-        thread_menu.addMenu(choose_group_menu);
+        if(thread_menu.isEnabled()) {
+            QAction* private_thread = new QAction("private thread", &menu);
+            private_thread->setIcon(QIcon(":/thread_group_none.png"));
+            private_thread->setIconVisibleInMenu(true);
+            handler[private_thread] = std::bind(&GraphView::usePrivateThreadFor, this);
+            thread_menu.addAction(private_thread);
+
+            thread_menu.addSeparator();
+
+            QMenu* choose_group_menu = new QMenu("thread group", &menu);
+
+
+            ThreadPool* thread_pool = graph_facade_->getThreadPool();
+
+            std::vector<ThreadGroupPtr> thread_groups = thread_pool->getGroups();
+            for(std::size_t i = 0; i < thread_groups.size(); ++i) {
+                const ThreadGroup& group = *thread_groups[i];
+
+                if(group.id() == ThreadGroup::PRIVATE_THREAD) {
+                    continue;
+                }
+
+                std::stringstream ss;
+                ss << "(" << group.id() << ") " << group.name();
+                QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
+                switch_thread->setIcon(QIcon(":/thread_group.png"));
+                switch_thread->setIconVisibleInMenu(true);
+                handler[switch_thread] = std::bind(&GraphView::switchToThread, this, group.id());
+                choose_group_menu->addAction(switch_thread);
+            }
+
+            choose_group_menu->addSeparator();
+
+            QAction* new_group = new QAction("new thread group", &menu);
+            new_group->setIcon(QIcon(":/thread_group_add.png"));
+            new_group->setIconVisibleInMenu(true);
+            //        handler[new_group] = std::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
+            handler[new_group] = std::bind(&GraphView::createNewThreadGroupFor, this);
+
+            choose_group_menu->addAction(new_group);
+
+            thread_menu.addMenu(choose_group_menu);
+        }
+
+        //    QAction* term = new QAction("terminate thread", &menu);
+        //    term->setIcon(QIcon(":/stop.png"));
+        //    term->setIconVisibleInMenu(true);
+        //    handler[term] = std::bind(&NodeBox::killContent, box);
+        //    menu.addAction(term);
+
+        menu.addSeparator();
+
+
+        bool has_profiling = false;
+        bool has_not_profiling = false;
+        for(NodeBox* box : selected_boxes_) {
+            bool p = box->getNodeWorker()->isProfiling();
+            has_profiling |= p;
+            has_not_profiling |= !p;
+        }
+        if(has_profiling) {
+            QAction* prof = new QAction("stop profiling", &menu);
+            prof->setIcon(QIcon(":/stop_profiling.png"));
+            prof->setIconVisibleInMenu(true);
+            handler[prof] = std::bind(&GraphView::showProfiling, this, false);
+            menu.addAction(prof);
+        }
+        if(has_not_profiling){
+            QAction* prof = new QAction("start profiling", &menu);
+            prof->setIcon(QIcon(":/profiling.png"));
+            prof->setIconVisibleInMenu(true);
+            handler[prof] = std::bind(&GraphView::showProfiling, this, true);
+            menu.addAction(prof);
+        }
+
+        if(selected_boxes_.size() == 1) {
+            QAction* info = new QAction("get information", &menu);
+            info->setIcon(QIcon(":/help.png"));
+            info->setIconVisibleInMenu(true);
+            handler[info] = std::bind(&NodeBox::getInformation, selected_boxes_.front());
+            menu.addAction(info);
+        }
+
+        menu.addSeparator();
+
     }
 
-    //    QAction* term = new QAction("terminate thread", &menu);
-    //    term->setIcon(QIcon(":/stop.png"));
-    //    term->setIconVisibleInMenu(true);
-    //    handler[term] = std::bind(&NodeBox::killContent, box);
-    //    menu.addAction(term);
-
-    menu.addSeparator();
-
-
-    bool has_profiling = false;
-    bool has_not_profiling = false;
-    for(NodeBox* box : selected_boxes_) {
-        bool p = box->getNodeWorker()->isProfiling();
-        has_profiling |= p;
-        has_not_profiling |= !p;
-    }
-    if(has_profiling) {
-        QAction* prof = new QAction("stop profiling", &menu);
-        prof->setIcon(QIcon(":/stop_profiling.png"));
-        prof->setIconVisibleInMenu(true);
-        handler[prof] = std::bind(&GraphView::showProfiling, this, false);
-        menu.addAction(prof);
-    }
-    if(has_not_profiling){
-        QAction* prof = new QAction("start profiling", &menu);
-        prof->setIcon(QIcon(":/profiling.png"));
-        prof->setIconVisibleInMenu(true);
-        handler[prof] = std::bind(&GraphView::showProfiling, this, true);
-        menu.addAction(prof);
-    }
-
-    if(selected_boxes_.size() == 1) {
-        QAction* info = new QAction("get information", &menu);
-        info->setIcon(QIcon(":/help.png"));
-        info->setIconVisibleInMenu(true);
-        handler[info] = std::bind(&NodeBox::getInformation, selected_boxes_.front());
-        menu.addAction(info);
-    }
-
-    menu.addSeparator();
+    QAction* set_color = new QAction("set color", &menu);
+    set_color->setIcon(QIcon(":/color_wheel.png"));
+    set_color->setIconVisibleInMenu(true);
+    handler[set_color] = std::bind(&GraphView::chooseColor, this);
+    menu.addAction(set_color);
 
     QAction* grp = new QAction("group into subgraph", &menu);
     grp->setIcon(QIcon(":/group.png"));
@@ -1173,6 +1216,25 @@ void GraphView::showProfiling(bool show)
     for(NodeBox* box : selected_boxes_) {
         box->showProfiling(show);
     }
+}
+
+void GraphView::chooseColor()
+{
+    QColor c = QColorDialog::getColor();
+
+    if(!c.isValid()) {
+        return;
+    }
+
+    int r = c.red();
+    int g = c.green();
+    int b = c.blue();
+
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"flip boxes"));
+    for(NodeBox* box : selected_boxes_) {
+        cmd->add(Command::Ptr(new command::SetColor(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), r, g, b)));
+    }
+    dispatcher_->execute(cmd);
 }
 
 void GraphView::flipBox()

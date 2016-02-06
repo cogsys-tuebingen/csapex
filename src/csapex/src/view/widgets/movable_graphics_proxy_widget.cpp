@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/node/box.h>
+#include <csapex/view/node/note_box.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
@@ -18,6 +19,10 @@
 
 using namespace csapex;
 
+
+long MovableGraphicsProxyWidget::next_box_z = 1;
+long MovableGraphicsProxyWidget::next_note_z = std::numeric_limits<int>::min();
+
 MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *view, DesignerOptions *options, QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QGraphicsProxyWidget(parent, wFlags), box_(box), view_(view), options_(options), relay_(false), clone_p_(false)
 {
@@ -28,6 +33,31 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *
     setWidget(box_);
 
     setAcceptDrops(true);
+
+    long z = 0;
+
+    NodeHandle* nh = box_->getNodeHandle();
+    if(nh) {
+        NodeStatePtr state = nh->getNodeState();
+        z = state->getZ();
+    }
+
+    if(z == 0){
+        if(dynamic_cast<NoteBox*>(box_)) {
+            z = std::numeric_limits<long>::min();
+        } else {
+            z = 1;
+        }
+    }
+
+    if(dynamic_cast<NoteBox*>(box_)) {
+        next_note_z = std::max(z, next_note_z);
+    } else {
+        next_box_z = std::max(z, next_box_z);
+    }
+
+    setZValue(z);
+
 }
 
 QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -61,8 +91,20 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
     }
 
     if(event->type() == QEvent::GraphicsSceneMousePress) {
-        static unsigned long nextz = 1;
-        setZValue(nextz++);
+        long z;
+
+        if(dynamic_cast<NoteBox*>(box_)) {
+            z = ++next_note_z;
+        } else {
+            z = ++next_box_z;
+        }
+
+        setZValue(z);
+        NodeHandle* nh = box_->getNodeHandle();
+        if(nh) {
+            NodeStatePtr state = nh->getNodeState();
+            state->setZ(z);
+        }
     }
 
     bool do_relay = child && child->objectName() != "boxframe" &&
@@ -165,11 +207,20 @@ void MovableGraphicsProxyWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent
 
     auto target = box_->childAt(e->pos().toPoint());
 
-    QContextMenuEvent contextMenuEvent(QContextMenuEvent::Reason(e->reason()),
-                                       pos.toPoint(), globalPos, e->modifiers());
-    QApplication::sendEvent(target, &contextMenuEvent);
+    if(target) {
+        QContextMenuEvent contextMenuEvent(QContextMenuEvent::Reason(e->reason()),
+                                           pos.toPoint(), globalPos, e->modifiers());
+        QApplication::sendEvent(target, &contextMenuEvent);
 
-    e->setAccepted(contextMenuEvent.isAccepted());
+        e->setAccepted(contextMenuEvent.isAccepted());
+    } else {
+        QContextMenuEvent contextMenuEvent(QContextMenuEvent::Reason(e->reason()),
+                                           pos.toPoint(), globalPos, e->modifiers());
+        QApplication::sendEvent(box_, &contextMenuEvent);
+
+        e->setAccepted(contextMenuEvent.isAccepted());
+
+    }
 }
 
 NodeBox* MovableGraphicsProxyWidget::getBox()

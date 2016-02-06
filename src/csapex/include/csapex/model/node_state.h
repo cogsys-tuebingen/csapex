@@ -32,6 +32,14 @@ public:
     void setPos(const Point &value);
     Signal pos_changed;
 
+    long getZ() const;
+    void setZ(long value);
+    Signal z_changed;
+
+    void getColor(int& r, int& g, int &b) const;
+    void setColor(int r, int g, int b);
+    Signal color_changed;
+
     std::string getLabel() const;
     void setLabel(const std::string &label);
     Signal label_changed;
@@ -67,6 +75,7 @@ private:
 
     std::string label_;
     Point pos_;
+    long z_;
 
     bool minimized_;
     bool enabled_;
@@ -74,6 +83,10 @@ private:
 
     int thread_id_;
     std::string thread_name_;
+
+    int r_;
+    int g_;
+    int b_;
 };
 
 }

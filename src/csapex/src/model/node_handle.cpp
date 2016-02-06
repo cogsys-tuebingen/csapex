@@ -47,6 +47,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
     node_state_->parent_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     node_state_->pos_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     node_state_->thread_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->color_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
 
     node_state_->label_changed->connect([this]() {
         std::string label = node_state_->getLabel();

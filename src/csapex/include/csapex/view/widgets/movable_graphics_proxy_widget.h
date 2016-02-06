@@ -50,6 +50,9 @@ private:
     bool relay_;
     QPointF clone_start_;
     bool clone_p_;
+
+    static long next_box_z;
+    static long next_note_z;
 };
 
 }

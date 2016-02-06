@@ -10,13 +10,18 @@ using namespace csapex;
 
 NodeState::NodeState(const NodeHandle *parent)
     : pos_changed(new SignalImpl),
+      z_changed(new SignalImpl),
+      color_changed(new SignalImpl),
       label_changed(new SignalImpl),
       minimized_changed(new SignalImpl),
       enabled_changed(new SignalImpl),
       flipped_changed(new SignalImpl),
       thread_changed(new SignalImpl),
       parent_changed(new SignalImpl),
-      parent_(parent), minimized_(false), enabled_(true), flipped_(false), thread_id_(-1)
+      parent_(parent),
+
+      z_(0), minimized_(false), enabled_(true), flipped_(false), thread_id_(-1),
+      r_(-1), g_(-1), b_(-1)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
@@ -31,6 +36,8 @@ NodeState& NodeState::operator = (const NodeState& rhs)
 {
     setPos(rhs.pos_);
     setEnabled(rhs.enabled_);
+    setZ(rhs.z_);
+    setColor(rhs.r_, rhs.g_, rhs.b_);
     setMinimized(rhs.minimized_);
     setFlipped(rhs.flipped_);
     setLabel(rhs.label_);
@@ -66,6 +73,15 @@ void NodeState::readYaml(const YAML::Node &node)
         Point p(x,y);
         setPos(p);
     }
+    if(node["color"].IsDefined()) {
+        int r = node["color"][0].as<int>();
+        int g = node["color"][1].as<int>();
+        int b = node["color"][2].as<int>();
+        setColor(r, g, b);
+    }
+    if(node["z"].IsDefined()) {
+        setZ(node["z"].as<long>());
+    }
 
     if(node["state"].IsDefined()) {
         const YAML::Node& state_map = node["state"];
@@ -92,6 +108,38 @@ void NodeState::setPos(const Point &value)
         (*pos_changed)();
     }
 }
+
+
+long NodeState::getZ() const
+{
+    return z_;
+}
+
+void NodeState::setZ(long value)
+{
+    if(z_ != value) {
+        z_ = value;
+        (*z_changed)();
+    }
+}
+
+void NodeState::getColor(int& r, int& g, int &b) const
+{
+    r = r_;
+    g = g_;
+    b = b_;
+}
+
+void NodeState::setColor(int r, int g, int b)
+{
+    if(r != r_ || b != b_ || g != g_) {
+        r_ = r;
+        g_ = g;
+        b_ = b;
+        (*color_changed)();
+    }
+}
+
 
 std::string NodeState::getLabel() const
 {
@@ -196,6 +244,10 @@ void NodeState::writeYaml(YAML::Node &out) const
     out["label"] = label_;
     out["pos"][0] = pos_.x;
     out["pos"][1] = pos_.y;
+    out["color"][0] = r_;
+    out["color"][1] = g_;
+    out["color"][2] = b_;
+    out["z"] = z_;
     out["minimized"] = minimized_;
     out["enabled"] = enabled_;
     out["flipped"] = flipped_;

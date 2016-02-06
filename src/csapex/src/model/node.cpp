@@ -64,6 +64,10 @@ bool Node::isAsynchronous() const
 {
     return false;
 }
+bool Node::isIsolated() const
+{
+    return false;
+}
 
 void Node::process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters,
                    std::function<void(std::function<void (csapex::NodeModifier&, csapex::Parameterizable&)>)> continuation)

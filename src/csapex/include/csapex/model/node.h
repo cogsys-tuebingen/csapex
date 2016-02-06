@@ -36,6 +36,8 @@ public: /* API */
     virtual void abort();
 
     virtual bool isAsynchronous() const;
+    virtual bool isIsolated() const;
+
     virtual void stateChanged();
 
 public:

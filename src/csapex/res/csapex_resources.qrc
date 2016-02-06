@@ -50,5 +50,7 @@
         <file>bug.png</file>
         <file>copy.png</file>
         <file>paste.png</file>
+        <file>note.png</file>
+        <file>color_wheel.png</file>
     </qresource>
 </RCC>

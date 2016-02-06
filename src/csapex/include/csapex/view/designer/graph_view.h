@@ -151,6 +151,7 @@ public Q_SLOTS:
 
 private:
     void flipBox();
+    void chooseColor();
     void minimizeBox(bool mini);
     void deleteBox();
     void groupBox();

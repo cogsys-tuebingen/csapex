@@ -10,6 +10,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/model/graph.h>
+#include <csapex/nodes/note.h>
 
 /// SYSTEM
 
@@ -37,6 +38,11 @@ NodeFactory::NodeFactory(csapex::PluginLocator* locator)
     NodeConstructorPtr provider = std::make_shared<NodeConstructor>("csapex::Graph", []{ return std::make_shared<Graph>(); });
     provider->setIcon(":/group.png");
     registerNodeType(provider, true);
+
+    NodeConstructorPtr note = std::make_shared<NodeConstructor>("csapex::Note", []{ return std::make_shared<Note>(); });
+    note->setIcon(":/note.png");
+    note->setDescription("A sticky note to keep information.");
+    registerNodeType(note, true);
 }
 
 namespace {

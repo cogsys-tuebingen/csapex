@@ -39,51 +39,54 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     node_handle->setNodeWorker(this);
 
     NodePtr node = node_handle_->getNode().lock();
-//    node->initialize(node_handle.get(), node_handle_->getUUID());
+
 
     try {
         node->setupParameters(*node);
-        node->setup(*node_handle);
+
+        if(!node->isIsolated()) {
+            node->setup(*node_handle);
+
+            handle_connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
+                notifyMessagesProcessed();
+            }));
+
+            node_handle_->addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
+            node_handle_->addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
+
+            auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
+            if(tickable) {
+                trigger_tick_done_ = node_handle_->addTrigger("ticked");
+            }
+            trigger_process_done_ = node_handle_->addTrigger("inputs\nprocessed");
+
+            is_setup_ = true;
+
+            handle_connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
+                triggerCheckTransitions();
+            }));
+
+            handle_connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
+                setProcessingEnabled(isProcessingEnabled());
+            }));
+
+            for(const auto& c : node_handle_->getAllConnectors()) {
+                connectConnector(c.get());
+            }
+            handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
+                                                 connectConnector(c.get());
+                                             }));
+            handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
+                                                 disconnectConnector(c.get());
+                                             }));
+
+            auto af = delegate::bind(&NodeWorker::triggerCheckTransitions, this);
+            node_handle_->getInputTransition()->setActivationFunction(af);
+            node_handle_->getOutputTransition()->setActivationFunction(af);
+        }
     } catch(const std::exception& e) {
         node->aerr << "setup failed: " << e.what() << std::endl;
     }
-
-    handle_connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
-        notifyMessagesProcessed();
-    }));
-
-    node_handle_->addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
-    node_handle_->addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
-
-    auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
-    if(tickable) {
-        trigger_tick_done_ = node_handle_->addTrigger("ticked");
-    }
-    trigger_process_done_ = node_handle_->addTrigger("inputs\nprocessed");
-
-    is_setup_ = true;
-
-    handle_connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
-        triggerCheckTransitions();
-    }));
-
-    handle_connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
-        setProcessingEnabled(isProcessingEnabled());
-    }));
-
-    for(const auto& c : node_handle_->getAllConnectors()) {
-        connectConnector(c.get());
-    }
-    handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
-                                         connectConnector(c.get());
-                                     }));
-    handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
-                                         disconnectConnector(c.get());
-                                     }));
-
-    auto af = delegate::bind(&NodeWorker::triggerCheckTransitions, this);
-    node_handle_->getInputTransition()->setActivationFunction(af);
-    node_handle_->getOutputTransition()->setActivationFunction(af);
 }
 
 NodeWorker::~NodeWorker()

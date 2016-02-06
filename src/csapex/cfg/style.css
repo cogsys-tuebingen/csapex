@@ -9,128 +9,135 @@ QFrame#boxframe QLabel#label {
 }
 
 /* box */
-QFrame#boxframe {
+csapex--NodeBox QFrame#boxframe {
         background: rgb(200, 220, 200);
         border: 2px solid rgb(90, 135, 80);
         border-radius: 24px;
         padding: 0;
 }
-QFrame#boxframe[flipped="false"] {
+csapex--NodeBox[flipped="false"] QFrame#boxframe {
     border-top-left-radius: 10px;
     border-bottom-right-radius: 0px;
 }
-QFrame#boxframe[flipped="true"] {
+csapex--NodeBox[flipped="true"] QFrame#boxframe {
         border-top-right-radius: 10px;
         border-bottom-right-radius: 0px;
 }
 
-QFrame#boxframe QLabel, QFrame#boxframe QCheckBox, QFrame#boxframe QRadioButton{
-        color: black ;
-}
 
-QFrame#boxframe QSizeGrip {
+csapex--NodeBox QFrame#boxframe QSizeGrip {
         image: url(:/sizegrip.png);
         width: 16px;
         height: 16px;
 }
 
-QFrame#boxframe QGroupBox {
-        color: black;
+csapex--NodeBox QFrame#boxframe QGroupBox {
         font-weight: bold;
         border: 2px solid rgba(0,0,0,0);
         border-left: 2px solid rgba(0,0,0,40);
         padding-left: 5px;
         margin-top: 20px;
 }
-QFrame#boxframe QGroupBox[hidden="true"] {
+csapex--NodeBox[hidden="true"] QFrame#boxframe QGroupBox {
         border: none;
         margin-top: 0;
 }
-QFrame#boxframe QGroupBox::title {
+csapex--NodeBox QFrame#boxframe QGroupBox::title {
         subcontrol-origin: margin;
         padding: 0 0;
 }
-QFrame#boxframe QGroupBox::indicator {
+csapex--NodeBox QFrame#boxframe QGroupBox::indicator {
         border-left: 2px solid rgba(0,0,0,0);
 }
 
-QFrame#boxframe QGroupBox::indicator:unchecked {
+csapex--NodeBox QFrame#boxframe QGroupBox::indicator:unchecked {
         image: url(:/show.png);
 }
-QFrame#boxframe QGroupBox::indicator:checked {
+csapex--NodeBox QFrame#boxframe QGroupBox::indicator:checked {
         image: url(:/hide.png);
 }
 
-QFrame#boxframe QLabel[component="true"] {
+csapex--NodeBox QFrame#boxframe QLabel[component="true"] {
         border: 1px solid black;
         font-size: 8pt;
         border-radius: 5px;
-        color: black;
         padding: 0px;
         font-weight: bold;
 }
-QFrame#boxframe QLabel[threadgroup="true"] {
+csapex--NodeBox QFrame#boxframe QLabel[threadgroup="true"] {
         border: 1px dotted black;
         font-size: 8pt;
         border-radius: 5px;
-        color: black;
         padding: 0px;
         font-weight: bold;
 }
-QFrame#boxframe QLabel[custom="true"] {
+csapex--NodeBox QFrame#boxframe QLabel[custom="true"] {
         border: 1px solid black;
         border-radius: 5px;
-        color: black;
         padding: 1px;
         font-weight: bold;
 }
 
-QCheckBox::indicator:unchecked {
+csapex--NodeBox QCheckBox::indicator:unchecked {
      image: url(:/checkbox_unchecked.png);
  }
 
- QCheckBox::indicator:checked {
+csapex--NodeBox  QCheckBox::indicator:checked {
      image: url(:/checkbox_checked.png);
  }
 
 /* minimized box */
-QFrame#boxframe[content_minimized="true"] {
+csapex--NodeBox[content_minimized="true"] QFrame#boxframe {
 }
 
 /* disabled box */
-QFrame#boxframe[disabled="true"] {
+csapex--NodeBox[disabled="true"] QFrame#boxframe {
         background: rgb(200,200,200)
 }
-QFrame#boxframe[disabled="true"]  QLabel {
-        color: black!important;
+csapex--NodeBox[disabled="true"] QFrame#boxframe  QLabel {
 }
 
 /* error box */
-QFrame#boxframe[error="true"] {
+csapex--NodeBox[error="true"] QFrame#boxframe {
         background: rgb(255, 100, 100);
         border-color: rgb(100,0,0);
 }
 
 /* warning box */
-QFrame#boxframe[warning="true"] {
+csapex--NodeBox[warning="true"] QFrame#boxframe {
         background: rgb(240, 230, 200);
         border-color: rgb(255,200,0);
 }
 
 /* blocked box */
-QFrame#boxframe[blocked="true"] {
+csapex--NodeBox[blocked="true"] QFrame#boxframe {
 }
 
 /* selected box */
-QFrame#boxframe[focused="true"] {
-        background-color: rgb(100,200,255);
-        border-color: rgb(50,100,200);
+csapex--NodeBox[focused="true"] QFrame#boxframe {
+        background: rgb(180, 200, 180);
+        border: 2px solid rgb(70, 115, 60);
         border-style: dashed;
 }
-QFrame#boxframe[focused="true"] QLabel {
-        color: black!important;
+/* note */
+csapex--NoteBox {
+        padding: 0;
+}
+csapex--NoteBox[focused="true"] {
+}
+csapex--NoteBox QSizeGrip {
+        background: rgba(0, 0, 0, 0);
+        width: 16px;
+        height: 16px;
 }
 
+csapex--NoteBox QTextEdit {
+        background: rgba(0, 0, 0, 0);
+        border: none;
+        padding: 0;
+	margin: 0;
+	font: bold 12px;	
+}
 /* connectors */
 csapex--Port {
         border: 2px solid rgb(0, 0, 0);

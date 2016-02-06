@@ -73,6 +73,9 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout,
 }
 
 void QtHelper::clearLayout(QLayout* layout) {
+    if(!layout) {
+        return;
+    }
     QLayoutItem* item;
     while((item = layout->takeAt(0)) != nullptr) {
         if(item->layout()) {

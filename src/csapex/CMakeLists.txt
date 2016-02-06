@@ -232,6 +232,8 @@ add_library(csapex SHARED
     src/model/tag.cpp
     src/model/unique.cpp
 
+    src/nodes/note.cpp
+
     src/msg/apex_message_provider.cpp
     src/msg/dynamic_input.cpp
     src/msg/dynamic_output.cpp
@@ -308,6 +310,7 @@ add_library(csapex_qt SHARED
     src/command/group_nodes.cpp
     src/command/paste_graph.cpp
     src/command/pass_out_connector.cpp
+    src/command/set_color.cpp
 
     src/view/csapex_window.cpp
     src/view/message_renderer.cpp
@@ -333,6 +336,7 @@ add_library(csapex_qt SHARED
     src/view/node/node_filter_proxy_model.cpp
     src/view/node/parameter_context_menu.cpp
     src/view/node/box.cpp
+    src/view/node/note_box.cpp
     src/view/node/node_statistics.cpp
 
     src/view/utility/node_list_generator.cpp

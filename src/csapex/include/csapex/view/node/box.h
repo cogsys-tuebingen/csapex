@@ -35,8 +35,15 @@ class NodeBox : public QWidget
 {
     Q_OBJECT
 
+    Q_PROPERTY(QString class READ cssClass)
+
 public:
     typedef std::shared_ptr<NodeBox> Ptr;
+
+    QString cssClass() {
+        return QString("NodeBox");
+    }
+
 
 public:
     static const QString MIME;
@@ -53,8 +60,8 @@ public:
     void setAdapter(NodeAdapterPtr adapter);
 
     virtual ~NodeBox();
-    void construct();
-    void init();
+    virtual void construct();
+    virtual void init();
 
     /// MODIFIER
     Port* createPort(ConnectableWeakPtr connector, QBoxLayout *layout);
@@ -90,7 +97,7 @@ public:
     void moveEvent(QMoveEvent*);
     void triggerPlaced();
 
-    void setSelected(bool selected);
+    virtual void setSelected(bool selected);
 
     void keyPressEvent(QKeyEvent * e);
 
@@ -116,8 +123,8 @@ public Q_SLOTS:
     void triggerFlipSides();
     void showProfiling(bool show);
 
-    void updateComponentInformation(Graph* graph);
-    void updateThreadInformation();
+    virtual void updateComponentInformation(Graph* graph);
+    virtual void updateThreadInformation();
     void contextMenuEvent(QContextMenuEvent* e);
 
     void registerEvent(Connectable*);
