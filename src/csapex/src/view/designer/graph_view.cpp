@@ -1067,18 +1067,17 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
         menu.addSeparator();
 
         bool threading = !settings_.get("threadless", false);
-        QMenu thread_menu("thread grouping", &menu);
-        thread_menu.setEnabled(threading);
-        menu.addMenu(&thread_menu);
+        QMenu* thread_menu = menu.addMenu(QIcon(":/thread_group.png"), "thread grouping");
+        thread_menu->setEnabled(threading);
 
-        if(thread_menu.isEnabled()) {
+        if(thread_menu->isEnabled()) {
             QAction* private_thread = new QAction("private thread", &menu);
             private_thread->setIcon(QIcon(":/thread_group_none.png"));
             private_thread->setIconVisibleInMenu(true);
             handler[private_thread] = std::bind(&GraphView::usePrivateThreadFor, this);
-            thread_menu.addAction(private_thread);
+            thread_menu->addAction(private_thread);
 
-            thread_menu.addSeparator();
+            thread_menu->addSeparator();
 
             QMenu* choose_group_menu = new QMenu("thread group", &menu);
 
@@ -1112,7 +1111,7 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
             choose_group_menu->addAction(new_group);
 
-            thread_menu.addMenu(choose_group_menu);
+            thread_menu->addMenu(choose_group_menu);
         }
 
         //    QAction* term = new QAction("terminate thread", &menu);
