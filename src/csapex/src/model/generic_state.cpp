@@ -238,6 +238,19 @@ std::vector<csapex::param::Parameter::Ptr> GenericState::getTemporaryParameters(
     return result;
 }
 
+std::vector<csapex::param::Parameter::Ptr> GenericState::getPersistentParameters() const
+{
+    std::vector<csapex::param::Parameter::Ptr> result;
+    for(const auto& name : persistent) {
+        auto pos = params.find(name);
+        if(pos != params.end()) {
+            result.push_back(pos->second);
+        }
+    }
+
+    return result;
+}
+
 std::size_t GenericState::getParameterCount() const
 {
     return params.size();

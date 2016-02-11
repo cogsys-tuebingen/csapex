@@ -156,6 +156,7 @@ private:
     void deleteBox();
     void groupBox();
     void usePrivateThreadFor();
+    void useDefaultThreadFor();
     void switchToThread(int group_id);
     void createNewThreadGroupFor();
 

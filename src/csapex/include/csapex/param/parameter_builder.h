@@ -17,6 +17,11 @@ public:
     ParameterBuilder& description(const std::string& description);
     ParameterBuilder& name(const std::string& name);
 
+    template <class T>
+    std::shared_ptr<T> build() {
+        return std::dynamic_pointer_cast<T>(build());
+    }
+
     std::shared_ptr<Parameter> build();
     operator std::shared_ptr<Parameter>();
 

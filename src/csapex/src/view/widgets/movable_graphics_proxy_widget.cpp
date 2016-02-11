@@ -58,6 +58,7 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *
 
     setZValue(z);
 
+    box_->show();
 }
 
 QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const QVariant &value)

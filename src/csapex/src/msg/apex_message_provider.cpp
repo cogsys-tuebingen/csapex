@@ -15,7 +15,13 @@ std::shared_ptr<MessageProvider> ApexMessageProvider::make()
 void ApexMessageProvider::load(const std::string& file)
 {
     file_ = file;
-    msg_ = std::dynamic_pointer_cast<connection_types::Message>(MessageFactory::readMessage(file));
+    if(cache_msg_) {
+        msg_ = cache_msg_;
+
+    } else {
+        msg_ = std::dynamic_pointer_cast<connection_types::Message>(MessageFactory::readMessage(file));
+        cache_msg_ = msg_;
+    }
 
     setSlotCount(1);
 }

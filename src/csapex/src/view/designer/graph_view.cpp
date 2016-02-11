@@ -781,7 +781,6 @@ void GraphView::addBox(NodeBox *box)
     }
 
     box->init();
-    box->show();
     box->triggerPlaced();
 
     box->updateBoxInformation(graph);
@@ -1077,6 +1076,12 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
             handler[private_thread] = std::bind(&GraphView::usePrivateThreadFor, this);
             thread_menu->addAction(private_thread);
 
+            QAction* default_thread = new QAction("default thread", &menu);
+            default_thread->setIcon(QIcon(":/thread_group.png"));
+            default_thread->setIconVisibleInMenu(true);
+            handler[default_thread] = std::bind(&GraphView::useDefaultThreadFor, this);
+            thread_menu->addAction(default_thread);
+
             thread_menu->addSeparator();
 
             QMenu* choose_group_menu = new QMenu("thread group", &menu);
@@ -1189,7 +1194,17 @@ void GraphView::usePrivateThreadFor()
 {
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"use private thread"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), 0)));
+        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), ThreadGroup::PRIVATE_THREAD)));
+    }
+    dispatcher_->execute(cmd);
+}
+
+
+void GraphView::useDefaultThreadFor()
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"use private thread"));
+    for(NodeBox* box : selected_boxes_) {
+        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), ThreadGroup::DEFAULT_GROUP_ID)));
     }
     dispatcher_->execute(cmd);
 }

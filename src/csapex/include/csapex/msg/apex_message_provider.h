@@ -27,6 +27,7 @@ public:
 private:
     std::string file_;
     connection_types::Message::Ptr msg_;
+    connection_types::Message::Ptr cache_msg_;
 };
 
 }

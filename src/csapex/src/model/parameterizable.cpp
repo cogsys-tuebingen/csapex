@@ -211,6 +211,16 @@ std::vector<csapex::param::Parameter::Ptr> Parameterizable::getParameters() cons
     return parameter_state_->getParameters();
 }
 
+std::vector<csapex::param::Parameter::Ptr> Parameterizable::getTemporaryParameters() const
+{
+    return parameter_state_->getTemporaryParameters();
+}
+
+std::vector<csapex::param::Parameter::Ptr> Parameterizable::getPersistentParameters() const
+{
+    return parameter_state_->getPersistentParameters();
+}
+
 std::size_t Parameterizable::getParameterCount() const
 {
     return parameter_state_->getParameterCount();

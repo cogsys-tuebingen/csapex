@@ -53,6 +53,7 @@ public:
 
 public:
     csapex::slim_signal::Signal<void(Trigger*)> triggered;
+    csapex::slim_signal::Signal<void()> connected;
 
 protected:
     bool acknowledgeConnection(Connectable* other_side);

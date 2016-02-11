@@ -45,7 +45,6 @@ NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worke
 
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
 
-
     setVisible(false);
 }
 

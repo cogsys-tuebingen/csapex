@@ -42,7 +42,7 @@ bool Slot::acknowledgeConnection(Connectable* other_side)
 
     sources_.push_back(target);
 
-//    other_side->enabled_changed.connect(connectionEnabled);
+    connected();
 
     return true;
 }

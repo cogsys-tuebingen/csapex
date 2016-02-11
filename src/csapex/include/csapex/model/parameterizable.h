@@ -81,6 +81,8 @@ public:
     void removeParameterCallbacks(csapex::param::Parameter* param);
 
     std::vector<csapex::param::ParameterPtr> getParameters() const;
+    std::vector<csapex::param::ParameterPtr> getTemporaryParameters() const;
+    std::vector<csapex::param::ParameterPtr> getPersistentParameters() const;
     std::size_t getParameterCount() const;
 
     csapex::param::ParameterPtr getParameter(const std::string& name) const;
