@@ -2,14 +2,14 @@
 #include <csapex/msg/message_provider.h>
 
 /// PROJECT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_factory.h>
 
 using namespace csapex;
 
 MessageProvider::MessageProvider()
     : slot_count_(1)
-{
-
+{    
+    state.addParameter(csapex::param::ParameterFactory::declareBool("playback/resend", false));
 }
 
 MessageProvider::~MessageProvider()

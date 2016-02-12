@@ -28,12 +28,15 @@ void ApexMessageProvider::load(const std::string& file)
 
 bool ApexMessageProvider::hasNext()
 {
-    return (bool) msg_;
+    return (bool) msg_ || state.readParameter<bool>("playback/resend");
 }
 
 connection_types::Message::Ptr ApexMessageProvider::next(std::size_t /*slot*/)
 {
     connection_types::Message::Ptr r = msg_;
+    if(!r) {
+        r = cache_msg_;
+    }
     msg_.reset();
     return r;
 }
