@@ -1083,11 +1083,13 @@ void DesignerScene::addPort(Port *port)
 
 void DesignerScene::removePort(Port *port)
 {
-    ConnectablePtr c = port->getAdaptee().lock();
-    if(c && !port_map_.empty()) {
-        auto pos = port_map_.find(c->getUUID());
-        if(pos != port_map_.end()) {
-            port_map_.erase(pos);
+    if(!port_map_.empty()) {
+        for(auto it = port_map_.begin(); it != port_map_.end(); ) {
+            if(it->second == port) {
+                it = port_map_.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
 }
