@@ -131,13 +131,14 @@ bool Graph::addConnection(ConnectionPtr connection)
     //from->connection_added_to(from);
     //to->connection_added_to(to);
 
+    if(dynamic_cast<Output*>(connection->from())) {
+        if(n_to != n_from) {
+            node_parents_[n_to].push_back(n_from);
+            node_children_[n_from].push_back(n_to);
 
-    if(n_to != n_from) {
-        node_parents_[n_to].push_back(n_from);
-        node_children_[n_from].push_back(n_to);
-
-        buildConnectedComponents();
-        verify();
+            buildConnectedComponents();
+            verify();
+        }
     }
 
     connectionAdded(connection.get());
@@ -171,20 +172,23 @@ void Graph::deleteConnection(ConnectionPtr connection)
             }
             NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
 
-            // erase pointer from TO to FROM
-            if(!crossing) {
-                if(n_from != n_to) {
-                    // if there are multiple edges, this only erases one entry
-                    node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
+            if(dynamic_cast<Output*>(connection->from())) {
+                // erase pointer from TO to FROM
+                if(!crossing) {
+                    if(n_from != n_to) {
+                        // if there are multiple edges, this only erases one entry
+                        node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
 
-                    // erase pointer from FROM to TO
-                    node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+                        // erase pointer from FROM to TO
+                        node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+                    }
                 }
             }
             connections_.erase(c);
 
             buildConnectedComponents();
             verify();
+
             connectionDeleted(connection.get());
             stateChanged();
 
@@ -432,7 +436,7 @@ Node* Graph::findNode(const UUID& uuid) const
 
 NodeHandle* Graph::findNodeHandle(const UUID& uuid) const
 {
-//    if(uuid == getUUID()) {
+    //    if(uuid == getUUID()) {
     if(uuid.empty()) {
         return node_handle_;
     }

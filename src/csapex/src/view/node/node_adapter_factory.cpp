@@ -31,32 +31,36 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeHandlePtr node, NodeBox
 {
     std::string type = node->getType();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-        return node_adapter_builders_[type]->build(node, parent);
+        auto builder = node_adapter_builders_[type];
+        if(builder) {
+            return builder->build(node, parent);
+        }
+
     } else {
-        return NodeAdapter::Ptr(new DefaultNodeAdapter(node, parent));
+        try {
+            const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(type + "AdapterBuilder");
+            if(constructor) {
+                auto builder = constructor->construct();
+                if(builder->getWrappedType() == type) {
+                    node_adapter_builders_[type] = builder;
+                    return builder->build(node, parent);
+                }
+            } else {
+                node_adapter_builders_[type] = nullptr;
+            }
+
+        } catch(const std::exception& e) {
+            std::cerr << "adapter " << type << " cannot be built: " << e.what() << std::endl;
+        }
     }
+
+    return NodeAdapter::Ptr(new DefaultNodeAdapter(node, parent));
 }
 
 void NodeAdapterFactory::loadPlugins()
 {
     if(node_adapter_builders_.empty()) {
         ensureLoaded();
-        rebuildPrototypes();
-    }
-}
-
-void NodeAdapterFactory::rebuildPrototypes()
-{
-    for(const auto& p : node_adapter_manager_->getConstructors()) {
-        const PluginConstructor<NodeAdapterBuilder>& constructor = p.second;
-
-        try {
-            NodeAdapterBuilder::Ptr builder = constructor.construct();
-            node_adapter_builders_[builder->getWrappedType()] = builder;
-
-        } catch(const std::exception& e) {
-            std::cerr << "adapter " << p.first << " cannot be built: " << e.what() << std::endl;
-        }
     }
 }
 
@@ -64,7 +68,5 @@ void NodeAdapterFactory::ensureLoaded()
 {
     if(!node_adapter_manager_->pluginsLoaded()) {
         node_adapter_manager_->load(plugin_locator_);
-
-        rebuildPrototypes();
     }
 }

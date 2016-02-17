@@ -448,6 +448,10 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
         layout->addWidget(port);
     }
 
+    QObject::connect(port, &Port::destroyed, [this, port](QObject* o) {
+        portRemoved(port);
+    });
+
     portAdded(port);
 
     return port;

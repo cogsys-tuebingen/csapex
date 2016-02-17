@@ -21,46 +21,46 @@ class PluginManagerImp
 {
     template <class>
     friend class PluginManager;
-
+    
 protected:
     typedef PluginConstructor<M> PluginConstructorM;
     typedef std::map<std::string, PluginConstructorM> Constructors;
-
+    
 protected:
     PluginManagerImp(const std::string& full_name)
         : plugins_loaded_(false), full_name_(full_name)
     {
     }
-
+    
     PluginManagerImp(const PluginManagerImp& rhs);
     PluginManagerImp& operator = (const PluginManagerImp& rhs);
-
+    
 public:
     virtual ~PluginManagerImp() {
     }
-
+    
 protected:
     void registerConstructor(PluginConstructorM constructor) {
         available_classes[constructor.getType()] = constructor;
     }
-
+    
     void enumerateXmlFiles()
     {
     }
-
+    
     void load(csapex::PluginLocator* locator) {
         std::vector<std::string> xml_files = locator->enumerateXmlFiles<M>();
         std::vector<std::string> library_paths = locator->enumerateLibraryPaths();
-
+        
         library_paths_.insert(library_paths_.end(), library_paths.begin(), library_paths.end());
 
         for(std::vector<std::string>::const_iterator manifest = xml_files.begin(); manifest != xml_files.end(); ++manifest) {
             processManifest(locator, *manifest);
         }
-
+        
         plugins_loaded_ = true;
     }
-
+    
     bool processManifest(csapex::PluginLocator* locator, const std::string& xml_file)
     {
         TiXmlDocument document;
@@ -74,121 +74,147 @@ protected:
             std::cerr << "[Plugin] Manifest root is not <library>" << std::endl;
             return false;
         }
-
+        
         TiXmlElement* library = config;
         while (library != nullptr) {
-
+            
             std::string library_name = library->Attribute("path");
             if (library_name.size() == 0) {
                 std::cerr << "[Plugin] Item in row" << library->Row() << " does not contain a path attribute" << std::endl;
                 continue;
             }
-
+            
             if(!locator->isLibraryIgnored(library_name)) {
-                try {
-                    std::string file = loadLibrary(library_name, library);
-                    if(!file.empty()) {
-                        locator->setLibraryLoaded(library_name, file);
-                    }
-
-                } catch(const class_loader::ClassLoaderException& e) {
-                    std::cerr << "cannot load library " << library_name << ": " << e.what() << std::endl;
-                    locator->setLibraryError(library_name, e.what());
-                }
+                loadLibrary(library_name, library);
             }
 
+            library_to_locator_[library_name] = locator;
+            
             library = library->NextSiblingElement( "library" );
         }
-
+        
         return true;
     }
 
-    std::string loadLibrary(const std::string& library_name, TiXmlElement* library)  {
-        std::string library_path = library_name + ".so";
-
-        bool load = false;
-        {
-            TiXmlElement* class_element = library->FirstChildElement("class");
-            while (class_element) {
-                std::string base_class_type = class_element->Attribute("base_class_type");
-                if(base_class_type == full_name_) {
-                    load = true;
-                    break;
-                }
-                class_element = class_element->NextSiblingElement( "class" );
-            }
+    void loadLibrary(const std::string& library_name, TiXmlElement* library)  {
+        if(!containsPlugins(library)) {
         }
-
-        if(!load) {
-            return "";
-        }
-
-        std::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(library_path));
-        loaders_[library_name] = loader;
 
         TiXmlElement* class_element = library->FirstChildElement("class");
         while (class_element) {
-            loadClass(library_name, class_element, loader.get());
+            loadClass(library_name, class_element);
 
             class_element = class_element->NextSiblingElement( "class" );
         }
-
-        return library_path;
     }
 
-    void loadClass(const std::string& library_name, TiXmlElement* class_element, class_loader::ClassLoader* loader) {
+    
+    void loadClass(const std::string& library_name, TiXmlElement* class_element) {
         std::string base_class_type = class_element->Attribute("base_class_type");
         std::string derived_class = class_element->Attribute("type");
-
+        
         std::string lookup_name;
         if(class_element->Attribute("name") != nullptr) {
             lookup_name = class_element->Attribute("name");
         } else {
             lookup_name = derived_class;
         }
-
+        
         if(base_class_type == full_name_){
             std::string description = readString(class_element, "description");
             std::string icon = readString(class_element, "icon");
             std::string tags = readString(class_element, "tags");
-
+            
             PluginConstructorM constructor;
             constructor.setType(lookup_name);
             constructor.setDescription(description);
             constructor.setIcon(icon);
             constructor.setTags(tags);
-
+            
             std::function< std::shared_ptr<M>(M*)> make_shared_ptr = [](M* p) { return std::shared_ptr<M>(p); };
-
-            auto ptr_maker = std::bind(&class_loader::ClassLoader::createUnmanagedInstance<M>, loader, lookup_name);
-            auto shared_ptr_maker = std::bind(make_shared_ptr, ptr_maker);
-            constructor.setConstructor(shared_ptr_maker);
+            
+            constructor.setConstructor([this, lookup_name]() {
+                return createInstance(lookup_name);
+            });
             constructor.setLibraryName(library_name);
-
+            
             registerConstructor(constructor);
+
+            plugin_to_library_[lookup_name] = library_name;
         }
     }
 
+    std::shared_ptr<M> createInstance(const std::string& lookup_name)
+    {
+        auto loader = getLoader(plugin_to_library_.at(lookup_name));
+        M* raw_ptr = loader->template createUnmanagedInstance<M>(lookup_name);
+        return std::shared_ptr<M>(raw_ptr);
+    }
+
+    std::shared_ptr<class_loader::ClassLoader> getLoader(const std::string& library_name)
+    {
+        std::string library_path = library_name + ".so";
+
+        auto pos = loaders_.find(library_path);
+        if(pos == loaders_.end()) {
+            try {
+                auto loader = std::make_shared<class_loader::ClassLoader>(library_path);
+                library_to_locator_[library_name]->setLibraryLoaded(library_name, library_path);
+
+                loaders_[library_path] = loader;
+
+                return loader;
+
+            } catch(const class_loader::ClassLoaderException& e) {
+                std::cerr << "cannot load library " << library_name << ": " << e.what() << std::endl;
+                library_to_locator_[library_name]->setLibraryError(library_name, e.what());
+            }
+
+            return nullptr;
+
+
+        } else {
+            return pos->second;
+        }
+    }
+    
     std::string readString(TiXmlElement* class_element, const std::string& name) {
         TiXmlElement* description = class_element->FirstChildElement(name);
         std::string description_str;
         if(description) {
             description_str = description->GetText() ? description->GetText() : "";
         }
-
+        
         return description_str;
+    }
+
+
+    bool containsPlugins(TiXmlElement* library)
+    {
+        TiXmlElement* class_element = library->FirstChildElement("class");
+        while (class_element) {
+            std::string base_class_type = class_element->Attribute("base_class_type");
+            if(base_class_type == full_name_) {
+                return true;
+            }
+            class_element = class_element->NextSiblingElement( "class" );
+        }
+
+        return false;
     }
 
 protected:
     csapex::slim_signal::Signal<void(const std::string&)> loaded;
-
+    
 protected:
     bool plugins_loaded_;
 
     std::map< std::string, std::shared_ptr<class_loader::ClassLoader> > loaders_;
-
+    std::map< std::string, std::string > plugin_to_library_;
+    
     std::vector<std::string> library_paths_;
-
+    std::map<std::string, csapex::PluginLocator*> library_to_locator_;
+    
     std::string full_name_;
     Constructors available_classes;
 };
@@ -209,11 +235,11 @@ public:
         static PluginManagerLocker instance;
         return instance.mutex;
     }
-
+    
 private:
     PluginManagerLocker()
     {}
-
+    
 private:
     std::mutex mutex;
 };
@@ -223,11 +249,11 @@ class PluginManager
 {
 protected:
     typedef PluginManagerImp<M> Parent;
-
+    
 public:
     typedef typename Parent::PluginConstructorM Constructor;
     typedef typename Parent::Constructors Constructors;
-
+    
     PluginManager(const std::string& full_name)
     {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
@@ -237,7 +263,7 @@ public:
         }
         instance->loaded.connect(loaded);
     }
-
+    
     virtual ~PluginManager()
     {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
@@ -246,18 +272,18 @@ public:
             delete instance;
         }
     }
-
+    
     virtual bool pluginsLoaded() const {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->plugins_loaded_;
     }
-
+    
     virtual void load(csapex::PluginLocator* locator) {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
-
+        
         instance->load(locator);
     }
-
+    
     const Constructors& getConstructors() const {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         return instance->available_classes;
@@ -270,16 +296,26 @@ public:
     }
     const Constructor& getConstructor(const std::string& key) const {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
-        return instance->available_classes[key];
+        return instance->available_classes.at(key);
     }
     Constructor& getConstructor(const std::string& key) {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
-        return instance->available_classes[key];
+        return instance->available_classes.at(key);
+    }
+
+    Constructor* getConstructorNoThrow(const std::string& key) {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
+        auto pos = instance->available_classes.find(key);
+        if(pos != instance->available_classes.end()) {
+            return &pos->second;
+        } else {
+            return nullptr;
+        }
     }
 
 public:
     csapex::slim_signal::Signal<void(const std::string&)> loaded;
-
+    
 protected:
     static int i_count;
     static Parent* instance;

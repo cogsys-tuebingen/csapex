@@ -28,7 +28,7 @@ public:
 
 private:
     void ensureLoaded();
-    void rebuildPrototypes();
+//    void rebuildPrototypes();
 
 protected:
     Settings& settings_;
