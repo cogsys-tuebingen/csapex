@@ -790,7 +790,7 @@ void model_updateAngleSpinParameter(param::AngleParameterWeakPtr angle_p, QDial*
     dial->setValue(angleToDial(p->as<double>()));
     dial->blockSignals(false);
 }
-void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, QDoubleSpinBox* /*spin*/)
+void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, QDoubleSpinBox* spin)
 {
     assertGuiThread();
     auto p = range_p.lock();
@@ -810,7 +810,7 @@ void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, 
     double val = angleToDial(angle);
 
     dial->setValue(val);
-    //spin->setValue(angle);
+    spin->setValue(angle);
 }
 
 // PROGRESS ////////////////////
@@ -1349,11 +1349,11 @@ void DefaultNodeAdapter::setupParameter(param::AngleParameterPtr angle_p)
     current_layout_->addWidget(dial);
 
     QDoubleSpinBox* spin = new QDoubleSpinBox;
-    spin->setValue(angle_p->as<double>());
     spin->setMinimum(-M_PI);
     spin->setMaximum(M_PI);
-    spin->setDecimals(4);
-    spin->setSingleStep(0.01);
+    spin->setDecimals(5);
+    spin->setSingleStep(0.001);
+    spin->setValue(angle_p->as<double>());
 
     current_layout_->addWidget(spin);
 
