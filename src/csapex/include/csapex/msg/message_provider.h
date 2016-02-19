@@ -34,6 +34,8 @@ public:
     virtual bool hasNext() = 0;
     virtual connection_types::Message::Ptr next(std::size_t slot) = 0;
 
+    virtual void restart();
+
     virtual std::vector<std::string> getExtensions() const = 0;
 
     virtual Memento::Ptr getState() const = 0;

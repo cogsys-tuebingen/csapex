@@ -17,6 +17,11 @@ MessageProvider::~MessageProvider()
 
 }
 
+void MessageProvider::restart()
+{
+
+}
+
 ConnectionType::ConstPtr MessageProvider::getType() const
 {
     return type_;
