@@ -28,12 +28,16 @@ Signal<Signature>::~Signal()
     while(!parents_.empty()) {
         removeParent(parents_.front());
     }
+
     while(!children_to_remove_.empty()) {
         removeChild(children_to_remove_.front());
     }
     while(!children_.empty()) {
         removeChild(children_.front());
     }
+
+    functions_.clear();
+    functions_to_remove_.clear();
 }
 
 

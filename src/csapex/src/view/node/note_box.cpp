@@ -101,8 +101,15 @@ void NoteBox::resizeEvent(QResizeEvent *e)
         return;
     }
 
-    note->setParameter("w", width());
-    note->setParameter("h", height());
+    if(note->hasParameter("w")) {
+        note->setParameter("w", width());
+    }
+
+    if(note->hasParameter("h")) {
+        note->setParameter("h", height());
+    }
+
+    Q_EMIT changed(this);
 }
 
 void NoteBox::construct()
@@ -130,8 +137,6 @@ void NoteBox::construct()
 
 void NoteBox::init()
 {
-    NodeBox::init();
-
     NodeHandlePtr nh = node_handle_.lock();
     if(!nh) {
         return;
@@ -146,6 +151,7 @@ void NoteBox::init()
 
     resize(note->readParameter<int>("w"), note->readParameter<int>("h"));
 
+    NodeBox::init();
 
 
     note->parameters_changed.connect([this](){

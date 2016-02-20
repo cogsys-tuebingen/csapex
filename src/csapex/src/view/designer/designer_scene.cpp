@@ -558,6 +558,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
         if(!preview_) {
             preview_ = new MessagePreviewWidget;
             preview_->hide();
+            addWidget(preview_);
         }
 
         preview_->setWindowTitle(QString::fromStdString("Output"));
@@ -565,7 +566,6 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
         if(!preview_->isConnected()) {
             preview_->connectTo(c->from());
-            addWidget(preview_);
         }
 
         update();

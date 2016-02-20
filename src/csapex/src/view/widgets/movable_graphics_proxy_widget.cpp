@@ -57,8 +57,6 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *
     }
 
     setZValue(z);
-
-    box_->show();
 }
 
 QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -84,7 +82,7 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
     QPoint pt = event->pos().toPoint();
     QWidget* child = widget()->childAt(pt);
 
-    bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
+//    bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
     bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
 
     if(!shift) {

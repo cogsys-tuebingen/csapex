@@ -45,6 +45,7 @@ public:
     std::vector<csapex::param::ParameterPtr> getPersistentParameters() const;
 
     std::size_t getParameterCount() const;
+    bool hasParameter(const std::string& name) const;
 
     template <typename T>
     T readParameter (const std::string& name) const;

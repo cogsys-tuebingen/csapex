@@ -144,8 +144,6 @@ void NodeBox::construct()
 
     setObjectName(QString::fromStdString(uuid.getFullName()));
 
-    installEventFilter(this);
-
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
@@ -178,6 +176,8 @@ void NodeBox::construct()
     }
 
     setupUi();
+
+    installEventFilter(this);
 }
 
 Node* NodeBox::getNode() const
@@ -429,6 +429,8 @@ void NodeBox::init()
     Point pt = state->getPos();
     move(QPoint(pt.x, pt.y));
     (*state->pos_changed)();
+
+    setVisible(true);
 }
 
 Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)

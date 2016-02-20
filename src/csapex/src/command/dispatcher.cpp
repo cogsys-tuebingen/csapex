@@ -22,7 +22,6 @@ CommandDispatcher::CommandDispatcher(Settings& settings, GraphFacade::Ptr root,
 
 void CommandDispatcher::reset()
 {
-    root_->reset();
     later.clear();
     done.clear();
     undone.clear();

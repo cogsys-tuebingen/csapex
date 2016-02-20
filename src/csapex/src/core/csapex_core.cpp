@@ -212,6 +212,8 @@ void CsApexCore::reset()
 {
     resetRequest();
 
+    root_->reset();
+
     resetDone();
 }
 

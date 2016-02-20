@@ -195,19 +195,14 @@ void Designer::closeView(int page)
 
 void Designer::removeGraph(GraphFacadePtr graph_facade)
 {
-    std::vector<GraphFacadePtr> graphs_;
-    std::map<Graph*, int> graph_tabs_;
-    std::map<Graph*, GraphView*> graph_views_;
-    std::map<GraphView*, GraphFacade*> view_graphs_;
-
     for(auto it = graphs_.begin(); it != graphs_.end(); ++it) {
-        if(*it == graph_facade) {
+        if(it->second == graph_facade) {
             Graph* graph = graph_facade->getGraph();
             GraphView* view = graph_views_[graph];
-            graph_tabs_.erase(graph);
             graph_views_.erase(graph);
             view_graphs_.erase(view);
             graphs_.erase(it);
+            delete view;
             return;
         }
     }

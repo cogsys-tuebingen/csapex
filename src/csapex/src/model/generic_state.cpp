@@ -256,6 +256,11 @@ std::size_t GenericState::getParameterCount() const
     return params.size();
 }
 
+bool GenericState::hasParameter(const std::string& name) const
+{
+    return params.find(name) != params.end();
+}
+
 template <typename T>
 T GenericState::readParameter(const std::string& name) const
 {

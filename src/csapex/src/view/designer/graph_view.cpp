@@ -151,27 +151,27 @@ GraphView::~GraphView()
 
 void GraphView::paintEvent(QPaintEvent *e)
 {
+    if(!scene_->isEmpty()) {
+        QPointF tl_view = mapToScene(QPoint(0, 0));
+        QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
 
-    QPointF tl_view = mapToScene(QPoint(0, 0));
-    QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
+        QPointF mid = 0.5 * (tl_view + br_view);
 
-    QPointF mid = 0.5 * (tl_view + br_view);
-
-    {
-        QPointF pos(tl_view.x(),
-                    mid.y() - relayed_outputs_widget_->height() / 2.0);
-        if(pos != relayed_outputs_widget_proxy_->pos()) {
-            relayed_outputs_widget_proxy_->setPos(pos);
+        {
+            QPointF pos(tl_view.x(),
+                        mid.y() - relayed_outputs_widget_->height() / 2.0);
+            if(pos != relayed_outputs_widget_proxy_->pos()) {
+                relayed_outputs_widget_proxy_->setPos(pos);
+            }
+        }
+        {
+            QPointF pos(br_view.x()-relayed_inputs_widget_->width(),
+                        mid.y() - relayed_inputs_widget_->height() / 2.0);
+            if(pos != relayed_inputs_widget_proxy_->pos()) {
+                relayed_inputs_widget_proxy_->setPos(pos);
+            }
         }
     }
-    {
-        QPointF pos(br_view.x()-relayed_inputs_widget_->width(),
-                    mid.y() - relayed_inputs_widget_->height() / 2.0);
-        if(pos != relayed_inputs_widget_proxy_->pos()) {
-            relayed_inputs_widget_proxy_->setPos(pos);
-        }
-    }
-
     QGraphicsView::paintEvent(e);
 
     Q_EMIT viewChanged();
@@ -216,6 +216,21 @@ void GraphView::centerOnPoint(QPointF point)
 void GraphView::reset()
 {
     scene_->clear();
+    boxes_.clear();
+    selected_boxes_.clear();
+    profiling_.clear();
+    profiling_connections_.clear();
+
+    box_map_.clear();
+    proxy_map_.clear();
+    port_map_.clear();
+
+    relayed_outputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::OUTPUT, scene_);
+    relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
+
+    relayed_inputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::INPUT, scene_);
+    relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
+
     update();
 }
 

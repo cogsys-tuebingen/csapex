@@ -69,7 +69,12 @@ MessageRendererPtr MessageRendererManager::createMessageRenderer(const Connectio
 
     const ConnectionType& m = *message;
     try {
-        return renderers.at(std::type_index(typeid(m)));
+        auto pos = renderers.find(std::type_index(typeid(m)));
+        if(pos != renderers.end()) {
+            return pos->second;
+        } else {
+            return nullptr;
+        }
     } catch(const std::exception& /*e*/) {
         throw std::runtime_error(std::string("cannot create message renderer for ") + type2name(typeid(m)));
     }

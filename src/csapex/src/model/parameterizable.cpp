@@ -226,6 +226,11 @@ std::size_t Parameterizable::getParameterCount() const
     return parameter_state_->getParameterCount();
 }
 
+bool Parameterizable::hasParameter(const std::string &name) const
+{
+    return parameter_state_->hasParameter(name);
+}
+
 csapex::param::Parameter::Ptr Parameterizable::getParameter(const std::string &name) const
 {
     return parameter_state_->getParameter(name);
