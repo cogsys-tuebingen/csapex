@@ -79,6 +79,15 @@ std::string SetParameter::convertToString(const boost::any &v) const
     return ss.str();
 }
 
+std::vector<std::string> SetParameter::getSetTexts() const
+{
+    std::vector<std::string> res;
+    for(const auto& pair : set_) {
+        res.push_back(pair.first);
+    }
+    return res;
+}
+
 std::string SetParameter::getText(int idx) const
 {
     std::map<std::string, boost::any>::const_iterator i = set_.begin();

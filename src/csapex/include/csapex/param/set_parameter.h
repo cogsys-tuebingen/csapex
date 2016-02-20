@@ -55,6 +55,7 @@ public:
     }
 
     void setSet(const std::vector<std::string>& set);
+    std::vector<std::string> getSetTexts() const;
 
     void setByName(const std::string& name);
 
