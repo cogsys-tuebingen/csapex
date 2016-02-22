@@ -46,6 +46,7 @@
 #include <functional>
 #include <QLabel>
 #include <qxt5/qxtspanslider.h>
+#include <QPointer>
 
 using namespace csapex;
 using namespace boost::lambda;
@@ -397,11 +398,11 @@ QString toColorSS(const std::vector<int>& v) {
 }
 
 // COLOR ////////////////////
-void ui_updateColorParameter(param::ColorParameterWeakPtr color_p, QPushButton* btn)
+void ui_updateColorParameter(param::ColorParameterWeakPtr color_p, QPointer<QPushButton> btn)
 {
     assertGuiThread();
     auto p = color_p.lock();
-    if(!p) {
+    if(!p || !btn) {
         return;
     }
     btn->setStyleSheet(toColorSS(p->value()));
@@ -428,21 +429,21 @@ void model_updateColorParameter(param::ColorParameterWeakPtr color_p)
 }
 
 // PATH ////////////////////
-void ui_updatePathParameter(param::PathParameterWeakPtr path_p, QLineEdit* path)
+void ui_updatePathParameter(param::PathParameterWeakPtr path_p, QPointer<QLineEdit> path)
 {
     assertGuiThread();
     auto p = path_p.lock();
-    if(!p) {
+    if(!p || !path) {
         return;
     }
     path->setText(QString::fromStdString(p->as<std::string>()));
 }
 
-void model_updatePathParameter(param::PathParameterWeakPtr path_p, QLineEdit* path)
+void model_updatePathParameter(param::PathParameterWeakPtr path_p, QPointer<QLineEdit> path)
 {
     assertNotGuiThread();
     auto p = path_p.lock();
-    if(!p) {
+    if(!p || !path) {
         return;
     }
     auto path_str = path->text().toStdString();
@@ -491,119 +492,119 @@ void ui_updatePathParameterDialog(param::PathParameterWeakPtr path_p)
 }
 
 // VALUE ////////////////////
-void ui_updateStringValueParameter(param::ValueParameterWeakPtr value_p, QLineEdit* txt)
+void ui_updateStringValueParameter(param::ValueParameterWeakPtr value_p, QPointer<QLineEdit> txt)
 {
     assertGuiThread();
     auto p = value_p.lock();
-    if(!p) {
+    if(!p || !txt) {
         return;
     }
     txt->setText(QString::fromStdString(p->as<std::string>()));
 }
-void model_updateStringValueParameter(param::ValueParameterWeakPtr value_p, QLineEdit* txt)
+void model_updateStringValueParameter(param::ValueParameterWeakPtr value_p, QPointer<QLineEdit> txt)
 {
     assertNotGuiThread();
     auto p = value_p.lock();
-    if(!p) {
+    if(!p || !txt) {
         return;
     }
     p->set<std::string>(txt->text().toStdString());
 }
 
-void ui_updateBoolValueParameter(param::ValueParameterWeakPtr value_p, QCheckBox* cb)
+void ui_updateBoolValueParameter(param::ValueParameterWeakPtr value_p, QPointer<QCheckBox> cb)
 {
     assertGuiThread();
     auto p = value_p.lock();
-    if(!p) {
+    if(!p || !cb) {
         return;
     }
     cb->setChecked(p->as<bool>());
 }
-void model_updateBoolValueParameter(param::ValueParameterWeakPtr value_p, QCheckBox* cb)
+void model_updateBoolValueParameter(param::ValueParameterWeakPtr value_p, QPointer<QCheckBox> cb)
 {
     assertNotGuiThread();
     auto p = value_p.lock();
-    if(!p) {
+    if(!p || !cb) {
         return;
     }
     p->set<bool>(cb->isChecked());
 }
 
 template <typename T, typename Widget>
-void ui_updateValueParameter(param::ValueParameterWeakPtr value_p, Widget* box)
+void ui_updateValueParameter(param::ValueParameterWeakPtr value_p, QPointer<Widget> box)
 {
     assertGuiThread();
     auto p = value_p.lock();
-    if(!p) {
+    if(!p || !box) {
         return;
     }
     box->setValue(p->as<T>());
 }
 template <typename T, typename Widget>
-void model_updateValueParameter(param::ValueParameterWeakPtr value_p, Widget* box)
+void model_updateValueParameter(param::ValueParameterWeakPtr value_p, QPointer<Widget> box)
 {
     assertNotGuiThread();
     auto p = value_p.lock();
-    if(!p) {
+    if(!p || !box) {
         return;
     }
     p->set<T>(box->value());
 }
 
 // RANGE ////////////////////
-void ui_updateIntRangeParameter(param::RangeParameterWeakPtr range_p, QIntSlider* slider)
+void ui_updateIntRangeParameter(param::RangeParameterWeakPtr range_p, QPointer<QIntSlider> slider)
 {
     assertGuiThread();
     auto p = range_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     slider->setIntValue(p->as<int>());
 }
-void model_updateIntRangeParameter(param::RangeParameterWeakPtr range_p, QIntSlider* slider)
+void model_updateIntRangeParameter(param::RangeParameterWeakPtr range_p, QPointer<QIntSlider> slider)
 {
     assertNotGuiThread();
     auto p = range_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     p->set<int>(slider->intValue());
 }
 
-void ui_updateIntRangeParameterScope(param::RangeParameterWeakPtr range_p, QIntSlider* slider)
+void ui_updateIntRangeParameterScope(param::RangeParameterWeakPtr range_p, QPointer<QIntSlider> slider)
 {
     assertGuiThread();
     auto p = range_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     slider->setIntRange(p->min<int>(), p->max<int>());
 }
 
-void ui_updateDoubleRangeParameter(param::RangeParameterWeakPtr range_p, QDoubleSlider* slider)
+void ui_updateDoubleRangeParameter(param::RangeParameterWeakPtr range_p, QPointer<QDoubleSlider> slider)
 {
     assertGuiThread();
     auto p = range_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     slider->setDoubleValue(p->as<double>());
 }
-void model_updateDoubleRangeParameter(param::RangeParameterWeakPtr range_p, QDoubleSlider* slider)
+void model_updateDoubleRangeParameter(param::RangeParameterWeakPtr range_p, QPointer<QDoubleSlider> slider)
 {
     assertNotGuiThread();
     auto p = range_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     p->set<double>(slider->doubleValue());
 }
 
-void ui_updateDoubleRangeParameterScope(param::RangeParameterWeakPtr range_p, QDoubleSlider* slider)
+void ui_updateDoubleRangeParameterScope(param::RangeParameterWeakPtr range_p, QPointer<QDoubleSlider> slider)
 {
     assertGuiThread();
     auto p = range_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     slider->setDoubleRange(p->min<double>(), p->max<double>());
@@ -611,52 +612,52 @@ void ui_updateDoubleRangeParameterScope(param::RangeParameterWeakPtr range_p, QD
 
 // INTERVAL ////////////////////
 template <typename T, typename Widget>
-void ui_updateIntervalParameter(param::IntervalParameterWeakPtr interval_p, Widget* slider)
+void ui_updateIntervalParameter(param::IntervalParameterWeakPtr interval_p, QPointer<Widget> slider)
 {
     assertGuiThread();
     auto p = interval_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     slider->setSpan(p->lower<T>(), p->upper<T>());
 }
 
-void model_updateIntIntervalParameter(param::IntervalParameterWeakPtr interval_p, QxtSpanSlider* slider)
+void model_updateIntIntervalParameter(param::IntervalParameterWeakPtr interval_p, QPointer<QxtSpanSlider> slider)
 {
     assertNotGuiThread();
     auto p = interval_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     p->set(std::make_pair(slider->lowerValue(), slider->upperValue()));
 }
-void model_updateDoubleIntervalParameter(param::IntervalParameterWeakPtr interval_p, DoubleSpanSlider* slider)
+void model_updateDoubleIntervalParameter(param::IntervalParameterWeakPtr interval_p, QPointer<DoubleSpanSlider> slider)
 {
     assertNotGuiThread();
     auto p = interval_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     p->set(std::make_pair(slider->lowerDoubleValue(), slider->upperDoubleValue()));
 }
 
 template <typename T, typename Widget>
-void ui_updateIntervalParameterScope(param::IntervalParameterWeakPtr interval_p, Widget* slider)
+void ui_updateIntervalParameterScope(param::IntervalParameterWeakPtr interval_p, QPointer<Widget> slider)
 {
     assertGuiThread();
     auto p = interval_p.lock();
-    if(!p) {
+    if(!p || !slider) {
         return;
     }
     slider->setRange(p->min<T>(), p->max<T>());
 }
 
 // SET ////////////////////
-void ui_updateSetParameter(param::SetParameterWeakPtr set_p, QComboBox* combo)
+void ui_updateSetParameter(param::SetParameterWeakPtr set_p, QPointer<QComboBox> combo)
 {
     assertGuiThread();
     auto p = set_p.lock();
-    if(!p) {
+    if(!p || !combo) {
         return;
     }
     int index = combo->findData(QString::fromStdString(p->getText()));
@@ -664,10 +665,10 @@ void ui_updateSetParameter(param::SetParameterWeakPtr set_p, QComboBox* combo)
         combo->setCurrentIndex(index);
     }
 }
-void model_updateSetParameter(param::SetParameterWeakPtr set_p, QComboBox* combo)
+void model_updateSetParameter(param::SetParameterWeakPtr set_p, QPointer<QComboBox> combo)
 {
     auto p = set_p.lock();
-    if(!p) {
+    if(!p || !combo) {
         return;
     }
     if(!combo->currentText().isEmpty()) {
@@ -676,11 +677,11 @@ void model_updateSetParameter(param::SetParameterWeakPtr set_p, QComboBox* combo
     }
 }
 
-void ui_updateSetParameterScope(param::SetParameterWeakPtr set_p, QComboBox* combo)
+void ui_updateSetParameterScope(param::SetParameterWeakPtr set_p, QPointer<QComboBox> combo)
 {
     assertGuiThread();
     auto p = set_p.lock();
-    if(!p) {
+    if(!p || !combo) {
         return;
     }
 
@@ -705,20 +706,20 @@ void ui_updateSetParameterScope(param::SetParameterWeakPtr set_p, QComboBox* com
 }
 
 // BITSET ////////////////////
-void ui_updateBitSetParameter(param::BitSetParameterWeakPtr bitset_p, QCheckBox* item, const std::string& str)
+void ui_updateBitSetParameter(param::BitSetParameterWeakPtr bitset_p, QPointer<QCheckBox> item, const std::string& str)
 {
     assertGuiThread();
     auto p = bitset_p.lock();
-    if(!p) {
+    if(!p || !item) {
         return;
     }
     item->setChecked(p->isSet(str));
 }
-void model_updateBitSetParameter(param::BitSetParameterWeakPtr bitset_p, QCheckBox* item, const std::string& str)
+void model_updateBitSetParameter(param::BitSetParameterWeakPtr bitset_p, QPointer<QCheckBox> item, const std::string& str)
 {
     assertNotGuiThread();
     auto p = bitset_p.lock();
-    if(!p) {
+    if(!p || !item) {
         return;
     }
     p->setBitTo(str, item->isChecked());
@@ -744,11 +745,11 @@ double dialToAngle(double dial)
     return normalizeAngle(dial  / 4.0 / 180.0 * M_PI - M_PI);
 }
 
-void model_updateAngleDialParameter(param::AngleParameterWeakPtr angle_p, QDial* dial, QDoubleSpinBox* spin)
+void model_updateAngleDialParameter(param::AngleParameterWeakPtr angle_p, QPointer<QDial> dial, QPointer<QDoubleSpinBox> spin)
 {
     assertNotGuiThread();
     auto p = angle_p.lock();
-    if(!p) {
+    if(!p || !dial  || !spin) {
         return;
     }
 
@@ -767,11 +768,11 @@ void model_updateAngleDialParameter(param::AngleParameterWeakPtr angle_p, QDial*
     spin->setValue(angle);
     spin->blockSignals(false);
 }
-void model_updateAngleSpinParameter(param::AngleParameterWeakPtr angle_p, QDial* dial, QDoubleSpinBox* spin)
+void model_updateAngleSpinParameter(param::AngleParameterWeakPtr angle_p, QPointer<QDial> dial, QPointer<QDoubleSpinBox> spin)
 {
     assertNotGuiThread();
     auto p = angle_p.lock();
-    if(!p) {
+    if(!p || !dial  || !spin) {
         return;
     }
 
@@ -790,11 +791,11 @@ void model_updateAngleSpinParameter(param::AngleParameterWeakPtr angle_p, QDial*
     dial->setValue(angleToDial(p->as<double>()));
     dial->blockSignals(false);
 }
-void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, QDoubleSpinBox* spin)
+void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QPointer<QDial> dial, QPointer<QDoubleSpinBox> spin)
 {
     assertGuiThread();
     auto p = range_p.lock();
-    if(!p) {
+    if(!p || !dial  || !spin) {
         return;
     }
 
@@ -814,20 +815,20 @@ void ui_updateAngleParameter(param::AngleParameterWeakPtr range_p, QDial* dial, 
 }
 
 // PROGRESS ////////////////////
-void ui_updateProgressParameter(param::OutputProgressParameterWeakPtr progress_p, QProgressBar* bar)
+void ui_updateProgressParameter(param::OutputProgressParameterWeakPtr progress_p, QPointer<QProgressBar> bar)
 {
     assertGuiThread();
     auto p = progress_p.lock();
-    if(!p) {
+    if(!p || !bar) {
         return;
     }
     bar->setValue(p->getProgress());
 }
-void ui_updateProgressScope(param::OutputProgressParameterWeakPtr progress_p, QProgressBar* bar)
+void ui_updateProgressScope(param::OutputProgressParameterWeakPtr progress_p, QPointer<QProgressBar> bar)
 {
     assertGuiThread();
     auto p = progress_p.lock();
-    if(!p) {
+    if(!p || !bar) {
         return;
     }
     bar->setMaximum(p->getProgressMaximum());
@@ -1062,7 +1063,7 @@ qt_helper::Call * DefaultNodeAdapter::makePausedUiCall(std::function<void()> cb)
 
 void DefaultNodeAdapter::setupParameter(param::TriggerParameterPtr trigger_p)
 {
-    QPushButton* btn = new QPushButton(trigger_p->name().c_str());
+    QPointer<QPushButton> btn = new QPushButton(trigger_p->name().c_str());
 
     QHBoxLayout* sub = new QHBoxLayout;
     sub->addWidget(btn);
@@ -1074,7 +1075,7 @@ void DefaultNodeAdapter::setupParameter(param::TriggerParameterPtr trigger_p)
 
 void DefaultNodeAdapter::setupParameter(param::ColorParameterPtr color_p)
 {
-    QPushButton* btn = new QPushButton;
+    QPointer<QPushButton> btn = new QPushButton;
 
     btn->setStyleSheet(toColorSS(color_p->value()));
 
@@ -1092,8 +1093,8 @@ void DefaultNodeAdapter::setupParameter(param::ColorParameterPtr color_p)
 
 void DefaultNodeAdapter::setupParameter(param::PathParameterPtr path_p)
 {
-    QLineEdit* path = new QLineEdit(path_p->as<std::string>().c_str());
-    QPushButton* select = new QPushButton("select");
+    QPointer<QLineEdit> path = new QLineEdit(path_p->as<std::string>().c_str());
+    QPointer<QPushButton> select = new QPushButton("select");
 
     QHBoxLayout* sub = new QHBoxLayout;
 
@@ -1116,9 +1117,9 @@ void DefaultNodeAdapter::setupParameter(param::PathParameterPtr path_p)
 void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
 {
     if(value_p->is<std::string>()) {
-        QLineEdit* txt = new QLineEdit;
+        QPointer<QLineEdit> txt = new QLineEdit;
         txt->setText(value_p->as<std::string>().c_str());
-        QPushButton* send = new QPushButton("set");
+        QPointer<QPushButton> send = new QPushButton("set");
 
         QHBoxLayout* sub = new QHBoxLayout;
 
@@ -1136,7 +1137,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
         bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateStringValueParameter, value_p, txt));
 
     } else if(value_p->is<bool>()) {
-        QCheckBox* box = new QCheckBox;
+        QPointer<QCheckBox> box = new QCheckBox;
         box->setChecked(value_p->as<bool>());
 
         current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p), value_p.get()));
@@ -1150,7 +1151,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
 
 
     } else if(value_p->is<double>()) {
-        QDoubleSpinBox* box = new QDoubleSpinBox;
+        QPointer<QDoubleSpinBox> box = new QDoubleSpinBox;
         box->setDecimals(10);
         box->setMaximum(1e12);
         box->setMinimum(-1e12);
@@ -1166,7 +1167,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
         bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
 
     }  else if(value_p->is<int>()) {
-        QSpinBox* box = new QSpinBox;
+        QPointer<QSpinBox> box = new QSpinBox;
         box->setMaximum(std::numeric_limits<int>::max());
         box->setMinimum(std::numeric_limits<int>::min());
         box->setValue(value_p->as<int>());
@@ -1188,7 +1189,7 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
 void DefaultNodeAdapter::setupParameter(param::RangeParameterPtr range_p)
 {
     if(range_p->is<int>()) {
-        QIntSlider* slider = makeIntSlider(current_layout_, current_display_name_ ,
+        QPointer<QIntSlider> slider = makeIntSlider(current_layout_, current_display_name_ ,
                                            range_p->def<int>(), range_p->min<int>(), range_p->max<int>(), range_p->step<int>(),
                                            range_p,
                                            new ParameterContextMenu(range_p));
@@ -1198,6 +1199,8 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameterPtr range_p)
         qt_helper::Call* call = makeModelCall(std::bind(&model_updateIntRangeParameter, range_p, slider));
         QObject::connect(slider, SIGNAL(intValueChanged(int)), call, SLOT(call()));
 
+        QObject::connect(slider, SIGNAL(destroyed(QObject*)), call, SLOT(invalidate()));
+
         // model change -> ui
         bridge.connectInGuiThread(range_p->parameter_changed, std::bind(&ui_updateIntRangeParameter, range_p, slider));
 
@@ -1205,7 +1208,7 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameterPtr range_p)
         bridge.connectInGuiThread(range_p->scope_changed, std::bind(&ui_updateIntRangeParameterScope, range_p, slider));
 
     } else if(range_p->is<double>()) {
-        QDoubleSlider* slider = makeDoubleSlider(current_layout_, current_display_name_ , range_p, new ParameterContextMenu(range_p));
+        QPointer<QDoubleSlider> slider = makeDoubleSlider(current_layout_, current_display_name_ , range_p, new ParameterContextMenu(range_p));
         slider->setDoubleValue(range_p->as<double>());
 
         // ui change -> model
@@ -1227,7 +1230,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)
 {
     if(interval_p->is<std::pair<int, int> >()) {
         const std::pair<int,int>& v = interval_p->as<std::pair<int,int> >();
-        QxtSpanSlider* slider = makeSpanSlider(current_layout_, current_display_name_,
+        QPointer<QxtSpanSlider> slider = makeSpanSlider(current_layout_, current_display_name_,
                                                v.first, v.second, interval_p->min<int>(), interval_p->max<int>(),
                                                interval_p,
                                                new ParameterContextMenu(interval_p));
@@ -1245,7 +1248,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)
 
     } else if(interval_p->is<std::pair<double, double> >()) {
         const std::pair<double,double>& v = interval_p->as<std::pair<double,double> >();
-        DoubleSpanSlider* slider = makeDoubleSpanSlider(current_layout_, current_display_name_,
+        QPointer<DoubleSpanSlider> slider = makeDoubleSpanSlider(current_layout_, current_display_name_,
                                                            v.first, v.second, interval_p->min<double>(), interval_p->max<double>(), interval_p->step<double>(),
                                                            new ParameterContextMenu(interval_p));
 
@@ -1267,7 +1270,7 @@ void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)
 
 void DefaultNodeAdapter::setupParameter(param::SetParameterPtr set_p)
 {
-    QComboBox* combo = new QComboBox;
+    QPointer<QComboBox> combo = new QComboBox;
 
     ui_updateSetParameterScope(set_p, combo);
     current_layout_->addLayout(QtHelper::wrap(current_display_name_, combo, new ParameterContextMenu(set_p)));
@@ -1286,7 +1289,7 @@ void DefaultNodeAdapter::setupParameter(param::SetParameterPtr set_p)
 
 void DefaultNodeAdapter::setupParameter(param::BitSetParameterPtr bitset_p)
 {
-    QGroupBox* group = new QGroupBox(current_name_.c_str());
+    QPointer<QGroupBox> group = new QGroupBox(current_name_.c_str());
     QVBoxLayout* l = new QVBoxLayout;
     group->setLayout(l);
 
@@ -1337,7 +1340,7 @@ void DefaultNodeAdapter::setupParameter(param::AngleParameterPtr angle_p)
 
     current_layout_->addWidget(label);
 
-    QDial* dial = new QDial;
+    QPointer<QDial> dial = new QDial;
     dial->setMinimum(0);
     dial->setMaximum(360.0 * 4);
     dial->setWrapping(true);
@@ -1348,7 +1351,7 @@ void DefaultNodeAdapter::setupParameter(param::AngleParameterPtr angle_p)
 
     current_layout_->addWidget(dial);
 
-    QDoubleSpinBox* spin = new QDoubleSpinBox;
+    QPointer<QDoubleSpinBox> spin = new QDoubleSpinBox;
     spin->setMinimum(-M_PI);
     spin->setMaximum(M_PI);
     spin->setDecimals(5);
@@ -1370,7 +1373,7 @@ void DefaultNodeAdapter::setupParameter(param::AngleParameterPtr angle_p)
 
 void DefaultNodeAdapter::setupParameter(param::OutputProgressParameterPtr progress)
 {
-    QProgressBar* bar = new QProgressBar;
+    QPointer<QProgressBar> bar = new QProgressBar;
     bar->setValue(progress->getProgress());
     bar->setMaximum(progress->getProgressMaximum());
     bar->setFormat(QString::fromStdString(progress->name()) + ": %p%");

@@ -66,6 +66,8 @@ public:
     bool isProcessingEnabled() const;
     void setProcessingEnabled(bool e);
 
+    void synchronize();
+
     void setProfiling(bool profiling);
     bool isProfiling() const;
 
@@ -152,6 +154,8 @@ private:
     Trigger* trigger_tick_done_;
     Trigger* trigger_process_done_;
 
+    Slot* sync_slot_;
+    bool wait_for_sync_;
 
     std::vector<csapex::slim_signal::Connection> handle_connections_;
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;

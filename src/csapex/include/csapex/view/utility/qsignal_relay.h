@@ -15,16 +15,23 @@ class Call : public QObject
 
 public:
     Call(CB cb)
-        : cb_(cb)
+        : cb_(cb), valid_(true)
     {}
 
 public Q_SLOTS:
     void call() {
-        cb_();
+        if(valid_) {
+            cb_();
+        }
+    }
+
+    void invalidate() {
+        valid_ = false;
     }
 
 private:
     CB cb_;
+    bool valid_;
 };
 
 }

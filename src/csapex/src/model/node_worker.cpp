@@ -53,6 +53,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             node_handle_->addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
             node_handle_->addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
+            sync_slot_ = node_handle_->addSlot("sync", std::bind(&NodeWorker::synchronize, this), false);
 
             auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
             if(tickable) {
@@ -190,6 +191,11 @@ void NodeWorker::setProcessingEnabled(bool e)
 
     checkIO();
     enabled(e);
+}
+
+void NodeWorker::synchronize()
+{
+    wait_for_sync_ = false;
 }
 
 bool NodeWorker::isWaitingForTrigger() const
@@ -423,13 +429,16 @@ void NodeWorker::finishProcessingMessages(bool was_executed)
         }
     }
 
-    if(getState() == State::PROCESSING) {
-        sendMessages();
+    if(getState() == State::PROCESSING) {        
+        if(!node_handle_->isSink()) {
+            sendMessages();
+        }
 
         setState(State::IDLE);
 
         messages_processed();
     }
+
 
     if(was_executed) {
         triggerCheckTransitions();
@@ -627,6 +636,12 @@ bool NodeWorker::tick()
         return false;
     }
 
+    if(sync_slot_->isConnected()) {
+        if(wait_for_sync_) {
+            return false;
+        }
+    }
+
     bool has_ticked = false;
 
     if(isProcessingEnabled()) {
@@ -696,6 +711,10 @@ bool NodeWorker::tick()
                     if(has_msg) {
                         node_handle_->getOutputTransition()->setConnectionsReadyToReceive();
                         sendMessages();
+
+                        if(sync_slot_->isConnected()) {
+                            wait_for_sync_ = true;
+                        }
 
                     } else {
                         node_handle_->getOutputTransition()->abortSendingMessages();
