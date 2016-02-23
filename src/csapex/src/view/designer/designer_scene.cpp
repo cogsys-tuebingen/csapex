@@ -1014,17 +1014,17 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     }
 
     if(ccs.hidden_from) {
-        color_start.setAlpha(30);
+        color_start.setAlpha(60);
     }
     if(ccs.hidden_to) {
-        color_end.setAlpha(30);
+        color_end.setAlpha(60);
     }
 
     if(!ccs.source_established) {
-        color_start.setAlpha(30);
+        color_start.setAlpha(60);
     }
     if(!ccs.sink_established) {
-        color_end.setAlpha(30);
+        color_end.setAlpha(60);
     }
 
     QLinearGradient lg(from, to);

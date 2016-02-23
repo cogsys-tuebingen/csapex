@@ -258,6 +258,10 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
 
 void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
 {
+    if(!uuid_provider_) {
+        return;
+    }
+
     if(p->is<int>()) {
         makeParameterConnectableImpl<int>(p);
     } else if(p->is<double>()) {
