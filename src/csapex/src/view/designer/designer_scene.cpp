@@ -800,6 +800,8 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     ccs.minimized_to = top->isMinimizedSize();
     ccs.hidden_from = !fromp->isVisible();
     ccs.hidden_to = !top->isVisible();
+    ccs.selected_from = fromp->property("focused").toBool();
+    ccs.selected_to = top->property("focused").toBool();
 
     Graph* graph = graph_facade_->getGraph();
 
@@ -997,20 +999,32 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     } else if(ccs.disabled) {
         color_start = style_->lineColorDisabled();
         color_end = style_->lineColorDisabled();
+
+    }
+    if(ccs.selected_from) {
+        color_start.setAlpha(255);
+    } else {
+        color_start.setAlpha(100);
+    }
+
+    if(ccs.selected_to) {
+        color_end.setAlpha(255);
+    }else {
+        color_end.setAlpha(100);
     }
 
     if(ccs.hidden_from) {
-        color_start.setAlpha(60);
+        color_start.setAlpha(30);
     }
     if(ccs.hidden_to) {
-        color_end.setAlpha(60);
+        color_end.setAlpha(30);
     }
 
     if(!ccs.source_established) {
-        color_start.setAlpha(60);
+        color_start.setAlpha(30);
     }
     if(!ccs.sink_established) {
-        color_end.setAlpha(60);
+        color_end.setAlpha(30);
     }
 
     QLinearGradient lg(from, to);

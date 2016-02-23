@@ -611,6 +611,9 @@ void NodeBox::triggerPlaced()
 void NodeBox::setSelected(bool selected)
 {
     setProperty("focused",selected);
+    for(Port* port : findChildren<Port*>()) {
+        port->setProperty("focused",selected);
+    }
     refreshStylesheet();
 }
 

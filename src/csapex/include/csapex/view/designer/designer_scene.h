@@ -127,6 +127,8 @@ private:
         bool minimized;
         bool hidden_from;
         bool hidden_to;
+        bool selected_from;
+        bool selected_to;
 
         ConnectionType type;
 
