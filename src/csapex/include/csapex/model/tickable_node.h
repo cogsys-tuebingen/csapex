@@ -11,7 +11,8 @@ class TickableNode : public Node
 {
 public:
     virtual bool canTick();
-    virtual void tick(csapex::NodeModifier& node_modifier, csapex::Parameterizable& /*parameters*/);
+
+    virtual bool tick(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
     virtual void tick();
 
     bool isTickEnabled() const;

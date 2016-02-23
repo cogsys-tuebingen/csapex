@@ -53,11 +53,12 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             node_handle_->addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
             node_handle_->addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
-            sync_slot_ = node_handle_->addSlot("sync", std::bind(&NodeWorker::synchronize, this), false);
+
 
             auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
             if(tickable) {
                 trigger_tick_done_ = node_handle_->addTrigger("ticked");
+                sync_slot_ = node_handle_->addSlot("sync", std::bind(&NodeWorker::synchronize, this), false);
             }
             trigger_process_done_ = node_handle_->addTrigger("inputs\nprocessed");
 
@@ -429,7 +430,7 @@ void NodeWorker::finishProcessingMessages(bool was_executed)
         }
     }
 
-    if(getState() == State::PROCESSING) {        
+    if(getState() == State::PROCESSING) {
         if(!node_handle_->isSink()) {
             sendMessages();
         }
@@ -678,46 +679,46 @@ bool NodeWorker::tick()
                     }
                     node->useTimer(t.get());
 
-                    tickable->tick(*node_handle_, *node);
+                    has_ticked = tickable->tick(*node_handle_, *node);
 
-                    has_ticked = true;
-
-                    if(trigger_tick_done_->isConnected()) {
-                        if(t) {
-                            t->step("trigger tick done");
-                        }
-                        trigger_tick_done_->trigger();
-                    }
-
-                    ticked();
-
-                    ++ticks_;
-
-                    bool has_msg = false;
-                    for(OutputPtr out : node_handle_->getAllOutputs()) {
-                        if(msg::isConnected(out.get())) {
-                            if(node_handle_->isParameterOutput(out.get())) {
-                                has_msg = true;
-                                break;
-                            }
-                            if(msg::hasMessage(out.get())) {
-                                has_msg = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
-                    if(has_msg) {
-                        node_handle_->getOutputTransition()->setConnectionsReadyToReceive();
-                        sendMessages();
-
+                    if(has_ticked) {
                         if(sync_slot_->isConnected()) {
                             wait_for_sync_ = true;
                         }
 
-                    } else {
-                        node_handle_->getOutputTransition()->abortSendingMessages();
+                        if(trigger_tick_done_->isConnected()) {
+                            if(t) {
+                                t->step("trigger tick done");
+                            }
+                            trigger_tick_done_->trigger();
+                        }
+
+                        ticked();
+
+                        ++ticks_;
+
+                        bool has_msg = false;
+                        for(OutputPtr out : node_handle_->getAllOutputs()) {
+                            if(msg::isConnected(out.get())) {
+                                if(node_handle_->isParameterOutput(out.get())) {
+                                    has_msg = true;
+                                    break;
+                                }
+                                if(msg::hasMessage(out.get())) {
+                                    has_msg = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
+                        if(has_msg) {
+                            node_handle_->getOutputTransition()->setConnectionsReadyToReceive();
+                            sendMessages();
+
+                        } else {
+                            node_handle_->getOutputTransition()->abortSendingMessages();
+                        }
                     }
 
                     if(t) {

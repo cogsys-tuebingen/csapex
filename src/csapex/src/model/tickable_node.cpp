@@ -40,9 +40,10 @@ bool TickableNode::isImmediate() const
     return tick_immediate_;
 }
 
-void TickableNode::tick(NodeModifier &node_modifier, Parameterizable &)
+bool TickableNode::tick(NodeModifier &nm, Parameterizable &p)
 {
     tick();
+    return true;
 }
 
 void TickableNode::tick()
