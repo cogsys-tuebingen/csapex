@@ -45,6 +45,10 @@ public:
         return false;
     }
 
+    virtual bool isVirtual() const {
+        return false;
+    }
+
     virtual void addConnection(ConnectionPtr connection);
     virtual void fadeConnection(ConnectionPtr connection);
 

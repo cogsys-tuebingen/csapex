@@ -89,7 +89,7 @@ private:
 private:
     struct TempConnection {
         TempConnection(bool is_connected)
-            : is_connected(is_connected)
+            : is_connected(is_connected), from(nullptr), to_c(nullptr)
         {}
 
         bool is_connected;

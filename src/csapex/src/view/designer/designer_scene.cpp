@@ -363,34 +363,6 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             continue;
         }
 
-        // draw box overlay
-//        if(scale_ < overlay_threshold_) {
-//            double o = 1.0;
-//            double thresh = overlay_threshold_ * 0.75;
-//            if(scale_ > thresh) {
-//                o = (overlay_threshold_ - scale_) / (overlay_threshold_ - thresh);
-//            }
-//            painter->setOpacity(o * 0.75);
-
-//            QBrush brush(QColor(0xCC, 0xCC, 0xCC));
-//            QPen pen(brush, 1.0);
-//            painter->setPen(pen);
-//            painter->setBrush(brush);
-//            painter->drawRect(box->geometry());
-
-//            painter->setRenderHint(QPainter::Antialiasing);
-//            painter->setPen(QPen(QColor(0,0,0)));
-//            QFont font = painter->font();
-//            font.setPixelSize(10 / scale_);
-//            font.setBold(true);
-//            painter->setFont(font);
-//            QTextOption opt(Qt::AlignCenter);
-//            opt.setWrapMode(QTextOption::WrapAnywhere);
-
-//            std::string s = box->getLabel();
-//            int grow = 10 / scale_;
-//            painter->drawText(box->geometry().adjusted(-grow, -grow, grow, grow), s.c_str(), opt);
-//        }
 
         // draw port information (in)
         for(auto input : node_handle->getAllInputs()) {
@@ -705,18 +677,23 @@ void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end
 {
     apex_assert_hard(from);
 
-    TempConnection temp(false);
-    temp.from = from;
-    temp.to_p = end;
+    if(!from->isVirtual()) {
+        TempConnection temp(false);
+        temp.from = from;
+        temp.to_p = end;
 
-    temp_.push_back(temp);
+        temp_.push_back(temp);
 
-    update();
+        update();
+    }
 }
 
 void DesignerScene::previewConnection(Connectable *from, Connectable *to)
 {
-    deleteTemporaryConnections();
+    if(from->isVirtual() || to->isVirtual()) {
+        return;
+    }
+
     addTemporaryConnection(from, to);
     update();
 }
@@ -726,26 +703,28 @@ void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
     apex_assert_hard(from);
     apex_assert_hard(to);
 
-    Connectable* input;
-    Connectable* output;
-    if(from->isInput()) {
-        input = from;
-        output = to;
+    if(!from->isVirtual() && !to->isVirtual()) {
+        Connectable* input;
+        Connectable* output;
+        if(from->isInput()) {
+            input = from;
+            output = to;
 
-    } else {
-        input = to;
-        output = from;
+        } else {
+            input = to;
+            output = from;
+        }
+
+        apex_assert_hard(input);
+        apex_assert_hard(output);
+
+
+        TempConnection temp(true);
+        temp.from = output;
+        temp.to_c = input;
+
+        temp_.push_back(temp);
     }
-
-    apex_assert_hard(input);
-    apex_assert_hard(output);
-
-
-    TempConnection temp(true);
-    temp.from = output;
-    temp.to_c = input;
-
-    temp_.push_back(temp);
 }
 
 void DesignerScene::deleteTemporaryConnections()

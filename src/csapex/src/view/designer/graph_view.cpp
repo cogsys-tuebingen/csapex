@@ -842,8 +842,10 @@ void GraphView::addPort(Port *port)
         if(!adaptee) {
             return;
         }
-        Command::Ptr cmd(new command::MoveConnection(graph_facade_->getAbsoluteUUID(), from, adaptee.get()));
-        dispatcher_->execute(cmd);
+        if(!from->isVirtual() && !adaptee->isVirtual()) {
+            Command::Ptr cmd(new command::MoveConnection(graph_facade_->getAbsoluteUUID(), from, adaptee.get()));
+             dispatcher_->execute(cmd);
+        }
     });
 }
 

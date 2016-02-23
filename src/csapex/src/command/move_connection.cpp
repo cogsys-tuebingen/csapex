@@ -28,6 +28,9 @@ MoveConnection::MoveConnection(const AUUID& parent_uuid, Connectable *from, Conn
     apex_assert_hard((from->isOutput() && to->isOutput()) ||
                      (from->isInput() && to->isInput()));
 
+    apex_assert_hard(!from->isVirtual());
+    apex_assert_hard(!to->isVirtual());
+
     bool is_output = from->isOutput();
 
     nested.clear();
@@ -41,14 +44,14 @@ MoveConnection::MoveConnection(const AUUID& parent_uuid, Connectable *from, Conn
                     continue;
                 }
                 Input* input = dynamic_cast<Input*>(c->to());
-                if(input) {
+                if(input && !input->isVirtual()) {
                     add(Command::Ptr(new DeleteMessageConnection(parent_uuid, out, input)));
                     add(Command::Ptr(new AddMessageConnection(parent_uuid, to_uuid, input->getUUID())));
                 }
             }
         } else {
             Trigger* trigger = dynamic_cast<Trigger*>(from);
-            if(trigger) {
+            if(trigger && !trigger->isVirtual()) {
                 for(Slot* slot : trigger->getTargets()) {
                     add(Command::Ptr(new DeleteSignalConnection(parent_uuid, trigger, slot)));
                     add(Command::Ptr(new AddSignalConnection(parent_uuid, to_uuid, slot->getUUID())));
@@ -59,14 +62,14 @@ MoveConnection::MoveConnection(const AUUID& parent_uuid, Connectable *from, Conn
     } else {
         Input* in = dynamic_cast<Input*>(from);
 
-        if(in) {
+        if(in && !in->isVirtual()) {
             Output* target = dynamic_cast<Output*>(in->getSource());
             add(Command::Ptr(new DeleteMessageConnection(parent_uuid, target, in)));
             add(Command::Ptr(new AddMessageConnection(parent_uuid, target->getUUID(), to_uuid)));
         } else {
             Slot* in = dynamic_cast<Slot*>(from);
 
-            if(in) {
+            if(in && !in->isVirtual()) {
                 for(Trigger* target : in->getSources()) {
                     add(Command::Ptr(new DeleteSignalConnection(parent_uuid, target, in)));
                     add(Command::Ptr(new AddSignalConnection(parent_uuid, target->getUUID(), to_uuid)));

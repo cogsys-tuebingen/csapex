@@ -21,6 +21,10 @@ public:
 
     virtual void inputMessage(ConnectionType::ConstPtr message) override;
 
+    virtual bool isVirtual() const {
+        return true;
+    }
+
 private:
     MessagePreviewWidget* parent_;
 };
