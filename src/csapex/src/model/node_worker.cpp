@@ -22,6 +22,8 @@
 #include <csapex/model/tickable_node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/delegate_bind.h>
+#include <csapex/msg/marker_message.h>
+#include <csapex/msg/end_of_sequence_message.h>
 
 /// SYSTEM
 #include <thread>
@@ -336,15 +338,23 @@ void NodeWorker::startProcessingMessages()
 
 
     bool all_inputs_are_present = true;
+    bool is_final_message = false;
 
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
 
-        // check if one is "NoMessage";
+        // check if one is a marker message
         for(InputPtr cin : node_handle_->getAllInputs()) {
             apex_assert_hard(cin->hasReceived() || (cin->isOptional() && !cin->isConnected()));
             if(!cin->isOptional() && !msg::hasMessage(cin.get())) {
                 all_inputs_are_present = false;
+            }
+
+            if(auto marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getMessage())) {
+                if(auto end = std::dynamic_pointer_cast<connection_types::EndOfSequenceMessage const>(marker)) {
+                    is_final_message = true;
+                    all_inputs_are_present = false;
+                }
             }
         }
 
@@ -366,6 +376,21 @@ void NodeWorker::startProcessingMessages()
 
     node_handle_->getInputTransition()->notifyMessageProcessed();
 
+
+    NodePtr node = node_handle_->getNode().lock();
+    if(!node) {
+        return;
+    }
+
+    if(is_final_message) {
+        node->endOfSequence();
+
+        auto end = connection_types::makeEmpty<connection_types::EndOfSequenceMessage>();
+        for(OutputPtr out : node_handle_->getAllOutputs()) {
+            msg::publish(out.get(), end);
+        }
+    }
+
     if(!all_inputs_are_present) {
         finishProcessingMessages(false);
         return;
@@ -378,11 +403,6 @@ void NodeWorker::startProcessingMessages()
     if(profiling_) {
         current_process_timer_.reset(new Timer(getUUID().getFullName()));
         timerStarted(this, PROCESS, current_process_timer_->startTimeMs());
-    }
-
-    NodePtr node = node_handle_->getNode().lock();
-    if(!node) {
-        return;
     }
 
     node->useTimer(current_process_timer_.get());

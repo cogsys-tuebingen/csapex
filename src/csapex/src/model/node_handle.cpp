@@ -15,7 +15,7 @@
 #include <csapex/signal/trigger.h>
 #include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/dynamic_output.h>
-#include <csapex/msg/no_message.h>
+#include <csapex/msg/marker_message.h>
 #include <csapex/utility/uuid_provider.h>
 
 using namespace csapex;
@@ -346,7 +346,7 @@ void NodeHandle::updateParameterValue(Connectable *s)
         updateParameterValueFrom<std::pair<int, int>>(p, source);
     } else if(msg::isValue<std::pair<double,double>>(source)) {
         updateParameterValueFrom<std::pair<double, double>>(p, source);
-    } else if(msg::hasMessage(source) && !msg::isMessage<connection_types::NoMessage>(source)) {
+    } else if(msg::hasMessage(source) && !msg::isMessage<connection_types::MarkerMessage>(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
 }

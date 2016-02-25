@@ -1,5 +1,5 @@
-#ifndef NO_MESSAGE_H
-#define NO_MESSAGE_H
+#ifndef END_OF_SEQUENCE_MESSAGE_H
+#define END_OF_SEQUENCE_MESSAGE_H
 
 /// COMPONENT
 #include <csapex/msg/marker_message.h>
@@ -9,13 +9,13 @@ namespace csapex
 namespace connection_types
 {
 
-struct NoMessage : public MarkerMessage
+struct EndOfSequenceMessage : public MarkerMessage
 {
 public:
-    typedef std::shared_ptr<NoMessage> Ptr;
+    typedef std::shared_ptr<EndOfSequenceMessage> Ptr;
 
 public:
-    NoMessage();
+    EndOfSequenceMessage();
 
 public:
     virtual ConnectionType::Ptr clone() const override;
@@ -23,14 +23,13 @@ public:
 };
 
 template <>
-struct type<NoMessage> {
+struct type<EndOfSequenceMessage> {
     static std::string name() {
-        return "Nothing";
+        return "EndOfSequence";
     }
 };
 
 }
 }
 
-#endif // NO_MESSAGE_H
-
+#endif // END_OF_SEQUENCE_MESSAGE_H

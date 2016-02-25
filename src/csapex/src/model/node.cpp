@@ -91,3 +91,8 @@ void Node::process()
 void Node::abort()
 {
 }
+
+void Node::endOfSequence()
+{
+
+}

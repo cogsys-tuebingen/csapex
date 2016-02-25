@@ -3,7 +3,7 @@
 
 /// SYSTEM
 #include <mutex>
-#include <csapex/msg/no_message.h>
+#include <csapex/msg/marker_message.h>
 
 using namespace csapex;
 
@@ -60,6 +60,6 @@ bool Buffer::isFilled() const
 
 bool Buffer::containsNoMessage() const
 {
-    auto test = std::dynamic_pointer_cast<connection_types::NoMessage const>(message_);
+    auto test = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_);
     return test != nullptr;
 }

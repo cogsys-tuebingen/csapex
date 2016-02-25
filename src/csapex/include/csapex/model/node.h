@@ -33,6 +33,8 @@ public: /* API */
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
     virtual void process();
 
+    virtual void endOfSequence();
+
     virtual void abort();
 
     virtual bool isAsynchronous() const;

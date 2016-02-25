@@ -5,7 +5,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/input_transition.h>
-#include <csapex/msg/no_message.h>
+#include <csapex/msg/marker_message.h>
 
 /// SYSTEM
 #include <iostream>
@@ -73,7 +73,7 @@ bool Input::hasMessage() const
     }
 
     std::unique_lock<std::mutex> lock(message_mutex_);
-    return !std::dynamic_pointer_cast<connection_types::NoMessage const>(message_);
+    return !std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_);
 }
 
 void Input::stop()
@@ -170,7 +170,7 @@ void Input::inputMessage(ConnectionType::ConstPtr message)
 {
     apex_assert_hard(message != nullptr);
 
-    if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message)){
+    if(!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message)){
         int s = message->sequenceNumber();
 
         //    if(s < sequenceNumber()) {
