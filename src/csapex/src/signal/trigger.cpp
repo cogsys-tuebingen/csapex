@@ -76,10 +76,13 @@ void Trigger::trigger()
         }
     }
 
+    std::cerr << "trigger " << getLabel() << " called" << std::endl;
+
     triggered();
 
     for(Slot* s : targets_) {
         try {
+            std::cerr << "triggering slot " << s->getLabel()  << std::endl;
             s->trigger(this);
         } catch(const std::exception& e) {
             std::cerr << "triggering slot " << s->getLabel()  << " failed: " << e.what();

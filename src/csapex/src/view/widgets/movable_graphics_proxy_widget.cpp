@@ -162,6 +162,7 @@ void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             NodeStatePtr state = box_->getNodeHandle()->getNodeStateCopy();
             state->setLabel("");
             view_->startPlacingBox(box_->getNodeHandle()->getType(), state);
+            clone_p_ = false;
         }
         return;
     }

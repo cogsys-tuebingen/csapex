@@ -456,8 +456,11 @@ void GraphView::dragEnterEvent(QDragEnterEvent* e)
     delete move_event_;
     move_event_ = nullptr;
 
-    QGraphicsView::dragEnterEvent(e);
-    drag_io_.dragEnterEvent(this, e);
+    if(!e->isAccepted()) {
+        drag_io_.dragEnterEvent(this, e);
+
+        QGraphicsView::dragEnterEvent(e);
+    }
 }
 
 void GraphView::dragMoveEvent(QDragMoveEvent* e)
@@ -466,9 +469,7 @@ void GraphView::dragMoveEvent(QDragMoveEvent* e)
     move_event_ = new QDragMoveEvent(*e);
 
     QGraphicsView::dragMoveEvent(e);
-    if(!e->isAccepted()) {
-        drag_io_.dragMoveEvent(this, e);
-    }
+    drag_io_.dragMoveEvent(this, e);
 
     static const int border_threshold = 20;
     static const double scroll_factor = 10.;
@@ -512,8 +513,10 @@ void GraphView::dropEvent(QDropEvent* e)
     delete move_event_;
     move_event_ = nullptr;
 
-    QGraphicsView::dropEvent(e);
     drag_io_.dropEvent(this, e, mapToScene(e->pos()));
+    if(!e->isAccepted()) {
+        QGraphicsView::dropEvent(e);
+    }
 
     if(scroll_animation_timer_.isActive()) {
         scroll_animation_timer_.stop();
@@ -566,6 +569,12 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 {
     NodeConstructorPtr c = node_factory_.getConstructor(type);
     NodeHandlePtr handle = c->makePrototype();
+
+    if(!state) {
+        state = handle->getNodeState();
+    }
+
+    apex_assert_hard(handle);
 
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;

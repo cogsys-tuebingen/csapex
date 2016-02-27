@@ -147,8 +147,14 @@ protected:
     std::shared_ptr<M> createInstance(const std::string& lookup_name)
     {
         auto loader = getLoader(plugin_to_library_.at(lookup_name));
-        M* raw_ptr = loader->template createUnmanagedInstance<M>(lookup_name);
-        return std::shared_ptr<M>(raw_ptr);
+        try {
+            M* raw_ptr = loader->template createUnmanagedInstance<M>(lookup_name);
+            return std::shared_ptr<M>(raw_ptr);
+
+        } catch(const std::exception& e) {
+            std::cerr << "cannot create instance of " << lookup_name << ": " << e.what() << std::endl;
+            return nullptr;
+        }
     }
 
     std::shared_ptr<class_loader::ClassLoader> getLoader(const std::string& library_name)

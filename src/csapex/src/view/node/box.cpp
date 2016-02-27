@@ -692,6 +692,10 @@ void NodeBox::triggerMinimized()
 
 void NodeBox::updateVisuals()
 {
+    if(!ui || !ui->boxframe) {
+        return;
+    }
+
     NodeHandlePtr nh = node_handle_.lock();
     if(!nh) {
         return;

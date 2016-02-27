@@ -29,6 +29,8 @@ public:
     void registerHandler(DragIOHandler::Ptr h);
 
 private:
+    void createNode(GraphView *src, std::string type, const QPointF &pos,
+                    NodeStatePtr state);
     void load();
 
 private:

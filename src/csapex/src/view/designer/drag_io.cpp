@@ -90,8 +90,8 @@ void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
             if(cmd == NodeBox::MIME.toStdString()) {
                 e->accept();
 
-                std::string type = v[Qt::UserRole+1].toString().toStdString();
-                src->startPlacingBox(type, nullptr, QPoint(0,0));
+                //std::string type = v[Qt::UserRole+1].toString().toStdString();
+                //src->startPlacingBox(type, nullptr, QPoint(0,0));
             }
         }
     }
@@ -135,56 +135,75 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
-        Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        e->acceptProposedAction();
 
-        DesignerScene* scene = src->designerScene();
-        scene->deleteTemporaryConnections();
-        scene->addTemporaryConnection(c, src->mapToScene(e->pos()));
+        if(!e->isAccepted()) {
+            Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
+            e->acceptProposedAction();
+
+            DesignerScene* scene = src->designerScene();
+            scene->deleteTemporaryConnections();
+            scene->addTemporaryConnection(c, src->mapToScene(e->pos()));
+        }
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
-        Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        e->acceptProposedAction();
+        if(!e->isAccepted()) {
+            Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
+            e->acceptProposedAction();
 
-        DesignerScene* scene = src->designerScene();
-        scene->deleteTemporaryConnections();
+            DesignerScene* scene = src->designerScene();
+            scene->deleteTemporaryConnections();
 
-        if(c->isOutput()) {
-            Output* out = dynamic_cast<Output*> (c);
-            if(out) {
-                for(ConnectionPtr c : out->getConnections()) {
-                    if(!c) {
-                        continue;
+            if(c->isOutput()) {
+                Output* out = dynamic_cast<Output*> (c);
+                if(out) {
+                    for(ConnectionPtr c : out->getConnections()) {
+                        if(!c) {
+                            continue;
+                        }
+                        Input* input = dynamic_cast<Input*>(c->to());
+                        if(input && !input->isVirtual()) {
+                            scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
+                        }
                     }
-                    Input* input = dynamic_cast<Input*>(c->to());
-                    if(input && !input->isVirtual()) {
-                        scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
+                } else {
+                    Trigger* trigger = dynamic_cast<Trigger*> (c);
+                    if(trigger) {
+                        for(Slot* slot : trigger->getTargets()) {
+                            scene->addTemporaryConnection(slot, src->mapToScene(e->pos()));
+                        }
                     }
                 }
             } else {
-                Trigger* trigger = dynamic_cast<Trigger*> (c);
-                if(trigger) {
-                    for(Slot* slot : trigger->getTargets()) {
-                        scene->addTemporaryConnection(slot, src->mapToScene(e->pos()));
+                Input* in = dynamic_cast<Input*> (c);
+                if(in) {
+                    scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
+                } else {
+                    Slot* slot = dynamic_cast<Slot*> (c);
+                    if(slot) {
+                        for(Trigger* trigger : slot->getSources()) {
+                            scene->addTemporaryConnection(trigger, src->mapToScene(e->pos()));
+                        }
                     }
                 }
             }
-        } else {
-            Input* in = dynamic_cast<Input*> (c);
-            if(in) {
-                scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
-            } else {
-                Slot* slot = dynamic_cast<Slot*> (c);
-                if(slot) {
-                    for(Trigger* trigger : slot->getSources()) {
-                        scene->addTemporaryConnection(trigger, src->mapToScene(e->pos()));
-                    }
-                }
-            }
+            scene->update();
         }
-        scene->update();
 
-    } else {
+    }  else if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+        QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
+        QDataStream stream(&itemData, QIODevice::ReadOnly);
+
+        int r, c;
+        QMap<int, QVariant> v;
+        stream >> r >> c >> v;
+
+        std::string cmd = v[Qt::UserRole].toString().toStdString();
+
+        if(cmd == NodeBox::MIME.toStdString()) {
+            e->accept();
+        }
+    }
+    else {
         for(auto h : handler_) {
             if(h->handleMove(src, dispatcher_, e)) {
                 return;
@@ -202,8 +221,7 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
     if(e->mimeData()->hasFormat(NodeBox::MIME)) {
-        QByteArray b = e->mimeData()->data(NodeBox::MIME);
-        std::string type = (QString(b)).toStdString();
+        std::string type = QString(e->mimeData()->data(NodeBox::MIME)).toStdString();
 
         e->setDropAction(Qt::CopyAction);
         e->accept();
@@ -211,28 +229,41 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        GraphFacade* gf = src->getGraphFacade();
-        Graph* graph = gf->getGraph();
-        UUID uuid = graph->generateUUID(type);
-
         NodeStatePtr state;
-
         if(!e->mimeData()->property("state").isNull()) {
             NodeStatePtr* state_ptr = (NodeStatePtr *) e->mimeData()->property("state").value<void *>();
             state = *state_ptr;
         }
 
-        dispatcher_->executeLater(Command::Ptr(new command::AddNode(gf->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
+        createNode(src, type, pos, state);
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
-        e->ignore();
-        DesignerScene* scene = src->designerScene();
-        scene->deleteTemporaryConnectionsAndRepaint();
+    } else if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+        QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
+        QDataStream stream(&itemData, QIODevice::ReadOnly);
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
-        e->ignore();
-        DesignerScene* scene = src->designerScene();
-        scene->deleteTemporaryConnectionsAndRepaint();
+        int r, c;
+        QMap<int, QVariant> v;
+        stream >> r >> c >> v;
+
+        std::string cmd = v[Qt::UserRole].toString().toStdString();
+
+        if(cmd == NodeBox::MIME.toStdString()) {
+            std::string type = v[Qt::UserRole + 1].toString().toStdString();
+
+            e->setDropAction(Qt::CopyAction);
+            e->accept();
+
+            QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
+            QPointF pos = src->mapToScene(e->pos()) + offset;
+
+            NodeStatePtr state;
+            if(!e->mimeData()->property("state").isNull()) {
+                NodeStatePtr* state_ptr = (NodeStatePtr *) e->mimeData()->property("state").value<void *>();
+                state = *state_ptr;
+            }
+
+            createNode(src, type, pos, state);
+        }
 
     } else {
         for(auto h : handler_) {
@@ -241,4 +272,17 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
             }
         }
     }
+}
+
+
+void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
+                        NodeStatePtr state)
+{
+    std::cerr << "add node " << type << " @ " << pos.x() << ", " << pos.y() << " w/ state "  << state.get() << std::endl;
+
+    GraphFacade* gf = src->getGraphFacade();
+    Graph* graph = gf->getGraph();
+    UUID uuid = graph->generateUUID(type);
+
+    dispatcher_->executeLater(Command::Ptr(new command::AddNode(gf->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
 }

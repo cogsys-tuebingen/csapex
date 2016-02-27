@@ -28,7 +28,7 @@ public:
     std::shared_ptr<M> construct() const {
         std::shared_ptr<M> res(constructor());
 //        impl::setType<M>(res, type);
-        assert(res.get() != nullptr);
+        apex_assert_hard(res.get() != nullptr);
         instances_.push_back(res);
         return res;
     }
