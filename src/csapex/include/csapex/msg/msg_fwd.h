@@ -26,13 +26,29 @@ FWD(MessageProvider);
 namespace connection_types
 {
 FWD(Message);
-
+FWD(MarkerMessage);
 template <typename Type>
 struct GenericPointerMessage;
 template <typename Type>
 struct GenericValueMessage;
 }
 }
+
+/// this is used for generating more readable warnings
+namespace warning
+{
+template<typename T, int>
+constexpr auto is_complete(int) -> decltype(sizeof(T),bool{}) {
+    return true;
+}
+
+template<typename T, int>
+constexpr auto is_complete(...) -> bool {
+    return false;
+}
+}
+
+#define IS_COMPLETE(T) warning::is_complete<T,__LINE__>(0)
 
 #undef FWD
 

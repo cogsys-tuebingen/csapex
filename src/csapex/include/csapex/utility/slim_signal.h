@@ -31,7 +31,7 @@ class SignalBase
 public:
     virtual ~SignalBase();
 
-    void disconnectAll();
+    virtual void disconnectAll();
 
 protected:
     SignalBase();
@@ -127,7 +127,10 @@ public:
     template <typename... Args>
     Signal& operator () (Args... args);
 
+    virtual void disconnectAll() override;
+
 private:
+    void clear();
     void removeParent(Signal* parent);
 
     void addChild(Signal* child);

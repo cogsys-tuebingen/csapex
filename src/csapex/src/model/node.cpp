@@ -18,6 +18,7 @@ using namespace csapex;
 
 Node::Node()
     : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
+      node_handle_(nullptr),
       guard_(-1)
 {
 }
@@ -92,7 +93,7 @@ void Node::abort()
 {
 }
 
-void Node::endOfSequence()
+void Node::processMarker(const csapex::connection_types::MessageConstPtr &marker)
 {
 
 }

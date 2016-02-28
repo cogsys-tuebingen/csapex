@@ -127,6 +127,7 @@ private:
     std::map<csapex::param::Parameter*, std::vector<csapex::slim_signal::Connection> > connections_;
     std::map<csapex::param::Parameter*, std::function<bool()> > conditions_;
 
+    mutable std::recursive_mutex mutex_;
     mutable std::mutex changed_params_mutex_;
     std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > changed_params_;
 

@@ -17,6 +17,7 @@ public:
 
     virtual void commitMessages() override;
     virtual bool hasMessage() override;
+    virtual bool hasMarkerMessage() override;
     virtual void nextMessage() override;
     virtual ConnectionTypeConstPtr getMessage() const override;
 

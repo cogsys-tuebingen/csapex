@@ -33,7 +33,7 @@ public: /* API */
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
     virtual void process();
 
-    virtual void endOfSequence();
+    virtual void processMarker(const connection_types::MessageConstPtr &marker);
 
     virtual void abort();
 

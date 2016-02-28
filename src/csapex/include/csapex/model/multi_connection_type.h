@@ -3,9 +3,13 @@
 
 /// COMPONENT
 #include <csapex/model/connection_type.h>
+#include <csapex/msg/message_traits.h>
+#include <csapex/msg/msg_fwd.h>
 
 /// SYSTEM
 #include <vector>
+#include <type_traits>
+
 
 namespace csapex
 {
@@ -39,9 +43,38 @@ struct AddType;
 template < typename T, typename... Ts >
 struct AddType<T, Ts...>
 {
+    template <typename MsgType>
+    static void insert(std::vector<ConnectionType::Ptr>& types,
+                     typename std::enable_if<connection_types::should_use_pointer_message<MsgType>::value >::type* = 0)
+    {
+        static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<MsgType>),
+                      "connection_types::GenericPointerMessage is not included: "
+                      "#include <csapex/msg/generic_pointer_message.hpp>");
+        types.push_back(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<MsgType> >());
+    }
+
+    template <typename MsgType>
+    static void insert(std::vector<ConnectionType::Ptr>& types,
+                     typename std::enable_if<connection_types::should_use_value_message<MsgType>::value >::type* = 0)
+    {
+        static_assert(IS_COMPLETE(connection_types::GenericValueMessage<MsgType>),
+                      "connection_types::GenericPointerMessage is not included: "
+                      "#include <csapex/msg/generic_pointer_message.hpp>");
+        types.push_back(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >());
+    }
+
+    template <typename MsgType>
+    static void insert(std::vector<ConnectionType::Ptr>& types,
+                     typename std::enable_if<
+                     !connection_types::should_use_pointer_message<MsgType>::value &&
+                     !connection_types::should_use_value_message<MsgType>::value>::type* = 0)
+    {
+        types.push_back(connection_types::makeEmptyMessage<MsgType>());
+    }
+
     static void call(std::vector<ConnectionType::Ptr>& types)
     {
-        types.push_back(ConnectionType::Ptr(new T));
+        insert<T>(types);
         AddType<Ts...>::call(types);
     }
 };

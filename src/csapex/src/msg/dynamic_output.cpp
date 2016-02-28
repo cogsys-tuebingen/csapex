@@ -82,6 +82,13 @@ bool DynamicOutput::hasMessage()
     return !messages_to_send_.empty();
 }
 
+
+bool DynamicOutput::hasMarkerMessage()
+{
+    // TODO: implement
+    return false;
+}
+
 void DynamicOutput::nextMessage()
 {
     if(committed_messages_.empty()) {

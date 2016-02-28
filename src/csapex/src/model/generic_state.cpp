@@ -127,6 +127,8 @@ void GenericState::triggerParameterSetChanged()
 
 void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
+    param->setTemporary(true);
+
     // check if there is an old version of the parameter
     csapex::param::Parameter::Ptr entry = param;
     std::string name = param->name();

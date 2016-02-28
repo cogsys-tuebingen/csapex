@@ -124,7 +124,6 @@ std::vector<Trigger*> Slot::getSources() const
 
 void Slot::trigger(Trigger* source)
 {
-    std::cerr << "slot " << getLabel() << " triggered" << std::endl;
     triggered(source);
 }
 

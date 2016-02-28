@@ -124,6 +124,9 @@ public:
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
+    bool isTemporary() const;
+    void setTemporary(bool temporary);
+
     bool isInteractive() const;
     void setInteractive(bool enabled);
 
@@ -156,6 +159,7 @@ protected:
 
     ParameterDescription description_;
     bool enabled_;
+    bool temporary_;
     bool interactive_;
 
     mutable boost::recursive_mutex mutex_;

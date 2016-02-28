@@ -8,7 +8,7 @@ using namespace csapex;
 using namespace param;
 
 Parameter::Parameter(const std::string &name, const ParameterDescription &description)
-    : name_(name), description_(description), enabled_(true), interactive_(false)
+    : name_(name), description_(description), enabled_(true), temporary_(false), interactive_(false)
 {
 }
 
@@ -53,6 +53,17 @@ void Parameter::setInteractive(bool interactive)
 bool Parameter::isInteractive() const
 {
     return interactive_;
+}
+
+
+void Parameter::setTemporary(bool temporary)
+{
+    temporary_ = temporary;
+}
+
+bool Parameter::isTemporary() const
+{
+    return temporary_;
 }
 
 bool Parameter::hasState() const

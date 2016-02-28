@@ -262,6 +262,10 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
         return;
     }
 
+    if(p->isTemporary()) {
+        return;
+    }
+
     if(p->is<int>()) {
         makeParameterConnectableImpl<int>(p);
     } else if(p->is<double>()) {

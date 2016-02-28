@@ -15,6 +15,7 @@
 #include <csapex/view/widgets/doublespanslider.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/designer/graph_view.h>
+#include <csapex/utility/timer.h>
 
 /// PROJECT
 #include <csapex/param/range_parameter.h>
@@ -27,6 +28,7 @@
 #include <csapex/param/color_parameter.h>
 #include <csapex/param/angle_parameter.h>
 #include <csapex/param/output_progress_parameter.h>
+
 
 /// SYSTEM
 #include <boost/lambda/lambda.hpp>
@@ -334,7 +336,17 @@ void DefaultNodeAdapterBridge::executeModelCallback(Function cb)
 
 void DefaultNodeAdapterBridge::setupAdaptiveUi()
 {
+//    Timer timer("setup");
+    NodeHandlePtr node_handle = parent_->node_.lock();
+    if(!node_handle) {
+        return;
+    }
     parent_->setupAdaptiveUi();
+//    timer.finish();
+//    for(auto pair : timer.entries()) {
+//        std::cerr << pair.second << " ms" << std::endl;
+//    }
+
 }
 
 void DefaultNodeAdapterBridge::enableGroup(bool enable, const std::string &group)

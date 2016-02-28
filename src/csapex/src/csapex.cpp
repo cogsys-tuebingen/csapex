@@ -222,7 +222,10 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         CsApexWindow w(*core, &dispatcher, root, thread_pool, designer, minimap, legend, timeline, plugin_locator);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
-        csapex::error_handling::stop_request().connect(std::bind(&CsApexWindow::close, &w));
+        csapex::error_handling::stop_request().connect([this](){
+            std::cout << "shutdown request" << std::endl;
+            QCoreApplication::postEvent(app.get(), new QCloseEvent);
+        });
 
         core->init();
 
@@ -242,7 +245,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
     } else {
         core->init();
-        csapex::error_handling::stop_request().connect(std::bind(&csapex::error_handling::kill));
+        csapex::error_handling::stop_request().connect([this, root](){
+            app->quit();
+        });
         core->startup();
         res = run();
     }

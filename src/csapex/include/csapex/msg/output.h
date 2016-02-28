@@ -67,6 +67,7 @@ public:
     std::vector<ConnectionPtr> getConnections() const;
 
     virtual bool hasMessage() = 0;
+    virtual bool hasMarkerMessage() = 0;
 
     virtual void reset();
     virtual void startReceiving() = 0;

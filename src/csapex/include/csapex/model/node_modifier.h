@@ -10,23 +10,6 @@
 #include <csapex/msg/message_traits.h>
 #include <csapex/utility/uuid.h>
 
-/// this is used for generating more readable warnings
-namespace warning
-{
-    template<typename T, int>
-        constexpr auto is_complete(int) -> decltype(sizeof(T),bool{}) {
-            return true;
-        }
-
-    template<typename T, int>
-        constexpr auto is_complete(...) -> bool {
-            return false;
-        }
-}
-
-#define IS_COMPLETE(T) warning::is_complete<T,__LINE__>(0)
-
-
 
 namespace csapex
 {

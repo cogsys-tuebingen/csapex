@@ -150,31 +150,34 @@ bool isValue(Input* input) {
 /// OUTPUT
 void publish(Output* output, ConnectionTypeConstPtr message);
 
-template <typename T>
+template <typename T,
+          typename = typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type>
 void publish(Output* output,
              typename std::shared_ptr<T> message,
-             std::string frame_id = "/",
-             typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
+             std::string frame_id = "/")
+{
     typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
     msg->value = message;
     publish(output, message_cast<ConnectionType>(msg));
 }
 
-template <typename T>
+template <typename T,
+          typename = typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type>
 void publish(Output* output,
              typename boost::shared_ptr<T> message,
-             std::string frame_id = "/",
-             typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
+             std::string frame_id = "/")
+{
     typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
     msg->value = shared_ptr_tools::to_std_shared(message);
     publish(output, message_cast<ConnectionType>(msg));
 }
 
-template <typename T>
+template <typename T,
+          typename = typename std::enable_if<connection_types::should_use_value_message<T>::value >::type>
 void publish(Output* output,
              T message,
-             std::string frame_id = "/",
-             typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
+             std::string frame_id = "/")
+{
     typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(frame_id));
     msg->value = message;
     publish(output, message_cast<ConnectionType>(msg));

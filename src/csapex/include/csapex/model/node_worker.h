@@ -87,7 +87,7 @@ public:
     bool tick();
 
     void startProcessingMessages();
-    void finishProcessingMessages(bool was_executed);
+    void finishProcessingMessages(bool was_executed, bool is_marker_message);
 
     void checkTransitions();
 

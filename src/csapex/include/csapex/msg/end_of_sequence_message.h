@@ -17,6 +17,9 @@ public:
 public:
     EndOfSequenceMessage();
 
+protected:
+    EndOfSequenceMessage(const std::string& name);
+
 public:
     virtual ConnectionType::Ptr clone() const override;
     virtual ConnectionType::Ptr toType() const override;

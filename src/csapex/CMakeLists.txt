@@ -245,6 +245,7 @@ add_library(csapex SHARED
     src/msg/marker_message.cpp
     src/msg/no_message.cpp
     src/msg/end_of_sequence_message.cpp
+    src/msg/end_of_program_message.cpp
     src/msg/message_provider.cpp
     src/msg/output.cpp
     src/msg/output_transition.cpp
@@ -273,6 +274,8 @@ add_library(csapex SHARED
 )
 
 target_link_libraries(csapex
+    csapex_util
+    csapex_param
     ${Boost_LIBRARIES}
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}

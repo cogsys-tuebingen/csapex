@@ -23,6 +23,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/delegate_bind.h>
 #include <csapex/msg/marker_message.h>
+#include <csapex/msg/no_message.h>
 #include <csapex/msg/end_of_sequence_message.h>
 
 /// SYSTEM
@@ -297,7 +298,7 @@ void NodeWorker::startProcessingMessages()
     setState(State::FIRED);
 
     if(!isProcessingEnabled()) {
-        finishProcessingMessages(true);
+        finishProcessingMessages(true, false);
         return;
     }
 
@@ -338,7 +339,7 @@ void NodeWorker::startProcessingMessages()
 
 
     bool all_inputs_are_present = true;
-    bool is_final_message = false;
+    connection_types::MarkerMessageConstPtr marker;
 
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
@@ -350,10 +351,11 @@ void NodeWorker::startProcessingMessages()
                 all_inputs_are_present = false;
             }
 
-            if(auto marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getMessage())) {
-                if(auto end = std::dynamic_pointer_cast<connection_types::EndOfSequenceMessage const>(marker)) {
-                    is_final_message = true;
+            if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getMessage())) {
+                if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
+                    marker = m;
                     all_inputs_are_present = false;
+                    break;
                 }
             }
         }
@@ -382,17 +384,16 @@ void NodeWorker::startProcessingMessages()
         return;
     }
 
-    if(is_final_message) {
-        node->endOfSequence();
+    if(marker) {
+        node->processMarker(marker);
 
-        auto end = connection_types::makeEmpty<connection_types::EndOfSequenceMessage>();
         for(OutputPtr out : node_handle_->getAllOutputs()) {
-            msg::publish(out.get(), end);
+            msg::publish(out.get(), marker);
         }
     }
 
-    if(!all_inputs_are_present) {
-        finishProcessingMessages(false);
+    if(marker || !all_inputs_are_present) {
+        finishProcessingMessages(false, true);
         return;
     }
 
@@ -417,7 +418,7 @@ void NodeWorker::startProcessingMessages()
             node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
                 node_handle_->executionRequested([this, f, node]() {
                     f(*node_handle_, *node);
-                    finishProcessingMessages(true);
+                    finishProcessingMessages(true, false);
                 });
             });
         }
@@ -431,11 +432,11 @@ void NodeWorker::startProcessingMessages()
     }
 
     if(sync) {
-        finishProcessingMessages(true);
+        finishProcessingMessages(true, false);
     }
 }
 
-void NodeWorker::finishProcessingMessages(bool was_executed)
+void NodeWorker::finishProcessingMessages(bool was_executed, bool is_marker_message)
 {
     if(was_executed) {
         if(current_process_timer_) {
@@ -452,6 +453,9 @@ void NodeWorker::finishProcessingMessages(bool was_executed)
 
     if(getState() == State::PROCESSING) {
         if(!node_handle_->isSink()) {
+            if(!is_marker_message) {
+                publishParameters();
+            }
             sendMessages();
         }
 
@@ -633,8 +637,6 @@ void NodeWorker::sendMessages()
 
     apex_assert_hard(getState() == State::PROCESSING);
 
-    publishParameters();
-
     node_handle_->getOutputTransition()->sendMessages();
 }
 
@@ -665,7 +667,7 @@ bool NodeWorker::tick()
 
     bool has_ticked = false;
 
-    if(isProcessingEnabled()) {
+    if(isProcessingEnabled() && tickable->isTickEnabled()) {
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
@@ -718,15 +720,18 @@ bool NodeWorker::tick()
                         ++ticks_;
 
                         bool has_msg = false;
+                        bool has_marker = false;
                         for(OutputPtr out : node_handle_->getAllOutputs()) {
                             if(msg::isConnected(out.get())) {
                                 if(node_handle_->isParameterOutput(out.get())) {
                                     has_msg = true;
-                                    break;
+                                }
+
+                                if(out->hasMarkerMessage()) {
+                                    has_marker = true;
                                 }
                                 if(msg::hasMessage(out.get())) {
                                     has_msg = true;
-                                    break;
                                 }
                             }
                         }
@@ -734,6 +739,10 @@ bool NodeWorker::tick()
                         apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
                         if(has_msg) {
                             node_handle_->getOutputTransition()->setConnectionsReadyToReceive();
+
+                            if(!has_marker) {
+                                publishParameters();
+                            }
                             sendMessages();
 
                         } else {

@@ -25,19 +25,8 @@ Signal<Signature>::~Signal()
 {
     apex_assert_hard(guard_ == -1);
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    while(!parents_.empty()) {
-        removeParent(parents_.front());
-    }
 
-    while(!children_to_remove_.empty()) {
-        removeChild(children_to_remove_.front());
-    }
-    while(!children_.empty()) {
-        removeChild(children_.front());
-    }
-
-    functions_.clear();
-    functions_to_remove_.clear();
+    clear();
 }
 
 
@@ -169,6 +158,36 @@ Connection Signal<Signature>::connect(Signal<Signature>& signal)
 
     addChild(&signal);
     return Connection(this, makeSignalDeleter(this, &signal));
+}
+
+
+template <typename Signature>
+void Signal<Signature>::disconnectAll()
+{
+    apex_assert_hard(guard_ == -1);
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+
+    SignalBase::disconnectAll();
+
+    clear();
+}
+
+template <typename Signature>
+void Signal<Signature>::clear()
+{
+    while(!parents_.empty()) {
+        removeParent(parents_.front());
+    }
+
+    while(!children_to_remove_.empty()) {
+        removeChild(children_to_remove_.front());
+    }
+    while(!children_.empty()) {
+        removeChild(children_.front());
+    }
+
+    functions_.clear();
+    functions_to_remove_.clear();
 }
 
 template <typename Signature>

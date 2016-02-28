@@ -36,6 +36,18 @@ bool StaticOutput::hasMessage()
 }
 
 
+bool StaticOutput::hasMarkerMessage()
+{
+    if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_to_send_)) {
+        if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 void StaticOutput::nextMessage()
 {
     setState(State::IDLE);

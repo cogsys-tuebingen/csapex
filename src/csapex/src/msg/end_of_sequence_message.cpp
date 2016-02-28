@@ -8,6 +8,9 @@ EndOfSequenceMessage::EndOfSequenceMessage()
     : MarkerMessage(type<EndOfSequenceMessage>::name(), 0)
 {}
 
+EndOfSequenceMessage::EndOfSequenceMessage(const std::string& name)
+    : MarkerMessage(name, 0)
+{}
 ConnectionType::Ptr EndOfSequenceMessage::clone() const
 {
     EndOfSequenceMessage::Ptr new_msg(new EndOfSequenceMessage);
