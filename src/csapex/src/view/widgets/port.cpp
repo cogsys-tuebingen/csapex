@@ -15,6 +15,7 @@
 
 /// SYSTEM
 #include <sstream>
+#include <iostream>
 #include <stdexcept>
 #include <QDrag>
 #include <QWidget>

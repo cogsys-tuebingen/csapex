@@ -6,6 +6,9 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/yaml_io.hpp>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 NodeState::NodeState(const NodeHandle *parent)

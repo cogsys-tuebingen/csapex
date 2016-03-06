@@ -13,6 +13,7 @@
 
 /// SYSTEM
 #include <memory>
+#include <iostream>
 
 using namespace csapex;
 

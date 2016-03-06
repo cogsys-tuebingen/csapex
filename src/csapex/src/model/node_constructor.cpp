@@ -11,6 +11,9 @@
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/delegate_bind.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 NodeConstructor::NodeConstructor(const std::string &type, std::function<NodePtr()> c)

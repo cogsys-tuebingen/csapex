@@ -112,6 +112,8 @@ protected:
     virtual boost::any get_unsafe() const override;
     virtual bool set_unsafe(const boost::any& v) override;
 
+    RangeParameter(const RangeParameter& other) = default;
+
 private:
     template <typename T>
     T read(const boost::any& var) const

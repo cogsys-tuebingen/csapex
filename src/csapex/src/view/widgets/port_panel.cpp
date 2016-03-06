@@ -15,6 +15,7 @@
 #include <QDragEnterEvent>
 #include <QDrag>
 #include <QApplication>
+#include <iostream>
 
 using namespace csapex;
 

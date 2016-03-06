@@ -10,9 +10,7 @@
 #include <memory>
 #include <boost/any.hpp>
 #include <csapex/utility/slim_signal.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include <mutex>
 
 /// FORWARD DECLARATIONS
 namespace YAML {
@@ -22,7 +20,7 @@ class Node;
 namespace csapex {
 namespace param {
 
-class Parameter : boost::noncopyable
+class Parameter
 {
 public:
     friend class ParameterFactory;
@@ -30,7 +28,7 @@ public:
 
     typedef std::shared_ptr<Parameter> Ptr;
 
-    typedef std::shared_ptr<boost::recursive_mutex::scoped_lock> Lock;
+    typedef std::shared_ptr<std::unique_lock<std::recursive_mutex>> Lock;
 
 public:
     csapex::slim_signal::Signal<void(Parameter*)> parameter_changed;
@@ -143,6 +141,7 @@ protected:
 
 protected:
     explicit Parameter(const std::string& name, const ParameterDescription& description);
+    Parameter(const Parameter& other);
 
     virtual boost::any get_unsafe() const = 0;
     virtual bool set_unsafe(const boost::any& v) = 0;
@@ -162,7 +161,7 @@ protected:
     bool temporary_;
     bool interactive_;
 
-    mutable boost::recursive_mutex mutex_;
+    mutable std::recursive_mutex mutex_;
 };
 
 }

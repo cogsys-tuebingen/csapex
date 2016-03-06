@@ -4,6 +4,9 @@
 /// PROJECT
 #include <csapex/core/csapex_core.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 ExceptionHandler::ExceptionHandler(bool fatal_exceptions)

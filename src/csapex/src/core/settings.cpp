@@ -10,6 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/version.hpp>
 #include <fstream>
+#include <iostream>
 
 #if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
 namespace bf3 = boost::filesystem;

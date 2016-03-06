@@ -12,7 +12,7 @@
 #include <csapex/core/settings.h>
 
 /// SYSTEM
-
+#include <iostream>
 
 using namespace csapex;
 

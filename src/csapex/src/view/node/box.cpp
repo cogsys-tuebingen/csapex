@@ -31,6 +31,7 @@
 #include <QSizeGrip>
 #include <QThread>
 #include <cmath>
+#include <sstream>
 
 using namespace csapex;
 

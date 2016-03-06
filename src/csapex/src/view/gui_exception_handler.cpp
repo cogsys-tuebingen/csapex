@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QUrl>
+#include <sstream>
 
 using namespace csapex;
 

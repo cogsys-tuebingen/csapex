@@ -18,6 +18,9 @@
 #include <csapex/msg/marker_message.h>
 #include <csapex/utility/uuid_provider.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,

@@ -22,6 +22,9 @@
 #include <csapex/msg/static_output.h>
 #include <csapex/msg/bundled_connection.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 Graph::Graph()

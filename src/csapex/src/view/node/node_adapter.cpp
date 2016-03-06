@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <QLayout>
 #include <QWidget>
+#include <iostream>
 
 using namespace csapex;
 

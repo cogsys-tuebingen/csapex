@@ -30,6 +30,7 @@
 
 /// SYSTEM
 #include <boost/program_options.hpp>
+#include <iostream>
 #include <QtGui>
 #include <QMessageBox>
 #include <execinfo.h>

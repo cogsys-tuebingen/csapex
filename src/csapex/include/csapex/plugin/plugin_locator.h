@@ -16,7 +16,7 @@
 
 namespace csapex
 {
-class PluginLocator : private boost::noncopyable
+class PluginLocator
 {
 public:
     PluginLocator(Settings& settings);
@@ -50,6 +50,10 @@ public:
     bool isLibraryLoaded(const std::string& name) const;
 
     std::vector<std::string> getAllLibraries() const;
+
+private:
+    PluginLocator(const PluginLocator& copy) = delete;
+    PluginLocator& operator = (const PluginLocator& copy) = delete;
 
 private:
     Settings &settings_;

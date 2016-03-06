@@ -8,6 +8,7 @@
 
 /// SYSTEM
 #include <mutex>
+#include <iostream>
 
 using namespace csapex;
 
