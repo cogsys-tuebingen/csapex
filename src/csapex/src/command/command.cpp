@@ -49,6 +49,11 @@ void Command::init(Settings *settings, GraphFacade* root, ThreadPool *thread_poo
     initialized_ = true;
 }
 
+bool Command::isUndoable() const
+{
+    return true;
+}
+
 bool Command::executeCommand(Command::Ptr cmd)
 {
     cmd->init(settings_, getRoot(), getRootThreadPool(), node_factory_);

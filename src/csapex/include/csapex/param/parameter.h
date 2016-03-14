@@ -91,15 +91,22 @@ public:
         if(!is<T>() && !is<void>()) {
             throwTypeError(typeid(T), type(),"set failed: ");
         }
-        bool changed = false;
-        {
-            Lock l = lock();
-            changed = set_unsafe(v);
-        }
+        bool changed = setSilent(v);
 
         if(changed) {
             triggerChange();
         }
+    }
+
+    template <typename T>
+    bool setSilent(const T& v)
+    {
+        if(!is<T>() && !is<void>()) {
+            throwTypeError(typeid(T), type(),"set failed: ");
+        }
+
+        Lock l = lock();
+        return set_unsafe(v);
     }
 
     template <typename T>

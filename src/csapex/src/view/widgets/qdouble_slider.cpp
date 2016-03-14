@@ -44,14 +44,14 @@ int QDoubleSlider::double2int(double val)
 void QDoubleSlider::scaleValue(int value)
 {
     double val = int2double(value);
-    if(val != doubleValue()){
-        setDoubleValue(val);
+    if(val != scaledValue()){
+        setScaledValue(val);
     }
 
-    Q_EMIT doubleValueChanged(val);
+    Q_EMIT scaledValueChanged(val);
 }
 
-void QDoubleSlider::setDoubleMinimum(double min)
+void QDoubleSlider::setScaledMinimum(double min)
 {
     bool change = min != min_;
 
@@ -61,7 +61,7 @@ void QDoubleSlider::setDoubleMinimum(double min)
     }
 }
 
-void QDoubleSlider::setDoubleMaximum(double max)
+void QDoubleSlider::setScaledMaximum(double max)
 {
     bool change = max != max_;
 
@@ -71,7 +71,7 @@ void QDoubleSlider::setDoubleMaximum(double max)
     }
 }
 
-void QDoubleSlider::setDoubleRange(double min, double max)
+void QDoubleSlider::setScaledRange(double min, double max)
 {
     bool change = max != max_ || min != min_;
 
@@ -82,7 +82,7 @@ void QDoubleSlider::setDoubleRange(double min, double max)
     }
 }
 
-void QDoubleSlider::setDoubleValue(double val)
+void QDoubleSlider::setScaledValue(double val)
 {
     int intval= double2int(val);
     if(value() != intval) {
@@ -98,34 +98,34 @@ void QDoubleSlider::setNearestDoubleValue(double val)
         setValue(intval);
         blockSignals(false);
 
-        Q_EMIT doubleValueChanged(val);
+        Q_EMIT scaledValueChanged(val);
     }
 }
 
 void QDoubleSlider::limitMin(double limit)
 {
-    double limited = std::max(doubleValue(), limit);
-    setDoubleValue(limited);
+    double limited = std::max(scaledValue(), limit);
+    setScaledValue(limited);
 }
 
 void QDoubleSlider::limitMax(double limit)
 {
-    double limited = std::min(doubleValue(), limit);
-    setDoubleValue(limited);
+    double limited = std::min(scaledValue(), limit);
+    setScaledValue(limited);
 }
 
 
-double QDoubleSlider::doubleValue()
+double QDoubleSlider::scaledValue()
 {
     return int2double(value());
 }
 
-double QDoubleSlider::doubleMaximum()
+double QDoubleSlider::scaledMaximum()
 {
     return int2double(maximum());
 }
 
-double QDoubleSlider::doubleMinimum()
+double QDoubleSlider::scaledMinimum()
 {
     return int2double(minimum());
 }
@@ -133,11 +133,11 @@ double QDoubleSlider::doubleMinimum()
 void QDoubleSlider::emitRangeChanged(int min, int max)
 {
     if(int2double(min) != min_)
-        setDoubleMinimum(int2double(min));
+        setScaledMinimum(int2double(min));
     if(int2double(max) != max_)
-        setDoubleMaximum(int2double(max));
+        setScaledMaximum(int2double(max));
 
-    Q_EMIT doubleRangeChanged(min_, max_);
+    Q_EMIT scaledRangeChanged(min_, max_);
 }
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_qdouble_slider.cpp"

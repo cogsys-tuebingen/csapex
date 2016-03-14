@@ -42,6 +42,7 @@ public:
     Command(const AUUID& graph_uuid);
 
     virtual void init(Settings* settings, GraphFacade* graph_facade, ThreadPool* thread_pool, NodeFactory *node_factory);
+    virtual bool isUndoable() const;
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();

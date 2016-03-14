@@ -67,9 +67,14 @@ public:
     }
 
     template <typename T>
-    void setParameter(const std::string& name, const T& value)
+    void setParameter(const std::string& name, const T& value, bool silent = false)
     {
-        doSetParameter<T>(name, value);
+        doSetParameter<T>(name, value, silent);
+    }
+    template <typename T>
+    void setParameterLater(const std::string& name, const T& value, bool silent = false)
+    {
+        doSetParameterLater<T>(name, value, silent);
     }
 
     /***
@@ -116,7 +121,19 @@ private:
     template <typename T>
     T doReadParameter(const std::string& name) const;
     template <typename T>
-    void doSetParameter(const std::string& name, const T& value);
+    void doSetParameter(const std::string& name, const T& value, bool silent);
+
+    template <typename T>
+    void doSetParameterLater(const std::string& name, const T& value, bool silent)
+    {
+        {
+            std::unique_lock<std::recursive_mutex> lock(mutex_);
+            param_updates_[name] = [this, name, value, silent](){
+                doSetParameter(name, value, silent);
+            };
+        }
+        parameters_changed();
+    }
 
 private:
     void parameterChanged(csapex::param::Parameter* param);
@@ -129,6 +146,7 @@ private:
 
     mutable std::recursive_mutex mutex_;
     mutable std::mutex changed_params_mutex_;
+    std::map<std::string, std::function<void()>> param_updates_;
     std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > changed_params_;
 
 protected:

@@ -5,6 +5,7 @@
 #include <csapex/param/io.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/assert.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <qglobal.h>
@@ -164,7 +165,7 @@ void GenericState::registerParameter(const csapex::param::Parameter::Ptr &param)
 {
     params[param->name()] = param;
 
-    param->setUUID(parent_uuid_);
+    param->setUUID(UUIDProvider::makeTypedUUID_forced(parent_uuid_, "param", param->name()));
 
     (*parameter_added)(param);
     triggerParameterSetChanged();

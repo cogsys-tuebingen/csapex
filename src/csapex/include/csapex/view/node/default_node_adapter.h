@@ -6,6 +6,7 @@
 
 /// PROJECT
 #include <csapex/param/param_fwd.h>
+#include <csapex/view/view_fwd.h>
 
 /// SYSTEM
 #include <QObject>
@@ -104,6 +105,8 @@ private:
     std::map<std::string, QBoxLayout*> groups;
     std::map<std::string, bool> groups_enabled;
     std::map<std::string, QGroupBox*> groupsboxes;
+
+    std::vector<ParameterAdapterPtr> adapters_;
 
     std::map<Connectable*, csapex::slim_signal::ScopedConnection> parameter_connections_;
 

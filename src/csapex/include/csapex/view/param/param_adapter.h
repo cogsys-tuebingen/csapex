@@ -5,7 +5,7 @@
 #include <csapex/view/utility/qsignal_relay.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/param/parameter.h>
-#include <csapex/param/proxy.hpp>
+#include <csapex/command/command_fwd.h>
 
 /// SYSTEM
 #include <string>
@@ -21,10 +21,13 @@ class ParameterAdapter : public QObject
     Q_OBJECT
 
 public:
-    ParameterAdapter(param::Proxy<param::Parameter>::Ptr p);
+    ParameterAdapter(param::Parameter::Ptr p);
     virtual ~ParameterAdapter();
 
     virtual void setup(QBoxLayout* layout, const std::string& display_name) = 0;
+
+public:
+    csapex::slim_signal::Signal<void(CommandPtr)> executeCommand;
 
 Q_SIGNALS:
     void modelCallback(std::function<void()>);
@@ -37,7 +40,7 @@ protected:
                  std::function<void()> cb);
 
 protected:
-    param::Proxy<param::Parameter>::Ptr p_;
+    param::Parameter::Ptr p_;
 
 private:
     std::vector<csapex::slim_signal::ScopedConnection> connections;

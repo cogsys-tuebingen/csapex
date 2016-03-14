@@ -30,10 +30,14 @@ T Parameterizable::doReadParameter(const std::string& name) const
 }
 
 template <typename T>
-void Parameterizable::doSetParameter(const std::string& name, const T& value)
+void Parameterizable::doSetParameter(const std::string& name, const T& value, bool silent)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    parameter_state_->getParameter(name)->set<T>(value);
+    if(silent) {
+        parameter_state_->getParameter(name)->setSilent<T>(value);
+    } else {
+        parameter_state_->getParameter(name)->set<T>(value);
+    }
 }
 
 
@@ -47,14 +51,14 @@ template std::vector<double> Parameterizable::doReadParameter<std::vector<double
 template std::vector<int> Parameterizable::doReadParameter<std::vector<int> >(const std::string& name) const;
 
 
-template void Parameterizable::doSetParameter<bool>(const std::string& name, const bool& value);
-template void Parameterizable::doSetParameter<double>(const std::string& name, const double& value);
-template void Parameterizable::doSetParameter<int>(const std::string& name, const int& value);
-template void Parameterizable::doSetParameter<std::string>(const std::string& name, const std::string& value);
-template void Parameterizable::doSetParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
-template void Parameterizable::doSetParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
-template void Parameterizable::doSetParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
-template void Parameterizable::doSetParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
+template void Parameterizable::doSetParameter<bool>(const std::string& name, const bool& value, bool silent);
+template void Parameterizable::doSetParameter<double>(const std::string& name, const double& value, bool silent);
+template void Parameterizable::doSetParameter<int>(const std::string& name, const int& value, bool silent);
+template void Parameterizable::doSetParameter<std::string>(const std::string& name, const std::string& value, bool silent);
+template void Parameterizable::doSetParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value, bool silent);
+template void Parameterizable::doSetParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value, bool silent);
+template void Parameterizable::doSetParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value, bool silent);
+template void Parameterizable::doSetParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value, bool silent);
 
 
 
@@ -309,6 +313,14 @@ Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
     ChangedParameterList changed_params;
 
     std::unique_lock<std::mutex> clock(changed_params_mutex_);
+
+    while(!param_updates_.empty()) {
+        for(auto& entry : param_updates_) {
+            entry.second();
+        }
+        param_updates_.clear();
+    }
+
     changed_params = changed_params_;
     changed_params_.clear();
 

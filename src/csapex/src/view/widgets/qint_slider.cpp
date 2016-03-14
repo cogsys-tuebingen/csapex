@@ -46,14 +46,14 @@ int QIntSlider::integer2int(int val)
 void QIntSlider::scaleValue(int value)
 {
     double val = int2integer(value);
-    if(val != intValue()){
-        setIntValue(val);
+    if(val != scaledValue()){
+        setScaledValue(val);
     }
 
-    Q_EMIT intValueChanged(val);
+    Q_EMIT scaledValueChanged(val);
 }
 
-void QIntSlider::setIntMinimum(int min)
+void QIntSlider::setScaledMinimum(int min)
 {
     bool change = min != min_;
 
@@ -67,7 +67,7 @@ void QIntSlider::setIntMinimum(int min)
     }
 }
 
-void QIntSlider::setIntMaximum(int max)
+void QIntSlider::setScaledMaximum(int max)
 {
     bool change = max != max_;
 
@@ -81,7 +81,7 @@ void QIntSlider::setIntMaximum(int max)
     }
 }
 
-void QIntSlider::setIntRange(int min, int max)
+void QIntSlider::setScaledRange(int min, int max)
 {
     bool change = max != max_ || min != min_;
 
@@ -92,7 +92,7 @@ void QIntSlider::setIntRange(int min, int max)
     }
 }
 
-void QIntSlider::setIntValue(int val)
+void QIntSlider::setScaledValue(int val)
 {
     int intval= integer2int(val);
     if(value() != intval) {
@@ -102,28 +102,28 @@ void QIntSlider::setIntValue(int val)
 
 void QIntSlider::limitMin(int limit)
 {
-    double limited = std::max(intValue(), limit);
-    setIntValue(limited);
+    double limited = std::max(scaledValue(), limit);
+    setScaledValue(limited);
 }
 
 void QIntSlider::limitMax(int limit)
 {
-    double limited = std::min(intValue(), limit);
-    setIntValue(limited);
+    double limited = std::min(scaledValue(), limit);
+    setScaledValue(limited);
 }
 
 
-int QIntSlider::intValue()
+int QIntSlider::scaledValue()
 {
     return int2integer(value());
 }
 
-int QIntSlider::intMaximum()
+int QIntSlider::scaledMaximum()
 {
     return int2integer(maximum());
 }
 
-int QIntSlider::intMinimum()
+int QIntSlider::scaledMinimum()
 {
     return int2integer(minimum());
 }
@@ -131,11 +131,11 @@ int QIntSlider::intMinimum()
 void QIntSlider::emitRangeChanged(int min, int max)
 {
     if(int2integer(min) != min_)
-        setIntMinimum(int2integer(min));
+        setScaledMinimum(int2integer(min));
     if(int2integer(max) != max_)
-        setIntMaximum(int2integer(max));
+        setScaledMaximum(int2integer(max));
 
-    Q_EMIT intRangeChanged(min_, max_);
+    Q_EMIT scaledRangeChanged(min_, max_);
 }
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_qint_slider.cpp"

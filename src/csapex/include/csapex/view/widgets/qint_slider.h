@@ -23,20 +23,20 @@ private:
     void update();
 
 Q_SIGNALS:
-    void intValueChanged(int value);
-    void intRangeChanged(int min, int max);
+    void scaledValueChanged(int value);
+    void scaledRangeChanged(int min, int max);
 
 public Q_SLOTS:
     void scaleValue(int value);
-    void setIntMinimum(int min);
-    void setIntMaximum(int max);
-    void setIntRange(int min, int max);
-    void setIntValue(int val);
+    void setScaledMinimum(int min);
+    void setScaledMaximum(int max);
+    void setScaledRange(int min, int max);
+    void setScaledValue(int val);
     void limitMin(int limit);
     void limitMax(int limit);
-    int intValue();
-    int intMaximum();
-    int intMinimum();
+    int scaledValue();
+    int scaledMaximum();
+    int scaledMinimum();
 
 private Q_SLOTS:
     void emitRangeChanged(int min, int max);

@@ -126,7 +126,7 @@ UUID UUIDProvider::makeUUID_forced(const std::string &representation)
     return r;
 }
 
-UUID UUIDProvider::generateConnectableUUID(const UUID &parent, const std::string& type)
+UUID UUIDProvider::generateTypedUUID(const UUID &parent, const std::string& type)
 {
     if(parent.empty()) {
         return UUID::NONE;
@@ -135,22 +135,32 @@ UUID UUIDProvider::generateConnectableUUID(const UUID &parent, const std::string
     return generateDerivedUUID(parent, type);
 }
 
-UUID UUIDProvider::makeConnectableUUID(const UUID &parent, const std::string& type, int sub_id)
+UUID UUIDProvider::makeTypedUUID(const UUID &parent, const std::string& type, int sub_id)
 {
-    if(parent.empty()) {
-        return UUID::NONE;
-    }
-
-    return makeDerivedUUID(parent, type + "_" + std::to_string(sub_id));
+    return makeTypedUUID(parent, type, std::to_string(sub_id));
 }
 
-UUID UUIDProvider::makeConnectableUUID_forced(const UUID &parent, const std::string& type, int sub_id)
+UUID UUIDProvider::makeTypedUUID(const UUID &parent, const std::string& type, const std::string& sub_id)
 {
     if(parent.empty()) {
         return UUID::NONE;
     }
 
-    return makeDerivedUUID_forced(parent, type + "_" + std::to_string(sub_id));
+    return makeDerivedUUID(parent, type + "_" + sub_id);
+}
+
+UUID UUIDProvider::makeTypedUUID_forced(const UUID &parent, const std::string& type, int sub_id)
+{
+    return makeTypedUUID_forced(parent, type, std::to_string(sub_id));
+}
+
+UUID UUIDProvider::makeTypedUUID_forced(const UUID &parent, const std::string& type, const std::string& sub_id)
+{
+    if(parent.empty()) {
+        return UUID::NONE;
+    }
+
+    return makeDerivedUUID_forced(parent, type + "_" + sub_id);
 }
 
 

@@ -22,6 +22,7 @@ FWD(NodeAdapter);
 FWD(NodeAdapterBuilder);
 FWD(NodeAdapterFactory);
 FWD(Port);
+FWD(ParameterAdapter);
 
 class PortPanel;
 

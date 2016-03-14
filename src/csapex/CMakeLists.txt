@@ -316,6 +316,7 @@ add_library(csapex_qt SHARED
     src/command/paste_graph.cpp
     src/command/pass_out_connector.cpp
     src/command/set_color.cpp
+    src/command/update_parameter.cpp
 
     src/view/csapex_window.cpp
     src/view/message_renderer.cpp

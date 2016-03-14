@@ -171,7 +171,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
     apex_assert_hard(output);
     Output* o = output->getOutput(output_id);
     apex_assert_hard(o);
-    Input* i = input->getInput(graph_->makeConnectableUUID_forced(input->getUUID(), "in", input_id));
+    Input* i = input->getInput(graph_->makeTypedUUID_forced(input->getUUID(), "in", input_id));
     if(!i) {
         throw std::logic_error(input->getUUID().getFullName() +
                                " does not have an input with the label " +
@@ -187,7 +187,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
 ConnectionPtr GraphFacade::connect(NodeHandlePtr output, int output_id,
                                    const UUID& input_id)
 {
-    Output* o = output->getOutput(graph_->makeConnectableUUID_forced(output->getUUID(), "out", output_id));
+    Output* o = output->getOutput(graph_->makeTypedUUID_forced(output->getUUID(), "out", output_id));
     if(!o) {
         throw std::logic_error(output->getUUID().getFullName() +
                                " does not have an output with the index " +
@@ -273,13 +273,13 @@ ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output
 ConnectionPtr GraphFacade::connect(NodeHandle *output, int output_id,
                                    NodeHandle *input, int input_id)
 {
-    Output* o = output->getOutput(graph_->makeConnectableUUID_forced(output->getUUID(), "out", output_id));
+    Output* o = output->getOutput(graph_->makeTypedUUID_forced(output->getUUID(), "out", output_id));
     if(!o) {
         throw std::logic_error(output->getUUID().getFullName() +
                                " does not have an output with the index " +
                                std::to_string(output_id));
     }
-    Input* i = input->getInput(graph_->makeConnectableUUID_forced(input->getUUID(), "in", input_id));
+    Input* i = input->getInput(graph_->makeTypedUUID_forced(input->getUUID(), "in", input_id));
     if(!i) {
         throw std::logic_error(input->getUUID().getFullName() +
                                " does not have an input with the label " +

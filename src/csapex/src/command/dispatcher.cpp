@@ -67,10 +67,13 @@ void CommandDispatcher::doExecute(Command::Ptr command)
     }
 
     bool success = Command::Access::executeCommand(command);
-    done.push_back(command);
 
-    while(!undone.empty()) {
-        undone.pop_back();
+    if(command->isUndoable()) {
+        done.push_back(command);
+
+        while(!undone.empty()) {
+            undone.pop_back();
+        }
     }
 
     if(success) {

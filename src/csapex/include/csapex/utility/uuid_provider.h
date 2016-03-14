@@ -25,12 +25,14 @@ public:
     UUID makeDerivedUUID(const UUID& parent, const std::string& name);
     UUID generateDerivedUUID(const UUID& parent, const std::string& name);
 
-    UUID makeConnectableUUID(const UUID &parent, const std::string &type, int sub_id);
-    UUID generateConnectableUUID(const UUID &parent, const std::string &type);
+    UUID makeTypedUUID(const UUID &parent, const std::string &type, int sub_id);
+    UUID makeTypedUUID(const UUID &parent, const std::string &type, const std::string& sub_id);
+    UUID generateTypedUUID(const UUID &parent, const std::string &type);
 
     static UUID makeUUID_forced(const std::string& representation);
     static UUID makeDerivedUUID_forced(const UUID& parent, const std::string& name);
-    static UUID makeConnectableUUID_forced(const UUID &parent, const std::string &type, int sub_id);
+    static UUID makeTypedUUID_forced(const UUID &parent, const std::string &type, int sub_id);
+    static UUID makeTypedUUID_forced(const UUID &parent, const std::string &type, const std::string& sub_id);
 
 
     void registerUUID(const UUID& uuid);

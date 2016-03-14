@@ -22,24 +22,24 @@ private:
     void update();
 
 Q_SIGNALS:
-    void doubleValueChanged(double value);
-    void doubleRangeChanged(double min, double max);
+    void scaledValueChanged(double value);
+    void scaledRangeChanged(double min, double max);
 
 public Q_SLOTS:
     void scaleValue(int value);
 
-    void setDoubleMinimum(double min);
-    void setDoubleMaximum(double max);
-    void setDoubleRange(double min, double max);
-    void setDoubleValue(double val);
+    void setScaledMinimum(double min);
+    void setScaledMaximum(double max);
+    void setScaledRange(double min, double max);
+    void setScaledValue(double val);
     void setNearestDoubleValue(double val);
 
     void limitMin(double limit);
     void limitMax(double limit);
 
-    double doubleValue();
-    double doubleMaximum();
-    double doubleMinimum();
+    double scaledValue();
+    double scaledMaximum();
+    double scaledMinimum();
 
 private Q_SLOTS:
     void emitRangeChanged(int min, int max);

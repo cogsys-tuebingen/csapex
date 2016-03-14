@@ -31,8 +31,6 @@
 
 #include <csapex/view/param/range_param_adapter.h>
 
-#include <csapex/param/proxy.hpp>
-
 
 /// SYSTEM
 #include <boost/lambda/lambda.hpp>
@@ -1026,9 +1024,13 @@ void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
 
 void DefaultNodeAdapter::setupParameter(param::RangeParameterPtr range_p)
 {
-    auto proxy = std::make_shared<param::Proxy<param::RangeParameter>>(range_p);
-    RangeParameterAdapter adapter(proxy);
-    adapter.setup(current_layout_, current_display_name_);
+    ParameterAdapterPtr adapter(std::make_shared<RangeParameterAdapter>(range_p));
+
+    adapter->executeCommand.connect(executeCommand);
+
+    adapters_.push_back(adapter);
+
+    adapter->setup(current_layout_, current_display_name_);
 }
 
 void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)

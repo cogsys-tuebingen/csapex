@@ -22,10 +22,15 @@ void assertNotGuiThread()
 }
 }
 
-ParameterAdapter::ParameterAdapter(param::Proxy<param::Parameter>::Ptr p)
+ParameterAdapter::ParameterAdapter(param::Parameter::Ptr p)
     : p_(p)
 {
     apex_assert_hard(p);
+
+    qRegisterMetaType<std::function<void()>>("std::function<void()>");
+
+    QObject::connect(this, &ParameterAdapter::modelCallback,
+                     this, &ParameterAdapter::executeModelCallback);
 }
 
 ParameterAdapter::~ParameterAdapter()
