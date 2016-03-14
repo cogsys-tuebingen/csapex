@@ -3,8 +3,6 @@
 
 /// PROJECT
 #include <csapex/view/widgets/qint_slider.h>
-#include <csapex/view/utility/qwrapper.h>
-#include <csapex/view/utility/context_menu_handler.h>
 #include <csapex/view/node/parameter_context_menu.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/utility/assert.h>
@@ -22,16 +20,13 @@ using namespace csapex;
 
 RangeParameterAdapter::RangeParameterAdapter(param::RangeParameter::Ptr p)
     : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), range_p_(p),
-      internal_layout(nullptr)
+      internal_layout(new QHBoxLayout)
 {
 
 }
 
 void RangeParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
-    internal_layout = new QHBoxLayout;
-    context_handler = new ParameterContextMenu(range_p_);
-
     QLabel* label = new QLabel(QString::fromStdString(display_name));
     if(context_handler) {
         label->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -51,7 +46,7 @@ void RangeParameterAdapter::setup(QBoxLayout* layout, const std::string& display
 
     for(int i = 0; i < internal_layout->count(); ++i) {
         QWidget* child = internal_layout->itemAt(i)->widget();
-        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(range_p_.get()))));
+        child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(p_.get()))));
     }
 
     layout->addLayout(internal_layout);

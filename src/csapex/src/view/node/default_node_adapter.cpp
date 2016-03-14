@@ -30,6 +30,7 @@
 #include <csapex/param/output_progress_parameter.h>
 
 #include <csapex/view/param/range_param_adapter.h>
+#include <csapex/view/param/value_param_adapter.h>
 
 
 /// SYSTEM
@@ -382,69 +383,6 @@ void ui_updatePathParameterDialog(param::PathParameterWeakPtr path_p)
         //        cb();
     }
 }
-
-// VALUE ////////////////////
-void ui_updateStringValueParameter(param::ValueParameterWeakPtr value_p, QPointer<QLineEdit> txt)
-{
-    assertGuiThread();
-    auto p = value_p.lock();
-    if(!p || !txt) {
-        return;
-    }
-    txt->setText(QString::fromStdString(p->as<std::string>()));
-}
-void model_updateStringValueParameter(param::ValueParameterWeakPtr value_p, QPointer<QLineEdit> txt)
-{
-    assertNotGuiThread();
-    auto p = value_p.lock();
-    if(!p || !txt) {
-        return;
-    }
-    p->set<std::string>(txt->text().toStdString());
-}
-
-void ui_updateBoolValueParameter(param::ValueParameterWeakPtr value_p, QPointer<QCheckBox> cb)
-{
-    assertGuiThread();
-    auto p = value_p.lock();
-    if(!p || !cb) {
-        return;
-    }
-    cb->setChecked(p->as<bool>());
-}
-void model_updateBoolValueParameter(param::ValueParameterWeakPtr value_p, QPointer<QCheckBox> cb)
-{
-    assertNotGuiThread();
-    auto p = value_p.lock();
-    if(!p || !cb) {
-        return;
-    }
-    p->set<bool>(cb->isChecked());
-}
-
-template <typename T, typename Widget>
-void ui_updateValueParameter(param::ValueParameterWeakPtr value_p, QPointer<Widget> box)
-{
-    assertGuiThread();
-    auto p = value_p.lock();
-    if(!p || !box) {
-        return;
-    }
-    box->setValue(p->as<T>());
-}
-template <typename T, typename Widget>
-void model_updateValueParameter(param::ValueParameterWeakPtr value_p, QPointer<Widget> box)
-{
-    assertNotGuiThread();
-    auto p = value_p.lock();
-    if(!p || !box) {
-        return;
-    }
-    p->set<T>(box->value());
-}
-
-// RANGE ////////////////////
-
 
 // INTERVAL ////////////////////
 template <typename T, typename Widget>
@@ -952,74 +890,13 @@ void DefaultNodeAdapter::setupParameter(param::PathParameterPtr path_p)
 
 void DefaultNodeAdapter::setupParameter(param::ValueParameterPtr value_p)
 {
-    if(value_p->is<std::string>()) {
-        QPointer<QLineEdit> txt = new QLineEdit;
-        txt->setText(value_p->as<std::string>().c_str());
-        QPointer<QPushButton> send = new QPushButton("set");
+    ParameterAdapterPtr adapter(std::make_shared<ValueParameterAdapter>(value_p));
 
-        QHBoxLayout* sub = new QHBoxLayout;
+    adapter->executeCommand.connect(executeCommand);
 
-        sub->addWidget(txt);
-        sub->addWidget(send);
+    adapters_.push_back(adapter);
 
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(value_p)));
-
-        // ui change -> model
-        qt_helper::Call* call = makeModelCall(std::bind(&model_updateStringValueParameter, value_p, txt));
-        QObject::connect(txt, SIGNAL(returnPressed()), call, SLOT(call()));
-        QObject::connect(send, SIGNAL(clicked()), call, SLOT(call()));
-
-        // model change -> ui
-        bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateStringValueParameter, value_p, txt));
-
-    } else if(value_p->is<bool>()) {
-        QPointer<QCheckBox> box = new QCheckBox;
-        box->setChecked(value_p->as<bool>());
-
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p), value_p.get()));
-
-        // ui change -> model
-        qt_helper::Call* call = makeModelCall(std::bind(&model_updateBoolValueParameter, value_p, box));
-        QObject::connect(box, SIGNAL(toggled(bool)), call, SLOT(call()));
-
-        // model change -> ui
-        bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateBoolValueParameter, value_p, box));
-
-
-    } else if(value_p->is<double>()) {
-        QPointer<QDoubleSpinBox> box = new QDoubleSpinBox;
-        box->setDecimals(10);
-        box->setMaximum(1e12);
-        box->setMinimum(-1e12);
-        box->setValue(value_p->as<double>());
-
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p), value_p.get()));
-
-        // ui change -> model
-        qt_helper::Call* call = makeModelCall(std::bind(&model_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
-        QObject::connect(box, SIGNAL(valueChanged(double)), call, SLOT(call()));
-
-        // model change -> ui
-        bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateValueParameter<double, QDoubleSpinBox>, value_p, box));
-
-    }  else if(value_p->is<int>()) {
-        QPointer<QSpinBox> box = new QSpinBox;
-        box->setMaximum(std::numeric_limits<int>::max());
-        box->setMinimum(std::numeric_limits<int>::min());
-        box->setValue(value_p->as<int>());
-
-        current_layout_->addLayout(QtHelper::wrap(current_display_name_, box, new ParameterContextMenu(value_p),  value_p.get()));
-
-        // ui change -> model
-        qt_helper::Call* call = makeModelCall(std::bind(&model_updateValueParameter<int, QSpinBox>, value_p, box));
-        QObject::connect(box, SIGNAL(valueChanged(int)), call, SLOT(call()));
-
-        // model change -> ui
-        bridge.connectInGuiThread(value_p->parameter_changed, std::bind(&ui_updateValueParameter<int, QSpinBox>, value_p, box));
-
-    } else {
-        current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet implemented (value: " + type2name(value_p->type()) + ")").c_str()));
-    }
+    adapter->doSetup(current_layout_, current_display_name_);
 }
 
 void DefaultNodeAdapter::setupParameter(param::RangeParameterPtr range_p)
@@ -1030,7 +907,7 @@ void DefaultNodeAdapter::setupParameter(param::RangeParameterPtr range_p)
 
     adapters_.push_back(adapter);
 
-    adapter->setup(current_layout_, current_display_name_);
+    adapter->doSetup(current_layout_, current_display_name_);
 }
 
 void DefaultNodeAdapter::setupParameter(param::IntervalParameterPtr interval_p)

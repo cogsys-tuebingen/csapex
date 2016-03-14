@@ -5,11 +5,8 @@
 #include <csapex/view/param/param_adapter.h>
 #include <csapex/param/range_parameter.h>
 
-class QHBoxLayout;
-
 namespace csapex
 {
-class ParameterContextMenu;
 
 class RangeParameterAdapter : public ParameterAdapter
 {
@@ -26,7 +23,6 @@ private:
     param::RangeParameterPtr range_p_;
 
     QHBoxLayout* internal_layout;
-    ParameterContextMenu* context_handler;
 };
 
 

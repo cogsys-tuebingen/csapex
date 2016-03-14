@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/assert.h>
+#include <csapex/view/node/parameter_context_menu.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -31,13 +32,18 @@ ParameterAdapter::ParameterAdapter(param::Parameter::Ptr p)
 
     QObject::connect(this, &ParameterAdapter::modelCallback,
                      this, &ParameterAdapter::executeModelCallback);
+
+    context_handler = new ParameterContextMenu(p);
 }
 
 ParameterAdapter::~ParameterAdapter()
 {
-
 }
 
+void ParameterAdapter::doSetup(QBoxLayout *layout, const std::string &display_name)
+{
+    setup(layout, display_name);
+}
 
 void ParameterAdapter::connectInGuiThread(csapex::slim_signal::Signal<void (csapex::param::Parameter *)> &signal,
                                                   std::function<void ()> cb)

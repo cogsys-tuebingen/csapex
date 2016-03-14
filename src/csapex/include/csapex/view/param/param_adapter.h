@@ -2,7 +2,6 @@
 #define PARAM_ADAPTER_H
 
 /// PROJECT
-#include <csapex/view/utility/qsignal_relay.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/param/parameter.h>
 #include <csapex/command/command_fwd.h>
@@ -12,9 +11,13 @@
 #include <QObject>
 
 class QBoxLayout;
+class QHBoxLayout;
+
 
 namespace csapex
 {
+
+class ParameterContextMenu;
 
 class ParameterAdapter : public QObject
 {
@@ -24,6 +27,9 @@ public:
     ParameterAdapter(param::Parameter::Ptr p);
     virtual ~ParameterAdapter();
 
+    void doSetup(QBoxLayout* layout, const std::string& display_name);
+
+protected:
     virtual void setup(QBoxLayout* layout, const std::string& display_name) = 0;
 
 public:
@@ -41,6 +47,8 @@ protected:
 
 protected:
     param::Parameter::Ptr p_;
+
+    ParameterContextMenu* context_handler;
 
 private:
     std::vector<csapex::slim_signal::ScopedConnection> connections;
