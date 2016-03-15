@@ -247,7 +247,7 @@ UUID GraphIO::readConnectorUUID(const YAML::Node& doc)
         if(pos != old_node_uuid_to_new_.end()) {
             parent = old_node_uuid_to_new_[parent];
 
-            uuid = graph_->makeDerivedUUID(parent, uuid.id());
+            uuid = graph_->makeDerivedUUID_forced(parent, uuid.id());
         }
     }
     return uuid;
