@@ -349,6 +349,21 @@ add_library(csapex_qt SHARED
     src/view/param/range_param_adapter.cpp
     src/view/param/value_param_adapter.cpp
 
+
+    src/view/param/range_param_adapter.cpp
+    src/view/param/interval_param_adapter.cpp
+    src/view/param/set_param_adapter.cpp
+    src/view/param/bitset_param_adapter.cpp
+    src/view/param/value_param_adapter.cpp
+    src/view/param/path_param_adapter.cpp
+    #src/view/param/trigger_param_adapter.cpp
+    src/view/param/color_param_adapter.cpp
+    src/view/param/angle_param_adapter.cpp
+    #src/view/param/null_param_adapter.cpp
+    #src/view/param/string_list_param_adapter.cpp
+
+    src/view/param/output_progress_param_adapter.cpp
+
     src/view/utility/node_list_generator.cpp
     src/view/utility/context_menu_handler.cpp
     src/view/utility/html_delegate.cpp

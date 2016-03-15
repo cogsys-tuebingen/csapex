@@ -67,15 +67,17 @@ public:
     }
 
     template <typename T>
-    void setParameter(const std::string& name, const T& value, bool silent = false)
+    void setParameter(const std::string& name, const T& value)
     {
-        doSetParameter<T>(name, value, silent);
+        doSetParameter<T>(name, value);
     }
     template <typename T>
-    void setParameterLater(const std::string& name, const T& value, bool silent = false)
+    void setParameterLater(const std::string& name, const T& value)
     {
-        doSetParameterLater<T>(name, value, silent);
+        doSetParameterLater<T>(name, value);
     }
+
+    void setSilent(bool silent);
 
     /***
      *  PARAMETER CONSTRAINTS
@@ -121,15 +123,15 @@ private:
     template <typename T>
     T doReadParameter(const std::string& name) const;
     template <typename T>
-    void doSetParameter(const std::string& name, const T& value, bool silent);
+    void doSetParameter(const std::string& name, const T& value);
 
     template <typename T>
-    void doSetParameterLater(const std::string& name, const T& value, bool silent)
+    void doSetParameterLater(const std::string& name, const T& value)
     {
         {
-            std::unique_lock<std::recursive_mutex> lock(mutex_);
-            param_updates_[name] = [this, name, value, silent](){
-                doSetParameter(name, value, silent);
+            std::unique_lock<std::recursive_mutex> lock(changed_params_mutex_);
+            param_updates_[name] = [this, name, value](){
+                doSetParameter(name, value);
             };
         }
         parameters_changed();
@@ -145,12 +147,15 @@ private:
     std::map<csapex::param::Parameter*, std::function<bool()> > conditions_;
 
     mutable std::recursive_mutex mutex_;
-    mutable std::mutex changed_params_mutex_;
+    mutable std::recursive_mutex changed_params_mutex_;
     std::map<std::string, std::function<void()>> param_updates_;
     std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > changed_params_;
 
 protected:
     GenericStatePtr parameter_state_;
+
+private:
+    bool silent_;
 };
 
 }

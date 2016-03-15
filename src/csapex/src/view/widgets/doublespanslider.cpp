@@ -70,6 +70,8 @@ void DoubleSpanSlider::setRange(double min, double max)
 
 void DoubleSpanSlider::update(double min, double max)
 {
+    apex_assert_hard(step_ != 0.0);
+
     int mini = double2int(min, min);
     int maxi = double2int(max, min);
 

@@ -14,12 +14,17 @@ using namespace csapex;
 
 
 Parameterizable::Parameterizable()
-    : parameter_state_(new GenericState)
+    : parameter_state_(new GenericState), silent_(false)
 {
 }
 
 Parameterizable::~Parameterizable()
 {
+}
+
+void Parameterizable::setSilent(bool silent)
+{
+    silent_ = silent;
 }
 
 template <typename T>
@@ -30,14 +35,10 @@ T Parameterizable::doReadParameter(const std::string& name) const
 }
 
 template <typename T>
-void Parameterizable::doSetParameter(const std::string& name, const T& value, bool silent)
+void Parameterizable::doSetParameter(const std::string& name, const T& value)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    if(silent) {
-        parameter_state_->getParameter(name)->setSilent<T>(value);
-    } else {
-        parameter_state_->getParameter(name)->set<T>(value);
-    }
+    parameter_state_->getParameter(name)->set<T>(value);
 }
 
 
@@ -47,18 +48,20 @@ template int Parameterizable::doReadParameter<int>(const std::string& name) cons
 template std::string Parameterizable::doReadParameter<std::string>(const std::string& name) const;
 template std::pair<int,int> Parameterizable::doReadParameter<std::pair<int,int> >(const std::string& name) const;
 template std::pair<double,double> Parameterizable::doReadParameter<std::pair<double,double> >(const std::string& name) const;
+template std::pair<std::string, bool> Parameterizable::doReadParameter<std::pair<std::string, bool> >(const std::string& name) const;
 template std::vector<double> Parameterizable::doReadParameter<std::vector<double> >(const std::string& name) const;
 template std::vector<int> Parameterizable::doReadParameter<std::vector<int> >(const std::string& name) const;
 
 
-template void Parameterizable::doSetParameter<bool>(const std::string& name, const bool& value, bool silent);
-template void Parameterizable::doSetParameter<double>(const std::string& name, const double& value, bool silent);
-template void Parameterizable::doSetParameter<int>(const std::string& name, const int& value, bool silent);
-template void Parameterizable::doSetParameter<std::string>(const std::string& name, const std::string& value, bool silent);
-template void Parameterizable::doSetParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value, bool silent);
-template void Parameterizable::doSetParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value, bool silent);
-template void Parameterizable::doSetParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value, bool silent);
-template void Parameterizable::doSetParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value, bool silent);
+template void Parameterizable::doSetParameter<bool>(const std::string& name, const bool& value);
+template void Parameterizable::doSetParameter<double>(const std::string& name, const double& value);
+template void Parameterizable::doSetParameter<int>(const std::string& name, const int& value);
+template void Parameterizable::doSetParameter<std::string>(const std::string& name, const std::string& value);
+template void Parameterizable::doSetParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
+template void Parameterizable::doSetParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
+template void Parameterizable::doSetParameter<std::pair<std::string, bool> >(const std::string& name, const std::pair<std::string, bool>& value);
+template void Parameterizable::doSetParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
+template void Parameterizable::doSetParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
 
 
 
@@ -74,11 +77,10 @@ void Parameterizable::addParameterCallback(csapex::param::Parameter* param, std:
 void Parameterizable::removeParameterCallbacks(csapex::param::Parameter *param)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    std::unique_lock<std::mutex> clock(changed_params_mutex_);
+    std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
 
-    typedef std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > PAIR;
-    for(std::vector<PAIR>::iterator it = changed_params_.begin(); it != changed_params_.end();) {
-        const PAIR& p = *it;
+    for(auto it = changed_params_.begin(); it != changed_params_.end();) {
+        const auto& p = *it;
         if(p.first == param) {
             it = changed_params_.erase(it);
         } else {
@@ -107,12 +109,16 @@ void Parameterizable::parameterChanged(csapex::param::Parameter *)
 
 void Parameterizable::parameterChanged(csapex::param::Parameter *param, std::function<void(csapex::param::Parameter *)> cb)
 {
-    std::unique_lock<std::recursive_mutex> lock(mutex_);
-    std::unique_lock<std::mutex> clock(changed_params_mutex_);
+    {
+        std::unique_lock<std::recursive_mutex> lock(mutex_);
+        std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
 
-    changed_params_.push_back(std::make_pair(param, cb));
+        changed_params_.push_back(std::make_pair(param, cb));
+    }
 
-    parameters_changed();
+    if(!silent_) {
+        parameters_changed();
+    }
 }
 
 void Parameterizable::parameterEnabled(csapex::param::Parameter */*param*/, bool /*enabled*/)
@@ -312,14 +318,16 @@ Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     ChangedParameterList changed_params;
 
-    std::unique_lock<std::mutex> clock(changed_params_mutex_);
+    std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
 
+    setSilent(true);
     while(!param_updates_.empty()) {
         for(auto& entry : param_updates_) {
             entry.second();
         }
         param_updates_.clear();
     }
+    setSilent(false);
 
     changed_params = changed_params_;
     changed_params_.clear();

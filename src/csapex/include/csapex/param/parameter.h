@@ -66,8 +66,10 @@ public:
     template <typename T>
     bool is() const
     {
-        return type() == typeid(T);
+        return accepts(typeid(T));
     }
+
+    virtual bool accepts(const std::type_info& type) const;
 
     Lock lock() const;
 

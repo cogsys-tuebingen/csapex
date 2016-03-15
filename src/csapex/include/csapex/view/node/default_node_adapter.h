@@ -72,16 +72,9 @@ public:
 
 public:
     void setupParameter(param::TriggerParameterPtr trigger_p);
-    void setupParameter(param::ColorParameterPtr color_p);
-    void setupParameter(param::PathParameterPtr path_p);
-    void setupParameter(param::ValueParameterPtr value_p);
-    void setupParameter(param::RangeParameterPtr range_p);
-    void setupParameter(param::IntervalParameterPtr interval_p);
-    void setupParameter(param::SetParameterPtr set_p);
-    void setupParameter(param::BitSetParameterPtr bitset_p);
-    void setupParameter(param::AngleParameterPtr angle_p);
 
-    void setupParameter(param::OutputProgressParameterPtr bitset_p);
+    template <typename Parameter, typename Adapter>
+    void setupParameter(std::shared_ptr<Parameter> adapter);
 
 
 protected:
@@ -95,8 +88,6 @@ public:
 
 private:
     qt_helper::Call* makeModelCall(std::function<void()> cb);
-    qt_helper::Call* makeUiCall(std::function<void()> cb);
-    qt_helper::Call* makePausedUiCall(std::function<void()> cb);
 
 private:
     std::vector<csapex::slim_signal::ScopedConnection> connections_;

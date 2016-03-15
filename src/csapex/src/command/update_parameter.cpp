@@ -43,8 +43,26 @@ std::string UpdateParameter::getDescription() const
     } else if(value.type() == typeid(bool)) {
         ss << boost::any_cast<bool> (value);
 
+    } else if(value.type() == typeid(std::vector<int>)) {
+        auto v =  boost::any_cast<std::vector<int>> (value);
+        for(const auto& e : v) {
+            ss << e << " ";
+        }
+
     } else if(value.type() == typeid(std::string)) {
         ss << boost::any_cast<std::string> (value);
+
+    } else if(value.type() == typeid(std::pair<int, int>)) {
+        auto p = boost::any_cast<std::pair<int, int>> (value);
+        ss << "[" << p.first << ", " << p.second << "]";
+
+    } else if(value.type() == typeid(std::pair<double, double>)) {
+        auto p = boost::any_cast<std::pair<double, double>> (value);
+        ss << "[" << p.first << ", " << p.second << "]";
+
+    } else if(value.type() == typeid(std::pair<std::string, bool>)) {
+        auto p = boost::any_cast<std::pair<std::string, bool>> (value);
+        ss << "[" << p.first << ": " << p.second << "]";
 
     } else {
         throw std::runtime_error(std::string("unsupported type: ") + value.type().name());
@@ -66,16 +84,28 @@ bool UpdateParameter::doExecute()
 
 
     if(value.type() == typeid(int)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<int> (value), true);
+        node->setParameterLater(uuid.name(), boost::any_cast<int> (value));
 
     } else if(value.type() == typeid(double)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<double> (value), true);
+        node->setParameterLater(uuid.name(), boost::any_cast<double> (value));
 
     } else if(value.type() == typeid(bool)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<bool> (value), true);
+        node->setParameterLater(uuid.name(), boost::any_cast<bool> (value));
 
     } else if(value.type() == typeid(std::string)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<std::string> (value), true);
+        node->setParameterLater(uuid.name(), boost::any_cast<std::string> (value));
+
+    } else if(value.type() == typeid(std::vector<int>)) {
+        node->setParameterLater(uuid.name(), boost::any_cast<std::vector<int>> (value));
+
+    } else if(value.type() == typeid(std::pair<int, int>)) {
+        node->setParameterLater(uuid.name(), boost::any_cast<std::pair<int, int>> (value));
+
+    } else if(value.type() == typeid(std::pair<double, double>)) {
+        node->setParameterLater(uuid.name(), boost::any_cast<std::pair<double, double>> (value));
+
+    } else if(value.type() == typeid(std::pair<std::string, bool>)) {
+        node->setParameterLater(uuid.name(), boost::any_cast<std::pair<std::string, bool>> (value));
 
     } else {
         throw std::runtime_error(std::string("unsupported type: ") + value.type().name());

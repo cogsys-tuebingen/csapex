@@ -23,6 +23,11 @@ BitSetParameter::~BitSetParameter()
 
 }
 
+bool BitSetParameter::accepts(const std::type_info& type) const
+{
+    return type == typeid(int) || type == typeid(std::pair<std::string, bool>);
+}
+
 void BitSetParameter::setByName(const std::string &name)
 {
     for(std::map<std::string, int>::iterator it = set_.begin(); it != set_.end(); ++it) {
@@ -151,11 +156,17 @@ boost::any BitSetParameter::get_unsafe() const
 }
 
 
-bool BitSetParameter::set_unsafe(const boost::any &/*v*/)
+bool BitSetParameter::set_unsafe(const boost::any &v)
 {
-    int val = boost::any_cast<int>(val);
-    if(val != value_) {
-        value_ = val;
+    if(v.type() == typeid(int)) {
+        int val = boost::any_cast<int>(v);
+        if(val != value_) {
+            value_ = val;
+            return true;
+        }
+    } else if(v.type() == typeid(std::pair<std::string, bool>)) {
+        auto pair = boost::any_cast<std::pair<std::string, bool>>(v);
+        setBitTo(pair.first, pair.second);
         return true;
     }
 

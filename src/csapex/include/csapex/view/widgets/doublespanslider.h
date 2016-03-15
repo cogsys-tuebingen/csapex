@@ -16,7 +16,6 @@ public:
     double doubleMinimum() const;
     double doubleMaximum() const;
 
-    void setRange(double min, double max);
 
 public Q_SLOTS:
     void setSpan(double lower, double upper);
@@ -25,7 +24,9 @@ public Q_SLOTS:
     void setUpperDoubleValue(double upper);
     void setDoubleMinimum(double min);
     void setDoubleMaximum(double max);
+
     void setDoubleRange(double min, double max);
+    void setRange(double min, double max);
 
     void scaleSpan(int l, int u);
     void scaleRange(int l, int u);

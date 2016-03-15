@@ -185,3 +185,8 @@ void Parameter::throwTypeError(const std::type_info &a, const std::type_info &b,
 {
     throw std::runtime_error(prefix + std::string("'") + name() + "' is not of type '" + type2string(a) + "' but '" + type2string(b) + "'");
 }
+
+bool Parameter::accepts(const std::type_info& t) const
+{
+    return type() == t;
+}

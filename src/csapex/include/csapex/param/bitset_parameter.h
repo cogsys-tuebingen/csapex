@@ -34,6 +34,9 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
+
+    virtual bool accepts(const std::type_info& type) const override;
+
     int def() const { return def_; }
 
     void setBitSet(const std::map<std::string, int>& set);
