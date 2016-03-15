@@ -135,6 +135,13 @@ boost::any SetParameter::get_unsafe() const
 
 bool SetParameter::set_unsafe(const boost::any &v)
 {
+    if(v.type() == typeid(std::pair<std::string, bool>)) {
+        auto pair = boost::any_cast<std::pair<std::string, bool>>(v);
+        setByName(pair.first);
+        return true;
+    }
+
+
     bool change = true;
     if(!value_.empty()) {
         if(v.type() == typeid(int)) {
@@ -254,4 +261,9 @@ void SetParameter::doDeserialize(const YAML::Node& n)
         value_ = __read<std::string>(n["string"]);
     }
     set_[name_] = value_;
+}
+
+bool SetParameter::accepts(const std::type_info& type) const
+{
+    return type == value_.type() || type == typeid(std::pair<std::string, bool>);
 }

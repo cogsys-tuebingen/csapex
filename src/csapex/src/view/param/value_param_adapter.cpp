@@ -51,11 +51,13 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
 
         // model change -> ui
         connectInGuiThread(p_->parameter_changed, [this, txt]() {
-            txt->blockSignals(true);
+            if(p_ && txt) {
+                txt->blockSignals(true);
 
-            txt->setText(QString::fromStdString(p_->as<std::string>()));
+                txt->setText(QString::fromStdString(p_->as<std::string>()));
 
-            txt->blockSignals(false);
+                txt->blockSignals(false);
+            }
         });
 
     } else if(value_p_->is<bool>()) {
@@ -75,11 +77,13 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
 
         // model change -> ui
         connectInGuiThread(p_->parameter_changed, [this, box]() {
-            box->blockSignals(true);
+            if(p_ && box) {
+                box->blockSignals(true);
 
-            box->setChecked(p_->as<bool>());
+                box->setChecked(p_->as<bool>());
 
-            box->blockSignals(false);
+                box->blockSignals(false);
+            }
         });
 
 
@@ -104,11 +108,13 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
 
         // model change -> ui
         connectInGuiThread(p_->parameter_changed, [this, box]() {
-            box->blockSignals(true);
+            if(p_ && box) {
+                box->blockSignals(true);
 
-            box->setValue(p_->as<double>());
+                box->setValue(p_->as<double>());
 
-            box->blockSignals(false);
+                box->blockSignals(false);
+            }
         });
 
     }  else if(value_p_->is<int>()) {
@@ -130,11 +136,13 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
 
         // model change -> ui
         connectInGuiThread(p_->parameter_changed, [this, box]() {
-            box->blockSignals(true);
+            if(p_ && box) {
+                box->blockSignals(true);
 
-            box->setValue(p_->as<int>());
+                box->setValue(p_->as<int>());
 
-            box->blockSignals(false);
+                box->blockSignals(false);
+            }
         });
 
     } else {

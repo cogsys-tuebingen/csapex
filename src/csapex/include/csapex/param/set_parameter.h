@@ -34,6 +34,8 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
+    virtual bool accepts(const std::type_info& type) const override;
+
     template <typename T>
     T def() const { return read<T>(def_); }
 

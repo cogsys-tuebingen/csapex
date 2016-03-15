@@ -42,7 +42,8 @@ void SetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_n
 
         if(!val.isEmpty()) {
 //            p->setByName(combo->currentText().toStdString());
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(AUUID(p_->getUUID()), val.toStdString());
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>
+                    (AUUID(p_->getUUID()), std::make_pair(val.toStdString(), true));
             executeCommand(update_parameter);
         }
     });
