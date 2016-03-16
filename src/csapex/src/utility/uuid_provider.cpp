@@ -10,7 +10,8 @@
 
 using namespace csapex;
 
-UUIDProvider::UUIDProvider()
+UUIDProvider::UUIDProvider(UUIDProvider* parent, AUUID auuid)
+    : parent_provider_(parent), auuid_(auuid)
 {
 
 }
@@ -20,6 +21,11 @@ UUIDProvider::~UUIDProvider()
     reset();
 }
 
+void UUIDProvider::setParent(UUIDProvider *parent, AUUID auuid)
+{
+    parent_provider_ = parent;
+    auuid_ = auuid;
+}
 
 void UUIDProvider::reset()
 {
@@ -190,4 +196,9 @@ std::string UUIDProvider::generateNextSubName(const UUID& parent, const std::str
 std::map<std::string, int> UUIDProvider::getUUIDMap() const
 {
     return uuids_;
+}
+
+AUUID UUIDProvider::getAbsoluteUUID() const
+{
+    return auuid_;
 }

@@ -183,6 +183,15 @@ std::string UUID::name() const
     return t.substr(t.find("_") + 1);
 }
 
+AUUID UUID::getAbsoluteUUID() const
+{
+    if(parent_) {
+        return AUUID(parent_->makeDerivedUUID_forced(parent_->getAbsoluteUUID(), id()));
+    } else {
+        return AUUID(*this);
+    }
+}
+
 namespace csapex
 {
 bool operator == (const std::string& str, const UUID& uuid_) {

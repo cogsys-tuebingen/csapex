@@ -10,6 +10,7 @@
 namespace csapex {
 
 class UUIDProvider;
+class AUUID;
 
 /**
  * @brief The UUID class represents unique IDs
@@ -71,6 +72,8 @@ public:
     std::string id() const;
 
     bool empty() const;
+
+    AUUID getAbsoluteUUID() const;
 
 private:
     explicit UUID(UUIDProvider *parent, const std::string& representation);

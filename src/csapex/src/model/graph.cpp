@@ -28,7 +28,8 @@
 using namespace csapex;
 
 Graph::Graph()
-    : transition_relay_in_(new InputTransition),
+    : UUIDProvider(nullptr, AUUID(uuid_)),
+      transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
@@ -37,6 +38,14 @@ Graph::Graph()
 Graph::~Graph()
 {
     clear();
+}
+
+
+void Graph::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
+{
+    Node::initialize(node_handle, uuid);
+
+    setParent(node_handle->getUUIDProvider(), node_handle->getUUID().getAbsoluteUUID());
 }
 
 void Graph::clear()

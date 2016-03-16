@@ -44,6 +44,8 @@ public:
     Graph();
     virtual ~Graph();
 
+    virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid) override;
+
     void clear();
 
     Node* findNode(const UUID& uuid) const;

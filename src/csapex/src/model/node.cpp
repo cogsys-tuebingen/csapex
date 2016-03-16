@@ -37,7 +37,7 @@ void Node::initialize(NodeHandle *node_handle, const UUID& uuid)
     node_handle_ = node_handle;
     parameters_ = this;
 
-    parameter_state_->setParentUUID(uuid);
+    parameter_state_->setParentUUID(uuid.getAbsoluteUUID());
 
     std::string p = uuid.getFullName();
     adebug.setPrefix(p);

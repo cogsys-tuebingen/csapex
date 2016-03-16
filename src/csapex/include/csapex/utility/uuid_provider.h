@@ -16,8 +16,10 @@ class UUIDProvider
     friend class GraphIO; // TODO: remove
 
 public:
-    UUIDProvider();
+    UUIDProvider(UUIDProvider* parent = nullptr, AUUID auuid = AUUID());
     virtual ~UUIDProvider();
+
+    void setParent(UUIDProvider* parent, AUUID auuid);
 
     UUID makeUUID(const std::string& name);
     UUID generateUUID(const std::string& prefix);
@@ -40,6 +42,8 @@ public:
 
     std::map<std::string, int> getUUIDMap() const;
 
+    AUUID getAbsoluteUUID() const;
+
 protected:
     void reset();
     void free(const UUID& uuid);
@@ -47,6 +51,9 @@ protected:
     std::string generateNextSubName(const UUID& parent, const std::string& name);
 
 protected:
+    UUIDProvider* parent_provider_;
+    AUUID auuid_;
+
     std::recursive_mutex hash_mutex_;
     std::map<std::string, int> hash_;
 
