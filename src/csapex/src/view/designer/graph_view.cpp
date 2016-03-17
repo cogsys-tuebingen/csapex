@@ -808,6 +808,12 @@ void GraphView::addBox(NodeBox *box)
     box->triggerPlaced();
 
     box->updateBoxInformation(graph);
+
+    if(graph_facade_->getGraph()->countNodes() > 0) {
+        setCacheMode(QGraphicsView::CacheNone);
+        scene_->invalidate();
+        setCacheMode(QGraphicsView::CacheBackground);
+    }
 }
 
 void GraphView::removeBox(NodeBox *box)
@@ -820,6 +826,12 @@ void GraphView::removeBox(NodeBox *box)
 
     boxes_.erase(std::find(boxes_.begin(), boxes_.end(), box));
     profiling_.erase(box);
+
+    if(graph_facade_->getGraph()->countNodes() == 0) {
+        setCacheMode(QGraphicsView::CacheNone);
+        scene_->invalidate();
+        setCacheMode(QGraphicsView::CacheBackground);
+    }
 }
 
 void GraphView::addPort(Port *port)
