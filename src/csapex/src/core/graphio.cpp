@@ -105,7 +105,7 @@ GraphIO::loadIntoGraph(const YAML::Node &blueprint, const Point& position)
 
             std::string type = n["type"].as<std::string>();
             UUID new_uuid = graph_->generateUUID(type);
-            UUID blue_print_uuid = n["uuid"].as<UUID>();
+            UUID blue_print_uuid = UUIDProvider::makeUUID_without_parent(n["uuid"].as<std::string>());
 
             old_node_uuid_to_new_[blue_print_uuid] = new_uuid;
 
@@ -152,8 +152,8 @@ void GraphIO::saveNodes(YAML::Node &yaml)
         Input* i = pair.first;
 
         YAML::Node in(YAML::NodeType::Map);
-        in["uuid_external"] = i->getUUID();
-        in["uuid_internal"] = pair.second->getUUID();
+        in["uuid_external"] = i->getUUID().getFullName();
+        in["uuid_internal"] = pair.second->getUUID().getFullName();
         in["type"] = i->getType()->typeName();
         in["optional"] = i->isOptional();
         in["label"] = i->getLabel();
@@ -168,8 +168,8 @@ void GraphIO::saveNodes(YAML::Node &yaml)
         Output* o = pair.first;
 
         YAML::Node out(YAML::NodeType::Map);
-        out["uuid_external"] = o->getUUID();
-        out["uuid_internal"] = pair.second->getUUID();
+        out["uuid_external"] = o->getUUID().getFullName();
+        out["uuid_internal"] = pair.second->getUUID().getFullName();
         out["type"] = o->getType()->typeName();
         out["label"] = o->getLabel();
 
@@ -207,7 +207,11 @@ void GraphIO::loadNodes(const YAML::Node& doc)
         for(std::size_t i = 0, total = fw_in.size(); i < total; ++i) {
             YAML::Node node = fw_in[i];
             ConnectionTypeConstPtr type = MessageFactory::createMessage(node["type"].as<std::string>());
-            graph_->addForwardingInput(node["uuid_internal"].as<UUID>(), node["uuid_external"].as<UUID>(),
+
+            UUID internal = UUIDProvider::makeUUID_without_parent(node["uuid_internal"].as<std::string>());
+            UUID external = UUIDProvider::makeUUID_without_parent(node["uuid_external"].as<std::string>());
+
+            graph_->addForwardingInput(internal, external,
                     type, node["label"].as<std::string>(), node["optional"].as<bool>());
         }
     }
@@ -216,15 +220,20 @@ void GraphIO::loadNodes(const YAML::Node& doc)
         for(std::size_t i = 0, total = fw_out.size(); i < total; ++i) {
             YAML::Node node = fw_out[i];
             ConnectionTypeConstPtr type = MessageFactory::createMessage(node["type"].as<std::string>());
-            graph_->addForwardingOutput(node["uuid_internal"].as<UUID>(), node["uuid_external"].as<UUID>(),
+
+            UUID internal = UUIDProvider::makeUUID_without_parent(node["uuid_internal"].as<std::string>());
+            UUID external = UUIDProvider::makeUUID_without_parent(node["uuid_external"].as<std::string>());
+
+            graph_->addForwardingOutput(internal, external,
                     type, node["label"].as<std::string>());
         }
     }
 }
 
-UUID GraphIO::readNodeUUID(const YAML::Node& doc)
+UUID GraphIO::readNodeUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc)
 {
-    UUID uuid = doc.as<UUID>();
+    UUID uuid = UUIDProvider::makeUUID_forced(parent, doc.as<std::string>());
+
 
     if(!old_node_uuid_to_new_.empty()) {
         auto pos = old_node_uuid_to_new_.find(uuid);
@@ -236,9 +245,9 @@ UUID GraphIO::readNodeUUID(const YAML::Node& doc)
     return uuid;
 }
 
-UUID GraphIO::readConnectorUUID(const YAML::Node& doc)
+UUID GraphIO::readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc)
 {
-    UUID uuid = doc.as<UUID>();
+    UUID uuid = UUIDProvider::makeUUID_forced(parent, doc.as<std::string>());
 
     if(!old_node_uuid_to_new_.empty()) {
         UUID parent = uuid.parentUUID();
@@ -255,7 +264,7 @@ UUID GraphIO::readConnectorUUID(const YAML::Node& doc)
 
 void GraphIO::loadNode(const YAML::Node& doc)
 {
-    UUID uuid = readNodeUUID(doc["uuid"]);
+    UUID uuid = readNodeUUID(graph_->shared_from_this(), doc["uuid"]);
 
     std::string type = doc["type"].as<std::string>();
 
@@ -294,9 +303,9 @@ void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>
     yaml["connections"] = YAML::Node(YAML::NodeType::Sequence);
     for(const auto& pair : connection_map) {
         YAML::Node entry(YAML::NodeType::Map);
-        entry["uuid"] = pair.first;
+        entry["uuid"] = pair.first.getFullName();
         for(const auto& uuid : pair.second) {
-            entry["targets"].push_back(uuid);
+            entry["targets"].push_back(uuid.getFullName());
         }
         yaml["connections"].push_back(entry);
     }
@@ -340,7 +349,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
 void GraphIO::loadConnection(const YAML::Node& connection)
 {
-    UUID from_uuid =  readConnectorUUID(connection["uuid"]);
+    UUID from_uuid =  readConnectorUUID(graph_->shared_from_this(), connection["uuid"]);
 
     NodeHandle* parent = nullptr;
     try {
@@ -360,7 +369,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
     apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
 
     for(unsigned j=0; j<targets.size(); ++j) {
-        UUID to_uuid = readConnectorUUID(targets[j]);
+        UUID to_uuid = readConnectorUUID(graph_->shared_from_this(), targets[j]);
 
         Connectable* from = parent->getOutput(from_uuid);
         if(from != nullptr) {
@@ -382,8 +391,8 @@ void GraphIO::loadConnection(const YAML::Node& connection)
 
 void GraphIO::saveFulcrums(YAML::Node &fulcrum, const Connection *connection)
 {
-    fulcrum["from"] = connection->from()->getUUID();
-    fulcrum["to"] = connection->to()->getUUID();
+    fulcrum["from"] = connection->from()->getUUID().getFullName();
+    fulcrum["to"] = connection->to()->getUUID().getFullName();
 
     for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
         YAML::Node pt;
@@ -414,8 +423,8 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     std::string from_uuid_tmp = fulcrum["from"].as<std::string>();
     std::string to_uuid_tmp = fulcrum["to"].as<std::string>();
 
-    UUID from_uuid = graph_->makeUUID_forced(from_uuid_tmp);
-    UUID to_uuid = graph_->makeUUID_forced(to_uuid_tmp);
+    UUID from_uuid = UUIDProvider::makeUUID_forced(graph_->shared_from_this(), from_uuid_tmp);
+    UUID to_uuid = UUIDProvider::makeUUID_forced(graph_->shared_from_this(), to_uuid_tmp);
 
     Connectable* from = graph_->findConnector(from_uuid);
     if(from == nullptr) {

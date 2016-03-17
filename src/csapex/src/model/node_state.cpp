@@ -48,57 +48,6 @@ NodeState& NodeState::operator = (const NodeState& rhs)
 
     return *this;
 }
-
-void NodeState::readYaml(const YAML::Node &node)
-{
-    if(node["minimized"].IsDefined()) {
-        setMinimized(node["minimized"].as<bool>());
-    }
-
-    if(node["enabled"].IsDefined()) {
-        setEnabled(node["enabled"].as<bool>());
-    }
-
-    if(node["flipped"].IsDefined()) {
-        setFlipped(node["flipped"].as<bool>());
-    }
-
-    if(node["label"].IsDefined()) {
-        setLabel(node["label"].as<std::string>());
-        if(label_.empty()) {
-            setLabel(parent_->getUUID().getFullName());
-        }
-    }
-
-    if(node["pos"].IsDefined()) {
-        double x = node["pos"][0].as<double>();
-        double y = node["pos"][1].as<double>();
-        Point p(x,y);
-        setPos(p);
-    }
-    if(node["color"].IsDefined()) {
-        int r = node["color"][0].as<int>();
-        int g = node["color"][1].as<int>();
-        int b = node["color"][2].as<int>();
-        setColor(r, g, b);
-    }
-    if(node["z"].IsDefined()) {
-        setZ(node["z"].as<long>());
-    }
-
-    if(node["state"].IsDefined()) {
-        const YAML::Node& state_map = node["state"];
-        auto node = parent_->getNode().lock();
-        if(!node) {
-            return;
-        }
-        child_state_ = node->getParameterStateClone();
-
-        if(child_state_) {
-            child_state_->readYaml(state_map);
-        }
-    }
-}
 Point NodeState::getPos() const
 {
     return pos_;
@@ -242,7 +191,7 @@ void NodeState::writeYaml(YAML::Node &out) const
 {
     if(parent_) {
         out["type"] = parent_->getType();
-        out["uuid"] = parent_->getUUID();
+        out["uuid"] = parent_->getUUID().getFullName();
     }
     out["label"] = label_;
     out["pos"][0] = pos_.x;
@@ -275,6 +224,58 @@ void NodeState::writeYaml(YAML::Node &out) const
         } catch(const std::exception& e) {
             std::cerr << "cannot save child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
             throw e;
+        }
+    }
+}
+
+
+void NodeState::readYaml(const YAML::Node &node)
+{
+    if(node["minimized"].IsDefined()) {
+        setMinimized(node["minimized"].as<bool>());
+    }
+
+    if(node["enabled"].IsDefined()) {
+        setEnabled(node["enabled"].as<bool>());
+    }
+
+    if(node["flipped"].IsDefined()) {
+        setFlipped(node["flipped"].as<bool>());
+    }
+
+    if(node["label"].IsDefined()) {
+        setLabel(node["label"].as<std::string>());
+        if(label_.empty()) {
+            setLabel(parent_->getUUID().getFullName());
+        }
+    }
+
+    if(node["pos"].IsDefined()) {
+        double x = node["pos"][0].as<double>();
+        double y = node["pos"][1].as<double>();
+        Point p(x,y);
+        setPos(p);
+    }
+    if(node["color"].IsDefined()) {
+        int r = node["color"][0].as<int>();
+        int g = node["color"][1].as<int>();
+        int b = node["color"][2].as<int>();
+        setColor(r, g, b);
+    }
+    if(node["z"].IsDefined()) {
+        setZ(node["z"].as<long>());
+    }
+
+    if(node["state"].IsDefined()) {
+        const YAML::Node& state_map = node["state"];
+        auto node = parent_->getNode().lock();
+        if(!node) {
+            return;
+        }
+        child_state_ = node->getParameterStateClone();
+
+        if(child_state_) {
+            child_state_->readYaml(state_map);
         }
     }
 }

@@ -23,6 +23,8 @@ GenericState::GenericState()
 
 void GenericState::setParentUUID(const UUID &parent_uuid)
 {
+    apex_assert_hard(!parent_uuid.composite());
+
     parent_uuid_ = parent_uuid;
 
     for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = params.begin(); it != params.end(); ++it) {

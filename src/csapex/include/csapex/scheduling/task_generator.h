@@ -11,7 +11,7 @@
 namespace csapex
 {
 
-class TaskGenerator
+class TaskGenerator : public std::enable_shared_from_this<TaskGenerator>
 {
 public:
     virtual ~TaskGenerator();

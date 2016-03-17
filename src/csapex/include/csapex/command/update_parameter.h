@@ -16,8 +16,8 @@ namespace command
 struct UpdateParameter : public Command
 {
     template <typename T>
-    explicit UpdateParameter(const AUUID &parameter_uuid, const T& value)
-        : Command(parameter_uuid), uuid(parameter_uuid),
+    explicit UpdateParameter(const UUID &parameter_uuid, const T& value)
+        : Command(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()),
           value(value)
     {
     }

@@ -87,6 +87,8 @@ public Q_SLOTS:
     void deleteSelected();
     void copySelected();
     void paste();
+    void groupSelected();
+    void ungroupSelected();
 
 private:
     void observe(GraphFacadePtr graph);

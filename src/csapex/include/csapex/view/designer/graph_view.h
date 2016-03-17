@@ -146,6 +146,9 @@ public Q_SLOTS:
     void copySelected();
     void paste();
 
+    void groupSelected();
+    void ungroupSelected();
+
     void showPreview(Port* port);
     void stopPreview();
 
@@ -154,7 +157,6 @@ private:
     void chooseColor();
     void minimizeBox(bool mini);
     void deleteBox();
-    void groupBox();
     void usePrivateThreadFor();
     void useDefaultThreadFor();
     void switchToThread(int group_id);

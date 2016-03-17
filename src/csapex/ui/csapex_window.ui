@@ -28,7 +28,7 @@
      <x>0</x>
      <y>0</y>
      <width>1038</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -58,6 +58,8 @@
     <addaction name="actionClear"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_Selected"/>
+    <addaction name="actionGroup"/>
+    <addaction name="actionUngroup"/>
    </widget>
    <widget class="QMenu" name="menuSelection">
     <property name="title">
@@ -287,8 +289,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>274</width>
-          <height>144</height>
+          <width>261</width>
+          <height>107</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -368,8 +370,8 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>266</width>
-          <height>199</height>
+          <width>267</width>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -432,8 +434,8 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>274</width>
-          <height>144</height>
+          <width>261</width>
+          <height>107</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -525,8 +527,8 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>1020</width>
-          <height>68</height>
+          <width>1016</width>
+          <height>83</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -966,6 +968,27 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionGroup">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/group.png</normaloff>:/group.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Group</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionUngroup">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/ungroup.png</normaloff>:/ungroup.png</iconset>
+   </property>
+   <property name="text">
+    <string>Ungroup</string>
    </property>
   </action>
  </widget>

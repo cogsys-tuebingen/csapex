@@ -31,8 +31,8 @@ public:
 
     virtual bool isEmpty() const = 0;
 
-    virtual void add(TaskGenerator* schedulable) = 0;
-    virtual void add(TaskGenerator* schedulable, const std::vector<TaskPtr>& initial_tasks) = 0;
+    virtual void add(TaskGeneratorPtr schedulable) = 0;
+    virtual void add(TaskGeneratorPtr schedulable, const std::vector<TaskPtr>& initial_tasks) = 0;
     virtual std::vector<TaskPtr> remove(TaskGenerator* schedulable) = 0;
 
     virtual void schedule(TaskPtr schedulable) = 0;

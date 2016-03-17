@@ -86,7 +86,7 @@ std::string NodeConstructor::getDescription() const
 
 NodeHandlePtr NodeConstructor::makePrototype() const
 {
-    return makeNodeHandle(UUIDProvider::makeUUID_forced("prototype"), nullptr);
+    return makeNodeHandle(UUIDProvider::makeUUID_without_parent("prototype"), nullptr);
 }
 
 NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, csapex::UUIDProvider *uuid_provider) const

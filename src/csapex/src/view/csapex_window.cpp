@@ -110,6 +110,8 @@ void CsApexWindow::construct()
     forceShortcut(ui->actionExit);
     forceShortcut(ui->actionDelete_Selected);
     forceShortcut(ui->actionCopy);
+    forceShortcut(ui->actionGroup);
+    forceShortcut(ui->actionUngroup);
     forceShortcut(ui->actionPaste);
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
@@ -143,6 +145,9 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionDelete_Selected, SIGNAL(triggered(bool)), designer_, SLOT(deleteSelected()));
     QObject::connect(ui->actionCopy, SIGNAL(triggered(bool)), designer_, SLOT(copySelected()));
     QObject::connect(ui->actionPaste, SIGNAL(triggered(bool)), designer_, SLOT(paste()));
+
+    QObject::connect(ui->actionGroup, SIGNAL(triggered(bool)), designer_, SLOT(groupSelected()));
+    QObject::connect(ui->actionUngroup, SIGNAL(triggered(bool)), designer_, SLOT(ungroupSelected()));
 
     QObject::connect(ui->actionClear_selection, SIGNAL(triggered()), designer_,  SLOT(clearSelection()));
     QObject::connect(ui->actionSelect_all, SIGNAL(triggered()), designer_,  SLOT(selectAll()));

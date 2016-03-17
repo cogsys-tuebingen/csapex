@@ -16,7 +16,7 @@ using namespace csapex;
 using namespace csapex::impl;
 
 PreviewInput::PreviewInput(MessagePreviewWidget *parent)
-    : Input(UUIDProvider::makeUUID_forced("message_preview_in")),
+    : Input(UUIDProvider::makeUUID_without_parent("message_preview_in")),
       parent_(parent)
 {
     setType(std::make_shared<connection_types::AnyMessage>());

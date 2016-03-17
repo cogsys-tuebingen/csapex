@@ -28,8 +28,7 @@
 using namespace csapex;
 
 Graph::Graph()
-    : UUIDProvider(nullptr, AUUID(uuid_)),
-      transition_relay_in_(new InputTransition),
+    : transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
@@ -45,7 +44,7 @@ void Graph::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
 {
     Node::initialize(node_handle, uuid);
 
-    setParent(node_handle->getUUIDProvider(), node_handle->getUUID().getAbsoluteUUID());
+    setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
 }
 
 void Graph::clear()
@@ -92,9 +91,8 @@ void Graph::deleteNode(const UUID& uuid)
     NodeHandle* node_handle = findNodeHandle(uuid);
     node_handle->stop();
 
-    /// assert that all connections have already been deleted
-    apex_assert_hard(node_parents_[node_handle].empty());
-    apex_assert_hard(node_children_[node_handle].empty());
+    node_parents_[node_handle].clear();
+    node_children_[node_handle].clear();
 
     node_parents_.erase(node_handle);
     node_children_.erase(node_handle);
@@ -144,7 +142,9 @@ bool Graph::addConnection(ConnectionPtr connection)
     //to->connection_added_to(to);
 
     if(dynamic_cast<Output*>(connection->from())) {
-        if(n_to != n_from) {
+        if(n_to != n_from && n_to != node_handle_ && n_from != node_handle_) {
+            apex_assert_hard(n_to->getUUID().getAbsoluteUUID() != n_from->getUUID().getAbsoluteUUID());
+
             node_parents_[n_to].push_back(n_from);
             node_children_[n_from].push_back(n_to);
 
@@ -187,7 +187,7 @@ void Graph::deleteConnection(ConnectionPtr connection)
             if(dynamic_cast<Output*>(connection->from())) {
                 // erase pointer from TO to FROM
                 if(!crossing) {
-                    if(n_from != n_to) {
+                    if(n_from != n_to && n_from != node_handle_ && n_to != node_handle_) {
                         // if there are multiple edges, this only erases one entry
                         node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
 
@@ -762,6 +762,8 @@ void Graph::outputActivation()
         transition_relay_in_->forwardMessages();
         transition_relay_in_->notifyMessageProcessed();
 
-        continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+        if(continuation_) {
+            continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+        }
     }
 }

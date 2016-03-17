@@ -44,6 +44,9 @@ void AddMessageConnection::refresh()
     Connectable* f = graph->findConnector(from_uuid);
     Connectable* t = graph->findConnector(to_uuid);
 
+    apex_assert_hard(!f->isVirtual());
+    apex_assert_hard(!t->isVirtual());
+
     apex_assert_hard((f->isOutput() && t->isInput()));
     from = dynamic_cast<Output*>(f);
     to =  dynamic_cast<Input*>(t);

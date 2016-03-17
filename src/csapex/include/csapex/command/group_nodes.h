@@ -28,6 +28,8 @@ protected:
 private:
     std::vector<UUID> uuids;
 
+    UUID sub_graph_uuid_;
+
     YAML::Node selection_yaml;
 };
 

@@ -163,7 +163,7 @@ void ThreadGroup::clear()
     }
 }
 
-void ThreadGroup::add(TaskGenerator* generator)
+void ThreadGroup::add(TaskGeneratorPtr generator)
 {
     generator->setPause(pause_);
     generator->setSteppingMode(stepping_);
@@ -174,12 +174,12 @@ void ThreadGroup::add(TaskGenerator* generator)
     }
     generators_.push_back(generator);
 
-    auto& cs = generator_connections_[generator];
+    auto& cs = generator_connections_[generator.get()];
 
     cs.push_back(generator->end_step.connect([this]() { checkIfStepIsDone(); }));
 }
 
-void ThreadGroup::add(TaskGenerator *generator, const std::vector<TaskPtr> &initial_tasks)
+void ThreadGroup::add(TaskGeneratorPtr generator, const std::vector<TaskPtr> &initial_tasks)
 {
     add(generator);
 
@@ -215,7 +215,7 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
     }
 
     for(auto it = generators_.begin(); it != generators_.end();) {
-        if(*it == generator) {
+        if(it->get() == generator) {
             it = generators_.erase(it);
         } else {
             ++it;

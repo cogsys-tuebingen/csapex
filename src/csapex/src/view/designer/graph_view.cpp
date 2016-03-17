@@ -1194,11 +1194,18 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
     handler[set_color] = std::bind(&GraphView::chooseColor, this);
     menu.addAction(set_color);
 
-    QAction* grp = new QAction("group into subgraph", &menu);
+    QAction* grp = new QAction("group", &menu);
     grp->setIcon(QIcon(":/group.png"));
     grp->setIconVisibleInMenu(true);
-    handler[grp] = std::bind(&GraphView::groupBox, this);
+    handler[grp] = std::bind(&GraphView::groupSelected, this);
     menu.addAction(grp);
+
+    QAction* ungrp = new QAction("ungroup", &menu);
+    ungrp->setIcon(QIcon(":/ungroup.png"));
+    ungrp->setIconVisibleInMenu(true);
+    ungrp->setEnabled(false);
+    handler[ungrp] = std::bind(&GraphView::ungroupSelected, this);
+    menu.addAction(ungrp);
 
     menu.addSeparator();
 
@@ -1312,18 +1319,6 @@ void GraphView::deleteBox()
     dispatcher_->execute(cmd);
 }
 
-void GraphView::groupBox()
-{
-    std::vector<UUID> uuids;
-    uuids.reserve(selected_boxes_.size());
-    for(NodeBox* box : selected_boxes_) {
-        uuids.push_back(box->getNodeHandle()->getUUID());
-    }
-    CommandPtr cmd(new command::GroupNodes(graph_facade_->getAbsoluteUUID(),uuids));
-    dispatcher_->execute(cmd);
-}
-
-
 void GraphView::copySelected()
 {
     GraphIO io(graph_facade_->getGraph(), &node_factory_);
@@ -1337,6 +1332,23 @@ void GraphView::copySelected()
     io.saveSelectedGraph(yaml, nodes);
 
     ClipBoard::set(yaml);
+}
+
+
+void GraphView::groupSelected()
+{
+    std::vector<UUID> uuids;
+    uuids.reserve(selected_boxes_.size());
+    for(NodeBox* box : selected_boxes_) {
+        uuids.push_back(box->getNodeHandle()->getUUID());
+    }
+    CommandPtr cmd(new command::GroupNodes(graph_facade_->getAbsoluteUUID(),uuids));
+    dispatcher_->execute(cmd);
+}
+
+
+void GraphView::ungroupSelected()
+{
 }
 
 void GraphView::paste()

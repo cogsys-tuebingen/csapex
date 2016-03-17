@@ -275,6 +275,25 @@ void Designer::copySelected()
 
     view->copySelected();
 }
+void Designer::groupSelected()
+{
+    GraphView* view = getVisibleGraphView();
+    if(!view) {
+        return;
+    }
+
+    view->groupSelected();
+}
+
+void Designer::ungroupSelected()
+{
+    GraphView* view = getVisibleGraphView();
+    if(!view) {
+        return;
+    }
+
+    view->ungroupSelected();
+}
 
 void Designer::paste()
 {

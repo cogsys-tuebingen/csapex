@@ -71,14 +71,16 @@ bool GroupNodes::doExecute()
         }
     }
 
-    UUID sub_graph_uuid = graph->generateUUID("csapex::Graph");
+    if(sub_graph_uuid_.empty()) {
+        sub_graph_uuid_ = graph->generateUUID("csapex::Graph");
+    }
 
     AUUID parent_auuid = getGraphFacade()->getAbsoluteUUID();
     AUUID sub_graph_auuid(UUIDProvider::makeDerivedUUID_forced(
                               parent_auuid,
-                              sub_graph_uuid.getFullName()));
+                              sub_graph_uuid_.getFullName()));
 
-    CommandPtr add_graph = std::make_shared<command::AddNode>(parent_auuid, "csapex::Graph", insert_pos, sub_graph_uuid, nullptr);
+    CommandPtr add_graph = std::make_shared<command::AddNode>(parent_auuid, "csapex::Graph", insert_pos, sub_graph_uuid_, nullptr);
     executeCommand(add_graph);
     add(add_graph);
 
@@ -112,6 +114,10 @@ bool GroupNodes::doExecute()
                 Output* output = dynamic_cast<Output*>(connection->from());
                 apex_assert_hard(output);
 
+                if(input->isVirtual() || output->isVirtual()) {
+                    continue;
+                }
+
                 NodeHandle* source = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(source);
 
@@ -131,6 +137,10 @@ bool GroupNodes::doExecute()
             for(const ConnectionPtr& connection : output->getConnections()) {
                 Input* input = dynamic_cast<Input*>(connection->to());
                 apex_assert_hard(input);
+
+                if(input->isVirtual() || output->isVirtual()) {
+                    continue;
+                }
 
                 NodeHandle* target = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(target);

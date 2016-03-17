@@ -52,5 +52,6 @@
         <file>paste.png</file>
         <file>note.png</file>
         <file>color_wheel.png</file>
+        <file>ungroup.png</file>
     </qresource>
 </RCC>

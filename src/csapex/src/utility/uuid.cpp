@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <stdexcept>
@@ -13,7 +14,7 @@
 using namespace csapex;
 
 const std::string UUID::namespace_separator = ":|:";
-UUID UUID::NONE(nullptr, "");
+UUID UUID::NONE(std::weak_ptr<UUIDProvider>(), "");
 
 std::size_t UUID::Hasher::operator()(const UUID& k) const {
     return k.hash();
@@ -21,7 +22,7 @@ std::size_t UUID::Hasher::operator()(const UUID& k) const {
 
 bool UUID::empty() const
 {
-    return representation_.empty() || (representation_.size() == 1 && representation_.front() == "~");
+    return representation_.empty();
 }
 
 std::string UUID::stripNamespace(const std::string &name)
@@ -32,17 +33,16 @@ std::string UUID::stripNamespace(const std::string &name)
 
 
 UUID::UUID()
-    : parent_(nullptr)
 {
 }
 
-UUID::UUID(UUIDProvider* parent, const std::vector<std::string> &representation)
+UUID::UUID(std::weak_ptr<UUIDProvider> parent, const std::vector<std::string> &representation)
     : parent_(parent), representation_(representation)
 {
-
+    apex_assert_hard(representation_.empty() || representation_.back() != "~");
 }
 
-UUID::UUID(UUIDProvider* parent, const std::string &representation)
+UUID::UUID(std::weak_ptr<UUIDProvider> parent, const std::string &representation)
     : parent_(parent)
 {
     /**
@@ -75,7 +75,9 @@ UUID::UUID(UUIDProvider* parent, const std::string &representation)
 
         std::string sub_id = representation.substr(begin, end - begin);
 
-        representation_.push_back(sub_id);
+        if(sub_id != "~") {
+            representation_.push_back(sub_id);
+        }
         end = pos;
 
         if(begin == 0) {
@@ -83,12 +85,13 @@ UUID::UUID(UUIDProvider* parent, const std::string &representation)
         }
 
     }
+    apex_assert_hard(representation_.empty() || representation_.back() != "~");
 }
 
 void UUID::free()
 {
-    if(parent_) {
-        parent_->free(*this);
+    if(auto parent = parent_.lock()) {
+        parent->free(*this);
     }
 }
 
@@ -164,7 +167,11 @@ UUID UUID::nestedUUID() const
 }
 UUID UUID::rootUUID() const
 {
-    return UUID(parent_, representation_.back());
+    if(auto parent = parent_.lock()) {
+        return UUID(parent, representation_.back());
+    } else {
+        return UUID(std::weak_ptr<UUIDProvider>(), representation_.back());
+    }
 }
 
 std::string UUID::id() const
@@ -185,8 +192,15 @@ std::string UUID::name() const
 
 AUUID UUID::getAbsoluteUUID() const
 {
-    if(parent_) {
-        return AUUID(parent_->makeDerivedUUID_forced(parent_->getAbsoluteUUID(), id()));
+    if(auto parent = parent_.lock()) {
+//        return AUUID(parent->makeDerivedUUID_forced(parent->getAbsoluteUUID(), id()));
+
+        UUID parent_uuid = parent->getAbsoluteUUID();
+        UUID uuid = *this;
+        for(const std::string& part : parent_uuid.representation_) {
+            uuid.representation_.push_back(part);
+        }
+        return AUUID(uuid);
     } else {
         return AUUID(*this);
     }

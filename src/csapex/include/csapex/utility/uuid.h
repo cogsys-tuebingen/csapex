@@ -6,6 +6,7 @@
 #include <map>
 #include <mutex>
 #include <vector>
+#include <memory>
 
 namespace csapex {
 
@@ -76,11 +77,11 @@ public:
     AUUID getAbsoluteUUID() const;
 
 private:
-    explicit UUID(UUIDProvider *parent, const std::string& representation);
-    explicit UUID(UUIDProvider *parent, const std::vector<std::string>& representation);
+    explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::string& representation);
+    explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::vector<std::string>& representation);
 
 private:
-    UUIDProvider* parent_;
+    std::weak_ptr<UUIDProvider> parent_;
     std::vector<std::string> representation_;
 };
 

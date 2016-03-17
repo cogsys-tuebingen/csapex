@@ -6,20 +6,21 @@
 
 /// SYSTEM
 #include <unordered_map>
+#include <memory>
 
 namespace csapex
 {
 
-class UUIDProvider
+class UUIDProvider : public std::enable_shared_from_this<UUIDProvider>
 {
     friend class UUID;
     friend class GraphIO; // TODO: remove
 
 public:
-    UUIDProvider(UUIDProvider* parent = nullptr, AUUID auuid = AUUID());
+    UUIDProvider();
     virtual ~UUIDProvider();
 
-    void setParent(UUIDProvider* parent, AUUID auuid);
+    void setParent(std::weak_ptr<UUIDProvider> parent, AUUID auuid);
 
     UUID makeUUID(const std::string& name);
     UUID generateUUID(const std::string& prefix);
@@ -31,7 +32,9 @@ public:
     UUID makeTypedUUID(const UUID &parent, const std::string &type, const std::string& sub_id);
     UUID generateTypedUUID(const UUID &parent, const std::string &type);
 
-    static UUID makeUUID_forced(const std::string& representation);
+    static UUID makeUUID_without_parent(const std::string& representation);
+
+    static UUID makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const std::string& representation);
     static UUID makeDerivedUUID_forced(const UUID& parent, const std::string& name);
     static UUID makeTypedUUID_forced(const UUID &parent, const std::string &type, int sub_id);
     static UUID makeTypedUUID_forced(const UUID &parent, const std::string &type, const std::string& sub_id);
@@ -51,7 +54,7 @@ protected:
     std::string generateNextSubName(const UUID& parent, const std::string& name);
 
 protected:
-    UUIDProvider* parent_provider_;
+    std::weak_ptr<UUIDProvider> parent_provider_;
     AUUID auuid_;
 
     std::recursive_mutex hash_mutex_;

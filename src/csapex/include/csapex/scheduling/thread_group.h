@@ -51,8 +51,8 @@ public:
     virtual void stop() override;
     virtual void clear() override;
 
-    virtual void add(TaskGenerator *generator) override;
-    virtual void add(TaskGenerator *generator, const std::vector<TaskPtr>& initial_tasks) override;
+    virtual void add(TaskGeneratorPtr generator) override;
+    virtual void add(TaskGeneratorPtr generator, const std::vector<TaskPtr>& initial_tasks) override;
 
     virtual std::vector<TaskPtr> remove(TaskGenerator* generator) override;
 
@@ -81,7 +81,7 @@ private:
 
     std::thread scheduler_thread_;
 
-    std::vector<TaskGenerator*> generators_;
+    std::vector<TaskGeneratorPtr> generators_;
     std::map<TaskGenerator*, std::vector<csapex::slim_signal::Connection>> generator_connections_;
 
     std::condition_variable_any work_available_;

@@ -119,14 +119,16 @@ GraphFacade* Command::getGraphFacade()
 
     if(graph_uuid.empty()) {
         gf = root_;
+        apex_assert_hard(gf);
 
     } else if(root_->getAbsoluteUUID() == graph_uuid) {
         gf = root_;
+        apex_assert_hard(gf);
 
     } else {
         gf = root_->getSubGraph(graph_uuid);
+        apex_assert_hard(gf);
     }
-    apex_assert_hard(gf);
     return gf;
 }
 

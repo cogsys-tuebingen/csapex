@@ -90,12 +90,14 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
     }
     apex_assert_hard(connections.size() == 1);
     Output* output = dynamic_cast<Output*>(input->getSource());
+    apex_assert_hard(!input->isVirtual() && !output->isVirtual());
     Command::Ptr cmd(new command::DeleteMessageConnection(graph_uuid, output, input));
     return cmd;
 }
 
 Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* connection) {
     Input* input = dynamic_cast<Input*>(connection->to());
+    apex_assert_hard(!input->isVirtual() && !output->isVirtual());
     return Command::Ptr (new command::DeleteMessageConnection(graph_uuid, output, input));
 }
 
@@ -105,8 +107,10 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 
     for(ConnectionPtr connection : output->getConnections()) {
         Input* input = dynamic_cast<Input*>(connection->to());
-        Command::Ptr removeThis(new command::DeleteMessageConnection(graph_uuid, output, input));
-        removeAll->add(removeThis);
+        if(!input->isVirtual() && !output->isVirtual()) {
+            Command::Ptr removeThis(new command::DeleteMessageConnection(graph_uuid, output, input));
+            removeAll->add(removeThis);
+        }
     }
 
     return removeAll;

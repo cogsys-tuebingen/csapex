@@ -10,8 +10,7 @@
 
 using namespace csapex;
 
-UUIDProvider::UUIDProvider(UUIDProvider* parent, AUUID auuid)
-    : parent_provider_(parent), auuid_(auuid)
+UUIDProvider::UUIDProvider()
 {
 
 }
@@ -21,7 +20,7 @@ UUIDProvider::~UUIDProvider()
     reset();
 }
 
-void UUIDProvider::setParent(UUIDProvider *parent, AUUID auuid)
+void UUIDProvider::setParent(std::weak_ptr<UUIDProvider> parent, AUUID auuid)
 {
     parent_provider_ = parent;
     auuid_ = auuid;
@@ -46,7 +45,7 @@ UUID UUIDProvider::makeUUID(const std::string &name)
         throw std::runtime_error("the UUID " + name + " is already taken");
     }
 
-    UUID r(this, rep);
+    UUID r(shared_from_this(), rep);
     registerUUID(r);
     return r;
 }
@@ -71,7 +70,7 @@ UUID UUIDProvider::generateUUID(const std::string &prefix)
     // ensure uniqueness
     do {
         std::string name = generateNextName(prefix);
-        r = UUID(this, name);
+        r = UUID(shared_from_this(), name);
 
     } while(exists(r));
 
@@ -93,7 +92,7 @@ UUID UUIDProvider::generateDerivedUUID(const UUID &parent, const std::string &pr
     UUID r;
     do {
         std::string name = generateNextSubName(parent, prefix);
-        r = UUID (this, parent.getFullName() + UUID::namespace_separator + name);
+        r = UUID (shared_from_this(), parent.getFullName() + UUID::namespace_separator + name);
     } while(exists(r));
 
     registerUUID(r);
@@ -103,11 +102,7 @@ UUID UUIDProvider::generateDerivedUUID(const UUID &parent, const std::string &pr
 
 UUID UUIDProvider::makeDerivedUUID_forced(const UUID &parent, const std::string &name)
 {
-    if(!parent.empty()) {
-        return makeUUID_forced(parent.getFullName()  + UUID::namespace_separator + name);
-    } else {
-        return makeUUID_forced(name);
-    }
+    return makeUUID_forced(parent.parent_, parent.getFullName()  + UUID::namespace_separator + name);
 }
 
 void UUIDProvider::free(const UUID &uuid)
@@ -126,10 +121,14 @@ void UUIDProvider::free(const UUID &uuid)
     }
 }
 
-UUID UUIDProvider::makeUUID_forced(const std::string &representation)
+UUID UUIDProvider::makeUUID_without_parent(const std::string &representation)
 {
-    UUID r(nullptr, representation);
-    return r;
+    return UUID(std::weak_ptr<UUIDProvider>(), representation);
+}
+
+UUID UUIDProvider::makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const std::string &representation)
+{
+    return UUID (parent, representation);
 }
 
 UUID UUIDProvider::generateTypedUUID(const UUID &parent, const std::string& type)

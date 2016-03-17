@@ -81,7 +81,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
     scheduler_ = scheduler;
 
-    scheduler_->add(this, remaining_tasks_);
+    scheduler_->add(shared_from_this(), remaining_tasks_);
     worker_->getNodeHandle()->getNodeState()->setThread(scheduler->name(), scheduler->id());
 
     remaining_tasks_.clear();

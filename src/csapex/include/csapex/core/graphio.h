@@ -59,8 +59,8 @@ protected:
     void loadMessageConnection(Connectable *from, NodeHandle *parent, const UUID &to_uuid);
     void loadSignalConnection(Connectable *from, const UUID &to_uuid);
 
-    UUID readNodeUUID(const YAML::Node& doc);
-    UUID readConnectorUUID(const YAML::Node& doc);
+    UUID readNodeUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
+    UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
 
 private:
     Graph* graph_;

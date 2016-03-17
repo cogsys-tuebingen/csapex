@@ -296,7 +296,7 @@ void ThreadPool::saveSettings(YAML::Node& node)
     {
         YAML::Node assignment;
         TaskGenerator* tg = it->first;
-        assignment["uuid"] = tg->getUUID();
+        assignment["uuid"] = tg->getUUID().getFullName();
         assignment["id"] = it->second->id();
         assignments.push_back(assignment);
     }
@@ -339,7 +339,8 @@ void ThreadPool::loadSettings(YAML::Node& node)
             for(std::size_t i = 0, total = assignments.size(); i < total; ++i) {
                 const YAML::Node& assignment = assignments[i];
 
-                UUID uuid = assignment["uuid"].as<UUID>();
+                std::string uuid_str = assignment["uuid"].as<std::string>();
+                UUID uuid = UUIDProvider::makeUUID_without_parent(uuid_str);
                 int id = assignment["id"].as<int>();
 
                 assignment_map[uuid] = id;
