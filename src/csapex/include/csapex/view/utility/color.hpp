@@ -1,9 +1,6 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
-/// SYSTEM
-#include <QColor>
-
 namespace color {
 #define __HSV2RGB__(H, S, V, R, G, B) \
     { \
@@ -39,11 +36,12 @@ namespace color {
 } \
 }
 
-inline QColor fromCount(std::size_t count)
+template <class Color>
+inline Color fromCount(std::size_t count)
 {
     double r = 0, g = 0, b = 0;
     __HSV2RGB__((double) ((count * 77) % 360), 1.0, 1.0, r, g, b);
-    return QColor(r,g,b);
+    return Color(r,g,b);
 }
 
 inline void fromCount(std::size_t count, double& r, double &g, double &b)
