@@ -157,7 +157,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
             const std::string& name = it->first;
             std::map<std::string, QColor>::iterator pos = steps_.find(name);
             if(pos == steps_.end()) {
-                steps_[name] = color::fromCount(steps_.size()).light();
+                steps_[name] = color::fromCount<QColor>(steps_.size()).light();
             }
         }
     }
