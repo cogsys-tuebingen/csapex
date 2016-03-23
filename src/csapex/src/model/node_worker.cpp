@@ -770,8 +770,6 @@ void NodeWorker::checkParameters()
         return;
     }
 
-    node->checkConditions(false);
-
     // check if a parameter was changed
     Parameterizable::ChangedParameterList changed_params = node->getChangedParameters();
     if(!changed_params.empty()) {
@@ -786,6 +784,8 @@ void NodeWorker::checkParameters()
             }
         }
     }
+
+    node->checkConditions(false);
 }
 
 

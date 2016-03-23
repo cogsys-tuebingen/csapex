@@ -320,14 +320,16 @@ Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
 
     std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
 
-    setSilent(true);
-    while(!param_updates_.empty()) {
-        for(auto& entry : param_updates_) {
-            entry.second();
+    if(!param_updates_.empty()) {
+//        setSilent(true);
+        while(!param_updates_.empty()) {
+            for(auto& entry : param_updates_) {
+                entry.second();
+            }
+            param_updates_.clear();
         }
-        param_updates_.clear();
+//        setSilent(false);
     }
-    setSilent(false);
 
     changed_params = changed_params_;
     changed_params_.clear();
