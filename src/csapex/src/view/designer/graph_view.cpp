@@ -1215,7 +1215,15 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
     QAction* ungrp = new QAction("ungroup", &menu);
     ungrp->setIcon(QIcon(":/ungroup.png"));
     ungrp->setIconVisibleInMenu(true);
-    ungrp->setEnabled(false);
+
+
+    bool is_graph = false;
+    if(selected_boxes_.size() == 1) {
+        NodeBox* box = selected_boxes_.front();
+        is_graph = dynamic_cast<Graph*>(box->getNode());
+    }
+
+    ungrp->setEnabled(is_graph);
     handler[ungrp] = std::bind(&GraphView::ungroupSelected, this);
     menu.addAction(ungrp);
 
