@@ -8,6 +8,7 @@
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.h>
+#include <boost/any.hpp>
 
 namespace csapex
 {
@@ -68,6 +69,25 @@ public:
     Memento::Ptr getParameterState() const;
     void setParameterState(const Memento::Ptr &value);
 
+    bool hasDictionaryEntry(const std::string& key) const;
+    void deleteDictionaryEntry(const std::string& key);
+
+    template <typename T>
+    T getDictionaryEntry(const std::string& key) const;
+    template <typename T>
+    T getDictionaryEntry(const std::string& key, const T& default_value) const
+    {
+        if(hasDictionaryEntry(key)) {
+            return getDictionaryEntry<T>(key);
+
+        } else {
+            return default_value;
+        }
+    }
+
+    template <typename T>
+    void setDictionaryEntry(const std::string& key, const T& value);
+
 private:
     const NodeHandle* parent_;
 
@@ -87,6 +107,8 @@ private:
     int r_;
     int g_;
     int b_;
+
+    std::map<std::string, boost::any> dictionary;
 };
 
 }

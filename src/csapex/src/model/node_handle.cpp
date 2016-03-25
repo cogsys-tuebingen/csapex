@@ -64,9 +64,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
         node_->aerr.setPrefix(label);
     });
 
-    triggerNodeStateChanged();
-
-    node_->stateChanged();
+//    triggerNodeStateChanged();
 
     node_->parameters_changed.connect(parametersChanged);
     node_->getParameterState()->parameter_set_changed->connect(parametersChanged);
@@ -186,10 +184,6 @@ void NodeHandle::setNodeState(NodeStatePtr memento)
         node_->setParameterState(memento->getParameterState());
     }
 
-    triggerNodeStateChanged();
-
-    node_->stateChanged();
-
     if(node_state_->getLabel().empty()) {
         if(old_label.empty()) {
             node_state_->setLabel(getUUID().getShortName());
@@ -197,11 +191,14 @@ void NodeHandle::setNodeState(NodeStatePtr memento)
             node_state_->setLabel(old_label);
         }
     }
+
+    triggerNodeStateChanged();
 }
 
 void NodeHandle::triggerNodeStateChanged()
 {
     nodeStateChanged();
+    node_->stateChanged();
 }
 
 NodeState::Ptr NodeHandle::getNodeStateCopy() const

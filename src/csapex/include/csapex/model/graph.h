@@ -46,6 +46,8 @@ public:
 
     virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid) override;
 
+    virtual void stateChanged() override;
+
     void clear();
 
     Node* findNode(const UUID& uuid) const;
@@ -120,7 +122,7 @@ private:
     void outputActivation();
 
 public:
-    csapex::slim_signal::Signal<void()> stateChanged;
+    csapex::slim_signal::Signal<void()> state_changed;
     csapex::slim_signal::Signal<void(Graph*)> structureChanged;
 
     csapex::slim_signal::Signal<void(Connection*)> connectionAdded;
@@ -152,6 +154,8 @@ protected:
 
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_output_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
+
+    bool is_initialized_;
 };
 
 }

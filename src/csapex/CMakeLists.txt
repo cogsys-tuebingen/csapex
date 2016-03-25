@@ -313,6 +313,7 @@ add_library(csapex_qt SHARED
     src/command/move_fulcrum.cpp
     src/command/switch_thread.cpp
     src/command/group_nodes.cpp
+    src/command/ungroup_nodes.cpp
     src/command/paste_graph.cpp
     src/command/pass_out_connector.cpp
     src/command/set_color.cpp

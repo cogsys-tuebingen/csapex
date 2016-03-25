@@ -15,6 +15,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node_state.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/utility/timer.h>
 #include <csapex/msg/io.h>
@@ -29,7 +30,8 @@ using namespace csapex;
 
 Graph::Graph()
     : transition_relay_in_(new InputTransition),
-      transition_relay_out_(new OutputTransition)
+      transition_relay_out_(new OutputTransition),
+      is_initialized_(false)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
 }
@@ -45,6 +47,48 @@ void Graph::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
     Node::initialize(node_handle, uuid);
 
     setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
+}
+
+void Graph::stateChanged()
+{
+    Node::stateChanged();
+
+
+    if(!is_initialized_) {
+        NodeStatePtr state = node_handle_->getNodeState();
+
+        std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_outputs", {});
+        // delete save entries -> will now be replaced.
+        state->deleteDictionaryEntry("forwarding_outputs");
+
+        for(const std::string& output_name : output_uuids) {
+            ConnectionTypeConstPtr type = MessageFactory::createMessage(state->getDictionaryEntry<std::string>(output_name + "_type"));
+
+            UUID internal = UUIDProvider::makeUUID_without_parent(state->getDictionaryEntry<std::string>(output_name + "_uuid_internal"));
+            UUID external = UUIDProvider::makeUUID_without_parent(state->getDictionaryEntry<std::string>(output_name + "_uuid_external"));
+
+            addForwardingOutput(internal, external, type,
+                                state->getDictionaryEntry<std::string>(output_name + "_label"));
+        }
+
+
+        std::vector<std::string> input_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_inputs", {});
+        // delete save entries -> will now be replaced.
+        state->deleteDictionaryEntry("forwarding_inputs");
+
+        for(const std::string& input_name : input_uuids) {
+            ConnectionTypeConstPtr type = MessageFactory::createMessage(state->getDictionaryEntry<std::string>(input_name + "_type"));
+
+            UUID internal = UUIDProvider::makeUUID_without_parent(state->getDictionaryEntry<std::string>(input_name + "_uuid_internal"));
+            UUID external = UUIDProvider::makeUUID_without_parent(state->getDictionaryEntry<std::string>(input_name + "_uuid_external"));
+
+            addForwardingInput(internal, external, type,
+                               state->getDictionaryEntry<std::string>(input_name + "_label"),
+                               state->getDictionaryEntry<bool>(input_name + "_optional"));
+        }
+
+        is_initialized_ = true;
+    }
 }
 
 void Graph::clear()
@@ -202,7 +246,7 @@ void Graph::deleteConnection(ConnectionPtr connection)
             verify();
 
             connectionDeleted(connection.get());
-            stateChanged();
+            state_changed();
 
             for(const auto& c : connections_) {
                 apex_assert_hard(c);
@@ -683,6 +727,21 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
 
     relay_to_external_input_[internal_uuid] = internal_uuid;
 
+
+    NodeStatePtr state = node_handle_->getNodeState();
+
+    std::string name = relay->getUUID().getFullName();
+
+    std::vector<std::string> input_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_inputs", {});
+    input_uuids.push_back(name);
+    state->setDictionaryEntry("forwarding_inputs", input_uuids);
+
+    state->setDictionaryEntry(name + "_uuid_external", external_input->getUUID().getFullName());
+    state->setDictionaryEntry(name + "_uuid_internal", name);
+    state->setDictionaryEntry(name + "_type", external_input->getType()->typeName());
+    state->setDictionaryEntry(name + "_label", external_input->getLabel());
+    state->setDictionaryEntry(name + "_optional", external_input->isOptional());
+
     forwardingAdded(relay);
 
     return {external_uuid, internal_uuid};
@@ -719,6 +778,20 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
     transition_relay_in_->addInput(relay);
 
     relay_to_external_output_[internal_uuid] = external_uuid;
+
+
+    NodeStatePtr state = node_handle_->getNodeState();
+
+    std::string name = relay->getUUID().getFullName();
+
+    std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_outputs", {});
+    output_uuids.push_back(name);
+    state->setDictionaryEntry("forwarding_outputs", output_uuids);
+
+    state->setDictionaryEntry(name + "_uuid_external", external_output->getUUID().getFullName());
+    state->setDictionaryEntry(name + "_uuid_internal", name);
+    state->setDictionaryEntry(name + "_type", external_output->getType()->typeName());
+    state->setDictionaryEntry(name + "_label", external_output->getLabel());
 
     forwardingAdded(relay);
 

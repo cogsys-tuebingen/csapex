@@ -145,37 +145,6 @@ GraphIO::loadIntoGraph(const YAML::Node &blueprint, const Point& position)
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
     saveNodes(yaml, graph_->getAllNodeHandles());
-
-    // save forwarded inputs
-    YAML::Node fw_in(YAML::NodeType::Sequence);
-    for(const auto& pair : graph_->forward_inputs_) {
-        Input* i = pair.first;
-
-        YAML::Node in(YAML::NodeType::Map);
-        in["uuid_external"] = i->getUUID().getFullName();
-        in["uuid_internal"] = pair.second->getUUID().getFullName();
-        in["type"] = i->getType()->typeName();
-        in["optional"] = i->isOptional();
-        in["label"] = i->getLabel();
-
-        fw_in.push_back(in);
-    }
-    yaml["forward_in"] = fw_in;
-
-    // save forwarded outputs
-    YAML::Node fw_out(YAML::NodeType::Sequence);
-    for(const auto& pair : graph_->forward_outputs_) {
-        Output* o = pair.first;
-
-        YAML::Node out(YAML::NodeType::Map);
-        out["uuid_external"] = o->getUUID().getFullName();
-        out["uuid_internal"] = pair.second->getUUID().getFullName();
-        out["type"] = o->getType()->typeName();
-        out["label"] = o->getLabel();
-
-        fw_out.push_back(out);
-    }
-    yaml["forward_out"] = fw_out;
 }
 
 void GraphIO::saveNodes(YAML::Node &yaml, const std::vector<NodeHandle*>& nodes)
@@ -199,33 +168,6 @@ void GraphIO::loadNodes(const YAML::Node& doc)
         for(std::size_t i = 0, total = nodes.size(); i < total; ++i) {
             const YAML::Node& n = nodes[i];
             loadNode(n);
-        }
-    }
-
-    YAML::Node fw_in = doc["forward_in"];
-    if(fw_in.IsDefined()) {
-        for(std::size_t i = 0, total = fw_in.size(); i < total; ++i) {
-            YAML::Node node = fw_in[i];
-            ConnectionTypeConstPtr type = MessageFactory::createMessage(node["type"].as<std::string>());
-
-            UUID internal = UUIDProvider::makeUUID_without_parent(node["uuid_internal"].as<std::string>());
-            UUID external = UUIDProvider::makeUUID_without_parent(node["uuid_external"].as<std::string>());
-
-            graph_->addForwardingInput(internal, external,
-                    type, node["label"].as<std::string>(), node["optional"].as<bool>());
-        }
-    }
-    YAML::Node fw_out = doc["forward_out"];
-    if(fw_out.IsDefined()) {
-        for(std::size_t i = 0, total = fw_out.size(); i < total; ++i) {
-            YAML::Node node = fw_out[i];
-            ConnectionTypeConstPtr type = MessageFactory::createMessage(node["type"].as<std::string>());
-
-            UUID internal = UUIDProvider::makeUUID_without_parent(node["uuid_internal"].as<std::string>());
-            UUID external = UUIDProvider::makeUUID_without_parent(node["uuid_external"].as<std::string>());
-
-            graph_->addForwardingOutput(internal, external,
-                    type, node["label"].as<std::string>());
         }
     }
 }
@@ -537,7 +479,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
 void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
 {
 
-    NodeState::Ptr s = node_handle->getNodeState();
+    NodeState::Ptr s = node_handle->getNodeStateCopy();
     s->readYaml(doc);
 
     int x = doc["pos"][0].as<double>() + position_offset_x_;

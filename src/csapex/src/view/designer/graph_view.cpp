@@ -10,6 +10,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/flip_sides.h>
 #include <csapex/command/group_nodes.h>
+#include <csapex/command/ungroup_nodes.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/minimize.h>
 #include <csapex/command/move_box.h>
@@ -1214,8 +1215,8 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
     QAction* ungrp = new QAction("ungroup", &menu);
     ungrp->setIcon(QIcon(":/ungroup.png"));
+    handler[ungrp] = std::bind(&GraphView::ungroupSelected, this);
     ungrp->setIconVisibleInMenu(true);
-
 
     bool is_graph = false;
     if(selected_boxes_.size() == 1) {
@@ -1224,7 +1225,6 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
     }
 
     ungrp->setEnabled(is_graph);
-    handler[ungrp] = std::bind(&GraphView::ungroupSelected, this);
     menu.addAction(ungrp);
 
     menu.addSeparator();
@@ -1369,6 +1369,10 @@ void GraphView::groupSelected()
 
 void GraphView::ungroupSelected()
 {
+    apex_assert_hard(selected_boxes_.size() == 1);
+
+    CommandPtr cmd(new command::UngroupNodes(graph_facade_->getAbsoluteUUID(), selected_boxes_.front()->getNodeHandle()->getUUID()));
+    dispatcher_->execute(cmd);
 }
 
 void GraphView::paste()
