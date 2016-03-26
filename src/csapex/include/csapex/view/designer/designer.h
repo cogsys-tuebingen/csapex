@@ -114,6 +114,7 @@ private:
     std::map<Graph*, GraphView*> graph_views_;
     std::map<AUUID, GraphView*> auuid_views_;
     std::map<GraphView*, GraphFacade*> view_graphs_;
+    std::map<GraphView*, std::vector<slim_signal::ScopedConnection>> view_connections_;
 
     std::map<UUID, YAML::Node> states_for_invisible_graphs_;
 

@@ -91,6 +91,31 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
     }
 }
 
+namespace {
+QString generateTitle(GraphFacade* graph_facade)
+{
+    QString title;
+    for(GraphFacade* parent = graph_facade; parent != nullptr; parent = parent->getParent()) {
+        NodeHandle* nh = parent->getNodeHandle();
+        if(!nh) break;
+
+        QString label = QString::fromStdString(nh->getNodeState()->getLabel());
+        if(!title.isEmpty()) {
+            title = label + " / " + title;
+
+        } else {
+            title = label;
+        }
+    }
+
+    if(title.isEmpty()) {
+        return "Main";
+    } else {
+        return title;
+    }
+}
+}
+
 
 void Designer::showGraph(GraphFacadePtr graph_facade)
 {
@@ -118,26 +143,19 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
         // root
         QTabWidget* tabs = ui->tabWidget;
         QIcon icon = tabs->tabIcon(0);
-        QString title = tabs->tabText(0);
         tabs->removeTab(0);
-        tabs->insertTab(0, graph_view, icon, title);
+        tabs->insertTab(0, graph_view, icon, generateTitle(graph_facade.get()));
     } else {
-        std::string title;
-        for(GraphFacade* parent = graph_facade.get(); parent != nullptr; parent = parent->getParent()) {
-            NodeHandle* nh = parent->getNodeHandle();
-            if(!nh) {
-                break;
-            }
-            std::string label = nh->getNodeState()->getLabel();
-            if(!title.empty()) {
-                title = label + " / " + title;
+        tab = ui->tabWidget->addTab(graph_view, generateTitle(graph_facade.get()));
 
-            } else {
-                title = label;
+        view_connections_[graph_view].emplace_back(graph_facade->getNodeHandle()->getNodeState()->label_changed->connect([this]() {
+            for(int i = 0; i < ui->tabWidget->count(); ++i) {
+                GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(i));
+                if(view) {
+                    ui->tabWidget->setTabText(i, generateTitle(view->getGraphFacade()));
+                }
             }
-        }
-
-        tab = ui->tabWidget->addTab(graph_view, QString::fromStdString(title));
+        }));
     }
 
     graph_view->overwriteStyleSheet(styleSheet());
@@ -190,6 +208,8 @@ void Designer::closeView(int page)
         graph_views_.erase(graph);
         view_graphs_.erase(view);
         auuid_views_.erase(graph_facade->getAbsoluteUUID());
+
+        view_connections_.erase(view);
     }
 }
 
