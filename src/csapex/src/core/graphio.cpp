@@ -31,10 +31,17 @@ using namespace csapex;
 
 GraphIO::GraphIO(Graph *graph, NodeFactory* node_factory)
     : graph_(graph), node_factory_(node_factory),
-      position_offset_x_(0.0), position_offset_y_(0.0)
+      position_offset_x_(0.0), position_offset_y_(0.0),
+
+      ignore_forwarding_connections_(false)
 {
 }
 
+
+void GraphIO::setIgnoreForwardingConnections(bool ignore)
+{
+    ignore_forwarding_connections_ = ignore;
+}
 
 void GraphIO::saveSettings(YAML::Node& doc)
 {
@@ -219,7 +226,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
         deserializeNode(doc, node_handle);
 
     } catch(const std::exception& e) {
-        std::cerr << "cannot load state for box " << uuid << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
+        std::cerr << "cannot load state for box " << uuid << ": " << type2name(typeid(e)) << ", what=" << e.what() << std::endl;
     }
 }
 
@@ -233,6 +240,13 @@ void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>
     std::unordered_map<UUID, std::vector<UUID>, UUID::Hasher> connection_map;
 
     for(const ConnectionPtr& connection : connections) {
+        if(ignore_forwarding_connections_) {
+            if(connection->from()->getUUID().type() == "relayout" ||
+                    connection->to()->getUUID().type() == "relayin") {
+                continue;
+            }
+        }
+
         connection_map[connection->from()->getUUID()].push_back(connection->to()->getUUID());
 
         if(connection->getFulcrumCount() > 0) {

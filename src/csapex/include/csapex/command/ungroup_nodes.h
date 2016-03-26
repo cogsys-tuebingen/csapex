@@ -2,8 +2,7 @@
 #define UNGROUP_NODES_H
 
 /// COMPONENT
-#include "meta.h"
-#include <csapex/utility/uuid.h>
+#include "group_base.h"
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -13,12 +12,16 @@ namespace csapex
 namespace command
 {
 
-struct UngroupNodes : public Meta
+class UngroupNodes : public GroupBase
 {
+public:
     UngroupNodes(const AUUID &graph_uuid, const UUID &uuid);
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;
+
+protected:
+    void unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid);
 
 protected:
     bool doExecute() override;
@@ -28,9 +31,10 @@ protected:
 private:
     UUID uuid;
 
-    UUID sub_graph_uuid_;
+    GraphPtr subgraph;
 
-    YAML::Node selection_yaml;
+    std::unordered_map<UUID, UUID, UUID::Hasher> old_connections_in;
+    std::unordered_map<UUID, std::vector<UUID>, UUID::Hasher> old_connections_out;
 };
 
 }

@@ -2,8 +2,7 @@
 #define GROUP_NODES_H
 
 /// COMPONENT
-#include "meta.h"
-#include <csapex/utility/uuid.h>
+#include "group_base.h"
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -13,12 +12,14 @@ namespace csapex
 namespace command
 {
 
-struct GroupNodes : public Meta
+class GroupNodes : public GroupBase
 {
+public:
     GroupNodes(const AUUID &graph_uuid, const std::vector<UUID>& nodes);
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;
+
 
 protected:
     bool doExecute() override;
@@ -26,11 +27,13 @@ protected:
     bool doRedo() override;
 
 private:
+    void findNodes(Graph* graph);
+    void mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid);
+
+private:
     std::vector<UUID> uuids;
 
     UUID sub_graph_uuid_;
-
-    YAML::Node selection_yaml;
 };
 
 }

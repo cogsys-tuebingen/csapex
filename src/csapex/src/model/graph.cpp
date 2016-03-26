@@ -64,8 +64,8 @@ void Graph::stateChanged()
         for(const std::string& output_name : output_uuids) {
             ConnectionTypeConstPtr type = MessageFactory::createMessage(state->getDictionaryEntry<std::string>(output_name + "_type"));
 
-            UUID internal = UUIDProvider::makeUUID_without_parent(state->getDictionaryEntry<std::string>(output_name + "_uuid_internal"));
-            UUID external = UUIDProvider::makeUUID_without_parent(state->getDictionaryEntry<std::string>(output_name + "_uuid_external"));
+            UUID internal = makeUUID(state->getDictionaryEntry<std::string>(output_name + "_uuid_internal"));
+            UUID external = node_handle_->getUUIDProvider()->makeDerivedUUID(getUUID(), state->getDictionaryEntry<std::string>(output_name + "_uuid_external"));
 
             addForwardingOutput(internal, external, type,
                                 state->getDictionaryEntry<std::string>(output_name + "_label"));
@@ -79,8 +79,8 @@ void Graph::stateChanged()
         for(const std::string& input_name : input_uuids) {
             ConnectionTypeConstPtr type = MessageFactory::createMessage(state->getDictionaryEntry<std::string>(input_name + "_type"));
 
-            UUID internal = UUIDProvider::makeUUID_without_parent(state->getDictionaryEntry<std::string>(input_name + "_uuid_internal"));
-            UUID external = UUIDProvider::makeUUID_without_parent(state->getDictionaryEntry<std::string>(input_name + "_uuid_external"));
+            UUID internal = makeUUID(state->getDictionaryEntry<std::string>(input_name + "_uuid_internal"));
+            UUID external = node_handle_->getUUIDProvider()->makeDerivedUUID(getUUID(), state->getDictionaryEntry<std::string>(input_name + "_uuid_external"));
 
             addForwardingInput(internal, external, type,
                                state->getDictionaryEntry<std::string>(input_name + "_label"),
@@ -725,7 +725,7 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
 
     forward_inputs_[external_input.get()] = relay;
 
-    relay_to_external_input_[internal_uuid] = internal_uuid;
+    relay_to_external_input_[internal_uuid] = external_uuid;
 
 
     NodeStatePtr state = node_handle_->getNodeState();
@@ -736,7 +736,7 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
     input_uuids.push_back(name);
     state->setDictionaryEntry("forwarding_inputs", input_uuids);
 
-    state->setDictionaryEntry(name + "_uuid_external", external_input->getUUID().getFullName());
+    state->setDictionaryEntry(name + "_uuid_external", external_input->getUUID().id());
     state->setDictionaryEntry(name + "_uuid_internal", name);
     state->setDictionaryEntry(name + "_type", external_input->getType()->typeName());
     state->setDictionaryEntry(name + "_label", external_input->getLabel());
@@ -788,7 +788,7 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
     output_uuids.push_back(name);
     state->setDictionaryEntry("forwarding_outputs", output_uuids);
 
-    state->setDictionaryEntry(name + "_uuid_external", external_output->getUUID().getFullName());
+    state->setDictionaryEntry(name + "_uuid_external", external_output->getUUID().id());
     state->setDictionaryEntry(name + "_uuid_internal", name);
     state->setDictionaryEntry(name + "_type", external_output->getType()->typeName());
     state->setDictionaryEntry(name + "_label", external_output->getLabel());
@@ -802,14 +802,24 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
     return {external_uuid, internal_uuid};
 }
 
-InputPtr Graph::getForwardedInput(const UUID &internal_uuid) const
+InputPtr Graph::getForwardedInputInternal(const UUID &internal_uuid) const
 {
     return transition_relay_in_->getInput(internal_uuid);
 }
 
-OutputPtr Graph::getForwardedOutput(const UUID &internal_uuid) const
+OutputPtr Graph::getForwardedOutputInternal(const UUID &internal_uuid) const
 {
     return transition_relay_out_->getOutput(internal_uuid);
+}
+
+UUID Graph::getForwardedInputExternal(const UUID &internal_uuid) const
+{
+    return relay_to_external_output_.at(internal_uuid);
+}
+
+UUID Graph::getForwardedOutputExternal(const UUID &internal_uuid) const
+{
+    return relay_to_external_input_.at(internal_uuid);
 }
 
 std::vector<UUID> Graph::getRelayOutputs() const

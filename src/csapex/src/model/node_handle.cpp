@@ -538,6 +538,8 @@ void NodeHandle::removeTrigger(Trigger* t)
 
 void NodeHandle::addInput(InputPtr in)
 {
+    apex_assert_hard(in->getUUID().rootUUID() == getUUID().rootUUID());
+
     inputs_.push_back(in);
 
     connectConnector(in.get());
@@ -548,6 +550,8 @@ void NodeHandle::addInput(InputPtr in)
 
 void NodeHandle::addOutput(OutputPtr out)
 {
+    apex_assert_hard(out->getUUID().rootUUID() == getUUID().rootUUID());
+
     outputs_.push_back(out);
 
     connectConnector(out.get());
@@ -573,6 +577,8 @@ bool NodeHandle::isParameterOutput(Output *out) const
 
 void NodeHandle::addSlot(SlotPtr s)
 {
+    apex_assert_hard(s->getUUID().rootUUID() == getUUID().rootUUID());
+
     slots_.push_back(s);
 
     connectConnector(s.get());
@@ -595,6 +601,8 @@ void NodeHandle::addSlot(SlotPtr s)
 
 void NodeHandle::addTrigger(TriggerPtr t)
 {
+    apex_assert_hard(t->getUUID().rootUUID() == getUUID().rootUUID());
+
     triggers_.push_back(t);
 
     //PROBLEM: wait for all m slots to be done...
@@ -645,7 +653,7 @@ Input* NodeHandle::getInput(const UUID& uuid) const
 
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
-        return graph->getForwardedInput(uuid).get();
+        return graph->getForwardedInputInternal(uuid).get();
     }
 
     return nullptr;
@@ -661,7 +669,7 @@ Output* NodeHandle::getOutput(const UUID& uuid) const
 
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
-        return graph->getForwardedOutput(uuid).get();
+        return graph->getForwardedOutputInternal(uuid).get();
     }
 
     return nullptr;

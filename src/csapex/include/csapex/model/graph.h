@@ -103,8 +103,11 @@ public:
     std::pair<UUID, UUID> addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
     std::pair<UUID, UUID> addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);
 
-    InputPtr getForwardedInput(const UUID& internal_uuid) const;
-    OutputPtr getForwardedOutput(const UUID& internal_uuid) const;
+    InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
+    OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
+
+    UUID getForwardedInputExternal(const UUID& internal_uuid) const;
+    UUID getForwardedOutputExternal(const UUID& internal_uuid) const;
 
     std::vector<UUID> getRelayOutputs() const;
     std::vector<UUID> getRelayInputs() const;
