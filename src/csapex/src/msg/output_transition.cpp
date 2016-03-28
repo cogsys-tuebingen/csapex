@@ -114,12 +114,14 @@ void OutputTransition::connectionAdded(Connection *connection)
 
 void OutputTransition::establishConnections()
 {
+    apex_assert_hard(areAllConnections(Connection::State::DONE, Connection::State::READ));
+
     std::unique_lock<std::recursive_mutex> lock(sync);
     auto unestablished_connections = unestablished_connections_;
     lock.unlock();
 
     if(!unestablished_connections.empty()) {
-        for(auto c : unestablished_connections) {
+        for(ConnectionPtr c : unestablished_connections) {
             if(!c->isSourceEstablished()) {
                 c->establishSource();
             }
@@ -186,7 +188,7 @@ void OutputTransition::sendMessages()
     fillConnections();
 
     if(isSink()) {
-        abortSendingMessages();
+        setOutputsIdle();
     }
 }
 
@@ -212,7 +214,6 @@ void OutputTransition::publishNextMessage()
         }
 
     } else {
-        setConnectionsReadyToReceive();
         fillConnections();
     }
 }
@@ -234,6 +235,8 @@ void OutputTransition::fillConnections()
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(outputs_.empty() || !areOutputsIdle());
 
+    apex_assert_hard(areAllConnections(Connection::State::DONE));
+
     for(auto pair : outputs_) {
         OutputPtr out = pair.second;
         apex_assert_hard(out);
@@ -242,28 +245,20 @@ void OutputTransition::fillConnections()
     }
 }
 
-void OutputTransition::startReceiving()
+void OutputTransition::clearBuffer()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
-        output->startReceiving();
+        output->clearBuffer();
     }
 }
 
-void OutputTransition::abortSendingMessages()
+void OutputTransition::setOutputsIdle()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
         output->setState(Output::State::IDLE);
     }
-}
-
-void OutputTransition::setConnectionsReadyToReceive()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-
-    apex_assert_hard(areAllConnections(Connection::State::DONE, Connection::State::NOT_INITIALIZED));
-
 }

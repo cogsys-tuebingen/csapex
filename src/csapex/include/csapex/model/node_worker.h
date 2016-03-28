@@ -66,8 +66,6 @@ public:
     bool isProcessingEnabled() const;
     void setProcessingEnabled(bool e);
 
-    void synchronize();
-
     void setProfiling(bool profiling);
     bool isProfiling() const;
 
@@ -87,7 +85,7 @@ public:
     bool tick();
 
     void startProcessingMessages();
-    void finishProcessingMessages(bool was_executed, bool is_marker_message);
+    void forwardMessages(bool send_parameters);
 
     void checkTransitions();
 
@@ -133,7 +131,14 @@ private:
 
     void finishTimer(TimerPtr t);
 
+    void signalExecutionFinished();
+    void signalMessagesProcessed();
+
+    void activateOutput();
     void updateTransitionConnections();
+
+    void finishGenerator();
+    void finishProcessing();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
 
@@ -153,9 +158,6 @@ private:
 
     Trigger* trigger_tick_done_;
     Trigger* trigger_process_done_;
-
-    Slot* sync_slot_;
-    bool wait_for_sync_;
 
     std::vector<csapex::slim_signal::Connection> handle_connections_;
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;

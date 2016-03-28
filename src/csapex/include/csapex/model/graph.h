@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid.h>
-#include <csapex/model/node.h>
+#include <csapex/model/generator_node.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid_provider.h>
 
@@ -15,7 +15,7 @@
 
 namespace csapex {
 
-class Graph : public Node, public UUIDProvider
+class Graph : public GeneratorNode, public UUIDProvider
 {
     friend class GraphIO;
     friend class GraphFacade;
@@ -122,7 +122,10 @@ private:
     void buildConnectedComponents();
     void assignLevels();
 
+    virtual void notifyMessagesProcessed() override;
     void outputActivation();
+
+    void publishSubGraphMessages();
 
 public:
     csapex::slim_signal::Signal<void()> state_changed;
@@ -159,6 +162,7 @@ protected:
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
 
     bool is_initialized_;
+    bool output_active_;
 };
 
 }

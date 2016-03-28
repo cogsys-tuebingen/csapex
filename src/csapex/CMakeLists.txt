@@ -170,7 +170,6 @@ add_library(csapex_util SHARED
     src/utility/assert.cpp
     src/utility/exceptions.cpp
     src/utility/bash_parser.cpp
-    src/utility/buffer.cpp
     src/utility/error_handling.cpp
     src/utility/stream_interceptor.cpp
     src/utility/stream_relay.cpp
@@ -228,6 +227,7 @@ add_library(csapex SHARED
     src/model/node_runner.cpp
     src/model/node_state.cpp
     src/model/parameterizable.cpp
+    src/model/generator_node.cpp
     src/model/tickable_node.cpp
     src/model/tag.cpp
     src/model/unique.cpp

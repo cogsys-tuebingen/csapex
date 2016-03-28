@@ -1,6 +1,10 @@
 /// HEADER
 #include <csapex/model/tickable_node.h>
 
+/// PROJECT
+#include <csapex/utility/timer.h>
+#include <csapex/utility/interlude.hpp>
+
 using namespace csapex;
 
 TickableNode::TickableNode()
@@ -9,6 +13,19 @@ TickableNode::TickableNode()
       tick_immediate_(false)
 {
 
+}
+
+bool TickableNode::doTick(NodeModifier &nm, Parameterizable &p)
+{
+    bool res;
+    {
+        INTERLUDE("tick");
+        res = tick(nm, p);
+    }
+
+    updated();
+
+    return res;
 }
 
 bool TickableNode::canTick()

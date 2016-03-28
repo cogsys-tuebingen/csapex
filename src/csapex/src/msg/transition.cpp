@@ -7,6 +7,9 @@
 #include <csapex/model/connectable.h>
 #include <csapex/utility/assert.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 Transition::Transition(delegate::Delegate0<> activation_fn)
@@ -81,11 +84,13 @@ void Transition::removeFadingConnections()
 
 void Transition::updateConnections()
 {
-    if(hasUnestablishedConnection()) {
-        establishConnections();
-    }
-    if(hasFadingConnection()) {
-        removeFadingConnections();
+    if(areAllConnections(Connection::State::DONE, Connection::State::READ)) {
+        if(hasUnestablishedConnection()) {
+            establishConnections();
+        }
+        if(hasFadingConnection()) {
+            removeFadingConnections();
+        }
     }
 }
 
@@ -93,19 +98,21 @@ void Transition::updateConnections()
 
 void Transition::checkIfEnabled()
 {
-//    if(isEnabled()) { // TODO: check here if enabled
+    //    if(isEnabled()) { // TODO: check here if enabled
     if(activation_fn_) {
         activation_fn_();
     }
-//    }
+    //    }
 }
 
 void Transition::establishConnection(ConnectionPtr connection)
 {
+    apex_assert_hard(areAllConnections(Connection::State::DONE, Connection::State::READ));
+
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(auto it = unestablished_connections_.begin(); it != unestablished_connections_.end(); ) {
         ConnectionPtr c = *it;
-        if(connection == c) {            
+        if(connection == c) {
             if(c->isSourceEstablished() && c->isSinkEstablished()) {
                 if(!c->isEstablished()) {
                     c->establish();

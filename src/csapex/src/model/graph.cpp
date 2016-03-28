@@ -31,7 +31,7 @@ using namespace csapex;
 Graph::Graph()
     : transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition),
-      is_initialized_(false)
+      is_initialized_(false), output_active_(false)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
 }
@@ -839,14 +839,42 @@ std::vector<UUID> Graph::getRelayInputs() const
     return res;
 }
 
+void Graph::notifyMessagesProcessed()
+{
+    if(output_active_) {
+        transition_relay_in_->notifyMessageProcessed();
+        output_active_ = false;
+    }
+}
+
 void Graph::outputActivation()
 {
-    if(transition_relay_in_->isEnabled()) {
-        transition_relay_in_->forwardMessages();
-        transition_relay_in_->notifyMessageProcessed();
+    if(transition_relay_in_->isEnabled() && node_handle_->getOutputTransition()->canStartSendingMessages()) {
+        publishSubGraphMessages();
+    }
+}
 
-        if(continuation_) {
-            continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
-        }
+void Graph::publishSubGraphMessages()
+{
+    apex_assert_hard(transition_relay_in_->isEnabled());
+    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+
+    //        node_handle_->executionRequested([this](){
+    transition_relay_in_->forwardMessages();
+
+    apex_assert_hard(!output_active_);
+    output_active_ = true;
+
+    if(node_handle_->isSource()) {
+        updated();
+
+    } else {
+        apex_assert_hard(continuation_);
+        continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+    }
+    //        });
+
+    if(node_handle_->isSink()) {
+        notifyMessagesProcessed();
     }
 }
