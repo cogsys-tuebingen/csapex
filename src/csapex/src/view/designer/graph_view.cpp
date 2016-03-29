@@ -194,8 +194,8 @@ void GraphView::scrollContentsBy(int dx, int dy)
     QPointF tl_view = mapToScene(QPoint(0, 0));
     QPointF br_view = mapToScene(QPoint(width(), height()));
 
-    double mx = std::abs(dx * 5) + 10;
-    double my = std::abs(dy * 5) + 10;
+    double mx = std::abs(dx) + 10;
+    double my = std::abs(dy) + 10;
 
     QPointF tl(std::min(tl_view.x() - mx, min_r.x()),
                std::min(tl_view.y() - my, min_r.y()));
