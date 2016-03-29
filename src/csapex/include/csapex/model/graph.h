@@ -123,6 +123,7 @@ private:
     void assignLevels();
 
     virtual void notifyMessagesProcessed() override;
+    void inputActivation();
     void outputActivation();
 
     void publishSubGraphMessages();

@@ -34,6 +34,8 @@ Graph::Graph()
       is_initialized_(false), output_active_(false)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
+
+    transition_relay_out_->messages_processed.connect(delegate::Delegate0<>(this, &Graph::inputActivation));
 }
 
 Graph::~Graph()
@@ -844,6 +846,15 @@ void Graph::notifyMessagesProcessed()
     if(output_active_) {
         transition_relay_in_->notifyMessageProcessed();
         output_active_ = false;
+    }
+}
+
+void Graph::inputActivation()
+{
+    if(node_handle_->isSink()) {
+        if(continuation_) {
+            continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+        }
     }
 }
 
