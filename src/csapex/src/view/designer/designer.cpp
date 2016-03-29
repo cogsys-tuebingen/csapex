@@ -19,6 +19,10 @@
 #include <csapex/view/designer/designerio.h>
 #include "ui_designer.h"
 
+/// SYSTEM
+#include <QTabWidget>
+#include <QInputDialog>
+
 using namespace csapex;
 
 Designer::Designer(Settings& settings, NodeFactory &node_factory, NodeAdapterFactory& node_adapter_factory,
@@ -54,12 +58,34 @@ void Designer::setup()
 
     addGraph(root_graph_facade_);
 
-//    ui->horizontalLayout->addWidget(minimap_);
+    //    ui->horizontalLayout->addWidget(minimap_);
     minimap_->setParent(this);
     minimap_->move(10, 10);
 
-    QObject::connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(updateMinimap()));
-    QObject::connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeView(int)));
+    QObject::connect(ui->tabWidget, &QTabWidget::currentChanged,
+                     [this](int) {
+        updateMinimap();
+    });
+    QObject::connect(ui->tabWidget, &QTabWidget::tabCloseRequested,
+                     [this](int tab) {
+        closeView(tab);
+    });
+    QObject::connect(ui->tabWidget, &QTabWidget::tabBarDoubleClicked,
+                     [this](int tab) {
+        bool ok = false;
+        GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(tab));
+        if(view) {
+            NodeStatePtr state = view->getGraphFacade()->getNodeHandle()->getNodeState();
+            QString old_name = QString::fromStdString(state->getLabel());
+            QString text = QInputDialog::getText(this, "Graph Label", "Enter new name",
+                                                 QLineEdit::Normal, old_name, &ok);
+            if(ok) {
+                if(old_name != text && !text.isEmpty()) {
+                    state->setLabel(text.toStdString());
+                }
+            }
+        }
+    });
 
     updateMinimap();
 }
