@@ -60,5 +60,4 @@ void DirectConnection::setMessage(const ConnectionTypeConstPtr &msg)
 void DirectConnection::establish()
 {
     Connection::establish();
-    std::cerr << "establish" << std::endl;
 }
