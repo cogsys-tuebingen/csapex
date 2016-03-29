@@ -843,6 +843,8 @@ std::vector<UUID> Graph::getRelayInputs() const
 
 void Graph::notifyMessagesProcessed()
 {
+    GeneratorNode::notifyMessagesProcessed();
+
     if(output_active_) {
         transition_relay_in_->notifyMessageProcessed();
         output_active_ = false;
@@ -851,9 +853,10 @@ void Graph::notifyMessagesProcessed()
 
 void Graph::inputActivation()
 {
-    if(node_handle_->isSink()) {
+    if(!transition_relay_in_->hasEstablishedConnection()) {
         if(continuation_) {
             continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+            continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
         }
     }
 }
@@ -861,7 +864,9 @@ void Graph::inputActivation()
 void Graph::outputActivation()
 {
     if(transition_relay_in_->isEnabled() && node_handle_->getOutputTransition()->canStartSendingMessages()) {
-        publishSubGraphMessages();
+        if(node_handle_->isSource() || continuation_) {
+            publishSubGraphMessages();
+        }
     }
 }
 
@@ -882,6 +887,7 @@ void Graph::publishSubGraphMessages()
     } else {
         apex_assert_hard(continuation_);
         continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+        continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
     }
     //        });
 
