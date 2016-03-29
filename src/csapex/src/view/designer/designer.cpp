@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
+#include <csapex/command/rename_node.h>
 #include <csapex/core/settings.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -75,13 +76,21 @@ void Designer::setup()
         bool ok = false;
         GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(tab));
         if(view) {
-            NodeStatePtr state = view->getGraphFacade()->getNodeHandle()->getNodeState();
-            QString old_name = QString::fromStdString(state->getLabel());
-            QString text = QInputDialog::getText(this, "Graph Label", "Enter new name",
-                                                 QLineEdit::Normal, old_name, &ok);
-            if(ok) {
-                if(old_name != text && !text.isEmpty()) {
-                    state->setLabel(text.toStdString());
+            GraphFacade* graph = view->getGraphFacade();
+            GraphFacade* parent = graph->getParent();
+            if(parent) {
+                NodeHandle* node = graph->getNodeHandle();
+                NodeStatePtr state = node->getNodeState();
+                QString old_name = QString::fromStdString(state->getLabel());
+                QString text = QInputDialog::getText(this, "Graph Label", "Enter new name",
+                                                     QLineEdit::Normal, old_name, &ok);
+                if(ok) {
+                    if(old_name != text && !text.isEmpty()) {
+                        command::RenameNode::Ptr cmd(new command::RenameNode(parent->getAbsoluteUUID(),
+                                                                             node->getUUID(),
+                                                                             text.toStdString()));
+                        dispatcher_->execute(cmd);
+                    }
                 }
             }
         }

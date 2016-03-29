@@ -14,6 +14,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/minimize.h>
 #include <csapex/command/move_box.h>
+#include <csapex/command/rename_node.h>
 #include <csapex/command/move_connection.h>
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/switch_thread.h>
@@ -25,6 +26,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -866,7 +868,7 @@ void GraphView::addPort(Port *port)
         }
         if(!from->isVirtual() && !adaptee->isVirtual()) {
             Command::Ptr cmd(new command::MoveConnection(graph_facade_->getAbsoluteUUID(), from, adaptee.get()));
-             dispatcher_->execute(cmd);
+            dispatcher_->execute(cmd);
         }
     });
 }
@@ -878,11 +880,21 @@ void GraphView::removePort(Port *port)
 
 void GraphView::renameBox(NodeBox *box)
 {
-    bool ok;
-    QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, box->getLabel().c_str(), &ok);
+    GraphFacade* graph = getGraphFacade();
+    NodeHandle* node = box->getNodeHandle();
+    NodeStatePtr state = node->getNodeState();
+    QString old_name = QString::fromStdString(state->getLabel());
 
-    if(ok && !text.isEmpty()) {
-        box->setLabel(text);
+    bool ok = false;
+    QString text = QInputDialog::getText(this, "Graph Label", "Enter new name",
+                                         QLineEdit::Normal, old_name, &ok);
+    if(ok) {
+        if(old_name != text && !text.isEmpty()) {
+            command::RenameNode::Ptr cmd(new command::RenameNode(graph->getAbsoluteUUID(),
+                                                                 node->getUUID(),
+                                                                 text.toStdString()));
+            dispatcher_->execute(cmd);
+        }
     }
 }
 
