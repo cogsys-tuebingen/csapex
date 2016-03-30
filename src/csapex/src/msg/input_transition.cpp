@@ -16,12 +16,12 @@
 using namespace csapex;
 
 InputTransition::InputTransition(delegate::Delegate0<> activation_fn)
-    : Transition(activation_fn), one_input_is_dynamic_(false)
+    : Transition(activation_fn), one_input_is_dynamic_(false), forwarded_(false)
 {
 }
 
 InputTransition::InputTransition()
-    : Transition(), one_input_is_dynamic_(false)
+    : Transition(), one_input_is_dynamic_(false), forwarded_(false)
 {
 }
 
@@ -61,6 +61,8 @@ void InputTransition::removeInput(InputPtr input)
 
 void InputTransition::establishConnections()
 {
+    apex_assert_hard(areAllConnections(Connection::State::DONE, Connection::State::READ));
+
     std::unique_lock<std::recursive_mutex> lock(sync);
     auto unestablished_connections = unestablished_connections_;
     lock.unlock();
@@ -115,6 +117,10 @@ void InputTransition::connectionAdded(Connection *connection)
 
 bool InputTransition::isEnabled() const
 {
+    if(forwarded_) {
+        return false;
+    }
+
     if(!areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/)) {
         return false;
     }
@@ -197,7 +203,9 @@ void InputTransition::notifyOlderConnections(int seq)
 
 void InputTransition::notifyMessageProcessed()
 {
-    apex_assert_hard(areAllConnections(Connection::State::READ));
+    apex_assert_hard(forwarded_);
+
+    apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
     bool has_multipart = false;
     bool multipart_are_done = true;
@@ -233,10 +241,14 @@ void InputTransition::notifyMessageProcessed()
         }
 
     }
+    apex_assert_hard(areAllConnections(Connection::State::DONE));
+    forwarded_ = false;
 }
 
 void InputTransition::forwardMessages()
 {
+    apex_assert_hard(!forwarded_);
+
     apex_assert_hard(!isOneConnection(Connection::State::DONE));
     apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
 
@@ -279,4 +291,6 @@ void InputTransition::forwardMessages()
     for(auto& c : established_connections_) {
         c->setState(Connection::State::READ);
     }
+
+    forwarded_ = true;
 }

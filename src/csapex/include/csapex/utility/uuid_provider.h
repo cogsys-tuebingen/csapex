@@ -47,11 +47,11 @@ public:
 
     AUUID getAbsoluteUUID() const;
 
-protected:
     void reset();
     void free(const UUID& uuid);
     std::string generateNextName(const std::string& name);
     std::string generateNextSubName(const UUID& parent, const std::string& name);
+
 
 protected:
     std::weak_ptr<UUIDProvider> parent_provider_;

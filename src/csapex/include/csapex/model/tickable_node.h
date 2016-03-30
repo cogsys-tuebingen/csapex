@@ -2,18 +2,16 @@
 #define TICKABLE_NODE_H
 
 /// COMPONENT
-#include <csapex/model/node.h>
+#include <csapex/model/generator_node.h>
 
 namespace csapex
 {
 
-class TickableNode : public Node
+class TickableNode : public GeneratorNode
 {
 public:
+    bool doTick(NodeModifier &nm, Parameterizable &p);
     virtual bool canTick();
-
-    virtual bool tick(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
-    virtual void tick();
 
     bool isTickEnabled() const;
     void setTickEnabled(bool tick);
@@ -22,6 +20,10 @@ public:
     void setTickFrequency(double f);
 
     bool isImmediate() const;
+
+protected:
+    virtual bool tick(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
+    virtual void tick();
 
 protected:
     TickableNode();

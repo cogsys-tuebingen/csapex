@@ -40,12 +40,12 @@ public:
     virtual bool isEnabled() const = 0;
     /*TODO: find better name*/ void checkIfEnabled();
 
-protected:
     bool areAllConnections(Connection::State state) const;
     bool areAllConnections(Connection::State a, /*or*/ Connection::State b) const;
     bool areAllConnections(Connection::State a, /*or*/ Connection::State b, /*or*/ Connection::State c) const;
     bool isOneConnection(Connection::State state) const;
 
+protected:
     void establishConnection(ConnectionPtr connection);
 
     virtual void connectionAdded(Connection* connection);

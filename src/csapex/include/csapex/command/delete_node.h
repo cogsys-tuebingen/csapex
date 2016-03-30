@@ -5,6 +5,9 @@
 #include <csapex/command/meta.h>
 #include <csapex/utility/uuid.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 namespace csapex
 {
 
@@ -27,9 +30,8 @@ protected:
     std::string type;
     UUID uuid;
 
-//    Command::Ptr remove_connections;
-
     NodeStatePtr saved_state;
+    YAML::Node saved_graph;
 };
 
 }

@@ -17,7 +17,7 @@ CommandDispatcher::CommandDispatcher(Settings& settings, GraphFacade::Ptr root,
     : settings_(settings), root_(root), thread_pool_(thread_pool), node_factory_(node_factory),
       dirty_(false)
 {
-    stateChanged.connect([this](){ root_->getGraph()->stateChanged(); });
+    stateChanged.connect([this](){ root_->getGraph()->state_changed(); });
 }
 
 void CommandDispatcher::reset()

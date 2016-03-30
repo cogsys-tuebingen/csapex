@@ -179,7 +179,6 @@ void Parameterizable::removeTemporaryParameter(const csapex::param::Parameter::P
 void Parameterizable::setTemporaryParameters(const std::vector<csapex::param::Parameter::Ptr> &params)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    std::cerr << "set temporary" << std::endl;
     setParameterSetSilence(true);
     removeTemporaryParameters();
     for(csapex::param::Parameter::Ptr param : params) {
@@ -187,13 +186,11 @@ void Parameterizable::setTemporaryParameters(const std::vector<csapex::param::Pa
     }
     setParameterSetSilence(false);
     triggerParameterSetChanged();
-    std::cerr << "/set temporary" << std::endl;
 }
 
 void Parameterizable::setTemporaryParameters(const std::vector<csapex::param::Parameter::Ptr> &params, std::function<void (csapex::param::Parameter *)> cb)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    std::cerr << "set temporary" << std::endl;
     setParameterSetSilence(true);
     removeTemporaryParameters();
     for(csapex::param::Parameter::Ptr param : params) {
@@ -201,7 +198,6 @@ void Parameterizable::setTemporaryParameters(const std::vector<csapex::param::Pa
     }
     setParameterSetSilence(false);
     triggerParameterSetChanged();
-    std::cerr << "/set temporary" << std::endl;
 }
 
 

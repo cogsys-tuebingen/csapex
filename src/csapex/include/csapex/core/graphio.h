@@ -21,6 +21,10 @@ public:
     GraphIO(Graph *graph, NodeFactory* node_factory);
 
 public:
+    // options
+    void setIgnoreForwardingConnections(bool ignore);
+
+    // api
     void saveSettings(YAML::Node& yaml);
     void loadSettings(const YAML::Node& doc);
 
@@ -69,6 +73,8 @@ private:
     std::unordered_map<UUID, UUID, UUID::Hasher> old_node_uuid_to_new_;
     double position_offset_x_;
     double position_offset_y_;
+
+    bool ignore_forwarding_connections_;
 };
 
 }

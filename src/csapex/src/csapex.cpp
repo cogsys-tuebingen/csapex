@@ -224,8 +224,13 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         csapex::error_handling::stop_request().connect([this](){
-            std::cout << "shutdown request" << std::endl;
-            QCoreApplication::postEvent(app.get(), new QCloseEvent);
+            static int request = 0;
+            if(request++ < 3) {
+                std::cout << "shutdown request" << std::endl;
+                QCoreApplication::postEvent(app.get(), new QCloseEvent);
+            } else {
+                raise(SIGTERM);
+            }
         });
 
         core->init();

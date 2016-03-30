@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
+#include <csapex/command/rename_node.h>
 #include <csapex/core/settings.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -18,6 +19,10 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/designer/designerio.h>
 #include "ui_designer.h"
+
+/// SYSTEM
+#include <QTabWidget>
+#include <QInputDialog>
 
 using namespace csapex;
 
@@ -54,12 +59,42 @@ void Designer::setup()
 
     addGraph(root_graph_facade_);
 
-//    ui->horizontalLayout->addWidget(minimap_);
+    //    ui->horizontalLayout->addWidget(minimap_);
     minimap_->setParent(this);
     minimap_->move(10, 10);
 
-    QObject::connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(updateMinimap()));
-    QObject::connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeView(int)));
+    QObject::connect(ui->tabWidget, &QTabWidget::currentChanged,
+                     [this](int) {
+        updateMinimap();
+    });
+    QObject::connect(ui->tabWidget, &QTabWidget::tabCloseRequested,
+                     [this](int tab) {
+        closeView(tab);
+    });
+    QObject::connect(ui->tabWidget, &QTabWidget::tabBarDoubleClicked,
+                     [this](int tab) {
+        bool ok = false;
+        GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(tab));
+        if(view) {
+            GraphFacade* graph = view->getGraphFacade();
+            GraphFacade* parent = graph->getParent();
+            if(parent) {
+                NodeHandle* node = graph->getNodeHandle();
+                NodeStatePtr state = node->getNodeState();
+                QString old_name = QString::fromStdString(state->getLabel());
+                QString text = QInputDialog::getText(this, "Graph Label", "Enter new name",
+                                                     QLineEdit::Normal, old_name, &ok);
+                if(ok) {
+                    if(old_name != text && !text.isEmpty()) {
+                        command::RenameNode::Ptr cmd(new command::RenameNode(parent->getAbsoluteUUID(),
+                                                                             node->getUUID(),
+                                                                             text.toStdString()));
+                        dispatcher_->execute(cmd);
+                    }
+                }
+            }
+        }
+    });
 
     updateMinimap();
 }
@@ -91,6 +126,31 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
     }
 }
 
+namespace {
+QString generateTitle(GraphFacade* graph_facade)
+{
+    QString title;
+    for(GraphFacade* parent = graph_facade; parent != nullptr; parent = parent->getParent()) {
+        NodeHandle* nh = parent->getNodeHandle();
+        if(!nh) break;
+
+        QString label = QString::fromStdString(nh->getNodeState()->getLabel());
+        if(!title.isEmpty()) {
+            title = label + " / " + title;
+
+        } else {
+            title = label;
+        }
+    }
+
+    if(title.isEmpty()) {
+        return "Main";
+    } else {
+        return title;
+    }
+}
+}
+
 
 void Designer::showGraph(GraphFacadePtr graph_facade)
 {
@@ -118,26 +178,19 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
         // root
         QTabWidget* tabs = ui->tabWidget;
         QIcon icon = tabs->tabIcon(0);
-        QString title = tabs->tabText(0);
         tabs->removeTab(0);
-        tabs->insertTab(0, graph_view, icon, title);
+        tabs->insertTab(0, graph_view, icon, generateTitle(graph_facade.get()));
     } else {
-        std::string title;
-        for(GraphFacade* parent = graph_facade.get(); parent != nullptr; parent = parent->getParent()) {
-            NodeHandle* nh = parent->getNodeHandle();
-            if(!nh) {
-                break;
-            }
-            std::string label = nh->getNodeState()->getLabel();
-            if(!title.empty()) {
-                title = label + " / " + title;
+        tab = ui->tabWidget->addTab(graph_view, generateTitle(graph_facade.get()));
 
-            } else {
-                title = label;
+        view_connections_[graph_view].emplace_back(graph_facade->getNodeHandle()->getNodeState()->label_changed->connect([this]() {
+            for(int i = 0; i < ui->tabWidget->count(); ++i) {
+                GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(i));
+                if(view) {
+                    ui->tabWidget->setTabText(i, generateTitle(view->getGraphFacade()));
+                }
             }
-        }
-
-        tab = ui->tabWidget->addTab(graph_view, QString::fromStdString(title));
+        }));
     }
 
     graph_view->overwriteStyleSheet(styleSheet());
@@ -190,6 +243,8 @@ void Designer::closeView(int page)
         graph_views_.erase(graph);
         view_graphs_.erase(view);
         auuid_views_.erase(graph_facade->getAbsoluteUUID());
+
+        view_connections_.erase(view);
     }
 }
 

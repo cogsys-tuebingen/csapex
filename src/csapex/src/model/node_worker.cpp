@@ -61,8 +61,14 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
             if(tickable) {
                 trigger_tick_done_ = node_handle_->addTrigger("ticked");
-                sync_slot_ = node_handle_->addSlot("sync", std::bind(&NodeWorker::synchronize, this), false);
             }
+
+
+            auto generator = std::dynamic_pointer_cast<GeneratorNode>(node);
+            if(generator) {
+                generator->updated.connect(delegate::Delegate0<>(this, &NodeWorker::finishGenerator));
+            }
+
             trigger_process_done_ = node_handle_->addTrigger("inputs\nprocessed");
 
             is_setup_ = true;
@@ -197,11 +203,6 @@ void NodeWorker::setProcessingEnabled(bool e)
     enabled(e);
 }
 
-void NodeWorker::synchronize()
-{
-    wait_for_sync_ = false;
-}
-
 bool NodeWorker::isWaitingForTrigger() const
 {
     for(TriggerPtr t : node_handle_->getAllTriggers()) {
@@ -298,7 +299,7 @@ void NodeWorker::startProcessingMessages()
     setState(State::FIRED);
 
     if(!isProcessingEnabled()) {
-        finishProcessingMessages(true, false);
+        signalMessagesProcessed();
         return;
     }
 
@@ -373,8 +374,7 @@ void NodeWorker::startProcessingMessages()
     }
 
     apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
-    node_handle_->getOutputTransition()->setConnectionsReadyToReceive();
-    node_handle_->getOutputTransition()->startReceiving();
+    node_handle_->getOutputTransition()->clearBuffer();
 
     node_handle_->getInputTransition()->notifyMessageProcessed();
 
@@ -393,7 +393,8 @@ void NodeWorker::startProcessingMessages()
     }
 
     if(marker || !all_inputs_are_present) {
-        finishProcessingMessages(false, true);
+        forwardMessages(false);
+        signalMessagesProcessed();
         return;
     }
 
@@ -418,7 +419,7 @@ void NodeWorker::startProcessingMessages()
             node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
                 node_handle_->executionRequested([this, f, node]() {
                     f(*node_handle_, *node);
-                    finishProcessingMessages(true, false);
+                    finishProcessing();
                 });
             });
         }
@@ -432,42 +433,98 @@ void NodeWorker::startProcessingMessages()
     }
 
     if(sync) {
-        finishProcessingMessages(true, false);
+        finishProcessing();
     }
 }
 
-void NodeWorker::finishProcessingMessages(bool was_executed, bool is_marker_message)
+void NodeWorker::finishGenerator()
 {
-    if(was_executed) {
+    apex_assert_hard(canSend());
+
+    bool has_msg = false;
+    for(OutputPtr out : node_handle_->getAllOutputs()) {
+        if(msg::isConnected(out.get())) {
+            if(node_handle_->isParameterOutput(out.get())) {
+                has_msg = true;
+                break;
+            }
+
+            if(msg::hasMessage(out.get())) {
+                has_msg = true;
+                break;
+            }
+        }
+    }
+
+    if(has_msg) {
+        activateOutput();
+
+    } else {
+        node_handle_->getOutputTransition()->setOutputsIdle();
+    }
+}
+
+void NodeWorker::finishProcessing()
+{
+    signalExecutionFinished();
+    forwardMessages(true);
+    signalMessagesProcessed();
+    triggerCheckTransitions();
+}
+
+void NodeWorker::signalExecutionFinished()
+{
+    if(current_process_timer_) {
+        finishTimer(current_process_timer_);
+    }
+
+    if(trigger_process_done_->isConnected()) {
         if(current_process_timer_) {
-            finishTimer(current_process_timer_);
+            current_process_timer_->step("trigger process done");
         }
+        trigger_process_done_->trigger();
+    }
+}
 
-        if(trigger_process_done_->isConnected()) {
-            if(current_process_timer_) {
-                current_process_timer_->step("trigger process done");
+void NodeWorker::signalMessagesProcessed()
+{
+    setState(State::IDLE);
+
+    messages_processed();
+}
+
+void NodeWorker::forwardMessages(bool send_parameters)
+{
+    apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
+
+    if(!node_handle_->isSink()) {
+        if(send_parameters) {
+            publishParameters();
+        }
+        sendMessages();
+    }
+}
+
+void NodeWorker::activateOutput()
+{
+    bool has_marker = false;
+    for(OutputPtr out : node_handle_->getAllOutputs()) {
+        if(msg::isConnected(out.get())) {
+            if(out->hasMarkerMessage()) {
+                has_marker = true;
+                break;
             }
-            trigger_process_done_->trigger();
         }
     }
 
-    if(getState() == State::PROCESSING) {
-        if(!node_handle_->isSink()) {
-            if(!is_marker_message) {
-                publishParameters();
-            }
-            sendMessages();
-        }
+    bool send_parameters = !has_marker;
 
-        setState(State::IDLE);
-
-        messages_processed();
+    apex_assert_hard(getState() == NodeWorker::State::PROCESSING ||
+                     getState() == NodeWorker::State::IDLE);
+    if(send_parameters) {
+        publishParameters();
     }
-
-
-    if(was_executed) {
-        triggerCheckTransitions();
-    }
+    sendMessages();
 }
 
 bool NodeWorker::areAllInputsAvailable() const
@@ -524,6 +581,13 @@ void NodeWorker::notifyMessagesProcessed()
         apex_assert_hard(node_handle_->getOutputTransition()->isSink() ||
                          node_handle_->getOutputTransition()->areOutputsIdle());
     }
+
+    auto generator = std::dynamic_pointer_cast<GeneratorNode>(node_handle_->getNode().lock());
+    if(generator) {
+        apex_assert_hard(canSend());
+        generator->notifyMessagesProcessed();
+    }
+
 
     triggerCheckTransitions();
 }
@@ -611,6 +675,8 @@ void NodeWorker::publishParameterOn(const csapex::param::Parameter& p, Output* o
             msg::publish(out, p.as<int>());
         else if(p.is<double>())
             msg::publish(out, p.as<double>());
+        if(p.is<bool>())
+            msg::publish(out, p.as<bool>());
         else if(p.is<std::string>())
             msg::publish(out, p.as<std::string>());
         else if(p.is<std::pair<int, int>>())
@@ -635,7 +701,8 @@ void NodeWorker::sendMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    apex_assert_hard(getState() == State::PROCESSING);
+    apex_assert_hard(getState() == State::PROCESSING ||
+                     getState() == State::IDLE);
 
     node_handle_->getOutputTransition()->sendMessages();
 }
@@ -657,12 +724,6 @@ bool NodeWorker::tick()
 
     if(!isProcessingEnabled()) {
         return false;
-    }
-
-    if(sync_slot_->isConnected()) {
-        if(wait_for_sync_) {
-            return false;
-        }
     }
 
     bool has_ticked = false;
@@ -692,7 +753,7 @@ bool NodeWorker::tick()
                         setState(State::FIRED);
                         setState(State::PROCESSING);
                     }
-                    node_handle_->getOutputTransition()->startReceiving();
+                    node_handle_->getOutputTransition()->clearBuffer();
 
                     TimerPtr t = nullptr;
                     if(profiling_) {
@@ -701,53 +762,16 @@ bool NodeWorker::tick()
                     }
                     node->useTimer(t.get());
 
-                    has_ticked = tickable->tick(*node_handle_, *node);
+                    has_ticked = tickable->doTick(*node_handle_, *node);
 
                     if(has_ticked) {
-                        if(sync_slot_->isConnected()) {
-                            wait_for_sync_ = true;
-                        }
-
                         if(trigger_tick_done_->isConnected()) {
-                            if(t) {
-                                t->step("trigger tick done");
-                            }
                             trigger_tick_done_->trigger();
                         }
 
                         ticked();
 
                         ++ticks_;
-
-                        bool has_msg = false;
-                        bool has_marker = false;
-                        for(OutputPtr out : node_handle_->getAllOutputs()) {
-                            if(msg::isConnected(out.get())) {
-                                if(node_handle_->isParameterOutput(out.get())) {
-                                    has_msg = true;
-                                }
-
-                                if(out->hasMarkerMessage()) {
-                                    has_marker = true;
-                                }
-                                if(msg::hasMessage(out.get())) {
-                                    has_msg = true;
-                                }
-                            }
-                        }
-
-                        apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
-                        if(has_msg) {
-                            node_handle_->getOutputTransition()->setConnectionsReadyToReceive();
-
-                            if(!has_marker) {
-                                publishParameters();
-                            }
-                            sendMessages();
-
-                        } else {
-                            node_handle_->getOutputTransition()->abortSendingMessages();
-                        }
                     }
 
                     if(t) {

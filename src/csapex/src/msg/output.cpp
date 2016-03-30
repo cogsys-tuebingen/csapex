@@ -25,6 +25,12 @@ Output::~Output()
 
 void Output::setMessageProcessed()
 {
+    for(auto connection : connections_) {
+        if(connection->getState() != Connection::State::DONE) {
+            return;
+        }
+    }
+
     message_processed();
 }
 
@@ -45,7 +51,7 @@ Output::State Output::getState() const
 
 void Output::reset()
 {
-    startReceiving();
+    clearBuffer();
 
     setSequenceNumber(0);
     setState(State::IDLE);

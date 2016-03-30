@@ -164,7 +164,7 @@ void CsApexWindow::construct()
     connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
     connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
 
-    connections_.push_back(graph->stateChanged.connect([this]() { updateMenu(); }));
+    connections_.push_back(graph->state_changed.connect([this]() { updateMenu(); }));
     connections_.push_back(root_->panic.connect([this]() { clearBlock(); }));
 
     connections_.push_back(cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); }));
