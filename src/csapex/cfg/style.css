@@ -167,6 +167,12 @@ csapex--Port[blocked="true"]  {
         border: 2px solid rgb(255,200,0)!important;
 }
 
+csapex--MetaPort {
+        border: 2px solid rgb(100, 100, 100);
+        background: rgb(100,100,100);
+        border-radius: 8px;
+}
+
 csapex--PortPanel {
         background: rgb(200, 220, 200);
         border: 1px solid rgb(90, 135, 80);

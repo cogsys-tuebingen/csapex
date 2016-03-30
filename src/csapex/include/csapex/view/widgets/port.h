@@ -70,6 +70,8 @@ public Q_SLOTS:
     void setError(bool e, const std::string& msg, int level);
 
 protected:
+    Port(QWidget *parent = nullptr);
+
     void startDrag();
     void createToolTip();
     void paintEvent(QPaintEvent *);

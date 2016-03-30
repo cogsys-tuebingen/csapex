@@ -105,6 +105,8 @@ public Q_SLOTS:
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
 
+    void createPort(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
+
     void addPort(Port* port);
     void removePort(Port* port);
 

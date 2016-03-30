@@ -26,10 +26,26 @@
 
 using namespace csapex;
 
-Port::Port(ConnectableWeakPtr adaptee, QWidget *parent)
-    : QFrame(parent), adaptee_(adaptee),
+Port::Port(QWidget *parent)
+    : QFrame(parent),
       refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0)
 {
+    setFlipped(flipped_);
+
+    setFocusPolicy(Qt::NoFocus);
+    setAcceptDrops(true);
+
+    setContextMenuPolicy(Qt::PreventContextMenu);
+
+    setMinimizedSize(minimized_);
+
+    setEnabled(true);
+}
+
+Port::Port(ConnectableWeakPtr adaptee, QWidget *parent)
+    : Port(parent)
+{
+    adaptee_ = adaptee;
     ConnectablePtr adaptee_ptr = adaptee_.lock();
     if(adaptee_ptr) {
         createToolTip();
@@ -44,18 +60,8 @@ Port::Port(ConnectableWeakPtr adaptee, QWidget *parent)
     } else {
         std::cerr << "creating empty port!" << std::endl;
     }
-
-    setFlipped(flipped_);
-
-    setFocusPolicy(Qt::NoFocus);
-    setAcceptDrops(true);
-
-    setContextMenuPolicy(Qt::PreventContextMenu);
-
-    setMinimizedSize(minimized_);
-
-    setEnabled(true);
 }
+
 
 Port::~Port()
 {

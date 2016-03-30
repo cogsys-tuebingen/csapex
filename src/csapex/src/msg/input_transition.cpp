@@ -211,21 +211,25 @@ void InputTransition::notifyMessageProcessed()
     bool multipart_are_done = true;
 
     for(auto& c : established_connections_) {
-        int f = c->getMessage()->flags.data;
-        if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
-            has_multipart = true;
-            bool last_part = f & (int) ConnectionType::Flags::Fields::LAST_PART;
-            multipart_are_done &= last_part;
+        if(c->getMessage()) {
+            int f = c->getMessage()->flags.data;
+            if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
+                has_multipart = true;
+                bool last_part = f & (int) ConnectionType::Flags::Fields::LAST_PART;
+                multipart_are_done &= last_part;
+            }
         }
     }
 
     if(has_multipart && !multipart_are_done) {
         for(ConnectionPtr& c : established_connections_) {
-            int f = c->getMessage()->flags.data;
+            if(c->getMessage()) {
+                int f = c->getMessage()->flags.data;
 
-            if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
-                //                c->setState(Connection::State::DONE);
-                c->setMessageProcessed();
+                if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
+                    //                c->setState(Connection::State::DONE);
+                    c->setMessageProcessed();
+                }
             }
         }
 
@@ -281,7 +285,7 @@ void InputTransition::forwardMessages()
 
     for(auto& c : established_connections_) {
         auto s = c->getState();
-//        apex_assert_hard(c->isEstablished());
+        //        apex_assert_hard(c->isEstablished());
         apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
         apex_assert_hard(s == Connection::State::UNREAD ||
                          s == Connection::State::READ);

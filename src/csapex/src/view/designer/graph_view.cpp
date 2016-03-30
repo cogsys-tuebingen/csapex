@@ -19,6 +19,7 @@
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/switch_thread.h>
 #include <csapex/command/set_color.h>
+#include <csapex/command/add_msg_connection.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
@@ -138,9 +139,11 @@ GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph_facade,
     }
 
     relayed_outputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::OUTPUT, scene_);
+    QObject::connect(relayed_outputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
     relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
 
     relayed_inputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::INPUT, scene_);
+    QObject::connect(relayed_inputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
     relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
 }
 
@@ -835,6 +838,25 @@ void GraphView::removeBox(NodeBox *box)
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
     }
+}
+
+void GraphView::createPort(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+{
+    Graph* graph = graph_facade_->getGraph();
+    AUUID graph_uuid = graph_facade_->getGraph()->getUUID().getAbsoluteUUID();
+
+    command::AddMessageConnection::Ptr add_msg;
+    if(from->isOutput()) {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
+        add_msg.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), ports.second));
+    } else {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
+        add_msg.reset(new command::AddMessageConnection(graph_uuid, ports.second, from->getUUID()));
+    }
+
+    dispatcher_->execute(add_msg);
 }
 
 void GraphView::addPort(Port *port)

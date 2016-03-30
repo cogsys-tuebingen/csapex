@@ -19,7 +19,7 @@ class PortPanel : public QFrame
 
 public:
     enum class Type {
-        OUTPUT, INPUT, TRIGGER, SLOT
+        OUTPUT, INPUT, TRIGGER, SLOT_
     };
 
 public:
@@ -29,9 +29,12 @@ public:
         return QString("PortPanel");
     }
 
-    void dragEnterEvent(QDragEnterEvent* e);
-    void dragMoveEvent(QDragMoveEvent* e);
-    void dropEvent(QDropEvent* e);
+//    void dragEnterEvent(QDragEnterEvent* e);
+//    void dragMoveEvent(QDragMoveEvent* e);
+//    void dropEvent(QDropEvent* e);
+
+Q_SIGNALS:
+    void createPortRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
 
 public Q_SLOTS:
     void connectorAdded(ConnectablePtr c);

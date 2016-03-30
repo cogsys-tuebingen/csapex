@@ -8,6 +8,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/widgets/meta_port.h>
 
 /// SYSTEM
 #include <QBoxLayout>
@@ -28,8 +29,17 @@ PortPanel::PortPanel(GraphFacadePtr graph_facade, Type type, DesignerScene* pare
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setMinimumSize(10, 10);
 
+    QVBoxLayout* mainlayout = new QVBoxLayout;
+
+
     layout = new QVBoxLayout;
-    setLayout(layout);
+    mainlayout->addLayout(layout);
+
+    MetaPort* meta_port = new MetaPort;
+    QObject::connect(meta_port, &MetaPort::createPortRequest, this, &PortPanel::createPortRequest);
+    mainlayout->addWidget(meta_port);
+
+    setLayout(mainlayout);
 
     setAcceptDrops(true);
 
@@ -102,42 +112,5 @@ void PortPanel::add(ConnectablePtr c)
 
     adjustSize();
 }
-
-void PortPanel::dragEnterEvent(QDragEnterEvent* e)
-{
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
-        e->acceptProposedAction();
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
-        e->acceptProposedAction();
-    }
-}
-
-void PortPanel::dragMoveEvent(QDragMoveEvent* e)
-{
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
-        e->acceptProposedAction();
-
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
-        e->acceptProposedAction();
-    }
-}
-
-void PortPanel::dropEvent(QDropEvent* e)
-{
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
-        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        if(from) {
-            // TODO: make command
-            std::cerr << "create port" << std::endl;
-            auto type = from->getType();
-            auto label = from->getLabel();
-            graph_->addForwardingOutput(type, label);
-        }
-
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
-
-    }
-}
-
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_port_panel.cpp"
