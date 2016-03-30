@@ -675,6 +675,8 @@ void NodeWorker::publishParameterOn(const csapex::param::Parameter& p, Output* o
             msg::publish(out, p.as<int>());
         else if(p.is<double>())
             msg::publish(out, p.as<double>());
+        if(p.is<bool>())
+            msg::publish(out, p.as<bool>());
         else if(p.is<std::string>())
             msg::publish(out, p.as<std::string>());
         else if(p.is<std::pair<int, int>>())
