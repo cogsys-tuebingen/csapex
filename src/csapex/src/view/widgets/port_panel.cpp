@@ -80,10 +80,6 @@ void PortPanel::setup()
     default:
         throw std::logic_error("unsupported type");
     }
-
-    if(ports_.empty()) {
-        hide();
-    }
 }
 
 void PortPanel::setupOutput()

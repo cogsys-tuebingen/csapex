@@ -29,9 +29,6 @@ public:
         return QString("PortPanel");
     }
 
-//    void dragEnterEvent(QDragEnterEvent* e);
-//    void dragMoveEvent(QDragMoveEvent* e);
-//    void dropEvent(QDropEvent* e);
 
 Q_SIGNALS:
     void createPortRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);

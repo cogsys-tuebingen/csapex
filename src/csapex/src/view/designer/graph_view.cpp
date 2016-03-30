@@ -138,14 +138,9 @@ GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph_facade,
         nodeAdded(nw);
     }
 
-    relayed_outputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::OUTPUT, scene_);
-    QObject::connect(relayed_outputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
-    relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
-
-    relayed_inputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::INPUT, scene_);
-    QObject::connect(relayed_inputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
-    relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
+    setupWidgets();
 }
+
 
 GraphView::~GraphView()
 {
@@ -153,6 +148,17 @@ GraphView::~GraphView()
     worker_connections_.clear();
 
     delete scene_;
+}
+
+void GraphView::setupWidgets()
+{
+    relayed_outputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::OUTPUT, scene_);
+    QObject::connect(relayed_outputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
+
+    relayed_inputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::INPUT, scene_);
+    QObject::connect(relayed_inputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
 }
 
 void GraphView::paintEvent(QPaintEvent *e)
@@ -219,6 +225,7 @@ void GraphView::centerOnPoint(QPointF point)
     centerOn(point);
 }
 
+
 void GraphView::reset()
 {
     scene_->clear();
@@ -231,11 +238,7 @@ void GraphView::reset()
     proxy_map_.clear();
     port_map_.clear();
 
-    relayed_outputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::OUTPUT, scene_);
-    relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
-
-    relayed_inputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::INPUT, scene_);
-    relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
+    setupWidgets();
 
     update();
 }

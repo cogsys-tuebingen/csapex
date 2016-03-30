@@ -155,6 +155,8 @@ public Q_SLOTS:
     void stopPreview();
 
 private:
+    void setupWidgets();
+
     void flipBox();
     void chooseColor();
     void minimizeBox(bool mini);
