@@ -255,6 +255,11 @@ void CsApexWindow::updateSelectionActions()
     ui->actionDelete_Selected->setEnabled(enabled);
     ui->actionCopy->setEnabled(enabled);
     ui->actionClear_selection->setEnabled(enabled);
+    ui->actionGroup->setEnabled(enabled);
+
+    std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
+    bool is_graph = selected.size() == 1 && selected[0]->getNodeHandle()->getType() == "csapex::Graph";
+    ui->actionUngroup->setEnabled(is_graph);
 }
 
 void CsApexWindow::updateClipboardActions()
@@ -739,7 +744,7 @@ void CsApexWindow::reset()
 
 void CsApexWindow::clear()
 {
-    CommandPtr cmd = CommandFactory(root_.get(), AUUID(UUID::NONE)).clearCommand();
+    CommandPtr cmd = CommandFactory(root_.get()).clearCommand();
     cmd_dispatcher_->execute(cmd);
 }
 
