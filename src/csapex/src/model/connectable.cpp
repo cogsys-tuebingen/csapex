@@ -31,6 +31,11 @@ void Connectable::notifyMessageProcessed()
     messageProcessed(this);
 }
 
+void Connectable::reset()
+{
+    messageProcessed(this);
+}
+
 void Connectable::stop()
 {
     notifyMessageProcessed();

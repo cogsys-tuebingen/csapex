@@ -35,7 +35,7 @@ public: /* API */
 
     virtual void processMarker(const connection_types::MessageConstPtr &marker);
 
-    virtual void abort();
+    virtual void reset();
 
     virtual bool isAsynchronous() const;
     virtual bool isIsolated() const;

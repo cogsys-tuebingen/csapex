@@ -76,6 +76,7 @@ public:
     virtual void disable();
     virtual void enable();
 
+    virtual void reset();
     virtual void stop();
 
     virtual void notifyMessageProcessed();

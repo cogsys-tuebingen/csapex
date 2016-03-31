@@ -309,7 +309,6 @@ add_library(csapex_qt SHARED
     src/command/minimize.cpp
     src/command/modify_fulcrum.cpp
     src/command/move_box.cpp
-    src/command/move_connection.cpp
     src/command/move_fulcrum.cpp
     src/command/rename_node.cpp
     src/command/switch_thread.cpp

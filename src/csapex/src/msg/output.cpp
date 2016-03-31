@@ -51,6 +51,8 @@ Output::State Output::getState() const
 
 void Output::reset()
 {
+    Connectable::reset();
+
     clearBuffer();
 
     setSequenceNumber(0);

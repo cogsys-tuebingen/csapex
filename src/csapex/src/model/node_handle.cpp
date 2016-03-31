@@ -142,7 +142,7 @@ bool NodeHandle::isSink() const
 
 void NodeHandle::stop()
 {
-    node_->abort();
+    node_->reset();
 
     for(OutputPtr i : getAllOutputs()) {
         i->stop();

@@ -5,7 +5,6 @@
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_connection.h>
-#include <csapex/command/move_connection.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
@@ -213,10 +212,13 @@ void Port::createToolTip()
     tooltip << ", Enabled: " << adaptee->isEnabled();
     tooltip << ", #: " << adaptee->sequenceNumber();
 
-    Output* o = dynamic_cast<Output*>(adaptee.get());
-    if(o) {
+    if(InputPtr in = std::dynamic_pointer_cast<Input>(adaptee)) {
+        tooltip << ", optional: " << in->isOptional();
+    }
+
+    if(OutputPtr out = std::dynamic_pointer_cast<Output>(adaptee)) {
         tooltip << ", state: ";
-        switch(o->getState()) {
+        switch(out->getState()) {
         case Output::State::ACTIVE:
             tooltip << "ACTIVE";
             break;

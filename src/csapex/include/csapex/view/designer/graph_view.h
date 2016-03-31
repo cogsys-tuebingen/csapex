@@ -46,7 +46,7 @@ class GraphView : public QGraphicsView
 
 public:
     GraphView(DesignerScene* scene, csapex::GraphFacadePtr graph,
-              Settings& settings, NodeFactory& node_factory, NodeAdapterFactory& node_adapter_factory,
+              Settings& settings, DesignerOptions& options, NodeFactory& node_factory, NodeAdapterFactory& node_adapter_factory,
               CommandDispatcher *dispatcher, DragIO& dragio,
               DesignerStyleable* style, Designer *parent);
     ~GraphView();
@@ -78,6 +78,7 @@ public:
     void dropEvent(QDropEvent* e);
     void dragLeaveEvent(QDragLeaveEvent * e);
 
+    void drawForeground(QPainter* painter, const QRectF& rect);
     void paintEvent(QPaintEvent* e);
 
     void nodeAdded(NodeWorkerPtr node_worker);
@@ -105,7 +106,8 @@ public Q_SLOTS:
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
 
-    void createPort(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
+    void createPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
+    void createPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
 
     void addPort(Port* port);
     void removePort(Port* port);
@@ -174,6 +176,7 @@ private:
     DesignerStyleable* style_;
 
     Settings& settings_;
+    DesignerOptions& options_;
     NodeFactory& node_factory_;
     NodeAdapterFactory& node_adapter_factory_;
 

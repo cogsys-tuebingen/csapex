@@ -36,7 +36,8 @@ PortPanel::PortPanel(GraphFacadePtr graph_facade, Type type, DesignerScene* pare
     mainlayout->addLayout(layout);
 
     MetaPort* meta_port = new MetaPort;
-    QObject::connect(meta_port, &MetaPort::createPortRequest, this, &PortPanel::createPortRequest);
+    QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &PortPanel::createPortAndConnectRequest);
+    QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &PortPanel::createPortAndMoveRequest);
     mainlayout->addWidget(meta_port);
 
     setLayout(mainlayout);

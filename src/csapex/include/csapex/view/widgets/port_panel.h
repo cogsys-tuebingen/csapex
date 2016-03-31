@@ -31,7 +31,8 @@ public:
 
 
 Q_SIGNALS:
-    void createPortRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
+    void createPortAndConnectRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
+    void createPortAndMoveRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
 
 public Q_SLOTS:
     void connectorAdded(ConnectablePtr c);

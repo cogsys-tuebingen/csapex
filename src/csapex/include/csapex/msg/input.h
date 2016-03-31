@@ -52,7 +52,7 @@ public:
 
     virtual void notifyMessageProcessed() override;
 
-    void reset();
+    virtual void reset() override;
 
 
 protected:

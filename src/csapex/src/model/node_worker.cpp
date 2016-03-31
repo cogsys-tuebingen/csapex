@@ -250,7 +250,7 @@ void NodeWorker::reset()
         return;
     }
 
-    node->abort();
+    node->reset();
     setError(false);
 
     // set state without checking!

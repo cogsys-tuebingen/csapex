@@ -15,7 +15,6 @@
 #include <csapex/command/minimize.h>
 #include <csapex/command/move_box.h>
 #include <csapex/command/rename_node.h>
-#include <csapex/command/move_connection.h>
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/switch_thread.h>
 #include <csapex/command/set_color.h>
@@ -68,10 +67,11 @@
 using namespace csapex;
 
 GraphView::GraphView(DesignerScene *scene, GraphFacadePtr graph_facade,
-                     Settings &settings, NodeFactory& node_factory, NodeAdapterFactory& node_adapter_factory,
+                     Settings &settings, DesignerOptions& options,
+                     NodeFactory& node_factory, NodeAdapterFactory& node_adapter_factory,
                      CommandDispatcher *dispatcher, DragIO& dragio, DesignerStyleable *style,
                      Designer *parent)
-    : QGraphicsView(parent), parent_(parent), scene_(scene), style_(style), settings_(settings),
+    : QGraphicsView(parent), parent_(parent), scene_(scene), style_(style), settings_(settings), options_(options),
       node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
       graph_facade_(graph_facade), dispatcher_(dispatcher), drag_io_(dragio),
       scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr),
@@ -153,11 +153,13 @@ GraphView::~GraphView()
 void GraphView::setupWidgets()
 {
     relayed_outputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::OUTPUT, scene_);
-    QObject::connect(relayed_outputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+    QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
     relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
 
     relayed_inputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::INPUT, scene_);
-    QObject::connect(relayed_inputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+    QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
     relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
 }
 
@@ -187,6 +189,29 @@ void GraphView::paintEvent(QPaintEvent *e)
     QGraphicsView::paintEvent(e);
 
     Q_EMIT viewChanged();
+}
+
+void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
+{
+    QGraphicsView::drawForeground(painter, rect);
+
+    if(options_.isDebug()) {
+        Graph* graph = graph_facade_->getGraph();
+
+        QString debug_info =  QString::fromStdString(graph->makeStatusString());
+
+        QFont font;
+        font.setPixelSize(12);
+        painter->setFont(font);
+
+        QFontMetrics fm(font);
+        QRectF box = fm.boundingRect(rect.toRect(), Qt::AlignLeft | Qt::AlignTop, debug_info);
+
+        box.translate(rect.width() - box.width() - 1, rect.height() - box.height() - 1);
+
+        painter->fillRect(box, Qt::white);
+        painter->drawText(box, debug_info);
+    }
 }
 
 void GraphView::resizeEvent(QResizeEvent *event)
@@ -843,23 +868,41 @@ void GraphView::removeBox(NodeBox *box)
     }
 }
 
-void GraphView::createPort(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+void GraphView::createPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
     Graph* graph = graph_facade_->getGraph();
     AUUID graph_uuid = graph_facade_->getGraph()->getUUID().getAbsoluteUUID();
 
-    command::AddMessageConnection::Ptr add_msg;
+    Command::Ptr cmd;
     if(from->isOutput()) {
         // TODO: command!
         std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
-        add_msg.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), ports.second));
+        cmd.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), ports.second));
     } else {
         // TODO: command!
         std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
-        add_msg.reset(new command::AddMessageConnection(graph_uuid, ports.second, from->getUUID()));
+        cmd.reset(new command::AddMessageConnection(graph_uuid, ports.second, from->getUUID()));
     }
 
-    dispatcher_->execute(add_msg);
+    dispatcher_->execute(cmd);
+}
+
+void GraphView::createPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+{
+    Graph* graph = graph_facade_->getGraph();
+
+    Command::Ptr cmd;
+    if(from->isInput()) {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
+        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+    } else {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
+        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+    }
+
+    dispatcher_->execute(cmd);
 }
 
 void GraphView::addPort(Port *port)
@@ -892,7 +935,7 @@ void GraphView::addPort(Port *port)
             return;
         }
         if(!from->isVirtual() && !adaptee->isVirtual()) {
-            Command::Ptr cmd(new command::MoveConnection(graph_facade_->getAbsoluteUUID(), from, adaptee.get()));
+            Command::Ptr cmd = CommandFactory(graph_facade_.get()).moveConnections(from, adaptee.get());
             dispatcher_->execute(cmd);
         }
     });

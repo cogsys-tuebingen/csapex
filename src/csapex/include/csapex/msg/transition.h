@@ -45,6 +45,9 @@ public:
     bool areAllConnections(Connection::State a, /*or*/ Connection::State b, /*or*/ Connection::State c) const;
     bool isOneConnection(Connection::State state) const;
 
+    std::vector<ConnectionPtr> getEstablishedConnections() const;
+    std::vector<ConnectionPtr> getFadingConnections() const;
+
 protected:
     void establishConnection(ConnectionPtr connection);
 

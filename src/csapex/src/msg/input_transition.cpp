@@ -95,6 +95,8 @@ void InputTransition::reset()
     for(ConnectionPtr connection : established_connections_) {
         connection->reset();
     }
+
+    forwarded_ = false;
 }
 
 void InputTransition::connectionAdded(Connection *connection)

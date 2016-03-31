@@ -28,7 +28,6 @@ class DeleteNode;
 class MoveBox;
 
 class AddConnection;
-class MoveConnection;
 class DeleteConnection;
 
 class AddFulcrum;

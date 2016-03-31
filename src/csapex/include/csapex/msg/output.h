@@ -69,7 +69,7 @@ public:
     virtual bool hasMessage() = 0;
     virtual bool hasMarkerMessage() = 0;
 
-    virtual void reset();
+    virtual void reset() override;
     virtual void clearBuffer() = 0;
 
     virtual bool isConnectionPossible(Connectable* other_side) override;

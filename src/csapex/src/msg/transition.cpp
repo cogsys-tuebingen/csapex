@@ -211,3 +211,14 @@ void Transition::trackConnection(Connection *connection, const csapex::slim_sign
 {
     signal_connections_[connection].push_back(c);
 }
+
+std::vector<ConnectionPtr> Transition::getEstablishedConnections() const
+{
+    return established_connections_;
+}
+
+
+std::vector<ConnectionPtr> Transition::getFadingConnections() const
+{
+    return fading_connections_;
+}

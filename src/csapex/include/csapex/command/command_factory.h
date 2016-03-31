@@ -32,6 +32,9 @@ public:
     CommandPtr removeConnectionCmd(Trigger* trigger, Slot* other_side);
 
 
+    CommandPtr moveConnections(const UUID& from, const UUID& to);
+    CommandPtr moveConnections(Connectable* from, Connectable* to);
+
 
     CommandPtr deleteConnectionFulcrumCommand(int connection, int fulcrum);
     CommandPtr deleteAllConnectionFulcrumsCommand(int connection);

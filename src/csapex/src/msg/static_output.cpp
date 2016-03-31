@@ -103,6 +103,7 @@ void StaticOutput::reset()
 {
     Output::reset();
     committed_message_.reset();
+    message_to_send_.reset();
 }
 
 void StaticOutput::disable()

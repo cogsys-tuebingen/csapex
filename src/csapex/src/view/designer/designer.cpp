@@ -167,7 +167,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     UUID uuid = graph_facade->getAbsoluteUUID();
     DesignerScene* designer_scene = new DesignerScene(graph_facade, dispatcher_, &style);
     GraphView* graph_view = new GraphView(designer_scene, graph_facade,
-                                          settings_, node_factory_, node_adapter_factory_,
+                                          settings_, options_, node_factory_, node_adapter_factory_,
                                           dispatcher_, drag_io, &style, this);
     graph_views_[graph] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();

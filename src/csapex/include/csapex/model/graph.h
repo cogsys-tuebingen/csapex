@@ -45,6 +45,7 @@ public:
     virtual ~Graph();
 
     virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid) override;
+    virtual void reset() override;
 
     virtual void stateChanged() override;
 
@@ -111,6 +112,8 @@ public:
 
     std::vector<UUID> getRelayOutputs() const;
     std::vector<UUID> getRelayInputs() const;
+
+    std::string makeStatusString() const;
 
 private:
     std::pair<UUID, UUID> addForwardingInput(const UUID& internal_uuid, const UUID &external_uuid, const ConnectionTypeConstPtr& type,

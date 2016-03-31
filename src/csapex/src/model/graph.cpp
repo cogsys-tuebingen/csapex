@@ -51,6 +51,17 @@ void Graph::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
     setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
 }
 
+void Graph::reset()
+{
+    Node::reset();
+
+    continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
+    output_active_ = false;
+
+    transition_relay_out_->reset();
+    transition_relay_in_->reset();
+}
+
 void Graph::stateChanged()
 {
     Node::stateChanged();
@@ -774,6 +785,7 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
     InputPtr relay = std::make_shared<Input>(internal_uuid);
     relay->setType(type);
     relay->setLabel(label);
+    relay->setOptional(true);
 
     forward_outputs_[external_output.get()] = relay;
 
@@ -894,4 +906,58 @@ void Graph::publishSubGraphMessages()
     if(node_handle_->isSink()) {
         notifyMessagesProcessed();
     }
+}
+
+std::string Graph::makeStatusString() const
+{
+    std::stringstream ss;
+    ss << "UUID: " << getUUID() << '\n';
+    ss << "AUUID: " << getUUID().getAbsoluteUUID() << '\n';
+    ss << "output_active_: " << output_active_ << '\n';
+    ss << "continuation_: " << ((bool) continuation_) << '\n';
+    if(node_handle_) {
+        ss << "output transiton:\n";
+        ss << " - " << (node_handle_->getOutputTransition()->canStartSendingMessages() ? "can send" : "can't send") << '\n';
+    }
+
+
+
+    auto printStatus = [&ss](const ConnectionPtr& c) {
+        switch(c->getState()) {
+        case Connection::State::DONE:
+//        case Connection::State::NOT_INITIALIZED:
+            ss << "DONE / NOT_INITIALIZED";
+            break;
+        case Connection::State::READ:
+            ss << "READ";
+            break;
+        case Connection::State::UNREAD:
+            ss << "UNREAD";
+            break;
+        default:
+            ss << "???";
+        }
+    };
+
+    ss << "(left) transition_relay_out:\n";
+    ss << " - " << (transition_relay_out_->isEnabled() ? "enabled" : "disabled") << '\n';
+    ss << " - " << (transition_relay_out_->canStartSendingMessages() ? "can" : "can't") << " send\n";
+    ss << " - " << (transition_relay_out_->hasEstablishedConnection() ? "has" : "doesn't have") <<  " established connection\n";
+    ss << " - outputs are " << (transition_relay_out_->areOutputsIdle() ? "idle" : "busy") << '\n';
+    ss << "(right) transition_relay_in:\n";
+    ss << " - " << (transition_relay_in_->isEnabled() ? "enabled" : "disabled") << '\n';
+    ss << " - established connections: ";
+    for(const ConnectionPtr& c : transition_relay_in_->getEstablishedConnections()) {
+        printStatus(c);
+        ss << '\t';
+    }
+    ss << '\n';
+    ss << " - fading connections: ";
+    for(const ConnectionPtr& c : transition_relay_in_->getFadingConnections()) {
+        printStatus(c);
+        ss << '\t';
+    }
+    ss << '\n';
+
+    return ss.str();
 }

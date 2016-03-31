@@ -24,6 +24,8 @@ Input::~Input()
 
 void Input::reset()
 {
+    Connectable::reset();
+
     free();
     setSequenceNumber(0);
 }
