@@ -29,6 +29,8 @@ void OutputTransition::reset()
     for(ConnectionPtr connection : established_connections_) {
         connection->reset();
     }
+
+    Transition::reset();
 }
 
 OutputPtr OutputTransition::getOutput(const UUID& id) const

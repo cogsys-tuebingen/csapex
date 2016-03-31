@@ -809,8 +809,11 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
 
     forwardingAdded(relay);
 
-    relay->messageArrived.connect([this, external_output, relay](Connectable*) {
-        msg::publish(external_output.get(), relay->getMessage());
+    std::weak_ptr<Output> external_output_weak = external_output;
+    relay->messageArrived.connect([this, external_output_weak, relay](Connectable*) {
+        if(auto external_output = external_output_weak.lock()) {
+            msg::publish(external_output.get(), relay->getMessage());
+        }
     });
 
     return {external_uuid, internal_uuid};

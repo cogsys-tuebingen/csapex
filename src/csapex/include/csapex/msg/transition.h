@@ -34,7 +34,7 @@ public:
     void removeFadingConnections();
 
     virtual void establishConnections() = 0;
-    virtual void reset() = 0;
+    virtual void reset();
 
 
     virtual bool isEnabled() const = 0;

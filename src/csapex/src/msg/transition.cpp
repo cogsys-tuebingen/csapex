@@ -64,6 +64,12 @@ void Transition::fadeConnection(ConnectionPtr connection)
     }
 }
 
+void Transition::reset()
+{
+    removeFadingConnections();
+    establishConnections();
+}
+
 void Transition::removeFadingConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);

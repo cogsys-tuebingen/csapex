@@ -97,6 +97,8 @@ void InputTransition::reset()
     }
 
     forwarded_ = false;
+
+    Transition::reset();
 }
 
 void InputTransition::connectionAdded(Connection *connection)
