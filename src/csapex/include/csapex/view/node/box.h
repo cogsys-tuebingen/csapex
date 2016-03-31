@@ -182,10 +182,6 @@ protected:
 
     QIcon icon_;
 
-    bool down_;
-    QPoint start_drag_;
-    QPoint start_drag_global_;
-
     QIcon minimize_icon_;
     QIcon maximize_icon_;
 

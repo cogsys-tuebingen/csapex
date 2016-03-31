@@ -238,7 +238,7 @@ void InputTransition::notifyMessageProcessed()
         }
 
     } else {
-        apex_assert_hard(areAllConnections(Connection::State::READ));
+        apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
         for(ConnectionPtr& c : established_connections_) {
             c->setMessageProcessed();

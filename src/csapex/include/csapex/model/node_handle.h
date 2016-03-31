@@ -119,11 +119,8 @@ public:
 
     csapex::slim_signal::Signal<void()> mightBeEnabled;
 
-
-    // TODO: get rid of
     csapex::slim_signal::Signal<void(std::function<void()>)> executionRequested;
 
-protected:
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);
 

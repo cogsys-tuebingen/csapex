@@ -19,11 +19,13 @@ class PortPanel : public QFrame
 
 public:
     enum class Type {
-        OUTPUT, INPUT, TRIGGER, SLOT_
+        OUTPUT_RELAY, INPUT_RELAY
     };
 
 public:
-    PortPanel(GraphFacadePtr graph_facade, Type type, DesignerScene *parent);
+    PortPanel(Type type, DesignerScene *parent);
+
+    void setup(GraphFacadePtr graph_facade);
 
     QString cssClass() {
         return QString("PortPanel");
@@ -31,8 +33,12 @@ public:
 
 
 Q_SIGNALS:
+    void createPortRequest(bool output, ConnectionTypeConstPtr, std::string, bool);
     void createPortAndConnectRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
     void createPortAndMoveRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
+
+    void portAdded(Port*);
+    void portRemoved(Port*);
 
 public Q_SLOTS:
     void connectorAdded(ConnectablePtr c);
@@ -40,8 +46,6 @@ public Q_SLOTS:
 private:
     void setupOutput();
     void setupInput();
-
-    void setup();
 
     void add(ConnectablePtr c);
 

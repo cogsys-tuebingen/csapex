@@ -32,8 +32,6 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *
 
     setWidget(box_);
 
-    setAcceptDrops(true);
-
     long z = 0;
 
     NodeHandle* nh = box_->getNodeHandle();

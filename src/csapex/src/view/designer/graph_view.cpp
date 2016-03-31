@@ -152,20 +152,30 @@ GraphView::~GraphView()
 
 void GraphView::setupWidgets()
 {
-    relayed_outputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::OUTPUT, scene_);
-    QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
-    QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
-    relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
+    if(graph_facade_->getParent()) {
+        relayed_outputs_widget_ = new PortPanel(PortPanel::Type::OUTPUT_RELAY, scene_);
+        QObject::connect(relayed_outputs_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+        QObject::connect(relayed_outputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+        QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+        QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+        relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
 
-    relayed_inputs_widget_ = new PortPanel(graph_facade_, PortPanel::Type::INPUT, scene_);
-    QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
-    QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
-    relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
+        relayed_outputs_widget_->setup(graph_facade_);
+
+        relayed_inputs_widget_ = new PortPanel(PortPanel::Type::INPUT_RELAY, scene_);
+        QObject::connect(relayed_inputs_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+        QObject::connect(relayed_inputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+        QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+        QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+        relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
+
+        relayed_inputs_widget_->setup(graph_facade_);
+    }
 }
 
 void GraphView::paintEvent(QPaintEvent *e)
 {
-    if(!scene_->isEmpty()) {
+    if(!scene_->isEmpty() && graph_facade_->getParent()) {
         QPointF tl_view = mapToScene(QPoint(0, 0));
         QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
 
@@ -199,6 +209,8 @@ void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
         Graph* graph = graph_facade_->getGraph();
 
         QString debug_info =  QString::fromStdString(graph->makeStatusString());
+
+        debug_info += QString::fromStdString(scene_->makeStatusString());
 
         QFont font;
         font.setPixelSize(12);
@@ -669,8 +681,8 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
         box = new NodeBox(settings_, node_handle, node_worker, icon, this);
     }
 
-    QObject::connect(box, SIGNAL(portAdded(Port*)), this, SLOT(addPort(Port*)));
-    QObject::connect(box, SIGNAL(portRemoved(Port*)), this, SLOT(removePort(Port*)));
+    QObject::connect(box, &NodeBox::portAdded, this, &GraphView::addPort);
+    QObject::connect(box, &NodeBox::portRemoved, this, &GraphView::removePort);
 
     NodeAdapter::Ptr adapter = node_adapter_factory_.makeNodeAdapter(node_handle, box);
     adapter->executeCommand.connect(delegate::Delegate<void(CommandPtr)>(dispatcher_, &CommandDispatcher::execute));
@@ -814,6 +826,8 @@ void GraphView::addBox(NodeBox *box)
     worker_connections_[worker].emplace_back(handle->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
     worker_connections_[worker].emplace_back(handle->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
+    worker_connections_[worker].emplace_back(graph->internalConnectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
+
     worker_connections_[worker].emplace_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
@@ -865,6 +879,19 @@ void GraphView::removeBox(NodeBox *box)
         setCacheMode(QGraphicsView::CacheNone);
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
+    }
+}
+
+
+void GraphView::createPort(bool output, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+{
+    Graph* graph = graph_facade_->getGraph();
+    if(output) {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
+    } else {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
     }
 }
 
@@ -980,7 +1007,7 @@ void GraphView::startProfiling(NodeWorker *node)
     prof->show();
 
 
-    foreach (QGraphicsItem *item, items()) {
+    for (QGraphicsItem *item : items()) {
         item->setFlag(QGraphicsItem::ItemIsMovable);
         item->setFlag(QGraphicsItem::ItemIsSelectable);
         item->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
@@ -988,7 +1015,7 @@ void GraphView::startProfiling(NodeWorker *node)
     }
 
     MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
-    QObject::connect(proxy, SIGNAL(moving(double,double)), prof, SLOT(reposition(double,double)));
+    QObject::connect(proxy, &MovableGraphicsProxyWidget::moving, prof, &ProfilingWidget::reposition);
 
     auto nw = box->getNodeWorker();
 
@@ -1048,8 +1075,10 @@ void GraphView::overwriteStyleSheet(const QString &stylesheet)
         box->updateVisuals();
     }
 
-    relayed_outputs_widget_->setStyleSheet(stylesheet);
-    relayed_inputs_widget_->setStyleSheet(stylesheet);
+    if(graph_facade_->getParent()) {
+        relayed_outputs_widget_->setStyleSheet(stylesheet);
+        relayed_inputs_widget_->setStyleSheet(stylesheet);
+    }
 }
 
 void GraphView::updateBoxInformation()

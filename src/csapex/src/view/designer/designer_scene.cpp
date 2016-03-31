@@ -693,7 +693,6 @@ void DesignerScene::previewConnection(Connectable *from, Connectable *to)
     if(from->isVirtual() || to->isVirtual()) {
         return;
     }
-
     addTemporaryConnection(from, to);
     update();
 }
@@ -1224,5 +1223,22 @@ void DesignerScene::refresh()
 {
     invalidateSchema();
 }
+
+std::string DesignerScene::makeStatusString() const
+{
+    std::stringstream ss;
+    ss << "Temporary connections: " << temp_.size() << '\n';
+    if(!temp_.empty()) {
+        for(const TempConnection& c : temp_) {
+            if(c.is_connected) {
+                ss << " - " << c.from->getUUID() << " => " << c.to_c->getUUID() << '\n';
+            } else {
+                ss << " - " << c.from->getUUID() << " => [" << c.to_p.x() << ", " << c.to_p.y() << "]\n";
+            }
+        }
+    }
+    return ss.str();
+}
+
 /// MOC
 #include "../../../include/csapex/view/designer/moc_designer_scene.cpp"

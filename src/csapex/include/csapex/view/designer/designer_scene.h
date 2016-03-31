@@ -46,9 +46,7 @@ public:
     void addPort(Port* port);
     void removePort(Port* port);
 
-Q_SIGNALS:
-    void eventConnectionAdded(Connection*);
-    void evetnConnectionDeleted(Connection*);
+    std::string makeStatusString() const;
 
 public Q_SLOTS:
     void fulcrumAdded(Fulcrum *f);

@@ -63,7 +63,7 @@ void Connection::setMessageProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
-        apex_assert_hard(state_ == State::READ);
+        apex_assert_hard(state_ == State::READ || state_ == State::NOT_INITIALIZED);
         setState(State::DONE);
     }
     Output* o = dynamic_cast<Output*>(from_);
@@ -74,13 +74,15 @@ void Connection::setMessageProcessed()
 
 void Connection::setMessage(const ConnectionTypeConstPtr &msg)
 {
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(isSinkEnabled());
-    apex_assert_hard(msg != nullptr);
-    apex_assert_hard(state_ == State::NOT_INITIALIZED);
+    {
+        std::unique_lock<std::recursive_mutex> lock(sync);
+        apex_assert_hard(isSinkEnabled());
+        apex_assert_hard(msg != nullptr);
+        apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
-    message_ = msg;
-    setState(State::UNREAD);
+        message_ = msg;
+        setState(State::UNREAD);
+    }
 
     notifyMessageSet();
 }

@@ -143,6 +143,9 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
             DesignerScene* scene = src->designerScene();
             scene->deleteTemporaryConnections();
             scene->addTemporaryConnection(c, src->mapToScene(e->pos()));
+        } else {
+            DesignerScene* scene = src->designerScene();
+            scene->update();
         }
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {

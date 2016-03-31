@@ -22,11 +22,10 @@
 #include <csapex/model/graph_facade.h>
 
 /// SYSTEM
-#include <QDragMoveEvent>
-#include <QGraphicsSceneDragDropEvent>
 #include <QMenu>
 #include <QTimer>
 #include <QPainter>
+#include <QContextMenuEvent>
 #include <iostream>
 #include <QSizeGrip>
 #include <QThread>
@@ -39,7 +38,7 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, QIcon icon, GraphView* parent)
     : parent_(parent), ui(new Ui::Box), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(nullptr), icon_(icon),
-      down_(false), info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), initialized_(false)
+      info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), initialized_(false)
 {
     handle->getNodeState()->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this));
     handle->getNodeState()->minimized_changed->connect(std::bind(&NodeBox::triggerMinimized, this));

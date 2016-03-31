@@ -3,19 +3,52 @@
 
 /// COMPONENT
 #include <csapex/model/connectable.h>
+#include <csapex/msg/any_message.h>
 
 /// SYSTEM
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <iostream>
+#include <QMenu>
+#include <QInputDialog>
+#include <QApplication>
 
 using namespace csapex;
 
-MetaPort::MetaPort(QWidget *parent)
-    : Port(parent)
+MetaPort::MetaPort(bool output, QWidget *parent)
+    : Port(parent), output_(output)
 {
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
+    QObject::connect(this, &MetaPort::customContextMenuRequested, this, &MetaPort::showContextMenu);
 }
 
+void MetaPort::showContextMenu(const QPoint& pos)
+{
+    QMenu menu("Port");
+
+    QString type = output_ ? "output" : "input";
+    QAction add_port(QString("Add new ") + type, &menu);
+    QObject::connect(&add_port, &QAction::triggered, this, &MetaPort::triggerCreatePort);
+    menu.addAction(&add_port);
+
+    menu.exec(QCursor::pos());
+}
+
+void MetaPort::triggerCreatePort()
+{
+    bool ok = false;
+    QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label",
+                                         QLineEdit::Normal, "", &ok);
+    if(!ok) {
+        return;
+    }
+
+    bool optional = true;
+
+    ConnectionTypePtr type(new connection_types::AnyMessage);
+    Q_EMIT createPortRequest(output_, type, label.toStdString(), optional);
+}
 
 void MetaPort::dragEnterEvent(QDragEnterEvent* e)
 {

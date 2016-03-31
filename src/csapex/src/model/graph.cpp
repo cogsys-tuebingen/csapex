@@ -739,6 +739,8 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
     relay->setType(type);
     relay->setLabel(label);
 
+    relay->connectionInProgress.connect(internalConnectionInProgress);
+
     transition_relay_out_->addOutput(relay);
 
     forward_inputs_[external_input.get()] = relay;
@@ -785,12 +787,15 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
     external_output->setLabel(label);
     external_output->setType(type);
 
+
     node_handle_->addOutput(external_output);
 
     InputPtr relay = std::make_shared<Input>(internal_uuid);
     relay->setType(type);
     relay->setLabel(label);
     relay->setOptional(true);
+
+    relay->connectionInProgress.connect(internalConnectionInProgress);
 
     forward_outputs_[external_output.get()] = relay;
 
@@ -934,10 +939,10 @@ std::string Graph::makeStatusString() const
         switch(c->getState()) {
         case Connection::State::DONE:
 //        case Connection::State::NOT_INITIALIZED:
-            ss << "DONE / NOT_INITIALIZED";
+            ss << "DONE  ";
             break;
         case Connection::State::READ:
-            ss << "READ";
+            ss << "READ  ";
             break;
         case Connection::State::UNREAD:
             ss << "UNREAD";

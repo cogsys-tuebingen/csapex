@@ -144,6 +144,8 @@ public:
     csapex::slim_signal::Signal<void(ConnectablePtr)> forwardingAdded;
     csapex::slim_signal::Signal<void(ConnectablePtr)> forwardingRemoved;
 
+    csapex::slim_signal::Signal<void(Connectable*,Connectable*)> internalConnectionInProgress;
+
 protected:
     std::vector<NodeHandlePtr> nodes_;
     std::map<NodeHandle*, int> node_component_;

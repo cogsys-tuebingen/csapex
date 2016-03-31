@@ -311,8 +311,8 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 
         if(from->canConnectTo(adaptee.get(), false)) {
             if(adaptee->canConnectTo(from, false)) {
+                adaptee->connectionInProgress(adaptee.get(), from);
                 e->acceptProposedAction();
-                Q_EMIT(adaptee->connectionInProgress(adaptee.get(), from));
             }
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
