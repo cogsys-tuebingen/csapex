@@ -169,6 +169,11 @@ void Graph::deleteNode(const UUID& uuid)
     apex_assert_hard(removed);
 
     if(removed) {
+        if(NodePtr node = removed->getNode().lock()) {
+            if(GraphPtr child = std::dynamic_pointer_cast<Graph>(node)) {
+                child->clear();
+            }
+        }
         nodeRemoved(removed);
         buildConnectedComponents();
     }
