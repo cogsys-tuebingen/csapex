@@ -37,6 +37,7 @@ MessagePreviewWidget::MessagePreviewWidget()
     input_ = std::make_shared<impl::PreviewInput>(this);
     setScene(new QGraphicsScene);
 
+    setWindowFlags( windowFlags() | Qt::FramelessWindowHint );
 
     scene()->setBackgroundBrush(QBrush());
 

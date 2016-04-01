@@ -524,13 +524,11 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             }
         }
 
-        QPointF preview_pos = e->scenePos();
-        preview_pos.setY(preview_pos.y() + 50);
+        QPointF preview_pos = QCursor::pos() + QPointF(20, 20);
 
         if(!preview_) {
             preview_ = new MessagePreviewWidget;
             preview_->hide();
-            addWidget(preview_);
         }
 
         preview_->setWindowTitle(QString::fromStdString("Output"));

@@ -1519,8 +1519,7 @@ void GraphView::selectAll()
 
 void GraphView::showPreview(Port* port)
 {
-    QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
-    pos.setY(pos.y() + 50);
+    QPointF pos = QCursor::pos() + QPointF(20, 20);
 
     if(!preview_widget_) {
         preview_widget_ = new MessagePreviewWidget;
@@ -1532,7 +1531,6 @@ void GraphView::showPreview(Port* port)
 
     if(!preview_widget_->isConnected()) {
         preview_widget_->connectTo(port->getAdaptee().lock().get());
-        designerScene()->addWidget(preview_widget_);
     }
 }
 
