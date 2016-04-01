@@ -186,4 +186,5 @@ csapex--GraphView  {
         qproperty-lineColorBlocked: rgb(255,200,0);
         qproperty-lineColorDisabled: rgb(200,200,200);
         qproperty-lineWidth: 5;
+        qproperty-balloonColor: rgb(90, 135, 80);
 }

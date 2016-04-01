@@ -40,7 +40,7 @@
 
 using namespace csapex;
 
-const float DesignerScene::ARROW_LENGTH = 3.0f;
+const float DesignerScene::ARROW_LENGTH = 1.5f;
 
 namespace {
 QRgb id2rgb(int id, int subsection)
@@ -1053,6 +1053,8 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     painter->setPen(QPen(painter->brush(), 1.0));
     painter->drawPath(arrow_path);
 
+    bounding_boxes.push_back(arrow_path.boundingRect());
+
     if(draw_schema_) {
         painter->setBrush(QBrush());
         for(auto r: bounding_boxes) {
@@ -1098,8 +1100,22 @@ Port* DesignerScene::getPort(Connectable *c)
 
 void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
 {
-    // reset brush if it is set
-    painter->setBrush(QBrush());
+    auto* item = itemAt(centerPoint(p), QTransform());
+    if(!item || item->type() != QGraphicsProxyWidget::Type) {
+        return;
+    }
+
+    QGraphicsProxyWidget* proxy = static_cast<QGraphicsProxyWidget*>(item);
+    QWidget* widget = proxy->widget();
+    if(!widget) {
+        return;
+    }
+    QPointF pt = proxy->mapFromScene(centerPoint(p));
+    QWidget* child = widget->childAt(pt.toPoint());
+
+    if(dynamic_cast<Port*>(child) != p) {
+        return;
+    }
 
     ConnectablePtr c = p->getAdaptee().lock();
     if(!c) {
@@ -1109,11 +1125,13 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
     bool is_message = (dynamic_cast<Slot*>(c.get()) == nullptr && dynamic_cast<Trigger*>(c.get()) == nullptr);
 
     if(!p->isMinimizedSize()) {
-        int font_size = debug_ ? 12 : 10;
-        int lines = 2;
+        int font_size = debug_ ? 10 : 8;
+        int lines = 1;
 
-        QFont font;
-        font.setPixelSize(font_size);
+
+        painter->save();
+
+        QFont font("Ubuntu Condensed, Liberation Sans, FreeSans, Arial", font_size, QFont::Light);
         painter->setFont(font);
 
         QString text;
@@ -1133,7 +1151,7 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
                     if(text.length() != 0) {
                         text += "\n";
                     }
-                    text += descr + " "; // TODO: why does the space somehow fix the qt render error???
+                    text += descr;
                     ++lines;
                 }
             }
@@ -1142,28 +1160,93 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
 
         QFontMetrics metrics(font);
 
-        int dx = 160;
-        int dy = lines * metrics.height();
+        QRectF rect = metrics.boundingRect(rect.toRect(), Qt::AlignLeft | Qt::AlignTop, text);
+        rect.translate(centerPoint(p));
 
-        QPointF pos = centerPoint(p);
-        QRectF rect;
+        int dx = rect.width();
+        int dy = rect.height();
+
         QTextOption opt;
+        opt.setUseDesignMetrics(true);
+        opt.setWrapMode(QTextOption::WrapAnywhere);
+
+        enum class Direction {
+            UP, RIGHT, DOWN, LEFT
+        };;
+
+        Direction dir = Direction::LEFT;
+
         if(is_message) {
-            bool right = c->isOutput() ^ p->isFlipped();
-            rect = QRectF(pos + QPointF(right ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0), QSize(dx, dy));
-            opt = QTextOption(Qt::AlignVCenter | (right ? Qt::AlignLeft : Qt::AlignRight));
+            dir = (c->isOutput() ^ p->isFlipped()) ? Direction::LEFT : Direction::RIGHT;
+            rect.translate((dir == Direction::LEFT) ? 2*connector_radius_ : -2*connector_radius_-dx, -dy / 2.0);
+            opt = QTextOption(Qt::AlignVCenter | ((dir == Direction::LEFT) ? Qt::AlignLeft : Qt::AlignRight));
         } else {
-            bool bottom = c->isOutput();
-            rect = QRectF(pos + QPointF(-dx/2.0, bottom ? connector_radius_ : -connector_radius_-dy), QSize(dx, dy));
-            opt = QTextOption(Qt::AlignHCenter);
+            dir = c->isOutput() ? Direction::UP : Direction::DOWN;
+            auto distance = connector_radius_ + 3;
+            rect.translate(-dx/2.0, (dir == Direction::UP) ? distance : -distance-dy);
         }
 
-        QColor color = style_->lineColor();
-        QPen p = painter->pen();
-        p.setColor(color.dark());
-        painter->setPen(p);
-        //        painter->drawRect(rect);
+        // drawing
+        QColor box_color = style_->balloonColor();
+        QColor text_color = style_->lineColor();
+
+        if(p->isHovered()) {
+            box_color.setAlphaF(0.8);
+        } else {
+            box_color.setAlphaF(box->isSelected() ? 0.4 : 0.1);
+        }
+
+        // draw box
+        QPainterPath path;
+
+        QPointF tl = rect.topLeft() + QPointF(-2, 0);
+        QPointF bl = rect.bottomLeft() + QPointF(-2, 0);
+        QPointF tr = rect.topRight() + QPointF(2, 0);
+        QPointF br = rect.bottomRight() + QPointF(2, 0);
+
+        double corner = 5.0;
+        QSizeF corner_size(corner * 2, corner * 2);
+        QPointF offset_x(corner, 0);
+        QPointF offset_y(0, corner);
+
+        QPointF port_center = centerPoint(p);
+
+        auto drawSide = [&port_center, &path, &offset_x, &offset_y]
+                (const Direction& dir, const Direction& side,
+                const QPointF& start, const QPointF& end, const QPointF& end_offset)
+        {
+            QPointF real_end = end + end_offset;
+            if(dir == side) {
+                QPointF cp = 0.5 * (start + end);
+                path.cubicTo(cp, port_center, port_center);
+                path.cubicTo(port_center, cp, real_end);
+            } else {
+                path.lineTo(real_end);
+            }
+        };
+
+        path.moveTo(tl + offset_x);
+        path.arcTo(QRectF(tl, corner_size), 90.0, 90.0);
+        drawSide(dir, Direction::LEFT, tl, bl, -offset_y);
+        path.arcTo(QRectF(bl - 2*offset_y, corner_size), 180.0, 90.0);
+        drawSide(dir, Direction::DOWN, bl, br, -offset_x);
+        path.arcTo(QRectF(br - 2* offset_x - 2*offset_y, corner_size), -90.0, 90.0);
+        drawSide(dir, Direction::RIGHT, br, tr, offset_y);
+        path.arcTo(QRectF(tr - 2* offset_x, corner_size), 0.0, 90.0);
+        drawSide(dir, Direction::UP, tr, tl, offset_x);
+
+        painter->setBrush(QBrush(box_color));
+        painter->setPen(QPen(box_color.dark()));
+        painter->drawPath(path);
+
+        // draw text
+        QPen pen = painter->pen();
+        pen.setColor(text_color.dark());
+        painter->setBrush(QBrush());
+        painter->setPen(pen);
         painter->drawText(rect, text, opt);
+
+        painter->restore();
     }
 }
 

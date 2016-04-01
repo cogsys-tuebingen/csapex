@@ -98,6 +98,9 @@
          <enum>QFrame::NoFrame</enum>
         </property>
         <layout class="QVBoxLayout" name="output_layout">
+         <property name="spacing">
+          <number>12</number>
+         </property>
          <property name="sizeConstraint">
           <enum>QLayout::SetDefaultConstraint</enum>
          </property>

@@ -32,17 +32,21 @@ class GraphView : public QGraphicsView
     Q_PROPERTY(QColor lineColorDisabled READ lineColorDisabled WRITE setLineColorDisabled)
     Q_PROPERTY(int lineWidth            READ lineWidth         WRITE setLineWidth)
 
+    Q_PROPERTY(QColor balloonColor         READ balloonColor         WRITE setBalloonColor)
+
     void setLineColor(const QColor& c) { style_->setLineColor(c); }
     void setLineColorError(const QColor& c) { style_->setLineColorError(c); }
     void setLineColorBlocked(const QColor& c) { style_->setLineColorBlocked(c); }
     void setLineColorDisabled(const QColor& c) { style_->setLineColorDisabled(c);}
     void setLineWidth(int width) { style_->setLineWidth(width); }
+    void setBalloonColor(const QColor& c) { style_->setBalloonColor(c); }
 
     QColor lineColor() const { return style_->lineColor(); }
     QColor lineColorError() const { return style_->lineColorError(); }
     QColor lineColorBlocked() const { return style_->lineColorBlocked(); }
     QColor lineColorDisabled() const { return style_->lineColorDisabled();}
     int lineWidth() const { return style_->lineWidth(); }
+    QColor balloonColor() const { return style_->balloonColor(); }
 
 public:
     GraphView(DesignerScene* scene, csapex::GraphFacadePtr graph,

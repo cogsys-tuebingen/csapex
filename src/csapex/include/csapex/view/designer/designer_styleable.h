@@ -29,6 +29,10 @@ public:
     {
         return line_width_;
     }
+    QColor balloonColor() const
+    {
+        return balloon_color_;
+    }
 
     void setLineColor(const QColor& c)
     {
@@ -50,6 +54,10 @@ public:
     {
         line_width_ = width;
     }
+    void setBalloonColor(const QColor& c)
+    {
+        balloon_color_ = c;
+    }
 
 protected:
     // CSS settable
@@ -58,6 +66,8 @@ protected:
     QColor line_blocked_color_;
     QColor line_disabled_color_;
     int line_width_;
+
+    QColor balloon_color_;
 };
 }
 

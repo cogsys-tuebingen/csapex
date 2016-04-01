@@ -97,6 +97,7 @@ public:
     void moveEvent(QMoveEvent*);
     void triggerPlaced();
 
+    bool isSelected() const;
     virtual void setSelected(bool selected);
 
     void keyPressEvent(QKeyEvent * e);

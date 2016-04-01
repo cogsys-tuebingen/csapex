@@ -608,6 +608,11 @@ void NodeBox::triggerPlaced()
     nh->getNodeState()->setPos(p);
 }
 
+bool NodeBox::isSelected() const
+{
+    return property("focused").toBool();
+}
+
 void NodeBox::setSelected(bool selected)
 {
     setProperty("focused",selected);

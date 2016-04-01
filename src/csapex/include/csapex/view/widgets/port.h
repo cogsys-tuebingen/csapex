@@ -30,6 +30,7 @@ public:
 
     bool isMinimizedSize() const;
     bool isFlipped() const;
+    bool isHovered() const;
 
     void setPortProperty(const std::string& name, bool b);
 
@@ -81,6 +82,8 @@ protected:
     bool refresh_style_sheet_;
     bool minimized_;
     bool flipped_;
+
+    bool hovered_;
 
     Qt::MouseButtons buttons_down_;
 

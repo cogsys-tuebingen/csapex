@@ -27,7 +27,8 @@ using namespace csapex;
 
 Port::Port(QWidget *parent)
     : QFrame(parent),
-      refresh_style_sheet_(false), minimized_(false), flipped_(false), buttons_down_(0)
+      refresh_style_sheet_(false), minimized_(false), flipped_(false), hovered_(false),
+      buttons_down_(0)
 {
     setFlipped(flipped_);
 
@@ -182,6 +183,11 @@ void Port::setFlipped(bool flipped)
 bool Port::isFlipped() const
 {
     return flipped_;
+}
+
+bool Port::isHovered() const
+{
+    return hovered_;
 }
 
 void Port::setEnabledFlag(bool enabled)
@@ -364,11 +370,13 @@ void Port::dropEvent(QDropEvent* e)
 
 void Port::enterEvent(QEvent */*e*/)
 {
+    hovered_ = true;
     Q_EMIT mouseOver(this);
 }
 
 void Port::leaveEvent(QEvent */*e*/)
 {
+    hovered_ = false;
     Q_EMIT mouseOut(this);
 }
 

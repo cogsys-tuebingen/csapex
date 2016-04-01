@@ -281,8 +281,6 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
 void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
                         NodeStatePtr state)
 {
-    std::cerr << "add node " << type << " @ " << pos.x() << ", " << pos.y() << " w/ state "  << state.get() << std::endl;
-
     GraphFacade* gf = src->getGraphFacade();
     Graph* graph = gf->getGraph();
     UUID uuid = graph->generateUUID(type);
