@@ -95,6 +95,7 @@ void NodeModifier::setProcessingEnabled(bool enabled)
     }
 }
 
+
 bool NodeModifier::isError() const
 {
     if(!node_worker_) {

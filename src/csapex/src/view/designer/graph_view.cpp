@@ -272,7 +272,6 @@ void GraphView::reset()
 
     box_map_.clear();
     proxy_map_.clear();
-    port_map_.clear();
 
     setupWidgets();
 
@@ -736,6 +735,10 @@ void GraphView::connectorCreated(ConnectablePtr connector)
 
 void GraphView::connectorRemoved(ConnectablePtr connector)
 {
+    UUID parent_uuid = connector->getUUID().parentUUID();
+    NodeBox* box = getBox(parent_uuid);
+
+    box->removePort(connector);
 }
 
 

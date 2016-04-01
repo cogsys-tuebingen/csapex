@@ -666,6 +666,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     }
 
     event->accept();
+    closed();
 }
 
 void CsApexWindow::showStatusMessage(const std::string &msg)

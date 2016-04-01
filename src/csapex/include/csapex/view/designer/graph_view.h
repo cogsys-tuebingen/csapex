@@ -219,7 +219,6 @@ private:
 
     std::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;
     std::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher> proxy_map_;
-    std::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
 
     MessagePreviewWidget* preview_widget_;
 };

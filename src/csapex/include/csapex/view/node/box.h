@@ -65,6 +65,7 @@ public:
 
     /// MODIFIER
     Port* createPort(ConnectableWeakPtr connector, QBoxLayout *layout);
+    void removePort(ConnectableWeakPtr connector);
 
     /// ACCESSORS
     Node* getNode() const;
@@ -136,6 +137,10 @@ public Q_SLOTS:
 
     void updateVisuals();
 
+    void createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional);
+    void createVariadicPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
+    void createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
+
 Q_SIGNALS:
     void toggled(bool);
     void flipped(bool);
@@ -180,6 +185,8 @@ protected:
     NodeHandleWeakPtr node_handle_;
     NodeWorkerWeakPtr node_worker_;
     NodeAdapterPtr adapter_;
+
+    std::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
 
     QIcon icon_;
 

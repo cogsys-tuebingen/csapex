@@ -69,11 +69,13 @@ Point NodeState::getPos() const
     return pos_;
 }
 
-void NodeState::setPos(const Point &value)
+void NodeState::setPos(const Point &value, bool quiet)
 {
     if(pos_ != value) {
         pos_ = value;
-        (*pos_changed)();
+        if(!quiet) {
+            (*pos_changed)();
+        }
     }
 }
 

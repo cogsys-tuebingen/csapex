@@ -223,6 +223,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         CsApexWindow w(*core, &dispatcher, root, thread_pool, designer, minimap, legend, timeline, plugin_locator);
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
+        app->connect(&w, &CsApexWindow::closed, app.get(), &QCoreApplication::quit);
+
         csapex::error_handling::stop_request().connect([this](){
             static int request = 0;
             if(request++ < 3) {

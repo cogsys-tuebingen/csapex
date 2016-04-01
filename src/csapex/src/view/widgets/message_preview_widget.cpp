@@ -20,7 +20,7 @@ PreviewInput::PreviewInput(MessagePreviewWidget *parent)
       parent_(parent)
 {
     setType(std::make_shared<connection_types::AnyMessage>());
-}
+    }
 
 void PreviewInput::inputMessage(ConnectionType::ConstPtr message)
 {

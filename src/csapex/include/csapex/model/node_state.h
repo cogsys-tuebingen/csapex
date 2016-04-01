@@ -30,7 +30,7 @@ public:
 
 public:
     Point getPos() const;
-    void setPos(const Point &value);
+    void setPos(const Point &value, bool quiet = false);
     Signal pos_changed;
 
     long getZ() const;

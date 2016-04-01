@@ -95,6 +95,9 @@ public:
     bool isSink() const override;
     void setIsSink(bool sink) override;
 
+    virtual bool hasVariadicInputs() const override;
+    virtual void setVariadicInputs(bool variadic) override;
+
     void triggerNodeStateChanged();
 
     UUIDProvider* getUUIDProvider();
@@ -172,6 +175,8 @@ private:
 
     bool source_;
     bool sink_;
+
+    bool has_variadic_inputs_;
 };
 
 }

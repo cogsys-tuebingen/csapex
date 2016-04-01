@@ -20,6 +20,7 @@
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/view/widgets/meta_port.h>
 
 /// SYSTEM
 #include <QMenu>
@@ -96,11 +97,22 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_error);
     }
 
-
     setupUiAgain();
+
+    if(NodeHandlePtr nh = node_handle_.lock()) {
+        if(nh->hasVariadicInputs()) {
+            MetaPort* meta_port = new MetaPort(false);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            ui->input_panel->layout()->addWidget(meta_port);
+        }
+    }
 
     Q_EMIT changed(this);
 }
+
+
 
 void NodeBox::setupUiAgain()
 {
@@ -179,6 +191,30 @@ void NodeBox::construct()
 
     installEventFilter(this);
 }
+
+
+void NodeBox::createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+{
+    if(NodeHandlePtr nh = node_handle_.lock()) {
+        apex_assert_hard(nh->hasVariadicInputs());
+        std::abort();
+    }
+}
+
+void NodeBox::createVariadicPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+{
+    if(NodeHandlePtr nh = node_handle_.lock()) {
+        apex_assert_hard(nh->hasVariadicInputs());
+    }
+}
+
+void NodeBox::createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+{
+    if(NodeHandlePtr nh = node_handle_.lock()) {
+        apex_assert_hard(nh->hasVariadicInputs());
+    }
+}
+
 
 Node* NodeBox::getNode() const
 {
@@ -446,17 +482,50 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
     QObject::connect(this, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
 
     ConnectablePtr adaptee = port->getAdaptee().lock();
-    if(adaptee) {
+    apex_assert_hard(adaptee == connector.lock());
+
+    NodeHandlePtr nh = node_handle_.lock();
+    if(nh->hasVariadicInputs() && layout == ui->input_panel->layout()) {
+        std::vector<MetaPort*> metas;
+        for(int i = 0; i < layout->count();) {
+            MetaPort* meta = dynamic_cast<MetaPort*>(layout->itemAt(i)->widget());
+            if(meta) {
+                metas.push_back(meta);
+                layout->removeWidget(meta);
+            } else {
+                ++i;
+            }
+        }
+
+        layout->addWidget(port);
+
+        for(MetaPort* meta : metas) {
+            layout->addWidget(meta);
+        }
+    } else {
         layout->addWidget(port);
     }
 
-    QObject::connect(port, &Port::destroyed, [this, port](QObject* o) {
-        portRemoved(port);
-    });
+    port_map_[adaptee->getUUID()] = port;
 
     portAdded(port);
 
     return port;
+}
+
+void NodeBox::removePort(ConnectableWeakPtr connector)
+{
+    ConnectablePtr adaptee = connector.lock();
+    apex_assert_hard(adaptee);
+
+    Port* port = port_map_.at(adaptee->getUUID());
+    if(port) {
+        port->deleteLater();
+    }
+
+    port_map_.erase(adaptee->getUUID());
+
+    portRemoved(port);
 }
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)

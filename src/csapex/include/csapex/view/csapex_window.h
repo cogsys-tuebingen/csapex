@@ -93,6 +93,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void statusChanged(const QString& status);
+    void closed();
 
 private:
     void construct();
