@@ -1,6 +1,7 @@
 /// HEADER
 #include <csapex/param/parameter.h>
 
+/// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <cxxabi.h>
 #include <iostream>
@@ -151,6 +152,12 @@ void Parameter::deserialize(const YAML::Node &n)
         std::cerr << "cannot deserialize parameter " << name() << ": " << e.what() << std::endl;
         throw e;
     }
+}
+
+Parameter& Parameter::operator = (const Parameter& p)
+{
+    setValueFrom(p);
+    return *this;
 }
 
 void Parameter::setValueFrom(const Parameter &other)

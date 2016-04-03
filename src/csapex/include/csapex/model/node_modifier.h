@@ -220,9 +220,6 @@ public:
     bool isProcessingEnabled() const;
     void setProcessingEnabled(bool enabled);
 
-    virtual bool hasVariadicInputs() const = 0;
-    virtual void setVariadicInputs(bool variadic) = 0;
-
     bool isError() const;
     void setNoError();
     void setError(const std::string& msg);

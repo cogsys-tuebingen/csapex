@@ -95,6 +95,7 @@ void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh)
 
     if(nh->getType() == "csapex::Graph") {
         auto pos = children_.find(nh->getUUID());
+        apex_assert_hard(pos != children_.end());
         childRemoved(pos->second);
         children_.erase(pos);
     }

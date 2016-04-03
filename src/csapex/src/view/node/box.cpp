@@ -5,8 +5,10 @@
 #include "ui_box.h"
 #include <csapex/model/node.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/command/add_msg_connection.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/model/variadic_io.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
@@ -99,14 +101,12 @@ void NodeBox::setupUi()
 
     setupUiAgain();
 
-    if(NodeHandlePtr nh = node_handle_.lock()) {
-        if(nh->hasVariadicInputs()) {
-            MetaPort* meta_port = new MetaPort(false);
-            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
-            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
-            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
-            ui->input_panel->layout()->addWidget(meta_port);
-        }
+    if(dynamic_cast<VariadicInputs*>(getNode())) {
+        MetaPort* meta_port = new MetaPort(false);
+        QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
+        QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
+        QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+        ui->input_panel->layout()->addWidget(meta_port);
     }
 
     Q_EMIT changed(this);
@@ -195,23 +195,37 @@ void NodeBox::construct()
 
 void NodeBox::createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
-    if(NodeHandlePtr nh = node_handle_.lock()) {
-        apex_assert_hard(nh->hasVariadicInputs());
-        std::abort();
+    if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
+        // TODO: command!
+        vi->createVariadicPort(output, type, label, optional);
     }
 }
 
 void NodeBox::createVariadicPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
-    if(NodeHandlePtr nh = node_handle_.lock()) {
-        apex_assert_hard(nh->hasVariadicInputs());
+    if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
+        // TODO: command!
+        Connectable* new_port = vi->createVariadicPort(!from->isOutput(), type, label, optional);
+
+        GraphFacade* graph_facade = getGraphView()->getGraphFacade();
+        AUUID graph_uuid = graph_facade->getGraph()->getUUID().getAbsoluteUUID();
+
+        Command::Ptr cmd;
+        if(from->isOutput()) {
+            cmd.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), new_port->getUUID()));
+        } else {
+            cmd.reset(new command::AddMessageConnection(graph_uuid, new_port->getUUID(), from->getUUID()));
+        }
+
+        executeCommand(cmd);
     }
 }
 
 void NodeBox::createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
-    if(NodeHandlePtr nh = node_handle_.lock()) {
-        apex_assert_hard(nh->hasVariadicInputs());
+    if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
+        // TODO: command!
+        vi->createVariadicPort(!from->isOutput(), type, label, optional);
     }
 }
 
@@ -484,8 +498,7 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
     ConnectablePtr adaptee = port->getAdaptee().lock();
     apex_assert_hard(adaptee == connector.lock());
 
-    NodeHandlePtr nh = node_handle_.lock();
-    if(nh->hasVariadicInputs() && layout == ui->input_panel->layout()) {
+    if(dynamic_cast<VariadicInputs*>(getNode()) && layout == ui->input_panel->layout()) {
         std::vector<MetaPort*> metas;
         for(int i = 0; i < layout->count();) {
             MetaPort* meta = dynamic_cast<MetaPort*>(layout->itemAt(i)->widget());

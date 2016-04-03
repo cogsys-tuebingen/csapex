@@ -36,7 +36,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
       uuid_provider_(uuid_provider),
       level_(0),
-      source_(false), sink_(false), has_variadic_inputs_(false)
+      source_(false), sink_(false)
 {
     node_->initialize(this, uuid);
 
@@ -573,15 +573,6 @@ bool NodeHandle::isParameterInput(Input *in) const
 bool NodeHandle::isParameterOutput(Output *out) const
 {
     return output_2_param_.find(out) != output_2_param_.end();
-}
-
-bool NodeHandle::hasVariadicInputs() const
-{
-    return has_variadic_inputs_;
-}
-void NodeHandle::setVariadicInputs(bool variadic)
-{
-    has_variadic_inputs_ = variadic;
 }
 
 void NodeHandle::addSlot(SlotPtr s)

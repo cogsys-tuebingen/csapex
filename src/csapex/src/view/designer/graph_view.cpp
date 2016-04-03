@@ -679,6 +679,8 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
         box = new NodeBox(settings_, node_handle, node_worker, icon, this);
     }
 
+    box->executeCommand.connect(delegate::Delegate<void(CommandPtr)>(dispatcher_, &CommandDispatcher::execute));
+
     QObject::connect(box, &NodeBox::portAdded, this, &GraphView::addPort);
     QObject::connect(box, &NodeBox::portRemoved, this, &GraphView::removePort);
 
@@ -887,6 +889,7 @@ void GraphView::removeBox(NodeBox *box)
 
 void GraphView::createPort(bool output, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
+    // TODO: move to graph! make graph derive from variadic io!
     Graph* graph = graph_facade_->getGraph();
     if(output) {
         // TODO: command!

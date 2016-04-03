@@ -231,6 +231,7 @@ add_library(csapex SHARED
     src/model/tickable_node.cpp
     src/model/tag.cpp
     src/model/unique.cpp
+    src/model/variadic_io.cpp
 
     src/nodes/note.cpp
 

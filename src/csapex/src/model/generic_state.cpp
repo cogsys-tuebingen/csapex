@@ -76,7 +76,7 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
         if(legacy_pos == legacy.end()) {
             throw std::logic_error(std::string("a parameter with the name ") + param->name() + " has already been added.");
         }
-        param->setValueFrom(*param_pos->second);
+        *param = *param_pos->second;
     }
     registerParameter(param);
 
@@ -143,7 +143,7 @@ void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &pa
                                      "of an existing parameter '" + name + "'");
         }
         param::Parameter::Ptr p = param_pos->second;
-        entry->setValueFrom(*p);
+        *entry = *p;
         removeParameter(p);
     }
     temporary[entry->name()] = true;

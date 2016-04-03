@@ -123,6 +123,8 @@ public:
         return operator = (std::string(cstr));
     }
 
+    Parameter& operator = (const Parameter& p);
+
     virtual const std::type_info &type() const;
     std::string toString() const;
 

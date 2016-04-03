@@ -141,6 +141,9 @@ public Q_SLOTS:
     void createVariadicPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
     void createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
 
+public:
+    csapex::slim_signal::Signal<void(CommandPtr)> executeCommand;
+
 Q_SIGNALS:
     void toggled(bool);
     void flipped(bool);
