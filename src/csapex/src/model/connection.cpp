@@ -76,15 +76,25 @@ void Connection::setMessage(const ConnectionTypeConstPtr &msg)
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
-        apex_assert_hard(isSinkEnabled());
         apex_assert_hard(msg != nullptr);
         apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
         message_ = msg;
-        setState(State::UNREAD);
+        if(isSinkEnabled()) {
+            setState(State::UNREAD);
+
+        } else {
+            setState(State::UNREAD);
+            setState(State::READ);
+        }
     }
 
     notifyMessageSet();
+}
+
+bool Connection::isEnabled() const
+{
+    return isSourceEnabled() && isSinkEnabled();
 }
 
 bool Connection::isSourceEnabled() const

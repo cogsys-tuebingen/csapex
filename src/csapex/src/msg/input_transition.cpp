@@ -131,7 +131,7 @@ bool InputTransition::isEnabled() const
 
     // TODO: is this necessary?
     for(const auto& connection : established_connections_) {
-        if(connection->getState() == Connection::State::NOT_INITIALIZED) {
+        if(connection->isEnabled() && connection->getState() == Connection::State::NOT_INITIALIZED) {
             if(connection->isEstablished()) {
                 return false;
             }

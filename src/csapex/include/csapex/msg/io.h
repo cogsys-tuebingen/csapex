@@ -21,6 +21,9 @@ bool hasMessage(Output* output);
 bool isConnected(Input* input);
 bool isConnected(Output* output);
 
+bool isEnabled(Input* input);
+bool isEnabled(Output* output);
+
 void enable(Input* input);
 void disable(Input* input);
 void enable(Output* output);

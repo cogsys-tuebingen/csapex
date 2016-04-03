@@ -37,7 +37,7 @@ struct CsApexGuiApp : public QApplication, public AppProxy
     virtual bool notify(QObject* receiver, QEvent* event) override;
     virtual bool doNotify(QObject* receiver, QEvent* event) override;
 
-    void handleAssertionFailure(const csapex::HardAssertionFailure& assertion);
+    void handleAssertionFailure(const csapex::Failure& assertion);
 
 private:
     ExceptionHandler& handler;

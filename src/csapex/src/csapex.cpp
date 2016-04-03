@@ -436,7 +436,7 @@ int main(int argc, char** argv)
     try {
         return m.main(headless, threadless, paused, thread_grouping, input, path_to_bin, additional_args);
 
-    } catch(const csapex::HardAssertionFailure& af) {
+    } catch(const csapex::Failure& af) {
         std::cerr << af.what() << std::endl;
         return 42;
     }

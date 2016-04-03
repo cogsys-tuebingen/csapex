@@ -15,11 +15,16 @@
 using namespace csapex;
 
 GuiExceptionHandler::GuiExceptionHandler(bool fatal_exceptions)
-    : ExceptionHandler(fatal_exceptions)
+    : ExceptionHandler(fatal_exceptions), last_failure_(nullptr)
 {
-    qRegisterMetaType < HardAssertionFailure > ("HardAssertionFailure");
+    qRegisterMetaType < Failure > ("Failure");
 
-    QObject::connect(this, SIGNAL(fatalError(HardAssertionFailure)), this, SLOT(showErrorDialog(HardAssertionFailure)));
+    QObject::connect(this, SIGNAL(fatalError()), this, SLOT(showErrorDialog()));
+}
+
+GuiExceptionHandler::~GuiExceptionHandler()
+{
+    delete last_failure_;
 }
 
 bool GuiExceptionHandler::notifyImpl(AppProxy* app, QObject *receiver, QEvent *event)
@@ -27,32 +32,31 @@ bool GuiExceptionHandler::notifyImpl(AppProxy* app, QObject *receiver, QEvent *e
     return ExceptionHandler::notifyImpl(app, receiver, event);
 }
 
-void GuiExceptionHandler::handleAssertionFailure(const HardAssertionFailure &assertion)
+void GuiExceptionHandler::handleAssertionFailure(const Failure &failure)
 {
     pause();
 
-    assertion.printStackTrace();
+    failure.printStackTrace();
 
-    Q_EMIT fatalError(assertion);
+    delete last_failure_;
+    last_failure_ = failure.clone();
+
+    Q_EMIT fatalError();
 }
 
-void GuiExceptionHandler::showErrorDialog(const HardAssertionFailure &assertion)
+void GuiExceptionHandler::showErrorDialog()
 {
     auto window = QApplication::activeWindow();
 
-    std::stringstream msg;
-    if(!assertion.msg.empty()) {
-        msg << assertion.msg << "\n";
-    }
-    msg << "assertion \"" << assertion.code << "\" failed in "
-        << assertion.file << ", line " << assertion.line << ", thread \"" << assertion.thread << "\"" << std::endl;
+    std::stringstream msg_stream;
+    last_failure_->stackTrace(msg_stream, 12);
 
-    msg << "\n\n" << assertion.stackTrace(12);
+    QString msg = QString::fromStdString(msg_stream.str());
 
-    std::string title = assertion.msg.empty() ? assertion.code : assertion.msg;
+    QString failure_type = QString::fromStdString(last_failure_->type());
 
-    int reply = QMessageBox::critical(window, QString::fromStdString(title),
-                                      QString::fromStdString(msg.str()), "&Ignore", "&Report (Email)", "&Create Issue on GitLab");
+    int reply = QMessageBox::critical(window, failure_type,
+                                      msg, "&Ignore", "&Report (Email)", "&Create Issue on GitLab");
 
     switch(reply) {
     case 0: // ignore
@@ -60,14 +64,14 @@ void GuiExceptionHandler::showErrorDialog(const HardAssertionFailure &assertion)
     case 1: // report
     {
         QString mail = "mailto:sebastian.buck@uni-tuebingen.de?";
-        mail += "subject=[CS::APEX] Bug Report&body=" + QString::fromStdString(msg.str());
+        mail += "subject=[CS::APEX] Bug Report&body=" + msg;
         QDesktopServices::openUrl(QUrl(mail, QUrl::TolerantMode));
     }
         break;
     case 2: // issue
     {
         QString issue = "https://gitlab.cs.uni-tuebingen.de/csapex/csapex/issues/new?issue[assignee_id]=&issue[milestone_id]=&issue[title]=";
-        issue += "Assertion Failed&issue[description]=" + QString::fromStdString(msg.str());
+        issue += failure_type + "&issue[description]=" + msg;
         QDesktopServices::openUrl(QUrl(issue, QUrl::TolerantMode));
     }
         break;

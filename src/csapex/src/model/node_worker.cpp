@@ -25,6 +25,7 @@
 #include <csapex/msg/marker_message.h>
 #include <csapex/msg/no_message.h>
 #include <csapex/msg/end_of_sequence_message.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <thread>
@@ -197,9 +198,9 @@ void NodeWorker::setProcessingEnabled(bool e)
 
     if(!e) {
         setError(false);
+    } else {
+        checkIO();
     }
-
-    checkIO();
     enabled(e);
 }
 
@@ -298,17 +299,11 @@ void NodeWorker::startProcessingMessages()
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
     setState(State::FIRED);
 
-    if(!isProcessingEnabled()) {
-        signalMessagesProcessed();
-        return;
-    }
-
 
     apex_assert_hard(state_ == State::FIRED);
     apex_assert_hard(!node_handle_->getInputTransition()->hasUnestablishedConnection());
     //apex_assert_hard(!node_handle_->getOutputTransition()->hasUnestablishedConnection());
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-    apex_assert_hard(isProcessingEnabled());
     apex_assert_hard(canProcess());
     setState(State::PROCESSING);
 
@@ -411,30 +406,39 @@ void NodeWorker::startProcessingMessages()
 
     bool sync = !node->isAsynchronous();
 
-    try {
-        if(sync) {
-            node->process(*node_handle_, *node);
+    if(isProcessingEnabled()) {
+        try {
+            if(sync) {
+                node->process(*node_handle_, *node);
 
-        } else {
-            node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
-                node_handle_->executionRequested([this, f, node]() {
-                    f(*node_handle_, *node);
-                    finishProcessing();
+            } else {
+                node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
+                    node_handle_->executionRequested([this, f, node]() {
+                        f(*node_handle_, *node);
+                        finishProcessing();
+                    });
                 });
-            });
+            }
+
+
+
+        } catch(const std::exception& e) {
+            setError(true, e.what());
+        } catch(const Failure& f) {
+            throw;
+        } catch(...) {
+            throw Failure("Unknown exception caught in NodeWorker.");
+        }
+        if(sync) {
+            finishProcessing();
         }
 
-
-
-    } catch(const std::exception& e) {
-        setError(true, e.what());
-    } catch(...) {
-        throw;
+    } else {
+        forwardMessages(true);
+        signalMessagesProcessed();
+        triggerCheckTransitions();
     }
 
-    if(sync) {
-        finishProcessing();
-    }
 }
 
 void NodeWorker::finishGenerator()
@@ -832,74 +836,10 @@ void NodeWorker::disconnectConnector(Connectable *c)
 void NodeWorker::checkIO()
 {
     if(isProcessingEnabled()) {
-        enableInput(canReceive());
-        enableOutput(canReceive());
-        enableSlots(true);
-        enableTriggers(true);
-
         triggerCheckTransitions();
-
-    } else {
-        enableInput(false);
-        enableOutput(false);
-        enableSlots(false);
-        enableTriggers(false);
     }
 }
 
-
-void NodeWorker::enableIO(bool enable)
-{
-    enableInput(canReceive() && enable);
-    enableOutput(enable);
-    enableSlots(enable);
-    enableTriggers(enable);
-}
-
-void NodeWorker::enableInput (bool enable)
-{
-    for(InputPtr i : node_handle_->getAllInputs()) {
-        if(enable) {
-            i->enable();
-        } else {
-            i->disable();
-        }
-    }
-}
-
-
-void NodeWorker::enableOutput (bool enable)
-{
-    for(OutputPtr o : node_handle_->getAllOutputs()) {
-        if(enable) {
-            o->enable();
-        } else {
-            o->disable();
-        }
-    }
-}
-
-void NodeWorker::enableSlots (bool enable)
-{
-    for(SlotPtr i : node_handle_->getAllSlots()) {
-        if(enable) {
-            i->enable();
-        } else {
-            i->disable();
-        }
-    }
-}
-
-void NodeWorker::enableTriggers (bool enable)
-{
-    for(TriggerPtr i : node_handle_->getAllTriggers()) {
-        if(enable) {
-            i->enable();
-        } else {
-            i->disable();
-        }
-    }
-}
 
 void NodeWorker::triggerError(bool e, const std::string &what)
 {

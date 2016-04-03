@@ -55,6 +55,7 @@ public:
     ConnectionTypeConstPtr getMessage() const;
     void setMessageProcessed();
 
+    bool isEnabled() const;
     bool isSourceEnabled() const;
     bool isSinkEnabled() const;
 

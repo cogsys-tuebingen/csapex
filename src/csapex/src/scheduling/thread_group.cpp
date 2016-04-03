@@ -336,7 +336,7 @@ void ThreadGroup::executeTask(const TaskPtr& task)
     } catch(const std::string& s) {
         std::cerr << "Uncaught exception (string) exception: " << s << std::endl;
 
-    } catch(const csapex::HardAssertionFailure& assertion) {
+    } catch(const csapex::Failure& assertion) {
         handler_.handleAssertionFailure(assertion);
 
     } catch(...) {

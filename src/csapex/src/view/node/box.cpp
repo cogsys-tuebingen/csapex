@@ -171,10 +171,10 @@ void NodeBox::construct()
 
     setLabel(nh->getNodeState()->getLabel());
 
-    QObject::connect(ui->enablebtn, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+    QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 
     nh->nodeStateChanged.connect([this]() { nodeStateChanged(); });
-    QObject::connect(this, SIGNAL(nodeStateChanged()), this, SLOT(nodeStateChangedEvent()), Qt::QueuedConnection);
+    QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
     nh->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
     nh->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
@@ -183,7 +183,7 @@ void NodeBox::construct()
     if(worker) {
         enabledChangeEvent(worker->isProcessingEnabled());
         //    nh->enabled.connect([this](bool e){ enabledChange(e); });
-        QObject::connect(this, SIGNAL(enabledChange(bool)), this, SLOT(enabledChangeEvent(bool)), Qt::QueuedConnection);
+        QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
         worker->threadChanged.connect([this](){ updateThreadInformation(); });
         worker->errorHappened.connect([this](bool){ updateVisualsRequest(); });
@@ -971,9 +971,8 @@ void NodeBox::nodeStateChangedEvent()
     NodeStatePtr state = worker->getNodeHandle()->getNodeState();
 
     bool state_enabled = state->isEnabled();
-    bool worker_enabled = worker->isProcessingEnabled();
-    if(state_enabled != worker_enabled) {
-        worker->setProcessingEnabled(state_enabled);
+    bool box_enabled = !property("disabled").toBool();
+    if(state_enabled != box_enabled) {
         ui->label->setEnabled(state_enabled);
         enabledChange(state_enabled);
     }

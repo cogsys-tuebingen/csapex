@@ -138,7 +138,7 @@ bool Transition::areAllConnections(Connection::State state) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
-        if(connection->isSinkEnabled() && connection->getState() != state) {
+        if(connection->isEnabled() && connection->getState() != state) {
             return false;
         }
     }
@@ -150,7 +150,7 @@ bool Transition::areAllConnections(Connection::State a, Connection::State b) con
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
         auto s = connection->getState();
-        if(connection->isSinkEnabled() && s != a && s != b) {
+        if(connection->isEnabled() && s != a && s != b) {
             return false;
         }
     }
@@ -162,7 +162,7 @@ bool Transition::areAllConnections(Connection::State a, Connection::State b, Con
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
         auto s = connection->getState();
-        if(connection->isSinkEnabled() &&  s != a && s != b && s != c) {
+        if(connection->isEnabled() && s != a && s != b && s != c) {
             return false;
         }
     }
@@ -173,7 +173,7 @@ bool Transition::isOneConnection(Connection::State state) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(ConnectionPtr connection : established_connections_) {
-        if(connection->isSinkEnabled() &&  connection->getState() == state) {
+        if(connection->isEnabled() && connection->getState() == state) {
             return true;
         }
     }

@@ -9,16 +9,26 @@ using namespace csapex;
 
 ConnectionTypeConstPtr csapex::msg::getMessage(Input *input)
 {
+    apex_assert_hard_msg(input->isEnabled(), "you have requested a message from a disabled input");
     return input->getMessage();
 }
 
 bool csapex::msg::hasMessage(Input *input)
 {
-    return input->hasMessage();
+    return input->hasMessage() && input->isEnabled();
 }
 bool csapex::msg::hasMessage(Output *output)
 {
-    return output->hasMessage();
+    return output->hasMessage() && output->isEnabled();
+}
+
+bool csapex::msg::isEnabled(Input *input)
+{
+    return input->isEnabled();
+}
+bool csapex::msg::isEnabled(Output *output)
+{
+    return output->isEnabled();
 }
 
 bool csapex::msg::isConnected(Input *input)

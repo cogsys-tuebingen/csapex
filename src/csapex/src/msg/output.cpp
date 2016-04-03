@@ -161,8 +161,6 @@ void Output::publish()
     apex_assert_hard(msg);
 
     for(auto connection : connections_) {
-        if(connection->isSinkEnabled()) {
-            connection->setMessage(msg);
-        }
+        connection->setMessage(msg);
     }
 }

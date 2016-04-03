@@ -16,16 +16,20 @@ class GuiExceptionHandler : public QObject, public ExceptionHandler
 
 public:
     GuiExceptionHandler(bool fatal_exceptions);
+    ~GuiExceptionHandler();
 
 Q_SIGNALS:
-    void fatalError(const HardAssertionFailure &assertion);
+    void fatalError();
 
 private Q_SLOTS:
-    void showErrorDialog(const HardAssertionFailure &assertion);
+    void showErrorDialog();
 
 protected:
     virtual bool notifyImpl(AppProxy* app, QObject* receiver, QEvent* event) override;
-    virtual void handleAssertionFailure(const csapex::HardAssertionFailure& assertion) override;
+    virtual void handleAssertionFailure(const csapex::Failure& assertion) override;
+
+private:
+    Failure* last_failure_;
 };
 
 }

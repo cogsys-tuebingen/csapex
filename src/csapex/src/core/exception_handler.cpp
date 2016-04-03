@@ -45,7 +45,7 @@ bool ExceptionHandler::notifyImpl(AppProxy* app, QObject *receiver, QEvent *even
         std::cerr << "Uncaught exception:" << e.what() << std::endl;
         return false;
 
-    } catch(const csapex::HardAssertionFailure& assertion) {
+    } catch(const csapex::Failure& assertion) {
         handleAssertionFailure(assertion);
     } catch(const std::string& s) {
         std::cerr << "Uncaught exception (string) exception: " << s << std::endl;
@@ -57,7 +57,7 @@ bool ExceptionHandler::notifyImpl(AppProxy* app, QObject *receiver, QEvent *even
     return true;
 }
 
-void ExceptionHandler::handleAssertionFailure(const HardAssertionFailure &assertion)
+void ExceptionHandler::handleAssertionFailure(const Failure &assertion)
 {
     pause();
 

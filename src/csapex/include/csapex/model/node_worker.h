@@ -92,12 +92,6 @@ public:
     void checkParameters();    
     void checkIO();
 
-    void enableIO(bool enable);
-    void enableInput(bool enable);
-    void enableOutput(bool enable);
-    void enableSlots(bool enable);
-    void enableTriggers(bool enable);
-
     void triggerError(bool e, const std::string& what);
 
     void killExecution();

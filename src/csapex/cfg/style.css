@@ -90,13 +90,6 @@ csapex--NodeBox  QCheckBox::indicator:checked {
 csapex--NodeBox[content_minimized="true"] QFrame#boxframe {
 }
 
-/* disabled box */
-csapex--NodeBox[disabled="true"] QFrame#boxframe {
-        background: rgb(200,200,200)
-}
-csapex--NodeBox[disabled="true"] QFrame#boxframe  QLabel {
-}
-
 /* error box */
 csapex--NodeBox[error="true"] QFrame#boxframe {
         background: rgb(255, 100, 100);
@@ -119,6 +112,13 @@ csapex--NodeBox[focused="true"] QFrame#boxframe {
         border: 2px solid rgb(70, 115, 60);
         border-style: dashed;
 }
+/* disabled box */
+csapex--NodeBox[disabled="true"] QFrame#boxframe {
+        background: rgb(200,200,200)
+}
+csapex--NodeBox[disabled="true"] QFrame#boxframe  QLabel {
+}
+
 /* note */
 csapex--NoteBox {
         padding: 0;

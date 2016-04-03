@@ -26,7 +26,7 @@ public:
     void setCore(csapex::CsApexCore* core);
 
     virtual bool notifyImpl(AppProxy* app, QObject* receiver, QEvent* event);
-    virtual void handleAssertionFailure(const csapex::HardAssertionFailure& assertion);
+    virtual void handleAssertionFailure(const csapex::Failure& assertion);
 
 protected:
     void pause();
