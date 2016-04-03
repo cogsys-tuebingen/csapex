@@ -6,6 +6,7 @@
 #include <csapex/model/node.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/command/add_msg_connection.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/variadic_io.h>
@@ -101,12 +102,21 @@ void NodeBox::setupUi()
 
     setupUiAgain();
 
-    if(dynamic_cast<VariadicInputs*>(getNode())) {
-        MetaPort* meta_port = new MetaPort(false);
-        QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
-        QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
-        QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
-        ui->input_panel->layout()->addWidget(meta_port);
+    if(dynamic_cast<VariadicBase*>(getNode())) {
+        if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
+            MetaPort* meta_port = new MetaPort(false);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            ui->input_panel->layout()->addWidget(meta_port);
+        }
+        if(VariadicOutputs* vo = dynamic_cast<VariadicOutputs*>(getNode())) {
+            MetaPort* meta_port = new MetaPort(false);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            ui->output_panel->layout()->addWidget(meta_port);
+        }
     }
 
     Q_EMIT changed(this);
@@ -195,7 +205,7 @@ void NodeBox::construct()
 
 void NodeBox::createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
-    if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
+    if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
         // TODO: command!
         vi->createVariadicPort(output, type, label, optional);
     }
@@ -203,7 +213,7 @@ void NodeBox::createVariadicPort(bool output, ConnectionTypeConstPtr type, const
 
 void NodeBox::createVariadicPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
-    if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
+    if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
         // TODO: command!
         Connectable* new_port = vi->createVariadicPort(!from->isOutput(), type, label, optional);
 
@@ -223,9 +233,14 @@ void NodeBox::createVariadicPortAndConnect(Connectable* from, ConnectionTypeCons
 
 void NodeBox::createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
-    if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
+    if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
         // TODO: command!
-        vi->createVariadicPort(!from->isOutput(), type, label, optional);
+        Connectable* new_port = vi->createVariadicPort(from->isOutput(), type, label, optional);
+
+        GraphFacade* graph_facade = getGraphView()->getGraphFacade();
+        CommandPtr cmd = CommandFactory(graph_facade).moveConnections(from->getUUID(), new_port->getUUID());
+
+        executeCommand(cmd);
     }
 }
 
@@ -498,7 +513,7 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
     ConnectablePtr adaptee = port->getAdaptee().lock();
     apex_assert_hard(adaptee == connector.lock());
 
-    if(dynamic_cast<VariadicInputs*>(getNode()) && layout == ui->input_panel->layout()) {
+    if(dynamic_cast<VariadicBase*>(getNode())) {
         std::vector<MetaPort*> metas;
         for(int i = 0; i < layout->count();) {
             MetaPort* meta = dynamic_cast<MetaPort*>(layout->itemAt(i)->widget());
