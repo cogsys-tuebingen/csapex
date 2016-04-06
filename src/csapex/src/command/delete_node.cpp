@@ -13,6 +13,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/core/graphio.h>
 
 /// SYSTEM
 
@@ -50,6 +51,15 @@ bool DeleteNode::doExecute()
         }
     }
 
+    // serialize sub graph
+    if(node_handle->getType() == "csapex::Graph") {
+        GraphPtr g = std::dynamic_pointer_cast<Graph>(node_handle->getNode().lock());
+        apex_assert_hard(g);
+
+        GraphIO io(g.get(), node_factory_);
+        io.saveGraph(saved_graph);
+    }
+
     locked = true;
 
     if(Meta::doExecute()) {
@@ -65,11 +75,19 @@ bool DeleteNode::doExecute()
 bool DeleteNode::doUndo()
 {
     Graph* graph = getGraph();
-    NodeHandlePtr node = node_factory_->makeNode(type, uuid, graph);
+    NodeHandlePtr node_handle = node_factory_->makeNode(type, uuid, graph);
+    node_handle->setNodeState(saved_state);
 
-    node->setNodeState(saved_state);
+    graph->addNode(node_handle);
 
-    graph->addNode(node);
+    //deserialize subgraph
+    if(node_handle->getType() == "csapex::Graph") {
+        GraphPtr g = std::dynamic_pointer_cast<Graph>(node_handle->getNode().lock());
+        apex_assert_hard(g);
+
+        GraphIO io(g.get(), node_factory_);
+        io.loadGraph(saved_graph);
+    }
 
     return Meta::doUndo();
 }

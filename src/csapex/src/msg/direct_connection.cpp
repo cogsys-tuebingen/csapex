@@ -6,6 +6,9 @@
 #include <csapex/msg/input.h>
 #include <csapex/utility/assert.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 ConnectionPtr DirectConnection::connect(Output *from, Input *to)
@@ -52,4 +55,9 @@ void DirectConnection::setMessage(const ConnectionTypeConstPtr &msg)
 //    setState(Connection::State::DONE);
 
     setMessageProcessed();
+}
+
+void DirectConnection::establish()
+{
+    Connection::establish();
 }

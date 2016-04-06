@@ -23,7 +23,7 @@ public:
 
     virtual void disable() override;
     virtual void reset() override;
-    virtual void startReceiving() override;
+    virtual void clearBuffer() override;
 
     ConnectionType::ConstPtr getMessage();
 

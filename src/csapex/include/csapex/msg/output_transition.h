@@ -32,9 +32,8 @@ public:
     void sendMessages();
     void publishNextMessage();
 
-    void startReceiving();
-    void abortSendingMessages();
-    void setConnectionsReadyToReceive();
+    void clearBuffer();
+    void setOutputsIdle();
     bool areOutputsIdle() const;
 
     virtual bool isEnabled() const override;

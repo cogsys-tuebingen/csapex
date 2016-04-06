@@ -82,7 +82,7 @@ void StaticOutput::commitMessages()
 
     if(message_to_send_) {
         committed_message_ = message_to_send_;
-        startReceiving();
+        clearBuffer();
 
     } else {
         if(!connections_.empty()) {
@@ -118,7 +118,7 @@ ConnectionType::ConstPtr StaticOutput::getMessage()
     return committed_message_;
 }
 
-void StaticOutput::startReceiving()
+void StaticOutput::clearBuffer()
 {
     message_to_send_.reset();
 }

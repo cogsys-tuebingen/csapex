@@ -11,6 +11,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
+#include <csapex/msg/no_message.h>
 
 /// SYSTEM
 #include <cmath>

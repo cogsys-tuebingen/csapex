@@ -37,14 +37,30 @@ NodeState::~NodeState()
 
 NodeState& NodeState::operator = (const NodeState& rhs)
 {
-    setPos(rhs.pos_);
-    setEnabled(rhs.enabled_);
-    setZ(rhs.z_);
-    setColor(rhs.r_, rhs.g_, rhs.b_);
-    setMinimized(rhs.minimized_);
-    setFlipped(rhs.flipped_);
-    setLabel(rhs.label_);
-    setThread(rhs.thread_name_, rhs.thread_id_);
+    // first change all values
+    pos_ = rhs.pos_;
+    enabled_ = rhs.enabled_;
+    z_ = rhs.z_;
+    r_ = rhs.r_;
+    g_ = rhs.g_;
+    b_ = rhs.b_;
+    minimized_ = rhs.minimized_;
+    flipped_ = rhs.flipped_;
+    label_ = rhs.label_;
+    thread_name_ = rhs.thread_name_;
+    thread_id_ = rhs.thread_id_;
+
+    dictionary = rhs.dictionary;
+
+    // then trigger the signals
+    (*pos_changed)();
+    (*enabled_changed)();
+    (*z_changed)();
+    (*color_changed)();
+    (*minimized_changed)();
+    (*flipped_changed)();
+    (*label_changed)();
+    (*thread_changed)();
 
     return *this;
 }
@@ -204,6 +220,34 @@ void NodeState::writeYaml(YAML::Node &out) const
     out["enabled"] = enabled_;
     out["flipped"] = flipped_;
 
+    if(!dictionary.empty()) {
+        YAML::Node dict(YAML::NodeType::Sequence);
+        for(const auto& pair : dictionary) {
+            YAML::Node n(YAML::NodeType::Map);
+
+            n["key"] = pair.first;
+
+            if(pair.second.type() == typeid(int)) {
+                n["int"] = boost::any_cast<int> (pair.second);
+
+            } else if(pair.second.type() == typeid(double)) {
+                n["double"] = boost::any_cast<double> (pair.second);
+
+            } else if(pair.second.type() == typeid(bool)) {
+                n["bool"] = boost::any_cast<bool> (pair.second);
+
+            } else if(pair.second.type() == typeid(std::string)) {
+                n["string"] = boost::any_cast<std::string> (pair.second);
+
+            } else if(pair.second.type() == typeid(std::vector<std::string>)) {
+                n["stringv"] = boost::any_cast<std::vector<std::string>> (pair.second);
+            }
+
+            dict.push_back(n);
+        }
+        out["dict"] = dict;
+    }
+
     try {
         if(parent_) {
             auto node = parent_->getNode().lock();
@@ -266,6 +310,33 @@ void NodeState::readYaml(const YAML::Node &node)
         setZ(node["z"].as<long>());
     }
 
+    if(node["dict"].IsDefined()) {
+        const YAML::Node& dict = node["dict"];
+        if(dict.Type() == YAML::NodeType::Sequence) {
+
+            for(auto it = dict.begin(); it != dict.end(); ++it) {
+                YAML::Node entry = *it;
+                std::string key = entry["key"].as<std::string>();
+
+                if(entry["int"].IsDefined()) {
+                    dictionary[key] = entry["int"].as<int>();
+
+                } else if(entry["double"].IsDefined()) {
+                    dictionary[key] = entry["double"].as<double>();
+
+                } else if(entry["bool"].IsDefined()) {
+                    dictionary[key] = entry["bool"].as<bool>();
+
+                } else if(entry["string"].IsDefined()) {
+                    dictionary[key] = entry["string"].as<std::string>();
+
+                } else if(entry["stringv"].IsDefined()) {
+                    dictionary[key] = entry["stringv"].as<std::vector<std::string>>();
+                }
+            }
+        }
+    }
+
     if(node["state"].IsDefined()) {
         const YAML::Node& state_map = node["state"];
         auto node = parent_->getNode().lock();
@@ -278,4 +349,40 @@ void NodeState::readYaml(const YAML::Node &node)
             child_state_->readYaml(state_map);
         }
     }
+}
+
+bool NodeState::hasDictionaryEntry(const std::string& key) const
+{
+    return dictionary.find(key) != dictionary.end();
+}
+
+void NodeState::deleteDictionaryEntry(const std::string &key)
+{
+    dictionary.erase(key);
+}
+
+template <typename T>
+T NodeState::getDictionaryEntry(const std::string& key) const
+{
+    return boost::any_cast<T>(dictionary.at(key));
+}
+template <typename T>
+void NodeState::setDictionaryEntry(const std::string& key, const T& value)
+{
+    dictionary[key] = value;
+}
+
+namespace csapex
+{
+template void NodeState::setDictionaryEntry<int>(const std::string&, const int&);
+template void NodeState::setDictionaryEntry<double>(const std::string&, const double&);
+template void NodeState::setDictionaryEntry<bool>(const std::string&, const bool&);
+template void NodeState::setDictionaryEntry<std::string>(const std::string&, const std::string&);
+template void NodeState::setDictionaryEntry<std::vector<std::string>>(const std::string&, const std::vector<std::string>&);
+
+template int NodeState::getDictionaryEntry<int>(const std::string&) const;
+template double NodeState::getDictionaryEntry<double>(const std::string&) const;
+template bool NodeState::getDictionaryEntry<bool>(const std::string&) const;
+template std::string NodeState::getDictionaryEntry<std::string>(const std::string&) const;
+template std::vector<std::string> NodeState::getDictionaryEntry<std::vector<std::string>>(const std::string&) const;
 }

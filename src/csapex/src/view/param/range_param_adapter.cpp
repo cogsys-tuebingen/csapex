@@ -25,6 +25,24 @@ RangeParameterAdapter::RangeParameterAdapter(param::RangeParameter::Ptr p)
 
 }
 
+namespace {
+void setDecimals(QSpinBox*, int)
+{
+    // do nothing
+}
+
+void setDecimals(QDoubleSpinBox* box, double step)
+{
+    int decimals = 0;
+    double v = step;
+    while(v < 1.0) {
+        v *= 10;
+        ++decimals;
+    }
+    box->setDecimals(decimals);
+}
+}
+
 void RangeParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QLabel* label = new QLabel(QString::fromStdString(display_name));
@@ -85,6 +103,7 @@ void RangeParameterAdapter::genericSetup()
     display->setMaximum(max);
     display->setValue(def);
     display->setSingleStep(step);
+    setDecimals(display.data(), step);
 
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);

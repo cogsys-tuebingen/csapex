@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid.h>
-#include <csapex/model/node.h>
+#include <csapex/model/generator_node.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid_provider.h>
 
@@ -15,7 +15,7 @@
 
 namespace csapex {
 
-class Graph : public Node, public UUIDProvider
+class Graph : public GeneratorNode, public UUIDProvider
 {
     friend class GraphIO;
     friend class GraphFacade;
@@ -45,6 +45,8 @@ public:
     virtual ~Graph();
 
     virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid) override;
+
+    virtual void stateChanged() override;
 
     void clear();
 
@@ -101,8 +103,11 @@ public:
     std::pair<UUID, UUID> addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
     std::pair<UUID, UUID> addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);
 
-    InputPtr getForwardedInput(const UUID& internal_uuid) const;
-    OutputPtr getForwardedOutput(const UUID& internal_uuid) const;
+    InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
+    OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
+
+    UUID getForwardedInputExternal(const UUID& internal_uuid) const;
+    UUID getForwardedOutputExternal(const UUID& internal_uuid) const;
 
     std::vector<UUID> getRelayOutputs() const;
     std::vector<UUID> getRelayInputs() const;
@@ -117,10 +122,14 @@ private:
     void buildConnectedComponents();
     void assignLevels();
 
+    virtual void notifyMessagesProcessed() override;
+    void inputActivation();
     void outputActivation();
 
+    void publishSubGraphMessages();
+
 public:
-    csapex::slim_signal::Signal<void()> stateChanged;
+    csapex::slim_signal::Signal<void()> state_changed;
     csapex::slim_signal::Signal<void(Graph*)> structureChanged;
 
     csapex::slim_signal::Signal<void(Connection*)> connectionAdded;
@@ -152,6 +161,9 @@ protected:
 
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_output_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
+
+    bool is_initialized_;
+    bool output_active_;
 };
 
 }

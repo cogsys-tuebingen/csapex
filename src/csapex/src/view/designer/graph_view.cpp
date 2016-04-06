@@ -10,9 +10,11 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/flip_sides.h>
 #include <csapex/command/group_nodes.h>
+#include <csapex/command/ungroup_nodes.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/minimize.h>
 #include <csapex/command/move_box.h>
+#include <csapex/command/rename_node.h>
 #include <csapex/command/move_connection.h>
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/switch_thread.h>
@@ -24,6 +26,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -191,8 +194,8 @@ void GraphView::scrollContentsBy(int dx, int dy)
     QPointF tl_view = mapToScene(QPoint(0, 0));
     QPointF br_view = mapToScene(QPoint(width(), height()));
 
-    double mx = std::abs(dx * 5) + 10;
-    double my = std::abs(dy * 5) + 10;
+    double mx = std::abs(dx) + 10;
+    double my = std::abs(dy) + 10;
 
     QPointF tl(std::min(tl_view.x() - mx, min_r.x()),
                std::min(tl_view.y() - my, min_r.y()));
@@ -808,6 +811,12 @@ void GraphView::addBox(NodeBox *box)
     box->triggerPlaced();
 
     box->updateBoxInformation(graph);
+
+    if(graph_facade_->getGraph()->countNodes() > 0) {
+        setCacheMode(QGraphicsView::CacheNone);
+        scene_->invalidate();
+        setCacheMode(QGraphicsView::CacheBackground);
+    }
 }
 
 void GraphView::removeBox(NodeBox *box)
@@ -820,6 +829,12 @@ void GraphView::removeBox(NodeBox *box)
 
     boxes_.erase(std::find(boxes_.begin(), boxes_.end(), box));
     profiling_.erase(box);
+
+    if(graph_facade_->getGraph()->countNodes() == 0) {
+        setCacheMode(QGraphicsView::CacheNone);
+        scene_->invalidate();
+        setCacheMode(QGraphicsView::CacheBackground);
+    }
 }
 
 void GraphView::addPort(Port *port)
@@ -853,7 +868,7 @@ void GraphView::addPort(Port *port)
         }
         if(!from->isVirtual() && !adaptee->isVirtual()) {
             Command::Ptr cmd(new command::MoveConnection(graph_facade_->getAbsoluteUUID(), from, adaptee.get()));
-             dispatcher_->execute(cmd);
+            dispatcher_->execute(cmd);
         }
     });
 }
@@ -865,11 +880,21 @@ void GraphView::removePort(Port *port)
 
 void GraphView::renameBox(NodeBox *box)
 {
-    bool ok;
-    QString text = QInputDialog::getText(this, "Box Label", "Enter new name", QLineEdit::Normal, box->getLabel().c_str(), &ok);
+    GraphFacade* graph = getGraphFacade();
+    NodeHandle* node = box->getNodeHandle();
+    NodeStatePtr state = node->getNodeState();
+    QString old_name = QString::fromStdString(state->getLabel());
 
-    if(ok && !text.isEmpty()) {
-        box->setLabel(text);
+    bool ok = false;
+    QString text = QInputDialog::getText(this, "Graph Label", "Enter new name",
+                                         QLineEdit::Normal, old_name, &ok);
+    if(ok) {
+        if(old_name != text && !text.isEmpty()) {
+            command::RenameNode::Ptr cmd(new command::RenameNode(graph->getAbsoluteUUID(),
+                                                                 node->getUUID(),
+                                                                 text.toStdString()));
+            dispatcher_->execute(cmd);
+        }
     }
 }
 
@@ -1202,9 +1227,16 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
     QAction* ungrp = new QAction("ungroup", &menu);
     ungrp->setIcon(QIcon(":/ungroup.png"));
-    ungrp->setIconVisibleInMenu(true);
-    ungrp->setEnabled(false);
     handler[ungrp] = std::bind(&GraphView::ungroupSelected, this);
+    ungrp->setIconVisibleInMenu(true);
+
+    bool is_graph = false;
+    if(selected_boxes_.size() == 1) {
+        NodeBox* box = selected_boxes_.front();
+        is_graph = dynamic_cast<Graph*>(box->getNode());
+    }
+
+    ungrp->setEnabled(is_graph);
     menu.addAction(ungrp);
 
     menu.addSeparator();
@@ -1349,6 +1381,10 @@ void GraphView::groupSelected()
 
 void GraphView::ungroupSelected()
 {
+    apex_assert_hard(selected_boxes_.size() == 1);
+
+    CommandPtr cmd(new command::UngroupNodes(graph_facade_->getAbsoluteUUID(), selected_boxes_.front()->getNodeHandle()->getUUID()));
+    dispatcher_->execute(cmd);
 }
 
 void GraphView::paste()

@@ -50,6 +50,8 @@ private:
     std::map<InputPtr, std::vector<csapex::slim_signal::Connection>> input_signal_connections_;
 
     std::unordered_map<UUID, InputPtr, UUID::Hasher> inputs_;
+
+    bool forwarded_;
 };
 
 }

@@ -15,6 +15,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node_state.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/utility/timer.h>
 #include <csapex/msg/io.h>
@@ -29,9 +30,12 @@ using namespace csapex;
 
 Graph::Graph()
     : transition_relay_in_(new InputTransition),
-      transition_relay_out_(new OutputTransition)
+      transition_relay_out_(new OutputTransition),
+      is_initialized_(false), output_active_(false)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
+
+    transition_relay_out_->messages_processed.connect(delegate::Delegate0<>(this, &Graph::inputActivation));
 }
 
 Graph::~Graph()
@@ -45,6 +49,48 @@ void Graph::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
     Node::initialize(node_handle, uuid);
 
     setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
+}
+
+void Graph::stateChanged()
+{
+    Node::stateChanged();
+
+
+    if(!is_initialized_) {
+        NodeStatePtr state = node_handle_->getNodeState();
+
+        std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_outputs", {});
+        // delete save entries -> will now be replaced.
+        state->deleteDictionaryEntry("forwarding_outputs");
+
+        for(const std::string& output_name : output_uuids) {
+            ConnectionTypeConstPtr type = MessageFactory::createMessage(state->getDictionaryEntry<std::string>(output_name + "_type"));
+
+            UUID internal = makeUUID(state->getDictionaryEntry<std::string>(output_name + "_uuid_internal"));
+            UUID external = node_handle_->getUUIDProvider()->makeDerivedUUID(getUUID(), state->getDictionaryEntry<std::string>(output_name + "_uuid_external"));
+
+            addForwardingOutput(internal, external, type,
+                                state->getDictionaryEntry<std::string>(output_name + "_label"));
+        }
+
+
+        std::vector<std::string> input_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_inputs", {});
+        // delete save entries -> will now be replaced.
+        state->deleteDictionaryEntry("forwarding_inputs");
+
+        for(const std::string& input_name : input_uuids) {
+            ConnectionTypeConstPtr type = MessageFactory::createMessage(state->getDictionaryEntry<std::string>(input_name + "_type"));
+
+            UUID internal = makeUUID(state->getDictionaryEntry<std::string>(input_name + "_uuid_internal"));
+            UUID external = node_handle_->getUUIDProvider()->makeDerivedUUID(getUUID(), state->getDictionaryEntry<std::string>(input_name + "_uuid_external"));
+
+            addForwardingInput(internal, external, type,
+                               state->getDictionaryEntry<std::string>(input_name + "_label"),
+                               state->getDictionaryEntry<bool>(input_name + "_optional"));
+        }
+
+        is_initialized_ = true;
+    }
 }
 
 void Graph::clear()
@@ -202,7 +248,7 @@ void Graph::deleteConnection(ConnectionPtr connection)
             verify();
 
             connectionDeleted(connection.get());
-            stateChanged();
+            state_changed();
 
             for(const auto& c : connections_) {
                 apex_assert_hard(c);
@@ -681,7 +727,22 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
 
     forward_inputs_[external_input.get()] = relay;
 
-    relay_to_external_input_[internal_uuid] = internal_uuid;
+    relay_to_external_input_[internal_uuid] = external_uuid;
+
+
+    NodeStatePtr state = node_handle_->getNodeState();
+
+    std::string name = relay->getUUID().getFullName();
+
+    std::vector<std::string> input_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_inputs", {});
+    input_uuids.push_back(name);
+    state->setDictionaryEntry("forwarding_inputs", input_uuids);
+
+    state->setDictionaryEntry(name + "_uuid_external", external_input->getUUID().id());
+    state->setDictionaryEntry(name + "_uuid_internal", name);
+    state->setDictionaryEntry(name + "_type", external_input->getType()->typeName());
+    state->setDictionaryEntry(name + "_label", external_input->getLabel());
+    state->setDictionaryEntry(name + "_optional", external_input->isOptional());
 
     forwardingAdded(relay);
 
@@ -720,6 +781,20 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
 
     relay_to_external_output_[internal_uuid] = external_uuid;
 
+
+    NodeStatePtr state = node_handle_->getNodeState();
+
+    std::string name = relay->getUUID().getFullName();
+
+    std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_outputs", {});
+    output_uuids.push_back(name);
+    state->setDictionaryEntry("forwarding_outputs", output_uuids);
+
+    state->setDictionaryEntry(name + "_uuid_external", external_output->getUUID().id());
+    state->setDictionaryEntry(name + "_uuid_internal", name);
+    state->setDictionaryEntry(name + "_type", external_output->getType()->typeName());
+    state->setDictionaryEntry(name + "_label", external_output->getLabel());
+
     forwardingAdded(relay);
 
     relay->messageArrived.connect([this, external_output, relay](Connectable*) {
@@ -729,14 +804,24 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
     return {external_uuid, internal_uuid};
 }
 
-InputPtr Graph::getForwardedInput(const UUID &internal_uuid) const
+InputPtr Graph::getForwardedInputInternal(const UUID &internal_uuid) const
 {
     return transition_relay_in_->getInput(internal_uuid);
 }
 
-OutputPtr Graph::getForwardedOutput(const UUID &internal_uuid) const
+OutputPtr Graph::getForwardedOutputInternal(const UUID &internal_uuid) const
 {
     return transition_relay_out_->getOutput(internal_uuid);
+}
+
+UUID Graph::getForwardedInputExternal(const UUID &internal_uuid) const
+{
+    return relay_to_external_output_.at(internal_uuid);
+}
+
+UUID Graph::getForwardedOutputExternal(const UUID &internal_uuid) const
+{
+    return relay_to_external_input_.at(internal_uuid);
 }
 
 std::vector<UUID> Graph::getRelayOutputs() const
@@ -756,14 +841,57 @@ std::vector<UUID> Graph::getRelayInputs() const
     return res;
 }
 
-void Graph::outputActivation()
+void Graph::notifyMessagesProcessed()
 {
-    if(transition_relay_in_->isEnabled()) {
-        transition_relay_in_->forwardMessages();
-        transition_relay_in_->notifyMessageProcessed();
+    GeneratorNode::notifyMessagesProcessed();
 
+    if(output_active_) {
+        transition_relay_in_->notifyMessageProcessed();
+        output_active_ = false;
+    }
+}
+
+void Graph::inputActivation()
+{
+    if(!transition_relay_in_->hasEstablishedConnection()) {
         if(continuation_) {
             continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+            continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
         }
+    }
+}
+
+void Graph::outputActivation()
+{
+    if(transition_relay_in_->isEnabled() && node_handle_->getOutputTransition()->canStartSendingMessages()) {
+        if(node_handle_->isSource() || continuation_) {
+            publishSubGraphMessages();
+        }
+    }
+}
+
+void Graph::publishSubGraphMessages()
+{
+    apex_assert_hard(transition_relay_in_->isEnabled());
+    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+
+    //        node_handle_->executionRequested([this](){
+    transition_relay_in_->forwardMessages();
+
+    apex_assert_hard(!output_active_);
+    output_active_ = true;
+
+    if(node_handle_->isSource()) {
+        updated();
+
+    } else {
+        apex_assert_hard(continuation_);
+        continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+        continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
+    }
+    //        });
+
+    if(node_handle_->isSink()) {
+        notifyMessagesProcessed();
     }
 }

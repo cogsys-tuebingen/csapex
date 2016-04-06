@@ -79,14 +79,14 @@ void PortPanel::setup()
 void PortPanel::setupOutput()
 {
     for(const UUID& uuid : graph_->getRelayOutputs()) {
-        add(graph_->getForwardedOutput(uuid));
+        add(graph_->getForwardedOutputInternal(uuid));
     }
 }
 
 void PortPanel::setupInput()
 {
     for(const UUID& uuid : graph_->getRelayInputs()) {
-        add(graph_->getForwardedInput(uuid));
+        add(graph_->getForwardedInputInternal(uuid));
     }
 }
 
