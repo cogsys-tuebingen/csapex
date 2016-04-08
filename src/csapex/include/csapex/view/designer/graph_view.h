@@ -10,6 +10,7 @@
 #include <csapex/view/designer/designer_styleable.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/connector_type.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -110,7 +111,7 @@ public Q_SLOTS:
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
 
-    void createPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional);
+    void createPort(csapex::ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional);
     void createPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
     void createPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
 
@@ -193,6 +194,10 @@ private:
     QGraphicsProxyWidget* relayed_inputs_widget_proxy_;
     PortPanel* relayed_outputs_widget_;
     QGraphicsProxyWidget* relayed_outputs_widget_proxy_;
+    PortPanel* relayed_slots_widget_;
+    QGraphicsProxyWidget* relayed_slots_widget_proxy_;
+    PortPanel* relayed_triggers_widget_;
+    QGraphicsProxyWidget* relayed_triggers_widget_proxy_;
 
     std::map<NodeWorker*, std::vector<csapex::slim_signal::ScopedConnection>> worker_connections_;
     std::map<NodeHandle*, std::vector<csapex::slim_signal::ScopedConnection>> handle_connections_;

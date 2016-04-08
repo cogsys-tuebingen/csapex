@@ -23,6 +23,10 @@ public:
     virtual bool isInput() const override {
         return true;
     }
+    virtual ConnectorType getConnectorType() const override
+    {
+        return ConnectorType::INPUT;
+    }
 
     bool canConnectTo(Connectable* other_side, bool move) const override;
 

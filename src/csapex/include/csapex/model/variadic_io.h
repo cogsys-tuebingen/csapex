@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/parameterizable.h>
+#include <csapex/model/connector_type.h>
 
 namespace csapex
 {
@@ -13,7 +14,7 @@ class VariadicBase
 public:
     ~VariadicBase();
 
-    virtual Connectable* createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional) = 0;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) = 0;
 
 protected:
     VariadicBase(ConnectionTypeConstPtr type);
@@ -33,7 +34,7 @@ protected:
 class VariadicInputs : public virtual VariadicBase
 {
 public:
-    virtual Connectable* createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
     VariadicInputs(ConnectionTypeConstPtr type);
@@ -53,7 +54,7 @@ private:
 class VariadicOutputs : public virtual VariadicBase
 {
 public:
-    virtual Connectable* createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
     VariadicOutputs(ConnectionTypeConstPtr type);
@@ -70,14 +71,68 @@ private:
 
 
 
+
+class VariadicTriggers : public virtual VariadicBase
+{
+public:
+    virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+
+protected:
+    VariadicTriggers(ConnectionTypeConstPtr type);
+    VariadicTriggers();
+
+    virtual void setupVariadicParameters(Parameterizable &parameters) override;
+
+private:
+    void updateTriggers(int trigger_count);
+
+private:
+    param::ParameterPtr trigger_count_;
+};
+
+
+
+class VariadicSlots: public virtual VariadicBase
+{
+public:
+    virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+
+protected:
+    VariadicSlots(ConnectionTypeConstPtr type);
+    VariadicSlots();
+
+    virtual void setupVariadicParameters(Parameterizable &parameters) override;
+
+private:
+    void updateSlots(int slot_count);
+
+private:
+    param::ParameterPtr slot_count_;
+};
+
+
+
 class VariadicIO : public VariadicInputs, public VariadicOutputs
 {
 public:
-    virtual Connectable* createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
     VariadicIO(ConnectionTypeConstPtr type);
     VariadicIO();
+
+    virtual void setupVariadicParameters(Parameterizable &parameters) final override;
+};
+
+
+class Variadic : public VariadicInputs, public VariadicOutputs, public VariadicTriggers, public VariadicSlots
+{
+public:
+    virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+
+protected:
+    Variadic(ConnectionTypeConstPtr type);
+    Variadic();
 
     virtual void setupVariadicParameters(Parameterizable &parameters) final override;
 };

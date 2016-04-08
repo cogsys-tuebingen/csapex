@@ -4,6 +4,8 @@
 /// PROJECT
 #include <csapex/msg/output.h>
 #include <csapex/msg/input.h>
+#include <csapex/signal/slot.h>
+#include <csapex/signal/trigger.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/widgets/port.h>
@@ -19,20 +21,36 @@
 using namespace csapex;
 
 
-PortPanel::PortPanel(Type type, DesignerScene* parent)
+PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
     : type_(type), parent_(parent)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setMinimumSize(10, 10);
 
-    QVBoxLayout* mainlayout = new QVBoxLayout;
+    QBoxLayout* mainlayout = nullptr;
 
     setFocusPolicy(Qt::NoFocus);
 
-    layout = new QVBoxLayout;
+    switch(type) {
+    case ConnectorType::INPUT:
+    case ConnectorType::OUTPUT:
+        mainlayout =  new QVBoxLayout;;
+        layout = new QVBoxLayout;
+
+        break;
+
+
+    case ConnectorType::SLOT_T:
+    case ConnectorType::TRIGGER:
+        mainlayout =  new QHBoxLayout;;
+        layout = new QHBoxLayout;
+
+        break;
+    }
+
     mainlayout->addLayout(layout);
 
-    MetaPort* meta_port = new MetaPort(type_ != Type::OUTPUT_RELAY);
+    MetaPort* meta_port = new MetaPort(port_type::opposite(type_));
     QObject::connect(meta_port, &MetaPort::createPortRequest, this, &PortPanel::createPortRequest);
     QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &PortPanel::createPortAndConnectRequest);
     QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &PortPanel::createPortAndMoveRequest);
@@ -47,11 +65,17 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
     graph_ = graph_facade_->getGraph();
 
     switch(type_) {
-    case Type::OUTPUT_RELAY:
+    case ConnectorType::OUTPUT:
         setupOutput();
         break;
-    case Type::INPUT_RELAY:
+    case ConnectorType::INPUT:
         setupInput();
+        break;
+    case ConnectorType::SLOT_T:
+        setupSlot();
+        break;
+    case ConnectorType::TRIGGER:
+        setupSlot();
         break;
 
     default:
@@ -64,13 +88,24 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
 void PortPanel::connectorAdded(ConnectablePtr c)
 {
     switch(type_) {
-    case Type::OUTPUT_RELAY:
+    case ConnectorType::OUTPUT:
         if(std::dynamic_pointer_cast<Output>(c)) {
             add(c);
         }
         break;
-    case Type::INPUT_RELAY:
+    case ConnectorType::INPUT:
         if(std::dynamic_pointer_cast<Input>(c)) {
+            add(c);
+        }
+        break;
+
+    case ConnectorType::SLOT_T:
+        if(std::dynamic_pointer_cast<Slot>(c)) {
+            add(c);
+        }
+        break;
+    case ConnectorType::TRIGGER:
+        if(std::dynamic_pointer_cast<Trigger>(c)) {
             add(c);
         }
         break;
@@ -94,6 +129,20 @@ void PortPanel::setupInput()
     }
 }
 
+void PortPanel::setupSlot()
+{
+    for(const UUID& uuid : graph_->getRelaySlots()) {
+        add(graph_->getForwardedSlotInternal(uuid));
+    }
+}
+
+void PortPanel::setupTrigger()
+{
+    for(const UUID& uuid : graph_->getRelayTriggers()) {
+        add(graph_->getForwardedTriggerInternal(uuid));
+    }
+}
+
 void PortPanel::add(ConnectablePtr c)
 {
     Port* port = new Port(c);
@@ -111,5 +160,6 @@ void PortPanel::add(ConnectablePtr c)
     });
     portAdded(port);
 }
+
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_port_panel.cpp"

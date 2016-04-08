@@ -829,6 +829,121 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
     return {external_uuid, internal_uuid};
 }
 
+std::pair<UUID, UUID> Graph::addForwardingSlot(const std::string& label)
+{
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relaytrigger");
+    UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "slot");
+
+    return addForwardingSlot(internal_uuid, external_uuid, label);
+}
+
+std::pair<UUID, UUID> Graph::addForwardingSlot(const UUID& internal_uuid, const UUID& external_uuid,
+                                                  const std::string& label)
+{
+    registerUUID(internal_uuid);
+    node_handle_->getUUIDProvider()->registerUUID(external_uuid);
+
+
+    TriggerPtr relay = std::make_shared<Trigger>(internal_uuid);
+    relay->setLabel(label);
+
+    relay->connectionInProgress.connect(internalConnectionInProgress);
+
+    relay_trigger_[internal_uuid] = relay;
+
+    auto cb = [this, relay]() {
+        relay->trigger();
+    };
+
+    SlotPtr external_slot = std::make_shared<Slot>(cb, external_uuid, false);
+    external_slot->setLabel(label);
+
+    node_handle_->addSlot(external_slot);
+    forward_slots_[external_slot.get()] = relay;
+
+    relay_to_external_slot_[internal_uuid] = external_uuid;
+
+
+    NodeStatePtr state = node_handle_->getNodeState();
+
+    std::string name = relay->getUUID().getFullName();
+
+    std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_slots", {});
+    output_uuids.push_back(name);
+    state->setDictionaryEntry("forwarding_slots", output_uuids);
+
+    state->setDictionaryEntry(name + "_uuid_external", external_slot->getUUID().id());
+    state->setDictionaryEntry(name + "_uuid_internal", name);
+    state->setDictionaryEntry(name + "_type", external_slot->getType()->typeName());
+    state->setDictionaryEntry(name + "_label", external_slot->getLabel());
+
+    forwardingAdded(relay);
+
+    return {external_uuid, internal_uuid};
+}
+
+
+std::pair<UUID, UUID> Graph::addForwardingTrigger(const std::string& label)
+{
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relayslot");
+    UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "trigger");
+
+    return addForwardingTrigger(internal_uuid, external_uuid, label);
+}
+
+std::pair<UUID, UUID> Graph::addForwardingTrigger(const UUID& internal_uuid, const UUID& external_uuid,
+                                                  const std::string& label)
+{
+    registerUUID(internal_uuid);
+    node_handle_->getUUIDProvider()->registerUUID(external_uuid);
+
+    TriggerPtr external_trigger = std::make_shared<Trigger>(external_uuid);
+    external_trigger->setLabel(label);
+
+    node_handle_->addTrigger(external_trigger);
+
+    auto cb = [this, external_trigger](){
+        external_trigger->trigger();
+    };
+
+    SlotPtr relay = std::make_shared<Slot>(cb, internal_uuid, false);
+    relay->setLabel(label);
+
+    Slot* slot = relay.get();
+
+    relay->connectionInProgress.connect(internalConnectionInProgress);
+    relay->triggered.connect([this, slot](Trigger* source) {
+        node_handle_->executionRequested([this, slot, source]() {
+            slot->handleTrigger();
+            source->signalHandled(slot);
+        });
+    });
+
+    relay_slot_[internal_uuid] = relay;
+    forward_triggers_[external_trigger.get()] = relay;
+
+    relay_to_external_trigger_[internal_uuid] = external_uuid;
+
+
+    NodeStatePtr state = node_handle_->getNodeState();
+
+    std::string name = relay->getUUID().getFullName();
+
+    std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_triggers", {});
+    output_uuids.push_back(name);
+    state->setDictionaryEntry("forwarding_triggers", output_uuids);
+
+    state->setDictionaryEntry(name + "_uuid_external", external_trigger->getUUID().id());
+    state->setDictionaryEntry(name + "_uuid_internal", name);
+    state->setDictionaryEntry(name + "_type", external_trigger->getType()->typeName());
+    state->setDictionaryEntry(name + "_label", external_trigger->getLabel());
+
+    forwardingAdded(relay);
+
+    return {external_uuid, internal_uuid};
+}
+
+
 InputPtr Graph::getForwardedInputInternal(const UUID &internal_uuid) const
 {
     return transition_relay_in_->getInput(internal_uuid);
@@ -839,6 +954,16 @@ OutputPtr Graph::getForwardedOutputInternal(const UUID &internal_uuid) const
     return transition_relay_out_->getOutput(internal_uuid);
 }
 
+SlotPtr Graph::getForwardedSlotInternal(const UUID &internal_uuid) const
+{
+    return relay_slot_.at(internal_uuid);
+}
+
+TriggerPtr Graph::getForwardedTriggerInternal(const UUID &internal_uuid) const
+{
+    return relay_trigger_.at(internal_uuid);
+}
+
 UUID Graph::getForwardedInputExternal(const UUID &internal_uuid) const
 {
     return relay_to_external_output_.at(internal_uuid);
@@ -847,6 +972,16 @@ UUID Graph::getForwardedInputExternal(const UUID &internal_uuid) const
 UUID Graph::getForwardedOutputExternal(const UUID &internal_uuid) const
 {
     return relay_to_external_input_.at(internal_uuid);
+}
+
+UUID Graph::getForwardedSlotExternal(const UUID &internal_uuid) const
+{
+    return relay_to_external_slot_.at(internal_uuid);
+}
+
+UUID Graph::getForwardedTriggerExternal(const UUID &internal_uuid) const
+{
+    return relay_to_external_trigger_.at(internal_uuid);
 }
 
 std::vector<UUID> Graph::getRelayOutputs() const
@@ -861,6 +996,22 @@ std::vector<UUID> Graph::getRelayInputs() const
 {
     std::vector<UUID> res;
     for(const auto& pair : forward_outputs_) {
+        res.push_back(pair.second->getUUID());
+    }
+    return res;
+}
+std::vector<UUID> Graph::getRelaySlots() const
+{
+    std::vector<UUID> res;
+    for(const auto& pair : forward_slots_) {
+        res.push_back(pair.second->getUUID());
+    }
+    return res;
+}
+std::vector<UUID> Graph::getRelayTriggers() const
+{
+    std::vector<UUID> res;
+    for(const auto& pair : forward_triggers_) {
         res.push_back(pair.second->getUUID());
     }
     return res;
@@ -938,7 +1089,7 @@ std::string Graph::makeStatusString() const
     auto printStatus = [&ss](const ConnectionPtr& c) {
         switch(c->getState()) {
         case Connection::State::DONE:
-//        case Connection::State::NOT_INITIALIZED:
+            //        case Connection::State::NOT_INITIALIZED:
             ss << "DONE  ";
             break;
         case Connection::State::READ:

@@ -14,7 +14,7 @@ class MetaPort : public Port
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    MetaPort(bool output, QWidget *parent = nullptr);
+    MetaPort(ConnectorType port_type, QWidget *parent = nullptr);
 
     QString cssClass() {
         return QString("MetaPort");
@@ -27,7 +27,7 @@ public:
     void dropEvent(QDropEvent* e);
 
 Q_SIGNALS:
-    void createPortRequest(bool output, ConnectionTypeConstPtr, std::string, bool);
+    void createPortRequest(ConnectorType output, ConnectionTypeConstPtr, std::string, bool);
     void createPortAndConnectRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
     void createPortAndMoveRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
 
@@ -35,7 +35,7 @@ private Q_SLOTS:
     void triggerCreatePort();
 
 private:
-    bool output_;
+    ConnectorType port_type_;
 };
 
 }

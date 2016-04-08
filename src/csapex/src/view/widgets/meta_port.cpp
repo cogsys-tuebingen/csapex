@@ -15,8 +15,8 @@
 
 using namespace csapex;
 
-MetaPort::MetaPort(bool output, QWidget *parent)
-    : Port(parent), output_(output)
+MetaPort::MetaPort(ConnectorType port_type, QWidget *parent)
+    : Port(parent), port_type_(port_type)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -27,7 +27,7 @@ void MetaPort::showContextMenu(const QPoint& pos)
 {
     QMenu menu("Port");
 
-    QString type = output_ ? "output" : "input";
+    QString type = QString::fromStdString(port_type::name(port_type_));
     QAction add_port(QString("Add new ") + type, &menu);
     QObject::connect(&add_port, &QAction::triggered, this, &MetaPort::triggerCreatePort);
     menu.addAction(&add_port);
@@ -47,7 +47,7 @@ void MetaPort::triggerCreatePort()
     bool optional = true;
 
     ConnectionTypePtr type(new connection_types::AnyMessage);
-    Q_EMIT createPortRequest(output_, type, label.toStdString(), optional);
+    Q_EMIT createPortRequest(port_type_, type, label.toStdString(), optional);
 }
 
 void MetaPort::dragEnterEvent(QDragEnterEvent* e)

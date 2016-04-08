@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/view_fwd.h>
+#include <csapex/model/connector_type.h>
 
 /// SYSTEM
 #include <QFrame>
@@ -18,12 +19,9 @@ class PortPanel : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    enum class Type {
-        OUTPUT_RELAY, INPUT_RELAY
-    };
 
 public:
-    PortPanel(Type type, DesignerScene *parent);
+    PortPanel(ConnectorType type, DesignerScene *parent);
 
     void setup(GraphFacadePtr graph_facade);
 
@@ -33,7 +31,7 @@ public:
 
 
 Q_SIGNALS:
-    void createPortRequest(bool output, ConnectionTypeConstPtr, std::string, bool);
+    void createPortRequest(ConnectorType type, ConnectionTypeConstPtr, std::string, bool);
     void createPortAndConnectRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
     void createPortAndMoveRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
 
@@ -46,13 +44,15 @@ public Q_SLOTS:
 private:
     void setupOutput();
     void setupInput();
+    void setupSlot();
+    void setupTrigger();
 
     void add(ConnectablePtr c);
 
 private:
     GraphFacadePtr graph_facade_;
     Graph* graph_;
-    Type type_;
+    ConnectorType type_;
     DesignerScene *parent_;
 
     QLayout* layout;

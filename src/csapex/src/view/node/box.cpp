@@ -104,18 +104,32 @@ void NodeBox::setupUi()
 
     if(dynamic_cast<VariadicBase*>(getNode())) {
         if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
-            MetaPort* meta_port = new MetaPort(false);
+            MetaPort* meta_port = new MetaPort(ConnectorType::INPUT);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
             ui->input_panel->layout()->addWidget(meta_port);
         }
         if(VariadicOutputs* vo = dynamic_cast<VariadicOutputs*>(getNode())) {
-            MetaPort* meta_port = new MetaPort(false);
+            MetaPort* meta_port = new MetaPort(ConnectorType::OUTPUT);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
             ui->output_panel->layout()->addWidget(meta_port);
+        }
+        if(VariadicSlots* vs = dynamic_cast<VariadicSlots*>(getNode())) {
+            MetaPort* meta_port = new MetaPort(ConnectorType::SLOT_T);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            ui->slot_panel->layout()->addWidget(meta_port);
+        }
+        if(VariadicTriggers* vt = dynamic_cast<VariadicTriggers*>(getNode())) {
+            MetaPort* meta_port = new MetaPort(ConnectorType::TRIGGER);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            ui->trigger_panel->layout()->addWidget(meta_port);
         }
     }
 
@@ -203,11 +217,11 @@ void NodeBox::construct()
 }
 
 
-void NodeBox::createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+void NodeBox::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
     if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
         // TODO: command!
-        vi->createVariadicPort(output, type, label, optional);
+        vi->createVariadicPort(port_type, type, label, optional);
     }
 }
 
@@ -215,7 +229,7 @@ void NodeBox::createVariadicPortAndConnect(Connectable* from, ConnectionTypeCons
 {
     if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
         // TODO: command!
-        Connectable* new_port = vi->createVariadicPort(!from->isOutput(), type, label, optional);
+        Connectable* new_port = vi->createVariadicPort(port_type::opposite(from->getConnectorType()), type, label, optional);
 
         GraphFacade* graph_facade = getGraphView()->getGraphFacade();
         AUUID graph_uuid = graph_facade->getGraph()->getUUID().getAbsoluteUUID();
@@ -235,7 +249,7 @@ void NodeBox::createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPt
 {
     if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
         // TODO: command!
-        Connectable* new_port = vi->createVariadicPort(from->isOutput(), type, label, optional);
+        Connectable* new_port = vi->createVariadicPort(from->getConnectorType(), type, label, optional);
 
         GraphFacade* graph_facade = getGraphView()->getGraphFacade();
         CommandPtr cmd = CommandFactory(graph_facade).moveConnections(from->getUUID(), new_port->getUUID());
@@ -471,10 +485,8 @@ void NodeBox::registerInputEvent(Input* /*in*/)
     Q_EMIT changed(this);
 }
 
-void NodeBox::registerOutputEvent(Output* out)
+void NodeBox::registerOutputEvent(Output* /*out*/)
 {
-    apex_assert_hard(out);
-
     Q_EMIT changed(this);
 }
 

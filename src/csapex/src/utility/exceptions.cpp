@@ -129,7 +129,7 @@ std::ostream &Failure::stackTrace(std::ostream &ss, std::size_t depth) const
 
     reason(ss);
 
-    ss << "Stacktrace:\n";
+    ss << "Stack trace:\n";
 
     size_t i = 1;
     for (; i < stack_depth_ && i < depth; i++) {

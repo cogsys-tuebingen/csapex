@@ -28,6 +28,10 @@ public:
     virtual bool isInput() const override {
         return true;
     }
+    virtual ConnectorType getConnectorType() const override
+    {
+        return ConnectorType::SLOT_T;
+    }
 
     bool isActive() const;
 

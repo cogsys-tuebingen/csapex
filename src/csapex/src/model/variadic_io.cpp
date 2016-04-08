@@ -38,6 +38,9 @@ void VariadicBase::portCountChanged()
 }
 
 
+///
+/// INPUTS
+///
 
 VariadicInputs::VariadicInputs(ConnectionTypeConstPtr type)
     : VariadicBase(type)
@@ -49,10 +52,10 @@ VariadicInputs::VariadicInputs()
 {
 }
 
-Connectable* VariadicInputs::createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional)
+Connectable* VariadicInputs::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
-    apex_assert_hard(!output);
+    apex_assert_hard(port_type == ConnectorType::INPUT);
     auto result = variadic_modifier_->addInput(type, label.empty() ? std::string("Channel") : label, false, optional);
     if(result) {
         input_count_->set((int) variadic_modifier_->getMessageInputs().size());
@@ -93,13 +96,17 @@ void VariadicInputs::updateInputs(int count)
             msg::enable(inputs[i]);
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicPort(false, variadic_type_, "Channel", true);
+            createVariadicPort(ConnectorType::INPUT, variadic_type_, "Channel", true);
         }
     }
 
     portCountChanged();
 }
 
+
+///
+/// OUTPUTS
+///
 
 
 VariadicOutputs::VariadicOutputs(ConnectionTypeConstPtr type)
@@ -112,10 +119,10 @@ VariadicOutputs::VariadicOutputs()
 {
 }
 
-Connectable* VariadicOutputs::createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional)
+Connectable* VariadicOutputs::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
-    apex_assert_hard(output);
+    apex_assert_hard(port_type == ConnectorType::OUTPUT);
     auto result = variadic_modifier_->addOutput(type, label.empty() ? std::string("Channel") : label, false);
     if(result) {
         output_count_->set((int) variadic_modifier_->getMessageOutputs().size());
@@ -155,7 +162,7 @@ void VariadicOutputs::updateOutputs(int count)
             msg::enable(outputs[i]);
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicPort(true, variadic_type_, "Channel", true);
+            createVariadicPort(ConnectorType::OUTPUT, variadic_type_, "Channel", true);
         }
     }
 
@@ -163,8 +170,85 @@ void VariadicOutputs::updateOutputs(int count)
 }
 
 
+///
+/// TRIGGERS
+///
 
 
+VariadicTriggers::VariadicTriggers(ConnectionTypeConstPtr type)
+    : VariadicBase(type)
+{
+
+}
+VariadicTriggers::VariadicTriggers()
+    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+{
+}
+
+Connectable* VariadicTriggers::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional)
+{
+    apex_assert_hard(variadic_modifier_);
+    apex_assert_hard(port_type == ConnectorType::TRIGGER);
+    return nullptr;
+}
+
+void VariadicTriggers::setupVariadicParameters(Parameterizable &parameters)
+{
+    trigger_count_ = csapex::param::ParameterFactory::declareValue("trigger count", 2);
+    parameters.addParameter(trigger_count_, [this](param::Parameter* p) {
+        updateTriggers(p->as<int>());
+    });
+}
+
+void VariadicTriggers::updateTriggers(int count)
+{
+    apex_assert_hard(variadic_modifier_);
+}
+
+
+
+///
+/// SLOTS
+///
+
+
+VariadicSlots::VariadicSlots(ConnectionTypeConstPtr type)
+    : VariadicBase(type)
+{
+
+}
+VariadicSlots::VariadicSlots()
+    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+{
+}
+
+Connectable* VariadicSlots::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional)
+{
+    apex_assert_hard(variadic_modifier_);
+    apex_assert_hard(port_type == ConnectorType::SLOT_T);
+    return nullptr;
+}
+
+void VariadicSlots::setupVariadicParameters(Parameterizable &parameters)
+{
+    slot_count_ = csapex::param::ParameterFactory::declareValue("slot count", 2);
+    parameters.addParameter(slot_count_, [this](param::Parameter* p) {
+        updateSlots(p->as<int>());
+    });
+}
+
+void VariadicSlots::updateSlots(int count)
+{
+    apex_assert_hard(variadic_modifier_);
+}
+
+
+
+
+
+///
+/// IO
+///
 
 
 VariadicIO::VariadicIO(ConnectionTypeConstPtr type)
@@ -177,13 +261,16 @@ VariadicIO::VariadicIO()
 {
 }
 
-Connectable* VariadicIO::createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional)
+Connectable* VariadicIO::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
-    if(output) {
-        return VariadicOutputs::createVariadicPort(output, type, label, optional);
-    } else {
-        return VariadicInputs::createVariadicPort(output, type, label, optional);
+    switch (port_type) {
+    case ConnectorType::OUTPUT:
+        return VariadicOutputs::createVariadicPort(port_type, type, label, optional);
+    case ConnectorType::INPUT:
+        return VariadicInputs::createVariadicPort(port_type, type, label, optional);
+    default:
+        throw std::logic_error(std::string("Variadic port of type ") + port_type::name(port_type) + " is not supported.");
     }
 }
 
@@ -191,4 +278,47 @@ void VariadicIO::setupVariadicParameters(Parameterizable &parameters)
 {
     VariadicInputs::setupVariadicParameters(parameters);
     VariadicOutputs::setupVariadicParameters(parameters);
+}
+
+
+
+
+///
+/// VARIADIC
+///
+
+
+Variadic::Variadic(ConnectionTypeConstPtr type)
+    : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type), VariadicTriggers(type), VariadicSlots(type)
+{
+
+}
+Variadic::Variadic()
+    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+{
+}
+
+Connectable* Variadic::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional)
+{
+    apex_assert_hard(variadic_modifier_);
+    switch (port_type) {
+    case ConnectorType::OUTPUT:
+        return VariadicOutputs::createVariadicPort(port_type, type, label, optional);
+    case ConnectorType::INPUT:
+        return VariadicInputs::createVariadicPort(port_type, type, label, optional);
+    case ConnectorType::SLOT_T:
+        return VariadicSlots::createVariadicPort(port_type, type, label, optional);
+    case ConnectorType::TRIGGER:
+        return VariadicTriggers::createVariadicPort(port_type, type, label, optional);
+    default:
+        throw std::logic_error(std::string("Variadic port of type ") + port_type::name(port_type) + " is not supported.");
+    }
+}
+
+void Variadic::setupVariadicParameters(Parameterizable &parameters)
+{
+    VariadicInputs::setupVariadicParameters(parameters);
+    VariadicOutputs::setupVariadicParameters(parameters);
+    VariadicTriggers::setupVariadicParameters(parameters);
+    VariadicSlots::setupVariadicParameters(parameters);
 }

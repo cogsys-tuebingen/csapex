@@ -50,9 +50,6 @@ void GroupBase::analyzeConnections(Graph* graph)
     connections_going_in.clear();
     connections_going_out.clear();
 
-    crossing_inputs.clear();
-    crossing_outputs.clear();
-
     for(NodeHandle* nh : nodes) {
         for(const InputPtr& input : nh->getAllInputs()) {
             for(const ConnectionPtr& connection : input->getConnections()) {
@@ -74,7 +71,6 @@ void GroupBase::analyzeConnections(Graph* graph)
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     connections_going_in.push_back(c);
-                    crossing_inputs.push_back({ output->getUUID(), input->getUUID() });
                 }
             }
         }
@@ -97,7 +93,6 @@ void GroupBase::analyzeConnections(Graph* graph)
                     c.to = input->getUUID();
                     c.type = input->getType();
                     connections_going_out.push_back(c);
-                    crossing_outputs.push_back({ output->getUUID(), input->getUUID() });
                 }
             }
         }

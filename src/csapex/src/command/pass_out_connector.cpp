@@ -14,7 +14,7 @@
 using namespace csapex;
 using namespace command;
 
-PassOutConnector::PassOutConnector(const AUUID& graph_id, const std::string& connector_type,
+PassOutConnector::PassOutConnector(const AUUID& graph_id, const ConnectorType& connector_type,
                                    const ConnectionTypeConstPtr& type)
     : Command(graph_id), connector_type(connector_type), token_type(type)
 {
@@ -27,7 +27,7 @@ std::string PassOutConnector::getType() const
 
 std::string PassOutConnector::getDescription() const
 {
-    return std::string("create forwarding connector with type ") + connector_type;
+    return std::string("create forwarding connector with type ") + port_type::name(connector_type);
 }
 
 
@@ -35,10 +35,21 @@ bool PassOutConnector::doExecute()
 {
     Graph* graph = getGraph();
 
-    if(connector_type == "in") {
+    switch(connector_type) {
+    case ConnectorType::INPUT:
         map = graph->addForwardingInput(token_type, "forwarding", false);
-    } else {
+        break;
+    case ConnectorType::OUTPUT:
         map = graph->addForwardingOutput(token_type, "forwarding");
+        break;
+    case ConnectorType::SLOT_T:
+        map = graph->addForwardingSlot("forwarding");
+        break;
+    case ConnectorType::TRIGGER:
+        map = graph->addForwardingTrigger("forwarding");
+        break;
+    default:
+        throw std::logic_error(std::string("unknown connector type: ") + port_type::name(connector_type));
     }
 
     return true;

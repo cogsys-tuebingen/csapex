@@ -19,6 +19,7 @@
 #include <csapex/command/switch_thread.h>
 #include <csapex/command/set_color.h>
 #include <csapex/command/add_msg_connection.h>
+#include <csapex/command/add_signal_connection.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
@@ -153,7 +154,7 @@ GraphView::~GraphView()
 void GraphView::setupWidgets()
 {
     if(graph_facade_->getParent()) {
-        relayed_outputs_widget_ = new PortPanel(PortPanel::Type::OUTPUT_RELAY, scene_);
+        relayed_outputs_widget_ = new PortPanel(ConnectorType::OUTPUT, scene_);
         QObject::connect(relayed_outputs_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
         QObject::connect(relayed_outputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
         QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
@@ -162,7 +163,8 @@ void GraphView::setupWidgets()
 
         relayed_outputs_widget_->setup(graph_facade_);
 
-        relayed_inputs_widget_ = new PortPanel(PortPanel::Type::INPUT_RELAY, scene_);
+
+        relayed_inputs_widget_ = new PortPanel(ConnectorType::INPUT, scene_);
         QObject::connect(relayed_inputs_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
         QObject::connect(relayed_inputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
         QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
@@ -170,6 +172,26 @@ void GraphView::setupWidgets()
         relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
 
         relayed_inputs_widget_->setup(graph_facade_);
+
+
+        relayed_slots_widget_ = new PortPanel(ConnectorType::SLOT_T, scene_);
+        QObject::connect(relayed_slots_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+        QObject::connect(relayed_slots_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+        QObject::connect(relayed_slots_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+        QObject::connect(relayed_slots_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+        relayed_slots_widget_proxy_ = scene_->addWidget(relayed_slots_widget_);
+
+        relayed_slots_widget_->setup(graph_facade_);
+
+
+        relayed_triggers_widget_ = new PortPanel(ConnectorType::TRIGGER, scene_);
+        QObject::connect(relayed_triggers_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+        QObject::connect(relayed_triggers_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+        QObject::connect(relayed_triggers_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+        QObject::connect(relayed_triggers_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+        relayed_triggers_widget_proxy_ = scene_->addWidget(relayed_triggers_widget_);
+
+        relayed_triggers_widget_->setup(graph_facade_);
     }
 }
 
@@ -193,6 +215,20 @@ void GraphView::paintEvent(QPaintEvent *e)
                         mid.y() - relayed_inputs_widget_->height() / 2.0);
             if(pos != relayed_inputs_widget_proxy_->pos()) {
                 relayed_inputs_widget_proxy_->setPos(pos);
+            }
+        }
+        {
+            QPointF pos(mid.x() - relayed_slots_widget_->width() / 2.0,
+                        br_view.y() - relayed_slots_widget_->height());
+            if(pos != relayed_slots_widget_proxy_->pos()) {
+                relayed_slots_widget_proxy_->setPos(pos);
+            }
+        }
+        {
+            QPointF pos(mid.x() - relayed_triggers_widget_->width() / 2.0,
+                        tl_view.y());
+            if(pos != relayed_triggers_widget_proxy_->pos()) {
+                relayed_triggers_widget_proxy_->setPos(pos);
             }
         }
     }
@@ -887,16 +923,28 @@ void GraphView::removeBox(NodeBox *box)
 }
 
 
-void GraphView::createPort(bool output, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+void GraphView::createPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
     // TODO: move to graph! make graph derive from variadic io!
     Graph* graph = graph_facade_->getGraph();
-    if(output) {
+
+    switch(port_type) {
+    case ConnectorType::OUTPUT:
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
-    } else {
+        graph->addForwardingOutput(type, label);
+        break;
+    case ConnectorType::INPUT:
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
+        graph->addForwardingInput(type, label, optional);
+        break;
+    case ConnectorType::TRIGGER:
+        // TODO: command!
+        graph->addForwardingTrigger(label);
+        break;
+    case ConnectorType::SLOT_T:
+        // TODO: command!
+        graph->addForwardingSlot(label);
+        break;
     }
 }
 
@@ -906,14 +954,36 @@ void GraphView::createPortAndConnect(Connectable* from, ConnectionTypeConstPtr t
     AUUID graph_uuid = graph_facade_->getGraph()->getUUID().getAbsoluteUUID();
 
     Command::Ptr cmd;
-    if(from->isOutput()) {
+
+    switch(from->getConnectorType()) {
+    case ConnectorType::OUTPUT:
+    {
         // TODO: command!
         std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
         cmd.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), ports.second));
-    } else {
+    }
+        break;
+    case ConnectorType::INPUT:
+    {
         // TODO: command!
         std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
         cmd.reset(new command::AddMessageConnection(graph_uuid, ports.second, from->getUUID()));
+    }
+        break;
+    case ConnectorType::TRIGGER:
+    {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingTrigger(label);
+        cmd.reset(new command::AddSignalConnection(graph_uuid, from->getUUID(), ports.second));
+    }
+        break;
+    case ConnectorType::SLOT_T:
+    {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingSlot(label);
+        cmd.reset(new command::AddSignalConnection(graph_uuid, ports.second, from->getUUID()));
+    }
+        break;
     }
 
     dispatcher_->execute(cmd);
@@ -924,14 +994,36 @@ void GraphView::createPortAndMove(Connectable* from, ConnectionTypeConstPtr type
     Graph* graph = graph_facade_->getGraph();
 
     Command::Ptr cmd;
-    if(from->isInput()) {
+
+    switch(port_type::opposite(from->getConnectorType())) {
+    case ConnectorType::OUTPUT:
+    {
         // TODO: command!
         std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
         cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
-    } else {
+    }
+        break;
+    case ConnectorType::INPUT:
+    {
         // TODO: command!
         std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
         cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+    }
+        break;
+    case ConnectorType::TRIGGER:
+    {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingTrigger(label);
+        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+    }
+        break;
+    case ConnectorType::SLOT_T:
+    {
+        // TODO: command!
+        std::pair<UUID, UUID> ports = graph->addForwardingSlot(label);
+        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+    }
+        break;
     }
 
     dispatcher_->execute(cmd);
@@ -1083,6 +1175,8 @@ void GraphView::overwriteStyleSheet(const QString &stylesheet)
     if(graph_facade_->getParent()) {
         relayed_outputs_widget_->setStyleSheet(stylesheet);
         relayed_inputs_widget_->setStyleSheet(stylesheet);
+        relayed_slots_widget_->setStyleSheet(stylesheet);
+        relayed_triggers_widget_->setStyleSheet(stylesheet);
     }
 }
 

@@ -5,6 +5,7 @@
 #include <csapex/model/connectable.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/command/command_fwd.h>
+#include <csapex/model/connector_type.h>
 
 /// SYSTEM
 #include <QFrame>

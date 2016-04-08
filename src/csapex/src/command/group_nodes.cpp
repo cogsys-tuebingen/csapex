@@ -105,7 +105,7 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
         std::shared_ptr<command::PassOutConnector> pass_out =
-                std::make_shared<command::PassOutConnector>(sub_graph_auuid, "in", ci.type);
+                std::make_shared<command::PassOutConnector>(sub_graph_auuid, ConnectorType::INPUT, ci.type);
         executeCommand(pass_out);
         add(pass_out);
 
@@ -130,7 +130,7 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
         std::shared_ptr<command::PassOutConnector> pass_out =
-                std::make_shared<command::PassOutConnector>(sub_graph_auuid, "out", ci.type);
+                std::make_shared<command::PassOutConnector>(sub_graph_auuid, ConnectorType::OUTPUT, ci.type);
         executeCommand(pass_out);
         add(pass_out);
 

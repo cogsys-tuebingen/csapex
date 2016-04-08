@@ -25,6 +25,10 @@ public:
     virtual bool isOutput() const override {
         return true;
     }
+    virtual ConnectorType getConnectorType() const override
+    {
+        return ConnectorType::TRIGGER;
+    }
 
     void trigger();
     void signalHandled(Slot* slot);

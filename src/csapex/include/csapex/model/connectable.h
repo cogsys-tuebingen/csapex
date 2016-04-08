@@ -6,6 +6,7 @@
 #include <csapex/model/connection_type.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
+#include <csapex/model/connector_type.h>
 
 /// SYSTEM
 #include <mutex>
@@ -59,6 +60,8 @@ public:
 
     void setType(ConnectionType::ConstPtr type);
     ConnectionType::ConstPtr getType() const;
+
+    virtual ConnectorType getConnectorType() const = 0;
 
     void setLevel(int level);
     int getLevel() const;

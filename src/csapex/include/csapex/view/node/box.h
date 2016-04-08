@@ -9,6 +9,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/connector_type.h>
 
 /// SYSTEM
 #include <memory>
@@ -137,7 +138,7 @@ public Q_SLOTS:
 
     void updateVisuals();
 
-    void createVariadicPort(bool output, ConnectionTypeConstPtr type, const std::string& label, bool optional);
+    void createVariadicPort(csapex::ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional);
     void createVariadicPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
     void createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
 

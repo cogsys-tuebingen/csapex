@@ -212,6 +212,7 @@ add_library(csapex SHARED
     src/manager/message_provider_manager.cpp
 
     src/model/connectable.cpp
+    src/model/connector_type.cpp
     src/model/connection.cpp
     src/model/connection_type.cpp
     src/model/error_state.cpp

@@ -103,15 +103,23 @@ public:
 
     std::pair<UUID, UUID> addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
     std::pair<UUID, UUID> addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);
+    std::pair<UUID, UUID> addForwardingSlot(const std::string& label);
+    std::pair<UUID, UUID> addForwardingTrigger(const std::string& label);
 
     InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
     OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
+    SlotPtr getForwardedSlotInternal(const UUID& internal_uuid) const;
+    TriggerPtr getForwardedTriggerInternal(const UUID& internal_uuid) const;
 
     UUID getForwardedInputExternal(const UUID& internal_uuid) const;
     UUID getForwardedOutputExternal(const UUID& internal_uuid) const;
+    UUID getForwardedSlotExternal(const UUID& internal_uuid) const;
+    UUID getForwardedTriggerExternal(const UUID& internal_uuid) const;
 
     std::vector<UUID> getRelayOutputs() const;
     std::vector<UUID> getRelayInputs() const;
+    std::vector<UUID> getRelaySlots() const;
+    std::vector<UUID> getRelayTriggers() const;
 
     std::string makeStatusString() const;
 
@@ -120,6 +128,8 @@ private:
                                              const std::string& label, bool optional);
     std::pair<UUID, UUID> addForwardingOutput(const UUID& internal_uuid, const UUID& external_uuid, const ConnectionTypeConstPtr& type,
                                               const std::string& label);
+    std::pair<UUID, UUID> addForwardingSlot(const UUID& internal_uuid, const UUID &external_uuid, const std::string& label);
+    std::pair<UUID, UUID> addForwardingTrigger(const UUID& internal_uuid, const UUID &external_uuid, const std::string& label);
 
    /*rename*/ void verify();
     void buildConnectedComponents();
@@ -160,12 +170,18 @@ protected:
 
     InputTransitionPtr transition_relay_in_;
     OutputTransitionPtr transition_relay_out_;
+    std::unordered_map<UUID, SlotPtr, UUID::Hasher> relay_slot_;
+    std::unordered_map<UUID, TriggerPtr, UUID::Hasher> relay_trigger_;
 
     std::map<Input*, OutputPtr> forward_inputs_;
     std::map<Output*, InputPtr> forward_outputs_;
+    std::map<Slot*, TriggerPtr> forward_slots_;
+    std::map<Trigger*, SlotPtr> forward_triggers_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_output_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_slot_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_trigger_;
 
     bool is_initialized_;
     bool output_active_;

@@ -588,9 +588,6 @@ void NodeHandle::addSlot(SlotPtr s)
     auto connection = s->triggered.connect([this, slot](Trigger* source) {
         executionRequested([this, slot, source]() {
             slot->handleTrigger();
-            /// PROBLEM: Relaying signals not yet possible here
-            ///  if slot triggeres a signal itself...
-            /// SOLUTION: boost signal?
             source->signalHandled(slot);
         });
     });
@@ -634,9 +631,9 @@ Connectable* NodeHandle::getConnector(const UUID &uuid) const
         return getInput(uuid);
     } else if(type == "out" || type == "relayout") {
         return getOutput(uuid);
-    } else if(type == "slot") {
+    } else if(type == "slot" || type == "relayslot") {
         return getSlot(uuid);
-    } else if(type == "trigger") {
+    } else if(type == "trigger" || type == "relaytrigger") {
         return getTrigger(uuid);
     } else {
         throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
@@ -684,6 +681,11 @@ Slot* NodeHandle::getSlot(const UUID& uuid) const
         }
     }
 
+    GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
+    if(graph) {
+        return graph->getForwardedSlotInternal(uuid).get();
+    }
+
     return nullptr;
 }
 
@@ -694,6 +696,11 @@ Trigger* NodeHandle::getTrigger(const UUID& uuid) const
         if(t->getUUID() == uuid) {
             return t.get();
         }
+    }
+
+    GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
+    if(graph) {
+        return graph->getForwardedTriggerInternal(uuid).get();
     }
 
     return nullptr;

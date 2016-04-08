@@ -40,6 +40,10 @@ public:
     {
         return true;
     }
+    virtual ConnectorType getConnectorType() const override
+    {
+        return ConnectorType::OUTPUT;
+    }
 
     void activate();
 

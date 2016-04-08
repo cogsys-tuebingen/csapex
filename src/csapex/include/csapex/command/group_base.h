@@ -39,9 +39,8 @@ protected:
 
     std::vector<ConnectionInformation> connections_going_in;
     std::vector<ConnectionInformation> connections_going_out;
-
-    std::vector<std::pair<UUID, UUID>> crossing_inputs;
-    std::vector<std::pair<UUID, UUID>> crossing_outputs;
+    std::vector<ConnectionInformation> signals_going_in;
+    std::vector<ConnectionInformation> signals_going_out;
 
 
     YAML::Node selection_yaml;
