@@ -53,7 +53,7 @@ void SetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_n
         if(!set_p_ || !combo) {
             return;
         }
-        int index = combo->findData(QString::fromStdString(set_p_->getText()));
+        int index = combo->findText(QString::fromStdString(set_p_->getText()));
         if(index >= 0) {
             combo->blockSignals(true);
             combo->setCurrentIndex(index);
