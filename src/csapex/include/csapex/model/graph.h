@@ -6,6 +6,7 @@
 #include <csapex/model/generator_node.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/model/variadic_io.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
@@ -15,7 +16,7 @@
 
 namespace csapex {
 
-class Graph : public GeneratorNode, public UUIDProvider
+class Graph : public GeneratorNode, public UUIDProvider, public Variadic
 {
     friend class GraphIO;
     friend class GraphFacade;
@@ -96,10 +97,16 @@ public:
 
     // Node interface
     virtual void setup(csapex::NodeModifier& modifier) override;
+    virtual void setupParameters(Parameterizable& params) override;
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& params,
                          std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation) override;
 
     virtual bool isAsynchronous() const override;
+
+    virtual Connectable* createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label) override;
+    virtual Connectable* createVariadicTrigger(const std::string& label) override;
+    virtual Connectable* createVariadicSlot(const std::string& label) override;
 
     std::pair<UUID, UUID> addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
     std::pair<UUID, UUID> addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);

@@ -16,6 +16,7 @@ class MovableGraphicsProxyWidget : public QGraphicsProxyWidget
 
 public:
     MovableGraphicsProxyWidget(NodeBox* box, GraphView* view, DesignerOptions *options, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    ~MovableGraphicsProxyWidget();
 
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 

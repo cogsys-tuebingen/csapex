@@ -24,6 +24,7 @@
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/widgets/meta_port.h>
+#include <csapex/view/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <QMenu>
@@ -69,7 +70,15 @@ void NodeBox::setAdapter(NodeAdapter::Ptr adapter)
 
 NodeBox::~NodeBox()
 {
+    adapter_.reset();
+
+    for(QObject* child : children()) {
+        delete child;
+    }
+
+    apex_assert_hard(initialized_);
     delete ui;
+    initialized_ = false;
 }
 
 

@@ -57,6 +57,11 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *
     setZValue(z);
 }
 
+MovableGraphicsProxyWidget::~MovableGraphicsProxyWidget()
+{
+
+}
+
 QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (QApplication::mouseButtons() == Qt::LeftButton &&

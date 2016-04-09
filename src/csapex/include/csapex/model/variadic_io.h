@@ -3,6 +3,8 @@
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
+#include <csapex/msg/msg_fwd.h>
+#include <csapex/signal/signal_fwd.h>
 #include <csapex/model/parameterizable.h>
 #include <csapex/model/connector_type.h>
 
@@ -34,6 +36,7 @@ protected:
 class VariadicInputs : public virtual VariadicBase
 {
 public:
+    virtual Connectable* createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
@@ -47,6 +50,7 @@ private:
 
 private:
     param::ParameterPtr input_count_;
+    std::vector<Input*> variadic_inputs_;
 };
 
 
@@ -54,6 +58,7 @@ private:
 class VariadicOutputs : public virtual VariadicBase
 {
 public:
+    virtual Connectable* createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
@@ -67,6 +72,7 @@ private:
 
 private:
     param::ParameterPtr output_count_;
+    std::vector<Output*> variadic_outputs_;
 };
 
 
@@ -75,6 +81,7 @@ private:
 class VariadicTriggers : public virtual VariadicBase
 {
 public:
+    virtual Connectable* createVariadicTrigger(const std::string& label);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
@@ -88,6 +95,7 @@ private:
 
 private:
     param::ParameterPtr trigger_count_;
+    std::vector<Trigger*> variadic_triggers_;
 };
 
 
@@ -95,6 +103,7 @@ private:
 class VariadicSlots: public virtual VariadicBase
 {
 public:
+    virtual Connectable* createVariadicSlot(const std::string& label);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
@@ -108,6 +117,7 @@ private:
 
 private:
     param::ParameterPtr slot_count_;
+    std::vector<Slot*> variadic_slots_;
 };
 
 

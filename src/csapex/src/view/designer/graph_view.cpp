@@ -629,7 +629,9 @@ void GraphView::animateScroll()
 
 void GraphView::showBoxDialog()
 {
-    BoxDialog diag(node_factory_);
+    auto window =  QApplication::activeWindow();
+    BoxDialog diag(node_factory_, window);
+
     int r = diag.exec();
 
     if(r) {
@@ -845,6 +847,7 @@ void GraphView::nodeRemoved(NodeHandlePtr node_handle)
     box->stop();
 
     box_map_.erase(box_map_.find(node_uuid));
+    proxy_map_.erase(proxy_map_.find(node_uuid));
 
     removeBox(box);
 

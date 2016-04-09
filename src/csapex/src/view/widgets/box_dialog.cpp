@@ -139,8 +139,8 @@ void BoxDialog::makeUI()
     setWindowIcon(QIcon(":/add_node.png"));
     setWindowTitle("Create Node");
 
+    setFocusPolicy(Qt::StrongFocus);
     setModal(true);
-    setWindowFlags(Qt::WindowStaysOnTopHint);
 
     QVBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
@@ -166,6 +166,7 @@ void BoxDialog::makeUI()
 
     connect(name_edit_, SIGNAL(editingFinished()), this, SLOT(finish()));
 }
+
 
 void BoxDialog::finish()
 {

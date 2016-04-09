@@ -671,9 +671,14 @@ const Graph::node_const_iterator Graph::endNodes() const
     return nodes_.cend();
 }
 
-void Graph::setup(NodeModifier &/*modifier*/)
+void Graph::setup(NodeModifier &modifier)
 {
+    setupVariadic(modifier);
+}
 
+void Graph::setupParameters(Parameterizable &params)
+{
+    setupVariadicParameters(params);
 }
 
 void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
@@ -710,6 +715,26 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
 bool Graph::isAsynchronous() const
 {
     return true;
+}
+
+Connectable* Graph::createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional)
+{
+    return VariadicInputs::createVariadicInput(type, label, optional);
+}
+
+Connectable* Graph::createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label)
+{
+    return VariadicOutputs::createVariadicOutput(type, label);
+}
+
+Connectable* Graph::createVariadicTrigger(const std::string& label)
+{
+    return VariadicTriggers::createVariadicTrigger(label);
+}
+
+Connectable* Graph::createVariadicSlot(const std::string& label)
+{
+    return VariadicSlots::createVariadicSlot(label);
 }
 
 std::pair<UUID, UUID> Graph::addForwardingInput(const ConnectionTypeConstPtr& type,
