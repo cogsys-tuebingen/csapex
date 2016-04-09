@@ -36,7 +36,8 @@ protected:
 class VariadicInputs : public virtual VariadicBase
 {
 public:
-    virtual Connectable* createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional);
+    virtual Input* createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional);
+    virtual void removeVariadicInput(InputPtr input);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
@@ -50,7 +51,7 @@ private:
 
 private:
     param::ParameterPtr input_count_;
-    std::vector<Input*> variadic_inputs_;
+    std::vector<InputPtr> variadic_inputs_;
 };
 
 
@@ -58,7 +59,8 @@ private:
 class VariadicOutputs : public virtual VariadicBase
 {
 public:
-    virtual Connectable* createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label);
+    virtual Output* createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label);
+    virtual void removeVariadicOutput(OutputPtr output);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
@@ -72,7 +74,7 @@ private:
 
 private:
     param::ParameterPtr output_count_;
-    std::vector<Output*> variadic_outputs_;
+    std::vector<OutputPtr> variadic_outputs_;
 };
 
 
@@ -81,7 +83,8 @@ private:
 class VariadicTriggers : public virtual VariadicBase
 {
 public:
-    virtual Connectable* createVariadicTrigger(const std::string& label);
+    virtual Trigger* createVariadicTrigger(const std::string& label);
+    virtual void removeVariadicTrigger(TriggerPtr trigger);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
@@ -95,7 +98,7 @@ private:
 
 private:
     param::ParameterPtr trigger_count_;
-    std::vector<Trigger*> variadic_triggers_;
+    std::vector<TriggerPtr> variadic_triggers_;
 };
 
 
@@ -103,7 +106,8 @@ private:
 class VariadicSlots: public virtual VariadicBase
 {
 public:
-    virtual Connectable* createVariadicSlot(const std::string& label);
+    virtual Slot* createVariadicSlot(const std::string& label, std::function<void ()> callback);
+    virtual void removeVariadicSlot(SlotPtr slot);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
 protected:
@@ -117,7 +121,7 @@ private:
 
 private:
     param::ParameterPtr slot_count_;
-    std::vector<Slot*> variadic_slots_;
+    std::vector<SlotPtr> variadic_slots_;
 };
 
 

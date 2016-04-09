@@ -242,7 +242,9 @@ void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>
     for(const ConnectionPtr& connection : connections) {
         if(ignore_forwarding_connections_) {
             if(connection->from()->getUUID().type() == "relayout" ||
-                    connection->to()->getUUID().type() == "relayin") {
+                    connection->to()->getUUID().type() == "relayin" ||
+                    connection->from()->getUUID().type() == "relaytrigger" ||
+                    connection->to()->getUUID().type() == "relayslot") {
                 continue;
             }
         }
@@ -327,21 +329,15 @@ void GraphIO::loadConnection(const YAML::Node& connection)
     for(unsigned j=0; j<targets.size(); ++j) {
         UUID to_uuid = readConnectorUUID(graph_->shared_from_this(), targets[j]);
 
-        Connectable* from = parent->getOutput(from_uuid);
-        if(from != nullptr) {
+        std::string type = to_uuid.type();
+
+        if(type == "in" || type == "relayin") {
+            Output* from = parent->getOutput(from_uuid);
             loadMessageConnection(from, parent, to_uuid);
-            continue;
-
         } else {
-            from = parent->getTrigger(from_uuid);
-            if(from != nullptr) {
-                loadSignalConnection(from, to_uuid);
-                continue;
-            }
+            Trigger* from = parent->getTrigger(from_uuid);
+            loadSignalConnection(from, to_uuid);
         }
-
-        std::cerr << "cannot load connection, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
-
     }
 }
 

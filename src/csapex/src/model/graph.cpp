@@ -69,37 +69,6 @@ void Graph::stateChanged()
 
     if(!is_initialized_) {
         NodeStatePtr state = node_handle_->getNodeState();
-
-        std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_outputs", {});
-        // delete save entries -> will now be replaced.
-        state->deleteDictionaryEntry("forwarding_outputs");
-
-        for(const std::string& output_name : output_uuids) {
-            ConnectionTypeConstPtr type = MessageFactory::createMessage(state->getDictionaryEntry<std::string>(output_name + "_type"));
-
-            UUID internal = makeUUID(state->getDictionaryEntry<std::string>(output_name + "_uuid_internal"));
-            UUID external = node_handle_->getUUIDProvider()->makeDerivedUUID(getUUID(), state->getDictionaryEntry<std::string>(output_name + "_uuid_external"));
-
-            addForwardingOutput(internal, external, type,
-                                state->getDictionaryEntry<std::string>(output_name + "_label"));
-        }
-
-
-        std::vector<std::string> input_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_inputs", {});
-        // delete save entries -> will now be replaced.
-        state->deleteDictionaryEntry("forwarding_inputs");
-
-        for(const std::string& input_name : input_uuids) {
-            ConnectionTypeConstPtr type = MessageFactory::createMessage(state->getDictionaryEntry<std::string>(input_name + "_type"));
-
-            UUID internal = makeUUID(state->getDictionaryEntry<std::string>(input_name + "_uuid_internal"));
-            UUID external = node_handle_->getUUIDProvider()->makeDerivedUUID(getUUID(), state->getDictionaryEntry<std::string>(input_name + "_uuid_external"));
-
-            addForwardingInput(internal, external, type,
-                               state->getDictionaryEntry<std::string>(input_name + "_label"),
-                               state->getDictionaryEntry<bool>(input_name + "_optional"));
-        }
-
         is_initialized_ = true;
     }
 }
@@ -717,48 +686,39 @@ bool Graph::isAsynchronous() const
     return true;
 }
 
-Connectable* Graph::createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional)
+Input* Graph::createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional)
 {
-    return VariadicInputs::createVariadicInput(type, label, optional);
+    auto pair = addForwardingInput(type, label, optional);
+    return node_handle_->getInput(pair.external);
 }
 
-Connectable* Graph::createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label)
+void Graph::removeVariadicInput(InputPtr input)
 {
-    return VariadicOutputs::createVariadicOutput(type, label);
+    OutputPtr relay = forward_inputs_[input.get()];
+    forwardingRemoved(relay);
+
+    VariadicInputs::removeVariadicInput(input);
+
+    relay_to_external_input_.erase(relay->getUUID());
+
+    forward_inputs_.erase(input.get());
+    transition_relay_out_->removeOutput(relay);
 }
 
-Connectable* Graph::createVariadicTrigger(const std::string& label)
-{
-    return VariadicTriggers::createVariadicTrigger(label);
-}
-
-Connectable* Graph::createVariadicSlot(const std::string& label)
-{
-    return VariadicSlots::createVariadicSlot(label);
-}
-
-std::pair<UUID, UUID> Graph::addForwardingInput(const ConnectionTypeConstPtr& type,
+RelayMapping Graph::addForwardingInput(const ConnectionTypeConstPtr& type,
                                                 const std::string& label, bool optional)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayout");
-    UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "in");
+    UUID external_uuid = addForwardingInput(internal_uuid, type, label, optional);
 
-    return addForwardingInput(internal_uuid, external_uuid, type, label, optional);
+    return {external_uuid, internal_uuid};
 }
 
-std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const UUID& external_uuid,
-                                                const ConnectionTypeConstPtr& type,
-                                                const std::string& label, bool optional)
+UUID  Graph::addForwardingInput(const UUID& internal_uuid, const ConnectionTypeConstPtr& type, const std::string& label, bool optional)
 {
     registerUUID(internal_uuid);
-    node_handle_->getUUIDProvider()->registerUUID(external_uuid);
 
-    InputPtr external_input = std::make_shared<Input>(external_uuid);
-    external_input->setLabel(label);
-    external_input->setOptional(optional);
-    external_input->setType(type);
-
-    node_handle_->addInput(external_input);
+    Input* external_input = VariadicInputs::createVariadicInput(type, label, optional);
 
     OutputPtr relay = std::make_shared<StaticOutput>(internal_uuid);
     relay->setType(type);
@@ -768,52 +728,49 @@ std::pair<UUID, UUID> Graph::addForwardingInput(const UUID& internal_uuid, const
 
     transition_relay_out_->addOutput(relay);
 
-    forward_inputs_[external_input.get()] = relay;
+    forward_inputs_[external_input] = relay;
 
-    relay_to_external_input_[internal_uuid] = external_uuid;
-
-
-    NodeStatePtr state = node_handle_->getNodeState();
-
-    std::string name = relay->getUUID().getFullName();
-
-    std::vector<std::string> input_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_inputs", {});
-    input_uuids.push_back(name);
-    state->setDictionaryEntry("forwarding_inputs", input_uuids);
-
-    state->setDictionaryEntry(name + "_uuid_external", external_input->getUUID().id());
-    state->setDictionaryEntry(name + "_uuid_internal", name);
-    state->setDictionaryEntry(name + "_type", external_input->getType()->typeName());
-    state->setDictionaryEntry(name + "_label", external_input->getLabel());
-    state->setDictionaryEntry(name + "_optional", external_input->isOptional());
+    relay_to_external_input_[internal_uuid] = external_input->getUUID();
 
     forwardingAdded(relay);
+
+    return external_input->getUUID();
+}
+
+
+Output* Graph::createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label)
+{
+    auto pair = addForwardingOutput(type, label);
+    return node_handle_->getOutput(pair.external);
+}
+
+void Graph::removeVariadicOutput(OutputPtr output)
+{
+    InputPtr relay = forward_outputs_[output.get()];
+    forwardingRemoved(relay);
+
+    VariadicOutputs::removeVariadicOutput(output);
+
+    relay_to_external_output_.erase(relay->getUUID());
+
+    forward_outputs_.erase(output.get());
+    transition_relay_in_->removeInput(relay);
+}
+
+RelayMapping Graph::addForwardingOutput(const ConnectionTypeConstPtr& type,
+                                                 const std::string& label)
+{
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
+    UUID external_uuid = addForwardingOutput(internal_uuid, type, label);
 
     return {external_uuid, internal_uuid};
 }
 
-std::pair<UUID, UUID> Graph::addForwardingOutput(const ConnectionTypeConstPtr& type,
-                                                 const std::string& label)
-{
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
-    UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "out");
-
-    return addForwardingOutput(internal_uuid, external_uuid, type, label);
-}
-
-std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, const UUID& external_uuid,
-                                                 const ConnectionTypeConstPtr& type,
-                                                 const std::string& label)
+UUID Graph::addForwardingOutput(const UUID& internal_uuid, const ConnectionTypeConstPtr& type,  const std::string& label)
 {
     registerUUID(internal_uuid);
-    node_handle_->getUUIDProvider()->registerUUID(external_uuid);
 
-    OutputPtr external_output = std::make_shared<StaticOutput>(external_uuid);
-    external_output->setLabel(label);
-    external_output->setType(type);
-
-
-    node_handle_->addOutput(external_output);
+    Output* external_output = VariadicOutputs::createVariadicOutput(type, label);
 
     InputPtr relay = std::make_shared<Input>(internal_uuid);
     relay->setType(type);
@@ -822,110 +779,114 @@ std::pair<UUID, UUID> Graph::addForwardingOutput(const UUID& internal_uuid, cons
 
     relay->connectionInProgress.connect(internalConnectionInProgress);
 
-    forward_outputs_[external_output.get()] = relay;
-
-    transition_relay_in_->addInput(relay);
-
-    relay_to_external_output_[internal_uuid] = external_uuid;
-
-
-    NodeStatePtr state = node_handle_->getNodeState();
-
-    std::string name = relay->getUUID().getFullName();
-
-    std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_outputs", {});
-    output_uuids.push_back(name);
-    state->setDictionaryEntry("forwarding_outputs", output_uuids);
-
-    state->setDictionaryEntry(name + "_uuid_external", external_output->getUUID().id());
-    state->setDictionaryEntry(name + "_uuid_internal", name);
-    state->setDictionaryEntry(name + "_type", external_output->getType()->typeName());
-    state->setDictionaryEntry(name + "_label", external_output->getLabel());
-
-    forwardingAdded(relay);
-
-    std::weak_ptr<Output> external_output_weak = external_output;
+    std::weak_ptr<Output> external_output_weak = std::dynamic_pointer_cast<Output>(external_output->shared_from_this());
     relay->messageArrived.connect([this, external_output_weak, relay](Connectable*) {
         if(auto external_output = external_output_weak.lock()) {
             msg::publish(external_output.get(), relay->getMessage());
         }
     });
 
+    transition_relay_in_->addInput(relay);
+
+    forward_outputs_[external_output] = relay;
+
+    relay_to_external_output_[internal_uuid] = external_output->getUUID();
+
+    forwardingAdded(relay);
+
+    return external_output->getUUID();
+}
+
+
+
+Slot* Graph::createVariadicSlot(const std::string& label, std::function<void()> callback)
+{
+    auto pair = addForwardingSlot(label);
+    return node_handle_->getSlot(pair.external);
+}
+
+void Graph::removeVariadicSlot(SlotPtr slot)
+{
+    TriggerPtr relay = forward_slot_.at(slot->getUUID());
+    forward_slot_.erase(slot->getUUID());
+
+    relay_trigger_.erase(relay->getUUID());
+
+    forwardingRemoved(relay);
+
+    VariadicSlots::removeVariadicSlot(slot);
+
+    relay_to_external_slot_.erase(relay->getUUID());
+}
+
+RelayMapping Graph::addForwardingSlot(const std::string& label)
+{
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relaytrigger");
+    UUID external_uuid = addForwardingSlot(internal_uuid, label);
+
     return {external_uuid, internal_uuid};
 }
 
-std::pair<UUID, UUID> Graph::addForwardingSlot(const std::string& label)
-{
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relaytrigger");
-    UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "slot");
-
-    return addForwardingSlot(internal_uuid, external_uuid, label);
-}
-
-std::pair<UUID, UUID> Graph::addForwardingSlot(const UUID& internal_uuid, const UUID& external_uuid,
-                                                  const std::string& label)
+UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& label)
 {
     registerUUID(internal_uuid);
-    node_handle_->getUUIDProvider()->registerUUID(external_uuid);
-
 
     TriggerPtr relay = std::make_shared<Trigger>(internal_uuid);
     relay->setLabel(label);
 
-    relay->connectionInProgress.connect(internalConnectionInProgress);
-
-    relay_trigger_[internal_uuid] = relay;
-
-    auto cb = [this, relay]() {
+    auto cb = [relay]() {
         relay->trigger();
     };
 
-    SlotPtr external_slot = std::make_shared<Slot>(cb, external_uuid, false);
-    external_slot->setLabel(label);
+    Slot* external_slot = VariadicSlots::createVariadicSlot(label, cb);
 
-    node_handle_->addSlot(external_slot);
-    forward_slots_[external_slot.get()] = relay;
+    relay->connectionInProgress.connect(internalConnectionInProgress);
 
-    relay_to_external_slot_[internal_uuid] = external_uuid;
+    forward_slot_[external_slot->getUUID()] = relay;
+    relay_trigger_[internal_uuid] = relay;
 
-
-    NodeStatePtr state = node_handle_->getNodeState();
-
-    std::string name = relay->getUUID().getFullName();
-
-    std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_slots", {});
-    output_uuids.push_back(name);
-    state->setDictionaryEntry("forwarding_slots", output_uuids);
-
-    state->setDictionaryEntry(name + "_uuid_external", external_slot->getUUID().id());
-    state->setDictionaryEntry(name + "_uuid_internal", name);
-    state->setDictionaryEntry(name + "_type", external_slot->getType()->typeName());
-    state->setDictionaryEntry(name + "_label", external_slot->getLabel());
+    relay_to_external_slot_[internal_uuid] = external_slot->getUUID();
 
     forwardingAdded(relay);
+
+    return external_slot->getUUID();
+}
+
+
+
+Trigger* Graph::createVariadicTrigger(const std::string& label)
+{
+    auto pair = addForwardingTrigger(label);
+    return node_handle_->getTrigger(pair.external);
+}
+
+void Graph::removeVariadicTrigger(TriggerPtr trigger)
+{
+    SlotPtr relay = forward_trigger_.at(trigger->getUUID());
+    forward_trigger_.erase(trigger->getUUID());
+
+    relay_slot_.erase(relay->getUUID());
+
+    forwardingRemoved(relay);
+
+    VariadicTriggers::removeVariadicTrigger(trigger);
+
+    relay_to_external_trigger_.erase(relay->getUUID());
+}
+
+RelayMapping Graph::addForwardingTrigger(const std::string& label)
+{
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relayslot");
+    UUID external_uuid = addForwardingTrigger(internal_uuid, label);
 
     return {external_uuid, internal_uuid};
 }
 
-
-std::pair<UUID, UUID> Graph::addForwardingTrigger(const std::string& label)
-{
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relayslot");
-    UUID external_uuid = node_handle_->getUUIDProvider()->generateDerivedUUID(getUUID(), "trigger");
-
-    return addForwardingTrigger(internal_uuid, external_uuid, label);
-}
-
-std::pair<UUID, UUID> Graph::addForwardingTrigger(const UUID& internal_uuid, const UUID& external_uuid,
-                                                  const std::string& label)
+UUID Graph::addForwardingTrigger(const UUID& internal_uuid, const std::string& label)
 {
     registerUUID(internal_uuid);
-    node_handle_->getUUIDProvider()->registerUUID(external_uuid);
 
-    TriggerPtr external_trigger = std::make_shared<Trigger>(external_uuid);
-    external_trigger->setLabel(label);
-
-    node_handle_->addTrigger(external_trigger);
+    Trigger* external_trigger = VariadicTriggers::createVariadicTrigger(label);
 
     auto cb = [this, external_trigger](){
         external_trigger->trigger();
@@ -944,28 +905,14 @@ std::pair<UUID, UUID> Graph::addForwardingTrigger(const UUID& internal_uuid, con
         });
     });
 
+    forward_trigger_[external_trigger->getUUID()] = relay;
     relay_slot_[internal_uuid] = relay;
-    forward_triggers_[external_trigger.get()] = relay;
 
-    relay_to_external_trigger_[internal_uuid] = external_uuid;
-
-
-    NodeStatePtr state = node_handle_->getNodeState();
-
-    std::string name = relay->getUUID().getFullName();
-
-    std::vector<std::string> output_uuids = state->getDictionaryEntry<std::vector<std::string>>("forwarding_triggers", {});
-    output_uuids.push_back(name);
-    state->setDictionaryEntry("forwarding_triggers", output_uuids);
-
-    state->setDictionaryEntry(name + "_uuid_external", external_trigger->getUUID().id());
-    state->setDictionaryEntry(name + "_uuid_internal", name);
-    state->setDictionaryEntry(name + "_type", external_trigger->getType()->typeName());
-    state->setDictionaryEntry(name + "_label", external_trigger->getLabel());
+    relay_to_external_trigger_[internal_uuid] = external_trigger->getUUID();
 
     forwardingAdded(relay);
 
-    return {external_uuid, internal_uuid};
+    return external_trigger->getUUID();
 }
 
 
@@ -1028,7 +975,7 @@ std::vector<UUID> Graph::getRelayInputs() const
 std::vector<UUID> Graph::getRelaySlots() const
 {
     std::vector<UUID> res;
-    for(const auto& pair : forward_slots_) {
+    for(const auto& pair : forward_trigger_) {
         res.push_back(pair.second->getUUID());
     }
     return res;
@@ -1036,7 +983,7 @@ std::vector<UUID> Graph::getRelaySlots() const
 std::vector<UUID> Graph::getRelayTriggers() const
 {
     std::vector<UUID> res;
-    for(const auto& pair : forward_triggers_) {
+    for(const auto& pair : forward_slot_) {
         res.push_back(pair.second->getUUID());
     }
     return res;

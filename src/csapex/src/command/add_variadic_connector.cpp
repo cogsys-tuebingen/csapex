@@ -65,7 +65,7 @@ bool AddVariadicConnector::doRedo()
     return doExecute();
 }
 
-std::pair<UUID, UUID> AddVariadicConnector::getMap() const
+RelayMapping AddVariadicConnector::getMap() const
 {
     return map;
 }

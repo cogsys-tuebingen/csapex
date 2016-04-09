@@ -5,6 +5,7 @@
 #include "command.h"
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
+#include <csapex/model/graph.h>
 
 namespace csapex
 {
@@ -16,7 +17,7 @@ class AddVariadicConnector : public Command
 {
 public:
     AddVariadicConnector(const AUUID &graph_id, const ConnectorType &connector_type, const ConnectionTypeConstPtr& type);
-    std::pair<UUID, UUID> getMap() const;
+    RelayMapping getMap() const;
 
 protected:
     bool doExecute() override;
@@ -30,7 +31,7 @@ protected:
 private:
     ConnectorType connector_type;
     ConnectionTypeConstPtr token_type;
-    std::pair<UUID, UUID> map;
+    RelayMapping map;
 };
 }
 }

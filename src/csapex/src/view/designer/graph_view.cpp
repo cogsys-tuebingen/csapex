@@ -962,29 +962,29 @@ void GraphView::createPortAndConnect(Connectable* from, ConnectionTypeConstPtr t
     case ConnectorType::OUTPUT:
     {
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
-        cmd.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), ports.second));
+        RelayMapping ports = graph->addForwardingOutput(type, label);
+        cmd.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), ports.internal));
     }
         break;
     case ConnectorType::INPUT:
     {
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
-        cmd.reset(new command::AddMessageConnection(graph_uuid, ports.second, from->getUUID()));
+        RelayMapping ports = graph->addForwardingInput(type, label, optional);
+        cmd.reset(new command::AddMessageConnection(graph_uuid, ports.internal, from->getUUID()));
     }
         break;
     case ConnectorType::TRIGGER:
     {
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingTrigger(label);
-        cmd.reset(new command::AddSignalConnection(graph_uuid, from->getUUID(), ports.second));
+        RelayMapping ports = graph->addForwardingTrigger(label);
+        cmd.reset(new command::AddSignalConnection(graph_uuid, from->getUUID(), ports.internal));
     }
         break;
     case ConnectorType::SLOT_T:
     {
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingSlot(label);
-        cmd.reset(new command::AddSignalConnection(graph_uuid, ports.second, from->getUUID()));
+        RelayMapping ports = graph->addForwardingSlot(label);
+        cmd.reset(new command::AddSignalConnection(graph_uuid, ports.internal, from->getUUID()));
     }
         break;
     }
@@ -1002,29 +1002,29 @@ void GraphView::createPortAndMove(Connectable* from, ConnectionTypeConstPtr type
     case ConnectorType::OUTPUT:
     {
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingOutput(type, label);
-        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+        RelayMapping ports = graph->addForwardingOutput(type, label);
+        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.internal);
     }
         break;
     case ConnectorType::INPUT:
     {
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingInput(type, label, optional);
-        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+        RelayMapping ports = graph->addForwardingInput(type, label, optional);
+        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.internal);
     }
         break;
     case ConnectorType::TRIGGER:
     {
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingTrigger(label);
-        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+        RelayMapping ports = graph->addForwardingTrigger(label);
+        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.internal);
     }
         break;
     case ConnectorType::SLOT_T:
     {
         // TODO: command!
-        std::pair<UUID, UUID> ports = graph->addForwardingSlot(label);
-        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.second);
+        RelayMapping ports = graph->addForwardingSlot(label);
+        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.internal);
     }
         break;
     }

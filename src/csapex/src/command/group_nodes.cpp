@@ -109,17 +109,17 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         executeCommand(pass_out);
         add(pass_out);
 
-        std::pair<UUID, UUID> in_map = pass_out->getMap();
+        RelayMapping in_map = pass_out->getMap();
 
         // forwarding connection
         CommandPtr add_internal_connection =
-                std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.second, nested_connector_uuid);
+                std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid);
         executeCommand(add_internal_connection);
         add(add_internal_connection);
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, ci.from, in_map.first);
+                std::make_shared<command::AddMessageConnection>(parent_auuid, ci.from, in_map.external);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
@@ -134,17 +134,17 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         executeCommand(pass_out);
         add(pass_out);
 
-        std::pair<UUID, UUID> out_map = pass_out->getMap();
+        RelayMapping out_map = pass_out->getMap();
 
         // forwarding connection
         CommandPtr add_internal_connection =
-                std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.second);
+                std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal);
         executeCommand(add_internal_connection);
         add(add_internal_connection);
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.first, ci.to);
+                std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.external, ci.to);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }

@@ -29,7 +29,6 @@ public:
         return QString("PortPanel");
     }
 
-
 Q_SIGNALS:
     void createPortRequest(ConnectorType type, ConnectionTypeConstPtr, std::string, bool);
     void createPortAndConnectRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
@@ -38,16 +37,18 @@ Q_SIGNALS:
     void portAdded(Port*);
     void portRemoved(Port*);
 
-public Q_SLOTS:
     void connectorAdded(ConnectablePtr c);
+    void connectorRemoved(ConnectablePtr c);
+
+private Q_SLOTS:
+    void addPortForConnector(ConnectablePtr c);
+    void removePortForConnector(ConnectablePtr c);
 
 private:
     void setupOutput();
     void setupInput();
     void setupSlot();
     void setupTrigger();
-
-    void add(ConnectablePtr c);
 
 private:
     GraphFacadePtr graph_facade_;
@@ -56,8 +57,6 @@ private:
     DesignerScene *parent_;
 
     QLayout* layout;
-
-    std::vector<Port*> ports_;
 };
 
 }

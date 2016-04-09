@@ -44,6 +44,7 @@ public:
     std::vector<NodeBox*> getSelectedBoxes() const;
 
     void addPort(Port* port);
+    Port* getPort(Connectable* c);
     void removePort(Port* port);
 
     std::string makeStatusString() const;
@@ -146,7 +147,6 @@ private:
     std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
     void drawPort(QPainter *painter, NodeBox *box, Port* p);
-    Port* getPort(Connectable* c);
 
     QPointF offset(const QPointF& vector, Position position, double offset);
 

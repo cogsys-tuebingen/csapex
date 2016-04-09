@@ -16,6 +16,13 @@
 
 namespace csapex {
 
+struct RelayMapping
+{
+    UUID external;
+    UUID internal;
+};
+
+
 class Graph : public GeneratorNode, public UUIDProvider, public Variadic
 {
     friend class GraphIO;
@@ -103,15 +110,20 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    virtual Connectable* createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
-    virtual Connectable* createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label) override;
-    virtual Connectable* createVariadicTrigger(const std::string& label) override;
-    virtual Connectable* createVariadicSlot(const std::string& label) override;
+    virtual Input* createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+    virtual Output* createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label) override;
+    virtual Trigger* createVariadicTrigger(const std::string& label) override;
+    virtual Slot* createVariadicSlot(const std::string& label, std::function<void()> callback) override;
 
-    std::pair<UUID, UUID> addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
-    std::pair<UUID, UUID> addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);
-    std::pair<UUID, UUID> addForwardingSlot(const std::string& label);
-    std::pair<UUID, UUID> addForwardingTrigger(const std::string& label);
+    virtual void removeVariadicInput(InputPtr input) override;
+    virtual void removeVariadicOutput(OutputPtr input) override;
+    virtual void removeVariadicTrigger(TriggerPtr input) override;
+    virtual void removeVariadicSlot(SlotPtr input) override;
+
+    RelayMapping addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
+    RelayMapping addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);
+    RelayMapping addForwardingSlot(const std::string& label);
+    RelayMapping addForwardingTrigger(const std::string& label);
 
     InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
     OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
@@ -131,12 +143,10 @@ public:
     std::string makeStatusString() const;
 
 private:
-    std::pair<UUID, UUID> addForwardingInput(const UUID& internal_uuid, const UUID &external_uuid, const ConnectionTypeConstPtr& type,
-                                             const std::string& label, bool optional);
-    std::pair<UUID, UUID> addForwardingOutput(const UUID& internal_uuid, const UUID& external_uuid, const ConnectionTypeConstPtr& type,
-                                              const std::string& label);
-    std::pair<UUID, UUID> addForwardingSlot(const UUID& internal_uuid, const UUID &external_uuid, const std::string& label);
-    std::pair<UUID, UUID> addForwardingTrigger(const UUID& internal_uuid, const UUID &external_uuid, const std::string& label);
+    UUID addForwardingInput(const UUID& internal_uuid, const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
+    UUID  addForwardingOutput(const UUID& internal_uuid, const ConnectionTypeConstPtr& type, const std::string& label);
+    UUID  addForwardingSlot(const UUID& internal_uuid, const std::string& label);
+    UUID  addForwardingTrigger(const UUID& internal_uuid, const std::string& label);
 
    /*rename*/ void verify();
     void buildConnectedComponents();
@@ -182,8 +192,8 @@ protected:
 
     std::map<Input*, OutputPtr> forward_inputs_;
     std::map<Output*, InputPtr> forward_outputs_;
-    std::map<Slot*, TriggerPtr> forward_slots_;
-    std::map<Trigger*, SlotPtr> forward_triggers_;
+    std::unordered_map<UUID, SlotPtr, UUID::Hasher> forward_trigger_;
+    std::unordered_map<UUID, TriggerPtr, UUID::Hasher> forward_slot_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_output_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;

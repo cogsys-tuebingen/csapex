@@ -57,6 +57,9 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
     mainlayout->addWidget(meta_port);
 
     setLayout(mainlayout);
+
+    QObject::connect(this, &PortPanel::connectorAdded, this, &PortPanel::addPortForConnector);
+    QObject::connect(this, &PortPanel::connectorRemoved, this, &PortPanel::removePortForConnector);
 }
 
 void PortPanel::setup(GraphFacadePtr graph_facade)
@@ -75,7 +78,7 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
         setupSlot();
         break;
     case ConnectorType::TRIGGER:
-        setupSlot();
+        setupTrigger();
         break;
 
     default:
@@ -83,82 +86,76 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
     }
 
     graph_->forwardingAdded.connect(delegate::Delegate<void(ConnectablePtr)>(this, &PortPanel::connectorAdded));
+    graph_->forwardingRemoved.connect(delegate::Delegate<void(ConnectablePtr)>(this, &PortPanel::connectorRemoved));
 }
 
-void PortPanel::connectorAdded(ConnectablePtr c)
+void PortPanel::addPortForConnector(ConnectablePtr c)
 {
-    switch(type_) {
-    case ConnectorType::OUTPUT:
-        if(std::dynamic_pointer_cast<Output>(c)) {
-            add(c);
-        }
-        break;
-    case ConnectorType::INPUT:
-        if(std::dynamic_pointer_cast<Input>(c)) {
-            add(c);
-        }
-        break;
-
-    case ConnectorType::SLOT_T:
-        if(std::dynamic_pointer_cast<Slot>(c)) {
-            add(c);
-        }
-        break;
-    case ConnectorType::TRIGGER:
-        if(std::dynamic_pointer_cast<Trigger>(c)) {
-            add(c);
-        }
-        break;
-
-    default:
-        break;
+    if(c->getConnectorType() != type_) {
+        return;
     }
+
+    Port* port = new Port(c);
+
+    parent_->addPort(port);
+
+    layout->addWidget(port);
+
+    layout->activate();
+
+    QApplication::processEvents();
+
+    adjustSize();
+    portAdded(port);
+}
+
+
+void PortPanel::removePortForConnector(ConnectablePtr c)
+{
+    if(c->getConnectorType() != type_) {
+        return;
+    }
+
+    Port* port = parent_->getPort(c.get());
+    port->setVisible(false);
+
+    apex_assert_hard(port);
+
+    parent_->removePort(port);
+    layout->removeWidget(port);
+
+    layout->activate();
+
+    adjustSize();
+    portRemoved(port);
 }
 
 void PortPanel::setupOutput()
 {
     for(const UUID& uuid : graph_->getRelayOutputs()) {
-        add(graph_->getForwardedOutputInternal(uuid));
+        addPortForConnector(graph_->getForwardedOutputInternal(uuid));
     }
 }
 
 void PortPanel::setupInput()
 {
     for(const UUID& uuid : graph_->getRelayInputs()) {
-        add(graph_->getForwardedInputInternal(uuid));
+        addPortForConnector(graph_->getForwardedInputInternal(uuid));
     }
 }
 
 void PortPanel::setupSlot()
 {
     for(const UUID& uuid : graph_->getRelaySlots()) {
-        add(graph_->getForwardedSlotInternal(uuid));
+        addPortForConnector(graph_->getForwardedSlotInternal(uuid));
     }
 }
 
 void PortPanel::setupTrigger()
 {
     for(const UUID& uuid : graph_->getRelayTriggers()) {
-        add(graph_->getForwardedTriggerInternal(uuid));
+        addPortForConnector(graph_->getForwardedTriggerInternal(uuid));
     }
-}
-
-void PortPanel::add(ConnectablePtr c)
-{
-    Port* port = new Port(c);
-
-    ports_.push_back(port);
-    parent_->addPort(port);
-
-    layout->addWidget(port);
-    QApplication::processEvents();
-
-    adjustSize();
-
-    QObject::connect(port, &Port::destroyed, [this, port](QObject* o) {
-        portRemoved(port);
-    });
-    portAdded(port);
 }
 
 /// MOC

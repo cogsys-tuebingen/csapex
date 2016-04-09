@@ -13,11 +13,12 @@
 #include <vector>
 #include <atomic>
 #include <csapex/utility/slim_signal.hpp>
+#include <memory>
 
 namespace csapex
 {
 
-class Connectable : public ErrorState, public Unique
+class Connectable : public ErrorState, public Unique, public std::enable_shared_from_this<Connectable>
 {
     friend class Graph;
     friend class Connection;
