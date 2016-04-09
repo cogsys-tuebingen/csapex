@@ -318,7 +318,7 @@ add_library(csapex_qt SHARED
     src/command/group_nodes.cpp
     src/command/ungroup_nodes.cpp
     src/command/paste_graph.cpp
-    src/command/pass_out_connector.cpp
+    src/command/add_variadic_connector.cpp
     src/command/set_color.cpp
     src/command/update_parameter.cpp
 

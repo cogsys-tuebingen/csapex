@@ -1,5 +1,5 @@
-#ifndef PASS_OUT_CONNECTOR_H
-#define PASS_OUT_CONNECTOR_H
+#ifndef add_variadic_connector_H
+#define add_variadic_connector_H
 
 /// COMPONENT
 #include "command.h"
@@ -12,10 +12,10 @@ namespace csapex
 namespace command
 {
 
-class PassOutConnector : public Command
+class AddVariadicConnector : public Command
 {
 public:
-    PassOutConnector(const AUUID &graph_id, const ConnectorType &connector_type, const ConnectionTypeConstPtr& type);
+    AddVariadicConnector(const AUUID &graph_id, const ConnectorType &connector_type, const ConnectionTypeConstPtr& type);
     std::pair<UUID, UUID> getMap() const;
 
 protected:
@@ -35,4 +35,4 @@ private:
 }
 }
 
-#endif // PASS_OUT_CONNECTOR_H
+#endif // add_variadic_connector_H

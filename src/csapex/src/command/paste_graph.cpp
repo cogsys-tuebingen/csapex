@@ -10,7 +10,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/core/graphio.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/command/pass_out_connector.h>
+#include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_msg_connection.h>
 
 using namespace csapex;

@@ -14,7 +14,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
 #include <csapex/core/graphio.h>
-#include <csapex/command/pass_out_connector.h>
+#include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/utility/assert.h>
 
@@ -104,8 +104,8 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         std::string child = ci.to.id();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
-        std::shared_ptr<command::PassOutConnector> pass_out =
-                std::make_shared<command::PassOutConnector>(sub_graph_auuid, ConnectorType::INPUT, ci.type);
+        std::shared_ptr<command::AddVariadicConnector> pass_out =
+                std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::INPUT, ci.type);
         executeCommand(pass_out);
         add(pass_out);
 
@@ -129,8 +129,8 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         std::string child = ci.from.id();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
-        std::shared_ptr<command::PassOutConnector> pass_out =
-                std::make_shared<command::PassOutConnector>(sub_graph_auuid, ConnectorType::OUTPUT, ci.type);
+        std::shared_ptr<command::AddVariadicConnector> pass_out =
+                std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::OUTPUT, ci.type);
         executeCommand(pass_out);
         add(pass_out);
 

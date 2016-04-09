@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/command/pass_out_connector.h>
+#include <csapex/command/add_variadic_connector.h>
 
 /// COMPONENT
 #include <csapex/model/node_handle.h>
@@ -14,24 +14,24 @@
 using namespace csapex;
 using namespace command;
 
-PassOutConnector::PassOutConnector(const AUUID& graph_id, const ConnectorType& connector_type,
+AddVariadicConnector::AddVariadicConnector(const AUUID& graph_id, const ConnectorType& connector_type,
                                    const ConnectionTypeConstPtr& type)
     : Command(graph_id), connector_type(connector_type), token_type(type)
 {
 }
 
-std::string PassOutConnector::getType() const
+std::string AddVariadicConnector::getType() const
 {
     return "PassOutConnector";
 }
 
-std::string PassOutConnector::getDescription() const
+std::string AddVariadicConnector::getDescription() const
 {
     return std::string("create forwarding connector with type ") + port_type::name(connector_type);
 }
 
 
-bool PassOutConnector::doExecute()
+bool AddVariadicConnector::doExecute()
 {
     Graph* graph = getGraph();
 
@@ -55,17 +55,17 @@ bool PassOutConnector::doExecute()
     return true;
 }
 
-bool PassOutConnector::doUndo()
+bool AddVariadicConnector::doUndo()
 {
     return false;
 }
 
-bool PassOutConnector::doRedo()
+bool AddVariadicConnector::doRedo()
 {
     return doExecute();
 }
 
-std::pair<UUID, UUID> PassOutConnector::getMap() const
+std::pair<UUID, UUID> AddVariadicConnector::getMap() const
 {
     return map;
 }

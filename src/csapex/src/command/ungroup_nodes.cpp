@@ -15,7 +15,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
 #include <csapex/core/graphio.h>
-#include <csapex/command/pass_out_connector.h>
+#include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/utility/assert.h>
 
