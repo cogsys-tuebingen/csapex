@@ -35,6 +35,9 @@ private:
 
     std::unordered_map<UUID, UUID, UUID::Hasher> old_connections_in;
     std::unordered_map<UUID, std::vector<UUID>, UUID::Hasher> old_connections_out;
+
+    std::unordered_map<UUID, std::vector<UUID>, UUID::Hasher> old_signals_in;
+    std::unordered_map<UUID, std::vector<UUID>, UUID::Hasher> old_signals_out;
 };
 
 }

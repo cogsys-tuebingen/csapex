@@ -16,6 +16,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_msg_connection.h>
+#include <csapex/command/add_signal_connection.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -145,6 +146,57 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         // crossing connection
         CommandPtr add_external_connection =
                 std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.external, ci.to);
+        executeCommand(add_external_connection);
+        add(add_external_connection);
+    }
+
+
+    for(const ConnectionInformation& ci : signals_going_in) {
+        UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
+        std::string child = ci.to.id();
+        UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
+
+        std::shared_ptr<command::AddVariadicConnector> pass_out =
+                std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::SLOT_T, ci.type);
+        executeCommand(pass_out);
+        add(pass_out);
+
+        RelayMapping in_map = pass_out->getMap();
+
+        // forwarding connection
+        CommandPtr add_internal_connection =
+                std::make_shared<command::AddSignalConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid);
+        executeCommand(add_internal_connection);
+        add(add_internal_connection);
+
+        // crossing connection
+        CommandPtr add_external_connection =
+                std::make_shared<command::AddSignalConnection>(parent_auuid, ci.from, in_map.external);
+        executeCommand(add_external_connection);
+        add(add_external_connection);
+    }
+
+    for(const ConnectionInformation& ci : signals_going_out) {
+        UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
+        std::string child = ci.from.id();
+        UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
+
+        std::shared_ptr<command::AddVariadicConnector> pass_out =
+                std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::TRIGGER, ci.type);
+        executeCommand(pass_out);
+        add(pass_out);
+
+        RelayMapping out_map = pass_out->getMap();
+
+        // forwarding connection
+        CommandPtr add_internal_connection =
+                std::make_shared<command::AddSignalConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal);
+        executeCommand(add_internal_connection);
+        add(add_internal_connection);
+
+        // crossing connection
+        CommandPtr add_external_connection =
+                std::make_shared<command::AddSignalConnection>(parent_auuid, out_map.external, ci.to);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }

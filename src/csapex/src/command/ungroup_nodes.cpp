@@ -13,10 +13,13 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
+#include <csapex/signal/slot.h>
 #include <csapex/model/connection.h>
 #include <csapex/core/graphio.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_msg_connection.h>
+#include <csapex/command/add_signal_connection.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -62,7 +65,10 @@ bool UngroupNodes::doExecute()
     }
 
     for(InputPtr in : nh->getAllInputs()) {
-        old_connections_in[in->getUUID()] = in->getSource()->getUUID();
+        auto source = in->getSource();
+        if(source) {
+            old_connections_in[in->getUUID()] = source->getUUID();
+        }
     }
     for(OutputPtr out : nh->getAllOutputs()) {
         auto& vec = old_connections_out[out->getUUID()];
@@ -70,6 +76,27 @@ bool UngroupNodes::doExecute()
             Input* in = dynamic_cast<Input*>(c->to());
             if(in) {
                 vec.push_back(in->getUUID());
+            }
+        }
+    }
+
+
+    for(SlotPtr slot : nh->getAllSlots()) {
+        auto& vec = old_signals_in[slot->getUUID()];
+        for(ConnectionPtr c : slot->getConnections()) {
+            Trigger* trigger = dynamic_cast<Trigger*>(c->from());
+            if(trigger) {
+                vec.push_back(trigger->getUUID());
+            }
+        }
+    }
+
+    for(TriggerPtr trigger : nh->getAllTriggers()) {
+        auto& vec = old_signals_out[trigger->getUUID()];
+        for(ConnectionPtr c : trigger->getConnections()) {
+            Slot* slot = dynamic_cast<Slot*>(c->to());
+            if(slot) {
+                vec.push_back(slot->getUUID());
             }
         }
     }
@@ -117,6 +144,38 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         for(const UUID& to : targets) {
             CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to);
+            executeCommand(add_connection);
+            add(add_connection);
+        }
+    }
+
+    for(const ConnectionInformation& ci : signals_going_in) {
+        UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
+        std::string child = ci.to.id();
+        UUID from = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
+
+        UUID graph_out = subgraph->getForwardedSlotExternal(ci.from);
+        const std::vector<UUID>& targets = old_signals_in[graph_out];
+
+
+        for(const UUID& to : targets) {
+            CommandPtr add_connection = std::make_shared<command::AddSignalConnection>(parent_auuid, from, to);
+            executeCommand(add_connection);
+            add(add_connection);
+        }
+    }
+
+    for(const ConnectionInformation& ci : signals_going_out) {
+        UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
+        std::string child = ci.from.id();
+        UUID from = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
+
+        UUID graph_out = subgraph->getForwardedTriggerExternal(ci.to);
+        const std::vector<UUID>& targets = old_signals_out[graph_out];
+
+
+        for(const UUID& to : targets) {
+            CommandPtr add_connection = std::make_shared<command::AddSignalConnection>(parent_auuid, from, to);
             executeCommand(add_connection);
             add(add_connection);
         }

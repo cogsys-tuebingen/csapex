@@ -7,6 +7,8 @@
 #include <csapex/model/node_state.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
+#include <csapex/signal/slot.h>
 #include <csapex/model/connection.h>
 #include <csapex/command/paste_graph.h>
 
@@ -49,6 +51,8 @@ void GroupBase::analyzeConnections(Graph* graph)
 {
     connections_going_in.clear();
     connections_going_out.clear();
+    signals_going_in.clear();
+    signals_going_out.clear();
 
     for(NodeHandle* nh : nodes) {
         for(const InputPtr& input : nh->getAllInputs()) {
@@ -93,6 +97,52 @@ void GroupBase::analyzeConnections(Graph* graph)
                     c.to = input->getUUID();
                     c.type = input->getType();
                     connections_going_out.push_back(c);
+                }
+            }
+        }
+
+        for(const SlotPtr& slot : nh->getAllSlots()) {
+            for(const ConnectionPtr& connection : slot->getConnections()) {
+                Trigger* trigger = dynamic_cast<Trigger*>(connection->from());
+                apex_assert_hard(trigger);
+
+                if(trigger->isVirtual() || slot->isVirtual()) {
+                    continue;
+                }
+
+                NodeHandle* target = graph->findNodeHandleForConnector(trigger->getUUID());
+                apex_assert_hard(target);
+
+                if(node_set.find(target) == node_set.end()) {
+                    // going out
+                    ConnectionInformation c;
+                    c.from = trigger->getUUID();
+                    c.to = slot->getUUID();
+                    c.type = trigger->getType();
+                    signals_going_in.push_back(c);
+                }
+            }
+        }
+        for(const TriggerPtr& trigger : nh->getAllTriggers()) {
+            for(const ConnectionPtr& connection : trigger->getConnections()) {
+                Slot* slot = dynamic_cast<Slot*>(connection->to());
+                apex_assert_hard(slot);
+
+                if(trigger->isVirtual() || slot->isVirtual()) {
+                    continue;
+                }
+
+                NodeHandle* source = graph->findNodeHandleForConnector(slot->getUUID());
+                apex_assert_hard(source);
+
+                ConnectionInformation c;
+                c.from = trigger->getUUID();
+                c.to = slot->getUUID();
+                c.type = slot->getType();
+
+                if(node_set.find(source) == node_set.end()) {
+                    // coming in
+                    signals_going_out.push_back(c);
                 }
             }
         }
