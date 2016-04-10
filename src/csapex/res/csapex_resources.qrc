@@ -53,5 +53,6 @@
         <file>note.png</file>
         <file>color_wheel.png</file>
         <file>ungroup.png</file>
+        <file>add.png</file>
     </qresource>
 </RCC>

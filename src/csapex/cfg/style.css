@@ -168,9 +168,7 @@ csapex--Port[blocked="true"]  {
 }
 
 csapex--MetaPort {
-        border: 2px solid rgb(100, 100, 100);
-        background: rgb(100,100,100);
-        border-radius: 8px;
+        image: url(:/add.png);
 }
 
 csapex--PortPanel {
