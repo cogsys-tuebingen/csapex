@@ -4,6 +4,7 @@
 /// COMPONENT
 #include "command.h"
 #include <csapex/utility/uuid.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <boost/any.hpp>
@@ -20,6 +21,7 @@ struct UpdateParameter : public Command
         : Command(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()),
           value(value)
     {
+        apex_assert(!parameter_uuid.empty());
     }
 
     virtual std::string getType() const override;
