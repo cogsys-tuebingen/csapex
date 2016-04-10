@@ -163,8 +163,6 @@ private:
     void inputActivation();
     void outputActivation();
 
-    void publishSubGraphMessages();
-
 public:
     csapex::slim_signal::Signal<void()> state_changed;
     csapex::slim_signal::Signal<void(Graph*)> structureChanged;
@@ -208,7 +206,6 @@ protected:
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_trigger_;
 
     bool is_initialized_;
-    bool output_active_;
 };
 
 }

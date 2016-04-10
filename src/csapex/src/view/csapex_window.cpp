@@ -102,8 +102,11 @@ void CsApexWindow::construct()
     ui->actionPause->setChecked(executor_.isPaused());
 
     auto forceShortcut = [this](QAction* action) {
-        QShortcut *shortcut = new QShortcut(action->shortcut(), this);
-        QObject::connect(shortcut, SIGNAL(activated()), action, SLOT(trigger()));
+        if(action->shortcut().isDetached()) {
+            QShortcut *shortcut = new QShortcut(action->shortcut(), this);
+            QObject::connect(shortcut, &QShortcut::activated, action, &QAction::trigger);
+            QObject::connect(shortcut, &QShortcut::activatedAmbiguously, action, &QAction::trigger);
+        }
     };
     forceShortcut(ui->actionClear_selection);
     forceShortcut(ui->actionSelect_all);

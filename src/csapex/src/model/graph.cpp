@@ -31,7 +31,7 @@ using namespace csapex;
 Graph::Graph()
     : transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition),
-      is_initialized_(false), output_active_(false)
+      is_initialized_(false)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
 
@@ -56,7 +56,6 @@ void Graph::reset()
     Node::reset();
 
     continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
-    output_active_ = false;
 
     transition_relay_out_->reset();
     transition_relay_in_->reset();
@@ -666,6 +665,8 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
     }
     transition_relay_out_->sendMessages();
 
+    outputActivation();
+
     //    continuation_ = continuation;
 
     //    received_.clear();
@@ -708,7 +709,7 @@ void Graph::removeVariadicInput(InputPtr input)
 }
 
 RelayMapping Graph::addForwardingInput(const ConnectionTypeConstPtr& type,
-                                                const std::string& label, bool optional)
+                                       const std::string& label, bool optional)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayout");
     UUID external_uuid = addForwardingInput(internal_uuid, type, label, optional);
@@ -762,7 +763,7 @@ void Graph::removeVariadicOutput(OutputPtr output)
 }
 
 RelayMapping Graph::addForwardingOutput(const ConnectionTypeConstPtr& type,
-                                                 const std::string& label)
+                                        const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
     UUID external_uuid = addForwardingOutput(internal_uuid, type, label);
@@ -1013,10 +1014,7 @@ void Graph::notifyMessagesProcessed()
 {
     GeneratorNode::notifyMessagesProcessed();
 
-    if(output_active_) {
-        transition_relay_in_->notifyMessageProcessed();
-        output_active_ = false;
-    }
+    transition_relay_in_->notifyMessageProcessed();
 }
 
 void Graph::inputActivation()
@@ -1032,35 +1030,36 @@ void Graph::inputActivation()
 void Graph::outputActivation()
 {
     if(transition_relay_in_->isEnabled() && node_handle_->getOutputTransition()->canStartSendingMessages()) {
-        if(node_handle_->isSource() || continuation_) {
-            publishSubGraphMessages();
+        // if(node_handle_->isSource() || continuation_) {
+        apex_assert_hard(transition_relay_in_->isEnabled());
+        apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+
+        if(node_handle_->isSource()) {
+            transition_relay_in_->forwardMessages();
+
+            updated();
+
+            if(node_handle_->isSink()) {
+                notifyMessagesProcessed();
+            }
+
+        } else {
+            if(transition_relay_in_->hasEstablishedConnection()) {
+                //apex_assert_hard(continuation_);
+                if(continuation_) {
+                    transition_relay_in_->forwardMessages();
+
+                    continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+                    continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
+
+                    if(node_handle_->isSink()) {
+                        notifyMessagesProcessed();
+                    }
+                }
+            }
         }
-    }
-}
+        //        });
 
-void Graph::publishSubGraphMessages()
-{
-    apex_assert_hard(transition_relay_in_->isEnabled());
-    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-
-    //        node_handle_->executionRequested([this](){
-    transition_relay_in_->forwardMessages();
-
-    apex_assert_hard(!output_active_);
-    output_active_ = true;
-
-    if(node_handle_->isSource()) {
-        updated();
-
-    } else {
-        apex_assert_hard(continuation_);
-        continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
-        continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
-    }
-    //        });
-
-    if(node_handle_->isSink()) {
-        notifyMessagesProcessed();
     }
 }
 
@@ -1069,7 +1068,6 @@ std::string Graph::makeStatusString() const
     std::stringstream ss;
     ss << "UUID: " << getUUID() << '\n';
     ss << "AUUID: " << getUUID().getAbsoluteUUID() << '\n';
-    ss << "output_active_: " << output_active_ << '\n';
     ss << "continuation_: " << ((bool) continuation_) << '\n';
     if(node_handle_) {
         ss << "output transiton:\n";

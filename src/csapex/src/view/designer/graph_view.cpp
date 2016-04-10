@@ -253,6 +253,8 @@ void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
         QFont font("Ubuntu Condensed, Liberation Sans, FreeSans, Arial", 8, QFont::Normal);
         painter->setFont(font);
 
+        painter->setPen(QPen(Qt::black));
+
         QFontMetrics fm(font);
         QRectF box = fm.boundingRect(rect.toRect(), Qt::AlignLeft, debug_info);
 

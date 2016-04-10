@@ -117,28 +117,28 @@ void NodeBox::setupUi()
     setupUiAgain();
 
     if(dynamic_cast<VariadicBase*>(getNode())) {
-        if(VariadicInputs* vi = dynamic_cast<VariadicInputs*>(getNode())) {
+        if(dynamic_cast<VariadicInputs*>(getNode())) {
             MetaPort* meta_port = new MetaPort(ConnectorType::INPUT);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
             ui->input_panel->layout()->addWidget(meta_port);
         }
-        if(VariadicOutputs* vo = dynamic_cast<VariadicOutputs*>(getNode())) {
+        if(dynamic_cast<VariadicOutputs*>(getNode())) {
             MetaPort* meta_port = new MetaPort(ConnectorType::OUTPUT);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
             ui->output_panel->layout()->addWidget(meta_port);
         }
-        if(VariadicSlots* vs = dynamic_cast<VariadicSlots*>(getNode())) {
+        if(dynamic_cast<VariadicSlots*>(getNode())) {
             MetaPort* meta_port = new MetaPort(ConnectorType::SLOT_T);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
             ui->slot_panel->layout()->addWidget(meta_port);
         }
-        if(VariadicTriggers* vt = dynamic_cast<VariadicTriggers*>(getNode())) {
+        if(dynamic_cast<VariadicTriggers*>(getNode())) {
             MetaPort* meta_port = new MetaPort(ConnectorType::TRIGGER);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);

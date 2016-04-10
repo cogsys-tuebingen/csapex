@@ -207,8 +207,9 @@ void InputTransition::notifyOlderConnections(int seq)
 
 void InputTransition::notifyMessageProcessed()
 {
-    apex_assert_hard(forwarded_);
-
+    if(!forwarded_) {
+        return;
+    }
     apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
     bool has_multipart = false;
