@@ -16,7 +16,7 @@ namespace command
 class AddVariadicConnector : public Command
 {
 public:
-    AddVariadicConnector(const AUUID &graph_id, const ConnectorType &connector_type, const ConnectionTypeConstPtr& type);
+    AddVariadicConnector(const AUUID &graph_id, const AUUID &node, const ConnectorType &connector_type, const ConnectionTypeConstPtr& type);
     RelayMapping getMap() const;
 
     void setLabel(const std::string& label);
@@ -39,6 +39,7 @@ private:
     std::string label_;
     bool optional_;
 
+    AUUID node_id;
     UUID connector_id;
 };
 }

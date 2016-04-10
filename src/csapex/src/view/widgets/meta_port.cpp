@@ -15,8 +15,8 @@
 
 using namespace csapex;
 
-MetaPort::MetaPort(ConnectorType port_type, QWidget *parent)
-    : Port(parent), port_type_(port_type)
+MetaPort::MetaPort(ConnectorType port_type, const AUUID& target, QWidget *parent)
+    : Port(parent), port_type_(port_type), target(target)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -47,7 +47,7 @@ void MetaPort::triggerCreatePort()
     bool optional = true;
 
     ConnectionTypePtr type(new connection_types::AnyMessage);
-    Q_EMIT createPortRequest(port_type_, type, label.toStdString(), optional);
+    Q_EMIT createPortRequest(target, port_type_, type, label.toStdString(), optional);
 }
 
 void MetaPort::dragEnterEvent(QDragEnterEvent* e)
@@ -76,7 +76,7 @@ void MetaPort::dropEvent(QDropEvent* e)
             auto label = from->getLabel();
             bool optional = false;
 
-            Q_EMIT createPortAndConnectRequest(from, type, label, optional);
+            Q_EMIT createPortAndConnectRequest(target, from, type, label, optional);
         }
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
@@ -86,7 +86,7 @@ void MetaPort::dropEvent(QDropEvent* e)
             auto label = from->getLabel();
             bool optional = false;
 
-            Q_EMIT createPortAndMoveRequest(from, type, label, optional);
+            Q_EMIT createPortAndMoveRequest(target, from, type, label, optional);
         }
 
     }

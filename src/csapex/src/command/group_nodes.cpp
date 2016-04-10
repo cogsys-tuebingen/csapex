@@ -121,7 +121,7 @@ void GroupNodes::mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         } else {
             std::shared_ptr<command::AddVariadicConnector> pass_out =
-                    std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::INPUT, ci.type);
+                    std::make_shared<command::AddVariadicConnector>(parent_auuid, sub_graph_auuid, ConnectorType::INPUT, ci.type);
             executeCommand(pass_out);
             add(pass_out);
             in_map = pass_out->getMap();
@@ -158,7 +158,7 @@ void GroupNodes::mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         } else {
             std::shared_ptr<command::AddVariadicConnector> pass_out =
-                    std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::OUTPUT, ci.type);
+                    std::make_shared<command::AddVariadicConnector>(parent_auuid, sub_graph_auuid, ConnectorType::OUTPUT, ci.type);
             executeCommand(pass_out);
             add(pass_out);
             out_map = pass_out->getMap();
@@ -194,7 +194,7 @@ void GroupNodes::mapSignalGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         } else {
             std::shared_ptr<command::AddVariadicConnector> pass_out =
-                    std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::SLOT_T, ci.type);
+                    std::make_shared<command::AddVariadicConnector>(parent_auuid, sub_graph_auuid, ConnectorType::SLOT_T, ci.type);
             executeCommand(pass_out);
             add(pass_out);
             in_map = pass_out->getMap();
@@ -230,7 +230,7 @@ void GroupNodes::mapSignalGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         } else {
             std::shared_ptr<command::AddVariadicConnector> pass_out =
-                    std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::TRIGGER, ci.type);
+                    std::make_shared<command::AddVariadicConnector>(parent_auuid, sub_graph_auuid, ConnectorType::TRIGGER, ci.type);
             executeCommand(pass_out);
             add(pass_out);
             out_map = pass_out->getMap();

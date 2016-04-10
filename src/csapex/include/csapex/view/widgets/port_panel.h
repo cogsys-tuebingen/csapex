@@ -5,6 +5,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/connector_type.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <QFrame>
@@ -21,7 +22,7 @@ class PortPanel : public QFrame
 public:
 
 public:
-    PortPanel(ConnectorType type, DesignerScene *parent);
+    PortPanel(ConnectorType type, const AUUID &target, DesignerScene *parent);
 
     void setup(GraphFacadePtr graph_facade);
 
@@ -30,9 +31,9 @@ public:
     }
 
 Q_SIGNALS:
-    void createPortRequest(ConnectorType type, ConnectionTypeConstPtr, std::string, bool);
-    void createPortAndConnectRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
-    void createPortAndMoveRequest(Connectable*, ConnectionTypeConstPtr, std::string, bool);
+    void createPortRequest(const AUUID& target, ConnectorType type, ConnectionTypeConstPtr, std::string, bool);
+    void createPortAndConnectRequest(const AUUID& target, Connectable*, ConnectionTypeConstPtr, std::string, bool);
+    void createPortAndMoveRequest(const AUUID& target, Connectable*, ConnectionTypeConstPtr, std::string, bool);
 
     void portAdded(Port*);
     void portRemoved(Port*);

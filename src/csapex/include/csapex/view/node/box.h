@@ -139,13 +139,6 @@ public Q_SLOTS:
 
     void updateVisuals();
 
-    void createVariadicPort(csapex::ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional);
-    void createVariadicPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
-    void createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string& label, bool optional);
-
-public:
-    csapex::slim_signal::Signal<void(CommandPtr)> executeCommand;
-
 Q_SIGNALS:
     void toggled(bool);
     void flipped(bool);
@@ -170,6 +163,10 @@ Q_SIGNALS:
 
     void portAdded(Port*);
     void portRemoved(Port*);
+
+    void createPortRequest(const AUUID& target, ConnectorType output, ConnectionTypeConstPtr, std::string, bool);
+    void createPortAndConnectRequest(const AUUID& target, Connectable*, ConnectionTypeConstPtr, std::string, bool);
+    void createPortAndMoveRequest(const AUUID& target, Connectable*, ConnectionTypeConstPtr, std::string, bool);
 
 protected:
     void resizeEvent(QResizeEvent * e);

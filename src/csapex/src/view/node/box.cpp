@@ -117,32 +117,33 @@ void NodeBox::setupUi()
     setupUiAgain();
 
     if(dynamic_cast<VariadicBase*>(getNode())) {
+        AUUID parent = getNodeHandle()->getUUID().getAbsoluteUUID();
         if(dynamic_cast<VariadicInputs*>(getNode())) {
-            MetaPort* meta_port = new MetaPort(ConnectorType::INPUT);
-            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
-            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
-            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            MetaPort* meta_port = new MetaPort(ConnectorType::INPUT, parent);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->input_panel->layout()->addWidget(meta_port);
         }
         if(dynamic_cast<VariadicOutputs*>(getNode())) {
-            MetaPort* meta_port = new MetaPort(ConnectorType::OUTPUT);
-            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
-            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
-            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            MetaPort* meta_port = new MetaPort(ConnectorType::OUTPUT, parent);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->output_panel->layout()->addWidget(meta_port);
         }
         if(dynamic_cast<VariadicSlots*>(getNode())) {
-            MetaPort* meta_port = new MetaPort(ConnectorType::SLOT_T);
-            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
-            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
-            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            MetaPort* meta_port = new MetaPort(ConnectorType::SLOT_T, parent);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->slot_panel->layout()->addWidget(meta_port);
         }
         if(dynamic_cast<VariadicTriggers*>(getNode())) {
-            MetaPort* meta_port = new MetaPort(ConnectorType::TRIGGER);
-            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createVariadicPort);
-            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createVariadicPortAndConnect);
-            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createVariadicPortAndMove);
+            MetaPort* meta_port = new MetaPort(ConnectorType::TRIGGER, parent);
+            QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
+            QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
+            QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->trigger_panel->layout()->addWidget(meta_port);
         }
     }
@@ -231,43 +232,6 @@ void NodeBox::construct()
     setupUi();
 
     installEventFilter(this);
-}
-
-
-void NodeBox::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
-{
-    if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
-        // TODO: command!
-        vi->createVariadicPort(port_type, type, label, optional);
-    }
-}
-
-void NodeBox::createVariadicPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
-{
-    if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
-        // TODO: command!
-        Connectable* new_port = vi->createVariadicPort(port_type::opposite(from->getConnectorType()), type, label, optional);
-
-        GraphFacade* graph_facade = getGraphView()->getGraphFacade();
-        AUUID graph_uuid = graph_facade->getGraph()->getUUID().getAbsoluteUUID();
-
-        Command::Ptr cmd = CommandFactory(graph_facade).addConnection(from->getUUID(), new_port->getUUID());
-        executeCommand(cmd);
-    }
-}
-
-void NodeBox::createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
-{
-    if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
-        // TODO: command!
-
-        Connectable* new_port = vi->createVariadicPort(from->getConnectorType(), type, label, optional);
-
-        GraphFacade* graph_facade = getGraphView()->getGraphFacade();
-        CommandPtr cmd = CommandFactory(graph_facade).moveConnections(from->getUUID(), new_port->getUUID());
-
-        executeCommand(cmd);
-    }
 }
 
 
@@ -975,10 +939,6 @@ GraphFacade* NodeBox::getSubGraph() const
         NodePtr node = nh->getNode().lock();
         if(node) {
             return parent_->getGraphFacade()->getSubGraph(node->getUUID());
-            //            Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(node);
-            //            if(graph) {
-            //                return graph;
-            //            }
         }
     }
 

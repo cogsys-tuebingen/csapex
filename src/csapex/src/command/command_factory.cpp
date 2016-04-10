@@ -302,34 +302,34 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
 }
 
 
-CommandPtr CommandFactory::createVariadicInput(ConnectionTypeConstPtr connection_type, const std::string& label, bool optional)
+CommandPtr CommandFactory::createVariadicInput(const AUUID& node_uuid, ConnectionTypeConstPtr connection_type, const std::string& label, bool optional)
 {
-    return createVariadicPort(ConnectorType::INPUT, connection_type, label, optional);
+    return createVariadicPort(node_uuid, ConnectorType::INPUT, connection_type, label, optional);
 }
 
-CommandPtr CommandFactory::createVariadicOutput(ConnectionTypeConstPtr connection_type, const std::string& label)
+CommandPtr CommandFactory::createVariadicOutput(const AUUID& node_uuid, ConnectionTypeConstPtr connection_type, const std::string& label)
 {
-    return createVariadicPort(ConnectorType::OUTPUT, connection_type, label, false);
+    return createVariadicPort(node_uuid, ConnectorType::OUTPUT, connection_type, label, false);
 }
 
-CommandPtr CommandFactory::createVariadicTrigger(const std::string& label)
+CommandPtr CommandFactory::createVariadicTrigger(const AUUID& node_uuid, const std::string& label)
 {
-    return createVariadicPort(ConnectorType::TRIGGER, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
+    return createVariadicPort(node_uuid, ConnectorType::TRIGGER, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
 }
 
-CommandPtr CommandFactory::createVariadicSlot(const std::string& label)
+CommandPtr CommandFactory::createVariadicSlot(const AUUID& node_uuid, const std::string& label)
 {
-    return createVariadicPort(ConnectorType::SLOT_T, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
+    return createVariadicPort(node_uuid, ConnectorType::SLOT_T, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
 }
 
-CommandPtr CommandFactory::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr connection_type)
+CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, ConnectionTypeConstPtr connection_type)
 {
-    std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, port_type, connection_type);
+    std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, node_uuid, port_type, connection_type);
     return res;
 }
-CommandPtr CommandFactory::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr connection_type, const std::string& label, bool optional)
+CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, ConnectionTypeConstPtr connection_type, const std::string& label, bool optional)
 {
-    std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, port_type, connection_type);
+    std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, node_uuid, port_type, connection_type);
     res->setLabel(label);
     res->setOptional(optional);
     return res;

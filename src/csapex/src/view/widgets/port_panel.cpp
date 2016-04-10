@@ -21,7 +21,7 @@
 using namespace csapex;
 
 
-PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
+PortPanel::PortPanel(ConnectorType type, const AUUID& target, DesignerScene* parent)
     : type_(type), parent_(parent)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -50,7 +50,7 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
 
     mainlayout->addLayout(layout);
 
-    MetaPort* meta_port = new MetaPort(port_type::opposite(type_));
+    MetaPort* meta_port = new MetaPort(port_type::opposite(type_), target);
     QObject::connect(meta_port, &MetaPort::createPortRequest, this, &PortPanel::createPortRequest);
     QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &PortPanel::createPortAndConnectRequest);
     QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &PortPanel::createPortAndMoveRequest);
