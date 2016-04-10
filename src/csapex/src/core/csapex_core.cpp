@@ -212,7 +212,7 @@ void CsApexCore::reset()
 {
     resetRequest();
 
-    root_->reset();
+    root_->clear();
 
     resetDone();
 }
@@ -276,14 +276,16 @@ void CsApexCore::load(const std::string &file)
 {
     settings_.set("config", file);
 
+    bool running = thread_pool_.isRunning();
+    if(running) {
+        thread_pool_.stop();
+    }
+
     if(load_needs_reset_) {
         reset();
     }
 
     apex_assert_hard(root_->getGraph()->countNodes() == 0);
-
-    bool paused = thread_pool_.isPaused();
-    thread_pool_.setPause(true);
 
     GraphIO graphio(root_->getGraph(), node_factory_);
     csapex::slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.loadDetailRequest);
@@ -308,5 +310,7 @@ void CsApexCore::load(const std::string &file)
 
     loaded();
 
-    thread_pool_.setPause(paused);
+    if(running) {
+        thread_pool_.start();
+    }
 }

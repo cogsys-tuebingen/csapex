@@ -17,7 +17,7 @@ UUIDProvider::UUIDProvider()
 
 UUIDProvider::~UUIDProvider()
 {
-    reset();
+    clearCache();
 }
 
 void UUIDProvider::setParent(std::weak_ptr<UUIDProvider> parent, AUUID auuid)
@@ -26,7 +26,7 @@ void UUIDProvider::setParent(std::weak_ptr<UUIDProvider> parent, AUUID auuid)
     auuid_ = auuid;
 }
 
-void UUIDProvider::reset()
+void UUIDProvider::clearCache()
 {
     std::unique_lock<std::recursive_mutex > lock(hash_mutex_);
     hash_.clear();

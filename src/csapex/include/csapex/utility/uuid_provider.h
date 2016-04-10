@@ -47,7 +47,7 @@ public:
 
     AUUID getAbsoluteUUID() const;
 
-    void reset();
+    void clearCache();
     void free(const UUID& uuid);
     std::string generateNextName(const std::string& name);
     std::string generateNextSubName(const UUID& parent, const std::string& name);

@@ -70,17 +70,23 @@ void NodeBox::setAdapter(NodeAdapter::Ptr adapter)
 
 NodeBox::~NodeBox()
 {
-    adapter_.reset();
+    destruct();
 
     for(QObject* child : children()) {
         delete child;
     }
 
-    apex_assert_hard(initialized_);
     delete ui;
     initialized_ = false;
 }
 
+void NodeBox::destruct()
+{
+    QObject::disconnect(this);
+
+    node_worker_.reset();
+    adapter_.reset();
+}
 
 void NodeBox::setupUi()
 {
@@ -196,20 +202,23 @@ void NodeBox::construct()
 
     QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 
-    nh->nodeStateChanged.connect([this]() { nodeStateChanged(); });
+
+    connections_.emplace_back(nh->nodeStateChanged.connect([this]() { nodeStateChanged(); }));
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
-    nh->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); });
-    nh->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); });
+    connections_.emplace_back(nh->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); }));
+    connections_.emplace_back(nh->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); }));
 
     NodeWorkerPtr worker = node_worker_.lock();
     if(worker) {
+        connections_.emplace_back(worker->destroyed.connect([this](){ destruct(); }));
+
         enabledChangeEvent(worker->isProcessingEnabled());
         //    nh->enabled.connect([this](bool e){ enabledChange(e); });
         QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
-        worker->threadChanged.connect([this](){ updateThreadInformation(); });
-        worker->errorHappened.connect([this](bool){ updateVisualsRequest(); });
+        connections_.emplace_back(worker->threadChanged.connect([this](){ updateThreadInformation(); }));
+        connections_.emplace_back(worker->errorHappened.connect([this](bool){ updateVisualsRequest(); }));
     }
 
 
@@ -936,7 +945,7 @@ void NodeBox::updateVisuals()
 
     refreshStylesheet();
 
-    QApplication::processEvents();
+    ensurePolished();
     adjustSize();
 }
 

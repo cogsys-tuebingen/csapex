@@ -245,6 +245,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         w.show();
         splash->finish(&w);
 
+        thread_pool.start();
+
         res = run();
 
         deleteRecoveryConfig();
@@ -257,6 +259,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
             app->quit();
         });
         core->startup();
+
+        thread_pool.start();
+
         res = run();
     }
 

@@ -100,6 +100,7 @@ public:
     void notifyMessagesProcessed();
 
 public:
+    csapex::slim_signal::Signal<void()> destroyed;
     csapex::slim_signal::Signal<void()> panic;
 
     csapex::slim_signal::Signal<void()> ticked;

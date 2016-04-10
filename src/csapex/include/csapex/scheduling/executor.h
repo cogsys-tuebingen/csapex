@@ -27,9 +27,11 @@ public:
     void setSteppingMode(bool stepping);
     void step();
 
+    virtual void start() = 0;
     virtual void stop() = 0;
     virtual void clear() = 0;
 
+    virtual bool isRunning() const = 0;
 
 protected:
     virtual void pauseChanged(bool pause) = 0;

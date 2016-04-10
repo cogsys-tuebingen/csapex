@@ -354,7 +354,7 @@ TaskGenerator* GraphFacade::getTaskGenerator(const UUID &uuid)
     return generators_.at(uuid).get();
 }
 
-void GraphFacade::reset()
+void GraphFacade::clear()
 {
     stop();
     graph_->clear();

@@ -62,6 +62,7 @@ public:
 
     virtual ~NodeBox();
     virtual void construct();
+    void destruct();
     virtual void init();
 
     /// MODIFIER
@@ -189,6 +190,8 @@ protected:
     NodeHandleWeakPtr node_handle_;
     NodeWorkerWeakPtr node_worker_;
     NodeAdapterPtr adapter_;
+
+    std::vector<slim_signal::ScopedConnection> connections_;
 
     std::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
 

@@ -18,7 +18,6 @@ using namespace csapex;
 ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool grouping)
     : handler_(handler), enable_threading_(enable_threading), grouping_(grouping)
 {
-
     default_group_ = std::make_shared<ThreadGroup>(handler_,
                                                    ThreadGroup::DEFAULT_GROUP_ID, "default");
     default_group_->end_step.connect([this]() {
@@ -31,7 +30,6 @@ ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool gr
 ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_threading, bool grouping)
     : handler_(handler), enable_threading_(enable_threading), grouping_(grouping)
 {
-
     default_group_ = std::make_shared<ThreadGroup>(handler_,
                                                    ThreadGroup::DEFAULT_GROUP_ID, "default");
     default_group_->end_step.connect([this]() {
@@ -62,12 +60,25 @@ void ThreadPool::performStep()
     }
 }
 
+void ThreadPool::start()
+{
+    default_group_->start();
+    for(auto g : groups_) {
+        g->start();
+    }
+}
+
 void ThreadPool::stop()
 {
     default_group_->stop();
     for(auto g : groups_) {
         g->stop();
     }
+}
+
+bool ThreadPool::isRunning() const
+{
+    return default_group_->isRunning();
 }
 
 void ThreadPool::clear()

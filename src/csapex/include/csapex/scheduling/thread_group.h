@@ -48,8 +48,11 @@ public:
     virtual bool isStepping() const override;
     virtual bool isStepDone() const override;
 
+    virtual void start() override;
     virtual void stop() override;
     virtual void clear() override;
+
+    bool isRunning() const;
 
     virtual void add(TaskGeneratorPtr generator) override;
     virtual void add(TaskGeneratorPtr generator, const std::vector<TaskPtr>& initial_tasks) override;
@@ -59,8 +62,6 @@ public:
     virtual void schedule(TaskPtr schedulable) override;
 
 private:
-    void startThread();
-
     void schedulingLoop();
 
     bool waitForTasks();

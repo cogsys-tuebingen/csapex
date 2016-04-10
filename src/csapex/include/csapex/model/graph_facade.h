@@ -71,7 +71,7 @@ public:
     bool isPaused() const;
     void pauseRequest(bool pause);
 
-    void reset();
+    void clear();
 
 public:
     csapex::slim_signal::Signal<void (bool)> paused;

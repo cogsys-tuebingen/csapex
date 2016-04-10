@@ -29,8 +29,11 @@ public:
 
     virtual void performStep() override;
 
+    virtual void start() override;
     virtual void stop() override;
     virtual void clear() override;
+
+    virtual bool isRunning() const override;
 
     std::vector<ThreadGroupPtr> getGroups();
     ThreadGroup* getGroup(int id);

@@ -915,7 +915,10 @@ void GraphView::removeBox(NodeBox *box)
     box->setVisible(false);
     box->deleteLater();
 
-    boxes_.erase(std::find(boxes_.begin(), boxes_.end(), box));
+    auto pos = std::find(boxes_.begin(), boxes_.end(), box);
+    if(pos != boxes_.end()) {
+        boxes_.erase(pos);
+    }
     profiling_.erase(box);
 
     if(graph_facade_->getGraph()->countNodes() == 0) {

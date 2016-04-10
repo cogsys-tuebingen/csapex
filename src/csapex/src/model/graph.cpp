@@ -75,6 +75,8 @@ void Graph::stateChanged()
 
 void Graph::clear()
 {
+    UUIDProvider::clearCache();
+
     auto connections = connections_;
     for(ConnectionPtr c : connections) {
         deleteConnection(c);

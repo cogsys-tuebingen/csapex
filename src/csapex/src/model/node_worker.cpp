@@ -103,6 +103,8 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 NodeWorker::~NodeWorker()
 {
+    destroyed();
+
     is_setup_ = false;
 
     for(auto& connection : handle_connections_) {

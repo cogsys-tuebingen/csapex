@@ -26,6 +26,7 @@ public:
     virtual bool isStepDone() const = 0;
     virtual void step() = 0;
 
+    virtual void start() = 0;
     virtual void stop() = 0;
     virtual void clear() = 0;
 

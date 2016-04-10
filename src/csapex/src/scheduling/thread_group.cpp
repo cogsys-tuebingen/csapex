@@ -21,13 +21,11 @@ ThreadGroup::ThreadGroup(ExceptionHandler& handler, int id, std::string name)
       id_(id), name_(name), running_(false), pause_(false), stepping_(false)
 {
     next_id_ = std::max(next_id_, id + 1);
-    startThread();
 }
 ThreadGroup::ThreadGroup(ExceptionHandler &handler, std::string name)
     : handler_(handler),
       id_(next_id_++), name_(name), running_(false), pause_(false), stepping_(false)
 {
-    startThread();
 }
 
 ThreadGroup::~ThreadGroup()
@@ -126,6 +124,25 @@ bool ThreadGroup::isStepDone() const
     return true;
 }
 
+void ThreadGroup::start()
+{
+    std::unique_lock<std::recursive_mutex> lock(state_mtx_);
+    if(scheduler_thread_.joinable()) {
+        running_ = false;
+        pause_changed_.notify_all();
+        lock.unlock();
+
+        scheduler_thread_.join();
+    }
+
+    running_ = true;
+
+    scheduler_thread_ = std::thread ([this]() {
+        csapex::thread::set_name((name_).c_str());
+        schedulingLoop();
+    });
+}
+
 void ThreadGroup::stop()
 {
     {
@@ -150,6 +167,11 @@ void ThreadGroup::stop()
     }
 }
 
+bool ThreadGroup::isRunning() const
+{
+    return running_;
+}
+
 void ThreadGroup::clear()
 {
 
@@ -169,9 +191,6 @@ void ThreadGroup::add(TaskGeneratorPtr generator)
     generator->setSteppingMode(stepping_);
 
     std::unique_lock<std::recursive_mutex> lock(state_mtx_);
-    if(!running_) {
-        startThread();
-    }
     generators_.push_back(generator);
 
     auto& cs = generator_connections_[generator.get()];
@@ -244,25 +263,6 @@ void ThreadGroup::schedule(TaskPtr task)
     tasks_.insert(task);
 
     work_available_.notify_all();
-}
-
-void ThreadGroup::startThread()
-{
-    std::unique_lock<std::recursive_mutex> lock(state_mtx_);
-    if(scheduler_thread_.joinable()) {
-        running_ = false;
-        pause_changed_.notify_all();
-        lock.unlock();
-
-        scheduler_thread_.join();
-    }
-
-    running_ = true;
-
-    scheduler_thread_ = std::thread ([this]() {
-        csapex::thread::set_name((name_).c_str());
-        schedulingLoop();
-    });
 }
 
 void ThreadGroup::schedulingLoop()
