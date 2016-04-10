@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/command/command_fwd.h>
+#include <csapex/command/playback_command.h>
 
 /// SYSTEM
 #include <deque>
@@ -44,6 +45,8 @@ public:
     void setClean();
     void resetDirtyPoint();
     void clearSavepoints();
+
+    std::shared_ptr<command::PlaybackCommand> make_playback(const AUUID& graph_uuid, const std::string& type) const;
 
 public:
     csapex::slim_signal::Signal<void()> stateChanged;

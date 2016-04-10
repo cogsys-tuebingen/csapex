@@ -293,6 +293,7 @@ add_library(csapex_qt SHARED
     src/command/command.cpp
     src/command/dispatcher.cpp
     src/command/meta.cpp
+    src/command/playback_command.cpp
     src/command/command_factory.cpp
     src/command/add_connection.cpp
     src/command/add_msg_connection.cpp

@@ -130,6 +130,13 @@ public:
     SlotPtr getForwardedSlotInternal(const UUID& internal_uuid) const;
     TriggerPtr getForwardedTriggerInternal(const UUID& internal_uuid) const;
 
+    OutputPtr getRelayForInput(const UUID& external_uuid) const;
+    InputPtr getRelayForOutput(const UUID& external_uuid) const;
+    TriggerPtr getRelayForSlot(const UUID& external_uuid) const;
+    SlotPtr getRelayForTrigger(const UUID& external_uuid) const;
+
+
+
     UUID getForwardedInputExternal(const UUID& internal_uuid) const;
     UUID getForwardedOutputExternal(const UUID& internal_uuid) const;
     UUID getForwardedSlotExternal(const UUID& internal_uuid) const;
@@ -190,8 +197,8 @@ protected:
     std::unordered_map<UUID, SlotPtr, UUID::Hasher> relay_slot_;
     std::unordered_map<UUID, TriggerPtr, UUID::Hasher> relay_trigger_;
 
-    std::map<Input*, OutputPtr> forward_inputs_;
-    std::map<Output*, InputPtr> forward_outputs_;
+    std::unordered_map<UUID, OutputPtr, UUID::Hasher> forward_inputs_;
+    std::unordered_map<UUID, InputPtr, UUID::Hasher> forward_outputs_;
     std::unordered_map<UUID, SlotPtr, UUID::Hasher> forward_trigger_;
     std::unordered_map<UUID, TriggerPtr, UUID::Hasher> forward_slot_;
 

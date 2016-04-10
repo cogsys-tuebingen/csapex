@@ -7,6 +7,7 @@
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/connector_type.h>
 
 namespace csapex
 {
@@ -41,6 +42,15 @@ public:
     CommandPtr deleteAllConnectionFulcrumsCommand(ConnectionPtr connection);
     CommandPtr deleteConnectionByIdCommand(int id);
     CommandPtr clearCommand();
+
+
+    CommandPtr createVariadicInput(ConnectionTypeConstPtr connection_type, const std::string& label, bool optional);
+    CommandPtr createVariadicOutput(ConnectionTypeConstPtr connection_type, const std::string& label);
+    CommandPtr createVariadicTrigger(const std::string& label);
+    CommandPtr createVariadicSlot(const std::string& label);
+
+    CommandPtr createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr connection_type);
+    CommandPtr createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr connection_type, const std::string& label, bool optional);
 
 private:
     GraphFacade* getGraphFacade() const;

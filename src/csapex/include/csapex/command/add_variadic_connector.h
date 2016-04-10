@@ -19,6 +19,9 @@ public:
     AddVariadicConnector(const AUUID &graph_id, const ConnectorType &connector_type, const ConnectionTypeConstPtr& type);
     RelayMapping getMap() const;
 
+    void setLabel(const std::string& label);
+    void setOptional(bool optional);
+
 protected:
     bool doExecute() override;
     bool doUndo() override;
@@ -32,6 +35,11 @@ private:
     ConnectorType connector_type;
     ConnectionTypeConstPtr token_type;
     RelayMapping map;
+
+    std::string label_;
+    bool optional_;
+
+    UUID connector_id;
 };
 }
 }

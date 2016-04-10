@@ -260,6 +260,7 @@ void NodeBox::createVariadicPortAndMove(Connectable* from, ConnectionTypeConstPt
 {
     if(VariadicBase* vi = dynamic_cast<VariadicBase*>(getNode())) {
         // TODO: command!
+
         Connectable* new_port = vi->createVariadicPort(from->getConnectorType(), type, label, optional);
 
         GraphFacade* graph_facade = getGraphView()->getGraphFacade();

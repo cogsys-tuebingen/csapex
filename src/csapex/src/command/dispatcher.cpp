@@ -216,3 +216,10 @@ void CommandDispatcher::visitRedoCommands(std::function<void (int level, const C
         c->accept(0, callback);
     }
 }
+
+std::shared_ptr<command::PlaybackCommand> CommandDispatcher::make_playback(const AUUID& graph_uuid, const std::string& type) const
+{
+     std::shared_ptr<command::PlaybackCommand> res = std::make_shared<command::PlaybackCommand>(graph_uuid, type);
+     res->init(&settings_, root_.get(), thread_pool_, node_factory_);
+     return res;
+}

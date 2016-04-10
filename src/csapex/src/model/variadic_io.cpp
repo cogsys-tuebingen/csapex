@@ -66,6 +66,19 @@ void VariadicInputs::removeVariadicInput(InputPtr input)
     variadic_inputs_.erase(std::find(variadic_inputs_.begin(), variadic_inputs_.end(), input));
 }
 
+void VariadicInputs::removeVariadicInputById(const UUID& input)
+{
+    for(auto it = variadic_inputs_.begin(); it != variadic_inputs_.end(); ) {
+        InputPtr i = *it;
+        if(i->getUUID() == input) {
+            removeVariadicInput(i);
+            return;
+        } else {
+            ++it;
+        }
+    }
+}
+
 Input *VariadicInputs::createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
@@ -164,6 +177,19 @@ void VariadicOutputs::removeVariadicOutput(OutputPtr output)
     variadic_outputs_.erase(std::find(variadic_outputs_.begin(), variadic_outputs_.end(), output));
 }
 
+void VariadicOutputs::removeVariadicOutputById(const UUID& output)
+{
+    for(auto it = variadic_outputs_.begin(); it != variadic_outputs_.end(); ) {
+        OutputPtr o = *it;
+        if(o->getUUID() == output) {
+            removeVariadicOutput(o);
+            return;
+        } else {
+            ++it;
+        }
+    }
+}
+
 void VariadicOutputs::setupVariadicParameters(Parameterizable &parameters)
 {
     output_count_ = csapex::param::ParameterFactory::declareValue("output count", 0);
@@ -247,8 +273,21 @@ Trigger *VariadicTriggers::createVariadicTrigger(const std::string& label)
 }
 void VariadicTriggers::removeVariadicTrigger(TriggerPtr trigger)
 {
-    variadic_modifier_->removeTrigger(trigger->getUUID());
     variadic_triggers_.erase(std::find(variadic_triggers_.begin(), variadic_triggers_.end(), trigger));
+}
+
+void VariadicTriggers::removeVariadicTriggerById(const UUID& trigger)
+{
+    variadic_modifier_->removeTrigger(trigger);
+    for(auto it = variadic_triggers_.begin(); it != variadic_triggers_.end(); ) {
+        TriggerPtr t = *it;
+        if(t->getUUID() == trigger) {
+            removeVariadicTrigger(t);
+            return;
+        } else {
+            ++it;
+        }
+    }
 }
 
 void VariadicTriggers::setupVariadicParameters(Parameterizable &parameters)
@@ -336,6 +375,19 @@ void VariadicSlots::removeVariadicSlot(SlotPtr slot)
 {
     variadic_modifier_->removeSlot(slot->getUUID());
     variadic_slots_.erase(std::find(variadic_slots_.begin(), variadic_slots_.end(), slot));
+}
+
+void VariadicSlots::removeVariadicSlotById(const UUID& slot)
+{
+    for(auto it = variadic_slots_.begin(); it != variadic_slots_.end(); ) {
+        SlotPtr s = *it;
+        if(s->getUUID() == slot) {
+            removeVariadicSlot(s);
+            return;
+        } else {
+            ++it;
+        }
+    }
 }
 
 

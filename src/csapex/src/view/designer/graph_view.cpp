@@ -12,6 +12,7 @@
 #include <csapex/command/group_nodes.h>
 #include <csapex/command/ungroup_nodes.h>
 #include <csapex/command/meta.h>
+#include <csapex/command/playback_command.h>
 #include <csapex/command/minimize.h>
 #include <csapex/command/move_box.h>
 #include <csapex/command/rename_node.h>
@@ -20,6 +21,7 @@
 #include <csapex/command/set_color.h>
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/command/add_signal_connection.h>
+#include <csapex/command/add_variadic_connector.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
@@ -931,108 +933,48 @@ void GraphView::removeBox(NodeBox *box)
 
 void GraphView::createPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
-    // TODO: move to graph! make graph derive from variadic io!
-    Graph* graph = graph_facade_->getGraph();
+    CommandFactory factory(graph_facade_.get());
 
-    switch(port_type) {
-    case ConnectorType::OUTPUT:
-        // TODO: command!
-        graph->addForwardingOutput(type, label);
-        break;
-    case ConnectorType::INPUT:
-        // TODO: command!
-        graph->addForwardingInput(type, label, optional);
-        break;
-    case ConnectorType::TRIGGER:
-        // TODO: command!
-        graph->addForwardingTrigger(label);
-        break;
-    case ConnectorType::SLOT_T:
-        // TODO: command!
-        graph->addForwardingSlot(label);
-        break;
-    }
+    CommandPtr cmd = factory.createVariadicPort(port_type, type, label, optional);
+    dispatcher_->execute(cmd);
 }
 
 void GraphView::createPortAndConnect(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
     Graph* graph = graph_facade_->getGraph();
-    AUUID graph_uuid = graph_facade_->getGraph()->getUUID().getAbsoluteUUID();
+    AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
 
-    Command::Ptr cmd;
+    CommandFactory factory(graph_facade_.get());
 
-    switch(from->getConnectorType()) {
-    case ConnectorType::OUTPUT:
-    {
-        // TODO: command!
-        RelayMapping ports = graph->addForwardingOutput(type, label);
-        cmd.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), ports.internal));
-    }
-        break;
-    case ConnectorType::INPUT:
-    {
-        // TODO: command!
-        RelayMapping ports = graph->addForwardingInput(type, label, optional);
-        cmd.reset(new command::AddMessageConnection(graph_uuid, ports.internal, from->getUUID()));
-    }
-        break;
-    case ConnectorType::TRIGGER:
-    {
-        // TODO: command!
-        RelayMapping ports = graph->addForwardingTrigger(label);
-        cmd.reset(new command::AddSignalConnection(graph_uuid, from->getUUID(), ports.internal));
-    }
-        break;
-    case ConnectorType::SLOT_T:
-    {
-        // TODO: command!
-        RelayMapping ports = graph->addForwardingSlot(label);
-        cmd.reset(new command::AddSignalConnection(graph_uuid, ports.internal, from->getUUID()));
-    }
-        break;
-    }
+    std::shared_ptr<command::PlaybackCommand> playback = dispatcher_->make_playback(graph_uuid, "CreatePortAndConnect");
 
-    dispatcher_->execute(cmd);
+    std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, from->getConnectorType(), type);
+    playback->execute(add);
+
+    RelayMapping ports = add->getMap();
+
+    playback->execute(factory.addConnection(ports.internal, from->getUUID()));
+
+    dispatcher_->execute(playback);
 }
 
 void GraphView::createPortAndMove(Connectable* from, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
     Graph* graph = graph_facade_->getGraph();
+    AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
 
-    Command::Ptr cmd;
+    CommandFactory factory(graph_facade_.get());
 
-    switch(port_type::opposite(from->getConnectorType())) {
-    case ConnectorType::OUTPUT:
-    {
-        // TODO: command!
-        RelayMapping ports = graph->addForwardingOutput(type, label);
-        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.internal);
-    }
-        break;
-    case ConnectorType::INPUT:
-    {
-        // TODO: command!
-        RelayMapping ports = graph->addForwardingInput(type, label, optional);
-        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.internal);
-    }
-        break;
-    case ConnectorType::TRIGGER:
-    {
-        // TODO: command!
-        RelayMapping ports = graph->addForwardingTrigger(label);
-        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.internal);
-    }
-        break;
-    case ConnectorType::SLOT_T:
-    {
-        // TODO: command!
-        RelayMapping ports = graph->addForwardingSlot(label);
-        cmd = CommandFactory(graph_facade_.get()).moveConnections(from->getUUID(), ports.internal);
-    }
-        break;
-    }
+    std::shared_ptr<command::PlaybackCommand> playback = dispatcher_->make_playback(graph_uuid, "CreatePortAndMove");
 
-    dispatcher_->execute(cmd);
+    std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, port_type::opposite(from->getConnectorType()), type);
+    playback->execute(add);
+
+    RelayMapping ports = add->getMap();
+
+    playback->execute(factory.moveConnections(from->getUUID(), ports.internal));
+
+    dispatcher_->execute(playback);
 }
 
 void GraphView::addPort(Port *port)

@@ -660,7 +660,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
     for(Input* i : node_modifier.getMessageInputs()) {
         ConnectionTypeConstPtr m = msg::getMessage(i);
-        OutputPtr o = forward_inputs_.at(i);
+        OutputPtr o = forward_inputs_.at(i->getUUID());
 
         msg::publish(o.get(), m);
     }
@@ -696,14 +696,14 @@ Input* Graph::createVariadicInput(ConnectionTypeConstPtr type, const std::string
 
 void Graph::removeVariadicInput(InputPtr input)
 {
-    OutputPtr relay = forward_inputs_[input.get()];
+    OutputPtr relay = forward_inputs_[input->getUUID()];
     forwardingRemoved(relay);
 
     VariadicInputs::removeVariadicInput(input);
 
     relay_to_external_input_.erase(relay->getUUID());
 
-    forward_inputs_.erase(input.get());
+    forward_inputs_.erase(input->getUUID());
     transition_relay_out_->removeOutput(relay);
 }
 
@@ -730,7 +730,7 @@ UUID  Graph::addForwardingInput(const UUID& internal_uuid, const ConnectionTypeC
 
     transition_relay_out_->addOutput(relay);
 
-    forward_inputs_[external_input] = relay;
+    forward_inputs_[external_input->getUUID()] = relay;
 
     relay_to_external_input_[internal_uuid] = external_input->getUUID();
 
@@ -748,14 +748,16 @@ Output* Graph::createVariadicOutput(ConnectionTypeConstPtr type, const std::stri
 
 void Graph::removeVariadicOutput(OutputPtr output)
 {
-    InputPtr relay = forward_outputs_[output.get()];
+    InputPtr relay = forward_outputs_[output->getUUID()];
     forwardingRemoved(relay);
+
+    relay->messageArrived.disconnectAll();
 
     VariadicOutputs::removeVariadicOutput(output);
 
     relay_to_external_output_.erase(relay->getUUID());
 
-    forward_outputs_.erase(output.get());
+    forward_outputs_.erase(output->getUUID());
     transition_relay_in_->removeInput(relay);
 }
 
@@ -790,7 +792,7 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const ConnectionTypeC
 
     transition_relay_in_->addInput(relay);
 
-    forward_outputs_[external_output] = relay;
+    forward_outputs_[external_output->getUUID()] = relay;
 
     relay_to_external_output_[internal_uuid] = external_output->getUUID();
 
@@ -917,6 +919,22 @@ UUID Graph::addForwardingTrigger(const UUID& internal_uuid, const std::string& l
     return external_trigger->getUUID();
 }
 
+OutputPtr Graph::getRelayForInput(const UUID& external_uuid) const
+{
+    return forward_inputs_.at(external_uuid);
+}
+InputPtr Graph::getRelayForOutput(const UUID& external_uuid) const
+{
+    return forward_outputs_.at(external_uuid);
+}
+TriggerPtr Graph::getRelayForSlot(const UUID& external_uuid) const
+{
+    return forward_slot_.at(external_uuid);
+}
+SlotPtr Graph::getRelayForTrigger(const UUID& external_uuid) const
+{
+    return forward_trigger_.at(external_uuid);
+}
 
 InputPtr Graph::getForwardedInputInternal(const UUID &internal_uuid) const
 {

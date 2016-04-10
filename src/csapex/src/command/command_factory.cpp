@@ -10,6 +10,8 @@
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/command/add_signal_connection.h>
+#include <csapex/command/add_variadic_connector.h>
+#include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/trigger.h>
@@ -297,4 +299,38 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
     }
 
     return meta;
+}
+
+
+CommandPtr CommandFactory::createVariadicInput(ConnectionTypeConstPtr connection_type, const std::string& label, bool optional)
+{
+    return createVariadicPort(ConnectorType::INPUT, connection_type, label, optional);
+}
+
+CommandPtr CommandFactory::createVariadicOutput(ConnectionTypeConstPtr connection_type, const std::string& label)
+{
+    return createVariadicPort(ConnectorType::OUTPUT, connection_type, label, false);
+}
+
+CommandPtr CommandFactory::createVariadicTrigger(const std::string& label)
+{
+    return createVariadicPort(ConnectorType::TRIGGER, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
+}
+
+CommandPtr CommandFactory::createVariadicSlot(const std::string& label)
+{
+    return createVariadicPort(ConnectorType::SLOT_T, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
+}
+
+CommandPtr CommandFactory::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr connection_type)
+{
+    std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, port_type, connection_type);
+    return res;
+}
+CommandPtr CommandFactory::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr connection_type, const std::string& label, bool optional)
+{
+    std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, port_type, connection_type);
+    res->setLabel(label);
+    res->setOptional(optional);
+    return res;
 }

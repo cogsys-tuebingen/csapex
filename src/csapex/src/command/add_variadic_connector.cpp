@@ -5,6 +5,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/trigger.h>
+#include <csapex/signal/slot.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/node.h>
@@ -15,14 +17,24 @@ using namespace csapex;
 using namespace command;
 
 AddVariadicConnector::AddVariadicConnector(const AUUID& graph_id, const ConnectorType& connector_type,
-                                   const ConnectionTypeConstPtr& type)
-    : Command(graph_id), connector_type(connector_type), token_type(type)
+                                           const ConnectionTypeConstPtr& type)
+    : Command(graph_id), connector_type(connector_type), token_type(type), label_("forwarding"), optional_(false)
 {
+}
+
+void AddVariadicConnector::setLabel(const std::string &label)
+{
+    label_ = label;
+}
+
+void AddVariadicConnector::setOptional(bool optional)
+{
+    optional_ = optional;
 }
 
 std::string AddVariadicConnector::getType() const
 {
-    return "PassOutConnector";
+    return "AddVariadicConnector";
 }
 
 std::string AddVariadicConnector::getDescription() const
@@ -37,16 +49,36 @@ bool AddVariadicConnector::doExecute()
 
     switch(connector_type) {
     case ConnectorType::INPUT:
-        map = graph->addForwardingInput(token_type, "forwarding", false);
+    {
+        Input* input = graph->createVariadicInput(token_type, label_, optional_);
+        connector_id = map.external = input->getUUID();
+        auto relay = graph->getRelayForInput(connector_id);
+        map.internal = relay->getUUID();
+    }
         break;
     case ConnectorType::OUTPUT:
-        map = graph->addForwardingOutput(token_type, "forwarding");
+    {
+        Output* output = graph->createVariadicOutput(token_type, label_);
+        connector_id = map.external = output->getUUID();
+        auto relay = graph->getRelayForOutput(connector_id);
+        map.internal = relay->getUUID();
+    }
         break;
     case ConnectorType::SLOT_T:
-        map = graph->addForwardingSlot("forwarding");
+    {
+        Slot* slot = graph->createVariadicSlot(label_, [](){});
+        connector_id = map.external = slot->getUUID();
+        auto relay = graph->getRelayForSlot(connector_id);
+        map.internal = relay->getUUID();
+    }
         break;
     case ConnectorType::TRIGGER:
-        map = graph->addForwardingTrigger("forwarding");
+    {
+        Trigger* trigger = graph->createVariadicTrigger(label_);
+        connector_id = map.external = trigger->getUUID();
+        auto relay = graph->getRelayForTrigger(connector_id);
+        map.internal = relay->getUUID();
+    }
         break;
     default:
         throw std::logic_error(std::string("unknown connector type: ") + port_type::name(connector_type));
@@ -57,7 +89,26 @@ bool AddVariadicConnector::doExecute()
 
 bool AddVariadicConnector::doUndo()
 {
-    return false;
+    Graph* graph = getGraph();
+
+    switch(connector_type) {
+    case ConnectorType::INPUT:
+        graph->removeVariadicInputById(connector_id);
+        break;
+    case ConnectorType::OUTPUT:
+        graph->removeVariadicOutputById(connector_id);
+        break;
+    case ConnectorType::SLOT_T:
+        graph->removeVariadicSlotById(connector_id);
+        break;
+    case ConnectorType::TRIGGER:
+        graph->removeVariadicTriggerById(connector_id);
+        break;
+    default:
+        throw std::logic_error(std::string("unknown connector type: ") + port_type::name(connector_type));
+    }
+
+    return true;
 }
 
 bool AddVariadicConnector::doRedo()
