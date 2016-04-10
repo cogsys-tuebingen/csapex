@@ -140,9 +140,9 @@ csapex--NoteBox QTextEdit {
 }
 /* connectors */
 csapex--Port {
-        border: 2px solid rgb(0, 0, 0);
+        /*border: 1px solid rgb(200, 200, 200);
         background: rgb(255,255,255);
-        border-radius: 8px;
+        border-radius: 8px;*/
 }
 csapex--Port[dynamic="true"] {
         border: 2px solid rgb(0, 0, 0);
@@ -156,12 +156,22 @@ csapex--Port[disabled="true"]  {
 csapex--Port[error="true"]  {
         border: 2px solid rgb(165,30,55);
         background: rgb(255,200,200);
+        border-radius: 8px;
 }
-csapex--Port[unconnected="true"]  {
-        border: 2px solid rgb(128,200,255);
-        background: rgb(255,255,255);
+csapex--Port[type="input"]  {
+        image: url(:/port_input.png);
+}
+csapex--Port[type="output"]  {
+        image: url(:/port_output.png);
+}
+csapex--Port[type="trigger"]  {
+        image: url(:/port_trigger.png);
+}
+csapex--Port[type="slot"]  {
+        image: url(:/port_slot.png);
 }
 csapex--Port[optional="true"]  {
+        image: url(:/port_input_optional.png);
 }
 csapex--Port[blocked="true"]  {
         border: 2px solid rgb(255,200,0)!important;

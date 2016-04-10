@@ -54,5 +54,10 @@
         <file>color_wheel.png</file>
         <file>ungroup.png</file>
         <file>add.png</file>
+        <file>port_output.png</file>
+        <file>port_input_optional.png</file>
+        <file>port_input.png</file>
+        <file>port_slot.png</file>
+        <file>port_trigger.png</file>
     </qresource>
 </RCC>

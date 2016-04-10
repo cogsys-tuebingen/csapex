@@ -56,6 +56,10 @@ Port::Port(ConnectableWeakPtr adaptee, QWidget *parent)
         if(adaptee_ptr->isDynamic()) {
             setProperty("dynamic", true);
         }
+        bool opt = dynamic_cast<Input*>(adaptee_ptr.get()) && dynamic_cast<Input*>(adaptee_ptr.get())->isOptional();
+        setProperty("optional", opt);
+
+        setProperty("type", QString::fromStdString(port_type::name(adaptee_ptr->getConnectorType())));
 
     } else {
         std::cerr << "creating empty port!" << std::endl;
@@ -132,9 +136,6 @@ void Port::paintEvent(QPaintEvent *e)
     if(!adaptee) {
         return;
     }
-    bool opt = dynamic_cast<Input*>(adaptee.get()) && dynamic_cast<Input*>(adaptee.get())->isOptional();
-    setProperty("unconnected", isInput() && !opt && !adaptee->isConnected());
-    setProperty("optional", opt);
 
     if(refresh_style_sheet_) {
         refresh_style_sheet_ = false;
