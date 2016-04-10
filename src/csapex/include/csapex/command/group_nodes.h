@@ -30,6 +30,11 @@ private:
     void findNodes(Graph* graph);
     void mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid);
 
+    void mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid);
+    void mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid);
+    void mapSignalGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid);
+    void mapSignalGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid);
+
 private:
     std::vector<UUID> uuids;
 

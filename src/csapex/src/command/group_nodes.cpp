@@ -98,25 +98,43 @@ void GroupNodes::findNodes(Graph* graph)
     setNodes(n);
 }
 
+
 void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 {
+    mapMessageGoingIn(parent_auuid, sub_graph_auuid);
+    mapMessageGoingOut(parent_auuid, sub_graph_auuid);
+    mapSignalGoingIn(parent_auuid, sub_graph_auuid);
+    mapSignalGoingOut(parent_auuid, sub_graph_auuid);
+}
+
+void GroupNodes::mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
+{
+    std::unordered_map<UUID, RelayMapping, UUID::Hasher> cache;
     for(const ConnectionInformation& ci : connections_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
-        std::shared_ptr<command::AddVariadicConnector> pass_out =
-                std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::INPUT, ci.type);
-        executeCommand(pass_out);
-        add(pass_out);
+        RelayMapping in_map;
+        if(cache.find(ci.to) != cache.end()) {
+            in_map = cache.at(ci.to);
 
-        RelayMapping in_map = pass_out->getMap();
+        } else {
+            std::shared_ptr<command::AddVariadicConnector> pass_out =
+                    std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::INPUT, ci.type);
+            executeCommand(pass_out);
+            add(pass_out);
+            in_map = pass_out->getMap();
+            cache[ci.to] = in_map;
 
-        // forwarding connection
-        CommandPtr add_internal_connection =
-                std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid);
-        executeCommand(add_internal_connection);
-        add(add_internal_connection);
+            // forwarding connection
+            CommandPtr add_internal_connection =
+                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid);
+            executeCommand(add_internal_connection);
+            add(add_internal_connection);
+
+        }
+
 
         // crossing connection
         CommandPtr add_external_connection =
@@ -124,24 +142,35 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
+}
 
+void GroupNodes::mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
+{
+    std::unordered_map<UUID, RelayMapping, UUID::Hasher> cache;
     for(const ConnectionInformation& ci : connections_going_out) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
         std::string child = ci.from.id();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
-        std::shared_ptr<command::AddVariadicConnector> pass_out =
-                std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::OUTPUT, ci.type);
-        executeCommand(pass_out);
-        add(pass_out);
+        RelayMapping out_map;
+        if(cache.find(ci.from) != cache.end()) {
+            out_map = cache.at(ci.from);
 
-        RelayMapping out_map = pass_out->getMap();
+        } else {
+            std::shared_ptr<command::AddVariadicConnector> pass_out =
+                    std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::OUTPUT, ci.type);
+            executeCommand(pass_out);
+            add(pass_out);
+            out_map = pass_out->getMap();
+            cache[ci.from] = out_map;
 
-        // forwarding connection
-        CommandPtr add_internal_connection =
-                std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal);
-        executeCommand(add_internal_connection);
-        add(add_internal_connection);
+            // forwarding connection
+            CommandPtr add_internal_connection =
+                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal);
+            executeCommand(add_internal_connection);
+            add(add_internal_connection);
+
+        }
 
         // crossing connection
         CommandPtr add_external_connection =
@@ -149,25 +178,34 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
+}
 
-
+void GroupNodes::mapSignalGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
+{
+    std::unordered_map<UUID, RelayMapping, UUID::Hasher> cache;
     for(const ConnectionInformation& ci : signals_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
-        std::shared_ptr<command::AddVariadicConnector> pass_out =
-                std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::SLOT_T, ci.type);
-        executeCommand(pass_out);
-        add(pass_out);
+        RelayMapping in_map;
+        if(cache.find(ci.to) != cache.end()) {
+            in_map = cache.at(ci.to);
 
-        RelayMapping in_map = pass_out->getMap();
+        } else {
+            std::shared_ptr<command::AddVariadicConnector> pass_out =
+                    std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::SLOT_T, ci.type);
+            executeCommand(pass_out);
+            add(pass_out);
+            in_map = pass_out->getMap();
+            cache[ci.to] = in_map;
 
-        // forwarding connection
-        CommandPtr add_internal_connection =
-                std::make_shared<command::AddSignalConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid);
-        executeCommand(add_internal_connection);
-        add(add_internal_connection);
+            // forwarding connection
+            CommandPtr add_internal_connection =
+                    std::make_shared<command::AddSignalConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid);
+            executeCommand(add_internal_connection);
+            add(add_internal_connection);
+        }
 
         // crossing connection
         CommandPtr add_external_connection =
@@ -175,24 +213,35 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
+}
 
+void GroupNodes::mapSignalGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
+{
+    std::unordered_map<UUID, RelayMapping, UUID::Hasher> cache;
     for(const ConnectionInformation& ci : signals_going_out) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
         std::string child = ci.from.id();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
-        std::shared_ptr<command::AddVariadicConnector> pass_out =
-                std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::TRIGGER, ci.type);
-        executeCommand(pass_out);
-        add(pass_out);
 
-        RelayMapping out_map = pass_out->getMap();
+        RelayMapping out_map;
+        if(cache.find(ci.from) != cache.end()) {
+            out_map = cache.at(ci.from);
 
-        // forwarding connection
-        CommandPtr add_internal_connection =
-                std::make_shared<command::AddSignalConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal);
-        executeCommand(add_internal_connection);
-        add(add_internal_connection);
+        } else {
+            std::shared_ptr<command::AddVariadicConnector> pass_out =
+                    std::make_shared<command::AddVariadicConnector>(sub_graph_auuid, ConnectorType::TRIGGER, ci.type);
+            executeCommand(pass_out);
+            add(pass_out);
+            out_map = pass_out->getMap();
+            cache[ci.from] = out_map;
+
+            // forwarding connection
+            CommandPtr add_internal_connection =
+                    std::make_shared<command::AddSignalConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal);
+            executeCommand(add_internal_connection);
+            add(add_internal_connection);
+        }
 
         // crossing connection
         CommandPtr add_external_connection =
@@ -201,6 +250,7 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         add(add_external_connection);
     }
 }
+
 
 bool GroupNodes::doUndo()
 {
