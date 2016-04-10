@@ -7,6 +7,7 @@
 #include <csapex/factory/message_factory.h>
 #include <csapex/command/meta.h>
 #include <csapex/utility/assert.h>
+#include <csapex/param/parameter.h>
 
 /// SYSTEM
 #include <iostream>
@@ -53,7 +54,12 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout,
 
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
-    QLabel* label = new QLabel(txt.c_str());
+    QLabel* label = nullptr;
+    if(p && !p->description().toString().empty()) {
+        label = new QLabel(QString::fromStdString(txt) + "<img src=':/help.png' />");
+    } else {
+        label = new QLabel(QString::fromStdString(txt));
+    }
     if(context_handler) {
         label->setContextMenuPolicy(Qt::CustomContextMenu);
         context_handler->setParent(label);
@@ -65,7 +71,9 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout,
     if(p) {
         for(int i = 0; i < internal_layout->count(); ++i) {
             QWidget* child = internal_layout->itemAt(i)->widget();
-            child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(p))));
+            if(child) {
+                child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(p))));
+            }
         }
     }
 

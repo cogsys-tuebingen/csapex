@@ -41,6 +41,8 @@ public:
     void removeVariadicInputById(const UUID& input);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
+    int getVariadicInputCount() const;
+
 protected:
     VariadicInputs(ConnectionTypeConstPtr type);
     VariadicInputs();
@@ -64,6 +66,8 @@ public:
     virtual void removeVariadicOutput(OutputPtr output);
     void removeVariadicOutputById(const UUID& output);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+
+    int getVariadicOutputCount() const;
 
 protected:
     VariadicOutputs(ConnectionTypeConstPtr type);
@@ -90,6 +94,8 @@ public:
     void removeVariadicTriggerById(const UUID& trigger);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
+    int getVariadicTriggerCount() const;
+
 protected:
     VariadicTriggers(ConnectionTypeConstPtr type);
     VariadicTriggers();
@@ -113,6 +119,8 @@ public:
     virtual void removeVariadicSlot(SlotPtr slot);
     void removeVariadicSlotById(const UUID& slot);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
+
+    int getVariadicSlotCount() const;
 
 protected:
     VariadicSlots(ConnectionTypeConstPtr type);

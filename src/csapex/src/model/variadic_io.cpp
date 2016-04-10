@@ -60,6 +60,11 @@ Connectable* VariadicInputs::createVariadicPort(ConnectorType port_type, Connect
     return createVariadicInput(type, label, optional);
 }
 
+int VariadicInputs::getVariadicInputCount() const
+{
+    return variadic_inputs_.size();
+}
+
 void VariadicInputs::removeVariadicInput(InputPtr input)
 {
     variadic_modifier_->removeInput(input->getUUID());
@@ -158,6 +163,11 @@ Connectable* VariadicOutputs::createVariadicPort(ConnectorType port_type, Connec
 {
     apex_assert_hard(port_type == ConnectorType::OUTPUT);
     return createVariadicOutput(type, label);
+}
+
+int VariadicOutputs::getVariadicOutputCount() const
+{
+    return variadic_outputs_.size();
 }
 
 Output *VariadicOutputs::createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label)
@@ -259,6 +269,10 @@ Connectable* VariadicTriggers::createVariadicPort(ConnectorType port_type, Conne
     return createVariadicTrigger(label);
 }
 
+int VariadicTriggers::getVariadicTriggerCount() const
+{
+    return variadic_triggers_.size();
+}
 
 
 Trigger *VariadicTriggers::createVariadicTrigger(const std::string& label)
@@ -358,6 +372,10 @@ Connectable* VariadicSlots::createVariadicPort(ConnectorType port_type, Connecti
 {
     apex_assert_hard(port_type == ConnectorType::SLOT_T);
     return createVariadicSlot(label, [](){});
+}
+int VariadicSlots::getVariadicSlotCount() const
+{
+    return variadic_slots_.size();
 }
 
 Slot* VariadicSlots::createVariadicSlot(const std::string& label, std::function<void()> callback)

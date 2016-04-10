@@ -38,7 +38,7 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
         sub->addWidget(txt);
         sub->addWidget(send);
 
-        layout->addLayout(QtHelper::wrap(display_name, sub, context_handler));
+        layout->addLayout(QtHelper::wrap(display_name, sub, context_handler, p_.get()));
 
         // ui change -> model
         auto cb = [this, txt](){
