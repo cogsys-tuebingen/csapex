@@ -5,7 +5,6 @@
 #include "ui_box.h"
 #include <csapex/model/node.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/command/add_msg_connection.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -252,13 +251,7 @@ void NodeBox::createVariadicPortAndConnect(Connectable* from, ConnectionTypeCons
         GraphFacade* graph_facade = getGraphView()->getGraphFacade();
         AUUID graph_uuid = graph_facade->getGraph()->getUUID().getAbsoluteUUID();
 
-        Command::Ptr cmd;
-        if(from->isOutput()) {
-            cmd.reset(new command::AddMessageConnection(graph_uuid, from->getUUID(), new_port->getUUID()));
-        } else {
-            cmd.reset(new command::AddMessageConnection(graph_uuid, new_port->getUUID(), from->getUUID()));
-        }
-
+        Command::Ptr cmd = CommandFactory(graph_facade).addConnection(from->getUUID(), new_port->getUUID());
         executeCommand(cmd);
     }
 }
