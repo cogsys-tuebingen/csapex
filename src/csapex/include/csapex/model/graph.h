@@ -67,6 +67,7 @@ public:
     NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept;
     NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
     NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept;
+    NodeHandle* findNodeHandleWithLabel(const std::string& label) const;
 
     std::vector<NodeHandle*> getAllNodeHandles();
 

@@ -559,6 +559,19 @@ NodeHandle* Graph::findNodeHandleForConnectorNoThrow(const UUID &uuid) const noe
     return findNodeHandleNoThrow(uuid.parentUUID());
 }
 
+NodeHandle* Graph::findNodeHandleWithLabel(const std::string& label) const
+{
+    for(const auto b : nodes_) {
+        NodeStatePtr state = b->getNodeState();
+        if(state) {
+            if(state->getLabel() == label) {
+                return b.get();
+            }
+        }
+    }
+    return nullptr;
+}
+
 std::vector<NodeHandle*> Graph::getAllNodeHandles()
 {
     std::vector<NodeHandle*> node_handles;

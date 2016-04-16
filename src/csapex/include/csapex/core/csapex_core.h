@@ -38,6 +38,8 @@ public:
     Settings& getSettings() const;
     NodeFactory& getNodeFactory() const;
 
+    GraphFacadePtr getRoot() const;
+
     bool isPaused() const;
     void setPause(bool pause);
 

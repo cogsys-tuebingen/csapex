@@ -227,6 +227,11 @@ NodeFactory &CsApexCore::getNodeFactory() const
     return *node_factory_;
 }
 
+GraphFacadePtr CsApexCore::getRoot() const
+{
+    return root_;
+}
+
 void CsApexCore::settingsChanged()
 {
     settings_.save();
