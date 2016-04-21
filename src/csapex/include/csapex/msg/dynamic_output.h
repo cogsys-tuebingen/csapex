@@ -19,7 +19,7 @@ public:
     void clearCorrespondents();
     void addCorrespondent(DynamicInput* input);
 
-    virtual void addMessage(ConnectionType::ConstPtr message) override;
+    virtual void addMessage(Token::ConstPtr message) override;
 
     virtual void setMultipart(bool multipart, bool last_part) override;
 
@@ -27,16 +27,16 @@ public:
     virtual bool hasMessage() override;
     virtual bool hasMarkerMessage() override;
     virtual void nextMessage() override;
-    virtual ConnectionTypeConstPtr getMessage() const override;
+    virtual TokenConstPtr getMessage() const override;
 
     virtual void clearBuffer() override;
 
 private:
     std::vector<DynamicInput*> correspondents_;
 
-    std::deque<ConnectionType::ConstPtr> messages_to_send_;
-    std::deque<ConnectionType::ConstPtr> committed_messages_;
-    ConnectionTypeConstPtr current_message_;
+    std::deque<Token::ConstPtr> messages_to_send_;
+    std::deque<Token::ConstPtr> committed_messages_;
+    TokenConstPtr current_message_;
 };
 }
 

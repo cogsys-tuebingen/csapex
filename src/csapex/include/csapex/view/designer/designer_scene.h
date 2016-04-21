@@ -108,7 +108,7 @@ private:
         UNDEFINED = 99
     };
 
-    enum class ConnectionType {
+    enum class Token {
         SIG, MSG
     };
 
@@ -129,7 +129,7 @@ private:
         bool selected_from;
         bool selected_to;
 
-        ConnectionType type;
+        Token type;
 
         Position start_pos;
         Position end_pos;

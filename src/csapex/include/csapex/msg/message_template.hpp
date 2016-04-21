@@ -21,7 +21,7 @@ public:
         : Message(type<Instance>::name(), frame_id, stamp)
     {}
 
-    virtual ConnectionType::Ptr clone() const override
+    virtual Token::Ptr clone() const override
     {
         Ptr new_msg(new Instance);
         new_msg->frame_id = frame_id;
@@ -30,14 +30,14 @@ public:
         return new_msg;
     }
 
-    virtual ConnectionType::Ptr toType() const override
+    virtual Token::Ptr toType() const override
     {
         Ptr new_msg(new Instance);
         return new_msg;
     }
 
 
-    bool acceptsConnectionFrom(const ConnectionType* other_side) const override
+    bool acceptsConnectionFrom(const Token* other_side) const override
     {
         return typeName() == other_side->typeName();
     }

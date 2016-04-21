@@ -30,7 +30,7 @@ void DynamicOutput::addCorrespondent(DynamicInput *input)
     correspondents_.push_back(input);
 }
 
-void DynamicOutput::addMessage(ConnectionType::ConstPtr message)
+void DynamicOutput::addMessage(Token::ConstPtr message)
 {
     setType(message->toType());
     messages_to_send_.push_back(message);
@@ -56,13 +56,13 @@ void DynamicOutput::commitMessages()
 
     ++seq_no_;
 
-    for(ConnectionTypeConstPtr& m : committed_messages_) {
-        m->flags.data |= (int) ConnectionType::Flags::Fields::MULTI_PART;
+    for(TokenConstPtr& m : committed_messages_) {
+        m->flags.data |= (int) Token::Flags::Fields::MULTI_PART;
         m->setSequenceNumber(seq_no_);
     }
 
     apex_assert_hard(committed_messages_.size() > 0);
-    committed_messages_.back()->flags.data |= (int) ConnectionType::Flags::Fields::LAST_PART;
+    committed_messages_.back()->flags.data |= (int) Token::Flags::Fields::LAST_PART;
 
     messages_to_send_.clear();
 
@@ -99,7 +99,7 @@ void DynamicOutput::nextMessage()
     }
 }
 
-ConnectionTypeConstPtr DynamicOutput::getMessage() const
+TokenConstPtr DynamicOutput::getMessage() const
 {
     apex_assert_hard(current_message_ != nullptr);
     return current_message_;

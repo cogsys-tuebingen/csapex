@@ -31,7 +31,7 @@
 /// PROJECT
 #include <csapex/param/parameter_factory.h>
 #include <csapex/manager/message_renderer_manager.h>
-#include <csapex/model/connection_type.h>
+#include <csapex/model/token.h>
 #include <csapex/view/utility/clipboard.h>
 
 /// SYSTEM
@@ -61,8 +61,8 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
 {    
     qRegisterMetaType < QImage > ("QImage");
-    qRegisterMetaType < ConnectionType::Ptr > ("ConnectionType::Ptr");
-    qRegisterMetaType < ConnectionType::ConstPtr > ("ConnectionType::ConstPtr");
+    qRegisterMetaType < Token::Ptr > ("Token::Ptr");
+    qRegisterMetaType < Token::ConstPtr > ("Token::ConstPtr");
     qRegisterMetaType < std::string > ("std::string");
 
     QTextCodec *utfCodec = QTextCodec::codecForName("UTF-8");

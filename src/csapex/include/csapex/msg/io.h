@@ -35,7 +35,7 @@ UUID getUUID(Output* input);
 void setLabel(Input* input, const std::string& label);
 void setLabel(Output* input, const std::string& label);
 
-void throwError(const ConnectionTypeConstPtr& msg, const std::type_info& type);
+void throwError(const TokenConstPtr& msg, const std::type_info& type);
 
 
 /// CASTING
@@ -78,12 +78,12 @@ std::shared_ptr<R> message_cast(const std::shared_ptr<S>& msg)
 }
 
 /// INPUT
-ConnectionTypeConstPtr getMessage(Input* input);
+TokenConstPtr getMessage(Input* input);
 
 template <typename R>
 std::shared_ptr<R const>
 getMessage(Input* input,
-           typename std::enable_if<std::is_base_of<ConnectionType, R>::value >::type* /*dummy*/ = 0)
+           typename std::enable_if<std::is_base_of<Token, R>::value >::type* /*dummy*/ = 0)
 {
     auto msg = getMessage(input);
     typename std::shared_ptr<R const> result = message_cast<R const> (msg);
@@ -96,7 +96,7 @@ getMessage(Input* input,
 template <typename R>
 std::shared_ptr<R const>
 getMessage(Input* input,
-           typename std::enable_if<!std::is_base_of<ConnectionType, R>::value >::type* /*dummy*/ = 0)
+           typename std::enable_if<!std::is_base_of<Token, R>::value >::type* /*dummy*/ = 0)
 {
     auto msg = getMessage(input);
     auto result = message_cast<connection_types::GenericPointerMessage<R> const> (msg);
@@ -151,7 +151,7 @@ bool isValue(Input* input) {
 
 
 /// OUTPUT
-void publish(Output* output, ConnectionTypeConstPtr message);
+void publish(Output* output, TokenConstPtr message);
 
 template <typename T,
           typename = typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type>
@@ -161,7 +161,7 @@ void publish(Output* output,
 {
     typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
     msg->value = message;
-    publish(output, message_cast<ConnectionType>(msg));
+    publish(output, message_cast<Token>(msg));
 }
 
 template <typename T,
@@ -172,7 +172,7 @@ void publish(Output* output,
 {
     typename connection_types::GenericPointerMessage<T>::Ptr msg(new connection_types::GenericPointerMessage<T>(frame_id));
     msg->value = shared_ptr_tools::to_std_shared(message);
-    publish(output, message_cast<ConnectionType>(msg));
+    publish(output, message_cast<Token>(msg));
 }
 
 template <typename T,
@@ -183,7 +183,7 @@ void publish(Output* output,
 {
     typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(frame_id));
     msg->value = message;
-    publish(output, message_cast<ConnectionType>(msg));
+    publish(output, message_cast<Token>(msg));
 }
 
 template <class Container, typename T>

@@ -7,25 +7,25 @@
 using namespace csapex;
 
 namespace YAML {
-Node convert<csapex::ConnectionType>::encode(const csapex::ConnectionType& rhs)
+Node convert<csapex::Token>::encode(const csapex::Token& rhs)
 {
     return MessageSerializer::serializeMessage(rhs);
 }
 
-bool convert<csapex::ConnectionType>::decode(const Node& node, csapex::ConnectionType& rhs)
+bool convert<csapex::Token>::decode(const Node& node, csapex::Token& rhs)
 {
     rhs = *MessageSerializer::deserializeMessage(node);
     return true;
 }
 
-Node convert<csapex::ConnectionTypeConstPtr>::encode(const csapex::ConnectionTypeConstPtr& rhs)
+Node convert<csapex::TokenConstPtr>::encode(const csapex::TokenConstPtr& rhs)
 {
     return MessageSerializer::serializeMessage(*rhs);
 }
 
-bool convert<csapex::ConnectionTypeConstPtr>::decode(const Node& node, csapex::ConnectionTypeConstPtr& rhs)
+bool convert<csapex::TokenConstPtr>::decode(const Node& node, csapex::TokenConstPtr& rhs)
 {
-    ConnectionTypeConstPtr ptr = MessageSerializer::deserializeMessage(node);
+    TokenConstPtr ptr = MessageSerializer::deserializeMessage(node);
     rhs.swap(ptr);
     return true;
 }

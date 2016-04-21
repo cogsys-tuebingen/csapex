@@ -50,9 +50,9 @@ public:
 
     bool contains(Connectable* c) const;
 
-    virtual void setMessage(const ConnectionTypeConstPtr& msg);
+    virtual void setMessage(const TokenConstPtr& msg);
 
-    ConnectionTypeConstPtr getMessage() const;
+    TokenConstPtr getMessage() const;
     void setMessageProcessed();
 
     bool isEnabled() const;
@@ -124,7 +124,7 @@ protected:
     std::vector<FulcrumPtr> fulcrums_;
 
     State state_;
-    ConnectionTypeConstPtr message_;
+    TokenConstPtr message_;
 
     static int next_connection_id_;
 

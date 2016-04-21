@@ -16,7 +16,7 @@ public:
 public:
     ~DirectConnection();
 
-    virtual void setMessage(const ConnectionTypeConstPtr& msg) override;
+    virtual void setMessage(const TokenConstPtr& msg) override;
 
     virtual void establish() override;
 

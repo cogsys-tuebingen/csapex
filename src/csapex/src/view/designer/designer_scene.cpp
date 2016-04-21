@@ -778,13 +778,13 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
         if(!display_signals_) {
             return std::vector<QRectF>();
         }
-        ccs.type = ConnectionType::SIG;
+        ccs.type = Token::SIG;
 
     } else {
         if(!display_messages_) {
             return std::vector<QRectF>();
         }
-        ccs.type = ConnectionType::MSG;
+        ccs.type = Token::MSG;
     }
 
 
@@ -854,7 +854,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         scale_factor = 1.0;
     }
 
-    if(ccs.type == ConnectionType::SIG) {
+    if(ccs.type == Token::SIG) {
         scale_factor *= 0.5;
     }
 
@@ -1029,7 +1029,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     lg.setColorAt(1, color_end);
 
     if(ccs.established) {
-        painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == ConnectionType::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == Token::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
 
     } else {
         painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin));

@@ -41,11 +41,11 @@ public:
     void setLevel(int level);
 
 
-    Input* addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional) override;
+    Input* addInput(TokenConstPtr type, const std::string& label, bool dynamic, bool optional) override;
     void addInput(InputPtr in);
     bool isParameterInput(Input* in) const override;
 
-    Output* addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic) override;
+    Output* addOutput(TokenConstPtr type, const std::string& label, bool dynamic) override;
     void addOutput(OutputPtr out);
     bool isParameterOutput(Output* out) const;
 

@@ -46,7 +46,7 @@ void MetaPort::triggerCreatePort()
 
     bool optional = true;
 
-    ConnectionTypePtr type(new connection_types::AnyMessage);
+    TokenPtr type(new connection_types::AnyMessage);
     Q_EMIT createPortRequest(target, port_type_, type, label.toStdString(), optional);
 }
 

@@ -214,7 +214,7 @@ add_library(csapex SHARED
     src/model/connectable.cpp
     src/model/connector_type.cpp
     src/model/connection.cpp
-    src/model/connection_type.cpp
+    src/model/token.cpp
     src/model/error_state.cpp
     src/model/fulcrum.cpp
     src/model/generic_state.cpp

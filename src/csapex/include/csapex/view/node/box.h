@@ -164,9 +164,9 @@ Q_SIGNALS:
     void portAdded(Port*);
     void portRemoved(Port*);
 
-    void createPortRequest(const AUUID& target, ConnectorType output, ConnectionTypeConstPtr, std::string, bool);
-    void createPortAndConnectRequest(const AUUID& target, Connectable*, ConnectionTypeConstPtr, std::string, bool);
-    void createPortAndMoveRequest(const AUUID& target, Connectable*, ConnectionTypeConstPtr, std::string, bool);
+    void createPortRequest(const AUUID& target, ConnectorType output, TokenConstPtr, std::string, bool);
+    void createPortAndConnectRequest(const AUUID& target, Connectable*, TokenConstPtr, std::string, bool);
+    void createPortAndMoveRequest(const AUUID& target, Connectable*, TokenConstPtr, std::string, bool);
 
 protected:
     void resizeEvent(QResizeEvent * e);

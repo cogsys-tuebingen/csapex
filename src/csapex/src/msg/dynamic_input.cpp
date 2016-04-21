@@ -17,13 +17,13 @@ void DynamicInput::setCorrespondent(DynamicOutput *output)
     correspondent_ = output;
 }
 
-std::vector<ConnectionTypeConstPtr> DynamicInput::getMessageParts() const
+std::vector<TokenConstPtr> DynamicInput::getMessageParts() const
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
     return composed_msg_;
 }
 
-bool DynamicInput::inputMessagePart(const ConnectionTypeConstPtr &msg)
+bool DynamicInput::inputMessagePart(const TokenConstPtr &msg)
 {
     apex_assert_hard(msg != nullptr);
 
@@ -32,7 +32,7 @@ bool DynamicInput::inputMessagePart(const ConnectionTypeConstPtr &msg)
 
     composed_msg_.clear();
 
-    return msg->flags.data & (int) ConnectionType::Flags::Fields::LAST_PART;
+    return msg->flags.data & (int) Token::Flags::Fields::LAST_PART;
 }
 
 void DynamicInput::composeMessage()
@@ -47,7 +47,7 @@ void DynamicInput::composeMessage()
 }
 
 
-ConnectionTypeConstPtr DynamicInput::getMessage() const
+TokenConstPtr DynamicInput::getMessage() const
 {
     throw std::runtime_error("cannot call get message on a dynamic input");
 }

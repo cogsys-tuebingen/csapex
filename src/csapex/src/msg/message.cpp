@@ -9,7 +9,7 @@ using namespace csapex;
 using namespace connection_types;
 
 Message::Message(const std::string& name, const std::string &frame_id, Stamp stamp)
-    : ConnectionType(name), frame_id(frame_id), stamp_micro_seconds(stamp)
+    : Token(name), frame_id(frame_id), stamp_micro_seconds(stamp)
 {
     apex_assert(!frame_id.empty());
 }

@@ -20,7 +20,7 @@ private:
     BundledConnection(Output* from, Input* to, OutputTransition* ot, InputTransition* it);
     BundledConnection(Output* from, Input* to, OutputTransition* ot, InputTransition* it, int id);
 
-    virtual void setMessage(const ConnectionTypeConstPtr &msg) override;
+    virtual void setMessage(const TokenConstPtr &msg) override;
 
     virtual void establishSource() override;
     virtual void establishSink() override;

@@ -22,7 +22,7 @@ public:
 public:
     virtual ~MessageRenderer();
 
-    virtual QImage render(const ConnectionTypeConstPtr& msg) = 0;
+    virtual QImage render(const TokenConstPtr& msg) = 0;
     virtual std::type_index messageType() const = 0;
 
     virtual std::vector<csapex::param::ParameterPtr> getParameters() const
@@ -35,7 +35,7 @@ template <class Message>
 class MessageRendererImplementation : public MessageRenderer
 {
 public:
-    virtual QImage render(const ConnectionTypeConstPtr& msg) final override
+    virtual QImage render(const TokenConstPtr& msg) final override
     {
         const auto& real_msg = std::dynamic_pointer_cast<Message const>(msg);
         if(real_msg) {

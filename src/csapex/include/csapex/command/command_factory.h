@@ -44,13 +44,13 @@ public:
     CommandPtr clearCommand();
 
 
-    CommandPtr createVariadicInput(const AUUID& node_uuid, ConnectionTypeConstPtr connection_type, const std::string& label, bool optional);
-    CommandPtr createVariadicOutput(const AUUID& node_uuid, ConnectionTypeConstPtr connection_type, const std::string& label);
+    CommandPtr createVariadicInput(const AUUID& node_uuid, TokenConstPtr connection_type, const std::string& label, bool optional);
+    CommandPtr createVariadicOutput(const AUUID& node_uuid, TokenConstPtr connection_type, const std::string& label);
     CommandPtr createVariadicEvent(const AUUID& node_uuid, const std::string& label);
     CommandPtr createVariadicSlot(const AUUID& node_uuid, const std::string& label);
 
-    CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, ConnectionTypeConstPtr connection_type);
-    CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, ConnectionTypeConstPtr connection_type, const std::string& label, bool optional);
+    CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenConstPtr connection_type);
+    CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenConstPtr connection_type, const std::string& label, bool optional);
 
 private:
     GraphFacade* getGraphFacade() const;

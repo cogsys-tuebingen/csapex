@@ -18,8 +18,8 @@ public:
     EndOfProgramMessage();
 
 public:
-    virtual ConnectionType::Ptr clone() const override;
-    virtual ConnectionType::Ptr toType() const override;
+    virtual Token::Ptr clone() const override;
+    virtual Token::Ptr toType() const override;
 };
 
 template <>

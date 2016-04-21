@@ -10,14 +10,14 @@
 /// YAML
 namespace YAML {
 template<>
-struct convert<csapex::ConnectionType> {
-    static Node encode(const csapex::ConnectionType& rhs);
-    static bool decode(const Node& node, csapex::ConnectionType& rhs);
+struct convert<csapex::Token> {
+    static Node encode(const csapex::Token& rhs);
+    static bool decode(const Node& node, csapex::Token& rhs);
 };
 template<>
-struct convert<csapex::ConnectionTypeConstPtr> {
-    static Node encode(const csapex::ConnectionTypeConstPtr& rhs);
-    static bool decode(const Node& node, csapex::ConnectionTypeConstPtr& rhs);
+struct convert<csapex::TokenConstPtr> {
+    static Node encode(const csapex::TokenConstPtr& rhs);
+    static bool decode(const Node& node, csapex::TokenConstPtr& rhs);
 };
 }
 

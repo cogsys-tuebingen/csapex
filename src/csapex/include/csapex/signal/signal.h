@@ -7,17 +7,17 @@
 namespace csapex {
 namespace connection_types {
 
-class Signal : public ConnectionType
+class Signal : public Token
 {
 public:
     typedef std::shared_ptr<Signal> Ptr;
 
     Signal();
 
-    virtual ConnectionType::Ptr clone() const override;
-    virtual ConnectionType::Ptr toType() const override;
+    virtual Token::Ptr clone() const override;
+    virtual Token::Ptr toType() const override;
 
-    bool acceptsConnectionFrom(const ConnectionType* other_side) const override;
+    bool acceptsConnectionFrom(const Token* other_side) const override;
 };
 
 

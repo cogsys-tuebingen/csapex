@@ -71,7 +71,7 @@ BundledConnection::BundledConnection(Output *from, Input *to, OutputTransition* 
 
 }
 
-void BundledConnection::setMessage(const ConnectionTypeConstPtr &msg)
+void BundledConnection::setMessage(const TokenConstPtr &msg)
 {
 
     if(it_) {

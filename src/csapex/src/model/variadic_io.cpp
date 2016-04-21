@@ -14,7 +14,7 @@
 
 using namespace csapex;
 
-VariadicBase::VariadicBase(ConnectionTypeConstPtr type)
+VariadicBase::VariadicBase(TokenConstPtr type)
     : variadic_type_(type), variadic_modifier_(nullptr)
 {
 
@@ -44,7 +44,7 @@ void VariadicBase::portCountChanged()
 /// INPUTS
 ///
 
-VariadicInputs::VariadicInputs(ConnectionTypeConstPtr type)
+VariadicInputs::VariadicInputs(TokenConstPtr type)
     : VariadicBase(type)
 {
 
@@ -54,7 +54,7 @@ VariadicInputs::VariadicInputs()
 {
 }
 
-Connectable* VariadicInputs::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicInputs::createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string &label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::INPUT);
     return createVariadicInput(type, label, optional);
@@ -84,7 +84,7 @@ void VariadicInputs::removeVariadicInputById(const UUID& input)
     }
 }
 
-Input *VariadicInputs::createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional)
+Input *VariadicInputs::createVariadicInput(TokenConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
     Input* result = variadic_modifier_->addInput(type, label.empty() ? std::string("Channel") : label, false, optional);
@@ -149,7 +149,7 @@ void VariadicInputs::updateInputs(int count)
 ///
 
 
-VariadicOutputs::VariadicOutputs(ConnectionTypeConstPtr type)
+VariadicOutputs::VariadicOutputs(TokenConstPtr type)
     : VariadicBase(type)
 {
 
@@ -159,7 +159,7 @@ VariadicOutputs::VariadicOutputs()
 {
 }
 
-Connectable* VariadicOutputs::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicOutputs::createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string &label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::OUTPUT);
     return createVariadicOutput(type, label);
@@ -170,7 +170,7 @@ int VariadicOutputs::getVariadicOutputCount() const
     return variadic_outputs_.size();
 }
 
-Output *VariadicOutputs::createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label)
+Output *VariadicOutputs::createVariadicOutput(TokenConstPtr type, const std::string& label)
 {
     apex_assert_hard(variadic_modifier_);
     auto result = variadic_modifier_->addOutput(type, label.empty() ? std::string("Channel") : label, false);
@@ -253,7 +253,7 @@ void VariadicOutputs::updateOutputs(int count)
 ///
 
 
-VariadicEvents::VariadicEvents(ConnectionTypeConstPtr type)
+VariadicEvents::VariadicEvents(TokenConstPtr type)
     : VariadicBase(type)
 {
 
@@ -263,7 +263,7 @@ VariadicEvents::VariadicEvents()
 {
 }
 
-Connectable* VariadicEvents::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicEvents::createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string &label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::EVENT);
     return createVariadicEvent(label);
@@ -358,7 +358,7 @@ void VariadicEvents::updateEvents(int count)
 ///
 
 
-VariadicSlots::VariadicSlots(ConnectionTypeConstPtr type)
+VariadicSlots::VariadicSlots(TokenConstPtr type)
     : VariadicBase(type)
 {
 
@@ -368,7 +368,7 @@ VariadicSlots::VariadicSlots()
 {
 }
 
-Connectable* VariadicSlots::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicSlots::createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string &label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::SLOT_T);
     return createVariadicSlot(label, [](){});
@@ -465,7 +465,7 @@ void VariadicSlots::updateSlots(int count)
 ///
 
 
-VariadicIO::VariadicIO(ConnectionTypeConstPtr type)
+VariadicIO::VariadicIO(TokenConstPtr type)
     : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type)
 {
 
@@ -475,7 +475,7 @@ VariadicIO::VariadicIO()
 {
 }
 
-Connectable* VariadicIO::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional)
+Connectable* VariadicIO::createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
     switch (port_type) {
@@ -502,7 +502,7 @@ void VariadicIO::setupVariadicParameters(Parameterizable &parameters)
 ///
 
 
-Variadic::Variadic(ConnectionTypeConstPtr type)
+Variadic::Variadic(TokenConstPtr type)
     : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type), VariadicEvents(type), VariadicSlots(type)
 {
 
@@ -512,7 +512,7 @@ Variadic::Variadic()
 {
 }
 
-Connectable* Variadic::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional)
+Connectable* Variadic::createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
     switch (port_type) {

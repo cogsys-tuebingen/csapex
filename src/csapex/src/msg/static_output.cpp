@@ -20,7 +20,7 @@ StaticOutput::StaticOutput(const UUID &uuid)
 
 }
 
-void StaticOutput::addMessage(ConnectionType::ConstPtr message)
+void StaticOutput::addMessage(Token::ConstPtr message)
 {
     setType(message->toType());
 
@@ -53,7 +53,7 @@ void StaticOutput::nextMessage()
     setState(State::IDLE);
 }
 
-ConnectionTypeConstPtr StaticOutput::getMessage() const
+TokenConstPtr StaticOutput::getMessage() const
 {
     if(!committed_message_) {
         return connection_types::makeEmpty<connection_types::NoMessage>();
@@ -66,9 +66,9 @@ void StaticOutput::setMultipart(bool multipart, bool last_part)
 {
     message_flags_ = 0;
     if(multipart) {
-        message_flags_ |= (int) ConnectionType::Flags::Fields::MULTI_PART;
+        message_flags_ |= (int) Token::Flags::Fields::MULTI_PART;
         if(last_part) {
-            message_flags_ |= (int) ConnectionType::Flags::Fields::LAST_PART;
+            message_flags_ |= (int) Token::Flags::Fields::LAST_PART;
         }
     }
 }
@@ -114,7 +114,7 @@ void StaticOutput::disable()
     committed_message_.reset();
 }
 
-ConnectionType::ConstPtr StaticOutput::getMessage()
+Token::ConstPtr StaticOutput::getMessage()
 {
     return committed_message_;
 }

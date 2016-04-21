@@ -28,27 +28,27 @@ public:
     /// "real" messages
     template <typename T>
     Input* addInput(const std::string& label,
-                    typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
+                    typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, false, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
-                            typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
+                            typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, false, true);
     }
     template <typename T>
     Input* addDynamicInput(const std::string& label,
-                           typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
+                           typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, true, false);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
-                      typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
+                      typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
         return addOutput(connection_types::makeEmptyMessage<T>(), label, false);
     }
     template <typename T>
     Output* addDynamicOutput(const std::string& label,
-                             typename std::enable_if<std::is_base_of<ConnectionType, T>::value >::type* = 0) {
+                             typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
         return addOutput(connection_types::makeEmptyMessage<T>(), label, true);
     }
 
@@ -230,8 +230,8 @@ public:
     /**
      * Raw construction, handle with care!
      */
-    virtual Input* addInput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic, bool optional) = 0;
-    virtual Output* addOutput(ConnectionTypeConstPtr type, const std::string& label, bool dynamic) = 0;
+    virtual Input* addInput(TokenConstPtr type, const std::string& label, bool dynamic, bool optional) = 0;
+    virtual Output* addOutput(TokenConstPtr type, const std::string& label, bool dynamic) = 0;
 
 protected:
     virtual std::vector<ConnectablePtr> getAllConnectors() const = 0;

@@ -11,7 +11,7 @@ class StaticOutput : public Output
 public:
     StaticOutput(const UUID &uuid);
 
-    virtual void addMessage(ConnectionType::ConstPtr message) override;
+    virtual void addMessage(Token::ConstPtr message) override;
 
     virtual void setMultipart(bool multipart, bool last_part) override;
 
@@ -19,17 +19,17 @@ public:
     virtual bool hasMessage() override;
     virtual bool hasMarkerMessage() override;
     virtual void nextMessage() override;
-    virtual ConnectionTypeConstPtr getMessage() const override;
+    virtual TokenConstPtr getMessage() const override;
 
     virtual void disable() override;
     virtual void reset() override;
     virtual void clearBuffer() override;
 
-    ConnectionType::ConstPtr getMessage();
+    Token::ConstPtr getMessage();
 
 private:
-    ConnectionType::ConstPtr message_to_send_;
-    ConnectionType::ConstPtr committed_message_;
+    Token::ConstPtr message_to_send_;
+    Token::ConstPtr committed_message_;
 
     int message_flags_;
 };

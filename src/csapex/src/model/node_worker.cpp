@@ -318,10 +318,10 @@ void NodeWorker::startProcessingMessages()
         for(auto input : node_handle_->getAllInputs()) {
             for(auto& c : input->getConnections()) {
                 int f = c->getMessage()->flags.data;
-                if(f & (int) ConnectionType::Flags::Fields::MULTI_PART) {
+                if(f & (int) Token::Flags::Fields::MULTI_PART) {
                     has_multipart = true;
 
-                    bool last_part = f & (int) ConnectionType::Flags::Fields::LAST_PART;
+                    bool last_part = f & (int) Token::Flags::Fields::LAST_PART;
                     multipart_are_done &= last_part;
                 }
             }

@@ -16,7 +16,7 @@ MessageSerializer::MessageSerializer()
 {
 }
 
-ConnectionType::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
+Token::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
 {
     MessageSerializer& i = instance();
 
@@ -37,7 +37,7 @@ ConnectionType::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node
         throw DeserializationError(std::string("no such type (") + type + ")");
     }
 
-    ConnectionType::Ptr msg = MessageFactory::createMessage(type);
+    Token::Ptr msg = MessageFactory::createMessage(type);
     try {
         i.type_to_converter.at(type).decoder(node["data"], *msg);
     } catch(const YAML::Exception& e) {
@@ -47,7 +47,7 @@ ConnectionType::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node
     return msg;
 }
 
-YAML::Node MessageSerializer::serializeMessage(const ConnectionType &msg)
+YAML::Node MessageSerializer::serializeMessage(const Token &msg)
 {
     try {
         MessageSerializer& i = instance();
@@ -70,9 +70,9 @@ YAML::Node MessageSerializer::serializeMessage(const ConnectionType &msg)
 }
 
 
-ConnectionType::Ptr MessageSerializer::readYaml(const YAML::Node &node)
+Token::Ptr MessageSerializer::readYaml(const YAML::Node &node)
 {
-    ConnectionType::Ptr msg = MessageSerializer::deserializeMessage(node);
+    Token::Ptr msg = MessageSerializer::deserializeMessage(node);
     if(!msg) {
         std::string type = node["type"].as<std::string>();
         throw DeserializationError(std::string("message type '") + type + "' unknown");

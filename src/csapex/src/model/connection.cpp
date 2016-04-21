@@ -48,7 +48,7 @@ void Connection::reset()
     state_ = Connection::State::NOT_INITIALIZED;
 }
 
-ConnectionTypeConstPtr Connection::getMessage() const
+TokenConstPtr Connection::getMessage() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     return message_;
@@ -72,7 +72,7 @@ void Connection::setMessageProcessed()
     }
 }
 
-void Connection::setMessage(const ConnectionTypeConstPtr &msg)
+void Connection::setMessage(const TokenConstPtr &msg)
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);

@@ -2,7 +2,7 @@
 #define MESSAGE_SERIALIZER_H
 
 /// PROJECT
-#include <csapex/model/connection_type.h>
+#include <csapex/model/token.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/utility/singleton.hpp>
 #include <csapex/utility/tmp.hpp>
@@ -30,11 +30,11 @@ static bool decode(const YAML::Node& node, Message& msg) {
 
 
 template <typename Message>
-YAML::Node encodeMessage(const csapex::ConnectionType& msg) {
+YAML::Node encodeMessage(const csapex::Token& msg) {
     return serial::Serializer<Message>::encode(dynamic_cast<const Message&>(msg));
 }
 template <typename Message>
-bool decodeMessage(const YAML::Node& node, csapex::ConnectionType& msg) {
+bool decodeMessage(const YAML::Node& node, csapex::Token& msg) {
     return serial::Serializer<Message>::decode(node, dynamic_cast<Message&>(msg));
 }
 
@@ -47,8 +47,8 @@ class MessageSerializer : public Singleton<MessageSerializer>
 public:
     struct Converter
     {
-        typedef std::function<YAML::Node(const csapex::ConnectionType&)> Encoder;
-        typedef std::function<bool(const YAML::Node&, csapex::ConnectionType&)> Decoder;
+        typedef std::function<YAML::Node(const csapex::Token&)> Encoder;
+        typedef std::function<bool(const YAML::Node&, csapex::Token&)> Decoder;
 
         Converter(Encoder encode, Decoder decode)
             : encoder(encode), decoder(decode)
@@ -62,10 +62,10 @@ public:
     typedef std::runtime_error DeserializationError;
 
 public:
-    static ConnectionType::Ptr deserializeMessage(const YAML::Node &node);
-    static YAML::Node serializeMessage(const ConnectionType& msg);
+    static Token::Ptr deserializeMessage(const YAML::Node &node);
+    static YAML::Node serializeMessage(const Token& msg);
 
-    static ConnectionType::Ptr readYaml(const YAML::Node& node);
+    static Token::Ptr readYaml(const YAML::Node& node);
 
 public:
     template <template <typename> class Wrapper, typename M>
@@ -107,14 +107,14 @@ private:
 
 
     template <template <typename> class Wrapper, typename Message>
-    static YAML::Node encodeDirectMessage(const csapex::ConnectionType& msg) {
+    static YAML::Node encodeDirectMessage(const csapex::Token& msg) {
         typedef Wrapper<Message> Implementation;
         const Implementation& impl = dynamic_cast<const Implementation&>(msg);
 
         return YAML::convert<Message>::encode(impl);
     }
     template <template <typename> class Wrapper, typename Message>
-    static bool decodeDirectMessage(const YAML::Node& node, csapex::ConnectionType& msg) {
+    static bool decodeDirectMessage(const YAML::Node& node, csapex::Token& msg) {
         typedef Wrapper<Message> Implementation;
         Implementation& impl = dynamic_cast<Implementation&>(msg);
 

@@ -19,7 +19,7 @@ class PreviewInput : public Input
 public:
     PreviewInput(MessagePreviewWidget* parent);
 
-    virtual void inputMessage(ConnectionType::ConstPtr message) override;
+    virtual void inputMessage(Token::ConstPtr message) override;
 
     virtual bool isVirtual() const {
         return true;
@@ -42,16 +42,16 @@ public:
     void connectTo(Connectable* c);
     void disconnect();
 
-    void setCallback(std::function<void(ConnectionType::ConstPtr)> cb);
+    void setCallback(std::function<void(Token::ConstPtr)> cb);
 
 
     bool isConnected() const;
 
 Q_SIGNALS:
-    void displayMessage(const ConnectionTypeConstPtr& msg);
+    void displayMessage(const TokenConstPtr& msg);
 
 public Q_SLOTS:
-    void display(const ConnectionTypeConstPtr& msg);
+    void display(const TokenConstPtr& msg);
     void showText(const QString &txt);
     
 private:

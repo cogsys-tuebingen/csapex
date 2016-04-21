@@ -22,20 +22,20 @@ struct GenericValueMessage : public Message
         static csapex::DirectMessageSerializerRegistered<connection_types::GenericValueMessage, Type> reg_s;
     }
 
-    virtual ConnectionType::Ptr clone() const override
+    virtual Token::Ptr clone() const override
     {
         Ptr new_msg(new GenericValueMessage<Type>(frame_id, stamp_micro_seconds));
         new_msg->value = value;
         return new_msg;
     }
 
-    virtual ConnectionType::Ptr toType() const override
+    virtual Token::Ptr toType() const override
     {
         Ptr new_msg(new GenericValueMessage<Type>("/"));
         return new_msg;
     }
 
-    bool acceptsConnectionFrom(const ConnectionType* other_side) const override
+    bool acceptsConnectionFrom(const Token* other_side) const override
     {
         return descriptiveName() == other_side->descriptiveName();
     }

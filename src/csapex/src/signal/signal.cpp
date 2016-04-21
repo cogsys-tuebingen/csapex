@@ -9,23 +9,23 @@ using namespace csapex;
 using namespace connection_types;
 
 Signal::Signal()
-    : ConnectionType("Signal")
+    : Token("Signal")
 {
 }
 
-ConnectionType::Ptr Signal::clone() const
-{
-    Ptr new_msg(new Signal);
-    return new_msg;
-}
-
-ConnectionType::Ptr Signal::toType() const
+Token::Ptr Signal::clone() const
 {
     Ptr new_msg(new Signal);
     return new_msg;
 }
 
-bool Signal::acceptsConnectionFrom(const ConnectionType* other_side) const
+Token::Ptr Signal::toType() const
+{
+    Ptr new_msg(new Signal);
+    return new_msg;
+}
+
+bool Signal::acceptsConnectionFrom(const Token* other_side) const
 {
     return dynamic_cast<const Signal*> (other_side);
 }

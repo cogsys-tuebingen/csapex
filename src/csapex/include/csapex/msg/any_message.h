@@ -18,11 +18,11 @@ public:
     AnyMessage();
 
 public:
-    virtual ConnectionType::Ptr clone() const override;
-    virtual ConnectionType::Ptr toType() const override;
+    virtual Token::Ptr clone() const override;
+    virtual Token::Ptr toType() const override;
 
-    bool canConnectTo(const ConnectionType* other_side) const override;
-    bool acceptsConnectionFrom(const ConnectionType* other_side) const override;
+    bool canConnectTo(const Token* other_side) const override;
+    bool acceptsConnectionFrom(const Token* other_side) const override;
 };
 template <>
 struct type<AnyMessage> {

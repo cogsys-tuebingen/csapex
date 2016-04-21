@@ -1,16 +1,16 @@
-#ifndef CONNECTION_TYPE_H
-#define CONNECTION_TYPE_H
+#ifndef TOKEN_H
+#define TOKEN_H
 
 /// SYSTEM
 #include <memory>
 
 namespace csapex {
 
-class ConnectionType
+class Token
 {
 public:
-    typedef std::shared_ptr<ConnectionType> Ptr;
-    typedef std::shared_ptr<const ConnectionType> ConstPtr;    
+    typedef std::shared_ptr<Token> Ptr;
+    typedef std::shared_ptr<const Token> ConstPtr;
 
     struct Flags
     {
@@ -26,8 +26,8 @@ public:
 
 
 public:
-    ConnectionType(const std::string &type_name);
-    virtual ~ConnectionType();
+    Token(const std::string &type_name);
+    virtual ~Token();
 
     template <typename R>
     std::shared_ptr<R> cloneAs() const
@@ -35,8 +35,8 @@ public:
         return std::dynamic_pointer_cast<R>(clone());
     }
 
-    virtual ConnectionType::Ptr clone() const = 0;
-    virtual ConnectionType::Ptr toType() const = 0;
+    virtual Token::Ptr clone() const = 0;
+    virtual Token::Ptr toType() const = 0;
 
     virtual bool isValid() const;
 
@@ -46,8 +46,8 @@ public:
     virtual void addNestedValue(const ConstPtr& msg);
     virtual std::size_t nestedValueCount() const;
 
-    virtual bool canConnectTo(const ConnectionType* other_side) const;
-    virtual bool acceptsConnectionFrom(const ConnectionType *other_side) const;
+    virtual bool canConnectTo(const Token* other_side) const;
+    virtual bool acceptsConnectionFrom(const Token *other_side) const;
 
     virtual std::string descriptiveName() const;
     std::string typeName() const;
@@ -71,4 +71,4 @@ public:
 
 }
 
-#endif // CONNECTION_TYPE_H
+#endif // TOKEN_H

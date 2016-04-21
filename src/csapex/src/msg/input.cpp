@@ -140,8 +140,8 @@ void Input::validateConnections()
     if(isConnected()) {
         apex_assert_hard(connections_.size() == 1);
 
-        ConnectionType::ConstPtr target_type = getSource()->getType();
-        ConnectionType::ConstPtr type = getType();
+        Token::ConstPtr target_type = getSource()->getType();
+        Token::ConstPtr type = getType();
         if(!target_type) {
             e = true;
         } else if(!target_type->canConnectTo(type.get())) {
@@ -162,13 +162,13 @@ Connectable *Input::getSource() const
     }
 }
 
-ConnectionTypeConstPtr Input::getMessage() const
+TokenConstPtr Input::getMessage() const
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
     return message_;
 }
 
-void Input::inputMessage(ConnectionType::ConstPtr message)
+void Input::inputMessage(Token::ConstPtr message)
 {
     apex_assert_hard(message != nullptr);
 

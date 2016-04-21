@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/model/connection_type.h>
+#include <csapex/model/token.h>
 
 /// COMPONENT
 #include <csapex/msg/message.h>
@@ -14,85 +14,85 @@ using namespace csapex;
 /***
  * MESSAGE FLAGS
  */
-ConnectionType::Flags::Flags()
+Token::Flags::Flags()
     : data(0)
 {
 
 }
 
-ConnectionType::ConnectionType(const std::string& type_name)
+Token::Token(const std::string& type_name)
     : type_name_(type_name), seq_no_(-1)
 {
     setDescriptiveName(type_name);
 }
 
-ConnectionType::~ConnectionType()
+Token::~Token()
 {
 }
 
-void ConnectionType::setDescriptiveName(const std::string &name)
+void Token::setDescriptiveName(const std::string &name)
 {
     descriptive_name_ = name;
 }
 
-bool ConnectionType::canConnectTo(const ConnectionType *other_side) const
+bool Token::canConnectTo(const Token *other_side) const
 {
     return other_side->acceptsConnectionFrom(this);
 }
 
-bool ConnectionType::acceptsConnectionFrom(const ConnectionType *other_side) const
+bool Token::acceptsConnectionFrom(const Token *other_side) const
 {
     return type_name_ == other_side->typeName();
 }
 
-std::string ConnectionType::descriptiveName() const
+std::string Token::descriptiveName() const
 {
     return descriptive_name_;
 }
 
-std::string ConnectionType::typeName() const
+std::string Token::typeName() const
 {
     return type_name_;
 }
 
-int ConnectionType::sequenceNumber() const
+int Token::sequenceNumber() const
 {
     return seq_no_;
 }
 
-void ConnectionType::setSequenceNumber(int seq_no) const
+void Token::setSequenceNumber(int seq_no) const
 {
     seq_no_ = seq_no;
 }
 
-bool ConnectionType::isValid() const
+bool Token::isValid() const
 {
     return true;
 }
 
-bool ConnectionType::isContainer() const
+bool Token::isContainer() const
 {
     return false;
 }
 
-ConnectionType::Ptr ConnectionType::nestedType() const
+Token::Ptr Token::nestedType() const
 {
     throw std::logic_error("cannot get nested type for non-container messages");
 }
-ConnectionType::ConstPtr ConnectionType::nestedValue(std::size_t index) const
+Token::ConstPtr Token::nestedValue(std::size_t index) const
 {
     throw std::logic_error("cannot get nested value for non-container messages");
 }
-std::size_t ConnectionType::nestedValueCount() const
+std::size_t Token::nestedValueCount() const
 {
     throw std::logic_error("cannot get nested count for non-container messages");
 }
-void ConnectionType::addNestedValue(const ConstPtr &msg)
+void Token::addNestedValue(const ConstPtr &msg)
 {
     throw std::logic_error("cannot add nested value to non-container messages");
 }
 
-void ConnectionType::writeRaw(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
+void Token::writeRaw(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
 {
     std::cerr << "error: writeRaw not implemented for message type " << descriptiveName() << std::endl;
 }

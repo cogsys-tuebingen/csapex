@@ -22,7 +22,7 @@ PreviewInput::PreviewInput(MessagePreviewWidget *parent)
     setType(std::make_shared<connection_types::AnyMessage>());
     }
 
-void PreviewInput::inputMessage(ConnectionType::ConstPtr message)
+void PreviewInput::inputMessage(Token::ConstPtr message)
 {
     Input::inputMessage(message);
 
@@ -41,9 +41,9 @@ MessagePreviewWidget::MessagePreviewWidget()
 
     scene()->setBackgroundBrush(QBrush());
 
-    qRegisterMetaType < ConnectionTypeConstPtr > ("ConnectionTypeConstPtr");
+    qRegisterMetaType < TokenConstPtr > ("TokenConstPtr");
 
-    QObject::connect(this, SIGNAL(displayMessage(ConnectionTypeConstPtr)), this, SLOT(display(ConnectionTypeConstPtr)));
+    QObject::connect(this, SIGNAL(displayMessage(TokenConstPtr)), this, SLOT(display(TokenConstPtr)));
 
     setMaximumSize(256, 256);
     setAutoFillBackground(false);
@@ -120,7 +120,7 @@ void MessagePreviewWidget::showText(const QString& txt)
     }
 }
 
-void MessagePreviewWidget::display(const ConnectionTypeConstPtr &msg)
+void MessagePreviewWidget::display(const TokenConstPtr &msg)
 {
     if(isConnected()) {
         try {

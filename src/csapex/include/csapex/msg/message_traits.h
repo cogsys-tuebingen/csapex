@@ -2,7 +2,7 @@
 #define MESSAGE_TRAITS_H
 
 /// COMPONENT
-#include <csapex/model/connection_type.h>
+#include <csapex/model/token.h>
 #include <csapex/utility/tmp.hpp>
 
 /// SYSTEM
@@ -76,7 +76,7 @@ struct should_use_pointer_message {
             std::is_class<M>::value &&
             has_ptr_member<M>::value &&
             !std::is_same<std::string, M>::value &&
-            !std::is_base_of<ConnectionType, M>::value;
+            !std::is_base_of<Token, M>::value;
 };
 
 template <typename M>
@@ -84,7 +84,7 @@ struct should_use_value_message {
     static constexpr bool value =
             !should_use_pointer_message<M>::value &&
             !has_elem_type_member<M>::value && // reject shared_ptr
-            !std::is_base_of<ConnectionType, M>::value;
+            !std::is_base_of<Token, M>::value;
 };
 
 }

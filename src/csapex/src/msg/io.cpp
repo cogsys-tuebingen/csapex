@@ -7,7 +7,7 @@
 
 using namespace csapex;
 
-ConnectionTypeConstPtr csapex::msg::getMessage(Input *input)
+TokenConstPtr csapex::msg::getMessage(Input *input)
 {
     apex_assert_hard_msg(input->isEnabled(), "you have requested a message from a disabled input");
     return input->getMessage();
@@ -78,7 +78,7 @@ void csapex::msg::setLabel(Output *output, const std::string &label)
     output->setLabel(label);
 }
 
-void csapex::msg::throwError(const ConnectionTypeConstPtr &msg, const std::type_info &type)
+void csapex::msg::throwError(const TokenConstPtr &msg, const std::type_info &type)
 {
     if(!msg) {
         throw std::runtime_error(std::string ("cannot cast null message from to ") + type2name(type));
@@ -87,7 +87,7 @@ void csapex::msg::throwError(const ConnectionTypeConstPtr &msg, const std::type_
     }
 }
 
-void csapex::msg::publish(Output *output, ConnectionTypeConstPtr message)
+void csapex::msg::publish(Output *output, TokenConstPtr message)
 {
     output->addMessage(message);
 }

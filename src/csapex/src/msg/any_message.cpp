@@ -13,24 +13,24 @@ AnyMessage::AnyMessage()
     : Message(type<AnyMessage>::name(), "/", 0)
 {}
 
-ConnectionType::Ptr AnyMessage::clone() const
+Token::Ptr AnyMessage::clone() const
 {
     AnyMessage::Ptr new_msg(new AnyMessage);
     return new_msg;
 }
 
-ConnectionType::Ptr AnyMessage::toType() const
+Token::Ptr AnyMessage::toType() const
 {
     Ptr new_msg(new AnyMessage);
     return new_msg;
 }
 
-bool AnyMessage::canConnectTo(const ConnectionType*) const
+bool AnyMessage::canConnectTo(const Token*) const
 {
     return true;
 }
 
-bool AnyMessage::acceptsConnectionFrom(const ConnectionType*) const
+bool AnyMessage::acceptsConnectionFrom(const Token*) const
 {
     return true;
 }

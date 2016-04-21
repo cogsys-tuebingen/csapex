@@ -45,7 +45,7 @@ DirectConnection::DirectConnection(Output *from, Input *to, int id)
 
 }
 
-void DirectConnection::setMessage(const ConnectionTypeConstPtr &msg)
+void DirectConnection::setMessage(const TokenConstPtr &msg)
 {
     Connection::setMessage(msg);
 

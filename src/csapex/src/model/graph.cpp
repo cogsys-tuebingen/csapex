@@ -671,7 +671,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
 
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
     for(Input* i : node_modifier.getMessageInputs()) {
-        ConnectionTypeConstPtr m = msg::getMessage(i);
+        TokenConstPtr m = msg::getMessage(i);
         OutputPtr o = forward_inputs_.at(i->getUUID());
 
         msg::publish(o.get(), m);
@@ -688,7 +688,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
     //    }
 
     //    for(Input* i : node_modifier.getMessageInputs()) {
-    //        ConnectionTypeConstPtr m = msg::getMessage(i);
+    //        TokenConstPtr m = msg::getMessage(i);
     //        OutputPtr o = pass_on_inputs_[i];
 
     //        msg::publish(o.get(), m);
@@ -702,7 +702,7 @@ bool Graph::isAsynchronous() const
     return true;
 }
 
-Input* Graph::createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional)
+Input* Graph::createVariadicInput(TokenConstPtr type, const std::string& label, bool optional)
 {
     auto pair = addForwardingInput(type, label, optional);
     return node_handle_->getInput(pair.external);
@@ -721,7 +721,7 @@ void Graph::removeVariadicInput(InputPtr input)
     transition_relay_out_->removeOutput(relay);
 }
 
-RelayMapping Graph::addForwardingInput(const ConnectionTypeConstPtr& type,
+RelayMapping Graph::addForwardingInput(const TokenConstPtr& type,
                                        const std::string& label, bool optional)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayout");
@@ -730,7 +730,7 @@ RelayMapping Graph::addForwardingInput(const ConnectionTypeConstPtr& type,
     return {external_uuid, internal_uuid};
 }
 
-UUID  Graph::addForwardingInput(const UUID& internal_uuid, const ConnectionTypeConstPtr& type, const std::string& label, bool optional)
+UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenConstPtr& type, const std::string& label, bool optional)
 {
     registerUUID(internal_uuid);
 
@@ -754,7 +754,7 @@ UUID  Graph::addForwardingInput(const UUID& internal_uuid, const ConnectionTypeC
 }
 
 
-Output* Graph::createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label)
+Output* Graph::createVariadicOutput(TokenConstPtr type, const std::string& label)
 {
     auto pair = addForwardingOutput(type, label);
     return node_handle_->getOutput(pair.external);
@@ -775,7 +775,7 @@ void Graph::removeVariadicOutput(OutputPtr output)
     transition_relay_in_->removeInput(relay);
 }
 
-RelayMapping Graph::addForwardingOutput(const ConnectionTypeConstPtr& type,
+RelayMapping Graph::addForwardingOutput(const TokenConstPtr& type,
                                         const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
@@ -784,7 +784,7 @@ RelayMapping Graph::addForwardingOutput(const ConnectionTypeConstPtr& type,
     return {external_uuid, internal_uuid};
 }
 
-UUID Graph::addForwardingOutput(const UUID& internal_uuid, const ConnectionTypeConstPtr& type,  const std::string& label)
+UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenConstPtr& type,  const std::string& label)
 {
     registerUUID(internal_uuid);
 

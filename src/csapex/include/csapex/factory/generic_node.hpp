@@ -105,8 +105,8 @@ public:
     std::vector<Output*> output_;
     std::vector<std::string> params_;
 
-    std::vector<std::shared_ptr<ConnectionType const>> in_msg_;
-    std::vector<std::shared_ptr<ConnectionType>> out_msg_;
+    std::vector<std::shared_ptr<Token const>> in_msg_;
+    std::vector<std::shared_ptr<Token>> out_msg_;
 
 private:
     struct GenericNodeSetup {
@@ -211,7 +211,7 @@ private:
             typedef typename connection_types::MessageContainer<RawType>::type Msg;
 
             static_assert(!std::is_pointer<I>::value, "type is not a pointer");
-            static_assert(std::is_base_of<ConnectionType, Msg>::value ||
+            static_assert(std::is_base_of<Token, Msg>::value ||
                           std::is_integral<I>::value ||
                           std::is_floating_point<I>::value ||
                           std::is_same<std::string, Msg>::value,
