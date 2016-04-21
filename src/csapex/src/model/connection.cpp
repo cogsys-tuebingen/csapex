@@ -7,7 +7,7 @@
 #include <csapex/msg/dynamic_output.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/core/settings.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>

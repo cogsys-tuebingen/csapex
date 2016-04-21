@@ -7,7 +7,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/connection.h>
 #include <csapex/command/paste_graph.h>
@@ -103,7 +103,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
         for(const SlotPtr& slot : nh->getAllSlots()) {
             for(const ConnectionPtr& connection : slot->getConnections()) {
-                Trigger* trigger = dynamic_cast<Trigger*>(connection->from());
+                Event* trigger = dynamic_cast<Event*>(connection->from());
                 apex_assert_hard(trigger);
 
                 if(trigger->isVirtual() || slot->isVirtual()) {
@@ -123,7 +123,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 }
             }
         }
-        for(const TriggerPtr& trigger : nh->getAllTriggers()) {
+        for(const EventPtr& trigger : nh->getAllEvents()) {
             for(const ConnectionPtr& connection : trigger->getConnections()) {
                 Slot* slot = dynamic_cast<Slot*>(connection->to());
                 apex_assert_hard(slot);

@@ -15,7 +15,7 @@ namespace command
 class DeleteSignalConnection : public DeleteConnection
 {
 public:
-    DeleteSignalConnection(const AUUID &graph_uuid, Trigger* a, Slot* b);
+    DeleteSignalConnection(const AUUID &graph_uuid, Event* a, Slot* b);
 
     virtual bool doUndo() override;
 };

@@ -14,7 +14,7 @@
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/connection.h>
 #include <csapex/command/meta.h>
@@ -54,7 +54,7 @@ Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to)
     } else if(dynamic_cast<Input*>(from_c)) {
         return std::make_shared<AddMessageConnection>(graph_uuid, to, from);
     }
-    if(dynamic_cast<Trigger*>(from_c)) {
+    if(dynamic_cast<Event*>(from_c)) {
         return std::make_shared<AddSignalConnection>(graph_uuid, from, to);
     } else if(dynamic_cast<Slot*>(from_c)) {
         return std::make_shared<AddSignalConnection>(graph_uuid, to, from);
@@ -79,7 +79,7 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Connectable* c)
     if(Slot* slot = dynamic_cast<Slot*>(c)) {
         return removeAllConnectionsCmd(slot);
     }
-    if(Trigger* trigger = dynamic_cast<Trigger*>(c)) {
+    if(Event* trigger = dynamic_cast<Event*>(c)) {
         return removeAllConnectionsCmd(trigger);
     }
     return nullptr;
@@ -123,18 +123,18 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Slot* slot)
 {
     Meta::Ptr cmd(new Meta(graph_uuid, "Delete sources"));
-    for(Trigger* source : slot->getSources()) {
+    for(Event* source : slot->getSources()) {
         cmd->add(Command::Ptr(new DeleteSignalConnection(graph_uuid, source, slot)));
     }
     return cmd;
 }
 
-Command::Ptr CommandFactory::removeConnectionCmd(Trigger* trigger, Slot* other_side)
+Command::Ptr CommandFactory::removeConnectionCmd(Event* trigger, Slot* other_side)
 {
     return Command::Ptr (new DeleteSignalConnection(graph_uuid, trigger, other_side));
 }
 
-Command::Ptr CommandFactory::removeAllConnectionsCmd(Trigger* trigger)
+Command::Ptr CommandFactory::removeAllConnectionsCmd(Event* trigger)
 {
     Meta::Ptr removeAll(new Meta(graph_uuid, "Remove All Connections"));
 
@@ -177,7 +177,7 @@ Command::Ptr CommandFactory::deleteConnectionByIdCommand(int id)
                 Input* input = dynamic_cast<Input*>(t);
                 return Command::Ptr(new DeleteMessageConnection(graph_uuid, output, input));
 
-            } else if(Trigger* trigger = dynamic_cast<Trigger*>(f)) {
+            } else if(Event* trigger = dynamic_cast<Event*>(f)) {
                 Slot* slot = dynamic_cast<Slot*>(t);
                 return Command::Ptr(new DeleteSignalConnection(graph_uuid, trigger, slot));
             }
@@ -270,10 +270,10 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
                 }
             }
         } else {
-            Trigger* trigger = dynamic_cast<Trigger*>(from);
-            if(trigger && !trigger->isVirtual()) {
-                for(Slot* slot : trigger->getTargets()) {
-                    meta->add(Command::Ptr(new DeleteSignalConnection(parent_uuid, trigger, slot)));
+            Event* event = dynamic_cast<Event*>(from);
+            if(event && !event->isVirtual()) {
+                for(Slot* slot : event->getTargets()) {
+                    meta->add(Command::Ptr(new DeleteSignalConnection(parent_uuid, event, slot)));
                     meta->add(Command::Ptr(new AddSignalConnection(parent_uuid, to_uuid, slot->getUUID())));
                 }
             }
@@ -290,7 +290,7 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
             Slot* in = dynamic_cast<Slot*>(from);
 
             if(in && !in->isVirtual()) {
-                for(Trigger* target : in->getSources()) {
+                for(Event* target : in->getSources()) {
                     meta->add(Command::Ptr(new DeleteSignalConnection(parent_uuid, target, in)));
                     meta->add(Command::Ptr(new AddSignalConnection(parent_uuid, target->getUUID(), to_uuid)));
                 }
@@ -312,9 +312,9 @@ CommandPtr CommandFactory::createVariadicOutput(const AUUID& node_uuid, Connecti
     return createVariadicPort(node_uuid, ConnectorType::OUTPUT, connection_type, label, false);
 }
 
-CommandPtr CommandFactory::createVariadicTrigger(const AUUID& node_uuid, const std::string& label)
+CommandPtr CommandFactory::createVariadicEvent(const AUUID& node_uuid, const std::string& label)
 {
-    return createVariadicPort(node_uuid, ConnectorType::TRIGGER, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
+    return createVariadicPort(node_uuid, ConnectorType::EVENT, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
 }
 
 CommandPtr CommandFactory::createVariadicSlot(const AUUID& node_uuid, const std::string& label)

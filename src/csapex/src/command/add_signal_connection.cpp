@@ -7,7 +7,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/utility/assert.h>
 #include <csapex/signal/signal_connection.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/graph_facade.h>
 
@@ -38,11 +38,11 @@ void AddSignalConnection::refresh()
     Connectable* t = graph->findConnector(to_uuid);
 
     if((f->isOutput() && t->isInput())) {
-        from = dynamic_cast<Trigger*>(f);
+        from = dynamic_cast<Event*>(f);
         to =  dynamic_cast<Slot*>(t);
 
     } else if(f->isInput() && t->isOutput()) {
-        from = dynamic_cast<Trigger*>(t);
+        from = dynamic_cast<Event*>(t);
         to =  dynamic_cast<Slot*>(f);
 
     } else {

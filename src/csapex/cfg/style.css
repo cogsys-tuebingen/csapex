@@ -164,8 +164,8 @@ csapex--Port[type="input"]  {
 csapex--Port[type="output"]  {
         image: url(:/port_output.png);
 }
-csapex--Port[type="trigger"]  {
-        image: url(:/port_trigger.png);
+csapex--Port[type="event"]  {
+        image: url(:/port_event.png);
 }
 csapex--Port[type="slot"]  {
         image: url(:/port_slot.png);

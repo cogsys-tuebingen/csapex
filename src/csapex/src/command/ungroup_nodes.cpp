@@ -13,7 +13,7 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/connection.h>
 #include <csapex/core/graphio.h>
@@ -84,14 +84,14 @@ bool UngroupNodes::doExecute()
     for(SlotPtr slot : nh->getAllSlots()) {
         auto& vec = old_signals_in[slot->getUUID()];
         for(ConnectionPtr c : slot->getConnections()) {
-            Trigger* trigger = dynamic_cast<Trigger*>(c->from());
+            Event* trigger = dynamic_cast<Event*>(c->from());
             if(trigger) {
                 vec.push_back(trigger->getUUID());
             }
         }
     }
 
-    for(TriggerPtr trigger : nh->getAllTriggers()) {
+    for(EventPtr trigger : nh->getAllEvents()) {
         auto& vec = old_signals_out[trigger->getUUID()];
         for(ConnectionPtr c : trigger->getConnections()) {
             Slot* slot = dynamic_cast<Slot*>(c->to());
@@ -170,7 +170,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         std::string child = ci.from.id();
         UUID from = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
-        UUID graph_out = subgraph->getForwardedTriggerExternal(ci.to);
+        UUID graph_out = subgraph->getForwardedEventExternal(ci.to);
         const std::vector<UUID>& targets = old_signals_out[graph_out];
 
 

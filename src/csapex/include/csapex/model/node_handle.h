@@ -52,21 +52,21 @@ public:
     Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active) override;
     void addSlot(SlotPtr s);
 
-    Trigger* addTrigger(const std::string& label) override;
-    void addTrigger(TriggerPtr t);
+    Event* addEvent(const std::string& label) override;
+    void addEvent(EventPtr t);
 
 
     Connectable* getConnector(const UUID& uuid) const;
     Input* getInput(const UUID& uuid) const;
     Output* getOutput(const UUID& uuid) const;
     Slot* getSlot(const UUID& uuid) const;
-    Trigger* getTrigger(const UUID& uuid) const;
+    Event* getEvent(const UUID& uuid) const;
 
 
     void removeInput(const UUID& uuid) override;
     void removeOutput(const UUID& uuid) override;
     void removeSlot(const UUID& uuid) override;
-    void removeTrigger(const UUID& uuid) override;
+    void removeEvent(const UUID& uuid) override;
 
 
     void makeParameterConnectable(csapex::param::ParameterPtr);
@@ -80,7 +80,7 @@ public:
     std::vector<OutputPtr> getAllOutputs() const override;
 
     std::vector<SlotPtr> getAllSlots() const override;
-    std::vector<TriggerPtr> getAllTriggers() const override;
+    std::vector<EventPtr> getAllEvents() const override;
 
     std::map<std::string, InputWeakPtr>& paramToInputMap();
     std::map<std::string, OutputWeakPtr>& paramToOutputMap();
@@ -128,7 +128,7 @@ private:
     void removeInput(Input *in);
     void removeOutput(Output *out);
     void removeSlot(Slot *out);
-    void removeTrigger(Trigger *out);
+    void removeEvent(Event *out);
 
 
 
@@ -145,7 +145,7 @@ protected:
 
     std::vector<InputPtr> inputs_;
     std::vector<OutputPtr> outputs_;
-    std::vector<TriggerPtr> triggers_;
+    std::vector<EventPtr> triggers_;
     std::vector<SlotPtr> slots_;
 
     std::string node_type_;
@@ -165,8 +165,8 @@ private:
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
 
     std::map<Slot*, csapex::slim_signal::Connection> slot_connections_;
-    std::map<Trigger*, csapex::slim_signal::Connection> trigger_triggered_connections_;
-    std::map<Trigger*, csapex::slim_signal::Connection> trigger_handled_connections_;
+    std::map<Event*, csapex::slim_signal::Connection> trigger_triggered_connections_;
+    std::map<Event*, csapex::slim_signal::Connection> trigger_handled_connections_;
 
     int level_;
 

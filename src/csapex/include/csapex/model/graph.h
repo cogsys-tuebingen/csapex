@@ -113,40 +113,40 @@ public:
 
     virtual Input* createVariadicInput(ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
     virtual Output* createVariadicOutput(ConnectionTypeConstPtr type, const std::string& label) override;
-    virtual Trigger* createVariadicTrigger(const std::string& label) override;
+    virtual Event* createVariadicEvent(const std::string& label) override;
     virtual Slot* createVariadicSlot(const std::string& label, std::function<void()> callback) override;
 
     virtual void removeVariadicInput(InputPtr input) override;
     virtual void removeVariadicOutput(OutputPtr input) override;
-    virtual void removeVariadicTrigger(TriggerPtr input) override;
+    virtual void removeVariadicEvent(EventPtr input) override;
     virtual void removeVariadicSlot(SlotPtr input) override;
 
     RelayMapping addForwardingInput(const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
     RelayMapping addForwardingOutput(const ConnectionTypeConstPtr& type, const std::string& label);
     RelayMapping addForwardingSlot(const std::string& label);
-    RelayMapping addForwardingTrigger(const std::string& label);
+    RelayMapping addForwardingEvent(const std::string& label);
 
     InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
     OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
     SlotPtr getForwardedSlotInternal(const UUID& internal_uuid) const;
-    TriggerPtr getForwardedTriggerInternal(const UUID& internal_uuid) const;
+    EventPtr getForwardedEventInternal(const UUID& internal_uuid) const;
 
     OutputPtr getRelayForInput(const UUID& external_uuid) const;
     InputPtr getRelayForOutput(const UUID& external_uuid) const;
-    TriggerPtr getRelayForSlot(const UUID& external_uuid) const;
-    SlotPtr getRelayForTrigger(const UUID& external_uuid) const;
+    EventPtr getRelayForSlot(const UUID& external_uuid) const;
+    SlotPtr getRelayForEvent(const UUID& external_uuid) const;
 
 
 
     UUID getForwardedInputExternal(const UUID& internal_uuid) const;
     UUID getForwardedOutputExternal(const UUID& internal_uuid) const;
     UUID getForwardedSlotExternal(const UUID& internal_uuid) const;
-    UUID getForwardedTriggerExternal(const UUID& internal_uuid) const;
+    UUID getForwardedEventExternal(const UUID& internal_uuid) const;
 
     std::vector<UUID> getRelayOutputs() const;
     std::vector<UUID> getRelayInputs() const;
     std::vector<UUID> getRelaySlots() const;
-    std::vector<UUID> getRelayTriggers() const;
+    std::vector<UUID> getRelayEvents() const;
 
     std::string makeStatusString() const;
 
@@ -154,7 +154,7 @@ private:
     UUID addForwardingInput(const UUID& internal_uuid, const ConnectionTypeConstPtr& type, const std::string& label, bool optional);
     UUID  addForwardingOutput(const UUID& internal_uuid, const ConnectionTypeConstPtr& type, const std::string& label);
     UUID  addForwardingSlot(const UUID& internal_uuid, const std::string& label);
-    UUID  addForwardingTrigger(const UUID& internal_uuid, const std::string& label);
+    UUID  addForwardingEvent(const UUID& internal_uuid, const std::string& label);
 
    /*rename*/ void verify();
     void buildConnectedComponents();
@@ -194,17 +194,17 @@ protected:
     InputTransitionPtr transition_relay_in_;
     OutputTransitionPtr transition_relay_out_;
     std::unordered_map<UUID, SlotPtr, UUID::Hasher> relay_slot_;
-    std::unordered_map<UUID, TriggerPtr, UUID::Hasher> relay_trigger_;
+    std::unordered_map<UUID, EventPtr, UUID::Hasher> relay_event_;
 
     std::unordered_map<UUID, OutputPtr, UUID::Hasher> forward_inputs_;
     std::unordered_map<UUID, InputPtr, UUID::Hasher> forward_outputs_;
-    std::unordered_map<UUID, SlotPtr, UUID::Hasher> forward_trigger_;
-    std::unordered_map<UUID, TriggerPtr, UUID::Hasher> forward_slot_;
+    std::unordered_map<UUID, SlotPtr, UUID::Hasher> forward_event_;
+    std::unordered_map<UUID, EventPtr, UUID::Hasher> forward_slot_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_output_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_slot_;
-    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_trigger_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_event_;
 
     bool is_initialized_;
 };

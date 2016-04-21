@@ -36,7 +36,7 @@
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/view/node/box.h>
@@ -188,7 +188,7 @@ void GraphView::setupWidgets()
         relayed_slots_widget_->setup(graph_facade_);
 
 
-        relayed_triggers_widget_ = new PortPanel(ConnectorType::TRIGGER, parent, scene_);
+        relayed_triggers_widget_ = new PortPanel(ConnectorType::EVENT, parent, scene_);
         QObject::connect(relayed_triggers_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
         QObject::connect(relayed_triggers_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
         QObject::connect(relayed_triggers_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
@@ -754,8 +754,8 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     for(auto slot : node_handle->getAllSlots()) {
         connectorSignalAdded(slot);
     }
-    for(auto trigger : node_handle->getAllTriggers()) {
-        connectorSignalAdded(trigger);
+    for(auto event : node_handle->getAllEvents()) {
+        connectorSignalAdded(event);
     }
 
     // subscribe to coming connectors
@@ -777,7 +777,7 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
 void GraphView::connectorCreated(ConnectablePtr connector)
 {
     // TODO: dirty...
-    if(dynamic_cast<Slot*> (connector.get()) || dynamic_cast<Trigger*>(connector.get())) {
+    if(dynamic_cast<Slot*> (connector.get()) || dynamic_cast<Event*>(connector.get())) {
         connectorSignalAdded(connector);
     } else {
         connectorMessageAdded(connector);
@@ -821,7 +821,7 @@ void GraphView::connectorSignalAdded(ConnectablePtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
     NodeBox* box = getBox(parent_uuid);
-    QBoxLayout* layout = dynamic_cast<Trigger*>(connector.get()) ? box->getTriggerLayout() : box->getSlotLayout();
+    QBoxLayout* layout = dynamic_cast<Event*>(connector.get()) ? box->getEventLayout() : box->getSlotLayout();
 
     box->createPort(connector, layout);
 }

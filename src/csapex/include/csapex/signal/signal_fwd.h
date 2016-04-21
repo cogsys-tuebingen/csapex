@@ -14,7 +14,7 @@
 
 namespace csapex
 {
-FWD(Trigger);
+FWD(Event);
 FWD(Slot);
 
 namespace connection_types

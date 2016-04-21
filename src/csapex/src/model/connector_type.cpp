@@ -19,8 +19,8 @@ std::string name(ConnectorType type) {
         return "input";
     case ConnectorType::SLOT_T:
         return "slot";
-    case ConnectorType::TRIGGER:
-        return "trigger";
+    case ConnectorType::EVENT:
+        return "event";
     default:
         throw std::logic_error("unknown connector type");
     }
@@ -34,8 +34,8 @@ ConnectorType opposite(ConnectorType type)
     case ConnectorType::INPUT:
         return ConnectorType::OUTPUT;
     case ConnectorType::SLOT_T:
-        return ConnectorType::TRIGGER;
-    case ConnectorType::TRIGGER:
+        return ConnectorType::EVENT;
+    case ConnectorType::EVENT:
         return ConnectorType::SLOT_T;
     default:
         throw std::logic_error("unknown connector type");

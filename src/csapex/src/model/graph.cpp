@@ -11,7 +11,7 @@
 #include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/dynamic_output.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
@@ -825,10 +825,10 @@ Slot* Graph::createVariadicSlot(const std::string& label, std::function<void()> 
 
 void Graph::removeVariadicSlot(SlotPtr slot)
 {
-    TriggerPtr relay = forward_slot_.at(slot->getUUID());
+    EventPtr relay = forward_slot_.at(slot->getUUID());
     forward_slot_.erase(slot->getUUID());
 
-    relay_trigger_.erase(relay->getUUID());
+    relay_event_.erase(relay->getUUID());
 
     forwardingRemoved(relay);
 
@@ -839,7 +839,7 @@ void Graph::removeVariadicSlot(SlotPtr slot)
 
 RelayMapping Graph::addForwardingSlot(const std::string& label)
 {
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relaytrigger");
+    UUID internal_uuid = generateDerivedUUID(UUID(),"relayevent");
     UUID external_uuid = addForwardingSlot(internal_uuid, label);
 
     return {external_uuid, internal_uuid};
@@ -849,7 +849,7 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& labe
 {
     registerUUID(internal_uuid);
 
-    TriggerPtr relay = std::make_shared<Trigger>(internal_uuid);
+    EventPtr relay = std::make_shared<Event>(internal_uuid);
     relay->setLabel(label);
 
     auto cb = [relay]() {
@@ -861,7 +861,7 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& labe
     relay->connectionInProgress.connect(internalConnectionInProgress);
 
     forward_slot_[external_slot->getUUID()] = relay;
-    relay_trigger_[internal_uuid] = relay;
+    relay_event_[internal_uuid] = relay;
 
     relay_to_external_slot_[internal_uuid] = external_slot->getUUID();
 
@@ -872,42 +872,42 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& labe
 
 
 
-Trigger* Graph::createVariadicTrigger(const std::string& label)
+Event* Graph::createVariadicEvent(const std::string& label)
 {
-    auto pair = addForwardingTrigger(label);
-    return node_handle_->getTrigger(pair.external);
+    auto pair = addForwardingEvent(label);
+    return node_handle_->getEvent(pair.external);
 }
 
-void Graph::removeVariadicTrigger(TriggerPtr trigger)
+void Graph::removeVariadicEvent(EventPtr event)
 {
-    SlotPtr relay = forward_trigger_.at(trigger->getUUID());
-    forward_trigger_.erase(trigger->getUUID());
+    SlotPtr relay = forward_event_.at(event->getUUID());
+    forward_event_.erase(event->getUUID());
 
     relay_slot_.erase(relay->getUUID());
 
     forwardingRemoved(relay);
 
-    VariadicTriggers::removeVariadicTrigger(trigger);
+    VariadicEvents::removeVariadicEvent(event);
 
-    relay_to_external_trigger_.erase(relay->getUUID());
+    relay_to_external_event_.erase(relay->getUUID());
 }
 
-RelayMapping Graph::addForwardingTrigger(const std::string& label)
+RelayMapping Graph::addForwardingEvent(const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayslot");
-    UUID external_uuid = addForwardingTrigger(internal_uuid, label);
+    UUID external_uuid = addForwardingEvent(internal_uuid, label);
 
     return {external_uuid, internal_uuid};
 }
 
-UUID Graph::addForwardingTrigger(const UUID& internal_uuid, const std::string& label)
+UUID Graph::addForwardingEvent(const UUID& internal_uuid, const std::string& label)
 {
     registerUUID(internal_uuid);
 
-    Trigger* external_trigger = VariadicTriggers::createVariadicTrigger(label);
+    Event* external_event = VariadicEvents::createVariadicEvent(label);
 
-    auto cb = [this, external_trigger](){
-        external_trigger->trigger();
+    auto cb = [this, external_event](){
+        external_event->trigger();
     };
 
     SlotPtr relay = std::make_shared<Slot>(cb, internal_uuid, false);
@@ -916,21 +916,21 @@ UUID Graph::addForwardingTrigger(const UUID& internal_uuid, const std::string& l
     Slot* slot = relay.get();
 
     relay->connectionInProgress.connect(internalConnectionInProgress);
-    relay->triggered.connect([this, slot](Trigger* source) {
+    relay->triggered.connect([this, slot](Event* source) {
         node_handle_->executionRequested([this, slot, source]() {
-            slot->handleTrigger();
+            slot->handleEvent();
             source->signalHandled(slot);
         });
     });
 
-    forward_trigger_[external_trigger->getUUID()] = relay;
+    forward_event_[external_event->getUUID()] = relay;
     relay_slot_[internal_uuid] = relay;
 
-    relay_to_external_trigger_[internal_uuid] = external_trigger->getUUID();
+    relay_to_external_event_[internal_uuid] = external_event->getUUID();
 
     forwardingAdded(relay);
 
-    return external_trigger->getUUID();
+    return external_event->getUUID();
 }
 
 OutputPtr Graph::getRelayForInput(const UUID& external_uuid) const
@@ -941,13 +941,13 @@ InputPtr Graph::getRelayForOutput(const UUID& external_uuid) const
 {
     return forward_outputs_.at(external_uuid);
 }
-TriggerPtr Graph::getRelayForSlot(const UUID& external_uuid) const
+EventPtr Graph::getRelayForSlot(const UUID& external_uuid) const
 {
     return forward_slot_.at(external_uuid);
 }
-SlotPtr Graph::getRelayForTrigger(const UUID& external_uuid) const
+SlotPtr Graph::getRelayForEvent(const UUID& external_uuid) const
 {
-    return forward_trigger_.at(external_uuid);
+    return forward_event_.at(external_uuid);
 }
 
 InputPtr Graph::getForwardedInputInternal(const UUID &internal_uuid) const
@@ -965,9 +965,9 @@ SlotPtr Graph::getForwardedSlotInternal(const UUID &internal_uuid) const
     return relay_slot_.at(internal_uuid);
 }
 
-TriggerPtr Graph::getForwardedTriggerInternal(const UUID &internal_uuid) const
+EventPtr Graph::getForwardedEventInternal(const UUID &internal_uuid) const
 {
-    return relay_trigger_.at(internal_uuid);
+    return relay_event_.at(internal_uuid);
 }
 
 UUID Graph::getForwardedInputExternal(const UUID &internal_uuid) const
@@ -985,9 +985,9 @@ UUID Graph::getForwardedSlotExternal(const UUID &internal_uuid) const
     return relay_to_external_slot_.at(internal_uuid);
 }
 
-UUID Graph::getForwardedTriggerExternal(const UUID &internal_uuid) const
+UUID Graph::getForwardedEventExternal(const UUID &internal_uuid) const
 {
-    return relay_to_external_trigger_.at(internal_uuid);
+    return relay_to_external_event_.at(internal_uuid);
 }
 
 std::vector<UUID> Graph::getRelayOutputs() const
@@ -1009,12 +1009,12 @@ std::vector<UUID> Graph::getRelayInputs() const
 std::vector<UUID> Graph::getRelaySlots() const
 {
     std::vector<UUID> res;
-    for(const auto& pair : forward_trigger_) {
+    for(const auto& pair : forward_event_) {
         res.push_back(pair.second->getUUID());
     }
     return res;
 }
-std::vector<UUID> Graph::getRelayTriggers() const
+std::vector<UUID> Graph::getRelayEvents() const
 {
     std::vector<UUID> res;
     for(const auto& pair : forward_slot_) {

@@ -73,7 +73,7 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
-    bool isWaitingForTrigger() const;
+    bool isWaitingForEvent() const;
     bool canProcess() const;
     bool canReceive() const;
     bool canSend() const;
@@ -151,8 +151,8 @@ private:
     bool is_setup_;
     State state_;
 
-    Trigger* trigger_tick_done_;
-    Trigger* trigger_process_done_;
+    Event* trigger_tick_done_;
+    Event* trigger_process_done_;
 
     std::vector<csapex::slim_signal::Connection> handle_connections_;
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;

@@ -5,7 +5,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/msg/input.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/widgets/port.h>
@@ -41,7 +41,7 @@ PortPanel::PortPanel(ConnectorType type, const AUUID& target, DesignerScene* par
 
 
     case ConnectorType::SLOT_T:
-    case ConnectorType::TRIGGER:
+    case ConnectorType::EVENT:
         mainlayout =  new QHBoxLayout;;
         layout = new QHBoxLayout;
 
@@ -77,8 +77,8 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
     case ConnectorType::SLOT_T:
         setupSlot();
         break;
-    case ConnectorType::TRIGGER:
-        setupTrigger();
+    case ConnectorType::EVENT:
+        setupEvent();
         break;
 
     default:
@@ -151,10 +151,10 @@ void PortPanel::setupSlot()
     }
 }
 
-void PortPanel::setupTrigger()
+void PortPanel::setupEvent()
 {
-    for(const UUID& uuid : graph_->getRelayTriggers()) {
-        addPortForConnector(graph_->getForwardedTriggerInternal(uuid));
+    for(const UUID& uuid : graph_->getRelayEvents()) {
+        addPortForConnector(graph_->getForwardedEventInternal(uuid));
     }
 }
 

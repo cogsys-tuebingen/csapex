@@ -86,28 +86,28 @@ private:
 
 
 
-class VariadicTriggers : public virtual VariadicBase
+class VariadicEvents : public virtual VariadicBase
 {
 public:
-    virtual Trigger* createVariadicTrigger(const std::string& label);
-    virtual void removeVariadicTrigger(TriggerPtr trigger);
-    void removeVariadicTriggerById(const UUID& trigger);
+    virtual Event* createVariadicEvent(const std::string& label);
+    virtual void removeVariadicEvent(EventPtr trigger);
+    void removeVariadicEventById(const UUID& trigger);
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;
 
-    int getVariadicTriggerCount() const;
+    int getVariadicEventCount() const;
 
 protected:
-    VariadicTriggers(ConnectionTypeConstPtr type);
-    VariadicTriggers();
+    VariadicEvents(ConnectionTypeConstPtr type);
+    VariadicEvents();
 
     virtual void setupVariadicParameters(Parameterizable &parameters) override;
 
 private:
-    void updateTriggers(int trigger_count);
+    void updateEvents(int trigger_count);
 
 private:
-    param::ParameterPtr trigger_count_;
-    std::vector<TriggerPtr> variadic_triggers_;
+    param::ParameterPtr event_count_;
+    std::vector<EventPtr> variadic_events_;
 };
 
 
@@ -151,7 +151,7 @@ protected:
 };
 
 
-class Variadic : public VariadicInputs, public VariadicOutputs, public VariadicTriggers, public VariadicSlots
+class Variadic : public VariadicInputs, public VariadicOutputs, public VariadicEvents, public VariadicSlots
 {
 public:
     virtual Connectable* createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string& label, bool optional) override;

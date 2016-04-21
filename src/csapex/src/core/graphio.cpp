@@ -10,7 +10,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
@@ -335,7 +335,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
             Output* from = parent->getOutput(from_uuid);
             loadMessageConnection(from, parent, to_uuid);
         } else {
-            Trigger* from = parent->getTrigger(from_uuid);
+            Event* from = parent->getEvent(from_uuid);
             loadSignalConnection(from, to_uuid);
         }
     }
@@ -454,7 +454,7 @@ void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid)
             return;
         }
 
-        Trigger* out = dynamic_cast<Trigger*>(from);
+        Event* out = dynamic_cast<Event*>(from);
         if(out && in) {
             ConnectionPtr c = SignalConnection::connect(
                         out, in);

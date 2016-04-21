@@ -230,7 +230,7 @@ void GroupNodes::mapSignalGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         } else {
             std::shared_ptr<command::AddVariadicConnector> pass_out =
-                    std::make_shared<command::AddVariadicConnector>(parent_auuid, sub_graph_auuid, ConnectorType::TRIGGER, ci.type);
+                    std::make_shared<command::AddVariadicConnector>(parent_auuid, sub_graph_auuid, ConnectorType::EVENT, ci.type);
             executeCommand(pass_out);
             add(pass_out);
             out_map = pass_out->getMap();

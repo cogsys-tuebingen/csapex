@@ -12,7 +12,7 @@
 #include <csapex/msg/static_output.h>
 #include <csapex/param/trigger_parameter.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/dynamic_output.h>
 #include <csapex/msg/marker_message.h>
@@ -84,7 +84,7 @@ NodeHandle::~NodeHandle()
         removeSlot(slots_.begin()->get());
     }
     while(!triggers_.empty()) {
-        removeTrigger(triggers_.begin()->get());
+        removeEvent(triggers_.begin()->get());
     }
 
     nodeRemoved();
@@ -283,9 +283,9 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
 
     param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
     if(t) {
-        Trigger* trigger = addTrigger(t->name());
+        Event* trigger = addEvent(t->name());
         addSlot(t->name(), std::bind(&param::TriggerParameter::trigger, t), false);
-        node_->addParameterCallback(t.get(), std::bind(&Trigger::trigger, trigger));
+        node_->addParameterCallback(t.get(), std::bind(&Event::trigger, trigger));
     }
 }
 
@@ -403,14 +403,14 @@ Slot* NodeHandle::addSlot(const std::string& label, std::function<void()> callba
     return slot.get();
 }
 
-Trigger* NodeHandle::addTrigger(const std::string& label)
+Event* NodeHandle::addEvent(const std::string& label)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "trigger");
-    TriggerPtr trigger = std::make_shared<Trigger>(uuid);
+    EventPtr trigger = std::make_shared<Event>(uuid);
     trigger->setLabel(label);
 
-    addTrigger(trigger);
+    addEvent(trigger);
 
     return trigger.get();
 }
@@ -509,9 +509,9 @@ void NodeHandle::removeSlot(Slot* s)
 
 }
 
-void NodeHandle::removeTrigger(Trigger* t)
+void NodeHandle::removeEvent(Event* t)
 {
-    std::vector<TriggerPtr>::iterator it;
+    std::vector<EventPtr>::iterator it;
     for(it = triggers_.begin(); it != triggers_.end(); ++it) {
         if(it->get() == t) {
             break;
@@ -527,7 +527,7 @@ void NodeHandle::removeTrigger(Trigger* t)
     trigger_handled_connections_.erase(pos_h);
 
     if(it != triggers_.end()) {
-        TriggerPtr trigger = *it;
+        EventPtr trigger = *it;
 
         triggers_.erase(it);
 
@@ -585,9 +585,9 @@ void NodeHandle::addSlot(SlotPtr s)
 
     Slot* slot = s.get();
 
-    auto connection = s->triggered.connect([this, slot](Trigger* source) {
+    auto connection = s->triggered.connect([this, slot](Event* source) {
         executionRequested([this, slot, source]() {
-            slot->handleTrigger();
+            slot->handleEvent();
             source->signalHandled(slot);
         });
     });
@@ -596,7 +596,7 @@ void NodeHandle::addSlot(SlotPtr s)
     connectorCreated(s);
 }
 
-void NodeHandle::addTrigger(TriggerPtr t)
+void NodeHandle::addEvent(EventPtr t)
 {
     apex_assert_hard(t->getUUID().rootUUID() == getUUID().rootUUID());
 
@@ -634,7 +634,7 @@ Connectable* NodeHandle::getConnector(const UUID &uuid) const
     } else if(type == "slot" || type == "relayslot") {
         return getSlot(uuid);
     } else if(type == "trigger" || type == "relaytrigger") {
-        return getTrigger(uuid);
+        return getEvent(uuid);
     } else {
         throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
     }
@@ -690,9 +690,9 @@ Slot* NodeHandle::getSlot(const UUID& uuid) const
 }
 
 
-Trigger* NodeHandle::getTrigger(const UUID& uuid) const
+Event* NodeHandle::getEvent(const UUID& uuid) const
 {
-    for(TriggerPtr t : triggers_) {
+    for(EventPtr t : triggers_) {
         if(t->getUUID() == uuid) {
             return t.get();
         }
@@ -700,7 +700,7 @@ Trigger* NodeHandle::getTrigger(const UUID& uuid) const
 
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
-        return graph->getForwardedTriggerInternal(uuid).get();
+        return graph->getForwardedEventInternal(uuid).get();
     }
 
     return nullptr;
@@ -721,9 +721,9 @@ void NodeHandle::removeSlot(const UUID &uuid)
     removeSlot(getSlot(uuid));
 }
 
-void NodeHandle::removeTrigger(const UUID &uuid)
+void NodeHandle::removeEvent(const UUID &uuid)
 {
-    removeTrigger(getTrigger(uuid));
+    removeEvent(getEvent(uuid));
 }
 
 std::vector<ConnectablePtr> NodeHandle::getAllConnectors() const
@@ -763,7 +763,7 @@ std::vector<SlotPtr> NodeHandle::getAllSlots() const
     return slots_;
 }
 
-std::vector<TriggerPtr> NodeHandle::getAllTriggers() const
+std::vector<EventPtr> NodeHandle::getAllEvents() const
 {
     return triggers_;
 }

@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/signal/signal_connection.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_facade.h>
@@ -11,7 +11,7 @@
 using namespace csapex;
 using namespace csapex::command;
 
-DeleteSignalConnection::DeleteSignalConnection(const AUUID& parent_uuid, Trigger *a, Slot *b)
+DeleteSignalConnection::DeleteSignalConnection(const AUUID& parent_uuid, Event *a, Slot *b)
     : DeleteConnection(parent_uuid, a, b)
 {
 
@@ -24,7 +24,7 @@ bool DeleteSignalConnection::doUndo()
     Connectable* from = graph->findConnector(from_uuid);
     Connectable* to = graph->findConnector(to_uuid);
 
-    Trigger* trigger = dynamic_cast<Trigger*>(from);
+    Event* trigger = dynamic_cast<Event*>(from);
     Slot* slot = dynamic_cast<Slot*>(to);
 
     graph->addConnection(SignalConnection::connect(trigger, slot, connection_id));

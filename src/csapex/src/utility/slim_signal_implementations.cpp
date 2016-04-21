@@ -23,7 +23,7 @@ template class Signal<void(Connectable*)>;
 template class Signal<void(Connectable*,Connectable*)>;
 template class Signal<void(Connectable&)>;
 template class Signal<void(ConnectablePtr)>;
-template class Signal<void(Trigger*)>;
+template class Signal<void(Event*)>;
 template class Signal<void(const UUID&)>;
 template class Signal<void(const YAML::Node&)>;
 template class Signal<void(param::ParameterPtr)>;

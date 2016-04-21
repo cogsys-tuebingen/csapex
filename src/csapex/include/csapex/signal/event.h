@@ -10,14 +10,14 @@
 namespace csapex
 {
 
-class Trigger : public Connectable
+class Event : public Connectable
 {
     friend class Input;
     friend class Graph;
 
 public:
-    Trigger(const UUID &uuid);
-    ~Trigger();
+    Event(const UUID &uuid);
+    ~Event();
 
     virtual bool canOutput() const override {
         return true;
@@ -27,7 +27,7 @@ public:
     }
     virtual ConnectorType getConnectorType() const override
     {
-        return ConnectorType::TRIGGER;
+        return ConnectorType::EVENT;
     }
 
     void trigger();

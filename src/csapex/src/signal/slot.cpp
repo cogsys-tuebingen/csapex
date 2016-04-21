@@ -2,7 +2,7 @@
 #include <csapex/signal/slot.h>
 
 /// COMPONENT
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/signal.h>
 #include <csapex/utility/assert.h>
 
@@ -38,7 +38,7 @@ bool Slot::isConnectionPossible(Connectable* other_side)
 
 bool Slot::acknowledgeConnection(Connectable* other_side)
 {
-    Trigger* target = dynamic_cast<Trigger*>(other_side);
+    Event* target = dynamic_cast<Event*>(other_side);
 
     sources_.push_back(target);
 
@@ -49,7 +49,7 @@ bool Slot::acknowledgeConnection(Connectable* other_side)
 
 void Slot::removeConnection(Connectable* other_side)
 {
-    std::vector<Trigger*>::iterator pos = std::find(sources_.begin(), sources_.end(), other_side);
+    std::vector<Event*>::iterator pos = std::find(sources_.begin(), sources_.end(), other_side);
     if(pos != sources_.end()) {
         sources_.erase(pos);
 
@@ -74,7 +74,7 @@ void Slot::disable()
 
 void Slot::removeAllConnectionsNotUndoable()
 {
-    for(std::vector<Trigger*>::iterator i = sources_.begin(); i != sources_.end();) {
+    for(std::vector<Event*>::iterator i = sources_.begin(); i != sources_.end();) {
         Connectable* target = *i;
         target->removeConnection(this);
         i = sources_.erase(i);
@@ -86,13 +86,13 @@ void Slot::removeAllConnectionsNotUndoable()
 
 bool Slot::canConnectTo(Connectable* other_side, bool /*move*/) const
 {
-    Trigger* trigger = dynamic_cast<Trigger*>(other_side);
+    Event* trigger = dynamic_cast<Event*>(other_side);
     return trigger;
 }
 
 bool Slot::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    for(Trigger* trigger : sources_) {
+    for(Event* trigger : sources_) {
         if(!trigger->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
             return false;
         }
@@ -107,7 +107,7 @@ bool Slot::isConnected() const
 
 void Slot::connectionMovePreview(Connectable *other_side)
 {
-    for(Trigger* trigger : sources_) {
+    for(Event* trigger : sources_) {
         connectionInProgress(trigger, other_side);
     }
 }
@@ -117,17 +117,17 @@ void Slot::validateConnections()
 {
 }
 
-std::vector<Trigger*> Slot::getSources() const
+std::vector<Event*> Slot::getSources() const
 {
     return sources_;
 }
 
-void Slot::trigger(Trigger* source)
+void Slot::trigger(Event* source)
 {
     triggered(source);
 }
 
-void Slot::handleTrigger()
+void Slot::handleEvent()
 {
     // do the work
     if(isEnabled() || isActive()) {
@@ -139,7 +139,7 @@ void Slot::notifyMessageProcessed()
 {
     Connectable::notifyMessageProcessed();
 
-    for(Trigger* trigger : sources_) {
+    for(Event* trigger : sources_) {
         trigger->notifyMessageProcessed();
     }
 }

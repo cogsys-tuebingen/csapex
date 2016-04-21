@@ -70,10 +70,10 @@ std::vector<Slot*> NodeModifier::getSlots() const
     }
     return result;
 }
-std::vector<Trigger*> NodeModifier::getTriggers() const
+std::vector<Event*> NodeModifier::getEvents() const
 {
-    auto vec = getAllTriggers();
-    std::vector<Trigger*> result(vec.size());
+    auto vec = getAllEvents();
+    std::vector<Event*> result(vec.size());
     std::size_t i = 0;
     for(auto entry : vec) {
         result[i++] = entry.get();

@@ -193,17 +193,17 @@ public:
     Slot* addSlot(const std::string& label, std::function<void()> callback);
     virtual Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active) = 0;
 
-    virtual Trigger* addTrigger(const std::string& label) = 0;
+    virtual Event* addEvent(const std::string& label) = 0;
 
 
     std::vector<Input*> getMessageInputs() const;
     std::vector<Output*> getMessageOutputs() const;
     std::vector<Slot*> getSlots() const;
-    std::vector<Trigger*> getTriggers() const;
+    std::vector<Event*> getEvents() const;
 
     virtual void removeInput(const UUID& uuid) = 0;
     virtual void removeOutput(const UUID& uuid) = 0;
-    virtual void removeTrigger(const UUID& uuid) = 0;
+    virtual void removeEvent(const UUID& uuid) = 0;
     virtual void removeSlot(const UUID& uuid) = 0;
 
 
@@ -238,7 +238,7 @@ protected:
     virtual std::vector<InputPtr> getAllInputs() const = 0;
     virtual std::vector<OutputPtr> getAllOutputs() const = 0;
     virtual std::vector<SlotPtr> getAllSlots() const = 0;
-    virtual std::vector<TriggerPtr> getAllTriggers() const = 0;
+    virtual std::vector<EventPtr> getAllEvents() const = 0;
 
 private:
     mutable NodeWorker* node_worker_;

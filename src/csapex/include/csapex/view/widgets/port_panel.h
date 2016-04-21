@@ -49,7 +49,7 @@ private:
     void setupOutput();
     void setupInput();
     void setupSlot();
-    void setupTrigger();
+    void setupEvent();
 
 private:
     GraphFacadePtr graph_facade_;

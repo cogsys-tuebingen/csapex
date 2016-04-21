@@ -5,7 +5,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/assert.h>

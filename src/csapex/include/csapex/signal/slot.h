@@ -14,13 +14,13 @@ namespace csapex
 
 class Slot : public Connectable
 {
-    friend class Trigger;
+    friend class Event;
 
 public:
     Slot(std::function<void()> callback, const UUID &uuid, bool active);
     virtual ~Slot();
 
-    virtual void trigger(Trigger *source);
+    virtual void trigger(Event *source);
 
     virtual bool canInput() const override {
         return true;
@@ -44,7 +44,7 @@ public:
     virtual void connectionMovePreview(Connectable* other_side) override;
     virtual void validateConnections() override;
 
-    std::vector<Trigger*> getSources() const;
+    std::vector<Event*> getSources() const;
 
     virtual void enable() override;
     virtual void disable() override;
@@ -53,10 +53,10 @@ public:
 
     void reset();
 
-    void handleTrigger();
+    void handleEvent();
 
 public:
-    csapex::slim_signal::Signal<void(Trigger*)> triggered;
+    csapex::slim_signal::Signal<void(Event*)> triggered;
     csapex::slim_signal::Signal<void()> connected;
 
 protected:
@@ -67,7 +67,7 @@ protected:
     virtual void removeAllConnectionsNotUndoable() override;
 
 protected:
-    std::vector<Trigger*> sources_;
+    std::vector<Event*> sources_;
 
     std::function<void()> callback_;
     bool active_;

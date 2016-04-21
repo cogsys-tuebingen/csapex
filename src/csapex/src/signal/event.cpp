@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 
 /// COMPONENT
 #include <csapex/signal/slot.h>
@@ -14,32 +14,32 @@
 
 using namespace csapex;
 
-Trigger::Trigger(const UUID& uuid)
+Event::Event(const UUID& uuid)
     : Connectable(uuid)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
 }
 
-Trigger::~Trigger()
+Event::~Event()
 {
 }
 
-void Trigger::reset()
+void Event::reset()
 {
     setSequenceNumber(0);
 }
 
-int Trigger::noTargets()
+int Event::noTargets()
 {
     return targets_.size();
 }
 
-std::vector<Slot*> Trigger::getTargets() const
+std::vector<Slot*> Event::getTargets() const
 {
     return targets_;
 }
 
-void Trigger::removeConnection(Connectable* other_side)
+void Event::removeConnection(Connectable* other_side)
 {
     for(std::vector<Slot*>::iterator i = targets_.begin(); i != targets_.end();) {
         if(*i == other_side) {
@@ -56,7 +56,7 @@ void Trigger::removeConnection(Connectable* other_side)
     }
 }
 
-void Trigger::removeAllConnectionsNotUndoable()
+void Event::removeAllConnectionsNotUndoable()
 {
     for(std::vector<Slot*>::iterator i = targets_.begin(); i != targets_.end();) {
         (*i)->removeConnection(this);
@@ -66,7 +66,7 @@ void Trigger::removeAllConnectionsNotUndoable()
     disconnected(this);
 }
 
-void Trigger::trigger()
+void Event::trigger()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
@@ -88,7 +88,7 @@ void Trigger::trigger()
     ++count_;
 }
 
-void Trigger::signalHandled(Slot *slot)
+void Event::signalHandled(Slot *slot)
 {
     std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
     targets_running_.erase(slot);
@@ -98,18 +98,18 @@ void Trigger::signalHandled(Slot *slot)
     }
 }
 
-bool Trigger::isBeingProcessed() const
+bool Event::isBeingProcessed() const
 {
     std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
     return !targets_running_.empty();
 }
 
-void Trigger::disable()
+void Event::disable()
 {
     Connectable::disable();
 }
 
-bool Trigger::isConnectionPossible(Connectable *other_side)
+bool Event::isConnectionPossible(Connectable *other_side)
 {
     Slot* slot = dynamic_cast<Slot*>(other_side);
     if(!slot) {
@@ -118,7 +118,7 @@ bool Trigger::isConnectionPossible(Connectable *other_side)
     return true;
 }
 
-bool Trigger::connect(Slot *slot)
+bool Event::connect(Slot *slot)
 {
     apex_assert_hard(slot);
 
@@ -133,7 +133,7 @@ bool Trigger::connect(Slot *slot)
     return true;
 }
 
-bool Trigger::canConnectTo(Connectable* other_side, bool move) const
+bool Event::canConnectTo(Connectable* other_side, bool move) const
 {
     if(!Connectable::canConnectTo(other_side, move)) {
         return false;
@@ -148,7 +148,7 @@ bool Trigger::canConnectTo(Connectable* other_side, bool move) const
 }
 
 
-bool Trigger::targetsCanBeMovedTo(Connectable* other_side) const
+bool Event::targetsCanBeMovedTo(Connectable* other_side) const
 {
     for(Slot* slot : targets_) {
         if(!slot->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
@@ -158,19 +158,19 @@ bool Trigger::targetsCanBeMovedTo(Connectable* other_side) const
     return true;
 }
 
-bool Trigger::isConnected() const
+bool Event::isConnected() const
 {
     return targets_.size() > 0;
 }
 
-void Trigger::connectionMovePreview(Connectable *other_side)
+void Event::connectionMovePreview(Connectable *other_side)
 {
     for(Slot* slot : targets_) {
         connectionInProgress(slot, other_side);
     }
 }
 
-void Trigger::validateConnections()
+void Event::validateConnections()
 {
     for(Slot* target : targets_) {
         target->validateConnections();

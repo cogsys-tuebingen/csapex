@@ -272,7 +272,7 @@ add_library(csapex SHARED
     src/signal/signal.cpp
     src/signal/signal_connection.cpp
     src/signal/slot.cpp
-    src/signal/trigger.cpp
+    src/signal/event.cpp
 )
 
 target_link_libraries(csapex

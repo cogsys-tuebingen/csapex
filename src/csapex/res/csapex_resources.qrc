@@ -58,6 +58,6 @@
         <file>port_input_optional.png</file>
         <file>port_input.png</file>
         <file>port_slot.png</file>
-        <file>port_trigger.png</file>
+        <file>port_event.png</file>
     </qresource>
 </RCC>

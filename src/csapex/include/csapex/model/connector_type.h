@@ -7,7 +7,7 @@
 namespace csapex
 {
 enum class ConnectorType {
-    OUTPUT, INPUT, SLOT_T, TRIGGER
+    OUTPUT, INPUT, SLOT_T, EVENT
 };
 
 namespace port_type

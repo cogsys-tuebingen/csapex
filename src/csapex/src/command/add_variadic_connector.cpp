@@ -5,7 +5,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_facade.h>
@@ -74,11 +74,11 @@ bool AddVariadicConnector::doExecute()
         connector_id = slot->getUUID();
     }
         break;
-    case ConnectorType::TRIGGER:
+    case ConnectorType::EVENT:
     {
-        VariadicTriggers* vt = dynamic_cast<VariadicTriggers*>(node.get());
+        VariadicEvents* vt = dynamic_cast<VariadicEvents*>(node.get());
         apex_assert_hard(vt);
-        Trigger* trigger = vt->createVariadicTrigger(label_);
+        Event* trigger = vt->createVariadicEvent(label_);
         connector_id = trigger->getUUID();
     }
         break;
@@ -110,9 +110,9 @@ bool AddVariadicConnector::doExecute()
             map.internal = relay->getUUID();
         }
             break;
-        case ConnectorType::TRIGGER:
+        case ConnectorType::EVENT:
         {
-            auto relay = graph->getRelayForTrigger(connector_id);
+            auto relay = graph->getRelayForEvent(connector_id);
             map.internal = relay->getUUID();
         }
             break;
@@ -151,11 +151,11 @@ bool AddVariadicConnector::doUndo()
         vs->removeVariadicSlotById(connector_id);
     }
         break;
-    case ConnectorType::TRIGGER:
+    case ConnectorType::EVENT:
     {
-        VariadicTriggers* vt = dynamic_cast<VariadicTriggers*>(node.get());
+        VariadicEvents* vt = dynamic_cast<VariadicEvents*>(node.get());
         apex_assert_hard(vt);
-        vt->removeVariadicTriggerById(connector_id);
+        vt->removeVariadicEventById(connector_id);
     }
         break;
     default:

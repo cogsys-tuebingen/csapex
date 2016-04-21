@@ -6,7 +6,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/model/parameterizable.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/msg/any_message.h>
@@ -249,54 +249,54 @@ void VariadicOutputs::updateOutputs(int count)
 
 
 ///
-/// TRIGGERS
+/// EVENTS
 ///
 
 
-VariadicTriggers::VariadicTriggers(ConnectionTypeConstPtr type)
+VariadicEvents::VariadicEvents(ConnectionTypeConstPtr type)
     : VariadicBase(type)
 {
 
 }
-VariadicTriggers::VariadicTriggers()
+VariadicEvents::VariadicEvents()
     : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
 {
 }
 
-Connectable* VariadicTriggers::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicEvents::createVariadicPort(ConnectorType port_type, ConnectionTypeConstPtr type, const std::string &label, bool optional)
 {
-    apex_assert_hard(port_type == ConnectorType::TRIGGER);
-    return createVariadicTrigger(label);
+    apex_assert_hard(port_type == ConnectorType::EVENT);
+    return createVariadicEvent(label);
 }
 
-int VariadicTriggers::getVariadicTriggerCount() const
+int VariadicEvents::getVariadicEventCount() const
 {
-    return variadic_triggers_.size();
+    return variadic_events_.size();
 }
 
 
-Trigger *VariadicTriggers::createVariadicTrigger(const std::string& label)
+Event *VariadicEvents::createVariadicEvent(const std::string& label)
 {
     apex_assert_hard(variadic_modifier_);
-    auto result = variadic_modifier_->addTrigger(label.empty() ? std::string("Trigger") : label);
+    auto result = variadic_modifier_->addEvent(label.empty() ? std::string("Event") : label);
     if(result) {
-        variadic_triggers_.emplace_back(std::dynamic_pointer_cast<Trigger>(result->shared_from_this()));
-        trigger_count_->set((int) variadic_triggers_.size());
+        variadic_events_.emplace_back(std::dynamic_pointer_cast<Event>(result->shared_from_this()));
+        event_count_->set((int) variadic_events_.size());
     }
     return result;
 }
-void VariadicTriggers::removeVariadicTrigger(TriggerPtr trigger)
+void VariadicEvents::removeVariadicEvent(EventPtr event)
 {
-    variadic_triggers_.erase(std::find(variadic_triggers_.begin(), variadic_triggers_.end(), trigger));
+    variadic_events_.erase(std::find(variadic_events_.begin(), variadic_events_.end(), event));
 }
 
-void VariadicTriggers::removeVariadicTriggerById(const UUID& trigger)
+void VariadicEvents::removeVariadicEventById(const UUID& event)
 {
-    variadic_modifier_->removeTrigger(trigger);
-    for(auto it = variadic_triggers_.begin(); it != variadic_triggers_.end(); ) {
-        TriggerPtr t = *it;
-        if(t->getUUID() == trigger) {
-            removeVariadicTrigger(t);
+    variadic_modifier_->removeEvent(event);
+    for(auto it = variadic_events_.begin(); it != variadic_events_.end(); ) {
+        EventPtr t = *it;
+        if(t->getUUID() == event) {
+            removeVariadicEvent(t);
             return;
         } else {
             ++it;
@@ -304,20 +304,20 @@ void VariadicTriggers::removeVariadicTriggerById(const UUID& trigger)
     }
 }
 
-void VariadicTriggers::setupVariadicParameters(Parameterizable &parameters)
+void VariadicEvents::setupVariadicParameters(Parameterizable &parameters)
 {
-    trigger_count_ = csapex::param::ParameterFactory::declareValue("trigger count", 0);
-    parameters.addParameter(trigger_count_, [this](param::Parameter* p) {
+    event_count_ = csapex::param::ParameterFactory::declareValue("event count", 0);
+    parameters.addParameter(event_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
         if(count >= 0) {
-            updateTriggers(p->as<int>());
+            updateEvents(p->as<int>());
         } else {
             p->set(0);
         }
     });
 }
 
-void VariadicTriggers::updateTriggers(int count)
+void VariadicEvents::updateEvents(int count)
 {
     if(count < 0) {
         return;
@@ -325,26 +325,26 @@ void VariadicTriggers::updateTriggers(int count)
 
     apex_assert_hard(variadic_modifier_);
 
-    int current_amount = variadic_triggers_.size();
+    int current_amount = variadic_events_.size();
 
     if(current_amount > count) {
         bool connected = false;
         for(int i = current_amount; i > count ; i--) {
-            TriggerPtr t = variadic_triggers_[i - 1];
+            EventPtr t = variadic_events_[i - 1];
             if(connected || t->isConnected()) {
                 t->disable();
                 connected = true;
             } else {
-                removeVariadicTrigger(t);
+                removeVariadicEvent(t);
             }
         }
     } else {
         int to_add = count - current_amount;
         for(int i = 0 ; i < current_amount; i++) {
-            variadic_triggers_[i]->enable();
+            variadic_events_[i]->enable();
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicTrigger("Trigger");
+            createVariadicEvent("Event");
         }
     }
 
@@ -503,7 +503,7 @@ void VariadicIO::setupVariadicParameters(Parameterizable &parameters)
 
 
 Variadic::Variadic(ConnectionTypeConstPtr type)
-    : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type), VariadicTriggers(type), VariadicSlots(type)
+    : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type), VariadicEvents(type), VariadicSlots(type)
 {
 
 }
@@ -522,8 +522,8 @@ Connectable* Variadic::createVariadicPort(ConnectorType port_type, ConnectionTyp
         return createVariadicInput(type, label, optional);
     case ConnectorType::SLOT_T:
         return createVariadicSlot(label, [](){});
-    case ConnectorType::TRIGGER:
-        return createVariadicTrigger(label);
+    case ConnectorType::EVENT:
+        return createVariadicEvent(label);
     default:
         throw std::logic_error(std::string("Variadic port of type ") + port_type::name(port_type) + " is not supported.");
     }
@@ -533,6 +533,6 @@ void Variadic::setupVariadicParameters(Parameterizable &parameters)
 {
     VariadicInputs::setupVariadicParameters(parameters);
     VariadicOutputs::setupVariadicParameters(parameters);
-    VariadicTriggers::setupVariadicParameters(parameters);
+    VariadicEvents::setupVariadicParameters(parameters);
     VariadicSlots::setupVariadicParameters(parameters);
 }

@@ -12,7 +12,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/core/settings.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
@@ -391,7 +391,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
         }
         // draw triggers
-        for(auto trigger : node_handle->getAllTriggers()) {
+        for(auto trigger : node_handle->getAllEvents()) {
             Port* p = getPort(trigger.get());
             if(p) {
                 drawPort(painter, box, p);
@@ -774,7 +774,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
         return std::vector<QRectF>();
     }
 
-    if(dynamic_cast<Trigger*>(from) != nullptr) {
+    if(dynamic_cast<Event*>(from) != nullptr) {
         if(!display_signals_) {
             return std::vector<QRectF>();
         }
@@ -1120,7 +1120,7 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
         return;
     }
 
-    bool is_message = (dynamic_cast<Slot*>(c.get()) == nullptr && dynamic_cast<Trigger*>(c.get()) == nullptr);
+    bool is_message = (dynamic_cast<Slot*>(c.get()) == nullptr && dynamic_cast<Event*>(c.get()) == nullptr);
 
     if(!p->isMinimizedSize()) {
         int font_size = debug_ ? 10 : 8;

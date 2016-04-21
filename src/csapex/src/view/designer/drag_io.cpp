@@ -10,7 +10,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/node.h>
 #include <csapex/view/node/box.h>
@@ -169,7 +169,7 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
                         }
                     }
                 } else {
-                    Trigger* trigger = dynamic_cast<Trigger*> (c);
+                    Event* trigger = dynamic_cast<Event*> (c);
                     if(trigger) {
                         for(Slot* slot : trigger->getTargets()) {
                             scene->addTemporaryConnection(slot, src->mapToScene(e->pos()));
@@ -183,7 +183,7 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
                 } else {
                     Slot* slot = dynamic_cast<Slot*> (c);
                     if(slot) {
-                        for(Trigger* trigger : slot->getSources()) {
+                        for(Event* trigger : slot->getSources()) {
                             scene->addTemporaryConnection(trigger, src->mapToScene(e->pos()));
                         }
                     }

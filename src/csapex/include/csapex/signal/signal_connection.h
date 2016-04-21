@@ -10,12 +10,12 @@ namespace csapex
 class SignalConnection : public Connection
 {
 public:
-    static ConnectionPtr connect(Trigger* from, Slot* to);
-    static ConnectionPtr connect(Trigger* from, Slot* to, int id);
+    static ConnectionPtr connect(Event* from, Slot* to);
+    static ConnectionPtr connect(Event* from, Slot* to, int id);
 
 private:
-    SignalConnection(Trigger* from, Slot* to);
-    SignalConnection(Trigger* from, Slot* to, int id);
+    SignalConnection(Event* from, Slot* to);
+    SignalConnection(Event* from, Slot* to, int id);
 };
 
 }

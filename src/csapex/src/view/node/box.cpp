@@ -139,12 +139,12 @@ void NodeBox::setupUi()
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->slot_panel->layout()->addWidget(meta_port);
         }
-        if(dynamic_cast<VariadicTriggers*>(getNode())) {
-            MetaPort* meta_port = new MetaPort(ConnectorType::TRIGGER, parent);
+        if(dynamic_cast<VariadicEvents*>(getNode())) {
+            MetaPort* meta_port = new MetaPort(ConnectorType::EVENT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
-            ui->trigger_panel->layout()->addWidget(meta_port);
+            ui->event_panel->layout()->addWidget(meta_port);
         }
     }
 
@@ -378,7 +378,7 @@ QBoxLayout* NodeBox::getSlotLayout()
     return ui->slot_layout;
 }
 
-QBoxLayout* NodeBox::getTriggerLayout()
+QBoxLayout* NodeBox::getEventLayout()
 {
     return ui->signal_layout;
 }
@@ -821,7 +821,7 @@ void NodeBox::updateVisuals()
             ui->input_panel->hide();
             ui->output_panel->hide();
             ui->slot_panel->hide();
-            ui->trigger_panel->hide();
+            ui->event_panel->hide();
 
             if(grip_) {
                 grip_->hide();
@@ -845,7 +845,7 @@ void NodeBox::updateVisuals()
             ui->input_panel->show();
             ui->output_panel->show();
             ui->slot_panel->show();
-            ui->trigger_panel->show();
+            ui->event_panel->show();
 
             if(grip_) {
                 grip_->show();

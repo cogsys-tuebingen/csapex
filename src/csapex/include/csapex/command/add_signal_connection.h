@@ -24,7 +24,7 @@ protected:
     void refresh() override;
 
 private:
-    Trigger* from;
+    Event* from;
     Slot* to;
 };
 }

@@ -15,7 +15,7 @@
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
 #include <csapex/signal/slot.h>
-#include <csapex/signal/trigger.h>
+#include <csapex/signal/event.h>
 #include <csapex/param/trigger_parameter.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node_modifier.h>
@@ -61,7 +61,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
             if(tickable) {
-                trigger_tick_done_ = node_handle_->addTrigger("ticked");
+                trigger_tick_done_ = node_handle_->addEvent("ticked");
             }
 
 
@@ -70,7 +70,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 generator->updated.connect(delegate::Delegate0<>(this, &NodeWorker::finishGenerator));
             }
 
-            trigger_process_done_ = node_handle_->addTrigger("inputs\nprocessed");
+            trigger_process_done_ = node_handle_->addEvent("inputs\nprocessed");
 
             is_setup_ = true;
 
@@ -206,9 +206,9 @@ void NodeWorker::setProcessingEnabled(bool e)
     enabled(e);
 }
 
-bool NodeWorker::isWaitingForTrigger() const
+bool NodeWorker::isWaitingForEvent() const
 {
-    for(TriggerPtr t : node_handle_->getAllTriggers()) {
+    for(EventPtr t : node_handle_->getAllEvents()) {
         if(t->isBeingProcessed()) {
             return true;
         }
@@ -218,7 +218,7 @@ bool NodeWorker::isWaitingForTrigger() const
 
 bool NodeWorker::canProcess() const
 {
-    return canReceive() && canSend() && !isWaitingForTrigger();
+    return canReceive() && canSend() && !isWaitingForEvent();
 }
 
 bool NodeWorker::canReceive() const
@@ -738,7 +738,7 @@ bool NodeWorker::tick()
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
-            if(!isWaitingForTrigger() && tickable->canTick()) {
+            if(!isWaitingForEvent() && tickable->canTick()) {
                 if(state == State::ENABLED) {
                     setState(State::IDLE);
                 }
