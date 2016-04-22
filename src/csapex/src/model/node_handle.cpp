@@ -391,7 +391,7 @@ Output* NodeHandle::addOutput(TokenConstPtr type, const std::string& label, bool
     return c.get();
 }
 
-Slot* NodeHandle::addSlot(const std::string& label, std::function<void()> callback, bool active)
+Slot* NodeHandle::addSlot(const std::string& label, std::function<void(const TokenConstPtr& )> callback, bool active)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");

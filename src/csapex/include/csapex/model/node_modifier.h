@@ -190,8 +190,10 @@ public:
      * SIGNALING
      */
     Slot* addActiveSlot(const std::string& label, std::function<void()> callback);
+    Slot* addActiveTypedSlot(const std::string& label, std::function<void(const TokenConstPtr&)> callback);
     Slot* addSlot(const std::string& label, std::function<void()> callback);
-    virtual Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active) = 0;
+    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenConstPtr&)> callback);
+    virtual Slot* addSlot(const std::string& label, std::function<void (const TokenConstPtr& )> callback, bool active) = 0;
 
     virtual Event* addEvent(const std::string& label) = 0;
 

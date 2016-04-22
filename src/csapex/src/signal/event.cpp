@@ -7,6 +7,7 @@
 #include <csapex/utility/timer.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/message_traits.h>
+#include <csapex/msg/no_message.h>
 
 /// SYSTEM
 
@@ -68,6 +69,12 @@ void Event::removeAllConnectionsNotUndoable()
 
 void Event::trigger()
 {
+    TokenConstPtr token(new connection_types::NoMessage);
+    triggerWith(token);
+}
+
+void Event::triggerWith(TokenConstPtr token)
+{
     {
         std::unique_lock<std::recursive_mutex> lock(targets_running_mtx_);
         apex_assert_hard(targets_running_.empty());
@@ -80,7 +87,7 @@ void Event::trigger()
 
     for(Slot* s : targets_) {
         try {
-            s->trigger(this);
+            s->trigger(this, token);
         } catch(const std::exception& e) {
             std::cerr << "triggering slot " << s->getLabel()  << " failed: " << e.what();
         }

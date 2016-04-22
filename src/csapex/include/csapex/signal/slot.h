@@ -18,9 +18,17 @@ class Slot : public Connectable
 
 public:
     Slot(std::function<void()> callback, const UUID &uuid, bool active);
+    Slot(std::function<void(const TokenConstPtr&)> callback, const UUID &uuid, bool active);
+
+    template <typename TokenType>
+    Slot(std::function<void(const std::shared_ptr<TokenType const>&)> callback, const UUID &uuid, bool active)
+        : Slot([callback](const TokenConstPtr& token){ auto t = std::dynamic_pointer_cast<TokenType const>(token); apex_assert_hard(t); callback(t); }, uuid, active)
+    {
+    }
+
     virtual ~Slot();
 
-    virtual void trigger(Event *source);
+    virtual void trigger(Event *source, TokenConstPtr token);
 
     virtual bool canInput() const override {
         return true;
@@ -69,8 +77,10 @@ protected:
 protected:
     std::vector<Event*> sources_;
 
-    std::function<void()> callback_;
+    std::function<void(const TokenConstPtr&)> callback_;
     bool active_;
+
+    TokenConstPtr current_token_;
 };
 
 }

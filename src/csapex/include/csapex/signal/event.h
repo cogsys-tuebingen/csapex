@@ -30,7 +30,17 @@ public:
         return ConnectorType::EVENT;
     }
 
+    /**
+     * @brief trigger triggers an event with a "Nothing" token
+     */
     void trigger();
+
+    /**
+     * @brief triggerWith triggers an event with a specified token
+     * @param token
+     */
+    void triggerWith(TokenConstPtr token);
+
     void signalHandled(Slot* slot);
 
     virtual void disable() override;

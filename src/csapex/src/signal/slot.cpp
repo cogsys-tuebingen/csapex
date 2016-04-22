@@ -12,6 +12,11 @@
 using namespace csapex;
 
 Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active)
+    : Connectable(uuid), callback_([callback](const TokenConstPtr&){callback();}), active_(active)
+{
+    setType(connection_types::makeEmpty<connection_types::Signal>());
+}
+Slot::Slot(std::function<void(const TokenConstPtr&)> callback, const UUID &uuid, bool active)
     : Connectable(uuid), callback_(callback), active_(active)
 {
     setType(connection_types::makeEmpty<connection_types::Signal>());
@@ -122,17 +127,22 @@ std::vector<Event*> Slot::getSources() const
     return sources_;
 }
 
-void Slot::trigger(Event* source)
+void Slot::trigger(Event* source, TokenConstPtr token)
 {
+    current_token_ = token,
     triggered(source);
 }
 
 void Slot::handleEvent()
 {
+    apex_assert_hard(current_token_);
+
     // do the work
     if(isEnabled() || isActive()) {
-        callback_();
+        callback_(current_token_);
     }
+
+    current_token_.reset();
 }
 
 void Slot::notifyMessageProcessed()

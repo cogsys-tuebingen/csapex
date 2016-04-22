@@ -49,7 +49,7 @@ public:
     void addOutput(OutputPtr out);
     bool isParameterOutput(Output* out) const;
 
-    Slot* addSlot(const std::string& label, std::function<void ()> callback, bool active) override;
+    Slot* addSlot(const std::string& label, std::function<void (const TokenConstPtr& )> callback, bool active) override;
     void addSlot(SlotPtr s);
 
     Event* addEvent(const std::string& label) override;
