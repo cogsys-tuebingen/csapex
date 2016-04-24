@@ -1209,9 +1209,9 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
 
         QPointF port_center = centerPoint(p);
 
-        auto drawSide = [&port_center, &path, &offset_x, &offset_y]
+        auto drawSide = [&port_center, &path]
                 (const Direction& dir, const Direction& side,
-                const QPointF& start, const QPointF& end, const QPointF& end_offset)
+                const QPointF& start, const QPointF& end, QPointF end_offset)
         {
             QPointF real_end = end + end_offset;
             if(dir == side) {
