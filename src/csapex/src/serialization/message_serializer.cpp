@@ -54,10 +54,15 @@ YAML::Node MessageSerializer::serializeMessage(const Token &msg)
 
         std::string type = msg.typeName();
 
+        YAML::Node node;
+        auto pos = i.type_to_converter.find(type);
+        if(pos == i.type_to_converter.end()) {
+            return node;
+        }
+
         Converter& converter = i.type_to_converter.at(type);
         Converter::Encoder& encoder = converter.encoder;
 
-        YAML::Node node;
         node["type"] = type;
         node["data"] = encoder(msg);
 

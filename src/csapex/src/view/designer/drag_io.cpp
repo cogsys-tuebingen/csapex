@@ -168,25 +168,11 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
                             scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
                         }
                     }
-                } else {
-                    Event* trigger = dynamic_cast<Event*> (c);
-                    if(trigger) {
-                        for(Slot* slot : trigger->getTargets()) {
-                            scene->addTemporaryConnection(slot, src->mapToScene(e->pos()));
-                        }
-                    }
                 }
             } else {
                 Input* in = dynamic_cast<Input*> (c);
                 if(in) {
                     scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
-                } else {
-                    Slot* slot = dynamic_cast<Slot*> (c);
-                    if(slot) {
-                        for(Event* trigger : slot->getSources()) {
-                            scene->addTemporaryConnection(trigger, src->mapToScene(e->pos()));
-                        }
-                    }
                 }
             }
             scene->update();

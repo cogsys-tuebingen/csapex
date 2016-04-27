@@ -17,8 +17,8 @@
 #include <csapex/model/node_state.h>
 #include <csapex/utility/yaml_node_builder.h>
 #include <csapex/serialization/serialization.h>
-#include <csapex/signal/signal_connection.h>
 #include <csapex/utility/yaml_io.hpp>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -456,13 +456,15 @@ void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid)
 
         Event* out = dynamic_cast<Event*>(from);
         if(out && in) {
-            ConnectionPtr c = SignalConnection::connect(
+            ConnectionPtr c = DirectConnection::connect(
                         out, in);
             graph_->addConnection(c);
         }
 
     } catch(const std::exception& e) {
         std::cerr << "cannot load connection: " << e.what() << std::endl;
+    } catch(const Failure& e) {
+        std::cerr << "failure loading connection: " << e.what() << std::endl;
     }
 }
 

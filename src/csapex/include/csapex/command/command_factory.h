@@ -26,11 +26,8 @@ public:
 
     CommandPtr removeAllConnectionsCmd(Input* input);
     CommandPtr removeAllConnectionsCmd(Output* output);
-    CommandPtr removeAllConnectionsCmd(Slot* slot);
-    CommandPtr removeAllConnectionsCmd(Event* trigger);
 
     CommandPtr removeConnectionCmd(Output* output, Connection* connection);
-    CommandPtr removeConnectionCmd(Event* trigger, Slot* other_side);
 
 
     CommandPtr moveConnections(const UUID& from, const UUID& to);

@@ -75,6 +75,8 @@ private:
 private:
     ExceptionHandler& handler_;
 
+    bool destroyed_;
+
     static int next_id_;
 
     int id_;

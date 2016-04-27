@@ -206,19 +206,9 @@ void NodeWorker::setProcessingEnabled(bool e)
     enabled(e);
 }
 
-bool NodeWorker::isWaitingForEvent() const
-{
-    for(EventPtr t : node_handle_->getAllEvents()) {
-        if(t->isBeingProcessed()) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool NodeWorker::canProcess() const
 {
-    return canReceive() && canSend() && !isWaitingForEvent();
+    return canReceive() && canSend();
 }
 
 bool NodeWorker::canReceive() const
@@ -233,7 +223,17 @@ bool NodeWorker::canReceive() const
 
 bool NodeWorker::canSend() const
 {
-    return node_handle_->getOutputTransition()->canStartSendingMessages();
+    if(!node_handle_->getOutputTransition()->canStartSendingMessages()) {
+        return false;
+    }
+
+    for(Event* e : node_handle_->getEvents()){
+        if(!e->canSendMessages()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void NodeWorker::triggerPanic()
@@ -507,8 +507,8 @@ void NodeWorker::forwardMessages(bool send_parameters)
         if(send_parameters) {
             publishParameters();
         }
-        sendMessages();
     }
+    sendMessages();
 }
 
 void NodeWorker::activateOutput()
@@ -711,6 +711,11 @@ void NodeWorker::sendMessages()
                      getState() == State::IDLE);
 
     node_handle_->getOutputTransition()->sendMessages();
+
+    for(Event* e : node_handle_->getEvents()){
+        e->commitMessages();
+        e->publish();
+    }
 }
 
 
@@ -738,7 +743,7 @@ bool NodeWorker::tick()
         std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
-            if(!isWaitingForEvent() && tickable->canTick()) {
+            if(tickable->canTick()) {
                 if(state == State::ENABLED) {
                     setState(State::IDLE);
                 }

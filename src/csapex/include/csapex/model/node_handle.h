@@ -165,8 +165,6 @@ private:
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
 
     std::map<Slot*, csapex::slim_signal::Connection> slot_connections_;
-    std::map<Event*, csapex::slim_signal::Connection> trigger_triggered_connections_;
-    std::map<Event*, csapex::slim_signal::Connection> trigger_handled_connections_;
 
     int level_;
 

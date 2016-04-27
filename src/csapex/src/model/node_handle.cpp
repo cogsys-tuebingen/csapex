@@ -518,14 +518,6 @@ void NodeHandle::removeEvent(Event* t)
         }
     }
 
-    auto pos_t = trigger_triggered_connections_.find(t);
-    pos_t->second.disconnect();
-    trigger_triggered_connections_.erase(pos_t);
-
-    auto pos_h = trigger_handled_connections_.find(t);
-    pos_h->second.disconnect();
-    trigger_handled_connections_.erase(pos_h);
-
     if(it != triggers_.end()) {
         EventPtr trigger = *it;
 
@@ -585,10 +577,9 @@ void NodeHandle::addSlot(SlotPtr s)
 
     Slot* slot = s.get();
 
-    auto connection = s->triggered.connect([this, slot](Event* source) {
-        executionRequested([this, slot, source]() {
+    auto connection = s->triggered.connect([this, slot]() {
+        executionRequested([this, slot]() {
             slot->handleEvent();
-            source->signalHandled(slot);
         });
     });
     slot_connections_.insert(std::make_pair(slot, connection));
@@ -601,22 +592,6 @@ void NodeHandle::addEvent(EventPtr t)
     apex_assert_hard(t->getUUID().rootUUID() == getUUID().rootUUID());
 
     triggers_.push_back(t);
-
-    //PROBLEM: wait for all m slots to be done...
-    // in the mean time, allow NO TICK; NO PROCESS;
-    // BUT ALSO EXECUTE OTHER TRIGGERS OF THE SAME PROCESS / TICK...
-    // solution: "lock" the NodeHandle, "unlock" it in signalHandled, once all
-    //  TRIGGERs are done (not only this one!!!!!)
-
-    auto connection_triggered = t->triggered.connect([this](){
-        mightBeEnabled();
-    });
-    trigger_triggered_connections_.insert(std::make_pair(t.get(), connection_triggered));
-
-    auto connection_handled = t->all_signals_handled.connect([this](){
-        mightBeEnabled();
-    });
-    trigger_handled_connections_.insert(std::make_pair(t.get(), connection_handled));
 
     connectConnector(t.get());
 

@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/signal/signal_fwd.h>
-#include <csapex/model/connectable.h>
+#include <csapex/msg/input.h>
 
 /// SYSTEM
 #include <mutex>
@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class Slot : public Connectable
+class Slot : public Input
 {
     friend class Event;
 
@@ -28,14 +28,8 @@ public:
 
     virtual ~Slot();
 
-    virtual void trigger(Event *source, TokenConstPtr token);
+    virtual void inputMessage(Token::ConstPtr message) override;
 
-    virtual bool canInput() const override {
-        return true;
-    }
-    virtual bool isInput() const override {
-        return true;
-    }
     virtual ConnectorType getConnectorType() const override
     {
         return ConnectorType::SLOT_T;
@@ -43,44 +37,21 @@ public:
 
     bool isActive() const;
 
-    virtual bool canConnectTo(Connectable* other_side, bool move) const override;
 
+    bool canConnectTo(Connectable* other_side, bool move) const override;
 
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const override;
-    virtual bool isConnected() const override;
-
-    virtual void connectionMovePreview(Connectable* other_side) override;
-    virtual void validateConnections() override;
-
-    std::vector<Event*> getSources() const;
-
-    virtual void enable() override;
     virtual void disable() override;
-
-    virtual void notifyMessageProcessed() override;
 
     void reset();
 
     void handleEvent();
 
 public:
-    csapex::slim_signal::Signal<void(Event*)> triggered;
-    csapex::slim_signal::Signal<void()> connected;
+    csapex::slim_signal::Signal<void()> triggered;
 
 protected:
-    bool acknowledgeConnection(Connectable* other_side);
-
-    virtual bool isConnectionPossible(Connectable* other_side) override;
-    virtual void removeConnection(Connectable* other_side) override;
-    virtual void removeAllConnectionsNotUndoable() override;
-
-protected:
-    std::vector<Event*> sources_;
-
     std::function<void(const TokenConstPtr&)> callback_;
     bool active_;
-
-    TokenConstPtr current_token_;
 };
 
 }

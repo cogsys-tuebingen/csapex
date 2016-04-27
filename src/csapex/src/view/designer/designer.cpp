@@ -101,13 +101,15 @@ void Designer::setup()
 
 void Designer::observe(GraphFacadePtr graph)
 {
-    graph->childAdded.connect([this](GraphFacadePtr child){
-        addGraph(child);
-        observe(child);
-    });
-    graph->childRemoved.connect([this](GraphFacadePtr child){
-        removeGraph(child);
-    });
+    graph_connections_[graph->getGraph()].emplace_back(
+                graph->childAdded.connect([this](GraphFacadePtr child){
+                    addGraph(child);
+                    observe(child);
+                }));
+    graph_connections_[graph->getGraph()].emplace_back(
+                graph->childRemoved.connect([this](GraphFacadePtr child){
+                    removeGraph(child);
+                }));
 }
 
 void Designer::showGraph(UUID uuid)
@@ -253,6 +255,7 @@ void Designer::removeGraph(GraphFacadePtr graph_facade)
     for(auto it = graphs_.begin(); it != graphs_.end(); ++it) {
         if(it->second == graph_facade) {
             Graph* graph = graph_facade->getGraph();
+            graph_connections_.erase(graph);
             GraphView* view = graph_views_[graph];
             graph_views_.erase(graph);
             view_graphs_.erase(view);

@@ -13,11 +13,7 @@ namespace csapex
 
 class Output : public Connectable
 {
-    friend class Input;
     friend class Graph;
-//    friend class command::AddConnection;
-//    friend class command::MoveConnection;
-//    friend class command::DeleteConnection;
     friend class DesignerIO;
 
 public:

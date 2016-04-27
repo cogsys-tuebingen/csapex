@@ -73,7 +73,6 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
-    bool isWaitingForEvent() const;
     bool canProcess() const;
     bool canReceive() const;
     bool canSend() const;

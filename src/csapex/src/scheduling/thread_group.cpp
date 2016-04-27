@@ -17,13 +17,13 @@ using namespace csapex;
 int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
 
 ThreadGroup::ThreadGroup(ExceptionHandler& handler, int id, std::string name)
-    : handler_(handler),
+    : handler_(handler), destroyed_(false),
       id_(id), name_(name), running_(false), pause_(false), stepping_(false)
 {
     next_id_ = std::max(next_id_, id + 1);
 }
 ThreadGroup::ThreadGroup(ExceptionHandler &handler, std::string name)
-    : handler_(handler),
+    : handler_(handler), destroyed_(false),
       id_(next_id_++), name_(name), running_(false), pause_(false), stepping_(false)
 {
 }
@@ -33,6 +33,7 @@ ThreadGroup::~ThreadGroup()
     if(running_ || scheduler_thread_.joinable()) {
         stop();
     }
+    destroyed_ = true;
 }
 
 int ThreadGroup::nextId()
@@ -252,6 +253,8 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
 
 void ThreadGroup::schedule(TaskPtr task)
 {
+    apex_assert_hard(!destroyed_);
+
     std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
 
     for(TaskPtr t : tasks_) {

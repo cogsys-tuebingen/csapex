@@ -19,7 +19,6 @@
 #include <csapex/core/graphio.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_msg_connection.h>
-#include <csapex/command/add_signal_connection.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -159,7 +158,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 
 
         for(const UUID& to : targets) {
-            CommandPtr add_connection = std::make_shared<command::AddSignalConnection>(parent_auuid, from, to);
+            CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to);
             executeCommand(add_connection);
             add(add_connection);
         }
@@ -175,7 +174,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 
 
         for(const UUID& to : targets) {
-            CommandPtr add_connection = std::make_shared<command::AddSignalConnection>(parent_auuid, from, to);
+            CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to);
             executeCommand(add_connection);
             add(add_connection);
         }

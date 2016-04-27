@@ -63,7 +63,6 @@ void NodeBox::setAdapter(NodeAdapter::Ptr adapter)
 
     if(adapter->isResizable()) {
         grip_ = new QSizeGrip(this);
-        grip_->installEventFilter(this);
     }
 }
 
@@ -197,6 +196,10 @@ void NodeBox::construct()
 
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
+
+    if(grip_) {
+        grip_->installEventFilter(this);
+    }
 
     setLabel(nh->getNodeState()->getLabel());
 

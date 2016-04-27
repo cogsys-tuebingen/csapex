@@ -20,7 +20,6 @@
 #include <csapex/command/switch_thread.h>
 #include <csapex/command/set_color.h>
 #include <csapex/command/add_msg_connection.h>
-#include <csapex/command/add_signal_connection.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>

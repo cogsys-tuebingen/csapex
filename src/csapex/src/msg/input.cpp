@@ -45,7 +45,6 @@ void Input::removeConnection(Connectable* other_side)
     if(connections_.empty()) {
         return;
     }
-    apex_assert_hard(connections_.size() == 1);
     apex_assert_hard(getSource() == other_side);
 
     connections_.clear();
@@ -108,8 +107,6 @@ void Input::disable()
 void Input::removeAllConnectionsNotUndoable()
 {
     if(!connections_.empty()) {
-        apex_assert_hard(connections_.size() == 1);
-
         getSource()->removeConnection(this);
         connections_.clear();
         setError(false);
@@ -124,7 +121,6 @@ bool Input::canConnectTo(Connectable* other_side, bool move) const
 
 bool Input::targetsCanBeMovedTo(Connectable* other_side) const
 {
-    apex_assert_hard(connections_.size() == 1);
     return getSource()->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
 
@@ -138,8 +134,6 @@ void Input::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
-        apex_assert_hard(connections_.size() == 1);
-
         Token::ConstPtr target_type = getSource()->getType();
         Token::ConstPtr type = getType();
         if(!target_type) {
@@ -154,7 +148,6 @@ void Input::validateConnections()
 
 Connectable *Input::getSource() const
 {
-    apex_assert_hard(connections_.size() <= 1);
     if(connections_.empty()) {
         return nullptr;
     } else {
@@ -198,8 +191,4 @@ void Input::notifyMessageProcessed()
 {
 //    std::cerr << "notify input " <<  getUUID() << std::endl;
     Connectable::notifyMessageProcessed();
-
-    if(isConnected()) {
-        apex_assert_hard(connections_.size() == 1);
-    }
 }

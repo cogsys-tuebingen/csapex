@@ -916,10 +916,9 @@ UUID Graph::addForwardingEvent(const UUID& internal_uuid, const std::string& lab
     Slot* slot = relay.get();
 
     relay->connectionInProgress.connect(internalConnectionInProgress);
-    relay->triggered.connect([this, slot](Event* source) {
-        node_handle_->executionRequested([this, slot, source]() {
+    relay->triggered.connect([this, slot]() {
+        node_handle_->executionRequested([this, slot]() {
             slot->handleEvent();
-            source->signalHandled(slot);
         });
     });
 

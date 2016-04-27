@@ -1158,7 +1158,8 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
 
         QFontMetrics metrics(font);
 
-        QRectF rect = metrics.boundingRect(rect.toRect(), Qt::AlignLeft | Qt::AlignTop, text);
+        QRect no_rect;
+        QRectF rect = metrics.boundingRect(no_rect, Qt::AlignLeft | Qt::AlignTop, text);
         rect.translate(centerPoint(p));
 
         int dx = rect.width();
