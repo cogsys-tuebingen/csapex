@@ -72,7 +72,6 @@ void MessagePreviewWidget::connectTo(Connectable *c)
     }
 
     if(connection_) {
-        connection_->establishSink();
         QApplication::setOverrideCursor(Qt::BusyCursor);
     }
 }

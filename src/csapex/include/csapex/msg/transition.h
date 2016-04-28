@@ -23,17 +23,12 @@ public:
     void setActivationFunction(delegate::Delegate0<> activation_fn);
 
     void addConnection(ConnectionPtr connection);
-    void fadeConnection(ConnectionPtr connection);
+    void removeConnection(ConnectionPtr connection);
 
     void updateConnections();
 
-    bool hasEstablishedConnection() const;
-    bool hasUnestablishedConnection() const;
-    bool hasFadingConnection() const;
+    bool hasConnection() const;
 
-    void removeFadingConnections();
-
-    virtual void establishConnections() = 0;
     virtual void reset();
 
 
@@ -45,12 +40,9 @@ public:
     bool areAllConnections(Connection::State a, /*or*/ Connection::State b, /*or*/ Connection::State c) const;
     bool isOneConnection(Connection::State state) const;
 
-    std::vector<ConnectionPtr> getEstablishedConnections() const;
-    std::vector<ConnectionPtr> getFadingConnections() const;
+    std::vector<ConnectionPtr> getConnections() const;
 
 protected:
-    void establishConnection(ConnectionPtr connection);
-
     virtual void connectionAdded(Connection* connection);
     virtual void connectionRemoved(Connection* connection);
 
@@ -59,9 +51,7 @@ protected:
 protected:
     delegate::Delegate0<> activation_fn_;
 
-    std::vector<ConnectionPtr> established_connections_;
-    std::vector<ConnectionPtr> unestablished_connections_;
-    std::vector<ConnectionPtr> fading_connections_;
+    std::vector<ConnectionPtr> connections_;
 
     std::map<Connection*, std::vector<csapex::slim_signal::Connection>> signal_connections_;
 

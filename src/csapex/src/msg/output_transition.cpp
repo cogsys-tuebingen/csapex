@@ -26,7 +26,7 @@ void OutputTransition::reset()
         OutputPtr output = pair.second;
         output->reset();
     }
-    for(ConnectionPtr connection : established_connections_) {
+    for(ConnectionPtr connection : connections_) {
         connection->reset();
     }
 
@@ -52,7 +52,7 @@ void OutputTransition::addOutput(OutputPtr output)
     output_signal_connections_[output].push_back(ca);
 
     auto cf = output->connection_faded.connect([this](ConnectionPtr connection) {
-            fadeConnection(connection);
+            removeConnection(connection);
 });
     output_signal_connections_[output].push_back(cf);
 
@@ -98,9 +98,7 @@ void OutputTransition::connectionRemoved(Connection *connection)
 {
     Transition::connectionRemoved(connection);
 
-    connection->fadeSource();
-
-    if(established_connections_.empty()) {
+    if(connections_.empty()) {
         //        node_->notifyMessagesProcessed();
     }
 }
@@ -112,27 +110,6 @@ void OutputTransition::connectionAdded(Connection *connection)
     if(isEnabled()) {
        updateConnections();
     }
-}
-
-void OutputTransition::establishConnections()
-{
-    apex_assert_hard(areAllConnections(Connection::State::DONE, Connection::State::READ));
-
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    auto unestablished_connections = unestablished_connections_;
-    lock.unlock();
-
-    if(!unestablished_connections.empty()) {
-        for(ConnectionPtr c : unestablished_connections) {
-            if(!c->isSourceEstablished()) {
-                c->establishSource();
-            }
-
-            establishConnection(c);
-        }
-    }
-
-    checkIfEnabled();
 }
 
 bool OutputTransition::canStartSendingMessages() const

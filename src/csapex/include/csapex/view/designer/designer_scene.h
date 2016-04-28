@@ -118,9 +118,6 @@ private:
         bool disabled;
         bool full_read;
         bool full_unread;
-        bool established;
-        bool source_established;
-        bool sink_established;
         bool minimized_from;
         bool minimized_to;
         bool minimized;

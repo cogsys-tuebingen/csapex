@@ -512,11 +512,6 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
                 descr += ", # " + QString::number(m->sequenceNumber());
             }
 
-            descr += ", " + c->isEstablished() ? "established" : "not established";
-            descr += " (";
-            descr += c->isSourceEstablished() ? "source established" : "source not established";
-            descr += ", ";
-            descr += c->isSinkEstablished() ? "sink established" : "sink not established";
             descr += ")";
 
             for(auto v : views()) {
@@ -749,9 +744,6 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs = CurrentConnectionState();
 
     ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
-    ccs.established = connection.isEstablished();
-    ccs.source_established = connection.isSourceEstablished();
-    ccs.sink_established = connection.isSinkEstablished();
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;
 
@@ -1017,23 +1009,11 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         color_end.setAlpha(60);
     }
 
-    if(!ccs.source_established) {
-        color_start.setAlpha(60);
-    }
-    if(!ccs.sink_established) {
-        color_end.setAlpha(60);
-    }
-
     QLinearGradient lg(from, to);
     lg.setColorAt(0, color_start);
     lg.setColorAt(1, color_end);
 
-    if(ccs.established) {
-        painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == Token::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
-
-    } else {
-        painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin));
-    }
+    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == Token::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
 
     std::vector<QRectF> bounding_boxes;
 

@@ -40,8 +40,6 @@ ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransiti
     from->addConnection(r);
     to->addConnection(r);
 
-    // no input transition to establish
-    r->establishSink();
     return r;
 }
 
@@ -54,8 +52,6 @@ ConnectionPtr BundledConnection::connect(Output *from, Input *to, InputTransitio
     from->addConnection(r);
     to->addConnection(r);
 
-    // no output transition to establish
-    r->establishSource();
     return r;
 }
 
@@ -89,29 +85,3 @@ void BundledConnection::setMessage(const TokenConstPtr &msg)
     }
 }
 
-
-void BundledConnection::establishSource()
-{
-    Connection::establishSource();
-
-    if(it_) {
-        it_->checkIfEnabled();
-    }
-
-    if(ot_) {
-        ot_->checkIfEnabled();
-    }
-}
-
-void BundledConnection::establishSink()
-{
-    Connection::establishSink();
-
-    if(it_) {
-        it_->checkIfEnabled();
-    }
-
-    if(ot_) {
-        ot_->checkIfEnabled();
-    }
-}

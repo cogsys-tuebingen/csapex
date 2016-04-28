@@ -303,8 +303,6 @@ void NodeWorker::startProcessingMessages()
 
 
     apex_assert_hard(state_ == State::FIRED);
-    apex_assert_hard(!node_handle_->getInputTransition()->hasUnestablishedConnection());
-    //apex_assert_hard(!node_handle_->getOutputTransition()->hasUnestablishedConnection());
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
     apex_assert_hard(canProcess());
     setState(State::PROCESSING);
@@ -628,13 +626,6 @@ void NodeWorker::checkTransitionsImpl(bool try_fire)
     InputTransition* transition_in_ = node_handle_->getInputTransition();
     OutputTransition* transition_out_ = node_handle_->getOutputTransition();
 
-    if(transition_in_->hasUnestablishedConnection()/* || transition_out_->hasUnestablishedConnection()*/) {
-        if(state_ == State::ENABLED) {
-            setState(State::IDLE);
-        }
-        return;
-    }
-
     if(!transition_out_->isEnabled()) {
         if(state_ == State::ENABLED) {
             setState(State::IDLE);
@@ -709,6 +700,10 @@ void NodeWorker::sendMessages()
 
     apex_assert_hard(getState() == State::PROCESSING ||
                      getState() == State::IDLE);
+    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+    for(Event* e : node_handle_->getEvents()){
+        apex_assert_hard(e->canSendMessages());
+    }
 
     node_handle_->getOutputTransition()->sendMessages();
 
@@ -750,8 +745,7 @@ bool NodeWorker::tick()
 
                 checkTransitionsImpl(false);
 
-                if(node_handle_->getOutputTransition()->canStartSendingMessages() &&
-                        !node_handle_->getOutputTransition()->hasFadingConnection()) {
+                if(node_handle_->getOutputTransition()->canStartSendingMessages()) {
                     //            std::cerr << "ticks" << std::endl;
 
                     {

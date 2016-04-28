@@ -42,7 +42,7 @@ void InputTransition::addInput(InputPtr input)
     input_signal_connections_[input].push_back(ca);
 
     auto cf = input->connection_faded.connect([this](ConnectionPtr connection) {
-            fadeConnection(connection);
+            removeConnection(connection);
 });
     input_signal_connections_[input].push_back(cf);
 }
@@ -59,31 +59,9 @@ void InputTransition::removeInput(InputPtr input)
     inputs_.erase(input->getUUID());
 }
 
-void InputTransition::establishConnections()
-{
-    apex_assert_hard(areAllConnections(Connection::State::DONE, Connection::State::READ));
-
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    auto unestablished_connections = unestablished_connections_;
-    lock.unlock();
-
-    if(!unestablished_connections.empty()) {
-        for(auto c : unestablished_connections) {
-            if(!c->isSinkEstablished()) {
-                c->establishSink();
-            }
-
-            establishConnection(c);
-        }
-    }
-
-    checkIfEnabled();
-}
-
 void InputTransition::connectionRemoved(Connection *connection)
 {
     Transition::connectionRemoved(connection);
-    connection->fadeSink();
 }
 
 void InputTransition::reset()
@@ -92,7 +70,7 @@ void InputTransition::reset()
         InputPtr input = pair.second;
         input->reset();
     }
-    for(ConnectionPtr connection : established_connections_) {
+    for(ConnectionPtr connection : connections_) {
         connection->reset();
     }
 
@@ -130,11 +108,9 @@ bool InputTransition::isEnabled() const
     }
 
     // TODO: is this necessary?
-    for(const auto& connection : established_connections_) {
+    for(const auto& connection : connections_) {
         if(connection->isEnabled() && connection->getState() == Connection::State::NOT_INITIALIZED) {
-            if(connection->isEstablished()) {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -215,7 +191,7 @@ void InputTransition::notifyMessageProcessed()
     bool has_multipart = false;
     bool multipart_are_done = true;
 
-    for(auto& c : established_connections_) {
+    for(auto& c : connections_) {
         if(c->getMessage()) {
             int f = c->getMessage()->flags.data;
             if(f & (int) Token::Flags::Fields::MULTI_PART) {
@@ -227,7 +203,7 @@ void InputTransition::notifyMessageProcessed()
     }
 
     if(has_multipart && !multipart_are_done) {
-        for(ConnectionPtr& c : established_connections_) {
+        for(ConnectionPtr& c : connections_) {
             if(c->getMessage()) {
                 int f = c->getMessage()->flags.data;
 
@@ -241,14 +217,9 @@ void InputTransition::notifyMessageProcessed()
     } else {
         apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
-        for(ConnectionPtr& c : established_connections_) {
+        for(ConnectionPtr& c : connections_) {
             c->setMessageProcessed();
         }
-
-        if(hasFadingConnection()) {
-            removeFadingConnections();
-        }
-
     }
     apex_assert_hard(areAllConnections(Connection::State::DONE));
     forwarded_ = false;
@@ -262,7 +233,7 @@ void InputTransition::forwardMessages()
     apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
 
     updateConnections();
-    apex_assert_hard(established_connections_.empty() || !areAllConnections(Connection::State::READ));
+    apex_assert_hard(connections_.empty() || !areAllConnections(Connection::State::READ));
 
     for(auto pair : inputs_) {
         InputPtr input = pair.second;
@@ -288,7 +259,7 @@ void InputTransition::forwardMessages()
         }
     }
 
-    for(auto& c : established_connections_) {
+    for(auto& c : connections_) {
         auto s = c->getState();
         //        apex_assert_hard(c->isEstablished());
         apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
@@ -297,7 +268,7 @@ void InputTransition::forwardMessages()
     }
 
     apex_assert_hard(!areAllConnections(Connection::State::DONE));
-    for(auto& c : established_connections_) {
+    for(auto& c : connections_) {
         c->setState(Connection::State::READ);
     }
 

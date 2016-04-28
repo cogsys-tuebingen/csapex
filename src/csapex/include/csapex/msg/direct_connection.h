@@ -18,8 +18,6 @@ public:
 
     virtual void setMessage(const TokenConstPtr& msg) override;
 
-    virtual void establish() override;
-
 protected:
     DirectConnection(Output* from, Input* to);
     DirectConnection(Output* from, Input* to, int id);

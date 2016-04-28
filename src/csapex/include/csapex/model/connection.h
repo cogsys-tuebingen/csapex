@@ -59,18 +59,6 @@ public:
     bool isSourceEnabled() const;
     bool isSinkEnabled() const;
 
-    virtual void establishSource();
-    virtual void establishSink();
-    virtual void establish();
-
-    bool isSourceEstablished() const;
-    bool isSinkEstablished() const;
-    bool isEstablished() const;
-
-    void fadeSource();
-    void fadeSink();
-    bool isFaded() const;
-
     State getState() const;
     void setState(State s);
 
@@ -82,8 +70,6 @@ public:
 
 public:
     csapex::slim_signal::Signal<void()> new_message;
-    csapex::slim_signal::Signal<void()> endpoint_established;
-    csapex::slim_signal::Signal<void()> connection_established;
 
     csapex::slim_signal::Signal<void()> deleted;
 
@@ -116,10 +102,6 @@ protected:
     Connectable* to_;
     int id_;
     bool is_dynamic_;
-
-    bool source_established_;
-    bool sink_established_;
-    bool established_;
 
     std::vector<FulcrumPtr> fulcrums_;
 

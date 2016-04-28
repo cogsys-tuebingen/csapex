@@ -27,7 +27,6 @@ Connection::Connection(Connectable *from, Connectable *to)
 
 Connection::Connection(Connectable *from, Connectable *to, int id)
     : from_(from), to_(to), id_(id),
-      source_established_(false), sink_established_(false), established_(false),
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
@@ -107,85 +106,6 @@ bool Connection::isSinkEnabled() const
     return to()->isEnabled();
 }
 
-void Connection::establish()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    if(established_) {
-        return;
-    }
-
-    established_ = true;
-    lock.unlock();
-    connection_established();
-}
-
-void Connection::establishSource()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    if(source_established_) {
-        return;
-    }
-    source_established_ = true;
-    lock.unlock();
-    endpoint_established();
-}
-
-void Connection::establishSink()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    if(sink_established_) {
-        return;
-    }
-    sink_established_ = true;
-    lock.unlock();
-    endpoint_established();
-}
-
-bool Connection::isEstablished() const
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    return established_;
-}
-
-bool Connection::isSourceEstablished() const
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    return source_established_;
-}
-
-bool Connection::isSinkEstablished() const
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    return sink_established_;
-}
-
-void Connection::fadeSource()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    source_established_ = false;
-
-    if(isFaded()) {
-        lock.unlock();
-        deleted();
-    }
-}
-
-void Connection::fadeSink()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    sink_established_ = false;
-
-    if(isFaded()) {
-        lock.unlock();
-        deleted();
-    }
-}
-
-bool Connection::isFaded() const
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    return !source_established_ && !sink_established_;
-}
 
 Connection::State Connection::getState() const
 {

@@ -32,7 +32,6 @@ public:
 
     virtual bool isEnabled() const override;
 
-    virtual void establishConnections() override;
     virtual void connectionRemoved(Connection* connection) override;
 
     virtual void reset() override;

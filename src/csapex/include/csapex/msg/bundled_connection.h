@@ -22,9 +22,6 @@ private:
 
     virtual void setMessage(const TokenConstPtr &msg) override;
 
-    virtual void establishSource() override;
-    virtual void establishSink() override;
-
 private:
     OutputTransition* ot_;
     InputTransition* it_;

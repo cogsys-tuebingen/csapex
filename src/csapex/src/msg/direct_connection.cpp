@@ -56,8 +56,3 @@ void DirectConnection::setMessage(const TokenConstPtr &msg)
 
     setMessageProcessed();
 }
-
-void DirectConnection::establish()
-{
-    Connection::establish();
-}

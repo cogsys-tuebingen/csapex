@@ -40,8 +40,6 @@ public:
 
     virtual void reset() override;
 
-    void establishConnections() override;
-
 public:
     csapex::slim_signal::Signal<void()> messages_processed;
 

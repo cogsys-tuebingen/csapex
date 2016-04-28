@@ -1031,7 +1031,7 @@ void Graph::notifyMessagesProcessed()
 
 void Graph::inputActivation()
 {
-    if(!transition_relay_in_->hasEstablishedConnection()) {
+    if(!transition_relay_in_->hasConnection()) {
         if(continuation_) {
             continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
             continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
@@ -1056,7 +1056,7 @@ void Graph::outputActivation()
             }
 
         } else {
-            if(transition_relay_in_->hasEstablishedConnection()) {
+            if(transition_relay_in_->hasConnection()) {
                 //apex_assert_hard(continuation_);
                 if(continuation_) {
                     transition_relay_in_->forwardMessages();
@@ -1108,18 +1108,12 @@ std::string Graph::makeStatusString() const
     ss << "(left) transition_relay_out:\n";
     ss << " - " << (transition_relay_out_->isEnabled() ? "enabled" : "disabled") << '\n';
     ss << " - " << (transition_relay_out_->canStartSendingMessages() ? "can" : "can't") << " send\n";
-    ss << " - " << (transition_relay_out_->hasEstablishedConnection() ? "has" : "doesn't have") <<  " established connection\n";
+    ss << " - " << (transition_relay_out_->hasConnection() ? "has" : "doesn't have") <<  " established connection\n";
     ss << " - outputs are " << (transition_relay_out_->areOutputsIdle() ? "idle" : "busy") << '\n';
     ss << "(right) transition_relay_in:\n";
     ss << " - " << (transition_relay_in_->isEnabled() ? "enabled" : "disabled") << '\n';
     ss << " - established connections: ";
-    for(const ConnectionPtr& c : transition_relay_in_->getEstablishedConnections()) {
-        printStatus(c);
-        ss << '\t';
-    }
-    ss << '\n';
-    ss << " - fading connections: ";
-    for(const ConnectionPtr& c : transition_relay_in_->getFadingConnections()) {
+    for(const ConnectionPtr& c : transition_relay_in_->getConnections()) {
         printStatus(c);
         ss << '\t';
     }
