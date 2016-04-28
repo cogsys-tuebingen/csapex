@@ -26,6 +26,9 @@ public:
     Output(const UUID &uuid);
     ~Output();
 
+    void setOutputTransition(OutputTransition* ot);
+    void removeOutputTransition();
+
     void setMessageProcessed();
 
     virtual bool canOutput() const override
@@ -78,9 +81,12 @@ public:
 
 public:
     csapex::slim_signal::Signal<void()> message_processed;
+    csapex::slim_signal::Signal<void(Connectable*)> messageSent;
 
 
 protected:
+    OutputTransition* transition_;
+
     State state_;
 };
 

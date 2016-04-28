@@ -32,10 +32,17 @@ InputPtr InputTransition::getInput(const UUID& id) const
 
 void InputTransition::addInput(InputPtr input)
 {
+    input->setInputTransition(this);
+
     // remember the input
     inputs_[input->getUUID()] = input;
 
     // connect signals
+    auto cm = input->message_available.connect([this](Connection*) {
+            checkIfEnabled();
+});
+    input_signal_connections_[input].push_back(cm);
+
     auto ca = input->connection_added.connect([this](ConnectionPtr connection) {
             addConnection(connection);
 });
@@ -49,6 +56,8 @@ void InputTransition::addInput(InputPtr input)
 
 void InputTransition::removeInput(InputPtr input)
 {
+    input->removeInputTransition();
+
     // disconnect signals
     for(auto f : input_signal_connections_[input]) {
         f.disconnect();
@@ -82,8 +91,6 @@ void InputTransition::reset()
 void InputTransition::connectionAdded(Connection *connection)
 {
     Transition::connectionAdded(connection);
-
-    connection->new_message.connect(delegate::Delegate0<>(this, &InputTransition::checkIfEnabled));
 
     one_input_is_dynamic_ = false;
     for(auto pair : inputs_) {
@@ -180,7 +187,6 @@ void InputTransition::notifyOlderConnections(int seq)
         }
     }
 }
-
 void InputTransition::notifyMessageProcessed()
 {
     if(!forwarded_) {

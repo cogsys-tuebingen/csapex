@@ -20,12 +20,12 @@ using namespace csapex;
 
 int Connection::next_connection_id_ = 0;
 
-Connection::Connection(Connectable *from, Connectable *to)
+Connection::Connection(Output *from, Input *to)
     : Connection(from, to, next_connection_id_++)
 {
 }
 
-Connection::Connection(Connectable *from, Connectable *to, int id)
+Connection::Connection(Output *from, Input *to, int id)
     : from_(from), to_(to), id_(id),
       state_(State::NOT_INITIALIZED)
 {
@@ -53,22 +53,25 @@ TokenConstPtr Connection::getMessage() const
     return message_;
 }
 
+TokenConstPtr Connection::readMessage()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    setState(State::READ);
+    return message_;
+}
+
 void Connection::notifyMessageSet()
 {
-    new_message();
+    to_->notifyMessageAvailable(this);
 }
 
 void Connection::setMessageProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
-        apex_assert_hard(state_ == State::READ || state_ == State::NOT_INITIALIZED);
         setState(State::DONE);
     }
-    Output* o = dynamic_cast<Output*>(from_);
-    if(o) {
-        o->setMessageProcessed();
-    }
+    from_->setMessageProcessed();
 }
 
 void Connection::setMessage(const TokenConstPtr &msg)
@@ -130,32 +133,32 @@ void Connection::setState(State s)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    switch (s) {
-    case State::UNREAD:
-        apex_assert_hard(state_ == State::NOT_INITIALIZED);
-        apex_assert_hard(message_ != nullptr);
-        break;
-    case State::READ:
-        apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
-        apex_assert_hard(message_ != nullptr);
-        break;
-    case State::DONE:
-        apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ);
-        apex_assert_hard(message_ != nullptr);
-        break;
-    default:
-        break;
-    }
+//    switch (s) {
+//    case State::UNREAD:
+//        apex_assert_hard(state_ == State::NOT_INITIALIZED);
+//        apex_assert_hard(message_ != nullptr);
+//        break;
+//    case State::READ:
+//        apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
+//        apex_assert_hard(message_ != nullptr);
+//        break;
+//    case State::DONE:
+//        apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ);
+//        apex_assert_hard(message_ != nullptr);
+//        break;
+//    default:
+//        break;
+//    }
 
     state_ = s;
 }
 
-Connectable* Connection::from() const
+Output* Connection::from() const
 {
     return from_;
 }
 
-Connectable* Connection::to() const
+Input *Connection::to() const
 {
     return to_;
 }

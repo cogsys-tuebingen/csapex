@@ -17,6 +17,9 @@ public:
     Input(const UUID &uuid);
     virtual ~Input();
 
+    void setInputTransition(InputTransition* it);
+    void removeInputTransition();
+
     virtual bool canInput() const override {
         return true;
     }
@@ -38,7 +41,7 @@ public:
     virtual void connectionMovePreview(Connectable* other_side) override;
     virtual void validateConnections() override;
 
-    Connectable* getSource() const;
+    Output* getSource() const;
 
     virtual void removeAllConnectionsNotUndoable() override;
 
@@ -54,16 +57,22 @@ public:
     virtual void enable() override;
     virtual void disable() override;
 
+    void notifyMessageAvailable(Connection *connection);
     virtual void notifyMessageProcessed() override;
 
     virtual void reset() override;
 
+public:
+    csapex::slim_signal::Signal<void(Connectable*)> message_set;
+    csapex::slim_signal::Signal<void(Connection* )> message_available;
 
 protected:
     virtual bool isConnectionPossible(Connectable* other_side) override;
     virtual void removeConnection(Connectable* other_side) override;
 
 protected:
+    InputTransition* transition_;
+
     mutable std::mutex message_mutex_;
     TokenConstPtr message_;
 

@@ -27,8 +27,6 @@ void PreviewInput::inputMessage(Token::ConstPtr message)
     Input::inputMessage(message);
 
     Q_EMIT parent_->displayMessage(message);
-
-    notifyMessageProcessed();
 }
 
 

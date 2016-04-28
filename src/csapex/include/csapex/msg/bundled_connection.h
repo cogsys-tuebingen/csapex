@@ -17,14 +17,8 @@ public:
     static ConnectionPtr connect(Output* from, Input* to, InputTransition* it);
 
 private:
-    BundledConnection(Output* from, Input* to, OutputTransition* ot, InputTransition* it);
-    BundledConnection(Output* from, Input* to, OutputTransition* ot, InputTransition* it, int id);
-
-    virtual void setMessage(const TokenConstPtr &msg) override;
-
-private:
-    OutputTransition* ot_;
-    InputTransition* it_;
+    BundledConnection(Output* from, Input* to);
+    BundledConnection(Output* from, Input* to, int id);
 };
 
 }

@@ -75,7 +75,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             is_setup_ = true;
 
             handle_connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
-                triggerCheckTransitions();
+                triggerTryProcess();
             }));
 
             handle_connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
@@ -92,7 +92,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                                                  disconnectConnector(c.get());
                                              }));
 
-            auto af = delegate::bind(&NodeWorker::triggerCheckTransitions, this);
+            auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
             node_handle_->getInputTransition()->setActivationFunction(af);
             node_handle_->getOutputTransition()->setActivationFunction(af);
         }
@@ -241,9 +241,9 @@ void NodeWorker::triggerPanic()
     panic();
 }
 
-void NodeWorker::triggerCheckTransitions()
+void NodeWorker::triggerTryProcess()
 {
-    checkTransitionsRequested();
+    tryProcessRequested();
 }
 
 void NodeWorker::reset()
@@ -297,6 +297,8 @@ void NodeWorker::startProcessingMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(state_ == State::ENABLED);
+
+    node_handle_->getInputTransition()->forwardMessages();
 
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
     setState(State::FIRED);
@@ -436,7 +438,7 @@ void NodeWorker::startProcessingMessages()
     } else {
         forwardMessages(true);
         signalMessagesProcessed();
-        triggerCheckTransitions();
+        triggerTryProcess();
     }
 
 }
@@ -473,7 +475,7 @@ void NodeWorker::finishProcessing()
     signalExecutionFinished();
     forwardMessages(true);
     signalMessagesProcessed();
-    triggerCheckTransitions();
+    triggerTryProcess();
 }
 
 void NodeWorker::signalExecutionFinished()
@@ -593,7 +595,7 @@ void NodeWorker::notifyMessagesProcessed()
     }
 
 
-    triggerCheckTransitions();
+    triggerTryProcess();
 }
 
 
@@ -607,12 +609,7 @@ void NodeWorker::updateTransitionConnections()
     }
 }
 
-void NodeWorker::checkTransitions()
-{
-    checkTransitionsImpl(true);
-}
-
-void NodeWorker::checkTransitionsImpl(bool try_fire)
+void NodeWorker::updateState()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
@@ -639,17 +636,21 @@ void NodeWorker::checkTransitionsImpl(bool try_fire)
         setState(State::IDLE);
         return;
     }
+}
 
-    if(try_fire && canProcess()) {
-        apex_assert_hard(transition_out_->canStartSendingMessages());
+void NodeWorker::tryProcess()
+{
+    updateState();
+    if(isEnabled() && canProcess()) {
+        apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
-        int highest_deviant_seq = transition_in_->findHighestDeviantSequenceNumber();
+        auto it = node_handle_->getInputTransition();
+
+        int highest_deviant_seq = it->findHighestDeviantSequenceNumber();
 
         if(highest_deviant_seq >= 0) {
-            transition_in_->notifyOlderConnections(highest_deviant_seq);
+            it->notifyOlderConnections(highest_deviant_seq);
         } else {
-            transition_in_->forwardMessages();
-
             startProcessingMessages();
         }
     }
@@ -743,7 +744,7 @@ bool NodeWorker::tick()
                     setState(State::IDLE);
                 }
 
-                checkTransitionsImpl(false);
+                updateState();
 
                 if(node_handle_->getOutputTransition()->canStartSendingMessages()) {
                     //            std::cerr << "ticks" << std::endl;
@@ -837,7 +838,7 @@ void NodeWorker::disconnectConnector(Connectable *c)
 void NodeWorker::checkIO()
 {
     if(isProcessingEnabled()) {
-        triggerCheckTransitions();
+        triggerTryProcess();
     }
 }
 

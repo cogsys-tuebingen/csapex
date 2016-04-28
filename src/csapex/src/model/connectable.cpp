@@ -29,6 +29,10 @@ Connectable::Connectable(const UUID& uuid)
 void Connectable::notifyMessageProcessed()
 {
     messageProcessed(this);
+
+    for(ConnectionPtr& c : connections_) {
+        c->setMessageProcessed();
+    }
 }
 
 void Connectable::reset()

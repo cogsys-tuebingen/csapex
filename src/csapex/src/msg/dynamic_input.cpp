@@ -43,7 +43,7 @@ void DynamicInput::composeMessage()
 
     msg_parts_.clear();
 
-    messageArrived(this);
+    message_set(this);
 }
 
 

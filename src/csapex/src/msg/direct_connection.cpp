@@ -49,10 +49,10 @@ void DirectConnection::setMessage(const TokenConstPtr &msg)
 {
     Connection::setMessage(msg);
 
-    dynamic_cast<Input*>(to())->inputMessage(msg);
+//    dynamic_cast<Input*>(to())->inputMessage(msg);
 
-    setState(Connection::State::READ);
-//    setState(Connection::State::DONE);
+//    setState(Connection::State::READ);
+////    setState(Connection::State::DONE);
 
-    setMessageProcessed();
+//    setMessageProcessed();
 }

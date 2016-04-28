@@ -375,9 +375,10 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());
-        if(!tooltip.isEmpty()){
-            setTooltip(current_layout_, tooltip);
+        if(tooltip.isEmpty()){
             setTooltip(current_layout_, QString::fromStdString(p->getUUID().getAbsoluteUUID().getFullName()));
+        } else {
+            setTooltip(current_layout_, tooltip);
         }
 
         // put into layout

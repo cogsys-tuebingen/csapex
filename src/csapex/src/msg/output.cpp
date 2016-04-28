@@ -14,13 +14,23 @@
 using namespace csapex;
 
 Output::Output(const UUID& uuid)
-    : Connectable(uuid),
+    : Connectable(uuid), transition_(nullptr),
       state_(State::IDLE)
 {
 }
 
 Output::~Output()
 {
+}
+
+void Output::setOutputTransition(OutputTransition *ot)
+{
+    transition_ = ot;
+}
+
+void Output::removeOutputTransition()
+{
+    transition_ = nullptr;
 }
 
 void Output::setMessageProcessed()

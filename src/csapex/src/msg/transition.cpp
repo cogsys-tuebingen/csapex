@@ -43,7 +43,6 @@ void Transition::addConnection(ConnectionPtr connection)
 void Transition::removeConnection(ConnectionPtr connection)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    bool contained = false;
     for(auto it = connections_.begin(); it != connections_.end(); ++it) {
         if(*it == connection) {
             connections_.erase(it);

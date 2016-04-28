@@ -38,14 +38,14 @@ public:
     friend std::ostream& operator << (std::ostream& out, const Connection& c);
 
 protected:
-    Connection(Connectable* from, Connectable* to);
-    Connection(Connectable* from, Connectable* to, int id);
+    Connection(Output* from, Input* to);
+    Connection(Output* from, Input* to, int id);
 
 public:
     virtual ~Connection();
 
-    Connectable* from() const;
-    Connectable* to() const;
+    Output* from() const;
+    Input* to() const;
     int id() const;
 
     bool contains(Connectable* c) const;
@@ -54,6 +54,12 @@ public:
 
     TokenConstPtr getMessage() const;
     void setMessageProcessed();
+
+    /**
+     * @brief readMessage retrieves the current message and marks the Connection read
+     * @return
+     */
+    TokenConstPtr readMessage();
 
     bool isEnabled() const;
     bool isSourceEnabled() const;
@@ -69,8 +75,6 @@ public:
     bool downLevel() const;
 
 public:
-    csapex::slim_signal::Signal<void()> new_message;
-
     csapex::slim_signal::Signal<void()> deleted;
 
     csapex::slim_signal::Signal<void(bool)> source_enable_changed;
@@ -98,8 +102,8 @@ protected:
     void notifyMessageSet();
 
 protected:
-    Connectable* from_;
-    Connectable* to_;
+    Output* from_;
+    Input* to_;
     int id_;
     bool is_dynamic_;
 

@@ -51,7 +51,7 @@ public:
 
     void reset();
 
-    void triggerCheckTransitions();
+    void triggerTryProcess();
     void triggerPanic();
 
     void setState(State state);
@@ -86,7 +86,7 @@ public:
     void startProcessingMessages();
     void forwardMessages(bool send_parameters);
 
-    void checkTransitions();
+    void tryProcess();
 
     void checkParameters();    
     void checkIO();
@@ -116,7 +116,7 @@ public:
 
     csapex::slim_signal::Signal<void()> messages_processed;
     csapex::slim_signal::Signal<void()> processRequested;
-    csapex::slim_signal::Signal<void()> checkTransitionsRequested;
+    csapex::slim_signal::Signal<void()> tryProcessRequested;
 
 private:
     void publishParameters();
@@ -129,6 +129,8 @@ private:
     void signalMessagesProcessed();
 
     void activateOutput();
+
+    void updateState();
     void updateTransitionConnections();
 
     void finishGenerator();
@@ -139,8 +141,6 @@ private:
 
     void connectConnector(Connectable *c);
     void disconnectConnector(Connectable *c);
-
-    void checkTransitionsImpl(bool try_fire);
 
 private:
     mutable std::recursive_mutex sync;

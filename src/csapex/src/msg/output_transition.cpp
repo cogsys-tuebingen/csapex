@@ -39,7 +39,9 @@ OutputPtr OutputTransition::getOutput(const UUID& id) const
 }
 
 void OutputTransition::addOutput(OutputPtr output)
-{
+{    
+    output->setOutputTransition(this);
+
     output->setSequenceNumber(sequence_number_);
 
     // remember the output
@@ -64,6 +66,8 @@ void OutputTransition::addOutput(OutputPtr output)
 
 void OutputTransition::removeOutput(OutputPtr output)
 {
+    output->removeOutputTransition();
+
     // disconnect signals
     for(auto f : output_signal_connections_[output]) {
         f.disconnect();

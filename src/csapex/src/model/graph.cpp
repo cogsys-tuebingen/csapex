@@ -765,7 +765,7 @@ void Graph::removeVariadicOutput(OutputPtr output)
     InputPtr relay = forward_outputs_[output->getUUID()];
     forwardingRemoved(relay);
 
-    relay->messageArrived.disconnectAll();
+    relay->message_set.disconnectAll();
 
     VariadicOutputs::removeVariadicOutput(output);
 
@@ -798,7 +798,7 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenConstPtr& 
     relay->connectionInProgress.connect(internalConnectionInProgress);
 
     std::weak_ptr<Output> external_output_weak = std::dynamic_pointer_cast<Output>(external_output->shared_from_this());
-    relay->messageArrived.connect([this, external_output_weak, relay](Connectable*) {
+    relay->message_set.connect([this, external_output_weak, relay](Connectable*) {
         if(auto external_output = external_output_weak.lock()) {
             msg::publish(external_output.get(), relay->getMessage());
         }

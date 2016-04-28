@@ -75,7 +75,7 @@ void StaticOutput::setMultipart(bool multipart, bool last_part)
 
 void StaticOutput::commitMessages()
 {
-    assert(canSendMessages());
+    apex_assert_hard(canSendMessages());
 
     activate();
 

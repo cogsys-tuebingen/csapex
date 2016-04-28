@@ -6,6 +6,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/marker_message.h>
+#include <csapex/msg/output.h>
 
 /// SYSTEM
 #include <iostream>
@@ -13,13 +14,23 @@
 using namespace csapex;
 
 Input::Input(const UUID &uuid)
-    : Connectable(uuid), optional_(false)
+    : Connectable(uuid), transition_(nullptr), optional_(false)
 {
 }
 
 Input::~Input()
 {
     free();
+}
+
+void Input::setInputTransition(InputTransition *it)
+{
+    transition_ = it;
+}
+
+void Input::removeInputTransition()
+{
+    transition_ = nullptr;
 }
 
 void Input::reset()
@@ -45,8 +56,6 @@ void Input::removeConnection(Connectable* other_side)
     if(connections_.empty()) {
         return;
     }
-    apex_assert_hard(getSource() == other_side);
-
     connections_.clear();
     connection_removed_to(this);
 }
@@ -146,7 +155,7 @@ void Input::validateConnections()
     setError(e);
 }
 
-Connectable *Input::getSource() const
+Output *Input::getSource() const
 {
     if(connections_.empty()) {
         return nullptr;
@@ -184,7 +193,17 @@ void Input::inputMessage(Token::ConstPtr message)
     }
     count_++;
 
-    messageArrived(this);
+    message_set(this);
+}
+
+void Input::notifyMessageAvailable(Connection* connection)
+{
+    message_available(connection);
+
+    if(!transition_) {
+        inputMessage(connection->readMessage());
+        connection->setMessageProcessed();
+    }
 }
 
 void Input::notifyMessageProcessed()

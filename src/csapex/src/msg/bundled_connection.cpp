@@ -15,7 +15,7 @@ ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransiti
     apex_assert_hard(from);
     apex_assert_hard(to);
     apex_assert_hard(from->isConnectionPossible(to));
-    ConnectionPtr r(new BundledConnection(from, to, ot, it));
+    ConnectionPtr r(new BundledConnection(from, to));
     from->addConnection(r);
     to->addConnection(r);
     return r;
@@ -25,7 +25,7 @@ ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransiti
     apex_assert_hard(from);
     apex_assert_hard(to);
     apex_assert_hard(from->isConnectionPossible(to));
-    ConnectionPtr r(new BundledConnection(from, to, ot, it, id));
+    ConnectionPtr r(new BundledConnection(from, to, id));
     from->addConnection(r);
     to->addConnection(r);
     return r;
@@ -36,7 +36,7 @@ ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransiti
     apex_assert_hard(from);
     apex_assert_hard(to);
     apex_assert_hard(from->isConnectionPossible(to));
-    ConnectionPtr r(new BundledConnection(from, to, ot, nullptr));
+    ConnectionPtr r(new BundledConnection(from, to));
     from->addConnection(r);
     to->addConnection(r);
 
@@ -48,40 +48,21 @@ ConnectionPtr BundledConnection::connect(Output *from, Input *to, InputTransitio
     apex_assert_hard(from);
     apex_assert_hard(to);
     apex_assert_hard(from->isConnectionPossible(to));
-    ConnectionPtr r(new BundledConnection(from, to, nullptr, it));
+    ConnectionPtr r(new BundledConnection(from, to));
     from->addConnection(r);
     to->addConnection(r);
 
     return r;
 }
 
-BundledConnection::BundledConnection(Output *from, Input *to, OutputTransition* ot, InputTransition* it)
-    : DirectConnection(from, to), ot_(ot), it_(it)
+BundledConnection::BundledConnection(Output *from, Input *to)
+    : DirectConnection(from, to)
 {
 
 }
 
-BundledConnection::BundledConnection(Output *from, Input *to, OutputTransition* ot, InputTransition* it, int id)
-    : DirectConnection(from, to, id), ot_(ot), it_(it)
+BundledConnection::BundledConnection(Output *from, Input *to, int id)
+    : DirectConnection(from, to, id)
 {
 
 }
-
-void BundledConnection::setMessage(const TokenConstPtr &msg)
-{
-
-    if(it_) {
-        Connection::setMessage(msg);
-    } else {
-        DirectConnection::setMessage(msg);
-    }
-
-    if(it_) {
-        it_->checkIfEnabled();
-    }
-
-    if(ot_) {
-        ot_->checkIfEnabled();
-    }
-}
-

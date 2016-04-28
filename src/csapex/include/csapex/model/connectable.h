@@ -105,8 +105,6 @@ public:
     csapex::slim_signal::Signal<void(Connectable*)> messageProcessed;
     csapex::slim_signal::Signal<void(bool, std::string, int)> connectableError;
 
-    csapex::slim_signal::Signal<void(Connectable*)> messageSent;
-    csapex::slim_signal::Signal<void(Connectable*)> messageArrived;
     csapex::slim_signal::Signal<void()> typeChanged;
 
 public:
