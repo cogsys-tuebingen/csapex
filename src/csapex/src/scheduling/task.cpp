@@ -7,7 +7,7 @@
 using namespace csapex;
 
 Task::Task(const std::string& name, std::function<void ()> callback, long priority, TaskGenerator *parent)
-    : parent_(parent), name_(name), callback_(callback), priority_(priority)
+    : parent_(parent), name_(name), callback_(callback), priority_(priority), scheduled_(false)
 {
 
 }
@@ -39,4 +39,14 @@ void Task::setPriority(long priority)
 long Task::getPriority() const
 {
     return priority_;
+}
+
+bool Task::isScheduled() const
+{
+    return scheduled_;
+}
+
+void Task::setScheduled(bool scheduled)
+{
+    scheduled_ = scheduled;
 }

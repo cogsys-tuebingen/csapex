@@ -21,6 +21,9 @@ public:
     void setPriority(long priority);
     long getPriority() const;
 
+    void setScheduled(bool scheduled);
+    bool isScheduled() const;
+
     TaskGenerator* getParent() const;
     std::string getName() const;
 
@@ -30,6 +33,7 @@ private:
     std::function<void()> callback_;
 
     long priority_;
+    bool scheduled_;
 };
 
 }

@@ -9,8 +9,7 @@ using namespace csapex;
 
 TickableNode::TickableNode()
     : tick_enabled_(true),
-      tick_frequency_(30.0),
-      tick_immediate_(false)
+      tick_rate_(30.0, false)
 {
 
 }
@@ -45,16 +44,21 @@ void TickableNode::setTickEnabled(bool tick)
 
 double TickableNode::getTickFrequency() const
 {
-    return tick_frequency_;
+    return tick_rate_.getFrequency();
 }
 void TickableNode::setTickFrequency(double f)
 {
-    tick_frequency_ = f;
+    tick_rate_.setFrequency(f);
+}
+
+void TickableNode::setTickImmediate(bool immediate)
+{
+    tick_rate_.setImmediate(immediate);
 }
 
 bool TickableNode::isImmediate() const
 {
-    return tick_immediate_;
+    return tick_rate_.isImmediate();
 }
 
 bool TickableNode::tick(NodeModifier &nm, Parameterizable &p)
@@ -65,4 +69,9 @@ bool TickableNode::tick(NodeModifier &nm, Parameterizable &p)
 
 void TickableNode::tick()
 {
+}
+
+void TickableNode::keepUpRate()
+{
+    tick_rate_.tick();
 }

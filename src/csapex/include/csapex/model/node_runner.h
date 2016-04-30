@@ -41,6 +41,8 @@ public:
 
 private:
     void tickLoop();
+    void scheduleTick();
+    void tick();
 
 private:
     NodeWorkerPtr worker_;

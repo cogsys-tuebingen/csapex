@@ -176,6 +176,7 @@ add_library(csapex_util SHARED
     src/utility/thread.cpp
     src/utility/timable.cpp
     src/utility/timer.cpp
+    src/utility/rate.cpp
     src/utility/type.cpp
     src/utility/uuid.cpp
     src/utility/uuid_provider.cpp

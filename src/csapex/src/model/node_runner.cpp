@@ -38,15 +38,8 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
 
     if(ticking_) {
         tick_ = std::make_shared<Task>(std::string("tick ") + handle->getUUID().getFullName(),
-                                       [this, worker]() {
-            bool success = worker->tick();
-            if(stepping_) {
-                if(!success) {
-                    can_step_ = true;
-                } else {
-                    end_step();
-                }
-            }
+                                       [this]() {
+            tick();
         }, 0, this);
     }
 }
@@ -127,32 +120,47 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     }
 }
 
+void NodeRunner::scheduleTick()
+{
+    if(!paused_) {
+        if(!stepping_ || can_step_) {
+            can_step_ = false;
+            schedule(tick_);
+        }
+    }
+}
+
+void NodeRunner::tick()
+{
+    bool success = worker_->tick();
+    if(stepping_) {
+        if(!success) {
+            can_step_ = true;
+        } else {
+            end_step();
+        }
+    }
+
+    NodeHandlePtr handle = worker_->getNodeHandle();
+    NodePtr node = handle->getNode().lock();
+    auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
+
+    if(ticker->isImmediate()) {
+        scheduleTick();
+    }
+}
+
 void NodeRunner::tickLoop()
 {
     NodePtr node =  worker_->getNode();
     auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
 
-    using std::chrono::system_clock;
-    auto next_tick = system_clock::now();
-
     while(!tick_thread_stop_) {
-        double f = ticker->getTickFrequency();
-        std::chrono::milliseconds interval(int(1000.0 / f));
-
-        bool immediate = ticker->isImmediate();
-
-        if(!paused_) {
-            if(!stepping_ || can_step_) {
-                can_step_ = false;
-                schedule(tick_);
-            }
+        if(!ticker->isImmediate() || !tick_->isScheduled()) {
+            scheduleTick();
         }
 
-        next_tick += interval;
-
-        if(next_tick > system_clock::now() && !immediate) {
-            std::this_thread::sleep_until(next_tick);
-        }
+        ticker->keepUpRate();
     }
 }
 

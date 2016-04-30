@@ -265,6 +265,8 @@ void ThreadGroup::schedule(TaskPtr task)
 
     tasks_.insert(task);
 
+    task->setScheduled(true);
+
     work_available_.notify_all();
 }
 
@@ -306,8 +308,10 @@ bool ThreadGroup::executeNextTask()
 {
     std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
     if(!tasks_.empty()) {
-        auto task = *tasks_.begin();
+        TaskPtr task = *tasks_.begin();
         tasks_.erase(tasks_.begin());
+
+        task->setScheduled(false);
 
         tasks_lock.unlock();
 

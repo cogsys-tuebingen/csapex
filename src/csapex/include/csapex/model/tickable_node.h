@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/generator_node.h>
+#include <csapex/utility/rate.h>
 
 namespace csapex
 {
@@ -16,10 +17,13 @@ public:
     bool isTickEnabled() const;
     void setTickEnabled(bool tick);
 
-    double getTickFrequency() const;
     void setTickFrequency(double f);
+    double getTickFrequency() const;
 
+    void setTickImmediate(bool immediate);
     bool isImmediate() const;
+
+    void keepUpRate();
 
 protected:
     virtual bool tick(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
@@ -30,8 +34,8 @@ protected:
 
 private:
     bool tick_enabled_;
-    double tick_frequency_;
-    bool tick_immediate_;
+
+    Rate tick_rate_;
 };
 
 }
