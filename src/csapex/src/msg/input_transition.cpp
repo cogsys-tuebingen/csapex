@@ -227,7 +227,7 @@ void InputTransition::notifyMessageProcessed()
             c->setMessageProcessed();
         }
     }
-    apex_assert_hard(areAllConnections(Connection::State::DONE));
+
     forwarded_ = false;
 }
 

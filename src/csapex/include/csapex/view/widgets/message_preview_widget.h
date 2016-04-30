@@ -48,11 +48,12 @@ public:
     bool isConnected() const;
 
 Q_SIGNALS:
-    void displayMessage(const TokenConstPtr& msg);
+    void displayImageRequest(const QImage& msg);
+    void displayTextRequest(const QString &txt);
 
 public Q_SLOTS:
-    void display(const TokenConstPtr& msg);
-    void showText(const QString &txt);
+    void displayImage(const QImage& msg);
+    void displayText(const QString &txt);
     
 private:
     void connectToImpl(Output* out);
@@ -63,6 +64,9 @@ private:
     std::shared_ptr<impl::PreviewInput> input_;
 
     QString displayed_;
+
+    QGraphicsPixmapItem* pm_item_;
+    QGraphicsTextItem* txt_item_;
 };
 
 }

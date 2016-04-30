@@ -856,8 +856,7 @@ void NodeBox::updateVisuals()
 
         }
         layout()->invalidate();
-        QApplication::processEvents();
-        adjustSize();
+        QApplication::processEvents(); adjustSize();
     }
 
 

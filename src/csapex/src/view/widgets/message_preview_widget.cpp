@@ -11,6 +11,7 @@
 
 /// SYSTEM
 #include <QApplication>
+#include <QGraphicsPixmapItem>
 
 using namespace csapex;
 using namespace csapex::impl;
@@ -20,17 +21,44 @@ PreviewInput::PreviewInput(MessagePreviewWidget *parent)
       parent_(parent)
 {
     setType(std::make_shared<connection_types::AnyMessage>());
-    }
+}
 
-void PreviewInput::inputMessage(Token::ConstPtr message)
+void PreviewInput::inputMessage(Token::ConstPtr msg)
 {
-    Input::inputMessage(message);
+    Input::inputMessage(msg);
 
-    Q_EMIT parent_->displayMessage(message);
+    if(isConnected()) {
+        try {
+            if(auto m = msg::message_cast<connection_types::GenericValueMessage<int>>(msg)) {
+                parent_->displayTextRequest(QString::number(m->value));
+                return;
+
+            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<float>>(msg)) {
+                parent_->displayTextRequest(QString::number(m->value));
+                return;
+
+            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<double>>(msg)) {
+                parent_->displayTextRequest(QString::number(m->value));
+                return;
+
+            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<std::string>>(msg)) {
+                parent_->displayTextRequest(QString::fromStdString(m->value));
+                return;
+            }
+            MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
+            if(renderer) {
+                QImage img = renderer->render(msg);
+                parent_->displayImageRequest(img);
+            }
+        } catch(const std::exception& e) {
+            // silent death
+        }
+    }
 }
 
 
 MessagePreviewWidget::MessagePreviewWidget()
+    : pm_item_(nullptr), txt_item_(nullptr)
 {
     input_ = std::make_shared<impl::PreviewInput>(this);
     setScene(new QGraphicsScene);
@@ -41,7 +69,8 @@ MessagePreviewWidget::MessagePreviewWidget()
 
     qRegisterMetaType < TokenConstPtr > ("TokenConstPtr");
 
-    QObject::connect(this, SIGNAL(displayMessage(TokenConstPtr)), this, SLOT(display(TokenConstPtr)));
+    QObject::connect(this, &MessagePreviewWidget::displayImageRequest, this, &MessagePreviewWidget::displayImage);
+    QObject::connect(this, &MessagePreviewWidget::displayTextRequest, this, &MessagePreviewWidget::displayText);
 
     setMaximumSize(256, 256);
     setAutoFillBackground(false);
@@ -106,58 +135,49 @@ void MessagePreviewWidget::disconnect()
     connection_.reset();
 }
 
-void MessagePreviewWidget::showText(const QString& txt)
+void MessagePreviewWidget::displayText(const QString& txt)
 {
-    if(txt != displayed_) {
+    if(!txt_item_ || txt != displayed_) {
         displayed_ = txt;
-        scene()->addText(displayed_);
+
+        if(pm_item_) {
+            scene()->removeItem(pm_item_);
+            delete pm_item_;
+            pm_item_ = nullptr;
+        }
+
+        if(txt_item_) {
+            txt_item_->setPlainText(txt);
+        } else {
+            txt_item_ = scene()->addText(displayed_);
+        }
         resize(scene()->sceneRect().width() + 4, scene()->sceneRect().height() + 4);
         show();
         fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
     }
 }
 
-void MessagePreviewWidget::display(const TokenConstPtr &msg)
+void MessagePreviewWidget::displayImage(const QImage &img)
 {
-    if(isConnected()) {
-        try {
-            if(auto m = msg::message_cast<connection_types::GenericValueMessage<int>>(msg)) {
-                showText(QString::number(m->value));
-                return;
-
-            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<float>>(msg)) {
-                showText(QString::number(m->value));
-                return;
-
-            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<double>>(msg)) {
-                showText(QString::number(m->value));
-                return;
-
-            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<std::string>>(msg)) {
-                showText(QString::fromStdString(m->value));
-                return;
-            }
-
-            displayed_ = "";
-
-            MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
-            if(renderer) {
-                QImage img = renderer->render(msg);
-
-                auto pm = QPixmap::fromImage(img);
-                scene()->clear();
-                scene()->addPixmap(pm);
-                fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
-
-                show();
-                return;
-            }
-        } catch(const std::exception& e) {
-            // silent death
-        }
+    if(img.isNull()) {
+        hide();
+        return;
     }
 
-    hide();
+    if(txt_item_) {
+        scene()->removeItem(txt_item_);
+        delete txt_item_;
+        txt_item_ = nullptr;
+    }
+
+    if(pm_item_) {
+        pm_item_->setPixmap(QPixmap::fromImage(img));
+    } else {
+        pm_item_ = scene()->addPixmap(QPixmap::fromImage(img));
+    }
+    fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
+
+    show();
 }
 
 bool MessagePreviewWidget::isConnected() const
