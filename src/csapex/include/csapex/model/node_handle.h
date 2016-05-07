@@ -95,6 +95,9 @@ public:
     bool isSink() const override;
     void setIsSink(bool sink) override;
 
+    bool isActive() const;
+    void setActive(bool active);
+
     void triggerNodeStateChanged();
 
     UUIDProvider* getUUIDProvider();
@@ -116,6 +119,8 @@ public:
     csapex::slim_signal::Signal<void()> parametersChanged;
 
     csapex::slim_signal::Signal<void()> nodeStateChanged;
+
+    csapex::slim_signal::Signal<void()> activationChanged;
 
     csapex::slim_signal::Signal<void()> mightBeEnabled;
 
@@ -164,12 +169,12 @@ private:
 
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
 
-    std::map<Slot*, csapex::slim_signal::Connection> slot_connections_;
-
     int level_;
 
     bool source_;
     bool sink_;
+
+    bool active_;
 };
 
 }

@@ -120,6 +120,16 @@ bool Transition::hasConnection() const
     std::unique_lock<std::recursive_mutex> lock(sync);
     return !connections_.empty();
 }
+bool Transition::hasActiveConnection() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    for(ConnectionPtr connection : connections_) {
+        if(connection->isEnabled() && connection->isActive()) {
+            return true;
+        }
+    }
+    return false;
+}
 
 
 void Transition::connectionAdded(Connection */*connection*/)

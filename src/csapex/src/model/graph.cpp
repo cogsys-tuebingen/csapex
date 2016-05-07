@@ -676,7 +676,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
 
         msg::publish(o.get(), m);
     }
-    transition_relay_out_->sendMessages();
+    transition_relay_out_->sendMessages(node_handle_->isActive());
 
     outputActivation();
 

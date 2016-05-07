@@ -55,6 +55,20 @@ std::string Token::typeName() const
     return type_name_;
 }
 
+void Token::setActive(bool active) const
+{
+    if(active) {
+        flags.data |=  (int) Token::Flags::Fields::ACTIVE;
+    } else {
+        flags.data &= ~(int) Token::Flags::Fields::ACTIVE;
+    }
+}
+
+bool Token::isActive() const
+{
+    return (flags.data & (int) Token::Flags::Fields::ACTIVE) != 0;
+}
+
 int Token::sequenceNumber() const
 {
     return seq_no_;

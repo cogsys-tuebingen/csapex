@@ -27,6 +27,7 @@ Connection::Connection(Output *from, Input *to)
 
 Connection::Connection(Output *from, Input *to, int id)
     : from_(from), to_(to), id_(id),
+      active_(false),
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
@@ -81,6 +82,12 @@ void Connection::setMessage(const TokenConstPtr &msg)
         apex_assert_hard(msg != nullptr);
         apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
+        bool msg_active = msg->isActive();
+        if(!isActive() && msg_active) {
+            // remove active flag if the connection is inactive
+            msg->setActive(false);
+        }
+
         message_ = msg;
         if(isSinkEnabled()) {
             setState(State::UNREAD);
@@ -92,6 +99,18 @@ void Connection::setMessage(const TokenConstPtr &msg)
     }
 
     notifyMessageSet();
+}
+
+bool Connection::isActive() const
+{
+    return active_;
+}
+
+void Connection::setActive(bool active)
+{
+    if(active != active_) {
+        active_ = active;
+    }
 }
 
 bool Connection::isEnabled() const

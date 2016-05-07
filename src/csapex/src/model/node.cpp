@@ -97,3 +97,13 @@ void Node::processMarker(const csapex::connection_types::MessageConstPtr &marker
 {
 
 }
+
+void Node::activation()
+{
+
+}
+
+void Node::deactivation()
+{
+
+}

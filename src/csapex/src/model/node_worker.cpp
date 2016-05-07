@@ -77,7 +77,6 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             handle_connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
                 triggerTryProcess();
             }));
-
             handle_connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
                 setProcessingEnabled(isProcessingEnabled());
             }));
@@ -311,18 +310,25 @@ void NodeWorker::startProcessingMessages()
 
     // everything has a message here
 
+    bool has_active_token = false;
+
     {
         bool has_multipart = false;
         bool multipart_are_done = true;
 
         for(auto input : node_handle_->getAllInputs()) {
             for(auto& c : input->getConnections()) {
-                int f = c->getMessage()->flags.data;
+                TokenConstPtr token = c->getMessage();
+                int f = token->flags.data;
                 if(f & (int) Token::Flags::Fields::MULTI_PART) {
                     has_multipart = true;
 
                     bool last_part = f & (int) Token::Flags::Fields::LAST_PART;
                     multipart_are_done &= last_part;
+                }
+
+                if(token->isActive()) {
+                    has_active_token = true;
                 }
             }
         }
@@ -379,6 +385,12 @@ void NodeWorker::startProcessingMessages()
     NodePtr node = node_handle_->getNode().lock();
     if(!node) {
         return;
+    }
+
+    if(has_active_token) {
+        if(!node_handle_->isActive()) {
+            node_handle_->setActive(true);
+        }
     }
 
     if(marker) {
@@ -468,6 +480,8 @@ void NodeWorker::finishGenerator()
     } else {
         node_handle_->getOutputTransition()->setOutputsIdle();
     }
+
+    sendEventsAndMaybeDeactivate(node_handle_->isActive());
 }
 
 void NodeWorker::finishProcessing()
@@ -695,6 +709,37 @@ void NodeWorker::publishParameter(csapex::param::Parameter* p)
     }
 }
 
+bool NodeWorker::hasActiveOutputConnection()
+{
+    if(node_handle_->getOutputTransition()->hasActiveConnection()) {
+        return true;
+    }
+    for(Event* e : node_handle_->getEvents()){
+        for(const ConnectionPtr& c : e->getConnections()) {
+            if(c->isEnabled() && c->isActive()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void NodeWorker::sendEventsAndMaybeDeactivate(bool active)
+{
+    if(active) {
+        if(node_handle_->isActive()) {
+            // if there is an active connection -> deactivate
+            if(hasActiveOutputConnection()) {
+                node_handle_->setActive(false);
+            }
+        }
+    }
+    for(Event* e : node_handle_->getEvents()){
+        e->commitMessages(active);
+        e->publish();
+    }
+}
+
 void NodeWorker::sendMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -706,12 +751,12 @@ void NodeWorker::sendMessages()
         apex_assert_hard(e->canSendMessages());
     }
 
-    node_handle_->getOutputTransition()->sendMessages();
+    //tokens are activated if the node is active.
+    bool active = node_handle_->isActive();
 
-    for(Event* e : node_handle_->getEvents()){
-        e->commitMessages();
-        e->publish();
-    }
+    sendEventsAndMaybeDeactivate(active);
+
+    node_handle_->getOutputTransition()->sendMessages(active);
 }
 
 
@@ -825,6 +870,21 @@ void NodeWorker::connectConnector(Connectable *c)
     connections_[c].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
     connections_[c].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
     connections_[c].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
+
+    if(Slot* slot = dynamic_cast<Slot*>(c)) {
+        auto connection = slot->triggered.connect([this, slot]() {
+            TokenConstPtr t = slot->getMessage();
+            apex_assert_hard(t);
+            if(t->isActive()) {
+                node_handle_->setActive(true);
+            }
+            node_handle_->executionRequested([this, slot]() {
+                slot->handleEvent();
+            });
+            sendEventsAndMaybeDeactivate(node_handle_->isActive());
+        });
+        connections_[c].emplace_back(connection);
+    }
 }
 
 void NodeWorker::disconnectConnector(Connectable *c)

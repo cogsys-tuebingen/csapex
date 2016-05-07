@@ -15,6 +15,8 @@
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/event.h>
+#include <csapex/signal/slot.h>
 
 using namespace csapex;
 
@@ -227,6 +229,13 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
             break;
         }
     }
+    for(auto in : input->getSlots()) {
+        Slot* in_ptr = in;
+        if(in_ptr->getLabel() == input_id) {
+            i = in_ptr;
+            break;
+        }
+    }
     if(!i) {
         throw std::logic_error(input->getUUID().getFullName() +
                                " does not have an input with the label " +
@@ -250,6 +259,13 @@ ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output
     Output* o = nullptr;
     for(auto out : output->getAllOutputs()) {
         Output* out_ptr = out.get();
+        if(out_ptr->getLabel() == output_id) {
+            o = out_ptr;
+            break;
+        }
+    }
+    for(auto out : output->getEvents()) {
+        Output* out_ptr = out;
         if(out_ptr->getLabel() == output_id) {
             o = out_ptr;
             break;
@@ -309,6 +325,13 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output
             break;
         }
     }
+    for(auto out : output->getEvents()) {
+        Output* out_ptr = out;
+        if(out_ptr->getLabel() == output_id) {
+            o = out_ptr;
+            break;
+        }
+    }
     if(!o) {
         throw std::logic_error(output->getUUID().getFullName() +
                                " does not have an output with the label " +
@@ -317,6 +340,13 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output
     Input* i = nullptr;
     for(auto in : input->getAllInputs()) {
         Input* in_ptr = in.get();
+        if(in_ptr->getLabel() == input_id) {
+            i = in_ptr;
+            break;
+        }
+    }
+    for(auto in : input->getSlots()) {
+        Slot* in_ptr = in;
         if(in_ptr->getLabel() == input_id) {
             i = in_ptr;
             break;

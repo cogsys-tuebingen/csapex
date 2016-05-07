@@ -73,7 +73,7 @@ void StaticOutput::setMultipart(bool multipart, bool last_part)
     }
 }
 
-void StaticOutput::commitMessages()
+void StaticOutput::commitMessages(bool is_activated)
 {
     apex_assert_hard(canSendMessages());
 
@@ -94,6 +94,8 @@ void StaticOutput::commitMessages()
     ++seq_no_;
     committed_message_->setSequenceNumber(seq_no_);
     committed_message_->flags.data = message_flags_;
+
+    committed_message_->setActive(is_activated);
 
     ++count_;
     messageSent(this);

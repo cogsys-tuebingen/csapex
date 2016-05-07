@@ -36,7 +36,8 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
       uuid_provider_(uuid_provider),
       level_(0),
-      source_(false), sink_(false)
+      source_(false), sink_(false),
+      active_(false)
 {
     node_->initialize(this, uuid);
 
@@ -137,6 +138,25 @@ void NodeHandle::setIsSink(bool sink)
 bool NodeHandle::isSink() const
 {
     return sink_ || outputs_.empty() || transition_out_->isSink();
+}
+
+void NodeHandle::setActive(bool active)
+{
+    if(active != active_) {
+        active_ = active;
+        activationChanged();
+
+        if(active_) {
+            node_->activation();
+        } else {
+            node_->deactivation();
+        }
+    }
+}
+
+bool NodeHandle::isActive() const
+{
+    return active_;
 }
 
 
@@ -493,10 +513,6 @@ void NodeHandle::removeSlot(Slot* s)
         }
     }
 
-    auto cb_it = slot_connections_.find(s);
-    cb_it->second.disconnect();
-    slot_connections_.erase(cb_it);
-
 
     if(it != slots_.end()) {
         SlotPtr slot = *it;
@@ -574,15 +590,6 @@ void NodeHandle::addSlot(SlotPtr s)
     slots_.push_back(s);
 
     connectConnector(s.get());
-
-    Slot* slot = s.get();
-
-    auto connection = s->triggered.connect([this, slot]() {
-        executionRequested([this, slot]() {
-            slot->handleEvent();
-        });
-    });
-    slot_connections_.insert(std::make_pair(slot, connection));
 
     connectorCreated(s);
 }

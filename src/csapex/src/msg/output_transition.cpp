@@ -140,7 +140,7 @@ bool OutputTransition::isSink() const
     return true;
 }
 
-void OutputTransition::sendMessages()
+void OutputTransition::sendMessages(bool is_active)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
@@ -151,7 +151,7 @@ void OutputTransition::sendMessages()
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
 //        if(output->isConnected()) {
-            output->commitMessages();
+            output->commitMessages(is_active);
 //        }
     }
 

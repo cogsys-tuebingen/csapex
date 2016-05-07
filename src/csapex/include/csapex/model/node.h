@@ -35,6 +35,9 @@ public: /* API */
 
     virtual void processMarker(const connection_types::MessageConstPtr &marker);
 
+    virtual void activation();
+    virtual void deactivation();
+
     virtual void reset();
 
     virtual bool isAsynchronous() const;

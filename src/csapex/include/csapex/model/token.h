@@ -15,8 +15,10 @@ public:
     struct Flags
     {
         enum class Fields {
-            MULTI_PART = 1,
-            LAST_PART = 2
+            ACTIVE = 1,
+            MULTI_PART = 8,
+            LAST_PART = 16,
+
         };
 
         Flags();
@@ -56,6 +58,9 @@ public:
     void setSequenceNumber(int seq_no_) const;
 
     virtual void writeRaw(const std::string& file,  const std::string &base, const std::string &suffix) const;
+
+    void setActive(bool active) const;
+    bool isActive() const;
 
 protected:
     void setDescriptiveName(const std::string& descriptiveName);

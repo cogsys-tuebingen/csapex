@@ -15,7 +15,7 @@ public:
 
     virtual void setMultipart(bool multipart, bool last_part) override;
 
-    virtual void commitMessages() override;
+    virtual void commitMessages(bool is_activated) override;
     virtual bool hasMessage() override;
     virtual bool hasMarkerMessage() override;
     virtual void nextMessage() override;

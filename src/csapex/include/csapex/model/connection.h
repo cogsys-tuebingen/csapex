@@ -61,6 +61,9 @@ public:
      */
     TokenConstPtr readMessage();
 
+    bool isActive() const;
+    void setActive(bool active);
+
     bool isEnabled() const;
     bool isSourceEnabled() const;
     bool isSinkEnabled() const;
@@ -106,6 +109,8 @@ protected:
     Input* to_;
     int id_;
     bool is_dynamic_;
+
+    bool active_;
 
     std::vector<FulcrumPtr> fulcrums_;
 

@@ -41,7 +41,7 @@ void DynamicOutput::setMultipart(bool /*multipart*/, bool /*last_part*/)
     // ignored since this is already dynamic
 }
 
-void DynamicOutput::commitMessages()
+void DynamicOutput::commitMessages(bool is_activated)
 {
     apex_assert_hard(canSendMessages());
 
@@ -59,6 +59,8 @@ void DynamicOutput::commitMessages()
     for(TokenConstPtr& m : committed_messages_) {
         m->flags.data |= (int) Token::Flags::Fields::MULTI_PART;
         m->setSequenceNumber(seq_no_);
+
+        m->setActive(is_activated);
     }
 
     apex_assert_hard(committed_messages_.size() > 0);

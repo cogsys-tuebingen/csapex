@@ -138,9 +138,12 @@ private:
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
 
+    void sendEventsAndMaybeDeactivate(bool active);
 
     void connectConnector(Connectable *c);
     void disconnectConnector(Connectable *c);
+
+    bool hasActiveOutputConnection();
 
 private:
     mutable std::recursive_mutex sync;
