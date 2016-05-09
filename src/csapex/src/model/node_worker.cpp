@@ -735,8 +735,10 @@ void NodeWorker::sendEventsAndMaybeDeactivate(bool active)
         }
     }
     for(Event* e : node_handle_->getEvents()){
-        e->commitMessages(active);
-        e->publish();
+        if(e->hasMessage()) {
+            e->commitMessages(active);
+            e->publish();
+        }
     }
 }
 
@@ -880,8 +882,8 @@ void NodeWorker::connectConnector(Connectable *c)
             }
             node_handle_->executionRequested([this, slot]() {
                 slot->handleEvent();
+                sendEventsAndMaybeDeactivate(node_handle_->isActive());
             });
-            sendEventsAndMaybeDeactivate(node_handle_->isActive());
         });
         connections_[c].emplace_back(connection);
     }
