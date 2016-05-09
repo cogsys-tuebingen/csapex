@@ -156,6 +156,9 @@ private:
     Event* trigger_tick_done_;
     Event* trigger_process_done_;
 
+    Event* trigger_activated_;
+    Event* trigger_deactivated_;
+
     std::vector<csapex::slim_signal::Connection> handle_connections_;
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
 

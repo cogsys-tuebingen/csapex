@@ -64,13 +64,15 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 trigger_tick_done_ = node_handle_->addEvent("ticked");
             }
 
+            trigger_activated_ = node_handle_->addEvent("activated");
+            trigger_deactivated_ = node_handle_->addEvent("deactivated");
 
             auto generator = std::dynamic_pointer_cast<GeneratorNode>(node);
             if(generator) {
                 generator->updated.connect(delegate::Delegate0<>(this, &NodeWorker::finishGenerator));
             }
 
-            trigger_process_done_ = node_handle_->addEvent("inputs\nprocessed");
+            trigger_process_done_ = node_handle_->addEvent("inputs processed");
 
             is_setup_ = true;
 

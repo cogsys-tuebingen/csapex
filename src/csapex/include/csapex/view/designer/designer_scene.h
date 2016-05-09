@@ -143,7 +143,7 @@ private:
     std::vector<QRectF> drawConnection(QPainter *painter, Connectable* from, Connectable* to, int id);
     std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
-    void drawPort(QPainter *painter, NodeBox *box, Port* p);
+    void drawPort(QPainter *painter, NodeBox *box, Port* p, int pos = -1);
 
     QPointF offset(const QPointF& vector, Position position, double offset);
 

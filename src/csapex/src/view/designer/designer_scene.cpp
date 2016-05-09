@@ -384,17 +384,23 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         }
 
         // draw slots
-        for(auto slot : node_handle->getAllSlots()) {
-            Port* p = getPort(slot.get());
-            if(p) {
-                drawPort(painter, box, p);
+        {
+            int i = 0;
+            for(auto slot : node_handle->getAllSlots()) {
+                Port* p = getPort(slot.get());
+                if(p) {
+                    drawPort(painter, box, p, i++);
+                }
             }
         }
-        // draw triggers
-        for(auto trigger : node_handle->getAllEvents()) {
-            Port* p = getPort(trigger.get());
-            if(p) {
-                drawPort(painter, box, p);
+        // draw events
+        {
+            int i = 0;
+            for(auto event : node_handle->getAllEvents()) {
+                Port* p = getPort(event.get());
+                if(p) {
+                    drawPort(painter, box, p, i++);
+                }
             }
         }
     }
@@ -1076,7 +1082,7 @@ Port* DesignerScene::getPort(Connectable *c)
     }
 }
 
-void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
+void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p, int pos)
 {
     auto* item = itemAt(centerPoint(p), QTransform());
     if(!item || item->type() != QGraphicsProxyWidget::Type) {
@@ -1163,6 +1169,15 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p)
             dir = c->isOutput() ? Direction::UP : Direction::DOWN;
             auto distance = connector_radius_ + 3;
             rect.translate(-dx/2.0, (dir == Direction::UP) ? distance : -distance-dy);
+        }
+
+        // draw every other port offset
+        if(pos >= 0 && ((pos % 2) == 1)) {
+            if(dir == Direction::UP || dir == Direction::DOWN) {
+                rect.translate(0, dir == Direction::UP ? metrics.height() : -metrics.height());
+            } else {
+                rect.translate(0, 0);
+            }
         }
 
         // drawing
