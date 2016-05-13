@@ -250,7 +250,7 @@ void InputTransition::notifyMessageProcessed()
         }
 
     }
-    apex_assert_hard(areAllConnections(Connection::State::DONE));
+    //apex_assert_hard(areAllConnections(Connection::State::DONE));
     forwarded_ = false;
 }
 

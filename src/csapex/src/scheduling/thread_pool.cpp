@@ -307,7 +307,7 @@ void ThreadPool::saveSettings(YAML::Node& node)
     {
         YAML::Node assignment;
         TaskGenerator* tg = it->first;
-        assignment["uuid"] = tg->getUUID().getFullName();
+        assignment["uuid"] = tg->getUUID().getAbsoluteUUID().getFullName();
         assignment["id"] = it->second->id();
         assignments.push_back(assignment);
     }
@@ -343,7 +343,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
         }
 
 
-        std::unordered_map<UUID, int, UUID::Hasher> assignment_map;
+        std::unordered_map<AUUID, int, UUID::Hasher> assignment_map;
 
         const YAML::Node& assignments = threads["assignments"];
         if(assignments.IsDefined()) {
@@ -351,7 +351,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
                 const YAML::Node& assignment = assignments[i];
 
                 std::string uuid_str = assignment["uuid"].as<std::string>();
-                UUID uuid = UUIDProvider::makeUUID_without_parent(uuid_str);
+                AUUID uuid(UUIDProvider::makeUUID_without_parent(uuid_str));
                 int id = assignment["id"].as<int>();
 
                 assignment_map[uuid] = id;
@@ -363,8 +363,8 @@ void ThreadPool::loadSettings(YAML::Node& node)
             tasks.push_back(it->first);
         }
         for(TaskGenerator* task : tasks) {
-            if(assignment_map.find(task->getUUID()) != assignment_map.end()) {
-                int id = assignment_map[task->getUUID()];
+            if(assignment_map.find(task->getUUID().getAbsoluteUUID()) != assignment_map.end()) {
+                int id = assignment_map.at(task->getUUID().getAbsoluteUUID());
                 addToGroup(task, id);
             }
         }

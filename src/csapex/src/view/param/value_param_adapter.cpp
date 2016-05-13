@@ -90,6 +90,7 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
     } else if(value_p_->is<double>()) {
         QPointer<QDoubleSpinBox> box = new QDoubleSpinBox;
         box->setDecimals(10);
+        box->setSingleStep(0.001);
         box->setMaximum(1e12);
         box->setMinimum(-1e12);
         box->setValue(value_p_->as<double>());

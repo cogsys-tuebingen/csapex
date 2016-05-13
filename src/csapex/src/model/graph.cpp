@@ -155,7 +155,7 @@ int Graph::countNodes()
 }
 
 
-bool Graph::addConnection(ConnectionPtr connection)
+bool Graph::addConnection(ConnectionPtr connection, bool quiet)
 {
     apex_assert_hard(connection);
 
@@ -180,12 +180,15 @@ bool Graph::addConnection(ConnectionPtr connection)
             node_parents_[n_to].push_back(n_from);
             node_children_[n_from].push_back(n_to);
 
-            buildConnectedComponents();
-            verify();
+            if(!quiet) {
+                buildConnectedComponents();
+            }
         }
     }
 
-    connectionAdded(connection.get());
+    if(!quiet) {
+        connectionAdded(connection.get());
+    }
     return true;
 }
 
@@ -231,7 +234,6 @@ void Graph::deleteConnection(ConnectionPtr connection)
             connections_.erase(c);
 
             buildConnectedComponents();
-            verify();
 
             connectionDeleted(connection.get());
             state_changed();
@@ -443,9 +445,6 @@ void Graph::assignLevels()
 
 }
 
-void Graph::verify()
-{
-}
 
 int Graph::getComponent(const UUID &node_uuid) const
 {

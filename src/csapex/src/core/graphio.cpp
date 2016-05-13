@@ -68,6 +68,8 @@ void GraphIO::loadGraph(const YAML::Node& doc)
     loadNodes(doc);
     loadConnections(doc);
 
+    graph_->buildConnectedComponents();
+
     loadViewRequest(graph_, doc);
 }
 
@@ -434,7 +436,7 @@ void GraphIO::loadMessageConnection(Connectable* from, NodeHandle* parent, const
             ConnectionPtr c = BundledConnection::connect(
                         out, in,
                         parent->getOutputTransition(), target->getInputTransition());
-            graph_->addConnection(c);
+            graph_->addConnection(c, true);
         }
 
     } catch(const std::exception& e) {
