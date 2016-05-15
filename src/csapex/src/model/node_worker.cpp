@@ -888,12 +888,12 @@ void NodeWorker::connectConnector(Connectable *c)
 
     } else if(Slot* slot = dynamic_cast<Slot*>(c)) {
         auto connection = slot->triggered.connect([this, slot]() {
-            TokenConstPtr t = slot->getMessage();
-            apex_assert_hard(t);
-            if(t->isActive()) {
-                node_handle_->setActive(true);
-            }
             node_handle_->executionRequested([this, slot]() {
+                TokenConstPtr t = slot->getMessage();
+                apex_assert_hard(t);
+                if(t->isActive()) {
+                    node_handle_->setActive(true);
+                }
                 slot->handleEvent();
             });
         });

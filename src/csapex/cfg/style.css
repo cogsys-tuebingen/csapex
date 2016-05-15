@@ -118,6 +118,10 @@ csapex--NodeBox[disabled="true"] QFrame#boxframe {
 }
 csapex--NodeBox[disabled="true"] QFrame#boxframe  QLabel {
 }
+/* active box */
+csapex--NodeBox[active="true"] QFrame#boxframe {
+        border-width: 5px;
+}
 
 /* note */
 csapex--NoteBox {

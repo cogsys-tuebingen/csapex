@@ -182,8 +182,6 @@ private:
 
     bool source_;
     bool sink_;
-
-    bool active_;
 };
 
 }

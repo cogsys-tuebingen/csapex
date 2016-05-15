@@ -53,6 +53,10 @@ public:
     void setEnabled(bool value);
     Signal enabled_changed;
 
+    bool isActive() const;
+    void setActive(bool value);
+    Signal active_changed;
+
     bool isFlipped() const;
     void setFlipped(bool value);
     Signal flipped_changed;
@@ -99,6 +103,7 @@ private:
 
     bool minimized_;
     bool enabled_;
+    bool active_;
     bool flipped_;
 
     int thread_id_;

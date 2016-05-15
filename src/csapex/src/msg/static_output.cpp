@@ -79,8 +79,11 @@ void StaticOutput::commitMessages(bool is_activated)
 
     activate();
 
+    bool send_active = is_activated;
 
     if(message_to_send_) {
+        send_active |= message_to_send_->isActive();
+
         committed_message_ = message_to_send_;
         clearBuffer();
 
@@ -95,7 +98,7 @@ void StaticOutput::commitMessages(bool is_activated)
     committed_message_->setSequenceNumber(seq_no_);
     committed_message_->flags.data = message_flags_;
 
-    committed_message_->setActive(is_activated);
+    committed_message_->setActive(send_active);
 
     ++count_;
     messageSent(this);

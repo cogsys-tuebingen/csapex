@@ -36,8 +36,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
       uuid_provider_(uuid_provider),
       level_(0),
-      source_(false), sink_(false),
-      active_(false)
+      source_(false), sink_(false)
 {
     node_->initialize(this, uuid);
 
@@ -45,6 +44,14 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
     node_state_->setParent(this);
 
     node_state_->enabled_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->active_changed->connect([this](){
+        activationChanged();
+        if(isActive()) {
+            node_->activation();
+        } else {
+            node_->deactivation();
+        }
+    });
     node_state_->flipped_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     node_state_->label_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     node_state_->minimized_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
@@ -142,21 +149,12 @@ bool NodeHandle::isSink() const
 
 void NodeHandle::setActive(bool active)
 {
-    if(active != active_) {
-        active_ = active;
-        activationChanged();
-
-        if(active_) {
-            node_->activation();
-        } else {
-            node_->deactivation();
-        }
-    }
+    node_state_->setActive(active);
 }
 
 bool NodeHandle::isActive() const
 {
-    return active_;
+    return node_state_->isActive();
 }
 
 

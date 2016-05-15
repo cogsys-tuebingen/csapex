@@ -18,12 +18,13 @@ NodeState::NodeState(const NodeHandle *parent)
       label_changed(new SignalImpl),
       minimized_changed(new SignalImpl),
       enabled_changed(new SignalImpl),
+      active_changed(new SignalImpl),
       flipped_changed(new SignalImpl),
       thread_changed(new SignalImpl),
       parent_changed(new SignalImpl),
       parent_(parent),
 
-      z_(0), minimized_(false), enabled_(true), flipped_(false), thread_id_(-1),
+      z_(0), minimized_(false), enabled_(true), active_(false), flipped_(false), thread_id_(-1),
       r_(-1), g_(-1), b_(-1)
 {
     if(parent) {
@@ -40,6 +41,7 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     // first change all values
     pos_ = rhs.pos_;
     enabled_ = rhs.enabled_;
+    active_ = rhs.active_;
     z_ = rhs.z_;
     r_ = rhs.r_;
     g_ = rhs.g_;
@@ -55,6 +57,7 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     // then trigger the signals
     (*pos_changed)();
     (*enabled_changed)();
+    (*active_changed)();
     (*z_changed)();
     (*color_changed)();
     (*minimized_changed)();
@@ -146,6 +149,19 @@ void NodeState::setEnabled(bool value)
     if(enabled_ != value) {
         enabled_ = value;
         (*enabled_changed)();
+    }
+}
+
+bool NodeState::isActive() const
+{
+    return active_;
+}
+
+void NodeState::setActive(bool value)
+{
+    if(active_ != value) {
+        active_ = value;
+        (*active_changed)();
     }
 }
 

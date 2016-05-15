@@ -794,8 +794,11 @@ void NodeBox::updateVisuals()
         return;
     }
     NodeStatePtr state = nh->getNodeState();
-    bool flip = state->isFlipped();
 
+    setProperty("active", state->isActive());
+    apex_assert_hard(!state->isActive());
+
+    bool flip = state->isFlipped();
 
     if(grip_) {
         auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());

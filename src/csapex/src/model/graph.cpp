@@ -677,8 +677,6 @@ void Graph::activation()
     TokenConstPtr active_token(new connection_types::NoMessage);
     active_token->setActive(true);
     activation_event_->triggerWith(active_token);
-
-//    todo: continue here -> doesn't trigger!
 }
 
 
