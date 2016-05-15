@@ -190,14 +190,14 @@ private:
     CommandDispatcher* dispatcher_;
     DragIO& drag_io_;
 
-    PortPanel* relayed_inputs_widget_;
-    QGraphicsProxyWidget* relayed_inputs_widget_proxy_;
-    PortPanel* relayed_outputs_widget_;
-    QGraphicsProxyWidget* relayed_outputs_widget_proxy_;
-    PortPanel* relayed_slots_widget_;
-    QGraphicsProxyWidget* relayed_slots_widget_proxy_;
-    PortPanel* relayed_triggers_widget_;
-    QGraphicsProxyWidget* relayed_triggers_widget_proxy_;
+    PortPanel* inputs_widget_;
+    QGraphicsProxyWidget* inputs_widget_proxy_;
+    PortPanel* outputs_widget_;
+    QGraphicsProxyWidget* outputs_widget_proxy_;
+    PortPanel* slots_widget_;
+    QGraphicsProxyWidget* slots_widget_proxy_;
+    PortPanel* triggers_widget_;
+    QGraphicsProxyWidget* triggers_widget_proxy_;
 
     std::map<NodeWorker*, std::vector<csapex::slim_signal::ScopedConnection>> worker_connections_;
     std::map<NodeHandle*, std::vector<csapex::slim_signal::ScopedConnection>> handle_connections_;

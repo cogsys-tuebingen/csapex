@@ -21,13 +21,11 @@
 using namespace csapex;
 
 
-PortPanel::PortPanel(ConnectorType type, const AUUID& target, DesignerScene* parent)
-    : type_(type), parent_(parent)
+PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
+    : type_(type), parent_(parent), mainlayout(nullptr), layout(nullptr)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setMinimumSize(10, 10);
-
-    QBoxLayout* mainlayout = nullptr;
 
     setFocusPolicy(Qt::NoFocus);
 
@@ -50,16 +48,19 @@ PortPanel::PortPanel(ConnectorType type, const AUUID& target, DesignerScene* par
 
     mainlayout->addLayout(layout);
 
+    setLayout(mainlayout);
+
+    QObject::connect(this, &PortPanel::connectorAdded, this, &PortPanel::addPortForConnector);
+    QObject::connect(this, &PortPanel::connectorRemoved, this, &PortPanel::removePortForConnector);
+}
+
+void PortPanel::enableMetaPort(const AUUID& target)
+{
     MetaPort* meta_port = new MetaPort(port_type::opposite(type_), target);
     QObject::connect(meta_port, &MetaPort::createPortRequest, this, &PortPanel::createPortRequest);
     QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &PortPanel::createPortAndConnectRequest);
     QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &PortPanel::createPortAndMoveRequest);
     mainlayout->addWidget(meta_port);
-
-    setLayout(mainlayout);
-
-    QObject::connect(this, &PortPanel::connectorAdded, this, &PortPanel::addPortForConnector);
-    QObject::connect(this, &PortPanel::connectorRemoved, this, &PortPanel::removePortForConnector);
 }
 
 void PortPanel::setup(GraphFacadePtr graph_facade)
@@ -132,28 +133,28 @@ void PortPanel::removePortForConnector(ConnectablePtr c)
 
 void PortPanel::setupOutput()
 {
-    for(const UUID& uuid : graph_->getRelayOutputs()) {
+    for(const UUID& uuid : graph_->getInternalOutputs()) {
         addPortForConnector(graph_->getForwardedOutputInternal(uuid));
     }
 }
 
 void PortPanel::setupInput()
 {
-    for(const UUID& uuid : graph_->getRelayInputs()) {
+    for(const UUID& uuid : graph_->getInternalInputs()) {
         addPortForConnector(graph_->getForwardedInputInternal(uuid));
     }
 }
 
 void PortPanel::setupSlot()
 {
-    for(const UUID& uuid : graph_->getRelaySlots()) {
+    for(const UUID& uuid : graph_->getInternalSlots()) {
         addPortForConnector(graph_->getForwardedSlotInternal(uuid));
     }
 }
 
 void PortPanel::setupEvent()
 {
-    for(const UUID& uuid : graph_->getRelayEvents()) {
+    for(const UUID& uuid : graph_->getInternalEvents()) {
         addPortForConnector(graph_->getForwardedEventInternal(uuid));
     }
 }

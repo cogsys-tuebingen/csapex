@@ -154,53 +154,55 @@ GraphView::~GraphView()
 
 void GraphView::setupWidgets()
 {
+    AUUID parent = getGraphFacade()->getAbsoluteUUID();
+
+    outputs_widget_ = new PortPanel(ConnectorType::OUTPUT, scene_);
+    QObject::connect(outputs_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+    QObject::connect(outputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    QObject::connect(outputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+    QObject::connect(outputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+    outputs_widget_proxy_ = scene_->addWidget(outputs_widget_);
+    outputs_widget_->setup(graph_facade_);
+
+
+    inputs_widget_ = new PortPanel(ConnectorType::INPUT, scene_);
+    QObject::connect(inputs_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+    QObject::connect(inputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    QObject::connect(inputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+    QObject::connect(inputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+    inputs_widget_proxy_ = scene_->addWidget(inputs_widget_);
+    inputs_widget_->setup(graph_facade_);
+
+
+    slots_widget_ = new PortPanel(ConnectorType::SLOT_T, scene_);
+    QObject::connect(slots_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+    QObject::connect(slots_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    QObject::connect(slots_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+    QObject::connect(slots_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+    slots_widget_proxy_ = scene_->addWidget(slots_widget_);
+    slots_widget_->setup(graph_facade_);
+
+
+    triggers_widget_ = new PortPanel(ConnectorType::EVENT, scene_);
+    QObject::connect(triggers_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+    QObject::connect(triggers_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    QObject::connect(triggers_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+    QObject::connect(triggers_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+    triggers_widget_proxy_ = scene_->addWidget(triggers_widget_);
+    triggers_widget_->setup(graph_facade_);
+
+    // if this is a nested graph -> enable meta port
     if(graph_facade_->getParent()) {
-        AUUID parent = getGraphFacade()->getAbsoluteUUID();
-
-        relayed_outputs_widget_ = new PortPanel(ConnectorType::OUTPUT, parent, scene_);
-        QObject::connect(relayed_outputs_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
-        QObject::connect(relayed_outputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
-        QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
-        QObject::connect(relayed_outputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
-        relayed_outputs_widget_proxy_ = scene_->addWidget(relayed_outputs_widget_);
-
-        relayed_outputs_widget_->setup(graph_facade_);
-
-
-        relayed_inputs_widget_ = new PortPanel(ConnectorType::INPUT, parent, scene_);
-        QObject::connect(relayed_inputs_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
-        QObject::connect(relayed_inputs_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
-        QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
-        QObject::connect(relayed_inputs_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
-        relayed_inputs_widget_proxy_ = scene_->addWidget(relayed_inputs_widget_);
-
-        relayed_inputs_widget_->setup(graph_facade_);
-
-
-        relayed_slots_widget_ = new PortPanel(ConnectorType::SLOT_T, parent, scene_);
-        QObject::connect(relayed_slots_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
-        QObject::connect(relayed_slots_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
-        QObject::connect(relayed_slots_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
-        QObject::connect(relayed_slots_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
-        relayed_slots_widget_proxy_ = scene_->addWidget(relayed_slots_widget_);
-
-        relayed_slots_widget_->setup(graph_facade_);
-
-
-        relayed_triggers_widget_ = new PortPanel(ConnectorType::EVENT, parent, scene_);
-        QObject::connect(relayed_triggers_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
-        QObject::connect(relayed_triggers_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
-        QObject::connect(relayed_triggers_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
-        QObject::connect(relayed_triggers_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
-        relayed_triggers_widget_proxy_ = scene_->addWidget(relayed_triggers_widget_);
-
-        relayed_triggers_widget_->setup(graph_facade_);
+        outputs_widget_->enableMetaPort(parent);
+        inputs_widget_->enableMetaPort(parent);
+        slots_widget_->enableMetaPort(parent);
+        triggers_widget_->enableMetaPort(parent);
     }
 }
 
 void GraphView::paintEvent(QPaintEvent *e)
 {
-    if(!scene_->isEmpty() && graph_facade_->getParent()) {
+    if(!scene_->isEmpty()) {
         QPointF tl_view = mapToScene(QPoint(0, 0));
         QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
 
@@ -208,30 +210,30 @@ void GraphView::paintEvent(QPaintEvent *e)
 
         {
             QPointF pos(tl_view.x(),
-                        mid.y() - relayed_outputs_widget_->height() / 2.0);
-            if(pos != relayed_outputs_widget_proxy_->pos()) {
-                relayed_outputs_widget_proxy_->setPos(pos);
+                        mid.y() - outputs_widget_->height() / 2.0);
+            if(pos != outputs_widget_proxy_->pos()) {
+                outputs_widget_proxy_->setPos(pos);
             }
         }
         {
-            QPointF pos(br_view.x()-relayed_inputs_widget_->width(),
-                        mid.y() - relayed_inputs_widget_->height() / 2.0);
-            if(pos != relayed_inputs_widget_proxy_->pos()) {
-                relayed_inputs_widget_proxy_->setPos(pos);
+            QPointF pos(br_view.x()-inputs_widget_->width(),
+                        mid.y() - inputs_widget_->height() / 2.0);
+            if(pos != inputs_widget_proxy_->pos()) {
+                inputs_widget_proxy_->setPos(pos);
             }
         }
         {
-            QPointF pos(mid.x() - relayed_slots_widget_->width() / 2.0,
-                        br_view.y() - relayed_slots_widget_->height());
-            if(pos != relayed_slots_widget_proxy_->pos()) {
-                relayed_slots_widget_proxy_->setPos(pos);
+            QPointF pos(mid.x() - slots_widget_->width() / 2.0,
+                        br_view.y() - slots_widget_->height());
+            if(pos != slots_widget_proxy_->pos()) {
+                slots_widget_proxy_->setPos(pos);
             }
         }
         {
-            QPointF pos(mid.x() - relayed_triggers_widget_->width() / 2.0,
+            QPointF pos(mid.x() - triggers_widget_->width() / 2.0,
                         tl_view.y());
-            if(pos != relayed_triggers_widget_proxy_->pos()) {
-                relayed_triggers_widget_proxy_->setPos(pos);
+            if(pos != triggers_widget_proxy_->pos()) {
+                triggers_widget_proxy_->setPos(pos);
             }
         }
     }
@@ -744,16 +746,16 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     addBox(box);
 
     // add existing connectors
-    for(auto input : node_handle->getAllInputs()) {
+    for(auto input : node_handle->getExternalInputs()) {
         connectorMessageAdded(input);
     }
-    for(auto output : node_handle->getAllOutputs()) {
+    for(auto output : node_handle->getExternalOutputs()) {
         connectorMessageAdded(output);
     }
-    for(auto slot : node_handle->getAllSlots()) {
+    for(auto slot : node_handle->getExternalSlots()) {
         connectorSignalAdded(slot);
     }
-    for(auto event : node_handle->getAllEvents()) {
+    for(auto event : node_handle->getExternalEvents()) {
         connectorSignalAdded(event);
     }
 
@@ -820,9 +822,11 @@ void GraphView::connectorSignalAdded(ConnectablePtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
     NodeBox* box = getBox(parent_uuid);
-    QBoxLayout* layout = dynamic_cast<Event*>(connector.get()) ? box->getEventLayout() : box->getSlotLayout();
+    if(box) {
+        QBoxLayout* layout = dynamic_cast<Event*>(connector.get()) ? box->getEventLayout() : box->getSlotLayout();
 
-    box->createPort(connector, layout);
+        box->createPort(connector, layout);
+    }
 }
 
 NodeBox* GraphView::getBox(const UUID &node_id)
@@ -1144,12 +1148,10 @@ void GraphView::overwriteStyleSheet(const QString &stylesheet)
         box->updateVisuals();
     }
 
-    if(graph_facade_->getParent()) {
-        relayed_outputs_widget_->setStyleSheet(stylesheet);
-        relayed_inputs_widget_->setStyleSheet(stylesheet);
-        relayed_slots_widget_->setStyleSheet(stylesheet);
-        relayed_triggers_widget_->setStyleSheet(stylesheet);
-    }
+    outputs_widget_->setStyleSheet(stylesheet);
+    inputs_widget_->setStyleSheet(stylesheet);
+    slots_widget_->setStyleSheet(stylesheet);
+    triggers_widget_->setStyleSheet(stylesheet);
 }
 
 void GraphView::updateBoxInformation()

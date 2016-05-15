@@ -33,6 +33,15 @@ void OutputTransition::reset()
     Transition::reset();
 }
 
+std::vector<UUID> OutputTransition::getOutputs() const
+{
+    std::vector<UUID> res;
+    for(const auto& pair : outputs_) {
+        res.push_back(pair.second->getUUID());
+    }
+    return res;
+}
+
 OutputPtr OutputTransition::getOutput(const UUID& id) const
 {
     return outputs_.at(id);

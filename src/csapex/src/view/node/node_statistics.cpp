@@ -63,7 +63,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
 
-        for(auto input : node_handle_->getAllInputs()) {
+        for(auto input : node_handle_->getExternalInputs()) {
             QTreeWidgetItem* connector_widget = createDebugInformationConnector(input.get());
 
             QTreeWidgetItem* input_widget = new QTreeWidgetItem;
@@ -93,7 +93,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
 
-        for(auto output : node_handle_->getAllOutputs()) {
+        for(auto output : node_handle_->getExternalOutputs()) {
             QTreeWidgetItem* output_widget = createDebugInformationConnector(output.get());
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;

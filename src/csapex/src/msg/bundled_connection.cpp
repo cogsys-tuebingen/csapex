@@ -10,7 +10,7 @@
 
 using namespace csapex;
 
-ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransition* ot, InputTransition* it)
+ConnectionPtr BundledConnection::connect(Output *from, Input *to)
 {
     apex_assert_hard(from);
     apex_assert_hard(to);
@@ -20,7 +20,7 @@ ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransiti
     to->addConnection(r);
     return r;
 }
-ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransition *ot, InputTransition *it, int id)
+ConnectionPtr BundledConnection::connect(Output *from, Input *to, int id)
 {
     apex_assert_hard(from);
     apex_assert_hard(to);
@@ -28,30 +28,6 @@ ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransiti
     ConnectionPtr r(new BundledConnection(from, to, id));
     from->addConnection(r);
     to->addConnection(r);
-    return r;
-}
-
-ConnectionPtr BundledConnection::connect(Output *from, Input *to, OutputTransition* ot)
-{
-    apex_assert_hard(from);
-    apex_assert_hard(to);
-    apex_assert_hard(from->isConnectionPossible(to));
-    ConnectionPtr r(new BundledConnection(from, to));
-    from->addConnection(r);
-    to->addConnection(r);
-
-    return r;
-}
-
-ConnectionPtr BundledConnection::connect(Output *from, Input *to, InputTransition* it)
-{
-    apex_assert_hard(from);
-    apex_assert_hard(to);
-    apex_assert_hard(from->isConnectionPossible(to));
-    ConnectionPtr r(new BundledConnection(from, to));
-    from->addConnection(r);
-    to->addConnection(r);
-
     return r;
 }
 

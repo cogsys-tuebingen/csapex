@@ -10,11 +10,8 @@ namespace csapex
 class BundledConnection : public DirectConnection
 {
 public:
-    static ConnectionPtr connect(Output* from, Input* to, OutputTransition* ot, InputTransition* it);
-    static ConnectionPtr connect(Output* from, Input* to, OutputTransition* ot, InputTransition* it, int id);
-
-    static ConnectionPtr connect(Output* from, Input* to, OutputTransition* ot);
-    static ConnectionPtr connect(Output* from, Input* to, InputTransition* it);
+    static ConnectionPtr connect(Output* from, Input* to);
+    static ConnectionPtr connect(Output* from, Input* to, int id);
 
 private:
     BundledConnection(Output* from, Input* to);

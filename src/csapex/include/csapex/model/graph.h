@@ -57,6 +57,9 @@ public:
 
     virtual void stateChanged() override;
 
+    virtual void activation() override;
+    void setupRoot();
+
     void clear();
 
     Node* findNode(const UUID& uuid) const;
@@ -116,6 +119,7 @@ public:
     virtual Event* createVariadicEvent(const std::string& label) override;
     virtual Slot* createVariadicSlot(const std::string& label, std::function<void()> callback) override;
 
+
     virtual void removeVariadicInput(InputPtr input) override;
     virtual void removeVariadicOutput(OutputPtr input) override;
     virtual void removeVariadicEvent(EventPtr input) override;
@@ -136,17 +140,15 @@ public:
     EventPtr getRelayForSlot(const UUID& external_uuid) const;
     SlotPtr getRelayForEvent(const UUID& external_uuid) const;
 
-
-
     UUID getForwardedInputExternal(const UUID& internal_uuid) const;
     UUID getForwardedOutputExternal(const UUID& internal_uuid) const;
     UUID getForwardedSlotExternal(const UUID& internal_uuid) const;
     UUID getForwardedEventExternal(const UUID& internal_uuid) const;
 
-    std::vector<UUID> getRelayOutputs() const;
-    std::vector<UUID> getRelayInputs() const;
-    std::vector<UUID> getRelaySlots() const;
-    std::vector<UUID> getRelayEvents() const;
+    std::vector<UUID> getInternalOutputs() const;
+    std::vector<UUID> getInternalInputs() const;
+    std::vector<UUID> getInternalSlots() const;
+    std::vector<UUID> getInternalEvents() const;
 
     std::string makeStatusString() const;
 
@@ -155,6 +157,8 @@ private:
     UUID  addForwardingOutput(const UUID& internal_uuid, const TokenConstPtr& type, const std::string& label);
     UUID  addForwardingSlot(const UUID& internal_uuid, const std::string& label);
     UUID  addForwardingEvent(const UUID& internal_uuid, const std::string& label);
+
+    EventPtr createInternalEvent(const UUID& internal_uuid, const std::string& label);
 
    /*rename*/ void verify();
     void buildConnectedComponents();
@@ -193,13 +197,13 @@ protected:
 
     InputTransitionPtr transition_relay_in_;
     OutputTransitionPtr transition_relay_out_;
-    std::unordered_map<UUID, SlotPtr, UUID::Hasher> relay_slot_;
-    std::unordered_map<UUID, EventPtr, UUID::Hasher> relay_event_;
+    std::unordered_map<UUID, SlotPtr, UUID::Hasher> internal_slots_;
+    std::unordered_map<UUID, EventPtr, UUID::Hasher> internal_events_;
 
-    std::unordered_map<UUID, OutputPtr, UUID::Hasher> forward_inputs_;
-    std::unordered_map<UUID, InputPtr, UUID::Hasher> forward_outputs_;
-    std::unordered_map<UUID, SlotPtr, UUID::Hasher> forward_event_;
-    std::unordered_map<UUID, EventPtr, UUID::Hasher> forward_slot_;
+    std::unordered_map<UUID, OutputPtr, UUID::Hasher> external_to_internal_outputs_;
+    std::unordered_map<UUID, InputPtr, UUID::Hasher> external_to_internal_inputs_;
+    std::unordered_map<UUID, SlotPtr, UUID::Hasher> external_to_internal_slots_;
+    std::unordered_map<UUID, EventPtr, UUID::Hasher> external_to_internal_events_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_output_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
@@ -207,6 +211,8 @@ protected:
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_event_;
 
     bool is_initialized_;
+
+    EventPtr activation_event_;
 };
 
 }

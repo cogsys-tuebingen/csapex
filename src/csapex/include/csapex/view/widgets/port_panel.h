@@ -10,6 +10,8 @@
 /// SYSTEM
 #include <QFrame>
 
+class QBoxLayout;
+
 namespace csapex
 {
 
@@ -22,9 +24,11 @@ class PortPanel : public QFrame
 public:
 
 public:
-    PortPanel(ConnectorType type, const AUUID &target, DesignerScene *parent);
+    PortPanel(ConnectorType type, DesignerScene *parent);
 
     void setup(GraphFacadePtr graph_facade);
+
+    void enableMetaPort(const AUUID& target);
 
     QString cssClass() {
         return QString("PortPanel");
@@ -57,6 +61,7 @@ private:
     ConnectorType type_;
     DesignerScene *parent_;
 
+    QBoxLayout* mainlayout;
     QLayout* layout;
 };
 

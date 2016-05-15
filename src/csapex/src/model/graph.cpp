@@ -22,6 +22,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
 #include <csapex/msg/bundled_connection.h>
+#include <csapex/msg/no_message.h>
 
 /// SYSTEM
 #include <iostream>
@@ -345,7 +346,7 @@ void Graph::assignLevels()
         int max_dynamic_level = NO_LEVEL;
         bool has_dynamic_parent_output = false;
         bool has_dynamic_input = false;
-        for(const auto& input : current->getAllInputs()) {
+        for(const auto& input : current->getExternalInputs()) {
             if(input->isDynamic()) {
                 has_dynamic_input = true;
             }
@@ -389,7 +390,7 @@ void Graph::assignLevels()
     for(auto node : nodes_) {
         node->setLevel(node_level[node.get()]);
 
-        for(auto output : node->getAllOutputs()) {
+        for(auto output : node->getExternalOutputs()) {
             if(output->isDynamic()) {
                 DynamicOutput* dout = dynamic_cast<DynamicOutput*>(output.get());
                 dout->clearCorrespondents();
@@ -409,7 +410,7 @@ void Graph::assignLevels()
             Q.pop_front();
             visited.insert(current);
 
-            for(auto input : current->getAllInputs()) {
+            for(auto input : current->getExternalInputs()) {
                 if(input->isConnected()) {
                     ConnectionPtr connection = input->getConnections().front();
                     Output* out = dynamic_cast<Output*>(connection->from());
@@ -431,7 +432,7 @@ void Graph::assignLevels()
         }
 
         if(correspondent) {
-            for(auto input : node->getAllInputs()) {
+            for(auto input : node->getExternalInputs()) {
                 if(input->isDynamic()) {
                     DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
                     di->setCorrespondent(correspondent);
@@ -584,6 +585,13 @@ std::vector<NodeHandle*> Graph::getAllNodeHandles()
 
 Connectable* Graph::findConnector(const UUID &uuid)
 {
+    if(internal_slots_.find(uuid) != internal_slots_.end()) {
+        return internal_slots_.at(uuid).get();
+    }
+    if(internal_events_.find(uuid) != internal_events_.end()) {
+        return internal_events_.at(uuid).get();
+    }
+
     NodeHandle* owner = findNodeHandle(uuid.parentUUID());
     apex_assert_hard(owner);
 
@@ -659,6 +667,21 @@ void Graph::setup(NodeModifier &modifier)
     setupVariadic(modifier);
 }
 
+void Graph::setupRoot()
+{
+    activation_event_ = createInternalEvent(generateDerivedUUID(UUID(),"event"), "activation");
+}
+
+void Graph::activation()
+{
+    TokenConstPtr active_token(new connection_types::NoMessage);
+    active_token->setActive(true);
+    activation_event_->triggerWith(active_token);
+
+//    todo: continue here -> doesn't trigger!
+}
+
+
 void Graph::setupParameters(Parameterizable &params)
 {
     setupVariadicParameters(params);
@@ -672,7 +695,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
     for(Input* i : node_modifier.getMessageInputs()) {
         TokenConstPtr m = msg::getMessage(i);
-        OutputPtr o = forward_inputs_.at(i->getUUID());
+        OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
         msg::publish(o.get(), m);
     }
@@ -710,14 +733,14 @@ Input* Graph::createVariadicInput(TokenConstPtr type, const std::string& label, 
 
 void Graph::removeVariadicInput(InputPtr input)
 {
-    OutputPtr relay = forward_inputs_[input->getUUID()];
+    OutputPtr relay = external_to_internal_outputs_[input->getUUID()];
     forwardingRemoved(relay);
 
     VariadicInputs::removeVariadicInput(input);
 
     relay_to_external_input_.erase(relay->getUUID());
 
-    forward_inputs_.erase(input->getUUID());
+    external_to_internal_outputs_.erase(input->getUUID());
     transition_relay_out_->removeOutput(relay);
 }
 
@@ -744,7 +767,7 @@ UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenConstPtr& 
 
     transition_relay_out_->addOutput(relay);
 
-    forward_inputs_[external_input->getUUID()] = relay;
+    external_to_internal_outputs_[external_input->getUUID()] = relay;
 
     relay_to_external_input_[internal_uuid] = external_input->getUUID();
 
@@ -762,7 +785,7 @@ Output* Graph::createVariadicOutput(TokenConstPtr type, const std::string& label
 
 void Graph::removeVariadicOutput(OutputPtr output)
 {
-    InputPtr relay = forward_outputs_[output->getUUID()];
+    InputPtr relay = external_to_internal_inputs_[output->getUUID()];
     forwardingRemoved(relay);
 
     relay->message_set.disconnectAll();
@@ -771,7 +794,7 @@ void Graph::removeVariadicOutput(OutputPtr output)
 
     relay_to_external_output_.erase(relay->getUUID());
 
-    forward_outputs_.erase(output->getUUID());
+    external_to_internal_inputs_.erase(output->getUUID());
     transition_relay_in_->removeInput(relay);
 }
 
@@ -806,7 +829,7 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenConstPtr& 
 
     transition_relay_in_->addInput(relay);
 
-    forward_outputs_[external_output->getUUID()] = relay;
+    external_to_internal_inputs_[external_output->getUUID()] = relay;
 
     relay_to_external_output_[internal_uuid] = external_output->getUUID();
 
@@ -825,10 +848,10 @@ Slot* Graph::createVariadicSlot(const std::string& label, std::function<void()> 
 
 void Graph::removeVariadicSlot(SlotPtr slot)
 {
-    EventPtr relay = forward_slot_.at(slot->getUUID());
-    forward_slot_.erase(slot->getUUID());
+    EventPtr relay = external_to_internal_events_.at(slot->getUUID());
+    external_to_internal_events_.erase(slot->getUUID());
 
-    relay_event_.erase(relay->getUUID());
+    internal_events_.erase(relay->getUUID());
 
     forwardingRemoved(relay);
 
@@ -849,8 +872,7 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& labe
 {
     registerUUID(internal_uuid);
 
-    EventPtr relay = std::make_shared<Event>(internal_uuid);
-    relay->setLabel(label);
+    EventPtr relay = createInternalEvent(internal_uuid, label);
 
     auto cb = [relay]() {
         relay->trigger();
@@ -858,10 +880,7 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& labe
 
     Slot* external_slot = VariadicSlots::createVariadicSlot(label, cb);
 
-    relay->connectionInProgress.connect(internalConnectionInProgress);
-
-    forward_slot_[external_slot->getUUID()] = relay;
-    relay_event_[internal_uuid] = relay;
+    external_to_internal_events_[external_slot->getUUID()] = relay;
 
     relay_to_external_slot_[internal_uuid] = external_slot->getUUID();
 
@@ -870,7 +889,20 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& labe
     return external_slot->getUUID();
 }
 
+EventPtr Graph::createInternalEvent(const UUID& internal_uuid, const std::string& label)
+{
+    EventPtr event = node_handle_->addInternalEvent(internal_uuid, label);
 
+    event->connectionInProgress.connect(internalConnectionInProgress);
+
+    internal_events_[internal_uuid] = event;
+
+//    event->triggered.connect([this]() {
+//        std::cerr << "tigger internal event" << std::endl;
+//    });
+
+    return event;
+}
 
 Event* Graph::createVariadicEvent(const std::string& label)
 {
@@ -880,10 +912,10 @@ Event* Graph::createVariadicEvent(const std::string& label)
 
 void Graph::removeVariadicEvent(EventPtr event)
 {
-    SlotPtr relay = forward_event_.at(event->getUUID());
-    forward_event_.erase(event->getUUID());
+    SlotPtr relay = external_to_internal_slots_.at(event->getUUID());
+    external_to_internal_slots_.erase(event->getUUID());
 
-    relay_slot_.erase(relay->getUUID());
+    internal_slots_.erase(relay->getUUID());
 
     forwardingRemoved(relay);
 
@@ -922,8 +954,8 @@ UUID Graph::addForwardingEvent(const UUID& internal_uuid, const std::string& lab
         });
     });
 
-    forward_event_[external_event->getUUID()] = relay;
-    relay_slot_[internal_uuid] = relay;
+    external_to_internal_slots_[external_event->getUUID()] = relay;
+    internal_slots_[internal_uuid] = relay;
 
     relay_to_external_event_[internal_uuid] = external_event->getUUID();
 
@@ -934,19 +966,19 @@ UUID Graph::addForwardingEvent(const UUID& internal_uuid, const std::string& lab
 
 OutputPtr Graph::getRelayForInput(const UUID& external_uuid) const
 {
-    return forward_inputs_.at(external_uuid);
+    return external_to_internal_outputs_.at(external_uuid);
 }
 InputPtr Graph::getRelayForOutput(const UUID& external_uuid) const
 {
-    return forward_outputs_.at(external_uuid);
+    return external_to_internal_inputs_.at(external_uuid);
 }
 EventPtr Graph::getRelayForSlot(const UUID& external_uuid) const
 {
-    return forward_slot_.at(external_uuid);
+    return external_to_internal_events_.at(external_uuid);
 }
 SlotPtr Graph::getRelayForEvent(const UUID& external_uuid) const
 {
-    return forward_event_.at(external_uuid);
+    return external_to_internal_slots_.at(external_uuid);
 }
 
 InputPtr Graph::getForwardedInputInternal(const UUID &internal_uuid) const
@@ -961,12 +993,12 @@ OutputPtr Graph::getForwardedOutputInternal(const UUID &internal_uuid) const
 
 SlotPtr Graph::getForwardedSlotInternal(const UUID &internal_uuid) const
 {
-    return relay_slot_.at(internal_uuid);
+    return internal_slots_.at(internal_uuid);
 }
 
 EventPtr Graph::getForwardedEventInternal(const UUID &internal_uuid) const
 {
-    return relay_event_.at(internal_uuid);
+    return internal_events_.at(internal_uuid);
 }
 
 UUID Graph::getForwardedInputExternal(const UUID &internal_uuid) const
@@ -989,34 +1021,26 @@ UUID Graph::getForwardedEventExternal(const UUID &internal_uuid) const
     return relay_to_external_event_.at(internal_uuid);
 }
 
-std::vector<UUID> Graph::getRelayOutputs() const
+std::vector<UUID> Graph::getInternalOutputs() const
+{
+    return transition_relay_out_->getOutputs();
+}
+std::vector<UUID> Graph::getInternalInputs() const
+{
+    return transition_relay_in_->getInputs();
+}
+std::vector<UUID> Graph::getInternalSlots() const
 {
     std::vector<UUID> res;
-    for(const auto& pair : forward_inputs_) {
+    for(const auto& pair : internal_slots_) {
         res.push_back(pair.second->getUUID());
     }
     return res;
 }
-std::vector<UUID> Graph::getRelayInputs() const
+std::vector<UUID> Graph::getInternalEvents() const
 {
     std::vector<UUID> res;
-    for(const auto& pair : forward_outputs_) {
-        res.push_back(pair.second->getUUID());
-    }
-    return res;
-}
-std::vector<UUID> Graph::getRelaySlots() const
-{
-    std::vector<UUID> res;
-    for(const auto& pair : forward_event_) {
-        res.push_back(pair.second->getUUID());
-    }
-    return res;
-}
-std::vector<UUID> Graph::getRelayEvents() const
-{
-    std::vector<UUID> res;
-    for(const auto& pair : forward_slot_) {
+    for(const auto& pair : internal_events_) {
         res.push_back(pair.second->getUUID());
     }
     return res;

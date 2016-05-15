@@ -225,10 +225,10 @@ void NodeBox::construct()
     }
 
 
-    for(auto input : nh->getAllInputs()) {
+    for(auto input : nh->getExternalInputs()) {
         registerInputEvent(input.get());
     }
-    for(auto output : nh->getAllOutputs()) {
+    for(auto output : nh->getExternalOutputs()) {
         registerOutputEvent(output.get());
     }
 

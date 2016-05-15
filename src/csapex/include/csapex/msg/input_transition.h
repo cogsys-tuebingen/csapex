@@ -19,6 +19,7 @@ public:
     InputTransition();
 
     InputPtr getInput(const UUID& id) const;
+    std::vector<UUID> getInputs() const;
 
     void addInput(InputPtr input);
     void removeInput(InputPtr input);

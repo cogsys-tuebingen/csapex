@@ -55,6 +55,8 @@ public:
     Event* addEvent(const std::string& label) override;
     void addEvent(EventPtr t);
 
+    EventPtr addInternalEvent(const UUID &internal_uuid, const std::string& label);
+
 
     Connectable* getConnector(const UUID& uuid) const;
     Input* getInput(const UUID& uuid) const;
@@ -75,12 +77,14 @@ public:
     OutputWeakPtr getParameterOutput(const std::string& name) const;
 
 
-    std::vector<ConnectablePtr> getAllConnectors() const override;
-    std::vector<InputPtr> getAllInputs() const override;
-    std::vector<OutputPtr> getAllOutputs() const override;
+    std::vector<ConnectablePtr> getExternalConnectors() const override;
+    std::vector<InputPtr> getExternalInputs() const override;
+    std::vector<OutputPtr> getExternalOutputs() const override;
 
-    std::vector<SlotPtr> getAllSlots() const override;
-    std::vector<EventPtr> getAllEvents() const override;
+    std::vector<SlotPtr> getExternalSlots() const override;
+
+    std::vector<EventPtr> getExternalEvents() const override;
+    std::vector<EventPtr> getInternalEvents() const;
 
     std::map<std::string, InputWeakPtr>& paramToInputMap();
     std::map<std::string, OutputWeakPtr>& paramToOutputMap();
@@ -148,10 +152,15 @@ protected:
     NodePtr node_;
     NodeStatePtr node_state_;
 
-    std::vector<InputPtr> inputs_;
-    std::vector<OutputPtr> outputs_;
-    std::vector<EventPtr> triggers_;
-    std::vector<SlotPtr> slots_;
+    std::vector<InputPtr> external_inputs_;
+    std::vector<OutputPtr> external_outputs_;
+    std::vector<EventPtr> external_events_;
+    std::vector<SlotPtr> external_slots_;
+
+    std::vector<InputPtr> internal_inputs_;
+    std::vector<OutputPtr> internal_outputs_;
+    std::vector<EventPtr> internal_events_;
+    std::vector<SlotPtr> internal_slots_;
 
     std::string node_type_;
 

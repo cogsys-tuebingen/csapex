@@ -146,23 +146,24 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         settings.set("additional_args", additional_args);
     }
 
+    if(!settings.knows("initially_paused")) {
+        settings.add(csapex::param::ParameterFactory::declareValue< bool >("initially_paused", paused));
+    } else {
+        settings.set("initially_paused", paused);
+    }
+
     PluginLocatorPtr plugin_locator =std::make_shared<PluginLocator>(settings);
 
+    CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator, handler);
 
-    GraphPtr graph = std::make_shared<Graph>();
-    ThreadPool thread_pool(handler, !threadless, thread_grouping);
-    thread_pool.setPause(paused);
-    GraphFacadePtr root = std::make_shared<GraphFacade>(thread_pool, graph.get());
+    NodeFactory& node_factory = core->getNodeFactory();
 
-    NodeFactoryPtr node_factory = std::make_shared<NodeFactory>(plugin_locator.get());
-
-    CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator,
-                                                      root, thread_pool, node_factory.get());
+    ThreadPool& thread_pool = *core->getThreadPool();
 
     settings.saveRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     settings.loadRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
 
-    handler.setCore(core.get());
+    core->init();
 
     int res;
     if(!headless) {
@@ -170,7 +171,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
-        CommandDispatcher dispatcher(settings, root, &thread_pool, node_factory.get());
+        GraphFacadePtr root = core->getRoot();
+
+        CommandDispatcher dispatcher(settings, root, &thread_pool, &node_factory);
         csapex::slim_signal::ScopedConnection saved_connection(core->saved.connect([&](){
             dispatcher.setClean();
             dispatcher.resetDirtyPoint();
@@ -204,7 +207,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         DragIO drag_io(plugin_locator, &dispatcher);
 
         MinimapWidget* minimap = new MinimapWidget;
-        Designer* designer = new Designer(settings, *node_factory, *node_adapter_factory,
+        Designer* designer = new Designer(settings, node_factory, *node_adapter_factory,
                                           root, minimap, &dispatcher, drag_io);
 
         ActivityLegend* legend = new ActivityLegend;
@@ -235,8 +238,6 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
             }
         });
 
-        core->init();
-
         node_adapter_factory->loadPlugins();
 
         w.start();
@@ -254,7 +255,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         delete designer;
 
     } else {
-        core->init();
+        GraphFacadePtr root = core->getRoot();
         csapex::error_handling::stop_request().connect([this, root](){
             app->quit();
         });
@@ -264,9 +265,6 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         res = run();
     }
-
-    graph->clear();  // TODO: this should not be necessary...
-    node_factory->shutdown(); // TODO: this should not be necessary... but must be destroyed before core
 
     return res;
 }

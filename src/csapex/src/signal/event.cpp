@@ -38,11 +38,11 @@ void Event::trigger()
 
 void Event::triggerWith(TokenConstPtr token)
 {
-//    triggered();
-
     addMessage(token);
 //    commitMessages();
 //    publish();
     ++count_;
+
+    triggered();
 }
 

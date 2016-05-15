@@ -25,16 +25,11 @@ bool DeleteMessageConnection::doUndo()
     Connectable* from = graph->findConnector(from_uuid);
     Connectable* to = graph->findConnector(to_uuid);
 
-    NodeHandle* from_nh = graph->findNodeHandleForConnector(from_uuid);
-    NodeHandle* to_nh = graph->findNodeHandleForConnector(to_uuid);
-
     Output* output = dynamic_cast<Output*>(from);
     Input* input = dynamic_cast<Input*>(to);
 
     graph->addConnection(BundledConnection::connect(
                              output, input,
-                             from_nh->getOutputTransition(),
-                             to_nh->getInputTransition(),
                              connection_id));
 
     return Meta::doUndo();

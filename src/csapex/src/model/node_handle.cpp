@@ -75,17 +75,17 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
 NodeHandle::~NodeHandle()
 {
-    while(!inputs_.empty()) {
-        removeInput(inputs_.begin()->get());
+    while(!external_inputs_.empty()) {
+        removeInput(external_inputs_.begin()->get());
     }
-    while(!outputs_.empty()) {
-        removeOutput(outputs_.begin()->get());
+    while(!external_outputs_.empty()) {
+        removeOutput(external_outputs_.begin()->get());
     }
-    while(!slots_.empty()) {
-        removeSlot(slots_.begin()->get());
+    while(!external_slots_.empty()) {
+        removeSlot(external_slots_.begin()->get());
     }
-    while(!triggers_.empty()) {
-        removeEvent(triggers_.begin()->get());
+    while(!external_events_.empty()) {
+        removeEvent(external_events_.begin()->get());
     }
 
     nodeRemoved();
@@ -99,10 +99,10 @@ int NodeHandle::getLevel() const
 void NodeHandle::setLevel(int level)
 {
     level_ = level;
-    for(InputPtr in : inputs_) {
+    for(InputPtr in : external_inputs_) {
         in->setLevel(level);
     }
-    for(OutputPtr out : outputs_) {
+    for(OutputPtr out : external_outputs_) {
         out->setLevel(level);
     }
 }
@@ -120,7 +120,7 @@ bool NodeHandle::isSource() const
 
     // check if there are no (mandatory) inputs -> then it's a virtual source
     // TODO: remove and refactor old plugins
-    for(InputPtr in : inputs_) {
+    for(InputPtr in : external_inputs_) {
         if(!in->isOptional() || in->isConnected()) {
             return false;
         }
@@ -137,7 +137,7 @@ void NodeHandle::setIsSink(bool sink)
 
 bool NodeHandle::isSink() const
 {
-    return sink_ || outputs_.empty() || transition_out_->isSink();
+    return sink_ || external_outputs_.empty() || transition_out_->isSink();
 }
 
 void NodeHandle::setActive(bool active)
@@ -164,10 +164,10 @@ void NodeHandle::stop()
 {
     node_->reset();
 
-    for(OutputPtr i : getAllOutputs()) {
+    for(OutputPtr i : getExternalOutputs()) {
         i->stop();
     }
-    for(InputPtr i : getAllInputs()) {
+    for(InputPtr i : getExternalInputs()) {
         i->stop();
     }
 }
@@ -426,13 +426,28 @@ Slot* NodeHandle::addSlot(const std::string& label, std::function<void(const Tok
 Event* NodeHandle::addEvent(const std::string& label)
 {
     apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "trigger");
-    EventPtr trigger = std::make_shared<Event>(uuid);
-    trigger->setLabel(label);
+    UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "event");
+    EventPtr event = std::make_shared<Event>(uuid);
+    event->setLabel(label);
 
-    addEvent(trigger);
+    addEvent(event);
 
-    return trigger.get();
+    return event.get();
+}
+
+EventPtr NodeHandle::addInternalEvent(const UUID& internal_uuid, const std::string& label)
+{
+    apex_assert_hard(uuid_provider_);
+    EventPtr event = std::make_shared<Event>(internal_uuid);
+    event->setLabel(label);
+
+    internal_events_.push_back(event);
+
+    connectConnector(event.get());
+
+    connectorCreated(event);
+
+    return event;
 }
 
 InputWeakPtr NodeHandle::getParameterInput(const std::string &name) const
@@ -459,17 +474,17 @@ OutputWeakPtr NodeHandle::getParameterOutput(const std::string &name) const
 void NodeHandle::removeInput(Input* in)
 {
     std::vector<InputPtr>::iterator it;
-    for(it = inputs_.begin(); it != inputs_.end(); ++it) {
+    for(it = external_inputs_.begin(); it != external_inputs_.end(); ++it) {
         if(it->get() == in) {
             break;
         }
     }
 
-    if(it != inputs_.end()) {
+    if(it != external_inputs_.end()) {
         InputPtr input = *it;
         transition_in_->removeInput(input);
 
-        inputs_.erase(it);
+        external_inputs_.erase(it);
 
         disconnectConnector(input.get());
         connectorRemoved(input);
@@ -483,17 +498,17 @@ void NodeHandle::removeOutput(Output* out)
 {
 
     std::vector<OutputPtr>::iterator it;
-    for(it = outputs_.begin(); it != outputs_.end(); ++it) {
+    for(it = external_outputs_.begin(); it != external_outputs_.end(); ++it) {
         if(it->get() == out) {
             break;
         }
     }
 
-    if(it != outputs_.end()) {
+    if(it != external_outputs_.end()) {
         OutputPtr output = *it;
         transition_out_->removeOutput(output);
 
-        outputs_.erase(it);
+        external_outputs_.erase(it);
 
         disconnectConnector(output.get());
         connectorRemoved(output);
@@ -507,17 +522,17 @@ void NodeHandle::removeOutput(Output* out)
 void NodeHandle::removeSlot(Slot* s)
 {
     std::vector<SlotPtr>::iterator it;
-    for(it = slots_.begin(); it != slots_.end(); ++it) {
+    for(it = external_slots_.begin(); it != external_slots_.end(); ++it) {
         if(it->get() == s) {
             break;
         }
     }
 
 
-    if(it != slots_.end()) {
+    if(it != external_slots_.end()) {
         SlotPtr slot = *it;
 
-        slots_.erase(it);
+        external_slots_.erase(it);
 
         disconnectConnector(slot.get());
         connectorRemoved(slot);
@@ -528,16 +543,16 @@ void NodeHandle::removeSlot(Slot* s)
 void NodeHandle::removeEvent(Event* t)
 {
     std::vector<EventPtr>::iterator it;
-    for(it = triggers_.begin(); it != triggers_.end(); ++it) {
+    for(it = external_events_.begin(); it != external_events_.end(); ++it) {
         if(it->get() == t) {
             break;
         }
     }
 
-    if(it != triggers_.end()) {
+    if(it != external_events_.end()) {
         EventPtr trigger = *it;
 
-        triggers_.erase(it);
+        external_events_.erase(it);
 
         disconnectConnector(trigger.get());
         connectorRemoved(trigger);
@@ -546,9 +561,11 @@ void NodeHandle::removeEvent(Event* t)
 
 void NodeHandle::addInput(InputPtr in)
 {
-    apex_assert_hard(in->getUUID().rootUUID() == getUUID().rootUUID());
+    if(!getUUID().empty()) {
+        apex_assert_hard(in->getUUID().rootUUID() == getUUID().rootUUID());
+    }
 
-    inputs_.push_back(in);
+    external_inputs_.push_back(in);
 
     connectConnector(in.get());
 
@@ -558,9 +575,11 @@ void NodeHandle::addInput(InputPtr in)
 
 void NodeHandle::addOutput(OutputPtr out)
 {
-    apex_assert_hard(out->getUUID().rootUUID() == getUUID().rootUUID());
+    if(!getUUID().empty()) {
+        apex_assert_hard(out->getUUID().rootUUID() == getUUID().rootUUID());
+    }
 
-    outputs_.push_back(out);
+    external_outputs_.push_back(out);
 
     connectConnector(out.get());
 
@@ -585,9 +604,11 @@ bool NodeHandle::isParameterOutput(Output *out) const
 
 void NodeHandle::addSlot(SlotPtr s)
 {
-    apex_assert_hard(s->getUUID().rootUUID() == getUUID().rootUUID());
+    if(!getUUID().empty()) {
+        apex_assert_hard(s->getUUID().rootUUID() == getUUID().rootUUID());
+    }
 
-    slots_.push_back(s);
+    external_slots_.push_back(s);
 
     connectConnector(s.get());
 
@@ -596,9 +617,11 @@ void NodeHandle::addSlot(SlotPtr s)
 
 void NodeHandle::addEvent(EventPtr t)
 {
-    apex_assert_hard(t->getUUID().rootUUID() == getUUID().rootUUID());
+    if(!getUUID().empty()) {
+        apex_assert_hard(t->getUUID().rootUUID() == getUUID().rootUUID());
+    }
 
-    triggers_.push_back(t);
+    external_events_.push_back(t);
 
     connectConnector(t.get());
 
@@ -615,7 +638,7 @@ Connectable* NodeHandle::getConnector(const UUID &uuid) const
         return getOutput(uuid);
     } else if(type == "slot" || type == "relayslot") {
         return getSlot(uuid);
-    } else if(type == "trigger" || type == "relaytrigger") {
+    } else if(type == "event" || type == "relayevent") {
         return getEvent(uuid);
     } else {
         throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
@@ -624,7 +647,7 @@ Connectable* NodeHandle::getConnector(const UUID &uuid) const
 
 Input* NodeHandle::getInput(const UUID& uuid) const
 {
-    for(InputPtr in : inputs_) {
+    for(InputPtr in : external_inputs_) {
         if(in->getUUID() == uuid) {
             return in.get();
         }
@@ -640,7 +663,7 @@ Input* NodeHandle::getInput(const UUID& uuid) const
 
 Output* NodeHandle::getOutput(const UUID& uuid) const
 {
-    for(OutputPtr out : outputs_) {
+    for(OutputPtr out : external_outputs_) {
         if(out->getUUID() == uuid) {
             return out.get();
         }
@@ -657,7 +680,7 @@ Output* NodeHandle::getOutput(const UUID& uuid) const
 
 Slot* NodeHandle::getSlot(const UUID& uuid) const
 {
-    for(SlotPtr s : slots_) {
+    for(SlotPtr s : external_slots_) {
         if(s->getUUID() == uuid) {
             return s.get();
         }
@@ -674,7 +697,7 @@ Slot* NodeHandle::getSlot(const UUID& uuid) const
 
 Event* NodeHandle::getEvent(const UUID& uuid) const
 {
-    for(EventPtr t : triggers_) {
+    for(EventPtr t : external_events_) {
         if(t->getUUID() == uuid) {
             return t.get();
         }
@@ -708,46 +731,50 @@ void NodeHandle::removeEvent(const UUID &uuid)
     removeEvent(getEvent(uuid));
 }
 
-std::vector<ConnectablePtr> NodeHandle::getAllConnectors() const
+std::vector<ConnectablePtr> NodeHandle::getExternalConnectors() const
 {
-    std::size_t n = inputs_.size();
-    n += outputs_.size();
-    n += triggers_.size() + slots_.size();
+    std::size_t n = external_inputs_.size();
+    n += external_outputs_.size();
+    n += external_events_.size() + external_slots_.size();
     std::vector<ConnectablePtr> result(n, nullptr);
     std::size_t pos = 0;
-    for(auto i : inputs_) {
+    for(auto i : external_inputs_) {
         result[pos++] = i;
     }
-    for(auto i : outputs_) {
+    for(auto i : external_outputs_) {
         result[pos++] = i;
     }
-    for(auto i : triggers_) {
+    for(auto i : external_events_) {
         result[pos++] = i;
     }
-    for(auto i : slots_) {
+    for(auto i : external_slots_) {
         result[pos++] = i;
     }
     return result;
 }
 
-std::vector<InputPtr> NodeHandle::getAllInputs() const
+std::vector<InputPtr> NodeHandle::getExternalInputs() const
 {
-    return inputs_;
+    return external_inputs_;
 }
 
-std::vector<OutputPtr> NodeHandle::getAllOutputs() const
+std::vector<OutputPtr> NodeHandle::getExternalOutputs() const
 {
-    return outputs_;
+    return external_outputs_;
 }
 
-std::vector<SlotPtr> NodeHandle::getAllSlots() const
+std::vector<SlotPtr> NodeHandle::getExternalSlots() const
 {
-    return slots_;
+    return external_slots_;
 }
 
-std::vector<EventPtr> NodeHandle::getAllEvents() const
+std::vector<EventPtr> NodeHandle::getExternalEvents() const
 {
-    return triggers_;
+    return external_events_;
+}
+std::vector<EventPtr> NodeHandle::getInternalEvents() const
+{
+    return internal_events_;
 }
 
 

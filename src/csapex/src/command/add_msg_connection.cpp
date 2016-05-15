@@ -28,13 +28,7 @@ bool AddMessageConnection::doExecute()
 
     Graph* graph = getGraph();
 
-    NodeHandle* from_nw = graph->findNodeHandleForConnector(from_uuid);
-    NodeHandle* to_nw = graph->findNodeHandleForConnector(to_uuid);
-
-    return graph->addConnection(BundledConnection::connect(
-                                     from, to,
-                                     from_nw->getOutputTransition(),
-                                     to_nw->getInputTransition()));
+    return graph->addConnection(BundledConnection::connect(from, to));
 }
 
 void AddMessageConnection::refresh()

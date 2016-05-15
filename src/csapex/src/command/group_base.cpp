@@ -55,7 +55,7 @@ void GroupBase::analyzeConnections(Graph* graph)
     signals_going_out.clear();
 
     for(NodeHandle* nh : nodes) {
-        for(const InputPtr& input : nh->getAllInputs()) {
+        for(const InputPtr& input : nh->getExternalInputs()) {
             for(const ConnectionPtr& connection : input->getConnections()) {
                 Output* output = dynamic_cast<Output*>(connection->from());
                 apex_assert_hard(output);
@@ -78,7 +78,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 }
             }
         }
-        for(const OutputPtr& output : nh->getAllOutputs()) {
+        for(const OutputPtr& output : nh->getExternalOutputs()) {
             for(const ConnectionPtr& connection : output->getConnections()) {
                 Input* input = dynamic_cast<Input*>(connection->to());
                 apex_assert_hard(input);
@@ -101,7 +101,7 @@ void GroupBase::analyzeConnections(Graph* graph)
             }
         }
 
-        for(const SlotPtr& slot : nh->getAllSlots()) {
+        for(const SlotPtr& slot : nh->getExternalSlots()) {
             for(const ConnectionPtr& connection : slot->getConnections()) {
                 Event* trigger = dynamic_cast<Event*>(connection->from());
                 apex_assert_hard(trigger);
@@ -123,7 +123,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 }
             }
         }
-        for(const EventPtr& trigger : nh->getAllEvents()) {
+        for(const EventPtr& trigger : nh->getExternalEvents()) {
             for(const ConnectionPtr& connection : trigger->getConnections()) {
                 Slot* slot = dynamic_cast<Slot*>(connection->to());
                 apex_assert_hard(slot);

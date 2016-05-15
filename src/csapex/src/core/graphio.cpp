@@ -83,7 +83,7 @@ void GraphIO::saveSelectedGraph(YAML::Node &yaml, const std::vector<UUID> &uuids
         NodeHandle* node = graph_->findNodeHandle(uuid);
         nodes.push_back(node);
 
-        for(const ConnectablePtr& connectable : node->getAllConnectors()) {
+        for(const ConnectablePtr& connectable : node->getExternalConnectors()) {
             if(connectable->isOutput()) {
                 for(const ConnectionPtr& connection : connectable->getConnections()) {
                     auto target = graph_->findNodeHandleForConnector(connection->to()->getUUID());
@@ -196,7 +196,18 @@ UUID GraphIO::readNodeUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node&
 
 UUID GraphIO::readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc)
 {
-    UUID uuid = UUIDProvider::makeUUID_forced(parent, doc.as<std::string>());
+    std::string id = doc.as<std::string>();
+
+    // backward compatibility (trigger instead of event)
+    {
+        static std::string legacy = UUID::namespace_separator + "trigger_";
+        auto pos = id.find(legacy);
+        if(pos != id.npos) {
+            id = id.substr(0, pos) + UUID::namespace_separator + "event_" + id.substr(pos + legacy.size());
+        }
+    }
+
+    UUID uuid = UUIDProvider::makeUUID_forced(parent, id);
 
     if(!old_node_uuid_to_new_.empty()) {
         UUID parent = uuid.parentUUID();
@@ -309,20 +320,6 @@ void GraphIO::loadConnection(const YAML::Node& connection)
 {
     UUID from_uuid =  readConnectorUUID(graph_->shared_from_this(), connection["uuid"]);
 
-    NodeHandle* parent = nullptr;
-    try {
-        parent = graph_->findNodeHandleForConnector(from_uuid);
-
-    } catch(const std::exception& e) {
-        std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
-        return;
-    }
-
-    if(!parent) {
-        std::cerr << "cannot find connector '" << from_uuid << "'" << std::endl;
-        return;
-    }
-
     const YAML::Node& targets = connection["targets"];
     apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
 
@@ -331,11 +328,10 @@ void GraphIO::loadConnection(const YAML::Node& connection)
 
         std::string type = to_uuid.type();
 
+        Connectable* from = graph_->findConnector(from_uuid);
         if(type == "in" || type == "relayin") {
-            Output* from = parent->getOutput(from_uuid);
-            loadMessageConnection(from, parent, to_uuid);
+            loadMessageConnection(from, to_uuid);
         } else {
-            Event* from = parent->getEvent(from_uuid);
             loadSignalConnection(from, to_uuid);
         }
     }
@@ -418,7 +414,7 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     }
 }
 
-void GraphIO::loadMessageConnection(Connectable* from, NodeHandle* parent, const UUID& to_uuid)
+void GraphIO::loadMessageConnection(Connectable* from, const UUID& to_uuid)
 {
     try {
         NodeHandle* target = graph_->findNodeHandleForConnector(to_uuid);
@@ -431,9 +427,7 @@ void GraphIO::loadMessageConnection(Connectable* from, NodeHandle* parent, const
 
         Output* out = dynamic_cast<Output*>(from);
         if(out && in) {
-            ConnectionPtr c = BundledConnection::connect(
-                        out, in,
-                        parent->getOutputTransition(), target->getInputTransition());
+            ConnectionPtr c = BundledConnection::connect(out, in);
             graph_->addConnection(c);
         }
 

@@ -47,7 +47,7 @@ Slot* NodeModifier::addActiveTypedSlot(const std::string& label, std::function<v
 std::vector<Input*> NodeModifier::getMessageInputs() const
 {
     // hide parameter inputs from the nodes
-    auto vec = getAllInputs();
+    auto vec = getExternalInputs();
     std::vector<Input*> result;
     for(auto entry : vec) {
         if(!isParameterInput(entry.get()))  {
@@ -59,7 +59,7 @@ std::vector<Input*> NodeModifier::getMessageInputs() const
 std::vector<Output*> NodeModifier::getMessageOutputs() const
 {
     // hide parameter outputs from the nodes
-    auto vec = getAllOutputs();
+    auto vec = getExternalOutputs();
     std::vector<Output*> result;
     for(auto entry : vec) {
         if(!isParameterOutput(entry.get()))  {
@@ -70,7 +70,7 @@ std::vector<Output*> NodeModifier::getMessageOutputs() const
 }
 std::vector<Slot*> NodeModifier::getSlots() const
 {
-    auto vec = getAllSlots();
+    auto vec = getExternalSlots();
     std::vector<Slot*> result(vec.size());
     std::size_t i = 0;
     for(auto entry : vec) {
@@ -80,7 +80,7 @@ std::vector<Slot*> NodeModifier::getSlots() const
 }
 std::vector<Event*> NodeModifier::getEvents() const
 {
-    auto vec = getAllEvents();
+    auto vec = getExternalEvents();
     std::vector<Event*> result(vec.size());
     std::size_t i = 0;
     for(auto entry : vec) {

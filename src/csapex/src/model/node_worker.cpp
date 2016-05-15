@@ -49,6 +49,13 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
         node->setupParameters(*node);
 
         if(!node->isIsolated()) {
+            handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
+                                                 connectConnector(c.get());
+                                             }));
+            handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
+                                                 disconnectConnector(c.get());
+                                             }));
+
             node->setup(*node_handle);
 
             handle_connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
@@ -82,16 +89,6 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             handle_connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
                 setProcessingEnabled(isProcessingEnabled());
             }));
-
-            for(const auto& c : node_handle_->getAllConnectors()) {
-                connectConnector(c.get());
-            }
-            handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
-                                                 connectConnector(c.get());
-                                             }));
-            handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
-                                                 disconnectConnector(c.get());
-                                             }));
 
             auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
             node_handle_->getInputTransition()->setActivationFunction(af);
@@ -214,7 +211,7 @@ bool NodeWorker::canProcess() const
 
 bool NodeWorker::canReceive() const
 {
-    for(InputPtr i : node_handle_->getAllInputs()) {
+    for(InputPtr i : node_handle_->getExternalInputs()) {
         if(!i->isConnected() && !i->isOptional()) {
             return false;
         }
@@ -318,7 +315,7 @@ void NodeWorker::startProcessingMessages()
         bool has_multipart = false;
         bool multipart_are_done = true;
 
-        for(auto input : node_handle_->getAllInputs()) {
+        for(auto input : node_handle_->getExternalInputs()) {
             for(auto& c : input->getConnections()) {
                 TokenConstPtr token = c->getMessage();
                 int f = token->flags.data;
@@ -336,7 +333,7 @@ void NodeWorker::startProcessingMessages()
         }
 
         if(has_multipart) {
-            for(auto output : node_handle_->getAllOutputs()) {
+            for(auto output : node_handle_->getExternalOutputs()) {
                 bool is_last = multipart_are_done;
                 output->setMultipart(true, is_last);
             }
@@ -351,7 +348,7 @@ void NodeWorker::startProcessingMessages()
         std::unique_lock<std::recursive_mutex> lock(sync);
 
         // check if one is a marker message
-        for(InputPtr cin : node_handle_->getAllInputs()) {
+        for(InputPtr cin : node_handle_->getExternalInputs()) {
             apex_assert_hard(cin->hasReceived() || (cin->isOptional() && !cin->isConnected()));
             if(!cin->isOptional() && !msg::hasMessage(cin.get())) {
                 all_inputs_are_present = false;
@@ -398,7 +395,7 @@ void NodeWorker::startProcessingMessages()
     if(marker) {
         node->processMarker(marker);
 
-        for(OutputPtr out : node_handle_->getAllOutputs()) {
+        for(OutputPtr out : node_handle_->getExternalOutputs()) {
             msg::publish(out.get(), marker);
         }
     }
@@ -462,7 +459,7 @@ void NodeWorker::finishGenerator()
     apex_assert_hard(canSend());
 
     bool has_msg = false;
-    for(OutputPtr out : node_handle_->getAllOutputs()) {
+    for(OutputPtr out : node_handle_->getExternalOutputs()) {
         if(msg::isConnected(out.get())) {
             if(node_handle_->isParameterOutput(out.get())) {
                 has_msg = true;
@@ -483,7 +480,7 @@ void NodeWorker::finishGenerator()
         node_handle_->getOutputTransition()->setOutputsIdle();
     }
 
-    sendEventsAndMaybeDeactivate(node_handle_->isActive());
+    //sendEventsAndMaybeDeactivate(node_handle_->isActive());
 }
 
 void NodeWorker::finishProcessing()
@@ -530,7 +527,7 @@ void NodeWorker::forwardMessages(bool send_parameters)
 void NodeWorker::activateOutput()
 {
     bool has_marker = false;
-    for(OutputPtr out : node_handle_->getAllOutputs()) {
+    for(OutputPtr out : node_handle_->getExternalOutputs()) {
         if(msg::isConnected(out.get())) {
             if(out->hasMarkerMessage()) {
                 has_marker = true;
@@ -554,7 +551,7 @@ bool NodeWorker::areAllInputsAvailable() const
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     // check if all inputs have messages
-    for(InputPtr cin : node_handle_->getAllInputs()) {
+    for(InputPtr cin : node_handle_->getExternalInputs()) {
         if(!cin->hasReceived()) {
             // connector doesn't have a message
             if(cin->isOptional()) {
@@ -736,7 +733,13 @@ void NodeWorker::sendEventsAndMaybeDeactivate(bool active)
             }
         }
     }
-    for(Event* e : node_handle_->getEvents()){
+    for(EventPtr e : node_handle_->getExternalEvents()){
+        if(e->hasMessage()) {
+            e->commitMessages(active);
+            e->publish();
+        }
+    }
+    for(EventPtr e : node_handle_->getInternalEvents()){
         if(e->hasMessage()) {
             e->commitMessages(active);
             e->publish();
@@ -875,7 +878,15 @@ void NodeWorker::connectConnector(Connectable *c)
     connections_[c].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
     connections_[c].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
 
-    if(Slot* slot = dynamic_cast<Slot*>(c)) {
+    if(Event* event = dynamic_cast<Event*>(c)) {
+        auto connection = event->triggered.connect([this, event]() {
+            node_handle_->executionRequested([this, event]() {
+                sendEventsAndMaybeDeactivate(node_handle_->isActive());
+            });
+        });
+        connections_[c].emplace_back(connection);
+
+    } else if(Slot* slot = dynamic_cast<Slot*>(c)) {
         auto connection = slot->triggered.connect([this, slot]() {
             TokenConstPtr t = slot->getMessage();
             apex_assert_hard(t);
@@ -884,7 +895,6 @@ void NodeWorker::connectConnector(Connectable *c)
             }
             node_handle_->executionRequested([this, slot]() {
                 slot->handleEvent();
-                sendEventsAndMaybeDeactivate(node_handle_->isActive());
             });
         });
         connections_[c].emplace_back(connection);

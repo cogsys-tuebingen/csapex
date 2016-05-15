@@ -236,11 +236,11 @@ public:
     virtual Output* addOutput(TokenConstPtr type, const std::string& label, bool dynamic) = 0;
 
 protected:
-    virtual std::vector<ConnectablePtr> getAllConnectors() const = 0;
-    virtual std::vector<InputPtr> getAllInputs() const = 0;
-    virtual std::vector<OutputPtr> getAllOutputs() const = 0;
-    virtual std::vector<SlotPtr> getAllSlots() const = 0;
-    virtual std::vector<EventPtr> getAllEvents() const = 0;
+    virtual std::vector<ConnectablePtr> getExternalConnectors() const = 0;
+    virtual std::vector<InputPtr> getExternalInputs() const = 0;
+    virtual std::vector<OutputPtr> getExternalOutputs() const = 0;
+    virtual std::vector<SlotPtr> getExternalSlots() const = 0;
+    virtual std::vector<EventPtr> getExternalEvents() const = 0;
 
 private:
     mutable NodeWorker* node_worker_;

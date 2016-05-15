@@ -21,9 +21,7 @@ class CsApexCore
 {
 public:
     CsApexCore(Settings& settings_,
-               PluginLocatorPtr plugin_locator, GraphFacadePtr root,
-               ThreadPool& thread_pool,
-               NodeFactory* node_factory);
+               PluginLocatorPtr plugin_locator, ExceptionHandler &handler);
     virtual ~CsApexCore();
 
     void init();
@@ -39,6 +37,7 @@ public:
     NodeFactory& getNodeFactory() const;
 
     GraphFacadePtr getRoot() const;
+    ThreadPoolPtr getThreadPool() const;
 
     bool isPaused() const;
     void setPause(bool pause);
@@ -71,13 +70,19 @@ private:
 
 private:
     Settings& settings_;
-
     csapex::PluginLocatorPtr plugin_locator_;
+    ExceptionHandler &exception_handler_;
 
+    ThreadPoolPtr thread_pool_;
+
+    std::shared_ptr<UUIDProvider> root_uuid_provider_;
     GraphFacadePtr root_;
-    ThreadPool& thread_pool_;
+    NodeHandlePtr root_handle_;
+    NodeWorkerPtr root_worker_;
+    TaskGeneratorPtr root_scheduler_;
 
-    NodeFactory* node_factory_;
+
+    NodeFactoryPtr node_factory_;
 
     bool destruct;
 
@@ -90,6 +95,7 @@ private:
 
     bool init_;
     bool load_needs_reset_;
+
 };
 
 }

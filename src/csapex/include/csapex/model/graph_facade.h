@@ -34,10 +34,8 @@ public:
 
     void addNode(NodeHandlePtr node);
 
-    ConnectionPtr connect(OutputPtr output, InputPtr input,
-                          OutputTransition* ot, InputTransition* it);
-    ConnectionPtr connect(Output* output, Input* input,
-                          OutputTransition* ot, InputTransition* it);
+    ConnectionPtr connect(OutputPtr output, InputPtr input);
+    ConnectionPtr connect(Output* output, Input* input);
 
     ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name,
                           NodeHandlePtr input, const std::string& inputput_name);

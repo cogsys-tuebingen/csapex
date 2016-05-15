@@ -96,7 +96,7 @@ NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, csapex::UUIDProv
         OutputTransitionPtr ot = std::make_shared<OutputTransition>();
         InputTransitionPtr it = std::make_shared<InputTransition>();
         NodeHandlePtr node_handle = std::make_shared<NodeHandle>(type_, uuid, node, uuid_provider, it, ot);
-        if(uuid_provider) {
+        if(!uuid.empty() && uuid_provider) {
             uuid_provider->registerUUID(uuid);
         }
         return node_handle;

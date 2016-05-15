@@ -16,6 +16,7 @@ public:
     OutputTransition(delegate::Delegate0<> activation_fn);
     OutputTransition();
 
+    std::vector<UUID> getOutputs() const;
     OutputPtr getOutput(const UUID& id) const;
 
     void addOutput(OutputPtr output);

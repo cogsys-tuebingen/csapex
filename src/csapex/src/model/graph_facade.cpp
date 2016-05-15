@@ -149,14 +149,14 @@ GraphFacade* GraphFacade::getSubGraph(const UUID &uuid)
     }
 }
 
-ConnectionPtr GraphFacade::connect(OutputPtr output, InputPtr input, OutputTransition *ot, InputTransition *it)
+ConnectionPtr GraphFacade::connect(OutputPtr output, InputPtr input)
 {
-    return GraphFacade::connect(output.get(), input.get(), ot, it);
+    return GraphFacade::connect(output.get(), input.get());
 }
 
-ConnectionPtr GraphFacade::connect(Output *output, Input *input, OutputTransition *ot, InputTransition *it)
+ConnectionPtr GraphFacade::connect(Output *output, Input *input)
 {
-    auto c = BundledConnection::connect(output, input, ot, it);
+    auto c = BundledConnection::connect(output, input);
     graph_->addConnection(c);
     return c;
 }
@@ -182,7 +182,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
     }
     apex_assert_hard(i);
 
-    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    auto c = BundledConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -202,7 +202,7 @@ ConnectionPtr GraphFacade::connect(NodeHandlePtr output, int output_id,
     Input* i = input->getInput(input_id);
     apex_assert_hard(i);
 
-    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    auto c = BundledConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -222,7 +222,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
     apex_assert_hard(o);
 
     Input* i = nullptr;
-    for(auto in : input->getAllInputs()) {
+    for(auto in : input->getExternalInputs()) {
         Input* in_ptr = in.get();
         if(in_ptr->getLabel() == input_id) {
             i = in_ptr;
@@ -242,7 +242,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
                                input_id);
     }
 
-    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    auto c = BundledConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -257,7 +257,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output
                                    const UUID& input_id)
 {
     Output* o = nullptr;
-    for(auto out : output->getAllOutputs()) {
+    for(auto out : output->getExternalOutputs()) {
         Output* out_ptr = out.get();
         if(out_ptr->getLabel() == output_id) {
             o = out_ptr;
@@ -282,7 +282,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output
     Input* i = input->getInput(input_id);
     apex_assert_hard(i);
 
-    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    auto c = BundledConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -303,7 +303,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, int output_id,
                                std::to_string(input_id));
     }
 
-    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    auto c = BundledConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -318,7 +318,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output
                                    NodeHandle *input, const std::string& input_id)
 {
     Output* o = nullptr;
-    for(auto out : output->getAllOutputs()) {
+    for(auto out : output->getExternalOutputs()) {
         Output* out_ptr = out.get();
         if(out_ptr->getLabel() == output_id) {
             o = out_ptr;
@@ -338,7 +338,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output
                                output_id);
     }
     Input* i = nullptr;
-    for(auto in : input->getAllInputs()) {
+    for(auto in : input->getExternalInputs()) {
         Input* in_ptr = in.get();
         if(in_ptr->getLabel() == input_id) {
             i = in_ptr;
@@ -358,7 +358,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output
                                input_id);
     }
 
-    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    auto c = BundledConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -374,7 +374,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id, const UUID& input_id)
     apex_assert_hard(o);
     apex_assert_hard(i);
 
-    auto c = BundledConnection::connect(o, i, output->getOutputTransition(), input->getInputTransition());
+    auto c = BundledConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }

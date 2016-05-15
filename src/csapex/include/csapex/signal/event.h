@@ -37,7 +37,7 @@ public:
     void reset();
 
 public:
-//    csapex::slim_signal::Signal<void()> triggered;
+    csapex::slim_signal::Signal<void()> triggered;
 
 };
 

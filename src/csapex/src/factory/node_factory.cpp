@@ -235,7 +235,7 @@ NodeHandlePtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
 
 NodeHandlePtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, UUIDProvider *uuid_provider,  NodeStatePtr state)
 {
-    apex_assert_hard(!uuid.empty());
+    apex_assert_hard(target_type == "csapex::Graph" || !uuid.empty());
 
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {

@@ -45,7 +45,7 @@ bool DeleteNode::doExecute()
     locked = false;
     clear();
 
-    for(auto connectable : node_handle->getAllConnectors()) {
+    for(auto connectable : node_handle->getExternalConnectors()) {
         if(connectable->isConnected()) {
             add(CommandFactory(getRoot(), graph_uuid).removeAllConnectionsCmd(connectable));
         }

@@ -30,6 +30,15 @@ InputPtr InputTransition::getInput(const UUID& id) const
     return inputs_.at(id);
 }
 
+std::vector<UUID> InputTransition::getInputs() const
+{
+    std::vector<UUID> res;
+    for(const auto& pair : inputs_) {
+        res.push_back(pair.second->getUUID());
+    }
+    return res;
+}
+
 void InputTransition::addInput(InputPtr input)
 {
     input->setInputTransition(this);

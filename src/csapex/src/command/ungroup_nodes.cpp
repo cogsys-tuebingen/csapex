@@ -63,13 +63,13 @@ bool UngroupNodes::doExecute()
         io.saveGraph(selection_yaml);
     }
 
-    for(InputPtr in : nh->getAllInputs()) {
+    for(InputPtr in : nh->getExternalInputs()) {
         auto source = in->getSource();
         if(source) {
             old_connections_in[in->getUUID()] = source->getUUID();
         }
     }
-    for(OutputPtr out : nh->getAllOutputs()) {
+    for(OutputPtr out : nh->getExternalOutputs()) {
         auto& vec = old_connections_out[out->getUUID()];
         for(ConnectionPtr c : out->getConnections()) {
             Input* in = dynamic_cast<Input*>(c->to());
@@ -80,7 +80,7 @@ bool UngroupNodes::doExecute()
     }
 
 
-    for(SlotPtr slot : nh->getAllSlots()) {
+    for(SlotPtr slot : nh->getExternalSlots()) {
         auto& vec = old_signals_in[slot->getUUID()];
         for(ConnectionPtr c : slot->getConnections()) {
             Event* trigger = dynamic_cast<Event*>(c->from());
@@ -90,7 +90,7 @@ bool UngroupNodes::doExecute()
         }
     }
 
-    for(EventPtr trigger : nh->getAllEvents()) {
+    for(EventPtr trigger : nh->getExternalEvents()) {
         auto& vec = old_signals_out[trigger->getUUID()];
         for(ConnectionPtr c : trigger->getConnections()) {
             Slot* slot = dynamic_cast<Slot*>(c->to());

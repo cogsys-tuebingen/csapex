@@ -365,7 +365,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 
 
         // draw port information (in)
-        for(auto input : node_handle->getAllInputs()) {
+        for(auto input : node_handle->getExternalInputs()) {
             if(!node_handle->isParameterInput(input.get())) {
                 Port* p = getPort(input.get());
                 if(p) {
@@ -374,7 +374,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
         }
         // draw port information (out)
-        for(auto output : node_handle->getAllOutputs()) {
+        for(auto output : node_handle->getExternalOutputs()) {
             if(!node_handle->isParameterOutput(output.get())) {
                 Port* p = getPort(output.get());
                 if(p) {
@@ -386,7 +386,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         // draw slots
         {
             int i = 0;
-            for(auto slot : node_handle->getAllSlots()) {
+            for(auto slot : node_handle->getExternalSlots()) {
                 Port* p = getPort(slot.get());
                 if(p) {
                     drawPort(painter, box, p, i++);
@@ -396,7 +396,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         // draw events
         {
             int i = 0;
-            for(auto event : node_handle->getAllEvents()) {
+            for(auto event : node_handle->getExternalEvents()) {
                 Port* p = getPort(event.get());
                 if(p) {
                     drawPort(painter, box, p, i++);
@@ -765,10 +765,10 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
                                                   Connectable *from, Connectable *to,
                                                   int id)
 {
-    Port* fromp = getPort(from);
-    Port* top = getPort(to);
+    Port* from_port = getPort(from);
+    Port* to_port = getPort(to);
 
-    if(!fromp || !top) {
+    if(!from_port || !to_port) {
         return std::vector<QRectF>();
     }
 
@@ -786,32 +786,47 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     }
 
 
-    QPointF p1 = centerPoint(fromp);
-    QPointF p2 = centerPoint(top);
+    QPointF p1 = centerPoint(from_port);
+    QPointF p2 = centerPoint(to_port);
 
     ccs.highlighted = (highlight_connection_id_ == id);
     ccs.error = (to->isError() || from->isError());
-    ccs.minimized_from = fromp->isMinimizedSize();
-    ccs.minimized_to = top->isMinimizedSize();
-    ccs.hidden_from = !fromp->isVisible();
-    ccs.hidden_to = !top->isVisible();
-    ccs.selected_from = fromp->property("focused").toBool();
-    ccs.selected_to = top->property("focused").toBool();
+    ccs.minimized_from = from_port->isMinimizedSize();
+    ccs.minimized_to = to_port->isMinimizedSize();
+    ccs.hidden_from = !from_port->isVisible();
+    ccs.hidden_to = !to_port->isVisible();
+    ccs.selected_from = from_port->property("focused").toBool();
+    ccs.selected_to = to_port->property("focused").toBool();
 
     Graph* graph = graph_facade_->getGraph();
 
-    int lf = graph->getLevel(graph->findNodeHandleForConnector(from->getUUID())->getUUID());
-    int lt = graph->getLevel(graph->findNodeHandleForConnector(to->getUUID())->getUUID());
+    NodeHandle* from_nh = graph->findNodeHandleForConnector(from->getUUID());
+    NodeHandle* to_nh = graph->findNodeHandleForConnector(to->getUUID());
 
-    if(from->isDynamic()) {
-        ccs.level = lt;
+    if(!from_nh || !to_nh) {
+        ccs.level = 0;
+
     } else {
-        ccs.level = lf;
-    }
-    bool is_msg = dynamic_cast<Input*>(from) || dynamic_cast<Output*>(from);
+        int lf = graph->getLevel(from_nh->getUUID());
+        int lt = graph->getLevel(to_nh->getUUID());
 
-    ccs.start_pos = is_msg ? (fromp->isFlipped() ? LEFT : RIGHT) : BOTTOM;
-    ccs.end_pos = is_msg ? (top->isFlipped() ? RIGHT : LEFT) : TOP;
+        if(from->isDynamic()) {
+            ccs.level = lt;
+        } else {
+            ccs.level = lf;
+        }
+    }
+
+    if(dynamic_cast<Event*>(from)) {
+        ccs.start_pos = BOTTOM;
+    } else {
+        ccs.start_pos = from_port->isFlipped() ? LEFT : RIGHT;
+    }
+    if(dynamic_cast<Slot*>(to)) {
+        ccs.end_pos = TOP;
+    } else {
+        ccs.end_pos = to_port->isFlipped() ? RIGHT : LEFT;
+    }
 
     return drawConnection(painter, p1, p2, id);
 }
