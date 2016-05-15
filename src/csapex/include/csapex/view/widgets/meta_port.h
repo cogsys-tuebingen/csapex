@@ -27,9 +27,9 @@ public:
     void dropEvent(QDropEvent* e);
 
 Q_SIGNALS:
-    void createPortRequest(const AUUID& target, ConnectorType output, TokenConstPtr, std::string, bool);
-    void createPortAndConnectRequest(const AUUID& target, Connectable*, TokenConstPtr, std::string, bool);
-    void createPortAndMoveRequest(const AUUID& target, Connectable*, TokenConstPtr, std::string, bool);
+    void createPortRequest(const AUUID& target, ConnectorType output, TokenDataConstPtr, std::string, bool);
+    void createPortAndConnectRequest(const AUUID& target, Connectable*, TokenDataConstPtr, std::string, bool);
+    void createPortAndMoveRequest(const AUUID& target, Connectable*, TokenDataConstPtr, std::string, bool);
 
 private Q_SLOTS:
     void triggerCreatePort();

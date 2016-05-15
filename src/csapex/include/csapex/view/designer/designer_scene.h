@@ -108,7 +108,7 @@ private:
         UNDEFINED = 99
     };
 
-    enum class Token {
+    enum class TokenType {
         SIG, MSG
     };
 
@@ -125,8 +125,9 @@ private:
         bool hidden_to;
         bool selected_from;
         bool selected_to;
+        bool active;
 
-        Token type;
+        TokenType type;
 
         Position start_pos;
         Position end_pos;

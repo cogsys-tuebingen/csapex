@@ -52,13 +52,13 @@ public:
     virtual void disable() override;
 
     virtual void setMultipart(bool multipart, bool last_part) = 0;
-    virtual void addMessage(Token::ConstPtr message) = 0;
+    virtual void addMessage(TokenPtr message) = 0;
 
     virtual bool canSendMessages() const;
     virtual void commitMessages(bool is_activated) = 0;
     virtual void publish();
     virtual void nextMessage() = 0;
-    virtual TokenConstPtr getMessage() const = 0;
+    virtual TokenPtr getToken() const = 0;
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;

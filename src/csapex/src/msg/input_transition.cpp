@@ -144,10 +144,10 @@ int InputTransition::findHighestDeviantSequenceNumber() const
         if(input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
-            auto connection = connections.front();
-            auto msg = connection->getMessage();
+            ConnectionPtr connection = connections.front();
+            TokenConstPtr token = connection->getToken();
 
-            int s = msg->sequenceNumber();
+            int s = token->getSequenceNumber();
             if(highest_deviant_seq != -1 && highest_deviant_seq != s) {
                 a_connection_deviates = true;
             }
@@ -171,13 +171,13 @@ void InputTransition::notifyOlderConnections(int seq)
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
             ConnectionPtr connection = connections.front();
-            auto msg = connection->getMessage();
+            TokenConstPtr token = connection->getToken();
 
-            int s = msg->sequenceNumber();
+            int s = token->getSequenceNumber();
             if(seq != s) {
                 std::cout << input->getUUID().getFullName() << " has seq " << s << " instead of " << seq << std::endl;
                 connection->setState(Connection::State::READ);
-                connection->setMessageProcessed();
+                connection->setTokenProcessed();
             }
         }
     }
@@ -187,9 +187,9 @@ void InputTransition::notifyOlderConnections(int seq)
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
             ConnectionPtr connection = connections.front();
-            auto msg = connection->getMessage();
+            TokenConstPtr token = connection->getToken();
 
-            int s = msg->sequenceNumber();
+            int s = token->getSequenceNumber();
             if(seq == s) {
                 std::cout << input->getUUID().getFullName() << " has seq " << s << std::endl;
             }
@@ -207,8 +207,8 @@ void InputTransition::notifyMessageProcessed()
     bool multipart_are_done = true;
 
     for(auto& c : connections_) {
-        if(c->getMessage()) {
-            int f = c->getMessage()->flags.data;
+        if(TokenConstPtr token = c->getToken()) {
+            int f = token->flags.data;
             if(f & (int) Token::Flags::Fields::MULTI_PART) {
                 has_multipart = true;
                 bool last_part = f & (int) Token::Flags::Fields::LAST_PART;
@@ -219,12 +219,12 @@ void InputTransition::notifyMessageProcessed()
 
     if(has_multipart && !multipart_are_done) {
         for(ConnectionPtr& c : connections_) {
-            if(c->getMessage()) {
-                int f = c->getMessage()->flags.data;
+            if(TokenConstPtr token = c->getToken()) {
+                int f = token->flags.data;
 
                 if(f & (int) Token::Flags::Fields::MULTI_PART) {
                     //                c->setState(Connection::State::DONE);
-                    c->setMessageProcessed();
+                    c->setTokenProcessed();
                 }
             }
         }
@@ -233,7 +233,7 @@ void InputTransition::notifyMessageProcessed()
         apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
         for(ConnectionPtr& c : connections_) {
-            c->setMessageProcessed();
+            c->setTokenProcessed();
         }
     }
 
@@ -261,16 +261,16 @@ void InputTransition::forwardMessages()
             } else {
                 auto connections = input->getConnections();
                 apex_assert_hard(connections.size() == 1);
-                auto connection = connections.front();
+                ConnectionPtr connection = connections.front();
                 auto s = connection->getState();
                 apex_assert_hard(s == Connection::State::READ ||
                                  s == Connection::State::UNREAD);
-                auto msg = connection->getMessage();
-                apex_assert_hard(msg != nullptr);
-                input->inputMessage(msg);
+                TokenPtr token = connection->getToken();
+                apex_assert_hard(token != nullptr);
+                input->setToken(token);
             }
         } else {
-            input->inputMessage(connection_types::makeEmpty<connection_types::NoMessage>());
+            input->setToken(Token::makeEmpty<connection_types::NoMessage>());
         }
     }
 

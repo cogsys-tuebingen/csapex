@@ -18,8 +18,8 @@ public:
     EndOfProgramMessage();
 
 public:
-    virtual Token::Ptr clone() const override;
-    virtual Token::Ptr toType() const override;
+    virtual TokenData::Ptr clone() const override;
+    virtual TokenData::Ptr toType() const override;
 };
 
 template <>

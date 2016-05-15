@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/msg/input.h>
+#include <csapex/model/token.h>
 
 /// SYSTEM
 #include <mutex>
@@ -18,17 +19,17 @@ class Slot : public Input
 
 public:
     Slot(std::function<void()> callback, const UUID &uuid, bool active);
-    Slot(std::function<void(const TokenConstPtr&)> callback, const UUID &uuid, bool active);
+    Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active);
 
     template <typename TokenType>
     Slot(std::function<void(const std::shared_ptr<TokenType const>&)> callback, const UUID &uuid, bool active)
-        : Slot([callback](const TokenConstPtr& token){ auto t = std::dynamic_pointer_cast<TokenType const>(token); apex_assert_hard(t); callback(t); }, uuid, active)
+        : Slot([callback](const TokenPtr& token){ auto t = std::dynamic_pointer_cast<TokenType const>(token->getTokenData()); apex_assert_hard(t); callback(t); }, uuid, active)
     {
     }
 
     virtual ~Slot();
 
-    virtual void inputMessage(Token::ConstPtr message) override;
+    virtual void setToken(TokenPtr message) override;
 
     virtual ConnectorType getConnectorType() const override
     {
@@ -50,7 +51,7 @@ public:
     csapex::slim_signal::Signal<void()> triggered;
 
 protected:
-    std::function<void(const TokenConstPtr&)> callback_;
+    std::function<void(const TokenPtr&)> callback_;
     bool active_;
 };
 

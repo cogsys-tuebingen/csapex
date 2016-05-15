@@ -674,9 +674,10 @@ void Graph::setupRoot()
 
 void Graph::activation()
 {
-    TokenConstPtr active_token(new connection_types::NoMessage);
-    active_token->setActive(true);
-    activation_event_->triggerWith(active_token);
+    TokenDataConstPtr data(new connection_types::NoMessage);
+    TokenPtr token = std::make_shared<Token>(data);
+    token->setActive(true);
+    activation_event_->triggerWith(token);
 }
 
 
@@ -692,7 +693,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
 
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
     for(Input* i : node_modifier.getMessageInputs()) {
-        TokenConstPtr m = msg::getMessage(i);
+        TokenDataConstPtr m = msg::getMessage(i);
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
         msg::publish(o.get(), m);
@@ -709,7 +710,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
     //    }
 
     //    for(Input* i : node_modifier.getMessageInputs()) {
-    //        TokenConstPtr m = msg::getMessage(i);
+    //        TokenDataConstPtr m = msg::getMessage(i);
     //        OutputPtr o = pass_on_inputs_[i];
 
     //        msg::publish(o.get(), m);
@@ -723,7 +724,7 @@ bool Graph::isAsynchronous() const
     return true;
 }
 
-Input* Graph::createVariadicInput(TokenConstPtr type, const std::string& label, bool optional)
+Input* Graph::createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
     auto pair = addForwardingInput(type, label, optional);
     return node_handle_->getInput(pair.external);
@@ -742,7 +743,7 @@ void Graph::removeVariadicInput(InputPtr input)
     transition_relay_out_->removeOutput(relay);
 }
 
-RelayMapping Graph::addForwardingInput(const TokenConstPtr& type,
+RelayMapping Graph::addForwardingInput(const TokenDataConstPtr& type,
                                        const std::string& label, bool optional)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayout");
@@ -751,7 +752,7 @@ RelayMapping Graph::addForwardingInput(const TokenConstPtr& type,
     return {external_uuid, internal_uuid};
 }
 
-UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenConstPtr& type, const std::string& label, bool optional)
+UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional)
 {
     registerUUID(internal_uuid);
 
@@ -775,7 +776,7 @@ UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenConstPtr& 
 }
 
 
-Output* Graph::createVariadicOutput(TokenConstPtr type, const std::string& label)
+Output* Graph::createVariadicOutput(TokenDataConstPtr type, const std::string& label)
 {
     auto pair = addForwardingOutput(type, label);
     return node_handle_->getOutput(pair.external);
@@ -796,7 +797,7 @@ void Graph::removeVariadicOutput(OutputPtr output)
     transition_relay_in_->removeInput(relay);
 }
 
-RelayMapping Graph::addForwardingOutput(const TokenConstPtr& type,
+RelayMapping Graph::addForwardingOutput(const TokenDataConstPtr& type,
                                         const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
@@ -805,7 +806,7 @@ RelayMapping Graph::addForwardingOutput(const TokenConstPtr& type,
     return {external_uuid, internal_uuid};
 }
 
-UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenConstPtr& type,  const std::string& label)
+UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type,  const std::string& label)
 {
     registerUUID(internal_uuid);
 
@@ -821,7 +822,7 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenConstPtr& 
     std::weak_ptr<Output> external_output_weak = std::dynamic_pointer_cast<Output>(external_output->shared_from_this());
     relay->message_set.connect([this, external_output_weak, relay](Connectable*) {
         if(auto external_output = external_output_weak.lock()) {
-            msg::publish(external_output.get(), relay->getMessage());
+            msg::publish(external_output.get(), relay->getToken()->getTokenData());
         }
     });
 

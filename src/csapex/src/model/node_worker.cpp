@@ -317,7 +317,7 @@ void NodeWorker::startProcessingMessages()
 
         for(auto input : node_handle_->getExternalInputs()) {
             for(auto& c : input->getConnections()) {
-                TokenConstPtr token = c->getMessage();
+                TokenConstPtr token = c->getToken();
                 int f = token->flags.data;
                 if(f & (int) Token::Flags::Fields::MULTI_PART) {
                     has_multipart = true;
@@ -326,7 +326,7 @@ void NodeWorker::startProcessingMessages()
                     multipart_are_done &= last_part;
                 }
 
-                if(token->isActive()) {
+                if(c->holdsActiveToken()) {
                     has_active_token = true;
                 }
             }
@@ -354,7 +354,7 @@ void NodeWorker::startProcessingMessages()
                 all_inputs_are_present = false;
             }
 
-            if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getMessage())) {
+            if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getToken()->getTokenData())) {
                 if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
                     marker = m;
                     all_inputs_are_present = false;
@@ -723,27 +723,27 @@ bool NodeWorker::hasActiveOutputConnection()
     return false;
 }
 
-void NodeWorker::sendEventsAndMaybeDeactivate(bool active)
+void NodeWorker::sendEvents(bool active)
 {
-    if(active) {
-        if(node_handle_->isActive()) {
-            // if there is an active connection -> deactivate
-            if(hasActiveOutputConnection()) {
-                node_handle_->setActive(false);
-            }
-        }
-    }
+    bool sent = false;
     for(EventPtr e : node_handle_->getExternalEvents()){
         if(e->hasMessage()) {
             e->commitMessages(active);
             e->publish();
+            sent = true;
         }
     }
     for(EventPtr e : node_handle_->getInternalEvents()){
         if(e->hasMessage()) {
             e->commitMessages(active);
             e->publish();
+            sent = true;
         }
+    }
+
+    if(active && sent) {
+        std::cerr << "deactive node via event: " << getUUID() << std::endl;
+        node_handle_->setActive(false);
     }
 }
 
@@ -761,9 +761,16 @@ void NodeWorker::sendMessages()
     //tokens are activated if the node is active.
     bool active = node_handle_->isActive();
 
-    sendEventsAndMaybeDeactivate(active);
-
     node_handle_->getOutputTransition()->sendMessages(active);
+
+    sendEvents(active);
+
+    // if there is an active connection -> deactivate
+    if(active && hasActiveOutputConnection()) {
+        std::cerr << "deactive node via message: " << getUUID() << std::endl;
+        node_handle_->setActive(false);
+    }
+
 }
 
 
@@ -881,7 +888,7 @@ void NodeWorker::connectConnector(Connectable *c)
     if(Event* event = dynamic_cast<Event*>(c)) {
         auto connection = event->triggered.connect([this, event]() {
             node_handle_->executionRequested([this, event]() {
-                sendEventsAndMaybeDeactivate(node_handle_->isActive());
+                sendEvents(node_handle_->isActive());
             });
         });
         connections_[c].emplace_back(connection);
@@ -889,7 +896,7 @@ void NodeWorker::connectConnector(Connectable *c)
     } else if(Slot* slot = dynamic_cast<Slot*>(c)) {
         auto connection = slot->triggered.connect([this, slot]() {
             node_handle_->executionRequested([this, slot]() {
-                TokenConstPtr t = slot->getMessage();
+                TokenConstPtr t = slot->getToken();
                 apex_assert_hard(t);
                 if(t->isActive()) {
                     node_handle_->setActive(true);

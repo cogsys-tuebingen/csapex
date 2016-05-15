@@ -111,9 +111,9 @@ public Q_SLOTS:
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
 
-    void createPort(const AUUID& target, csapex::ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional);
-    void createPortAndConnect(const AUUID& target, Connectable* from, TokenConstPtr type, const std::string& label, bool optional);
-    void createPortAndMove(const AUUID &target, Connectable* from, TokenConstPtr type, const std::string& label, bool optional);
+    void createPort(const AUUID& target, csapex::ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional);
+    void createPortAndConnect(const AUUID& target, Connectable* from, TokenDataConstPtr type, const std::string& label, bool optional);
+    void createPortAndMove(const AUUID &target, Connectable* from, TokenDataConstPtr type, const std::string& label, bool optional);
 
     void addPort(Port* port);
     void removePort(Port* port);

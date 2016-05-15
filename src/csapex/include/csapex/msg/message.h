@@ -2,7 +2,7 @@
 #define MESSAGE_H
 
 /// COMPONENT
-#include <csapex/model/token.h>
+#include <csapex/model/token_data.h>
 #include <csapex/utility/type.h>
 //#include <csapex/utility/yaml_io.hpp> // TODO: get rid of this....
 #include <csapex/msg/message_traits.h>
@@ -12,7 +12,7 @@ namespace csapex
 namespace connection_types
 {
 
-class Message : public Token
+class Message : public TokenData
 {
 public:
     typedef std::shared_ptr<Message> Ptr;

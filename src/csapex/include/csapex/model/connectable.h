@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/model_fwd.h>
-#include <csapex/model/token.h>
+#include <csapex/model/token_data.h>
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/connector_type.h>
@@ -59,8 +59,8 @@ public:
     void setLabel(const std::string& label);
     std::string getLabel() const;
 
-    void setType(Token::ConstPtr type);
-    Token::ConstPtr getType() const;
+    void setType(TokenData::ConstPtr type);
+    TokenData::ConstPtr getType() const;
 
     virtual ConnectorType getConnectorType() const = 0;
 
@@ -136,7 +136,7 @@ protected:
 
     std::string label_;
 
-    Token::ConstPtr type_;
+    TokenData::ConstPtr type_;
     std::vector<ConnectionPtr> connections_;
 
     int count_;

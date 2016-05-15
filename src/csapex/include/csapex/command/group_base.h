@@ -29,7 +29,7 @@ protected:
     struct ConnectionInformation {
         UUID from;
         UUID to;
-        TokenConstPtr type;
+        TokenDataConstPtr type;
     };
 
     std::set<NodeHandle*> node_set;

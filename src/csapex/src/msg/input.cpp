@@ -83,7 +83,7 @@ bool Input::hasMessage() const
     }
 
     std::unique_lock<std::mutex> lock(message_mutex_);
-    return !std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_);
+    return !std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_->getTokenData());
 }
 
 void Input::stop()
@@ -143,8 +143,8 @@ void Input::validateConnections()
 {
     bool e = false;
     if(isConnected()) {
-        Token::ConstPtr target_type = getSource()->getType();
-        Token::ConstPtr type = getType();
+        TokenData::ConstPtr target_type = getSource()->getType();
+        TokenData::ConstPtr type = getType();
         if(!target_type) {
             e = true;
         } else if(!target_type->canConnectTo(type.get())) {
@@ -164,18 +164,18 @@ Output *Input::getSource() const
     }
 }
 
-TokenConstPtr Input::getMessage() const
+TokenPtr Input::getToken() const
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
     return message_;
 }
 
-void Input::inputMessage(Token::ConstPtr message)
+void Input::setToken(TokenPtr message)
 {
     apex_assert_hard(message != nullptr);
 
-    if(!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message)){
-        int s = message->sequenceNumber();
+    if(!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message->getTokenData())){
+        int s = message->getSequenceNumber();
 
         //    if(s < sequenceNumber()) {
         //        std::cerr << "connector @" << getUUID().getFullName() <<
@@ -201,8 +201,8 @@ void Input::notifyMessageAvailable(Connection* connection)
     message_available(connection);
 
     if(!transition_) {
-        inputMessage(connection->readMessage());
-        connection->setMessageProcessed();
+        setToken(connection->readToken());
+        connection->setTokenProcessed();
     }
 }
 

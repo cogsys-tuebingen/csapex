@@ -23,11 +23,13 @@ PreviewInput::PreviewInput(MessagePreviewWidget *parent)
     setType(std::make_shared<connection_types::AnyMessage>());
 }
 
-void PreviewInput::inputMessage(Token::ConstPtr msg)
+void PreviewInput::setToken(TokenPtr token)
 {
-    Input::inputMessage(msg);
+    Input::setToken(token);
 
     if(isConnected()) {
+        TokenDataConstPtr msg = token->getTokenData();
+
         try {
             if(auto m = msg::message_cast<connection_types::GenericValueMessage<int>>(msg)) {
                 parent_->displayTextRequest(QString::number(m->value));
@@ -67,7 +69,7 @@ MessagePreviewWidget::MessagePreviewWidget()
 
     scene()->setBackgroundBrush(QBrush());
 
-    qRegisterMetaType < TokenConstPtr > ("TokenConstPtr");
+    qRegisterMetaType < TokenDataConstPtr > ("TokenDataConstPtr");
 
     QObject::connect(this, &MessagePreviewWidget::displayImageRequest, this, &MessagePreviewWidget::displayImage);
     QObject::connect(this, &MessagePreviewWidget::displayTextRequest, this, &MessagePreviewWidget::displayText);

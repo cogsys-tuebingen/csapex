@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/assert.h>
+#include <csapex/model/token.h>
 
 using namespace csapex;
 
@@ -17,13 +18,13 @@ void DynamicInput::setCorrespondent(DynamicOutput *output)
     correspondent_ = output;
 }
 
-std::vector<TokenConstPtr> DynamicInput::getMessageParts() const
+std::vector<TokenPtr> DynamicInput::getMessageParts() const
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
     return composed_msg_;
 }
 
-bool DynamicInput::inputMessagePart(const TokenConstPtr &msg)
+bool DynamicInput::inputMessagePart(const TokenPtr &msg)
 {
     apex_assert_hard(msg != nullptr);
 
@@ -47,7 +48,7 @@ void DynamicInput::composeMessage()
 }
 
 
-TokenConstPtr DynamicInput::getMessage() const
+TokenPtr DynamicInput::getToken() const
 {
     throw std::runtime_error("cannot call get message on a dynamic input");
 }

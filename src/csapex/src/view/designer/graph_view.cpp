@@ -943,7 +943,7 @@ void GraphView::removeBox(NodeBox *box)
 }
 
 
-void GraphView::createPort(const AUUID &target, ConnectorType port_type, TokenConstPtr type, const std::string &label, bool optional)
+void GraphView::createPort(const AUUID &target, ConnectorType port_type, TokenDataConstPtr type, const std::string &label, bool optional)
 {
     CommandFactory factory(graph_facade_.get());
 
@@ -951,7 +951,7 @@ void GraphView::createPort(const AUUID &target, ConnectorType port_type, TokenCo
     dispatcher_->execute(cmd);
 }
 
-void GraphView::createPortAndConnect(const AUUID& target, Connectable* from, TokenConstPtr type, const std::string &label, bool optional)
+void GraphView::createPortAndConnect(const AUUID& target, Connectable* from, TokenDataConstPtr type, const std::string &label, bool optional)
 {
     Graph* graph = graph_facade_->getGraph();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -978,7 +978,7 @@ void GraphView::createPortAndConnect(const AUUID& target, Connectable* from, Tok
     dispatcher_->execute(playback);
 }
 
-void GraphView::createPortAndMove(const AUUID& target, Connectable* from, TokenConstPtr type, const std::string &label, bool optional)
+void GraphView::createPortAndMove(const AUUID& target, Connectable* from, TokenDataConstPtr type, const std::string &label, bool optional)
 {
     Graph* graph = graph_facade_->getGraph();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();

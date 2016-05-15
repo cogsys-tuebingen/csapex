@@ -1,21 +1,19 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-/// SYSTEM
-#include <memory>
+/// PROJECT
+#include <csapex/model/model_fwd.h>
+#include <csapex/model/token.h>
+#include <csapex/msg/message_traits.h>
 
 namespace csapex {
 
 class Token
 {
 public:
-    typedef std::shared_ptr<Token> Ptr;
-    typedef std::shared_ptr<const Token> ConstPtr;
-
     struct Flags
     {
         enum class Fields {
-            ACTIVE = 1,
             MULTI_PART = 8,
             LAST_PART = 16,
 
@@ -27,47 +25,29 @@ public:
     };
 
 
-public:
-    Token(const std::string &type_name);
-    virtual ~Token();
 
-    template <typename R>
-    std::shared_ptr<R> cloneAs() const
-    {
-        return std::dynamic_pointer_cast<R>(clone());
+public:
+    template <typename DataType>
+    static TokenPtr makeEmpty() {
+        return std::make_shared<Token>(connection_types::makeEmpty<DataType>());
     }
 
-    virtual Token::Ptr clone() const = 0;
-    virtual Token::Ptr toType() const = 0;
+public:
+    Token(const TokenDataConstPtr& token);
 
-    virtual bool isValid() const;
-
-    virtual bool isContainer() const;
-    virtual Ptr nestedType() const;
-    virtual ConstPtr nestedValue(std::size_t i) const;
-    virtual void addNestedValue(const ConstPtr& msg);
-    virtual std::size_t nestedValueCount() const;
-
-    virtual bool canConnectTo(const Token* other_side) const;
-    virtual bool acceptsConnectionFrom(const Token *other_side) const;
-
-    virtual std::string descriptiveName() const;
-    std::string typeName() const;
-
-    int sequenceNumber() const;
-    void setSequenceNumber(int seq_no_) const;
-
-    virtual void writeRaw(const std::string& file,  const std::string &base, const std::string &suffix) const;
-
-    void setActive(bool active) const;
+    void setActive(bool active);
     bool isActive() const;
 
-protected:
-    void setDescriptiveName(const std::string& descriptiveName);
+    TokenDataConstPtr getTokenData() const;
+
+    int getSequenceNumber() const;
+    void setSequenceNumber(int seq_no_) const;
 
 private:
-    std::string type_name_;
-    std::string descriptive_name_;
+    TokenDataConstPtr token_;
+
+    bool active_;
+
     mutable int seq_no_;
 
 public:
@@ -76,4 +56,4 @@ public:
 
 }
 
-#endif // TOKEN_H
+#endif // TOKEN_CONTAINER_H

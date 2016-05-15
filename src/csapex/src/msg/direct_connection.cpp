@@ -45,9 +45,9 @@ DirectConnection::DirectConnection(Output *from, Input *to, int id)
 
 }
 
-void DirectConnection::setMessage(const TokenConstPtr &msg)
+void DirectConnection::setToken(const TokenPtr &msg)
 {
-    Connection::setMessage(msg);
+    Connection::setToken(msg);
 
 //    dynamic_cast<Input*>(to())->inputMessage(msg);
 

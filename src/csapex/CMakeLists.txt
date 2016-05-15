@@ -216,6 +216,7 @@ add_library(csapex SHARED
     src/model/connector_type.cpp
     src/model/connection.cpp
     src/model/token.cpp
+    src/model/token_data.cpp
     src/model/error_state.cpp
     src/model/fulcrum.cpp
     src/model/generic_state.cpp
@@ -308,6 +309,7 @@ add_library(csapex_qt SHARED
     src/command/flip_sides.cpp
     src/command/minimize.cpp
     src/command/modify_fulcrum.cpp
+    src/command/modify_connection.cpp
     src/command/move_box.cpp
     src/command/move_fulcrum.cpp
     src/command/rename_node.cpp

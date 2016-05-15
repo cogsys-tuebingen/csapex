@@ -41,15 +41,15 @@ public:
     void setLevel(int level);
 
 
-    Input* addInput(TokenConstPtr type, const std::string& label, bool dynamic, bool optional) override;
+    Input* addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional) override;
     void addInput(InputPtr in);
     bool isParameterInput(Input* in) const override;
 
-    Output* addOutput(TokenConstPtr type, const std::string& label, bool dynamic) override;
+    Output* addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic) override;
     void addOutput(OutputPtr out);
     bool isParameterOutput(Output* out) const;
 
-    Slot* addSlot(const std::string& label, std::function<void (const TokenConstPtr& )> callback, bool active) override;
+    Slot* addSlot(const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) override;
     void addSlot(SlotPtr s);
 
     Event* addEvent(const std::string& label) override;

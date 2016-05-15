@@ -11,13 +11,13 @@ EndOfSequenceMessage::EndOfSequenceMessage()
 EndOfSequenceMessage::EndOfSequenceMessage(const std::string& name)
     : MarkerMessage(name, 0)
 {}
-Token::Ptr EndOfSequenceMessage::clone() const
+TokenData::Ptr EndOfSequenceMessage::clone() const
 {
     EndOfSequenceMessage::Ptr new_msg(new EndOfSequenceMessage);
     return new_msg;
 }
 
-Token::Ptr EndOfSequenceMessage::toType() const
+TokenData::Ptr EndOfSequenceMessage::toType() const
 {
     Ptr new_msg(new EndOfSequenceMessage);
     return new_msg;

@@ -18,7 +18,7 @@ using namespace command;
 
 AddVariadicConnector::AddVariadicConnector(const AUUID& graph_id, const AUUID& node,
                                            const ConnectorType& connector_type,
-                                           const TokenConstPtr& type)
+                                           const TokenDataConstPtr& type)
     : Command(graph_id), connector_type(connector_type), token_type(type), label_("forwarding"), optional_(false), node_id(node)
 {
 }

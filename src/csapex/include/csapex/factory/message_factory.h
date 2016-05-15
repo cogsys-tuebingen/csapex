@@ -2,7 +2,7 @@
 #define MESSAGE_FACTORY_H
 
 /// COMPONENT
-#include <csapex/model/token.h>
+#include <csapex/model/token_data.h>
 #include <csapex/msg/message.h>
 #include <csapex/msg/message_traits.h>
 
@@ -22,22 +22,22 @@ class MessageFactory : public Singleton<MessageFactory>
     friend class Singleton<MessageFactory>;
 
 public:
-    typedef std::function<Token::Ptr()>  Constructor;
+    typedef std::function<TokenData::Ptr()>  Constructor;
 
 public:
     template <typename M>
-    static Token::Ptr createMessage() {
+    static TokenData::Ptr createMessage() {
         return connection_types::makeEmpty<M>();
     }
     template <template <typename> class Wrapper,typename M>
-    static Token::Ptr createDirectMessage() {
+    static TokenData::Ptr createDirectMessage() {
         return connection_types::makeEmptyMessage< Wrapper<M> >();
     }
 
-    static Token::Ptr createMessage(const std::string& type);
+    static TokenData::Ptr createMessage(const std::string& type);
 
-    static Token::Ptr readMessage(const std::string& path);
-    static void writeMessage(const std::string& path, const Token &msg);
+    static TokenData::Ptr readMessage(const std::string& path);
+    static void writeMessage(const std::string& path, const TokenData &msg);
 
 public:
     template <template <typename> class Wrapper, typename M>

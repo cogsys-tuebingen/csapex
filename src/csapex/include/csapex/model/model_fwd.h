@@ -22,6 +22,7 @@ FWD(Connectable);
 FWD(Memento);
 FWD(Graph);
 FWD(GraphFacade);
+FWD(TokenData);
 FWD(Token);
 FWD(GenericState);
 FWD(Node);

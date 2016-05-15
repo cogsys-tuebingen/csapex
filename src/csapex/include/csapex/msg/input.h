@@ -33,8 +33,8 @@ public:
 
     bool canConnectTo(Connectable* other_side, bool move) const override;
 
-    virtual void inputMessage(Token::ConstPtr message);
-    virtual TokenConstPtr getMessage() const;
+    virtual void setToken(TokenPtr message);
+    virtual TokenPtr getToken() const;
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const override;
 
@@ -74,7 +74,7 @@ protected:
     InputTransition* transition_;
 
     mutable std::mutex message_mutex_;
-    TokenConstPtr message_;
+    TokenPtr message_;
 
     bool optional_;
 };

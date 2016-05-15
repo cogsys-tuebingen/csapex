@@ -172,10 +172,15 @@ bool Output::canSendMessages() const
 
 void Output::publish()
 {
-    auto msg = getMessage();
+    auto msg = getToken();
     apex_assert_hard(msg);
 
+    if(msg->isActive()) {
+        std::cerr << "publishing active message on " << getUUID() << std::endl;
+    }
+
+
     for(auto connection : connections_) {
-        connection->setMessage(msg);
+        connection->setToken(msg);
     }
 }

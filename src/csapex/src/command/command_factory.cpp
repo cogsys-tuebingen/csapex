@@ -7,6 +7,7 @@
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/delete_msg_connection.h>
 #include <csapex/command/delete_fulcrum.h>
+#include <csapex/command/modify_connection.h>
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/msg/any_message.h>
@@ -117,6 +118,11 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 /// graph_
 ///
 ///
+
+Command::Ptr CommandFactory::setConnectionActive(int connection, bool active)
+{
+    return Command::Ptr(new ModifyConnection(graph_uuid, connection, active));
+}
 
 Command::Ptr CommandFactory::clearCommand()
 {
@@ -246,12 +252,12 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
 }
 
 
-CommandPtr CommandFactory::createVariadicInput(const AUUID& node_uuid, TokenConstPtr connection_type, const std::string& label, bool optional)
+CommandPtr CommandFactory::createVariadicInput(const AUUID& node_uuid, TokenDataConstPtr connection_type, const std::string& label, bool optional)
 {
     return createVariadicPort(node_uuid, ConnectorType::INPUT, connection_type, label, optional);
 }
 
-CommandPtr CommandFactory::createVariadicOutput(const AUUID& node_uuid, TokenConstPtr connection_type, const std::string& label)
+CommandPtr CommandFactory::createVariadicOutput(const AUUID& node_uuid, TokenDataConstPtr connection_type, const std::string& label)
 {
     return createVariadicPort(node_uuid, ConnectorType::OUTPUT, connection_type, label, false);
 }
@@ -266,12 +272,12 @@ CommandPtr CommandFactory::createVariadicSlot(const AUUID& node_uuid, const std:
     return createVariadicPort(node_uuid, ConnectorType::SLOT_T, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
 }
 
-CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenConstPtr connection_type)
+CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type)
 {
     std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, node_uuid, port_type, connection_type);
     return res;
 }
-CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenConstPtr connection_type, const std::string& label, bool optional)
+CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string& label, bool optional)
 {
     std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, node_uuid, port_type, connection_type);
     res->setLabel(label);

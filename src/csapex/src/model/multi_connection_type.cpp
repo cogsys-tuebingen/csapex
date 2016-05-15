@@ -7,10 +7,10 @@
 using namespace csapex;
 
 namespace {
-std::string toString(const std::vector<Token::Ptr>& types) {
+std::string toString(const std::vector<TokenData::Ptr>& types) {
     std::stringstream ss;
     int i = 0;
-    for(std::vector<Token::Ptr>::const_iterator it = types.begin(); it != types.end(); ++it) {
+    for(std::vector<TokenData::Ptr>::const_iterator it = types.begin(); it != types.end(); ++it) {
         if(i++ > 0) ss << ", ";
         ss << (*it)->typeName();
     }
@@ -18,15 +18,15 @@ std::string toString(const std::vector<Token::Ptr>& types) {
 }
 }
 
-MultiToken::MultiToken(const std::vector<Token::Ptr>& types)
-    : Token("one of {" + toString(types) + "}"), types_(types)
+MultiTokenData::MultiTokenData(const std::vector<TokenData::Ptr>& types)
+    : TokenData("one of {" + toString(types) + "}"), types_(types)
 {
 
 }
 
-bool MultiToken::canConnectTo(const Token *other_side) const
+bool MultiTokenData::canConnectTo(const TokenData *other_side) const
 {
-    for(std::vector<Token::Ptr>::const_iterator it = types_.begin(); it != types_.end(); ++it) {
+    for(std::vector<TokenData::Ptr>::const_iterator it = types_.begin(); it != types_.end(); ++it) {
         if((*it)->canConnectTo(other_side)) {
             return true;
         }
@@ -35,9 +35,9 @@ bool MultiToken::canConnectTo(const Token *other_side) const
     return false;
 }
 
-bool MultiToken::acceptsConnectionFrom(const Token *other_side) const
+bool MultiTokenData::acceptsConnectionFrom(const TokenData *other_side) const
 {
-    for(std::vector<Token::Ptr>::const_iterator it = types_.begin(); it != types_.end(); ++it) {
+    for(std::vector<TokenData::Ptr>::const_iterator it = types_.begin(); it != types_.end(); ++it) {
         if((*it)->acceptsConnectionFrom(other_side)) {
             return true;
         }
@@ -46,14 +46,14 @@ bool MultiToken::acceptsConnectionFrom(const Token *other_side) const
     return false;
 }
 
-Token::Ptr MultiToken::clone() const
+TokenData::Ptr MultiTokenData::clone() const
 {
-    Ptr new_msg(new MultiToken(types_));
+    Ptr new_msg(new MultiTokenData(types_));
     return new_msg;
 }
 
-Token::Ptr MultiToken::toType() const
+TokenData::Ptr MultiTokenData::toType() const
 {
-    Ptr new_msg(new MultiToken(types_));
+    Ptr new_msg(new MultiTokenData(types_));
     return new_msg;
 }

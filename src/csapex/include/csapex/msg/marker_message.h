@@ -18,8 +18,8 @@ protected:
     MarkerMessage(const std::string &name, Stamp stamp);
 
 public:
-    bool canConnectTo(const Token* other_side) const override;
-    bool acceptsConnectionFrom(const Token* other_side) const override;
+    bool canConnectTo(const TokenData* other_side) const override;
+    bool acceptsConnectionFrom(const TokenData* other_side) const override;
 };
 template <>
 struct type<MarkerMessage> {

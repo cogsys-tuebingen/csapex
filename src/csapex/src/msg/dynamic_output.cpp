@@ -30,9 +30,9 @@ void DynamicOutput::addCorrespondent(DynamicInput *input)
     correspondents_.push_back(input);
 }
 
-void DynamicOutput::addMessage(Token::ConstPtr message)
+void DynamicOutput::addMessage(TokenPtr message)
 {
-    setType(message->toType());
+    setType(message->getTokenData()->toType());
     messages_to_send_.push_back(message);
 }
 
@@ -48,7 +48,7 @@ void DynamicOutput::commitMessages(bool is_activated)
     activate();
 
     if(messages_to_send_.empty()) {
-        messages_to_send_.push_back(connection_types::makeEmpty<connection_types::NoMessage>());
+        messages_to_send_.push_back(Token::makeEmpty<connection_types::NoMessage>());
     }
 
     committed_messages_ = messages_to_send_;
@@ -56,11 +56,11 @@ void DynamicOutput::commitMessages(bool is_activated)
 
     ++seq_no_;
 
-    for(TokenConstPtr& m : committed_messages_) {
-        m->flags.data |= (int) Token::Flags::Fields::MULTI_PART;
-        m->setSequenceNumber(seq_no_);
+    for(TokenPtr& token : committed_messages_) {
+        token->flags.data |= (int) Token::Flags::Fields::MULTI_PART;
+        token->setSequenceNumber(seq_no_);
 
-        m->setActive(is_activated);
+        token->setActive(is_activated);
     }
 
     apex_assert_hard(committed_messages_.size() > 0);
@@ -101,7 +101,7 @@ void DynamicOutput::nextMessage()
     }
 }
 
-TokenConstPtr DynamicOutput::getMessage() const
+TokenPtr DynamicOutput::getToken() const
 {
     apex_assert_hard(current_message_ != nullptr);
     return current_message_;

@@ -32,7 +32,7 @@ public:
      * @brief triggerWith triggers an event with a specified token
      * @param token
      */
-    void triggerWith(TokenConstPtr token);
+    void triggerWith(TokenPtr token);
 
     void reset();
 

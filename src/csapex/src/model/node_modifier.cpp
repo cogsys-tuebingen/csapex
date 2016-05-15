@@ -25,18 +25,18 @@ void NodeModifier::setNodeWorker(NodeWorker *worker)
 
 Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback)
 {
-    return addSlot(label, [callback](const TokenConstPtr&) {callback();}, false);
+    return addSlot(label, [callback](const TokenPtr&) {callback();}, false);
 }
-Slot* NodeModifier::addTypedSlot(const std::string& label, std::function<void(const TokenConstPtr&)> callback)
+Slot* NodeModifier::addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback)
 {
     return addSlot(label, callback, false);
 }
 
 Slot* NodeModifier::addActiveSlot(const std::string& label, std::function<void()> callback)
 {
-    return addSlot(label, [callback](const TokenConstPtr&) {callback();}, true);
+    return addSlot(label, [callback](const TokenPtr&) {callback();}, true);
 }
-Slot* NodeModifier::addActiveTypedSlot(const std::string& label, std::function<void(const TokenConstPtr&)> callback)
+Slot* NodeModifier::addActiveTypedSlot(const std::string& label, std::function<void(const TokenPtr &)> callback)
 {
     return addSlot(label, callback, true);
 }

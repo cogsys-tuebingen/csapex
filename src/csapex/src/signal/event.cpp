@@ -8,9 +8,9 @@
 #include <csapex/msg/message_traits.h>
 #include <csapex/msg/no_message.h>
 #include <csapex/msg/any_message.h>
+#include <csapex/model/token.h>
 
 /// SYSTEM
-
 #include <iostream>
 
 using namespace csapex;
@@ -32,11 +32,11 @@ void Event::reset()
 
 void Event::trigger()
 {
-    TokenConstPtr token(new connection_types::NoMessage);
+    TokenPtr token = Token::makeEmpty<connection_types::NoMessage>();
     triggerWith(token);
 }
 
-void Event::triggerWith(TokenConstPtr token)
+void Event::triggerWith(TokenPtr token)
 {
     addMessage(token);
 //    commitMessages();

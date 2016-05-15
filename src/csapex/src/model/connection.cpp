@@ -48,17 +48,23 @@ void Connection::reset()
     state_ = Connection::State::NOT_INITIALIZED;
 }
 
-TokenConstPtr Connection::getMessage() const
+TokenPtr Connection::getToken() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     return message_;
 }
 
-TokenConstPtr Connection::readMessage()
+TokenPtr Connection::readToken()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     setState(State::READ);
     return message_;
+}
+
+bool Connection::holdsActiveToken() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return message_ && message_->isActive();
 }
 
 void Connection::notifyMessageSet()
@@ -66,7 +72,7 @@ void Connection::notifyMessageSet()
     to_->notifyMessageAvailable(this);
 }
 
-void Connection::setMessageProcessed()
+void Connection::setTokenProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
@@ -75,7 +81,7 @@ void Connection::setMessageProcessed()
     from_->setMessageProcessed();
 }
 
-void Connection::setMessage(const TokenConstPtr &msg)
+void Connection::setToken(const TokenPtr &msg)
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
@@ -86,6 +92,12 @@ void Connection::setMessage(const TokenConstPtr &msg)
         if(!isActive() && msg_active) {
             // remove active flag if the connection is inactive
             msg->setActive(false);
+        }
+
+        if(isActive() && msg_active) {
+            std::cerr << "set active token on connection " << from()->getUUID() << " -> " << to()->getUUID() << std::endl;
+        } else if(msg_active) {
+            std::cerr << "ignoring active token on connection " << from()->getUUID() << " -> " << to()->getUUID() << std::endl;
         }
 
         message_ = msg;

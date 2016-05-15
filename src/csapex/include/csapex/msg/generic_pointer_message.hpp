@@ -24,20 +24,20 @@ struct GenericPointerMessage : public Message
         setDescriptiveName(type2name(typeid(Type)));
     }
 
-    virtual Token::Ptr clone() const override
+    virtual TokenData::Ptr clone() const override
     {
         Ptr new_msg(new GenericPointerMessage<Type>(frame_id, stamp_micro_seconds));
         new_msg->value = value;
         return new_msg;
     }
 
-    virtual Token::Ptr toType() const override
+    virtual TokenData::Ptr toType() const override
     {
         Ptr new_msg(new GenericPointerMessage<Type>(frame_id, 0));
         return new_msg;
     }
 
-    bool acceptsConnectionFrom(const Token* other_side) const override
+    bool acceptsConnectionFrom(const TokenData* other_side) const override
     {
         return descriptiveName() == other_side->descriptiveName();
     }

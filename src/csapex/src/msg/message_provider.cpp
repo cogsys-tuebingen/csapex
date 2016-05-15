@@ -22,12 +22,12 @@ void MessageProvider::restart()
 
 }
 
-Token::ConstPtr MessageProvider::getType() const
+TokenData::ConstPtr MessageProvider::getType() const
 {
     return type_;
 }
 
-void MessageProvider::setType(Token::Ptr type)
+void MessageProvider::setType(TokenData::Ptr type)
 {
     type_ = type;
 }

@@ -31,7 +31,7 @@ void Connectable::notifyMessageProcessed()
     messageProcessed(this);
 
     for(ConnectionPtr& c : connections_) {
-        c->setMessageProcessed();
+        c->setTokenProcessed();
     }
 }
 
@@ -152,7 +152,7 @@ void Connectable::setLabel(const std::string &label)
     label_ = label;
 }
 
-void Connectable::setType(Token::ConstPtr type)
+void Connectable::setType(TokenData::ConstPtr type)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     bool validate = type_ != type;
@@ -166,7 +166,7 @@ void Connectable::setType(Token::ConstPtr type)
     }
 }
 
-Token::ConstPtr Connectable::getType() const
+TokenData::ConstPtr Connectable::getType() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return type_;

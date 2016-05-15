@@ -8,13 +8,13 @@ EndOfProgramMessage::EndOfProgramMessage()
     : EndOfSequenceMessage(type<EndOfProgramMessage>::name())
 {}
 
-Token::Ptr EndOfProgramMessage::clone() const
+TokenData::Ptr EndOfProgramMessage::clone() const
 {
     EndOfProgramMessage::Ptr new_msg(new EndOfProgramMessage);
     return new_msg;
 }
 
-Token::Ptr EndOfProgramMessage::toType() const
+TokenData::Ptr EndOfProgramMessage::toType() const
 {
     Ptr new_msg(new EndOfProgramMessage);
     return new_msg;

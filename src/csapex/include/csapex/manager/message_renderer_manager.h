@@ -30,7 +30,7 @@ public:
     void setPluginLocator(PluginLocatorPtr locator);
     void shutdown();
 
-    MessageRendererPtr createMessageRenderer(const TokenConstPtr &message);
+    MessageRendererPtr createMessageRenderer(const TokenDataConstPtr &message);
 
 private:
     MessageRendererManager();

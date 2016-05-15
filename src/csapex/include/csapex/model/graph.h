@@ -114,8 +114,8 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    virtual Input* createVariadicInput(TokenConstPtr type, const std::string& label, bool optional) override;
-    virtual Output* createVariadicOutput(TokenConstPtr type, const std::string& label) override;
+    virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
+    virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
     virtual Event* createVariadicEvent(const std::string& label) override;
     virtual Slot* createVariadicSlot(const std::string& label, std::function<void()> callback) override;
 
@@ -125,8 +125,8 @@ public:
     virtual void removeVariadicEvent(EventPtr input) override;
     virtual void removeVariadicSlot(SlotPtr input) override;
 
-    RelayMapping addForwardingInput(const TokenConstPtr& type, const std::string& label, bool optional);
-    RelayMapping addForwardingOutput(const TokenConstPtr& type, const std::string& label);
+    RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
+    RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);
     RelayMapping addForwardingSlot(const std::string& label);
     RelayMapping addForwardingEvent(const std::string& label);
 
@@ -153,8 +153,8 @@ public:
     std::string makeStatusString() const;
 
 private:
-    UUID addForwardingInput(const UUID& internal_uuid, const TokenConstPtr& type, const std::string& label, bool optional);
-    UUID  addForwardingOutput(const UUID& internal_uuid, const TokenConstPtr& type, const std::string& label);
+    UUID addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional);
+    UUID  addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
     UUID  addForwardingSlot(const UUID& internal_uuid, const std::string& label);
     UUID  addForwardingEvent(const UUID& internal_uuid, const std::string& label);
 

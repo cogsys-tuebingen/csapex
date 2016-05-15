@@ -53,7 +53,7 @@ void MessageRendererManager::loadPlugins()
     }
 }
 
-MessageRendererPtr MessageRendererManager::createMessageRenderer(const TokenConstPtr& message)
+MessageRendererPtr MessageRendererManager::createMessageRenderer(const TokenDataConstPtr& message)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     if(!manager_) {
@@ -67,7 +67,7 @@ MessageRendererPtr MessageRendererManager::createMessageRenderer(const TokenCons
         throw std::runtime_error("no message renderers registered!");
     }
 
-    const Token& m = *message;
+    const TokenData& m = *message;
     try {
         auto pos = renderers.find(std::type_index(typeid(m)));
         if(pos != renderers.end()) {

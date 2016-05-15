@@ -4,13 +4,14 @@
 /// PROJECT
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/model/token.h>
 
 using namespace csapex;
 
-TokenConstPtr csapex::msg::getMessage(Input *input)
+TokenDataConstPtr csapex::msg::getMessage(Input *input)
 {
     apex_assert_hard_msg(input->isEnabled(), "you have requested a message from a disabled input");
-    return input->getMessage();
+    return input->getToken()->getTokenData();
 }
 
 bool csapex::msg::hasMessage(Input *input)
@@ -78,7 +79,7 @@ void csapex::msg::setLabel(Output *output, const std::string &label)
     output->setLabel(label);
 }
 
-void csapex::msg::throwError(const TokenConstPtr &msg, const std::type_info &type)
+void csapex::msg::throwError(const TokenDataConstPtr &msg, const std::type_info &type)
 {
     if(!msg) {
         throw std::runtime_error(std::string ("cannot cast null message from to ") + type2name(type));
@@ -87,7 +88,7 @@ void csapex::msg::throwError(const TokenConstPtr &msg, const std::type_info &typ
     }
 }
 
-void csapex::msg::publish(Output *output, TokenConstPtr message)
+void csapex::msg::publish(Output *output, TokenDataConstPtr message)
 {
-    output->addMessage(message);
+    output->addMessage(std::make_shared<Token>(message));
 }

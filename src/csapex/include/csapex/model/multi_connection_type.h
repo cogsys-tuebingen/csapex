@@ -2,7 +2,7 @@
 #define MULTI_CONNECTION_TYPE_H
 
 /// COMPONENT
-#include <csapex/model/token.h>
+#include <csapex/model/token_data.h>
 #include <csapex/msg/message_traits.h>
 #include <csapex/msg/msg_fwd.h>
 
@@ -14,23 +14,23 @@
 namespace csapex
 {
 
-class MultiToken : public Token
+class MultiTokenData : public TokenData
 {
 public:
-    typedef std::shared_ptr<MultiToken> Ptr;
+    typedef std::shared_ptr<MultiTokenData> Ptr;
 
 public:
-    MultiToken(const std::vector<Token::Ptr>& types);
+    MultiTokenData(const std::vector<TokenData::Ptr>& types);
 
-    virtual bool canConnectTo(const Token* other_side) const override;
-    virtual bool acceptsConnectionFrom(const Token *other_side) const override;
+    virtual bool canConnectTo(const TokenData* other_side) const override;
+    virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
 
 public:
-    virtual Token::Ptr clone() const override;
-    virtual Token::Ptr toType() const override;
+    virtual TokenData::Ptr clone() const override;
+    virtual TokenData::Ptr toType() const override;
 
 private:
-    std::vector<Token::Ptr> types_;
+    std::vector<TokenData::Ptr> types_;
 };
 
 
@@ -44,7 +44,7 @@ template < typename T, typename... Ts >
 struct AddType<T, Ts...>
 {
     template <typename MsgType>
-    static void insert(std::vector<Token::Ptr>& types,
+    static void insert(std::vector<TokenData::Ptr>& types,
                      typename std::enable_if<connection_types::should_use_pointer_message<MsgType>::value >::type* = 0)
     {
         static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<MsgType>),
@@ -54,7 +54,7 @@ struct AddType<T, Ts...>
     }
 
     template <typename MsgType>
-    static void insert(std::vector<Token::Ptr>& types,
+    static void insert(std::vector<TokenData::Ptr>& types,
                      typename std::enable_if<connection_types::should_use_value_message<MsgType>::value >::type* = 0)
     {
         static_assert(IS_COMPLETE(connection_types::GenericValueMessage<MsgType>),
@@ -64,7 +64,7 @@ struct AddType<T, Ts...>
     }
 
     template <typename MsgType>
-    static void insert(std::vector<Token::Ptr>& types,
+    static void insert(std::vector<TokenData::Ptr>& types,
                      typename std::enable_if<
                      !connection_types::should_use_pointer_message<MsgType>::value &&
                      !connection_types::should_use_value_message<MsgType>::value>::type* = 0)
@@ -72,7 +72,7 @@ struct AddType<T, Ts...>
         types.push_back(connection_types::makeEmptyMessage<MsgType>());
     }
 
-    static void call(std::vector<Token::Ptr>& types)
+    static void call(std::vector<TokenData::Ptr>& types)
     {
         insert<T>(types);
         AddType<Ts...>::call(types);
@@ -81,7 +81,7 @@ struct AddType<T, Ts...>
 template <>
 struct AddType<>
 {
-    static void call(std::vector<Token::Ptr>& /*types*/)
+    static void call(std::vector<TokenData::Ptr>& /*types*/)
     {
     }
 };
@@ -91,11 +91,11 @@ struct AddType<>
 
 
 template <typename... Types>
-static Token::Ptr make()
+static TokenData::Ptr make()
 {
-    std::vector<Token::Ptr> types;
+    std::vector<TokenData::Ptr> types;
     detail::AddType<Types...>::call(types);
-    return MultiToken::Ptr(new MultiToken(types));
+    return MultiTokenData::Ptr(new MultiTokenData(types));
 }
 }
 }

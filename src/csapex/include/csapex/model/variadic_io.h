@@ -16,10 +16,10 @@ class VariadicBase
 public:
     ~VariadicBase();
 
-    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional) = 0;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) = 0;
 
 protected:
-    VariadicBase(TokenConstPtr type);
+    VariadicBase(TokenDataConstPtr type);
     VariadicBase();
 
     void setupVariadic(csapex::NodeModifier& node_modifier);
@@ -28,7 +28,7 @@ protected:
     virtual void portCountChanged();
 
 protected:
-    TokenConstPtr variadic_type_;
+    TokenDataConstPtr variadic_type_;
     csapex::NodeModifier* variadic_modifier_;
 };
 
@@ -36,15 +36,15 @@ protected:
 class VariadicInputs : public virtual VariadicBase
 {
 public:
-    virtual Input* createVariadicInput(TokenConstPtr type, const std::string& label, bool optional);
+    virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional);
     virtual void removeVariadicInput(InputPtr input);
     void removeVariadicInputById(const UUID& input);
-    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
 
     int getVariadicInputCount() const;
 
 protected:
-    VariadicInputs(TokenConstPtr type);
+    VariadicInputs(TokenDataConstPtr type);
     VariadicInputs();
 
     virtual void setupVariadicParameters(Parameterizable &parameters) override;
@@ -62,15 +62,15 @@ private:
 class VariadicOutputs : public virtual VariadicBase
 {
 public:
-    virtual Output* createVariadicOutput(TokenConstPtr type, const std::string& label);
+    virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label);
     virtual void removeVariadicOutput(OutputPtr output);
     void removeVariadicOutputById(const UUID& output);
-    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
 
     int getVariadicOutputCount() const;
 
 protected:
-    VariadicOutputs(TokenConstPtr type);
+    VariadicOutputs(TokenDataConstPtr type);
     VariadicOutputs();
 
     virtual void setupVariadicParameters(Parameterizable &parameters) override;
@@ -92,12 +92,12 @@ public:
     virtual Event* createVariadicEvent(const std::string& label);
     virtual void removeVariadicEvent(EventPtr trigger);
     void removeVariadicEventById(const UUID& trigger);
-    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
 
     int getVariadicEventCount() const;
 
 protected:
-    VariadicEvents(TokenConstPtr type);
+    VariadicEvents(TokenDataConstPtr type);
     VariadicEvents();
 
     virtual void setupVariadicParameters(Parameterizable &parameters) override;
@@ -118,12 +118,12 @@ public:
     virtual Slot* createVariadicSlot(const std::string& label, std::function<void ()> callback);
     virtual void removeVariadicSlot(SlotPtr slot);
     void removeVariadicSlotById(const UUID& slot);
-    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
 
     int getVariadicSlotCount() const;
 
 protected:
-    VariadicSlots(TokenConstPtr type);
+    VariadicSlots(TokenDataConstPtr type);
     VariadicSlots();
 
     virtual void setupVariadicParameters(Parameterizable &parameters) override;
@@ -141,10 +141,10 @@ private:
 class VariadicIO : public VariadicInputs, public VariadicOutputs
 {
 public:
-    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
 
 protected:
-    VariadicIO(TokenConstPtr type);
+    VariadicIO(TokenDataConstPtr type);
     VariadicIO();
 
     virtual void setupVariadicParameters(Parameterizable &parameters) final override;
@@ -154,10 +154,10 @@ protected:
 class Variadic : public VariadicInputs, public VariadicOutputs, public VariadicEvents, public VariadicSlots
 {
 public:
-    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenConstPtr type, const std::string& label, bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
 
 protected:
-    Variadic(TokenConstPtr type);
+    Variadic(TokenDataConstPtr type);
     Variadic();
 
     virtual void setupVariadicParameters(Parameterizable &parameters) final override;

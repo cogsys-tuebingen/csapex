@@ -7,6 +7,7 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/utility/slim_signal.hpp>
+#include <csapex/model/token.h>
 
 /// SYSTEM
 #include <memory>
@@ -50,16 +51,18 @@ public:
 
     bool contains(Connectable* c) const;
 
-    virtual void setMessage(const TokenConstPtr& msg);
+    virtual void setToken(const TokenPtr &msg);
 
-    TokenConstPtr getMessage() const;
-    void setMessageProcessed();
+    TokenPtr getToken() const;
+    void setTokenProcessed();
 
     /**
      * @brief readMessage retrieves the current message and marks the Connection read
      * @return
      */
-    TokenConstPtr readMessage();
+    TokenPtr readToken();
+
+    bool holdsActiveToken() const;
 
     bool isActive() const;
     void setActive(bool active);
@@ -115,7 +118,7 @@ protected:
     std::vector<FulcrumPtr> fulcrums_;
 
     State state_;
-    TokenConstPtr message_;
+    TokenPtr message_;
 
     static int next_connection_id_;
 

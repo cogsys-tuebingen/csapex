@@ -248,7 +248,7 @@ void GraphIO::saveConnections(YAML::Node &yaml)
 
 void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>& connections)
 {
-    std::unordered_map<UUID, std::vector<UUID>, UUID::Hasher> connection_map;
+    std::unordered_map<UUID, std::vector<std::pair<UUID, std::string>>, UUID::Hasher> connection_map;
 
     for(const ConnectionPtr& connection : connections) {
         if(ignore_forwarding_connections_) {
@@ -260,7 +260,9 @@ void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>
             }
         }
 
-        connection_map[connection->from()->getUUID()].push_back(connection->to()->getUUID());
+        std::string type = connection->isActive() ? "active" : "default";
+
+        connection_map[connection->from()->getUUID()].push_back(std::make_pair(connection->to()->getUUID(), type));
 
         if(connection->getFulcrumCount() > 0) {
             YAML::Node fulcrum;
@@ -273,8 +275,9 @@ void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>
     for(const auto& pair : connection_map) {
         YAML::Node entry(YAML::NodeType::Map);
         entry["uuid"] = pair.first.getFullName();
-        for(const auto& uuid : pair.second) {
-            entry["targets"].push_back(uuid.getFullName());
+        for(const auto& info : pair.second) {
+            entry["targets"].push_back(info.first.getFullName());
+            entry["types"].push_back(info.second);
         }
         yaml["connections"].push_back(entry);
     }
@@ -323,16 +326,27 @@ void GraphIO::loadConnection(const YAML::Node& connection)
     const YAML::Node& targets = connection["targets"];
     apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
 
+    const YAML::Node& types = connection["types"];
+    apex_assert_hard(!types.IsDefined() || (types.Type() == YAML::NodeType::Sequence && targets.size() == types.size()));
+
     for(unsigned j=0; j<targets.size(); ++j) {
         UUID to_uuid = readConnectorUUID(graph_->shared_from_this(), targets[j]);
+
+        std::string connection_type;
+        if(!types.IsDefined()) {
+            connection_type = "default";
+        } else {
+            connection_type = types[j].as<std::string>();
+        }
 
         std::string type = to_uuid.type();
 
         Connectable* from = graph_->findConnector(from_uuid);
+
         if(type == "in" || type == "relayin") {
-            loadMessageConnection(from, to_uuid);
+            loadMessageConnection(from, to_uuid, connection_type);
         } else {
-            loadSignalConnection(from, to_uuid);
+            loadSignalConnection(from, to_uuid, connection_type);
         }
     }
 }
@@ -414,7 +428,7 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     }
 }
 
-void GraphIO::loadMessageConnection(Connectable* from, const UUID& to_uuid)
+void GraphIO::loadMessageConnection(Connectable* from, const UUID& to_uuid, const std::string& connection_type)
 {
     try {
         NodeHandle* target = graph_->findNodeHandleForConnector(to_uuid);
@@ -428,6 +442,9 @@ void GraphIO::loadMessageConnection(Connectable* from, const UUID& to_uuid)
         Output* out = dynamic_cast<Output*>(from);
         if(out && in) {
             ConnectionPtr c = BundledConnection::connect(out, in);
+            if(connection_type == "active") {
+                c->setActive(true);
+            }
             graph_->addConnection(c);
         }
 
@@ -437,7 +454,7 @@ void GraphIO::loadMessageConnection(Connectable* from, const UUID& to_uuid)
 }
 
 
-void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid)
+void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid, const std::string& connection_type)
 {
     try {
         NodeHandle* target = graph_->findNodeHandleForConnector(to_uuid);
@@ -450,8 +467,11 @@ void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid)
 
         Event* out = dynamic_cast<Event*>(from);
         if(out && in) {
-            ConnectionPtr c = DirectConnection::connect(
-                        out, in);
+            // TODO: make connection factory
+            ConnectionPtr c = DirectConnection::connect(out, in);
+            if(connection_type == "active") {
+                c->setActive(true);
+            }
             graph_->addConnection(c);
         }
 

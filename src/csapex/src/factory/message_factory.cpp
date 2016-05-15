@@ -15,7 +15,7 @@ MessageFactory::MessageFactory()
 {
 }
 
-Token::Ptr MessageFactory::createMessage(const std::string& type)
+TokenData::Ptr MessageFactory::createMessage(const std::string& type)
 {
     MessageFactory& i = instance();
 
@@ -30,13 +30,13 @@ Token::Ptr MessageFactory::createMessage(const std::string& type)
     return i.type_to_constructor[type]();
 }
 
-Token::Ptr MessageFactory::readMessage(const std::string &path)
+TokenData::Ptr MessageFactory::readMessage(const std::string &path)
 {
     YAML::Node node = YAML::LoadFile(path);
     return MessageSerializer::instance().readYaml(node);
 }
 
-void MessageFactory::writeMessage(const std::string &path, const Token& msg)
+void MessageFactory::writeMessage(const std::string &path, const TokenData& msg)
 {
     std::ofstream out(path.c_str());
 

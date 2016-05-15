@@ -16,7 +16,7 @@ Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
-Slot::Slot(std::function<void(const TokenConstPtr&)> callback, const UUID &uuid, bool active)
+Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active)
     : Input(uuid), callback_(callback), active_(active)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
@@ -40,9 +40,9 @@ void Slot::disable()
 }
 
 
-void Slot::inputMessage(TokenConstPtr token)
+void Slot::setToken(TokenPtr token)
 {
-    Input::inputMessage(token);
+    Input::setToken(token);
 
     triggered();
 }

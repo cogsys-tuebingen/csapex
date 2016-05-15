@@ -60,8 +60,8 @@ protected:
     void serializeNode(YAML::Node& doc, NodeHandle* node_handle);
     void deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle);
 
-    void loadMessageConnection(Connectable *from, const UUID &to_uuid);
-    void loadSignalConnection(Connectable *from, const UUID &to_uuid);
+    void loadMessageConnection(Connectable *from, const UUID &to_uuid, const std::string& connection_type);
+    void loadSignalConnection(Connectable *from, const UUID &to_uuid, const std::string& connection_type);
 
     UUID readNodeUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
     UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);

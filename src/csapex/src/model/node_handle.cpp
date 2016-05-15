@@ -373,7 +373,7 @@ void NodeHandle::updateParameterValue(Connectable *s)
     }
 }
 
-Input* NodeHandle::addInput(TokenConstPtr type, const std::string& label, bool dynamic, bool optional)
+Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "in");
@@ -392,7 +392,7 @@ Input* NodeHandle::addInput(TokenConstPtr type, const std::string& label, bool d
     return c.get();
 }
 
-Output* NodeHandle::addOutput(TokenConstPtr type, const std::string& label, bool dynamic)
+Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "out");
@@ -409,7 +409,7 @@ Output* NodeHandle::addOutput(TokenConstPtr type, const std::string& label, bool
     return c.get();
 }
 
-Slot* NodeHandle::addSlot(const std::string& label, std::function<void(const TokenConstPtr& )> callback, bool active)
+Slot* NodeHandle::addSlot(const std::string& label, std::function<void(const TokenPtr& )> callback, bool active)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");

@@ -19,7 +19,7 @@ class PreviewInput : public Input
 public:
     PreviewInput(MessagePreviewWidget* parent);
 
-    virtual void inputMessage(Token::ConstPtr message) override;
+    virtual void setToken(TokenPtr message) override;
 
     virtual bool isVirtual() const {
         return true;
@@ -42,7 +42,7 @@ public:
     void connectTo(Connectable* c);
     void disconnect();
 
-    void setCallback(std::function<void(Token::ConstPtr)> cb);
+    void setCallback(std::function<void(TokenData::ConstPtr)> cb);
 
 
     bool isConnected() const;

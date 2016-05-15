@@ -20,9 +20,9 @@ StaticOutput::StaticOutput(const UUID &uuid)
 
 }
 
-void StaticOutput::addMessage(Token::ConstPtr message)
+void StaticOutput::addMessage(TokenPtr message)
 {
-    setType(message->toType());
+    setType(message->getTokenData()->toType());
 
     // update buffer
 
@@ -38,7 +38,7 @@ bool StaticOutput::hasMessage()
 
 bool StaticOutput::hasMarkerMessage()
 {
-    if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_to_send_)) {
+    if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_to_send_->getTokenData())) {
         if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
             return true;
         }
@@ -53,10 +53,10 @@ void StaticOutput::nextMessage()
     setState(State::IDLE);
 }
 
-TokenConstPtr StaticOutput::getMessage() const
+TokenPtr StaticOutput::getToken() const
 {
     if(!committed_message_) {
-        return connection_types::makeEmpty<connection_types::NoMessage>();
+        return Token::makeEmpty<connection_types::NoMessage>();
     } else {
         return committed_message_;
     }
@@ -91,10 +91,11 @@ void StaticOutput::commitMessages(bool is_activated)
         if(!connections_.empty()) {
 //            std::cout << getUUID() << " sends empty message" << std::endl;
         }
-        committed_message_ = connection_types::makeEmpty<connection_types::NoMessage>();
+        committed_message_ = Token::makeEmpty<connection_types::NoMessage>();
     }
 
     ++seq_no_;
+
     committed_message_->setSequenceNumber(seq_no_);
     committed_message_->flags.data = message_flags_;
 
@@ -119,7 +120,7 @@ void StaticOutput::disable()
     committed_message_.reset();
 }
 
-Token::ConstPtr StaticOutput::getMessage()
+TokenPtr StaticOutput::getToken()
 {
     return committed_message_;
 }

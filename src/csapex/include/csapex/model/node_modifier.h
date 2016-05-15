@@ -28,27 +28,27 @@ public:
     /// "real" messages
     template <typename T>
     Input* addInput(const std::string& label,
-                    typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
+                    typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, false, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
-                            typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
+                            typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, false, true);
     }
     template <typename T>
     Input* addDynamicInput(const std::string& label,
-                           typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
+                           typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
         return addInput(connection_types::makeEmptyMessage<T>(), label, true, false);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
-                      typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
+                      typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
         return addOutput(connection_types::makeEmptyMessage<T>(), label, false);
     }
     template <typename T>
     Output* addDynamicOutput(const std::string& label,
-                             typename std::enable_if<std::is_base_of<Token, T>::value >::type* = 0) {
+                             typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
         return addOutput(connection_types::makeEmptyMessage<T>(), label, true);
     }
 
@@ -190,10 +190,10 @@ public:
      * SIGNALING
      */
     Slot* addActiveSlot(const std::string& label, std::function<void()> callback);
-    Slot* addActiveTypedSlot(const std::string& label, std::function<void(const TokenConstPtr&)> callback);
+    Slot* addActiveTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback);
     Slot* addSlot(const std::string& label, std::function<void()> callback);
-    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenConstPtr&)> callback);
-    virtual Slot* addSlot(const std::string& label, std::function<void (const TokenConstPtr& )> callback, bool active) = 0;
+    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback);
+    virtual Slot* addSlot(const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) = 0;
 
     virtual Event* addEvent(const std::string& label) = 0;
 
@@ -232,8 +232,8 @@ public:
     /**
      * Raw construction, handle with care!
      */
-    virtual Input* addInput(TokenConstPtr type, const std::string& label, bool dynamic, bool optional) = 0;
-    virtual Output* addOutput(TokenConstPtr type, const std::string& label, bool dynamic) = 0;
+    virtual Input* addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional) = 0;
+    virtual Output* addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic) = 0;
 
 protected:
     virtual std::vector<ConnectablePtr> getExternalConnectors() const = 0;

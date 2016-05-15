@@ -488,7 +488,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
         if(!c) {
             return;
         }
-        auto m = c->getMessage();
+        auto m = c->getToken();
         if(debug_){
             QString descr("Connection #");
             descr += QString::number(c->id());
@@ -514,8 +514,8 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
             if(m) {
                 descr += ", Message: ";
-                descr += QString::fromStdString(m->descriptiveName());
-                descr += ", # " + QString::number(m->sequenceNumber());
+                descr += QString::fromStdString(m->getTokenData()->descriptiveName());
+                descr += ", # " + QString::number(m->getSequenceNumber());
             }
 
             descr += ")";
@@ -752,6 +752,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;
+    ccs.active = connection.isActive();
 
     if(debug_){
         ccs.label = QString::number(connection.from()->sequenceNumber()) +
@@ -776,13 +777,13 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
         if(!display_signals_) {
             return std::vector<QRectF>();
         }
-        ccs.type = Token::SIG;
+        ccs.type = TokenType::SIG;
 
     } else {
         if(!display_messages_) {
             return std::vector<QRectF>();
         }
-        ccs.type = Token::MSG;
+        ccs.type = TokenType::MSG;
     }
 
 
@@ -867,8 +868,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         scale_factor = 1.0;
     }
 
-    if(ccs.type == Token::SIG) {
+    if(ccs.type == TokenType::SIG) {
         scale_factor *= 0.5;
+    }
+
+    if(ccs.active) {
+        scale_factor *= 3;
     }
 
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
@@ -1034,7 +1039,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     lg.setColorAt(0, color_start);
     lg.setColorAt(1, color_end);
 
-    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == Token::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
+    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == TokenType::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
 
     std::vector<QRectF> bounding_boxes;
 
@@ -1266,6 +1271,8 @@ bool DesignerScene::showConnectionContextMenu()
     menu.addAction(reset);
     QAction* del = new QAction("delete connection", &menu);
     menu.addAction(del);
+    QAction* active = new QAction("set active", &menu);
+    menu.addAction(active);
 
     QAction* selectedItem = menu.exec(QCursor::pos());
 
@@ -1274,6 +1281,9 @@ bool DesignerScene::showConnectionContextMenu()
 
     } else if(selectedItem == reset) {
         dispatcher_->execute(CommandFactory(graph_facade_.get()).deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
+
+    } else if(selectedItem == active) {
+        dispatcher_->execute(CommandFactory(graph_facade_.get()).setConnectionActive(highlight_connection_id_, true));
     }
 
     return true;
