@@ -38,6 +38,8 @@ public:
     void setActive(bool active);
     bool isActive() const;
 
+    TokenPtr clone() const;
+
     TokenDataConstPtr getTokenData() const;
 
     int getSequenceNumber() const;

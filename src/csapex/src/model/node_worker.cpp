@@ -89,6 +89,13 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             handle_connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
                 setProcessingEnabled(isProcessingEnabled());
             }));
+            handle_connections_.emplace_back(node_handle_->activationChanged.connect([this](){
+                if(node_handle_->isActive()) {
+                    trigger_activated_->trigger();
+                } else {
+                    trigger_deactivated_->trigger();
+                }
+            }));
 
             auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
             node_handle_->getInputTransition()->setActivationFunction(af);
@@ -725,24 +732,27 @@ bool NodeWorker::hasActiveOutputConnection()
 
 void NodeWorker::sendEvents(bool active)
 {
-    bool sent = false;
+    bool sent_active_event = false;
     for(EventPtr e : node_handle_->getExternalEvents()){
         if(e->hasMessage()) {
             e->commitMessages(active);
             e->publish();
-            sent = true;
+            if(e->hasActiveConnection()) {
+                sent_active_event = true;
+            }
         }
     }
     for(EventPtr e : node_handle_->getInternalEvents()){
         if(e->hasMessage()) {
             e->commitMessages(active);
             e->publish();
-            sent = true;
+            if(e->hasActiveConnection()) {
+                sent_active_event = true;
+            }
         }
     }
 
-    if(active && sent) {
-        std::cerr << "deactive node via event: " << getUUID() << std::endl;
+    if(active && sent_active_event) {
         node_handle_->setActive(false);
     }
 }
@@ -767,7 +777,6 @@ void NodeWorker::sendMessages()
 
     // if there is an active connection -> deactivate
     if(active && hasActiveOutputConnection()) {
-        std::cerr << "deactive node via message: " << getUUID() << std::endl;
         node_handle_->setActive(false);
     }
 
@@ -806,7 +815,6 @@ bool NodeWorker::tick()
                 updateState();
 
                 if(node_handle_->getOutputTransition()->canStartSendingMessages()) {
-                    //            std::cerr << "ticks" << std::endl;
 
                     {
                         std::unique_lock<std::recursive_mutex> lock(state_mutex_);

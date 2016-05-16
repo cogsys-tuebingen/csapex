@@ -218,6 +218,17 @@ std::vector<ConnectionPtr> Connectable::getConnections() const
     return connections_;
 }
 
+bool Connectable::hasActiveConnection() const
+{
+    for(const ConnectionPtr& c : connections_) {
+        if(c->isActive()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Connectable::isConnected() const
 {
     return !connections_.empty();

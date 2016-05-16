@@ -81,9 +81,11 @@ void Connection::setTokenProcessed()
     from_->setMessageProcessed();
 }
 
-void Connection::setToken(const TokenPtr &msg)
+void Connection::setToken(const TokenPtr &token)
 {
     {
+        TokenPtr msg = token->clone();
+
         std::unique_lock<std::recursive_mutex> lock(sync);
         apex_assert_hard(msg != nullptr);
         apex_assert_hard(state_ == State::NOT_INITIALIZED);
@@ -92,12 +94,6 @@ void Connection::setToken(const TokenPtr &msg)
         if(!isActive() && msg_active) {
             // remove active flag if the connection is inactive
             msg->setActive(false);
-        }
-
-        if(isActive() && msg_active) {
-            std::cerr << "set active token on connection " << from()->getUUID() << " -> " << to()->getUUID() << std::endl;
-        } else if(msg_active) {
-            std::cerr << "ignoring active token on connection " << from()->getUUID() << " -> " << to()->getUUID() << std::endl;
         }
 
         message_ = msg;

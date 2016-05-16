@@ -75,6 +75,8 @@ public:
 
     std::vector<ConnectionPtr> getConnections() const;
 
+    bool hasActiveConnection() const;
+
     virtual bool isConnected() const;
 
     virtual void disable();
