@@ -8,6 +8,7 @@ for f in *; do
     cd $f
     if [[ -d .git ]]; then
       echo "${bld}${blu}pulling $f${rst}"
+      git fetch --all
       if [[ $1 ]] && [[ $2 ]]; then
         git pull $1 $2
       else

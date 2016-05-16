@@ -42,7 +42,7 @@ std::string SwitchThread::getDescription() const
 
 bool SwitchThread::doExecute()
 {
-    TaskGenerator* tg = getRoot()->getTaskGenerator(uuid);
+    TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
 
     auto group = getRootThreadPool()->getGroupFor(tg);
     old_id = group->id();

@@ -96,7 +96,7 @@ public:
     void addNode(NodeHandlePtr node);
     void deleteNode(const UUID &uuid);
 
-    bool addConnection(ConnectionPtr connection);
+    bool addConnection(ConnectionPtr connection, bool quiet = false);
     void deleteConnection(ConnectionPtr connection);
 
     // iterators
@@ -152,6 +152,8 @@ public:
 
     std::string makeStatusString() const;
 
+    void buildConnectedComponents();
+
 private:
     UUID addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional);
     UUID  addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
@@ -160,8 +162,6 @@ private:
 
     EventPtr createInternalEvent(const UUID& internal_uuid, const std::string& label);
 
-   /*rename*/ void verify();
-    void buildConnectedComponents();
     void assignLevels();
 
     virtual void notifyMessagesProcessed() override;

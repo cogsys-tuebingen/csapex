@@ -39,7 +39,7 @@ std::string CreateThread::getDescription() const
 
 bool CreateThread::doExecute()
 {
-    TaskGenerator* tg = getRoot()->getTaskGenerator(uuid);
+    TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
 
     ThreadPool* thread_pool = getRootThreadPool();
 

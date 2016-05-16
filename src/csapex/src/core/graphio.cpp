@@ -68,6 +68,8 @@ void GraphIO::loadGraph(const YAML::Node& doc)
     loadNodes(doc);
     loadConnections(doc);
 
+    graph_->buildConnectedComponents();
+
     loadViewRequest(graph_, doc);
 }
 
@@ -445,7 +447,7 @@ void GraphIO::loadMessageConnection(Connectable* from, const UUID& to_uuid, cons
             if(connection_type == "active") {
                 c->setActive(true);
             }
-            graph_->addConnection(c);
+            graph_->addConnection(c, true);
         }
 
     } catch(const std::exception& e) {
