@@ -155,6 +155,18 @@ void Parameterizable::addPersistentParameter(const csapex::param::Parameter::Ptr
     parameter_state_->addPersistentParameter(param);
 }
 
+void Parameterizable::addHiddenParameter(const csapex::param::Parameter::Ptr &param)
+{
+    param->setHidden(true);
+    addParameter(param);
+}
+
+void Parameterizable::addHiddenParameter(const csapex::param::Parameter::Ptr &param, std::function<void(csapex::param::Parameter *)> cb)
+{
+    param->setHidden(true);
+    addParameter(param, cb);
+}
+
 void Parameterizable::addTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);

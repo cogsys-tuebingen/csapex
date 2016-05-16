@@ -10,13 +10,13 @@ using namespace csapex;
 using namespace param;
 
 Parameter::Parameter(const std::string &name, const ParameterDescription &description)
-    : name_(name), description_(description), enabled_(true), temporary_(false), interactive_(false)
+    : name_(name), description_(description), enabled_(true), temporary_(false), hidden_(false), interactive_(false)
 {
 }
 
 Parameter::Parameter(const Parameter& other)
     : name_(other.name_), uuid_(other.uuid_),
-      description_(other.description_), enabled_(other.enabled_), temporary_(other.temporary_), interactive_(other.interactive_)
+      description_(other.description_), enabled_(other.enabled_), temporary_(other.temporary_), hidden_(other.hidden_), interactive_(other.interactive_)
 {
 }
 
@@ -61,6 +61,17 @@ void Parameter::setInteractive(bool interactive)
 bool Parameter::isInteractive() const
 {
     return interactive_;
+}
+
+
+void Parameter::setHidden(bool hidden)
+{
+    hidden_ = hidden;
+}
+
+bool Parameter::isHidden() const
+{
+    return hidden_;
 }
 
 

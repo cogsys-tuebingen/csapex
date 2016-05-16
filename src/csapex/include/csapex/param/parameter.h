@@ -136,6 +136,9 @@ public:
     bool isTemporary() const;
     void setTemporary(bool temporary);
 
+    bool isHidden() const;
+    void setHidden(bool hidden);
+
     bool isInteractive() const;
     void setInteractive(bool enabled);
 
@@ -170,6 +173,7 @@ protected:
     ParameterDescription description_;
     bool enabled_;
     bool temporary_;
+    bool hidden_;
     bool interactive_;
 
     mutable std::recursive_mutex mutex_;

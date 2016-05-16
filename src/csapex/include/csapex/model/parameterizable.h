@@ -48,6 +48,16 @@ public:
     }
 
 
+    void addHiddenParameter(const csapex::param::ParameterPtr& param);
+    void addHiddenParameter(const csapex::param::ParameterPtr& param, std::function<void(csapex::param::Parameter *)> cb);
+
+    template <typename T>
+    void addHiddenParameter(const csapex::param::ParameterPtr& param, T& target)
+    {
+        addHiddenParameter(param, [&](csapex::param::Parameter* p) { target = p->as<T>(); });
+    }
+
+
     void addPersistentParameter(const csapex::param::ParameterPtr& param);
 
     void addTemporaryParameter(const csapex::param::ParameterPtr& param);

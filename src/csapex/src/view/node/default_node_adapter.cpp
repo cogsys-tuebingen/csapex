@@ -281,7 +281,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
     for(Parameter::Ptr p : params) {
         Parameter* parameter = p.get();
 
-        if(!parameter->isEnabled()) {
+        if(!parameter->isEnabled() || parameter->isHidden()) {
             continue;
         }
 
@@ -338,9 +338,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
                 qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&DefaultNodeAdapterBridge::enableGroup, &bridge, std::bind(&QGroupBox::isChecked, gb), group));
                 callbacks.push_back(call_trigger);
-                QObject::connect(gb, SIGNAL(toggled(bool)), call_trigger, SLOT(call()));
+                QObject::connect(gb, &QGroupBox::toggled, call_trigger, &qt_helper::Call::call);
 
-                QObject::connect(gb, SIGNAL(toggled(bool)), hider, SLOT(setVisible(bool)));
+                QObject::connect(gb, &QGroupBox::toggled, hider, &QFrame::setVisible);
             }
         }
 
