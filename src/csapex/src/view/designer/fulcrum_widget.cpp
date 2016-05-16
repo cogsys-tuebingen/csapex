@@ -13,6 +13,7 @@
 #include <QGraphicsLineItem>
 #include <cmath>
 #include <QMenu>
+#include <QPainter>
 
 using namespace csapex;
 
@@ -54,6 +55,13 @@ FulcrumWidget::FulcrumWidget(Fulcrum *fulcrum, QGraphicsItem *parent)
     QObject::connect(handle_in_, SIGNAL(moved(bool)), this, SLOT(updateHandleIn(bool)));
     QObject::connect(handle_out_, SIGNAL(moved(bool)), this, SLOT(updateHandleOut(bool)));
 
+}
+
+
+void FulcrumWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    painter->setRenderHint(QPainter::Antialiasing);
+    QGraphicsEllipseItem::paint(painter, option, widget);
 }
 
 void FulcrumWidget::moved()

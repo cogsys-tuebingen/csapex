@@ -193,6 +193,15 @@ bool Graph::addConnection(ConnectionPtr connection, bool quiet)
     return true;
 }
 
+void Graph::triggerConnectionsAdded()
+{
+    buildConnectedComponents();
+
+    for(const ConnectionPtr& connection : connections_) {
+        connectionAdded(connection.get());
+    }
+}
+
 void Graph::deleteConnection(ConnectionPtr connection)
 {
     apex_assert_hard(connection);

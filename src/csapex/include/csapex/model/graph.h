@@ -99,6 +99,8 @@ public:
     bool addConnection(ConnectionPtr connection, bool quiet = false);
     void deleteConnection(ConnectionPtr connection);
 
+    void triggerConnectionsAdded();
+
     // iterators
     node_iterator beginNodes();
     const node_const_iterator beginNodes() const;

@@ -431,7 +431,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
             QPoint pos = e->scenePos().toPoint();
             dispatcher_->execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
                                                                       highlight_connection_id_, highlight_connection_sub_id_,
-                                                                      Point(pos.x(), pos.y()), 0)));
+                                                                      Point(pos.x(), pos.y()), Fulcrum::LINEAR)));
             e->accept();
 
             // allow moving the fulcrum directly

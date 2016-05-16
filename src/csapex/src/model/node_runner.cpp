@@ -102,7 +102,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
     // generic task
     auto cg = worker_->getNodeHandle()->executionRequested.connect([this](std::function<void()> cb) {
-            schedule(std::make_shared<Task>("anonymous", cb, 0));
+            schedule(std::make_shared<Task>("anonymous", cb, 0, this));
 });
     connections_.push_back(cg);
 

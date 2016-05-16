@@ -22,6 +22,8 @@ public:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* e);
     bool sceneEvent(QEvent *event);
 
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
 Q_SIGNALS:
     void movedEvent();
     void movedHandlesEvent(Fulcrum* f, bool dropped, int which);

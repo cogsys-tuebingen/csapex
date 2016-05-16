@@ -98,9 +98,6 @@ void CsApexWindow::construct()
 
     setupDesigner();
 
-
-
-
     ui->actionPause->setChecked(executor_.isPaused());
 
     auto forceShortcut = [this](QAction* action) {
