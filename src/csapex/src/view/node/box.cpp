@@ -44,14 +44,6 @@ NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worke
     : parent_(parent), ui(new Ui::Box), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(nullptr), icon_(icon),
       info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), initialized_(false)
 {
-    NodeState* state = handle->getNodeState().get();
-    state->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this));
-    state->minimized_changed->connect(std::bind(&NodeBox::triggerMinimized, this));
-    state->active_changed->connect([this, state](){
-        setProperty("active", state->isActive());
-        updateVisualsRequest();
-    });
-
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
 
     setVisible(false);
@@ -151,6 +143,15 @@ void NodeBox::setupUi()
             ui->event_panel->layout()->addWidget(meta_port);
         }
     }
+
+
+    NodeState* state = node_handle_.lock()->getNodeState().get();
+    state->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this));
+    state->minimized_changed->connect(std::bind(&NodeBox::triggerMinimized, this));
+    state->active_changed->connect([this, state](){
+        setProperty("active", state->isActive());
+        updateVisualsRequest();
+    });
 
     Q_EMIT changed(this);
 }

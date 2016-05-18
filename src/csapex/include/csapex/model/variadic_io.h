@@ -54,6 +54,8 @@ private:
 
 private:
     param::ParameterPtr input_count_;
+
+protected:
     std::vector<InputPtr> variadic_inputs_;
 };
 
@@ -80,6 +82,8 @@ private:
 
 private:
     param::ParameterPtr output_count_;
+
+protected:
     std::vector<OutputPtr> variadic_outputs_;
 };
 
@@ -107,6 +111,8 @@ private:
 
 private:
     param::ParameterPtr event_count_;
+
+protected:
     std::vector<EventPtr> variadic_events_;
 };
 
@@ -133,6 +139,8 @@ private:
 
 private:
     param::ParameterPtr slot_count_;
+
+protected:
     std::vector<SlotPtr> variadic_slots_;
 };
 
