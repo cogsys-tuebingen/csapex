@@ -116,11 +116,12 @@ public:
 
     virtual bool isAsynchronous() const override;
 
+    EventPtr createInternalEvent(const UUID& internal_uuid, const std::string& label);
+
     virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
     virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
     virtual Event* createVariadicEvent(const std::string& label) override;
     virtual Slot* createVariadicSlot(const std::string& label, std::function<void()> callback) override;
-
 
     virtual void removeVariadicInput(InputPtr input) override;
     virtual void removeVariadicOutput(OutputPtr input) override;
@@ -161,8 +162,6 @@ private:
     UUID  addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
     UUID  addForwardingSlot(const UUID& internal_uuid, const std::string& label);
     UUID  addForwardingEvent(const UUID& internal_uuid, const std::string& label);
-
-    EventPtr createInternalEvent(const UUID& internal_uuid, const std::string& label);
 
     void assignLevels();
 

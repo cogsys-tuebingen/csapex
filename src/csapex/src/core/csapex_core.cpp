@@ -161,6 +161,10 @@ void CsApexCore::init()
 
         root_scheduler_ = std::make_shared<NodeRunner>(root_worker_);
         thread_pool_->add(root_scheduler_.get());
+
+        for(PAIR plugin : core_plugins_) {
+            plugin.second->setupGraph(root_->getGraph());
+        }
     }
 }
 

@@ -16,6 +16,7 @@ public:
     virtual ~CorePlugin();
     virtual void prepare(Settings& settings);
     virtual void init(CsApexCore& core) = 0;
+    virtual void setupGraph(Graph* graph);
     virtual void shutdown();
 
     void setName(const std::string& name);

@@ -27,3 +27,8 @@ void CorePlugin::prepare(Settings&)
 {
 
 }
+
+void CorePlugin::setupGraph(Graph *graph)
+{
+
+}
