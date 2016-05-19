@@ -48,6 +48,7 @@ public:
     void handleEvent();
 
 public:
+    csapex::slim_signal::Signal<void(const TokenPtr&)> token_set;
     csapex::slim_signal::Signal<void()> triggered;
 
 protected:

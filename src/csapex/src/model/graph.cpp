@@ -673,11 +673,12 @@ const Graph::node_const_iterator Graph::endNodes() const
 void Graph::setup(NodeModifier &modifier)
 {
     setupVariadic(modifier);
+
+    activation_event_ = createInternalEvent(makeUUID("event_activation"), "activation");
 }
 
 void Graph::setupRoot()
 {
-    activation_event_ = createInternalEvent(generateDerivedUUID(UUID(),"event"), "activation");
 }
 
 void Graph::activation()
@@ -956,22 +957,14 @@ UUID Graph::addForwardingEvent(const UUID& internal_uuid, const std::string& lab
 
     Event* external_event = VariadicEvents::createVariadicEvent(label);
 
-    auto cb = [this, external_event](const TokenPtr& /*token*/){
-        external_event->trigger();
+    auto cb = [this, external_event](const TokenPtr& token){
+        external_event->triggerWith(token);
     };
 
     SlotPtr relay = createInternalSlot(internal_uuid, label, cb);
 
-    Slot* slot = relay.get();
-
-    relay->triggered.connect([this, slot]() {
-        node_handle_->executionRequested([this, slot]() {
-            slot->handleEvent();
-        });
-    });
 
     external_to_internal_slots_[external_event->getUUID()] = relay;
-    internal_slots_[internal_uuid] = relay;
 
     relay_to_external_event_[internal_uuid] = external_event->getUUID();
 

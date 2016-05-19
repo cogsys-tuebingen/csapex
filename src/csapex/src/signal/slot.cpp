@@ -44,6 +44,7 @@ void Slot::setToken(TokenPtr token)
 {
     Input::setToken(token);
 
+    token_set(token);
     triggered();
 }
 

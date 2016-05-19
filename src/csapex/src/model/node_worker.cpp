@@ -733,12 +733,14 @@ bool NodeWorker::hasActiveOutputConnection()
 void NodeWorker::sendEvents(bool active)
 {
     bool sent_active_event = false;
+    bool sent_active_external = false;
     for(EventPtr e : node_handle_->getExternalEvents()){
         if(e->hasMessage()) {
             e->commitMessages(active);
             e->publish();
             if(e->hasActiveConnection()) {
                 sent_active_event = true;
+                sent_active_external = true;
             }
         }
     }
@@ -752,7 +754,7 @@ void NodeWorker::sendEvents(bool active)
         }
     }
 
-    if(active && sent_active_event) {
+    if(active && sent_active_external) {
         node_handle_->setActive(false);
     }
 }
@@ -904,9 +906,9 @@ void NodeWorker::connectConnector(Connectable *c)
     } else if(Slot* slot = dynamic_cast<Slot*>(c)) {
         auto connection = slot->triggered.connect([this, slot]() {
             node_handle_->executionRequested([this, slot]() {
-                TokenConstPtr t = slot->getToken();
-                apex_assert_hard(t);
-                if(t->isActive()) {
+                TokenPtr token = slot->getToken();
+                apex_assert_hard(token);
+                if(token->isActive()) {
                     node_handle_->setActive(true);
                 }
                 slot->handleEvent();
