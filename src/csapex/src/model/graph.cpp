@@ -847,6 +847,17 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstP
 
 
 
+SlotPtr Graph::createInternalSlot(const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
+{
+    SlotPtr slot = node_handle_->addInternalSlot(internal_uuid, label, callback);
+
+    slot->connectionInProgress.connect(internalConnectionInProgress);
+
+    internal_slots_[internal_uuid] = slot;
+
+    return slot;
+}
+
 Slot* Graph::createVariadicSlot(const std::string& label, std::function<void()> callback)
 {
     auto pair = addForwardingSlot(label);
@@ -945,16 +956,14 @@ UUID Graph::addForwardingEvent(const UUID& internal_uuid, const std::string& lab
 
     Event* external_event = VariadicEvents::createVariadicEvent(label);
 
-    auto cb = [this, external_event](){
+    auto cb = [this, external_event](const TokenPtr& /*token*/){
         external_event->trigger();
     };
 
-    SlotPtr relay = std::make_shared<Slot>(cb, internal_uuid, false);
-    relay->setLabel(label);
+    SlotPtr relay = createInternalSlot(internal_uuid, label, cb);
 
     Slot* slot = relay.get();
 
-    relay->connectionInProgress.connect(internalConnectionInProgress);
     relay->triggered.connect([this, slot]() {
         node_handle_->executionRequested([this, slot]() {
             slot->handleEvent();

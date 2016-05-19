@@ -117,6 +117,7 @@ public:
     virtual bool isAsynchronous() const override;
 
     EventPtr createInternalEvent(const UUID& internal_uuid, const std::string& label);
+    SlotPtr createInternalSlot(const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr &)> callback);
 
     virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
     virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;

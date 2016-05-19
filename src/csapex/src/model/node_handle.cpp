@@ -433,6 +433,21 @@ Event* NodeHandle::addEvent(const std::string& label)
     return event.get();
 }
 
+SlotPtr NodeHandle::addInternalSlot(const UUID &internal_uuid, const std::string &label, std::function<void (const TokenPtr &)> callback)
+{
+    apex_assert_hard(uuid_provider_);
+    SlotPtr slot = std::make_shared<Slot>(callback, internal_uuid, false);
+    slot->setLabel(label);
+
+    internal_slots_.push_back(slot);
+
+    connectConnector(slot.get());
+
+    connectorCreated(slot);
+
+    return slot;
+}
+
 EventPtr NodeHandle::addInternalEvent(const UUID& internal_uuid, const std::string& label)
 {
     apex_assert_hard(uuid_provider_);

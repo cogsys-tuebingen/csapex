@@ -55,6 +55,7 @@ public:
     Event* addEvent(const std::string& label) override;
     void addEvent(EventPtr t);
 
+    SlotPtr addInternalSlot(const UUID &internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback);
     EventPtr addInternalEvent(const UUID &internal_uuid, const std::string& label);
 
 
