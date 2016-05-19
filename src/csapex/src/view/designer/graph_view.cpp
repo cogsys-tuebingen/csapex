@@ -960,7 +960,7 @@ void GraphView::createPortAndConnect(const AUUID& target, Connectable* from, Tok
 
     std::shared_ptr<command::PlaybackCommand> playback = dispatcher_->make_playback(graph_uuid, "CreatePortAndConnect");
 
-    if(target.type() == "csapex::Graph") {
+    if(target == graph->getUUID().getAbsoluteUUID()) {
         std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, from->getConnectorType(), type);
         playback->execute(add);
 
@@ -987,7 +987,7 @@ void GraphView::createPortAndMove(const AUUID& target, Connectable* from, TokenD
 
     std::shared_ptr<command::PlaybackCommand> playback = dispatcher_->make_playback(graph_uuid, "CreatePortAndMove");
 
-    if(target.type() == "csapex::Graph") {
+    if(target == graph->getUUID().getAbsoluteUUID()) {
         std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type::opposite(from->getConnectorType()), type);
         playback->execute(add);
 
