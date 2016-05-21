@@ -149,19 +149,19 @@ bool OutputTransition::isSink() const
     return true;
 }
 
-void OutputTransition::sendMessages(bool is_active)
+bool OutputTransition::sendMessages(bool is_active)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     updateConnections();
 
+    bool has_sent_active_message = false;
+
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
 
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
-//        if(output->isConnected()) {
-            output->commitMessages(is_active);
-//        }
+        has_sent_active_message |= output->commitMessages(is_active);
     }
 
     long seq_no = -1;
@@ -182,6 +182,12 @@ void OutputTransition::sendMessages(bool is_active)
     if(isSink()) {
         setOutputsIdle();
     }
+
+    if(has_sent_active_message) {
+        std::cerr << "sent an active message" << std::endl;
+    }
+
+    return has_sent_active_message;
 }
 
 void OutputTransition::publishNextMessage()

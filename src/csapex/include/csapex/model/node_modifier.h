@@ -190,12 +190,20 @@ public:
      * SIGNALING
      */
     Slot* addActiveSlot(const std::string& label, std::function<void()> callback);
-    Slot* addActiveTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback);
-    Slot* addSlot(const std::string& label, std::function<void()> callback);
-    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback);
-    virtual Slot* addSlot(const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) = 0;
+    Slot* addSlot(const std::string& label, std::function<void()> callback, bool active = false);
 
-    virtual Event* addEvent(const std::string& label) = 0;
+    template <typename T>
+    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false)
+    {
+        return addSlot(connection_types::makeEmptyMessage<T>(), label, callback, active);
+    }
+
+    template <typename T>
+    Event* addEvent(const std::string& label)
+    {
+        return addEvent(connection_types::makeEmptyMessage<T>(), label);
+    }
+    Event* addEvent(const std::string& label);
 
 
     std::vector<Input*> getMessageInputs() const;
@@ -234,6 +242,8 @@ public:
      */
     virtual Input* addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional) = 0;
     virtual Output* addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic) = 0;
+    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) = 0;
+    virtual Event* addEvent(TokenDataConstPtr type, const std::string& label) = 0;
 
 protected:
     virtual std::vector<ConnectablePtr> getExternalConnectors() const = 0;

@@ -149,6 +149,9 @@ bool NodeHandle::isSink() const
 
 void NodeHandle::setActive(bool active)
 {
+    if(active != node_state_->isActive()) {
+        node_->ainfo << "set active to " << (active ? "true" : "false") << std::endl;
+    }
     node_state_->setActive(active);
 }
 
@@ -260,7 +263,7 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
         param_2_input_[p->name()] = cin;
         input_2_param_[cin.get()] = p;
 
-        addInput(cin);
+        manageInput(cin);
     }
     {
         OutputPtr cout = std::make_shared<StaticOutput>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("out_") + p->name()));
@@ -270,7 +273,7 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
         param_2_output_[p->name()] = cout;
         output_2_param_[cout.get()] = p;
 
-        addOutput(cout);
+        manageOutput(cout);
     }
 }
 
@@ -301,8 +304,8 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
 
     param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
     if(t) {
-        Event* trigger = addEvent(t->name());
-        addSlot(t->name(), std::bind(&param::TriggerParameter::trigger, t), false);
+        Event* trigger = NodeModifier::addEvent(t->name());
+        NodeModifier::addSlot(t->name(), std::bind(&param::TriggerParameter::trigger, t), false);
         node_->addParameterCallback(t.get(), std::bind(&Event::trigger, trigger));
     }
 }
@@ -387,7 +390,7 @@ Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bo
     c->setOptional(optional);
     c->setType(type);
 
-    addInput(c);
+    manageInput(c);
 
     return c.get();
 }
@@ -405,39 +408,42 @@ Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label, 
     c->setLabel(label);
     c->setType(type);
 
-    addOutput(c);
+    manageOutput(c);
     return c.get();
 }
 
-Slot* NodeHandle::addSlot(const std::string& label, std::function<void(const TokenPtr& )> callback, bool active)
+Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr& )> callback, bool active)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
     SlotPtr slot = std::make_shared<Slot>(callback, uuid, active);
     slot->setLabel(label);
+    slot->setType(type);
 
-    addSlot(slot);
+    manageSlot(slot);
 
     return slot.get();
 }
 
-Event* NodeHandle::addEvent(const std::string& label)
+Event* NodeHandle::addEvent(TokenDataConstPtr type, const std::string& label)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "event");
     EventPtr event = std::make_shared<Event>(uuid);
     event->setLabel(label);
+    event->setType(type);
 
-    addEvent(event);
+    manageEvent(event);
 
     return event.get();
 }
 
-SlotPtr NodeHandle::addInternalSlot(const UUID &internal_uuid, const std::string &label, std::function<void (const TokenPtr &)> callback)
+SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string &label, std::function<void (const TokenPtr &)> callback)
 {
     apex_assert_hard(uuid_provider_);
     SlotPtr slot = std::make_shared<Slot>(callback, internal_uuid, false);
     slot->setLabel(label);
+    slot->setType(type);
 
     internal_slots_.push_back(slot);
 
@@ -448,11 +454,12 @@ SlotPtr NodeHandle::addInternalSlot(const UUID &internal_uuid, const std::string
     return slot;
 }
 
-EventPtr NodeHandle::addInternalEvent(const UUID& internal_uuid, const std::string& label)
+EventPtr NodeHandle::addInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     apex_assert_hard(uuid_provider_);
     EventPtr event = std::make_shared<Event>(internal_uuid);
     event->setLabel(label);
+    event->setType(type);
 
     internal_events_.push_back(event);
 
@@ -572,7 +579,7 @@ void NodeHandle::removeEvent(Event* t)
     }
 }
 
-void NodeHandle::addInput(InputPtr in)
+void NodeHandle::manageInput(InputPtr in)
 {
     if(!getUUID().empty()) {
         apex_assert_hard(in->getUUID().rootUUID() == getUUID().rootUUID());
@@ -586,7 +593,7 @@ void NodeHandle::addInput(InputPtr in)
     transition_in_->addInput(in);
 }
 
-void NodeHandle::addOutput(OutputPtr out)
+void NodeHandle::manageOutput(OutputPtr out)
 {
     if(!getUUID().empty()) {
         apex_assert_hard(out->getUUID().rootUUID() == getUUID().rootUUID());
@@ -615,7 +622,7 @@ bool NodeHandle::isParameterOutput(Output *out) const
     return output_2_param_.find(out) != output_2_param_.end();
 }
 
-void NodeHandle::addSlot(SlotPtr s)
+void NodeHandle::manageSlot(SlotPtr s)
 {
     if(!getUUID().empty()) {
         apex_assert_hard(s->getUUID().rootUUID() == getUUID().rootUUID());
@@ -628,7 +635,7 @@ void NodeHandle::addSlot(SlotPtr s)
     connectorCreated(s);
 }
 
-void NodeHandle::addEvent(EventPtr t)
+void NodeHandle::manageEvent(EventPtr t)
 {
     if(!getUUID().empty()) {
         apex_assert_hard(t->getUUID().rootUUID() == getUUID().rootUUID());

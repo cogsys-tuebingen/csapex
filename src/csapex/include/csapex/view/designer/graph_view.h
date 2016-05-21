@@ -112,8 +112,8 @@ public Q_SLOTS:
     void removeBox(NodeBox* box);
 
     void createPort(const AUUID& target, csapex::ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional);
-    void createPortAndConnect(const AUUID& target, Connectable* from, TokenDataConstPtr type, const std::string& label, bool optional);
-    void createPortAndMove(const AUUID &target, Connectable* from, TokenDataConstPtr type, const std::string& label, bool optional);
+    void createPortAndConnect(const AUUID& target, ConnectorType port_type, Connectable* from, TokenDataConstPtr type);
+    void createPortAndMove(const AUUID &target, ConnectorType port_type, Connectable* from, TokenDataConstPtr type);
 
     void addPort(Port* port);
     void removePort(Port* port);
@@ -196,7 +196,7 @@ private:
     QGraphicsProxyWidget* outputs_widget_proxy_;
     PortPanel* slots_widget_;
     QGraphicsProxyWidget* slots_widget_proxy_;
-    PortPanel* triggers_widget_;
+    PortPanel* events_widget_;
     QGraphicsProxyWidget* triggers_widget_proxy_;
 
     std::map<NodeWorker*, std::vector<csapex::slim_signal::ScopedConnection>> worker_connections_;

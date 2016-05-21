@@ -41,7 +41,7 @@ void DynamicOutput::setMultipart(bool /*multipart*/, bool /*last_part*/)
     // ignored since this is already dynamic
 }
 
-void DynamicOutput::commitMessages(bool is_activated)
+bool DynamicOutput::commitMessages(bool is_activated)
 {
     apex_assert_hard(canSendMessages());
 
@@ -77,6 +77,8 @@ void DynamicOutput::commitMessages(bool is_activated)
     committed_messages_.pop_front();
 
     messageSent(this);
+
+    return is_activated;
 }
 
 bool DynamicOutput::hasMessage()

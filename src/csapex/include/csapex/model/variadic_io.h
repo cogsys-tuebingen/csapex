@@ -93,7 +93,7 @@ protected:
 class VariadicEvents : public virtual VariadicBase
 {
 public:
-    virtual Event* createVariadicEvent(const std::string& label);
+    virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label);
     virtual void removeVariadicEvent(EventPtr trigger);
     void removeVariadicEventById(const UUID& trigger);
     virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
@@ -121,7 +121,7 @@ protected:
 class VariadicSlots: public virtual VariadicBase
 {
 public:
-    virtual Slot* createVariadicSlot(const std::string& label, std::function<void ()> callback);
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr&)> callback);
     virtual void removeVariadicSlot(SlotPtr slot);
     void removeVariadicSlotById(const UUID& slot);
     virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;

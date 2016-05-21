@@ -23,6 +23,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/delegate_bind.h>
 #include <csapex/msg/marker_message.h>
+#include <csapex/msg/any_message.h>
 #include <csapex/msg/no_message.h>
 #include <csapex/msg/end_of_sequence_message.h>
 #include <csapex/utility/exceptions.h>
@@ -46,15 +47,16 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 
     try {
+        handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
+                                             connectConnector(c.get());
+                                         }));
+        handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
+                                             disconnectConnector(c.get());
+                                         }));
+
         node->setupParameters(*node);
 
         if(!node->isIsolated()) {
-            handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
-                                                 connectConnector(c.get());
-                                             }));
-            handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
-                                                 disconnectConnector(c.get());
-                                             }));
 
             node->setup(*node_handle);
 
@@ -62,24 +64,24 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 notifyMessagesProcessed();
             }));
 
-            node_handle_->addSlot("enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
-            node_handle_->addSlot("disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
+            node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
+            node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
 
 
             auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
             if(tickable) {
-                trigger_tick_done_ = node_handle_->addEvent("ticked");
+                trigger_tick_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"ticked");
             }
 
-            trigger_activated_ = node_handle_->addEvent("activated");
-            trigger_deactivated_ = node_handle_->addEvent("deactivated");
+            trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"activated");
+            trigger_deactivated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"deactivated");
 
             auto generator = std::dynamic_pointer_cast<GeneratorNode>(node);
             if(generator) {
                 generator->updated.connect(delegate::Delegate0<>(this, &NodeWorker::finishGenerator));
             }
 
-            trigger_process_done_ = node_handle_->addEvent("inputs processed");
+            trigger_process_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"inputs processed");
 
             is_setup_ = true;
 
@@ -101,6 +103,9 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             node_handle_->getInputTransition()->setActivationFunction(af);
             node_handle_->getOutputTransition()->setActivationFunction(af);
         }
+
+        sendEvents(node_handle_->isActive());
+
     } catch(const std::exception& e) {
         node->aerr << "setup failed: " << e.what() << std::endl;
     }
@@ -732,14 +737,12 @@ bool NodeWorker::hasActiveOutputConnection()
 
 void NodeWorker::sendEvents(bool active)
 {
-    bool sent_active_event = false;
     bool sent_active_external = false;
     for(EventPtr e : node_handle_->getExternalEvents()){
         if(e->hasMessage()) {
             e->commitMessages(active);
             e->publish();
             if(e->hasActiveConnection()) {
-                sent_active_event = true;
                 sent_active_external = true;
             }
         }
@@ -748,13 +751,10 @@ void NodeWorker::sendEvents(bool active)
         if(e->hasMessage()) {
             e->commitMessages(active);
             e->publish();
-            if(e->hasActiveConnection()) {
-                sent_active_event = true;
-            }
         }
     }
 
-    if(active && sent_active_external) {
+    if(node_handle_->isActive() && sent_active_external) {
         node_handle_->setActive(false);
     }
 }
@@ -773,12 +773,12 @@ void NodeWorker::sendMessages()
     //tokens are activated if the node is active.
     bool active = node_handle_->isActive();
 
-    node_handle_->getOutputTransition()->sendMessages(active);
+    bool has_sent_active_message = node_handle_->getOutputTransition()->sendMessages(active);
 
     sendEvents(active);
 
     // if there is an active connection -> deactivate
-    if(active && hasActiveOutputConnection()) {
+    if(active && has_sent_active_message) {
         node_handle_->setActive(false);
     }
 

@@ -341,15 +341,9 @@ void GraphIO::loadConnection(const YAML::Node& connection)
             connection_type = types[j].as<std::string>();
         }
 
-        std::string type = to_uuid.type();
-
         Connectable* from = graph_->findConnector(from_uuid);
 
-        if(type == "in" || type == "relayin") {
-            loadMessageConnection(from, to_uuid, connection_type);
-        } else {
-            loadSignalConnection(from, to_uuid, connection_type);
-        }
+        loadConnection(from, to_uuid, connection_type);
     }
 }
 
@@ -430,44 +424,20 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     }
 }
 
-void GraphIO::loadMessageConnection(Connectable* from, const UUID& to_uuid, const std::string& connection_type)
+
+void GraphIO::loadConnection(Connectable* from, const UUID& to_uuid, const std::string& connection_type)
 {
     try {
         NodeHandle* target = graph_->findNodeHandleForConnector(to_uuid);
 
-        Input* in = target->getInput(to_uuid);
+        Input* in = dynamic_cast<Input*>(target->getConnector(to_uuid));
         if(!in) {
             std::cerr << "cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", input doesn't exist." << std::endl;
             return;
         }
 
         Output* out = dynamic_cast<Output*>(from);
-        if(out && in) {
-            ConnectionPtr c = BundledConnection::connect(out, in);
-            if(connection_type == "active") {
-                c->setActive(true);
-            }
-            graph_->addConnection(c, true);
-        }
 
-    } catch(const std::exception& e) {
-        std::cerr << "cannot load connection: " << e.what() << std::endl;
-    }
-}
-
-
-void GraphIO::loadSignalConnection(Connectable* from, const UUID& to_uuid, const std::string& connection_type)
-{
-    try {
-        NodeHandle* target = graph_->findNodeHandleForConnector(to_uuid);
-
-        Slot* in = target->getSlot(to_uuid);
-        if(!in) {
-            std::cerr << "cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", slot doesn't exist." << std::endl;
-            return;
-        }
-
-        Event* out = dynamic_cast<Event*>(from);
         if(out && in) {
             // TODO: make connection factory
             ConnectionPtr c = DirectConnection::connect(out, in);

@@ -5,6 +5,8 @@
 #include <csapex/signal/event.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/any_message.h>
+#include <csapex/msg/no_message.h>
+#include <csapex/model/connection.h>
 
 /// SYSTEM
 #include <iostream>
@@ -42,10 +44,45 @@ void Slot::disable()
 
 void Slot::setToken(TokenPtr token)
 {
+    apex_assert_hard(getType()->canConnectTo(token->getTokenData().get()));
     Input::setToken(token);
 
     token_set(token);
+
     triggered();
+}
+
+void Slot::notifyMessageAvailable(Connection* connection)
+{
+    message_available(connection);
+
+    std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
+
+    available_connections_.push_back(connection);
+
+    if(!message_) {
+        TokenPtr token = available_connections_.front()->readToken();
+        lock.unlock();
+
+        setToken(token);
+    }
+}
+
+void Slot::notifyMessageProcessed()
+{
+    messageProcessed(this);
+
+    std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
+
+    available_connections_.front()->setTokenProcessed();
+    available_connections_.pop_front();
+
+    if(!available_connections_.empty()) {
+        TokenPtr token = available_connections_.front()->readToken();
+        lock.unlock();
+
+        setToken(token);
+    }
 }
 
 void Slot::handleEvent()
@@ -54,10 +91,14 @@ void Slot::handleEvent()
 
     // do the work
     if(isEnabled() || isActive()) {
-        callback_(message_);
+        if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
+            callback_(message_);
+        }
     }
 
     message_.reset();
+
+    notifyMessageProcessed();
 }
 
 bool Slot::isActive() const

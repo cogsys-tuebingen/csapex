@@ -57,7 +57,7 @@ public:
     virtual void enable() override;
     virtual void disable() override;
 
-    void notifyMessageAvailable(Connection *connection);
+    virtual void notifyMessageAvailable(Connection *connection);
     virtual void notifyMessageProcessed() override;
 
     virtual void reset() override;

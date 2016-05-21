@@ -42,21 +42,21 @@ public:
 
 
     Input* addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional) override;
-    void addInput(InputPtr in);
+    void manageInput(InputPtr in);
     bool isParameterInput(Input* in) const override;
 
     Output* addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic) override;
-    void addOutput(OutputPtr out);
+    void manageOutput(OutputPtr out);
     bool isParameterOutput(Output* out) const;
 
-    Slot* addSlot(const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) override;
-    void addSlot(SlotPtr s);
+    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) override;
+    void manageSlot(SlotPtr s);
 
-    Event* addEvent(const std::string& label) override;
-    void addEvent(EventPtr t);
+    Event* addEvent(TokenDataConstPtr type, const std::string& label) override;
+    void manageEvent(EventPtr t);
 
-    SlotPtr addInternalSlot(const UUID &internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback);
-    EventPtr addInternalEvent(const UUID &internal_uuid, const std::string& label);
+    SlotPtr addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback);
+    EventPtr addInternalEvent(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label);
 
 
     Connectable* getConnector(const UUID& uuid) const;

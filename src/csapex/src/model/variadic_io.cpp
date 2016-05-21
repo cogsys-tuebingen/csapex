@@ -266,7 +266,7 @@ VariadicEvents::VariadicEvents()
 Connectable* VariadicEvents::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string &label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::EVENT);
-    return createVariadicEvent(label);
+    return createVariadicEvent(type, label);
 }
 
 int VariadicEvents::getVariadicEventCount() const
@@ -275,10 +275,10 @@ int VariadicEvents::getVariadicEventCount() const
 }
 
 
-Event *VariadicEvents::createVariadicEvent(const std::string& label)
+Event *VariadicEvents::createVariadicEvent(TokenDataConstPtr type, const std::string& label)
 {
     apex_assert_hard(variadic_modifier_);
-    auto result = variadic_modifier_->addEvent(label.empty() ? std::string("Event") : label);
+    auto result = variadic_modifier_->addEvent(type, label.empty() ? std::string("Event") : label);
     if(result) {
         variadic_events_.emplace_back(std::dynamic_pointer_cast<Event>(result->shared_from_this()));
         event_count_->set((int) variadic_events_.size());
@@ -344,7 +344,7 @@ void VariadicEvents::updateEvents(int count)
             variadic_events_[i]->enable();
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicEvent("Event");
+            createVariadicEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), "Event");
         }
     }
 
@@ -371,18 +371,18 @@ VariadicSlots::VariadicSlots()
 Connectable* VariadicSlots::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string &label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::SLOT_T);
-    return createVariadicSlot(label, [](){});
+    return createVariadicSlot(type, label, [](const TokenPtr&){});
 }
 int VariadicSlots::getVariadicSlotCount() const
 {
     return variadic_slots_.size();
 }
 
-Slot* VariadicSlots::createVariadicSlot(const std::string& label, std::function<void()> callback)
+Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr &)> callback)
 {
     apex_assert_hard(variadic_modifier_);
 
-    auto result = variadic_modifier_->addSlot(label.empty() ? std::string("Slot") : label, callback);
+    auto result = variadic_modifier_->addSlot(type, label.empty() ? std::string("Slot") : label, callback, false);
     if(result) {
         variadic_slots_.emplace_back(std::dynamic_pointer_cast<Slot>(result->shared_from_this()));
         slot_count_->set((int) variadic_slots_.size());
@@ -449,7 +449,7 @@ void VariadicSlots::updateSlots(int count)
             variadic_slots_[i]->enable();
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicSlot("Slot", [](){});
+            createVariadicSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "Slot", [](const TokenPtr&){});
         }
     }
 
@@ -521,9 +521,9 @@ Connectable* Variadic::createVariadicPort(ConnectorType port_type, TokenDataCons
     case ConnectorType::INPUT:
         return createVariadicInput(type, label, optional);
     case ConnectorType::SLOT_T:
-        return createVariadicSlot(label, [](){});
+        return createVariadicSlot(type, label, [](const TokenPtr&){});
     case ConnectorType::EVENT:
-        return createVariadicEvent(label);
+        return createVariadicEvent(type, label);
     default:
         throw std::logic_error(std::string("Variadic port of type ") + port_type::name(port_type) + " is not supported.");
     }

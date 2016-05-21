@@ -9,6 +9,7 @@
 /// SYSTEM
 #include <mutex>
 #include <condition_variable>
+#include <deque>
 
 namespace csapex
 {
@@ -38,6 +39,8 @@ public:
 
     bool isActive() const;
 
+    void notifyMessageAvailable(Connection* connection) override;
+    void notifyMessageProcessed() override;
 
     bool canConnectTo(Connectable* other_side, bool move) const override;
 
@@ -54,6 +57,11 @@ public:
 protected:
     std::function<void(const TokenPtr&)> callback_;
     bool active_;
+
+private:
+    std::deque<Connection*> available_connections_;
+
+    std::recursive_mutex available_connections_mutex_;
 };
 
 }

@@ -22,7 +22,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
 #include <csapex/msg/bundled_connection.h>
-#include <csapex/msg/no_message.h>
+#include <csapex/msg/any_message.h>
 
 /// SYSTEM
 #include <iostream>
@@ -674,19 +674,25 @@ void Graph::setup(NodeModifier &modifier)
 {
     setupVariadic(modifier);
 
-    activation_event_ = createInternalEvent(makeUUID("event_activation"), "activation");
-}
-
-void Graph::setupRoot()
-{
+    activation_event_ = createInternalEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), makeUUID("event_activation"), "activation");
+    deactivation_event_ = createInternalEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), makeUUID("event_deactivation"), "deactivation");
 }
 
 void Graph::activation()
 {
-    TokenDataConstPtr data(new connection_types::NoMessage);
-    TokenPtr token = std::make_shared<Token>(data);
-    token->setActive(true);
-    activation_event_->triggerWith(token);
+    if(activation_event_) {
+        TokenDataConstPtr data(new connection_types::AnyMessage);
+        TokenPtr token = std::make_shared<Token>(data);
+        token->setActive(true);
+        activation_event_->triggerWith(token);
+    }
+}
+
+void Graph::deactivation()
+{
+    if(deactivation_event_) {
+        deactivation_event_->trigger();
+    }
 }
 
 
@@ -848,9 +854,9 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstP
 
 
 
-SlotPtr Graph::createInternalSlot(const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
+SlotPtr Graph::createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
 {
-    SlotPtr slot = node_handle_->addInternalSlot(internal_uuid, label, callback);
+    SlotPtr slot = node_handle_->addInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), internal_uuid, label, callback);
 
     slot->connectionInProgress.connect(internalConnectionInProgress);
 
@@ -859,9 +865,9 @@ SlotPtr Graph::createInternalSlot(const UUID& internal_uuid, const std::string& 
     return slot;
 }
 
-Slot* Graph::createVariadicSlot(const std::string& label, std::function<void()> callback)
+Slot* Graph::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback)
 {
-    auto pair = addForwardingSlot(label);
+    auto pair = addForwardingSlot(type, label);
     return node_handle_->getSlot(pair.external);
 }
 
@@ -879,25 +885,25 @@ void Graph::removeVariadicSlot(SlotPtr slot)
     relay_to_external_slot_.erase(relay->getUUID());
 }
 
-RelayMapping Graph::addForwardingSlot(const std::string& label)
+RelayMapping Graph::addForwardingSlot(const TokenDataConstPtr& type, const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayevent");
-    UUID external_uuid = addForwardingSlot(internal_uuid, label);
+    UUID external_uuid = addForwardingSlot(internal_uuid, type, label);
 
     return {external_uuid, internal_uuid};
 }
 
-UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& label)
+UUID Graph::addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label)
 {
     registerUUID(internal_uuid);
 
-    EventPtr relay = createInternalEvent(internal_uuid, label);
+    EventPtr relay = createInternalEvent(type, internal_uuid, label);
 
-    auto cb = [relay]() {
-        relay->trigger();
+    auto cb = [relay](const TokenConstPtr& data) {
+        relay->triggerWith(std::make_shared<Token>(*data));
     };
 
-    Slot* external_slot = VariadicSlots::createVariadicSlot(label, cb);
+    Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb);
 
     external_to_internal_events_[external_slot->getUUID()] = relay;
 
@@ -908,24 +914,24 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const std::string& labe
     return external_slot->getUUID();
 }
 
-EventPtr Graph::createInternalEvent(const UUID& internal_uuid, const std::string& label)
+EventPtr Graph::createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
-    EventPtr event = node_handle_->addInternalEvent(internal_uuid, label);
+    EventPtr event = node_handle_->addInternalEvent(type, internal_uuid, label);
 
     event->connectionInProgress.connect(internalConnectionInProgress);
 
     internal_events_[internal_uuid] = event;
 
-//    event->triggered.connect([this]() {
-//        std::cerr << "tigger internal event" << std::endl;
-//    });
+    //    event->triggered.connect([this]() {
+    //        std::cerr << "tigger internal event" << std::endl;
+    //    });
 
     return event;
 }
 
-Event* Graph::createVariadicEvent(const std::string& label)
+Event* Graph::createVariadicEvent(TokenDataConstPtr type, const std::string& label)
 {
-    auto pair = addForwardingEvent(label);
+    auto pair = addForwardingEvent(type, label);
     return node_handle_->getEvent(pair.external);
 }
 
@@ -943,25 +949,25 @@ void Graph::removeVariadicEvent(EventPtr event)
     relay_to_external_event_.erase(relay->getUUID());
 }
 
-RelayMapping Graph::addForwardingEvent(const std::string& label)
+RelayMapping Graph::addForwardingEvent(const TokenDataConstPtr& type, const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayslot");
-    UUID external_uuid = addForwardingEvent(internal_uuid, label);
+    UUID external_uuid = addForwardingEvent(internal_uuid, type, label);
 
     return {external_uuid, internal_uuid};
 }
 
-UUID Graph::addForwardingEvent(const UUID& internal_uuid, const std::string& label)
+UUID Graph::addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label)
 {
     registerUUID(internal_uuid);
 
-    Event* external_event = VariadicEvents::createVariadicEvent(label);
+    Event* external_event = VariadicEvents::createVariadicEvent(type, label);
 
     auto cb = [this, external_event](const TokenPtr& token){
         external_event->triggerWith(token);
     };
 
-    SlotPtr relay = createInternalSlot(internal_uuid, label, cb);
+    SlotPtr relay = createInternalSlot(type, internal_uuid, label, cb);
 
 
     external_to_internal_slots_[external_event->getUUID()] = relay;

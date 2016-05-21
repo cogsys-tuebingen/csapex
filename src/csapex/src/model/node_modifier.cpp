@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/factory/message_factory.h>
+#include <csapex/msg/any_message.h>
 
 using namespace csapex;
 
@@ -23,22 +24,19 @@ void NodeModifier::setNodeWorker(NodeWorker *worker)
 }
 
 
-Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback)
+Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback, bool active)
 {
-    return addSlot(label, [callback](const TokenPtr&) {callback();}, false);
+    return addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, active);
 }
-Slot* NodeModifier::addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback)
-{
-    return addSlot(label, callback, false);
-}
-
 Slot* NodeModifier::addActiveSlot(const std::string& label, std::function<void()> callback)
 {
-    return addSlot(label, [callback](const TokenPtr&) {callback();}, true);
+    return addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, true);
 }
-Slot* NodeModifier::addActiveTypedSlot(const std::string& label, std::function<void(const TokenPtr &)> callback)
+
+
+Event* NodeModifier::addEvent(const std::string &label)
 {
-    return addSlot(label, callback, true);
+    return addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), label);
 }
 
 

@@ -183,20 +183,20 @@ void GraphView::setupWidgets()
     slots_widget_->setup(graph_facade_);
 
 
-    triggers_widget_ = new PortPanel(ConnectorType::EVENT, scene_);
-    QObject::connect(triggers_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
-    QObject::connect(triggers_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
-    QObject::connect(triggers_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
-    QObject::connect(triggers_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
-    triggers_widget_proxy_ = scene_->addWidget(triggers_widget_);
-    triggers_widget_->setup(graph_facade_);
+    events_widget_ = new PortPanel(ConnectorType::EVENT, scene_);
+    QObject::connect(events_widget_, &PortPanel::portAdded, this, &GraphView::addPort);
+    QObject::connect(events_widget_, &PortPanel::createPortRequest, this, &GraphView::createPort);
+    QObject::connect(events_widget_, &PortPanel::createPortAndConnectRequest, this, &GraphView::createPortAndConnect);
+    QObject::connect(events_widget_, &PortPanel::createPortAndMoveRequest, this, &GraphView::createPortAndMove);
+    triggers_widget_proxy_ = scene_->addWidget(events_widget_);
+    events_widget_->setup(graph_facade_);
 
     // if this is a nested graph -> enable meta port
     if(graph_facade_->getParent()) {
         outputs_widget_->enableMetaPort(parent);
         inputs_widget_->enableMetaPort(parent);
         slots_widget_->enableMetaPort(parent);
-        triggers_widget_->enableMetaPort(parent);
+        events_widget_->enableMetaPort(parent);
     }
 }
 
@@ -230,7 +230,7 @@ void GraphView::paintEvent(QPaintEvent *e)
             }
         }
         {
-            QPointF pos(mid.x() - triggers_widget_->width() / 2.0,
+            QPointF pos(mid.x() - events_widget_->width() / 2.0,
                         tl_view.y());
             if(pos != triggers_widget_proxy_->pos()) {
                 triggers_widget_proxy_->setPos(pos);
@@ -951,7 +951,7 @@ void GraphView::createPort(const AUUID &target, ConnectorType port_type, TokenDa
     dispatcher_->execute(cmd);
 }
 
-void GraphView::createPortAndConnect(const AUUID& target, Connectable* from, TokenDataConstPtr type, const std::string &label, bool optional)
+void GraphView::createPortAndConnect(const AUUID& target, ConnectorType port_type, Connectable* from, TokenDataConstPtr type)
 {
     Graph* graph = graph_facade_->getGraph();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -961,14 +961,14 @@ void GraphView::createPortAndConnect(const AUUID& target, Connectable* from, Tok
     std::shared_ptr<command::PlaybackCommand> playback = dispatcher_->make_playback(graph_uuid, "CreatePortAndConnect");
 
     if(target == graph->getUUID().getAbsoluteUUID()) {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, from->getConnectorType(), type);
+        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type, type);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
         playback->execute(factory.addConnection(ports.internal, from->getUUID()));
 
     } else {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type::opposite(from->getConnectorType()), type);
+        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type, type);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
@@ -978,7 +978,7 @@ void GraphView::createPortAndConnect(const AUUID& target, Connectable* from, Tok
     dispatcher_->execute(playback);
 }
 
-void GraphView::createPortAndMove(const AUUID& target, Connectable* from, TokenDataConstPtr type, const std::string &label, bool optional)
+void GraphView::createPortAndMove(const AUUID& target, ConnectorType port_type, Connectable* from, TokenDataConstPtr type)
 {
     Graph* graph = graph_facade_->getGraph();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -988,14 +988,14 @@ void GraphView::createPortAndMove(const AUUID& target, Connectable* from, TokenD
     std::shared_ptr<command::PlaybackCommand> playback = dispatcher_->make_playback(graph_uuid, "CreatePortAndMove");
 
     if(target == graph->getUUID().getAbsoluteUUID()) {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type::opposite(from->getConnectorType()), type);
+        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type, type);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
         playback->execute(factory.moveConnections(from->getUUID(), ports.internal));
 
     } else {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, from->getConnectorType(), type);
+        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type, type);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
@@ -1151,7 +1151,7 @@ void GraphView::overwriteStyleSheet(const QString &stylesheet)
     outputs_widget_->setStyleSheet(stylesheet);
     inputs_widget_->setStyleSheet(stylesheet);
     slots_widget_->setStyleSheet(stylesheet);
-    triggers_widget_->setStyleSheet(stylesheet);
+    events_widget_->setStyleSheet(stylesheet);
 }
 
 void GraphView::updateBoxInformation()

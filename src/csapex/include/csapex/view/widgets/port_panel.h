@@ -36,8 +36,8 @@ public:
 
 Q_SIGNALS:
     void createPortRequest(const AUUID& target, ConnectorType type, TokenDataConstPtr, std::string, bool);
-    void createPortAndConnectRequest(const AUUID& target, Connectable*, TokenDataConstPtr, std::string, bool);
-    void createPortAndMoveRequest(const AUUID& target, Connectable*, TokenDataConstPtr, std::string, bool);
+    void createPortAndConnectRequest(const AUUID& target, ConnectorType port_type, Connectable*, TokenDataConstPtr);
+    void createPortAndMoveRequest(const AUUID& target, ConnectorType port_type, Connectable*, TokenDataConstPtr);
 
     void portAdded(Port*);
     void portRemoved(Port*);

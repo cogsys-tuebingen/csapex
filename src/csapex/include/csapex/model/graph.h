@@ -58,7 +58,7 @@ public:
     virtual void stateChanged() override;
 
     virtual void activation() override;
-    void setupRoot();
+    virtual void deactivation() override;
 
     void clear();
 
@@ -116,13 +116,13 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    EventPtr createInternalEvent(const UUID& internal_uuid, const std::string& label);
-    SlotPtr createInternalSlot(const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr &)> callback);
+    EventPtr createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
+    SlotPtr createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr &)> callback);
 
     virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
     virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
-    virtual Event* createVariadicEvent(const std::string& label) override;
-    virtual Slot* createVariadicSlot(const std::string& label, std::function<void()> callback) override;
+    virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label) override;
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback) override;
 
     virtual void removeVariadicInput(InputPtr input) override;
     virtual void removeVariadicOutput(OutputPtr input) override;
@@ -131,8 +131,8 @@ public:
 
     RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
     RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);
-    RelayMapping addForwardingSlot(const std::string& label);
-    RelayMapping addForwardingEvent(const std::string& label);
+    RelayMapping addForwardingSlot(const TokenDataConstPtr& type, const std::string& label);
+    RelayMapping addForwardingEvent(const TokenDataConstPtr& type, const std::string& label);
 
     InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
     OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
@@ -161,8 +161,8 @@ public:
 private:
     UUID addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional);
     UUID  addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
-    UUID  addForwardingSlot(const UUID& internal_uuid, const std::string& label);
-    UUID  addForwardingEvent(const UUID& internal_uuid, const std::string& label);
+    UUID  addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
+    UUID  addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
 
     void assignLevels();
 
@@ -215,6 +215,7 @@ protected:
     bool is_initialized_;
 
     EventPtr activation_event_;
+    EventPtr deactivation_event_;
 };
 
 }

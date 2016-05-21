@@ -165,8 +165,8 @@ Q_SIGNALS:
     void portRemoved(Port*);
 
     void createPortRequest(const AUUID& target, ConnectorType output, TokenDataConstPtr, std::string, bool);
-    void createPortAndConnectRequest(const AUUID& target, Connectable*, TokenDataConstPtr, std::string, bool);
-    void createPortAndMoveRequest(const AUUID& target, Connectable*, TokenDataConstPtr, std::string, bool);
+    void createPortAndConnectRequest(const AUUID& target, ConnectorType port_type,  Connectable*, TokenDataConstPtr);
+    void createPortAndMoveRequest(const AUUID& target, ConnectorType port_type,  Connectable*, TokenDataConstPtr);
 
 protected:
     void resizeEvent(QResizeEvent * e);

@@ -30,7 +30,7 @@ public:
 
     bool isSink() const;
     bool canStartSendingMessages() const;
-    void sendMessages(bool is_active);
+    bool sendMessages(bool is_active);
     void publishNextMessage();
 
     void clearBuffer();

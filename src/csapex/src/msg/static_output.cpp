@@ -73,13 +73,14 @@ void StaticOutput::setMultipart(bool multipart, bool last_part)
     }
 }
 
-void StaticOutput::commitMessages(bool is_activated)
+bool StaticOutput::commitMessages(bool is_activated)
 {
     apex_assert_hard(canSendMessages());
 
     activate();
 
     bool send_active = is_activated;
+
 
     if(message_to_send_) {
         send_active |= message_to_send_->isActive();
@@ -99,10 +100,20 @@ void StaticOutput::commitMessages(bool is_activated)
     committed_message_->setSequenceNumber(seq_no_);
     committed_message_->flags.data = message_flags_;
 
-    committed_message_->setActive(send_active);
+    bool sent_active = false;
+
+    if(hasActiveConnection() && send_active && !std::dynamic_pointer_cast<connection_types::NoMessage const>(committed_message_->getTokenData())) {
+        std::cerr << "set an active token: " << getUUID() << std::endl;
+        sent_active = true;
+        committed_message_->setActive(true);
+    } else {
+        committed_message_->setActive(false);
+    }
 
     ++count_;
     messageSent(this);
+
+    return sent_active;
 }
 
 void StaticOutput::reset()

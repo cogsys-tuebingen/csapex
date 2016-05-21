@@ -70,7 +70,7 @@ bool AddVariadicConnector::doExecute()
     {
         VariadicSlots* vs = dynamic_cast<VariadicSlots*>(node.get());
         apex_assert_hard(vs);
-        Slot* slot = vs->createVariadicSlot(label_, [](){});
+        Slot* slot = vs->createVariadicSlot(token_type, label_, [](const TokenPtr&){});
         connector_id = slot->getUUID();
     }
         break;
@@ -78,7 +78,7 @@ bool AddVariadicConnector::doExecute()
     {
         VariadicEvents* vt = dynamic_cast<VariadicEvents*>(node.get());
         apex_assert_hard(vt);
-        Event* trigger = vt->createVariadicEvent(label_);
+        Event* trigger = vt->createVariadicEvent(token_type, label_);
         connector_id = trigger->getUUID();
     }
         break;

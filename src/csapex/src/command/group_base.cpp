@@ -103,42 +103,42 @@ void GroupBase::analyzeConnections(Graph* graph)
 
         for(const SlotPtr& slot : nh->getExternalSlots()) {
             for(const ConnectionPtr& connection : slot->getConnections()) {
-                Event* trigger = dynamic_cast<Event*>(connection->from());
-                apex_assert_hard(trigger);
+                Output* output = dynamic_cast<Output*>(connection->from());
+                apex_assert_hard(output);
 
-                if(trigger->isVirtual() || slot->isVirtual()) {
+                if(output->isVirtual() || slot->isVirtual()) {
                     continue;
                 }
 
-                NodeHandle* target = graph->findNodeHandleForConnector(trigger->getUUID());
+                NodeHandle* target = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(target);
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
                     ConnectionInformation c;
-                    c.from = trigger->getUUID();
+                    c.from = output->getUUID();
                     c.to = slot->getUUID();
-                    c.type = trigger->getType();
+                    c.type = output->getType();
                     signals_going_in.push_back(c);
                 }
             }
         }
         for(const EventPtr& trigger : nh->getExternalEvents()) {
             for(const ConnectionPtr& connection : trigger->getConnections()) {
-                Slot* slot = dynamic_cast<Slot*>(connection->to());
-                apex_assert_hard(slot);
+                Input* input = dynamic_cast<Input*>(connection->to());
+                apex_assert_hard(input);
 
-                if(trigger->isVirtual() || slot->isVirtual()) {
+                if(trigger->isVirtual() || input->isVirtual()) {
                     continue;
                 }
 
-                NodeHandle* source = graph->findNodeHandleForConnector(slot->getUUID());
+                NodeHandle* source = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(source);
 
                 ConnectionInformation c;
                 c.from = trigger->getUUID();
-                c.to = slot->getUUID();
-                c.type = slot->getType();
+                c.to = input->getUUID();
+                c.type = input->getType();
 
                 if(node_set.find(source) == node_set.end()) {
                     // coming in

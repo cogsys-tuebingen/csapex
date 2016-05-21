@@ -155,7 +155,6 @@ void CsApexCore::init()
 
         root_worker_ = std::make_shared<NodeWorker>(root_handle_);
 
-        graph->setupRoot();
         root_ = std::make_shared<GraphFacade>(*thread_pool_, graph.get());
 
 

@@ -73,20 +73,14 @@ void MetaPort::dropEvent(QDropEvent* e)
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from) {
             auto type = from->getType();
-            auto label = from->getLabel();
-            bool optional = false;
-
-            Q_EMIT createPortAndConnectRequest(target, from, type, label, optional);
+            Q_EMIT createPortAndConnectRequest(target, port_type_, from, type);
         }
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from) {
             auto type = from->getType();
-            auto label = from->getLabel();
-            bool optional = false;
-
-            Q_EMIT createPortAndMoveRequest(target, from, type, label, optional);
+            Q_EMIT createPortAndMoveRequest(target, port_type_, from, type);
         }
 
     }
