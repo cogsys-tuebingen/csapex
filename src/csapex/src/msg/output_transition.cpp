@@ -183,10 +183,6 @@ bool OutputTransition::sendMessages(bool is_active)
         setOutputsIdle();
     }
 
-    if(has_sent_active_message) {
-        std::cerr << "sent an active message" << std::endl;
-    }
-
     return has_sent_active_message;
 }
 
