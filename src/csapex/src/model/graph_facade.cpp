@@ -20,8 +20,8 @@
 
 using namespace csapex;
 
-GraphFacade::GraphFacade(ThreadPool &executor, Graph* graph, GraphFacade *parent)
-    : parent_(parent), absolute_uuid_(graph->getUUID()), graph_(graph), graph_handle_(nullptr), executor_(executor)
+GraphFacade::GraphFacade(ThreadPool &executor, Graph* graph, NodeHandle* nh, GraphFacade *parent)
+    : parent_(parent), absolute_uuid_(graph->getUUID()), graph_(graph), graph_handle_(nh), executor_(executor)
 {
     connections_.push_back(graph->nodeAdded.connect(
                                delegate::Delegate<void(NodeHandlePtr)>(this, &GraphFacade::nodeAddedHandler)));
@@ -30,7 +30,6 @@ GraphFacade::GraphFacade(ThreadPool &executor, Graph* graph, GraphFacade *parent
                                delegate::Delegate<void(NodeHandlePtr)>(this, &GraphFacade::nodeRemovedHandler)));
 
     if(parent_) {
-        graph_handle_ = parent_->getGraph()->findNodeHandle(graph->getUUID());
         apex_assert_hard(graph_handle_);
 
         AUUID parent_auuid = parent_->getAbsoluteUUID();
@@ -61,7 +60,9 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
         GraphPtr sub_graph = std::dynamic_pointer_cast<Graph>(node);
         apex_assert_hard(sub_graph);
 
-        GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get(), this);
+        NodeHandle* subnh = graph_->findNodeHandle(sub_graph->getUUID());;
+        apex_assert_hard(subnh == nh.get());
+        GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get(), nh.get(), this);
         children_[nh->getUUID()] = sub_graph_facade;
 
         childAdded(sub_graph_facade);

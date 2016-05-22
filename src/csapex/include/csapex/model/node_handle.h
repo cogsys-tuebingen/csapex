@@ -55,6 +55,8 @@ public:
     Event* addEvent(TokenDataConstPtr type, const std::string& label) override;
     void manageEvent(EventPtr t);
 
+    InputPtr addInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic, bool optional);
+    OutputPtr addInternalOutput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic);
     SlotPtr addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback);
     EventPtr addInternalEvent(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label);
 
@@ -79,10 +81,16 @@ public:
 
 
     std::vector<ConnectablePtr> getExternalConnectors() const override;
+
     std::vector<InputPtr> getExternalInputs() const override;
+    std::vector<InputPtr> getInternalInputs() const;
+
     std::vector<OutputPtr> getExternalOutputs() const override;
+    std::vector<OutputPtr> getInternalOutputs() const;
 
     std::vector<SlotPtr> getExternalSlots() const override;
+    std::vector<SlotPtr> getInternalSlots() const;
+
 
     std::vector<EventPtr> getExternalEvents() const override;
     std::vector<EventPtr> getInternalEvents() const;

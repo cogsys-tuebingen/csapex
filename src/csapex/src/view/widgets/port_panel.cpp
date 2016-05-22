@@ -33,7 +33,9 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
     case ConnectorType::INPUT:
     case ConnectorType::OUTPUT:
         mainlayout =  new QVBoxLayout;;
+        mainlayout->setSpacing(16);
         layout = new QVBoxLayout;
+        layout->setSpacing(16);
 
         break;
 
@@ -41,12 +43,18 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
     case ConnectorType::SLOT_T:
     case ConnectorType::EVENT:
         mainlayout =  new QHBoxLayout;;
+        mainlayout->setSpacing(32);
         layout = new QHBoxLayout;
+        layout->setSpacing(32);
 
         break;
     }
 
+    mainlayout->setMargin(2);
+
     mainlayout->addLayout(layout);
+
+    setVisible(false);
 
     setLayout(mainlayout);
 
@@ -60,7 +68,12 @@ void PortPanel::enableMetaPort(const AUUID& target)
     QObject::connect(meta_port, &MetaPort::createPortRequest, this, &PortPanel::createPortRequest);
     QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &PortPanel::createPortAndConnectRequest);
     QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &PortPanel::createPortAndMoveRequest);
+
     mainlayout->addWidget(meta_port);
+
+    updateLayouts();
+
+    setVisible(true);
 }
 
 void PortPanel::setup(GraphFacadePtr graph_facade)
@@ -90,6 +103,16 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
     graph_->forwardingRemoved.connect(delegate::Delegate<void(ConnectablePtr)>(this, &PortPanel::connectorRemoved));
 }
 
+void PortPanel::updateLayouts()
+{
+    mainlayout->activate();
+    layout->activate();
+
+    QApplication::processEvents();
+
+    adjustSize();
+}
+
 void PortPanel::addPortForConnector(ConnectablePtr c)
 {
     if(c->getConnectorType() != type_) {
@@ -102,12 +125,11 @@ void PortPanel::addPortForConnector(ConnectablePtr c)
 
     layout->addWidget(port);
 
-    layout->activate();
+    updateLayouts();
 
-    QApplication::processEvents();
-
-    adjustSize();
     portAdded(port);
+
+    setVisible(true);
 }
 
 

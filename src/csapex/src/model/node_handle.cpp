@@ -438,6 +438,34 @@ Event* NodeHandle::addEvent(TokenDataConstPtr type, const std::string& label)
     return event.get();
 }
 
+InputPtr NodeHandle::addInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic, bool optional)
+{
+    InputPtr in = std::make_shared<Input>(internal_uuid);
+    in->setType(type);
+    in->setLabel(label);
+    in->setOptional(optional);
+
+    internal_inputs_.push_back(in);
+
+    return in;
+}
+
+OutputPtr NodeHandle::addInternalOutput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic)
+{
+    OutputPtr out;
+    if(dynamic) {
+        out = std::make_shared<DynamicOutput>(internal_uuid);
+    } else {
+        out = std::make_shared<StaticOutput>(internal_uuid);
+    }
+    out->setType(type);
+    out->setLabel(label);
+
+    internal_outputs_.push_back(out);
+
+    return out;
+}
+
 SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string &label, std::function<void (const TokenPtr &)> callback)
 {
     apex_assert_hard(uuid_provider_);
@@ -777,16 +805,34 @@ std::vector<InputPtr> NodeHandle::getExternalInputs() const
 {
     return external_inputs_;
 }
+std::vector<InputPtr> NodeHandle::getInternalInputs() const
+{
+    return internal_inputs_;
+}
+
+
 
 std::vector<OutputPtr> NodeHandle::getExternalOutputs() const
 {
     return external_outputs_;
 }
+std::vector<OutputPtr> NodeHandle::getInternalOutputs() const
+{
+    return internal_outputs_;
+}
+
+
 
 std::vector<SlotPtr> NodeHandle::getExternalSlots() const
 {
     return external_slots_;
 }
+std::vector<SlotPtr> NodeHandle::getInternalSlots() const
+{
+    return internal_slots_;
+}
+
+
 
 std::vector<EventPtr> NodeHandle::getExternalEvents() const
 {

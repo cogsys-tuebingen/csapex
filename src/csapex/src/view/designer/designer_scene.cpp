@@ -369,7 +369,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             if(!node_handle->isParameterInput(input.get())) {
                 Port* p = getPort(input.get());
                 if(p) {
-                    drawPort(painter, box, p);
+                    drawPort(painter, box->isSelected(), p);
                 }
             }
         }
@@ -378,7 +378,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             if(!node_handle->isParameterOutput(output.get())) {
                 Port* p = getPort(output.get());
                 if(p) {
-                    drawPort(painter, box, p);
+                    drawPort(painter, box->isSelected(), p);
                 }
             }
         }
@@ -389,7 +389,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             for(auto slot : node_handle->getExternalSlots()) {
                 Port* p = getPort(slot.get());
                 if(p) {
-                    drawPort(painter, box, p, i++);
+                    drawPort(painter, box->isSelected(), p, i++);
                 }
             }
         }
@@ -399,7 +399,48 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             for(auto event : node_handle->getExternalEvents()) {
                 Port* p = getPort(event.get());
                 if(p) {
-                    drawPort(painter, box, p, i++);
+                    drawPort(painter, box->isSelected(), p, i++);
+                }
+            }
+        }
+    }
+
+    // augment graph ports
+    NodeHandle* nh = graph_facade_->getNodeHandle();
+    if(nh) {
+        {
+            int i = 0;
+            for(const InputPtr& input : nh->getInternalInputs()) {
+                Port* p = getPort(input.get());
+                if(p) {
+                    drawPort(painter, false, p, i++);
+                }
+            }
+        }
+        {
+            int i = 0;
+            for(const OutputPtr& output : nh->getInternalOutputs()) {
+                Port* p = getPort(output.get());
+                if(p) {
+                    drawPort(painter, false, p, i++);
+                }
+            }
+        }
+        {
+            int i = 0;
+            for(const SlotPtr& slot : nh->getInternalSlots()) {
+                Port* p = getPort(slot.get());
+                if(p) {
+                    drawPort(painter, false, p, i++);
+                }
+            }
+        }
+        {
+            int i = 0;
+            for(const EventPtr& event : nh->getInternalEvents()) {
+                Port* p = getPort(event.get());
+                if(p) {
+                    drawPort(painter, false, p, i++);
                 }
             }
         }
@@ -1102,7 +1143,7 @@ Port* DesignerScene::getPort(Connectable *c)
     }
 }
 
-void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p, int pos)
+void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
 {
     auto* item = itemAt(centerPoint(p), QTransform());
     if(!item || item->type() != QGraphicsProxyWidget::Type) {
@@ -1207,7 +1248,7 @@ void DesignerScene::drawPort(QPainter *painter, NodeBox* box, Port *p, int pos)
         if(p->isHovered()) {
             box_color.setAlphaF(0.8);
         } else {
-            box_color.setAlphaF(box->isSelected() ? 0.4 : 0.1);
+            box_color.setAlphaF(selected ? 0.4 : 0.1);
         }
 
         // draw box

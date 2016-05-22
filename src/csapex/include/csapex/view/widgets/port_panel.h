@@ -55,6 +55,8 @@ private:
     void setupSlot();
     void setupEvent();
 
+    void updateLayouts();
+
 private:
     GraphFacadePtr graph_facade_;
     Graph* graph_;

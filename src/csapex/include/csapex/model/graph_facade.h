@@ -20,7 +20,7 @@ public:
     typedef std::shared_ptr<GraphFacade> Ptr;
 
 public:
-    GraphFacade(ThreadPool& executor, Graph* graph, GraphFacade* parent = nullptr);
+    GraphFacade(ThreadPool& executor, Graph* graph, NodeHandle *nh = nullptr, GraphFacade* parent = nullptr);
     ~GraphFacade();
 
     AUUID getAbsoluteUUID() const;

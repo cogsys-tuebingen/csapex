@@ -745,6 +745,18 @@ Input* Graph::createVariadicInput(TokenDataConstPtr type, const std::string& lab
     return node_handle_->getInput(pair.external);
 }
 
+InputPtr Graph::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic, bool optional)
+{
+    InputPtr input = node_handle_->addInternalInput(type, internal_uuid, label, dynamic, optional);
+
+    transition_relay_in_->addInput(input);
+
+    input->connectionInProgress.connect(internalConnectionInProgress);
+
+    return input;
+}
+
+
 void Graph::removeVariadicInput(InputPtr input)
 {
     OutputPtr relay = external_to_internal_outputs_[input->getUUID()];
@@ -773,13 +785,7 @@ UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenDataConstP
 
     Input* external_input = VariadicInputs::createVariadicInput(type, label, optional);
 
-    OutputPtr relay = std::make_shared<StaticOutput>(internal_uuid);
-    relay->setType(type);
-    relay->setLabel(label);
-
-    relay->connectionInProgress.connect(internalConnectionInProgress);
-
-    transition_relay_out_->addOutput(relay);
+    OutputPtr relay = createInternalOutput(type, internal_uuid, label, false);
 
     external_to_internal_outputs_[external_input->getUUID()] = relay;
 
@@ -795,6 +801,18 @@ Output* Graph::createVariadicOutput(TokenDataConstPtr type, const std::string& l
 {
     auto pair = addForwardingOutput(type, label);
     return node_handle_->getOutput(pair.external);
+}
+
+
+OutputPtr Graph::createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool dynamic)
+{
+    OutputPtr output = node_handle_->addInternalOutput(type, internal_uuid, label, dynamic);
+
+    transition_relay_out_->addOutput(output);
+
+    output->connectionInProgress.connect(internalConnectionInProgress);
+
+    return output;
 }
 
 void Graph::removeVariadicOutput(OutputPtr output)
@@ -827,12 +845,7 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstP
 
     Output* external_output = VariadicOutputs::createVariadicOutput(type, label);
 
-    InputPtr relay = std::make_shared<Input>(internal_uuid);
-    relay->setType(type);
-    relay->setLabel(label);
-    relay->setOptional(true);
-
-    relay->connectionInProgress.connect(internalConnectionInProgress);
+    InputPtr relay = createInternalInput(type, internal_uuid, label, false, true);
 
     std::weak_ptr<Output> external_output_weak = std::dynamic_pointer_cast<Output>(external_output->shared_from_this());
     relay->message_set.connect([this, external_output_weak, relay](Connectable*) {
@@ -840,8 +853,6 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstP
             msg::publish(external_output.get(), relay->getToken()->getTokenData());
         }
     });
-
-    transition_relay_in_->addInput(relay);
 
     external_to_internal_inputs_[external_output->getUUID()] = relay;
 
