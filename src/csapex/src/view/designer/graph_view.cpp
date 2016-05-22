@@ -943,15 +943,15 @@ void GraphView::removeBox(NodeBox *box)
 }
 
 
-void GraphView::createPort(const AUUID &target, ConnectorType port_type, TokenDataConstPtr type, const std::string &label, bool optional)
+void GraphView::createPort(CreateConnectorRequest request)
 {
     CommandFactory factory(graph_facade_.get());
 
-    CommandPtr cmd = factory.createVariadicPort(target, port_type, type, label, optional);
+    CommandPtr cmd = factory.createVariadicPort(request.target, request.connector_type, request.type, request.label, request.optional);
     dispatcher_->execute(cmd);
 }
 
-void GraphView::createPortAndConnect(const AUUID& target, ConnectorType port_type, Connectable* from, TokenDataConstPtr type)
+void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable* from)
 {
     Graph* graph = graph_facade_->getGraph();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -960,15 +960,15 @@ void GraphView::createPortAndConnect(const AUUID& target, ConnectorType port_typ
 
     std::shared_ptr<command::PlaybackCommand> playback = dispatcher_->make_playback(graph_uuid, "CreatePortAndConnect");
 
-    if(target == graph->getUUID().getAbsoluteUUID()) {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type, type);
+    if(request.target == graph->getUUID().getAbsoluteUUID()) {
+        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
         playback->execute(factory.addConnection(ports.internal, from->getUUID()));
 
     } else {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type, type);
+        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
@@ -978,7 +978,7 @@ void GraphView::createPortAndConnect(const AUUID& target, ConnectorType port_typ
     dispatcher_->execute(playback);
 }
 
-void GraphView::createPortAndMove(const AUUID& target, ConnectorType port_type, Connectable* from, TokenDataConstPtr type)
+void GraphView::createPortAndMove(CreateConnectorRequest request, Connectable* from)
 {
     Graph* graph = graph_facade_->getGraph();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -987,15 +987,15 @@ void GraphView::createPortAndMove(const AUUID& target, ConnectorType port_type, 
 
     std::shared_ptr<command::PlaybackCommand> playback = dispatcher_->make_playback(graph_uuid, "CreatePortAndMove");
 
-    if(target == graph->getUUID().getAbsoluteUUID()) {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type, type);
+    if(request.target == graph->getUUID().getAbsoluteUUID()) {
+        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
         playback->execute(factory.moveConnections(from->getUUID(), ports.internal));
 
     } else {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, target, port_type, type);
+        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();

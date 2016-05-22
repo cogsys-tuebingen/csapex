@@ -47,7 +47,7 @@ void MetaPort::triggerCreatePort()
     bool optional = true;
 
     TokenDataPtr type(new connection_types::AnyMessage);
-    Q_EMIT createPortRequest(target, port_type_, type, label.toStdString(), optional);
+    Q_EMIT createPortRequest(CreateConnectorRequest(target, port_type_, type, label.toStdString(), optional));
 }
 
 void MetaPort::dragEnterEvent(QDragEnterEvent* e)
@@ -73,14 +73,31 @@ void MetaPort::dropEvent(QDropEvent* e)
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from) {
             auto type = from->getType();
-            Q_EMIT createPortAndConnectRequest(target, port_type_, from, type);
+
+            bool ok = false;
+            QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label",
+                                                 QLineEdit::Normal, "", &ok);
+            if(!ok) {
+                return;
+            }
+
+            Q_EMIT createPortAndConnectRequest(CreateConnectorRequest(target, port_type_, type, label.toStdString()), from);
         }
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from) {
             auto type = from->getType();
-            Q_EMIT createPortAndMoveRequest(target, port_type_, from, type);
+
+            bool ok = false;
+            QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label",
+                                                 QLineEdit::Normal, "", &ok);
+            if(!ok) {
+                return;
+            }
+
+
+            Q_EMIT createPortAndMoveRequest(CreateConnectorRequest(target, port_type_, type, label.toStdString()), from);
         }
 
     }

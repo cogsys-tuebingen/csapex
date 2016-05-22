@@ -11,6 +11,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
+#include <csapex/utility/create_connector_request.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -111,9 +112,9 @@ public Q_SLOTS:
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
 
-    void createPort(const AUUID& target, csapex::ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional);
-    void createPortAndConnect(const AUUID& target, ConnectorType port_type, Connectable* from, TokenDataConstPtr type);
-    void createPortAndMove(const AUUID &target, ConnectorType port_type, Connectable* from, TokenDataConstPtr type);
+    void createPort(CreateConnectorRequest request);
+    void createPortAndConnect(CreateConnectorRequest request, Connectable* from);
+    void createPortAndMove(CreateConnectorRequest request, Connectable* from);
 
     void addPort(Port* port);
     void removePort(Port* port);

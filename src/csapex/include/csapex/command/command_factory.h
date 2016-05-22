@@ -48,7 +48,7 @@ public:
     CommandPtr createVariadicEvent(const AUUID& node_uuid, const std::string& label);
     CommandPtr createVariadicSlot(const AUUID& node_uuid, const std::string& label);
 
-    CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type);
+    CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string &label);
     CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string& label, bool optional);
 
 private:

@@ -6,6 +6,7 @@
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/utility/create_connector_request.h>
 
 /// SYSTEM
 #include <QFrame>
@@ -35,9 +36,9 @@ public:
     }
 
 Q_SIGNALS:
-    void createPortRequest(const AUUID& target, ConnectorType type, TokenDataConstPtr, std::string, bool);
-    void createPortAndConnectRequest(const AUUID& target, ConnectorType port_type, Connectable*, TokenDataConstPtr);
-    void createPortAndMoveRequest(const AUUID& target, ConnectorType port_type, Connectable*, TokenDataConstPtr);
+    void createPortRequest(CreateConnectorRequest request);
+    void createPortAndConnectRequest(CreateConnectorRequest request, Connectable*);
+    void createPortAndMoveRequest(CreateConnectorRequest request, Connectable*);
 
     void portAdded(Port*);
     void portRemoved(Port*);

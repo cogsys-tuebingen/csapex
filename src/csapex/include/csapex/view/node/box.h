@@ -10,6 +10,7 @@
 #include <csapex/model/error_state.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/connector_type.h>
+#include <csapex/utility/create_connector_request.h>
 
 /// SYSTEM
 #include <memory>
@@ -164,9 +165,9 @@ Q_SIGNALS:
     void portAdded(Port*);
     void portRemoved(Port*);
 
-    void createPortRequest(const AUUID& target, ConnectorType output, TokenDataConstPtr, std::string, bool);
-    void createPortAndConnectRequest(const AUUID& target, ConnectorType port_type,  Connectable*, TokenDataConstPtr);
-    void createPortAndMoveRequest(const AUUID& target, ConnectorType port_type,  Connectable*, TokenDataConstPtr);
+    void createPortRequest(CreateConnectorRequest request);
+    void createPortAndConnectRequest(CreateConnectorRequest request, Connectable*);
+    void createPortAndMoveRequest(CreateConnectorRequest request,  Connectable*);
 
 protected:
     void resizeEvent(QResizeEvent * e);

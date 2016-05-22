@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/view/widgets/port.h>
+#include <csapex/utility/create_connector_request.h>
 
 namespace csapex
 {
@@ -27,9 +28,9 @@ public:
     void dropEvent(QDropEvent* e);
 
 Q_SIGNALS:
-    void createPortRequest(const AUUID& target, ConnectorType output, TokenDataConstPtr, std::string, bool);
-    void createPortAndConnectRequest(const AUUID& target, ConnectorType port_type, Connectable*, TokenDataConstPtr);
-    void createPortAndMoveRequest(const AUUID& target, ConnectorType port_type, Connectable*, TokenDataConstPtr);
+    void createPortRequest(CreateConnectorRequest request);
+    void createPortAndConnectRequest(CreateConnectorRequest request, Connectable*);
+    void createPortAndMoveRequest(CreateConnectorRequest request, Connectable*);
 
 private Q_SLOTS:
     void triggerCreatePort();
