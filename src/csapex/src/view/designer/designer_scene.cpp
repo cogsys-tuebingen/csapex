@@ -1307,12 +1307,16 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
 
 bool DesignerScene::showConnectionContextMenu()
 {
+    ConnectionConstPtr c = graph_facade_->getGraph()->getConnectionWithId(highlight_connection_id_);
+
     QMenu menu;
     QAction* reset = new QAction("reset connection", &menu);
     menu.addAction(reset);
     QAction* del = new QAction("delete connection", &menu);
     menu.addAction(del);
-    QAction* active = new QAction("set active", &menu);
+    QAction* active = new QAction("allow active tokens", &menu);
+    active->setCheckable(true);
+    active->setChecked(c->isActive());
     menu.addAction(active);
 
     QAction* selectedItem = menu.exec(QCursor::pos());
@@ -1324,7 +1328,7 @@ bool DesignerScene::showConnectionContextMenu()
         dispatcher_->execute(CommandFactory(graph_facade_.get()).deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
 
     } else if(selectedItem == active) {
-        dispatcher_->execute(CommandFactory(graph_facade_.get()).setConnectionActive(highlight_connection_id_, true));
+        dispatcher_->execute(CommandFactory(graph_facade_.get()).setConnectionActive(highlight_connection_id_, active->isChecked()));
     }
 
     return true;
