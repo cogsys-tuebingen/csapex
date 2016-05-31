@@ -67,8 +67,9 @@ void StringListParameter::doSetValueFrom(const Parameter &other)
     if(list) {
         list_ = list->list_;
         triggerChange();
+    } else {
+        throw std::runtime_error("bad setFrom, invalid types");
     }
-    throw std::runtime_error("bad setFrom, invalid types");
 }
 
 void StringListParameter::doClone(const Parameter &other)

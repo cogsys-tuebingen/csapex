@@ -11,6 +11,7 @@
 #include <csapex/param/parameter_factory.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/io.h>
+#include <csapex/param/string_list_parameter.h>
 
 using namespace csapex;
 
@@ -87,10 +88,14 @@ void VariadicInputs::removeVariadicInputById(const UUID& input)
 Input *VariadicInputs::createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
-    Input* result = variadic_modifier_->addInput(type, label.empty() ? std::string("Channel") : label, false, optional);
+    Input* result = variadic_modifier_->addInput(type, label.empty() ? std::string("Input") : label, false, optional);
     if(result) {
         variadic_inputs_.push_back(std::dynamic_pointer_cast<Input>(result->shared_from_this()));
         input_count_->set((int) variadic_inputs_.size());
+
+        if(variadic_inputs_.size() >= input_names_->count()) {
+            input_names_->add(label);
+        }
     }
     return result;
 }
@@ -106,6 +111,9 @@ void VariadicInputs::setupVariadicParameters(Parameterizable &parameters)
             p->set(0);
         }
     });
+
+    input_names_ = std::make_shared<csapex::param::StringListParameter>("input names", param::ParameterDescription("variadic input names"));
+    parameters.addHiddenParameter(input_names_);
 }
 
 
@@ -118,6 +126,8 @@ void VariadicInputs::updateInputs(int count)
     apex_assert_hard(variadic_modifier_);
 
     int current_amount = variadic_inputs_.size();
+
+    std::vector<std::string> variadic_names = input_names_->getValues();
 
     if(current_amount > count) {
         bool connected = false;
@@ -136,7 +146,13 @@ void VariadicInputs::updateInputs(int count)
             variadic_inputs_.at(i)->enable();
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicInput(variadic_type_, "Channel", true);
+            std::string label;
+            if(variadic_inputs_.size() < variadic_names.size()) {
+                label = variadic_names.at(variadic_inputs_.size());
+            } else {
+                label = "Input";
+            }
+            createVariadicInput(variadic_type_, label, true);
         }
     }
 
@@ -173,10 +189,14 @@ int VariadicOutputs::getVariadicOutputCount() const
 Output *VariadicOutputs::createVariadicOutput(TokenDataConstPtr type, const std::string& label)
 {
     apex_assert_hard(variadic_modifier_);
-    auto result = variadic_modifier_->addOutput(type, label.empty() ? std::string("Channel") : label, false);
+    auto result = variadic_modifier_->addOutput(type, label.empty() ? std::string("Output") : label, false);
     if(result) {
         variadic_outputs_.emplace_back(std::dynamic_pointer_cast<Output>(result->shared_from_this()));
         output_count_->set((int) variadic_outputs_.size());
+
+        if(variadic_outputs_.size() >= output_names_->count()) {
+            output_names_->add(label);
+        }
     }
     return result;
 }
@@ -211,6 +231,9 @@ void VariadicOutputs::setupVariadicParameters(Parameterizable &parameters)
             p->set(0);
         }
     });
+
+    output_names_ = std::make_shared<csapex::param::StringListParameter>("output names", param::ParameterDescription("variadic output names"));
+    parameters.addHiddenParameter(output_names_);
 }
 
 void VariadicOutputs::updateOutputs(int count)
@@ -222,6 +245,8 @@ void VariadicOutputs::updateOutputs(int count)
     apex_assert_hard(variadic_modifier_);
 
     int current_amount = variadic_outputs_.size();
+
+    std::vector<std::string> variadic_names = output_names_->getValues();
 
     if(current_amount > count) {
         bool connected = false;
@@ -240,7 +265,13 @@ void VariadicOutputs::updateOutputs(int count)
             variadic_outputs_.at(i)->enable();
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicOutput(variadic_type_, "Channel");
+            std::string label;
+            if(variadic_outputs_.size() < variadic_names.size()) {
+                label = variadic_names.at(variadic_outputs_.size());
+            } else {
+                label = "Output";
+            }
+            createVariadicOutput(variadic_type_, label);
         }
     }
 
@@ -282,6 +313,10 @@ Event *VariadicEvents::createVariadicEvent(TokenDataConstPtr type, const std::st
     if(result) {
         variadic_events_.emplace_back(std::dynamic_pointer_cast<Event>(result->shared_from_this()));
         event_count_->set((int) variadic_events_.size());
+
+        if(variadic_events_.size() >= event_names_->count()) {
+            event_names_->add(label);
+        }
     }
     return result;
 }
@@ -315,6 +350,9 @@ void VariadicEvents::setupVariadicParameters(Parameterizable &parameters)
             p->set(0);
         }
     });
+
+    event_names_ = std::make_shared<csapex::param::StringListParameter>("event names", param::ParameterDescription("variadic event names"));
+    parameters.addHiddenParameter(event_names_);
 }
 
 void VariadicEvents::updateEvents(int count)
@@ -326,6 +364,8 @@ void VariadicEvents::updateEvents(int count)
     apex_assert_hard(variadic_modifier_);
 
     int current_amount = variadic_events_.size();
+
+    std::vector<std::string> variadic_names = event_names_->getValues();
 
     if(current_amount > count) {
         bool connected = false;
@@ -344,7 +384,13 @@ void VariadicEvents::updateEvents(int count)
             variadic_events_[i]->enable();
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), "Event");
+            std::string label;
+            if(variadic_events_.size() < variadic_names.size()) {
+                label = variadic_names.at(variadic_events_.size());
+            } else {
+                label = "Event";
+            }
+            createVariadicEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), label);
         }
     }
 
@@ -386,6 +432,10 @@ Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::strin
     if(result) {
         variadic_slots_.emplace_back(std::dynamic_pointer_cast<Slot>(result->shared_from_this()));
         slot_count_->set((int) variadic_slots_.size());
+
+        if(variadic_slots_.size() >= slot_names_->count()) {
+            slot_names_->add(label);
+        }
     }
     return result;
 }
@@ -420,6 +470,9 @@ void VariadicSlots::setupVariadicParameters(Parameterizable &parameters)
             p->set(0);
         }
     });
+
+    slot_names_ = std::make_shared<csapex::param::StringListParameter>("slot names", param::ParameterDescription("variadic slot names"));
+    parameters.addHiddenParameter(slot_names_);
 }
 
 void VariadicSlots::updateSlots(int count)
@@ -431,6 +484,8 @@ void VariadicSlots::updateSlots(int count)
     apex_assert_hard(variadic_modifier_);
 
     int current_amount = variadic_slots_.size();
+
+    std::vector<std::string> variadic_names = slot_names_->getValues();
 
     if(current_amount > count) {
         bool connected = false;
@@ -449,7 +504,13 @@ void VariadicSlots::updateSlots(int count)
             variadic_slots_[i]->enable();
         }
         for(int i = 0 ; i < to_add ; i++) {
-            createVariadicSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "Slot", [](const TokenPtr&){});
+            std::string label;
+            if(variadic_slots_.size() < variadic_names.size()) {
+                label = variadic_names.at(variadic_slots_.size());
+            } else {
+                label = "Slot";
+            }
+            createVariadicSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [](const TokenPtr&){});
         }
     }
 
