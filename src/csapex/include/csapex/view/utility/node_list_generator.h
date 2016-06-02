@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/factory/factory_fwd.h>
+#include <csapex/view/node/node_adapter_factory.h>
 
 /// SYSTEM
 #include <QMenu>
@@ -15,7 +16,7 @@ namespace csapex
 class NodeListGenerator
 {
 public:
-    NodeListGenerator(NodeFactory &node_factory);
+    NodeListGenerator(NodeFactory &node_factory, NodeAdapterFactory& adapter_factory);
 
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
@@ -23,6 +24,7 @@ public:
 
 private:
     NodeFactory& node_factory_;
+    NodeAdapterFactory& adapter_factory_;
 };
 
 }

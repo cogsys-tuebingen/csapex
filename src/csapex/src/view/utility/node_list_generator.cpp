@@ -13,8 +13,8 @@
 
 using namespace csapex;
 
-NodeListGenerator::NodeListGenerator(NodeFactory &node_factory)
-    : node_factory_(node_factory)
+NodeListGenerator::NodeListGenerator(NodeFactory &node_factory, NodeAdapterFactory &adapter_factory)
+    : node_factory_(node_factory), adapter_factory_(adapter_factory)
 {
 
 }
@@ -92,11 +92,21 @@ QAbstractItemModel* NodeListGenerator::listAvailableNodeTypes()
             tags << tag->getName().c_str();
         }
 
+        QStringList properties;
+        for(const std::string& s : proxy->getProperties()) {
+            properties.append(QString::fromStdString(s));
+        }
+
+        if(adapter_factory_.hasAdapter(proxy->getType())) {
+            properties.push_back("QT");
+        }
+
         QStandardItem* item = new QStandardItem(QIcon(QString::fromStdString(proxy->getIcon())), type);
         item->setData(type, Qt::UserRole);
         item->setData(descr, Qt::UserRole + 1);
         item->setData(name, Qt::UserRole + 2);
         item->setData(tags, Qt::UserRole + 3);
+        item->setData(properties, Qt::UserRole + 4);
 
         model->appendRow(item);
     }

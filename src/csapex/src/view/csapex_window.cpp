@@ -484,7 +484,7 @@ void CsApexWindow::updateNodeTypes()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    NodeListGenerator generator(core_.getNodeFactory());
+    NodeListGenerator generator(core_.getNodeFactory(), *designer_->getNodeAdapterFactory());
 
     generator.insertAvailableNodeTypes(ui->boxes);
     generator.insertAvailableNodeTypes(ui->node_info_tree);

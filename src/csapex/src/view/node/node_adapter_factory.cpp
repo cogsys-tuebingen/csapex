@@ -27,6 +27,28 @@ NodeAdapterFactory::~NodeAdapterFactory()
     node_adapter_manager_ = nullptr;
 }
 
+bool NodeAdapterFactory::hasAdapter(const std::string &type) const
+{
+    if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
+        return true;
+    } else {
+        try {
+            const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(type + "AdapterBuilder");
+            if(constructor) {
+                auto builder = constructor->construct();
+                if(builder->getWrappedType() == type) {
+                    return true;
+                }
+            }
+
+        } catch(const std::exception&) {
+            return false;
+        }
+    }
+
+    return false;
+}
+
 NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeHandlePtr node, NodeBox* parent)
 {
     std::string type = node->getType();

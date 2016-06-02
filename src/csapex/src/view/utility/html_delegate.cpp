@@ -58,11 +58,12 @@ HTMLBoxDelegate::HTMLBoxDelegate(int line_height)
 {
 }
 
-void HTMLBoxDelegate::setKeyWords (const QString& words) {
+void HTMLBoxDelegate::setKeyWords (const QString& words)
+{
     key_words = words.split(QRegExp("(\\s+|::)"));
 }
-
-void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const {
+void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
+{
     QStyleOptionViewItemV4 options = option;
     initStyleOption(&options, index);
 
@@ -71,6 +72,7 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
     QString descr = index.data(Qt::UserRole + 1).toString();
     QString name = index.data(Qt::UserRole + 2).toString();
     QStringList tags = index.data(Qt::UserRole + 3).toStringList();
+    QStringList properties = index.data(Qt::UserRole + 4).toStringList();
 
     if(tags.empty()) {
         return;
@@ -96,7 +98,22 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
     }
 
     QTextDocument doc;
-    QString html = QString("<small>") + tag + " :: </small>" + name + "<br /><small><i>" + descr + "</i></small>";
+    QString html;
+    html += "<table><tr>";
+    html += "<th><small>" + tag + " :: </small>" + name + "</th>";
+    html += "<th style='font-size: 10px; color: #888; padding-left: 6px' valign='middle'>";
+    for(QString property : properties) {
+        for(const QString& s : key_words) {
+            if(property.contains(s, Qt::CaseInsensitive)) {
+                property.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<span style='color: #000'>\\1</span>");
+            }
+        }
+
+        html += property + " &nbsp; ";
+    }
+    html += "</th>";
+    html += "</tr></table>";
+    html += "<br /><small><i>" + descr + "</i></small>";
 
     doc.setHtml(html);
 

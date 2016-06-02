@@ -13,6 +13,11 @@ TickableNode::TickableNode()
 {
 
 }
+void TickableNode::getProperties(std::vector<std::string>& properties) const
+{
+    GeneratorNode::getProperties(properties);
+    properties.push_back("ticking");
+}
 
 bool TickableNode::doTick(NodeModifier &nm, Parameterizable &p)
 {

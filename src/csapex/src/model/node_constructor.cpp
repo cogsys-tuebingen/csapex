@@ -59,6 +59,19 @@ std::vector<TagPtr> NodeConstructor::getTags() const
     return tags_;
 }
 
+std::vector<std::string> NodeConstructor::getProperties() const
+{
+    if(properties_.empty()) {
+        try {
+            NodePtr node = makeNode();
+            node->getProperties(properties_);
+
+        } catch(...) {
+            // ignore
+        }
+    }
+    return properties_;
+}
 
 
 NodeConstructor& NodeConstructor::setIcon(const std::string& icon)

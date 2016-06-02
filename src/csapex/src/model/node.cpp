@@ -107,3 +107,7 @@ void Node::deactivation()
 {
 
 }
+
+void Node::getProperties(std::vector<std::string> &/*properties*/) const
+{
+}

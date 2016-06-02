@@ -638,7 +638,7 @@ void GraphView::animateScroll()
 void GraphView::showBoxDialog()
 {
     auto window =  QApplication::activeWindow();
-    BoxDialog diag(node_factory_, window);
+    BoxDialog diag(node_factory_, node_adapter_factory_);
 
     int r = diag.exec();
 
@@ -1197,7 +1197,7 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
-    NodeListGenerator generator(node_factory_);
+    NodeListGenerator generator(node_factory_, node_adapter_factory_);
     generator.insertAvailableNodeTypes(&add_node);
     menu.addMenu(&add_node);
 

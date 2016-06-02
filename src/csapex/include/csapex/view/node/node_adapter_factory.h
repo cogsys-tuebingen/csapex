@@ -23,6 +23,7 @@ public:
     ~NodeAdapterFactory();
 
     NodeAdapterPtr makeNodeAdapter(NodeHandlePtr node, NodeBox* parent);
+    bool hasAdapter(const std::string& type) const;
 
     void loadPlugins();
 

@@ -54,6 +54,8 @@ public:
     GraphFacade* getVisibleGraphFacade() const;
     DesignerScene* getVisibleDesignerScene() const;
 
+    NodeAdapterFactory* getNodeAdapterFactory() const;
+
     bool hasSelection() const;
 
     void saveSettings(YAML::Node& doc);

@@ -16,6 +16,7 @@ bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) 
     QString descr = sourceModel()->index(sourceRow, 0).data(Qt::UserRole + 1).toString();
     QString name = sourceModel()->index(sourceRow, 0).data(Qt::UserRole + 2).toString();
     QStringList tags = sourceModel()->index(sourceRow, 0).data(Qt::UserRole + 3).toStringList();
+    QStringList properties = sourceModel()->index(sourceRow, 0).data(Qt::UserRole + 4).toStringList();
 
     QStringList qrys = filterRegExp().pattern().split(" ", QString::SkipEmptyParts);
 
@@ -27,8 +28,14 @@ bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) 
                 tagged = true;
             }
         }
+        bool prop = false;
+        for(const QString& p : properties) {
+            if(p.contains(qry, Qt::CaseInsensitive)) {
+                prop = true;
+            }
+        }
 
-        contains_all &= (name.contains(qry, Qt::CaseInsensitive) || descr.contains(qry, Qt::CaseInsensitive)) || tagged;
+        contains_all &= (name.contains(qry, Qt::CaseInsensitive) || descr.contains(qry, Qt::CaseInsensitive) || prop || tagged);
     }
     return contains_all;
 }

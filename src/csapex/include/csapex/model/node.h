@@ -45,6 +45,8 @@ public: /* API */
 
     virtual void stateChanged();
 
+    virtual void getProperties(std::vector<std::string>& properties) const;
+
 public:
     StreamRelay adebug;
     StreamRelay ainfo;

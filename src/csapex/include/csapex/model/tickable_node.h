@@ -25,6 +25,9 @@ public:
 
     void keepUpRate();
 
+
+    virtual void getProperties(std::vector<std::string>& properties) const override;
+
 protected:
     virtual bool tick(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
     virtual void tick();

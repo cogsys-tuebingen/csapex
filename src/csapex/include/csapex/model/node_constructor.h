@@ -44,6 +44,8 @@ public:
     NodeConstructor& setTags(const std::vector<TagPtr> &tags);
     std::vector<TagPtr> getTags() const;
 
+    std::vector<std::string> getProperties() const;
+
     NodeConstructor& setIcon(const std::string &icon);
     std::string getIcon() const;
 
@@ -63,6 +65,7 @@ protected:
     std::string descr_;
     std::string icon_;
     std::vector<TagPtr> tags_;
+    mutable std::vector<std::string> properties_;
 
     std::function<NodePtr()> c;
 };

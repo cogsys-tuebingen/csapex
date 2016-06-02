@@ -409,6 +409,11 @@ DesignerScene* Designer::getVisibleDesignerScene() const
     return view->designerScene();
 }
 
+NodeAdapterFactory* Designer::getNodeAdapterFactory() const
+{
+    return &node_adapter_factory_;
+}
+
 void Designer::refresh()
 {
     DesignerScene* scene = getVisibleDesignerScene();

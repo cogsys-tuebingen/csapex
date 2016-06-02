@@ -8,7 +8,14 @@ GeneratorNode::GeneratorNode()
 
 }
 
+void GeneratorNode::getProperties(std::vector<std::string>& properties) const
+{
+    Node::getProperties(properties);
+    properties.push_back("source");
+}
+
 void GeneratorNode::notifyMessagesProcessed()
 {
 
 }
+

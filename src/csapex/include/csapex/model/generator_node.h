@@ -12,6 +12,8 @@ class GeneratorNode : public Node
 public:
     virtual void notifyMessagesProcessed();
 
+    virtual void getProperties(std::vector<std::string>& properties) const override;
+
 public:
     csapex::slim_signal::Signal<void()> updated;
 
