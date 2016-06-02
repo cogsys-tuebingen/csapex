@@ -16,6 +16,7 @@
 #include <csapex/command/minimize.h>
 #include <csapex/command/move_box.h>
 #include <csapex/command/rename_node.h>
+#include <csapex/command/rename_connector.h>
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/switch_thread.h>
 #include <csapex/command/set_color.h>
@@ -1038,6 +1039,15 @@ void GraphView::addPort(Port *port)
             Command::Ptr cmd = CommandFactory(graph_facade_.get()).moveConnections(from, adaptee.get());
             dispatcher_->execute(cmd);
         }
+    });
+
+    QObject::connect(port, &Port::changePortRequest, [this, port](QString label) {
+        ConnectablePtr adaptee = port->getAdaptee().lock();
+        if(!adaptee) {
+            return;
+        }
+        Command::Ptr cmd = std::make_shared<command::RenameConnector>(graph_facade_->getAbsoluteUUID(), adaptee->getUUID(), label.toStdString());
+        dispatcher_->execute(cmd);
     });
 }
 

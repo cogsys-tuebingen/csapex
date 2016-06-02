@@ -22,6 +22,9 @@
 #include <QMimeData>
 #include <QHelpEvent>
 #include <QEvent>
+#include <QInputDialog>
+#include <QApplication>
+#include <QTimer>
 
 using namespace csapex;
 
@@ -40,6 +43,12 @@ Port::Port(QWidget *parent)
     setMinimizedSize(minimized_);
 
     setEnabled(true);
+
+    double_click_timer_ = new QTimer(this);
+
+    QObject::connect(double_click_timer_, &QTimer::timeout, this, &Port::mouseClickEvent);
+
+    double_click_timer_->setInterval(200);
 }
 
 Port::Port(ConnectableWeakPtr adaptee, QWidget *parent)
@@ -83,6 +92,7 @@ bool Port::event(QEvent *e)
         }
 
         createToolTip();
+
     }
 
     return QWidget::event(e);
@@ -291,11 +301,37 @@ void Port::mouseMoveEvent(QMouseEvent* e)
     e->accept();
 }
 
-void Port::mouseReleaseEvent(QMouseEvent* e)
+void Port::mouseDoubleClickEvent(QMouseEvent *e)
+{
+    e->accept();
+
+    double_click_timer_->stop();
+
+    auto adaptee = adaptee_.lock();
+
+    if(adaptee) {
+        bool ok = false;
+        QString label = QInputDialog::getText(QApplication::activeWindow(), "Rename Port", "Enter a new name",
+                                              QLineEdit::Normal, QString::fromStdString(adaptee->getLabel()), &ok);
+        if(ok) {
+            changePortRequest(label);
+        }
+    }
+    buttons_down_ = e->buttons();
+}
+
+void Port::mouseClickEvent()
 {
     startDrag();
 
-    buttons_down_ = e->buttons();
+    buttons_down_ = Qt::NoButton;
+}
+
+void Port::mouseReleaseEvent(QMouseEvent* e)
+{
+    double_click_timer_->setSingleShot(true);
+    double_click_timer_->start();
+
 
     if(e->button() == Qt::MiddleButton) {
         Q_EMIT removeConnectionsRequest();

@@ -96,6 +96,10 @@ Input *VariadicInputs::createVariadicInput(TokenDataConstPtr type, const std::st
         if(variadic_inputs_.size() >= input_names_->count()) {
             input_names_->add(label);
         }
+        int index = variadic_inputs_.size() - 1;
+        result->labelChanged.connect([this, index](const std::string& label){
+            input_names_->setAt(index, label);
+        });
     }
     return result;
 }
@@ -197,6 +201,10 @@ Output *VariadicOutputs::createVariadicOutput(TokenDataConstPtr type, const std:
         if(variadic_outputs_.size() >= output_names_->count()) {
             output_names_->add(label);
         }
+        int index = variadic_outputs_.size() - 1;
+        result->labelChanged.connect([this, index](const std::string& label){
+            output_names_->setAt(index, label);
+        });
     }
     return result;
 }
@@ -317,6 +325,10 @@ Event *VariadicEvents::createVariadicEvent(TokenDataConstPtr type, const std::st
         if(variadic_events_.size() >= event_names_->count()) {
             event_names_->add(label);
         }
+        int index = variadic_events_.size() - 1;
+        result->labelChanged.connect([this, index](const std::string& label){
+            event_names_->setAt(index, label);
+        });
     }
     return result;
 }
@@ -436,6 +448,11 @@ Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::strin
         if(variadic_slots_.size() >= slot_names_->count()) {
             slot_names_->add(label);
         }
+
+        int index = variadic_slots_.size() - 1;
+        result->labelChanged.connect([this, index](const std::string& label){
+            slot_names_->setAt(index, label);
+        });
     }
     return result;
 }

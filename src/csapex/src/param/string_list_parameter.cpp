@@ -106,6 +106,11 @@ void StringListParameter::add(const std::string& value)
     list_.push_back(value);
 }
 
+void StringListParameter::setAt(std::size_t i, const std::string &value)
+{
+    list_.at(i) = value;
+}
+
 void StringListParameter::remove(std::size_t i)
 {
     list_.erase(list_.begin() + i);

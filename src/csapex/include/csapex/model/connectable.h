@@ -108,6 +108,7 @@ public:
     csapex::slim_signal::Signal<void(bool, std::string, int)> connectableError;
 
     csapex::slim_signal::Signal<void()> typeChanged;
+    csapex::slim_signal::Signal<void(std::string)> labelChanged;
 
 public:
     /**

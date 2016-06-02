@@ -38,6 +38,8 @@ public:
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent * e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
+    virtual void mouseDoubleClickEvent(QMouseEvent* e);
+    void mouseClickEvent();
 
     virtual void enterEvent(QEvent* e);
     virtual void leaveEvent(QEvent* e);
@@ -62,6 +64,8 @@ Q_SIGNALS:
 
     void addConnectionRequest(Connectable*);
     void moveConnectionRequest(Connectable*);
+
+    void changePortRequest(QString label);
 
 public Q_SLOTS:
     void setMinimizedSize(bool mini);
@@ -89,6 +93,8 @@ protected:
     Qt::MouseButtons buttons_down_;
 
     std::vector<csapex::slim_signal::Connection> connections_;
+
+    QTimer* double_click_timer_;
 };
 
 }

@@ -149,7 +149,10 @@ void Connectable::setDynamic(bool dynamic)
 void Connectable::setLabel(const std::string &label)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    label_ = label;
+    if(label != label_) {
+        label_ = label;
+        labelChanged(label_);
+    }
 }
 
 void Connectable::setType(TokenData::ConstPtr type)

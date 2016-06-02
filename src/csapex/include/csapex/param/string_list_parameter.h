@@ -20,6 +20,7 @@ public:
     virtual ~StringListParameter();
 
     void add(const std::string& value);
+    void setAt(std::size_t i, const std::string& value);
     void remove(std::size_t i);
     void removeAll(const std::string& value);
 
