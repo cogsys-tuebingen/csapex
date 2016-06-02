@@ -196,6 +196,11 @@ public:
     Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false)
     {
         return addSlot(connection_types::makeEmptyMessage<T>(), label, callback, active);
+    }    
+    template <typename Container, typename T>
+    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false) {
+        Container::template registerType<T>();
+        return addSlot(Container::template make<T>(), label, callback, active);
     }
 
     template <typename T>
