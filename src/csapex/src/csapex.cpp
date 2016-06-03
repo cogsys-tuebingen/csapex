@@ -156,8 +156,6 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
     CsApexCorePtr core = std::make_shared<CsApexCore>(settings, plugin_locator, handler);
 
-    NodeFactory& node_factory = core->getNodeFactory();
-
     ThreadPool& thread_pool = *core->getThreadPool();
 
     settings.saveRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
@@ -173,7 +171,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         GraphFacadePtr root = core->getRoot();
 
-        CommandDispatcher dispatcher(settings, root, &thread_pool, &node_factory);
+        CommandDispatcher dispatcher(*core);
         csapex::slim_signal::ScopedConnection saved_connection(core->saved.connect([&](){
             dispatcher.setClean();
             dispatcher.resetDirtyPoint();
@@ -206,9 +204,10 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
         DragIO drag_io(plugin_locator, &dispatcher);
 
+        CsApexViewCore view_core(*core, *node_adapter_factory, dispatcher, drag_io);
+
         MinimapWidget* minimap = new MinimapWidget;
-        Designer* designer = new Designer(settings, node_factory, *node_adapter_factory,
-                                          root, minimap, &dispatcher, drag_io);
+        Designer* designer = new Designer(view_core, minimap);
 
         ActivityLegend* legend = new ActivityLegend;
         ActivityTimeline* timeline = new ActivityTimeline;

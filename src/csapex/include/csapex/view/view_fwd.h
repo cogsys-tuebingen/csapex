@@ -24,6 +24,8 @@ FWD(NodeAdapterFactory);
 FWD(Port);
 FWD(ParameterAdapter);
 
+class CsApexViewCore;
+
 class PortPanel;
 
 class Designer;

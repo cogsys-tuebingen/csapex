@@ -9,7 +9,6 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/node_state.h>
-#include <csapex/view/designer/designer_options.h>
 
 /// SYSTEM
 #include <QGraphicsSceneMouseEvent>
@@ -23,8 +22,8 @@ using namespace csapex;
 long MovableGraphicsProxyWidget::next_box_z = 1;
 long MovableGraphicsProxyWidget::next_note_z = std::numeric_limits<int>::min();
 
-MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *view, DesignerOptions *options, QGraphicsItem *parent, Qt::WindowFlags wFlags)
-    : QGraphicsProxyWidget(parent, wFlags), box_(box), view_(view), options_(options), relay_(false), clone_p_(false)
+MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *view, CsApexViewCore &view_core, QGraphicsItem *parent, Qt::WindowFlags wFlags)
+    : QGraphicsProxyWidget(parent, wFlags), box_(box), view_(view), view_core_(view_core), relay_(false), clone_p_(false)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
@@ -66,7 +65,7 @@ QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const
 {
     if (QApplication::mouseButtons() == Qt::LeftButton &&
             change == ItemPositionChange &&
-            options_->isGridLockEnabled()) {
+            view_core_.isGridLockEnabled()) {
 
         QVariant value_p = QGraphicsProxyWidget::itemChange(change, value);
         QPointF newPos = value_p.toPointF();

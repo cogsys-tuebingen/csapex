@@ -45,7 +45,7 @@ bool AddNode::doExecute()
         uuid_ = graph->generateUUID(type_);
     }
 
-    NodeHandlePtr node = node_factory_->makeNode(type_, uuid_, graph, saved_state_);
+    NodeHandlePtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
 
     if(!node) {
         return false;

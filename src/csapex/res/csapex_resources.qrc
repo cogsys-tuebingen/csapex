@@ -59,5 +59,6 @@
         <file>port_input.png</file>
         <file>port_slot.png</file>
         <file>port_event.png</file>
+        <file>pencil.png</file>
     </qresource>
 </RCC>

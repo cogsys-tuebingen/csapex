@@ -12,6 +12,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/utility/create_connector_request.h>
+#include <csapex/view/csapex_view_core.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -36,25 +37,22 @@ class GraphView : public QGraphicsView
 
     Q_PROPERTY(QColor balloonColor         READ balloonColor         WRITE setBalloonColor)
 
-    void setLineColor(const QColor& c) { style_->setLineColor(c); }
-    void setLineColorError(const QColor& c) { style_->setLineColorError(c); }
-    void setLineColorBlocked(const QColor& c) { style_->setLineColorBlocked(c); }
-    void setLineColorDisabled(const QColor& c) { style_->setLineColorDisabled(c);}
-    void setLineWidth(int width) { style_->setLineWidth(width); }
-    void setBalloonColor(const QColor& c) { style_->setBalloonColor(c); }
+    void setLineColor(const QColor& c) { view_core_.getStyle().setLineColor(c); }
+    void setLineColorError(const QColor& c) { view_core_.getStyle().setLineColorError(c); }
+    void setLineColorBlocked(const QColor& c) { view_core_.getStyle().setLineColorBlocked(c); }
+    void setLineColorDisabled(const QColor& c) { view_core_.getStyle().setLineColorDisabled(c);}
+    void setLineWidth(int width) { view_core_.getStyle().setLineWidth(width); }
+    void setBalloonColor(const QColor& c) { view_core_.getStyle().setBalloonColor(c); }
 
-    QColor lineColor() const { return style_->lineColor(); }
-    QColor lineColorError() const { return style_->lineColorError(); }
-    QColor lineColorBlocked() const { return style_->lineColorBlocked(); }
-    QColor lineColorDisabled() const { return style_->lineColorDisabled();}
-    int lineWidth() const { return style_->lineWidth(); }
-    QColor balloonColor() const { return style_->balloonColor(); }
+    QColor lineColor() const { return view_core_.getStyle().lineColor(); }
+    QColor lineColorError() const { return view_core_.getStyle().lineColorError(); }
+    QColor lineColorBlocked() const { return view_core_.getStyle().lineColorBlocked(); }
+    QColor lineColorDisabled() const { return view_core_.getStyle().lineColorDisabled();}
+    int lineWidth() const { return view_core_.getStyle().lineWidth(); }
+    QColor balloonColor() const { return view_core_.getStyle().balloonColor(); }
 
 public:
-    GraphView(DesignerScene* scene, csapex::GraphFacadePtr graph,
-              Settings& settings, DesignerOptions& options, NodeFactory& node_factory, NodeAdapterFactory& node_adapter_factory,
-              CommandDispatcher *dispatcher, DragIO& dragio,
-              DesignerStyleable* style, Designer *parent);
+    GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_core, QWidget *parent = nullptr);
     ~GraphView();
 
     DesignerScene* designerScene();
@@ -170,6 +168,7 @@ private:
     void chooseColor();
     void minimizeBox(bool mini);
     void deleteBox();
+    void morphNode();
     void usePrivateThreadFor();
     void useDefaultThreadFor();
     void switchToThread(int group_id);
@@ -178,18 +177,12 @@ private:
     void showProfiling(bool visible);
 
 private:
-    Designer* parent_;
-    DesignerScene* scene_;
-    DesignerStyleable* style_;
+    CsApexCore& core_;
+    CsApexViewCore& view_core_;
 
-    Settings& settings_;
-    DesignerOptions& options_;
-    NodeFactory& node_factory_;
-    NodeAdapterFactory& node_adapter_factory_;
+    DesignerScene* scene_;
 
     GraphFacadePtr graph_facade_;
-    CommandDispatcher* dispatcher_;
-    DragIO& drag_io_;
 
     PortPanel* inputs_widget_;
     QGraphicsProxyWidget* inputs_widget_proxy_;

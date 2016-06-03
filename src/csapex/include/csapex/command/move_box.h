@@ -15,7 +15,7 @@ namespace command
 class MoveBox : public Command
 {
 public:
-    MoveBox(const AUUID &graph_uuid, const UUID& node_uuid, Point from, Point to, Designer *designer);
+    MoveBox(const AUUID &graph_uuid, const UUID& node_uuid, Point from, Point to);
 
 protected:
     bool doExecute();
@@ -26,8 +26,6 @@ protected:
     virtual std::string getDescription() const;
 
 protected:
-    Designer* view_;
-
     Point from;
     Point to;
 

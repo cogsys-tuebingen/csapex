@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/assert.h>
+#include <csapex/core/csapex_core.h>
 
 /// SYSTEM
 #include <iostream>
@@ -14,12 +15,11 @@ Meta::Meta(const AUUID &parent_uuid, const std::string &type)
 {
 }
 
-void Meta::init(Settings* settings, GraphFacade* graph_facade,
-                ThreadPool* thread_pool, NodeFactory *node_factory)
+void Meta::init(GraphFacade* root, CsApexCore& core, Designer* designer)
 {
-    Command::init(settings, graph_facade, thread_pool, node_factory);
+    Command::init(root, core, designer);
     for(Command::Ptr cmd : nested) {
-        cmd->init(settings, graph_facade, thread_pool, node_factory);
+        cmd->init(root, core, designer);
     }
 }
 
@@ -53,7 +53,7 @@ void Meta::add(Command::Ptr cmd)
     apex_assert_hard(cmd);
 
     if(initialized_) {
-        cmd->init(settings_, root_, thread_pool_, node_factory_);
+        cmd->init(core_->getRoot().get(), *core_, designer_);
     }
 
     nested.push_back(cmd);

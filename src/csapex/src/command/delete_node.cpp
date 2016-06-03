@@ -56,7 +56,7 @@ bool DeleteNode::doExecute()
         GraphPtr g = std::dynamic_pointer_cast<Graph>(node_handle->getNode().lock());
         apex_assert_hard(g);
 
-        GraphIO io(g.get(), node_factory_);
+        GraphIO io(g.get(), getNodeFactory());
         io.saveGraph(saved_graph);
     }
 
@@ -75,7 +75,7 @@ bool DeleteNode::doExecute()
 bool DeleteNode::doUndo()
 {
     Graph* graph = getGraph();
-    NodeHandlePtr node_handle = node_factory_->makeNode(type, uuid, graph);
+    NodeHandlePtr node_handle = getNodeFactory()->makeNode(type, uuid, graph);
     node_handle->setNodeState(saved_state);
 
     graph->addNode(node_handle);
@@ -85,7 +85,7 @@ bool DeleteNode::doUndo()
         GraphPtr g = std::dynamic_pointer_cast<Graph>(node_handle->getNode().lock());
         apex_assert_hard(g);
 
-        GraphIO io(g.get(), node_factory_);
+        GraphIO io(g.get(), getNodeFactory());
         io.loadGraph(saved_graph);
     }
 

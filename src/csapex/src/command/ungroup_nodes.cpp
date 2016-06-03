@@ -58,7 +58,7 @@ bool UngroupNodes::doExecute()
     {
         selection_yaml = YAML::Node(YAML::NodeType::Map);
 
-        GraphIO io(subgraph.get(), node_factory_);
+        GraphIO io(subgraph.get(), getNodeFactory());
         io.setIgnoreForwardingConnections(true);
         io.saveGraph(selection_yaml);
     }

@@ -19,8 +19,9 @@ public:
     typedef std::shared_ptr<CommandDispatcher> Ptr;
 
 public:
-    CommandDispatcher(Settings& settings, GraphFacadePtr root,
-                      ThreadPool* thread_pool, NodeFactory* node_factory);
+    CommandDispatcher(CsApexCore& core);
+
+    void setDesigner(Designer* designer);
 
     void execute(Command::Ptr command);
     void executeLater(Command::Ptr command);
@@ -61,10 +62,8 @@ protected:
     CommandDispatcher& operator = (const CommandDispatcher& assign);
 
 private:
-    Settings& settings_;
-    GraphFacadePtr root_;
-    ThreadPool* thread_pool_;
-    NodeFactory* node_factory_;
+    CsApexCore& core_;
+    Designer* designer_;
 
     std::vector<Command::Ptr> later;
 

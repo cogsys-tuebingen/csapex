@@ -6,10 +6,9 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/model_fwd.h>
-#include <csapex/view/designer/designer_styleable.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/slim_signal.h>
-#include <csapex/view/designer/designer_options.h>
+#include <csapex/view/csapex_view_core.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -35,8 +34,7 @@ class Designer : public QWidget
     friend class DesignerOptions;
 
 public:
-    Designer(Settings& settings, NodeFactory& node_factory, NodeAdapterFactory &node_adapter_factory, GraphFacadePtr main_graph_facade, MinimapWidget* minimap, CommandDispatcher* dispatcher,
-             DragIO& dragio, QWidget* parent = 0);
+    Designer(CsApexViewCore& view_core, MinimapWidget* minimap, QWidget* parent = 0);
     virtual ~Designer();
 
     DesignerOptions *options();
@@ -98,18 +96,14 @@ private:
 
 private:
     Ui::Designer* ui;
-    DesignerStyleable style;
 
     DesignerOptions options_;
 
-    DragIO& drag_io;
     MinimapWidget* minimap_;
 
-    Settings& settings_;
-    NodeFactory& node_factory_;
-    NodeAdapterFactory& node_adapter_factory_;
+    CsApexCore& core_;
+    CsApexViewCore& view_core_;
 
-    GraphFacadePtr root_graph_facade_;
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> graphs_;
 
     std::set<Graph*> visible_graphs_;
@@ -120,8 +114,6 @@ private:
     std::map<GraphView*, std::vector<slim_signal::ScopedConnection>> view_connections_;
 
     std::map<UUID, YAML::Node> states_for_invisible_graphs_;
-
-    CommandDispatcher* dispatcher_;
 
     bool space_;
     bool drag_;

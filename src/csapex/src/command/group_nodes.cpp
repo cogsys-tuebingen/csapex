@@ -44,7 +44,7 @@ bool GroupNodes::doExecute()
     {
         selection_yaml = YAML::Node(YAML::NodeType::Map);
 
-        GraphIO io(graph, node_factory_);
+        GraphIO io(graph, getNodeFactory());
         io.setIgnoreForwardingConnections(true);
         io.saveSelectedGraph(selection_yaml, uuids);
     }

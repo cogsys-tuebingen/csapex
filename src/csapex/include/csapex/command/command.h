@@ -18,6 +18,8 @@
 namespace csapex
 {
 
+class Designer;
+
 class Command
 {
 
@@ -41,7 +43,7 @@ public:
 public:
     Command(const AUUID& graph_uuid);
 
-    virtual void init(Settings* settings, GraphFacade* graph_facade, ThreadPool* thread_pool, NodeFactory *node_factory);
+    virtual void init(GraphFacade* graph_facade, CsApexCore& core, Designer* designer);
     virtual bool isUndoable() const;
 
     void setAfterSavepoint(bool save);
@@ -69,19 +71,22 @@ protected:
     GraphFacade* getGraphFacade();
     Graph* getGraph();
 
+    NodeFactory* getNodeFactory();
+
+    Designer* getDesigner();
+
     GraphFacade* getSubGraph(const UUID& graph_id);
     ThreadPool* getRootThreadPool();
 
 protected:
-    Settings* settings_;
-    NodeFactory* node_factory_;
-
     AUUID graph_uuid;
+    CsApexCore* core_;
+
+    GraphFacade* graph_facade_;
+
+    Designer* designer_;
 
 private:
-    GraphFacade* root_;
-    ThreadPool* thread_pool_;
-
     static std::vector<Command::Ptr> undo_later;
 
     bool before_save_point_;

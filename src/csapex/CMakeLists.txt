@@ -323,6 +323,7 @@ add_library(csapex_qt SHARED
     src/command/set_color.cpp
     src/command/update_parameter.cpp
 
+    src/view/csapex_view_core.cpp
     src/view/csapex_window.cpp
     src/view/message_renderer.cpp
     src/view/gui_exception_handler.cpp
@@ -383,6 +384,7 @@ add_library(csapex_qt SHARED
     src/view/widgets/activity_legend.cpp
     src/view/widgets/activity_timeline.cpp
     src/view/widgets/box_dialog.cpp
+    src/view/widgets/rewiring_dialog.cpp
     src/view/widgets/csapex_splashscreen.cpp
     src/view/widgets/doublespanslider.cpp
     src/view/widgets/minimap_widget.cpp

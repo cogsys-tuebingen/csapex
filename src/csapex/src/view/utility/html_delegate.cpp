@@ -91,9 +91,9 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
 
     for(const QString& s : key_words) {
         if(s.length() > 0) {
-            descr.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b>\\1</b>");
-            name.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b>\\1</b>");
-            tag.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b>\\1</b>");
+            descr.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
+            name.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
+            tag.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
         }
     }
 
@@ -105,7 +105,7 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
     for(QString property : properties) {
         for(const QString& s : key_words) {
             if(property.contains(s, Qt::CaseInsensitive)) {
-                property.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<span style='color: #000'>\\1</span>");
+                property.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<span style='color: #000'><u>\\1</u></span>");
             }
         }
 

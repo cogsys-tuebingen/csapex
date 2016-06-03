@@ -39,7 +39,7 @@ bool PasteGraph::doExecute()
 
     Graph* graph = graph_facade->getGraph();
 
-    GraphIO io(graph, node_factory_);
+    GraphIO io(graph, getNodeFactory());
 
     id_mapping_ = io.loadIntoGraph(blueprint_, pos_);
 
@@ -53,7 +53,7 @@ bool PasteGraph::doUndo()
     GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
     for(const auto& pair : id_mapping_) {
         CommandPtr del(new command::DeleteNode(graph_uuid, pair.second));
-        del->init(settings_, graph_facade, getRootThreadPool(), node_factory_);
+        del->init(graph_facade, *core_, getDesigner());
         executeCommand(del);
     }
 

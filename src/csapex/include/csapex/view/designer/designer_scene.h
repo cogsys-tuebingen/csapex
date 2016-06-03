@@ -7,6 +7,7 @@
 #include <csapex/view/view_fwd.h>
 #include <csapex/view/designer/fulcrum_widget.h>
 #include <csapex/view/designer/designer_styleable.h>
+#include <csapex/view/csapex_view_core.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/utility/uuid.h>
 
@@ -27,7 +28,7 @@ private:
     static const float ARROW_LENGTH;
 
 public:
-    DesignerScene(csapex::GraphFacadePtr graph, CommandDispatcher *dispatcher, DesignerStyleable* style);
+    DesignerScene(csapex::GraphFacadePtr graph, CsApexViewCore& view_core);
     ~DesignerScene();
 
     void drawBackground(QPainter *painter, const QRectF &rect);
@@ -149,11 +150,11 @@ private:
     QPointF offset(const QPointF& vector, Position position, double offset);
 
 private:
-    DesignerStyleable* style_;
+    CsApexViewCore& view_core_;
+
     CurrentConnectionState ccs;
 
     GraphFacadePtr graph_facade_;
-    CommandDispatcher* dispatcher_;
 
     QPixmap background_;
 

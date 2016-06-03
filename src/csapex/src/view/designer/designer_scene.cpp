@@ -102,8 +102,8 @@ Point convert(const QPointF& p) {
 
 
 
-DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CommandDispatcher *dispatcher, DesignerStyleable *style)
-    : style_(style), graph_facade_(graph_facade), dispatcher_(dispatcher),
+DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CsApexViewCore& view_core)
+    : view_core_(view_core), graph_facade_(graph_facade),
       preview_(nullptr),
       draw_grid_(false), draw_schema_(false), display_messages_(true), display_signals_(true),
       scale_(1.0), overlay_threshold_(0.45),
@@ -470,7 +470,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
     if(!e->isAccepted() && e->button() == Qt::LeftButton) {
         if(highlight_connection_id_ >= 0) {
             QPoint pos = e->scenePos().toPoint();
-            dispatcher_->execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
+            view_core_.execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
                                                                       highlight_connection_id_, highlight_connection_sub_id_,
                                                                       Point(pos.x(), pos.y()), Fulcrum::LINEAR)));
             e->accept();
@@ -486,7 +486,7 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
     if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
         auto cmd = CommandFactory(graph_facade_.get()).deleteConnectionByIdCommand(highlight_connection_id_);
         if(cmd) {
-            dispatcher_->execute(cmd);
+            view_core_.execute(cmd);
         }
         return;
     }
@@ -644,7 +644,7 @@ void DesignerScene::fulcrumAdded(Fulcrum * f)
     fulcrum_last_hout_[f] = f->handleOut();
 
     QObject::connect(w, &FulcrumWidget::deleteRequest, [this](Fulcrum* f){
-        dispatcher_->execute(Command::Ptr(new command::DeleteFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id())));
+        view_core_.execute(Command::Ptr(new command::DeleteFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id())));
     });
 
 
@@ -655,7 +655,7 @@ void DesignerScene::fulcrumAdded(Fulcrum * f)
                                             f->connectionId(), f->id(),
                                             f->type(), f->handleIn(), f->handleOut(),
                                             type, f->handleIn(), f->handleOut()));
-        dispatcher_->execute(cmd);
+        view_core_.execute(cmd);
     });
 
     clearSelection();
@@ -686,7 +686,7 @@ void DesignerScene::fulcrumMoved(void * fulcrum, bool dropped)
     Fulcrum* f = (Fulcrum*) fulcrum;
 
     if(dropped) {
-        dispatcher_->execute(Command::Ptr(new command::MoveFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(), fulcrum_last_pos_[f], f->pos())));
+        view_core_.execute(Command::Ptr(new command::MoveFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(), fulcrum_last_pos_[f], f->pos())));
         fulcrum_last_pos_[f] = f->pos();
     }
     invalidateSchema();
@@ -697,7 +697,7 @@ void DesignerScene::fulcrumHandleMoved(void * fulcrum, bool dropped, int /*which
     Fulcrum* f = (Fulcrum*) fulcrum;
 
     if(dropped) {
-        dispatcher_->execute(Command::Ptr(new command::ModifyFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(),
+        view_core_.execute(Command::Ptr(new command::ModifyFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(),
                                                                      fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
                                                                      f->type(), f->handleIn(), f->handleOut())));
         fulcrum_last_type_[f] = f->type();
@@ -900,7 +900,7 @@ QPointF DesignerScene::offset(const QPointF& vector, Position position, double o
 
 std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPointF& from, const QPointF& real_to, int id)
 {
-    QPointF to = offset(real_to, ccs.end_pos, style_->lineWidth()*ARROW_LENGTH);
+    QPointF to = offset(real_to, ccs.end_pos, view_core_.getStyle().lineWidth()*ARROW_LENGTH);
 
     painter->setRenderHint(QPainter::Antialiasing);
 
@@ -918,7 +918,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     }
 
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
-    ccs.r = ccs.minimized ? style_->lineWidth() / 2.0 : style_->lineWidth();
+    ccs.r = ccs.minimized ? view_core_.getStyle().lineWidth() / 2.0 : view_core_.getStyle().lineWidth();
     ccs.r *= scale_factor;
     ccs.r *= (ccs.level + 1);
 
@@ -1006,7 +1006,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
     // arrow
     QPolygonF arrow;
-    QPointF a = offset(QPointF(0,0), ccs.end_pos, ARROW_LENGTH * style_->lineWidth()) * scale_factor;
+    QPointF a = offset(QPointF(0,0), ccs.end_pos, ARROW_LENGTH * view_core_.getStyle().lineWidth()) * scale_factor;
 
     QPointF side(a.y()/2.0, a.x()/2.0);
     arrow.append(to - a);
@@ -1036,12 +1036,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
     }
 
-    QColor color_start = style_->lineColor();
-    QColor color_end = style_->lineColor();
+    QColor color_start = view_core_.getStyle().lineColor();
+    QColor color_end = view_core_.getStyle().lineColor();
 
     if(ccs.full_read || ccs.full_unread) {
-        color_start = style_->lineColorBlocked();
-        color_end = style_->lineColorBlocked();
+        color_start = view_core_.getStyle().lineColorBlocked();
+        color_end = view_core_.getStyle().lineColorBlocked();
 
         if(ccs.full_read) {
             color_start = color_start.dark();
@@ -1049,12 +1049,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         }
 
     } else if(ccs.error) {
-        color_start = style_->lineColorError();
-        color_end = style_->lineColorError();
+        color_start = view_core_.getStyle().lineColorError();
+        color_end = view_core_.getStyle().lineColorError();
 
     } else if(ccs.disabled) {
-        color_start = style_->lineColorDisabled();
-        color_end = style_->lineColorDisabled();
+        color_start = view_core_.getStyle().lineColorDisabled();
+        color_end = view_core_.getStyle().lineColorDisabled();
 
     }
     if(ccs.selected_from) {
@@ -1242,8 +1242,8 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
         }
 
         // drawing
-        QColor box_color = style_->balloonColor();
-        QColor text_color = style_->lineColor();
+        QColor box_color = view_core_.getStyle().balloonColor();
+        QColor text_color = view_core_.getStyle().lineColor();
 
         if(p->isHovered()) {
             box_color.setAlphaF(0.8);
@@ -1322,13 +1322,13 @@ bool DesignerScene::showConnectionContextMenu()
     QAction* selectedItem = menu.exec(QCursor::pos());
 
     if(selectedItem == del) {
-        dispatcher_->execute(CommandFactory(graph_facade_.get()).deleteConnectionByIdCommand(highlight_connection_id_));
+        view_core_.execute(CommandFactory(graph_facade_.get()).deleteConnectionByIdCommand(highlight_connection_id_));
 
     } else if(selectedItem == reset) {
-        dispatcher_->execute(CommandFactory(graph_facade_.get()).deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
+        view_core_.execute(CommandFactory(graph_facade_.get()).deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
 
     } else if(selectedItem == active) {
-        dispatcher_->execute(CommandFactory(graph_facade_.get()).setConnectionActive(highlight_connection_id_, active->isChecked()));
+        view_core_.execute(CommandFactory(graph_facade_.get()).setConnectionActive(highlight_connection_id_, active->isChecked()));
     }
 
     return true;

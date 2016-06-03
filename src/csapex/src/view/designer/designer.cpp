@@ -10,6 +10,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_state.h>
+#include <csapex/core/csapex_core.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/node/box.h>
 #include <csapex/view/designer/graph_view.h>
@@ -26,21 +27,21 @@
 
 using namespace csapex;
 
-Designer::Designer(Settings& settings, NodeFactory &node_factory, NodeAdapterFactory& node_adapter_factory,
-                   GraphFacadePtr main_graph_facade, MinimapWidget *minimap, CommandDispatcher *dispatcher,
-                   DragIO& dragio, QWidget* parent)
+Designer::Designer(CsApexViewCore& view_core, MinimapWidget* minimap, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer),
-      options_(settings, this), drag_io(dragio), minimap_(minimap),
-      settings_(settings), node_factory_(node_factory), node_adapter_factory_(node_adapter_factory),
-      root_graph_facade_(main_graph_facade), dispatcher_(dispatcher), is_init_(false)
+      options_(view_core.getSettings(), this),
+      minimap_(minimap),
+      core_(view_core.getCore()), view_core_(view_core), is_init_(false)
 {
-    connections_.emplace_back(settings_.saveRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
-    connections_.emplace_back(settings_.loadRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
+    view_core.getCommandDispatcher().setDesigner(this);
 
-    connections_.emplace_back(settings_.saveDetailRequest.connect([this](Graph* graph, YAML::Node& node){ saveView(graph, node); }));
-    connections_.emplace_back(settings_.loadDetailRequest.connect([this](Graph* graph, YAML::Node& node){ loadView(graph, node); }));
+    connections_.emplace_back(core_.getSettings().saveRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
+    connections_.emplace_back(core_.getSettings().loadRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
 
-    observe(main_graph_facade);
+    connections_.emplace_back(core_.getSettings().saveDetailRequest.connect([this](Graph* graph, YAML::Node& node){ saveView(graph, node); }));
+    connections_.emplace_back(core_.getSettings().loadDetailRequest.connect([this](Graph* graph, YAML::Node& node){ loadView(graph, node); }));
+
+    observe(core_.getRoot());
 }
 
 Designer::~Designer()
@@ -57,7 +58,7 @@ void Designer::setup()
 {
     ui->setupUi(this);
 
-    addGraph(root_graph_facade_);
+    addGraph(core_.getRoot());
 
     //    ui->horizontalLayout->addWidget(minimap_);
     minimap_->setParent(this);
@@ -89,7 +90,7 @@ void Designer::setup()
                         command::RenameNode::Ptr cmd(new command::RenameNode(parent->getAbsoluteUUID(),
                                                                              node->getUUID(),
                                                                              text.toStdString()));
-                        dispatcher_->execute(cmd);
+                        view_core_.execute(cmd);
                     }
                 }
             }
@@ -123,7 +124,7 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
 
     graphs_[uuid] = graph_facade;
 
-    if(graph_facade == root_graph_facade_) {
+    if(graph_facade == core_.getRoot()) {
         showGraph(graph_facade);
     }
 }
@@ -166,11 +167,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
         return;
     }
 
-    UUID uuid = graph_facade->getAbsoluteUUID();
-    DesignerScene* designer_scene = new DesignerScene(graph_facade, dispatcher_, &style);
-    GraphView* graph_view = new GraphView(designer_scene, graph_facade,
-                                          settings_, options_, node_factory_, node_adapter_factory_,
-                                          dispatcher_, drag_io, &style, this);
+    GraphView* graph_view = new GraphView(graph_facade, view_core_, this);
     graph_views_[graph] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();
     auuid_views_[graph_facade->getAbsoluteUUID()] = graph_view;
@@ -321,7 +318,7 @@ void Designer::deleteSelected()
     del->add(view->deleteSelected());
 
     if(del->commands() != 0) {
-        dispatcher_->execute(del);
+        view_core_.execute(del);
     }
 }
 void Designer::copySelected()
@@ -390,7 +387,7 @@ GraphView* Designer::getVisibleGraphView() const
 {
     GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
     if(!current_view) {
-        return graph_views_.at(root_graph_facade_->getGraph());
+        return graph_views_.at(core_.getRoot()->getGraph());
     }
     return current_view;
 }
@@ -411,7 +408,7 @@ DesignerScene* Designer::getVisibleDesignerScene() const
 
 NodeAdapterFactory* Designer::getNodeAdapterFactory() const
 {
-    return &node_adapter_factory_;
+    return &view_core_.getNodeAdapterFactory();
 }
 
 void Designer::refresh()
