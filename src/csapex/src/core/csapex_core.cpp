@@ -270,6 +270,11 @@ ThreadPoolPtr CsApexCore::getThreadPool() const
     return thread_pool_;
 }
 
+ExceptionHandler& CsApexCore::getExceptionHandler() const
+{
+    return exception_handler_;
+}
+
 void CsApexCore::settingsChanged()
 {
     settings_.save();

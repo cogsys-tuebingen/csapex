@@ -30,6 +30,10 @@ ThreadGroup::ThreadGroup(ExceptionHandler &handler, std::string name)
 
 ThreadGroup::~ThreadGroup()
 {
+    std::vector<TaskGeneratorPtr> generators_copy = generators_;
+    for(TaskGeneratorPtr tg : generators_copy) {
+        tg->detach();
+    }
     if(running_ || scheduler_thread_.joinable()) {
         stop();
     }

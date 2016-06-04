@@ -35,6 +35,9 @@ std::string MoveBox::getDescription() const
 bool MoveBox::doExecute()
 {
     MovableGraphicsProxyWidget* box = getDesigner()->getGraphView(graph_uuid)->getProxy(box_uuid);
+    if(!box) {
+        return false;
+    }
     box->getBox()->triggerPlaced();
     return true;
 }
@@ -42,6 +45,9 @@ bool MoveBox::doExecute()
 bool MoveBox::doUndo()
 {
     MovableGraphicsProxyWidget* box = getDesigner()->getGraphView(graph_uuid)->getProxy(box_uuid);
+    if(!box) {
+        return false;
+    }
     box->setPos(QPoint(from.x, from.y));
     box->getBox()->triggerPlaced();
     return true;
@@ -50,6 +56,9 @@ bool MoveBox::doUndo()
 bool MoveBox::doRedo()
 {
     MovableGraphicsProxyWidget* box = getDesigner()->getGraphView(graph_uuid)->getProxy(box_uuid);
+    if(!box) {
+        return false;
+    }
     box->setPos(QPoint(to.x, to.y));
     box->getBox()->triggerPlaced();
     return true;

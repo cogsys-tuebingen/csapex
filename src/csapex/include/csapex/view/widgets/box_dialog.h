@@ -46,7 +46,7 @@ class BoxDialog : public QDialog
     Q_OBJECT
 
 public:
-    BoxDialog(csapex::NodeFactory &node_factory, NodeAdapterFactory& adapter_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    BoxDialog(QString message, csapex::NodeFactory &node_factory, NodeAdapterFactory& adapter_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
     std::string getName();
 
@@ -60,6 +60,8 @@ private:
     CompleteLineEdit * name_edit_;
     NodeFactory& node_factory_;
     NodeAdapterFactory& adapter_factory_;
+
+    QString message_;
 };
 
 }

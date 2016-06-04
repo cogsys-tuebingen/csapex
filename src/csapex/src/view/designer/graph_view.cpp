@@ -635,7 +635,8 @@ void GraphView::animateScroll()
 void GraphView::showBoxDialog()
 {
 //    auto window =  QApplication::activeWindow();
-    BoxDialog diag(core_.getNodeFactory(), view_core_.getNodeAdapterFactory());
+    BoxDialog diag("Please enter the type of node to add.",
+                   core_.getNodeFactory(), view_core_.getNodeAdapterFactory());
 
     int r = diag.exec();
 
@@ -1537,7 +1538,12 @@ void GraphView::deleteBox()
 
 void GraphView::morphNode()
 {
-    RewiringDialog diag;
+    apex_assert_hard(getSelectedBoxes().size() == 1);
+
+    const NodeBox* box = getSelectedBoxes()[0];
+
+    RewiringDialog diag(graph_facade_.get(), box->getNodeHandle(), view_core_);
+    diag.makeUI(styleSheet());
 
     int r = diag.exec();
 

@@ -128,8 +128,9 @@ void CompleteLineEdit::completeText(const QModelIndex &index) {
     Q_EMIT editingFinished();
 }
 
-BoxDialog::BoxDialog(NodeFactory& node_factory, NodeAdapterFactory &adapter_factory, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f), node_factory_(node_factory), adapter_factory_(adapter_factory)
+BoxDialog::BoxDialog(QString message, NodeFactory& node_factory, NodeAdapterFactory &adapter_factory, QWidget *parent, Qt::WindowFlags f)
+    : QDialog(parent, f), node_factory_(node_factory), adapter_factory_(adapter_factory),
+      message_(message)
 {
     makeUI();
 }
@@ -145,7 +146,7 @@ void BoxDialog::makeUI()
     QVBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    QLabel *lbl = new QLabel("<img src=\":/add_node.png\"> Please enter the type of node to add. (<em>Autocompleted</em>)");
+    QLabel *lbl = new QLabel(QString("<img src=\":/add_node.png\"> ") + message_ + " (<em>Autocompleted</em>)");
     name_edit_ = new CompleteLineEdit;
     name_edit_->setFixedWidth(350);
     lbl->setBuddy(name_edit_);

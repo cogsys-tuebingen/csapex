@@ -39,6 +39,8 @@ public:
     GraphFacadePtr getRoot() const;
     ThreadPoolPtr getThreadPool() const;
 
+    ExceptionHandler& getExceptionHandler() const;
+
     bool isPaused() const;
     void setPause(bool pause);
 
