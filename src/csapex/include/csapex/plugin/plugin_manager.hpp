@@ -147,6 +147,9 @@ protected:
     std::shared_ptr<M> createInstance(const std::string& lookup_name)
     {
         auto loader = getLoader(plugin_to_library_.at(lookup_name));
+        if(!loader) {
+            return nullptr;
+        }
         try {
             M* raw_ptr = loader->template createUnmanagedInstance<M>(lookup_name);
             return std::shared_ptr<M>(raw_ptr);
