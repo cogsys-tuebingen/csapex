@@ -76,7 +76,7 @@ void MetaPort::dropEvent(QDropEvent* e)
 
             bool ok = false;
             QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label",
-                                                 QLineEdit::Normal, "", &ok);
+                                                 QLineEdit::Normal, QString::fromStdString(from->getLabel()), &ok);
             if(!ok) {
                 return;
             }
@@ -91,7 +91,7 @@ void MetaPort::dropEvent(QDropEvent* e)
 
             bool ok = false;
             QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label",
-                                                 QLineEdit::Normal, "", &ok);
+                                                 QLineEdit::Normal, QString::fromStdString(from->getLabel()), &ok);
             if(!ok) {
                 return;
             }

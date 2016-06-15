@@ -243,7 +243,7 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
 
         if(in && !in->isVirtual()) {
             ConnectionPtr c = in->getConnections().front();
-            Output* target = dynamic_cast<Output*>(c->to());
+            Output* target = dynamic_cast<Output*>(c->from());
             meta->add(Command::Ptr(new DeleteMessageConnection(parent_uuid, target, in)));
             meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, target->getUUID(), to_uuid, c->isActive())));
         }

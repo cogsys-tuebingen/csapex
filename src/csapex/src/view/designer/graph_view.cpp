@@ -1024,7 +1024,7 @@ void GraphView::addPort(Port *port)
         if(!adaptee) {
             return;
         }
-        auto cmd = CommandFactory(graph_facade_.get()).addConnection(adaptee->getUUID(), from->getUUID(), true);
+        auto cmd = CommandFactory(graph_facade_.get()).addConnection(adaptee->getUUID(), from->getUUID(), false);
         view_core_.execute(cmd);
     });
 
