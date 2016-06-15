@@ -109,7 +109,7 @@ StreamInterceptor::~StreamInterceptor()
 
 StreamInterceptor::StreamInterceptor()
     : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()),
-      running_(true),  in_getline_(false), had_input_(false)
+      running_(false),  in_getline_(false), had_input_(false)
 {
     clog_global_ = std::clog.rdbuf();
     cout_global_ = std::cout.rdbuf();
@@ -121,11 +121,18 @@ StreamInterceptor::StreamInterceptor()
     std::cout.rdbuf(std::clog.rdbuf());
 }
 
+bool StreamInterceptor::isRunning() const
+{
+    return running_;
+}
+
 void StreamInterceptor::start()
 {
-    thread_ = std::thread([this]() {
-        run();
-    });
+    if(!isRunning()) {
+        thread_ = std::thread([this]() {
+            run();
+        });
+    }
 }
 
 void StreamInterceptor::stop()

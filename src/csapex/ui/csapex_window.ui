@@ -112,6 +112,8 @@
     <addaction name="separator"/>
     <addaction name="actionStep"/>
     <addaction name="actionClearBlock"/>
+    <addaction name="separator"/>
+    <addaction name="actionReset_Activity"/>
    </widget>
    <widget class="QMenu" name="menuPlugins">
     <property name="title">
@@ -161,6 +163,7 @@
    <addaction name="actionStep"/>
    <addaction name="actionClearBlock"/>
    <addaction name="separator"/>
+   <addaction name="actionReset_Activity"/>
    <addaction name="actionGrid"/>
    <addaction name="actionSchematics"/>
    <addaction name="actionDisplay_Graph_Components"/>
@@ -995,6 +998,15 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Ungroup</string>
+   </property>
+  </action>
+  <action name="actionReset_Activity">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/port_slot.png</normaloff>:/port_slot.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reset Activity</string>
    </property>
   </action>
  </widget>

@@ -22,6 +22,7 @@ public:
     std::string getCerr();
     std::string getCin();
 
+    bool isRunning() const;
     void start();
     void stop();
 

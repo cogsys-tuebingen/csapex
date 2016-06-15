@@ -65,6 +65,7 @@ public:
 
     void stop();
     void clearBlock();
+    void resetActivity();
 
     bool isPaused() const;
     void pauseRequest(bool pause);

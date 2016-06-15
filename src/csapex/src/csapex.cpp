@@ -27,6 +27,9 @@
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/view/gui_exception_handler.h>
+#include <csapex/utility/stream_interceptor.h>
+#include <csapex/manager/message_provider_manager.h>
+#include <csapex/serialization/serialization.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -161,6 +164,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
     settings.saveRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.saveSettings(n); });
     settings.loadRequest.connect([&thread_pool](YAML::Node& n){ thread_pool.loadSettings(n); });
 
+
+    StreamInterceptor::instance().start();
+
+    MessageProviderManager::instance().setPluginLocator(plugin_locator);
+
     core->init();
 
     int res;
@@ -264,6 +272,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         res = run();
     }
+
+    StreamInterceptor::instance().stop();
+
+    MessageProviderManager::instance().shutdown();
+    Serialization::instance().shutdown();
 
     return res;
 }

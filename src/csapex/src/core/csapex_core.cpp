@@ -6,8 +6,6 @@
 #include <csapex/core/core_plugin.h>
 #include <csapex/core/graphio.h>
 #include <csapex/info.h>
-#include <csapex/manager/message_provider_manager.h>
-#include <csapex/manager/message_renderer_manager.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/tag.h>
@@ -19,9 +17,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/utility/register_msg.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
-#include <csapex/utility/stream_interceptor.h>
 #include <csapex/utility/yaml_node_builder.h>
-#include <csapex/serialization/serialization.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/core/exception_handler.h>
@@ -43,7 +39,6 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
       init_(false), load_needs_reset_(false)
 {
     destruct = true;
-    StreamInterceptor::instance().start();
 
     settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this));
 
@@ -62,11 +57,6 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
 CsApexCore::~CsApexCore()
 {
     root_->clear();
-
-    StreamInterceptor::instance().stop();
-
-    MessageProviderManager::instance().shutdown();
-    Serialization::instance().shutdown();
 
     for(std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
         it->second->shutdown();
@@ -213,8 +203,6 @@ void CsApexCore::boot()
             std::cerr << "boot plugin " << path << " failed: " << e.what() << std::endl;
         }
     }
-
-    MessageProviderManager::instance().setPluginLocator(plugin_locator_);
 }
 
 void CsApexCore::startup()
@@ -268,6 +256,11 @@ GraphFacadePtr CsApexCore::getRoot() const
 ThreadPoolPtr CsApexCore::getThreadPool() const
 {
     return thread_pool_;
+}
+
+PluginLocatorPtr CsApexCore::getPluginLocator() const
+{
+    return plugin_locator_;
 }
 
 ExceptionHandler& CsApexCore::getExceptionHandler() const

@@ -54,6 +54,7 @@ public:
 
     virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid) override;
     virtual void reset() override;
+    void resetActivity();
 
     virtual void stateChanged() override;
 

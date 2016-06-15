@@ -427,3 +427,23 @@ void GraphFacade::clearBlock()
 {
     executor_.clear();
 }
+
+void GraphFacade::resetActivity()
+{
+    bool pause = isPaused();
+
+    pauseRequest(true);
+
+    graph_->resetActivity();
+
+    for(auto pair: children_) {
+        GraphFacadePtr child = pair.second;
+        child->resetActivity();
+    }
+
+    if(!parent_) {
+        graph_->activation();
+    }
+
+    pauseRequest(pause);
+}

@@ -39,6 +39,7 @@ public:
     GraphFacadePtr getRoot() const;
     ThreadPoolPtr getThreadPool() const;
 
+    PluginLocatorPtr getPluginLocator() const;
     ExceptionHandler& getExceptionHandler() const;
 
     bool isPaused() const;

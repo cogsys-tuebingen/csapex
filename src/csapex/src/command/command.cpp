@@ -37,7 +37,6 @@ bool Command::Access::redoCommand(Command::Ptr cmd)
 void Command::init(GraphFacade* graph_facade, CsApexCore& core, Designer *designer)
 {
     apex_assert_hard(graph_facade);
-    apex_assert_hard(designer);
 
     graph_facade_ = graph_facade;
 
@@ -146,5 +145,6 @@ ThreadPool* Command::getRootThreadPool()
 
 Designer* Command::getDesigner()
 {
+    apex_assert_hard(designer_);
     return designer_;
 }

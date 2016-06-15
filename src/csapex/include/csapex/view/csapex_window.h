@@ -90,6 +90,7 @@ public Q_SLOTS:
     void about();
     void copyRight();
     void clearBlock();
+    void resetActivity();
 
 Q_SIGNALS:
     void statusChanged(const QString& status);

@@ -31,10 +31,16 @@ RewiringDialog::RewiringDialog(GraphFacade *graph, NodeHandle* node, CsApexViewC
     : QDialog(parent, f),
       view_core_(view_core),
 
+      core_temp_(std::make_shared<CsApexCore>(view_core.getSettings(), view_core.getCore().getPluginLocator(), view_core.getCore().getExceptionHandler())),
+      temp_dispatcher_(std::make_shared<CommandDispatcher>(view_core.getCore())),
+      view_core_temp_(std::make_shared<CsApexViewCore>(*core_temp_, view_core.getNodeAdapterFactory(), *temp_dispatcher_, view_core.getDragIO())),
+
       graph_(graph),
       node_(node)
 {
     root_uuid_provider_ = std::make_shared<UUIDProvider>();
+
+    core_temp_->init();
 }
 
 RewiringDialog::~RewiringDialog()
@@ -49,7 +55,7 @@ RewiringDialog::~RewiringDialog()
 
 void RewiringDialog::makeUI(const QString& stylesheet)
 {
-    BoxDialog diag("Please enter the new node type.", view_core_.getCore().getNodeFactory(), view_core_.getNodeAdapterFactory());
+    BoxDialog diag("Please enter the new node type.", view_core_temp_->getCore().getNodeFactory(), view_core_temp_->getNodeAdapterFactory());
     diag.setWindowTitle("Select new node type.");
 
     int r = diag.exec();
@@ -72,9 +78,8 @@ void RewiringDialog::makeUI(const QString& stylesheet)
     setLayout(layout);
 
 
-    NodeFactory& node_factory = view_core_.getCore().getNodeFactory();
-    executor = std::make_shared<ThreadPool>(view_core_.getCore().getExceptionHandler(), false, false);
-
+    NodeFactory& node_factory = view_core_temp_->getCore().getNodeFactory();
+    executor = std::make_shared<ThreadPool>(view_core_temp_->getCore().getExceptionHandler(), false, false);
 
     graph_old_handle = node_factory.makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_.get());
     apex_assert_hard(graph_old_handle);
@@ -122,7 +127,7 @@ void RewiringDialog::makeUI(const QString& stylesheet)
 
     layout->addWidget(new QLabel("Current node:"));
 
-    GraphView* view_old = new GraphView(graph_facade_old_, view_core_);
+    GraphView* view_old = new GraphView(graph_facade_old_, *view_core_temp_);
     view_old->overwriteStyleSheet(stylesheet);
     view_old->setMinimumSize(500, 350);
     view_old->setInteractive(false);
@@ -130,7 +135,7 @@ void RewiringDialog::makeUI(const QString& stylesheet)
 
     layout->addWidget(new QLabel("New node:"));
 
-    GraphView* view_new = new GraphView(graph_facade_new_, view_core_);
+    GraphView* view_new = new GraphView(graph_facade_new_, *view_core_temp_);
     view_new->overwriteStyleSheet(stylesheet);
     view_new->setMinimumSize(500, 350);
     layout->addWidget(view_new);

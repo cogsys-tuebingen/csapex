@@ -15,6 +15,8 @@ namespace csapex
 class CsApexViewCore;
 class Input;
 class Output;
+class CommandDispatcher;
+class CsApexCore;
 
 class RewiringDialog : public QDialog
 {
@@ -36,6 +38,10 @@ private:
 
 private:
     CsApexViewCore& view_core_;
+
+    std::shared_ptr<CsApexCore> core_temp_;
+    std::shared_ptr<CommandDispatcher> temp_dispatcher_;
+    std::shared_ptr<CsApexViewCore> view_core_temp_;
 
     std::shared_ptr<UUIDProvider> root_uuid_provider_;
 

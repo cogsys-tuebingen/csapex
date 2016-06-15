@@ -56,10 +56,28 @@ void Graph::reset()
 {
     Node::reset();
 
+    resetActivity();
+
     continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
 
     transition_relay_out_->reset();
     transition_relay_in_->reset();
+}
+
+void Graph::resetActivity()
+{
+    auto connections = connections_;
+    for(ConnectionPtr c : connections) {
+        TokenPtr t = c->getToken();
+        if(t) {
+            t->setActive(false);
+        }
+    }
+
+    auto nodes = nodes_;
+    for(NodeHandlePtr node : nodes) {
+        node->setActive(false);
+    }
 }
 
 void Graph::stateChanged()

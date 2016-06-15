@@ -132,6 +132,7 @@ void CsApexWindow::construct()
 
 
     QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
+    QObject::connect(ui->actionReset_Activity, SIGNAL(triggered(bool)), this, SLOT(resetActivity()));
 
 
     QObject::connect(designer_, SIGNAL(selectionChanged()), this, SLOT(updateSelectionActions()));
@@ -469,6 +470,12 @@ void CsApexWindow::clearBlock()
 {
     std::cerr << "clearing blocking connections" << std::endl;
     root_->clearBlock();
+}
+
+void CsApexWindow::resetActivity()
+{
+    std::cerr << "resetting activity" << std::endl;
+    root_->resetActivity();
 }
 
 void CsApexWindow::updateNodeTypes()
