@@ -41,7 +41,7 @@ CommandFactory::CommandFactory(GraphFacade *root)
 ///
 ///
 
-Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to)
+Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to, bool active)
 {
     GraphFacade* graph_facade = getGraphFacade();
     Graph* graph = graph_facade->getGraph();
@@ -49,9 +49,9 @@ Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to)
     auto from_c = graph->findConnector(from);
 
     if(dynamic_cast<Output*>(from_c)) {
-        return std::make_shared<AddMessageConnection>(graph_uuid, from, to);
+        return std::make_shared<AddMessageConnection>(graph_uuid, from, to, active);
     } else if(dynamic_cast<Input*>(from_c)) {
-        return std::make_shared<AddMessageConnection>(graph_uuid, to, from);
+        return std::make_shared<AddMessageConnection>(graph_uuid, to, from, active);
     }
     return nullptr;
 }
@@ -233,7 +233,7 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
                 Input* input = dynamic_cast<Input*>(c->to());
                 if(input && !input->isVirtual()) {
                     meta->add(Command::Ptr(new DeleteMessageConnection(parent_uuid, out, input)));
-                    meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, to_uuid, input->getUUID())));
+                    meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, to_uuid, input->getUUID(), c->isActive())));
                 }
             }
         }
@@ -242,9 +242,10 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
         Input* in = dynamic_cast<Input*>(from);
 
         if(in && !in->isVirtual()) {
-            Output* target = dynamic_cast<Output*>(in->getSource());
+            ConnectionPtr c = in->getConnections().front();
+            Output* target = dynamic_cast<Output*>(c->to());
             meta->add(Command::Ptr(new DeleteMessageConnection(parent_uuid, target, in)));
-            meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, target->getUUID(), to_uuid)));
+            meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, target->getUUID(), to_uuid, c->isActive())));
         }
     }
 

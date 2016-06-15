@@ -15,8 +15,8 @@
 using namespace csapex;
 using namespace csapex::command;
 
-GroupBase::ConnectionInformation::ConnectionInformation(Connectable *from, Connectable *to, const TokenDataConstPtr& type)
-    : from(from->getUUID()), to(to->getUUID()), from_label(from->getLabel()), to_label(to->getLabel()), type(type)
+GroupBase::ConnectionInformation::ConnectionInformation(Connectable *from, Connectable *to, const TokenDataConstPtr& type, bool active)
+    : from(from->getUUID()), to(to->getUUID()), from_label(from->getLabel()), to_label(to->getLabel()), type(type), active(active)
 {
 
 }
@@ -73,7 +73,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 NodeHandle* source = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c(output, input.get(), output->getType());
+                ConnectionInformation c(output, input.get(), output->getType(), connection->isActive());
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     connections_going_in.push_back(c);
@@ -94,7 +94,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c(output.get(), input, input->getType());
+                    ConnectionInformation c(output.get(), input, input->getType(), connection->isActive());
                     connections_going_out.push_back(c);
                 }
             }
@@ -114,7 +114,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c(output, slot.get(), output->getType());
+                    ConnectionInformation c(output, slot.get(), output->getType(), connection->isActive());
                     signals_going_in.push_back(c);
                 }
             }
@@ -131,7 +131,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 NodeHandle* source = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c(trigger.get(), input, input->getType());
+                ConnectionInformation c(trigger.get(), input, input->getType(), connection->isActive());
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     signals_going_out.push_back(c);

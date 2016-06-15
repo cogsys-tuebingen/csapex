@@ -127,7 +127,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         UUID graph_in = subgraph->getForwardedOutputExternal(ci.from);
         UUID from = old_connections_in[graph_in];
 
-        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to);
+        CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to, ci.active);
         executeCommand(add_connection);
         add(add_connection);
     }
@@ -142,7 +142,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 
 
         for(const UUID& to : targets) {
-            CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to);
+            CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to, ci.active);
             executeCommand(add_connection);
             add(add_connection);
         }
@@ -158,7 +158,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 
 
         for(const UUID& to : targets) {
-            CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to);
+            CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to, ci.active);
             executeCommand(add_connection);
             add(add_connection);
         }
@@ -174,7 +174,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 
 
         for(const UUID& to : targets) {
-            CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to);
+            CommandPtr add_connection = std::make_shared<command::AddMessageConnection>(parent_auuid, from, to, ci.active);
             executeCommand(add_connection);
             add(add_connection);
         }

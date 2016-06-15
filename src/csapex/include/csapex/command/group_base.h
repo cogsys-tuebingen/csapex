@@ -33,7 +33,9 @@ protected:
         std::string to_label;
         TokenDataConstPtr type;
 
-        ConnectionInformation(Connectable* from, Connectable* to, const TokenDataConstPtr &type);
+        bool active;
+
+        ConnectionInformation(Connectable* from, Connectable* to, const TokenDataConstPtr &type, bool active);
     };
 
     std::set<NodeHandle*> node_set;

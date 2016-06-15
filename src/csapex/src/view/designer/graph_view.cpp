@@ -964,14 +964,14 @@ void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
-        playback->execute(factory.addConnection(ports.internal, from->getUUID()));
+        playback->execute(factory.addConnection(ports.internal, from->getUUID(), false));
 
     } else {
         std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
         playback->execute(add);
 
         RelayMapping ports = add->getMap();
-        playback->execute(factory.addConnection(ports.external, from->getUUID()));
+        playback->execute(factory.addConnection(ports.external, from->getUUID(), false));
     }
 
     view_core_.execute(playback);
@@ -1024,7 +1024,7 @@ void GraphView::addPort(Port *port)
         if(!adaptee) {
             return;
         }
-        auto cmd = CommandFactory(graph_facade_.get()).addConnection(adaptee->getUUID(), from->getUUID());
+        auto cmd = CommandFactory(graph_facade_.get()).addConnection(adaptee->getUUID(), from->getUUID(), true);
         view_core_.execute(cmd);
     });
 

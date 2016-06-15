@@ -19,7 +19,7 @@ public:
     CommandFactory(GraphFacade *root);
 
 public:
-    CommandPtr addConnection(const UUID& from, const UUID& to);
+    CommandPtr addConnection(const UUID& from, const UUID& to, bool active);
 
     CommandPtr removeAllConnectionsCmd(ConnectablePtr input);
     CommandPtr removeAllConnectionsCmd(Connectable* input);

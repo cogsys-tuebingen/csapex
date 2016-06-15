@@ -25,6 +25,7 @@ protected:
 
 protected:
     int connection_id;
+    bool active_;
 
     UUID from_uuid;
     UUID to_uuid;

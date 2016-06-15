@@ -15,8 +15,8 @@
 using namespace csapex;
 using namespace csapex::command;
 
-AddMessageConnection::AddMessageConnection(const AUUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid)
-    : AddConnection(parent_uuid, from_uuid, to_uuid), from(nullptr), to(nullptr)
+AddMessageConnection::AddMessageConnection(const AUUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid, bool active)
+    : AddConnection(parent_uuid, from_uuid, to_uuid), from(nullptr), to(nullptr), active(active)
 {
 }
 
@@ -28,7 +28,10 @@ bool AddMessageConnection::doExecute()
 
     Graph* graph = getGraph();
 
-    return graph->addConnection(BundledConnection::connect(from, to));
+    ConnectionPtr c = BundledConnection::connect(from, to);
+    c->setActive(active);
+
+    return graph->addConnection(c);
 }
 
 void AddMessageConnection::refresh()

@@ -28,9 +28,9 @@ bool DeleteMessageConnection::doUndo()
     Output* output = dynamic_cast<Output*>(from);
     Input* input = dynamic_cast<Input*>(to);
 
-    graph->addConnection(BundledConnection::connect(
-                             output, input,
-                             connection_id));
+    ConnectionPtr c = BundledConnection::connect(output, input, connection_id);
+    c->setActive(active_);
+    graph->addConnection(c);
 
     return Meta::doUndo();
 }

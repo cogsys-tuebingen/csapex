@@ -16,7 +16,7 @@ namespace command
 class AddMessageConnection : public AddConnection
 {
 public:
-    AddMessageConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid);
+    AddMessageConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid, bool active);
 
 protected:
     bool doExecute() override;
@@ -27,6 +27,7 @@ private:
     Output* from;
     Input* to;
 
+    bool active;
 };
 }
 }

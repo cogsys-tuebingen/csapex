@@ -128,7 +128,7 @@ void GroupNodes::mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 
             // forwarding connection
             CommandPtr add_internal_connection =
-                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid);
+                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid, ci.active);
             executeCommand(add_internal_connection);
             add(add_internal_connection);
 
@@ -137,7 +137,7 @@ void GroupNodes::mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, ci.from, in_map.external);
+                std::make_shared<command::AddMessageConnection>(parent_auuid, ci.from, in_map.external, ci.active);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
@@ -165,7 +165,7 @@ void GroupNodes::mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
             // forwarding connection
             CommandPtr add_internal_connection =
-                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal);
+                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal, ci.active);
             executeCommand(add_internal_connection);
             add(add_internal_connection);
 
@@ -173,7 +173,7 @@ void GroupNodes::mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.external, ci.to);
+                std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.external, ci.to, ci.active);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
@@ -201,14 +201,14 @@ void GroupNodes::mapSignalGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 
             // forwarding connection
             CommandPtr add_internal_connection =
-                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid);
+                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid, ci.active);
             executeCommand(add_internal_connection);
             add(add_internal_connection);
         }
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, ci.from, in_map.external);
+                std::make_shared<command::AddMessageConnection>(parent_auuid, ci.from, in_map.external, ci.active);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
@@ -237,14 +237,14 @@ void GroupNodes::mapSignalGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
             // forwarding connection
             CommandPtr add_internal_connection =
-                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal);
+                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal, ci.active);
             executeCommand(add_internal_connection);
             add(add_internal_connection);
         }
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.external, ci.to);
+                std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.external, ci.to, ci.active);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
