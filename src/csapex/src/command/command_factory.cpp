@@ -46,7 +46,7 @@ Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to, boo
     GraphFacade* graph_facade = getGraphFacade();
     Graph* graph = graph_facade->getGraph();
 
-    auto from_c = graph->findConnector(from);
+    auto from_c = graph->findConnectorNoThrow(from);
 
     if(dynamic_cast<Output*>(from_c)) {
         return std::make_shared<AddMessageConnection>(graph_uuid, from, to, active);

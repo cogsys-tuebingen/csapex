@@ -38,6 +38,9 @@ bool StaticOutput::hasMessage()
 
 bool StaticOutput::hasMarkerMessage()
 {
+    if(!message_to_send_) {
+        return false;
+    }
     if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_to_send_->getTokenData())) {
         if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
             return true;

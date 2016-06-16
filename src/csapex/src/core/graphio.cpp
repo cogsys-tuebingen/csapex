@@ -341,9 +341,10 @@ void GraphIO::loadConnection(const YAML::Node& connection)
             connection_type = types[j].as<std::string>();
         }
 
-        Connectable* from = graph_->findConnector(from_uuid);
-
-        loadConnection(from, to_uuid, connection_type);
+        Connectable* from = graph_->findConnectorNoThrow(from_uuid);
+        if(from) {
+            loadConnection(from, to_uuid, connection_type);
+        }
     }
 }
 

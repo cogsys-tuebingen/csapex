@@ -17,6 +17,7 @@
 #include <csapex/msg/dynamic_output.h>
 #include <csapex/msg/marker_message.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <iostream>
@@ -686,15 +687,6 @@ void NodeHandle::manageEvent(EventPtr t)
 
 Connectable* NodeHandle::getConnector(const UUID &uuid) const
 {
-    Connectable* res = getConnectorNoThrow(uuid);
-    if(!res) {
-        throw std::logic_error(std::string("the connector type '") + uuid.type() + "' is unknown.");
-    }
-    return res;
-}
-
-Connectable* NodeHandle::getConnectorNoThrow(const UUID &uuid) const noexcept
-{
     std::string type = uuid.type();
 
     if(type == "in" || type == "relayin") {
@@ -706,6 +698,20 @@ Connectable* NodeHandle::getConnectorNoThrow(const UUID &uuid) const noexcept
     } else if(type == "event" || type == "relayevent") {
         return getEvent(uuid);
     } else {
+        throw std::logic_error(std::string("the connector type '") + uuid.type() + "' is unknown.");
+    }
+}
+
+Connectable* NodeHandle::getConnectorNoThrow(const UUID &uuid) const noexcept
+{
+    try {
+        return getConnector(uuid);
+
+    } catch(const std::exception& e) {
+        std::cerr << "cannot get connector " << uuid << ": " << e.what() << std::endl;
+        return nullptr;
+    } catch(const Failure& e) {
+        std::cerr << "cannot get connector " << uuid << ": " << e.what() << std::endl;
         return nullptr;
     }
 }

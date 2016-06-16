@@ -535,6 +535,9 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const noexcept
 
 NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
+    if(uuid.empty()) {
+        return node_handle_;
+    }
     if(uuid.composite()) {
         UUID root = uuid.rootUUID();
 
@@ -627,6 +630,7 @@ Connectable* Graph::findConnectorNoThrow(const UUID &uuid) noexcept
 
     NodeHandle* owner = findNodeHandleNoThrow(uuid.parentUUID());
     if(!owner) {
+
         return nullptr;
     }
 
