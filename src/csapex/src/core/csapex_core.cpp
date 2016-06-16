@@ -31,27 +31,37 @@
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
-                       ExceptionHandler& handler)
+                       ExceptionHandler& handler, NodeFactoryPtr node_factory, std::shared_ptr<PluginManager<CorePlugin>> plugin_manager)
     : settings_(settings), plugin_locator_(plugin_locator), exception_handler_(handler),
       root_uuid_provider_(std::make_shared<UUIDProvider>()),
-      node_factory_(std::make_shared<NodeFactory>(plugin_locator.get())),
-      core_plugin_manager(new PluginManager<csapex::CorePlugin>("csapex::CorePlugin")),
+      node_factory_(node_factory),
+      core_plugin_manager(plugin_manager),
       init_(false), load_needs_reset_(false)
 {
-    destruct = true;
-
-    settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this));
+    signal_connections_.emplace_back(settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this)));
 
 
     thread_pool_ = std::make_shared<ThreadPool>(exception_handler_, !settings_.get<bool>("threadless"), settings_.get<bool>("thread_grouping"));
     thread_pool_->setPause(settings_.get<bool>("initially_paused"));
 
-    thread_pool_->paused.connect(paused);
+    signal_connections_.emplace_back(thread_pool_->paused.connect(paused));
 
-    thread_pool_->begin_step.connect(begin_step);
-    thread_pool_->end_step.connect(end_step);
+    signal_connections_.emplace_back(thread_pool_->begin_step.connect(begin_step));
+    signal_connections_.emplace_back(thread_pool_->end_step.connect(end_step));
+}
 
+CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
+                       ExceptionHandler& handler)
+    : CsApexCore(settings, plugin_locator, handler,
+                 std::make_shared<NodeFactory>(plugin_locator.get()), std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin"))
+{
     exception_handler_.setCore(this);
+}
+
+CsApexCore::CsApexCore(const CsApexCore& parent)
+    : CsApexCore(parent.getSettings(), parent.getPluginLocator(), parent.getExceptionHandler(),
+                 parent.node_factory_, parent.core_plugin_manager)
+{
 }
 
 CsApexCore::~CsApexCore()
@@ -62,9 +72,7 @@ CsApexCore::~CsApexCore()
         it->second->shutdown();
     }
     core_plugins_.clear();
-    if(destruct) {
-        delete core_plugin_manager;
-    }
+    core_plugin_manager.reset();
 
     boot_plugins_.clear();
     while(!boot_plugin_loaders_.empty()) {
@@ -111,9 +119,6 @@ void CsApexCore::init()
     if(!init_) {
         init_ = true;
 
-        showStatusMessage("booting up");
-        boot();
-
         showStatusMessage("loading core plugins");
         core_plugin_manager->load(plugin_locator_.get());
 
@@ -130,8 +135,8 @@ void CsApexCore::init()
         }
 
         showStatusMessage("loading node plugins");
-        node_factory_->loaded.connect(showStatusMessage);
-        node_factory_->new_node_type.connect(newNodeType);
+        signal_connections_.emplace_back(node_factory_->loaded.connect(showStatusMessage));
+        signal_connections_.emplace_back(node_factory_->new_node_type.connect(newNodeType));
         node_factory_->loadPlugins();
 
 
@@ -177,6 +182,8 @@ CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
 
 void CsApexCore::boot()
 {
+    showStatusMessage("booting up");
+
     std::string dir_string = csapex::info::CSAPEX_BOOT_PLUGIN_DIR;
 
     boost::filesystem::path directory(dir_string);

@@ -611,6 +611,13 @@ std::vector<NodeHandle*> Graph::getAllNodeHandles()
 
 Connectable* Graph::findConnector(const UUID &uuid)
 {
+    Connectable* res = findConnectorNoThrow(uuid);
+    apex_assert_hard(res);
+    return res;
+}
+
+Connectable* Graph::findConnectorNoThrow(const UUID &uuid) noexcept
+{
     if(internal_slots_.find(uuid) != internal_slots_.end()) {
         return internal_slots_.at(uuid).get();
     }
@@ -618,15 +625,12 @@ Connectable* Graph::findConnector(const UUID &uuid)
         return internal_events_.at(uuid).get();
     }
 
-    NodeHandle* owner = findNodeHandle(uuid.parentUUID());
-    apex_assert_hard(owner);
+    NodeHandle* owner = findNodeHandleNoThrow(uuid.parentUUID());
+    if(!owner) {
+        return nullptr;
+    }
 
-    std::string type = uuid.type();
-
-    Connectable* result = owner->getConnector(uuid);
-    apex_assert_hard(result);
-
-    return result;
+    return owner->getConnectorNoThrow(uuid);
 }
 
 ConnectionPtr Graph::getConnectionWithId(int id)
@@ -1088,6 +1092,13 @@ std::vector<UUID> Graph::getInternalEvents() const
         res.push_back(pair.second->getUUID());
     }
     return res;
+}
+
+void Graph::removeInternalPorts()
+{
+    node_handle_->removeInternalPorts();
+    internal_events_.clear();
+    internal_slots_.clear();
 }
 
 void Graph::notifyMessagesProcessed()

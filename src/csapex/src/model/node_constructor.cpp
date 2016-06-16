@@ -68,6 +68,7 @@ std::vector<std::string> NodeConstructor::getProperties() const
 
         } catch(...) {
             // ignore
+            properties_.push_back("invalid");
         }
     }
     return properties_;

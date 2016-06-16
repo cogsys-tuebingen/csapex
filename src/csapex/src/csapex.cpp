@@ -169,6 +169,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
     MessageProviderManager::instance().setPluginLocator(plugin_locator);
 
+    core->boot();
     core->init();
 
     int res;

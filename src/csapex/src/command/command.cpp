@@ -145,6 +145,5 @@ ThreadPool* Command::getRootThreadPool()
 
 Designer* Command::getDesigner()
 {
-    apex_assert_hard(designer_);
     return designer_;
 }

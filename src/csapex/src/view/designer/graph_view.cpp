@@ -1542,13 +1542,31 @@ void GraphView::morphNode()
 
     const NodeBox* box = getSelectedBoxes()[0];
 
-    RewiringDialog diag(graph_facade_.get(), box->getNodeHandle(), view_core_);
+    NodeHandle* nh = box->getNodeHandle();
+
+    RewiringDialog diag(graph_facade_.get(), nh, view_core_);
     diag.makeUI(styleSheet());
 
     int r = diag.exec();
-
     if(r) {
+        std::string type = diag.getType();
 
+        command::Meta::Ptr morph = std::make_shared<command::Meta>(graph_facade_->getAbsoluteUUID(), "change node type");
+
+        CommandPtr delete_old = std::make_shared<command::DeleteNode>(graph_facade_->getAbsoluteUUID(), nh->getUUID());
+        morph->add(delete_old);
+
+        UUID new_uuid = graph_facade_->getGraph()->generateUUID(type);
+        CommandPtr add_new = std::make_shared<command::AddNode>(graph_facade_->getAbsoluteUUID(),
+                                                                type, nh->getNodeState()->getPos(), new_uuid, nullptr);
+        morph->add(add_new);
+
+        for(const ConnectionInformation& ci : diag.getConnections(new_uuid)) {
+            morph->add(std::make_shared<command::AddMessageConnection>(graph_facade_->getAbsoluteUUID(),
+                                                                       ci.from, ci.to, ci.active));
+        }
+
+        view_core_.execute(morph);
     }
 }
 

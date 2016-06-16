@@ -20,8 +20,9 @@ namespace csapex
 class CsApexCore
 {
 public:
-    CsApexCore(Settings& settings_,
-               PluginLocatorPtr plugin_locator, ExceptionHandler &handler);
+    CsApexCore(Settings& settings_, PluginLocatorPtr plugin_locator, ExceptionHandler &handler);
+    CsApexCore(const CsApexCore& parent);
+
     virtual ~CsApexCore();
 
     void init();
@@ -69,6 +70,9 @@ public:
     csapex::slim_signal::Signal<void ()> end_step;
 
 private:
+    CsApexCore(Settings& settings_, PluginLocatorPtr plugin_locator, ExceptionHandler &handler,
+               NodeFactoryPtr node_factory, std::shared_ptr<PluginManager<CorePlugin>> plugin_manager);
+
     CorePluginPtr makeCorePlugin(const std::string& name);
 
 private:
@@ -87,9 +91,9 @@ private:
 
     NodeFactoryPtr node_factory_;
 
-    bool destruct;
+    std::vector<slim_signal::ScopedConnection> signal_connections_;
 
-    PluginManager<CorePlugin>* core_plugin_manager;
+    std::shared_ptr<PluginManager<CorePlugin>> core_plugin_manager;
     std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
     std::map<std::string, bool> core_plugins_connected_;
 

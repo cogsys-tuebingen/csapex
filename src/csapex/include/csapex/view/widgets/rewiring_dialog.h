@@ -5,9 +5,11 @@
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/connection_information.h>
 
 /// SYSTEM
 #include <QDialog>
+#include <unordered_map>
 
 namespace csapex
 {
@@ -27,7 +29,10 @@ public:
     ~RewiringDialog();
 
     void makeUI(const QString &stylesheet);
-    std::string getName();
+
+    std::string getType() const;
+
+    std::vector<ConnectionInformation> getConnections(const UUID &new_node_uuid);
 
 private Q_SLOTS:
     void finish();
@@ -60,8 +65,13 @@ private:
     GraphFacadePtr graph_facade_old_;
 
     std::string type_new_;
-    GraphPtr graph_new;
+    Graph* graph_new;
     GraphFacadePtr graph_facade_new_;
+
+    std::vector<ConnectionInformation> connections_;
+
+    std::unordered_map<UUID, UUID, UUID::Hasher> new_target_uuid_to_old_uuid_;
+    std::unordered_map<UUID, UUID, UUID::Hasher> uuid_cache_;
 };
 
 }

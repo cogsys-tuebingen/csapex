@@ -79,10 +79,17 @@ public:
     int getLevel(const UUID& node_uuid) const;
 
     Connectable* findConnector(const UUID &uuid);
+    Connectable* findConnectorNoThrow(const UUID &uuid) noexcept;
 
     template <typename T>
-    T *findConnector(const UUID &uuid) {
+    T *findConnector(const UUID &uuid)
+    {
         return dynamic_cast<T*>(findConnector(uuid));
+    }
+    template <typename T>
+    T *findConnectorNoThrow(const UUID &uuid) noexcept
+    {
+        return dynamic_cast<T*>(findConnectorNoThrow(uuid));
     }
 
     ConnectionPtr getConnectionWithId(int id);
@@ -131,6 +138,8 @@ public:
     virtual void removeVariadicOutput(OutputPtr input) override;
     virtual void removeVariadicEvent(EventPtr input) override;
     virtual void removeVariadicSlot(SlotPtr input) override;
+
+    void removeInternalPorts();
 
     RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
     RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);

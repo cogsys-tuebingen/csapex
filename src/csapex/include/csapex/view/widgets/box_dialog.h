@@ -7,15 +7,18 @@
 /// SYSTEM
 #include <QDialog>
 #include <QLineEdit>
+#include <QFuture>
 
 class QAbstractItemModel;
 class QListView;
 class QStringListModel;
 class QModelIndex;
+class QProgressBar;
 
 namespace csapex
 {
 class NodeFactory;
+class NodeFilterProxyModel;
 
 class CompleteLineEdit : public QLineEdit
 {
@@ -50,8 +53,14 @@ public:
 
     std::string getName();
 
+    void showEvent(QShowEvent*) override;
+
 private Q_SLOTS:
+    void setupTextBox();
     void finish();
+
+Q_SIGNALS:
+    void pluginsLoaded();
 
 private:
     void makeUI();
@@ -61,7 +70,15 @@ private:
     NodeFactory& node_factory_;
     NodeAdapterFactory& adapter_factory_;
 
+    QProgressBar* loading_;
+
     QString message_;
+
+    NodeFilterProxyModel* filter;
+
+    QFuture<bool> load_nodes;
+
+    QAbstractItemModel* model_;
 };
 
 }

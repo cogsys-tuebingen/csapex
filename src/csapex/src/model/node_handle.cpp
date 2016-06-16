@@ -30,19 +30,19 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       node_(node),
       node_state_(std::make_shared<NodeState>(this)),
       node_type_(type),
-
+      
       transition_in_(transition_in),
       transition_out_(transition_out),
-
+      
       uuid_provider_(uuid_provider),
       level_(0),
       source_(false), sink_(false)
 {
     node_->initialize(this, uuid);
-
+    
     node_state_->setLabel(uuid.getFullName());
     node_state_->setParent(this);
-
+    
     node_state_->enabled_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     node_state_->active_changed->connect([this](){
         activationChanged();
@@ -59,21 +59,21 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
     node_state_->pos_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     node_state_->thread_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     node_state_->color_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-
+    
     node_state_->label_changed->connect([this]() {
         std::string label = node_state_->getLabel();
         if(label.empty()) {
             label = getUUID().getShortName();
         }
-
+        
         node_->adebug.setPrefix(label);
         node_->ainfo.setPrefix(label);
         node_->awarn.setPrefix(label);
         node_->aerr.setPrefix(label);
     });
-
-//    triggerNodeStateChanged();
-
+    
+    //    triggerNodeStateChanged();
+    
     node_->parameters_changed.connect(parametersChanged);
     node_->getParameterState()->parameter_set_changed->connect(parametersChanged);
     node_->getParameterState()->parameter_added->connect(std::bind(&NodeHandle::makeParameterConnectable, this, std::placeholders::_1));
@@ -94,7 +94,7 @@ NodeHandle::~NodeHandle()
     while(!external_events_.empty()) {
         removeEvent(external_events_.begin()->get());
     }
-
+    
     nodeRemoved();
 }
 
@@ -124,7 +124,7 @@ bool NodeHandle::isSource() const
     if(source_) {
         return true;
     }
-
+    
     // check if there are no (mandatory) inputs -> then it's a virtual source
     // TODO: remove and refactor old plugins
     for(InputPtr in : external_inputs_) {
@@ -132,7 +132,7 @@ bool NodeHandle::isSource() const
             return false;
         }
     }
-
+    
     return true;
 }
 
@@ -164,7 +164,7 @@ bool NodeHandle::isActive() const
 void NodeHandle::stop()
 {
     node_->reset();
-
+    
     for(OutputPtr i : getExternalOutputs()) {
         i->stop();
     }
@@ -197,14 +197,14 @@ OutputTransition* NodeHandle::getOutputTransition() const
 void NodeHandle::setNodeState(NodeStatePtr memento)
 {
     std::string old_label = node_state_->getLabel();
-
+    
     *node_state_ = *memento;
-
-
+    
+    
     if(memento->getParameterState()) {
         node_->setParameterState(memento->getParameterState());
     }
-
+    
     if(node_state_->getLabel().empty()) {
         if(old_label.empty()) {
             node_state_->setLabel(getUUID().getShortName());
@@ -212,7 +212,7 @@ void NodeHandle::setNodeState(NodeStatePtr memento)
             node_state_->setLabel(old_label);
         }
     }
-
+    
     triggerNodeStateChanged();
 }
 
@@ -225,19 +225,19 @@ void NodeHandle::triggerNodeStateChanged()
 NodeState::Ptr NodeHandle::getNodeStateCopy() const
 {
     apex_assert_hard(node_state_);
-
+    
     NodeState::Ptr memento(new NodeState(this));
     *memento = *node_state_;
-
+    
     memento->setParameterState(node_->getParameterStateClone());
-
+    
     return memento;
 }
 
 NodeState::Ptr NodeHandle::getNodeState()
 {
     apex_assert_hard(node_state_);
-
+    
     return node_state_;
 }
 
@@ -247,32 +247,32 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
 {
     apex_assert_hard(uuid_provider_);
     csapex::param::Parameter* p = param.get();
-
+    
     auto pos = param_2_input_.find(p->name());
     if(pos != param_2_input_.end() && pos->second.lock()) {
         return;
     }
-
-
+    
+    
     {
         InputPtr cin = std::make_shared<Input>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("in_") + p->name()));
         cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cin->setOptional(true);
         cin->setLabel(p->name());
-
+        
         param_2_input_[p->name()] = cin;
         input_2_param_[cin.get()] = p;
-
+        
         manageInput(cin);
     }
     {
         OutputPtr cout = std::make_shared<StaticOutput>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("out_") + p->name()));
         cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
         cout->setLabel(p->name());
-
+        
         param_2_output_[p->name()] = cout;
         output_2_param_[cout.get()] = p;
-
+        
         manageOutput(cout);
     }
 }
@@ -282,11 +282,11 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
     if(!uuid_provider_) {
         return;
     }
-
+    
     if(p->isTemporary()) {
         return;
     }
-
+    
     if(p->is<int>()) {
         makeParameterConnectableImpl<int>(p);
     } else if(p->is<double>()) {
@@ -301,7 +301,7 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
         makeParameterConnectableImpl<std::pair<double, double> >(p);
     }
     // else: do nothing and ignore the parameter
-
+    
     param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
     if(t) {
         Event* trigger = NodeModifier::addEvent(t->name());
@@ -314,30 +314,30 @@ void NodeHandle::makeParameterNotConnectable(csapex::param::ParameterPtr p)
 {
     auto pin = param_2_input_.find(p->name());
     auto pout = param_2_output_.find(p->name());
-
+    
     if(pin == param_2_input_.end() || pout == param_2_output_.end()) {
         return;
     }
-
+    
     InputPtr cin_ptr = pin->second.lock();
     OutputPtr cout_ptr = pout->second.lock();
-
+    
     Input* cin = cin_ptr.get();
     Output* cout = cout_ptr.get();
-
+    
     if(!cin || !cout) {
         return;
     }
-
+    
     disconnectConnector(cin);
     disconnectConnector(cout);
-
+    
     removeInput(cin);
     removeOutput(cout);
-
+    
     apex_assert_hard(param_2_input_.erase(p->name()) != 0);
     apex_assert_hard(input_2_param_.erase(cin) != 0);
-
+    
     apex_assert_hard(param_2_output_.erase(p->name()) != 0);
     apex_assert_hard(output_2_param_.erase(cout) != 0);
 }
@@ -358,9 +358,9 @@ void NodeHandle::updateParameterValue(Connectable *s)
 {
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
-
+    
     csapex::param::Parameter* p = input_2_param_.at(source);
-
+    
     if(msg::isValue<int>(source)) {
         updateParameterValueFrom<int>(p, source);
     } else if(msg::isValue<double>(source)) {
@@ -389,9 +389,9 @@ Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bo
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);
-
+    
     manageInput(c);
-
+    
     return c.get();
 }
 
@@ -407,7 +407,7 @@ Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label, 
     }
     c->setLabel(label);
     c->setType(type);
-
+    
     manageOutput(c);
     return c.get();
 }
@@ -419,9 +419,9 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
     SlotPtr slot = std::make_shared<Slot>(callback, uuid, active);
     slot->setLabel(label);
     slot->setType(type);
-
+    
     manageSlot(slot);
-
+    
     return slot.get();
 }
 
@@ -432,9 +432,9 @@ Event* NodeHandle::addEvent(TokenDataConstPtr type, const std::string& label)
     EventPtr event = std::make_shared<Event>(uuid);
     event->setLabel(label);
     event->setType(type);
-
+    
     manageEvent(event);
-
+    
     return event.get();
 }
 
@@ -444,9 +444,9 @@ InputPtr NodeHandle::addInternalInput(const TokenDataConstPtr& type, const UUID 
     in->setType(type);
     in->setLabel(label);
     in->setOptional(optional);
-
+    
     internal_inputs_.push_back(in);
-
+    
     return in;
 }
 
@@ -460,9 +460,9 @@ OutputPtr NodeHandle::addInternalOutput(const TokenDataConstPtr& type, const UUI
     }
     out->setType(type);
     out->setLabel(label);
-
+    
     internal_outputs_.push_back(out);
-
+    
     return out;
 }
 
@@ -472,13 +472,13 @@ SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &i
     SlotPtr slot = std::make_shared<Slot>(callback, internal_uuid, false);
     slot->setLabel(label);
     slot->setType(type);
-
+    
     internal_slots_.push_back(slot);
-
+    
     connectConnector(slot.get());
-
+    
     connectorCreated(slot);
-
+    
     return slot;
 }
 
@@ -488,14 +488,22 @@ EventPtr NodeHandle::addInternalEvent(const TokenDataConstPtr& type, const UUID&
     EventPtr event = std::make_shared<Event>(internal_uuid);
     event->setLabel(label);
     event->setType(type);
-
+    
     internal_events_.push_back(event);
-
+    
     connectConnector(event.get());
-
+    
     connectorCreated(event);
-
+    
     return event;
+}
+
+void NodeHandle::removeInternalPorts()
+{
+    internal_outputs_.clear();
+    internal_inputs_.clear();
+    internal_slots_.clear();
+    internal_events_.clear();
 }
 
 InputWeakPtr NodeHandle::getParameterInput(const std::string &name) const
@@ -527,16 +535,16 @@ void NodeHandle::removeInput(Input* in)
             break;
         }
     }
-
+    
     if(it != external_inputs_.end()) {
         InputPtr input = *it;
         transition_in_->removeInput(input);
-
+        
         external_inputs_.erase(it);
-
+        
         disconnectConnector(input.get());
         connectorRemoved(input);
-
+        
     } else {
         std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
     }
@@ -544,27 +552,27 @@ void NodeHandle::removeInput(Input* in)
 
 void NodeHandle::removeOutput(Output* out)
 {
-
+    
     std::vector<OutputPtr>::iterator it;
     for(it = external_outputs_.begin(); it != external_outputs_.end(); ++it) {
         if(it->get() == out) {
             break;
         }
     }
-
+    
     if(it != external_outputs_.end()) {
         OutputPtr output = *it;
         transition_out_->removeOutput(output);
-
+        
         external_outputs_.erase(it);
-
+        
         disconnectConnector(output.get());
         connectorRemoved(output);
-
+        
     } else {
         std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
     }
-
+    
 }
 
 void NodeHandle::removeSlot(Slot* s)
@@ -575,17 +583,17 @@ void NodeHandle::removeSlot(Slot* s)
             break;
         }
     }
-
-
+    
+    
     if(it != external_slots_.end()) {
         SlotPtr slot = *it;
-
+        
         external_slots_.erase(it);
-
+        
         disconnectConnector(slot.get());
         connectorRemoved(slot);
     }
-
+    
 }
 
 void NodeHandle::removeEvent(Event* t)
@@ -596,12 +604,12 @@ void NodeHandle::removeEvent(Event* t)
             break;
         }
     }
-
+    
     if(it != external_events_.end()) {
         EventPtr trigger = *it;
-
+        
         external_events_.erase(it);
-
+        
         disconnectConnector(trigger.get());
         connectorRemoved(trigger);
     }
@@ -612,11 +620,11 @@ void NodeHandle::manageInput(InputPtr in)
     if(!getUUID().empty()) {
         apex_assert_hard(in->getUUID().rootUUID() == getUUID().rootUUID());
     }
-
+    
     external_inputs_.push_back(in);
-
+    
     connectConnector(in.get());
-
+    
     connectorCreated(in);
     transition_in_->addInput(in);
 }
@@ -626,16 +634,16 @@ void NodeHandle::manageOutput(OutputPtr out)
     if(!getUUID().empty()) {
         apex_assert_hard(out->getUUID().rootUUID() == getUUID().rootUUID());
     }
-
+    
     external_outputs_.push_back(out);
-
+    
     connectConnector(out.get());
-
+    
     connections_[out.get()].emplace_back(out->messageProcessed.connect([this](Connectable*) { mightBeEnabled(); }));
     connections_[out.get()].emplace_back(out->connection_removed_to.connect([this](Connectable*) { mightBeEnabled(); }));
     connections_[out.get()].emplace_back(out->connection_added_to.connect([this](Connectable*) { mightBeEnabled(); }));
     connections_[out.get()].emplace_back(out->connectionEnabled.connect([this](bool) { mightBeEnabled(); }));
-
+    
     connectorCreated(out);
     transition_out_->addOutput(out);
 }
@@ -655,11 +663,11 @@ void NodeHandle::manageSlot(SlotPtr s)
     if(!getUUID().empty()) {
         apex_assert_hard(s->getUUID().rootUUID() == getUUID().rootUUID());
     }
-
+    
     external_slots_.push_back(s);
-
+    
     connectConnector(s.get());
-
+    
     connectorCreated(s);
 }
 
@@ -668,15 +676,24 @@ void NodeHandle::manageEvent(EventPtr t)
     if(!getUUID().empty()) {
         apex_assert_hard(t->getUUID().rootUUID() == getUUID().rootUUID());
     }
-
+    
     external_events_.push_back(t);
-
+    
     connectConnector(t.get());
-
+    
     connectorCreated(t);
 }
 
 Connectable* NodeHandle::getConnector(const UUID &uuid) const
+{
+    Connectable* res = getConnectorNoThrow(uuid);
+    if(!res) {
+        throw std::logic_error(std::string("the connector type '") + uuid.type() + "' is unknown.");
+    }
+    return res;
+}
+
+Connectable* NodeHandle::getConnectorNoThrow(const UUID &uuid) const noexcept
 {
     std::string type = uuid.type();
 
@@ -689,7 +706,7 @@ Connectable* NodeHandle::getConnector(const UUID &uuid) const
     } else if(type == "event" || type == "relayevent") {
         return getEvent(uuid);
     } else {
-        throw std::logic_error(std::string("the connector type '") + type + "' is unknown.");
+        return nullptr;
     }
 }
 
@@ -700,12 +717,12 @@ Input* NodeHandle::getInput(const UUID& uuid) const
             return in.get();
         }
     }
-
+    
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
         return graph->getForwardedInputInternal(uuid).get();
     }
-
+    
     return nullptr;
 }
 
@@ -716,12 +733,12 @@ Output* NodeHandle::getOutput(const UUID& uuid) const
             return out.get();
         }
     }
-
+    
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
         return graph->getForwardedOutputInternal(uuid).get();
     }
-
+    
     return nullptr;
 }
 
@@ -733,12 +750,12 @@ Slot* NodeHandle::getSlot(const UUID& uuid) const
             return s.get();
         }
     }
-
+    
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
         return graph->getForwardedSlotInternal(uuid).get();
     }
-
+    
     return nullptr;
 }
 
@@ -750,12 +767,12 @@ Event* NodeHandle::getEvent(const UUID& uuid) const
             return t.get();
         }
     }
-
+    
     GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
     if(graph) {
         return graph->getForwardedEventInternal(uuid).get();
     }
-
+    
     return nullptr;
 }
 

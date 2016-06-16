@@ -5,6 +5,7 @@
 #include "meta.h"
 #include <csapex/data/point.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/model/connection_information.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -26,17 +27,6 @@ protected:
     void pasteSelection(AUUID sub_graph_auuid);
 
 protected:
-    struct ConnectionInformation {
-        UUID from;
-        UUID to;
-        std::string from_label;
-        std::string to_label;
-        TokenDataConstPtr type;
-
-        bool active;
-
-        ConnectionInformation(Connectable* from, Connectable* to, const TokenDataConstPtr &type, bool active);
-    };
 
     std::set<NodeHandle*> node_set;
     std::vector<NodeHandle*> nodes;

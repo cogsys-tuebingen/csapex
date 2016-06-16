@@ -15,7 +15,7 @@ using namespace csapex;
 using namespace csapex::command;
 
 DeleteConnection::DeleteConnection(const AUUID &parent_uuid, Connectable* a, Connectable* b)
-    : Meta(parent_uuid, "delete connection and fulcrums"), from_uuid(UUID::NONE), to_uuid(UUID::NONE), active_(false)
+    : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
 {
     apex_assert_hard(!a->isVirtual());
     apex_assert_hard(!b->isVirtual());
@@ -46,6 +46,8 @@ bool DeleteConnection::doExecute()
     const auto& graph = getGraph();
 
     ConnectionPtr connection = graph->getConnection(from_uuid, to_uuid);
+
+    apex_assert_hard(connection);
 
     active_ = connection->isActive();
 

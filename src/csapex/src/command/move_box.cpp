@@ -34,7 +34,11 @@ std::string MoveBox::getDescription() const
 
 bool MoveBox::doExecute()
 {
-    MovableGraphicsProxyWidget* box = getDesigner()->getGraphView(graph_uuid)->getProxy(box_uuid);
+    Designer* designer = getDesigner();
+    if(!designer) {
+        return false;
+    }
+    MovableGraphicsProxyWidget* box = designer->getGraphView(graph_uuid)->getProxy(box_uuid);
     if(!box) {
         return false;
     }
@@ -44,7 +48,11 @@ bool MoveBox::doExecute()
 
 bool MoveBox::doUndo()
 {
-    MovableGraphicsProxyWidget* box = getDesigner()->getGraphView(graph_uuid)->getProxy(box_uuid);
+    Designer* designer = getDesigner();
+    if(!designer) {
+        return false;
+    }
+    MovableGraphicsProxyWidget* box = designer->getGraphView(graph_uuid)->getProxy(box_uuid);
     if(!box) {
         return false;
     }
@@ -55,7 +63,11 @@ bool MoveBox::doUndo()
 
 bool MoveBox::doRedo()
 {
-    MovableGraphicsProxyWidget* box = getDesigner()->getGraphView(graph_uuid)->getProxy(box_uuid);
+    Designer* designer = getDesigner();
+    if(!designer) {
+        return false;
+    }
+    MovableGraphicsProxyWidget* box = designer->getGraphView(graph_uuid)->getProxy(box_uuid);
     if(!box) {
         return false;
     }

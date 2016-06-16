@@ -12,6 +12,8 @@
 #include <QKeyEvent>
 #include <QListView>
 #include <QVBoxLayout>
+#include <QtConcurrent/QtConcurrentRun>
+#include <QProgressBar>
 
 using namespace csapex;
 
@@ -147,30 +149,64 @@ void BoxDialog::makeUI()
     setLayout(layout);
 
     QLabel *lbl = new QLabel(QString("<img src=\":/add_node.png\"> ") + message_ + " (<em>Autocompleted</em>)");
+
+    layout->addWidget(lbl);
+
+    loading_ = new QProgressBar;
+    loading_->setTextVisible(true);
+    loading_->setValue(-1);
+    loading_->setRange(0,0);
+    loading_->setFormat("Loading plugins..");
+
+    layout->addWidget(loading_);
+
+    QObject::connect(this, &BoxDialog::pluginsLoaded, this, &BoxDialog::setupTextBox);
+}
+
+void BoxDialog::showEvent(QShowEvent * e)
+{
+    QDialog::showEvent(e);
+
+    if(!load_nodes.isRunning()) {
+        load_nodes = QtConcurrent::run([this](){
+            NodeListGenerator generator(node_factory_, adapter_factory_);
+            model_ = generator.listAvailableNodeTypes();
+
+            Q_EMIT pluginsLoaded();
+
+            return true;
+        });
+    }
+}
+
+void BoxDialog::setupTextBox()
+{
     name_edit_ = new CompleteLineEdit;
     name_edit_->setFixedWidth(350);
-    lbl->setBuddy(name_edit_);
 
-    NodeFilterProxyModel* filter = new NodeFilterProxyModel;
+    filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    NodeListGenerator generator(node_factory_, adapter_factory_);
-    filter->setSourceModel(generator.listAvailableNodeTypes());
-
-    connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString &)));
-    connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(invalidate()));
+    QObject::connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString &)));
+    QObject::connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(invalidate()));
 
     name_edit_->setModel(filter);
 
-    layout->addWidget(lbl);
-    layout->addWidget(name_edit_);
+    delete loading_;
+    layout()->addWidget(name_edit_);
 
-    connect(name_edit_, SIGNAL(editingFinished()), this, SLOT(finish()));
+    name_edit_->setFocus();
+
+    filter->setSourceModel(model_);
+
+    QObject::connect(name_edit_, SIGNAL(editingFinished()), this, SLOT(finish()));
 }
-
 
 void BoxDialog::finish()
 {
+    if(load_nodes.isRunning()) {
+        load_nodes.waitForFinished();
+    }
     if(getName().empty()) {
         Q_EMIT reject();
     } else {

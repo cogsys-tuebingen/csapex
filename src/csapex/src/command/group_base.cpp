@@ -15,12 +15,6 @@
 using namespace csapex;
 using namespace csapex::command;
 
-GroupBase::ConnectionInformation::ConnectionInformation(Connectable *from, Connectable *to, const TokenDataConstPtr& type, bool active)
-    : from(from->getUUID()), to(to->getUUID()), from_label(from->getLabel()), to_label(to->getLabel()), type(type), active(active)
-{
-
-}
-
 GroupBase::GroupBase(const AUUID &graph_uuid, const std::string& type)
     : Meta(graph_uuid, type)
 {
