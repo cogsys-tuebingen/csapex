@@ -344,9 +344,14 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             }
         }
 
-        current_layout_ = new QHBoxLayout;
+        QPointer<QHBoxLayout> layout_ptr(new QHBoxLayout);
+        current_layout_ = layout_ptr;
         setDirection(current_layout_, node_);
-        node_handle->getNodeState()->flipped_changed->connect(std::bind(&setDirection, current_layout_, node_));
+        node_handle->getNodeState()->flipped_changed->connect([this, layout_ptr](){
+            if(!layout_ptr.isNull()) {
+                setDirection(layout_ptr, node_);
+            }
+        });
 
         // connect parameter input, if available
         InputPtr param_in = node_handle->getParameterInput(current_name_).lock();
