@@ -533,15 +533,15 @@ void NodeWorker::forwardMessages(bool send_parameters)
             publishParameters();
         }
     }
-    sendMessages();
+    sendMessages(true);
 }
 
 void NodeWorker::activateOutput()
 {
     bool has_marker = false;
     for(OutputPtr out : node_handle_->getExternalOutputs()) {
-        if(msg::isConnected(out.get())) {
-            if(out->hasMarkerMessage()) {
+        if(msg::isConnected(out.get()) && !node_handle_->isParameterOutput(out.get())) {
+            if(out->hasMessage() && out->hasMarkerMessage()) {
                 has_marker = true;
                 break;
             }
@@ -555,7 +555,7 @@ void NodeWorker::activateOutput()
     if(send_parameters) {
         publishParameters();
     }
-    sendMessages();
+    sendMessages(false);
 }
 
 bool NodeWorker::areAllInputsAvailable() const
@@ -759,7 +759,7 @@ void NodeWorker::sendEvents(bool active)
     }
 }
 
-void NodeWorker::sendMessages()
+void NodeWorker::sendMessages(bool ignore_sink)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
@@ -773,7 +773,10 @@ void NodeWorker::sendMessages()
     //tokens are activated if the node is active.
     bool active = node_handle_->isActive();
 
-    bool has_sent_active_message = node_handle_->getOutputTransition()->sendMessages(active);
+    bool has_sent_active_message = false;
+    if(!(ignore_sink && node_handle_->isSink())) {
+        has_sent_active_message = node_handle_->getOutputTransition()->sendMessages(active);
+    }
 
     sendEvents(active);
 

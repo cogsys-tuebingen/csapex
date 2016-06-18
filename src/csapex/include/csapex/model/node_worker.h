@@ -95,7 +95,7 @@ public:
 
     void killExecution();
 
-    void sendMessages();
+    void sendMessages(bool ignore_sink);
     void notifyMessagesProcessed();
 
 public:

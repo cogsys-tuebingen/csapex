@@ -27,7 +27,9 @@ bool TickableNode::doTick(NodeModifier &nm, Parameterizable &p)
         res = tick(nm, p);
     }
 
-    updated();
+    if(res) {
+        updated();
+    }
 
     return res;
 }
