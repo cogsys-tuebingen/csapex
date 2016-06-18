@@ -12,6 +12,10 @@
 #include <vector>
 #include <boost/type_traits.hpp>
 
+namespace YAML {
+class Node;
+}
+
 namespace csapex
 {
 
@@ -31,6 +35,7 @@ public:
 private:
     void createNode(GraphView *src, std::string type, const QPointF &pos,
                     NodeStatePtr state);
+    void pasteGraph(GraphView *src, const QPointF &pos, const YAML::Node& blueprint);
     void load();
 
 private:

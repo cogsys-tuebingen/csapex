@@ -57,7 +57,7 @@ public:
 
     DesignerScene* designerScene();
     std::vector<NodeBox*> boxes();
-    std::vector<NodeBox*> getSelectedBoxes();
+    std::vector<NodeBox*> getSelectedBoxes() const;
     CommandPtr deleteSelected();
 
     NodeBox* getBox(const UUID& node_id);
@@ -89,6 +89,7 @@ public:
     void nodeRemoved(NodeHandlePtr node_handle);
 
     void startPlacingBox(const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
+    void startCloningSelection(NodeBox *handle, const QPoint &offset = QPoint(0,0));
 
 Q_SIGNALS:
     void selectionChanged();
@@ -175,6 +176,8 @@ private:
     void createNewThreadGroupFor();
 
     void showProfiling(bool visible);
+
+    YAML::Node serializeSelection() const;
 
 private:
     CsApexCore& core_;

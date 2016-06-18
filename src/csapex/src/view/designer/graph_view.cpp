@@ -387,7 +387,7 @@ std::vector<NodeBox*> GraphView::boxes()
     return boxes_;
 }
 
-std::vector<NodeBox*> GraphView::getSelectedBoxes()
+std::vector<NodeBox*> GraphView::getSelectedBoxes() const
 {
     return selected_boxes_;
 }
@@ -634,7 +634,7 @@ void GraphView::animateScroll()
 
 void GraphView::showBoxDialog()
 {
-//    auto window =  QApplication::activeWindow();
+    //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
                    core_.getNodeFactory(), view_core_.getNodeAdapterFactory());
 
@@ -651,6 +651,7 @@ void GraphView::showBoxDialog()
         }
     }
 }
+
 
 
 void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, const QPoint &offset)
@@ -1570,19 +1571,105 @@ void GraphView::morphNode()
     }
 }
 
-void GraphView::copySelected()
+YAML::Node GraphView::serializeSelection() const
 {
     GraphIO io(graph_facade_->getGraph(), &core_.getNodeFactory());
 
     std::vector<UUID> nodes;
-    for(const NodeBox* box : getSelectedBoxes()) {
+    for(const NodeBox* box : selected_boxes_) {
         nodes.emplace_back(box->getNodeHandle()->getUUID());
     }
 
     YAML::Node yaml;
     io.saveSelectedGraph(yaml, nodes);
 
-    ClipBoard::set(yaml);
+    return yaml;
+}
+
+void GraphView::copySelected()
+{
+    ClipBoard::set(serializeSelection());
+}
+
+void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
+{
+    if(std::find(selected_boxes_.begin(), selected_boxes_.end(), box_handle) == selected_boxes_.end()) {
+        box_handle->setSelected(true);
+        selected_boxes_.push_back(box_handle);
+    }
+
+    YAML::Node yaml = serializeSelection();
+    std::stringstream yaml_txt;
+    yaml_txt << yaml;
+
+
+    Point box_pos = box_handle->getNodeHandle()->getNodeState()->getPos();
+    Point top_left = box_pos;
+    for(NodeBox* box : selected_boxes_) {
+        Point pos = box->getNodeHandle()->getNodeState()->getPos();
+        if(pos.x < top_left.x) {
+            top_left.x = pos.x;
+        }
+        if(pos.y < top_left.y) {
+            top_left.y = pos.y;
+        }
+    }
+
+    QPoint insert_pos = offset;
+
+    if(box_pos.x > top_left.x) {
+        insert_pos.setX(insert_pos.x() + top_left.x - box_pos.x);
+    }
+    if(box_pos.y > top_left.y) {
+        insert_pos.setY(insert_pos.y() + top_left.y - box_pos.y);
+    }
+
+
+    std::string type = box_handle->getNodeHandle()->getType();
+
+    NodeConstructorPtr c = core_.getNodeFactory().getConstructor(type);
+    NodeHandlePtr handle = c->makePrototype();
+
+    apex_assert_hard(handle);
+
+    QDrag* drag = new QDrag(this);
+    QMimeData* mimeData = new QMimeData;
+
+    auto data = QString::fromStdString(yaml_txt.str()).toUtf8();
+    mimeData->setData("xcsapex/node-list", data);
+    mimeData->setProperty("ox", insert_pos.x());
+    mimeData->setProperty("oy", insert_pos.y());
+    drag->setMimeData(mimeData);
+
+    NodeBox* box = nullptr;
+
+    bool is_note = type == "csapex::Note";
+
+    if(is_note) {
+        box = new NoteBox(core_.getSettings(), handle,
+                          QIcon(QString::fromStdString(c->getIcon())));
+
+    } else {
+        box = new NodeBox(core_.getSettings(), handle,
+                          QIcon(QString::fromStdString(c->getIcon())));
+    }
+    box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));
+
+    handle->setNodeState(box_handle->getNodeHandle()->getNodeStateCopy());
+
+    box->setStyleSheet(styleSheet());
+    box->construct();
+    box->setObjectName(handle->getType().c_str());
+
+    if(!is_note) {
+        box->setLabel(type);
+    }
+
+    drag->setPixmap(box->grab());
+    drag->setHotSpot(-offset);
+    drag->exec();
+
+    delete box;
 }
 
 

@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/command/add_node.h>
+#include <csapex/command/paste_graph.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/connectable.h>
@@ -17,6 +18,7 @@
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/plugin/plugin_manager.hpp>
+#include <csapex/model/node_state.h>
 
 /// SYSTEM
 #include <QMimeData>
@@ -67,7 +69,10 @@ void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
         load();
     }
 
-    if(e->mimeData()->hasFormat(NodeBox::MIME)) {
+    if(e->mimeData()->hasFormat("xcsapex/node-list")) {
+        e->acceptProposedAction();
+    }
+    else if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
@@ -131,7 +136,10 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
         load();
     }
 
-    if(e->mimeData()->hasFormat(NodeBox::MIME)) {
+    if(e->mimeData()->hasFormat("xcsapex/node-list")) {
+        e->acceptProposedAction();
+
+    } else if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
@@ -209,7 +217,21 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
 
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
-    if(e->mimeData()->hasFormat(NodeBox::MIME)) {
+    if(e->mimeData()->hasFormat("xcsapex/node-list")) {
+        e->setDropAction(Qt::CopyAction);
+        e->accept();
+
+        QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
+        QPointF pos = src->mapToScene(e->pos()) + offset;
+
+        QByteArray itemData = e->mimeData()->data("xcsapex/node-list");
+        QString serialized(itemData);
+        YAML::Node doc = YAML::Load(serialized.toStdString());
+
+        pasteGraph(src, pos, doc);
+
+
+    } if(e->mimeData()->hasFormat(NodeBox::MIME)) {
         std::string type = QString(e->mimeData()->data(NodeBox::MIME)).toStdString();
 
         e->setDropAction(Qt::CopyAction);
@@ -272,4 +294,13 @@ void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
     UUID uuid = graph->generateUUID(type);
 
     dispatcher_->executeLater(Command::Ptr(new command::AddNode(gf->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
+}
+
+void DragIO::pasteGraph(GraphView *src, const QPointF &pos, const YAML::Node& blueprint)
+{
+    GraphFacade* gf = src->getGraphFacade();
+    Graph* graph = gf->getGraph();
+    CommandPtr cmd(new command::PasteGraph(graph->getAbsoluteUUID(), blueprint, Point (pos.x(), pos.y())));
+
+    dispatcher_->executeLater(cmd);
 }

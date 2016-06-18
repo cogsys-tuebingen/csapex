@@ -9,6 +9,9 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/node_state.h>
+#include <csapex/core/graphio.h>
+#include <csapex/core/csapex_core.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #include <QGraphicsSceneMouseEvent>
@@ -161,9 +164,8 @@ void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if(clone_p_) {
         QPointF delta = clone_start_ - event->pos();
         if(hypot(delta.x(), delta.y()) > 10) {
-            NodeStatePtr state = box_->getNodeHandle()->getNodeStateCopy();
-            state->setLabel("");
-            view_->startPlacingBox(box_->getNodeHandle()->getType(), state);
+
+            view_->startCloningSelection(box_, -event->pos().toPoint());
             clone_p_ = false;
         }
         return;

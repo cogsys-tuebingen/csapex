@@ -49,7 +49,9 @@ void Graph::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
 {
     Node::initialize(node_handle, uuid);
 
-    setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
+    if(node_handle->getUUIDProvider()) {
+        setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
+    }
 }
 
 void Graph::reset()
