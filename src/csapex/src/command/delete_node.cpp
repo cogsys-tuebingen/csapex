@@ -2,7 +2,7 @@
 #include <csapex/command/delete_node.h>
 
 /// COMPONENT
-#include <csapex/command/delete_connection.h>
+#include <csapex/command/delete_msg_connection.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
@@ -13,6 +13,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/model/connection.h>
 #include <csapex/core/graphio.h>
 
 /// SYSTEM
@@ -45,10 +46,17 @@ bool DeleteNode::doExecute()
     locked = false;
     clear();
 
-    for(auto connectable : node_handle->getExternalConnectors()) {
+    std::set<ConnectionPtr> connections;
+    for(ConnectablePtr connectable : node_handle->getExternalConnectors()) {
         if(connectable->isConnected()) {
-            add(CommandFactory(getRoot(), graph_uuid).removeAllConnectionsCmd(connectable));
+            for(ConnectionPtr c : connectable->getConnections()) {
+                connections.insert(c);
+            }
         }
+    }
+
+    for(ConnectionPtr c : connections) {
+        add(std::make_shared<DeleteMessageConnection>(graph_uuid, c->from(), c->to()));
     }
 
     // serialize sub graph

@@ -55,7 +55,7 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout,
     QHBoxLayout* internal_layout = new QHBoxLayout;
 
     QLabel* label = nullptr;
-    if(p && !p->description().toString().empty()) {
+    if(p && !p->description().empty()) {
         label = new QLabel(QString::fromStdString(txt) + "<img src=':/help.png' />");
     } else {
         label = new QLabel(QString::fromStdString(txt));

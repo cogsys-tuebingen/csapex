@@ -23,3 +23,8 @@ std::string ParameterDescription::toString() const
         return description_;
     }
 }
+
+bool ParameterDescription::empty() const
+{
+    return description_.empty();
+}
