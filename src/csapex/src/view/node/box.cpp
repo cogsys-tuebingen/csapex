@@ -822,7 +822,7 @@ void NodeBox::updateVisuals()
     bool minimized = isMinimizedSize();
 
     if(minimized != flag_set) {
-        setProperty("content_minimized", minimized);
+        ui->boxframe->setProperty("content_minimized", minimized);
 
         if(minimized) {
             ui->frame->hide();
