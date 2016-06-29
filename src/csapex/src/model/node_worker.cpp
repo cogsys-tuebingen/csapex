@@ -908,13 +908,17 @@ void NodeWorker::connectConnector(Connectable *c)
 
     } else if(Slot* slot = dynamic_cast<Slot*>(c)) {
         auto connection = slot->triggered.connect([this, slot]() {
+            TokenPtr token = slot->getToken();
+            apex_assert_hard(token);
             node_handle_->executionRequested([this, slot]() {
                 TokenPtr token = slot->getToken();
-                apex_assert_hard(token);
-                if(token->isActive()) {
-                    node_handle_->setActive(true);
+                if(token) {
+                    //apex_assert_hard(token);
+                    if(token->isActive()) {
+                        node_handle_->setActive(true);
+                    }
+                    slot->handleEvent();
                 }
-                slot->handleEvent();
             });
         });
         connections_[c].emplace_back(connection);

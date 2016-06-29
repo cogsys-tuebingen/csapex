@@ -72,11 +72,15 @@ void Slot::notifyMessageProcessed()
 {
     messageProcessed(this);
 
+    Connection* front;
+    {
+        std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
+        front = available_connections_.front();
+        available_connections_.pop_front();
+    }
+    front->setTokenProcessed();
+
     std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
-
-    available_connections_.front()->setTokenProcessed();
-    available_connections_.pop_front();
-
     if(!available_connections_.empty()) {
         TokenPtr token = available_connections_.front()->readToken();
         lock.unlock();
