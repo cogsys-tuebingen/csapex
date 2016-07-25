@@ -416,13 +416,12 @@ target_link_libraries(csapex_qt
 # LIST EVERYTHING IN QT
 #
 file(GLOB_RECURSE ALL_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/*.hpp include/*.h)
-add_custom_target(${PROJECT_NAME}_show_all_headers_in_qtc SOURCES ${ALL_HEADERS})
 
 #
 # BUILD THE APPLICATION
 #
-
 add_executable(csapex_node
+    ${ALL_HEADERS}
     src/csapex.cpp)
 
 target_link_libraries(csapex_node
