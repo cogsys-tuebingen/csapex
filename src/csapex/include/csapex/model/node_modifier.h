@@ -78,6 +78,16 @@ public:
         Container::template registerType<T>();
         return addOutput(Container::template make<T>(), label, true);
     }
+    template <typename Container, typename T>
+    Event* addEvent(const std::string& label) {
+        Container::template registerType<T>();
+        return addEvent(Container::template make<T>(), label);
+    }
+    template <typename Container, typename T>
+    Slot* addSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false) {
+        Container::template registerType<T>();
+        return addSlot(Container::template make<T>(), label, callback, active);
+    }
 
 
 
