@@ -22,6 +22,8 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/model/node_runner.h>
+#include <csapex/msg/any_message.h>
+#include <csapex/utility/error_handling.h>
 
 /// SYSTEM
 #include <fstream>
@@ -156,6 +158,17 @@ void CsApexCore::init()
         root_scheduler_ = std::make_shared<NodeRunner>(root_worker_);
         thread_pool_->add(root_scheduler_.get());
 
+        root_->getGraph()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+                                              root_->getGraph()->makeUUID("slot_save"), "save",
+                                              [this](const TokenPtr&) {
+            saveAs(getSettings().get<std::string>("config"));
+        });
+        root_->getGraph()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+                                              root_->getGraph()->makeUUID("slot_exit"), "exit",
+                                              [this](const TokenPtr&) {
+            // TODO: more graceful stopping
+            csapex::error_handling::stop();
+        });
         for(PAIR plugin : core_plugins_) {
             plugin.second->setupGraph(root_->getGraph());
         }

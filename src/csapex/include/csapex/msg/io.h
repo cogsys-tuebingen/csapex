@@ -138,12 +138,24 @@ R getValue(Input* input)
     return msg->value;
 }
 
-template <typename T>
-bool isMessage(Input* input) {
+template <typename R>
+bool isMessage(Input* input,
+               typename std::enable_if<std::is_base_of<TokenData, R>::value >::type* /*dummy*/ = 0)
+{
     auto msg = getMessage(input);
-    auto test = message_cast<T const> (msg);
+    auto test = message_cast<R const> (msg);
     return test != nullptr;
 }
+
+template <typename R>
+bool isMessage(Input* input,
+               typename std::enable_if<!std::is_base_of<TokenData, R>::value >::type* /*dummy*/ = 0)
+{
+    auto msg = getMessage(input);
+    auto test = message_cast<connection_types::GenericPointerMessage<R> const> (msg);
+    return test != nullptr;
+}
+
 template <typename R>
 bool isValue(Input* input) {
     return isMessage< connection_types::GenericValueMessage<R> >(input);

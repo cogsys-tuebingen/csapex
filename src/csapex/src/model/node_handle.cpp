@@ -67,6 +67,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
             label = getUUID().getShortName();
         }
         
+        label = getUUID().getAbsoluteUUID().getFullName();
         node_->adebug.setPrefix(label);
         node_->ainfo.setPrefix(label);
         node_->awarn.setPrefix(label);
