@@ -2,12 +2,6 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(csapex)
 
-## Check the build type
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type, options: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
-    message("No CMAKE_BUILD_TYPE specified, defaulting to ${CMAKE_BUILD_TYPE}")
-endif(NOT CMAKE_BUILD_TYPE)
-
 ## Add our own cmake subdirectory
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(cmake/csapex-extras.cmake)
@@ -22,14 +16,13 @@ add_definitions(-W -Wall)
 find_package(catkin REQUIRED)
 find_package(class_loader REQUIRED)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
 
 set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
 
 find_package(OpenGL REQUIRED)
 find_package(TinyXML REQUIRED)
-find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 find_package(console_bridge REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
@@ -424,11 +417,9 @@ target_link_libraries(csapex_qt
 #
 file(GLOB_RECURSE ALL_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/*.hpp include/*.h)
 
-
 #
 # BUILD THE APPLICATION
 #
-
 add_executable(csapex_node
     ${ALL_HEADERS}
     src/csapex.cpp)
@@ -475,6 +466,16 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(TARGETS csapex
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS csapex_param
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS csapex_util
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
