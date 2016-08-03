@@ -734,6 +734,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
 {
     continuation_ = continuation;
 
+    // can fail...
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
     for(Input* i : node_modifier.getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i);

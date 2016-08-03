@@ -101,7 +101,6 @@ Q_SIGNALS:
     void startProfilingRequest(NodeWorker* box);
     void stopProfilingRequest(NodeWorker *box);
 
-
     void triggerConnectorCreated(ConnectablePtr connector);
     void triggerConnectorRemoved(ConnectablePtr connector);
 

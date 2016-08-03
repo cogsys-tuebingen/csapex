@@ -196,6 +196,22 @@ void GraphView::setupWidgets()
         slots_widget_->enableMetaPort(parent);
         events_widget_->enableMetaPort(parent);
     }
+
+    if(scene_->isEmpty()) {
+        outputs_widget_->hide();
+        inputs_widget_->hide();
+        slots_widget_->hide();
+        events_widget_->hide();
+    }
+
+    QObject::connect(scene_, &DesignerScene::changed, [this]() {
+        bool visible = !scene_->isEmpty();
+
+        outputs_widget_->setVisible(visible);
+        inputs_widget_->setVisible(visible);
+        slots_widget_->setVisible(visible);
+        events_widget_->setVisible(visible);
+    });
 }
 
 void GraphView::paintEvent(QPaintEvent *e)
