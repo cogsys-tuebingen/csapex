@@ -204,9 +204,19 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
             dispatcher.reset();
             settings.set("config_recovery", false);
         }));
+
+        bool recover_needed = false;
+        QTimer *timer = new QTimer(this);
+        QObject::connect(timer, &QTimer::timeout, [&](){
+            if(recover_needed) {
+                recover_needed = false;
+                std::string temp_file_name = settings.get("config")->as<std::string>() + ".recover";
+                core->saveAs(temp_file_name, true);
+            }
+        });
+        timer->start(settings.get<int>("config_recovery_save_interval", 1000));
         csapex::slim_signal::ScopedConnection change(dispatcher.stateChanged.connect([&](){
-            std::string temp_file_name = settings.get("config")->as<std::string>() + ".recover";
-            core->saveAs(temp_file_name, true);
+            recover_needed = true;
         }));
 
 

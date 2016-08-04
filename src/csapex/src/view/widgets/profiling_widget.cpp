@@ -52,11 +52,11 @@ ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *par
 
     QPushButton* reset = new QPushButton("reset");
     buttons_layout->addWidget(reset);
-    connect(reset, SIGNAL(clicked(bool)), this, SLOT(reset()));
+    connect(reset, &QPushButton::clicked, this, &ProfilingWidget::reset);
 
     QPushButton* export_csv = new QPushButton("export");
     buttons_layout->addWidget(export_csv);
-    connect(export_csv, SIGNAL(clicked(bool)), this, SLOT(exportCsv()));
+    connect(export_csv, &QPushButton::clicked, this, &ProfilingWidget::exportCsv);
 
     layout_->addLayout(buttons_layout);
 
