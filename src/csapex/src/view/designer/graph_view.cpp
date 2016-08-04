@@ -195,60 +195,63 @@ void GraphView::setupWidgets()
         inputs_widget_->enableMetaPort(parent);
         slots_widget_->enableMetaPort(parent);
         events_widget_->enableMetaPort(parent);
+    } else {
+        // hide panels in an empty top level graph
+        if(scene_->isEmpty()) {
+            outputs_widget_->hide();
+            inputs_widget_->hide();
+            slots_widget_->hide();
+            events_widget_->hide();
+        }
     }
 
-    if(scene_->isEmpty()) {
-        outputs_widget_->hide();
-        inputs_widget_->hide();
-        slots_widget_->hide();
-        events_widget_->hide();
-    }
 
     QObject::connect(scene_, &DesignerScene::changed, [this]() {
         bool visible = !scene_->isEmpty();
 
-        outputs_widget_->setVisible(visible);
-        inputs_widget_->setVisible(visible);
-        slots_widget_->setVisible(visible);
-        events_widget_->setVisible(visible);
+        // hide panels in an empty top level graph
+        if(!graph_facade_->getParent()) {
+            outputs_widget_->setVisible(visible);
+            inputs_widget_->setVisible(visible);
+            slots_widget_->setVisible(visible);
+            events_widget_->setVisible(visible);
+        }
     });
 }
 
 void GraphView::paintEvent(QPaintEvent *e)
 {
-    if(!scene_->isEmpty()) {
-        QPointF tl_view = mapToScene(QPoint(0, 0));
-        QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
+    QPointF tl_view = mapToScene(QPoint(0, 0));
+    QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
 
-        QPointF mid = 0.5 * (tl_view + br_view);
+    QPointF mid = 0.5 * (tl_view + br_view);
 
-        {
-            QPointF pos(tl_view.x(),
-                        mid.y() - outputs_widget_->height() / 2.0);
-            if(pos != outputs_widget_proxy_->pos()) {
-                outputs_widget_proxy_->setPos(pos);
-            }
+    {
+        QPointF pos(tl_view.x(),
+                    mid.y() - outputs_widget_->height() / 2.0);
+        if(pos != outputs_widget_proxy_->pos()) {
+            outputs_widget_proxy_->setPos(pos);
         }
-        {
-            QPointF pos(br_view.x()-inputs_widget_->width(),
-                        mid.y() - inputs_widget_->height() / 2.0);
-            if(pos != inputs_widget_proxy_->pos()) {
-                inputs_widget_proxy_->setPos(pos);
-            }
+    }
+    {
+        QPointF pos(br_view.x()-inputs_widget_->width(),
+                    mid.y() - inputs_widget_->height() / 2.0);
+        if(pos != inputs_widget_proxy_->pos()) {
+            inputs_widget_proxy_->setPos(pos);
         }
-        {
-            QPointF pos(mid.x() - slots_widget_->width() / 2.0,
-                        br_view.y() - slots_widget_->height());
-            if(pos != slots_widget_proxy_->pos()) {
-                slots_widget_proxy_->setPos(pos);
-            }
+    }
+    {
+        QPointF pos(mid.x() - slots_widget_->width() / 2.0,
+                    br_view.y() - slots_widget_->height());
+        if(pos != slots_widget_proxy_->pos()) {
+            slots_widget_proxy_->setPos(pos);
         }
-        {
-            QPointF pos(mid.x() - events_widget_->width() / 2.0,
-                        tl_view.y());
-            if(pos != triggers_widget_proxy_->pos()) {
-                triggers_widget_proxy_->setPos(pos);
-            }
+    }
+    {
+        QPointF pos(mid.x() - events_widget_->width() / 2.0,
+                    tl_view.y());
+        if(pos != triggers_widget_proxy_->pos()) {
+            triggers_widget_proxy_->setPos(pos);
         }
     }
     QGraphicsView::paintEvent(e);
@@ -1209,6 +1212,10 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
     add_note.setIcon(QIcon(":/note.png"));
     menu.addAction(&add_note);
 
+    QAction add_subgraph("create subgraph", &menu);
+    add_subgraph.setIcon(QIcon(":/group.png"));
+    menu.addAction(&add_subgraph);
+
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
     NodeListGenerator generator(core_.getNodeFactory(), view_core_.getNodeAdapterFactory());
@@ -1226,6 +1233,9 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 
         } else if(selectedItem == &add_note) {
             startPlacingBox("csapex::Note", nullptr);
+
+        } else if(selectedItem == &add_subgraph) {
+            startPlacingBox("csapex::Graph", nullptr);
 
         } else {
             // else it must be an insertion
