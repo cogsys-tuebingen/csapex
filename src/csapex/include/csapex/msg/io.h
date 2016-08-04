@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 #include <csapex/msg/msg_fwd.h>
-#include <csapex/msg/message_traits.h>
+#include <csapex/msg/token_traits.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
 

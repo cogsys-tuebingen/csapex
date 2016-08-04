@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/token_data.h>
 #include <csapex/msg/message.h>
-#include <csapex/msg/message_traits.h>
+#include <csapex/msg/token_traits.h>
 
 /// PROJECT
 #include <csapex/utility/singleton.hpp>

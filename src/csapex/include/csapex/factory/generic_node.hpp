@@ -1,7 +1,7 @@
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex/msg/io.h>
-#include <csapex/msg/message_traits.h>
+#include <csapex/msg/token_traits.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/param/parameter_factory.h>
 
