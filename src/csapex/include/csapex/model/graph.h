@@ -76,7 +76,6 @@ public:
     std::vector<NodeHandle*> getAllNodeHandles();
 
     int getComponent(const UUID& node_uuid) const;
-    int getLevel(const UUID& node_uuid) const;
 
     Connectable* findConnector(const UUID &uuid);
     Connectable* findConnectorNoThrow(const UUID &uuid) noexcept;
@@ -176,8 +175,6 @@ private:
     UUID  addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
     UUID  addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
 
-    void assignLevels();
-
     virtual void notifyMessagesProcessed() override;
     void inputActivation();
     void outputActivation();
@@ -200,7 +197,6 @@ public:
 protected:
     std::vector<NodeHandlePtr> nodes_;
     std::map<NodeHandle*, int> node_component_;
-    std::map<NodeHandle*, int> node_level_;
 
     std::map<NodeHandle*, std::vector<NodeHandle*> > node_parents_;
     std::map<NodeHandle*, std::vector<NodeHandle*> > node_children_;

@@ -845,20 +845,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     NodeHandle* from_nh = graph->findNodeHandleForConnector(from->getUUID());
     NodeHandle* to_nh = graph->findNodeHandleForConnector(to->getUUID());
 
-    if(!from_nh || !to_nh) {
-        ccs.level = 0;
-
-    } else {
-        int lf = graph->getLevel(from_nh->getUUID());
-        int lt = graph->getLevel(to_nh->getUUID());
-
-        if(from->isDynamic()) {
-            ccs.level = lt;
-        } else {
-            ccs.level = lf;
-        }
-    }
-
     if(dynamic_cast<Event*>(from)) {
         ccs.start_pos = BOTTOM;
     } else {
@@ -920,7 +906,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? view_core_.getStyle().lineWidth() / 2.0 : view_core_.getStyle().lineWidth();
     ccs.r *= scale_factor;
-    ccs.r *= (ccs.level + 1);
 
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;

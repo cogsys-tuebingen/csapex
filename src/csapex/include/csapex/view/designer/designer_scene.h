@@ -135,8 +135,6 @@ private:
 
         QString label;
 
-        int level;
-
         double r;
     };
 

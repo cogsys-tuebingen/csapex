@@ -64,9 +64,6 @@ public:
 
     virtual ConnectorType getConnectorType() const = 0;
 
-    void setLevel(int level);
-    int getLevel() const;
-
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
@@ -148,7 +145,6 @@ protected:
 private:
     std::atomic<bool> enabled_;
     std::atomic<bool> dynamic_;
-    int level_;
 };
 
 }

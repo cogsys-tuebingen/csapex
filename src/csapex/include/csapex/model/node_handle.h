@@ -37,9 +37,6 @@ public:
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
 
-    int getLevel() const;
-    void setLevel(int level);
-
 
     Input* addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional) override;
     void manageInput(InputPtr in);
@@ -188,8 +185,6 @@ private:
     UUIDProvider* uuid_provider_;
 
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
-
-    int level_;
 
     bool source_;
     bool sink_;

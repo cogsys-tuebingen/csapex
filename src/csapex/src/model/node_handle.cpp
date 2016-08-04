@@ -36,7 +36,6 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       transition_out_(transition_out),
       
       uuid_provider_(uuid_provider),
-      level_(0),
       source_(false), sink_(false)
 {
     node_->initialize(this, uuid);
@@ -98,22 +97,6 @@ NodeHandle::~NodeHandle()
     }
     
     nodeRemoved();
-}
-
-int NodeHandle::getLevel() const
-{
-    return level_;
-}
-
-void NodeHandle::setLevel(int level)
-{
-    level_ = level;
-    for(InputPtr in : external_inputs_) {
-        in->setLevel(level);
-    }
-    for(OutputPtr out : external_outputs_) {
-        out->setLevel(level);
-    }
 }
 
 void NodeHandle::setIsSource(bool source)

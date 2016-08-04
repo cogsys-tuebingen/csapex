@@ -21,7 +21,7 @@ const std::string Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_
 
 Connectable::Connectable(const UUID& uuid)
     : Unique(uuid),
-      count_(0), seq_no_(-1), enabled_(true), dynamic_(false), level_(0)
+      count_(0), seq_no_(-1), enabled_(true), dynamic_(false)
 {
     init();
 }
@@ -91,16 +91,6 @@ void Connectable::setEnabled(bool enabled)
     } else {
         disable();
     }
-}
-
-void Connectable::setLevel(int level)
-{
-    level_ = level;
-}
-
-int Connectable::getLevel() const
-{
-    return level_;
 }
 
 bool Connectable::isEnabled() const

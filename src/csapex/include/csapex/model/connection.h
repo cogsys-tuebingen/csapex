@@ -78,10 +78,6 @@ public:
 
     void reset();
 
-    bool inLevel() const;
-    bool upLevel() const;
-    bool downLevel() const;
-
 public:
     csapex::slim_signal::Signal<void()> deleted;
 
