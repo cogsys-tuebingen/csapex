@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <QGraphicsView>
+#include <QPointer>
 
 namespace csapex
 {
@@ -17,7 +18,7 @@ namespace impl {
 class PreviewInput : public Input
 {
 public:
-    PreviewInput(MessagePreviewWidget* parent);
+    PreviewInput(QPointer<MessagePreviewWidget> parent);
 
     virtual void setToken(TokenPtr message) override;
 
@@ -25,10 +26,13 @@ public:
         return true;
     }
 
+    void detach();
+
 private:
-    MessagePreviewWidget* parent_;
+    QPointer<MessagePreviewWidget> parent_;
 };
 }
+
 
 class MessagePreviewWidget : public QGraphicsView
 {

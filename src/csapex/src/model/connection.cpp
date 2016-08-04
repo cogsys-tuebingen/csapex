@@ -27,7 +27,7 @@ Connection::Connection(Output *from, Input *to)
 
 Connection::Connection(Output *from, Input *to, int id)
     : from_(from), to_(to), id_(id),
-      active_(false),
+      active_(false), detached_(false),
       state_(State::NOT_INITIALIZED)
 {
     is_dynamic_ = from_->isDynamic() || to_->isDynamic();
@@ -41,6 +41,18 @@ Connection::Connection(Output *from, Input *to, int id)
 
 Connection::~Connection()
 {
+}
+
+void Connection::detach(Connectable *c)
+{
+    if(c == from_) {
+        from_ = nullptr;
+        detached_ = true;
+
+    } else if(c == to_) {
+        to_ = nullptr;
+        detached_ = true;
+    }
 }
 
 void Connection::reset()
@@ -69,6 +81,9 @@ bool Connection::holdsActiveToken() const
 
 void Connection::notifyMessageSet()
 {
+    if(detached_) {
+        return;
+    }
     to_->notifyMessageAvailable(this);
 }
 
@@ -77,6 +92,9 @@ void Connection::setTokenProcessed()
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
         setState(State::DONE);
+    }
+    if(detached_) {
+        return;
     }
     from_->setMessageProcessed();
 }
@@ -145,14 +163,23 @@ Connection::State Connection::getState() const
 
 bool Connection::inLevel() const
 {
+    if(detached_) {
+        return false;
+    }
     return to_->getLevel() == from_->getLevel();
 }
 bool Connection::upLevel() const
 {
+    if(detached_) {
+        return false;
+    }
     return to_->getLevel() < from_->getLevel();
 }
 bool Connection::downLevel() const
 {
+    if(detached_) {
+        return false;
+    }
     return to_->getLevel() > from_->getLevel();
 }
 

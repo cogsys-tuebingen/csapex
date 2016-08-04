@@ -45,6 +45,8 @@ protected:
 public:
     virtual ~Connection();
 
+    void detach(Connectable* c);
+
     Output* from() const;
     Input* to() const;
     int id() const;
@@ -114,6 +116,7 @@ protected:
     bool is_dynamic_;
 
     bool active_;
+    bool detached_;
 
     std::vector<FulcrumPtr> fulcrums_;
 

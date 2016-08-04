@@ -53,6 +53,9 @@ void Connectable::init()
 
 Connectable::~Connectable()
 {
+    for(ConnectionPtr& c : connections_) {
+        c->detach(this);
+    }
 }
 
 void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
