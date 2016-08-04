@@ -379,8 +379,18 @@ void GraphIO::saveFulcrums(YAML::Node &fulcrum, const Connection *connection)
 
 void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
 {
-    std::string from_uuid_tmp = fulcrum["from"].as<std::string>();
-    std::string to_uuid_tmp = fulcrum["to"].as<std::string>();
+    YAML::Node from_node = fulcrum["from"];
+    if(!from_node.IsDefined()) {
+        return;
+    }
+
+    YAML::Node to_node = fulcrum["to"];
+    if(!to_node.IsDefined()) {
+        return;
+    }
+
+    std::string from_uuid_tmp = from_node.as<std::string>();
+    std::string to_uuid_tmp = to_node.as<std::string>();
 
     UUID from_uuid = UUIDProvider::makeUUID_forced(graph_->shared_from_this(), from_uuid_tmp);
     UUID to_uuid = UUIDProvider::makeUUID_forced(graph_->shared_from_this(), to_uuid_tmp);
