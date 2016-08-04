@@ -58,6 +58,8 @@ protected:
     std::function<void(const TokenPtr&)> callback_;
     bool active_;
 
+    long guard_;
+
 private:
     std::deque<Connection*> available_connections_;
 

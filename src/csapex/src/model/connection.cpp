@@ -106,7 +106,7 @@ void Connection::setToken(const TokenPtr &token)
 
         std::unique_lock<std::recursive_mutex> lock(sync);
         apex_assert_hard(msg != nullptr);
-        apex_assert_hard(state_ == State::NOT_INITIALIZED);
+//        apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
         bool msg_active = msg->isActive();
         if(!isActive() && msg_active) {

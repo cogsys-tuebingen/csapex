@@ -840,11 +840,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     ccs.selected_from = from_port->property("focused").toBool();
     ccs.selected_to = to_port->property("focused").toBool();
 
-    Graph* graph = graph_facade_->getGraph();
-
-    NodeHandle* from_nh = graph->findNodeHandleForConnector(from->getUUID());
-    NodeHandle* to_nh = graph->findNodeHandleForConnector(to->getUUID());
-
     if(dynamic_cast<Event*>(from)) {
         ccs.start_pos = BOTTOM;
     } else {

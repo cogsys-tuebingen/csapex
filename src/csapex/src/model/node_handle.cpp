@@ -83,6 +83,8 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
 NodeHandle::~NodeHandle()
 {
+    node_->tearDown();
+
     while(!external_inputs_.empty()) {
         removeInput(external_inputs_.begin()->get());
     }
@@ -95,7 +97,7 @@ NodeHandle::~NodeHandle()
     while(!external_events_.empty()) {
         removeEvent(external_events_.begin()->get());
     }
-    
+
     nodeRemoved();
 }
 

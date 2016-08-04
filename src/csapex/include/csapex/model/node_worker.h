@@ -140,7 +140,7 @@ private:
 
     void sendEvents(bool active);
 
-    void connectConnector(Connectable *c);
+    void connectConnector(ConnectablePtr c);
     void disconnectConnector(Connectable *c);
 
     bool hasActiveOutputConnection();

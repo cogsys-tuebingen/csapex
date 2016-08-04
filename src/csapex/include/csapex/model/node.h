@@ -40,6 +40,8 @@ public: /* API */
 
     virtual void reset();
 
+    virtual void tearDown();
+
     virtual bool isAsynchronous() const;
     virtual bool isIsolated() const;
 

@@ -48,7 +48,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
     try {
         handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
-                                             connectConnector(c.get());
+                                             connectConnector(c);
                                          }));
         handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
                                              disconnectConnector(c.get());
@@ -891,37 +891,38 @@ void NodeWorker::checkParameters()
 }
 
 
-void NodeWorker::connectConnector(Connectable *c)
+void NodeWorker::connectConnector(ConnectablePtr c)
 {
-    connections_[c].emplace_back(c->connection_added_to.connect([this](Connectable*) { checkIO(); }));
-    connections_[c].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
-    connections_[c].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
-    connections_[c].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
+    connections_[c.get()].emplace_back(c->connection_added_to.connect([this](Connectable*) { checkIO(); }));
+    connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
+    connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
+    connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
 
-    if(Event* event = dynamic_cast<Event*>(c)) {
-        auto connection = event->triggered.connect([this, event]() {
-            node_handle_->executionRequested([this, event]() {
+    if(EventPtr event = std::dynamic_pointer_cast<Event>(c)) {
+        auto connection = event->triggered.connect([this]() {
+            node_handle_->executionRequested([this]() {
                 sendEvents(node_handle_->isActive());
             });
         });
-        connections_[c].emplace_back(connection);
+        connections_[c.get()].emplace_back(connection);
 
-    } else if(Slot* slot = dynamic_cast<Slot*>(c)) {
-        auto connection = slot->triggered.connect([this, slot]() {
-            TokenPtr token = slot->getToken();
-            apex_assert_hard(token);
-            node_handle_->executionRequested([this, slot]() {
-                TokenPtr token = slot->getToken();
-                if(token) {
-                    //apex_assert_hard(token);
-                    if(token->isActive()) {
-                        node_handle_->setActive(true);
+    } else if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(c)) {
+        SlotWeakPtr slot_w = slot;
+        auto connection = slot->triggered.connect([this, slot_w]() {
+            node_handle_->executionRequested([this, slot_w]() {
+                if(SlotPtr slot = slot_w.lock()) {
+                    TokenPtr token = slot->getToken();
+                    if(token) {
+                        //apex_assert_hard(token);
+                        if(token->isActive()) {
+                            node_handle_->setActive(true);
+                        }
+                        slot->handleEvent();
                     }
-                    slot->handleEvent();
                 }
             });
         });
-        connections_[c].emplace_back(connection);
+        connections_[c.get()].emplace_back(connection);
     }
 }
 

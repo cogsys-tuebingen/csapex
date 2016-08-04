@@ -14,18 +14,19 @@
 using namespace csapex;
 
 Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active)
-    : Input(uuid), callback_([callback](const TokenConstPtr&){callback();}), active_(active)
+    : Input(uuid), callback_([callback](const TokenConstPtr&){callback();}), active_(active), guard_(-1)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
 Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active)
-    : Input(uuid), callback_(callback), active_(active)
+    : Input(uuid), callback_(callback), active_(active), guard_(-1)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
 
 Slot::~Slot()
 {
+    guard_ = 0xDEADBEEF;
 }
 
 void Slot::reset()
@@ -49,6 +50,7 @@ void Slot::setToken(TokenPtr token)
 
     token_set(token);
 
+    apex_assert_hard(guard_ == -1);
     triggered();
 }
 
@@ -96,6 +98,7 @@ void Slot::handleEvent()
     // do the work
     if(isEnabled() || isActive()) {
         if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
+            apex_assert_hard(guard_ == -1);
             callback_(message_);
         }
     }
