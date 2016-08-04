@@ -65,12 +65,15 @@ ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *par
     connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
-    connection_ = node_worker_->messages_processed.connect(delegate::Delegate0<>(this, &ProfilingWidget::update));
+    node_worker_->messages_processed.connect(delegate::Delegate0<>(this, &ProfilingWidget::update));
+
+    node_worker_->destroyed.connect([this](){
+       node_worker_ = nullptr;
+    });
 }
 
 ProfilingWidget::~ProfilingWidget()
 {
-    connection_.disconnect();
 }
 
 void ProfilingWidget::reposition(double, double)
@@ -107,6 +110,10 @@ void ProfilingWidget::exportCsv()
 
 void ProfilingWidget::paintEvent(QPaintEvent *)
 {
+    if(!node_worker_) {
+        return;
+    }
+
     // update stats
     auto new_measurements = node_worker_->extractLatestTimers();
     for(TimerPtr timer : new_measurements) {

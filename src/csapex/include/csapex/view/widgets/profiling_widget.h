@@ -44,8 +44,6 @@ private:
     NodeBox* box_;
     NodeWorker* node_worker_;
 
-    csapex::slim_signal::Connection connection_;
-
     QVBoxLayout* layout_;
     QSpacerItem* space_for_painting_;
     float bar_height_;
