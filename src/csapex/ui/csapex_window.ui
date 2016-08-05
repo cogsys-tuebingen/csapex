@@ -57,6 +57,7 @@
     <addaction name="separator"/>
     <addaction name="actionClear"/>
     <addaction name="separator"/>
+    <addaction name="actionCreate_Node"/>
     <addaction name="actionDelete_Selected"/>
     <addaction name="actionGroup"/>
     <addaction name="actionUngroup"/>
@@ -293,8 +294,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>88</height>
+          <width>274</width>
+          <height>144</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -374,7 +375,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>218</width>
+          <width>266</width>
           <height>199</height>
          </rect>
         </property>
@@ -1020,6 +1021,18 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionCreate_Node">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/add_node.png</normaloff>:/add_node.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Node</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Space</string>
    </property>
   </action>
  </widget>

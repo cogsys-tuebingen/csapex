@@ -35,6 +35,7 @@ void SearchDialog::makeUI()
 {
     setWindowIcon(QIcon(":/magnifier.png"));
     setWindowTitle("Search Node");
+    setWindowFlags(Qt::WindowStaysOnTopHint);
 
     setFocusPolicy(Qt::StrongFocus);
     setModal(true);

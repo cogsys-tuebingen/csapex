@@ -68,6 +68,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void showGraph(UUID uuid);
+    void showNodeDialog();
     void showNodeSearchDialog();
 
     void closeView(int page);

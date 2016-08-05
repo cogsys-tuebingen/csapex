@@ -96,8 +96,8 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     setDragMode(QGraphicsView::RubberBandDrag);
     setInteractive(true);
 
-    QShortcut *create_node_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
-    QObject::connect(create_node_shortcut, SIGNAL(activated()), this, SLOT(showNodeInsertDialog()));
+//    QShortcut *create_node_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
+//    QObject::connect(create_node_shortcut, SIGNAL(activated()), this, SLOT(showNodeInsertDialog()));
 
     QShortcut *box_reset_view = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_0), this);
     QObject::connect(box_reset_view, SIGNAL(activated()), this, SLOT(resetZoom()));

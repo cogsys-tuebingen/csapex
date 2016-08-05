@@ -119,10 +119,16 @@ void Designer::showGraph(UUID uuid)
     showGraph(graphs_.at(uuid));
 }
 
+void Designer::showNodeDialog()
+{
+    if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
+        current_view->showNodeInsertDialog();
+    }
+}
+
 void Designer::showNodeSearchDialog()
 {
-    GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
-    if(current_view) {
+    if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
         SearchDialog diag(current_view->getGraphFacade()->getGraph(), core_.getNodeFactory(),
                           "Please enter the UUID, the label or the type of the node");
 

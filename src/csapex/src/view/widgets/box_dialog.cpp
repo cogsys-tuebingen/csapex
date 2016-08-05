@@ -30,6 +30,7 @@ void BoxDialog::makeUI()
 {
     setWindowIcon(QIcon(":/add_node.png"));
     setWindowTitle("Create Node");
+    setWindowFlags(Qt::WindowStaysOnTopHint);
 
     setFocusPolicy(Qt::StrongFocus);
     setModal(true);
