@@ -218,7 +218,7 @@ UUID GraphIO::readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::
         if(pos != old_node_uuid_to_new_.end()) {
             parent = old_node_uuid_to_new_[parent];
 
-            uuid = graph_->makeDerivedUUID_forced(parent, uuid.id());
+            uuid = graph_->makeDerivedUUID_forced(parent, uuid.id().getFullName());
         }
     }
     return uuid;

@@ -74,19 +74,19 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
     QStringList tags = index.data(Qt::UserRole + 3).toStringList();
     QStringList properties = index.data(Qt::UserRole + 4).toStringList();
 
-    if(tags.empty()) {
-        return;
-    }
-
-    QString tag = tags.at(0);
-    for(const QString& t : tags) {
-        for(const QString& s : key_words) {
-            if(s.length() > 0) {
-                if(t.contains(s, Qt::CaseInsensitive)) {
-                    tag = t;
+    QString tag;
+    if(!tags.empty()) {
+        tag =  tags.at(0);
+        for(const QString& t : tags) {
+            for(const QString& s : key_words) {
+                if(s.length() > 0) {
+                    if(t.contains(s, Qt::CaseInsensitive)) {
+                        tag = t;
+                    }
                 }
             }
         }
+
     }
 
     for(const QString& s : key_words) {
@@ -99,8 +99,11 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
 
     QTextDocument doc;
     QString html;
-    html += "<table><tr>";
-    html += "<th><small>" + tag + " :: </small>" + name + "</th>";
+    html += "<table><tr><th>";
+    if(!tag.isEmpty()) {
+        html += "<small>" + tag + " :: </small>" ;
+    }
+    html += name + "</th>";
     html += "<th style='font-size: 10px; color: #888; padding-left: 6px' valign='middle'>";
     for(QString property : properties) {
         for(const QString& s : key_words) {

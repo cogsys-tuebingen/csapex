@@ -29,8 +29,9 @@ NodeAdapterFactory::~NodeAdapterFactory()
 
 bool NodeAdapterFactory::hasAdapter(const std::string &type) const
 {
-    if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-        return true;
+    auto pos = node_adapter_builders_.find(type);
+    if(pos != node_adapter_builders_.end()) {
+        return pos->second != nullptr;
     } else {
         try {
             const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(type + "AdapterBuilder");

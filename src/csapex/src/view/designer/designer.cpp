@@ -20,6 +20,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/designer/designerio.h>
 #include "ui_designer.h"
+#include <csapex/view/widgets/search_dialog.h>
 
 /// SYSTEM
 #include <QTabWidget>
@@ -118,6 +119,22 @@ void Designer::showGraph(UUID uuid)
     showGraph(graphs_.at(uuid));
 }
 
+void Designer::showNodeSearchDialog()
+{
+    GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
+    if(current_view) {
+        SearchDialog diag(current_view->getGraphFacade()->getGraph(), core_.getNodeFactory(),
+                          "Please enter the UUID, the label or the type of the node");
+
+        int r = diag.exec();
+
+        if(r) {
+            Q_EMIT focusOnNode(diag.getAUUID());
+        }
+    }
+}
+
+
 void Designer::addGraph(GraphFacadePtr graph_facade)
 {
     UUID uuid = graph_facade->getAbsoluteUUID();
@@ -199,8 +216,8 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
 
     ui->tabWidget->setCurrentIndex(tab);
 
-    QObject::connect(graph_view, SIGNAL(boxAdded(NodeBox*)), this, SLOT(addBox(NodeBox*)));
-    QObject::connect(graph_view, SIGNAL(boxRemoved(NodeBox*)), this, SLOT(removeBox(NodeBox*)));
+    QObject::connect(graph_view, &GraphView::boxAdded, this, &Designer::addBox);
+    QObject::connect(graph_view, &GraphView::boxRemoved, this, &Designer::removeBox);
 
     for(const auto& nh : graph->getAllNodeHandles()) {
         NodeBox* box = graph_view->getBox(nh->getUUID());
@@ -438,6 +455,19 @@ void Designer::addBox(NodeBox *box)
 void Designer::removeBox(NodeBox *box)
 {
     minimap_->update();
+}
+
+void Designer::focusOnNode(const AUUID &id)
+{
+    AUUID graph_id = id.parentUUID().getAbsoluteUUID();
+
+    // show the parent graph
+    showGraph(graph_id);
+
+    // set the node in focus and center it
+    GraphView* view = getGraphView(graph_id);
+
+    view->focusOnNode(id.id());
 }
 
 

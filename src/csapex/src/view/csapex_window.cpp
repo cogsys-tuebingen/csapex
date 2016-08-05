@@ -147,6 +147,8 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionCopy, SIGNAL(triggered(bool)), designer_, SLOT(copySelected()));
     QObject::connect(ui->actionPaste, SIGNAL(triggered(bool)), designer_, SLOT(paste()));
 
+    QObject::connect(ui->actionFind_Node, SIGNAL(triggered(bool)), designer_, SLOT(showNodeSearchDialog()));
+
     QObject::connect(ui->actionGroup, SIGNAL(triggered(bool)), designer_, SLOT(groupSelected()));
     QObject::connect(ui->actionUngroup, SIGNAL(triggered(bool)), designer_, SLOT(ungroupSelected()));
 

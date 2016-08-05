@@ -65,6 +65,8 @@ public:
 
     GraphFacade* getGraphFacade() const;
 
+    void focusOnNode(const UUID& uuid);
+
     void resizeEvent(QResizeEvent *event);
     void scrollContentsBy(int dx, int dy);
 
@@ -105,7 +107,7 @@ Q_SIGNALS:
     void triggerConnectorRemoved(ConnectablePtr connector);
 
 public Q_SLOTS:
-    void showBoxDialog();
+    void showNodeInsertDialog();
 
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);

@@ -68,11 +68,14 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void showGraph(UUID uuid);
+    void showNodeSearchDialog();
 
     void closeView(int page);
 
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
+
+    void focusOnNode(const AUUID& id);
 
     void overwriteStyleSheet(QString& stylesheet);
 

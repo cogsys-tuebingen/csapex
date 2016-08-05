@@ -44,7 +44,7 @@ public:
 
     Output* addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic) override;
     void manageOutput(OutputPtr out);
-    bool isParameterOutput(Output* out) const;
+    bool isParameterOutput(Output* out) const override;
 
     Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) override;
     void manageSlot(SlotPtr s);

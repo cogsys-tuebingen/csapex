@@ -96,8 +96,8 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     setDragMode(QGraphicsView::RubberBandDrag);
     setInteractive(true);
 
-    QShortcut *box_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
-    QObject::connect(box_shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
+    QShortcut *create_node_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
+    QObject::connect(create_node_shortcut, SIGNAL(activated()), this, SLOT(showNodeInsertDialog()));
 
     QShortcut *box_reset_view = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_0), this);
     QObject::connect(box_reset_view, SIGNAL(activated()), this, SLOT(resetZoom()));
@@ -651,7 +651,7 @@ void GraphView::animateScroll()
     }
 }
 
-void GraphView::showBoxDialog()
+void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
@@ -670,7 +670,6 @@ void GraphView::showBoxDialog()
         }
     }
 }
-
 
 
 void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, const QPoint &offset)
@@ -873,6 +872,14 @@ GraphFacade* GraphView::getGraphFacade() const
     return graph_facade_.get();
 }
 
+void GraphView::focusOnNode(const UUID &uuid)
+{
+    NodeBox* box = getBox(uuid);
+    if(box) {
+        scene_->setSelection(box);
+    }
+}
+
 void GraphView::nodeRemoved(NodeHandlePtr node_handle)
 {
     UUID node_uuid = node_handle->getUUID();
@@ -915,7 +922,7 @@ void GraphView::addBox(NodeBox *box)
     MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
     scene_->addItem(proxy);
 
-    QObject::connect(proxy, SIGNAL(moved(double,double)), this, SLOT(movedBoxes(double,double)));
+    QObject::connect(proxy, &MovableGraphicsProxyWidget::moved, this, &GraphView::movedBoxes);
 
     boxes_.push_back(box);
 

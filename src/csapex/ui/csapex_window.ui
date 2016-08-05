@@ -60,6 +60,7 @@
     <addaction name="actionDelete_Selected"/>
     <addaction name="actionGroup"/>
     <addaction name="actionUngroup"/>
+    <addaction name="actionFind_Node"/>
    </widget>
    <widget class="QMenu" name="menuSelection">
     <property name="title">
@@ -1007,6 +1008,18 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Reset Activity</string>
+   </property>
+  </action>
+  <action name="actionFind_Node">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/magnifier.png</normaloff>:/magnifier.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find Node</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

@@ -67,10 +67,10 @@ public:
     bool contains(const std::string& sub) const;
 
     UUID parentUUID() const;
+    UUID id() const;
 
     std::string name() const;
     std::string type() const;
-    std::string id() const;
 
     bool empty() const;
 
