@@ -1120,11 +1120,14 @@ void GraphView::startProfiling(NodeWorker *node)
     NodeBox* box = getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
-    ProfilingWidget* prof = new ProfilingWidget(this, box);
+    ProfilingWidget* prof = new ProfilingWidget(box->getNodeWorker()->getProfiler());
     profiling_[box] = prof;
 
+    QObject::connect(box, &NodeBox::destroyed, prof, &ProfilingWidget::close);
+    QObject::connect(box, &NodeBox::destroyed, prof, &ProfilingWidget::deleteLater);
+
     QGraphicsProxyWidget* prof_proxy = scene_->addWidget(prof);
-    prof->reposition(prof_proxy->pos().x(), prof_proxy->pos().y());
+    prof_proxy->setPos(box->graphicsProxyWidget()->pos() + QPointF(0,box->height()));
     prof->show();
 
 
@@ -1136,7 +1139,10 @@ void GraphView::startProfiling(NodeWorker *node)
     }
 
     MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
-    QObject::connect(proxy, &MovableGraphicsProxyWidget::moving, prof, &ProfilingWidget::reposition);
+    QObject::connect(proxy, &MovableGraphicsProxyWidget::moving, [box, prof](double, double){
+        QPointF pos = box->graphicsProxyWidget()->pos() + QPointF(0,box->height());
+        prof->graphicsProxyWidget()->setPos(pos);
+    });
 
     auto nw = box->getNodeWorker();
 

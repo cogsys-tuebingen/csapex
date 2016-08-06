@@ -59,7 +59,7 @@ public:
     void setState(State state);
     State getState() const;
 
-    std::shared_ptr<Profiler> getProfilingTimer();
+    std::shared_ptr<Profiler> getProfiler();
 
     bool isEnabled() const;
     bool isIdle() const;

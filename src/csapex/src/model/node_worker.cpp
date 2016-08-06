@@ -157,7 +157,7 @@ NodeWorker::State NodeWorker::getState() const
     return state_;
 }
 
-std::shared_ptr<Profiler> NodeWorker::getProfilingTimer()
+std::shared_ptr<Profiler> NodeWorker::getProfiler()
 {
     return profiler_;
 }

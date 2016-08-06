@@ -3,9 +3,6 @@
 
 /// COMPONENT
 #include <csapex/profiling/profiler.h>
-#include <csapex/view/view_fwd.h>
-#include <csapex/model/model_fwd.h>
-#include <csapex/utility/utility_fwd.h>
 #include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
@@ -23,12 +20,10 @@ class ProfilingWidget : public QWidget
     Q_OBJECT
 
 public:
-    ProfilingWidget(GraphView *view, NodeBox* box, QWidget* parent=0);
+    ProfilingWidget(std::shared_ptr<Profiler> profiler, QWidget* parent=0);
     ~ProfilingWidget();
 
 public Q_SLOTS:
-    void reposition(double x, double y);
-
     void reset();
     void exportCsv();
 
@@ -38,9 +33,6 @@ protected:
     float paintInterval(QPainter &p, const Timer::Interval &interval, float height_offset, int depth);
 
 private:
-    NodeBox* box_;
-    NodeWorker* node_worker_;
-
     std::shared_ptr<Profiler> profiler_;
 
     std::vector<slim_signal::ScopedConnection> connections_;

@@ -2,14 +2,9 @@
 #include <csapex/view/widgets/profiling_widget.h>
 
 /// COMPONENT
-#include <csapex/view/node/box.h>
-#include <csapex/model/node.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/profiling/timer.h>
 #include <csapex/core/settings.h>
-#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/utility/color.hpp>
-#include <csapex/utility/delegate_bind.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -23,9 +18,9 @@
 
 using namespace csapex;
 
-ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *parent)
-    : QWidget(parent), box_(box), node_worker_(box->getNodeWorker()),
-      profiler_(node_worker_->getProfilingTimer()),
+ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, QWidget *parent)
+    : QWidget(parent),
+      profiler_(profiler),
       space_for_painting_(nullptr)
 {
     int min_w = 300;
@@ -55,25 +50,11 @@ ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *par
 
     layout_->addWidget(new QSizeGrip(this), 0, Qt::AlignBottom | Qt::AlignRight);
 
-    connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
-    connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-
-
-    connections_.emplace_back(node_worker_->messages_processed.connect(delegate::Delegate0<>(this, &ProfilingWidget::update)));
-
-    connections_.emplace_back(node_worker_->destroyed.connect([this](){
-        node_worker_ = nullptr;
-    }));
+    profiler_->getTimer()->finished.connect([this](Timer::Interval::Ptr) { update(); });
 }
 
 ProfilingWidget::~ProfilingWidget()
 {
-}
-
-void ProfilingWidget::reposition(double, double)
-{
-    QPointF pos = box_->graphicsProxyWidget()->pos() + QPointF(0,box_->height());
-    graphicsProxyWidget()->setPos(pos);
 }
 
 void ProfilingWidget::reset()
@@ -100,10 +81,6 @@ void ProfilingWidget::exportCsv()
 
 void ProfilingWidget::paintEvent(QPaintEvent *)
 {
-    if(!node_worker_) {
-        return;
-    }
-
     // update stats
     QPainter p(this);
 
