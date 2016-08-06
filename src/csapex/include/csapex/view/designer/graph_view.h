@@ -151,6 +151,8 @@ public Q_SLOTS:
 
     void animateScroll();
 
+    void enableSelection(bool enabled);
+
     void updateSelection();
     void selectAll();
 

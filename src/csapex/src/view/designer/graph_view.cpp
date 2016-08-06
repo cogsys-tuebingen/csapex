@@ -411,8 +411,21 @@ std::vector<NodeBox*> GraphView::getSelectedBoxes() const
     return selected_boxes_;
 }
 
+void GraphView::enableSelection(bool enabled)
+{
+    selected_boxes_ = scene_->getSelectedBoxes();
+
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(), enabled ? "enable nodes" : "disable nodes"));
+
+    for(NodeBox* box: selected_boxes_) {
+        cmd->add(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), box->getNodeHandle()->getUUID(), !enabled));
+    }
+
+    view_core_.execute(cmd);
+}
+
 void GraphView::updateSelection()
-{    
+{
     selected_boxes_ = scene_->getSelectedBoxes();
 
     QList<QGraphicsItem *> selected = scene_->items();
@@ -1290,12 +1303,18 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
     bool has_minimized = false;
     bool has_maximized = false;
+    bool has_enabled = false;
+    bool has_disabled = false;
     bool has_box = false;
     bool has_note = false;
     for(NodeBox* box : selected_boxes_) {
         bool m = box->isMinimizedSize();
         has_minimized |= m;
         has_maximized |= !m;
+
+        bool e = box->getNodeWorker()->isProcessingEnabled();
+        has_enabled |= e;
+        has_disabled |= !e;
 
         bool is_note = dynamic_cast<NoteBox*>(box);
         has_note |= is_note;
@@ -1304,6 +1323,23 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
 
     if(has_box) {
+        if(has_disabled){
+            QAction* enable = new QAction("enable", &menu);
+            enable->setIcon(QIcon(":/checkbox_checked.png"));
+            enable->setIconVisibleInMenu(true);
+            handler[enable] = std::bind(&GraphView::enableSelection, this, true);
+            menu.addAction(enable);
+        }
+        if(has_enabled) {
+            QAction* disable = new QAction("disable", &menu);
+            disable->setIcon(QIcon(":/checkbox_unchecked.png"));
+            disable->setIconVisibleInMenu(true);
+            handler[disable] = std::bind(&GraphView::enableSelection, this, false);
+            menu.addAction(disable);
+        }
+
+        menu.addSeparator();
+
         if(has_minimized) {
             QAction* max = new QAction("maximize", &menu);
             max->setIcon(QIcon(":/maximize.png"));
