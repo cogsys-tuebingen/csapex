@@ -29,8 +29,8 @@ public Q_SLOTS:
 
 protected:
     void paintEvent(QPaintEvent *);
-    void paintInterval(QPainter &p, const Timer::Interval &interval);
-    float paintInterval(QPainter &p, const Timer::Interval &interval, float height_offset, int depth);
+    void paintInterval(QPainter &p, const Interval &interval);
+    float paintInterval(QPainter &p, const Interval &interval, float height_offset, int depth);
 
 private:
     std::shared_ptr<Profiler> profiler_;

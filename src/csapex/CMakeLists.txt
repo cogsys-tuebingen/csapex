@@ -172,11 +172,6 @@ add_library(csapex_util SHARED
     src/utility/uuid.cpp
     src/utility/uuid_provider.cpp
     src/utility/yaml_node_builder.cpp
-
-    src/profiling/timer.cpp
-    src/profiling/profiler.cpp
-    src/profiling/timable.cpp
-    src/profiling/profilable.cpp
 )
 
 target_link_libraries(csapex_util
@@ -185,6 +180,27 @@ target_link_libraries(csapex_util
 )
 
 list(APPEND csapex_LIBRARIES csapex_util)
+
+
+
+add_library(csapex_profiling SHARED
+    src/profiling/timer.cpp
+    src/profiling/interval.cpp
+    src/profiling/interlude.cpp
+    src/profiling/profile.cpp
+    src/profiling/timer.cpp
+    src/profiling/profiler.cpp
+    src/profiling/timable.cpp
+    src/profiling/profilable.cpp
+)
+
+target_link_libraries(csapex_profiling
+    csapex_util
+    ${Boost_LIBRARIES}
+    ${YAML_LIBRARIES}
+)
+
+list(APPEND csapex_LIBRARIES csapex_profiling)
 
 
 add_library(csapex SHARED
@@ -274,6 +290,7 @@ add_library(csapex SHARED
 
 target_link_libraries(csapex
     csapex_util
+    csapex_profiling
     csapex_param
     ${Boost_LIBRARIES}
     ${YAML_LIBRARIES}

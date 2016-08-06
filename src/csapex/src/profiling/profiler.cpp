@@ -9,7 +9,7 @@ Profiler::Profiler()
 
 }
 
-Profiler::Profile::Profile(const std::string& key)
+Profile::Profile(const std::string& key)
     : timer(std::make_shared<Timer>(key)),
       timer_history_pos_(0),
       count_(0)
@@ -27,17 +27,17 @@ Timer::Ptr Profiler::getTimer(const std::string &key)
     return prof.timer;
 }
 
-const Profiler::Profile& Profiler::getProfile(const std::string& key)
+const Profile& Profiler::getProfile(const std::string& key)
 {
     auto pos = profiles_.find(key);
     if(pos == profiles_.end()) {
         profiles_.emplace(key, key);
         Profile& profile = profiles_.at(key);
 
-        profile.timer->finished.connect([this](Timer::Interval::Ptr) { updated(); });
+        profile.timer->finished.connect([this](Interval::Ptr) { updated(); });
         profile.timer->setEnabled(enabled_);
 
-        connections_.emplace_back(profile.timer->finished.connect([this, &profile](Timer::Interval::Ptr interval){
+        connections_.emplace_back(profile.timer->finished.connect([this, &profile](Interval::Ptr interval){
             profile.timer_history_[profile.timer_history_pos_] = interval;
 
             if(++profile.timer_history_pos_ >= (int) profile.timer_history_.size()) {
@@ -58,7 +58,7 @@ const Profiler::Profile& Profiler::getProfile(const std::string& key)
     return pos->second;
 }
 
-void Profiler::Profile::reset()
+void Profile::reset()
 {
     for(auto pair : steps_acc_) {
         accumulator& acc = pair.second;
@@ -91,38 +91,38 @@ void Profiler::reset()
     }
 }
 
-Timer::Ptr Profiler::Profile::getTimer() const
+Timer::Ptr Profile::getTimer() const
 {
     return timer;
 }
 
-std::size_t Profiler::Profile::count() const
+std::size_t Profile::count() const
 {
     return count_;
 }
-std::size_t Profiler::Profile::size() const
+std::size_t Profile::size() const
 {
     return timer_history_.size();
 }
 
-int Profiler::Profile::getCurrentIndex() const
+int Profile::getCurrentIndex() const
 {
     return timer_history_pos_;
 }
 
-const std::vector<Timer::Interval::Ptr>& Profiler::Profile::getIntervals() const
+const std::vector<Interval::Ptr>& Profile::getIntervals() const
 {
     return timer_history_;
 }
 
-Timer::Interval::Ptr Profiler::Profile::getInterval(const std::size_t index) const
+Interval::Ptr Profile::getInterval(const std::size_t index) const
 {
     return timer_history_.at(index);
 }
 
-Profiler::Stats Profiler::Profile::getStats(const std::string& name) const
+ProfilerStats Profile::getStats(const std::string& name) const
 {
-    Stats res;
+    ProfilerStats res;
     res.mean = boost::accumulators::mean(steps_acc_.at(name));
     res.stddev = std::sqrt(boost::accumulators::variance(steps_acc_.at(name)));
     return res;
