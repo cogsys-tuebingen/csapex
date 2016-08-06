@@ -20,6 +20,8 @@
 
 namespace csapex {
 
+class Profiler;
+
 class NodeWorker : public ErrorState
 {
 public:
@@ -57,7 +59,7 @@ public:
     void setState(State state);
     State getState() const;
 
-    TimerPtr getProfilingTimer();
+    std::shared_ptr<Profiler> getProfilingTimer();
 
     bool isEnabled() const;
     bool isIdle() const;
@@ -167,9 +169,10 @@ private:
     mutable std::recursive_mutex state_mutex_;
 
     std::recursive_mutex timer_mutex_;
-    std::vector<TimerPtr> timer_history_;
 
-    TimerPtr profiling_timer_;
+    //TimerPtr profiling_timer_;
+    std::shared_ptr<Profiler> profiler_;
+
 };
 
 }

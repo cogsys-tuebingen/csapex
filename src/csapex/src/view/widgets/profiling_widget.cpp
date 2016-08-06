@@ -25,9 +25,8 @@ using namespace csapex;
 
 ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *parent)
     : QWidget(parent), box_(box), node_worker_(box->getNodeWorker()),
-      space_for_painting_(nullptr),
-      timer_history_pos_(0),
-      count_(0)
+      profiler_(node_worker_->getProfilingTimer()),
+      space_for_painting_(nullptr)
 {
     int min_w = 300;
     bar_height_ = 80;
@@ -35,12 +34,6 @@ ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *par
     left_space = 50;
     padding = 5;
     line_height = 14.f;
-
-    //    timer_history_length = settings_.get<int>("timer_history_length", 15);
-    timer_history_length = 15;
-    timer_history_.resize(timer_history_length);
-    apex_assert_hard(timer_history_.size() == timer_history_length);
-    apex_assert_hard(timer_history_.capacity() == timer_history_length);
 
     layout_ = new QVBoxLayout;
     setLayout(layout_);
@@ -71,21 +64,6 @@ ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *par
     connections_.emplace_back(node_worker_->destroyed.connect([this](){
         node_worker_ = nullptr;
     }));
-
-    connections_.emplace_back(node_worker_->getProfilingTimer()->finished.connect([this](Timer::Interval::Ptr interval){
-        timer_history_[timer_history_pos_] = interval;
-
-        if(++timer_history_pos_ >= (int) timer_history_.size()) {
-            timer_history_pos_ = 0;
-        }
-
-        std::vector<std::pair<std::string, double> > entries;
-        interval->entries(entries);
-        for(const auto& it : entries) {
-            steps_acc_[it.first](it.second);
-        }
-        ++count_;
-    }));
 }
 
 ProfilingWidget::~ProfilingWidget()
@@ -100,11 +78,7 @@ void ProfilingWidget::reposition(double, double)
 
 void ProfilingWidget::reset()
 {
-    //    timer_history_pos_ = 0;
-    //    timer_history_.clear();
-    //    steps_.clear();
-    steps_acc_.clear();
-    count_ = 0;
+    profiler_->reset();
 }
 
 void ProfilingWidget::exportCsv()
@@ -116,10 +90,10 @@ void ProfilingWidget::exportCsv()
 
         for(std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
             const std::string& name = it->first;
-            accumulator::sample_type mean = boost::accumulators::mean(steps_acc_[name]);
-            accumulator::sample_type stddev = std::sqrt(boost::accumulators::variance(steps_acc_[name]));
 
-            of << name << "," << mean << "," << stddev << "\n";
+            Profiler::Stats stats = profiler_->getStats(name);
+
+            of << name << "," << stats.mean << "," << stats.stddev << "\n";
         }
     }
 }
@@ -144,7 +118,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     bar_height_ = bottom - padding;
 
-    std::size_t history_length = timer_history_.size();
+    std::size_t history_length = profiler_->size();
 
     content_width_ = right - left - 2 * padding;
     indiv_width_ = content_width_ / history_length;
@@ -154,15 +128,15 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     double max_time_ms = 10;
 
-    for(const auto& timer : timer_history_) {
-        if(!timer) {
+    for(const auto& interval : profiler_->getIntervals()) {
+        if(!interval) {
             continue;
         }
 
-        max_time_ms = std::max(max_time_ms, timer->lengthMs());
+        max_time_ms = std::max(max_time_ms, interval->lengthMs());
 
         std::vector<std::pair<std::string, double> > names;
-        timer->entries(names);
+        interval->entries(names);
         for(auto it = names.begin(); it != names.end(); ++it) {
             const std::string& name = it->first;
             std::map<std::string, QColor>::iterator pos = steps_.find(name);
@@ -190,7 +164,8 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     p.drawLine(left, bottom, left, up);
 
 
-    if(timer_history_pos_ < 0) {
+    int current_index = profiler_->getCurrentIndex();
+    if(history_length == 0) {
         // no entries
         QFont font = p.font();
         font.setPixelSize(line_height * 2);
@@ -226,10 +201,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
             static const float min_opacity = 0.25f;
 
-            float op = ((time - timer_history_pos_ + n - 1) % n) / (float) n;
+            float op = ((time - current_index + n - 1) % n) / (float) n;
             p.setOpacity(min_opacity + op * (1.0f - min_opacity));
 
-            const Timer::Interval::Ptr& interval = timer_history_[time];
+            const Timer::Interval::Ptr& interval = profiler_->getInterval(time);
 
             if(interval) {
                 paintInterval(p, *interval);
@@ -239,7 +214,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     // time line
     p.setOpacity(0.8);
-    float pos = left + padding + (timer_history_pos_+1) * indiv_width_;
+    float pos = left + padding + (current_index+1) * indiv_width_;
     QPen pen(QColor(255, 20, 20));
     pen.setWidth(3);
     p.setPen(pen);
@@ -263,7 +238,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     p.drawText(QRectF(info_x + info_w / 2.0f, y, info_w / 2.0f, line_height), "stddev");
     y += line_height;
     std::stringstream ss;
-    ss << "(" << count_ << " frames, [ms])";
+    ss << "(" << profiler_->count() << " frames, [ms])";
     p.drawText(QRectF(info_x, y, info_w, line_height), QString::fromStdString(ss.str()));
     y += line_height;
 
@@ -276,11 +251,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         p.fillRect(QRectF(text_x - 2*padding - line_height, y, line_height, line_height), it->second);
         p.drawText(QRectF(text_x, y, text_w, line_height), QString::fromStdString(name));
 
-        accumulator::sample_type mean = boost::accumulators::mean(steps_acc_[name]);
-        accumulator::sample_type stddev = std::sqrt(boost::accumulators::variance(steps_acc_[name]));
+        Profiler::Stats stats = profiler_->getStats(name);
 
-        p.drawText(QRectF(info_x, y, info_w / 2.0f, line_height), QString::number(mean));
-        p.drawText(QRectF(info_x + info_w / 2.0f, y, info_w / 2.0f, line_height), QString::number(stddev));
+        p.drawText(QRectF(info_x, y, info_w / 2.0f, line_height), QString::number(stats.mean));
+        p.drawText(QRectF(info_x + info_w / 2.0f, y, info_w / 2.0f, line_height), QString::number(stats.stddev));
         y += line_height;
     }
 

@@ -167,13 +167,15 @@ add_library(csapex_util SHARED
     src/utility/stream_interceptor.cpp
     src/utility/stream_relay.cpp
     src/utility/thread.cpp
-    src/utility/timable.cpp
-    src/utility/timer.cpp
     src/utility/rate.cpp
     src/utility/type.cpp
     src/utility/uuid.cpp
     src/utility/uuid_provider.cpp
     src/utility/yaml_node_builder.cpp
+
+    src/utility/timable.cpp
+    src/utility/timer.cpp
+    src/profiling/profiler.cpp
 )
 
 target_link_libraries(csapex_util

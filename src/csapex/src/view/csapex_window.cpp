@@ -72,6 +72,8 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
     QTextCodec::setCodecForLocale(utfCodec);
 
     MessageRendererManager::instance().setPluginLocator(plugin_locator_);
+
+    useTimer(std::make_shared<Timer>("Debug"));
 }
 
 CsApexWindow::~CsApexWindow()
@@ -487,18 +489,22 @@ void CsApexWindow::resetActivity()
 void CsApexWindow::useTimer(std::shared_ptr<Timer> timer)
 {
     Timable::useTimer(timer);
+
+    timer->finished.connect([this](Timer::Interval::Ptr interval){
+        std::vector<std::pair<std::string, double> > entries;
+        interval->entries(entries);
+
+        for(const auto& it : entries) {
+            std::cerr << it.first << " - " << it.second << std::endl;
+        }
+    });
+
     designer_->useTimer(timer);
 }
 
 void CsApexWindow::enableDebugProfiling(bool enabled)
 {
-    if(enabled) {
-        if(!profiling_timer_) {
-            useTimer(std::make_shared<Timer>("Debug"));
-        }
-    } else {
-        useTimer(nullptr);
-    }
+    profiling_timer_->setEnabled(enabled);
 }
 
 void CsApexWindow::updateNodeTypes()

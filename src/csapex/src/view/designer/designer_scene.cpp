@@ -277,10 +277,9 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     long draw_begin = QDateTime::currentMSecsSinceEpoch();
 
 #endif
-    csapex::Timer::Interlude::Ptr interlude;
-//    if(profiling_timer_->isEnabled()) {
-//        interlude.reset(new csapex::Timer::Interlude(profiling_timer_.get(), "render scene"));
-//    }
+    if(profiling_timer_->isEnabled()) {
+        profiling_timer_->restart();
+    }
 
     QGraphicsScene::drawForeground(painter, rect);
 
@@ -467,6 +466,10 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     long dt_drawing = draw_end - draw_begin;
     std::cerr << "drawing took " << dt_drawing << "ms" << std::endl;
 #endif
+
+    if(profiling_timer_->isEnabled()) {
+        profiling_timer_->finish();
+    }
 }
 
 

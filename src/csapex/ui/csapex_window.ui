@@ -622,7 +622,7 @@ p, li { white-space: pre-wrap; }
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_11">
          <item>
-          <widget class="QTableView" name="profiling_debug_table"/>
+          <widget class="QTableWidget" name="profiling_debug_table"/>
          </item>
          <item>
           <widget class="QCheckBox" name="profiling_debug_enable">

@@ -27,6 +27,7 @@
 #include <csapex/msg/no_message.h>
 #include <csapex/msg/end_of_sequence_message.h>
 #include <csapex/utility/exceptions.h>
+#include <csapex/profiling/profiler.h>
 
 /// SYSTEM
 #include <thread>
@@ -42,10 +43,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 {
     node_handle->setNodeWorker(this);
 
-    profiling_timer_.reset(new Timer(node_handle->getUUID().getFullName()));
+    profiler_ = std::make_shared<Profiler>(node_handle->getUUID().getFullName());
 
     NodePtr node = node_handle_->getNode().lock();
-    node->useTimer(profiling_timer_);
+    node->useTimer(profiler_->getTimer());
 
 
     try {
@@ -156,9 +157,9 @@ NodeWorker::State NodeWorker::getState() const
     return state_;
 }
 
-TimerPtr NodeWorker::getProfilingTimer()
+std::shared_ptr<Profiler> NodeWorker::getProfilingTimer()
 {
-    return profiling_timer_;
+    return profiler_;
 }
 
 bool NodeWorker::isEnabled() const
@@ -284,7 +285,7 @@ void NodeWorker::reset()
 
 void NodeWorker::setProfiling(bool profiling)
 {
-    profiling_timer_->setEnabled(profiling);
+    profiler_->setEnabled(profiling);
 
     if(profiling) {
         startProfiling(this);
@@ -295,7 +296,7 @@ void NodeWorker::setProfiling(bool profiling)
 
 bool NodeWorker::isProfiling() const
 {
-    return profiling_timer_->isEnabled();
+    return profiler_->isEnabled();
 }
 
 void NodeWorker::killExecution()
@@ -422,9 +423,9 @@ void NodeWorker::startProcessingMessages()
 
     std::unique_lock<std::recursive_mutex> sync_lock(sync);
 
-    if(profiling_timer_->isEnabled()) {
-        profiling_timer_->restart();
-        timerStarted(this, PROCESS, profiling_timer_->startTimeMs());
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer()->restart();
+        timerStarted(this, PROCESS, profiler_->getTimer()->startTimeMs());
     }
 
 
@@ -504,7 +505,7 @@ void NodeWorker::finishProcessing()
 
 void NodeWorker::signalExecutionFinished()
 {
-    finishTimer(profiling_timer_);
+    finishTimer(profiler_->getTimer());
 
     if(trigger_process_done_->isConnected()) {
         trigger_process_done_->trigger();
@@ -814,9 +815,9 @@ bool NodeWorker::tick()
                     }
                     node_handle_->getOutputTransition()->clearBuffer();
 
-                    if(profiling_timer_->isEnabled()) {
-                        profiling_timer_->restart();
-                        timerStarted(this, TICK, profiling_timer_->startTimeMs());
+                    if(profiler_->isEnabled()) {
+                        profiler_->getTimer()->restart();
+                        timerStarted(this, TICK, profiler_->getTimer()->startTimeMs());
                     }
 
 
@@ -832,7 +833,7 @@ bool NodeWorker::tick()
                         ++ticks_;
                     }
 
-                    finishTimer(profiling_timer_);
+                    finishTimer(profiler_->getTimer());
 
                     setState(State::IDLE);
                 }

@@ -2,7 +2,7 @@
 #define PROFILING_WIDGET_H
 
 /// COMPONENT
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/profiler.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/utility_fwd.h>
@@ -11,9 +11,6 @@
 /// SYSTEM
 #include <QWidget>
 #include <map>
-#define BOOST_PARAMETER_MAX_ARITY 7
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics.hpp>
 
 class QSpacerItem;
 class QVBoxLayout;
@@ -44,6 +41,8 @@ private:
     NodeBox* box_;
     NodeWorker* node_worker_;
 
+    std::shared_ptr<Profiler> profiler_;
+
     std::vector<slim_signal::ScopedConnection> connections_;
 
     QVBoxLayout* layout_;
@@ -55,9 +54,6 @@ private:
     float padding;
     float line_height;
 
-    std::size_t timer_history_length;
-    int timer_history_pos_;
-    std::vector<Timer::Interval::Ptr> timer_history_;
 
     float left;
     float right;
@@ -72,11 +68,6 @@ private:
     double indiv_width_;
 
     std::map<std::string, QColor> steps_;
-
-    typedef boost::accumulators::stats<boost::accumulators::tag::variance> stats;
-    typedef boost::accumulators::accumulator_set<double, stats > accumulator;
-    std::map<std::string, accumulator> steps_acc_;
-    unsigned int count_;
 };
 
 }
