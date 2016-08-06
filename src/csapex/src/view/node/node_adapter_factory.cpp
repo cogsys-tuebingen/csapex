@@ -69,7 +69,6 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeHandlePtr node, NodeBox
                     return builder->build(node, parent);
                 }
             } else {
-                std::cerr << "adapter " << type << " does not exist. Maybe you forgot to add 'AdapterBuilder'?" << std::endl;
                 node_adapter_builders_[type] = nullptr;
             }
 
