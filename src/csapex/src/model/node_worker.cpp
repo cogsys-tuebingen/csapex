@@ -43,10 +43,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 {
     node_handle->setNodeWorker(this);
 
-    profiler_ = std::make_shared<Profiler>(node_handle->getUUID().getFullName());
+    profiler_ = std::make_shared<Profiler>();
 
     NodePtr node = node_handle_->getNode().lock();
-    node->useTimer(profiler_->getTimer());
+    node->useTimer(profiler_->getTimer(node_handle->getUUID().getFullName()));
 
 
     try {
@@ -424,8 +424,9 @@ void NodeWorker::startProcessingMessages()
     std::unique_lock<std::recursive_mutex> sync_lock(sync);
 
     if(profiler_->isEnabled()) {
-        profiler_->getTimer()->restart();
-        timerStarted(this, PROCESS, profiler_->getTimer()->startTimeMs());
+        Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
+        timer->restart();
+        timerStarted(this, PROCESS, timer->startTimeMs());
     }
 
 
@@ -505,7 +506,7 @@ void NodeWorker::finishProcessing()
 
 void NodeWorker::signalExecutionFinished()
 {
-    finishTimer(profiler_->getTimer());
+    finishTimer(profiler_->getTimer(node_handle_->getUUID().getFullName()));
 
     if(trigger_process_done_->isConnected()) {
         trigger_process_done_->trigger();
@@ -581,6 +582,10 @@ bool NodeWorker::areAllInputsAvailable() const
 
 void NodeWorker::finishTimer(Timer::Ptr t)
 {
+    if(!t) {
+        return;
+    }
+
     t->finish();
     if(t->isEnabled()) {
         timerStopped(this, t->stopTimeMs());
@@ -815,9 +820,12 @@ bool NodeWorker::tick()
                     }
                     node_handle_->getOutputTransition()->clearBuffer();
 
+                    Timer::Ptr timer;
+
                     if(profiler_->isEnabled()) {
-                        profiler_->getTimer()->restart();
-                        timerStarted(this, TICK, profiler_->getTimer()->startTimeMs());
+                        timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
+                        timer->restart();
+                        timerStarted(this, TICK, timer->startTimeMs());
                     }
 
 
@@ -833,7 +841,7 @@ bool NodeWorker::tick()
                         ++ticks_;
                     }
 
-                    finishTimer(profiler_->getTimer());
+                    finishTimer(timer);
 
                     setState(State::IDLE);
                 }

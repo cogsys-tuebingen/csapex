@@ -27,7 +27,9 @@
 #include <csapex/command/command.h>
 #include "ui_csapex_window.h"
 #include <csapex/view/utility/node_list_generator.h>
+#include <csapex/profiling/profiler.h>
 #include <csapex/profiling/timer.h>
+#include <csapex/view/widgets/profiling_widget.h>
 
 /// PROJECT
 #include <csapex/param/parameter_factory.h>
@@ -57,7 +59,7 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
                            ActivityLegend *legend, ActivityTimeline *timeline,
                            PluginLocatorPtr locator, QWidget *parent)
     : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher),
-      root_(graph_facade), executor_(executor),
+      root_(graph_facade), executor_(executor), profiler_(std::make_shared<Profiler>()),
       ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
       activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
 {    
@@ -73,7 +75,7 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
 
     MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 
-    useTimer(std::make_shared<Timer>("Debug"));
+    designer_->useProfiler(profiler_);
 }
 
 CsApexWindow::~CsApexWindow()
@@ -486,25 +488,22 @@ void CsApexWindow::resetActivity()
     root_->resetActivity();
 }
 
-void CsApexWindow::useTimer(std::shared_ptr<Timer> timer)
-{
-    Timable::useTimer(timer);
-
-    timer->finished.connect([this](Timer::Interval::Ptr interval){
-        std::vector<std::pair<std::string, double> > entries;
-        interval->entries(entries);
-
-        for(const auto& it : entries) {
-            std::cerr << it.first << " - " << it.second << std::endl;
-        }
-    });
-
-    designer_->useTimer(timer);
-}
 
 void CsApexWindow::enableDebugProfiling(bool enabled)
 {
-    profiling_timer_->setEnabled(enabled);
+    profiler_->setEnabled(enabled);
+
+    if(enabled) {
+        QLayout* layout = ui->profiling_debug_profilers->layout();
+        if(!layout) {
+            layout = new QVBoxLayout();
+
+            layout->addWidget(new ProfilingWidget(profiler_, "drawForeground"));
+            layout->addWidget(new ProfilingWidget(profiler_, "drawBackground"));
+
+            ui->profiling_debug_profilers->setLayout(layout);
+        }
+    }
 }
 
 void CsApexWindow::updateNodeTypes()

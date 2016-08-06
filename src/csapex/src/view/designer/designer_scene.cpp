@@ -28,6 +28,7 @@
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/profiling/timer.h>
+#include <csapex/profiling/profiler.h>
 #include <csapex/profiling/interlude.hpp>
 
 /// SYSTEM
@@ -199,6 +200,10 @@ void DesignerScene::setScale(double scale)
 }
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer("drawBackground")->restart();
+    }
+
     QGraphicsScene::drawBackground(painter, rect);
 
     if(isEmpty()) {
@@ -229,6 +234,10 @@ void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
         painter->setPen(QPen(QBrush(Qt::darkGray), 2./scale_));
         painter->drawLine(0, miny, 0, maxy);
         painter->drawLine(minx, 0, maxx, 0);
+    }
+
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer("drawBackground")->finish();
     }
 }
 
@@ -277,8 +286,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     long draw_begin = QDateTime::currentMSecsSinceEpoch();
 
 #endif
-    if(profiling_timer_->isEnabled()) {
-        profiling_timer_->restart();
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer("drawForeground")->restart();
     }
 
     QGraphicsScene::drawForeground(painter, rect);
@@ -467,8 +476,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     std::cerr << "drawing took " << dt_drawing << "ms" << std::endl;
 #endif
 
-    if(profiling_timer_->isEnabled()) {
-        profiling_timer_->finish();
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer("drawForeground")->finish();
     }
 }
 

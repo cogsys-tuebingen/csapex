@@ -22,39 +22,57 @@ public:
         double stddev;
     };
 
+    struct Profile
+    {
+        friend class Profiler;
+
+    public:
+        Profile(const std::string &key);
+
+        Timer::Ptr getTimer() const;
+
+        std::size_t count() const;
+        std::size_t size() const;
+        int getCurrentIndex() const;
+
+        const std::vector<Timer::Interval::Ptr>& getIntervals() const;
+        Timer::Interval::Ptr getInterval(const std::size_t index) const;
+
+        Stats getStats(const std::string &name) const;
+        void reset();
+
+    private:
+        Timer::Ptr timer;
+
+        std::size_t timer_history_length;
+        int timer_history_pos_;
+
+        typedef boost::accumulators::stats<boost::accumulators::tag::variance> stats;
+        typedef boost::accumulators::accumulator_set<double, stats > accumulator;
+        std::map<std::string, accumulator> steps_acc_;
+        std::vector<Timer::Interval::Ptr> timer_history_;
+        unsigned int count_;
+    };
+
 public:
-    Profiler(const std::string &name);
-    Profiler(Timer::Ptr timer);
+    slim_signal::Signal<void()> updated;
+
+public:
+    Profiler();
 
     void setEnabled(bool enabled);
     bool isEnabled() const;
 
-
     void reset();
 
-    Timer::Ptr getTimer() const;
-
-    std::size_t count() const;
-    std::size_t size() const;
-    int getCurrentIndex() const;
-
-    const std::vector<Timer::Interval::Ptr>& getIntervals() const;
-    Timer::Interval::Ptr getInterval(const std::size_t index) const;
-
-    Stats getStats(const std::string &name) const;
+    Timer::Ptr getTimer(const std::string& key);
+    const Profile& getProfile(const std::string& key);
 
 private:
-    Timer::Ptr timer_;
+    std::map<std::string, Profile> profiles_;
     std::vector<slim_signal::ScopedConnection> connections_;
 
-    std::size_t timer_history_length;
-    int timer_history_pos_;
-
-    typedef boost::accumulators::stats<boost::accumulators::tag::variance> stats;
-    typedef boost::accumulators::accumulator_set<double, stats > accumulator;
-    std::map<std::string, accumulator> steps_acc_;
-    std::vector<Timer::Interval::Ptr> timer_history_;
-    unsigned int count_;
+    bool enabled_;
 };
 
 }

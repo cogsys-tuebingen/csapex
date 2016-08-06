@@ -49,7 +49,8 @@ public Q_SLOTS:
 Q_SIGNALS:
     void scrollingChanged(bool);
 
-    void addItemRequest(QGraphicsItem* item);
+    void updateRowStartRequest(NodeWorker* worker, int type, long stamp);
+    void updateRowStopRequest(NodeWorker* worker, long stamp);
 
 private:
     void startTimer();
@@ -76,7 +77,6 @@ private:
         void step(int time);
         void stop(int stop_time);
         void update();
-        void clear();
 
         Parameters* params_;
         Row* row;

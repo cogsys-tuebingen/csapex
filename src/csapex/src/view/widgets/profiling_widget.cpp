@@ -5,6 +5,7 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/core/settings.h>
 #include <csapex/view/utility/color.hpp>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -13,22 +14,25 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <fstream>
-#include <QSizeGrip>
 #include <functional>
 
 using namespace csapex;
 
-ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, QWidget *parent)
+ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string& profile, QWidget *parent)
     : QWidget(parent),
-      profiler_(profiler),
+      profiler_(profiler), profile_(profile),
       space_for_painting_(nullptr)
 {
+    apex_assert_hard(!profile_.empty());
+
     int min_w = 300;
     bar_height_ = 80;
 
     left_space = 50;
     padding = 5;
     line_height = 14.f;
+
+    setMinimumHeight(200);
 
     layout_ = new QVBoxLayout;
     setLayout(layout_);
@@ -48,9 +52,7 @@ ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, QWidget *pa
 
     layout_->addLayout(buttons_layout);
 
-    layout_->addWidget(new QSizeGrip(this), 0, Qt::AlignBottom | Qt::AlignRight);
-
-    profiler_->getTimer()->finished.connect([this](Timer::Interval::Ptr) { update(); });
+    profiler_->getProfile(profile_).getTimer()->finished.connect([this](Timer::Interval::Ptr) { update(); });
 }
 
 ProfilingWidget::~ProfilingWidget()
@@ -69,10 +71,12 @@ void ProfilingWidget::exportCsv()
     if(!filename.isEmpty()) {
         std::ofstream of(filename.toStdString());
 
+        const Profiler::Profile& profile = profiler_->getProfile(profile_);
+
         for(std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
             const std::string& name = it->first;
 
-            Profiler::Stats stats = profiler_->getStats(name);
+            Profiler::Stats stats = profile.getStats(name);
 
             of << name << "," << stats.mean << "," << stats.stddev << "\n";
         }
@@ -81,6 +85,8 @@ void ProfilingWidget::exportCsv()
 
 void ProfilingWidget::paintEvent(QPaintEvent *)
 {
+    apex_assert_hard(!profile_.empty());
+
     // update stats
     QPainter p(this);
 
@@ -95,7 +101,9 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     bar_height_ = bottom - padding;
 
-    std::size_t history_length = profiler_->size();
+    const Profiler::Profile& profile = profiler_->getProfile(profile_);
+
+    std::size_t history_length = profile.size();
 
     content_width_ = right - left - 2 * padding;
     indiv_width_ = content_width_ / history_length;
@@ -105,7 +113,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     double max_time_ms = 10;
 
-    for(const auto& interval : profiler_->getIntervals()) {
+    for(const auto& interval : profile.getIntervals()) {
         if(!interval) {
             continue;
         }
@@ -141,7 +149,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     p.drawLine(left, bottom, left, up);
 
 
-    int current_index = profiler_->getCurrentIndex();
+    int current_index = profile.getCurrentIndex();
     if(history_length == 0) {
         // no entries
         QFont font = p.font();
@@ -181,7 +189,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
             float op = ((time - current_index + n - 1) % n) / (float) n;
             p.setOpacity(min_opacity + op * (1.0f - min_opacity));
 
-            const Timer::Interval::Ptr& interval = profiler_->getInterval(time);
+            const Timer::Interval::Ptr& interval = profile.getInterval(time);
 
             if(interval) {
                 paintInterval(p, *interval);
@@ -215,7 +223,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     p.drawText(QRectF(info_x + info_w / 2.0f, y, info_w / 2.0f, line_height), "stddev");
     y += line_height;
     std::stringstream ss;
-    ss << "(" << profiler_->count() << " frames, [ms])";
+    ss << "(" << profile.count() << " frames, [ms])";
     p.drawText(QRectF(info_x, y, info_w, line_height), QString::fromStdString(ss.str()));
     y += line_height;
 
@@ -228,7 +236,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         p.fillRect(QRectF(text_x - 2*padding - line_height, y, line_height, line_height), it->second);
         p.drawText(QRectF(text_x, y, text_w, line_height), QString::fromStdString(name));
 
-        Profiler::Stats stats = profiler_->getStats(name);
+        Profiler::Stats stats = profile.getStats(name);
 
         p.drawText(QRectF(info_x, y, info_w / 2.0f, line_height), QString::number(stats.mean));
         p.drawText(QRectF(info_x + info_w / 2.0f, y, info_w / 2.0f, line_height), QString::number(stats.stddev));

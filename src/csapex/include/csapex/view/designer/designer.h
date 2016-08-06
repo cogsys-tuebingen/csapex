@@ -9,7 +9,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/view/csapex_view_core.h>
-#include <csapex/profiling/timable.h>
+#include <csapex/profiling/profilable.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -27,7 +27,7 @@ namespace csapex
 
 class NodeFactory;
 
-class Designer : public QWidget, public Timable
+class Designer : public QWidget, public Profilable
 {
     Q_OBJECT
 
@@ -64,7 +64,7 @@ public:
     void loadView(Graph* graph, YAML::Node& doc);
 
 
-    virtual void useTimer(std::shared_ptr<Timer> timer) override;
+    virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
 
 Q_SIGNALS:
     void selectionChanged();

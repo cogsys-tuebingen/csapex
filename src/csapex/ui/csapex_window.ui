@@ -294,7 +294,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>260</width>
+          <width>98</width>
           <height>88</height>
          </rect>
         </property>
@@ -375,7 +375,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>266</width>
+          <width>218</width>
           <height>199</height>
          </rect>
         </property>
@@ -439,8 +439,8 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>260</width>
-          <height>88</height>
+          <width>274</width>
+          <height>101</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -532,8 +532,8 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>417</width>
-          <height>199</height>
+          <width>491</width>
+          <height>117</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -615,6 +615,15 @@ p, li { white-space: pre-wrap; }
         <attribute name="title">
          <string>Thread Profiling</string>
         </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Not yet implemented</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="debug">
         <attribute name="title">
@@ -622,7 +631,21 @@ p, li { white-space: pre-wrap; }
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_11">
          <item>
-          <widget class="QTableWidget" name="profiling_debug_table"/>
+          <widget class="QScrollArea" name="profiling_debug_profilers_sa">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="profiling_debug_profilers">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>486</width>
+              <height>70</height>
+             </rect>
+            </property>
+           </widget>
+          </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="profiling_debug_enable">

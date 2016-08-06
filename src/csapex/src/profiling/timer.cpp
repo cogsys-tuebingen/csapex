@@ -13,7 +13,6 @@ Timer::Timer(const std::string& name)
 }
 Timer::~Timer()
 {
-    finish();
 }
 
 std::vector<std::pair<std::string, double> > Timer::entries() const

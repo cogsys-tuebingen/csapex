@@ -68,6 +68,7 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QColorDialog>
+#include <QSizeGrip>
 
 using namespace csapex;
 
@@ -1120,8 +1121,12 @@ void GraphView::startProfiling(NodeWorker *node)
     NodeBox* box = getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
-    ProfilingWidget* prof = new ProfilingWidget(box->getNodeWorker()->getProfiler());
+    ProfilingWidget* prof = new ProfilingWidget(box->getNodeWorker()->getProfiler(), node->getUUID().getFullName());
     profiling_[box] = prof;
+
+    if(QVBoxLayout* vbl = dynamic_cast<QVBoxLayout*>(prof->layout())) {
+        vbl->addWidget(new QSizeGrip(prof), 0, Qt::AlignBottom | Qt::AlignRight);
+    }
 
     QObject::connect(box, &NodeBox::destroyed, prof, &ProfilingWidget::close);
     QObject::connect(box, &NodeBox::destroyed, prof, &ProfilingWidget::deleteLater);
@@ -1830,11 +1835,11 @@ void GraphView::stopPreview()
 }
 
 
-void GraphView::useTimer(std::shared_ptr<Timer> timer)
+void GraphView::useProfiler(std::shared_ptr<Profiler> profiler)
 {
-    Timable::useTimer(timer);
+    Profilable::useProfiler(profiler);
 
-    scene_->useTimer(timer);
+    scene_->useProfiler(profiler);
 }
 
 

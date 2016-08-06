@@ -20,7 +20,7 @@ class ProfilingWidget : public QWidget
     Q_OBJECT
 
 public:
-    ProfilingWidget(std::shared_ptr<Profiler> profiler, QWidget* parent=0);
+    ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string &profile, QWidget* parent=0);
     ~ProfilingWidget();
 
 public Q_SLOTS:
@@ -34,6 +34,7 @@ protected:
 
 private:
     std::shared_ptr<Profiler> profiler_;
+    std::string profile_;
 
     std::vector<slim_signal::ScopedConnection> connections_;
 
