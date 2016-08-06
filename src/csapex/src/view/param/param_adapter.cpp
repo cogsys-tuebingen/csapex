@@ -31,9 +31,13 @@ ParameterAdapter::ParameterAdapter(param::Parameter::Ptr p)
     qRegisterMetaType<std::function<void()>>("std::function<void()>");
 
     QObject::connect(this, &ParameterAdapter::modelCallback,
-                     this, &ParameterAdapter::executeModelCallback);
+                     this, &ParameterAdapter::executeModelCallback,
+                     Qt::QueuedConnection);
 
     context_handler = new ParameterContextMenu(p);
+    QObject::connect(this, &ParameterAdapter::customContextMenuRequested,
+                     context_handler, &ParameterContextMenu::showContextMenu);
+
 }
 
 ParameterAdapter::~ParameterAdapter()
@@ -42,14 +46,14 @@ ParameterAdapter::~ParameterAdapter()
 
 void ParameterAdapter::doSetup(QBoxLayout *layout, const std::string &display_name)
 {
-    setup(layout, display_name);
-}
+    QWidget* main_widget = setup(layout, display_name);
 
-void ParameterAdapter::connectInGuiThread(csapex::slim_signal::Signal<void (csapex::param::Parameter *)> &signal,
-                                                  std::function<void ()> cb)
-{
-    // cb should be executed in the gui thread
-    connections.push_back(signal.connect(std::bind(&ParameterAdapter::modelCallback, this, cb)));
+    if(context_handler) {
+        setupContextMenu(context_handler);
+        if(main_widget) {
+            context_handler->setParent(main_widget);
+        }
+    }
 }
 
 void ParameterAdapter::executeModelCallback(std::function<void()> cb)
@@ -58,6 +62,10 @@ void ParameterAdapter::executeModelCallback(std::function<void()> cb)
     cb();
 }
 
+void ParameterAdapter::setupContextMenu(ParameterContextMenu */*context_handler*/)
+{
+
+}
 
 /// MOC
 #include "../../../include/csapex/view/param/moc_param_adapter.cpp"

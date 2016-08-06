@@ -16,9 +16,14 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QInputDialog>
+#include <QApplication>
 #include <iostream>
 
 using namespace csapex;
+
+const int ValueParameterAdapter::DEFAULT_INT_STEP_SIZE = 1;
+const double ValueParameterAdapter::DEFAULT_DOUBLE_STEP_SIZE = 0.001;
 
 ValueParameterAdapter::ValueParameterAdapter(param::ValueParameter::Ptr p)
     : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), value_p_(p)
@@ -26,7 +31,7 @@ ValueParameterAdapter::ValueParameterAdapter(param::ValueParameter::Ptr p)
 
 }
 
-void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     if(value_p_->is<std::string>()) {
         QPointer<QLineEdit> txt = new QLineEdit;
@@ -50,7 +55,7 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
         QObject::connect(send.data(), &QPushButton::pressed, cb);
 
         // model change -> ui
-        connectInGuiThread(p_->parameter_changed, [this, txt]() {
+        connectInGuiThread(p_->parameter_changed, [this, txt](param::Parameter*) {
             if(p_ && txt) {
                 txt->blockSignals(true);
 
@@ -59,6 +64,8 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
                 txt->blockSignals(false);
             }
         });
+
+        return txt;
 
     } else if(value_p_->is<bool>()) {
         QPointer<QCheckBox> box = new QCheckBox;
@@ -76,7 +83,7 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
         });
 
         // model change -> ui
-        connectInGuiThread(p_->parameter_changed, [this, box]() {
+        connectInGuiThread(p_->parameter_changed, [this, box](param::Parameter*) {
             if(p_ && box) {
                 box->blockSignals(true);
 
@@ -86,11 +93,13 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
             }
         });
 
+        return box;
+
 
     } else if(value_p_->is<double>()) {
         QPointer<QDoubleSpinBox> box = new QDoubleSpinBox;
         box->setDecimals(10);
-        box->setSingleStep(0.001);
+        box->setSingleStep(value_p_->getDictionaryValue("step_size", DEFAULT_DOUBLE_STEP_SIZE));
         box->setMaximum(1e12);
         box->setMinimum(-1e12);
         box->setValue(value_p_->as<double>());
@@ -108,7 +117,7 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
 
 
         // model change -> ui
-        connectInGuiThread(p_->parameter_changed, [this, box]() {
+        connectInGuiThread(p_->parameter_changed, [this, box](param::Parameter*) {
             if(p_ && box) {
                 box->blockSignals(true);
 
@@ -117,11 +126,21 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
                 box->blockSignals(false);
             }
         });
+        connectInGuiThread(p_->dictionary_entry_changed, [this, box](const std::string& key) {
+            if(p_ && box) {
+                if(key == "step_size") {
+                    box->setSingleStep(p_->getDictionaryValue<double>(key));
+                }
+            }
+        });
+
+        return box;
 
     }  else if(value_p_->is<int>()) {
         QPointer<QSpinBox> box = new QSpinBox;
         box->setMaximum(std::numeric_limits<int>::max());
         box->setMinimum(std::numeric_limits<int>::min());
+        box->setSingleStep(value_p_->getDictionaryValue("step_size", DEFAULT_INT_STEP_SIZE));
         box->setValue(value_p_->as<int>());
 
         layout->addLayout(QtHelper::wrap(display_name, box, context_handler,  p_.get()));
@@ -136,7 +155,7 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
         });
 
         // model change -> ui
-        connectInGuiThread(p_->parameter_changed, [this, box]() {
+        connectInGuiThread(p_->parameter_changed, [this, box](param::Parameter*) {
             if(p_ && box) {
                 box->blockSignals(true);
 
@@ -145,8 +164,50 @@ void ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& display
                 box->blockSignals(false);
             }
         });
+        connectInGuiThread(p_->dictionary_entry_changed, [this, box](const std::string& key) {
+            if(p_ && box) {
+                if(key == "step_size") {
+                    box->setSingleStep(p_->getDictionaryValue<int>(key));
+                }
+            }
+        });
+
+        return box;
 
     } else {
         layout->addWidget(new QLabel((display_name + "'s type is not yet implemented (value: " + type2name(p_->type()) + ")").c_str()));
+    }
+
+    return nullptr;
+}
+
+void ValueParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+{
+    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
+        if(value_p_->is<std::string>()) {
+            value_p_->set<std::string>(value_p_->def<std::string>());
+        } else if(value_p_->is<bool>()) {
+            value_p_->set<bool>(value_p_->def<bool>());
+        } else if(value_p_->is<int>()) {
+            value_p_->set<int>(value_p_->def<int>());
+        } else if(value_p_->is<double>()) {
+            value_p_->set<double>(value_p_->def<double>());
+        }
+    });
+
+    if(value_p_->is<int>() || value_p_->is<double>()) {
+        context_handler->addAction(new QAction("set step size", context_handler), [this](){
+            if(value_p_->is<int>()) {
+                int s = QInputDialog::getInt(QApplication::activeWindow(), "Step size", "Please enter the new step size",
+                                             value_p_->getDictionaryValue("step_size", DEFAULT_INT_STEP_SIZE));
+                value_p_->setDictionaryValue("step_size", s);
+            } else if(value_p_->is<double>()) {
+                double s = QInputDialog::getDouble(QApplication::activeWindow(), "Step size", "Please enter the new step size",
+                                                   value_p_->getDictionaryValue("step_size", DEFAULT_DOUBLE_STEP_SIZE),
+                                                   -1000., 1000.,
+                                                   8);
+                value_p_->setDictionaryValue("step_size", s);
+            }
+        });
     }
 }

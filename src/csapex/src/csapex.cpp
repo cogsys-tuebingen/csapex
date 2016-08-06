@@ -36,6 +36,7 @@
 #include <iostream>
 #include <QtGui>
 #include <QMessageBox>
+#include <QStatusBar>
 #include <execinfo.h>
 #include <stdlib.h>
 #include <console_bridge/console.h>
@@ -205,20 +206,6 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
             settings.set("config_recovery", false);
         }));
 
-        bool recover_needed = false;
-        QTimer *timer = new QTimer(this);
-        QObject::connect(timer, &QTimer::timeout, [&](){
-            if(recover_needed) {
-                recover_needed = false;
-                std::string temp_file_name = settings.get("config")->as<std::string>() + ".recover";
-                core->saveAs(temp_file_name, true);
-            }
-        });
-        timer->start(settings.get<int>("config_recovery_save_interval", 1000));
-        csapex::slim_signal::ScopedConnection change(dispatcher.stateChanged.connect([&](){
-            recover_needed = true;
-        }));
-
 
         NodeAdapterFactoryPtr node_adapter_factory = std::make_shared<NodeAdapterFactory>(settings, plugin_locator.get());
         DragIO drag_io(plugin_locator, &dispatcher);
@@ -257,6 +244,25 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         });
 
         node_adapter_factory->loadPlugins();
+
+
+
+        bool recover_needed = false;
+        QTimer *timer = new QTimer(this);
+        QObject::connect(timer, &QTimer::timeout, [&](){
+            if(recover_needed) {
+                recover_needed = false;
+                std::string temp_file_name = settings.get("config")->as<std::string>() + ".recover";
+                core->saveAs(temp_file_name, true);
+                w.statusBar()->showMessage(tr("Recovery file saved."));
+            }
+        });
+        timer->start(settings.get<int>("config_recovery_save_interval", 1000));
+        csapex::slim_signal::ScopedConnection change(dispatcher.stateChanged.connect([&](){
+            recover_needed = true;
+        }));
+
+
 
         w.start();
         core->startup();

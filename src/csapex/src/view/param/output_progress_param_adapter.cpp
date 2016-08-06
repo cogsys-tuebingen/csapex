@@ -23,7 +23,7 @@ OutputProgressParameterAdapter::OutputProgressParameterAdapter(param::OutputProg
 
 }
 
-void OutputProgressParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* OutputProgressParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QPointer<QProgressBar> bar = new QProgressBar;
     bar->setValue(op_p_->getProgress());
@@ -32,16 +32,18 @@ void OutputProgressParameterAdapter::setup(QBoxLayout* layout, const std::string
     layout->addWidget(bar);
 
     // model change -> ui
-    connectInGuiThread(op_p_->parameter_changed, [this, bar]() {
+    connectInGuiThread(op_p_->parameter_changed, [this, bar](param::Parameter*) {
         if(op_p_ && bar) {
             bar->setValue(op_p_->getProgress());
         }
     });
 
     // parameter scope changed -> update slider interval
-    connectInGuiThread(op_p_->scope_changed, [this, bar]() {
+    connectInGuiThread(op_p_->scope_changed, [this, bar](param::Parameter*) {
         if(op_p_ && bar) {
             bar->setMaximum(op_p_->getProgressMaximum());
         }
     });
+
+    return bar;
 }

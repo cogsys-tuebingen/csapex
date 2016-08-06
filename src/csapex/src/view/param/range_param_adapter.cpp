@@ -14,6 +14,8 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QApplication>
+#include <QInputDialog>
+#include <QApplication>
 #include <iostream>
 
 using namespace csapex;
@@ -43,14 +45,12 @@ void setDecimals(QDoubleSpinBox* box, double step)
 }
 }
 
-void RangeParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* RangeParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QLabel* label = new QLabel(QString::fromStdString(display_name));
-    if(context_handler) {
-        label->setContextMenuPolicy(Qt::CustomContextMenu);
-        context_handler->setParent(label);
-        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
-    }
+    label->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(label, &QLabel::customContextMenuRequested,
+                     this, &RangeParameterAdapter::customContextMenuRequested);
 
     internal_layout->addWidget(label);
 
@@ -68,6 +68,8 @@ void RangeParameterAdapter::setup(QBoxLayout* layout, const std::string& display
     }
 
     layout->addLayout(internal_layout);
+
+    return label;
 }
 
 template <typename T, typename Slider, typename Spinbox>
@@ -96,7 +98,7 @@ void RangeParameterAdapter::genericSetup()
     slider->setScaledMaximum(max);
     slider->setScaledValue(def);
     slider->setMinimumWidth(100);
-    slider->setSingleStep(step);
+    slider->setStepSize(step);
 
     QPointer<Spinbox> display = new Spinbox;
     display->setMinimum(min);
@@ -108,12 +110,17 @@ void RangeParameterAdapter::genericSetup()
     internal_layout->addWidget(slider);
     internal_layout->addWidget(display);
 
+    slider->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(slider.data(), &QLabel::customContextMenuRequested,
+                     this, &RangeParameterAdapter::customContextMenuRequested);
+
     QObject::connect(slider.data(), &Slider::scaledValueChanged,
                      display.data(), &Spinbox::setValue);
     QObject::connect(slider.data(), &Slider::scaledRangeChanged,
                      display.data(), &Spinbox::setRange);
     QObject::connect(display.data(), static_cast<void(Spinbox::*)(T)>(&Spinbox::valueChanged),
                      slider.data(), &Slider::setScaledValue);
+
 
     slider->setScaledValue(p_->as<T>());
 
@@ -129,7 +136,7 @@ void RangeParameterAdapter::genericSetup()
 
 
     // model change -> ui
-    connectInGuiThread(p_->parameter_changed, [this, slider, display](){
+    connectInGuiThread(p_->parameter_changed, [this, slider, display](param::Parameter*){
         if(!p_ || !slider || !display) {
             return;
         }
@@ -143,19 +150,91 @@ void RangeParameterAdapter::genericSetup()
         display->blockSignals(false);
         slider->blockSignals(false);
     });
+    connectInGuiThread(range_p_->step_changed, [this, slider, display](param::Parameter*){
+        if(!range_p_ || !slider || !display) {
+            return;
+        }
+        slider->blockSignals(true);
+        display->blockSignals(true);
+
+        auto step = range_p_->step<T>();
+
+        slider->setStepSize(step);
+        display->setSingleStep(step);
+
+        display->blockSignals(false);
+        slider->blockSignals(false);
+    });
+
 
     // parameter scope changed -> update slider interval
-    connectInGuiThread(p_->scope_changed, [this, slider, display]() {
+    connectInGuiThread(p_->scope_changed, [this, slider, display](param::Parameter*) {
         if(!p_ || !slider || !display) {
             return;
         }
         slider->blockSignals(true);
         display->blockSignals(true);
 
-        slider->setScaledRange(range_p_->min<T>(), range_p_->max<T>());
+        auto min = range_p_->min<T>();
+        auto max = range_p_->max<T>();
+
+        slider->setScaledRange(min, max);
+        display->setMinimum(min);
+        display->setMaximum(max);
         display->setValue(slider->scaledValue());
 
         display->blockSignals(false);
         slider->blockSignals(false);
+    });
+}
+
+void RangeParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+{
+    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
+        if(range_p_->is<int>()) {
+            range_p_->set(range_p_->def<int>());
+        } else if(range_p_->is<double>()) {
+            range_p_->set(range_p_->def<double>());
+        }
+    });
+
+    context_handler->addAction(new QAction("set step size", context_handler), [this](){
+        if(range_p_->is<int>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Step size", "Please enter the new step size",
+                                         range_p_->step<int>());
+            range_p_->setStep(s);
+        } else if(range_p_->is<double>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Step size", "Please enter the new step size",
+                                               range_p_->step<double>(),
+                                               -1000., 1000.,
+                                               8);
+            range_p_->setStep(s);
+        }
+    });
+    context_handler->addAction(new QAction("set minimum", context_handler), [this](){
+        if(range_p_->is<int>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Minimum", "Please enter the new minimum value",
+                                         range_p_->min<int>());
+            range_p_->setMin(s);
+        } else if(range_p_->is<double>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Minimum", "Please enter the new minimum value",
+                                               range_p_->min<double>(),
+                                               -10000000., 10000000.,
+                                               8);
+            range_p_->setMin(s);
+        }
+    });
+    context_handler->addAction(new QAction("set maximum", context_handler), [this](){
+        if(range_p_->is<int>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Maximum", "Please enter the new maximum value",
+                                         range_p_->max<int>());
+            range_p_->setMax(s);
+        } else if(range_p_->is<double>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Maximum", "Please enter the new maximum value",
+                                               range_p_->max<double>(),
+                                               -10000000., 10000000.,
+                                               8);
+            range_p_->setMax(s);
+        }
     });
 }

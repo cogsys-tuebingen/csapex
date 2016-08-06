@@ -13,7 +13,9 @@ class RangeParameterAdapter : public ParameterAdapter
 public:
     RangeParameterAdapter(param::RangeParameter::Ptr p);
 
-    virtual void setup(QBoxLayout* layout, const std::string& display_name) override;
+    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+
+    virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
     template <typename T, typename Slider, typename Spinbox>

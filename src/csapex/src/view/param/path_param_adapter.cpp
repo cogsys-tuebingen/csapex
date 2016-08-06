@@ -26,7 +26,7 @@ PathParameterAdapter::PathParameterAdapter(param::PathParameter::Ptr p)
 
 }
 
-void PathParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QPointer<QLineEdit> path = new QLineEdit(path_p_->as<std::string>().c_str());
     QPointer<QPushButton> select = new QPushButton("select");
@@ -87,10 +87,12 @@ void PathParameterAdapter::setup(QBoxLayout* layout, const std::string& display_
     });
 
     // model change -> ui
-    connectInGuiThread(p_->parameter_changed, [this, path](){
+    connectInGuiThread(p_->parameter_changed, [this, path](param::Parameter*){
         if(!path_p_ || !path) {
             return;
         }
         path->setText(QString::fromStdString(path_p_->as<std::string>()));
     });
+
+    return nullptr;
 }

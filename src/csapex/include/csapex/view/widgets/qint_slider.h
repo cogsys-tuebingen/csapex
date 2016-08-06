@@ -12,6 +12,8 @@ public:
     QIntSlider(Qt::Orientation orientation, double step_size, QWidget *parent = 0);
     virtual ~QIntSlider();
 
+    void setStepSize(int step);
+
 private:
     int step_;
     int min_;

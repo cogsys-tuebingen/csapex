@@ -37,6 +37,8 @@ public:
     csapex::slim_signal::Signal<void(Parameter*, bool)> parameter_enabled;
     csapex::slim_signal::Signal<void(Parameter*)> destroyed;
 
+    csapex::slim_signal::Signal<void(const std::string&)> dictionary_entry_changed;
+
 public:
     virtual ~Parameter();
 
@@ -146,6 +148,28 @@ public:
 
     void triggerChange();
 
+
+    void setDictionaryEntry(const std::string& key, const ParameterPtr &param);
+    ParameterPtr getDictionaryEntry(const std::string& key) const;
+
+    template <typename T>
+    void setDictionaryValue(const std::string& key, const T& value);
+    template <typename T>
+    T getDictionaryValue(const std::string& key)
+    {
+        return dict_.at(key)->as<T>();
+    }
+    template <typename T>
+    T getDictionaryValue(const std::string& key, const T& def_value)
+    {
+        auto pos = dict_.find(key);
+        if(pos == dict_.end()) {
+            return def_value;
+        } else {
+            return pos->second->as<T>();
+        }
+    }
+
 public:
     static std::string type2string(const std::type_info& type);
 
@@ -175,6 +199,8 @@ protected:
     bool temporary_;
     bool hidden_;
     bool interactive_;
+
+    std::map<std::string, param::ParameterPtr> dict_;
 
     mutable std::recursive_mutex mutex_;
 };

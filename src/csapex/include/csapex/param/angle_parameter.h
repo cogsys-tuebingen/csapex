@@ -35,11 +35,6 @@ public:
     double min() const;
     double max() const;
 
-    template<class Archive>
-    void serialize(Archive& ar, const unsigned int /*file_version*/) {
-        ar & angle_;
-    }
-
 protected:
     virtual boost::any get_unsafe() const override;
     virtual bool set_unsafe(const boost::any& v) override;

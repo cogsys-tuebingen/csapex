@@ -11,6 +11,8 @@ public:
     QDoubleSlider(Qt::Orientation orientation, double step_size, QWidget *parent = 0);
     virtual ~QDoubleSlider();
 
+    void setStepSize(double step);
+
 private:
     double step_;
     double min_;

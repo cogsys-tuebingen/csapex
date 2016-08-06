@@ -55,7 +55,7 @@ void ParameterContextMenu::doShowContextMenu(const QPoint& pt)
         menu.addSeparator();
     }
 
-    QAction* connectable = new QAction("connectable", &menu);
+    QAction* connectable = new QAction("make connectable", &menu);
     connectable->setCheckable(true);
     connectable->setChecked(param->isInteractive());
     connectable->setIcon(QIcon(":/connector.png"));

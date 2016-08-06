@@ -440,7 +440,7 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>0</y>
           <width>274</width>
-          <height>144</height>
+          <height>131</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -596,6 +596,7 @@ p, li { white-space: pre-wrap; }
     </layout>
    </widget>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSave">
    <property name="icon">
     <iconset resource="../res/csapex_resources.qrc">

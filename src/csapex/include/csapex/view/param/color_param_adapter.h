@@ -16,7 +16,9 @@ class ColorParameterAdapter : public ParameterAdapter
 public:
     ColorParameterAdapter(param::ColorParameter::Ptr p);
 
-    virtual void setup(QBoxLayout* layout, const std::string& display_name) override;
+    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+
+    virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
     param::ColorParameterPtr color_p_;
