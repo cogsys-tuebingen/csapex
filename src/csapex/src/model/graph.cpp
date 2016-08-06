@@ -17,7 +17,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_modifier.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>

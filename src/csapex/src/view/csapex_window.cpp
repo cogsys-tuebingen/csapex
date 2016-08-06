@@ -27,7 +27,7 @@
 #include <csapex/command/command.h>
 #include "ui_csapex_window.h"
 #include <csapex/view/utility/node_list_generator.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 
 /// PROJECT
 #include <csapex/param/parameter_factory.h>

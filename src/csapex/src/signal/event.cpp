@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/signal/slot.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/msg/no_message.h>

@@ -11,7 +11,7 @@
 #include <csapex/msg/output_transition.h>
 #include <csapex/msg/static_output.h>
 #include <csapex/msg/dynamic_output.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
 #include <csapex/signal/slot.h>

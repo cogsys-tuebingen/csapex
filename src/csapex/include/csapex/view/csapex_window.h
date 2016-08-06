@@ -9,7 +9,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/slim_signal.hpp>
-#include <csapex/utility/timable.h>
+#include <csapex/profiling/timable.h>
 
 /// SYSTEM
 #include <QMainWindow>

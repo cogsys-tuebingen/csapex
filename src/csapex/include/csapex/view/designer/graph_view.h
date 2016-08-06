@@ -13,7 +13,7 @@
 #include <csapex/model/connector_type.h>
 #include <csapex/utility/create_connector_request.h>
 #include <csapex/view/csapex_view_core.h>
-#include <csapex/utility/timable.h>
+#include <csapex/profiling/timable.h>
 
 /// SYSTEM
 #include <QGraphicsView>

@@ -9,7 +9,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/view/csapex_view_core.h>
-#include <csapex/utility/timable.h>
+#include <csapex/profiling/timable.h>
 
 /// SYSTEM
 #include <QWidget>

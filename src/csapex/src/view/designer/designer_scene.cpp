@@ -27,8 +27,8 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/core/csapex_core.h>
-#include <csapex/utility/timer.h>
-#include <csapex/utility/interlude.hpp>
+#include <csapex/profiling/timer.h>
+#include <csapex/profiling/interlude.hpp>
 
 /// SYSTEM
 #include <QtGui>

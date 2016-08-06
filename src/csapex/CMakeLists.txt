@@ -173,8 +173,8 @@ add_library(csapex_util SHARED
     src/utility/uuid_provider.cpp
     src/utility/yaml_node_builder.cpp
 
-    src/utility/timable.cpp
-    src/utility/timer.cpp
+    src/profiling/timable.cpp
+    src/profiling/timer.cpp
     src/profiling/profiler.cpp
 )
 

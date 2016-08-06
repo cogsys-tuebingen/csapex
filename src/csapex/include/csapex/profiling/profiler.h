@@ -2,7 +2,7 @@
 #define PROFILER_H
 
 /// COMPONENT
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 
 /// SYSTEM
 #define BOOST_PARAMETER_MAX_ARITY 7

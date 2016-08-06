@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/utility/timable.h>
+#include <csapex/profiling/timable.h>
 
 /// COMPONENT
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 
 using namespace csapex;
 

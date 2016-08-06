@@ -5,7 +5,7 @@
 #include <csapex/view/node/box.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 #include <csapex/core/settings.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/utility/color.hpp>
