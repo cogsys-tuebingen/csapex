@@ -75,6 +75,7 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     spin->setDecimals(5);
     spin->setSingleStep(0.001);
     spin->setValue(angle_p_->as<double>());
+    spin->setKeyboardTracking(false);
 
     layout->addWidget(spin);
 

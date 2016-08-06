@@ -146,11 +146,13 @@ void IntervalParameterAdapter::genericSetup()
     displayLower->setRange(min, max);
     displayLower->setValue(v.first);
     displayLower->setSingleStep(step);
+    displayLower->setKeyboardTracking(false);
 
     QPointer<Spinbox> displayUpper = new Spinbox;
     displayUpper->setRange(min, max);
     displayUpper->setValue(v.second);
     displayUpper->setSingleStep(step);
+    displayLower->setKeyboardTracking(false);
 
 
     internal_layout->addWidget(displayLower);

@@ -102,7 +102,8 @@ QWidget* ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
         box->setSingleStep(value_p_->getDictionaryValue("step_size", DEFAULT_DOUBLE_STEP_SIZE));
         box->setMaximum(1e12);
         box->setMinimum(-1e12);
-        box->setValue(value_p_->as<double>());
+        box->setValue(value_p_->as<double>());        
+        box->setKeyboardTracking(false);
 
         layout->addLayout(QtHelper::wrap(display_name, box, context_handler, p_.get()));
 
@@ -142,6 +143,7 @@ QWidget* ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
         box->setMinimum(std::numeric_limits<int>::min());
         box->setSingleStep(value_p_->getDictionaryValue("step_size", DEFAULT_INT_STEP_SIZE));
         box->setValue(value_p_->as<int>());
+        box->setKeyboardTracking(false);
 
         layout->addLayout(QtHelper::wrap(display_name, box, context_handler,  p_.get()));
 

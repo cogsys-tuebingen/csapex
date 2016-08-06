@@ -105,6 +105,7 @@ void RangeParameterAdapter::genericSetup()
     display->setMaximum(max);
     display->setValue(def);
     display->setSingleStep(step);
+    display->setKeyboardTracking(false);
     setDecimals(display.data(), step);
 
     internal_layout->addWidget(slider);
