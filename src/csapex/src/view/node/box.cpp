@@ -322,10 +322,8 @@ void NodeBox::updateComponentInformation(Graph* graph)
 
     if(info_compo) {
         int compo = graph->getComponent(nh->getUUID());
-        int level = graph->getLevel(nh->getUUID());
         std::stringstream info;
         info << "C:" << compo;
-        info << "L:" << level;
         info_compo->setText(info.str().c_str());
 
         setStyleForId(info_compo, compo);
@@ -748,11 +746,11 @@ void NodeBox::refreshStylesheet()
     update();
 }
 
-void NodeBox::showProfiling(bool show)
+void NodeBox::showProfiling(bool profiling)
 {
     NodeWorkerPtr node = node_worker_.lock();
-    if(node->isProfiling() != show) {
-        node->setProfiling(show);
+    if(node->isProfiling() != profiling) {
+        node->setProfiling(profiling);
     }
 }
 
@@ -822,7 +820,7 @@ void NodeBox::updateVisuals()
     bool minimized = isMinimizedSize();
 
     if(minimized != flag_set) {
-        setProperty("content_minimized", minimized);
+        ui->boxframe->setProperty("content_minimized", minimized);
 
         if(minimized) {
             ui->frame->hide();

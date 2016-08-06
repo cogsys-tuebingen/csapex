@@ -30,20 +30,30 @@ public:
     void doSetup(QBoxLayout* layout, const std::string& display_name);
 
 protected:
-    virtual void setup(QBoxLayout* layout, const std::string& display_name) = 0;
+    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) = 0;
+    virtual void setupContextMenu(ParameterContextMenu* context_handler);
 
 public:
     csapex::slim_signal::Signal<void(CommandPtr)> executeCommand;
 
 Q_SIGNALS:
     void modelCallback(std::function<void()>);
+    void customContextMenuRequested(QPoint);
 
 public Q_SLOTS:
     void executeModelCallback(std::function<void()>);
 
 protected:
-    void connectInGuiThread(csapex::slim_signal::Signal<void(csapex::param::Parameter*)>& signal,
-                 std::function<void()> cb);
+    template <typename Callback, typename T>
+    void connectInGuiThread(csapex::slim_signal::Signal<void(T)>& signal,
+                            Callback cb)
+    {
+        connections.push_back(signal.connect([=](T v) {
+            modelCallback([=]() {
+                cb(v);
+            });
+        }));
+    }
 
 protected:
     param::Parameter::Ptr p_;

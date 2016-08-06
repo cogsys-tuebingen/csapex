@@ -26,6 +26,10 @@
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/command/delete_fulcrum.h>
+#include <csapex/core/csapex_core.h>
+#include <csapex/profiling/timer.h>
+#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/interlude.hpp>
 
 /// SYSTEM
 #include <QtGui>
@@ -196,6 +200,10 @@ void DesignerScene::setScale(double scale)
 }
 void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer("drawBackground")->restart();
+    }
+
     QGraphicsScene::drawBackground(painter, rect);
 
     if(isEmpty()) {
@@ -226,6 +234,10 @@ void DesignerScene::drawBackground(QPainter *painter, const QRectF &rect)
         painter->setPen(QPen(QBrush(Qt::darkGray), 2./scale_));
         painter->drawLine(0, miny, 0, maxy);
         painter->drawLine(minx, 0, maxx, 0);
+    }
+
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer("drawBackground")->finish();
     }
 }
 
@@ -274,6 +286,9 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     long draw_begin = QDateTime::currentMSecsSinceEpoch();
 
 #endif
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer("drawForeground")->restart();
+    }
 
     QGraphicsScene::drawForeground(painter, rect);
 
@@ -460,6 +475,10 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     long dt_drawing = draw_end - draw_begin;
     std::cerr << "drawing took " << dt_drawing << "ms" << std::endl;
 #endif
+
+    if(profiler_->isEnabled()) {
+        profiler_->getTimer("drawForeground")->finish();
+    }
 }
 
 
@@ -840,25 +859,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     ccs.selected_from = from_port->property("focused").toBool();
     ccs.selected_to = to_port->property("focused").toBool();
 
-    Graph* graph = graph_facade_->getGraph();
-
-    NodeHandle* from_nh = graph->findNodeHandleForConnector(from->getUUID());
-    NodeHandle* to_nh = graph->findNodeHandleForConnector(to->getUUID());
-
-    if(!from_nh || !to_nh) {
-        ccs.level = 0;
-
-    } else {
-        int lf = graph->getLevel(from_nh->getUUID());
-        int lt = graph->getLevel(to_nh->getUUID());
-
-        if(from->isDynamic()) {
-            ccs.level = lt;
-        } else {
-            ccs.level = lf;
-        }
-    }
-
     if(dynamic_cast<Event*>(from)) {
         ccs.start_pos = BOTTOM;
     } else {
@@ -920,7 +920,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     ccs.minimized = ccs.minimized_from || ccs.minimized_to;
     ccs.r = ccs.minimized ? view_core_.getStyle().lineWidth() / 2.0 : view_core_.getStyle().lineWidth();
     ccs.r *= scale_factor;
-    ccs.r *= (ccs.level + 1);
 
     double max_slack_height = 40.0;
     double mindist_for_slack = 60.0;

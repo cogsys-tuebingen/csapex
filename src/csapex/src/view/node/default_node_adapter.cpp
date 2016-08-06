@@ -15,7 +15,7 @@
 #include <csapex/view/widgets/doublespanslider.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/designer/graph_view.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 
 /// PROJECT
 #include <csapex/param/range_parameter.h>

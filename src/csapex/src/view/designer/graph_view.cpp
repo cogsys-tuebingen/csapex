@@ -68,6 +68,7 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QColorDialog>
+#include <QSizeGrip>
 
 using namespace csapex;
 
@@ -96,8 +97,8 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     setDragMode(QGraphicsView::RubberBandDrag);
     setInteractive(true);
 
-    QShortcut *box_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
-    QObject::connect(box_shortcut, SIGNAL(activated()), this, SLOT(showBoxDialog()));
+//    QShortcut *create_node_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
+//    QObject::connect(create_node_shortcut, SIGNAL(activated()), this, SLOT(showNodeInsertDialog()));
 
     QShortcut *box_reset_view = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_0), this);
     QObject::connect(box_reset_view, SIGNAL(activated()), this, SLOT(resetZoom()));
@@ -195,44 +196,63 @@ void GraphView::setupWidgets()
         inputs_widget_->enableMetaPort(parent);
         slots_widget_->enableMetaPort(parent);
         events_widget_->enableMetaPort(parent);
+    } else {
+        // hide panels in an empty top level graph
+        if(scene_->isEmpty()) {
+            outputs_widget_->hide();
+            inputs_widget_->hide();
+            slots_widget_->hide();
+            events_widget_->hide();
+        }
     }
+
+
+    QObject::connect(scene_, &DesignerScene::changed, [this]() {
+        bool visible = !scene_->isEmpty();
+
+        // hide panels in an empty top level graph
+        if(!graph_facade_->getParent()) {
+            outputs_widget_->setVisible(visible);
+            inputs_widget_->setVisible(visible);
+            slots_widget_->setVisible(visible);
+            events_widget_->setVisible(visible);
+        }
+    });
 }
 
 void GraphView::paintEvent(QPaintEvent *e)
 {
-    if(!scene_->isEmpty()) {
-        QPointF tl_view = mapToScene(QPoint(0, 0));
-        QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
+    QPointF tl_view = mapToScene(QPoint(0, 0));
+    QPointF br_view = mapToScene(QPoint(viewport()->width(), viewport()->height()));
 
-        QPointF mid = 0.5 * (tl_view + br_view);
+    QPointF mid = 0.5 * (tl_view + br_view);
 
-        {
-            QPointF pos(tl_view.x(),
-                        mid.y() - outputs_widget_->height() / 2.0);
-            if(pos != outputs_widget_proxy_->pos()) {
-                outputs_widget_proxy_->setPos(pos);
-            }
+    {
+        QPointF pos(tl_view.x(),
+                    mid.y() - outputs_widget_->height() / 2.0);
+        if(pos != outputs_widget_proxy_->pos()) {
+            outputs_widget_proxy_->setPos(pos);
         }
-        {
-            QPointF pos(br_view.x()-inputs_widget_->width(),
-                        mid.y() - inputs_widget_->height() / 2.0);
-            if(pos != inputs_widget_proxy_->pos()) {
-                inputs_widget_proxy_->setPos(pos);
-            }
+    }
+    {
+        QPointF pos(br_view.x()-inputs_widget_->width(),
+                    mid.y() - inputs_widget_->height() / 2.0);
+        if(pos != inputs_widget_proxy_->pos()) {
+            inputs_widget_proxy_->setPos(pos);
         }
-        {
-            QPointF pos(mid.x() - slots_widget_->width() / 2.0,
-                        br_view.y() - slots_widget_->height());
-            if(pos != slots_widget_proxy_->pos()) {
-                slots_widget_proxy_->setPos(pos);
-            }
+    }
+    {
+        QPointF pos(mid.x() - slots_widget_->width() / 2.0,
+                    br_view.y() - slots_widget_->height());
+        if(pos != slots_widget_proxy_->pos()) {
+            slots_widget_proxy_->setPos(pos);
         }
-        {
-            QPointF pos(mid.x() - events_widget_->width() / 2.0,
-                        tl_view.y());
-            if(pos != triggers_widget_proxy_->pos()) {
-                triggers_widget_proxy_->setPos(pos);
-            }
+    }
+    {
+        QPointF pos(mid.x() - events_widget_->width() / 2.0,
+                    tl_view.y());
+        if(pos != triggers_widget_proxy_->pos()) {
+            triggers_widget_proxy_->setPos(pos);
         }
     }
     QGraphicsView::paintEvent(e);
@@ -392,8 +412,21 @@ std::vector<NodeBox*> GraphView::getSelectedBoxes() const
     return selected_boxes_;
 }
 
+void GraphView::enableSelection(bool enabled)
+{
+    selected_boxes_ = scene_->getSelectedBoxes();
+
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(), enabled ? "enable nodes" : "disable nodes"));
+
+    for(NodeBox* box: selected_boxes_) {
+        cmd->add(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), box->getNodeHandle()->getUUID(), !enabled));
+    }
+
+    view_core_.execute(cmd);
+}
+
 void GraphView::updateSelection()
-{    
+{
     selected_boxes_ = scene_->getSelectedBoxes();
 
     QList<QGraphicsItem *> selected = scene_->items();
@@ -632,7 +665,7 @@ void GraphView::animateScroll()
     }
 }
 
-void GraphView::showBoxDialog()
+void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
@@ -651,7 +684,6 @@ void GraphView::showBoxDialog()
         }
     }
 }
-
 
 
 void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, const QPoint &offset)
@@ -854,6 +886,14 @@ GraphFacade* GraphView::getGraphFacade() const
     return graph_facade_.get();
 }
 
+void GraphView::focusOnNode(const UUID &uuid)
+{
+    NodeBox* box = getBox(uuid);
+    if(box) {
+        scene_->setSelection(box);
+    }
+}
+
 void GraphView::nodeRemoved(NodeHandlePtr node_handle)
 {
     UUID node_uuid = node_handle->getUUID();
@@ -896,7 +936,7 @@ void GraphView::addBox(NodeBox *box)
     MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
     scene_->addItem(proxy);
 
-    QObject::connect(proxy, SIGNAL(moved(double,double)), this, SLOT(movedBoxes(double,double)));
+    QObject::connect(proxy, &MovableGraphicsProxyWidget::moved, this, &GraphView::movedBoxes);
 
     boxes_.push_back(box);
 
@@ -1081,11 +1121,18 @@ void GraphView::startProfiling(NodeWorker *node)
     NodeBox* box = getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
-    ProfilingWidget* prof = new ProfilingWidget(this, box);
+    ProfilingWidget* prof = new ProfilingWidget(box->getNodeWorker()->getProfiler(), node->getUUID().getFullName());
     profiling_[box] = prof;
 
+    if(QVBoxLayout* vbl = dynamic_cast<QVBoxLayout*>(prof->layout())) {
+        vbl->addWidget(new QSizeGrip(prof), 0, Qt::AlignBottom | Qt::AlignRight);
+    }
+
+    QObject::connect(box, &NodeBox::destroyed, prof, &ProfilingWidget::close);
+    QObject::connect(box, &NodeBox::destroyed, prof, &ProfilingWidget::deleteLater);
+
     QGraphicsProxyWidget* prof_proxy = scene_->addWidget(prof);
-    prof->reposition(prof_proxy->pos().x(), prof_proxy->pos().y());
+    prof_proxy->setPos(box->graphicsProxyWidget()->pos() + QPointF(0,box->height()));
     prof->show();
 
 
@@ -1097,7 +1144,10 @@ void GraphView::startProfiling(NodeWorker *node)
     }
 
     MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
-    QObject::connect(proxy, &MovableGraphicsProxyWidget::moving, prof, &ProfilingWidget::reposition);
+    QObject::connect(proxy, &MovableGraphicsProxyWidget::moving, [box, prof](double, double){
+        QPointF pos = box->graphicsProxyWidget()->pos() + QPointF(0,box->height());
+        prof->graphicsProxyWidget()->setPos(pos);
+    });
 
     auto nw = box->getNodeWorker();
 
@@ -1193,6 +1243,10 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
     add_note.setIcon(QIcon(":/note.png"));
     menu.addAction(&add_note);
 
+    QAction add_subgraph("create subgraph", &menu);
+    add_subgraph.setIcon(QIcon(":/group.png"));
+    menu.addAction(&add_subgraph);
+
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
     NodeListGenerator generator(core_.getNodeFactory(), view_core_.getNodeAdapterFactory());
@@ -1210,6 +1264,9 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 
         } else if(selectedItem == &add_note) {
             startPlacingBox("csapex::Note", nullptr);
+
+        } else if(selectedItem == &add_subgraph) {
+            startPlacingBox("csapex::Graph", nullptr);
 
         } else {
             // else it must be an insertion
@@ -1257,12 +1314,18 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
     bool has_minimized = false;
     bool has_maximized = false;
+    bool has_enabled = false;
+    bool has_disabled = false;
     bool has_box = false;
     bool has_note = false;
     for(NodeBox* box : selected_boxes_) {
         bool m = box->isMinimizedSize();
         has_minimized |= m;
         has_maximized |= !m;
+
+        bool e = box->getNodeWorker()->isProcessingEnabled();
+        has_enabled |= e;
+        has_disabled |= !e;
 
         bool is_note = dynamic_cast<NoteBox*>(box);
         has_note |= is_note;
@@ -1271,6 +1334,23 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
 
     if(has_box) {
+        if(has_disabled){
+            QAction* enable = new QAction("enable", &menu);
+            enable->setIcon(QIcon(":/checkbox_checked.png"));
+            enable->setIconVisibleInMenu(true);
+            handler[enable] = std::bind(&GraphView::enableSelection, this, true);
+            menu.addAction(enable);
+        }
+        if(has_enabled) {
+            QAction* disable = new QAction("disable", &menu);
+            disable->setIcon(QIcon(":/checkbox_unchecked.png"));
+            disable->setIconVisibleInMenu(true);
+            handler[disable] = std::bind(&GraphView::enableSelection, this, false);
+            menu.addAction(disable);
+        }
+
+        menu.addSeparator();
+
         if(has_minimized) {
             QAction* max = new QAction("maximize", &menu);
             max->setIcon(QIcon(":/maximize.png"));
@@ -1753,6 +1833,15 @@ void GraphView::stopPreview()
         preview_widget_ = nullptr;
     }
 }
+
+
+void GraphView::useProfiler(std::shared_ptr<Profiler> profiler)
+{
+    Profilable::useProfiler(profiler);
+
+    scene_->useProfiler(profiler);
+}
+
 
 /// MOC
 #include "../../../include/csapex/view/designer/moc_graph_view.cpp"

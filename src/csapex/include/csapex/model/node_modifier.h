@@ -7,7 +7,7 @@
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/model/multi_connection_type.h>
 #include <csapex/msg/message.h>
-#include <csapex/msg/message_traits.h>
+#include <csapex/msg/token_traits.h>
 #include <csapex/utility/uuid.h>
 
 
@@ -77,6 +77,16 @@ public:
     Output* addDynamicOutput(const std::string& label) {
         Container::template registerType<T>();
         return addOutput(Container::template make<T>(), label, true);
+    }
+    template <typename Container, typename T>
+    Event* addEvent(const std::string& label) {
+        Container::template registerType<T>();
+        return addEvent(Container::template make<T>(), label);
+    }
+    template <typename Container, typename T>
+    Slot* addSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false) {
+        Container::template registerType<T>();
+        return addSlot(Container::template make<T>(), label, callback, active);
     }
 
 

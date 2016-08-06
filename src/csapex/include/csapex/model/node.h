@@ -7,7 +7,7 @@
 #include <csapex/model/parameterizable.h>
 #include <csapex/utility/stream_relay.h>
 #include <csapex/utility/assert.h>
-#include <csapex/utility/timable.h>
+#include <csapex/profiling/timable.h>
 
 namespace csapex {
 
@@ -39,6 +39,8 @@ public: /* API */
     virtual void deactivation();
 
     virtual void reset();
+
+    virtual void tearDown();
 
     virtual bool isAsynchronous() const;
     virtual bool isIsolated() const;

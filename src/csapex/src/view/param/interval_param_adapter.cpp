@@ -17,6 +17,8 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QInputDialog>
+#include <QApplication>
 #include <iostream>
 #include <qxt5/qxtspanslider.h>
 
@@ -30,14 +32,12 @@ IntervalParameterAdapter::IntervalParameterAdapter(param::IntervalParameter::Ptr
 
 }
 
-void IntervalParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* IntervalParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QLabel* label = new QLabel(QString::fromStdString(display_name));
-    if(context_handler) {
-        label->setContextMenuPolicy(Qt::CustomContextMenu);
-        context_handler->setParent(label);
-        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
-    }
+    label->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(label, &QLabel::customContextMenuRequested,
+                     this, &IntervalParameterAdapter::customContextMenuRequested);
 
     internal_layout->addWidget(label);
 
@@ -55,6 +55,8 @@ void IntervalParameterAdapter::setup(QBoxLayout* layout, const std::string& disp
     }
 
     layout->addLayout(internal_layout);
+
+    return label;
 }
 
 namespace {
@@ -138,14 +140,19 @@ void IntervalParameterAdapter::genericSetup()
     QPointer<Slider> slider = MakeSlider<Slider>::makeSlider(Qt::Horizontal, step);
     slider->setRange(min, max);
     slider->setSpan(v.first, v.second);
+    slider->setSingleStep(step);
 
     QPointer<Spinbox> displayLower = new Spinbox;
     displayLower->setRange(min, max);
     displayLower->setValue(v.first);
+    displayLower->setSingleStep(step);
+    displayLower->setKeyboardTracking(false);
 
     QPointer<Spinbox> displayUpper = new Spinbox;
     displayUpper->setRange(min, max);
     displayUpper->setValue(v.second);
+    displayUpper->setSingleStep(step);
+    displayLower->setKeyboardTracking(false);
 
 
     internal_layout->addWidget(displayLower);
@@ -153,6 +160,10 @@ void IntervalParameterAdapter::genericSetup()
 
     internal_layout->addWidget(displayUpper);
 
+
+    slider->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(slider.data(), &QLabel::customContextMenuRequested,
+                     this, &IntervalParameterAdapter::customContextMenuRequested);
 
     QObject::connect(slider.data(), &Slider::rangeChanged, displayLower.data(), &Spinbox::setRange);
     QObject::connect(slider.data(), &Slider::rangeChanged, displayUpper.data(), &Spinbox::setRange);
@@ -174,15 +185,38 @@ void IntervalParameterAdapter::genericSetup()
     connect(slider.data(), &Slider::upperValueChanged, cb);
 
     // model change -> ui
-    connectInGuiThread(p_->parameter_changed, [this, slider, displayLower, displayUpper](){
-        if(!interval_p_ || !slider) {
+    connectInGuiThread(p_->parameter_changed, [this, slider, displayLower, displayUpper](param::Parameter*){
+        if(!interval_p_ || !slider || !displayLower || !displayUpper) {
             return;
         }
         slider->blockSignals(true);
         displayLower->blockSignals(true);
         displayUpper->blockSignals(true);
 
-        slider->setSpan(interval_p_->lower<T>(), interval_p_->upper<T>());
+        auto low = interval_p_->lower<T>();
+        auto up = interval_p_->upper<T>();
+
+        slider->setSpan(low, up);
+        displayLower->setValue(low);
+        displayUpper->setValue(up);
+
+        slider->blockSignals(false);
+        displayLower->blockSignals(false);
+        displayUpper->blockSignals(false);
+    });
+    connectInGuiThread(interval_p_->step_changed, [this, slider, displayLower, displayUpper](param::Parameter*){
+        if(!interval_p_ || !slider || !displayLower || !displayUpper) {
+            return;
+        }
+        slider->blockSignals(true);
+        displayLower->blockSignals(true);
+        displayUpper->blockSignals(true);
+
+        auto step = interval_p_->step<T>();
+
+        slider->setSingleStep(step);
+        displayLower->setSingleStep(step);
+        displayUpper->setSingleStep(step);
 
         slider->blockSignals(false);
         displayLower->blockSignals(false);
@@ -190,7 +224,7 @@ void IntervalParameterAdapter::genericSetup()
     });
 
     // parameter scope changed -> update slider interval
-    connectInGuiThread(p_->scope_changed, [this, slider, displayLower, displayUpper](){
+    connectInGuiThread(p_->scope_changed, [this, slider, displayLower, displayUpper](param::Parameter*){
         if(!interval_p_ || !slider) {
             return;
         }
@@ -198,10 +232,66 @@ void IntervalParameterAdapter::genericSetup()
         displayLower->blockSignals(true);
         displayUpper->blockSignals(true);
 
-        slider->setRange(interval_p_->min<T>(), interval_p_->max<T>());
+        auto min = interval_p_->min<T>();
+        auto max = interval_p_->max<T>();
+        slider->setRange(min, max);
+        displayLower->setRange(min, max);
+        displayUpper->setRange(min, max);
 
         slider->blockSignals(false);
         displayLower->blockSignals(false);
         displayUpper->blockSignals(false);
+    });
+}
+
+
+void IntervalParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+{
+    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
+        if(interval_p_->is<std::pair<int, int>>()) {
+            interval_p_->set(interval_p_->def<int>());
+        } else if(interval_p_->is<std::pair<double, double>>()) {
+            interval_p_->set(interval_p_->def<double>());
+        }
+    });
+
+    context_handler->addAction(new QAction("set step size", context_handler), [this](){
+        if(interval_p_->is<std::pair<int, int>>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Step size", "Please enter the new step size",
+                                         interval_p_->step<int>());
+            interval_p_->setStep(s);
+        } else if(interval_p_->is<std::pair<double, double>>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Step size", "Please enter the new step size",
+                                               interval_p_->step<double>(),
+                                               -1000., 1000.,
+                                               8);
+            interval_p_->setStep(s);
+        }
+    });
+    context_handler->addAction(new QAction("set minimum", context_handler), [this](){
+        if(interval_p_->is<std::pair<int, int>>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Minimum", "Please enter the new minimum value",
+                                         interval_p_->min<int>());
+            interval_p_->setMin(s);
+        } else if(interval_p_->is<std::pair<double, double>>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Minimum", "Please enter the new minimum value",
+                                               interval_p_->min<double>(),
+                                               -10000000., 10000000.,
+                                               8);
+            interval_p_->setMin(s);
+        }
+    });
+    context_handler->addAction(new QAction("set maximum", context_handler), [this](){
+        if(interval_p_->is<std::pair<int, int>>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Maximum", "Please enter the new maximum value",
+                                         interval_p_->max<int>());
+            interval_p_->setMax(s);
+        } else if(interval_p_->is<std::pair<double, double>>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Maximum", "Please enter the new maximum value",
+                                               interval_p_->max<double>(),
+                                               -10000000., 10000000.,
+                                               8);
+            interval_p_->setMax(s);
+        }
     });
 }

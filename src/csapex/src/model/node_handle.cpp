@@ -36,7 +36,6 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       transition_out_(transition_out),
       
       uuid_provider_(uuid_provider),
-      level_(0),
       source_(false), sink_(false)
 {
     node_->initialize(this, uuid);
@@ -67,6 +66,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
             label = getUUID().getShortName();
         }
         
+        label = getUUID().getAbsoluteUUID().getFullName();
         node_->adebug.setPrefix(label);
         node_->ainfo.setPrefix(label);
         node_->awarn.setPrefix(label);
@@ -83,6 +83,8 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
 NodeHandle::~NodeHandle()
 {
+    node_->tearDown();
+
     while(!external_inputs_.empty()) {
         removeInput(external_inputs_.begin()->get());
     }
@@ -95,24 +97,8 @@ NodeHandle::~NodeHandle()
     while(!external_events_.empty()) {
         removeEvent(external_events_.begin()->get());
     }
-    
+
     nodeRemoved();
-}
-
-int NodeHandle::getLevel() const
-{
-    return level_;
-}
-
-void NodeHandle::setLevel(int level)
-{
-    level_ = level;
-    for(InputPtr in : external_inputs_) {
-        in->setLevel(level);
-    }
-    for(OutputPtr out : external_outputs_) {
-        out->setLevel(level);
-    }
 }
 
 void NodeHandle::setIsSource(bool source)

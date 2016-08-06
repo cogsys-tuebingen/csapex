@@ -20,6 +20,8 @@
 
 namespace csapex {
 
+class Profiler;
+
 class NodeWorker : public ErrorState
 {
 public:
@@ -57,6 +59,8 @@ public:
     void setState(State state);
     State getState() const;
 
+    std::shared_ptr<Profiler> getProfiler();
+
     bool isEnabled() const;
     bool isIdle() const;
     bool isProcessing() const;
@@ -77,8 +81,6 @@ public:
     bool canReceive() const;
     bool canSend() const;
     bool areAllInputsAvailable() const;
-
-    std::vector<TimerPtr> extractLatestTimers();
 
 public:
     bool tick();
@@ -140,7 +142,7 @@ private:
 
     void sendEvents(bool active);
 
-    void connectConnector(Connectable *c);
+    void connectConnector(ConnectablePtr c);
     void disconnectConnector(Connectable *c);
 
     bool hasActiveOutputConnection();
@@ -167,10 +169,10 @@ private:
     mutable std::recursive_mutex state_mutex_;
 
     std::recursive_mutex timer_mutex_;
-    std::vector<TimerPtr> timer_history_;
 
-    std::atomic<bool> profiling_;
-    TimerPtr current_process_timer_;
+    //TimerPtr profiling_timer_;
+    std::shared_ptr<Profiler> profiler_;
+
 };
 
 }

@@ -16,10 +16,15 @@ class ValueParameterAdapter : public ParameterAdapter
 public:
     ValueParameterAdapter(param::ValueParameter::Ptr p);
 
-    virtual void setup(QBoxLayout* layout, const std::string& display_name) override;
+    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+    virtual void setupContextMenu(ParameterContextMenu *context_handler) override;
 
 private:
     param::ValueParameterPtr value_p_;
+
+private:
+    static const int DEFAULT_INT_STEP_SIZE;
+    static const double DEFAULT_DOUBLE_STEP_SIZE;
 };
 
 

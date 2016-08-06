@@ -2,7 +2,7 @@
 #define CSAPEX_YAML_IO_HPP
 
 /// PROJECT
-#include <csapex/msg/message_traits.h>
+#include <csapex/msg/token_traits.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM

@@ -19,6 +19,12 @@ QIntSlider::~QIntSlider()
 {
 }
 
+void QIntSlider::setStepSize(int step)
+{
+    step_ = step;
+    update();
+}
+
 void QIntSlider::update()
 {
     if(min_ > max_) {
@@ -27,6 +33,7 @@ void QIntSlider::update()
     int min = integer2int(min_);
     int max = integer2int(max_);
 
+    setSingleStep(step_);
     if(max != maximum() || min != minimum()) {
         setRange(min, max);
     }

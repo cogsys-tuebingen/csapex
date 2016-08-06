@@ -73,14 +73,17 @@ void RangeParameter::doSetValueFrom(const Parameter &other)
 {
     const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other);
     if(range) {
-        bool change = false;
+        bool value_change = false;
         if(value_.type() == typeid(int)) {
-            change = boost::any_cast<int>(value_) != boost::any_cast<int>(range->value_);
+            value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(range->value_);
         } else if(value_.type() == typeid(double)) {
-            change = boost::any_cast<double>(value_) != boost::any_cast<double>(range->value_);
+            value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(range->value_);
         }
-        if(change) {
-            value_ = range->value_;
+        value_ = range->value_;
+        min_ = range->min_;
+        max_ = range->max_;
+        step_ = range->step_;
+        if(value_change) {
             triggerChange();
         }
     } else {

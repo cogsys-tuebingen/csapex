@@ -22,7 +22,10 @@ StaticOutput::StaticOutput(const UUID &uuid)
 
 void StaticOutput::addMessage(TokenPtr message)
 {
-    setType(message->getTokenData()->toType());
+    const auto& data = message->getTokenData();
+    if(!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(data)) {
+        setType(data->toType());
+    }
 
     // update buffer
 

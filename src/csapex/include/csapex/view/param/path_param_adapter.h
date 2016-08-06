@@ -16,7 +16,7 @@ class PathParameterAdapter : public ParameterAdapter
 public:
     PathParameterAdapter(param::PathParameter::Ptr p);
 
-    virtual void setup(QBoxLayout* layout, const std::string& display_name) override;
+    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
 
 private:
     param::PathParameterPtr path_p_;

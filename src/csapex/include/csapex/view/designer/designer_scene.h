@@ -10,6 +10,7 @@
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/utility/uuid.h>
+#include <csapex/profiling/profilable.h>
 
 /// SYSTEM
 #include <QGraphicsScene>
@@ -20,7 +21,7 @@
 namespace csapex
 {
 
-class DesignerScene : public QGraphicsScene
+class DesignerScene : public QGraphicsScene, public Profilable
 {
     Q_OBJECT
 
@@ -134,8 +135,6 @@ private:
         Position end_pos;
 
         QString label;
-
-        int level;
 
         double r;
     };

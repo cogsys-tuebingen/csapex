@@ -91,20 +91,21 @@ Connection::Connection()
 Connection::~Connection()
 {
     if(parent_) {
-        parent_->removeConnection(this);
+        detach();
     }
 }
 
 void Connection::detach() const
 {
+    detached_ = true;
     parent_->removeConnection(this);
     parent_ = nullptr;
-    detached_ = true;
 }
 
 void Connection::disconnect() const
 {
     if(parent_) {
+        apex_assert_hard(parent_->guard_ == -1);
         if(deleter_) {
             deleter_();
         }

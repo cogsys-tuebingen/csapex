@@ -16,7 +16,7 @@ class OutputProgressParameterAdapter : public ParameterAdapter
 public:
     OutputProgressParameterAdapter(param::OutputProgressParameter::Ptr p);
 
-    virtual void setup(QBoxLayout* layout, const std::string& display_name) override;
+    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
 
 private:
     param::OutputProgressParameterPtr op_p_;

@@ -65,6 +65,7 @@ public:
     UUID parent_uuid_;
 
     std::map<std::string, csapex::param::ParameterPtr> params;
+    std::map<std::string, std::string> param_valid_name_cache;
     std::map<std::string, bool> temporary;
     std::set<std::string> persistent;
     std::set<std::string> legacy;

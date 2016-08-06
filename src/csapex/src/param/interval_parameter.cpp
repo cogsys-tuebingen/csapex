@@ -107,10 +107,12 @@ void IntervalParameter::doSetValueFrom(const Parameter &other)
             change = boost::any_cast<double>(values_.first) != boost::any_cast<double>(interval->values_.first) ||
                     boost::any_cast<double>(values_.second) != boost::any_cast<double>(interval->values_.second);
         }
+        values_ = interval->values_;
+        max_ = interval->max_;
+        min_ = interval->min_;
+        step_ = interval->step_;
+
         if(change) {
-            values_ = interval->values_;
-            max_ = interval->max_;
-            min_ = interval->min_;
             triggerChange();
         }
     } else {

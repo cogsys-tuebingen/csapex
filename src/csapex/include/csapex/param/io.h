@@ -10,10 +10,17 @@
 namespace YAML {
 
 template<>
-struct convert<csapex::param::Parameter::Ptr> {
-    static Node encode(const csapex::param::Parameter::Ptr& rhs);
+struct convert<csapex::param::ParameterPtr> {
+    static Node encode(const csapex::param::ParameterPtr& rhs);
 
-    static bool decode(const Node& node, csapex::param::Parameter::Ptr& rhs);
+    static bool decode(const Node& node, csapex::param::ParameterPtr& rhs);
+};
+
+template<>
+struct convert<csapex::param::ParameterConstPtr> {
+    static Node encode(const csapex::param::ParameterConstPtr& rhs);
+
+    static bool decode(const Node& node, csapex::param::ParameterConstPtr& rhs);
 };
 
 }

@@ -62,6 +62,15 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
     QObject::connect(this, &PortPanel::connectorRemoved, this, &PortPanel::removePortForConnector);
 }
 
+void PortPanel::setVisible(bool visible)
+{
+    if(mainlayout->isEmpty()) {
+        QFrame::setVisible(false);
+    } else {
+        QFrame::setVisible(visible);
+    }
+}
+
 void PortPanel::enableMetaPort(const AUUID& target)
 {
     MetaPort* meta_port = new MetaPort(port_type::opposite(type_), target);

@@ -20,6 +20,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/designer/designerio.h>
 #include "ui_designer.h"
+#include <csapex/view/widgets/search_dialog.h>
 
 /// SYSTEM
 #include <QTabWidget>
@@ -118,6 +119,28 @@ void Designer::showGraph(UUID uuid)
     showGraph(graphs_.at(uuid));
 }
 
+void Designer::showNodeDialog()
+{
+    if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
+        current_view->showNodeInsertDialog();
+    }
+}
+
+void Designer::showNodeSearchDialog()
+{
+    if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
+        SearchDialog diag(current_view->getGraphFacade()->getGraph(), core_.getNodeFactory(),
+                          "Please enter the UUID, the label or the type of the node");
+
+        int r = diag.exec();
+
+        if(r) {
+            Q_EMIT focusOnNode(diag.getAUUID());
+        }
+    }
+}
+
+
 void Designer::addGraph(GraphFacadePtr graph_facade)
 {
     UUID uuid = graph_facade->getAbsoluteUUID();
@@ -168,6 +191,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     }
 
     GraphView* graph_view = new GraphView(graph_facade, view_core_, this);
+    graph_view->useProfiler(profiler_);
     graph_views_[graph] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();
     auuid_views_[graph_facade->getAbsoluteUUID()] = graph_view;
@@ -199,8 +223,8 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
 
     ui->tabWidget->setCurrentIndex(tab);
 
-    QObject::connect(graph_view, SIGNAL(boxAdded(NodeBox*)), this, SLOT(addBox(NodeBox*)));
-    QObject::connect(graph_view, SIGNAL(boxRemoved(NodeBox*)), this, SLOT(removeBox(NodeBox*)));
+    QObject::connect(graph_view, &GraphView::boxAdded, this, &Designer::addBox);
+    QObject::connect(graph_view, &GraphView::boxRemoved, this, &Designer::removeBox);
 
     for(const auto& nh : graph->getAllNodeHandles()) {
         NodeBox* box = graph_view->getBox(nh->getUUID());
@@ -440,6 +464,19 @@ void Designer::removeBox(NodeBox *box)
     minimap_->update();
 }
 
+void Designer::focusOnNode(const AUUID &id)
+{
+    AUUID graph_id = id.parentUUID().getAbsoluteUUID();
+
+    // show the parent graph
+    showGraph(graph_id);
+
+    // set the node in focus and center it
+    GraphView* view = getGraphView(graph_id);
+
+    view->focusOnNode(id.id());
+}
+
 
 void Designer::saveSettings(YAML::Node& doc)
 {
@@ -477,5 +514,16 @@ void Designer::loadView(Graph* graph, YAML::Node &doc)
     }
     states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
 }
+
+void Designer::useProfiler(std::shared_ptr<Profiler> profiler)
+{
+    Profilable::useProfiler(profiler);
+
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
+        view->useProfiler(profiler);
+    }
+}
+
 /// MOC
 #include "../../../include/csapex/view/designer/moc_designer.cpp"

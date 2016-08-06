@@ -4,9 +4,9 @@
 /// COMPONENT
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 #include <csapex/utility/assert.h>
-#include <csapex/msg/message_traits.h>
+#include <csapex/msg/token_traits.h>
 
 /// SYSTEM
 #include <iostream>

@@ -9,6 +9,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/slim_signal.hpp>
+#include <csapex/profiling/profiler.h>
 
 /// SYSTEM
 #include <QMainWindow>
@@ -91,6 +92,7 @@ public Q_SLOTS:
     void copyRight();
     void clearBlock();
     void resetActivity();
+    void enableDebugProfiling(bool enabled);
 
 Q_SIGNALS:
     void statusChanged(const QString& status);
@@ -110,6 +112,8 @@ private:
     CommandDispatcher* cmd_dispatcher_;
     GraphFacadePtr root_;
     Executor& executor_;
+
+    std::shared_ptr<Profiler> profiler_;
 
     Ui::CsApexWindow* ui;
 

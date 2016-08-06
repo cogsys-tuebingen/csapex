@@ -60,5 +60,6 @@
         <file>port_slot.png</file>
         <file>port_event.png</file>
         <file>pencil.png</file>
+        <file>magnifier.png</file>
     </qresource>
 </RCC>

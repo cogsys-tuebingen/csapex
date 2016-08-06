@@ -11,7 +11,7 @@
 #include <csapex/msg/output_transition.h>
 #include <csapex/msg/static_output.h>
 #include <csapex/msg/dynamic_output.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
 #include <csapex/signal/slot.h>
@@ -27,6 +27,7 @@
 #include <csapex/msg/no_message.h>
 #include <csapex/msg/end_of_sequence_message.h>
 #include <csapex/utility/exceptions.h>
+#include <csapex/profiling/profiler.h>
 
 /// SYSTEM
 #include <thread>
@@ -38,17 +39,19 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     : node_handle_(node_handle),
       is_setup_(false), state_(State::IDLE),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
-      ticks_(0),
-      profiling_(false)
+      ticks_(0)
 {
     node_handle->setNodeWorker(this);
 
+    profiler_ = std::make_shared<Profiler>();
+
     NodePtr node = node_handle_->getNode().lock();
+    node->useTimer(profiler_->getTimer(node_handle->getUUID().getFullName()));
 
 
     try {
         handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
-                                             connectConnector(c.get());
+                                             connectConnector(c);
                                          }));
         handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
                                              disconnectConnector(c.get());
@@ -152,6 +155,11 @@ NodeWorker::State NodeWorker::getState() const
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
     return state_;
+}
+
+std::shared_ptr<Profiler> NodeWorker::getProfiler()
+{
+    return profiler_;
 }
 
 bool NodeWorker::isEnabled() const
@@ -277,14 +285,9 @@ void NodeWorker::reset()
 
 void NodeWorker::setProfiling(bool profiling)
 {
-    profiling_ = profiling;
+    profiler_->setEnabled(profiling);
 
-    {
-        std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
-        timer_history_.clear();
-    }
-
-    if(profiling_) {
+    if(profiling) {
         startProfiling(this);
     } else {
         stopProfiling(this);
@@ -293,7 +296,7 @@ void NodeWorker::setProfiling(bool profiling)
 
 bool NodeWorker::isProfiling() const
 {
-    return profiling_;
+    return profiler_->isEnabled();
 }
 
 void NodeWorker::killExecution()
@@ -420,14 +423,12 @@ void NodeWorker::startProcessingMessages()
 
     std::unique_lock<std::recursive_mutex> sync_lock(sync);
 
-    current_process_timer_.reset();
-
-    if(profiling_) {
-        current_process_timer_.reset(new Timer(getUUID().getFullName()));
-        timerStarted(this, PROCESS, current_process_timer_->startTimeMs());
+    if(profiler_->isEnabled()) {
+        Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
+        timer->restart();
+        timerStarted(this, PROCESS, timer->startTimeMs());
     }
 
-    node->useTimer(current_process_timer_.get());
 
     bool sync = !node->isAsynchronous();
 
@@ -505,14 +506,9 @@ void NodeWorker::finishProcessing()
 
 void NodeWorker::signalExecutionFinished()
 {
-    if(current_process_timer_) {
-        finishTimer(current_process_timer_);
-    }
+    finishTimer(profiler_->getTimer(node_handle_->getUUID().getFullName()));
 
     if(trigger_process_done_->isConnected()) {
-        if(current_process_timer_) {
-            current_process_timer_->step("trigger process done");
-        }
         trigger_process_done_->trigger();
     }
 }
@@ -586,24 +582,15 @@ bool NodeWorker::areAllInputsAvailable() const
 
 void NodeWorker::finishTimer(Timer::Ptr t)
 {
-    t->finish();
-
-    {
-        std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
-        timer_history_.push_back(t);
+    if(!t) {
+        return;
     }
-    timerStopped(this, t->stopTimeMs());
+
+    t->finish();
+    if(t->isEnabled()) {
+        timerStopped(this, t->stopTimeMs());
+    }
 }
-
-std::vector<TimerPtr> NodeWorker::extractLatestTimers()
-{
-    std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
-
-    std::vector<TimerPtr> result = timer_history_;
-    timer_history_.clear();
-    return result;
-}
-
 
 void NodeWorker::notifyMessagesProcessed()
 {
@@ -833,12 +820,14 @@ bool NodeWorker::tick()
                     }
                     node_handle_->getOutputTransition()->clearBuffer();
 
-                    TimerPtr t = nullptr;
-                    if(profiling_) {
-                        t.reset(new Timer(getUUID().getFullName()));
-                        timerStarted(this, TICK, t->startTimeMs());
+                    Timer::Ptr timer;
+
+                    if(profiler_->isEnabled()) {
+                        timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
+                        timer->restart();
+                        timerStarted(this, TICK, timer->startTimeMs());
                     }
-                    node->useTimer(t.get());
+
 
                     has_ticked = tickable->doTick(*node_handle_, *node);
 
@@ -852,9 +841,7 @@ bool NodeWorker::tick()
                         ++ticks_;
                     }
 
-                    if(t) {
-                        finishTimer(t);
-                    }
+                    finishTimer(timer);
 
                     setState(State::IDLE);
                 }
@@ -891,33 +878,38 @@ void NodeWorker::checkParameters()
 }
 
 
-void NodeWorker::connectConnector(Connectable *c)
+void NodeWorker::connectConnector(ConnectablePtr c)
 {
-    connections_[c].emplace_back(c->connection_added_to.connect([this](Connectable*) { checkIO(); }));
-    connections_[c].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
-    connections_[c].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
-    connections_[c].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
+    connections_[c.get()].emplace_back(c->connection_added_to.connect([this](Connectable*) { checkIO(); }));
+    connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
+    connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
+    connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
 
-    if(Event* event = dynamic_cast<Event*>(c)) {
-        auto connection = event->triggered.connect([this, event]() {
-            node_handle_->executionRequested([this, event]() {
+    if(EventPtr event = std::dynamic_pointer_cast<Event>(c)) {
+        auto connection = event->triggered.connect([this]() {
+            node_handle_->executionRequested([this]() {
                 sendEvents(node_handle_->isActive());
             });
         });
-        connections_[c].emplace_back(connection);
+        connections_[c.get()].emplace_back(connection);
 
-    } else if(Slot* slot = dynamic_cast<Slot*>(c)) {
-        auto connection = slot->triggered.connect([this, slot]() {
-            node_handle_->executionRequested([this, slot]() {
-                TokenPtr token = slot->getToken();
-                apex_assert_hard(token);
-                if(token->isActive()) {
-                    node_handle_->setActive(true);
+    } else if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(c)) {
+        SlotWeakPtr slot_w = slot;
+        auto connection = slot->triggered.connect([this, slot_w]() {
+            node_handle_->executionRequested([this, slot_w]() {
+                if(SlotPtr slot = slot_w.lock()) {
+                    TokenPtr token = slot->getToken();
+                    if(token) {
+                        //apex_assert_hard(token);
+                        if(token->isActive()) {
+                            node_handle_->setActive(true);
+                        }
+                        slot->handleEvent();
+                    }
                 }
-                slot->handleEvent();
             });
         });
-        connections_[c].emplace_back(connection);
+        connections_[c.get()].emplace_back(connection);
     }
 }
 

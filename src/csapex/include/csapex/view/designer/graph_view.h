@@ -13,6 +13,7 @@
 #include <csapex/model/connector_type.h>
 #include <csapex/utility/create_connector_request.h>
 #include <csapex/view/csapex_view_core.h>
+#include <csapex/profiling/profilable.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -25,7 +26,7 @@ namespace csapex
 
 class NodeFactory;
 
-class GraphView : public QGraphicsView
+class GraphView : public QGraphicsView, public Profilable
 {
     Q_OBJECT
 
@@ -65,6 +66,8 @@ public:
 
     GraphFacade* getGraphFacade() const;
 
+    void focusOnNode(const UUID& uuid);
+
     void resizeEvent(QResizeEvent *event);
     void scrollContentsBy(int dx, int dy);
 
@@ -91,6 +94,8 @@ public:
     void startPlacingBox(const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
     void startCloningSelection(NodeBox *handle, const QPoint &offset = QPoint(0,0));
 
+    virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
+
 Q_SIGNALS:
     void selectionChanged();
     void viewChanged();
@@ -101,12 +106,11 @@ Q_SIGNALS:
     void startProfilingRequest(NodeWorker* box);
     void stopProfilingRequest(NodeWorker *box);
 
-
     void triggerConnectorCreated(ConnectablePtr connector);
     void triggerConnectorRemoved(ConnectablePtr connector);
 
 public Q_SLOTS:
-    void showBoxDialog();
+    void showNodeInsertDialog();
 
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
@@ -149,6 +153,8 @@ public Q_SLOTS:
     void animateZoom();
 
     void animateScroll();
+
+    void enableSelection(bool enabled);
 
     void updateSelection();
     void selectAll();
@@ -212,6 +218,8 @@ private:
     QTimer scroll_animation_timer_;
     double scroll_offset_x_;
     double scroll_offset_y_;
+
+    bool panning_possible_;
 
     bool middle_mouse_dragging_;
     bool middle_mouse_panning_;

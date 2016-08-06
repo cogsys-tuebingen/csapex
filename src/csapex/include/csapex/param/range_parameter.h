@@ -25,6 +25,9 @@ public:
     typedef std::shared_ptr<RangeParameter> Ptr;
 
 public:
+    csapex::slim_signal::Signal<void(Parameter*)> step_changed;
+
+public:
     RangeParameter();
     explicit RangeParameter(const std::string& name, const ParameterDescription &description);
     virtual ~RangeParameter();
@@ -52,11 +55,6 @@ public:
 
     template <typename T>
     T step() const { return read<T>(step_); }
-
-    template<class Archive>
-    void serialize(Archive& ar, const unsigned int /*file_version*/) {
-        ar & value_;
-    }
 
     template <typename T>
     void setInterval(T min, T max) {
@@ -93,20 +91,22 @@ public:
         }
     }
 
-//    template <typename T>
-//    void setStep(T step) {
-//        T _step = read<T>(step_);
-//        if (_step != step) {
-//            // test, if difference between max and min is bigger than step
-//            T _max = read<T>(max_);
-//            T _min = read<T>(min_);
-//            if(((_min + step) < _max) && ((_min - step) < _max)) {
-//                step_ = step;
-//            } else {
-//                step_ = _max - _min;
-//            }
-//        }
-//    }
+    template <typename T>
+    void setStep(T step) {
+        T _step = read<T>(step_);
+        if (_step != step) {
+            // test, if difference between max and min is bigger than step
+            T _max = read<T>(max_);
+            T _min = read<T>(min_);
+            if(((_min + step) < _max) && ((_min - step) < _max)) {
+                step_ = step;
+            } else {
+                step_ = _max - _min;
+            }
+
+            step_changed(this);
+        }
+    }
 
 protected:
     virtual boost::any get_unsafe() const override;

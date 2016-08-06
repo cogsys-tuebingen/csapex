@@ -49,29 +49,13 @@ AngleParameterAdapter::AngleParameterAdapter(param::AngleParameter::Ptr p)
 
 }
 
-void AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QLabel* label = new QLabel(angle_p_->name().c_str());
 
-    context_handler->addAction(new QAction("set -π", context_handler), [this](){
-        set(-M_PI);
-    });
-    context_handler->addAction(new QAction("set -π/2", context_handler), [this](){
-        set(-M_PI_2);
-    });
-    context_handler->addAction(new QAction("set 0", context_handler), [this](){
-        set(0.0);
-    });
-    context_handler->addAction(new QAction("set +π/2", context_handler), [this](){
-        set(M_PI_2);
-    });
-    context_handler->addAction(new QAction("set +π", context_handler), [this](){
-        set(M_PI-1e-9);
-    });
-    context_handler->setParent(label);
-
     label->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+    QObject::connect(label, &QLabel::customContextMenuRequested,
+                     this, &AngleParameterAdapter::customContextMenuRequested);
 
     layout->addWidget(label);
 
@@ -80,10 +64,9 @@ void AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& display
     dial->setMaximum(360.0 * 4);
     dial->setWrapping(true);
     dial->setValue(angleToDial(angle_p_->as<double>()));
-
     dial->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(dial, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
-
+    QObject::connect(dial.data(), &QDial::customContextMenuRequested,
+                     this, &AngleParameterAdapter::customContextMenuRequested);
     layout->addWidget(dial);
 
     QPointer<QDoubleSpinBox> spin = new QDoubleSpinBox;
@@ -92,6 +75,7 @@ void AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& display
     spin->setDecimals(5);
     spin->setSingleStep(0.001);
     spin->setValue(angle_p_->as<double>());
+    spin->setKeyboardTracking(false);
 
     layout->addWidget(spin);
 
@@ -141,7 +125,7 @@ void AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& display
     });
 
     // model change -> ui
-    connectInGuiThread(angle_p_->parameter_changed, [this, dial, spin](){
+    connectInGuiThread(angle_p_->parameter_changed, [this, dial, spin](param::Parameter*){
         if(!angle_p_ || !dial  || !spin) {
             return;
         }
@@ -165,6 +149,27 @@ void AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& display
 
         dial->blockSignals(false);
         spin->blockSignals(false);
+    });
+
+    return label;
+}
+
+void AngleParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+{
+    context_handler->addAction(new QAction("set -π", context_handler), [this](){
+        set(-M_PI);
+    });
+    context_handler->addAction(new QAction("set -π/2", context_handler), [this](){
+        set(-M_PI_2);
+    });
+    context_handler->addAction(new QAction("set 0", context_handler), [this](){
+        set(0.0);
+    });
+    context_handler->addAction(new QAction("set +π/2", context_handler), [this](){
+        set(M_PI_2);
+    });
+    context_handler->addAction(new QAction("set +π", context_handler), [this](){
+        set(M_PI-1e-9);
     });
 }
 

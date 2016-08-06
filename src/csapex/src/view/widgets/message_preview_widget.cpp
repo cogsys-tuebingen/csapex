@@ -16,7 +16,7 @@
 using namespace csapex;
 using namespace csapex::impl;
 
-PreviewInput::PreviewInput(MessagePreviewWidget *parent)
+PreviewInput::PreviewInput(QPointer<MessagePreviewWidget> parent)
     : Input(UUIDProvider::makeUUID_without_parent("message_preview_in")),
       parent_(parent)
 {
@@ -30,6 +30,9 @@ void PreviewInput::setToken(TokenPtr token)
     if(isConnected()) {
         TokenDataConstPtr msg = token->getTokenData();
 
+        if(!parent_) {
+            return;
+        }
         try {
             if(auto m = msg::message_cast<connection_types::GenericValueMessage<int>>(msg)) {
                 parent_->displayTextRequest(QString::number(m->value));
@@ -50,7 +53,9 @@ void PreviewInput::setToken(TokenPtr token)
             MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
             if(renderer) {
                 QImage img = renderer->render(msg);
-                parent_->displayImageRequest(img);
+                if(parent_) {
+                    parent_->displayImageRequest(img);
+                }
             }
         } catch(const std::exception& e) {
             // silent death
@@ -58,6 +63,10 @@ void PreviewInput::setToken(TokenPtr token)
     }
 }
 
+void PreviewInput::detach()
+{
+    parent_.clear();
+}
 
 MessagePreviewWidget::MessagePreviewWidget()
     : pm_item_(nullptr), txt_item_(nullptr)
@@ -83,6 +92,7 @@ MessagePreviewWidget::MessagePreviewWidget()
 
 MessagePreviewWidget::~MessagePreviewWidget()
 {
+    input_->detach();
     if(isConnected()) {
         disconnect();
     }

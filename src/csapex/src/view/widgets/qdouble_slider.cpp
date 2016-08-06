@@ -22,11 +22,18 @@ QDoubleSlider::~QDoubleSlider()
 {
 }
 
+void QDoubleSlider::setStepSize(double step)
+{
+    step_ = step;
+    update();
+}
+
 void QDoubleSlider::update()
 {
     if(min_ > max_) {
         max_ = min_;
     }
+    setSingleStep(step_);
     setRange(double2int(min_), double2int(max_));
 }
 

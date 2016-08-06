@@ -9,6 +9,7 @@
 
 /// SYSTEM
 #include <qglobal.h>
+#include <boost/regex.hpp>
 
 using namespace csapex;
 
@@ -69,12 +70,14 @@ void GenericState::initializePersistentParameters()
 
 void GenericState::addParameter(csapex::param::Parameter::Ptr param)
 {
-    apex_assert_hard(param->name() != "noname");
-    auto legacy_pos = legacy.find(param->name());
-    auto param_pos = params.find(param->name());
+    std::string param_name = param->name();
+
+    apex_assert_hard(param_name != "noname");
+    auto legacy_pos = legacy.find(param_name);
+    auto param_pos = params.find(param_name);
     if(param_pos != params.end()) {
         if(legacy_pos == legacy.end()) {
-            throw std::logic_error(std::string("a parameter with the name ") + param->name() + " has already been added.");
+            throw std::logic_error(std::string("a parameter with the name ") + param_name + " has already been added.");
         }
         *param = *param_pos->second;
     }
@@ -83,9 +86,20 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
     if(legacy_pos != legacy.end()) {
         legacy.erase(legacy_pos);
     }
-    if(std::find(order.begin(), order.end(), param->name()) == order.end()) {
-        order.push_back(param->name());
+    if(std::find(order.begin(), order.end(), param_name) == order.end()) {
+        order.push_back(param_name);
+    }    
+
+    std::string valid_name;
+    // generate a valid name, valid characters are a-z, A-Z, 0-9, / and _.
+    boost::regex invalid("[^0-9a-zA-Z/_]");
+    if (boost::regex_search(param_name, invalid)) {
+        valid_name = boost::regex_replace(param_name, invalid, std::string("_"));
+    } else {
+        valid_name = param_name;
     }
+
+    param_valid_name_cache[valid_name] = param_name;
 }
 
 void GenericState::removeParameter(csapex::param::ParameterPtr param)
@@ -263,7 +277,12 @@ std::size_t GenericState::getParameterCount() const
 
 bool GenericState::hasParameter(const std::string& name) const
 {
-    return params.find(name) != params.end();
+    auto pos = param_valid_name_cache.find(name);
+    if(pos == param_valid_name_cache.end()) {
+        return false;
+    }
+
+    return params.find(pos->second) != params.end();
 }
 
 template <typename T>

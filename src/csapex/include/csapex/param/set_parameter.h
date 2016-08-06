@@ -36,8 +36,7 @@ public:
 
     virtual bool accepts(const std::type_info& type) const override;
 
-    template <typename T>
-    T def() const { return read<T>(def_); }
+    std::string defText() const;
 
     template <typename T>
     void setSet(const std::vector< std::pair<std::string, T> >& set) {
@@ -65,6 +64,7 @@ public:
     std::string getText() const;
 
     int noParameters() const;
+
 
 protected:
     virtual boost::any get_unsafe() const override;

@@ -37,9 +37,6 @@ public:
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
 
-    int getLevel() const;
-    void setLevel(int level);
-
 
     Input* addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional) override;
     void manageInput(InputPtr in);
@@ -47,7 +44,7 @@ public:
 
     Output* addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic) override;
     void manageOutput(OutputPtr out);
-    bool isParameterOutput(Output* out) const;
+    bool isParameterOutput(Output* out) const override;
 
     Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) override;
     void manageSlot(SlotPtr s);
@@ -188,8 +185,6 @@ private:
     UUIDProvider* uuid_provider_;
 
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
-
-    int level_;
 
     bool source_;
     bool sink_;

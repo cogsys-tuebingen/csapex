@@ -17,7 +17,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_modifier.h>
-#include <csapex/utility/timer.h>
+#include <csapex/profiling/timer.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
@@ -110,7 +110,6 @@ void Graph::clear()
     apex_assert_hard(nodes_.empty());
 
     node_component_.clear();
-    node_level_.clear();
 
     node_parents_.clear();
     node_children_.clear();
@@ -331,148 +330,7 @@ void Graph::buildConnectedComponents()
         ++component;
     }
 
-    assignLevels();
-
     structureChanged(this);
-}
-
-void Graph::assignLevels()
-{
-    std::map<NodeHandle*, int> node_level;
-
-    static const int NO_LEVEL = std::numeric_limits<int>::min();
-
-    std::deque<NodeHandle*> unmarked;
-    for(auto nh : nodes_) {
-        if(nh->isSource() && nh->isSink()) {
-            node_level[nh.get()] = 0;
-        } else if(node_parents_[nh.get()].empty()) {
-            node_level[nh.get()] = 0;
-        } else {
-            node_level[nh.get()] = NO_LEVEL;
-            unmarked.push_back(nh.get());
-        }
-    }
-
-    std::deque<NodeHandle*> gateways;
-
-    // to assign a level, every parent must be known
-    while(!unmarked.empty()) {
-        NodeHandle* current = unmarked.front();
-        unmarked.pop_front();
-
-        int max_level = NO_LEVEL;
-        for(NodeHandle* parent : node_parents_.at(current)) {
-            int parent_level = node_level[parent];
-            if(parent_level == NO_LEVEL) {
-                max_level = NO_LEVEL;
-                break;
-            } else {
-                if(parent_level > max_level) {
-                    max_level = parent_level;
-                }
-            }
-        }
-
-        int max_dynamic_level = NO_LEVEL;
-        bool has_dynamic_parent_output = false;
-        bool has_dynamic_input = false;
-        for(const auto& input : current->getExternalInputs()) {
-            if(input->isDynamic()) {
-                has_dynamic_input = true;
-            }
-
-            for(const auto& connection : input->getConnections()) {
-                const auto& parent_output = connection->from();
-                if(parent_output->isDynamic()) {
-                    has_dynamic_parent_output = true;
-                    NodeHandle* node = findNodeHandleForConnector(parent_output->getUUID());
-                    int level = node_level.at(node);
-                    //                    apex_assert_hard(level != NO_LEVEL);
-
-                    if(level > max_dynamic_level) {
-                        max_dynamic_level = level;
-                    }
-                }
-            }
-        }
-
-        bool unknown_parent = max_level == NO_LEVEL;
-        if(unknown_parent) {
-            unmarked.push_back(current);
-
-        } else {
-            if(!has_dynamic_parent_output && !has_dynamic_input) {
-                node_level[current] = max_level;
-
-            } else if(has_dynamic_parent_output && !has_dynamic_input) {
-                node_level[current] = max_level + 1;
-
-            } else if(!has_dynamic_parent_output && has_dynamic_input) {
-                node_level[current] = max_level - 1;
-                gateways.push_back(current);
-
-            } else if(has_dynamic_parent_output && has_dynamic_input) {
-                node_level[current] = max_level;
-            }
-        }
-    }
-
-    for(auto node : nodes_) {
-        node->setLevel(node_level[node.get()]);
-
-        for(auto output : node->getExternalOutputs()) {
-            if(output->isDynamic()) {
-                DynamicOutput* dout = dynamic_cast<DynamicOutput*>(output.get());
-                dout->clearCorrespondents();
-            }
-        }
-    }
-
-    for(NodeHandle* node : gateways) {
-        DynamicOutput* correspondent = nullptr;
-
-        // perform bfs to find the parent with a dynamic output
-        std::deque<NodeHandle*> Q;
-        std::set<NodeHandle*> visited;
-        Q.push_back(node);
-        while(!Q.empty()) {
-            auto* current = Q.front();
-            Q.pop_front();
-            visited.insert(current);
-
-            for(auto input : current->getExternalInputs()) {
-                if(input->isConnected()) {
-                    ConnectionPtr connection = input->getConnections().front();
-                    Output* out = dynamic_cast<Output*>(connection->from());
-                    if(out) {
-                        auto* parent = findNodeHandleForConnector(out->getUUID());
-
-                        if(out->isDynamic() && parent->getLevel() == node->getLevel()) {
-                            correspondent = dynamic_cast<DynamicOutput*>(out);
-                            Q.clear();
-                            break;
-                        }
-
-                        if(visited.find(parent) == visited.end()) {
-                            Q.push_back(parent);
-                        }
-                    }
-                }
-            }
-        }
-
-        if(correspondent) {
-            for(auto input : node->getExternalInputs()) {
-                if(input->isDynamic()) {
-                    DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
-                    di->setCorrespondent(correspondent);
-                    correspondent->addCorrespondent(di);
-                }
-            }
-        }
-    }
-
 }
 
 
@@ -484,16 +342,6 @@ int Graph::getComponent(const UUID &node_uuid) const
     }
 
     return node_component_.at(node);
-}
-
-int Graph::getLevel(const UUID &node_uuid) const
-{
-    NodeHandle* node = findNodeHandleNoThrow(node_uuid);
-    if(!node) {
-        return 0;
-    }
-
-    return node->getLevel();
 }
 
 Node* Graph::findNode(const UUID& uuid) const
@@ -734,6 +582,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
 {
     continuation_ = continuation;
 
+    // can fail...
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
     for(Input* i : node_modifier.getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i);

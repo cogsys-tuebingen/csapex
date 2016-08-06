@@ -14,6 +14,7 @@ public:
     explicit ParameterDescription();
 
     std::string toString() const;
+    bool empty() const;
 
 private:
     std::string description_;

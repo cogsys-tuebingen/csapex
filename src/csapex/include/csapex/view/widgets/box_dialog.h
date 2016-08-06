@@ -3,14 +3,12 @@
 
 /// COMPONENT
 #include <csapex/view/view_fwd.h>
+#include <csapex/view/widgets/completed_line_edit.h>
 
 /// SYSTEM
 #include <QDialog>
-#include <QLineEdit>
 #include <QFuture>
 
-class QAbstractItemModel;
-class QListView;
 class QStringListModel;
 class QModelIndex;
 class QProgressBar;
@@ -20,29 +18,6 @@ namespace csapex
 class NodeFactory;
 class NodeFilterProxyModel;
 
-class CompleteLineEdit : public QLineEdit
-{
-    Q_OBJECT
-
-public:
-    CompleteLineEdit(QWidget *parent = 0);
-
-public Q_SLOTS:
-    void update();
-    void setModel(QAbstractItemModel *completer);
-    void completeText(const QModelIndex &index);
-
-protected:
-    virtual void keyPressEvent(QKeyEvent *e);
-    virtual void focusOutEvent(QFocusEvent *e);
-    virtual void focusInEvent(QFocusEvent* e);
-
-private:
-    QListView *list_view;
-
-    bool was_hidden;
-    int line_height;
-};
 
 class BoxDialog : public QDialog
 {
@@ -66,7 +41,7 @@ private:
     void makeUI();
 
 private:
-    CompleteLineEdit * name_edit_;
+    CompletedLineEdit * name_edit_;
     NodeFactory& node_factory_;
     NodeAdapterFactory& adapter_factory_;
 

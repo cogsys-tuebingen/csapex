@@ -45,6 +45,8 @@ protected:
 public:
     virtual ~Connection();
 
+    void detach(Connectable* c);
+
     Output* from() const;
     Input* to() const;
     int id() const;
@@ -75,10 +77,6 @@ public:
     void setState(State s);
 
     void reset();
-
-    bool inLevel() const;
-    bool upLevel() const;
-    bool downLevel() const;
 
 public:
     csapex::slim_signal::Signal<void()> deleted;
@@ -114,6 +112,7 @@ protected:
     bool is_dynamic_;
 
     bool active_;
+    bool detached_;
 
     std::vector<FulcrumPtr> fulcrums_;
 

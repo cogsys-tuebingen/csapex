@@ -25,6 +25,9 @@ public:
     typedef std::shared_ptr<IntervalParameter> Ptr;
 
 public:
+    csapex::slim_signal::Signal<void(Parameter*)> step_changed;
+
+public:
     IntervalParameter();
     explicit IntervalParameter(const std::string& name, const ParameterDescription &description);
     virtual ~IntervalParameter();
@@ -67,15 +70,10 @@ public:
     T max() const { return read<T>(max_); }
 
     template <typename T>
-    T def() const { return read<T>(def_); }
+    std::pair<T, T> def() const { return std::make_pair(read<T>(def_.first), read<T>(def_.second)); }
 
     template <typename T>
     T step() const { return read<T>(step_); }
-
-    template<class Archive>
-    void serialize(Archive& ar, const unsigned int /*file_version*/) {
-        ar & values_;
-    }
 
 
     template <typename T>
@@ -104,6 +102,24 @@ public:
             scope_changed(this);
         }
     }
+
+    template <typename T>
+    void setStep(T step) {
+        T _step = read<T>(step_);
+        if (_step != step) {
+            // test, if difference between max and min is bigger than step
+            T _max = read<T>(max_);
+            T _min = read<T>(min_);
+            if(((_min + step) < _max) && ((_min - step) < _max)) {
+                step_ = step;
+            } else {
+                step_ = _max - _min;
+            }
+
+            step_changed(this);
+        }
+    }
+
 
 protected:
     virtual boost::any get_unsafe() const override;

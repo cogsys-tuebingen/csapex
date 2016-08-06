@@ -26,7 +26,7 @@ BitSetParameterAdapter::BitSetParameterAdapter(param::BitSetParameter::Ptr p)
 
 }
 
-void BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QPointer<QGroupBox> group = new QGroupBox(display_name.c_str());
     QVBoxLayout* l = new QVBoxLayout;
@@ -51,7 +51,7 @@ void BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& displa
         });
 
         // model change -> ui
-        connectInGuiThread(bitset_p_->parameter_changed, [this, item, str]() {
+        connectInGuiThread(bitset_p_->parameter_changed, [this, item, str](param::Parameter*) {
             if(!bitset_p_ || !item) {
                 return;
             }
@@ -62,4 +62,13 @@ void BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& displa
     }
 
     layout->addWidget(group);
+
+    return group;
+}
+
+void BitSetParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+{
+    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
+        bitset_p_->set(bitset_p_->def());
+    });
 }

@@ -5,7 +5,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/model/connectable.h>
-#include <csapex/msg/message_traits.h>
+#include <csapex/msg/token_traits.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
 
 namespace csapex

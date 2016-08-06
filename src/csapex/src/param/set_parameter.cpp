@@ -111,6 +111,11 @@ std::string SetParameter::getText() const
     throw std::runtime_error("cannot get the text for parameter '" + name() + "'");
 }
 
+std::string SetParameter::defText() const
+{
+    return convertToString(def_);
+}
+
 
 const std::type_info& SetParameter::type() const
 {

@@ -46,6 +46,9 @@ Q_SIGNALS:
     void connectorAdded(ConnectablePtr c);
     void connectorRemoved(ConnectablePtr c);
 
+public Q_SLOTS:
+    virtual void setVisible(bool visible);
+
 private Q_SLOTS:
     void addPortForConnector(ConnectablePtr c);
     void removePortForConnector(ConnectablePtr c);

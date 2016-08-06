@@ -34,11 +34,6 @@ public:
     template <typename T>
     T def() const { return read<T>(def_); }
 
-    template<class Archive>
-    void serialize(Archive& ar, const unsigned int /*file_version*/) {
-        ar & value_;
-    }
-
 protected:
     virtual boost::any get_unsafe() const override;
     virtual bool set_unsafe(const boost::any& v) override;

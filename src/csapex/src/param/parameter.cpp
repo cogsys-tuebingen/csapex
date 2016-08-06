@@ -1,6 +1,10 @@
 /// HEADER
 #include <csapex/param/parameter.h>
 
+/// PROJECT
+#include <csapex/param/io.h>
+#include <csapex/param/value_parameter.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <cxxabi.h>
@@ -16,7 +20,8 @@ Parameter::Parameter(const std::string &name, const ParameterDescription &descri
 
 Parameter::Parameter(const Parameter& other)
     : name_(other.name_), uuid_(other.uuid_),
-      description_(other.description_), enabled_(other.enabled_), temporary_(other.temporary_), hidden_(other.hidden_), interactive_(other.interactive_)
+      description_(other.description_), enabled_(other.enabled_), temporary_(other.temporary_), hidden_(other.hidden_), interactive_(other.interactive_),
+      dict_(other.dict_)
 {
 }
 
@@ -143,6 +148,11 @@ void Parameter::serialize(YAML::Node &n) const
     if(interactive_) {
         n["interactive"] = interactive_;
     }
+
+    if(!dict_.empty()) {
+        n["dict"] = dict_;
+    }
+
     try {
         doSerialize(n);
     } catch(const std::exception& e) {
@@ -155,6 +165,9 @@ void Parameter::deserialize(const YAML::Node &n)
 {
     if(n["interactive"].IsDefined()) {
         interactive_ = n["interactive"].as<bool>();
+    }
+    if(n["dict"].IsDefined()) {
+        dict_ = n["dict"].as<std::map<std::string, param::ParameterPtr>>();
     }
 
     try {
@@ -176,6 +189,7 @@ void Parameter::setValueFrom(const Parameter &other)
     name_ = other.name_;
     interactive_ = other.interactive_;
     enabled_ = other.enabled_;
+    dict_ = other.dict_;
     doSetValueFrom(other);
 }
 
@@ -185,6 +199,7 @@ void Parameter::clone(const Parameter &other)
     description_ = other.description_;
     interactive_ = other.interactive_;
     enabled_ = other.enabled_;
+    dict_ = other.dict_;
     doClone(other);
 }
 
@@ -207,4 +222,33 @@ void Parameter::throwTypeError(const std::type_info &a, const std::type_info &b,
 bool Parameter::accepts(const std::type_info& t) const
 {
     return type() == t;
+}
+
+void Parameter::setDictionaryEntry(const std::string& key, const param::ParameterPtr& p)
+{
+    dict_[key] = p;
+    dictionary_entry_changed(key);
+}
+
+param::ParameterPtr Parameter::getDictionaryEntry(const std::string &key) const
+{
+    return dict_.at(key);
+}
+
+
+namespace csapex {
+namespace param {
+template <typename T>
+void Parameter::setDictionaryValue(const std::string& key, const T& value)
+{
+    param::ValueParameterPtr p = std::make_shared<param::ValueParameter>();
+    p->set(value);
+    setDictionaryEntry(key, p);
+}
+
+template void Parameter::setDictionaryValue<bool>(const std::string& key, const bool& value);
+template void Parameter::setDictionaryValue<int>(const std::string& key, const int& value);
+template void Parameter::setDictionaryValue<double>(const std::string& key, const double& value);
+template void Parameter::setDictionaryValue<std::string>(const std::string& key, const std::string& value);
+}
 }

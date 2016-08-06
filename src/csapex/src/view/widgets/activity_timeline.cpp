@@ -45,8 +45,12 @@ ActivityTimeline::ActivityTimeline()
 
     setVisible(false);
 
-    QObject::connect(horizontalScrollBar(), SIGNAL(sliderMoved(int)), this, SLOT(updateScrolling()));
-    QObject::connect(this, SIGNAL(addItemRequest(QGraphicsItem*)), this, SLOT(addItem(QGraphicsItem*)));
+    QObject::connect(horizontalScrollBar(), &QScrollBar::sliderMoved,
+                     this, &ActivityTimeline::updateScrolling);
+    QObject::connect(this, &ActivityTimeline::updateRowStartRequest,
+                     this, &ActivityTimeline::updateRowStart);
+    QObject::connect(this, &ActivityTimeline::updateRowStopRequest,
+                     this, &ActivityTimeline::updateRowStop);
 }
 
 ActivityTimeline::~ActivityTimeline()
@@ -145,12 +149,12 @@ void ActivityTimeline::addNode(NodeWorker* node)
     resizeToFit();
 
     auto cstart = node->timerStarted.connect([this](NodeWorker* worker, int type, long stamp) {
-            if(isVisible()) updateRowStart(worker, type, stamp);
+            updateRowStartRequest(worker, type, stamp);
     });
     node2connections_[node].push_back(cstart);
 
     auto cstop = node->timerStopped.connect([this](NodeWorker* worker, long stamp) {
-            if(isVisible()) updateRowStop(worker, stamp);
+            updateRowStopRequest(worker, stamp);
     });
     node2connections_[node].push_back(cstop);
 }
@@ -252,7 +256,7 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, long stamp)
     row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type)));
     row->active_activity_ = row->activities_.back();
 
-    Q_EMIT addItemRequest(row->active_activity_->rect);
+    addItem(row->active_activity_->rect);
 }
 
 void ActivityTimeline::updateRowStop(NodeWorker* node, long stamp)
@@ -308,6 +312,8 @@ void ActivityTimeline::update()
 
 void ActivityTimeline::reset()
 {
+    scene()->clear();
+
     updateTime();
 
     params_.start_time = params_.time;
@@ -375,7 +381,6 @@ ActivityTimeline::Activity::Activity(Parameters* params, Row *row, int start_tim
 
 ActivityTimeline::Activity::~Activity()
 {
-    clear();
 }
 
 
@@ -416,13 +421,8 @@ void ActivityTimeline::Activity::update()
     int bottom = row->top;
 
     double x = std::max(0.0, (start_ - params_->start_time) / params_->resolution);
-    rect->setRect(x, bottom, (stop_ - start_)  / params_->resolution, row_height);
-}
-
-void ActivityTimeline::Activity::clear()
-{
-    delete rect;
-    rect = nullptr;
+    int width = (stop_ - start_)  / params_->resolution;
+    rect->setRect(x, bottom, std::max(2, width), row_height);
 }
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_activity_timeline.cpp"

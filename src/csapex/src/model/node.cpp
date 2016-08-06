@@ -88,6 +88,10 @@ void Node::process()
     // default: do nothing, clients overwrite this
 }
 
+void Node::tearDown()
+{
+
+}
 
 void Node::reset()
 {

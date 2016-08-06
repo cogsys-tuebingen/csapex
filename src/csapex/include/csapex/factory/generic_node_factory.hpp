@@ -1,7 +1,7 @@
 /// PROJECT
 #include <csapex/factory//generic_node.hpp>
 #include <csapex/model/node_constructor.h>
-#include <csapex/msg/message_traits.h>
+#include <csapex/msg/token_traits.h>
 
 /// SYSTEM
 #include <boost/function_types/parameter_types.hpp>

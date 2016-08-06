@@ -2,8 +2,8 @@
 #include <csapex/model/tickable_node.h>
 
 /// PROJECT
-#include <csapex/utility/timer.h>
-#include <csapex/utility/interlude.hpp>
+#include <csapex/profiling/timer.h>
+#include <csapex/profiling/interlude.hpp>
 
 using namespace csapex;
 

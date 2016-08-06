@@ -13,6 +13,7 @@
 #include <QPointer>
 #include <QPushButton>
 #include <QColorDialog>
+#include <QApplication>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -34,14 +35,6 @@ QString toColorSS(const std::vector<int>& v) {
     return QString::fromStdString(ss.str());
 }
 
-void ui_updateColorParameter(param::ColorParameterWeakPtr color_p, QPointer<QPushButton> btn)
-{
-
-}
-
-void model_updateColorParameter(param::ColorParameterWeakPtr color_p)
-{
-}
 }
 
 ColorParameterAdapter::ColorParameterAdapter(param::ColorParameter::Ptr p)
@@ -50,11 +43,16 @@ ColorParameterAdapter::ColorParameterAdapter(param::ColorParameter::Ptr p)
 
 }
 
-void ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QPointer<QPushButton> btn = new QPushButton;
 
     btn->setStyleSheet(toColorSS(color_p_->value()));
+
+    btn->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(btn.data(), &QPushButton::customContextMenuRequested,
+                     this, &ColorParameterAdapter::customContextMenuRequested);
+
 
     QHBoxLayout* sub = new QHBoxLayout;
     sub->addWidget(btn);
@@ -68,7 +66,25 @@ void ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& display
 
         std::vector<int> c = color_p_->value();
         QColor init(c[0], c[1], c[2]);
-        QColor color = QColorDialog::getColor(init);
+
+        QColorDialog diag(QApplication::activeWindow());
+        diag.setCurrentColor(init);
+        diag.setModal(true);
+
+//        diag.setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::ShowAlphaChannel);
+//        diag.setVisible(true);
+//        diag.setOptions(QColorDialog::DontUseNativeDialog);
+
+//        diag.setAttribute(Qt::WA_WState_Visible, true);
+//        diag.setAttribute(Qt::WA_WState_Hidden, false);
+
+        //        diag.setAttribute(Qt::WA_WState_ExplicitShowHide);
+
+        if(!diag.exec()) {
+            return;
+        }
+
+        QColor color = diag.selectedColor();
         if (color.isValid()) {
             std::vector<int> v(3);
             v[0] = color.red();
@@ -83,11 +99,22 @@ void ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& display
     });
 
     // model change -> ui
-    connectInGuiThread(p_->parameter_changed, [this, btn](){
+    connectInGuiThread(p_->parameter_changed, [this, btn](param::Parameter*){
         if(!color_p_ || !btn) {
             return;
         }
         btn->setStyleSheet(toColorSS(color_p_->value()));
+    });
+
+    return btn;
+}
+
+
+
+void ColorParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+{
+    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
+        color_p_->set(color_p_->def());
     });
 }
 

@@ -141,12 +141,14 @@ void NodeRunner::tick()
         }
     }
 
-    NodeHandlePtr handle = worker_->getNodeHandle();
-    NodePtr node = handle->getNode().lock();
-    auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
+    if(success) {
+        NodeHandlePtr handle = worker_->getNodeHandle();
+        NodePtr node = handle->getNode().lock();
+        auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
 
-    if(ticker->isImmediate()) {
-        scheduleTick();
+        if(ticker->isImmediate()) {
+            scheduleTick();
+        }
     }
 }
 

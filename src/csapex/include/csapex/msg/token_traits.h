@@ -1,5 +1,5 @@
-#ifndef MESSAGE_TRAITS_H
-#define MESSAGE_TRAITS_H
+#ifndef token_traits_H
+#define token_traits_H
 
 /// COMPONENT
 #include <csapex/model/token_data.h>
@@ -91,4 +91,4 @@ struct should_use_value_message {
 }
 
 
-#endif // MESSAGE_TRAITS_H
+#endif // token_traits_H

@@ -26,7 +26,7 @@ SetParameterAdapter::SetParameterAdapter(param::SetParameter::Ptr p)
 
 }
 
-void SetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* SetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QPointer<QComboBox> combo = new QComboBox;
 
@@ -49,7 +49,7 @@ void SetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_n
     });
 
     // model change -> ui
-    connectInGuiThread(set_p_->parameter_changed, [this, combo]() {
+    connectInGuiThread(set_p_->parameter_changed, [this, combo](param::Parameter*) {
         if(!set_p_ || !combo) {
             return;
         }
@@ -61,9 +61,11 @@ void SetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_n
         }
     });
 
-    connectInGuiThread(set_p_->scope_changed, [this, combo]() {
+    connectInGuiThread(set_p_->scope_changed, [this, combo](param::Parameter*) {
         updateSetParameterScope(combo);
     });
+
+    return combo;
 }
 
 
@@ -94,4 +96,12 @@ void SetParameterAdapter::updateSetParameterScope(QPointer<QComboBox> combo)
     combo->setCurrentIndex(current);
     combo->blockSignals(false);
     combo->update();
+}
+
+
+void SetParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+{
+    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
+        set_p_->setByName(set_p_->defText());
+    });
 }
