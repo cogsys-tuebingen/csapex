@@ -27,6 +27,7 @@
 #include <csapex/command/command.h>
 #include "ui_csapex_window.h"
 #include <csapex/view/utility/node_list_generator.h>
+#include <csapex/utility/timer.h>
 
 /// PROJECT
 #include <csapex/param/parameter_factory.h>
@@ -162,6 +163,8 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionCopyright_Notices, SIGNAL(triggered()), this, SLOT(copyRight()));
 
     QObject::connect(ui->node_info_tree, SIGNAL(itemSelectionChanged()), this, SLOT(updateNodeInfo()));
+
+    QObject::connect(ui->profiling_debug_enable, SIGNAL(toggled(bool)), this, SLOT(enableDebugProfiling(bool)));
 
     connections_.push_back(core_.resetDone.connect([this](){ designer_->reset(); }));
     connections_.push_back(core_.configChanged.connect([this](){ updateTitle(); }));
@@ -479,6 +482,23 @@ void CsApexWindow::resetActivity()
 {
     std::cerr << "resetting activity" << std::endl;
     root_->resetActivity();
+}
+
+void CsApexWindow::useTimer(std::shared_ptr<Timer> timer)
+{
+    Timable::useTimer(timer);
+    designer_->useTimer(timer);
+}
+
+void CsApexWindow::enableDebugProfiling(bool enabled)
+{
+    if(enabled) {
+        if(!profiling_timer_) {
+            useTimer(std::make_shared<Timer>("Debug"));
+        }
+    } else {
+        useTimer(nullptr);
+    }
 }
 
 void CsApexWindow::updateNodeTypes()

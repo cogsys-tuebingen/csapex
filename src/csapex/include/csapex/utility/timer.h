@@ -1,6 +1,9 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+/// PROJECT
+#include <csapex/utility/slim_signal.hpp>
+
 /// SYSTEM
 #include <chrono>
 #include <boost/noncopyable.hpp>
@@ -50,6 +53,7 @@ public:
 
     public:
         Interlude(Timer* parent, const std::string& name);
+        Interlude(const std::shared_ptr<Timer>& parent, const std::string& name);
         ~Interlude();
     private:
         Timer* parent_;
@@ -57,9 +61,16 @@ public:
     };
 
 public:
+    slim_signal::Signal<void(Interval::Ptr)> finished;
+
+public:
     Timer(const std::string &name);
     ~Timer();
 
+    void setEnabled(bool enabled);
+    bool isEnabled() const;
+
+    void restart();
     void finish();
     std::vector<std::pair<std::string, double> > entries() const;
 
@@ -73,6 +84,8 @@ public:
 
     Interval::Ptr root;
     std::deque<Interval::Ptr> active;
+
+    bool enabled_;
 };
 
 }

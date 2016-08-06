@@ -26,6 +26,9 @@
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/command/delete_fulcrum.h>
+#include <csapex/core/csapex_core.h>
+#include <csapex/utility/timer.h>
+#include <csapex/utility/interlude.hpp>
 
 /// SYSTEM
 #include <QtGui>
@@ -274,6 +277,10 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     long draw_begin = QDateTime::currentMSecsSinceEpoch();
 
 #endif
+    csapex::Timer::Interlude::Ptr interlude;
+//    if(profiling_timer_->isEnabled()) {
+//        interlude.reset(new csapex::Timer::Interlude(profiling_timer_.get(), "render scene"));
+//    }
 
     QGraphicsScene::drawForeground(painter, rect);
 

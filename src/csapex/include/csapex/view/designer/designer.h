@@ -9,6 +9,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/view/csapex_view_core.h>
+#include <csapex/utility/timable.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -26,7 +27,7 @@ namespace csapex
 
 class NodeFactory;
 
-class Designer : public QWidget
+class Designer : public QWidget, public Timable
 {
     Q_OBJECT
 
@@ -61,6 +62,9 @@ public:
 
     void saveView(Graph *graph, YAML::Node &e);
     void loadView(Graph* graph, YAML::Node& doc);
+
+
+    virtual void useTimer(std::shared_ptr<Timer> timer) override;
 
 Q_SIGNALS:
     void selectionChanged();

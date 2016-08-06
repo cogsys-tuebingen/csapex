@@ -1,6 +1,9 @@
 #ifndef TIMABLE_H
 #define TIMABLE_H
 
+/// SYSTEM
+#include <memory>
+
 namespace csapex
 {
 
@@ -10,13 +13,13 @@ class Timable
 {
 public:
     Timable();
-    Timable(Timer* timer);
+    Timable(std::shared_ptr<Timer> timer);
 
-    virtual void useTimer(Timer* timer);
-    Timer* getTimer();
+    virtual void useTimer(std::shared_ptr<Timer> timer);
+    std::shared_ptr<Timer> getTimer();
 
 protected:
-    Timer* profiling_timer_;
+    std::shared_ptr<Timer> profiling_timer_;
 };
 
 }

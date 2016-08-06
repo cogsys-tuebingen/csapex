@@ -9,6 +9,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/slim_signal.hpp>
+#include <csapex/utility/timable.h>
 
 /// SYSTEM
 #include <QMainWindow>
@@ -32,7 +33,7 @@ namespace csapex
 /**
  * @brief The CsApexWindow class provides the window for the evaluator program
  */
-class CsApexWindow : public QMainWindow
+class CsApexWindow : public QMainWindow, public Timable
 {
     Q_OBJECT
 
@@ -50,6 +51,8 @@ public:
     void closeEvent(QCloseEvent* event);
 
     void setupTimeline();
+
+    virtual void useTimer(std::shared_ptr<Timer> timer) override;
 
 private Q_SLOTS:
     void updateMenu();
@@ -91,6 +94,7 @@ public Q_SLOTS:
     void copyRight();
     void clearBlock();
     void resetActivity();
+    void enableDebugProfiling(bool enabled);
 
 Q_SIGNALS:
     void statusChanged(const QString& status);

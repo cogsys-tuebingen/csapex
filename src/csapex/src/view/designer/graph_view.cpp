@@ -1823,5 +1823,14 @@ void GraphView::stopPreview()
     }
 }
 
+
+void GraphView::useTimer(std::shared_ptr<Timer> timer)
+{
+    Timable::useTimer(timer);
+
+    scene_->useTimer(timer);
+}
+
+
 /// MOC
 #include "../../../include/csapex/view/designer/moc_graph_view.cpp"

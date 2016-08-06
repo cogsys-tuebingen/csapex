@@ -1,26 +1,30 @@
 /// HEADER
 #include <csapex/utility/timable.h>
 
+/// COMPONENT
+#include <csapex/utility/timer.h>
+
 using namespace csapex;
 
 Timable::Timable()
-    : profiling_timer_(nullptr)
+    : profiling_timer_(std::make_shared<Timer>("null"))
 {
 
 }
 
-Timable::Timable(Timer* timer)
+Timable::Timable(std::shared_ptr<Timer> timer)
     : profiling_timer_(timer)
 {
 
 }
 
-void Timable::useTimer(Timer *timer)
+void Timable::useTimer(std::shared_ptr<Timer> timer)
 {
+    apex_assert_hard(timer);
     profiling_timer_ = timer;
 }
 
-Timer* Timable::getTimer()
+std::shared_ptr<Timer> Timable::getTimer()
 {
     return profiling_timer_;
 }

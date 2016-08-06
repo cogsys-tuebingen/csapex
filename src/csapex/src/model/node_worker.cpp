@@ -38,12 +38,14 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     : node_handle_(node_handle),
       is_setup_(false), state_(State::IDLE),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
-      ticks_(0),
-      profiling_(false)
+      ticks_(0)
 {
     node_handle->setNodeWorker(this);
 
+    profiling_timer_.reset(new Timer(node_handle->getUUID().getFullName()));
+
     NodePtr node = node_handle_->getNode().lock();
+    node->useTimer(profiling_timer_);
 
 
     try {
@@ -152,6 +154,11 @@ NodeWorker::State NodeWorker::getState() const
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
     return state_;
+}
+
+TimerPtr NodeWorker::getProfilingTimer()
+{
+    return profiling_timer_;
 }
 
 bool NodeWorker::isEnabled() const
@@ -277,14 +284,9 @@ void NodeWorker::reset()
 
 void NodeWorker::setProfiling(bool profiling)
 {
-    profiling_ = profiling;
+    profiling_timer_->setEnabled(profiling);
 
-    {
-        std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
-        timer_history_.clear();
-    }
-
-    if(profiling_) {
+    if(profiling) {
         startProfiling(this);
     } else {
         stopProfiling(this);
@@ -293,7 +295,7 @@ void NodeWorker::setProfiling(bool profiling)
 
 bool NodeWorker::isProfiling() const
 {
-    return profiling_;
+    return profiling_timer_->isEnabled();
 }
 
 void NodeWorker::killExecution()
@@ -420,14 +422,11 @@ void NodeWorker::startProcessingMessages()
 
     std::unique_lock<std::recursive_mutex> sync_lock(sync);
 
-    current_process_timer_.reset();
-
-    if(profiling_) {
-        current_process_timer_.reset(new Timer(getUUID().getFullName()));
-        timerStarted(this, PROCESS, current_process_timer_->startTimeMs());
+    if(profiling_timer_->isEnabled()) {
+        profiling_timer_->restart();
+        timerStarted(this, PROCESS, profiling_timer_->startTimeMs());
     }
 
-    node->useTimer(current_process_timer_.get());
 
     bool sync = !node->isAsynchronous();
 
@@ -505,14 +504,9 @@ void NodeWorker::finishProcessing()
 
 void NodeWorker::signalExecutionFinished()
 {
-    if(current_process_timer_) {
-        finishTimer(current_process_timer_);
-    }
+    finishTimer(profiling_timer_);
 
     if(trigger_process_done_->isConnected()) {
-        if(current_process_timer_) {
-            current_process_timer_->step("trigger process done");
-        }
         trigger_process_done_->trigger();
     }
 }
@@ -587,23 +581,10 @@ bool NodeWorker::areAllInputsAvailable() const
 void NodeWorker::finishTimer(Timer::Ptr t)
 {
     t->finish();
-
-    {
-        std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
-        timer_history_.push_back(t);
+    if(t->isEnabled()) {
+        timerStopped(this, t->stopTimeMs());
     }
-    timerStopped(this, t->stopTimeMs());
 }
-
-std::vector<TimerPtr> NodeWorker::extractLatestTimers()
-{
-    std::unique_lock<std::recursive_mutex> lock(timer_mutex_);
-
-    std::vector<TimerPtr> result = timer_history_;
-    timer_history_.clear();
-    return result;
-}
-
 
 void NodeWorker::notifyMessagesProcessed()
 {
@@ -833,12 +814,11 @@ bool NodeWorker::tick()
                     }
                     node_handle_->getOutputTransition()->clearBuffer();
 
-                    TimerPtr t = nullptr;
-                    if(profiling_) {
-                        t.reset(new Timer(getUUID().getFullName()));
-                        timerStarted(this, TICK, t->startTimeMs());
+                    if(profiling_timer_->isEnabled()) {
+                        profiling_timer_->restart();
+                        timerStarted(this, TICK, profiling_timer_->startTimeMs());
                     }
-                    node->useTimer(t.get());
+
 
                     has_ticked = tickable->doTick(*node_handle_, *node);
 
@@ -852,9 +832,7 @@ bool NodeWorker::tick()
                         ++ticks_;
                     }
 
-                    if(t) {
-                        finishTimer(t);
-                    }
+                    finishTimer(profiling_timer_);
 
                     setState(State::IDLE);
                 }

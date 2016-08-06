@@ -37,12 +37,14 @@ public Q_SLOTS:
 
 protected:
     void paintEvent(QPaintEvent *);
-    void paintTimer(QPainter &p, const Timer*);
-    float paintInterval(QPainter &p, const Timer::Interval::Ptr &interval, float height_offset, int depth);
+    void paintInterval(QPainter &p, const Timer::Interval &interval);
+    float paintInterval(QPainter &p, const Timer::Interval &interval, float height_offset, int depth);
 
 private:
     NodeBox* box_;
     NodeWorker* node_worker_;
+
+    std::vector<slim_signal::ScopedConnection> connections_;
 
     QVBoxLayout* layout_;
     QSpacerItem* space_for_painting_;
@@ -55,7 +57,7 @@ private:
 
     std::size_t timer_history_length;
     int timer_history_pos_;
-    std::vector<TimerPtr> timer_history_;
+    std::vector<Timer::Interval::Ptr> timer_history_;
 
     float left;
     float right;

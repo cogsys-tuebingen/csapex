@@ -7,9 +7,9 @@
 using namespace csapex;
 
 Timer::Timer(const std::string& name)
-    : timer_name_(name), root(new Interval(name))
+    : timer_name_(name), root(new Interval(name)), enabled_(false)
 {
-    active.push_back(root);
+    restart();
 }
 Timer::~Timer()
 {
@@ -25,11 +25,32 @@ std::vector<std::pair<std::string, double> > Timer::entries() const
     return result;
 }
 
+void Timer::setEnabled(bool enabled)
+{
+    enabled_ = enabled;
+}
+
+bool Timer::isEnabled() const
+{
+    return enabled_;
+}
+
+void Timer::restart()
+{
+    root.reset(new Interval(timer_name_));
+    active.clear();
+    active.push_back(root);
+}
+
 void Timer::finish()
 {
     while(!active.empty()) {
         active.back()->stop();
         active.pop_back();
+    }
+
+    if(enabled_) {
+        finished(root);
     }
 }
 
@@ -47,11 +68,19 @@ Timer::Interlude::Ptr Timer::step(const std::string &name)
 {
     return Timer::Interlude::Ptr(new Timer::Interlude(this, name));
 }
+Timer::Interlude::Interlude(const std::shared_ptr<Timer> &parent, const std::string &name)
+    : Timer::Interlude(parent.get(), name)
+{
+}
 
-Timer::Interlude::Interlude(Timer *parent, const std::string &name)
+Timer::Interlude::Interlude(Timer* parent, const std::string &name)
     : parent_(parent)
 {
     // start new interval in timer
+    if(parent_->active.empty()) {
+        throw std::runtime_error("no active timer");
+    }
+
     if(parent_->active.back()->sub.find(name) == parent_->active.back()->sub.end()) {
         interval_ = std::make_shared<Interval>(name);
         parent_->active.back()->sub[name] = interval_;

@@ -13,6 +13,7 @@
 #include <csapex/model/connector_type.h>
 #include <csapex/utility/create_connector_request.h>
 #include <csapex/view/csapex_view_core.h>
+#include <csapex/utility/timable.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -25,7 +26,7 @@ namespace csapex
 
 class NodeFactory;
 
-class GraphView : public QGraphicsView
+class GraphView : public QGraphicsView, public Timable
 {
     Q_OBJECT
 
@@ -92,6 +93,8 @@ public:
 
     void startPlacingBox(const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
     void startCloningSelection(NodeBox *handle, const QPoint &offset = QPoint(0,0));
+
+    virtual void useTimer(std::shared_ptr<Timer> timer) override;
 
 Q_SIGNALS:
     void selectionChanged();

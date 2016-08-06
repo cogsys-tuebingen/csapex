@@ -65,11 +65,27 @@ ProfilingWidget::ProfilingWidget(GraphView */*view*/, NodeBox *box, QWidget *par
     connect(box_, SIGNAL(destroyed()), this, SLOT(close()));
     connect(box_, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
-    node_worker_->messages_processed.connect(delegate::Delegate0<>(this, &ProfilingWidget::update));
 
-    node_worker_->destroyed.connect([this](){
-       node_worker_ = nullptr;
-    });
+    connections_.emplace_back(node_worker_->messages_processed.connect(delegate::Delegate0<>(this, &ProfilingWidget::update)));
+
+    connections_.emplace_back(node_worker_->destroyed.connect([this](){
+        node_worker_ = nullptr;
+    }));
+
+    connections_.emplace_back(node_worker_->getProfilingTimer()->finished.connect([this](Timer::Interval::Ptr interval){
+        timer_history_[timer_history_pos_] = interval;
+
+        if(++timer_history_pos_ >= (int) timer_history_.size()) {
+            timer_history_pos_ = 0;
+        }
+
+        std::vector<std::pair<std::string, double> > entries;
+        interval->entries(entries);
+        for(const auto& it : entries) {
+            steps_acc_[it.first](it.second);
+        }
+        ++count_;
+    }));
 }
 
 ProfilingWidget::~ProfilingWidget()
@@ -84,9 +100,9 @@ void ProfilingWidget::reposition(double, double)
 
 void ProfilingWidget::reset()
 {
-//    timer_history_pos_ = 0;
-//    timer_history_.clear();
-//    steps_.clear();
+    //    timer_history_pos_ = 0;
+    //    timer_history_.clear();
+    //    steps_.clear();
     steps_acc_.clear();
     count_ = 0;
 }
@@ -115,20 +131,6 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     }
 
     // update stats
-    auto new_measurements = node_worker_->extractLatestTimers();
-    for(TimerPtr timer : new_measurements) {
-        timer_history_[timer_history_pos_] = timer;
-
-        if(++timer_history_pos_ >= (int) timer_history_.size()) {
-            timer_history_pos_ = 0;
-        }
-
-        for(const auto& it : timer->entries()) {
-            steps_acc_[it.first](it.second);
-        }
-        ++count_;
-    }
-
     QPainter p(this);
 
     int w = width();
@@ -157,9 +159,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
             continue;
         }
 
-        max_time_ms = std::max(max_time_ms, timer->root->lengthMs());
+        max_time_ms = std::max(max_time_ms, timer->lengthMs());
 
-        auto names = timer->entries();
+        std::vector<std::pair<std::string, double> > names;
+        timer->entries(names);
         for(auto it = names.begin(); it != names.end(); ++it) {
             const std::string& name = it->first;
             std::map<std::string, QColor>::iterator pos = steps_.find(name);
@@ -226,10 +229,10 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
             float op = ((time - timer_history_pos_ + n - 1) % n) / (float) n;
             p.setOpacity(min_opacity + op * (1.0f - min_opacity));
 
-            const Timer::Ptr& timer = timer_history_[time];
+            const Timer::Interval::Ptr& interval = timer_history_[time];
 
-            if(timer) {
-                paintTimer(p, timer.get());
+            if(interval) {
+                paintInterval(p, *interval);
             }
         }
     }
@@ -288,31 +291,31 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     }
 }
 
-void ProfilingWidget::paintTimer(QPainter& p, const Timer * timer)
+void ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval& interval)
 {
-    paintInterval(p, timer->root, 0, 0);
+    paintInterval(p, interval, 0, 0);
 
     current_draw_x += indiv_width_;
 }
 
-float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval::Ptr& interval, float height_offset, int depth)
+float ProfilingWidget::paintInterval(QPainter& p, const Timer::Interval& interval, float height_offset, int depth)
 {
-    float interval_time = interval->lengthMs();
+    float interval_time = interval.lengthMs();
 
     float f = interval_time / max_time_ms_;
     f = std::max(0.0f, std::min(1.0f, f));
     float height = f * content_height_;
 
-    p.setBrush(QBrush(steps_[interval->name()]));
+    p.setBrush(QBrush(steps_[interval.name()]));
 
 
     float w = indiv_width_ / (depth+1);
     p.drawRect(QRectF(current_draw_x + indiv_width_ - w, bottom - height - height_offset, w, height));
 
     float h = height_offset;
-    for(std::map<std::string, Timer::Interval::Ptr>::const_iterator sub = interval->sub.begin(); sub != interval->sub.end(); ++sub) {
+    for(auto sub = interval.sub.begin(); sub != interval.sub.end(); ++sub) {
         const Timer::Interval::Ptr& sub_interval = sub->second;
-        h += paintInterval(p, sub_interval, h, depth + 1);
+        h += paintInterval(p, *sub_interval, h, depth + 1);
     }
 
     return height;

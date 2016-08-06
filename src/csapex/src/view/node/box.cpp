@@ -746,11 +746,11 @@ void NodeBox::refreshStylesheet()
     update();
 }
 
-void NodeBox::showProfiling(bool show)
+void NodeBox::showProfiling(bool profiling)
 {
     NodeWorkerPtr node = node_worker_.lock();
-    if(node->isProfiling() != show) {
-        node->setProfiling(show);
+    if(node->isProfiling() != profiling) {
+        node->setProfiling(profiling);
     }
 }
 

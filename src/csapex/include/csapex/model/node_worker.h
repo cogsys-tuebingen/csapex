@@ -57,6 +57,8 @@ public:
     void setState(State state);
     State getState() const;
 
+    TimerPtr getProfilingTimer();
+
     bool isEnabled() const;
     bool isIdle() const;
     bool isProcessing() const;
@@ -77,8 +79,6 @@ public:
     bool canReceive() const;
     bool canSend() const;
     bool areAllInputsAvailable() const;
-
-    std::vector<TimerPtr> extractLatestTimers();
 
 public:
     bool tick();
@@ -169,8 +169,7 @@ private:
     std::recursive_mutex timer_mutex_;
     std::vector<TimerPtr> timer_history_;
 
-    std::atomic<bool> profiling_;
-    TimerPtr current_process_timer_;
+    TimerPtr profiling_timer_;
 };
 
 }

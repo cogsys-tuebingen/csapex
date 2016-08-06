@@ -191,6 +191,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     }
 
     GraphView* graph_view = new GraphView(graph_facade, view_core_, this);
+    graph_view->useTimer(profiling_timer_);
     graph_views_[graph] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();
     auuid_views_[graph_facade->getAbsoluteUUID()] = graph_view;
@@ -513,5 +514,16 @@ void Designer::loadView(Graph* graph, YAML::Node &doc)
     }
     states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
 }
+
+void Designer::useTimer(std::shared_ptr<Timer> timer)
+{
+    Timable::useTimer(timer);
+
+    for(const auto& pair : graph_views_) {
+        GraphView* view = pair.second;
+        view->useTimer(timer);
+    }
+}
+
 /// MOC
 #include "../../../include/csapex/view/designer/moc_designer.cpp"
