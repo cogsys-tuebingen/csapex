@@ -85,7 +85,7 @@ private:
         virtual EntryInterface::Ptr cloneEntry() const override
         {
             Self::Ptr r(new Self);
-            r->value = value;
+            r->value = std::make_shared<std::vector<Payload>>(*value);
             return r;
         }
 
