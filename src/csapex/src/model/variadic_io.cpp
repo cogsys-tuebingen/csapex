@@ -88,7 +88,7 @@ void VariadicInputs::removeVariadicInputById(const UUID& input)
 Input *VariadicInputs::createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
-    Input* result = variadic_modifier_->addInput(type, label.empty() ? std::string("Input") : label, false, optional);
+    Input* result = variadic_modifier_->addInput(type, label.empty() ? std::string("Input") : label, optional);
     if(result) {
         variadic_inputs_.push_back(std::dynamic_pointer_cast<Input>(result->shared_from_this()));
         input_count_->set((int) variadic_inputs_.size());
@@ -193,7 +193,7 @@ int VariadicOutputs::getVariadicOutputCount() const
 Output *VariadicOutputs::createVariadicOutput(TokenDataConstPtr type, const std::string& label)
 {
     apex_assert_hard(variadic_modifier_);
-    auto result = variadic_modifier_->addOutput(type, label.empty() ? std::string("Output") : label, false);
+    auto result = variadic_modifier_->addOutput(type, label.empty() ? std::string("Output") : label);
     if(result) {
         variadic_outputs_.emplace_back(std::dynamic_pointer_cast<Output>(result->shared_from_this()));
         output_count_->set((int) variadic_outputs_.size());

@@ -123,8 +123,8 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    InputPtr createInternalInput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool dynamic, bool optional);
-    OutputPtr createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool dynamic);
+    InputPtr createInternalInput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool optional);
+    OutputPtr createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
     EventPtr createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
     SlotPtr createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr &)> callback);
 

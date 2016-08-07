@@ -62,9 +62,6 @@ Port::Port(ConnectableWeakPtr adaptee, QWidget *parent)
         connections_.push_back(adaptee_ptr->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
         connections_.push_back(adaptee_ptr->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
 
-        if(adaptee_ptr->isDynamic()) {
-            setProperty("dynamic", true);
-        }
         bool opt = dynamic_cast<Input*>(adaptee_ptr.get()) && dynamic_cast<Input*>(adaptee_ptr.get())->isOptional();
         setProperty("optional", opt);
 

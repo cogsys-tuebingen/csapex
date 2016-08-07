@@ -54,8 +54,6 @@ public:
     virtual void addConnection(ConnectionPtr connection);
     virtual void fadeConnection(ConnectionPtr connection);
 
-    bool isDynamic() const;
-
     void setLabel(const std::string& label);
     std::string getLabel() const;
 
@@ -123,8 +121,6 @@ protected:
 protected:
     Connectable(const UUID &uuid);
 
-    void setDynamic(bool dynamic);
-
     void init();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
@@ -144,7 +140,6 @@ protected:
 
 private:
     std::atomic<bool> enabled_;
-    std::atomic<bool> dynamic_;
 };
 
 }

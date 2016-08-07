@@ -13,8 +13,6 @@
 #include <csapex/param/trigger_parameter.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
-#include <csapex/msg/dynamic_input.h>
-#include <csapex/msg/dynamic_output.h>
 #include <csapex/msg/marker_message.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/exceptions.h>
@@ -363,16 +361,12 @@ void NodeHandle::updateParameterValue(Connectable *s)
     }
 }
 
-Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional)
+Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "in");
-    InputPtr c;
-    if(dynamic) {
-        c = std::make_shared<DynamicInput>(uuid);
-    } else {
-        c = std::make_shared<Input>(uuid);
-    }
+    InputPtr c = std::make_shared<Input>(uuid);;
+
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);
@@ -382,16 +376,12 @@ Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bo
     return c.get();
 }
 
-Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic)
+Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "out");
-    OutputPtr c;
-    if(dynamic) {
-        c = std::make_shared<DynamicOutput>(uuid);
-    } else {
-        c = std::make_shared<StaticOutput>(uuid);
-    }
+    OutputPtr c = std::make_shared<StaticOutput>(uuid);;
+
     c->setLabel(label);
     c->setType(type);
     
@@ -425,7 +415,7 @@ Event* NodeHandle::addEvent(TokenDataConstPtr type, const std::string& label)
     return event.get();
 }
 
-InputPtr NodeHandle::addInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic, bool optional)
+InputPtr NodeHandle::addInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional)
 {
     InputPtr in = std::make_shared<Input>(internal_uuid);
     in->setType(type);
@@ -437,14 +427,9 @@ InputPtr NodeHandle::addInternalInput(const TokenDataConstPtr& type, const UUID 
     return in;
 }
 
-OutputPtr NodeHandle::addInternalOutput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic)
+OutputPtr NodeHandle::addInternalOutput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label)
 {
-    OutputPtr out;
-    if(dynamic) {
-        out = std::make_shared<DynamicOutput>(internal_uuid);
-    } else {
-        out = std::make_shared<StaticOutput>(internal_uuid);
-    }
+    OutputPtr out = std::make_shared<StaticOutput>(internal_uuid);
     out->setType(type);
     out->setLabel(label);
     

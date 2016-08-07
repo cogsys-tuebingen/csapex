@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/msg/dynamic_output.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
@@ -30,8 +29,6 @@ Connection::Connection(Output *from, Input *to, int id)
       active_(false), detached_(false),
       state_(State::NOT_INITIALIZED)
 {
-    is_dynamic_ = from_->isDynamic() || to_->isDynamic();
-
     from->enabled_changed.connect(source_enable_changed);
     to->enabled_changed.connect(sink_enabled_changed);
 

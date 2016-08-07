@@ -109,7 +109,6 @@ protected:
     Output* from_;
     Input* to_;
     int id_;
-    bool is_dynamic_;
 
     bool active_;
     bool detached_;

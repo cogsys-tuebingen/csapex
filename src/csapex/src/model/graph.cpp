@@ -8,8 +8,6 @@
 #include <csapex/msg/output.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
-#include <csapex/msg/dynamic_input.h>
-#include <csapex/msg/dynamic_output.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/model/node.h>
@@ -622,9 +620,9 @@ Input* Graph::createVariadicInput(TokenDataConstPtr type, const std::string& lab
     return node_handle_->getInput(pair.external);
 }
 
-InputPtr Graph::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic, bool optional)
+InputPtr Graph::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional)
 {
-    InputPtr input = node_handle_->addInternalInput(type, internal_uuid, label, dynamic, optional);
+    InputPtr input = node_handle_->addInternalInput(type, internal_uuid, label, optional);
 
     transition_relay_in_->addInput(input);
 
@@ -662,7 +660,7 @@ UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenDataConstP
 
     Input* external_input = VariadicInputs::createVariadicInput(type, label, optional);
 
-    OutputPtr relay = createInternalOutput(type, internal_uuid, label, false);
+    OutputPtr relay = createInternalOutput(type, internal_uuid, label);
 
     external_to_internal_outputs_[external_input->getUUID()] = relay;
 
@@ -681,9 +679,9 @@ Output* Graph::createVariadicOutput(TokenDataConstPtr type, const std::string& l
 }
 
 
-OutputPtr Graph::createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool dynamic)
+OutputPtr Graph::createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
-    OutputPtr output = node_handle_->addInternalOutput(type, internal_uuid, label, dynamic);
+    OutputPtr output = node_handle_->addInternalOutput(type, internal_uuid, label);
 
     transition_relay_out_->addOutput(output);
 
@@ -722,7 +720,7 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstP
 
     Output* external_output = VariadicOutputs::createVariadicOutput(type, label);
 
-    InputPtr relay = createInternalInput(type, internal_uuid, label, false, true);
+    InputPtr relay = createInternalInput(type, internal_uuid, label, true);
 
     std::weak_ptr<Output> external_output_weak = std::dynamic_pointer_cast<Output>(external_output->shared_from_this());
     relay->message_set.connect([this, external_output_weak, relay](Connectable*) {

@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/model/connection.h>
 #include <csapex/msg/input.h>
-#include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/output.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/no_message.h>
@@ -16,12 +15,12 @@
 using namespace csapex;
 
 InputTransition::InputTransition(delegate::Delegate0<> activation_fn)
-    : Transition(activation_fn), one_input_is_dynamic_(false), forwarded_(false)
+    : Transition(activation_fn), forwarded_(false)
 {
 }
 
 InputTransition::InputTransition()
-    : Transition(), one_input_is_dynamic_(false), forwarded_(false)
+    : Transition(), forwarded_(false)
 {
 }
 
@@ -100,15 +99,6 @@ void InputTransition::reset()
 void InputTransition::connectionAdded(Connection *connection)
 {
     Transition::connectionAdded(connection);
-
-    one_input_is_dynamic_ = false;
-    for(auto pair : inputs_) {
-        InputPtr input = pair.second;
-        if(input->isDynamic()) {
-            one_input_is_dynamic_ = true;
-            break;
-        }
-    }
 
     updateConnections();
 }

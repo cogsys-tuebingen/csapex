@@ -5,12 +5,10 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/msg/input.h>
-#include <csapex/msg/dynamic_input.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/msg/static_output.h>
-#include <csapex/msg/dynamic_output.h>
 #include <csapex/profiling/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
@@ -313,14 +311,7 @@ void NodeWorker::startProcessingMessages()
 
     node_handle_->getInputTransition()->forwardMessages();
 
-    if(!node_handle_->getInputTransition()->areMessagesComplete()) {
-        for(InputPtr input : node_handle_->getExternalInputs()) {
-            if(DynamicInputPtr di = std::dynamic_pointer_cast<DynamicInput>(input)) {
-                di->notifyMessageProcessed();
-            }
-        }
-        return;
-    }
+    apex_assert_hard(node_handle_->getInputTransition()->areMessagesComplete());
 
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
     setState(State::FIRED);

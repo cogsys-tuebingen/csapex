@@ -21,7 +21,7 @@ const std::string Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_
 
 Connectable::Connectable(const UUID& uuid)
     : Unique(uuid),
-      count_(0), seq_no_(-1), enabled_(true), dynamic_(false)
+      count_(0), seq_no_(-1), enabled_(true)
 {
     init();
 }
@@ -127,16 +127,6 @@ std::string Connectable::getLabel() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return label_;
-}
-
-bool Connectable::isDynamic() const
-{
-    return dynamic_;
-}
-
-void Connectable::setDynamic(bool dynamic)
-{
-    dynamic_ = dynamic;
 }
 
 void Connectable::setLabel(const std::string &label)

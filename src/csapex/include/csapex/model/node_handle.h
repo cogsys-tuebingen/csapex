@@ -38,11 +38,11 @@ public:
     NodeStatePtr getNodeStateCopy() const;
 
 
-    Input* addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional) override;
+    Input* addInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
     void manageInput(InputPtr in);
     bool isParameterInput(Input* in) const override;
 
-    Output* addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic) override;
+    Output* addOutput(TokenDataConstPtr type, const std::string& label) override;
     void manageOutput(OutputPtr out);
     bool isParameterOutput(Output* out) const override;
 
@@ -52,8 +52,8 @@ public:
     Event* addEvent(TokenDataConstPtr type, const std::string& label) override;
     void manageEvent(EventPtr t);
 
-    InputPtr addInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic, bool optional);
-    OutputPtr addInternalOutput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool dynamic);
+    InputPtr addInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional);
+    OutputPtr addInternalOutput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label);
     SlotPtr addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback);
     EventPtr addInternalEvent(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label);
 

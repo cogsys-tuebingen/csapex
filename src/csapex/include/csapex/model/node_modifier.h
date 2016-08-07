@@ -29,54 +29,34 @@ public:
     template <typename T>
     Input* addInput(const std::string& label,
                     typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
-        return addInput(connection_types::makeEmptyMessage<T>(), label, false, false);
+        return addInput(connection_types::makeEmptyMessage<T>(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
                             typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
-        return addInput(connection_types::makeEmptyMessage<T>(), label, false, true);
-    }
-    template <typename T>
-    Input* addDynamicInput(const std::string& label,
-                           typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
-        return addInput(connection_types::makeEmptyMessage<T>(), label, true, false);
+        return addInput(connection_types::makeEmptyMessage<T>(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
                       typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
-        return addOutput(connection_types::makeEmptyMessage<T>(), label, false);
-    }
-    template <typename T>
-    Output* addDynamicOutput(const std::string& label,
-                             typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0) {
-        return addOutput(connection_types::makeEmptyMessage<T>(), label, true);
+        return addOutput(connection_types::makeEmptyMessage<T>(), label);
     }
 
     /// "container" messages
     template <typename Container, typename T>
     Input* addInput(const std::string& label) {
         Container::template registerType<T>();
-        return addInput(Container::template make<T>(), label, false, false);
+        return addInput(Container::template make<T>(), label, false);
     }
     template <typename Container, typename T>
     Input* addOptionalInput(const std::string& label) {
         Container::template registerType<T>();
-        return addInput(Container::template make<T>(), label, false, true);
-    }
-    template <typename Container, typename T>
-    Input* addDynamicInput(const std::string& label) {
-        Container::template registerType<T>();
-        return addInput(Container::template make<T>(), label, true, false);
+        return addInput(Container::template make<T>(), label, true);
     }
     template <typename Container, typename T>
     Output* addOutput(const std::string& label) {
         Container::template registerType<T>();
-        return addOutput(Container::template make<T>(), label, false);
-    }
-    template <typename Container, typename T>
-    Output* addDynamicOutput(const std::string& label) {
-        Container::template registerType<T>();
-        return addOutput(Container::template make<T>(), label, true);
+        return addOutput(Container::template make<T>(), label);
     }
     template <typename Container, typename T>
     Event* addEvent(const std::string& label) {
@@ -99,7 +79,7 @@ public:
                       "connection_types::GenericPointerMessage is not included: "
                       "#include <csapex/msg/generic_pointer_message.hpp>");
         connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, false);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
@@ -108,16 +88,7 @@ public:
                       "connection_types::GenericPointerMessage is not included: "
                       "#include <csapex/msg/generic_pointer_message.hpp>");
         connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false, true);
-    }
-    template <typename T>
-    Input* addDynamicInput(const std::string& label,
-                           typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
-        static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
-                      "connection_types::GenericPointerMessage is not included: "
-                      "#include <csapex/msg/generic_pointer_message.hpp>");
-        connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true, false);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
@@ -126,16 +97,7 @@ public:
                       "connection_types::GenericPointerMessage is not included: "
                       "#include <csapex/msg/generic_pointer_message.hpp>");
         connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
-        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, false);
-    }
-    template <typename T>
-    Output* addDynamicOutput(const std::string& label,
-                      typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0) {
-        static_assert(IS_COMPLETE(connection_types::GenericPointerMessage<T>),
-                      "connection_types::GenericPointerMessage is not included: "
-                      "#include <csapex/msg/generic_pointer_message.hpp>");
-        connection_types::MessageConversionHook<connection_types::GenericPointerMessage, T>::registerConversion();
-        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label, true);
+        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<T> >(), label);
     }
 
 
@@ -145,15 +107,7 @@ public:
         static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
                       "connection_types::GenericValueMessage is not included: "
                       "#include <csapex/msg/generic_value_message.hpp>");
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false, false);
-    }
-    template <typename T>
-    Input* addDynamicInput(const std::string& label,
-                           typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
-        static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
-                      "connection_types::GenericValueMessage is not included: "
-                      "#include <csapex/msg/generic_value_message.hpp>");
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true, false);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false);
     }
     template <typename T>
     Input* addOptionalInput(const std::string& label,
@@ -161,7 +115,7 @@ public:
         static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
                       "connection_types::GenericValueMessage is not included: "
                       "#include <csapex/msg/generic_value_message.hpp>");
-        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false, true);
+        return addInput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true);
     }
     template <typename T>
     Output* addOutput(const std::string& label,
@@ -169,27 +123,19 @@ public:
         static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
                       "connection_types::GenericValueMessage is not included: "
                       "#include <csapex/msg/generic_value_message.hpp>");
-        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, false);
-    }
-    template <typename T>
-    Output* addDynamicOutput(const std::string& label,
-                             typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0) {
-        static_assert(IS_COMPLETE(connection_types::GenericValueMessage<T>),
-                      "connection_types::GenericValueMessage is not included: "
-                      "#include <csapex/msg/generic_value_message.hpp>");
-        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label, true);
+        return addOutput(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<T> >(), label);
     }
 
 
     /// multiple input types allowed
     template <typename... Types>
     Input* addMultiInput(const std::string& label) {
-        return addInput(multi_type::make<Types...>(), label, false, false);
+        return addInput(multi_type::make<Types...>(), label, false);
     }
 
     template <typename... Types>
     Input* addOptionalMultiInput(const std::string& label) {
-        return addInput(multi_type::make<Types...>(), label, false, true);
+        return addInput(multi_type::make<Types...>(), label, true);
     }
 
     virtual bool isParameterInput(Input* in) const = 0;
@@ -255,8 +201,8 @@ public:
     /**
      * Raw construction, handle with care!
      */
-    virtual Input* addInput(TokenDataConstPtr type, const std::string& label, bool dynamic, bool optional) = 0;
-    virtual Output* addOutput(TokenDataConstPtr type, const std::string& label, bool dynamic) = 0;
+    virtual Input* addInput(TokenDataConstPtr type, const std::string& label, bool optional) = 0;
+    virtual Output* addOutput(TokenDataConstPtr type, const std::string& label) = 0;
     virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) = 0;
     virtual Event* addEvent(TokenDataConstPtr type, const std::string& label) = 0;
 

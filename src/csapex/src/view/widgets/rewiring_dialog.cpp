@@ -225,10 +225,10 @@ void RewiringDialog::updateConnection(Input *input, const ConnectionPtr &connect
         }
     } else {
         if(!source_old) {
-            source_old = graph_old->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel(), out_original->isDynamic()).get();
+            source_old = graph_old->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel()).get();
         }
         if(!source_new) {
-            source_new = graph_new->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel(), out_original->isDynamic()).get();
+            source_new = graph_new->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel()).get();
         }
     }
 
@@ -273,10 +273,10 @@ void RewiringDialog::updateConnection(Output *output, const ConnectionPtr &conne
         }
     } else {
         if(!sink_old) {
-            sink_old = graph_old->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isDynamic(), in_original->isOptional()).get();
+            sink_old = graph_old->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isOptional()).get();
         }
         if(!sink_new) {
-            sink_new = graph_new->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isDynamic(), in_original->isOptional()).get();
+            sink_new = graph_new->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isOptional()).get();
         }
     }
 

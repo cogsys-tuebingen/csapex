@@ -252,8 +252,6 @@ add_library(csapex SHARED
     src/nodes/note.cpp
 
     src/msg/apex_message_provider.cpp
-    src/msg/dynamic_input.cpp
-    src/msg/dynamic_output.cpp
     src/msg/input.cpp
     src/msg/input_transition.cpp
     src/msg/io.cpp
