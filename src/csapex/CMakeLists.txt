@@ -270,6 +270,7 @@ add_library(csapex SHARED
     src/msg/transition.cpp
     src/msg/bundled_connection.cpp
     src/msg/direct_connection.cpp
+    src/msg/generic_vector_message.cpp
 
     src/serialization/yaml.cpp
     src/serialization/message_serializer.cpp

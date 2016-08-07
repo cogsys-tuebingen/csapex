@@ -21,14 +21,27 @@ struct convertPtr
 
     static bool decode(const Node& node, std::shared_ptr<T>& rhs)
     {
-        init(rhs);
+        rhs = csapex::connection_types::makeEmpty<T>();
         return YAML::convert<T>::decode(node, *rhs);
     }
+};
 
-    static void init(std::shared_ptr<T>& rhs)
+template<typename T, typename Enable = void>
+struct convertConstPtr
+{
+    static Node encode(const std::shared_ptr<T const> rhs)
     {
-        rhs = csapex::connection_types::makeEmpty<T>();
+        return Node (*rhs);
     }
+
+    static bool decode(const Node& node, std::shared_ptr<T const>& rhs)
+    {
+        auto tmp = csapex::connection_types::makeEmpty<T>();
+        auto res = YAML::convert<T>::decode(node, *tmp);
+        rhs = tmp;
+        return res;
+    }
+
 };
 
 template<typename T>
@@ -41,6 +54,19 @@ struct convert< std::shared_ptr<T> > {
   static bool decode(const Node& node, std::shared_ptr<T>& rhs)
   {
       return YAML::convertPtr<T>::decode(node, rhs);
+  }
+};
+
+template<typename T>
+struct convert< std::shared_ptr<T const> > {
+  static Node encode(const std::shared_ptr<T const> rhs)
+  {
+      return YAML::convertConstPtr<T>::encode(rhs);
+  }
+
+  static bool decode(const Node& node, std::shared_ptr<T const>& rhs)
+  {
+      return YAML::convertConstPtr<T>::decode(node, rhs);
   }
 };
 
