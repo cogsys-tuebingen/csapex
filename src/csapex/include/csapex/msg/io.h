@@ -112,6 +112,9 @@ getMessage(Input* input)
 {
     auto msg = getMessage(input);
     typename std::shared_ptr<Container const> result = message_cast<Container const> (msg);
+    if(!result) {
+        throwError(msg, typeid(Container));
+    }
     return result -> template makeShared<R>();
 }
 

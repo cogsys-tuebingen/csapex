@@ -6,34 +6,29 @@
 
 namespace csapex
 {
-class DynamicOutput;
-
 class DynamicInput : public Input
 {
 public:
     DynamicInput(const UUID &uuid);
 
-    void setCorrespondent(DynamicOutput* output);
-
-    /**
-     * @brief inputMessagePart
-     * @param msg
-     * @return true, iff every message part has been received
-     */
-    bool inputMessagePart(const TokenPtr& msg);
-    std::vector<TokenPtr> getMessageParts() const;
-    void composeMessage();
-
     virtual bool hasMessage() const override;
     virtual bool hasReceived() const override;
 
+    virtual void setToken(TokenPtr message) override;
     virtual TokenPtr getToken() const override;
 
-private:
-    DynamicOutput* correspondent_;
+    std::vector<TokenPtr> getMessageParts() const;
 
+    virtual void notifyMessageProcessed() override;
+
+private:
+    void composeMessage();
+
+private:
     std::vector<TokenPtr> msg_parts_;
     std::vector<TokenPtr> composed_msg_;
+
+    bool has_last_;
 };
 
 }

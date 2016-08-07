@@ -240,6 +240,17 @@ void InputTransition::notifyMessageProcessed()
     forwarded_ = false;
 }
 
+bool InputTransition::areMessagesComplete() const
+{
+    for(auto pair : inputs_) {
+        InputPtr input = pair.second;
+        if(input->isConnected() && !input->hasReceived()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void InputTransition::forwardMessages()
 {
     apex_assert_hard(!forwarded_);
@@ -254,21 +265,15 @@ void InputTransition::forwardMessages()
         InputPtr input = pair.second;
 
         if(input->isConnected()) {
-            if(input->isDynamic()) {
-                DynamicInput* di = dynamic_cast<DynamicInput*>(input.get());
-                di->composeMessage();
-
-            } else {
-                auto connections = input->getConnections();
-                apex_assert_hard(connections.size() == 1);
-                ConnectionPtr connection = connections.front();
-                auto s = connection->getState();
-                apex_assert_hard(s == Connection::State::READ ||
-                                 s == Connection::State::UNREAD);
-                TokenPtr token = connection->getToken();
-                apex_assert_hard(token != nullptr);
-                input->setToken(token);
-            }
+            auto connections = input->getConnections();
+            apex_assert_hard(connections.size() == 1);
+            ConnectionPtr connection = connections.front();
+            auto s = connection->getState();
+            apex_assert_hard(s == Connection::State::READ ||
+                             s == Connection::State::UNREAD);
+            TokenPtr token = connection->getToken();
+            apex_assert_hard(token != nullptr);
+            input->setToken(token);
         } else {
             input->setToken(Token::makeEmpty<connection_types::NoMessage>());
         }

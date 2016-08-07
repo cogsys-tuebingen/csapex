@@ -29,6 +29,13 @@ std::shared_ptr<T> makeEmpty()
     return std::make_shared<T>();
 }
 
+template <>
+inline std::shared_ptr<TokenData> makeEmpty<TokenData>()
+{
+    return std::shared_ptr<TokenData>(new TokenData("empty"));
+}
+
+
 template <typename M>
 struct MessageContainer
 {

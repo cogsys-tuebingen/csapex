@@ -118,11 +118,11 @@ void Output::disable()
 bool Output::isConnectionPossible(Connectable *other_side)
 {
     if(!other_side->canInput()) {
-        std::cerr << "cannot connect, other side can't input" << std::endl;
+        std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", other side can't input" << std::endl;
         return false;
     }
     if(!other_side->canConnectTo(this, false)) {
-        std::cerr << "cannot connect, other side can't connect" << std::endl;
+        std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", can't connect" << std::endl;
         return false;
     }
 

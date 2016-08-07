@@ -16,14 +16,15 @@ public:
     TokenData(const std::string &type_name);
     virtual ~TokenData();
 
+    virtual TokenData::Ptr clone() const;
+    virtual TokenData::Ptr toType() const;
+
     template <typename R>
     std::shared_ptr<R> cloneAs() const
     {
         return std::dynamic_pointer_cast<R>(clone());
     }
 
-    virtual TokenData::Ptr clone() const = 0;
-    virtual TokenData::Ptr toType() const = 0;
 
     virtual bool isValid() const;
 

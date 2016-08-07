@@ -97,23 +97,35 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
         }
     }
 
-    QTextDocument doc;
-    QString html;
-    html += "<table><tr><th>";
-    if(!tag.isEmpty()) {
-        html += "<small>" + tag + " :: </small>" ;
-    }
-    html += name + "</th>";
-    html += "<th style='font-size: 10px; color: #888; padding-left: 6px' valign='middle'>";
+
+    QString properties_str;
+    bool invalid = false;
     for(QString property : properties) {
+        if(property == "invalid") {
+            invalid = true;
+        }
         for(const QString& s : key_words) {
             if(property.contains(s, Qt::CaseInsensitive)) {
                 property.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<span style='color: #000'><u>\\1</u></span>");
             }
         }
 
-        html += property + " &nbsp; ";
+        properties_str += property + " &nbsp; ";
     }
+
+    QTextDocument doc;
+    QString html;
+    html += "<table><tr><th" +
+            (invalid ? QString(" style='color: #f00'") : QString("") ) +
+            ">";
+    if(!tag.isEmpty()) {
+        html += "<small>" + tag + " :: </small>" ;
+    }
+    html += name + "</th>";
+    html += "<th style='font-size: 10px; color: " +
+            (invalid ? QString("#f00") : QString("#888") ) +
+            "; padding-left: 6px' valign='middle'>";
+    html += properties_str;
     html += "</th>";
     html += "</tr></table>";
     html += "<br /><small><i>" + descr + "</i></small>";

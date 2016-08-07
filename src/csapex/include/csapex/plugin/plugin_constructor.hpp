@@ -28,7 +28,9 @@ public:
     std::shared_ptr<M> construct() const {
         std::shared_ptr<M> res(constructor());
 //        impl::setType<M>(res, type);
-        apex_assert_hard(res.get() != nullptr);
+        if(!res) {
+            throw std::runtime_error(std::string("cannot construct class ") + type);
+        }
         instances_.push_back(res);
         return res;
     }

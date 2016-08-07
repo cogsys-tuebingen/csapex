@@ -27,6 +27,7 @@ public:
     void notifyMessageProcessed();
 
     void forwardMessages();
+    bool areMessagesComplete() const;
 
     int findHighestDeviantSequenceNumber() const;
     void notifyOlderConnections(int highest_seq);

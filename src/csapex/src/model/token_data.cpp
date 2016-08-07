@@ -46,6 +46,16 @@ std::string TokenData::typeName() const
     return type_name_;
 }
 
+TokenData::Ptr TokenData::clone() const
+{
+    return std::make_shared<TokenData>(*this);
+}
+
+TokenData::Ptr TokenData::toType() const
+{
+    return std::make_shared<TokenData>(type_name_);
+}
+
 bool TokenData::isValid() const
 {
     return true;

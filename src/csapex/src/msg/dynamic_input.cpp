@@ -8,15 +8,12 @@
 using namespace csapex;
 
 DynamicInput::DynamicInput(const UUID &uuid)
-    : Input(uuid), correspondent_(nullptr)
+    : Input(uuid),
+      has_last_(false)
 {
     setDynamic(true);
 }
 
-void DynamicInput::setCorrespondent(DynamicOutput *output)
-{
-    correspondent_ = output;
-}
 
 std::vector<TokenPtr> DynamicInput::getMessageParts() const
 {
@@ -24,17 +21,18 @@ std::vector<TokenPtr> DynamicInput::getMessageParts() const
     return composed_msg_;
 }
 
-bool DynamicInput::inputMessagePart(const TokenPtr &msg)
+void DynamicInput::setToken(TokenPtr msg)
 {
     apex_assert_hard(msg != nullptr);
-
     std::unique_lock<std::mutex> lock(message_mutex_);
     msg_parts_.push_back(msg);
 
-    composed_msg_.clear();
-
-    return msg->flags.data & (int) Token::Flags::Fields::LAST_PART;
+    has_last_ = msg->flags.data & (int) Token::Flags::Fields::LAST_PART;
+    if(has_last_) {
+        composeMessage();
+    }
 }
+
 
 void DynamicInput::composeMessage()
 {
@@ -43,6 +41,7 @@ void DynamicInput::composeMessage()
     count_++;
 
     msg_parts_.clear();
+    has_last_ = false;
 
     message_set(this);
 }
@@ -67,4 +66,10 @@ bool DynamicInput::hasMessage() const
 
     std::unique_lock<std::mutex> lock(message_mutex_);
     return !composed_msg_.empty();
+}
+
+void DynamicInput::notifyMessageProcessed()
+{
+    composed_msg_.clear();
+    Connectable::notifyMessageProcessed();
 }

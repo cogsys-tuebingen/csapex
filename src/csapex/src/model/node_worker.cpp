@@ -313,6 +313,15 @@ void NodeWorker::startProcessingMessages()
 
     node_handle_->getInputTransition()->forwardMessages();
 
+    if(!node_handle_->getInputTransition()->areMessagesComplete()) {
+        for(InputPtr input : node_handle_->getExternalInputs()) {
+            if(DynamicInputPtr di = std::dynamic_pointer_cast<DynamicInput>(input)) {
+                di->notifyMessageProcessed();
+            }
+        }
+        return;
+    }
+
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
     setState(State::FIRED);
 
