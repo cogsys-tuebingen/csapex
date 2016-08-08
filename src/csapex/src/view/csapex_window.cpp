@@ -118,6 +118,8 @@ void CsApexWindow::construct()
     forceShortcut(ui->actionGroup);
     forceShortcut(ui->actionUngroup);
     forceShortcut(ui->actionPaste);
+    forceShortcut(ui->actionCreate_Node);
+    forceShortcut(ui->actionFind_Node);
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));
