@@ -107,6 +107,7 @@ void CsApexWindow::construct()
 
     auto forceShortcut = [this](QAction* action) {
         QShortcut *shortcut = new QShortcut(action->shortcut(), this);
+        shortcut->setEnabled(false);
         QObject::connect(shortcut, &QShortcut::activated, action, &QAction::trigger);
         QObject::connect(shortcut, &QShortcut::activatedAmbiguously, action, &QAction::trigger);
     };
