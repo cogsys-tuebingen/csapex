@@ -26,14 +26,14 @@ the functionality of the whole system.
 ## Application to Robotics
 
 The framework is targeted toward use in robotics and is fully compatible with
-[ROS](https://www.wiki.ros.org/). Configurations generated using the GUI can
+[ROS](http://wiki.ros.org/). Configurations generated using the GUI can
 directly be deployed on any ROS-based robotic system.
 
 
 ## Dependencies
 
-Currently we rely on the [catkin](https://www.wiki.ros.org/catkin) build system
-developed in the [ROS](https://www.wiki.ros.org/) ecosystem. The core framework
+Currently we rely on the [catkin](http://wiki.ros.org/catkin) build system
+developed in the [ROS](http://wiki.ros.org/) ecosystem. The core framework
 is independent of ROS, however.
 
 Required for a build are:
