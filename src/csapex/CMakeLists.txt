@@ -23,7 +23,6 @@ set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
 
 find_package(OpenGL REQUIRED)
 find_package(TinyXML REQUIRED)
-find_package(console_bridge REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -50,7 +49,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
    INCLUDE_DIRS include
    # CATKIN_DEPENDS
-   DEPENDS Boost console_bridge
+   DEPENDS Boost
    CFG_EXTRAS csapex-extras.cmake
 )
 
@@ -294,7 +293,6 @@ target_link_libraries(csapex
     ${Boost_LIBRARIES}
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}
-    ${console_bridge_LIBRARIES}
     ${class_loader_LIBRARIES}
 )
 
@@ -429,7 +427,6 @@ target_link_libraries(csapex_qt
     ${OPENGL_LIBRARIES}
     ${YAML_LIBRARIES}
     ${TinyXML_LIBRARIES}
-    ${console_bridge_LIBRARIES}   
     ${class_loader_LIBRARIES}
 )
 

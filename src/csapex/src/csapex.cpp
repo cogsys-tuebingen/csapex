@@ -39,7 +39,6 @@
 #include <QStatusBar>
 #include <execinfo.h>
 #include <stdlib.h>
-#include <console_bridge/console.h>
 #define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/filesystem.hpp>
 #undef BOOST_NO_CXX11_SCOPED_ENUMS
@@ -104,7 +103,6 @@ int Main::run()
 int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping,
                const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
-    //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     if(!headless) {
         splash = new CsApexSplashScreen;
         splash->show();
@@ -344,7 +342,6 @@ void Main::showMessage(const QString& msg)
 
 int main(int argc, char** argv)
 {
-    //    console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
     int effective_argc = argc;
     std::string path_to_bin(argv[0]);
 
