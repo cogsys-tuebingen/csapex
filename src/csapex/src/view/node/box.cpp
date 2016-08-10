@@ -152,6 +152,7 @@ void NodeBox::setupUi()
         setProperty("active", state->isActive());
         updateVisualsRequest();
     });
+    state->color_changed->connect(std::bind(&NodeBox::changeColor, this));
 
     Q_EMIT changed(this);
 }
@@ -787,6 +788,58 @@ void NodeBox::triggerMinimized()
     Q_EMIT minimized(minimize);
 }
 
+void NodeBox::changeColor()
+{
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return;
+    }
+    NodeStatePtr state = nh->getNodeState();
+
+    QColor text_color = Qt::black;
+
+    int r, g, b;
+    state->getColor(r, g, b);
+
+    QString style = parent_ ? parent_->styleSheet() : styleSheet();
+
+    if(r >= 0 && g >= 0 && b >= 0) {
+        QColor background(r,g,b);
+
+        bool light = (background.lightness() > 128);
+
+        QColor border = light ? background.darker(160) : background.lighter(160);
+        QColor background_selected = light ? background.darker(140) : background.lighter(140);
+        QColor border_selected = light ? border.darker(140) : border.lighter(140);
+        text_color = light ? Qt::black: Qt::white;
+
+        style += "csapex--NodeBox QFrame#boxframe { ";
+        style += "background-color: rgb(" + QString::number(background.red()) + ", " +
+                QString::number(background.green()) + ", " +
+                QString::number(background.blue()) + ");";
+        style += "border-color: rgb(" + QString::number(border.red()) + ", " +
+                QString::number(border.green()) + ", " +
+                QString::number(border.blue()) + ");";
+        style += "}";
+        style += "csapex--NodeBox[focused=\"true\"] QFrame#boxframe { ";
+        style += "background-color: rgb(" + QString::number(background.red()) + ", " +
+                QString::number(background_selected.green()) + ", " +
+                QString::number(background_selected.blue()) + ");";
+        style += "border-color: rgb(" + QString::number(border.red()) + ", " +
+                QString::number(border_selected.green()) + ", " +
+                QString::number(border_selected.blue()) + ");";
+        style += "}";
+    }
+
+    style += "csapex--NodeBox QLabel, csapex--NodeBox QGroupBox { ";
+    style += "color: rgb(" + QString::number(text_color.red()) + ", " +
+            QString::number(text_color.green()) + ", " +
+            QString::number(text_color.blue()) + ") !important;";
+    style += "}";
+
+    setStyleSheet(style);
+}
+
 void NodeBox::updateVisuals()
 {
     if(!ui || !ui->boxframe) {
@@ -862,50 +915,6 @@ void NodeBox::updateVisuals()
         layout()->invalidate();
         QApplication::processEvents(); adjustSize();
     }
-
-
-    QColor text_color = Qt::black;
-
-    int r, g, b;
-    state->getColor(r, g, b);
-
-    QString style = parent_ ? parent_->styleSheet() : styleSheet();
-
-    if(r >= 0 && g >= 0 && b >= 0) {
-        QColor background(r,g,b);
-
-        bool light = (background.lightness() > 128);
-
-        QColor border = light ? background.darker(160) : background.lighter(160);
-        QColor background_selected = light ? background.darker(140) : background.lighter(140);
-        QColor border_selected = light ? border.darker(140) : border.lighter(140);
-        text_color = light ? Qt::black: Qt::white;
-
-        style += "csapex--NodeBox QFrame#boxframe { ";
-        style += "background-color: rgb(" + QString::number(background.red()) + ", " +
-                QString::number(background.green()) + ", " +
-                QString::number(background.blue()) + ");";
-        style += "border-color: rgb(" + QString::number(border.red()) + ", " +
-                QString::number(border.green()) + ", " +
-                QString::number(border.blue()) + ");";
-        style += "}";
-        style += "csapex--NodeBox[focused=\"true\"] QFrame#boxframe { ";
-        style += "background-color: rgb(" + QString::number(background.red()) + ", " +
-                QString::number(background_selected.green()) + ", " +
-                QString::number(background_selected.blue()) + ");";
-        style += "border-color: rgb(" + QString::number(border.red()) + ", " +
-                QString::number(border_selected.green()) + ", " +
-                QString::number(border_selected.blue()) + ");";
-        style += "}";
-    }
-
-    style += "csapex--NodeBox QLabel, csapex--NodeBox QGroupBox { ";
-    style += "color: rgb(" + QString::number(text_color.red()) + ", " +
-            QString::number(text_color.green()) + ", " +
-            QString::number(text_color.blue()) + ") !important;";
-    style += "}";
-
-    setStyleSheet(style);
 
     refreshStylesheet();
 
