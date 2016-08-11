@@ -152,6 +152,7 @@ void NodeBox::setupUi()
         setProperty("active", state->isActive());
         updateVisualsRequest();
     });
+    state->color_changed->connect(std::bind(&NodeBox::changeColor, this));
 
     Q_EMIT changed(this);
 }
@@ -843,7 +844,7 @@ void NodeBox::updateStylesheetColor(const NodeStatePtr& state)
     setStyleSheet(style);
 }
 
-void NodeBox::updateVisuals()
+void NodeBox::changeColor()
 {
     NodeHandlePtr nh = node_handle_.lock();
     if(!nh) {
@@ -851,7 +852,23 @@ void NodeBox::updateVisuals()
     }
     NodeStatePtr state = nh->getNodeState();
 
+    updateStylesheetColor(state);
+}
+
+void NodeBox::updateVisuals()
+{
+    if(!ui || !ui->boxframe) {
+        return;
+    }
+
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return;
+    }
+    NodeStatePtr state = nh->getNodeState();
+
     bool flip = state->isFlipped();
+
     setProperty("flipped", flip);
 
     if(ui && ui->boxframe) {
@@ -917,8 +934,6 @@ void NodeBox::updateVisuals()
     }
 
     QApplication::processEvents(); adjustSize();
-
-    updateStylesheetColor(state);
 
     refreshStylesheet();
 

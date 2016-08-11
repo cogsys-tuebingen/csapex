@@ -185,9 +185,10 @@ void NoteBox::init()
 
     NodeState* state = node_handle_.lock()->getNodeState().get();
     state->color_changed->connect([this, state](){
-        updateVisualsRequest();
+        changeColor();
     });
 
+    changeColor();
     updateVisualsRequest();
 }
 

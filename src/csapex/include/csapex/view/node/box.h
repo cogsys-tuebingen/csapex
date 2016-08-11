@@ -123,6 +123,7 @@ public Q_SLOTS:
 
     void getInformation();
     void triggerMinimized();
+    void changeColor();
     void refreshStylesheet();
     void killContent();
     void triggerFlipSides();
