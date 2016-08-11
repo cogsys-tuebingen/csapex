@@ -351,6 +351,7 @@ add_library(csapex_qt SHARED
     src/view/designer/drag_io_handler.cpp
     src/view/designer/fulcrum_handle.cpp
     src/view/designer/fulcrum_widget.cpp
+    src/view/designer/tutorial_tree_model.cpp
 
     src/view/node/default_node_adapter.cpp
     src/view/node/node_adapter_builder.cpp

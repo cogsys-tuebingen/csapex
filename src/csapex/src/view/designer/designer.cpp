@@ -110,7 +110,7 @@ void Designer::observe(GraphFacadePtr graph)
                 }));
     graph_connections_[graph->getGraph()].emplace_back(
                 graph->childRemoved.connect([this](GraphFacadePtr child){
-                    removeGraph(child);
+                    removeGraph(child.get());
                 }));
 }
 
@@ -271,10 +271,10 @@ void Designer::closeView(int page)
     }
 }
 
-void Designer::removeGraph(GraphFacadePtr graph_facade)
+void Designer::removeGraph(GraphFacade* graph_facade)
 {
     for(auto it = graphs_.begin(); it != graphs_.end(); ++it) {
-        if(it->second == graph_facade) {
+        if(it->second.get() == graph_facade) {
             Graph* graph = graph_facade->getGraph();
             graph_connections_.erase(graph);
             GraphView* view = graph_views_[graph];
@@ -445,10 +445,16 @@ void Designer::refresh()
 
 void Designer::reset()
 {
-    for(const auto& pair : graph_views_) {
-        GraphView* view = pair.second;
-        view->reset();
-    }
+    graphs_.clear();
+    visible_graphs_.clear();
+    auuid_views_.clear();
+    view_graphs_.clear();
+    graph_connections_.clear();
+    view_connections_.clear();
+
+    states_for_invisible_graphs_.clear();
+
+    connections_.clear();
 }
 
 void Designer::addBox(NodeBox *box)

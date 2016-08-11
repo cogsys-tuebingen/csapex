@@ -25,11 +25,13 @@
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/screenshot_dialog.h>
 #include <csapex/command/command.h>
-#include "ui_csapex_window.h"
 #include <csapex/view/utility/node_list_generator.h>
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/timer.h>
 #include <csapex/view/widgets/profiling_widget.h>
+#include <csapex/view/designer/tutorial_tree_model.h>
+#include <csapex/view/utility/html_delegate.h>
+#include "ui_csapex_window.h"
 
 /// PROJECT
 #include <csapex/param/parameter_factory.h>
@@ -106,8 +108,9 @@ void CsApexWindow::construct()
     ui->actionPause->setChecked(executor_.isPaused());
 
     auto forceShortcut = [this](QAction* action) {
+        action->setShortcutContext(Qt::ApplicationShortcut);
         QShortcut *shortcut = new QShortcut(action->shortcut(), this);
-        shortcut->setEnabled(false);
+//        shortcut->setEnabled(false);
         QObject::connect(shortcut, &QShortcut::activated, action, &QAction::trigger);
         QObject::connect(shortcut, &QShortcut::activatedAmbiguously, action, &QAction::trigger);
     };
@@ -173,7 +176,7 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->profiling_debug_enable, SIGNAL(toggled(bool)), this, SLOT(enableDebugProfiling(bool)));
 
-    connections_.push_back(core_.resetDone.connect([this](){ designer_->reset(); }));
+    connections_.push_back(core_.resetRequest.connect([this](){ designer_->reset(); }));
     connections_.push_back(core_.configChanged.connect([this](){ updateTitle(); }));
     connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
     connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
@@ -193,6 +196,7 @@ void CsApexWindow::construct()
     updateTitle();
 
     createPluginsMenu();
+    createTutorialsMenu();
 
     timer.setInterval(100);
     timer.setSingleShot(false);
@@ -392,12 +396,15 @@ void CsApexWindow::updateNodeInfo()
 
             auto node = n->makePrototype()->getNode().lock();
             if(node) {
+                node->setupParameters(*node);
                 std::vector<csapex::param::Parameter::Ptr> params = node->getParameters();
 
                 for(const csapex::param::Parameter::Ptr& p : params) {
-                    ss << "<h2>" << p->name() << "</h2>";
-                    ss << "<p>" << p->description().toString() << "</p>";
-                    ss << "<p>" << p->toString() << "</p>";
+                    if(!p->isHidden()) {
+                        ss << "<h2>" << p->name() << "</h2>";
+                        ss << "<p>" << p->description().toString() << "</p>";
+                        ss << "<p>" << p->toString() << "</p>";
+                    }
                 }
             }
         }
@@ -650,6 +657,34 @@ void CsApexWindow::createPluginsMenu()
     }
 }
 
+void CsApexWindow::createTutorialsMenu()
+{
+    QTreeWidget* tree = ui->tutorials_tree;
+    tree->setWordWrap(true);
+    tree->setUniformRowHeights(false);
+    tree->setItemDelegate(new HTMLDelegate);
+
+    TutorialTreeModel tutorials(core_.getSettings());
+    tutorials.fill(tree);
+
+    QObject::connect(tree, &QTreeWidget::activated,
+                     this, &CsApexWindow::loadTutorial);
+//    QObject::connect(tree, &QTreeWidget::doubleClicked,
+//                     this, &CsApexWindow::loadTutorial);
+}
+
+void CsApexWindow::loadTutorial(const QModelIndex &index)
+{
+    QTreeWidget* tree = ui->tutorials_tree;
+    QVariant data = tree->model()->data(index, Qt::UserRole);
+    if(data.isValid()) {
+        QString filename = data.toString();
+        if(QFile(filename).exists()) {
+            core_.load(filename.toStdString());
+        }
+    }
+}
+
 void CsApexWindow::updatePluginIgnored(const QObject* &action)
 {
     const QAction* a = dynamic_cast<const QAction*>(action);
@@ -688,7 +723,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
         settings.add(csapex::param::ParameterFactory::declareText("uistate", ""));
     }
     if(!settings.knows("geometry")) {
-        settings.add(csapex::param::ParameterFactory::declareText("geometry", "geometry.toStdString()"));
+        settings.add(csapex::param::ParameterFactory::declareText("geometry", geometry.toStdString()));
     }
 
     settings.set("uistate", uistate.toStdString());

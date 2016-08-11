@@ -21,10 +21,13 @@ QSize HTMLDelegate::sizeHint ( const QStyleOptionViewItem & option, const QModel
     QStyleOptionViewItemV4 options = option;
     initStyleOption(&options, index);
 
+    options.rect.setSize(QStyledItemDelegate::sizeHint(option, index));
+
     QTextDocument doc;
     doc.setTextWidth(options.rect.width());
     doc.setDefaultFont(options.font);
     doc.setHtml(options.text);
+    doc.adjustSize();
 
     return doc.size().toSize();
 }
@@ -42,8 +45,16 @@ void HTMLDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & opti
     doc.setTextWidth(options.rect.width());
     doc.setDefaultFont(options.font);
     doc.setHtml(html);
+    doc.adjustSize();
+
     options.text = "";
     options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
+
+    int dx = options.icon.isNull() ? 0 : 18;
+    int dy = 0;
+
+    options.rect.setX(options.rect.x() + dx);
+    options.rect.setY(options.rect.y() + dy);
 
     painter->translate(options.rect.left(), options.rect.top());
     QRect clip(0, 0, options.rect.width(), options.rect.height());
