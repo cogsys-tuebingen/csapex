@@ -61,5 +61,6 @@
         <file>port_event.png</file>
         <file>pencil.png</file>
         <file>magnifier.png</file>
+        <file>folder.png</file>
     </qresource>
 </RCC>

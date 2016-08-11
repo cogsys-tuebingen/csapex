@@ -44,6 +44,10 @@ protected:
     void paintEvent(QPaintEvent* e) override;
     void resizeEvent(QResizeEvent* e) override;
 
+    virtual void updateStylesheetColor(const NodeStatePtr &state) override;
+    virtual void startResize() override;
+    virtual void stopResize() override;
+
 private:
     slim_signal::Connection connection_;
 

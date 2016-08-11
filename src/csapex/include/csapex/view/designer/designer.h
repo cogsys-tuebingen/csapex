@@ -45,7 +45,7 @@ public:
     void setView(int x, int y);
 
     void addGraph(GraphFacadePtr graph);
-    void removeGraph(GraphFacadePtr graph);
+    void removeGraph(GraphFacade *graph);
 
     GraphView* getVisibleGraphView() const;
     GraphView* getGraphView(const AUUID &uuid) const;

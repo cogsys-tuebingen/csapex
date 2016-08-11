@@ -94,6 +94,8 @@ public Q_SLOTS:
     void resetActivity();
     void enableDebugProfiling(bool enabled);
 
+    void loadTutorial(const QModelIndex& index);
+
 Q_SIGNALS:
     void statusChanged(const QString& status);
     void closed();
@@ -103,6 +105,7 @@ private:
     void setupDesigner();
 
     void createPluginsMenu();
+    void createTutorialsMenu();
     void loadStyleSheet();
 
     std::string getConfigFile();

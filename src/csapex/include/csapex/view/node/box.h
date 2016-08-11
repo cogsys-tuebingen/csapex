@@ -177,6 +177,11 @@ protected:
 
     QString getNodeState();
 
+    virtual void updateStylesheetColor(const NodeStatePtr &state);
+
+    virtual void startResize();
+    virtual void stopResize();
+
 protected:
     GraphView* parent_;
 

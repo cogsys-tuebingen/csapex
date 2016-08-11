@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1038</width>
-    <height>659</height>
+    <width>1157</width>
+    <height>841</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1038</width>
+     <width>1157</width>
      <height>22</height>
     </rect>
    </property>
@@ -287,7 +287,7 @@
      <item>
       <widget class="QToolBox" name="help_toolbox">
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="ui">
         <property name="geometry">
@@ -439,8 +439,8 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>274</width>
-          <height>101</height>
+          <width>98</width>
+          <height>88</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -480,6 +480,46 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Now &lt;span style=&quot; font-weight:600;&quot;&gt;lib&lt;/span&gt;&lt;span style=&quot; font-weight:600; color:#ff6868;&quot;&gt;my_plugins&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;.so&lt;/span&gt; will be loaded.&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;TODO: describe how to create nodes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tutorials">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>256</width>
+          <height>184</height>
+         </rect>
+        </property>
+        <attribute name="icon">
+         <iconset resource="../res/csapex_resources.qrc">
+          <normaloff>:/help.png</normaloff>:/help.png</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>Tutorials</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTreeWidget" name="tutorials_tree">
+           <column>
+            <property name="text">
+             <string>Tutorials</string>
+            </property>
+           </column>
           </widget>
          </item>
         </layout>
@@ -532,7 +572,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>491</width>
+          <width>549</width>
           <height>117</height>
          </rect>
         </property>
@@ -640,7 +680,7 @@ p, li { white-space: pre-wrap; }
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>486</width>
+              <width>547</width>
               <height>70</height>
              </rect>
             </property>

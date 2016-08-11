@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/nodes/note.h>
 #include <csapex/model/node_state.h>
+#include <csapex/view/designer/graph_view.h>
 
 /// SYSTEM
 #include <QStyle>
@@ -149,10 +150,9 @@ void NoteBox::init()
 
     edit_->setText(QString::fromStdString(note->readParameter<std::string>("text")));
 
-    resize(note->readParameter<int>("w"), note->readParameter<int>("h"));
+    stopResize();
 
     NodeBox::init();
-
 
     note->parameters_changed.connect([this](){
         NodeHandlePtr nh = node_handle_.lock();
@@ -181,7 +181,42 @@ void NoteBox::init()
 
         note->setParameter("text", edit_->toPlainText().toStdString());
     });
+
+
+    NodeState* state = node_handle_.lock()->getNodeState().get();
+    state->color_changed->connect([this, state](){
+        updateVisualsRequest();
+    });
+
+    updateVisualsRequest();
 }
+
+void NoteBox::startResize()
+{
+    setMinimumSize(40, 40);
+    setMaximumSize(10000, 10000);
+}
+void NoteBox::stopResize()
+{
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return;
+    }
+
+    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(nh->getNode().lock());
+    if(!note) {
+        return;
+    }
+
+    if(note->hasParameter("w") && note->hasParameter("h")) {
+        int w = note->readParameter<int>("w");
+        int h = note->readParameter<int>("h");
+        setFixedSize(std::max(40, w), std::max(40, h));
+    } else {
+        setFixedSize(40, 40);
+    }
+}
+
 
 void NoteBox::updateComponentInformation(Graph* graph)
 {
@@ -197,4 +232,29 @@ void NoteBox::setSelected(bool selected)
 {
     setProperty("focused",selected);
     refreshStylesheet();
+}
+
+void NoteBox::updateStylesheetColor(const NodeStatePtr& state)
+{
+    QColor text_color = Qt::black;
+
+    int r, g, b;
+    state->getColor(r, g, b);
+
+    QString style = parent_ ? parent_->styleSheet() : styleSheet();
+
+    if(r >= 0 && g >= 0 && b >= 0) {
+        QColor background(r,g,b);
+
+        bool light = (background.lightness() > 128);
+        text_color = light ? Qt::black: Qt::white;
+    }
+
+    style += "csapex--NoteBox QTextEdit { ";
+    style += "color: rgb(" + QString::number(text_color.red()) + ", " +
+            QString::number(text_color.green()) + ", " +
+            QString::number(text_color.blue()) + ") !important;";
+    style += "}";
+
+    setStyleSheet(style);
 }

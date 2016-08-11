@@ -41,7 +41,7 @@ using namespace csapex;
 const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, QIcon icon, GraphView* parent)
-    : parent_(parent), ui(new Ui::Box), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(nullptr), icon_(icon),
+    : parent_(parent), ui(nullptr), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(nullptr), icon_(icon),
       info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), initialized_(false)
 {
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
@@ -182,6 +182,7 @@ void NodeBox::construct()
         return;
     }
 
+    ui = new Ui::Box;
     ui->setupUi(this);
 
     ui->input_layout->addSpacerItem(new QSpacerItem(16, 0));
@@ -563,7 +564,7 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
         return false;
     }
 
-    if(o == ui->label) {
+    if(ui && o == ui->label) {
         QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
         if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
             Q_EMIT renameRequest(this);
@@ -573,13 +574,22 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
         }
     } else if(grip_ && o == grip_) {
         if(e->type() == QEvent::MouseButtonPress) {
-            adapter_->setManualResize(true);
+            startResize();
         } else if(e->type() == QEvent::MouseButtonRelease) {
-            adapter_->setManualResize(false);
+            stopResize();
         }
     }
 
     return false;
+}
+
+void NodeBox::startResize()
+{
+    adapter_->setManualResize(true);
+}
+void NodeBox::stopResize()
+{
+    adapter_->setManualResize(false);
 }
 
 void NodeBox::enabledChangeEvent(bool val)
@@ -787,83 +797,8 @@ void NodeBox::triggerMinimized()
     Q_EMIT minimized(minimize);
 }
 
-void NodeBox::updateVisuals()
+void NodeBox::updateStylesheetColor(const NodeStatePtr& state)
 {
-    if(!ui || !ui->boxframe) {
-        return;
-    }
-
-    NodeHandlePtr nh = node_handle_.lock();
-    if(!nh) {
-        return;
-    }
-    NodeStatePtr state = nh->getNodeState();
-
-    bool flip = state->isFlipped();
-
-    if(grip_) {
-        auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
-        if(layout) {
-            if(flip) {
-                layout->addWidget(grip_, 3, 0, Qt::AlignBottom | Qt::AlignLeft);
-            } else {
-                layout->addWidget(grip_, 3, 2, Qt::AlignBottom | Qt::AlignRight);
-            }
-        }
-    }
-
-    setProperty("flipped", flip);
-    ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
-    ui->frame->setLayoutDirection(Qt::LeftToRight);
-
-    bool flag_set = ui->boxframe->property("content_minimized").toBool();
-    bool minimized = isMinimizedSize();
-
-    if(minimized != flag_set) {
-        ui->boxframe->setProperty("content_minimized", minimized);
-
-        if(minimized) {
-            ui->frame->hide();
-            info_exec->hide();
-            ui->input_panel->hide();
-            ui->output_panel->hide();
-            ui->slot_panel->hide();
-            ui->event_panel->hide();
-
-            if(grip_) {
-                grip_->hide();
-            }
-
-            ui->gridLayout->removeWidget(ui->enablebtn);
-            ui->gridLayout->addWidget(ui->enablebtn, 2, 0);
-
-            ui->header_spacer->changeSize(0, 0);
-
-        } else {
-            ui->header_spacer->changeSize(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
-            ui->header_spacer->invalidate();
-
-            ui->gridLayout->removeWidget(ui->enablebtn);
-            ui->gridLayout->addWidget(ui->enablebtn, 1, 0);
-
-            ui->frame->show();
-            info_exec->show();
-            ui->output_panel->show();
-            ui->input_panel->show();
-            ui->output_panel->show();
-            ui->slot_panel->show();
-            ui->event_panel->show();
-
-            if(grip_) {
-                grip_->show();
-            }
-
-        }
-        layout()->invalidate();
-        QApplication::processEvents(); adjustSize();
-    }
-
-
     QColor text_color = Qt::black;
 
     int r, g, b;
@@ -906,6 +841,84 @@ void NodeBox::updateVisuals()
     style += "}";
 
     setStyleSheet(style);
+}
+
+void NodeBox::updateVisuals()
+{
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return;
+    }
+    NodeStatePtr state = nh->getNodeState();
+
+    bool flip = state->isFlipped();
+    setProperty("flipped", flip);
+
+    if(ui && ui->boxframe) {
+        if(grip_) {
+            auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
+            if(layout) {
+                if(flip) {
+                    layout->addWidget(grip_, 3, 0, Qt::AlignBottom | Qt::AlignLeft);
+                } else {
+                    layout->addWidget(grip_, 3, 2, Qt::AlignBottom | Qt::AlignRight);
+                }
+            }
+        }
+
+        ui->boxframe->setLayoutDirection(flip ? Qt::RightToLeft : Qt::LeftToRight);
+        ui->frame->setLayoutDirection(Qt::LeftToRight);
+
+        bool flag_set = ui->boxframe->property("content_minimized").toBool();
+        bool minimized = isMinimizedSize();
+
+        if(minimized != flag_set) {
+            ui->boxframe->setProperty("content_minimized", minimized);
+
+            if(minimized) {
+                ui->frame->hide();
+                info_exec->hide();
+                ui->input_panel->hide();
+                ui->output_panel->hide();
+                ui->slot_panel->hide();
+                ui->event_panel->hide();
+
+                if(grip_) {
+                    grip_->hide();
+                }
+
+                ui->gridLayout->removeWidget(ui->enablebtn);
+                ui->gridLayout->addWidget(ui->enablebtn, 2, 0);
+
+                ui->header_spacer->changeSize(0, 0);
+
+            } else {
+                ui->header_spacer->changeSize(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
+                ui->header_spacer->invalidate();
+
+                ui->gridLayout->removeWidget(ui->enablebtn);
+                ui->gridLayout->addWidget(ui->enablebtn, 1, 0);
+
+                ui->frame->show();
+                info_exec->show();
+                ui->output_panel->show();
+                ui->input_panel->show();
+                ui->output_panel->show();
+                ui->slot_panel->show();
+                ui->event_panel->show();
+
+                if(grip_) {
+                    grip_->show();
+                }
+
+            }
+            layout()->invalidate();
+        }
+    }
+
+    QApplication::processEvents(); adjustSize();
+
+    updateStylesheetColor(state);
 
     refreshStylesheet();
 
