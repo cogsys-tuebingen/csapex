@@ -773,6 +773,8 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     box_map_[node_handle->getUUID()] = box;
     proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, this, view_core_);
 
+    box->setStyleSheet(styleSheet());
+
     box->construct();
 
     addBox(box);
@@ -939,8 +941,6 @@ void GraphView::addBox(NodeBox *box)
     QObject::connect(proxy, &MovableGraphicsProxyWidget::moved, this, &GraphView::movedBoxes);
 
     boxes_.push_back(box);
-
-    box->setStyleSheet(styleSheet());
 
     for(QGraphicsItem *item : items()) {
         item->setFlag(QGraphicsItem::ItemIsMovable);

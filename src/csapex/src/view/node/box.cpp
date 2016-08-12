@@ -154,6 +154,9 @@ void NodeBox::setupUi()
     });
     state->color_changed->connect(std::bind(&NodeBox::changeColor, this));
 
+    changeColor();
+    updateVisualsRequest();
+
     Q_EMIT changed(this);
 }
 
@@ -853,6 +856,7 @@ void NodeBox::changeColor()
     NodeStatePtr state = nh->getNodeState();
 
     updateStylesheetColor(state);
+    refreshStylesheet();
 }
 
 void NodeBox::updateVisuals()
