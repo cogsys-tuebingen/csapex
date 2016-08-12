@@ -7,3 +7,4 @@ git clone gitlab@gitlab.cs.uni-tuebingen.de:ioc/cip104.git plugins/cip104
 git clone gitlab@gitlab.cs.uni-tuebingen.de:patsy/patsy-apex.git plugins/patsy
 git clone gitlab@gitlab.cs.uni-tuebingen.de:csapex/vision-plugins-gpu.git plugins/vision_plugins_gpu
 git clone gitlab@gitlab.cs.uni-tuebingen.de:csapex/jannlab.git plugins/jannlab
+git clone gitlab@gitlab.cs.uni-tuebingen.de:csapex/csapex_dataset.git
