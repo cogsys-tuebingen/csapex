@@ -2,6 +2,7 @@
 #define DESIGNER_SCENE_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/data/point.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/view/view_fwd.h>
@@ -21,7 +22,7 @@
 namespace csapex
 {
 
-class DesignerScene : public QGraphicsScene, public Profilable
+class CSAPEX_QT_EXPORT DesignerScene : public QGraphicsScene, public Profilable
 {
     Q_OBJECT
 

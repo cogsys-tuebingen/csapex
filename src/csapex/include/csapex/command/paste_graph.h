@@ -19,7 +19,7 @@ namespace csapex
 namespace command
 {
 
-class PasteGraph : public Meta
+class CSAPEX_COMMAND_EXPORT PasteGraph : public Meta
 {
 public:
     PasteGraph(const AUUID &graph_id, const YAML::Node& blueprint, const Point &pos);

@@ -2,6 +2,7 @@
 #define DRAG_IO_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/designer/drag_io_handler.h>
 #include <csapex/plugin/plugin_fwd.h>
 #include <csapex/view/view_fwd.h>
@@ -19,7 +20,7 @@ class Node;
 namespace csapex
 {
 
-class DragIO
+class CSAPEX_QT_EXPORT DragIO
 {
 public:
     DragIO(PluginLocatorPtr locator, CommandDispatcher* dispatcher);

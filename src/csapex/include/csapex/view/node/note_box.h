@@ -2,6 +2,7 @@
 #define NOTE_BOX_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/node/box.h>
 
 class QTextEdit;
@@ -9,7 +10,7 @@ class QTextEdit;
 namespace csapex
 {
 
-class NoteBox : public NodeBox
+class CSAPEX_QT_EXPORT NoteBox : public NodeBox
 {
     Q_OBJECT
 

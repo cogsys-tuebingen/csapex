@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-struct CreateThread : public Command
+struct CSAPEX_COMMAND_EXPORT CreateThread : public Command
 {
     CreateThread(const AUUID &graph_uuid, const UUID& node, const std::string &name);
 

@@ -17,6 +17,7 @@
 /// COMPONENT
 #include <csapex/utility/assert.h>
 
+using namespace csapex;
 using namespace csapex::command;
 
 

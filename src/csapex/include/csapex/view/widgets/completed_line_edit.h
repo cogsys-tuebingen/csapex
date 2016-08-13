@@ -1,6 +1,9 @@
 #ifndef COMPLETED_LINE_EDIT_H
 #define COMPLETED_LINE_EDIT_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QLineEdit>
 
@@ -10,7 +13,7 @@ class QAbstractItemModel;
 namespace csapex
 {
 
-class CompletedLineEdit : public QLineEdit
+class CSAPEX_QT_EXPORT CompletedLineEdit : public QLineEdit
 {
     Q_OBJECT
 

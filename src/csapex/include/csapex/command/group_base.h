@@ -15,7 +15,7 @@ namespace csapex
 {
 namespace command
 {
-class GroupBase : public Meta
+class CSAPEX_COMMAND_EXPORT GroupBase : public Meta
 {
 protected:
     GroupBase(const AUUID &graph_uuid, const std::string &type);

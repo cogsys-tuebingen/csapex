@@ -7,7 +7,7 @@
 namespace csapex
 {
 
-class BundledConnection : public DirectConnection
+class CSAPEX_EXPORT BundledConnection : public DirectConnection
 {
 public:
     static ConnectionPtr connect(Output* from, Input* to);

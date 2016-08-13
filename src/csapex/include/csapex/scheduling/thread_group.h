@@ -18,7 +18,7 @@
 namespace csapex
 {
 
-class ThreadGroup : public Scheduler
+class CSAPEX_EXPORT ThreadGroup : public Scheduler
 {
 public:
     enum {

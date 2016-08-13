@@ -1,3 +1,8 @@
+#if WIN32
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
+
 /// HEADER
 #include <csapex/view/designer/fulcrum_widget.h>
 
@@ -121,7 +126,7 @@ void FulcrumWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 
     QAction* curve = new QAction("curve", &menu);
     curve->setCheckable(true);
-    if(fulcrum_->type() == Fulcrum::CURVE) {
+    if(fulcrum_->type() == Fulcrum::FULCRUM_CURVE) {
         curve->setDisabled(true);
         curve->setChecked(true);
     }
@@ -129,7 +134,7 @@ void FulcrumWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 
     QAction* linear = new QAction("linear", &menu);
     linear->setCheckable(true);
-    if(fulcrum_->type() == Fulcrum::LINEAR) {
+    if(fulcrum_->type() == Fulcrum::FULCRUM_LINEAR) {
         linear->setDisabled(true);
         linear->setChecked(true);
     }
@@ -146,10 +151,10 @@ void FulcrumWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
     } else if(selectedItem == curve || selectedItem == linear) {
         int type = 0;
         if(selectedItem == curve) {
-            type = Fulcrum::CURVE;
+            type = Fulcrum::FULCRUM_CURVE;
 
         } else if(selectedItem == linear) {
-            type = Fulcrum::LINEAR;
+            type = Fulcrum::FULCRUM_LINEAR;
 
         } else {
             return;
@@ -165,7 +170,7 @@ bool FulcrumWidget::sceneEvent(QEvent *event)
 
     switch(event->type()) {
     case QEvent::GraphicsSceneMousePress:
-        if(fulcrum_->type() == Fulcrum::CURVE) {
+        if(fulcrum_->type() == Fulcrum::FULCRUM_CURVE) {
             bool v = !handle_in_->isVisible();
             handle_in_->setVisible(v);
             handle_out_->setVisible(v);

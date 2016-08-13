@@ -1,13 +1,16 @@
 #ifndef FULCRUM_HANDLE_H
 #define FULCRUM_HANDLE_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QGraphicsItem>
 
 namespace csapex
 {
 
-class FulcrumHandle: public QObject, public QGraphicsEllipseItem
+class CSAPEX_QT_EXPORT FulcrumHandle: public QObject, public QGraphicsEllipseItem
 {
     Q_OBJECT
 

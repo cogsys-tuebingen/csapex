@@ -1,12 +1,15 @@
 #ifndef DESIGNER_STYLEABLE_H
 #define DESIGNER_STYLEABLE_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QColor>
 
 namespace csapex
 {
-class DesignerStyleable
+class CSAPEX_QT_EXPORT DesignerStyleable
 {
 public:
     QColor lineColor() const

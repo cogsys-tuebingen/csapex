@@ -11,7 +11,7 @@ namespace csapex
 {
 class ParameterContextMenu;
 
-class PathParameterAdapter : public ParameterAdapter
+class CSAPEX_QT_EXPORT PathParameterAdapter : public ParameterAdapter
 {
 public:
     PathParameterAdapter(param::PathParameter::Ptr p);

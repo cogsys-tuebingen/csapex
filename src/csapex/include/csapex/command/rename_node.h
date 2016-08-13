@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-struct RenameNode : public Command
+struct CSAPEX_COMMAND_EXPORT RenameNode : public Command
 {
     RenameNode(const AUUID &graph_uuid, const UUID& node, const std::string &new_name);
 

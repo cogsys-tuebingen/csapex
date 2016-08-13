@@ -11,7 +11,7 @@ namespace csapex
 {
 class ParameterContextMenu;
 
-class ColorParameterAdapter : public ParameterAdapter
+class CSAPEX_QT_EXPORT ColorParameterAdapter : public ParameterAdapter
 {
 public:
     ColorParameterAdapter(param::ColorParameter::Ptr p);

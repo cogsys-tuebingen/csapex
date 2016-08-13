@@ -8,6 +8,7 @@
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/token.h>
+#include "csapex_export.h"
 
 /// SYSTEM
 #include <memory>
@@ -19,7 +20,7 @@
 namespace csapex
 {
 
-class Connection
+class CSAPEX_EXPORT Connection
 {
     friend class GraphIO;
     friend class Graph;

@@ -15,7 +15,7 @@
 namespace csapex
 {
 
-class GraphIO
+class CSAPEX_EXPORT GraphIO
 {
 public:
     GraphIO(Graph *graph, NodeFactory* node_factory);

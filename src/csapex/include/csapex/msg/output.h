@@ -11,7 +11,7 @@
 namespace csapex
 {
 
-class Output : public Connectable
+class CSAPEX_EXPORT Output : public Connectable
 {
     friend class Graph;
     friend class DesignerIO;

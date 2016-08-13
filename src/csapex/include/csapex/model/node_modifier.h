@@ -13,7 +13,7 @@
 
 namespace csapex
 {
-class NodeModifier
+class CSAPEX_EXPORT NodeModifier
 {
 public:
     NodeModifier();

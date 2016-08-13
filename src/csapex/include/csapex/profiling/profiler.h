@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/profiling/timer.h>
 #include <csapex/profiling/profile.h>
+#include "csapex_profiling_export.h"
 
 /// SYSTEM
 #include <map>
@@ -11,7 +12,7 @@
 namespace csapex
 {
 
-class Profiler
+class CSAPEX_PROFILING_EXPORT Profiler
 {
 public:
 

@@ -1,6 +1,9 @@
 #ifndef PORT_PANEL_H
 #define PORT_PANEL_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/view_fwd.h>
@@ -16,7 +19,7 @@ class QBoxLayout;
 namespace csapex
 {
 
-class PortPanel : public QFrame
+class CSAPEX_QT_EXPORT PortPanel : public QFrame
 {
     Q_OBJECT
 

@@ -1,6 +1,9 @@
 #ifndef MINIMAP_WIDGET_H
 #define MINIMAP_WIDGET_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/view/view_fwd.h>
 
@@ -10,7 +13,7 @@
 namespace csapex
 {
 
-class MinimapWidget : public QWidget
+class CSAPEX_QT_EXPORT MinimapWidget : public QWidget
 {
     Q_OBJECT
 

@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-struct Minimize : public Command
+struct CSAPEX_COMMAND_EXPORT Minimize : public Command
 {
     Minimize(const AUUID &graph_uuid, const UUID& node, bool mini);
 

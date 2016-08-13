@@ -424,7 +424,7 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
 
     int n = pts.size();
     for(int i = 0; i < n; ++i) {
-        int type = (!types.empty()) ? types[i] : Fulcrum::LINEAR;
+        int type = (!types.empty()) ? types[i] : Fulcrum::FULCRUM_LINEAR;
         if(has_handle) {
             Point in(handles[i][0], handles[i][1]);
             Point out(handles[i][2], handles[i][3]);

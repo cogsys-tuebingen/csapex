@@ -18,6 +18,7 @@
 
 /// SYSTEM
 
+using namespace csapex;
 using namespace csapex::command;
 
 DeleteNode::DeleteNode(const AUUID& parent_uuid, const UUID& uuid)

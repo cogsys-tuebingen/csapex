@@ -13,7 +13,7 @@ namespace csapex
 namespace command
 {
 
-class Meta : public Command
+class CSAPEX_COMMAND_EXPORT Meta : public Command
 {
 public:
     typedef std::shared_ptr<Meta> Ptr;

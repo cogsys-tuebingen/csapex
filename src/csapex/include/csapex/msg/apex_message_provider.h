@@ -3,11 +3,12 @@
 
 /// COMPONENT
 #include <csapex/msg/message_provider.h>
+#include "csapex_export.h"
 
 namespace csapex
 {
 
-class ApexMessageProvider : public MessageProvider
+class CSAPEX_EXPORT ApexMessageProvider : public MessageProvider
 {
 public:
     static std::shared_ptr<MessageProvider> make();

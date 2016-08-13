@@ -13,7 +13,7 @@
 namespace csapex
 {
 
-class CommandDispatcher
+class CSAPEX_COMMAND_EXPORT CommandDispatcher
 {
 public:
     typedef std::shared_ptr<CommandDispatcher> Ptr;

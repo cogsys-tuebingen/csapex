@@ -1,6 +1,9 @@
 #ifndef TAG_H
 #define TAG_H
 
+/// COMPONENT
+#include "csapex_export.h"
+
 /// SYSTEM
 #include <string>
 #include <map>
@@ -9,7 +12,7 @@
 namespace csapex
 {
 
-class Tag
+class CSAPEX_EXPORT Tag
 {
 public:
     typedef std::shared_ptr<Tag> Ptr;

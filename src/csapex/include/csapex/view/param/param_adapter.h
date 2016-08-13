@@ -5,6 +5,7 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/param/parameter.h>
 #include <csapex/command/command_fwd.h>
+#include <csapex/view/csapex_qt_export.h>
 
 /// SYSTEM
 #include <string>
@@ -19,7 +20,7 @@ namespace csapex
 
 class ParameterContextMenu;
 
-class ParameterAdapter : public QObject
+class CSAPEX_QT_EXPORT ParameterAdapter : public QObject
 {
     Q_OBJECT
 

@@ -11,7 +11,7 @@ namespace csapex
 {
 class ParameterContextMenu;
 
-class IntervalParameterAdapter : public ParameterAdapter
+class CSAPEX_QT_EXPORT IntervalParameterAdapter : public ParameterAdapter
 {
 public:
     IntervalParameterAdapter(param::IntervalParameter::Ptr p);

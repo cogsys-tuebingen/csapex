@@ -3,11 +3,12 @@
 
 /// COMPONENT
 #include <csapex/param/value_parameter.h>
+#include "csapex_param_export.h"
 
 namespace csapex {
 namespace param {
 
-class ColorParameter : public Parameter
+class CSAPEX_PARAM_EXPORT ColorParameter : public Parameter
 {
     friend class ParameterFactory;
 

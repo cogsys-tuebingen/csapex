@@ -14,7 +14,7 @@ namespace csapex
 namespace command
 {
 
-class AddConnection : public Command
+class CSAPEX_COMMAND_EXPORT AddConnection : public Command
 {
 public:
     AddConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid);

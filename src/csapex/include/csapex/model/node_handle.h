@@ -17,7 +17,7 @@
 namespace csapex
 {
 
-class NodeHandle : public Unique, public NodeModifier
+class CSAPEX_EXPORT NodeHandle : public Unique, public NodeModifier
 {
 public:
     NodeHandle(const std::string& type, const UUID &uuid,

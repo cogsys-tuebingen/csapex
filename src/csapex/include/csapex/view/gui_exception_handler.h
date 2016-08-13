@@ -1,6 +1,9 @@
 #ifndef GUI_EXCEPTION_HANDLER_H
 #define GUI_EXCEPTION_HANDLER_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/core/exception_handler.h>
 
@@ -10,7 +13,7 @@
 namespace csapex
 {
 
-class GuiExceptionHandler : public QObject, public ExceptionHandler
+class CSAPEX_QT_EXPORT GuiExceptionHandler : public QObject, public ExceptionHandler
 {
     Q_OBJECT
 

@@ -2,6 +2,9 @@
 #define PROFILING_WIDGET_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
+/// PROJECT
 #include <csapex/profiling/profiler.h>
 #include <csapex/utility/slim_signal.hpp>
 
@@ -15,7 +18,7 @@ class QVBoxLayout;
 namespace csapex
 {
 
-class ProfilingWidget : public QWidget
+class CSAPEX_QT_EXPORT ProfilingWidget : public QWidget
 {
     Q_OBJECT
 

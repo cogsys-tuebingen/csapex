@@ -9,7 +9,7 @@
 namespace csapex
 {
 
-class Input : public Connectable
+class CSAPEX_EXPORT Input : public Connectable
 {
     friend class Output;
 

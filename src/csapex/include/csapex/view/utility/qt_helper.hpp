@@ -8,7 +8,8 @@
 #ifndef QT_HELPER_HPP
 #define QT_HELPER_HPP
 
-/// COMPONENT
+ /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/widgets/qdouble_slider.h>
 #include <csapex/view/widgets/qint_slider.h>
 #include <csapex/view/utility/qwrapper.h>
@@ -22,13 +23,13 @@
 
 namespace qt_helper {
 
-struct QSleepThread {
+struct CSAPEX_QT_EXPORT QSleepThread {
     static void msleep(unsigned long t);
 };
 
 }
 
-class QtHelper
+class CSAPEX_QT_EXPORT QtHelper
 {
 public:
     static QWidget* wrapLayout(QBoxLayout *l, QWidget *parent = 0);

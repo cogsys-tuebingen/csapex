@@ -15,7 +15,7 @@
 
 /// SYSTEM
 
-
+using namespace csapex;
 using namespace csapex::command;
 
 DisableNode::DisableNode(const AUUID& parent_uuid, const UUID& uuid, bool disable)

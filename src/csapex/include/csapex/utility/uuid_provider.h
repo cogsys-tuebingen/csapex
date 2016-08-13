@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid.h>
+#include "csapex_util_export.h"
 
 /// SYSTEM
 #include <unordered_map>
@@ -11,7 +12,7 @@
 namespace csapex
 {
 
-class UUIDProvider : public std::enable_shared_from_this<UUIDProvider>
+class CSAPEX_UTILS_EXPORT UUIDProvider : public std::enable_shared_from_this<UUIDProvider>
 {
     friend class UUID;
     friend class GraphIO; // TODO: remove

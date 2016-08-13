@@ -12,7 +12,7 @@ namespace csapex
 namespace command
 {
 
-class DeleteMessageConnection : public DeleteConnection
+class CSAPEX_COMMAND_EXPORT DeleteMessageConnection : public DeleteConnection
 {
 public:
     DeleteMessageConnection(const AUUID& graph_uuid, Output* a, Input* b);

@@ -11,7 +11,7 @@ namespace csapex
 namespace command
 {
 
-class AddFulcrum : public Command
+class CSAPEX_COMMAND_EXPORT AddFulcrum : public Command
 {
 public:
     AddFulcrum(const AUUID& graph_uuid, int connection_id, int sub_section_to_split, const Point& pos, int type);

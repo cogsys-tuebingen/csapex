@@ -2,6 +2,7 @@
 #define CSAPEX_WINDOW_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/plugin/plugin_fwd.h>
@@ -33,7 +34,7 @@ namespace csapex
 /**
  * @brief The CsApexWindow class provides the window for the evaluator program
  */
-class CsApexWindow : public QMainWindow
+class CSAPEX_QT_EXPORT CsApexWindow : public QMainWindow
 {
     Q_OBJECT
 

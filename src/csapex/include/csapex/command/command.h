@@ -5,6 +5,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/utility/uuid.h>
+#include "csapex_command_export.h"
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
@@ -20,11 +21,11 @@ namespace csapex
 
 class Designer;
 
-class Command
+class CSAPEX_COMMAND_EXPORT Command
 {
 
 public:
-    class Access {
+    class CSAPEX_COMMAND_EXPORT Access {
         friend class Group;
         friend class CommandDispatcher;
         friend class command::Meta;

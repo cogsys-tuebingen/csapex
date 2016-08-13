@@ -13,6 +13,7 @@
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
 
+using namespace csapex;
 using namespace csapex::command;
 
 AddNode::AddNode(const AUUID &parent_uuid, const std::string &type, Point pos, const UUID& uuid, NodeState::Ptr state)

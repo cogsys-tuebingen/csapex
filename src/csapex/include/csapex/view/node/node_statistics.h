@@ -1,6 +1,9 @@
 #ifndef NODE_STATISTICS_H
 #define NODE_STATISTICS_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 #include <csapex/factory/factory_fwd.h>
@@ -10,7 +13,7 @@
 
 namespace csapex
 {
-class NodeStatistics
+class CSAPEX_QT_EXPORT NodeStatistics
 {
 public:
     NodeStatistics(NodeHandle *node);

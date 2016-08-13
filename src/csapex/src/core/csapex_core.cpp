@@ -27,7 +27,9 @@
 
 /// SYSTEM
 #include <fstream>
-
+#ifdef WIN32
+#include <direct.h>
+#endif
 #include <boost/filesystem.hpp>
 
 using namespace csapex;
@@ -200,6 +202,10 @@ void CsApexCore::boot()
     std::string dir_string = csapex::info::CSAPEX_BOOT_PLUGIN_DIR;
 
     boost::filesystem::path directory(dir_string);
+
+	if (!boost::filesystem::exists(directory)) {
+		return;
+	}
     boost::filesystem::directory_iterator dir(directory);
     boost::filesystem::directory_iterator end;
 
@@ -299,7 +305,11 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     std::string dir = file.substr(0, file.find_last_of('/')+1);
 
     if(!dir.empty()) {
-        int chdir_result = chdir(dir.c_str());
+#ifdef WIN32
+		int chdir_result = _chdir(dir.c_str());
+#else
+		int chdir_result = chdir(dir.c_str());
+#endif
         if(chdir_result != 0) {
             throw std::runtime_error(std::string("cannot change into directory ") + dir);
         }

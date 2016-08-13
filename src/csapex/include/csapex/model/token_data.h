@@ -1,12 +1,16 @@
 #ifndef TOKEN_DATA_H
 #define TOKEN_DATA_H
 
+/// COMPONENT
+#include "csapex_export.h"
+
 /// SYSTEM
 #include <memory>
+#include <string>
 
 namespace csapex {
 
-class TokenData
+class CSAPEX_EXPORT TokenData
 {
 public:
     typedef std::shared_ptr<TokenData> Ptr;

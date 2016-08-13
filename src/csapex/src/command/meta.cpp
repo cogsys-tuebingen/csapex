@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <iostream>
 
+using namespace csapex;
 using namespace csapex::command;
 
 Meta::Meta(const AUUID &parent_uuid, const std::string &type)

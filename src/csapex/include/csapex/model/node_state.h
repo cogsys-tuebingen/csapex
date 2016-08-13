@@ -13,7 +13,7 @@
 namespace csapex
 {
 
-class NodeState : public Memento
+class CSAPEX_EXPORT NodeState : public Memento
 {
 public:
     typedef std::shared_ptr<NodeState> Ptr;

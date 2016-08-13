@@ -23,7 +23,7 @@ struct RelayMapping
 };
 
 
-class Graph : public GeneratorNode, public UUIDProvider, public Variadic
+class CSAPEX_EXPORT Graph : public GeneratorNode, public UUIDProvider, public Variadic
 {
     friend class GraphIO;
     friend class GraphFacade;

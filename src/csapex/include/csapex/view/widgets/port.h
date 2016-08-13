@@ -1,6 +1,9 @@
 #ifndef PORT_H
 #define PORT_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/model/connectable.h>
 #include <csapex/view/view_fwd.h>
@@ -13,7 +16,7 @@
 namespace csapex
 {
 
-class Port : public QFrame
+class CSAPEX_QT_EXPORT Port : public QFrame
 {
     Q_OBJECT
 

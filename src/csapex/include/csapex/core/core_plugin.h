@@ -8,7 +8,7 @@
 #include <memory>
 
 namespace csapex {
-class CorePlugin {
+class CSAPEX_EXPORT CorePlugin {
 public:
     typedef std::shared_ptr<CorePlugin> Ptr;
 

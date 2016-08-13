@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-class MoveFulcrum : public Command
+class CSAPEX_COMMAND_EXPORT MoveFulcrum : public Command
 {
 public:
     MoveFulcrum(const AUUID& graph_uuid, int connection_id, int fulcrum_id, const Point& from, const Point& to);

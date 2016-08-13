@@ -1,12 +1,15 @@
 #ifndef HTML_DELEGATE_H
 #define HTML_DELEGATE_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QStyledItemDelegate>
 
 namespace csapex
 {
-class HTMLDelegate : public QStyledItemDelegate
+class CSAPEX_QT_EXPORT HTMLDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
@@ -21,7 +24,7 @@ protected:
     int line_height;
 };
 
-class HTMLBoxDelegate : public HTMLDelegate
+class CSAPEX_QT_EXPORT HTMLBoxDelegate : public HTMLDelegate
 {
     Q_OBJECT
 

@@ -1,6 +1,10 @@
 #ifndef EXECPTIONS_H
 #define EXECPTIONS_H
 
+/// PROJECT
+#include "csapex_util_export.h"
+
+/// SYSTEM
 #include <exception>
 #include <string>
 #include <vector>
@@ -8,7 +12,7 @@
 namespace csapex
 {
 
-class Failure
+class CSAPEX_UTILS_EXPORT Failure
 {
 public:
     Failure();
@@ -35,7 +39,7 @@ private:
     std::vector<std::string> stack_strings_;
 };
 
-class HardAssertionFailure : public Failure
+class CSAPEX_UTILS_EXPORT HardAssertionFailure : public Failure
 {
 public:
     HardAssertionFailure();

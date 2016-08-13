@@ -13,7 +13,7 @@ namespace csapex
 namespace command
 {
 
-class AddVariadicConnector : public Command
+class CSAPEX_COMMAND_EXPORT AddVariadicConnector : public Command
 {
 public:
     AddVariadicConnector(const AUUID &graph_id, const AUUID &node, const ConnectorType &connector_type, const TokenDataConstPtr& type, const std::string& label);

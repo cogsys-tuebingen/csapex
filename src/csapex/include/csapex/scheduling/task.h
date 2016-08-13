@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/scheduling/scheduling_fwd.h>
+#include "csapex_export.h"
 
 /// SYSTEM
 #include <functional>
@@ -10,7 +11,7 @@
 namespace csapex
 {
 
-class Task
+class CSAPEX_EXPORT Task
 {
 public:
     Task(const std::string &name, std::function<void()> callback, long priority = 0, TaskGenerator* parent = nullptr);

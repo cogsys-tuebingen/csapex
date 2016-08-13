@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/view/view_fwd.h>
 #include <csapex/view/widgets/completed_line_edit.h>
+#include <csapex/view/csapex_qt_export.h>
 
 /// SYSTEM
 #include <QDialog>
@@ -19,7 +20,7 @@ class NodeFactory;
 class NodeFilterProxyModel;
 
 
-class BoxDialog : public QDialog
+class CSAPEX_QT_EXPORT BoxDialog : public QDialog
 {
     Q_OBJECT
 

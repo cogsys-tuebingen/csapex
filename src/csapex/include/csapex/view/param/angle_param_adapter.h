@@ -11,7 +11,7 @@ namespace csapex
 {
 class ParameterContextMenu;
 
-class AngleParameterAdapter : public ParameterAdapter
+class CSAPEX_QT_EXPORT AngleParameterAdapter : public ParameterAdapter
 {
 public:
     AngleParameterAdapter(param::AngleParameter::Ptr p);

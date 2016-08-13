@@ -2,15 +2,18 @@
 #define DISPLAYABLE_H
 
 /// COMPONENT
+#include "csapex_export.h"
 
 /// SYSTEM
 #include <string>
 #include <mutex>
 
+#undef ERROR
+
 namespace csapex
 {
 
-class ErrorState
+class CSAPEX_EXPORT ErrorState
 {
 public:
     enum class ErrorLevel {

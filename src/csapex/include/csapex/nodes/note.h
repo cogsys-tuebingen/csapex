@@ -7,7 +7,7 @@
 namespace csapex
 {
 
-class Note : public Node
+class CSAPEX_EXPORT Note : public Node
 {
 public:
     void setup(csapex::NodeModifier& node_modifier) override;

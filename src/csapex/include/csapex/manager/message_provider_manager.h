@@ -15,7 +15,7 @@
 
 namespace csapex {
 
-class MessageProviderManager : public Singleton<MessageProviderManager>
+class CSAPEX_EXPORT MessageProviderManager : public Singleton<MessageProviderManager>
 {
     friend class Singleton<MessageProviderManager>;
 
