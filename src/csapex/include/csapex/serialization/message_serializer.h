@@ -7,7 +7,7 @@
 #include <csapex/utility/singleton.hpp>
 #include <csapex/utility/tmp.hpp>
 #include <csapex/utility/type.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>

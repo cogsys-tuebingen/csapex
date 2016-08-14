@@ -2,13 +2,11 @@
 #define ERROR_HANDLING_H
 
 /// PROJECT
-#include "csapex_util_export.h"
+#include <csapex/csapex_util_export.h>
 #include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <csignal>
-
-class siginfo_t;
 
 namespace csapex
 {

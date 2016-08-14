@@ -2,7 +2,7 @@
 #define STREAM_RELAY_H
 
 /// PROJECT
-#include "csapex_util_export.h"
+#include <csapex/csapex_util_export.h>
 
 /// SYSTEM
 #include <string>

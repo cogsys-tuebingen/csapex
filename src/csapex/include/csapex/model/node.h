@@ -8,7 +8,7 @@
 #include <csapex/utility/stream_relay.h>
 #include <csapex/utility/assert.h>
 #include <csapex/profiling/timable.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 namespace csapex {
 

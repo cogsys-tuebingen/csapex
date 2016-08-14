@@ -2,7 +2,7 @@
 #define ASSERT_H
 
 /// PROJECT
-#include "csapex_util_export.h"
+#include <csapex/csapex_util_export.h>
 
 #define apex_assert_msg(assertion,msg)       _apex_assert(static_cast<bool>(assertion),      msg, #assertion, __FILE__, __LINE__)
 #define apex_assert_hard_msg(assertion,msg)  _apex_assert_hard(static_cast<bool>(assertion), msg, #assertion, __FILE__, __LINE__)

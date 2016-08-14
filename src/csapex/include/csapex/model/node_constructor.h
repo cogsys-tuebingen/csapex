@@ -7,7 +7,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <typeinfo>

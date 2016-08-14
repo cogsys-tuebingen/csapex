@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <string>

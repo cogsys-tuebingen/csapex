@@ -5,7 +5,7 @@
 #include <csapex/param/param_fwd.h>
 #include <csapex/param/parameter_description.h>
 #include <csapex/utility/uuid.h>
-#include "csapex_param_export.h"
+#include <csapex/csapex_param_export.h>
 
 /// SYSTEM
 #include <memory>

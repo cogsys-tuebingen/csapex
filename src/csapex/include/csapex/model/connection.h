@@ -8,7 +8,7 @@
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/token.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <memory>

@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid.h>
-#include "csapex_util_export.h"
+#include <csapex/csapex_util_export.h>
 
 /// SYSTEM
 #include <unordered_map>

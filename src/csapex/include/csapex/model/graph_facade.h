@@ -6,7 +6,7 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/uuid.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>

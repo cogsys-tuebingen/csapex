@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/memento.h>
 #include <csapex/utility/uuid.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// PROJECT
 #include <csapex/param/param_fwd.h>

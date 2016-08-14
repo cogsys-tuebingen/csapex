@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/profiling/interval.h>
-#include "csapex_profiling_export.h"
+#include <csapex/csapex_profiling_export.h>
 
 /// SYSTEM
 #include <memory>

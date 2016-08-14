@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/msg/message_provider.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 namespace csapex
 {

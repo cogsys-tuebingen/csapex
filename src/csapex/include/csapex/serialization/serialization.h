@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/utility/singleton.hpp>
 #include <csapex/model/model_fwd.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <map>

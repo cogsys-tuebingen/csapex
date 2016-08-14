@@ -2,7 +2,7 @@
 #define MEMENTO_H
 
 /// PROJECT
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <memory>

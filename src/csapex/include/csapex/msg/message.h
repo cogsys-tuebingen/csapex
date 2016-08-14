@@ -5,7 +5,7 @@
 #include <csapex/model/token_data.h>
 #include <csapex/utility/type.h>
 #include <csapex/msg/token_traits.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 namespace csapex
 {

@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/param/parameter.h>
 #include <csapex/param/value_parameter.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <string>
