@@ -3,13 +3,10 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-//#include <csapex/view/node/box.h>
-//#include <csapex/view/designer/graph_view.h>
-//#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
-//#include <csapex/view/designer/designer.h>
+#include <csapex/model/node_state.h>
+#include <csapex/model/node_handle.h>
 
 /// SYSTEM
-//#include <QPoint>
 #include <sstream>
 
 using namespace csapex;
@@ -36,44 +33,29 @@ std::string MoveBox::getDescription() const
 
 bool MoveBox::doExecute()
 {
-   /* Designer* designer = getDesigner();
-    if(!designer) {
-        return false;
-    }
-    MovableGraphicsProxyWidget* box = designer->getGraphView(graph_uuid)->getProxy(box_uuid);
-    if(!box) {
-        return false;
-    }
-    box->getBox()->triggerPlaced();*/
+    NodeHandle* node_handle = getGraph()->findNodeHandle(box_uuid);
+    apex_assert_hard(node_handle);
+
+    NodeStatePtr node_state = node_handle->getNodeState();
+
+    node_state->setPos(to);
+
     return true;
 }
 
 bool MoveBox::doUndo()
 {
-   /* Designer* designer = getDesigner();
-    if(!designer) {
-        return false;
-    }
-    MovableGraphicsProxyWidget* box = designer->getGraphView(graph_uuid)->getProxy(box_uuid);
-    if(!box) {
-        return false;
-    }
-    box->setPos(QPoint(from.x, from.y));
-    box->getBox()->triggerPlaced();*/
+    NodeHandle* node_handle = getGraph()->findNodeHandle(box_uuid);
+    apex_assert_hard(node_handle);
+
+    NodeStatePtr node_state = node_handle->getNodeState();
+
+    node_state->setPos(from);
+
     return true;
 }
 
 bool MoveBox::doRedo()
 {
-    /*Designer* designer = getDesigner();
-    if(!designer) {
-        return false;
-    }
-    MovableGraphicsProxyWidget* box = designer->getGraphView(graph_uuid)->getProxy(box_uuid);
-    if(!box) {
-        return false;
-    }
-    box->setPos(QPoint(to.x, to.y));
-    box->getBox()->triggerPlaced();*/
-    return true;
+    return doExecute();
 }

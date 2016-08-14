@@ -950,7 +950,6 @@ void GraphView::addBox(NodeBox *box)
     }
 
     box->init();
-    box->triggerPlaced();
 
     box->updateBoxInformation(graph);
 
