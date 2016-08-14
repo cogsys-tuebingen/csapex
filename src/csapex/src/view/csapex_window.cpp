@@ -106,24 +106,7 @@ void CsApexWindow::construct()
     setupDesigner();
 
     ui->actionPause->setChecked(executor_.isPaused());
-
-    auto forceShortcut = [this](QAction* action) {
-        action->setShortcutContext(Qt::ApplicationShortcut);
-        QShortcut *shortcut = new QShortcut(action->shortcut(), this);
-//        shortcut->setEnabled(false);
-        QObject::connect(shortcut, &QShortcut::activated, action, &QAction::trigger);
-        QObject::connect(shortcut, &QShortcut::activatedAmbiguously, action, &QAction::trigger);
-    };
-    forceShortcut(ui->actionClear_selection);
-    forceShortcut(ui->actionSelect_all);
-    forceShortcut(ui->actionExit);
-    forceShortcut(ui->actionDelete_Selected);
-    forceShortcut(ui->actionCopy);
-    forceShortcut(ui->actionGroup);
-    forceShortcut(ui->actionUngroup);
-    forceShortcut(ui->actionPaste);
-    forceShortcut(ui->actionCreate_Node);
-    forceShortcut(ui->actionFind_Node);
+    ui->menuBar->setVisible(true);
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     QObject::connect(ui->actionSaveAs, SIGNAL(triggered()), this,  SLOT(saveAs()));

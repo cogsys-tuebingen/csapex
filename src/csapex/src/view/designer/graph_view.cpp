@@ -1754,6 +1754,10 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
 
 void GraphView::groupSelected()
 {
+    if(selected_boxes_.empty()) {
+        return;
+    }
+
     std::vector<UUID> uuids;
     uuids.reserve(selected_boxes_.size());
     for(NodeBox* box : selected_boxes_) {
