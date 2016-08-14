@@ -41,6 +41,8 @@ public:
     long startTimeMs() const;
     long stopTimeMs() const;
 
+    long elapsedMs() const;
+
 public:
     std::string timer_name_;
 
