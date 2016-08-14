@@ -616,6 +616,18 @@ bool Graph::isAsynchronous() const
     return true;
 }
 
+namespace {
+void crossConnectLabelChange(Connectable* a, Connectable* b)
+{
+    a->labelChanged.connect([b](const std::string& label) {
+        b->setLabel(label);
+    });
+    b->labelChanged.connect([a](const std::string& label) {
+        a->setLabel(label);
+    });
+}
+}
+
 Input* Graph::createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
     auto pair = addForwardingInput(type, label, optional);
@@ -663,6 +675,8 @@ UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenDataConstP
     Input* external_input = VariadicInputs::createVariadicInput(type, label, optional);
 
     OutputPtr relay = createInternalOutput(type, internal_uuid, label);
+
+    crossConnectLabelChange(external_input, relay.get());
 
     external_to_internal_outputs_[external_input->getUUID()] = relay;
 
@@ -723,6 +737,8 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstP
     Output* external_output = VariadicOutputs::createVariadicOutput(type, label);
 
     InputPtr relay = createInternalInput(type, internal_uuid, label, true);
+
+    crossConnectLabelChange(external_output, relay.get());
 
     std::weak_ptr<Output> external_output_weak = std::dynamic_pointer_cast<Output>(external_output->shared_from_this());
     relay->message_set.connect([this, external_output_weak, relay](Connectable*) {
@@ -793,6 +809,8 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr
 
     Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb);
 
+    crossConnectLabelChange(external_slot, relay.get());
+
     external_to_internal_events_[external_slot->getUUID()] = relay;
 
     relay_to_external_slot_[internal_uuid] = external_slot->getUUID();
@@ -857,6 +875,7 @@ UUID Graph::addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPt
 
     SlotPtr relay = createInternalSlot(type, internal_uuid, label, cb);
 
+    crossConnectLabelChange(external_event, relay.get());
 
     external_to_internal_slots_[external_event->getUUID()] = relay;
 
