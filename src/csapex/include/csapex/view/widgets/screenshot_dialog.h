@@ -2,6 +2,9 @@
 #define SCREENSHOT_DIALOG_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
+/// PROJECT
 #include <csapex/model/model_fwd.h>
 
 /// SYSTEM
@@ -14,7 +17,7 @@ class QAbstractButton;
 
 namespace csapex
 {
-class ScreenshotDialog : public QDialog
+class CSAPEX_QT_EXPORT ScreenshotDialog : public QDialog
 {
     Q_OBJECT
 

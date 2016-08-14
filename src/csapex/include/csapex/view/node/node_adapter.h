@@ -2,6 +2,7 @@
 #define NODE_ADAPTER_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/command/command_fwd.h>
@@ -16,7 +17,7 @@ class QListView;
 
 namespace csapex
 {
-class NodeAdapter
+class CSAPEX_QT_EXPORT NodeAdapter
 {
 public:
     typedef std::shared_ptr<NodeAdapter> Ptr;

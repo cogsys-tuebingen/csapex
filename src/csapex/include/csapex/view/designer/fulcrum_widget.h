@@ -1,6 +1,9 @@
 #ifndef FULCRUM_WIDGET_H
 #define FULCRUM_WIDGET_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 
@@ -12,7 +15,7 @@ namespace csapex
 
 class FulcrumHandle;
 
-class FulcrumWidget : public QObject, public QGraphicsEllipseItem
+class CSAPEX_QT_EXPORT FulcrumWidget : public QObject, public QGraphicsEllipseItem
 {
     Q_OBJECT
 

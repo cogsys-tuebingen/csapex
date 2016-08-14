@@ -491,7 +491,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
             QPoint pos = e->scenePos().toPoint();
             view_core_.execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
                                                                       highlight_connection_id_, highlight_connection_sub_id_,
-                                                                      Point(pos.x(), pos.y()), Fulcrum::LINEAR)));
+                                                                      Point(pos.x(), pos.y()), Fulcrum::FULCRUM_LINEAR)));
             e->accept();
 
             // allow moving the fulcrum directly
@@ -925,7 +925,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     double mindist_for_slack = 60.0;
     double slack_smooth_distance = 300.0;
 
-    Fulcrum::Ptr first(new Fulcrum(nullptr, convert(from), Fulcrum::OUT, convert(from), convert(from)));
+    Fulcrum::Ptr first(new Fulcrum(nullptr, convert(from), Fulcrum::FULCRUM_OUT, convert(from), convert(from)));
     Fulcrum::Ptr current = first;
     Fulcrum::Ptr last = current;
 
@@ -934,7 +934,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         ConnectionPtr connection = graph_facade_->getGraph()->getConnectionWithId(id);
         targets = connection->getFulcrums();
     }
-    targets.push_back(Fulcrum::Ptr(new Fulcrum(nullptr, convert(to), Fulcrum::IN, convert(to), convert(to))));
+    targets.push_back(Fulcrum::Ptr(new Fulcrum(nullptr, convert(to), Fulcrum::FULCRUM_IN, convert(to), convert(to))));
 
     int sub_section = 0;
 
@@ -965,29 +965,29 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
         QPainterPath path(current_pos);
 
-        if(current->type() == Fulcrum::OUT) {
+        if(current->type() == Fulcrum::FULCRUM_OUT) {
             cp1 = offset(current_pos, ccs.start_pos, x_offset) + y_offset;
 
-        } else if(current->type() == Fulcrum::IN) {
+        } else if(current->type() == Fulcrum::FULCRUM_IN) {
             cp1 = offset(current_pos, ccs.end_pos, x_offset) + y_offset;
 
         } else {
             const Fulcrum::Ptr& last = targets[sub_section-1];
-            if(last->type() == Fulcrum::LINEAR) {
+            if(last->type() == Fulcrum::FULCRUM_LINEAR) {
                 cp1 = current_pos;
             } else {
                 cp1 = current_pos + convert(current->handleOut());
             }
         }
 
-        if(next->type() == Fulcrum::OUT) {
+        if(next->type() == Fulcrum::FULCRUM_OUT) {
             cp2 = offset(next_pos, ccs.start_pos, x_offset) + y_offset;
 
-        } else if(next->type() == Fulcrum::IN) {
+        } else if(next->type() == Fulcrum::FULCRUM_IN) {
             cp2 = offset(next_pos, ccs.end_pos, x_offset) + y_offset;
 
         } else {
-            if(next->type() == Fulcrum::LINEAR) {
+            if(next->type() == Fulcrum::FULCRUM_LINEAR) {
                 cp2 = next_pos;
             } else {
                 cp2 = next_pos + convert(next->handleIn());

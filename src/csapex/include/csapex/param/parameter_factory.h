@@ -7,13 +7,14 @@
 #include <csapex/param/value_parameter.h>
 #include <csapex/param/set_parameter.h>
 #include <csapex/param/parameter_description.h>
+#include "csapex_param_export.h"
 
 namespace csapex
 {
 namespace param
 {
 
-class ParameterFactory
+class CSAPEX_PARAM_EXPORT ParameterFactory
 {
 public:
     /**

@@ -1,6 +1,9 @@
 #ifndef REWIRING_DIALOG_H
 #define REWIRING_DIALOG_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/model/model_fwd.h>
@@ -20,7 +23,7 @@ class Output;
 class CommandDispatcher;
 class CsApexCore;
 
-class RewiringDialog : public QDialog
+class CSAPEX_QT_EXPORT RewiringDialog : public QDialog
 {
     Q_OBJECT
 

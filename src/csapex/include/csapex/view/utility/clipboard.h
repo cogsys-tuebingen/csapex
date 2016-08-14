@@ -1,6 +1,9 @@
 #ifndef CLIPBOARD_H
 #define CLIPBOARD_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <string>
 
@@ -12,7 +15,7 @@ class Node;
 namespace csapex
 {
 
-class ClipBoard
+class CSAPEX_QT_EXPORT ClipBoard
 {
 
 public:

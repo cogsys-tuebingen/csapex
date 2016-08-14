@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class Transition
+class CSAPEX_EXPORT Transition
 {
 public:
     Transition(delegate::Delegate0<> activation_fn);

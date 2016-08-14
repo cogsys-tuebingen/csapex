@@ -13,6 +13,7 @@
 /// COMPONENT
 #include <csapex/utility/assert.h>
 
+using namespace csapex;
 using namespace csapex::command;
 
 Minimize::Minimize(const AUUID& parent_uuid, const UUID &node, bool mini)

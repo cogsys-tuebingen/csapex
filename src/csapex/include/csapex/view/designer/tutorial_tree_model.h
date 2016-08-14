@@ -1,6 +1,9 @@
 #ifndef TUTORIAL_TREE_MODEL_H
 #define TUTORIAL_TREE_MODEL_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QStandardItemModel>
 #include <QFile>
@@ -14,7 +17,7 @@ namespace csapex
 class Settings;
 
 
-class TutorialTreeModel
+class CSAPEX_QT_EXPORT TutorialTreeModel
 {
 public:
     struct ReadMe

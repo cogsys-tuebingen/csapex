@@ -4,16 +4,23 @@
 /// SYSTEM
 #include <cstddef>
 #include <cstdio>
-#include <execinfo.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ucontext.h>
-#include <unistd.h>
 #include <string.h>
 #include <iostream>
-#include <cxxabi.h>
 #include <vector>
 
+#ifdef WIN32
+#else
+#include <execinfo.h>
+#include <ucontext.h>
+#include <unistd.h>
+#include <cxxabi.h>
+#endif
+
+
+#ifdef WIN32
+#else
 // This structure mirrors the one found in /usr/include/asm/ucontext.h
 typedef struct _sig_ucontext {
     unsigned long     uc_flags;
@@ -22,11 +29,15 @@ typedef struct _sig_ucontext {
     struct sigcontext uc_mcontext;
     sigset_t          uc_sigmask;
 } sig_ucontext_t;
+#endif
+
 
 void csapex::error_handling::init()
 {
     signal(SIGINT, csapex::error_handling::siginthandler);
 
+#ifdef WIN32
+#else
     struct sigaction sigact;
     memset (&sigact, '\0', sizeof(sigact));
 
@@ -47,11 +58,15 @@ void csapex::error_handling::init()
             stop();
         }
     }
+#endif
 }
 
 void csapex::error_handling::kill()
 {
+#ifdef WIN32
+#else
     raise(SIGKILL);
+#endif
 }
 
 void csapex::error_handling::stop()
@@ -67,6 +82,8 @@ void csapex::error_handling::siginthandler(int)
 
 void csapex::error_handling::sigsegvhandler(int sig_num, siginfo_t * info, void * ucontext)
 {
+#ifdef WIN32
+#else
     sig_ucontext_t * uc = (sig_ucontext_t *)ucontext;
 
 #if defined(__i386__) // gcc specific
@@ -151,4 +168,6 @@ void csapex::error_handling::sigsegvhandler(int sig_num, siginfo_t * info, void 
     free(messages);
 
     raise(SIGKILL);
+#endif
+
 }

@@ -26,7 +26,7 @@ typedef std::function<void()> Function;
 
 class DefaultNodeAdapter;
 
-class DefaultNodeAdapterBridge : public QObject
+class CSAPEX_QT_EXPORT DefaultNodeAdapterBridge : public QObject
 {
     Q_OBJECT
 
@@ -60,7 +60,7 @@ private:
     std::vector<csapex::slim_signal::Connection> connections;
 };
 
-class DefaultNodeAdapter : public NodeAdapter
+class CSAPEX_QT_EXPORT DefaultNodeAdapter : public NodeAdapter
 {
     friend class DefaultNodeAdapterBridge;
 

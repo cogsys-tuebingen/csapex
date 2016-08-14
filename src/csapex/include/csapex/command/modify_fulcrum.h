@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-class ModifyFulcrum : public Command
+class CSAPEX_COMMAND_EXPORT ModifyFulcrum : public Command
 {
 public:
     ModifyFulcrum(const AUUID &graph_uuid, int connection_id, int fulcrum_id,

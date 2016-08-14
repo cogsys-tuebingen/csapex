@@ -3,13 +3,14 @@
 
 /// COMPONENT
 #include <csapex/param/parameter.h>
+#include "csapex_param_export.h"
 
 namespace csapex
 {
 namespace param
 {
 
-class ParameterBuilder
+class CSAPEX_PARAM_EXPORT ParameterBuilder
 {
 public:
     ParameterBuilder(const std::shared_ptr<Parameter>& param);

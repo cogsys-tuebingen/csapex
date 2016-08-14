@@ -5,6 +5,7 @@
 #include <csapex/param/param_fwd.h>
 #include <csapex/param/parameter_description.h>
 #include <csapex/utility/uuid.h>
+#include "csapex_param_export.h"
 
 /// SYSTEM
 #include <memory>
@@ -20,7 +21,7 @@ class Node;
 namespace csapex {
 namespace param {
 
-class Parameter
+class CSAPEX_PARAM_EXPORT Parameter
 {
 public:
     friend class ParameterFactory;

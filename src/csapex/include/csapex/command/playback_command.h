@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-class PlaybackCommand : public Meta
+class CSAPEX_COMMAND_EXPORT PlaybackCommand : public Meta
 {
 public:
     PlaybackCommand(const AUUID& graph_uuid, const std::string& type);

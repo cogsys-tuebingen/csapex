@@ -27,11 +27,11 @@
 #define QXTNAMESPACE_H
 
 #include "qxtglobal.h"
-#include <QObject>
+//#include <QObject>
 
 class QXT_CORE_EXPORT Qxt  : public QObject
 {
-    Q_OBJECT
+    //Q_OBJECT
     Q_ENUMS(Rotation)
     Q_ENUMS(DecorationStyle)
     Q_ENUMS(ErrorCode)

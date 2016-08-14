@@ -2,6 +2,7 @@
 #define DESIGNER_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/view/view_fwd.h>
@@ -27,7 +28,7 @@ namespace csapex
 
 class NodeFactory;
 
-class Designer : public QWidget, public Profilable
+class CSAPEX_QT_EXPORT Designer : public QWidget, public Profilable
 {
     Q_OBJECT
 

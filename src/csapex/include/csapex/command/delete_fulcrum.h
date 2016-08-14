@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-class DeleteFulcrum : public Command
+class CSAPEX_COMMAND_EXPORT DeleteFulcrum : public Command
 {
 public:
     DeleteFulcrum(const AUUID &graph_uuid, int connection_id, int fulcrum_id);

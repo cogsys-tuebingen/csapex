@@ -16,7 +16,7 @@
 
 namespace csapex
 {
-class PluginLocator
+class CSAPEX_EXPORT PluginLocator
 {
 public:
     PluginLocator(Settings& settings);

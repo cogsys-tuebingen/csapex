@@ -1,10 +1,13 @@
 #ifndef QINT_SLIDER_H
 #define QINT_SLIDER_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QSlider>
 
-class QIntSlider : public QSlider
+class CSAPEX_QT_EXPORT QIntSlider : public QSlider
 {
     Q_OBJECT
 

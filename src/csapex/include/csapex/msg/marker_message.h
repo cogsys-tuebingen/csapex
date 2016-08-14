@@ -9,7 +9,7 @@ namespace csapex
 namespace connection_types
 {
 
-struct MarkerMessage : public Message
+struct CSAPEX_EXPORT MarkerMessage : public Message
 {
 public:
     typedef std::shared_ptr<MarkerMessage> Ptr;

@@ -21,6 +21,7 @@
 /// SYSTEM
 #include <sstream>
 
+using namespace csapex;
 using namespace csapex::command;
 
 GroupNodes::GroupNodes(const AUUID& parent_uuid, const std::vector<UUID> &uuids)

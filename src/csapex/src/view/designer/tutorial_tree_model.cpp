@@ -71,10 +71,10 @@ void TutorialTreeModel::importDirectory(QTreeWidgetItem *parent, const Path& p)
     std::sort(subpaths.begin(), subpaths.end());
 
     if(contains_readme) {
-        QFile rmfile(QString::fromStdString(readme.native()));
+        QFile rmfile(QString::fromStdString(readme.string()));
         ReadMe rm = parseReadMe(rmfile);
 
-        QString id(QString::fromStdString(path.filename().native()));
+        QString id(QString::fromStdString(path.filename().string()));
         if(id == ".") {
             id = "tutorial_id";
         }
@@ -89,14 +89,14 @@ void TutorialTreeModel::importDirectory(QTreeWidgetItem *parent, const Path& p)
         }
 
         if(contains_apex_file) {
-            item->setData(0, Qt::UserRole, QString::fromStdString(apex_file.native()));
+            item->setData(0, Qt::UserRole, QString::fromStdString(apex_file.string()));
         }
 
         if(!rm.description.isEmpty()) {
             QTreeWidgetItem* descr = new QTreeWidgetItem();
             descr->setText(0, rm.description);
             if(contains_apex_file) {
-                descr->setData(0, Qt::UserRole, QString::fromStdString(apex_file.native()));
+                descr->setData(0, Qt::UserRole, QString::fromStdString(apex_file.string()));
             }
             item->addChild(descr);
         }

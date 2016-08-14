@@ -5,6 +5,7 @@
 #include <csapex/model/token_data.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/msg/msg_fwd.h>
+#include "csapex_export.h"
 
 /// SYSTEM
 #include <vector>
@@ -14,7 +15,7 @@
 namespace csapex
 {
 
-class MultiTokenData : public TokenData
+class CSAPEX_EXPORT MultiTokenData : public TokenData
 {
 public:
     typedef std::shared_ptr<MultiTokenData> Ptr;

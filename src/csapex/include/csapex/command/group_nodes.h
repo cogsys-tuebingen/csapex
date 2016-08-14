@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "group_base.h"
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -12,7 +13,7 @@ namespace csapex
 namespace command
 {
 
-class GroupNodes : public GroupBase
+class CSAPEX_COMMAND_EXPORT GroupNodes : public GroupBase
 {
 public:
     GroupNodes(const AUUID &graph_uuid, const std::vector<UUID>& nodes);

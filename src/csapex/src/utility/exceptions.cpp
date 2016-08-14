@@ -5,18 +5,24 @@
 #include <csapex/utility/thread.h>
 
 /// SYSTEM
-#include <execinfo.h>
 #include <iostream>
 #include <sstream>
+#ifdef WIN32
+
+#else
+#include <execinfo.h>
 #include <cxxabi.h>
+#endif
+
 
 using namespace csapex;
 
 Failure::Failure()
     : stack_depth_(0)
 {
+#ifdef WIN32
+#else
     void *stack_addrs[max_depth];
-
     stack_depth_ = backtrace(stack_addrs, max_depth);
     char **stack_strings = backtrace_symbols(stack_addrs, stack_depth_);
 
@@ -91,6 +97,7 @@ Failure::Failure()
     stack_depth_ = line;
 
     free(stack_strings); // malloc()ed by backtrace_symbols
+#endif
 }
 
 Failure::Failure(const char *m)

@@ -1,6 +1,9 @@
 #ifndef CONTEXT_MENU_HANDLER_H
 #define CONTEXT_MENU_HANDLER_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QObject>
 #include <QPoint>
@@ -8,7 +11,7 @@
 
 namespace csapex
 {
-class ContextMenuHandler : public QObject
+class CSAPEX_QT_EXPORT ContextMenuHandler : public QObject
 {
     Q_OBJECT
 

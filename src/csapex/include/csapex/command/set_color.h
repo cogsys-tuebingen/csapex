@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-struct SetColor : public Command
+struct CSAPEX_COMMAND_EXPORT SetColor : public Command
 {
     SetColor(const AUUID &graph_uuid, const UUID& node,
              int r, int g, int b);

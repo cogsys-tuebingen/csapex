@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-class ModifyConnection : public Command
+class CSAPEX_COMMAND_EXPORT ModifyConnection : public Command
 {
 public:
     ModifyConnection(const AUUID &graph_uuid, int connection_id, bool active);

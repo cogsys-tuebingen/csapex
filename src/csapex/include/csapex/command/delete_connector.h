@@ -11,7 +11,7 @@ namespace csapex
 namespace command
 {
 
-struct DeleteConnector : public Command
+struct CSAPEX_COMMAND_EXPORT DeleteConnector : public Command
 {
     DeleteConnector(const AUUID &graph_uuid, Connectable *_c);
 

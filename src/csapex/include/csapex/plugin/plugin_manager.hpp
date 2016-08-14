@@ -10,7 +10,8 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <class_loader/class_loader.h>
 #include <set>
-#include <tinyxml.h>
+#define TIXML_USE_STL
+#include <tinyxml/tinyxml.h>
 #include <mutex>
 
 namespace csapex

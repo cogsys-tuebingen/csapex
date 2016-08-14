@@ -1,6 +1,9 @@
 #ifndef BASE_PARSER_H
 #define BASE_PARSER_H
 
+/// PROJECT
+#include "csapex_util_export.h"
+
 /// SYSTEM
 #include <string>
 #include <sstream>
@@ -8,7 +11,7 @@
 namespace csapex
 {
 
-class BashParser
+class CSAPEX_UTILS_EXPORT BashParser
 {
 public:
     BashParser();

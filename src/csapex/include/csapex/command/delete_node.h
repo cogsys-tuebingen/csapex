@@ -13,7 +13,7 @@ namespace csapex
 
 namespace command
 {
-class DeleteNode : public Meta
+class CSAPEX_COMMAND_EXPORT DeleteNode : public Meta
 {
 public:
     DeleteNode(const AUUID &graph_uuid, const UUID &uuid);

@@ -2,6 +2,7 @@
 #define DRAG_IO_HANDLER_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/command/command_fwd.h>
 
 /// SYSTEM
@@ -13,7 +14,7 @@ namespace csapex
 
 class GraphView;
 
-class DragIOHandler
+class CSAPEX_QT_EXPORT DragIOHandler
 {
 public:
     typedef std::shared_ptr<DragIOHandler> Ptr;

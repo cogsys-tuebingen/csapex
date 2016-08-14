@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/profiling/timer.h>
+#include "csapex_profiling_export.h"
 
 /// SYSTEM
 #define BOOST_PARAMETER_MAX_ARITY 7
@@ -18,7 +19,7 @@ struct ProfilerStats
     double stddev;
 };
 
-struct Profile
+struct CSAPEX_PROFILING_EXPORT Profile
 {
     friend class Profiler;
 

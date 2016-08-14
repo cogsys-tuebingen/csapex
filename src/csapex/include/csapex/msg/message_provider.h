@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class MessageProvider
+class CSAPEX_EXPORT MessageProvider
 {
 public:
     typedef std::shared_ptr<MessageProvider> Ptr;

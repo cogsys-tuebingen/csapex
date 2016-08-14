@@ -5,14 +5,13 @@
 #include "command.h"
 #include <csapex/utility/uuid.h>
 #include <csapex/data/point.h>
-#include <csapex/view/designer/designer.h>
 
 namespace csapex
 {
 
 namespace command
 {
-class MoveBox : public Command
+class CSAPEX_COMMAND_EXPORT MoveBox : public Command
 {
 public:
     MoveBox(const AUUID &graph_uuid, const UUID& node_uuid, Point from, Point to);

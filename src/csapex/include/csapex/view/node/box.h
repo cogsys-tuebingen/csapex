@@ -11,6 +11,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/utility/create_connector_request.h>
+#include <csapex/view/csapex_qt_export.h>
 
 /// SYSTEM
 #include <memory>
@@ -33,7 +34,7 @@ namespace csapex
 {
 
 
-class NodeBox : public QWidget
+class CSAPEX_QT_EXPORT NodeBox : public QWidget
 {
     Q_OBJECT
 

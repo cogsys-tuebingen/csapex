@@ -11,7 +11,7 @@ namespace csapex
 {
 class ParameterContextMenu;
 
-class OutputProgressParameterAdapter : public ParameterAdapter
+class CSAPEX_QT_EXPORT OutputProgressParameterAdapter : public ParameterAdapter
 {
 public:
     OutputProgressParameterAdapter(param::OutputProgressParameter::Ptr p);

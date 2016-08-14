@@ -2,6 +2,7 @@
 #define MESSAGE_PREVIEW_WIDGET_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/msg/output.h>
 #include <csapex/msg/input.h>
 
@@ -15,7 +16,7 @@ namespace csapex
 class MessagePreviewWidget;
 
 namespace impl {
-class PreviewInput : public Input
+class CSAPEX_QT_EXPORT PreviewInput : public Input
 {
 public:
     PreviewInput(QPointer<MessagePreviewWidget> parent);
@@ -34,7 +35,7 @@ private:
 }
 
 
-class MessagePreviewWidget : public QGraphicsView
+class CSAPEX_QT_EXPORT MessagePreviewWidget : public QGraphicsView
 {
     Q_OBJECT
 

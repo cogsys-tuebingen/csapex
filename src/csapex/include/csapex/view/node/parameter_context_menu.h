@@ -2,6 +2,7 @@
 #define PARAMETER_CONTEXT_MENU_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/utility/context_menu_handler.h>
 
 /// PROJECT
@@ -14,7 +15,7 @@
 namespace csapex
 {
 
-class ParameterContextMenu : public ContextMenuHandler
+class CSAPEX_QT_EXPORT ParameterContextMenu : public ContextMenuHandler
 {
 public:
     ParameterContextMenu(csapex::param::ParameterWeakPtr p);

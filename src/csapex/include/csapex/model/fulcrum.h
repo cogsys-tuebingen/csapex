@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/data/point.h>
 #include <csapex/model/model_fwd.h>
+#include "csapex_export.h"
 
 /// SYSTEM
 #include <memory>
@@ -11,17 +12,17 @@
 
 namespace csapex
 {
-class Fulcrum
+class CSAPEX_EXPORT Fulcrum
 {
 public:
     typedef std::shared_ptr<Fulcrum> Ptr;
 
     enum Type {
-        CURVE = 0,
-        LINEAR = 1,
-        OUT = 10,
-        IN = 11,
-        HANDLE = IN
+		FULCRUM_CURVE = 0,
+		FULCRUM_LINEAR = 1,
+		FULCRUM_OUT = 10,
+		FULCRUM_IN = 11,
+		FULCRUM_HANDLE = FULCRUM_IN
     };
 
 public:

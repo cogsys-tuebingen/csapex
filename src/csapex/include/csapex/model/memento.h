@@ -1,6 +1,9 @@
 #ifndef MEMENTO_H
 #define MEMENTO_H
 
+/// PROJECT
+#include "csapex_export.h"
+
 /// SYSTEM
 #include <memory>
 
@@ -13,7 +16,7 @@ class Node;
 namespace csapex
 {
 
-class Memento
+class CSAPEX_EXPORT Memento
 {
 public:
     typedef std::shared_ptr<Memento> Ptr;

@@ -1,6 +1,9 @@
 #ifndef META_PORT_H
 #define META_PORT_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/view/widgets/port.h>
 #include <csapex/utility/create_connector_request.h>
@@ -8,7 +11,7 @@
 namespace csapex
 {
 
-class MetaPort : public Port
+class CSAPEX_QT_EXPORT MetaPort : public Port
 {
     Q_OBJECT
 

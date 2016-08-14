@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/memento.h>
 #include <csapex/utility/uuid.h>
+#include "csapex_export.h"
 
 /// PROJECT
 #include <csapex/param/param_fwd.h>
@@ -15,7 +16,7 @@
 namespace csapex
 {
 
-class GenericState : public Memento
+class CSAPEX_EXPORT GenericState : public Memento
 {
 public:
     typedef std::shared_ptr<GenericState> Ptr;

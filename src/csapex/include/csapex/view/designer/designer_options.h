@@ -1,6 +1,9 @@
 #ifndef DESIGNER_OPTIONS_H
 #define DESIGNER_OPTIONS_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QObject>
 
@@ -10,7 +13,7 @@ class Designer;
 class Settings;
 class GraphView;
 
-class DesignerOptions : public QObject
+class CSAPEX_QT_EXPORT DesignerOptions : public QObject
 {
     Q_OBJECT
 

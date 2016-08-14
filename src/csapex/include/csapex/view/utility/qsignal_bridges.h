@@ -1,6 +1,9 @@
 #ifndef QSIGNAL_BRIDGES_H
 #define QSIGNAL_BRIDGES_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QObject>
 #include <QAbstractSlider>
@@ -8,7 +11,7 @@
 
 namespace QSignalBridges
 {
-class QAbstractSliderLimiter : public QObject {
+class CSAPEX_QT_EXPORT QAbstractSliderLimiter : public QObject {
 
     Q_OBJECT
 

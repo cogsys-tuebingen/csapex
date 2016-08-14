@@ -1,12 +1,16 @@
 #ifndef QDOUBLE_SLIDER_H
 #define QDOUBLE_SLIDER_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QSlider>
 
-class QDoubleSlider : public QSlider
+class CSAPEX_QT_EXPORT QDoubleSlider : public QSlider
 {
     Q_OBJECT
+
 public:
     QDoubleSlider(Qt::Orientation orientation, double step_size, QWidget *parent = 0);
     virtual ~QDoubleSlider();

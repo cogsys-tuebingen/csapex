@@ -37,7 +37,6 @@
 #include <QtGui>
 #include <QMessageBox>
 #include <QStatusBar>
-#include <execinfo.h>
 #include <stdlib.h>
 #define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/filesystem.hpp>
@@ -377,7 +376,11 @@ int main(int argc, char** argv)
     if(!headless) {
         // if headless not requested, check if there is a display
         // if not, we enforce headless mode
-        if(!getenv("DISPLAY")) {
+#if WIN32
+		if (false) {
+#else
+		if (!getenv("DISPLAY")) {
+#endif
             headless = true;
             std::cout << "warning: enforcing headless mode because there is no display detected" << std::endl;
         }

@@ -2,15 +2,17 @@
 #include <csapex/command/move_box.h>
 
 /// COMPONENT
-#include <csapex/view/node/box.h>
 #include <csapex/model/graph.h>
-#include <csapex/view/designer/graph_view.h>
-#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
+//#include <csapex/view/node/box.h>
+//#include <csapex/view/designer/graph_view.h>
+//#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
+//#include <csapex/view/designer/designer.h>
 
 /// SYSTEM
-#include <QPoint>
+//#include <QPoint>
 #include <sstream>
 
+using namespace csapex;
 using namespace csapex::command;
 
 MoveBox::MoveBox(const AUUID& graph_uuid, const UUID& node_uuid, Point from, Point to)
@@ -34,7 +36,7 @@ std::string MoveBox::getDescription() const
 
 bool MoveBox::doExecute()
 {
-    Designer* designer = getDesigner();
+   /* Designer* designer = getDesigner();
     if(!designer) {
         return false;
     }
@@ -42,13 +44,13 @@ bool MoveBox::doExecute()
     if(!box) {
         return false;
     }
-    box->getBox()->triggerPlaced();
+    box->getBox()->triggerPlaced();*/
     return true;
 }
 
 bool MoveBox::doUndo()
 {
-    Designer* designer = getDesigner();
+   /* Designer* designer = getDesigner();
     if(!designer) {
         return false;
     }
@@ -57,13 +59,13 @@ bool MoveBox::doUndo()
         return false;
     }
     box->setPos(QPoint(from.x, from.y));
-    box->getBox()->triggerPlaced();
+    box->getBox()->triggerPlaced();*/
     return true;
 }
 
 bool MoveBox::doRedo()
 {
-    Designer* designer = getDesigner();
+    /*Designer* designer = getDesigner();
     if(!designer) {
         return false;
     }
@@ -72,6 +74,6 @@ bool MoveBox::doRedo()
         return false;
     }
     box->setPos(QPoint(to.x, to.y));
-    box->getBox()->triggerPlaced();
+    box->getBox()->triggerPlaced();*/
     return true;
 }

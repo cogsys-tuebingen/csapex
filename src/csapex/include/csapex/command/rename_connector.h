@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-struct RenameConnector : public Command
+struct CSAPEX_COMMAND_EXPORT RenameConnector : public Command
 {
     RenameConnector(const AUUID &graph_uuid, const UUID& connector, const std::string &new_name);
 

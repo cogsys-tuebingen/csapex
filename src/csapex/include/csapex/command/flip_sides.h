@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-struct FlipSides : public Command
+struct CSAPEX_COMMAND_EXPORT FlipSides : public Command
 {
     FlipSides(const AUUID &graph_uuid, const UUID& node);
 

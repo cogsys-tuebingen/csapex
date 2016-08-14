@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node_worker.h>
+#include <csapex/view/csapex_qt_export.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -10,7 +11,7 @@
 namespace csapex
 {
 
-class ActivityTimeline : public QGraphicsView
+class CSAPEX_QT_EXPORT ActivityTimeline : public QGraphicsView
 {
     Q_OBJECT
 

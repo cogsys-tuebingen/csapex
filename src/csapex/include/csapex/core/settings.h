@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/param/parameter.h>
 #include <csapex/param/value_parameter.h>
+#include "csapex_export.h"
 
 /// SYSTEM
 #include <string>
@@ -14,7 +15,7 @@ namespace csapex
 
 class Graph;
 
-class Settings
+class CSAPEX_EXPORT Settings
 {
 public:
     static const std::string settings_file;

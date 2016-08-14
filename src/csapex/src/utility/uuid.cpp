@@ -10,6 +10,7 @@
 #include <iostream>
 #include <boost/functional/hash.hpp>
 #include <ostream>
+#include <sstream>
 
 using namespace csapex;
 

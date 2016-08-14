@@ -12,7 +12,7 @@ namespace csapex
 namespace command
 {
 
-class UngroupNodes : public GroupBase
+class CSAPEX_COMMAND_EXPORT UngroupNodes : public GroupBase
 {
 public:
     UngroupNodes(const AUUID &graph_uuid, const UUID &uuid);

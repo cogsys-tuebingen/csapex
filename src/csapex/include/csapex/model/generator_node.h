@@ -7,7 +7,7 @@
 namespace csapex
 {
 
-class GeneratorNode : public Node
+class CSAPEX_EXPORT GeneratorNode : public Node
 {
 public:
     virtual void notifyMessagesProcessed();

@@ -863,7 +863,7 @@ void GraphView::connectorSignalAdded(ConnectablePtr connector)
     }
 }
 
-NodeBox* GraphView::getBox(const UUID &node_id)
+NodeBox* GraphView::getBox(const csapex::UUID &node_id)
 {
     auto pos = box_map_.find(node_id);
     if(pos == box_map_.end()) {
@@ -873,7 +873,7 @@ NodeBox* GraphView::getBox(const UUID &node_id)
     return pos->second;
 }
 
-MovableGraphicsProxyWidget* GraphView::getProxy(const UUID &node_id)
+MovableGraphicsProxyWidget* GraphView::getProxy(const csapex::UUID &node_id)
 {
     auto pos = proxy_map_.find(node_id);
     if(pos == proxy_map_.end()) {
@@ -888,7 +888,7 @@ GraphFacade* GraphView::getGraphFacade() const
     return graph_facade_.get();
 }
 
-void GraphView::focusOnNode(const UUID &uuid)
+void GraphView::focusOnNode(const csapex::UUID &uuid)
 {
     NodeBox* box = getBox(uuid);
     if(box) {

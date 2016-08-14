@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/utility/uuid.h>
 #include <csapex/scheduling/scheduling_fwd.h>
+#include "csapex_export.h"
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
@@ -11,7 +12,7 @@
 namespace csapex
 {
 
-class TaskGenerator : public std::enable_shared_from_this<TaskGenerator>
+class CSAPEX_EXPORT TaskGenerator : public std::enable_shared_from_this<TaskGenerator>
 {
 public:
     virtual ~TaskGenerator();

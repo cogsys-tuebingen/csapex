@@ -29,7 +29,7 @@ PluginLocator::PluginLocator(Settings &settings)
     std::vector<std::string> tmp = ignored_persistent_->getValues();
     ignored_libraries_.insert(tmp.begin(), tmp.end());
 
-    std::string ld_lib = getenv("LD_LIBRARY_PATH");
+	std::string ld_lib;// = getenv("LD_LIBRARY_PATH");
     boost::algorithm::split(library_paths_, ld_lib, boost::is_any_of(":"));
 }
 
