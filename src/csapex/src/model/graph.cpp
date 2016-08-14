@@ -463,7 +463,9 @@ std::vector<NodeHandle*> Graph::getAllNodeHandles()
 Connectable* Graph::findConnector(const UUID &uuid)
 {
     Connectable* res = findConnectorNoThrow(uuid);
-    apex_assert_hard(res);
+    if(!res) {
+        throw std::runtime_error(std::string("cannot find connector with UUID=") + uuid.getFullName());
+    }
     return res;
 }
 

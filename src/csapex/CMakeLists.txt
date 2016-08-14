@@ -568,8 +568,6 @@ endif()
 #
 
 foreach(lib ${csapex_LIBRARIES})
-    message("lib: " ${CMAKE_CURRENT_BINARY_DIR}/${lib}.h)
-
     if(WIN32)
     else()
         file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${lib}_export.h

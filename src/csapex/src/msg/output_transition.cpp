@@ -39,6 +39,7 @@ std::vector<UUID> OutputTransition::getOutputs() const
     for(const auto& pair : outputs_) {
         res.push_back(pair.second->getUUID());
     }
+    std::sort(res.begin(), res.end());
     return res;
 }
 
