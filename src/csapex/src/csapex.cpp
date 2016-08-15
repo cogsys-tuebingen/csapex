@@ -273,6 +273,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         deleteRecoveryConfig();
 
+        root->clear();
+
         delete designer;
 
     } else {
