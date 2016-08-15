@@ -7,7 +7,7 @@
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/connector_type.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <mutex>

@@ -104,6 +104,12 @@ Input *VariadicInputs::createVariadicInput(TokenDataConstPtr type, const std::st
     return result;
 }
 
+InputPtr VariadicInputs::getVariadicInput(std::size_t index)
+{
+    return variadic_inputs_.at(index);
+}
+
+
 void VariadicInputs::setupVariadicParameters(Parameterizable &parameters)
 {
     input_count_ = csapex::param::ParameterFactory::declareValue("input count", 0);
@@ -244,6 +250,12 @@ void VariadicOutputs::setupVariadicParameters(Parameterizable &parameters)
     parameters.addHiddenParameter(output_names_);
 }
 
+OutputPtr VariadicOutputs::getVariadicOutput(std::size_t index)
+{
+    return variadic_outputs_.at(index);
+}
+
+
 void VariadicOutputs::updateOutputs(int count)
 {
     if(count < 0) {
@@ -367,6 +379,11 @@ void VariadicEvents::setupVariadicParameters(Parameterizable &parameters)
     parameters.addHiddenParameter(event_names_);
 }
 
+EventPtr VariadicEvents::getVariadicEvent(std::size_t index)
+{
+    return variadic_events_.at(index);
+}
+
 void VariadicEvents::updateEvents(int count)
 {
     if(count < 0) {
@@ -473,6 +490,12 @@ void VariadicSlots::removeVariadicSlotById(const UUID& slot)
             ++it;
         }
     }
+}
+
+
+SlotPtr VariadicSlots::getVariadicSlot(std::size_t index)
+{
+    return variadic_slots_.at(index);
 }
 
 

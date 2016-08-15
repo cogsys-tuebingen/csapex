@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/utility/uuid.h>
 #include <csapex/model/model_fwd.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 namespace csapex
 {

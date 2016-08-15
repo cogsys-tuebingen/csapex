@@ -2,7 +2,7 @@
 #define POINT_H
 
 /// COMPONENT
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 namespace csapex
 {

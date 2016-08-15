@@ -43,6 +43,8 @@ public:
 
     int getVariadicInputCount() const;
 
+    InputPtr getVariadicInput(std::size_t index);
+
 protected:
     VariadicInputs(TokenDataConstPtr type);
     VariadicInputs();
@@ -78,6 +80,8 @@ protected:
 
     virtual void setupVariadicParameters(Parameterizable &parameters) override;
 
+    OutputPtr getVariadicOutput(std::size_t index);
+
 private:
     void updateOutputs(int output_count);
 
@@ -108,6 +112,8 @@ protected:
 
     virtual void setupVariadicParameters(Parameterizable &parameters) override;
 
+    EventPtr getVariadicEvent(std::size_t index);
+
 private:
     void updateEvents(int trigger_count);
 
@@ -130,6 +136,8 @@ public:
     virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
 
     int getVariadicSlotCount() const;
+
+    SlotPtr getVariadicSlot(std::size_t index);
 
 protected:
     VariadicSlots(TokenDataConstPtr type);

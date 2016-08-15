@@ -1,9 +1,10 @@
 [Desktop Entry]
-Version=0.1
-Name=cs::APEX
+Name=csapex
+GenericName=CS::APEX
+MimeType=application/x-csapex
 Comment=Algorithm Prototyper and EXperimentor
-Exec=${exe}
+Exec=env bash -c "source ${ws}/setup.bash && ${exe} %f"
 Icon=${img}
 Terminal=true
 Type=Application
-Categories=Utility;Application;
+Categories=Utility;Application;X-csapex;X-ROS;

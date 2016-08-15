@@ -2,7 +2,7 @@
 #define TOKEN_DATA_H
 
 /// COMPONENT
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <memory>

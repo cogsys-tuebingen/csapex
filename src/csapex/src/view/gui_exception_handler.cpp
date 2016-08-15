@@ -56,7 +56,8 @@ void GuiExceptionHandler::showErrorDialog()
     QString failure_type = QString::fromStdString(last_failure_->type());
 
     int reply = QMessageBox::critical(window, failure_type,
-                                      msg, "&Ignore", "&Report (Email)", "&Create Issue on GitLab");
+                                      msg, "&Ignore", "&Report (Email)",
+                                      "&Create Issue");
 
     switch(reply) {
     case 0: // ignore
@@ -68,13 +69,28 @@ void GuiExceptionHandler::showErrorDialog()
         QDesktopServices::openUrl(QUrl(mail, QUrl::TolerantMode));
     }
         break;
-    case 2: // issue
+    case 2: // issue on github or gitlab
     {
-        QString issue = "https://gitlab.cs.uni-tuebingen.de/csapex/csapex/issues/new?issue[assignee_id]=&issue[milestone_id]=&issue[title]=";
-        issue += failure_type + "&issue[description]=" + msg;
-        QDesktopServices::openUrl(QUrl(issue, QUrl::TolerantMode));
+        int which = QMessageBox::question(window, "Please select a target.", "Please choose where to post the new issue:",
+                                          "github.com", "gitlab.cs.uni-tuebingen.de", 0);
+
+        switch(which)
+        {
+        case 0: {
+            QString issue_github = "https://github.com/cogsys-tuebingen/csapex/issues/new?title=";
+            issue_github += failure_type + "&body=" + msg;
+            QDesktopServices::openUrl(QUrl(issue_github, QUrl::TolerantMode));
+        }
+            break;
+
+        case 1: {
+            QString issue_gitlab = "https://gitlab.cs.uni-tuebingen.de/csapex/csapex/issues/new?issue[assignee_id]=&issue[milestone_id]=&issue[title]=";
+            issue_gitlab += failure_type + "&issue[description]=" + msg;
+            QDesktopServices::openUrl(QUrl(issue_gitlab, QUrl::TolerantMode));
+        }
+            break;
+        }
     }
-        break;
     }
 }
 

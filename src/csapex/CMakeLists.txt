@@ -11,7 +11,12 @@ include (GenerateExportHeader)
 #add_definitions(-ftime-report)
 
 ## Find catkin macros and libraries
-#find_package(catkin REQUIRED)
+if(WIN32)
+    message("building on windows without catkin")
+else()
+    find_package(catkin REQUIRED)
+endif()
+
 find_package(class_loader REQUIRED)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED)
@@ -22,13 +27,15 @@ find_package(TinyXML REQUIRED)
 find_package(YAMLCPP REQUIRED)
 
 if(WIN32)
-set(Poco_DIR cmake)
-find_package(Poco REQUIRED COMPONENTS Foundation)
-find_package(console_bridge REQUIRED)
+    set(Poco_DIR cmake)
+    find_package(Poco REQUIRED COMPONENTS Foundation)
+    find_package(console_bridge REQUIRED)
+    set(INSTALL_DIR "C:/Users/buck/ws/apex/install")
+    set(CATKIN_PACKAGE_INCLUDE_DESTINATION ${INSTALL_DIR}/include)
+    set(CATKIN_PACKAGE_LIB_DESTINATION ${INSTALL_DIR}/lib)
+    set(CATKIN_GLOBAL_BIN_DESTINATION ${INSTALL_DIR}/bin)
 else()
 endif()
-
-set(YAML_LIBRARIES ${YAMLCPP_LIBRARY})
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -52,17 +59,16 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-#catkin_package(
-#   INCLUDE_DIRS include
-#   # CATKIN_DEPENDS
-#   DEPENDS Boost
-#   CFG_EXTRAS csapex-extras.cmake
-#)
-
-set(INSTALL_DIR "C:/Users/buck/ws/apex/install")
-set(CATKIN_PACKAGE_INCLUDE_DESTINATION ${INSTALL_DIR}/include)
-set(CATKIN_PACKAGE_LIB_DESTINATION ${INSTALL_DIR}/lib)
-set(CATKIN_GLOBAL_BIN_DESTINATION ${INSTALL_DIR}/bin)
+if(WIN32)
+    message("building on windows without catkin")
+else()
+    catkin_package(
+       INCLUDE_DIRS include
+       # CATKIN_DEPENDS
+       DEPENDS Boost
+       CFG_EXTRAS csapex-extras.cmake
+    )
+endif()
 
 #
 # CCACHE
@@ -166,7 +172,7 @@ generate_export_header( csapex_util
 			 )
 target_link_libraries(csapex_util
     ${Boost_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
 )
 
 list(APPEND csapex_LIBRARIES csapex_util)
@@ -206,7 +212,7 @@ generate_export_header( csapex_param
 target_link_libraries(csapex_param
     csapex_util
     ${Boost_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
 )
 
 list(APPEND csapex_LIBRARIES csapex_param)
@@ -235,7 +241,7 @@ generate_export_header( csapex_profiling
 target_link_libraries(csapex_profiling
     csapex_util
     ${Boost_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
 )
 
 list(APPEND csapex_LIBRARIES csapex_profiling)
@@ -336,7 +342,7 @@ target_link_libraries(csapex
     csapex_profiling
     csapex_param
     ${Boost_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
     ${TinyXML_LIBRARIES}
     ${class_loader_LIBRARIES}
     ${console_bridge_LIBRARIES} 
@@ -395,7 +401,7 @@ target_link_libraries(csapex_command
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
     ${TinyXML_LIBRARIES}
     ${class_loader_LIBRARIES}
 )
@@ -491,7 +497,7 @@ add_library(csapex_qt SHARED
 generate_export_header( csapex_qt
              BASE_NAME csapex_qt
              EXPORT_MACRO_NAME CSAPEX_QT_EXPORT_CMAKE
-             EXPORT_FILE_NAME csapex_qt_export_cmake.h
+             EXPORT_FILE_NAME csapex_qt_export.h
              STATIC_DEFINE csapex_qt_BUILT_AS_STATIC
 			 )
 target_link_libraries(csapex_qt
@@ -503,10 +509,11 @@ target_link_libraries(csapex_qt
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
     ${TinyXML_LIBRARIES}
     ${class_loader_LIBRARIES}
 )
+list(APPEND csapex_LIBRARIES csapex_qt)
 
 #
 # LIST EVERYTHING IN QT
@@ -528,6 +535,8 @@ target_link_libraries(csapex_node
 add_custom_target(cfg ALL DEPENDS cfg/style.css)
 add_custom_command(TARGET cfg POST_BUILD
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
+        ${CATKIN_DEVEL_PREFIX}
+        ${PROJECT_NAME}/csapex_node
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -558,9 +567,22 @@ endif()
 # INSTALL
 #
 
+foreach(lib ${csapex_LIBRARIES})
+    if(WIN32)
+        file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${lib}_export.h
+             DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
+    else()
+        file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${lib}_export.h
+             DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
+    endif()
+
+    install(FILES ${PROJECT_BINARY_DIR}/${lib}_export.h
+            DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+endforeach()
+
 install(DIRECTORY include/${PROJECT_NAME}/
-        #LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(TARGETS csapex
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

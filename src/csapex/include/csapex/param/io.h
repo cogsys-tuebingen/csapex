@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/param/parameter.h>
-#include "csapex_param_export.h"
+#include <csapex/csapex_param_export.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>

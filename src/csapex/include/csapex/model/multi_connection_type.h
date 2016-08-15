@@ -5,7 +5,7 @@
 #include <csapex/model/token_data.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/msg/msg_fwd.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <vector>

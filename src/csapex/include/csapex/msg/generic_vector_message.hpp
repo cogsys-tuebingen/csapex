@@ -106,7 +106,9 @@ private:
                 if(vec != 0) {
                     return vec->canConnectTo(this);
                 } else {
-                    return dynamic_cast<const AnyMessage*> (other_side) != nullptr;
+                    auto type = nestedType();
+                    return other_side->canConnectTo(type.get());
+                    //return dynamic_cast<const AnyMessage*> (other_side) != nullptr;
                 }
             }
         }

@@ -153,6 +153,10 @@ void NodeBox::setupUi()
         updateVisualsRequest();
     });
     state->color_changed->connect(std::bind(&NodeBox::changeColor, this));
+    state->pos_changed->connect(std::bind(&NodeBox::updatePosition, this));
+
+    changeColor();
+    updateVisualsRequest();
 
     Q_EMIT changed(this);
 }
@@ -488,8 +492,7 @@ void NodeBox::init()
     }
 
     NodeStatePtr state = nh->getNodeState();
-    Point pt = state->getPos();
-    move(QPoint(pt.x, pt.y));
+    updatePosition();
     (*state->pos_changed)();
 
     setVisible(true);
@@ -698,19 +701,6 @@ void NodeBox::moveEvent(QMoveEvent* e)
     eventFilter(this, e);
 }
 
-void NodeBox::triggerPlaced()
-{
-    NodeHandlePtr nh = node_handle_.lock();
-    if(!nh) {
-        return;
-    }
-
-    Point p;
-    p.x = pos().x();
-    p.y = pos().y();
-    nh->getNodeState()->setPos(p);
-}
-
 bool NodeBox::isSelected() const
 {
     return property("focused").toBool();
@@ -853,6 +843,7 @@ void NodeBox::changeColor()
     NodeStatePtr state = nh->getNodeState();
 
     updateStylesheetColor(state);
+    refreshStylesheet();
 }
 
 void NodeBox::updateVisuals()
@@ -941,6 +932,12 @@ void NodeBox::updateVisuals()
     adjustSize();
 }
 
+void NodeBox::updatePosition()
+{
+    auto pt = getNodeHandle()->getNodeState()->getPos();
+    move(QPoint(pt.x, pt.y));
+}
+
 bool NodeBox::isMinimizedSize() const
 {
     NodeHandlePtr nh = node_handle_.lock();
@@ -1001,9 +998,7 @@ void NodeBox::nodeStateChangedEvent()
     updateThreadInformation();
 
     updateVisuals();
-
-    auto pt = state->getPos();
-    move(QPoint(pt.x, pt.y));
+    updatePosition();
 }
 /// MOC
 #include "../../../include/csapex/view/node/moc_box.cpp"

@@ -30,6 +30,17 @@ The framework is targeted toward use in robotics and is fully compatible with
 directly be deployed on any ROS-based robotic system.
 
 
+## Tutorials and more Information
+
+For more information, please refer to the Wiki at
+    https://github.com/cogsys-tuebingen/csapex/wiki
+
+the official website at
+    http://www.ra.cs.uni-tuebingen.de/forschung/apex/
+
+or contact the maintainers via email.
+
+
 ## Dependencies
 
 Currently we rely on the [catkin](http://wiki.ros.org/catkin) build system

@@ -2,7 +2,7 @@
 #define THREAD_H
 
 /// PROJECT
-#include "csapex_util_export.h"
+#include <csapex/csapex_util_export.h>
 
 namespace csapex {
 

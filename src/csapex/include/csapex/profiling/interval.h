@@ -2,7 +2,7 @@
 #define INTERVAL_H
 
 /// COMPONENT
-#include "csapex_profiling_export.h"
+#include <csapex/csapex_profiling_export.h>
 
 /// SYSTEM
 #include <map>

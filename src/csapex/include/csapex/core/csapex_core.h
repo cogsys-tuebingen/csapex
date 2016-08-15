@@ -6,7 +6,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
 #include <csapex/utility/uuid.h>
-#include "csapex_export.h"
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.h>

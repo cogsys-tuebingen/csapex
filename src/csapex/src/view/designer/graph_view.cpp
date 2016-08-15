@@ -773,6 +773,8 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     box_map_[node_handle->getUUID()] = box;
     proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, this, view_core_);
 
+    box->setStyleSheet(styleSheet());
+
     box->construct();
 
     addBox(box);
@@ -940,8 +942,6 @@ void GraphView::addBox(NodeBox *box)
 
     boxes_.push_back(box);
 
-    box->setStyleSheet(styleSheet());
-
     for(QGraphicsItem *item : items()) {
         item->setFlag(QGraphicsItem::ItemIsMovable);
         item->setFlag(QGraphicsItem::ItemIsSelectable);
@@ -950,7 +950,6 @@ void GraphView::addBox(NodeBox *box)
     }
 
     box->init();
-    box->triggerPlaced();
 
     box->updateBoxInformation(graph);
 
@@ -1755,6 +1754,10 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
 
 void GraphView::groupSelected()
 {
+    if(selected_boxes_.empty()) {
+        return;
+    }
+
     std::vector<UUID> uuids;
     uuids.reserve(selected_boxes_.size());
     for(NodeBox* box : selected_boxes_) {

@@ -100,7 +100,6 @@ public:
 
     /// UI CALLBACKS
     void moveEvent(QMoveEvent*);
-    void triggerPlaced();
 
     bool isSelected() const;
     virtual void setSelected(bool selected);
@@ -141,6 +140,7 @@ public Q_SLOTS:
     void enabledChangeEvent(bool val);
 
     void updateVisuals();
+    void updatePosition();
 
 Q_SIGNALS:
     void toggled(bool);
