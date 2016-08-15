@@ -3,13 +3,14 @@
 
 /// COMPONENT
 #include <csapex/msg/message.h>
+#include <csapex/csapex_export.h>
 
 namespace csapex
 {
 namespace connection_types
 {
 
-struct AnyMessage : public Message
+struct CSAPEX_EXPORT AnyMessage : public Message
 {
 public:
     typedef std::shared_ptr<AnyMessage> Ptr;

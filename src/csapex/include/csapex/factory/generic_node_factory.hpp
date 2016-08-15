@@ -1,7 +1,8 @@
 /// PROJECT
-#include <csapex/factory//generic_node.hpp>
+#include <csapex/factory/generic_node.hpp>
 #include <csapex/model/node_constructor.h>
 #include <csapex/msg/token_traits.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <boost/function_types/parameter_types.hpp>
@@ -10,7 +11,7 @@
 
 namespace csapex {
 
-class GenericNodeFactory
+class CSAPEX_EXPORT GenericNodeFactory
 {
 public:
     /**

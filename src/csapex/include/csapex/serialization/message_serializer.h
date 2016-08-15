@@ -7,9 +7,11 @@
 #include <csapex/utility/singleton.hpp>
 #include <csapex/utility/tmp.hpp>
 #include <csapex/utility/type.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <functional>
 
 HAS_MEM_FUNC(encode, has_yaml_implementation);
 
@@ -40,7 +42,7 @@ bool decodeMessage(const YAML::Node& node, csapex::TokenData& msg) {
 
 }
 
-class MessageSerializer : public Singleton<MessageSerializer>
+class CSAPEX_EXPORT MessageSerializer : public Singleton<MessageSerializer>
 {
     friend class Singleton<MessageSerializer>;
 

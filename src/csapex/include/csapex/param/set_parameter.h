@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/param/parameter.h>
+#include <csapex/csapex_param_export.h>
 
 /// SYSTEM
 #include <vector>
@@ -10,7 +11,7 @@
 namespace csapex {
 namespace param {
 
-class SetParameter : public Parameter
+class CSAPEX_PARAM_EXPORT SetParameter : public Parameter
 {
     friend class ParameterFactory;
 

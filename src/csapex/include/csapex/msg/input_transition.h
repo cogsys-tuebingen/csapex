@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class InputTransition : public Transition
+class CSAPEX_EXPORT InputTransition : public Transition
 {
 public:
     InputTransition(delegate::Delegate0<> activation_fn);

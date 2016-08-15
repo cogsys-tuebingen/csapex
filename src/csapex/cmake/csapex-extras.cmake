@@ -1,6 +1,10 @@
+if(WIN32)
+#add_definitions(-Wall)
+else()
 add_definitions(-W -Wall -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function -Wno-deprecated-register
  -Wno-inconsistent-missing-override -Wno-deprecated-register)
-#add_definitions(-g -rdynamic)
+endif()
+
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

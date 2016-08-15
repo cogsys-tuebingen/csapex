@@ -3,13 +3,14 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <string>
 
 namespace csapex
 {
-class Unique
+class CSAPEX_EXPORT Unique
 {
 public:
     Unique(const UUID &uuid);

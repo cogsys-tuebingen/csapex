@@ -1,13 +1,16 @@
 #ifndef STREAM_RELAY_H
 #define STREAM_RELAY_H
 
+/// PROJECT
+#include <csapex/csapex_util_export.h>
+
 /// SYSTEM
 #include <string>
 #include <iosfwd>
 
 namespace csapex
 {
-class StreamRelay
+class CSAPEX_UTILS_EXPORT StreamRelay
 {
 public:
     StreamRelay(std::ostream& stream, const std::string& prefix);

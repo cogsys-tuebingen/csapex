@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <vector>
@@ -11,7 +12,7 @@
 namespace csapex
 {
 
-class Scheduler
+class CSAPEX_EXPORT Scheduler
 {
 public:
     virtual ~Scheduler();

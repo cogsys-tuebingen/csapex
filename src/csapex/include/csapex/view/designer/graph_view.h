@@ -2,6 +2,7 @@
 #define GRAPH_VIEW_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/core/core_fwd.h>
@@ -26,7 +27,7 @@ namespace csapex
 
 class NodeFactory;
 
-class GraphView : public QGraphicsView, public Profilable
+class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable
 {
     Q_OBJECT
 
@@ -61,12 +62,12 @@ public:
     std::vector<NodeBox*> getSelectedBoxes() const;
     CommandPtr deleteSelected();
 
-    NodeBox* getBox(const UUID& node_id);
-    MovableGraphicsProxyWidget* getProxy(const UUID& node_id);
+    NodeBox* getBox(const csapex::UUID& node_id);
+    MovableGraphicsProxyWidget* getProxy(const csapex::UUID& node_id);
 
     GraphFacade* getGraphFacade() const;
 
-    void focusOnNode(const UUID& uuid);
+    void focusOnNode(const csapex::UUID& uuid);
 
     void resizeEvent(QResizeEvent *event);
     void scrollContentsBy(int dx, int dy);

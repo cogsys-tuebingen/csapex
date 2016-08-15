@@ -13,7 +13,7 @@ namespace csapex
 namespace command
 {
 
-class AddMessageConnection : public AddConnection
+class CSAPEX_COMMAND_EXPORT AddMessageConnection : public AddConnection
 {
 public:
     AddMessageConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid, bool active);

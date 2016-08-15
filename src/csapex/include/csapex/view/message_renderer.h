@@ -1,6 +1,9 @@
 #ifndef MESSAGE_RENDERER_H
 #define MESSAGE_RENDERER_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/param/param_fwd.h>
 #include <csapex/model/model_fwd.h>
@@ -14,7 +17,7 @@
 namespace csapex
 {
 
-class MessageRenderer
+class CSAPEX_QT_EXPORT MessageRenderer
 {
 public:
     typedef std::shared_ptr<MessageRenderer> Ptr;

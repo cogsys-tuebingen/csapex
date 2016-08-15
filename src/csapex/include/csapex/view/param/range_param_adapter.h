@@ -8,7 +8,7 @@
 namespace csapex
 {
 
-class RangeParameterAdapter : public ParameterAdapter
+class CSAPEX_QT_EXPORT RangeParameterAdapter : public ParameterAdapter
 {
 public:
     RangeParameterAdapter(param::RangeParameter::Ptr p);

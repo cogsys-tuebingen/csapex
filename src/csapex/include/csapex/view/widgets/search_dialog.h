@@ -2,8 +2,11 @@
 #define SEARCH_DIALOG_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/view/widgets/completed_line_edit.h>
+
+/// PROJECT
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
@@ -22,7 +25,7 @@ class NodeFilterProxyModel;
 class Graph;
 class NodeFactory;
 
-class SearchDialog : public QDialog
+class CSAPEX_QT_EXPORT SearchDialog : public QDialog
 {
     Q_OBJECT
 

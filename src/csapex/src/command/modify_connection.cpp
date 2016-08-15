@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <sstream>
 
+using namespace csapex;
 using namespace csapex::command;
 
 ModifyConnection::ModifyConnection(const AUUID& parent_uuid, int connection_id, bool active)

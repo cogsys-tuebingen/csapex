@@ -4,11 +4,12 @@
 /// PROJECT
 #include <csapex/core/core_fwd.h>
 #include <csapex/utility/exceptions.h>
+#include <csapex/csapex_export.h>
 
 class QObject;
 class QEvent;
 
-struct AppProxy
+struct CSAPEX_EXPORT AppProxy
 {
     virtual bool doNotify(QObject* receiver, QEvent* event) = 0;
 };
@@ -16,7 +17,7 @@ struct AppProxy
 namespace csapex
 {
 
-class ExceptionHandler
+class CSAPEX_EXPORT ExceptionHandler
 {
 public:
     ExceptionHandler(bool fatal_exceptions);

@@ -1,6 +1,9 @@
 #ifndef PORT_TYPE_H
 #define PORT_TYPE_H
 
+/// COMPONENT
+#include <csapex/csapex_export.h>
+
 /// SYSTEM
 #include <string>
 
@@ -12,9 +15,9 @@ enum class ConnectorType {
 
 namespace port_type
 {
-std::string name(ConnectorType type);
+CSAPEX_EXPORT std::string name(ConnectorType type);
 
-ConnectorType opposite(ConnectorType type);
+CSAPEX_EXPORT ConnectorType opposite(ConnectorType type);
 }
 }
 

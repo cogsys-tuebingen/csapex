@@ -10,7 +10,7 @@ namespace csapex
 namespace command
 {
 
-struct SwitchThread : public Command
+struct CSAPEX_COMMAND_EXPORT SwitchThread : public Command
 {
     SwitchThread(const AUUID& graph_uuid, const UUID& node, int thread_id);
 

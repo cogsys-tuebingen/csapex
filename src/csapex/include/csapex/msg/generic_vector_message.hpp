@@ -16,11 +16,13 @@
 #include <string>
 #include <boost/static_assert.hpp>
 #include <vector>
+#undef NDEBUG
+#include <assert.h>
 
 namespace csapex {
 namespace connection_types {
 
-struct GenericVectorMessage : public Message
+struct CSAPEX_EXPORT GenericVectorMessage : public Message
 {
 public:
     struct Anything {};
@@ -72,7 +74,7 @@ private:
 
 
     public:
-        static Self::Ptr make() {
+        static typename Self::Ptr make() {
             return Self::Ptr (new Self);
         }
 
@@ -316,7 +318,7 @@ private:
     public:
         typedef std::shared_ptr< Self > Ptr;
 
-        static Self::Ptr make() {
+        static typename Self::Ptr make() {
             return Self::Ptr (new Self);
         }
     };

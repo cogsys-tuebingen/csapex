@@ -10,7 +10,7 @@
 namespace csapex
 {
 
-class Event : public StaticOutput
+class CSAPEX_EXPORT Event : public StaticOutput
 {
     friend class Graph;
 

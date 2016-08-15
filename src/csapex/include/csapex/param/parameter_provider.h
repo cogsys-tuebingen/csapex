@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "parameter.h"
+#include <csapex/csapex_param_export.h>
 
 /// SYSTEM
 #include <string>
@@ -12,7 +13,7 @@
 namespace csapex {
 namespace param {
 
-class ParameterProvider
+class CSAPEX_PARAM_EXPORT ParameterProvider
 {
 public:
     ParameterProvider();

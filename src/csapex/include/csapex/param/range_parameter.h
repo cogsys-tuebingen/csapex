@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/param/parameter.h>
+#include <csapex/csapex_param_export.h>
 
 /// SYSTEM
 #include <boost/mpl/vector.hpp>
@@ -17,7 +18,7 @@ int
 > RangeParameterTypes;
 
 
-class RangeParameter : public Parameter
+class CSAPEX_PARAM_EXPORT RangeParameter : public Parameter
 {
     friend class ParameterFactory;
 

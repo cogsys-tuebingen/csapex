@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node_handle.h>
+#include <csapex/view/csapex_qt_export.h>
 
 /// SYSTEM
 #include <QFrame>
@@ -11,7 +12,7 @@
 namespace csapex
 {
 
-class ActivityLegend : public QTableWidget
+class CSAPEX_QT_EXPORT ActivityLegend : public QTableWidget
 {
     Q_OBJECT
 

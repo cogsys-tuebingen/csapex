@@ -18,7 +18,7 @@ namespace csapex
 
 class CsApexCore;
 
-class ThreadPool : public Executor
+class CSAPEX_EXPORT ThreadPool : public Executor
 {
 public:
     ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);

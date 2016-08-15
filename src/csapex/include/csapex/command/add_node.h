@@ -12,7 +12,7 @@ namespace csapex
 namespace command
 {
 
-class AddNode : public Command
+class CSAPEX_COMMAND_EXPORT AddNode : public Command
 {
 public:
     AddNode(const AUUID &graph_uuid, const std::string& type, Point pos, const UUID& uuid_, NodeStatePtr state);

@@ -11,7 +11,7 @@
 namespace csapex
 {
 
-class VariadicBase
+class CSAPEX_EXPORT VariadicBase
 {
 public:
     ~VariadicBase();
@@ -33,7 +33,7 @@ protected:
 };
 
 
-class VariadicInputs : public virtual VariadicBase
+class CSAPEX_EXPORT VariadicInputs : public virtual VariadicBase
 {
 public:
     virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional);
@@ -64,7 +64,7 @@ protected:
 
 
 
-class VariadicOutputs : public virtual VariadicBase
+class CSAPEX_EXPORT VariadicOutputs : public virtual VariadicBase
 {
 public:
     virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label);
@@ -96,7 +96,7 @@ protected:
 
 
 
-class VariadicEvents : public virtual VariadicBase
+class CSAPEX_EXPORT VariadicEvents : public virtual VariadicBase
 {
 public:
     virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label);
@@ -127,7 +127,7 @@ protected:
 
 
 
-class VariadicSlots: public virtual VariadicBase
+class CSAPEX_EXPORT VariadicSlots: public virtual VariadicBase
 {
 public:
     virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr&)> callback);
@@ -158,7 +158,7 @@ protected:
 
 
 
-class VariadicIO : public VariadicInputs, public VariadicOutputs
+class CSAPEX_EXPORT VariadicIO : public VariadicInputs, public VariadicOutputs
 {
 public:
     virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
@@ -171,7 +171,7 @@ protected:
 };
 
 
-class Variadic : public VariadicInputs, public VariadicOutputs, public VariadicEvents, public VariadicSlots
+class CSAPEX_EXPORT Variadic : public VariadicInputs, public VariadicOutputs, public VariadicEvents, public VariadicSlots
 {
 public:
     virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;

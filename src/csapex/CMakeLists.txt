@@ -5,24 +5,37 @@ project(csapex)
 ## Add our own cmake subdirectory
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(cmake/csapex-extras.cmake)
-
-## Enable warnings
-add_definitions(-W -Wall)
+include (GenerateExportHeader)
 
 ## Enable Profiling
 #add_definitions(-ftime-report)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED)
+if(WIN32)
+    message("building on windows without catkin")
+else()
+    find_package(catkin REQUIRED)
+endif()
+
 find_package(class_loader REQUIRED)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED)
-find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
-
-set(YAML_LIBRARIES -L/usr/local/lib/ yaml-cpp)
+find_package(Boost COMPONENTS program_options filesystem system regex serialization thread REQUIRED)
 
 find_package(OpenGL REQUIRED)
 find_package(TinyXML REQUIRED)
+find_package(YAMLCPP REQUIRED)
+
+if(WIN32)
+    set(Poco_DIR cmake)
+    find_package(Poco REQUIRED COMPONENTS Foundation)
+    find_package(console_bridge REQUIRED)
+    set(INSTALL_DIR "C:/Users/buck/ws/apex/install")
+    set(CATKIN_PACKAGE_INCLUDE_DESTINATION ${INSTALL_DIR}/include)
+    set(CATKIN_PACKAGE_LIB_DESTINATION ${INSTALL_DIR}/lib)
+    set(CATKIN_GLOBAL_BIN_DESTINATION ${INSTALL_DIR}/bin)
+else()
+endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -46,12 +59,16 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-   INCLUDE_DIRS include
-   # CATKIN_DEPENDS
-   DEPENDS Boost
-   CFG_EXTRAS csapex-extras.cmake
-)
+if(WIN32)
+    message("building on windows without catkin")
+else()
+    catkin_package(
+       INCLUDE_DIRS include
+       # CATKIN_DEPENDS
+       DEPENDS Boost
+       CFG_EXTRAS csapex-extras.cmake
+    )
+endif()
 
 #
 # CCACHE
@@ -96,8 +113,12 @@ file(APPEND ${INFO} "static const std::string CSAPEX_VERSION { \"${csapex_VERSIO
 
 file(APPEND ${INFO} "}\n}\n\n")
 
+if(WIN32) 
+file(RENAME ${INFO} ${INFO_H})
+else()
 execute_process(COMMAND bash -c "if [[ ! -f info.h  ]] || [[ `diff info.h.tmp info.h` ]]; then mv info.h.tmp info.h; else rm info.h.tmp; fi"
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
+endif()	
 
 ###########
 ## Build ##
@@ -108,10 +129,12 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/external)
 include_directories(include
 
     external/qxt5/include
-
+	${YAMLCPP_INCLUDE_DIR}
+	${Boost_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS}
+	${console_bridge_INCLUDE_DIRS} 
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -123,6 +146,38 @@ endif()
 #
 
 set(csapex_LIBRARIES)
+
+
+
+add_library(csapex_util SHARED
+    src/utility/slim_signal.cpp
+    src/utility/assert.cpp
+    src/utility/exceptions.cpp
+    src/utility/bash_parser.cpp
+    src/utility/error_handling.cpp
+    src/utility/stream_interceptor.cpp
+    src/utility/stream_relay.cpp
+    src/utility/thread.cpp
+    src/utility/rate.cpp
+    src/utility/type.cpp
+    src/utility/uuid.cpp
+    src/utility/uuid_provider.cpp
+    src/utility/yaml_node_builder.cpp
+)
+generate_export_header( csapex_util
+             BASE_NAME csapex_util
+             EXPORT_MACRO_NAME CSAPEX_UTILS_EXPORT
+             EXPORT_FILE_NAME csapex_util_export.h
+             STATIC_DEFINE csapex_util_BUILT_AS_STATIC
+			 )
+target_link_libraries(csapex_util
+    ${Boost_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
+)
+
+list(APPEND csapex_LIBRARIES csapex_util)
+
+
 
 add_library(csapex_param SHARED
     src/param/io.cpp
@@ -148,37 +203,21 @@ add_library(csapex_param SHARED
     src/param/parameter_map.cpp
     src/param/parameter_provider.cpp
 )
+generate_export_header( csapex_param
+             BASE_NAME csapex_param
+             EXPORT_MACRO_NAME CSAPEX_PARAM_EXPORT
+             EXPORT_FILE_NAME csapex_param_export.h
+             STATIC_DEFINE csapex_param_BUILT_AS_STATIC
+			 )
 target_link_libraries(csapex_param
+    csapex_util
     ${Boost_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
 )
 
 list(APPEND csapex_LIBRARIES csapex_param)
 
 
-
-add_library(csapex_util SHARED
-    src/utility/slim_signal.cpp
-    src/utility/assert.cpp
-    src/utility/exceptions.cpp
-    src/utility/bash_parser.cpp
-    src/utility/error_handling.cpp
-    src/utility/stream_interceptor.cpp
-    src/utility/stream_relay.cpp
-    src/utility/thread.cpp
-    src/utility/rate.cpp
-    src/utility/type.cpp
-    src/utility/uuid.cpp
-    src/utility/uuid_provider.cpp
-    src/utility/yaml_node_builder.cpp
-)
-
-target_link_libraries(csapex_util
-    ${Boost_LIBRARIES}
-    ${YAML_LIBRARIES}
-)
-
-list(APPEND csapex_LIBRARIES csapex_util)
 
 
 
@@ -192,11 +231,17 @@ add_library(csapex_profiling SHARED
     src/profiling/timable.cpp
     src/profiling/profilable.cpp
 )
+generate_export_header( csapex_profiling
+             BASE_NAME csapex_profiling
+             EXPORT_MACRO_NAME CSAPEX_PROFILING_EXPORT
+             EXPORT_FILE_NAME csapex_profiling_export.h
+             STATIC_DEFINE csapex_profiling_BUILT_AS_STATIC
+			 )
 
 target_link_libraries(csapex_profiling
     csapex_util
     ${Boost_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
 )
 
 list(APPEND csapex_LIBRARIES csapex_profiling)
@@ -286,21 +331,28 @@ add_library(csapex SHARED
     src/signal/event.cpp
 )
 
+generate_export_header( csapex
+             BASE_NAME csapex
+             EXPORT_MACRO_NAME CSAPEX_EXPORT
+             EXPORT_FILE_NAME csapex_export.h
+             STATIC_DEFINE csapex_BUILT_AS_STATIC
+			 )
 target_link_libraries(csapex
     csapex_util
     csapex_profiling
     csapex_param
     ${Boost_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
     ${TinyXML_LIBRARIES}
     ${class_loader_LIBRARIES}
+    ${console_bridge_LIBRARIES} 
+    ${Poco_LIBRARIES}
 )
 
 list(APPEND csapex_LIBRARIES csapex)
 
 
-# Library for the app itself
-add_library(csapex_qt SHARED
+add_library(csapex_command SHARED
     src/command/command.cpp
     src/command/dispatcher.cpp
     src/command/meta.cpp
@@ -333,6 +385,31 @@ add_library(csapex_qt SHARED
     src/command/add_variadic_connector.cpp
     src/command/set_color.cpp
     src/command/update_parameter.cpp
+)
+
+generate_export_header( csapex_command
+             BASE_NAME csapex_command
+             EXPORT_MACRO_NAME CSAPEX_COMMAND_EXPORT
+             EXPORT_FILE_NAME csapex_command_export.h
+             STATIC_DEFINE csapex_command_BUILT_AS_STATIC
+			 )
+target_link_libraries(csapex_command
+    csapex_util
+	csapex_param
+	csapex
+	
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
+    ${TinyXML_LIBRARIES}
+    ${class_loader_LIBRARIES}
+)
+
+list(APPEND csapex_LIBRARIES csapex_command)
+
+# Library for the app itself
+add_library(csapex_qt SHARED
 
     src/view/csapex_view_core.cpp
     src/view/csapex_window.cpp
@@ -387,7 +464,7 @@ add_library(csapex_qt SHARED
     src/view/utility/html_delegate.cpp
     src/view/utility/qsignal_bridges.cpp
     src/view/utility/qsignal_relay.cpp
-    src/view/utility/QtCvImageConverter.cpp
+    #src/view/utility/QtCvImageConverter.cpp
     src/view/utility/qt_helper.cpp
     src/view/utility/qwrapper.cpp
     src/view/utility/widget_picker.cpp
@@ -417,6 +494,12 @@ add_library(csapex_qt SHARED
     ${QT_UI}
 )
 
+generate_export_header( csapex_qt
+             BASE_NAME csapex_qt
+             EXPORT_MACRO_NAME CSAPEX_QT_EXPORT_CMAKE
+             EXPORT_FILE_NAME csapex_qt_export.h
+             STATIC_DEFINE csapex_qt_BUILT_AS_STATIC
+			 )
 target_link_libraries(csapex_qt
     ${csapex_LIBRARIES}
 
@@ -426,10 +509,11 @@ target_link_libraries(csapex_qt
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${YAML_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
     ${TinyXML_LIBRARIES}
     ${class_loader_LIBRARIES}
 )
+list(APPEND csapex_LIBRARIES csapex_qt)
 
 #
 # LIST EVERYTHING IN QT
@@ -483,31 +567,60 @@ endif()
 # INSTALL
 #
 
+foreach(lib ${csapex_LIBRARIES})
+    if(WIN32)
+    else()
+        file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${lib}_export.h
+             DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
+    endif()
+
+    install(FILES ${PROJECT_BINARY_DIR}/${lib}_export.h
+            DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+endforeach()
+
 install(DIRECTORY include/${PROJECT_NAME}/
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(TARGETS csapex
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 install(TARGETS csapex_param
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+		
+install(TARGETS csapex_command
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+		
+install(TARGETS csapex_profiling
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 install(TARGETS csapex_util
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 install(TARGETS csapex_qt
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 install(TARGETS csapex_node
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 #
 # ANALYSIS TOOLS

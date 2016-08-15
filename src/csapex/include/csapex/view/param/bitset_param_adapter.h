@@ -11,7 +11,7 @@ namespace csapex
 {
 class ParameterContextMenu;
 
-class BitSetParameterAdapter : public ParameterAdapter
+class CSAPEX_QT_EXPORT BitSetParameterAdapter : public ParameterAdapter
 {
 public:
     BitSetParameterAdapter(param::BitSetParameter::Ptr p);

@@ -1,13 +1,16 @@
 #ifndef qsignal_relay_H
 #define qsignal_relay_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// SYSTEM
 #include <QObject>
 #include <functional>
 
 namespace qt_helper {
 
-class Call : public QObject
+class CSAPEX_QT_EXPORT Call : public QObject
 {
     Q_OBJECT
 

@@ -63,3 +63,11 @@ long Timer::stopTimeMs() const
     return std::chrono::duration_cast<std::chrono::milliseconds>(root->end_.time_since_epoch()).count();
 }
 
+
+long Timer::elapsedMs() const
+{
+    auto now = std::chrono::high_resolution_clock::now();
+    auto start = root->start_;
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
+}
+

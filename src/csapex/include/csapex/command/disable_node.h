@@ -10,7 +10,7 @@ namespace csapex
 
 namespace command
 {
-class DisableNode : public Command
+class CSAPEX_COMMAND_EXPORT DisableNode : public Command
 {
 public:
     DisableNode(const AUUID &graph_uuid, const UUID &uuid, bool disable = true);

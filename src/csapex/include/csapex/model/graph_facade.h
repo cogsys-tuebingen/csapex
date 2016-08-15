@@ -6,6 +6,7 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
@@ -14,7 +15,7 @@
 namespace csapex
 {
 
-class GraphFacade
+class CSAPEX_EXPORT GraphFacade
 {
 public:
     typedef std::shared_ptr<GraphFacade> Ptr;

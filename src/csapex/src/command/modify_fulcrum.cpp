@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <sstream>
 
+using namespace csapex;
 using namespace csapex::command;
 
 ModifyFulcrum::ModifyFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id,

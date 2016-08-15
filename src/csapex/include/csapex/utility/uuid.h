@@ -1,6 +1,9 @@
 #ifndef UUID_H
 #define UUID_H
 
+/// PROJECT
+#include <csapex/csapex_util_export.h>
+
 /// SYSTEM
 #include <string>
 #include <map>
@@ -23,29 +26,27 @@ class AUUID;
  *  - ID[1]    - the unique id of the parent id
  *  - ...
  */
-class UUID
+class CSAPEX_UTILS_EXPORT UUID
 {
     friend class UUIDProvider;
 
 public:
-    static std::string stripNamespace(const std::string& name);
+	static std::string stripNamespace(const std::string& name);
 
-    static const std::string namespace_separator;
+	static const std::string namespace_separator;
 
-    static UUID NONE;
+	static UUID NONE;
 
 public:
-    friend std::ostream& operator << (std::ostream& out, const UUID& uuid_);
+    friend bool CSAPEX_UTILS_EXPORT operator == (const std::string& str, const UUID& uuid_);
+    friend bool CSAPEX_UTILS_EXPORT operator == (const UUID& uuid_, const std::string& str);
 
-    friend bool operator == (const std::string& str, const UUID& uuid_);
-    friend bool operator == (const UUID& uuid_, const std::string& str);
-
-    friend bool operator == (const UUID& a, const UUID& b);
-    friend bool operator != (const UUID& a, const UUID& b);
+    friend bool CSAPEX_UTILS_EXPORT operator == (const UUID& a, const UUID& b);
+    friend bool CSAPEX_UTILS_EXPORT operator != (const UUID& a, const UUID& b);
 
     bool operator < (const UUID& rhs) const;
 
-    struct Hasher {
+	struct CSAPEX_UTILS_EXPORT Hasher {
       std::size_t operator()(const UUID& k) const;
     };
 
@@ -88,7 +89,7 @@ private:
 /**
  * @brief The AUUID class represents an *absolute* UUID
  */
-class AUUID : public UUID
+class CSAPEX_UTILS_EXPORT AUUID : public UUID
 {
 public:
     AUUID() = default;
@@ -106,6 +107,9 @@ public:
     };
 
 };
+
+
+CSAPEX_UTILS_EXPORT std::ostream& operator << (std::ostream& out, const UUID& uuid_);
 
 }
 #endif // UUID_H

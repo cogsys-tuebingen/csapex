@@ -1,6 +1,9 @@
 #ifndef PROFILABLE_H
 #define PROFILABLE_H
 
+/// COMPONENT
+#include <csapex/csapex_profiling_export.h>
+
 /// SYSTEM
 #include <memory>
 
@@ -9,7 +12,7 @@ namespace csapex
 
 class Profiler;
 
-class Profilable
+class CSAPEX_PROFILING_EXPORT Profilable
 {
 public:
     Profilable();

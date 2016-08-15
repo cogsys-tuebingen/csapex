@@ -6,11 +6,17 @@
 #include <csapex/utility/yaml_node_builder.h>
 
 /// SYSTEM
-#include <pwd.h>
 #include <boost/filesystem.hpp>
 #include <boost/version.hpp>
 #include <fstream>
 #include <iostream>
+#include <string>
+
+#ifdef WIN32
+#include <Shlobj.h>
+#else
+#include <pwd.h>
+#endif
 
 #if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
 namespace bf3 = boost::filesystem;
@@ -32,8 +38,15 @@ const std::string Settings::namespace_separator = ":/:";
 
 std::string Settings::defaultConfigPath()
 {
+#ifdef WIN32
+	CHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+		return std::string(path) + "/.csapex/";
+	}
+#else
     struct passwd *pw = getpwuid(getuid());
     return std::string(pw->pw_dir) + "/.csapex/";
+#endif
 }
 
 std::string Settings::defaultConfigFile()

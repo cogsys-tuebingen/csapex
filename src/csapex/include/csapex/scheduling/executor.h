@@ -3,13 +3,14 @@
 
 /// COMPONENT
 #include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
-class Executor
+class CSAPEX_EXPORT Executor
 {
 public:
     Executor();

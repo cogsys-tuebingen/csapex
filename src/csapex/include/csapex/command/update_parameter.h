@@ -14,7 +14,7 @@ namespace csapex
 namespace command
 {
 
-struct UpdateParameter : public Command
+struct CSAPEX_COMMAND_EXPORT UpdateParameter : public Command
 {
     template <typename T>
     explicit UpdateParameter(const UUID &parameter_uuid, const T& value)

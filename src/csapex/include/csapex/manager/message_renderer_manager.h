@@ -2,6 +2,7 @@
 #define MESSAGE_RENDERER_MANAGER_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/message_renderer.h>
 
 /// PROJECT
@@ -18,7 +19,7 @@
 
 namespace csapex {
 
-class MessageRendererManager : public Singleton<MessageRendererManager>
+class CSAPEX_QT_EXPORT MessageRendererManager : public Singleton<MessageRendererManager>
 {
     friend class Singleton<MessageRendererManager>;
 

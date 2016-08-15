@@ -5,6 +5,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/profiling/interval.h>
 #include <csapex/profiling/interlude.h>
+#include <csapex/csapex_profiling_export.h>
 
 /// SYSTEM
 #include <chrono>
@@ -16,7 +17,7 @@
 namespace csapex
 {
 
-class Timer
+class CSAPEX_PROFILING_EXPORT Timer
 {
 public:
     typedef std::shared_ptr<Timer> Ptr;
@@ -39,6 +40,8 @@ public:
 
     long startTimeMs() const;
     long stopTimeMs() const;
+
+    long elapsedMs() const;
 
 public:
     std::string timer_name_;

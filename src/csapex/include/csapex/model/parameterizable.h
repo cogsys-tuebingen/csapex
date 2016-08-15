@@ -14,7 +14,7 @@
 namespace csapex
 {
 
-class Parameterizable
+class CSAPEX_EXPORT Parameterizable
 {
 public:
     typedef std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > ChangedParameterList;

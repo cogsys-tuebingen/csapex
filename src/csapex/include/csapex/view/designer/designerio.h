@@ -2,6 +2,7 @@
 #define DESIGNERIO_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/view_fwd.h>
 
@@ -16,7 +17,7 @@ class Node;
 namespace csapex
 {
 
-class DesignerIO
+class CSAPEX_QT_EXPORT DesignerIO
 {
 public:
     DesignerIO();

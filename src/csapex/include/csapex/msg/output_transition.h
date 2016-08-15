@@ -10,7 +10,7 @@
 
 namespace csapex
 {
-class OutputTransition : public Transition
+class CSAPEX_EXPORT OutputTransition : public Transition
 {
 public:
     OutputTransition(delegate::Delegate0<> activation_fn);

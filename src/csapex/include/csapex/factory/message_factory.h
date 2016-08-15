@@ -17,7 +17,7 @@
 
 namespace csapex {
 
-class MessageFactory : public Singleton<MessageFactory>
+class CSAPEX_EXPORT MessageFactory : public Singleton<MessageFactory>
 {
     friend class Singleton<MessageFactory>;
 

@@ -25,6 +25,7 @@
 #include <sstream>
 #include <iostream>
 
+using namespace csapex;
 using namespace csapex::command;
 
 UngroupNodes::UngroupNodes(const AUUID& parent_uuid, const UUID &uuid)

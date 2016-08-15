@@ -6,10 +6,15 @@
 
 /// SYSTEM
 #include <iostream>
-#include <unistd.h>
 #include <stdio.h>
 #include <thread>
 #include <assert.h>
+
+#ifdef WIN32
+#else
+#include <unistd.h>
+#endif
+
 
 using namespace csapex;
 
@@ -49,6 +54,8 @@ std::string StreamInterceptor::getCin()
 namespace {
 bool inputAvailable()
 {
+#ifdef WIN32
+#else
     struct timeval tv;
     fd_set fds;
     tv.tv_sec = 0;
@@ -57,13 +64,19 @@ bool inputAvailable()
     FD_SET(STDIN_FILENO, &fds);
     select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
     return (FD_ISSET(0, &fds));
+#endif
+	return false;
 }
 }
 
 void StreamInterceptor::run() {
     csapex::thread::set_name("stream_interceptor");
 
+#ifdef WIN32
+	if(false) {
+#else
     if (isatty(fileno(stdin))) {
+#endif
         std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
         return;
 

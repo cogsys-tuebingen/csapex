@@ -1,7 +1,8 @@
 #ifndef CSAPEX_VIEW_CORE_H
 #define CSAPEX_VIEW_CORE_H
 
-// COMPONENT
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/view/designer/designer_styleable.h>
 #include <csapex/view/designer/designer_options.h>
 #include <csapex/command/command_fwd.h>
@@ -16,7 +17,7 @@ class DesignerStyleable;
 class DesignerOptions;
 class DragIO;
 
-class CsApexViewCore
+class CSAPEX_QT_EXPORT CsApexViewCore
 {
 public:
     CsApexViewCore(CsApexCore& core, NodeAdapterFactory &node_adapter_factory, CommandDispatcher &dispatcher, DragIO& dragio);

@@ -1,8 +1,8 @@
 #ifndef SLIM_SIGNAL_H
 #define SLIM_SIGNAL_H
 
-
 /// PROJECT
+#include <csapex/csapex_util_export.h>
 #include <csapex/utility/delegate.h>
 
 /// SYSTEM
@@ -23,7 +23,7 @@ class ScopedConnection;
 /**
  * @brief The SignalBase class is the inferface for signals
  */
-class SignalBase
+class CSAPEX_UTILS_EXPORT SignalBase
 {
     friend class Connection;
     friend class ScopedConnection;
@@ -57,7 +57,7 @@ protected:
 /**
  * @brief The Connection class is a handle for a signal connection
  */
-class Connection
+class CSAPEX_UTILS_EXPORT Connection
 {
     friend class ScopedConnection;
     friend class SignalBase;
@@ -89,7 +89,7 @@ private:
  * A scoped connection can't be copied, only moved.
  * If a scoped connection is moved from, the signal will not be disconnected.
  */
-class ScopedConnection : public Connection
+class CSAPEX_UTILS_EXPORT ScopedConnection : public Connection
 {
 public:
     ScopedConnection();

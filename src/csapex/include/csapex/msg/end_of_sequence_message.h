@@ -9,7 +9,7 @@ namespace csapex
 namespace connection_types
 {
 
-struct EndOfSequenceMessage : public MarkerMessage
+struct CSAPEX_EXPORT EndOfSequenceMessage : public MarkerMessage
 {
 public:
     typedef std::shared_ptr<EndOfSequenceMessage> Ptr;

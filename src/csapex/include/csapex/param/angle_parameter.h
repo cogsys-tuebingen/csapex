@@ -3,12 +3,17 @@
 
 /// COMPONENT
 #include <csapex/param/value_parameter.h>
+#include <csapex/csapex_param_export.h>
+
+/// SYSTEM
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace csapex {
 namespace param {
 
 
-class AngleParameter : public Parameter
+class CSAPEX_PARAM_EXPORT AngleParameter : public Parameter
 {
     friend class ParameterFactory;
 

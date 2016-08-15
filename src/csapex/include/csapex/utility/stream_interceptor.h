@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/singleton.hpp>
+#include <csapex/csapex_util_export.h>
 
 /// SYSTEM
 #include <mutex>
@@ -13,7 +14,7 @@
 namespace csapex
 {
 
-class StreamInterceptor : public Singleton<StreamInterceptor>
+class CSAPEX_UTILS_EXPORT StreamInterceptor : public Singleton<StreamInterceptor>
 {
     friend class Singleton<StreamInterceptor>;
 

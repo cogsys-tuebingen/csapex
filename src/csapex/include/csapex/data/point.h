@@ -1,10 +1,13 @@
 #ifndef POINT_H
 #define POINT_H
 
+/// COMPONENT
+#include <csapex/csapex_export.h>
+
 namespace csapex
 {
 
-struct Point
+struct CSAPEX_EXPORT Point
 {
     float x;
     float y;

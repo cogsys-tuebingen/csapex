@@ -10,7 +10,12 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <class_loader/class_loader.h>
 #include <set>
+#if WIN32
+#define TIXML_USE_STL
+#include <tinyxml/tinyxml.h>
+#else
 #include <tinyxml.h>
+#endif
 #include <mutex>
 
 namespace csapex
@@ -148,8 +153,10 @@ protected:
     {
         auto loader = getLoader(plugin_to_library_.at(lookup_name));
         if(!loader) {
+            std::cerr << "cannot create instance of " << lookup_name << ": no loader exists" << std::endl;
             return nullptr;
         } else if(!loader->template isClassAvailable<M>(lookup_name)) {
+            std::cerr << "cannot create instance of " << lookup_name << ": class is not available" << std::endl;
             return nullptr;
         }
         try {

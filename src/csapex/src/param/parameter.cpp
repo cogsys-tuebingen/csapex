@@ -7,7 +7,12 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#ifdef WIN32
+
+#else
 #include <cxxabi.h>
+#endif
+
 #include <iostream>
 
 using namespace csapex;
@@ -210,8 +215,12 @@ boost::any Parameter::access_unsafe(const Parameter &p) const
 
 std::string Parameter::type2string(const std::type_info &type)
 {
-    int status;
+#ifdef WIN32
+	return type.name();
+#else
+	int status;
     return abi::__cxa_demangle(type.name(), 0, 0, &status);
+#endif
 }
 
 void Parameter::throwTypeError(const std::type_info &a, const std::type_info &b, const std::string& prefix) const
@@ -246,9 +255,9 @@ void Parameter::setDictionaryValue(const std::string& key, const T& value)
     setDictionaryEntry(key, p);
 }
 
-template void Parameter::setDictionaryValue<bool>(const std::string& key, const bool& value);
-template void Parameter::setDictionaryValue<int>(const std::string& key, const int& value);
-template void Parameter::setDictionaryValue<double>(const std::string& key, const double& value);
-template void Parameter::setDictionaryValue<std::string>(const std::string& key, const std::string& value);
+template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<bool>(const std::string& key, const bool& value);
+template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<int>(const std::string& key, const int& value);
+template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<double>(const std::string& key, const double& value);
+template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<std::string>(const std::string& key, const std::string& value);
 }
 }

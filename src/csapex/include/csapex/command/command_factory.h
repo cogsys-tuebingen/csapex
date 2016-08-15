@@ -8,11 +8,12 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
+#include <csapex/csapex_command_export.h>
 
 namespace csapex
 {
 
-class CommandFactory
+class CSAPEX_COMMAND_EXPORT CommandFactory
 {
 public:
     CommandFactory(GraphFacade *root, const AUUID& graph_id);

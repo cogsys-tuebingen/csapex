@@ -42,26 +42,26 @@ void Parameterizable::doSetParameter(const std::string& name, const T& value)
 }
 
 
-template bool Parameterizable::doReadParameter<bool>(const std::string& name) const;
-template double Parameterizable::doReadParameter<double>(const std::string& name) const;
-template int Parameterizable::doReadParameter<int>(const std::string& name) const;
-template std::string Parameterizable::doReadParameter<std::string>(const std::string& name) const;
-template std::pair<int,int> Parameterizable::doReadParameter<std::pair<int,int> >(const std::string& name) const;
-template std::pair<double,double> Parameterizable::doReadParameter<std::pair<double,double> >(const std::string& name) const;
-template std::pair<std::string, bool> Parameterizable::doReadParameter<std::pair<std::string, bool> >(const std::string& name) const;
-template std::vector<double> Parameterizable::doReadParameter<std::vector<double> >(const std::string& name) const;
-template std::vector<int> Parameterizable::doReadParameter<std::vector<int> >(const std::string& name) const;
+template CSAPEX_EXPORT bool Parameterizable::doReadParameter<bool>(const std::string& name) const;
+template CSAPEX_EXPORT double Parameterizable::doReadParameter<double>(const std::string& name) const;
+template CSAPEX_EXPORT int Parameterizable::doReadParameter<int>(const std::string& name) const;
+template CSAPEX_EXPORT std::string Parameterizable::doReadParameter<std::string>(const std::string& name) const;
+template CSAPEX_EXPORT std::pair<int,int> Parameterizable::doReadParameter<std::pair<int,int> >(const std::string& name) const;
+template CSAPEX_EXPORT std::pair<double,double> Parameterizable::doReadParameter<std::pair<double,double> >(const std::string& name) const;
+template CSAPEX_EXPORT std::pair<std::string, bool> Parameterizable::doReadParameter<std::pair<std::string, bool> >(const std::string& name) const;
+template CSAPEX_EXPORT std::vector<double> Parameterizable::doReadParameter<std::vector<double> >(const std::string& name) const;
+template CSAPEX_EXPORT std::vector<int> Parameterizable::doReadParameter<std::vector<int> >(const std::string& name) const;
 
 
-template void Parameterizable::doSetParameter<bool>(const std::string& name, const bool& value);
-template void Parameterizable::doSetParameter<double>(const std::string& name, const double& value);
-template void Parameterizable::doSetParameter<int>(const std::string& name, const int& value);
-template void Parameterizable::doSetParameter<std::string>(const std::string& name, const std::string& value);
-template void Parameterizable::doSetParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
-template void Parameterizable::doSetParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
-template void Parameterizable::doSetParameter<std::pair<std::string, bool> >(const std::string& name, const std::pair<std::string, bool>& value);
-template void Parameterizable::doSetParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
-template void Parameterizable::doSetParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<bool>(const std::string& name, const bool& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<double>(const std::string& name, const double& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<int>(const std::string& name, const int& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<std::string>(const std::string& name, const std::string& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<std::pair<std::string, bool> >(const std::string& name, const std::pair<std::string, bool>& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
+template CSAPEX_EXPORT void Parameterizable::doSetParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
 
 
 

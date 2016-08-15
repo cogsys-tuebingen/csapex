@@ -3,6 +3,8 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#undef NDEBUG
+#include <assert.h>
 
 using namespace csapex;
 using namespace param;

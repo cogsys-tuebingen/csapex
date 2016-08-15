@@ -35,6 +35,7 @@ std::vector<UUID> InputTransition::getInputs() const
     for(const auto& pair : inputs_) {
         res.push_back(pair.second->getUUID());
     }
+    std::sort(res.begin(), res.end());
     return res;
 }
 

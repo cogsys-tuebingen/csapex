@@ -9,6 +9,7 @@
 #include <csapex/core/core_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/plugin/plugin_fwd.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <vector>
@@ -18,7 +19,7 @@
 namespace csapex
 {
 
-class NodeFactory
+class CSAPEX_EXPORT NodeFactory
 {
 public:
     typedef std::shared_ptr<NodeFactory> Ptr;

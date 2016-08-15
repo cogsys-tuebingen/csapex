@@ -22,7 +22,7 @@ namespace csapex {
 
 class Profiler;
 
-class NodeWorker : public ErrorState
+class CSAPEX_EXPORT NodeWorker : public ErrorState
 {
 public:
     enum ActivityType {

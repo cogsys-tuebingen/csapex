@@ -1,13 +1,16 @@
 #ifndef RATE_H
 #define RATE_H
 
+/// PROJECT
+#include <csapex/csapex_util_export.h>
+
 /// SYSTEM
 #include <chrono>
 
 namespace csapex
 {
 
-class Rate
+class CSAPEX_UTILS_EXPORT Rate
 {
 public:
     Rate(double frequency, bool immediate);

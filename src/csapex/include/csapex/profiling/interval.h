@@ -1,6 +1,9 @@
 #ifndef INTERVAL_H
 #define INTERVAL_H
 
+/// COMPONENT
+#include <csapex/csapex_profiling_export.h>
+
 /// SYSTEM
 #include <map>
 #include <chrono>
@@ -11,7 +14,7 @@ namespace csapex
 {
 class Timer;
 
-class Interval {
+class CSAPEX_PROFILING_EXPORT Interval {
     friend class Timer;
 
 public:

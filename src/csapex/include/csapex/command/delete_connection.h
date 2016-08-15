@@ -11,7 +11,7 @@ namespace csapex
 namespace command
 {
 
-class DeleteConnection : public Meta
+class CSAPEX_COMMAND_EXPORT DeleteConnection : public Meta
 {
 protected:
     DeleteConnection(const AUUID& graph_uuid, Connectable* a, Connectable* b);

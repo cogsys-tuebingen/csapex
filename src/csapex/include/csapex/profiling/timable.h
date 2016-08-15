@@ -1,6 +1,9 @@
 #ifndef TIMABLE_H
 #define TIMABLE_H
 
+/// COMPONENT
+#include <csapex/csapex_profiling_export.h>
+
 /// SYSTEM
 #include <memory>
 
@@ -9,7 +12,7 @@ namespace csapex
 
 class Timer;
 
-class Timable
+class CSAPEX_PROFILING_EXPORT Timable
 {
 public:
     Timable();

@@ -12,6 +12,7 @@
 /// COMPONENT
 #include <csapex/utility/assert.h>
 
+using namespace csapex;
 using namespace csapex::command;
 
 RenameConnector::RenameConnector(const AUUID& parent_uuid, const UUID &connector, const std::string& new_name)

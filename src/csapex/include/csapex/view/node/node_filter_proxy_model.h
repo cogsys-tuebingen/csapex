@@ -2,6 +2,7 @@
 #define NODE_COMPLETER_H
 
 /// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
 #include <csapex/model/tag.h>
 
 /// SYSTEM
@@ -11,7 +12,7 @@
 
 namespace csapex {
 
-class NodeFilterProxyModel : public QSortFilterProxyModel
+class CSAPEX_QT_EXPORT NodeFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 

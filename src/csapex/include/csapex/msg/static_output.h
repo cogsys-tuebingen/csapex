@@ -6,7 +6,7 @@
 
 namespace csapex
 {
-class StaticOutput : public Output
+class CSAPEX_EXPORT StaticOutput : public Output
 {
 public:
     StaticOutput(const UUID &uuid);

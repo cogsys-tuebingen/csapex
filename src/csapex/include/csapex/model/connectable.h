@@ -7,6 +7,7 @@
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/connector_type.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <mutex>
@@ -18,7 +19,7 @@
 namespace csapex
 {
 
-class Connectable : public ErrorState, public Unique, public std::enable_shared_from_this<Connectable>
+class CSAPEX_EXPORT Connectable : public ErrorState, public Unique, public std::enable_shared_from_this<Connectable>
 {
     friend class Graph;
     friend class Connection;

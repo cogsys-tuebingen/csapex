@@ -14,7 +14,7 @@
 namespace csapex
 {
 
-class Slot : public Input
+class CSAPEX_EXPORT Slot : public Input
 {
     friend class Event;
 

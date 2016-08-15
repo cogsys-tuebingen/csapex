@@ -11,6 +11,7 @@
 /// SYSTEM
 #include <sstream>
 
+using namespace csapex;
 using namespace csapex::command;
 
 AddFulcrum::AddFulcrum(const AUUID& parent_uuid, int connection_id, int sub_section_to_split, const Point &pos, int type)

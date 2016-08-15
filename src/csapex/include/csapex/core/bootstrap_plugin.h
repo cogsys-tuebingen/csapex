@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/plugin/plugin_fwd.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <class_loader/class_loader_register_macro.h>
@@ -12,7 +13,7 @@
 
 namespace csapex
 {
-class BootstrapPlugin
+class CSAPEX_EXPORT BootstrapPlugin
 {
 public:
     virtual ~BootstrapPlugin();

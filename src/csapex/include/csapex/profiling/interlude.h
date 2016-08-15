@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/profiling/interval.h>
+#include <csapex/csapex_profiling_export.h>
 
 /// SYSTEM
 #include <memory>
@@ -12,7 +13,7 @@ namespace csapex
 
 class Timer;
 
-class Interlude {
+class CSAPEX_PROFILING_EXPORT Interlude {
 public:
     typedef std::shared_ptr<Interlude> Ptr;
 

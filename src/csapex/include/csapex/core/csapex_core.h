@@ -6,6 +6,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.h>
@@ -17,7 +18,7 @@ class ClassLoader;
 namespace csapex
 {
 
-class CsApexCore
+class CSAPEX_EXPORT CsApexCore
 {
 public:
     CsApexCore(Settings& settings_, PluginLocatorPtr plugin_locator, ExceptionHandler &handler);

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include "parameter.h"
+#include <csapex/csapex_param_export.h>
 
 /// SYSTEM
 #include <map>
@@ -14,7 +15,7 @@ namespace csapex
 namespace param
 {
 
-class ParameterMap
+class CSAPEX_PARAM_EXPORT ParameterMap
 {
 public:
     ParameterMap();

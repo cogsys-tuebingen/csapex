@@ -259,3 +259,6 @@ void NoteBox::updateStylesheetColor(const NodeStatePtr& state)
 
     setStyleSheet(style);
 }
+
+/// MOC
+#include "../../../include/csapex/view/node/moc_note_box.cpp"

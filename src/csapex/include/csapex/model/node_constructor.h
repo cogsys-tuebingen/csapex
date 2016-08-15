@@ -7,6 +7,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <typeinfo>
@@ -16,7 +17,7 @@
 namespace csapex
 {
 
-class NodeConstructor
+class CSAPEX_EXPORT NodeConstructor
 {
     friend class command::AddNode;
     friend class NodeFactory;

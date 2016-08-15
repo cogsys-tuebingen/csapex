@@ -22,7 +22,6 @@
 #include <yaml-cpp/yaml.h>
 #include <QScrollBar>
 #include <sys/types.h>
-#include <pwd.h>
 
 using namespace csapex;
 

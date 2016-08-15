@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <vector>
@@ -14,7 +15,7 @@
 namespace csapex
 {
 
-class NodeRunner : public TaskGenerator
+class CSAPEX_EXPORT NodeRunner : public TaskGenerator
 {
 public:
     NodeRunner(NodeWorkerPtr worker);

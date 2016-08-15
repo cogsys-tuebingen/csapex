@@ -1,6 +1,9 @@
 #ifndef WIDGET_PICKER_H
 #define WIDGET_PICKER_H
 
+/// COMPONENT
+#include <csapex/view/csapex_qt_export.h>
+
 /// PROJECT
 #include <csapex/view/view_fwd.h>
 
@@ -9,7 +12,7 @@
 
 namespace csapex
 {
-class WidgetPicker : public QObject
+class CSAPEX_QT_EXPORT WidgetPicker : public QObject
 {
     Q_OBJECT
 

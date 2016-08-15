@@ -8,7 +8,7 @@
 namespace csapex
 {
 
-class TickableNode : public GeneratorNode
+class CSAPEX_EXPORT TickableNode : public GeneratorNode
 {
 public:
     bool doTick(NodeModifier &nm, Parameterizable &p);

@@ -4,20 +4,20 @@
 /// COMPONENT
 #include <csapex/model/token_data.h>
 #include <csapex/utility/type.h>
-//#include <csapex/utility/yaml_io.hpp> // TODO: get rid of this....
 #include <csapex/msg/token_traits.h>
+#include <csapex/csapex_export.h>
 
 namespace csapex
 {
 namespace connection_types
 {
 
-class Message : public TokenData
+class CSAPEX_EXPORT Message : public TokenData
 {
 public:
     typedef std::shared_ptr<Message> Ptr;
     typedef std::shared_ptr<Message const> ConstPtr;
-    typedef u_int64_t Stamp;
+    typedef std::uint64_t Stamp;
 
 protected:
     Message(const std::string& name, const std::string& frame_id, Stamp stamp_micro_seconds);

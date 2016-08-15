@@ -34,7 +34,7 @@ bool convert<csapex::connection_types::Message>::decode(const Node& node, csapex
         return false;
     }
     rhs.frame_id = node["frame_id"].as<std::string>();
-    rhs.stamp_micro_seconds = node["stamp"].as<u_int64_t>();
+    rhs.stamp_micro_seconds = node["stamp"].as<std::int64_t>();
     return true;
 }
 }

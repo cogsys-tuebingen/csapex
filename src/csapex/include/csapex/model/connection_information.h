@@ -1,14 +1,15 @@
 #ifndef CONNECTION_INFORMATION_H
 #define CONNECTION_INFORMATION_H
 
-/// SYSTEM
+/// COMPONENT
 #include <csapex/utility/uuid.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/csapex_export.h>
 
 namespace csapex
 {
 
-struct ConnectionInformation {
+struct CSAPEX_EXPORT ConnectionInformation {
     UUID from;
     UUID to;
     std::string from_label;

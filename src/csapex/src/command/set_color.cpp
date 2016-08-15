@@ -13,6 +13,7 @@
 /// COMPONENT
 #include <csapex/utility/assert.h>
 
+using namespace csapex;
 using namespace csapex::command;
 
 SetColor::SetColor(const AUUID& parent_uuid, const UUID &node, int r, int g, int b)
