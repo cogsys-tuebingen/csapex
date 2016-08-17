@@ -37,7 +37,7 @@ struct type<AnyMessage> {
 /// YAML
 namespace YAML {
 template<>
-struct convert<csapex::connection_types::AnyMessage> {
+struct CSAPEX_EXPORT convert<csapex::connection_types::AnyMessage> {
   static Node encode(const csapex::connection_types::AnyMessage& rhs);
   static bool decode(const Node& node, csapex::connection_types::AnyMessage& rhs);
 };

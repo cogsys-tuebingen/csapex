@@ -28,7 +28,7 @@ public:
     struct Anything {};
 
 private:
-    struct EntryInterface : public Message
+    struct CSAPEX_EXPORT EntryInterface : public Message
     {
         typedef std::shared_ptr< EntryInterface > Ptr;
 
@@ -323,7 +323,7 @@ private:
         }
     };
 
-    struct AnythingImplementation : public EntryInterface
+    struct CSAPEX_EXPORT AnythingImplementation : public EntryInterface
     {
         AnythingImplementation();
 
@@ -480,7 +480,7 @@ inline std::shared_ptr<GenericVectorMessage> makeEmpty<GenericVectorMessage>()
 /// YAML
 namespace YAML {
 template<>
-struct convert<csapex::connection_types::GenericVectorMessage> {
+struct CSAPEX_EXPORT convert<csapex::connection_types::GenericVectorMessage> {
     static Node encode(const csapex::connection_types::GenericVectorMessage& rhs);
     static bool decode(const Node& node, csapex::connection_types::GenericVectorMessage& rhs);
 };

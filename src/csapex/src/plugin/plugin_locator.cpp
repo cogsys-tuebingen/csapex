@@ -11,6 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <thread>
+#include <iostream>
 
 using namespace csapex;
 
@@ -29,12 +30,25 @@ PluginLocator::PluginLocator(Settings &settings)
     std::vector<std::string> tmp = ignored_persistent_->getValues();
     ignored_libraries_.insert(tmp.begin(), tmp.end());
 
-	std::string ld_lib;// = getenv("LD_LIBRARY_PATH");
+#if WIN32
+	std::string ld_lib = getenv("PATH");
+#else
+	std::string ld_lib = getenv("LD_LIBRARY_PATH");
+#endif
     boost::algorithm::split(library_paths_, ld_lib, boost::is_any_of(":"));
 }
 
 PluginLocator::~PluginLocator()
 {
+	shutdown();
+}
+
+void PluginLocator::shutdown()
+{
+	for (auto& pair : locators_) {
+		std::cerr << "deleting " << pair.second.size() << " callbacks" << std::endl;
+	}
+	locators_.clear();
 }
 
 std::vector<std::string> PluginLocator::enumerateLibraryPaths()

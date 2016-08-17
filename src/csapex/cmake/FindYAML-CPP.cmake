@@ -1,24 +1,24 @@
 # Locate yaml-cpp
 #
 # This module defines
-#  YAMLCPP_FOUND, if false, do not try to link to yaml-cpp
-#  YAMLCPP_LIBRARY, where to find yaml-cpp
-#  YAMLCPP_INCLUDE_DIR, where to find yaml.h
+#  YAML-CPP_FOUND, if false, do not try to link to yaml-cpp
+#  YAML-CPP_LIBRARY, where to find yaml-cpp
+#  YAML-CPP_INCLUDE_DIR, where to find yaml.h
 #
 # By default, the dynamic libraries of yaml-cpp will be found. To find the static ones instead,
-# you must set the YAMLCPP_STATIC_LIBRARY variable to TRUE before calling find_package(YamlCpp ...).
+# you must set the YAML-CPP_STATIC_LIBRARY variable to TRUE before calling find_package(YAML-CPP ...).
 #
-# If yaml-cpp is not installed in a standard path, you can use the YAMLCPP_DIR CMake variable
+# If yaml-cpp is not installed in a standard path, you can use the YAML-CPP_DIR CMake variable
 # to tell CMake where yaml-cpp is.
 
 # attempt to find static library first if this is set
-if(YAMLCPP_STATIC_LIBRARY)
-    set(YAMLCPP_STATIC libyaml-cpp.a)
+if(YAML-CPP_STATIC_LIBRARY)
+    set(YAML-CPP_STATIC libyaml-cpp.a)
 endif()
 
 
 # find the yaml-cpp include directory
-find_path(YAMLCPP_INCLUDE_DIR yaml-cpp/yaml.h
+find_path(YAML-CPP_INCLUDE_DIR yaml-cpp/yaml.h
           PATH_SUFFIXES include
           PATHS
           ~/Library/Frameworks/yaml-cpp/include/
@@ -29,11 +29,11 @@ find_path(YAMLCPP_INCLUDE_DIR yaml-cpp/yaml.h
           /opt/local/yaml-cpp/  # DarwinPorts
           /opt/csw/yaml-cpp/    # Blastwave
           /opt/yaml-cpp/
-          ${YAMLCPP_DIR}/include/)
+          ${YAML-CPP_DIR}/include/)
 
 # find the yaml-cpp library
-find_library(YAMLCPP_LIBRARY
-             NAMES ${YAMLCPP_STATIC} yaml-cpp
+find_library(YAML-CPP_LIBRARY
+             NAMES ${YAML-CPP_STATIC} yaml-cpp
              PATH_SUFFIXES lib64 lib
              PATHS ~/Library/Frameworks
                     /Library/Frameworks
@@ -43,9 +43,9 @@ find_library(YAMLCPP_LIBRARY
                     /opt/local
                     /opt/csw
                     /opt
-                    ${YAMLCPP_DIR}/lib)
+                    ${YAML-CPP_DIR}/lib)
 
-# handle the QUIETLY and REQUIRED arguments and set YAMLCPP_FOUND to TRUE if all listed variables are TRUE
+# handle the QUIETLY and REQUIRED arguments and set YAML-CPP_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(YAMLCPP DEFAULT_MSG YAMLCPP_INCLUDE_DIR YAMLCPP_LIBRARY)
-mark_as_advanced(YAMLCPP_INCLUDE_DIR YAMLCPP_LIBRARY)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(YAML-CPP DEFAULT_MSG YAML-CPP_INCLUDE_DIR YAML-CPP_LIBRARY)
+mark_as_advanced(YAML-CPP_INCLUDE_DIR YAML-CPP_LIBRARY)

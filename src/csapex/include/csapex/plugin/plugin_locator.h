@@ -22,6 +22,8 @@ public:
     PluginLocator(Settings& settings);
     ~PluginLocator();
 
+	void shutdown();
+
     template <typename PluginType>
     std::vector<std::string> enumerateXmlFiles() {
         std::vector<std::string> files;

@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
+#include <csapex/utility/export_plugin.h>
 
 /// SYSTEM
 #include <memory>

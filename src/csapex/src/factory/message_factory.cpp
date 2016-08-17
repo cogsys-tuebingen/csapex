@@ -15,6 +15,11 @@ MessageFactory::MessageFactory()
 {
 }
 
+void MessageFactory::shutdown()
+{
+	type_to_constructor.clear();
+}
+
 TokenData::Ptr MessageFactory::createMessage(const std::string& type)
 {
     MessageFactory& i = instance();

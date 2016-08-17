@@ -9,6 +9,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/profiling/timable.h>
 #include <csapex/csapex_export.h>
+#include <csapex/utility/export_plugin.h>
 
 namespace csapex {
 

@@ -274,11 +274,11 @@ ParameterBuilder ParameterFactory::declareRange(const std::string& name,
 
 
 template
-ParameterBuilder ParameterFactory::declareRange<double>(const std::string& name,
+CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<double>(const std::string& name,
                                                       const ParameterDescription& description,
                                                       double min, double max, double def, double step);
 template
-ParameterBuilder ParameterFactory::declareRange<int>(const std::string& name,
+CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<int>(const std::string& name,
                                                    const ParameterDescription& description,
                                                    int min, int max, int def, int step);
 
@@ -306,11 +306,11 @@ ParameterBuilder ParameterFactory::declareInterval(const std::string& name,
 
 
 template
-ParameterBuilder ParameterFactory::declareInterval<double>(const std::string& name,
+CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<double>(const std::string& name,
                                                       const ParameterDescription& description,
                                                       double min, double max, double def_min, double def_max, double step);
 template
-ParameterBuilder ParameterFactory::declareInterval<int>(const std::string& name,
+CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<int>(const std::string& name,
                                                    const ParameterDescription& description,
                                                    int min, int max, int def_min, int def_max, int step);
 

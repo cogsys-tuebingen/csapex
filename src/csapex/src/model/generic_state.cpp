@@ -295,11 +295,11 @@ T GenericState::readParameter(const std::string& name) const
     }
 }
 
-template bool GenericState::readParameter<bool>(const std::string& name) const;
-template double GenericState::readParameter<double>(const std::string& name) const;
-template int GenericState::readParameter<int>(const std::string& name) const;
-template std::string GenericState::readParameter<std::string>(const std::string& name) const;
-template std::pair<int,int> GenericState::readParameter<std::pair<int,int> >(const std::string& name) const;
-template std::pair<double,double> GenericState::readParameter<std::pair<double,double> >(const std::string& name) const;
-template std::vector<int> GenericState::readParameter<std::vector<int> >(const std::string& name) const;
-template std::vector<double> GenericState::readParameter<std::vector<double> >(const std::string& name) const;
+template CSAPEX_EXPORT bool GenericState::readParameter<bool>(const std::string& name) const;
+template CSAPEX_EXPORT double GenericState::readParameter<double>(const std::string& name) const;
+template CSAPEX_EXPORT int GenericState::readParameter<int>(const std::string& name) const;
+template CSAPEX_EXPORT std::string GenericState::readParameter<std::string>(const std::string& name) const;
+template CSAPEX_EXPORT std::pair<int,int> GenericState::readParameter<std::pair<int,int> >(const std::string& name) const;
+template CSAPEX_EXPORT std::pair<double,double> GenericState::readParameter<std::pair<double,double> >(const std::string& name) const;
+template CSAPEX_EXPORT std::vector<int> GenericState::readParameter<std::vector<int> >(const std::string& name) const;
+template CSAPEX_EXPORT std::vector<double> GenericState::readParameter<std::vector<double> >(const std::string& name) const;

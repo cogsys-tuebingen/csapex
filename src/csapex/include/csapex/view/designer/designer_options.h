@@ -15,7 +15,7 @@ class GraphView;
 
 class CSAPEX_QT_EXPORT DesignerOptions : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
     DesignerOptions(Settings& settings, Designer* designer);

@@ -23,7 +23,7 @@ public:
     virtual std::string type() const;
     virtual std::string what() const;
     virtual std::ostream& reason(std::ostream& ss) const;
-    virtual std::ostream& stackTrace(std::ostream& ss, std::size_t depth = max_depth) const;
+    virtual std::ostream& stackTrace(std::ostream& ss, std::size_t depth = 100) const;
 
     virtual Failure* clone() const;
 

@@ -29,6 +29,8 @@ void MessageProviderManager::setPluginLocator(PluginLocatorPtr locator)
 
 void MessageProviderManager::shutdown()
 {
+	classes.clear();
+	plugin_locator_.reset();
     delete manager_;
     manager_ = nullptr;
 }

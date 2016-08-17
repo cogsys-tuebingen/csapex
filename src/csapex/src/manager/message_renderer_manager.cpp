@@ -26,6 +26,7 @@ void MessageRendererManager::setPluginLocator(PluginLocatorPtr locator)
 void MessageRendererManager::shutdown()
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
+	plugin_locator_.reset();
     renderers.clear();
     manager_.reset();
 }

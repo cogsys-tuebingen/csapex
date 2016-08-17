@@ -16,6 +16,16 @@ MessageSerializer::MessageSerializer()
 {
 }
 
+MessageSerializer::~MessageSerializer()
+{
+
+}
+
+void MessageSerializer::shutdown()
+{
+	type_to_converter.clear();
+}
+
 TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
 {
     MessageSerializer& i = instance();

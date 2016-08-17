@@ -1,7 +1,7 @@
 # GENERATED #
 #############
 src/csapex/include/csapex/info.h
-src/csapex/include/csapex/csapex*export.h
+*export.h
 src/csapex/reports
 
 # TESTS #

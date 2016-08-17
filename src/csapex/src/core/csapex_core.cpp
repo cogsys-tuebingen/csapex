@@ -216,8 +216,8 @@ void CsApexCore::boot()
         class_loader::ClassLoader* loader = boot_plugin_loaders_.back();
 
         try {
+			apex_assert_hard(loader->isLibraryLoaded());
             std::vector<std::string> classes = loader->getAvailableClasses<BootstrapPlugin>();
-
             for(std::size_t c = 0; c < classes.size(); ++c){
                 auto boost_plugin = loader->createInstance<BootstrapPlugin>(classes[c]);
                 std::shared_ptr<BootstrapPlugin> plugin = shared_ptr_tools::to_std_shared(boost_plugin);

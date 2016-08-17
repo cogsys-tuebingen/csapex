@@ -39,6 +39,8 @@ public:
     static TokenData::Ptr readMessage(const std::string& path);
     static void writeMessage(const std::string& path, const TokenData &msg);
 
+	void shutdown();
+
 public:
     template <template <typename> class Wrapper, typename M>
     static void registerDirectMessage()

@@ -6,7 +6,7 @@
 #include <csapex/csapex_qt_export.h>
 
 #if WIN32
-#if defined(CSAPEX_QT_EXPORT_CMAKE)
+#if defined(csapex_qt_EXPORTS)
    #define CSAPEX_QT_EXPORT Q_DECL_EXPORT
 #else
    #define CSAPEX_QT_EXPORT Q_DECL_IMPORT

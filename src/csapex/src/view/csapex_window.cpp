@@ -88,8 +88,6 @@ CsApexWindow::~CsApexWindow()
     connections_.clear();
 
     delete ui;
-
-    MessageRendererManager::instance().shutdown();
 }
 
 

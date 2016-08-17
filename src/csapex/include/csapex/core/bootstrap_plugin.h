@@ -4,12 +4,11 @@
 /// PROJECT
 #include <csapex/plugin/plugin_fwd.h>
 #include <csapex/csapex_export.h>
-
-/// SYSTEM
-#include <class_loader/class_loader_register_macro.h>
+#include <csapex/utility/register_apex_plugin.h>
+#include <csapex/utility/export_plugin.h>
 
 #define CSAPEX_REGISTER_BOOT(name) \
-    CLASS_LOADER_REGISTER_CLASS(name, BootstrapPlugin)
+    CLASS_LOADER_REGISTER_CLASS_WITH_MESSAGE(name, BootstrapPlugin, "INSTALLING BOOTSTRAP PLUGIN")
 
 namespace csapex
 {

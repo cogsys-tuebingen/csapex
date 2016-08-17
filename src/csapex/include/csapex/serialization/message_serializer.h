@@ -69,6 +69,8 @@ public:
 
     static TokenData::Ptr readYaml(const YAML::Node& node);
 
+	void shutdown();
+
 public:
     template <template <typename> class Wrapper, typename M>
     static void registerDirectMessage()
@@ -125,6 +127,7 @@ private:
 
 private:
     MessageSerializer();
+	~MessageSerializer();
 
     static void registerMessage(std::string type, Converter converter);
 

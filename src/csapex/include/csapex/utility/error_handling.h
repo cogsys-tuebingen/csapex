@@ -7,6 +7,9 @@
 
 /// SYSTEM
 #include <csignal>
+#if WIN32
+#include <windows.h>
+#endif
 
 namespace csapex
 {
@@ -16,7 +19,11 @@ namespace error_handling
 CSAPEX_UTILS_EXPORT void init();
 
 CSAPEX_UTILS_EXPORT void siginthandler(int);
+#if WIN32
+CSAPEX_UTILS_EXPORT LONG WINAPI sigsegvhandler(EXCEPTION_POINTERS * ExceptionInfo);
+#else
 CSAPEX_UTILS_EXPORT void sigsegvhandler(int sig_num, siginfo_t * info, void * ucontext);
+#endif
 CSAPEX_UTILS_EXPORT void stop();
 CSAPEX_UTILS_EXPORT void kill();
 

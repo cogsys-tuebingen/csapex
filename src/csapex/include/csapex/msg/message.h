@@ -6,6 +6,7 @@
 #include <csapex/utility/type.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/csapex_export.h>
+#include <csapex/utility/export_plugin.h>
 
 namespace csapex
 {
@@ -38,7 +39,7 @@ template<class T>
 struct convert;
 
 template<>
-struct convert<csapex::connection_types::Message> {
+struct CSAPEX_EXPORT convert<csapex::connection_types::Message> {
   static Node encode(const csapex::connection_types::Message& rhs);
   static bool decode(const Node& node, csapex::connection_types::Message& rhs);
 };

@@ -30,6 +30,9 @@
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/serialization/serialization.h>
+#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/serialization/message_serializer.h>
+#include <csapex/factory/message_factory.h>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -42,6 +45,7 @@
 #include <boost/filesystem.hpp>
 #undef BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/version.hpp>
+//#include <console_bridge/console.h>
 
 #if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
 namespace bf3 = boost::filesystem;
@@ -102,6 +106,8 @@ int Main::run()
 int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping,
                const std::string& config, const std::string& path_to_bin, const std::vector<std::string>& additional_args)
 {
+	//console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
+
     if(!headless) {
         splash = new CsApexSplashScreen;
         splash->show();
@@ -274,6 +280,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         deleteRecoveryConfig();
 
         root->clear();
+		plugin_locator->shutdown();
+
+		MessageRendererManager::instance().shutdown();
 
         delete designer;
 
@@ -289,8 +298,11 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         res = run();
     }
 
+
     StreamInterceptor::instance().stop();
 
+	MessageFactory::instance().shutdown();
+	MessageSerializer::instance().shutdown();
     MessageProviderManager::instance().shutdown();
     Serialization::instance().shutdown();
 

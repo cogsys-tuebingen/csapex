@@ -15,27 +15,27 @@ namespace msg
 {
 
 /// COMMON
-bool hasMessage(Input* input);
-bool hasMessage(Output* output);
+CSAPEX_EXPORT bool hasMessage(Input* input);
+CSAPEX_EXPORT bool hasMessage(Output* output);
 
-bool isConnected(Input* input);
-bool isConnected(Output* output);
+CSAPEX_EXPORT bool isConnected(Input* input);
+CSAPEX_EXPORT bool isConnected(Output* output);
 
-bool isEnabled(Input* input);
-bool isEnabled(Output* output);
+CSAPEX_EXPORT bool isEnabled(Input* input);
+CSAPEX_EXPORT bool isEnabled(Output* output);
 
-void enable(Input* input);
-void disable(Input* input);
-void enable(Output* output);
-void disable(Output* output);
+CSAPEX_EXPORT void enable(Input* input);
+CSAPEX_EXPORT void disable(Input* input);
+CSAPEX_EXPORT void enable(Output* output);
+CSAPEX_EXPORT void disable(Output* output);
 
-UUID getUUID(Input* input);
-UUID getUUID(Output* input);
+CSAPEX_EXPORT UUID getUUID(Input* input);
+CSAPEX_EXPORT UUID getUUID(Output* input);
 
-void setLabel(Input* input, const std::string& label);
-void setLabel(Output* input, const std::string& label);
+CSAPEX_EXPORT void setLabel(Input* input, const std::string& label);
+CSAPEX_EXPORT void setLabel(Output* input, const std::string& label);
 
-void throwError(const TokenDataConstPtr& msg, const std::type_info& type);
+CSAPEX_EXPORT void throwError(const TokenDataConstPtr& msg, const std::type_info& type);
 
 
 /// CASTING
@@ -78,7 +78,7 @@ std::shared_ptr<R> message_cast(const std::shared_ptr<S>& msg)
 }
 
 /// INPUT
-TokenDataConstPtr getMessage(Input* input);
+CSAPEX_EXPORT TokenDataConstPtr getMessage(Input* input);
 
 template <typename R>
 std::shared_ptr<R const>
@@ -166,7 +166,7 @@ bool isValue(Input* input) {
 
 
 /// OUTPUT
-void publish(Output* output, TokenDataConstPtr message);
+CSAPEX_EXPORT void publish(Output* output, TokenDataConstPtr message);
 
 template <typename T,
           typename = typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type>

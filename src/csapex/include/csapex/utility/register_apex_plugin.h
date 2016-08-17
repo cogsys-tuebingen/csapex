@@ -5,6 +5,6 @@
 #include <class_loader/class_loader_register_macro.h>
 
 #define CSAPEX_REGISTER_CLASS(name, parent) \
-    CLASS_LOADER_REGISTER_CLASS(name,parent)
-
+    CLASS_LOADER_REGISTER_CLASS_WITH_MESSAGE(name,parent, "REGISTER PLUGIN")
+	
 #endif // REGISTER_PLUGIN_H

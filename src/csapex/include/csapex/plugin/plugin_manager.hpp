@@ -171,7 +171,11 @@ protected:
 
     std::shared_ptr<class_loader::ClassLoader> getLoader(const std::string& library_name)
     {
+#if WIN32
+		std::string library_path = library_name.substr(3) + ".dll";
+#else
         std::string library_path = library_name + ".so";
+#endif
 
         auto pos = loaders_.find(library_path);
         if(pos == loaders_.end()) {
