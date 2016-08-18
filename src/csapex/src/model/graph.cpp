@@ -306,6 +306,8 @@ void Graph::buildConnectedComponents()
             auto* front = Q.front();
             Q.pop_front();
 
+            checkNodeState(front);
+
             unmarked.erase(std::find(unmarked.begin(), unmarked.end(), front));
 
             // iterate all neighbors
@@ -331,6 +333,15 @@ void Graph::buildConnectedComponents()
     structureChanged(this);
 }
 
+void Graph::checkNodeState(NodeHandle *nh)
+{
+    // check if the node should be enabled
+    nh->getInputTransition()->checkIfEnabled();
+    nh->getOutputTransition()->checkIfEnabled();
+    if(NodeWorker* worker = nh->getNodeWorker()) {
+        worker->checkIO();
+    }
+}
 
 int Graph::getComponent(const UUID &node_uuid) const
 {

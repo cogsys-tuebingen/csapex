@@ -90,6 +90,7 @@ void Output::removeConnection(Connectable* other_side)
             i = connections_.erase(i);
 
             connection_removed_to(this);
+
             return;
 
         } else {

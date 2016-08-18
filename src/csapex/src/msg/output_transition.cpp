@@ -7,6 +7,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/input.h>
+#include <csapex/msg/no_message.h>
 
 using namespace csapex;
 
@@ -58,20 +59,28 @@ void OutputTransition::addOutput(OutputPtr output)
     outputs_[output->getUUID()] = output;
 
     // connect signals
-    auto ca = output->connection_added.connect([this](ConnectionPtr connection) {
-            addConnection(connection);
-});
+    auto ca = output->connection_added.connect([this](const ConnectionPtr& connection) {
+        addConnection(connection);
+        connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
+    });
     output_signal_connections_[output].push_back(ca);
 
-    auto cf = output->connection_faded.connect([this](ConnectionPtr connection) {
-            removeConnection(connection);
-});
+    auto cf = output->connection_faded.connect([this](const ConnectionPtr& connection) {
+        removeConnection(connection);
+    });
     output_signal_connections_[output].push_back(cf);
 
     auto cp = output->message_processed.connect([this]() {
         publishNextMessage();
     });
     output_signal_connections_[output].push_back(cp);
+
+    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
+        if(output->isEnabled()) {
+            publishNextMessage();
+        }
+    });
+    output_signal_connections_[output].push_back(cr);
 }
 
 void OutputTransition::removeOutput(OutputPtr output)
@@ -122,7 +131,7 @@ void OutputTransition::connectionAdded(Connection *connection)
     Transition::connectionAdded(connection);
 
     if(isEnabled()) {
-       updateConnections();
+        updateConnections();
     }
 }
 

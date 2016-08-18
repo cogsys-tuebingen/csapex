@@ -179,6 +179,8 @@ private:
     void inputActivation();
     void outputActivation();
 
+    void checkNodeState(NodeHandle* nh);
+
 public:
     csapex::slim_signal::Signal<void()> state_changed;
     csapex::slim_signal::Signal<void(Graph*)> structureChanged;
