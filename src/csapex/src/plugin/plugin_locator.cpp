@@ -45,9 +45,6 @@ PluginLocator::~PluginLocator()
 
 void PluginLocator::shutdown()
 {
-	for (auto& pair : locators_) {
-		std::cerr << "deleting " << pair.second.size() << " callbacks" << std::endl;
-	}
 	locators_.clear();
 }
 

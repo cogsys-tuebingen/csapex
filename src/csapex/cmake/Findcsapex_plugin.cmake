@@ -1,14 +1,14 @@
 macro(find_csapex_plugin name library  headerfile)
  	MESSAGE(STATUS "Searching for CS::APEX plugin " ${name})
 	
-	if(csapex_plugin_${name}_INCLUDE_DIRS)
+        if(csapex_plugin_${name}_INCLUDE_DIRS)
 		# Built in this project
 		set(${name}_FOUND True)
 			
-		set(${name}_INCLUDE_DIR ${csapex_plugin_${name}_INCLUDE_DIRS})
+                set(${name}_INCLUDE_DIRS ${csapex_plugin_${name}_INCLUDE_DIRS})
 		set(${name}_LIBRARIES ${csapex_plugin_${name}_LIBRARIES})
 	else()
-		FIND_PATH(${name}_INCLUDE_DIR NAMES ${name}/${headerfile} PATH_SUFFIXES ${SUFFIX_FOR_INCLUDE_PATH} PATHS
+                FIND_PATH(${name}_INCLUDE_DIRS NAMES ${name}/${headerfile} PATH_SUFFIXES ${SUFFIX_FOR_INCLUDE_PATH} PATHS
 		# Look in other places.
 		  ${CSAPEX_DIR_SEARCH}
 
@@ -18,12 +18,12 @@ macro(find_csapex_plugin name library  headerfile)
 		
 		
 		FIND_LIBRARY(${name}_LIBRARIES NAMES ${library} PATHS
-		  ${csapex_INCLUDE_DIR}/../lib
-		  ${csapex_INCLUDE_DIR}/../bin
+                  ${csapex_INCLUDE_DIRS}/../lib
+                  ${csapex_INCLUDE_DIRS}/../bin
 		  ${CSAPEX_DIR_SEARCH}
 		)
 		
-		if(${name}_INCLUDE_DIR AND ${name}_LIBRARIES)
+                if(${name}_INCLUDE_DIRS AND ${name}_LIBRARIES)
 			set(${name}_FOUND True)
 			set(${name}_LIBRARIES)
 		else()
@@ -38,7 +38,7 @@ macro(find_csapex_plugin name library  headerfile)
 	#	  ENDIF(${name}_FIND_QUIETLY)
 
 			include(FindPackageHandleStandardArgs)
-			find_package_handle_standard_args(${name} DEFAULT_MSG ${name}_LIBRARIES ${name}_INCLUDE_DIR)
+                        find_package_handle_standard_args(${name} DEFAULT_MSG ${name}_LIBRARIES ${name}_INCLUDE_DIRS)
 		endif()
 	endif()
 	

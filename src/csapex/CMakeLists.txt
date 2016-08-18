@@ -269,15 +269,14 @@ list(APPEND csapex_LIBRARIES csapex_profiling)
 
 
 file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS 
-	include/csapex/model/*.h*
-	include/core/model/*.h*
-	include/core/data/*.h*
-	include/core/factory/*.h*
-	include/core/msg/*.h*
-	include/core/signal/*.h*
-	include/core/serialization/*.h*
-	include/core/plugin/*.h*
-	include/core/scheduling/*.h*
+        include/csapex/model/*.h*
+        include/csapex/data/*.h*
+        include/csapex/factory/*.h*
+        include/csapex/msg/*.h*
+        include/csapex/signal/*.h*
+        include/csapex/serialization/*.h*
+        include/csapex/plugin/*.h*
+        include/csapex/scheduling/*.h*
 )
 
 add_library(csapex SHARED
