@@ -82,6 +82,7 @@ private:
             : EntryInterface(std::string("std::vector<") + type2nameWithoutNamespace(typeid(T)) + ">")
         {
             static_assert(!std::is_same<T, void*>::value, "void* not allowed");
+            value.reset(new std::vector<Payload>);
         }
 
         virtual EntryInterface::Ptr cloneEntry() const override
