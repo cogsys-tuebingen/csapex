@@ -76,13 +76,14 @@ void RangeParameter::doSetValueFrom(const Parameter &other)
         bool value_change = false;
         if(value_.type() == typeid(int)) {
             value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(range->value_);
+            step_ = range::limitStep(boost::any_cast<int>(range->min_), boost::any_cast<int>(range->max_), boost::any_cast<int>(range->step_));
         } else if(value_.type() == typeid(double)) {
             value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(range->value_);
+            step_ = range::limitStep(boost::any_cast<double>(range->min_), boost::any_cast<double>(range->max_), boost::any_cast<double>(range->step_));
         }
         value_ = range->value_;
         min_ = range->min_;
         max_ = range->max_;
-        step_ = range->step_;
         if(value_change) {
             triggerChange();
         }
@@ -102,7 +103,11 @@ void RangeParameter::doClone(const Parameter &other)
         def_min_ = range->def_min_;
         def_max_ = range->def_max_;
         def_value_ = range->def_value_;
-        step_ = range->step_;
+        if(value_.type() == typeid(int)) {
+            step_ = range::limitStep(boost::any_cast<int>(range->min_), boost::any_cast<int>(range->max_), boost::any_cast<int>(range->step_));
+        } else if(value_.type() == typeid(double)) {
+            step_ = range::limitStep(boost::any_cast<double>(range->min_), boost::any_cast<double>(range->max_), boost::any_cast<double>(range->step_));
+        }
     } else {
         throw std::runtime_error("bad clone, invalid types");
     }
@@ -139,7 +144,7 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
         if(n["max"].IsDefined())
             max_ = n["max"].as<int>();
         if(n["step"].IsDefined())
-            step_ = n["step"].as<int>();
+            step_ = range::limitStep(boost::any_cast<int>(min_), boost::any_cast<int>(max_), n["step"].as<int>());
 
     } else if(n["double"].IsDefined()) {
         value_ = n["double"].as<double>();
@@ -148,7 +153,7 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
         if(n["max"].IsDefined())
             max_ = n["max"].as<double>();
         if(n["step"].IsDefined())
-            step_ = n["step"].as<double>();
+            step_ = range::limitStep(boost::any_cast<double>(min_), boost::any_cast<double>(max_), n["step"].as<double>());
     }
 
     if(def_min_.empty())
@@ -159,4 +164,46 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
 
     if(def_value_.empty())
         def_value_ = value_;
+}
+
+
+
+namespace csapex
+{
+namespace param
+{
+namespace range
+{
+template <>
+double limitStep<double>(const double min, const double max, const double step) {
+    double range = max - min;
+    long long necessary_intervals = (range) / step + 1;
+
+    long max_intervals = std::numeric_limits<int>::max();
+
+    if(necessary_intervals >= max_intervals) {
+        std::cerr << "step size " << step << " is to small with range [" << min << ", " << max << "]" <<
+                     ", would take " << necessary_intervals << " intervals, which is larger than std::numeric_limits<int>::max() = " << max_intervals << "!" << std::endl;
+        double min_step_size = (range / max_intervals);
+        double res = step;
+        while(res < min_step_size) {
+            res *= 10.0;
+        }
+        std::cerr << "increasing step size to " << res << std::endl;
+        return limitStep(min, max, res);
+    }
+    return step;
+}
+
+template <>
+int limitStep(const int min, const int max, const int step) {
+    if(step == 0) {
+        std::cerr << "step cannot be 0! setting to 1"<< std::endl;
+        return 1;
+    }
+    return step;
+}
+
+}
+}
 }

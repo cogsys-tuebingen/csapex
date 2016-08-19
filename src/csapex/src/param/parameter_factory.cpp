@@ -13,6 +13,9 @@
 #include <csapex/param/string_list_parameter.h>
 #include <csapex/param/output_progress_parameter.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 using namespace param;
 
@@ -253,12 +256,15 @@ ParameterBuilder ParameterFactory::declareParameterStringSet(const std::string& 
     return declareParameterStringSet(name, ParameterDescription(), set, def);
 }
 
+
 template <typename T>
 ParameterBuilder ParameterFactory::declareRange(const std::string& name,
                                    const ParameterDescription& description,
                                    T min, T max, T def, T step)
 {
     BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
+
+    step = param::range::limitStep<T>(min, max, step);
 
     std::shared_ptr<RangeParameter> result(new RangeParameter(name, description));
     result->def_value_ = def;

@@ -18,6 +18,21 @@ int
 > RangeParameterTypes;
 
 
+namespace range
+{
+template <typename T>
+T limitStep(const T min, const T max, const T step)
+{
+    return step;
+}
+
+template <>
+double limitStep(const double min, const double max, const double step);
+template <>
+int limitStep(const int min, const int max, const int step);
+}
+
+
 class CSAPEX_PARAM_EXPORT RangeParameter : public Parameter
 {
     friend class ParameterFactory;
