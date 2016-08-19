@@ -287,7 +287,10 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 
 #endif
     if(profiler_->isEnabled()) {
-        profiler_->getTimer("drawForeground")->restart();
+        profiling_timer_ = profiler_->getTimer("drawForeground");
+        profiling_timer_->restart();
+    } else {
+        profiling_timer_.reset(new Timer("disabled"));
     }
 
     QGraphicsScene::drawForeground(painter, rect);
@@ -317,145 +320,156 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(Qt::black, 3));
 
-    // check if we have temporary connections
-    if(!temp_.empty()) {
-        for(const TempConnection& temp : temp_) {
-            ccs = CurrentConnectionState();
+    {
+        INTERLUDE("connections");
 
-            if(temp.is_connected) {
-                drawConnection(painter, temp.from, temp.to_c, -1);
+        // check if we have temporary connections
+        if(!temp_.empty()) {
+            for(const TempConnection& temp : temp_) {
+                ccs = CurrentConnectionState();
 
-            } else {
-                Port* fromp = getPort(temp.from);
+                if(temp.is_connected) {
+                    drawConnection(painter, temp.from, temp.to_c, -1);
 
-                if(fromp) {
-                    ccs.start_pos = UNDEFINED;
-                    ccs.end_pos = UNDEFINED;
+                } else {
+                    Port* fromp = getPort(temp.from);
+
+                    if(fromp) {
+                        ccs.start_pos = UNDEFINED;
+                        ccs.end_pos = UNDEFINED;
 
 
-                    if(temp.from->isInput()) {
-                        drawConnection(painter, temp.to_p, centerPoint(fromp), -1);
-                    } else {
-                        drawConnection(painter, centerPoint(fromp), temp.to_p, -1);
+                        if(temp.from->isInput()) {
+                            drawConnection(painter, temp.to_p, centerPoint(fromp), -1);
+                        } else {
+                            drawConnection(painter, centerPoint(fromp), temp.to_p, -1);
+                        }
+                    }
+                }
+            }
+        }
+
+        // draw all connections
+        auto intersects_any = [](const std::vector<QRectF>& rects, const QRectF& rect) {
+            for(auto r : rects) {
+                if(rect.intersects(r)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        for(ConnectionPtr connection : graph_facade_->getGraph()->getConnections()) {
+            auto pos = connection_bb_.find(connection.get());
+            if(pos == connection_bb_.end() || intersects_any(pos->second, rect)) {
+                drawConnection(painter, *connection);
+            }
+        }
+    }
+
+    // augment nodes
+
+    {
+        INTERLUDE("node augmentations");
+        for(QGraphicsItem* item : items()) {
+            MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
+            if(!proxy) {
+                continue;
+            }
+
+            NodeBox* box = proxy->getBox();
+
+            if(!box || !rect.intersects(box->geometry())) {
+                continue;
+            }
+
+            NodeHandle* node_handle = box->getNodeHandle();
+            if(!node_handle) {
+                continue;
+            }
+
+
+            // draw port information (in)
+            for(auto input : node_handle->getExternalInputs()) {
+                if(!node_handle->isParameterInput(input.get())) {
+                    Port* p = getPort(input.get());
+                    if(p) {
+                        drawPort(painter, box->isSelected(), p);
+                    }
+                }
+            }
+            // draw port information (out)
+            for(auto output : node_handle->getExternalOutputs()) {
+                if(!node_handle->isParameterOutput(output.get())) {
+                    Port* p = getPort(output.get());
+                    if(p) {
+                        drawPort(painter, box->isSelected(), p);
+                    }
+                }
+            }
+
+            // draw slots
+            {
+                int i = 0;
+                for(auto slot : node_handle->getExternalSlots()) {
+                    Port* p = getPort(slot.get());
+                    if(p) {
+                        drawPort(painter, box->isSelected(), p, i++);
+                    }
+                }
+            }
+            // draw events
+            {
+                int i = 0;
+                for(auto event : node_handle->getExternalEvents()) {
+                    Port* p = getPort(event.get());
+                    if(p) {
+                        drawPort(painter, box->isSelected(), p, i++);
                     }
                 }
             }
         }
     }
 
-    // draw all connections
-    auto intersects_any = [](const std::vector<QRectF>& rects, const QRectF& rect) {
-        for(auto r : rects) {
-            if(rect.intersects(r)) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    for(ConnectionPtr connection : graph_facade_->getGraph()->getConnections()) {
-        auto pos = connection_bb_.find(connection.get());
-        if(pos == connection_bb_.end() || intersects_any(pos->second, rect)) {
-            drawConnection(painter, *connection);
-        }
-    }
-
-    // augment nodes
-    for(QGraphicsItem* item : items()) {
-        MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
-        if(!proxy) {
-            continue;
-        }
-
-        NodeBox* box = proxy->getBox();
-
-        if(!box || !rect.intersects(box->geometry())) {
-            continue;
-        }
-
-        NodeHandle* node_handle = box->getNodeHandle();
-        if(!node_handle) {
-            continue;
-        }
-
-
-        // draw port information (in)
-        for(auto input : node_handle->getExternalInputs()) {
-            if(!node_handle->isParameterInput(input.get())) {
-                Port* p = getPort(input.get());
-                if(p) {
-                    drawPort(painter, box->isSelected(), p);
-                }
-            }
-        }
-        // draw port information (out)
-        for(auto output : node_handle->getExternalOutputs()) {
-            if(!node_handle->isParameterOutput(output.get())) {
-                Port* p = getPort(output.get());
-                if(p) {
-                    drawPort(painter, box->isSelected(), p);
-                }
-            }
-        }
-
-        // draw slots
-        {
-            int i = 0;
-            for(auto slot : node_handle->getExternalSlots()) {
-                Port* p = getPort(slot.get());
-                if(p) {
-                    drawPort(painter, box->isSelected(), p, i++);
-                }
-            }
-        }
-        // draw events
-        {
-            int i = 0;
-            for(auto event : node_handle->getExternalEvents()) {
-                Port* p = getPort(event.get());
-                if(p) {
-                    drawPort(painter, box->isSelected(), p, i++);
-                }
-            }
-        }
-    }
-
     // augment graph ports
-    NodeHandle* nh = graph_facade_->getNodeHandle();
-    if(nh) {
-        {
-            int i = 0;
-            for(const InputPtr& input : nh->getInternalInputs()) {
-                Port* p = getPort(input.get());
-                if(p) {
-                    drawPort(painter, false, p, i++);
+    {
+        INTERLUDE("port augmentations");
+        NodeHandle* nh = graph_facade_->getNodeHandle();
+        if(nh) {
+            {
+                int i = 0;
+                for(const InputPtr& input : nh->getInternalInputs()) {
+                    Port* p = getPort(input.get());
+                    if(p) {
+                        drawPort(painter, false, p, i++);
+                    }
                 }
             }
-        }
-        {
-            int i = 0;
-            for(const OutputPtr& output : nh->getInternalOutputs()) {
-                Port* p = getPort(output.get());
-                if(p) {
-                    drawPort(painter, false, p, i++);
+            {
+                int i = 0;
+                for(const OutputPtr& output : nh->getInternalOutputs()) {
+                    Port* p = getPort(output.get());
+                    if(p) {
+                        drawPort(painter, false, p, i++);
+                    }
                 }
             }
-        }
-        {
-            int i = 0;
-            for(const SlotPtr& slot : nh->getInternalSlots()) {
-                Port* p = getPort(slot.get());
-                if(p) {
-                    drawPort(painter, false, p, i++);
+            {
+                int i = 0;
+                for(const SlotPtr& slot : nh->getInternalSlots()) {
+                    Port* p = getPort(slot.get());
+                    if(p) {
+                        drawPort(painter, false, p, i++);
+                    }
                 }
             }
-        }
-        {
-            int i = 0;
-            for(const EventPtr& event : nh->getInternalEvents()) {
-                Port* p = getPort(event.get());
-                if(p) {
-                    drawPort(painter, false, p, i++);
+            {
+                int i = 0;
+                for(const EventPtr& event : nh->getInternalEvents()) {
+                    Port* p = getPort(event.get());
+                    if(p) {
+                        drawPort(painter, false, p, i++);
+                    }
                 }
             }
         }
@@ -464,6 +478,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     if(draw_schema_){
         painter->setOpacity(0.35);
         painter->drawImage(sceneRect().topLeft(), schematics);
+    }
+
+    if(debug_) {
+        // draw outline
+        painter->save();
+        painter->setPen(Qt::red);
+        painter->drawRect(sceneRect());
+        painter->restore();
     }
 
     schema_dirty_ = false;
@@ -477,7 +499,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 #endif
 
     if(profiler_->isEnabled()) {
-        profiler_->getTimer("drawForeground")->finish();
+        profiling_timer_->finish();
     }
 }
 
@@ -490,8 +512,8 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
         if(highlight_connection_id_ >= 0) {
             QPoint pos = e->scenePos().toPoint();
             view_core_.execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
-                                                                      highlight_connection_id_, highlight_connection_sub_id_,
-                                                                      Point(pos.x(), pos.y()), Fulcrum::FULCRUM_LINEAR)));
+                                                                    highlight_connection_id_, highlight_connection_sub_id_,
+                                                                    Point(pos.x(), pos.y()), Fulcrum::FULCRUM_LINEAR)));
             e->accept();
 
             // allow moving the fulcrum directly
@@ -717,8 +739,8 @@ void DesignerScene::fulcrumHandleMoved(void * fulcrum, bool dropped, int /*which
 
     if(dropped) {
         view_core_.execute(Command::Ptr(new command::ModifyFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(),
-                                                                     fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
-                                                                     f->type(), f->handleIn(), f->handleOut())));
+                                                                   fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
+                                                                   f->type(), f->handleIn(), f->handleOut())));
         fulcrum_last_type_[f] = f->type();
         fulcrum_last_hin_[f] = f->handleIn();
         fulcrum_last_hout_[f] = f->handleOut();
@@ -1144,6 +1166,7 @@ Port* DesignerScene::getPort(Connectable *c)
 
 void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
 {
+    INTERLUDE("drawPort");
     auto* item = itemAt(centerPoint(p), QTransform());
     if(!item || item->type() != QGraphicsProxyWidget::Type) {
         return;
@@ -1168,7 +1191,9 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
 
     bool is_message = (dynamic_cast<Slot*>(c.get()) == nullptr && dynamic_cast<Event*>(c.get()) == nullptr);
 
-    if(!p->isMinimizedSize()) {
+    if(!p->isMinimizedSize())  {
+        INTERLUDE("overlays");
+
         int font_size = debug_ ? 10 : 8;
         int lines = 1;
 
@@ -1240,6 +1265,7 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
             }
         }
 
+        INTERLUDE("overlay drawing");
         // drawing
         QColor box_color = view_core_.getStyle().balloonColor();
         QColor text_color = view_core_.getStyle().lineColor();

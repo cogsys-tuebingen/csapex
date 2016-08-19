@@ -22,6 +22,8 @@
 namespace csapex
 {
 
+class Timer;
+
 class CSAPEX_QT_EXPORT DesignerScene : public QGraphicsScene, public Profilable
 {
     Q_OBJECT
@@ -198,6 +200,8 @@ private:
     bool debug_;
 
     std::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
+
+    std::shared_ptr<Timer> profiling_timer_;
 };
 
 }
