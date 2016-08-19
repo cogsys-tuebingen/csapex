@@ -101,6 +101,11 @@ void InputTransition::connectionAdded(Connection *connection)
 {
     Transition::connectionAdded(connection);
 
+    bool needs_message = isOneConnection(Connection::State::UNREAD);
+    if(needs_message) {
+        connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
+    }
+
     updateConnections();
 }
 

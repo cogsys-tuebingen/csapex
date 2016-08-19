@@ -280,9 +280,9 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
         deleteRecoveryConfig();
 
         root->clear();
-		plugin_locator->shutdown();
+        plugin_locator->shutdown();
 
-		MessageRendererManager::instance().shutdown();
+        MessageRendererManager::instance().shutdown();
 
         delete designer;
 
@@ -297,6 +297,8 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
         res = run();
     }
+
+    thread_pool.clear();
 
 
     StreamInterceptor::instance().stop();

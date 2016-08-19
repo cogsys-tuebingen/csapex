@@ -97,13 +97,13 @@ void Graph::clear()
 
     auto connections = connections_;
     for(ConnectionPtr c : connections) {
-        deleteConnection(c);
+        deleteConnection(c, true);
     }
     apex_assert_hard(connections_.empty());
 
     auto nodes = nodes_;
     for(NodeHandlePtr node : nodes) {
-        deleteNode(node->getUUID());
+        deleteNode(node->getUUID(), true);
     }
     apex_assert_hard(nodes_.empty());
 
@@ -131,7 +131,7 @@ std::vector<ConnectionPtr> Graph::getConnections()
     return connections_;
 }
 
-void Graph::deleteNode(const UUID& uuid)
+void Graph::deleteNode(const UUID& uuid, bool quiet)
 {
     NodeHandle* node_handle = findNodeHandle(uuid);
     node_handle->stop();
@@ -162,8 +162,11 @@ void Graph::deleteNode(const UUID& uuid)
                 child->clear();
             }
         }
-        nodeRemoved(removed);
-        buildConnectedComponents();
+
+        if(!quiet) {
+            nodeRemoved(removed);
+            buildConnectedComponents();
+        }
     }
 }
 
@@ -219,7 +222,7 @@ void Graph::triggerConnectionsAdded()
     }
 }
 
-void Graph::deleteConnection(ConnectionPtr connection)
+void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
 {
     apex_assert_hard(connection);
 
@@ -260,10 +263,12 @@ void Graph::deleteConnection(ConnectionPtr connection)
             }
             connections_.erase(c);
 
-            buildConnectedComponents();
+            if(!quiet) {
+                buildConnectedComponents();
 
-            connectionDeleted(connection.get());
-            state_changed();
+                connectionDeleted(connection.get());
+                state_changed();
+            }
 
             for(const auto& c : connections_) {
                 apex_assert_hard(c);
@@ -359,7 +364,7 @@ Node* Graph::findNode(const UUID& uuid) const
     if(node) {
         return node;
     }
-    throw NodeNotFoundException(uuid.getFullName());
+     throw NodeNotFoundException(uuid.getFullName());
 }
 
 

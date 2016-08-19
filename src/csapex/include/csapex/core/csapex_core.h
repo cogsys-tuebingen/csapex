@@ -81,6 +81,8 @@ private:
     csapex::PluginLocatorPtr plugin_locator_;
     ExceptionHandler &exception_handler_;
 
+    NodeFactoryPtr node_factory_;
+
     ThreadPoolPtr thread_pool_;
 
     std::shared_ptr<UUIDProvider> root_uuid_provider_;
@@ -88,9 +90,6 @@ private:
     NodeHandlePtr root_handle_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
-
-
-    NodeFactoryPtr node_factory_;
 
     std::vector<slim_signal::ScopedConnection> signal_connections_;
 

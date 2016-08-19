@@ -81,8 +81,6 @@ void StaticOutput::setMultipart(bool multipart, bool last_part)
 
 bool StaticOutput::commitMessages(bool is_activated)
 {
-    apex_assert_hard(canSendMessages());
-
     activate();
 
     bool send_active = is_activated;

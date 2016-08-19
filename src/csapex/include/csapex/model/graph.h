@@ -101,10 +101,10 @@ public:
     int countNodes();
 
     void addNode(NodeHandlePtr node);
-    void deleteNode(const UUID &uuid);
+    void deleteNode(const UUID &uuid, bool quiet = false);
 
     bool addConnection(ConnectionPtr connection, bool quiet = false);
-    void deleteConnection(ConnectionPtr connection);
+    void deleteConnection(ConnectionPtr connection, bool quiet = false);
 
     void triggerConnectionsAdded();
 

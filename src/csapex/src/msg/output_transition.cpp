@@ -60,8 +60,13 @@ void OutputTransition::addOutput(OutputPtr output)
 
     // connect signals
     auto ca = output->connection_added.connect([this](const ConnectionPtr& connection) {
+        bool needs_message = !areOutputsIdle();
+
         addConnection(connection);
-        connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
+
+        if(needs_message) {
+            connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
+        }
     });
     output_signal_connections_[output].push_back(ca);
 
@@ -238,8 +243,6 @@ void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(outputs_.empty() || !areOutputsIdle());
-
-    apex_assert_hard(areAllConnections(Connection::State::DONE));
 
     for(auto pair : outputs_) {
         OutputPtr out = pair.second;

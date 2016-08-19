@@ -37,8 +37,8 @@ using namespace csapex;
 CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
                        ExceptionHandler& handler, NodeFactoryPtr node_factory, std::shared_ptr<PluginManager<CorePlugin>> plugin_manager)
     : settings_(settings), plugin_locator_(plugin_locator), exception_handler_(handler),
-      root_uuid_provider_(std::make_shared<UUIDProvider>()),
       node_factory_(node_factory),
+      root_uuid_provider_(std::make_shared<UUIDProvider>()),
       core_plugin_manager(plugin_manager),
       init_(false), load_needs_reset_(false)
 {
