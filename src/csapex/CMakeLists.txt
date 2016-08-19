@@ -450,6 +450,13 @@ list(APPEND csapex_LIBRARIES csapex_command)
 
 file(GLOB_RECURSE csapex_qt_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex/view/*.h*)
 
+if(NOT WIN32)
+    # for visual studio, we want the headers in the library
+    # however, with ubuntu that doesn't compile due to auto moc'ing
+    add_custom_target(csapex_qt_headers SOURCES ${csapex_qt_HEADERS})
+    set(csapex_qt_HEADERS)
+endif()
+
 # Library for the app itself
 add_library(csapex_qt SHARED
 
@@ -530,7 +537,7 @@ add_library(csapex_qt SHARED
     src/view/widgets/movable_graphics_proxy_widget.cpp
     src/view/widgets/message_preview_widget.cpp
 
-	${csapex_qt_HEADERS}
+    ${csapex_qt_HEADERS}
 
     ${QT_RESOURCES}
 
@@ -557,7 +564,8 @@ target_link_libraries(csapex_qt
     ${class_loader_LIBRARIES}
 )
 list(APPEND csapex_LIBRARIES csapex_qt)
-#set_target_properties(csapex_qt PROPERTIES AUTOMOC TRUE)
+
+set_target_properties(csapex_qt PROPERTIES AUTOMOC TRUE)
 
 
 #
@@ -574,6 +582,7 @@ else()
 		src/csapex.cpp)
 endif()
 
+set_target_properties(csapex_node PROPERTIES AUTOMOC TRUE)
 target_link_libraries(csapex_node
     csapex_qt
     ${Boost_LIBRARIES})
