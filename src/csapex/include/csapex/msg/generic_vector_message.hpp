@@ -136,7 +136,7 @@ private:
 
         TokenData::Ptr nestedType() const override
         {
-            return makeTypeSwitch(Payload());
+            return makeTypeSwitch(Tag<Payload>());
         }
 
         virtual void addNestedValue(const TokenData::ConstPtr &msg) override
@@ -269,16 +269,17 @@ private:
         }
 
 
-
+        template <class Type>
+        struct Tag {};
 
 
         template <typename MsgType>
-        static TokenData::Ptr makeTypeSwitch(const std::shared_ptr<MsgType>& ptr)
+        static TokenData::Ptr makeTypeSwitch(const Tag<std::shared_ptr<MsgType>>& ptr)
         {
             return makeTypeImpl<MsgType>();
         }
         template <typename MsgType>
-        static TokenData::Ptr makeTypeSwitch(const MsgType& type)
+        static TokenData::Ptr makeTypeSwitch(const Tag<MsgType>& type)
         {
             return makeTypeImpl<MsgType>();
         }
