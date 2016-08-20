@@ -656,15 +656,7 @@ void NodeWorker::tryProcess()
     if(isEnabled() && canProcess()) {
         apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
-        auto it = node_handle_->getInputTransition();
-
-        int highest_deviant_seq = it->findHighestDeviantSequenceNumber();
-
-//        if(highest_deviant_seq >= 0) {
-//            it->notifyOlderConnections(highest_deviant_seq);
-//        } else {
-            startProcessingMessages();
-//        }
+        startProcessingMessages();
     }
 }
 
