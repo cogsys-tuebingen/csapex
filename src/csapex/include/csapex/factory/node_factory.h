@@ -16,6 +16,8 @@
 #include <csapex/utility/slim_signal.h>
 #include <unordered_map>
 
+class TiXmlElement;
+
 namespace csapex
 {
 
@@ -50,6 +52,7 @@ public:
 public:
     csapex::slim_signal::Signal<void(const std::string&)> loaded;
     csapex::slim_signal::Signal<void()> new_node_type;
+    csapex::slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
 
 protected:
     void ensureLoaded();

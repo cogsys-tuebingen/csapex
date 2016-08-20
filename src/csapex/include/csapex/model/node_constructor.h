@@ -41,6 +41,7 @@ public:
 
     std::string getType() const;
 
+    NodeConstructor& setTags(const std::string& tags);
     NodeConstructor& setTags(const std::vector<std::string> &tags);
     NodeConstructor& setTags(const std::vector<TagPtr> &tags);
     std::vector<TagPtr> getTags() const;

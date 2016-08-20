@@ -75,12 +75,11 @@ protected:
             std::cerr << "[Plugin] Cannot load the file " << xml_file << std::endl;
             return false;
         }
-        if (config->ValueStr() != "library") {
-            std::cerr << "[Plugin] Manifest root is not <library>" << std::endl;
-            return false;
-        }
-        
+
         TiXmlElement* library = config;
+        if (library->ValueStr() != "library") {
+            library = library->NextSiblingElement("library");
+        }        
         while (library != nullptr) {
             
             std::string library_name = library->Attribute("path");
@@ -97,6 +96,8 @@ protected:
             
             library = library->NextSiblingElement( "library" );
         }
+
+        manifest_loaded(xml_file, config);
         
         return true;
     }
@@ -227,6 +228,7 @@ protected:
 
 protected:
     csapex::slim_signal::Signal<void(const std::string&)> loaded;
+    csapex::slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
     
 protected:
     bool plugins_loaded_;
@@ -284,6 +286,7 @@ public:
             instance = new Parent(full_name);
         }
         instance->loaded.connect(loaded);
+        instance->manifest_loaded.connect(manifest_loaded);
     }
     
     virtual ~PluginManager()
@@ -337,6 +340,7 @@ public:
 
 public:
     csapex::slim_signal::Signal<void(const std::string&)> loaded;
+    csapex::slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
     
 protected:
     static int i_count;

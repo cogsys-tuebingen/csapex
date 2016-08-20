@@ -13,6 +13,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 
 using namespace csapex;
 
@@ -34,6 +35,23 @@ NodeConstructor::~NodeConstructor()
 std::string NodeConstructor::getType() const
 {
     return type_;
+}
+
+NodeConstructor& NodeConstructor::setTags(const std::string &taglist)
+{
+    // convert tag list into vector
+    std::vector<std::string> tokens;
+
+    boost::algorithm::split(tokens, taglist, boost::is_any_of(",;"));
+
+    for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+        std::string str = boost::algorithm::trim_copy(*it);
+        if(!str.empty()) {
+            tags_.push_back(Tag::get(str));
+        }
+    }
+
+    return *this;
 }
 
 NodeConstructor& NodeConstructor::setTags(const std::vector<std::string> &strings)

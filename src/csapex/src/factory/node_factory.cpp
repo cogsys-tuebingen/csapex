@@ -12,10 +12,6 @@
 #include <csapex/model/graph.h>
 #include <csapex/nodes/note.h>
 
-/// SYSTEM
-
-#include <boost/algorithm/string.hpp>
-
 using namespace csapex;
 
 
@@ -43,6 +39,8 @@ NodeFactory::NodeFactory(csapex::PluginLocator* locator)
     note->setIcon(":/note.png");
     note->setDescription("A sticky note to keep information.");
     registerNodeType(note, true);
+
+    node_manager_->manifest_loaded.connect(manifest_loaded);
 }
 
 namespace {
@@ -80,24 +78,10 @@ void NodeFactory::rebuildPrototypes()
     for(const auto& p : node_manager_->getConstructors()) {
         const PluginConstructor<Node>& plugin_constructor = p.second;
 
-        // convert tag list into vector
-        std::vector<std::string> tokens;
-        std::vector<Tag::Ptr> tags;
-
-        std::string taglist = p.second.getTags();
-        boost::algorithm::split(tokens, taglist, boost::is_any_of(",;"));
-
-        for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-            std::string str = boost::algorithm::trim_copy(*it);
-            if(!str.empty()) {
-                tags.push_back(Tag::get(str));
-            }
-        }
-
         // make the constructor
         csapex::NodeConstructor::Ptr constructor = std::make_shared<NodeConstructor>(p.second.getType(), plugin_constructor);
 
-        constructor->setDescription(p.second.getDescription()).setIcon(p.second.getIcon()).setTags(tags);
+        constructor->setDescription(p.second.getDescription()).setIcon(p.second.getIcon()).setTags(p.second.getTags());
 
         registerNodeType(constructor, true);
     }
