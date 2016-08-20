@@ -101,7 +101,7 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
     }
 
     for(const QString& s : key_words) {
-        if(s.length() > 0) {
+        if(s.length() > 0 && s != ".") {
             descr.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
             name.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
             tag.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
