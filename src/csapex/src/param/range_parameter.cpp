@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <iostream>
 
 using namespace csapex;
 using namespace param;
