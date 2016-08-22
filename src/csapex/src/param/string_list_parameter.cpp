@@ -89,12 +89,6 @@ void StringListParameter::doSerialize(YAML::Node& n) const
 
 void StringListParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
-
     if(n["list"].IsDefined()) {
         list_ = n["list"].as<std::vector<std::string> >();
     }

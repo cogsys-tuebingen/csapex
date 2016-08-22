@@ -12,6 +12,7 @@
 #include <csapex/param/value_parameter.h>
 #include <csapex/param/string_list_parameter.h>
 #include <csapex/param/output_progress_parameter.h>
+#include <csapex/param/output_text_parameter.h>
 
 /// SYSTEM
 #include <iostream>
@@ -45,6 +46,8 @@ ParameterBuilder ParameterFactory::makeEmpty(const std::string &type)
         return std::shared_ptr<Parameter>(new AngleParameter);
     } else if(t == "progress") {
         return std::shared_ptr<Parameter>(new OutputProgressParameter);
+    } else if(t == "outtext") {
+        return std::shared_ptr<Parameter>(new OutputTextParameter);
     } else {
         throw std::runtime_error(std::string("illegal parameter type: ") + t);
     }
@@ -324,5 +327,11 @@ CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<int>(cons
 ParameterBuilder ParameterFactory::declareOutputProgress(const std::string &name, const ParameterDescription &description)
 {
     std::shared_ptr<OutputProgressParameter> result(new OutputProgressParameter(name, description));
+    return ParameterBuilder(std::move(result));
+}
+
+ParameterBuilder ParameterFactory::declareOutputText(const std::string &name, const ParameterDescription &description)
+{
+    std::shared_ptr<OutputTextParameter> result(new OutputTextParameter(name, description));
     return ParameterBuilder(std::move(result));
 }

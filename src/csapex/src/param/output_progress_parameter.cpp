@@ -50,11 +50,6 @@ void OutputProgressParameter::doSerialize(YAML::Node& /*n*/) const
 }
 void OutputProgressParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
 }
 
 void OutputProgressParameter::doSetValueFrom(const Parameter& other)

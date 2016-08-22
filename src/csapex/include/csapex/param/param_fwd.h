@@ -28,6 +28,7 @@ FWD(AngleParameter);
 FWD(StringListParameter);
 
 FWD(OutputProgressParameter);
+FWD(OutputTextParameter);
 
 }
 }

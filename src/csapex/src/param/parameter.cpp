@@ -168,6 +168,11 @@ void Parameter::serialize(YAML::Node &n) const
 
 void Parameter::deserialize(const YAML::Node &n)
 {
+    if(!n["name"].IsDefined()) {
+        return;
+    }
+    name_ = n["name"].as<std::string>();
+
     if(n["interactive"].IsDefined()) {
         interactive_ = n["interactive"].as<bool>();
     }

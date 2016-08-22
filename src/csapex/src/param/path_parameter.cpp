@@ -82,11 +82,6 @@ void PathParameter::doSerialize(YAML::Node& n) const
 
 void PathParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
     value_ = n["value"].as<std::string>();
 }
 

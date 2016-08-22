@@ -212,6 +212,7 @@ add_library(csapex_param SHARED
     src/param/null_parameter.cpp
     src/param/string_list_parameter.cpp
 
+    src/param/output_text_parameter.cpp
     src/param/output_progress_parameter.cpp
 
     src/param/parameter_factory.cpp
@@ -507,6 +508,7 @@ add_library(csapex_qt SHARED
     #src/view/param/string_list_param_adapter.cpp
 
     src/view/param/output_progress_param_adapter.cpp
+    src/view/param/output_text_param_adapter.cpp
 
     src/view/utility/node_list_generator.cpp
     src/view/utility/context_menu_handler.cpp

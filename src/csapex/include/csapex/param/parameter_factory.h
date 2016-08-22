@@ -355,6 +355,14 @@ public:
      * @return
      */
     static ParameterBuilder declareOutputProgress(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
+
+    /**
+     * @brief declareOutputText
+     * @param name
+     * @param description
+     * @return
+     */
+    static ParameterBuilder declareOutputText(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
 };
 
 }

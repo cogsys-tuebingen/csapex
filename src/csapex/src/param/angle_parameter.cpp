@@ -96,12 +96,6 @@ void AngleParameter::doSerialize(YAML::Node& n) const
 
 void AngleParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
-
     if(!n["value"].IsDefined()) {
         return;
     }

@@ -206,11 +206,6 @@ void BitSetParameter::doSerialize(YAML::Node& n) const
 
 void BitSetParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
     if(n["int"].IsDefined()) {
         value_ = n["int"].as<int>();
     }

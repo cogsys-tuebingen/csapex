@@ -240,12 +240,6 @@ T __read(const YAML::Node& n) {
 
 void SetParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
-
     if(n["txt"].IsDefined()) {
         txt_ = n["txt"].as<std::string>();
     } else {

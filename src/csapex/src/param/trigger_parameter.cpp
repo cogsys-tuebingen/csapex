@@ -61,12 +61,6 @@ void TriggerParameter::doSerialize(YAML::Node&) const
 
 void TriggerParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
-
 }
 
 void TriggerParameter::trigger()

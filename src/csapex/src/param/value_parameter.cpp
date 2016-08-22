@@ -145,12 +145,6 @@ T __read(const YAML::Node& n) {
 
 void ValueParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
-
     if(n["int"].IsDefined()) {
         value_ = __read<int>(n["int"]);
 

@@ -37,6 +37,7 @@
 #include <csapex/view/param/set_param_adapter.h>
 #include <csapex/view/param/bitset_param_adapter.h>
 #include <csapex/view/param/path_param_adapter.h>
+#include <csapex/view/param/output_text_param_adapter.h>
 #include <csapex/view/param/output_progress_param_adapter.h>
 
 
@@ -263,6 +264,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         install<BitSetParameter, BitSetParameterAdapter>::execute(mapping_);
         install<AngleParameter, AngleParameterAdapter>::execute(mapping_);
 
+        install<OutputTextParameter, OutputTextParameterAdapter>::execute(mapping_);
         install<OutputProgressParameter, OutputProgressParameterAdapter>::execute(mapping_);
     }
 

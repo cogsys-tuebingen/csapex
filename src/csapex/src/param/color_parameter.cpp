@@ -106,12 +106,6 @@ void ColorParameter::doSerialize(YAML::Node& n) const
 
 void ColorParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["name"].IsDefined()) {
-        return;
-    }
-
-    name_ = n["name"].as<std::string>();
-
     if(n["values"].IsDefined()) {
         colors_ = n["values"].as< std::vector<int> >();
     }
