@@ -52,7 +52,7 @@ ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::
 
     layout_->addLayout(buttons_layout);
 
-    profiler_->getProfile(profile_).getTimer()->finished.connect([this](Interval::Ptr) { update(); });
+    connections_.emplace_back(profiler_->getProfile(profile_).getTimer()->finished.connect([this](Interval::Ptr) { update(); }));
 }
 
 ProfilingWidget::~ProfilingWidget()
