@@ -214,6 +214,13 @@ void NodeWorker::setProcessingEnabled(bool e)
 {
     node_handle_->getNodeState()->setEnabled(e);
 
+    for(Slot* slot : node_handle_->getSlots()) {
+        slot->setEnabled(e);
+    }
+    for(Event* event : node_handle_->getEvents()) {
+        event->setEnabled(e);
+    }
+
     if(!e) {
         setError(false);
     } else {

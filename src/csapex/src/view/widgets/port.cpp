@@ -11,6 +11,7 @@
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/view/designer/designer_scene.h>
+#include <csapex/signal/slot.h>
 
 /// SYSTEM
 #include <sstream>
@@ -198,8 +199,16 @@ bool Port::isHovered() const
     return hovered_;
 }
 
-void Port::setEnabledFlag(bool enabled)
+void Port::setEnabledFlag(bool processing_enabled)
 {
+    bool enabled = processing_enabled;
+    if(ConnectablePtr adaptee = adaptee_.lock()) {
+        if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(adaptee)) {
+            if(slot->isActive()) {
+                enabled = true;
+            }
+        }
+    }
     setPortProperty("enabled", enabled);
     setPortProperty("disabled", !enabled);
     setEnabled(true);

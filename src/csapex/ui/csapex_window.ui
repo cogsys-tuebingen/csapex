@@ -498,7 +498,7 @@ p, li { white-space: pre-wrap; }
           <normaloff>:/help.png</normaloff>:/help.png</iconset>
         </attribute>
         <attribute name="label">
-         <string>Tutorials</string>
+         <string>Demo Configurations</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <property name="leftMargin">
@@ -517,7 +517,7 @@ p, li { white-space: pre-wrap; }
           <widget class="QTreeWidget" name="tutorials_tree">
            <column>
             <property name="text">
-             <string>Tutorials</string>
+             <string>Configurations</string>
             </property>
            </column>
           </widget>
