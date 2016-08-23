@@ -26,7 +26,7 @@ long MovableGraphicsProxyWidget::next_box_z = 1;
 long MovableGraphicsProxyWidget::next_note_z = std::numeric_limits<int>::min();
 
 MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *view, CsApexViewCore &view_core, QGraphicsItem *parent, Qt::WindowFlags wFlags)
-    : QGraphicsProxyWidget(parent, wFlags), box_(box), view_(view), view_core_(view_core), relay_(false), clone_p_(false)
+    : QGraphicsProxyWidget(parent, wFlags), box_(box), view_(view), view_core_(view_core), relay_(false), clone_started_(false), clone_allowed_(false)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
@@ -82,7 +82,7 @@ QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const
 
 void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    clone_p_ = false;
+    clone_allowed_ = false;
 
     QPoint pt = event->pos().toPoint();
     QWidget* child = widget()->childAt(pt);
@@ -121,8 +121,10 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
         relay_ = true;
 
     } else if(shift) {
-        clone_start_ = event->pos();
-        clone_p_ = true;
+        if(!clone_allowed_) {
+            clone_start_ = event->pos();
+        }
+        clone_allowed_ = true;
     }
 }
 
@@ -143,7 +145,8 @@ void MovableGraphicsProxyWidget::signalMoving(const QPointF &delta)
 
 void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    clone_p_ = false;
+    clone_allowed_ = false;
+    clone_started_ = false;
 
     QGraphicsItem::mouseReleaseEvent(event);
 
@@ -161,12 +164,11 @@ void MovableGraphicsProxyWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *eve
 
 void MovableGraphicsProxyWidget::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(clone_p_) {
+    if(clone_allowed_ && !clone_started_) {
         QPointF delta = clone_start_ - event->pos();
         if(hypot(delta.x(), delta.y()) > 10) {
-
+            clone_started_ = true;
             view_->startCloningSelection(box_, -event->pos().toPoint());
-            clone_p_ = false;
         }
         return;
     }

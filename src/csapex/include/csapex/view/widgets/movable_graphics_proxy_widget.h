@@ -51,7 +51,8 @@ private:
 
     bool relay_;
     QPointF clone_start_;
-    bool clone_p_;
+    bool clone_started_;
+    bool clone_allowed_;
 
     static long next_box_z;
     static long next_note_z;
