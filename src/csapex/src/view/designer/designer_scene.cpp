@@ -483,6 +483,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     if(debug_) {
         // draw outline
         painter->save();
+        painter->setBrush(QBrush());
         painter->setPen(Qt::red);
         painter->drawRect(sceneRect());
         painter->restore();

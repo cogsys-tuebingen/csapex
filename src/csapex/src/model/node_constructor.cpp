@@ -18,12 +18,12 @@
 using namespace csapex;
 
 NodeConstructor::NodeConstructor(const std::string &type, std::function<NodePtr()> c)
-    : type_(type), icon_(":/no_icon.png"), c(c)
+    : type_(type), icon_(":/no_icon.png"), properties_loaded_(false), c(c)
 {
 }
 
 NodeConstructor::NodeConstructor(const std::string &type)
-    : type_(type), icon_(":/no_icon.png")
+    : type_(type), icon_(":/no_icon.png"), properties_loaded_(false)
 {
 }
 
@@ -79,15 +79,17 @@ std::vector<TagPtr> NodeConstructor::getTags() const
 
 std::vector<std::string> NodeConstructor::getProperties() const
 {
-    if(properties_.empty()) {
+    if(!properties_loaded_) {
         try {
             NodePtr node = makeNode();
             node->getProperties(properties_);
 
         } catch(...) {
-            // ignore
+            // ignore error and mark the node as invalid
             properties_.push_back("invalid");
         }
+
+        properties_loaded_ = true;
     }
     return properties_;
 }

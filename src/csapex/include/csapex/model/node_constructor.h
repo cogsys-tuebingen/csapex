@@ -67,7 +67,9 @@ protected:
     std::string descr_;
     std::string icon_;
     std::vector<TagPtr> tags_;
+
     mutable std::vector<std::string> properties_;
+    mutable bool properties_loaded_;
 
     std::function<NodePtr()> c;
 };

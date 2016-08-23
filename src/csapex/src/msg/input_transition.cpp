@@ -290,3 +290,8 @@ void InputTransition::forwardMessages()
 
     forwarded_ = true;
 }
+
+bool InputTransition::areMessagesForwarded() const
+{
+    return forwarded_;
+}

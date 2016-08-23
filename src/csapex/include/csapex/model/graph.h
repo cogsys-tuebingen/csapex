@@ -171,13 +171,15 @@ public:
 
 private:
     UUID addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional);
-    UUID  addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
-    UUID  addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
-    UUID  addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
+    UUID addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
+    UUID addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
+    UUID addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
 
     virtual void notifyMessagesProcessed() override;
     void inputActivation();
     void outputActivation();
+
+    void tryFinishProcessing();
 
     void checkNodeState(NodeHandle* nh);
 

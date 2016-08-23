@@ -27,6 +27,7 @@ public:
     void notifyMessageProcessed();
 
     void forwardMessages();
+    bool areMessagesForwarded() const;
     bool areMessagesComplete() const;
 
     int findHighestDeviantSequenceNumber() const;

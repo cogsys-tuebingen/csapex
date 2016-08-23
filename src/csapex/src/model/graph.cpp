@@ -994,53 +994,44 @@ void Graph::removeInternalPorts()
 void Graph::notifyMessagesProcessed()
 {
     GeneratorNode::notifyMessagesProcessed();
-
-    transition_relay_in_->notifyMessageProcessed();
 }
 
 void Graph::inputActivation()
 {
-    if(!transition_relay_in_->hasConnection()) {
-        if(continuation_) {
-            continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
-            continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
-        }
-    }
+    tryFinishProcessing();
 }
 
 void Graph::outputActivation()
 {
-    if(transition_relay_in_->isEnabled() && node_handle_->getOutputTransition()->canStartSendingMessages()) {
-        // if(node_handle_->isSource() || continuation_) {
+    if(transition_relay_in_->isEnabled()) {
+        if(!node_handle_->getOutputTransition()->canStartSendingMessages()) {
+            std::cerr << "cannot finish subgraph: parent cannot send" << std::endl;
+            return;
+        }
         apex_assert_hard(transition_relay_in_->isEnabled());
         apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
-        if(node_handle_->isSource()) {
-            transition_relay_in_->forwardMessages();
+        transition_relay_in_->forwardMessages();
+        transition_relay_in_->notifyMessageProcessed();
 
-            updated();
+        tryFinishProcessing();
+    }
+}
 
-            if(node_handle_->isSink()) {
-                notifyMessagesProcessed();
-            }
+void Graph::tryFinishProcessing()
+{
+    bool relay_out_ready = !transition_relay_out_->hasConnection() ||
+            transition_relay_out_->areAllConnections(Connection::State::DONE);
+    bool relay_in_ready = !transition_relay_in_->hasConnection() ||
+            transition_relay_in_->areAllConnections(Connection::State::DONE);
 
-        } else {
-            if(transition_relay_in_->hasConnection()) {
-                //apex_assert_hard(continuation_);
-                if(continuation_) {
-                    transition_relay_in_->forwardMessages();
+    if(relay_in_ready && relay_out_ready) {
+        if(continuation_) {
+            continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+            continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
 
-                    continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
-                    continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
-
-                    if(node_handle_->isSink()) {
-                        notifyMessagesProcessed();
-                    }
-                }
-            }
+            notifyMessagesProcessed();
         }
-        //        });
-
     }
 }
 
