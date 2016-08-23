@@ -364,7 +364,7 @@ Node* Graph::findNode(const UUID& uuid) const
     if(node) {
         return node;
     }
-     throw NodeNotFoundException(uuid.getFullName());
+    throw NodeNotFoundException(uuid.getFullName());
 }
 
 
@@ -995,7 +995,8 @@ void Graph::notifyMessagesProcessed()
 {
     GeneratorNode::notifyMessagesProcessed();
 
-    tryFinishProcessing();
+//    tryFinishProcessing();
+    transition_relay_in_->notifyMessageProcessed();
 }
 
 void Graph::inputActivation()
@@ -1010,35 +1011,30 @@ void Graph::outputActivation()
 
 void Graph::tryFinishProcessing()
 {
-//    bool send = transition_relay_in_->isEnabled();
-    bool send = !node_handle_->isSink() && transition_relay_in_->areAllConnections(Connection::State::UNREAD);
-    if(send) {
+    bool notify = false;
+
+    if(!node_handle_->isSink()) {
         if(!node_handle_->getOutputTransition()->canStartSendingMessages()) {
-            std::cerr << "cannot finish subgraph: parent cannot send" << std::endl;
+            return;
+        }
+        if(!transition_relay_in_->isEnabled()) {
             return;
         }
         apex_assert_hard(transition_relay_in_->isEnabled());
         apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
         transition_relay_in_->forwardMessages();
-        transition_relay_in_->notifyMessageProcessed();
+
+        notify = true;
     }
 
-    bool relay_out_ready = !transition_relay_out_->hasConnection() ||
-            transition_relay_out_->areAllConnections(Connection::State::DONE);
-    bool relay_in_ready = !transition_relay_in_->hasConnection() ||
-            transition_relay_in_->areAllConnections(Connection::State::DONE);
+    if(node_handle_->isSource()) {
+        updated();
+    } else {
+        if(continuation_) {
+            continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+            continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
 
-    if(relay_in_ready && relay_out_ready) {
-        if(node_handle_->isSource()) {
-            updated();
-        } else {
-            if(continuation_) {
-                continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
-                continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
-
-                notifyMessagesProcessed();
-            }
         }
     }
 }
