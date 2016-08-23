@@ -200,7 +200,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     if(visible_graphs_.empty()) {
         // root
         QTabWidget* tabs = ui->tabWidget;
-        QIcon icon = tabs->tabIcon(0);
+        QIcon icon(":/step_next.png");
         tabs->removeTab(0);
         tabs->insertTab(0, graph_view, icon, generateTitle(graph_facade.get()));
     } else {
@@ -445,6 +445,13 @@ void Designer::refresh()
 
 void Designer::reset()
 {
+    ui->tabWidget->blockSignals(true);
+
+    auto graphs = graphs_;
+    for(auto& pair : graphs) {
+        removeGraph(pair.second.get());
+    }
+
     graphs_.clear();
     visible_graphs_.clear();
     auuid_views_.clear();
@@ -453,8 +460,14 @@ void Designer::reset()
     view_connections_.clear();
 
     states_for_invisible_graphs_.clear();
-
     connections_.clear();
+}
+
+void Designer::reinitialize()
+{
+    ui->tabWidget->blockSignals(false);
+
+    addGraph(core_.getRoot());
 }
 
 void Designer::addBox(NodeBox *box)

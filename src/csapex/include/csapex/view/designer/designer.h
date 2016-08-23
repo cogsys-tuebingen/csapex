@@ -89,6 +89,7 @@ public Q_SLOTS:
 
     void refresh();
     void reset();
+    void reinitialize();
 
     std::vector<NodeBox*> getSelectedBoxes() const;
     void selectAll();

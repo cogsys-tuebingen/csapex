@@ -158,6 +158,7 @@ void CsApexWindow::construct()
     QObject::connect(ui->profiling_debug_enable, SIGNAL(toggled(bool)), this, SLOT(enableDebugProfiling(bool)));
 
     connections_.push_back(core_.resetRequest.connect([this](){ designer_->reset(); }));
+    connections_.push_back(core_.resetDone.connect([this](){ designer_->reinitialize(); }));
     connections_.push_back(core_.configChanged.connect([this](){ updateTitle(); }));
     connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
     connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
