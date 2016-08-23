@@ -47,6 +47,7 @@ QWidget* OutputTextParameterAdapter::setup(QBoxLayout* layout, const std::string
 {
     QPointer<QLabel> label = new QLabel;
     label->setFont(getMonospaceFont());
+    label->setText(QString::fromStdString(op_p_->as<std::string>()));
     layout->addWidget(label);
 
     // model change -> ui
@@ -56,6 +57,5 @@ QWidget* OutputTextParameterAdapter::setup(QBoxLayout* layout, const std::string
             label->setText(QString::fromStdString(op_p_->as<std::string>()));
         }
     });
-
     return label;
 }
