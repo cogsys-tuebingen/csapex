@@ -1011,8 +1011,6 @@ void Graph::outputActivation()
 
 void Graph::tryFinishProcessing()
 {
-    bool notify = false;
-
     if(!node_handle_->isSink()) {
         if(!node_handle_->getOutputTransition()->canStartSendingMessages()) {
             return;
@@ -1025,7 +1023,10 @@ void Graph::tryFinishProcessing()
 
         transition_relay_in_->forwardMessages();
 
-        notify = true;
+    } else {
+        if(!transition_relay_out_->areAllConnections(Connection::State::DONE)) {
+            return;
+        }
     }
 
     if(node_handle_->isSource()) {
