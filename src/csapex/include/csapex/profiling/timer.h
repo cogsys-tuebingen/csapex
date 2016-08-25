@@ -50,6 +50,7 @@ public:
     std::deque<Interval::Ptr> active;
 
     bool enabled_;
+    bool dirty_;
 };
 
 }
