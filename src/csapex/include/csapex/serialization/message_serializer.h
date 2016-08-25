@@ -69,7 +69,7 @@ public:
 
     static TokenData::Ptr readYaml(const YAML::Node& node);
 
-	void shutdown();
+    void shutdown() override;
 
 public:
     template <template <typename> class Wrapper, typename M>

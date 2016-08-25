@@ -117,7 +117,7 @@ void StreamInterceptor::run() {
 
 StreamInterceptor::~StreamInterceptor()
 {
-    stop();
+    shutdown();
 
     if(thread_.joinable()) {
         thread_.join();
@@ -153,7 +153,7 @@ void StreamInterceptor::start()
     }
 }
 
-void StreamInterceptor::stop()
+void StreamInterceptor::shutdown()
 {
     if(running_) {
         stop_ = true;

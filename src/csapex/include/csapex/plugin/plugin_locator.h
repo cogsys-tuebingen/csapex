@@ -22,7 +22,7 @@ public:
     PluginLocator(Settings& settings);
     ~PluginLocator();
 
-	void shutdown();
+    void shutdown();
 
     template <typename PluginType>
     std::vector<std::string> enumerateXmlFiles() {

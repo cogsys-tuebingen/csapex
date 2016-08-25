@@ -25,7 +25,7 @@ public:
 
     bool isRunning() const;
     void start();
-    void stop();
+    void shutdown() override;
 
 public:
     std::ostream cout;

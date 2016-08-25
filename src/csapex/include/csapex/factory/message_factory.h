@@ -45,7 +45,7 @@ public:
     static void writeMessage(YAML::Emitter &yaml,
                              const TokenData &msg);
 
-	void shutdown();
+    void shutdown() override;
 
 public:
     template <template <typename> class Wrapper, typename M>

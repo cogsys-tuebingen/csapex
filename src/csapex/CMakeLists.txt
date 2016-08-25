@@ -167,6 +167,7 @@ add_library(csapex_util SHARED
     src/utility/error_handling.cpp
     src/utility/stream_interceptor.cpp
     src/utility/stream_relay.cpp
+    src/utility/singleton.cpp
     src/utility/thread.cpp
     src/utility/rate.cpp
     src/utility/type.cpp

@@ -348,11 +348,7 @@ public:
         typedef std::shared_ptr<type const> ConstPtr;
     };
 
-    struct SupportedTypes {
-        static SupportedTypes& instance() {
-            static SupportedTypes i;
-            return i;
-        }
+    struct SupportedTypes : public Singleton<SupportedTypes> {
         static EntryInterface::Ptr make(const std::string& type) {
             return instance().map_.at(type)->cloneEntry();
         }
@@ -365,6 +361,11 @@ public:
             if(map.find(type) == map.end()) {
                 map[type].reset(new Implementation<T>());
             }
+        }
+
+        void shutdown() override
+        {
+            map_.clear();
         }
 
     private:

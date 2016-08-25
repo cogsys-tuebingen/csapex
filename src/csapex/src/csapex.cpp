@@ -33,6 +33,7 @@
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/factory/message_factory.h>
+#include <csapex/msg/generic_vector_message.hpp>
 
 /// SYSTEM
 #include <boost/program_options.hpp>
@@ -300,13 +301,7 @@ int Main::main(bool headless, bool threadless, bool paused, bool thread_grouping
 
     thread_pool.clear();
 
-
-    StreamInterceptor::instance().stop();
-
-	MessageFactory::instance().shutdown();
-	MessageSerializer::instance().shutdown();
-    MessageProviderManager::instance().shutdown();
-    Serialization::instance().shutdown();
+    SingletonInterface::shutdownAll();
 
     return res;
 }

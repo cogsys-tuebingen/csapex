@@ -41,7 +41,7 @@ public:
         };
     }
 
-    void shutdown();
+    void shutdown() override;
 
     void serialize(const csapex::Node& node, YAML::Node& doc);
     void deserialize(csapex::Node& node, const YAML::Node& doc);

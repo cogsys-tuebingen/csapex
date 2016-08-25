@@ -31,8 +31,8 @@ void MessageProviderManager::shutdown()
 {
 	classes.clear();
 	plugin_locator_.reset();
-//    delete manager_;
-//    manager_ = nullptr;
+    delete manager_;
+    manager_ = nullptr;
 }
 
 void MessageProviderManager::loadPlugins()
