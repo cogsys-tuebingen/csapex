@@ -50,6 +50,12 @@ void MessageFactory::writeMessage(const std::string &path, const TokenData& msg)
     out << yaml.c_str();
 }
 
+void MessageFactory::writeMessage(YAML::Emitter &yaml, const TokenData& msg)
+{
+    yaml << MessageSerializer::instance().serializeMessage(msg);
+}
+
+
 void MessageFactory::registerMessage(std::string type, Constructor constructor)
 {
     MessageFactory& i = instance();

@@ -15,6 +15,10 @@
 #include <functional>
 #include <boost/type_traits.hpp>
 
+namespace YAML {
+class Emitter;
+}
+
 namespace csapex {
 
 class CSAPEX_EXPORT MessageFactory : public Singleton<MessageFactory>
@@ -38,6 +42,8 @@ public:
 
     static TokenData::Ptr readMessage(const std::string& path);
     static void writeMessage(const std::string& path, const TokenData &msg);
+    static void writeMessage(YAML::Emitter &yaml,
+                             const TokenData &msg);
 
 	void shutdown();
 
