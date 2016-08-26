@@ -8,6 +8,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/utility/type.h>
 #include <csapex/command/update_parameter.h>
+#include <csapex/view/utility/qt_helper.hpp>
 
 /// SYSTEM
 #include <QPointer>
@@ -28,14 +29,32 @@ BitSetParameterAdapter::BitSetParameterAdapter(param::BitSetParameter::Ptr p)
 
 QWidget* BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
-    QPointer<QGroupBox> group = new QGroupBox(display_name.c_str());
+    group = new QGroupBox(display_name.c_str());
     QVBoxLayout* l = new QVBoxLayout;
     group->setLayout(l);
 
+    setupAgain();
+
+    layout->addWidget(group);
+
+    connectInGuiThread(bitset_p_->scope_changed, [this](param::Parameter*) {
+        if(!bitset_p_) {
+            return;
+        }
+
+        disconnect();
+        QtHelper::clearLayout(group->layout());
+        setupAgain();
+    });
+    return group;
+}
+
+void BitSetParameterAdapter::setupAgain()
+{
     for(int i = 0; i < bitset_p_->noParameters(); ++i) {
         std::string str = bitset_p_->getName(i);
         QCheckBox* item = new QCheckBox(QString::fromStdString(str));
-        l->addWidget(item);
+        group->layout()->addWidget(item);
         if(bitset_p_->isSet(str)) {
             item->setChecked(true);
         }
@@ -61,10 +80,8 @@ QWidget* BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& di
         });
     }
 
-    layout->addWidget(group);
-
-    return group;
 }
+
 
 void BitSetParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
 {

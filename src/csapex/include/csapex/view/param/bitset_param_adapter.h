@@ -5,7 +5,11 @@
 #include <csapex/view/param/param_adapter.h>
 #include <csapex/param/bitset_parameter.h>
 
+/// SYSTEM
+#include <QPointer>
+
 class QHBoxLayout;
+class QGroupBox;
 
 namespace csapex
 {
@@ -20,7 +24,11 @@ public:
     virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
+    void setupAgain() ;
+
+private:
     param::BitSetParameterPtr bitset_p_;
+    QPointer<QGroupBox> group;
 };
 
 

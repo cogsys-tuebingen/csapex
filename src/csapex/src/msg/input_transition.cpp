@@ -120,7 +120,7 @@ bool InputTransition::isEnabled() const
     }
 
     // TODO: is this necessary?
-    for(const auto& connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         if(connection->isEnabled() && connection->getState() == Connection::State::NOT_INITIALIZED) {
             return false;
         }
@@ -159,39 +159,6 @@ int InputTransition::findHighestDeviantSequenceNumber() const
     }
 }
 
-void InputTransition::notifyOlderConnections(int seq)
-{
-    for(auto pair : inputs_) {
-        InputPtr input = pair.second;
-        if(input->isConnected()) {
-            auto connections = input->getConnections();
-            apex_assert_hard(connections.size() == 1);
-            ConnectionPtr connection = connections.front();
-            TokenConstPtr token = connection->getToken();
-
-            int s = token->getSequenceNumber();
-            if(seq != s) {
-                std::cout << input->getUUID().getFullName() << " has seq " << s << " instead of " << seq << std::endl;
-                connection->setState(Connection::State::READ);
-                connection->setTokenProcessed();
-            }
-        }
-    }
-    for(auto pair : inputs_) {
-        InputPtr input = pair.second;
-        if(input->isConnected()) {
-            auto connections = input->getConnections();
-            apex_assert_hard(connections.size() == 1);
-            ConnectionPtr connection = connections.front();
-            TokenConstPtr token = connection->getToken();
-
-            int s = token->getSequenceNumber();
-            if(seq == s) {
-                std::cout << input->getUUID().getFullName() << " has seq " << s << std::endl;
-            }
-        }
-    }
-}
 void InputTransition::notifyMessageProcessed()
 {
     if(!forwarded_) {
@@ -199,40 +166,9 @@ void InputTransition::notifyMessageProcessed()
     }
     apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
-    bool has_multipart = false;
-    bool multipart_are_done = true;
-
-    for(auto& c : connections_) {
-        if(TokenConstPtr token = c->getToken()) {
-            int f = token->flags.data;
-            if(f & (int) Token::Flags::Fields::MULTI_PART) {
-                has_multipart = true;
-                bool last_part = f & (int) Token::Flags::Fields::LAST_PART;
-                multipart_are_done &= last_part;
-            }
-        }
+    for(ConnectionPtr& c : connections_) {
+        c->setTokenProcessed();
     }
-
-    if(has_multipart && !multipart_are_done) {
-        for(ConnectionPtr& c : connections_) {
-            if(TokenConstPtr token = c->getToken()) {
-                int f = token->flags.data;
-
-                if(f & (int) Token::Flags::Fields::MULTI_PART) {
-                    //                c->setState(Connection::State::DONE);
-                    c->setTokenProcessed();
-                }
-            }
-        }
-
-    } else {
-        apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
-
-        for(ConnectionPtr& c : connections_) {
-            c->setTokenProcessed();
-        }
-    }
-
     forwarded_ = false;
 }
 

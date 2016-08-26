@@ -22,6 +22,8 @@
 #include <csapex/msg/bundled_connection.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/generic_vector_message.hpp>
+#include <csapex/param/parameter_factory.h>
+#include <csapex/param/bitset_parameter.h>
 
 /// SYSTEM
 #include <iostream>
@@ -594,6 +596,30 @@ void Graph::deactivation()
 void Graph::setupParameters(Parameterizable &params)
 {
     setupVariadicParameters(params);
+
+    params.addParameter(param::ParameterFactory::declareBool("iterate_containers",
+                                                             param::ParameterDescription("When true, input vectors will be iterated internally"),
+                                                             false));
+
+
+    std::map<std::string, std::pair<int, bool> > flags;
+
+    iterated_inputs_param_ = std::dynamic_pointer_cast<param::BitSetParameter>(param::ParameterFactory::declareParameterBitSet("iterated_containers", flags).build());
+
+    params.addConditionalParameter(iterated_inputs_param_,
+                                   [this](){
+        return readParameter<bool>("iterate_containers");
+    },
+    [this](param::Parameter* p) {
+        for(auto& pair : relay_to_external_input_) {
+            UUID id = pair.second;
+            Input* i = node_handle_->getInput(id);
+            apex_assert_hard(i);
+
+            bool iterate = iterated_inputs_param_->isSet(id.getFullName());
+            setIterationEnabled(id, iterate);
+        }
+    });
 }
 
 void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
@@ -605,6 +631,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
 
     is_iterating_ = false;
+    has_sent_current_iteration_ = false;
 
     for(Input* i : node_modifier.getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i);
@@ -700,6 +727,15 @@ UUID  Graph::addForwardingInput(const UUID& internal_uuid, const TokenDataConstP
 
     forwardingAdded(relay);
 
+    std::map<std::string, int> possibly_iterated_inputs;
+    for(auto& pair : iterated_inputs_param_->getBitSet()) {
+        possibly_iterated_inputs[pair.first] = pair.second;
+
+    }
+    possibly_iterated_inputs[external_input->getUUID().getFullName()] = possibly_iterated_inputs.size();
+
+    iterated_inputs_param_->setBitSet(possibly_iterated_inputs);
+
     return external_input->getUUID();
 }
 
@@ -771,6 +807,7 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstP
                 apex_assert(vector);
                 vector->addNestedValue(token->getTokenData());
                 msg::publish(external_output.get(), vector);
+
             } else {
                 msg::publish(external_output.get(), token->getTokenData());
             }
@@ -1006,9 +1043,9 @@ void Graph::setIterationEnabled(const UUID& external_input_uuid, bool enabled)
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
         TokenDataConstPtr vector_type = i->getType();
-        apex_assert(vector_type->isContainer());
-
-        o->setType(vector_type->nestedType());
+        if(vector_type->isContainer()) {
+            o->setType(vector_type->nestedType());
+        }
 
     } else {
         iterated_inputs_.erase(external_input_uuid);
@@ -1026,13 +1063,15 @@ void Graph::notifyMessagesProcessed()
 {
     GeneratorNode::notifyMessagesProcessed();
 
-//    tryFinishProcessing();
+    //    tryFinishProcessing();
     transition_relay_in_->notifyMessageProcessed();
 }
 
 void Graph::inputActivation()
 {
-    tryFinishProcessing();
+    if(node_handle_->isSink() || !transition_relay_in_->areMessagesForwarded()) {
+        tryFinishProcessing();
+    }
 }
 
 void Graph::outputActivation()
@@ -1046,13 +1085,6 @@ void Graph::tryFinishProcessing()
         if(!node_handle_->getOutputTransition()->canStartSendingMessages()) {
             return;
         }
-        if(!transition_relay_in_->isEnabled()) {
-            return;
-        }
-        apex_assert_hard(transition_relay_in_->isEnabled());
-        apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-
-        transition_relay_in_->forwardMessages();
 
     } else {
         if(!transition_relay_out_->areAllConnections(Connection::State::DONE)) {
@@ -1060,18 +1092,41 @@ void Graph::tryFinishProcessing()
         }
     }
 
+    if(!node_handle_->isSink() && !has_sent_current_iteration_) {
+        if(transition_relay_in_->isEnabled()) {
+            apex_assert_hard(transition_relay_in_->isEnabled());
+            apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+            transition_relay_in_->forwardMessages();
+
+            has_sent_current_iteration_ = true;
+            if(is_iterating_) {
+                transition_relay_in_->notifyMessageProcessed();
+            }
+        }
+    }
+
     // done processing
     if(is_iterating_) {
-        apex_assert_hard(transition_relay_out_->canStartSendingMessages());
+        if(!transition_relay_out_->areAllConnections(Connection::State::DONE, Connection::State::READ)) {
+            return;
+        }
+
+        if(!node_handle_->isSink()) {
+            if(!has_sent_current_iteration_){
+                return;
+            }
+        }
+
 
         if(iteration_index_ < iteration_count_) {
-            transition_relay_in_->notifyMessageProcessed();
+//            transition_relay_in_->notifyMessageProcessed();
 
             for(Input* i : node_modifier_->getMessageInputs()) {
                 TokenDataConstPtr m = msg::getMessage(i);
                 OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
                 if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
+                    has_sent_current_iteration_ = false;
                     msg::publish(o.get(), m->nestedValue(iteration_index_));
 
                 } else {
@@ -1079,9 +1134,9 @@ void Graph::tryFinishProcessing()
                 }
             }
 
+            ++iteration_index_;
             transition_relay_out_->sendMessages(node_handle_->isActive());
 
-            ++iteration_index_;
             return;
 
         } else {
@@ -1089,15 +1144,23 @@ void Graph::tryFinishProcessing()
         }
     }
 
+    if(!node_handle_->isSink()) {
+        if(!has_sent_current_iteration_) {
+            return;
+        }
+    }
+
+    transition_relay_in_->notifyMessageProcessed();
+
     if(node_handle_->isSource()) {
         updated();
     } else {
         if(continuation_) {
             continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
             continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
-
         }
     }
+
 }
 
 std::string Graph::makeStatusString() const

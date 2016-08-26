@@ -41,6 +41,7 @@ public:
     int def() const { return def_; }
 
     void setBitSet(const std::map<std::string, int>& set);
+    std::map<std::string, int> getBitSet() const;
 
     void clear();
     void setBits(const std::vector<std::string> &elements, bool silent = false);

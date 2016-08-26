@@ -12,22 +12,6 @@ namespace csapex {
 class CSAPEX_EXPORT Token
 {
 public:
-    struct Flags
-    {
-        enum class Fields {
-            MULTI_PART = 8,
-            LAST_PART = 16,
-
-        };
-
-        Flags();
-
-        std::int8_t data;
-    };
-
-
-
-public:
     template <typename DataType>
     static TokenPtr makeEmpty() {
         return std::make_shared<Token>(connection_types::makeEmpty<DataType>());
@@ -52,9 +36,6 @@ private:
     bool active_;
 
     mutable int seq_no_;
-
-public:
-    mutable Flags flags;
 };
 
 }

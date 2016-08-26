@@ -13,8 +13,6 @@ public:
 
     virtual void addMessage(TokenPtr message) override;
 
-    virtual void setMultipart(bool multipart, bool last_part) override;
-
     virtual bool commitMessages(bool is_activated) override;
     virtual bool hasMessage() override;
     virtual bool hasMarkerMessage() override;
@@ -32,8 +30,6 @@ public:
 private:
     TokenPtr message_to_send_;
     TokenPtr committed_message_;
-
-    int message_flags_;
 };
 }
 

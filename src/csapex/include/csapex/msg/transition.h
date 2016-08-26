@@ -28,6 +28,8 @@ public:
     void updateConnections();
 
     bool hasConnection() const;
+    bool hasConnection(const ConnectionPtr& connection) const;
+    bool hasConnection(Connection* connection) const;
     bool hasActiveConnection() const;
 
     virtual void reset();

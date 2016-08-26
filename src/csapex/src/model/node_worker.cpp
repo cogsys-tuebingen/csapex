@@ -334,30 +334,12 @@ void NodeWorker::startProcessingMessages()
     bool has_active_token = false;
 
     {
-        bool has_multipart = false;
-        bool multipart_are_done = true;
 
         for(auto input : node_handle_->getExternalInputs()) {
             for(auto& c : input->getConnections()) {
-                TokenConstPtr token = c->getToken();
-                int f = token->flags.data;
-                if(f & (int) Token::Flags::Fields::MULTI_PART) {
-                    has_multipart = true;
-
-                    bool last_part = f & (int) Token::Flags::Fields::LAST_PART;
-                    multipart_are_done &= last_part;
-                }
-
                 if(c->holdsActiveToken()) {
                     has_active_token = true;
                 }
-            }
-        }
-
-        if(has_multipart) {
-            for(auto output : node_handle_->getExternalOutputs()) {
-                bool is_last = multipart_are_done;
-                output->setMultipart(true, is_last);
             }
         }
     }

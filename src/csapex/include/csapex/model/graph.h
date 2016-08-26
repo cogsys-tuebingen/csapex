@@ -228,7 +228,9 @@ protected:
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_event_;
 
     std::set<UUID> iterated_inputs_;
+    param::BitSetParameterPtr iterated_inputs_param_;
     bool is_iterating_;
+    bool has_sent_current_iteration_;
     int iteration_index_;
     int iteration_count_;
 

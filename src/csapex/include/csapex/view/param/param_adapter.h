@@ -34,6 +34,8 @@ protected:
     virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) = 0;
     virtual void setupContextMenu(ParameterContextMenu* context_handler);
 
+    void disconnect();
+
 public:
     csapex::slim_signal::Signal<void(CommandPtr)> executeCommand;
 

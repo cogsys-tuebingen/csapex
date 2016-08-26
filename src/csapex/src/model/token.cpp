@@ -3,16 +3,6 @@
 
 using namespace csapex;
 
-/***
- * MESSAGE FLAGS
- */
-Token::Flags::Flags()
-    : data(0)
-{
-
-}
-
-
 Token::Token(const TokenDataConstPtr &token)
     : token_(token), active_(false), seq_no_(-1)
 {

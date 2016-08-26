@@ -208,6 +208,5 @@ void Input::notifyMessageAvailable(Connection* connection)
 
 void Input::notifyMessageProcessed()
 {
-//    std::cerr << "notify input " <<  getUUID() << std::endl;
     Connectable::notifyMessageProcessed();
 }

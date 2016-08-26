@@ -141,9 +141,12 @@ void Connectable::setLabel(const std::string &label)
 void Connectable::setType(TokenData::ConstPtr type)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    bool validate = type_ != type;
+    bool compatible = type_ && type && type_->canConnectTo(type.get()) && type->canConnectTo(type_.get());
 
-    if(validate) {
+    bool is_any = std::dynamic_pointer_cast<connection_types::AnyMessage const>(type_) != nullptr;
+    bool will_be_any = std::dynamic_pointer_cast<connection_types::AnyMessage const>(type) != nullptr;
+
+    if(!compatible || (is_any != will_be_any)) {
         type_ = type;
         validateConnections();
         lock.unlock();

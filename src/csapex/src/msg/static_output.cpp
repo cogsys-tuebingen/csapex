@@ -15,7 +15,7 @@
 using namespace csapex;
 
 StaticOutput::StaticOutput(const UUID &uuid)
-    : Output(uuid), message_flags_(0)
+    : Output(uuid)
 {
 
 }
@@ -68,17 +68,6 @@ TokenPtr StaticOutput::getToken() const
     }
 }
 
-void StaticOutput::setMultipart(bool multipart, bool last_part)
-{
-    message_flags_ = 0;
-    if(multipart) {
-        message_flags_ |= (int) Token::Flags::Fields::MULTI_PART;
-        if(last_part) {
-            message_flags_ |= (int) Token::Flags::Fields::LAST_PART;
-        }
-    }
-}
-
 bool StaticOutput::commitMessages(bool is_activated)
 {
     activate();
@@ -102,7 +91,6 @@ bool StaticOutput::commitMessages(bool is_activated)
     ++seq_no_;
 
     committed_message_->setSequenceNumber(seq_no_);
-    committed_message_->flags.data = message_flags_;
 
     bool sent_active = false;
 

@@ -31,7 +31,6 @@ public:
     bool areMessagesComplete() const;
 
     int findHighestDeviantSequenceNumber() const;
-    void notifyOlderConnections(int highest_seq);
 
     virtual bool isEnabled() const override;
 

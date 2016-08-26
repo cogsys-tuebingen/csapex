@@ -51,7 +51,6 @@ public:
 
     virtual void disable() override;
 
-    virtual void setMultipart(bool multipart, bool last_part) = 0;
     virtual void addMessage(TokenPtr message) = 0;
 
     virtual bool canSendMessages() const;

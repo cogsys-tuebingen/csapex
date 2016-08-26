@@ -67,5 +67,10 @@ void ParameterAdapter::setupContextMenu(ParameterContextMenu */*context_handler*
 
 }
 
+void ParameterAdapter::disconnect()
+{
+    connections.clear();
+}
+
 /// MOC
 #include "../../../include/csapex/view/param/moc_param_adapter.cpp"

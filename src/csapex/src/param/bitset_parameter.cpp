@@ -41,8 +41,15 @@ void BitSetParameter::setByName(const std::string &name)
     throw std::runtime_error(std::string("no such parameter: ") + name);
 }
 
-void BitSetParameter::setBitSet(const std::map<std::string, int> &set) {
+void BitSetParameter::setBitSet(const std::map<std::string, int> &set)
+{
     set_ = set;
+    scope_changed(this);
+}
+
+std::map<std::string, int> BitSetParameter::getBitSet() const
+{
+    return set_;
 }
 
 void BitSetParameter::clear()
