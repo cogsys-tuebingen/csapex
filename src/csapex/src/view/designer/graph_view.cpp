@@ -583,6 +583,14 @@ void GraphView::dragEnterEvent(QDragEnterEvent* e)
 
 void GraphView::dragMoveEvent(QDragMoveEvent* e)
 {
+    QGraphicsItem* item = scene_->itemAt(mapToScene(e->pos()), QTransform());
+    if(item) {
+        if(scroll_animation_timer_.isActive()) {
+            scroll_animation_timer_.stop();
+        }
+        return;
+    }
+
     delete move_event_;
     move_event_ = new QDragMoveEvent(*e);
 
