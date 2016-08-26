@@ -1150,7 +1150,9 @@ void Graph::tryFinishProcessing()
         }
     }
 
-    transition_relay_in_->notifyMessageProcessed();
+//        transition_relay_in_->notifyMessageProcessed();
+
+    has_sent_current_iteration_ = false;
 
     if(node_handle_->isSource()) {
         updated();

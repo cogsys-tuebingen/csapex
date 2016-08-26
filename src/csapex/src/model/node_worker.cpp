@@ -487,10 +487,12 @@ void NodeWorker::finishGenerator()
 
 void NodeWorker::finishProcessing()
 {
-    signalExecutionFinished();
-    forwardMessages(true);
-    signalMessagesProcessed();
-    triggerTryProcess();
+    if(getState() == State::PROCESSING) {
+        signalExecutionFinished();
+        forwardMessages(true);
+        signalMessagesProcessed();
+        triggerTryProcess();
+    }
 }
 
 void NodeWorker::signalExecutionFinished()
