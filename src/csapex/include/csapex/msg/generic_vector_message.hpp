@@ -337,6 +337,28 @@ private:
         virtual void decode(const YAML::Node& node);
     };
 
+    struct CSAPEX_EXPORT InstancedImplementation : public EntryInterface
+    {
+        InstancedImplementation(TokenData::ConstPtr type);
+
+        virtual EntryInterface::Ptr cloneEntry() const;
+        virtual TokenData::Ptr toType() const override;
+        virtual bool canConnectTo(const TokenData* other_side) const override;
+        virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
+        virtual void encode(YAML::Node& node) const;
+        virtual void decode(const YAML::Node& node);
+
+        TokenData::Ptr nestedType() const override;
+
+        virtual void addNestedValue(const TokenData::ConstPtr &msg) override;
+        virtual TokenData::ConstPtr nestedValue(std::size_t i) const override;
+        virtual std::size_t nestedValueCount() const override;
+
+    private:
+        TokenData::ConstPtr type_;
+        std::vector<TokenDataPtr> value;
+    };
+
 public:
     typedef std::shared_ptr<GenericVectorMessage> Ptr;
     typedef std::shared_ptr<const GenericVectorMessage> ConstPtr;
@@ -397,6 +419,13 @@ public:
     {
         return GenericVectorMessage::Ptr(new GenericVectorMessage(std::make_shared<AnythingImplementation>(), "/", 0));
     }
+
+
+    static GenericVectorMessage::Ptr make(TokenData::ConstPtr type)
+    {
+        return GenericVectorMessage::Ptr(new GenericVectorMessage(std::make_shared<InstancedImplementation>(type), "/", 0));
+    }
+
 
     template <typename T>
     std::shared_ptr<std::vector<T> const>  makeShared() const
