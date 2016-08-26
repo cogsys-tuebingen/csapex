@@ -139,6 +139,10 @@ TokenPtr StaticOutput::getToken()
 {
     return committed_message_;
 }
+TokenPtr StaticOutput::getAddedToken()
+{
+    return message_to_send_;
+}
 
 void StaticOutput::clearBuffer()
 {

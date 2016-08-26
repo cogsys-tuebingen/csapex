@@ -123,7 +123,7 @@ bool Output::isConnectionPossible(Connectable *other_side)
         return false;
     }
     if(!other_side->canConnectTo(this, false)) {
-        std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", can't connect" << std::endl;
+        std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", not compatible" << std::endl;
         return false;
     }
 

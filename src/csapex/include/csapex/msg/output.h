@@ -59,6 +59,7 @@ public:
     virtual void publish();
     virtual void nextMessage() = 0;
     virtual TokenPtr getToken() const = 0;
+    virtual TokenPtr getAddedToken() = 0;
 
     virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
     virtual bool isConnected() const override;

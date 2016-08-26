@@ -21,6 +21,7 @@
 #include <csapex/msg/static_output.h>
 #include <csapex/msg/bundled_connection.h>
 #include <csapex/msg/any_message.h>
+#include <csapex/msg/generic_vector_message.hpp>
 
 /// SYSTEM
 #include <iostream>
@@ -30,7 +31,7 @@ using namespace csapex;
 Graph::Graph()
     : transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition),
-      is_initialized_(false)
+      is_iterating_(false), is_initialized_(false)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::outputActivation));
 
@@ -62,6 +63,8 @@ void Graph::reset()
 
     transition_relay_out_->reset();
     transition_relay_in_->reset();
+
+    iterated_inputs_.clear();
 }
 
 void Graph::resetActivity()
@@ -600,31 +603,28 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
 
     // can fail...
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
+
+    is_iterating_ = false;
+
     for(Input* i : node_modifier.getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i);
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
-        msg::publish(o.get(), m);
+        if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
+            is_iterating_ = true;
+            iteration_count_ = m->nestedValueCount();
+            iteration_index_ = 1;
+
+            msg::publish(o.get(), m->nestedValue(0));
+
+        } else {
+            msg::publish(o.get(), m);
+        }
     }
+
     transition_relay_out_->sendMessages(node_handle_->isActive());
 
     outputActivation();
-
-    //    continuation_ = continuation;
-
-    //    received_.clear();
-    //    for(Output* o : node_modifier.getMessageOutputs()) {
-    //        received_[o] = false;
-    //    }
-
-    //    for(Input* i : node_modifier.getMessageInputs()) {
-    //        TokenDataConstPtr m = msg::getMessage(i);
-    //        OutputPtr o = pass_on_inputs_[i];
-
-    //        msg::publish(o.get(), m);
-    //        o->commitMessages();
-    //        o->publish();
-    //    }
 }
 
 bool Graph::isAsynchronous() const
@@ -759,7 +759,21 @@ UUID Graph::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstP
     std::weak_ptr<Output> external_output_weak = std::dynamic_pointer_cast<Output>(external_output->shared_from_this());
     relay->message_set.connect([this, external_output_weak, relay](Connectable*) {
         if(auto external_output = external_output_weak.lock()) {
-            msg::publish(external_output.get(), relay->getToken()->getTokenData());
+            TokenPtr token = relay->getToken();
+            if(is_iterating_) {
+                connection_types::GenericVectorMessage::Ptr vector;
+                if(!external_output->hasMessage()) {
+                    vector = connection_types::GenericVectorMessage::make(token->getTokenData());
+                } else {
+                    auto collected = external_output->getAddedToken()->getTokenData()->clone();
+                    vector = std::dynamic_pointer_cast<connection_types::GenericVectorMessage>(collected);
+                }
+                apex_assert(vector);
+                vector->addNestedValue(token->getTokenData());
+                msg::publish(external_output.get(), vector);
+            } else {
+                msg::publish(external_output.get(), token->getTokenData());
+            }
         }
     });
 
@@ -984,6 +998,23 @@ std::vector<UUID> Graph::getInternalEvents() const
     return res;
 }
 
+void Graph::setIterationEnabled(const UUID& external_input_uuid, bool enabled)
+{
+    if(enabled) {
+        iterated_inputs_.insert(external_input_uuid);
+        Input* i = node_handle_->getInput(external_input_uuid);
+        OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
+
+        TokenDataConstPtr vector_type = i->getType();
+        apex_assert(vector_type->isContainer());
+
+        o->setType(vector_type->nestedType());
+
+    } else {
+        iterated_inputs_.erase(external_input_uuid);
+    }
+}
+
 void Graph::removeInternalPorts()
 {
     node_handle_->removeInternalPorts();
@@ -1026,6 +1057,35 @@ void Graph::tryFinishProcessing()
     } else {
         if(!transition_relay_out_->areAllConnections(Connection::State::DONE)) {
             return;
+        }
+    }
+
+    // done processing
+    if(is_iterating_) {
+        apex_assert_hard(transition_relay_out_->canStartSendingMessages());
+
+        if(iteration_index_ < iteration_count_) {
+            transition_relay_in_->notifyMessageProcessed();
+
+            for(Input* i : node_modifier_->getMessageInputs()) {
+                TokenDataConstPtr m = msg::getMessage(i);
+                OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
+
+                if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
+                    msg::publish(o.get(), m->nestedValue(iteration_index_));
+
+                } else {
+                    msg::publish(o.get(), m);
+                }
+            }
+
+            transition_relay_out_->sendMessages(node_handle_->isActive());
+
+            ++iteration_index_;
+            return;
+
+        } else {
+            is_iterating_ = false;
         }
     }
 

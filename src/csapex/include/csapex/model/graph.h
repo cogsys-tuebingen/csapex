@@ -108,6 +108,10 @@ public:
 
     void triggerConnectionsAdded();
 
+    std::string makeStatusString() const;
+
+    void buildConnectedComponents();
+
     // iterators
     node_iterator beginNodes();
     const node_const_iterator beginNodes() const;
@@ -165,9 +169,8 @@ public:
     std::vector<UUID> getInternalSlots() const;
     std::vector<UUID> getInternalEvents() const;
 
-    std::string makeStatusString() const;
 
-    void buildConnectedComponents();
+    void setIterationEnabled(const UUID& external_input_uuid, bool enabled);
 
 private:
     UUID addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional);
@@ -223,6 +226,11 @@ protected:
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_slot_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_event_;
+
+    std::set<UUID> iterated_inputs_;
+    bool is_iterating_;
+    int iteration_index_;
+    int iteration_count_;
 
     bool is_initialized_;
 

@@ -339,6 +339,8 @@ private:
 
     struct CSAPEX_EXPORT InstancedImplementation : public EntryInterface
     {
+        friend class GenericVectorMessage;
+
         InstancedImplementation(TokenData::ConstPtr type);
 
         virtual EntryInterface::Ptr cloneEntry() const;
@@ -428,15 +430,105 @@ public:
 
 
     template <typename T>
-    std::shared_ptr<std::vector<T> const>  makeShared() const
+    std::shared_ptr<std::vector<T> const>  makeShared(typename std::enable_if<std::is_base_of<TokenData, T>::value>::type* = 0) const
     {
-        return std::dynamic_pointer_cast< Implementation<T> > (impl)->value;
+        if(auto i = std::dynamic_pointer_cast< Implementation<T> > (impl)) {
+            return i->value;
+        } else if(auto i = std::dynamic_pointer_cast< InstancedImplementation > (impl)) {
+            auto res = std::make_shared<std::vector<T>>();
+            for(TokenDataConstPtr td : i->value) {
+                res->push_back(*std::dynamic_pointer_cast<T const>(td));
+            }
+            return res;
+        } else {
+            throw std::runtime_error("cannot make the vector shared");
+        }
+    }
+    template <typename T>
+    std::shared_ptr<std::vector<T> const>  makeShared(typename std::enable_if<!std::is_base_of<TokenData, T>::value>::type* = 0) const
+    {
+        if(auto i = std::dynamic_pointer_cast< Implementation<T> > (impl)) {
+            return i->value;
+        } else if(auto i = std::dynamic_pointer_cast< InstancedImplementation > (impl)) {
+            auto res = std::make_shared<std::vector<T>>();
+            makeSharedValue(i.get(), res);
+            return res;
+        } else {
+            throw std::runtime_error("cannot make the vector shared");
+        }
+    }
+
+    template <typename T>
+    static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<T>>& res,
+                                typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0)
+    {
+        for(TokenDataConstPtr td : i->value) {
+            res->push_back(*std::dynamic_pointer_cast<T const>(td));
+        }
+    }
+    template <typename T>
+    static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<std::shared_ptr<T>>>& res,
+                                typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0)
+    {
+        for(TokenDataConstPtr td : i->value) {
+            res->push_back(std::dynamic_pointer_cast<T>(td));
+        }
+    }
+    template <typename T>
+    static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<std::shared_ptr<T const>>>& res,
+                                typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0)
+    {
+        for(TokenDataConstPtr td : i->value) {
+            res->push_back(std::dynamic_pointer_cast<T const>(td));
+        }
+    }
+
+    template <typename T>
+    static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<T>>& res,
+                                typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0)
+    {
+        static_assert(!std::is_base_of<TokenData, T>::value, "not applicable to messages");
+        for(TokenDataConstPtr td : i->value) {
+            res->push_back(*std::dynamic_pointer_cast<GenericPointerMessage<T> const>(td)->value);
+        }
+    }
+    template <typename T>
+    static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<std::shared_ptr<T>>>& res,
+                                typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0)
+    {
+        static_assert(!std::is_base_of<TokenData, T>::value, "not applicable to messages");
+        for(TokenDataConstPtr td : i->value) {
+            res->push_back(std::dynamic_pointer_cast<GenericPointerMessage<T> const>(td)->value);
+        }
+    }
+    template <typename T>
+    static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<std::shared_ptr<T const>>>& res,
+                                typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0)
+    {
+        static_assert(!std::is_base_of<TokenData, T>::value, "not applicable to messages");
+        for(TokenDataConstPtr td : i->value) {
+            res->push_back(std::dynamic_pointer_cast<GenericPointerMessage<T const> const>(td)->value);
+        }
+    }
+
+    template <typename T>
+    static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<T>>& res,
+                                typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0)
+    {
+        static_assert(!std::is_base_of<TokenData, T>::value, "not applicable to messages");
+        for(TokenDataConstPtr td : i->value) {
+            res->push_back(std::dynamic_pointer_cast<GenericValueMessage<T> const>(td)->value);
+        }
     }
 
 
     template <typename T>
     void set(const std::shared_ptr< std::vector<T> > & v) {
-        std::dynamic_pointer_cast< Implementation<T> > (impl)->value = v;
+        if(auto i = std::dynamic_pointer_cast< Implementation<T> > (impl)) {
+            i->value = v;
+        } else {
+            throw std::runtime_error("cannot set the vector");
+        }
     }
 
     void encode(YAML::Node& node) const

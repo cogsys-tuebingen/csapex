@@ -27,6 +27,8 @@ public:
 
     TokenPtr getToken();
 
+    TokenPtr getAddedToken() override;
+
 private:
     TokenPtr message_to_send_;
     TokenPtr committed_message_;
