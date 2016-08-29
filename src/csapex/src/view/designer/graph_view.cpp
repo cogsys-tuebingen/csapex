@@ -583,13 +583,7 @@ void GraphView::dragEnterEvent(QDragEnterEvent* e)
 
 void GraphView::dragMoveEvent(QDragMoveEvent* e)
 {
-    QGraphicsItem* item = scene_->itemAt(mapToScene(e->pos()), QTransform());
-    if(item) {
-        if(scroll_animation_timer_.isActive()) {
-            scroll_animation_timer_.stop();
-        }
-        return;
-    }
+    QGraphicsItem* item_under_mouse = scene_->itemAt(mapToScene(e->pos()), QTransform());
 
     delete move_event_;
     move_event_ = new QDragMoveEvent(*e);
@@ -597,39 +591,45 @@ void GraphView::dragMoveEvent(QDragMoveEvent* e)
     QGraphicsView::dragMoveEvent(e);
     view_core_.getDragIO().dragMoveEvent(this, e);
 
-    static const int border_threshold = 20;
-    static const double scroll_factor = 10.;
-
-    bool scroll_p = false;
-
-    QPointF pos = e->posF();
-    if(pos.x() < border_threshold) {
-        scroll_p = true;
-        scroll_offset_x_ = scroll_factor * (pos.x() - border_threshold) / double(border_threshold);
-    } else if(pos.x() > viewport()->width() - border_threshold) {
-        scroll_p = true;
-        scroll_offset_x_ = scroll_factor * (pos.x() - (viewport()->width() - border_threshold)) / double(border_threshold);
-    } else {
-        scroll_offset_x_ = 0;
-    }
-
-    if(pos.y() < border_threshold) {
-        scroll_p = true;
-        scroll_offset_y_ = scroll_factor * (pos.y() - border_threshold) / double(border_threshold);
-    } else if(pos.y() > viewport()->height() - border_threshold) {
-        scroll_p = true;
-        scroll_offset_y_ = scroll_factor * (pos.y() - (viewport()->height() - border_threshold)) / double(border_threshold);
-    } else {
-        scroll_offset_y_ = 0;
-    }
-
-    if(scroll_p) {
-        if(!scroll_animation_timer_.isActive()) {
-            scroll_animation_timer_.start(1000./60.);
-        }
-    } else {
+    if(item_under_mouse) {
         if(scroll_animation_timer_.isActive()) {
             scroll_animation_timer_.stop();
+        }
+    } else {
+        static const int border_threshold = 20;
+        static const double scroll_factor = 10.;
+
+        bool scroll_p = false;
+
+        QPointF pos = e->posF();
+        if(pos.x() < border_threshold) {
+            scroll_p = true;
+            scroll_offset_x_ = scroll_factor * (pos.x() - border_threshold) / double(border_threshold);
+        } else if(pos.x() > viewport()->width() - border_threshold) {
+            scroll_p = true;
+            scroll_offset_x_ = scroll_factor * (pos.x() - (viewport()->width() - border_threshold)) / double(border_threshold);
+        } else {
+            scroll_offset_x_ = 0;
+        }
+
+        if(pos.y() < border_threshold) {
+            scroll_p = true;
+            scroll_offset_y_ = scroll_factor * (pos.y() - border_threshold) / double(border_threshold);
+        } else if(pos.y() > viewport()->height() - border_threshold) {
+            scroll_p = true;
+            scroll_offset_y_ = scroll_factor * (pos.y() - (viewport()->height() - border_threshold)) / double(border_threshold);
+        } else {
+            scroll_offset_y_ = 0;
+        }
+
+        if(scroll_p) {
+            if(!scroll_animation_timer_.isActive()) {
+                scroll_animation_timer_.start(1000./60.);
+            }
+        } else {
+            if(scroll_animation_timer_.isActive()) {
+                scroll_animation_timer_.stop();
+            }
         }
     }
 }
