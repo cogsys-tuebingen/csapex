@@ -901,6 +901,7 @@ void GraphView::focusOnNode(const csapex::UUID &uuid)
     NodeBox* box = getBox(uuid);
     if(box) {
         scene_->setSelection(box);
+        centerOn(box->graphicsProxyWidget());
     }
 }
 

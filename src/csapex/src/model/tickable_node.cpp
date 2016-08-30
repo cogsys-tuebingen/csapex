@@ -24,7 +24,12 @@ bool TickableNode::doTick(NodeModifier &nm, Parameterizable &p)
     bool res;
     {
         INTERLUDE("tick");
-        res = tick(nm, p);
+        try {
+            res = tick(nm, p);
+        } catch(const std::exception& e) {
+            aerr << "tick failed: " << e.what() << std::endl;
+            res = false;
+        }
     }
 
     if(res) {

@@ -108,7 +108,7 @@ csapex--NodeBox[blocked="true"] QFrame#boxframe {
 
 /* selected box */
 csapex--NodeBox[focused="true"] QFrame#boxframe {
-        background: rgb(180, 200, 180);
+        background: rgb(140, 180, 140);
         border: 2px solid rgb(70, 115, 60);
         border-style: dashed;
 }
