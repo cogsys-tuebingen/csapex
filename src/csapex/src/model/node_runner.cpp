@@ -55,10 +55,7 @@ NodeRunner::~NodeRunner()
         //        detach();
     }
 
-    if(tick_thread_running_) {
-        tick_thread_stop_ = true;
-        ticking_thread_.join();
-    }
+    stopTickThread();
 }
 
 void NodeRunner::reset()
@@ -179,8 +176,18 @@ void NodeRunner::schedule(TaskPtr task)
     }
 }
 
+void NodeRunner::stopTickThread()
+{
+    if(tick_thread_running_) {
+        tick_thread_stop_ = true;
+        ticking_thread_.join();
+    }
+}
+
 void NodeRunner::detach()
 {
+    stopTickThread();
+
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     if(scheduler_) {

@@ -44,6 +44,7 @@ private:
     void tickLoop();
     void scheduleTick();
     void tick();
+    void stopTickThread();
 
 private:
     NodeWorkerPtr worker_;
