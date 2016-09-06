@@ -90,13 +90,15 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
         order.push_back(param_name);
     }    
 
-    std::string valid_name;
+    std::string valid_name = param_name;
+
+    boost::regex to_remove("~");
+    valid_name = boost::regex_replace(valid_name, to_remove, std::string(""));
+
     // generate a valid name, valid characters are a-z, A-Z, 0-9, / and _.
     boost::regex invalid("[^0-9a-zA-Z/_]");
-    if (boost::regex_search(param_name, invalid)) {
-        valid_name = boost::regex_replace(param_name, invalid, std::string("_"));
-    } else {
-        valid_name = param_name;
+    if (boost::regex_search(valid_name, invalid)) {
+        valid_name = boost::regex_replace(valid_name, invalid, std::string("_"));
     }
 
     param_valid_name_cache[valid_name] = param_name;
@@ -226,6 +228,15 @@ csapex::param::Parameter::Ptr GenericState::getParameter(const std::string &name
 {
     try {
         return params.at(name);
+    } catch(const std::exception& e) {
+        throw std::runtime_error("cannot get parameter '" + name + "', doesn't exist: " + e.what());
+    }
+}
+csapex::param::Parameter::Ptr GenericState::getMappedParameter(const std::string &name) const
+{
+    try {
+        auto pos = param_valid_name_cache.find(name);
+        return params.at(pos->second);
     } catch(const std::exception& e) {
         throw std::runtime_error("cannot get parameter '" + name + "', doesn't exist: " + e.what());
     }
