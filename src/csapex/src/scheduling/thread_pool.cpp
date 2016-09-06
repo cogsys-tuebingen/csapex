@@ -199,6 +199,10 @@ void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
         });
 
         assignGeneratorToGroup(task, group.get());
+
+        if(isRunning()) {
+            group->start();
+        }
     }
 }
 
@@ -244,6 +248,10 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
     });
 
     assignGeneratorToGroup(task, group.get());
+
+    if(isRunning()) {
+        group->start();
+    }
 
     return group->id();
 }
