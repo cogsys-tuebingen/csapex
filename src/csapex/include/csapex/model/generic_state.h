@@ -41,6 +41,7 @@ public:
 
     csapex::param::Parameter& operator [] (const std::string& name) const;
     csapex::param::ParameterPtr getParameter(const std::string& name) const;
+    csapex::param::ParameterPtr getMappedParameter(const std::string& name) const;
     std::vector<csapex::param::ParameterPtr> getParameters() const;
     std::vector<csapex::param::ParameterPtr> getTemporaryParameters() const;
     std::vector<csapex::param::ParameterPtr> getPersistentParameters() const;

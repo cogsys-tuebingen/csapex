@@ -108,6 +108,8 @@ public:
         return std::dynamic_pointer_cast<T> (getParameter(name));
     }
 
+    csapex::param::ParameterPtr getMappedParameter(const std::string& name) const;
+
     std::size_t getParameterCount() const;
     bool hasParameter(const std::string& name) const;
 

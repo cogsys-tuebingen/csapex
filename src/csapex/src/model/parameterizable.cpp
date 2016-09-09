@@ -284,6 +284,12 @@ csapex::param::Parameter::Ptr Parameterizable::getParameter(const std::string &n
     return parameter_state_->getParameter(name);
 }
 
+csapex::param::Parameter::Ptr Parameterizable::getMappedParameter(const std::string &name) const
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    return parameter_state_->getMappedParameter(name);
+}
+
 bool Parameterizable::isParameterEnabled(const std::string &name) const
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
