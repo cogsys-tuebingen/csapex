@@ -21,6 +21,9 @@ NodeModifier::~NodeModifier()
 void NodeModifier::setNodeWorker(NodeWorker *worker)
 {
     node_worker_ = worker;
+    node_worker_->destroyed.connect([this]() {
+        node_worker_ = nullptr;
+    });
 }
 
 

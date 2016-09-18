@@ -69,6 +69,8 @@ private:
     std::atomic<bool> tick_thread_running_;
     std::atomic<bool> tick_thread_stop_;
     std::vector<TaskPtr> remaining_tasks_;
+
+    long guard_;
 };
 
 }

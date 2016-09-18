@@ -20,7 +20,7 @@ using namespace csapex;
 NodeRunner::NodeRunner(NodeWorkerPtr worker)
     : worker_(worker), scheduler_(nullptr),
       paused_(false), ticking_(false), is_source_(false), stepping_(false), can_step_(false),
-      tick_thread_running_(false)
+      tick_thread_running_(false), guard_(-1)
 {
     NodeHandlePtr handle = worker_->getNodeHandle();
     NodePtr node = handle->getNode().lock();
@@ -56,6 +56,8 @@ NodeRunner::~NodeRunner()
     }
 
     stopTickThread();
+
+    guard_ = 0xDEADBEEF;
 }
 
 void NodeRunner::reset()
@@ -129,6 +131,7 @@ void NodeRunner::scheduleTick()
 
 void NodeRunner::tick()
 {
+    apex_assert_hard(guard_ == -1);
     bool success = worker_->tick();
     if(stepping_) {
         if(!success) {

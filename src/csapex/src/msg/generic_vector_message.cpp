@@ -81,7 +81,8 @@ bool GenericVectorMessage::AnythingImplementation::canConnectTo(const TokenData*
     } else if(dynamic_cast<const GenericVectorMessage*> (other_side)) {
         return true;
     } else {
-        return dynamic_cast<const AnyMessage*> (other_side) != nullptr;
+        auto type = toType();
+        return other_side->canConnectTo(type.get());
     }
 }
 

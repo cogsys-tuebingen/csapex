@@ -12,11 +12,11 @@
 using namespace csapex;
 
 OutputTransition::OutputTransition(delegate::Delegate0<> activation_fn)
-    : Transition(activation_fn), sequence_number_(-1)
+    : Transition(activation_fn), sequence_number_(-1), try_to_publish_(false)
 {
 }
 OutputTransition::OutputTransition()
-    : Transition(), sequence_number_(-1)
+    : Transition(), sequence_number_(-1), try_to_publish_(false)
 {
 }
 
@@ -203,7 +203,12 @@ bool OutputTransition::sendMessages(bool is_active)
 
 void OutputTransition::publishNextMessage()
 {
-    std::unique_lock<std::recursive_mutex> lock(sync);
+    std::unique_lock<std::recursive_mutex> lock(sync, std::try_to_lock);
+    if(!lock) {
+        try_to_publish_ = true;
+        return;
+    }
+
 
     if(!areAllConnections(Connection::State::DONE)) {
         return;
@@ -249,6 +254,10 @@ void OutputTransition::fillConnections()
         apex_assert_hard(out);
 
         out->publish();
+    }
+
+    if(try_to_publish_) {
+        publishNextMessage();
     }
 }
 

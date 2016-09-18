@@ -52,6 +52,7 @@ private:
     std::unordered_map<UUID, OutputPtr, UUID::Hasher> outputs_;
 
     long sequence_number_;
+    bool try_to_publish_;
 };
 }
 

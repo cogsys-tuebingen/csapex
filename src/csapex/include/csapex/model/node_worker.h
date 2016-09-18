@@ -161,8 +161,8 @@ private:
     Event* trigger_activated_;
     Event* trigger_deactivated_;
 
-    std::vector<csapex::slim_signal::Connection> handle_connections_;
-    std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
+    std::vector<csapex::slim_signal::ScopedConnection> connections_;
+    std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> port_connections_;
 
     int ticks_;
 
@@ -173,6 +173,7 @@ private:
     //TimerPtr profiling_timer_;
     std::shared_ptr<Profiler> profiler_;
 
+    long guard_;
 };
 
 }

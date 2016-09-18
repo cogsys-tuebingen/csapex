@@ -37,7 +37,8 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     : node_handle_(node_handle),
       is_setup_(false), state_(State::IDLE),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
-      ticks_(0)
+      ticks_(0),
+      guard_(-1)
 {
     node_handle->setNodeWorker(this);
 
@@ -48,12 +49,12 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 
     try {
-        handle_connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
-                                             connectConnector(c);
-                                         }));
-        handle_connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
-                                             disconnectConnector(c.get());
-                                         }));
+        connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
+                                      connectConnector(c);
+                                  }));
+        connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
+                                      disconnectConnector(c.get());
+                                  }));
 
         node->setupParameters(*node);
 
@@ -61,7 +62,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             node->setup(*node_handle);
 
-            handle_connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
+            connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
                 notifyMessagesProcessed();
             }));
 
@@ -79,20 +80,20 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             auto generator = std::dynamic_pointer_cast<GeneratorNode>(node);
             if(generator) {
-                generator->updated.connect(delegate::Delegate0<>(this, &NodeWorker::finishGenerator));
+                connections_.emplace_back(generator->updated.connect(delegate::Delegate0<>(this, &NodeWorker::finishGenerator)));
             }
 
             trigger_process_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"inputs processed");
 
             is_setup_ = true;
 
-            handle_connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
+            connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
                 triggerTryProcess();
             }));
-            handle_connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
+            connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
                 setProcessingEnabled(isProcessingEnabled());
             }));
-            handle_connections_.emplace_back(node_handle_->activationChanged.connect([this](){
+            connections_.emplace_back(node_handle_->activationChanged.connect([this](){
                 if(node_handle_->isActive()) {
                     trigger_activated_->trigger();
                 } else {
@@ -114,19 +115,19 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 NodeWorker::~NodeWorker()
 {
+    std::unique_lock<std::recursive_mutex> lock(sync);
+
     destroyed();
 
     is_setup_ = false;
 
-    for(auto& connection : handle_connections_) {
-        connection.disconnect();
-    }
-
-    for(auto& pair : connections_) {
+    for(auto& pair : port_connections_) {
         disconnectConnector(pair.first);
     }
 
-    connections_.clear();
+    port_connections_.clear();
+
+    guard_ = 0xDEADBEEF;
 }
 
 NodeHandlePtr NodeWorker::getNodeHandle()
@@ -246,6 +247,7 @@ bool NodeWorker::canReceive() const
 
 bool NodeWorker::canSend() const
 {
+    apex_assert_hard(guard_ == -1);
     if(!node_handle_->getOutputTransition()->canStartSendingMessages()) {
         return false;
     }
@@ -382,13 +384,17 @@ void NodeWorker::startProcessingMessages()
     apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
     node_handle_->getOutputTransition()->clearBuffer();
 
+    NodePtr node = node_handle_->getNode().lock();
+
+    lock.unlock();
+
     node_handle_->getInputTransition()->notifyMessageProcessed();
 
-
-    NodePtr node = node_handle_->getNode().lock();
     if(!node) {
         return;
     }
+
+    lock.lock();
 
     if(has_active_token) {
         if(!node_handle_->isActive()) {
@@ -410,7 +416,6 @@ void NodeWorker::startProcessingMessages()
         return;
     }
 
-    std::unique_lock<std::recursive_mutex> sync_lock(sync);
 
     if(profiler_->isEnabled()) {
         Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
@@ -458,6 +463,7 @@ void NodeWorker::startProcessingMessages()
 
 void NodeWorker::finishGenerator()
 {
+    apex_assert_hard(guard_ == -1);
     apex_assert_hard(canSend());
 
     bool has_msg = false;
@@ -614,12 +620,10 @@ void NodeWorker::updateTransitionConnections()
 
 void NodeWorker::updateState()
 {
-    {
-        std::unique_lock<std::recursive_mutex> lock(sync);
+    std::unique_lock<std::recursive_mutex> lock(sync);
 
-        if(state_ != State::IDLE && state_ != State::ENABLED) {
-            return;
-        }
+    if(state_ != State::IDLE && state_ != State::ENABLED) {
+        return;
     }
     updateTransitionConnections();
 
@@ -760,6 +764,8 @@ void NodeWorker::sendMessages(bool ignore_sink)
 
 bool NodeWorker::tick()
 {
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    apex_assert_hard(guard_ == -1);
     if(!is_setup_) {
         return false;
     }
@@ -779,7 +785,6 @@ bool NodeWorker::tick()
     bool has_ticked = false;
 
     if(isProcessingEnabled() && tickable->isTickEnabled()) {
-        std::unique_lock<std::recursive_mutex> lock(sync);
         auto state = getState();
         if(state == State::IDLE || state == State::ENABLED) {
             if(tickable->canTick()) {
@@ -819,6 +824,7 @@ bool NodeWorker::tick()
                             trigger_tick_done_->trigger();
                         }
 
+                        apex_assert_hard(guard_ == -1);
                         ticked();
 
                         ++ticks_;
@@ -863,10 +869,10 @@ void NodeWorker::checkParameters()
 
 void NodeWorker::connectConnector(ConnectablePtr c)
 {
-    connections_[c.get()].emplace_back(c->connection_added_to.connect([this](Connectable*) { checkIO(); }));
-    connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
-    connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
-    connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
+    port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](Connectable*) { checkIO(); }));
+    port_connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
+    port_connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](Connectable*) { checkIO(); }));
+    port_connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
 
     if(EventPtr event = std::dynamic_pointer_cast<Event>(c)) {
         auto connection = event->triggered.connect([this]() {
@@ -874,7 +880,7 @@ void NodeWorker::connectConnector(ConnectablePtr c)
                 sendEvents(node_handle_->isActive());
             });
         });
-        connections_[c.get()].emplace_back(connection);
+        port_connections_[c.get()].emplace_back(connection);
 
     } else if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(c)) {
         SlotWeakPtr slot_w = slot;
@@ -892,16 +898,16 @@ void NodeWorker::connectConnector(ConnectablePtr c)
                 }
             });
         });
-        connections_[c.get()].emplace_back(connection);
+        port_connections_[c.get()].emplace_back(connection);
     }
 }
 
 void NodeWorker::disconnectConnector(Connectable *c)
 {
-    for(auto& connection : connections_[c]) {
+    for(auto& connection : port_connections_[c]) {
         connection.disconnect();
     }
-    connections_[c].clear();
+    port_connections_[c].clear();
 }
 
 void NodeWorker::checkIO()
