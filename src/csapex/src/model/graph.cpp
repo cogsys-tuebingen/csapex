@@ -628,7 +628,7 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
     continuation_ = continuation;
 
     // can fail...
-    apex_assert_hard(transition_relay_out_->canStartSendingMessages());
+    //apex_assert_hard(transition_relay_out_->canStartSendingMessages());
 
     is_iterating_ = false;
     has_sent_current_iteration_ = false;

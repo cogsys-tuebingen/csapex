@@ -60,7 +60,7 @@ const Profile& Profiler::getProfile(const std::string& key)
 
 void Profile::reset()
 {
-    for(auto pair : steps_acc_) {
+    for(auto& pair : steps_acc_) {
         accumulator& acc = pair.second;
         acc = accumulator();
     }
