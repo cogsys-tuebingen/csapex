@@ -105,7 +105,11 @@ void Slot::handleEvent()
     if(isEnabled() || isActive()) {
         if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
             apex_assert_hard(guard_ == -1);
-            callback_(message_);
+            try {
+                callback_(message_);
+            } catch(const std::exception& e) {
+                std::cerr << "slot " << getUUID() << " has thrown an exception: " << e.what() << std::endl;
+            }
         }
     }
 
