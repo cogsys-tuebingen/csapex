@@ -18,6 +18,8 @@ class ClassLoader;
 namespace csapex
 {
 
+class Profiler;
+
 class CSAPEX_EXPORT CsApexCore
 {
 public:
@@ -43,6 +45,8 @@ public:
 
     PluginLocatorPtr getPluginLocator() const;
     ExceptionHandler& getExceptionHandler() const;
+
+    std::shared_ptr<Profiler> getProfiler() const;
 
     bool isPaused() const;
     void setPause(bool pause);
@@ -90,6 +94,8 @@ private:
     NodeHandlePtr root_handle_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
+
+    std::shared_ptr<Profiler> profiler_;
 
     std::vector<slim_signal::ScopedConnection> signal_connections_;
 

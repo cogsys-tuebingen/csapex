@@ -42,7 +42,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 {
     node_handle->setNodeWorker(this);
 
-    profiler_ = std::make_shared<Profiler>();
+    profiler_ = std::make_shared<Profiler>(false, 16);
 
     NodePtr node = node_handle_->getNode().lock();
     node->useTimer(profiler_->getTimer(node_handle->getUUID().getFullName()));

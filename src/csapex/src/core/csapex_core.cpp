@@ -24,6 +24,7 @@
 #include <csapex/model/node_runner.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/utility/error_handling.h>
+#include <csapex/profiling/profiler.h>
 
 /// SYSTEM
 #include <fstream>
@@ -39,6 +40,7 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
     : settings_(settings), plugin_locator_(plugin_locator), exception_handler_(handler),
       node_factory_(node_factory),
       root_uuid_provider_(std::make_shared<UUIDProvider>()),
+      profiler_(std::make_shared<Profiler>()),
       core_plugin_manager(plugin_manager),
       init_(false), load_needs_reset_(false)
 {
@@ -294,6 +296,11 @@ ExceptionHandler& CsApexCore::getExceptionHandler() const
     return exception_handler_;
 }
 
+std::shared_ptr<Profiler> CsApexCore::getProfiler() const
+{
+    return profiler_;
+}
+
 void CsApexCore::settingsChanged()
 {
     settings_.save();
@@ -359,6 +366,8 @@ void CsApexCore::load(const std::string &file)
     apex_assert_hard(root_->getGraph()->countNodes() == 0);
 
     GraphIO graphio(root_->getGraph(), node_factory_.get());
+    graphio.useProfiler(profiler_);
+
     csapex::slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.loadDetailRequest);
 
     {

@@ -26,11 +26,13 @@ public:
     slim_signal::Signal<void(Interval::Ptr)> finished;
 
 public:
-    Timer(const std::string &name);
+    Timer(const std::string &name, bool enabled = true);
     ~Timer();
 
     void setEnabled(bool enabled);
     bool isEnabled() const;
+
+    bool isFinished() const;
 
     void restart();
     void finish();
@@ -51,6 +53,7 @@ public:
 
     bool enabled_;
     bool dirty_;
+    bool finished_;
 };
 
 }

@@ -231,6 +231,9 @@ void CsApexWindow::setupDesigner()
 
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)),opt,  SLOT(enableGridLock(bool)));
     QObject::connect(opt, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
+
+
+    ui->startup->layout()->addWidget(new ProfilingWidget(core_.getProfiler(), "load graph"));
 }
 
 

@@ -7,6 +7,7 @@
 /// PROJECT
 #include <csapex/factory/factory_fwd.h>
 #include <csapex/data/point.h>
+#include <csapex/profiling/profilable.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -15,7 +16,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT GraphIO
+class CSAPEX_EXPORT GraphIO : public Profilable
 {
 public:
     GraphIO(Graph *graph, NodeFactory* node_factory);

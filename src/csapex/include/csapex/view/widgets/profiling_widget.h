@@ -31,6 +31,10 @@ public Q_SLOTS:
     void exportCsv();
 
 protected:
+    void enterEvent(QEvent* e);
+    void mouseMoveEvent(QMouseEvent* me);
+    void leaveEvent(QEvent* e);
+
     void paintEvent(QPaintEvent *);
     void paintInterval(QPainter &p, const Interval &interval);
     float paintInterval(QPainter &p, const Interval &interval, float height_offset, int depth);
@@ -64,6 +68,10 @@ private:
     double indiv_width_;
 
     std::map<std::string, QColor> steps_;
+
+    QPointF cursor_;
+
+    const Interval* selected_interval_;
 };
 
 }

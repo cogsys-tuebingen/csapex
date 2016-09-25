@@ -19,6 +19,8 @@
 #include <csapex/serialization/serialization.h>
 #include <csapex/utility/yaml_io.hpp>
 #include <csapex/utility/exceptions.h>
+#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/timer.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -65,12 +67,26 @@ void GraphIO::saveGraph(YAML::Node &yaml)
 
 void GraphIO::loadGraph(const YAML::Node& doc)
 {
-    loadNodes(doc);
-    loadConnections(doc);
+    TimerPtr timer = getProfiler()->getTimer("load graph");
+    timer->restart();
+
+    {
+        auto interlude = timer->step("load nodes");
+        loadNodes(doc);
+    }
+    {
+        auto interlude = timer->step("load connections");
+        loadConnections(doc);
+    }
 
     graph_->triggerConnectionsAdded();
 
-    loadViewRequest(graph_, doc);
+    {
+        auto interlude = timer->step("load view");
+        loadViewRequest(graph_, doc);
+    }
+
+    timer->finish();
 }
 
 
@@ -172,10 +188,14 @@ void GraphIO::saveNodes(YAML::Node &yaml, const std::vector<NodeHandle*>& nodes)
 
 void GraphIO::loadNodes(const YAML::Node& doc)
 {
+    TimerPtr timer = getProfiler()->getTimer("load graph");
+
     YAML::Node nodes = doc["nodes"];
     if(nodes.IsDefined()) {
         for(std::size_t i = 0, total = nodes.size(); i < total; ++i) {
             const YAML::Node& n = nodes[i];
+
+            auto interlude = timer->step(n["uuid"].as<std::string>());
             loadNode(n);
         }
     }

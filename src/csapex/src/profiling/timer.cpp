@@ -6,8 +6,8 @@
 
 using namespace csapex;
 
-Timer::Timer(const std::string& name)
-    : timer_name_(name), root(new Interval(name)), enabled_(false), dirty_(false)
+Timer::Timer(const std::string& name, bool enabled)
+    : timer_name_(name), root(new Interval(name)), enabled_(enabled), dirty_(false), finished_(true)
 {
     restart();
 }
@@ -26,8 +26,12 @@ std::vector<std::pair<std::string, double> > Timer::entries() const
 
 void Timer::setEnabled(bool enabled)
 {
-    enabled_ = enabled;
-    dirty_  = true;
+    if(enabled_ != enabled) {
+        enabled_ = enabled;
+        if(!finished_) {
+            dirty_  = true;
+        }
+    }
 }
 
 bool Timer::isEnabled() const
@@ -35,15 +39,23 @@ bool Timer::isEnabled() const
     return enabled_;
 }
 
+bool Timer::isFinished() const
+{
+    return finished_;
+}
+
 void Timer::restart()
 {
     root.reset(new Interval(timer_name_));
     active.clear();
     active.push_back(root);
+
+    finished_ = false;
 }
 
 void Timer::finish()
 {
+    finished_ = true;
     while(!active.empty()) {
         active.back()->stop();
         active.pop_back();

@@ -20,7 +20,7 @@ public:
     slim_signal::Signal<void()> updated;
 
 public:
-    Profiler();
+    Profiler(bool enabled = true, int history = 1);
 
     void setEnabled(bool enabled);
     bool isEnabled() const;
@@ -35,6 +35,7 @@ private:
     std::vector<slim_signal::ScopedConnection> connections_;
 
     bool enabled_;
+    std::size_t history_length_;
 };
 
 }

@@ -18,9 +18,9 @@
 
 using namespace csapex;
 
-ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string& profile, QWidget *parent)
+ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string& profile_name, QWidget *parent)
     : QWidget(parent),
-      profiler_(profiler), profile_(profile),
+      profiler_(profiler), profile_(profile_name),
       space_for_painting_(nullptr)
 {
     apex_assert_hard(!profile_.empty());
@@ -52,7 +52,11 @@ ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::
 
     layout_->addLayout(buttons_layout);
 
-    connections_.emplace_back(profiler_->getProfile(profile_).getTimer()->finished.connect([this](Interval::Ptr) { update(); }));
+    const Profile& profile = profiler_->getProfile(profile_);
+    std::shared_ptr<Timer> timer = profile.getTimer();
+    connections_.emplace_back(timer->finished.connect([this](Interval::Ptr) { update(); }));
+
+    setMouseTracking(true);
 }
 
 ProfilingWidget::~ProfilingWidget()
@@ -83,6 +87,22 @@ void ProfilingWidget::exportCsv()
     }
 }
 
+void ProfilingWidget::enterEvent(QEvent *e)
+{
+    cursor_ = QPointF();
+}
+void ProfilingWidget::leaveEvent(QEvent *e)
+{
+    cursor_ = QPointF();
+    selected_interval_ = nullptr;
+    update();
+}
+
+void ProfilingWidget::mouseMoveEvent(QMouseEvent *me)
+{
+    cursor_ = me->pos();
+}
+
 void ProfilingWidget::paintEvent(QPaintEvent *)
 {
     apex_assert_hard(!profile_.empty());
@@ -111,7 +131,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     int n = history_length;
 
-    double max_time_ms = 10;
+    double max_time_ms = 1;
 
     for(const auto& interval : profile.getIntervals()) {
         if(!interval) {
@@ -160,8 +180,11 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         return;
     }
 
+    selected_interval_ = nullptr;
+
     // bars
     if(n > 0) {
+
         std::stringstream txt;
         txt << max_time_ms << " ms";
 
@@ -194,6 +217,12 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
             if(interval) {
                 paintInterval(p, *interval);
             }
+        }
+
+        if(selected_interval_) {
+            std::string name = selected_interval_->name();
+            ProfilerStats stats = profile.getStats(name);
+            setToolTip(QString("<b>") + QString::fromStdString(name) + "</b>:<br /> " + QString::number(stats.mean) + " &plusmn; " + QString::number(stats.stddev) + " ms");
         }
     }
 
@@ -230,7 +259,17 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     // stats
     for(std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
         const std::string& name = it->first;
-        QBrush brush(it->second);
+        QColor color;
+        if(selected_interval_) {
+            if(name == selected_interval_->name()) {
+                color = it->second;
+            } else {
+                color = Qt::gray;
+            }
+        } else {
+            color = it->second;
+        }
+        QBrush brush(color);
         QPen pen(brush, 2);
         p.setPen(pen);
         p.fillRect(QRectF(text_x - 2*padding - line_height, y, line_height, line_height), it->second);
@@ -265,11 +304,25 @@ float ProfilingWidget::paintInterval(QPainter& p, const Interval& interval, floa
     f = std::max(0.0f, std::min(1.0f, f));
     float height = f * content_height_;
 
-    p.setBrush(QBrush(steps_[interval.name()]));
-
-
     float w = indiv_width_ / (depth+1);
-    p.drawRect(QRectF(current_draw_x + indiv_width_ - w, bottom - height - height_offset, w, height));
+
+    QRectF rect(current_draw_x + indiv_width_ - w, bottom - height - height_offset, w, height);
+    bool is_selected = rect.contains(cursor_);
+
+    if(is_selected) {
+        p.setBrush(QBrush(steps_[interval.name()].lighter(110)));
+        p.setPen(QPen (QColor(20, 20, 20), 5, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin));
+
+    } else {
+        p.setBrush(QBrush(steps_[interval.name()]));
+        p.setPen(QPen (QColor(20, 20, 20)));
+    }
+
+    p.drawRect(rect);
+
+    if(is_selected) {
+        selected_interval_ = &interval;
+    }
 
     float h = height_offset;
     for(auto sub = interval.sub.begin(); sub != interval.sub.end(); ++sub) {

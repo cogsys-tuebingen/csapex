@@ -24,7 +24,7 @@ struct CSAPEX_PROFILING_EXPORT Profile
     friend class Profiler;
 
 public:
-    Profile(const std::string &key);
+    Profile(const std::string &key, int timer_history_length = 1, bool enabled = true);
 
     Timer::Ptr getTimer() const;
 
