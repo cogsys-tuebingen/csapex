@@ -22,7 +22,7 @@ static const int row_height = 30;
 }
 
 ActivityTimeline::ActivityTimeline()
-    : scene_(new QGraphicsScene), scrolling_(true)
+    : scene_(new QGraphicsScene), recording_(true)
 {
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
@@ -35,7 +35,7 @@ ActivityTimeline::ActivityTimeline()
 
     setFixedHeight(row_height);
 
-    setScrolling(false);
+    setRecording(false);
 
     params_.resolution = 0.5; /*ms*/
     params_.time = 0;
@@ -46,7 +46,7 @@ ActivityTimeline::ActivityTimeline()
     setVisible(false);
 
     QObject::connect(horizontalScrollBar(), &QScrollBar::sliderMoved,
-                     this, &ActivityTimeline::updateScrolling);
+                     this, &ActivityTimeline::updateRecording);
     QObject::connect(this, &ActivityTimeline::updateRowStartRequest,
                      this, &ActivityTimeline::updateRowStart);
     QObject::connect(this, &ActivityTimeline::updateRowStopRequest,
@@ -207,21 +207,19 @@ void ActivityTimeline::setSelection(QList<NodeWorker *> nodes)
     refresh();
 }
 
-void ActivityTimeline::updateScrolling()
+void ActivityTimeline::updateRecording()
 {
-    if(scrolling_) {
-        QScrollBar* bar = horizontalScrollBar();
-        if(bar->value() < bar->maximum() - 10) {
-            setScrolling(false);
-        }
-    }
 }
 
-void ActivityTimeline::setScrolling(bool scrolling)
+void ActivityTimeline::setRecording(bool recording)
 {
-    if(scrolling != scrolling_) {
-        scrolling_ = scrolling;
-        Q_EMIT scrollingChanged(scrolling);
+    if(recording != recording_) {
+        recording_ = recording;
+        Q_EMIT recordingChanged(recording);
+
+        if(recording) {
+            reset();
+        }
     }
 }
 
@@ -250,6 +248,10 @@ void ActivityTimeline::wheelEvent(QWheelEvent *we)
 
 void ActivityTimeline::updateRowStart(NodeWorker* node, int type, long stamp)
 {
+    if(!recording_) {
+        return;
+    }
+
     Row* row = node2row.at(node);
 
     updateTime(stamp);
@@ -261,6 +263,10 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, long stamp)
 
 void ActivityTimeline::updateRowStop(NodeWorker* node, long stamp)
 {
+    if(!recording_) {
+        return;
+    }
+
     try {
         Row* row = node2row.at(node);
         if(!row->active_activity_) {
@@ -283,7 +289,9 @@ void ActivityTimeline::updateTime()
 
 void ActivityTimeline::updateTime(long stamp)
 {
-    params_.time = (stamp - params_.start_time_stamp);
+    if(recording_) {
+        params_.time = (stamp - params_.start_time_stamp);
+    }
 }
 
 void ActivityTimeline::update()
@@ -304,7 +312,7 @@ void ActivityTimeline::update()
 
     resizeToFit();
 
-    if(scrolling_) {
+    if(recording_) {
         QScrollBar* bar = horizontalScrollBar();
         bar->setValue(bar->maximum());
     }

@@ -63,5 +63,7 @@
         <file>pencil.png</file>
         <file>magnifier.png</file>
         <file>folder.png</file>
+        <file>timeline_pause.png</file>
+        <file>timeline_record.png</file>
     </qresource>
 </RCC>

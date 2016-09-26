@@ -232,7 +232,6 @@ void CsApexWindow::setupDesigner()
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)),opt,  SLOT(enableGridLock(bool)));
     QObject::connect(opt, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
 
-
     ui->startup->layout()->addWidget(new ProfilingWidget(core_.getProfiler(), "load graph"));
 }
 
@@ -248,8 +247,8 @@ void CsApexWindow::setupTimeline()
 
     QObject::connect(ui->timeline_reset, SIGNAL(pressed()), activity_timeline_, SLOT(reset()));
 
-    QObject::connect(ui->timeline_scroll, SIGNAL(toggled(bool)), activity_timeline_, SLOT(setScrolling(bool)));
-    QObject::connect(activity_timeline_, SIGNAL(scrollingChanged(bool)), ui->timeline_scroll, SLOT(setChecked(bool)));
+    QObject::connect(ui->timeline_record, SIGNAL(toggled(bool)), activity_timeline_, SLOT(setRecording(bool)));
+    QObject::connect(activity_timeline_, SIGNAL(recordingChanged(bool)), ui->timeline_record, SLOT(setChecked(bool)));
 }
 
 void CsApexWindow::updateSelectionActions()

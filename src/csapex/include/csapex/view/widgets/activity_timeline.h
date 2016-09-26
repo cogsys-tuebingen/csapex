@@ -28,8 +28,8 @@ public Q_SLOTS:
 
     void setSelection(QList<NodeWorker*>);
 
-    void updateScrolling();
-    void setScrolling(bool scrolling);
+    void updateRecording();
+    void setRecording(bool recording);
 
     void reset();
 
@@ -48,7 +48,7 @@ public Q_SLOTS:
 
 
 Q_SIGNALS:
-    void scrollingChanged(bool);
+    void recordingChanged(bool);
 
     void updateRowStartRequest(NodeWorker* worker, int type, long stamp);
     void updateRowStopRequest(NodeWorker* worker, long stamp);
@@ -115,7 +115,7 @@ private:
     QGraphicsScene* scene_;
     QTimer* timer_;
 
-    bool scrolling_;
+    bool recording_;
 
     Parameters params_;
 
