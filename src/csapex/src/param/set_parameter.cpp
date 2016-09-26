@@ -26,16 +26,28 @@ SetParameter::~SetParameter()
 void SetParameter::setSet(const std::vector<std::string> &set)
 {
     set_.clear();
-    bool found = txt_.empty();
+    bool serialized_found = txt_.empty();
     for(typename std::vector<std::string>::const_iterator it = set.begin(); it != set.end(); ++it) {
         set_[*it] = *it;
-        if(!found && txt_ == *it) {
-            found = true;
+        if(!serialized_found && txt_ == *it) {
+            serialized_found = true;
         }
     }
-    if(!found) {
-        set_[txt_] = value_;
+    if(!serialized_found) {
+        set_[txt_] = txt_;
     }
+
+    if(!set.empty()) {
+        if(def_.empty()) {
+            def_ = set.front();
+        }
+
+        if(value_.empty()) {
+            value_ = def_;
+        }
+    }
+
+
     scope_changed(this);
 }
 

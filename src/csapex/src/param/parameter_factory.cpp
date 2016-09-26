@@ -247,9 +247,9 @@ ParameterBuilder ParameterFactory::declareParameterStringSet(const std::string& 
         if(v.empty()) {
             v = set[0];
         }
+        result->def_ = v;
+        result->set<std::string>(v);
     }
-    result->def_ = v;
-    result->set<std::string>(v);
 
     return ParameterBuilder(std::move(result));
 }
