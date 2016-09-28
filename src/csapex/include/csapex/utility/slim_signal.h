@@ -124,6 +124,11 @@ public:
 
     Connection connect(Signal<Signature>& signal);
 
+    template <typename Class>
+    Connection connect(Class* that, Signature Class::*mem) {
+        return connect(std::move(delegate::Delegate<Signature>(that, mem)));
+    }
+
     template <typename... Args>
     Signal& operator () (Args... args);
 
