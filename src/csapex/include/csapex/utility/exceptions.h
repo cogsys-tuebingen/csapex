@@ -43,7 +43,7 @@ class CSAPEX_UTILS_EXPORT HardAssertionFailure : public Failure
 {
 public:
     HardAssertionFailure();
-    HardAssertionFailure(const char* msg, const char* code, const char* file, int line);
+    HardAssertionFailure(const char* msg, const char* code, const char* file, int line, const char* signature);
     ~HardAssertionFailure();
 
     virtual std::ostream& reason(std::ostream& ss) const override;
@@ -56,6 +56,7 @@ public:
     std::string code;
     std::string file;
     int line;
+    std::string signature;
 
     std::string thread;
 };

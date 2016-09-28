@@ -177,8 +177,8 @@ HardAssertionFailure::HardAssertionFailure()
 
 }
 
-HardAssertionFailure::HardAssertionFailure(const char *msg, const char* code, const char* file, int line)
-    : Failure(msg), code(code), file(file), line(line), thread(csapex::thread::get_name())
+HardAssertionFailure::HardAssertionFailure(const char *msg, const char* code, const char* file, int line, const char *signature)
+    : Failure(msg), code(code), file(file), line(line), signature(signature), thread(csapex::thread::get_name())
 {
 }
 
@@ -201,7 +201,7 @@ std::string HardAssertionFailure::what() const
 
 std::ostream &HardAssertionFailure::reason(std::ostream& ss) const
 {
-    ss << "Assertion \"" << code << "\" failed in " << file << ", line " << line << ", thread \"" << csapex::thread::get_name() << "\"" << std::endl;
+    ss << "Assertion \"" << code << "\" failed in " << file << ", line " << line << ", function: " << signature << ", thread \"" << csapex::thread::get_name() << "\"" << std::endl;
     return ss;
 }
 
