@@ -10,8 +10,8 @@ Profile::Profile(const std::string& key, int timer_history_length, bool enabled)
       count_(0)
 {
     timer_history_.resize(timer_history_length);
-    apex_assert_hard(timer_history_.size() == timer_history_length);
-    apex_assert_hard(timer_history_.capacity() == timer_history_length);
+    apex_assert_hard((int) timer_history_.size() == timer_history_length);
+    apex_assert_hard((int) timer_history_.capacity() == timer_history_length);
 }
 
 void Profile::reset()
