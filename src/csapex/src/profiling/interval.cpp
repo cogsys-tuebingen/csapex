@@ -37,6 +37,16 @@ std::string Interval::name() const
     return name_;
 }
 
+long Interval::getStartMs() const
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(start_.time_since_epoch()).count();
+}
+
+long Interval::getEndMs() const
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end_.time_since_epoch()).count();
+}
+
 void Interval::start()
 {
     start_ = std::chrono::high_resolution_clock::now();

@@ -71,6 +71,7 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
     qRegisterMetaType < TokenDataPtr > ("TokenData::Ptr");
     qRegisterMetaType < TokenDataConstPtr > ("TokenData::ConstPtr");
     qRegisterMetaType < std::string > ("std::string");
+    qRegisterMetaType < std::shared_ptr<const Interval> > ("std::shared_ptr<const Interval>");
 
     QTextCodec *utfCodec = QTextCodec::codecForName("UTF-8");
     QTextCodec::setCodecForLocale(utfCodec);

@@ -23,6 +23,9 @@ public:
 public:
     Interval(const std::string& name);
 
+    long getStartMs() const;
+    long getEndMs() const;
+
     void start();
     void stop();
 

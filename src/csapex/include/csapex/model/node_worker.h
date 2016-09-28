@@ -21,6 +21,7 @@
 namespace csapex {
 
 class Profiler;
+class Interval;
 
 class CSAPEX_EXPORT NodeWorker : public ErrorState
 {
@@ -107,8 +108,8 @@ public:
     csapex::slim_signal::Signal<void()> ticked;
     csapex::slim_signal::Signal<void(bool)> enabled;
 
-    csapex::slim_signal::Signal<void(NodeWorker* worker, int type, long stamp)> timerStarted;
-    csapex::slim_signal::Signal<void(NodeWorker* worker, long stamp)> timerStopped;
+    csapex::slim_signal::Signal<void(NodeWorker* worker, int type, std::shared_ptr<const Interval> stamp)> interval_start;
+    csapex::slim_signal::Signal<void(NodeWorker* worker, std::shared_ptr<const Interval> stamp)> interval_end;
 
     csapex::slim_signal::Signal<void(NodeWorker* worker)> startProfiling;
     csapex::slim_signal::Signal<void(NodeWorker* worker)> stopProfiling;

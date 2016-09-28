@@ -11,6 +11,8 @@
 namespace csapex
 {
 
+class Interval;
+
 class CSAPEX_QT_EXPORT ActivityTimeline : public QGraphicsView
 {
     Q_OBJECT
@@ -37,8 +39,8 @@ public Q_SLOTS:
     void update();
     void updateTime();
     void updateTime(long stamp);
-    void updateRowStart(NodeWorker* worker, int type, long stamp);
-    void updateRowStop(NodeWorker* worker, long stamp);
+    void updateRowStart(NodeWorker* worker, int type, std::shared_ptr<const Interval> profile);
+    void updateRowStop(NodeWorker* worker, std::shared_ptr<const Interval> profile);
 
     void wheelEvent(QWheelEvent *we);
 
@@ -50,8 +52,8 @@ public Q_SLOTS:
 Q_SIGNALS:
     void recordingChanged(bool);
 
-    void updateRowStartRequest(NodeWorker* worker, int type, long stamp);
-    void updateRowStopRequest(NodeWorker* worker, long stamp);
+    void updateRowStartRequest(NodeWorker* worker, int type, std::shared_ptr<const Interval> profile);
+    void updateRowStopRequest(NodeWorker* worker, std::shared_ptr<const Interval> profile);
 
 private:
     void startTimer();

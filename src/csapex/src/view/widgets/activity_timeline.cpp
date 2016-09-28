@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
+#include <csapex/profiling/interval.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -188,15 +189,8 @@ void ActivityTimeline::addNode(NodeWorker* node)
 
     resizeToFit();
 
-    auto cstart = node->timerStarted.connect([this](NodeWorker* worker, int type, long stamp) {
-            updateRowStartRequest(worker, type, stamp);
-    });
-    node2connections_[node].push_back(cstart);
-
-    auto cstop = node->timerStopped.connect([this](NodeWorker* worker, long stamp) {
-            updateRowStopRequest(worker, stamp);
-    });
-    node2connections_[node].push_back(cstop);
+    node2connections_[node].emplace_back(node->interval_start.connect(this, &ActivityTimeline::updateRowStartRequest));
+    node2connections_[node].emplace_back(node->interval_end.connect(this, &ActivityTimeline::updateRowStopRequest));
 }
 
 void ActivityTimeline::removeNode(NodeWorker* node)
@@ -305,7 +299,7 @@ void ActivityTimeline::wheelEvent(QWheelEvent *we)
     }
 }
 
-void ActivityTimeline::updateRowStart(NodeWorker* node, int type, long stamp)
+void ActivityTimeline::updateRowStart(NodeWorker* node, int type, std::shared_ptr<const Interval> interval)
 {
     if(!recording_) {
         return;
@@ -313,14 +307,14 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, long stamp)
 
     Row* row = node2row.at(node);
 
-    updateTime(stamp);
+    updateTime(interval->getStartMs());
     row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type)));
     row->active_activity_ = row->activities_.back();
 
     addItem(row->active_activity_->rect);
 }
 
-void ActivityTimeline::updateRowStop(NodeWorker* node, long stamp)
+void ActivityTimeline::updateRowStop(NodeWorker* node, std::shared_ptr<const Interval> interval)
 {
     if(!recording_) {
         return;
@@ -332,7 +326,7 @@ void ActivityTimeline::updateRowStop(NodeWorker* node, long stamp)
             return;
         }
 
-        updateTime(stamp);
+        updateTime(interval->getEndMs());
         row->active_activity_->stop(params_.time);
         row->active_activity_ = nullptr;
 
