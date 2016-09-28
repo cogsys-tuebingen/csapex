@@ -29,7 +29,10 @@ ActivityTimeline::ActivityTimeline()
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    setCacheMode(QGraphicsView::CacheNone);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
+    setAutoFillBackground(true);
 
     setScene(scene_);
 
@@ -63,10 +66,18 @@ ActivityTimeline::~ActivityTimeline()
 
 void ActivityTimeline::resizeToFit()
 {
+    // adjust resolution to fit the width
+    double duration = std::max<double>(100, params_.time - params_.start_time);
+
+    params_.resolution = duration / width();
+
     QRectF rect = scene_->sceneRect();
+
     rect.setHeight(row_height * rows_.size() + 1);
     rect.setWidth((params_.time - params_.start_time) / params_.resolution);
     scene_->setSceneRect(rect);
+
+    refresh();
 
     setFixedHeight(scene_->sceneRect().height() + horizontalScrollBar()->height() + 5);
 }
@@ -80,33 +91,62 @@ void ActivityTimeline::addItem(QGraphicsItem *item)
 void ActivityTimeline::drawBackground(QPainter *painter, const QRectF &rect)
 {
     QGraphicsView::drawBackground(painter, rect);
-}
 
-void ActivityTimeline::drawForeground(QPainter *painter, const QRectF &rect)
-{
-    QGraphicsView::drawForeground(painter, rect);
+//    painter->fillRect(rect, Qt::white);
 
     double left = rect.x();
     double right = rect.x() + rect.width();
     double top = rect.y();
-    double bottom = rect.y() + rect.height() / 2;
+    double bottom = rect.y() + rect.height();
 
+    double width_of_a_millisecond = 1.0 / params_.resolution;
+
+    // separate lanes
     for(std::size_t r = 0; r < rows_.size() + 1; ++r) {
         double y = r * row_height;
         painter->drawLine(left,y, right,y);
     }
 
-    double scale = 1.0 / transform().m11();
-    painter->setPen(QPen(QBrush(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5)), scale));
+    // second tick marks
+    painter->setPen(QPen(QBrush(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5)), 10));
 
-    double delta = 1e3 / params_.resolution;
+    double width_of_a_second = 1000.0 * width_of_a_millisecond;
+    for(int second = 0, seconds = (params_.time - params_.start_time) / 1000.0; second <= seconds; ++second) {
+        double tick = second * width_of_a_second;
 
-    for(double x = std::floor(left); x < std::ceil(right); x += delta) {
-        painter->drawLine(x,top, x,bottom);
+        painter->drawLine(tick,top, tick,bottom);
 
-//        QString text = QString::number(x);
-//        painter->drawText(QRectF(x-10, 10, 20, 20), text);
+        QString text = QString::number(tick);
+        painter->drawText(QRectF(tick-10, 10, 20, 20), text);
     }
+
+    // centisecond tick marks
+    double width_of_a_centisecond = 10.0 * width_of_a_millisecond;
+    if(width_of_a_centisecond > 10.0) {
+        painter->setPen(QPen(QBrush(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5)), 3));
+
+        for(int centisecond = 0, centiseconds = (params_.time - params_.start_time) / 10.0; centisecond <= centiseconds; ++centisecond) {
+            double tick = centisecond * width_of_a_centisecond;
+
+            painter->drawLine(tick,top, tick,bottom);
+        }
+    }
+
+    // millisecond tick marks
+    if(width_of_a_millisecond > 10.0) {
+        painter->setPen(QPen(QBrush(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5)), 1));
+
+        for(int millisecond = 0, milliseconds = (params_.time - params_.start_time); millisecond <= milliseconds; ++millisecond) {
+            double tick = millisecond * width_of_a_millisecond;
+
+            painter->drawLine(tick,top, tick,bottom);
+        }
+    }
+}
+
+void ActivityTimeline::drawForeground(QPainter *painter, const QRectF &rect)
+{
+    QGraphicsView::drawForeground(painter, rect);
 }
 
 void ActivityTimeline::startTimer()
@@ -225,19 +265,38 @@ void ActivityTimeline::setRecording(bool recording)
 
 void ActivityTimeline::wheelEvent(QWheelEvent *we)
 {
-    //    bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
     bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
 
     if(ctrl) {
-        //        params_.resolution *= we->delta() < 0 ? 1.25 : 0.75;
+        QPointF old_scene_pos = mapToScene(we->pos());
+        double time_anchor = old_scene_pos.x() * params_.resolution;
 
-        scale(we->delta() > 0 ? 1.25 : 0.75, 1.0);
+        QPointF old_center = mapToScene(viewport()->rect().center());
+        double offset_x = old_center.x() - old_scene_pos.x();
+
+        double old_res = params_.resolution;
+
+        params_.resolution *= we->delta() < 0 ? 1.25 : 0.75;
 
         if(params_.resolution < 0.01) {
             params_.resolution = 0.01;
         } else if(params_.resolution > 1000.0) {
             params_.resolution = 1000.0;
         }
+
+        if(params_.resolution == old_res) {
+            return;
+        }
+
+        QRectF rect = scene_->sceneRect();
+        rect.setHeight(row_height * rows_.size() + 1);
+        rect.setWidth((params_.time - params_.start_time) / params_.resolution);
+        scene_->setSceneRect(rect);
+
+        double new_scene_pos_x = time_anchor / params_.resolution;
+        centerOn(new_scene_pos_x + offset_x, we->pos().y());
+
+        invalidateScene();
 
         refresh();
 
@@ -310,11 +369,11 @@ void ActivityTimeline::update()
         ++i;
     }
 
-    resizeToFit();
 
     if(recording_) {
-        QScrollBar* bar = horizontalScrollBar();
-        bar->setValue(bar->maximum());
+        resizeToFit();
+        //QScrollBar* bar = horizontalScrollBar();
+        //bar->setValue(bar->maximum());
     }
 }
 
@@ -424,7 +483,10 @@ void ActivityTimeline::Activity::update()
     }
 
     rect->setBrush(QBrush(color/*, Qt::Dense4Pattern*/));
-    rect->setPen(Qt::NoPen);
+
+    QPen pen(QColor(20, 20, 20));
+    pen.setWidth(2);
+    rect->setPen(pen);
 
     int bottom = row->top;
 
