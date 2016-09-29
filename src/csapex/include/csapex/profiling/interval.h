@@ -25,6 +25,8 @@ public:
 
     long getStartMs() const;
     long getEndMs() const;
+    long getStartMicro() const;
+    long getEndMicro() const;
 
     void start();
     void stop();

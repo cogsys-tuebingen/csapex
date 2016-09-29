@@ -5,6 +5,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/profiling/interval.h>
+#include <csapex/view/widgets/activity_timeline_item.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -272,8 +273,8 @@ void ActivityTimeline::wheelEvent(QWheelEvent *we)
 
         params_.resolution *= we->delta() < 0 ? 1.25 : 0.75;
 
-        if(params_.resolution < 0.01) {
-            params_.resolution = 0.01;
+        if(params_.resolution < 0.001) {
+            params_.resolution = 0.001;
         } else if(params_.resolution > 1000.0) {
             params_.resolution = 1000.0;
         }
@@ -308,7 +309,7 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, std::shared_pt
     Row* row = node2row.at(node);
 
     updateTime(interval->getStartMs());
-    row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type), interval->isActive()));
+    row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type), interval));
     row->active_activity_ = row->activities_.back();
 
     addItem(row->active_activity_->rect);
@@ -327,7 +328,6 @@ void ActivityTimeline::updateRowStop(NodeWorker* node, std::shared_ptr<const Int
         }
 
         updateTime(interval->getEndMs());
-        row->active_activity_->active_ = interval->isActive();
         row->active_activity_->stop(params_.time);
         row->active_activity_ = nullptr;
 
@@ -433,10 +433,10 @@ void ActivityTimeline::Row::clear()
     active_activity_ = nullptr;
 }
 
-ActivityTimeline::Activity::Activity(Parameters* params, Row *row, int start_time, NodeWorker::ActivityType type, bool active)
-    : params_(params), row(row), type_(type), active_(active), start_(start_time), stop_(start_time + 10)
+ActivityTimeline::Activity::Activity(Parameters* params, Row *row, int start_time, NodeWorker::ActivityType type, std::shared_ptr<const Interval> interval)
+    : params_(params), row(row), type_(type), interval_(interval), start_(start_time), stop_(start_time + 10)
 {
-    rect = new QGraphicsRectItem;
+    rect = new ActivityTimelineItem(interval);
 
     update();
 }
@@ -478,7 +478,7 @@ void ActivityTimeline::Activity::update()
     }
 
     QPen pen(QColor(20, 20, 20));
-    if(active_){
+    if(interval_->isActive()){
         rect->setBrush(QBrush(color/*, Qt::Dense4Pattern*/));
         pen.setWidth(3);
     } else {
@@ -493,6 +493,8 @@ void ActivityTimeline::Activity::update()
     double x = std::max(0.0, (start_ - params_->start_time) / params_->resolution);
     int width = (stop_ - start_)  / params_->resolution;
     rect->setRect(x, bottom, std::max(2, width), row_height);
+
+    rect->refresh();
 }
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_activity_timeline.cpp"

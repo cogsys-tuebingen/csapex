@@ -523,6 +523,7 @@ add_library(csapex_qt SHARED
 
     src/view/widgets/activity_legend.cpp
     src/view/widgets/activity_timeline.cpp
+    src/view/widgets/activity_timeline_item.cpp
     src/view/widgets/completed_line_edit.cpp
     src/view/widgets/box_dialog.cpp
     src/view/widgets/search_dialog.cpp

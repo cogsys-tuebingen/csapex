@@ -11,6 +11,7 @@
 namespace csapex
 {
 
+class ActivityTimelineItem;
 class Interval;
 
 class CSAPEX_QT_EXPORT ActivityTimeline : public QGraphicsView
@@ -74,7 +75,7 @@ private:
 
     struct Activity
     {
-        Activity(Parameters* params, Row* row, int start_time, NodeWorker::ActivityType type, bool active);
+        Activity(Parameters* params, Row* row, int start_time, NodeWorker::ActivityType type, std::shared_ptr<Interval const> interval);
         ~Activity();
 
         void step(int time);
@@ -85,12 +86,12 @@ private:
         Row* row;
 
         NodeWorker::ActivityType type_;
-        bool active_;
+        std::shared_ptr<Interval const> interval_;
 
         int start_;
         int stop_;
 
-        QGraphicsRectItem* rect;
+        ActivityTimelineItem* rect;
     };
 
     struct Row

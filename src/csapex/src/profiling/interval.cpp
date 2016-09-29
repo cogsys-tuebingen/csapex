@@ -57,6 +57,16 @@ long Interval::getEndMs() const
     return std::chrono::duration_cast<std::chrono::milliseconds>(end_.time_since_epoch()).count();
 }
 
+long Interval::getStartMicro() const
+{
+    return std::chrono::duration_cast<std::chrono::microseconds>(start_.time_since_epoch()).count();
+}
+
+long Interval::getEndMicro() const
+{
+    return std::chrono::duration_cast<std::chrono::microseconds>(end_.time_since_epoch()).count();
+}
+
 void Interval::start()
 {
     start_ = std::chrono::high_resolution_clock::now();
