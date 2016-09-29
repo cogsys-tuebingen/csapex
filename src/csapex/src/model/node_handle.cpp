@@ -879,3 +879,8 @@ UUIDProvider* NodeHandle::getUUIDProvider()
 {
     return uuid_provider_;
 }
+
+bool NodeHandle::isGraph() const
+{
+    return node_type_ == "csapex::Graph";
+}

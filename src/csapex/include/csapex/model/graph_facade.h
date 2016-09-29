@@ -90,10 +90,12 @@ public:
     csapex::slim_signal::Signal<void(TaskGeneratorPtr)> generatorRemoved;
 
     csapex::slim_signal::Signal<void()> panic;
-
+    
 private:
     void nodeAddedHandler(NodeHandlePtr node);
     void nodeRemovedHandler(NodeHandlePtr node);
+
+    void createSubgraphFacade(NodeHandlePtr nh);
 
 private:
     GraphFacade* parent_;

@@ -114,6 +114,8 @@ public:
 
     UUIDProvider* getUUIDProvider();
 
+    bool isGraph() const;
+
 public:
     // TODO: get rid of
     void updateParameterValue(Connectable* source);

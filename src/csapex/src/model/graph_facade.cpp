@@ -54,18 +54,8 @@ GraphFacade* GraphFacade::getParent() const
 }
 
 void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
-    if(nh->getType() == "csapex::Graph") {
-        NodePtr node = nh->getNode().lock();
-        apex_assert_hard(node);
-        GraphPtr sub_graph = std::dynamic_pointer_cast<Graph>(node);
-        apex_assert_hard(sub_graph);
-
-        NodeHandle* subnh = graph_->findNodeHandle(sub_graph->getUUID());;
-        apex_assert_hard(subnh == nh.get());
-        GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get(), nh.get(), this);
-        children_[nh->getUUID()] = sub_graph_facade;
-
-        childAdded(sub_graph_facade);
+    if(nh->isGraph()) {
+        createSubgraphFacade(nh);
     }
 
     NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
@@ -88,7 +78,21 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
 
     nw->checkParameters();
     nw->panic.connect(panic);
+}
 
+void GraphFacade::createSubgraphFacade(NodeHandlePtr nh)
+{
+    NodePtr node = nh->getNode().lock();
+    apex_assert_hard(node);
+    GraphPtr sub_graph = std::dynamic_pointer_cast<Graph>(node);
+    apex_assert_hard(sub_graph);
+
+    NodeHandle* subnh = graph_->findNodeHandle(sub_graph->getUUID());;
+    apex_assert_hard(subnh == nh.get());
+    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get(), nh.get(), this);
+    children_[nh->getUUID()] = sub_graph_facade;
+
+    childAdded(sub_graph_facade);
 }
 
 void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh)
