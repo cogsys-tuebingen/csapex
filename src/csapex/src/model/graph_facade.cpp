@@ -6,6 +6,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node_state.h>
 #include <csapex/model/connection.h>
 #include <csapex/core/settings.h>
 #include <csapex/scheduling/task_generator.h>
@@ -17,7 +18,6 @@
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
-
 using namespace csapex;
 
 GraphFacade::GraphFacade(ThreadPool &executor, Graph* graph, NodeHandle* nh, GraphFacade *parent)
@@ -73,7 +73,14 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
 
     TaskGeneratorPtr runner = std::make_shared<NodeRunner>(nw);
     generators_[nh->getUUID()] = runner;
-    executor_.add(runner.get());
+
+    int thread_id = nh->getNodeState()->getThreadId();
+    if(thread_id >= 0) {
+        executor_.addToGroup(runner.get(), thread_id);
+    } else {
+        executor_.add(runner.get());
+    }
+
     generatorAdded(runner);
 
     nodeAdded(nh);
