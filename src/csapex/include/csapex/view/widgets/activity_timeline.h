@@ -74,7 +74,7 @@ private:
 
     struct Activity
     {
-        Activity(Parameters* params, Row* row, int start_time, NodeWorker::ActivityType type);
+        Activity(Parameters* params, Row* row, int start_time, NodeWorker::ActivityType type, bool active);
         ~Activity();
 
         void step(int time);
@@ -85,6 +85,8 @@ private:
         Row* row;
 
         NodeWorker::ActivityType type_;
+        bool active_;
+
         int start_;
         int stop_;
 

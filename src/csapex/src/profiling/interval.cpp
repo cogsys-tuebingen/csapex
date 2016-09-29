@@ -3,6 +3,22 @@
 
 using namespace csapex;
 
+Interval::Interval(const std::string &name)
+    : name_(name), length_micro_seconds_(0), active_(false)
+{
+    start();
+}
+
+bool Interval::isActive() const
+{
+    return active_;
+}
+
+void Interval::setActive(bool active)
+{
+    active_ = active;
+}
+
 void Interval::entries(std::vector<std::pair<std::string, double> > &out) const
 {
     out.push_back(std::make_pair(name_, lengthMs()));
@@ -24,12 +40,6 @@ double Interval::lengthSubMs() const
         sum += i.lengthMs();
     }
     return sum * 1e-3;
-}
-
-Interval::Interval(const std::string &name)
-    : name_(name), length_micro_seconds_(0)
-{
-    start();
 }
 
 std::string Interval::name() const

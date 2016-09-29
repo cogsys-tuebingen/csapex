@@ -420,6 +420,7 @@ void NodeWorker::startProcessingMessages()
     if(profiler_->isEnabled()) {
         Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
         timer->restart();
+        timer->root->setActive(node_handle_->isActive());
         interval_start(this, PROCESS, timer->root);
     }
 
@@ -813,6 +814,7 @@ bool NodeWorker::tick()
                     if(profiler_->isEnabled()) {
                         timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
                         timer->restart();
+                        timer->root->setActive(node_handle_->isActive());
                         interval_start(this, TICK, timer->root);
                     }
 

@@ -36,6 +36,9 @@ public:
 
     void entries(std::vector<std::pair<std::string, double> > &out) const;
 
+    void setActive(bool active);
+    bool isActive() const;
+
 public:
     std::map<std::string, Interval::Ptr> sub;
 
@@ -44,6 +47,8 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> start_;
     std::chrono::time_point<std::chrono::high_resolution_clock> end_;
     long length_micro_seconds_;
+
+    bool active_;
 };
 
 }

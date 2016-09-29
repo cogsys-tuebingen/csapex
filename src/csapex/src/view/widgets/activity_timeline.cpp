@@ -308,7 +308,7 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, std::shared_pt
     Row* row = node2row.at(node);
 
     updateTime(interval->getStartMs());
-    row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type)));
+    row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type), interval->isActive()));
     row->active_activity_ = row->activities_.back();
 
     addItem(row->active_activity_->rect);
@@ -327,6 +327,7 @@ void ActivityTimeline::updateRowStop(NodeWorker* node, std::shared_ptr<const Int
         }
 
         updateTime(interval->getEndMs());
+        row->active_activity_->active_ = interval->isActive();
         row->active_activity_->stop(params_.time);
         row->active_activity_ = nullptr;
 
@@ -432,8 +433,8 @@ void ActivityTimeline::Row::clear()
     active_activity_ = nullptr;
 }
 
-ActivityTimeline::Activity::Activity(Parameters* params, Row *row, int start_time, NodeWorker::ActivityType type)
-    : params_(params), row(row), type_(type), start_(start_time), stop_(start_time + 10)
+ActivityTimeline::Activity::Activity(Parameters* params, Row *row, int start_time, NodeWorker::ActivityType type, bool active)
+    : params_(params), row(row), type_(type), active_(active), start_(start_time), stop_(start_time + 10)
 {
     rect = new QGraphicsRectItem;
 
@@ -463,23 +464,28 @@ void ActivityTimeline::Activity::update()
 
     switch(type_) {
     case NodeWorker::PROCESS:
-        color = QColor::fromRgbF(1.0, 0.2, 0.2, 1.0);
+        color = QColor::fromRgbF(1.0, 0.15, 0.15, 1.0);
         break;
     case NodeWorker::TICK:
-        color = QColor::fromRgbF(0.2, 1.0, 0.2, 1.0);
+        color = QColor::fromRgbF(0.15, 1.0, 0.15, 1.0);
         break;
     case NodeWorker::OTHER:
-        color = QColor::fromRgbF(0.5, 0.5, 0.5, 1.0);
+        color = QColor::fromRgbF(0.15, 0.5, 0.5, 1.0);
         break;
     }
     if(!row->selected) {
         color = color.lighter();
     }
 
-    rect->setBrush(QBrush(color/*, Qt::Dense4Pattern*/));
-
     QPen pen(QColor(20, 20, 20));
-    pen.setWidth(2);
+    if(active_){
+        rect->setBrush(QBrush(color/*, Qt::Dense4Pattern*/));
+        pen.setWidth(3);
+    } else {
+
+        rect->setBrush(QBrush(color, Qt::Dense4Pattern));
+        pen.setWidth(1);
+    }
     rect->setPen(pen);
 
     int bottom = row->top;
