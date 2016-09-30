@@ -56,13 +56,13 @@ std::string IntervalParameter::toStringImpl() const
     return v.str();
 }
 
-boost::any IntervalParameter::get_unsafe() const
+void IntervalParameter::get_unsafe(boost::any& out) const
 {
     Lock l = lock();
     if(is<std::pair<int, int> >()) {
-        return std::make_pair(boost::any_cast<int>(values_.first), boost::any_cast<int>(values_.second));
+        out = std::make_pair(boost::any_cast<int>(values_.first), boost::any_cast<int>(values_.second));
     } else {
-        return std::make_pair(boost::any_cast<double>(values_.first), boost::any_cast<double>(values_.second));
+        out = std::make_pair(boost::any_cast<double>(values_.first), boost::any_cast<double>(values_.second));
     }
 }
 

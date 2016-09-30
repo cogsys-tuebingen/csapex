@@ -13,6 +13,7 @@
 #include <csapex/param/string_list_parameter.h>
 #include <csapex/param/output_progress_parameter.h>
 #include <csapex/param/output_text_parameter.h>
+#include <csapex/param/set_parameter.h>
 
 /// SYSTEM
 #include <iostream>
@@ -260,6 +261,25 @@ ParameterBuilder ParameterFactory::declareParameterStringSet(const std::string& 
 }
 
 
+
+ParameterBuilder ParameterFactory::declareOutputProgress(const std::string &name, const ParameterDescription &description)
+{
+    std::shared_ptr<OutputProgressParameter> result(new OutputProgressParameter(name, description));
+    return ParameterBuilder(std::move(result));
+}
+
+ParameterBuilder ParameterFactory::declareOutputText(const std::string &name, const ParameterDescription &description)
+{
+    std::shared_ptr<OutputTextParameter> result(new OutputTextParameter(name, description));
+    return ParameterBuilder(std::move(result));
+}
+
+
+namespace csapex
+{
+namespace param
+{
+
 template <typename T>
 ParameterBuilder ParameterFactory::declareRange(const std::string& name,
                                    const ParameterDescription& description,
@@ -281,19 +301,6 @@ ParameterBuilder ParameterFactory::declareRange(const std::string& name,
     return ParameterBuilder(std::move(result));
 }
 
-
-template
-CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<double>(const std::string& name,
-                                                      const ParameterDescription& description,
-                                                      double min, double max, double def, double step);
-template
-CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<int>(const std::string& name,
-                                                   const ParameterDescription& description,
-                                                   int min, int max, int def, int step);
-
-
-
-
 template <typename T>
 ParameterBuilder ParameterFactory::declareInterval(const std::string& name,
                                                  const ParameterDescription& description,
@@ -314,6 +321,63 @@ ParameterBuilder ParameterFactory::declareInterval(const std::string& name,
 }
 
 
+template <typename T>
+ParameterBuilder ParameterFactory::declareParameterSet(const std::string& name, const ParameterDescription& description,
+                                          const std::map<std::string, T> & set_values,
+                                          const T& def)
+{
+    std::unique_ptr<SetParameter> result(new SetParameter(name, description));
+    result->setSet(set_values);
+    if(!set_values.empty()) {
+        result->def_ = def;
+        result->set<T>(def);
+    }
+
+    return ParameterBuilder(std::move(result));
+}
+template <typename T>
+ParameterBuilder ParameterFactory::declareValue(const std::string& name, const ParameterDescription& description, const T& def)
+{
+    std::unique_ptr<ValueParameter> result(new ValueParameter(name, description));
+    result->def_ = def;
+    result->set<T>(def);
+
+    return ParameterBuilder(std::move(result));
+}
+
+/// EXPLICIT INSTANTIATON
+
+namespace {
+template<typename T> struct argument_type;
+template<typename T, typename U> struct argument_type<T(U)> { typedef U type; };
+}
+
+#define INSTANTIATE(T) \
+    template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareParameterSet(const std::string&, const ParameterDescription&, const std::map<std::string, argument_type<void(T)>::type> &, const argument_type<void(T)>::type&); \
+    template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareValue(const std::string&, const ParameterDescription&, const argument_type<void(T)>::type&);
+
+
+INSTANTIATE(bool)
+INSTANTIATE(int)
+INSTANTIATE(double)
+INSTANTIATE(std::string)
+INSTANTIATE((std::pair<int,int>))
+INSTANTIATE((std::pair<double,double>))
+INSTANTIATE((std::pair<std::string,bool>))
+INSTANTIATE((std::vector<int>))
+INSTANTIATE((std::vector<double>))
+INSTANTIATE((std::vector<std::string>))
+
+
+template
+CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<double>(const std::string& name,
+                                                      const ParameterDescription& description,
+                                                      double min, double max, double def, double step);
+template
+CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<int>(const std::string& name,
+                                                   const ParameterDescription& description,
+                                                   int min, int max, int def, int step);
+
 template
 CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<double>(const std::string& name,
                                                       const ParameterDescription& description,
@@ -322,16 +386,5 @@ template
 CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<int>(const std::string& name,
                                                    const ParameterDescription& description,
                                                    int min, int max, int def_min, int def_max, int step);
-
-
-ParameterBuilder ParameterFactory::declareOutputProgress(const std::string &name, const ParameterDescription &description)
-{
-    std::shared_ptr<OutputProgressParameter> result(new OutputProgressParameter(name, description));
-    return ParameterBuilder(std::move(result));
 }
-
-ParameterBuilder ParameterFactory::declareOutputText(const std::string &name, const ParameterDescription &description)
-{
-    std::shared_ptr<OutputTextParameter> result(new OutputTextParameter(name, description));
-    return ParameterBuilder(std::move(result));
 }

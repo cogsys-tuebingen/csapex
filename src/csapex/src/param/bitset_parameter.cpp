@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <boost/any.hpp>
 
 using namespace csapex;
 using namespace param;
@@ -157,9 +158,9 @@ std::string BitSetParameter::toStringImpl() const
     return std::string("[bitset: ") +  "]";
 }
 
-boost::any BitSetParameter::get_unsafe() const
+void BitSetParameter::get_unsafe(boost::any& out) const
 {
-    return value_;
+    out = value_;
 }
 
 

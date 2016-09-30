@@ -4,8 +4,6 @@
 /// COMPONENT
 #include <csapex/param/parameter.h>
 #include <csapex/param/parameter_builder.h>
-#include <csapex/param/value_parameter.h>
-#include <csapex/param/set_parameter.h>
 #include <csapex/param/parameter_description.h>
 #include <csapex/csapex_param_export.h>
 
@@ -258,17 +256,7 @@ public:
     template <typename T>
     static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description,
                                               const std::map<std::string, T> & set_values,
-                                              const T& def)
-    {
-        std::unique_ptr<SetParameter> result(new SetParameter(name, description));
-        result->setSet(set_values);
-        if(!set_values.empty()) {
-            result->def_ = def;
-            result->set<T>(def);
-        }
-
-        return ParameterBuilder(std::move(result));
-    }
+                                              const T& def);
     template <typename T>
     static ParameterBuilder declareParameterSet(const std::string& name,
                                               const std::map<std::string, T> & set,
@@ -332,14 +320,8 @@ public:
      * @return
      */
     template <typename T>
-    static ParameterBuilder declareValue(const std::string& name, const ParameterDescription& description, const T& def)
-    {
-        std::unique_ptr<ValueParameter> result(new ValueParameter(name, description));
-        result->def_ = def;
-        result->set<T>(def);
+    static ParameterBuilder declareValue(const std::string& name, const ParameterDescription& description, const T& def);
 
-        return ParameterBuilder(std::move(result));
-    }
     template <typename T>
     static ParameterBuilder declareValue(const std::string& name, const T& def)
     {

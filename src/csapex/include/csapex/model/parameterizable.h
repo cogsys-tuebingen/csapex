@@ -5,7 +5,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/param/param_fwd.h>
 #include <csapex/param/parameter.h>
-#include <csapex/model/generic_state.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
@@ -129,7 +129,7 @@ public:
 
     virtual GenericStatePtr getParameterState();
     virtual GenericStatePtr getParameterStateClone() const;
-    virtual void setParameterState(Memento::Ptr memento);
+    virtual void setParameterState(MementoPtr memento);
 
 private:
     template <typename T>

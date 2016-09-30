@@ -140,12 +140,12 @@ std::string SetParameter::toStringImpl() const
     return std::string("[set: ") + convertToString(value_)  + "]";
 }
 
-boost::any SetParameter::get_unsafe() const
+void SetParameter::get_unsafe(boost::any& out) const
 {
     if(value_.empty()) {
-        return def_;
+        out = def_;
     } else {
-        return value_;
+        out = value_;
     }
 }
 

@@ -8,6 +8,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/generic_state.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>

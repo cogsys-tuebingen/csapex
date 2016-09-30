@@ -47,9 +47,9 @@ std::string ColorParameter::toStringImpl() const
     return std::string("[color: ") + v.str()  + "]";
 }
 
-boost::any ColorParameter::get_unsafe() const
+void ColorParameter::get_unsafe(boost::any& out) const
 {
-    return colors_;
+    out = colors_;
 }
 
 

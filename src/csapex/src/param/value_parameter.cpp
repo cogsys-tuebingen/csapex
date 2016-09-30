@@ -49,9 +49,9 @@ std::string ValueParameter::toStringImpl() const
     return std::string("[value: ") + v.str()  + "]";
 }
 
-boost::any ValueParameter::get_unsafe() const
+void ValueParameter::get_unsafe(boost::any& out) const
 {
-    return value_;
+    out = value_;
 }
 
 
@@ -100,7 +100,7 @@ void ValueParameter::doSetValueFrom(const Parameter &other)
         }
     } else {
         try {
-            value_ = access_unsafe(other);
+            access_unsafe(other, value_);
             triggerChange();
 
         } catch(const std::exception& e) {

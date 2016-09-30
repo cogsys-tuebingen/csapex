@@ -42,7 +42,7 @@ public:
     }
 
 protected:
-    virtual boost::any get_unsafe() const override;
+    virtual void get_unsafe(boost::any& out) const override;
     virtual bool set_unsafe(const boost::any& v) override;
 
 private:

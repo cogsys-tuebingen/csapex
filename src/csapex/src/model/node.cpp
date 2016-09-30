@@ -10,6 +10,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/settings.h>
+#include <csapex/model/generic_state.h>
 
 /// SYSTEM
 #include <iostream>

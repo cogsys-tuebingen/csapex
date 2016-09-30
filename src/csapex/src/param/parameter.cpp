@@ -8,11 +8,10 @@
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #ifdef WIN32
-
 #else
 #include <cxxabi.h>
 #endif
-
+#include <boost/any.hpp>
 #include <iostream>
 
 using namespace csapex;
@@ -213,9 +212,9 @@ void Parameter::clone(const Parameter &other)
     doClone(other);
 }
 
-boost::any Parameter::access_unsafe(const Parameter &p) const
+void Parameter::access_unsafe(const Parameter &p, boost::any& out) const
 {
-    return p.get_unsafe();
+    p.get_unsafe(out);
 }
 
 std::string Parameter::type2string(const std::type_info &type)
@@ -252,6 +251,33 @@ param::ParameterPtr Parameter::getDictionaryEntry(const std::string &key) const
 
 namespace csapex {
 namespace param {
+
+template <typename T>
+T Parameter::as() const
+{
+    if(!is<T>() || is<void>()) {
+        throwTypeError(typeid(T), type(), "get failed: ");
+    }
+
+    {
+        Lock l = lock();
+        boost::any v;
+        get_unsafe(v);
+        return boost::any_cast<T> (v);
+    }
+}
+
+template <typename T>
+bool Parameter::setSilent(const T& v)
+{
+    if(!is<T>() && !is<void>()) {
+        throwTypeError(typeid(T), type(),"set failed: ");
+    }
+
+    Lock l = lock();
+    return set_unsafe(v);
+}
+
 template <typename T>
 void Parameter::setDictionaryValue(const std::string& key, const T& value)
 {
@@ -259,6 +285,33 @@ void Parameter::setDictionaryValue(const std::string& key, const T& value)
     p->set(value);
     setDictionaryEntry(key, p);
 }
+
+/// EXPLICIT INSTANTIATON
+
+namespace {
+template<typename T> struct argument_type;
+template<typename T, typename U> struct argument_type<T(U)> { typedef U type; };
+}
+#define INSTANTIATE_AS(T) \
+template CSAPEX_PARAM_EXPORT argument_type<void(T)>::type Parameter::as<argument_type<void(T)>::type>() const;
+#define INSTANTIATE_SILENT(T) \
+template CSAPEX_PARAM_EXPORT bool Parameter::setSilent<argument_type<void(T)>::type>(const argument_type<void(T)>::type& value);
+
+#define INSTANTIATE(T) \
+    INSTANTIATE_AS(T) \
+    INSTANTIATE_SILENT(T)
+
+INSTANTIATE(bool)
+INSTANTIATE(int)
+INSTANTIATE(double)
+INSTANTIATE(std::string)
+INSTANTIATE((std::pair<int,int>))
+INSTANTIATE((std::pair<double,double>))
+INSTANTIATE((std::pair<std::string,bool>))
+INSTANTIATE((std::vector<int>))
+INSTANTIATE((std::vector<double>))
+INSTANTIATE((std::vector<std::string>))
+
 
 template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<bool>(const std::string& key, const bool& value);
 template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<int>(const std::string& key, const int& value);

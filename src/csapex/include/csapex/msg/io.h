@@ -6,11 +6,19 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/utility/shared_ptr_tools.hpp>
+
+namespace boost
+{
+template <typename T> class shared_ptr;
+}
+
+namespace shared_ptr_tools
+{
+template <typename T> std::shared_ptr<T> to_std_shared(const boost::shared_ptr<T> &p);
+}
 
 namespace csapex
 {
-
 namespace msg
 {
 

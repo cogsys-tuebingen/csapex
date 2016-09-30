@@ -10,7 +10,6 @@
 #include <map>
 #include <functional>
 #include <mutex>
-#include <condition_variable>
 
 namespace csapex
 {

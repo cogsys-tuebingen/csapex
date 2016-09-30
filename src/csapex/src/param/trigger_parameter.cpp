@@ -35,7 +35,7 @@ std::string TriggerParameter::toStringImpl() const
     return std::string("[trigger]");
 }
 
-boost::any TriggerParameter::get_unsafe() const
+void TriggerParameter::get_unsafe(boost::any& out) const
 {
     throw std::runtime_error("cannot read TriggerParameter");
 }

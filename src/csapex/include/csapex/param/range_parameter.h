@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/contains.hpp>
+#include <boost/any.hpp>
 
 namespace csapex {
 namespace param {
@@ -125,7 +126,7 @@ public:
     }
 
 protected:
-    virtual boost::any get_unsafe() const override;
+    virtual void get_unsafe(boost::any& out) const override;
     virtual bool set_unsafe(const boost::any& v) override;
 
     RangeParameter(const RangeParameter& other) = default;

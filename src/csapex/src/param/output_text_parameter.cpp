@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <boost/any.hpp>
 
 using namespace csapex;
 using namespace param;
@@ -35,9 +36,9 @@ const std::type_info &OutputTextParameter::type() const
     return typeid(std::string);
 }
 
-boost::any OutputTextParameter::get_unsafe() const
+void OutputTextParameter::get_unsafe(boost::any& out) const
 {
-    return text_;
+    out = text_;
 }
 bool OutputTextParameter::set_unsafe(const boost::any& v)
 {

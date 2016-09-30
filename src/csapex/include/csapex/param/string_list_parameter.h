@@ -5,6 +5,9 @@
 #include <csapex/param/parameter.h>
 #include <csapex/csapex_param_export.h>
 
+/// SYSTEM
+#include <boost/any.hpp>
+
 namespace csapex {
 namespace param {
 
@@ -41,7 +44,7 @@ public:
     void doDeserialize(const YAML::Node& n) override;
 
 protected:
-    virtual boost::any get_unsafe() const override;
+    virtual void get_unsafe(boost::any& out) const override;
     virtual bool set_unsafe(const boost::any& v) override;
 
 private:

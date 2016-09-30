@@ -45,9 +45,9 @@ std::string RangeParameter::toStringImpl() const
     return std::string("[ranged: ") + v.str()  + "]";
 }
 
-boost::any RangeParameter::get_unsafe() const
+void RangeParameter::get_unsafe(boost::any& out) const
 {
-    return value_;
+    out = value_;
 }
 
 

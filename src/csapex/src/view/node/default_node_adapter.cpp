@@ -1,73 +1,49 @@
 /// HEADER
 #include <csapex/view/node/default_node_adapter.h>
 
-/// COMPONENT
-#include <csapex/view/utility/qt_helper.hpp>
-#include <csapex/view/utility/qsignal_relay.h>
-#include <csapex/model/node.h>
+/// PROJECT
+#include <csapex/model/generic_state.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/model/node_state.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/view/widgets/port.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/view/node/parameter_context_menu.h>
-#include <csapex/model/node_state.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/view/widgets/doublespanslider.h>
-#include <csapex/view/node/box.h>
-#include <csapex/view/designer/graph_view.h>
-#include <csapex/profiling/timer.h>
-
-/// PROJECT
-#include <csapex/param/range_parameter.h>
-#include <csapex/param/interval_parameter.h>
-#include <csapex/param/value_parameter.h>
-#include <csapex/param/set_parameter.h>
-#include <csapex/param/bitset_parameter.h>
-#include <csapex/param/path_parameter.h>
-#include <csapex/param/trigger_parameter.h>
-#include <csapex/param/color_parameter.h>
 #include <csapex/param/angle_parameter.h>
+#include <csapex/param/bitset_parameter.h>
+#include <csapex/param/color_parameter.h>
+#include <csapex/param/interval_parameter.h>
 #include <csapex/param/output_progress_parameter.h>
-
-#include <csapex/view/param/range_param_adapter.h>
-#include <csapex/view/param/value_param_adapter.h>
-#include <csapex/view/param/color_param_adapter.h>
+#include <csapex/param/path_parameter.h>
+#include <csapex/param/range_parameter.h>
+#include <csapex/param/set_parameter.h>
+#include <csapex/param/trigger_parameter.h>
+#include <csapex/param/value_parameter.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/node/parameter_context_menu.h>
 #include <csapex/view/param/angle_param_adapter.h>
-#include <csapex/view/param/interval_param_adapter.h>
-#include <csapex/view/param/set_param_adapter.h>
 #include <csapex/view/param/bitset_param_adapter.h>
-#include <csapex/view/param/path_param_adapter.h>
-#include <csapex/view/param/output_text_param_adapter.h>
+#include <csapex/view/param/color_param_adapter.h>
+#include <csapex/view/param/interval_param_adapter.h>
 #include <csapex/view/param/output_progress_param_adapter.h>
-
+#include <csapex/view/param/output_text_param_adapter.h>
+#include <csapex/view/param/path_param_adapter.h>
+#include <csapex/view/param/range_param_adapter.h>
+#include <csapex/view/param/set_param_adapter.h>
+#include <csapex/view/param/value_param_adapter.h>
+#include <csapex/view/utility/qsignal_relay.h>
+#include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/widgets/port.h>
 
 /// SYSTEM
-#include <boost/lambda/lambda.hpp>
-#include <boost/lambda/bind.hpp>
-#include <iomanip>
-#include <QCheckBox>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QComboBox>
-#include <QFileDialog>
-#include <QColorDialog>
-#include <QGroupBox>
-#include <QListWidget>
-#include <QApplication>
-#include <QProgressBar>
-#include <QDial>
 #include <functional>
-#include <QLabel>
-#include <qxt5/qxtspanslider.h>
 #include <QPointer>
+#include <QApplication>
+#include <QGroupBox>
+#include <QPushButton>
 
 using namespace csapex;
 using namespace csapex::param;
 
 namespace {
-
-
-
 
 /// THREADING
 void assertGuiThread()

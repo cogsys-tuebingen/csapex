@@ -5,6 +5,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/yaml_io.hpp>
+#include <csapex/model/generic_state.h>
 
 /// SYSTEM
 #include <iostream>

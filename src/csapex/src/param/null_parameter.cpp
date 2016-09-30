@@ -33,7 +33,7 @@ std::string NullParameter::toStringImpl() const
     return std::string("[null]");
 }
 
-boost::any NullParameter::get_unsafe() const
+void NullParameter::get_unsafe(boost::any& out) const
 {
     throw std::runtime_error("cannot use null parameters");
 }

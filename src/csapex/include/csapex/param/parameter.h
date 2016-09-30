@@ -9,13 +9,17 @@
 
 /// SYSTEM
 #include <memory>
-#include <boost/any.hpp>
 #include <csapex/utility/slim_signal.hpp>
 #include <mutex>
 
 /// FORWARD DECLARATIONS
 namespace YAML {
 class Node;
+}
+
+namespace boost
+{
+class any;
 }
 
 namespace csapex {
@@ -77,18 +81,7 @@ public:
     Lock lock() const;
 
     template <typename T>
-    T as() const
-    {
-        if(!is<T>() || is<void>()) {
-            throwTypeError(typeid(T), type(), "get failed: ");
-        }
-
-        {
-            Lock l = lock();
-            const boost::any& v = get_unsafe();
-            return boost::any_cast<T> (v);
-        }
-    }
+    T as() const;
 
     template <typename T>
     void set(const T& v)
@@ -104,15 +97,7 @@ public:
     }
 
     template <typename T>
-    bool setSilent(const T& v)
-    {
-        if(!is<T>() && !is<void>()) {
-            throwTypeError(typeid(T), type(),"set failed: ");
-        }
-
-        Lock l = lock();
-        return set_unsafe(v);
-    }
+    bool setSilent(const T& v);
 
     template <typename T>
     Parameter& operator = (const T& value)
@@ -182,10 +167,10 @@ protected:
     explicit Parameter(const std::string& name, const ParameterDescription& description);
     Parameter(const Parameter& other);
 
-    virtual boost::any get_unsafe() const = 0;
+    virtual void get_unsafe(boost::any& out) const = 0;
     virtual bool set_unsafe(const boost::any& v) = 0;
 
-    boost::any access_unsafe(const Parameter &p) const;
+    void access_unsafe(const Parameter &p, boost::any& out) const;
 
 private:
     void setName(const std::string& name);

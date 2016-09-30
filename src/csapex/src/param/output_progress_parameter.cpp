@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <boost/any.hpp>
 
 using namespace csapex;
 using namespace param;
@@ -29,9 +30,9 @@ std::string OutputProgressParameter::toStringImpl() const
     return std::string("[progress]");
 }
 
-boost::any OutputProgressParameter::get_unsafe() const
+void OutputProgressParameter::get_unsafe(boost::any& out) const
 {
-    return value;
+    out = value;
 }
 bool OutputProgressParameter::set_unsafe(const boost::any& v)
 {

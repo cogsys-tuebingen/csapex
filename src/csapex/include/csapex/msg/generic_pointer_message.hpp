@@ -5,6 +5,7 @@
 #include <csapex/msg/message.h>
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/utility/register_msg.h>
+#include <csapex/utility/shared_ptr_tools.hpp>
 
 namespace csapex {
 namespace connection_types {

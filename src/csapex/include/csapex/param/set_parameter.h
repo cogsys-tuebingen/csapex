@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <vector>
+#include <boost/any.hpp>
 
 namespace csapex {
 namespace param {
@@ -68,7 +69,7 @@ public:
 
 
 protected:
-    virtual boost::any get_unsafe() const override;
+    virtual void get_unsafe(boost::any& out) const override;
     virtual bool set_unsafe(const boost::any& v) override;
 
     std::string convertToString(const boost::any& v) const;

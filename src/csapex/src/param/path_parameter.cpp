@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <boost/any.hpp>
 
 using namespace csapex;
 using namespace param;
@@ -33,9 +34,9 @@ std::string PathParameter::toStringImpl() const
     return std::string("[path: ") + value_  + "]";
 }
 
-boost::any PathParameter::get_unsafe() const
+void PathParameter::get_unsafe(boost::any& out) const
 {
-    return value_;
+    out = value_;
 }
 
 

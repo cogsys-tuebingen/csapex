@@ -16,6 +16,7 @@
 #include <csapex/msg/marker_message.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/exceptions.h>
+#include <csapex/model/generic_state.h>
 
 /// SYSTEM
 #include <iostream>

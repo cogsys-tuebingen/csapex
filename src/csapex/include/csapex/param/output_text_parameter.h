@@ -26,7 +26,7 @@ public:
     virtual const std::type_info &type() const override;
 
 protected:
-    virtual boost::any get_unsafe() const override;
+    virtual void get_unsafe(boost::any& out) const override;
     virtual bool set_unsafe(const boost::any& v) override;
     virtual std::string toStringImpl() const override;
 

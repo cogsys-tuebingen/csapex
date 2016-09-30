@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <boost/any.hpp>
 
 using namespace csapex;
 using namespace param;
@@ -29,9 +30,9 @@ std::string AngleParameter::toStringImpl() const
     return std::string("[angle: ") + std::to_string(angle_ ) + "rad, " + std::to_string(angle_ / M_PI * 180.0) +  "°]";
 }
 
-boost::any AngleParameter::get_unsafe() const
+void AngleParameter::get_unsafe(boost::any& out) const
 {
-    return angle_;
+    out = angle_;
 }
 
 
