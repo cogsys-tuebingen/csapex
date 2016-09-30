@@ -6,6 +6,7 @@
 #include <csapex/view/designer/designer_styleable.h>
 #include <csapex/view/designer/designer_options.h>
 #include <csapex/command/command_fwd.h>
+#include <csapex/utility/slim_signal.h>
 
 namespace csapex
 {
@@ -20,19 +21,20 @@ class DragIO;
 class CSAPEX_QT_EXPORT CsApexViewCore
 {
 public:
-    CsApexViewCore(CsApexCore& core, NodeAdapterFactory &node_adapter_factory, CommandDispatcher &dispatcher, DragIO& dragio);
+    CsApexViewCore(CsApexCore& core);
+    CsApexViewCore(CsApexViewCore& parent, CsApexCore& core, std::shared_ptr<CommandDispatcher> dispatcher);
 
     void execute(const CommandPtr& command);
     void executeLater(const CommandPtr& command);
 
     CsApexCore& getCore();
 
-    NodeAdapterFactory& getNodeAdapterFactory();
+    std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory();
     CommandDispatcher& getCommandDispatcher();
 
     DesignerStyleable& getStyle();
 
-    DragIO& getDragIO();
+    std::shared_ptr<DragIO> getDragIO();
 
     Settings& getSettings();
 
@@ -42,13 +44,14 @@ public:
 private:
     CsApexCore& core_;
 
-    NodeAdapterFactory& node_adapter_factory_;
-
-    CommandDispatcher& dispatcher_;
+    std::shared_ptr<NodeAdapterFactory> node_adapter_factory_;
+    std::shared_ptr<CommandDispatcher> dispatcher_;
 
     DesignerStyleable style;
 
-    DragIO& drag_io;
+    std::shared_ptr<DragIO> drag_io;
+
+    std::vector<slim_signal::ScopedConnection> connections_;
 };
 
 }

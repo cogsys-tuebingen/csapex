@@ -28,10 +28,10 @@
 
 using namespace csapex;
 
-Designer::Designer(CsApexViewCore& view_core, MinimapWidget* minimap, QWidget* parent)
+Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer),
       options_(view_core.getSettings(), this),
-      minimap_(minimap),
+      minimap_(new MinimapWidget),
       core_(view_core.getCore()), view_core_(view_core), is_init_(false)
 {
     view_core.getCommandDispatcher().setDesigner(this);
@@ -53,6 +53,11 @@ Designer::~Designer()
 DesignerOptions* Designer::options()
 {
     return &options_;
+}
+
+MinimapWidget* Designer::getMinimap()
+{
+    return minimap_;
 }
 
 void Designer::setup()
@@ -432,7 +437,7 @@ DesignerScene* Designer::getVisibleDesignerScene() const
 
 NodeAdapterFactory* Designer::getNodeAdapterFactory() const
 {
-    return &view_core_.getNodeAdapterFactory();
+    return view_core_.getNodeAdapterFactory().get();
 }
 
 void Designer::refresh()

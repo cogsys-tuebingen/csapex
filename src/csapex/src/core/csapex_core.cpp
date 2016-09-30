@@ -25,6 +25,8 @@
 #include <csapex/msg/any_message.h>
 #include <csapex/utility/error_handling.h>
 #include <csapex/profiling/profiler.h>
+#include <csapex/manager/message_provider_manager.h>
+#include <csapex/utility/stream_interceptor.h>
 
 /// SYSTEM
 #include <fstream>
@@ -35,18 +37,17 @@
 
 using namespace csapex;
 
-CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
-                       ExceptionHandler& handler, NodeFactoryPtr node_factory, std::shared_ptr<PluginManager<CorePlugin>> plugin_manager)
-    : settings_(settings), plugin_locator_(plugin_locator), exception_handler_(handler),
-      node_factory_(node_factory),
+CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::PluginLocatorPtr plugin_locator)
+    : parent_(nullptr),
+      settings_(settings),
+      plugin_locator_(plugin_locator),
+      exception_handler_(handler),
+      node_factory_(nullptr),
       root_uuid_provider_(std::make_shared<UUIDProvider>()),
       profiler_(std::make_shared<Profiler>()),
-      core_plugin_manager(plugin_manager),
+      core_plugin_manager(nullptr),
       init_(false), load_needs_reset_(false)
 {
-    signal_connections_.emplace_back(settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this)));
-
-
     thread_pool_ = std::make_shared<ThreadPool>(exception_handler_, !settings_.get<bool>("threadless"), settings_.get<bool>("thread_grouping"));
     thread_pool_->setPause(settings_.get<bool>("initially_paused"));
 
@@ -56,23 +57,41 @@ CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
     signal_connections_.emplace_back(thread_pool_->end_step.connect(end_step));
 }
 
-CsApexCore::CsApexCore(Settings &settings, PluginLocatorPtr plugin_locator,
-                       ExceptionHandler& handler)
-    : CsApexCore(settings, plugin_locator, handler,
-                 std::make_shared<NodeFactory>(plugin_locator.get()), std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin"))
+CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
+    : CsApexCore(settings, handler, std::make_shared<PluginLocator>(settings))
 {
+    signal_connections_.emplace_back(settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this)));
+
     exception_handler_.setCore(this);
+
+    settings_.saveRequest.connect([this](YAML::Node& n){ thread_pool_->saveSettings(n); });
+    settings_.loadRequest.connect([this](YAML::Node& n){ thread_pool_->loadSettings(n); });
+
+    StreamInterceptor::instance().start();
+    MessageProviderManager::instance().setPluginLocator(plugin_locator_);
+
+    core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
+    node_factory_ = std::make_shared<NodeFactory>(plugin_locator_.get());
+
+    boot();
 }
 
 CsApexCore::CsApexCore(const CsApexCore& parent)
-    : CsApexCore(parent.getSettings(), parent.getPluginLocator(), parent.getExceptionHandler(),
-                 parent.node_factory_, parent.core_plugin_manager)
+    : CsApexCore(parent.getSettings(), parent.getExceptionHandler(), parent.getPluginLocator())
 {
+    parent_ = &parent;
+    core_plugin_manager = parent.core_plugin_manager;
+    node_factory_ =  parent.node_factory_;
 }
 
 CsApexCore::~CsApexCore()
 {
-    root_->clear();
+    if(!parent_) {
+        root_->clear();
+        plugin_locator_->shutdown();
+        SingletonInterface::shutdownAll();
+        thread_pool_->clear();
+    }
 
     for(std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
         it->second->shutdown();
@@ -80,12 +99,13 @@ CsApexCore::~CsApexCore()
     core_plugins_.clear();
     core_plugin_manager.reset();
 
-    boot_plugins_.clear();
-    while(!boot_plugin_loaders_.empty()) {
-        delete boot_plugin_loaders_.front();
-        boot_plugin_loaders_.erase(boot_plugin_loaders_.begin());
+    if(!parent_) {
+        boot_plugins_.clear();
+        while(!boot_plugin_loaders_.empty()) {
+            delete boot_plugin_loaders_.front();
+            boot_plugin_loaders_.erase(boot_plugin_loaders_.begin());
+        }
     }
-
 }
 
 void CsApexCore::setPause(bool pause)
@@ -205,9 +225,9 @@ void CsApexCore::boot()
 
     boost::filesystem::path directory(dir_string);
 
-	if (!boost::filesystem::exists(directory)) {
-		return;
-	}
+    if (!boost::filesystem::exists(directory)) {
+        return;
+    }
     boost::filesystem::directory_iterator dir(directory);
     boost::filesystem::directory_iterator end;
 
@@ -218,7 +238,7 @@ void CsApexCore::boot()
         class_loader::ClassLoader* loader = boot_plugin_loaders_.back();
 
         try {
-			apex_assert_hard(loader->isLibraryLoaded());
+            apex_assert_hard(loader->isLibraryLoaded());
             std::vector<std::string> classes = loader->getAvailableClasses<BootstrapPlugin>();
             for(std::size_t c = 0; c < classes.size(); ++c){
                 auto boost_plugin = loader->createInstance<BootstrapPlugin>(classes[c]);
@@ -231,6 +251,8 @@ void CsApexCore::boot()
             std::cerr << "boot plugin " << path << " failed: " << e.what() << std::endl;
         }
     }
+
+    init();
 }
 
 void CsApexCore::startup()
@@ -255,6 +277,8 @@ void CsApexCore::startup()
     root_->getGraph()->activation();
 
     showStatusMessage("painting user interface");
+
+    thread_pool_->start();
 }
 
 void CsApexCore::reset()
@@ -313,9 +337,9 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     if(!dir.empty()) {
 #ifdef WIN32
-		int chdir_result = _chdir(dir.c_str());
+        int chdir_result = _chdir(dir.c_str());
 #else
-		int chdir_result = chdir(dir.c_str());
+        int chdir_result = chdir(dir.c_str());
 #endif
         if(chdir_result != 0) {
             throw std::runtime_error(std::string("cannot change into directory ") + dir);
@@ -338,7 +362,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     YAML::Emitter yaml;
     yaml << node_map;
 
-//    std::cerr << yaml.c_str() << std::endl;
+    //    std::cerr << yaml.c_str() << std::endl;
 
     std::ofstream ofs(file.c_str());
     ofs << "#!" << settings_.get<std::string>("path_to_bin") << '\n';

@@ -43,10 +43,7 @@ public:
      * @brief CsApexWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexCore &core, CommandDispatcher *cmd_dispatcher,
-                          GraphFacadePtr graph_facade, Executor &executor,
-                          Designer *designer, MinimapWidget* minimap, ActivityLegend *legend, ActivityTimeline* timeline,
-                          PluginLocatorPtr locator, QWidget* parent = 0);
+    explicit CsApexWindow(CsApexViewCore &core, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void closeEvent(QCloseEvent* event);
@@ -112,6 +109,7 @@ private:
     std::string getConfigFile();
 
 private:
+    CsApexViewCore& view_core_;
     CsApexCore& core_;
     CommandDispatcher* cmd_dispatcher_;
     GraphFacadePtr root_;
@@ -133,7 +131,7 @@ private:
     QFileSystemWatcher* style_sheet_watcher_;
     PluginLocatorPtr plugin_locator_;
 
-    std::vector<csapex::slim_signal::Connection> connections_;
+    std::vector<csapex::slim_signal::ScopedConnection> connections_;
 };
 
 } /// NAMESPACE

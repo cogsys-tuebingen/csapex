@@ -575,7 +575,7 @@ void GraphView::dragEnterEvent(QDragEnterEvent* e)
     move_event_ = nullptr;
 
     if(!e->isAccepted()) {
-        view_core_.getDragIO().dragEnterEvent(this, e);
+        view_core_.getDragIO()->dragEnterEvent(this, e);
 
         QGraphicsView::dragEnterEvent(e);
     }
@@ -589,7 +589,7 @@ void GraphView::dragMoveEvent(QDragMoveEvent* e)
     move_event_ = new QDragMoveEvent(*e);
 
     QGraphicsView::dragMoveEvent(e);
-    view_core_.getDragIO().dragMoveEvent(this, e);
+    view_core_.getDragIO()->dragMoveEvent(this, e);
 
     if(item_under_mouse) {
         if(scroll_animation_timer_.isActive()) {
@@ -639,7 +639,7 @@ void GraphView::dropEvent(QDropEvent* e)
     delete move_event_;
     move_event_ = nullptr;
 
-    view_core_.getDragIO().dropEvent(this, e, mapToScene(e->pos()));
+    view_core_.getDragIO()->dropEvent(this, e, mapToScene(e->pos()));
     if(!e->isAccepted()) {
         QGraphicsView::dropEvent(e);
     }
@@ -669,7 +669,7 @@ void GraphView::animateScroll()
     v->setValue(v->value() + scroll_offset_y_);
 
     if(move_event_) {
-        view_core_.getDragIO().dragMoveEvent(this, move_event_);
+        view_core_.getDragIO()->dragMoveEvent(this, move_event_);
     }
 }
 
@@ -677,7 +677,7 @@ void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
-                   core_.getNodeFactory(), view_core_.getNodeAdapterFactory());
+                   core_.getNodeFactory(), *view_core_.getNodeAdapterFactory());
 
     int r = diag.exec();
 
@@ -774,7 +774,7 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     QObject::connect(box, &NodeBox::portAdded, this, &GraphView::addPort);
     QObject::connect(box, &NodeBox::portRemoved, this, &GraphView::removePort);
 
-    NodeAdapter::Ptr adapter = view_core_.getNodeAdapterFactory().makeNodeAdapter(node_handle, box);
+    NodeAdapter::Ptr adapter = view_core_.getNodeAdapterFactory()->makeNodeAdapter(node_handle, box);
     adapter->executeCommand.connect(delegate::Delegate<void(CommandPtr)>(&view_core_.getCommandDispatcher(), &CommandDispatcher::execute));
     box->setAdapter(adapter);
 
@@ -1257,7 +1257,7 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
-    NodeListGenerator generator(core_.getNodeFactory(), view_core_.getNodeAdapterFactory());
+    NodeListGenerator generator(core_.getNodeFactory(), *view_core_.getNodeAdapterFactory());
     generator.insertAvailableNodeTypes(&add_node);
     menu.addMenu(&add_node);
 

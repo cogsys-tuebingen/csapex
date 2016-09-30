@@ -14,7 +14,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/tag.h>
 #include <csapex/plugin/plugin_locator.h>
-#include <csapex/scheduling/executor.h>
+#include <csapex/scheduling/thread_pool.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/widgets/activity_legend.h>
@@ -55,16 +55,13 @@
 
 using namespace csapex;
 
-CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
-                           GraphFacadePtr graph_facade, Executor& executor,
-                           Designer* designer, MinimapWidget* minimap,
-                           ActivityLegend *legend, ActivityTimeline *timeline,
-                           PluginLocatorPtr locator, QWidget *parent)
-    : QMainWindow(parent), core_(core), cmd_dispatcher_(cmd_dispatcher),
-      root_(graph_facade), executor_(executor), profiler_(std::make_shared<Profiler>()),
-      ui(new Ui::CsApexWindow), designer_(designer), minimap_(minimap), activity_legend_(legend),
-      activity_timeline_(timeline), init_(false), style_sheet_watcher_(nullptr), plugin_locator_(locator)
-{    
+CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
+    : QMainWindow(parent), view_core_(view_core), core_(view_core.getCore()), cmd_dispatcher_(&view_core_.getCommandDispatcher()),
+      root_(view_core_.getCore().getRoot()), executor_(*core_.getThreadPool()), profiler_(std::make_shared<Profiler>()),
+      ui(new Ui::CsApexWindow), designer_(new Designer(view_core)), minimap_(designer_->getMinimap()),
+      activity_legend_(new ActivityLegend), activity_timeline_(new ActivityTimeline),
+      init_(false), style_sheet_watcher_(nullptr), plugin_locator_(core_.getPluginLocator())
+{
     qRegisterMetaType < QImage > ("QImage");
     qRegisterMetaType < TokenPtr > ("Token::Ptr");
     qRegisterMetaType < TokenConstPtr > ("Token::ConstPtr");
@@ -73,19 +70,22 @@ CsApexWindow::CsApexWindow(CsApexCore& core, CommandDispatcher* cmd_dispatcher,
     qRegisterMetaType < std::string > ("std::string");
     qRegisterMetaType < std::shared_ptr<const Interval> > ("std::shared_ptr<const Interval>");
 
+    QObject::connect(activity_legend_, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), activity_timeline_, SLOT(setSelection(QList<NodeWorker*>)));
+
+    connections_.emplace_back(root_->nodeWorkerAdded.connect([this](NodeWorkerPtr n) { activity_legend_->startTrackingNode(n); }));
+    connections_.emplace_back(root_->nodeRemoved.connect([this](NodeHandlePtr n) { activity_legend_->stopTrackingNode(n); }));
+
+    QObject::connect(activity_legend_, SIGNAL(nodeAdded(NodeWorker*)), activity_timeline_, SLOT(addNode(NodeWorker*)));
+    QObject::connect(activity_legend_, SIGNAL(nodeRemoved(NodeWorker*)), activity_timeline_, SLOT(removeNode(NodeWorker*)));
+
     QTextCodec *utfCodec = QTextCodec::codecForName("UTF-8");
     QTextCodec::setCodecForLocale(utfCodec);
-
-    MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 
     designer_->useProfiler(profiler_);
 }
 
 CsApexWindow::~CsApexWindow()
 {
-    for(auto connection : connections_) {
-        connection.disconnect();
-    }
     connections_.clear();
 
     delete ui;

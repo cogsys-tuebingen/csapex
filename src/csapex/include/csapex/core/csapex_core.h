@@ -23,7 +23,7 @@ class Profiler;
 class CSAPEX_EXPORT CsApexCore
 {
 public:
-    CsApexCore(Settings& settings_, PluginLocatorPtr plugin_locator, ExceptionHandler &handler);
+    CsApexCore(Settings& settings_, ExceptionHandler &handler);
     CsApexCore(const CsApexCore& parent);
 
     virtual ~CsApexCore();
@@ -75,12 +75,13 @@ public:
     csapex::slim_signal::Signal<void ()> end_step;
 
 private:
-    CsApexCore(Settings& settings_, PluginLocatorPtr plugin_locator, ExceptionHandler &handler,
-               NodeFactoryPtr node_factory, std::shared_ptr<PluginManager<CorePlugin>> plugin_manager);
+    CsApexCore(Settings& settings_, ExceptionHandler &handler, csapex::PluginLocatorPtr plugin_locator);
 
     CorePluginPtr makeCorePlugin(const std::string& name);
 
 private:
+    const CsApexCore* parent_;
+
     Settings& settings_;
     csapex::PluginLocatorPtr plugin_locator_;
     ExceptionHandler &exception_handler_;
@@ -108,7 +109,6 @@ private:
 
     bool init_;
     bool load_needs_reset_;
-
 };
 
 }

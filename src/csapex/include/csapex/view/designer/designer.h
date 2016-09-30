@@ -36,10 +36,11 @@ class CSAPEX_QT_EXPORT Designer : public QWidget, public Profilable
     friend class DesignerOptions;
 
 public:
-    Designer(CsApexViewCore& view_core, MinimapWidget* minimap, QWidget* parent = 0);
+    Designer(CsApexViewCore& view_core, QWidget* parent = 0);
     virtual ~Designer();
 
     DesignerOptions *options();
+    MinimapWidget* getMinimap();
 
     void setup();
 

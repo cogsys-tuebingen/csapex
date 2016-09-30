@@ -18,6 +18,9 @@
 namespace csapex
 {
 
+class CsApexViewCore;
+class CsApexWindow;
+
 
 struct CsApexCoreApp : public QCoreApplication, public AppProxy
 {
@@ -47,25 +50,35 @@ struct Main : public QObject {
     Q_OBJECT
 
 public:
-    Main(std::unique_ptr<QCoreApplication> &&app, ExceptionHandler &handler);
+    Main(std::unique_ptr<QCoreApplication> &&app, Settings &settings, ExceptionHandler &handler);
     ~Main();
 
     int run();
-    int main(bool headless, bool threadless, bool paused, bool thread_grouping, const std::string &config, const std::string& path_to_bin, const std::vector<std::string>& additional_args);
 
 public Q_SLOTS:
     void showMessage(const QString& msg);
 
 private:
+    int runWithGui();
+    int runHeadless();
+    int runImpl();
+
+    void checkRecoveryFile(CsApexViewCore& view_core, CsApexWindow& w);
     void askForRecoveryConfig(const std::string &config_to_load);
     void deleteRecoveryConfig();
 
 private:
     std::unique_ptr<QCoreApplication> app;
+    Settings& settings;
+
     ExceptionHandler& handler;
     CsApexSplashScreen* splash;
 
-    Settings settings;
+    CsApexCorePtr core;
+
+    bool recover_needed;
+
+    std::vector<slim_signal::ScopedConnection> connections_;
 };
 
 }

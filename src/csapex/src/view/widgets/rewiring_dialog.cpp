@@ -33,7 +33,7 @@ RewiringDialog::RewiringDialog(GraphFacade *graph, NodeHandle* node, CsApexViewC
 
       core_temp_(std::make_shared<CsApexCore>(view_core.getCore())),
       temp_dispatcher_(std::make_shared<CommandDispatcher>(*core_temp_)),
-      view_core_temp_(std::make_shared<CsApexViewCore>(*core_temp_, view_core.getNodeAdapterFactory(), *temp_dispatcher_, view_core.getDragIO())),
+      view_core_temp_(std::make_shared<CsApexViewCore>(view_core_, *core_temp_, temp_dispatcher_)),
 
       graph_(graph),
       node_(node)
@@ -104,7 +104,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
 
 void RewiringDialog::makeUI(const QString& stylesheet)
 {
-    BoxDialog diag("Please enter the new node type.", view_core_temp_->getCore().getNodeFactory(), view_core_temp_->getNodeAdapterFactory());
+    BoxDialog diag("Please enter the new node type.", view_core_temp_->getCore().getNodeFactory(), *view_core_temp_->getNodeAdapterFactory());
     diag.setWindowTitle("Select new node type.");
 
     int r = diag.exec();
