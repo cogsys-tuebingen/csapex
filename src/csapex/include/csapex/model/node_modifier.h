@@ -203,7 +203,9 @@ public:
      */
     virtual Input* addInput(TokenDataConstPtr type, const std::string& label, bool optional) = 0;
     virtual Output* addOutput(TokenDataConstPtr type, const std::string& label) = 0;
+    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot*, const TokenPtr& )> callback, bool active) = 0;
     virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active) = 0;
+    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void ()> callback, bool active) = 0;
     virtual Event* addEvent(TokenDataConstPtr type, const std::string& label) = 0;
 
 protected:

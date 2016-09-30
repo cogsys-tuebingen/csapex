@@ -66,8 +66,12 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 notifyMessagesProcessed();
             }));
 
-            node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", std::bind(&NodeWorker::setProcessingEnabled, this, true), true);
-            node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", std::bind(&NodeWorker::setProcessingEnabled, this, false), false);
+            node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
+                setProcessingEnabled(true);
+            }, true);
+            node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", [this](){
+                setProcessingEnabled(false);
+            }, false);
 
 
             auto tickable = std::dynamic_pointer_cast<TickableNode>(node);

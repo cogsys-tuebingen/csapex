@@ -21,6 +21,7 @@ class CSAPEX_EXPORT Slot : public Input
 public:
     Slot(std::function<void()> callback, const UUID &uuid, bool active);
     Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active);
+    Slot(std::function<void(Slot*,const TokenPtr&)> callback, const UUID &uuid, bool active);
 
     template <typename TokenType>
     Slot(std::function<void(const std::shared_ptr<TokenType const>&)> callback, const UUID &uuid, bool active)
@@ -55,7 +56,7 @@ public:
     csapex::slim_signal::Signal<void()> triggered;
 
 protected:
-    std::function<void(const TokenPtr&)> callback_;
+    std::function<void(Slot*,const TokenPtr&)> callback_;
     bool active_;
 
     long guard_;

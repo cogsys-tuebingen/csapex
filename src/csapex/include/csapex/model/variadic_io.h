@@ -130,6 +130,7 @@ protected:
 class CSAPEX_EXPORT VariadicSlots: public virtual VariadicBase
 {
 public:
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot* slot, const TokenPtr&)> callback);
     virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr&)> callback);
     virtual void removeVariadicSlot(SlotPtr slot);
     void removeVariadicSlotById(const UUID& slot);
@@ -147,10 +148,12 @@ protected:
 
 private:
     void updateSlots(int slot_count);
+    void registerSlot(Slot *result);
 
 private:
     param::ParameterPtr slot_count_;
     param::StringListParameterPtr slot_names_;
+
 
 protected:
     std::vector<SlotPtr> variadic_slots_;

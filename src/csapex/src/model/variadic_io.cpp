@@ -458,21 +458,36 @@ Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::strin
     apex_assert_hard(variadic_modifier_);
 
     auto result = variadic_modifier_->addSlot(type, label.empty() ? std::string("Slot") : label, callback, false);
-    if(result) {
-        variadic_slots_.emplace_back(std::dynamic_pointer_cast<Slot>(result->shared_from_this()));
+    registerSlot(result);
+    return result;
+}
+
+Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot* slot, const TokenPtr &)> callback)
+{
+    apex_assert_hard(variadic_modifier_);
+
+    auto result = variadic_modifier_->addSlot(type, label.empty() ? std::string("Slot") : label, callback, false);
+    registerSlot(result);
+    return result;
+}
+
+void VariadicSlots::registerSlot(Slot* slot)
+{
+    if(slot) {
+        variadic_slots_.emplace_back(std::dynamic_pointer_cast<Slot>(slot->shared_from_this()));
         slot_count_->set((int) variadic_slots_.size());
 
         if(variadic_slots_.size() >= slot_names_->count()) {
-            slot_names_->add(label);
+            slot_names_->add(slot->getLabel());
         }
 
         int index = variadic_slots_.size() - 1;
-        result->labelChanged.connect([this, index](const std::string& label){
+        slot->labelChanged.connect([this, index](const std::string& label){
             slot_names_->setAt(index, label);
         });
     }
-    return result;
 }
+
 void VariadicSlots::removeVariadicSlot(SlotPtr slot)
 {
     variadic_modifier_->removeSlot(slot->getUUID());
