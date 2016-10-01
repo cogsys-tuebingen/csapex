@@ -76,6 +76,8 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
     nodeAdded(nh);
     nodeWorkerAdded(nw);
 
+    nw->errorHappened.connect(notification);
+
     nw->checkParameters();
     nw->panic.connect(panic);
 }
@@ -91,6 +93,8 @@ void GraphFacade::createSubgraphFacade(NodeHandlePtr nh)
     apex_assert_hard(subnh == nh.get());
     GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get(), nh.get(), this);
     children_[nh->getUUID()] = sub_graph_facade;
+
+    sub_graph_facade->notification.connect(notification);
 
     childAdded(sub_graph_facade);
 }

@@ -7,8 +7,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_export.h>
-
-/// SYSTEM
+#include <csapex/utility/notification.h>
 #include <csapex/utility/slim_signal.h>
 
 namespace class_loader {
@@ -70,6 +69,8 @@ public:
     csapex::slim_signal::Signal<void ()> loaded;
 
     csapex::slim_signal::Signal<void (bool)> paused;
+
+    csapex::slim_signal::Signal<void (Notification)> notification;
 
     csapex::slim_signal::Signal<void ()> begin_step;
     csapex::slim_signal::Signal<void ()> end_step;

@@ -11,6 +11,7 @@
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/profiling/profiler.h>
+#include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
 #include <QMainWindow>
@@ -80,6 +81,7 @@ public Q_SLOTS:
 
     void start();
     void showStatusMessage(const std::string& msg);
+    void showNotification(const Notification& notification);
     void updateNodeTypes();
 
     void updateDebugInfo();
@@ -101,6 +103,7 @@ Q_SIGNALS:
 private:
     void construct();
     void setupDesigner();
+
 
     void createPluginsMenu();
     void createTutorialsMenu();

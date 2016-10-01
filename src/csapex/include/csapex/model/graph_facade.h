@@ -7,9 +7,10 @@
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_export.h>
+#include <csapex/utility/notification.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
-#include <csapex/utility/slim_signal.hpp>
 #include <unordered_map>
 
 namespace csapex
@@ -89,6 +90,7 @@ public:
     csapex::slim_signal::Signal<void(TaskGeneratorPtr)> generatorAdded;
     csapex::slim_signal::Signal<void(TaskGeneratorPtr)> generatorRemoved;
 
+    csapex::slim_signal::Signal<void (Notification)> notification;
     csapex::slim_signal::Signal<void()> panic;
     
 private:

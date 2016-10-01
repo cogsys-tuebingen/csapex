@@ -19,6 +19,8 @@ FWD(Timer);
 FWD(Timable);
 FWD(UUID);
 
+class Notification;
+
 class StreamRelay;
 }
 

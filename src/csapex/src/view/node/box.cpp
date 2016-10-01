@@ -233,7 +233,7 @@ void NodeBox::construct()
         QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
         connections_.emplace_back(worker->threadChanged.connect([this](){ updateThreadInformation(); }));
-        connections_.emplace_back(worker->errorHappened.connect([this](bool){ updateVisualsRequest(); }));
+        connections_.emplace_back(worker->errorHappened.connect([this](Notification){ updateVisualsRequest(); }));
     }
 
 

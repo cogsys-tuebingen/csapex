@@ -944,6 +944,11 @@ void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel /*lev
         node->aerr << msg << std::endl;
     }
 
-    errorHappened(error);
+    if(error) {
+        Notification message;
+        message.uuid = getUUID();
+        message.message = msg;
 
+        errorHappened(message);
+    }
 }

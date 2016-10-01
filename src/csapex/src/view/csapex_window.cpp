@@ -172,6 +172,8 @@ void CsApexWindow::construct()
 
     connections_.push_back(core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); }));
 
+    connections_.push_back(core_.notification.connect([this](Notification notification){ showNotification(notification); }));
+
     connections_.push_back(core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); }));
     connections_.push_back(core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); }));
 
@@ -730,6 +732,11 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 void CsApexWindow::showStatusMessage(const std::string &msg)
 {
     Q_EMIT statusChanged(QString(msg.c_str()));
+}
+
+void CsApexWindow::showNotification(const Notification &notification)
+{
+    statusBar()->showMessage(QString::fromStdString(notification.uuid.getAbsoluteUUID().getFullName() + ": " + notification.message));
 }
 
 void CsApexWindow::init()

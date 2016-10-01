@@ -9,6 +9,7 @@
 #include <csapex/param/parameter.h>
 #include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/utility/notification.h>
 
 /// SYSTEM
 #include <map>
@@ -115,7 +116,7 @@ public:
     csapex::slim_signal::Signal<void(NodeWorker* worker)> stopProfiling;
 
     csapex::slim_signal::Signal<void()> threadChanged;
-    csapex::slim_signal::Signal<void(bool)> errorHappened;
+    csapex::slim_signal::Signal<void(Notification)> errorHappened;
 
     csapex::slim_signal::Signal<void()> messages_processed;
     csapex::slim_signal::Signal<void()> processRequested;
