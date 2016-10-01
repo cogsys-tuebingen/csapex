@@ -1,18 +1,12 @@
-#!/bin/bash
+#!/bin/bash -l
 
 if [[ $(grep "::" <<< $1) ]]; then
     arrIN=(${1//::/ })
     NODE_NAME=${arrIN[1]}
     NAMESPACE="${arrIN[0]}::"
-    NAMESPACE_BEGIN="namespace ${arrIN[0]}{"
-    NAMESPACE_END="}"
-    NAMESPACE_USE="using namespace ${arrIN[0]};"
 else
     NODE_NAME=$1
-    NAMESPACE=""
-    NAMESPACE_BEGIN=""
-    NAMESPACE_END=""
-    NAMESPACE_USE=""
+    NAMESPACE="csapex"
 fi
 
 FILE_NAME=$(sed -e 's/\([A-Z]\)/_\L\1/g' -e 's/^_//' <<< $NODE_NAME)
@@ -52,7 +46,7 @@ DIR=${WORKING_DIR:${#PREFIX}}
 ###
 ### CMAKELISTS EXISTS, BEGIN PARSING
 ###
-CMAKELIST=CMakeLists.txt
+CMAKELIST=${PREFIX}CMakeLists.txt
 
 ###
 ### TEST IF NODE NAME IS FREE IN CMAKE LIST
@@ -96,114 +90,90 @@ fi
 ###
 ### FIND NAME OF THE PLUGIN LIBRARY
 ###
-LIBRARY=$(cat $PLUGINXML | grep "<library" | grep -Po 'path="lib\K[^"]*')
+LIBRARY=($(cat $PLUGINXML | grep "<library" | grep -Po 'path="lib\K[^"]*'))
 
 if [[ ! $LIBRARY ]]; then
     echo "ERROR: cannot find library name in $PLUGINXML"
     exit
 fi
 
+if [[ ${#LIBRARY[@]} > 1 ]]; then
+    echo "There are multiple libraries, please select the target:"
+    select LIB in ${LIBRARY[@]};
+    do
+        LIBRARY=$LIB
+        echo "You picked $LIBRARY"
+        break
+    done
+else
+    echo "Target library is $LIBRARY"
+fi
 
 ###
 ### EVERYTHING THERE -> CREATE
 ###
 
 NEW_FILE="$FILE_NAME.cpp"
-NEW_FILE_H="$FILE_NAME.h"
-NEW_XML_1="<class type=\"csapex::$NAMESPACE$NODE_NAME\" base_class_type=\"csapex::Node\">"
+NEW_XML_1="<class type=\"${NAMESPACE}::${NODE_NAME}\" base_class_type=\"csapex::Node\">"
 NEW_XML_2="  <description>$DESCRIPTION</description>"
 NEW_XML_3="<\/class>"
 
-###
-### GENERATE HEADER
-###
-
-# convert camel case to upper case + underscore
-GUARD=$(sed -e 's/\([A-Z]\)/_\L\1/g' -e 's/^_//' <<< $NODE_NAME)
-GUARD=$(echo $GUARD | tr '[:lower:]' '[:upper:]')
-GUARD="${GUARD}_H"
-
-echo "#ifndef $GUARD
-#define $GUARD
-
-/// COMPONENT
-
-/// PROJECT
-#include <csapex/model/node.h>
-
-/// SYSTEM
-
-namespace csapex {
-$NAMESPACE_BEGIN
-
-class $NODE_NAME : public csapex::Node
-{
-public:
-    $NODE_NAME();
-
-    void setupParameters();
-    void setup();
-    void process();
-
-private:
-    Input* in_;
-    Output* out_;
-};
-$NAMESPACE_END
-
-}
-
-#endif // $GUARD" > $DIR/$NEW_FILE_H
 
 
 ###
 ### GENERATE SOURCE
 ###
 
-echo "/// HEADER
-#include \"$NEW_FILE_H\"
-
+echo "
 /// PROJECT
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
-#include <csapex/utility/register_apex_plugin.h>
-#include <utils_param/parameter_factory.h>
+#include <csapex/model/node.h>
+#include <csapex/msg/io.h>
+#include <csapex/param/parameter_factory.h>
 #include <csapex/model/node_modifier.h>
-
-/// SYSTEM
-//#include <boost/assign.hpp>
-
-CSAPEX_REGISTER_CLASS(csapex::${NAMESPACE}${NODE_NAME}, csapex::Node)
+#include <csapex/utility/register_apex_plugin.h>
+#include <csapex/msg/generic_value_message.hpp>
 
 using namespace csapex;
 using namespace csapex::connection_types;
-$NAMESPACE_USE
 
-$NODE_NAME::$NODE_NAME()
+namespace $NAMESPACE
 {
+
+class $NODE_NAME : public Node
+{
+public:
+    $NODE_NAME()
+    {
+    }
+
+    void setup(csapex::NodeModifier& modifier) override
+    {
+        in_ = modifier.addInput<std::string>(\"Input\");
+        out_ = modifier.addOutput<std::string>(\"Output\");
+    }
+
+    void setupParameters(csapex::Parameterizable& params) override
+    {
+    }
+
+    void process() override
+    {
+        std::string value = msg::getValue<std::string>(in_);
+
+        MessageConstPtr message = msg::getMessage<GenericValueMessage<std::string>>(in_);
+        apex_assert(message);
+        msg::publish(out_, value + \"!\");
+    }
+
+    private:
+    Input* in_;
+    Output* out_;
+
+};
+
 }
 
-void $NODE_NAME::setupParameters()
-{
-    // addParameter(param::ParameterFactory::declareRange(\"range\", 0.01, 1.0, 0.2, 0.01), update);
-
-    //std::map<std::string, int> featuremix = boost::assign::map_list_of
-    //        (\"standard\", 0)
-    //        (\"no foo\", 1)
-    //        (\"no bar\", 2);
-
-    // addParameter(param::ParameterFactory::declareParameterSet<int>(\"feature mix\", featuremix));
-}
-
-void $NODE_NAME::setup()
-{
-    //in_  = modifier_->addInput<TYPE>(LABEL);
-    //out_ = modifier_->addOutput<TYPE>(LABEL);
-}
-
-void $NODE_NAME::process()
-{
-}
+CSAPEX_REGISTER_CLASS(${NAMESPACE}::${NODE_NAME}, csapex::Node)
 "> $DIR/$NEW_FILE
 
 
@@ -212,19 +182,12 @@ void $NODE_NAME::process()
 ###
 ### MODIFY CMAKELISTS
 ###
-ENTRY="    $DIR/$NEW_FILE"
-sed -i -e "/add_library.*$LIBRARY\s*/{
-        $!{ N ; s|\(add_library.*$LIBRARY\s*\)\n\(.*\)|\\1\n$ENTRY\n\\2|
-          }
-         }" $CMAKELIST
+WS=$(grep "add_library.*$LIBRARY" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ /\\ /')
+ENTRY="${WS}$DIR/$NEW_FILE"
+sed -i "/add_library.*$LIBRARY/a $ENTRY"  $CMAKELIST
                          
 ###
 ### MODIFY PLUGINXML
 ###
-ENTRY="    $NEW_FILE"
-sed -i -e "/<library.*$LIBRARY.*/{
-         $!{ N ; s|\(<library.*$LIBRARY.*\)\n\(.*\)|\\1\n$NEW_XML_1\n$NEW_XML_2\n$NEW_XML_3\n\\2|
-           }
-         }" $PLUGINXML
-                         
-
+ENTRY="$NEW_XML_1\n$NEW_XML_2\n$NEW_XML_3"
+sed -i -e "/<library.*$LIBRARY/a $ENTRY"  $PLUGINXML
