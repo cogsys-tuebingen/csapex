@@ -28,7 +28,7 @@ class CSAPEX_QT_EXPORT RewiringDialog : public QDialog
     Q_OBJECT
 
 public:
-    RewiringDialog(GraphFacade* graph, NodeHandle *node, CsApexViewCore &view_core, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    RewiringDialog(NodeHandle *node, CsApexViewCore &view_core, QWidget *parent = 0, Qt::WindowFlags f = 0);
     ~RewiringDialog();
 
     void makeUI(const QString &stylesheet);
@@ -61,7 +61,6 @@ private:
     NodeHandlePtr nh_old;
     NodeHandlePtr nh_new;
 
-    GraphFacade* graph_;
     NodeHandle* node_;
 
     GraphPtr graph_old;

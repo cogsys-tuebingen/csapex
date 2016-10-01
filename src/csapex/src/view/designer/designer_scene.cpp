@@ -110,8 +110,7 @@ DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CsApexViewCore& view_c
     : view_core_(view_core), graph_facade_(graph_facade),
       preview_(nullptr),
       draw_grid_(false), draw_schema_(false), display_messages_(true), display_signals_(true),
-      scale_(1.0), overlay_threshold_(0.45),
-      highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false),
+      scale_(1.0), highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false),
       debug_(false)
 {
     background_ = QPixmap::fromImage(QImage(":/background.png"));

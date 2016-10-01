@@ -1633,7 +1633,7 @@ void GraphView::morphNode()
 
     NodeHandle* nh = box->getNodeHandle();
 
-    RewiringDialog diag(graph_facade_.get(), nh, view_core_);
+    RewiringDialog diag(nh, view_core_);
     diag.makeUI(styleSheet());
 
     int r = diag.exec();

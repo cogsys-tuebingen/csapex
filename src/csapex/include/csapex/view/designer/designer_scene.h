@@ -182,8 +182,6 @@ private:
     bool display_signals_;
 
     double scale_;
-    double overlay_threshold_;
-
 
     int activity_marker_min_width_;
     int activity_marker_max_width_;

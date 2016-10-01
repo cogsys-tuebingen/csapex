@@ -27,15 +27,13 @@
 using namespace csapex;
 
 
-RewiringDialog::RewiringDialog(GraphFacade *graph, NodeHandle* node, CsApexViewCore& view_core, QWidget *parent, Qt::WindowFlags f)
+RewiringDialog::RewiringDialog(NodeHandle* node, CsApexViewCore& view_core, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
       view_core_(view_core),
 
       core_temp_(std::make_shared<CsApexCore>(view_core.getCore())),
       temp_dispatcher_(std::make_shared<CommandDispatcher>(*core_temp_)),
       view_core_temp_(std::make_shared<CsApexViewCore>(view_core_, *core_temp_, temp_dispatcher_)),
-
-      graph_(graph),
       node_(node)
 {
     root_uuid_provider_ = std::make_shared<UUIDProvider>();

@@ -22,7 +22,7 @@
 namespace csapex {
 namespace connection_types {
 
-struct CSAPEX_EXPORT GenericVectorMessage : public Message
+class CSAPEX_EXPORT GenericVectorMessage : public Message
 {
 public:
     struct Anything {};

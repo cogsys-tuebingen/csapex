@@ -220,8 +220,6 @@ private:
     double scroll_offset_x_;
     double scroll_offset_y_;
 
-    bool panning_possible_;
-
     bool middle_mouse_dragging_;
     bool middle_mouse_panning_;
     QPointF middle_mouse_drag_start_;
