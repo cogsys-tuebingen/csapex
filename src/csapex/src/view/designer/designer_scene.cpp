@@ -34,7 +34,6 @@
 /// SYSTEM
 #include <QtGui>
 #include <QtOpenGL>
-#include <GL/glu.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D

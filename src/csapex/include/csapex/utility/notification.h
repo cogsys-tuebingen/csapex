@@ -3,14 +3,17 @@
 
 /// COMPONENT
 #include <csapex/utility/uuid.h>
+#include <csapex/model/error_state.h>
 
 namespace csapex {
 
 class Notification
 {
 public:
-    UUID uuid;
+    AUUID auuid;
     std::string message;
+
+    ErrorState::ErrorLevel error;
 };
 
 }

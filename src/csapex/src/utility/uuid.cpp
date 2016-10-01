@@ -263,6 +263,16 @@ std::size_t AUUID::Hasher::operator()(const AUUID& k) const {
     return k.hash();
 }
 
+AUUID AUUID::parentAUUID() const
+{
+    AUUID parent = *this;
+    if(!representation_.empty()) {
+        parent.representation_.erase(parent.representation_.begin());
+    }
+
+    return parent;
+}
+
 namespace csapex
 {
 

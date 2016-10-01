@@ -21,10 +21,14 @@
 #include <csapex/view/designer/designerio.h>
 #include "ui_designer.h"
 #include <csapex/view/widgets/search_dialog.h>
+#include <csapex/view/widgets/notification_widget.h>
 
 /// SYSTEM
 #include <QTabWidget>
 #include <QInputDialog>
+#include <QResizeEvent>
+#include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
 
 using namespace csapex;
 
@@ -32,7 +36,8 @@ Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer),
       options_(view_core.getSettings(), this),
       minimap_(new MinimapWidget),
-      core_(view_core.getCore()), view_core_(view_core), is_init_(false)
+      core_(view_core.getCore()), view_core_(view_core), is_init_(false),
+      notification_animation_(nullptr)
 {
     view_core.getCommandDispatcher().setDesigner(this);
 
@@ -48,6 +53,7 @@ Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
 Designer::~Designer()
 {
     delete ui;
+    delete notification_animation_;
 }
 
 DesignerOptions* Designer::options()
@@ -58,6 +64,11 @@ DesignerOptions* Designer::options()
 MinimapWidget* Designer::getMinimap()
 {
     return minimap_;
+}
+
+void Designer::resizeEvent(QResizeEvent *re)
+{
+    QWidget::resizeEvent(re);
 }
 
 void Designer::setup()
@@ -299,6 +310,83 @@ void Designer::updateMinimap()
     minimap_->display(view);
 }
 
+void Designer::showNotification(const Notification &notification)
+{
+    auto pos = named_notifications_.find(notification.auuid);
+    if(pos == named_notifications_.end()) {
+        if(notification.error == ErrorState::ErrorLevel::NONE) {
+            // for now we only show error messages
+            return;
+        }
+
+        NotificationWidget* widget = new NotificationWidget(notification, this);
+        named_notifications_[notification.auuid] = widget;
+
+        QObject::connect(widget, &NotificationWidget::activated, this, &Designer::focusOnNode);
+        QObject::connect(widget, &NotificationWidget::timeout, [this, notification](){
+            removeNotification(notification);
+        });
+        int y = 0;
+        for(NotificationWidget* nw : sorted_notifications_) {
+            y += nw->height();
+        }
+
+        widget->move(widget->pos().x(), y);
+
+        sorted_notifications_.push_back(widget);
+
+        widget->show();
+    } else {
+        pos->second->setNotification(notification);
+    }
+}
+
+void Designer::removeNotification(const Notification &notification)
+{
+    NotificationWidget* widget = named_notifications_.at(notification.auuid);
+    named_notifications_.erase(notification.auuid);
+
+    int offset_y = 0;
+
+    if(notification_animation_) {
+        notification_animation_->stop();
+        delete notification_animation_;
+    }
+    notification_animation_ = new QParallelAnimationGroup;
+
+    for(auto it = sorted_notifications_.begin(); it != sorted_notifications_.end();) {
+        NotificationWidget* nw = *it;
+        if(nw == widget) {
+            it = sorted_notifications_.erase(it);
+
+        } else {
+            QRect rect = nw->geometry();
+            QRect rect_to = rect;
+
+            rect_to.setY(std::max(0, offset_y));
+            rect_to.setHeight(rect.height());
+
+            QPropertyAnimation *animation = new QPropertyAnimation(nw, "geometry");
+            animation->setDuration(500);
+            animation->setStartValue(rect);
+            animation->setEndValue(rect_to);
+            animation->setEasingCurve(QEasingCurve::OutCubic);
+
+            notification_animation_->addAnimation(animation);
+
+            ++it;
+            offset_y += nw->height();
+        }
+    }
+
+    if(notification_animation_->animationCount() == 0) {
+        delete notification_animation_;
+        notification_animation_ = nullptr;
+    } else {
+        notification_animation_->start(QPropertyAnimation::KeepWhenStopped);
+    }
+}
+
 std::vector<NodeBox*> Designer::getSelectedBoxes() const
 {
     DesignerScene* scene = getVisibleDesignerScene();
@@ -490,7 +578,7 @@ void Designer::removeBox(NodeBox *box)
 
 void Designer::focusOnNode(const AUUID &id)
 {
-    AUUID graph_id = id.parentUUID().getAbsoluteUUID();
+    AUUID graph_id = id.parentAUUID();
 
     // show the parent graph
     showGraph(graph_id);

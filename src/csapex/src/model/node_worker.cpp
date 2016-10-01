@@ -938,17 +938,25 @@ void NodeWorker::setMinimized(bool min)
     node_handle_->getNodeState()->setMinimized(min);
 }
 
-void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel /*level*/)
+void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level)
 {
-    if(NodePtr node = node_handle_->getNode().lock()) {
-        node->aerr << msg << std::endl;
+    if(!msg.empty()) {
+        if(NodePtr node = node_handle_->getNode().lock()) {
+            if(level == ErrorLevel::ERROR) {
+                node->aerr << msg << std::endl;
+            } else if(level == ErrorLevel::WARNING) {
+                node->awarn << msg << std::endl;
+            } else {
+                node->ainfo << msg << std::endl;
+            }
+        }
     }
 
-    if(error) {
-        Notification message;
-        message.uuid = getUUID();
-        message.message = msg;
+    Notification message;
+    message.message = msg;
+    message.auuid = getUUID().getAbsoluteUUID();
 
-        errorHappened(message);
-    }
+    message.error = error ? level : ErrorLevel::NONE;
+
+    errorHappened(message);
 }

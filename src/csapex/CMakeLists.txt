@@ -540,6 +540,7 @@ add_library(csapex_qt SHARED
     src/view/widgets/screenshot_dialog.cpp
     src/view/widgets/movable_graphics_proxy_widget.cpp
     src/view/widgets/message_preview_widget.cpp
+    src/view/widgets/notification_widget.cpp
 
     ${csapex_qt_HEADERS}
 

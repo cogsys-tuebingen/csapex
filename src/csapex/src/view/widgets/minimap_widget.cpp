@@ -171,5 +171,6 @@ void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
     painter.setBrush(brush_rect);
     painter.drawRect(QRectF(tl_view, br_view));
 }
+
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_minimap_widget.cpp"

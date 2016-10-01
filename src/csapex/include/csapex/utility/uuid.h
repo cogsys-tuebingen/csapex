@@ -80,7 +80,7 @@ private:
     explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::string& representation);
     explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::vector<std::string>& representation);
 
-private:
+protected:
     std::weak_ptr<UUIDProvider> parent_;
     std::vector<std::string> representation_;
 };
@@ -94,6 +94,8 @@ public:
     AUUID() = default;
     AUUID(const AUUID& uuid) = default;
     explicit AUUID(const UUID& uuid);
+
+    AUUID parentAUUID() const;
 
     AUUID& operator = (const AUUID& uuid) = default;
     AUUID& operator = (const UUID& uuid);

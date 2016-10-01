@@ -11,11 +11,13 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/profiling/profilable.h>
+#include <csapex/utility/notification.h>
 
 /// SYSTEM
 #include <QWidget>
 #include <yaml-cpp/yaml.h>
 #include <unordered_map>
+#include <deque>
 
 /// FORWARD DECLARATIONS
 namespace Ui
@@ -23,10 +25,14 @@ namespace Ui
 class Designer;
 }
 
+class QFrame;
+class QParallelAnimationGroup;
+
 namespace csapex
 {
 
 class NodeFactory;
+class NotificationWidget;
 
 class CSAPEX_QT_EXPORT Designer : public QWidget, public Profilable
 {
@@ -88,6 +94,9 @@ public Q_SLOTS:
 
     void updateMinimap();
 
+    void showNotification(const Notification& notification);
+    void removeNotification(const Notification& notification);
+
     void refresh();
     void reset();
     void reinitialize();
@@ -102,6 +111,8 @@ public Q_SLOTS:
     void ungroupSelected();
 
 private:
+    void resizeEvent(QResizeEvent* re);
+
     void observe(GraphFacadePtr graph);
     void showGraph(GraphFacadePtr graph);
 
@@ -133,6 +144,10 @@ private:
     bool is_init_;
 
     std::vector<csapex::slim_signal::ScopedConnection> connections_;
+
+    QParallelAnimationGroup* notification_animation_;
+    std::unordered_map<UUID, NotificationWidget*, UUID::Hasher> named_notifications_;
+    std::deque<NotificationWidget*> sorted_notifications_;
 };
 
 }

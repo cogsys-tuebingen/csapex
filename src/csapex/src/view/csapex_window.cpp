@@ -69,6 +69,7 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
     qRegisterMetaType < TokenDataConstPtr > ("TokenData::ConstPtr");
     qRegisterMetaType < std::string > ("std::string");
     qRegisterMetaType < std::shared_ptr<const Interval> > ("std::shared_ptr<const Interval>");
+    qRegisterMetaType < Notification > ("Notification");
 
     QObject::connect(activity_legend_, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), activity_timeline_, SLOT(setSelection(QList<NodeWorker*>)));
 
@@ -172,7 +173,8 @@ void CsApexWindow::construct()
 
     connections_.push_back(core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); }));
 
-    connections_.push_back(core_.notification.connect([this](Notification notification){ showNotification(notification); }));
+    QObject::connect(this, &CsApexWindow::showNotificationRequest, this, &CsApexWindow::showNotification);
+    connections_.push_back(core_.notification.connect([this](Notification notification){ showNotificationRequest(notification); }));
 
     connections_.push_back(core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); }));
     connections_.push_back(core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); }));
@@ -736,7 +738,8 @@ void CsApexWindow::showStatusMessage(const std::string &msg)
 
 void CsApexWindow::showNotification(const Notification &notification)
 {
-    statusBar()->showMessage(QString::fromStdString(notification.uuid.getAbsoluteUUID().getFullName() + ": " + notification.message));
+    designer_->showNotification(notification);
+    statusBar()->showMessage(QString::fromStdString(notification.auuid.getFullName() + ": " + notification.message));
 }
 
 void CsApexWindow::init()

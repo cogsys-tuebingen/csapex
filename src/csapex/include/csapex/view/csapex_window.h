@@ -98,6 +98,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void statusChanged(const QString& status);
+    void showNotificationRequest(const Notification& notification);
     void closed();
 
 private:

@@ -79,14 +79,8 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
       scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr),
       preview_widget_(nullptr)
 {
-    //    setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); // memory leak?
-    QGLFormat fmt;
-    fmt.setSampleBuffers(true);
-    fmt.setSamples(2);
-    setViewport(new QGLWidget(fmt));
-
     setCacheMode(QGraphicsView::CacheBackground);
-    setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     setScene(scene_);
     setFocusPolicy(Qt::StrongFocus);
@@ -96,9 +90,6 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     setDragMode(QGraphicsView::RubberBandDrag);
     setInteractive(true);
-
-//    QShortcut *create_node_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
-//    QObject::connect(create_node_shortcut, SIGNAL(activated()), this, SLOT(showNodeInsertDialog()));
 
     QShortcut *box_reset_view = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_0), this);
     QObject::connect(box_reset_view, SIGNAL(activated()), this, SLOT(resetZoom()));
