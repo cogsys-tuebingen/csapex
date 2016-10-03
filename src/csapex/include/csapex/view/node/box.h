@@ -131,6 +131,7 @@ public Q_SLOTS:
 
     virtual void updateComponentInformation(Graph* graph);
     virtual void updateThreadInformation();
+    void updateFrequencyInformation();
     void contextMenuEvent(QContextMenuEvent* e);
 
     void registerEvent(Connectable*);
@@ -208,10 +209,13 @@ protected:
     QLabel* info_exec;
     QLabel* info_compo;
     QLabel* info_thread;
+    QLabel* info_frequency;
     QLabel* info_error;
 
     bool initialized_;
     bool moved_;
+
+    QTimer* frequency_timer_;
 };
 
 }

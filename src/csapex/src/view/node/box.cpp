@@ -35,6 +35,7 @@
 #include <QThread>
 #include <cmath>
 #include <sstream>
+#include <iomanip>
 
 using namespace csapex;
 
@@ -42,7 +43,8 @@ const QString NodeBox::MIME = "csapex/model/box";
 
 NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, QIcon icon, GraphView* parent)
     : parent_(parent), ui(nullptr), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(nullptr), icon_(icon),
-      info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_error(nullptr), initialized_(false)
+      info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_frequency(nullptr), info_error(nullptr), initialized_(false),
+      frequency_timer_(nullptr)
 {
     QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
 
@@ -73,6 +75,8 @@ NodeBox::~NodeBox()
 
     delete ui;
     initialized_ = false;
+
+    delete frequency_timer_;
 }
 
 void NodeBox::destruct()
@@ -100,6 +104,12 @@ void NodeBox::setupUi()
         info_thread = new QLabel;
         info_thread->setProperty("threadgroup", true);
         ui->infos->addWidget(info_thread);
+    }
+
+    if(!info_frequency) {
+        info_frequency = new QLabel;
+        info_frequency->setProperty("frequency", true);
+        ui->infos->addWidget(info_frequency);
     }
 
     if(!info_error) {
@@ -232,8 +242,8 @@ void NodeBox::construct()
         //    nh->enabled.connect([this](bool e){ enabledChange(e); });
         QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
-        connections_.emplace_back(worker->threadChanged.connect([this](){ updateThreadInformation(); }));
-        connections_.emplace_back(worker->errorHappened.connect([this](Notification){ updateVisualsRequest(); }));
+        connections_.emplace_back(worker->thread_changed.connect([this](){ updateThreadInformation(); }));
+        connections_.emplace_back(worker->notification.connect([this](Notification){ updateVisualsRequest(); }));
     }
 
 
@@ -292,6 +302,7 @@ void NodeBox::updateBoxInformation(Graph* graph)
 {
     updateComponentInformation(graph);
     updateThreadInformation();
+    updateFrequencyInformation();
 }
 
 namespace {
@@ -326,7 +337,7 @@ void NodeBox::updateComponentInformation(Graph* graph)
         info_compo->setVisible(true);
     }
 
-    if(info_compo) {
+    if(info_compo->isVisible()) {
         int compo = graph->getComponent(nh->getUUID());
         std::stringstream info;
         info << "C:" << compo;
@@ -350,7 +361,7 @@ void NodeBox::updateThreadInformation()
         info_thread->setVisible(true);
     }
 
-    if(info_thread) {
+    if(info_thread->isVisible()) {
         NodeStatePtr state = nh->getNodeState();
         int id = state->getThreadId();
         std::stringstream info;
@@ -368,6 +379,42 @@ void NodeBox::updateThreadInformation()
             setStyleForId(info_thread, id);
         }
         info_thread->setText(info.str().c_str());
+    }
+}
+
+
+void NodeBox::updateFrequencyInformation()
+{
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return;
+    }
+
+    if(!settings_.get<bool>("display-frequencies", false)) {
+        info_frequency->setVisible(false);
+
+        if(frequency_timer_ && frequency_timer_->isActive()) {
+            frequency_timer_->stop();
+        }
+        return;
+    } else {
+        info_frequency->setVisible(true);
+        if(!frequency_timer_) {
+            frequency_timer_ = new QTimer;
+            QObject::connect(frequency_timer_, &QTimer::timeout, this, &NodeBox::updateFrequencyInformation);
+        }
+
+        if(!frequency_timer_->isActive()){
+            frequency_timer_->start(1000);
+        }
+    }
+
+    if(info_frequency->isVisible()) {
+        const Rate& rate = nh->getRate();
+        double f = rate.getEffectiveFrequency();
+        std::stringstream info;
+        info << "<i><b>" << std::setprecision(2) << f << "Hz</b></i>";
+        info_frequency->setText(info.str().c_str());
     }
 }
 

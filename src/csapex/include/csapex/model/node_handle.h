@@ -8,11 +8,12 @@
 #include <csapex/model/unique.h>
 #include <csapex/param/param_fwd.h>
 #include <csapex/model/node_modifier.h>
+#include <csapex/utility/slim_signal.hpp>
+#include <csapex/utility/rate.h>
 
 /// SYSTEM
 #include <vector>
 #include <string>
-#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
@@ -118,6 +119,9 @@ public:
 
     bool isGraph() const;
 
+    Rate& getRate();
+    const Rate& getRate() const;
+
 public:
     // TODO: get rid of
     void updateParameterValue(Connectable* source);
@@ -187,6 +191,8 @@ protected:
 
 private:
     UUIDProvider* uuid_provider_;
+
+    Rate rate_;
 
     std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
 

@@ -76,7 +76,7 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
     nodeAdded(nh);
     nodeWorkerAdded(nw);
 
-    nw->errorHappened.connect(notification);
+    nw->notification.connect(notification);
 
     nw->checkParameters();
     nw->panic.connect(panic);

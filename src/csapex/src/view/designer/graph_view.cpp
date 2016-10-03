@@ -931,8 +931,8 @@ void GraphView::addBox(NodeBox *box)
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
 
-    worker_connections_[worker].emplace_back(worker->startProfiling.connect([this](NodeWorker* nw) { startProfilingRequest(nw); }));
-    worker_connections_[worker].emplace_back(worker->stopProfiling.connect([this](NodeWorker* nw) { stopProfilingRequest(nw); }));
+    worker_connections_[worker].emplace_back(worker->start_profiling.connect([this](NodeWorker* nw) { startProfilingRequest(nw); }));
+    worker_connections_[worker].emplace_back(worker->stop_profiling.connect([this](NodeWorker* nw) { stopProfilingRequest(nw); }));
 
 
     MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());

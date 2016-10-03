@@ -31,10 +31,13 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
                                                std::bind(&NodeWorker::checkParameters, worker),
                                                0,
                                                this);
-    check_transitions_ = std::make_shared<Task>(std::string("check ") + handle->getUUID().getFullName(),
-                                                std::bind(&NodeWorker::tryProcess, worker),
-                                                0,
-                                                this);
+    try_process_ = std::make_shared<Task>(std::string("check ") + handle->getUUID().getFullName(),
+                                          [this]()
+    {
+        if(worker_->tryProcess()) {
+            measureFrequency();
+        }
+    }, 0, this);
 
     if(ticking_) {
         tick_ = std::make_shared<Task>(std::string("tick ") + handle->getUUID().getFullName(),
@@ -58,6 +61,11 @@ NodeRunner::~NodeRunner()
     stopTickThread();
 
     guard_ = 0xDEADBEEF;
+}
+
+void NodeRunner::measureFrequency()
+{
+    worker_->getNodeHandle()->getRate().tick();
 }
 
 void NodeRunner::reset()
@@ -84,9 +92,9 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     connections_.clear();
 
     // node tasks
-    auto ctr = worker_->tryProcessRequested.connect([this]() {
-        check_transitions_->setPriority(worker_->getSequenceNumber());
-        schedule(check_transitions_);
+    auto ctr = worker_->try_process_changed.connect([this]() {
+        try_process_->setPriority(worker_->getSequenceNumber());
+        schedule(try_process_);
     });
     connections_.push_back(ctr);
 
@@ -132,6 +140,7 @@ void NodeRunner::scheduleTick()
 void NodeRunner::tick()
 {
     apex_assert_hard(guard_ == -1);
+
     bool success = worker_->tick();
     if(stepping_) {
         if(!success) {
@@ -142,6 +151,8 @@ void NodeRunner::tick()
     }
 
     if(success) {
+        measureFrequency();
+
         NodeHandlePtr handle = worker_->getNodeHandle();
         NodePtr node = handle->getNode().lock();
         auto ticker = std::dynamic_pointer_cast<TickableNode>(node);

@@ -911,3 +911,12 @@ bool NodeHandle::isGraph() const
 {
     return node_type_ == "csapex::Graph";
 }
+
+Rate& NodeHandle::getRate()
+{
+    return rate_;
+}
+const Rate& NodeHandle::getRate() const
+{
+    return rate_;
+}

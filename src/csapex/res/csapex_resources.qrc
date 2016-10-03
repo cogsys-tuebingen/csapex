@@ -65,5 +65,6 @@
         <file>folder.png</file>
         <file>timeline_pause.png</file>
         <file>timeline_record.png</file>
+        <file>clock_red.png</file>
     </qresource>
 </RCC>

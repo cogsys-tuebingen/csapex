@@ -85,5 +85,5 @@ void TickableNode::tick()
 
 void TickableNode::keepUpRate()
 {
-    tick_rate_.tick();
+    tick_rate_.keepUp();
 }

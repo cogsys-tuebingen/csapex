@@ -28,6 +28,7 @@ public:
     bool isSchematicsEnabled() const;
     bool isGraphComponentsEnabled() const;
     bool isThreadsEnabled() const;
+    bool isFrequencyEnabled() const;
     bool isMinimapEnabled() const;
     bool areSignalConnectionsVisible() const;
     bool areMessageConnectionsVisibile() const;
@@ -39,6 +40,7 @@ public Q_SLOTS:
     void enableSchematics(bool);
     void displayGraphComponents(bool);
     void displayThreads(bool);
+    void displayFrequency(bool);
     void displayMinimap(bool);
     void displaySignalConnections(bool);
     void displayMessageConnections(bool);
@@ -54,6 +56,7 @@ Q_SIGNALS:
     void schematicsEnabled(bool);
     void graphComponentsEnabled(bool);
     void threadsEnabled(bool);
+    void frequencyEnabled(bool);
 
 private:
     Settings& settings_;

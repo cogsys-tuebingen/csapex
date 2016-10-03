@@ -82,7 +82,7 @@ void ProfilingWidget::exportCsv()
 
             ProfilerStats stats = profile.getStats(name);
 
-            of << name << "," << stats.mean << "," << stats.stddev << "\n";
+            of << name << "," << stats.mean << "," << stats.stddev << '\n';
         }
     }
 }

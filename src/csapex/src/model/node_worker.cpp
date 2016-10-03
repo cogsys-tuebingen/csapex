@@ -272,7 +272,7 @@ void NodeWorker::triggerPanic()
 
 void NodeWorker::triggerTryProcess()
 {
-    tryProcessRequested();
+    try_process_changed();
 }
 
 void NodeWorker::reset()
@@ -299,9 +299,9 @@ void NodeWorker::setProfiling(bool profiling)
     profiler_->setEnabled(profiling);
 
     if(profiling) {
-        startProfiling(this);
+        start_profiling(this);
     } else {
-        stopProfiling(this);
+        stop_profiling(this);
     }
 }
 
@@ -604,8 +604,9 @@ void NodeWorker::notifyMessagesProcessed()
 
     auto generator = std::dynamic_pointer_cast<GeneratorNode>(node_handle_->getNode().lock());
     if(generator) {
-        apex_assert_hard(canSend());
-        generator->notifyMessagesProcessed();
+        if(canSend()) {
+            generator->notifyMessagesProcessed();
+        }
     }
 
 
@@ -650,14 +651,17 @@ void NodeWorker::updateState()
     }
 }
 
-void NodeWorker::tryProcess()
+bool NodeWorker::tryProcess()
 {
     updateState();
     if(isEnabled() && canProcess()) {
         apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
         startProcessingMessages();
+        return true;
     }
+
+    return false;
 }
 
 
@@ -958,5 +962,5 @@ void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level
 
     message.error = error ? level : ErrorLevel::NONE;
 
-    errorHappened(message);
+    notification(message);
 }

@@ -66,6 +66,10 @@ bool DesignerOptions::isThreadsEnabled() const
 {
     return settings_.get<bool>("display-threads", false);
 }
+bool DesignerOptions::isFrequencyEnabled() const
+{
+    return settings_.get<bool>("display-frequencies", false);
+}
 
 bool DesignerOptions::isMinimapEnabled() const
 {
@@ -164,6 +168,22 @@ void DesignerOptions::displayThreads(bool display)
     }
 
     Q_EMIT threadsEnabled(display);
+}
+
+void DesignerOptions::displayFrequency(bool display)
+{
+    if(!settings_.knows("display-frequencies")) {
+        settings_.add(csapex::param::ParameterFactory::declareBool("display-frequencies", display));
+    }
+
+    settings_.set("display-frequencies", display);
+
+    for(const auto& pair : designer_->graph_views_) {
+        GraphView* view = pair.second;
+        view->updateBoxInformation();
+    }
+
+    Q_EMIT frequencyEnabled(display);
 }
 
 

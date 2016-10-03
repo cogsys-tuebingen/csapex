@@ -90,7 +90,7 @@ public:
     void startProcessingMessages();
     void forwardMessages(bool send_parameters);
 
-    void tryProcess();
+    bool tryProcess();
 
     void checkParameters();    
     void checkIO();
@@ -112,15 +112,15 @@ public:
     csapex::slim_signal::Signal<void(NodeWorker* worker, int type, std::shared_ptr<const Interval> stamp)> interval_start;
     csapex::slim_signal::Signal<void(NodeWorker* worker, std::shared_ptr<const Interval> stamp)> interval_end;
 
-    csapex::slim_signal::Signal<void(NodeWorker* worker)> startProfiling;
-    csapex::slim_signal::Signal<void(NodeWorker* worker)> stopProfiling;
+    csapex::slim_signal::Signal<void(NodeWorker* worker)> start_profiling;
+    csapex::slim_signal::Signal<void(NodeWorker* worker)> stop_profiling;
 
-    csapex::slim_signal::Signal<void()> threadChanged;
-    csapex::slim_signal::Signal<void(Notification)> errorHappened;
+    csapex::slim_signal::Signal<void()> thread_changed;
+    csapex::slim_signal::Signal<void(Notification)> notification;
 
     csapex::slim_signal::Signal<void()> messages_processed;
     csapex::slim_signal::Signal<void()> processRequested;
-    csapex::slim_signal::Signal<void()> tryProcessRequested;
+    csapex::slim_signal::Signal<void()> try_process_changed;
 
 private:
     void publishParameters();

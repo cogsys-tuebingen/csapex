@@ -330,7 +330,7 @@ int main(int argc, char** argv)
     if(vm.count("dump")) {
         std::cout << "to be passed on:\n";
         for(std::size_t i = 0; i < additional_args.size(); ++i) {
-            std::cout << additional_args[i] << "\n";
+            std::cout << additional_args[i] << '\n';
         }
         std::cout << std::flush;
         return 0;

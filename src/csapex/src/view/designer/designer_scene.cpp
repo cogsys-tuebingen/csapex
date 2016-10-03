@@ -1217,7 +1217,7 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
                 QString descr = QString::fromStdString(c->getType()->descriptiveName());
                 if(!descr.isEmpty()) {
                     if(text.length() != 0) {
-                        text += "\n";
+                        text += '\n';
                     }
                     text += descr;
                     ++lines;

@@ -205,6 +205,7 @@ void CsApexWindow::setupDesigner()
     ui->actionLock_to_Grid->setChecked(opt->isGridLockEnabled());
     ui->actionDisplay_Graph_Components->setChecked(opt->isGraphComponentsEnabled());
     ui->actionDisplay_Threads->setChecked(opt->isThreadsEnabled());
+    ui->actionDisplay_Frequency->setChecked(opt->isFrequencyEnabled());
 
     ui->actionSignal_Connections->setChecked(opt->areSignalConnectionsVisible());
     ui->actionMessage_Connections->setChecked(opt->areMessageConnectionsVisibile());
@@ -222,6 +223,8 @@ void CsApexWindow::setupDesigner()
     QObject::connect(opt, SIGNAL(graphComponentsEnabled(bool)), ui->actionDisplay_Graph_Components, SLOT(setChecked(bool)));
     QObject::connect(ui->actionDisplay_Threads, SIGNAL(toggled(bool)), opt,  SLOT(displayThreads(bool)));
     QObject::connect(opt, SIGNAL(threadsEnabled(bool)), ui->actionDisplay_Threads, SLOT(setChecked(bool)));
+    QObject::connect(ui->actionDisplay_Frequency, SIGNAL(toggled(bool)), opt,  SLOT(displayFrequency(bool)));
+    QObject::connect(opt, SIGNAL(frequencyEnabled(bool)), ui->actionDisplay_Frequency, SLOT(setChecked(bool)));
     QObject::connect(ui->actionDisplay_Minimap, SIGNAL(toggled(bool)), opt,  SLOT(displayMinimap(bool)));
     QObject::connect(opt, SIGNAL(minimapEnabled(bool)), ui->actionDisplay_Minimap, SLOT(setChecked(bool)));
 

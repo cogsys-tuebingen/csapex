@@ -49,8 +49,8 @@ void ActivityLegend::startTrackingNode(NodeWorkerPtr node)
 {
     NodeWorker* worker = node.get();
 
-    worker->startProfiling.connect([this](NodeWorker* nw) { addNode(nw); });
-    worker->stopProfiling.connect([this](NodeWorker* nw) { removeNode(nw); });
+    worker->start_profiling.connect([this](NodeWorker* nw) { addNode(nw); });
+    worker->stop_profiling.connect([this](NodeWorker* nw) { removeNode(nw); });
 }
 
 void ActivityLegend::stopTrackingNode(NodeHandlePtr /*node*/)
