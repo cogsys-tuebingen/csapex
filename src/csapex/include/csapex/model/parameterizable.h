@@ -42,9 +42,18 @@ public:
     void addConditionalParameter(const csapex::param::ParameterPtr& param, std::function<bool()> enable_condition, std::function<void(csapex::param::Parameter *)> cb);
 
     template <typename T>
-    void addConditionalParameter(const csapex::param::ParameterPtr& param, std::function<bool()> enable_condition,T& target)
+    void addConditionalParameter(const csapex::param::ParameterPtr& param, std::function<bool()> enable_condition, T& target)
     {
         addConditionalParameter(param, enable_condition, [&](csapex::param::Parameter* p) { target = p->as<T>(); });
+    }
+
+    void addConditionalParameter(const csapex::param::ParameterPtr& param, bool& condition_variable);
+    void addConditionalParameter(const csapex::param::ParameterPtr& param, bool& condition_variable, std::function<void(csapex::param::Parameter *)> cb);
+
+    template <typename T>
+    void addConditionalParameter(const csapex::param::ParameterPtr& param, bool& condition_variable, T& target)
+    {
+        addConditionalParameter(param, condition_variable, [&](csapex::param::Parameter* p) { target = p->as<T>(); });
     }
 
 
@@ -94,6 +103,7 @@ public:
      */
     void addParameterCallback(csapex::param::Parameter* param, std::function<void(csapex::param::Parameter *)> cb);
     void addParameterCondition(csapex::param::Parameter* param, std::function<bool()> enable_condition);
+    void addParameterCondition(csapex::param::Parameter* param, bool& enable_condition);
 
     void removeParameterCallbacks(csapex::param::Parameter* param);
 
