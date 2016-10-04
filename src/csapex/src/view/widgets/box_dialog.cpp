@@ -14,6 +14,7 @@
 #include <QVBoxLayout>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QProgressBar>
+#include <QTimer>
 
 using namespace csapex;
 
@@ -77,19 +78,20 @@ void BoxDialog::setupTextBox()
     filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    QObject::connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString &)));
-    QObject::connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(invalidate()));
+    QObject::connect(name_edit_, &CompletedLineEdit::textChanged, filter, &NodeFilterProxyModel::setFilterFixedString);;
+    QObject::connect(name_edit_, &CompletedLineEdit::textChanged, filter, &NodeFilterProxyModel::invalidate);
 
     name_edit_->setModel(filter);
 
     delete loading_;
     layout()->addWidget(name_edit_);
 
-    name_edit_->setFocus();
 
     filter->setSourceModel(model_);
 
     QObject::connect(name_edit_, SIGNAL(editingFinished()), this, SLOT(finish()));
+
+    QTimer::singleShot(0, name_edit_, SLOT(setFocus()));
 }
 
 void BoxDialog::finish()
