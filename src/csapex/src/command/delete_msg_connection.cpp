@@ -2,7 +2,7 @@
 #include <csapex/command/delete_msg_connection.h>
 
 /// PROJECT
-#include <csapex/msg/bundled_connection.h>
+#include <csapex/msg/direct_connection.h>
 #include <csapex/msg/output.h>
 #include <csapex/msg/input.h>
 #include <csapex/model/graph.h>
@@ -28,7 +28,7 @@ bool DeleteMessageConnection::doUndo()
     Output* output = dynamic_cast<Output*>(from);
     Input* input = dynamic_cast<Input*>(to);
 
-    ConnectionPtr c = BundledConnection::connect(output, input, connection_id);
+    ConnectionPtr c = DirectConnection::connect(output, input, connection_id);
     c->setActive(active_);
     graph->addConnection(c);
 

@@ -19,7 +19,7 @@
 #include <csapex/msg/io.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
-#include <csapex/msg/bundled_connection.h>
+#include <csapex/msg/direct_connection.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/param/parameter_factory.h>

@@ -862,13 +862,15 @@ void NodeWorker::checkParameters()
     Parameterizable::ChangedParameterList changed_params = node->getChangedParameters();
     if(!changed_params.empty()) {
         for(auto pair : changed_params) {
-            try {
-                if(pair.first->isEnabled()) {
-                    pair.second(pair.first);
-                }
+            if(param::ParameterPtr p = pair.first.lock()) {
+                try {
+                    if(p->isEnabled()) {
+                        pair.second(p.get());
+                    }
 
-            } catch(const std::exception& e) {
-                std::cerr << "parameter callback failed: " << e.what() << std::endl;
+                } catch(const std::exception& e) {
+                    std::cerr << "parameter callback failed: " << e.what() << std::endl;
+                }
             }
         }
     }

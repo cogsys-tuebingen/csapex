@@ -9,7 +9,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
-#include <csapex/msg/bundled_connection.h>
+#include <csapex/msg/direct_connection.h>
 
 using namespace csapex;
 using namespace csapex::command;

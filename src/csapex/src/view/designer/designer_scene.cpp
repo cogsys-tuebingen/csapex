@@ -1338,6 +1338,23 @@ bool DesignerScene::showConnectionContextMenu()
     menu.addAction(reset);
     QAction* del = new QAction("delete connection", &menu);
     menu.addAction(del);
+
+    menu.addSeparator();
+
+    QActionGroup* type = new QActionGroup(this);
+    type->setExclusive(true);
+    type->setObjectName("Type");
+
+    QAction* type_pipeline = new QAction("pipeline", &menu);
+    type_pipeline->setCheckable(true);
+    type_pipeline->setChecked(true);
+    menu.addAction(type_pipeline);
+    QAction* type_sequence = new QAction("sequence", &menu);
+    type_sequence->setCheckable(true);
+    menu.addAction(type_sequence);
+
+    menu.addSeparator();
+
     QAction* active = new QAction("allow active tokens", &menu);
     active->setCheckable(true);
     active->setChecked(c->isActive());

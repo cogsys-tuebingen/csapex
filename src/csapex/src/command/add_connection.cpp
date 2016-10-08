@@ -9,7 +9,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/utility/assert.h>
-#include <csapex/msg/bundled_connection.h>
+#include <csapex/msg/direct_connection.h>
 
 using namespace csapex;
 using namespace csapex::command;

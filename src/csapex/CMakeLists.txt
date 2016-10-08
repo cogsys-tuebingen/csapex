@@ -342,7 +342,6 @@ add_library(csapex SHARED
     src/msg/output_transition.cpp
     src/msg/static_output.cpp
     src/msg/transition.cpp
-    src/msg/bundled_connection.cpp
     src/msg/direct_connection.cpp
     src/msg/generic_vector_message.cpp
 

@@ -65,10 +65,17 @@ template CSAPEX_EXPORT void Parameterizable::doSetParameter<std::vector<double> 
 
 
 
-void Parameterizable::addParameterCallback(csapex::param::Parameter* param, std::function<void(csapex::param::Parameter *)> cb)
+void Parameterizable::addParameterCallback(csapex::param::ParameterPtr param, std::function<void(csapex::param::Parameter *)> cb)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    connections_[param].push_back(param->parameter_changed.connect([this,cb](csapex::param::Parameter* p) { this->parameterChanged(p, cb); } ));
+
+    param::ParameterWeakPtr pwp = param;
+    connections_[param.get()].push_back(param->parameter_changed.connect([this, pwp, cb](csapex::param::Parameter* p) {
+        if(param::Parameter::Ptr p = pwp.lock()) {
+            parameterChanged(p, cb);
+        }
+    }));
+
     if(param->hasState()) {
         parameterChanged(param, cb);
     }
@@ -80,9 +87,12 @@ void Parameterizable::removeParameterCallbacks(csapex::param::Parameter *param)
     std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
 
     for(auto it = changed_params_.begin(); it != changed_params_.end();) {
-        const auto& p = *it;
-        if(p.first == param) {
-            it = changed_params_.erase(it);
+        if(param::ParameterPtr p = it->first.lock()) {
+            if(p.get() == param) {
+                it = changed_params_.erase(it);
+            } else {
+                ++it;
+            }
         } else {
             ++it;
         }
@@ -93,18 +103,20 @@ void Parameterizable::removeParameterCallbacks(csapex::param::Parameter *param)
     }
 }
 
-void Parameterizable::addParameterCondition(csapex::param::Parameter* param, std::function<bool ()> enable_condition)
+void Parameterizable::addParameterCondition(csapex::param::ParameterPtr param, std::function<bool ()> enable_condition)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    conditions_[param] = enable_condition;
+    csapex::param::ParameterWeakPtr pwp = param;
+    conditions_[pwp] = enable_condition;
 }
-void Parameterizable::addParameterCondition(csapex::param::Parameter* param, bool& enable_condition)
+void Parameterizable::addParameterCondition(csapex::param::ParameterPtr param, bool& enable_condition)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    conditions_[param] = [&enable_condition](){ return enable_condition; };
+    csapex::param::ParameterWeakPtr pwp = param;
+    conditions_[pwp] = [&enable_condition](){ return enable_condition; };
 }
 
-void Parameterizable::parameterChanged(csapex::param::Parameter *)
+void Parameterizable::parameterChanged(param::ParameterPtr)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     if(!conditions_.empty()) {
@@ -112,7 +124,7 @@ void Parameterizable::parameterChanged(csapex::param::Parameter *)
     }
 }
 
-void Parameterizable::parameterChanged(csapex::param::Parameter *param, std::function<void(csapex::param::Parameter *)> cb)
+void Parameterizable::parameterChanged(csapex::param::ParameterPtr param, std::function<void(csapex::param::Parameter *)> cb)
 {
     {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
@@ -139,12 +151,13 @@ void Parameterizable::checkConditions(bool silent)
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     bool change = false;
     setParameterSetSilence(true);
-    for(std::map<csapex::param::Parameter*, std::function<bool()> >::iterator it = conditions_.begin(); it != conditions_.end(); ++it) {
-        csapex::param::Parameter* p = it->first;
-        bool should_be_enabled = it->second();
-        if(should_be_enabled != p->isEnabled()) {
-            it->first->setEnabled(should_be_enabled);
-            change = true;
+    for(auto it = conditions_.begin(); it != conditions_.end(); ++it) {
+        if(csapex::param::ParameterPtr p = it->first.lock()) {
+            bool should_be_enabled = it->second();
+            if(should_be_enabled != p->isEnabled()) {
+                p->setEnabled(should_be_enabled);
+                change = true;
+            }
         }
     }
     setParameterSetSilence(false);
@@ -182,7 +195,7 @@ void Parameterizable::addTemporaryParameter(const csapex::param::Parameter::Ptr 
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     parameter_state_->addTemporaryParameter(param);
-    addParameterCallback(param.get(), cb);
+    addParameterCallback(param, cb);
 }
 
 void Parameterizable::removeTemporaryParameter(const csapex::param::Parameter::Ptr &param)
@@ -224,15 +237,20 @@ void Parameterizable::addParameter(const csapex::param::Parameter::Ptr &param)
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     parameter_state_->addParameter(param);
 
-    connections_[param.get()].push_back(param->parameter_changed.connect([this](csapex::param::Parameter* p) { this->parameterChanged(p); } ));
-    connections_[param.get()].push_back(param->parameter_enabled.connect([this](csapex::param::Parameter* p, bool e) { this->parameterEnabled(p, e); } ));
+    param::ParameterWeakPtr pwp = param;
+    connections_[param.get()].push_back(param->parameter_changed.connect([this, pwp](csapex::param::Parameter* p) {
+        if(param::Parameter::Ptr p = pwp.lock()) {
+            parameterChanged(p);
+        }
+    }));
+    connections_[param.get()].push_back(param->parameter_enabled.connect([this](csapex::param::Parameter* p, bool e) { parameterEnabled(p, e); } ));
 }
 
 void Parameterizable::addParameter(const csapex::param::Parameter::Ptr &param, std::function<void (csapex::param::Parameter *)> cb)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     addParameter(param);
-    addParameterCallback(param.get(), cb);
+    addParameterCallback(param, cb);
 }
 
 
@@ -240,7 +258,7 @@ void Parameterizable::addConditionalParameter(const csapex::param::Parameter::Pt
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     addParameter(param);
-    addParameterCondition(param.get(), enable_condition);
+    addParameterCondition(param, enable_condition);
 }
 
 
@@ -248,15 +266,15 @@ void Parameterizable::addConditionalParameter(const csapex::param::Parameter::Pt
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     addParameter(param);
-    addParameterCallback(param.get(), cb);
-    addParameterCondition(param.get(), enable_condition);
+    addParameterCallback(param, cb);
+    addParameterCondition(param, enable_condition);
 }
 
 void Parameterizable::addConditionalParameter(const csapex::param::Parameter::Ptr &param, bool& condition_variable)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     addParameter(param);
-    addParameterCondition(param.get(), condition_variable);
+    addParameterCondition(param, condition_variable);
 }
 
 
@@ -264,8 +282,8 @@ void Parameterizable::addConditionalParameter(const csapex::param::Parameter::Pt
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     addParameter(param);
-    addParameterCallback(param.get(), cb);
-    addParameterCondition(param.get(), condition_variable);
+    addParameterCallback(param, cb);
+    addParameterCondition(param, condition_variable);
 }
 
 

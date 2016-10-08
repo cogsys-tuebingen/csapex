@@ -17,7 +17,7 @@ namespace csapex
 class CSAPEX_EXPORT Parameterizable
 {
 public:
-    typedef std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > ChangedParameterList;
+    typedef std::vector<std::pair<csapex::param::ParameterWeakPtr, std::function<void(csapex::param::Parameter *)> > > ChangedParameterList;
 
 public:
     csapex::slim_signal::Signal<void()> parameters_changed;
@@ -101,9 +101,9 @@ public:
     /***
      *  PARAMETER CONSTRAINTS
      */
-    void addParameterCallback(csapex::param::Parameter* param, std::function<void(csapex::param::Parameter *)> cb);
-    void addParameterCondition(csapex::param::Parameter* param, std::function<bool()> enable_condition);
-    void addParameterCondition(csapex::param::Parameter* param, bool& enable_condition);
+    void addParameterCallback(csapex::param::ParameterPtr param, std::function<void(csapex::param::Parameter *)> cb);
+    void addParameterCondition(csapex::param::ParameterPtr param, std::function<bool()> enable_condition);
+    void addParameterCondition(csapex::param::ParameterPtr param, bool& enable_condition);
 
     void removeParameterCallbacks(csapex::param::Parameter* param);
 
@@ -160,18 +160,18 @@ private:
     }
 
 private:
-    void parameterChanged(csapex::param::Parameter* param);
-    void parameterChanged(csapex::param::Parameter* param, std::function<void(csapex::param::Parameter *)> cb);
-    void parameterEnabled(csapex::param::Parameter* param, bool enabled);
+    void parameterChanged(param::ParameterPtr param);
+    void parameterChanged(param::ParameterPtr param, std::function<void(csapex::param::Parameter *)> cb);
+    void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
     std::map<csapex::param::Parameter*, std::vector<csapex::slim_signal::Connection> > connections_;
-    std::map<csapex::param::Parameter*, std::function<bool()> > conditions_;
+    std::map<csapex::param::ParameterWeakPtr, std::function<bool()>, std::owner_less<csapex::param::ParameterWeakPtr>> conditions_;
 
     mutable std::recursive_mutex mutex_;
     mutable std::recursive_mutex changed_params_mutex_;
     std::map<std::string, std::function<void()>> param_updates_;
-    std::vector<std::pair<csapex::param::Parameter*, std::function<void(csapex::param::Parameter *)> > > changed_params_;
+    ChangedParameterList changed_params_;
 
 protected:
     GenericStatePtr parameter_state_;

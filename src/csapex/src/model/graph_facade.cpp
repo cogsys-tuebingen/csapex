@@ -12,7 +12,7 @@
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/msg/bundled_connection.h>
+#include <csapex/msg/direct_connection.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -172,7 +172,7 @@ ConnectionPtr GraphFacade::connect(OutputPtr output, InputPtr input)
 
 ConnectionPtr GraphFacade::connect(Output *output, Input *input)
 {
-    auto c = BundledConnection::connect(output, input);
+    auto c = DirectConnection::connect(output, input);
     graph_->addConnection(c);
     return c;
 }
@@ -198,7 +198,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
     }
     apex_assert_hard(i);
 
-    auto c = BundledConnection::connect(o, i);
+    auto c = DirectConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -218,7 +218,7 @@ ConnectionPtr GraphFacade::connect(NodeHandlePtr output, int output_id,
     Input* i = input->getInput(input_id);
     apex_assert_hard(i);
 
-    auto c = BundledConnection::connect(o, i);
+    auto c = DirectConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -258,7 +258,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
                                input_id);
     }
 
-    auto c = BundledConnection::connect(o, i);
+    auto c = DirectConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -298,7 +298,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output
     Input* i = input->getInput(input_id);
     apex_assert_hard(i);
 
-    auto c = BundledConnection::connect(o, i);
+    auto c = DirectConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -319,7 +319,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, int output_id,
                                std::to_string(input_id));
     }
 
-    auto c = BundledConnection::connect(o, i);
+    auto c = DirectConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -374,7 +374,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output
                                input_id);
     }
 
-    auto c = BundledConnection::connect(o, i);
+    auto c = DirectConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }
@@ -390,7 +390,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id, const UUID& input_id)
     apex_assert_hard(o);
     apex_assert_hard(i);
 
-    auto c = BundledConnection::connect(o, i);
+    auto c = DirectConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
 }

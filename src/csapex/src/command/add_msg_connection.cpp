@@ -7,7 +7,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
 #include <csapex/utility/assert.h>
-#include <csapex/msg/bundled_connection.h>
+#include <csapex/msg/direct_connection.h>
 #include <csapex/msg/output.h>
 #include <csapex/msg/input.h>
 #include <csapex/model/node_handle.h>
@@ -28,7 +28,7 @@ bool AddMessageConnection::doExecute()
 
     Graph* graph = getGraph();
 
-    ConnectionPtr c = BundledConnection::connect(from, to);
+    ConnectionPtr c = DirectConnection::connect(from, to);
     c->setActive(active);
 
     return graph->addConnection(c);
