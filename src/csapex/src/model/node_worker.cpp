@@ -392,7 +392,7 @@ void NodeWorker::startProcessingMessages()
 
     lock.unlock();
 
-    node_handle_->getInputTransition()->notifyMessageProcessed();
+    node_handle_->getInputTransition()->notifyMessageRead();
 
     if(!node) {
         return;
@@ -519,6 +519,7 @@ void NodeWorker::signalMessagesProcessed()
 {
     setState(State::IDLE);
 
+    node_handle_->getInputTransition()->notifyMessageProcessed();
     messages_processed();
 }
 

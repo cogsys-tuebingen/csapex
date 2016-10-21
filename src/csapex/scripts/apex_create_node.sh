@@ -184,7 +184,7 @@ CSAPEX_REGISTER_CLASS(${NAMESPACE}::${NODE_NAME}, csapex::Node)
 ###
 WS=$(grep "add_library.*$LIBRARY" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ /\\ /')
 ENTRY="${WS}$DIR/$NEW_FILE"
-sed -i "/add_library.*$LIBRARY/a $ENTRY"  $CMAKELIST
+sed -i "/add_library.*$LIBRARY\s/a $ENTRY"  $CMAKELIST
                          
 ###
 ### MODIFY PLUGINXML

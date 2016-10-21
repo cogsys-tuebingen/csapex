@@ -13,6 +13,11 @@
 #include <vector>
 #include "yaml-cpp/node/ptr.h"
 
+#if defined(EMITTERSTYLE_H_62B23520_7C8E_11DE_8A39_0800200C9A66)
+#define USE_YAML_EMITTER_STYLE 1
+#else
+#define USE_YAML_EMITTER_STYLE 0
+#endif
 
 namespace YAML {
 namespace detail {
@@ -40,7 +45,7 @@ public:
                           anchor_t anchor, const std::string& value);
 
     virtual void OnSequenceStart(const Mark& mark, const std::string& tag, anchor_t anchor
-#if WIN32
+#if USE_YAML_EMITTER_STYLE
                                  , EmitterStyle::value style);
 #else
                                  );
@@ -49,7 +54,7 @@ public:
     virtual void OnSequenceEnd();
 
     virtual void OnMapStart(const Mark& mark, const std::string& tag, anchor_t anchor
-#if WIN32
+#if USE_YAML_EMITTER_STYLEs
                             , EmitterStyle::value style);
 #else
                             );

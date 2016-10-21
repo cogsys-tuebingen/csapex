@@ -159,7 +159,7 @@ int InputTransition::findHighestDeviantSequenceNumber() const
     }
 }
 
-void InputTransition::notifyMessageProcessed()
+void InputTransition::notifyMessageRead()
 {
     if(!forwarded_) {
         return;
@@ -167,9 +167,15 @@ void InputTransition::notifyMessageProcessed()
     apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
     for(ConnectionPtr& c : connections_) {
-        c->setTokenProcessed();
+        c->setTokenRead();
     }
     forwarded_ = false;
+}
+
+void InputTransition::notifyMessageProcessed()
+{
+    // TODO
+    notifyMessageRead();
 }
 
 bool InputTransition::areMessagesComplete() const

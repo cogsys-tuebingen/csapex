@@ -13,6 +13,8 @@
 
 namespace csapex {
 
+using Continuation = std::function<void(std::function<void (csapex::NodeModifier&, Parameterizable &)>)>;
+
 class CSAPEX_EXPORT Node : public Parameterizable, public Timable
 {
 public:
@@ -30,8 +32,7 @@ public: /* API */
 
     virtual void setupParameters(Parameterizable& parameters);
 
-    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters,
-                         std::function<void(std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation);
+    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters, Continuation continuation);
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
     virtual void process();
 

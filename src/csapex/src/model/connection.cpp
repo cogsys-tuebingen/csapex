@@ -26,7 +26,8 @@ Connection::Connection(Output *from, Input *to)
 
 Connection::Connection(Output *from, Input *to, int id)
     : from_(from), to_(to), id_(id),
-      active_(false), detached_(false),
+      active_(false), mode_(Mode::PIPELINING),
+      detached_(false),
       state_(State::NOT_INITIALIZED)
 {
     from->enabled_changed.connect(source_enable_changed);
@@ -84,8 +85,22 @@ void Connection::notifyMessageSet()
     to_->notifyMessageAvailable(this);
 }
 
+void Connection::setTokenRead()
+{
+    // TODO: finish here if pipelining
+    {
+        std::unique_lock<std::recursive_mutex> lock(sync);
+        setState(State::DONE);
+    }
+    if(detached_) {
+        return;
+    }
+    from_->setMessageProcessed();
+}
+
 void Connection::setTokenProcessed()
 {
+    // TODO: finish here if not pipelining
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
         setState(State::DONE);
@@ -133,6 +148,18 @@ void Connection::setActive(bool active)
 {
     if(active != active_) {
         active_ = active;
+    }
+}
+
+Connection::Mode Connection::getMode() const
+{
+    return mode_;
+}
+
+void Connection::setMode(Mode mode)
+{
+    if(mode != mode_) {
+        mode_ = mode;
     }
 }
 

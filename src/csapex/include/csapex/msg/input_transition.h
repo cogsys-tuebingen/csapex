@@ -24,6 +24,7 @@ public:
     void addInput(InputPtr input);
     void removeInput(InputPtr input);
 
+    void notifyMessageRead();
     void notifyMessageProcessed();
 
     void forwardMessages();
