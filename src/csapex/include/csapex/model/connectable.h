@@ -71,6 +71,8 @@ public:
 
     std::vector<ConnectionPtr> getConnections() const;
 
+    ConnectableOwnerPtr getOwner() const;
+
     bool hasActiveConnection() const;
 
     virtual bool isConnected() const;
@@ -120,7 +122,7 @@ protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
 
 protected:
-    Connectable(const UUID &uuid);
+    Connectable(const UUID &uuid, ConnectableOwnerWeakPtr owner);
 
     void init();
 
@@ -130,6 +132,8 @@ protected:
 protected:
     mutable std::recursive_mutex io_mutex;
     mutable std::recursive_mutex sync_mutex;
+
+    ConnectableOwnerWeakPtr owner_;
 
     std::string label_;
 

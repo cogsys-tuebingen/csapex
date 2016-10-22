@@ -7,6 +7,7 @@
 #include <csapex/view/widgets/port.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/node_state.h>
 #include <csapex/model/connection.h>
 #include <csapex/view/node/box.h>
 #include <csapex/msg/input.h>
@@ -834,6 +835,12 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;
     ccs.active = connection.isActive();
+    if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to->getOwner())) {
+        ccs.target_is_pipelining = node->getNodeState()->getExecutionMode() == ExecutionMode::PIPELINING;
+
+    } else {
+        ccs.target_is_pipelining = false;
+    }
 
     if(debug_){
         ccs.label = QString::number(connection.from()->sequenceNumber()) +
@@ -1053,7 +1060,6 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
             painter->drawPath(path.first);
         }
         painter->drawPath(arrow_path);
-
     }
 
     QColor color_start = view_core_.getStyle().lineColor();
@@ -1100,7 +1106,10 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     lg.setColorAt(0, color_start);
     lg.setColorAt(1, color_end);
 
-    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75, ccs.type == TokenType::MSG ? Qt::SolidLine : Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
+    painter->setPen(QPen(QBrush(lg), ccs.r * 0.75,
+                         ccs.target_is_pipelining ? Qt::DotLine : Qt::SolidLine,
+                         ccs.target_is_pipelining ? Qt::SquareCap: Qt::RoundCap,
+                         Qt::RoundJoin));
 
     std::vector<QRectF> bounding_boxes;
 
@@ -1341,20 +1350,6 @@ bool DesignerScene::showConnectionContextMenu()
 
     menu.addSeparator();
 
-    QActionGroup* type = new QActionGroup(this);
-    type->setExclusive(true);
-    type->setObjectName("Type");
-
-    QAction* type_pipeline = new QAction("pipeline", &menu);
-    type_pipeline->setCheckable(true);
-    type_pipeline->setChecked(true);
-    menu.addAction(type_pipeline);
-    QAction* type_sequence = new QAction("sequence", &menu);
-    type_sequence->setCheckable(true);
-    menu.addAction(type_sequence);
-
-    menu.addSeparator();
-
     QAction* active = new QAction("allow active tokens", &menu);
     active->setCheckable(true);
     active->setChecked(c->isActive());
@@ -1371,6 +1366,7 @@ bool DesignerScene::showConnectionContextMenu()
     } else if(selectedItem == active) {
         view_core_.execute(CommandFactory(graph_facade_.get()).setConnectionActive(highlight_connection_id_, active->isChecked()));
     }
+
 
     return true;
 }

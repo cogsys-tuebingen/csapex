@@ -15,6 +15,7 @@
 #include <csapex/utility/create_connector_request.h>
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/profiling/profilable.h>
+#include <csapex/model/execution_mode.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -173,6 +174,7 @@ private:
     void setupWidgets();
 
     void flipBox();
+    void setExecutionMode(ExecutionMode mode);
     void chooseColor();
     void minimizeBox(bool mini);
     void deleteBox();

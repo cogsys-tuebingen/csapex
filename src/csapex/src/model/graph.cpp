@@ -1064,7 +1064,7 @@ void Graph::notifyMessagesProcessed()
     GeneratorNode::notifyMessagesProcessed();
 
     //    tryFinishProcessing();
-    transition_relay_in_->notifyMessageRead();
+    transition_relay_in_->notifyMessageProcessed();
 }
 
 void Graph::inputActivation()
@@ -1101,6 +1101,7 @@ void Graph::tryFinishProcessing()
             has_sent_current_iteration_ = true;
             if(is_iterating_) {
                 transition_relay_in_->notifyMessageRead();
+                transition_relay_in_->notifyMessageProcessed();
             }
         }
     }

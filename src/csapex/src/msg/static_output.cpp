@@ -14,8 +14,8 @@
 
 using namespace csapex;
 
-StaticOutput::StaticOutput(const UUID &uuid)
-    : Output(uuid)
+StaticOutput::StaticOutput(const UUID &uuid, ConnectableOwnerWeakPtr owner)
+    : Output(uuid, owner)
 {
 
 }

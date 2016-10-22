@@ -22,6 +22,7 @@
 #include <csapex/command/set_color.h>
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/command/add_variadic_connector.h>
+#include <csapex/command/set_execution_mode.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/settings.h>
@@ -1317,6 +1318,8 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
     bool has_disabled = false;
     bool has_box = false;
     bool has_note = false;
+    bool has_pipeline = false;
+    bool has_sequential = false;
     for(NodeBox* box : selected_boxes_) {
         bool m = box->isMinimizedSize();
         has_minimized |= m;
@@ -1329,6 +1332,10 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
         bool is_note = dynamic_cast<NoteBox*>(box);
         has_note |= is_note;
         has_box |= !is_note;
+
+        ExecutionMode mode = box->getNodeHandle()->getNodeState()->getExecutionMode();
+        has_pipeline |= mode == ExecutionMode::PIPELINING;
+        has_sequential |= mode == ExecutionMode::SEQUENTIAL;
     }
 
 
@@ -1370,6 +1377,25 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
         flip->setIconVisibleInMenu(true);
         handler[flip] = std::bind(&GraphView::flipBox, this);
         menu.addAction(flip);
+
+
+        menu.addSeparator();
+
+        QActionGroup* type = new QActionGroup(this);
+        type->setExclusive(true);
+        type->setObjectName("Execution Mode");
+
+        QAction* type_pipeline = new QAction("pipeline", &menu);
+        type_pipeline->setCheckable(true);
+        type_pipeline->setChecked(has_pipeline && !has_sequential);
+        menu.addAction(type_pipeline);
+        handler[type_pipeline] = std::bind(&GraphView::setExecutionMode, this, ExecutionMode::PIPELINING);
+
+        QAction* type_sequence = new QAction("sequential", &menu);
+        type_sequence->setCheckable(true);
+        type_sequence->setChecked(!has_pipeline && has_sequential);
+        menu.addAction(type_sequence);
+        handler[type_sequence] = std::bind(&GraphView::setExecutionMode, this, ExecutionMode::SEQUENTIAL);
 
         menu.addSeparator();
 
@@ -1594,6 +1620,15 @@ void GraphView::flipBox()
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"flip boxes"));
     for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::FlipSides(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID())));
+    }
+    view_core_.execute(cmd);
+}
+
+void GraphView::setExecutionMode(ExecutionMode mode)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set execution mode"));
+    for(NodeBox* box : selected_boxes_) {
+        cmd->add(Command::Ptr(new command::SetExecutionMode(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), mode)));
     }
     view_core_.execute(cmd);
 }

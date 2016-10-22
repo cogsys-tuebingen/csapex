@@ -13,8 +13,8 @@
 
 using namespace csapex;
 
-Input::Input(const UUID &uuid)
-    : Connectable(uuid), transition_(nullptr), optional_(false)
+Input::Input(const UUID &uuid, ConnectableOwnerWeakPtr owner)
+    : Connectable(uuid, owner), transition_(nullptr), optional_(false)
 {
 }
 
@@ -204,9 +204,4 @@ void Input::notifyMessageAvailable(Connection* connection)
         setToken(connection->readToken());
         connection->setTokenProcessed();
     }
-}
-
-void Input::notifyMessageProcessed()
-{
-    Connectable::notifyMessageProcessed();
 }

@@ -10,6 +10,7 @@
 #include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/notification.h>
+#include <csapex/model/execution_mode.h>
 
 /// SYSTEM
 #include <map>
@@ -100,7 +101,7 @@ public:
     void killExecution();
 
     void sendMessages(bool ignore_sink);
-    void notifyMessagesProcessed();
+    void outgoingMessagesProcessed();
 
 public:
     csapex::slim_signal::Signal<void()> destroyed;
@@ -153,6 +154,8 @@ private:
     mutable std::recursive_mutex sync;
 
     NodeHandlePtr node_handle_;
+
+    ExecutionMode current_exec_mode_;
 
     bool is_setup_;
     State state_;

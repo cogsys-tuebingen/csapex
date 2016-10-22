@@ -19,9 +19,9 @@ class CSAPEX_EXPORT Slot : public Input
     friend class Event;
 
 public:
-    Slot(std::function<void()> callback, const UUID &uuid, bool active);
-    Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active);
-    Slot(std::function<void(Slot*,const TokenPtr&)> callback, const UUID &uuid, bool active);
+    Slot(std::function<void()> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void(Slot*,const TokenPtr&)> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
 
     template <typename TokenType>
     Slot(std::function<void(const std::shared_ptr<TokenType const>&)> callback, const UUID &uuid, bool active)

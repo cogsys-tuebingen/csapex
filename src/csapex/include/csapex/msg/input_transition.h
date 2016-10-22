@@ -52,6 +52,7 @@ private:
     std::unordered_map<UUID, InputPtr, UUID::Hasher> inputs_;
 
     bool forwarded_;
+    bool processed_;
 };
 
 }

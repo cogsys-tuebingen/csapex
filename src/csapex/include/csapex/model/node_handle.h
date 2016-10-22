@@ -10,6 +10,7 @@
 #include <csapex/model/node_modifier.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/utility/rate.h>
+#include <csapex/model/connectable_owner.h>
 
 /// SYSTEM
 #include <vector>
@@ -18,7 +19,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeHandle : public Unique, public NodeModifier
+class CSAPEX_EXPORT NodeHandle : public Unique, public NodeModifier, public ConnectableOwner, public std::enable_shared_from_this<NodeHandle>
 {
 public:
     NodeHandle(const std::string& type, const UUID &uuid,

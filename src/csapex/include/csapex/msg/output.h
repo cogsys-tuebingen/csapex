@@ -23,13 +23,13 @@ public:
     };
 
 public:
-    Output(const UUID &uuid);
+    Output(const UUID &uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
     ~Output();
 
     void setOutputTransition(OutputTransition* ot);
     void removeOutputTransition();
 
-    void setMessageProcessed();
+    void notifyMessageProcessed(Connection *connection);
 
     virtual bool canOutput() const override
     {

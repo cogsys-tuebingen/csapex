@@ -14,7 +14,7 @@ class CSAPEX_EXPORT Input : public Connectable
     friend class Output;
 
 public:
-    Input(const UUID &uuid);
+    Input(const UUID &uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
     virtual ~Input();
 
     void setInputTransition(InputTransition* it);
@@ -58,7 +58,6 @@ public:
     virtual void disable() override;
 
     virtual void notifyMessageAvailable(Connection *connection);
-    virtual void notifyMessageProcessed() override;
 
     virtual void reset() override;
 

@@ -19,6 +19,7 @@ FWD(NodeConstructor);
 FWD(NodeStatistics);
 FWD(NodeRunner);
 FWD(Connectable);
+FWD(ConnectableOwner);
 FWD(Memento);
 FWD(Graph);
 FWD(GraphFacade);

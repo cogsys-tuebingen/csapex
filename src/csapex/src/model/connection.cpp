@@ -26,7 +26,7 @@ Connection::Connection(Output *from, Input *to)
 
 Connection::Connection(Output *from, Input *to, int id)
     : from_(from), to_(to), id_(id),
-      active_(false), mode_(Mode::PIPELINING),
+      active_(false),
       detached_(false),
       state_(State::NOT_INITIALIZED)
 {
@@ -77,38 +77,12 @@ bool Connection::holdsActiveToken() const
     return message_ && message_->isActive();
 }
 
-void Connection::notifyMessageSet()
-{
-    if(detached_) {
-        return;
-    }
-    to_->notifyMessageAvailable(this);
-}
-
-void Connection::setTokenRead()
-{
-    // TODO: finish here if pipelining
-    {
-        std::unique_lock<std::recursive_mutex> lock(sync);
-        setState(State::DONE);
-    }
-    if(detached_) {
-        return;
-    }
-    from_->setMessageProcessed();
-}
-
 void Connection::setTokenProcessed()
 {
-    // TODO: finish here if not pipelining
-    {
-        std::unique_lock<std::recursive_mutex> lock(sync);
-        setState(State::DONE);
-    }
-    if(detached_) {
-        return;
-    }
-    from_->setMessageProcessed();
+
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    setState(State::DONE);
+    notifyMessageProcessed();
 }
 
 void Connection::setToken(const TokenPtr &token)
@@ -118,7 +92,7 @@ void Connection::setToken(const TokenPtr &token)
 
         std::unique_lock<std::recursive_mutex> lock(sync);
         apex_assert_hard(msg != nullptr);
-//        apex_assert_hard(state_ == State::NOT_INITIALIZED);
+        //        apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
         bool msg_active = msg->isActive();
         if(!isActive() && msg_active) {
@@ -139,6 +113,24 @@ void Connection::setToken(const TokenPtr &token)
     notifyMessageSet();
 }
 
+void Connection::notifyMessageSet()
+{
+    if(detached_) {
+        return;
+    }
+    to_->notifyMessageAvailable(this);
+}
+
+
+void Connection::notifyMessageProcessed()
+{
+    if(detached_) {
+        return;
+    }
+    from_->notifyMessageProcessed(this);
+}
+
+
 bool Connection::isActive() const
 {
     return active_;
@@ -148,18 +140,6 @@ void Connection::setActive(bool active)
 {
     if(active != active_) {
         active_ = active;
-    }
-}
-
-Connection::Mode Connection::getMode() const
-{
-    return mode_;
-}
-
-void Connection::setMode(Mode mode)
-{
-    if(mode != mode_) {
-        mode_ = mode;
     }
 }
 
@@ -189,22 +169,22 @@ void Connection::setState(State s)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-//    switch (s) {
-//    case State::UNREAD:
-//        apex_assert_hard(state_ == State::NOT_INITIALIZED);
-//        apex_assert_hard(message_ != nullptr);
-//        break;
-//    case State::READ:
-//        apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
-//        apex_assert_hard(message_ != nullptr);
-//        break;
-//    case State::DONE:
-//        apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ);
-//        apex_assert_hard(message_ != nullptr);
-//        break;
-//    default:
-//        break;
-//    }
+    //    switch (s) {
+    //    case State::UNREAD:
+    //        apex_assert_hard(state_ == State::NOT_INITIALIZED);
+    //        apex_assert_hard(message_ != nullptr);
+    //        break;
+    //    case State::READ:
+    //        apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
+    //        apex_assert_hard(message_ != nullptr);
+    //        break;
+    //    case State::DONE:
+    //        apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ);
+    //        apex_assert_hard(message_ != nullptr);
+    //        break;
+    //    default:
+    //        break;
+    //    }
 
     state_ = s;
 }

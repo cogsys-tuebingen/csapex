@@ -132,6 +132,8 @@ private:
         bool selected_to;
         bool active;
 
+        bool target_is_pipelining;
+
         TokenType type;
 
         Position start_pos;

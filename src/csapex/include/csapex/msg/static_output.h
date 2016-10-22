@@ -9,7 +9,7 @@ namespace csapex
 class CSAPEX_EXPORT StaticOutput : public Output
 {
 public:
-    StaticOutput(const UUID &uuid);
+    StaticOutput(const UUID &uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
 
     virtual void addMessage(TokenPtr message) override;
 

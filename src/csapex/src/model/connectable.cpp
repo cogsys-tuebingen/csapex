@@ -19,8 +19,9 @@ const std::string Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_
 //bool Connectable::allow_processing = true;
 
 
-Connectable::Connectable(const UUID& uuid)
+Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
     : Unique(uuid),
+      owner_(owner),
       count_(0), seq_no_(-1), enabled_(true)
 {
     init();
@@ -205,6 +206,11 @@ void Connectable::fadeConnection(ConnectionPtr connection)
 std::vector<ConnectionPtr> Connectable::getConnections() const
 {
     return connections_;
+}
+
+ConnectableOwnerPtr Connectable::getOwner() const
+{
+    return owner_.lock();
 }
 
 bool Connectable::hasActiveConnection() const

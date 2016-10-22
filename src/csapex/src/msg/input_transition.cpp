@@ -15,12 +15,12 @@
 using namespace csapex;
 
 InputTransition::InputTransition(delegate::Delegate0<> activation_fn)
-    : Transition(activation_fn), forwarded_(false)
+    : Transition(activation_fn), forwarded_(false), processed_(false)
 {
 }
 
 InputTransition::InputTransition()
-    : Transition(), forwarded_(false)
+    : Transition(), forwarded_(false), processed_(false)
 {
 }
 
@@ -93,6 +93,7 @@ void InputTransition::reset()
     }
 
     forwarded_ = false;
+    processed_ = false;
 
     Transition::reset();
 }
@@ -164,18 +165,28 @@ void InputTransition::notifyMessageRead()
     if(!forwarded_) {
         return;
     }
-    apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
+//    apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
-    for(ConnectionPtr& c : connections_) {
-        c->setTokenRead();
-    }
-    forwarded_ = false;
+//    for(ConnectionPtr& c : connections_) {
+//        c->setTokenRead();
+//    }
+//    forwarded_ = false;
 }
 
 void InputTransition::notifyMessageProcessed()
 {
-    // TODO
-    notifyMessageRead();
+    if(processed_) {
+        return;
+    }
+
+    if(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED)) {
+        forwarded_ = false;
+        processed_ = true;
+        for(ConnectionPtr& c : connections_) {
+            c->setTokenProcessed();
+        }
+    }
+
 }
 
 bool InputTransition::areMessagesComplete() const
@@ -195,6 +206,8 @@ void InputTransition::forwardMessages()
 
     apex_assert_hard(!isOneConnection(Connection::State::DONE));
     apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
+
+    processed_ = false;
 
     updateConnections();
     apex_assert_hard(connections_.empty() || !areAllConnections(Connection::State::READ));

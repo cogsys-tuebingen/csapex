@@ -63,7 +63,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             node->setup(*node_handle);
 
             connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
-                notifyMessagesProcessed();
+                outgoingMessagesProcessed();
             }));
 
             node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
@@ -433,6 +433,8 @@ void NodeWorker::startProcessingMessages()
 
     if(isProcessingEnabled()) {
         try {
+            current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
+
             if(sync) {
                 node->process(*node_handle_, *node);
 
@@ -502,6 +504,7 @@ void NodeWorker::finishProcessing()
         signalExecutionFinished();
         forwardMessages(true);
         signalMessagesProcessed();
+
         triggerTryProcess();
     }
 }
@@ -519,7 +522,10 @@ void NodeWorker::signalMessagesProcessed()
 {
     setState(State::IDLE);
 
-    node_handle_->getInputTransition()->notifyMessageProcessed();
+    if(node_handle_->isSink() || current_exec_mode_ == ExecutionMode::PIPELINING) {
+        node_handle_->getInputTransition()->notifyMessageProcessed();
+    }
+
     messages_processed();
 }
 
@@ -595,7 +601,7 @@ void NodeWorker::finishTimer(Timer::Ptr t)
     }
 }
 
-void NodeWorker::notifyMessagesProcessed()
+void NodeWorker::outgoingMessagesProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(state_mutex_);
@@ -610,6 +616,9 @@ void NodeWorker::notifyMessagesProcessed()
         }
     }
 
+    if(current_exec_mode_ == ExecutionMode::SEQUENTIAL) {
+        node_handle_->getInputTransition()->notifyMessageProcessed();
+    }
 
     triggerTryProcess();
 }

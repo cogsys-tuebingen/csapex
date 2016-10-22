@@ -36,11 +36,6 @@ public:
         DONE = NOT_INITIALIZED
     };
 
-    enum class Mode {
-        PIPELINING,
-        FORWARD
-    };
-
 public:
     friend std::ostream& operator << (std::ostream& out, const Connection& c);
 
@@ -62,7 +57,6 @@ public:
     virtual void setToken(const TokenPtr &msg);
 
     TokenPtr getToken() const;
-    void setTokenRead();
     void setTokenProcessed();
 
     /**
@@ -75,9 +69,6 @@ public:
 
     bool isActive() const;
     void setActive(bool active);
-
-    Mode getMode() const;
-    void setMode(Mode mode);
 
     bool isEnabled() const;
     bool isSourceEnabled() const;
@@ -114,6 +105,7 @@ public:
 
 protected:
     void notifyMessageSet();
+    void notifyMessageProcessed();
 
 protected:
     Output* from_;
@@ -121,7 +113,6 @@ protected:
     int id_;
 
     bool active_;
-    Mode mode_;
 
     bool detached_;
 

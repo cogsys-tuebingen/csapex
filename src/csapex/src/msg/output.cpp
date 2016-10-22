@@ -13,8 +13,8 @@
 
 using namespace csapex;
 
-Output::Output(const UUID& uuid)
-    : Connectable(uuid), transition_(nullptr),
+Output::Output(const UUID& uuid, ConnectableOwnerWeakPtr owner)
+    : Connectable(uuid, owner), transition_(nullptr),
       state_(State::IDLE)
 {
 }
@@ -33,7 +33,7 @@ void Output::removeOutputTransition()
     transition_ = nullptr;
 }
 
-void Output::setMessageProcessed()
+void Output::notifyMessageProcessed(Connection* connection)
 {
     for(auto connection : connections_) {
         if(connection->getState() != Connection::State::DONE) {

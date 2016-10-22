@@ -15,7 +15,7 @@ class CSAPEX_EXPORT Event : public StaticOutput
     friend class Graph;
 
 public:
-    Event(const UUID &uuid);
+    Event(const UUID &uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
     ~Event();
 
     virtual ConnectorType getConnectorType() const override

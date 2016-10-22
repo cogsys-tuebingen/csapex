@@ -22,11 +22,12 @@ NodeState::NodeState(const NodeHandle *parent)
       active_changed(new SignalImpl),
       flipped_changed(new SignalImpl),
       thread_changed(new SignalImpl),
+      execution_mode_changed(new SignalImpl),
       parent_changed(new SignalImpl),
       parent_(parent),
 
       z_(0), minimized_(false), enabled_(true), active_(false), flipped_(false), thread_id_(-1),
-      r_(-1), g_(-1), b_(-1)
+      r_(-1), g_(-1), b_(-1), exec_mode_(ExecutionMode::SEQUENTIAL)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
@@ -52,6 +53,7 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     label_ = rhs.label_;
     thread_name_ = rhs.thread_name_;
     thread_id_ = rhs.thread_id_;
+    exec_mode_ = rhs.exec_mode_;
 
     dictionary = rhs.dictionary;
 
@@ -65,6 +67,7 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     (*flipped_changed)();
     (*label_changed)();
     (*thread_changed)();
+    (*execution_mode_changed)();
 
     return *this;
 }
@@ -222,6 +225,19 @@ void NodeState::setThread(const std::string& name, int id)
 }
 
 
+ExecutionMode NodeState::getExecutionMode() const
+{
+    return exec_mode_;
+}
+void NodeState::setExecutionMode(ExecutionMode mode)
+{
+    if(exec_mode_ != mode) {
+        exec_mode_ = mode;
+
+        (*execution_mode_changed)();
+    }
+}
+
 void NodeState::writeYaml(YAML::Node &out) const
 {
     if(parent_) {
@@ -238,6 +254,7 @@ void NodeState::writeYaml(YAML::Node &out) const
     out["minimized"] = minimized_;
     out["enabled"] = enabled_;
     out["flipped"] = flipped_;
+    out["exec_mode"] = (int) exec_mode_;
 
     if(!dictionary.empty()) {
         YAML::Node dict(YAML::NodeType::Sequence);
@@ -304,6 +321,10 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(node["flipped"].IsDefined()) {
         setFlipped(node["flipped"].as<bool>());
+    }
+
+    if(node["exec_mode"].IsDefined()) {
+        setExecutionMode(static_cast<ExecutionMode>(node["exec_mode"].as<int>()));
     }
 
     if(node["label"].IsDefined()) {

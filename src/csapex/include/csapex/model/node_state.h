@@ -5,6 +5,7 @@
 #include <csapex/model/memento.h>
 #include <csapex/data/point.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/model/execution_mode.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.h>
@@ -66,6 +67,10 @@ public:
     void setThread(const std::string& name, int id);
     Signal thread_changed;
 
+    ExecutionMode getExecutionMode() const;
+    void setExecutionMode(ExecutionMode mode);
+    Signal execution_mode_changed;
+
     const NodeHandle* getParent() const;
     void setParent(const NodeHandle *value);
     Signal parent_changed;
@@ -114,6 +119,8 @@ private:
     int b_;
 
     std::map<std::string, boost::any> dictionary;
+
+    ExecutionMode exec_mode_;
 };
 
 }

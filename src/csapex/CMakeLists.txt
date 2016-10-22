@@ -301,6 +301,7 @@ add_library(csapex SHARED
     src/manager/message_provider_manager.cpp
 
     src/model/connectable.cpp
+    src/model/connectable_owner.cpp
     src/model/connector_type.cpp
     src/model/connection.cpp
     src/model/connection_information.cpp
@@ -422,6 +423,7 @@ add_library(csapex_command SHARED
     src/command/add_variadic_connector.cpp
     src/command/set_color.cpp
     src/command/update_parameter.cpp
+    src/command/set_execution_mode.cpp
 
 	${csapex_command_HEADERS}
 )
