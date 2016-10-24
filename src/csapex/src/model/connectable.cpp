@@ -5,6 +5,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/msg/message.h>
 #include <csapex/msg/any_message.h>
+#include <csapex/utility/debug.h>
 
 /// SYSTEM
 #include <iostream>
@@ -30,6 +31,8 @@ Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
 void Connectable::notifyMessageProcessed()
 {
     messageProcessed(this);
+
+    APEX_DEBUG_CERR <<"connectable " << getUUID() << " notified" << std::endl;
 
     for(ConnectionPtr& c : connections_) {
         c->setTokenProcessed();

@@ -26,6 +26,7 @@
 #include <csapex/msg/end_of_sequence_message.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/profiling/profiler.h>
+#include <csapex/utility/debug.h>
 
 /// SYSTEM
 #include <thread>
@@ -84,6 +85,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             auto generator = std::dynamic_pointer_cast<GeneratorNode>(node);
             if(generator) {
+                connections_.emplace_back(generator->finished.connect(delegate::Delegate0<>(this, &NodeWorker::triggerTryProcess)));
                 connections_.emplace_back(generator->updated.connect(delegate::Delegate0<>(this, &NodeWorker::finishGenerator)));
             }
 
@@ -236,6 +238,11 @@ void NodeWorker::setProcessingEnabled(bool e)
 
 bool NodeWorker::canProcess() const
 {
+    if(auto generator = std::dynamic_pointer_cast<GeneratorNode>(node_handle_->getNode().lock())) {
+        if(!generator->canProcess()) {
+            return false;
+        }
+    }
     return canReceive() && canSend();
 }
 
@@ -256,7 +263,7 @@ bool NodeWorker::canSend() const
         return false;
     }
 
-    for(Event* e : node_handle_->getEvents()){
+    for(EventPtr e : node_handle_->getExternalEvents()){
         if(!e->canSendMessages()) {
             return false;
         }
@@ -327,6 +334,11 @@ void NodeWorker::startProcessingMessages()
     apex_assert_hard(node_handle_->getInputTransition()->areMessagesComplete());
 
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+    for(Event* e : node_handle_->getEvents()) {
+        for(ConnectionPtr c : e->getConnections()) {
+            apex_assert_hard(c->getState() != Connection::State::UNREAD);
+        }
+    }
     setState(State::FIRED);
 
 
@@ -414,6 +426,8 @@ void NodeWorker::startProcessingMessages()
         }
     }
 
+    current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
+
     if(marker || !all_inputs_are_present) {
         forwardMessages(false);
         signalMessagesProcessed();
@@ -433,18 +447,22 @@ void NodeWorker::startProcessingMessages()
 
     if(isProcessingEnabled()) {
         try {
-            current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
-
             if(sync) {
                 node->process(*node_handle_, *node);
 
             } else {
-                node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
-                    node_handle_->executionRequested([this, f, node]() {
-                        f(*node_handle_, *node);
-                        finishProcessing();
+                try {
+                    node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
+                        node_handle_->executionRequested([this, f, node]() {
+                            f(*node_handle_, *node);
+                            finishProcessing();
+                        });
                     });
-                });
+                } catch(...) {
+                    // if flow is aborted -> call continuation anyway
+                    finishProcessing();
+                    throw;
+                }
             }
 
 
@@ -495,7 +513,7 @@ void NodeWorker::finishGenerator()
         node_handle_->getOutputTransition()->setOutputsIdle();
     }
 
-    //sendEventsAndMaybeDeactivate(node_handle_->isActive());
+    triggerTryProcess();
 }
 
 void NodeWorker::finishProcessing()
@@ -522,8 +540,11 @@ void NodeWorker::signalMessagesProcessed()
 {
     setState(State::IDLE);
 
-    if(node_handle_->isSink() || current_exec_mode_ == ExecutionMode::PIPELINING) {
+    if(node_handle_->isSink() || (current_exec_mode_ && current_exec_mode_.get() == ExecutionMode::PIPELINING)) {
+        APEX_DEBUG_TRACE getNode()->ainfo << "notify " << getUUID() <<", sink: " << node_handle_->isSink() << ", mode: " << (int) current_exec_mode_.get() << std::endl;
         node_handle_->getInputTransition()->notifyMessageProcessed();
+
+        current_exec_mode_.reset();
     }
 
     messages_processed();
@@ -603,24 +624,25 @@ void NodeWorker::finishTimer(Timer::Ptr t)
 
 void NodeWorker::outgoingMessagesProcessed()
 {
-    {
-        std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-        apex_assert_hard(node_handle_->getOutputTransition()->isSink() ||
-                         node_handle_->getOutputTransition()->areOutputsIdle());
+    if(auto generator = std::dynamic_pointer_cast<GeneratorNode>(node_handle_->getNode().lock())) {
+        generator->notifyMessagesProcessed();
     }
 
-    auto generator = std::dynamic_pointer_cast<GeneratorNode>(node_handle_->getNode().lock());
-    if(generator) {
-        if(canSend()) {
-            generator->notifyMessagesProcessed();
+    if(current_exec_mode_) {
+        if(current_exec_mode_.get() == ExecutionMode::SEQUENTIAL) {
+            APEX_DEBUG_TRACE getNode()->ainfo << "done" << std::endl;
+            node_handle_->getInputTransition()->notifyMessageProcessed();
+
+            current_exec_mode_.reset();
         }
+
+        APEX_DEBUG_TRACE getNode()->ainfo << "notify, try process" << std::endl;
+        triggerTryProcess();
+
+    } else {
+        APEX_DEBUG_TRACE getNode()->ainfo << "cannot notify, no current exec mode" << std::endl;
     }
 
-    if(current_exec_mode_ == ExecutionMode::SEQUENTIAL) {
-        node_handle_->getInputTransition()->notifyMessageProcessed();
-    }
-
-    triggerTryProcess();
 }
 
 
@@ -663,12 +685,22 @@ void NodeWorker::updateState()
 
 bool NodeWorker::tryProcess()
 {
+    APEX_DEBUG_TRACE getNode()->ainfo << "try process" << std::endl;
+
     updateState();
     if(isEnabled() && canProcess()) {
         apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
         startProcessingMessages();
         return true;
+
+    } else {
+        APEX_DEBUG_TRACE {
+            getNode()->ainfo << "cannot process: " << std::endl;
+            for(ConnectionPtr c : node_handle_->getInputTransition()->getConnections()) {
+                getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+            }
+        }
     }
 
     return false;
@@ -759,9 +791,6 @@ void NodeWorker::sendMessages(bool ignore_sink)
     apex_assert_hard(getState() == State::PROCESSING ||
                      getState() == State::IDLE);
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-    for(Event* e : node_handle_->getEvents()){
-        apex_assert_hard(e->canSendMessages());
-    }
 
     //tokens are activated if the node is active.
     bool active = node_handle_->isActive();
@@ -815,6 +844,8 @@ bool NodeWorker::tick()
 
                 if(node_handle_->getOutputTransition()->canStartSendingMessages()) {
 
+                    current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
+
                     {
                         std::unique_lock<std::recursive_mutex> lock(state_mutex_);
                         auto state = getState();
@@ -842,6 +873,11 @@ bool NodeWorker::tick()
                     if(has_ticked) {
                         if(trigger_tick_done_->isConnected()) {
                             trigger_tick_done_->trigger();
+                        }
+
+                        if(node_handle_->isSource()) {
+                            // reset input transition on tick
+                            node_handle_->getInputTransition()->forwardMessages();
                         }
 
                         apex_assert_hard(guard_ == -1);

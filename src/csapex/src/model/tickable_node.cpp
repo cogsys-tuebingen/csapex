@@ -13,6 +13,12 @@ TickableNode::TickableNode()
 {
 
 }
+
+bool TickableNode::isDoneProcessing() const
+{
+    return true;
+}
+
 void TickableNode::getProperties(std::vector<std::string>& properties) const
 {
     GeneratorNode::getProperties(properties);

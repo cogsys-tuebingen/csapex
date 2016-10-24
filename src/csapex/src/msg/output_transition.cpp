@@ -8,6 +8,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/no_message.h>
+#include <csapex/utility/debug.h>
 
 using namespace csapex;
 
@@ -80,12 +81,12 @@ void OutputTransition::addOutput(OutputPtr output)
     });
     output_signal_connections_[output].push_back(cp);
 
-    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
-        if(output->isEnabled()) {
-            publishNextMessage();
-        }
-    });
-    output_signal_connections_[output].push_back(cr);
+//    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
+//        if(output->isEnabled()) {
+//            publishNextMessage();
+//        }
+//    });
+//    output_signal_connections_[output].push_back(cr);
 }
 
 void OutputTransition::removeOutput(OutputPtr output)
@@ -168,6 +169,8 @@ bool OutputTransition::sendMessages(bool is_active)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
+    apex_assert_hard(areAllConnections(Connection::State::NOT_INITIALIZED));
+
     updateConnections();
 
     bool has_sent_active_message = false;
@@ -211,6 +214,7 @@ void OutputTransition::publishNextMessage()
 
 
     if(!areAllConnections(Connection::State::DONE)) {
+        APEX_DEBUG_CERR <<"cannot publish next, not all connections are done" << std::endl;
         return;
     }
 
@@ -221,13 +225,16 @@ void OutputTransition::publishNextMessage()
         output->nextMessage();
     }
     if(areOutputsIdle()) {
+        APEX_DEBUG_CERR <<"all outputs are idle" << std::endl;
         if(areAllConnections(Connection::State::DONE)) {
+            APEX_DEBUG_CERR <<"all outputs are done" << std::endl;
             updateConnections();
 
             messages_processed();
         }
 
     } else {
+        APEX_DEBUG_CERR <<"some outputs are not idle" << std::endl;
         fillConnections();
     }
 }
@@ -248,6 +255,8 @@ void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(outputs_.empty() || !areOutputsIdle());
+
+    apex_assert_hard(areAllConnections(Connection::State::NOT_INITIALIZED));
 
     for(auto pair : outputs_) {
         OutputPtr out = pair.second;

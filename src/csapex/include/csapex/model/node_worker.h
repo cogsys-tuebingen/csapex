@@ -19,6 +19,7 @@
 #include <vector>
 #include <atomic>
 #include <csapex/utility/slim_signal.hpp>
+#include <boost/optional.hpp>
 
 namespace csapex {
 
@@ -155,7 +156,7 @@ private:
 
     NodeHandlePtr node_handle_;
 
-    ExecutionMode current_exec_mode_;
+    boost::optional<ExecutionMode> current_exec_mode_;
 
     bool is_setup_;
     State state_;

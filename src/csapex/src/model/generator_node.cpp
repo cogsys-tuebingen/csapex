@@ -19,3 +19,8 @@ void GeneratorNode::notifyMessagesProcessed()
 
 }
 
+
+bool GeneratorNode::canProcess() const
+{
+    return true;
+}

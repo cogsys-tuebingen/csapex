@@ -1,13 +1,21 @@
 #!/bin/bash -l
 
+FULLNAME=$1
+
 if [[ $(grep "::" <<< $1) ]]; then
     arrIN=(${1//::/ })
-    NODE_NAME=${arrIN[1]}
-    NAMESPACE="${arrIN[0]}::"
+    NODE_NAME=${arrIN[-1]}
+    NAMESPACES=(${arrIN[@]})
+    unset NAMESPACES[${#NAMESPACES[@]}-1]
 else
     NODE_NAME=$1
-    NAMESPACE="csapex"
+    NAMESPACES=("csapex")
+    FULLNAME="csapex::$FULLNAME"
 fi
+
+
+OPENING_NS=$""
+CLOSING_NS=$""
 
 FILE_NAME=$(sed -e 's/\([A-Z]\)/_\L\1/g' -e 's/^_//' <<< $NODE_NAME)
 FILE_NAME=$(tr '[:upper:]' '[:lower:]' <<< $FILE_NAME)
@@ -51,8 +59,8 @@ CMAKELIST=${PREFIX}CMakeLists.txt
 ###
 ### TEST IF NODE NAME IS FREE IN CMAKE LIST
 ###
-if [[ `cat $CMAKELIST | grep $NODE_NAME.cpp | wc -l` != 0 ]]; then
-    echo "ERROR: $NODE_NAME.cpp already exists in CMakeLists.txt"
+if [[ `cat $CMAKELIST | grep $FILE_NAME | wc -l` != 0 ]]; then
+    echo "ERROR: $FILE_NAME already exists in CMakeLists.txt"
     exit
 fi
 
@@ -81,11 +89,15 @@ fi
 ###
 ### TEST IF NODE NAME IS FREE IN PACKAGEXML
 ###
-if [[ `cat $PLUGINXML | grep "type=.*$NODE_NAME\"" | wc -l` != 0 ]]; then
+if [[ `cat $PLUGINXML | grep "type=.*$FULLNAME\"" | wc -l` != 0 ]]; then
     echo "ERROR: $NODE_NAME already exists in $PLUGINXML"
     exit
 fi
 
+###
+### DETERMINE THE PROJECT NAME
+###
+PROJECT_NAME=$(cat $CMAKELIST | grep "project" | sed "s/project(\(.*\))/\\1/");
 
 ###
 ### FIND NAME OF THE PLUGIN LIBRARY
@@ -114,7 +126,7 @@ fi
 ###
 
 NEW_FILE="$FILE_NAME.cpp"
-NEW_XML_1="<class type=\"${NAMESPACE}::${NODE_NAME}\" base_class_type=\"csapex::Node\">"
+NEW_XML_1="<class type=\"$FULLNAME\" base_class_type=\"csapex::Node\">"
 NEW_XML_2="  <description>$DESCRIPTION</description>"
 NEW_XML_3="<\/class>"
 
@@ -123,6 +135,16 @@ NEW_XML_3="<\/class>"
 ###
 ### GENERATE SOURCE
 ###
+
+
+for ns in "${NAMESPACES[@]}"
+do
+    OPENING_NS="${OPENING_NS}namespace $ns
+{
+"
+    CLOSING_NS="} // $ns
+$CLOSING_NS"
+done
 
 echo "
 /// PROJECT
@@ -136,8 +158,7 @@ echo "
 using namespace csapex;
 using namespace csapex::connection_types;
 
-namespace $NAMESPACE
-{
+$OPENING_NS
 
 class $NODE_NAME : public Node
 {
@@ -165,15 +186,15 @@ public:
         msg::publish(out_, value + \"!\");
     }
 
-    private:
+private:
     Input* in_;
     Output* out_;
 
 };
 
-}
+$CLOSING_NS
 
-CSAPEX_REGISTER_CLASS(${NAMESPACE}::${NODE_NAME}, csapex::Node)
+CSAPEX_REGISTER_CLASS($FULLNAME, csapex::Node)
 "> $DIR/$NEW_FILE
 
 
@@ -184,7 +205,14 @@ CSAPEX_REGISTER_CLASS(${NAMESPACE}::${NODE_NAME}, csapex::Node)
 ###
 WS=$(grep "add_library.*$LIBRARY" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ /\\ /')
 ENTRY="${WS}$DIR/$NEW_FILE"
-sed -i "/add_library.*$LIBRARY\s/a $ENTRY"  $CMAKELIST
+sed -i "/add_library.*$LIBRARY\s*/a $ENTRY"  $CMAKELIST
+
+LIBRARY_VAR=$(echo $LIBRARY | sed "s/${PROJECT_NAME}/\${PROJECT_NAME}/")
+echo $LIBRARY_VAR
+
+WS=$(grep "add_library.*$LIBRARY_VAR" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ /\\ /')
+ENTRY="${WS}$DIR/$NEW_FILE"
+sed -i "/add_library.*$LIBRARY_VAR\s*/a $ENTRY"  $CMAKELIST
                          
 ###
 ### MODIFY PLUGINXML

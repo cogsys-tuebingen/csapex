@@ -112,6 +112,13 @@ csapex--NodeBox[focused="true"] QFrame#boxframe {
         border: 2px solid rgb(70, 115, 60);
         border-style: dashed;
 }
+
+csapex--NodeBox[focused="true"][error="true"] QFrame#boxframe {
+        background: rgb(255, 150, 150);
+        border-color: rgb(100,0,0);
+}
+
+
 /* disabled box */
 csapex--NodeBox[disabled="true"] QFrame#boxframe {
         background: rgb(200,200,200)

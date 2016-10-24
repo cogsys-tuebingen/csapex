@@ -623,6 +623,8 @@ void NodeHandle::manageInput(InputPtr in)
     external_inputs_.push_back(in);
     
     connectConnector(in.get());
+
+    connections_[in.get()].emplace_back(in->message_available.connect([this](Connection*) { mightBeEnabled(); }));
     
     connectorCreated(in);
     transition_in_->addInput(in);

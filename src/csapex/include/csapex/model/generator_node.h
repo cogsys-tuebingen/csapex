@@ -14,8 +14,12 @@ public:
 
     virtual void getProperties(std::vector<std::string>& properties) const override;
 
+    virtual bool canProcess() const;
+    virtual bool isDoneProcessing() const = 0;
+
 public:
     csapex::slim_signal::Signal<void()> updated;
+    csapex::slim_signal::Signal<void()> finished;
 
 protected:
     GeneratorNode();

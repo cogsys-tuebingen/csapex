@@ -7,6 +7,7 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/token_traits.h>
+#include <csapex/utility/debug.h>
 
 /// SYSTEM
 #include <iostream>
@@ -40,6 +41,8 @@ void Output::notifyMessageProcessed(Connection* connection)
             return;
         }
     }
+
+    APEX_DEBUG_CERR << getUUID() << " is processed" << std::endl;
 
     message_processed();
 }

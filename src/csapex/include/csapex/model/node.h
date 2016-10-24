@@ -53,10 +53,10 @@ public: /* API */
     virtual void getProperties(std::vector<std::string>& properties) const;
 
 public:
-    StreamRelay adebug;
-    StreamRelay ainfo;
-    StreamRelay awarn;
-    StreamRelay aerr;
+    mutable StreamRelay adebug;
+    mutable StreamRelay ainfo;
+    mutable StreamRelay awarn;
+    mutable StreamRelay aerr;
 
 protected:
     UUID uuid_;

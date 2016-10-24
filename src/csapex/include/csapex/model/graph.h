@@ -62,6 +62,9 @@ public:
     virtual void activation() override;
     virtual void deactivation() override;
 
+    virtual bool canProcess() const override;
+    virtual bool isDoneProcessing() const override;
+
     void clear();
 
     Node* findNode(const UUID& uuid) const;
@@ -180,12 +183,21 @@ private:
     UUID addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
 
     virtual void notifyMessagesProcessed() override;
-    void inputActivation();
-    void outputActivation();
+    void currentIterationIsProcessed();
+    void subgraphHasProducedAllMessages();
 
-    void tryFinishProcessing();
+    void tryFinishSubgraph();
 
     void checkNodeState(NodeHandle* nh);
+
+    void finishSubgraph();
+    void notifySubgraphHasProducedTokens();
+    void notifySubgraphProcessed();
+
+    void sendCurrentIteration();
+
+    void startNextIteration();
+
 
 public:
     csapex::slim_signal::Signal<void()> state_changed;
@@ -230,6 +242,7 @@ protected:
 
     std::set<UUID> iterated_inputs_;
     param::BitSetParameterPtr iterated_inputs_param_;
+    bool is_subgraph_finished_;
     bool is_iterating_;
     bool has_sent_current_iteration_;
     int iteration_index_;

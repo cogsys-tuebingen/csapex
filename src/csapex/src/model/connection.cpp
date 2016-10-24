@@ -11,6 +11,7 @@
 #include <csapex/model/fulcrum.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/no_message.h>
+#include <csapex/utility/debug.h>
 
 /// SYSTEM
 #include <cmath>
@@ -79,9 +80,11 @@ bool Connection::holdsActiveToken() const
 
 void Connection::setTokenProcessed()
 {
-
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    setState(State::DONE);
+    {
+        std::unique_lock<std::recursive_mutex> lock(sync);
+        setState(State::DONE);
+    }
+    APEX_DEBUG_CERR <<*this << " is done" << std::endl;
     notifyMessageProcessed();
 }
 
@@ -92,7 +95,7 @@ void Connection::setToken(const TokenPtr &token)
 
         std::unique_lock<std::recursive_mutex> lock(sync);
         apex_assert_hard(msg != nullptr);
-        //        apex_assert_hard(state_ == State::NOT_INITIALIZED);
+        apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
         bool msg_active = msg->isActive();
         if(!isActive() && msg_active) {
@@ -284,6 +287,6 @@ void Connection::deleteFulcrum(int fulcrum_id)
 }
 
 std::ostream& csapex::operator << (std::ostream& out, const Connection& c) {
-    out << "Connection: [" << c.from() << " / " << c.to() << "]";
+    out << "Connection: [" << c.from()->getUUID() << " / " << c.to()->getUUID() << "]";
     return out;
 }

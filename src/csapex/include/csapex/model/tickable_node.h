@@ -25,6 +25,7 @@ public:
 
     void keepUpRate();
 
+    virtual bool isDoneProcessing() const override;
 
     virtual void getProperties(std::vector<std::string>& properties) const override;
 
