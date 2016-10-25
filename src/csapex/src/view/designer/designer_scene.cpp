@@ -835,6 +835,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.full_read = connection.getState() == Connection::State::READ;
     ccs.full_unread = connection.getState() == Connection::State::UNREAD;
     ccs.active = connection.isActive();
+    ccs.active_token = connection.holdsActiveToken();
     if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to->getOwner())) {
         ccs.target_is_pipelining = node->getNodeState()->getExecutionMode() == ExecutionMode::PIPELINING;
 
@@ -1100,6 +1101,11 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     }
     if(ccs.hidden_to) {
         color_end.setAlpha(60);
+    }
+
+    if(ccs.active_token) {
+        color_start.setAlpha(255);
+        color_end.setAlpha(255);
     }
 
     QLinearGradient lg(from, to);

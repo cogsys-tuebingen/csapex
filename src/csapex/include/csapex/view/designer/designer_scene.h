@@ -131,6 +131,7 @@ private:
         bool selected_from;
         bool selected_to;
         bool active;
+        bool active_token;
 
         bool target_is_pipelining;
 

@@ -346,9 +346,11 @@ void NodeHandle::updateParameterValue(Connectable *s)
     apex_assert_hard(source);
     
     csapex::param::Parameter* p = input_2_param_.at(source);
-    
+
     if(msg::isValue<int>(source)) {
         updateParameterValueFrom<int>(p, source);
+    } else if(msg::isValue<bool>(source)) {
+        updateParameterValueFrom<bool>(p, source);
     } else if(msg::isValue<double>(source)) {
         updateParameterValueFrom<double>(p, source);
     } else if(msg::isValue<std::string>(source)) {

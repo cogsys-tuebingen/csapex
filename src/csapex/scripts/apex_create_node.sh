@@ -59,11 +59,10 @@ CMAKELIST=${PREFIX}CMakeLists.txt
 ###
 ### TEST IF NODE NAME IS FREE IN CMAKE LIST
 ###
-if [[ `cat $CMAKELIST | grep $FILE_NAME | wc -l` != 0 ]]; then
+if [[ `cat $CMAKELIST | grep "/[[:space:]]*$FILE_NAME" | wc -l` != 0 ]]; then
     echo "ERROR: $FILE_NAME already exists in CMakeLists.txt"
     exit
 fi
-
 
 ###
 ### FIND PACKAGE XML
@@ -208,7 +207,6 @@ ENTRY="${WS}$DIR/$NEW_FILE"
 sed -i "/add_library.*$LIBRARY\s*/a $ENTRY"  $CMAKELIST
 
 LIBRARY_VAR=$(echo $LIBRARY | sed "s/${PROJECT_NAME}/\${PROJECT_NAME}/")
-echo $LIBRARY_VAR
 
 WS=$(grep "add_library.*$LIBRARY_VAR" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ /\\ /')
 ENTRY="${WS}$DIR/$NEW_FILE"

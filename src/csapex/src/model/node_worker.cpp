@@ -386,14 +386,19 @@ void NodeWorker::startProcessingMessages()
         }
 
         // update parameters
+        bool change = false;
         for(auto pair : node_handle_->paramToInputMap()) {
             InputPtr cin = pair.second.lock();
             if(cin) {
                 apex_assert_hard(cin->isOptional());
                 if(msg::hasMessage(cin.get())) {
                     node_handle_->updateParameterValue(cin.get());
+                    change = true;
                 }
             }
+        }
+        if(change) {
+            checkParameters();
         }
     }
 
