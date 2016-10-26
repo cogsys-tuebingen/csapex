@@ -15,7 +15,8 @@ BitSetParameter::BitSetParameter()
 
 
 BitSetParameter::BitSetParameter(const std::string &name, const ParameterDescription& description)
-    : Parameter(name, description)
+    : Parameter(name, description),
+      value_(0)
 {
 }
 

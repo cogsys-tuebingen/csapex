@@ -38,7 +38,7 @@ QWidget* BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& di
     layout->addWidget(group);
 
     connectInGuiThread(bitset_p_->scope_changed, [this](param::Parameter*) {
-        if(!bitset_p_) {
+        if(!bitset_p_ || !group) {
             return;
         }
 

@@ -437,7 +437,9 @@ public:
         } else if(auto i = std::dynamic_pointer_cast< InstancedImplementation > (impl)) {
             auto res = std::make_shared<std::vector<T>>();
             for(TokenDataConstPtr td : i->value) {
-                res->push_back(*std::dynamic_pointer_cast<T const>(td));
+                if(auto v = std::dynamic_pointer_cast<T const>(td)) {
+                    res->push_back(*v);
+                }
             }
             return res;
         } else {

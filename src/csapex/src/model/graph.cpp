@@ -67,8 +67,6 @@ void Graph::reset()
 
     transition_relay_out_->reset();
     transition_relay_in_->reset();
-
-    iterated_inputs_.clear();
 }
 
 void Graph::resetActivity()
@@ -669,7 +667,12 @@ void Graph::process(NodeModifier &node_modifier, Parameterizable &params,
         }
     }
 
-    transition_relay_out_->sendMessages(node_handle_->isActive());
+    if(!transition_relay_out_->isSink()) {
+        transition_relay_out_->sendMessages(node_handle_->isActive());
+    } else {
+
+        finishSubgraph();
+    }
 }
 
 bool Graph::isAsynchronous() const
