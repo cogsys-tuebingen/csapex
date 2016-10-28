@@ -229,6 +229,11 @@ void NoteBox::updateThreadInformation()
 
 }
 
+void NoteBox::updateFrequencyInformation()
+{
+
+}
+
 void NoteBox::setSelected(bool selected)
 {
     setProperty("focused",selected);

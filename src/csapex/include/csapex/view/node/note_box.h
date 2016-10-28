@@ -40,6 +40,7 @@ public:
 
     void updateComponentInformation(Graph* graph) override;
     void updateThreadInformation() override;
+    void updateFrequencyInformation() override;
 
 protected:
     void paintEvent(QPaintEvent* e) override;

@@ -131,7 +131,7 @@ public Q_SLOTS:
 
     virtual void updateComponentInformation(Graph* graph);
     virtual void updateThreadInformation();
-    void updateFrequencyInformation();
+    virtual void updateFrequencyInformation();
     void contextMenuEvent(QContextMenuEvent* e);
 
     void registerEvent(Connectable*);
