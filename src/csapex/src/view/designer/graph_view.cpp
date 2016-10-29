@@ -14,6 +14,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/command/playback_command.h>
 #include <csapex/command/minimize.h>
+#include <csapex/command/mute_node.h>
 #include <csapex/command/move_box.h>
 #include <csapex/command/rename_node.h>
 #include <csapex/command/rename_connector.h>
@@ -23,6 +24,7 @@
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/set_execution_mode.h>
+#include <csapex/command/set_logger_level.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/settings.h>
@@ -1314,26 +1316,42 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
     bool has_minimized = false;
     bool has_maximized = false;
+    bool has_muted = false;
+    bool has_unmuted = false;
     bool has_enabled = false;
     bool has_disabled = false;
     bool has_box = false;
     bool has_note = false;
     bool has_pipeline = false;
     bool has_sequential = false;
+
+    std::map<int, bool> has_log_level;
+    for(int i = 0; i <=3; ++i) {
+        has_log_level[i] = false;
+    }
+
     for(NodeBox* box : selected_boxes_) {
-        bool m = box->isMinimizedSize();
-        has_minimized |= m;
-        has_maximized |= !m;
+        bool minimized = box->isMinimizedSize();
+        has_minimized |= minimized;
+        has_maximized |= !minimized;
 
-        bool e = box->getNodeWorker()->isProcessingEnabled();
-        has_enabled |= e;
-        has_disabled |= !e;
+        const auto& state = box->getNodeHandle()->getNodeState();
 
-        bool is_note = dynamic_cast<NoteBox*>(box);
-        has_note |= is_note;
-        has_box |= !is_note;
+        has_log_level[state->getLoggerLevel()] = true;
 
-        ExecutionMode mode = box->getNodeHandle()->getNodeState()->getExecutionMode();
+        bool muted = state->isMuted();
+        has_muted |= muted;
+        has_unmuted |= !muted;
+
+        bool enabled = box->getNodeWorker()->isProcessingEnabled();
+        has_enabled|= enabled;
+        has_disabled |= !enabled;
+
+        bool note = dynamic_cast<NoteBox*>(box);
+        has_note |= note;
+        has_box |= !note;
+
+        ExecutionMode mode = state->getExecutionMode();
         has_pipeline |= mode == ExecutionMode::PIPELINING;
         has_sequential |= mode == ExecutionMode::SEQUENTIAL;
     }
@@ -1353,6 +1371,40 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
             disable->setIconVisibleInMenu(true);
             handler[disable] = std::bind(&GraphView::enableSelection, this, false);
             menu.addAction(disable);
+        }
+
+        QMenu* log_level_menu = menu.addMenu(QIcon(":/logger_level.png"), "set logger level");
+        {
+            auto add_level = [this, &handler, &menu, log_level_menu, &has_log_level](const std::string& name, int level) {
+                QAction* log_level_action = new QAction(name.c_str(), &menu);
+                handler[log_level_action] = std::bind(&GraphView::setLoggerLevel, this, level);
+                log_level_menu->addAction(log_level_action);
+                log_level_action->setCheckable(true);
+                log_level_action->setChecked(has_log_level[level]);
+            };
+
+            add_level("Debug", 0);
+            add_level("Info", 1);
+            add_level("Warning", 2);
+            add_level("Error", 3);
+        }
+        menu.addMenu(log_level_menu);
+
+        menu.addSeparator();
+
+        if(has_unmuted) {
+            QAction* max = new QAction("mute", &menu);
+            max->setIcon(QIcon(":/muted.png"));
+            max->setIconVisibleInMenu(true);
+            handler[max] = std::bind(&GraphView::muteBox, this, true);
+            menu.addAction(max);
+        }
+        if(has_muted){
+            QAction* min = new QAction("unmute", &menu);
+            min->setIcon(QIcon(":/unmuted.png"));
+            min->setIconVisibleInMenu(true);
+            handler[min] = std::bind(&GraphView::muteBox, this, false);
+            menu.addAction(min);
         }
 
         menu.addSeparator();
@@ -1381,9 +1433,6 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
         menu.addSeparator();
 
-        QActionGroup* type = new QActionGroup(this);
-        type->setExclusive(true);
-        type->setObjectName("Execution Mode");
 
         QAction* type_pipeline = new QAction("pipeline", &menu);
         type_pipeline->setCheckable(true);
@@ -1633,11 +1682,29 @@ void GraphView::setExecutionMode(ExecutionMode mode)
     view_core_.execute(cmd);
 }
 
-void GraphView::minimizeBox(bool mini)
+void GraphView::setLoggerLevel(int level)
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),(mini ? std::string("minimize") : std::string("maximize")) + " boxes"));
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set logger level"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::Minimize(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), mini)));
+        cmd->add(Command::Ptr(new command::SetLoggerLevel(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), level)));
+    }
+    view_core_.execute(cmd);
+}
+
+void GraphView::minimizeBox(bool muted)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),(muted ? std::string("minimize") : std::string("maximize")) + " boxes"));
+    for(NodeBox* box : selected_boxes_) {
+        cmd->add(Command::Ptr(new command::Minimize(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), muted)));
+    }
+    view_core_.execute(cmd);
+}
+
+void GraphView::muteBox(bool mini)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),(mini ? std::string("mute") : std::string("unmute")) + " boxes"));
+    for(NodeBox* box : selected_boxes_) {
+        cmd->add(Command::Ptr(new command::MuteNode(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), mini)));
     }
     view_core_.execute(cmd);
 }

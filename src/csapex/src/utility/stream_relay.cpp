@@ -7,22 +7,18 @@
 using namespace csapex;
 
 StreamRelay::StreamRelay(std::ostream &stream, const std::string &prefix)
-    : s_(stream), has_prefix_(true), prefix_(prefix), history_(new std::stringstream),  continued_(new StreamRelay(s_, history_))
+    : s_(stream), is_enabled_(true), has_prefix_(true), prefix_(prefix), history_(new std::stringstream),  continued_(new StreamRelay(s_, history_))
 {
 
 }
-StreamRelay::StreamRelay(std::ostream &stream, std::stringstream* history)
-    : s_(stream), has_prefix_(false), history_(history), continued_(this)
+StreamRelay::StreamRelay(std::ostream &stream, std::shared_ptr<std::stringstream> history)
+    : s_(stream), is_enabled_(true), has_prefix_(false), history_(history)
 {
 
 }
 
 StreamRelay::~StreamRelay()
 {
-    if(continued_ != this) {
-        delete continued_;
-        delete history_;
-    }
 }
 
 void StreamRelay::setPrefix(const std::string &prefix)
@@ -43,7 +39,25 @@ std::stringstream& StreamRelay::history() const
 
 StreamRelay& StreamRelay::operator<<(std::ostream& (*pf)(std::ostream&))
 {
-    *history_ << pf;
-    s_ << pf;
+    if(is_enabled_) {
+        *history_ << pf;
+        s_ << pf;
+    }
+
     return *continued_;
+}
+
+void StreamRelay::setEnabled(bool enable)
+{
+    if(is_enabled_ != enable) {
+        is_enabled_ = enable;
+        if(continued_) {
+            continued_->setEnabled(enable);
+        }
+    }
+}
+
+bool StreamRelay::isEnabled() const
+{
+    return is_enabled_;
 }

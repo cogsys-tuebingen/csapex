@@ -8,7 +8,6 @@
 #include <iostream>
 #include <stdio.h>
 #include <thread>
-#include <assert.h>
 
 #ifdef WIN32
 #else
@@ -17,7 +16,6 @@
 
 
 using namespace csapex;
-
 
 std::string StreamInterceptor::getCout()
 {
@@ -77,11 +75,8 @@ void StreamInterceptor::run() {
 #else
     if (isatty(fileno(stdin))) {
 #endif
-        std::cout << "<b>std::cin is a terminal -> not polling</b>" << std::endl;
+        // cin is a terminal -> not polling
         return;
-
-    } else {
-        std::cout << "<b>std::cin is a file or pipe -> polling</b>" << std::endl;
     }
 
     running_ = true;

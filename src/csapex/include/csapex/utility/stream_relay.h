@@ -7,6 +7,7 @@
 /// SYSTEM
 #include <string>
 #include <iosfwd>
+#include <memory>
 
 namespace csapex
 {
@@ -20,14 +21,22 @@ public:
 
     template <class Type>
     StreamRelay& operator << (const Type &x) {
-        if(has_prefix_) {
-            writePrefix();
+        if(is_enabled_) {
+            if(has_prefix_) {
+                writePrefix();
+            }
+            *history_ << x;
+            s_ << x;
         }
-        *history_ << x;
-        s_ << x;
-        return *continued_;
+        if(continued_) {
+            return *continued_;
+        } else {
+            return *this;
+        }
     }
 
+    void setEnabled(bool muted);
+    bool isEnabled() const;
 
     typedef std::ostream& (*ostream_manipulator)(std::ostream&);
 
@@ -37,17 +46,19 @@ public:
 
 
 private:
-    StreamRelay(std::ostream& stream, std::stringstream *history);
+    StreamRelay(std::ostream& stream, std::shared_ptr<std::stringstream> history);
     void writePrefix();
 
 private:
     std::ostream& s_;
 
+    bool is_enabled_;
+
     bool has_prefix_;
     std::string prefix_;
 
-    mutable std::stringstream* history_;
-    StreamRelay* continued_;
+    mutable std::shared_ptr<std::stringstream> history_;
+    std::unique_ptr<StreamRelay> continued_;
 };
 }
 

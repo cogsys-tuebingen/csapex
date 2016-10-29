@@ -127,6 +127,8 @@ public:
     // TODO: get rid of
     void updateParameterValue(Connectable* source);
 
+    void updateLoggerLevel();
+
 public:
     csapex::slim_signal::Signal<void ()> nodeRemoved;
 

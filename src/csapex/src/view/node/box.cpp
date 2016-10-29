@@ -685,7 +685,7 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         return;
     }
     QString state = getNodeState();
-
+    QString state_text;
     QString transition_state;
     if(worker) {
         NodeHandlePtr handle = worker->getNodeHandle();
@@ -696,8 +696,14 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         transition_state += it->isEnabled() ? "enabled" : "disabled";
         transition_state += ", ot: ";
         transition_state += ot->isEnabled() ? "enabled" : "disabled";
+        state_text = "<img src=\":/node_";
+        state_text += state + ".png\" />";
+        if(handle->getNodeState()->isMuted()) {
+            state_text += "<img src=\":/muted.png\" />";
+        }
     }
-    info_exec->setText(QString("<img src=\":/node_") + state + ".png\" />");
+
+    info_exec->setText(state_text);
     info_exec->setToolTip(state + transition_state);
 
     bool is_error = false;

@@ -70,6 +70,14 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
         node_->ainfo.setPrefix(label);
         node_->awarn.setPrefix(label);
         node_->aerr.setPrefix(label);
+
+        triggerNodeStateChanged();
+    });
+    node_state_->logger_level_changed->connect([this](){
+        updateLoggerLevel();
+    });
+    node_state_->muted_changed->connect([this](){
+        updateLoggerLevel();
     });
     
     //    triggerNodeStateChanged();
@@ -98,6 +106,22 @@ NodeHandle::~NodeHandle()
     }
 
     nodeRemoved();
+}
+
+void NodeHandle::updateLoggerLevel()
+{
+    int level = node_state_->getLoggerLevel();
+    bool enabled = !node_state_->isMuted();
+    if(!enabled) {
+        level = 10;
+    }
+
+    node_->adebug.setEnabled(level <= 0);
+    node_->ainfo.setEnabled(level <= 1);
+    node_->awarn.setEnabled(level <= 2);
+    node_->aerr.setEnabled(level <= 3);
+
+    triggerNodeStateChanged();
 }
 
 void NodeHandle::setIsSource(bool source)

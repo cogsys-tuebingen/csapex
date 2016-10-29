@@ -50,6 +50,10 @@ public:
     void setMinimized(bool value);
     Signal minimized_changed;
 
+    bool isMuted() const;
+    void setMuted(bool value);
+    Signal muted_changed;
+
     bool isEnabled() const;
     void setEnabled(bool value);
     Signal enabled_changed;
@@ -70,6 +74,11 @@ public:
     ExecutionMode getExecutionMode() const;
     void setExecutionMode(ExecutionMode mode);
     Signal execution_mode_changed;
+
+    int getLoggerLevel() const;
+    void setLoggerLevel(int level);
+    Signal logger_level_changed;
+
 
     const NodeHandle* getParent() const;
     void setParent(const NodeHandle *value);
@@ -107,9 +116,12 @@ private:
     long z_;
 
     bool minimized_;
+    bool muted_;
     bool enabled_;
     bool active_;
     bool flipped_;
+
+    int logger_level_;
 
     int thread_id_;
     std::string thread_name_;

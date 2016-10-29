@@ -18,16 +18,18 @@ NodeState::NodeState(const NodeHandle *parent)
       color_changed(new SignalImpl),
       label_changed(new SignalImpl),
       minimized_changed(new SignalImpl),
+      muted_changed(new SignalImpl),
       enabled_changed(new SignalImpl),
       active_changed(new SignalImpl),
       flipped_changed(new SignalImpl),
       thread_changed(new SignalImpl),
       execution_mode_changed(new SignalImpl),
+      logger_level_changed(new SignalImpl),
       parent_changed(new SignalImpl),
       parent_(parent),
 
-      z_(0), minimized_(false), enabled_(true), active_(false), flipped_(false), thread_id_(-1),
-      r_(-1), g_(-1), b_(-1), exec_mode_(ExecutionMode::SEQUENTIAL)
+      z_(0), minimized_(false), muted_(false), enabled_(true), active_(false), flipped_(false), thread_id_(-1),
+      r_(-1), g_(-1), b_(-1), exec_mode_(ExecutionMode::SEQUENTIAL), logger_level_(1)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
@@ -49,11 +51,13 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     g_ = rhs.g_;
     b_ = rhs.b_;
     minimized_ = rhs.minimized_;
+    muted_ = rhs.muted_;
     flipped_ = rhs.flipped_;
     label_ = rhs.label_;
     thread_name_ = rhs.thread_name_;
     thread_id_ = rhs.thread_id_;
     exec_mode_ = rhs.exec_mode_;
+    logger_level_ = rhs.logger_level_;
 
     dictionary = rhs.dictionary;
 
@@ -64,10 +68,12 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     (*z_changed)();
     (*color_changed)();
     (*minimized_changed)();
+    (*muted_changed)();
     (*flipped_changed)();
     (*label_changed)();
     (*thread_changed)();
     (*execution_mode_changed)();
+    (*logger_level_changed)();
 
     return *this;
 }
@@ -141,6 +147,19 @@ void NodeState::setMinimized(bool value)
     if(minimized_ != value) {
         minimized_ = value;
         (*minimized_changed)();
+    }
+}
+
+bool NodeState::isMuted() const
+{
+    return muted_;
+}
+
+void NodeState::setMuted(bool value)
+{
+    if(muted_ != value) {
+        muted_ = value;
+        (*muted_changed)();
     }
 }
 bool NodeState::isEnabled() const
@@ -238,6 +257,19 @@ void NodeState::setExecutionMode(ExecutionMode mode)
     }
 }
 
+int NodeState::getLoggerLevel() const
+{
+    return logger_level_;
+}
+void NodeState::setLoggerLevel(int level)
+{
+    if(logger_level_ != level) {
+        logger_level_ = level;
+
+        (*logger_level_changed)();
+    }
+}
+
 void NodeState::writeYaml(YAML::Node &out) const
 {
     if(parent_) {
@@ -252,9 +284,11 @@ void NodeState::writeYaml(YAML::Node &out) const
     out["color"][2] = b_;
     out["z"] = z_;
     out["minimized"] = minimized_;
+    out["muted"] = muted_;
     out["enabled"] = enabled_;
     out["flipped"] = flipped_;
     out["exec_mode"] = (int) exec_mode_;
+    out["logger_level"] = logger_level_;
 
     if(!dictionary.empty()) {
         YAML::Node dict(YAML::NodeType::Sequence);
@@ -315,6 +349,10 @@ void NodeState::readYaml(const YAML::Node &node)
         setMinimized(node["minimized"].as<bool>());
     }
 
+    if(node["muted"].IsDefined()) {
+        setMuted(node["muted"].as<bool>());
+    }
+
     if(node["enabled"].IsDefined()) {
         setEnabled(node["enabled"].as<bool>());
     }
@@ -333,6 +371,11 @@ void NodeState::readYaml(const YAML::Node &node)
             setLabel(parent_->getUUID().getFullName());
         }
     }
+
+    if(node["logger_level"].IsDefined()) {
+        setLoggerLevel(node["logger_level"].as<int>());
+    }
+
 
     if(node["pos"].IsDefined()) {
         double x = node["pos"][0].as<double>();

@@ -770,6 +770,10 @@ void NodeWorker::sendEvents(bool active)
     bool sent_active_external = false;
     for(EventPtr e : node_handle_->getExternalEvents()){
         if(e->hasMessage()) {
+//            if(!e->canSendMessages()) {
+//                continue;
+//            }
+
             e->commitMessages(active);
             e->publish();
             if(e->hasActiveConnection()) {
@@ -779,7 +783,12 @@ void NodeWorker::sendEvents(bool active)
     }
     for(EventPtr e : node_handle_->getInternalEvents()){
         if(e->hasMessage()) {
+//            if(!e->canSendMessages()) {
+//                continue;
+//            }
+
             e->commitMessages(active);
+            apex_assert_hard(e->canSendMessages());
             e->publish();
         }
     }

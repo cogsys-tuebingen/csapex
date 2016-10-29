@@ -409,6 +409,7 @@ add_library(csapex_command SHARED
     src/command/disable_node.cpp
     src/command/flip_sides.cpp
     src/command/minimize.cpp
+    src/command/mute_node.cpp
     src/command/modify_fulcrum.cpp
     src/command/modify_connection.cpp
     src/command/move_box.cpp
@@ -424,6 +425,7 @@ add_library(csapex_command SHARED
     src/command/set_color.cpp
     src/command/update_parameter.cpp
     src/command/set_execution_mode.cpp
+    src/command/set_logger_level.cpp
 
 	${csapex_command_HEADERS}
 )

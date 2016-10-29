@@ -167,7 +167,7 @@ void Output::validateConnections()
 bool Output::canSendMessages() const
 {
     for(const ConnectionPtr& connection : connections_) {
-        if(connection->getState() == Connection::State::UNREAD) {
+        if(connection->getState() == Connection::State::NOT_INITIALIZED) {
             return false;
         }
     }

@@ -175,8 +175,10 @@ private:
 
     void flipBox();
     void setExecutionMode(ExecutionMode mode);
+    void setLoggerLevel(int level);
     void chooseColor();
     void minimizeBox(bool mini);
+    void muteBox(bool muted);
     void deleteBox();
     void morphNode();
     void usePrivateThreadFor();
