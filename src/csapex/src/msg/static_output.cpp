@@ -29,18 +29,21 @@ void StaticOutput::addMessage(TokenPtr message)
 
     // update buffer
 
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
     apex_assert_hard(message != nullptr);
     message_to_send_ = message;
 }
 
 bool StaticOutput::hasMessage()
 {
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
     return (bool) message_to_send_;
 }
 
 
 bool StaticOutput::hasMarkerMessage()
 {
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
     if(!message_to_send_) {
         return false;
     }
@@ -61,6 +64,8 @@ void StaticOutput::nextMessage()
 
 TokenPtr StaticOutput::getToken() const
 {
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
+
     if(!committed_message_) {
         return Token::makeEmpty<connection_types::NoMessage>();
     } else {
@@ -74,35 +79,41 @@ bool StaticOutput::commitMessages(bool is_activated)
 
     bool send_active = is_activated;
 
-
-    if(message_to_send_) {
-        send_active |= message_to_send_->isActive();
-
-        committed_message_ = message_to_send_;
-        clearBuffer();
-
-    } else {
-        if(!connections_.empty()) {
-//            std::cout << getUUID() << " sends empty message" << std::endl;
-        }
-        committed_message_ = Token::makeEmpty<connection_types::NoMessage>();
-    }
-
-    ++seq_no_;
-
-    committed_message_->setSequenceNumber(seq_no_);
-
     bool sent_active = false;
 
-    if(hasActiveConnection() && send_active && !std::dynamic_pointer_cast<connection_types::NoMessage const>(committed_message_->getTokenData())) {
-        std::cerr << "set an active token: " << getUUID() << std::endl;
-        sent_active = true;
-        committed_message_->setActive(true);
-    } else {
-        committed_message_->setActive(false);
-    }
+    {
+        std::unique_lock<std::recursive_mutex> lock(message_mutex_);
+        if(message_to_send_) {
+            apex_assert_hard(message_to_send_.get() != committed_message_.get());
 
-    ++count_;
+            send_active |= message_to_send_->isActive();
+
+            //committed_message_ = message_to_send_;
+            committed_message_.reset();
+            committed_message_ = message_to_send_;
+            message_to_send_.reset();
+            clearBuffer();
+
+        } else {
+            if(!connections_.empty()) {
+                //            std::cout << getUUID() << " sends empty message" << std::endl;
+            }
+            committed_message_ = Token::makeEmpty<connection_types::NoMessage>();
+        }
+
+        ++seq_no_;
+
+        committed_message_->setSequenceNumber(seq_no_);
+        if(hasActiveConnection() && send_active && !std::dynamic_pointer_cast<connection_types::NoMessage const>(committed_message_->getTokenData())) {
+            std::cerr << "set an active token: " << getUUID() << std::endl;
+            sent_active = true;
+            committed_message_->setActive(true);
+        } else {
+            committed_message_->setActive(false);
+        }
+
+        ++count_;
+    }
     messageSent(this);
 
     return sent_active;
@@ -111,6 +122,8 @@ bool StaticOutput::commitMessages(bool is_activated)
 void StaticOutput::reset()
 {
     Output::reset();
+
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
     committed_message_.reset();
     message_to_send_.reset();
 }
@@ -119,20 +132,24 @@ void StaticOutput::disable()
 {
     Output::disable();
 
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
     message_to_send_.reset();
     committed_message_.reset();
 }
 
 TokenPtr StaticOutput::getToken()
 {
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
     return committed_message_;
 }
 TokenPtr StaticOutput::getAddedToken()
 {
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
     return message_to_send_;
 }
 
 void StaticOutput::clearBuffer()
 {
+    std::unique_lock<std::recursive_mutex> lock(message_mutex_);
     message_to_send_.reset();
 }

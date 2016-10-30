@@ -69,10 +69,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
                 setProcessingEnabled(true);
-            }, true);
+            }, true, false);
             node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", [this](){
                 setProcessingEnabled(false);
-            }, false);
+            }, false, false);
 
 
             auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
@@ -264,10 +264,16 @@ bool NodeWorker::canSend() const
     }
 
     for(EventPtr e : node_handle_->getExternalEvents()){
-        if(!e->canSendMessages()) {
+        if(!e->canReceiveToken()) {
             return false;
         }
     }
+
+//    for(EventPtr e : node_handle_->getInternalEvents()){
+//        if(!e->canReceiveToken()) {
+//            return false;
+//        }
+//    }
 
     return true;
 }
@@ -769,11 +775,12 @@ void NodeWorker::sendEvents(bool active)
 {
     bool sent_active_external = false;
     for(EventPtr e : node_handle_->getExternalEvents()){
-        if(e->hasMessage()) {
-//            if(!e->canSendMessages()) {
-//                continue;
-//            }
+        if(e->hasMessage() && e->isConnected()) {
+            if(!e->canReceiveToken()) {
+                continue;
+            }
 
+//            apex_assert_hard(e->canReceiveToken());
             e->commitMessages(active);
             e->publish();
             if(e->hasActiveConnection()) {
@@ -782,13 +789,13 @@ void NodeWorker::sendEvents(bool active)
         }
     }
     for(EventPtr e : node_handle_->getInternalEvents()){
-        if(e->hasMessage()) {
-//            if(!e->canSendMessages()) {
-//                continue;
-//            }
+        if(e->hasMessage() && e->isConnected()) {
+            if(!e->canReceiveToken()) {
+                continue;
+            }
 
+//            apex_assert_hard(e->canReceiveToken());
             e->commitMessages(active);
-            apex_assert_hard(e->canSendMessages());
             e->publish();
         }
     }
@@ -965,7 +972,24 @@ void NodeWorker::connectConnector(ConnectablePtr c)
                         if(token->isActive()) {
                             node_handle_->setActive(true);
                         }
+
+                        Timer::Ptr timer;
+                        Interlude::Ptr interlude;
+
+                        if(profiler_->isEnabled()) {
+                            timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
+                            timer->restart();
+                            timer->root->setActive(node_handle_->isActive());
+                            interval_start(this, SLOT, timer->root);
+
+                            interlude = timer->step(std::string("slot ") + slot->getLabel());
+                        }
+
                         slot->handleEvent();
+
+                        interlude.reset();
+
+                        finishTimer(timer);
                     }
                 }
             });

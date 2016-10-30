@@ -130,8 +130,8 @@ protected:
 class CSAPEX_EXPORT VariadicSlots: public virtual VariadicBase
 {
 public:
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot* slot, const TokenPtr&)> callback);
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr&)> callback);
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot* slot, const TokenPtr&)> callback, bool active = false, bool asynchronous = false);
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr&)> callback, bool active = false, bool asynchronous = false);
     virtual void removeVariadicSlot(SlotPtr slot);
     void removeVariadicSlotById(const UUID& slot);
     virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;

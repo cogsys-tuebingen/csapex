@@ -29,6 +29,8 @@ public:
 
 private:
     TokenPtr message_to_send_;
+
+    mutable std::recursive_mutex message_mutex_;
     TokenPtr committed_message_;
 };
 }

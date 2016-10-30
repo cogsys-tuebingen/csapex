@@ -13,19 +13,19 @@
 
 using namespace csapex;
 
-Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr&){callback();}), active_(active), guard_(-1)
+Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active, bool asynchronous, ConnectableOwnerWeakPtr owner)
+    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr&){callback();}), active_(active), asynchronous_(asynchronous), guard_(-1)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
-Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr& token){callback(token);}), active_(active), guard_(-1)
+Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool asynchronous, ConnectableOwnerWeakPtr owner)
+    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr& token){callback(token);}), active_(active), asynchronous_(asynchronous), guard_(-1)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
 
-Slot::Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_(callback), active_(active), guard_(-1)
+Slot::Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID &uuid, bool active, bool asynchronous, ConnectableOwnerWeakPtr owner)
+    : Input(uuid, owner), callback_(callback), active_(active), asynchronous_(asynchronous), guard_(-1)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
@@ -112,6 +112,7 @@ void Slot::handleEvent()
         if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
             apex_assert_hard(guard_ == -1);
             try {
+                // TODO: this callback is not finished for graphs!
                 callback_(this, message_);
             } catch(const std::exception& e) {
                 std::cerr << "slot " << getUUID() << " has thrown an exception: " << e.what() << std::endl;
@@ -119,8 +120,15 @@ void Slot::handleEvent()
         }
     }
 
-    message_.reset();
+    if(!asynchronous_) {
+        message_.reset();
+        notifyMessageProcessed();
+    }
+}
 
+void Slot::notifyEventHandled()
+{
+    message_.reset();
     notifyMessageProcessed();
 }
 

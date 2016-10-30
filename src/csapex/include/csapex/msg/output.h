@@ -53,6 +53,7 @@ public:
 
     virtual void addMessage(TokenPtr message) = 0;
 
+    virtual bool canReceiveToken() const;
     virtual bool canSendMessages() const;
     virtual bool commitMessages(bool is_activated) = 0;
     virtual void publish();

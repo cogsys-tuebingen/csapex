@@ -453,20 +453,20 @@ int VariadicSlots::getVariadicSlotCount() const
     return variadic_slots_.size();
 }
 
-Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr &)> callback)
+Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr &)> callback, bool active, bool asynchronous)
 {
     apex_assert_hard(variadic_modifier_);
 
-    auto result = variadic_modifier_->addSlot(type, label.empty() ? std::string("Slot") : label, callback, false);
+    auto result = variadic_modifier_->addSlot(type, label.empty() ? std::string("Slot") : label, callback, active, asynchronous);
     registerSlot(result);
     return result;
 }
 
-Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot* slot, const TokenPtr &)> callback)
+Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot* slot, const TokenPtr &)> callback, bool active, bool asynchronous)
 {
     apex_assert_hard(variadic_modifier_);
 
-    auto result = variadic_modifier_->addSlot(type, label.empty() ? std::string("Slot") : label, callback, false);
+    auto result = variadic_modifier_->addSlot(type, label.empty() ? std::string("Slot") : label, callback, active, asynchronous);
     registerSlot(result);
     return result;
 }

@@ -19,9 +19,9 @@ class CSAPEX_EXPORT Slot : public Input
     friend class Event;
 
 public:
-    Slot(std::function<void()> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    Slot(std::function<void(Slot*,const TokenPtr&)> callback, const UUID &uuid, bool active, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void()> callback, const UUID &uuid, bool active, bool asynchronous = false, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool asynchronous = false, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void(Slot*,const TokenPtr&)> callback, const UUID &uuid, bool active, bool asynchronous = false, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
 
     template <typename TokenType>
     Slot(std::function<void(const std::shared_ptr<TokenType const>&)> callback, const UUID &uuid, bool active)
@@ -51,6 +51,8 @@ public:
 
     void handleEvent();
 
+    void notifyEventHandled();
+
 public:
     csapex::slim_signal::Signal<void(const TokenPtr&)> token_set;
     csapex::slim_signal::Signal<void()> triggered;
@@ -58,6 +60,7 @@ public:
 protected:
     std::function<void(Slot*,const TokenPtr&)> callback_;
     bool active_;
+    bool asynchronous_;
 
     long guard_;
 

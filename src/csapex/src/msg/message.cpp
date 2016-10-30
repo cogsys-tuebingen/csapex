@@ -11,7 +11,9 @@ using namespace connection_types;
 Message::Message(const std::string& name, const std::string &frame_id, Stamp stamp)
     : TokenData(name), frame_id(frame_id), stamp_micro_seconds(stamp)
 {
-    apex_assert(!frame_id.empty());
+    if(frame_id.size() > 0 && frame_id.at(0) == '/') {
+        this->frame_id = frame_id.substr(1);
+    }
 }
 
 Message::~Message()

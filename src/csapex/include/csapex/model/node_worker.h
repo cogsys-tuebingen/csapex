@@ -32,6 +32,7 @@ public:
     enum ActivityType {
         TICK,
         PROCESS,
+        SLOT,
         OTHER
     };
 

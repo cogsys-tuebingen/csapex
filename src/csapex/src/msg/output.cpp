@@ -164,6 +164,16 @@ void Output::validateConnections()
     }
 }
 
+bool Output::canReceiveToken() const
+{
+    for(const ConnectionPtr& connection : connections_) {
+        if(connection->getState() != Connection::State::NOT_INITIALIZED) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Output::canSendMessages() const
 {
     for(const ConnectionPtr& connection : connections_) {
@@ -179,7 +189,11 @@ void Output::publish()
     auto msg = getToken();
     apex_assert_hard(msg);
 
-    for(auto connection : connections_) {
-        connection->setToken(msg);
+    if(!connections_.empty()) {
+        for(auto connection : connections_) {
+            connection->setToken(msg);
+        }
+    } else {
+        messageProcessed(this);
     }
 }

@@ -92,6 +92,10 @@ MessagePreviewWidget::MessagePreviewWidget()
 
 MessagePreviewWidget::~MessagePreviewWidget()
 {
+    if(scene()) {
+        delete scene();
+        setScene(nullptr);
+    }
     input_->detach();
     if(isConnected()) {
         disconnect();

@@ -261,9 +261,13 @@ void ThreadGroup::schedule(TaskPtr task)
 
     std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
 
-    for(TaskPtr t : tasks_) {
-        if(t.get() == task.get()) {
-            return;
+    if(!tasks_.empty()) {
+//        for(TaskPtr t : tasks_) {
+        for(auto it = tasks_.begin(); it != tasks_.end(); ++it) {
+            const TaskPtr& t = *it;
+            if(t.get() == task.get()) {
+                return;
+            }
         }
     }
 

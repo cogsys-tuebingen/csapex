@@ -5,7 +5,7 @@
 
 #if ENABLE_TRACING
 #define APEX_DEBUG_TRACE
-#define APEX_DEBUG_CERR std::cerr <<
+#define APEX_DEBUG_CERR std::cerr
 #else
 #define APEX_DEBUG_TRACE if(0)
 #define APEX_DEBUG_CERR if(0) std::cerr

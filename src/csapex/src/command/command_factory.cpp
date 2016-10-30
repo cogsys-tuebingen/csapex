@@ -216,7 +216,7 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
 
     bool is_output = from->isOutput();
 
-//    UUID from_uuid = from->getUUID();
+    //    UUID from_uuid = from->getUUID();
     UUID to_uuid = to->getUUID();
 
     AUUID parent_uuid(graph_uuid);
@@ -242,10 +242,14 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
         Input* in = dynamic_cast<Input*>(from);
 
         if(in && !in->isVirtual()) {
-            ConnectionPtr c = in->getConnections().front();
-            Output* target = dynamic_cast<Output*>(c->from());
-            meta->add(Command::Ptr(new DeleteMessageConnection(parent_uuid, target, in)));
-            meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, target->getUUID(), to_uuid, c->isActive())));
+            for(ConnectionPtr c : in->getConnections()) {
+                if(!c) {
+                    continue;
+                }
+                Output* target = dynamic_cast<Output*>(c->from());
+                meta->add(Command::Ptr(new DeleteMessageConnection(parent_uuid, target, in)));
+                meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, target->getUUID(), to_uuid, c->isActive())));
+            }
         }
     }
 

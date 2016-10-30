@@ -139,7 +139,7 @@ public:
     virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
     virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
     virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label) override;
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback) override;
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active, bool asynchronous) override;
 
     virtual void removeVariadicInput(InputPtr input) override;
     virtual void removeVariadicOutput(OutputPtr input) override;

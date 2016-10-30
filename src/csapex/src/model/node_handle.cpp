@@ -416,11 +416,11 @@ Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label)
     return c.get();
 }
 
-Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void()> callback, bool active)
+Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void()> callback, bool active, bool asynchronous)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
-    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, shared_from_this());
+    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, asynchronous, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
 
@@ -429,11 +429,11 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
     return slot.get();
 }
 
-Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr& )> callback, bool active)
+Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr& )> callback, bool active, bool asynchronous)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
-    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, shared_from_this());
+    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, asynchronous, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
 
@@ -442,11 +442,11 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
     return slot.get();
 }
 
-Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(Slot*, const TokenPtr& )> callback, bool active)
+Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(Slot*, const TokenPtr& )> callback, bool active, bool asynchronous)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
-    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, shared_from_this());
+    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, asynchronous, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
 
@@ -494,7 +494,7 @@ OutputPtr NodeHandle::addInternalOutput(const TokenDataConstPtr& type, const UUI
 SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string &label, std::function<void (const TokenPtr &)> callback)
 {
     apex_assert_hard(uuid_provider_);
-    SlotPtr slot = std::make_shared<Slot>(callback, internal_uuid, false, shared_from_this());
+    SlotPtr slot = std::make_shared<Slot>(callback, internal_uuid, false, true, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
     

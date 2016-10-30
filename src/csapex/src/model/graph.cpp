@@ -35,7 +35,8 @@ Graph::Graph()
     : transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition),
       is_subgraph_finished_(false),
-      is_iterating_(false), is_initialized_(false)
+      is_iterating_(false), has_sent_current_iteration_(false),
+      is_initialized_(false)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &Graph::subgraphHasProducedAllMessages));
 
@@ -857,7 +858,7 @@ SlotPtr Graph::createInternalSlot(const TokenDataConstPtr& type, const UUID& int
     return slot;
 }
 
-Slot* Graph::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback)
+Slot* Graph::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> /*callback*/, bool /*active*/, bool /*asynchronous*/)
 {
     auto pair = addForwardingSlot(type, label);
     return node_handle_->getSlot(pair.external);
@@ -893,9 +894,12 @@ UUID Graph::addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr
 
     auto cb = [relay](const TokenConstPtr& data) {
         relay->triggerWith(std::make_shared<Token>(*data));
+        relay->messageProcessed(relay.get());
     };
 
-    Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb);
+    Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb, false, true);
+
+    relay->messageProcessed.connect(std::bind(&Slot::notifyEventHandled, external_slot));
 
     crossConnectLabelChange(external_slot, relay.get());
 
