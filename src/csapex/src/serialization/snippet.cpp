@@ -11,7 +11,7 @@
 using namespace csapex;
 
 Snippet::Snippet(const std::string &serialized)
-    : serialized_(serialized)
+    : yaml_(std::make_shared<YAML::Node>(YAML::Load(serialized)))
 {
 
 }
@@ -35,13 +35,8 @@ Snippet::Snippet()
 
 void Snippet::toYAML(YAML::Node &out) const
 {
-    if(!yaml_) {
-        yaml_ = std::make_shared<YAML::Node>(YAML::Load(serialized_));
-    }
     out = *yaml_;
 }
-
-
 
 void Snippet::setName(const std::string& name)
 {
@@ -70,11 +65,15 @@ void Snippet::setTags(const std::vector<TagConstPtr>& tags)
 
 std::vector<TagConstPtr> Snippet::getTags() const
 {
-    return tags_;
+    if(!tags_.empty()) {
+        return tags_;
+    } else {
+        return { Tag::get("General") };
+    }
 }
 
 
-void Snippet::save(const std::string &file)
+void Snippet::save(const std::string &file) const
 {
     YAML::Node exported;
     exported["name"] = name_;

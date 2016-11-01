@@ -27,6 +27,15 @@ std::map<std::string, std::vector<SnippetPtr>>& SnippetFactory::getTagMap()
     return tag_map_;
 }
 
+void SnippetFactory::addSnippet(SnippetPtr s)
+{
+    constructors_.insert(std::make_pair(s->getName(), s));
+
+    for(const TagConstPtr& tag : s->getTags()) {
+        tag_map_[tag->getName()].push_back(s);
+    }
+}
+
 void SnippetFactory::loadSnippets()
 {
     for(const std::string& dir_string : plugin_locator_->getPluginPaths("snippets")) {
@@ -45,19 +54,38 @@ void SnippetFactory::loadSnippets()
 
             if(path.extension() == ".apexs") {
                 SnippetPtr s =  std::make_shared<Snippet>(Snippet::load(path.string()));
-                constructors_.insert(std::make_pair(s->getName(), s));
-
-                for(const TagConstPtr& tag : s->getTags()) {
-                    tag_map_[tag->getName()].push_back(s);
-                }
+                addSnippet(s);
             }
         }
     }
 }
 
+void SnippetFactory::saveSnippet(const Snippet &s, const std::string &path)
+{
+    s.save(path);
+
+    if(SnippetPtr existing = getSnippetNoThrow(s.getName())) {
+        *existing = s;
+    } else {
+        addSnippet(std::make_shared<Snippet>(s));
+    }
+
+    snippet_set_changed();
+}
+
 std::map<std::string, SnippetPtr>& SnippetFactory::getSnippets()
 {
     return constructors_;
+}
+
+SnippetPtr SnippetFactory::getSnippetNoThrow(const std::string& name) const noexcept
+{
+    auto pos = constructors_.find(name);
+    if(pos == constructors_.end()) {
+        return nullptr;
+    } else {
+        return pos->second;
+    }
 }
 
 SnippetPtr SnippetFactory::getSnippet(const std::string &name) const

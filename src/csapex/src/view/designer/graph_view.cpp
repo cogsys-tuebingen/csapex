@@ -63,6 +63,7 @@
 #include <csapex/view/widgets/port_panel.h>
 #include <csapex/view/widgets/rewiring_dialog.h>
 #include <csapex/csapex_mime.h>
+#include <csapex/plugin/plugin_locator.h>
 
 /// SYSTEM
 #include <iostream>
@@ -1941,12 +1942,8 @@ void GraphView::makeSnippetFromSelected()
         return;
     }
 
-    QString description = QInputDialog::getMultiLineText(QApplication::activeWindow(), "Name", "Please enter a description for the snippet.");
-    if(description.isEmpty()) {
-        return;
-    }
-
-    QString tags_string = QInputDialog::getText(QApplication::activeWindow(), "Tags", "Please enter tags for the snippet (comma separated).", QLineEdit::Normal);
+    QString description = QInputDialog::getMultiLineText(QApplication::activeWindow(), "Name", "Please enter a description for the snippet. (optional)");
+    QString tags_string = QInputDialog::getText(QApplication::activeWindow(), "Tags", "Please enter tags for the snippet (comma separated).  (optional)", QLineEdit::Normal);
 
     std::vector<TagConstPtr> tags;
     for(const QString& qtag : tags_string.split(',')) {
@@ -1957,18 +1954,49 @@ void GraphView::makeSnippetFromSelected()
         }
     }
 
-    QString path = QFileDialog::getExistingDirectory(0, "Select directory for the snippet", "", QFileDialog::DontUseNativeDialog);
+    std::vector<std::string> snippet_dirs = core_.getPluginLocator()->getPluginPaths("snippets");
+    std::string first_snippet_dir = snippet_dirs.front();
 
-    QDir directory(path);
+    QString save_to_path;
+
+    while(save_to_path.isEmpty()) {
+        QString path = QFileDialog::getExistingDirectory(0, "Select directory for the snippet", QString::fromStdString(first_snippet_dir), QFileDialog::DontUseNativeDialog);
+        if(path.isEmpty()) {
+            return;
+        }
+
+        std::string path_s = path.toStdString();
+
+        bool dir_indexed = false;
+        for(const std::string& dir : snippet_dirs) {
+            if(dir == path_s) {
+                dir_indexed = true;
+                break;
+            }
+        }
+
+        if(!dir_indexed) {
+            int r = QMessageBox::warning(this, tr("The directory is not indexed!"),
+                                         QString("The directory ") + path + " is not indexed for snippets. Continue?",
+                                         QMessageBox::Yes | QMessageBox::No);
+            if(r == QMessageBox::Yes) {
+                save_to_path = path;
+            }
+        } else {
+            save_to_path = path;
+        }
+    }
+
+    QDir directory(save_to_path);
     if(directory.exists()) {
-        QString filename = name.toLower().replace("[\\/:?\"<>|] ", "_");
-        QFile file(path + QDir::separator() + filename + ".apexs");
+        QString filename = name.toLower().replace(QRegularExpression("[\\/:?\"<>| ]"), "_");
+        QFile file(save_to_path + QDir::separator() + filename + ".apexs");
 
         if(file.exists()) {
             int r = QMessageBox::warning(this, tr("Overwrite?"),
                                          QString("The file ") + file.fileName() + " already exist. Overwrite?",
-                                         QMessageBox::Save | QMessageBox::Cancel);
-            if(r != QMessageBox::Save) {
+                                         QMessageBox::Yes | QMessageBox::No);
+            if(r == QMessageBox::No) {
                 return;
             }
         }
@@ -1979,8 +2007,7 @@ void GraphView::makeSnippetFromSelected()
         snippet.setDescription(description.toStdString());
         snippet.setTags(tags);
 
-
-        snippet.save(file.fileName().toStdString());
+        core_.getSnippetFactory().saveSnippet(snippet, file.fileName().toStdString());
     }
 }
 

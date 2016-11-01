@@ -62,6 +62,7 @@ public:
     csapex::slim_signal::Signal<void ()> configChanged;
     csapex::slim_signal::Signal<void (const std::string& msg)> showStatusMessage;
     csapex::slim_signal::Signal<void ()> newNodeType;
+    csapex::slim_signal::Signal<void ()> newSnippetType;
 
     csapex::slim_signal::Signal<void ()> resetRequest;
     csapex::slim_signal::Signal<void ()> resetDone;

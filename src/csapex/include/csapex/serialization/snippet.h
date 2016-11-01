@@ -27,7 +27,7 @@ public:
     Snippet(YAML::Node&& yaml);
     Snippet();
 
-    void save(const std::string& file);
+    void save(const std::string& file) const;
     static Snippet load(const std::string& file);
 
     void setName(const std::string& name);
@@ -42,7 +42,6 @@ public:
     void toYAML(YAML::Node& out) const;
 
 private:
-    std::string serialized_;
     mutable std::shared_ptr<YAML::Node> yaml_;
 
     std::string name_;

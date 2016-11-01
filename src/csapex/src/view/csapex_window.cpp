@@ -8,6 +8,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
 #include <csapex/manager/message_renderer_manager.h>
 #include <csapex/model/graph_facade.h>
@@ -163,6 +164,7 @@ void CsApexWindow::construct()
     connections_.push_back(core_.configChanged.connect([this](){ updateTitle(); }));
     connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
     connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
+    connections_.push_back(core_.newSnippetType.connect([this](){ updateSnippets(); }));
 
     connections_.push_back(graph->state_changed.connect([this]() { updateMenu(); }));
     connections_.push_back(root_->panic.connect([this]() { clearBlock(); }));
@@ -528,13 +530,8 @@ void CsApexWindow::updateNodeTypes()
 
 void CsApexWindow::updateSnippets()
 {
-    if(ui->snippets->layout()) {
-        QtHelper::clearLayout(ui->snippets->layout());
-    } else {
-        ui->snippets->setLayout(new QVBoxLayout);
-    }
-
     SnippetListGenerator generator(core_.getSnippetFactory());
+    ui->snippets->clear();
     generator.insertAvailableSnippets(ui->snippets);
 }
 

@@ -166,9 +166,8 @@ void CsApexCore::init()
 
         showStatusMessage("loading node plugins");
         signal_connections_.emplace_back(node_factory_->loaded.connect(showStatusMessage));
-        signal_connections_.emplace_back(node_factory_->new_node_type.connect(newNodeType));
         node_factory_->loadPlugins();
-
+        signal_connections_.emplace_back(node_factory_->new_node_type.connect(newNodeType));
 
         showStatusMessage("make graph");
 
@@ -204,6 +203,7 @@ void CsApexCore::init()
 
         showStatusMessage("loading snippets");
         snippet_factory_->loadSnippets();
+        signal_connections_.emplace_back(snippet_factory_->snippet_set_changed.connect(newSnippetType));
     }
 }
 

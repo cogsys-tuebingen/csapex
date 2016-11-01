@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/serialization/serialization_fwd.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <string>
@@ -23,12 +24,20 @@ public:
     ~SnippetFactory();
 
     void loadSnippets();
+    void saveSnippet(const Snippet& s, const std::string& path);
 
+    SnippetPtr getSnippetNoThrow(const std::string& name) const noexcept;
     SnippetPtr getSnippet(const std::string& name) const;
 
     std::map<std::string, SnippetPtr>& getSnippets();
 
     std::map<std::string, std::vector<SnippetPtr>>& getTagMap();
+
+public:
+    csapex::slim_signal::Signal<void()> snippet_set_changed;
+
+private:
+    void addSnippet(SnippetPtr s);
 
 private:
     PluginLocator* plugin_locator_;
