@@ -28,7 +28,7 @@ protected:
     bool doRedo() override;
 
 private:
-    void findNodes(Graph* graph);
+    void findNodes(SubgraphNode *graph);
     void mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid);
 
     void mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid);

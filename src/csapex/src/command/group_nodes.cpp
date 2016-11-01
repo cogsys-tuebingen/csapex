@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/delete_node.h>
@@ -41,7 +41,7 @@ std::string GroupNodes::getDescription() const
 
 bool GroupNodes::doExecute()
 {
-    Graph* graph = getGraph();
+    SubgraphNode* graph = getSubgraphNode();
     {
         GraphIO io(graph, getNodeFactory());
         io.setIgnoreForwardingConnections(true);
@@ -85,7 +85,7 @@ bool GroupNodes::doExecute()
     return true;
 }
 
-void GroupNodes::findNodes(Graph* graph)
+void GroupNodes::findNodes(SubgraphNode* graph)
 {
     std::vector<NodeHandle*> n;
     for(const UUID& uuid : uuids) {

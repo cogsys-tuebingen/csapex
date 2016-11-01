@@ -7,7 +7,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
@@ -89,7 +89,7 @@ bool AddVariadicConnector::doExecute()
     map.external = connector_id;
 
 
-    Graph* graph = dynamic_cast<Graph*>(node.get());
+    SubgraphNode* graph = dynamic_cast<SubgraphNode*>(node.get());
     if(graph) {
         switch(connector_type) {
         case ConnectorType::INPUT:

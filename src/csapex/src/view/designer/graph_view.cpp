@@ -30,7 +30,7 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
@@ -130,7 +130,7 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     scoped_connections_.emplace_back(graph_facade_->nodeWorkerAdded.connect([this](NodeWorkerPtr n) { nodeAdded(n); }));
     scoped_connections_.emplace_back(graph_facade_->nodeRemoved.connect([this](NodeHandlePtr n) { nodeRemoved(n); }));
 
-    Graph* graph = graph_facade_->getGraph();
+    SubgraphNode* graph = graph_facade_->getSubgraphNode();
 
     scoped_connections_.emplace_back(graph->internalConnectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
     scoped_connections_.emplace_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
@@ -269,7 +269,7 @@ void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
     QGraphicsView::drawForeground(painter, rect);
 
     if(view_core_.isDebug()) {
-        Graph* graph = graph_facade_->getGraph();
+        SubgraphNode* graph = graph_facade_->getSubgraphNode();
 
         QString debug_info =  QString::fromStdString(graph->makeStatusString());
 
@@ -1015,7 +1015,7 @@ void GraphView::createPort(CreateConnectorRequest request)
 
 void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable* from)
 {
-    Graph* graph = graph_facade_->getGraph();
+    SubgraphNode* graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
 
     CommandFactory factory(graph_facade_.get());
@@ -1042,7 +1042,7 @@ void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable
 
 void GraphView::createPortAndMove(CreateConnectorRequest request, Connectable* from)
 {
-    Graph* graph = graph_facade_->getGraph();
+    SubgraphNode* graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
 
     CommandFactory factory(graph_facade_.get());
@@ -1799,7 +1799,7 @@ void GraphView::morphNode()
 
 Snippet GraphView::serializeSelection() const
 {
-    GraphIO io(graph_facade_->getGraph(), &core_.getNodeFactory());
+    GraphIO io(graph_facade_->getSubgraphNode(), &core_.getNodeFactory());
 
     std::vector<UUID> nodes;
     for(const NodeBox* box : selected_boxes_) {

@@ -71,6 +71,7 @@ protected:
 
     GraphFacade* getGraphFacade();
     Graph* getGraph();
+    SubgraphNode* getSubgraphNode();
 
     NodeFactory* getNodeFactory();
 

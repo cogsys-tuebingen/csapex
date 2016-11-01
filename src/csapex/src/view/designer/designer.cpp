@@ -18,6 +18,7 @@
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/core/graphio.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/view/designer/designerio.h>
 #include "ui_designer.h"
 #include <csapex/view/widgets/search_dialog.h>
@@ -44,8 +45,8 @@ Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
     connections_.emplace_back(core_.getSettings().saveRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
     connections_.emplace_back(core_.getSettings().loadRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
 
-    connections_.emplace_back(core_.getSettings().saveDetailRequest.connect([this](Graph* graph, YAML::Node& node){ saveView(graph, node); }));
-    connections_.emplace_back(core_.getSettings().loadDetailRequest.connect([this](Graph* graph, YAML::Node& node){ loadView(graph, node); }));
+    connections_.emplace_back(core_.getSettings().saveDetailRequest.connect([this](SubgraphNode* graph, YAML::Node& node){ saveView(graph, node); }));
+    connections_.emplace_back(core_.getSettings().loadDetailRequest.connect([this](SubgraphNode* graph, YAML::Node& node){ loadView(graph, node); }));
 
     observe(core_.getRoot());
 }
@@ -119,12 +120,12 @@ void Designer::setup()
 
 void Designer::observe(GraphFacadePtr graph)
 {
-    graph_connections_[graph->getGraph()].emplace_back(
+    graph_connections_[graph->getSubgraphNode()].emplace_back(
                 graph->childAdded.connect([this](GraphFacadePtr child){
                     addGraph(child);
                     observe(child);
                 }));
-    graph_connections_[graph->getGraph()].emplace_back(
+    graph_connections_[graph->getSubgraphNode()].emplace_back(
                 graph->childRemoved.connect([this](GraphFacadePtr child){
                     removeGraph(child.get());
                 }));
@@ -197,11 +198,11 @@ QString generateTitle(GraphFacade* graph_facade)
 void Designer::showGraph(GraphFacadePtr graph_facade)
 {
     // check if it is already displayed
-    Graph* graph = graph_facade->getGraph();
+    SubgraphNode* graph = graph_facade->getSubgraphNode();
     auto pos = visible_graphs_.find(graph);
     if(pos != visible_graphs_.end()) {
         // switch to view
-        GraphView* view = graph_views_.at(graph_facade->getGraph());
+        GraphView* view = graph_views_.at(graph_facade->getSubgraphNode());
         ui->tabWidget->setCurrentWidget(view);
         return;
     }
@@ -269,7 +270,7 @@ void Designer::closeView(int page)
     if(view) {
         GraphFacade* graph_facade = view_graphs_.at(view);
 
-        Graph* graph = graph_facade->getGraph();
+        SubgraphNode* graph = graph_facade->getSubgraphNode();
 
         DesignerIO designerio;
         YAML::Node doc;
@@ -291,7 +292,7 @@ void Designer::removeGraph(GraphFacade* graph_facade)
 {
     for(auto it = graphs_.begin(); it != graphs_.end(); ++it) {
         if(it->second.get() == graph_facade) {
-            Graph* graph = graph_facade->getGraph();
+            SubgraphNode* graph = graph_facade->getSubgraphNode();
             graph_connections_.erase(graph);
             GraphView* view = graph_views_[graph];
             graph_views_.erase(graph);
@@ -504,7 +505,7 @@ GraphView* Designer::getVisibleGraphView() const
 {
     GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
     if(!current_view) {
-        return graph_views_.at(core_.getRoot()->getGraph());
+        return graph_views_.at(core_.getRoot()->getSubgraphNode());
     }
     return current_view;
 }
@@ -603,7 +604,7 @@ void Designer::loadSettings(YAML::Node &doc)
 }
 
 
-void Designer::saveView(Graph* graph, YAML::Node &doc)
+void Designer::saveView(SubgraphNode* graph, YAML::Node &doc)
 {
     DesignerIO designerio;
 
@@ -616,7 +617,7 @@ void Designer::saveView(Graph* graph, YAML::Node &doc)
     }
 }
 
-void Designer::loadView(Graph* graph, YAML::Node &doc)
+void Designer::loadView(SubgraphNode* graph, YAML::Node &doc)
 {
     DesignerIO designerio;
 

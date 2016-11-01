@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
@@ -18,9 +19,10 @@
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
+
 using namespace csapex;
 
-GraphFacade::GraphFacade(ThreadPool &executor, Graph* graph, NodeHandle* nh, GraphFacade *parent)
+GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNode* graph, NodeHandle* nh, GraphFacade *parent)
     : parent_(parent), absolute_uuid_(graph->getUUID()), graph_(graph), graph_handle_(nh), executor_(executor)
 {
     connections_.push_back(graph->nodeAdded.connect(
@@ -87,7 +89,7 @@ void GraphFacade::createSubgraphFacade(NodeHandlePtr nh)
 {
     NodePtr node = nh->getNode().lock();
     apex_assert_hard(node);
-    GraphPtr sub_graph = std::dynamic_pointer_cast<Graph>(node);
+    SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(node);
     apex_assert_hard(sub_graph);
 
     NodeHandle* subnh = graph_->findNodeHandle(sub_graph->getUUID());;
@@ -129,6 +131,11 @@ AUUID GraphFacade::getAbsoluteUUID() const
 Graph* GraphFacade::getGraph()
 {
     return graph_;
+}
+
+SubgraphNode* GraphFacade::getSubgraphNode()
+{
+    return dynamic_cast<SubgraphNode*>(graph_);
 }
 
 ThreadPool* GraphFacade::getThreadPool()

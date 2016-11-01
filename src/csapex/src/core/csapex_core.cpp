@@ -5,6 +5,7 @@
 #include <csapex/core/bootstrap_plugin.h>
 #include <csapex/core/core_plugin.h>
 #include <csapex/core/graphio.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/info.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
@@ -174,7 +175,7 @@ void CsApexCore::init()
         root_handle_ = node_factory_->makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_.get());
         apex_assert_hard(root_handle_);
 
-        GraphPtr graph = std::dynamic_pointer_cast<Graph>(root_handle_->getNode().lock());
+        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNode().lock());
         apex_assert_hard(graph);
 
         root_worker_ = std::make_shared<NodeWorker>(root_handle_);
@@ -186,19 +187,19 @@ void CsApexCore::init()
         root_scheduler_ = std::make_shared<NodeRunner>(root_worker_);
         thread_pool_->add(root_scheduler_.get());
 
-        root_->getGraph()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+        root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
                                               root_->getGraph()->makeUUID("slot_save"), "save",
                                               [this](const TokenPtr&) {
             saveAs(getSettings().get<std::string>("config"));
         });
-        root_->getGraph()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+        root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
                                               root_->getGraph()->makeUUID("slot_exit"), "exit",
                                               [this](const TokenPtr&) {
             // TODO: more graceful stopping
             csapex::error_handling::stop();
         });
         for(PAIR plugin : core_plugins_) {
-            plugin.second->setupGraph(root_->getGraph());
+            plugin.second->setupGraph(root_->getSubgraphNode());
         }
 
         showStatusMessage("loading snippets");
@@ -282,7 +283,7 @@ void CsApexCore::startup()
         std::cerr << "error loading the config: " << e.what() << std::endl;
     }
 
-    root_->getGraph()->activation();
+    root_->getSubgraphNode()->activation();
 
     showStatusMessage("painting user interface");
 
@@ -362,7 +363,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     YAML::Node node_map(YAML::NodeType::Map);
 
-    GraphIO graphio(root_->getGraph(),  node_factory_.get());
+    GraphIO graphio(root_->getSubgraphNode(),  node_factory_.get());
 
     csapex::slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(settings_.saveDetailRequest);
 
@@ -402,7 +403,7 @@ void CsApexCore::load(const std::string &file)
 
     apex_assert_hard(root_->getGraph()->countNodes() == 0);
 
-    GraphIO graphio(root_->getGraph(), node_factory_.get());
+    GraphIO graphio(root_->getSubgraphNode(), node_factory_.get());
     graphio.useProfiler(profiler_);
 
     csapex::slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.loadDetailRequest);

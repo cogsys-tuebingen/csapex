@@ -8,6 +8,7 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
@@ -32,7 +33,7 @@
 
 using namespace csapex;
 
-GraphIO::GraphIO(Graph *graph, NodeFactory* node_factory)
+GraphIO::GraphIO(SubgraphNode *graph, NodeFactory* node_factory)
     : graph_(graph), node_factory_(node_factory),
       position_offset_x_(0.0), position_offset_y_(0.0),
 
@@ -520,7 +521,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
         // hook for nodes to serialize
         Serialization::instance().serialize(*node, doc);
 
-        GraphPtr subgraph = std::dynamic_pointer_cast<Graph>(node);
+        SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(node);
         if(subgraph) {
             YAML::Node subgraph_yaml;
             GraphIO sub_graph_io(subgraph.get(), node_factory_);
@@ -552,7 +553,7 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
 
     graph_->addNode(node_handle);
 
-    GraphPtr subgraph = std::dynamic_pointer_cast<Graph>(node);
+    SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(node);
     if(subgraph) {
         GraphIO sub_graph_io(subgraph.get(), node_factory_);
         slim_signal::ScopedConnection connection = sub_graph_io.loadViewRequest.connect(loadViewRequest);

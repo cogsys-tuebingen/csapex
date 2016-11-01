@@ -28,7 +28,7 @@ void CorePlugin::prepare(Settings&)
 
 }
 
-void CorePlugin::setupGraph(Graph *graph)
+void CorePlugin::setupGraph(SubgraphNode *graph)
 {
 
 }

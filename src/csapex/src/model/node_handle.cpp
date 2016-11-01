@@ -6,7 +6,7 @@
 #include <csapex/msg/output_transition.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/static_output.h>
@@ -750,8 +750,7 @@ Input* NodeHandle::getInput(const UUID& uuid) const
         }
     }
     
-    GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
-    if(graph) {
+    if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
         return graph->getForwardedInputInternal(uuid).get();
     }
     
@@ -765,9 +764,8 @@ Output* NodeHandle::getOutput(const UUID& uuid) const
             return out.get();
         }
     }
-    
-    GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
-    if(graph) {
+
+    if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
         return graph->getForwardedOutputInternal(uuid).get();
     }
     
@@ -782,9 +780,8 @@ Slot* NodeHandle::getSlot(const UUID& uuid) const
             return s.get();
         }
     }
-    
-    GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
-    if(graph) {
+
+    if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
         return graph->getForwardedSlotInternal(uuid).get();
     }
     
@@ -799,9 +796,8 @@ Event* NodeHandle::getEvent(const UUID& uuid) const
             return t.get();
         }
     }
-    
-    GraphPtr graph = std::dynamic_pointer_cast<Graph>(node_);
-    if(graph) {
+
+    if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
         return graph->getForwardedEventInternal(uuid).get();
     }
     

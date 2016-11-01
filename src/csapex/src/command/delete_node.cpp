@@ -10,7 +10,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
@@ -62,7 +62,7 @@ bool DeleteNode::doExecute()
 
     // serialize sub graph
     if(node_handle->getType() == "csapex::Graph") {
-        GraphPtr g = std::dynamic_pointer_cast<Graph>(node_handle->getNode().lock());
+        SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_handle->getNode().lock());
         apex_assert_hard(g);
 
         GraphIO io(g.get(), getNodeFactory());
@@ -91,7 +91,7 @@ bool DeleteNode::doUndo()
 
     //deserialize subgraph
     if(node_handle->getType() == "csapex::Graph") {
-        GraphPtr g = std::dynamic_pointer_cast<Graph>(node_handle->getNode().lock());
+        SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_handle->getNode().lock());
         apex_assert_hard(g);
 
         GraphIO io(g.get(), getNodeFactory());

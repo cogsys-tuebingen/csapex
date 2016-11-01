@@ -2,29 +2,18 @@
 #define GRAPH_H
 
 /// COMPONENT
-#include <csapex/utility/uuid.h>
-#include <csapex/model/generator_node.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid_provider.h>
-#include <csapex/model/variadic_io.h>
+#include <csapex/csapex_export.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
 #include <map>
-#include <unordered_map>
 #include <functional>
-#include <set>
 
 namespace csapex {
 
-struct RelayMapping
-{
-    UUID external;
-    UUID internal;
-};
-
-
-class CSAPEX_EXPORT Graph : public GeneratorNode, public UUIDProvider, public Variadic
+class CSAPEX_EXPORT Graph : public UUIDProvider
 {
     friend class GraphIO;
     friend class GraphFacade;
@@ -53,17 +42,7 @@ public:
     Graph();
     virtual ~Graph();
 
-    virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid) override;
-    virtual void reset() override;
     void resetActivity();
-
-    virtual void stateChanged() override;
-
-    virtual void activation() override;
-    virtual void deactivation() override;
-
-    virtual bool canProcess() const override;
-    virtual bool isDoneProcessing() const override;
 
     void clear();
 
@@ -71,8 +50,8 @@ public:
     Node* findNodeNoThrow(const UUID& uuid) const noexcept;
     Node* findNodeForConnector(const UUID &uuid) const;
 
-    NodeHandle* findNodeHandle(const UUID& uuid) const;
-    NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept;
+    virtual NodeHandle* findNodeHandle(const UUID& uuid) const;
+    virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept;
     NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
     NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept;
     NodeHandle* findNodeHandleWithLabel(const std::string& label) const;
@@ -81,8 +60,8 @@ public:
 
     int getComponent(const UUID& node_uuid) const;
 
-    Connectable* findConnector(const UUID &uuid);
-    Connectable* findConnectorNoThrow(const UUID &uuid) noexcept;
+    virtual Connectable* findConnector(const UUID &uuid);
+    virtual Connectable* findConnectorNoThrow(const UUID &uuid) noexcept;
 
     template <typename T>
     T *findConnector(const UUID &uuid)
@@ -112,8 +91,6 @@ public:
 
     void triggerConnectionsAdded();
 
-    std::string makeStatusString() const;
-
     void buildConnectedComponents();
 
     // iterators
@@ -123,80 +100,9 @@ public:
     node_iterator endNodes();
     const node_const_iterator endNodes() const;
 
-    // Node interface
-    virtual void setup(csapex::NodeModifier& modifier) override;
-    virtual void setupParameters(Parameterizable& params) override;
-    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& params,
-                         std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation) override;
-
-    virtual bool isAsynchronous() const override;
-
-    InputPtr createInternalInput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool optional);
-    OutputPtr createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
-    EventPtr createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
-    SlotPtr createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr &)> callback);
-
-    virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
-    virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
-    virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label) override;
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active, bool asynchronous) override;
-
-    virtual void removeVariadicInput(InputPtr input) override;
-    virtual void removeVariadicOutput(OutputPtr input) override;
-    virtual void removeVariadicEvent(EventPtr input) override;
-    virtual void removeVariadicSlot(SlotPtr input) override;
-
-    void removeInternalPorts();
-
-    RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
-    RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);
-    RelayMapping addForwardingSlot(const TokenDataConstPtr& type, const std::string& label);
-    RelayMapping addForwardingEvent(const TokenDataConstPtr& type, const std::string& label);
-
-    InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
-    OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
-    SlotPtr getForwardedSlotInternal(const UUID& internal_uuid) const;
-    EventPtr getForwardedEventInternal(const UUID& internal_uuid) const;
-
-    OutputPtr getRelayForInput(const UUID& external_uuid) const;
-    InputPtr getRelayForOutput(const UUID& external_uuid) const;
-    EventPtr getRelayForSlot(const UUID& external_uuid) const;
-    SlotPtr getRelayForEvent(const UUID& external_uuid) const;
-
-    UUID getForwardedInputExternal(const UUID& internal_uuid) const;
-    UUID getForwardedOutputExternal(const UUID& internal_uuid) const;
-    UUID getForwardedSlotExternal(const UUID& internal_uuid) const;
-    UUID getForwardedEventExternal(const UUID& internal_uuid) const;
-
-    std::vector<UUID> getInternalOutputs() const;
-    std::vector<UUID> getInternalInputs() const;
-    std::vector<UUID> getInternalSlots() const;
-    std::vector<UUID> getInternalEvents() const;
-
-
-    void setIterationEnabled(const UUID& external_input_uuid, bool enabled);
 
 private:
-    UUID addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional);
-    UUID addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
-    UUID addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
-    UUID addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);
-
-    virtual void notifyMessagesProcessed() override;
-    void currentIterationIsProcessed();
-    void subgraphHasProducedAllMessages();
-
-    void tryFinishSubgraph();
-
     void checkNodeState(NodeHandle* nh);
-
-    void finishSubgraph();
-    void notifySubgraphHasProducedTokens();
-    void notifySubgraphProcessed();
-
-    void sendCurrentIteration();
-
-    void startNextIteration();
 
 
 public:
@@ -209,11 +115,6 @@ public:
     csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeAdded;
     csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeRemoved;
 
-    csapex::slim_signal::Signal<void(ConnectablePtr)> forwardingAdded;
-    csapex::slim_signal::Signal<void(ConnectablePtr)> forwardingRemoved;
-
-    csapex::slim_signal::Signal<void(Connectable*,Connectable*)> internalConnectionInProgress;
-
 protected:
     std::vector<NodeHandlePtr> nodes_;
     std::map<NodeHandle*, int> node_component_;
@@ -222,36 +123,6 @@ protected:
     std::map<NodeHandle*, std::vector<NodeHandle*> > node_children_;
 
     std::vector<ConnectionPtr> connections_;
-
-    std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation_;
-
-    InputTransitionPtr transition_relay_in_;
-    OutputTransitionPtr transition_relay_out_;
-    std::unordered_map<UUID, SlotPtr, UUID::Hasher> internal_slots_;
-    std::unordered_map<UUID, EventPtr, UUID::Hasher> internal_events_;
-
-    std::unordered_map<UUID, OutputPtr, UUID::Hasher> external_to_internal_outputs_;
-    std::unordered_map<UUID, InputPtr, UUID::Hasher> external_to_internal_inputs_;
-    std::unordered_map<UUID, SlotPtr, UUID::Hasher> external_to_internal_slots_;
-    std::unordered_map<UUID, EventPtr, UUID::Hasher> external_to_internal_events_;
-
-    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_output_;
-    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
-    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_slot_;
-    std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_event_;
-
-    std::set<UUID> iterated_inputs_;
-    param::BitSetParameterPtr iterated_inputs_param_;
-    bool is_subgraph_finished_;
-    bool is_iterating_;
-    bool has_sent_current_iteration_;
-    int iteration_index_;
-    int iteration_count_;
-
-    bool is_initialized_;
-
-    EventPtr activation_event_;
-    EventPtr deactivation_event_;
 };
 
 }

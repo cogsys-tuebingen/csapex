@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/delete_node.h>
@@ -48,7 +48,7 @@ bool UngroupNodes::doExecute()
     Graph* graph = getGraph();
 
     NodeHandle* nh = graph->findNodeHandle(uuid);
-    subgraph = std::dynamic_pointer_cast<Graph>(nh->getNode().lock());
+    subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
 
     apex_assert_hard(subgraph);
 

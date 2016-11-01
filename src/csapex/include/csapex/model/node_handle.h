@@ -68,10 +68,10 @@ public:
 
     Connectable* getConnector(const UUID& uuid) const;
     Connectable* getConnectorNoThrow(const UUID& uuid) const noexcept;
-    Input* getInput(const UUID& uuid) const;
-    Output* getOutput(const UUID& uuid) const;
-    Slot* getSlot(const UUID& uuid) const;
-    Event* getEvent(const UUID& uuid) const;
+    virtual Input* getInput(const UUID& uuid) const;
+    virtual Output* getOutput(const UUID& uuid) const;
+    virtual Slot* getSlot(const UUID& uuid) const;
+    virtual Event* getEvent(const UUID& uuid) const;
 
 
     void removeInput(const UUID& uuid) override;

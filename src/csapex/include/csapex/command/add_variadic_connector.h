@@ -5,7 +5,7 @@
 #include "command.h"
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 
 namespace csapex
 {

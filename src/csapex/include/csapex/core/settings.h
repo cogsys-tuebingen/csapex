@@ -13,7 +13,7 @@
 namespace csapex
 {
 
-class Graph;
+class SubgraphNode;
 
 class CSAPEX_EXPORT Settings
 {
@@ -89,8 +89,8 @@ public:
     csapex::slim_signal::Signal<void (YAML::Node& e)> saveRequest;
     csapex::slim_signal::Signal<void (YAML::Node& n)> loadRequest;
 
-    csapex::slim_signal::Signal<void (Graph*, YAML::Node& e)> saveDetailRequest;
-    csapex::slim_signal::Signal<void (Graph*, YAML::Node& n)> loadDetailRequest;
+    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& e)> saveDetailRequest;
+    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& n)> loadDetailRequest;
 
 private:
     std::map<std::string, csapex::param::Parameter::Ptr> settings_;

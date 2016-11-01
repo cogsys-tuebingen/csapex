@@ -63,11 +63,11 @@ private:
 
     NodeHandle* node_;
 
-    GraphPtr graph_old;
+    SubgraphNodePtr graph_old;
     GraphFacadePtr graph_facade_old_;
 
     std::string type_new_;
-    Graph* graph_new;
+    SubgraphNode* graph_new;
     GraphFacadePtr graph_facade_new_;
 
     std::vector<ConnectionInformation> connections_;

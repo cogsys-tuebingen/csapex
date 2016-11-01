@@ -20,7 +20,7 @@ namespace csapex
 class CSAPEX_EXPORT GraphIO : public Profilable
 {
 public:
-    GraphIO(Graph *graph, NodeFactory* node_factory);
+    GraphIO(SubgraphNode *graph, NodeFactory* node_factory);
 
 public:
     // options
@@ -42,8 +42,8 @@ public:
     loadIntoGraph(const Snippet &blueprint, const csapex::Point &position);
 
 public:
-    csapex::slim_signal::Signal<void (Graph*, YAML::Node& e)> saveViewRequest;
-    csapex::slim_signal::Signal<void (Graph*, YAML::Node& n)> loadViewRequest;
+    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& e)> saveViewRequest;
+    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& n)> loadViewRequest;
 
 private:
 
@@ -72,7 +72,7 @@ protected:
     UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
 
 private:
-    Graph* graph_;
+    SubgraphNode* graph_;
     NodeFactory* node_factory_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> old_node_uuid_to_new_;

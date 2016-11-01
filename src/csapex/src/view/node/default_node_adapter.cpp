@@ -5,6 +5,7 @@
 #include <csapex/model/generic_state.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/param/angle_parameter.h>

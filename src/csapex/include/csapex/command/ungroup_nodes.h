@@ -31,7 +31,7 @@ protected:
 private:
     UUID uuid;
 
-    GraphPtr subgraph;
+    SubgraphNodePtr subgraph;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> old_connections_in;
     std::unordered_map<UUID, std::vector<UUID>, UUID::Hasher> old_connections_out;

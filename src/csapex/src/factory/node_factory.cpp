@@ -9,7 +9,7 @@
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/plugin/plugin_manager.hpp>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/nodes/note.h>
 
 using namespace csapex;
@@ -31,7 +31,7 @@ NodeFactory::NodeFactory(csapex::PluginLocator* locator)
       node_manager_(std::make_shared<PluginManager<Node>> ("csapex::Node")),
       tag_map_has_to_be_rebuilt_(false)
 {
-    NodeConstructorPtr provider = std::make_shared<NodeConstructor>("csapex::Graph", []{ return std::make_shared<Graph>(); });
+    NodeConstructorPtr provider = std::make_shared<NodeConstructor>("csapex::Graph", []{ return std::make_shared<SubgraphNode>(); });
     provider->setIcon(":/group.png");
     registerNodeType(provider, true);
 

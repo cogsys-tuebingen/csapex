@@ -128,6 +128,11 @@ Graph* Command::getGraph()
     return getGraphFacade()->getGraph();
 }
 
+SubgraphNode* Command::getSubgraphNode()
+{
+    return getGraphFacade()->getSubgraphNode();
+}
+
 NodeFactory* Command::getNodeFactory()
 {
     return &core_->getNodeFactory();

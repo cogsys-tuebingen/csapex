@@ -68,8 +68,8 @@ public:
     void saveSettings(YAML::Node& doc);
     void loadSettings(YAML::Node& doc);
 
-    void saveView(Graph *graph, YAML::Node &e);
-    void loadView(Graph* graph, YAML::Node& doc);
+    void saveView(SubgraphNode *graph, YAML::Node &e);
+    void loadView(SubgraphNode *graph, YAML::Node& doc);
 
 
     virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
@@ -128,11 +128,11 @@ private:
 
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> graphs_;
 
-    std::set<Graph*> visible_graphs_;
-    std::map<Graph*, GraphView*> graph_views_;
+    std::set<SubgraphNode*> visible_graphs_;
+    std::map<SubgraphNode*, GraphView*> graph_views_;
     std::map<AUUID, GraphView*> auuid_views_;
     std::map<GraphView*, GraphFacade*> view_graphs_;
-    std::map<Graph*, std::vector<slim_signal::ScopedConnection>> graph_connections_;
+    std::map<SubgraphNode*, std::vector<slim_signal::ScopedConnection>> graph_connections_;
     std::map<GraphView*, std::vector<slim_signal::ScopedConnection>> view_connections_;
 
     std::map<UUID, YAML::Node> states_for_invisible_graphs_;

@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/core/csapex_core.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/view/widgets/box_dialog.h>
@@ -132,12 +132,12 @@ void RewiringDialog::makeUI(const QString& stylesheet)
 
     graph_old_handle = node_factory.makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_.get());
     apex_assert_hard(graph_old_handle);
-    graph_old = std::dynamic_pointer_cast<Graph>(graph_old_handle->getNode().lock());
+    graph_old = std::dynamic_pointer_cast<SubgraphNode>(graph_old_handle->getNode().lock());
     apex_assert_hard(graph_old);
     graph_facade_old_ = std::make_shared<GraphFacade>(*executor, graph_old.get(), graph_old_handle.get());
 
     graph_facade_new_ = core_temp_->getRoot();
-    graph_new = graph_facade_new_->getGraph();
+    graph_new = graph_facade_new_->getSubgraphNode();
 
     graph_new->removeInternalPorts();
 

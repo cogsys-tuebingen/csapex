@@ -6,7 +6,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/designer/designer_scene.h>
@@ -88,7 +88,7 @@ void PortPanel::enableMetaPort(const AUUID& target)
 void PortPanel::setup(GraphFacadePtr graph_facade)
 {
     graph_facade_ = graph_facade;
-    graph_ = graph_facade_->getGraph();
+    graph_ = graph_facade_->getSubgraphNode();
 
     switch(type_) {
     case ConnectorType::OUTPUT:

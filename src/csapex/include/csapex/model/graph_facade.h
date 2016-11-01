@@ -22,11 +22,12 @@ public:
     typedef std::shared_ptr<GraphFacade> Ptr;
 
 public:
-    GraphFacade(ThreadPool& executor, Graph* graph, NodeHandle *nh = nullptr, GraphFacade* parent = nullptr);
+    GraphFacade(ThreadPool& executor, SubgraphNode *graph, NodeHandle *nh = nullptr, GraphFacade* parent = nullptr);
     ~GraphFacade();
 
     AUUID getAbsoluteUUID() const;
     Graph* getGraph();
+    SubgraphNode* getSubgraphNode();
     NodeHandle* getNodeHandle();
     GraphFacade* getParent() const;
     GraphFacade* getSubGraph(const UUID& uuid);
@@ -103,7 +104,7 @@ private:
     GraphFacade* parent_;
 
     AUUID absolute_uuid_;
-    Graph* graph_;
+    SubgraphNode* graph_;
     NodeHandle* graph_handle_;
     ThreadPool& executor_;
 

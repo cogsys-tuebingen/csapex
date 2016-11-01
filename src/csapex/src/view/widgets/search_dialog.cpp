@@ -7,6 +7,7 @@
 #include <csapex/view/utility/html_delegate.h>
 #include <csapex/view/utility/node_list_generator.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/factory/node_factory.h>
