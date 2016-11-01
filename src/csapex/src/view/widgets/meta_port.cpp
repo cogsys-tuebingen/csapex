@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connectable.h>
 #include <csapex/msg/any_message.h>
+#include <csapex/csapex_mime.h>
 
 /// SYSTEM
 #include <QDragEnterEvent>
@@ -52,24 +53,24 @@ void MetaPort::triggerCreatePort()
 
 void MetaPort::dragEnterEvent(QDragEnterEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         e->acceptProposedAction();
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         e->acceptProposedAction();
     }
 }
 
 void MetaPort::dragMoveEvent(QDragMoveEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION)) ||
-            e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create)) ||
+            e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         e->acceptProposedAction();
     }
 }
 
 void MetaPort::dropEvent(QDropEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from) {
             auto type = from->getType();
@@ -84,7 +85,7 @@ void MetaPort::dropEvent(QDropEvent* e)
             Q_EMIT createPortAndConnectRequest(CreateConnectorRequest(target, port_type_, type, label.toStdString()), from);
         }
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from) {
             auto type = from->getType();

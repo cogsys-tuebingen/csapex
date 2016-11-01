@@ -6,6 +6,7 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/view/node/box.h>
 #include <csapex/model/tag.h>
+#include <csapex/csapex_mime.h>
 
 /// SYSTEM
 #include <QTreeWidget>
@@ -39,6 +40,7 @@ void NodeListGenerator::insertAvailableNodeTypes(QMenu* menu)
                 action->setIconVisibleInMenu(true);
             }
             action->setToolTip(proxy->getDescription().c_str());
+            action->setData(QVariant::fromValue(QPair<QString, QString>(QString::fromStdString(csapex::mime::node), QString::fromStdString(proxy->getType()))));
             submenu->addAction(action);
         }
     }
@@ -70,7 +72,7 @@ void NodeListGenerator::insertAvailableNodeTypes(QTreeWidget* tree)
             child->setToolTip(0, (proxy->getType() + ": " + proxy->getDescription()).c_str());
             child->setIcon(0, icon);
             child->setText(0, name.c_str());
-            child->setData(0, Qt::UserRole, NodeBox::MIME);
+            child->setData(0, Qt::UserRole, QString::fromStdString(csapex::mime::node));
             child->setData(0, Qt::UserRole + 1, proxy->getType().c_str());
 
             submenu->addChild(child);
@@ -78,10 +80,8 @@ void NodeListGenerator::insertAvailableNodeTypes(QTreeWidget* tree)
     }
 }
 
-QAbstractItemModel* NodeListGenerator::listAvailableNodeTypes()
+void NodeListGenerator::listAvailableNodeTypes(QStandardItemModel* model)
 {
-    QStandardItemModel* model = new QStandardItemModel;
-
     for(const NodeConstructor::Ptr& proxy : node_factory_.getConstructors()) {
         QString name = QString::fromStdString(UUID::stripNamespace(proxy->getType()));
         QString descr(proxy->getDescription().c_str());
@@ -107,11 +107,8 @@ QAbstractItemModel* NodeListGenerator::listAvailableNodeTypes()
         item->setData(name, Qt::UserRole + 2);
         item->setData(tags, Qt::UserRole + 3);
         item->setData(properties, Qt::UserRole + 4);
+        item->setData(QString::fromStdString(csapex::mime::node), Qt::UserRole + 5);
 
         model->appendRow(item);
     }
-
-    model->sort(0);
-
-    return model;
 }

@@ -53,6 +53,9 @@ public:
 
     std::vector<std::string> getAllLibraries() const;
 
+    void setPluginPaths(const std::string& type, const std::vector<std::string>& paths);
+    std::vector<std::string> getPluginPaths(const std::string& type) const;
+
 private:
     PluginLocator(const PluginLocator& copy) = delete;
     PluginLocator& operator = (const PluginLocator& copy) = delete;
@@ -70,6 +73,8 @@ private:
 
     std::set<std::string> ignored_libraries_;
     param::StringListParameterPtr ignored_persistent_;
+
+    std::map<std::string, std::vector<std::string>> plugin_paths_;
 };
 }
 

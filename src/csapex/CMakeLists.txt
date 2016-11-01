@@ -297,6 +297,7 @@ add_library(csapex SHARED
     src/factory/generic_node_factory.cpp
     src/factory/node_factory.cpp
     src/factory/message_factory.cpp
+    src/factory/snippet_factory.cpp
 
     src/manager/message_provider_manager.cpp
 
@@ -349,6 +350,7 @@ add_library(csapex SHARED
     src/serialization/yaml.cpp
     src/serialization/message_serializer.cpp
     src/serialization/serialization.cpp
+    src/serialization/snippet.cpp
 
     src/plugin/plugin_locator.cpp
 
@@ -515,6 +517,7 @@ add_library(csapex_qt SHARED
     src/view/param/output_text_param_adapter.cpp
 
     src/view/utility/node_list_generator.cpp
+    src/view/utility/snippet_list_generator.cpp
     src/view/utility/context_menu_handler.cpp
     src/view/utility/html_delegate.cpp
     src/view/utility/qsignal_bridges.cpp

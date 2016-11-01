@@ -6,6 +6,7 @@
 #include <csapex/data/point.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connection_information.h>
+#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -39,7 +40,7 @@ protected:
     std::vector<ConnectionInformation> signals_going_out;
 
 
-    YAML::Node selection_yaml;
+    Snippet serialized_snippet_;
     std::unordered_map<UUID, UUID, UUID::Hasher> old_uuid_to_new;
 };
 

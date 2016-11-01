@@ -13,11 +13,14 @@
 class QStringListModel;
 class QModelIndex;
 class QProgressBar;
+class QStandardItemModel;
 
 namespace csapex
 {
 class NodeFactory;
 class NodeFilterProxyModel;
+
+class SnippetFactory;
 
 
 class CSAPEX_QT_EXPORT BoxDialog : public QDialog
@@ -25,8 +28,9 @@ class CSAPEX_QT_EXPORT BoxDialog : public QDialog
     Q_OBJECT
 
 public:
-    BoxDialog(QString message, csapex::NodeFactory &node_factory, NodeAdapterFactory& adapter_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    BoxDialog(QString message, csapex::NodeFactory &node_factory, NodeAdapterFactory& adapter_factory, SnippetFactory& snippet_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
+    std::string getMIME();
     std::string getName();
 
     void showEvent(QShowEvent*) override;
@@ -43,8 +47,11 @@ private:
 
 private:
     CompletedLineEdit * name_edit_;
+
     NodeFactory& node_factory_;
     NodeAdapterFactory& adapter_factory_;
+
+    SnippetFactory& snippet_factory_;
 
     QProgressBar* loading_;
 
@@ -54,7 +61,7 @@ private:
 
     QFuture<bool> load_nodes;
 
-    QAbstractItemModel* model_;
+    QStandardItemModel* model_;
 };
 
 }

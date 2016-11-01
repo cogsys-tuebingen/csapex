@@ -9,7 +9,7 @@
 /// SYSTEM
 #include <QMenu>
 #include <QTreeWidget>
-#include <QAbstractItemModel>
+#include <QStandardItemModel>
 
 namespace csapex
 {
@@ -21,7 +21,7 @@ public:
 
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget *tree);
-    QAbstractItemModel *listAvailableNodeTypes();
+    void listAvailableNodeTypes(QStandardItemModel *model);
 
 private:
     NodeFactory& node_factory_;

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/meta.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -31,7 +32,7 @@ protected:
     UUID uuid;
 
     NodeStatePtr saved_state;
-    YAML::Node saved_graph;
+    Snippet saved_graph;
 };
 
 }

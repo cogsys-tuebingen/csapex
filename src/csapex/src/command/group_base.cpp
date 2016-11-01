@@ -137,7 +137,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
 void GroupBase::pasteSelection(AUUID sub_graph_auuid)
 {
-    std::shared_ptr<PasteGraph> paste(new command::PasteGraph(sub_graph_auuid, selection_yaml, insert_pos));
+    std::shared_ptr<PasteGraph> paste(new command::PasteGraph(sub_graph_auuid, serialized_snippet_, insert_pos));
     executeCommand(paste);
     add(paste);
 

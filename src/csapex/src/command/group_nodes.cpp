@@ -43,11 +43,9 @@ bool GroupNodes::doExecute()
 {
     Graph* graph = getGraph();
     {
-        selection_yaml = YAML::Node(YAML::NodeType::Map);
-
         GraphIO io(graph, getNodeFactory());
         io.setIgnoreForwardingConnections(true);
-        io.saveSelectedGraph(selection_yaml, uuids);
+        serialized_snippet_ = io.saveSelectedGraph(uuids);
     }
 
 

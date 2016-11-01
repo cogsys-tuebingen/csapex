@@ -38,6 +38,7 @@ public:
 
     Settings& getSettings() const;
     NodeFactory& getNodeFactory() const;
+    SnippetFactory& getSnippetFactory() const;
 
     GraphFacadePtr getRoot() const;
     ThreadPoolPtr getThreadPool() const;
@@ -88,6 +89,7 @@ private:
     ExceptionHandler &exception_handler_;
 
     NodeFactoryPtr node_factory_;
+    SnippetFactoryPtr snippet_factory_;
 
     ThreadPoolPtr thread_pool_;
 

@@ -17,6 +17,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/utility/yaml_node_builder.h>
 #include <csapex/serialization/serialization.h>
+#include <csapex/serialization/snippet.h>
 #include <csapex/utility/yaml_io.hpp>
 #include <csapex/utility/exceptions.h>
 #include <csapex/profiling/profiler.h>
@@ -57,7 +58,16 @@ void GraphIO::loadSettings(const YAML::Node &doc)
     }
 }
 
-void GraphIO::saveGraph(YAML::Node &yaml)
+Snippet GraphIO::saveGraph()
+{
+    YAML::Node yaml;
+
+    saveGraphTo(yaml);
+
+    return Snippet(yaml);
+}
+
+void GraphIO::saveGraphTo(YAML::Node &yaml)
 {
     saveNodes(yaml);
     saveConnections(yaml);
@@ -65,7 +75,15 @@ void GraphIO::saveGraph(YAML::Node &yaml)
     saveViewRequest(graph_, yaml);
 }
 
-void GraphIO::loadGraph(const YAML::Node& doc)
+void GraphIO::loadGraph(const Snippet& doc)
+{
+    YAML::Node yaml;
+    doc.toYAML(yaml);
+
+    loadGraphFrom(yaml);
+}
+
+void GraphIO::loadGraphFrom(const YAML::Node& doc)
 {
     TimerPtr timer = getProfiler()->getTimer("load graph");
     timer->restart();
@@ -90,8 +108,10 @@ void GraphIO::loadGraph(const YAML::Node& doc)
 }
 
 
-void GraphIO::saveSelectedGraph(YAML::Node &yaml, const std::vector<UUID> &uuids)
+Snippet GraphIO::saveSelectedGraph(const std::vector<UUID> &uuids)
 {
+    YAML::Node yaml = YAML::Node(YAML::NodeType::Map);
+
     std::set<UUID> node_set(uuids.begin(), uuids.end());
 
     std::vector<NodeHandle*> nodes;
@@ -115,13 +135,18 @@ void GraphIO::saveSelectedGraph(YAML::Node &yaml, const std::vector<UUID> &uuids
 
     saveNodes(yaml, nodes);
     saveConnections(yaml, connections);
+
+    return Snippet(yaml);
 }
 
 std::unordered_map<UUID, UUID, UUID::Hasher>
-GraphIO::loadIntoGraph(const YAML::Node &blueprint, const Point& position)
+GraphIO::loadIntoGraph(const Snippet &snippet, const Point& position)
 {
     double min_x = std::numeric_limits<double>::infinity();
     double min_y = std::numeric_limits<double>::infinity();
+
+    YAML::Node blueprint;
+    snippet.toYAML(blueprint);
 
     YAML::Node nodes = blueprint["nodes"];
     if(nodes.IsDefined()) {
@@ -499,7 +524,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
         if(subgraph) {
             YAML::Node subgraph_yaml;
             GraphIO sub_graph_io(subgraph.get(), node_factory_);
-            sub_graph_io.saveGraph(subgraph_yaml);
+            sub_graph_io.saveGraphTo(subgraph_yaml);
             doc["subgraph"] = subgraph_yaml;
         }
     }

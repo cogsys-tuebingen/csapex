@@ -255,7 +255,7 @@
   </widget>
   <widget class="QDockWidget" name="Nodes">
    <property name="windowTitle">
-    <string>Available Nodes</string>
+    <string>Create Nodes</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -263,10 +263,19 @@
    <widget class="QWidget" name="NodesContents">
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="QTreeWidget" name="boxes">
+      <widget class="QTreeWidget" name="nodes">
        <column>
         <property name="text">
-         <string>Type</string>
+         <string>Nodes</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTreeWidget" name="snippets">
+       <column>
+        <property name="text">
+         <string>Snippets</string>
         </property>
        </column>
       </widget>

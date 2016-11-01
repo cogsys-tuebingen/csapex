@@ -16,7 +16,7 @@
 using namespace csapex;
 using namespace csapex::command;
 
-PasteGraph::PasteGraph(const AUUID &graph_id, const YAML::Node& blueprint, const Point& pos)
+PasteGraph::PasteGraph(const AUUID &graph_id, const Snippet &blueprint, const Point& pos)
     : Meta(graph_id, "PasteGraph"), blueprint_(blueprint), pos_(pos)
 {
 }

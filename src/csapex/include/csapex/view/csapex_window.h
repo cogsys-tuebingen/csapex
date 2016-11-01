@@ -83,6 +83,7 @@ public Q_SLOTS:
     void showStatusMessage(const std::string& msg);
     void showNotification(const Notification& notification);
     void updateNodeTypes();
+    void updateSnippets();
 
     void updateDebugInfo();
     void updateUndoInfo();

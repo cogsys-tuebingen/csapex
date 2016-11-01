@@ -111,3 +111,18 @@ std::vector<std::string> PluginLocator::getAllLibraries() const
 
     return result;
 }
+
+void PluginLocator::setPluginPaths(const std::string &type, const std::vector<std::string> &paths)
+{
+    plugin_paths_[type] = paths;
+}
+
+std::vector<std::string> PluginLocator::getPluginPaths(const std::string &type) const
+{
+    auto pos = plugin_paths_.find(type);
+    if(pos != plugin_paths_.end()) {
+        return pos->second;
+    } else {
+        return {};
+    }
+}

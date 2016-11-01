@@ -2,42 +2,41 @@
 #include <csapex/view/csapex_window.h>
 
 /// COMPONENT
+#include <csapex/command/command_factory.h>
+#include <csapex/command/command.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
-#include <csapex/info.h>
-#include <csapex/model/graph.h>
-#include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/info.h>
+#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph.h>
 #include <csapex/model/node.h>
-#include <csapex/view/node/node_statistics.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/tag.h>
+#include <csapex/model/token_data.h>
+#include <csapex/param/parameter_factory.h>
 #include <csapex/plugin/plugin_locator.h>
+#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/timer.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/command/command_factory.h>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/designer/designerio.h>
+#include <csapex/view/designer/tutorial_tree_model.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/node/node_statistics.h>
+#include <csapex/view/utility/clipboard.h>
+#include <csapex/view/utility/html_delegate.h>
+#include <csapex/view/utility/node_list_generator.h>
+#include <csapex/view/utility/snippet_list_generator.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/widgets/activity_legend.h>
 #include <csapex/view/widgets/activity_timeline.h>
-#include <csapex/view/node/box.h>
-#include <csapex/view/designer/designer.h>
-#include <csapex/view/designer/designerio.h>
 #include <csapex/view/widgets/minimap_widget.h>
-#include <csapex/view/widgets/screenshot_dialog.h>
-#include <csapex/command/command.h>
-#include <csapex/view/utility/node_list_generator.h>
-#include <csapex/profiling/profiler.h>
-#include <csapex/profiling/timer.h>
 #include <csapex/view/widgets/profiling_widget.h>
-#include <csapex/view/designer/tutorial_tree_model.h>
-#include <csapex/view/utility/html_delegate.h>
+#include <csapex/view/widgets/screenshot_dialog.h>
 #include "ui_csapex_window.h"
-
-/// PROJECT
-#include <csapex/param/parameter_factory.h>
-#include <csapex/manager/message_renderer_manager.h>
-#include <csapex/model/token_data.h>
-#include <csapex/view/utility/clipboard.h>
 
 /// SYSTEM
 #include <iostream>
@@ -510,10 +509,10 @@ void CsApexWindow::enableDebugProfiling(bool enabled)
 
 void CsApexWindow::updateNodeTypes()
 {
-    if(ui->boxes->layout()) {
-        QtHelper::clearLayout(ui->boxes->layout());
+    if(ui->nodes->layout()) {
+        QtHelper::clearLayout(ui->nodes->layout());
     } else {
-        ui->boxes->setLayout(new QVBoxLayout);
+        ui->nodes->setLayout(new QVBoxLayout);
     }
     if(ui->node_info_tree->layout()) {
         QtHelper::clearLayout(ui->node_info_tree->layout());
@@ -523,8 +522,20 @@ void CsApexWindow::updateNodeTypes()
 
     NodeListGenerator generator(core_.getNodeFactory(), *designer_->getNodeAdapterFactory());
 
-    generator.insertAvailableNodeTypes(ui->boxes);
+    generator.insertAvailableNodeTypes(ui->nodes);
     generator.insertAvailableNodeTypes(ui->node_info_tree);
+}
+
+void CsApexWindow::updateSnippets()
+{
+    if(ui->snippets->layout()) {
+        QtHelper::clearLayout(ui->snippets->layout());
+    } else {
+        ui->snippets->setLayout(new QVBoxLayout);
+    }
+
+    SnippetListGenerator generator(core_.getSnippetFactory());
+    generator.insertAvailableSnippets(ui->snippets);
 }
 
 
@@ -750,6 +761,7 @@ void CsApexWindow::init()
     init_ = true;
 
     updateNodeTypes();
+    updateSnippets();
     //    designer_->show();
 
     Settings& settings = core_.getSettings();

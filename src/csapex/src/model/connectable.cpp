@@ -14,8 +14,6 @@
 
 using namespace csapex;
 
-const std::string Connectable::MIME_CREATE_CONNECTION = "csapex/connectable/create_connection";
-const std::string Connectable::MIME_MOVE_CONNECTIONS = "csapex/connectable/move_connections";
 
 //bool Connectable::allow_processing = true;
 

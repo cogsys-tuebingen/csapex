@@ -8,6 +8,7 @@
 #include <csapex/factory/factory_fwd.h>
 #include <csapex/data/point.h>
 #include <csapex/profiling/profilable.h>
+#include <csapex/serialization/serialization_fwd.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -29,19 +30,23 @@ public:
     void saveSettings(YAML::Node& yaml);
     void loadSettings(const YAML::Node& doc);
 
-    void saveGraph(YAML::Node &yaml);
-    void loadGraph(const YAML::Node &doc);
+    Snippet saveGraph();
+    void saveGraphTo(YAML::Node &yaml);
 
-    void saveSelectedGraph(YAML::Node &yaml, const std::vector<UUID>& nodes);
+    void loadGraph(const Snippet &doc);
+    void loadGraphFrom(const YAML::Node &doc);
+
+    Snippet saveSelectedGraph(const std::vector<UUID>& nodes);
 
     std::unordered_map<UUID, UUID, UUID::Hasher>
-    loadIntoGraph(const YAML::Node &blueprint, const csapex::Point &position);
+    loadIntoGraph(const Snippet &blueprint, const csapex::Point &position);
 
 public:
     csapex::slim_signal::Signal<void (Graph*, YAML::Node& e)> saveViewRequest;
     csapex::slim_signal::Signal<void (Graph*, YAML::Node& n)> loadViewRequest;
 
 private:
+
     void saveNodes(YAML::Node &yaml);
     void loadNodes(const YAML::Node& doc);
     void loadNode(const YAML::Node &doc);

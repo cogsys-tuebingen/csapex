@@ -25,10 +25,6 @@ class CSAPEX_EXPORT Connectable : public ErrorState, public Unique, public std::
     friend class Connection;
 
 public:
-    static const std::string MIME_CREATE_CONNECTION;
-    static const std::string MIME_MOVE_CONNECTIONS;
-
-public:
     virtual ~Connectable();
 
     int getCount() const;

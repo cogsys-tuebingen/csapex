@@ -29,16 +29,19 @@
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/factory/snippet_factory.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/tag.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/thread_pool.h>
+#include <csapex/serialization/snippet.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/view/designer/designer_scene.h>
@@ -51,6 +54,7 @@
 #include <csapex/view/utility/clipboard.h>
 #include <csapex/view/utility/context_menu_handler.h>
 #include <csapex/view/utility/node_list_generator.h>
+#include <csapex/view/utility/snippet_list_generator.h>
 #include <csapex/view/widgets/box_dialog.h>
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/view/widgets/movable_graphics_proxy_widget.h>
@@ -58,6 +62,7 @@
 #include <csapex/view/widgets/profiling_widget.h>
 #include <csapex/view/widgets/port_panel.h>
 #include <csapex/view/widgets/rewiring_dialog.h>
+#include <csapex/csapex_mime.h>
 
 /// SYSTEM
 #include <iostream>
@@ -72,6 +77,8 @@
 #include <QMimeData>
 #include <QColorDialog>
 #include <QSizeGrip>
+#include <QFileDialog>
+#include <QMessageBox>
 
 using namespace csapex;
 
@@ -671,18 +678,16 @@ void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
-                   core_.getNodeFactory(), *view_core_.getNodeAdapterFactory());
+                   core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
+                   core_.getSnippetFactory());
 
     int r = diag.exec();
 
     if(r) {
-        std::string type = diag.getName();
+        std::string mime = diag.getMIME();
 
-        if(!type.empty() && core_.getNodeFactory().isValidType(type)) {
-            Graph* graph = graph_facade_->getGraph();
-            UUID uuid = graph->generateUUID(type);
-            QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
-            view_core_.executeLater(Command::Ptr(new command::AddNode(graph_facade_->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, nullptr)));
+        if(!mime.empty()) {
+            createNodes(QCursor::pos(), diag.getName(), mime);
         }
     }
 }
@@ -702,7 +707,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
 
-    mimeData->setData(NodeBox::MIME, type.c_str());
+    mimeData->setData(QString::fromStdString(csapex::mime::node), type.c_str());
     if(state) {
         QVariant payload = qVariantFromValue((void *) &state);
         mimeData->setProperty("state", payload);
@@ -888,6 +893,11 @@ MovableGraphicsProxyWidget* GraphView::getProxy(const csapex::UUID &node_id)
 GraphFacade* GraphView::getGraphFacade() const
 {
     return graph_facade_.get();
+}
+
+CsApexViewCore& GraphView::getViewCore() const
+{
+    return view_core_;
 }
 
 void GraphView::focusOnNode(const csapex::UUID &uuid)
@@ -1225,6 +1235,28 @@ void GraphView::updateBoxInformation()
     }
 }
 
+void GraphView::createNodes(const QPoint& global_pos, const std::string& type, const std::string& mime)
+{
+    if(mime == csapex::mime::node) {
+        QPointF pos = mapToScene(mapFromGlobal(global_pos));
+
+        AUUID graph_id = graph_facade_->getAbsoluteUUID();
+
+        UUID uuid = graph_facade_->getGraph()->generateUUID(type);
+        CommandPtr cmd(new command::AddNode(graph_id, type, Point (pos.x(), pos.y()), uuid, NodeStatePtr()));
+
+        view_core_.execute(cmd);
+
+    } else if(mime == csapex::mime::snippet) {
+        QPointF pos = mapToScene(mapFromGlobal(global_pos));
+
+        AUUID graph_id = graph_facade_->getAbsoluteUUID();
+        CommandPtr cmd(new command::PasteGraph(graph_id, *core_.getSnippetFactory().getSnippet(type), Point (pos.x(), pos.y())));
+
+        view_core_.execute(cmd);
+    }
+}
+
 void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 {
     QMenu menu;
@@ -1251,9 +1283,15 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
-    NodeListGenerator generator(core_.getNodeFactory(), *view_core_.getNodeAdapterFactory());
-    generator.insertAvailableNodeTypes(&add_node);
+    NodeListGenerator node_generator(core_.getNodeFactory(), *view_core_.getNodeAdapterFactory());
+    node_generator.insertAvailableNodeTypes(&add_node);
     menu.addMenu(&add_node);
+
+    QMenu add_snippet("add snippet");
+    add_snippet.setIcon(QIcon(":/snippet.png"));
+    SnippetListGenerator snippet_generator(core_.getSnippetFactory());
+    snippet_generator.insertAvailableSnippets(&add_snippet);
+    menu.addMenu(&add_snippet);
 
     QAction* selectedItem = menu.exec(global_pos);
 
@@ -1272,8 +1310,11 @@ void GraphView::showContextMenuGlobal(const QPoint& global_pos)
 
         } else {
             // else it must be an insertion
-            std::string selected = selectedItem->data().toString().toStdString();
-            startPlacingBox(selected, nullptr);
+            auto data = selectedItem->data().value<QPair<QString, QString>>();
+            std::string mime = data.first.toStdString();
+            std::string type = data.second.toStdString();
+
+            createNodes(global_pos, type, mime);
         }
     }
 }
@@ -1573,6 +1614,12 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
     menu.addSeparator();
 
+    QAction* snippet = new QAction("define snippet", &menu);
+    snippet->setIcon(QIcon(":/snippet_add.png"));
+    snippet->setIconVisibleInMenu(true);
+    handler[snippet] = std::bind(&GraphView::makeSnippetFromSelected, this);
+    menu.addAction(snippet);
+
     QAction* morph = new QAction("change node type", &menu);
     morph->setIcon(QIcon(":/pencil.png"));
     morph->setIconVisibleInMenu(true);
@@ -1752,7 +1799,7 @@ void GraphView::morphNode()
     }
 }
 
-YAML::Node GraphView::serializeSelection() const
+Snippet GraphView::serializeSelection() const
 {
     GraphIO io(graph_facade_->getGraph(), &core_.getNodeFactory());
 
@@ -1761,15 +1808,15 @@ YAML::Node GraphView::serializeSelection() const
         nodes.emplace_back(box->getNodeHandle()->getUUID());
     }
 
-    YAML::Node yaml;
-    io.saveSelectedGraph(yaml, nodes);
-
-    return yaml;
+    return io.saveSelectedGraph(nodes);
 }
 
 void GraphView::copySelected()
 {
-    ClipBoard::set(serializeSelection());
+    Snippet s = serializeSelection();
+    YAML::Node yaml;
+    s.toYAML(yaml);
+    ClipBoard::set(yaml);
 }
 
 void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
@@ -1779,7 +1826,9 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
         selected_boxes_.push_back(box_handle);
     }
 
-    YAML::Node yaml = serializeSelection();
+    Snippet snippet = serializeSelection();
+    YAML::Node yaml;
+    snippet.toYAML(yaml);
     std::stringstream yaml_txt;
     yaml_txt << yaml;
 
@@ -1878,11 +1927,68 @@ void GraphView::ungroupSelected()
     view_core_.execute(cmd);
 }
 
+void GraphView::makeSnippetFromSelected()
+{
+    if(selected_boxes_.empty()) {
+        return;
+    }
+
+    NodeBox* first = selected_boxes_.at(0);
+    QString default_name = QString::fromStdString(first->getLabel());
+
+    QString name = QInputDialog::getText(QApplication::activeWindow(), "Name", "Please enter a descriptive name for the snippet.", QLineEdit::Normal, default_name);
+    if(name.isEmpty()) {
+        return;
+    }
+
+    QString description = QInputDialog::getMultiLineText(QApplication::activeWindow(), "Name", "Please enter a description for the snippet.");
+    if(description.isEmpty()) {
+        return;
+    }
+
+    QString tags_string = QInputDialog::getText(QApplication::activeWindow(), "Tags", "Please enter tags for the snippet (comma separated).", QLineEdit::Normal);
+
+    std::vector<TagConstPtr> tags;
+    for(const QString& qtag : tags_string.split(',')) {
+        const std::string& stag = qtag.trimmed().toStdString();
+        if(!stag.empty()){
+            Tag::createIfNotExists(stag);
+            tags.push_back(Tag::get(stag));
+        }
+    }
+
+    QString path = QFileDialog::getExistingDirectory(0, "Select directory for the snippet", "", QFileDialog::DontUseNativeDialog);
+
+    QDir directory(path);
+    if(directory.exists()) {
+        QString filename = name.toLower().replace("[\\/:?\"<>|] ", "_");
+        QFile file(path + QDir::separator() + filename + ".apexs");
+
+        if(file.exists()) {
+            int r = QMessageBox::warning(this, tr("Overwrite?"),
+                                         QString("The file ") + file.fileName() + " already exist. Overwrite?",
+                                         QMessageBox::Save | QMessageBox::Cancel);
+            if(r != QMessageBox::Save) {
+                return;
+            }
+        }
+
+        Snippet snippet = serializeSelection();
+
+        snippet.setName(name.toStdString());
+        snippet.setDescription(description.toStdString());
+        snippet.setTags(tags);
+
+
+        snippet.save(file.fileName().toStdString());
+    }
+}
+
 void GraphView::paste()
 {
     apex_assert_hard(ClipBoard::canPaste());
-    YAML::Node blueprint = YAML::Load(ClipBoard::get());
 
+    Snippet blueprint(ClipBoard::get());
     QPointF pos = mapToScene(mapFromGlobal(QCursor::pos()));
 
     AUUID graph_id = graph_facade_->getAbsoluteUUID();

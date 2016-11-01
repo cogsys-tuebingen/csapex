@@ -112,7 +112,6 @@ void Slot::handleEvent()
         if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
             apex_assert_hard(guard_ == -1);
             try {
-                // TODO: this callback is not finished for graphs!
                 callback_(this, message_);
             } catch(const std::exception& e) {
                 std::cerr << "slot " << getUUID() << " has thrown an exception: " << e.what() << std::endl;

@@ -12,6 +12,7 @@
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/signal/slot.h>
+#include <csapex/csapex_mime.h>
 
 /// SYSTEM
 #include <sstream>
@@ -275,7 +276,7 @@ void Port::startDrag()
         QMimeData* mimeData = new QMimeData;
 
         if(move) {
-            mimeData->setData(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS), QByteArray());
+            mimeData->setData(QString::fromStdString(csapex::mime::connection_move), QByteArray());
             mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee.get())));
 
             drag->setMimeData(mimeData);
@@ -283,7 +284,7 @@ void Port::startDrag()
             drag->exec();
 
         } else {
-            mimeData->setData(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION), QByteArray());
+            mimeData->setData(QString::fromStdString(csapex::mime::connection_create), QByteArray());
             mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee.get())));
 
             drag->setMimeData(mimeData);
@@ -352,7 +353,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
     if(!adaptee) {
         return;
     }
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from == adaptee.get()) {
             return;
@@ -364,7 +365,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
                 e->acceptProposedAction();
             }
         }
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         Connectable* original = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         if(original->targetsCanBeMovedTo(adaptee.get())) {
@@ -379,10 +380,10 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
     if(!adaptee) {
         return;
     }
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
 
         from->connectionMovePreview(adaptee.get());
@@ -397,12 +398,12 @@ void Port::dropEvent(QDropEvent* e)
     if(!adaptee) {
         return;
     }
-    if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_CREATE_CONNECTION))) {
+    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from && from != adaptee.get()) {
             addConnectionRequest(from);
         }
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(Connectable::MIME_MOVE_CONNECTIONS))) {
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
         if(from) {
             moveConnectionRequest(from);

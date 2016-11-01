@@ -8,6 +8,7 @@
 #include <csapex/info.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/factory/snippet_factory.h>
 #include <csapex/model/tag.h>
 #include <csapex/factory/message_factory.h>
 #include <csapex/msg/message.h>
@@ -27,6 +28,7 @@
 #include <csapex/profiling/profiler.h>
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/utility/stream_interceptor.h>
+#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
 #include <fstream>
@@ -72,6 +74,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
 
     core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
     node_factory_ = std::make_shared<NodeFactory>(plugin_locator_.get());
+    snippet_factory_ = std::make_shared<SnippetFactory>(plugin_locator_.get());
 
     boot();
 }
@@ -82,6 +85,7 @@ CsApexCore::CsApexCore(const CsApexCore& parent)
     parent_ = &parent;
     core_plugin_manager = parent.core_plugin_manager;
     node_factory_ =  parent.node_factory_;
+    snippet_factory_ =  parent.snippet_factory_;
 }
 
 CsApexCore::~CsApexCore()
@@ -197,6 +201,9 @@ void CsApexCore::init()
         for(PAIR plugin : core_plugins_) {
             plugin.second->setupGraph(root_->getGraph());
         }
+
+        showStatusMessage("loading snippets");
+        snippet_factory_->loadSnippets();
     }
 }
 
@@ -301,6 +308,11 @@ NodeFactory &CsApexCore::getNodeFactory() const
     return *node_factory_;
 }
 
+SnippetFactory& CsApexCore::getSnippetFactory() const
+{
+    return *snippet_factory_;
+}
+
 GraphFacadePtr CsApexCore::getRoot() const
 {
     return root_;
@@ -358,7 +370,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     graphio.saveSettings(node_map);
 
-    graphio.saveGraph(node_map);
+    graphio.saveGraphTo(node_map);
 
     YAML::Emitter yaml;
     yaml << node_map;
@@ -406,7 +418,7 @@ void CsApexCore::load(const std::string &file)
         YAML::Node doc = builder.Root();
 
         graphio.loadSettings(doc);
-        graphio.loadGraph(doc);
+        graphio.loadGraphFrom(doc);
 
         settings_.loadRequest(doc);
     }

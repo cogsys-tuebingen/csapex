@@ -47,10 +47,6 @@ public:
         return QString("NodeBox");
     }
 
-
-public:
-    static const QString MIME;
-
 public:
     /// CONSTRUCTION
     NodeBox(Settings& settings,

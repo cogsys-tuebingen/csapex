@@ -7,9 +7,9 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/data/point.h>
+#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <unordered_map>
 
 namespace csapex
@@ -22,7 +22,7 @@ namespace command
 class CSAPEX_COMMAND_EXPORT PasteGraph : public Meta
 {
 public:
-    PasteGraph(const AUUID &graph_id, const YAML::Node& blueprint, const Point &pos);
+    PasteGraph(const AUUID &graph_id, const Snippet& blueprint, const Point &pos);
 
     std::unordered_map<UUID, UUID, UUID::Hasher> getMapping() const;
 
@@ -35,7 +35,7 @@ protected:
     virtual std::string getDescription() const override;
 
 protected:
-    YAML::Node blueprint_;
+    Snippet blueprint_;
     Point pos_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> id_mapping_;

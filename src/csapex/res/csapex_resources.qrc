@@ -69,5 +69,7 @@
         <file>muted.png</file>
         <file>unmuted.png</file>
         <file>logger_level.png</file>
+        <file>snippet_add.png</file>
+        <file>snippet.png</file>
     </qresource>
 </RCC>

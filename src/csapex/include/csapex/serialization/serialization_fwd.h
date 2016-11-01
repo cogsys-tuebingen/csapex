@@ -14,8 +14,9 @@
 
 namespace csapex
 {
-
+FWD(Snippet)
 }
+
 
 #undef FWD
 

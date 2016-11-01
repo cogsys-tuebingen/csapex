@@ -16,6 +16,7 @@
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/profiling/profilable.h>
 #include <csapex/model/execution_mode.h>
+#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -67,6 +68,8 @@ public:
     MovableGraphicsProxyWidget* getProxy(const csapex::UUID& node_id);
 
     GraphFacade* getGraphFacade() const;
+
+    CsApexViewCore& getViewCore() const;
 
     void focusOnNode(const csapex::UUID& uuid);
 
@@ -167,10 +170,14 @@ public Q_SLOTS:
     void groupSelected();
     void ungroupSelected();
 
+    void makeSnippetFromSelected();
+
     void showPreview(Port* port);
     void stopPreview();
 
 private:
+    void createNodes(const QPoint& global_pos, const std::string &type, const std::string &mime);
+
     void setupWidgets();
 
     void flipBox();
@@ -188,7 +195,7 @@ private:
 
     void showProfiling(bool visible);
 
-    YAML::Node serializeSelection() const;
+    Snippet serializeSelection() const;
 
 private:
     CsApexCore& core_;

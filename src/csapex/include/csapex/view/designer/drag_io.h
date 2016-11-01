@@ -7,6 +7,7 @@
 #include <csapex/plugin/plugin_fwd.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/serialization/serialization_fwd.h>
 
 /// SYSTEM
 #include <QDragEnterEvent>
@@ -36,7 +37,7 @@ public:
 private:
     void createNode(GraphView *src, std::string type, const QPointF &pos,
                     NodeStatePtr state);
-    void pasteGraph(GraphView *src, const QPointF &pos, const YAML::Node& blueprint);
+    void pasteGraph(GraphView *src, const QPointF &pos, const Snippet& blueprint);
     void load();
 
 private:

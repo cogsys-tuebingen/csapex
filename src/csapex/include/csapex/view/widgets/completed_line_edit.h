@@ -20,6 +20,9 @@ class CSAPEX_QT_EXPORT CompletedLineEdit : public QLineEdit
 public:
     CompletedLineEdit(QWidget *parent = 0);
 
+    std::string getMIME() const;
+    std::string getName() const;
+
 public Q_SLOTS:
     void update();
     void setModel(QAbstractItemModel *completer);
@@ -35,6 +38,8 @@ private:
 
     bool was_hidden;
     int line_height;
+
+    std::string mime_;
 };
 }
 

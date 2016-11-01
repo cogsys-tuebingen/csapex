@@ -66,7 +66,7 @@ bool DeleteNode::doExecute()
         apex_assert_hard(g);
 
         GraphIO io(g.get(), getNodeFactory());
-        io.saveGraph(saved_graph);
+        saved_graph = io.saveGraph();
     }
 
     locked = true;

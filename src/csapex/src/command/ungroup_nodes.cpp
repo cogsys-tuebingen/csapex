@@ -57,11 +57,9 @@ bool UngroupNodes::doExecute()
     analyzeConnections(subgraph.get());
 
     {
-        selection_yaml = YAML::Node(YAML::NodeType::Map);
-
         GraphIO io(subgraph.get(), getNodeFactory());
         io.setIgnoreForwardingConnections(true);
-        io.saveGraph(selection_yaml);
+        serialized_snippet_ = io.saveGraph();
     }
 
     for(InputPtr in : nh->getExternalInputs()) {

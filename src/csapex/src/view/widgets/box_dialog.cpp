@@ -6,6 +6,7 @@
 #include <csapex/view/node/node_filter_proxy_model.h>
 #include <csapex/view/utility/html_delegate.h>
 #include <csapex/view/utility/node_list_generator.h>
+#include <csapex/view/utility/snippet_list_generator.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -15,13 +16,14 @@
 #include <QtConcurrent/QtConcurrentRun>
 #include <QProgressBar>
 #include <QTimer>
+#include <QStandardItemModel>
 
 using namespace csapex;
 
 
 
-BoxDialog::BoxDialog(QString message, NodeFactory& node_factory, NodeAdapterFactory &adapter_factory, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f), node_factory_(node_factory), adapter_factory_(adapter_factory),
+BoxDialog::BoxDialog(QString message, NodeFactory& node_factory, NodeAdapterFactory &adapter_factory, SnippetFactory& snippet_factory, QWidget *parent, Qt::WindowFlags f)
+    : QDialog(parent, f), node_factory_(node_factory), adapter_factory_(adapter_factory), snippet_factory_(snippet_factory),
       message_(message)
 {
     makeUI();
@@ -60,8 +62,15 @@ void BoxDialog::showEvent(QShowEvent * e)
 
     if(!load_nodes.isRunning()) {
         load_nodes = QtConcurrent::run([this](){
-            NodeListGenerator generator(node_factory_, adapter_factory_);
-            model_ = generator.listAvailableNodeTypes();
+            model_ = new QStandardItemModel;
+
+            NodeListGenerator node_generator(node_factory_, adapter_factory_);
+            node_generator.listAvailableNodeTypes(model_);
+
+            SnippetListGenerator snippet_generator(snippet_factory_);
+            snippet_generator.listAvailableSnippets(model_);
+
+            model_->sort(0);
 
             Q_EMIT pluginsLoaded();
 
@@ -106,9 +115,14 @@ void BoxDialog::finish()
     }
 }
 
+std::string BoxDialog::getMIME()
+{
+    return name_edit_->getMIME();
+}
+
 std::string BoxDialog::getName()
 {
-    return name_edit_->text().toStdString();
+    return name_edit_->getName();
 }
 
 /// MOC

@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/view/utility/html_delegate.h>
+#include <csapex/csapex_mime.h>
 
 /// SYSTEM
 #include <QListView>
@@ -69,7 +70,9 @@ void CompletedLineEdit::keyPressEvent(QKeyEvent *e) {
 
         } else if (Qt::Key_Enter == key || Qt::Key_Return == key) {
             if (currentIndex.isValid()) {
-                completeText(list_view->currentIndex());
+                completeText(currentIndex);
+            } else {
+                completeText(list_view->rootIndex());
             }
 
             list_view->hide();
@@ -115,11 +118,26 @@ void CompletedLineEdit::update() {
     }
 }
 
-void CompletedLineEdit::completeText(const QModelIndex &index) {
+void CompletedLineEdit::completeText(const QModelIndex &index)
+{
+    mime_ = index.data(Qt::UserRole + 5).toString().toStdString();
+
     QString text = index.data().toString();
     setText(text);
+
     list_view->hide();
+
     Q_EMIT editingFinished();
+}
+
+std::string CompletedLineEdit::getMIME() const
+{
+    return mime_;
+}
+
+std::string CompletedLineEdit::getName() const
+{
+    return text().toStdString();
 }
 
 /// MOC
