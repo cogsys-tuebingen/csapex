@@ -698,6 +698,36 @@ bool NodeWorker::tryProcess()
 {
     APEX_DEBUG_TRACE getNode()->ainfo << "try process" << std::endl;
 
+    APEX_DEBUG_TRACE {
+        getNode()->ainfo << "try to  process" << std::endl;
+        getNode()->ainfo << "enabled: " << isEnabled() << ", process:" << canProcess() << ", state: " << (int) getState() << std::endl;
+        getNode()->ainfo << "receive:" << canReceive() << " / send: " << canSend() << std::endl;
+        getNode()->ainfo << "incoming message connections:" << std::endl;
+        for(ConnectionPtr c : node_handle_->getInputTransition()->getConnections()) {
+            getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+        }
+        getNode()->ainfo << "outgoing message connections:" << std::endl;
+        for(ConnectionPtr c : node_handle_->getOutputTransition()->getConnections()) {
+            getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+        }
+        getNode()->ainfo << "outputs:" << std::endl;
+        for(UUID uid : node_handle_->getOutputTransition()->getOutputs()) {
+            OutputPtr o =node_handle_->getOutputTransition()->getOutput(uid);
+            getNode()->ainfo << "- " << o->getUUID() << ": " << (int) o->getState() << std::endl;
+        }
+        getNode()->ainfo << "event connections:" << std::endl;
+        for(EventPtr e : node_handle_->getExternalEvents()){
+            for(ConnectionPtr c : e->getConnections()) {
+                getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+            }
+        }
+        getNode()->ainfo << "slot connections:" << std::endl;
+        for(SlotPtr s : node_handle_->getExternalSlots()){
+            for(ConnectionPtr c : s->getConnections()) {
+                getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+            }
+        }
+    }
     updateState();
     if(isEnabled() && canProcess()) {
         apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
@@ -707,9 +737,33 @@ bool NodeWorker::tryProcess()
 
     } else {
         APEX_DEBUG_TRACE {
-            getNode()->ainfo << "cannot process: " << std::endl;
+            getNode()->ainfo << "cannot process" << std::endl;
+            getNode()->ainfo << "enabled: " << isEnabled() << ", process:" << canProcess() << ", state: " << (int) getState() << std::endl;
+            getNode()->ainfo << "receive:" << canReceive() << " / send: " << canSend() << std::endl;
+            getNode()->ainfo << "incoming message connections:" << std::endl;
             for(ConnectionPtr c : node_handle_->getInputTransition()->getConnections()) {
                 getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+            }
+            getNode()->ainfo << "outgoing message connections:" << std::endl;
+            for(ConnectionPtr c : node_handle_->getOutputTransition()->getConnections()) {
+                getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+            }
+            getNode()->ainfo << "outputs:" << std::endl;
+            for(UUID uid : node_handle_->getOutputTransition()->getOutputs()) {
+                OutputPtr o =node_handle_->getOutputTransition()->getOutput(uid);
+                getNode()->ainfo << "- " << o->getUUID() << ": " << (int) o->getState() << std::endl;
+            }
+            getNode()->ainfo << "event connections:" << std::endl;
+            for(EventPtr e : node_handle_->getExternalEvents()){
+                for(ConnectionPtr c : e->getConnections()) {
+                    getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+                }
+            }
+            getNode()->ainfo << "slot connections:" << std::endl;
+            for(SlotPtr s : node_handle_->getExternalSlots()){
+                for(ConnectionPtr c : s->getConnections()) {
+                    getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
+                }
             }
         }
     }
@@ -954,12 +1008,14 @@ void NodeWorker::connectConnector(ConnectablePtr c)
     port_connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
 
     if(EventPtr event = std::dynamic_pointer_cast<Event>(c)) {
-        auto connection = event->triggered.connect([this]() {
+        port_connections_[c.get()].emplace_back(event->triggered.connect([this]() {
             node_handle_->executionRequested([this]() {
                 sendEvents(node_handle_->isActive());
             });
-        });
-        port_connections_[c.get()].emplace_back(connection);
+        }));
+        port_connections_[c.get()].emplace_back(event->message_processed.connect([this]() {
+            triggerTryProcess();
+        }));
 
     } else if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(c)) {
         SlotWeakPtr slot_w = slot;

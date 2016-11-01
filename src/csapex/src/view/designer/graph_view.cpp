@@ -132,6 +132,9 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     Graph* graph = graph_facade_->getGraph();
 
+    scoped_connections_.emplace_back(graph->internalConnectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
+    scoped_connections_.emplace_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
+
     for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
         const NodeHandlePtr& nh = *it;
         apex_assert_hard(nh.get());
@@ -948,9 +951,6 @@ void GraphView::addBox(NodeBox *box)
     worker_connections_[worker].emplace_back(handle->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
     worker_connections_[worker].emplace_back(handle->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
-    worker_connections_[worker].emplace_back(graph->internalConnectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
-
-    worker_connections_[worker].emplace_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
 
