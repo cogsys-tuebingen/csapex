@@ -25,6 +25,7 @@ class CSAPEX_EXPORT SubgraphNode : public Graph, public GeneratorNode, public Va
 {
 public:
     SubgraphNode();
+    ~SubgraphNode();
 
     template <typename T = Connectable>
     T *findConnector(const UUID &uuid)

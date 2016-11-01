@@ -54,6 +54,11 @@ void Connection::detach(Connectable *c)
     }
 }
 
+bool Connection::isDetached() const
+{
+    return detached_;
+}
+
 void Connection::reset()
 {
     state_ = Connection::State::NOT_INITIALIZED;

@@ -28,6 +28,11 @@ SubgraphNode::SubgraphNode()
     transition_relay_out_->messages_processed.connect(delegate::Delegate0<>(this, &SubgraphNode::currentIterationIsProcessed));
 }
 
+SubgraphNode::~SubgraphNode()
+{
+    clear();
+}
+
 NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
 {
     if(uuid.empty()) {

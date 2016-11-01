@@ -47,6 +47,7 @@ public:
     virtual ~Connection();
 
     void detach(Connectable* c);
+    bool isDetached() const;
 
     Output* from() const;
     Input* to() const;

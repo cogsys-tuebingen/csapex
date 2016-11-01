@@ -108,11 +108,11 @@ void Graph::deleteNode(const UUID& uuid, bool quiet)
     apex_assert_hard(removed);
 
     if(removed) {
-//        if(NodePtr node = removed->getNode().lock()) {
-//            if(GraphPtr child = std::dynamic_pointer_cast<Graph>(node)) {
-//                child->clear();
-//            }
-//        }
+        //        if(NodePtr node = removed->getNode().lock()) {
+        //            if(GraphPtr child = std::dynamic_pointer_cast<Graph>(node)) {
+        //                child->clear();
+        //            }
+        //        }
 
         if(!quiet) {
             nodeRemoved(removed);
@@ -157,6 +157,14 @@ bool Graph::addConnection(ConnectionPtr connection, bool quiet)
 void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
 {
     apex_assert_hard(connection);
+
+    if(connection->isDetached()) {
+        auto c = std::find(connections_.begin(), connections_.end(), connection);
+        if(c != connections_.end()) {
+            connections_.erase(c);
+        }
+        return;
+    }
 
     auto out = connection->from();
     auto in = connection->to();
