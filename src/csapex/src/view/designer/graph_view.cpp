@@ -19,7 +19,6 @@
 #include <csapex/command/rename_node.h>
 #include <csapex/command/rename_connector.h>
 #include <csapex/command/paste_graph.h>
-#include <csapex/command/switch_thread.h>
 #include <csapex/command/set_color.h>
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/command/add_variadic_connector.h>
@@ -412,6 +411,16 @@ std::vector<NodeBox*> GraphView::boxes()
 std::vector<NodeBox*> GraphView::getSelectedBoxes() const
 {
     return selected_boxes_;
+}
+
+std::vector<UUID> GraphView::getSelectedUUIDs() const
+{
+    std::vector<UUID> uuids;
+    uuids.reserve(selected_boxes_.size());
+    for(const auto& box : selected_boxes_) {
+        uuids.push_back(box->getNodeWorker()->getUUID());
+    }
+    return uuids;
 }
 
 void GraphView::enableSelection(bool enabled)
@@ -1645,30 +1654,18 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
 void GraphView::usePrivateThreadFor()
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"use private thread"));
-    for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), ThreadGroup::PRIVATE_THREAD)));
-    }
-    view_core_.execute(cmd);
+    view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), ThreadGroup::PRIVATE_THREAD));
 }
 
 
 void GraphView::useDefaultThreadFor()
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"use private thread"));
-    for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), ThreadGroup::DEFAULT_GROUP_ID)));
-    }
-    view_core_.execute(cmd);
+    view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), ThreadGroup::DEFAULT_GROUP_ID));
 }
 
 void GraphView::switchToThread(int group_id)
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"switch thread"));
-    for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), group_id)));
-    }
-    view_core_.execute(cmd);
+    view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), group_id));
 }
 
 void GraphView::createNewThreadGroupFor()

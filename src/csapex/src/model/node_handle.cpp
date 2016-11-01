@@ -948,3 +948,13 @@ const Rate& NodeHandle::getRate() const
 {
     return rate_;
 }
+
+void NodeHandle::setNodeRunner(NodeRunnerWeakPtr runner)
+{
+    node_runner_ = runner;
+}
+
+NodeRunnerPtr NodeHandle::getNodeRunner() const
+{
+    return node_runner_.lock();
+}

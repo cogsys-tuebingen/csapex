@@ -22,6 +22,7 @@ public:
     ~NodeRunner();
 
     virtual void assignToScheduler(Scheduler* scheduler) override;
+    virtual Scheduler* getScheduler() const override;
     virtual void detach() override;
 
     virtual bool isPaused() const override;

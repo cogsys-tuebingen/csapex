@@ -62,6 +62,7 @@ public:
     DesignerScene* designerScene();
     std::vector<NodeBox*> boxes();
     std::vector<NodeBox*> getSelectedBoxes() const;
+    std::vector<UUID> getSelectedUUIDs() const;
     CommandPtr deleteSelected();
 
     NodeBox* getBox(const csapex::UUID& node_id);

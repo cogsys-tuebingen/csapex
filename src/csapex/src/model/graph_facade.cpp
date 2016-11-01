@@ -61,7 +61,8 @@ void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
     NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
     node_workers_[nh.get()] = nw;
 
-    TaskGeneratorPtr runner = std::make_shared<NodeRunner>(nw);
+    NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
+    nh->setNodeRunner(runner);
     generators_[nh->getUUID()] = runner;
 
     int thread_id = nh->getNodeState()->getThreadId();

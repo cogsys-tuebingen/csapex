@@ -10,6 +10,7 @@
 #include <csapex/command/modify_connection.h>
 #include <csapex/command/add_msg_connection.h>
 #include <csapex/command/add_variadic_connector.h>
+#include <csapex/command/switch_thread.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -22,6 +23,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/assert.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/node_runner.h>
+#include <csapex/scheduling/scheduler.h>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -287,4 +290,42 @@ CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorT
     std::shared_ptr<AddVariadicConnector> res = std::make_shared<AddVariadicConnector>(graph_uuid, node_uuid, port_type, connection_type, label);
     res->setOptional(optional);
     return res;
+}
+
+
+void CommandFactory::switchThreadRecursively(const UUID &node_uuid, int old_thread_id, int id, std::shared_ptr<command::Meta>& out)
+{
+    NodeHandle* node = root_->getGraph()->findNodeHandle(node_uuid);
+    if(NodeRunnerPtr runner = node->getNodeRunner()) {
+        if(runner->getScheduler()->id() == old_thread_id)  {
+            out->add(Command::Ptr(new command::SwitchThread(graph_uuid, node_uuid, id)));
+        }
+    }
+
+    if(node && node->isGraph()) {
+        //        if(GraphPtr graph = std::dynamic_pointer_cast<Graph>(node->getNode().lock())) {
+        //            for(NodeHandle* child : graph->getAllNodeHandles()) {
+        //                switchThreadRecursively(UUIDProvider::makeDerivedUUID_forced(node_uuid, child->getUUID().getFullName()), old_thread_id, id, out);
+        //            }
+        //        }
+        if(GraphPtr graph = std::dynamic_pointer_cast<Graph>(node->getNode().lock())) {
+            CommandFactory ccf(root_->getSubGraph(node_uuid));
+            for(NodeHandle* child : graph->getAllNodeHandles()) {
+                ccf.switchThreadRecursively(child->getUUID(), old_thread_id, id, out);
+            }
+        }
+    }
+}
+
+
+CommandPtr CommandFactory::switchThreadRecursively(const std::vector<UUID> &node_uuids, int id)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_uuid, "change thread"));
+    for(const UUID& uuid: node_uuids) {
+        NodeHandle* node = root_->getGraph()->findNodeHandle(uuid);
+        if(NodeRunnerPtr runner = node->getNodeRunner()) {
+            switchThreadRecursively(uuid, runner->getScheduler()->id(), id, cmd);
+        }
+    }
+    return cmd;
 }

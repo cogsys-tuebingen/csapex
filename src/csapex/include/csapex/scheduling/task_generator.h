@@ -18,6 +18,7 @@ public:
     virtual ~TaskGenerator();
 
     virtual void assignToScheduler(Scheduler* scheduler) = 0;
+    virtual Scheduler* getScheduler() const = 0;
     virtual void detach() = 0;
 
     virtual bool isPaused() const = 0;

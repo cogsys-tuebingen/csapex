@@ -58,7 +58,7 @@ bool SwitchThread::doExecute()
 
 bool SwitchThread::doUndo()
 {
-    TaskGenerator* tg = getRoot()->getTaskGenerator(uuid);
+    TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
 
     getRootThreadPool()->addToGroup(tg, old_id);
 

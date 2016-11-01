@@ -39,6 +39,9 @@ public:
     NodeStatePtr getNodeState();
     NodeStatePtr getNodeStateCopy() const;
 
+    void setNodeRunner(NodeRunnerWeakPtr runner);
+    NodeRunnerPtr getNodeRunner() const;
+
 
     Input* addInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
     void manageInput(InputPtr in);
@@ -170,6 +173,7 @@ protected:
 
     NodePtr node_;
     NodeStatePtr node_state_;
+    NodeRunnerWeakPtr node_runner_;
 
     std::vector<InputPtr> external_inputs_;
     std::vector<OutputPtr> external_outputs_;

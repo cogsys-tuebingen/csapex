@@ -127,6 +127,12 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     }
 }
 
+
+Scheduler* NodeRunner::getScheduler() const
+{
+    return scheduler_;
+}
+
 void NodeRunner::scheduleTick()
 {
     if(!paused_) {

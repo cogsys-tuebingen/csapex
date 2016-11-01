@@ -43,6 +43,9 @@ public:
     CommandPtr deleteConnectionByIdCommand(int id);
     CommandPtr clearCommand();
 
+    CommandPtr switchThreadRecursively(const std::vector<UUID> &node_uuids, int id);
+    void switchThreadRecursively(const UUID &node_uuid, int old_thread_id, int id, std::shared_ptr<command::Meta>& out);
+
 
     CommandPtr createVariadicInput(const AUUID& node_uuid, TokenDataConstPtr connection_type, const std::string& label, bool optional);
     CommandPtr createVariadicOutput(const AUUID& node_uuid, TokenDataConstPtr connection_type, const std::string& label);
