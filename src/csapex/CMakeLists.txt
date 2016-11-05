@@ -321,6 +321,7 @@ add_library(csapex SHARED
     src/model/node_modifier.cpp
     src/model/node_runner.cpp
     src/model/node_state.cpp
+    src/model/node_characteristics.cpp
     src/model/parameterizable.cpp
     src/model/generator_node.cpp
     src/model/tickable_node.cpp

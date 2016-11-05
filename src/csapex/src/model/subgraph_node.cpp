@@ -190,7 +190,7 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
         }
     }
 
-    if(!transition_relay_out_->isSink()) {
+    if(transition_relay_out_->hasConnection()) {
         transition_relay_out_->sendMessages(node_handle_->isActive());
     } else {
 

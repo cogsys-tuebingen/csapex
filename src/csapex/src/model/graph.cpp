@@ -5,6 +5,8 @@
 #include <csapex/model/connection.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/event.h>
+#include <csapex/signal/slot.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/model/node.h>
@@ -69,10 +71,13 @@ void Graph::addNode(NodeHandlePtr nh)
     apex_assert_hard_msg(nh, "NodeHandle added is not null");
     nodes_.push_back(nh);
 
+    sources_.insert(nh.get());
+    sinks_.insert(nh.get());
+
     node_parents_[nh.get()] = std::vector<NodeHandle*>();
     node_children_[nh.get()] = std::vector<NodeHandle*>();
 
-    buildConnectedComponents();
+    analyzeGraph();
 
     nodeAdded(nh);
 }
@@ -116,7 +121,7 @@ void Graph::deleteNode(const UUID& uuid, bool quiet)
 
         if(!quiet) {
             nodeRemoved(removed);
-            buildConnectedComponents();
+            analyzeGraph();
         }
     }
 }
@@ -132,7 +137,7 @@ bool Graph::addConnection(ConnectionPtr connection, bool quiet)
     apex_assert_hard(connection);
     connections_.push_back(connection);
 
-    if(dynamic_cast<Output*>(connection->from())) {
+    if(!dynamic_cast<Event*>(connection->from()) && !dynamic_cast<Slot*>(connection->to())) {
         NodeHandle* n_from = findNodeHandleForConnector(connection->from()->getUUID());
         NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
 
@@ -142,8 +147,11 @@ bool Graph::addConnection(ConnectionPtr connection, bool quiet)
             node_parents_[n_to].push_back(n_from);
             node_children_[n_from].push_back(n_to);
 
+            sources_.erase(n_to);
+            sinks_.erase(n_from);
+
             if(!quiet) {
-                buildConnectedComponents();
+                analyzeGraph();
             }
         }
     }
@@ -183,7 +191,7 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
             NodeHandle* n_from = findNodeHandleForConnector(from_uuid);
             NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
 
-            if(dynamic_cast<Output*>(connection->from())) {
+            if(!dynamic_cast<Event*>(connection->from()) && !dynamic_cast<Slot*>(connection->to())) {
                 // erase pointer from TO to FROM
                 if(n_from != n_to) {
                     // if there are multiple edges, this only erases one entry
@@ -191,15 +199,23 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
 
                     // erase pointer from FROM to TO
                     node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+
+                    if(!n_from->getOutputTransition()->hasConnection()) {
+                        sinks_.insert(n_from);
+                    }
+                    if(!n_to->getInputTransition()->hasConnection()) {
+                        sources_.insert(n_to);
+                    }
+
                 }
             }
             connections_.erase(c);
 
             if(!quiet) {
-                buildConnectedComponents();
-
                 connectionDeleted(connection.get());
                 state_changed();
+
+                analyzeGraph();
             }
 
             for(const auto& c : connections_) {
@@ -219,18 +235,25 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
 
 void Graph::triggerConnectionsAdded()
 {
-    buildConnectedComponents();
+    analyzeGraph();
 
     for(const ConnectionPtr& connection : connections_) {
         connectionAdded(connection.get());
     }
 }
 
+void Graph::analyzeGraph()
+{
+    buildConnectedComponents();
+
+    calculateDepths();
+
+    structureChanged(this);
+}
 
 void Graph::buildConnectedComponents()
 {
     /* Find all connected sub components of this graph */
-    //    std::map<Node*, int> old_node_component = node_component_;
     node_component_.clear();
 
     std::deque<NodeHandle*> unmarked;
@@ -275,9 +298,180 @@ void Graph::buildConnectedComponents()
 
         ++component;
     }
-
-    structureChanged(this);
 }
+
+void Graph::calculateDepths()
+{
+    // start DFSs at each source. assign each node:
+    // - depth: the minimum distance to any source
+    // - joining: true, iff more than one path leads from any source to a node
+
+    // initialize
+    for(const NodeHandlePtr& nh: nodes_) {
+        nh->getNodeCharacteristics().is_joining_vertex = false;
+        nh->getNodeCharacteristics().is_joining_vertex_counterpart = false;
+
+        nh->getNodeCharacteristics().is_combined_by_joining_vertex = false;
+        nh->getNodeCharacteristics().is_leading_to_joining_vertex = false;
+    }
+
+    std::set<NodeHandle*> joins;
+
+    node_depth_.clear();
+    // init node_depth_ and find merging nodes
+    for(const NodeHandle* source : sources_) {
+        node_depth_[source] = 0;
+
+        std::deque<const NodeHandle*> Q;
+        Q.push_back(source);
+        while(!Q.empty()) {
+            const NodeHandle* top = Q.back();
+            Q.pop_back();
+
+            for(auto* child : node_children_[top]) {
+                auto it = node_depth_.find(child);
+                if(it == node_depth_.end()) {
+                    node_depth_[child] = std::numeric_limits<int>::max();
+                    Q.push_back(child);
+
+                } else  {
+                    // already visited
+                    joins.insert(child);
+                }
+            }
+        }
+    }
+
+    // populate node_depth_ with minimal depths
+    for(const NodeHandle* source : sources_) {
+        node_depth_[source] = 0;
+
+        std::deque<const NodeHandle*> Q;
+        Q.push_back(source);
+        while(!Q.empty()) {
+            const NodeHandle* top = Q.back();
+            Q.pop_back();
+
+            int depth = node_depth_.at(top);
+            for(auto* child : node_children_[top]) {
+                auto it = node_depth_.find(child);
+                if(it == node_depth_.end()) {
+                    node_depth_[child] = depth + 1;
+                    Q.push_back(child);
+
+                } else  {
+                    // already visited
+                    if(depth + 1 < it->second) {
+                        it->second = depth + 1;
+                        Q.push_back(child);
+                    }
+                }
+            }
+        }
+    }
+
+    for(const auto& pair : node_depth_) {
+        const NodeHandle* nh = pair.first;
+        int depth = pair.second;
+        nh->getNodeCharacteristics().depth = depth;
+
+        //        int min_child_depth = std::numeric_limits<int>::max();
+        //        for(NodeHandle* child : node_children_.at(nh)) {
+        //            min_child_depth = std::min(min_child_depth, node_depth_.at(child));
+        //        }
+        //    nh->getNodeCharacteristics().is_vertex_separator = depth < min_child_depth;
+
+    }
+
+    for(NodeHandle* nh : joins) {
+        nh->getNodeCharacteristics().is_joining_vertex = true;
+
+        // find counterparts
+        //        int level = node_depth_.at(nh);
+
+        //        const auto& parents = node_parents_.at(nh);
+        //        int min_level = std::accumulate(parents.begin(), parents.end(), std::numeric_limits<int>::max(),
+        //                                        [this](int level, NodeHandle* parent){ return std::min(level, node_depth_.at(parent)); });
+
+        int min_level = nh->getNodeCharacteristics().depth;
+
+        // iterate all parents, until we find a single common parent
+        // if no such parent exists, this joining node has no counterpart
+
+        struct CompareNH: public std::binary_function<NodeHandle*, NodeHandle*, bool> {
+            bool operator()(const NodeHandle* lhs, const NodeHandle* rhs) const {
+                return lhs->getNodeCharacteristics().depth > rhs->getNodeCharacteristics().depth;
+            }
+        };
+        //std::set<NodeHandle*, CompareNH> Q(parents.begin(), parents.end());
+        std::deque<NodeHandle*> Q({ nh });
+        std::set<NodeHandle*> done;
+        std::set<NodeHandle*> minimum;
+
+        bool is_closed = false;
+
+        while(!Q.empty()) {
+            NodeHandle* top = *Q.begin();
+
+            if(min_level > 0 && Q.size() == 1 && minimum.size() == 1) {
+                // if the only minimum is not a source and the queue has only the current element -> closed
+                is_closed  = true;
+                (*minimum.begin())->getNodeCharacteristics().is_joining_vertex_counterpart = true;
+                break;
+            }
+            done.insert(top);
+            Q.erase(Q.begin());
+            for(NodeHandle* parent : node_parents_.at(top)) {
+                if(done.find(parent) != done.end()) {
+                    continue;
+                }
+                if(std::find(Q.begin(), Q.end(), parent) == Q.end()) {
+                    Q.push_back(parent);
+                    std::sort(Q.begin(), Q.end(), CompareNH());
+                }
+
+                int level = parent->getNodeCharacteristics().depth;
+                if(level < min_level) {
+                    min_level = level;
+                    minimum.clear();
+                }
+                if(level == min_level){
+                    minimum.insert(parent);
+                }
+            }
+        }
+
+        if(min_level == 0 && minimum.size() == 1) {
+            // if exactly one source exists -> also closed
+            is_closed = true;
+            NodeHandle* top = *minimum.begin();
+            top->getNodeCharacteristics().is_joining_vertex_counterpart = true;
+            done.erase(top);
+        }
+
+        for(NodeHandle* top : done) {
+            if(top != nh) {
+                top->getNodeCharacteristics().is_leading_to_joining_vertex = true;
+            }
+        }
+        if(is_closed ){
+            for(NodeHandle* top : done) {
+                if(top != nh) {
+                    top->getNodeCharacteristics().is_combined_by_joining_vertex = true;
+                }
+            }
+        }
+
+//        todo:
+//        - remember for each of vertex join counterpart, which children are enclosed -> only send NoMessage to non-enclosed children.
+    }
+
+    for(NodeHandlePtr& nh : nodes_) {
+        NodeCharacteristics& c = nh->getNodeCharacteristics();
+        c.is_vertex_separator = !c.is_leading_to_joining_vertex;
+    }
+}
+
 
 void Graph::checkNodeState(NodeHandle *nh)
 {
@@ -296,7 +490,27 @@ int Graph::getComponent(const UUID &node_uuid) const
         return -1;
     }
 
-    return node_component_.at(node);
+    auto pos = node_component_.find(node);
+    if(pos == node_component_.end()) {
+        return -1;
+    } else {
+        return pos->second;
+    }
+}
+
+int Graph::getDepth(const UUID &node_uuid) const
+{
+    NodeHandle* node = findNodeHandleNoThrow(node_uuid);
+    if(!node) {
+        return -1;
+    }
+
+    auto pos = node_depth_.find(node);
+    if(pos == node_depth_.end()) {
+        return -1;
+    } else {
+        return pos->second;
+    }
 }
 
 Node* Graph::findNode(const UUID& uuid) const

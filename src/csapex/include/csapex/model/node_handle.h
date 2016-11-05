@@ -11,6 +11,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/utility/rate.h>
 #include <csapex/model/connectable_owner.h>
+#include <csapex/model/node_characteristics.h>
 
 /// SYSTEM
 #include <vector>
@@ -31,6 +32,8 @@ public:
 
     std::string getType() const;
     NodeWeakPtr getNode() const;
+
+    NodeCharacteristics& getNodeCharacteristics() const;
 
     InputTransition* getInputTransition() const;
     OutputTransition* getOutputTransition() const;
@@ -198,6 +201,8 @@ protected:
 
 private:
     UUIDProvider* uuid_provider_;
+
+    mutable NodeCharacteristics characteristics_;
 
     Rate rate_;
 

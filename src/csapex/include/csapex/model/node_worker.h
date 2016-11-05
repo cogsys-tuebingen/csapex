@@ -133,7 +133,7 @@ private:
     void finishTimer(TimerPtr t);
 
     void signalExecutionFinished();
-    void signalMessagesProcessed();
+    void signalMessagesProcessed(bool processing_aborted = false);
 
     void activateOutput();
 

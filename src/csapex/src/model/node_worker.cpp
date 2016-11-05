@@ -440,8 +440,20 @@ void NodeWorker::startProcessingMessages()
     current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
 
     if(marker || !all_inputs_are_present) {
-        forwardMessages(false);
-        signalMessagesProcessed();
+        if(!marker) {
+            // no processing because a non-optional port has a NoMessage marker
+            if(node_handle_->getNodeCharacteristics().is_vertex_separator) {
+                signalMessagesProcessed(true);
+            } else {
+                forwardMessages(false);
+                signalMessagesProcessed();
+            }
+
+        } else {
+            // no processing because a non-NoMessage marker is received
+            forwardMessages(false);
+            signalMessagesProcessed();
+        }
         return;
     }
 
@@ -547,11 +559,11 @@ void NodeWorker::signalExecutionFinished()
     }
 }
 
-void NodeWorker::signalMessagesProcessed()
+void NodeWorker::signalMessagesProcessed(bool processing_aborted)
 {
     setState(State::IDLE);
 
-    if(node_handle_->isSink() || (current_exec_mode_ && current_exec_mode_.get() == ExecutionMode::PIPELINING)) {
+    if(processing_aborted || node_handle_->isSink() || (current_exec_mode_ && current_exec_mode_.get() == ExecutionMode::PIPELINING)) {
         APEX_DEBUG_TRACE getNode()->ainfo << "notify " << getUUID() <<", sink: " << node_handle_->isSink() << ", mode: " << (int) current_exec_mode_.get() << std::endl;
         node_handle_->getInputTransition()->notifyMessageProcessed();
 

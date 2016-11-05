@@ -28,7 +28,6 @@ public:
     void connectionAdded(Connection* connection) override;
     void connectionRemoved(Connection *connection) override;
 
-    bool isSink() const;
     bool canStartSendingMessages() const;
     bool sendMessages(bool is_active);
     void publishNextMessage();

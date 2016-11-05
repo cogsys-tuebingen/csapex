@@ -204,6 +204,11 @@ void Connectable::fadeConnection(ConnectionPtr connection)
 
     connection_faded(connection);
 }
+
+int Connectable::countConnections()
+{
+    return connections_.size();
+}
 std::vector<ConnectionPtr> Connectable::getConnections() const
 {
     return connections_;

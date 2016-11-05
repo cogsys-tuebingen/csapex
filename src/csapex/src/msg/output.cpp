@@ -72,11 +72,6 @@ void Output::reset()
     setState(State::IDLE);
 }
 
-int Output::countConnections()
-{
-    return connections_.size();
-}
-
 std::vector<ConnectionPtr> Output::getConnections() const
 {
     return connections_;

@@ -32,7 +32,7 @@ FWD(NodeState);
 FWD(NodeWorker);
 FWD(NodeModifier);
 FWD(Tag);
-
+FWD(NodeCharacteristics);
 
 FWD(Connection);
 FWD(Fulcrum);

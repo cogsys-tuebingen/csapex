@@ -115,7 +115,7 @@ void Settings::load()
 void Settings::add(csapex::param::Parameter::Ptr p)
 {
     settings_[p->name()] = p;
-    settingsChanged();
+    settingsChanged(p->name());
 }
 
 csapex::param::Parameter::Ptr Settings::get(const std::string &name)

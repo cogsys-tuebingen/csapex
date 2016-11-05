@@ -67,7 +67,6 @@ public:
     virtual void connectionMovePreview(Connectable* other_side) override;
     virtual void validateConnections() override;
 
-    int countConnections();
     std::vector<ConnectionPtr> getConnections() const;
 
     virtual bool hasMessage() = 0;

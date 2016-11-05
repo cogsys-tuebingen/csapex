@@ -154,17 +154,6 @@ bool OutputTransition::canStartSendingMessages() const
     return areAllConnections(Connection::State::DONE, Connection::State::NOT_INITIALIZED);
 }
 
-bool OutputTransition::isSink() const
-{
-    for(auto pair : outputs_) {
-        OutputPtr output = pair.second;
-        if(output->isConnected()) {
-            return false;
-        }
-    }
-    return true;
-}
-
 bool OutputTransition::sendMessages(bool is_active)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -197,7 +186,7 @@ bool OutputTransition::sendMessages(bool is_active)
 
     fillConnections();
 
-    if(isSink()) {
+    if(!hasConnection()) {
         setOutputsIdle();
     }
 

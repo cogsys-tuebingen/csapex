@@ -10,6 +10,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <map>
 #include <functional>
+#include <set>
 
 namespace csapex {
 
@@ -42,6 +43,9 @@ public:
     Graph();
     virtual ~Graph();
 
+    int getComponent(const UUID& node_uuid) const;
+    int getDepth(const UUID& node_uuid) const;
+
     void resetActivity();
 
     void clear();
@@ -58,7 +62,6 @@ public:
 
     std::vector<NodeHandle*> getAllNodeHandles();
 
-    int getComponent(const UUID& node_uuid) const;
 
     virtual Connectable* findConnector(const UUID &uuid);
     virtual Connectable* findConnectorNoThrow(const UUID &uuid) noexcept;
@@ -91,7 +94,7 @@ public:
 
     void triggerConnectionsAdded();
 
-    void buildConnectedComponents();
+    void analyzeGraph();
 
     // iterators
     node_iterator beginNodes();
@@ -104,6 +107,8 @@ public:
 private:
     void checkNodeState(NodeHandle* nh);
 
+    void buildConnectedComponents();
+    void calculateDepths();
 
 public:
     csapex::slim_signal::Signal<void()> state_changed;
@@ -117,12 +122,17 @@ public:
 
 protected:
     std::vector<NodeHandlePtr> nodes_;
-    std::map<NodeHandle*, int> node_component_;
-
-    std::map<NodeHandle*, std::vector<NodeHandle*> > node_parents_;
-    std::map<NodeHandle*, std::vector<NodeHandle*> > node_children_;
-
     std::vector<ConnectionPtr> connections_;
+
+    std::map<const NodeHandle*, int> node_component_;
+    std::map<const NodeHandle*, int> node_depth_;
+
+    std::map<const NodeHandle*, std::vector<NodeHandle*> > node_parents_;
+    std::map<const NodeHandle*, std::vector<NodeHandle*> > node_children_;
+
+
+    std::set<const NodeHandle*> sources_;
+    std::set<const NodeHandle*> sinks_;
 };
 
 }

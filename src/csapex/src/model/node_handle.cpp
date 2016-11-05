@@ -154,7 +154,7 @@ void NodeHandle::setIsSink(bool sink)
 
 bool NodeHandle::isSink() const
 {
-    return sink_ || external_outputs_.empty() || transition_out_->isSink();
+    return sink_ || external_outputs_.empty() || !transition_out_->hasConnection();
 }
 
 void NodeHandle::setActive(bool active)
@@ -191,6 +191,11 @@ std::string NodeHandle::getType() const
 NodeWeakPtr NodeHandle::getNode() const
 {
     return node_;
+}
+
+NodeCharacteristics& NodeHandle::getNodeCharacteristics() const
+{
+    return characteristics_;
 }
 
 InputTransition* NodeHandle::getInputTransition() const

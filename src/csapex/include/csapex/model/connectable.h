@@ -65,6 +65,7 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
+    int countConnections();
     std::vector<ConnectionPtr> getConnections() const;
 
     ConnectableOwnerPtr getOwner() const;

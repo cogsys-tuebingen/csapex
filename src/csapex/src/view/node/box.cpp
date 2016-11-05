@@ -163,6 +163,12 @@ void NodeBox::setupUi()
     state->color_changed->connect(std::bind(&NodeBox::changeColor, this));
     state->pos_changed->connect(std::bind(&NodeBox::updatePosition, this));
 
+    settings_.settingsChanged.connect([this](const std::string& name) {
+        if(name == "debug") {
+            changeColor();
+        }
+    });
+
     changeColor();
     updateVisualsRequest();
 
@@ -328,6 +334,10 @@ void NodeBox::updateComponentInformation(Graph* graph)
         return;
     }
 
+    if(settings_.get("debug", false)) {
+        changeColor();
+    }
+
     if(!settings_.get<bool>("display-graph-components", false)) {
         info_compo->setVisible(false);
         return;
@@ -337,9 +347,21 @@ void NodeBox::updateComponentInformation(Graph* graph)
 
     if(info_compo->isVisible()) {
         int compo = graph->getComponent(nh->getUUID());
+        int depth = graph->getDepth(nh->getUUID());
         std::stringstream info;
         info << "C:" << compo;
+        info << "D:" << depth;
         info_compo->setText(info.str().c_str());
+
+        const auto& chara = nh->getNodeCharacteristics();
+
+        QString tooltip("characteristics: ");
+//        tooltip += QString("vertex separator: ") + (chara.is_vertex_separator ? "yes" : "no") + ", ";
+        tooltip += QString("joining vertex: ") + (chara.is_joining_vertex ? "yes" : "no") + ", ";
+        tooltip += QString("leading to joining vertex: ") + (chara.is_leading_to_joining_vertex ? "yes" : "no") + ", ";
+        tooltip += QString("combined by joining vertex: ") + (chara.is_combined_by_joining_vertex ? "yes" : "no") + ", ";
+        tooltip += QString("joining vertex counterpart: ") + (chara.is_joining_vertex_counterpart ? "yes" : "no");
+        info_compo->setToolTip(tooltip);
 
         setStyleForId(info_compo, compo);
     }
@@ -844,7 +866,25 @@ void NodeBox::updateStylesheetColor(const NodeStatePtr& state)
     QColor text_color = Qt::black;
 
     int r, g, b;
-    state->getColor(r, g, b);
+    if(settings_.get("debug", false)) {
+        r = 0; g = 0; b = 0;
+        if(NodeHandlePtr nh = node_handle_.lock()) {
+            if(nh->getNodeCharacteristics().is_joining_vertex) {
+                r = 255;
+            }
+            if(nh->getNodeCharacteristics().is_joining_vertex_counterpart) {
+                g = 255;
+            }
+            if(nh->getNodeCharacteristics().is_leading_to_joining_vertex) {
+                b = 128;
+            }
+            if(nh->getNodeCharacteristics().is_combined_by_joining_vertex) {
+                b = 255;
+            }
+        }
+    } else {
+        state->getColor(r, g, b);
+    }
 
     QString style = parent_ ? parent_->styleSheet() : styleSheet();
 

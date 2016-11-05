@@ -55,7 +55,7 @@ public:
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(def);
             add(p);
-            settingsChanged();
+            settingsChanged(name);
             return def;
         }
 
@@ -77,14 +77,14 @@ public:
         } else {
             pos->second->set<T>(val);
         }
-        settingsChanged();
+        settingsChanged(name);
     }
 
     void save();
     void load();
 
 public:
-    csapex::slim_signal::Signal<void()> settingsChanged;
+    csapex::slim_signal::Signal<void(const std::string&)> settingsChanged;
 
     csapex::slim_signal::Signal<void (YAML::Node& e)> saveRequest;
     csapex::slim_signal::Signal<void (YAML::Node& n)> loadRequest;
