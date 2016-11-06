@@ -36,8 +36,8 @@ public:
         {}
     };
 
-    typedef std::vector<NodeHandlePtr>::iterator node_iterator;
-    typedef std::vector<NodeHandlePtr>::const_iterator node_const_iterator;
+    typedef std::vector<graph::VertexPtr>::iterator vertex_iterator;
+    typedef std::vector<graph::VertexPtr>::const_iterator vertex_const_iterator;
 
 public:
     Graph();
@@ -97,11 +97,11 @@ public:
     void analyzeGraph();
 
     // iterators
-    node_iterator beginNodes();
-    const node_const_iterator beginNodes() const;
+    vertex_iterator beginVertices();
+    const vertex_const_iterator beginVertices() const;
 
-    node_iterator endNodes();
-    const node_const_iterator endNodes() const;
+    vertex_iterator endVertices();
+    const vertex_const_iterator endVertices() const;
 
 
 private:
@@ -117,22 +117,23 @@ public:
     csapex::slim_signal::Signal<void(Connection*)> connectionAdded;
     csapex::slim_signal::Signal<void(Connection*)> connectionDeleted;
 
-    csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeAdded;
-    csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeRemoved;
+    csapex::slim_signal::Signal<void(graph::VertexPtr)> vertex_added;
+    csapex::slim_signal::Signal<void(graph::VertexPtr)> vertex_removed;
 
 protected:
-    std::vector<NodeHandlePtr> nodes_;
+//    std::vector<NodeHandlePtr> nodes_;
+    std::vector<graph::VertexPtr> vertecies_;
     std::vector<ConnectionPtr> connections_;
 
-    std::map<const NodeHandle*, int> node_component_;
-    std::map<const NodeHandle*, int> node_depth_;
+    std::map<const graph::Vertex*, int> node_component_;
+    std::map<const graph::Vertex*, int> node_depth_;
 
-    std::map<const NodeHandle*, std::vector<NodeHandle*> > node_parents_;
-    std::map<const NodeHandle*, std::vector<NodeHandle*> > node_children_;
+    std::map<const graph::Vertex*, std::vector<graph::Vertex*> > node_parents_;
+    std::map<const graph::Vertex*, std::vector<graph::Vertex*> > node_children_;
 
 
-    std::set<const NodeHandle*> sources_;
-    std::set<const NodeHandle*> sinks_;
+    std::set<const graph::Vertex*> sources_;
+    std::set<const graph::Vertex*> sinks_;
 };
 
 }

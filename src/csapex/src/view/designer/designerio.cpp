@@ -12,10 +12,11 @@
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph/vertex.h>
+
 
 /// SYSTEM
 #include <QMessageBox>
-
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
@@ -40,8 +41,8 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, GraphView *view)
 {
     YAML::Node adapters(YAML::NodeType::Sequence);
-    for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
-        NodeHandlePtr nh = *it;
+    for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
+        NodeHandlePtr nh = (*it)->getNodeHandle();
         saveBox(nh.get(), view, adapters);
     }
     yaml["adapters"] = adapters;

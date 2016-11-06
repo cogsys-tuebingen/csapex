@@ -14,6 +14,12 @@
 
 namespace csapex
 {
+namespace graph
+{
+FWD(Vertex);
+FWD(Edge);
+}
+
 FWD(NodeHandle);
 FWD(NodeConstructor);
 FWD(NodeStatistics);

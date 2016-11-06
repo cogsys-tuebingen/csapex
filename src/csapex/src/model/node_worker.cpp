@@ -12,6 +12,7 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/graph/vertex.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/param/trigger_parameter.h>
@@ -442,7 +443,7 @@ void NodeWorker::startProcessingMessages()
     if(marker || !all_inputs_are_present) {
         if(!marker) {
             // no processing because a non-optional port has a NoMessage marker
-            if(node_handle_->getNodeCharacteristics().is_vertex_separator) {
+            if(node_handle_->getVertex()->getNodeCharacteristics().is_vertex_separator) {
                 signalMessagesProcessed(true);
             } else {
                 forwardMessages(false);

@@ -11,6 +11,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/model/graph/vertex.h>
+
 
 /// SYSTEM
 #include <QLabel>
@@ -108,8 +110,8 @@ QAbstractItemModel* SearchDialog::listNodes()
 
 void SearchDialog::addNodes(Graph *graph, QStandardItemModel *model)
 {
-    for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
-        NodeHandlePtr nh = *it;
+    for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
+        NodeHandlePtr nh = (*it)->getNodeHandle();
 
         NodePtr node = nh->getNode().lock();
         if(GraphPtr subgraph = std::dynamic_pointer_cast<Graph>(node)) {

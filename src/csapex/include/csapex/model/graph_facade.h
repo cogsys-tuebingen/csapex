@@ -95,8 +95,8 @@ public:
     csapex::slim_signal::Signal<void()> panic;
     
 private:
-    void nodeAddedHandler(NodeHandlePtr node);
-    void nodeRemovedHandler(NodeHandlePtr node);
+    void nodeAddedHandler(graph::VertexPtr node);
+    void nodeRemovedHandler(graph::VertexPtr node);
 
     void createSubgraphFacade(NodeHandlePtr nh);
 

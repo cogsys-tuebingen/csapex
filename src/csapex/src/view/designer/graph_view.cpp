@@ -36,6 +36,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/tag.h>
+#include <csapex/model/graph/vertex.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/scheduling/thread_group.h>
@@ -135,8 +136,8 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     scoped_connections_.emplace_back(graph->internalConnectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
     scoped_connections_.emplace_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
 
-    for(auto it = graph->beginNodes(); it != graph->endNodes(); ++it) {
-        const NodeHandlePtr& nh = *it;
+    for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
+        const NodeHandlePtr& nh = (*it)->getNodeHandle();
         apex_assert_hard(nh.get());
         NodeWorkerPtr nw = graph_facade_->getNodeWorker(nh.get());
         apex_assert_hard(nw);

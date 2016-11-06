@@ -301,6 +301,9 @@ add_library(csapex SHARED
 
     src/manager/message_provider_manager.cpp
 
+    src/model/graph/vertex.cpp
+    src/model/graph/edge.cpp
+
     src/model/connectable.cpp
     src/model/connectable_owner.cpp
     src/model/connector_type.cpp

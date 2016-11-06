@@ -12,6 +12,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/graph/vertex.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/command/meta.h>
@@ -353,7 +354,7 @@ void NodeBox::updateComponentInformation(Graph* graph)
         info << "D:" << depth;
         info_compo->setText(info.str().c_str());
 
-        const auto& chara = nh->getNodeCharacteristics();
+        const auto& chara = nh->getVertex()->getNodeCharacteristics();
 
         QString tooltip("characteristics: ");
 //        tooltip += QString("vertex separator: ") + (chara.is_vertex_separator ? "yes" : "no") + ", ";
@@ -869,16 +870,19 @@ void NodeBox::updateStylesheetColor(const NodeStatePtr& state)
     if(settings_.get("debug", false)) {
         r = 0; g = 0; b = 0;
         if(NodeHandlePtr nh = node_handle_.lock()) {
-            if(nh->getNodeCharacteristics().is_joining_vertex) {
+            graph::VertexPtr vertex = nh->getVertex();
+
+            const auto& characteristics = vertex->getNodeCharacteristics();
+            if(characteristics.is_joining_vertex) {
                 r = 255;
             }
-            if(nh->getNodeCharacteristics().is_joining_vertex_counterpart) {
+            if(characteristics.is_joining_vertex_counterpart) {
                 g = 255;
             }
-            if(nh->getNodeCharacteristics().is_leading_to_joining_vertex) {
+            if(characteristics.is_leading_to_joining_vertex) {
                 b = 128;
             }
-            if(nh->getNodeCharacteristics().is_combined_by_joining_vertex) {
+            if(characteristics.is_combined_by_joining_vertex) {
                 b = 255;
             }
         }

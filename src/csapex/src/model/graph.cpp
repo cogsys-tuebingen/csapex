@@ -13,6 +13,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/graph/vertex.h>
+#include <csapex/model/graph/edge.h>
 
 /// SYSTEM
 #include <iostream>
@@ -38,8 +40,9 @@ void Graph::resetActivity()
         }
     }
 
-    auto nodes = nodes_;
-    for(NodeHandlePtr node : nodes) {
+    auto vertecies = vertecies_;
+    for(graph::VertexPtr vertex : vertecies) {
+        NodeHandlePtr node = vertex->getNodeHandle();
         node->setActive(false);
     }
 }
@@ -54,11 +57,12 @@ void Graph::clear()
     }
     apex_assert_hard(connections_.empty());
 
-    auto nodes = nodes_;
-    for(NodeHandlePtr node : nodes) {
+    auto vertecies = vertecies_;
+    for(graph::VertexPtr vertex : vertecies) {
+        NodeHandlePtr node = vertex->getNodeHandle();
         deleteNode(node->getUUID(), true);
     }
-    apex_assert_hard(nodes_.empty());
+    apex_assert_hard(vertecies_.empty());
 
     node_component_.clear();
 
@@ -69,17 +73,20 @@ void Graph::clear()
 void Graph::addNode(NodeHandlePtr nh)
 {
     apex_assert_hard_msg(nh, "NodeHandle added is not null");
-    nodes_.push_back(nh);
+    graph::VertexPtr vertex = std::make_shared<graph::Vertex>(nh);
+    vertecies_.push_back(vertex);
 
-    sources_.insert(nh.get());
-    sinks_.insert(nh.get());
+    nh->setVertex(vertex);
 
-    node_parents_[nh.get()] = std::vector<NodeHandle*>();
-    node_children_[nh.get()] = std::vector<NodeHandle*>();
+    sources_.insert(vertex.get());
+    sinks_.insert(vertex.get());
+
+    node_parents_[vertex.get()] = std::vector<graph::Vertex*>();
+    node_children_[vertex.get()] = std::vector<graph::Vertex*>();
 
     analyzeGraph();
 
-    nodeAdded(nh);
+    vertex_added(vertex);
 }
 
 std::vector<ConnectionPtr> Graph::getConnections()
@@ -92,18 +99,21 @@ void Graph::deleteNode(const UUID& uuid, bool quiet)
     NodeHandle* node_handle = findNodeHandle(uuid);
     node_handle->stop();
 
-    node_parents_[node_handle].clear();
-    node_children_[node_handle].clear();
+    graph::VertexPtr vertex = node_handle->getVertex();
 
-    node_parents_.erase(node_handle);
-    node_children_.erase(node_handle);
+    node_parents_[vertex.get()].clear();
+    node_children_[vertex.get()].clear();
 
-    NodeHandlePtr removed;
+    node_parents_.erase(vertex.get());
+    node_children_.erase(vertex.get());
 
-    for(auto it = nodes_.begin(); it != nodes_.end();) {
-        if((*it)->getUUID() == uuid) {
+    graph::VertexPtr removed;
+
+    for(auto it = vertecies_.begin(); it != vertecies_.end();) {
+        NodeHandlePtr node = (*it)->getNodeHandle();
+        if(node->getUUID() == uuid) {
             removed = *it;
-            it = nodes_.erase(it);
+            it = vertecies_.erase(it);
 
         } else {
             ++it;
@@ -120,7 +130,7 @@ void Graph::deleteNode(const UUID& uuid, bool quiet)
         //        }
 
         if(!quiet) {
-            nodeRemoved(removed);
+            vertex_removed(removed);
             analyzeGraph();
         }
     }
@@ -128,7 +138,7 @@ void Graph::deleteNode(const UUID& uuid, bool quiet)
 
 int Graph::countNodes()
 {
-    return nodes_.size();
+    return vertecies_.size();
 }
 
 
@@ -144,11 +154,14 @@ bool Graph::addConnection(ConnectionPtr connection, bool quiet)
         if(n_to != n_from) {
             apex_assert_hard(n_to->getUUID().getAbsoluteUUID() != n_from->getUUID().getAbsoluteUUID());
 
-            node_parents_[n_to].push_back(n_from);
-            node_children_[n_from].push_back(n_to);
+            graph::VertexPtr v_from = n_from->getVertex();
+            graph::VertexPtr v_to = n_to->getVertex();
 
-            sources_.erase(n_to);
-            sinks_.erase(n_from);
+            node_parents_[v_to.get()].push_back(v_from.get());
+            node_children_[v_from.get()].push_back(v_to.get());
+
+            sources_.erase(v_to.get());
+            sinks_.erase(v_from.get());
 
             if(!quiet) {
                 analyzeGraph();
@@ -194,17 +207,20 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
             if(!dynamic_cast<Event*>(connection->from()) && !dynamic_cast<Slot*>(connection->to())) {
                 // erase pointer from TO to FROM
                 if(n_from != n_to) {
+                    graph::VertexPtr v_from = n_from->getVertex();
+                    graph::VertexPtr v_to = n_to->getVertex();
+
                     // if there are multiple edges, this only erases one entry
-                    node_parents_[n_to].erase(std::find(node_parents_[n_to].begin(), node_parents_[n_to].end(), n_from));
+                    node_parents_[v_to.get()].erase(std::find(node_parents_[v_to.get()].begin(), node_parents_[v_to.get()].end(), v_from.get()));
 
                     // erase pointer from FROM to TO
-                    node_children_[n_from].erase(std::find(node_children_[n_from].begin(), node_children_[n_from].end(), n_to));
+                    node_children_[v_from.get()].erase(std::find(node_children_[v_from.get()].begin(), node_children_[v_from.get()].end(), v_to.get()));
 
                     if(!n_from->getOutputTransition()->hasConnection()) {
-                        sinks_.insert(n_from);
+                        sinks_.insert(v_from.get());
                     }
                     if(!n_to->getInputTransition()->hasConnection()) {
-                        sources_.insert(n_to);
+                        sources_.insert(v_to.get());
                     }
 
                 }
@@ -256,13 +272,13 @@ void Graph::buildConnectedComponents()
     /* Find all connected sub components of this graph */
     node_component_.clear();
 
-    std::deque<NodeHandle*> unmarked;
-    for(auto node : nodes_) {
-        unmarked.push_back(node.get());
-        node_component_[node.get()] = -1;
+    std::deque<graph::Vertex*> unmarked;
+    for(auto vertex : vertecies_) {
+        unmarked.push_back(vertex.get());
+        node_component_[vertex.get()] = -1;
     }
 
-    std::deque<NodeHandle*> Q;
+    std::deque<graph::Vertex*> Q;
     int component = 0;
     while(!unmarked.empty()) {
         // take a random unmarked node to start bfs from
@@ -272,15 +288,15 @@ void Graph::buildConnectedComponents()
         node_component_[start] = component;
 
         while(!Q.empty()) {
-            auto* front = Q.front();
+            graph::Vertex* front = Q.front();
             Q.pop_front();
 
-            checkNodeState(front);
+            checkNodeState(front->getNodeHandle().get());
 
             unmarked.erase(std::find(unmarked.begin(), unmarked.end(), front));
 
             // iterate all neighbors
-            std::vector<NodeHandle*> neighbors;
+            std::vector<graph::Vertex*> neighbors;
             for(auto* parent : node_parents_[front]) {
                 neighbors.push_back(parent);
             }
@@ -307,25 +323,25 @@ void Graph::calculateDepths()
     // - joining: true, iff more than one path leads from any source to a node
 
     // initialize
-    for(const NodeHandlePtr& nh: nodes_) {
-        nh->getNodeCharacteristics().is_joining_vertex = false;
-        nh->getNodeCharacteristics().is_joining_vertex_counterpart = false;
+    for(const graph::VertexPtr& vertex: vertecies_) {
+        vertex->getNodeCharacteristics().is_joining_vertex = false;
+        vertex->getNodeCharacteristics().is_joining_vertex_counterpart = false;
 
-        nh->getNodeCharacteristics().is_combined_by_joining_vertex = false;
-        nh->getNodeCharacteristics().is_leading_to_joining_vertex = false;
+        vertex->getNodeCharacteristics().is_combined_by_joining_vertex = false;
+        vertex->getNodeCharacteristics().is_leading_to_joining_vertex = false;
     }
 
-    std::set<NodeHandle*> joins;
+    std::set<graph::Vertex*> joins;
 
     node_depth_.clear();
     // init node_depth_ and find merging nodes
-    for(const NodeHandle* source : sources_) {
+    for(const graph::Vertex* source : sources_) {
         node_depth_[source] = 0;
 
-        std::deque<const NodeHandle*> Q;
+        std::deque<const graph::Vertex*> Q;
         Q.push_back(source);
         while(!Q.empty()) {
-            const NodeHandle* top = Q.back();
+            const graph::Vertex* top = Q.back();
             Q.pop_back();
 
             for(auto* child : node_children_[top]) {
@@ -343,13 +359,13 @@ void Graph::calculateDepths()
     }
 
     // populate node_depth_ with minimal depths
-    for(const NodeHandle* source : sources_) {
+    for(const graph::Vertex* source : sources_) {
         node_depth_[source] = 0;
 
-        std::deque<const NodeHandle*> Q;
+        std::deque<const graph::Vertex*> Q;
         Q.push_back(source);
         while(!Q.empty()) {
-            const NodeHandle* top = Q.back();
+            const graph::Vertex* top = Q.back();
             Q.pop_back();
 
             int depth = node_depth_.at(top);
@@ -371,9 +387,9 @@ void Graph::calculateDepths()
     }
 
     for(const auto& pair : node_depth_) {
-        const NodeHandle* nh = pair.first;
+        const graph::Vertex* vertex = pair.first;
         int depth = pair.second;
-        nh->getNodeCharacteristics().depth = depth;
+        vertex->getNodeCharacteristics().depth = depth;
 
         //        int min_child_depth = std::numeric_limits<int>::max();
         //        for(NodeHandle* child : node_children_.at(nh)) {
@@ -383,8 +399,8 @@ void Graph::calculateDepths()
 
     }
 
-    for(NodeHandle* nh : joins) {
-        nh->getNodeCharacteristics().is_joining_vertex = true;
+    for(graph::Vertex* vertex : joins) {
+        vertex->getNodeCharacteristics().is_joining_vertex = true;
 
         // find counterparts
         //        int level = node_depth_.at(nh);
@@ -393,25 +409,25 @@ void Graph::calculateDepths()
         //        int min_level = std::accumulate(parents.begin(), parents.end(), std::numeric_limits<int>::max(),
         //                                        [this](int level, NodeHandle* parent){ return std::min(level, node_depth_.at(parent)); });
 
-        int min_level = nh->getNodeCharacteristics().depth;
+        int min_level = vertex->getNodeCharacteristics().depth;
 
         // iterate all parents, until we find a single common parent
         // if no such parent exists, this joining node has no counterpart
 
-        struct CompareNH: public std::binary_function<NodeHandle*, NodeHandle*, bool> {
-            bool operator()(const NodeHandle* lhs, const NodeHandle* rhs) const {
+        struct CompareNH: public std::binary_function<graph::Vertex*, graph::Vertex*, bool> {
+            bool operator()(const graph::Vertex* lhs, const graph::Vertex* rhs) const {
                 return lhs->getNodeCharacteristics().depth > rhs->getNodeCharacteristics().depth;
             }
         };
         //std::set<NodeHandle*, CompareNH> Q(parents.begin(), parents.end());
-        std::deque<NodeHandle*> Q({ nh });
-        std::set<NodeHandle*> done;
-        std::set<NodeHandle*> minimum;
+        std::deque<graph::Vertex*> Q({ vertex });
+        std::set<graph::Vertex*> done;
+        std::set<graph::Vertex*> minimum;
 
         bool is_closed = false;
 
         while(!Q.empty()) {
-            NodeHandle* top = *Q.begin();
+            graph::Vertex* top = *Q.begin();
 
             if(min_level > 0 && Q.size() == 1 && minimum.size() == 1) {
                 // if the only minimum is not a source and the queue has only the current element -> closed
@@ -421,7 +437,7 @@ void Graph::calculateDepths()
             }
             done.insert(top);
             Q.erase(Q.begin());
-            for(NodeHandle* parent : node_parents_.at(top)) {
+            for(graph::Vertex* parent : node_parents_.at(top)) {
                 if(done.find(parent) != done.end()) {
                     continue;
                 }
@@ -444,19 +460,19 @@ void Graph::calculateDepths()
         if(min_level == 0 && minimum.size() == 1) {
             // if exactly one source exists -> also closed
             is_closed = true;
-            NodeHandle* top = *minimum.begin();
+            graph::Vertex* top = *minimum.begin();
             top->getNodeCharacteristics().is_joining_vertex_counterpart = true;
             done.erase(top);
         }
 
-        for(NodeHandle* top : done) {
-            if(top != nh) {
+        for(graph::Vertex* top : done) {
+            if(top != vertex) {
                 top->getNodeCharacteristics().is_leading_to_joining_vertex = true;
             }
         }
         if(is_closed ){
-            for(NodeHandle* top : done) {
-                if(top != nh) {
+            for(graph::Vertex* top : done) {
+                if(top != vertex) {
                     top->getNodeCharacteristics().is_combined_by_joining_vertex = true;
                 }
             }
@@ -466,8 +482,8 @@ void Graph::calculateDepths()
 //        - remember for each of vertex join counterpart, which children are enclosed -> only send NoMessage to non-enclosed children.
     }
 
-    for(NodeHandlePtr& nh : nodes_) {
-        NodeCharacteristics& c = nh->getNodeCharacteristics();
+    for(graph::VertexPtr& vertex : vertecies_) {
+        NodeCharacteristics& c = vertex->getNodeCharacteristics();
         c.is_vertex_separator = !c.is_leading_to_joining_vertex;
     }
 }
@@ -490,7 +506,9 @@ int Graph::getComponent(const UUID &node_uuid) const
         return -1;
     }
 
-    auto pos = node_component_.find(node);
+    graph::VertexPtr vertex = node->getVertex();
+
+    auto pos = node_component_.find(vertex.get());
     if(pos == node_component_.end()) {
         return -1;
     } else {
@@ -505,7 +523,9 @@ int Graph::getDepth(const UUID &node_uuid) const
         return -1;
     }
 
-    auto pos = node_depth_.find(node);
+    graph::VertexPtr vertex = node->getVertex();
+
+    auto pos = node_depth_.find(vertex.get());
     if(pos == node_depth_.end()) {
         return -1;
     } else {
@@ -564,9 +584,10 @@ NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
         }
 
     } else {
-        for(const auto b : nodes_) {
-            if(b->getUUID() == uuid) {
-                return b.get();
+        for(const auto vertex : vertecies_) {
+            NodeHandlePtr nh = vertex->getNodeHandle();
+            if(nh->getUUID() == uuid) {
+                return nh.get();
             }
         }
     }
@@ -602,11 +623,12 @@ NodeHandle* Graph::findNodeHandleForConnectorNoThrow(const UUID &uuid) const noe
 
 NodeHandle* Graph::findNodeHandleWithLabel(const std::string& label) const
 {
-    for(const auto b : nodes_) {
-        NodeStatePtr state = b->getNodeState();
+    for(const auto vertex : vertecies_) {
+        NodeHandlePtr nh = vertex->getNodeHandle();
+        NodeStatePtr state = nh->getNodeState();
         if(state) {
             if(state->getLabel() == label) {
-                return b.get();
+                return nh.get();
             }
         }
     }
@@ -616,8 +638,9 @@ NodeHandle* Graph::findNodeHandleWithLabel(const std::string& label) const
 std::vector<NodeHandle*> Graph::getAllNodeHandles()
 {
     std::vector<NodeHandle*> node_handles;
-    for(const auto& node : nodes_) {
-        node_handles.push_back(node.get());
+    for(const auto& vertex : vertecies_) {
+        NodeHandlePtr nh = vertex->getNodeHandle();
+        node_handles.push_back(nh.get());
     }
 
     return node_handles;
@@ -680,24 +703,24 @@ int Graph::getConnectionId(ConnectionPtr c)
     return -1;
 }
 
-Graph::node_iterator Graph::beginNodes()
+Graph::vertex_iterator Graph::beginVertices()
 {
-    return nodes_.begin();
+    return vertecies_.begin();
 }
 
-const Graph::node_const_iterator Graph::beginNodes() const
+const Graph::vertex_const_iterator Graph::beginVertices() const
 {
-    return nodes_.cbegin();
+    return vertecies_.cbegin();
 }
 
 
-Graph::node_iterator Graph::endNodes()
+Graph::vertex_iterator Graph::endVertices()
 {
-    return nodes_.end();
+    return vertecies_.end();
 }
 
-const Graph::node_const_iterator Graph::endNodes() const
+const Graph::vertex_const_iterator Graph::endVertices() const
 {
-    return nodes_.cend();
+    return vertecies_.cend();
 }
 

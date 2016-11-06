@@ -193,9 +193,14 @@ NodeWeakPtr NodeHandle::getNode() const
     return node_;
 }
 
-NodeCharacteristics& NodeHandle::getNodeCharacteristics() const
+void NodeHandle::setVertex(graph::VertexWeakPtr vertex)
 {
-    return characteristics_;
+    vertex_ = vertex;
+}
+
+graph::VertexPtr NodeHandle::getVertex() const
+{
+    return vertex_.lock();
 }
 
 InputTransition* NodeHandle::getInputTransition() const

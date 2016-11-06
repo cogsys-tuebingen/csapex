@@ -2,16 +2,15 @@
 #define NODE_HANDLE_H
 
 /// PROJECT
-#include <csapex/model/model_fwd.h>
-#include <csapex/msg/msg_fwd.h>
-#include <csapex/signal/signal_fwd.h>
-#include <csapex/model/unique.h>
-#include <csapex/param/param_fwd.h>
-#include <csapex/model/node_modifier.h>
-#include <csapex/utility/slim_signal.hpp>
-#include <csapex/utility/rate.h>
 #include <csapex/model/connectable_owner.h>
-#include <csapex/model/node_characteristics.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/model/node_modifier.h>
+#include <csapex/model/unique.h>
+#include <csapex/msg/msg_fwd.h>
+#include <csapex/param/param_fwd.h>
+#include <csapex/signal/signal_fwd.h>
+#include <csapex/utility/rate.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <vector>
@@ -33,7 +32,8 @@ public:
     std::string getType() const;
     NodeWeakPtr getNode() const;
 
-    NodeCharacteristics& getNodeCharacteristics() const;
+    void setVertex(graph::VertexWeakPtr vertex);
+    graph::VertexPtr getVertex() const;
 
     InputTransition* getInputTransition() const;
     OutputTransition* getOutputTransition() const;
@@ -164,12 +164,8 @@ private:
     void removeSlot(Slot *out);
     void removeEvent(Event *out);
 
-
-
-
     template <typename T>
     void makeParameterConnectableImpl(csapex::param::ParameterPtr);
-
 
 protected:
     mutable std::recursive_mutex sync;
@@ -202,7 +198,7 @@ protected:
 private:
     UUIDProvider* uuid_provider_;
 
-    mutable NodeCharacteristics characteristics_;
+    graph::VertexWeakPtr vertex_;
 
     Rate rate_;
 

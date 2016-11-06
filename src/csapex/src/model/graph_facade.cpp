@@ -19,17 +19,18 @@
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
+#include <csapex/model/graph/vertex.h>
 
 using namespace csapex;
 
 GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNode* graph, NodeHandle* nh, GraphFacade *parent)
     : parent_(parent), absolute_uuid_(graph->getUUID()), graph_(graph), graph_handle_(nh), executor_(executor)
 {
-    connections_.push_back(graph->nodeAdded.connect(
-                               delegate::Delegate<void(NodeHandlePtr)>(this, &GraphFacade::nodeAddedHandler)));
+    connections_.push_back(graph->vertex_added.connect(
+                               delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeAddedHandler)));
 
-    connections_.push_back(graph->nodeRemoved.connect(
-                               delegate::Delegate<void(NodeHandlePtr)>(this, &GraphFacade::nodeRemovedHandler)));
+    connections_.push_back(graph->vertex_removed.connect(
+                               delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeRemovedHandler)));
 
     if(parent_) {
         apex_assert_hard(graph_handle_);
@@ -55,7 +56,9 @@ GraphFacade* GraphFacade::getParent() const
     return parent_;
 }
 
-void GraphFacade::nodeAddedHandler(NodeHandlePtr nh) {
+void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
+{
+    NodeHandlePtr nh = vertex->getNodeHandle();
     if(nh->isGraph()) {
         createSubgraphFacade(nh);
     }
@@ -102,8 +105,10 @@ void GraphFacade::createSubgraphFacade(NodeHandlePtr nh)
     childAdded(sub_graph_facade);
 }
 
-void GraphFacade::nodeRemovedHandler(NodeHandlePtr nh)
+void GraphFacade::nodeRemovedHandler(graph::VertexPtr vertex)
 {
+    NodeHandlePtr nh = vertex->getNodeHandle();
+
     TaskGeneratorPtr runner = generators_[nh->getUUID()];
     generators_.erase(nh->getUUID());
     executor_.remove(runner.get());
