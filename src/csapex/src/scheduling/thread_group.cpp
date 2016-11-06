@@ -168,8 +168,16 @@ void ThreadGroup::stop()
             scheduler_thread_.join();
         }
 
-        generators_.clear();
+        auto gen = generators_;
+        for(TaskGeneratorPtr tg : gen) {
+            tg->detach();
+        }
+
+        apex_assert_hard(generators_.empty());
+        apex_assert_hard(generator_connections_.empty());
+        apex_assert_hard(tasks_.empty());
     }
+
 }
 
 bool ThreadGroup::isRunning() const
@@ -248,9 +256,7 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
 
     work_available_.notify_all();
 
-    for(auto connection : generator_connections_[generator]) {
-        connection.disconnect();
-    }
+    generator_connections_.clear();
 
     return remaining_tasks;
 }

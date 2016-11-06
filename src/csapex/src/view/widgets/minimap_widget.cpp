@@ -23,11 +23,7 @@ MinimapWidget::MinimapWidget()
 
 void MinimapWidget::display(GraphView *view)
 {
-    if(view_) {
-        QObject::disconnect(view_, SIGNAL(viewChanged()), this, SLOT(update()));
-        QObject::disconnect(this, SIGNAL(positionRequest(QPointF)), view_, SLOT(centerOnPoint(QPointF)));
-        QObject::disconnect(this, SIGNAL(zoomRequest(QPointF, double)), view_, SLOT(zoomAt(QPointF,double)));
-    }
+    QObject::connect(view, &GraphView::destroyed,  this, &MinimapWidget::disconnectView);
 
     QObject::connect(view, SIGNAL(viewChanged()), this, SLOT(update()));
     QObject::connect(this, SIGNAL(positionRequest(QPointF)), view, SLOT(centerOnPoint(QPointF)));
@@ -35,6 +31,17 @@ void MinimapWidget::display(GraphView *view)
 
     view_ = view;
     scene_ = view_->designerScene();
+}
+
+void MinimapWidget::disconnectView()
+{
+    if(view_) {
+        QObject::disconnect(view_, SIGNAL(viewChanged()), this, SLOT(update()));
+        QObject::disconnect(this, SIGNAL(positionRequest(QPointF)), view_, SLOT(centerOnPoint(QPointF)));
+        QObject::disconnect(this, SIGNAL(zoomRequest(QPointF, double)), view_, SLOT(zoomAt(QPointF,double)));
+
+        view_ = nullptr;
+    }
 }
 
 void MinimapWidget::doResize()

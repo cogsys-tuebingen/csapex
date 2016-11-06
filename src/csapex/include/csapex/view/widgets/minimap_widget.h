@@ -29,6 +29,8 @@ public Q_SLOTS:
     void doResize();
     void display(GraphView* view);
 
+    void disconnectView();
+
 protected:
     void mousePressEvent(QMouseEvent* me);
     void mouseReleaseEvent(QMouseEvent* me);

@@ -74,6 +74,10 @@ void ThreadPool::stop()
     for(auto g : groups_) {
         g->stop();
     }
+    group_assignment_.clear();
+    groups_.clear();
+    apex_assert_hard(group_assignment_.empty());
+    apex_assert_hard(groups_.empty());
 }
 
 bool ThreadPool::isRunning() const

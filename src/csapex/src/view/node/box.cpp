@@ -155,20 +155,20 @@ void NodeBox::setupUi()
 
 
     NodeState* state = node_handle_.lock()->getNodeState().get();
-    state->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this));
-    state->minimized_changed->connect(std::bind(&NodeBox::triggerMinimized, this));
-    state->active_changed->connect([this, state](){
+    connections_.push_back(state->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this)));
+    connections_.push_back(state->minimized_changed->connect(std::bind(&NodeBox::triggerMinimized, this)));
+    connections_.push_back(state->active_changed->connect([this, state](){
         setProperty("active", state->isActive());
         updateVisualsRequest();
-    });
-    state->color_changed->connect(std::bind(&NodeBox::changeColor, this));
-    state->pos_changed->connect(std::bind(&NodeBox::updatePosition, this));
+    }));
+    connections_.push_back(state->color_changed->connect(std::bind(&NodeBox::changeColor, this)));
+    connections_.push_back(state->pos_changed->connect(std::bind(&NodeBox::updatePosition, this)));
 
-    settings_.settingsChanged.connect([this](const std::string& name) {
+    connections_.push_back(settings_.settingsChanged.connect([this](const std::string& name) {
         if(name == "debug") {
             changeColor();
         }
-    });
+    }));
 
     changeColor();
     updateVisualsRequest();
