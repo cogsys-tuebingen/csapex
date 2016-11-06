@@ -5,6 +5,7 @@ using namespace csapex;
 
 NodeCharacteristics::NodeCharacteristics()
     : depth(-1),
+      component(-1),
 
       is_vertex_separator(false),
       is_joining_vertex(false),

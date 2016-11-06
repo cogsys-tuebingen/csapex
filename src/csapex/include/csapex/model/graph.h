@@ -122,18 +122,11 @@ public:
 
 protected:
 //    std::vector<NodeHandlePtr> nodes_;
-    std::vector<graph::VertexPtr> vertecies_;
+    std::vector<graph::VertexPtr> vertices_;
     std::vector<ConnectionPtr> connections_;
 
-    std::map<const graph::Vertex*, int> node_component_;
-    std::map<const graph::Vertex*, int> node_depth_;
-
-    std::map<const graph::Vertex*, std::vector<graph::Vertex*> > node_parents_;
-    std::map<const graph::Vertex*, std::vector<graph::Vertex*> > node_children_;
-
-
-    std::set<const graph::Vertex*> sources_;
-    std::set<const graph::Vertex*> sinks_;
+    std::set<graph::VertexPtr> sources_;
+    std::set<graph::VertexPtr> sinks_;
 };
 
 }
