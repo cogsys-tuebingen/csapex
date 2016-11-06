@@ -41,7 +41,7 @@ NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
     return Graph::findNodeHandle(uuid);
 }
 
-NodeHandle* SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
+NodeHandle *SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.empty()) {
         return node_handle_;
@@ -49,13 +49,13 @@ NodeHandle* SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
     return Graph::findNodeHandleNoThrow(uuid);
 }
 
-Connectable* SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
+ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
 {
     if(internal_slots_.find(uuid) != internal_slots_.end()) {
-        return internal_slots_.at(uuid).get();
+        return internal_slots_.at(uuid);
     }
     if(internal_events_.find(uuid) != internal_events_.end()) {
-        return internal_events_.at(uuid).get();
+        return internal_events_.at(uuid);
     }
 
     return Graph::findConnectorNoThrow(uuid);
@@ -151,7 +151,7 @@ void SubgraphNode::setupParameters(Parameterizable &params)
     [this](param::Parameter* p) {
         for(auto& pair : relay_to_external_input_) {
             UUID id = pair.second;
-            Input* i = node_handle_->getInput(id);
+            InputPtr i = node_handle_->getInput(id);
             apex_assert_hard(i);
 
             bool iterate = iterated_inputs_param_->isSet(id.getFullName());
@@ -174,8 +174,8 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
     has_sent_current_iteration_ = false;
     is_subgraph_finished_ = false;
 
-    for(Input* i : node_modifier.getMessageInputs()) {
-        TokenDataConstPtr m = msg::getMessage(i);
+    for(InputPtr i : node_modifier.getMessageInputs()) {
+        TokenDataConstPtr m = msg::getMessage(i.get());
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
         if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
@@ -218,7 +218,7 @@ void crossConnectLabelChange(Connectable* a, Connectable* b)
 Input* SubgraphNode::createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
     auto pair = addForwardingInput(type, label, optional);
-    return node_handle_->getInput(pair.external);
+    return node_handle_->getInput(pair.external).get();
 }
 
 InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional)
@@ -287,7 +287,7 @@ UUID  SubgraphNode::addForwardingInput(const UUID& internal_uuid, const TokenDat
 Output* SubgraphNode::createVariadicOutput(TokenDataConstPtr type, const std::string& label)
 {
     auto pair = addForwardingOutput(type, label);
-    return node_handle_->getOutput(pair.external);
+    return node_handle_->getOutput(pair.external).get();
 }
 
 
@@ -383,7 +383,7 @@ SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UU
 Slot* SubgraphNode::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> /*callback*/, bool /*active*/, bool /*asynchronous*/)
 {
     auto pair = addForwardingSlot(type, label);
-    return node_handle_->getSlot(pair.external);
+    return node_handle_->getSlot(pair.external).get();
 }
 
 void SubgraphNode::removeVariadicSlot(SlotPtr slot)
@@ -452,7 +452,7 @@ EventPtr SubgraphNode::createInternalEvent(const TokenDataConstPtr& type, const 
 Event* SubgraphNode::createVariadicEvent(TokenDataConstPtr type, const std::string& label)
 {
     auto pair = addForwardingEvent(type, label);
-    return node_handle_->getEvent(pair.external);
+    return node_handle_->getEvent(pair.external).get();
 }
 
 void SubgraphNode::removeVariadicEvent(EventPtr event)
@@ -586,7 +586,7 @@ void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool ena
 {
     if(enabled) {
         iterated_inputs_.insert(external_input_uuid);
-        Input* i = node_handle_->getInput(external_input_uuid);
+        InputPtr i = node_handle_->getInput(external_input_uuid);
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
         TokenDataConstPtr vector_type = i->getType();
@@ -699,8 +699,8 @@ void SubgraphNode::sendCurrentIteration()
 
 void SubgraphNode::startNextIteration()
 {
-    for(Input* i : node_modifier_->getMessageInputs()) {
-        TokenDataConstPtr m = msg::getMessage(i);
+    for(InputPtr i : node_modifier_->getMessageInputs()) {
+        TokenDataConstPtr m = msg::getMessage(i.get());
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
         if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {

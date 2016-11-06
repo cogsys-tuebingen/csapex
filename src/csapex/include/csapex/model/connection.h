@@ -40,8 +40,8 @@ public:
     friend std::ostream& operator << (std::ostream& out, const Connection& c);
 
 protected:
-    Connection(Output* from, Input* to);
-    Connection(Output* from, Input* to, int id);
+    Connection(OutputPtr from, InputPtr to);
+    Connection(OutputPtr from, InputPtr to, int id);
 
 public:
     virtual ~Connection();
@@ -49,8 +49,8 @@ public:
     void detach(Connectable* c);
     bool isDetached() const;
 
-    Output* from() const;
-    Input* to() const;
+    OutputPtr from() const;
+    InputPtr to() const;
     int id() const;
 
     bool contains(Connectable* c) const;
@@ -109,8 +109,8 @@ protected:
     void notifyMessageProcessed();
 
 protected:
-    Output* from_;
-    Input* to_;
+    OutputPtr from_;
+    InputPtr to_;
     int id_;
 
     bool active_;

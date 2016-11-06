@@ -57,7 +57,7 @@ bool DeleteNode::doExecute()
     }
 
     for(ConnectionPtr c : connections) {
-        add(std::make_shared<DeleteMessageConnection>(graph_uuid, c->from(), c->to()));
+        add(std::make_shared<DeleteMessageConnection>(graph_uuid, c->from().get(), c->to().get()));
     }
 
     // serialize sub graph

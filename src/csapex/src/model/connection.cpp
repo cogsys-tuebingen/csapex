@@ -20,12 +20,12 @@ using namespace csapex;
 
 int Connection::next_connection_id_ = 0;
 
-Connection::Connection(Output *from, Input *to)
+Connection::Connection(OutputPtr from, InputPtr to)
     : Connection(from, to, next_connection_id_++)
 {
 }
 
-Connection::Connection(Output *from, Input *to, int id)
+Connection::Connection(OutputPtr from, InputPtr to, int id)
     : from_(from), to_(to), id_(id),
       active_(false),
       detached_(false),
@@ -44,12 +44,12 @@ Connection::~Connection()
 
 void Connection::detach(Connectable *c)
 {
-    if(c == from_) {
-        from_ = nullptr;
+    if(c == from_.get()) {
+        from_.reset();
         detached_ = true;
 
-    } else if(c == to_) {
-        to_ = nullptr;
+    } else if(c == to_.get()) {
+        to_.reset();
         detached_ = true;
     }
 }
@@ -197,12 +197,12 @@ void Connection::setState(State s)
     state_ = s;
 }
 
-Output* Connection::from() const
+OutputPtr Connection::from() const
 {
     return from_;
 }
 
-Input *Connection::to() const
+InputPtr Connection::to() const
 {
     return to_;
 }
@@ -214,7 +214,7 @@ int Connection::id() const
 
 bool Connection::contains(Connectable *c) const
 {
-    return from_ == c || to_ == c;
+    return from_.get() == c || to_.get() == c;
 }
 
 bool Connection::operator == (const Connection& c) const

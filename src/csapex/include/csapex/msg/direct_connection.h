@@ -10,8 +10,8 @@ namespace csapex
 class CSAPEX_EXPORT DirectConnection : public Connection
 {
 public:
-    static ConnectionPtr connect(Output* from, Input* to);
-    static ConnectionPtr connect(Output* from, Input* to, int id);
+    static ConnectionPtr connect(OutputPtr from, InputPtr to);
+    static ConnectionPtr connect(OutputPtr from, InputPtr to, int id);
 
 public:
     ~DirectConnection();
@@ -19,8 +19,8 @@ public:
     virtual void setToken(const TokenPtr& msg) override;
 
 protected:
-    DirectConnection(Output* from, Input* to);
-    DirectConnection(Output* from, Input* to, int id);
+    DirectConnection(OutputPtr from, InputPtr to);
+    DirectConnection(OutputPtr from, InputPtr to, int id);
 
 };
 

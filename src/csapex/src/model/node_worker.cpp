@@ -222,10 +222,10 @@ void NodeWorker::setProcessingEnabled(bool e)
 {
     node_handle_->getNodeState()->setEnabled(e);
 
-    for(Slot* slot : node_handle_->getSlots()) {
+    for(SlotPtr slot : node_handle_->getSlots()) {
         slot->setEnabled(e);
     }
-    for(Event* event : node_handle_->getEvents()) {
+    for(EventPtr event : node_handle_->getEvents()) {
         event->setEnabled(e);
     }
 
@@ -341,7 +341,7 @@ void NodeWorker::startProcessingMessages()
     apex_assert_hard(node_handle_->getInputTransition()->areMessagesComplete());
 
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-    for(Event* e : node_handle_->getEvents()) {
+    for(EventPtr e : node_handle_->getEvents()) {
         for(ConnectionPtr c : e->getConnections()) {
             apex_assert_hard(c->getState() != Connection::State::UNREAD);
         }
@@ -828,7 +828,7 @@ bool NodeWorker::hasActiveOutputConnection()
     if(node_handle_->getOutputTransition()->hasActiveConnection()) {
         return true;
     }
-    for(Event* e : node_handle_->getEvents()){
+    for(EventPtr e : node_handle_->getEvents()){
         for(const ConnectionPtr& c : e->getConnections()) {
             if(c->isEnabled() && c->isActive()) {
                 return true;

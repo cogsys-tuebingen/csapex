@@ -24,8 +24,8 @@ protected:
     void refresh() override;
 
 private:
-    Output* from;
-    Input* to;
+    OutputPtr from;
+    InputPtr to;
 
     bool active;
 };

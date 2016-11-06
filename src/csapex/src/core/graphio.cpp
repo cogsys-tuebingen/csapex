@@ -387,7 +387,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
             connection_type = types[j].as<std::string>();
         }
 
-        Connectable* from = graph_->findConnectorNoThrow(from_uuid);
+        ConnectablePtr from = graph_->findConnectorNoThrow(from_uuid);
         if(from) {
             loadConnection(from, to_uuid, connection_type);
         }
@@ -441,19 +441,19 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     UUID from_uuid = UUIDProvider::makeUUID_forced(graph_->shared_from_this(), from_uuid_tmp);
     UUID to_uuid = UUIDProvider::makeUUID_forced(graph_->shared_from_this(), to_uuid_tmp);
 
-    Connectable* from = graph_->findConnector(from_uuid);
+    ConnectablePtr from = graph_->findConnector(from_uuid);
     if(from == nullptr) {
         std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
         return;
     }
 
-    Connectable* to = graph_->findConnector(to_uuid);
+    ConnectablePtr to = graph_->findConnector(to_uuid);
     if(to == nullptr) {
         std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
         return;
     }
 
-    ConnectionPtr connection = graph_->getConnection(from, to);
+    ConnectionPtr connection = graph_->getConnection(from.get(), to.get());
 
     std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
 
@@ -482,18 +482,18 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
 }
 
 
-void GraphIO::loadConnection(Connectable* from, const UUID& to_uuid, const std::string& connection_type)
+void GraphIO::loadConnection(ConnectablePtr from, const UUID& to_uuid, const std::string& connection_type)
 {
     try {
         NodeHandle* target = graph_->findNodeHandleForConnector(to_uuid);
 
-        Input* in = dynamic_cast<Input*>(target->getConnector(to_uuid));
+        InputPtr in = std::dynamic_pointer_cast<Input>(target->getConnector(to_uuid));
         if(!in) {
             std::cerr << "cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", input doesn't exist." << std::endl;
             return;
         }
 
-        Output* out = dynamic_cast<Output*>(from);
+        OutputPtr out = std::dynamic_pointer_cast<Output>(from);
 
         if(out && in) {
             // TODO: make connection factory

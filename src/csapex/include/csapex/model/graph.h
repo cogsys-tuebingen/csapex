@@ -63,18 +63,18 @@ public:
     std::vector<NodeHandle*> getAllNodeHandles();
 
 
-    virtual Connectable* findConnector(const UUID &uuid);
-    virtual Connectable* findConnectorNoThrow(const UUID &uuid) noexcept;
+    virtual ConnectablePtr findConnector(const UUID &uuid);
+    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept;
 
     template <typename T>
-    T *findConnector(const UUID &uuid)
+    std::shared_ptr<T> findConnector(const UUID &uuid)
     {
-        return dynamic_cast<T*>(findConnector(uuid));
+        return std::dynamic_pointer_cast<T>(findConnector(uuid));
     }
     template <typename T>
-    T *findConnectorNoThrow(const UUID &uuid) noexcept
+    std::shared_ptr<T> findConnectorNoThrow(const UUID &uuid) noexcept
     {
-        return dynamic_cast<T*>(findConnectorNoThrow(uuid));
+        return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
     }
 
     ConnectionPtr getConnectionWithId(int id);

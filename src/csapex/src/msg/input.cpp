@@ -135,7 +135,7 @@ bool Input::targetsCanBeMovedTo(Connectable* other_side) const
 
 void Input::connectionMovePreview(Connectable *other_side)
 {
-    connectionInProgress(getSource(), other_side);
+    connectionInProgress(getSource().get(), other_side);
 }
 
 
@@ -155,7 +155,7 @@ void Input::validateConnections()
     setError(e);
 }
 
-Output *Input::getSource() const
+OutputPtr Input::getSource() const
 {
     if(connections_.empty()) {
         return nullptr;

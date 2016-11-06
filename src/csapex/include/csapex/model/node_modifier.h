@@ -167,10 +167,10 @@ public:
     Event* addEvent(const std::string& label);
 
 
-    std::vector<Input*> getMessageInputs() const;
-    std::vector<Output*> getMessageOutputs() const;
-    std::vector<Slot*> getSlots() const;
-    std::vector<Event*> getEvents() const;
+    std::vector<InputPtr> getMessageInputs() const;
+    std::vector<OutputPtr> getMessageOutputs() const;
+    std::vector<SlotPtr> getSlots() const;
+    std::vector<EventPtr> getEvents() const;
 
     virtual void removeInput(const UUID& uuid) = 0;
     virtual void removeOutput(const UUID& uuid) = 0;

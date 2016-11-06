@@ -44,7 +44,7 @@ public:
     ~MessagePreviewWidget();
 
 public:
-    void connectTo(Connectable* c);
+    void connectTo(ConnectablePtr c);
     void disconnect();
 
     void setCallback(std::function<void(TokenData::ConstPtr)> cb);
@@ -61,8 +61,8 @@ public Q_SLOTS:
     void displayText(const QString &txt);
     
 private:
-    void connectToImpl(Output* out);
-    void connectToImpl(Input* out);
+    void connectToImpl(OutputPtr out);
+    void connectToImpl(InputPtr out);
 
 private:
     ConnectionPtr connection_;

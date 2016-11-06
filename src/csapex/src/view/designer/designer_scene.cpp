@@ -824,8 +824,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
         return;
     }
 
-    Connectable* from = connection.from();
-    Connectable* to = connection.to();
+    ConnectablePtr from = connection.from();
+    ConnectablePtr to = connection.to();
 
     int id = connection.id();
 
@@ -848,7 +848,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
                 " -> " +
                 QString::number(connection.to()->sequenceNumber());
     }
-    connection_bb_[&connection] = drawConnection(painter, from, to, id);
+    connection_bb_[&connection] = drawConnection(painter, from.get(), to.get(), id);
 }
 
 std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,

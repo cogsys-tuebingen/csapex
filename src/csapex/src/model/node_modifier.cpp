@@ -45,49 +45,37 @@ Event* NodeModifier::addEvent(const std::string &label)
 
 
 
-std::vector<Input*> NodeModifier::getMessageInputs() const
+std::vector<InputPtr> NodeModifier::getMessageInputs() const
 {
     // hide parameter inputs from the nodes
     auto vec = getExternalInputs();
-    std::vector<Input*> result;
+    std::vector<InputPtr> result;
     for(auto entry : vec) {
         if(!isParameterInput(entry.get()))  {
-            result.push_back(entry.get());
+            result.push_back(entry);
         }
     }
     return result;
 }
-std::vector<Output*> NodeModifier::getMessageOutputs() const
+std::vector<OutputPtr> NodeModifier::getMessageOutputs() const
 {
     // hide parameter outputs from the nodes
     auto vec = getExternalOutputs();
-    std::vector<Output*> result;
+    std::vector<OutputPtr> result;
     for(auto entry : vec) {
         if(!isParameterOutput(entry.get()))  {
-            result.push_back(entry.get());
+            result.push_back(entry);
         }
     }
     return result;
 }
-std::vector<Slot*> NodeModifier::getSlots() const
+std::vector<SlotPtr> NodeModifier::getSlots() const
 {
-    auto vec = getExternalSlots();
-    std::vector<Slot*> result(vec.size());
-    std::size_t i = 0;
-    for(auto entry : vec) {
-        result[i++] = entry.get();
-    }
-    return result;
+    return getExternalSlots();
 }
-std::vector<Event*> NodeModifier::getEvents() const
+std::vector<EventPtr> NodeModifier::getEvents() const
 {
-    auto vec = getExternalEvents();
-    std::vector<Event*> result(vec.size());
-    std::size_t i = 0;
-    for(auto entry : vec) {
-        result[i++] = entry.get();
-    }
-    return result;
+    return getExternalEvents();
 }
 
 bool NodeModifier::isProcessingEnabled() const

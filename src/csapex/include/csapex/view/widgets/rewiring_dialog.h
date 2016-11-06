@@ -7,6 +7,7 @@
 /// PROJECT
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/msg/msg_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connection_information.h>
 
@@ -18,8 +19,6 @@ namespace csapex
 {
 
 class CsApexViewCore;
-class Input;
-class Output;
 class CommandDispatcher;
 class CsApexCore;
 
@@ -41,8 +40,8 @@ private Q_SLOTS:
     void finish();
 
 private:
-    void updateConnection(Input* input, const ConnectionPtr& connection);
-    void updateConnection(Output* output, const ConnectionPtr& connection);
+    void updateConnection(InputPtr input, const ConnectionPtr& connection);
+    void updateConnection(OutputPtr output, const ConnectionPtr& connection);
 
 private:
     CsApexViewCore& view_core_;

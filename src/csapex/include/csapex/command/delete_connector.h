@@ -27,9 +27,9 @@ protected:
 
 private:
     bool       in;
-    Connectable* c;
+    ConnectablePtr c;
 
-    Command::Ptr    delete_connections;
+    Command::Ptr delete_connections;
 
     UUID c_uuid;
 

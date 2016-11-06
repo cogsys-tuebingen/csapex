@@ -72,7 +72,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
 
             QTreeWidgetItem* target_widget = new QTreeWidgetItem;
             if(input->isConnected()) {
-                Connectable* target = input->getSource();
+                ConnectablePtr target = input->getSource();
                 target_widget->setText(0, QString::fromStdString(target->getUUID().getFullName()));
                 //target_widget->setIcon(1, target->getNode()->getIcon());
                 //target_widget->setText(1, target->getNode()->getType().c_str());
@@ -101,7 +101,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
             targets->setText(0, "Target");
             for(ConnectionPtr connection : output->getConnections()) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
-                Connectable* input = connection->to();
+                ConnectablePtr input = connection->to();
                 target_widget->setText(0, QString::fromStdString(input->getUUID().getFullName()));
                 //target_widget->setIcon(1, target->getNode()->getIcon());
                 //target_widget->setText(1, target->getNode()->getType().c_str());

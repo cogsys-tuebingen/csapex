@@ -102,13 +102,13 @@ MessagePreviewWidget::~MessagePreviewWidget()
     }
 }
 
-void MessagePreviewWidget::connectTo(Connectable *c)
+void MessagePreviewWidget::connectTo(ConnectablePtr c)
 {
     scene()->clear();
 
-    if(Output* o = dynamic_cast<Output*>(c)) {
+    if(OutputPtr o = std::dynamic_pointer_cast<Output>(c)) {
         connectToImpl(o);
-    } else if(Input* i = dynamic_cast<Input*>(c)) {
+    } else if(InputPtr i = std::dynamic_pointer_cast<Input>(c)) {
         connectToImpl(i);
     } else {
         return;
@@ -119,17 +119,18 @@ void MessagePreviewWidget::connectTo(Connectable *c)
     }
 }
 
-void MessagePreviewWidget::connectToImpl(Output *out)
+void MessagePreviewWidget::connectToImpl(OutputPtr out)
 {
-    connection_ = DirectConnection::connect(out, input_.get());
+    connection_ = DirectConnection::connect(out, input_);
 }
 
 
-void MessagePreviewWidget::connectToImpl(Input *in)
+void MessagePreviewWidget::connectToImpl(InputPtr in)
 {
     if(in->isConnected()) {
-        if(Output* source = dynamic_cast<Output*>(in->getSource())) {
-            connection_ = DirectConnection::connect(source, input_.get());
+        ConnectablePtr s = in->getSource()->shared_from_this();
+        if(OutputPtr source = std::dynamic_pointer_cast<Output>(s)) {
+            connection_ = DirectConnection::connect(source, input_);
         }
     }
 }
@@ -144,7 +145,7 @@ void MessagePreviewWidget::disconnect()
         QApplication::restoreOverrideCursor();
     }
 
-    Output* out = dynamic_cast<Output*> (connection_->from());
+    OutputPtr out = connection_->from();
     if(out) {
         out->removeConnection(input_.get());
     }

@@ -2056,7 +2056,7 @@ void GraphView::showPreview(Port* port)
     preview_widget_->move(pos.toPoint());
 
     if(!preview_widget_->isConnected()) {
-        preview_widget_->connectTo(port->getAdaptee().lock().get());
+        preview_widget_->connectTo(port->getAdaptee().lock());
     }
 }
 

@@ -177,16 +177,16 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
                         if(!c) {
                             continue;
                         }
-                        Input* input = dynamic_cast<Input*>(c->to());
+                        InputPtr input = c->to();
                         if(input && !input->isVirtual()) {
-                            scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
+                            scene->addTemporaryConnection(input.get(), src->mapToScene(e->pos()));
                         }
                     }
                 }
             } else {
                 Input* in = dynamic_cast<Input*> (c);
                 if(in) {
-                    scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
+                    scene->addTemporaryConnection(in->getSource().get(), src->mapToScene(e->pos()));
                 }
             }
             scene->update();

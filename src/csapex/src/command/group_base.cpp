@@ -57,7 +57,7 @@ void GroupBase::analyzeConnections(Graph* graph)
     for(NodeHandle* nh : nodes) {
         for(const InputPtr& input : nh->getExternalInputs()) {
             for(const ConnectionPtr& connection : input->getConnections()) {
-                Output* output = dynamic_cast<Output*>(connection->from());
+                OutputPtr output = connection->from();
                 apex_assert_hard(output);
 
                 if(input->isVirtual() || output->isVirtual()) {
@@ -67,7 +67,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 NodeHandle* source = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c(output, input.get(), output->getType(), connection->isActive());
+                ConnectionInformation c(output.get(), input.get(), output->getType(), connection->isActive());
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     connections_going_in.push_back(c);
@@ -76,7 +76,7 @@ void GroupBase::analyzeConnections(Graph* graph)
         }
         for(const OutputPtr& output : nh->getExternalOutputs()) {
             for(const ConnectionPtr& connection : output->getConnections()) {
-                Input* input = dynamic_cast<Input*>(connection->to());
+                InputPtr input = connection->to();
                 apex_assert_hard(input);
 
                 if(input->isVirtual() || output->isVirtual()) {
@@ -88,7 +88,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c(output.get(), input, input->getType(), connection->isActive());
+                    ConnectionInformation c(output.get(), input.get(), input->getType(), connection->isActive());
                     connections_going_out.push_back(c);
                 }
             }
@@ -96,7 +96,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
         for(const SlotPtr& slot : nh->getExternalSlots()) {
             for(const ConnectionPtr& connection : slot->getConnections()) {
-                Output* output = dynamic_cast<Output*>(connection->from());
+                OutputPtr output = connection->from();
                 apex_assert_hard(output);
 
                 if(output->isVirtual() || slot->isVirtual()) {
@@ -108,14 +108,14 @@ void GroupBase::analyzeConnections(Graph* graph)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c(output, slot.get(), output->getType(), connection->isActive());
+                    ConnectionInformation c(output.get(), slot.get(), output->getType(), connection->isActive());
                     signals_going_in.push_back(c);
                 }
             }
         }
         for(const EventPtr& trigger : nh->getExternalEvents()) {
             for(const ConnectionPtr& connection : trigger->getConnections()) {
-                Input* input = dynamic_cast<Input*>(connection->to());
+                InputPtr input = connection->to();
                 apex_assert_hard(input);
 
                 if(trigger->isVirtual() || input->isVirtual()) {
@@ -125,7 +125,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 NodeHandle* source = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c(trigger.get(), input, input->getType(), connection->isActive());
+                ConnectionInformation c(trigger.get(), input.get(), input->getType(), connection->isActive());
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     signals_going_out.push_back(c);

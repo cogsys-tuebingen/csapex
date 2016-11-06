@@ -180,11 +180,6 @@ GraphFacade* GraphFacade::getSubGraph(const UUID &uuid)
 
 ConnectionPtr GraphFacade::connect(OutputPtr output, InputPtr input)
 {
-    return GraphFacade::connect(output.get(), input.get());
-}
-
-ConnectionPtr GraphFacade::connect(Output *output, Input *input)
-{
     auto c = DirectConnection::connect(output, input);
     graph_->addConnection(c);
     return c;
@@ -201,9 +196,9 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
 {
     NodeHandle* output = graph_->findNodeHandleForConnector(output_id);
     apex_assert_hard(output);
-    Output* o = output->getOutput(output_id);
+    OutputPtr o = output->getOutput(output_id);
     apex_assert_hard(o);
-    Input* i = input->getInput(graph_->makeTypedUUID_forced(input->getUUID(), "in", input_id));
+    InputPtr i = input->getInput(graph_->makeTypedUUID_forced(input->getUUID(), "in", input_id));
     if(!i) {
         throw std::logic_error(input->getUUID().getFullName() +
                                " does not have an input with the label " +
@@ -219,7 +214,7 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
 ConnectionPtr GraphFacade::connect(NodeHandlePtr output, int output_id,
                                    const UUID& input_id)
 {
-    Output* o = output->getOutput(graph_->makeTypedUUID_forced(output->getUUID(), "out", output_id));
+    OutputPtr o = output->getOutput(graph_->makeTypedUUID_forced(output->getUUID(), "out", output_id));
     if(!o) {
         throw std::logic_error(output->getUUID().getFullName() +
                                " does not have an output with the index " +
@@ -228,7 +223,7 @@ ConnectionPtr GraphFacade::connect(NodeHandlePtr output, int output_id,
     apex_assert_hard(o);
     NodeHandle* input = graph_->findNodeHandleForConnector(input_id);
     apex_assert_hard(input);
-    Input* i = input->getInput(input_id);
+    InputPtr i = input->getInput(input_id);
     apex_assert_hard(i);
 
     auto c = DirectConnection::connect(o, i);
@@ -247,21 +242,20 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id,
 {
     NodeHandle* output = graph_->findNodeHandleForConnector(output_id);
     apex_assert_hard(output);
-    Output* o = output->getOutput(output_id);
+    OutputPtr o = output->getOutput(output_id);
     apex_assert_hard(o);
 
-    Input* i = nullptr;
+    InputPtr i = nullptr;
     for(auto in : input->getExternalInputs()) {
         Input* in_ptr = in.get();
         if(in_ptr->getLabel() == input_id) {
-            i = in_ptr;
+            i = in;
             break;
         }
     }
     for(auto in : input->getSlots()) {
-        Slot* in_ptr = in;
-        if(in_ptr->getLabel() == input_id) {
-            i = in_ptr;
+        if(in->getLabel() == input_id) {
+            i = in;
             break;
         }
     }
@@ -285,18 +279,16 @@ ConnectionPtr GraphFacade::connect(NodeHandlePtr output, const std::string& outp
 ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output_id,
                                    const UUID& input_id)
 {
-    Output* o = nullptr;
+    OutputPtr o = nullptr;
     for(auto out : output->getExternalOutputs()) {
-        Output* out_ptr = out.get();
-        if(out_ptr->getLabel() == output_id) {
-            o = out_ptr;
+        if(out->getLabel() == output_id) {
+            o = out;
             break;
         }
     }
     for(auto out : output->getEvents()) {
-        Output* out_ptr = out;
-        if(out_ptr->getLabel() == output_id) {
-            o = out_ptr;
+        if(out->getLabel() == output_id) {
+            o = out;
             break;
         }
     }
@@ -308,7 +300,7 @@ ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output
 
     NodeHandle* input = graph_->findNodeHandleForConnector(input_id);
     apex_assert_hard(input);
-    Input* i = input->getInput(input_id);
+    InputPtr i = input->getInput(input_id);
     apex_assert_hard(i);
 
     auto c = DirectConnection::connect(o, i);
@@ -319,13 +311,13 @@ ConnectionPtr GraphFacade::connect(NodeHandle* output, const std::string& output
 ConnectionPtr GraphFacade::connect(NodeHandle *output, int output_id,
                                    NodeHandle *input, int input_id)
 {
-    Output* o = output->getOutput(graph_->makeTypedUUID_forced(output->getUUID(), "out", output_id));
+    OutputPtr o = output->getOutput(graph_->makeTypedUUID_forced(output->getUUID(), "out", output_id));
     if(!o) {
         throw std::logic_error(output->getUUID().getFullName() +
                                " does not have an output with the index " +
                                std::to_string(output_id));
     }
-    Input* i = input->getInput(graph_->makeTypedUUID_forced(input->getUUID(), "in", input_id));
+    InputPtr i = input->getInput(graph_->makeTypedUUID_forced(input->getUUID(), "in", input_id));
     if(!i) {
         throw std::logic_error(input->getUUID().getFullName() +
                                " does not have an input with the label " +
@@ -346,18 +338,16 @@ ConnectionPtr GraphFacade::connect(NodeHandlePtr output, const std::string& outp
 ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output_id,
                                    NodeHandle *input, const std::string& input_id)
 {
-    Output* o = nullptr;
+    OutputPtr o = nullptr;
     for(auto out : output->getExternalOutputs()) {
-        Output* out_ptr = out.get();
-        if(out_ptr->getLabel() == output_id) {
-            o = out_ptr;
+        if(out->getLabel() == output_id) {
+            o = out;
             break;
         }
     }
-    for(auto out : output->getEvents()) {
-        Output* out_ptr = out;
-        if(out_ptr->getLabel() == output_id) {
-            o = out_ptr;
+    for(auto event : output->getEvents()) {
+        if(event->getLabel() == output_id) {
+            o = event;
             break;
         }
     }
@@ -366,18 +356,16 @@ ConnectionPtr GraphFacade::connect(NodeHandle *output, const std::string& output
                                " does not have an output with the label " +
                                output_id);
     }
-    Input* i = nullptr;
+    InputPtr i = nullptr;
     for(auto in : input->getExternalInputs()) {
-        Input* in_ptr = in.get();
-        if(in_ptr->getLabel() == input_id) {
-            i = in_ptr;
+        if(in->getLabel() == input_id) {
+            i = in;
             break;
         }
     }
-    for(auto in : input->getSlots()) {
-        Slot* in_ptr = in;
-        if(in_ptr->getLabel() == input_id) {
-            i = in_ptr;
+    for(auto slot : input->getSlots()) {
+        if(slot->getLabel() == input_id) {
+            i = slot;
             break;
         }
     }
@@ -398,8 +386,8 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id, const UUID& input_id)
     NodeHandle* input = graph_->findNodeHandleForConnector(input_id);
     apex_assert_hard(output);
     apex_assert_hard(input);
-    Output* o = output->getOutput(output_id);
-    Input* i = input->getInput(input_id);
+    OutputPtr o = output->getOutput(output_id);
+    InputPtr i = input->getInput(input_id);
     apex_assert_hard(o);
     apex_assert_hard(i);
 

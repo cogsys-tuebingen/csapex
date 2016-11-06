@@ -69,12 +69,12 @@ public:
 
     void removeInternalPorts();
 
-    Connectable* getConnector(const UUID& uuid) const;
-    Connectable* getConnectorNoThrow(const UUID& uuid) const noexcept;
-    virtual Input* getInput(const UUID& uuid) const;
-    virtual Output* getOutput(const UUID& uuid) const;
-    virtual Slot* getSlot(const UUID& uuid) const;
-    virtual Event* getEvent(const UUID& uuid) const;
+    ConnectablePtr getConnector(const UUID& uuid) const;
+    ConnectablePtr getConnectorNoThrow(const UUID& uuid) const noexcept;
+    virtual InputPtr getInput(const UUID& uuid) const;
+    virtual OutputPtr getOutput(const UUID& uuid) const;
+    virtual SlotPtr getSlot(const UUID& uuid) const;
+    virtual EventPtr getEvent(const UUID& uuid) const;
 
 
     void removeInput(const UUID& uuid) override;

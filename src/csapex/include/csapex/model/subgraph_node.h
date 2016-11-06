@@ -28,19 +28,19 @@ public:
     ~SubgraphNode();
 
     template <typename T = Connectable>
-    T *findConnector(const UUID &uuid)
+    std::shared_ptr<T> findConnector(const UUID &uuid)
     {
-        return dynamic_cast<T*>(Graph::findConnector(uuid));
+        return std::dynamic_pointer_cast<T>(Graph::findConnector(uuid));
     }
     template <typename T = Connectable>
-    T *findConnectorNoThrow(const UUID &uuid) noexcept
+    std::shared_ptr<T> findConnectorNoThrow(const UUID &uuid) noexcept
     {
-        return dynamic_cast<T*>(findConnectorNoThrow(uuid));
+        return std::dynamic_pointer_cast<T>(Graph::findConnectorNoThrow(uuid));
     }
 
-    virtual NodeHandle* findNodeHandle(const UUID& uuid) const override;
+    virtual NodeHandle*findNodeHandle(const UUID& uuid) const override;
     virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
-    virtual Connectable* findConnectorNoThrow(const UUID &uuid) noexcept override;
+    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid) override;
     virtual void reset() override;

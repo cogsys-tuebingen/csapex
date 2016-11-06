@@ -71,10 +71,7 @@ bool UngroupNodes::doExecute()
     for(OutputPtr out : nh->getExternalOutputs()) {
         auto& vec = old_connections_out[out->getUUID()];
         for(ConnectionPtr c : out->getConnections()) {
-            Input* in = dynamic_cast<Input*>(c->to());
-            if(in) {
-                vec.push_back(in->getUUID());
-            }
+            vec.push_back(c->to()->getUUID());
         }
     }
 
@@ -82,7 +79,7 @@ bool UngroupNodes::doExecute()
     for(SlotPtr slot : nh->getExternalSlots()) {
         auto& vec = old_signals_in[slot->getUUID()];
         for(ConnectionPtr c : slot->getConnections()) {
-            Event* trigger = dynamic_cast<Event*>(c->from());
+            EventPtr trigger = std::dynamic_pointer_cast<Event>(c->from());
             if(trigger) {
                 vec.push_back(trigger->getUUID());
             }
@@ -92,7 +89,7 @@ bool UngroupNodes::doExecute()
     for(EventPtr trigger : nh->getExternalEvents()) {
         auto& vec = old_signals_out[trigger->getUUID()];
         for(ConnectionPtr c : trigger->getConnections()) {
-            Slot* slot = dynamic_cast<Slot*>(c->to());
+            SlotPtr slot = std::dynamic_pointer_cast<Slot>(c->to());
             if(slot) {
                 vec.push_back(slot->getUUID());
             }

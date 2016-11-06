@@ -721,7 +721,7 @@ void NodeHandle::manageEvent(EventPtr t)
     connectorCreated(t);
 }
 
-Connectable* NodeHandle::getConnector(const UUID &uuid) const
+ConnectablePtr NodeHandle::getConnector(const UUID &uuid) const
 {
     std::string type = uuid.type();
 
@@ -738,7 +738,7 @@ Connectable* NodeHandle::getConnector(const UUID &uuid) const
     }
 }
 
-Connectable* NodeHandle::getConnectorNoThrow(const UUID &uuid) const noexcept
+ConnectablePtr NodeHandle::getConnectorNoThrow(const UUID &uuid) const noexcept
 {
     try {
         return getConnector(uuid);
@@ -752,63 +752,63 @@ Connectable* NodeHandle::getConnectorNoThrow(const UUID &uuid) const noexcept
     }
 }
 
-Input* NodeHandle::getInput(const UUID& uuid) const
+InputPtr NodeHandle::getInput(const UUID& uuid) const
 {
     for(InputPtr in : external_inputs_) {
         if(in->getUUID() == uuid) {
-            return in.get();
+            return in;
         }
     }
     
     if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
-        return graph->getForwardedInputInternal(uuid).get();
+        return graph->getForwardedInputInternal(uuid);
     }
     
     return nullptr;
 }
 
-Output* NodeHandle::getOutput(const UUID& uuid) const
+OutputPtr NodeHandle::getOutput(const UUID& uuid) const
 {
     for(OutputPtr out : external_outputs_) {
         if(out->getUUID() == uuid) {
-            return out.get();
+            return out;
         }
     }
 
     if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
-        return graph->getForwardedOutputInternal(uuid).get();
+        return graph->getForwardedOutputInternal(uuid);
     }
     
     return nullptr;
 }
 
 
-Slot* NodeHandle::getSlot(const UUID& uuid) const
+SlotPtr NodeHandle::getSlot(const UUID& uuid) const
 {
     for(SlotPtr s : external_slots_) {
         if(s->getUUID() == uuid) {
-            return s.get();
+            return s;
         }
     }
 
     if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
-        return graph->getForwardedSlotInternal(uuid).get();
+        return graph->getForwardedSlotInternal(uuid);
     }
     
     return nullptr;
 }
 
 
-Event* NodeHandle::getEvent(const UUID& uuid) const
+EventPtr NodeHandle::getEvent(const UUID& uuid) const
 {
     for(EventPtr t : external_events_) {
         if(t->getUUID() == uuid) {
-            return t.get();
+            return t;
         }
     }
 
     if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
-        return graph->getForwardedEventInternal(uuid).get();
+        return graph->getForwardedEventInternal(uuid);
     }
     
     return nullptr;
@@ -816,22 +816,22 @@ Event* NodeHandle::getEvent(const UUID& uuid) const
 
 void NodeHandle::removeInput(const UUID &uuid)
 {
-    removeInput(getInput(uuid));
+    removeInput(getInput(uuid).get());
 }
 
 void NodeHandle::removeOutput(const UUID &uuid)
 {
-    removeOutput(getOutput(uuid));
+    removeOutput(getOutput(uuid).get());
 }
 
 void NodeHandle::removeSlot(const UUID &uuid)
 {
-    removeSlot(getSlot(uuid));
+    removeSlot(getSlot(uuid).get());
 }
 
 void NodeHandle::removeEvent(const UUID &uuid)
 {
-    removeEvent(getEvent(uuid));
+    removeEvent(getEvent(uuid).get());
 }
 
 std::vector<ConnectablePtr> NodeHandle::getExternalConnectors() const

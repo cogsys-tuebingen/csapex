@@ -22,11 +22,11 @@ bool DeleteMessageConnection::doUndo()
 {
     Graph* graph = getGraph();
 
-    Connectable* from = graph->findConnector(from_uuid);
-    Connectable* to = graph->findConnector(to_uuid);
+    ConnectablePtr from = graph->findConnector(from_uuid);
+    ConnectablePtr to = graph->findConnector(to_uuid);
 
-    Output* output = dynamic_cast<Output*>(from);
-    Input* input = dynamic_cast<Input*>(to);
+    OutputPtr output = std::dynamic_pointer_cast<Output>(from);
+    InputPtr input = std::dynamic_pointer_cast<Input>(to);
 
     ConnectionPtr c = DirectConnection::connect(output, input, connection_id);
     c->setActive(active_);

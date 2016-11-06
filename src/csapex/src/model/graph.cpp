@@ -136,7 +136,7 @@ bool Graph::addConnection(ConnectionPtr connection, bool quiet)
     apex_assert_hard(connection);
     connections_.push_back(connection);
 
-    if(!dynamic_cast<Event*>(connection->from()) && !dynamic_cast<Slot*>(connection->to())) {
+    if(!std::dynamic_pointer_cast<Event>(connection->from()) && !std::dynamic_pointer_cast<Slot>(connection->to())) {
         NodeHandle* n_from = findNodeHandleForConnector(connection->from()->getUUID());
         NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
 
@@ -179,14 +179,14 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
     auto out = connection->from();
     auto in = connection->to();
 
-    out->removeConnection(in);
+    out->removeConnection(in.get());
 
     out->fadeConnection(connection);
     in->fadeConnection(connection);
 
     for(std::vector<ConnectionPtr>::iterator c = connections_.begin(); c != connections_.end();) {
         if(*connection == **c) {
-            Connectable* to = connection->to();
+            ConnectablePtr to = connection->to();
             to->setError(false);
 
             UUID from_uuid = connection->from()->getUUID();
@@ -202,7 +202,7 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
 
 
 
-            if(!dynamic_cast<Event*>(connection->from()) && !dynamic_cast<Slot*>(connection->to())) {
+            if(!std::dynamic_pointer_cast<Event>(connection->from()) && !std::dynamic_pointer_cast<Slot>(connection->to())) {
                 // erase pointer from TO to FROM
                 if(n_from != n_to) {
                     graph::VertexPtr v_from = n_from->getVertex();
@@ -213,7 +213,7 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
                         if(c->isDetached()) {
                             continue;
                         }
-                        Connectable* to = c->to();
+                        ConnectablePtr to = c->to();
                         apex_assert_hard(to);
                         if(NodeHandlePtr child = std::dynamic_pointer_cast<NodeHandle>(to->getOwner())) {
                             if(child.get() == n_to) {
@@ -551,7 +551,7 @@ Node* Graph::findNodeNoThrow(const UUID& uuid) const noexcept
 }
 
 
-NodeHandle* Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
+NodeHandle *Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.composite()) {
         UUID root = uuid.rootUUID();
@@ -630,16 +630,16 @@ std::vector<NodeHandle*> Graph::getAllNodeHandles()
     return node_handles;
 }
 
-Connectable* Graph::findConnector(const UUID &uuid)
+ConnectablePtr Graph::findConnector(const UUID &uuid)
 {
-    Connectable* res = findConnectorNoThrow(uuid);
+    ConnectablePtr res = findConnectorNoThrow(uuid);
     if(!res) {
         throw std::runtime_error(std::string("cannot find connector with UUID=") + uuid.getFullName());
     }
     return res;
 }
 
-Connectable* Graph::findConnectorNoThrow(const UUID &uuid) noexcept
+ConnectablePtr Graph::findConnectorNoThrow(const UUID &uuid) noexcept
 {
     NodeHandle* owner = findNodeHandleNoThrow(uuid.parentUUID());
     if(!owner) {

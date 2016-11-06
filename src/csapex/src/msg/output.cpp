@@ -82,7 +82,7 @@ void Output::removeConnection(Connectable* other_side)
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
         ConnectionPtr c = *i;
-        if(c->to() == other_side) {
+        if(c->to().get() == other_side) {
             other_side->removeConnection(this);
 
             i = connections_.erase(i);
@@ -148,7 +148,7 @@ void Output::connectionMovePreview(Connectable *other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(ConnectionPtr connection : connections_) {
-        connectionInProgress(connection->to(), other_side);
+        connectionInProgress(connection->to().get(), other_side);
     }
 }
 

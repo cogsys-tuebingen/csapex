@@ -41,7 +41,7 @@ public:
     virtual void connectionMovePreview(Connectable* other_side) override;
     virtual void validateConnections() override;
 
-    Output* getSource() const;
+    OutputPtr getSource() const;
 
     virtual void removeAllConnectionsNotUndoable() override;
 
