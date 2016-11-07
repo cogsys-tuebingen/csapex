@@ -22,6 +22,7 @@
 using namespace csapex;
 
 Graph::Graph()
+    : in_transaction_(false)
 {
 }
 
@@ -51,18 +52,22 @@ void Graph::clear()
 {
     UUIDProvider::clearCache();
 
+    beginTransaction();
+
     auto connections = connections_;
     for(ConnectionPtr c : connections) {
-        deleteConnection(c, true);
+        deleteConnection(c);
     }
     apex_assert_hard(connections_.empty());
 
     auto vertecies = vertices_;
     for(graph::VertexPtr vertex : vertecies) {
         NodeHandlePtr node = vertex->getNodeHandle();
-        deleteNode(node->getUUID(), true);
+        deleteNode(node->getUUID());
     }
     apex_assert_hard(vertices_.empty());
+
+    finalizeTransaction();
 }
 
 void Graph::addNode(NodeHandlePtr nh)
@@ -77,8 +82,10 @@ void Graph::addNode(NodeHandlePtr nh)
     sinks_.insert(vertex);
 
     vertex_added(vertex);
+    if(!in_transaction_) {
+        analyzeGraph();
+    }
 
-    analyzeGraph();
 }
 
 std::vector<ConnectionPtr> Graph::getConnections()
@@ -86,7 +93,7 @@ std::vector<ConnectionPtr> Graph::getConnections()
     return connections_;
 }
 
-void Graph::deleteNode(const UUID& uuid, bool quiet)
+void Graph::deleteNode(const UUID& uuid)
 {
     NodeHandle* node_handle = findNodeHandle(uuid);
     node_handle->stop();
@@ -119,8 +126,8 @@ void Graph::deleteNode(const UUID& uuid, bool quiet)
     //            }
     //        }
 
-    if(!quiet) {
-        vertex_removed(removed);
+    vertex_removed(removed);
+    if(!in_transaction_) {
         analyzeGraph();
     }
 }
@@ -131,7 +138,7 @@ int Graph::countNodes()
 }
 
 
-bool Graph::addConnection(ConnectionPtr connection, bool quiet)
+bool Graph::addConnection(ConnectionPtr connection)
 {
     apex_assert_hard(connection);
     connections_.push_back(connection);
@@ -151,20 +158,17 @@ bool Graph::addConnection(ConnectionPtr connection, bool quiet)
 
             sources_.erase(v_to);
             sinks_.erase(v_from);
-
-            if(!quiet) {
-                analyzeGraph();
-            }
         }
     }
 
-    if(!quiet) {
-        connectionAdded(connection.get());
+    connection_added(connection.get());
+    if(!in_transaction_) {
+        analyzeGraph();
     }
     return true;
 }
 
-void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
+void Graph::deleteConnection(ConnectionPtr connection)
 {
     apex_assert_hard(connection);
 
@@ -192,15 +196,6 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
             UUID from_uuid = connection->from()->getUUID();
             NodeHandle* n_from = findNodeHandleForConnector(from_uuid);
             NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
-
-            connections_.erase(c);
-
-            if(!quiet) {
-                connectionDeleted(connection.get());
-                state_changed();
-            }
-
-
 
             if(!std::dynamic_pointer_cast<Event>(connection->from()) && !std::dynamic_pointer_cast<Slot>(connection->to())) {
                 // erase pointer from TO to FROM
@@ -237,10 +232,12 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
                 }
             }
 
-            if(!quiet) {
+            connections_.erase(c);
+
+            connection_removed(connection.get());
+            if(!in_transaction_) {
                 analyzeGraph();
             }
-
             for(const auto& c : connections_) {
                 apex_assert_hard(c);
             }
@@ -256,13 +253,16 @@ void Graph::deleteConnection(ConnectionPtr connection, bool quiet)
     throw std::runtime_error("cannot delete connection");
 }
 
-void Graph::triggerConnectionsAdded()
+void Graph::beginTransaction()
 {
-    analyzeGraph();
+    in_transaction_ = true;
+}
 
-    for(const ConnectionPtr& connection : connections_) {
-        connectionAdded(connection.get());
-    }
+void Graph::finalizeTransaction()
+{
+    in_transaction_ = false;
+
+    analyzeGraph();
 }
 
 void Graph::analyzeGraph()
@@ -271,7 +271,7 @@ void Graph::analyzeGraph()
 
     calculateDepths();
 
-    structureChanged(this);
+    state_changed();
 }
 
 void Graph::buildConnectedComponents()

@@ -103,7 +103,7 @@ Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* con
 
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 {
-    Meta::Ptr removeAll(new Meta(graph_uuid, "Remove All Connections"));
+    Meta::Ptr removeAll(new Meta(graph_uuid, "Remove All Connections", true));
 
     for(ConnectionPtr connection : output->getConnections()) {
         InputPtr input = connection->to();
@@ -129,7 +129,7 @@ Command::Ptr CommandFactory::setConnectionActive(int connection, bool active)
 
 Command::Ptr CommandFactory::clearCommand()
 {
-    Meta::Ptr clear(new Meta(graph_uuid, "Clear graph_"));
+    Meta::Ptr clear(new Meta(graph_uuid, "Clear graph_", true));
 
     for(auto node : root_->getGraph()->getAllNodeHandles()) {
         clear->add(Command::Ptr (new DeleteNode(graph_uuid, node->getUUID())));
@@ -221,7 +221,7 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
 
     AUUID parent_uuid(graph_uuid);
 
-    Meta::Ptr meta(new Meta(parent_uuid, "MoveConnection"));
+    Meta::Ptr meta(new Meta(parent_uuid, "MoveConnection", true));
 
     if(is_output) {
         Output* out = dynamic_cast<Output*>(from);

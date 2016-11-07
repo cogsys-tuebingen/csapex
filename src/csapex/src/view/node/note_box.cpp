@@ -188,7 +188,7 @@ void NoteBox::init()
         changeColor();
     });
 
-    changeColor();
+    updateStylesheetColor();
     updateVisualsRequest();
 }
 
@@ -240,8 +240,15 @@ void NoteBox::setSelected(bool selected)
     refreshStylesheet();
 }
 
-void NoteBox::updateStylesheetColor(const NodeStatePtr& state)
+void NoteBox::updateStylesheetColor()
 {
+
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return;
+    }
+    NodeStatePtr state = nh->getNodeState();
+
     QColor text_color = Qt::black;
 
     int r, g, b;

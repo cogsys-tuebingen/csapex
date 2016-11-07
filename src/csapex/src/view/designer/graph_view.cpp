@@ -134,7 +134,7 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
 
     scoped_connections_.emplace_back(graph->internalConnectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
-    scoped_connections_.emplace_back(graph->structureChanged.connect([this](Graph*){ updateBoxInformation(); }));
+    scoped_connections_.emplace_back(graph->state_changed.connect([this](){ updateBoxInformation(); }));
 
     for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
         const NodeHandlePtr& nh = (*it)->getNodeHandle();
@@ -458,7 +458,7 @@ void GraphView::updateSelection()
 
 Command::Ptr GraphView::deleteSelected()
 {
-    command::Meta::Ptr meta(new command::Meta(graph_facade_->getAbsoluteUUID(), "delete selected boxes"));
+    command::Meta::Ptr meta(new command::Meta(graph_facade_->getAbsoluteUUID(), "delete selected boxes", true));
     for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
@@ -1237,6 +1237,7 @@ void GraphView::overwriteStyleSheet(const QString &stylesheet)
 
 void GraphView::updateBoxInformation()
 {
+    std::cerr << "updateing box info" << std::endl;
     for(QGraphicsItem* item : scene_->items()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
@@ -1757,7 +1758,7 @@ void GraphView::muteBox(bool mini)
 
 void GraphView::deleteBox()
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"delete boxes"));
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"delete boxes", true));
     for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::DeleteNode(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID())));
     }

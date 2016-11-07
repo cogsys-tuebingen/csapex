@@ -4,6 +4,8 @@
 /// PROJECT
 #include <csapex/utility/assert.h>
 #include <csapex/core/csapex_core.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph.h>
 
 /// SYSTEM
 #include <iostream>
@@ -11,8 +13,8 @@
 using namespace csapex;
 using namespace csapex::command;
 
-Meta::Meta(const AUUID &parent_uuid, const std::string &type)
-    : Command(parent_uuid), locked(false), type(type)
+Meta::Meta(const AUUID &parent_uuid, const std::string &type, bool transaction)
+    : Command(parent_uuid), locked(false), transaction(transaction), type(type)
 {
 }
 
@@ -69,6 +71,10 @@ bool Meta::doExecute()
 {
     locked = true;
 
+    if(transaction) {
+        graph_facade_->getGraph()->beginTransaction();
+    }
+
     bool success = true;
     for(Command::Ptr cmd : nested) {
         bool s = Access::executeCommand(cmd);
@@ -78,17 +84,31 @@ bool Meta::doExecute()
         }
         success &= s;
     }
+
+    if(transaction) {
+        graph_facade_->getGraph()->finalizeTransaction();
+    }
+
     return success;
 }
 
 bool Meta::doUndo()
 {
+    if(transaction) {
+        graph_facade_->getGraph()->beginTransaction();
+    }
+
     for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
         bool s = Access::undoCommand(*it);
         if(!s) {
             undo_later.push_back(*it);
         }
     }
+
+    if(transaction) {
+        graph_facade_->getGraph()->finalizeTransaction();
+    }
+
 
     return true;
 }

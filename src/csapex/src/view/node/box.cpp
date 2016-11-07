@@ -119,8 +119,6 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_error);
     }
 
-    setupUiAgain();
-
     if(dynamic_cast<VariadicBase*>(getNode())) {
         AUUID parent = getNodeHandle()->getUUID().getAbsoluteUUID();
         if(dynamic_cast<VariadicInputs*>(getNode())) {
@@ -170,16 +168,8 @@ void NodeBox::setupUi()
         }
     }));
 
-    changeColor();
-    updateVisualsRequest();
+    updateStylesheetColor();
 
-    Q_EMIT changed(this);
-}
-
-
-
-void NodeBox::setupUiAgain()
-{
     ui->header->setAlignment(Qt::AlignTop);
     ui->content->setAlignment(Qt::AlignTop);
 
@@ -193,6 +183,8 @@ void NodeBox::setupUiAgain()
     //    setBackgroundMode (Qt::NoBackground, true);
 
     updateVisuals();
+
+    Q_EMIT changed(this);
 }
 
 void NodeBox::construct()
@@ -672,7 +664,7 @@ void NodeBox::enabledChangeEvent(bool val)
     ui->enablebtn->setChecked(val);
     ui->enablebtn->blockSignals(false);
 
-    refreshStylesheet();
+    refreshTopLevelStylesheet();
 }
 
 QString NodeBox::getNodeState()
@@ -756,7 +748,7 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
             info_error->setVisible(false);
         }
 
-        refreshStylesheet();
+        refreshTopLevelStylesheet();
     }
 
     if(!initialized_) {
@@ -786,7 +778,7 @@ void NodeBox::setSelected(bool selected)
     for(Port* port : findChildren<Port*>()) {
         port->setProperty("focused",selected);
     }
-    refreshStylesheet();
+    refreshTopLevelStylesheet();
 }
 
 void NodeBox::keyPressEvent(QKeyEvent *)
@@ -810,13 +802,17 @@ void NodeBox::refreshStylesheet()
     apex_assert_hard(QThread::currentThread() == QApplication::instance()->thread());
     for(auto* child : children()) {
         if(QWidget* widget = dynamic_cast<QWidget*>(child)) {
-            widget->style()->unpolish(widget);
             widget->style()->polish(widget);
-            widget->update();
         }
     }
 
-    style()->unpolish(this);
+    style()->polish(this);
+    update();
+}
+
+void NodeBox::refreshTopLevelStylesheet()
+{
+    ui->boxframe->style()->polish(ui->boxframe);
     style()->polish(this);
     update();
 }
@@ -862,8 +858,14 @@ void NodeBox::triggerMinimized()
     Q_EMIT minimized(minimize);
 }
 
-void NodeBox::updateStylesheetColor(const NodeStatePtr& state)
+void NodeBox::updateStylesheetColor()
 {
+    NodeHandlePtr nh = node_handle_.lock();
+    if(!nh) {
+        return;
+    }
+    NodeStatePtr state = nh->getNodeState();
+
     QColor text_color = Qt::black;
 
     int r, g, b;
@@ -931,14 +933,8 @@ void NodeBox::updateStylesheetColor(const NodeStatePtr& state)
 
 void NodeBox::changeColor()
 {
-    NodeHandlePtr nh = node_handle_.lock();
-    if(!nh) {
-        return;
-    }
-    NodeStatePtr state = nh->getNodeState();
-
-    updateStylesheetColor(state);
-    refreshStylesheet();
+    updateStylesheetColor();
+    refreshTopLevelStylesheet();
 }
 
 void NodeBox::updateVisuals()
@@ -1019,9 +1015,7 @@ void NodeBox::updateVisuals()
         }
     }
 
-    QApplication::processEvents(); adjustSize();
-
-    refreshStylesheet();
+    refreshTopLevelStylesheet();
 
     ensurePolished();
     adjustSize();

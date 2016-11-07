@@ -87,12 +87,13 @@ public:
     int countNodes();
 
     void addNode(NodeHandlePtr node);
-    void deleteNode(const UUID &uuid, bool quiet = false);
+    void deleteNode(const UUID &uuid);
 
-    bool addConnection(ConnectionPtr connection, bool quiet = false);
-    void deleteConnection(ConnectionPtr connection, bool quiet = false);
+    bool addConnection(ConnectionPtr connection);
+    void deleteConnection(ConnectionPtr connection);
 
-    void triggerConnectionsAdded();
+    void beginTransaction();
+    void finalizeTransaction();
 
     void analyzeGraph();
 
@@ -112,10 +113,9 @@ private:
 
 public:
     csapex::slim_signal::Signal<void()> state_changed;
-    csapex::slim_signal::Signal<void(Graph*)> structureChanged;
 
-    csapex::slim_signal::Signal<void(Connection*)> connectionAdded;
-    csapex::slim_signal::Signal<void(Connection*)> connectionDeleted;
+    csapex::slim_signal::Signal<void(Connection*)> connection_added;
+    csapex::slim_signal::Signal<void(Connection*)> connection_removed;
 
     csapex::slim_signal::Signal<void(graph::VertexPtr)> vertex_added;
     csapex::slim_signal::Signal<void(graph::VertexPtr)> vertex_removed;
@@ -127,6 +127,8 @@ protected:
 
     std::set<graph::VertexPtr> sources_;
     std::set<graph::VertexPtr> sinks_;
+
+    bool in_transaction_;
 };
 
 }

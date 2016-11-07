@@ -89,16 +89,17 @@ void GraphIO::loadGraphFrom(const YAML::Node& doc)
     TimerPtr timer = getProfiler()->getTimer("load graph");
     timer->restart();
 
+    graph_->beginTransaction();
     {
         auto interlude = timer->step("load nodes");
         loadNodes(doc);
     }
+
     {
         auto interlude = timer->step("load connections");
         loadConnections(doc);
     }
-
-    graph_->triggerConnectionsAdded();
+    graph_->finalizeTransaction();
 
     {
         auto interlude = timer->step("load view");

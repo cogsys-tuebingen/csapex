@@ -114,13 +114,11 @@ public:
     void updateBoxInformation(Graph* graph);
 
 public Q_SLOTS:
-    void setupUiAgain();
-
-
     void getInformation();
     void triggerMinimized();
     void changeColor();
     void refreshStylesheet();
+    void refreshTopLevelStylesheet();
     void killContent();
     void triggerFlipSides();
     void showProfiling(bool show);
@@ -176,7 +174,7 @@ protected:
 
     QString getNodeState();
 
-    virtual void updateStylesheetColor(const NodeStatePtr &state);
+    virtual void updateStylesheetColor();
 
     virtual void startResize();
     virtual void stopResize();

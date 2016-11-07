@@ -18,7 +18,7 @@ class CSAPEX_COMMAND_EXPORT Meta : public Command
 public:
     typedef std::shared_ptr<Meta> Ptr;
 
-    Meta(const AUUID& graph_uuid, const std::string& type);
+    Meta(const AUUID& graph_uuid, const std::string& type, bool transaction = false);
     void clear();
     void add(Command::Ptr cmd);
 
@@ -39,6 +39,7 @@ protected:
 protected:
     std::vector<Command::Ptr> nested;
     bool locked;
+    bool transaction;
     std::string type;
 };
 }

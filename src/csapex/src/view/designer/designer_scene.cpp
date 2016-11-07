@@ -126,8 +126,8 @@ DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     Graph* graph = graph_facade_->getGraph();
 
-    connections_.push_back(graph->connectionAdded.connect([this](Connection* c) { connectionAdded(c); }));
-    connections_.push_back(graph->connectionDeleted.connect([this](Connection* c) { connectionDeleted(c); }));
+    connections_.push_back(graph->connection_added.connect([this](Connection* c) { connectionAdded(c); }));
+    connections_.push_back(graph->connection_removed.connect([this](Connection* c) { connectionDeleted(c); }));
 
     for(const auto& connection : graph->getConnections()) {
         connectionAdded(connection.get());
