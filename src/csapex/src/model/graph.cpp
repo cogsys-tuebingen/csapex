@@ -300,7 +300,11 @@ void Graph::buildConnectedComponents()
 
             checkNodeState(front->getNodeHandle().get());
 
-            unmarked.erase(std::find(unmarked.begin(), unmarked.end(), front));
+            auto it = std::find(unmarked.begin(), unmarked.end(), front);
+            if(it == unmarked.end()) {
+                continue;
+            }
+            unmarked.erase(it);
 
             // iterate all neighbors
             std::vector<graph::Vertex*> neighbors;
