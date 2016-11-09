@@ -90,14 +90,12 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
     }
     apex_assert_hard(connections.size() == 1);
     OutputPtr output = input->getSource();
-    apex_assert_hard(!input->isVirtual() && !output->isVirtual());
     Command::Ptr cmd(new DeleteMessageConnection(graph_uuid, output.get(), input));
     return cmd;
 }
 
 Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* connection) {
     InputPtr input = connection->to();
-    apex_assert_hard(!input->isVirtual() && !output->isVirtual());
     return Command::Ptr (new DeleteMessageConnection(graph_uuid, output, input.get()));
 }
 
@@ -107,10 +105,8 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 
     for(ConnectionPtr connection : output->getConnections()) {
         InputPtr input = connection->to();
-        if(!input->isVirtual() && !output->isVirtual()) {
-            Command::Ptr removeThis(new DeleteMessageConnection(graph_uuid, output, input.get()));
-            removeAll->add(removeThis);
-        }
+        Command::Ptr removeThis(new DeleteMessageConnection(graph_uuid, output, input.get()));
+        removeAll->add(removeThis);
     }
 
     return removeAll;
@@ -211,9 +207,6 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
     apex_assert_hard((from->isOutput() && to->isOutput()) ||
                      (from->isInput() && to->isInput()));
 
-    apex_assert_hard(!from->isVirtual());
-    apex_assert_hard(!to->isVirtual());
-
     bool is_output = from->isOutput();
 
     //    UUID from_uuid = from->getUUID();
@@ -231,7 +224,7 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
                     continue;
                 }
                 InputPtr input = c->to();
-                if(input && !input->isVirtual()) {
+                if(input) {
                     meta->add(Command::Ptr(new DeleteMessageConnection(parent_uuid, out, input.get())));
                     meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, to_uuid, input->getUUID(), c->isActive())));
                 }
@@ -241,7 +234,7 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
     } else {
         Input* in = dynamic_cast<Input*>(from);
 
-        if(in && !in->isVirtual()) {
+        if(in) {
             for(ConnectionPtr c : in->getConnections()) {
                 if(!c) {
                     continue;

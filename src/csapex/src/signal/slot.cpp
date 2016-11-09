@@ -78,7 +78,7 @@ void Slot::notifyMessageAvailable(Connection* connection)
 
 void Slot::notifyMessageProcessed()
 {
-    messageProcessed(this);
+    message_processed(this);
 
     Connection* front = nullptr;
     {
@@ -116,12 +116,14 @@ void Slot::handleEvent()
             } catch(const std::exception& e) {
                 std::cerr << "slot " << getUUID() << " has thrown an exception: " << e.what() << std::endl;
             }
+        } else {
+            notifyEventHandled();
+            return;
         }
     }
 
     if(!asynchronous_) {
-        message_.reset();
-        notifyMessageProcessed();
+        notifyEventHandled();
     }
 }
 

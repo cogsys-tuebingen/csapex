@@ -443,7 +443,9 @@ void NodeWorker::startProcessingMessages()
     if(marker || !all_inputs_are_present) {
         if(!marker) {
             // no processing because a non-optional port has a NoMessage marker
-            if(node_handle_->getVertex()->getNodeCharacteristics().is_vertex_separator) {
+            bool can_drop_marker = node_handle_->getVertex()->getNodeCharacteristics().is_vertex_separator
+                    && !node_handle_->getVertex()->getNodeCharacteristics().is_leading_to_essential_vertex;
+            if(can_drop_marker) {
                 signalMessagesProcessed(true);
             } else {
                 forwardMessages(false);
@@ -1012,6 +1014,10 @@ void NodeWorker::checkParameters()
     node->checkConditions(false);
 }
 
+void NodeWorker::trySendEvents()
+{
+    sendEvents(node_handle_->isActive());
+}
 
 void NodeWorker::connectConnector(ConnectablePtr c)
 {
@@ -1026,7 +1032,7 @@ void NodeWorker::connectConnector(ConnectablePtr c)
                 sendEvents(node_handle_->isActive());
             });
         }));
-        port_connections_[c.get()].emplace_back(event->message_processed.connect([this]() {
+        port_connections_[c.get()].emplace_back(event->message_processed.connect([this](Connectable*) {
             triggerTryProcess();
         }));
 

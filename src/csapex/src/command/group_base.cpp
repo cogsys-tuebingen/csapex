@@ -60,10 +60,6 @@ void GroupBase::analyzeConnections(Graph* graph)
                 OutputPtr output = connection->from();
                 apex_assert_hard(output);
 
-                if(input->isVirtual() || output->isVirtual()) {
-                    continue;
-                }
-
                 NodeHandle* source = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(source);
 
@@ -78,10 +74,6 @@ void GroupBase::analyzeConnections(Graph* graph)
             for(const ConnectionPtr& connection : output->getConnections()) {
                 InputPtr input = connection->to();
                 apex_assert_hard(input);
-
-                if(input->isVirtual() || output->isVirtual()) {
-                    continue;
-                }
 
                 NodeHandle* target = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(target);
@@ -99,10 +91,6 @@ void GroupBase::analyzeConnections(Graph* graph)
                 OutputPtr output = connection->from();
                 apex_assert_hard(output);
 
-                if(output->isVirtual() || slot->isVirtual()) {
-                    continue;
-                }
-
                 NodeHandle* target = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(target);
 
@@ -117,10 +105,6 @@ void GroupBase::analyzeConnections(Graph* graph)
             for(const ConnectionPtr& connection : trigger->getConnections()) {
                 InputPtr input = connection->to();
                 apex_assert_hard(input);
-
-                if(trigger->isVirtual() || input->isVirtual()) {
-                    continue;
-                }
 
                 NodeHandle* source = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(source);

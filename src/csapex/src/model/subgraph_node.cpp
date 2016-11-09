@@ -14,6 +14,7 @@
 #include <csapex/param/parameter_factory.h>
 #include <csapex/param/bitset_parameter.h>
 #include <csapex/utility/debug.h>
+#include <csapex/model/node_worker.h>
 
 using namespace csapex;
 
@@ -224,6 +225,7 @@ Input* SubgraphNode::createVariadicInput(TokenDataConstPtr type, const std::stri
 InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional)
 {
     InputPtr input = node_handle_->addInternalInput(type, internal_uuid, label, optional);
+    input->setVirtual(true);
 
     transition_relay_in_->addInput(input);
 
@@ -294,6 +296,7 @@ Output* SubgraphNode::createVariadicOutput(TokenDataConstPtr type, const std::st
 OutputPtr SubgraphNode::createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     OutputPtr output = node_handle_->addInternalOutput(type, internal_uuid, label);
+    output->setVirtual(true);
 
     transition_relay_out_->addOutput(output);
 
@@ -372,6 +375,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
 SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
 {
     SlotPtr slot = node_handle_->addInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), internal_uuid, label, callback);
+    slot->setVirtual(true);
 
     slot->connectionInProgress.connect(internalConnectionInProgress);
 
@@ -416,12 +420,12 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
 
     auto cb = [relay](const TokenConstPtr& data) {
         relay->triggerWith(std::make_shared<Token>(*data));
-        relay->messageProcessed(relay.get());
+        relay->message_processed(relay.get());
     };
 
     Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb, false, true);
 
-    relay->messageProcessed.connect(std::bind(&Slot::notifyEventHandled, external_slot));
+    relay->message_processed.connect(std::bind(&Slot::notifyEventHandled, external_slot));
 
     crossConnectLabelChange(external_slot, relay.get());
 
@@ -437,6 +441,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
 EventPtr SubgraphNode::createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     EventPtr event = node_handle_->addInternalEvent(type, internal_uuid, label);
+    event->setVirtual(true);
 
     event->connectionInProgress.connect(internalConnectionInProgress);
 
@@ -485,9 +490,11 @@ UUID SubgraphNode::addForwardingEvent(const UUID& internal_uuid, const TokenData
 
     auto cb = [this, external_event](const TokenPtr& token){
         external_event->triggerWith(token);
+        node_handle_->getNodeWorker()->trySendEvents();
     };
 
     SlotPtr relay = createInternalSlot(type, internal_uuid, label, cb);
+    external_event->message_processed.connect(std::bind(&Slot::notifyEventHandled, relay.get()));
 
     crossConnectLabelChange(external_event, relay.get());
 

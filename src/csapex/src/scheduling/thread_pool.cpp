@@ -207,6 +207,8 @@ void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
         if(isRunning()) {
             group->start();
         }
+
+        group_created(group);
     }
 }
 
@@ -237,7 +239,7 @@ void ThreadPool::addToGroup(TaskGenerator *task, int group_id)
 int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
 {
     for(auto group : groups_) {
-        if(group->name() == name) {
+        if(group->getName() == name) {
             assignGeneratorToGroup(task, group.get());
             return group->id();
         }
@@ -256,6 +258,8 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
     if(isRunning()) {
         group->start();
     }
+
+    group_created(group);
 
     return group->id();
 }
@@ -307,7 +311,7 @@ void ThreadPool::saveSettings(YAML::Node& node)
         int id = groups_[i]->id();
         if(id >= ThreadGroup::MINIMUM_THREAD_ID) {
             group["id"] =  id;
-            group["name"] =  groups_[i]->name();
+            group["name"] =  groups_[i]->getName();
             groups.push_back(group);
         }
     }
@@ -350,6 +354,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
                         checkIfStepIsDone();
                     });
 
+                    group_created(g);
                 }
             }
         }

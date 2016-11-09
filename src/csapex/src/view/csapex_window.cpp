@@ -22,6 +22,7 @@
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/timer.h>
 #include <csapex/scheduling/thread_pool.h>
+#include <csapex/scheduling/thread_group.h>
 #include <csapex/view/designer/designer.h>
 #include <csapex/view/designer/designerio.h>
 #include <csapex/view/designer/tutorial_tree_model.h>
@@ -180,11 +181,15 @@ void CsApexWindow::construct()
     connections_.push_back(core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); }));
     connections_.push_back(core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); }));
 
+    connections_.push_back(core_.getThreadPool()->group_created.connect([this](const ThreadGroupPtr& group) { updateThreadInfo(); }));
+
     updateMenu();
     updateTitle();
 
     createPluginsMenu();
     createTutorialsMenu();
+
+    updateNodeInfo();
 
     timer.setInterval(100);
     timer.setSingleShot(false);
@@ -405,6 +410,83 @@ void CsApexWindow::updateNodeInfo()
 
 
     ui->node_info_text->setHtml(QString::fromStdString(ss.str()));
+}
+
+void CsApexWindow::updateThreadInfo()
+{
+    ThreadPoolPtr thread_pool = core_.getThreadPool();
+
+    const std::vector<ThreadGroupPtr>& threads = thread_pool->getGroups();
+
+    ui->thread_table->setRowCount(threads.size());
+    ui->thread_table->setColumnCount(3);
+
+
+    int row = 0;
+    for(const ThreadGroupPtr& thread : threads) {
+        QTableWidgetItem* main_item = new QTableWidgetItem(QString::fromStdString(thread->getName()));
+        main_item->setText(QString::fromStdString(thread->getName()));
+        main_item->setTextAlignment(Qt::AlignVCenter);
+
+        if(thread->id() == ThreadGroup::PRIVATE_THREAD) {
+            main_item->setIcon(QIcon(QPixmap(":/thread_group_none.png")));
+        } else {
+            main_item->setIcon(QIcon(QPixmap(":/thread_group.png")));
+        }
+
+        QWidget* widget = nullptr;
+
+        ui->thread_table->setItem(row, 0, main_item);
+        ui->thread_table->setCellWidget(row, 1, widget);
+
+        ++row;
+    }
+
+    QObject::disconnect(ui->thread_table);
+
+//    QObject::connect(ui->thread_table, &QTableWidget::keyPressEvent,
+//                     [this](QKeyEvent* key) {
+//        if(key->key() == Qt::Key_Delete) {
+//            QList<int> rows;
+//            QItemSelection selection( ui->thread_table->selectionModel()->selection() );
+//            foreach( const QModelIndex & index, selection.indexes() ) {
+//               rows.append( index.row() );
+//            }
+
+//            qSort( rows );
+
+//            int prev = -1;
+//            for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
+//               int current = rows[i];
+//               if( current != prev ) {
+//                  ui->thread_table->model()->removeRows( current, 1 );
+//                  prev = current;
+//               }
+//            }
+//        }
+//    });
+
+    QObject::connect(ui->thread_table, &QTableWidget::cellChanged,
+                     [this](int row, int col) {
+
+        auto item = ui->thread_table->itemAt(row, col);
+        ThreadPoolPtr thread_pool = core_.getThreadPool();
+
+        if(col == 0) {
+            // name changed
+            QString new_name = item->data(Qt::EditRole).toString();
+
+            ThreadGroupPtr group = thread_pool->getGroups()[row];
+            if(new_name.isEmpty()) {
+                item->setData(Qt::EditRole, QString::fromStdString(group->getName()));
+
+            } else {
+                // command
+                group->setName(new_name.toStdString());
+            }
+
+        }
+    });
 }
 
 void CsApexWindow::updateUndoInfo()

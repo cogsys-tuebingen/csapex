@@ -111,6 +111,9 @@ private:
     void buildConnectedComponents();
     void calculateDepths();
 
+    std::set<graph::Vertex *> findVerticesThatNeedMessages();
+    std::set<graph::Vertex *> findVerticesThatJoinStreams();
+
 public:
     csapex::slim_signal::Signal<void()> state_changed;
 

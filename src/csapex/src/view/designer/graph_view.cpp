@@ -1097,10 +1097,8 @@ void GraphView::addPort(Port *port)
         if(!adaptee) {
             return;
         }
-        if(!from->isVirtual() && !adaptee->isVirtual()) {
-            Command::Ptr cmd = CommandFactory(graph_facade_.get()).moveConnections(from, adaptee.get());
-            view_core_.execute(cmd);
-        }
+        Command::Ptr cmd = CommandFactory(graph_facade_.get()).moveConnections(from, adaptee.get());
+        view_core_.execute(cmd);
     });
 
     QObject::connect(port, &Port::changePortRequest, [this, port](QString label) {
@@ -1534,7 +1532,7 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
                 }
 
                 std::stringstream ss;
-                ss << "(" << group.id() << ") " << group.name();
+                ss << "(" << group.id() << ") " << group.getName();
                 QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
                 switch_thread->setIcon(QIcon(":/thread_group.png"));
                 switch_thread->setIconVisibleInMenu(true);

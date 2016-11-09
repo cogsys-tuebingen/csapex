@@ -34,6 +34,11 @@ void Output::removeOutputTransition()
     transition_ = nullptr;
 }
 
+void Output::notifyMessageProcessed()
+{
+    message_processed(this);
+}
+
 void Output::notifyMessageProcessed(Connection* connection)
 {
     for(auto connection : connections_) {
@@ -44,7 +49,7 @@ void Output::notifyMessageProcessed(Connection* connection)
 
     APEX_DEBUG_CERR << getUUID() << " is processed" << std::endl;
 
-    message_processed();
+    notifyMessageProcessed();
 }
 
 void Output::activate()
@@ -189,6 +194,6 @@ void Output::publish()
             connection->setToken(msg);
         }
     } else {
-        messageProcessed(this);
+        notifyMessageProcessed();
     }
 }

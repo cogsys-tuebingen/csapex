@@ -44,9 +44,8 @@ public:
         return false;
     }
 
-    virtual bool isVirtual() const {
-        return false;
-    }
+    bool isVirtual() const;
+    void setVirtual(bool _virtual);
 
     virtual void addConnection(ConnectionPtr connection);
     virtual void fadeConnection(ConnectionPtr connection);
@@ -99,7 +98,7 @@ public:
     csapex::slim_signal::Signal<void(ConnectionPtr)> connection_faded;
 
     csapex::slim_signal::Signal<void(bool)> connectionEnabled;
-    csapex::slim_signal::Signal<void(Connectable*)> messageProcessed;
+    csapex::slim_signal::Signal<void(Connectable*)> message_processed;
     csapex::slim_signal::Signal<void(bool, std::string, int)> connectableError;
 
     csapex::slim_signal::Signal<void()> typeChanged;
@@ -139,6 +138,8 @@ protected:
 
     int count_;
     int seq_no_;
+
+    bool virtual_;
 
 private:
     std::atomic<bool> enabled_;

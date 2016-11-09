@@ -758,22 +758,17 @@ void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end
 {
     apex_assert_hard(from);
 
-    if(!from->isVirtual()) {
-        TempConnection temp(false);
-        temp.from = from;
-        temp.to_p = end;
+    TempConnection temp(false);
+    temp.from = from;
+    temp.to_p = end;
 
-        temp_.push_back(temp);
+    temp_.push_back(temp);
 
-        update();
-    }
+    update();
 }
 
 void DesignerScene::previewConnection(Connectable *from, Connectable *to)
 {
-    if(from->isVirtual() || to->isVirtual()) {
-        return;
-    }
     addTemporaryConnection(from, to);
     update();
 }
@@ -783,28 +778,26 @@ void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
     apex_assert_hard(from);
     apex_assert_hard(to);
 
-    if(!from->isVirtual() && !to->isVirtual()) {
-        Connectable* input;
-        Connectable* output;
-        if(from->isInput()) {
-            input = from;
-            output = to;
+    Connectable* input;
+    Connectable* output;
+    if(from->isInput()) {
+        input = from;
+        output = to;
 
-        } else {
-            input = to;
-            output = from;
-        }
-
-        apex_assert_hard(input);
-        apex_assert_hard(output);
-
-
-        TempConnection temp(true);
-        temp.from = output;
-        temp.to_c = input;
-
-        temp_.push_back(temp);
+    } else {
+        input = to;
+        output = from;
     }
+
+    apex_assert_hard(input);
+    apex_assert_hard(output);
+
+
+    TempConnection temp(true);
+    temp.from = output;
+    temp.to_c = input;
+
+    temp_.push_back(temp);
 }
 
 void DesignerScene::deleteTemporaryConnections()

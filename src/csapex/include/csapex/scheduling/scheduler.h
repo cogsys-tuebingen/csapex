@@ -18,7 +18,8 @@ public:
     virtual ~Scheduler();
 
     virtual int id() const = 0;
-    virtual std::string name() const = 0;
+    virtual std::string getName() const = 0;
+    virtual void setName(const std::string& name) = 0;
 
     virtual void setPause(bool pause) = 0;
 
@@ -40,8 +41,10 @@ public:
     virtual void schedule(TaskPtr schedulable) = 0;
 
 public:
-    csapex::slim_signal::Signal<void()> begin_step;
-    csapex::slim_signal::Signal<void()> end_step;
+    slim_signal::Signal<void()> begin_step;
+    slim_signal::Signal<void()> end_step;
+
+    slim_signal::Signal<void ()> scheduler_changed;
 };
 
 }

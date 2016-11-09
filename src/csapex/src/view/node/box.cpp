@@ -239,7 +239,6 @@ void NodeBox::construct()
         //    nh->enabled.connect([this](bool e){ enabledChange(e); });
         QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
-        connections_.emplace_back(worker->thread_changed.connect([this](){ updateThreadInformation(); }));
         connections_.emplace_back(worker->notification.connect([this](Notification){ updateVisualsRequest(); }));
     }
 

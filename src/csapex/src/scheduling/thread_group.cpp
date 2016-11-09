@@ -50,10 +50,18 @@ int ThreadGroup::id() const
     return id_;
 }
 
-std::string ThreadGroup::name() const
+std::string ThreadGroup::getName() const
 {
     return name_;
 }
+void ThreadGroup::setName(const std::string &name)
+{
+    if(name != name_) {
+        name_ = name;
+        scheduler_changed();
+    }
+}
+
 const std::thread& ThreadGroup::thread() const
 {
     return scheduler_thread_;

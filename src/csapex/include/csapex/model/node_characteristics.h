@@ -21,6 +21,7 @@ public:
     bool is_combined_by_joining_vertex;
     bool is_leading_to_joining_vertex;
 
+    bool is_leading_to_essential_vertex;
 };
 
 }

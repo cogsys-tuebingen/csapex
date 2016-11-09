@@ -203,32 +203,34 @@ void Graph::deleteConnection(ConnectionPtr connection)
                     graph::VertexPtr v_from = n_from->getVertex();
                     graph::VertexPtr v_to = n_to->getVertex();
 
-                    bool still_connected = false;
-                    for(ConnectionPtr c : n_from->getOutputTransition()->getConnections()) {
-                        if(c->isDetached()) {
-                            continue;
-                        }
-                        ConnectablePtr to = c->to();
-                        apex_assert_hard(to);
-                        if(NodeHandlePtr child = std::dynamic_pointer_cast<NodeHandle>(to->getOwner())) {
-                            if(child.get() == n_to) {
-                                still_connected = true;
-                                break;
+                    if(v_from && v_to) {
+
+                        bool still_connected = false;
+                        for(ConnectionPtr c : n_from->getOutputTransition()->getConnections()) {
+                            if(c->isDetached()) {
+                                continue;
+                            }
+                            ConnectablePtr to = c->to();
+                            apex_assert_hard(to);
+                            if(NodeHandlePtr child = std::dynamic_pointer_cast<NodeHandle>(to->getOwner())) {
+                                if(child.get() == n_to) {
+                                    still_connected = true;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    if(!still_connected) {
-                        v_to->removeParent(v_from.get());
-                        v_from->removeChild(v_to.get());
-                    }
+                        if(!still_connected) {
+                            v_to->removeParent(v_from.get());
+                            v_from->removeChild(v_to.get());
+                        }
 
-                    if(!n_from->getOutputTransition()->hasConnection()) {
-                        sinks_.insert(v_from);
+                        if(!n_from->getOutputTransition()->hasConnection()) {
+                            sinks_.insert(v_from);
+                        }
+                        if(!n_to->getInputTransition()->hasConnection()) {
+                            sources_.insert(v_to);
+                        }
                     }
-                    if(!n_to->getInputTransition()->hasConnection()) {
-                        sources_.insert(v_to);
-                    }
-
                 }
             }
 
@@ -321,22 +323,8 @@ void Graph::buildConnectedComponents()
     }
 }
 
-void Graph::calculateDepths()
+std::set<graph::Vertex *> Graph::findVerticesThatJoinStreams()
 {
-    // start DFSs at each source. assign each node:
-    // - depth: the minimum distance to any source
-    // - joining: true, iff more than one path leads from any source to a node
-
-    // initialize
-    for(const graph::VertexPtr& vertex: vertices_) {
-        NodeCharacteristics& characteristics =  vertex->getNodeCharacteristics();
-        characteristics.is_joining_vertex = false;
-        characteristics.is_joining_vertex_counterpart = false;
-
-        characteristics.is_combined_by_joining_vertex = false;
-        characteristics.is_leading_to_joining_vertex = false;
-    }
-
     std::set<graph::Vertex*> joins;
 
     for(graph::VertexPtr vertex : vertices_) {
@@ -359,12 +347,71 @@ void Graph::calculateDepths()
                     Q.push_back(child.get());
 
                 } else  {
-                    // already visited
+                    // already visited -> joins two or more "streams"
                     joins.insert(child.get());
                 }
             }
         }
     }
+
+    return joins;
+}
+
+std::set<graph::Vertex *> Graph::findVerticesThatNeedMessages()
+{
+    std::set<graph::Vertex*> vertices_that_need_messages;
+
+    for(const graph::VertexPtr v : vertices_) {
+        for(const ConnectionPtr c : v->getNodeHandle()->getOutputTransition()->getConnections()) {
+            if(c->to()->isVirtual()) {
+                vertices_that_need_messages.insert(v.get());
+                break;
+            }
+        }
+    }
+
+    return vertices_that_need_messages;
+}
+
+void Graph::calculateDepths()
+{
+    // start DFSs at each source. assign each node:
+    // - depth: the minimum distance to any source
+    // - joining: true, iff more than one path leads from any source to a node
+
+    // initialize
+    for(const graph::VertexPtr& vertex: vertices_) {
+        NodeCharacteristics& characteristics =  vertex->getNodeCharacteristics();
+        characteristics.is_joining_vertex = false;
+        characteristics.is_joining_vertex_counterpart = false;
+
+        characteristics.is_combined_by_joining_vertex = false;
+        characteristics.is_leading_to_joining_vertex = false;
+        characteristics.is_leading_to_essential_vertex = false;
+    }
+
+    std::set<graph::Vertex*> essentials = findVerticesThatNeedMessages();
+
+    for(const graph::Vertex* essential : essentials) {
+        essential->getNodeCharacteristics().is_leading_to_essential_vertex = true;
+
+        std::deque<const graph::Vertex*> Q;
+        Q.push_back(essential);
+        while(!Q.empty()) {
+            const graph::Vertex* top = Q.back();
+            Q.pop_back();
+
+            for(auto parent : top->getParents()) {
+                NodeCharacteristics& characteristics = parent->getNodeCharacteristics();
+                if(!characteristics.is_leading_to_essential_vertex) {
+                    characteristics.is_leading_to_essential_vertex = true;
+                    Q.push_back(parent.get());
+                }
+            }
+        }
+    }
+
+    std::set<graph::Vertex*> joins = findVerticesThatJoinStreams();
 
     // populate node_depth_ with minimal depths
     for(const graph::VertexPtr source : sources_) {
@@ -474,8 +521,8 @@ void Graph::calculateDepths()
             }
         }
 
-//        todo:
-//        - remember for each of vertex join counterpart, which children are enclosed -> only send NoMessage to non-enclosed children.
+        //        todo:
+        //        - remember for each of vertex join counterpart, which children are enclosed -> only send NoMessage to non-enclosed children.
     }
 
     for(graph::VertexPtr& vertex : vertices_) {

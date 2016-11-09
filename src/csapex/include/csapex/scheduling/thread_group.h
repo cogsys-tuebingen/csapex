@@ -36,7 +36,10 @@ public:
     ~ThreadGroup();
 
     int id() const override;
-    std::string name() const override;
+
+    std::string getName() const override;
+    void setName(const std::string& name) override;
+
     const std::thread &thread() const;
 
     virtual bool isEmpty() const override;

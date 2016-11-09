@@ -309,7 +309,7 @@
           <x>0</x>
           <y>0</y>
           <width>274</width>
-          <height>190</height>
+          <height>102</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -454,7 +454,7 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>0</y>
           <width>274</width>
-          <height>190</height>
+          <height>102</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -504,7 +504,7 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>0</y>
           <width>256</width>
-          <height>190</height>
+          <height>102</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -659,7 +659,7 @@ p, li { white-space: pre-wrap; }
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="Profiling">
    <property name="windowTitle">
     <string>Profiling</string>
    </property>
@@ -671,7 +671,7 @@ p, li { white-space: pre-wrap; }
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="thread">
         <attribute name="title">
@@ -725,6 +725,21 @@ p, li { white-space: pre-wrap; }
         <layout class="QVBoxLayout" name="verticalLayout_12"/>
        </widget>
       </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="ThreadManagement">
+   <property name="windowTitle">
+    <string>Thread Management</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QTableWidget" name="thread_table"/>
      </item>
     </layout>
    </widget>

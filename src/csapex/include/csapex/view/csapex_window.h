@@ -88,6 +88,7 @@ public Q_SLOTS:
     void updateDebugInfo();
     void updateUndoInfo();
     void updateNodeInfo();
+    void updateThreadInfo();
 
     void about();
     void copyRight();

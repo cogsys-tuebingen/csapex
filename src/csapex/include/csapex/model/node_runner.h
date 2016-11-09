@@ -66,7 +66,7 @@ private:
 
     std::thread ticking_thread_;
 
-    std::vector<csapex::slim_signal::Connection> connections_;
+    std::vector<csapex::slim_signal::ScopedConnection> connections_;
 
     std::atomic<bool> tick_thread_running_;
     std::atomic<bool> tick_thread_stop_;

@@ -76,7 +76,7 @@ void OutputTransition::addOutput(OutputPtr output)
     });
     output_signal_connections_[output].push_back(cf);
 
-    auto cp = output->message_processed.connect([this]() {
+    auto cp = output->message_processed.connect([this](Connectable*) {
         publishNextMessage();
     });
     output_signal_connections_[output].push_back(cp);

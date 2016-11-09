@@ -49,7 +49,7 @@ bool SwitchThread::doExecute()
     old_id = group->id();
 
     if(id != ThreadGroup::PRIVATE_THREAD) {
-        name = group->name();
+        name = group->getName();
     }
     getRootThreadPool()->addToGroup(tg, id);
 

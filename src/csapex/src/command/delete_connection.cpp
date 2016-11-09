@@ -17,9 +17,6 @@ using namespace csapex::command;
 DeleteConnection::DeleteConnection(const AUUID &parent_uuid, Connectable* a, Connectable* b)
     : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
 {
-    apex_assert_hard(!a->isVirtual());
-    apex_assert_hard(!b->isVirtual());
-
     if((a->isOutput() && b->isInput())) {
         from_uuid = a->getUUID();
         to_uuid =  b->getUUID();

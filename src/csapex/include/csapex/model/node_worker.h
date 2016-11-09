@@ -87,6 +87,8 @@ public:
     bool canSend() const;
     bool areAllInputsAvailable() const;
 
+    void trySendEvents();
+
 public:
     bool tick();
 
@@ -118,7 +120,6 @@ public:
     csapex::slim_signal::Signal<void(NodeWorker* worker)> start_profiling;
     csapex::slim_signal::Signal<void(NodeWorker* worker)> stop_profiling;
 
-    csapex::slim_signal::Signal<void()> thread_changed;
     csapex::slim_signal::Signal<void(Notification)> notification;
 
     csapex::slim_signal::Signal<void()> messages_processed;

@@ -54,6 +54,9 @@ public:
     void saveSettings(YAML::Node&);
     void loadSettings(YAML::Node&);
 
+public:
+    slim_signal::Signal<void (ThreadGroupPtr)> group_created;
+
 protected:
     void pauseChanged(bool pause) override;
     void steppingChanged(bool performStep) override;

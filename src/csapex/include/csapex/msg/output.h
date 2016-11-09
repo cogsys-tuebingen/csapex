@@ -29,6 +29,7 @@ public:
     void setOutputTransition(OutputTransition* ot);
     void removeOutputTransition();
 
+    void notifyMessageProcessed();
     void notifyMessageProcessed(Connection *connection);
 
     virtual bool canOutput() const override
@@ -80,7 +81,6 @@ public:
     virtual void removeAllConnectionsNotUndoable() override;
 
 public:
-    csapex::slim_signal::Signal<void()> message_processed;
     csapex::slim_signal::Signal<void(Connectable*)> messageSent;
 
 

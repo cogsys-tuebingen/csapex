@@ -21,14 +21,26 @@ using namespace csapex;
 Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
     : Unique(uuid),
       owner_(owner),
-      count_(0), seq_no_(-1), enabled_(true)
+      count_(0), seq_no_(-1),
+      virtual_(false),
+      enabled_(true)
 {
     init();
 }
 
+bool Connectable::isVirtual() const
+{
+    return virtual_;
+}
+
+void Connectable::setVirtual(bool _virtual)
+{
+    virtual_ = _virtual;
+}
+
 void Connectable::notifyMessageProcessed()
 {
-    messageProcessed(this);
+    message_processed(this);
 
     APEX_DEBUG_CERR <<"connectable " << getUUID() << " notified" << std::endl;
 
@@ -39,7 +51,7 @@ void Connectable::notifyMessageProcessed()
 
 void Connectable::reset()
 {
-    messageProcessed(this);
+    message_processed(this);
 }
 
 void Connectable::stop()

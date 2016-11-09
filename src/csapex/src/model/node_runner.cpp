@@ -49,9 +49,6 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
 
 NodeRunner::~NodeRunner()
 {
-    for(csapex::slim_signal::Connection& c : connections_) {
-        c.disconnect();
-    }
     connections_.clear();
 
     if(scheduler_) {
@@ -82,14 +79,17 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     scheduler_ = scheduler;
 
     scheduler_->add(shared_from_this(), remaining_tasks_);
-    worker_->getNodeHandle()->getNodeState()->setThread(scheduler->name(), scheduler->id());
+    worker_->getNodeHandle()->getNodeState()->setThread(scheduler->getName(), scheduler->id());
 
     remaining_tasks_.clear();
 
-    for(csapex::slim_signal::Connection& c : connections_) {
-        c.disconnect();
-    }
     connections_.clear();
+
+    // signals
+    connections_.emplace_back(scheduler->scheduler_changed.connect([this](){
+        NodeHandlePtr nh = worker_->getNodeHandle();
+        nh->getNodeState()->setThread(scheduler_->getName(), scheduler_->id());
+    }));
 
     // node tasks
     auto ctr = worker_->try_process_changed.connect([this]() {
