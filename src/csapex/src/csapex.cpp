@@ -23,7 +23,6 @@
 #include <boost/filesystem.hpp>
 #undef BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/version.hpp>
-#include <console_bridge/console.h>
 
 #if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
 namespace bf3 = boost::filesystem;
@@ -131,10 +130,6 @@ int Main::runHeadless()
 
 int Main::run()
 {
-    if(settings.get<bool>("debug")) {
-        console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
-    }
-
     bool headless = settings.get<bool>("headless");
 
     std::string config_to_load = settings.get<std::string>("config");
