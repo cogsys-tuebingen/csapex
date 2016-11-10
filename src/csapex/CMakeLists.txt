@@ -484,6 +484,7 @@ add_library(csapex_qt SHARED
     src/view/designer/designer_scene.cpp
     src/view/designer/designer_styleable.cpp
     src/view/designer/graph_view.cpp
+    src/view/designer/graph_view_context_menu.cpp
     src/view/designer/designerio.cpp
     src/view/designer/drag_io.cpp
     src/view/designer/drag_io_handler.cpp

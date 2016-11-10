@@ -28,9 +28,12 @@ namespace csapex
 {
 
 class NodeFactory;
+class GraphViewContextMenu;
 
 class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable
 {
+    friend class GraphViewContextMenu;
+
     Q_OBJECT
 
     Q_PROPERTY(QColor lineColor         READ lineColor         WRITE setLineColor)
