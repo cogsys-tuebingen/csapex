@@ -77,16 +77,18 @@ bool StaticOutput::commitMessages(bool is_activated)
 {
     activate();
 
-    bool send_active = is_activated;
+    bool send_activator = is_activated;
+    bool send_deactivator = false;
 
-    bool sent_active = false;
+    bool sent_activator_message = false;
 
     {
         std::unique_lock<std::recursive_mutex> lock(message_mutex_);
         if(message_to_send_) {
             apex_assert_hard(message_to_send_.get() != committed_message_.get());
 
-            send_active |= message_to_send_->isActive();
+            send_activator |= message_to_send_->getActivityModifier() == ActivityModifier::ACTIVATE;
+            send_deactivator |= message_to_send_->getActivityModifier() == ActivityModifier::DEACTIVATE;
 
             //committed_message_ = message_to_send_;
             committed_message_.reset();
@@ -104,19 +106,23 @@ bool StaticOutput::commitMessages(bool is_activated)
         ++seq_no_;
 
         committed_message_->setSequenceNumber(seq_no_);
-        if(hasActiveConnection() && send_active && !std::dynamic_pointer_cast<connection_types::NoMessage const>(committed_message_->getTokenData())) {
+        if(hasActiveConnection() && (send_activator || send_deactivator) && !std::dynamic_pointer_cast<connection_types::NoMessage const>(committed_message_->getTokenData())) {
             std::cerr << "set an active token: " << getUUID() << std::endl;
-            sent_active = true;
-            committed_message_->setActive(true);
+            sent_activator_message = true;
+            if(send_activator) {
+                committed_message_->setActivityModifier(ActivityModifier::ACTIVATE);
+            } else {
+                committed_message_->setActivityModifier(ActivityModifier::DEACTIVATE);
+            }
         } else {
-            committed_message_->setActive(false);
+            committed_message_->setActivityModifier(ActivityModifier::NONE);
         }
 
         ++count_;
     }
     messageSent(this);
 
-    return sent_active;
+    return sent_activator_message;
 }
 
 void StaticOutput::reset()

@@ -270,11 +270,11 @@ bool NodeWorker::canSend() const
         }
     }
 
-//    for(EventPtr e : node_handle_->getInternalEvents()){
-//        if(!e->canReceiveToken()) {
-//            return false;
-//        }
-//    }
+    //    for(EventPtr e : node_handle_->getInternalEvents()){
+    //        if(!e->canReceiveToken()) {
+    //            return false;
+    //        }
+    //    }
 
     return true;
 }
@@ -356,14 +356,14 @@ void NodeWorker::startProcessingMessages()
 
     // everything has a message here
 
-    bool has_active_token = false;
+    std::vector<ActivityModifier> activity_modifiers;
 
     {
 
         for(auto input : node_handle_->getExternalInputs()) {
-            for(auto& c : input->getConnections()) {
+            for(const ConnectionPtr& c : input->getConnections()) {
                 if(c->holdsActiveToken()) {
-                    has_active_token = true;
+                    activity_modifiers.push_back(c->getToken()->getActivityModifier());
                 }
             }
         }
@@ -424,9 +424,28 @@ void NodeWorker::startProcessingMessages()
 
     lock.lock();
 
-    if(has_active_token) {
-        if(!node_handle_->isActive()) {
+    if(!activity_modifiers.empty()) {
+        bool activate = false;
+        bool deactivate = false;
+
+        for(ActivityModifier& modifier : activity_modifiers) {
+            switch(modifier) {
+            case ActivityModifier::ACTIVATE:
+                activate = true;
+                break;
+            case ActivityModifier::DEACTIVATE:
+                deactivate = true;
+                break;
+            default:
+                // nothing
+                break;
+            }
+        }
+
+        if(!node_handle_->isActive() && activate) {
             node_handle_->setActive(true);
+        } else if(node_handle_->isActive() && deactivate) {
+            node_handle_->setActive(false);
         }
     }
 
@@ -849,7 +868,7 @@ void NodeWorker::sendEvents(bool active)
                 continue;
             }
 
-//            apex_assert_hard(e->canReceiveToken());
+            //            apex_assert_hard(e->canReceiveToken());
             e->commitMessages(active);
             e->publish();
             if(e->hasActiveConnection()) {
@@ -863,7 +882,7 @@ void NodeWorker::sendEvents(bool active)
                 continue;
             }
 
-//            apex_assert_hard(e->canReceiveToken());
+            //            apex_assert_hard(e->canReceiveToken());
             e->commitMessages(active);
             e->publish();
         }
@@ -885,15 +904,15 @@ void NodeWorker::sendMessages(bool ignore_sink)
     //tokens are activated if the node is active.
     bool active = node_handle_->isActive();
 
-    bool has_sent_active_message = false;
+    bool has_sent_activator_message = false;
     if(!(ignore_sink && node_handle_->isSink())) {
-        has_sent_active_message = node_handle_->getOutputTransition()->sendMessages(active);
+        has_sent_activator_message = node_handle_->getOutputTransition()->sendMessages(active);
     }
 
     sendEvents(active);
 
     // if there is an active connection -> deactivate
-    if(active && has_sent_active_message) {
+    if(active && has_sent_activator_message) {
         node_handle_->setActive(false);
     }
 
@@ -1033,8 +1052,8 @@ void NodeWorker::connectConnector(ConnectablePtr c)
             });
         }));
         port_connections_[c.get()].emplace_back(event->message_processed.connect([this](Connectable*) {
-            triggerTryProcess();
-        }));
+                                                    triggerTryProcess();
+                                                }));
 
     } else if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(c)) {
         SlotWeakPtr slot_w = slot;
@@ -1044,8 +1063,13 @@ void NodeWorker::connectConnector(ConnectablePtr c)
                     TokenPtr token = slot->getToken();
                     if(token) {
                         //apex_assert_hard(token);
-                        if(token->isActive()) {
-                            node_handle_->setActive(true);
+                        if(token->hasActivityModifier()) {
+                            if(token->getActivityModifier() == ActivityModifier::ACTIVATE) {
+                                node_handle_->setActive(true);
+
+                            } else if(token->getActivityModifier() == ActivityModifier::DEACTIVATE) {
+                                node_handle_->setActive(false);
+                            }
                         }
 
                         Timer::Ptr timer;

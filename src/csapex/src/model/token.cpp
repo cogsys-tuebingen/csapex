@@ -4,21 +4,25 @@
 using namespace csapex;
 
 Token::Token(const TokenDataConstPtr &token)
-    : token_(token), active_(false), seq_no_(-1)
+    : token_(token), activity_modifier_(ActivityModifier::NONE), seq_no_(-1)
 {
 
 }
 
-void Token::setActive(bool active)
+void Token::setActivityModifier(ActivityModifier active)
 {
-    active_ = active;
+    activity_modifier_ = active;
 }
 
-bool Token::isActive() const
+bool Token::hasActivityModifier() const
 {
-    return active_;
+    return activity_modifier_ != ActivityModifier::NONE;
 }
 
+ActivityModifier Token::getActivityModifier() const
+{
+    return activity_modifier_;
+}
 
 TokenDataConstPtr Token::getTokenData() const
 {

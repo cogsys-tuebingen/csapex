@@ -162,13 +162,13 @@ bool OutputTransition::sendMessages(bool is_active)
 
     updateConnections();
 
-    bool has_sent_active_message = false;
+    bool has_sent_activator_message = false;
 
     //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
 
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
-        has_sent_active_message |= output->commitMessages(is_active);
+        has_sent_activator_message |= output->commitMessages(is_active);
     }
 
     long seq_no = -1;
@@ -190,7 +190,7 @@ bool OutputTransition::sendMessages(bool is_active)
         setOutputsIdle();
     }
 
-    return has_sent_active_message;
+    return has_sent_activator_message;
 }
 
 void OutputTransition::publishNextMessage()

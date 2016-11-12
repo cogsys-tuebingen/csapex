@@ -80,7 +80,7 @@ TokenPtr Connection::readToken()
 bool Connection::holdsActiveToken() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    return message_ && message_->isActive();
+    return message_ && message_->hasActivityModifier();
 }
 
 void Connection::setTokenProcessed()
@@ -102,10 +102,9 @@ void Connection::setToken(const TokenPtr &token)
         apex_assert_hard(msg != nullptr);
         apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
-        bool msg_active = msg->isActive();
-        if(!isActive() && msg_active) {
+        if(!isActive() && msg->hasActivityModifier()) {
             // remove active flag if the connection is inactive
-            msg->setActive(false);
+            msg->setActivityModifier(ActivityModifier::NONE);
         }
 
         message_ = msg;

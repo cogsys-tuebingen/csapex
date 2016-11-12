@@ -104,7 +104,7 @@ void SubgraphNode::activation()
     if(activation_event_) {
         TokenDataConstPtr data(new connection_types::AnyMessage);
         TokenPtr token = std::make_shared<Token>(data);
-        token->setActive(true);
+        token->setActivityModifier(ActivityModifier::ACTIVATE);
         activation_event_->triggerWith(token);
     }
 }

@@ -6,6 +6,7 @@
 #include <csapex/model/token.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/csapex_export.h>
+#include <csapex/model/activity_modifier.h>
 
 namespace csapex {
 
@@ -20,8 +21,9 @@ public:
 public:
     Token(const TokenDataConstPtr& token);
 
-    void setActive(bool active);
-    bool isActive() const;
+    void setActivityModifier(ActivityModifier active);
+    bool hasActivityModifier() const;
+    ActivityModifier getActivityModifier() const;
 
     TokenPtr clone() const;
 
@@ -33,7 +35,7 @@ public:
 private:
     TokenDataConstPtr token_;
 
-    bool active_;
+    ActivityModifier activity_modifier_;
 
     mutable int seq_no_;
 };

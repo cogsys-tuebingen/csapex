@@ -37,7 +37,7 @@ void Graph::resetActivity()
     for(ConnectionPtr c : connections) {
         TokenPtr t = c->getToken();
         if(t) {
-            t->setActive(false);
+            t->setActivityModifier(ActivityModifier::NONE);
         }
     }
 
