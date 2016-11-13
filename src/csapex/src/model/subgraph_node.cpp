@@ -355,6 +355,8 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
                 vector->addNestedValue(token->getTokenData());
                 msg::publish(external_output.get(), vector);
 
+                external_output->setType(vector);
+
             } else {
                 msg::publish(external_output.get(), token->getTokenData());
             }
