@@ -1232,7 +1232,6 @@ void GraphView::overwriteStyleSheet(const QString &stylesheet)
 
 void GraphView::updateBoxInformation()
 {
-    std::cerr << "updateing box info" << std::endl;
     for(QGraphicsItem* item : scene_->items()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
