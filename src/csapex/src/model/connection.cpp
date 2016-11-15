@@ -15,6 +15,7 @@
 
 /// SYSTEM
 #include <cmath>
+#include <iostream>
 
 using namespace csapex;
 

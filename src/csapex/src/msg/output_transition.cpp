@@ -10,6 +10,9 @@
 #include <csapex/msg/no_message.h>
 #include <csapex/utility/debug.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 OutputTransition::OutputTransition(delegate::Delegate0<> activation_fn)
