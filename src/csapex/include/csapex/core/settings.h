@@ -22,6 +22,7 @@ public:
     static const std::string config_extension;
     static const std::string template_extension;
     static const std::string message_extension;
+    static const std::string message_extension_compressed;
     static const std::string default_config;
     static const std::string config_selector;
 
