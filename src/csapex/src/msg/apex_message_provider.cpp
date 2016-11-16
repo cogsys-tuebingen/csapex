@@ -48,7 +48,7 @@ std::string ApexMessageProvider::getLabel(std::size_t /*slot*/) const
 
 std::vector<std::string> ApexMessageProvider::getExtensions() const
 {
-    return { Settings::message_extension };
+    return { Settings::message_extension, Settings::message_extension_compressed };
 }
 
 
