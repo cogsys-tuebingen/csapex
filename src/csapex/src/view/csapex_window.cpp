@@ -466,27 +466,27 @@ void CsApexWindow::updateThreadInfo()
 //        }
 //    });
 
-    QObject::connect(ui->thread_table, &QTableWidget::cellChanged,
-                     [this](int row, int col) {
+//    QObject::connect(ui->thread_table, &QTableWidget::cellChanged,
+//                     [this](int row, int col) {
 
-        auto item = ui->thread_table->itemAt(row, col);
-        ThreadPoolPtr thread_pool = core_.getThreadPool();
+//        auto item = ui->thread_table->itemAt(row, col);
+//        ThreadPoolPtr thread_pool = core_.getThreadPool();
 
-        if(col == 0) {
-            // name changed
-            QString new_name = item->data(Qt::EditRole).toString();
+//        if(col == 0) {
+//            // name changed
+//            QString new_name = item->data(Qt::EditRole).toString();
 
-            ThreadGroupPtr group = thread_pool->getGroups()[row];
-            if(new_name.isEmpty()) {
-                item->setData(Qt::EditRole, QString::fromStdString(group->getName()));
+//            ThreadGroupPtr group = thread_pool->getGroups()[row];
+//            if(new_name.isEmpty()) {
+//                item->setData(Qt::EditRole, QString::fromStdString(group->getName()));
 
-            } else {
-                // command
-                group->setName(new_name.toStdString());
-            }
+//            } else {
+//                // command
+//                group->setName(new_name.toStdString());
+//            }
 
-        }
-    });
+//        }
+//    });
 }
 
 void CsApexWindow::updateUndoInfo()
