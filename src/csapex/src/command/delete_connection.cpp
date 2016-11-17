@@ -62,6 +62,25 @@ bool DeleteConnection::doExecute()
     return true;
 }
 
+bool DeleteConnection::doUndo()
+{
+    Graph* graph = getGraph();
+
+    ConnectablePtr from = graph->findConnector(from_uuid);
+    ConnectablePtr to = graph->findConnector(to_uuid);
+
+    OutputPtr output = std::dynamic_pointer_cast<Output>(from);
+    InputPtr input = std::dynamic_pointer_cast<Input>(to);
+
+    ConnectionPtr c = DirectConnection::connect(output, input, connection_id);
+    c->setActive(active_);
+    graph->addConnection(c);
+
+    return Meta::doUndo();
+}
+
+
+
 bool DeleteConnection::doRedo()
 {
     return doExecute();

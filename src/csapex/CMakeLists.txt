@@ -404,12 +404,10 @@ add_library(csapex_command SHARED
     src/command/playback_command.cpp
     src/command/command_factory.cpp
     src/command/add_connection.cpp
-    src/command/add_msg_connection.cpp
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp
     src/command/create_thread.cpp
     src/command/delete_connection.cpp
-    src/command/delete_msg_connection.cpp
     src/command/delete_connector.cpp
     src/command/delete_fulcrum.cpp
     src/command/delete_node.cpp

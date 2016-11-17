@@ -17,13 +17,14 @@ namespace command
 class CSAPEX_COMMAND_EXPORT AddConnection : public Command
 {
 public:
-    AddConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid);
+    AddConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid, bool active);
 
 protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual void refresh() = 0;
+    bool doExecute() override;
+    void refresh();
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;
@@ -31,6 +32,12 @@ protected:
 protected:
     UUID from_uuid;
     UUID to_uuid;
+
+private:
+    OutputPtr from;
+    InputPtr to;
+
+    bool active;
 };
 }
 }

@@ -5,10 +5,9 @@
 #include <csapex/command/command.h>
 #include <csapex/command/delete_node.h>
 #include <csapex/command/delete_connection.h>
-#include <csapex/command/delete_msg_connection.h>
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/modify_connection.h>
-#include <csapex/command/add_msg_connection.h>
+#include <csapex/command/add_connection.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/switch_thread.h>
 #include <csapex/msg/any_message.h>
@@ -40,6 +39,41 @@ CommandFactory::CommandFactory(GraphFacade *root)
 
 }
 
+CommandPtr CommandFactory::deleteAllNodes(const std::vector<UUID> &uuids)
+{
+    command::Meta::Ptr meta(new command::Meta(root_->getAbsoluteUUID(), "delete selected boxes", true));
+
+    meta->add(deleteAllConnectionsFromNodes(uuids));
+
+    for(const UUID& uuid : uuids) {
+        meta->add(Command::Ptr(new command::DeleteNode(root_->getAbsoluteUUID(), uuid)));
+    }
+    return meta;
+}
+
+
+CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID> &uuids)
+{
+    command::Meta::Ptr meta(new command::Meta(root_->getAbsoluteUUID(), "delete connections from boxes", true));
+
+
+    std::set<ConnectionPtr> connections;
+
+    for(const UUID& uuid : uuids) {
+        NodeHandle* nh = root_->getGraph()->findNodeHandle(uuid);
+        for(ConnectablePtr connectable : nh->getExternalConnectors()) {
+            for(ConnectionPtr c : connectable->getConnections()) {
+                connections.insert(c);
+            }
+        }
+    }
+
+    for(ConnectionPtr c : connections) {
+        meta->add(std::make_shared<DeleteConnection>(graph_uuid, c->from().get(), c->to().get()));
+    }
+    return meta;
+}
+
 /// CONNECTORS
 ///
 ///
@@ -52,9 +86,9 @@ Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to, boo
     auto from_c = graph->findConnectorNoThrow(from);
 
     if(std::dynamic_pointer_cast<Output>(from_c)) {
-        return std::make_shared<AddMessageConnection>(graph_uuid, from, to, active);
+        return std::make_shared<AddConnection>(graph_uuid, from, to, active);
     } else if(std::dynamic_pointer_cast<Input>(from_c)) {
-        return std::make_shared<AddMessageConnection>(graph_uuid, to, from, active);
+        return std::make_shared<AddConnection>(graph_uuid, to, from, active);
     }
     return nullptr;
 }
@@ -90,13 +124,13 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
     }
     apex_assert_hard(connections.size() == 1);
     OutputPtr output = input->getSource();
-    Command::Ptr cmd(new DeleteMessageConnection(graph_uuid, output.get(), input));
+    Command::Ptr cmd(new DeleteConnection(graph_uuid, output.get(), input));
     return cmd;
 }
 
 Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* connection) {
     InputPtr input = connection->to();
-    return Command::Ptr (new DeleteMessageConnection(graph_uuid, output, input.get()));
+    return Command::Ptr (new DeleteConnection(graph_uuid, output, input.get()));
 }
 
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
@@ -105,7 +139,7 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 
     for(ConnectionPtr connection : output->getConnections()) {
         InputPtr input = connection->to();
-        Command::Ptr removeThis(new DeleteMessageConnection(graph_uuid, output, input.get()));
+        Command::Ptr removeThis(new DeleteConnection(graph_uuid, output, input.get()));
         removeAll->add(removeThis);
     }
 
@@ -143,7 +177,7 @@ Command::Ptr CommandFactory::deleteConnectionByIdCommand(int id)
             OutputPtr out = connection->from();
             InputPtr in = connection->to();
 
-            return Command::Ptr(new DeleteMessageConnection(graph_uuid, out.get(), in.get()));
+            return Command::Ptr(new DeleteConnection(graph_uuid, out.get(), in.get()));
 
         }
     }
@@ -225,8 +259,8 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
                 }
                 InputPtr input = c->to();
                 if(input) {
-                    meta->add(Command::Ptr(new DeleteMessageConnection(parent_uuid, out, input.get())));
-                    meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, to_uuid, input->getUUID(), c->isActive())));
+                    meta->add(Command::Ptr(new DeleteConnection(parent_uuid, out, input.get())));
+                    meta->add(Command::Ptr(new AddConnection(parent_uuid, to_uuid, input->getUUID(), c->isActive())));
                 }
             }
         }
@@ -240,8 +274,8 @@ Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
                     continue;
                 }
                 OutputPtr output = c->from();
-                meta->add(Command::Ptr(new DeleteMessageConnection(parent_uuid, output.get(), in)));
-                meta->add(Command::Ptr(new AddMessageConnection(parent_uuid, output->getUUID(), to_uuid, c->isActive())));
+                meta->add(Command::Ptr(new DeleteConnection(parent_uuid, output.get(), in)));
+                meta->add(Command::Ptr(new AddConnection(parent_uuid, output->getUUID(), to_uuid, c->isActive())));
             }
         }
     }

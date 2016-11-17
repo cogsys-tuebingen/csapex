@@ -18,6 +18,7 @@
 #include <QLabel>
 #include <QTime>
 #include <unordered_map>
+#include <QPointer>
 
 namespace csapex
 {
@@ -200,7 +201,7 @@ private:
 
     bool debug_;
 
-    std::unordered_map<UUID, Port*, UUID::Hasher> port_map_;
+    std::unordered_map<UUID, QPointer<Port>, UUID::Hasher> port_map_;
 
     std::shared_ptr<Timer> profiling_timer_;
 };

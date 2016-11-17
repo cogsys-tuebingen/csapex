@@ -506,10 +506,11 @@ void CsApexWindow::updateUndoInfo()
 
         if(level == 0) {
             tree->addTopLevelItem(tl);
-            stack.push_back(tl);
         } else {
             stack.back()->addChild(tl);
         }
+
+        stack.push_back(tl);
     };
 
     cmd_dispatcher_->visitUndoCommands([this, &iterator](int level, const Command& cmd) {

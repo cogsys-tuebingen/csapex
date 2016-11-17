@@ -20,7 +20,7 @@
 #include <csapex/command/rename_connector.h>
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/set_color.h>
-#include <csapex/command/add_msg_connection.h>
+#include <csapex/command/add_connection.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/set_execution_mode.h>
 #include <csapex/command/set_logger_level.h>
@@ -455,14 +455,17 @@ void GraphView::updateSelection()
 
 Command::Ptr GraphView::deleteSelected()
 {
-    command::Meta::Ptr meta(new command::Meta(graph_facade_->getAbsoluteUUID(), "delete selected boxes", true));
+    CommandFactory factory(graph_facade_.get());
+
+    std::vector<UUID> uuids;
     for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
-            meta->add(Command::Ptr(new command::DeleteNode(graph_facade_->getAbsoluteUUID(), proxy->getBox()->getNodeHandle()->getUUID())));
+            uuids.push_back(proxy->getBox()->getNodeHandle()->getUUID());
         }
     }
-    return meta;
+
+    return factory.deleteAllNodes(uuids);
 }
 
 void GraphView::keyPressEvent(QKeyEvent* e)
@@ -1422,7 +1425,7 @@ void GraphView::morphNode()
         morph->add(add_new);
 
         for(const ConnectionInformation& ci : diag.getConnections(new_uuid)) {
-            morph->add(std::make_shared<command::AddMessageConnection>(graph_facade_->getAbsoluteUUID(),
+            morph->add(std::make_shared<command::AddConnection>(graph_facade_->getAbsoluteUUID(),
                                                                        ci.from, ci.to, ci.active));
         }
 

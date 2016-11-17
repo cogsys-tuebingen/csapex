@@ -11,7 +11,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/command/add_variadic_connector.h>
-#include <csapex/command/add_msg_connection.h>
+#include <csapex/command/add_connection.h>
 
 using namespace csapex;
 using namespace csapex::command;

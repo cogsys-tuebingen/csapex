@@ -2,7 +2,6 @@
 #include <csapex/command/delete_node.h>
 
 /// COMPONENT
-#include <csapex/command/delete_msg_connection.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
@@ -47,17 +46,8 @@ bool DeleteNode::doExecute()
     locked = false;
     clear();
 
-    std::set<ConnectionPtr> connections;
     for(ConnectablePtr connectable : node_handle->getExternalConnectors()) {
-        if(connectable->isConnected()) {
-            for(ConnectionPtr c : connectable->getConnections()) {
-                connections.insert(c);
-            }
-        }
-    }
-
-    for(ConnectionPtr c : connections) {
-        add(std::make_shared<DeleteMessageConnection>(graph_uuid, c->from().get(), c->to().get()));
+        apex_assert(!connectable->isConnected());
     }
 
     // serialize sub graph

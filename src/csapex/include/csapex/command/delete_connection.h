@@ -13,12 +13,13 @@ namespace command
 
 class CSAPEX_COMMAND_EXPORT DeleteConnection : public Meta
 {
-protected:
+public:
     DeleteConnection(const AUUID& graph_uuid, Connectable* a, Connectable* b);
 
 protected:
-    bool doExecute() override;
-    bool doRedo() override;
+    virtual bool doExecute() override;
+    virtual bool doRedo() override;
+    virtual bool doUndo() override;
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;

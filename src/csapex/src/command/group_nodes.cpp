@@ -15,7 +15,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/core/graphio.h>
 #include <csapex/command/add_variadic_connector.h>
-#include <csapex/command/add_msg_connection.h>
+#include <csapex/command/add_connection.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -127,7 +127,7 @@ void GroupNodes::mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 
             // forwarding connection
             CommandPtr add_internal_connection =
-                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid, ci.active);
+                    std::make_shared<command::AddConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid, ci.active);
             executeCommand(add_internal_connection);
             add(add_internal_connection);
 
@@ -136,7 +136,7 @@ void GroupNodes::mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, ci.from, in_map.external, ci.active);
+                std::make_shared<command::AddConnection>(parent_auuid, ci.from, in_map.external, ci.active);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
@@ -164,7 +164,7 @@ void GroupNodes::mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
             // forwarding connection
             CommandPtr add_internal_connection =
-                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal, ci.active);
+                    std::make_shared<command::AddConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal, ci.active);
             executeCommand(add_internal_connection);
             add(add_internal_connection);
 
@@ -172,7 +172,7 @@ void GroupNodes::mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.external, ci.to, ci.active);
+                std::make_shared<command::AddConnection>(parent_auuid, out_map.external, ci.to, ci.active);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
@@ -200,14 +200,14 @@ void GroupNodes::mapSignalGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 
             // forwarding connection
             CommandPtr add_internal_connection =
-                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid, ci.active);
+                    std::make_shared<command::AddConnection>(sub_graph_auuid, in_map.internal, nested_connector_uuid, ci.active);
             executeCommand(add_internal_connection);
             add(add_internal_connection);
         }
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, ci.from, in_map.external, ci.active);
+                std::make_shared<command::AddConnection>(parent_auuid, ci.from, in_map.external, ci.active);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }
@@ -236,14 +236,14 @@ void GroupNodes::mapSignalGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 
             // forwarding connection
             CommandPtr add_internal_connection =
-                    std::make_shared<command::AddMessageConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal, ci.active);
+                    std::make_shared<command::AddConnection>(sub_graph_auuid, nested_connector_uuid, out_map.internal, ci.active);
             executeCommand(add_internal_connection);
             add(add_internal_connection);
         }
 
         // crossing connection
         CommandPtr add_external_connection =
-                std::make_shared<command::AddMessageConnection>(parent_auuid, out_map.external, ci.to, ci.active);
+                std::make_shared<command::AddConnection>(parent_auuid, out_map.external, ci.to, ci.active);
         executeCommand(add_external_connection);
         add(add_external_connection);
     }

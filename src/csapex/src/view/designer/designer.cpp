@@ -431,13 +431,8 @@ void Designer::deleteSelected()
         return;
     }
 
-    AUUID id = view->getGraphFacade()->getAbsoluteUUID();
-    command::Meta::Ptr del(new command::Meta(id, "delete selected"));
-    del->add(view->deleteSelected());
-
-    if(del->commands() != 0) {
-        view_core_.execute(del);
-    }
+    Command::Ptr del = view->deleteSelected();
+    view_core_.execute(del);
 }
 void Designer::copySelected()
 {

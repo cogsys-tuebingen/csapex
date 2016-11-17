@@ -20,6 +20,9 @@ public:
     CommandFactory(GraphFacade *root);
 
 public:
+    CommandPtr deleteAllNodes(const std::vector<UUID>& uuids);
+    CommandPtr deleteAllConnectionsFromNodes(const std::vector<UUID>& uuids);
+
     CommandPtr addConnection(const UUID& from, const UUID& to, bool active);
 
     CommandPtr removeAllConnectionsCmd(ConnectablePtr input);
