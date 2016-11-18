@@ -2,6 +2,11 @@
 Changelog for package csapex
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* added missing dependencies for qt5
+* Contributors: buck
+
 0.9.1 (2016-11-18)
 ------------------
 * fixed error in un-/grouping
