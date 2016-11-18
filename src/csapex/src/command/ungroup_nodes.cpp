@@ -9,6 +9,7 @@
 #include <csapex/command/delete_node.h>
 #include <csapex/command/add_node.h>
 #include <csapex/command/paste_graph.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/msg/input.h>
@@ -79,25 +80,20 @@ bool UngroupNodes::doExecute()
     for(SlotPtr slot : nh->getExternalSlots()) {
         auto& vec = old_signals_in[slot->getUUID()];
         for(ConnectionPtr c : slot->getConnections()) {
-            EventPtr trigger = std::dynamic_pointer_cast<Event>(c->from());
-            if(trigger) {
-                vec.push_back(trigger->getUUID());
-            }
+            vec.push_back(c->from()->getUUID());
         }
     }
 
     for(EventPtr trigger : nh->getExternalEvents()) {
         auto& vec = old_signals_out[trigger->getUUID()];
         for(ConnectionPtr c : trigger->getConnections()) {
-            SlotPtr slot = std::dynamic_pointer_cast<Slot>(c->to());
-            if(slot) {
-                vec.push_back(slot->getUUID());
-            }
+            vec.push_back(c->to()->getUUID());
         }
     }
 
+    CommandFactory cf(graph_facade_);
 
-    CommandPtr del = std::make_shared<command::DeleteNode>(getGraphFacade()->getAbsoluteUUID(), uuid);
+    CommandPtr del = cf.deleteAllNodes({uuid});
     executeCommand(del);
     add(del);
 
@@ -147,13 +143,13 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
     for(const ConnectionInformation& ci : signals_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id().getFullName();
-        UUID from = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
+        UUID to = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
 
         UUID graph_out = subgraph->getForwardedSlotExternal(ci.from);
         const std::vector<UUID>& targets = old_signals_in[graph_out];
 
 
-        for(const UUID& to : targets) {
+        for(const UUID& from : targets) {
             CommandPtr add_connection = std::make_shared<command::AddConnection>(parent_auuid, from, to, ci.active);
             executeCommand(add_connection);
             add(add_connection);

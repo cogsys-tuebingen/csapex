@@ -303,7 +303,7 @@ void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>
         if(ignore_forwarding_connections_) {
             if(connection->from()->getUUID().type() == "relayout" ||
                     connection->to()->getUUID().type() == "relayin" ||
-                    connection->from()->getUUID().type() == "relaytrigger" ||
+                    connection->from()->getUUID().type() == "relayevent" ||
                     connection->to()->getUUID().type() == "relayslot") {
                 continue;
             }

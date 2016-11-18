@@ -12,6 +12,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_connection.h>
+#include <csapex/command/command_factory.h>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -50,12 +51,22 @@ bool PasteGraph::doExecute()
 
 bool PasteGraph::doUndo()
 {
+    std::vector<UUID> uuids;
+
     GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
     for(const auto& pair : id_mapping_) {
-        CommandPtr del(new command::DeleteNode(graph_uuid, pair.second));
-        del->init(graph_facade, *core_, getDesigner());
-        executeCommand(del);
+        uuids.push_back(pair.second);
+//        CommandPtr del(new command::DeleteNode(graph_uuid, pair.second));
+//        del->init(graph_facade, *core_, getDesigner());
+//        executeCommand(del);
     }
+
+    CommandFactory cf(graph_facade);
+
+    CommandPtr del = cf.deleteAllNodes(uuids);
+    //        del->init(graph_facade, *core_, getDesigner());
+    executeCommand(del);
+
 
     id_mapping_.clear();
 

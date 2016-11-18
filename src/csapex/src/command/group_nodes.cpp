@@ -7,6 +7,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/delete_node.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/command/add_node.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/scheduling/thread_pool.h>
@@ -71,12 +72,18 @@ bool GroupNodes::doExecute()
 
     analyzeConnections(graph);
 
-    for(NodeHandle* nh : nodes) {
-        UUID old_uuid = nh->getUUID();
-        CommandPtr del = std::make_shared<command::DeleteNode>(getGraphFacade()->getAbsoluteUUID(), old_uuid);
-        executeCommand(del);
-        add(del);
-    }
+    CommandFactory cf(graph_facade_);
+
+    CommandPtr del = cf.deleteAllNodes(uuids);
+    executeCommand(del);
+    add(del);
+
+//    for(NodeHandle* nh : nodes) {
+//        UUID old_uuid = nh->getUUID();
+//        CommandPtr del = std::make_shared<command::DeleteNode>(getGraphFacade()->getAbsoluteUUID(), old_uuid);
+//        executeCommand(del);
+//        add(del);
+//    }
 
     pasteSelection(sub_graph_auuid);
 
