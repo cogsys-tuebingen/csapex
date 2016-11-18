@@ -1623,7 +1623,7 @@ void GraphView::makeSnippetFromSelected()
     QDir directory(save_to_path);
     if(directory.exists()) {
         QString filename = name.toLower().replace(QRegularExpression("[\\/:?\"<>| ]"), "_");
-        QFile file(save_to_path + QDir::separator() + filename + ".apexs");
+        QFile file(save_to_path + QDir::separator() + filename + QString::fromStdString(Settings::template_extension));
 
         if(file.exists()) {
             int r = QMessageBox::warning(this, tr("Overwrite?"),

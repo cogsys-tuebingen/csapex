@@ -5,9 +5,13 @@
 #include <csapex/utility/assert.h>
 #include <csapex/utility/yaml_node_builder.h>
 #include <csapex/serialization/message_serializer.h>
+#include <csapex/core/settings.h>
 
 /// SYSTEM
 #include <fstream>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
 using namespace csapex;
 
@@ -17,7 +21,7 @@ MessageFactory::MessageFactory()
 
 void MessageFactory::shutdown()
 {
-	type_to_constructor.clear();
+    type_to_constructor.clear();
 }
 
 TokenData::Ptr MessageFactory::createMessage(const std::string& type)
@@ -37,7 +41,18 @@ TokenData::Ptr MessageFactory::createMessage(const std::string& type)
 
 TokenData::Ptr MessageFactory::readMessage(const std::string &path)
 {
-    YAML::Node node = YAML::LoadFile(path);
+    YAML::Node node;
+    if(path.substr(path.size() - Settings::message_extension_compressed.size()) == Settings::message_extension_compressed)
+    {
+        std::ifstream in (path, std::ios_base::in | std::ios_base::binary);
+        boost::iostreams::filtering_istream zipped_in;
+        zipped_in.push(boost::iostreams::gzip_decompressor());
+        zipped_in.push(in);
+        node = YAML::Load(zipped_in);
+    }
+    else{
+        node = YAML::LoadFile(path);
+    }
     return MessageSerializer::instance().readYaml(node);
 }
 

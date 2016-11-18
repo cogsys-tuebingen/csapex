@@ -53,7 +53,7 @@ void SnippetFactory::loadSnippets()
         for(; dir != end; ++dir) {
             boost::filesystem::path path = dir->path();
 
-            if(path.extension() == ".apexs") {
+            if(path.extension() == Settings::template_extension) {
                 SnippetPtr s =  std::make_shared<Snippet>(Snippet::load(path.string()));
                 addSnippet(s);
             }

@@ -16,7 +16,7 @@ find_package(catkin QUIET)
 find_package(class_loader REQUIRED)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED)
-find_package(Boost COMPONENTS program_options filesystem system regex serialization thread REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem system regex serialization thread iostreams REQUIRED)
 
 find_package(OpenGL REQUIRED)
 find_package(TinyXML REQUIRED)
