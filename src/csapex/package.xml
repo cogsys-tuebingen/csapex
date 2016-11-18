@@ -7,10 +7,22 @@
   <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>
 
   <license>BSD</license>
+
+  <url type="website">http://www.ra.cs.uni-tuebingen.de/forschung/apex/</url>
+  <url type="repository">https://github.com/cogsys-tuebingen/csapex</url>
+  <url type="bugtracker">https://github.com/cogsys-tuebingen/csapex/issues</url>
+
   <author email="sebastian.buck@uni-tuebingen.de">buck</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>qtbase5-dev</build_depend>
+  <build_depend>libqt5-opengl-dev</build_depend>
   <build_depend>class_loader</build_depend>
+
   <run_depend>class_loader</run_depend>
+  <run_depend>libqt5-core</run_depend>
+  <run_depend>libqt5-gui</run_depend>
+  <run_depend>libqt5-widgets</run_depend>
+  <run_depend>libqt5-opengl</run_depend>
 </package>
