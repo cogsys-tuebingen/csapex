@@ -2,8 +2,8 @@
 Changelog for package csapex
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.9.2 (2016-11-18)
+------------------
 * added missing dependencies for qt5
 * Contributors: buck
 
