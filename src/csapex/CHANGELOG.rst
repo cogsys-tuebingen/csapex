@@ -2,8 +2,8 @@
 Changelog for package csapex
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.9.1 (2016-11-18)
+------------------
 * fixed error in un-/grouping
 * fixed parameter context menu offset
 * Merge remote-tracking branch 'origin/compression' into devel
