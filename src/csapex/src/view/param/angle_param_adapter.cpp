@@ -55,7 +55,7 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
 
     label->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(label, &QLabel::customContextMenuRequested,
-                     this, &AngleParameterAdapter::customContextMenuRequested);
+                     [=](const QPoint& point){ customContextMenuRequested(label, point); });
 
     layout->addWidget(label);
 
@@ -66,7 +66,7 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     dial->setValue(angleToDial(angle_p_->as<double>()));
     dial->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(dial.data(), &QDial::customContextMenuRequested,
-                     this, &AngleParameterAdapter::customContextMenuRequested);
+                     [=](const QPoint& point){ customContextMenuRequested(dial, point); });
     layout->addWidget(dial);
 
     QPointer<QDoubleSpinBox> spin = new QDoubleSpinBox;

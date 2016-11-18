@@ -20,7 +20,7 @@ public:
     static void addHeader(QMenu& menu, const std::string& title);
 
 public Q_SLOTS:
-    void showContextMenu(const QPoint& pos);
+    void showContextMenu(QWidget *widget, const QPoint& pos);
 
 protected:
     virtual void doShowContextMenu(const QPoint& pos) = 0;

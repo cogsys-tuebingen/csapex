@@ -50,7 +50,7 @@ QWidget* RangeParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     QLabel* label = new QLabel(QString::fromStdString(display_name));
     label->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(label, &QLabel::customContextMenuRequested,
-                     this, &RangeParameterAdapter::customContextMenuRequested);
+                     [=](const QPoint& point){ customContextMenuRequested(label, point); });
 
     internal_layout->addWidget(label);
 
@@ -113,7 +113,7 @@ void RangeParameterAdapter::genericSetup()
 
     slider->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(slider.data(), &QLabel::customContextMenuRequested,
-                     this, &RangeParameterAdapter::customContextMenuRequested);
+                     [=](const QPoint& point){ customContextMenuRequested(slider, point); });
 
     QObject::connect(slider.data(), &Slider::scaledValueChanged,
                      display.data(), &Spinbox::setValue);

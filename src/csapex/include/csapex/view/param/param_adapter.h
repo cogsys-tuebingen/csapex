@@ -41,7 +41,7 @@ public:
 
 Q_SIGNALS:
     void modelCallback(std::function<void()>);
-    void customContextMenuRequested(QPoint);
+    void customContextMenuRequested(QWidget*, QPoint);
 
 public Q_SLOTS:
     void executeModelCallback(std::function<void()>);

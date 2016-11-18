@@ -37,7 +37,7 @@ QWidget* IntervalParameterAdapter::setup(QBoxLayout* layout, const std::string& 
     QLabel* label = new QLabel(QString::fromStdString(display_name));
     label->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(label, &QLabel::customContextMenuRequested,
-                     this, &IntervalParameterAdapter::customContextMenuRequested);
+                     [=](const QPoint& point){ customContextMenuRequested(label, point); });
 
     internal_layout->addWidget(label);
 
@@ -163,7 +163,7 @@ void IntervalParameterAdapter::genericSetup()
 
     slider->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(slider.data(), &QLabel::customContextMenuRequested,
-                     this, &IntervalParameterAdapter::customContextMenuRequested);
+                     [=](const QPoint& point){ customContextMenuRequested(slider, point); });
 
     QObject::connect(slider.data(), &Slider::rangeChanged, displayLower.data(), &Spinbox::setRange);
     QObject::connect(slider.data(), &Slider::rangeChanged, displayUpper.data(), &Spinbox::setRange);

@@ -51,7 +51,7 @@ QWidget* ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
 
     btn->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(btn.data(), &QPushButton::customContextMenuRequested,
-                     this, &ColorParameterAdapter::customContextMenuRequested);
+                     [=](const QPoint& point){ customContextMenuRequested(btn, point); });
 
 
     QHBoxLayout* sub = new QHBoxLayout;

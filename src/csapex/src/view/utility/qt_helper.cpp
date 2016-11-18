@@ -33,9 +33,8 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QWidget* widget,
     if(context_handler) {
         label->setContextMenuPolicy(Qt::CustomContextMenu);
         context_handler->setParent(label);
-        //QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
         QObject::connect(label, &QLabel::customContextMenuRequested, [label, context_handler](QPoint local){
-            context_handler->showContextMenu(label->mapToGlobal(local));
+            context_handler->showContextMenu(label, local);
         });
     }
     internal_layout->addWidget(label);
@@ -66,7 +65,9 @@ QHBoxLayout* QtHelper::wrap(const std::string& txt, QLayout* layout,
     if(context_handler) {
         label->setContextMenuPolicy(Qt::CustomContextMenu);
         context_handler->setParent(label);
-        QObject::connect(label, SIGNAL(customContextMenuRequested(QPoint)), context_handler, SLOT(showContextMenu(QPoint)));
+        QObject::connect(label, &QLabel::customContextMenuRequested, [label, context_handler](QPoint local){
+            context_handler->showContextMenu(label, local);
+        });
     }
     internal_layout->addWidget(label);
     internal_layout->addLayout(layout);
