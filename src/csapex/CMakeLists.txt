@@ -511,11 +511,8 @@ add_library(csapex_qt SHARED
     src/view/param/bitset_param_adapter.cpp
     src/view/param/value_param_adapter.cpp
     src/view/param/path_param_adapter.cpp
-    #src/view/param/trigger_param_adapter.cpp
     src/view/param/color_param_adapter.cpp
     src/view/param/angle_param_adapter.cpp
-    #src/view/param/null_param_adapter.cpp
-    #src/view/param/string_list_param_adapter.cpp
 
     src/view/param/output_progress_param_adapter.cpp
     src/view/param/output_text_param_adapter.cpp
@@ -660,7 +657,7 @@ if(WIN32)
 			DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
 else()
 	install(DIRECTORY include/${PROJECT_NAME}/
-			LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                        #LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 			DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 endif()
 
@@ -717,17 +714,17 @@ endif()
 # ANALYSIS TOOLS
 #
 
-if(WIN32)
-else()
-	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+#if(WIN32)
+#else()
+#	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
-	set(directories "")
-	foreach(dir ${dirs})
-	  #message(STATUS "dir='${dir}'")
-	  set(directories "-I${dir} ${directories}")
-	endforeach()
+#	set(directories "")
+#	foreach(dir ${dirs})
+#	  #message(STATUS "dir='${dir}'")
+#	  set(directories "-I${dir} ${directories}")
+#	endforeach()
 
-	add_custom_command(OUTPUT includes.txt
-					   COMMAND eval "echo ${directories} >includes.txt")
-	add_custom_target(generate_includes ALL DEPENDS includes.txt)
-endif()
+#	add_custom_command(OUTPUT includes.txt
+#					   COMMAND eval "echo ${directories} >includes.txt")
+#	add_custom_target(generate_includes ALL DEPENDS includes.txt)
+#endif()
