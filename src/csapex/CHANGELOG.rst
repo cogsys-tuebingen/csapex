@@ -2,6 +2,12 @@
 Changelog for package csapex
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed cmake problems on the ROS build farm, now that prerelease is possible
+  Added all dependencies
+* Contributors: buck
+
 0.9.2 (2016-11-18)
 ------------------
 * added missing dependencies for qt5
