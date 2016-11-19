@@ -2,8 +2,8 @@
 Changelog for package csapex
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.9.3 (2016-11-19)
+------------------
 * Fixed cmake problems on the ROS build farm, now that prerelease is possible
   Added all dependencies
 * Contributors: buck
