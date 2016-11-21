@@ -128,10 +128,10 @@ private:
     void startNextIteration();
 
 public:
-    csapex::slim_signal::Signal<void(ConnectablePtr)> forwardingAdded;
-    csapex::slim_signal::Signal<void(ConnectablePtr)> forwardingRemoved;
+    slim_signal::Signal<void(ConnectablePtr)> forwardingAdded;
+    slim_signal::Signal<void(ConnectablePtr)> forwardingRemoved;
 
-    csapex::slim_signal::Signal<void(Connectable*,Connectable*)> internalConnectionInProgress;
+    slim_signal::Signal<void(Connectable*,Connectable*)> internalConnectionInProgress;
 
 protected:
     std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation_;

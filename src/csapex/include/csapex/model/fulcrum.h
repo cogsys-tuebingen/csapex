@@ -56,9 +56,9 @@ public:
     Connection* connection() const;
 
 public:
-    csapex::slim_signal::Signal<void (Fulcrum*, bool dropped)> moved;
-    csapex::slim_signal::Signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
-    csapex::slim_signal::Signal<void (Fulcrum*, int type)> typeChanged;
+    slim_signal::Signal<void (Fulcrum*, bool dropped)> moved;
+    slim_signal::Signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
+    slim_signal::Signal<void (Fulcrum*, int type)> typeChanged;
 
 private:
     Connection* parent_;

@@ -81,7 +81,7 @@ public:
     virtual void removeAllConnectionsNotUndoable() override;
 
 public:
-    csapex::slim_signal::Signal<void(Connectable*)> messageSent;
+    slim_signal::Signal<void(Connectable*)> messageSent;
 
 
 protected:

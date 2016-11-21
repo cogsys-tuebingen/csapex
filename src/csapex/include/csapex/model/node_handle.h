@@ -136,24 +136,24 @@ public:
     void updateLoggerLevel();
 
 public:
-    csapex::slim_signal::Signal<void ()> nodeRemoved;
+    slim_signal::Signal<void ()> node_removed;
 
-    csapex::slim_signal::Signal<void (ConnectablePtr)> connectorCreated;
-    csapex::slim_signal::Signal<void (ConnectablePtr)> connectorRemoved;
+    slim_signal::Signal<void (ConnectablePtr)> connector_created;
+    slim_signal::Signal<void (ConnectablePtr)> connector_removed;
 
-    csapex::slim_signal::Signal<void (Connectable*, Connectable*)> connectionInProgress;
-    csapex::slim_signal::Signal<void (Connectable*)> connectionDone;
-    csapex::slim_signal::Signal<void (Connectable*)> connectionStart;
+    slim_signal::Signal<void (Connectable*, Connectable*)> connection_in_prograss;
+    slim_signal::Signal<void (Connectable*)> connection_done;
+    slim_signal::Signal<void (Connectable*)> connection_start;
 
-    csapex::slim_signal::Signal<void()> parametersChanged;
+    slim_signal::Signal<void()> parameters_changed;
 
-    csapex::slim_signal::Signal<void()> nodeStateChanged;
+    slim_signal::Signal<void()> node_state_changed;
 
-    csapex::slim_signal::Signal<void()> activationChanged;
+    slim_signal::Signal<void()> activation_changed;
 
-    csapex::slim_signal::Signal<void()> mightBeEnabled;
+    slim_signal::Signal<void()> might_be_enabled;
 
-    csapex::slim_signal::Signal<void(std::function<void()>)> executionRequested;
+    slim_signal::Signal<void(std::function<void()>)> execution_requested;
 
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);
@@ -202,7 +202,7 @@ private:
 
     Rate rate_;
 
-    std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> connections_;
+    std::map<Connectable*, std::vector<slim_signal::Connection>> connections_;
 
     bool source_;
     bool sink_;

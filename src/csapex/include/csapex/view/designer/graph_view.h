@@ -17,6 +17,7 @@
 #include <csapex/profiling/profilable.h>
 #include <csapex/model/execution_mode.h>
 #include <csapex/serialization/snippet.h>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -30,7 +31,7 @@ namespace csapex
 class NodeFactory;
 class GraphViewContextMenu;
 
-class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable
+class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable, public Observer
 {
     friend class GraphViewContextMenu;
 
@@ -220,7 +221,6 @@ private:
 
     std::map<NodeWorker*, std::vector<csapex::slim_signal::ScopedConnection>> worker_connections_;
     std::map<NodeHandle*, std::vector<csapex::slim_signal::ScopedConnection>> handle_connections_;
-    std::vector<csapex::slim_signal::ScopedConnection> scoped_connections_;
 
     std::vector<NodeBox*> boxes_;
     std::vector<NodeBox*> selected_boxes_;

@@ -18,8 +18,8 @@ public:
     virtual bool isDoneProcessing() const = 0;
 
 public:
-    csapex::slim_signal::Signal<void()> updated;
-    csapex::slim_signal::Signal<void()> finished;
+    slim_signal::Signal<void()> updated;
+    slim_signal::Signal<void()> finished;
 
 protected:
     GeneratorNode();

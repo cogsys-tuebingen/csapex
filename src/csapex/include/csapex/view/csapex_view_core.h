@@ -7,6 +7,7 @@
 #include <csapex/view/designer/designer_options.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/utility/slim_signal.h>
+#include <csapex/model/observer.h>
 
 namespace csapex
 {
@@ -18,7 +19,7 @@ class DesignerStyleable;
 class DesignerOptions;
 class DragIO;
 
-class CSAPEX_QT_EXPORT CsApexViewCore
+class CSAPEX_QT_EXPORT CsApexViewCore : public Observer
 {
 public:
     CsApexViewCore(CsApexCore& core);
@@ -50,8 +51,6 @@ private:
     DesignerStyleable style;
 
     std::shared_ptr<DragIO> drag_io;
-
-    std::vector<slim_signal::ScopedConnection> connections_;
 };
 
 }

@@ -54,8 +54,8 @@ public:
     void notifyEventHandled();
 
 public:
-    csapex::slim_signal::Signal<void(const TokenPtr&)> token_set;
-    csapex::slim_signal::Signal<void()> triggered;
+    slim_signal::Signal<void(const TokenPtr&)> token_set;
+    slim_signal::Signal<void()> triggered;
 
 protected:
     std::function<void(Slot*,const TokenPtr&)> callback_;

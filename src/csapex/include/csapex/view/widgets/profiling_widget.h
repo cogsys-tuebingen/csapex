@@ -6,7 +6,7 @@
 
 /// PROJECT
 #include <csapex/profiling/profiler.h>
-#include <csapex/utility/slim_signal.hpp>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -18,7 +18,7 @@ class QVBoxLayout;
 namespace csapex
 {
 
-class CSAPEX_QT_EXPORT ProfilingWidget : public QWidget
+class CSAPEX_QT_EXPORT ProfilingWidget : public QWidget, public Observer
 {
     Q_OBJECT
 
@@ -42,8 +42,6 @@ protected:
 private:
     std::shared_ptr<Profiler> profiler_;
     std::string profile_;
-
-    std::vector<slim_signal::ScopedConnection> connections_;
 
     QVBoxLayout* layout_;
     QSpacerItem* space_for_painting_;

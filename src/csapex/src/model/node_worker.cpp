@@ -51,12 +51,12 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 
     try {
-        connections_.emplace_back(node_handle_->connectorCreated.connect([this](ConnectablePtr c) {
-                                      connectConnector(c);
-                                  }));
-        connections_.emplace_back(node_handle_->connectorRemoved.connect([this](ConnectablePtr c) {
-                                      disconnectConnector(c.get());
-                                  }));
+        observe(node_handle_->connector_created, [this](ConnectablePtr c) {
+            connectConnector(c);
+        });
+        observe(node_handle_->connector_removed, [this](ConnectablePtr c) {
+            disconnectConnector(c.get());
+        });
 
         node->setupParameters(*node);
 
@@ -64,9 +64,9 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             node->setup(*node_handle);
 
-            connections_.emplace_back(node_handle_->getOutputTransition()->messages_processed.connect([this](){
+            observe(node_handle_->getOutputTransition()->messages_processed, [this](){
                 outgoingMessagesProcessed();
-            }));
+            });
 
             node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
                 setProcessingEnabled(true);
@@ -86,27 +86,27 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             auto generator = std::dynamic_pointer_cast<GeneratorNode>(node);
             if(generator) {
-                connections_.emplace_back(generator->finished.connect(delegate::Delegate0<>(this, &NodeWorker::triggerTryProcess)));
-                connections_.emplace_back(generator->updated.connect(delegate::Delegate0<>(this, &NodeWorker::finishGenerator)));
+                observe(generator->finished, delegate::Delegate0<>(this, &NodeWorker::triggerTryProcess));
+                observe(generator->updated, delegate::Delegate0<>(this, &NodeWorker::finishGenerator));
             }
 
             trigger_process_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"inputs processed");
 
             is_setup_ = true;
 
-            connections_.emplace_back(node_handle_->mightBeEnabled.connect([this]() {
+            observe(node_handle_->might_be_enabled, [this]() {
                 triggerTryProcess();
-            }));
-            connections_.emplace_back(node_handle_->getNodeState()->enabled_changed->connect([this](){
+            });
+            observe(node_handle_->getNodeState()->enabled_changed, [this](){
                 setProcessingEnabled(isProcessingEnabled());
-            }));
-            connections_.emplace_back(node_handle_->activationChanged.connect([this](){
+            });
+            observe(node_handle_->activation_changed, [this](){
                 if(node_handle_->isActive()) {
                     trigger_activated_->trigger();
                 } else {
                     trigger_deactivated_->trigger();
                 }
-            }));
+            });
 
             auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
             node_handle_->getInputTransition()->setActivationFunction(af);
@@ -498,7 +498,7 @@ void NodeWorker::startProcessingMessages()
             } else {
                 try {
                     node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
-                        node_handle_->executionRequested([this, f, node]() {
+                        node_handle_->execution_requested([this, f, node]() {
                             f(*node_handle_, *node);
                             finishProcessing();
                         });
@@ -1047,7 +1047,7 @@ void NodeWorker::connectConnector(ConnectablePtr c)
 
     if(EventPtr event = std::dynamic_pointer_cast<Event>(c)) {
         port_connections_[c.get()].emplace_back(event->triggered.connect([this]() {
-            node_handle_->executionRequested([this]() {
+            node_handle_->execution_requested([this]() {
                 sendEvents(node_handle_->isActive());
             });
         }));
@@ -1058,7 +1058,7 @@ void NodeWorker::connectConnector(ConnectablePtr c)
     } else if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(c)) {
         SlotWeakPtr slot_w = slot;
         auto connection = slot->triggered.connect([this, slot_w]() {
-            node_handle_->executionRequested([this, slot_w]() {
+            node_handle_->execution_requested([this, slot_w]() {
                 if(SlotPtr slot = slot_w.lock()) {
                     TokenPtr token = slot->getToken();
                     if(token) {

@@ -18,7 +18,7 @@ class CSAPEX_EXPORT NodeState : public Memento
 {
 public:
     typedef std::shared_ptr<NodeState> Ptr;
-    typedef csapex::slim_signal::Signal<void()> SignalImpl;
+    typedef slim_signal::Signal<void()> SignalImpl;
     typedef std::shared_ptr< SignalImpl > Signal;
 
     NodeState(const NodeHandle *parent);

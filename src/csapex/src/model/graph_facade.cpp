@@ -77,10 +77,10 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
         executor_.add(runner.get());
     }
 
-    generatorAdded(runner);
+    generator_added(runner);
 
-    nodeAdded(nh);
-    nodeWorkerAdded(nw);
+    node_added(nh);
+    node_worker_added(nw);
 
     nw->notification.connect(notification);
 
@@ -102,7 +102,7 @@ void GraphFacade::createSubgraphFacade(NodeHandlePtr nh)
 
     sub_graph_facade->notification.connect(notification);
 
-    childAdded(sub_graph_facade);
+    child_added(sub_graph_facade);
 }
 
 void GraphFacade::nodeRemovedHandler(graph::VertexPtr vertex)
@@ -112,17 +112,17 @@ void GraphFacade::nodeRemovedHandler(graph::VertexPtr vertex)
     TaskGeneratorPtr runner = generators_[nh->getUUID()];
     generators_.erase(nh->getUUID());
     executor_.remove(runner.get());
-    generatorRemoved(runner);
+    generator_removed(runner);
 
     NodeWorkerPtr nw = node_workers_[nh.get()];
-    nodeWorkerRemoved(nw);
+    node_worker_removed(nw);
     node_workers_.erase(nh.get());
-    nodeRemoved(nh);
+    node_removed(nh);
 
     if(nh->getType() == "csapex::Graph") {
         auto pos = children_.find(nh->getUUID());
         apex_assert_hard(pos != children_.end());
-        childRemoved(pos->second);
+        child_removed(pos->second);
         children_.erase(pos);
     }
 
@@ -406,7 +406,7 @@ void GraphFacade::clear()
     stop();
     graph_->clear();
     for(auto& gen: generators_) {
-        generatorRemoved(gen.second);
+        generator_removed(gen.second);
     }
     generators_.clear();
 }

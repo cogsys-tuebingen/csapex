@@ -227,8 +227,8 @@ protected:
     }
 
 protected:
-    csapex::slim_signal::Signal<void(const std::string&)> loaded;
-    csapex::slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
+    slim_signal::Signal<void(const std::string&)> loaded;
+    slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
     
 protected:
     bool plugins_loaded_;
@@ -339,8 +339,8 @@ public:
     }
 
 public:
-    csapex::slim_signal::Signal<void(const std::string&)> loaded;
-    csapex::slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
+    slim_signal::Signal<void(const std::string&)> loaded;
+    slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
     
 protected:
     static int i_count;

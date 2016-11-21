@@ -41,13 +41,13 @@ public:
     virtual void reset() override;
 
 public:
-    csapex::slim_signal::Signal<void()> messages_processed;
+    slim_signal::Signal<void()> messages_processed;
 
 private:
     void fillConnections();
 
 private:
-    std::unordered_map<OutputPtr, std::vector<csapex::slim_signal::Connection>> output_signal_connections_;
+    std::unordered_map<OutputPtr, std::vector<slim_signal::Connection>> output_signal_connections_;
     std::unordered_map<UUID, OutputPtr, UUID::Hasher> outputs_;
 
     long sequence_number_;

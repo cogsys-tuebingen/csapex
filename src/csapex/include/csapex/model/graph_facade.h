@@ -75,23 +75,23 @@ public:
     void clear();
 
 public:
-    csapex::slim_signal::Signal<void (bool)> paused;
-    csapex::slim_signal::Signal<void ()> stopped;
+    slim_signal::Signal<void (bool)> paused;
+    slim_signal::Signal<void ()> stopped;
 
-    csapex::slim_signal::Signal<void(GraphFacadePtr)> childAdded;
-    csapex::slim_signal::Signal<void(GraphFacadePtr)> childRemoved;
+    slim_signal::Signal<void(GraphFacadePtr)> child_added;
+    slim_signal::Signal<void(GraphFacadePtr)> child_removed;
 
-    csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeAdded;
-    csapex::slim_signal::Signal<void(NodeHandlePtr)> nodeRemoved;
+    slim_signal::Signal<void(NodeHandlePtr)> node_added;
+    slim_signal::Signal<void(NodeHandlePtr)> node_removed;
 
-    csapex::slim_signal::Signal<void(NodeWorkerPtr)> nodeWorkerAdded;
-    csapex::slim_signal::Signal<void(NodeWorkerPtr)> nodeWorkerRemoved;
+    slim_signal::Signal<void(NodeWorkerPtr)> node_worker_added;
+    slim_signal::Signal<void(NodeWorkerPtr)> node_worker_removed;
 
-    csapex::slim_signal::Signal<void(TaskGeneratorPtr)> generatorAdded;
-    csapex::slim_signal::Signal<void(TaskGeneratorPtr)> generatorRemoved;
+    slim_signal::Signal<void(TaskGeneratorPtr)> generator_added;
+    slim_signal::Signal<void(TaskGeneratorPtr)> generator_removed;
 
-    csapex::slim_signal::Signal<void (Notification)> notification;
-    csapex::slim_signal::Signal<void()> panic;
+    slim_signal::Signal<void (Notification)> notification;
+    slim_signal::Signal<void()> panic;
     
 private:
     void nodeAddedHandler(graph::VertexPtr node);
@@ -109,7 +109,7 @@ private:
 
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> children_;
 
-    std::vector<csapex::slim_signal::Connection> connections_;
+    std::vector<slim_signal::Connection> connections_;
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
 
     std::map<const NodeHandle*, NodeWorkerPtr> node_workers_;

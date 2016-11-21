@@ -165,9 +165,9 @@ void Main::checkRecoveryFile(CsApexViewCore &view_core, CsApexWindow &w)
         }
     });
     timer->start(settings.get<int>("config_recovery_save_interval", 1000));
-    connections_.emplace_back(view_core.getCommandDispatcher().stateChanged.connect([&](){
+    observe(view_core.getCommandDispatcher().state_changed, [&](){
         recover_needed = true;
-    }));
+    });
 }
 
 void Main::askForRecoveryConfig(const std::string& config_to_load)

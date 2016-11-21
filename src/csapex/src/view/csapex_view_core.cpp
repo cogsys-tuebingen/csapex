@@ -29,7 +29,7 @@ CsApexViewCore::CsApexViewCore(CsApexCore& core)
     MessageRendererManager::instance().setPluginLocator(core_.getPluginLocator());
     node_adapter_factory_->loadPlugins();
 
-    connections_.emplace_back(core_.saved.connect([this](){
+    observe(core_.saved, [this](){
         dispatcher_->setClean();
         dispatcher_->resetDirtyPoint();
 
@@ -43,15 +43,15 @@ CsApexViewCore::CsApexViewCore(CsApexCore& core)
                 core_.getSettings().set("config_recovery", false);
             }
         }
-    }));
-    connections_.emplace_back(core_.loaded.connect([this](){
+    });
+    observe(core_.loaded, [this](){
         dispatcher_->setClean();
         dispatcher_->resetDirtyPoint();
-    }));
-    connections_.emplace_back(core_.resetRequest.connect([this](){
+    });
+    observe(core_.reset_requested, [this](){
         dispatcher_->reset();
         core_.getSettings().set("config_recovery", false);
-    }));
+    });
 }
 
 CsApexViewCore::CsApexViewCore(CsApexViewCore& parent, CsApexCore& core, std::shared_ptr<CommandDispatcher> dispatcher)

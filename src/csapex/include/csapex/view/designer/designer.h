@@ -12,6 +12,7 @@
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/profiling/profilable.h>
 #include <csapex/utility/notification.h>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <QWidget>
@@ -34,7 +35,7 @@ namespace csapex
 class NodeFactory;
 class NotificationWidget;
 
-class CSAPEX_QT_EXPORT Designer : public QWidget, public Profilable
+class CSAPEX_QT_EXPORT Designer : public QWidget, public Profilable, public Observer
 {
     Q_OBJECT
 
@@ -113,7 +114,7 @@ public Q_SLOTS:
 private:
     void resizeEvent(QResizeEvent* re);
 
-    void observe(GraphFacadePtr graph);
+    void observeGraph(GraphFacadePtr graph);
     void showGraph(GraphFacadePtr graph);
 
 private:
@@ -142,8 +143,6 @@ private:
     QPoint drag_start_pos_;
 
     bool is_init_;
-
-    std::vector<csapex::slim_signal::ScopedConnection> connections_;
 
     QParallelAnimationGroup* notification_animation_;
     std::unordered_map<UUID, NotificationWidget*, UUID::Hasher> named_notifications_;

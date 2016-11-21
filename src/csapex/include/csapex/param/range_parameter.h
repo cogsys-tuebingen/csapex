@@ -42,7 +42,7 @@ public:
     typedef std::shared_ptr<RangeParameter> Ptr;
 
 public:
-    csapex::slim_signal::Signal<void(Parameter*)> step_changed;
+    slim_signal::Signal<void(Parameter*)> step_changed;
 
 public:
     RangeParameter();

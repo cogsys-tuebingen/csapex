@@ -153,20 +153,20 @@ void NodeBox::setupUi()
 
 
     NodeState* state = node_handle_.lock()->getNodeState().get();
-    connections_.push_back(state->flipped_changed->connect(std::bind(&NodeBox::triggerFlipSides, this)));
-    connections_.push_back(state->minimized_changed->connect(std::bind(&NodeBox::triggerMinimized, this)));
-    connections_.push_back(state->active_changed->connect([this, state](){
+    observe(state->flipped_changed, std::bind(&NodeBox::triggerFlipSides, this));
+    observe(state->minimized_changed, std::bind(&NodeBox::triggerMinimized, this));
+    observe(state->active_changed, [this, state](){
         setProperty("active", state->isActive());
         updateVisualsRequest();
-    }));
-    connections_.push_back(state->color_changed->connect(std::bind(&NodeBox::changeColor, this)));
-    connections_.push_back(state->pos_changed->connect(std::bind(&NodeBox::updatePosition, this)));
+    });
+    observe(state->color_changed, std::bind(&NodeBox::changeColor, this));
+    observe(state->pos_changed, std::bind(&NodeBox::updatePosition, this));
 
-    connections_.push_back(settings_.settingsChanged.connect([this](const std::string& name) {
+    observe(settings_.settings_changed, [this](const std::string& name) {
         if(name == "debug") {
             changeColor();
         }
-    }));
+    });
 
     updateStylesheetColor();
 
@@ -225,21 +225,21 @@ void NodeBox::construct()
     QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 
 
-    connections_.emplace_back(nh->nodeStateChanged.connect([this]() { nodeStateChanged(); }));
+    observe(nh->node_state_changed, [this]() { nodeStateChanged(); });
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
-    connections_.emplace_back(nh->connectorCreated.connect([this](ConnectablePtr c) { registerEvent(c.get()); }));
-    connections_.emplace_back(nh->connectorRemoved.connect([this](ConnectablePtr c) { unregisterEvent(c.get()); }));
+    observe(nh->connector_created, [this](ConnectablePtr c) { registerEvent(c.get()); });
+    observe(nh->connector_removed, [this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
     NodeWorkerPtr worker = node_worker_.lock();
     if(worker) {
-        connections_.emplace_back(worker->destroyed.connect([this](){ destruct(); }));
+        observe(worker->destroyed, [this](){ destruct(); });
 
         enabledChangeEvent(worker->isProcessingEnabled());
         //    nh->enabled.connect([this](bool e){ enabledChange(e); });
         QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
-        connections_.emplace_back(worker->notification.connect([this](Notification){ updateVisualsRequest(); }));
+        observe(worker->notification, [this](Notification){ updateVisualsRequest(); });
     }
 
 

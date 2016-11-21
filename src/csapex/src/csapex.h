@@ -8,6 +8,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/core/exception_handler.h>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -46,7 +47,8 @@ private:
     ExceptionHandler& handler;
 };
 
-struct Main : public QObject {
+struct Main : public QObject, public Observer
+{
     Q_OBJECT
 
 public:
@@ -77,8 +79,6 @@ private:
     CsApexCorePtr core;
 
     bool recover_needed;
-
-    std::vector<slim_signal::ScopedConnection> connections_;
 };
 
 }

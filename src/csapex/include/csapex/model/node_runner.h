@@ -5,6 +5,7 @@
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/csapex_export.h>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <vector>
@@ -15,7 +16,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeRunner : public TaskGenerator
+class CSAPEX_EXPORT NodeRunner : public TaskGenerator, public Observer
 {
 public:
     NodeRunner(NodeWorkerPtr worker);
@@ -65,8 +66,6 @@ private:
     TaskPtr try_process_;
 
     std::thread ticking_thread_;
-
-    std::vector<csapex::slim_signal::ScopedConnection> connections_;
 
     std::atomic<bool> tick_thread_running_;
     std::atomic<bool> tick_thread_stop_;

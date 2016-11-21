@@ -18,7 +18,7 @@ CommandDispatcher::CommandDispatcher(CsApexCore& core)
       designer_(nullptr),
       dirty_(false)
 {
-    stateChanged.connect([this](){ core_.getRoot()->getGraph()->state_changed(); });
+    state_changed.connect([this](){ core_.getRoot()->getGraph()->state_changed(); });
 }
 
 void CommandDispatcher::setDesigner(Designer *designer)
@@ -84,7 +84,7 @@ void CommandDispatcher::doExecute(Command::Ptr command)
 
     if(success) {
         setDirty();
-        stateChanged();
+        state_changed();
     }
 }
 
@@ -106,7 +106,7 @@ void CommandDispatcher::resetDirtyPoint()
         undone.back()->setAfterSavepoint(true);
     }
 
-    dirtyChanged(dirty_);
+    dirty_changed(dirty_);
 }
 
 void CommandDispatcher::clearSavepoints()
@@ -119,7 +119,7 @@ void CommandDispatcher::clearSavepoints()
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
-    dirtyChanged(dirty_);
+    dirty_changed(dirty_);
 }
 
 void CommandDispatcher::setDirty()
@@ -139,7 +139,7 @@ void CommandDispatcher::setDirty(bool dirty)
     dirty_ = dirty;
 
     if(change) {
-        dirtyChanged(dirty_);
+        dirty_changed(dirty_);
     }
 }
 
@@ -170,7 +170,7 @@ void CommandDispatcher::undo()
 
     undone.push_back(last);
 
-    stateChanged();
+    state_changed();
 }
 
 void CommandDispatcher::redo()
@@ -188,7 +188,7 @@ void CommandDispatcher::redo()
 
     setDirty(!last->isBeforeSavepoint());
 
-    stateChanged();
+    state_changed();
 }
 
 CommandConstPtr CommandDispatcher::getNextUndoCommand() const

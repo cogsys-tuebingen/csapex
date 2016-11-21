@@ -75,9 +75,9 @@ public:
 
     bool silent_;
 
-    std::shared_ptr<csapex::slim_signal::Signal<void()> > parameter_set_changed;
-    std::shared_ptr<csapex::slim_signal::Signal<void(csapex::param::ParameterPtr)> > parameter_added;
-    std::shared_ptr<csapex::slim_signal::Signal<void(csapex::param::ParameterPtr)> > parameter_removed;
+    std::shared_ptr<slim_signal::Signal<void()> > parameter_set_changed;
+    std::shared_ptr<slim_signal::Signal<void(csapex::param::ParameterPtr)> > parameter_added;
+    std::shared_ptr<slim_signal::Signal<void(csapex::param::ParameterPtr)> > parameter_removed;
 };
 
 }

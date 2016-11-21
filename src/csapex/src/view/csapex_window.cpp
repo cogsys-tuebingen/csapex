@@ -74,8 +74,8 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
 
     QObject::connect(activity_legend_, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), activity_timeline_, SLOT(setSelection(QList<NodeWorker*>)));
 
-    connections_.emplace_back(root_->nodeWorkerAdded.connect([this](NodeWorkerPtr n) { activity_legend_->startTrackingNode(n); }));
-    connections_.emplace_back(root_->nodeRemoved.connect([this](NodeHandlePtr n) { activity_legend_->stopTrackingNode(n); }));
+    observe(root_->node_worker_added, [this](NodeWorkerPtr n) { activity_legend_->startTrackingNode(n); });
+    observe(root_->node_removed, [this](NodeHandlePtr n) { activity_legend_->stopTrackingNode(n); });
 
     QObject::connect(activity_legend_, SIGNAL(nodeAdded(NodeWorker*)), activity_timeline_, SLOT(addNode(NodeWorker*)));
     QObject::connect(activity_legend_, SIGNAL(nodeRemoved(NodeWorker*)), activity_timeline_, SLOT(removeNode(NodeWorker*)));
@@ -88,8 +88,6 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
 
 CsApexWindow::~CsApexWindow()
 {
-    connections_.clear();
-
     delete ui;
 }
 
@@ -160,28 +158,28 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->profiling_debug_enable, SIGNAL(toggled(bool)), this, SLOT(enableDebugProfiling(bool)));
 
-    connections_.push_back(core_.resetRequest.connect([this](){ designer_->reset(); }));
-    connections_.push_back(core_.resetDone.connect([this](){ designer_->reinitialize(); }));
-    connections_.push_back(core_.configChanged.connect([this](){ updateTitle(); }));
-    connections_.push_back(core_.showStatusMessage.connect([this](const std::string& status){ showStatusMessage(status); }));
-    connections_.push_back(core_.newNodeType.connect([this](){ updateNodeTypes(); }));
-    connections_.push_back(core_.newSnippetType.connect([this](){ updateSnippets(); }));
+    observe(core_.reset_requested, [this](){ designer_->reset(); });
+    observe(core_.reset_done, [this](){ designer_->reinitialize(); });
+    observe(core_.config_changed, [this](){ updateTitle(); });
+    observe(core_.status_changed, [this](const std::string& status){ showStatusMessage(status); });
+    observe(core_.new_node_type, [this](){ updateNodeTypes(); });
+    observe(core_.new_snippet_type, [this](){ updateSnippets(); });
 
-    connections_.push_back(graph->state_changed.connect([this]() { updateMenu(); }));
-    connections_.push_back(root_->panic.connect([this]() { clearBlock(); }));
+    observe(graph->state_changed, [this]() { updateMenu(); });
+    observe(root_->panic, [this]() { clearBlock(); });
 
-    connections_.push_back(cmd_dispatcher_->stateChanged.connect([this](){ updateUndoInfo(); }));
-    connections_.push_back(cmd_dispatcher_->dirtyChanged.connect([this](bool) { updateTitle(); }));
+    observe(cmd_dispatcher_->state_changed, [this](){ updateUndoInfo(); });
+    observe(cmd_dispatcher_->dirty_changed, [this](bool) { updateTitle(); });
 
-    connections_.push_back(core_.paused.connect([this](bool pause) { ui->actionPause->setChecked(pause); }));
+    observe(core_.paused, [this](bool pause) { ui->actionPause->setChecked(pause); });
 
     QObject::connect(this, &CsApexWindow::showNotificationRequest, this, &CsApexWindow::showNotification);
-    connections_.push_back(core_.notification.connect([this](Notification notification){ showNotificationRequest(notification); }));
+    observe(core_.notification, [this](Notification notification){ showNotificationRequest(notification); });
 
-    connections_.push_back(core_.begin_step.connect([this](){ ui->actionStep->setEnabled(false); }));
-    connections_.push_back(core_.end_step.connect([this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); }));
+    observe(core_.begin_step, [this](){ ui->actionStep->setEnabled(false); });
+    observe(core_.end_step, [this](){ ui->actionStep->setEnabled(core_.isSteppingMode()); });
 
-    connections_.push_back(core_.getThreadPool()->group_created.connect([this](const ThreadGroupPtr& group) { updateThreadInfo(); }));
+    observe(core_.getThreadPool()->group_created, [this](const ThreadGroupPtr& group) { updateThreadInfo(); });
 
     updateMenu();
     updateTitle();
@@ -332,7 +330,7 @@ void CsApexWindow::updateDebugInfo()
 
     for(NodeBox* box : selected) {
         NodeHandle* handle = box->getNodeHandle();
-        handle->nodeStateChanged.connect([this](){ updateDebugInfo(); });
+        handle->node_state_changed.connect([this](){ updateDebugInfo(); });
         ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(&core_.getNodeFactory()));
     }
 

@@ -42,13 +42,13 @@ Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
 {
     view_core.getCommandDispatcher().setDesigner(this);
 
-    connections_.emplace_back(core_.getSettings().saveRequest.connect([this](YAML::Node& node){ saveSettings(node); }));
-    connections_.emplace_back(core_.getSettings().loadRequest.connect([this](YAML::Node& node){ loadSettings(node); }));
+    observe(core_.getSettings().save_request, [this](YAML::Node& node){ saveSettings(node); });
+    observe(core_.getSettings().load_request, [this](YAML::Node& node){ loadSettings(node); });
 
-    connections_.emplace_back(core_.getSettings().saveDetailRequest.connect([this](SubgraphNode* graph, YAML::Node& node){ saveView(graph, node); }));
-    connections_.emplace_back(core_.getSettings().loadDetailRequest.connect([this](SubgraphNode* graph, YAML::Node& node){ loadView(graph, node); }));
+    observe(core_.getSettings().save_detail_request, [this](SubgraphNode* graph, YAML::Node& node){ saveView(graph, node); });
+    observe(core_.getSettings().load_detail_request, [this](SubgraphNode* graph, YAML::Node& node){ loadView(graph, node); });
 
-    observe(core_.getRoot());
+    observeGraph(core_.getRoot());
 }
 
 Designer::~Designer()
@@ -118,15 +118,15 @@ void Designer::setup()
     updateMinimap();
 }
 
-void Designer::observe(GraphFacadePtr graph)
+void Designer::observeGraph(GraphFacadePtr graph)
 {
     graph_connections_[graph->getSubgraphNode()].emplace_back(
-                graph->childAdded.connect([this](GraphFacadePtr child){
+                graph->child_added.connect([this](GraphFacadePtr child){
                     addGraph(child);
-                    observe(child);
+                    observeGraph(child);
                 }));
     graph_connections_[graph->getSubgraphNode()].emplace_back(
-                graph->childRemoved.connect([this](GraphFacadePtr child){
+                graph->child_removed.connect([this](GraphFacadePtr child){
                     removeGraph(child.get());
                 }));
 }
@@ -549,7 +549,8 @@ void Designer::reset()
     view_connections_.clear();
 
     states_for_invisible_graphs_.clear();
-    connections_.clear();
+
+    stopObserving();
 }
 
 void Designer::reinitialize()

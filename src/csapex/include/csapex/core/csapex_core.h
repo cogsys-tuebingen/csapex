@@ -9,6 +9,7 @@
 #include <csapex/csapex_export.h>
 #include <csapex/utility/notification.h>
 #include <csapex/utility/slim_signal.h>
+#include <csapex/model/observer.h>
 
 namespace class_loader {
 class ClassLoader;
@@ -19,7 +20,7 @@ namespace csapex
 
 class Profiler;
 
-class CSAPEX_EXPORT CsApexCore
+class CSAPEX_EXPORT CsApexCore : public Observer
 {
 public:
     CsApexCore(Settings& settings_, ExceptionHandler &handler);
@@ -59,26 +60,26 @@ public:
     void setStatusMessage(const std::string& msg);
 
 public:
-    csapex::slim_signal::Signal<void ()> configChanged;
-    csapex::slim_signal::Signal<void (const std::string& msg)> showStatusMessage;
-    csapex::slim_signal::Signal<void ()> newNodeType;
-    csapex::slim_signal::Signal<void ()> newSnippetType;
+    slim_signal::Signal<void ()> config_changed;
+    slim_signal::Signal<void (const std::string& msg)> status_changed;
+    slim_signal::Signal<void ()> new_node_type;
+    slim_signal::Signal<void ()> new_snippet_type;
 
-    csapex::slim_signal::Signal<void ()> resetRequest;
-    csapex::slim_signal::Signal<void ()> resetDone;
+    slim_signal::Signal<void ()> reset_requested;
+    slim_signal::Signal<void ()> reset_done;
 
-    csapex::slim_signal::Signal<void ()> saved;
-    csapex::slim_signal::Signal<void ()> loaded;
+    slim_signal::Signal<void ()> saved;
+    slim_signal::Signal<void ()> loaded;
 
-    csapex::slim_signal::Signal<void (bool)> paused;
+    slim_signal::Signal<void (bool)> paused;
 
-    csapex::slim_signal::Signal<void (Notification)> notification;
+    slim_signal::Signal<void (Notification)> notification;
 
-    csapex::slim_signal::Signal<void ()> begin_step;
-    csapex::slim_signal::Signal<void ()> end_step;
+    slim_signal::Signal<void ()> begin_step;
+    slim_signal::Signal<void ()> end_step;
 
 private:
-    CsApexCore(Settings& settings_, ExceptionHandler &handler, csapex::PluginLocatorPtr plugin_locator);
+    CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator);
 
     CorePluginPtr makeCorePlugin(const std::string& name);
 
@@ -86,7 +87,7 @@ private:
     const CsApexCore* parent_;
 
     Settings& settings_;
-    csapex::PluginLocatorPtr plugin_locator_;
+    PluginLocatorPtr plugin_locator_;
     ExceptionHandler &exception_handler_;
 
     NodeFactoryPtr node_factory_;
@@ -101,8 +102,6 @@ private:
     TaskGeneratorPtr root_scheduler_;
 
     std::shared_ptr<Profiler> profiler_;
-
-    std::vector<slim_signal::ScopedConnection> signal_connections_;
 
     std::shared_ptr<PluginManager<CorePlugin>> core_plugin_manager;
     std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;

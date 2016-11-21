@@ -24,7 +24,7 @@ const Profile& Profiler::getProfile(const std::string& key)
 
         profile.timer->finished.connect([this](Interval::Ptr) { updated(); });
 
-        connections_.emplace_back(profile.timer->finished.connect([this, &profile](Interval::Ptr interval){
+        observe(profile.timer->finished, [this, &profile](Interval::Ptr interval){
             profile.timer_history_[profile.timer_history_pos_] = interval;
 
             if(++profile.timer_history_pos_ >= (int) profile.timer_history_.size()) {
@@ -37,7 +37,7 @@ const Profile& Profiler::getProfile(const std::string& key)
                 profile.steps_acc_[it.first](it.second);
             }
             ++profile.count_;
-        }));
+        });
 
         return profile;
     }

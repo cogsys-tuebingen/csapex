@@ -34,7 +34,7 @@ public:
     std::map<std::string, std::vector<SnippetPtr>>& getTagMap();
 
 public:
-    csapex::slim_signal::Signal<void()> snippet_set_changed;
+    slim_signal::Signal<void()> snippet_set_changed;
 
 private:
     void addSnippet(SnippetPtr s);

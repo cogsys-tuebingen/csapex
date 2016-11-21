@@ -44,11 +44,11 @@ public:
     std::vector<csapex::param::ParameterPtr> getParameters() const;
 
 public:
-    csapex::slim_signal::Signal<void(std::size_t)> slot_count_changed;
+    slim_signal::Signal<void(std::size_t)> slot_count_changed;
 
 
-    csapex::slim_signal::Signal<void()> begin;
-    csapex::slim_signal::Signal<void()> no_more_messages;
+    slim_signal::Signal<void()> begin;
+    slim_signal::Signal<void()> no_more_messages;
 
 protected:
     MessageProvider();

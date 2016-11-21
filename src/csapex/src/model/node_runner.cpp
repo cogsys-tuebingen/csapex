@@ -49,7 +49,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
 
 NodeRunner::~NodeRunner()
 {
-    connections_.clear();
+    stopObserving();
 
     if(scheduler_) {
         //        detach();
@@ -75,6 +75,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     apex_assert_hard(scheduler_ == nullptr);
+    apex_assert_hard(scheduler != nullptr);
 
     scheduler_ = scheduler;
 
@@ -83,35 +84,32 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
     remaining_tasks_.clear();
 
-    connections_.clear();
+    stopObserving();
 
     // signals
-    connections_.emplace_back(scheduler->scheduler_changed.connect([this](){
+    observe(scheduler->scheduler_changed, [this](){
         NodeHandlePtr nh = worker_->getNodeHandle();
         nh->getNodeState()->setThread(scheduler_->getName(), scheduler_->id());
-    }));
+    });
 
     // node tasks
-    auto ctr = worker_->try_process_changed.connect([this]() {
+    observe(worker_->try_process_changed, [this]() {
         try_process_->setPriority(worker_->getSequenceNumber());
         schedule(try_process_);
     });
-    connections_.push_back(ctr);
 
     // parameter change
-    auto check = worker_->getNodeHandle()->parametersChanged.connect([this]() {
+    observe(worker_->getNodeHandle()->parameters_changed, [this]() {
         schedule(check_parameters_);
     });
-    connections_.push_back(check);
 
     schedule(check_parameters_);
 
 
     // generic task
-    auto cg = worker_->getNodeHandle()->executionRequested.connect([this](std::function<void()> cb) {
-            schedule(std::make_shared<Task>("anonymous", cb, 0, this));
-});
-    connections_.push_back(cg);
+    observe(worker_->getNodeHandle()->execution_requested, [this](std::function<void()> cb) {
+                schedule(std::make_shared<Task>("anonymous", cb, 0, this));
+            });
 
     if(ticking_ && !tick_thread_running_) {
         // TODO: get rid of this!

@@ -27,9 +27,9 @@ CSAPEX_UTILS_EXPORT void sigsegvhandler(int sig_num, siginfo_t * info, void * uc
 CSAPEX_UTILS_EXPORT void stop();
 CSAPEX_UTILS_EXPORT void kill();
 
-inline csapex::slim_signal::Signal<void()>& stop_request()
+inline slim_signal::Signal<void()>& stop_request()
 {
-    static csapex::slim_signal::Signal<void()> s;
+    static slim_signal::Signal<void()> s;
     return s;
 }
 

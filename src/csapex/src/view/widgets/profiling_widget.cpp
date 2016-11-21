@@ -54,7 +54,7 @@ ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::
 
     const Profile& profile = profiler_->getProfile(profile_);
     std::shared_ptr<Timer> timer = profile.getTimer();
-    connections_.emplace_back(timer->finished.connect([this](Interval::Ptr) { update(); }));
+    observe(timer->finished, [this](Interval::Ptr) { update(); });
 
     setMouseTracking(true);
 }

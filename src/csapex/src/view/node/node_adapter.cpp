@@ -74,7 +74,7 @@ bool NodeAdapter::isResizable() const
     return false;
 }
 
-void NodeAdapter::trackConnection(const csapex::slim_signal::Connection &c)
+void NodeAdapter::trackConnection(const slim_signal::Connection &c)
 {
     connections_.push_back(c);
 }

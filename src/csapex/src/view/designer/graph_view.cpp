@@ -125,13 +125,13 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     qRegisterMetaType < ConnectablePtr > ("ConnectablePtr");
 
-    scoped_connections_.emplace_back(graph_facade_->nodeWorkerAdded.connect([this](NodeWorkerPtr n) { nodeAdded(n); }));
-    scoped_connections_.emplace_back(graph_facade_->nodeRemoved.connect([this](NodeHandlePtr n) { nodeRemoved(n); }));
+    observe(graph_facade_->node_worker_added, [this](NodeWorkerPtr n) { nodeAdded(n); });
+    observe(graph_facade_->node_removed, [this](NodeHandlePtr n) { nodeRemoved(n); });
 
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
 
-    scoped_connections_.emplace_back(graph->internalConnectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
-    scoped_connections_.emplace_back(graph->state_changed.connect([this](){ updateBoxInformation(); }));
+    observe(graph->internalConnectionInProgress, [this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); });
+    observe(graph->state_changed, [this](){ updateBoxInformation(); });
 
     for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
         const NodeHandlePtr& nh = (*it)->getNodeHandle();
@@ -815,9 +815,9 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     }
 
     // subscribe to coming connectors
-    auto c1 = node_handle->connectorCreated.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
+    auto c1 = node_handle->connector_created.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
     handle_connections_[node_handle.get()].emplace_back(c1);
-    auto c2 = node_handle->connectorRemoved.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
+    auto c2 = node_handle->connector_removed.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
     handle_connections_[node_handle.get()].emplace_back(c2);
 
 
@@ -948,9 +948,9 @@ void GraphView::addBox(NodeBox *box)
     NodeWorker* worker = box->getNodeWorker();
     NodeHandle* handle = worker->getNodeHandle().get();
 
-    worker_connections_[worker].emplace_back(handle->connectionStart.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); }));
-    worker_connections_[worker].emplace_back(handle->connectionInProgress.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
-    worker_connections_[worker].emplace_back(handle->connectionDone.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    worker_connections_[worker].emplace_back(handle->connection_start.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); }));
+    worker_connections_[worker].emplace_back(handle->connection_in_prograss.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
+    worker_connections_[worker].emplace_back(handle->connection_done.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));

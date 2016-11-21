@@ -44,10 +44,10 @@ protected:
     void checkIfStepIsDone();
 
 public:
-    csapex::slim_signal::Signal<void (bool)> paused;
+    slim_signal::Signal<void (bool)> paused;
 
-    csapex::slim_signal::Signal<void ()> begin_step;
-    csapex::slim_signal::Signal<void ()> end_step;
+    slim_signal::Signal<void ()> begin_step;
+    slim_signal::Signal<void ()> end_step;
 
 private:
     bool paused_;

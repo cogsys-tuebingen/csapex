@@ -27,7 +27,7 @@ public:
     typedef std::shared_ptr<IntervalParameter> Ptr;
 
 public:
-    csapex::slim_signal::Signal<void(Parameter*)> step_changed;
+    slim_signal::Signal<void(Parameter*)> step_changed;
 
 public:
     IntervalParameter();

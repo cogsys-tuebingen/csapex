@@ -62,8 +62,8 @@ public:
     virtual void reset() override;
 
 public:
-    csapex::slim_signal::Signal<void(Connectable*)> message_set;
-    csapex::slim_signal::Signal<void(Connection* )> message_available;
+    slim_signal::Signal<void(Connectable*)> message_set;
+    slim_signal::Signal<void(Connection* )> message_available;
 
 protected:
     virtual bool isConnectionPossible(Connectable* other_side) override;

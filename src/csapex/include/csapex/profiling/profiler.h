@@ -5,6 +5,7 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/profiling/profile.h>
 #include <csapex/csapex_profiling_export.h>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <map>
@@ -12,7 +13,7 @@
 namespace csapex
 {
 
-class CSAPEX_PROFILING_EXPORT Profiler
+class CSAPEX_PROFILING_EXPORT Profiler : public Observer
 {
 public:
 
@@ -32,7 +33,6 @@ public:
 
 private:
     std::map<std::string, Profile> profiles_;
-    std::vector<slim_signal::ScopedConnection> connections_;
 
     bool enabled_;
     std::size_t history_length_;

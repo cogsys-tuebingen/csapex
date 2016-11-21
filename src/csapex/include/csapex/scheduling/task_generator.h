@@ -36,8 +36,8 @@ public:
     virtual void reset() = 0;
 
 public:
-    csapex::slim_signal::Signal<void()> begin_step;
-    csapex::slim_signal::Signal<void()> end_step;
+    slim_signal::Signal<void()> begin_step;
+    slim_signal::Signal<void()> end_step;
 };
 
 }

@@ -54,21 +54,21 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
     thread_pool_ = std::make_shared<ThreadPool>(exception_handler_, !settings_.get<bool>("threadless"), settings_.get<bool>("thread_grouping"));
     thread_pool_->setPause(settings_.get<bool>("initially_paused"));
 
-    signal_connections_.emplace_back(thread_pool_->paused.connect(paused));
+    observe(thread_pool_->paused, paused);
 
-    signal_connections_.emplace_back(thread_pool_->begin_step.connect(begin_step));
-    signal_connections_.emplace_back(thread_pool_->end_step.connect(end_step));
+    observe(thread_pool_->begin_step, begin_step);
+    observe(thread_pool_->end_step, end_step);
 }
 
 CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
     : CsApexCore(settings, handler, std::make_shared<PluginLocator>(settings))
 {
-    signal_connections_.emplace_back(settings.settingsChanged.connect(std::bind(&CsApexCore::settingsChanged, this)));
+    observe(settings.settings_changed, std::bind(&CsApexCore::settingsChanged, this));
 
     exception_handler_.setCore(this);
 
-    settings_.saveRequest.connect([this](YAML::Node& n){ thread_pool_->saveSettings(n); });
-    settings_.loadRequest.connect([this](YAML::Node& n){ thread_pool_->loadSettings(n); });
+    settings_.save_request.connect([this](YAML::Node& n){ thread_pool_->saveSettings(n); });
+    settings_.load_request.connect([this](YAML::Node& n){ thread_pool_->loadSettings(n); });
 
     StreamInterceptor::instance().start();
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
@@ -142,7 +142,7 @@ void CsApexCore::step()
 
 void CsApexCore::setStatusMessage(const std::string &msg)
 {
-    showStatusMessage(msg);
+    status_changed(msg);
 }
 
 void CsApexCore::init()
@@ -150,7 +150,7 @@ void CsApexCore::init()
     if(!init_) {
         init_ = true;
 
-        showStatusMessage("loading core plugins");
+        status_changed("loading core plugins");
         core_plugin_manager->load(plugin_locator_.get());
 
         for(const auto& cp : core_plugin_manager->getConstructors()) {
@@ -165,12 +165,12 @@ void CsApexCore::init()
             plugin.second->init(*this);
         }
 
-        showStatusMessage("loading node plugins");
-        signal_connections_.emplace_back(node_factory_->loaded.connect(showStatusMessage));
+        status_changed("loading node plugins");
+        observe(node_factory_->loaded, status_changed);
         node_factory_->loadPlugins();
-        signal_connections_.emplace_back(node_factory_->new_node_type.connect(newNodeType));
+        observe(node_factory_->new_node_type, new_node_type);
 
-        showStatusMessage("make graph");
+        status_changed("make graph");
 
         root_handle_ = node_factory_->makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_.get());
         apex_assert_hard(root_handle_);
@@ -202,9 +202,9 @@ void CsApexCore::init()
             plugin.second->setupGraph(root_->getSubgraphNode());
         }
 
-        showStatusMessage("loading snippets");
+        status_changed("loading snippets");
         snippet_factory_->loadSnippets();
-        signal_connections_.emplace_back(snippet_factory_->snippet_set_changed.connect(newSnippetType));
+        observe(snippet_factory_->snippet_set_changed, new_snippet_type);
     }
 }
 
@@ -228,7 +228,7 @@ CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
 
 void CsApexCore::boot()
 {
-    showStatusMessage("booting up");
+    status_changed("booting up");
 
     std::string dir_string = csapex::info::CSAPEX_BOOT_PLUGIN_DIR;
 
@@ -266,7 +266,7 @@ void CsApexCore::boot()
 
 void CsApexCore::startup()
 {
-    showStatusMessage("loading config");
+    status_changed("loading config");
     try {
         std::string cfg = settings_.get<std::string>("config", Settings::defaultConfigFile());
 
@@ -285,18 +285,18 @@ void CsApexCore::startup()
 
     root_->getSubgraphNode()->activation();
 
-    showStatusMessage("painting user interface");
+    status_changed("painting user interface");
 
     thread_pool_->start();
 }
 
 void CsApexCore::reset()
 {
-    resetRequest();
+    reset_requested();
 
     root_->clear();
 
-    resetDone();
+    reset_done();
 }
 
 Settings &CsApexCore::getSettings() const
@@ -342,7 +342,7 @@ std::shared_ptr<Profiler> CsApexCore::getProfiler() const
 void CsApexCore::settingsChanged()
 {
     settings_.save();
-    configChanged();
+    config_changed();
 }
 
 void CsApexCore::saveAs(const std::string &file, bool quiet)
@@ -365,9 +365,9 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     GraphIO graphio(root_->getSubgraphNode(),  node_factory_.get());
 
-    csapex::slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(settings_.saveDetailRequest);
+    slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(settings_.save_detail_request);
 
-    settings_.saveRequest(node_map);
+    settings_.save_request(node_map);
 
     graphio.saveSettings(node_map);
 
@@ -406,7 +406,7 @@ void CsApexCore::load(const std::string &file)
     GraphIO graphio(root_->getSubgraphNode(), node_factory_.get());
     graphio.useProfiler(profiler_);
 
-    csapex::slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.loadDetailRequest);
+    slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.load_detail_request);
 
     {
         std::ifstream ifs(file.c_str());
@@ -421,7 +421,7 @@ void CsApexCore::load(const std::string &file)
         graphio.loadSettings(doc);
         graphio.loadGraphFrom(doc);
 
-        settings_.loadRequest(doc);
+        settings_.load_request(doc);
     }
 
     load_needs_reset_ = true;

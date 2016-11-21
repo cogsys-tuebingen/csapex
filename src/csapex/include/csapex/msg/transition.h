@@ -49,14 +49,14 @@ protected:
     virtual void connectionAdded(Connection* connection);
     virtual void connectionRemoved(Connection* connection);
 
-    void trackConnection(Connection* connection, const csapex::slim_signal::Connection& c);
+    void trackConnection(Connection* connection, const slim_signal::Connection& c);
 
 protected:
     delegate::Delegate0<> activation_fn_;
 
     std::vector<ConnectionPtr> connections_;
 
-    std::map<Connection*, std::vector<csapex::slim_signal::Connection>> signal_connections_;
+    std::map<Connection*, std::vector<slim_signal::Connection>> signal_connections_;
 
     mutable std::recursive_mutex sync;
 };

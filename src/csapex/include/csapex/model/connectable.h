@@ -85,24 +85,24 @@ public:
     /*REFACTOR*/ virtual bool shouldCreate(bool left, bool right);
 
 public:
-    csapex::slim_signal::Signal<void(bool)> enabled_changed;
+    slim_signal::Signal<void(bool)> enabled_changed;
 
-    csapex::slim_signal::Signal<void(Connectable*)> disconnected;
-    csapex::slim_signal::Signal<void(Connectable*)> connectionStart;
-    csapex::slim_signal::Signal<void(Connectable*,Connectable*)> connectionInProgress;
+    slim_signal::Signal<void(Connectable*)> disconnected;
+    slim_signal::Signal<void(Connectable*)> connectionStart;
+    slim_signal::Signal<void(Connectable*,Connectable*)> connectionInProgress;
 
-    csapex::slim_signal::Signal<void(Connectable*)> connection_added_to;
-    csapex::slim_signal::Signal<void(Connectable*)> connection_removed_to;
+    slim_signal::Signal<void(Connectable*)> connection_added_to;
+    slim_signal::Signal<void(Connectable*)> connection_removed_to;
 
-    csapex::slim_signal::Signal<void(ConnectionPtr)> connection_added;
-    csapex::slim_signal::Signal<void(ConnectionPtr)> connection_faded;
+    slim_signal::Signal<void(ConnectionPtr)> connection_added;
+    slim_signal::Signal<void(ConnectionPtr)> connection_faded;
 
-    csapex::slim_signal::Signal<void(bool)> connectionEnabled;
-    csapex::slim_signal::Signal<void(Connectable*)> message_processed;
-    csapex::slim_signal::Signal<void(bool, std::string, int)> connectableError;
+    slim_signal::Signal<void(bool)> connectionEnabled;
+    slim_signal::Signal<void(Connectable*)> message_processed;
+    slim_signal::Signal<void(bool, std::string, int)> connectableError;
 
-    csapex::slim_signal::Signal<void()> typeChanged;
-    csapex::slim_signal::Signal<void(std::string)> labelChanged;
+    slim_signal::Signal<void()> typeChanged;
+    slim_signal::Signal<void(std::string)> labelChanged;
 
 public:
     /**

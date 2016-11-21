@@ -115,13 +115,13 @@ private:
     std::set<graph::Vertex *> findVerticesThatJoinStreams();
 
 public:
-    csapex::slim_signal::Signal<void()> state_changed;
+    slim_signal::Signal<void()> state_changed;
 
-    csapex::slim_signal::Signal<void(Connection*)> connection_added;
-    csapex::slim_signal::Signal<void(Connection*)> connection_removed;
+    slim_signal::Signal<void(Connection*)> connection_added;
+    slim_signal::Signal<void(Connection*)> connection_removed;
 
-    csapex::slim_signal::Signal<void(graph::VertexPtr)> vertex_added;
-    csapex::slim_signal::Signal<void(graph::VertexPtr)> vertex_removed;
+    slim_signal::Signal<void(graph::VertexPtr)> vertex_added;
+    slim_signal::Signal<void(graph::VertexPtr)> vertex_removed;
 
 protected:
 //    std::vector<NodeHandlePtr> nodes_;

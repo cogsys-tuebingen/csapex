@@ -50,8 +50,8 @@ public:
     std::shared_ptr<command::PlaybackCommand> make_playback(const AUUID& graph_uuid, const std::string& type) const;
 
 public:
-    csapex::slim_signal::Signal<void()> stateChanged;
-    csapex::slim_signal::Signal<void(bool)> dirtyChanged;
+    slim_signal::Signal<void()> state_changed;
+    slim_signal::Signal<void(bool)> dirty_changed;
 
 private:
     void doExecute(Command::Ptr command);

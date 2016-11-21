@@ -12,6 +12,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/profiling/profiler.h>
 #include <csapex/utility/utility_fwd.h>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <QMainWindow>
@@ -35,7 +36,7 @@ namespace csapex
 /**
  * @brief The CsApexWindow class provides the window for the evaluator program
  */
-class CSAPEX_QT_EXPORT CsApexWindow : public QMainWindow
+class CSAPEX_QT_EXPORT CsApexWindow : public QMainWindow, public Observer
 {
     Q_OBJECT
 
@@ -136,8 +137,6 @@ private:
 
     QFileSystemWatcher* style_sheet_watcher_;
     PluginLocatorPtr plugin_locator_;
-
-    std::vector<csapex::slim_signal::ScopedConnection> connections_;
 };
 
 } /// NAMESPACE

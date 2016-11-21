@@ -88,7 +88,7 @@ private:
     std::thread scheduler_thread_;
 
     std::vector<TaskGeneratorPtr> generators_;
-    std::map<TaskGenerator*, std::vector<csapex::slim_signal::ScopedConnection>> generator_connections_;
+    std::map<TaskGenerator*, std::vector<slim_signal::ScopedConnection>> generator_connections_;
 
     std::condition_variable_any work_available_;
     std::condition_variable_any pause_changed_;

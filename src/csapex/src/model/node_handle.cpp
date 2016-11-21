@@ -44,7 +44,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
     
     node_state_->enabled_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     node_state_->active_changed->connect([this](){
-        activationChanged();
+        activation_changed();
         if(isActive()) {
             node_->activation();
         } else {
@@ -82,8 +82,8 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
     
     //    triggerNodeStateChanged();
     
-    node_->parameters_changed.connect(parametersChanged);
-    node_->getParameterState()->parameter_set_changed->connect(parametersChanged);
+    node_->parameters_changed.connect(parameters_changed);
+    node_->getParameterState()->parameter_set_changed->connect(parameters_changed);
     node_->getParameterState()->parameter_added->connect(std::bind(&NodeHandle::makeParameterConnectable, this, std::placeholders::_1));
     node_->getParameterState()->parameter_removed->connect(std::bind(&NodeHandle::makeParameterNotConnectable, this, std::placeholders::_1));
 }
@@ -105,7 +105,7 @@ NodeHandle::~NodeHandle()
         removeEvent(external_events_.begin()->get());
     }
 
-    nodeRemoved();
+    node_removed();
 }
 
 void NodeHandle::updateLoggerLevel()
@@ -238,7 +238,7 @@ void NodeHandle::setNodeState(NodeStatePtr memento)
 
 void NodeHandle::triggerNodeStateChanged()
 {
-    nodeStateChanged();
+    node_state_changed();
     node_->stateChanged();
 }
 
@@ -512,7 +512,7 @@ SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &i
     
     connectConnector(slot.get());
     
-    connectorCreated(slot);
+    connector_created(slot);
     
     return slot;
 }
@@ -528,7 +528,7 @@ EventPtr NodeHandle::addInternalEvent(const TokenDataConstPtr& type, const UUID&
     
     connectConnector(event.get());
     
-    connectorCreated(event);
+    connector_created(event);
     
     return event;
 }
@@ -578,7 +578,7 @@ void NodeHandle::removeInput(Input* in)
         external_inputs_.erase(it);
         
         disconnectConnector(input.get());
-        connectorRemoved(input);
+        connector_removed(input);
         
     } else {
         std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
@@ -602,7 +602,7 @@ void NodeHandle::removeOutput(Output* out)
         external_outputs_.erase(it);
         
         disconnectConnector(output.get());
-        connectorRemoved(output);
+        connector_removed(output);
         
     } else {
         std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
@@ -626,7 +626,7 @@ void NodeHandle::removeSlot(Slot* s)
         external_slots_.erase(it);
         
         disconnectConnector(slot.get());
-        connectorRemoved(slot);
+        connector_removed(slot);
     }
     
 }
@@ -646,7 +646,7 @@ void NodeHandle::removeEvent(Event* t)
         external_events_.erase(it);
         
         disconnectConnector(trigger.get());
-        connectorRemoved(trigger);
+        connector_removed(trigger);
     }
 }
 
@@ -660,9 +660,9 @@ void NodeHandle::manageInput(InputPtr in)
     
     connectConnector(in.get());
 
-    connections_[in.get()].emplace_back(in->message_available.connect([this](Connection*) { mightBeEnabled(); }));
+    connections_[in.get()].emplace_back(in->message_available.connect([this](Connection*) { might_be_enabled(); }));
     
-    connectorCreated(in);
+    connector_created(in);
     transition_in_->addInput(in);
 }
 
@@ -676,12 +676,12 @@ void NodeHandle::manageOutput(OutputPtr out)
     
     connectConnector(out.get());
     
-    connections_[out.get()].emplace_back(out->message_processed.connect([this](Connectable*) { mightBeEnabled(); }));
-    connections_[out.get()].emplace_back(out->connection_removed_to.connect([this](Connectable*) { mightBeEnabled(); }));
-    connections_[out.get()].emplace_back(out->connection_added_to.connect([this](Connectable*) { mightBeEnabled(); }));
-    connections_[out.get()].emplace_back(out->connectionEnabled.connect([this](bool) { mightBeEnabled(); }));
+    connections_[out.get()].emplace_back(out->message_processed.connect([this](Connectable*) { might_be_enabled(); }));
+    connections_[out.get()].emplace_back(out->connection_removed_to.connect([this](Connectable*) { might_be_enabled(); }));
+    connections_[out.get()].emplace_back(out->connection_added_to.connect([this](Connectable*) { might_be_enabled(); }));
+    connections_[out.get()].emplace_back(out->connectionEnabled.connect([this](bool) { might_be_enabled(); }));
     
-    connectorCreated(out);
+    connector_created(out);
     transition_out_->addOutput(out);
 }
 
@@ -705,7 +705,7 @@ void NodeHandle::manageSlot(SlotPtr s)
     
     connectConnector(s.get());
     
-    connectorCreated(s);
+    connector_created(s);
 }
 
 void NodeHandle::manageEvent(EventPtr t)
@@ -718,7 +718,7 @@ void NodeHandle::manageEvent(EventPtr t)
     
     connectConnector(t.get());
     
-    connectorCreated(t);
+    connector_created(t);
 }
 
 ConnectablePtr NodeHandle::getConnector(const UUID &uuid) const
@@ -922,9 +922,9 @@ std::map<Output*,csapex::param::Parameter*>& NodeHandle::outputToParamMap()
 
 void NodeHandle::connectConnector(Connectable *c)
 {
-    connections_[c].emplace_back(c->connectionInProgress.connect(connectionInProgress));
-    connections_[c].emplace_back(c->connectionStart.connect(connectionStart));
-    connections_[c].emplace_back(c->connection_added_to.connect(connectionDone));
+    connections_[c].emplace_back(c->connectionInProgress.connect(connection_in_prograss));
+    connections_[c].emplace_back(c->connectionStart.connect(connection_start));
+    connections_[c].emplace_back(c->connection_added_to.connect(connection_done));
 }
 
 

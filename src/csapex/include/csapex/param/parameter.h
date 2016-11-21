@@ -36,13 +36,13 @@ public:
     typedef std::shared_ptr<std::unique_lock<std::recursive_mutex>> Lock;
 
 public:
-    csapex::slim_signal::Signal<void(Parameter*)> parameter_changed;
-    csapex::slim_signal::Signal<void(Parameter*)> scope_changed;
-    csapex::slim_signal::Signal<void(Parameter*, bool)> interactive_changed;
-    csapex::slim_signal::Signal<void(Parameter*, bool)> parameter_enabled;
-    csapex::slim_signal::Signal<void(Parameter*)> destroyed;
+    slim_signal::Signal<void(Parameter*)> parameter_changed;
+    slim_signal::Signal<void(Parameter*)> scope_changed;
+    slim_signal::Signal<void(Parameter*, bool)> interactive_changed;
+    slim_signal::Signal<void(Parameter*, bool)> parameter_enabled;
+    slim_signal::Signal<void(Parameter*)> destroyed;
 
-    csapex::slim_signal::Signal<void(const std::string&)> dictionary_entry_changed;
+    slim_signal::Signal<void(const std::string&)> dictionary_entry_changed;
 
 public:
     virtual ~Parameter();

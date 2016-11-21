@@ -11,6 +11,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/notification.h>
 #include <csapex/model/execution_mode.h>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <map>
@@ -26,7 +27,7 @@ namespace csapex {
 class Profiler;
 class Interval;
 
-class CSAPEX_EXPORT NodeWorker : public ErrorState
+class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer
 {
 public:
     enum ActivityType {
@@ -108,23 +109,23 @@ public:
     void outgoingMessagesProcessed();
 
 public:
-    csapex::slim_signal::Signal<void()> destroyed;
-    csapex::slim_signal::Signal<void()> panic;
+    slim_signal::Signal<void()> destroyed;
+    slim_signal::Signal<void()> panic;
 
-    csapex::slim_signal::Signal<void()> ticked;
-    csapex::slim_signal::Signal<void(bool)> enabled;
+    slim_signal::Signal<void()> ticked;
+    slim_signal::Signal<void(bool)> enabled;
 
-    csapex::slim_signal::Signal<void(NodeWorker* worker, int type, std::shared_ptr<const Interval> stamp)> interval_start;
-    csapex::slim_signal::Signal<void(NodeWorker* worker, std::shared_ptr<const Interval> stamp)> interval_end;
+    slim_signal::Signal<void(NodeWorker* worker, int type, std::shared_ptr<const Interval> stamp)> interval_start;
+    slim_signal::Signal<void(NodeWorker* worker, std::shared_ptr<const Interval> stamp)> interval_end;
 
-    csapex::slim_signal::Signal<void(NodeWorker* worker)> start_profiling;
-    csapex::slim_signal::Signal<void(NodeWorker* worker)> stop_profiling;
+    slim_signal::Signal<void(NodeWorker* worker)> start_profiling;
+    slim_signal::Signal<void(NodeWorker* worker)> stop_profiling;
 
-    csapex::slim_signal::Signal<void(Notification)> notification;
+    slim_signal::Signal<void(Notification)> notification;
 
-    csapex::slim_signal::Signal<void()> messages_processed;
-    csapex::slim_signal::Signal<void()> processRequested;
-    csapex::slim_signal::Signal<void()> try_process_changed;
+    slim_signal::Signal<void()> messages_processed;
+    slim_signal::Signal<void()> processRequested;
+    slim_signal::Signal<void()> try_process_changed;
 
 private:
     void publishParameters();
@@ -169,8 +170,7 @@ private:
     Event* trigger_activated_;
     Event* trigger_deactivated_;
 
-    std::vector<csapex::slim_signal::ScopedConnection> connections_;
-    std::map<Connectable*, std::vector<csapex::slim_signal::Connection>> port_connections_;
+    std::map<Connectable*, std::vector<slim_signal::Connection>> port_connections_;
 
     int ticks_;
 

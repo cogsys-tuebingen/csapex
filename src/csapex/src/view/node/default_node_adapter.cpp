@@ -76,7 +76,7 @@ DefaultNodeAdapterBridge::~DefaultNodeAdapterBridge()
     disconnect();
 }
 
-void DefaultNodeAdapterBridge::connectInGuiThread(csapex::slim_signal::Signal<void (Parameter *)> &signal,
+void DefaultNodeAdapterBridge::connectInGuiThread(slim_signal::Signal<void (Parameter *)> &signal,
                                                   std::function<void ()> cb)
 {
     // cb should be executed in the gui thread
@@ -85,7 +85,7 @@ void DefaultNodeAdapterBridge::connectInGuiThread(csapex::slim_signal::Signal<vo
 
 void DefaultNodeAdapterBridge::disconnect()
 {
-    for(const csapex::slim_signal::Connection& c : connections) {
+    for(const slim_signal::Connection& c : connections) {
         c.disconnect();
     }
 
@@ -379,7 +379,7 @@ qt_helper::Call * DefaultNodeAdapter::makeModelCall(std::function<void()> cb)
     qt_helper::Call* call = new qt_helper::Call([this, cb](){
         NodeHandlePtr node = node_.lock();
         if(node) {
-            node->executionRequested(cb);
+            node->execution_requested(cb);
         }
     });
     callbacks.push_back(call);

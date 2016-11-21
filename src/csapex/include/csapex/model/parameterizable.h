@@ -20,7 +20,7 @@ public:
     typedef std::vector<std::pair<csapex::param::ParameterWeakPtr, std::function<void(csapex::param::Parameter *)> > > ChangedParameterList;
 
 public:
-    csapex::slim_signal::Signal<void()> parameters_changed;
+    slim_signal::Signal<void()> parameters_changed;
 
 public:
     Parameterizable();
@@ -165,7 +165,7 @@ private:
     void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
-    std::map<csapex::param::Parameter*, std::vector<csapex::slim_signal::Connection> > connections_;
+    std::map<csapex::param::Parameter*, std::vector<slim_signal::Connection> > connections_;
     std::map<csapex::param::ParameterWeakPtr, std::function<bool()>, std::owner_less<csapex::param::ParameterWeakPtr>> conditions_;
 
     mutable std::recursive_mutex mutex_;

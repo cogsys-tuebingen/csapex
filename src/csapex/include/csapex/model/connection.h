@@ -81,16 +81,16 @@ public:
     void reset();
 
 public:
-    csapex::slim_signal::Signal<void()> deleted;
+    slim_signal::Signal<void()> deleted;
 
-    csapex::slim_signal::Signal<void(bool)> source_enable_changed;
-    csapex::slim_signal::Signal<void(bool)> sink_enabled_changed;
+    slim_signal::Signal<void(bool)> source_enable_changed;
+    slim_signal::Signal<void(bool)> sink_enabled_changed;
 
-    csapex::slim_signal::Signal<void(Fulcrum*)> fulcrum_added;
-    csapex::slim_signal::Signal<void(Fulcrum*,bool dropped)> fulcrum_moved;
-    csapex::slim_signal::Signal<void(Fulcrum*,bool dropped, int which)> fulcrum_moved_handle;
-    csapex::slim_signal::Signal<void(Fulcrum*,int type)> fulcrum_type_changed;
-    csapex::slim_signal::Signal<void(Fulcrum*)> fulcrum_deleted;
+    slim_signal::Signal<void(Fulcrum*)> fulcrum_added;
+    slim_signal::Signal<void(Fulcrum*,bool dropped)> fulcrum_moved;
+    slim_signal::Signal<void(Fulcrum*,bool dropped, int which)> fulcrum_moved_handle;
+    slim_signal::Signal<void(Fulcrum*,int type)> fulcrum_type_changed;
+    slim_signal::Signal<void(Fulcrum*)> fulcrum_deleted;
 
 public:
     bool operator == (const Connection& c) const;

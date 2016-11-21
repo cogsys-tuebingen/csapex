@@ -98,7 +98,7 @@ void Parameterizable::removeParameterCallbacks(csapex::param::Parameter *param)
         }
     }
 
-    for(csapex::slim_signal::Connection c : connections_[param]) {
+    for(slim_signal::Connection c : connections_[param]) {
         c.disconnect();
     }
 }
