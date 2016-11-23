@@ -7,9 +7,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(cmake/csapex-extras.cmake)
 include (GenerateExportHeader)
 
-## Enable Profiling
-#add_definitions(-ftime-report)
-
 ## Find catkin macros and libraries
 find_package(catkin QUIET)
 
@@ -39,42 +36,41 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if(${catkin_FOUND})
     catkin_package(
        INCLUDE_DIRS include
-       # CATKIN_DEPENDS
        DEPENDS Boost
        CFG_EXTRAS csapex-extras.cmake
     )
 else()
     message("building without catkin")
 
-	set(Poco_DIR cmake)
-	find_package(Poco REQUIRED COMPONENTS Foundation)
-	find_package(console_bridge REQUIRED)
-	set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-	set(CATKIN_PACKAGE_INCLUDE_DESTINATION ${INSTALL_DIR}/include)
-	set(CATKIN_PACKAGE_LIB_DESTINATION ${INSTALL_DIR}/lib)
-	set(CATKIN_GLOBAL_BIN_DESTINATION ${INSTALL_DIR}/bin)
-	set(CATKIN_PACKAGE_SHARE_DESTINATION ${INSTALL_DIR}/share)
-	set(CSAPEX_MODULE_DESTINATION ${INSTALL_DIR}/CMake)
+    set(Poco_DIR cmake)
+    find_package(Poco REQUIRED COMPONENTS Foundation)
+    find_package(console_bridge REQUIRED)
+    set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
+    set(CATKIN_PACKAGE_INCLUDE_DESTINATION ${INSTALL_DIR}/include)
+    set(CATKIN_PACKAGE_LIB_DESTINATION ${INSTALL_DIR}/lib)
+    set(CATKIN_GLOBAL_BIN_DESTINATION ${INSTALL_DIR}/bin)
+    set(CATKIN_PACKAGE_SHARE_DESTINATION ${INSTALL_DIR}/share)
+    set(CSAPEX_MODULE_DESTINATION ${INSTALL_DIR}/CMake)
 
-	set(CSAPEX_BOOT_PLUGIN_DIR ${CATKIN_GLOBAL_BIN_DESTINATION}/csapex_plugins)
+    set(CSAPEX_BOOT_PLUGIN_DIR ${CATKIN_GLOBAL_BIN_DESTINATION}/csapex_plugins)
 
 	
-	FILE(READ ${CMAKE_CURRENT_LIST_DIR}/package.xml package)
+    FILE(READ ${CMAKE_CURRENT_LIST_DIR}/package.xml package)
 
-	string(REGEX MATCH "^.*<version>([^<]*)</version>.*$" match ${package})	
-	if(match)
-		set(csapex_VERSION ${CMAKE_MATCH_1})
-	endif()
+    string(REGEX MATCH "^.*<version>([^<]*)</version>.*$" match ${package})	
+    if(match)
+        set(csapex_VERSION ${CMAKE_MATCH_1})
+    endif()
 
-	string(REGEX MATCH "^.*<maintainer.*email=\"[^\"]*\">([^<]*)</maintainer>.*$" match ${package})
-	if(match)
-		set(csapex_MAINTAINER ${CMAKE_MATCH_1})
-	endif()
+    string(REGEX MATCH "^.*<maintainer.*email=\"[^\"]*\">([^<]*)</maintainer>.*$" match ${package})
+    if(match)
+        set(csapex_MAINTAINER ${CMAKE_MATCH_1})
+    endif()
 	
-	if(WIN32)	
-		# disable min and max macros
-		add_definitions(/D NOMINMAX)
-	endif()
+    if(WIN32)	
+        # disable min and max macros
+        add_definitions(/D NOMINMAX)
+    endif()
 endif()
 
 
@@ -136,14 +132,13 @@ endif()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/external)
 
 include_directories(include
-
     external/qxt5/include
-	${YAML-CPP_INCLUDE_DIR}
-	${Boost_INCLUDE_DIRS}
+    ${YAML-CPP_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS}
-	${console_bridge_INCLUDE_DIRS} 
+    ${console_bridge_INCLUDE_DIRS}
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -662,44 +657,12 @@ else()
 			DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 endif()
 
-install(TARGETS csapex
+install(TARGETS csapex_node ${csapex_LIBRARIES}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-
-install(TARGETS csapex_param
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-		
-install(TARGETS csapex_command
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-		
-install(TARGETS csapex_profiling
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-
-install(TARGETS csapex_util
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-
-install(TARGETS csapex_qt
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-        DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(TARGETS csapex_node
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 		
 		
@@ -711,21 +674,3 @@ if(NOT ${catkin_FOUND})
 	install(FILES cmake/csapex-extras.cmake
 			DESTINATION ${CSAPEX_MODULE_DESTINATION})
 endif()
-#
-# ANALYSIS TOOLS
-#
-
-#if(WIN32)
-#else()
-#	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-
-#	set(directories "")
-#	foreach(dir ${dirs})
-#	  #message(STATUS "dir='${dir}'")
-#	  set(directories "-I${dir} ${directories}")
-#	endforeach()
-
-#	add_custom_command(OUTPUT includes.txt
-#					   COMMAND eval "echo ${directories} >includes.txt")
-#	add_custom_target(generate_includes ALL DEPENDS includes.txt)
-#endif()

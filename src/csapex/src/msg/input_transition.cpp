@@ -199,11 +199,6 @@ void InputTransition::notifyMessageProcessed()
 
     } else {
         APEX_DEBUG_CERR <<"input transition not notified, some connection is not read" << std::endl;
-        for(ConnectionPtr& c : connections_) {
-            if(c->getState() != Connection::State::READ) {
-                std::cerr << "- " << *c << std::endl;
-            }
-        }
     }
 
 }
