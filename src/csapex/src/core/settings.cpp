@@ -13,9 +13,11 @@
 #include <string>
 
 #ifdef WIN32
+#include <windows.h>
 #include <Shlobj.h>
 #else
 #include <pwd.h>
+#include <unistd.h>
 #endif
 
 #if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
@@ -86,11 +88,19 @@ void Settings::save()
 
     yaml << YAML::EndSeq;
 
-    std::string tmp_file = settings_file + ".tmp";
+#if WIN32
+    uint32_t pid = GetCurrentProcessId();
+#else
+    uint32_t pid = getpid();
+#endif
+
+    std::string tmp_file = settings_file + "." + std::to_string(pid) + ".tmp";
     std::ofstream ofs(tmp_file.c_str());
     ofs << yaml.c_str();
 
     bf3::rename(tmp_file, settings_file);
+
+    bf3::remove(tmp_file);
 }
 
 void Settings::load()
