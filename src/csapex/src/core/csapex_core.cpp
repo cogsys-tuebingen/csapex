@@ -408,15 +408,9 @@ void CsApexCore::load(const std::string &file)
 
     slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.load_detail_request);
 
-    {
-        std::ifstream ifs(file.c_str());
-        YAML::Parser parser(ifs);
 
-        YAML::NodeBuilder builder;
-        if (!parser.HandleNextDocument(builder)) {
-            std::cerr << "cannot read the config" << std::endl;
-        }
-        YAML::Node doc = builder.Root();
+    if(bf3::exists(file)) {
+        YAML::Node doc = YAML::LoadFile(file.c_str());
 
         graphio.loadSettings(doc);
         graphio.loadGraphFrom(doc);

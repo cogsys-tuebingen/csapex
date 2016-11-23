@@ -105,14 +105,11 @@ void Settings::save()
 
 void Settings::load()
 {
-    std::ifstream ifs(settings_file.c_str());
-    YAML::Parser parser(ifs);
-
-    YAML::NodeBuilder builder;
-    if (!parser.HandleNextDocument(builder)) {
-        std::cerr << "cannot read the config" << std::endl;
+    if(!bf3::exists(settings_file)) {
+        return;
     }
-    YAML::Node doc = builder.Root();
+
+    YAML::Node doc = YAML::LoadFile(settings_file.c_str());
 
     if(doc.Type() != YAML::NodeType::Sequence) {
         std::cerr << "cannot read the settings" << std::endl;

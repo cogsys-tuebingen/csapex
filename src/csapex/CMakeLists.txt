@@ -37,6 +37,7 @@ if(${catkin_FOUND})
     catkin_package(
        INCLUDE_DIRS include
        DEPENDS Boost
+       CATKIN_DEPENDS class_loader
        CFG_EXTRAS csapex-extras.cmake
     )
 else()
@@ -136,6 +137,7 @@ include_directories(include
     ${YAML-CPP_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
+    ${class_loader_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS}
     ${console_bridge_INCLUDE_DIRS}
