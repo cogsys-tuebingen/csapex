@@ -86,8 +86,11 @@ void Settings::save()
 
     yaml << YAML::EndSeq;
 
-    std::ofstream ofs(settings_file.c_str());
+    std::string tmp_file = settings_file + ".tmp";
+    std::ofstream ofs(tmp_file.c_str());
     ofs << yaml.c_str();
+
+    bf3::rename(tmp_file, settings_file);
 }
 
 void Settings::load()
