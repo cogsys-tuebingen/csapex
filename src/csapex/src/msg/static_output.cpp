@@ -107,7 +107,6 @@ bool StaticOutput::commitMessages(bool is_activated)
 
         committed_message_->setSequenceNumber(seq_no_);
         if(hasActiveConnection() && (send_activator || send_deactivator) && !std::dynamic_pointer_cast<connection_types::NoMessage const>(committed_message_->getTokenData())) {
-            std::cerr << "set an active token: " << getUUID() << std::endl;
             sent_activator_message = true;
             if(send_activator) {
                 committed_message_->setActivityModifier(ActivityModifier::ACTIVATE);

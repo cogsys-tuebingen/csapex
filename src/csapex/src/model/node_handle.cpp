@@ -159,9 +159,6 @@ bool NodeHandle::isSink() const
 
 void NodeHandle::setActive(bool active)
 {
-    if(active != node_state_->isActive()) {
-        node_->ainfo << "set active to " << (active ? "true" : "false") << std::endl;
-    }
     node_state_->setActive(active);
 }
 
