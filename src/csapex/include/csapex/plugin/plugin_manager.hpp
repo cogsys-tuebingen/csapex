@@ -17,6 +17,14 @@
 #include <tinyxml.h>
 #endif
 #include <mutex>
+#include <boost/filesystem.hpp>
+#include <boost/version.hpp>
+#if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
+namespace bf3 = boost::filesystem;
+#else
+namespace bf3 = boost::filesystem3;
+#endif
+
 
 namespace csapex
 {
@@ -68,6 +76,10 @@ protected:
     
     bool processManifest(csapex::PluginLocator* locator, const std::string& xml_file)
     {
+        if(!bf3::exists(xml_file)) {
+            return false;
+        }
+
         TiXmlDocument document;
         document.LoadFile(xml_file);
         TiXmlElement * config = document.RootElement();
