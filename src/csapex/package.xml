@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>csapex</name>
-  <version>0.9.3</version>
+  <version>0.9.4</version>
   <description>The csapex package provides a gui for prototyping algorithms and experimenting</description>
 
   <maintainer email="sebastian.buck@uni-tuebingen.de">buck</maintainer>

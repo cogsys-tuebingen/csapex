@@ -2,8 +2,8 @@
 Changelog for package csapex
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.9.4 (2016-11-24)
+------------------
 * removed debug ouputs; builds on kinetic
 * ported to kinetic
 * use tempoary file name based on pid to get unique file handles
