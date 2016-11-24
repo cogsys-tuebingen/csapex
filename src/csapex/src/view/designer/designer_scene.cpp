@@ -327,21 +327,30 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             for(const TempConnection& temp : temp_) {
                 ccs = CurrentConnectionState();
 
+
                 if(temp.is_connected) {
-                    drawConnection(painter, temp.from, temp.to_c, -1);
+                    ConnectablePtr temp_from = temp.from.lock();
+                    ConnectablePtr temp_to = temp.to_c.lock();
+                    if(temp_from && temp_to) {
+                        drawConnection(painter, temp_from.get(), temp_to.get(), -1);
+                    }
 
                 } else {
-                    Port* fromp = getPort(temp.from);
+                    ConnectablePtr temp_from = temp.from.lock();
 
-                    if(fromp) {
-                        ccs.start_pos = UNDEFINED;
-                        ccs.end_pos = UNDEFINED;
+                    if(temp_from) {
+                        Port* fromp = getPort(temp_from.get());
+
+                        if(fromp) {
+                            ccs.start_pos = UNDEFINED;
+                            ccs.end_pos = UNDEFINED;
 
 
-                        if(temp.from->isInput()) {
-                            drawConnection(painter, temp.to_p, centerPoint(fromp), -1);
-                        } else {
-                            drawConnection(painter, centerPoint(fromp), temp.to_p, -1);
+                            if(temp_from->isInput()) {
+                                drawConnection(painter, temp.to_p, centerPoint(fromp), -1);
+                            } else {
+                                drawConnection(painter, centerPoint(fromp), temp.to_p, -1);
+                            }
                         }
                     }
                 }
@@ -754,7 +763,7 @@ void DesignerScene::fulcrumTypeChanged(void */*f*/, int /*type*/)
     invalidateSchema();
 }
 
-void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end)
+void DesignerScene::addTemporaryConnection(ConnectablePtr from, const QPointF& end)
 {
     apex_assert_hard(from);
 
@@ -767,19 +776,19 @@ void DesignerScene::addTemporaryConnection(Connectable *from, const QPointF& end
     update();
 }
 
-void DesignerScene::previewConnection(Connectable *from, Connectable *to)
+void DesignerScene::previewConnection(ConnectablePtr from, ConnectablePtr to)
 {
     addTemporaryConnection(from, to);
     update();
 }
 
-void DesignerScene::addTemporaryConnection(Connectable *from, Connectable *to)
+void DesignerScene::addTemporaryConnection(ConnectablePtr from, ConnectablePtr to)
 {
     apex_assert_hard(from);
     apex_assert_hard(to);
 
-    Connectable* input;
-    Connectable* output;
+    ConnectablePtr input;
+    ConnectablePtr output;
     if(from->isInput()) {
         input = from;
         output = to;
@@ -1413,10 +1422,16 @@ std::string DesignerScene::makeStatusString() const
     ss << "Temporary connections: " << temp_.size() << '\n';
     if(!temp_.empty()) {
         for(const TempConnection& c : temp_) {
-            if(c.is_connected) {
-                ss << " - " << c.from->getUUID() << " => " << c.to_c->getUUID() << '\n';
-            } else {
-                ss << " - " << c.from->getUUID() << " => [" << c.to_p.x() << ", " << c.to_p.y() << "]\n";
+            ConnectablePtr from = c.from.lock();
+            if(from) {
+                if(c.is_connected) {
+                    ConnectablePtr to = c.to_c.lock();
+                    if(to) {
+                        ss << " - " << from->getUUID() << " => " << to->getUUID() << '\n';
+                    }
+                } else {
+                    ss << " - " << from->getUUID() << " => [" << c.to_p.x() << ", " << c.to_p.y() << "]\n";
+                }
             }
         }
     }

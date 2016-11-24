@@ -65,8 +65,8 @@ Q_SIGNALS:
     void mouseOut(Port* port);
     void removeConnectionsRequest();
 
-    void addConnectionRequest(Connectable*);
-    void moveConnectionRequest(Connectable*);
+    void addConnectionRequest(ConnectablePtr);
+    void moveConnectionRequest(ConnectablePtr);
 
     void changePortRequest(QString label);
 

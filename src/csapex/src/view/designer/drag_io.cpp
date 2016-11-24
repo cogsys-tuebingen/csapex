@@ -28,6 +28,9 @@
 
 using namespace csapex;
 
+Q_DECLARE_METATYPE(ConnectablePtr)
+
+
 DragIO::DragIO(PluginLocatorPtr locator, CommandDispatcher* dispatcher)
     : loaded_(false), plugin_locator_(locator), manager_(new PluginManager<DragIOHandler>("csapex::DragIOHandler")),
       dispatcher_(dispatcher)
@@ -151,7 +154,7 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
 
         if(!e->isAccepted()) {
-            Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
+            ConnectablePtr c = e->mimeData()->property("connectable").value<ConnectablePtr>();
             e->acceptProposedAction();
 
             DesignerScene* scene = src->designerScene();
@@ -164,14 +167,14 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         if(!e->isAccepted()) {
-            Connectable* c = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
+            ConnectablePtr c = e->mimeData()->property("connectable").value<ConnectablePtr>();
             e->acceptProposedAction();
 
             DesignerScene* scene = src->designerScene();
             scene->deleteTemporaryConnections();
 
             if(c->isOutput()) {
-                Output* out = dynamic_cast<Output*> (c);
+                OutputPtr out = std::dynamic_pointer_cast<Output> (c);
                 if(out) {
                     for(ConnectionPtr c : out->getConnections()) {
                         if(!c) {
@@ -179,14 +182,14 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
                         }
                         InputPtr input = c->to();
                         if(input) {
-                            scene->addTemporaryConnection(input.get(), src->mapToScene(e->pos()));
+                            scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
                         }
                     }
                 }
             } else {
-                Input* in = dynamic_cast<Input*> (c);
+                InputPtr in = std::dynamic_pointer_cast<Input> (c);
                 if(in) {
-                    scene->addTemporaryConnection(in->getSource().get(), src->mapToScene(e->pos()));
+                    scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
                 }
             }
             scene->update();

@@ -130,7 +130,7 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
 
-    observe(graph->internalConnectionInProgress, [this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); });
+    observe(graph->internalConnectionInProgress, [this](ConnectablePtr from, ConnectablePtr to) { scene_->previewConnection(from, to); });
     observe(graph->state_changed, [this](){ updateBoxInformation(); });
 
     for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
@@ -948,9 +948,9 @@ void GraphView::addBox(NodeBox *box)
     NodeWorker* worker = box->getNodeWorker();
     NodeHandle* handle = worker->getNodeHandle().get();
 
-    worker_connections_[worker].emplace_back(handle->connection_start.connect([this](Connectable*) { scene_->deleteTemporaryConnections(); }));
-    worker_connections_[worker].emplace_back(handle->connection_in_prograss.connect([this](Connectable* from, Connectable* to) { scene_->previewConnection(from, to); }));
-    worker_connections_[worker].emplace_back(handle->connection_done.connect([this](Connectable*) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    worker_connections_[worker].emplace_back(handle->connection_start.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnections(); }));
+    worker_connections_[worker].emplace_back(handle->connection_in_prograss.connect([this](const ConnectablePtr& from, const ConnectablePtr& to) { scene_->previewConnection(from, to); }));
+    worker_connections_[worker].emplace_back(handle->connection_done.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
@@ -1014,7 +1014,7 @@ void GraphView::createPort(CreateConnectorRequest request)
     view_core_.execute(cmd);
 }
 
-void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable* from)
+void GraphView::createPortAndConnect(CreateConnectorRequest request, ConnectablePtr from)
 {
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -1041,7 +1041,7 @@ void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable
     view_core_.execute(playback);
 }
 
-void GraphView::createPortAndMove(CreateConnectorRequest request, Connectable* from)
+void GraphView::createPortAndMove(CreateConnectorRequest request, ConnectablePtr from)
 {
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -1083,7 +1083,7 @@ void GraphView::addPort(Port *port)
         view_core_.execute(CommandFactory(graph_facade_.get()).removeAllConnectionsCmd(adaptee));
     });
 
-    QObject::connect(port, &Port::addConnectionRequest, [this, port](Connectable* from) {
+    QObject::connect(port, &Port::addConnectionRequest, [this, port](const ConnectablePtr& from) {
         ConnectablePtr adaptee = port->getAdaptee().lock();
         if(!adaptee) {
             return;
@@ -1092,12 +1092,12 @@ void GraphView::addPort(Port *port)
         view_core_.execute(cmd);
     });
 
-    QObject::connect(port, &Port::moveConnectionRequest, [this, port](Connectable* from) {
+    QObject::connect(port, &Port::moveConnectionRequest, [this, port](const ConnectablePtr& from) {
         ConnectablePtr adaptee = port->getAdaptee().lock();
         if(!adaptee) {
             return;
         }
-        Command::Ptr cmd = CommandFactory(graph_facade_.get()).moveConnections(from, adaptee.get());
+        Command::Ptr cmd = CommandFactory(graph_facade_.get()).moveConnections(from.get(), adaptee.get());
         view_core_.execute(cmd);
     });
 

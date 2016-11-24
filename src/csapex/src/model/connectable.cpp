@@ -40,7 +40,7 @@ void Connectable::setVirtual(bool _virtual)
 
 void Connectable::notifyMessageProcessed()
 {
-    message_processed(this);
+    message_processed(shared_from_this());
 
     APEX_DEBUG_CERR <<"connectable " << getUUID() << " notified" << std::endl;
 
@@ -51,7 +51,7 @@ void Connectable::notifyMessageProcessed()
 
 void Connectable::reset()
 {
-    message_processed(this);
+    message_processed(shared_from_this());
 }
 
 void Connectable::stop()
@@ -201,7 +201,7 @@ void Connectable::addConnection(ConnectionPtr connection)
 
     connection_added(connection);
 
-    connection_added_to(this);
+    connection_added_to(shared_from_this());
 }
 
 void Connectable::fadeConnection(ConnectionPtr connection)

@@ -164,8 +164,8 @@ Q_SIGNALS:
     void portRemoved(Port*);
 
     void createPortRequest(CreateConnectorRequest request);
-    void createPortAndConnectRequest(CreateConnectorRequest request, Connectable*);
-    void createPortAndMoveRequest(CreateConnectorRequest request,  Connectable*);
+    void createPortAndConnectRequest(CreateConnectorRequest request, ConnectablePtr);
+    void createPortAndMoveRequest(CreateConnectorRequest request,  ConnectablePtr);
 
 protected:
     void resizeEvent(QResizeEvent * e);

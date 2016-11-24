@@ -57,7 +57,7 @@ void Input::removeConnection(Connectable* other_side)
         return;
     }
     connections_.clear();
-    connection_removed_to(this);
+    connection_removed_to(shared_from_this());
 }
 
 void Input::setOptional(bool optional)
@@ -119,7 +119,7 @@ void Input::removeAllConnectionsNotUndoable()
         getSource()->removeConnection(this);
         connections_.clear();
         setError(false);
-        disconnected(this);
+        disconnected(shared_from_this());
     }
 }
 
@@ -133,9 +133,9 @@ bool Input::targetsCanBeMovedTo(Connectable* other_side) const
     return getSource()->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
 
-void Input::connectionMovePreview(Connectable *other_side)
+void Input::connectionMovePreview(ConnectablePtr other_side)
 {
-    connectionInProgress(getSource().get(), other_side);
+    connectionInProgress(getSource(), other_side);
 }
 
 

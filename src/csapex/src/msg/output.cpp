@@ -36,7 +36,7 @@ void Output::removeOutputTransition()
 
 void Output::notifyMessageProcessed()
 {
-    message_processed(this);
+    message_processed(shared_from_this());
 }
 
 void Output::notifyMessageProcessed(Connection* connection)
@@ -92,7 +92,7 @@ void Output::removeConnection(Connectable* other_side)
 
             i = connections_.erase(i);
 
-            connection_removed_to(this);
+            connection_removed_to(shared_from_this());
 
             return;
 
@@ -111,7 +111,7 @@ void Output::removeAllConnectionsNotUndoable()
         i = connections_.erase(i);
     }
 
-    disconnected(this);
+    disconnected(shared_from_this());
 }
 
 void Output::disable()
@@ -149,11 +149,11 @@ bool Output::isConnected() const
     return !connections_.empty();
 }
 
-void Output::connectionMovePreview(Connectable *other_side)
+void Output::connectionMovePreview(ConnectablePtr other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(ConnectionPtr connection : connections_) {
-        connectionInProgress(connection->to().get(), other_side);
+        connectionInProgress(connection->to(), other_side);
     }
 }
 

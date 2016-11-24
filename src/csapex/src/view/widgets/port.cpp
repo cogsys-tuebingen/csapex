@@ -30,6 +30,8 @@
 
 using namespace csapex;
 
+Q_DECLARE_METATYPE(ConnectablePtr)
+
 Port::Port(QWidget *parent)
     : QFrame(parent),
       refresh_style_sheet_(false), minimized_(false), flipped_(false), hovered_(false),
@@ -269,7 +271,7 @@ void Port::startDrag()
     bool create = adaptee->shouldCreate(left, right);
     bool move = adaptee->shouldMove(left, right);
 
-    adaptee->connectionStart(adaptee.get());
+    adaptee->connectionStart(adaptee);
 
     if(create || move) {
         QDrag* drag = new QDrag(this);
@@ -277,7 +279,7 @@ void Port::startDrag()
 
         if(move) {
             mimeData->setData(QString::fromStdString(csapex::mime::connection_move), QByteArray());
-            mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee.get())));
+            mimeData->setProperty("connectable", qVariantFromValue(adaptee));
 
             drag->setMimeData(mimeData);
 
@@ -285,14 +287,14 @@ void Port::startDrag()
 
         } else {
             mimeData->setData(QString::fromStdString(csapex::mime::connection_create), QByteArray());
-            mimeData->setProperty("connectable", qVariantFromValue(static_cast<void*> (adaptee.get())));
+            mimeData->setProperty("connectable", qVariantFromValue(adaptee));
 
             drag->setMimeData(mimeData);
 
             drag->exec();
         }
 
-        adaptee->connection_added_to(adaptee.get());
+        adaptee->connection_added_to(adaptee);
         buttons_down_ = Qt::NoButton;
     }
 }
@@ -354,19 +356,19 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
         return;
     }
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
-        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        if(from == adaptee.get()) {
+        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        if(from == adaptee) {
             return;
         }
 
         if(from->canConnectTo(adaptee.get(), false)) {
-            if(adaptee->canConnectTo(from, false)) {
-                adaptee->connectionInProgress(adaptee.get(), from);
+            if(adaptee->canConnectTo(from.get(), false)) {
+                adaptee->connectionInProgress(adaptee, from);
                 e->acceptProposedAction();
             }
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        Connectable* original = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
+        ConnectablePtr original = e->mimeData()->property("connectable").value<ConnectablePtr>();
 
         if(original->targetsCanBeMovedTo(adaptee.get())) {
             e->acceptProposedAction();
@@ -384,9 +386,9 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
+        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
 
-        from->connectionMovePreview(adaptee.get());
+        from->connectionMovePreview(adaptee);
 
         e->acceptProposedAction();
     }
@@ -399,12 +401,12 @@ void Port::dropEvent(QDropEvent* e)
         return;
     }
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
-        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
-        if(from && from != adaptee.get()) {
+        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        if(from && from != adaptee) {
             addConnectionRequest(from);
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        Connectable* from = static_cast<Connectable*>(e->mimeData()->property("connectable").value<void*>());
+        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
         if(from) {
             moveConnectionRequest(from);
             e->setDropAction(Qt::MoveAction);

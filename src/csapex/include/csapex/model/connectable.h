@@ -87,18 +87,18 @@ public:
 public:
     slim_signal::Signal<void(bool)> enabled_changed;
 
-    slim_signal::Signal<void(Connectable*)> disconnected;
-    slim_signal::Signal<void(Connectable*)> connectionStart;
-    slim_signal::Signal<void(Connectable*,Connectable*)> connectionInProgress;
+    slim_signal::Signal<void(ConnectablePtr)> disconnected;
+    slim_signal::Signal<void(ConnectablePtr)> connectionStart;
+    slim_signal::Signal<void(ConnectablePtr,ConnectablePtr)> connectionInProgress;
 
-    slim_signal::Signal<void(Connectable*)> connection_added_to;
-    slim_signal::Signal<void(Connectable*)> connection_removed_to;
+    slim_signal::Signal<void(ConnectablePtr)> connection_added_to;
+    slim_signal::Signal<void(ConnectablePtr)> connection_removed_to;
 
     slim_signal::Signal<void(ConnectionPtr)> connection_added;
     slim_signal::Signal<void(ConnectionPtr)> connection_faded;
 
     slim_signal::Signal<void(bool)> connectionEnabled;
-    slim_signal::Signal<void(Connectable*)> message_processed;
+    slim_signal::Signal<void(ConnectablePtr)> message_processed;
     slim_signal::Signal<void(bool, std::string, int)> connectableError;
 
     slim_signal::Signal<void()> typeChanged;
@@ -112,7 +112,7 @@ public:
     virtual bool isConnectionPossible(Connectable* other_side) = 0;
     virtual void removeConnection(Connectable* other_side) = 0;
     virtual void validateConnections();
-    virtual void connectionMovePreview(Connectable* other_side) = 0;
+    virtual void connectionMovePreview(ConnectablePtr other_side) = 0;
 
 protected:
     virtual void removeAllConnectionsNotUndoable() = 0;

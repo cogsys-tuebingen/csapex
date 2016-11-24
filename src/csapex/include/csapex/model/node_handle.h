@@ -141,9 +141,9 @@ public:
     slim_signal::Signal<void (ConnectablePtr)> connector_created;
     slim_signal::Signal<void (ConnectablePtr)> connector_removed;
 
-    slim_signal::Signal<void (Connectable*, Connectable*)> connection_in_prograss;
-    slim_signal::Signal<void (Connectable*)> connection_done;
-    slim_signal::Signal<void (Connectable*)> connection_start;
+    slim_signal::Signal<void (ConnectablePtr, ConnectablePtr)> connection_in_prograss;
+    slim_signal::Signal<void (ConnectablePtr)> connection_done;
+    slim_signal::Signal<void (ConnectablePtr)> connection_start;
 
     slim_signal::Signal<void()> parameters_changed;
 

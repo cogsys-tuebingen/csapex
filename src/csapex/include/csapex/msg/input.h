@@ -38,7 +38,7 @@ public:
 
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const override;
 
-    virtual void connectionMovePreview(Connectable* other_side) override;
+    virtual void connectionMovePreview(ConnectablePtr other_side) override;
     virtual void validateConnections() override;
 
     OutputPtr getSource() const;

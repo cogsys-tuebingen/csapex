@@ -131,7 +131,7 @@ public:
     slim_signal::Signal<void(ConnectablePtr)> forwardingAdded;
     slim_signal::Signal<void(ConnectablePtr)> forwardingRemoved;
 
-    slim_signal::Signal<void(Connectable*,Connectable*)> internalConnectionInProgress;
+    slim_signal::Signal<void(ConnectablePtr,ConnectablePtr)> internalConnectionInProgress;
 
 protected:
     std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation_;

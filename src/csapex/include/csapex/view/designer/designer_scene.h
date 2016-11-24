@@ -64,9 +64,9 @@ public Q_SLOTS:
 
 
 public Q_SLOTS:
-    void addTemporaryConnection(Connectable* from, Connectable* to);
-    void previewConnection(Connectable* from, Connectable* to);
-    void addTemporaryConnection(Connectable *from, const QPointF &end);
+    void addTemporaryConnection(ConnectablePtr from, ConnectablePtr to);
+    void previewConnection(ConnectablePtr from, ConnectablePtr to);
+    void addTemporaryConnection(ConnectablePtr from, const QPointF &end);
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();
 
@@ -94,15 +94,15 @@ private:
 private:
     struct TempConnection {
         TempConnection(bool is_connected)
-            : is_connected(is_connected), from(nullptr), to_c(nullptr)
+            : is_connected(is_connected)
         {}
 
         bool is_connected;
 
-        Connectable* from;
+        ConnectableWeakPtr from;
 
         QPointF to_p;
-        Connectable* to_c;
+        ConnectableWeakPtr to_c;
     };
 
     enum Position {

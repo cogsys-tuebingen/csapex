@@ -126,8 +126,8 @@ public Q_SLOTS:
     void removeBox(NodeBox* box);
 
     void createPort(CreateConnectorRequest request);
-    void createPortAndConnect(CreateConnectorRequest request, Connectable* from);
-    void createPortAndMove(CreateConnectorRequest request, Connectable* from);
+    void createPortAndConnect(CreateConnectorRequest request, ConnectablePtr from);
+    void createPortAndMove(CreateConnectorRequest request, ConnectablePtr from);
 
     void addPort(Port* port);
     void removePort(Port* port);

@@ -422,7 +422,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
 
     auto cb = [relay](const TokenConstPtr& data) {
         relay->triggerWith(std::make_shared<Token>(*data));
-        relay->message_processed(relay.get());
+        relay->message_processed(relay);
     };
 
     Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb, false, true);

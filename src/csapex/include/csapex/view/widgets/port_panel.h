@@ -40,8 +40,8 @@ public:
 
 Q_SIGNALS:
     void createPortRequest(CreateConnectorRequest request);
-    void createPortAndConnectRequest(CreateConnectorRequest request, Connectable*);
-    void createPortAndMoveRequest(CreateConnectorRequest request, Connectable*);
+    void createPortAndConnectRequest(CreateConnectorRequest request, ConnectablePtr);
+    void createPortAndMoveRequest(CreateConnectorRequest request, ConnectablePtr);
 
     void portAdded(Port*);
     void portRemoved(Port*);

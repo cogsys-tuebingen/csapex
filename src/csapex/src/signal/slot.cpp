@@ -78,7 +78,7 @@ void Slot::notifyMessageAvailable(Connection* connection)
 
 void Slot::notifyMessageProcessed()
 {
-    message_processed(this);
+    message_processed(shared_from_this());
 
     Connection* front = nullptr;
     {
