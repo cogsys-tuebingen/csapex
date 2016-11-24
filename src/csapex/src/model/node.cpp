@@ -98,6 +98,11 @@ void Node::reset()
 {
 }
 
+bool Node::processNoMessageMarkers() const
+{
+    return false;
+}
+
 void Node::processMarker(const csapex::connection_types::MessageConstPtr &marker)
 {
 

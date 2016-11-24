@@ -15,6 +15,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/graph/edge.h>
+#include <csapex/model/node.h>
 
 /// SYSTEM
 #include <iostream>
@@ -366,6 +367,10 @@ std::set<graph::Vertex *> Graph::findVerticesThatNeedMessages()
     std::set<graph::Vertex*> vertices_that_need_messages;
 
     for(const graph::VertexPtr v : vertices_) {
+        if(v->getNodeHandle()->getNode().lock()->processNoMessageMarkers()) {
+            vertices_that_need_messages.insert(v.get());
+            break;
+        }
         for(const ConnectionPtr c : v->getNodeHandle()->getOutputTransition()->getConnections()) {
             if(c->to()->isVirtual()) {
                 vertices_that_need_messages.insert(v.get());

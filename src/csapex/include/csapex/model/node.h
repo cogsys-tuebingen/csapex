@@ -36,6 +36,7 @@ public: /* API */
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
     virtual void process();
 
+    virtual bool processNoMessageMarkers() const;
     virtual void processMarker(const connection_types::MessageConstPtr &marker);
 
     virtual void activation();

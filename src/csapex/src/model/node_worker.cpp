@@ -384,8 +384,10 @@ void NodeWorker::startProcessingMessages()
             }
 
             if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getToken()->getTokenData())) {
-                if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
+                if(cin->isConnected()) {
                     marker = m;
+                }
+                if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
                     all_inputs_are_present = false;
                     break;
                 }
@@ -450,10 +452,20 @@ void NodeWorker::startProcessingMessages()
     }
 
     if(marker) {
-        node->processMarker(marker);
+        auto no_message = std::dynamic_pointer_cast<connection_types::NoMessage const>(marker);
 
-        for(OutputPtr out : node_handle_->getExternalOutputs()) {
-            msg::publish(out.get(), marker);
+        if(!no_message) {
+            node->processMarker(marker);
+
+            for(OutputPtr out : node_handle_->getExternalOutputs()) {
+                msg::publish(out.get(), marker);
+            }
+
+        } else {
+            if(node->processNoMessageMarkers()) {
+                node->processMarker(marker);
+            }
+            marker.reset();
         }
     }
 
