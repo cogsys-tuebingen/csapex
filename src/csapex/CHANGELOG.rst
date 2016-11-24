@@ -2,6 +2,17 @@
 Changelog for package csapex
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* removed debug ouputs; builds on kinetic
+* ported to kinetic
+* use tempoary file name based on pid to get unique file handles
+* fixed cmake installing
+* suppress plugin.xml files that do not exist
+* fixed race-condition when multiple instances want to persist settings
+* added observer class to generalize reactive observing behaviour
+* Contributors: buck, robot
+
 0.9.3 (2016-11-19)
 ------------------
 * Fixed cmake problems on the ROS build farm, now that prerelease is possible
