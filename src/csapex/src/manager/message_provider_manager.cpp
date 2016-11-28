@@ -75,13 +75,6 @@ MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const s
         loadPlugins();
     }
 
-    bfs::path file(path);
-
-    bool is_dir = bfs::is_directory(file) ;
-    std::string ext = is_dir ? ".DIRECTORY" : file.extension().string();
-
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
     if(path.empty()) {
         return nullptr;
     }
@@ -90,7 +83,28 @@ MessageProvider::Ptr MessageProviderManager::createMessageProviderHelper(const s
         throw std::runtime_error("no message providers registered!");
     }
 
+    bfs::path file(path);
+
+    bool is_dir = bfs::is_directory(file) ;
+    std::string ext = is_dir ? ".DIRECTORY" : file.extension().string();
+
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+
     auto pos = classes.find(ext);
+    if(pos == classes.end()) {
+        // try with one dot in the extension
+        std::string filename = file.filename().string();
+        std::size_t dot_pos = filename.rfind('.');
+        if(dot_pos != std::string::npos) {
+            std::size_t ext_pos = filename.rfind('.', dot_pos - 1);
+            if(ext_pos != std::string::npos) {
+                std::string ext = filename.substr(ext_pos);
+                pos = classes.find(ext);
+            }
+        }
+    }
+
     if(pos == classes.end()) {
         throw std::runtime_error(std::string("cannot import ") + path);
     }
