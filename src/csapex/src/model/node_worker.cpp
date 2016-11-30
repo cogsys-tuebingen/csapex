@@ -383,13 +383,15 @@ void NodeWorker::startProcessingMessages()
                 all_inputs_are_present = false;
             }
 
-            if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getToken()->getTokenData())) {
-                if(cin->isConnected()) {
-                    marker = m;
-                }
-                if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
-                    all_inputs_are_present = false;
-                    break;
+            if(cin->hasReceived()) {
+                if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getToken()->getTokenData())) {
+                    if(cin->isConnected()) {
+                        marker = m;
+                    }
+                    if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
+                        all_inputs_are_present = false;
+                        break;
+                    }
                 }
             }
         }

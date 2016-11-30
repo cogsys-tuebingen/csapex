@@ -16,7 +16,7 @@
 
 using namespace csapex;
 
-Q_DECLARE_METATYPE(Connectable*)
+Q_DECLARE_METATYPE(ConnectablePtr)
 
 MetaPort::MetaPort(ConnectorType port_type, const AUUID& target, QWidget *parent)
     : Port(parent), port_type_(port_type), target(target)
@@ -73,7 +73,7 @@ void MetaPort::dragMoveEvent(QDragMoveEvent* e)
 void MetaPort::dropEvent(QDropEvent* e)
 {
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
-        ConnectablePtr from = e->mimeData()->property("connectable").value<Connectable*>()->shared_from_this();
+        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
         if(from) {
             auto type = from->getType();
 
@@ -88,7 +88,7 @@ void MetaPort::dropEvent(QDropEvent* e)
         }
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectablePtr from = e->mimeData()->property("connectable").value<Connectable*>()->shared_from_this();
+        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
         if(from) {
             auto type = from->getType();
 
