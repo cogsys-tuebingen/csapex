@@ -196,8 +196,10 @@ $CLOSING_NS
 CSAPEX_REGISTER_CLASS($FULLNAME, csapex::Node)
 "> $DIR/$NEW_FILE
 
-
-
+###
+### ADD TO GIT
+###
+git add $DIR/$NEW_FILE
 
 ###
 ### MODIFY CMAKELISTS
