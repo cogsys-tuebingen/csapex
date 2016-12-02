@@ -92,7 +92,9 @@ CsApexCore::CsApexCore(const CsApexCore& parent)
 CsApexCore::~CsApexCore()
 {
     if(!parent_) {
-        root_->clear();
+        if(root_) {
+            root_->clear();
+        }
         plugin_locator_->shutdown();
         SingletonInterface::shutdownAll();
         thread_pool_->clear();
