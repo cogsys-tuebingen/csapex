@@ -397,7 +397,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
     QAction* del = new QAction("delete", &menu);
     del->setIcon(QIcon(":/close.png"));
     del->setIconVisibleInMenu(true);
-    handler[del] = std::bind(&GraphView::deleteBox, &view_);
+    handler[del] = std::bind(&GraphView::deleteSelected, &view_);
     menu.addAction(del);
 
     QAction* selectedItem = menu.exec(global_pos);

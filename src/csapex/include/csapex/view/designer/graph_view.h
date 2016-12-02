@@ -191,7 +191,6 @@ private:
     void chooseColor();
     void minimizeBox(bool mini);
     void muteBox(bool muted);
-    void deleteBox();
     void morphNode();
     void usePrivateThreadFor();
     void useDefaultThreadFor();

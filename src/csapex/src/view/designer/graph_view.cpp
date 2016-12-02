@@ -1390,15 +1390,6 @@ void GraphView::muteBox(bool mini)
     view_core_.execute(cmd);
 }
 
-void GraphView::deleteBox()
-{
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"delete boxes", true));
-    for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::DeleteNode(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID())));
-    }
-    view_core_.execute(cmd);
-}
-
 void GraphView::morphNode()
 {
     apex_assert_hard(getSelectedBoxes().size() == 1);
