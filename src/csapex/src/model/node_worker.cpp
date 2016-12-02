@@ -599,7 +599,7 @@ void NodeWorker::signalMessagesProcessed(bool processing_aborted)
 {
     setState(State::IDLE);
 
-    if(processing_aborted || node_handle_->isSink() || (current_exec_mode_ && current_exec_mode_.get() == ExecutionMode::PIPELINING)) {
+    if(processing_aborted || node_handle_->isSink() || (current_exec_mode_ && current_exec_mode_.is_initialized() && current_exec_mode_.get() == ExecutionMode::PIPELINING)) {
         APEX_DEBUG_TRACE getNode()->ainfo << "notify " << getUUID() <<", sink: " << node_handle_->isSink() << ", mode: " << (int) current_exec_mode_.get() << std::endl;
         node_handle_->getInputTransition()->notifyMessageProcessed();
 
