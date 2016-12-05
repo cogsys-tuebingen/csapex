@@ -809,7 +809,6 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 
     settings.set("uistate", uistate.toStdString());
     settings.set("geometry", geometry.toStdString());
-    core_.settingsChanged();
 
     try {
         root_->stop();

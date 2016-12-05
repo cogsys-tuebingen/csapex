@@ -303,6 +303,7 @@ template CSAPEX_PARAM_EXPORT bool Parameter::setSilent<argument_type<void(T)>::t
 
 INSTANTIATE(bool)
 INSTANTIATE(int)
+INSTANTIATE(long)
 INSTANTIATE(double)
 INSTANTIATE(std::string)
 INSTANTIATE((std::pair<int,int>))
@@ -315,6 +316,7 @@ INSTANTIATE((std::vector<std::string>))
 
 template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<bool>(const std::string& key, const bool& value);
 template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<int>(const std::string& key, const int& value);
+template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<long>(const std::string& key, const long& value);
 template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<double>(const std::string& key, const double& value);
 template CSAPEX_PARAM_EXPORT void Parameter::setDictionaryValue<std::string>(const std::string& key, const std::string& value);
 }

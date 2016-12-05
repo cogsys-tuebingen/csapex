@@ -97,9 +97,9 @@ void NodeListGenerator::listAvailableNodeTypes(QStandardItemModel* model)
             properties.append(QString::fromStdString(s));
         }
 
-        if(adapter_factory_.hasAdapter(proxy->getType())) {
-            properties.push_back("QT");
-        }
+//        if(adapter_factory_.hasAdapter(proxy->getType())) {
+//            properties.push_back("QT");
+//        }
 
         QStandardItem* item = new QStandardItem(QIcon(QString::fromStdString(proxy->getIcon())), type);
         item->setData(type, Qt::UserRole);

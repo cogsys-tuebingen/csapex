@@ -56,11 +56,7 @@ protected:
     void registerConstructor(PluginConstructorM constructor) {
         available_classes[constructor.getType()] = constructor;
     }
-    
-    void enumerateXmlFiles()
-    {
-    }
-    
+
     void load(csapex::PluginLocator* locator) {
         std::vector<std::string> xml_files = locator->enumerateXmlFiles<M>();
         std::vector<std::string> library_paths = locator->enumerateLibraryPaths();
@@ -115,15 +111,24 @@ protected:
     }
 
     void loadLibrary(const std::string& library_name, TiXmlElement* library)  {
-        if(!containsPlugins(library)) {
-        }
-
         TiXmlElement* class_element = library->FirstChildElement("class");
         while (class_element) {
             loadClass(library_name, class_element);
 
             class_element = class_element->NextSiblingElement( "class" );
         }
+
+#if ! WIN32
+        std::stringstream ld_paths(getenv("LD_LIBRARY_PATH"));
+        std::string ld_path;
+        while (std::getline(ld_paths, ld_path, ':')) {
+            bf3::path file_candidate = ld_path + '/' + library_name + ".so";
+            if(bf3::exists(file_candidate)) {
+                library_stamp_[library_name] = bf3::last_write_time(file_candidate);
+                return;
+            }
+        }
+#endif
     }
 
     
@@ -223,19 +228,10 @@ protected:
         return description_str;
     }
 
-
-    bool containsPlugins(TiXmlElement* library)
+    std::time_t getLastModification(const std::string& class_name)
     {
-        TiXmlElement* class_element = library->FirstChildElement("class");
-        while (class_element) {
-            std::string base_class_type = class_element->Attribute("base_class_type");
-            if(base_class_type == full_name_) {
-                return true;
-            }
-            class_element = class_element->NextSiblingElement( "class" );
-        }
-
-        return false;
+        std::string library = plugin_to_library_.at(class_name);
+        return library_stamp_.at(library);
     }
 
 protected:
@@ -247,6 +243,7 @@ protected:
 
     std::map< std::string, std::shared_ptr<class_loader::ClassLoader> > loaders_;
     std::map< std::string, std::string > plugin_to_library_;
+    std::map< std::string, std::time_t> library_stamp_;
     
     std::vector<std::string> library_paths_;
     std::map<std::string, csapex::PluginLocator*> library_to_locator_;
@@ -348,6 +345,13 @@ public:
         } else {
             return nullptr;
         }
+    }
+
+
+    std::time_t getLastModification(const std::string& class_name)
+    {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
+        return instance->getLastModification(class_name);
     }
 
 public:

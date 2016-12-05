@@ -46,6 +46,7 @@ public:
     NodeConstructor& setTags(const std::vector<TagPtr> &tags);
     std::vector<TagPtr> getTags() const;
 
+    NodeConstructor& setProperties(const std::vector<std::string> &properties);
     std::vector<std::string> getProperties() const;
 
     NodeConstructor& setIcon(const std::string &icon);

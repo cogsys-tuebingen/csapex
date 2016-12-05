@@ -38,6 +38,7 @@ const std::string Settings::config_selector = "Configs(*" + Settings::config_ext
 
 const std::string Settings::namespace_separator = ":/:";
 
+Settings Settings::NoSettings(false);
 
 std::string Settings::defaultConfigPath()
 {
@@ -69,10 +70,45 @@ std::string Settings::defaultConfigFile()
     return file;
 }
 
-Settings::Settings()
+Settings::Settings(bool load_from_config)
+    : quiet_(false)
 {
-    load();
+    if(load_from_config) {
+        load();
+    }
 }
+
+bool Settings::isQuiet() const
+{
+    return quiet_;
+}
+
+void Settings::setQuiet(bool quiet)
+{
+    if(quiet != quiet_) {
+        quiet_ = quiet;
+
+        if(!quiet && !changes_.empty()) {
+           for(const std::string& key : changes_) {
+               setting_changed(key);
+           }
+           changes_.clear();
+           settings_changed();
+        }
+    }
+}
+
+void Settings::settingsChanged(const std::string &key)
+{
+    if(quiet_) {
+        changes_.push_back(key);
+
+    } else {
+        setting_changed(key);
+        settings_changed();
+    }
+}
+
 
 void Settings::save()
 {
@@ -126,7 +162,8 @@ void Settings::load()
 void Settings::add(csapex::param::Parameter::Ptr p)
 {
     settings_[p->name()] = p;
-    settings_changed(p->name());
+
+    settingsChanged(p->name());
 }
 
 csapex::param::Parameter::Ptr Settings::get(const std::string &name)

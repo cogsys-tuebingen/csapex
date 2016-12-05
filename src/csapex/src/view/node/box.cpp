@@ -162,7 +162,7 @@ void NodeBox::setupUi()
     observe(state->color_changed, std::bind(&NodeBox::changeColor, this));
     observe(state->pos_changed, std::bind(&NodeBox::updatePosition, this));
 
-    observe(settings_.settings_changed, [this](const std::string& name) {
+    observe(settings_.setting_changed, [this](const std::string& name) {
         if(name == "debug") {
             changeColor();
         }

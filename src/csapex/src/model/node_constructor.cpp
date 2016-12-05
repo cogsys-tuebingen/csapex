@@ -77,6 +77,14 @@ std::vector<TagPtr> NodeConstructor::getTags() const
     return tags_;
 }
 
+NodeConstructor& NodeConstructor::setProperties(const std::vector<std::string> &properties)
+{
+    properties_ = properties;
+    properties_loaded_ = true;
+
+    return *this;
+}
+
 std::vector<std::string> NodeConstructor::getProperties() const
 {
     if(!properties_loaded_) {

@@ -11,6 +11,7 @@
 #include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/nodes/note.h>
+#include <csapex/param/string_list_parameter.h>
 
 using namespace csapex;
 
@@ -26,8 +27,8 @@ struct PluginManagerGroup<Node>
 };
 }
 
-NodeFactory::NodeFactory(csapex::PluginLocator* locator)
-    : plugin_locator_(locator),
+NodeFactory::NodeFactory(Settings& settings, PluginLocator* locator)
+    : settings_(settings), plugin_locator_(locator),
       node_manager_(std::make_shared<PluginManager<Node>> ("csapex::Node")),
       tag_map_has_to_be_rebuilt_(false)
 {
@@ -72,19 +73,46 @@ void NodeFactory::shutdown()
 
 void NodeFactory::rebuildPrototypes()
 {
-    //    available_elements_prototypes.clear();
-    //    node_adapter_builders_.clear();
-    
+    settings_.setQuiet(true);
+
     for(const auto& p : node_manager_->getConstructors()) {
         const PluginConstructor<Node>& plugin_constructor = p.second;
 
         // make the constructor
-        csapex::NodeConstructor::Ptr constructor = std::make_shared<NodeConstructor>(p.second.getType(), plugin_constructor);
+        auto type = p.second.getType();
+        csapex::NodeConstructor::Ptr constructor = std::make_shared<NodeConstructor>(type, plugin_constructor);
 
         constructor->setDescription(p.second.getDescription()).setIcon(p.second.getIcon()).setTags(p.second.getTags());
 
+        // set cached properties, if the library modification time has not changed.
+        // otherwise rely on lazy initialization
+        std::string mod = std::string("__last_mod_") + type;
+        std::string key = std::string("__cached_properties_") + type;
+        bool loaded = false;
+        if(settings_.knows(mod)) {
+            long last_mod = settings_.get<long>(mod);
+            if(last_mod == node_manager_->getLastModification(type)) {
+                param::StringListParameter::Ptr properties = std::dynamic_pointer_cast<param::StringListParameter>(settings_.get(key));
+                if(properties) {
+                    constructor->setProperties(properties->getValues());
+                    loaded = true;
+                }
+            }
+        }
+
+        if(!loaded) {
+            std::cerr << "reloading properties for node type " << type << std::endl;
+            param::StringListParameter::Ptr properties(new param::StringListParameter(key, param::ParameterDescription()));
+            properties->set(constructor->getProperties());
+            settings_.add(properties);
+
+            settings_.set(mod, node_manager_->getLastModification(type));
+        }
+
         registerNodeType(constructor, true);
     }
+
+    settings_.setQuiet(false);
 }
 
 void NodeFactory::rebuildMap()

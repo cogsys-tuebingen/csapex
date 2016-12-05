@@ -74,7 +74,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
 
     core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
-    node_factory_ = std::make_shared<NodeFactory>(plugin_locator_.get());
+    node_factory_ = std::make_shared<NodeFactory>(settings_, plugin_locator_.get());
     snippet_factory_ = std::make_shared<SnippetFactory>(plugin_locator_.get());
 
     boot();

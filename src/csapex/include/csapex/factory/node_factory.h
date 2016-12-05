@@ -27,7 +27,7 @@ public:
     typedef std::shared_ptr<NodeFactory> Ptr;
 
 public:
-    NodeFactory(PluginLocator *locator);
+    NodeFactory(Settings& settings, PluginLocator *locator);
     ~NodeFactory();
 
     NodeFactory(const NodeFactory&) = delete;
@@ -60,6 +60,7 @@ protected:
     void rebuildMap();
 
 protected:
+    Settings &settings_;
     csapex::PluginLocator* plugin_locator_;
 
     std::map<std::string, std::vector<NodeConstructor::Ptr> > tag_map_;

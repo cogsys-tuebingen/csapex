@@ -44,6 +44,9 @@ std::string ValueParameter::toStringImpl() const
 
     } else if(value_.type() == typeid(std::string)) {
         v << boost::any_cast<std::string> (value_);
+
+    } else if(value_.type() == typeid(long)) {
+        v << boost::any_cast<long> (value_);
     }
 
     return std::string("[value: ") + v.str()  + "]";
@@ -67,6 +70,8 @@ bool ValueParameter::set_unsafe(const boost::any &v)
             change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(v);
         } else if(v.type() == typeid(std::string)) {
             change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(v);
+        } else if(v.type() == typeid(long)) {
+            change = boost::any_cast<long>(value_) != boost::any_cast<long>(v);
         }
     }
     if(change) {
@@ -91,6 +96,8 @@ void ValueParameter::doSetValueFrom(const Parameter &other)
             change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(value->value_);
         } else if(value_.type() == typeid(std::string)) {
             change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(value->value_);
+        } else if(value_.type() == typeid(long)) {
+            change = boost::any_cast<long>(value_) != boost::any_cast<long>(value->value_);
         } else {
             change = true;
         }
@@ -133,6 +140,9 @@ void ValueParameter::doSerialize(YAML::Node& n) const
 
     } else if(value_.type() == typeid(std::string)) {
         n["string"] = boost::any_cast<std::string> (value_);
+
+    } else if(value_.type() == typeid(long)) {
+        n["long"] = boost::any_cast<long> (value_);
     }
 }
 
@@ -156,5 +166,8 @@ void ValueParameter::doDeserialize(const YAML::Node& n)
 
     } else if(n["string"].IsDefined()) {
         value_ = __read<std::string>(n["string"]);
+
+    } else if(n["long"].IsDefined()) {
+        value_ = __read<long>(n["long"]);
     }
 }

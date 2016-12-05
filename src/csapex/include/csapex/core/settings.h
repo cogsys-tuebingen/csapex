@@ -33,7 +33,12 @@ public:
 
 
 public:
-    Settings();
+    static Settings NoSettings;
+
+    Settings(bool load_from_config = true);
+
+    bool isQuiet() const;
+    void setQuiet(bool quiet);
 
     bool knows(const std::string& name) const;
 
@@ -56,7 +61,7 @@ public:
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(def);
             add(p);
-            settings_changed(name);
+            settingsChanged(name);
             return def;
         }
 
@@ -78,14 +83,18 @@ public:
         } else {
             pos->second->set<T>(val);
         }
-        settings_changed(name);
+        settingsChanged(name);
     }
 
     void save();
     void load();
 
+private:
+    void settingsChanged(const std::string& key);
+
 public:
-    csapex::slim_signal::Signal<void(const std::string&)> settings_changed;
+    csapex::slim_signal::Signal<void(const std::string&)> setting_changed;
+    csapex::slim_signal::Signal<void()> settings_changed;
 
     csapex::slim_signal::Signal<void (YAML::Node& e)> save_request;
     csapex::slim_signal::Signal<void (YAML::Node& n)> load_request;
@@ -95,6 +104,9 @@ public:
 
 private:
     std::map<std::string, csapex::param::Parameter::Ptr> settings_;
+
+    bool quiet_;
+    std::vector<std::string> changes_;
 };
 
 }
