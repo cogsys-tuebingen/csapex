@@ -17,7 +17,7 @@ namespace csapex
 class CSAPEX_EXPORT Parameterizable
 {
 public:
-    typedef std::vector<std::pair<csapex::param::ParameterWeakPtr, std::function<void(csapex::param::Parameter *)> > > ChangedParameterList;
+    typedef std::vector<std::pair<csapex::param::ParameterWeakPtr, std::vector<std::function<void(csapex::param::Parameter *)>>>> ChangedParameterList;
 
 public:
     slim_signal::Signal<void()> parameters_changed;
@@ -161,7 +161,6 @@ private:
 
 private:
     void parameterChanged(param::ParameterPtr param);
-    void parameterChanged(param::ParameterPtr param, std::function<void(csapex::param::Parameter *)> cb);
     void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
@@ -172,6 +171,8 @@ private:
     mutable std::recursive_mutex changed_params_mutex_;
     std::map<std::string, std::function<void()>> param_updates_;
     ChangedParameterList changed_params_;
+
+    std::map<param::Parameter*, std::vector<std::function<void(param::Parameter*)>>> param_callbacks_;
 
 protected:
     GenericStatePtr parameter_state_;

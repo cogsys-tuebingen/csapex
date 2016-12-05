@@ -69,15 +69,20 @@ void Parameterizable::addParameterCallback(csapex::param::ParameterPtr param, st
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
-    param::ParameterWeakPtr pwp = param;
-    connections_[param.get()].push_back(param->parameter_changed.connect([this, pwp, cb](csapex::param::Parameter* p) {
-        if(param::Parameter::Ptr p = pwp.lock()) {
-            parameterChanged(p, cb);
-        }
-    }));
+    param_callbacks_[param.get()].push_back(cb);
+
+    // register callback, if not already there
+    if(connections_.find(param.get()) == connections_.end()) {
+        param::ParameterWeakPtr pwp = param;
+        connections_[param.get()].push_back(param->parameter_changed.connect([this, pwp](csapex::param::Parameter* p) {
+            if(param::Parameter::Ptr p = pwp.lock()) {
+                parameterChanged(p);
+            }
+        }));
+    }
 
     if(param->hasState()) {
-        parameterChanged(param, cb);
+        parameterChanged(param);
     }
 }
 
@@ -116,34 +121,35 @@ void Parameterizable::addParameterCondition(csapex::param::ParameterPtr param, b
     conditions_[pwp] = [&enable_condition](){ return enable_condition; };
 }
 
-void Parameterizable::parameterChanged(param::ParameterPtr)
+void Parameterizable::parameterChanged(param::ParameterPtr parameter)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     if(!conditions_.empty()) {
         checkConditions(false);
     }
-}
 
-void Parameterizable::parameterChanged(csapex::param::ParameterPtr param, std::function<void(csapex::param::Parameter *)> cb)
-{
-    {
-        std::unique_lock<std::recursive_mutex> lock(mutex_);
-        std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
+    auto pos = param_callbacks_.find(parameter.get());
+    if(pos != param_callbacks_.end()) {
+        std::vector<std::function<void(param::Parameter*)>>& callbacks = pos->second;
+        {
+            std::unique_lock<std::recursive_mutex> lock(mutex_);
+            std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
 
-        for(auto it = changed_params_.begin(); it != changed_params_.end();) {
-            param::ParameterWeakPtr pw = it->first;
-            param::ParameterPtr p = pw.lock();
-            if(p == param) {
-                it = changed_params_.erase(it);
-            } else {
-                ++it;
+            for(auto it = changed_params_.begin(); it != changed_params_.end();) {
+                param::ParameterWeakPtr pw = it->first;
+                param::ParameterPtr p = pw.lock();
+                if(p == parameter) {
+                    it = changed_params_.erase(it);
+                } else {
+                    ++it;
+                }
             }
+            changed_params_.push_back(std::make_pair(parameter, callbacks));
         }
-        changed_params_.push_back(std::make_pair(param, cb));
-    }
 
-    if(!silent_) {
-        parameters_changed();
+        if(!silent_) {
+            parameters_changed();
+        }
     }
 }
 

@@ -322,8 +322,12 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
     param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
     if(t) {
         Event* trigger = NodeModifier::addEvent(t->name());
-        NodeModifier::addSlot(t->name(), std::bind(&param::TriggerParameter::trigger, t), false);
-        node_->addParameterCallback(t, std::bind(&Event::trigger, trigger));
+        NodeModifier::addSlot(t->name(), [t]() {
+            t->trigger();
+        }, false);
+        node_->addParameterCallback(t, [trigger](param::Parameter*) {
+            trigger->trigger();
+        });
     }
 }
 

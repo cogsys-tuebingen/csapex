@@ -1034,7 +1034,9 @@ void NodeWorker::checkParameters()
             if(param::ParameterPtr p = pair.first.lock()) {
                 try {
                     if(p->isEnabled()) {
-                        pair.second(p.get());
+                        for(auto& cb : pair.second) {
+                            cb(p.get());
+                        }
                     }
 
                 } catch(const std::exception& e) {

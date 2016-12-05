@@ -283,7 +283,7 @@ std::vector<csapex::param::Parameter::Ptr> GenericState::getPersistentParameters
 
 std::size_t GenericState::getParameterCount() const
 {
-    return params.size();
+    return getParameters().size();
 }
 
 bool GenericState::hasParameter(const std::string& name) const
