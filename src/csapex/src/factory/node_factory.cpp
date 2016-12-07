@@ -102,11 +102,17 @@ void NodeFactory::rebuildPrototypes()
 
         if(!loaded) {
             std::cerr << "reloading properties for node type " << type << std::endl;
-            param::StringListParameter::Ptr properties(new param::StringListParameter(key, param::ParameterDescription()));
-            properties->set(constructor->getProperties());
-            settings_.add(properties);
+            try {
+                auto last_modification = node_manager_->getLastModification(type);
 
-            settings_.set(mod, node_manager_->getLastModification(type));
+                param::StringListParameter::Ptr properties(new param::StringListParameter(key, param::ParameterDescription()));
+                properties->set(constructor->getProperties());
+                settings_.add(properties);
+                settings_.set(mod, last_modification);
+
+            } catch(const std::exception& e) {
+                std::cerr << "plugin '" << type << "' cannot be loaded" << std::endl;
+            }
         }
 
         registerNodeType(constructor, true);
@@ -119,40 +125,40 @@ void NodeFactory::rebuildMap()
 {
     Tag::createIfNotExists("General");
     Tag::Ptr general = Tag::get("General");
-    
+
     tag_map_.clear();
-    
+
     for(std::vector<NodeConstructor::Ptr>::iterator
         it = constructors_.begin();
         it != constructors_.end();) {
-        
+
         const NodeConstructor::Ptr& p = *it;
-        
+
         try {
             bool has_tag = false;
             for(const Tag::Ptr& tag : p->getTags()) {
                 tag_map_[tag->getName()].push_back(p);
                 has_tag = true;
             }
-            
+
             if(!has_tag) {
                 tag_map_[general->getName()].push_back(p);
             }
-            
+
             ++it;
-            
+
         } catch(const NodeConstructor::NodeConstructionException& e) {
             std::cerr << "warning: cannot load node: " << e.what() << std::endl;
             it = constructors_.erase(it);
         }
     }
-    
+
 
     typedef std::map<std::string, std::vector<NodeConstructor::Ptr> > map;
     for(map::iterator it = tag_map_.begin(); it != tag_map_.end(); ++it) {
         std::sort(it->second.begin(), it->second.end(), compare);
     }
-    
+
     tag_map_has_to_be_rebuilt_ = false;
 }
 
@@ -184,7 +190,7 @@ void NodeFactory::registerNodeType(NodeConstructor::Ptr provider, bool suppress_
 {
     constructors_.push_back(provider);
     tag_map_has_to_be_rebuilt_ = true;
-    
+
     if(!suppress_signals) {
         new_node_type();
     }
@@ -197,7 +203,7 @@ bool NodeFactory::isValidType(const std::string &type) const
             return true;
         }
     }
-    
+
     return false;
 }
 
