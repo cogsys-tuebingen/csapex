@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/profiling/timer.h>
 #include <csapex/profiling/interlude.hpp>
+#include <csapex/model/node_handle.h>
 
 using namespace csapex;
 
@@ -48,6 +49,19 @@ bool TickableNode::doTick(NodeModifier &nm, Parameterizable &p)
 bool TickableNode::canTick()
 {
     return true;
+}
+
+bool TickableNode::canProcess() const
+{
+    if(node_handle_->isSource()) {
+        // legacy: sources deriving from tickable sould not process
+        // TODO: re-implement all tickables!
+        return false;
+
+    } else {
+        // the node is no source -> process as usual
+        return true;
+    }
 }
 
 bool TickableNode::isTickEnabled() const

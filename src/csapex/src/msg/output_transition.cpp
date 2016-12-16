@@ -222,7 +222,10 @@ void OutputTransition::publishNextMessage()
             APEX_DEBUG_CERR <<"all outputs are done" << std::endl;
             updateConnections();
 
+            lock.unlock();
+
             messages_processed();
+            checkIfEnabled();
         }
 
     } else {

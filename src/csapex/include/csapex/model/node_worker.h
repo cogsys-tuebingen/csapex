@@ -51,7 +51,7 @@ public:
     NodeWorker(NodeHandlePtr node_handle);
     ~NodeWorker();
 
-    NodeHandlePtr getNodeHandle();
+    NodeHandlePtr getNodeHandle() const;
     NodePtr getNode() const;
     UUID getUUID() const;
 
@@ -83,6 +83,7 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
+    bool canExecute();
     bool canProcess() const;
     bool canReceive() const;
     bool canSend() const;
@@ -93,10 +94,10 @@ public:
 public:
     bool tick();
 
-    void startProcessingMessages();
+    bool startProcessingMessages();
     void forwardMessages(bool send_parameters);
 
-    bool tryProcess();
+    bool execute();
 
     void checkParameters();    
     void checkIO();
@@ -163,6 +164,8 @@ private:
 
     bool is_setup_;
     State state_;
+
+    bool is_processing_;
 
     Event* trigger_tick_done_;
     Event* trigger_process_done_;

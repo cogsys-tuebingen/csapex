@@ -46,7 +46,10 @@ private:
     void measureFrequency();
     void tick();
     void tickLoop();
+
     void scheduleTick();
+    void scheduleProcess();
+
     void stopTickThread();
 
 private:
@@ -63,7 +66,7 @@ private:
 
     TaskPtr tick_;
     TaskPtr check_parameters_;
-    TaskPtr try_process_;
+    TaskPtr execute_;
 
     std::thread ticking_thread_;
 

@@ -113,6 +113,10 @@ void InputTransition::connectionAdded(Connection *connection)
 
 bool InputTransition::isEnabled() const
 {
+    if(connections_.empty()) {
+        return true;
+    }
+
     if(forwarded_) {
         APEX_DEBUG_CERR <<"not enabled because already forwarded" << std::endl;
         return false;

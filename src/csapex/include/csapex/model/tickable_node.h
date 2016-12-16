@@ -14,6 +14,8 @@ public:
     bool doTick(NodeModifier &nm, Parameterizable &p);
     virtual bool canTick();
 
+    bool canProcess() const override;
+
     bool isTickEnabled() const;
     void setTickEnabled(bool tick);
 

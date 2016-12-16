@@ -56,7 +56,7 @@ void Connectable::reset()
 
 void Connectable::stop()
 {
-    notifyMessageProcessed();
+    //notifyMessageProcessed();
 }
 
 void Connectable::init()

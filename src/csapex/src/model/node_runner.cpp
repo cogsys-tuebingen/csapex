@@ -31,11 +31,17 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
                                                std::bind(&NodeWorker::checkParameters, worker),
                                                0,
                                                this);
-    try_process_ = std::make_shared<Task>(std::string("check ") + handle->getUUID().getFullName(),
-                                          [this]()
+    execute_ = std::make_shared<Task>(std::string("check ") + handle->getUUID().getFullName(),
+                                      [this]()
     {
-        if(worker_->tryProcess()) {
-            measureFrequency();
+        if(worker_->canExecute()) {
+            if(worker_->execute()) {
+                measureFrequency();
+            } else {
+                can_step_ = true;
+            }
+        } else {
+            can_step_ = true;
         }
     }, 0, this);
 
@@ -94,8 +100,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
     // node tasks
     observe(worker_->try_process_changed, [this]() {
-        try_process_->setPriority(worker_->getSequenceNumber());
-        schedule(try_process_);
+        scheduleProcess();
     });
 
     // parameter change
@@ -108,8 +113,8 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
     // generic task
     observe(worker_->getNodeHandle()->execution_requested, [this](std::function<void()> cb) {
-                schedule(std::make_shared<Task>("anonymous", cb, 0, this));
-            });
+        schedule(std::make_shared<Task>("anonymous", cb, 0, this));
+    });
 
     if(ticking_ && !tick_thread_running_) {
         // TODO: get rid of this!
@@ -137,6 +142,20 @@ void NodeRunner::scheduleTick()
         if(!stepping_ || can_step_) {
             can_step_ = false;
             schedule(tick_);
+        }
+    }
+}
+
+void NodeRunner::scheduleProcess()
+{
+    if(!paused_) {
+        bool source = worker_->getNodeHandle()->isSource();
+        if(!source || !stepping_ || can_step_) {
+            execute_->setPriority(worker_->getSequenceNumber());
+            if(worker_->canExecute()) {
+                can_step_ = false;
+                schedule(execute_);
+            }
         }
     }
 }
@@ -236,6 +255,7 @@ void NodeRunner::step()
     if(is_source_ && worker_->isProcessingEnabled()) {
         begin_step();
         can_step_ = true;
+        scheduleProcess();
     } else {
         can_step_ = false;
         end_step();

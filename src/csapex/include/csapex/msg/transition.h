@@ -45,6 +45,9 @@ public:
 
     std::vector<ConnectionPtr> getConnections() const;
 
+public:
+    slim_signal::Signal<void()> enabled_changed;
+
 protected:
     virtual void connectionAdded(Connection* connection);
     virtual void connectionRemoved(Connection* connection);

@@ -37,7 +37,8 @@ using namespace csapex;
 
 NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     : node_handle_(node_handle),
-      is_setup_(false), state_(State::IDLE),
+      is_setup_(false),
+      state_(State::IDLE), is_processing_(false),
       trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
       ticks_(0),
       guard_(-1)
@@ -63,6 +64,13 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
         if(!node->isIsolated()) {
 
             node->setup(*node_handle);
+
+            observe(node_handle_->getInputTransition()->enabled_changed, [this](){
+                updateState();
+            });
+            observe(node_handle_->getOutputTransition()->enabled_changed, [this](){
+                updateState();
+            });
 
             observe(node_handle_->getOutputTransition()->messages_processed, [this](){
                 outgoingMessagesProcessed();
@@ -108,9 +116,9 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 }
             });
 
-            auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
-            node_handle_->getInputTransition()->setActivationFunction(af);
-            node_handle_->getOutputTransition()->setActivationFunction(af);
+//            auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
+//            node_handle_->getInputTransition()->setActivationFunction(af);
+//            node_handle_->getOutputTransition()->setActivationFunction(af);
         }
 
         sendEvents(node_handle_->isActive());
@@ -137,7 +145,7 @@ NodeWorker::~NodeWorker()
     guard_ = 0xDEADBEEF;
 }
 
-NodeHandlePtr NodeWorker::getNodeHandle()
+NodeHandlePtr NodeWorker::getNodeHandle() const
 {
     return node_handle_;
 }
@@ -159,6 +167,11 @@ NodePtr NodeWorker::getNode() const
 
 NodeWorker::State NodeWorker::getState() const
 {
+    if(isEnabled()) {
+        return State::ENABLED;
+    } else if(is_processing_) {
+        return State::PROCESSING;
+    }
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
     return state_;
 }
@@ -171,7 +184,7 @@ std::shared_ptr<Profiler> NodeWorker::getProfiler()
 bool NodeWorker::isEnabled() const
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-    return state_ == State::ENABLED;
+    return getNodeHandle()->getInputTransition()->isEnabled() &&  getNodeHandle()->getOutputTransition()->isEnabled();
 }
 bool NodeWorker::isIdle() const
 {
@@ -181,7 +194,7 @@ bool NodeWorker::isIdle() const
 bool NodeWorker::isProcessing() const
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-    return state_ == State::PROCESSING;
+    return is_processing_;
 }
 bool NodeWorker::isFired() const
 {
@@ -192,23 +205,16 @@ bool NodeWorker::isFired() const
 void NodeWorker::setState(State state)
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-    switch(state) {
-    case State::IDLE:
-        apex_assert_hard(state_ == State::PROCESSING || state_ == State::ENABLED || state_ == State::IDLE);
-        break;
-    case State::ENABLED:
-        apex_assert_hard(state_ == State::IDLE || state_ == State::ENABLED);
-        break;
-    case State::FIRED:
-        apex_assert_hard(state_ == State::ENABLED);
-        break;
-    case State::PROCESSING:
-        apex_assert_hard(state_ == State::FIRED);
-        break;
-
-    default:
-        break;
-    }
+//    switch(state) {
+//    case State::IDLE:
+//        apex_assert_hard(is_processing_ || isEnabled() || state_ == State::IDLE);
+//        break;
+//    case State::FIRED:
+//        apex_assert_hard(isEnabled());
+//        break;
+//    default:
+//        break;
+//    }
 
     state_ = state;
 }
@@ -239,6 +245,9 @@ void NodeWorker::setProcessingEnabled(bool e)
 
 bool NodeWorker::canProcess() const
 {
+    if(isProcessing()) {
+        return false;
+    }
     if(auto generator = std::dynamic_pointer_cast<GeneratorNode>(node_handle_->getNode().lock())) {
         if(!generator->canProcess()) {
             return false;
@@ -331,10 +340,11 @@ void NodeWorker::killExecution()
 
 
 
-void NodeWorker::startProcessingMessages()
+bool NodeWorker::startProcessingMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(state_ == State::ENABLED);
+    apex_assert_hard(isEnabled());
+    apex_assert_hard(!is_processing_);
 
     node_handle_->getInputTransition()->forwardMessages();
 
@@ -352,7 +362,7 @@ void NodeWorker::startProcessingMessages()
     apex_assert_hard(state_ == State::FIRED);
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
     apex_assert_hard(canProcess());
-    setState(State::PROCESSING);
+    is_processing_ = true;
 
     // everything has a message here
 
@@ -413,7 +423,7 @@ void NodeWorker::startProcessingMessages()
         }
     }
 
-    apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
+//    apex_assert_hard(isProcessing());
     node_handle_->getOutputTransition()->clearBuffer();
 
     NodePtr node = node_handle_->getNode().lock();
@@ -423,7 +433,7 @@ void NodeWorker::startProcessingMessages()
     node_handle_->getInputTransition()->notifyMessageRead();
 
     if(!node) {
-        return;
+        return false;
     }
 
     lock.lock();
@@ -490,7 +500,7 @@ void NodeWorker::startProcessingMessages()
             forwardMessages(false);
             signalMessagesProcessed();
         }
-        return;
+        return false;
     }
 
 
@@ -543,6 +553,7 @@ void NodeWorker::startProcessingMessages()
         triggerTryProcess();
     }
 
+    return true;
 }
 
 void NodeWorker::finishGenerator()
@@ -577,7 +588,7 @@ void NodeWorker::finishGenerator()
 
 void NodeWorker::finishProcessing()
 {
-    if(getState() == State::PROCESSING) {
+    if(isProcessing()) {
         signalExecutionFinished();
         forwardMessages(true);
         signalMessagesProcessed();
@@ -599,6 +610,8 @@ void NodeWorker::signalMessagesProcessed(bool processing_aborted)
 {
     setState(State::IDLE);
 
+    is_processing_ = false;
+
     if(processing_aborted || node_handle_->isSink() || (current_exec_mode_ && current_exec_mode_.is_initialized() && current_exec_mode_.get() == ExecutionMode::PIPELINING)) {
         APEX_DEBUG_TRACE getNode()->ainfo << "notify " << getUUID() <<", sink: " << node_handle_->isSink() << ", mode: " << (int) current_exec_mode_.get() << std::endl;
         node_handle_->getInputTransition()->notifyMessageProcessed();
@@ -611,7 +624,7 @@ void NodeWorker::signalMessagesProcessed(bool processing_aborted)
 
 void NodeWorker::forwardMessages(bool send_parameters)
 {
-    apex_assert_hard(getState() == NodeWorker::State::PROCESSING);
+    apex_assert_hard(isProcessing());
 
     if(!node_handle_->isSink()) {
         if(send_parameters) {
@@ -635,8 +648,7 @@ void NodeWorker::activateOutput()
 
     bool send_parameters = !has_marker;
 
-    apex_assert_hard(getState() == NodeWorker::State::PROCESSING ||
-                     getState() == NodeWorker::State::IDLE);
+    apex_assert_hard(isProcessing() || isIdle());
     if(send_parameters) {
         publishParameters();
     }
@@ -709,7 +721,7 @@ void NodeWorker::updateTransitionConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    if(state_ == State::IDLE || state_ == State::ENABLED) {
+    if(state_ == State::IDLE || isEnabled()) {
         node_handle_->getInputTransition()->updateConnections();
         node_handle_->getOutputTransition()->updateConnections();
     }
@@ -719,104 +731,33 @@ void NodeWorker::updateState()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    if(state_ != State::IDLE && state_ != State::ENABLED) {
+    if(state_ != State::IDLE && !isEnabled()) {
         return;
     }
     updateTransitionConnections();
 
-    InputTransition* transition_in_ = node_handle_->getInputTransition();
-    OutputTransition* transition_out_ = node_handle_->getOutputTransition();
-
-    if(!transition_out_->isEnabled()) {
-        if(state_ == State::ENABLED) {
-            setState(State::IDLE);
-        }
-        return;
-    }
-
-    if(transition_in_->isEnabled()) {
-        setState(State::ENABLED);
+    if(isEnabled()) {
+        triggerTryProcess();
     } else {
         setState(State::IDLE);
-        return;
     }
 }
 
-bool NodeWorker::tryProcess()
+bool NodeWorker::canExecute()
 {
-    APEX_DEBUG_TRACE getNode()->ainfo << "try process" << std::endl;
-
-    APEX_DEBUG_TRACE {
-        getNode()->ainfo << "try to  process" << std::endl;
-        getNode()->ainfo << "enabled: " << isEnabled() << ", process:" << canProcess() << ", state: " << (int) getState() << std::endl;
-        getNode()->ainfo << "receive:" << canReceive() << " / send: " << canSend() << std::endl;
-        getNode()->ainfo << "incoming message connections:" << std::endl;
-        for(ConnectionPtr c : node_handle_->getInputTransition()->getConnections()) {
-            getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
-        }
-        getNode()->ainfo << "outgoing message connections:" << std::endl;
-        for(ConnectionPtr c : node_handle_->getOutputTransition()->getConnections()) {
-            getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
-        }
-        getNode()->ainfo << "outputs:" << std::endl;
-        for(UUID uid : node_handle_->getOutputTransition()->getOutputs()) {
-            OutputPtr o =node_handle_->getOutputTransition()->getOutput(uid);
-            getNode()->ainfo << "- " << o->getUUID() << ": " << (int) o->getState() << std::endl;
-        }
-        getNode()->ainfo << "event connections:" << std::endl;
-        for(EventPtr e : node_handle_->getExternalEvents()){
-            for(ConnectionPtr c : e->getConnections()) {
-                getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
-            }
-        }
-        getNode()->ainfo << "slot connections:" << std::endl;
-        for(SlotPtr s : node_handle_->getExternalSlots()){
-            for(ConnectionPtr c : s->getConnections()) {
-                getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
-            }
-        }
-    }
-    updateState();
     if(isEnabled() && canProcess()) {
-        apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-
-        startProcessingMessages();
         return true;
-
     } else {
-        APEX_DEBUG_TRACE {
-            getNode()->ainfo << "cannot process" << std::endl;
-            getNode()->ainfo << "enabled: " << isEnabled() << ", process:" << canProcess() << ", state: " << (int) getState() << std::endl;
-            getNode()->ainfo << "receive:" << canReceive() << " / send: " << canSend() << std::endl;
-            getNode()->ainfo << "incoming message connections:" << std::endl;
-            for(ConnectionPtr c : node_handle_->getInputTransition()->getConnections()) {
-                getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
-            }
-            getNode()->ainfo << "outgoing message connections:" << std::endl;
-            for(ConnectionPtr c : node_handle_->getOutputTransition()->getConnections()) {
-                getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
-            }
-            getNode()->ainfo << "outputs:" << std::endl;
-            for(UUID uid : node_handle_->getOutputTransition()->getOutputs()) {
-                OutputPtr o =node_handle_->getOutputTransition()->getOutput(uid);
-                getNode()->ainfo << "- " << o->getUUID() << ": " << (int) o->getState() << std::endl;
-            }
-            getNode()->ainfo << "event connections:" << std::endl;
-            for(EventPtr e : node_handle_->getExternalEvents()){
-                for(ConnectionPtr c : e->getConnections()) {
-                    getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
-                }
-            }
-            getNode()->ainfo << "slot connections:" << std::endl;
-            for(SlotPtr s : node_handle_->getExternalSlots()){
-                for(ConnectionPtr c : s->getConnections()) {
-                    getNode()->ainfo << "- " << *c << ": " << (int) c->getState() << std::endl;
-                }
-            }
-        }
+        return false;
     }
+}
 
-    return false;
+bool NodeWorker::execute()
+{
+    apex_assert_hard(canExecute());
+    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+
+    return startProcessingMessages();
 }
 
 
@@ -911,8 +852,7 @@ void NodeWorker::sendMessages(bool ignore_sink)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    apex_assert_hard(getState() == State::PROCESSING ||
-                     getState() == State::IDLE);
+    apex_assert_hard(isProcessing() || isIdle());
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
     //tokens are activated if the node is active.
@@ -956,10 +896,9 @@ bool NodeWorker::tick()
     bool has_ticked = false;
 
     if(isProcessingEnabled() && tickable->isTickEnabled()) {
-        auto state = getState();
-        if(state == State::IDLE || state == State::ENABLED) {
+        if(isIdle() || isEnabled()) {
             if(tickable->canTick()) {
-                if(state == State::ENABLED) {
+                if(isEnabled()) {
                     setState(State::IDLE);
                 }
 
@@ -971,13 +910,9 @@ bool NodeWorker::tick()
 
                     {
                         std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-                        auto state = getState();
-                        apex_assert_hard(state == State::IDLE || state == State::ENABLED);
-                        if(state == State::IDLE) {
-                            setState(State::ENABLED);
-                        }
+                        apex_assert_hard(isIdle() || isEnabled());
                         setState(State::FIRED);
-                        setState(State::PROCESSING);
+                        is_processing_ = true;
                     }
                     node_handle_->getOutputTransition()->clearBuffer();
 
@@ -1011,6 +946,7 @@ bool NodeWorker::tick()
 
                     finishTimer(timer);
 
+                    is_processing_ = false;
                     setState(State::IDLE);
                 }
             }
@@ -1068,8 +1004,8 @@ void NodeWorker::connectConnector(ConnectablePtr c)
             });
         }));
         port_connections_[c.get()].emplace_back(event->message_processed.connect([this](const ConnectablePtr&) {
-                                                    triggerTryProcess();
-                                                }));
+            triggerTryProcess();
+        }));
 
     } else if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(c)) {
         SlotWeakPtr slot_w = slot;
