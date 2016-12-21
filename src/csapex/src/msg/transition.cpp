@@ -55,10 +55,6 @@ void Transition::reset()
 {
 }
 
-void Transition::updateConnections()
-{
-}
-
 
 void Transition::checkIfEnabled()
 {

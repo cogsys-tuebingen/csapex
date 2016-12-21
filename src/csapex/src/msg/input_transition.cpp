@@ -107,8 +107,6 @@ void InputTransition::connectionAdded(Connection *connection)
     if(needs_message) {
         connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
     }
-
-    updateConnections();
 }
 
 bool InputTransition::isEnabled() const
@@ -229,7 +227,6 @@ void InputTransition::forwardMessages()
         apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
 
 
-        updateConnections();
         apex_assert_hard(connections_.empty() || !areAllConnections(Connection::State::READ));
 
         for(auto pair : inputs_) {

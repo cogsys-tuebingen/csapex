@@ -425,7 +425,7 @@ void NodeBox::updateFrequencyInformation()
         const Rate& rate = nh->getRate();
         double f = rate.getEffectiveFrequency();
         std::stringstream info;
-        info << "<i><b>" << std::setprecision(2) << f << "Hz</b></i>";
+        info << "<i><b>" << std::setprecision(4) << f << "Hz</b></i>";
         info_frequency->setText(info.str().c_str());
     }
 }

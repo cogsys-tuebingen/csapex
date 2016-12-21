@@ -183,7 +183,6 @@ std::shared_ptr<Profiler> NodeWorker::getProfiler()
 
 bool NodeWorker::isEnabled() const
 {
-    std::unique_lock<std::recursive_mutex> lock(state_mutex_);
     return getNodeHandle()->getInputTransition()->isEnabled() &&  getNodeHandle()->getOutputTransition()->isEnabled();
 }
 bool NodeWorker::isIdle() const
@@ -313,8 +312,6 @@ void NodeWorker::reset()
 
     node_handle_->getOutputTransition()->reset();
     node_handle_->getInputTransition()->reset();
-
-    updateTransitionConnections();
 }
 
 void NodeWorker::setProfiling(bool profiling)
@@ -336,6 +333,7 @@ bool NodeWorker::isProfiling() const
 void NodeWorker::killExecution()
 {
     // TODO: implement
+    triggerTryProcess();
 }
 
 
@@ -482,6 +480,7 @@ bool NodeWorker::startProcessingMessages()
     }
 
     current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
+    apex_assert_hard(current_exec_mode_);
 
     if(marker || !all_inputs_are_present) {
         if(!marker) {
@@ -544,10 +543,12 @@ bool NodeWorker::startProcessingMessages()
             throw Failure("Unknown exception caught in NodeWorker.");
         }
         if(sync) {
+            lock.unlock();
             finishProcessing();
         }
 
     } else {
+        lock.unlock();
         forwardMessages(true);
         signalMessagesProcessed();
         triggerTryProcess();
@@ -616,7 +617,7 @@ void NodeWorker::signalMessagesProcessed(bool processing_aborted)
         APEX_DEBUG_TRACE getNode()->ainfo << "notify " << getUUID() <<", sink: " << node_handle_->isSink() << ", mode: " << (int) current_exec_mode_.get() << std::endl;
         node_handle_->getInputTransition()->notifyMessageProcessed();
 
-        current_exec_mode_.reset();
+        //current_exec_mode_.reset();
     }
 
     messages_processed();
@@ -704,38 +705,21 @@ void NodeWorker::outgoingMessagesProcessed()
             APEX_DEBUG_TRACE getNode()->ainfo << "done" << std::endl;
             node_handle_->getInputTransition()->notifyMessageProcessed();
 
-            current_exec_mode_.reset();
+//            current_exec_mode_.reset();
         }
 
         APEX_DEBUG_TRACE getNode()->ainfo << "notify, try process" << std::endl;
         triggerTryProcess();
 
     } else {
-        APEX_DEBUG_TRACE getNode()->ainfo << "cannot notify, no current exec mode" << std::endl;
+        getNode()->ainfo << "cannot notify, no current exec mode" << std::endl;
     }
 
 }
 
-
-void NodeWorker::updateTransitionConnections()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-
-    if(state_ == State::IDLE || isEnabled()) {
-        node_handle_->getInputTransition()->updateConnections();
-        node_handle_->getOutputTransition()->updateConnections();
-    }
-}
 
 void NodeWorker::updateState()
 {
-    std::unique_lock<std::recursive_mutex> lock(sync);
-
-    if(state_ != State::IDLE && !isEnabled()) {
-        return;
-    }
-    updateTransitionConnections();
-
     if(isEnabled()) {
         triggerTryProcess();
     } else {
@@ -860,7 +844,9 @@ void NodeWorker::sendMessages(bool ignore_sink)
 
     bool has_sent_activator_message = false;
     if(!(ignore_sink && node_handle_->isSink())) {
+        lock.unlock();
         has_sent_activator_message = node_handle_->getOutputTransition()->sendMessages(active);
+        lock.lock();
     }
 
     sendEvents(active);
@@ -907,6 +893,7 @@ bool NodeWorker::tick()
                 if(node_handle_->getOutputTransition()->canStartSendingMessages()) {
 
                     current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
+                    apex_assert_hard(current_exec_mode_);
 
                     {
                         std::unique_lock<std::recursive_mutex> lock(state_mutex_);

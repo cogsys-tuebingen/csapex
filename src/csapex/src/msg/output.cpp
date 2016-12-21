@@ -36,6 +36,7 @@ void Output::removeOutputTransition()
 
 void Output::notifyMessageProcessed()
 {
+    setState(State::IDLE);
     message_processed(shared_from_this());
 }
 
@@ -189,11 +190,7 @@ void Output::publish()
     auto msg = getToken();
     apex_assert_hard(msg);
 
-    if(!connections_.empty()) {
-        for(auto connection : connections_) {
-            connection->setToken(msg);
-        }
-    } else {
-        notifyMessageProcessed();
+    for(auto connection : connections_) {
+        connection->setToken(msg);
     }
 }

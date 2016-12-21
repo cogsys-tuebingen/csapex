@@ -16,7 +16,6 @@ public:
     virtual bool commitMessages(bool is_activated) override;
     virtual bool hasMessage() override;
     virtual bool hasMarkerMessage() override;
-    virtual void nextMessage() override;
     virtual TokenPtr getToken() const override;
 
     virtual void disable() override;

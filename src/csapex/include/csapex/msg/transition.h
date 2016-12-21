@@ -25,8 +25,6 @@ public:
     void addConnection(ConnectionPtr connection);
     void removeConnection(ConnectionPtr connection);
 
-    void updateConnections();
-
     bool hasConnection() const;
     bool hasConnection(const ConnectionPtr& connection) const;
     bool hasConnection(Connection* connection) const;

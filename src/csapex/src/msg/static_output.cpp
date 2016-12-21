@@ -57,11 +57,6 @@ bool StaticOutput::hasMarkerMessage()
 }
 
 
-void StaticOutput::nextMessage()
-{
-    setState(State::IDLE);
-}
-
 TokenPtr StaticOutput::getToken() const
 {
     std::unique_lock<std::recursive_mutex> lock(message_mutex_);

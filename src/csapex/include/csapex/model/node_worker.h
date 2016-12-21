@@ -141,7 +141,6 @@ private:
     void activateOutput();
 
     void updateState();
-    void updateTransitionConnections();
 
     void finishGenerator();
     void finishProcessing();
@@ -160,6 +159,7 @@ private:
 
     NodeHandlePtr node_handle_;
 
+    mutable std::recursive_mutex current_exec_mode_mutex_;
     boost::optional<ExecutionMode> current_exec_mode_;
 
     bool is_setup_;

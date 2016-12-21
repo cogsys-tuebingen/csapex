@@ -151,11 +151,11 @@ void NodeRunner::scheduleProcess()
     if(!paused_) {
         bool source = worker_->getNodeHandle()->isSource();
         if(!source || !stepping_ || can_step_) {
-            execute_->setPriority(worker_->getSequenceNumber());
-            if(worker_->canExecute()) {
+            //execute_->setPriority(std::max<long>(0, worker_->getSequenceNumber()));
+            //if(worker_->canExecute()) {
                 can_step_ = false;
                 schedule(execute_);
-            }
+            //}
         }
     }
 }
