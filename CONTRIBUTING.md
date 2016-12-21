@@ -2,7 +2,7 @@
 
 We are glad about contributions in any way, shape, or form.
 If you have patches or new features, please consider creating a merge request.
-We are also always happy to hear about projectes in which you have implemented 
+We are also always happy to hear about projects in which you have implemented 
 your own plug-ins.
 
 
