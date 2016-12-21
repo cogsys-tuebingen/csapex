@@ -479,9 +479,6 @@ bool NodeWorker::startProcessingMessages()
         }
     }
 
-    current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
-    apex_assert_hard(current_exec_mode_);
-
     if(marker || !all_inputs_are_present) {
         if(!marker) {
             // no processing because a non-optional port has a NoMessage marker
@@ -514,6 +511,12 @@ bool NodeWorker::startProcessingMessages()
     bool sync = !node->isAsynchronous();
 
     if(isProcessingEnabled()) {
+        {
+            std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
+            current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
+            apex_assert_hard(current_exec_mode_);
+        }
+
         try {
             if(sync) {
                 node->process(*node_handle_, *node);
@@ -611,13 +614,28 @@ void NodeWorker::signalMessagesProcessed(bool processing_aborted)
 {
     setState(State::IDLE);
 
+    bool is_pipelining = false;
+    {
+        std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
+        is_pipelining = (current_exec_mode_ && current_exec_mode_.get() == ExecutionMode::PIPELINING);
+    }
+
     is_processing_ = false;
 
-    if(processing_aborted || node_handle_->isSink() || (current_exec_mode_ && current_exec_mode_.is_initialized() && current_exec_mode_.get() == ExecutionMode::PIPELINING)) {
-        APEX_DEBUG_TRACE getNode()->ainfo << "notify " << getUUID() <<", sink: " << node_handle_->isSink() << ", mode: " << (int) current_exec_mode_.get() << std::endl;
+    if(processing_aborted || node_handle_->isSink() || is_pipelining) {
+        if(ENABLE_TRACING){
+            std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
+            if(current_exec_mode_) {
+                getNode()->ainfo << "notify " << getUUID() <<", sink: " << node_handle_->isSink() << ", mode: " << (int) current_exec_mode_.get() << std::endl;
+            }
+        }
         node_handle_->getInputTransition()->notifyMessageProcessed();
 
-        //current_exec_mode_.reset();
+        if(processing_aborted) {
+            getNode()->awarn << "aborted processing" << std::endl;
+        }
+        //        std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
+        //            current_exec_mode_.reset();
     }
 
     messages_processed();
@@ -700,6 +718,7 @@ void NodeWorker::outgoingMessagesProcessed()
         generator->notifyMessagesProcessed();
     }
 
+    std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
     if(current_exec_mode_) {
         if(current_exec_mode_.get() == ExecutionMode::SEQUENTIAL) {
             APEX_DEBUG_TRACE getNode()->ainfo << "done" << std::endl;
@@ -712,9 +731,8 @@ void NodeWorker::outgoingMessagesProcessed()
         triggerTryProcess();
 
     } else {
-        getNode()->ainfo << "cannot notify, no current exec mode" << std::endl;
+        getNode()->aerr << "cannot notify, no current exec mode" << std::endl;
     }
-
 }
 
 
@@ -892,9 +910,6 @@ bool NodeWorker::tick()
 
                 if(node_handle_->getOutputTransition()->canStartSendingMessages()) {
 
-                    current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
-                    apex_assert_hard(current_exec_mode_);
-
                     {
                         std::unique_lock<std::recursive_mutex> lock(state_mutex_);
                         apex_assert_hard(isIdle() || isEnabled());
@@ -912,6 +927,11 @@ bool NodeWorker::tick()
                         interval_start(this, TICK, timer->root);
                     }
 
+                    {
+                        std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
+                        current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
+                        apex_assert_hard(current_exec_mode_);
+                    }
 
                     has_ticked = tickable->doTick(*node_handle_, *node);
 
@@ -929,6 +949,10 @@ bool NodeWorker::tick()
                         ticked();
 
                         ++ticks_;
+
+                    } else {
+                        std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
+                        current_exec_mode_.reset();
                     }
 
                     finishTimer(timer);

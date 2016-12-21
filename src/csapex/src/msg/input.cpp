@@ -203,6 +203,6 @@ void Input::notifyMessageAvailable(Connection* connection)
     if(!transition_) {
         setToken(connection->readToken());
         connection->setTokenProcessed();
-        this causes problems.....
+        //this causes problems.....
     }
 }

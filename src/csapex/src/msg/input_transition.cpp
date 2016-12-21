@@ -220,6 +220,10 @@ void InputTransition::forwardMessages()
 {
     processed_ = false;
 
+    if(forwarded_) {
+        return;
+    }
+
     if(hasConnection()) {
         apex_assert_hard(!forwarded_);
 
