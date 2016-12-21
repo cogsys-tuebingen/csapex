@@ -290,6 +290,11 @@ bool GenericState::hasParameter(const std::string& name) const
 {
     auto pos = param_valid_name_cache.find(name);
     if(pos == param_valid_name_cache.end()) {
+        auto persistent_pos = persistent.find(name);
+        if(persistent_pos != persistent.end()) {
+            return true;
+        }
+
         return false;
     }
 
