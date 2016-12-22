@@ -225,7 +225,7 @@ Input* SubgraphNode::createVariadicInput(TokenDataConstPtr type, const std::stri
 InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional)
 {
     InputPtr input = node_handle_->addInternalInput(type, internal_uuid, label, optional);
-    input->setVirtual(true);
+    input->setEssential(true);
 
     transition_relay_in_->addInput(input);
 
@@ -296,7 +296,7 @@ Output* SubgraphNode::createVariadicOutput(TokenDataConstPtr type, const std::st
 OutputPtr SubgraphNode::createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     OutputPtr output = node_handle_->addInternalOutput(type, internal_uuid, label);
-    output->setVirtual(true);
+    output->setEssential(true);
 
     transition_relay_out_->addOutput(output);
 
@@ -377,7 +377,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
 SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
 {
     SlotPtr slot = node_handle_->addInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), internal_uuid, label, callback);
-    slot->setVirtual(true);
+    slot->setEssential(true);
 
     slot->connectionInProgress.connect(internalConnectionInProgress);
 
@@ -443,7 +443,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
 EventPtr SubgraphNode::createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     EventPtr event = node_handle_->addInternalEvent(type, internal_uuid, label);
-    event->setVirtual(true);
+    event->setEssential(true);
 
     event->connectionInProgress.connect(internalConnectionInProgress);
 

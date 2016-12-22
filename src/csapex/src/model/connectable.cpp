@@ -23,6 +23,7 @@ Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
       owner_(owner),
       count_(0), seq_no_(-1),
       virtual_(false),
+      essential_(false),
       enabled_(true)
 {
     init();
@@ -36,6 +37,16 @@ bool Connectable::isVirtual() const
 void Connectable::setVirtual(bool _virtual)
 {
     virtual_ = _virtual;
+}
+
+bool Connectable::isEssential() const
+{
+    return essential_;
+}
+
+void Connectable::setEssential(bool essential)
+{
+    essential_ = essential;
 }
 
 void Connectable::notifyMessageProcessed()

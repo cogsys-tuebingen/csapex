@@ -32,6 +32,8 @@ public: /* API */
 
     virtual void setupParameters(Parameterizable& parameters);
 
+    virtual bool canProcess() const;
+
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters, Continuation continuation);
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
     virtual void process();
@@ -52,6 +54,9 @@ public: /* API */
     virtual void stateChanged();
 
     virtual void getProperties(std::vector<std::string>& properties) const;
+
+protected:
+    void yield() const;
 
 public:
     mutable StreamRelay adebug;

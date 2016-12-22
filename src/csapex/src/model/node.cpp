@@ -11,6 +11,8 @@
 #include <csapex/utility/assert.h>
 #include <csapex/core/settings.h>
 #include <csapex/model/generic_state.h>
+#include <csapex/msg/output_transition.h>
+#include <csapex/msg/input_transition.h>
 
 /// SYSTEM
 #include <iostream>
@@ -69,6 +71,21 @@ bool Node::isAsynchronous() const
 bool Node::isIsolated() const
 {
     return false;
+}
+
+bool Node::canProcess() const
+{
+    if(!node_handle_->getOutputTransition()->hasConnection() && !node_handle_->getInputTransition()->hasConnection()) {
+        // by default, nodes without any synchronous ports should not be processed.
+        return false;
+    } else {
+        return true;
+    }
+}
+
+void Node::yield() const
+{
+    node_handle_->might_be_enabled();
 }
 
 void Node::process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters,

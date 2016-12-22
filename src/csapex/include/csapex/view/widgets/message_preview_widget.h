@@ -23,10 +23,6 @@ public:
 
     virtual void setToken(TokenPtr message) override;
 
-    virtual bool isVirtual() const {
-        return true;
-    }
-
     void detach();
 
 private:

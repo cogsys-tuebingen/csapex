@@ -777,6 +777,7 @@ void CsApexWindow::updatePluginIgnored(const QObject* &action)
 void CsApexWindow::tick()
 {
     cmd_dispatcher_->executeLater();
+    QApplication::processEvents();
 }
 
 void CsApexWindow::closeEvent(QCloseEvent* event)

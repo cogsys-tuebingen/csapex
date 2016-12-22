@@ -372,7 +372,7 @@ std::set<graph::Vertex *> Graph::findVerticesThatNeedMessages()
             break;
         }
         for(const ConnectionPtr c : v->getNodeHandle()->getOutputTransition()->getConnections()) {
-            if(c->to()->isVirtual()) {
+            if(c->to()->isEssential()) {
                 vertices_that_need_messages.insert(v.get());
                 break;
             }

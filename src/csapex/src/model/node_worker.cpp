@@ -247,11 +247,10 @@ bool NodeWorker::canProcess() const
     if(isProcessing()) {
         return false;
     }
-    if(auto generator = std::dynamic_pointer_cast<GeneratorNode>(node_handle_->getNode().lock())) {
-        if(!generator->canProcess()) {
-            return false;
-        }
+    if(!getNode()->canProcess()) {
+        return false;
     }
+
     return canReceive() && canSend();
 }
 
@@ -436,6 +435,13 @@ bool NodeWorker::startProcessingMessages()
 
     lock.lock();
 
+    {
+        std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
+        current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
+        apex_assert_hard(current_exec_mode_);
+    }
+
+
     if(!activity_modifiers.empty()) {
         bool activate = false;
         bool deactivate = false;
@@ -510,13 +516,7 @@ bool NodeWorker::startProcessingMessages()
 
     bool sync = !node->isAsynchronous();
 
-    if(isProcessingEnabled()) {
-        {
-            std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
-            current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
-            apex_assert_hard(current_exec_mode_);
-        }
-
+    if(isProcessingEnabled()) {        
         try {
             if(sync) {
                 node->process(*node_handle_, *node);

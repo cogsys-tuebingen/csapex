@@ -47,6 +47,9 @@ public:
     bool isVirtual() const;
     void setVirtual(bool _virtual);
 
+    bool isEssential() const;
+    void setEssential(bool essential);
+
     virtual void addConnection(ConnectionPtr connection);
     virtual void fadeConnection(ConnectionPtr connection);
 
@@ -140,6 +143,7 @@ protected:
     int seq_no_;
 
     bool virtual_;
+    bool essential_;
 
 private:
     std::atomic<bool> enabled_;

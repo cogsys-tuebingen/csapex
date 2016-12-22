@@ -122,10 +122,20 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
     if(connections.empty()) {
         return nullptr;
     }
+
+    Meta::Ptr removeAll(new Meta(graph_uuid, "Remove All Connections", true));
+
     apex_assert_hard(connections.size() == 1);
-    OutputPtr output = input->getSource();
-    Command::Ptr cmd(new DeleteConnection(graph_uuid, output.get(), input));
-    return cmd;
+    for(ConnectionPtr connection : input->getConnections()) {
+        OutputPtr output = connection->from();
+        if(!output->isVirtual() && !input->isVirtual()) {
+            Command::Ptr removeThis(new DeleteConnection(graph_uuid, output.get(), input));
+            removeAll->add(removeThis);
+        }
+    }
+
+
+    return removeAll;
 }
 
 Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* connection) {
@@ -139,8 +149,10 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 
     for(ConnectionPtr connection : output->getConnections()) {
         InputPtr input = connection->to();
-        Command::Ptr removeThis(new DeleteConnection(graph_uuid, output, input.get()));
-        removeAll->add(removeThis);
+        if(!output->isVirtual() && !input->isVirtual()) {
+            Command::Ptr removeThis(new DeleteConnection(graph_uuid, output, input.get()));
+            removeAll->add(removeThis);
+        }
     }
 
     return removeAll;

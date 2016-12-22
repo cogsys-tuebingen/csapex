@@ -14,7 +14,6 @@ public:
 
     virtual void getProperties(std::vector<std::string>& properties) const override;
 
-    virtual bool canProcess() const;
     virtual bool isDoneProcessing() const = 0;
 
 public:
