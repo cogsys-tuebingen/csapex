@@ -118,12 +118,11 @@ void SubgraphNode::deactivation()
 
 bool SubgraphNode::canProcess() const
 {
-    if(transition_relay_out_->canStartSendingMessages()) {
-        return true;
-    } else {
+    if(!transition_relay_out_->canStartSendingMessages()) {
         APEX_DEBUG_TRACE ainfo << "cannot process, out relay cannot send" << std::endl;
         return false;
     }
+    return true;
 }
 
 bool SubgraphNode::isDoneProcessing() const
@@ -168,7 +167,6 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
 
     // can fail...
     apex_assert_hard(transition_relay_out_->areAllConnections(Connection::State::NOT_INITIALIZED));
-    apex_assert_hard(transition_relay_in_->areAllConnections(Connection::State::NOT_INITIALIZED));
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
 
     is_iterating_ = false;
@@ -193,9 +191,6 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
 
     if(transition_relay_out_->hasConnection()) {
         transition_relay_out_->sendMessages(node_handle_->isActive());
-    } else {
-
-        finishSubgraph();
     }
 }
 
@@ -668,11 +663,7 @@ void SubgraphNode::finishSubgraph()
     is_iterating_ = false;
     has_sent_current_iteration_ = false;
 
-    if(node_handle_->isSource()) {
-        notifySubgraphHasProducedTokens();
-    } else {
-        notifySubgraphProcessed();
-    }
+    notifySubgraphProcessed();
 }
 
 
@@ -694,8 +685,7 @@ void SubgraphNode::notifySubgraphHasProducedTokens()
 void SubgraphNode::sendCurrentIteration()
 {
     apex_assert_hard(transition_relay_in_->isEnabled());
-    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-
+    
     APEX_DEBUG_TRACE ainfo << "forward_messages" << std::endl;
     transition_relay_in_->forwardMessages();
 

@@ -341,6 +341,7 @@ bool NodeWorker::startProcessingMessages()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     apex_assert_hard(isEnabled());
+    apex_assert_hard(canProcess());
     apex_assert_hard(!is_processing_);
 
     node_handle_->getInputTransition()->forwardMessages();
@@ -355,10 +356,8 @@ bool NodeWorker::startProcessingMessages()
     }
     setState(State::FIRED);
 
-
-    apex_assert_hard(state_ == State::FIRED);
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-    apex_assert_hard(canProcess());
+
     is_processing_ = true;
 
     // everything has a message here
@@ -630,10 +629,6 @@ void NodeWorker::signalMessagesProcessed(bool processing_aborted)
             }
         }
         node_handle_->getInputTransition()->notifyMessageProcessed();
-
-        if(processing_aborted) {
-            getNode()->awarn << "aborted processing" << std::endl;
-        }
         //        std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
         //            current_exec_mode_.reset();
     }
