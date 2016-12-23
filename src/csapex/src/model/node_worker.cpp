@@ -751,7 +751,10 @@ bool NodeWorker::canExecute()
 
 bool NodeWorker::execute()
 {
-    apex_assert_hard(canExecute());
+    if(!canExecute()) {
+        return false;
+    }
+
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
     return startProcessingMessages();

@@ -45,6 +45,7 @@ public:
     virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid) override;
     virtual void reset() override;
     virtual void stateChanged() override;
+    virtual void tearDown() override;
 
     virtual void activation() override;
     virtual void deactivation() override;

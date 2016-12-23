@@ -71,6 +71,11 @@ void SubgraphNode::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
     }
 }
 
+void SubgraphNode::tearDown()
+{
+    is_initialized_ = false;
+}
+
 void SubgraphNode::reset()
 {
     Node::reset();
@@ -118,11 +123,14 @@ void SubgraphNode::deactivation()
 
 bool SubgraphNode::canProcess() const
 {
+    if(!is_initialized_) {
+        return false;
+    }
     if(!transition_relay_out_->canStartSendingMessages()) {
         APEX_DEBUG_TRACE ainfo << "cannot process, out relay cannot send" << std::endl;
         return false;
     }
-    return true;
+    return Node::canProcess();
 }
 
 bool SubgraphNode::isDoneProcessing() const
@@ -161,9 +169,11 @@ void SubgraphNode::setupParameters(Parameterizable &params)
 }
 
 void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
-                    std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation)
+                           std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation)
 {
     continuation_ = continuation;
+
+    apex_assert_hard(is_initialized_);
 
     // can fail...
     apex_assert_hard(transition_relay_out_->areAllConnections(Connection::State::NOT_INITIALIZED));
@@ -174,18 +184,20 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
     is_subgraph_finished_ = false;
 
     for(InputPtr i : node_modifier.getMessageInputs()) {
-        TokenDataConstPtr m = msg::getMessage(i.get());
-        OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
+        if(msg::hasMessage(i.get())) {
+            TokenDataConstPtr m = msg::getMessage(i.get());
+            OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
-        if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
-            is_iterating_ = true;
-            iteration_count_ = m->nestedValueCount();
-            iteration_index_ = 1;
+            if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
+                is_iterating_ = true;
+                iteration_count_ = m->nestedValueCount();
+                iteration_index_ = 1;
 
-            msg::publish(o.get(), m->nestedValue(0));
+                msg::publish(o.get(), m->nestedValue(0));
 
-        } else {
-            msg::publish(o.get(), m);
+            } else {
+                msg::publish(o.get(), m);
+            }
         }
     }
 
@@ -244,7 +256,7 @@ void SubgraphNode::removeVariadicInput(InputPtr input)
 }
 
 RelayMapping SubgraphNode::addForwardingInput(const TokenDataConstPtr& type,
-                                       const std::string& label, bool optional)
+                                              const std::string& label, bool optional)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayout");
     UUID external_uuid = addForwardingInput(internal_uuid, type, label, optional);
@@ -316,7 +328,7 @@ void SubgraphNode::removeVariadicOutput(OutputPtr output)
 }
 
 RelayMapping SubgraphNode::addForwardingOutput(const TokenDataConstPtr& type,
-                                        const std::string& label)
+                                               const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
     UUID external_uuid = addForwardingOutput(internal_uuid, type, label);

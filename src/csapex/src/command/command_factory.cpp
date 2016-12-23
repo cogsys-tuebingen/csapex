@@ -69,7 +69,9 @@ CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>
     }
 
     for(ConnectionPtr c : connections) {
-        meta->add(std::make_shared<DeleteConnection>(graph_uuid, c->from().get(), c->to().get()));
+        if(!c->from()->isVirtual() && !c->to()->isVirtual()) {
+            meta->add(std::make_shared<DeleteConnection>(graph_uuid, c->from().get(), c->to().get()));
+        }
     }
     return meta;
 }
@@ -139,7 +141,9 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
 }
 
 Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* connection) {
+    apex_assert_hard(!output->isVirtual());
     InputPtr input = connection->to();
+    apex_assert_hard(!input->isVirtual());
     return Command::Ptr (new DeleteConnection(graph_uuid, output, input.get()));
 }
 

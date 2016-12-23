@@ -67,7 +67,6 @@ public:
     std::vector<NodeBox*> boxes();
     std::vector<NodeBox*> getSelectedBoxes() const;
     std::vector<UUID> getSelectedUUIDs() const;
-    CommandPtr deleteSelected();
 
     NodeBox* getBox(const csapex::UUID& node_id);
     MovableGraphicsProxyWidget* getProxy(const csapex::UUID& node_id);
@@ -171,6 +170,8 @@ public Q_SLOTS:
 
     void copySelected();
     void paste();
+
+    void deleteSelected();
 
     void groupSelected();
     void ungroupSelected();

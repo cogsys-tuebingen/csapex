@@ -453,7 +453,7 @@ void GraphView::updateSelection()
     }
 }
 
-Command::Ptr GraphView::deleteSelected()
+void GraphView::deleteSelected()
 {
     CommandFactory factory(graph_facade_.get());
 
@@ -465,7 +465,7 @@ Command::Ptr GraphView::deleteSelected()
         }
     }
 
-    return factory.deleteAllNodes(uuids);
+    view_core_.execute(factory.deleteAllNodes(uuids));
 }
 
 void GraphView::keyPressEvent(QKeyEvent* e)
