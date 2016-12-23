@@ -290,20 +290,22 @@ void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
 
 void GraphView::resizeEvent(QResizeEvent *event)
 {
-    scene_->setSceneRect(scene_->itemsBoundingRect());
+    //scene_->setSceneRect(scene_->itemsBoundingRect());
 
     QGraphicsView::resizeEvent(event);
 }
 
 void GraphView::scrollContentsBy(int dx, int dy)
 {
-    QRectF min_r = scene_->itemsBoundingRect();
+    QRectF min_r = item_bbox_;
 
     QPointF tl_view = mapToScene(QPoint(0, 0));
     QPointF br_view = mapToScene(QPoint(width(), height()));
 
-    double mx = std::abs(dx) + 10;
-    double my = std::abs(dy) + 10;
+    int grow = 50;
+
+    double mx = std::abs(dx) + grow;
+    double my = std::abs(dy) + grow;
 
     QPointF tl(std::min(tl_view.x() - mx, min_r.x()),
                std::min(tl_view.y() - my, min_r.y()));
@@ -982,6 +984,8 @@ void GraphView::addBox(NodeBox *box)
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
     }
+
+    invalidateCache();
 }
 
 void GraphView::removeBox(NodeBox *box)
@@ -1003,6 +1007,8 @@ void GraphView::removeBox(NodeBox *box)
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
     }
+
+    invalidateCache();
 }
 
 
@@ -1213,6 +1219,12 @@ void GraphView::movedBoxes(double dx, double dy)
     }
     view_core_.execute(meta);
 
+    invalidateCache();
+}
+
+void GraphView::invalidateCache()
+{
+    item_bbox_ = scene_->itemsBoundingRect();
     scene_->invalidateSchema();
 }
 

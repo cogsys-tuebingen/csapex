@@ -202,6 +202,8 @@ private:
 
     Snippet serializeSelection() const;
 
+    void invalidateCache();
+
 private:
     CsApexCore& core_;
     CsApexViewCore& view_core_;
@@ -230,6 +232,8 @@ private:
 
     int scalings_to_perform_;
     QTimer scalings_animation_timer_;
+
+    QRectF item_bbox_;
 
     QTimer scroll_animation_timer_;
     double scroll_offset_x_;
