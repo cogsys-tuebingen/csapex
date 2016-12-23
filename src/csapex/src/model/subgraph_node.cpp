@@ -204,6 +204,9 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
     if(transition_relay_out_->hasConnection()) {
         transition_relay_out_->sendMessages(node_handle_->isActive());
     }
+    if(transition_relay_in_->areMessagesForwarded()) {
+        finishSubgraph();
+    }
 }
 
 bool SubgraphNode::isAsynchronous() const

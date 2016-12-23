@@ -242,6 +242,9 @@ bool NodeRunner::isPaused() const
 void NodeRunner::setPause(bool pause)
 {
     paused_ = pause;
+    if(!paused_) {
+        scheduleProcess();
+    }
 }
 
 void NodeRunner::setSteppingMode(bool stepping)
