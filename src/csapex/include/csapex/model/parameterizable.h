@@ -152,9 +152,12 @@ private:
     {
         {
             std::unique_lock<std::recursive_mutex> lock(changed_params_mutex_);
-            param_updates_[name] = [this, name, value](){
-                doSetParameter(name, value);
-            };
+            bool change = getParameter(name)->setSilent(value);
+            if(change) {
+                param_updates_[name] = [this, name, value](){
+                    getParameter(name)->triggerChange();
+                };
+            }
         }
         parameters_changed();
     }
