@@ -46,7 +46,10 @@ bool Connectable::isEssential() const
 
 void Connectable::setEssential(bool essential)
 {
-    essential_ = essential;
+    if(essential != essential_) {
+        essential_ = essential;
+        essential_changed();
+    }
 }
 
 void Connectable::notifyMessageProcessed()

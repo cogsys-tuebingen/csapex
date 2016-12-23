@@ -90,6 +90,8 @@ public:
 public:
     slim_signal::Signal<void(bool)> enabled_changed;
 
+    slim_signal::Signal<void()> essential_changed;
+
     slim_signal::Signal<void(ConnectablePtr)> disconnected;
     slim_signal::Signal<void(ConnectablePtr)> connectionStart;
     slim_signal::Signal<void(ConnectablePtr,ConnectablePtr)> connectionInProgress;

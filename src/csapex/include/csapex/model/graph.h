@@ -128,6 +128,8 @@ protected:
     std::vector<graph::VertexPtr> vertices_;
     std::vector<ConnectionPtr> connections_;
 
+    std::map<Connection*, std::vector<slim_signal::ScopedConnection>> connection_observations_;
+
     std::set<graph::VertexPtr> sources_;
     std::set<graph::VertexPtr> sinks_;
 

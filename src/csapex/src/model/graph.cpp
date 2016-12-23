@@ -144,6 +144,12 @@ bool Graph::addConnection(ConnectionPtr connection)
     apex_assert_hard(connection);
     connections_.push_back(connection);
 
+    connection_observations_[connection.get()].push_back(connection->connection_changed.connect([this]() {
+        if(!in_transaction_) {
+            analyzeGraph();
+        }
+    }));
+
     if(!std::dynamic_pointer_cast<Event>(connection->from()) && !std::dynamic_pointer_cast<Slot>(connection->to())) {
         NodeHandle* n_from = findNodeHandleForConnector(connection->from()->getUUID());
         NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
@@ -172,6 +178,8 @@ bool Graph::addConnection(ConnectionPtr connection)
 void Graph::deleteConnection(ConnectionPtr connection)
 {
     apex_assert_hard(connection);
+
+    connection_observations_[connection.get()].clear();
 
     if(connection->isDetached()) {
         auto c = std::find(connections_.begin(), connections_.end(), connection);

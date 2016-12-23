@@ -419,9 +419,6 @@ bool NodeWorker::startProcessingMessages()
         }
     }
 
-//    apex_assert_hard(isProcessing());
-    node_handle_->getOutputTransition()->clearBuffer();
-
     NodePtr node = node_handle_->getNode().lock();
 
     lock.unlock();

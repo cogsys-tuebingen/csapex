@@ -85,6 +85,7 @@ public:
 
     slim_signal::Signal<void(bool)> source_enable_changed;
     slim_signal::Signal<void(bool)> sink_enabled_changed;
+    slim_signal::Signal<void()> connection_changed;
 
     slim_signal::Signal<void(Fulcrum*)> fulcrum_added;
     slim_signal::Signal<void(Fulcrum*,bool dropped)> fulcrum_moved;
