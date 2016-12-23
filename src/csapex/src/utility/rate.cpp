@@ -21,7 +21,7 @@ Rate::Rate()
 
 double Rate::getEffectiveFrequency() const
 {
-    if(real_ticks_.empty()) {
+    if(real_ticks_.size() <= 1) {
         return 0.0;
     }
 
