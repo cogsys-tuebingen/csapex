@@ -33,6 +33,9 @@
 
 using namespace csapex;
 
+#define sendNotificationStreamGraphio(args) \
+{ std::stringstream ss; ss << args; sendNotification(ss.str()); }
+
 GraphIO::GraphIO(SubgraphNode *graph, NodeFactory* node_factory)
     : graph_(graph), node_factory_(node_factory),
       position_offset_x_(0.0), position_offset_y_(0.0),
@@ -207,7 +210,7 @@ void GraphIO::saveNodes(YAML::Node &yaml, const std::vector<NodeHandle*>& nodes)
             serializeNode(yaml_node, node);
             yaml["nodes"].push_back(yaml_node);
         } catch(const std::exception& e) {
-            std::cerr << "cannot save state for node " << node->getUUID() << ": " << e.what() << std::endl;
+            sendNotificationStreamGraphio("cannot save state for node " << node->getUUID() << ": " << e.what());
             throw e;
         }
     }
@@ -286,7 +289,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
         deserializeNode(doc, node_handle);
 
     } catch(const std::exception& e) {
-        std::cerr << "cannot load state for box " << uuid << ": " << type2name(typeid(e)) << ", what=" << e.what() << std::endl;
+        sendNotificationStreamGraphio("cannot load state for box " << uuid << ": " << type2name(typeid(e)) << ", what=" << e.what());
     }
 }
 
@@ -345,7 +348,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             try {
                 loadConnection(connection);
             } catch(const std::exception& e) {
-                std::cerr << "cannot load connection: " << e.what() << std::endl;
+                sendNotificationStreamGraphio("cannot load connection: " << e.what());
             }
         }
     }
@@ -362,7 +365,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
             try {
                 loadFulcrum(fulcrum);
             } catch(const std::exception& e) {
-                std::cerr << "cannot load fulcrum: " << e.what() << std::endl;
+                sendNotificationStreamGraphio("cannot load fulcrum: " << e.what());
             }
         }
     }
@@ -444,13 +447,13 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
 
     ConnectablePtr from = graph_->findConnector(from_uuid);
     if(from == nullptr) {
-        std::cerr << "cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist." << std::endl;
+        sendNotificationStreamGraphio("cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist.");
         return;
     }
 
     ConnectablePtr to = graph_->findConnector(to_uuid);
     if(to == nullptr) {
-        std::cerr << "cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist." << std::endl;
+        sendNotificationStreamGraphio("cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist.");
         return;
     }
 
@@ -490,7 +493,7 @@ void GraphIO::loadConnection(ConnectablePtr from, const UUID& to_uuid, const std
 
         InputPtr in = std::dynamic_pointer_cast<Input>(target->getConnector(to_uuid));
         if(!in) {
-            std::cerr << "cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", input doesn't exist." << std::endl;
+            sendNotificationStreamGraphio("cannot load message connection from " << from->getUUID() << " to " << to_uuid << ", input doesn't exist.");
             return;
         }
 
@@ -506,9 +509,9 @@ void GraphIO::loadConnection(ConnectablePtr from, const UUID& to_uuid, const std
         }
 
     } catch(const std::exception& e) {
-        std::cerr << "cannot load connection: " << e.what() << std::endl;
+        sendNotificationStreamGraphio("cannot load connection: " << e.what());
     } catch(const Failure& e) {
-        std::cerr << "failure loading connection: " << e.what() << std::endl;
+        sendNotificationStreamGraphio("failure loading connection: " << e.what());
     }
 }
 
@@ -561,4 +564,9 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
 
         sub_graph_io.loadGraph(doc["subgraph"]);
     }
+}
+
+void GraphIO::sendNotification(const std::string &notification)
+{
+    graph_->notification(Notification(graph_->getAbsoluteUUID(), notification));
 }

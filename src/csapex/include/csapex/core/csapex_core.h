@@ -7,7 +7,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_export.h>
-#include <csapex/utility/notification.h>
+#include <csapex/utility/notifier.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/model/observer.h>
 
@@ -20,7 +20,7 @@ namespace csapex
 
 class Profiler;
 
-class CSAPEX_EXPORT CsApexCore : public Observer
+class CSAPEX_EXPORT CsApexCore : public Observer, public Notifier
 {
 public:
     CsApexCore(Settings& settings_, ExceptionHandler &handler);
@@ -72,8 +72,6 @@ public:
     slim_signal::Signal<void ()> loaded;
 
     slim_signal::Signal<void (bool)> paused;
-
-    slim_signal::Signal<void (Notification)> notification;
 
     slim_signal::Signal<void ()> begin_step;
     slim_signal::Signal<void ()> end_step;

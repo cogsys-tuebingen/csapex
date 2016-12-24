@@ -169,6 +169,7 @@ void CsApexCore::init()
 
         status_changed("loading node plugins");
         observe(node_factory_->loaded, status_changed);
+        observe(node_factory_->notification, notification);
         node_factory_->loadPlugins();
         observe(node_factory_->new_node_type, new_node_type);
 
@@ -259,7 +260,7 @@ void CsApexCore::boot()
                 plugin->boot(plugin_locator_.get());
             }
         } catch(const std::exception& e) {
-            std::cerr << "boot plugin " << path << " failed: " << e.what() << std::endl;
+            NOTIFICATION("boot plugin " << path << " failed: " << e.what());
         }
     }
 

@@ -5,6 +5,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/csapex_export.h>
+#include <csapex/utility/notifier.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
@@ -14,7 +15,7 @@
 
 namespace csapex {
 
-class CSAPEX_EXPORT Graph : public UUIDProvider
+class CSAPEX_EXPORT Graph : public UUIDProvider, public Notifier
 {
     friend class GraphIO;
     friend class GraphFacade;

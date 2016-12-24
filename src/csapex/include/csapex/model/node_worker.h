@@ -12,6 +12,7 @@
 #include <csapex/utility/notification.h>
 #include <csapex/model/execution_mode.h>
 #include <csapex/model/observer.h>
+#include <csapex/utility/notifier.h>
 
 /// SYSTEM
 #include <map>
@@ -27,7 +28,7 @@ namespace csapex {
 class Profiler;
 class Interval;
 
-class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer
+class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
 {
 public:
     enum ActivityType {
@@ -121,8 +122,6 @@ public:
 
     slim_signal::Signal<void(NodeWorker* worker)> start_profiling;
     slim_signal::Signal<void(NodeWorker* worker)> stop_profiling;
-
-    slim_signal::Signal<void(Notification)> notification;
 
     slim_signal::Signal<void()> messages_processed;
     slim_signal::Signal<void()> processRequested;

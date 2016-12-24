@@ -1100,7 +1100,7 @@ void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level
     }
 
     Notification message;
-    message.message = msg;
+    message << msg;
     message.auuid = getUUID().getAbsoluteUUID();
 
     message.error = error ? level : ErrorLevel::NONE;

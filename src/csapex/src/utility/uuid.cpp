@@ -179,7 +179,9 @@ UUID UUID::id() const
 {
     UUID res = *this;
     res.representation_.clear();
-    res.representation_.push_back(representation_.front());
+    if(!representation_.empty()) {
+        res.representation_.push_back(representation_.front());
+    }
     return res;
 }
 

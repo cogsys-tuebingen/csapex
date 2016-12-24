@@ -32,6 +32,8 @@ GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNode* graph, NodeHandle* 
     connections_.push_back(graph->vertex_removed.connect(
                                delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeRemovedHandler)));
 
+    connections_.push_back(graph->notification.connect(notification));
+
     if(parent_) {
         apex_assert_hard(graph_handle_);
 

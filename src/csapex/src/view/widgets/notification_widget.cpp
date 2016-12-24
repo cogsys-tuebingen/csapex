@@ -130,7 +130,11 @@ void NotificationWidget::setNotification(const Notification &notification)
     if(is_error) {
         QString s;
         QTextStream ss(&s);
-        ss << "<b>" << QString::fromStdString(notification_.auuid.getFullName()) << "</b>:<br /> " << QString::fromStdString(notification_.message);
+        ss << "<b>";
+        if(!notification_.auuid.empty()) {
+            ss << QString::fromStdString(notification_.auuid.getFullName()) << "</b>:<br /> ";
+        }
+        ss << QString::fromStdString(notification_.message.str());
         label_->setText(s);
 
         if(notification.error == ErrorState::ErrorLevel::ERROR) {

@@ -167,6 +167,7 @@ add_library(csapex_util SHARED
     src/utility/singleton.cpp
     src/utility/thread.cpp
     src/utility/rate.cpp
+    src/utility/notifier.cpp
     src/utility/type.cpp
     src/utility/uuid.cpp
     src/utility/uuid_provider.cpp
