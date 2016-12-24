@@ -975,11 +975,11 @@ void NodeWorker::checkParameters()
         for(auto pair : changed_params) {
             if(param::ParameterPtr p = pair.first.lock()) {
                 try {
-                    if(p->isEnabled()) {
+                    //if(p->isEnabled()) {
                         for(auto& cb : pair.second) {
                             cb(p.get());
                         }
-                    }
+                    //}
 
                 } catch(const std::exception& e) {
                     std::cerr << "parameter callback failed: " << e.what() << std::endl;
