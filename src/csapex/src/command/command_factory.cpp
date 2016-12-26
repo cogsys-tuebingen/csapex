@@ -120,14 +120,8 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Connectable* c)
 
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
 {
-    auto connections = input->getConnections();
-    if(connections.empty()) {
-        return nullptr;
-    }
-
     Meta::Ptr removeAll(new Meta(graph_uuid, "Remove All Connections", true));
 
-    apex_assert_hard(connections.size() == 1);
     for(ConnectionPtr connection : input->getConnections()) {
         OutputPtr output = connection->from();
         if(!output->isVirtual() && !input->isVirtual()) {

@@ -33,6 +33,11 @@ Node::~Node()
     guard_ = 0xDEADBEEF;
 }
 
+NodeHandle* Node::getNodeHandle() const
+{
+    return node_handle_;
+}
+
 void Node::initialize(NodeHandle *node_handle, const UUID& uuid)
 {
     uuid_ = uuid;

@@ -9,6 +9,7 @@
 #include <csapex/csapex_export.h>
 #include <csapex/utility/notification.h>
 #include <csapex/utility/slim_signal.hpp>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <unordered_map>
@@ -16,7 +17,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT GraphFacade
+class CSAPEX_EXPORT GraphFacade : public Observer
 {
 public:
     typedef std::shared_ptr<GraphFacade> Ptr;
@@ -109,7 +110,6 @@ private:
 
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> children_;
 
-    std::vector<slim_signal::Connection> connections_;
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
 
     std::map<const NodeHandle*, NodeWorkerPtr> node_workers_;

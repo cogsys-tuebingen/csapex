@@ -24,6 +24,8 @@ public:
     Node();
     virtual ~Node();
 
+    NodeHandle* getNodeHandle() const;
+
     UUID getUUID() const;
     virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid);
 

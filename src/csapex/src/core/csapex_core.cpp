@@ -147,6 +147,13 @@ void CsApexCore::setStatusMessage(const std::string &msg)
     status_changed(msg);
 }
 
+void CsApexCore::sendNotification(const std::string& msg, ErrorState::ErrorLevel error_level)
+{
+    Notification n(msg);
+    n.error = error_level;
+    notification(n);
+}
+
 void CsApexCore::init()
 {
     if(!init_) {

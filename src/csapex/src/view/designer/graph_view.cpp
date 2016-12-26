@@ -1419,8 +1419,8 @@ void GraphView::morphNode()
 
         command::Meta::Ptr morph = std::make_shared<command::Meta>(graph_facade_->getAbsoluteUUID(), "change node type");
 
-        CommandPtr delete_old = std::make_shared<command::DeleteNode>(graph_facade_->getAbsoluteUUID(), nh->getUUID());
-        morph->add(delete_old);
+        CommandFactory factory(graph_facade_.get());
+        morph->add(factory.deleteAllNodes({nh->getUUID()}));
 
         UUID new_uuid = graph_facade_->getGraph()->generateUUID(type);
         CommandPtr add_new = std::make_shared<command::AddNode>(graph_facade_->getAbsoluteUUID(),

@@ -51,6 +51,7 @@ public:
     void setEssential(bool essential);
 
     virtual void addConnection(ConnectionPtr connection);
+    virtual void removeConnection(Connectable* other_side);
     virtual void fadeConnection(ConnectionPtr connection);
 
     void setLabel(const std::string& label);
@@ -115,7 +116,6 @@ public:
      */
     virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
     virtual bool isConnectionPossible(Connectable* other_side) = 0;
-    virtual void removeConnection(Connectable* other_side) = 0;
     virtual void validateConnections();
     virtual void connectionMovePreview(ConnectablePtr other_side) = 0;
 
@@ -141,8 +141,8 @@ protected:
     TokenData::ConstPtr type_;
     std::vector<ConnectionPtr> connections_;
 
-    int count_;
-    int seq_no_;
+    std::atomic<int> count_;
+    std::atomic<int> seq_no_;
 
     bool virtual_;
     bool essential_;

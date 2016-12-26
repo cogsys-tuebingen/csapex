@@ -322,11 +322,27 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
     param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
     if(t) {
         Event* trigger = NodeModifier::addEvent(t->name());
-        NodeModifier::addSlot(t->name(), [t]() {
+        Slot* slot = NodeModifier::addSlot(t->name(), [t]() {
             t->trigger();
         }, false);
         node_->addParameterCallback(t, [trigger](param::Parameter*) {
             trigger->trigger();
+        });
+
+        param::TriggerParameterWeakPtr t_weak = t;
+        slot->connection_added.connect([this, slot, t_weak](ConnectionPtr) {
+            if(slot->getConnections().size() == 1) {
+                if(param::TriggerParameterPtr t = t_weak.lock()) {
+                    t->first_connect(t.get());
+                }
+            }
+        });
+        slot->connection_faded.connect([this, slot, t_weak](ConnectionPtr) {
+            if(slot->getConnections().empty()) {
+                if(param::TriggerParameterPtr t = t_weak.lock()) {
+                    t->last_disconnect(t.get());
+                }
+            }
         });
     }
 }
@@ -588,7 +604,6 @@ void NodeHandle::removeInput(Input* in)
 
 void NodeHandle::removeOutput(Output* out)
 {
-    
     std::vector<OutputPtr>::iterator it;
     for(it = external_outputs_.begin(); it != external_outputs_.end(); ++it) {
         if(it->get() == out) {
@@ -603,8 +618,8 @@ void NodeHandle::removeOutput(Output* out)
         external_outputs_.erase(it);
         
         disconnectConnector(output.get());
-        connector_removed(output);
-        
+        connector_removed(output);        
+
     } else {
         std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
     }

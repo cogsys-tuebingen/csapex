@@ -87,13 +87,7 @@ Port::~Port()
 bool Port::event(QEvent *e)
 {
     if (e->type() == QEvent::ToolTip) {
-        ConnectablePtr adaptee = adaptee_.lock();
-        if(!adaptee) {
-            return false;
-        }
-
         createToolTip();
-
     }
 
     return QWidget::event(e);
@@ -237,6 +231,7 @@ void Port::createToolTip()
     tooltip << ", Messages: " << adaptee->getCount();
     tooltip << ", Enabled: " << adaptee->isEnabled();
     tooltip << ", #: " << adaptee->sequenceNumber();
+    tooltip << ", use_count: " << adaptee.use_count() - 1; // -1 for the local variable
 
     if(InputPtr in = std::dynamic_pointer_cast<Input>(adaptee)) {
         tooltip << ", optional: " << in->isOptional();

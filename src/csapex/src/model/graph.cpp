@@ -160,11 +160,14 @@ bool Graph::addConnection(ConnectionPtr connection)
             graph::VertexPtr v_from = n_from->getVertex();
             graph::VertexPtr v_to = n_to->getVertex();
 
-            v_from->addChild(v_to);
-            v_to->addParent(v_from);
+            if(v_from && v_to) {
+                v_from->addChild(v_to);
+                v_to->addParent(v_from);
 
-            sources_.erase(v_to);
-            sinks_.erase(v_from);
+                sources_.erase(v_to);
+                sinks_.erase(v_from);
+            }
+
         }
     }
 
@@ -193,9 +196,6 @@ void Graph::deleteConnection(ConnectionPtr connection)
     auto in = connection->to();
 
     out->removeConnection(in.get());
-
-    out->fadeConnection(connection);
-    in->fadeConnection(connection);
 
     for(std::vector<ConnectionPtr>::iterator c = connections_.begin(); c != connections_.end();) {
         if(*connection == **c) {
@@ -736,8 +736,6 @@ ConnectionPtr Graph::getConnection(const UUID &from, const UUID &to)
             return connection;
         }
     }
-
-    std::cerr << "error: cannot get connection from " << from << " to " << to << std::endl;
 
     return nullptr;
 }

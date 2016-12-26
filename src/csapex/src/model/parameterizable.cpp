@@ -187,6 +187,23 @@ void Parameterizable::addPersistentParameter(const csapex::param::Parameter::Ptr
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     parameter_state_->addPersistentParameter(param);
 }
+void Parameterizable::removePersistentParameter(const csapex::param::Parameter::Ptr &param)
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    parameter_state_->removePersistentParameter(param);
+    triggerParameterSetChanged();
+}
+
+void Parameterizable::removePersistentParameters()
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    for(csapex::param::Parameter::Ptr param : parameter_state_->getPersistentParameters()) {
+        removeParameterCallbacks(param.get());
+    }
+
+    parameter_state_->removePersistentParameters();
+}
+
 
 void Parameterizable::addHiddenParameter(const csapex::param::Parameter::Ptr &param)
 {
@@ -218,6 +235,16 @@ void Parameterizable::removeTemporaryParameter(const csapex::param::Parameter::P
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     parameter_state_->removeTemporaryParameter(param);
     triggerParameterSetChanged();
+}
+
+void Parameterizable::removeTemporaryParameters()
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    for(csapex::param::Parameter::Ptr param : parameter_state_->getTemporaryParameters()) {
+        removeParameterCallbacks(param.get());
+    }
+
+    parameter_state_->removeTemporaryParameters();
 }
 
 
@@ -362,17 +389,6 @@ void Parameterizable::setParameterSetSilence(bool silent)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     parameter_state_->setParameterSetSilence(silent);
-}
-
-void Parameterizable::removeTemporaryParameters()
-{
-    std::unique_lock<std::recursive_mutex> lock(mutex_);
-    // TODO: handle callbacks!
-    for(csapex::param::Parameter::Ptr param : parameter_state_->getTemporaryParameters()) {
-        removeParameterCallbacks(param.get());
-    }
-
-    parameter_state_->removeTemporaryParameters();
 }
 
 void Parameterizable::triggerParameterSetChanged()

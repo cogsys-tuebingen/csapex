@@ -59,6 +59,8 @@ public:
     void settingsChanged();
     void setStatusMessage(const std::string& msg);
 
+    void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR);
+
 public:
     slim_signal::Signal<void ()> config_changed;
     slim_signal::Signal<void (const std::string& msg)> status_changed;

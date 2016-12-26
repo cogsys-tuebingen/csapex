@@ -72,17 +72,17 @@ void OutputTransition::addOutput(OutputPtr output)
             connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
         }
     });
-    output_signal_connections_[output].push_back(ca);
+    output_signal_connections_[output.get()].push_back(ca);
 
     auto cf = output->connection_faded.connect([this](const ConnectionPtr& connection) {
         removeConnection(connection);
     });
-    output_signal_connections_[output].push_back(cf);
+    output_signal_connections_[output.get()].push_back(cf);
 
     auto cp = output->message_processed.connect([this](const ConnectablePtr&) {
         tokenProcessed();
     });
-    output_signal_connections_[output].push_back(cp);
+    output_signal_connections_[output.get()].push_back(cp);
 
 //    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
 //        if(output->isEnabled()) {
@@ -97,10 +97,7 @@ void OutputTransition::removeOutput(OutputPtr output)
     output->removeOutputTransition();
 
     // disconnect signals
-    for(auto f : output_signal_connections_[output]) {
-        f.disconnect();
-    }
-    output_signal_connections_.erase(output);
+    output_signal_connections_.erase(output.get());
 
     // forget the output
     outputs_.erase(output->getUUID());

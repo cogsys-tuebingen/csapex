@@ -68,10 +68,13 @@ public:
 
 
     void addPersistentParameter(const csapex::param::ParameterPtr& param);
+    void removePersistentParameter(const csapex::param::ParameterPtr& param);
+    void removePersistentParameters();
 
     void addTemporaryParameter(const csapex::param::ParameterPtr& param);
     void addTemporaryParameter(const csapex::param::ParameterPtr& param, std::function<void(csapex::param::Parameter *)> cb);
     void removeTemporaryParameter(const csapex::param::ParameterPtr& param);
+    void removeTemporaryParameters();
 
     void setTemporaryParameters(const std::vector<csapex::param::ParameterPtr>& param);
     void setTemporaryParameters(const std::vector<csapex::param::ParameterPtr>& param, std::function<void(csapex::param::Parameter *)> cb);
@@ -132,7 +135,6 @@ public:
     void setParameterEnabled(const std::string& name, bool enabled);
 
     void setParameterSetSilence(bool silent);
-    void removeTemporaryParameters();
     void triggerParameterSetChanged();
 
     ChangedParameterList getChangedParameters();

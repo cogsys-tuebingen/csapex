@@ -937,7 +937,7 @@ bool NodeWorker::tick()
 
                         if(node_handle_->isSource()) {
                             // reset input transition on tick
-                            node_handle_->getInputTransition()->forwardMessages();
+                            //node_handle_->getInputTransition()->forwardMessages();
                         }
 
                         apex_assert_hard(guard_ == -1);

@@ -31,6 +31,8 @@ public:
     void removeParameter(csapex::param::ParameterPtr param);
 
     void addPersistentParameter(const csapex::param::ParameterPtr& param);
+    void removePersistentParameter(const csapex::param::ParameterPtr& param);
+    void removePersistentParameters();
 
     void addTemporaryParameter(const csapex::param::ParameterPtr& param);
     void removeTemporaryParameter(const csapex::param::ParameterPtr& param);

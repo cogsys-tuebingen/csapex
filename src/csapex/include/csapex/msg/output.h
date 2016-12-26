@@ -76,7 +76,6 @@ public:
     virtual void clearBuffer() = 0;
 
     virtual bool isConnectionPossible(Connectable* other_side) override;
-    virtual void removeConnection(Connectable* other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
 public:

@@ -14,7 +14,7 @@ using namespace csapex;
 using namespace command;
 
 DeleteConnector::DeleteConnector(const AUUID& parent_uuid, Connectable *_c)
-    : Command(parent_uuid), in(_c->canInput()), c(_c), c_uuid(c->getUUID())
+    : Command(parent_uuid), in(_c->canInput()), c_uuid(_c->getUUID())
 {
 }
 
@@ -31,45 +31,13 @@ std::string DeleteConnector::getDescription() const
 
 bool DeleteConnector::doExecute()
 {
-    NodeHandle* node_worker = getGraph()->findNodeHandleForConnector(c_uuid);
-
-    if(c->isConnected()) {
-        delete_connections = CommandFactory(getRoot(), graph_uuid).removeAllConnectionsCmd(c);
-
-        Command::executeCommand(delete_connections);
-    }
-
-    if(in) {
-        node_worker->removeInput(c->getUUID());
-    } else {
-        node_worker->removeOutput(c->getUUID());
-    }
-
-    return true;
-}
-
-bool DeleteConnector::doUndo()
-{
-    if(!refresh()) {
-        return false;
-    }
-
-    return false;
-}
-
-bool DeleteConnector::doRedo()
-{
-    return false;
-}
-
-bool DeleteConnector::refresh()
-{
     NodeHandle* node_handle = getGraph()->findNodeHandleForConnector(c_uuid);
 
     if(!node_handle) {
         return false;
     }
 
+    ConnectablePtr c;
     if(in) {
         c = node_handle->getInput(c_uuid);
     } else {
@@ -77,8 +45,29 @@ bool DeleteConnector::refresh()
     }
 
     apex_assert_hard(c);
+    if(c->isConnected()) {
+        delete_connections = CommandFactory(getRoot(), graph_uuid).removeAllConnectionsCmd(c);
+
+        Command::executeCommand(delete_connections);
+    }
+
+    if(in) {
+        node_handle->removeInput(c->getUUID());
+    } else {
+        node_handle->removeOutput(c->getUUID());
+    }
 
     return true;
+}
+
+bool DeleteConnector::doUndo()
+{
+    return false;
+}
+
+bool DeleteConnector::doRedo()
+{
+    return false;
 }
 
 

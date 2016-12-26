@@ -209,6 +209,15 @@ InputPtr Connection::to() const
 {
     return to_;
 }
+ConnectablePtr Connection::source() const
+{
+    return from_;
+}
+
+ConnectablePtr  Connection::target() const
+{
+    return to_;
+}
 
 int Connection::id() const
 {

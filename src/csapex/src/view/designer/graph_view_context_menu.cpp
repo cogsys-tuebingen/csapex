@@ -403,6 +403,16 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
     QAction* selectedItem = menu.exec(global_pos);
 
     if(selectedItem) {
-        handler[selectedItem]();
+        try {
+            handler[selectedItem]();
+
+        } catch(const csapex::Failure& af) {
+            view_.getViewCore().getCore().getExceptionHandler().handleAssertionFailure(af);
+
+        } catch(const std::exception& e) {
+            std::stringstream ss;
+            ss << "Context menu failed: " << e.what();
+            view_.getViewCore().getCore().sendNotification(ss.str());
+        }
     }
 }

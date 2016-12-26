@@ -13,6 +13,8 @@ using namespace csapex;
 
 ConnectionPtr DirectConnection::connect(OutputPtr from, InputPtr to)
 {
+    apex_assert_hard(from);
+    apex_assert_hard(to);
     apex_assert_hard(from->isConnectionPossible(to.get()));
     ConnectionPtr r(new DirectConnection(from, to));
     from->addConnection(r);
@@ -21,6 +23,8 @@ ConnectionPtr DirectConnection::connect(OutputPtr from, InputPtr to)
 }
 ConnectionPtr DirectConnection::connect(OutputPtr from, InputPtr to, int id)
 {
+    apex_assert_hard(from);
+    apex_assert_hard(to);
     apex_assert_hard(from->isConnectionPossible(to.get()));
     ConnectionPtr r(new DirectConnection(from, to, id));
     from->addConnection(r);

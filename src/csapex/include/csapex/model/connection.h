@@ -51,6 +51,10 @@ public:
 
     OutputPtr from() const;
     InputPtr to() const;
+
+    ConnectablePtr source() const;
+    ConnectablePtr target() const;
+
     int id() const;
 
     bool contains(Connectable* c) const;

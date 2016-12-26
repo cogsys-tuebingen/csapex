@@ -40,6 +40,11 @@ ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_
     parent->addChild(this);
 }
 
+ThreadPool::~ThreadPool()
+{
+    group_assignment_.clear();
+}
+
 
 bool ThreadPool::isThreadingEnabled() const
 {

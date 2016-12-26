@@ -100,7 +100,7 @@ private:
 
     std::vector<ParameterAdapterPtr> adapters_;
 
-    std::map<Connectable*, csapex::slim_signal::ScopedConnection> parameter_connections_;
+    std::map<param::Parameter*, std::vector<csapex::slim_signal::ScopedConnection>> parameter_connections_;
 
     QBoxLayout* wrapper_layout_;
 };

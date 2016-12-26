@@ -74,6 +74,8 @@ void NodeRunner::measureFrequency()
 void NodeRunner::reset()
 {
     worker_->reset();
+
+    scheduleProcess();
 }
 
 void NodeRunner::assignToScheduler(Scheduler *scheduler)
@@ -251,6 +253,9 @@ void NodeRunner::setSteppingMode(bool stepping)
 {
     stepping_ = stepping;
     can_step_ = false;
+    if(!stepping_) {
+        scheduleProcess();
+    }
 }
 
 void NodeRunner::step()

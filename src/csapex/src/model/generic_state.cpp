@@ -64,7 +64,9 @@ void GenericState::readYaml(const YAML::Node& node) {
 void GenericState::initializePersistentParameters()
 {
     for(const std::string& name : persistent) {
-        (*parameter_added)(params[name]);
+        param::ParameterPtr param = params[name];
+        param->setUUID(UUIDProvider::makeTypedUUID_forced(parent_uuid_, "param", param->name()));
+        (*parameter_added)(param);
     }
 }
 
@@ -121,22 +123,6 @@ void GenericState::setParameterSetSilence(bool silent)
     silent_ = silent;
 }
 
-void GenericState::removeTemporaryParameters()
-{
-    for(std::map<std::string,bool>::iterator it = temporary.begin(); it != temporary.end(); ++it) {
-        std::string name(it->first);
-        csapex::param::Parameter::Ptr p = getParameter(name);
-
-        // don't erase the param itself, remember the value for future!
-        // don't -> params.erase(params.find(name));
-        order.erase(std::find(order.begin(), order.end(), name));
-
-        (*parameter_removed)(p);
-    }
-
-    triggerParameterSetChanged();
-}
-
 void GenericState::triggerParameterSetChanged()
 {
     if(!silent_) {
@@ -169,6 +155,61 @@ void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &pa
 void GenericState::removeTemporaryParameter(const csapex::param::Parameter::Ptr &param)
 {
     removeParameter(param);
+
+    auto pos = temporary.find(param->name());
+    if(pos != temporary.end()) {
+        temporary.erase(pos);
+    }
+}
+
+void GenericState::removeTemporaryParameters()
+{
+    for(auto it = temporary.begin(); it != temporary.end(); ++it) {
+        std::string name(it->first);
+        csapex::param::Parameter::Ptr p = getParameter(name);
+
+        // don't erase the param itself, remember the value for future!
+        // don't -> params.erase(params.find(name));
+        order.erase(std::find(order.begin(), order.end(), name));
+
+        (*parameter_removed)(p);
+    }
+
+    temporary.clear();
+
+    triggerParameterSetChanged();
+}
+
+void GenericState::removePersistentParameter(const csapex::param::Parameter::Ptr &param)
+{
+    removeParameter(param);
+
+    auto pos = persistent.find(param->name());
+    if(pos != persistent.end()) {
+        persistent.erase(pos);
+    }
+}
+
+void GenericState::removePersistentParameters()
+{
+    for(const std::string& name : persistent) {
+        csapex::param::Parameter::Ptr p = getParameter(name);
+
+        int old_count = p.use_count();
+
+        removePersistentParameter(p);
+
+        if(p.use_count() == old_count) {
+            std::cerr << "could not removed the parameter " << name << std::endl;
+        }
+
+        p->removed(p);
+        (*parameter_removed)(p);
+    }
+
+    apex_assert_hard(persistent.empty());
+
+    triggerParameterSetChanged();
 }
 
 
