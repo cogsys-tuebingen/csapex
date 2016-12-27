@@ -23,6 +23,7 @@ Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
       owner_(owner),
       count_(0), seq_no_(-1),
       virtual_(false),
+      essential_(false),
       enabled_(true)
 {
     init();
@@ -36,6 +37,19 @@ bool Connectable::isVirtual() const
 void Connectable::setVirtual(bool _virtual)
 {
     virtual_ = _virtual;
+}
+
+bool Connectable::isEssential() const
+{
+    return essential_;
+}
+
+void Connectable::setEssential(bool essential)
+{
+    if(essential != essential_) {
+        essential_ = essential;
+        essential_changed();
+    }
 }
 
 void Connectable::notifyMessageProcessed()
@@ -56,7 +70,7 @@ void Connectable::reset()
 
 void Connectable::stop()
 {
-    notifyMessageProcessed();
+    //notifyMessageProcessed();
 }
 
 void Connectable::init()
@@ -171,28 +185,45 @@ void Connectable::setType(TokenData::ConstPtr type)
 
 TokenData::ConstPtr Connectable::getType() const
 {
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return type_;
 }
 
 int Connectable::getCount() const
 {
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return count_;
 }
 
 int Connectable::sequenceNumber() const
 {
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     return seq_no_;
 }
 
 void Connectable::setSequenceNumber(int seq_no)
 {
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-
     seq_no_ = seq_no;
 }
+
+void Connectable::removeConnection(Connectable* other_side)
+{
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
+    for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
+        ConnectionPtr c = *i;
+        Connectable* f = c->source().get();
+        Connectable* t = c->target().get();
+        if((t == other_side) || (f == other_side)) {
+            apex_assert_hard((this == t) ^ (this == f));
+
+            fadeConnection(c);
+            other_side->fadeConnection(c);
+
+            return;
+
+        } else {
+            ++i;
+        }
+    }
+}
+
 
 void Connectable::addConnection(ConnectionPtr connection)
 {
@@ -213,6 +244,9 @@ void Connectable::fadeConnection(ConnectionPtr connection)
             ++it;
         }
     }
+
+
+    connection_removed_to(shared_from_this());
 
     connection_faded(connection);
 }

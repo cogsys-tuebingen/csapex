@@ -466,9 +466,6 @@ void ActivityTimeline::Activity::update()
     case NodeWorker::PROCESS:
         color = QColor::fromRgbF(1.0, 0.15, 0.15, 1.0);
         break;
-    case NodeWorker::TICK:
-        color = QColor::fromRgbF(0.15, 1.0, 0.15, 1.0);
-        break;
     case NodeWorker::SLOT:
         color = QColor::fromRgbF(0.15, 0.15, 1.0, 1.0);
         break;

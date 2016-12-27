@@ -111,24 +111,29 @@ protected:
     }
 
     void loadLibrary(const std::string& library_name, TiXmlElement* library)  {
+#if ! WIN32
+        std::stringstream ld_paths(getenv("LD_LIBRARY_PATH"));
+        std::string ld_path;
+        bool exists = false;
+        while (std::getline(ld_paths, ld_path, ':')) {
+            bf3::path file_candidate = ld_path + '/' + library_name + ".so";
+            if(bf3::exists(file_candidate)) {
+                library_stamp_[library_name] = bf3::last_write_time(file_candidate);
+                exists = true;
+                break;
+            }
+        }
+        if(!exists) {
+            return;
+        }
+#endif
+
         TiXmlElement* class_element = library->FirstChildElement("class");
         while (class_element) {
             loadClass(library_name, class_element);
 
             class_element = class_element->NextSiblingElement( "class" );
         }
-
-#if ! WIN32
-        std::stringstream ld_paths(getenv("LD_LIBRARY_PATH"));
-        std::string ld_path;
-        while (std::getline(ld_paths, ld_path, ':')) {
-            bf3::path file_candidate = ld_path + '/' + library_name + ".so";
-            if(bf3::exists(file_candidate)) {
-                library_stamp_[library_name] = bf3::last_write_time(file_candidate);
-                return;
-            }
-        }
-#endif
     }
 
     
@@ -231,7 +236,12 @@ protected:
     std::time_t getLastModification(const std::string& class_name)
     {
         std::string library = plugin_to_library_.at(class_name);
-        return library_stamp_.at(library);
+        auto pos = library_stamp_.find(library);
+        if(pos == library_stamp_.end()) {
+            return 0;
+        } else {
+            return pos->second;
+        }
     }
 
 protected:

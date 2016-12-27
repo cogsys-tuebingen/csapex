@@ -6,6 +6,7 @@
 #include <csapex/utility/uuid.h>
 
 /// PROJECT
+#include <csapex/utility/notifier.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/plugin/plugin_fwd.h>
@@ -21,7 +22,7 @@ class TiXmlElement;
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeFactory
+class CSAPEX_EXPORT NodeFactory : public Notifier
 {
 public:
     typedef std::shared_ptr<NodeFactory> Ptr;
@@ -52,6 +53,7 @@ public:
 public:
     slim_signal::Signal<void(const std::string&)> loaded;
     slim_signal::Signal<void()> new_node_type;
+    slim_signal::Signal<void(NodeHandlePtr)> node_constructed;
     slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
 
 protected:

@@ -71,6 +71,11 @@ void SubgraphNode::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
     }
 }
 
+void SubgraphNode::tearDown()
+{
+    is_initialized_ = false;
+}
+
 void SubgraphNode::reset()
 {
     Node::reset();
@@ -118,17 +123,14 @@ void SubgraphNode::deactivation()
 
 bool SubgraphNode::canProcess() const
 {
-    if(transition_relay_out_->canStartSendingMessages()) {
-        return true;
-    } else {
+    if(!is_initialized_) {
+        return false;
+    }
+    if(!transition_relay_out_->canStartSendingMessages()) {
         APEX_DEBUG_TRACE ainfo << "cannot process, out relay cannot send" << std::endl;
         return false;
     }
-}
-
-bool SubgraphNode::isDoneProcessing() const
-{
-    return transition_relay_out_->canStartSendingMessages();
+    return Node::canProcess();
 }
 
 
@@ -162,13 +164,14 @@ void SubgraphNode::setupParameters(Parameterizable &params)
 }
 
 void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
-                    std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation)
+                           std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation)
 {
     continuation_ = continuation;
 
+    apex_assert_hard(is_initialized_);
+
     // can fail...
     apex_assert_hard(transition_relay_out_->areAllConnections(Connection::State::NOT_INITIALIZED));
-    apex_assert_hard(transition_relay_in_->areAllConnections(Connection::State::NOT_INITIALIZED));
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
 
     is_iterating_ = false;
@@ -176,25 +179,27 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
     is_subgraph_finished_ = false;
 
     for(InputPtr i : node_modifier.getMessageInputs()) {
-        TokenDataConstPtr m = msg::getMessage(i.get());
-        OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
+        if(msg::hasMessage(i.get())) {
+            TokenDataConstPtr m = msg::getMessage(i.get());
+            OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
-        if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
-            is_iterating_ = true;
-            iteration_count_ = m->nestedValueCount();
-            iteration_index_ = 1;
+            if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
+                is_iterating_ = true;
+                iteration_count_ = m->nestedValueCount();
+                iteration_index_ = 1;
 
-            msg::publish(o.get(), m->nestedValue(0));
+                msg::publish(o.get(), m->nestedValue(0));
 
-        } else {
-            msg::publish(o.get(), m);
+            } else {
+                msg::publish(o.get(), m);
+            }
         }
     }
 
     if(transition_relay_out_->hasConnection()) {
         transition_relay_out_->sendMessages(node_handle_->isActive());
-    } else {
-
+    }
+    if(transition_relay_in_->areMessagesForwarded()) {
         finishSubgraph();
     }
 }
@@ -225,7 +230,7 @@ Input* SubgraphNode::createVariadicInput(TokenDataConstPtr type, const std::stri
 InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional)
 {
     InputPtr input = node_handle_->addInternalInput(type, internal_uuid, label, optional);
-    input->setVirtual(true);
+    input->setEssential(true);
 
     transition_relay_in_->addInput(input);
 
@@ -249,7 +254,7 @@ void SubgraphNode::removeVariadicInput(InputPtr input)
 }
 
 RelayMapping SubgraphNode::addForwardingInput(const TokenDataConstPtr& type,
-                                       const std::string& label, bool optional)
+                                              const std::string& label, bool optional)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayout");
     UUID external_uuid = addForwardingInput(internal_uuid, type, label, optional);
@@ -296,7 +301,7 @@ Output* SubgraphNode::createVariadicOutput(TokenDataConstPtr type, const std::st
 OutputPtr SubgraphNode::createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     OutputPtr output = node_handle_->addInternalOutput(type, internal_uuid, label);
-    output->setVirtual(true);
+    output->setEssential(true);
 
     transition_relay_out_->addOutput(output);
 
@@ -321,7 +326,7 @@ void SubgraphNode::removeVariadicOutput(OutputPtr output)
 }
 
 RelayMapping SubgraphNode::addForwardingOutput(const TokenDataConstPtr& type,
-                                        const std::string& label)
+                                               const std::string& label)
 {
     UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
     UUID external_uuid = addForwardingOutput(internal_uuid, type, label);
@@ -377,7 +382,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
 SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
 {
     SlotPtr slot = node_handle_->addInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), internal_uuid, label, callback);
-    slot->setVirtual(true);
+    slot->setEssential(true);
 
     slot->connectionInProgress.connect(internalConnectionInProgress);
 
@@ -443,7 +448,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
 EventPtr SubgraphNode::createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     EventPtr event = node_handle_->addInternalEvent(type, internal_uuid, label);
-    event->setVirtual(true);
+    event->setEssential(true);
 
     event->connectionInProgress.connect(internalConnectionInProgress);
 
@@ -617,8 +622,6 @@ void SubgraphNode::removeInternalPorts()
 
 void SubgraphNode::notifyMessagesProcessed()
 {
-    GeneratorNode::notifyMessagesProcessed();
-
     //    tryFinishProcessing();
     APEX_DEBUG_TRACE ainfo << "is notified" << std::endl;
     transition_relay_in_->notifyMessageProcessed();
@@ -631,7 +634,7 @@ void SubgraphNode::currentIterationIsProcessed()
     if(!is_subgraph_finished_) {
         tryFinishSubgraph();
     }
-    finished();
+    yield();
 }
 
 void SubgraphNode::subgraphHasProducedAllMessages()
@@ -668,11 +671,7 @@ void SubgraphNode::finishSubgraph()
     is_iterating_ = false;
     has_sent_current_iteration_ = false;
 
-    if(node_handle_->isSource()) {
-        notifySubgraphHasProducedTokens();
-    } else {
-        notifySubgraphProcessed();
-    }
+    notifySubgraphProcessed();
 }
 
 
@@ -684,18 +683,10 @@ void SubgraphNode::notifySubgraphProcessed()
     }
 }
 
-void SubgraphNode::notifySubgraphHasProducedTokens()
-{
-    if(node_handle_->isSource()) {
-        updated();
-    }
-}
-
 void SubgraphNode::sendCurrentIteration()
 {
     apex_assert_hard(transition_relay_in_->isEnabled());
-    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-
+    
     APEX_DEBUG_TRACE ainfo << "forward_messages" << std::endl;
     transition_relay_in_->forwardMessages();
 

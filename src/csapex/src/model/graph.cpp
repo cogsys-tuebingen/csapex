@@ -144,6 +144,12 @@ bool Graph::addConnection(ConnectionPtr connection)
     apex_assert_hard(connection);
     connections_.push_back(connection);
 
+    connection_observations_[connection.get()].push_back(connection->connection_changed.connect([this]() {
+        if(!in_transaction_) {
+            analyzeGraph();
+        }
+    }));
+
     if(!std::dynamic_pointer_cast<Event>(connection->from()) && !std::dynamic_pointer_cast<Slot>(connection->to())) {
         NodeHandle* n_from = findNodeHandleForConnector(connection->from()->getUUID());
         NodeHandle* n_to = findNodeHandleForConnector(connection->to()->getUUID());
@@ -154,11 +160,14 @@ bool Graph::addConnection(ConnectionPtr connection)
             graph::VertexPtr v_from = n_from->getVertex();
             graph::VertexPtr v_to = n_to->getVertex();
 
-            v_from->addChild(v_to);
-            v_to->addParent(v_from);
+            if(v_from && v_to) {
+                v_from->addChild(v_to);
+                v_to->addParent(v_from);
 
-            sources_.erase(v_to);
-            sinks_.erase(v_from);
+                sources_.erase(v_to);
+                sinks_.erase(v_from);
+            }
+
         }
     }
 
@@ -173,6 +182,8 @@ void Graph::deleteConnection(ConnectionPtr connection)
 {
     apex_assert_hard(connection);
 
+    connection_observations_[connection.get()].clear();
+
     if(connection->isDetached()) {
         auto c = std::find(connections_.begin(), connections_.end(), connection);
         if(c != connections_.end()) {
@@ -185,9 +196,6 @@ void Graph::deleteConnection(ConnectionPtr connection)
     auto in = connection->to();
 
     out->removeConnection(in.get());
-
-    out->fadeConnection(connection);
-    in->fadeConnection(connection);
 
     for(std::vector<ConnectionPtr>::iterator c = connections_.begin(); c != connections_.end();) {
         if(*connection == **c) {
@@ -372,7 +380,7 @@ std::set<graph::Vertex *> Graph::findVerticesThatNeedMessages()
             break;
         }
         for(const ConnectionPtr c : v->getNodeHandle()->getOutputTransition()->getConnections()) {
-            if(c->to()->isVirtual()) {
+            if(c->to()->isEssential()) {
                 vertices_that_need_messages.insert(v.get());
                 break;
             }
@@ -728,8 +736,6 @@ ConnectionPtr Graph::getConnection(const UUID &from, const UUID &to)
             return connection;
         }
     }
-
-    std::cerr << "error: cannot get connection from " << from << " to " << to << std::endl;
 
     return nullptr;
 }

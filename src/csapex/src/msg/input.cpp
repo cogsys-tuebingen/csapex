@@ -51,15 +51,6 @@ bool Input::isConnectionPossible(Connectable* other_side)
     return other_side->isConnectionPossible(this);
 }
 
-void Input::removeConnection(Connectable* other_side)
-{
-    if(connections_.empty()) {
-        return;
-    }
-    connections_.clear();
-    connection_removed_to(shared_from_this());
-}
-
 void Input::setOptional(bool optional)
 {
     optional_ = optional;
@@ -203,5 +194,6 @@ void Input::notifyMessageAvailable(Connection* connection)
     if(!transition_) {
         setToken(connection->readToken());
         connection->setTokenProcessed();
+        //this causes problems.....
     }
 }

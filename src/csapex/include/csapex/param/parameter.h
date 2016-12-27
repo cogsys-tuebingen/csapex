@@ -41,6 +41,7 @@ public:
     slim_signal::Signal<void(Parameter*, bool)> interactive_changed;
     slim_signal::Signal<void(Parameter*, bool)> parameter_enabled;
     slim_signal::Signal<void(Parameter*)> destroyed;
+    slim_signal::Signal<void(ParameterPtr)> removed;
 
     slim_signal::Signal<void(const std::string&)> dictionary_entry_changed;
 

@@ -25,8 +25,6 @@ public:
     void addConnection(ConnectionPtr connection);
     void removeConnection(ConnectionPtr connection);
 
-    void updateConnections();
-
     bool hasConnection() const;
     bool hasConnection(const ConnectionPtr& connection) const;
     bool hasConnection(Connection* connection) const;
@@ -44,6 +42,9 @@ public:
     bool isOneConnection(Connection::State state) const;
 
     std::vector<ConnectionPtr> getConnections() const;
+
+public:
+    slim_signal::Signal<void()> enabled_changed;
 
 protected:
     virtual void connectionAdded(Connection* connection);

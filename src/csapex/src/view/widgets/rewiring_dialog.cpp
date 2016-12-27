@@ -16,6 +16,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/model/connection.h>
 #include <csapex/msg/direct_connection.h>
+#include <csapex/param/parameter_factory.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -34,7 +35,7 @@ RewiringDialog::RewiringDialog(NodeHandle* node, CsApexViewCore& view_core, QWid
       core_temp_(std::make_shared<CsApexCore>(view_core.getCore())),
       temp_dispatcher_(std::make_shared<CommandDispatcher>(*core_temp_)),
       view_core_temp_(std::make_shared<CsApexViewCore>(view_core_, *core_temp_, temp_dispatcher_)),
-      node_(node)
+      nh_(node)
 {
     root_uuid_provider_ = std::make_shared<UUIDProvider>();
 
@@ -141,37 +142,49 @@ void RewiringDialog::makeUI(const QString& stylesheet)
 
     graph_new->removeInternalPorts();
 
+    NodePtr node = nh_->getNode().lock();
 
-    nh_old = node_factory.makeNode(node_->getType(), node_->getUUID(), graph_old.get());
+    nh_old = node_factory.makeNode(nh_->getType(), nh_->getUUID(), graph_old.get());
+    NodePtr node_old = nh_old->getNode().lock();
+    for(param::ParameterPtr p : node->getPersistentParameters()) {
+        node_old->addPersistentParameter(param::ParameterFactory::clone(p));
+    }
+    for(param::ParameterPtr p : node->getTemporaryParameters()) {
+        node_old->addTemporaryParameter(param::ParameterFactory::clone(p));
+    }
     graph_old->addNode(nh_old);
 
     nh_new = node_factory.makeNode(type_new_, graph_new->generateUUID(type_new_), graph_new);
     graph_new->addNode(nh_new);
 
 
-    for(SlotPtr slot_original : node_->getSlots()) {
+    for(SlotPtr slot_original : nh_->getSlots()) {
         for(ConnectionPtr connection : slot_original->getConnections()) {
             SlotPtr slot_old = nh_old->getSlot(slot_original->getUUID());
+            apex_assert_hard(slot_old);
             updateConnection(slot_old, connection);
         }
     }
-    for(InputPtr input_original : node_->getExternalInputs()) {
+    for(InputPtr input_original : nh_->getExternalInputs()) {
         for(ConnectionPtr connection : input_original->getConnections()) {
             InputPtr input_old = nh_old->getInput(input_original->getUUID());
+            apex_assert_hard(input_old);
             updateConnection(input_old, connection);
         }
     }
 
 
-    for(EventPtr event_original : node_->getEvents()) {
+    for(EventPtr event_original : nh_->getEvents()) {
         for(ConnectionPtr connection : event_original->getConnections()) {
             EventPtr event_old = nh_old->getEvent(event_original->getUUID());
+            apex_assert_hard(event_old);
             updateConnection(event_old, connection);
         }
     }
-    for(OutputPtr output_original : node_->getExternalOutputs()) {
+    for(OutputPtr output_original : nh_->getExternalOutputs()) {
         for(ConnectionPtr connection : output_original->getConnections()) {
             OutputPtr output_old = nh_old->getOutput(output_original->getUUID());
+            apex_assert_hard(output_old);
             updateConnection(output_old, connection);
         }
     }
@@ -207,7 +220,7 @@ void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &conne
     if(uuid_cache_.find(original_uuid) != uuid_cache_.end()) {
         uuid_old = uuid_cache_.at(original_uuid);
     } else {
-        uuid_old = graph_old->generateUUID(original_uuid.id().getFullName());
+        uuid_old = graph_old->generateUUID(original_uuid.id().type());
         uuid_cache_[original_uuid] = uuid_old;
         new_target_uuid_to_old_uuid_[uuid_old] = original_uuid;
     }
@@ -256,7 +269,7 @@ void RewiringDialog::updateConnection(OutputPtr output, const ConnectionPtr &con
     if(uuid_cache_.find(original_uuid) != uuid_cache_.end()) {
         uuid_old = uuid_cache_.at(original_uuid);
     } else {
-        uuid_old = graph_old->generateUUID(original_uuid.id().getFullName());
+        uuid_old = graph_old->generateUUID(original_uuid.id().type());
         uuid_cache_[original_uuid] = uuid_old;
         new_target_uuid_to_old_uuid_[uuid_old] = original_uuid;
     }

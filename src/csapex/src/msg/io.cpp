@@ -11,7 +11,9 @@ using namespace csapex;
 TokenDataConstPtr csapex::msg::getMessage(Input *input)
 {
     apex_assert_hard_msg(input->isEnabled(), "you have requested a message from a disabled input");
-    return input->getToken()->getTokenData();
+    auto token = input->getToken();
+    apex_assert_hard_msg(token, "tried to read from an empty input");
+    return token->getTokenData();
 }
 
 bool csapex::msg::hasMessage(Input *input)

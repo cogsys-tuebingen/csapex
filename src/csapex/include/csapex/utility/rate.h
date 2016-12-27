@@ -28,12 +28,15 @@ public:
 
     void keepUp();
 
+    void startCycle();
+    std::chrono::system_clock::time_point endOfCycle() const;
 
 public:
     double frequency_;
     bool immediate_;
 
     std::chrono::system_clock::time_point last_scheduled_tick_;
+    std::chrono::system_clock::time_point last_tick_;
     std::deque<std::chrono::system_clock::time_point> real_ticks_;
 };
 

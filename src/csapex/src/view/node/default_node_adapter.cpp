@@ -338,7 +338,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             Port* port = parent_->createPort(param_in, current_layout_);
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[param_in.get()] = p->interactive_changed.connect([port](Parameter*, bool i) { return port->setVisible(i); });
+            parameter_connections_[p.get()].push_back(p->interactive_changed.connect([port](Parameter*, bool i) { return port->setVisible(i); }));
         }
 
         // generate UI element
@@ -355,7 +355,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             Port* port = parent_->createPort(param_out, current_layout_);
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[param_out.get()] = p->interactive_changed.connect([port](Parameter*, bool i) { return port->setVisible(i); });
+            parameter_connections_[p.get()].push_back(p->interactive_changed.connect([port](Parameter*, bool i) { return port->setVisible(i); }));
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());
@@ -386,15 +386,15 @@ qt_helper::Call * DefaultNodeAdapter::makeModelCall(std::function<void()> cb)
     return call;
 }
 
-void DefaultNodeAdapter::setupParameter(TriggerParameterPtr trigger_p)
+void DefaultNodeAdapter::setupParameter(TriggerParameterPtr p)
 {
-    QPointer<QPushButton> btn = new QPushButton(trigger_p->name().c_str());
+    QPointer<QPushButton> btn = new QPushButton(p->name().c_str());
 
     QHBoxLayout* sub = new QHBoxLayout;
     sub->addWidget(btn);
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(trigger_p)));
+    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(p)));
 
-    qt_helper::Call* call_trigger = makeModelCall(std::bind(&TriggerParameter::trigger, trigger_p));
+    qt_helper::Call* call_trigger = makeModelCall(std::bind(&TriggerParameter::trigger, p));
     QObject::connect(btn, SIGNAL(clicked()), call_trigger, SLOT(call()));
 }
 
@@ -407,6 +407,13 @@ void DefaultNodeAdapter::setupParameter(std::shared_ptr<Parameter> p)
     adapter->executeCommand.connect(executeCommand);
 
     adapter->doSetup(current_layout_, current_display_name_);
+
+    parameter_connections_[p.get()].push_back(p->removed.connect([this, adapter](param::ParameterPtr p) {
+        auto pos = std::find(adapters_.begin(), adapters_.end(), adapter);
+        if(pos != adapters_.end()) {
+            adapters_.erase(pos);
+        }
+    }));
 }
 
 

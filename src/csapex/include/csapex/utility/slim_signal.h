@@ -31,6 +31,7 @@ public:
     virtual ~SignalBase();
 
     virtual void disconnectAll();
+    bool isConnected() const;
 
 protected:
     SignalBase();
@@ -39,7 +40,7 @@ protected:
     SignalBase& operator= (const SignalBase&) = delete;
 
     void addConnection(Connection* connection);
-    void removeConnection(const Connection* connection);
+    void removeConnection(const Connection* connection);    
 
 protected:
     mutable std::recursive_mutex mutex_;

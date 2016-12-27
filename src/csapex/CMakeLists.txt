@@ -167,11 +167,13 @@ add_library(csapex_util SHARED
     src/utility/singleton.cpp
     src/utility/thread.cpp
     src/utility/rate.cpp
+    src/utility/notifier.cpp
     src/utility/type.cpp
     src/utility/uuid.cpp
     src/utility/uuid_provider.cpp
     src/utility/yaml_node_builder.cpp
     src/utility/slim_signal_implementations.cpp
+    src/utility/ticker.cpp
 
     ${csapex_util_HEADERS}
 )
@@ -324,8 +326,8 @@ add_library(csapex SHARED
     src/model/node_characteristics.cpp
     src/model/observer.cpp
     src/model/parameterizable.cpp
-    src/model/generator_node.cpp
     src/model/tickable_node.cpp
+    src/model/throttled_node.cpp
     src/model/tag.cpp
     src/model/unique.cpp
     src/model/variadic_io.cpp
@@ -363,6 +365,7 @@ add_library(csapex SHARED
     src/scheduling/task_generator.cpp
     src/scheduling/thread_group.cpp
     src/scheduling/thread_pool.cpp
+    src/scheduling/timed_queue.cpp
 
     src/signal/slot.cpp
     src/signal/event.cpp
@@ -429,6 +432,7 @@ add_library(csapex_command SHARED
     src/command/update_parameter.cpp
     src/command/set_execution_mode.cpp
     src/command/set_logger_level.cpp
+    src/command/set_max_execution_frequency.cpp
 
 	${csapex_command_HEADERS}
 )

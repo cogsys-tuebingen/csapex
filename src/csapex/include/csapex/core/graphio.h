@@ -59,6 +59,8 @@ private:
     void saveFulcrums(YAML::Node& fulcrum, const Connection* connection);
     void loadFulcrum(const YAML::Node& fulcrum);
 
+    void sendNotification(const std::string& notification);
+
 protected:
     void saveNodes(YAML::Node &yaml, const std::vector<NodeHandle *> &nodes);
     void saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr> &connections);

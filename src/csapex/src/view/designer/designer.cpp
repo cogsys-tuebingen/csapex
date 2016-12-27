@@ -431,8 +431,7 @@ void Designer::deleteSelected()
         return;
     }
 
-    Command::Ptr del = view->deleteSelected();
-    view_core_.execute(del);
+    view->deleteSelected();
 }
 void Designer::copySelected()
 {

@@ -41,13 +41,14 @@ public:
     virtual void reset() override;
 
     void schedule(TaskPtr task);
+    void scheduleDelayed(TaskPtr task, std::chrono::system_clock::time_point time);
 
 private:
     void measureFrequency();
-    void tick();
-    void tickLoop();
-    void scheduleTick();
-    void stopTickThread();
+
+    void scheduleProcess();
+
+    void execute();
 
 private:
     NodeWorkerPtr worker_;
@@ -56,22 +57,18 @@ private:
     mutable std::recursive_mutex mutex_;
 
     bool paused_;
-    bool ticking_;
-    bool is_source_;
     bool stepping_;
     bool can_step_;
 
-    TaskPtr tick_;
     TaskPtr check_parameters_;
-    TaskPtr try_process_;
+    TaskPtr execute_;
 
-    std::thread ticking_thread_;
-
-    std::atomic<bool> tick_thread_running_;
-    std::atomic<bool> tick_thread_stop_;
     std::vector<TaskPtr> remaining_tasks_;
 
     long guard_;
+    double max_frequency_;
+
+    bool waiting_;
 };
 
 }

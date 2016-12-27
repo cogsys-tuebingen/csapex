@@ -67,7 +67,6 @@ public:
     std::vector<NodeBox*> boxes();
     std::vector<NodeBox*> getSelectedBoxes() const;
     std::vector<UUID> getSelectedUUIDs() const;
-    CommandPtr deleteSelected();
 
     NodeBox* getBox(const csapex::UUID& node_id);
     MovableGraphicsProxyWidget* getProxy(const csapex::UUID& node_id);
@@ -172,6 +171,8 @@ public Q_SLOTS:
     void copySelected();
     void paste();
 
+    void deleteSelected();
+
     void groupSelected();
     void ungroupSelected();
 
@@ -188,6 +189,8 @@ private:
     void flipBox();
     void setExecutionMode(ExecutionMode mode);
     void setLoggerLevel(int level);
+    void setMaximumFrequency();
+    void setUnboundedMaximumFrequency();
     void chooseColor();
     void minimizeBox(bool mini);
     void muteBox(bool muted);
@@ -200,6 +203,8 @@ private:
     void showProfiling(bool visible);
 
     Snippet serializeSelection() const;
+
+    void invalidateCache();
 
 private:
     CsApexCore& core_;
@@ -229,6 +234,8 @@ private:
 
     int scalings_to_perform_;
     QTimer scalings_animation_timer_;
+
+    QRectF item_bbox_;
 
     QTimer scroll_animation_timer_;
     double scroll_offset_x_;

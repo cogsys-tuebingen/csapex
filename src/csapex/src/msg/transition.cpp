@@ -55,10 +55,6 @@ void Transition::reset()
 {
 }
 
-void Transition::updateConnections()
-{
-}
-
 
 void Transition::checkIfEnabled()
 {
@@ -67,6 +63,10 @@ void Transition::checkIfEnabled()
         activation_fn_();
     }
     //    }
+
+    if(isEnabled()) {
+        enabled_changed();
+    }
 }
 
 bool Transition::areAllConnections(Connection::State state) const

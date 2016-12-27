@@ -179,17 +179,21 @@ UUID UUID::id() const
 {
     UUID res = *this;
     res.representation_.clear();
-    res.representation_.push_back(representation_.front());
+    if(!representation_.empty()) {
+        res.representation_.push_back(representation_.front());
+    }
     return res;
 }
 
 std::string UUID::type() const
 {
+    apex_assert_hard(!representation_.empty());
     std::string t = representation_.front();
     return t.substr(0, t.find("_"));
 }
 std::string UUID::name() const
 {
+    apex_assert_hard(!representation_.empty());
     std::string t = representation_.front();
     return t.substr(t.find("_") + 1);
 }

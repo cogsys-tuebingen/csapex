@@ -30,6 +30,10 @@ public:
     virtual void readYaml(const YAML::Node& node) override;
 
 public:
+    double getMaximumFrequency() const;
+    void setMaximumFrequency(double f);
+    Signal max_frequency_changed;
+
     Point getPos() const;
     void setPos(const Point &value, bool quiet = false);
     Signal pos_changed;
@@ -110,6 +114,8 @@ private:
     const NodeHandle* parent_;
 
     mutable Memento::Ptr child_state_;
+
+    double max_frequency_;
 
     std::string label_;
     Point pos_;

@@ -18,7 +18,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT ThreadGroup : public Scheduler
+class CSAPEX_EXPORT ThreadGroup : public Scheduler, public std::enable_shared_from_this<ThreadGroup>
 {
 public:
     enum {
@@ -31,8 +31,8 @@ public:
     static int nextId();
 
 public:
-    ThreadGroup(ExceptionHandler& handler, int id, std::string name);
-    ThreadGroup(ExceptionHandler& handler, std::string name);
+    ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler& handler, int id, std::string name);
+    ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler& handler, std::string name);
     ~ThreadGroup();
 
     int id() const override;
@@ -62,7 +62,8 @@ public:
 
     virtual std::vector<TaskPtr> remove(TaskGenerator* generator) override;
 
-    virtual void schedule(TaskPtr schedulable) override;
+    virtual void schedule(TaskPtr schedulable) override;    
+    virtual void scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time) override;
 
 private:
     void schedulingLoop();
@@ -84,6 +85,8 @@ private:
 
     int id_;
     std::string name_;
+
+    TimedQueuePtr timed_queue_;
 
     std::thread scheduler_thread_;
 

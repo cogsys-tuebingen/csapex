@@ -25,12 +25,9 @@ public:
     void setSequenceNumber(long seq_no);
     long getSequenceNumber() const;
 
-    void connectionAdded(Connection* connection) override;
-    void connectionRemoved(Connection *connection) override;
-
     bool canStartSendingMessages() const;
     bool sendMessages(bool is_active);
-    void publishNextMessage();
+    void tokenProcessed();
 
     void clearBuffer();
     void setOutputsIdle();
@@ -47,11 +44,10 @@ private:
     void fillConnections();
 
 private:
-    std::unordered_map<OutputPtr, std::vector<slim_signal::Connection>> output_signal_connections_;
+    std::unordered_map<Output*, std::vector<slim_signal::ScopedConnection>> output_signal_connections_;
     std::unordered_map<UUID, OutputPtr, UUID::Hasher> outputs_;
 
     long sequence_number_;
-    bool try_to_publish_;
 };
 }
 

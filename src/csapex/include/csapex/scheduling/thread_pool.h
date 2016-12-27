@@ -23,6 +23,7 @@ class CSAPEX_EXPORT ThreadPool : public Executor
 public:
     ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
     ThreadPool(Executor* parent, csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
+    ~ThreadPool();
 
     bool isThreadingEnabled() const;
     bool isGroupingEnabled() const;
@@ -73,6 +74,8 @@ private:
 
 private:
     ExceptionHandler& handler_;
+
+    TimedQueuePtr timed_queue_;
 
     bool enable_threading_;
     bool grouping_;

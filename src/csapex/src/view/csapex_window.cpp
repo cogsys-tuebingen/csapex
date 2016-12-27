@@ -777,6 +777,7 @@ void CsApexWindow::updatePluginIgnored(const QObject* &action)
 void CsApexWindow::tick()
 {
     cmd_dispatcher_->executeLater();
+    QApplication::processEvents();
 }
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
@@ -830,7 +831,7 @@ void CsApexWindow::showStatusMessage(const std::string &msg)
 void CsApexWindow::showNotification(const Notification &notification)
 {
     designer_->showNotification(notification);
-    statusBar()->showMessage(QString::fromStdString(notification.auuid.getFullName() + ": " + notification.message));
+    statusBar()->showMessage(QString::fromStdString(notification.auuid.getFullName() + ": " + notification.message.str()));
 }
 
 void CsApexWindow::init()

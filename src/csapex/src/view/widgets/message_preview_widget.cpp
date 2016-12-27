@@ -12,6 +12,7 @@
 /// SYSTEM
 #include <QApplication>
 #include <QGraphicsPixmapItem>
+#include <QFocusEvent>
 
 using namespace csapex;
 using namespace csapex::impl;
@@ -21,6 +22,7 @@ PreviewInput::PreviewInput(QPointer<MessagePreviewWidget> parent)
       parent_(parent)
 {
     setType(std::make_shared<connection_types::AnyMessage>());
+    setVirtual(true);
 }
 
 void PreviewInput::setToken(TokenPtr token)
@@ -82,6 +84,7 @@ MessagePreviewWidget::MessagePreviewWidget()
 
     QObject::connect(this, &MessagePreviewWidget::displayImageRequest, this, &MessagePreviewWidget::displayImage);
     QObject::connect(this, &MessagePreviewWidget::displayTextRequest, this, &MessagePreviewWidget::displayText);
+
 
     setMaximumSize(256, 256);
     setAutoFillBackground(false);

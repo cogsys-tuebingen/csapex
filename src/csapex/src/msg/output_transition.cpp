@@ -16,11 +16,11 @@
 using namespace csapex;
 
 OutputTransition::OutputTransition(delegate::Delegate0<> activation_fn)
-    : Transition(activation_fn), sequence_number_(-1), try_to_publish_(false)
+    : Transition(activation_fn), sequence_number_(-1)
 {
 }
 OutputTransition::OutputTransition()
-    : Transition(), sequence_number_(-1), try_to_publish_(false)
+    : Transition(), sequence_number_(-1)
 {
 }
 
@@ -72,17 +72,17 @@ void OutputTransition::addOutput(OutputPtr output)
             connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
         }
     });
-    output_signal_connections_[output].push_back(ca);
+    output_signal_connections_[output.get()].push_back(ca);
 
     auto cf = output->connection_faded.connect([this](const ConnectionPtr& connection) {
         removeConnection(connection);
     });
-    output_signal_connections_[output].push_back(cf);
+    output_signal_connections_[output.get()].push_back(cf);
 
     auto cp = output->message_processed.connect([this](const ConnectablePtr&) {
-        publishNextMessage();
+        tokenProcessed();
     });
-    output_signal_connections_[output].push_back(cp);
+    output_signal_connections_[output.get()].push_back(cp);
 
 //    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
 //        if(output->isEnabled()) {
@@ -97,10 +97,7 @@ void OutputTransition::removeOutput(OutputPtr output)
     output->removeOutputTransition();
 
     // disconnect signals
-    for(auto f : output_signal_connections_[output]) {
-        f.disconnect();
-    }
-    output_signal_connections_.erase(output);
+    output_signal_connections_.erase(output.get());
 
     // forget the output
     outputs_.erase(output->getUUID());
@@ -126,24 +123,6 @@ bool OutputTransition::isEnabled() const
     return canStartSendingMessages();
 }
 
-void OutputTransition::connectionRemoved(Connection *connection)
-{
-    Transition::connectionRemoved(connection);
-
-    if(connections_.empty()) {
-        //        node_->notifyMessagesProcessed();
-    }
-}
-
-void OutputTransition::connectionAdded(Connection *connection)
-{
-    Transition::connectionAdded(connection);
-
-    if(isEnabled()) {
-        updateConnections();
-    }
-}
-
 bool OutputTransition::canStartSendingMessages() const
 {
     for(auto pair : outputs_) {
@@ -162,8 +141,6 @@ bool OutputTransition::sendMessages(bool is_active)
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     apex_assert_hard(areAllConnections(Connection::State::NOT_INITIALIZED));
-
-    updateConnections();
 
     bool has_sent_activator_message = false;
 
@@ -196,15 +173,9 @@ bool OutputTransition::sendMessages(bool is_active)
     return has_sent_activator_message;
 }
 
-void OutputTransition::publishNextMessage()
+void OutputTransition::tokenProcessed()
 {
-    std::unique_lock<std::recursive_mutex> lock(sync, std::try_to_lock);
-    if(!lock) {
-        try_to_publish_ = true;
-        return;
-    }
-
-
+    std::unique_lock<std::recursive_mutex> lock(sync);
     if(!areAllConnections(Connection::State::DONE)) {
         APEX_DEBUG_CERR <<"cannot publish next, not all connections are done" << std::endl;
         return;
@@ -212,23 +183,12 @@ void OutputTransition::publishNextMessage()
 
     apex_assert_hard(areAllConnections(Connection::State::DONE));
 
-    for(auto pair : outputs_) {
-        OutputPtr output = pair.second;
-        output->nextMessage();
-    }
-    if(areOutputsIdle()) {
-        APEX_DEBUG_CERR <<"all outputs are idle" << std::endl;
-        if(areAllConnections(Connection::State::DONE)) {
-            APEX_DEBUG_CERR <<"all outputs are done" << std::endl;
-            updateConnections();
+    APEX_DEBUG_CERR <<"all outputs are done" << std::endl;
 
-            messages_processed();
-        }
+    lock.unlock();
 
-    } else {
-        APEX_DEBUG_CERR <<"some outputs are not idle" << std::endl;
-        fillConnections();
-    }
+    messages_processed();
+    checkIfEnabled();
 }
 
 bool OutputTransition::areOutputsIdle() const
@@ -257,8 +217,13 @@ void OutputTransition::fillConnections()
         out->publish();
     }
 
-    if(try_to_publish_) {
-        publishNextMessage();
+    for(auto pair : outputs_) {
+        OutputPtr out = pair.second;
+        apex_assert_hard(out);
+
+        if(!out->isConnected()) {
+            out->notifyMessageProcessed();
+        }
     }
 }
 

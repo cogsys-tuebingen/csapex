@@ -4,7 +4,6 @@
 /// PROJECT
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/tickable_node.h>
 #include <csapex/scheduling/scheduler.h>
 #include <csapex/scheduling/task.h>
 #include <csapex/utility/assert.h>
@@ -19,32 +18,34 @@ using namespace csapex;
 
 NodeRunner::NodeRunner(NodeWorkerPtr worker)
     : worker_(worker), scheduler_(nullptr),
-      paused_(false), ticking_(false), is_source_(false), stepping_(false), can_step_(false),
-      tick_thread_running_(false), guard_(-1)
+      paused_(false), stepping_(false), can_step_(false),
+      guard_(-1),
+      waiting_(false)
 {
     NodeHandlePtr handle = worker_->getNodeHandle();
-    NodePtr node = handle->getNode().lock();
-    is_source_ = handle->isSource();
-    ticking_ = node && std::dynamic_pointer_cast<TickableNode>(node);
+
+    handle->getNodeState()->max_frequency_changed->connect([this](){
+        NodeHandlePtr handle = worker_->getNodeHandle();
+        max_frequency_ = handle->getNodeState()->getMaximumFrequency();
+
+        if(max_frequency_ > 0.0) {
+            handle->getRate().setFrequency(max_frequency_);
+        } else {
+            handle->getRate().setFrequency(0.0);
+        }
+    });
+    max_frequency_ = handle->getNodeState()->getMaximumFrequency();
+    handle->getRate().setFrequency(max_frequency_);
 
     check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + handle->getUUID().getFullName(),
                                                std::bind(&NodeWorker::checkParameters, worker),
                                                0,
                                                this);
-    try_process_ = std::make_shared<Task>(std::string("check ") + handle->getUUID().getFullName(),
-                                          [this]()
+    execute_ = std::make_shared<Task>(std::string("check ") + handle->getUUID().getFullName(),
+                                      [this]()
     {
-        if(worker_->tryProcess()) {
-            measureFrequency();
-        }
+        execute();
     }, 0, this);
-
-    if(ticking_) {
-        tick_ = std::make_shared<Task>(std::string("tick ") + handle->getUUID().getFullName(),
-                                       [this]() {
-            tick();
-        }, 0, this);
-    }
 }
 
 NodeRunner::~NodeRunner()
@@ -54,8 +55,6 @@ NodeRunner::~NodeRunner()
     if(scheduler_) {
         //        detach();
     }
-
-    stopTickThread();
 
     guard_ = 0xDEADBEEF;
 }
@@ -68,6 +67,8 @@ void NodeRunner::measureFrequency()
 void NodeRunner::reset()
 {
     worker_->reset();
+
+    scheduleProcess();
 }
 
 void NodeRunner::assignToScheduler(Scheduler *scheduler)
@@ -94,8 +95,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
     // node tasks
     observe(worker_->try_process_changed, [this]() {
-        try_process_->setPriority(worker_->getSequenceNumber());
-        schedule(try_process_);
+        scheduleProcess();
     });
 
     // parameter change
@@ -108,21 +108,8 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
     // generic task
     observe(worker_->getNodeHandle()->execution_requested, [this](std::function<void()> cb) {
-                schedule(std::make_shared<Task>("anonymous", cb, 0, this));
-            });
-
-    if(ticking_ && !tick_thread_running_) {
-        // TODO: get rid of this!
-        ticking_thread_ = std::thread([this]() {
-            csapex::thread::set_name((std::string("T") + worker_->getUUID().getShortName()).c_str());
-            tick_thread_running_ = true;
-
-            tick_thread_stop_ = false;
-            tickLoop();
-
-            tick_thread_running_ = false;
-        });
-    }
+        schedule(std::make_shared<Task>("anonymous", cb, 0, this));
+    });
 }
 
 
@@ -131,53 +118,52 @@ Scheduler* NodeRunner::getScheduler() const
     return scheduler_;
 }
 
-void NodeRunner::scheduleTick()
+void NodeRunner::scheduleProcess()
 {
     if(!paused_) {
-        if(!stepping_ || can_step_) {
-            can_step_ = false;
-            schedule(tick_);
+        bool source = worker_->getNodeHandle()->isSource();
+        if(!source || !stepping_ || can_step_) {
+            //execute_->setPriority(std::max<long>(0, worker_->getSequenceNumber()));
+            //if(worker_->canExecute()) {
+                can_step_ = false;
+                if(!waiting_) {
+                    schedule(execute_);
+                }
+            //}
         }
     }
 }
 
-void NodeRunner::tick()
+void NodeRunner::execute()
 {
-    apex_assert_hard(guard_ == -1);
+    if(worker_->canExecute()) {
+        if(max_frequency_ > 0.0) {
+            const Rate& rate = worker_->getNodeHandle()->getRate();
+            double f = rate.getEffectiveFrequency();
+            if(f > max_frequency_) {
+                auto next_process = rate.endOfCycle();
 
-    bool success = worker_->tick();
-    if(stepping_) {
-        if(!success) {
-            can_step_ = true;
+                auto now = std::chrono::system_clock::now();
+
+                if(next_process > now) {
+                    scheduleDelayed(execute_, next_process);
+                    waiting_ = true;
+                    return;
+                }
+            }
+        }
+
+        waiting_ = false;
+
+        worker_->getNodeHandle()->getRate().startCycle();
+
+        if(worker_->execute()) {
+            measureFrequency();
         } else {
-            end_step();
+            can_step_ = true;
         }
-    }
-
-    if(success) {
-        measureFrequency();
-
-        NodeHandlePtr handle = worker_->getNodeHandle();
-        NodePtr node = handle->getNode().lock();
-        auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
-
-        if(ticker->isImmediate()) {
-            scheduleTick();
-        }
-    }
-}
-
-void NodeRunner::tickLoop()
-{
-    NodePtr node =  worker_->getNode();
-    auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
-
-    while(!tick_thread_stop_) {
-        if(!ticker->isImmediate() || !tick_->isScheduled()) {
-            scheduleTick();
-        }
-
-        ticker->keepUpRate();
+    } else {
+        can_step_ = true;
     }
 }
 
@@ -194,18 +180,14 @@ void NodeRunner::schedule(TaskPtr task)
     }
 }
 
-void NodeRunner::stopTickThread()
+void NodeRunner::scheduleDelayed(TaskPtr task, std::chrono::system_clock::time_point time)
 {
-    if(tick_thread_running_) {
-        tick_thread_stop_ = true;
-        ticking_thread_.join();
-    }
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    scheduler_->scheduleDelayed(task, time);
 }
 
 void NodeRunner::detach()
 {
-    stopTickThread();
-
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     if(scheduler_) {
@@ -223,19 +205,26 @@ bool NodeRunner::isPaused() const
 void NodeRunner::setPause(bool pause)
 {
     paused_ = pause;
+    if(!paused_) {
+        scheduleProcess();
+    }
 }
 
 void NodeRunner::setSteppingMode(bool stepping)
 {
     stepping_ = stepping;
     can_step_ = false;
+    if(!stepping_) {
+        scheduleProcess();
+    }
 }
 
 void NodeRunner::step()
 {
-    if(is_source_ && worker_->isProcessingEnabled()) {
+    if(worker_->getNodeHandle()->isSource() && worker_->isProcessingEnabled()) {
         begin_step();
         can_step_ = true;
+        scheduleProcess();
     } else {
         can_step_ = false;
         end_step();
@@ -249,9 +238,6 @@ bool NodeRunner::isStepping() const
 
 bool NodeRunner::isStepDone() const
 {
-    if(!ticking_) {
-        return true;
-    }
     return !can_step_;
 }
 

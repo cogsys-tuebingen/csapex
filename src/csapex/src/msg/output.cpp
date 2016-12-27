@@ -36,6 +36,7 @@ void Output::removeOutputTransition()
 
 void Output::notifyMessageProcessed()
 {
+    setState(State::IDLE);
     message_processed(shared_from_this());
 }
 
@@ -81,27 +82,6 @@ std::vector<ConnectionPtr> Output::getConnections() const
 {
     return connections_;
 }
-
-void Output::removeConnection(Connectable* other_side)
-{
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
-        ConnectionPtr c = *i;
-        if(c->to().get() == other_side) {
-            other_side->removeConnection(this);
-
-            i = connections_.erase(i);
-
-            connection_removed_to(shared_from_this());
-
-            return;
-
-        } else {
-            ++i;
-        }
-    }
-}
-
 
 void Output::removeAllConnectionsNotUndoable()
 {
@@ -189,11 +169,7 @@ void Output::publish()
     auto msg = getToken();
     apex_assert_hard(msg);
 
-    if(!connections_.empty()) {
-        for(auto connection : connections_) {
-            connection->setToken(msg);
-        }
-    } else {
-        notifyMessageProcessed();
+    for(auto connection : connections_) {
+        connection->setToken(msg);
     }
 }

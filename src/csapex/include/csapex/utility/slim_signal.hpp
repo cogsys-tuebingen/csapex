@@ -19,7 +19,6 @@ Signal<Signature>::Signal()
     children_.reserve(4);
 }
 
-
 template <typename Signature>
 Signal<Signature>::~Signal()
 {
@@ -214,13 +213,13 @@ void Signal<Signature>::removeChild(Signal<Signature>* child)
 {
     apex_assert_hard(guard_ == -1);
     apex_assert_hard(child != nullptr);
-    apex_assert_hard(child->guard_ == -1);
 
     if(execution_mutex_.try_lock()) {
 
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         for(auto it = children_.begin(); it != children_.end();) {
             Signal<Signature>* c = *it;
+            // if the child exists, it has to be valid, otherwise the pointer may point to a destructed object
             apex_assert_hard(c->guard_ == -1);
             if(c == child) {
                 it =  children_.erase(it);
@@ -337,6 +336,7 @@ Connection::Deleter Signal<Signature>::makeSignalDeleter(Signal<Signature>* pare
 {
     apex_assert_hard(guard_ == -1);
     apex_assert_hard(parent->guard_ == -1);
+    apex_assert_hard(sig->guard_ == -1);
     return [parent, sig] {
         apex_assert_hard(parent->guard_ == -1);
         parent->removeChild(sig);

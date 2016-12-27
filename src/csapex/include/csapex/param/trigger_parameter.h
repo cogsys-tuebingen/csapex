@@ -16,6 +16,10 @@ public:
     typedef std::shared_ptr<TriggerParameter> Ptr;
 
 public:
+    slim_signal::Signal<void(Parameter*)> first_connect;
+    slim_signal::Signal<void(Parameter*)> last_disconnect;
+
+public:
     TriggerParameter();
     explicit TriggerParameter(const std::string& name, const ParameterDescription& description);
     virtual ~TriggerParameter();

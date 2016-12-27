@@ -2,44 +2,37 @@
 #define TICKABLE_NODE_H
 
 /// COMPONENT
-#include <csapex/model/generator_node.h>
+#include <csapex/model/node.h>
 #include <csapex/utility/rate.h>
+#include <csapex/utility/ticker.h>
+
+#warning TickableNode is deprecated and may not work correctly anymore!
+#warning  - if you used it to implement a source, just derive from Node directly and implement process()
+#warning  - if you used it to implement a frequency limit source, just derive from ThrottledNode directly and implement process()
+#warning  - if you used it to get a tick() callback periodically, use multiple inheritance and derive from Node and Ticker
 
 namespace csapex
 {
 
-class CSAPEX_EXPORT TickableNode : public GeneratorNode
+class CSAPEX_EXPORT TickableNode : public Node, public Ticker
 {
 public:
-    bool doTick(NodeModifier &nm, Parameterizable &p);
-    virtual bool canTick();
-
-    bool isTickEnabled() const;
-    void setTickEnabled(bool tick);
-
-    void setTickFrequency(double f);
-    double getTickFrequency() const;
-
-    void setTickImmediate(bool immediate);
-    bool isImmediate() const;
-
-    void keepUpRate();
-
-    virtual bool isDoneProcessing() const override;
+    virtual void setup(NodeModifier& modifier);
 
     virtual void getProperties(std::vector<std::string>& properties) const override;
 
 protected:
-    virtual bool tick(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
-    virtual void tick();
+    // API:
+    virtual bool canTick() const;
+    virtual void tick() = 0;
+
+private:
+    bool doTick();
+    virtual void tickEvent() final override;
 
 protected:
     TickableNode();
-
-private:
-    bool tick_enabled_;
-
-    Rate tick_rate_;
+    ~TickableNode();
 };
 
 }

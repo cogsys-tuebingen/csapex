@@ -24,6 +24,8 @@ public:
     Node();
     virtual ~Node();
 
+    NodeHandle* getNodeHandle() const;
+
     UUID getUUID() const;
     virtual void initialize(csapex::NodeHandle* node_handle, const UUID &uuid);
 
@@ -31,6 +33,8 @@ public: /* API */
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
 
     virtual void setupParameters(Parameterizable& parameters);
+
+    virtual bool canProcess() const;
 
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters, Continuation continuation);
     virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters);
@@ -52,6 +56,9 @@ public: /* API */
     virtual void stateChanged();
 
     virtual void getProperties(std::vector<std::string>& properties) const;
+
+protected:
+    void yield() const;
 
 public:
     mutable StreamRelay adebug;

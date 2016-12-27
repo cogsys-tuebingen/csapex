@@ -58,7 +58,6 @@ public:
     virtual bool canSendMessages() const;
     virtual bool commitMessages(bool is_activated) = 0;
     virtual void publish();
-    virtual void nextMessage() = 0;
     virtual TokenPtr getToken() const = 0;
     virtual TokenPtr getAddedToken() = 0;
 
@@ -77,7 +76,6 @@ public:
     virtual void clearBuffer() = 0;
 
     virtual bool isConnectionPossible(Connectable* other_side) override;
-    virtual void removeConnection(Connectable* other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
 public:

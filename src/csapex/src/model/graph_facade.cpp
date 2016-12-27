@@ -26,11 +26,11 @@ using namespace csapex;
 GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNode* graph, NodeHandle* nh, GraphFacade *parent)
     : parent_(parent), absolute_uuid_(graph->getUUID()), graph_(graph), graph_handle_(nh), executor_(executor)
 {
-    connections_.push_back(graph->vertex_added.connect(
-                               delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeAddedHandler)));
+    observe(graph->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeAddedHandler));
 
-    connections_.push_back(graph->vertex_removed.connect(
-                               delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeRemovedHandler)));
+    observe(graph->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeRemovedHandler));
+
+    observe(graph->notification, notification);
 
     if(parent_) {
         apex_assert_hard(graph_handle_);
@@ -45,10 +45,7 @@ GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNode* graph, NodeHandle* 
 
 GraphFacade::~GraphFacade()
 {
-    for(auto& connection : connections_) {
-        connection.disconnect();
-    }
-    connections_.clear();
+    stopObserving();
 }
 
 GraphFacade* GraphFacade::getParent() const

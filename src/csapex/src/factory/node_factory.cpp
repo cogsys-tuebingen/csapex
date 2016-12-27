@@ -101,7 +101,7 @@ void NodeFactory::rebuildPrototypes()
         }
 
         if(!loaded) {
-            std::cerr << "reloading properties for node type " << type << std::endl;
+            NOTIFICATION_INFO("reloading properties for node type " << type);
             try {
                 auto last_modification = node_manager_->getLastModification(type);
 
@@ -111,7 +111,7 @@ void NodeFactory::rebuildPrototypes()
                 settings_.set(mod, last_modification);
 
             } catch(const std::exception& e) {
-                std::cerr << "plugin '" << type << "' cannot be loaded" << std::endl;
+                NOTIFICATION("plugin '" << type << "' cannot be loaded");
             }
         }
 
@@ -148,7 +148,7 @@ void NodeFactory::rebuildMap()
             ++it;
 
         } catch(const NodeConstructor::NodeConstructionException& e) {
-            std::cerr << "warning: cannot load node: " << e.what() << std::endl;
+            NOTIFICATION("cannot load node: " << e.what());
             it = constructors_.erase(it);
         }
     }
@@ -213,7 +213,7 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
 
     std::string type = target_type;
     if(type.find_first_of(" ") != type.npos) {
-        std::cout << "warning: type '" << type << "' contains spaces, stripping them!" << std::endl;
+        NOTIFICATION_WARN("type '" << type << "' contains spaces, stripping them!");
         while(type.find(" ") != type.npos) {
             type.replace(type.find(" "), 1, "");
         }
@@ -263,10 +263,12 @@ NodeHandlePtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
             result->setNodeState(state);
         }
 
+        node_constructed(result);
+
         return result;
 
     } else {
-        std::cerr << "error: cannot make node, type '" << target_type << "' is unknown" << std::endl;
+        NOTIFICATION("error: cannot make node, type '" << target_type << "' is unknown");
         return nullptr;
     }
 }

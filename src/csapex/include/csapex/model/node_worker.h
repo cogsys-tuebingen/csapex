@@ -12,6 +12,7 @@
 #include <csapex/utility/notification.h>
 #include <csapex/model/execution_mode.h>
 #include <csapex/model/observer.h>
+#include <csapex/utility/notifier.h>
 
 /// SYSTEM
 #include <map>
@@ -27,11 +28,10 @@ namespace csapex {
 class Profiler;
 class Interval;
 
-class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer
+class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
 {
 public:
     enum ActivityType {
-        TICK,
         PROCESS,
         SLOT,
         OTHER
@@ -51,7 +51,7 @@ public:
     NodeWorker(NodeHandlePtr node_handle);
     ~NodeWorker();
 
-    NodeHandlePtr getNodeHandle();
+    NodeHandlePtr getNodeHandle() const;
     NodePtr getNode() const;
     UUID getUUID() const;
 
@@ -83,6 +83,7 @@ public:
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
+    bool canExecute();
     bool canProcess() const;
     bool canReceive() const;
     bool canSend() const;
@@ -91,12 +92,10 @@ public:
     void trySendEvents();
 
 public:
-    bool tick();
-
-    void startProcessingMessages();
+    bool startProcessingMessages();
     void forwardMessages(bool send_parameters);
 
-    bool tryProcess();
+    bool execute();
 
     void checkParameters();    
     void checkIO();
@@ -112,7 +111,6 @@ public:
     slim_signal::Signal<void()> destroyed;
     slim_signal::Signal<void()> panic;
 
-    slim_signal::Signal<void()> ticked;
     slim_signal::Signal<void(bool)> enabled;
 
     slim_signal::Signal<void(NodeWorker* worker, int type, std::shared_ptr<const Interval> stamp)> interval_start;
@@ -120,8 +118,6 @@ public:
 
     slim_signal::Signal<void(NodeWorker* worker)> start_profiling;
     slim_signal::Signal<void(NodeWorker* worker)> stop_profiling;
-
-    slim_signal::Signal<void(Notification)> notification;
 
     slim_signal::Signal<void()> messages_processed;
     slim_signal::Signal<void()> processRequested;
@@ -140,9 +136,7 @@ private:
     void activateOutput();
 
     void updateState();
-    void updateTransitionConnections();
 
-    void finishGenerator();
     void finishProcessing();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
@@ -159,20 +153,20 @@ private:
 
     NodeHandlePtr node_handle_;
 
+    mutable std::recursive_mutex current_exec_mode_mutex_;
     boost::optional<ExecutionMode> current_exec_mode_;
 
     bool is_setup_;
     State state_;
 
-    Event* trigger_tick_done_;
+    bool is_processing_;
+
     Event* trigger_process_done_;
 
     Event* trigger_activated_;
     Event* trigger_deactivated_;
 
     std::map<Connectable*, std::vector<slim_signal::Connection>> port_connections_;
-
-    int ticks_;
 
     mutable std::recursive_mutex state_mutex_;
 

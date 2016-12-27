@@ -55,6 +55,11 @@ void SignalBase::removeConnection(const Connection *connection)
     }
 }
 
+bool SignalBase::isConnected() const
+{
+    return !connections_.empty();
+}
+
 void SignalBase::disconnectAll()
 {
     apex_assert_hard(guard_ == -1);

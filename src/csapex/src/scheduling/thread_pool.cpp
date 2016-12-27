@@ -7,6 +7,7 @@
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/task.h>
 #include <csapex/scheduling/task_generator.h>
+#include <csapex/scheduling/timed_queue.h>
 
 /// SYSTEM
 #include <set>
@@ -16,9 +17,12 @@
 using namespace csapex;
 
 ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool grouping)
-    : handler_(handler), enable_threading_(enable_threading), grouping_(grouping)
+    : handler_(handler),
+      timed_queue_(new TimedQueue),
+      enable_threading_(enable_threading), grouping_(grouping)
 {
-    default_group_ = std::make_shared<ThreadGroup>(handler_,
+    default_group_ = std::make_shared<ThreadGroup>(timed_queue_,
+                                                   handler_,
                                                    ThreadGroup::DEFAULT_GROUP_ID, "default");
     default_group_->end_step.connect([this]() {
         checkIfStepIsDone();
@@ -30,7 +34,8 @@ ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool gr
 ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_threading, bool grouping)
     : handler_(handler), enable_threading_(enable_threading), grouping_(grouping)
 {
-    default_group_ = std::make_shared<ThreadGroup>(handler_,
+    default_group_ = std::make_shared<ThreadGroup>(timed_queue_,
+                                                   handler_,
                                                    ThreadGroup::DEFAULT_GROUP_ID, "default");
     default_group_->end_step.connect([this]() {
         checkIfStepIsDone();
@@ -38,6 +43,11 @@ ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_
 
     //parent->begin_step.connect(delegate::Delegate<void()>(this, &ThreadPool::step));
     parent->addChild(this);
+}
+
+ThreadPool::~ThreadPool()
+{
+    group_assignment_.clear();
 }
 
 
@@ -193,7 +203,8 @@ bool ThreadPool::isInGroup(TaskGenerator *task, int id) const
 void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
 {
     if(!isInPrivateThread(task)) {
-        auto group = std::make_shared<ThreadGroup>(handler_, ThreadGroup::PRIVATE_THREAD,
+        auto group = std::make_shared<ThreadGroup>(timed_queue_,
+                                                   handler_, ThreadGroup::PRIVATE_THREAD,
                                                    task->getUUID().getShortName());
         group->setPause(isPaused());
 
@@ -245,7 +256,7 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
         }
     }
 
-    ThreadGroupPtr group = std::make_shared<ThreadGroup>(handler_, name);
+    ThreadGroupPtr group = std::make_shared<ThreadGroup>(timed_queue_, handler_, name);
     group->setPause(isPaused());
 
     groups_.push_back(group);
@@ -346,7 +357,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
                 if(group_id >= ThreadGroup::MINIMUM_THREAD_ID) {
                     std::string group_name = group["name"].as<std::string>();
 
-                    auto g = std::make_shared<ThreadGroup>(handler_, group_id, group_name);
+                    auto g = std::make_shared<ThreadGroup>(timed_queue_, handler_, group_id, group_name);
                     g->setPause(isPaused());
 
                     groups_.push_back(g);

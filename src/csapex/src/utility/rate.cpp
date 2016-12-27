@@ -21,7 +21,7 @@ Rate::Rate()
 
 double Rate::getEffectiveFrequency() const
 {
-    if(real_ticks_.empty()) {
+    if(real_ticks_.size() <= 1) {
         return 0.0;
     }
 
@@ -37,7 +37,7 @@ double Rate::getFrequency() const
 }
 void Rate::setFrequency(double f)
 {
-    if(frequency_ < 0.0) {
+    if(f < 0.0) {
         setImmediate(true);
     } else {
         immediate_ = false;
@@ -61,15 +61,26 @@ void Rate::setImmediate(bool immediate)
 void Rate::keepUp()
 {
     std::chrono::milliseconds interval(int(1000.0 / frequency_));
-
-    auto now = std::chrono::system_clock::now();
-
     auto end_of_cycle = last_scheduled_tick_ + interval;
+
     last_scheduled_tick_ = end_of_cycle;
 
+    auto now = std::chrono::system_clock::now();
     if(end_of_cycle > now) {
         std::this_thread::sleep_until(end_of_cycle);
     }
+}
+
+void Rate::startCycle()
+{
+    last_tick_ = std::chrono::system_clock::now();
+}
+
+std::chrono::system_clock::time_point Rate::endOfCycle() const
+{
+    std::chrono::milliseconds interval(int(1000.0 / frequency_));
+
+    return last_tick_ + interval;
 }
 
 void Rate::tick()
@@ -77,7 +88,7 @@ void Rate::tick()
     auto now = std::chrono::system_clock::now();
     real_ticks_.emplace_back(now);
 
-    std::size_t N = 16;
+    const std::size_t N = 4;
     while(real_ticks_.size() > N) {
         auto duration = now - real_ticks_.front();
         double sec = std::chrono::duration_cast<std::chrono::microseconds>(duration).count() * 1e-6;

@@ -24,7 +24,6 @@ protected:
     bool doRedo() override;
 
     bool doExecute() override;
-    void refresh();
 
     virtual std::string getType() const override;
     virtual std::string getDescription() const override;
@@ -34,9 +33,6 @@ protected:
     UUID to_uuid;
 
 private:
-    OutputPtr from;
-    InputPtr to;
-
     bool active;
 };
 }

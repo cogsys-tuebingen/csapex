@@ -105,20 +105,26 @@ void Slot::notifyMessageProcessed()
 
 void Slot::handleEvent()
 {
-    apex_assert_hard(message_);
+    {
+        std::unique_lock<std::mutex> lock(message_mutex_);
+        apex_assert_hard(message_);
 
-    // do the work
-    if(isEnabled() || isActive()) {
-        if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
-            apex_assert_hard(guard_ == -1);
-            try {
-                callback_(this, message_);
-            } catch(const std::exception& e) {
-                std::cerr << "slot " << getUUID() << " has thrown an exception: " << e.what() << std::endl;
+        // do the work
+        if(isEnabled() || isActive()) {
+            auto msg_copy = message_;
+            lock.unlock();
+
+            if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
+                apex_assert_hard(guard_ == -1);
+                try {
+                    callback_(this, msg_copy);
+                } catch(const std::exception& e) {
+                    std::cerr << "slot " << getUUID() << " has thrown an exception: " << e.what() << std::endl;
+                }
+            } else {
+                notifyEventHandled();
+                return;
             }
-        } else {
-            notifyEventHandled();
-            return;
         }
     }
 
@@ -129,7 +135,15 @@ void Slot::handleEvent()
 
 void Slot::notifyEventHandled()
 {
-    message_.reset();
+    for(auto connection : connections_) {
+        if(connection->getState() == Connection::State::UNREAD) {
+            return;
+        }
+    }
+    {
+        std::unique_lock<std::mutex> lock(message_mutex_);
+        message_.reset();
+    }
     notifyMessageProcessed();
 }
 

@@ -24,6 +24,7 @@
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/set_execution_mode.h>
 #include <csapex/command/set_logger_level.h>
+#include <csapex/command/set_max_execution_frequency.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/settings.h>
@@ -290,20 +291,22 @@ void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
 
 void GraphView::resizeEvent(QResizeEvent *event)
 {
-    scene_->setSceneRect(scene_->itemsBoundingRect());
+    //scene_->setSceneRect(scene_->itemsBoundingRect());
 
     QGraphicsView::resizeEvent(event);
 }
 
 void GraphView::scrollContentsBy(int dx, int dy)
 {
-    QRectF min_r = scene_->itemsBoundingRect();
+    QRectF min_r = item_bbox_;
 
     QPointF tl_view = mapToScene(QPoint(0, 0));
     QPointF br_view = mapToScene(QPoint(width(), height()));
 
-    double mx = std::abs(dx) + 10;
-    double my = std::abs(dy) + 10;
+    int grow = 50;
+
+    double mx = std::abs(dx) + grow;
+    double my = std::abs(dy) + grow;
 
     QPointF tl(std::min(tl_view.x() - mx, min_r.x()),
                std::min(tl_view.y() - my, min_r.y()));
@@ -453,7 +456,7 @@ void GraphView::updateSelection()
     }
 }
 
-Command::Ptr GraphView::deleteSelected()
+void GraphView::deleteSelected()
 {
     CommandFactory factory(graph_facade_.get());
 
@@ -465,7 +468,7 @@ Command::Ptr GraphView::deleteSelected()
         }
     }
 
-    return factory.deleteAllNodes(uuids);
+    view_core_.execute(factory.deleteAllNodes(uuids));
 }
 
 void GraphView::keyPressEvent(QKeyEvent* e)
@@ -982,6 +985,8 @@ void GraphView::addBox(NodeBox *box)
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
     }
+
+    invalidateCache();
 }
 
 void GraphView::removeBox(NodeBox *box)
@@ -1003,6 +1008,8 @@ void GraphView::removeBox(NodeBox *box)
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
     }
+
+    invalidateCache();
 }
 
 
@@ -1174,9 +1181,6 @@ void GraphView::startProfiling(NodeWorker *node)
 
     auto cp = nw->messages_processed.connect([prof](){ prof->update(); });
     profiling_connections_[box].push_back(cp);
-
-    auto ct = nw->ticked.connect([prof](){ prof->update(); });
-    profiling_connections_[box].push_back(ct);
 }
 
 void GraphView::stopProfiling(NodeWorker *node)
@@ -1213,6 +1217,12 @@ void GraphView::movedBoxes(double dx, double dy)
     }
     view_core_.execute(meta);
 
+    invalidateCache();
+}
+
+void GraphView::invalidateCache()
+{
+    item_bbox_ = scene_->itemsBoundingRect();
     scene_->invalidateSchema();
 }
 
@@ -1372,6 +1382,38 @@ void GraphView::setLoggerLevel(int level)
     view_core_.execute(cmd);
 }
 
+
+void GraphView::setMaximumFrequency()
+{
+    if(selected_boxes_.empty()) {
+        return;
+    }
+
+    bool ok = false;
+    double current_f = selected_boxes_.front()->getNodeHandle()->getNodeState()->getMaximumFrequency();
+    if(current_f <= 0.0) {
+        current_f = 30.0;
+    }
+
+    double max_f = QInputDialog::getDouble(QApplication::activeWindow(), "Maximum Frequency", "Please enter the maximum frequency.", current_f, 0.0001, 400.0, 5, &ok);
+    if(ok) {
+        command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set maximum frequency"));
+        for(NodeBox* box : selected_boxes_) {
+            cmd->add(Command::Ptr(new command::SetMaximumExecutionFrequency(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), max_f)));
+        }
+        view_core_.execute(cmd);
+    }
+}
+
+void GraphView::setUnboundedMaximumFrequency()
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set unbounded frequency"));
+    for(NodeBox* box : selected_boxes_) {
+        cmd->add(Command::Ptr(new command::SetMaximumExecutionFrequency(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), 0.0)));
+    }
+    view_core_.execute(cmd);
+}
+
 void GraphView::minimizeBox(bool muted)
 {
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),(muted ? std::string("minimize") : std::string("maximize")) + " boxes"));
@@ -1407,8 +1449,8 @@ void GraphView::morphNode()
 
         command::Meta::Ptr morph = std::make_shared<command::Meta>(graph_facade_->getAbsoluteUUID(), "change node type");
 
-        CommandPtr delete_old = std::make_shared<command::DeleteNode>(graph_facade_->getAbsoluteUUID(), nh->getUUID());
-        morph->add(delete_old);
+        CommandFactory factory(graph_facade_.get());
+        morph->add(factory.deleteAllNodes({nh->getUUID()}));
 
         UUID new_uuid = graph_facade_->getGraph()->generateUUID(type);
         CommandPtr add_new = std::make_shared<command::AddNode>(graph_facade_->getAbsoluteUUID(),

@@ -35,6 +35,9 @@ Connection::Connection(OutputPtr from, InputPtr to, int id)
     from->enabled_changed.connect(source_enable_changed);
     to->enabled_changed.connect(sink_enabled_changed);
 
+    to->essential_changed.connect(connection_changed);
+    from->essential_changed.connect(connection_changed);
+
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
 }
@@ -203,6 +206,15 @@ OutputPtr Connection::from() const
 }
 
 InputPtr Connection::to() const
+{
+    return to_;
+}
+ConnectablePtr Connection::source() const
+{
+    return from_;
+}
+
+ConnectablePtr  Connection::target() const
 {
     return to_;
 }

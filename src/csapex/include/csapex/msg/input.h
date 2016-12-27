@@ -67,7 +67,6 @@ public:
 
 protected:
     virtual bool isConnectionPossible(Connectable* other_side) override;
-    virtual void removeConnection(Connectable* other_side) override;
 
 protected:
     InputTransition* transition_;

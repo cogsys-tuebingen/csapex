@@ -69,7 +69,9 @@ CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>
     }
 
     for(ConnectionPtr c : connections) {
-        meta->add(std::make_shared<DeleteConnection>(graph_uuid, c->from().get(), c->to().get()));
+        if(!c->from()->isVirtual() && !c->to()->isVirtual()) {
+            meta->add(std::make_shared<DeleteConnection>(graph_uuid, c->from().get(), c->to().get()));
+        }
     }
     return meta;
 }
@@ -118,18 +120,24 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Connectable* c)
 
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
 {
-    auto connections = input->getConnections();
-    if(connections.empty()) {
-        return nullptr;
+    Meta::Ptr removeAll(new Meta(graph_uuid, "Remove All Connections", true));
+
+    for(ConnectionPtr connection : input->getConnections()) {
+        OutputPtr output = connection->from();
+        if(!output->isVirtual() && !input->isVirtual()) {
+            Command::Ptr removeThis(new DeleteConnection(graph_uuid, output.get(), input));
+            removeAll->add(removeThis);
+        }
     }
-    apex_assert_hard(connections.size() == 1);
-    OutputPtr output = input->getSource();
-    Command::Ptr cmd(new DeleteConnection(graph_uuid, output.get(), input));
-    return cmd;
+
+
+    return removeAll;
 }
 
 Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* connection) {
+    apex_assert_hard(!output->isVirtual());
     InputPtr input = connection->to();
+    apex_assert_hard(!input->isVirtual());
     return Command::Ptr (new DeleteConnection(graph_uuid, output, input.get()));
 }
 
@@ -139,8 +147,10 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
 
     for(ConnectionPtr connection : output->getConnections()) {
         InputPtr input = connection->to();
-        Command::Ptr removeThis(new DeleteConnection(graph_uuid, output, input.get()));
-        removeAll->add(removeThis);
+        if(!output->isVirtual() && !input->isVirtual()) {
+            Command::Ptr removeThis(new DeleteConnection(graph_uuid, output, input.get()));
+            removeAll->add(removeThis);
+        }
     }
 
     return removeAll;

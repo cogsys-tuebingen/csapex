@@ -82,6 +82,8 @@ bool WidgetPicker::eventFilter(QObject*, QEvent * e)
         break;
 
     default:
+        e->ignore();
+        return true;
         break;
     }
 

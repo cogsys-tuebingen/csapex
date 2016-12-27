@@ -8,6 +8,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/core/exception_handler.h>
+#include <csapex/scheduling/timed_queue.h>
 
 /// SYSTEM
 #include <iostream>
@@ -16,15 +17,19 @@ using namespace csapex;
 
 int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
 
-ThreadGroup::ThreadGroup(ExceptionHandler& handler, int id, std::string name)
+ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler& handler, int id, std::string name)
     : handler_(handler), destroyed_(false),
-      id_(id), name_(name), running_(false), pause_(false), stepping_(false)
+      id_(id), name_(name),
+      timed_queue_(timed_queue),
+      running_(false), pause_(false), stepping_(false)
 {
     next_id_ = std::max(next_id_, id + 1);
 }
-ThreadGroup::ThreadGroup(ExceptionHandler &handler, std::string name)
+ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler &handler, std::string name)
     : handler_(handler), destroyed_(false),
-      id_(next_id_++), name_(name), running_(false), pause_(false), stepping_(false)
+      id_(next_id_++), name_(name),
+      timed_queue_(timed_queue),
+      running_(false), pause_(false), stepping_(false)
 {
 }
 
@@ -183,7 +188,8 @@ void ThreadGroup::stop()
 
         apex_assert_hard(generators_.empty());
         apex_assert_hard(generator_connections_.empty());
-        apex_assert_hard(tasks_.empty());
+
+        clear();
     }
 
 }
@@ -290,6 +296,11 @@ void ThreadGroup::schedule(TaskPtr task)
     task->setScheduled(true);
 
     work_available_.notify_all();
+}
+
+void ThreadGroup::scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time)
+{
+    timed_queue_->schedule(shared_from_this(), schedulable, time);
 }
 
 void ThreadGroup::schedulingLoop()

@@ -46,13 +46,14 @@ private:
 private:
     CsApexViewCore& view_core_;
 
+    ThreadPoolPtr executor;
+
     std::shared_ptr<CsApexCore> core_temp_;
     std::shared_ptr<CommandDispatcher> temp_dispatcher_;
     std::shared_ptr<CsApexViewCore> view_core_temp_;
 
     std::shared_ptr<UUIDProvider> root_uuid_provider_;
 
-    ThreadPoolPtr executor;
 
     NodeHandlePtr graph_old_handle;
     NodeHandlePtr graph_new_handle;
@@ -60,7 +61,7 @@ private:
     NodeHandlePtr nh_old;
     NodeHandlePtr nh_new;
 
-    NodeHandle* node_;
+    NodeHandle* nh_;
 
     SubgraphNodePtr graph_old;
     GraphFacadePtr graph_facade_old_;
