@@ -364,6 +364,7 @@ add_library(csapex SHARED
     src/scheduling/task_generator.cpp
     src/scheduling/thread_group.cpp
     src/scheduling/thread_pool.cpp
+    src/scheduling/timed_queue.cpp
 
     src/signal/slot.cpp
     src/signal/event.cpp
@@ -430,6 +431,7 @@ add_library(csapex_command SHARED
     src/command/update_parameter.cpp
     src/command/set_execution_mode.cpp
     src/command/set_logger_level.cpp
+    src/command/set_max_execution_frequency.cpp
 
 	${csapex_command_HEADERS}
 )

@@ -75,6 +75,8 @@ private:
 private:
     ExceptionHandler& handler_;
 
+    TimedQueuePtr timed_queue_;
+
     bool enable_threading_;
     bool grouping_;
 

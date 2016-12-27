@@ -423,9 +423,16 @@ void NodeBox::updateFrequencyInformation()
 
     if(info_frequency->isVisible()) {
         const Rate& rate = nh->getRate();
+        double max_f = nh->getNodeState()->getMaximumFrequency();
+
         double f = rate.getEffectiveFrequency();
         std::stringstream info;
-        info << "<i><b>" << std::setprecision(4) << f << "Hz</b></i>";
+        info << "<i><b>";
+        info << std::setprecision(4) << f;
+        if(max_f > 0.0) {
+            info << " / " << max_f;
+        }
+        info << "Hz</b></i>";
         info_frequency->setText(info.str().c_str());
     }
 }

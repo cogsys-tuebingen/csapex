@@ -13,7 +13,8 @@
 using namespace csapex;
 
 NodeState::NodeState(const NodeHandle *parent)
-    : pos_changed(new SignalImpl),
+    : max_frequency_changed(new SignalImpl),
+      pos_changed(new SignalImpl),
       z_changed(new SignalImpl),
       color_changed(new SignalImpl),
       label_changed(new SignalImpl),
@@ -28,7 +29,7 @@ NodeState::NodeState(const NodeHandle *parent)
       parent_changed(new SignalImpl),
       parent_(parent),
 
-      z_(0), minimized_(false), muted_(false), enabled_(true), active_(false), flipped_(false),
+      max_frequency_(60.0), z_(0), minimized_(false), muted_(false), enabled_(true), active_(false), flipped_(false),
       logger_level_(1), thread_id_(-1),
       r_(-1), g_(-1), b_(-1), exec_mode_(ExecutionMode::SEQUENTIAL)
 {
@@ -44,6 +45,7 @@ NodeState::~NodeState()
 NodeState& NodeState::operator = (const NodeState& rhs)
 {
     // first change all values
+    max_frequency_ = rhs.max_frequency_;
     pos_ = rhs.pos_;
     enabled_ = rhs.enabled_;
     active_ = rhs.active_;
@@ -63,6 +65,7 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     dictionary = rhs.dictionary;
 
     // then trigger the signals
+    (*max_frequency_changed)();
     (*pos_changed)();
     (*enabled_changed)();
     (*active_changed)();
@@ -78,6 +81,20 @@ NodeState& NodeState::operator = (const NodeState& rhs)
 
     return *this;
 }
+
+void NodeState::setMaximumFrequency(double f)
+{
+    if(max_frequency_ != f) {
+        max_frequency_ = f;
+        (*max_frequency_changed)();
+    }
+}
+
+double NodeState::getMaximumFrequency() const
+{
+    return max_frequency_;
+}
+
 Point NodeState::getPos() const
 {
     return pos_;
@@ -277,6 +294,7 @@ void NodeState::writeYaml(YAML::Node &out) const
         out["type"] = parent_->getType();
         out["uuid"] = parent_->getUUID().getFullName();
     }
+    out["max_frequency"] = max_frequency_;
     out["label"] = label_;
     out["pos"][0] = pos_.x;
     out["pos"][1] = pos_.y;
@@ -346,6 +364,10 @@ void NodeState::writeYaml(YAML::Node &out) const
 
 void NodeState::readYaml(const YAML::Node &node)
 {
+    if(node["max_frequency"].IsDefined()) {
+        setMaximumFrequency(node["max_frequency"].as<double>());
+    }
+
     if(node["minimized"].IsDefined()) {
         setMinimized(node["minimized"].as<bool>());
     }

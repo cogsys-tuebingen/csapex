@@ -1,0 +1,65 @@
+/// HEADER
+#include <csapex/command/set_max_execution_frequency.h>
+
+/// COMPONENT
+#include <csapex/command/command.h>
+#include <csapex/model/graph.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/model/node_state.h>
+
+/// SYSTEM
+#include <sstream>
+
+/// COMPONENT
+#include <csapex/utility/assert.h>
+
+using namespace csapex;
+using namespace csapex::command;
+
+SetMaximumExecutionFrequency::SetMaximumExecutionFrequency(const AUUID& parent_uuid, const UUID &node, double frequency)
+    : Command(parent_uuid), uuid(node), frequency(frequency)
+{
+}
+
+std::string SetMaximumExecutionFrequency::getType() const
+{
+    return "SetMaximumExecutionFrequency";
+}
+
+std::string SetMaximumExecutionFrequency::getDescription() const
+{
+    std::stringstream ss;
+    ss << "set the frequency of " << uuid << " to " << frequency;
+    return ss.str();
+}
+
+bool SetMaximumExecutionFrequency::doExecute()
+{
+    NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
+    apex_assert_hard(node_handle);
+
+    NodeStatePtr state = node_handle->getNodeState();
+    was_frequency = state->getMaximumFrequency();
+
+    state->setMaximumFrequency(frequency);
+
+    return true;
+}
+
+bool SetMaximumExecutionFrequency::doUndo()
+{
+    NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
+    apex_assert_hard(node_handle);
+
+    NodeStatePtr state = node_handle->getNodeState();
+
+    state->setMaximumFrequency(was_frequency);
+
+    return true;
+}
+
+bool SetMaximumExecutionFrequency::doRedo()
+{
+    return doExecute();
+}
+

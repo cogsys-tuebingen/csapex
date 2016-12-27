@@ -189,6 +189,8 @@ private:
     void flipBox();
     void setExecutionMode(ExecutionMode mode);
     void setLoggerLevel(int level);
+    void setMaximumFrequency();
+    void setUnboundedMaximumFrequency();
     void chooseColor();
     void minimizeBox(bool mini);
     void muteBox(bool muted);

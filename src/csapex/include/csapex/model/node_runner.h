@@ -41,6 +41,7 @@ public:
     virtual void reset() override;
 
     void schedule(TaskPtr task);
+    void scheduleDelayed(TaskPtr task, std::chrono::system_clock::time_point time);
 
 private:
     void measureFrequency();
@@ -49,6 +50,8 @@ private:
 
     void scheduleTick();
     void scheduleProcess();
+
+    void execute();
 
     void stopTickThread();
 
@@ -60,7 +63,6 @@ private:
 
     bool paused_;
     bool ticking_;
-    bool is_source_;
     bool stepping_;
     bool can_step_;
 
@@ -75,6 +77,9 @@ private:
     std::vector<TaskPtr> remaining_tasks_;
 
     long guard_;
+    double max_frequency_;
+
+    bool waiting_;
 };
 
 }

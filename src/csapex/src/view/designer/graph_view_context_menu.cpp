@@ -131,6 +131,8 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
     bool has_note = false;
     bool has_pipeline = false;
     bool has_sequential = false;
+    bool has_bounded = false;
+    bool has_unbounded = false;
 
     std::map<int, bool> has_log_level;
     for(int i = 0; i <=3; ++i) {
@@ -149,6 +151,10 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         bool muted = state->isMuted();
         has_muted |= muted;
         has_unmuted |= !muted;
+
+        double max_f = state->getMaximumFrequency();
+        has_unbounded |= max_f <= 0.0;
+        has_bounded |= max_f > 0.0;
 
         bool enabled = box->getNodeWorker()->isProcessingEnabled();
         has_enabled|= enabled;
@@ -252,6 +258,24 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         type_sequence->setChecked(!has_pipeline && has_sequential);
         menu.addAction(type_sequence);
         handler[type_sequence] = std::bind(&GraphView::setExecutionMode, &view_, ExecutionMode::SEQUENTIAL);
+
+        menu.addSeparator();
+
+        QMenu* max_freq_menu = menu.addMenu(QIcon(":/help.png"), "set maximum frequency");
+        {
+            QAction* a1 = new QAction("unbounded", &menu);
+            handler[a1] = std::bind(&GraphView::setUnboundedMaximumFrequency, &view_);
+            max_freq_menu->addAction(a1);
+            a1->setCheckable(true);
+            a1->setChecked(has_unbounded && !has_bounded);
+
+            QAction* a2 = new QAction("limited", &menu);
+            handler[a2] = std::bind(&GraphView::setMaximumFrequency, &view_);
+            max_freq_menu->addAction(a2);
+            a2->setCheckable(true);
+            a2->setChecked(!has_unbounded && has_bounded);
+        }
+        menu.addMenu(max_freq_menu);
 
         menu.addSeparator();
 

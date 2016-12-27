@@ -183,10 +183,7 @@ public:
      */
 
     virtual bool isSource() const = 0;
-    virtual void setIsSource(bool source) = 0;
-
     virtual bool isSink() const = 0;
-    virtual void setIsSink(bool sink) = 0;
 
     bool isProcessingEnabled() const;
     void setProcessingEnabled(bool enabled);

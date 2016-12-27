@@ -34,8 +34,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       transition_in_(transition_in),
       transition_out_(transition_out),
       
-      uuid_provider_(uuid_provider),
-      source_(false), sink_(false)
+      uuid_provider_(uuid_provider)
 {
     node_->initialize(this, uuid);
     
@@ -124,19 +123,8 @@ void NodeHandle::updateLoggerLevel()
     triggerNodeStateChanged();
 }
 
-void NodeHandle::setIsSource(bool source)
-{
-    source_ = source;
-}
-
 bool NodeHandle::isSource() const
 {
-    if(source_) {
-        return true;
-    }
-    
-    // check if there are no (mandatory) inputs -> then it's a virtual source
-    // TODO: remove and refactor old plugins
     for(InputPtr in : external_inputs_) {
         if(!in->isOptional() || in->isConnected()) {
             return false;
@@ -147,14 +135,9 @@ bool NodeHandle::isSource() const
 }
 
 
-void NodeHandle::setIsSink(bool sink)
-{
-    sink_ = sink;
-}
-
 bool NodeHandle::isSink() const
 {
-    return sink_ || external_outputs_.empty() || !transition_out_->hasConnection();
+    return external_outputs_.empty() || !transition_out_->hasConnection();
 }
 
 void NodeHandle::setActive(bool active)

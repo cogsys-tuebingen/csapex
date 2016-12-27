@@ -20,6 +20,7 @@ FWD(TaskGenerator);
 FWD(ThreadPool);
 FWD(ThreadGroup);
 FWD(Task);
+FWD(TimedQueue);
 }
 
 #undef FWD

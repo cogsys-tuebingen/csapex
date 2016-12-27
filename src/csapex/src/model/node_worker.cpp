@@ -739,7 +739,7 @@ void NodeWorker::updateState()
 
 bool NodeWorker::canExecute()
 {
-    if(isEnabled() && canProcess()) {
+    if(isEnabled() && canProcess() && isProcessingEnabled()) {
         return true;
     } else {
         return false;

@@ -39,6 +39,7 @@ public:
     virtual std::vector<TaskPtr> remove(TaskGenerator* schedulable) = 0;
 
     virtual void schedule(TaskPtr schedulable) = 0;
+    virtual void scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time) = 0;
 
 public:
     slim_signal::Signal<void()> begin_step;

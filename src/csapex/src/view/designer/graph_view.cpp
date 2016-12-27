@@ -24,6 +24,7 @@
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/set_execution_mode.h>
 #include <csapex/command/set_logger_level.h>
+#include <csapex/command/set_max_execution_frequency.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/settings.h>
@@ -1380,6 +1381,38 @@ void GraphView::setLoggerLevel(int level)
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set logger level"));
     for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::SetLoggerLevel(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), level)));
+    }
+    view_core_.execute(cmd);
+}
+
+
+void GraphView::setMaximumFrequency()
+{
+    if(selected_boxes_.empty()) {
+        return;
+    }
+
+    bool ok = false;
+    double current_f = selected_boxes_.front()->getNodeHandle()->getNodeState()->getMaximumFrequency();
+    if(current_f <= 0.0) {
+        current_f = 30.0;
+    }
+
+    double max_f = QInputDialog::getDouble(QApplication::activeWindow(), "Maximum Frequency", "Please enter the maximum frequency.", current_f, 0.0001, 400.0, 5, &ok);
+    if(ok) {
+        command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set maximum frequency"));
+        for(NodeBox* box : selected_boxes_) {
+            cmd->add(Command::Ptr(new command::SetMaximumExecutionFrequency(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), max_f)));
+        }
+        view_core_.execute(cmd);
+    }
+}
+
+void GraphView::setUnboundedMaximumFrequency()
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set unbounded frequency"));
+    for(NodeBox* box : selected_boxes_) {
+        cmd->add(Command::Ptr(new command::SetMaximumExecutionFrequency(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), 0.0)));
     }
     view_core_.execute(cmd);
 }

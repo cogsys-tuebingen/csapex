@@ -112,10 +112,7 @@ public:
 
 
     bool isSource() const override;
-    void setIsSource(bool source) override;
-
     bool isSink() const override;
-    void setIsSink(bool sink) override;
 
     bool isActive() const;
     void setActive(bool active);
@@ -203,9 +200,6 @@ private:
     Rate rate_;
 
     std::map<Connectable*, std::vector<slim_signal::Connection>> connections_;
-
-    bool source_;
-    bool sink_;
 };
 
 }
