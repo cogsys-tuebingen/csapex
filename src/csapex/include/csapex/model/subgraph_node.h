@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-#include <csapex/model/generator_node.h>
+#include <csapex/model/node.h>
 #include <csapex/model/variadic_io.h>
 #include <csapex/utility/uuid.h>
 
@@ -21,7 +21,7 @@ struct RelayMapping
 };
 
 
-class CSAPEX_EXPORT SubgraphNode : public Graph, public GeneratorNode, public Variadic
+class CSAPEX_EXPORT SubgraphNode : public Graph, public Node, public Variadic
 {
 public:
     SubgraphNode();
@@ -51,7 +51,6 @@ public:
     virtual void deactivation() override;
 
     virtual bool canProcess() const override;
-    virtual bool isDoneProcessing() const override;
     // Node interface
     virtual void setup(csapex::NodeModifier& modifier) override;
     virtual void setupParameters(Parameterizable& params) override;
@@ -105,7 +104,7 @@ public:
 
     void setIterationEnabled(const UUID& external_input_uuid, bool enabled);
 
-    virtual void notifyMessagesProcessed() override;
+    void notifyMessagesProcessed();
 
     std::string makeStatusString() const;
 
@@ -121,7 +120,6 @@ private:
     void tryFinishSubgraph();
 
     void finishSubgraph();
-    void notifySubgraphHasProducedTokens();
     void notifySubgraphProcessed();
 
     void sendCurrentIteration();

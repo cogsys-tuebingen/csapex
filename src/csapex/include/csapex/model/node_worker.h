@@ -137,7 +137,6 @@ private:
 
     void updateState();
 
-    void finishGenerator();
     void finishProcessing();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;

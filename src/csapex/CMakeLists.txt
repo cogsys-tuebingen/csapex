@@ -326,7 +326,6 @@ add_library(csapex SHARED
     src/model/node_characteristics.cpp
     src/model/observer.cpp
     src/model/parameterizable.cpp
-    src/model/generator_node.cpp
     src/model/tickable_node.cpp
     src/model/throttled_node.cpp
     src/model/tag.cpp

@@ -133,11 +133,6 @@ bool SubgraphNode::canProcess() const
     return Node::canProcess();
 }
 
-bool SubgraphNode::isDoneProcessing() const
-{
-    return transition_relay_out_->canStartSendingMessages();
-}
-
 
 void SubgraphNode::setupParameters(Parameterizable &params)
 {
@@ -627,8 +622,6 @@ void SubgraphNode::removeInternalPorts()
 
 void SubgraphNode::notifyMessagesProcessed()
 {
-    GeneratorNode::notifyMessagesProcessed();
-
     //    tryFinishProcessing();
     APEX_DEBUG_TRACE ainfo << "is notified" << std::endl;
     transition_relay_in_->notifyMessageProcessed();
@@ -641,7 +634,7 @@ void SubgraphNode::currentIterationIsProcessed()
     if(!is_subgraph_finished_) {
         tryFinishSubgraph();
     }
-    finished();
+    yield();
 }
 
 void SubgraphNode::subgraphHasProducedAllMessages()
@@ -687,13 +680,6 @@ void SubgraphNode::notifySubgraphProcessed()
     if(continuation_) {
         continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
         continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
-    }
-}
-
-void SubgraphNode::notifySubgraphHasProducedTokens()
-{
-    if(node_handle_->isSource()) {
-        updated();
     }
 }
 

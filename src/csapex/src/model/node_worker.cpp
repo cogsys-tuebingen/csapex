@@ -13,7 +13,7 @@
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph/vertex.h>
-#include <csapex/model/generator_node.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/param/trigger_parameter.h>
@@ -85,12 +85,6 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"activated");
             trigger_deactivated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"deactivated");
-
-            auto generator = std::dynamic_pointer_cast<GeneratorNode>(node);
-            if(generator) {
-                observe(generator->finished, delegate::Delegate0<>(this, &NodeWorker::triggerTryProcess));
-                observe(generator->updated, delegate::Delegate0<>(this, &NodeWorker::finishGenerator));
-            }
 
             trigger_process_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"inputs processed");
 
@@ -550,36 +544,6 @@ bool NodeWorker::startProcessingMessages()
     return true;
 }
 
-void NodeWorker::finishGenerator()
-{
-    apex_assert_hard(guard_ == -1);
-    apex_assert_hard(canSend());
-
-    bool has_msg = false;
-    for(OutputPtr out : node_handle_->getExternalOutputs()) {
-        if(msg::isConnected(out.get())) {
-            if(node_handle_->isParameterOutput(out.get())) {
-                has_msg = true;
-                break;
-            }
-
-            if(msg::hasMessage(out.get())) {
-                has_msg = true;
-                break;
-            }
-        }
-    }
-
-    if(has_msg) {
-        activateOutput();
-
-    } else {
-        node_handle_->getOutputTransition()->setOutputsIdle();
-    }
-
-    triggerTryProcess();
-}
-
 void NodeWorker::finishProcessing()
 {
     if(isProcessing()) {
@@ -700,8 +664,8 @@ void NodeWorker::finishTimer(Timer::Ptr t)
 
 void NodeWorker::outgoingMessagesProcessed()
 {
-    if(auto generator = std::dynamic_pointer_cast<GeneratorNode>(node_handle_->getNode().lock())) {
-        generator->notifyMessagesProcessed();
+    if(auto subgraph = std::dynamic_pointer_cast<SubgraphNode>(node_handle_->getNode().lock())) {
+        subgraph->notifyMessagesProcessed();
     }
 
     std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);

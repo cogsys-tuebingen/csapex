@@ -2,7 +2,7 @@
 #define TICKABLE_NODE_H
 
 /// COMPONENT
-#include <csapex/model/generator_node.h>
+#include <csapex/model/node.h>
 #include <csapex/utility/rate.h>
 #include <csapex/utility/ticker.h>
 
@@ -14,12 +14,11 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT TickableNode : public GeneratorNode, public Ticker
+class CSAPEX_EXPORT TickableNode : public Node, public Ticker
 {
 public:
     virtual void setup(NodeModifier& modifier);
 
-    virtual bool isDoneProcessing() const override;
     virtual void getProperties(std::vector<std::string>& properties) const override;
 
 protected:

@@ -22,14 +22,8 @@ void TickableNode::setup(NodeModifier& modifier)
     startTickThread();
 }
 
-bool TickableNode::isDoneProcessing() const
-{
-    return true;
-}
-
 void TickableNode::getProperties(std::vector<std::string>& properties) const
 {
-    GeneratorNode::getProperties(properties);
     properties.push_back("ticking");
 }
 
