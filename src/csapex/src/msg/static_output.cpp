@@ -22,6 +22,7 @@ StaticOutput::StaticOutput(const UUID &uuid, ConnectableOwnerWeakPtr owner)
 
 void StaticOutput::addMessage(TokenPtr message)
 {
+    apex_assert_hard(message);
     const auto& data = message->getTokenData();
     if(!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(data)) {
         setType(data->toType());

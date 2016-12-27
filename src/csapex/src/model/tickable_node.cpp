@@ -5,14 +5,21 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/profiling/interlude.hpp>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/node_worker.h>
 
 using namespace csapex;
 
 TickableNode::TickableNode()
-    : tick_enabled_(true),
-      tick_rate_(30.0, false)
 {
+}
 
+TickableNode::~TickableNode()
+{
+}
+
+void TickableNode::setup(NodeModifier& modifier)
+{
+    startTickThread();
 }
 
 bool TickableNode::isDoneProcessing() const
@@ -26,84 +33,35 @@ void TickableNode::getProperties(std::vector<std::string>& properties) const
     properties.push_back("ticking");
 }
 
-bool TickableNode::doTick(NodeModifier &nm, Parameterizable &p)
+bool TickableNode::doTick()
 {
-    bool res;
-    {
+    apex_assert_hard(node_handle_->getNodeWorker()->canSend());
+
+    bool res = false;
+    if(canTick()){
         INTERLUDE("tick");
         try {
-            res = tick(nm, p);
+            tick();
+            yield();
+            res = true;
         } catch(const std::exception& e) {
             aerr << "tick failed: " << e.what() << std::endl;
-            res = false;
         }
-    }
-
-    if(res) {
-        updated();
     }
 
     return res;
 }
 
-bool TickableNode::canTick()
+bool TickableNode::canTick() const
 {
     return true;
 }
 
-bool TickableNode::canProcess() const
+void TickableNode::tickEvent()
 {
-    if(node_handle_->isSource()) {
-        // legacy: sources deriving from tickable sould not process
-        // TODO: re-implement all tickables!
-        return false;
-
-    } else {
-        // the node is no source -> process as usual
-        return true;
-    }
-}
-
-bool TickableNode::isTickEnabled() const
-{
-    return tick_enabled_;
-}
-
-void TickableNode::setTickEnabled(bool tick)
-{
-    tick_enabled_ = tick;
-}
-
-double TickableNode::getTickFrequency() const
-{
-    return tick_rate_.getFrequency();
-}
-void TickableNode::setTickFrequency(double f)
-{
-    tick_rate_.setFrequency(f);
-}
-
-void TickableNode::setTickImmediate(bool immediate)
-{
-    tick_rate_.setImmediate(immediate);
-}
-
-bool TickableNode::isImmediate() const
-{
-    return tick_rate_.isImmediate();
-}
-
-bool TickableNode::tick(NodeModifier &nm, Parameterizable &p)
-{
-    tick();
-    return true;
-}
-
-void TickableNode::tick()
-{
-}
-
-void TickableNode::keepUpRate()
-{
-    tick_rate_.keepUp();
+    node_handle_->execution_requested([this](){
+        if(node_handle_->getNodeWorker()->canSend()) {
+            doTick();
+        }
+    });
 }

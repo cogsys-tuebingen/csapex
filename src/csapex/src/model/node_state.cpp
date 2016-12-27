@@ -29,7 +29,7 @@ NodeState::NodeState(const NodeHandle *parent)
       parent_changed(new SignalImpl),
       parent_(parent),
 
-      max_frequency_(60.0), z_(0), minimized_(false), muted_(false), enabled_(true), active_(false), flipped_(false),
+      max_frequency_(0.0), z_(0), minimized_(false), muted_(false), enabled_(true), active_(false), flipped_(false),
       logger_level_(1), thread_id_(-1),
       r_(-1), g_(-1), b_(-1), exec_mode_(ExecutionMode::SEQUENTIAL)
 {

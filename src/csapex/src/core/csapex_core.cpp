@@ -8,6 +8,7 @@
 #include <csapex/model/subgraph_node.h>
 #include <csapex/info.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/node_state.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/model/tag.h>
@@ -179,6 +180,9 @@ void CsApexCore::init()
         observe(node_factory_->notification, notification);
         node_factory_->loadPlugins();
         observe(node_factory_->new_node_type, new_node_type);
+        observe(node_factory_->node_constructed, [this](NodeHandlePtr n) {
+            n->getNodeState()->setMaximumFrequency(settings_.get("default_frequency", 60));
+        });
 
         status_changed("make graph");
 

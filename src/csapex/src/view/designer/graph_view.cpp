@@ -1181,9 +1181,6 @@ void GraphView::startProfiling(NodeWorker *node)
 
     auto cp = nw->messages_processed.connect([prof](){ prof->update(); });
     profiling_connections_[box].push_back(cp);
-
-    auto ct = nw->ticked.connect([prof](){ prof->update(); });
-    profiling_connections_[box].push_back(ct);
 }
 
 void GraphView::stopProfiling(NodeWorker *node)

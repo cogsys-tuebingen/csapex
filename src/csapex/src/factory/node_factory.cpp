@@ -263,6 +263,8 @@ NodeHandlePtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
             result->setNodeState(state);
         }
 
+        node_constructed(result);
+
         return result;
 
     } else {

@@ -32,7 +32,6 @@ class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer, public Noti
 {
 public:
     enum ActivityType {
-        TICK,
         PROCESS,
         SLOT,
         OTHER
@@ -93,8 +92,6 @@ public:
     void trySendEvents();
 
 public:
-    bool tick();
-
     bool startProcessingMessages();
     void forwardMessages(bool send_parameters);
 
@@ -114,7 +111,6 @@ public:
     slim_signal::Signal<void()> destroyed;
     slim_signal::Signal<void()> panic;
 
-    slim_signal::Signal<void()> ticked;
     slim_signal::Signal<void(bool)> enabled;
 
     slim_signal::Signal<void(NodeWorker* worker, int type, std::shared_ptr<const Interval> stamp)> interval_start;
@@ -166,15 +162,12 @@ private:
 
     bool is_processing_;
 
-    Event* trigger_tick_done_;
     Event* trigger_process_done_;
 
     Event* trigger_activated_;
     Event* trigger_deactivated_;
 
     std::map<Connectable*, std::vector<slim_signal::Connection>> port_connections_;
-
-    int ticks_;
 
     mutable std::recursive_mutex state_mutex_;
 

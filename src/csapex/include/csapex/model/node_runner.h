@@ -45,15 +45,10 @@ public:
 
 private:
     void measureFrequency();
-    void tick();
-    void tickLoop();
 
-    void scheduleTick();
     void scheduleProcess();
 
     void execute();
-
-    void stopTickThread();
 
 private:
     NodeWorkerPtr worker_;
@@ -62,18 +57,12 @@ private:
     mutable std::recursive_mutex mutex_;
 
     bool paused_;
-    bool ticking_;
     bool stepping_;
     bool can_step_;
 
-    TaskPtr tick_;
     TaskPtr check_parameters_;
     TaskPtr execute_;
 
-    std::thread ticking_thread_;
-
-    std::atomic<bool> tick_thread_running_;
-    std::atomic<bool> tick_thread_stop_;
     std::vector<TaskPtr> remaining_tasks_;
 
     long guard_;

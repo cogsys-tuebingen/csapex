@@ -4,7 +4,6 @@
 /// PROJECT
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/tickable_node.h>
 #include <csapex/scheduling/scheduler.h>
 #include <csapex/scheduling/task.h>
 #include <csapex/utility/assert.h>
@@ -19,13 +18,11 @@ using namespace csapex;
 
 NodeRunner::NodeRunner(NodeWorkerPtr worker)
     : worker_(worker), scheduler_(nullptr),
-      paused_(false), ticking_(false), stepping_(false), can_step_(false),
-      tick_thread_running_(false), guard_(-1),
+      paused_(false), stepping_(false), can_step_(false),
+      guard_(-1),
       waiting_(false)
 {
     NodeHandlePtr handle = worker_->getNodeHandle();
-    NodePtr node = handle->getNode().lock();
-    ticking_ = node && std::dynamic_pointer_cast<TickableNode>(node);
 
     handle->getNodeState()->max_frequency_changed->connect([this](){
         NodeHandlePtr handle = worker_->getNodeHandle();
@@ -49,13 +46,6 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
     {
         execute();
     }, 0, this);
-
-    if(ticking_) {
-        tick_ = std::make_shared<Task>(std::string("tick ") + handle->getUUID().getFullName(),
-                                       [this]() {
-            tick();
-        }, 0, this);
-    }
 }
 
 NodeRunner::~NodeRunner()
@@ -65,8 +55,6 @@ NodeRunner::~NodeRunner()
     if(scheduler_) {
         //        detach();
     }
-
-    stopTickThread();
 
     guard_ = 0xDEADBEEF;
 }
@@ -122,35 +110,12 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     observe(worker_->getNodeHandle()->execution_requested, [this](std::function<void()> cb) {
         schedule(std::make_shared<Task>("anonymous", cb, 0, this));
     });
-
-    if(ticking_ && !tick_thread_running_) {
-        // TODO: get rid of this!
-        ticking_thread_ = std::thread([this]() {
-            csapex::thread::set_name((std::string("T") + worker_->getUUID().getShortName()).c_str());
-            tick_thread_running_ = true;
-
-            tick_thread_stop_ = false;
-            tickLoop();
-
-            tick_thread_running_ = false;
-        });
-    }
 }
 
 
 Scheduler* NodeRunner::getScheduler() const
 {
     return scheduler_;
-}
-
-void NodeRunner::scheduleTick()
-{
-    if(!paused_) {
-        if(!stepping_ || can_step_) {
-            can_step_ = false;
-            schedule(tick_);
-        }
-    }
 }
 
 void NodeRunner::scheduleProcess()
@@ -202,46 +167,6 @@ void NodeRunner::execute()
     }
 }
 
-void NodeRunner::tick()
-{
-    apex_assert_hard(guard_ == -1);
-
-    bool success = worker_->tick();
-    if(stepping_) {
-        if(!success) {
-            can_step_ = true;
-        } else {
-            end_step();
-        }
-    }
-
-    if(success) {
-        measureFrequency();
-
-        NodeHandlePtr handle = worker_->getNodeHandle();
-        NodePtr node = handle->getNode().lock();
-        auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
-
-        if(ticker->isImmediate()) {
-            scheduleTick();
-        }
-    }
-}
-
-void NodeRunner::tickLoop()
-{
-    NodePtr node =  worker_->getNode();
-    auto ticker = std::dynamic_pointer_cast<TickableNode>(node);
-
-    while(!tick_thread_stop_) {
-        if(!ticker->isImmediate() || !tick_->isScheduled()) {
-            scheduleTick();
-        }
-
-        ticker->keepUpRate();
-    }
-}
-
 void NodeRunner::schedule(TaskPtr task)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
@@ -261,18 +186,8 @@ void NodeRunner::scheduleDelayed(TaskPtr task, std::chrono::system_clock::time_p
     scheduler_->scheduleDelayed(task, time);
 }
 
-void NodeRunner::stopTickThread()
-{
-    if(tick_thread_running_) {
-        tick_thread_stop_ = true;
-        ticking_thread_.join();
-    }
-}
-
 void NodeRunner::detach()
 {
-    stopTickThread();
-
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     if(scheduler_) {
@@ -323,9 +238,6 @@ bool NodeRunner::isStepping() const
 
 bool NodeRunner::isStepDone() const
 {
-    if(!ticking_) {
-        return true;
-    }
     return !can_step_;
 }
 

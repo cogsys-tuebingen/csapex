@@ -13,12 +13,12 @@
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph/vertex.h>
+#include <csapex/model/generator_node.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/param/trigger_parameter.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/node_modifier.h>
-#include <csapex/model/tickable_node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/delegate_bind.h>
 #include <csapex/msg/marker_message.h>
@@ -39,8 +39,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     : node_handle_(node_handle),
       is_setup_(false),
       state_(State::IDLE), is_processing_(false),
-      trigger_tick_done_(nullptr), trigger_process_done_(nullptr),
-      ticks_(0),
+      trigger_process_done_(nullptr),
       guard_(-1)
 {
     node_handle->setNodeWorker(this);
@@ -83,11 +82,6 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 setProcessingEnabled(false);
             }, false, false);
 
-
-            auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
-            if(tickable) {
-                trigger_tick_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"ticked");
-            }
 
             trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"activated");
             trigger_deactivated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"deactivated");
@@ -869,97 +863,6 @@ void NodeWorker::sendMessages(bool ignore_sink)
         node_handle_->setActive(false);
     }
 
-}
-
-
-bool NodeWorker::tick()
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(guard_ == -1);
-    if(!is_setup_) {
-        return false;
-    }
-
-    NodePtr node = node_handle_->getNode().lock();
-    if(!node) {
-        return false;
-    }
-
-    auto tickable = std::dynamic_pointer_cast<TickableNode>(node);
-    apex_assert_hard(tickable);
-
-    if(!isProcessingEnabled()) {
-        return false;
-    }
-
-    bool has_ticked = false;
-
-    if(isProcessingEnabled() && tickable->isTickEnabled()) {
-        if(isIdle() || isEnabled()) {
-            if(tickable->canTick()) {
-                if(isEnabled()) {
-                    setState(State::IDLE);
-                }
-
-                updateState();
-
-                if(node_handle_->getOutputTransition()->canStartSendingMessages()) {
-
-                    {
-                        std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-                        apex_assert_hard(isIdle() || isEnabled());
-                        setState(State::FIRED);
-                        is_processing_ = true;
-                    }
-                    node_handle_->getOutputTransition()->clearBuffer();
-
-                    Timer::Ptr timer;
-
-                    if(profiler_->isEnabled()) {
-                        timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
-                        timer->restart();
-                        timer->root->setActive(node_handle_->isActive());
-                        interval_start(this, TICK, timer->root);
-                    }
-
-                    {
-                        std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
-                        current_exec_mode_ = getNodeHandle()->getNodeState()->getExecutionMode();
-                        apex_assert_hard(current_exec_mode_);
-                    }
-
-                    has_ticked = tickable->doTick(*node_handle_, *node);
-
-                    if(has_ticked) {
-                        if(trigger_tick_done_->isConnected()) {
-                            trigger_tick_done_->trigger();
-                        }
-
-                        if(node_handle_->isSource()) {
-                            // reset input transition on tick
-                            //node_handle_->getInputTransition()->forwardMessages();
-                        }
-
-                        apex_assert_hard(guard_ == -1);
-                        ticked();
-
-                        ++ticks_;
-
-                    } else {
-                        std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
-                        current_exec_mode_.reset();
-                    }
-
-                    finishTimer(timer);
-
-                    is_processing_ = false;
-                    setState(State::IDLE);
-                }
-            }
-        }
-    }
-
-    return has_ticked;
 }
 
 void NodeWorker::checkParameters()

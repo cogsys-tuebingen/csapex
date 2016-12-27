@@ -173,6 +173,7 @@ add_library(csapex_util SHARED
     src/utility/uuid_provider.cpp
     src/utility/yaml_node_builder.cpp
     src/utility/slim_signal_implementations.cpp
+    src/utility/ticker.cpp
 
     ${csapex_util_HEADERS}
 )
@@ -327,6 +328,7 @@ add_library(csapex SHARED
     src/model/parameterizable.cpp
     src/model/generator_node.cpp
     src/model/tickable_node.cpp
+    src/model/throttled_node.cpp
     src/model/tag.cpp
     src/model/unique.cpp
     src/model/variadic_io.cpp
