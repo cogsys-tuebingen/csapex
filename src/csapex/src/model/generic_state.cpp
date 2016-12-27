@@ -195,13 +195,7 @@ void GenericState::removePersistentParameters()
     for(const std::string& name : persistent) {
         csapex::param::Parameter::Ptr p = getParameter(name);
 
-        int old_count = p.use_count();
-
         removePersistentParameter(p);
-
-        if(p.use_count() == old_count) {
-            std::cerr << "could not removed the parameter " << name << std::endl;
-        }
 
         p->removed(p);
         (*parameter_removed)(p);
