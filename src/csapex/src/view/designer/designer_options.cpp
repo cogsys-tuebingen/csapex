@@ -31,17 +31,15 @@ void DesignerOptions::setup(GraphView *view)
     if(settings_.knows("schematics")) {
         enableSchematics(settings_.get<bool>("schematics"));
     }
-
-    if(settings_.knows("display-messages")) {
-        designer_scene->displayMessages(settings_.get<bool>("display-messages"));
-    }
-
-    if(settings_.knows("display-signals")) {
-        designer_scene->displaySignals(settings_.get<bool>("display-signals"));
-    }
-
     if(settings_.knows("debug")) {
         designer_scene->enableDebug(settings_.get<bool>("debug"));
+    }
+
+    for(const std::string& type : {"messages", "signals", "active", "inactive"}) {
+        std::string key = "display-" + type;
+        if(settings_.knows(key)) {
+            designer_scene->displayConnections(QString::fromStdString(type), settings_.get<bool>(key));
+        }
     }
 }
 
@@ -76,15 +74,6 @@ bool DesignerOptions::isMinimapEnabled() const
     return settings_.get<bool>("display-minimap", false);
 }
 
-bool DesignerOptions::areMessageConnectionsVisibile() const
-{
-    return settings_.get<bool>("display-messages", true);
-}
-
-bool DesignerOptions::areSignalConnectionsVisible() const
-{
-    return settings_.get<bool>("display-signals", true);
-}
 bool DesignerOptions::isDebug() const
 {
     return settings_.get<bool>("debug", false);
@@ -199,40 +188,6 @@ void DesignerOptions::displayMinimap(bool display)
 
     Q_EMIT minimapEnabled(display);
 }
-
-void DesignerOptions::displaySignalConnections(bool display)
-{
-    if(!settings_.knows("display-signals")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-signals", display));
-    }
-
-    settings_.set("display-signals", display);
-
-    for(const auto& pair : designer_->graph_views_) {
-        GraphView* view = pair.second;
-        view->designerScene()->displaySignals(display);
-    }
-
-
-    Q_EMIT signalsEnabled(display);
-}
-
-void DesignerOptions::displayMessageConnections(bool display)
-{
-    if(!settings_.knows("display-messages")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-messages", display));
-    }
-
-    settings_.set("display-messages", display);
-
-    for(const auto& pair : designer_->graph_views_) {
-        GraphView* view = pair.second;
-        view->designerScene()->displayMessages(display);
-    }
-
-    Q_EMIT messagesEnabled(display);
-}
-
 void DesignerOptions::enableDebug(bool debug)
 {
     if(!settings_.knows("debug")) {
@@ -248,6 +203,71 @@ void DesignerOptions::enableDebug(bool debug)
 
     Q_EMIT debugEnabled(debug);
 }
+
+
+
+
+bool DesignerOptions::areMessageConnectionsVisibile() const
+{
+    return settings_.get<bool>("display-messages", true);
+}
+bool DesignerOptions::areSignalConnectionsVisible() const
+{
+    return settings_.get<bool>("display-signals", true);
+}
+bool DesignerOptions::areActiveConnectionsVisible() const
+{
+    return settings_.get<bool>("display-active", true);
+}
+bool DesignerOptions::areInactiveConnectionsVisibile() const
+{
+    return settings_.get<bool>("display-inactive", true);
+}
+
+void DesignerOptions::displaySignalConnections(bool display)
+{
+    displayConnections("signals", display);
+}
+void DesignerOptions::displayMessageConnections(bool display)
+{
+    displayConnections("messages", display);
+}
+void DesignerOptions::displayActiveConnections(bool display)
+{
+    displayConnections("active", display);
+}
+void DesignerOptions::displayInactiveConnections(bool display)
+{
+    displayConnections("inactive", display);
+}
+
+void DesignerOptions::displayConnections(const std::string& type, bool display)
+{
+    QString q_type = QString::fromStdString(type);
+    std::string key = std::string("display-") + type;
+
+    if(!settings_.knows(key)) {
+        settings_.add(csapex::param::ParameterFactory::declareBool(key, display));
+    }
+
+    settings_.set(key, display);
+
+    for(const auto& pair : designer_->graph_views_) {
+        GraphView* view = pair.second;
+        view->designerScene()->displayConnections(q_type, display);
+    }
+
+    if(type == "messages") {
+        messagesEnabled(display);
+    } else if(type == "signals") {
+        signalsEnabled(display);
+    } else if(type == "active") {
+        activeEnabled(display);
+    } else if(type == "inactive") {
+        inactiveEnabled(display);
+    }
+}
+
 
 /// MOC
 #include "../../../include/csapex/view/designer/moc_designer_options.cpp"

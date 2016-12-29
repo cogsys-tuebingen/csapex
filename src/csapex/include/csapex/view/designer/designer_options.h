@@ -30,9 +30,12 @@ public:
     bool isThreadsEnabled() const;
     bool isFrequencyEnabled() const;
     bool isMinimapEnabled() const;
+    bool isDebug() const;
+
     bool areSignalConnectionsVisible() const;
     bool areMessageConnectionsVisibile() const;
-    bool isDebug() const;
+    bool areActiveConnectionsVisible() const;
+    bool areInactiveConnectionsVisibile() const;
 
 public Q_SLOTS:
     void enableGrid(bool);
@@ -42,21 +45,30 @@ public Q_SLOTS:
     void displayThreads(bool);
     void displayFrequency(bool);
     void displayMinimap(bool);
+    void enableDebug(bool);
+
     void displaySignalConnections(bool);
     void displayMessageConnections(bool);
-    void enableDebug(bool);
+    void displayActiveConnections(bool);
+    void displayInactiveConnections(bool);
 
 Q_SIGNALS:
     void gridEnabled(bool);
     void gridLockEnabled(bool);
     void minimapEnabled(bool);
-    void signalsEnabled(bool);
-    void messagesEnabled(bool);
     void debugEnabled(bool);
     void schematicsEnabled(bool);
     void graphComponentsEnabled(bool);
     void threadsEnabled(bool);
     void frequencyEnabled(bool);
+
+    void signalsEnabled(bool);
+    void messagesEnabled(bool);
+    void activeEnabled(bool);
+    void inactiveEnabled(bool);
+
+private:
+    void displayConnections(const std::string& key, bool display);
 
 private:
     Settings& settings_;

@@ -83,6 +83,10 @@ public Q_SLOTS:
 
     void displaySignals(bool display);
     void displayMessages(bool display);
+    void displayActive(bool display);
+    void displayInactive(bool display);
+
+    void displayConnections(const QString& key, bool show);
 
     void enableDebug(bool debug);
 
@@ -90,6 +94,8 @@ public Q_SLOTS:
 
 private:
     void drawGrid(const QRectF &rect, QPainter *painter, double dimension);
+
+    void displayConnections(bool &member, bool show);
 
 private:
     struct TempConnection {
@@ -184,6 +190,8 @@ private:
     bool draw_schema_;
     bool display_messages_;
     bool display_signals_;
+    bool display_active_;
+    bool display_inactive_;
 
     double scale_;
 

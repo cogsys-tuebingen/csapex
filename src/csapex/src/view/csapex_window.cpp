@@ -211,14 +211,12 @@ void CsApexWindow::setupDesigner()
     ui->actionDisplay_Threads->setChecked(opt->isThreadsEnabled());
     ui->actionDisplay_Frequency->setChecked(opt->isFrequencyEnabled());
 
-    ui->actionSignal_Connections->setChecked(opt->areSignalConnectionsVisible());
-    ui->actionMessage_Connections->setChecked(opt->areMessageConnectionsVisibile());
-
     ui->actionDebug->setChecked(opt->isDebug());
 
     minimap_->setVisible(opt->isMinimapEnabled());
     ui->actionDisplay_Minimap->setChecked(opt->isMinimapEnabled());
 
+    /// tools
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), opt,  SLOT(enableGrid(bool)));
     QObject::connect(opt, SIGNAL(gridEnabled(bool)), ui->actionGrid, SLOT(setChecked(bool)));
     QObject::connect(ui->actionSchematics, SIGNAL(toggled(bool)), opt,  SLOT(enableSchematics(bool)));
@@ -231,18 +229,29 @@ void CsApexWindow::setupDesigner()
     QObject::connect(opt, SIGNAL(frequencyEnabled(bool)), ui->actionDisplay_Frequency, SLOT(setChecked(bool)));
     QObject::connect(ui->actionDisplay_Minimap, SIGNAL(toggled(bool)), opt,  SLOT(displayMinimap(bool)));
     QObject::connect(opt, SIGNAL(minimapEnabled(bool)), ui->actionDisplay_Minimap, SLOT(setChecked(bool)));
-
-    QObject::connect(ui->actionSignal_Connections, SIGNAL(toggled(bool)), opt, SLOT(displaySignalConnections(bool)));
-    QObject::connect(opt, SIGNAL(signalsEnabled(bool)), ui->actionSignal_Connections, SLOT(setChecked(bool)));
-
-    QObject::connect(ui->actionMessage_Connections, SIGNAL(toggled(bool)), opt, SLOT(displayMessageConnections(bool)));
-    QObject::connect(opt, SIGNAL(messagesEnabled(bool)), ui->actionMessage_Connections, SLOT(setChecked(bool)));
-
     QObject::connect(ui->actionDebug, SIGNAL(toggled(bool)), opt, SLOT(enableDebug(bool)));
     QObject::connect(opt, SIGNAL(debugEnabled(bool)), ui->actionDebug, SLOT(setChecked(bool)));
-
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)),opt,  SLOT(enableGridLock(bool)));
     QObject::connect(opt, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
+
+
+    // filters
+    ui->Filters->insertWidget(ui->actionMessage_Connections, new QLabel("Show connections: "));
+
+    ui->actionSignal_Connections->setChecked(opt->areSignalConnectionsVisible());
+    ui->actionMessage_Connections->setChecked(opt->areMessageConnectionsVisibile());
+    ui->actionActive_Connections->setChecked(opt->areActiveConnectionsVisible());
+    ui->actionInactive_Connections->setChecked(opt->areInactiveConnectionsVisibile());
+
+    QObject::connect(ui->actionSignal_Connections, &QAction::toggled, opt, &DesignerOptions::displaySignalConnections);
+    QObject::connect(opt, &DesignerOptions::signalsEnabled, ui->actionSignal_Connections, &QAction::setChecked);
+    QObject::connect(ui->actionMessage_Connections, &QAction::toggled, opt, &DesignerOptions::displayMessageConnections);
+    QObject::connect(opt, &DesignerOptions::messagesEnabled, ui->actionMessage_Connections, &QAction::setChecked);
+    QObject::connect(ui->actionActive_Connections, &QAction::toggled, opt, &DesignerOptions::displayActiveConnections);
+    QObject::connect(opt, &DesignerOptions::activeEnabled, ui->actionActive_Connections, &QAction::setChecked);
+    QObject::connect(ui->actionInactive_Connections, &QAction::toggled, opt, &DesignerOptions::displayInactiveConnections);
+    QObject::connect(opt, &DesignerOptions::inactiveEnabled, ui->actionInactive_Connections, &QAction::setChecked);
+
 
     ui->startup->layout()->addWidget(new ProfilingWidget(core_.getProfiler(), "load graph"));
 }

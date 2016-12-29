@@ -71,5 +71,7 @@
         <file>logger_level.png</file>
         <file>snippet_add.png</file>
         <file>snippet.png</file>
+        <file>activity_add.png</file>
+        <file>activity_remove.png</file>
     </qresource>
 </RCC>

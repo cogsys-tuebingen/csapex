@@ -162,8 +162,39 @@ void DesignerScene::enableSchema(bool draw)
 
 void DesignerScene::displayMessages(bool display)
 {
-    if(display != display_messages_) {
-        display_messages_ = display;
+    displayConnections(display_messages_, display);
+}
+void DesignerScene::displaySignals(bool display)
+{
+    displayConnections(display_signals_, display);
+}
+void DesignerScene::displayActive(bool display)
+{
+    displayConnections(display_active_, display);
+}
+void DesignerScene::displayInactive(bool display)
+{
+    displayConnections(display_inactive_, display);
+}
+
+void DesignerScene::displayConnections(const QString& type, bool display)
+{
+    if(type == "messages") {
+        displayMessages(display);
+    } else if(type == "signals") {
+        displaySignals(display);
+    } else if(type == "active") {
+        displayActive(display);
+    } else if(type == "inactive") {
+        displayInactive(display);
+    }
+}
+
+
+void DesignerScene::displayConnections(bool &member, bool display)
+{
+    if(display != member) {
+        member = display;
 
         connection_bb_.clear();
 
@@ -180,17 +211,6 @@ void DesignerScene::enableDebug(bool debug)
     }
 }
 
-
-void DesignerScene::displaySignals(bool display)
-{
-    if(display != display_signals_) {
-        display_signals_ = display;
-
-        connection_bb_.clear();
-
-        invalidate();
-    }
-}
 
 void DesignerScene::setScale(double scale)
 {
@@ -826,6 +846,13 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
         return;
     }
 
+    if(connection.isActive() && !display_active_) {
+        return;
+    }
+    if(!connection.isActive() && !display_inactive_) {
+        return;
+    }
+
     ConnectablePtr from = connection.from();
     ConnectablePtr to = connection.to();
 
@@ -864,13 +891,13 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
         return std::vector<QRectF>();
     }
 
-    if(dynamic_cast<Event*>(from) != nullptr) {
+    if(dynamic_cast<Slot*>(to)) {
         if(!display_signals_) {
             return std::vector<QRectF>();
         }
         ccs.type = TokenType::SIG;
 
-    } else {
+    } else if(dynamic_cast<Input*>(to)) {
         if(!display_messages_) {
             return std::vector<QRectF>();
         }
