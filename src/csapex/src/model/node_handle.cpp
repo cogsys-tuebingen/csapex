@@ -308,8 +308,13 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
         Slot* slot = NodeModifier::addSlot(t->name(), [t]() {
             t->trigger();
         }, false);
-        node_->addParameterCallback(t, [trigger](param::Parameter*) {
-            trigger->trigger();
+        node_->addParameterCallback(t, [slot, trigger](param::Parameter*) {
+            auto token = slot->getToken();
+            if(token) {
+                trigger->triggerWith(token);
+            } else {
+                trigger->trigger();
+            }
         });
 
         param::TriggerParameterWeakPtr t_weak = t;

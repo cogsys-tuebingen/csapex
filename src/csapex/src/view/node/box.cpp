@@ -159,6 +159,8 @@ void NodeBox::setupUi()
         setProperty("active", state->isActive());
         updateVisualsRequest();
     });
+    setProperty("active", state->isActive());
+
     observe(state->color_changed, std::bind(&NodeBox::changeColor, this));
     observe(state->pos_changed, std::bind(&NodeBox::updatePosition, this));
 

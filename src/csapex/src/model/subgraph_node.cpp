@@ -117,7 +117,10 @@ void SubgraphNode::activation()
 void SubgraphNode::deactivation()
 {
     if(deactivation_event_) {
-        deactivation_event_->trigger();
+        TokenDataConstPtr data(new connection_types::AnyMessage);
+        TokenPtr token = std::make_shared<Token>(data);
+        token->setActivityModifier(ActivityModifier::DEACTIVATE);
+        deactivation_event_->triggerWith(token);
     }
 }
 
@@ -230,6 +233,7 @@ Input* SubgraphNode::createVariadicInput(TokenDataConstPtr type, const std::stri
 InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional)
 {
     InputPtr input = node_handle_->addInternalInput(type, internal_uuid, label, optional);
+    input->setGraphPort(true);
     input->setEssential(true);
 
     transition_relay_in_->addInput(input);
@@ -301,6 +305,7 @@ Output* SubgraphNode::createVariadicOutput(TokenDataConstPtr type, const std::st
 OutputPtr SubgraphNode::createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     OutputPtr output = node_handle_->addInternalOutput(type, internal_uuid, label);
+    output->setGraphPort(true);
     output->setEssential(true);
 
     transition_relay_out_->addOutput(output);
@@ -382,6 +387,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
 SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
 {
     SlotPtr slot = node_handle_->addInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), internal_uuid, label, callback);
+    slot->setGraphPort(true);
     slot->setEssential(true);
 
     slot->connectionInProgress.connect(internalConnectionInProgress);
@@ -448,6 +454,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
 EventPtr SubgraphNode::createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
     EventPtr event = node_handle_->addInternalEvent(type, internal_uuid, label);
+    event->setGraphPort(true);
     event->setEssential(true);
 
     event->connectionInProgress.connect(internalConnectionInProgress);

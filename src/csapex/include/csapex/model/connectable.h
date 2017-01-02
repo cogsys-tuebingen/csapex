@@ -47,6 +47,9 @@ public:
     bool isVirtual() const;
     void setVirtual(bool _virtual);
 
+    bool isGraphPort() const;
+    void setGraphPort(bool graph);
+
     bool isEssential() const;
     void setEssential(bool essential);
 
@@ -145,6 +148,7 @@ protected:
     std::atomic<int> seq_no_;
 
     bool virtual_;
+    bool graph_port_;
     bool essential_;
 
 private:

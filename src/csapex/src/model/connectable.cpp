@@ -23,6 +23,7 @@ Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
       owner_(owner),
       count_(0), seq_no_(-1),
       virtual_(false),
+      graph_port_(false),
       essential_(false),
       enabled_(true)
 {
@@ -37,6 +38,17 @@ bool Connectable::isVirtual() const
 void Connectable::setVirtual(bool _virtual)
 {
     virtual_ = _virtual;
+}
+
+
+bool Connectable::isGraphPort() const
+{
+    return graph_port_;
+}
+
+void Connectable::setGraphPort(bool graph_port)
+{
+    graph_port_ = graph_port;
 }
 
 bool Connectable::isEssential() const

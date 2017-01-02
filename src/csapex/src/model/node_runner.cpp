@@ -120,6 +120,7 @@ Scheduler* NodeRunner::getScheduler() const
 
 void NodeRunner::scheduleProcess()
 {
+    apex_assert_hard(guard_ == -1);
     if(!paused_) {
         bool source = worker_->getNodeHandle()->isSource();
         if(!source || !stepping_ || can_step_) {
@@ -136,6 +137,7 @@ void NodeRunner::scheduleProcess()
 
 void NodeRunner::execute()
 {
+    apex_assert_hard(guard_ == -1);
     if(worker_->canExecute()) {
         if(max_frequency_ > 0.0) {
             const Rate& rate = worker_->getNodeHandle()->getRate();

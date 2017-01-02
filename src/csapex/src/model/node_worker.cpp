@@ -228,6 +228,10 @@ void NodeWorker::setProcessingEnabled(bool e)
         checkIO();
     }
     enabled(e);
+
+    if(e) {
+        triggerTryProcess();
+    }
 }
 
 bool NodeWorker::canProcess() const
@@ -887,8 +891,7 @@ void NodeWorker::connectConnector(ConnectablePtr c)
                 if(SlotPtr slot = slot_w.lock()) {
                     TokenPtr token = slot->getToken();
                     if(token) {
-                        //apex_assert_hard(token);
-                        if(token->hasActivityModifier()) {
+                        if(!slot->isGraphPort() && token->hasActivityModifier()) {
                             if(token->getActivityModifier() == ActivityModifier::ACTIVATE) {
                                 node_handle_->setActive(true);
 
