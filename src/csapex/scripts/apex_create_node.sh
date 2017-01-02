@@ -130,6 +130,30 @@ NEW_XML_2="  <description>$DESCRIPTION</description>"
 NEW_XML_3="<\/class>"
 
 
+###
+### MODIFY CMAKELISTS
+###
+if [[ $(grep "add_library.*$LIBRARY" $CMAKELIST) ]]; then
+    WS=$(grep "add_library.*$LIBRARY" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ //')
+    ENTRY="${WS}$DIR/$NEW_FILE"
+    sed -i "/add_library.*$LIBRARY\s*$/a\ $ENTRY"  $CMAKELIST
+    sed -i "/add_library.*$LIBRARY\s*SHARED\s*$/a\ $ENTRY"  $CMAKELIST
+
+else
+    LIBRARY_VAR=$(echo $LIBRARY | sed "s/${PROJECT_NAME}/\${PROJECT_NAME}/")
+
+    WS=$(grep "add_library.*$LIBRARY_VAR" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ //')
+    ENTRY="${WS}$DIR/$NEW_FILE"
+    sed -i "/add_library.*$LIBRARY_VAR\s*$/a\ $ENTRY"  $CMAKELIST
+    sed -i "/add_library.*$LIBRARY_VAR\s*SHARED\s*$/a\ $ENTRY"  $CMAKELIST
+fi
+
+###
+### MODIFY PLUGINXML
+###
+ENTRY="$NEW_XML_1\n$NEW_XML_2\n$NEW_XML_3"
+sed -i -e "/<library.*$LIBRARY/a $ENTRY"  $PLUGINXML
+
 
 ###
 ### GENERATE SOURCE
@@ -200,24 +224,3 @@ CSAPEX_REGISTER_CLASS($FULLNAME, csapex::Node)
 ### ADD TO GIT
 ###
 git add $DIR/$NEW_FILE
-
-###
-### MODIFY CMAKELISTS
-###
-WS=$(grep "add_library.*$LIBRARY" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ /\\ /')
-ENTRY="${WS}$DIR/$NEW_FILE"
-sed -i "/add_library.*$LIBRARY\s*$/a $ENTRY"  $CMAKELIST
-sed -i "/add_library.*$LIBRARY\s*SHARED\s*$/a $ENTRY"  $CMAKELIST
-
-LIBRARY_VAR=$(echo $LIBRARY | sed "s/${PROJECT_NAME}/\${PROJECT_NAME}/")
-
-WS=$(grep "add_library.*$LIBRARY_VAR" $CMAKELIST -A 1 | tail -n 1 | cut -d's' -f1 | sed 's/ /\\ /')
-ENTRY="${WS}$DIR/$NEW_FILE"
-sed -i "/add_library.*$LIBRARY_VAR\s*$/a $ENTRY"  $CMAKELIST
-sed -i "/add_library.*$LIBRARY_VAR\s*SHARED\s*$/a $ENTRY"  $CMAKELIST
-                         
-###
-### MODIFY PLUGINXML
-###
-ENTRY="$NEW_XML_1\n$NEW_XML_2\n$NEW_XML_3"
-sed -i -e "/<library.*$LIBRARY/a $ENTRY"  $PLUGINXML
