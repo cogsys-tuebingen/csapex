@@ -166,10 +166,15 @@ void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
 
     // draw boxes
     QBrush brush_box(QColor::fromRgb(100,100,100,255));
-    QPen pen_box(QBrush(QColor::fromRgb(0,0,0)), 2);
+    QBrush brush_box_active(QColor::fromRgb(120,255,120,255));
+    QPen pen_box(QBrush(QColor::fromRgb(0,0,0)), 1);
     painter.setPen(pen_box);
-    painter.setBrush(brush_box);
     for (NodeBox *box : boxes) {
+        if(box->getNodeHandle()->isActive()) {
+            painter.setBrush(brush_box_active);
+        } else {
+            painter.setBrush(brush_box);
+        }
         QRectF rect(box->pos(), box->size());
         painter.drawPolygon(scene_to_minimap_.map(rect));
     }
