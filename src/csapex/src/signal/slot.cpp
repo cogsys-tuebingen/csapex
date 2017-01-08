@@ -40,6 +40,12 @@ void Slot::reset()
     setSequenceNumber(0);
 }
 
+void Slot::enable()
+{
+    Connectable::enable();
+
+    tryNextToken();
+}
 
 void Slot::disable()
 {
@@ -64,16 +70,12 @@ void Slot::notifyMessageAvailable(Connection* connection)
 {
     message_available(connection);
 
-    std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
-
-    available_connections_.push_back(connection);
-
-    if(!message_) {
-        TokenPtr token = available_connections_.front()->readToken();
-        lock.unlock();
-
-        setToken(token);
+    {
+        std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
+        available_connections_.push_back(connection);
     }
+
+    tryNextToken();
 }
 
 void Slot::notifyMessageProcessed()
@@ -92,9 +94,15 @@ void Slot::notifyMessageProcessed()
         front->setTokenProcessed();
     }
 
+    tryNextToken();
+}
+
+
+void Slot::tryNextToken()
+{
     if(isEnabled() || isActive()) {
         std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
-        if(!available_connections_.empty()) {
+        if(!message_ && !available_connections_.empty()) {
             TokenPtr token = available_connections_.front()->readToken();
             lock.unlock();
 

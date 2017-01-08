@@ -45,6 +45,7 @@ public:
 
     bool canConnectTo(Connectable* other_side, bool move) const override;
 
+    virtual void enable() override;
     virtual void disable() override;
 
     void reset();
@@ -56,6 +57,10 @@ public:
 public:
     slim_signal::Signal<void(const TokenPtr&)> token_set;
     slim_signal::Signal<void()> triggered;
+
+
+private:
+    void tryNextToken();
 
 protected:
     std::function<void(Slot*,const TokenPtr&)> callback_;

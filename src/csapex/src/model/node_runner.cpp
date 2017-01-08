@@ -103,6 +103,13 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
         schedule(check_parameters_);
     });
 
+    // processing enabled change
+    observe(worker_->getNodeHandle()->getNodeState()->enabled_changed, [this]() {
+        if(!worker_->getNodeHandle()->getNodeState()->isEnabled()) {
+            waiting_ = false;
+        }
+    });
+
     schedule(check_parameters_);
 
 

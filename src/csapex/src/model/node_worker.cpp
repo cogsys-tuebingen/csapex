@@ -94,7 +94,21 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 triggerTryProcess();
             });
             observe(node_handle_->getNodeState()->enabled_changed, [this](){
-                setProcessingEnabled(isProcessingEnabled());
+                bool e = isProcessingEnabled();
+
+                for(SlotPtr slot : node_handle_->getSlots()) {
+                    slot->setEnabled(e);
+                }
+                for(EventPtr event : node_handle_->getEvents()) {
+                    event->setEnabled(e);
+                }
+
+                if(!e) {
+                    setError(false);
+                } else {
+                    checkIO();
+                }
+                enabled(e);
             });
             observe(node_handle_->activation_changed, [this](){
                 if(node_handle_->isActive()) {
@@ -214,24 +228,6 @@ bool NodeWorker::isProcessingEnabled() const
 void NodeWorker::setProcessingEnabled(bool e)
 {
     node_handle_->getNodeState()->setEnabled(e);
-
-    for(SlotPtr slot : node_handle_->getSlots()) {
-        slot->setEnabled(e);
-    }
-    for(EventPtr event : node_handle_->getEvents()) {
-        event->setEnabled(e);
-    }
-
-    if(!e) {
-        setError(false);
-    } else {
-        checkIO();
-    }
-    enabled(e);
-
-    if(e) {
-        triggerTryProcess();
-    }
 }
 
 bool NodeWorker::canProcess() const
