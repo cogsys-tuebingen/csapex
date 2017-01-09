@@ -180,22 +180,22 @@ void Connection::setState(State s)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    //    switch (s) {
-    //    case State::UNREAD:
-    //        apex_assert_hard(state_ == State::NOT_INITIALIZED);
-    //        apex_assert_hard(message_ != nullptr);
-    //        break;
-    //    case State::READ:
-    //        apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
-    //        apex_assert_hard(message_ != nullptr);
-    //        break;
-    //    case State::DONE:
-    //        apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ);
-    //        apex_assert_hard(message_ != nullptr);
-    //        break;
-    //    default:
-    //        break;
-    //    }
+        switch (s) {
+        case State::UNREAD:
+            apex_assert_hard(state_ == State::NOT_INITIALIZED);
+//            apex_assert_hard(message_ != nullptr);
+            break;
+        case State::READ:
+            apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
+//            apex_assert_hard(message_ != nullptr);
+            break;
+        case State::DONE:
+            apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ);
+//            apex_assert_hard(message_ != nullptr);
+            break;
+        default:
+            break;
+        }
 
     state_ = s;
 }

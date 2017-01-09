@@ -133,7 +133,8 @@ bool InputTransition::isEnabled() const
         }
     }
 
-    if(!areAllConnections(Connection::State::READ)) {
+   //if(!areAllConnections(Connection::State::READ)) {
+    if(areAllConnections(Connection::State::UNREAD)) {
         return true;
     } else {
         APEX_DEBUG_CERR <<"not enabled because a connection is read" << std::endl;
@@ -228,7 +229,8 @@ void InputTransition::forwardMessages()
         apex_assert_hard(!forwarded_);
 
         apex_assert_hard(!isOneConnection(Connection::State::DONE));
-        apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
+        //apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
+        apex_assert_hard(areAllConnections(Connection::State::UNREAD));
 
 
         apex_assert_hard(connections_.empty() || !areAllConnections(Connection::State::READ));
@@ -263,6 +265,7 @@ void InputTransition::forwardMessages()
         for(auto& c : connections_) {
             c->setState(Connection::State::READ);
         }
+        apex_assert_hard(areAllConnections(Connection::State::READ));
     }
 
     forwarded_ = true;

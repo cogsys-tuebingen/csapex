@@ -227,6 +227,11 @@ void Port::createToolTip()
     std::stringstream tooltip;
     tooltip << "UUID: " << adaptee->getUUID();
     tooltip << ", Type: " << adaptee->getType()->descriptiveName();
+    if(InputPtr i = std::dynamic_pointer_cast<Input>(adaptee)) {
+        if(TokenPtr token = i->getToken()) {
+            tooltip << ", Last Message Type: " << token->getTokenData()->descriptiveName();
+        }
+    }
     tooltip << ", Connections: " << adaptee->getConnections().size();
     tooltip << ", Messages: " << adaptee->getCount();
     tooltip << ", Enabled: " << adaptee->isEnabled();
