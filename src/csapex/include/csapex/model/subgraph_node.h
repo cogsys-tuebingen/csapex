@@ -133,6 +133,7 @@ public:
     slim_signal::Signal<void(ConnectablePtr,ConnectablePtr)> internalConnectionInProgress;
 
 protected:
+    mutable std::recursive_mutex continuation_mutex_;
     std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation_;
 
     InputTransitionPtr transition_relay_in_;

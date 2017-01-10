@@ -109,7 +109,9 @@ Point convert(const QPointF& p) {
 DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CsApexViewCore& view_core)
     : view_core_(view_core), graph_facade_(graph_facade),
       preview_(nullptr),
-      draw_grid_(false), draw_schema_(false), display_messages_(true), display_signals_(true),
+      draw_grid_(false), draw_schema_(false),
+      display_messages_(true), display_signals_(true),
+      display_active_(true), display_inactive_(true),
       scale_(1.0), highlight_connection_id_(-1), highlight_connection_sub_id_(-1), schema_dirty_(false),
       debug_(false)
 {

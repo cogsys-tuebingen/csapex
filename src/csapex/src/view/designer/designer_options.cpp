@@ -39,6 +39,8 @@ void DesignerOptions::setup(GraphView *view)
         std::string key = "display-" + type;
         if(settings_.knows(key)) {
             designer_scene->displayConnections(QString::fromStdString(type), settings_.get<bool>(key));
+        } else {
+            designer_scene->displayConnections(QString::fromStdString(type), true);
         }
     }
 }

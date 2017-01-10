@@ -82,7 +82,10 @@ void SubgraphNode::reset()
 
     resetActivity();
 
-    continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
+    {
+        std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
+        continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
+    }
 
     transition_relay_out_->reset();
     transition_relay_in_->reset();
@@ -169,7 +172,10 @@ void SubgraphNode::setupParameters(Parameterizable &params)
 void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
                            std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation)
 {
-    continuation_ = continuation;
+    {
+        std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
+        continuation_ = continuation;
+    }
 
     apex_assert_hard(is_initialized_);
 
@@ -684,9 +690,13 @@ void SubgraphNode::finishSubgraph()
 
 void SubgraphNode::notifySubgraphProcessed()
 {
+    std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
     if(continuation_) {
-        continuation_([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+        auto cnt = continuation_;
         continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
+        lock.unlock();
+
+        cnt([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
     }
 }
 
@@ -729,7 +739,10 @@ std::string SubgraphNode::makeStatusString() const
     std::stringstream ss;
     ss << "UUID: " << getUUID() << '\n';
     ss << "AUUID: " << getUUID().getAbsoluteUUID() << '\n';
-    ss << "continuation_: " << ((bool) continuation_) << '\n';
+    {
+        std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
+        ss << "continuation_: " << ((bool) continuation_) << '\n';
+    }
     if(node_handle_) {
         ss << "output transiton:\n";
         ss << " - " << (node_handle_->getOutputTransition()->canStartSendingMessages() ? "can send" : "can't send") << '\n';
