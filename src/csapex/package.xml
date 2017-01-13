@@ -31,4 +31,8 @@
   <run_depend>tinyxml</run_depend>
   <run_depend>yaml-cpp</run_depend>
   <run_depend>opengl</run_depend>
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
 </package>

@@ -38,12 +38,13 @@ NodeHandle* Node::getNodeHandle() const
     return node_handle_;
 }
 
-void Node::initialize(NodeHandle *node_handle, const UUID& uuid)
+void Node::initialize(NodeHandle *node_handle)
 {
-    uuid_ = uuid;
     node_modifier_ = node_handle;
     node_handle_ = node_handle;
     parameters_ = this;
+
+    UUID uuid = node_handle->getUUID();
 
     parameter_state_->setParentUUID(uuid);
 
@@ -56,7 +57,7 @@ void Node::initialize(NodeHandle *node_handle, const UUID& uuid)
 
 UUID Node::getUUID() const
 {
-    return uuid_;
+    return node_handle_->getUUID();
 }
 
 void Node::setupParameters(Parameterizable& )
@@ -120,7 +121,7 @@ void Node::reset()
 {
 }
 
-bool Node::processNoMessageMarkers() const
+bool Node::processMessageMarkers() const
 {
     return false;
 }

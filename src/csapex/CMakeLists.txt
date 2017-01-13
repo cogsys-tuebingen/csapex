@@ -628,7 +628,6 @@ add_custom_command(TARGET cfg POST_BUILD
 #  set_property(TARGET csapex_qt PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 #endif()
 
-
 #
 # TESTS
 #

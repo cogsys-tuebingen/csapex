@@ -36,7 +36,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       
       uuid_provider_(uuid_provider)
 {
-    node_->initialize(this, uuid);
+    node_->initialize(this);
     
     node_state_->setLabel(uuid.getFullName());
     node_state_->setParent(this);

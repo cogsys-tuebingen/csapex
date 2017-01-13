@@ -62,9 +62,9 @@ ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
     return Graph::findConnectorNoThrow(uuid);
 }
 
-void SubgraphNode::initialize(csapex::NodeHandle* node_handle, const UUID &uuid)
+void SubgraphNode::initialize(csapex::NodeHandle* node_handle)
 {
-    Node::initialize(node_handle, uuid);
+    Node::initialize(node_handle);
 
     if(node_handle->getUUIDProvider()) {
         setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());

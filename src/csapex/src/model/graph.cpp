@@ -375,7 +375,7 @@ std::set<graph::Vertex *> Graph::findVerticesThatNeedMessages()
     std::set<graph::Vertex*> vertices_that_need_messages;
 
     for(const graph::VertexPtr v : vertices_) {
-        if(v->getNodeHandle()->getNode().lock()->processNoMessageMarkers()) {
+        if(v->getNodeHandle()->getNode().lock()->processMessageMarkers()) {
             vertices_that_need_messages.insert(v.get());
             break;
         }

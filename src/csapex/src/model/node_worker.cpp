@@ -462,7 +462,7 @@ bool NodeWorker::startProcessingMessages()
             }
 
         } else {
-            if(node->processNoMessageMarkers()) {
+            if(node->processMessageMarkers()) {
                 node->processMarker(marker);
             }
             marker.reset();
