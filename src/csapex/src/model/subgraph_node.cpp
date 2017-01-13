@@ -702,8 +702,6 @@ void SubgraphNode::notifySubgraphProcessed()
 
 void SubgraphNode::sendCurrentIteration()
 {
-    apex_assert_hard(transition_relay_in_->isEnabled());
-    
     APEX_DEBUG_TRACE ainfo << "forward_messages" << std::endl;
     transition_relay_in_->forwardMessages();
 
