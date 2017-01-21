@@ -556,6 +556,7 @@ void Designer::reinitialize()
 {
     ui->tabWidget->blockSignals(false);
 
+    observeGraph(core_.getRoot());
     addGraph(core_.getRoot());
 }
 
