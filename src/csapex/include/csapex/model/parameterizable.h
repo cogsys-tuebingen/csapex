@@ -177,9 +177,9 @@ public:
 
     /**
      * @brief addHiddenParameter adds a new parameter to the object that is not shown to users.
-     * @param[in] param The new hidden parameter     *
-     * @param[in] target A reference to where the value of the parameter should be written to,
-     *            when it changes.
+     * @param[in] param The new hidden parameter
+     * @param[out] target A reference to where the value of the parameter should be written to,
+     *             when it changes.
      * @warning The name of the parameter has to be unique for the node.
      */
     template <typename T>
@@ -232,6 +232,21 @@ public:
      * @see addParameterCallback
      */
     void addTemporaryParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
+
+    /**
+     * @brief addTemporaryParameter adds a new parameter to the object that can be
+     *        removed during the lifetime with the object.
+     * @param[in] param The new hidden parameter
+     * @param[out] target A reference to where the value of the parameter should be written to,
+     *             when it changes.
+     * @warning The name of the parameter has to be unique for the node.
+     */
+    template <typename T>
+    void addTemporaryParameter(const param::ParameterPtr& param, T& target)
+    {
+        addTemporaryParameter(param, [&](param::Parameter* p) { target = p->as<T>(); });
+    }
+
 
     /**
      * @brief removeTemporaryParameter removes a temporary parameter
