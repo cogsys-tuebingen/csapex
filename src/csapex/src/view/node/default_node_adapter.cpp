@@ -335,10 +335,15 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter input, if available
         InputPtr param_in = node_handle->getParameterInput(current_name_).lock();
         if(param_in) {
-            Port* port = parent_->createPort(param_in, current_layout_);
+            QPointer<Port> port = parent_->createPort(param_in, current_layout_);
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[p.get()].push_back(p->interactive_changed.connect([port](Parameter*, bool i) { return port->setVisible(i); }));
+            parameter_connections_[p.get()].push_back(p->interactive_changed.connect([port](Parameter*, bool i) {
+                                                          if(port.isNull()) {
+                                                              return;
+                                                          }
+                                                          return port->setVisible(i);
+                                                      }));
         }
 
         // generate UI element
@@ -352,10 +357,15 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // connect parameter output, if available
         OutputPtr param_out = node_handle->getParameterOutput(current_name_).lock();
         if(param_out) {
-            Port* port = parent_->createPort(param_out, current_layout_);
+            QPointer<Port> port = parent_->createPort(param_out, current_layout_);
 
             port->setVisible(p->isInteractive());
-            parameter_connections_[p.get()].push_back(p->interactive_changed.connect([port](Parameter*, bool i) { return port->setVisible(i); }));
+            parameter_connections_[p.get()].push_back(p->interactive_changed.connect([port](Parameter*, bool i) {
+                                                          if(port.isNull()) {
+                                                              return;
+                                                          }
+                                                          return port->setVisible(i);
+                                                      }));
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());
@@ -413,6 +423,7 @@ void DefaultNodeAdapter::setupParameter(std::shared_ptr<Parameter> p)
         if(pos != adapters_.end()) {
             adapters_.erase(pos);
         }
+        parameter_connections_.erase(p.get());
     }));
 }
 
