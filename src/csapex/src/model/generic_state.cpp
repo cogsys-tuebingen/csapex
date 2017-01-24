@@ -140,7 +140,9 @@ void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &pa
     auto param_pos = params.find(name);
     if(param_pos != params.end()) {
         // the existing parameter should be temporary or legacy
-        if(temporary.find(name) == temporary.end() && legacy.find(name) == legacy.end()) {
+        if(temporary.find(name) == temporary.end() &&
+                cached_parameter.find(name) == cached_parameter.end() &&
+                legacy.find(name) == legacy.end()) {
             throw std::runtime_error("trying to add a temporary parameter with the name "
                                      "of an existing parameter '" + name + "'");
         }
@@ -171,6 +173,8 @@ void GenericState::removeTemporaryParameters()
         // don't erase the param itself, remember the value for future!
         // don't -> params.erase(params.find(name));
         order.erase(std::find(order.begin(), order.end(), name));
+
+        cached_parameter[name] = true;
 
         (*parameter_removed)(p);
     }
