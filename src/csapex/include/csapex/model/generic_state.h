@@ -71,6 +71,7 @@ public:
     std::map<std::string, csapex::param::ParameterPtr> params;
     std::map<std::string, std::string> param_valid_name_cache;
     std::map<std::string, bool> temporary;
+    std::map<std::string, bool> cached_parameter;
     std::set<std::string> persistent;
     std::set<std::string> legacy;
     std::vector<std::string> order;
