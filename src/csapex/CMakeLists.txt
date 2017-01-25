@@ -36,6 +36,13 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if(${catkin_FOUND})
     catkin_package(
        INCLUDE_DIRS include
+       LIBRARIES
+            csapex_util
+            csapex_param
+            csapex_profiling
+            csapex
+            csapex_command
+            csapex_qt
        DEPENDS Boost
        CATKIN_DEPENDS class_loader
        CFG_EXTRAS csapex-extras.cmake
