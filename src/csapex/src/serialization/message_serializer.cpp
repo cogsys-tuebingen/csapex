@@ -44,7 +44,7 @@ TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
     }
 
     if(i.type_to_converter.find(type) == i.type_to_converter.end()) {
-        throw DeserializationError(std::string("no such type (") + type + ")");
+        throw DeserializationError(std::string("cannot deserialize, no such type (") + type + ")");
     }
 
     TokenData::Ptr msg = MessageFactory::createMessage(type);

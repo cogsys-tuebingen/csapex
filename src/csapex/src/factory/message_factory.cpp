@@ -33,7 +33,7 @@ TokenData::Ptr MessageFactory::createMessage(const std::string& type)
     }
 
     if(i.type_to_constructor.find(type) == i.type_to_constructor.end()) {
-        throw std::runtime_error(std::string("no such type (") + type + ")");
+        throw std::runtime_error(std::string("cannot create message, no such type (") + type + ")");
     }
 
     return i.type_to_constructor[type]();
