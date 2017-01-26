@@ -97,8 +97,7 @@ public:
 
     bool execute();
 
-    void checkParameters();    
-    void checkIO();
+    void checkParameters();
 
     void triggerError(bool e, const std::string& what);
 

@@ -169,6 +169,7 @@ void Output::publish()
     auto msg = getToken();
     apex_assert_hard(msg);
 
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(auto connection : connections_) {
         connection->setToken(msg);
     }

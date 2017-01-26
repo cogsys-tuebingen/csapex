@@ -555,7 +555,7 @@ void Graph::checkNodeState(NodeHandle *nh)
     nh->getInputTransition()->checkIfEnabled();
     nh->getOutputTransition()->checkIfEnabled();
     if(NodeWorker* worker = nh->getNodeWorker()) {
-        worker->checkIO();
+        worker->triggerTryProcess();
     }
 }
 

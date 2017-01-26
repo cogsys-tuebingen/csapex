@@ -112,13 +112,7 @@ void Connection::setToken(const TokenPtr &token)
         }
 
         message_ = msg;
-        if(isSinkEnabled()) {
-            setState(State::UNREAD);
-
-        } else {
-            setState(State::UNREAD);
-            setState(State::READ);
-        }
+        setState(State::UNREAD);
     }
 
     notifyMessageSet();
@@ -190,7 +184,7 @@ void Connection::setState(State s)
 //            apex_assert_hard(message_ != nullptr);
             break;
         case State::DONE:
-            apex_assert_hard(/*state_ == State::UNREAD || */state_ == State::READ);
+            apex_assert_hard(state_ == State::DONE || state_ == State::READ);
 //            apex_assert_hard(message_ != nullptr);
             break;
         default:

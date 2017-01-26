@@ -61,7 +61,9 @@ NodeRunner::~NodeRunner()
 
 void NodeRunner::measureFrequency()
 {
-    worker_->getNodeHandle()->getRate().tick();
+    if(worker_->isProcessingEnabled()) {
+        worker_->getNodeHandle()->getRate().tick();
+    }
 }
 
 void NodeRunner::reset()

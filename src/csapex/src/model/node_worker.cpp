@@ -106,7 +106,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 if(!e) {
                     setError(false);
                 } else {
-                    checkIO();
+                    triggerTryProcess();
                 }
                 enabled(e);
             });
@@ -490,17 +490,17 @@ bool NodeWorker::startProcessingMessages()
     }
 
 
-    if(profiler_->isEnabled()) {
-        Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
-        timer->restart();
-        timer->root->setActive(node_handle_->isActive());
-        interval_start(this, PROCESS, timer->root);
-    }
+    if(isProcessingEnabled()) {
 
+        if(profiler_->isEnabled()) {
+            Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
+            timer->restart();
+            timer->root->setActive(node_handle_->isActive());
+            interval_start(this, PROCESS, timer->root);
+        }
 
-    bool sync = !node->isAsynchronous();
+        bool sync = !node->isAsynchronous();
 
-    if(isProcessingEnabled()) {        
         try {
             if(sync) {
                 node->process(*node_handle_, *node);
@@ -536,9 +536,7 @@ bool NodeWorker::startProcessingMessages()
 
     } else {
         lock.unlock();
-        forwardMessages(true);
-        signalMessagesProcessed();
-        triggerTryProcess();
+        finishProcessing();
     }
 
     return true;
@@ -557,7 +555,9 @@ void NodeWorker::finishProcessing()
 
 void NodeWorker::signalExecutionFinished()
 {
-    finishTimer(profiler_->getTimer(node_handle_->getUUID().getFullName()));
+    if(profiler_->isEnabled()) {
+        finishTimer(profiler_->getTimer(node_handle_->getUUID().getFullName()));
+    }
 
     if(trigger_process_done_->isConnected()) {
         trigger_process_done_->trigger();
@@ -697,7 +697,7 @@ void NodeWorker::updateState()
 
 bool NodeWorker::canExecute()
 {
-    if(isEnabled() && canProcess() && isProcessingEnabled()) {
+    if(isEnabled() && canProcess()) {
         return true;
     } else {
         return false;
@@ -865,10 +865,10 @@ void NodeWorker::trySendEvents()
 
 void NodeWorker::connectConnector(ConnectablePtr c)
 {
-    port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectablePtr&) { checkIO(); }));
-    port_connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { checkIO(); }));
-    port_connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](const ConnectablePtr& ) { checkIO(); }));
-    port_connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { checkIO(); }));
+    port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectablePtr&) { triggerTryProcess(); }));
+    port_connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { triggerTryProcess(); }));
+    port_connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](const ConnectablePtr& ) { triggerTryProcess(); }));
+    port_connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { triggerTryProcess(); }));
 
     if(EventPtr event = std::dynamic_pointer_cast<Event>(c)) {
         port_connections_[c.get()].emplace_back(event->triggered.connect([this]() {
@@ -928,14 +928,6 @@ void NodeWorker::disconnectConnector(Connectable *c)
     }
     port_connections_[c].clear();
 }
-
-void NodeWorker::checkIO()
-{
-    if(isProcessingEnabled()) {
-        triggerTryProcess();
-    }
-}
-
 
 void NodeWorker::triggerError(bool e, const std::string &what)
 {

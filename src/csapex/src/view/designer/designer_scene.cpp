@@ -31,6 +31,7 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/interlude.hpp>
+#include <csapex/msg/marker_message.h>
 
 /// SYSTEM
 #include <QtGui>
@@ -862,9 +863,15 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
 
     ccs = CurrentConnectionState();
 
+    bool marker = false;
+    TokenPtr token = connection.getToken();
+    if(token) {
+        marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(token->getTokenData()) != nullptr;
+    }
+
     ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
-    ccs.full_read = connection.getState() == Connection::State::READ;
-    ccs.full_unread = connection.getState() == Connection::State::UNREAD;
+    ccs.full_read = !marker && connection.getState() == Connection::State::READ;
+    ccs.full_unread = !marker && connection.getState() == Connection::State::UNREAD;
     ccs.active = connection.isActive();
     ccs.active_token = connection.holdsActiveToken();
     if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to->getOwner())) {
