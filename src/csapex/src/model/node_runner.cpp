@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node.h>
 #include <csapex/scheduling/scheduler.h>
 #include <csapex/scheduling/task.h>
 #include <csapex/utility/assert.h>
@@ -175,6 +176,7 @@ void NodeRunner::execute()
         }
     } else {
         can_step_ = true;
+        waiting_ = false;
     }
 }
 

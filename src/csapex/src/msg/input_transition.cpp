@@ -103,9 +103,17 @@ void InputTransition::connectionAdded(Connection *connection)
 {
     Transition::connectionAdded(connection);
 
-    bool needs_message = isOneConnection(Connection::State::UNREAD) && connection->getState() == Connection::State::NOT_INITIALIZED;
+    bool read = isOneConnection(Connection::State::READ);
+    bool unread = isOneConnection(Connection::State::UNREAD);
+
+    bool has_read_or_unread = unread || read;
+    bool needs_message = has_read_or_unread && connection->getState() == Connection::State::NOT_INITIALIZED;
+
     if(needs_message) {
         connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
+        if(!unread) {
+            connection->setState(Connection::State::READ);
+        }
     }
 }
 

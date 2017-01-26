@@ -865,7 +865,9 @@ void NodeWorker::trySendEvents()
 
 void NodeWorker::connectConnector(ConnectablePtr c)
 {
-    port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectablePtr&) { triggerTryProcess(); }));
+    port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectablePtr&) {
+        triggerTryProcess();
+    }));
     port_connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { triggerTryProcess(); }));
     port_connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](const ConnectablePtr& ) { triggerTryProcess(); }));
     port_connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { triggerTryProcess(); }));

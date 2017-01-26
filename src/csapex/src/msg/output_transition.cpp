@@ -64,13 +64,7 @@ void OutputTransition::addOutput(OutputPtr output)
 
     // connect signals
     auto ca = output->connection_added.connect([this](const ConnectionPtr& connection) {
-        bool needs_message = !areOutputsIdle();
-
         addConnection(connection);
-
-        if(needs_message) {
-            connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
-        }
     });
     output_signal_connections_[output.get()].push_back(ca);
 

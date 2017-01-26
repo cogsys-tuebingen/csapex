@@ -56,6 +56,8 @@ bool AddConnection::doExecute()
     OutputPtr f = graph->findConnector<Output>(from_uuid);
     InputPtr t = graph->findConnector<Input>(to_uuid);
 
+    apex_assert_hard(f);
+    apex_assert_hard(t);
     apex_assert_hard((f->isOutput() && t->isInput()));
 
     ConnectionPtr c = DirectConnection::connect(f, t);
