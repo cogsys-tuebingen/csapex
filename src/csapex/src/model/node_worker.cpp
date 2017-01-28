@@ -600,27 +600,6 @@ void NodeWorker::forwardMessages(bool send_parameters)
             publishParameters();
         }
     }
-    sendMessages(true);
-}
-
-void NodeWorker::activateOutput()
-{
-    bool has_marker = false;
-    for(OutputPtr out : node_handle_->getExternalOutputs()) {
-        if(msg::isConnected(out.get()) && !node_handle_->isParameterOutput(out.get())) {
-            if(out->hasMessage() && out->hasMarkerMessage()) {
-                has_marker = true;
-                break;
-            }
-        }
-    }
-
-    bool send_parameters = !has_marker;
-
-    apex_assert_hard(isProcessing() || isIdle());
-    if(send_parameters) {
-        publishParameters();
-    }
     sendMessages(false);
 }
 

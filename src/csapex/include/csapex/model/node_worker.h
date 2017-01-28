@@ -132,8 +132,6 @@ private:
     void signalExecutionFinished();
     void signalMessagesProcessed(bool processing_aborted = false);
 
-    void activateOutput();
-
     void updateState();
 
     void finishProcessing();
