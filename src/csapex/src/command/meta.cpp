@@ -72,7 +72,7 @@ bool Meta::doExecute()
     locked = true;
 
     if(transaction) {
-        graph_facade_->getGraph()->beginTransaction();
+        root_graph_facade_->getGraph()->beginTransaction();
     }
 
     bool success = true;
@@ -86,7 +86,7 @@ bool Meta::doExecute()
     }
 
     if(transaction) {
-        graph_facade_->getGraph()->finalizeTransaction();
+        root_graph_facade_->getGraph()->finalizeTransaction();
     }
 
     return success;
@@ -95,7 +95,7 @@ bool Meta::doExecute()
 bool Meta::doUndo()
 {
     if(transaction) {
-        graph_facade_->getGraph()->beginTransaction();
+        root_graph_facade_->getGraph()->beginTransaction();
     }
 
     for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
@@ -106,7 +106,7 @@ bool Meta::doUndo()
     }
 
     if(transaction) {
-        graph_facade_->getGraph()->finalizeTransaction();
+        root_graph_facade_->getGraph()->finalizeTransaction();
     }
 
 

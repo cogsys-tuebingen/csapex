@@ -84,7 +84,7 @@ protected:
     AUUID graph_uuid;
     CsApexCore* core_;
 
-    GraphFacade* graph_facade_;
+    GraphFacade* root_graph_facade_;
 
     Designer* designer_;
 

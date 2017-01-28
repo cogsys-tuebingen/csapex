@@ -91,7 +91,7 @@ bool UngroupNodes::doExecute()
         }
     }
 
-    CommandFactory cf(graph_facade_);
+    CommandFactory cf(getGraphFacade());
 
     CommandPtr del = cf.deleteAllNodes({uuid});
     executeCommand(del);

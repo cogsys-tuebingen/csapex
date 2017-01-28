@@ -34,6 +34,14 @@ void Output::removeOutputTransition()
     transition_ = nullptr;
 }
 
+void Output::removeConnection(Connectable *other_side)
+{
+    Connectable::removeConnection(other_side);
+    if(connections_.empty()) {
+        setState(State::IDLE);
+    }
+}
+
 void Output::notifyMessageProcessed()
 {
     setState(State::IDLE);

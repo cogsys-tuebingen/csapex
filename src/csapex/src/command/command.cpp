@@ -12,7 +12,7 @@ using namespace csapex;
 std::vector<Command::Ptr> Command::undo_later;
 
 Command::Command(const AUUID &parent_uuid)
-    : graph_uuid(parent_uuid), core_(nullptr), graph_facade_(nullptr),
+    : graph_uuid(parent_uuid), core_(nullptr), root_graph_facade_(nullptr),
       designer_(nullptr),
       before_save_point_(false), after_save_point_(false),
       initialized_(false)
@@ -38,7 +38,7 @@ void Command::init(GraphFacade* graph_facade, CsApexCore& core, Designer *design
 {
     apex_assert_hard(graph_facade);
 
-    graph_facade_ = graph_facade;
+    root_graph_facade_ = graph_facade;
 
     designer_ = designer;
 
@@ -101,7 +101,7 @@ void Command::accept(int level, std::function<void (int level, const Command &)>
 
 GraphFacade* Command::getRoot()
 {
-    return graph_facade_;
+    return root_graph_facade_;
 }
 
 GraphFacade* Command::getGraphFacade()

@@ -72,18 +72,11 @@ bool GroupNodes::doExecute()
 
     analyzeConnections(graph);
 
-    CommandFactory cf(graph_facade_);
+    CommandFactory cf(getGraphFacade());
 
     CommandPtr del = cf.deleteAllNodes(uuids);
     executeCommand(del);
     add(del);
-
-//    for(NodeHandle* nh : nodes) {
-//        UUID old_uuid = nh->getUUID();
-//        CommandPtr del = std::make_shared<command::DeleteNode>(getGraphFacade()->getAbsoluteUUID(), old_uuid);
-//        executeCommand(del);
-//        add(del);
-//    }
 
     pasteSelection(sub_graph_auuid);
 
