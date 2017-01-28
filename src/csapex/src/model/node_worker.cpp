@@ -118,9 +118,9 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 }
             });
 
-//            auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
-//            node_handle_->getInputTransition()->setActivationFunction(af);
-//            node_handle_->getOutputTransition()->setActivationFunction(af);
+            //            auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
+            //            node_handle_->getInputTransition()->setActivationFunction(af);
+            //            node_handle_->getOutputTransition()->setActivationFunction(af);
         }
 
         sendEvents(node_handle_->isActive());
@@ -206,16 +206,16 @@ bool NodeWorker::isFired() const
 void NodeWorker::setState(State state)
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-//    switch(state) {
-//    case State::IDLE:
-//        apex_assert_hard(is_processing_ || isEnabled() || state_ == State::IDLE);
-//        break;
-//    case State::FIRED:
-//        apex_assert_hard(isEnabled());
-//        break;
-//    default:
-//        break;
-//    }
+    //    switch(state) {
+    //    case State::IDLE:
+    //        apex_assert_hard(is_processing_ || isEnabled() || state_ == State::IDLE);
+    //        break;
+    //    case State::FIRED:
+    //        apex_assert_hard(isEnabled());
+    //        break;
+    //    default:
+    //        break;
+    //    }
 
     state_ = state;
 }
@@ -593,14 +593,32 @@ void NodeWorker::signalMessagesProcessed(bool processing_aborted)
 
 void NodeWorker::forwardMessages(bool send_parameters)
 {
-    apex_assert_hard(isProcessing());
+    std::unique_lock<std::recursive_mutex> lock(sync);
 
-    if(!node_handle_->isSink()) {
-        if(send_parameters) {
-            publishParameters();
+    apex_assert_hard(isProcessing());
+    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+
+    if(send_parameters && !node_handle_->isSink()) {
+        for(auto pair : node_handle_->outputToParamMap()) {
+            auto out = pair.first;
+            auto p = pair.second;
+            publishParameterOn(*p, out);
         }
     }
-    sendMessages(false);
+
+    //tokens are activated if the node is active.
+    bool active = node_handle_->isActive();
+
+    lock.unlock();
+    bool has_sent_activator_message = node_handle_->getOutputTransition()->sendMessages(active);
+    lock.lock();
+
+    sendEvents(active);
+
+    // if there is an active connection -> deactivate
+    if(active && has_sent_activator_message) {
+        node_handle_->setActive(false);
+    }
 }
 
 bool NodeWorker::areAllInputsAvailable() const
@@ -653,7 +671,7 @@ void NodeWorker::outgoingMessagesProcessed()
             APEX_DEBUG_TRACE getNode()->ainfo << "done" << std::endl;
             node_handle_->getInputTransition()->notifyMessageProcessed();
 
-//            current_exec_mode_.reset();
+            //            current_exec_mode_.reset();
         }
 
         APEX_DEBUG_TRACE getNode()->ainfo << "notify, try process" << std::endl;
@@ -694,16 +712,6 @@ bool NodeWorker::execute()
     return startProcessingMessages();
 }
 
-
-
-void NodeWorker::publishParameters()
-{
-    for(auto pair : node_handle_->outputToParamMap()) {
-        auto out = pair.first;
-        auto p = pair.second;
-        publishParameterOn(*p, out);
-    }
-}
 void NodeWorker::publishParameterOn(const csapex::param::Parameter& p, Output* out)
 {
     if(out->isConnected()) {
@@ -782,32 +790,6 @@ void NodeWorker::sendEvents(bool active)
     }
 }
 
-void NodeWorker::sendMessages(bool ignore_sink)
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-
-    apex_assert_hard(isProcessing() || isIdle());
-    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-
-    //tokens are activated if the node is active.
-    bool active = node_handle_->isActive();
-
-    bool has_sent_activator_message = false;
-    if(!(ignore_sink && node_handle_->isSink())) {
-        lock.unlock();
-        has_sent_activator_message = node_handle_->getOutputTransition()->sendMessages(active);
-        lock.lock();
-    }
-
-    sendEvents(active);
-
-    // if there is an active connection -> deactivate
-    if(active && has_sent_activator_message) {
-        node_handle_->setActive(false);
-    }
-
-}
-
 void NodeWorker::checkParameters()
 {
     NodePtr node = node_handle_->getNode().lock();
@@ -822,9 +804,9 @@ void NodeWorker::checkParameters()
             if(param::ParameterPtr p = pair.first.lock()) {
                 try {
                     //if(p->isEnabled()) {
-                        for(auto& cb : pair.second) {
-                            cb(p.get());
-                        }
+                    for(auto& cb : pair.second) {
+                        cb(p.get());
+                    }
                     //}
 
                 } catch(const std::exception& e) {

@@ -7,9 +7,12 @@
 #include <csapex/command/delete_connection.h>
 #include <csapex/command/delete_fulcrum.h>
 #include <csapex/command/modify_connection.h>
+#include <csapex/command/mute_node.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/switch_thread.h>
+#include <csapex/command/set_max_execution_frequency.h>
+#include <csapex/command/set_logger_level.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -23,6 +26,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/node_runner.h>
+#include <csapex/model/node_state.h>
 #include <csapex/scheduling/scheduler.h>
 
 using namespace csapex;
@@ -327,28 +331,35 @@ CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorT
 }
 
 
-void CommandFactory::switchThreadRecursively(const UUID &node_uuid, int old_thread_id, int id, std::shared_ptr<command::Meta>& out)
+namespace {
+template <typename Lambda>
+void foreachNode(GraphFacade* graph_facade, const UUID &node_uuid, Lambda fn)
 {
-    NodeHandle* node = root_->getGraph()->findNodeHandle(node_uuid);
-    if(NodeRunnerPtr runner = node->getNodeRunner()) {
-        if(runner->getScheduler()->id() == old_thread_id)  {
-            out->add(Command::Ptr(new command::SwitchThread(graph_uuid, node_uuid, id)));
-        }
-    }
+    // evalute at the node
+    NodeHandle* nh = graph_facade->getGraph()->findNodeHandle(node_uuid);
+    apex_assert_hard(nh);
+    fn(graph_facade, nh);
 
-    if(node && node->isGraph()) {
-        //        if(GraphPtr graph = std::dynamic_pointer_cast<Graph>(node->getNode().lock())) {
-        //            for(NodeHandle* child : graph->getAllNodeHandles()) {
-        //                switchThreadRecursively(UUIDProvider::makeDerivedUUID_forced(node_uuid, child->getUUID().getFullName()), old_thread_id, id, out);
-        //            }
-        //        }
-        if(GraphPtr graph = std::dynamic_pointer_cast<Graph>(node->getNode().lock())) {
-            CommandFactory ccf(root_->getSubGraph(node_uuid));
-            for(NodeHandle* child : graph->getAllNodeHandles()) {
-                ccf.switchThreadRecursively(child->getUUID(), old_thread_id, id, out);
-            }
+    // recursive call into child graphs
+    if(nh->isGraph()) {
+        GraphPtr child_graph = std::dynamic_pointer_cast<Graph>(nh->getNode().lock());
+        apex_assert_hard(child_graph);
+        GraphFacade* child_facade = graph_facade->getSubGraph(node_uuid);
+        apex_assert_hard(child_facade);
+
+        for(NodeHandle* child : child_graph->getAllNodeHandles()) {
+            foreachNode(child_facade, child->getUUID(), fn);
         }
     }
+}
+
+template <typename Lambda>
+void foreachNode(GraphFacade* graph_facade, const std::vector<UUID> &node_uuids, Lambda fn)
+{
+    for(const UUID& uuid: node_uuids) {
+        foreachNode(graph_facade, uuid, fn);
+    }
+}
 }
 
 
@@ -358,8 +369,45 @@ CommandPtr CommandFactory::switchThreadRecursively(const std::vector<UUID> &node
     for(const UUID& uuid: node_uuids) {
         NodeHandle* node = root_->getGraph()->findNodeHandle(uuid);
         if(NodeRunnerPtr runner = node->getNodeRunner()) {
-            switchThreadRecursively(uuid, runner->getScheduler()->id(), id, cmd);
+            int old_thread_id = runner->getScheduler()->id();
+
+            foreachNode(root_, uuid, [&](GraphFacade* graph_facade, NodeHandle* nh) {
+                if(NodeRunnerPtr runner = nh->getNodeRunner()) {
+                    if(runner->getScheduler()->id() == old_thread_id)  {
+                        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade->getAbsoluteUUID(), nh->getUUID(), id)));
+                    }
+                }
+            });
         }
     }
+    return cmd;
+}
+
+CommandPtr CommandFactory::muteRecursively(const std::vector<UUID> &node_uuids, bool muted)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_uuid, muted ? "mute nodes" : "unmute nodes"));
+    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, NodeHandle* nh) {
+        if(nh->getNodeState()->isMuted() != muted) {
+            cmd->add(Command::Ptr(new command::MuteNode(graph_facade->getAbsoluteUUID(), nh->getUUID(), muted)));
+        }
+    });
+    return cmd;
+}
+
+CommandPtr CommandFactory::setMaximumFrequencyRecursively(const std::vector<UUID> &node_uuids, double frequency)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_uuid, frequency == 0.0 ? "set unbounded frequency" : "set maximum frequency"));
+    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, NodeHandle* nh) {
+        cmd->add(Command::Ptr(new command::SetMaximumExecutionFrequency(graph_facade->getAbsoluteUUID(), nh->getUUID(), frequency)));
+    });
+    return cmd;
+}
+
+CommandPtr CommandFactory::setLoggerLevelRecursively(const std::vector<UUID> &node_uuids, int level)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_uuid, "set logger level"));
+    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, NodeHandle* nh) {
+        cmd->add(Command::Ptr(new command::SetLoggerLevel(graph_facade->getAbsoluteUUID(), nh->getUUID(), level)));
+    });
     return cmd;
 }

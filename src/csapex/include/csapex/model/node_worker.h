@@ -103,7 +103,6 @@ public:
 
     void killExecution();
 
-    void sendMessages(bool ignore_sink);
     void outgoingMessagesProcessed();
 
 public:
@@ -123,7 +122,6 @@ public:
     slim_signal::Signal<void()> try_process_changed;
 
 private:
-    void publishParameters();
     void publishParameter(csapex::param::Parameter *p);
     void publishParameterOn(const csapex::param::Parameter &p, Output *out);
 

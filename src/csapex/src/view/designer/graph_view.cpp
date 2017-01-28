@@ -23,8 +23,6 @@
 #include <csapex/command/add_connection.h>
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/set_execution_mode.h>
-#include <csapex/command/set_logger_level.h>
-#include <csapex/command/set_max_execution_frequency.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/settings.h>
@@ -1375,11 +1373,7 @@ void GraphView::setExecutionMode(ExecutionMode mode)
 
 void GraphView::setLoggerLevel(int level)
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set logger level"));
-    for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SetLoggerLevel(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), level)));
-    }
-    view_core_.execute(cmd);
+    view_core_.execute(CommandFactory(graph_facade_.get()).setLoggerLevelRecursively(getSelectedUUIDs(), level));
 }
 
 
@@ -1397,21 +1391,13 @@ void GraphView::setMaximumFrequency()
 
     double max_f = QInputDialog::getDouble(QApplication::activeWindow(), "Maximum Frequency", "Please enter the maximum frequency.", current_f, 0.0001, 400.0, 5, &ok);
     if(ok) {
-        command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set maximum frequency"));
-        for(NodeBox* box : selected_boxes_) {
-            cmd->add(Command::Ptr(new command::SetMaximumExecutionFrequency(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), max_f)));
-        }
-        view_core_.execute(cmd);
+        view_core_.execute(CommandFactory(graph_facade_.get()).setMaximumFrequencyRecursively(getSelectedUUIDs(), max_f));
     }
 }
 
 void GraphView::setUnboundedMaximumFrequency()
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set unbounded frequency"));
-    for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SetMaximumExecutionFrequency(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), 0.0)));
-    }
-    view_core_.execute(cmd);
+    view_core_.execute(CommandFactory(graph_facade_.get()).setMaximumFrequencyRecursively(getSelectedUUIDs(), 0.0));
 }
 
 void GraphView::minimizeBox(bool muted)
@@ -1423,13 +1409,9 @@ void GraphView::minimizeBox(bool muted)
     view_core_.execute(cmd);
 }
 
-void GraphView::muteBox(bool mini)
+void GraphView::muteBox(bool muted)
 {
-    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),(mini ? std::string("mute") : std::string("unmute")) + " boxes"));
-    for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::MuteNode(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), mini)));
-    }
-    view_core_.execute(cmd);
+    view_core_.execute(CommandFactory(graph_facade_.get()).muteRecursively(getSelectedUUIDs(), muted));
 }
 
 void GraphView::morphNode()

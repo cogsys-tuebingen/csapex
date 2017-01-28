@@ -47,7 +47,9 @@ public:
     CommandPtr clearCommand();
 
     CommandPtr switchThreadRecursively(const std::vector<UUID> &node_uuids, int id);
-    void switchThreadRecursively(const UUID &node_uuid, int old_thread_id, int id, std::shared_ptr<command::Meta>& out);
+    CommandPtr muteRecursively(const std::vector<UUID> &node_uuids, bool muted);
+    CommandPtr setMaximumFrequencyRecursively(const std::vector<UUID> &node_uuids, double frequency);
+    CommandPtr setLoggerLevelRecursively(const std::vector<UUID> &node_uuids, int level);
 
 
     CommandPtr createVariadicInput(const AUUID& node_uuid, TokenDataConstPtr connection_type, const std::string& label, bool optional);
@@ -60,6 +62,7 @@ public:
 
 private:
     GraphFacade* getGraphFacade() const;
+
 
 private:
     GraphFacade* root_;
