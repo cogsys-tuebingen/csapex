@@ -1,0 +1,18 @@
+#!/bin/bash -l
+ROS_BOOT=$HOME/.csapex/boot/libcsapex_ros_boot.so
+if ! [ -f $ROS_BOOT ]; then
+    for dir in ${LD_LIBRARY_PATH//:/ }; do
+        path=$(find $dir -name libcsapex_ros_boot.so);
+        if [ $path ]; then
+            mkdir -p $HOME/.csapex/boot
+            ln -sf $path $ROS_BOOT;
+        fi
+    done
+fi
+
+if [ -f $ROS_BOOT ]; then
+    rosrun csapex csapex_main
+else
+    echo "ERROR: cannot find any boot plugins!"
+    echo "make sure that $ROS_BOOT exists"
+fi

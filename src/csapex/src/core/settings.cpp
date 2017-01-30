@@ -131,6 +131,8 @@ void Settings::save()
 #endif
 
     std::string tmp_file = settings_file + "." + std::to_string(pid) + ".tmp";
+    bf3::create_directories(tmp_file);
+
     std::ofstream ofs(tmp_file.c_str());
     ofs << yaml.c_str();
 

@@ -587,17 +587,17 @@ set_target_properties(csapex_qt PROPERTIES AUTOMOC TRUE)
 #
 
 if(WIN32)
-	add_executable(csapex_node
+        add_executable(csapex_main
 		src/csapex.cpp
 		res/csapex.rc
 	)
 else()
-        add_executable(csapex_node
+        add_executable(csapex_main
 		src/csapex.cpp)
 endif()
 
-set_target_properties(csapex_node PROPERTIES AUTOMOC TRUE)
-target_link_libraries(csapex_node
+set_target_properties(csapex_main PROPERTIES AUTOMOC TRUE)
+target_link_libraries(csapex_main
     csapex_qt
     ${Boost_LIBRARIES})
 
@@ -606,7 +606,7 @@ add_custom_target(cfg ALL DEPENDS cfg/style.css)
 add_custom_command(TARGET cfg POST_BUILD
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
         ${CATKIN_DEVEL_PREFIX}
-        ${PROJECT_NAME}/csapex_node
+        ${PROJECT_NAME}/csapex_main
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -662,12 +662,12 @@ else()
 			DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 endif()
 
-install(TARGETS csapex_node ${csapex_LIBRARIES}
+install(TARGETS csapex_main ${csapex_LIBRARIES}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-install(TARGETS csapex_node
+install(TARGETS csapex_main
         DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 		
 		
