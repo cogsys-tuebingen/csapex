@@ -17,6 +17,7 @@ GenericState::GenericState()
     : silent_(false),
       parameter_set_changed(new slim_signal::Signal<void()>),
       parameter_added(new slim_signal::Signal<void(csapex::param::ParameterPtr)>),
+      parameter_changed(new slim_signal::Signal<void(csapex::param::Parameter*)>),
       parameter_removed(new slim_signal::Signal<void(csapex::param::ParameterPtr)>)
 {
 
@@ -104,6 +105,8 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
     }
 
     param_valid_name_cache[valid_name] = param_name;
+
+    param->parameter_changed.connect(*parameter_changed);
 }
 
 void GenericState::removeParameter(csapex::param::ParameterPtr param)

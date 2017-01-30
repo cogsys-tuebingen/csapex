@@ -13,6 +13,7 @@
 #include <csapex/utility/thread.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph/vertex.h>
+#include <csapex/model/generic_state.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
@@ -118,9 +119,9 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
                 }
             });
 
-            //            auto af = delegate::bind(&NodeWorker::triggerTryProcess, this);
-            //            node_handle_->getInputTransition()->setActivationFunction(af);
-            //            node_handle_->getOutputTransition()->setActivationFunction(af);
+            observe(node->getParameterState()->parameter_changed, [this](param::Parameter*){
+                triggerTryProcess();
+            });
         }
 
         sendEvents(node_handle_->isActive());
@@ -299,6 +300,11 @@ void NodeWorker::reset()
 
     node_handle_->getOutputTransition()->reset();
     node_handle_->getInputTransition()->reset();
+
+    apex_assert_hard(canReceive());
+    apex_assert_hard(canSend());
+
+    triggerTryProcess();
 }
 
 void NodeWorker::setProfiling(bool profiling)

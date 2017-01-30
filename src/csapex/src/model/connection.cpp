@@ -65,7 +65,9 @@ bool Connection::isDetached() const
 
 void Connection::reset()
 {
+    std::unique_lock<std::recursive_mutex> lock(sync);
     state_ = Connection::State::NOT_INITIALIZED;
+    message_.reset();
 }
 
 TokenPtr Connection::getToken() const

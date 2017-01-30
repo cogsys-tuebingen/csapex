@@ -70,8 +70,6 @@ void NodeRunner::measureFrequency()
 void NodeRunner::reset()
 {
     worker_->reset();
-
-    scheduleProcess();
 }
 
 void NodeRunner::assignToScheduler(Scheduler *scheduler)
