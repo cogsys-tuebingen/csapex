@@ -130,8 +130,8 @@ void Settings::save()
     uint32_t pid = getpid();
 #endif
 
-    std::string tmp_file = settings_file + "." + std::to_string(pid) + ".tmp";
-    bf3::create_directories(tmp_file);
+    bf3::path tmp_file = settings_file + "." + std::to_string(pid) + ".tmp";
+    bf3::create_directories(tmp_file.parent_path());
 
     std::ofstream ofs(tmp_file.c_str());
     ofs << yaml.c_str();
