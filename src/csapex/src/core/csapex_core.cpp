@@ -278,7 +278,7 @@ void CsApexCore::boot()
         std::cerr << "a) running the following command:" << '\n';
         std::cerr << "   for dir in ${LD_LIBRARY_PATH//:/ }; do \\\n"
                      "     path=$(find $dir -name libcsapex_ros_boot.so);\\\n"
-                     "     if [ $path ]; then echo mkdir -p ~/.csapex/boot &&  ln -sf $path ~/.csapex/boot/libcsapex_ros_boot.so; fi;\\\n"
+                     "     if [ $path ]; then mkdir -p ~/.csapex/boot &&  ln -sf $path ~/.csapex/boot/libcsapex_ros_boot.so; fi;\\\n"
                      "   done" << '\n';
         std::cerr << "b) creating a link by hand in ~/.csapex/boot/ to the library 'libcsapex_ros_boot.so' " << '\n';
         std::cerr << "c) recompiling csapex_ros" << '\n';
