@@ -248,9 +248,6 @@ void CsApexCore::boot()
 
     boost::filesystem::path directory(dir_string);
 
-    if (!boost::filesystem::exists(directory)) {
-        return;
-    }
     boost::filesystem::directory_iterator dir(directory);
     boost::filesystem::directory_iterator end;
 
@@ -273,6 +270,20 @@ void CsApexCore::boot()
         } catch(const std::exception& e) {
             NOTIFICATION("boot plugin " << path << " failed: " << e.what());
         }
+    }
+
+    if (boot_plugins_.empty()) {
+        std::cerr << "there is no boot plugin in directory " << dir_string << '\n';
+        std::cerr << "please create it by either" << '\n';
+        std::cerr << "a) running the following command:" << '\n';
+        std::cerr << "   for dir in ${LD_LIBRARY_PATH//:/ }; do \\\n"
+                     "     path=$(find $dir -name libcsapex_ros_boot.so);\\\n"
+                     "     if [ $path ]; then echo mkdir -p ~/.csapex/boot &&  ln -sf $path ~/.csapex/boot/libcsapex_ros_boot.so; fi;\\\n"
+                     "   done" << '\n';
+        std::cerr << "b) creating a link by hand in ~/.csapex/boot/ to the library 'libcsapex_ros_boot.so' " << '\n';
+        std::cerr << "c) recompiling csapex_ros" << '\n';
+        std::cerr << std::flush;
+        std::abort();
     }
 
     init();

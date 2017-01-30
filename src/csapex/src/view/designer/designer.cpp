@@ -120,6 +120,7 @@ void Designer::setup()
 
 void Designer::observeGraph(GraphFacadePtr graph)
 {
+    apex_assert_hard(graph);
     graph_connections_[graph->getSubgraphNode()].emplace_back(
                 graph->child_added.connect([this](GraphFacadePtr child){
                     addGraph(child);
