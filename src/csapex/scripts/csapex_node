@@ -11,7 +11,7 @@ if ! [ -f $ROS_BOOT ]; then
 fi
 
 if [ -f $ROS_BOOT ]; then
-    rosrun csapex csapex_main
+    rosrun csapex csapex_main "$@"
 else
     echo "ERROR: cannot find any boot plugins!"
     echo "make sure that $ROS_BOOT exists"
