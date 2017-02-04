@@ -45,6 +45,10 @@ CSAPEX_EXPORT void setLabel(Output* input, const std::string& label);
 
 CSAPEX_EXPORT void throwError(const TokenDataConstPtr& msg, const std::type_info& type);
 
+CSAPEX_EXPORT void trigger(Event* event);
+CSAPEX_EXPORT void trigger(Event* event, const TokenPtr& token);
+CSAPEX_EXPORT void triggerWith(Event* event, const TokenPtr& token);
+
 
 /// CASTING
 

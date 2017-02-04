@@ -1,8 +1,7 @@
 #ifndef SIGNAL_FWD_H
 #define SIGNAL_FWD_H
 
-/// shared_ptr
-#include <memory>
+#include <csapex/msg/msg_fwd.h>
 
 #define FWD(name) \
     class name;\
@@ -14,9 +13,6 @@
 
 namespace csapex
 {
-FWD(Event);
-FWD(Slot);
-
 namespace connection_types
 {
 FWD(Signal);

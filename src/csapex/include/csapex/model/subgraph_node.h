@@ -54,8 +54,7 @@ public:
     // Node interface
     virtual void setup(csapex::NodeModifier& modifier) override;
     virtual void setupParameters(Parameterizable& params) override;
-    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& params,
-                         std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation) override;
+    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& params, Continuation continuation) override;
 
     virtual bool isAsynchronous() const override;
 
@@ -134,7 +133,7 @@ public:
 
 protected:
     mutable std::recursive_mutex continuation_mutex_;
-    std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation_;
+    Continuation continuation_;
 
     InputTransitionPtr transition_relay_in_;
     OutputTransitionPtr transition_relay_out_;

@@ -1,4 +1,5 @@
 /// HEADER
+#define IGNORE_TICKABLE_NODE_WARNING
 #include <csapex/model/tickable_node.h>
 
 /// PROJECT

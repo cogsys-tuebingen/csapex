@@ -94,8 +94,7 @@ void Node::yield() const
     node_handle_->might_be_enabled();
 }
 
-void Node::process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters,
-                   std::function<void(std::function<void (csapex::NodeModifier&, csapex::Parameterizable&)>)> continuation)
+void Node::process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters, Continuation continuation)
 {
     process(node_modifier, parameters);
     continuation([](csapex::NodeModifier&, csapex::Parameterizable&){});

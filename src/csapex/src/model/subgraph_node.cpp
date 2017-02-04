@@ -84,7 +84,7 @@ void SubgraphNode::reset()
 
     {
         std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
-        continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
+        continuation_ = Continuation();
     }
 
     transition_relay_out_->reset();
@@ -169,8 +169,7 @@ void SubgraphNode::setupParameters(Parameterizable &params)
     });
 }
 
-void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
-                           std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)> continuation)
+void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params, Continuation continuation)
 {
     {
         std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
@@ -697,7 +696,7 @@ void SubgraphNode::notifySubgraphProcessed()
     std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
     if(continuation_) {
         auto cnt = continuation_;
-        continuation_ = std::function<void (std::function<void (csapex::NodeModifier&, Parameterizable &)>)>();
+        continuation_ = Continuation();
         lock.unlock();
 
         cnt([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});

@@ -313,7 +313,7 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
             if(token) {
                 trigger->triggerWith(token);
             } else {
-                trigger->trigger();
+                msg::trigger(trigger);
             }
         });
 

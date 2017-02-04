@@ -113,9 +113,9 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             });
             observe(node_handle_->activation_changed, [this](){
                 if(node_handle_->isActive()) {
-                    trigger_activated_->trigger();
+                    msg::trigger(trigger_activated_);
                 } else {
-                    trigger_deactivated_->trigger();
+                    msg::trigger(trigger_deactivated_);
                 }
             });
 
@@ -513,9 +513,11 @@ bool NodeWorker::startProcessingMessages()
 
             } else {
                 try {
-                    node->process(*node_handle_, *node, [this, node](std::function<void(csapex::NodeModifier&, Parameterizable &)> f) {
+                    node->process(*node_handle_, *node, [this, node](ProcessingFunction f) {
                         node_handle_->execution_requested([this, f, node]() {
-                            f(*node_handle_, *node);
+                            if(f) {
+                                f(*node_handle_, *node);
+                            }
                             finishProcessing();
                         });
                     });
@@ -566,7 +568,7 @@ void NodeWorker::signalExecutionFinished()
     }
 
     if(trigger_process_done_->isConnected()) {
-        trigger_process_done_->trigger();
+        msg::trigger(trigger_process_done_);
     }
 }
 

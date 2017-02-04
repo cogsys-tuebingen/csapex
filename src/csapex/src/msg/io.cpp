@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/event.h>
 #include <csapex/model/token.h>
 
 using namespace csapex;
@@ -93,4 +94,19 @@ void csapex::msg::throwError(const TokenDataConstPtr &msg, const std::type_info 
 void csapex::msg::publish(Output *output, TokenDataConstPtr message)
 {
     output->addMessage(std::make_shared<Token>(message));
+}
+
+void csapex::msg::trigger(Event *event)
+{
+    event->trigger();
+}
+
+void csapex::msg::trigger(Event *event, const TokenPtr& token)
+{
+    triggerWith(event, token);
+}
+
+void csapex::msg::triggerWith(Event *event, const TokenPtr& token)
+{
+    event->triggerWith(token);
 }

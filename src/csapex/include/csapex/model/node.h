@@ -10,8 +10,15 @@
 #include <csapex/profiling/timable.h>
 #include <csapex/csapex_export.h>
 #include <csapex/utility/export_plugin.h>
+#include <csapex/model/observer.h>
 
 namespace csapex {
+
+/**
+ * @typedef ProcessingFunction
+ * @brief Represents a call to a process-like function, having the same  signature as Node::process.
+ */
+using ProcessingFunction = std::function<void (csapex::NodeModifier&, Parameterizable &)>;
 
 /**
  * @typedef Continuation
@@ -20,12 +27,11 @@ namespace csapex {
  * This is specifically used with nodes, so the control state will return to the process calling Node::process.
  * A continuation C is of the form
  *   C( Fn )
- * where Fn is a function itself, specified as
- *   std::function<void (csapex::NodeModifier&, Parameterizable &)>).
+ * where Fn is a ProcessingFunction.
  *
  * Fn will be called in the context of the callee of Node::process, returning the control.
  */
-using Continuation = std::function<void(std::function<void (csapex::NodeModifier&, Parameterizable &)>)>;
+using Continuation = std::function<void(ProcessingFunction)>;
 
 /**
  * @brief Node is the most fundamental base class of the frame work. Plug-ins mostly implement this interface.
@@ -36,7 +42,7 @@ using Continuation = std::function<void(std::function<void (csapex::NodeModifier
  * Slots and events can be used to process messages asynchronously.
  * Nodes can be activiated externally, which can also be handled in implementation classes.
  */
-class CSAPEX_EXPORT Node : public Parameterizable, public Timable
+class CSAPEX_EXPORT Node : public Parameterizable, public Timable, public Observer
 {
 public:
     /**
