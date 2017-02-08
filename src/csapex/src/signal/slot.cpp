@@ -100,6 +100,24 @@ void Slot::notifyMessageProcessed()
 
 void Slot::tryNextToken()
 {
+    if(!isEnabled()) {
+        std::vector<Connection*> connections;
+        std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
+        while(!available_connections_.empty()) {
+            Connection* c = available_connections_.front();
+            connections.push_back(c);
+            available_connections_.pop_front();
+        }
+        lock.unlock();
+
+        for(Connection* c : connections) {
+            c->setState(Connection::State::READ);
+            c->setTokenProcessed();
+        }
+
+
+    }
+
     if(isEnabled() || isActive()) {
         std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
         if(!message_ && !available_connections_.empty()) {
