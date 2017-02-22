@@ -72,7 +72,10 @@ void OutputTextParameter::doSetValueFrom(const Parameter& other)
             triggerChange();
         }
     } else {
-        throw std::runtime_error("bad setFrom, invalid types");
+        if(text_ != other.toString()) {
+            text_ = other.toString();
+            triggerChange();
+        }
     }
 }
 

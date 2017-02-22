@@ -158,15 +158,20 @@ protected:
             constructor.setDescription(description);
             constructor.setIcon(icon);
             constructor.setTags(tags);
-            
-            std::function< std::shared_ptr<M>(M*)> make_shared_ptr = [](M* p) { return std::shared_ptr<M>(p); };
-            
+
             constructor.setConstructor([this, lookup_name]() {
                 return createInstance(lookup_name);
             });
             constructor.setLibraryName(library_name);
             
             registerConstructor(constructor);
+
+            if(plugin_to_library_.find(lookup_name) != plugin_to_library_.end()) {
+                std::cerr << "*** SEVERE WARNING: the plugin with name '" << lookup_name << "' is defined multiple times!\n" <<
+                             "  first defined in " << plugin_to_library_.find(lookup_name)->second << "\n" <<
+                             "  redefined in " << library_name << "\n" <<
+                             "****" <<std::endl;
+            }
 
             plugin_to_library_[lookup_name] = library_name;
         }
