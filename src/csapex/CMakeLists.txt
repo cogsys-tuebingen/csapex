@@ -492,9 +492,10 @@ add_library(csapex_qt SHARED
     src/view/designer/fulcrum_widget.cpp
     src/view/designer/tutorial_tree_model.cpp
 
-    src/view/node/default_node_adapter.cpp
-    src/view/node/node_adapter_builder.cpp
     src/view/node/node_adapter.cpp
+    src/view/node/default_node_adapter.cpp
+    src/view/node/resizable_node_adapter.cpp
+    src/view/node/node_adapter_builder.cpp
     src/view/node/node_adapter_factory.cpp
     src/view/node/node_filter_proxy_model.cpp
     src/view/node/parameter_context_menu.cpp

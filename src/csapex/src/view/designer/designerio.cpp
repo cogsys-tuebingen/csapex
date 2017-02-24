@@ -82,6 +82,9 @@ void DesignerIO::loadBoxes(YAML::Node &doc, GraphView *view)
             NodeBox* box = view->getBox(uuid);
             if(box) {
                 NodeAdapter::Ptr na = box->getNodeAdapter();
+                na->readLegacyYaml(e["state"]);
+
+                /// deprecated:
                 Memento::Ptr m = na->getState();
                 if(m) {
                     m->readYaml(e["state"]);

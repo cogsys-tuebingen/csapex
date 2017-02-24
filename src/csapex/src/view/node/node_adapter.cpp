@@ -64,6 +64,11 @@ void NodeAdapter::setParameterState(Memento::Ptr)
 
 }
 
+void NodeAdapter::readLegacyYaml(const YAML::Node & )
+{
+
+}
+
 void NodeAdapter::setManualResize(bool manual)
 {
 

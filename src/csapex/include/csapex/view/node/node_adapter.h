@@ -15,6 +15,10 @@
 
 class QListView;
 
+namespace YAML {
+class Node;
+}
+
 namespace csapex
 {
 class CSAPEX_QT_EXPORT NodeAdapter
@@ -34,6 +38,8 @@ public:
 
     virtual MementoPtr getState() const;
     virtual void setParameterState(MementoPtr memento);
+
+    virtual void readLegacyYaml(const YAML::Node& node);
 
     virtual bool isResizable() const;
     virtual void setManualResize(bool manual);
