@@ -872,8 +872,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     }
 
     ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
-    ccs.full_read = !marker && connection.getState() == Connection::State::READ;
-    ccs.full_unread = !marker && connection.getState() == Connection::State::UNREAD;
+    ccs.full_read = /*!marker && */connection.getState() == Connection::State::READ;
+    ccs.full_unread = /*!marker && */connection.getState() == Connection::State::UNREAD;
     ccs.active = connection.isActive();
     ccs.active_token = connection.holdsActiveToken();
     if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to->getOwner())) {

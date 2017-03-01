@@ -8,6 +8,7 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/signal/event.h>
 #include <csapex/model/variadic_io.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
@@ -717,6 +718,15 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         transition_state += it->isEnabled() ? "enabled" : "disabled";
         transition_state += ", ot: ";
         transition_state += ot->isEnabled() ? "enabled" : "disabled";
+        transition_state += ", events: ";
+        bool events_enabled = true;
+        for(EventPtr e : handle->getExternalEvents()){
+            if(!e->canReceiveToken()) {
+                events_enabled = false;
+                break;
+            }
+        }
+        transition_state += events_enabled ? "enabled" : "disabled";
         state_text = "<img src=\":/node_";
         state_text += state + ".png\" />";
         if(handle->getNodeState()->isMuted()) {

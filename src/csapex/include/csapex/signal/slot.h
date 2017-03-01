@@ -39,6 +39,7 @@ public:
     }
 
     bool isActive() const;
+    bool isAsynchronous() const;
 
     void notifyMessageAvailable(Connection* connection) override;
     void notifyMessageProcessed() override;
@@ -64,6 +65,7 @@ private:
 
 protected:
     std::function<void(Slot*,const TokenPtr&)> callback_;
+
     bool active_;
     bool asynchronous_;
 

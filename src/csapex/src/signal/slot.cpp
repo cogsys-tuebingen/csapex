@@ -58,7 +58,17 @@ void Slot::disable()
 void Slot::setToken(TokenPtr token)
 {
     apex_assert_hard(getType()->canConnectTo(token->getTokenData().get()));
-    Input::setToken(token);
+
+//    Input::setToken(token);
+
+    {
+        std::unique_lock<std::mutex> lock(message_mutex_);
+        if(!message_) {
+            message_ = token;
+        }
+    }
+    count_++;
+    message_set(this);
 
     token_set(token);
 
@@ -121,7 +131,8 @@ void Slot::tryNextToken()
     if(isEnabled() || isActive()) {
         std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
         if(!message_ && !available_connections_.empty()) {
-            TokenPtr token = available_connections_.front()->readToken();
+            auto* current_connection = available_connections_.front();
+            TokenPtr token = current_connection->readToken();
             lock.unlock();
 
             setToken(token);
@@ -161,21 +172,26 @@ void Slot::handleEvent()
 
 void Slot::notifyEventHandled()
 {
-    for(auto connection : connections_) {
-        if(connection->getState() == Connection::State::UNREAD) {
-            return;
-        }
-    }
     {
         std::unique_lock<std::mutex> lock(message_mutex_);
         message_.reset();
     }
+//    for(auto connection : connections_) {
+//        if(connection->getState() == Connection::State::UNREAD) {
+//            return;
+//        }
+//    }
     notifyMessageProcessed();
 }
 
 bool Slot::isActive() const
 {
     return active_;
+}
+
+bool Slot::isAsynchronous() const
+{
+    return asynchronous_;
 }
 
 

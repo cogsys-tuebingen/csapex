@@ -1,6 +1,10 @@
 #ifndef INTERLUDE_HPP
 #define INTERLUDE_HPP
 
+/// PROJECT
+#include <csapex/profiling/timer.h>
+#include <csapex/profiling/interlude.h>
+
 /// SYSTEM
 #include <sstream>
 

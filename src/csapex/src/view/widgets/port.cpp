@@ -240,6 +240,10 @@ void Port::createToolTip()
 
     if(InputPtr in = std::dynamic_pointer_cast<Input>(adaptee)) {
         tooltip << ", optional: " << in->isOptional();
+
+    }
+    if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(adaptee)) {
+        tooltip << ", asynchronous: " << slot->isAsynchronous();
     }
 
     if(OutputPtr out = std::dynamic_pointer_cast<Output>(adaptee)) {

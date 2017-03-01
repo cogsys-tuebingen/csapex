@@ -21,7 +21,7 @@ Interlude::Interlude(Timer* parent, const std::string &name)
 {
     // start new interval in timer
     if(parent_->active.empty()) {
-        throw std::runtime_error("no active timer");
+        parent_->active.emplace_back(std::make_shared<Interval>(name));
     }
 
     if(parent_->active.back()->sub.find(name) == parent_->active.back()->sub.end()) {
