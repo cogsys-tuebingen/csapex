@@ -143,6 +143,8 @@ void NotificationWidget::setNotification(const Notification &notification)
             icon_->setText("<img src=':help.png' />");
         }
 
+        setToolTip(s);
+
     } else if(!was_error) {
         icon_->setText("<img src=':error.png' />");
     }

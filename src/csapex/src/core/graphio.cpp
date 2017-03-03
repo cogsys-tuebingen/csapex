@@ -394,6 +394,9 @@ void GraphIO::loadConnection(const YAML::Node& connection)
         ConnectablePtr from = graph_->findConnectorNoThrow(from_uuid);
         if(from) {
             loadConnection(from, to_uuid, connection_type);
+        } else {
+            sendNotificationStreamGraphio("cannot load connection from '" << from_uuid << "' to '" << to_uuid <<
+                                          "', '" << from_uuid << "' doesn't exist.");
         }
     }
 }

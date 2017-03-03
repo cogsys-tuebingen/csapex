@@ -41,6 +41,42 @@ void Parameterizable::doSetParameter(const std::string& name, const T& value)
     parameter_state_->getParameter(name)->set<T>(value);
 }
 
+/**
+ * Convenience conversions
+ */
+
+namespace csapex
+{
+template <>
+std::size_t Parameterizable::doReadParameter<std::size_t>(const std::string& name) const
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    return parameter_state_->getParameter(name)->as<int>();
+}
+
+template <>
+void Parameterizable::doSetParameter<std::size_t>(const std::string& name, const std::size_t& value)
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    parameter_state_->getParameter(name)->set<int>(value);
+}
+
+
+template <>
+float Parameterizable::doReadParameter<float>(const std::string& name) const
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    return parameter_state_->getParameter(name)->as<double>();
+}
+
+template <>
+void Parameterizable::doSetParameter<float>(const std::string& name, const float& value)
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+    parameter_state_->getParameter(name)->set<double>(value);
+}
+}
+
 
 template CSAPEX_EXPORT bool Parameterizable::doReadParameter<bool>(const std::string& name) const;
 template CSAPEX_EXPORT double Parameterizable::doReadParameter<double>(const std::string& name) const;
