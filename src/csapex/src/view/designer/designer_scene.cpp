@@ -979,7 +979,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     }
 
     if(ccs.type == TokenType::SIG) {
-        scale_factor *= 0.5;
+//        scale_factor *= 0.5;
     }
 
     if(ccs.active) {
@@ -1144,8 +1144,8 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     }
 
     if(ccs.active_token) {
-        color_start.setAlpha(255);
-        color_end.setAlpha(255);
+        color_start.setAlpha(200);
+        color_end.setAlpha(200);
     }
 
     QLinearGradient lg(from, to);
