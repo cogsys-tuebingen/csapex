@@ -225,6 +225,8 @@ void Connectable::removeConnection(Connectable* other_side)
         if((t == other_side) || (f == other_side)) {
             apex_assert_hard((this == t) ^ (this == f));
 
+            lock.unlock();
+
             fadeConnection(c);
             other_side->fadeConnection(c);
 

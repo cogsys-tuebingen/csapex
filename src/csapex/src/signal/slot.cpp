@@ -7,6 +7,7 @@
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/no_message.h>
 #include <csapex/model/connection.h>
+#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <iostream>
@@ -157,6 +158,10 @@ void Slot::handleEvent()
                     callback_(this, msg_copy);
                 } catch(const std::exception& e) {
                     std::cerr << "slot " << getUUID() << " has thrown an exception: " << e.what() << std::endl;
+
+                    if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(getOwner())) {
+                        node->setError(e.what());
+                    }
                 }
             } else {
                 notifyEventHandled();
