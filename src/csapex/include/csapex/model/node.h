@@ -107,6 +107,15 @@ public:
      */
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
 
+
+    /**
+     * @brief finishSetup is called after the node is completely set up.
+     *
+     * By default, this does nothing. The method can be used to make adjustments
+     * to the node after it has been fully initialized, e.g. after deserialization.
+     */
+    virtual void finishSetup();
+
     /**
      * @brief tearDown is used after the last call to process, before
      * the node is completely destroyed.

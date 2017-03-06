@@ -57,6 +57,7 @@ public:
 
     long getSequenceNumber() const;
 
+    void initialize();
     void reset();
 
     void triggerTryProcess();

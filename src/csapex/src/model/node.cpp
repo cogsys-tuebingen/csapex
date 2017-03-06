@@ -111,6 +111,11 @@ void Node::process()
     // default: do nothing, clients overwrite this
 }
 
+void Node::finishSetup()
+{
+
+}
+
 void Node::tearDown()
 {
 

@@ -285,6 +285,18 @@ void NodeWorker::triggerTryProcess()
     try_process_changed();
 }
 
+void NodeWorker::initialize()
+{
+    checkParameters();
+
+    NodePtr node = node_handle_->getNode().lock();
+    if(!node) {
+        return;
+    }
+
+    node->finishSetup();
+}
+
 void NodeWorker::reset()
 {
     NodePtr node = node_handle_->getNode().lock();

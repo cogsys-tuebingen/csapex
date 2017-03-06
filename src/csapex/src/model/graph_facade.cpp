@@ -81,7 +81,7 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
 
     nw->notification.connect(notification);
 
-    nw->checkParameters();
+    nw->initialize();
     nw->panic.connect(panic);
 }
 
