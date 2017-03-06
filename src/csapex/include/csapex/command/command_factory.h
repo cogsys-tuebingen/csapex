@@ -9,6 +9,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/csapex_command_export.h>
+#include <csapex/scheduling/scheduling_fwd.h>
 
 namespace csapex
 {
@@ -59,6 +60,8 @@ public:
 
     CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string &label);
     CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string& label, bool optional);
+
+    CommandPtr deleteThreadGroup(csapex::ThreadGroup * group);
 
 private:
     GraphFacade* getGraphFacade() const;

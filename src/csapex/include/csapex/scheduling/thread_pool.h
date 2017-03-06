@@ -36,6 +36,9 @@ public:
 
     virtual bool isRunning() const override;
 
+    std::size_t getGroupCount() const;
+    ThreadGroup* getGroupAt(std::size_t pos);
+
     std::vector<ThreadGroupPtr> getGroups();
     ThreadGroup* getGroup(int id);
     ThreadGroup* getGroupFor(TaskGenerator* generator);
@@ -48,7 +51,9 @@ public:
     void usePrivateThreadFor(TaskGenerator* task);
     void addToGroup(TaskGenerator* task, int group_id);
 
+    ThreadGroup *createGroup(const std::string &name, int id = -1);
     int createNewGroupFor(TaskGenerator *task, const std::string &name);
+    void removeGroup(int id);
 
     void useDefaultThreadFor(TaskGenerator *task);
 
@@ -57,6 +62,7 @@ public:
 
 public:
     slim_signal::Signal<void (ThreadGroupPtr)> group_created;
+    slim_signal::Signal<void (ThreadGroupPtr)> group_removed;
 
 protected:
     void pauseChanged(bool pause) override;
@@ -71,6 +77,7 @@ private:
     bool isInGroup(TaskGenerator* task, int id) const;
 
 //    void clearGroup(ThreadGroup *group);
+    void removeGroup(ThreadGroup *group);
 
 private:
     ExceptionHandler& handler_;

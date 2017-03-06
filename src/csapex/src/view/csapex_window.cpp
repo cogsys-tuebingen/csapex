@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command.h>
+#include <csapex/command/create_thread.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
@@ -38,6 +39,8 @@
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/profiling_widget.h>
 #include <csapex/view/widgets/screenshot_dialog.h>
+#include <csapex/view/model/thread_group_table_model.h>
+#include <csapex/view/designer/graph_view.h>
 #include "ui_csapex_window.h"
 
 /// SYSTEM
@@ -53,6 +56,7 @@
 #include <QMimeData>
 #include <QClipboard>
 #include <QTextCodec>
+#include <QInputDialog>
 
 using namespace csapex;
 
@@ -197,6 +201,7 @@ void CsApexWindow::construct()
 }
 
 
+
 void CsApexWindow::setupDesigner()
 {
     designer_->setup();
@@ -253,9 +258,93 @@ void CsApexWindow::setupDesigner()
     QObject::connect(opt, &DesignerOptions::inactiveEnabled, ui->actionInactive_Connections, &QAction::setChecked);
 
 
+    // models
+    setupThreadManagement();
+
     ui->startup->layout()->addWidget(new ProfilingWidget(core_.getProfiler(), "load graph"));
 }
 
+void CsApexWindow::setupThreadManagement()
+{
+    ThreadGroupTableModel* model = new ThreadGroupTableModel(core_.getThreadPool(), view_core_.getCommandDispatcher());
+    ui->thread_table->setModel(model);
+
+    QItemSelectionModel* select = ui->thread_table->selectionModel();
+
+    QObject::connect(select, &QItemSelectionModel::selectionChanged, [this](const QItemSelection &, const QItemSelection &) {
+        QItemSelectionModel* select = ui->thread_table->selectionModel();
+        int rows = 0;
+        for(const auto& entry : select->selection()) {
+            rows += entry.bottom() - entry.top() + 1;
+        }
+
+        ui->thread_assign->setEnabled(rows == 1);
+        ui->thread_remove->setEnabled(rows > 0);
+    });
+
+    select->selectionChanged(QItemSelection(), QItemSelection());
+
+    QObject::connect(model, &ThreadGroupTableModel::rowsInserted,
+                     [this](const QModelIndex &parent, int first, int last)
+    {
+        ui->thread_table->resizeRowsToContents();
+        ui->thread_table->resizeColumnsToContents();
+    });
+
+
+    QObject::connect(ui->thread_assign, &QPushButton::clicked, [this](bool) {
+        if(GraphView* view = designer_->getVisibleGraphView()) {
+            QItemSelectionModel* select = ui->thread_table->selectionModel();
+            ThreadGroup* group = core_.getThreadPool()->getGroupAt(select->currentIndex().row());
+            view->switchSelectedNodesToThread(group->id());
+        }
+    });
+
+    QObject::connect(ui->thread_private, &QPushButton::clicked, [this](bool) {
+        if(GraphView* view = designer_->getVisibleGraphView()) {
+            view->usePrivateThreadForSelectedNodes();
+        }
+    });
+
+    QObject::connect(ui->thread_default, &QPushButton::clicked, [this](bool) {
+        if(GraphView* view = designer_->getVisibleGraphView()) {
+            view->useDefaultThreadForSelectedNodes();
+        }
+    });
+
+    QObject::connect(ui->thread_create, &QPushButton::clicked, [this](bool) {
+        bool ok;
+        ThreadPool* thread_pool = core_.getThreadPool().get();
+        QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
+
+        if(ok && !text.isEmpty()) {
+            Command::Ptr cmd(new command::CreateThread(core_.getRoot()->getAbsoluteUUID(), UUID::NONE, text.toStdString()));
+            view_core_.execute(cmd);
+        }
+    });
+
+    QObject::connect(ui->thread_remove, &QPushButton::clicked, [this, model](bool) {
+
+        QItemSelectionModel* select = ui->thread_table->selectionModel();
+        if(select->hasSelection()) {
+            QItemSelection selection = select->selection();
+
+            command::Meta::Ptr meta(new command::Meta(AUUID(), "delete selected thread groups"));
+            CommandFactory factory(root_.get());
+
+            ThreadPoolPtr thread_pool = core_.getThreadPool();
+
+            for(const auto& entry : selection) {
+                for(int row = entry.top(); row <= entry.bottom(); ++row) {
+                    ThreadGroup* group = thread_pool->getGroupAt(row);
+                    meta->add(factory.deleteThreadGroup(group));
+                }
+            }
+
+            view_core_.execute(meta);
+        }
+    });
+}
 
 void CsApexWindow::setupTimeline()
 {
@@ -421,79 +510,79 @@ void CsApexWindow::updateNodeInfo()
 
 void CsApexWindow::updateThreadInfo()
 {
-    ThreadPoolPtr thread_pool = core_.getThreadPool();
+    //    ThreadPoolPtr thread_pool = core_.getThreadPool();
 
-    const std::vector<ThreadGroupPtr>& threads = thread_pool->getGroups();
+    //    const std::vector<ThreadGroupPtr>& threads = thread_pool->getGroups();
 
-    ui->thread_table->setRowCount(threads.size());
-    ui->thread_table->setColumnCount(3);
+    //    ui->thread_table->setRowCount(threads.size());
+    //    ui->thread_table->setColumnCount(3);
 
 
-    int row = 0;
-    for(const ThreadGroupPtr& thread : threads) {
-        QTableWidgetItem* main_item = new QTableWidgetItem(QString::fromStdString(thread->getName()));
-        main_item->setText(QString::fromStdString(thread->getName()));
-        main_item->setTextAlignment(Qt::AlignVCenter);
+    //    int row = 0;
+    //    for(const ThreadGroupPtr& thread : threads) {
+    //        QTableWidgetItem* main_item = new QTableWidgetItem(QString::fromStdString(thread->getName()));
+    //        main_item->setText(QString::fromStdString(thread->getName()));
+    //        main_item->setTextAlignment(Qt::AlignVCenter);
 
-        if(thread->id() == ThreadGroup::PRIVATE_THREAD) {
-            main_item->setIcon(QIcon(QPixmap(":/thread_group_none.png")));
-        } else {
-            main_item->setIcon(QIcon(QPixmap(":/thread_group.png")));
-        }
+    //        if(thread->id() == ThreadGroup::PRIVATE_THREAD) {
+    //            main_item->setIcon(QIcon(QPixmap(":/thread_group_none.png")));
+    //        } else {
+    //            main_item->setIcon(QIcon(QPixmap(":/thread_group.png")));
+    //        }
 
-        QWidget* widget = nullptr;
+    //        QWidget* widget = nullptr;
 
-        ui->thread_table->setItem(row, 0, main_item);
-        ui->thread_table->setCellWidget(row, 1, widget);
+    //        ui->thread_table->setItem(row, 0, main_item);
+    //        ui->thread_table->setCellWidget(row, 1, widget);
 
-        ++row;
-    }
+    //        ++row;
+    //    }
 
-    QObject::disconnect(ui->thread_table);
+    //    QObject::disconnect(ui->thread_table);
 
-//    QObject::connect(ui->thread_table, &QTableWidget::keyPressEvent,
-//                     [this](QKeyEvent* key) {
-//        if(key->key() == Qt::Key_Delete) {
-//            QList<int> rows;
-//            QItemSelection selection( ui->thread_table->selectionModel()->selection() );
-//            foreach( const QModelIndex & index, selection.indexes() ) {
-//               rows.append( index.row() );
-//            }
+    //    QObject::connect(ui->thread_table, &QTableWidget::keyPressEvent,
+    //                     [this](QKeyEvent* key) {
+    //        if(key->key() == Qt::Key_Delete) {
+    //            QList<int> rows;
+    //            QItemSelection selection( ui->thread_table->selectionModel()->selection() );
+    //            foreach( const QModelIndex & index, selection.indexes() ) {
+    //               rows.append( index.row() );
+    //            }
 
-//            qSort( rows );
+    //            qSort( rows );
 
-//            int prev = -1;
-//            for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
-//               int current = rows[i];
-//               if( current != prev ) {
-//                  ui->thread_table->model()->removeRows( current, 1 );
-//                  prev = current;
-//               }
-//            }
-//        }
-//    });
+    //            int prev = -1;
+    //            for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
+    //               int current = rows[i];
+    //               if( current != prev ) {
+    //                  ui->thread_table->model()->removeRows( current, 1 );
+    //                  prev = current;
+    //               }
+    //            }
+    //        }
+    //    });
 
-//    QObject::connect(ui->thread_table, &QTableWidget::cellChanged,
-//                     [this](int row, int col) {
+    //    QObject::connect(ui->thread_table, &QTableWidget::cellChanged,
+    //                     [this](int row, int col) {
 
-//        auto item = ui->thread_table->itemAt(row, col);
-//        ThreadPoolPtr thread_pool = core_.getThreadPool();
+    //        auto item = ui->thread_table->itemAt(row, col);
+    //        ThreadPoolPtr thread_pool = core_.getThreadPool();
 
-//        if(col == 0) {
-//            // name changed
-//            QString new_name = item->data(Qt::EditRole).toString();
+    //        if(col == 0) {
+    //            // name changed
+    //            QString new_name = item->data(Qt::EditRole).toString();
 
-//            ThreadGroupPtr group = thread_pool->getGroups()[row];
-//            if(new_name.isEmpty()) {
-//                item->setData(Qt::EditRole, QString::fromStdString(group->getName()));
+    //            ThreadGroupPtr group = thread_pool->getGroups()[row];
+    //            if(new_name.isEmpty()) {
+    //                item->setData(Qt::EditRole, QString::fromStdString(group->getName()));
 
-//            } else {
-//                // command
-//                group->setName(new_name.toStdString());
-//            }
+    //            } else {
+    //                // command
+    //                group->setName(new_name.toStdString());
+    //            }
 
-//        }
-//    });
+    //        }
+    //    });
 }
 
 void CsApexWindow::updateUndoInfo()
@@ -759,8 +848,8 @@ void CsApexWindow::createTutorialsMenu()
 
     QObject::connect(tree, &QTreeWidget::activated,
                      this, &CsApexWindow::loadTutorial);
-//    QObject::connect(tree, &QTreeWidget::doubleClicked,
-//                     this, &CsApexWindow::loadTutorial);
+    //    QObject::connect(tree, &QTreeWidget::doubleClicked,
+    //                     this, &CsApexWindow::loadTutorial);
 }
 
 void CsApexWindow::loadTutorial(const QModelIndex &index)

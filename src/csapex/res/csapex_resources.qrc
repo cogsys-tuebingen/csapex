@@ -73,5 +73,6 @@
         <file>snippet.png</file>
         <file>activity_add.png</file>
         <file>activity_remove.png</file>
+        <file>thread_group_delete.png</file>
     </qresource>
 </RCC>

@@ -1296,18 +1296,18 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 }
 
 
-void GraphView::usePrivateThreadFor()
+void GraphView::usePrivateThreadForSelectedNodes()
 {
     view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), ThreadGroup::PRIVATE_THREAD));
 }
 
 
-void GraphView::useDefaultThreadFor()
+void GraphView::useDefaultThreadForSelectedNodes()
 {
     view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), ThreadGroup::DEFAULT_GROUP_ID));
 }
 
-void GraphView::switchToThread(int group_id)
+void GraphView::switchSelectedNodesToThread(int group_id)
 {
     view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), group_id));
 }
@@ -1319,7 +1319,7 @@ void GraphView::createNewThreadGroupFor()
     QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
 
     if(ok && !text.isEmpty()) {
-        command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"create new thread group"));
+        command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(), "create new thread group"));
         for(NodeBox* box : selected_boxes_) {
             cmd->add(Command::Ptr(new command::CreateThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), text.toStdString())));
         }

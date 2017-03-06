@@ -15,7 +15,7 @@
 using namespace csapex;
 
 const std::string UUID::namespace_separator = ":|:";
-UUID UUID::NONE(std::weak_ptr<UUIDProvider>(), "");
+UUID UUID::NONE;
 
 std::size_t UUID::Hasher::operator()(const UUID& k) const {
     return k.hash();

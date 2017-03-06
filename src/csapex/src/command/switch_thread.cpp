@@ -33,7 +33,7 @@ std::string SwitchThread::getType() const
 std::string SwitchThread::getDescription() const
 {
     std::stringstream ss;
-    if(id == 0) {
+    if(id == ThreadGroup::PRIVATE_THREAD) {
         ss << "Switched to private thread for node " << uuid;
     } else {
         ss << "Switched thread for node " << uuid << " to " << name;

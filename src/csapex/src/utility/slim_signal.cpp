@@ -128,8 +128,10 @@ ScopedConnection::ScopedConnection(const Connection& c)
 ScopedConnection::ScopedConnection(ScopedConnection&& c) noexcept
     : Connection(c)
 {
-    c.parent_->removeConnection(&c);
-    c.parent_ = nullptr;
+    if(c.parent_) {
+        c.parent_->removeConnection(&c);
+        c.parent_ = nullptr;
+    }
 }
 ScopedConnection::ScopedConnection()
 {

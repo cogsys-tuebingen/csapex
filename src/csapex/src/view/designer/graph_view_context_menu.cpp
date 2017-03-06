@@ -287,13 +287,13 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
             QAction* private_thread = new QAction("private thread", &menu);
             private_thread->setIcon(QIcon(":/thread_group_none.png"));
             private_thread->setIconVisibleInMenu(true);
-            handler[private_thread] = std::bind(&GraphView::usePrivateThreadFor, &view_);
+            handler[private_thread] = std::bind(&GraphView::usePrivateThreadForSelectedNodes, &view_);
             thread_menu->addAction(private_thread);
 
             QAction* default_thread = new QAction("default thread", &menu);
             default_thread->setIcon(QIcon(":/thread_group.png"));
             default_thread->setIconVisibleInMenu(true);
-            handler[default_thread] = std::bind(&GraphView::useDefaultThreadFor, &view_);
+            handler[default_thread] = std::bind(&GraphView::useDefaultThreadForSelectedNodes, &view_);
             thread_menu->addAction(default_thread);
 
             thread_menu->addSeparator();
@@ -316,7 +316,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
                 QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
                 switch_thread->setIcon(QIcon(":/thread_group.png"));
                 switch_thread->setIconVisibleInMenu(true);
-                handler[switch_thread] = std::bind(&GraphView::switchToThread, &view_, group.id());
+                handler[switch_thread] = std::bind(&GraphView::switchSelectedNodesToThread, &view_, group.id());
                 choose_group_menu->addAction(switch_thread);
             }
 

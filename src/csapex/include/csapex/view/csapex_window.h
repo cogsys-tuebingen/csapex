@@ -50,8 +50,6 @@ public:
 
     void closeEvent(QCloseEvent* event);
 
-    void setupTimeline();
-
 private Q_SLOTS:
     void updateMenu();
     void updateTitle();
@@ -112,6 +110,9 @@ private:
     void createPluginsMenu();
     void createTutorialsMenu();
     void loadStyleSheet();
+
+    void setupTimeline();
+    void setupThreadManagement();
 
     std::string getConfigFile();
 

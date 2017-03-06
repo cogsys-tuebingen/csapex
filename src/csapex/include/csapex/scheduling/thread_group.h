@@ -42,6 +42,7 @@ public:
 
     const std::thread &thread() const;
 
+    std::size_t size() const;
     virtual bool isEmpty() const override;
 
     virtual void setPause(bool pause) override;
@@ -64,6 +65,15 @@ public:
 
     virtual void schedule(TaskPtr schedulable) override;    
     virtual void scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time) override;
+
+    std::vector<TaskGeneratorPtr>::iterator begin();
+    std::vector<TaskGeneratorPtr>::const_iterator begin() const;
+    std::vector<TaskGeneratorPtr>::iterator end();
+    std::vector<TaskGeneratorPtr>::const_iterator end() const;
+
+public:
+    slim_signal::Signal<void (TaskGeneratorPtr)> generator_added;
+    slim_signal::Signal<void (TaskGeneratorPtr)> generator_removed;
 
 private:
     void schedulingLoop();

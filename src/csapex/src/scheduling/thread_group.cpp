@@ -72,6 +72,11 @@ const std::thread& ThreadGroup::thread() const
     return scheduler_thread_;
 }
 
+std::size_t ThreadGroup::size() const
+{
+    return generators_.size();
+}
+
 bool ThreadGroup::isEmpty() const
 {
     return generators_.empty();
@@ -223,6 +228,8 @@ void ThreadGroup::add(TaskGeneratorPtr generator)
     auto& cs = generator_connections_[generator.get()];
 
     cs.push_back(generator->end_step.connect([this]() { checkIfStepIsDone(); }));
+
+    generator_added(generator);
 }
 
 void ThreadGroup::add(TaskGeneratorPtr generator, const std::vector<TaskPtr> &initial_tasks)
@@ -250,6 +257,8 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
 
     std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
 
+    TaskGeneratorPtr removed;
+
     for(auto it = tasks_.begin(); it != tasks_.end();) {
         TaskPtr task = *it;
         if(task->getParent() == generator) {
@@ -262,6 +271,7 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
 
     for(auto it = generators_.begin(); it != generators_.end();) {
         if(it->get() == generator) {
+            removed = *it;
             it = generators_.erase(it);
         } else {
             ++it;
@@ -271,6 +281,8 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
     work_available_.notify_all();
 
     generator_connections_.clear();
+
+    generator_removed(removed);
 
     return remaining_tasks;
 }
@@ -385,3 +397,22 @@ void ThreadGroup::executeTask(const TaskPtr& task)
     }
 }
 
+std::vector<TaskGeneratorPtr>::iterator ThreadGroup::begin()
+{
+    return generators_.begin();
+}
+
+std::vector<TaskGeneratorPtr>::const_iterator ThreadGroup::begin() const
+{
+    return generators_.begin();
+}
+
+std::vector<TaskGeneratorPtr>::iterator ThreadGroup::end()
+{
+    return generators_.end();
+}
+
+std::vector<TaskGeneratorPtr>::const_iterator ThreadGroup::end() const
+{
+    return generators_.end();
+}

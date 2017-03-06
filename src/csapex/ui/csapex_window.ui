@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1157</width>
-    <height>841</height>
+    <height>928</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -310,8 +310,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>256</width>
-          <height>102</height>
+          <width>274</width>
+          <height>141</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -391,7 +391,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>242</width>
+          <width>266</width>
           <height>197</height>
          </rect>
         </property>
@@ -455,8 +455,8 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>256</width>
-          <height>102</height>
+          <width>274</width>
+          <height>141</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -506,7 +506,7 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>0</y>
           <width>256</width>
-          <height>102</height>
+          <height>141</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -741,7 +741,108 @@ p, li { white-space: pre-wrap; }
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QTableWidget" name="thread_table"/>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>Thread Groups</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_13">
+        <item>
+         <widget class="QTableView" name="thread_table">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustToContents</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="thread_remove">
+            <property name="text">
+             <string>delete selected</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res/csapex_resources.qrc">
+              <normaloff>:/thread_group_delete.png</normaloff>:/thread_group_delete.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="thread_create">
+            <property name="text">
+             <string>create new group</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res/csapex_resources.qrc">
+              <normaloff>:/thread_group_add.png</normaloff>:/thread_group_add.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="thread_assign">
+          <property name="text">
+           <string>assign nodes to group</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../res/csapex_resources.qrc">
+            <normaloff>:/thread_group.png</normaloff>:/thread_group.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="thread_tools">
+       <item>
+        <widget class="QPushButton" name="thread_default">
+         <property name="text">
+          <string>assign default thread</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../res/csapex_resources.qrc">
+           <normaloff>:/thread_group.png</normaloff>:/thread_group.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="thread_private">
+         <property name="text">
+          <string>assign private thread</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../res/csapex_resources.qrc">
+           <normaloff>:/thread_group_none.png</normaloff>:/thread_group_none.png</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </widget>
@@ -1238,7 +1339,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/csapex_resources.qrc">
      <normaloff>:/activity_add.png</normaloff>:/activity_add.png</iconset>
    </property>
    <property name="text">
@@ -1256,7 +1357,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/csapex_resources.qrc">
      <normaloff>:/activity_remove.png</normaloff>:/activity_remove.png</iconset>
    </property>
    <property name="text">

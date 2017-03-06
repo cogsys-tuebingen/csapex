@@ -34,35 +34,61 @@ std::string CreateThread::getType() const
 std::string CreateThread::getDescription() const
 {
     std::stringstream ss;
-    ss << "created thread for " << uuid << " with name " << name;
+    if(uuid.empty()) {
+        ss << "created thread with name " << name;
+
+    } else {
+        ss << "created thread for " << uuid << " with name " << name;
+    }
     return ss.str();
 }
 
 bool CreateThread::doExecute()
 {
-    TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
+    if(uuid.empty()) {
+        ThreadPool* thread_pool = getRootThreadPool();
 
-    ThreadPool* thread_pool = getRootThreadPool();
+        new_id = thread_pool->createGroup(name)->id();
 
-    auto group = thread_pool->getGroupFor(tg);
+    } else {
+        TaskGenerator* tg = getGraphFacade()->getTaskGenerator(uuid);
 
-    old_id = group->id();
-    new_id = thread_pool->createNewGroupFor(tg, name);
+        ThreadPool* thread_pool = getRootThreadPool();
+
+        auto group = thread_pool->getGroupFor(tg);
+
+        old_id = group->id();
+        new_id = thread_pool->createNewGroupFor(tg, name);
+
+    }
 
     return true;
 }
 
 bool CreateThread::doUndo()
 {
-    TaskGenerator* tg = getRoot()->getTaskGenerator(uuid);
+    if(uuid.empty()) {
+        getRootThreadPool()->removeGroup(new_id);
 
-    getRootThreadPool()->addToGroup(tg, old_id);
+    } else {
+        TaskGenerator* tg = getRoot()->getTaskGenerator(uuid);
+
+        getRootThreadPool()->addToGroup(tg, old_id);
+    }
 
     return true;
 }
 
 bool CreateThread::doRedo()
 {
-    return doExecute();
+    if(uuid.empty()) {
+        ThreadPool* thread_pool = getRootThreadPool();
+
+        thread_pool->createGroup(name, new_id);
+        return true;
+
+    } else {
+        return doExecute();
+    }
 }
 

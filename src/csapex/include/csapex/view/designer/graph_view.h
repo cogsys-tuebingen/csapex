@@ -105,6 +105,10 @@ public:
 
     virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
 
+    void usePrivateThreadForSelectedNodes();
+    void useDefaultThreadForSelectedNodes();
+    void switchSelectedNodesToThread(int group_id);
+
 Q_SIGNALS:
     void selectionChanged();
     void viewChanged();
@@ -195,9 +199,6 @@ private:
     void minimizeBox(bool mini);
     void muteBox(bool muted);
     void morphNode();
-    void usePrivateThreadFor();
-    void useDefaultThreadFor();
-    void switchToThread(int group_id);
     void createNewThreadGroupFor();
 
     void showProfiling(bool visible);

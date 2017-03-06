@@ -423,6 +423,8 @@ add_library(csapex_command SHARED
     src/command/rename_node.cpp
     src/command/rename_connector.cpp
     src/command/switch_thread.cpp
+    src/command/modify_thread.cpp
+    src/command/delete_thread.cpp
     src/command/group_base.cpp
     src/command/group_nodes.cpp
     src/command/ungroup_nodes.cpp
@@ -478,6 +480,8 @@ add_library(csapex_qt SHARED
     src/view/gui_exception_handler.cpp
 
     src/manager/message_renderer_manager.cpp
+
+    src/view/model/thread_group_table_model.cpp
 
     src/view/designer/designer.cpp
     src/view/designer/designer_options.cpp

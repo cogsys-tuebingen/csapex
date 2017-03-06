@@ -18,11 +18,6 @@ void Observer::manageConnection(slim_signal::ScopedConnection&& connection)
     connections_.emplace_back(std::move(connection));
 }
 
-void Observer::manageConnection(slim_signal::Connection&& connection)
-{
-    connections_.emplace_back(std::move(connection));
-}
-
 void Observer::manageConnection(const slim_signal::Connection& connection)
 {
     connections_.emplace_back(connection);

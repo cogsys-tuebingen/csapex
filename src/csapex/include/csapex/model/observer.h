@@ -18,7 +18,6 @@ public:
 protected:
     void stopObserving();
 
-    void manageConnection(slim_signal::Connection&& connection);
     void manageConnection(slim_signal::ScopedConnection&& connection);
     void manageConnection(const slim_signal::Connection& connection);
 

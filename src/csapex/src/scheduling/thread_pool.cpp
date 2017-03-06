@@ -146,6 +146,16 @@ void ThreadPool::remove(TaskGenerator *task)
     group_assignment_.erase(task);
 }
 
+std::size_t ThreadPool::getGroupCount() const
+{
+    return groups_.size();
+}
+
+ThreadGroup *ThreadPool::getGroupAt(std::size_t pos)
+{
+    return groups_.at(pos).get();
+}
+
 std::vector<ThreadGroupPtr> ThreadPool::getGroups()
 {
     return groups_;
@@ -175,14 +185,23 @@ ThreadGroup* ThreadPool::getGroupFor(TaskGenerator* generator)
 void ThreadPool::assignGeneratorToGroup(TaskGenerator *task, ThreadGroup *group)
 {
     if(!isInGroup(task, group->id())) {
+        ThreadGroup* old_group = nullptr;
+
         auto pos = group_assignment_.find(task);
         if(pos != group_assignment_.end()) {
+            old_group = pos->second;
             group_assignment_.erase(pos);
         }
 
         task->detach();
         task->assignToScheduler(group);
         group_assignment_[task] = group;
+
+        if(old_group) {
+            if(old_group->id() == ThreadGroup::PRIVATE_THREAD) {
+                removeGroup(old_group);
+            }
+        }
     }
 }
 
@@ -256,7 +275,22 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
         }
     }
 
-    ThreadGroupPtr group = std::make_shared<ThreadGroup>(timed_queue_, handler_, name);
+    ThreadGroup* group = createGroup(name);
+
+    assignGeneratorToGroup(task, group);
+
+
+    return group->id();
+}
+
+ThreadGroup* ThreadPool::createGroup(const std::string &name, int id)
+{
+    ThreadGroupPtr group;
+    if(id > 0 ) {
+        group = std::make_shared<ThreadGroup>(timed_queue_, handler_, id, name);
+    } else {
+        group = std::make_shared<ThreadGroup>(timed_queue_, handler_, name);
+    }
     group->setPause(isPaused());
 
     groups_.push_back(group);
@@ -264,16 +298,43 @@ int ThreadPool::createNewGroupFor(TaskGenerator* task, const std::string &name)
         checkIfStepIsDone();
     });
 
-    assignGeneratorToGroup(task, group.get());
-
     if(isRunning()) {
         group->start();
     }
 
     group_created(group);
 
-    return group->id();
+    return group.get();
 }
+
+void ThreadPool::removeGroup(int id)
+{
+    for(auto it = groups_.begin(); it != groups_.end(); ++it ) {
+        ThreadGroupPtr group = *it;
+        if(group->id() == id) {
+            apex_assert_hard(group->isEmpty());
+            groups_.erase(it);
+
+            group_removed(group);
+            return;
+        }
+    }
+}
+
+void ThreadPool::removeGroup(ThreadGroup *group)
+{
+    for(auto it = groups_.begin(); it != groups_.end(); ++it ) {
+        if(it->get() == group) {
+            apex_assert_hard(group->isEmpty());
+            group_removed(*it);
+            groups_.erase(it);
+
+            return;
+        }
+    }
+}
+
+
 
 bool ThreadPool::isStepDone()
 {

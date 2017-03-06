@@ -13,6 +13,8 @@
 #include <csapex/command/switch_thread.h>
 #include <csapex/command/set_max_execution_frequency.h>
 #include <csapex/command/set_logger_level.h>
+#include <csapex/command/switch_thread.h>
+#include <csapex/command/delete_thread.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -28,6 +30,8 @@
 #include <csapex/model/node_runner.h>
 #include <csapex/model/node_state.h>
 #include <csapex/scheduling/scheduler.h>
+#include <csapex/scheduling/thread_group.h>
+#include <csapex/model/node_runner.h>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -409,5 +413,20 @@ CommandPtr CommandFactory::setLoggerLevelRecursively(const std::vector<UUID> &no
     foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, NodeHandle* nh) {
         cmd->add(Command::Ptr(new command::SetLoggerLevel(graph_facade->getAbsoluteUUID(), nh->getUUID(), level)));
     });
+    return cmd;
+}
+
+CommandPtr CommandFactory::deleteThreadGroup(ThreadGroup* group)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_uuid, "delete thread group"));
+
+    // first move all generators to the default thread
+    for(const TaskGeneratorPtr& generator : *group) {
+        cmd->add(std::make_shared<command::SwitchThread>(graph_uuid, generator->getUUID(), ThreadGroup::DEFAULT_GROUP_ID));
+    }
+
+    // then delete the group itself
+    cmd->add(std::make_shared<command::DeleteThread>(group->id()));
+
     return cmd;
 }
