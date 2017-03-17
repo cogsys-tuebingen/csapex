@@ -1,5 +1,5 @@
-#ifndef SERIALIZATION_FWD_H
-#define SERIALIZATION_FWD_H
+#ifndef IO_FWD_H
+#define IO_FWD_H
 
 /// shared_ptr
 #include <memory>
@@ -14,12 +14,11 @@
 
 namespace csapex
 {
-FWD(Snippet)
-FWD(Serializable);
+FWD(Session);
+FWD(BroadcastMessage);
 }
-
 
 #undef FWD
 
-#endif // SERIALIZATION_FWD_H
+#endif // IO_FWD_H
 

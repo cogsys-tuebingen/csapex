@@ -182,6 +182,11 @@ HardAssertionFailure::HardAssertionFailure(const char *msg, const char* code, co
 {
 }
 
+HardAssertionFailure::HardAssertionFailure(const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& signature)
+    : Failure(msg), code(code), file(file), line(line), signature(signature), thread(csapex::thread::get_name())
+{
+}
+
 HardAssertionFailure::~HardAssertionFailure()
 {
 }
@@ -189,9 +194,9 @@ HardAssertionFailure::~HardAssertionFailure()
 std::string HardAssertionFailure::what() const
 {
     std::stringstream ss;
-    if(!msg.empty()) {
-        ss << msg << " - ";
-    }
+//    if(!msg.empty()) {
+//        ss << msg << " - ";
+//    }
 
     stackTrace(ss, max_depth);
 

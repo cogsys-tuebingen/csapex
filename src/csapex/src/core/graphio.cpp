@@ -17,7 +17,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/model/node_state.h>
 #include <csapex/utility/yaml_node_builder.h>
-#include <csapex/serialization/serialization.h>
+#include <csapex/serialization/node_serializer.h>
 #include <csapex/serialization/snippet.h>
 #include <csapex/utility/yaml_io.hpp>
 #include <csapex/utility/exceptions.h>
@@ -526,7 +526,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
     auto node = node_handle->getNode().lock();
     if(node) {
         // hook for nodes to serialize
-        Serialization::instance().serialize(*node, doc);
+        NodeSerializer::instance().serialize(*node, doc);
 
         SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(node);
         if(subgraph) {
@@ -556,7 +556,7 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
     auto node = node_handle->getNode().lock();
     apex_assert_hard(node);
 
-    Serialization::instance().deserialize(*node, doc);
+    NodeSerializer::instance().deserialize(*node, doc);
 
     graph_->addNode(node_handle);
 

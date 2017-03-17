@@ -1,5 +1,5 @@
-#ifndef SERIALIZATION_H
-#define SERIALIZATION_H
+#ifndef NODE_SERIALIZER_H
+#define NODE_SERIALIZER_H
 
 /// COMPONENT
 #include <csapex/utility/singleton.hpp>
@@ -27,7 +27,7 @@ class Node;
 
 namespace csapex
 {
-class CSAPEX_EXPORT Serialization : public Singleton<Serialization>
+class CSAPEX_EXPORT NodeSerializer : public Singleton<NodeSerializer>
 {
 public:
     template <typename N, typename Instance>
@@ -61,12 +61,12 @@ struct SerializationRegistered
 {
     SerializationRegistered()
     {
-        csapex::Serialization::template registerInstance<N, Instance>();
+        csapex::NodeSerializer::template registerInstance<N, Instance>();
     }
 };
 
 }
 }
 
-#endif // SERIALIZATION_H
+#endif // NODE_SERIALIZER_H
 

@@ -47,6 +47,8 @@ public:
     PluginLocatorPtr getPluginLocator() const;
     ExceptionHandler& getExceptionHandler() const;
 
+    CommandDispatcherPtr getCommandDispatcher() const;
+
     std::shared_ptr<Profiler> getProfiler() const;
 
     bool isPaused() const;
@@ -100,6 +102,8 @@ private:
     NodeHandlePtr root_handle_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
+
+    std::shared_ptr<CommandDispatcher> dispatcher_;
 
     std::shared_ptr<Profiler> profiler_;
 

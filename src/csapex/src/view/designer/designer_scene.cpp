@@ -865,11 +865,11 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
 
     ccs = CurrentConnectionState();
 
-    bool marker = false;
-    TokenPtr token = connection.getToken();
-    if(token) {
-        marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(token->getTokenData()) != nullptr;
-    }
+//    bool marker = false;
+//    TokenPtr token = connection.getToken();
+//    if(token) {
+//        marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(token->getTokenData()) != nullptr;
+//    }
 
     ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
     ccs.full_read = /*!marker && */connection.getState() == Connection::State::READ;

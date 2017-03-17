@@ -11,12 +11,12 @@
 #include <iostream>
 #include <cstring>
 
-void _apex_assert(bool assertion, const char* msg, const char* code, const char* file, int line, const char* sig)
+void _apex_assert(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig)
 {
     if(!assertion) {
         std::stringstream ss;
         ss << "[cs::APEX - ASSERTION FAILED] ";
-        if(strlen(msg) > 0) {
+        if(!msg.empty()) {
             ss << msg << " ";
         }
         ss << "\"" << code << "\" [file " << file << ", line " << line << ", function: " << sig << ", thread \"" << csapex::thread::get_name() << "\"]";
@@ -24,18 +24,18 @@ void _apex_assert(bool assertion, const char* msg, const char* code, const char*
     }
 }
 
-void _apex_assert_hard(bool assertion, const char* msg, const char* code, const char* file, int line, const char* sig)
+void _apex_assert_hard(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig)
 {
     if(!assertion) {
         throw csapex::HardAssertionFailure(msg, code, file, line, sig);
     }
 }
 
-void _apex_assert_soft(bool assertion, const char* msg, const char* code, const char* file, int line, const char *sig)
+void _apex_assert_soft(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const char *sig)
 {
     if(!assertion) {
         std::cerr << "[cs::APEX - SOFT ASSERTION FAILED] ";
-        if(strlen(msg) > 0) {
+        if(!msg.empty()) {
             std::cerr << msg << " ";
         }
         std::cerr << "\"" << code << "\" [file " << file << ", line " << line << ", function: " << sig << ", thread \"" << csapex::thread::get_name() << "]" << std::endl;

@@ -23,7 +23,7 @@ using namespace csapex;
 CsApexViewCore::CsApexViewCore(CsApexCore& core)
     : core_(core),
       node_adapter_factory_(std::make_shared<NodeAdapterFactory>(core_.getSettings(), core.getPluginLocator().get())),
-      dispatcher_(std::make_shared<CommandDispatcher>(core_)),
+      dispatcher_(core_.getCommandDispatcher()),
       drag_io(std::make_shared<DragIO>(core_.getPluginLocator(), dispatcher_.get()))
 {
     MessageRendererManager::instance().setPluginLocator(core_.getPluginLocator());

@@ -12,6 +12,7 @@
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/gui_exception_handler.h>
+#include <csapex/io/server.h>
 
 /// SYSTEM
 #include <iostream>
@@ -145,6 +146,13 @@ int Main::run()
     }
 
     core = std::make_shared<CsApexCore>(settings, handler);
+
+    Server server(core);
+    csapex::error_handling::stop_request().connect([&server](){
+        server.stop();
+    });
+
+    server.start();
 
     if(headless) {
         return runHeadless();

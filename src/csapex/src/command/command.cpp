@@ -152,3 +152,19 @@ Designer* Command::getDesigner()
 {
     return designer_;
 }
+
+uint8_t Command::getPacketType() const
+{
+    return PACKET_TYPE_ID;
+}
+
+
+void Command::serialize(SerializationBuffer &data)
+{
+    throw std::runtime_error("command is not serializable");
+}
+
+void Command::deserialize(SerializationBuffer& data)
+{
+    throw std::runtime_error("command is not serializable");
+}

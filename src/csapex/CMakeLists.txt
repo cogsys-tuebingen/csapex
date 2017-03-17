@@ -278,6 +278,7 @@ file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYM
         include/csapex/serialization/*.h*
         include/csapex/plugin/*.h*
         include/csapex/scheduling/*.h*
+        include/csapex/io/*.h*
 )
 
 add_library(csapex SHARED
@@ -290,6 +291,11 @@ add_library(csapex SHARED
     src/core/graphio.cpp
     src/core/settings.cpp
     src/core/exception_handler.cpp
+
+    src/command/command.cpp
+    src/command/dispatcher.cpp
+    src/command/meta.cpp
+    src/command/playback_command.cpp
 
     src/data/point.cpp
 
@@ -352,9 +358,10 @@ add_library(csapex SHARED
     src/msg/direct_connection.cpp
     src/msg/generic_vector_message.cpp
 
+    src/serialization/serializable.cpp
     src/serialization/yaml.cpp
     src/serialization/message_serializer.cpp
-    src/serialization/serialization.cpp
+    src/serialization/node_serializer.cpp
     src/serialization/snippet.cpp
 
     src/plugin/plugin_locator.cpp
@@ -370,7 +377,16 @@ add_library(csapex SHARED
     src/signal/slot.cpp
     src/signal/event.cpp
 
-	${csapex_HEADERS}
+    src/io/server.cpp
+    src/io/broadcast_message.cpp
+    src/io/broadcast_message_serializer.cpp
+    src/io/session.cpp
+    src/io/packet_serializer.cpp
+
+    src/io/protocol/notification_message.cpp
+    src/io/protocol/tick_message.cpp
+
+    ${csapex_HEADERS}
 )
 
 generate_export_header( csapex
@@ -399,11 +415,9 @@ list(APPEND csapex_LIBRARIES csapex)
 file(GLOB_RECURSE csapex_command_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex/command/*.h*)
 
 add_library(csapex_command SHARED
-    src/command/command.cpp
-    src/command/dispatcher.cpp
-    src/command/meta.cpp
-    src/command/playback_command.cpp
     src/command/command_factory.cpp
+    src/command/command_serializer.cpp
+
     src/command/add_connection.cpp
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp
@@ -436,7 +450,9 @@ add_library(csapex_command SHARED
     src/command/set_logger_level.cpp
     src/command/set_max_execution_frequency.cpp
 
-	${csapex_command_HEADERS}
+    src/command/quit.cpp
+
+        ${csapex_command_HEADERS}
 )
 
 generate_export_header( csapex_command
@@ -444,12 +460,12 @@ generate_export_header( csapex_command
              EXPORT_MACRO_NAME CSAPEX_COMMAND_EXPORT
              EXPORT_FILE_NAME csapex_command_export.h
              STATIC_DEFINE csapex_command_BUILT_AS_STATIC
-			 )
+                         )
 target_link_libraries(csapex_command
     csapex_util
-	csapex_param
-	csapex
-	
+        csapex_param
+        csapex
+
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OPENGL_LIBRARIES}
@@ -593,18 +609,38 @@ set_target_properties(csapex_qt PROPERTIES AUTOMOC TRUE)
 
 if(WIN32)
         add_executable(csapex_main
-		src/csapex.cpp
-		res/csapex.rc
-	)
+                src/csapex.cpp
+                res/csapex.rc
+        )
 else()
         add_executable(csapex_main
-		src/csapex.cpp)
+                src/csapex.cpp)
 endif()
 
 set_target_properties(csapex_main PROPERTIES AUTOMOC TRUE)
 target_link_libraries(csapex_main
     csapex_qt
     ${Boost_LIBRARIES})
+
+
+
+
+add_executable(csapex_server
+        src/csapex_server.cpp)
+
+target_link_libraries(csapex_server
+    csapex_qt
+    ${Boost_LIBRARIES})
+
+
+
+add_executable(csapex_demo_client
+    src/io/demo_client.cpp)
+
+target_link_libraries(csapex_demo_client
+    csapex_qt
+    ${Boost_LIBRARIES})
+
 
 
 add_custom_target(cfg ALL DEPENDS cfg/style.css)

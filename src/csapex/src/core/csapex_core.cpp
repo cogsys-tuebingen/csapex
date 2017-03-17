@@ -47,7 +47,8 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
       plugin_locator_(plugin_locator),
       exception_handler_(handler),
       node_factory_(nullptr),
-      root_uuid_provider_(std::make_shared<UUIDProvider>()),
+      root_uuid_provider_(std::make_shared<UUIDProvider>()),      
+      dispatcher_(std::make_shared<CommandDispatcher>(*this)),
       profiler_(std::make_shared<Profiler>()),
       core_plugin_manager(nullptr),
       init_(false), load_needs_reset_(false)
@@ -357,6 +358,11 @@ PluginLocatorPtr CsApexCore::getPluginLocator() const
 ExceptionHandler& CsApexCore::getExceptionHandler() const
 {
     return exception_handler_;
+}
+
+CommandDispatcherPtr CsApexCore::getCommandDispatcher() const
+{
+    return dispatcher_;
 }
 
 std::shared_ptr<Profiler> CsApexCore::getProfiler() const

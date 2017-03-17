@@ -6,6 +6,7 @@
 #include <csapex/core/core_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_command_export.h>
+#include <csapex/serialization/serializable.h>
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
@@ -21,9 +22,8 @@ namespace csapex
 
 class Designer;
 
-class CSAPEX_COMMAND_EXPORT Command
+class CSAPEX_COMMAND_EXPORT Command : public Serializable
 {
-
 public:
     class CSAPEX_COMMAND_EXPORT Access {
         friend class Group;
@@ -37,6 +37,8 @@ public:
     };
 
     friend class command::Meta;
+
+    static const uint8_t PACKET_TYPE_ID = 1;
 
 public:
     typedef std::shared_ptr<Command> Ptr;
@@ -57,6 +59,13 @@ public:
 
     virtual std::string getType() const = 0;
     virtual std::string getDescription() const = 0;
+
+
+    virtual uint8_t getPacketType() const override;
+
+
+    virtual void serialize(SerializationBuffer &data);
+    virtual void deserialize(SerializationBuffer& data);
 
 protected:
     bool executeCommand(CommandPtr cmd);
