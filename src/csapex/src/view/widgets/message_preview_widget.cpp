@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/msg/direct_connection.h>
-#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/view/utility/message_renderer_manager.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/any_message.h>

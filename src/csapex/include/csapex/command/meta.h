@@ -24,7 +24,7 @@ public:
 
     int commands() const;
 
-    virtual void init(GraphFacade* root, CsApexCore& core, Designer* designer) override;
+    virtual void init(GraphFacade* root, CsApexCore& core) override;
 
 protected:
     bool doExecute() override;

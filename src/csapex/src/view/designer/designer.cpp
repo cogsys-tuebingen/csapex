@@ -40,8 +40,6 @@ Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
       core_(view_core.getCore()), view_core_(view_core), is_init_(false),
       notification_animation_(nullptr)
 {
-    view_core.getCommandDispatcher().setDesigner(this);
-
     observe(core_.getSettings().save_request, [this](YAML::Node& node){ saveSettings(node); });
     observe(core_.getSettings().load_request, [this](YAML::Node& node){ loadSettings(node); });
 

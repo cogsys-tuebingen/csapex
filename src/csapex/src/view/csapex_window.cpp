@@ -11,7 +11,7 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
-#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/view/utility/message_renderer_manager.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>

@@ -21,8 +21,6 @@ public:
 public:
     CommandDispatcher(CsApexCore& core);
 
-    void setDesigner(Designer* designer);
-
     void execute(Command::Ptr command);
     void executeLater(Command::Ptr command);
     void executeLater();
@@ -63,7 +61,6 @@ protected:
 
 private:
     CsApexCore& core_;
-    Designer* designer_;
 
     std::vector<Command::Ptr> later;
 

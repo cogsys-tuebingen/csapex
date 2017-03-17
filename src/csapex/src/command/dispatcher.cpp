@@ -15,15 +15,9 @@ using namespace csapex;
 
 CommandDispatcher::CommandDispatcher(CsApexCore& core)
     : core_(core),
-      designer_(nullptr),
       dirty_(false)
 {
     state_changed.connect([this](){ core_.getRoot()->getGraph()->state_changed(); });
-}
-
-void CommandDispatcher::setDesigner(Designer *designer)
-{
-    designer_ = designer;
 }
 
 void CommandDispatcher::reset()
@@ -40,7 +34,7 @@ void CommandDispatcher::execute(Command::Ptr command)
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
-    command->init(core_.getRoot().get(), core_, designer_);
+    command->init(core_.getRoot().get(), core_);
     doExecute(command);
 }
 
@@ -50,7 +44,7 @@ void CommandDispatcher::executeLater(Command::Ptr command)
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
-    command->init(core_.getRoot().get(), core_, designer_);
+    command->init(core_.getRoot().get(), core_);
     later.push_back(command);
 }
 
@@ -226,6 +220,6 @@ void CommandDispatcher::visitRedoCommands(std::function<void (int level, const C
 std::shared_ptr<command::PlaybackCommand> CommandDispatcher::make_playback(const AUUID& graph_uuid, const std::string& type) const
 {
      std::shared_ptr<command::PlaybackCommand> res = std::make_shared<command::PlaybackCommand>(graph_uuid, type);
-     res->init(core_.getRoot().get(), core_, designer_);
+     res->init(core_.getRoot().get(), core_);
      return res;
 }

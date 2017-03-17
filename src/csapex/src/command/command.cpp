@@ -13,7 +13,6 @@ std::vector<Command::Ptr> Command::undo_later;
 
 Command::Command(const AUUID &parent_uuid)
     : graph_uuid(parent_uuid), core_(nullptr), root_graph_facade_(nullptr),
-      designer_(nullptr),
       before_save_point_(false), after_save_point_(false),
       initialized_(false)
 {
@@ -34,13 +33,11 @@ bool Command::Access::redoCommand(Command::Ptr cmd)
     return cmd->redoCommand(cmd);
 }
 
-void Command::init(GraphFacade* graph_facade, CsApexCore& core, Designer *designer)
+void Command::init(GraphFacade* graph_facade, CsApexCore& core)
 {
     apex_assert_hard(graph_facade);
 
     root_graph_facade_ = graph_facade;
-
-    designer_ = designer;
 
     core_ = &core;
 
@@ -54,7 +51,7 @@ bool Command::isUndoable() const
 
 bool Command::executeCommand(Command::Ptr cmd)
 {
-    cmd->init(getRoot(), *core_, designer_);
+    cmd->init(getRoot(), *core_);
 
     return cmd->doExecute();
 }
@@ -146,11 +143,6 @@ GraphFacade* Command::getSubGraph(const UUID& graph_id)
 ThreadPool* Command::getRootThreadPool()
 {
     return core_->getThreadPool().get();
-}
-
-Designer* Command::getDesigner()
-{
-    return designer_;
 }
 
 uint8_t Command::getPacketType() const

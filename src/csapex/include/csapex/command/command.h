@@ -46,7 +46,7 @@ public:
 public:
     Command(const AUUID& graph_uuid);
 
-    virtual void init(GraphFacade* graph_facade, CsApexCore& core, Designer* designer);
+    virtual void init(GraphFacade* graph_facade, CsApexCore& core);
     virtual bool isUndoable() const;
 
     void setAfterSavepoint(bool save);
@@ -84,8 +84,6 @@ protected:
 
     NodeFactory* getNodeFactory();
 
-    Designer* getDesigner();
-
     GraphFacade* getSubGraph(const UUID& graph_id);
     ThreadPool* getRootThreadPool();
 
@@ -94,8 +92,6 @@ protected:
     CsApexCore* core_;
 
     GraphFacade* root_graph_facade_;
-
-    Designer* designer_;
 
 private:
     static std::vector<Command::Ptr> undo_later;

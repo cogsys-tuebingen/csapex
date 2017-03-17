@@ -18,11 +18,11 @@ Meta::Meta(const AUUID &parent_uuid, const std::string &type, bool transaction)
 {
 }
 
-void Meta::init(GraphFacade* root, CsApexCore& core, Designer* designer)
+void Meta::init(GraphFacade* root, CsApexCore& core)
 {
-    Command::init(root, core, designer);
+    Command::init(root, core);
     for(Command::Ptr cmd : nested) {
-        cmd->init(root, core, designer);
+        cmd->init(root, core);
     }
 }
 
@@ -56,7 +56,7 @@ void Meta::add(Command::Ptr cmd)
     apex_assert_hard(cmd);
 
     if(initialized_) {
-        cmd->init(core_->getRoot().get(), *core_, designer_);
+        cmd->init(core_->getRoot().get(), *core_);
     }
 
     nested.push_back(cmd);

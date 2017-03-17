@@ -57,14 +57,14 @@ bool PasteGraph::doUndo()
     for(const auto& pair : id_mapping_) {
         uuids.push_back(pair.second);
 //        CommandPtr del(new command::DeleteNode(graph_uuid, pair.second));
-//        del->init(graph_facade, *core_, getDesigner());
+//        del->init(graph_facade, *core_);
 //        executeCommand(del);
     }
 
     CommandFactory cf(graph_facade);
 
     CommandPtr del = cf.deleteAllNodes(uuids);
-    //        del->init(graph_facade, *core_, getDesigner());
+    //        del->init(graph_facade, *core_);
     executeCommand(del);
 
 

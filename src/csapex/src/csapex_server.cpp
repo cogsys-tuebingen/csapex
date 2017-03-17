@@ -9,9 +9,6 @@
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
-#include <csapex/view/csapex_view_core.h>
-#include <csapex/view/csapex_window.h>
-#include <csapex/view/gui_exception_handler.h>
 #include <csapex/io/server.h>
 
 /// SYSTEM

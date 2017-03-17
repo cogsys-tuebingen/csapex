@@ -495,7 +495,7 @@ add_library(csapex_qt SHARED
     src/view/message_renderer.cpp
     src/view/gui_exception_handler.cpp
 
-    src/manager/message_renderer_manager.cpp
+    src/view/utility/message_renderer_manager.cpp
 
     src/view/model/thread_group_table_model.cpp
 
