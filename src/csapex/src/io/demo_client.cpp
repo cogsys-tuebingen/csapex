@@ -8,8 +8,8 @@
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/io/packet_serializer.h>
+#include <csapex/core/settings.h>
 
-#include <condition_variable>
 
 using boost::asio::ip::tcp;
 using namespace csapex;
@@ -88,6 +88,8 @@ int main(int argc, char* argv[])
         tcp::resolver resolver(io_service);
         boost::asio::connect(s, resolver.resolve({argv[1], argv[2]}));
 
+        Settings settings;
+        std::cerr << settings.get("access-test", std::string("no access possible")) << std::endl;
 
         readPacket(s);
 

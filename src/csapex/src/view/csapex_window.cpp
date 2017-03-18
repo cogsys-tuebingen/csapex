@@ -837,10 +837,10 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
 
     Settings& settings = view_core_.getSettings();
     if(!settings.knows("uistate")) {
-        settings.add(csapex::param::ParameterFactory::declareText("uistate", ""));
+        settings.addTemporary(csapex::param::ParameterFactory::declareText("uistate", ""));
     }
     if(!settings.knows("geometry")) {
-        settings.add(csapex::param::ParameterFactory::declareText("geometry", geometry.toStdString()));
+        settings.addTemporary(csapex::param::ParameterFactory::declareText("geometry", geometry.toStdString()));
     }
 
     settings.set("uistate", uistate.toStdString());

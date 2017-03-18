@@ -115,11 +115,14 @@ void Settings::save()
     YAML::Emitter yaml;
     yaml << YAML::BeginSeq;
 
-    for(std::map<std::string, csapex::param::Parameter::Ptr>::iterator it = settings_.begin(); it != settings_.end(); ++it) {
-        csapex::param::Parameter::Ptr p = it->second;
-        YAML::Node n;
-        p->serialize(n);
-        yaml << n;
+    for(auto it = settings_.begin(); it != settings_.end(); ++it) {
+        Entry& entry = it->second;
+        if(entry.persistent) {
+            csapex::param::Parameter::Ptr p = entry.parameter;
+            YAML::Node n;
+            p->serialize(n);
+            yaml << n;
+        }
     }
 
     yaml << YAML::EndSeq;
@@ -157,20 +160,33 @@ void Settings::load()
     for(std::size_t i = 0, n = doc.size(); i < n; ++i) {
         csapex::param::Parameter::Ptr p = doc[i].as<csapex::param::Parameter::Ptr>();
 
-        settings_[p->name()] = p;
+        Entry& entry = settings_[p->name()];
+        entry.parameter = p;
+        entry.persistent = true;
     }
 }
 
-void Settings::add(csapex::param::Parameter::Ptr p)
+void Settings::add(csapex::param::Parameter::Ptr p, bool persistent)
 {
-    settings_[p->name()] = p;
+    Entry& entry = settings_[p->name()];
+    entry.parameter = p;
+    entry.persistent = persistent;
 
     settingsChanged(p->name());
+}
+void Settings::addPersistent(csapex::param::Parameter::Ptr p)
+{
+    add(p, true);
+}
+void Settings::addTemporary(csapex::param::Parameter::Ptr p)
+{
+    add(p, false);
 }
 
 csapex::param::Parameter::Ptr Settings::get(const std::string &name)
 {
-    return settings_.at(name);
+    const Entry& entry = settings_.at(name);
+    return entry.parameter;
 }
 
 bool Settings::knows(const std::string &name) const

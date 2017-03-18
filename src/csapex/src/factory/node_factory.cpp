@@ -107,7 +107,7 @@ void NodeFactory::rebuildPrototypes()
 
                 param::StringListParameter::Ptr properties(new param::StringListParameter(key, param::ParameterDescription()));
                 properties->set(constructor->getProperties());
-                settings_.add(properties);
+                settings_.addPersistent(properties);
                 settings_.set(mod, last_modification);
 
             } catch(const std::exception& e) {

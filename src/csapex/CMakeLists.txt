@@ -271,6 +271,7 @@ list(APPEND csapex_LIBRARIES csapex_profiling)
 
 file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS 
         include/csapex/model/*.h*
+        include/csapex/core/*.h*
         include/csapex/data/*.h*
         include/csapex/factory/*.h*
         include/csapex/msg/*.h*

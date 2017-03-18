@@ -347,7 +347,7 @@ int main(int argc, char** argv)
     }
 
     if(!settings.knows("path_to_bin")) {
-        settings.add(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
+        settings.addTemporary(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
     } else {
         settings.set("path_to_bin", path_to_bin);
     }

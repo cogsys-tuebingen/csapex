@@ -169,7 +169,7 @@ int main(int argc, char** argv)
     }
 
     if(!settings.knows("path_to_bin")) {
-        settings.add(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
+        settings.addTemporary(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
     } else {
         settings.set("path_to_bin", path_to_bin);
     }
@@ -180,6 +180,8 @@ int main(int argc, char** argv)
     settings.set("thread_grouping", vm.count("disable_thread_grouping") == 0);
     settings.set("additional_args", additional_args);
     settings.set("initially_paused", vm.count("paused") > 0);
+
+    settings.set("access-test", std::string("access granted."));
 
     // start the app
     CsApexServer m(settings, *handler);

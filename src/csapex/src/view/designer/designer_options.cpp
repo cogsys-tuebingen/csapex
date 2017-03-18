@@ -85,7 +85,7 @@ bool DesignerOptions::isDebug() const
 void DesignerOptions::enableGrid(bool grid)
 {
     if(!settings_.knows("grid")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("grid", grid));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool("grid", grid));
     }
 
     settings_.set("grid", grid);
@@ -104,7 +104,7 @@ void DesignerOptions::enableGrid(bool grid)
 void DesignerOptions::enableGridLock(bool enabled)
 {
     if(!settings_.knows("grid-lock")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("grid-lock", enabled));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool("grid-lock", enabled));
     }
 
     settings_.set("grid-lock", enabled);
@@ -115,7 +115,7 @@ void DesignerOptions::enableGridLock(bool enabled)
 void DesignerOptions::enableSchematics(bool schema)
 {
     if(!settings_.knows("schematics")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("schematics", schema));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool("schematics", schema));
     }
 
     settings_.set("schematics", schema);
@@ -132,7 +132,7 @@ void DesignerOptions::enableSchematics(bool schema)
 void DesignerOptions::displayGraphComponents(bool display)
 {
     if(!settings_.knows("display-graph-components")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-graph-components", display));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool("display-graph-components", display));
     }
 
     settings_.set("display-graph-components", display);
@@ -148,7 +148,7 @@ void DesignerOptions::displayGraphComponents(bool display)
 void DesignerOptions::displayThreads(bool display)
 {
     if(!settings_.knows("display-threads")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-threads", display));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool("display-threads", display));
     }
 
     settings_.set("display-threads", display);
@@ -164,7 +164,7 @@ void DesignerOptions::displayThreads(bool display)
 void DesignerOptions::displayFrequency(bool display)
 {
     if(!settings_.knows("display-frequencies")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-frequencies", display));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool("display-frequencies", display));
     }
 
     settings_.set("display-frequencies", display);
@@ -181,7 +181,7 @@ void DesignerOptions::displayFrequency(bool display)
 void DesignerOptions::displayMinimap(bool display)
 {
     if(!settings_.knows("display-minimap")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("display-minimap", display));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool("display-minimap", display));
     }
 
     settings_.set("display-minimap", display);
@@ -193,7 +193,7 @@ void DesignerOptions::displayMinimap(bool display)
 void DesignerOptions::enableDebug(bool debug)
 {
     if(!settings_.knows("debug")) {
-        settings_.add(csapex::param::ParameterFactory::declareBool("debug", debug));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool("debug", debug));
     }
 
     settings_.set("debug", debug);
@@ -249,7 +249,7 @@ void DesignerOptions::displayConnections(const std::string& type, bool display)
     std::string key = std::string("display-") + type;
 
     if(!settings_.knows(key)) {
-        settings_.add(csapex::param::ParameterFactory::declareBool(key, display));
+        settings_.addPersistent(csapex::param::ParameterFactory::declareBool(key, display));
     }
 
     settings_.set(key, display);

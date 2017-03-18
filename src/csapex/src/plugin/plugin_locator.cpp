@@ -25,7 +25,7 @@ PluginLocator::PluginLocator(Settings &settings)
         std::vector<std::string> ignored_libraries(ignored_libraries_.begin(), ignored_libraries_.end());
 
         ignored_persistent_.reset(new param::StringListParameter("ignored_libraries", csapex::param::ParameterDescription("ignored libraries")));
-        settings_.add(ignored_persistent_);
+        settings_.addTemporary(ignored_persistent_);
     }
     std::vector<std::string> tmp = ignored_persistent_->getValues();
     ignored_libraries_.insert(tmp.begin(), tmp.end());

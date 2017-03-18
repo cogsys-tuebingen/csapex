@@ -45,43 +45,51 @@ public:
     template <typename T>
     T get(const std::string& name) const
     {
-        std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        auto pos = settings_.find(name);
         if(pos == settings_.end()) {
             throw std::runtime_error(std::string("settings.get: unknown parameter '") + name + "'");
         }
 
-        return pos->second->as<T>();
+        const Entry& entry = pos->second;
+        return entry.parameter->as<T>();
     }
 
     template <typename T>
     T get(const std::string& name, T def)
     {
-        std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        auto pos = settings_.find(name);
         if(pos == settings_.end()) {
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(def);
-            add(p);
+            addTemporary(p);
             settingsChanged(name);
             return def;
         }
 
-        return pos->second->as<T>();
+        Entry& entry = pos->second;
+        return entry.parameter->as<T>();
     }
 
-    void add(csapex::param::Parameter::Ptr p);
+
+    void add(csapex::param::Parameter::Ptr p, bool persistent);
     csapex::param::ParameterPtr get(const std::string& name);
+
+    void addTemporary(csapex::param::Parameter::Ptr p);
+    void addPersistent(csapex::param::Parameter::Ptr p);
+
 
     template <typename T>
     void set(const std::string& name, const T& val)
     {
-        std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator pos = settings_.find(name);
+        auto pos = settings_.find(name);
         if(pos == settings_.end()) {
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(val);
-            add(p);
+            addTemporary(p);
 
         } else {
-            pos->second->set<T>(val);
+            Entry& entry = pos->second;
+            entry.parameter->set<T>(val);
         }
         settingsChanged(name);
     }
@@ -103,7 +111,13 @@ public:
     csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& n)> load_detail_request;
 
 private:
-    std::map<std::string, csapex::param::Parameter::Ptr> settings_;
+    struct Entry
+    {
+        csapex::param::Parameter::Ptr parameter;
+        bool persistent;
+    };
+
+    std::map<std::string, Entry> settings_;
 
     bool quiet_;
     std::vector<std::string> changes_;
