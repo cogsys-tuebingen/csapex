@@ -789,7 +789,7 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     QObject::connect(box, &NodeBox::portRemoved, this, &GraphView::removePort);
 
     NodeAdapter::Ptr adapter = view_core_.getNodeAdapterFactory()->makeNodeAdapter(node_handle, box);
-    adapter->executeCommand.connect(delegate::Delegate<void(CommandPtr)>(&view_core_.getCommandDispatcher(), &CommandDispatcher::execute));
+    adapter->executeCommand.connect(delegate::Delegate<void(const CommandPtr&)>(&view_core_, &CsApexViewCore::execute));
     box->setAdapter(adapter);
 
     box_map_[node_handle->getUUID()] = box;

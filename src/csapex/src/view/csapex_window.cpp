@@ -105,7 +105,7 @@ void CsApexWindow::construct()
 
     setupTimeline();
 
-    Graph* graph = view_core_.getCore().getRoot()->getGraph();
+    Graph* graph = view_core_.getRoot()->getGraph();
 
     setupDesigner();
 
@@ -172,8 +172,8 @@ void CsApexWindow::construct()
     observe(graph->state_changed, [this]() { updateMenu(); });
     observe(view_core_.panic, [this]() { clearBlock(); });
 
-    observe(view_core_.getCommandDispatcher().state_changed, [this](){ updateUndoInfo(); });
-    observe(view_core_.getCommandDispatcher().dirty_changed, [this](bool) { updateTitle(); });
+    observe(view_core_.undo_state_changed, [this](){ updateUndoInfo(); });
+    observe(view_core_.undo_dirty_changed, [this](bool) { updateTitle(); });
 
     observe(view_core_.paused, [this](bool pause) { ui->actionPause->setChecked(pause); });
 
@@ -266,7 +266,7 @@ void CsApexWindow::setupDesigner()
 
 void CsApexWindow::setupThreadManagement()
 {
-    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getCore().getThreadPool(), view_core_.getCommandDispatcher());
+    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getThreadPool(), view_core_);
     ui->thread_table->setModel(model);
 
     QItemSelectionModel* select = ui->thread_table->selectionModel();
@@ -295,7 +295,7 @@ void CsApexWindow::setupThreadManagement()
     QObject::connect(ui->thread_assign, &QPushButton::clicked, [this](bool) {
         if(GraphView* view = designer_->getVisibleGraphView()) {
             QItemSelectionModel* select = ui->thread_table->selectionModel();
-            ThreadGroup* group = view_core_.getCore().getThreadPool()->getGroupAt(select->currentIndex().row());
+            ThreadGroup* group = view_core_.getThreadPool()->getGroupAt(select->currentIndex().row());
             view->switchSelectedNodesToThread(group->id());
         }
     });
@@ -314,11 +314,11 @@ void CsApexWindow::setupThreadManagement()
 
     QObject::connect(ui->thread_create, &QPushButton::clicked, [this](bool) {
         bool ok;
-        ThreadPool* thread_pool = view_core_.getCore().getThreadPool().get();
+        ThreadPool* thread_pool = view_core_.getThreadPool().get();
         QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
 
         if(ok && !text.isEmpty()) {
-            Command::Ptr cmd(new command::CreateThread(view_core_.getCore().getRoot()->getAbsoluteUUID(), UUID::NONE, text.toStdString()));
+            Command::Ptr cmd(new command::CreateThread(view_core_.getRoot()->getAbsoluteUUID(), UUID::NONE, text.toStdString()));
             view_core_.execute(cmd);
         }
     });
@@ -330,9 +330,9 @@ void CsApexWindow::setupThreadManagement()
             QItemSelection selection = select->selection();
 
             command::Meta::Ptr meta(new command::Meta(AUUID(), "delete selected thread groups"));
-            CommandFactory factory(view_core_.getCore().getRoot().get());
+            CommandFactory factory(view_core_.getRoot().get());
 
-            ThreadPoolPtr thread_pool = view_core_.getCore().getThreadPool();
+            ThreadPoolPtr thread_pool = view_core_.getThreadPool();
 
             for(const auto& entry : selection) {
                 for(int row = entry.top(); row <= entry.bottom(); ++row) {
@@ -517,35 +517,37 @@ void CsApexWindow::updateUndoInfo()
     ui->undo->clear();
     ui->redo->clear();
 
-    std::deque<QTreeWidgetItem*> stack;
+    if(CommandDispatcherPtr dispatcher = view_core_.getCommandDispatcher()) {
+        std::deque<QTreeWidgetItem*> stack;
 
-    auto iterator = [&stack](QTreeWidget* tree, int level, const Command& cmd) {
-        while(level < (int) stack.size()) {
-            stack.pop_back();
-        }
-        QTreeWidgetItem* tl = new QTreeWidgetItem;
-        tl->setText(0, cmd.getType().c_str());
-        tl->setText(1, cmd.getDescription().c_str());
+        auto iterator = [&stack](QTreeWidget* tree, int level, const Command& cmd) {
+            while(level < (int) stack.size()) {
+                stack.pop_back();
+            }
+            QTreeWidgetItem* tl = new QTreeWidgetItem;
+            tl->setText(0, cmd.getType().c_str());
+            tl->setText(1, cmd.getDescription().c_str());
 
-        if(level == 0) {
-            tree->addTopLevelItem(tl);
-        } else {
-            stack.back()->addChild(tl);
-        }
+            if(level == 0) {
+                tree->addTopLevelItem(tl);
+            } else {
+                stack.back()->addChild(tl);
+            }
 
-        stack.push_back(tl);
-    };
+            stack.push_back(tl);
+        };
 
-    view_core_.getCommandDispatcher().visitUndoCommands([this, &iterator](int level, const Command& cmd) {
-        iterator(ui->undo, level, cmd);
-    });
-    stack.clear();
-    view_core_.getCommandDispatcher().visitRedoCommands([this, &iterator](int level, const Command& cmd) {
-        iterator(ui->redo, level, cmd);
-    });
+        dispatcher->visitUndoCommands([this, &iterator](int level, const Command& cmd) {
+            iterator(ui->undo, level, cmd);
+        });
+        stack.clear();
+        dispatcher->visitRedoCommands([this, &iterator](int level, const Command& cmd) {
+            iterator(ui->redo, level, cmd);
+        });
 
-    ui->undo->expandAll();
-    ui->redo->expandAll();
+        ui->undo->expandAll();
+        ui->redo->expandAll();
+    }
 }
 
 void CsApexWindow::about()
@@ -696,18 +698,26 @@ void CsApexWindow::start()
 
 void CsApexWindow::updateMenu()
 {
-    bool can_undo = view_core_.getCommandDispatcher().canUndo();
+    bool can_undo = view_core_.canUndo();
     ui->actionUndo->setDisabled(!can_undo);
     if(can_undo) {
-        ui->actionUndo->setText(QString("&Undo ") + QString::fromStdString(view_core_.getCommandDispatcher().getNextUndoCommand()->getType()));
+        if(CommandDispatcherPtr dispatcher = view_core_.getCommandDispatcher()) {
+            ui->actionUndo->setText(QString("&Undo ") + QString::fromStdString(dispatcher->getNextUndoCommand()->getType()));
+        } else {
+            ui->actionUndo->setText(QString("&Undo"));
+        }
     } else {
         ui->actionUndo->setText(QString("&Undo"));
     }
 
-    bool can_redo = view_core_.getCommandDispatcher().canRedo();
+    bool can_redo = view_core_.canRedo();
     ui->actionRedo->setDisabled(!can_redo);
     if(can_redo) {
-        ui->actionRedo->setText(QString("&Redo ") + QString::fromStdString(view_core_.getCommandDispatcher().getNextRedoCommand()->getType()));
+        if(CommandDispatcherPtr dispatcher = view_core_.getCommandDispatcher()) {
+            ui->actionRedo->setText(QString("&Redo ") + QString::fromStdString(dispatcher->getNextRedoCommand()->getType()));
+        } else {
+            ui->actionRedo->setText(QString("&Redo"));
+        }
     } else {
         ui->actionRedo->setText(QString("&Redo"));
     }
@@ -719,11 +729,11 @@ void CsApexWindow::updateTitle()
     std::stringstream window;
     window << "CS::APEX (" << getConfigFile() << ")";
 
-    if(view_core_.getCommandDispatcher().isDirty()) {
+    if(view_core_.isDirty()) {
         window << " *";
     }
 
-    bool recovery = view_core_.getCore().getSettings().get<bool>("config_recovery", false);
+    bool recovery = view_core_.getSettings().get<bool>("config_recovery", false);
     if(recovery) {
         window << " (recovery)";
     }
@@ -770,7 +780,7 @@ void CsApexWindow::createTutorialsMenu()
     tree->setUniformRowHeights(false);
     tree->setItemDelegate(new HTMLDelegate);
 
-    TutorialTreeModel tutorials(view_core_.getCore().getSettings());
+    TutorialTreeModel tutorials(view_core_.getSettings());
     tutorials.fill(tree);
 
     QObject::connect(tree, &QTreeWidget::activated,
@@ -786,7 +796,7 @@ void CsApexWindow::loadTutorial(const QModelIndex &index)
     if(data.isValid()) {
         QString filename = data.toString();
         if(QFile(filename).exists()) {
-            view_core_.getCore().load(filename.toStdString());
+            view_core_.load(filename.toStdString());
         }
     }
 }
@@ -801,13 +811,13 @@ void CsApexWindow::updatePluginIgnored(const QObject* &action)
 
 void CsApexWindow::tick()
 {
-    view_core_.getCommandDispatcher().executeLater();
+    view_core_.executeLater();
     QApplication::processEvents();
 }
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    if(view_core_.getCommandDispatcher().isDirty()) {
+    if(view_core_.isDirty()) {
         int r = QMessageBox::warning(this, tr("cs::APEX"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -825,7 +835,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     QString geometry(saveGeometry().toBase64());
     QString uistate(saveState().toBase64());
 
-    Settings& settings = view_core_.getCore().getSettings();
+    Settings& settings = view_core_.getSettings();
     if(!settings.knows("uistate")) {
         settings.add(csapex::param::ParameterFactory::declareText("uistate", ""));
     }
@@ -867,7 +877,7 @@ void CsApexWindow::init()
     updateSnippets();
     //    designer_->show();
 
-    Settings& settings = view_core_.getCore().getSettings();
+    Settings& settings = view_core_.getSettings();
     if(settings.knows("uistate")) {
         std::string uistate = settings.get<std::string>("uistate");
         restoreState(QByteArray::fromBase64(uistate.data()));
@@ -884,12 +894,12 @@ void CsApexWindow::init()
 
 std::string CsApexWindow::getConfigFile()
 {
-    return view_core_.getCore().getSettings().get<std::string>("config");
+    return view_core_.getSettings().get<std::string>("config");
 }
 
 void CsApexWindow::save()
 {
-    view_core_.getCore().saveAs(getConfigFile());
+    view_core_.saveAs(getConfigFile());
 }
 
 void CsApexWindow::saveAs()
@@ -898,8 +908,8 @@ void CsApexWindow::saveAs()
                                                     QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(!filename.isEmpty()) {
-        view_core_.getCore().saveAs(filename.toStdString());
-        view_core_.getCore().getSettings().set("config", filename.toStdString());
+        view_core_.saveAs(filename.toStdString());
+        view_core_.getSettings().set("config", filename.toStdString());
     }
 }
 
@@ -910,13 +920,13 @@ void CsApexWindow::saveAsCopy()
                                                     QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(!filename.isEmpty()) {
-        view_core_.getCore().saveAs(filename.toStdString());
+        view_core_.saveAs(filename.toStdString());
     }
 }
 
 void CsApexWindow::reload()
 {
-    view_core_.getCore().load(getConfigFile());
+    view_core_.load(getConfigFile());
 }
 
 void CsApexWindow::reset()
@@ -925,29 +935,29 @@ void CsApexWindow::reset()
                                  tr("Do you really want to reset? This <b>cannot</b> be undone!"),
                                  QMessageBox::Ok | QMessageBox::Cancel);
     if(r == QMessageBox::Ok) {
-        view_core_.getCore().reset();
+        view_core_.reset();
     }
 }
 
 void CsApexWindow::clear()
 {
-    CommandPtr cmd = CommandFactory(view_core_.getCore().getRoot().get()).clearCommand();
-    view_core_.getCommandDispatcher().execute(cmd);
+    CommandPtr cmd = CommandFactory(view_core_.getRoot().get()).clearCommand();
+    view_core_.execute(cmd);
 }
 
 void CsApexWindow::undo()
 {
-    view_core_.getCommandDispatcher().undo();
+    view_core_.undo();
 }
 
 void CsApexWindow::redo()
 {
-    view_core_.getCommandDispatcher().redo();
+    view_core_.redo();
 }
 
 void CsApexWindow::makeScreenshot()
 {
-    ScreenshotDialog diag(view_core_.getCore().getRoot(), this);
+    ScreenshotDialog diag(view_core_.getRoot(), this);
     diag.exec();
 }
 
@@ -957,7 +967,7 @@ void CsApexWindow::load()
                                                     QString::fromStdString(Settings::config_selector), 0, QFileDialog::DontUseNativeDialog);
 
     if(QFile(filename).exists()) {
-        view_core_.getCore().load(filename.toStdString());
+        view_core_.load(filename.toStdString());
     }
 }
 

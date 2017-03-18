@@ -15,7 +15,7 @@ namespace csapex
 class ThreadGroupTableModel : public QAbstractTableModel, public Observer
 {
 public:
-    ThreadGroupTableModel(ThreadPoolPtr thread_pool, csapex::CommandDispatcher& dispatcher);
+    ThreadGroupTableModel(ThreadPoolPtr thread_pool, CommandExecutor& dispatcher);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -31,7 +31,7 @@ private:
 
 private:
     ThreadPoolPtr thread_pool_;
-    CommandDispatcher& dispatcher_;
+    CommandExecutor& cmd_executor_;
 };
 
 }

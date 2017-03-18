@@ -37,7 +37,7 @@ protected:
     void disconnect();
 
 public:
-    csapex::slim_signal::Signal<void(CommandPtr)> executeCommand;
+    csapex::slim_signal::Signal<void(const CommandPtr&)> executeCommand;
 
 Q_SIGNALS:
     void modelCallback(std::function<void()>);

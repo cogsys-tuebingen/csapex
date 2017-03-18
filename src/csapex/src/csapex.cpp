@@ -173,7 +173,7 @@ void Main::checkRecoveryFile(CsApexViewCore &view_core, CsApexWindow &w)
         }
     });
     timer->start(settings.get<int>("config_recovery_save_interval", 1000));
-    observe(view_core.getCommandDispatcher().state_changed, [&](){
+    observe(view_core.undo_state_changed, [&](){
         recover_needed = true;
     });
 }

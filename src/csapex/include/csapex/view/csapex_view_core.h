@@ -11,6 +11,7 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/utility/notifier.h>
 #include <csapex/model/observer.h>
+#include <csapex/command/command_executor.h>
 
 namespace csapex
 {
@@ -22,14 +23,20 @@ class DesignerStyleable;
 class DesignerOptions;
 class DragIO;
 
-class CSAPEX_QT_EXPORT CsApexViewCore : public Observer, public Notifier
+class CSAPEX_QT_EXPORT CsApexViewCore :
+        // abstract classes
+        public Observer, public Notifier,
+        // interfaces
+        public CommandExecutor
 {
 public:
     CsApexViewCore(CsApexCore& core);
     CsApexViewCore(CsApexViewCore& parent, CsApexCore& core, std::shared_ptr<CommandDispatcher> dispatcher);
 
-    void execute(const CommandPtr& command);
-    void executeLater(const CommandPtr& command);
+    // CORE
+    void reset();
+    void load(const std::string& file);
+    void saveAs(const std::string& file, bool quiet = false);
 
     void setPause(bool paused);
     bool isPaused() const;
@@ -38,19 +45,41 @@ public:
     void setSteppingMode(bool stepping);
     void step();
 
+
+    /// TODO: change to proxy?
+    void execute(const CommandPtr& command);
+    void executeLater(const CommandPtr& command);
+    void executeLater();
+
+    void undo();
+    void redo();
+    bool canUndo() const;
+    bool canRedo() const;
+    bool isDirty() const;
+
+
+
+    // TODO: add proxies
+    Settings& getSettings();
+
+    GraphFacadePtr getRoot();
     void stop();
     void clearBlock();
     void resetActivity();
 
+    ThreadPoolPtr getThreadPool();
+
+
+
+    // TODO: only for direct sessions:
+    CommandDispatcherPtr getCommandDispatcher();
 
 
 
     // TODO: remove
     CsApexCore& getCore();
-    CommandDispatcher& getCommandDispatcher();
 
-    // TODO: remove or proxy
-    Settings& getSettings();
+
 
 
 
@@ -92,6 +121,10 @@ public:
     /// THREAD POOL
     slim_signal::Signal<void (ThreadGroupPtr)> group_created;
     slim_signal::Signal<void (ThreadGroupPtr)> group_removed;
+
+    /// COMMANDS
+    slim_signal::Signal<void ()> undo_state_changed;
+    slim_signal::Signal<void (bool)> undo_dirty_changed;
 
 private:
     CsApexCore& core_;

@@ -5,12 +5,12 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/command/modify_thread.h>
-#include <csapex/command/dispatcher.h>
+#include <csapex/command/command_executor.h>
 
 using namespace csapex;
 
-ThreadGroupTableModel::ThreadGroupTableModel(ThreadPoolPtr thread_pool, CommandDispatcher &dispatcher)
-    : thread_pool_(thread_pool), dispatcher_(dispatcher)
+ThreadGroupTableModel::ThreadGroupTableModel(ThreadPoolPtr thread_pool, CommandExecutor& dispatcher)
+    : thread_pool_(thread_pool), cmd_executor_(dispatcher)
 {
     observe(thread_pool_->group_created, [this](ThreadGroupPtr group){
         refresh();
@@ -54,7 +54,7 @@ bool ThreadGroupTableModel::setData(const QModelIndex &index, const QVariant &va
 //        group->setName(var.toStdString());
 
         command::ModifyThread::Ptr modify(new command::ModifyThread(group->id(), var.toStdString()));
-        dispatcher_.execute(modify);
+        cmd_executor_.execute(modify);
     }
         break;
     default:

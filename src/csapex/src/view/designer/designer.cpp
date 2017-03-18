@@ -37,16 +37,16 @@ Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
     : QWidget(parent), ui(new Ui::Designer),
       options_(view_core.getSettings(), this),
       minimap_(new MinimapWidget),
-      core_(view_core.getCore()), view_core_(view_core), is_init_(false),
+      view_core_(view_core), is_init_(false),
       notification_animation_(nullptr)
 {
-    observe(core_.getSettings().save_request, [this](YAML::Node& node){ saveSettings(node); });
-    observe(core_.getSettings().load_request, [this](YAML::Node& node){ loadSettings(node); });
+    observe(view_core_.getSettings().save_request, [this](YAML::Node& node){ saveSettings(node); });
+    observe(view_core_.getSettings().load_request, [this](YAML::Node& node){ loadSettings(node); });
 
-    observe(core_.getSettings().save_detail_request, [this](SubgraphNode* graph, YAML::Node& node){ saveView(graph, node); });
-    observe(core_.getSettings().load_detail_request, [this](SubgraphNode* graph, YAML::Node& node){ loadView(graph, node); });
+    observe(view_core_.getSettings().save_detail_request, [this](SubgraphNode* graph, YAML::Node& node){ saveView(graph, node); });
+    observe(view_core_.getSettings().load_detail_request, [this](SubgraphNode* graph, YAML::Node& node){ loadView(graph, node); });
 
-    observeGraph(core_.getRoot());
+    observeGraph(view_core_.getRoot());
 }
 
 Designer::~Designer()
@@ -74,7 +74,7 @@ void Designer::setup()
 {
     ui->setupUi(this);
 
-    addGraph(core_.getRoot());
+    addGraph(view_core_.getRoot());
 
     //    ui->horizontalLayout->addWidget(minimap_);
     minimap_->setParent(this);
@@ -145,7 +145,7 @@ void Designer::showNodeDialog()
 void Designer::showNodeSearchDialog()
 {
     if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
-        SearchDialog diag(current_view->getGraphFacade()->getGraph(), core_.getNodeFactory(),
+        SearchDialog diag(current_view->getGraphFacade()->getGraph(), view_core_.getCore().getNodeFactory(),
                           "Please enter the UUID, the label or the type of the node");
 
         int r = diag.exec();
@@ -163,7 +163,7 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
 
     graphs_[uuid] = graph_facade;
 
-    if(graph_facade == core_.getRoot()) {
+    if(graph_facade == view_core_.getRoot()) {
         showGraph(graph_facade);
     }
 }
@@ -498,7 +498,7 @@ GraphView* Designer::getVisibleGraphView() const
 {
     GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
     if(!current_view) {
-        return graph_views_.at(core_.getRoot()->getSubgraphNode());
+        return graph_views_.at(view_core_.getRoot()->getSubgraphNode());
     }
     return current_view;
 }
@@ -555,8 +555,8 @@ void Designer::reinitialize()
 {
     ui->tabWidget->blockSignals(false);
 
-    observeGraph(core_.getRoot());
-    addGraph(core_.getRoot());
+    observeGraph(view_core_.getRoot());
+    addGraph(view_core_.getRoot());
 }
 
 void Designer::addBox(NodeBox *box)

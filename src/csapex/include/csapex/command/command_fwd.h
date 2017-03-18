@@ -16,6 +16,7 @@ namespace csapex
 {
 
 FWD(Command);
+FWD(CommandExecutor);
 FWD(CommandDispatcher);
 FWD(CommandFactory);
 

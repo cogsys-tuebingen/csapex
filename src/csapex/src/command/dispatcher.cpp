@@ -28,7 +28,7 @@ void CommandDispatcher::reset()
     dirty_ = false;
 }
 
-void CommandDispatcher::execute(Command::Ptr command)
+void CommandDispatcher::execute(const CommandPtr &command)
 {
     if(!command) {
         std::cerr << "trying to execute null command" << std::endl;
@@ -38,7 +38,7 @@ void CommandDispatcher::execute(Command::Ptr command)
     doExecute(command);
 }
 
-void CommandDispatcher::executeLater(Command::Ptr command)
+void CommandDispatcher::executeLater(const CommandPtr &command)
 {
     if(!command) {
         std::cerr << "trying to execute null command" << std::endl;

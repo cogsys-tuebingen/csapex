@@ -45,7 +45,7 @@ public:
     virtual void setManualResize(bool manual);
 
 public:
-    csapex::slim_signal::Signal<void(CommandPtr)> executeCommand;
+    csapex::slim_signal::Signal<void(const CommandPtr&)> executeCommand;
 
 protected:
     virtual void setupUi(QBoxLayout* layout) = 0;

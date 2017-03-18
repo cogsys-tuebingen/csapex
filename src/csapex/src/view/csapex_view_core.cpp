@@ -79,6 +79,9 @@ CsApexViewCore::CsApexViewCore(CsApexCore& core)
     observe(core_.getThreadPool()->group_removed, group_removed);
 
 
+    observe(core_.getCommandDispatcher()->state_changed, undo_state_changed);
+    observe(core_.getCommandDispatcher()->dirty_changed, undo_dirty_changed);
+
     observe(core_.notification, notification);
 }
 
@@ -97,6 +100,35 @@ void CsApexViewCore::executeLater(const CommandPtr &command)
     dispatcher_->executeLater(command);
 }
 
+void CsApexViewCore::executeLater()
+{
+    dispatcher_->executeLater();
+}
+
+void CsApexViewCore::undo()
+{
+    dispatcher_->undo();
+}
+void CsApexViewCore::redo()
+{
+    dispatcher_->redo();
+}
+
+
+bool CsApexViewCore::canUndo() const
+{
+    return dispatcher_->canUndo();
+}
+bool CsApexViewCore::canRedo() const
+{
+    return dispatcher_->canRedo();
+}
+
+bool CsApexViewCore::isDirty() const
+{
+    return dispatcher_->isDirty();
+}
+
 CsApexCore& CsApexViewCore::getCore()
 {
     return core_;
@@ -105,11 +137,6 @@ CsApexCore& CsApexViewCore::getCore()
 NodeAdapterFactoryPtr CsApexViewCore::getNodeAdapterFactory()
 {
     return node_adapter_factory_;
-}
-
-CommandDispatcher& CsApexViewCore::getCommandDispatcher()
-{
-    return *dispatcher_;
 }
 
 DesignerStyleable& CsApexViewCore::getStyle()
@@ -122,15 +149,50 @@ std::shared_ptr<DragIO> CsApexViewCore::getDragIO()
     return drag_io;
 }
 
+
+
+
+
+/// PROXIES
+CommandDispatcherPtr CsApexViewCore::getCommandDispatcher()
+{
+    return dispatcher_;
+}
+
 Settings& CsApexViewCore::getSettings()
 {
-    // TODO: don't relay remote stettings.
     return core_.getSettings();
+}
+
+GraphFacadePtr CsApexViewCore::getRoot()
+{
+    return core_.getRoot();
+}
+
+ThreadPoolPtr CsApexViewCore::getThreadPool()
+{
+    return core_.getThreadPool();
 }
 
 
 
 /// RELAYS
+
+void CsApexViewCore::reset()
+{
+    core_.reset();
+}
+
+
+void CsApexViewCore::load(const std::string& file)
+{
+    core_.load(file);
+}
+
+void CsApexViewCore::saveAs(const std::string& file, bool quiet)
+{
+    core_.saveAs(file, quiet);
+}
 
 bool CsApexViewCore::isDebug() const
 {

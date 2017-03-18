@@ -124,7 +124,6 @@ private:
 
     MinimapWidget* minimap_;
 
-    CsApexCore& core_;
     CsApexViewCore& view_core_;
 
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> graphs_;

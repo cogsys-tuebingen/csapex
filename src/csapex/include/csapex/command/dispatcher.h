@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/command/command_fwd.h>
+#include <csapex/command/command_executor.h>
 
 /// SYSTEM
 #include <deque>
@@ -12,7 +13,7 @@
 namespace csapex
 {
 
-class CSAPEX_COMMAND_EXPORT CommandDispatcher
+class CSAPEX_COMMAND_EXPORT CommandDispatcher : public CommandExecutor
 {
 public:
     typedef std::shared_ptr<CommandDispatcher> Ptr;
@@ -20,8 +21,8 @@ public:
 public:
     CommandDispatcher(CsApexCore& core);
 
-    void execute(Command::Ptr command);
-    void executeLater(Command::Ptr command);
+    void execute(const CommandPtr& command);
+    void executeLater(const CommandPtr&  command);
     void executeLater();
 
     bool isDirty() const;
