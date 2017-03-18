@@ -12,7 +12,6 @@
 #include <csapex/command/group_nodes.h>
 #include <csapex/command/ungroup_nodes.h>
 #include <csapex/command/meta.h>
-#include <csapex/command/playback_command.h>
 #include <csapex/command/minimize.h>
 #include <csapex/command/mute_node.h>
 #include <csapex/command/move_box.h>
@@ -22,6 +21,7 @@
 #include <csapex/command/set_color.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/add_variadic_connector.h>
+#include <csapex/command/add_variadic_connector_and_connect.h>
 #include <csapex/command/set_execution_mode.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/csapex_core.h>
@@ -1024,26 +1024,18 @@ void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
 
-    CommandFactory factory(graph_facade_.get());
-
-    std::shared_ptr<command::PlaybackCommand> playback = view_core_.getCommandDispatcher().make_playback(graph_uuid, "CreatePortAndConnect");
+    std::shared_ptr<Command> cmd;
 
     if(request.target == graph->getUUID().getAbsoluteUUID()) {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
-        playback->execute(add);
-
-        RelayMapping ports = add->getMap();
-        playback->execute(factory.addConnection(ports.internal, from->getUUID(), false));
+        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.target, request.connector_type, request.type, request.label,
+                                                                        from->getUUID(), false, false);
 
     } else {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
-        playback->execute(add);
-
-        RelayMapping ports = add->getMap();
-        playback->execute(factory.addConnection(ports.external, from->getUUID(), false));
+        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.target, request.connector_type, request.type, request.label,
+                                                                        from->getUUID(), false, true);
     }
 
-    view_core_.execute(playback);
+    view_core_.execute(cmd);
 }
 
 void GraphView::createPortAndMove(CreateConnectorRequest request, ConnectablePtr from)
@@ -1051,26 +1043,18 @@ void GraphView::createPortAndMove(CreateConnectorRequest request, ConnectablePtr
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
 
-    CommandFactory factory(graph_facade_.get());
-
-    std::shared_ptr<command::PlaybackCommand> playback = view_core_.getCommandDispatcher().make_playback(graph_uuid, "CreatePortAndMove");
+    std::shared_ptr<Command> cmd;
 
     if(request.target == graph->getUUID().getAbsoluteUUID()) {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
-        playback->execute(add);
-
-        RelayMapping ports = add->getMap();
-        playback->execute(factory.moveConnections(from->getUUID(), ports.internal));
+        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.target, request.connector_type, request.type, request.label,
+                                                                        from->getUUID(), true, false);
 
     } else {
-        std::shared_ptr<command::AddVariadicConnector> add = std::make_shared<command::AddVariadicConnector>(graph_uuid, request.target, request.connector_type, request.type, request.label);
-        playback->execute(add);
-
-        RelayMapping ports = add->getMap();
-        playback->execute(factory.moveConnections(from->getUUID(), ports.external));
+        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.target, request.connector_type, request.type, request.label,
+                                                                        from->getUUID(), true, true);
     }
 
-    view_core_.execute(playback);
+    view_core_.execute(cmd);
 }
 
 void GraphView::addPort(Port *port)

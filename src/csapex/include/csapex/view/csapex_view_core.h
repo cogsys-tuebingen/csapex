@@ -42,16 +42,24 @@ public:
     void clearBlock();
     void resetActivity();
 
+
+
+
+    // TODO: remove
     CsApexCore& getCore();
+    CommandDispatcher& getCommandDispatcher();
+
+    // TODO: remove or proxy
+    Settings& getSettings();
+
+
+
 
     std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory();
-    CommandDispatcher& getCommandDispatcher();
 
     DesignerStyleable& getStyle();
 
     std::shared_ptr<DragIO> getDragIO();
-
-    Settings& getSettings();
 
     bool isDebug() const;
     bool isGridLockEnabled() const;

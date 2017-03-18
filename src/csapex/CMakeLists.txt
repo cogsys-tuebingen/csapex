@@ -295,7 +295,6 @@ add_library(csapex SHARED
     src/command/command.cpp
     src/command/dispatcher.cpp
     src/command/meta.cpp
-    src/command/playback_command.cpp
 
     src/data/point.cpp
 
@@ -444,6 +443,7 @@ add_library(csapex_command SHARED
     src/command/ungroup_nodes.cpp
     src/command/paste_graph.cpp
     src/command/add_variadic_connector.cpp
+    src/command/add_variadic_connector_and_connect.cpp
     src/command/set_color.cpp
     src/command/update_parameter.cpp
     src/command/set_execution_mode.cpp
