@@ -118,10 +118,6 @@ private:
 
 private:
     CsApexViewCore& view_core_;
-    CsApexCore& core_;
-    CommandDispatcher* cmd_dispatcher_;
-    GraphFacadePtr root_;
-    Executor& executor_;
 
     std::shared_ptr<Profiler> profiler_;
 

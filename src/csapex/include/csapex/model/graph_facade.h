@@ -7,6 +7,7 @@
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_export.h>
+#include <csapex/utility/notifier.h>
 #include <csapex/utility/notification.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/observer.h>
@@ -17,7 +18,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT GraphFacade : public Observer
+class CSAPEX_EXPORT GraphFacade : public Observer, public Notifier
 {
 public:
     typedef std::shared_ptr<GraphFacade> Ptr;
@@ -91,7 +92,6 @@ public:
     slim_signal::Signal<void(TaskGeneratorPtr)> generator_added;
     slim_signal::Signal<void(TaskGeneratorPtr)> generator_removed;
 
-    slim_signal::Signal<void (Notification)> notification;
     slim_signal::Signal<void()> panic;
     
 private:

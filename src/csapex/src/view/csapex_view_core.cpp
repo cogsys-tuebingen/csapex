@@ -6,6 +6,8 @@
 #include <csapex/view/utility/message_renderer_manager.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/designer/drag_io.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/scheduling/thread_pool.h>
 
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -52,6 +54,32 @@ CsApexViewCore::CsApexViewCore(CsApexCore& core)
         dispatcher_->reset();
         core_.getSettings().set("config_recovery", false);
     });
+
+    observe(core_.config_changed, config_changed);
+    observe(core_.status_changed, status_changed);
+    observe(core_.new_node_type, new_node_type);
+    observe(core_.new_snippet_type, new_snippet_type);
+    observe(core_.reset_requested, reset_requested);
+    observe(core_.reset_done, reset_done);
+    observe(core_.saved, saved);
+    observe(core_.loaded, loaded);
+    observe(core_.paused, paused);
+    observe(core_.begin_step, begin_step);
+    observe(core_.end_step, end_step);
+
+
+    observe(core_.getRoot()->node_added, node_added);
+    observe(core_.getRoot()->node_removed, node_removed);
+    observe(core_.getRoot()->node_worker_added, node_worker_added);
+    observe(core_.getRoot()->node_worker_removed, node_worker_removed);
+    observe(core_.getRoot()->panic, panic);
+
+
+    observe(core_.getThreadPool()->group_created, group_created);
+    observe(core_.getThreadPool()->group_removed, group_removed);
+
+
+    observe(core_.notification, notification);
 }
 
 CsApexViewCore::CsApexViewCore(CsApexViewCore& parent, CsApexCore& core, std::shared_ptr<CommandDispatcher> dispatcher)
@@ -96,8 +124,13 @@ std::shared_ptr<DragIO> CsApexViewCore::getDragIO()
 
 Settings& CsApexViewCore::getSettings()
 {
+    // TODO: don't relay remote stettings.
     return core_.getSettings();
 }
+
+
+
+/// RELAYS
 
 bool CsApexViewCore::isDebug() const
 {
@@ -107,4 +140,46 @@ bool CsApexViewCore::isDebug() const
 bool CsApexViewCore::isGridLockEnabled() const
 {
     return core_.getSettings().get<bool>("grid-lock", false);
+}
+
+bool CsApexViewCore::isPaused() const
+{
+    return core_.isPaused();
+}
+
+void CsApexViewCore::setPause(bool paused)
+{
+    core_.setPause(paused);
+}
+
+
+bool CsApexViewCore::isSteppingMode() const
+{
+    return core_.isSteppingMode();
+}
+
+void CsApexViewCore::setSteppingMode(bool stepping)
+{
+    core_.setSteppingMode(stepping);
+}
+
+void CsApexViewCore::step()
+{
+    core_.step();
+}
+
+
+void CsApexViewCore::stop()
+{
+    core_.getRoot()->stop();
+}
+
+void CsApexViewCore::clearBlock()
+{
+    core_.getRoot()->clearBlock();
+}
+
+void CsApexViewCore::resetActivity()
+{
+    core_.getRoot()->resetActivity();
 }
