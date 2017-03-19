@@ -12,24 +12,14 @@ template <typename I>
 class RequestImplementation : public Request
 {
 protected:
-    RequestImplementation()
+    RequestImplementation(uint8_t id)
+        : Request(id)
     {
     }
 
     std::shared_ptr<Clonable> makeEmptyClone() const
     {
-        return std::make_shared<I>();
-    }
-
-    std::string getType() const override
-    {
-        return typeName();
-    }
-
-public:
-    static std::string typeName()
-    {
-        return type2nameWithoutNamespace(typeid(I));
+        return std::make_shared<I>(0);
     }
 };
 

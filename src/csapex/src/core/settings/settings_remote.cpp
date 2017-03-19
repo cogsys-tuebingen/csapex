@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/param/io.h>
+#include <csapex/command/update_parameter.h>
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/request_parameter.h>
 #include <csapex/utility/uuid_provider.h>
@@ -66,10 +67,10 @@ void SettingsRemote::addTemporary(csapex::param::Parameter::Ptr p)
 
 csapex::param::Parameter::Ptr SettingsRemote::get(const std::string &name) const
 {
-//    use tcp to get the parameter:
-//        - derive parameter from serializable
-//        - make value parameter serializable
-//        - get the parameter via request
+    //    use tcp to get the parameter:
+    //        - derive parameter from serializable
+    //        - make value parameter serializable
+    //        - get the parameter via request
 
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + name));
     std::shared_ptr<RequestParameter::ParameterRequest> request = std::make_shared<RequestParameter::ParameterRequest>(param_id);
@@ -79,12 +80,19 @@ csapex::param::Parameter::Ptr SettingsRemote::get(const std::string &name) const
         apex_assert_hard(response->getParameter());
 
         std::cerr << response->getParameter()->getUUID() << std::endl;
-        // TODO: make a new parameter, when it gets changed relay the change to the remote server
-//        return response->getParameter();
 
+        // TODO: make a new parameter, when it gets changed relay the change to the remote server
         param::ParameterPtr proxy = response->getParameter()->clone<param::Parameter>();
 
-        return param::ParameterPtr();
+        proxy->parameter_changed.connect([this](param::Parameter* param){
+            // request to set the parameter
+            boost::any raw;
+            param->get_unsafe(raw);
+            CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
+            session_->write(change);
+        });
+
+        return proxy;
     }
 
     throw std::out_of_range(std::string("parameter ") + name + " does not exist.");

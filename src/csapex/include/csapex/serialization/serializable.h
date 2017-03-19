@@ -2,7 +2,7 @@
 #define PACKET_H
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/serialization_fwd.h>
 #include <csapex/model/clonable.h>
 
 /// SYSTEM

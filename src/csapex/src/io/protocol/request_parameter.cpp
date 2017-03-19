@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/request_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/serialization/parameter_serializer.h>
 
@@ -16,12 +17,13 @@ using namespace csapex;
 /// REQUEST
 ///
 RequestParameter::ParameterRequest::ParameterRequest(const AUUID &id)
-    : id_(id)
+    : RequestImplementation(0), id_(id)
 {
 
 }
 
-RequestParameter::ParameterRequest::ParameterRequest()
+RequestParameter::ParameterRequest::ParameterRequest(uint8_t request_id)
+    : RequestImplementation(request_id)
 {
 
 }
@@ -33,7 +35,8 @@ ResponsePtr RequestParameter::ParameterRequest::execute(CsApexCore &core) const
     std::string name = id_.getFullName();
     bool is_setting = name.at(0) == ':';
     if(is_setting) {
-        response = std::make_shared<ParameterResponse>(core.getSettings().get(name.substr(1)));
+        auto param = core.getSettings().get(name.substr(1));
+        response = std::make_shared<ParameterResponse>(param, getRequestID());
     } else {
         // TODO: get the parameter from the node
     }
@@ -57,13 +60,13 @@ void RequestParameter::ParameterRequest::deserialize(SerializationBuffer& data)
 /// RESPONSE
 ///
 
-RequestParameter::ParameterResponse::ParameterResponse(const param::ParameterConstPtr &parameter)
-    : param_(parameter)
+RequestParameter::ParameterResponse::ParameterResponse(const param::ParameterConstPtr &parameter, uint8_t request_id)
+    : ResponseImplementation(request_id), param_(parameter)
 {
 
 }
-
-RequestParameter::ParameterResponse::ParameterResponse()
+RequestParameter::ParameterResponse::ParameterResponse(uint8_t request_id)
+    : ResponseImplementation(request_id)
 {
 
 }
@@ -97,9 +100,9 @@ class RequestParameterSerializer : public RequestSerializerInterface
     {
         packet->serialize(data);
     }
-    virtual RequestPtr deserializeRequest(SerializationBuffer& data) override
+    virtual RequestPtr deserializeRequest(SerializationBuffer& data, uint8_t request_id) override
     {
-        auto result = std::make_shared<RequestParameter::ParameterRequest>();
+        auto result = std::make_shared<RequestParameter::ParameterRequest>(request_id);
         result->deserialize(data);
         return result;
     }
@@ -107,9 +110,9 @@ class RequestParameterSerializer : public RequestSerializerInterface
     {
         packet->serialize(data);
     }
-    virtual ResponsePtr deserializeResponse(SerializationBuffer& data) override
+    virtual ResponsePtr deserializeResponse(SerializationBuffer& data, uint8_t request_id) override
     {
-        auto result = std::make_shared<RequestParameter::ParameterResponse>();
+        auto result = std::make_shared<RequestParameter::ParameterResponse>(request_id);
         result->deserialize(data);
         return result;
     }

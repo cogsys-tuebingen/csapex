@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/packet_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 #include <csapex/utility/assert.h>
 #include <csapex/io/request.h>
 #include <csapex/io/response.h>
@@ -12,7 +13,8 @@
 
 using namespace csapex;
 
-SerializerRegistered<RequestSerializer> g_register_Request_serializer_(Request::PACKET_TYPE_ID, &RequestSerializer::instance());
+SerializerRegistered<RequestSerializer> g_register_request_serializer_(Request::PACKET_TYPE_ID, &RequestSerializer::instance());
+SerializerRegistered<RequestSerializer> g_register_response_serializer_(Response::PACKET_TYPE_ID, &RequestSerializer::instance());
 
 
 RequestSerializerInterface::~RequestSerializerInterface()
@@ -32,6 +34,8 @@ void RequestSerializer::serialize(const SerializableConstPtr &packet, Serializat
 
             data << (uint8_t) 0;
 
+            data << request->getRequestID();
+
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
             serializer->serializeRequest(request, data);
@@ -49,6 +53,8 @@ void RequestSerializer::serialize(const SerializableConstPtr &packet, Serializat
             data << type;
 
             data << (uint8_t) 1;
+
+            data << response->getRequestID();
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
@@ -73,19 +79,22 @@ SerializablePtr RequestSerializer::deserialize(SerializationBuffer& data)
         uint8_t direction;
         data >> direction;
 
+        uint8_t id;
+        data >> id;
+
         if(direction == 0) {
             std::cerr << "deserializing Request (type=" << type << ")" << std::endl;
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
-            return serializer->deserializeRequest(data);
+            return serializer->deserializeRequest(data, id);
 
         } else if(direction == 1) {
             std::cerr << "deserializing Response (type=" << type << ")" << std::endl;
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
-            return serializer->deserializeResponse(data);
+            return serializer->deserializeResponse(data, id);
 
         }
     }

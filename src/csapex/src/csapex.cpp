@@ -359,6 +359,8 @@ int main(int argc, char** argv)
     settings.set("additional_args", additional_args);
     settings.set("initially_paused", vm.count("paused") > 0);
 
+    settings.set("access-test", std::string("access granted."));
+
     // start the app
     Main m(std::move(app), settings, *handler);
     try {

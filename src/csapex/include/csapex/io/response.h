@@ -14,12 +14,17 @@ namespace csapex
 class Response : public Serializable
 {
 public:
-    Response();
+    Response(uint8_t id);
 
     static const uint8_t PACKET_TYPE_ID = 3;
 
     virtual uint8_t getPacketType() const override;
     virtual std::string getType() const = 0;
+
+    uint8_t getRequestID() const;
+
+private:
+    uint8_t request_id_;
 };
 
 }

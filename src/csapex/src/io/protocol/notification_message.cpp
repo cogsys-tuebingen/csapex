@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/serialization/broadcast_message_serializer.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <iostream>

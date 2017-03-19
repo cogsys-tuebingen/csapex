@@ -5,7 +5,7 @@
 #include <csapex/io/request_impl.hpp>
 #include <csapex/io/response_impl.hpp>
 #include <csapex/param/parameter.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/serialization_fwd.h>
 
 namespace csapex
 {
@@ -22,12 +22,17 @@ public:
     {
     public:
         ParameterRequest(const AUUID& id);
-        ParameterRequest();
+        ParameterRequest(uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
 
         virtual ResponsePtr execute(CsApexCore& core) const override;
+
+        std::string getType() const override
+        {
+            return "RequestParameter";
+        }
 
     private:
         AUUID id_;
@@ -37,13 +42,19 @@ public:
     class ParameterResponse : public ResponseImplementation<ParameterResponse>
     {
     public:
-        ParameterResponse(const param::ParameterConstPtr &parameter);
-        ParameterResponse();
+        ParameterResponse(const param::ParameterConstPtr &parameter, uint8_t request_id);
+        ParameterResponse(uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
 
         param::ParameterConstPtr getParameter() const;
+
+        std::string getType() const override
+        {
+            return "RequestParameter";
+        }
+
 
     private:
         param::ParameterConstPtr param_;

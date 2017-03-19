@@ -16,6 +16,7 @@ namespace csapex
 {
 FWD(Snippet)
 FWD(Serializable);
+FWD(SerializationBuffer);
 }
 
 

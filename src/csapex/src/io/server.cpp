@@ -7,6 +7,7 @@
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/io/request.h>
 #include <csapex/io/response.h>
+#include <csapex/io/feedback.h>
 
 /// SYSTEM
 #include <cstdlib>
@@ -90,7 +91,17 @@ void Server::handlePacket(const SessionPtr& session, const SerializableConstPtr&
         }
 
     } else if(RequestConstPtr request = std::dynamic_pointer_cast<Request const>(packet)) {
-        ResponseConstPtr response = request->execute(*core_);
+        SerializableConstPtr response;
+        try {
+            response = request->execute(*core_);
+
+        } catch(const std::exception& e) {
+            response = std::make_shared<Feedback>(std::string("Request has thrown an exception: ") + e.what(), request->getRequestID());
+
+        } catch(...) {
+            response = std::make_shared<Feedback>(std::string("Request has failed with unkown cause."), request->getRequestID());
+        }
+
         session->write(response);
 
     } else {

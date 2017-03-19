@@ -163,6 +163,7 @@ protected:
     EventPtr activation_event_;
     EventPtr deactivation_event_;
 
+    long guard_;
 };
 
 }

@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -130,25 +131,6 @@ void ValueParameter::doClone(const Parameter &other)
     }
 }
 
-void ValueParameter::doSerialize(YAML::Node& n) const
-{
-    if(value_.type() == typeid(int)) {
-        n["int"] = boost::any_cast<int> (value_);
-
-    } else if(value_.type() == typeid(double)) {
-        n["double"] = boost::any_cast<double> (value_);
-
-    } else if(value_.type() == typeid(bool)) {
-        n["bool"] = boost::any_cast<bool> (value_);
-
-    } else if(value_.type() == typeid(std::string)) {
-        n["string"] = boost::any_cast<std::string> (value_);
-
-    } else if(value_.type() == typeid(long)) {
-        n["long"] = boost::any_cast<long> (value_);
-    }
-}
-
 namespace {
 template <typename T>
 T __read(const YAML::Node& n) {
@@ -175,6 +157,96 @@ void ValueParameter::doDeserialize(const YAML::Node& n)
     }
 }
 
+
+void ValueParameter::doSerialize(YAML::Node& n) const
+{
+    if(value_.type() == typeid(int)) {
+        n["int"] = boost::any_cast<int> (value_);
+
+    } else if(value_.type() == typeid(double)) {
+        n["double"] = boost::any_cast<double> (value_);
+
+    } else if(value_.type() == typeid(bool)) {
+        n["bool"] = boost::any_cast<bool> (value_);
+
+    } else if(value_.type() == typeid(std::string)) {
+        n["string"] = boost::any_cast<std::string> (value_);
+
+    } else if(value_.type() == typeid(long)) {
+        n["long"] = boost::any_cast<long> (value_);
+    }
+}
+
+
+
+
+void ValueParameter::serialize(SerializationBuffer &data) const
+{
+    if(value_.type() == typeid(int)) {
+        data << (uint8_t) 0;
+        data << boost::any_cast<int> (value_);
+
+    } else if(value_.type() == typeid(double)) {
+        data << (uint8_t) 1;
+        data << boost::any_cast<double> (value_);
+
+    } else if(value_.type() == typeid(bool)) {
+        data << (uint8_t) 2;
+        data << boost::any_cast<bool> (value_);
+
+    } else if(value_.type() == typeid(std::string)) {
+        data << (uint8_t) 3;
+        data << boost::any_cast<std::string> (value_);
+
+    } else if(value_.type() == typeid(long)) {
+        data << (uint8_t) 4;
+        data << boost::any_cast<long> (value_);
+    }
+}
+
+void ValueParameter::deserialize(SerializationBuffer& data)
+{
+    uint8_t type;
+    data >> type;
+
+    switch(type) {
+    case 0:
+    {
+        int v;
+        data >> v;
+        value_ = v;
+    }
+        break;
+    case 1:
+    {
+        double v;
+        data >> v;
+        value_ = v;
+    }
+        break;
+    case 2:
+    {
+        bool v;
+        data >> v;
+        value_ = v;
+    }
+        break;
+    case 3:
+    {
+        std::string v;
+        data >> v;
+        value_ = v;
+    }
+        break;
+    case 4:
+    {
+        long v;
+        data >> v;
+        value_ = v;
+    }
+        break;
+    }
+}
 
 
 namespace csapex

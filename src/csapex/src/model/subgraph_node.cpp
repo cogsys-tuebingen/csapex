@@ -23,7 +23,9 @@ SubgraphNode::SubgraphNode()
       transition_relay_out_(new OutputTransition),
       is_subgraph_finished_(false),
       is_iterating_(false), has_sent_current_iteration_(false),
-      is_initialized_(false)
+      is_initialized_(false),
+
+      guard_(-1)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &SubgraphNode::subgraphHasProducedAllMessages));
     transition_relay_out_->messages_processed.connect(delegate::Delegate0<>(this, &SubgraphNode::currentIterationIsProcessed));
@@ -32,11 +34,14 @@ SubgraphNode::SubgraphNode()
 SubgraphNode::~SubgraphNode()
 {
     clear();
+    guard_ = 0xDEADBEEF;
 }
 
 NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
 {
+    apex_assert_hard(guard_ == -1);
     if(uuid.empty()) {
+        apex_assert_hard(node_handle_->guard_ == -1);
         return node_handle_;
     }
     return Graph::findNodeHandle(uuid);

@@ -200,6 +200,9 @@ private:
     Rate rate_;
 
     std::map<Connectable*, std::vector<slim_signal::Connection>> connections_;
+
+public:
+    long guard_;
 };
 
 }

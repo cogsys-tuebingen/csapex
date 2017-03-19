@@ -294,7 +294,6 @@ add_library(csapex SHARED
 
     src/core/settings.cpp
     src/core/settings/settings_local.cpp
-    src/core/settings/settings_remote.cpp
 
     src/command/command.cpp
     src/command/dispatcher.cpp
@@ -368,6 +367,7 @@ add_library(csapex SHARED
     src/serialization/snippet.cpp
     src/serialization/request_serializer.cpp
     src/serialization/broadcast_message_serializer.cpp
+    src/serialization/feedback_serializer.cpp
     src/serialization/parameter_serializer.cpp
     src/serialization/packet_serializer.cpp
 
@@ -387,6 +387,7 @@ add_library(csapex SHARED
     src/io/server.cpp
     src/io/request.cpp
     src/io/response.cpp
+    src/io/feedback.cpp
     src/io/broadcast_message.cpp
     src/io/session.cpp
 
@@ -485,6 +486,40 @@ target_link_libraries(csapex_command
 
 list(APPEND csapex_LIBRARIES csapex_command)
 
+
+
+
+file(GLOB_RECURSE csapex_remote_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS
+    include/csapex/core/*.h*
+    include/csapex/io/*.h*
+)
+
+add_library(csapex_remote SHARED
+    src/core/settings/settings_remote.cpp
+
+    ${csapex_remote_HEADERS}
+)
+
+generate_export_header(csapex_remote
+             BASE_NAME csapex_remote
+             EXPORT_MACRO_NAME CSAPEX_REMOTE_EXPORT
+             EXPORT_FILE_NAME csapex_remote_export.h
+             STATIC_DEFINE csapex_BUILT_AS_STATIC
+                         )
+target_link_libraries(csapex_remote
+    csapex_util
+    csapex_profiling
+    csapex_param
+    csapex_command
+    ${Boost_LIBRARIES}
+    ${YAML-CPP_LIBRARY}
+    ${TinyXML_LIBRARIES}
+    ${class_loader_LIBRARIES}
+    ${console_bridge_LIBRARIES}
+    ${Poco_LIBRARIES}
+)
+
+list(APPEND csapex_LIBRARIES csapex_remote)
 
 
 file(GLOB_RECURSE csapex_qt_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex/view/*.h*)

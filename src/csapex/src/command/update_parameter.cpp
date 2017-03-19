@@ -8,6 +8,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/core/settings.h>
+#include <csapex/core/csapex_core.h>
 
 /// SYSTEM
 #include <sstream>
@@ -69,46 +71,59 @@ std::string UpdateParameter::getDescription() const
 
 bool UpdateParameter::doExecute()
 {
-    UUID node_uuid = uuid.parentUUID();
-
-    NodeHandle* node_handle = getRoot()->getGraph()->findNodeHandle(node_uuid);
-    apex_assert_hard(node_handle);
-
-
-    NodePtr node = node_handle->getNode().lock();
-    apex_assert_hard(node);
-
-
     if(value.type() == typeid(int)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<int> (value));
+        setParameter(boost::any_cast<int> (value));
 
     } else if(value.type() == typeid(double)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<double> (value));
+        setParameter(boost::any_cast<double> (value));
 
     } else if(value.type() == typeid(bool)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<bool> (value));
+        setParameter(boost::any_cast<bool> (value));
 
     } else if(value.type() == typeid(std::string)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<std::string> (value));
+        setParameter(boost::any_cast<std::string> (value));
 
     } else if(value.type() == typeid(std::vector<int>)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<std::vector<int>> (value));
+        setParameter(boost::any_cast<std::vector<int>> (value));
 
     } else if(value.type() == typeid(std::pair<int, int>)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<std::pair<int, int>> (value));
+        setParameter(boost::any_cast<std::pair<int, int>> (value));
 
     } else if(value.type() == typeid(std::pair<double, double>)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<std::pair<double, double>> (value));
+        setParameter(boost::any_cast<std::pair<double, double>> (value));
 
     } else if(value.type() == typeid(std::pair<std::string, bool>)) {
-        node->setParameterLater(uuid.name(), boost::any_cast<std::pair<std::string, bool>> (value));
+        setParameter(boost::any_cast<std::pair<std::string, bool>> (value));
 
     } else {
         throw std::runtime_error(std::string("unsupported type: ") + value.type().name());
     }
 
-
     return true;
+}
+
+
+template <typename T>
+void UpdateParameter::setParameter(const T& value)
+{
+    std::string full_name = uuid.getFullName();
+
+    if(full_name.at(0) == ':') {
+        // setting
+        core_->getSettings().set(full_name.substr(1), value);
+
+    } else {
+        UUID node_uuid = uuid.parentUUID();
+
+        NodeHandle* node_handle = getRoot()->getGraph()->findNodeHandle(node_uuid);
+        apex_assert_hard(node_handle);
+
+
+        NodePtr node = node_handle->getNode().lock();
+        apex_assert_hard(node);
+
+        node->setParameterLater(uuid.name(), value);
+    }
 }
 
 bool UpdateParameter::doUndo()

@@ -2,13 +2,14 @@
 #define SETTINGS_REMOTE_H
 
 /// COMPONENT
+#include <csapex_remote_export.h>
 #include <csapex/core/settings.h>
 #include <csapex/io/io_fwd.h>
 
 namespace csapex
 {
 
-class SettingsRemote : public Settings
+class CSAPEX_REMOTE_EXPORT SettingsRemote : public Settings
 {
 public:
     SettingsRemote(SessionPtr session);

@@ -18,6 +18,7 @@ FWD(Session);
 FWD(BroadcastMessage);
 FWD(Request);
 FWD(Response);
+FWD(Feedback);
 }
 
 #undef FWD

@@ -7,6 +7,8 @@
 #include <csapex/command/command.h>
 #include <csapex/io/request.h>
 #include <csapex/io/response.h>
+#include <csapex/io/feedback.h>
+#include <csapex/serialization/serialization_buffer.h>
 #include <csapex/serialization/packet_serializer.h>
 
 /// SYSTEM
@@ -17,9 +19,9 @@ using boost::asio::ip::tcp;
 
 Session::Session(tcp::socket socket)
     : socket_(std::move(socket)),
+      next_request_id_(1),
       live_(false)
 {
-    data_.resize(max_length);
 }
 
 Session::~Session()
@@ -40,24 +42,37 @@ void Session::stop()
 {
     live_ = false;
     stopped();
+
+    std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
+    for(auto pair : open_requests_) {
+        std::promise<ResponseConstPtr>* open_requests = pair.second;
+        open_requests->set_value(nullptr);
+    }
 }
 
 
 ResponseConstPtr Session::sendRequest(RequestConstPtr request)
 {
-    std::cerr << "sending request" << std::endl;;
-    write(request);
-    std::cerr << "waiting for answer" << std::endl;
-    SerializableConstPtr result = read();
+    request->overwriteRequestID(next_request_id_++);
 
-    std::cerr << "got resonse" << std::endl;;
-    if(ResponseConstPtr response = std::dynamic_pointer_cast<Response const>(result)) {
+    write(request);
+
+    std::promise<ResponseConstPtr> promise;
+
+    {
+        std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
+        open_requests_[request->getRequestID()] = &promise;
+    }
+
+    std::future<ResponseConstPtr> future = promise.get_future();
+
+    future.wait();
+
+    if(ResponseConstPtr response = future.get()) {
         return response;
     }
 
-//    TODO: don't  block in write and read, rather use ids for messages
-//            -> currently notifications can be received in between request and response!
-    throw std::logic_error("request didn't return a response.");
+    return nullptr;
 }
 
 void Session::write(const SerializableConstPtr &packet)
@@ -68,7 +83,7 @@ void Session::write(const SerializableConstPtr &packet)
 
 void Session::write(const std::string &message)
 {
-    write_synch(message);
+    write(std::make_shared<Feedback>(message));
 }
 
 void Session::read_async()
@@ -77,14 +92,7 @@ void Session::read_async()
         return;
     }
 
-
     std::shared_ptr<SerializationBuffer> message_data = std::make_shared<SerializationBuffer>();
-//    std::cerr << "async read" << std::endl;
-//    size_t reply_length = boost::asio::read(s, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH));
-//    std::cerr << reply_length << std::endl;
-
-    //s.async_read_some(boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH),
-      //                      [&s, message_data](boost::system::error_code ec, std::size_t reply_length){
     boost::asio::async_read(socket_, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH),
                             [this, message_data](boost::system::error_code ec, std::size_t reply_length){
         if ((ec  == boost::asio::error::eof) || (ec == boost::asio::error::connection_reset)) {
@@ -96,47 +104,51 @@ void Session::read_async()
             if(reply_length == SerializationBuffer::HEADER_LENGTH) {
                 uint8_t message_length(message_data->at(0));
 
-                std::cerr << "next message: " << (int) message_length << std::endl;
+                if(message_length <= SerializationBuffer::HEADER_LENGTH) {
+                    std::cerr << "got illegal message of length " << (int) message_length << std::endl;
 
-                message_data->resize(message_length, ' ');
-                reply_length = boost::asio::read(socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
-                apex_assert_equal_hard((int) reply_length, ((int) (message_length - SerializationBuffer::HEADER_LENGTH)));
+                } else {
+                    message_data->resize(message_length, ' ');
+                    reply_length = boost::asio::read(socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
+                    apex_assert_equal_hard((int) reply_length, ((int) (message_length - SerializationBuffer::HEADER_LENGTH)));
 
-                SerializablePtr serial = PacketSerializer::deserializePacket(*message_data);
+                    SerializablePtr serial = PacketSerializer::deserializePacket(*message_data);
 
-                if(serial) {
-                    packet_received(serial);
+                    if(serial) {
+                        if(FeedbackConstPtr feedback = std::dynamic_pointer_cast<Feedback const>(serial)) {
+                            std::cerr << feedback->getMessage() << std::endl;
+                            if(feedback->getRequestID() != 0) {
+                                std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
+                                auto it = open_requests_.find(feedback->getRequestID());
+                                if(it != open_requests_.end()) {
+                                    std::promise<ResponseConstPtr>* promise = it->second;
+                                    promise->set_value(nullptr);
+                                    open_requests_.erase(it);
+                                }
+                            }
+
+                        } else if(ResponseConstPtr response = std::dynamic_pointer_cast<Response const>(serial)) {
+                            std::cerr << "got response #" << response->getRequestID() << std::endl;
+
+                            std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
+                            auto it = open_requests_.find(response->getRequestID());
+                            if(it != open_requests_.end()) {
+                                std::promise<ResponseConstPtr>* promise = it->second;
+                                promise->set_value(response);
+                                open_requests_.erase(it);
+                            }
+                        } else {
+                            packet_received(serial);
+                        }
+                    }
                 }
+
+            } else {
+                std::cerr << "got illegal header of length " << (int) reply_length << std::endl;
             }
         }
         read_async();
     });
-}
-
-
-SerializableConstPtr Session::read()
-{
-    apex_assert_hard(live_);
-
-    std::shared_ptr<SerializationBuffer> message_data = std::make_shared<SerializationBuffer>();
-
-    // TODO: implement timeout
-    boost::system::error_code ec;
-    while (!ec) {
-        size_t reply_length = boost::asio::read(socket_, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH), ec);
-
-        if(reply_length > 0) {
-            uint8_t message_length(message_data->at(0));
-
-            message_data->resize(message_length, ' ');
-            reply_length = boost::asio::read(socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
-            apex_assert_equal_hard((int) reply_length, ((int) (message_length - SerializationBuffer::HEADER_LENGTH)));
-
-            return PacketSerializer::deserializePacket(*message_data);
-        }
-    }
-
-    return nullptr;
 }
 
 void Session::write_packet(SerializationBuffer &buffer)
@@ -158,43 +170,4 @@ void Session::write_packet(SerializationBuffer &buffer)
         std::cerr << "the session has crashed with an unknown cause." << std::endl;
         stop();
     }
-}
-
-
-void Session::write_synch(const std::string& message)
-{
-    std::cerr << "writing " << message << std::endl;
-    boost::system::error_code ignored_error;
-
-    char size_msg[] = { (char) message.size() };
-    boost::asio::write(socket_, boost::asio::buffer(size_msg),
-                       boost::asio::transfer_all(), ignored_error);
-
-    boost::asio::write(socket_, boost::asio::buffer(message),
-                       boost::asio::transfer_all(), ignored_error);
-}
-
-void Session::write_asynch(const std::string& message)
-{
-    if(!live_) {
-        return;
-    }
-
-    auto self(shared_from_this());
-    char size_msg[] = { (char) message.size() };
-    boost::asio::async_write(socket_, boost::asio::buffer(size_msg, 1),
-                             [this, message, self](boost::system::error_code ec, std::size_t /*length*/)
-    {
-        if (!ec)
-        {
-            boost::asio::async_write(socket_, boost::asio::buffer(message.data(), message.size()),
-                                     [this, self](boost::system::error_code ec, std::size_t /*length*/)
-            {
-                if (!ec)
-                {
-                    //            do_read();
-                }
-            });
-        }
-    });
 }

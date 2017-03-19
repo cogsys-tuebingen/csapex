@@ -596,6 +596,7 @@ NodeHandle* Graph::findNodeHandle(const UUID& uuid) const
 {
     NodeHandle* node_handle = findNodeHandleNoThrow(uuid);
     if(node_handle) {
+        apex_assert_hard(node_handle->guard_ == -1);
         return node_handle;
     }
     throw NodeHandleNotFoundException(uuid.getFullName());

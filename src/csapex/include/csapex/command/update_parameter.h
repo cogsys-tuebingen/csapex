@@ -37,6 +37,10 @@ protected:
     bool doRedo() override;
 
 private:
+    template <typename T>
+    void setParameter(const T& value);
+
+private:
     AUUID uuid;
 
     boost::any value;

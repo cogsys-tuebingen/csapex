@@ -17,10 +17,10 @@ public:
     virtual ~RequestSerializerInterface();
 
     virtual void serializeRequest(const RequestConstPtr& packet, SerializationBuffer &data) = 0;
-    virtual RequestPtr deserializeRequest(SerializationBuffer& data) = 0;
+    virtual RequestPtr deserializeRequest(SerializationBuffer& data, uint8_t request_id) = 0;
 
     virtual void serializeResponse(const ResponseConstPtr& packet, SerializationBuffer &data) = 0;
-    virtual ResponsePtr deserializeResponse(SerializationBuffer& data) = 0;
+    virtual ResponsePtr deserializeResponse(SerializationBuffer& data, uint8_t request_id) = 0;
 };
 
 

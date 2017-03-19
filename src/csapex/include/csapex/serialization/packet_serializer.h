@@ -5,7 +5,6 @@
 #include <csapex/io/io_fwd.h>
 #include <csapex/utility/singleton.hpp>
 #include <csapex/serialization/serialization_fwd.h>
-#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <vector>

@@ -57,7 +57,7 @@ void Node::initialize(NodeHandle *node_handle)
 
 UUID Node::getUUID() const
 {
-    return node_handle_->getUUID();
+    return node_handle_ ? node_handle_->getUUID() : UUID::NONE;
 }
 
 void Node::setupParameters(Parameterizable& )

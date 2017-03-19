@@ -34,7 +34,9 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       transition_in_(transition_in),
       transition_out_(transition_out),
       
-      uuid_provider_(uuid_provider)
+      uuid_provider_(uuid_provider),
+
+      guard_(-1)
 {
     node_->initialize(this);
     
@@ -105,6 +107,10 @@ NodeHandle::~NodeHandle()
     }
 
     node_removed();
+
+    node_.reset();
+
+    guard_ = 0xDEADBEEF;
 }
 
 void NodeHandle::updateLoggerLevel()
@@ -175,11 +181,13 @@ NodeWeakPtr NodeHandle::getNode() const
 
 void NodeHandle::setVertex(graph::VertexWeakPtr vertex)
 {
+    apex_assert_hard(guard_ == -1);
     vertex_ = vertex;
 }
 
 graph::VertexPtr NodeHandle::getVertex() const
 {
+    apex_assert_hard(guard_ == -1);
     return vertex_.lock();
 }
 
