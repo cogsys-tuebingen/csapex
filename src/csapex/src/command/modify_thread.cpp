@@ -18,13 +18,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 ModifyThread::ModifyThread(int thread_id, const std::string &name)
-    : Command(AUUID()), id(thread_id), name(name)
+    : id(thread_id), name(name)
 {
-}
-
-std::string ModifyThread::getType() const
-{
-    return "ModifyThread";
 }
 
 std::string ModifyThread::getDescription() const

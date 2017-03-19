@@ -2,13 +2,13 @@
 #define TRIGGER_PARAM_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT TriggerParameter : public Parameter
+class CSAPEX_PARAM_EXPORT TriggerParameter : public ParameterImplementation<TriggerParameter, 0x007>
 {
     friend class ParameterFactory;
 
@@ -24,7 +24,6 @@ public:
     explicit TriggerParameter(const std::string& name, const ParameterDescription& description);
     virtual ~TriggerParameter();
 
-    virtual int ID() const override { return 0x007; }
     virtual std::string TYPE() const override { return "trigger"; }
 
     void trigger();

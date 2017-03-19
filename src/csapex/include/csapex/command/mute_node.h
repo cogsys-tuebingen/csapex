@@ -2,7 +2,7 @@
 #define MUTE_NODE_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -10,11 +10,13 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT MuteNode : public Command
+class CSAPEX_COMMAND_EXPORT MuteNode : public CommandImplementation<MuteNode>
 {
+    COMMAND_HEADER(MuteNode);
+
+public:
     MuteNode(const AUUID &graph_uuid, const UUID& node, bool muted);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

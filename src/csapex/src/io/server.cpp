@@ -4,6 +4,9 @@
 /// COMPONENT
 #include <csapex/core/csapex_core.h>
 #include <csapex/io/session.h>
+#include <csapex/io/protcol/notification_message.h>
+#include <csapex/io/request.h>
+#include <csapex/io/response.h>
 
 /// SYSTEM
 #include <cstdlib>
@@ -41,7 +44,7 @@ void Server::do_accept()
 
         if (!ec)
         {
-            SessionPtr session = std::make_shared<Session>(std::move(socket_), core_);
+            SessionPtr session = std::make_shared<Session>(std::move(socket_));
 
             SessionWeakPtr w_session = session;
             session->stopped.connect([this, w_session]() {
@@ -49,6 +52,19 @@ void Server::do_accept()
                 auto pos = std::find(sessions_.begin(), sessions_.end(), w_session.lock());
                 if(pos != sessions_.end()) {
                     sessions_.erase(pos);
+                }
+            });
+
+
+            observe(core_->notification, [this, w_session](const Notification& notification) {
+                if(SessionPtr session = w_session.lock()) {
+                    session->write(std::make_shared<NotificationMessage>(notification));
+                }
+            });
+
+            observe(session->packet_received, [this, w_session](const SerializableConstPtr& packet){
+                if(SessionPtr session = w_session.lock()) {
+                    handlePacket(session, packet);
                 }
             });
 
@@ -60,6 +76,26 @@ void Server::do_accept()
 
         do_accept();
     });
+}
+
+
+void Server::handlePacket(const SessionPtr& session, const SerializableConstPtr& packet)
+{
+    if(CommandConstPtr cmd = std::dynamic_pointer_cast<Command const>(packet)) {
+        if(!cmd) {
+            session->write("unknown command received");
+        } else {
+            session->write(cmd->getDescription());
+            core_->getCommandDispatcher()->execute(cmd->clone<Command>());
+        }
+
+    } else if(RequestConstPtr request = std::dynamic_pointer_cast<Request const>(packet)) {
+        ResponseConstPtr response = request->execute(*core_);
+        session->write(response);
+
+    } else {
+        session->write("packet with unknown type received");
+    }
 }
 
 void Server::spin()
@@ -98,6 +134,8 @@ void Server::stop()
         for(SessionPtr session : sessions_) {
             session->stop();
         }
+        sessions_.clear();
+
         io_service_.stop();
 
         if(std::this_thread::get_id() != worker_thread_.get_id()) {

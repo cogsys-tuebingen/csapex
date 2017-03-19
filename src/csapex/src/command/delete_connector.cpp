@@ -14,13 +14,8 @@ using namespace csapex;
 using namespace command;
 
 DeleteConnector::DeleteConnector(const AUUID& parent_uuid, Connectable *_c)
-    : Command(parent_uuid), in(_c->canInput()), c_uuid(_c->getUUID())
+    : CommandImplementation(parent_uuid), in(_c->canInput()), c_uuid(_c->getUUID())
 {
-}
-
-std::string DeleteConnector::getType() const
-{
-    return "DeleteConnector";
 }
 
 std::string DeleteConnector::getDescription() const

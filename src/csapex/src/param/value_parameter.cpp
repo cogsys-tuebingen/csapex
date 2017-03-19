@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/param/value_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 
@@ -8,12 +11,12 @@ using namespace csapex;
 using namespace param;
 
 ValueParameter::ValueParameter()
-    : Parameter("noname", ParameterDescription())
+    : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
 ValueParameter::ValueParameter(const std::string &name, const ParameterDescription &description)
-    : Parameter(name, description)
+    : ParameterImplementation(name, description)
 {
 }
 
@@ -171,3 +174,28 @@ void ValueParameter::doDeserialize(const YAML::Node& n)
         value_ = __read<long>(n["long"]);
     }
 }
+
+
+
+namespace csapex
+{
+namespace param
+{
+
+class ValueParameterSerializer : public ParameterSerializerInterface
+{
+    virtual void serialize(const ParameterConstPtr& packet, SerializationBuffer &data) const override
+    {
+        packet->serialize(data);
+    }
+    virtual ParameterPtr deserialize(SerializationBuffer& data) override
+    {
+        auto result = std::make_shared<ValueParameter>();
+        result->deserialize(data);
+        return result;
+    }
+};
+}
+ParameterSerializerRegistered<param::ValueParameterSerializer> g_register_value_parameter_serializer(ValueParameter::NUMERICAL_ID);
+}
+

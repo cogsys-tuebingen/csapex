@@ -13,13 +13,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 MoveBox::MoveBox(const AUUID& graph_uuid, const UUID& node_uuid, Point from, Point to)
-    : Command(graph_uuid), from(from), to(to), box_uuid(node_uuid)
+    : CommandImplementation(graph_uuid), from(from), to(to), box_uuid(node_uuid)
 {
-}
-
-std::string MoveBox::getType() const
-{
-    return "MoveBox";
 }
 
 std::string MoveBox::getDescription() const

@@ -2,13 +2,13 @@
 #define COLOR_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/value_parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT ColorParameter : public Parameter
+class CSAPEX_PARAM_EXPORT ColorParameter : public ParameterImplementation<ColorParameter, 0x002>
 {
     friend class ParameterFactory;
 
@@ -21,7 +21,6 @@ public:
 
     virtual const std::type_info &type() const override;
 
-    virtual int ID() const override { return 0x002; }
     virtual std::string TYPE() const override { return "color"; }
 
     virtual std::string toStringImpl() const override;

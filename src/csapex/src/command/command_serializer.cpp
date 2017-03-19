@@ -2,7 +2,7 @@
 #include <csapex/command/command_serializer.h>
 
 /// PROJECT
-#include <csapex/io/packet_serializer.h>
+#include <csapex/serialization/packet_serializer.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -18,9 +18,9 @@ CommandSerializerInterface::~CommandSerializerInterface()
 
 }
 
-void CommandSerializer::serialize(const SerializablePtr& packet, SerializationBuffer& data)
+void CommandSerializer::serialize(const SerializableConstPtr& packet, SerializationBuffer& data)
 {
-    if(const CommandPtr& cmd = std::dynamic_pointer_cast<Command>(packet)) {
+    if(const CommandConstPtr& cmd = std::dynamic_pointer_cast<Command const>(packet)) {
         std::cerr << "serializing command" << std::endl;
         std::string type = cmd->getType();
         auto it = serializers_.find(type);

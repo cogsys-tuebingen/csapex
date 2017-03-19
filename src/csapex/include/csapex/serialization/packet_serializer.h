@@ -19,7 +19,7 @@ class Serializer
 public:
     virtual ~Serializer();
 
-    virtual void serialize(const SerializablePtr& packet, SerializationBuffer &data) = 0;
+    virtual void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) = 0;
     virtual SerializablePtr deserialize(SerializationBuffer& data) = 0;
 };
 
@@ -36,13 +36,13 @@ class PacketSerializer : public Singleton<PacketSerializer>, public Serializer
     friend class Singleton<PacketSerializer>;
 
 public:
-    static SerializationBuffer serializePacket(const SerializablePtr& packet);
+    static SerializationBuffer serializePacket(const SerializableConstPtr& packet);
     static SerializablePtr deserializePacket(SerializationBuffer &serial);
     static void registerSerializer(uint8_t type, Serializer* serializer);
 
 public:
-    void serialize(const SerializablePtr& packet, SerializationBuffer &data);
-    SerializablePtr deserialize(SerializationBuffer &data);
+    void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override;
+    SerializablePtr deserialize(SerializationBuffer &data) override;
 
 
 private:

@@ -10,12 +10,12 @@ using namespace csapex;
 using namespace param;
 
 IntervalParameter::IntervalParameter()
-    : Parameter("noname", ParameterDescription())
+    : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
 IntervalParameter::IntervalParameter(const std::string &name, const ParameterDescription& description)
-    : Parameter(name, description)
+    : ParameterImplementation(name, description)
 {
 }
 

@@ -2,7 +2,7 @@
 #define QUIT_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/assert.h>
 
@@ -14,15 +14,16 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT Quit : public Command
+struct CSAPEX_COMMAND_EXPORT Quit : public CommandImplementation<Quit>
 {
+    COMMAND_HEADER_NO_DEFAULT(Quit);
+
 public:
     typedef std::shared_ptr<Quit> Ptr;
 
 public:
     Quit();
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
     virtual bool isUndoable() const override;

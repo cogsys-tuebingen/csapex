@@ -2,8 +2,10 @@
 #define SERVER_H
 
 /// PROJECT
+#include <csapex/model/observer.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/io/io_fwd.h>
+#include <csapex/serialization/serialization_fwd.h>
 
 /// SYSTEM
 #include <boost/asio.hpp>
@@ -13,7 +15,7 @@
 namespace csapex
 {
 
-class Server
+class Server : public Observer
 {
 public:
     Server(CsApexCorePtr core, bool spin_thread = true);
@@ -25,6 +27,8 @@ public:
 private:
     void spin();
     void do_accept();
+
+    void handlePacket(const SessionPtr &session, const SerializableConstPtr &packet);
 
     boost::asio::io_service io_service_;
     boost::asio::ip::tcp::acceptor acceptor_;

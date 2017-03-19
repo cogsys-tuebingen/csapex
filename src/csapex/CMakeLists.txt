@@ -290,8 +290,11 @@ add_library(csapex SHARED
     src/core/core_plugin.cpp
     src/core/bootstrap_plugin.cpp
     src/core/graphio.cpp
-    src/core/settings.cpp
     src/core/exception_handler.cpp
+
+    src/core/settings.cpp
+    src/core/settings/settings_local.cpp
+    src/core/settings/settings_remote.cpp
 
     src/command/command.cpp
     src/command/dispatcher.cpp
@@ -363,6 +366,10 @@ add_library(csapex SHARED
     src/serialization/message_serializer.cpp
     src/serialization/node_serializer.cpp
     src/serialization/snippet.cpp
+    src/serialization/request_serializer.cpp
+    src/serialization/broadcast_message_serializer.cpp
+    src/serialization/parameter_serializer.cpp
+    src/serialization/packet_serializer.cpp
 
     src/plugin/plugin_locator.cpp
 
@@ -378,13 +385,14 @@ add_library(csapex SHARED
     src/signal/event.cpp
 
     src/io/server.cpp
+    src/io/request.cpp
+    src/io/response.cpp
     src/io/broadcast_message.cpp
-    src/io/broadcast_message_serializer.cpp
     src/io/session.cpp
-    src/io/packet_serializer.cpp
 
     src/io/protocol/notification_message.cpp
     src/io/protocol/tick_message.cpp
+    src/io/protocol/request_parameter.cpp
 
     ${csapex_HEADERS}
 )

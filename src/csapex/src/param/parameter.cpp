@@ -34,6 +34,22 @@ Parameter::~Parameter()
     destroyed(this);
 }
 
+uint8_t Parameter::getPacketType() const
+{
+    return PACKET_TYPE_ID;
+}
+
+
+void Parameter::serialize(SerializationBuffer &data) const
+{
+
+}
+
+void Parameter::deserialize(SerializationBuffer& data)
+{
+
+}
+
 void Parameter::setUUID(const UUID& uuid)
 {
     uuid_ = uuid;
@@ -144,7 +160,7 @@ std::string Parameter::toStringImpl() const
     throw std::logic_error("not implemented");
 }
 
-void Parameter::serialize(YAML::Node &n) const
+void Parameter::serialize_yaml(YAML::Node &n) const
 {
     n["type"] = TYPE();
     n["name"] = name();
@@ -165,7 +181,7 @@ void Parameter::serialize(YAML::Node &n) const
     }
 }
 
-void Parameter::deserialize(const YAML::Node &n)
+void Parameter::deserialize_yaml(const YAML::Node &n)
 {
     if(!n["name"].IsDefined()) {
         return;
@@ -202,7 +218,14 @@ void Parameter::setValueFrom(const Parameter &other)
     doSetValueFrom(other);
 }
 
-void Parameter::clone(const Parameter &other)
+std::shared_ptr<Clonable> Parameter::cloneRaw() const
+{
+    auto res = std::dynamic_pointer_cast<Parameter>(makeEmptyClone());
+    res->cloneFrom(*this);
+    return res;
+}
+
+void Parameter::cloneFrom(const Parameter &other)
 {
     name_ = other.name_;
     description_ = other.description_;

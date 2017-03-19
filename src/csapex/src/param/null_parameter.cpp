@@ -8,13 +8,13 @@ using namespace csapex;
 using namespace param;
 
 NullParameter::NullParameter()
-    : Parameter("null", ParameterDescription())
+    : ParameterImplementation("null", ParameterDescription())
 {
 }
 
 
 NullParameter::NullParameter(const std::string &name, const ParameterDescription& description)
-    : Parameter(name, description)
+    : ParameterImplementation(name, description)
 {
 }
 

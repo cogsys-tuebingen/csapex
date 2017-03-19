@@ -2,7 +2,7 @@
 #define UPDATE_PARAMETER_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/assert.h>
 
@@ -14,17 +14,19 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT UpdateParameter : public Command
+class CSAPEX_COMMAND_EXPORT UpdateParameter : public CommandImplementation<UpdateParameter>
 {
+    COMMAND_HEADER(UpdateParameter);
+
+public:
     template <typename T>
     explicit UpdateParameter(const UUID &parameter_uuid, const T& value)
-        : Command(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()),
+        : CommandImplementation(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()),
           value(value)
     {
         apex_assert(!parameter_uuid.empty());
     }
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
     virtual bool isUndoable() const override;

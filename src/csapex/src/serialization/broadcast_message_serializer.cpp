@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/io/broadcast_message_serializer.h>
+#include <csapex/serialization/broadcast_message_serializer.h>
 
 /// PROJECT
-#include <csapex/io/packet_serializer.h>
+#include <csapex/serialization/packet_serializer.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -18,9 +18,9 @@ BroadcastMessageSerializerInterface::~BroadcastMessageSerializerInterface()
 
 }
 
-void BroadcastMessageSerializer::serialize(const SerializablePtr& packet, SerializationBuffer& data)
+void BroadcastMessageSerializer::serialize(const SerializableConstPtr &packet, SerializationBuffer& data)
 {
-    if(const BroadcastMessagePtr& cmd = std::dynamic_pointer_cast<BroadcastMessage>(packet)) {
+    if(const BroadcastMessageConstPtr& cmd = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
 //        std::cerr << "serializing BroadcastMessage" << std::endl;
         std::string type = cmd->getType();
         auto it = serializers_.find(type);

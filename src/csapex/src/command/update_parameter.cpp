@@ -25,11 +25,6 @@ bool UpdateParameter::isUndoable() const
     return false;
 }
 
-std::string UpdateParameter::getType() const
-{
-    return "UpdateParameter";
-}
-
 std::string UpdateParameter::getDescription() const
 {
     std::stringstream ss;

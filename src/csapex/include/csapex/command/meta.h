@@ -2,7 +2,7 @@
 #define COMMAND_META_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 
 /// SYSTEM
 #include <vector>
@@ -13,8 +13,10 @@ namespace csapex
 namespace command
 {
 
-class CSAPEX_COMMAND_EXPORT Meta : public Command
+class CSAPEX_COMMAND_EXPORT Meta : public CommandImplementation<Meta>
 {
+    COMMAND_HEADER(Meta);
+
 public:
     typedef std::shared_ptr<Meta> Ptr;
 
@@ -27,6 +29,7 @@ public:
     virtual void init(GraphFacade* root, CsApexCore& core) override;
 
 protected:
+
     bool doExecute() override;
     bool doUndo() override;
     bool doRedo() override;

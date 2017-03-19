@@ -9,12 +9,12 @@ using namespace csapex;
 using namespace param;
 
 OutputTextParameter::OutputTextParameter()
-    : Parameter("noname", ParameterDescription())
+    : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
 OutputTextParameter::OutputTextParameter(const std::string &name, const ParameterDescription& description)
-    : Parameter(name, description)
+    : ParameterImplementation(name, description)
 {
 }
 

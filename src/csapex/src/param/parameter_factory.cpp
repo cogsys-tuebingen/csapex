@@ -59,7 +59,7 @@ ParameterBuilder ParameterFactory::clone(const Parameter* param)
     std::string type = param->TYPE();
     ParameterBuilder r = makeEmpty(type);
     ParameterPtr p = r.build();
-    p->clone(*param);
+    p->cloneFrom(*param);
     return r;
 }
 ParameterBuilder ParameterFactory::clone(const Parameter& param)

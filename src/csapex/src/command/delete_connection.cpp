@@ -30,11 +30,6 @@ DeleteConnection::DeleteConnection(const AUUID &parent_uuid, Connectable* a, Con
     }
 }
 
-std::string DeleteConnection::getType() const
-{
-    return "DeleteConnection";
-}
-
 std::string DeleteConnection::getDescription() const
 {
     return std::string("deleted connection between ") + from_uuid.getFullName() + " and " + to_uuid.getFullName();

@@ -16,6 +16,8 @@ namespace command
 {
 class CSAPEX_COMMAND_EXPORT DeleteNode : public Meta
 {
+    COMMAND_HEADER(DeleteNode);
+
 public:
     DeleteNode(const AUUID &graph_uuid, const UUID &uuid);
 
@@ -24,7 +26,6 @@ protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

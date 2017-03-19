@@ -17,13 +17,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 SetLoggerLevel::SetLoggerLevel(const AUUID& parent_uuid, const UUID &node, int level)
-    : Command(parent_uuid), uuid(node), level(level)
+    : CommandImplementation(parent_uuid), uuid(node), level(level)
 {
-}
-
-std::string SetLoggerLevel::getType() const
-{
-    return "SetLoggerLevel";
 }
 
 std::string SetLoggerLevel::getDescription() const

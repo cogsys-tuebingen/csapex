@@ -13,7 +13,7 @@ namespace csapex
 class BroadcastMessage : public Serializable
 {
 public:
-    static const uint8_t PACKET_TYPE_ID = 3;
+    static const uint8_t PACKET_TYPE_ID = 5;
 
     virtual uint8_t getPacketType() const override;
     virtual std::string getType() const = 0;

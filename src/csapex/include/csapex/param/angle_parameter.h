@@ -2,7 +2,7 @@
 #define ANGLE_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/value_parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 /// SYSTEM
@@ -13,7 +13,7 @@ namespace csapex {
 namespace param {
 
 
-class CSAPEX_PARAM_EXPORT AngleParameter : public Parameter
+class CSAPEX_PARAM_EXPORT AngleParameter : public ParameterImplementation<AngleParameter, 0x00B>
 {
     friend class ParameterFactory;
 
@@ -26,7 +26,6 @@ public:
 
     virtual const std::type_info &type() const override;
 
-    virtual int ID() const override { return 0x00B; }
     virtual std::string TYPE() const override { return "angle"; }
 
     virtual std::string toStringImpl() const override;

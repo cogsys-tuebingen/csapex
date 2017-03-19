@@ -64,10 +64,12 @@ public:
     virtual uint8_t getPacketType() const override;
 
 
-    virtual void serialize(SerializationBuffer &data);
-    virtual void deserialize(SerializationBuffer& data);
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(SerializationBuffer& data) override;
 
 protected:
+    Command();
+
     bool executeCommand(CommandPtr cmd);
     bool undoCommand(CommandPtr cmd);
     bool redoCommand(CommandPtr cmd);

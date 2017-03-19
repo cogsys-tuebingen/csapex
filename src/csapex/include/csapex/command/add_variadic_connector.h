@@ -2,7 +2,7 @@
 #define add_variadic_connector_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/model/subgraph_node.h>
@@ -13,8 +13,10 @@ namespace csapex
 namespace command
 {
 
-class CSAPEX_COMMAND_EXPORT AddVariadicConnector : public Command
+class CSAPEX_COMMAND_EXPORT AddVariadicConnector : public CommandImplementation<AddVariadicConnector>
 {
+    COMMAND_HEADER(AddVariadicConnector);
+
 public:
     AddVariadicConnector(const AUUID &graph_id, const AUUID &node, const ConnectorType &connector_type, const TokenDataConstPtr& type, const std::string& label);
     RelayMapping getMap() const;
@@ -27,7 +29,6 @@ protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 

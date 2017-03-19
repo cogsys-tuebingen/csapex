@@ -3,19 +3,20 @@
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <boost/any.hpp>
 
 using namespace csapex;
 using namespace param;
 
 ColorParameter::ColorParameter()
-    : Parameter("color", ParameterDescription())
+    : ParameterImplementation("color", ParameterDescription())
 {
     def_.resize(3);
     colors_.resize(3);
 }
 
 ColorParameter::ColorParameter(const std::string &name, const ParameterDescription& description, int r, int g, int b)
-    : Parameter(name, description)
+    : ParameterImplementation(name, description)
 {
     def_.resize(3);
     def_[0] = r;

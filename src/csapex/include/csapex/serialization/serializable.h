@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/serialization_buffer.h>
+#include <csapex/model/clonable.h>
 
 /// SYSTEM
 #include <inttypes.h>
@@ -11,14 +12,14 @@
 namespace csapex
 {
 
-class Serializable
+class Serializable : public Clonable
 {
 public:
     virtual ~Serializable();
 
     virtual uint8_t getPacketType() const = 0;
 
-    virtual void serialize(SerializationBuffer &data) = 0;
+    virtual void serialize(SerializationBuffer &data) const = 0;
     virtual void deserialize(SerializationBuffer& data) = 0;
 };
 

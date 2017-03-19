@@ -3,12 +3,12 @@
 
 /// PROJECT
 #include <csapex/param/parameter.h>
-#include <csapex/param/value_parameter.h>
 #include <csapex/csapex_export.h>
+#include <csapex/param/value_parameter.h>
+#include <csapex/utility/slim_signal.h>
 
 /// SYSTEM
 #include <string>
-#include <csapex/utility/slim_signal.h>
 
 namespace csapex
 {
@@ -33,72 +33,79 @@ public:
 
 
 public:
-    static Settings NoSettings;
+    Settings();
+    virtual ~Settings();
 
-    Settings(bool load_from_config = true);
+    virtual bool isQuiet() const = 0;
+    virtual void setQuiet(bool quiet) = 0;
 
-    bool isQuiet() const;
-    void setQuiet(bool quiet);
+    virtual bool knows(const std::string& name) const = 0;
 
-    bool knows(const std::string& name) const;
+    virtual void add(csapex::param::Parameter::Ptr p, bool persistent) = 0;
+    virtual csapex::param::ParameterPtr get(const std::string& name) const = 0;
+    virtual csapex::param::ParameterPtr getNoThrow(const std::string& name) const = 0;
+
+    virtual void addTemporary(csapex::param::Parameter::Ptr p) = 0;
+    virtual void addPersistent(csapex::param::Parameter::Ptr p) = 0;
+
+    virtual void save() = 0;
+    virtual void load() = 0;
+
+
 
     template <typename T>
     T get(const std::string& name) const
     {
-        auto pos = settings_.find(name);
-        if(pos == settings_.end()) {
+        auto param = getNoThrow(name);
+        if(!param) {
             throw std::runtime_error(std::string("settings.get: unknown parameter '") + name + "'");
         }
 
-        const Entry& entry = pos->second;
-        return entry.parameter->as<T>();
+        return param->as<T>();
     }
 
     template <typename T>
     T get(const std::string& name, T def)
     {
-        auto pos = settings_.find(name);
-        if(pos == settings_.end()) {
+        auto param = getNoThrow(name);
+        if(!param) {
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(def);
             addTemporary(p);
-            settingsChanged(name);
             return def;
         }
 
-        Entry& entry = pos->second;
-        return entry.parameter->as<T>();
+        return param->as<T>();
     }
-
-
-    void add(csapex::param::Parameter::Ptr p, bool persistent);
-    csapex::param::ParameterPtr get(const std::string& name);
-
-    void addTemporary(csapex::param::Parameter::Ptr p);
-    void addPersistent(csapex::param::Parameter::Ptr p);
-
 
     template <typename T>
     void set(const std::string& name, const T& val)
     {
-        auto pos = settings_.find(name);
-        if(pos == settings_.end()) {
+        auto param = getNoThrow(name);
+        if(!param) {
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(val);
             addTemporary(p);
 
         } else {
-            Entry& entry = pos->second;
-            entry.parameter->set<T>(val);
+            param->set<T>(val);
         }
-        settingsChanged(name);
     }
 
-    void save();
-    void load();
 
-private:
-    void settingsChanged(const std::string& key);
+    template <typename T>
+    void setPersistent(const std::string& name, const T& val)
+    {
+        auto param = getNoThrow(name);
+        if(!param) {
+            param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
+            p->set(val);
+            addPersistent(p);
+
+        } else {
+            param->set<T>(val);
+        }
+    }
 
 public:
     csapex::slim_signal::Signal<void(const std::string&)> setting_changed;
@@ -109,18 +116,6 @@ public:
 
     csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& e)> save_detail_request;
     csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& n)> load_detail_request;
-
-private:
-    struct Entry
-    {
-        csapex::param::Parameter::Ptr parameter;
-        bool persistent;
-    };
-
-    std::map<std::string, Entry> settings_;
-
-    bool quiet_;
-    std::vector<std::string> changes_;
 };
 
 }

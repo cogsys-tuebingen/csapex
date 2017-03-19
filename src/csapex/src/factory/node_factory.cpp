@@ -75,6 +75,8 @@ void NodeFactory::rebuildPrototypes()
 {
     settings_.setQuiet(true);
 
+    bool dirty = false;
+
     for(const auto& p : node_manager_->getConstructors()) {
         const PluginConstructor<Node>& plugin_constructor = p.second;
 
@@ -102,13 +104,14 @@ void NodeFactory::rebuildPrototypes()
 
         if(!loaded) {
             NOTIFICATION_INFO("reloading properties for node type " << type);
+            dirty = true;
             try {
                 auto last_modification = node_manager_->getLastModification(type);
 
                 param::StringListParameter::Ptr properties(new param::StringListParameter(key, param::ParameterDescription()));
                 properties->set(constructor->getProperties());
                 settings_.addPersistent(properties);
-                settings_.set(mod, last_modification);
+                settings_.setPersistent(mod, last_modification);
 
             } catch(const std::exception& e) {
                 NOTIFICATION("plugin '" << type << "' cannot be loaded");
@@ -119,6 +122,10 @@ void NodeFactory::rebuildPrototypes()
     }
 
     settings_.setQuiet(false);
+
+    if(dirty) {
+        settings_.save();
+    }
 }
 
 void NodeFactory::rebuildMap()

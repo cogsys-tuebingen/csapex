@@ -14,13 +14,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 DeleteFulcrum::DeleteFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id)
-    : Command(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id)
+    : CommandImplementation(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id)
 {
-}
-
-std::string DeleteFulcrum::getType() const
-{
-    return "DeleteFulcrum";
 }
 
 std::string DeleteFulcrum::getDescription() const

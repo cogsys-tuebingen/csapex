@@ -2,13 +2,13 @@
 #define OUTPUT_TEXT_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT OutputTextParameter : public Parameter
+class CSAPEX_PARAM_EXPORT OutputTextParameter : public ParameterImplementation<OutputTextParameter, 0x00C>
 {
     friend class ParameterFactory;
 
@@ -20,7 +20,6 @@ public:
     explicit OutputTextParameter(const std::string& name, const ParameterDescription& description);
     virtual ~OutputTextParameter();
 
-    virtual int ID() const override { return 0x00C; }
     virtual std::string TYPE() const override { return "outtext"; }
 
     virtual const std::type_info &type() const override;

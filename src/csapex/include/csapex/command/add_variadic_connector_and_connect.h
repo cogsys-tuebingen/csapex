@@ -15,6 +15,8 @@ namespace command
 
 class CSAPEX_COMMAND_EXPORT AddVariadicConnectorAndConnect : public AddVariadicConnector
 {
+    COMMAND_HEADER(AddVariadicConnectorAndConnect);
+
 public:
     AddVariadicConnectorAndConnect(const AUUID &graph_id, const AUUID &node, const ConnectorType &connector_type, const TokenDataConstPtr& type, const std::string& label,
                                    const UUID &target, bool move, bool external);
@@ -24,7 +26,6 @@ protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 private:

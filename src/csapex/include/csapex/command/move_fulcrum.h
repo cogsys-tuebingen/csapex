@@ -2,7 +2,7 @@
 #define COMMAND_MOVE_FULCRUM_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/data/point.h>
 
 namespace csapex
@@ -10,12 +10,13 @@ namespace csapex
 namespace command
 {
 
-class CSAPEX_COMMAND_EXPORT MoveFulcrum : public Command
+class CSAPEX_COMMAND_EXPORT MoveFulcrum : public CommandImplementation<MoveFulcrum>
 {
+    COMMAND_HEADER(MoveFulcrum);
+
 public:
     MoveFulcrum(const AUUID& graph_uuid, int connection_id, int fulcrum_id, const Point& from, const Point& to);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

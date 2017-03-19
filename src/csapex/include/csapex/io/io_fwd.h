@@ -16,6 +16,8 @@ namespace csapex
 {
 FWD(Session);
 FWD(BroadcastMessage);
+FWD(Request);
+FWD(Response);
 }
 
 #undef FWD

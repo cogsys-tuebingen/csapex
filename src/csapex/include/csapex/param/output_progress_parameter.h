@@ -2,13 +2,13 @@
 #define OUTPUT_PROGRESS_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT OutputProgressParameter : public Parameter
+class CSAPEX_PARAM_EXPORT OutputProgressParameter : public ParameterImplementation<OutputProgressParameter, 0x009>
 {
     friend class ParameterFactory;
 
@@ -20,7 +20,6 @@ public:
     explicit OutputProgressParameter(const std::string& name, const ParameterDescription& description);
     virtual ~OutputProgressParameter();
 
-    virtual int ID() const override { return 0x009; }
     virtual std::string TYPE() const override { return "progress"; }
 
     void setProgress(int progress, int maximum);

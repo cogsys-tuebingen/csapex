@@ -2,7 +2,7 @@
 #include <csapex/io/protcol/notification_message.h>
 
 /// PROJECT
-#include <csapex/io/broadcast_message_serializer.h>
+#include <csapex/serialization/broadcast_message_serializer.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
@@ -22,14 +22,7 @@ NotificationMessage::NotificationMessage()
 
 }
 
-std::string NotificationMessage::getType() const
-{
-    return "Notification";
-}
-
-
-
-void NotificationMessage::serialize(SerializationBuffer &data)
+void NotificationMessage::serialize(SerializationBuffer &data) const
 {
 //    std::cerr << "serializing Notification" << std::endl;
     data << notification.auuid.getFullName();
@@ -67,7 +60,7 @@ namespace io
 
 class NotificationMessageSerializer : public BroadcastMessageSerializerInterface
 {
-    virtual void serialize(const BroadcastMessagePtr& packet, SerializationBuffer &data) override
+    virtual void serialize(const BroadcastMessageConstPtr& packet, SerializationBuffer &data) override
     {
         packet->serialize(data);
     }
@@ -79,6 +72,6 @@ class NotificationMessageSerializer : public BroadcastMessageSerializerInterface
     }
 };
 }
-BroadcastMessageSerializerRegistered<io::NotificationMessageSerializer> g_register_broadcast_message_notification_("Notification");
+BroadcastMessageSerializerRegistered<io::NotificationMessageSerializer> g_register_broadcast_message_notification_(NotificationMessage::typeName());
 }
 

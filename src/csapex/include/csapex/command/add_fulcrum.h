@@ -2,7 +2,7 @@
 #define COMMAND_ADD_FULCRUM_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/data/point.h>
 #include <string>
 
@@ -11,8 +11,10 @@ namespace csapex
 namespace command
 {
 
-class CSAPEX_COMMAND_EXPORT AddFulcrum : public Command
+class CSAPEX_COMMAND_EXPORT AddFulcrum : public CommandImplementation<AddFulcrum>
 {
+    COMMAND_HEADER(AddFulcrum);
+
 public:
     AddFulcrum(const AUUID& graph_uuid, int connection_id, int sub_section_to_split, const Point& pos, int type);
 
@@ -21,7 +23,6 @@ protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 private:

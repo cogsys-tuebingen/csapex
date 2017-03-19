@@ -17,13 +17,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 SetColor::SetColor(const AUUID& parent_uuid, const UUID &node, int r, int g, int b)
-    : Command(parent_uuid), uuid(node), r(r), g(g), b(b)
+    : CommandImplementation(parent_uuid), uuid(node), r(r), g(g), b(b)
 {
-}
-
-std::string SetColor::getType() const
-{
-    return "SetColor";
 }
 
 std::string SetColor::getDescription() const

@@ -6,6 +6,7 @@
 #include <csapex/param/parameter_description.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_param_export.h>
+#include <csapex/serialization/serializable.h>
 
 /// SYSTEM
 #include <memory>
@@ -25,7 +26,7 @@ class any;
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT Parameter
+class CSAPEX_PARAM_EXPORT Parameter : public Serializable
 {
 public:
     friend class ParameterFactory;
@@ -45,14 +46,23 @@ public:
 
     slim_signal::Signal<void(const std::string&)> dictionary_entry_changed;
 
+    static const uint8_t PACKET_TYPE_ID = 4;
+
 public:
     virtual ~Parameter();
 
-    void serialize(YAML::Node& n) const;
-    void deserialize(const YAML::Node& n);
+    void serialize_yaml(YAML::Node& n) const;
+    void deserialize_yaml(const YAML::Node& n);
+
+    virtual uint8_t getPacketType() const override;
+
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(SerializationBuffer& data) override;
 
     void setValueFrom(const Parameter& other);
-    void clone(const Parameter& other);
+    void cloneFrom(const Parameter& other);
+
+    virtual std::shared_ptr<Clonable> cloneRaw() const override;
 
 protected:
     virtual void doSerialize(YAML::Node& n) const = 0;

@@ -2,7 +2,7 @@
 #define COMMAND_SERIALIZER_H
 
 /// PROJECT
-#include <csapex/io/packet_serializer.h>
+#include <csapex/serialization/packet_serializer.h>
 #include <csapex/command/command.h>
 
 /// SYSTEM
@@ -16,7 +16,7 @@ class CommandSerializerInterface
 public:
     virtual ~CommandSerializerInterface();
 
-    virtual void serialize(const CommandPtr& packet, SerializationBuffer &data) = 0;
+    virtual void serialize(const CommandConstPtr& packet, SerializationBuffer &data) = 0;
     virtual CommandPtr deserialize(SerializationBuffer& data) = 0;
 };
 
@@ -24,7 +24,7 @@ public:
 class CommandSerializer : public Singleton<CommandSerializer>, public Serializer
 {
 public:
-    void serialize(const SerializablePtr& packet, SerializationBuffer &data) override;
+    void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override;
     SerializablePtr deserialize(SerializationBuffer &data) override;
 
     static void registerSerializer(const std::string& type, std::shared_ptr<CommandSerializerInterface> serializer);
@@ -36,11 +36,36 @@ private:
 template <typename S>
 struct CommandSerializerRegistered
 {
-    CommandSerializerRegistered(const char* type) {
+    CommandSerializerRegistered(const std::string& type) {
         CommandSerializer::registerSerializer(type, std::make_shared<S>());
     }
 };
 }
 
+
+#define REGISTER_COMMAND_SERIALIZER(Name) \
+    namespace csapex\
+    {\
+    namespace command\
+    {\
+    \
+    class Name##Serializer : public CommandSerializerInterface\
+    {\
+        virtual void serialize(const CommandConstPtr& packet, SerializationBuffer &data) override\
+        {\
+            if(auto impl = std::dynamic_pointer_cast<Name const>(packet)) {\
+                impl->serialize(data);\
+            }\
+        }\
+        virtual CommandPtr deserialize(SerializationBuffer& data) override\
+        {\
+            CommandPtr res = std::make_shared<Name>();\
+            res->deserialize(data);\
+            return res;\
+        }\
+    };\
+    }\
+    CommandSerializerRegistered<Name##Serializer> g_register_command_serializer_quit_(Name::typeName());\
+    }
 
 #endif // COMMAND_SERIALIZER_H

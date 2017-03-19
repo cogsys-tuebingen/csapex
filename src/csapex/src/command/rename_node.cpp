@@ -17,13 +17,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 RenameNode::RenameNode(const AUUID& parent_uuid, const UUID &node, const std::string& new_name)
-    : Command(parent_uuid), uuid(node), new_name_(new_name)
+    : CommandImplementation(parent_uuid), uuid(node), new_name_(new_name)
 {
-}
-
-std::string RenameNode::getType() const
-{
-    return "RenameNode";
 }
 
 std::string RenameNode::getDescription() const

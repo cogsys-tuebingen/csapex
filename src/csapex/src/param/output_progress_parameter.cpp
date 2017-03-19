@@ -9,12 +9,12 @@ using namespace csapex;
 using namespace param;
 
 OutputProgressParameter::OutputProgressParameter()
-    : Parameter("noname", ParameterDescription()), value(0), maximum(100)
+    : ParameterImplementation("noname", ParameterDescription()), value(0), maximum(100)
 {
 }
 
 OutputProgressParameter::OutputProgressParameter(const std::string &name, const ParameterDescription& description)
-    : Parameter(name, description), value(0), maximum(100)
+    : ParameterImplementation(name, description), value(0), maximum(100)
 {
 }
 

@@ -16,15 +16,10 @@ using namespace csapex::command;
 ModifyFulcrum::ModifyFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id,
                              int f_type, const Point &f_handle_in, const Point &f_handle_out,
                              int t_type, const Point &t_handle_in, const Point &t_handle_out)
-    : Command(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id),
+    : CommandImplementation(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id),
       f_type(f_type), f_in(f_handle_in), f_out(f_handle_out),
       t_type(t_type), t_in(t_handle_in), t_out(t_handle_out)
 {
-}
-
-std::string ModifyFulcrum::getType() const
-{
-    return "ModifyFulcrum";
 }
 
 std::string ModifyFulcrum::getDescription() const

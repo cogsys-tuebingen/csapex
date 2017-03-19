@@ -2,7 +2,7 @@
 #define MODIFY_CONNECTION_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/data/point.h>
 
 namespace csapex
@@ -10,12 +10,13 @@ namespace csapex
 namespace command
 {
 
-class CSAPEX_COMMAND_EXPORT ModifyConnection : public Command
+class CSAPEX_COMMAND_EXPORT ModifyConnection : public CommandImplementation<ModifyConnection>
 {
+    COMMAND_HEADER(ModifyConnection);
+
 public:
     ModifyConnection(const AUUID &graph_uuid, int connection_id, bool active);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

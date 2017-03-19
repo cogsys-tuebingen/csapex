@@ -19,17 +19,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 DisableNode::DisableNode(const AUUID& parent_uuid, const UUID& uuid, bool disable)
-    : Command(parent_uuid), uuid(uuid), disable_(disable)
+    : CommandImplementation(parent_uuid), uuid(uuid), disable_(disable)
 {
-}
-
-std::string DisableNode::getType() const
-{
-    if(disable_) {
-        return "DisableNode";
-    } else {
-        return "EnableNode";
-    }
 }
 
 std::string DisableNode::getDescription() const

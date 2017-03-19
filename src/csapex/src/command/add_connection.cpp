@@ -15,13 +15,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 AddConnection::AddConnection(const AUUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid, bool active)
-    : Command(parent_uuid), from_uuid(from_uuid), to_uuid(to_uuid), active(active)
+    : CommandImplementation(parent_uuid), from_uuid(from_uuid), to_uuid(to_uuid), active(active)
 {
-}
-
-std::string AddConnection::getType() const
-{
-    return "AddConnection";
 }
 
 std::string AddConnection::getDescription() const

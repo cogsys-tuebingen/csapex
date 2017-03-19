@@ -17,7 +17,7 @@ using namespace csapex;
 using namespace csapex::command;
 
 AddNode::AddNode(const AUUID &parent_uuid, const std::string &type, Point pos, const UUID& uuid, NodeState::Ptr state)
-    : Command(parent_uuid), type_(type), pos_(pos), uuid_(uuid)
+    : CommandImplementation(parent_uuid), type_(type), pos_(pos), uuid_(uuid)
 {
     apex_assert_hard(!uuid.empty());
 
@@ -25,11 +25,6 @@ AddNode::AddNode(const AUUID &parent_uuid, const std::string &type, Point pos, c
         NodeState::Ptr bs = std::dynamic_pointer_cast<NodeState> (state);
         saved_state_ = bs;
     }
-}
-
-std::string AddNode::getType() const
-{
-    return "AddNode";
 }
 
 std::string AddNode::getDescription() const

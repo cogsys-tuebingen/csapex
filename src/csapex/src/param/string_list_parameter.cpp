@@ -9,12 +9,12 @@ using namespace csapex;
 using namespace param;
 
 StringListParameter::StringListParameter()
-    : Parameter("noname", ParameterDescription())
+    : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
 StringListParameter::StringListParameter(const std::string &name, const ParameterDescription &description)
-    : Parameter(name, description)
+    : ParameterImplementation(name, description)
 {
 }
 

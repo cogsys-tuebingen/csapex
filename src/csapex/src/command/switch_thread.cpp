@@ -21,13 +21,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 SwitchThread::SwitchThread(const AUUID& parent_uuid, const UUID &node, int thread_id)
-    : Command(parent_uuid), uuid(node), old_id(-1), id(thread_id)
+    : CommandImplementation(parent_uuid), uuid(node), old_id(-1), id(thread_id)
 {
-}
-
-std::string SwitchThread::getType() const
-{
-    return "SwitchThread";
 }
 
 std::string SwitchThread::getDescription() const

@@ -7,8 +7,9 @@
 #include <csapex/command/quit.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/protcol/notification_message.h>
-#include <csapex/io/packet_serializer.h>
-#include <csapex/core/settings.h>
+#include <csapex/serialization/packet_serializer.h>
+#include <csapex/core/settings/settings_remote.h>
+#include <csapex/io/session.h>
 
 
 using boost::asio::ip::tcp;
@@ -34,36 +35,6 @@ void handlePacket(SerializableConstPtr packet)
     }
 }
 
-
-void readPacket(tcp::socket& s)
-{
-    std::shared_ptr<SerializationBuffer> message_data = std::make_shared<SerializationBuffer>();
-    std::cerr << "async read" << std::endl;
-//    size_t reply_length = boost::asio::read(s, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH));
-//    std::cerr << reply_length << std::endl;
-
-    //s.async_read_some(boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH),
-      //                      [&s, message_data](boost::system::error_code ec, std::size_t reply_length){
-    boost::asio::async_read(s, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH),
-                            [&s, message_data](boost::system::error_code ec, std::size_t reply_length){
-        apex_assert_hard(reply_length == SerializationBuffer::HEADER_LENGTH);
-        uint8_t message_length(message_data->at(0));
-
-        std::cerr << "next message: " << (int) message_length << std::endl;
-
-        message_data->resize(message_length, ' ');
-        reply_length = boost::asio::read(s, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
-        apex_assert_equal_hard((int) reply_length, ((int) (message_length - SerializationBuffer::HEADER_LENGTH)));
-
-        SerializableConstPtr serial = PacketSerializer::deserializePacket(*message_data);
-
-        //            std::cerr << "received\n" << message_data.toString() << std::endl;
-
-        handlePacket(serial);
-
-        readPacket(s);
-    });
-}
 void siginthandler(int param)
 {
     g_io_service->stop();
@@ -88,17 +59,34 @@ int main(int argc, char* argv[])
         tcp::resolver resolver(io_service);
         boost::asio::connect(s, resolver.resolve({argv[1], argv[2]}));
 
-        Settings settings;
-        std::cerr << settings.get("access-test", std::string("no access possible")) << std::endl;
+        SessionPtr session = std::make_shared<Session>(std::move(s));
 
-        readPacket(s);
+//        readPacket(s);
+        session->packet_received.connect([](SerializableConstPtr packet){
+            handlePacket(packet);
+        });
 
-        io_service.run();
+        session->start();
+
+
+//        SettingsRemote remote_settings(session);
+//        Settings& settings = remote_settings;
+//        try {
+//            param::ParameterPtr p = settings.get("access-test");
+//            std::cerr << p->as<std::string>() << std::endl;
+//            std::exit(0);
+//        } catch(const std::out_of_range& e) {
+//            std::cerr << "no access to server settings" << std::endl;
+//            std::exit(0);
+//        }
+//
+//        io_service.run();
 
         csapex::command::Quit::Ptr quit = std::make_shared<csapex::command::Quit>();
-        SerializationBuffer data = PacketSerializer::serializePacket(quit);
-        boost::asio::write(s, boost::asio::buffer(data, data.size()));
 
+        session->write(quit);
+
+        io_service.run();
     }
     catch (const csapex::HardAssertionFailure& e)
     {

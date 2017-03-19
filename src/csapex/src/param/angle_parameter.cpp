@@ -9,12 +9,12 @@ using namespace csapex;
 using namespace param;
 
 AngleParameter::AngleParameter()
-    : Parameter("angle", ParameterDescription()), angle_(0.0), min_(-M_PI), max_(M_PI)
+    : ParameterImplementation("angle", ParameterDescription()), angle_(0.0), min_(-M_PI), max_(M_PI)
 {
 }
 
 AngleParameter::AngleParameter(const std::string &name, const ParameterDescription& description, double angle, double min, double max)
-    : Parameter(name, description), angle_(angle), min_(min), max_(max)
+    : ParameterImplementation(name, description), angle_(angle), min_(min), max_(max)
 {
    set(angle_);
 }

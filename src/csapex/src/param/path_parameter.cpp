@@ -9,12 +9,12 @@ using namespace csapex;
 using namespace param;
 
 PathParameter::PathParameter()
-    : Parameter("noname", ParameterDescription())
+    : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
 PathParameter::PathParameter(const std::string &name, const ParameterDescription& description, const std::string &filter, bool is_file, bool input, bool output)
-    : Parameter(name, description), filter_(filter), is_file_(is_file), input_(input), output_(output)
+    : ParameterImplementation(name, description), filter_(filter), is_file_(is_file), input_(input), output_(output)
 {
 }
 

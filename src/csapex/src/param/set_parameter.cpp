@@ -8,13 +8,13 @@ using namespace csapex;
 using namespace param;
 
 SetParameter::SetParameter()
-    : Parameter("noname", ParameterDescription()), txt_("")
+    : ParameterImplementation("noname", ParameterDescription()), txt_("")
 {
 }
 
 
 SetParameter::SetParameter(const std::string &name, const ParameterDescription &description)
-    : Parameter(name, description), txt_("")
+    : ParameterImplementation(name, description), txt_("")
 {
 }
 

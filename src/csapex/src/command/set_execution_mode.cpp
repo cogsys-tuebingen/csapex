@@ -17,13 +17,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 SetExecutionMode::SetExecutionMode(const AUUID& parent_uuid, const UUID &node, ExecutionMode mode)
-    : Command(parent_uuid), uuid(node), mode(mode)
+    : CommandImplementation(parent_uuid), uuid(node), mode(mode)
 {
-}
-
-std::string SetExecutionMode::getType() const
-{
-    return "SetExecutionMode";
 }
 
 std::string SetExecutionMode::getDescription() const

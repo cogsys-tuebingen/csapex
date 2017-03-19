@@ -2,7 +2,7 @@
 #define INTERVAL_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 /// SYSTEM
@@ -19,7 +19,7 @@ int
 > IntervalParameterTypes;
 
 
-class CSAPEX_PARAM_EXPORT IntervalParameter : public Parameter
+class CSAPEX_PARAM_EXPORT IntervalParameter : public ParameterImplementation<IntervalParameter, 0x003>
 {
     friend class ParameterFactory;
 
@@ -34,7 +34,6 @@ public:
     explicit IntervalParameter(const std::string& name, const ParameterDescription &description);
     virtual ~IntervalParameter();
 
-    virtual int ID() const override { return 0x003; }
     virtual std::string TYPE() const override { return "interval"; }
 
     virtual const std::type_info &type() const override;

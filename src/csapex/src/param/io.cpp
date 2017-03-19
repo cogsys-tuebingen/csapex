@@ -10,7 +10,7 @@ using namespace YAML;
 
 Node YAML::convert<csapex::param::ParameterPtr>::encode(const csapex::param::ParameterPtr& rhs) {
     YAML::Node n;
-    rhs->serialize(n);
+    rhs->serialize_yaml(n);
     return n;
 }
 
@@ -24,7 +24,7 @@ bool YAML::convert<csapex::param::ParameterPtr>::decode(const Node& node, csapex
     }
 
     rhs = ParameterFactory::makeEmpty(type);
-    rhs->deserialize(node);
+    rhs->deserialize_yaml(node);
     return true;
 }
 
@@ -32,7 +32,7 @@ bool YAML::convert<csapex::param::ParameterPtr>::decode(const Node& node, csapex
 
 Node YAML::convert<csapex::param::ParameterConstPtr>::encode(const csapex::param::ParameterConstPtr& rhs) {
     YAML::Node n;
-    rhs->serialize(n);
+    rhs->serialize_yaml(n);
     return n;
 }
 
@@ -46,7 +46,7 @@ bool YAML::convert<csapex::param::ParameterConstPtr>::decode(const Node& node, c
     }
 
     param::ParameterPtr res = ParameterFactory::makeEmpty(type);
-    res->deserialize(node);
+    res->deserialize_yaml(node);
     rhs = res;
     return true;
 }

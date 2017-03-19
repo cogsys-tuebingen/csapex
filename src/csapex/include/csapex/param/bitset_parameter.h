@@ -2,7 +2,7 @@
 #define BITSET_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 /// SYSTEM
@@ -11,7 +11,7 @@
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT BitSetParameter : public Parameter
+class CSAPEX_PARAM_EXPORT BitSetParameter : public ParameterImplementation<BitSetParameter, 0x001>
 {
     friend class ParameterFactory;
 
@@ -23,7 +23,6 @@ public:
     explicit BitSetParameter(const std::string& name, const ParameterDescription& description);
     virtual ~BitSetParameter();
 
-    virtual int ID() const override { return 0x001; }
     virtual std::string TYPE() const override { return "bitset"; }
 
     virtual const std::type_info &type() const override;

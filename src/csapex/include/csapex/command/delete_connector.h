@@ -2,7 +2,7 @@
 #define COMMAND_DELETE_CONNECTOR_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -11,8 +11,11 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT DeleteConnector : public Command
+class CSAPEX_COMMAND_EXPORT DeleteConnector : public CommandImplementation<DeleteConnector>
 {
+    COMMAND_HEADER(DeleteConnector);
+
+public:
     DeleteConnector(const AUUID &graph_uuid, Connectable *_c);
 
 protected:
@@ -20,7 +23,6 @@ protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 private:

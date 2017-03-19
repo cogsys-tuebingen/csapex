@@ -2,7 +2,7 @@
 #define MINIMIZE_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -10,11 +10,13 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT Minimize : public Command
+class CSAPEX_COMMAND_EXPORT Minimize : public CommandImplementation<Minimize>
 {
+    COMMAND_HEADER(Minimize);
+
+public:
     Minimize(const AUUID &graph_uuid, const UUID& node, bool mini);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

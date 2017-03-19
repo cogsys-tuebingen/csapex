@@ -137,7 +137,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
 
             YAML::Emitter e;
             YAML::Node n;
-            p->serialize(n);
+            p->serialize_yaml(n);
             e << n;
 
             QTreeWidgetItem* params_type_data = new QTreeWidgetItem;

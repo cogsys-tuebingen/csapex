@@ -2,7 +2,7 @@
 #define DELETE_THREAD_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -10,11 +10,13 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT DeleteThread : public Command
+class CSAPEX_COMMAND_EXPORT DeleteThread : public CommandImplementation<DeleteThread>
 {
+    COMMAND_HEADER(DeleteThread);
+
+public:
     DeleteThread(int thread_id);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

@@ -34,11 +34,6 @@ UngroupNodes::UngroupNodes(const AUUID& parent_uuid, const UUID &uuid)
 {
 }
 
-std::string UngroupNodes::getType() const
-{
-    return "UngroupNodes";
-}
-
 std::string UngroupNodes::getDescription() const
 {
     return "inline a sub graph";

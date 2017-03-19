@@ -25,11 +25,6 @@ DeleteNode::DeleteNode(const AUUID& parent_uuid, const UUID& uuid)
 {
 }
 
-std::string DeleteNode::getType() const
-{
-    return "DeleteNode";
-}
-
 std::string DeleteNode::getDescription() const
 {
     return std::string("deleted node ") + uuid.getFullName();

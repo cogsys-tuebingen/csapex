@@ -14,10 +14,11 @@ namespace command
 
 class CSAPEX_COMMAND_EXPORT UngroupNodes : public GroupBase
 {
+    COMMAND_HEADER(UngroupNodes);
+
 public:
     UngroupNodes(const AUUID &graph_uuid, const UUID &uuid);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

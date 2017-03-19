@@ -16,13 +16,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 RenameConnector::RenameConnector(const AUUID& parent_uuid, const UUID &connector, const std::string& new_name)
-    : Command(parent_uuid), uuid(connector), new_name_(new_name)
+    : CommandImplementation(parent_uuid), uuid(connector), new_name_(new_name)
 {
-}
-
-std::string RenameConnector::getType() const
-{
-    return "RenameConnector";
 }
 
 std::string RenameConnector::getDescription() const

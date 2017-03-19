@@ -2,13 +2,13 @@
 #define PATH_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT PathParameter : public Parameter
+class CSAPEX_PARAM_EXPORT PathParameter : public ParameterImplementation<PathParameter, 0x004>
 {
     friend class ParameterFactory;
 
@@ -20,7 +20,6 @@ public:
     explicit PathParameter(const std::string& name, const ParameterDescription& description, const std::string& filter, bool is_file, bool input, bool output);
     virtual ~PathParameter();
 
-    virtual int ID() const override { return 0x004; }
     virtual std::string TYPE() const override { return "path"; }
 
     virtual const std::type_info &type() const override;

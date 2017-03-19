@@ -17,13 +17,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 Minimize::Minimize(const AUUID& parent_uuid, const UUID &node, bool mini)
-    : Command(parent_uuid), uuid(node), mini(mini), executed(false)
+    : CommandImplementation(parent_uuid), uuid(node), mini(mini), executed(false)
 {
-}
-
-std::string Minimize::getType() const
-{
-    return "Minimize";
 }
 
 std::string Minimize::getDescription() const

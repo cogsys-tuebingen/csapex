@@ -19,7 +19,7 @@ using namespace command;
 AddVariadicConnector::AddVariadicConnector(const AUUID& graph_id, const AUUID& node,
                                            const ConnectorType& connector_type,
                                            const TokenDataConstPtr& type, const std::string &label)
-    : Command(graph_id), connector_type(connector_type), token_type(type), label_(label), optional_(false), node_id(node)
+    : CommandImplementation(graph_id), connector_type(connector_type), token_type(type), label_(label), optional_(false), node_id(node)
 {
 }
 
@@ -31,11 +31,6 @@ void AddVariadicConnector::setLabel(const std::string &label)
 void AddVariadicConnector::setOptional(bool optional)
 {
     optional_ = optional;
-}
-
-std::string AddVariadicConnector::getType() const
-{
-    return "AddVariadicConnector";
 }
 
 std::string AddVariadicConnector::getDescription() const

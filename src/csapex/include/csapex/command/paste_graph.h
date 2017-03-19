@@ -21,6 +21,8 @@ namespace command
 
 class CSAPEX_COMMAND_EXPORT PasteGraph : public Meta
 {
+    COMMAND_HEADER(PasteGraph);
+
 public:
     PasteGraph(const AUUID &graph_id, const Snippet& blueprint, const Point &pos);
 
@@ -31,7 +33,6 @@ protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

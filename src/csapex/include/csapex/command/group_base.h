@@ -18,6 +18,8 @@ namespace command
 {
 class CSAPEX_COMMAND_EXPORT GroupBase : public Meta
 {
+    COMMAND_HEADER(GroupBase);
+
 protected:
     GroupBase(const AUUID &graph_uuid, const std::string &type);
 

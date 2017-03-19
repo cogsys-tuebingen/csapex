@@ -114,8 +114,10 @@ void Connection::disconnect() const
         if(deleter_) {
             deleter_();
         }
-        parent_->removeConnection(this);
-        parent_ = nullptr;
+        if(parent_) {
+            parent_->removeConnection(this);
+            parent_ = nullptr;
+        }
     }
 }
 

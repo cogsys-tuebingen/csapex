@@ -2,7 +2,7 @@
 #define SET_COLOR_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -10,12 +10,14 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT SetColor : public Command
+class CSAPEX_COMMAND_EXPORT SetColor : public CommandImplementation<SetColor>
 {
+    COMMAND_HEADER(SetColor);
+
+public:
     SetColor(const AUUID &graph_uuid, const UUID& node,
              int r, int g, int b);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

@@ -2,7 +2,7 @@
 #define SET_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 /// SYSTEM
@@ -12,7 +12,7 @@
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT SetParameter : public Parameter
+class CSAPEX_PARAM_EXPORT SetParameter : public ParameterImplementation<SetParameter, 0x006>
 {
     friend class ParameterFactory;
 
@@ -24,7 +24,6 @@ public:
     explicit SetParameter(const std::string& name, const ParameterDescription &description);
     virtual ~SetParameter();
 
-    virtual int ID() const override { return 0x006; }
     virtual std::string TYPE() const override { return "set"; }
 
     virtual const std::type_info &type() const override;

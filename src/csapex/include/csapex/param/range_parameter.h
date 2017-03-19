@@ -2,7 +2,7 @@
 #define RANGE_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 /// SYSTEM
@@ -34,7 +34,7 @@ int limitStep(const int min, const int max, const int step);
 }
 
 
-class CSAPEX_PARAM_EXPORT RangeParameter : public Parameter
+class CSAPEX_PARAM_EXPORT RangeParameter : public ParameterImplementation<RangeParameter, 0x005>
 {
     friend class ParameterFactory;
 
@@ -49,7 +49,6 @@ public:
     explicit RangeParameter(const std::string& name, const ParameterDescription &description);
     virtual ~RangeParameter();
 
-    virtual int ID() const override { return 0x005; }
     virtual std::string TYPE() const override { return "range"; }
 
     virtual const std::type_info &type() const override;

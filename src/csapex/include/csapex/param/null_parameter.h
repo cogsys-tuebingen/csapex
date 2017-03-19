@@ -2,13 +2,13 @@
 #define NULL_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT NullParameter : public Parameter
+class CSAPEX_PARAM_EXPORT NullParameter : public ParameterImplementation<NullParameter, 0x000>
 {
     friend class ParameterFactory;
 
@@ -19,7 +19,6 @@ public:
     explicit NullParameter(const std::string& name, const ParameterDescription &description);
     virtual ~NullParameter();
 
-    virtual int ID() const override { return 0x000; }
     virtual std::string TYPE() const override { return "null"; }
 
     virtual const std::type_info &type() const override;

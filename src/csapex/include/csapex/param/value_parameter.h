@@ -2,7 +2,7 @@
 #define VALUE_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 /// SYSTEM
@@ -11,7 +11,7 @@
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT ValueParameter : public Parameter
+class CSAPEX_PARAM_EXPORT ValueParameter : public ParameterImplementation<ValueParameter, 0x008>
 {
     friend class ParameterFactory;
 
@@ -23,7 +23,6 @@ public:
     explicit ValueParameter(const std::string& name, const ParameterDescription &description);
     virtual ~ValueParameter();
 
-    virtual int ID() const override { return 0x008; }
     virtual std::string TYPE() const override { return "value"; }
 
     virtual const std::type_info &type() const override;

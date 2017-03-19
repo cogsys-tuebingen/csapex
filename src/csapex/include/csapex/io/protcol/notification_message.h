@@ -2,7 +2,7 @@
 #define NOTIFICATION_MESSAGE_H
 
 /// PROJECT
-#include <csapex/io/broadcast_message.h>
+#include <csapex/io/broadcast_impl.hpp>
 #include <csapex/utility/notification.h>
 #include <csapex/serialization/serialization_buffer.h>
 
@@ -14,14 +14,13 @@ namespace io
     class NotificationMessageSerializer;
 }
 
-class NotificationMessage : public BroadcastMessage
+class NotificationMessage : public BroadcastImplementation<NotificationMessage>
 {
 public:
     NotificationMessage(const Notification& notification);
     NotificationMessage();
-    virtual std::string getType() const override;
 
-    virtual void serialize(SerializationBuffer &data) override;
+    virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(SerializationBuffer& data) override;
 
     const Notification& getNotification() const;

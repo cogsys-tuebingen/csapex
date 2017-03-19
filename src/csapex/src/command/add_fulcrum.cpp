@@ -15,15 +15,11 @@ using namespace csapex;
 using namespace csapex::command;
 
 AddFulcrum::AddFulcrum(const AUUID& parent_uuid, int connection_id, int sub_section_to_split, const Point &pos, int type)
-    : Command(parent_uuid), connection_id(connection_id), sub_section_to_split(sub_section_to_split), pos(pos), type(type)
+    : CommandImplementation(parent_uuid), connection_id(connection_id), sub_section_to_split(sub_section_to_split), pos(pos), type(type)
 {
 
 }
 
-std::string AddFulcrum::getType() const
-{
-    return "AddFulcrum";
-}
 
 std::string AddFulcrum::getDescription() const
 {

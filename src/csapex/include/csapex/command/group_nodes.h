@@ -15,10 +15,11 @@ namespace command
 
 class CSAPEX_COMMAND_EXPORT GroupNodes : public GroupBase
 {
+    COMMAND_HEADER(GroupNodes);
+
 public:
     GroupNodes(const AUUID &graph_uuid, const std::vector<UUID>& nodes);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 

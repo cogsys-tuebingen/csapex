@@ -2,7 +2,7 @@
 #define SET_MAX_EXECUTION_FREQUENCY_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 #include <csapex/model/execution_mode.h>
 
@@ -11,11 +11,13 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT SetMaximumExecutionFrequency : public Command
+class CSAPEX_COMMAND_EXPORT SetMaximumExecutionFrequency : public CommandImplementation<SetMaximumExecutionFrequency>
 {
+    COMMAND_HEADER(SetMaximumExecutionFrequency);
+
+public:
     SetMaximumExecutionFrequency(const AUUID &graph_uuid, const UUID& node, double frequency);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

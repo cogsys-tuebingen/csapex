@@ -22,13 +22,8 @@ using namespace csapex::command;
 
 
 DeleteThread::DeleteThread(int thread_id)
-    : Command(AUUID()), id(thread_id)
+    : id(thread_id)
 {
-}
-
-std::string DeleteThread::getType() const
-{
-    return "DeleteThread";
 }
 
 std::string DeleteThread::getDescription() const

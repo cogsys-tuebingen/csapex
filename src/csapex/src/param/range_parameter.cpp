@@ -9,12 +9,12 @@ using namespace csapex;
 using namespace param;
 
 RangeParameter::RangeParameter()
-    : Parameter("noname", ParameterDescription())
+    : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
 RangeParameter::RangeParameter(const std::string &name, const ParameterDescription& description)
-    : Parameter(name, description)
+    : ParameterImplementation(name, description)
 {
 }
 

@@ -14,13 +14,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 ModifyConnection::ModifyConnection(const AUUID& parent_uuid, int connection_id, bool active)
-    : Command(parent_uuid), connection_id(connection_id), active(active)
+    : CommandImplementation(parent_uuid), connection_id(connection_id), active(active)
 {
-}
-
-std::string ModifyConnection::getType() const
-{
-    return "ModifyConnection";
 }
 
 std::string ModifyConnection::getDescription() const

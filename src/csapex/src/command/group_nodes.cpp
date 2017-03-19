@@ -30,11 +30,6 @@ GroupNodes::GroupNodes(const AUUID& parent_uuid, const std::vector<UUID> &uuids)
 {
 }
 
-std::string GroupNodes::getType() const
-{
-    return "GroupNodes";
-}
-
 std::string GroupNodes::getDescription() const
 {
     return "create a sub graph";

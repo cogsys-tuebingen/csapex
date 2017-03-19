@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/io/packet_serializer.h>
+#include <csapex/serialization/packet_serializer.h>
 
 /// PROJECT
 #include <csapex/utility/assert.h>
@@ -15,7 +15,7 @@ Serializer::~Serializer()
 {
 
 }
-SerializationBuffer PacketSerializer::serializePacket(const SerializablePtr& packet)
+SerializationBuffer PacketSerializer::serializePacket(const SerializableConstPtr &packet)
 {
     SerializationBuffer data;
     instance().serialize(packet, data);
@@ -34,7 +34,7 @@ void PacketSerializer::registerSerializer(uint8_t type, Serializer *serializer)
 }
 
 
-void PacketSerializer::serialize(const SerializablePtr& packet, SerializationBuffer &data)
+void PacketSerializer::serialize(const SerializableConstPtr& packet, SerializationBuffer &data)
 {
     // determine packet type
     uint8_t type = packet->getPacketType();
@@ -61,7 +61,7 @@ SerializablePtr PacketSerializer::deserialize(SerializationBuffer& data)
         return serializer->deserialize(data);
 
     } else {
-        std::cerr << "received packet of unknown type: " << (int) type << std::endl;
+        std::cerr << "cannot deserialize packet of type: " << (int) type << std::endl;
     }
 
     return SerializablePtr();

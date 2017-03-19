@@ -2,7 +2,7 @@
 #define STRING_LIST_PARAMETER_H
 
 /// COMPONENT
-#include <csapex/param/parameter.h>
+#include <csapex/param/parameter_impl.hpp>
 #include <csapex/csapex_param_export.h>
 
 /// SYSTEM
@@ -11,7 +11,7 @@
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT StringListParameter : public Parameter
+class CSAPEX_PARAM_EXPORT StringListParameter : public ParameterImplementation<StringListParameter, 0x00A>
 {
     friend class ParameterFactory;
 
@@ -31,7 +31,6 @@ public:
     std::size_t count() const;
     std::vector<std::string> getValues() const;
 
-    virtual int ID() const override { return 0x00A; }
     virtual std::string TYPE() const override { return "string_list"; }
 
     virtual const std::type_info &type() const override;

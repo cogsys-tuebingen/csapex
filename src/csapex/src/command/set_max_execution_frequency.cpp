@@ -17,13 +17,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 SetMaximumExecutionFrequency::SetMaximumExecutionFrequency(const AUUID& parent_uuid, const UUID &node, double frequency)
-    : Command(parent_uuid), uuid(node), frequency(frequency)
+    : CommandImplementation(parent_uuid), uuid(node), frequency(frequency)
 {
-}
-
-std::string SetMaximumExecutionFrequency::getType() const
-{
-    return "SetMaximumExecutionFrequency";
 }
 
 std::string SetMaximumExecutionFrequency::getDescription() const

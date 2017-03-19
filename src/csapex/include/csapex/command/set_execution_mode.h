@@ -2,7 +2,7 @@
 #define SET_EXECUTION_MODE_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 #include <csapex/model/execution_mode.h>
 
@@ -11,11 +11,13 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT SetExecutionMode : public Command
+class CSAPEX_COMMAND_EXPORT SetExecutionMode : public CommandImplementation<SetExecutionMode>
 {
+    COMMAND_HEADER(SetExecutionMode);
+
+public:
     SetExecutionMode(const AUUID &graph_uuid, const UUID& node, ExecutionMode mode);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

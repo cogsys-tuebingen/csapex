@@ -17,13 +17,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 FlipSides::FlipSides(const AUUID& parent_uuid, const UUID &node)
-    : Command(parent_uuid), uuid(node)
+    : CommandImplementation(parent_uuid), uuid(node)
 {
-}
-
-std::string FlipSides::getType() const
-{
-    return "FlipSides";
 }
 
 std::string FlipSides::getDescription() const

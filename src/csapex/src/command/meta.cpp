@@ -14,7 +14,7 @@ using namespace csapex;
 using namespace csapex::command;
 
 Meta::Meta(const AUUID &parent_uuid, const std::string &type, bool transaction)
-    : Command(parent_uuid), locked(false), transaction(transaction), type(type)
+    : CommandImplementation(parent_uuid), locked(false), transaction(transaction), type(type)
 {
 }
 

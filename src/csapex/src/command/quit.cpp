@@ -19,9 +19,9 @@
 
 using namespace csapex::command;
 
+REGISTER_COMMAND_SERIALIZER(Quit)
 
 Quit::Quit()
-    : Command(AUUID(UUID::NONE))
 {
 
 }
@@ -29,11 +29,6 @@ Quit::Quit()
 bool Quit::isUndoable() const
 {
     return false;
-}
-
-std::string Quit::getType() const
-{
-    return "Quit";
 }
 
 std::string Quit::getDescription() const
@@ -56,26 +51,3 @@ bool Quit::doRedo()
 {
     return doExecute();
 }
-
-namespace csapex
-{
-namespace command
-{
-
-class QuitSerializer : public CommandSerializerInterface
-{
-    virtual void serialize(const CommandPtr& packet, SerializationBuffer &data) override
-    {
-        std::cerr << "serializing quit" << std::endl;
-    }
-    virtual CommandPtr deserialize(SerializationBuffer& data) override
-    {
-        std::cerr << "deserializing quit" << std::endl;
-        return std::make_shared<Quit>();
-    }
-};
-}
-CommandSerializerRegistered<QuitSerializer> g_register_command_serializer_quit_("Quit");
-}
-
-

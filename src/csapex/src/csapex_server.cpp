@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/settings.h>
+#include <csapex/core/settings/settings_local.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/error_handling.h>
@@ -62,7 +62,7 @@ int CsApexServer::run()
 
 int main(int argc, char** argv)
 {
-    Settings settings;
+    SettingsLocal settings;
 
     int effective_argc = argc;
     std::string path_to_bin(argv[0]);

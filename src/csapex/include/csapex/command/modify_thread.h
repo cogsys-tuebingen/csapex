@@ -2,7 +2,7 @@
 #define MODIFY_THREAD_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -10,11 +10,13 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT ModifyThread : public Command
+class CSAPEX_COMMAND_EXPORT ModifyThread : public CommandImplementation<ModifyThread>
 {
+    COMMAND_HEADER(ModifyThread);
+
+public:
     ModifyThread(int thread_id, const std::string& name);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

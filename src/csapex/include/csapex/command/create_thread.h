@@ -2,7 +2,7 @@
 #define CREATE_THREAD_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -10,11 +10,13 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT CreateThread : public Command
+class CSAPEX_COMMAND_EXPORT CreateThread : public CommandImplementation<CreateThread>
 {
+    COMMAND_HEADER(CreateThread);
+
+public:
     CreateThread(const AUUID &graph_uuid, const UUID& node, const std::string &name);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

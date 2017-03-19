@@ -12,10 +12,17 @@ using namespace csapex;
 std::vector<Command::Ptr> Command::undo_later;
 
 Command::Command(const AUUID &parent_uuid)
-    : graph_uuid(parent_uuid), core_(nullptr), root_graph_facade_(nullptr),
+    : Command()
+{
+    graph_uuid = parent_uuid;
+}
+
+Command::Command()
+    : core_(nullptr), root_graph_facade_(nullptr),
       before_save_point_(false), after_save_point_(false),
       initialized_(false)
 {
+
 }
 
 bool Command::Access::executeCommand(Command::Ptr cmd)
@@ -151,7 +158,7 @@ uint8_t Command::getPacketType() const
 }
 
 
-void Command::serialize(SerializationBuffer &data)
+void Command::serialize(SerializationBuffer &data) const
 {
     throw std::runtime_error("command is not serializable");
 }

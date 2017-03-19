@@ -2,7 +2,7 @@
 #define COMMAND_ADD_CONNECTION_HPP
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/model/model_fwd.h>
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/utility/uuid.h>
@@ -14,8 +14,10 @@ namespace csapex
 namespace command
 {
 
-class CSAPEX_COMMAND_EXPORT AddConnection : public Command
+class CSAPEX_COMMAND_EXPORT AddConnection : public CommandImplementation<AddConnection>
 {
+    COMMAND_HEADER(AddConnection);
+
 public:
     AddConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid, bool active);
 
@@ -25,7 +27,6 @@ protected:
 
     bool doExecute() override;
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

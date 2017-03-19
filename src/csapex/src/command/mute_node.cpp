@@ -17,13 +17,8 @@ using namespace csapex;
 using namespace csapex::command;
 
 MuteNode::MuteNode(const AUUID& parent_uuid, const UUID &node, bool muted)
-    : Command(parent_uuid), uuid(node), muted(muted), executed(false)
+    : CommandImplementation(parent_uuid), uuid(node), muted(muted), executed(false)
 {
-}
-
-std::string MuteNode::getType() const
-{
-    return "MuteNode";
 }
 
 std::string MuteNode::getDescription() const

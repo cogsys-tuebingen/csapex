@@ -21,12 +21,6 @@ PasteGraph::PasteGraph(const AUUID &graph_id, const Snippet &blueprint, const Po
     : Meta(graph_id, "PasteGraph"), blueprint_(blueprint), pos_(pos)
 {
 }
-
-std::string PasteGraph::getType() const
-{
-    return "PasteGraph";
-}
-
 std::string PasteGraph::getDescription() const
 {
     return std::string("paste into a graph");

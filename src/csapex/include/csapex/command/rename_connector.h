@@ -2,7 +2,7 @@
 #define RENAME_CONNECTOR_H
 
 /// COMPONENT
-#include "command.h"
+#include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 
 namespace csapex
@@ -10,11 +10,13 @@ namespace csapex
 namespace command
 {
 
-struct CSAPEX_COMMAND_EXPORT RenameConnector : public Command
+class CSAPEX_COMMAND_EXPORT RenameConnector : public CommandImplementation<RenameConnector>
 {
+    COMMAND_HEADER(RenameConnector);
+
+public:
     RenameConnector(const AUUID &graph_uuid, const UUID& connector, const std::string &new_name);
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

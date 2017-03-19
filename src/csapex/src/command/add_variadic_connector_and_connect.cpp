@@ -26,11 +26,6 @@ AddVariadicConnectorAndConnect::AddVariadicConnectorAndConnect(const AUUID& grap
 {
 }
 
-std::string AddVariadicConnectorAndConnect::getType() const
-{
-    return "AddVariadicConnectorAndConnect";
-}
-
 std::string AddVariadicConnectorAndConnect::getDescription() const
 {
     return AddVariadicConnector::getDescription() + " and connect it";
