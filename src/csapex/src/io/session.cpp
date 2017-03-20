@@ -13,6 +13,7 @@
 
 /// SYSTEM
 #include <csapex/utility/error_handling.h>
+#include <iostream>
 
 using namespace csapex;
 using boost::asio::ip::tcp;
