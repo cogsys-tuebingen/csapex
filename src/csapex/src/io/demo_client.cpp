@@ -85,6 +85,16 @@ int main(int argc, char* argv[])
             param::ParameterPtr p = settings.get("access-test");
             std::cerr << p->as<std::string>() << std::endl;
             apex_assert_equal_hard(std::string("access granted."), p->as<std::string>());
+
+            p->parameter_changed.connect([](param::Parameter*p) {
+               std::cerr << "test observer has changed to " << p->as<std::string>() << std::endl;
+            });
+
+
+            param::ParameterPtr test_observer = settings.get("test-observer");
+            test_observer->set<std::string>("change request");
+
+
         } catch(const std::out_of_range& e) {
             std::cerr << "no access to server settings" << std::endl;
             std::exit(1);

@@ -63,6 +63,8 @@ public:
 
     virtual uint8_t getPacketType() const override;
 
+    std::shared_ptr<Clonable> cloneRaw() const override;
+    virtual void cloneFrom(const Command& other);
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(SerializationBuffer& data) override;

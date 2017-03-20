@@ -8,6 +8,8 @@
 #include <csapex/io/request.h>
 #include <csapex/io/response.h>
 #include <csapex/io/feedback.h>
+#include <csapex/command/update_parameter.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <cstdlib>
@@ -53,6 +55,15 @@ void Server::do_accept()
                 auto pos = std::find(sessions_.begin(), sessions_.end(), w_session.lock());
                 if(pos != sessions_.end()) {
                     sessions_.erase(pos);
+                }
+            });
+
+
+            observe(core_->getSettings().setting_changed, [this, w_session](const std::string& name) {
+                if(SessionPtr session = w_session.lock()) {
+                    UUID id = UUIDProvider::makeUUID_without_parent(std::string(":") + name);
+                    CommandPtr change = std::make_shared<command::UpdateParameter>(id, core_->getSettings().get(name));
+                    session->write(change);
                 }
             });
 

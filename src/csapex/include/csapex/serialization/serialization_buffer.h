@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/assert.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <vector>
@@ -10,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <limits>
+#include <boost/any.hpp>
 
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
 union _GFloatIEEE754
@@ -306,6 +308,101 @@ public:
         s.str(str);
         return *this;
     }
+
+    // UUID
+    SerializationBuffer& operator << (const UUID& s)
+    {
+        apex_assert_gte_hard(pos, HEADER_LENGTH);
+        operator << (s.getFullName());
+        return *this;
+    }
+
+    SerializationBuffer& operator >> (UUID& s)
+    {
+        apex_assert_gte_hard(pos, HEADER_LENGTH);
+        std::string full_name;
+        operator >> (full_name);
+        s = UUIDProvider::makeUUID_without_parent(full_name);
+        return *this;
+    }
+
+
+    // BOOST ANY
+    SerializationBuffer& operator << (const boost::any& any)
+    {
+        apex_assert_gte_hard(pos, HEADER_LENGTH);
+
+        if(any.type() == typeid(int)) {
+            operator << ((uint8_t) 0);
+            operator << (boost::any_cast<int> (any));
+
+        } else if(any.type() == typeid(double)) {
+            operator << ((uint8_t) 1);
+            operator << (boost::any_cast<double> (any));
+
+        } else if(any.type() == typeid(bool)) {
+            operator << ((uint8_t) 2);
+            operator << (boost::any_cast<bool> (any));
+
+        } else if(any.type() == typeid(std::string)) {
+            operator << ((uint8_t) 3);
+            operator << (boost::any_cast<std::string> (any));
+
+        } else if(any.type() == typeid(long)) {
+            operator << ((uint8_t) 4);
+            operator << (boost::any_cast<long> (any));
+        }
+
+        return *this;
+    }
+
+    SerializationBuffer& operator >> (boost::any& any)
+    {
+        apex_assert_gte_hard(pos, HEADER_LENGTH);
+
+        uint8_t type;
+        operator >> (type);
+
+        switch(type) {
+        case 0:
+        {
+            int v;
+            operator >> (v);
+            any = v;
+        }
+            break;
+        case 1:
+        {
+            double v;
+            operator >> (v);
+            any = v;
+        }
+            break;
+        case 2:
+        {
+            bool v;
+            operator >> (v);
+            any = v;
+        }
+            break;
+        case 3:
+        {
+            std::string v;
+            operator >> (v);
+            any = v;
+        }
+            break;
+        case 4:
+        {
+            long v;
+            operator >> (v);
+            any = v;
+        }
+            break;
+        }
+        return *this;
+    }
+
 
     std::size_t pos;
 };

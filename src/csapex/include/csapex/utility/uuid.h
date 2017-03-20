@@ -74,6 +74,9 @@ public:
 
     bool empty() const;
 
+    bool global() const;
+    std::string globalName() const;
+
     AUUID getAbsoluteUUID() const;
 
 private:

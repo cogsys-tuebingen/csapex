@@ -32,10 +32,8 @@ ResponsePtr RequestParameter::ParameterRequest::execute(CsApexCore &core) const
 {
     std::shared_ptr<ParameterResponse> response;
 
-    std::string name = id_.getFullName();
-    bool is_setting = name.at(0) == ':';
-    if(is_setting) {
-        auto param = core.getSettings().get(name.substr(1));
+    if(id_.global()) {
+        auto param = core.getSettings().get(id_.globalName());
         response = std::make_shared<ParameterResponse>(param, getRequestID());
     } else {
         // TODO: get the parameter from the node
@@ -46,14 +44,12 @@ ResponsePtr RequestParameter::ParameterRequest::execute(CsApexCore &core) const
 
 void RequestParameter::ParameterRequest::serialize(SerializationBuffer &data) const
 {
-    data << id_.getFullName();
+    data << id_;
 }
 
 void RequestParameter::ParameterRequest::deserialize(SerializationBuffer& data)
 {
-    std::string full_name;
-    data >> full_name;
-    id_ = AUUID(UUIDProvider::makeUUID_without_parent(full_name));
+    data >> id_;
 }
 
 ///

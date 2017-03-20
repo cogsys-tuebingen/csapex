@@ -65,7 +65,7 @@ struct CommandSerializerRegistered
         }\
     };\
     }\
-    CommandSerializerRegistered<Name##Serializer> g_register_command_serializer_quit_(Name::typeName());\
+    CommandSerializerRegistered<Name##Serializer> g_register_command_serializer_##Name##_(Name::typeName());\
     }
 
 #endif // COMMAND_SERIALIZER_H

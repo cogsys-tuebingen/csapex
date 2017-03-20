@@ -31,6 +31,11 @@ public:
 
     virtual bool isUndoable() const override;
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
+    virtual void cloneFrom(const Command& other);
+
 protected:
     bool doExecute() override;
     bool doUndo() override;

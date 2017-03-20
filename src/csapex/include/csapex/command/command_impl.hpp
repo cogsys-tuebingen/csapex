@@ -56,8 +56,9 @@ protected: \
     friend class CommandImplementation<Instance>
 
 #define COMMAND_HEADER(Instance)\
-protected: \
+public: \
     Instance() {} \
+protected: \
     COMMAND_HEADER_NO_DEFAULT(Instance)
 
 #endif // COMMAND_IMPL_HPP

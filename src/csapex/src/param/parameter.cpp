@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/param/io.h>
 #include <csapex/param/value_parameter.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -42,12 +43,12 @@ uint8_t Parameter::getPacketType() const
 
 void Parameter::serialize(SerializationBuffer &data) const
 {
-
+    data << uuid_;
 }
 
 void Parameter::deserialize(SerializationBuffer& data)
 {
-
+    data >> uuid_;
 }
 
 void Parameter::setUUID(const UUID& uuid)
@@ -232,6 +233,7 @@ void Parameter::cloneFrom(const Parameter &other)
     interactive_ = other.interactive_;
     enabled_ = other.enabled_;
     dict_ = other.dict_;
+    uuid_ = other.uuid_;
     doClone(other);
 }
 

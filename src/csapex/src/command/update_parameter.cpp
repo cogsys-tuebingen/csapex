@@ -10,6 +10,8 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/core/settings.h>
 #include <csapex/core/csapex_core.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -21,6 +23,7 @@
 
 using namespace csapex::command;
 
+REGISTER_COMMAND_SERIALIZER(UpdateParameter)
 
 bool UpdateParameter::isUndoable() const
 {
@@ -106,11 +109,9 @@ bool UpdateParameter::doExecute()
 template <typename T>
 void UpdateParameter::setParameter(const T& value)
 {
-    std::string full_name = uuid.getFullName();
-
-    if(full_name.at(0) == ':') {
+    if(uuid.global()) {
         // setting
-        core_->getSettings().set(full_name.substr(1), value);
+        core_->getSettings().set(uuid.globalName(), value);
 
     } else {
         UUID node_uuid = uuid.parentUUID();
@@ -136,3 +137,24 @@ bool UpdateParameter::doRedo()
     return doExecute();
 }
 
+
+void UpdateParameter::serialize(SerializationBuffer &data) const
+{
+    data << uuid;
+    data << value;
+}
+
+void UpdateParameter::deserialize(SerializationBuffer& data)
+{
+    data >> uuid;
+    data >> value;
+}
+
+void UpdateParameter::cloneFrom(const Command& other)
+{
+    const UpdateParameter* update = dynamic_cast<const UpdateParameter*>(&other);
+    if(update) {
+        uuid = update->uuid;
+        value = update->value;
+    }
+}

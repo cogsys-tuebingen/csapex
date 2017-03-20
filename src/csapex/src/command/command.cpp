@@ -167,3 +167,15 @@ void Command::deserialize(SerializationBuffer& data)
 {
     throw std::runtime_error("command is not serializable");
 }
+
+std::shared_ptr<Clonable> Command::cloneRaw() const
+{
+    auto res = std::dynamic_pointer_cast<Command>(makeEmptyClone());
+    res->cloneFrom(*this);
+    return res;
+}
+
+void Command::cloneFrom(const Command& other)
+{
+
+}

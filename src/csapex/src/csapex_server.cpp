@@ -55,6 +55,18 @@ int CsApexServer::run()
 
     core->startup();
 
+    settings.set("test-observer", std::string("nothing"));
+
+    param::ParameterPtr param = settings.get("test-observer");
+    param->parameter_changed.connect([this](param::Parameter* p) {
+       std::cerr << "test observer changed to " << p->as<std::string>() << std::endl;
+       if(p->as<std::string>() == "change request") {
+           p->set<std::string>("change has been processed");
+       }
+    });
+
+    settings.set("test-observer", std::string("initialized"));
+
     server.start();
 
     return 0;

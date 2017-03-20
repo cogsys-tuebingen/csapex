@@ -182,70 +182,16 @@ void ValueParameter::doSerialize(YAML::Node& n) const
 
 void ValueParameter::serialize(SerializationBuffer &data) const
 {
-    if(value_.type() == typeid(int)) {
-        data << (uint8_t) 0;
-        data << boost::any_cast<int> (value_);
+    Parameter::serialize(data);
 
-    } else if(value_.type() == typeid(double)) {
-        data << (uint8_t) 1;
-        data << boost::any_cast<double> (value_);
-
-    } else if(value_.type() == typeid(bool)) {
-        data << (uint8_t) 2;
-        data << boost::any_cast<bool> (value_);
-
-    } else if(value_.type() == typeid(std::string)) {
-        data << (uint8_t) 3;
-        data << boost::any_cast<std::string> (value_);
-
-    } else if(value_.type() == typeid(long)) {
-        data << (uint8_t) 4;
-        data << boost::any_cast<long> (value_);
-    }
+    data << value_;
 }
 
 void ValueParameter::deserialize(SerializationBuffer& data)
 {
-    uint8_t type;
-    data >> type;
+    Parameter::deserialize(data);
 
-    switch(type) {
-    case 0:
-    {
-        int v;
-        data >> v;
-        value_ = v;
-    }
-        break;
-    case 1:
-    {
-        double v;
-        data >> v;
-        value_ = v;
-    }
-        break;
-    case 2:
-    {
-        bool v;
-        data >> v;
-        value_ = v;
-    }
-        break;
-    case 3:
-    {
-        std::string v;
-        data >> v;
-        value_ = v;
-    }
-        break;
-    case 4:
-    {
-        long v;
-        data >> v;
-        value_ = v;
-    }
-        break;
-    }
+    data >> value_;
 }
 
 

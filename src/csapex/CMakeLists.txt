@@ -153,6 +153,32 @@ endif()
 
 set(csapex_LIBRARIES)
 
+file(GLOB_RECURSE csapex_serialization_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex/serializationity/*.h*)
+
+add_library(csapex_serialization SHARED
+
+    src/serialization/serializable.cpp
+    src/serialization/yaml.cpp
+    src/serialization/message_serializer.cpp
+    src/serialization/node_serializer.cpp
+    src/serialization/snippet.cpp
+    src/serialization/packet_serializer.cpp
+
+    ${csapex_serialization_HEADERS}
+)
+generate_export_header( csapex_serialization
+             BASE_NAME csapex_serialization
+             EXPORT_MACRO_NAME CSAPEX_serializationS_EXPORT
+             EXPORT_FILE_NAME csapex_serialization_export.h
+             STATIC_DEFINE csapex_serialization_BUILT_AS_STATIC
+                         )
+target_link_libraries(csapex_serialization
+    ${Boost_LIBRARIES}
+    ${YAML-CPP_LIBRARY}
+)
+
+list(APPEND csapex_LIBRARIES csapex_serialization)
+
 
 file(GLOB_RECURSE csapex_util_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex/utility/*.h*)
 
@@ -218,7 +244,9 @@ add_library(csapex_param SHARED
     src/param/parameter_factory.cpp
     src/param/parameter_map.cpp
     src/param/parameter_provider.cpp
-	
+
+    src/serialization/parameter_serializer.cpp
+
     ${csapex_param_HEADERS}
 )
 generate_export_header( csapex_param
@@ -229,6 +257,7 @@ generate_export_header( csapex_param
 			 )
 target_link_libraries(csapex_param
     csapex_util
+    csapex_serialization
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
 )
@@ -360,17 +389,6 @@ add_library(csapex SHARED
     src/msg/direct_connection.cpp
     src/msg/generic_vector_message.cpp
 
-    src/serialization/serializable.cpp
-    src/serialization/yaml.cpp
-    src/serialization/message_serializer.cpp
-    src/serialization/node_serializer.cpp
-    src/serialization/snippet.cpp
-    src/serialization/request_serializer.cpp
-    src/serialization/broadcast_message_serializer.cpp
-    src/serialization/feedback_serializer.cpp
-    src/serialization/parameter_serializer.cpp
-    src/serialization/packet_serializer.cpp
-
     src/plugin/plugin_locator.cpp
 
     src/scheduling/executor.cpp
@@ -383,17 +401,6 @@ add_library(csapex SHARED
 
     src/signal/slot.cpp
     src/signal/event.cpp
-
-    src/io/server.cpp
-    src/io/request.cpp
-    src/io/response.cpp
-    src/io/feedback.cpp
-    src/io/broadcast_message.cpp
-    src/io/session.cpp
-
-    src/io/protocol/notification_message.cpp
-    src/io/protocol/tick_message.cpp
-    src/io/protocol/request_parameter.cpp
 
     ${csapex_HEADERS}
 )
@@ -408,6 +415,7 @@ target_link_libraries(csapex
     csapex_util
     csapex_profiling
     csapex_param
+    csapex_serialization
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
     ${TinyXML_LIBRARIES}
@@ -473,8 +481,9 @@ generate_export_header( csapex_command
                          )
 target_link_libraries(csapex_command
     csapex_util
-        csapex_param
-        csapex
+    csapex_param
+    csapex_serialization
+    csapex
 
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
@@ -496,6 +505,21 @@ file(GLOB_RECURSE csapex_remote_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOL
 
 add_library(csapex_remote SHARED
     src/core/settings/settings_remote.cpp
+
+    src/io/server.cpp
+    src/io/request.cpp
+    src/io/response.cpp
+    src/io/feedback.cpp
+    src/io/broadcast_message.cpp
+    src/io/session.cpp
+
+    src/io/protocol/notification_message.cpp
+    src/io/protocol/tick_message.cpp
+    src/io/protocol/request_parameter.cpp
+
+    src/serialization/request_serializer.cpp
+    src/serialization/broadcast_message_serializer.cpp
+    src/serialization/feedback_serializer.cpp
 
     ${csapex_remote_HEADERS}
 )
@@ -663,6 +687,7 @@ endif()
 
 set_target_properties(csapex_main PROPERTIES AUTOMOC TRUE)
 target_link_libraries(csapex_main
+    csapex_remote
     csapex_qt
     ${Boost_LIBRARIES})
 
@@ -673,6 +698,7 @@ add_executable(csapex_server
         src/csapex_server.cpp)
 
 target_link_libraries(csapex_server
+    csapex_remote
     csapex_qt
     ${Boost_LIBRARIES})
 

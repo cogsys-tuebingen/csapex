@@ -26,7 +26,7 @@ NotificationMessage::NotificationMessage()
 void NotificationMessage::serialize(SerializationBuffer &data) const
 {
 //    std::cerr << "serializing Notification" << std::endl;
-    data << notification.auuid.getFullName();
+    data << notification.auuid;
 
     data << notification.error;
     data << notification.message;
@@ -35,10 +35,7 @@ void NotificationMessage::serialize(SerializationBuffer &data) const
 void NotificationMessage::deserialize(SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Notification" << std::endl;
-
-    std::string full_name;
-    data >> full_name;
-    notification.auuid = AUUID(UUIDProvider::makeUUID_without_parent(full_name));
+    data >> notification.auuid;
 
 //    std::cerr << "full name: " << full_name << std::endl;
 

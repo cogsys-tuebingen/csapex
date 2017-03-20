@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/param/io.h>
 #include <csapex/utility/delegate.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -121,6 +122,7 @@ void SettingsLocal::load()
 
     for(std::size_t i = 0, n = doc.size(); i < n; ++i) {
         csapex::param::Parameter::Ptr p = doc[i].as<csapex::param::Parameter::Ptr>();
+        p->setUUID(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
 
         Entry& entry = settings_[p->name()];
         entry.parameter = p;
@@ -130,6 +132,8 @@ void SettingsLocal::load()
 
 void SettingsLocal::add(csapex::param::Parameter::Ptr p, bool persistent)
 {
+    p->setUUID(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
+
     Entry& entry = settings_[p->name()];
     entry.parameter = p;
     entry.persistent = persistent;

@@ -25,6 +25,20 @@ bool UUID::empty() const
 {
     return representation_.empty();
 }
+bool UUID::global() const
+{
+    if(empty() || composite()) {
+        return false;
+    }
+
+    return representation_.back().at(0) == ':';
+}
+
+std::string UUID::globalName() const
+{
+    apex_assert_hard(global());
+    return representation_.back().substr(1);
+}
 
 std::string UUID::stripNamespace(const std::string &name)
 {
