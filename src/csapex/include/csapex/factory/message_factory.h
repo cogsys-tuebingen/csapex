@@ -14,6 +14,7 @@
 #include <string>
 #include <functional>
 #include <boost/type_traits.hpp>
+#include <typeindex>
 
 namespace YAML {
 class Emitter;
@@ -52,22 +53,25 @@ public:
     static void registerDirectMessage()
     {
         MessageFactory::instance().registerMessage(connection_types::serializationName< Wrapper<M> >(),
+                                                   std::type_index(typeid(Wrapper<M>)),
                                                    std::bind(&MessageFactory::createDirectMessage<Wrapper, M>));
     }
 
     template <typename M>
     static void registerMessage() {
         MessageFactory::instance().registerMessage(connection_types::serializationName<M>(),
+                                                   std::type_index(typeid(M)),
                                                    std::bind(&MessageFactory::createMessage<M>));
     }
 
 private:
     MessageFactory();
 
-    static void registerMessage(std::string type, Constructor constructor);
+    static void registerMessage(std::string type, std::type_index typeindex, Constructor constructor);
 
 private:
     std::map<std::string, Constructor> type_to_constructor;
+    std::map<std::string, std::type_index> type_to_type_index;
 };
 
 

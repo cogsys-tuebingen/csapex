@@ -71,17 +71,15 @@ void MessageFactory::writeMessage(YAML::Emitter &yaml, const TokenData& msg)
 }
 
 
-void MessageFactory::registerMessage(std::string type, Constructor constructor)
+void MessageFactory::registerMessage(std::string type, std::type_index typeindex, Constructor constructor)
 {
     MessageFactory& i = instance();
 
     std::map<std::string, Constructor>::const_iterator it = i.type_to_constructor.find(type);
 
-    if(it != i.type_to_constructor.end()) {
-        return;
-    }
-
-    apex_assert_hard(it == i.type_to_constructor.end());
+    apex_assert_hard_msg(it == i.type_to_constructor.end() || i.type_to_type_index.at(type) == typeindex,
+                         std::string("there are two or more messages of type '") + type + "' registered");
 
     i.type_to_constructor.insert(std::make_pair(type, constructor));
+    i.type_to_type_index.insert(std::make_pair(type, typeindex));
 }

@@ -13,6 +13,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <exception>
 #include <thread>
 #include <boost/program_options.hpp>
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -59,10 +60,10 @@ int CsApexServer::run()
 
     param::ParameterPtr param = settings.get("test-observer");
     param->parameter_changed.connect([this](param::Parameter* p) {
-       std::cerr << "test observer changed to " << p->as<std::string>() << std::endl;
-       if(p->as<std::string>() == "change request") {
-           p->set<std::string>("change has been processed");
-       }
+        std::cerr << "test observer changed to " << p->as<std::string>() << std::endl;
+        if(p->as<std::string>() == "change request") {
+            p->set<std::string>("change has been processed");
+        }
     });
 
     settings.set("test-observer", std::string("initialized"));
@@ -72,8 +73,29 @@ int CsApexServer::run()
     return 0;
 }
 
+void csapex_terminate () {
+    if( auto e = std::current_exception() ) {
+        try {
+            std::rethrow_exception(e);
+
+        } catch(const csapex::HardAssertionFailure& e ) {
+            std::cerr << "CS::APEX terminated with a failed assertion: " << e.what() << std::endl;
+
+        } catch(const std::exception& e ) {
+            std::cerr << "CS::APEX terminated with an exception: " << e.what() << std::endl;
+
+        } catch( ... ) {
+            std::cerr << "CS::APEX terminated with an unknown cause." << std::endl;
+        }
+    }
+    abort();  // forces abnormal termination
+}
+
+
 int main(int argc, char** argv)
 {
+    std::set_terminate (csapex_terminate);
+
     SettingsLocal settings;
 
     int effective_argc = argc;
