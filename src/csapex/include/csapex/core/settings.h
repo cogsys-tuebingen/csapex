@@ -36,8 +36,8 @@ public:
     Settings();
     virtual ~Settings();
 
-    virtual bool isQuiet() const = 0;
-    virtual void setQuiet(bool quiet) = 0;
+    virtual bool isQuiet() const;
+    virtual void setQuiet(bool quiet);
 
     virtual bool knows(const std::string& name) const = 0;
 
@@ -107,6 +107,9 @@ public:
         }
     }
 
+protected:
+    void settingsChanged(const std::string& key);
+
 public:
     csapex::slim_signal::Signal<void(const std::string&)> setting_changed;
     csapex::slim_signal::Signal<void()> settings_changed;
@@ -116,6 +119,10 @@ public:
 
     csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& e)> save_detail_request;
     csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& n)> load_detail_request;
+
+protected:
+    bool quiet_;
+    std::vector<std::string> changes_;
 };
 
 }

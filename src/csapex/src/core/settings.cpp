@@ -69,6 +69,7 @@ std::string Settings::defaultConfigFile()
 }
 
 Settings::Settings()
+    : quiet_(false)
 {
 }
 
@@ -84,4 +85,36 @@ void Settings::addPersistent(csapex::param::Parameter::Ptr p)
 void Settings::addTemporary(csapex::param::Parameter::Ptr p)
 {
     add(p, false);
+}
+
+
+bool Settings::isQuiet() const
+{
+    return quiet_;
+}
+
+void Settings::setQuiet(bool quiet)
+{
+    if(quiet != quiet_) {
+        quiet_ = quiet;
+
+        if(!quiet && !changes_.empty()) {
+            for(const std::string& key : changes_) {
+                setting_changed(key);
+            }
+            changes_.clear();
+            settings_changed();
+        }
+    }
+}
+
+void Settings::settingsChanged(const std::string &key)
+{
+    if(quiet_) {
+        changes_.push_back(key);
+
+    } else {
+        setting_changed(key);
+        settings_changed();
+    }
 }

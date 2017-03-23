@@ -34,44 +34,11 @@ using namespace csapex;
 SettingsLocal SettingsLocal::NoSettings(false);
 
 SettingsLocal::SettingsLocal(bool load_from_config)
-    : quiet_(false)
 {
     if(load_from_config) {
         load();
     }
 }
-
-bool SettingsLocal::isQuiet() const
-{
-    return quiet_;
-}
-
-void SettingsLocal::setQuiet(bool quiet)
-{
-    if(quiet != quiet_) {
-        quiet_ = quiet;
-
-        if(!quiet && !changes_.empty()) {
-            for(const std::string& key : changes_) {
-                setting_changed(key);
-            }
-            changes_.clear();
-            settings_changed();
-        }
-    }
-}
-
-void SettingsLocal::settingsChanged(const std::string &key)
-{
-    if(quiet_) {
-        changes_.push_back(key);
-
-    } else {
-        setting_changed(key);
-        settings_changed();
-    }
-}
-
 
 void SettingsLocal::save()
 {
@@ -140,7 +107,6 @@ void SettingsLocal::add(csapex::param::Parameter::Ptr p, bool persistent)
 
     observe(p->parameter_changed, [this](param::Parameter* p) {
         settingsChanged(p->name());
-        settings_changed();
     });
 
     settingsChanged(p->name());

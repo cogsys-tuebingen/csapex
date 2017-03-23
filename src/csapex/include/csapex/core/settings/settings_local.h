@@ -16,9 +16,6 @@ public:
 public:
     SettingsLocal(bool load_from_config = true);
 
-    bool isQuiet() const override;
-    void setQuiet(bool quiet) override;
-
     bool knows(const std::string& name) const override;
 
     void add(csapex::param::Parameter::Ptr p, bool persistent) override;
@@ -29,8 +26,6 @@ public:
     void load() override;
 
 private:
-    void settingsChanged(const std::string& key);
-private:
     struct Entry
     {
         csapex::param::Parameter::Ptr parameter;
@@ -38,9 +33,6 @@ private:
     };
 
     std::map<std::string, Entry> settings_;
-
-    bool quiet_;
-    std::vector<std::string> changes_;
 };
 
 }

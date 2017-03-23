@@ -115,6 +115,8 @@ void SettingsRemote::createParameterProxy(const std::string &name, param::Parame
         param->get_unsafe(raw);
         CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
         session_->write(change);
+
+        settingsChanged(param->name());
     });
 
     cache_[name] = proxy;
