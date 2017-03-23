@@ -33,6 +33,8 @@ private:
     std::map<int, std::shared_ptr<ParameterSerializerInterface>> serializers_;
 };
 
+/// REGISTRATION
+
 template <typename S>
 struct ParameterSerializerRegistered
 {
@@ -41,6 +43,31 @@ struct ParameterSerializerRegistered
     }
 };
 }
+
+
+#define CSAPEX_REGISTER_PARAMETER_SERIALIZER(Name) \
+    namespace csapex \
+    { \
+    namespace param \
+    { \
+     \
+    class Name##Serializer : public ParameterSerializerInterface \
+    { \
+        virtual void serialize(const ParameterConstPtr& packet, SerializationBuffer &data) const override \
+        { \
+            packet->serialize(data); \
+        } \
+        virtual ParameterPtr deserialize(SerializationBuffer& data) override \
+        { \
+            auto result = std::make_shared<Name>(); \
+            result->deserialize(data); \
+            return result; \
+        } \
+    }; \
+    } \
+    ParameterSerializerRegistered<param::Name##Serializer> g_register_##Name##_serializer(param::Name::NUMERICAL_ID); \
+    }
+
 
 
 #endif // PARAMETER_SERIALIZER_H

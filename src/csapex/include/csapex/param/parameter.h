@@ -168,6 +168,7 @@ public:
     }
 
     virtual void get_unsafe(boost::any& out) const = 0;
+    virtual bool set_unsafe(const boost::any& v) = 0;
 
 public:
     static std::string type2string(const std::type_info& type);
@@ -181,7 +182,6 @@ protected:
     Parameter(const Parameter& other);
 
     void access_unsafe(const Parameter &p, boost::any& out) const;
-    virtual bool set_unsafe(const boost::any& v) = 0;
 
 private:
     void setName(const std::string& name);

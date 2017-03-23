@@ -23,7 +23,7 @@
 
 using namespace csapex::command;
 
-REGISTER_COMMAND_SERIALIZER(UpdateParameter)
+CSAPEX_REGISTER_COMMAND_SERIALIZER(UpdateParameter)
 
 bool UpdateParameter::isUndoable() const
 {

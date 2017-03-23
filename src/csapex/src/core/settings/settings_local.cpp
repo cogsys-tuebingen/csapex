@@ -138,7 +138,8 @@ void SettingsLocal::add(csapex::param::Parameter::Ptr p, bool persistent)
     entry.parameter = p;
     entry.persistent = persistent;
 
-    observe(p->parameter_changed, [this](param::Parameter*) {
+    observe(p->parameter_changed, [this](param::Parameter* p) {
+        settingsChanged(p->name());
         settings_changed();
     });
 

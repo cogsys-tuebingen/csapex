@@ -8,6 +8,8 @@
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(ValueParameter)
+
 using namespace csapex;
 using namespace param;
 
@@ -192,28 +194,5 @@ void ValueParameter::deserialize(SerializationBuffer& data)
     Parameter::deserialize(data);
 
     data >> value_;
-}
-
-
-namespace csapex
-{
-namespace param
-{
-
-class ValueParameterSerializer : public ParameterSerializerInterface
-{
-    virtual void serialize(const ParameterConstPtr& packet, SerializationBuffer &data) const override
-    {
-        packet->serialize(data);
-    }
-    virtual ParameterPtr deserialize(SerializationBuffer& data) override
-    {
-        auto result = std::make_shared<ValueParameter>();
-        result->deserialize(data);
-        return result;
-    }
-};
-}
-ParameterSerializerRegistered<param::ValueParameterSerializer> g_register_value_parameter_serializer(ValueParameter::NUMERICAL_ID);
 }
 

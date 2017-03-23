@@ -9,6 +9,7 @@
 /// SYSTEM
 #include <iostream>
 
+CSAPEX_REGISTER_BROADCAST_SERIALIZER(NotificationMessage)
 
 using namespace csapex;
 
@@ -50,26 +51,3 @@ const Notification& NotificationMessage::getNotification() const
 {
     return notification;
 }
-
-namespace csapex
-{
-namespace io
-{
-
-class NotificationMessageSerializer : public BroadcastMessageSerializerInterface
-{
-    virtual void serialize(const BroadcastMessageConstPtr& packet, SerializationBuffer &data) override
-    {
-        packet->serialize(data);
-    }
-    virtual BroadcastMessagePtr deserialize(SerializationBuffer& data) override
-    {
-        auto result = std::make_shared<NotificationMessage>();
-        result->deserialize(data);
-        return result;
-    }
-};
-}
-BroadcastMessageSerializerRegistered<io::NotificationMessageSerializer> g_register_broadcast_message_notification_(NotificationMessage::typeName());
-}
-

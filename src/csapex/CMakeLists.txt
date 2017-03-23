@@ -514,6 +514,7 @@ add_library(csapex_remote SHARED
     src/io/session.cpp
 
     src/io/protocol/notification_message.cpp
+    src/io/protocol/parameter_changed.cpp
     src/io/protocol/tick_message.cpp
     src/io/protocol/request_parameter.cpp
 

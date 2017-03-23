@@ -11,7 +11,7 @@
 
 using namespace csapex;
 
-SerializerRegistered<CommandSerializer> g_register_command_serializer_(Command::PACKET_TYPE_ID, &CommandSerializer::instance());
+SerializerRegistered<CommandSerializer> g_CSAPEX_REGISTER_COMMAND_SERIALIZER_(Command::PACKET_TYPE_ID, &CommandSerializer::instance());
 
 
 CommandSerializerInterface::~CommandSerializerInterface()

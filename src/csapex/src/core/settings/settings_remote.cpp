@@ -67,10 +67,10 @@ void SettingsRemote::addTemporary(csapex::param::Parameter::Ptr p)
 
 csapex::param::Parameter::Ptr SettingsRemote::get(const std::string &name) const
 {
-    //    use tcp to get the parameter:
-    //        - derive parameter from serializable
-    //        - make value parameter serializable
-    //        - get the parameter via request
+    auto it = cache_.find(name);
+    if(it != cache_.end()) {
+        return it->second;
+    }
 
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + name));
     std::shared_ptr<RequestParameter::ParameterRequest> request = std::make_shared<RequestParameter::ParameterRequest>(param_id);
@@ -91,6 +91,8 @@ csapex::param::Parameter::Ptr SettingsRemote::get(const std::string &name) const
             CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
             session_->write(change);
         });
+
+        cache_[name] = proxy;
 
         return proxy;
     }

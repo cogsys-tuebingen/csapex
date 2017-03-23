@@ -10,6 +10,7 @@
 #include <csapex/io/feedback.h>
 #include <csapex/command/update_parameter.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/io/protcol/parameter_changed.h>
 
 /// SYSTEM
 #include <cstdlib>
@@ -62,8 +63,11 @@ void Server::do_accept()
             observe(core_->getSettings().setting_changed, [this, w_session](const std::string& name) {
                 if(SessionPtr session = w_session.lock()) {
                     UUID id = UUIDProvider::makeUUID_without_parent(std::string(":") + name);
-                    CommandPtr change = std::make_shared<command::UpdateParameter>(id, core_->getSettings().get(name));
-                    session->write(change);
+                    param::ParameterPtr p = core_->getSettings().get(name);
+
+                    boost::any any;
+                    p->get_unsafe(any);
+                    session->write(std::make_shared<ParameterChanged>(id, any));
                 }
             });
 

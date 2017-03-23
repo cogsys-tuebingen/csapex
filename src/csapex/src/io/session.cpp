@@ -159,7 +159,7 @@ void Session::write_packet(SerializationBuffer &buffer)
 
         apex_assert_hard(socket_.is_open());
 
-        std::cerr << "sending:\n" << buffer.toString() << std::endl;
+//        std::cerr << "sending:\n" << buffer.toString() << std::endl;
 
         boost::asio::async_write(socket_, boost::asio::buffer(buffer, buffer.size()),
                                  [](boost::system::error_code /*ec*/, std::size_t /*length*/){});

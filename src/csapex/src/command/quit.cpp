@@ -19,7 +19,7 @@
 
 using namespace csapex::command;
 
-REGISTER_COMMAND_SERIALIZER(Quit)
+CSAPEX_REGISTER_COMMAND_SERIALIZER(Quit)
 
 Quit::Quit()
 {

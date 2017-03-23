@@ -33,17 +33,6 @@ public:
 
 private:
     void settingsChanged(const std::string& key);
-
-public:
-    csapex::slim_signal::Signal<void(const std::string&)> setting_changed;
-    csapex::slim_signal::Signal<void()> settings_changed;
-
-    csapex::slim_signal::Signal<void (YAML::Node& e)> save_request;
-    csapex::slim_signal::Signal<void (YAML::Node& n)> load_request;
-
-    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& e)> save_detail_request;
-    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& n)> load_detail_request;
-
 private:
     struct Entry
     {

@@ -43,7 +43,7 @@ struct CommandSerializerRegistered
 }
 
 
-#define REGISTER_COMMAND_SERIALIZER(Name) \
+#define CSAPEX_REGISTER_COMMAND_SERIALIZER(Name) \
     namespace csapex\
     {\
     namespace command\
@@ -65,7 +65,7 @@ struct CommandSerializerRegistered
         }\
     };\
     }\
-    CommandSerializerRegistered<Name##Serializer> g_register_command_serializer_##Name##_(Name::typeName());\
+    CommandSerializerRegistered<Name##Serializer> g_CSAPEX_REGISTER_COMMAND_SERIALIZER_##Name##_(Name::typeName());\
     }
 
 #endif // COMMAND_SERIALIZER_H

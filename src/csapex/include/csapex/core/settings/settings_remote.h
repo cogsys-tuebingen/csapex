@@ -31,6 +31,8 @@ public:
 
 private:
     SessionPtr session_;
+
+    mutable std::map<std::string, param::ParameterPtr> cache_;
 };
 
 }

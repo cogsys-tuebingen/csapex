@@ -33,6 +33,9 @@ private:
     std::map<std::string, std::shared_ptr<BroadcastMessageSerializerInterface>> serializers_;
 };
 
+
+/// REGISTRATION
+
 template <typename S>
 struct BroadcastMessageSerializerRegistered
 {
@@ -41,6 +44,29 @@ struct BroadcastMessageSerializerRegistered
     }
 };
 }
+
+
+#define CSAPEX_REGISTER_BROADCAST_SERIALIZER(Name) \
+    namespace csapex \
+    { \
+    namespace io \
+    { \
+    class Name##Serializer : public BroadcastMessageSerializerInterface \
+    { \
+        virtual void serialize(const BroadcastMessageConstPtr& packet, SerializationBuffer &data) override \
+        { \
+            packet->serialize(data); \
+        } \
+        virtual BroadcastMessagePtr deserialize(SerializationBuffer& data) override \
+        { \
+            auto result = std::make_shared<Name>(); \
+            result->deserialize(data); \
+            return result; \
+        } \
+    }; \
+    } \
+    BroadcastMessageSerializerRegistered<io::Name##Serializer> g_register_broadcast_message_##Name##_(Name::typeName()); \
+    }
 
 
 #endif // BROADCAST_MESSAGE_SERIALIZER_H
