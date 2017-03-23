@@ -145,14 +145,6 @@ void SettingsLocal::add(csapex::param::Parameter::Ptr p, bool persistent)
 
     settingsChanged(p->name());
 }
-void SettingsLocal::addPersistent(csapex::param::Parameter::Ptr p)
-{
-    add(p, true);
-}
-void SettingsLocal::addTemporary(csapex::param::Parameter::Ptr p)
-{
-    add(p, false);
-}
 
 csapex::param::Parameter::Ptr SettingsLocal::get(const std::string &name) const
 {

@@ -30,12 +30,40 @@ Session::~Session()
     if(live_) {
         socket_.close();
     }
+
+    if(packet_handler_thread_.joinable()) {
+        packet_handler_thread_.join();
+    }
 }
 
 void Session::start()
 {
     live_ = true;
     started();
+
+    packet_handler_thread_ = std::thread([this](){
+        while(live_) {
+            std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
+            while(packets_.empty()) {
+                packets_available_.wait_for(packet_lock, std::chrono::milliseconds(100));
+            }
+
+            while(!packets_.empty()) {
+                SerializableConstPtr next = packets_.front();
+                packets_.pop_front();
+                packet_lock.unlock();
+
+                try {
+                    packet_received(next);
+                } catch(...) {
+                    // silent death
+                }
+
+                packet_lock.lock();
+            }
+        }
+    });
+
     read_async();
 }
 
@@ -129,7 +157,7 @@ void Session::read_async()
                             }
 
                         } else if(ResponseConstPtr response = std::dynamic_pointer_cast<Response const>(serial)) {
-                            std::cerr << "got response #" << response->getRequestID() << std::endl;
+                            std::cerr << "got response #" << (int) response->getRequestID() << std::endl;
 
                             std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
                             auto it = open_requests_.find(response->getRequestID());
@@ -138,8 +166,11 @@ void Session::read_async()
                                 promise->set_value(response);
                                 open_requests_.erase(it);
                             }
+
                         } else {
-                            packet_received(serial);
+                            std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
+                            packets_.push_back(serial);
+                            packets_available_.notify_all();
                         }
                     }
                 }

@@ -22,9 +22,9 @@ ParameterSerializerInterface::~ParameterSerializerInterface()
 
 void ParameterSerializer::serialize(const SerializableConstPtr& packet, SerializationBuffer& data)
 {
-    if(const ParameterConstPtr& cmd = std::dynamic_pointer_cast<Parameter const>(packet)) {
+    if(const ParameterConstPtr& parameter = std::dynamic_pointer_cast<Parameter const>(packet)) {
 //        std::cerr << "serializing Parameter" << std::endl;
-        uint8_t type = cmd->ID();
+        uint8_t type = parameter->ID();
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
 
@@ -33,7 +33,7 @@ void ParameterSerializer::serialize(const SerializableConstPtr& packet, Serializ
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<ParameterSerializerInterface> serializer = it->second;
-            serializer->serialize(cmd, data);
+            serializer->serialize(parameter, data);
 
         } else {
             std::cerr << "cannot serialize Parameter of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;

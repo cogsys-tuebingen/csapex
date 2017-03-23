@@ -45,8 +45,8 @@ public:
     virtual csapex::param::ParameterPtr get(const std::string& name) const = 0;
     virtual csapex::param::ParameterPtr getNoThrow(const std::string& name) const = 0;
 
-    virtual void addTemporary(csapex::param::Parameter::Ptr p) = 0;
-    virtual void addPersistent(csapex::param::Parameter::Ptr p) = 0;
+    void addTemporary(csapex::param::Parameter::Ptr p);
+    void addPersistent(csapex::param::Parameter::Ptr p);
 
     virtual void save() = 0;
     virtual void load() = 0;

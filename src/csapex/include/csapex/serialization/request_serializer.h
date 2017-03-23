@@ -46,4 +46,38 @@ struct RequestSerializerRegistered
 }
 
 
+#define CSAPEX_REGISTER_REQUEST_SERIALIZER(Name) \
+    namespace csapex  \
+    { \
+    namespace io \
+    { \
+     \
+    class Name##Serializer : public RequestSerializerInterface \
+    { \
+        virtual void serializeRequest(const RequestConstPtr& packet, SerializationBuffer &data) override \
+        { \
+            packet->serialize(data); \
+        } \
+        virtual RequestPtr deserializeRequest(SerializationBuffer& data, uint8_t request_id) override \
+        { \
+            auto result = std::make_shared<Name::ParameterRequest>(request_id); \
+            result->deserialize(data); \
+            return result; \
+        } \
+        virtual void serializeResponse(const ResponseConstPtr& packet, SerializationBuffer &data) override \
+        { \
+            packet->serialize(data); \
+        } \
+        virtual ResponsePtr deserializeResponse(SerializationBuffer& data, uint8_t request_id) override \
+        { \
+            auto result = std::make_shared<Name::ParameterResponse>(request_id); \
+            result->deserialize(data); \
+            return result; \
+        } \
+    }; \
+    } \
+    RequestSerializerRegistered<io::Name##Serializer> g_register_##Name##_(#Name); \
+    }
+
+
 #endif // REQUEST_SERIALIZER_H

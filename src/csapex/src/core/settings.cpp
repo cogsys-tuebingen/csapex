@@ -76,3 +76,12 @@ Settings::~Settings()
 {
 
 }
+
+void Settings::addPersistent(csapex::param::Parameter::Ptr p)
+{
+    add(p, true);
+}
+void Settings::addTemporary(csapex::param::Parameter::Ptr p)
+{
+    add(p, false);
+}

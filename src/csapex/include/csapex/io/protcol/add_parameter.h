@@ -1,5 +1,5 @@
-#ifndef REQUEST_PARAMETER_H
-#define REQUEST_PARAMETER_H
+#ifndef ADD_PARAMETER_H
+#define ADD_PARAMETER_H
 
 /// PROJECT
 #include <csapex/io/request_impl.hpp>
@@ -10,13 +10,13 @@
 namespace csapex
 {
 
-class RequestParameter
+class AddParameter
 {
 public:
     class ParameterRequest : public RequestImplementation<ParameterRequest>
     {
     public:
-        ParameterRequest(const AUUID& id);
+        ParameterRequest(const AUUID& id, const std::string &name, const std::string &description, boost::any value, bool persistent);
         ParameterRequest(uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
@@ -26,11 +26,15 @@ public:
 
         std::string getType() const override
         {
-            return "RequestParameter";
+            return "AddParameter";
         }
 
     private:
         AUUID id_;
+        std::string name_;
+        std::string description_;
+        boost::any value_;
+        bool persistent_;
     };
 
 
@@ -47,7 +51,7 @@ public:
 
         std::string getType() const override
         {
-            return "RequestParameter";
+            return "AddParameter";
         }
 
 
@@ -63,4 +67,4 @@ public:
 
 }
 
-#endif // REQUEST_PARAMETER_H
+#endif // ADD_PARAMETER_H

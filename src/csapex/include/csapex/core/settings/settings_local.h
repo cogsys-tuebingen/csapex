@@ -16,20 +16,17 @@ public:
 public:
     SettingsLocal(bool load_from_config = true);
 
-    bool isQuiet() const;
-    void setQuiet(bool quiet);
+    bool isQuiet() const override;
+    void setQuiet(bool quiet) override;
 
-    bool knows(const std::string& name) const;
+    bool knows(const std::string& name) const override;
 
-    void add(csapex::param::Parameter::Ptr p, bool persistent);
-    csapex::param::ParameterPtr get(const std::string& name) const;
-    csapex::param::ParameterPtr getNoThrow(const std::string& name) const;
+    void add(csapex::param::Parameter::Ptr p, bool persistent) override;
+    csapex::param::ParameterPtr get(const std::string& name) const override;
+    csapex::param::ParameterPtr getNoThrow(const std::string& name) const override;
 
-    void addTemporary(csapex::param::Parameter::Ptr p);
-    void addPersistent(csapex::param::Parameter::Ptr p);
-
-    void save();
-    void load();
+    void save() override;
+    void load() override;
 
 private:
     void settingsChanged(const std::string& key);

@@ -14,20 +14,20 @@ class CSAPEX_REMOTE_EXPORT SettingsRemote : public Settings
 public:
     SettingsRemote(SessionPtr session);
 
-    bool isQuiet() const;
-    void setQuiet(bool quiet);
+    bool isQuiet() const override;
+    void setQuiet(bool quiet) override;
 
-    bool knows(const std::string& name) const;
+    bool knows(const std::string& name) const override;
 
-    void add(csapex::param::Parameter::Ptr p, bool persistent);
-    param::ParameterPtr get(const std::string& name) const;
-    param::ParameterPtr getNoThrow(const std::string& name) const;
+    void add(csapex::param::Parameter::Ptr p, bool persistent) override;
+    param::ParameterPtr get(const std::string& name) const override;
+    param::ParameterPtr getNoThrow(const std::string& name) const override;
 
-    void addTemporary(csapex::param::Parameter::Ptr p);
-    void addPersistent(csapex::param::Parameter::Ptr p);
+    void save() override;
+    void load() override;
 
-    void save();
-    void load();
+private:
+    void createParameterProxy(const std::string &name, param::ParameterPtr proxy) const;
 
 private:
     SessionPtr session_;

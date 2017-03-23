@@ -57,11 +57,9 @@ public:
     bool canRedo() const;
     bool isDirty() const;
 
-
-
-    // TODO: add proxies
     Settings& getSettings();
 
+    // TODO: add proxies
     GraphFacadePtr getRoot();
     void stop();
     void clearBlock();

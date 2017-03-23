@@ -117,6 +117,10 @@ void Server::handlePacket(const SessionPtr& session, const SerializableConstPtr&
             response = std::make_shared<Feedback>(std::string("Request has failed with unkown cause."), request->getRequestID());
         }
 
+        if(!response) {
+            response = std::make_shared<Feedback>(std::string("Request failed to produce a response"), request->getRequestID());
+        }
+
         session->write(response);
 
     } else {

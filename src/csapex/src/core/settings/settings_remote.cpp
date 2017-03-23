@@ -6,6 +6,7 @@
 #include <csapex/command/update_parameter.h>
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/request_parameter.h>
+#include <csapex/io/protcol/add_parameter.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
@@ -57,15 +58,32 @@ void SettingsRemote::load()
 
 void SettingsRemote::add(csapex::param::Parameter::Ptr p, bool persistent)
 {
-}
-void SettingsRemote::addPersistent(csapex::param::Parameter::Ptr p)
-{
-}
-void SettingsRemote::addTemporary(csapex::param::Parameter::Ptr p)
-{
+    AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
+    boost::any value;
+    p->get_unsafe(value);
+    if(const auto& response = session_->sendRequest<AddParameter>(param_id, p->name(), p->description().toString(), value, persistent))
+    {
+        if(response->getParameter()) {
+            std::cerr << "created parameter " << response->getParameter()->getUUID() << std::endl;
+
+            // make a new parameter, when it gets changed relay the change to the remote server
+            param::ParameterPtr proxy = response->getParameter()->clone<param::Parameter>();
+
+            createParameterProxy(p->name(), proxy);
+        }
+    }
 }
 
 csapex::param::Parameter::Ptr SettingsRemote::get(const std::string &name) const
+{
+    auto res = getNoThrow(name);
+    if(!res) {
+        throw std::out_of_range(std::string("parameter ") + name + " does not exist.");
+    }
+
+    return res;
+}
+csapex::param::Parameter::Ptr SettingsRemote::getNoThrow(const std::string &name) const
 {
     auto it = cache_.find(name);
     if(it != cache_.end()) {
@@ -73,38 +91,37 @@ csapex::param::Parameter::Ptr SettingsRemote::get(const std::string &name) const
     }
 
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + name));
-    std::shared_ptr<RequestParameter::ParameterRequest> request = std::make_shared<RequestParameter::ParameterRequest>(param_id);
-
-    ResponseConstPtr raw_response = session_->sendRequest(request);
-    if(const std::shared_ptr<RequestParameter::ParameterResponse const>& response = std::dynamic_pointer_cast<RequestParameter::ParameterResponse const>(raw_response)) {
+    if(const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
         apex_assert_hard(response->getParameter());
 
         std::cerr << response->getParameter()->getUUID() << std::endl;
 
-        // TODO: make a new parameter, when it gets changed relay the change to the remote server
+        // make a new parameter, when it gets changed relay the change to the remote server
         param::ParameterPtr proxy = response->getParameter()->clone<param::Parameter>();
 
-        proxy->parameter_changed.connect([this](param::Parameter* param){
-            // request to set the parameter
-            boost::any raw;
-            param->get_unsafe(raw);
-            CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
-            session_->write(change);
-        });
-
-        cache_[name] = proxy;
+        createParameterProxy(name, proxy);
 
         return proxy;
     }
 
-    throw std::out_of_range(std::string("parameter ") + name + " does not exist.");
-}
-csapex::param::Parameter::Ptr SettingsRemote::getNoThrow(const std::string &name) const
-{
     return nullptr;
+}
+
+void SettingsRemote::createParameterProxy(const std::string &name, param::ParameterPtr proxy) const
+{
+    proxy->parameter_changed.connect([this](param::Parameter* param){
+        // request to set the parameter
+        boost::any raw;
+        param->get_unsafe(raw);
+        CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
+        session_->write(change);
+    });
+
+    cache_[name] = proxy;
 }
 
 bool SettingsRemote::knows(const std::string &name) const
 {
-    return false;
+    auto res = getNoThrow(name);
+    return res != nullptr;
 }

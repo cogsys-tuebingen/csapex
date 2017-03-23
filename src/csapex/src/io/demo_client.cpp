@@ -79,6 +79,11 @@ public:
                 apex_assert_equal_hard(std::string("change request"), test_observer->as<std::string>());
 
 
+                apex_assert_hard(!settings_->knows("foo-bar_baz"));
+                settings_->set<std::string>("foo-bar_baz", "lorem-ipsum");
+                apex_assert_hard(settings_->knows("foo-bar_baz"));
+                apex_assert_equal_hard("lorem-ipsum", settings_->get<std::string>("foo-bar_baz"));
+
 
             } catch(const std::out_of_range& e) {
                 std::cerr << "no access to server settings" << std::endl;
@@ -94,6 +99,8 @@ public:
                 param::ParameterPtr test_observer = settings_->get("test-observer");
                 std::cerr << test_observer->as<std::string>() << std::endl;
                 apex_assert_equal_hard(std::string("change has been processed"), test_observer->as<std::string>());
+
+                apex_assert_equal_hard(std::string("change has been processed"), settings_->get<std::string>("test-observer"));
             }
 
             csapex::command::Quit::Ptr quit = std::make_shared<csapex::command::Quit>();

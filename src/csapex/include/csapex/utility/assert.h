@@ -20,6 +20,11 @@ inline std::string universal_to_string(const std::string& string)
     return string;
 }
 
+inline std::string universal_to_string(const char* string)
+{
+    return std::string(string);
+}
+
 template <typename V>
 inline std::string universal_to_string(V value)
 {

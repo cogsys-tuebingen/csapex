@@ -10,6 +10,7 @@
 /// SYSTEM
 #include <iostream>
 
+CSAPEX_REGISTER_REQUEST_SERIALIZER(RequestParameter)
 
 using namespace csapex;
 
@@ -33,8 +34,10 @@ ResponsePtr RequestParameter::ParameterRequest::execute(CsApexCore &core) const
     std::shared_ptr<ParameterResponse> response;
 
     if(id_.global()) {
-        auto param = core.getSettings().get(id_.globalName());
-        response = std::make_shared<ParameterResponse>(param, getRequestID());
+        auto param = core.getSettings().getNoThrow(id_.globalName());
+        if(param) {
+            response = std::make_shared<ParameterResponse>(param, getRequestID());
+        }
     } else {
         // TODO: get the parameter from the node
     }
@@ -81,39 +84,3 @@ param::ParameterConstPtr RequestParameter::ParameterResponse::getParameter() con
 {
     return param_;
 }
-
-
-
-
-namespace csapex
-{
-namespace io
-{
-
-class RequestParameterSerializer : public RequestSerializerInterface
-{
-    virtual void serializeRequest(const RequestConstPtr& packet, SerializationBuffer &data) override
-    {
-        packet->serialize(data);
-    }
-    virtual RequestPtr deserializeRequest(SerializationBuffer& data, uint8_t request_id) override
-    {
-        auto result = std::make_shared<RequestParameter::ParameterRequest>(request_id);
-        result->deserialize(data);
-        return result;
-    }
-    virtual void serializeResponse(const ResponseConstPtr& packet, SerializationBuffer &data) override
-    {
-        packet->serialize(data);
-    }
-    virtual ResponsePtr deserializeResponse(SerializationBuffer& data, uint8_t request_id) override
-    {
-        auto result = std::make_shared<RequestParameter::ParameterResponse>(request_id);
-        result->deserialize(data);
-        return result;
-    }
-};
-}
-RequestSerializerRegistered<io::RequestParameterSerializer> g_register_request_parameter_("RequestParameter");
-}
-
