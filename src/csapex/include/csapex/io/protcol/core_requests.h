@@ -13,23 +13,19 @@ namespace csapex
 class CoreRequests
 {
 public:
-    enum class CoreRequestTarget
-    {
-        Settings,
-        Core,
-        Other
-    };
 
     enum class CoreRequestType
     {
-        Save,
-        Load
+        SettingsSave,
+        SettingsLoad,
+        CoreSave,
+        CoreLoad
     };
 
     class CoreRequest : public RequestImplementation<CoreRequest>
     {
     public:
-        CoreRequest(CoreRequestTarget request_target, CoreRequestType request_type);
+        CoreRequest(CoreRequestType request_type);
         CoreRequest(uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
@@ -43,11 +39,6 @@ public:
         }
 
     private:
-        ResponsePtr executeCore(CsApexCore& core) const;
-        ResponsePtr executeSettings(CsApexCore& core) const;
-
-    private:
-        CoreRequestTarget request_target_;
         CoreRequestType request_type_;
     };
 
@@ -55,7 +46,7 @@ public:
     class CoreResponse : public ResponseImplementation<CoreResponse>
     {
     public:
-        CoreResponse(CoreRequestTarget request_target, CoreRequestType request_type, uint8_t request_id);
+        CoreResponse(CoreRequestType request_type, uint8_t request_id);
         CoreResponse(uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
@@ -67,7 +58,6 @@ public:
         }
 
     private:
-        CoreRequestTarget request_target_;
         CoreRequestType request_type_;
     };
 

@@ -43,12 +43,12 @@ SettingsRemote::SettingsRemote(SessionPtr session)
 
 void SettingsRemote::save()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestTarget::Settings, CoreRequests::CoreRequestType::Save);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsSave);
 }
 
 void SettingsRemote::load()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestTarget::Settings, CoreRequests::CoreRequestType::Load);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsLoad);
 }
 
 void SettingsRemote::add(csapex::param::Parameter::Ptr p, bool persistent)

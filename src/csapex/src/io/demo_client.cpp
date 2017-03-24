@@ -109,7 +109,7 @@ public:
                 }
             }
 
-            session->sendRequest<CoreRequests>(CoreRequests::CoreRequestTarget::Core, CoreRequests::CoreRequestType::Save);
+            session->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSave);
 
             csapex::command::Quit::Ptr quit = std::make_shared<csapex::command::Quit>();
             session->write(quit);
