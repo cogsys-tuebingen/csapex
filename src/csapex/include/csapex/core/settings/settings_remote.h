@@ -14,9 +14,6 @@ class CSAPEX_REMOTE_EXPORT SettingsRemote : public Settings
 public:
     SettingsRemote(SessionPtr session);
 
-    bool isQuiet() const override;
-    void setQuiet(bool quiet) override;
-
     bool knows(const std::string& name) const override;
 
     void add(csapex::param::Parameter::Ptr p, bool persistent) override;

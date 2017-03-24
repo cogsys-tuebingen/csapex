@@ -60,7 +60,7 @@ struct RequestSerializerRegistered
         } \
         virtual RequestPtr deserializeRequest(SerializationBuffer& data, uint8_t request_id) override \
         { \
-            auto result = std::make_shared<Name::ParameterRequest>(request_id); \
+            auto result = std::make_shared<typename Name::RequestT>(request_id); \
             result->deserialize(data); \
             return result; \
         } \
@@ -70,7 +70,7 @@ struct RequestSerializerRegistered
         } \
         virtual ResponsePtr deserializeResponse(SerializationBuffer& data, uint8_t request_id) override \
         { \
-            auto result = std::make_shared<Name::ParameterResponse>(request_id); \
+            auto result = std::make_shared<typename Name::ResponseT>(request_id); \
             result->deserialize(data); \
             return result; \
         } \

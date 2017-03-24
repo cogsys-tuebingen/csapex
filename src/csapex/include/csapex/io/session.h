@@ -38,9 +38,9 @@ public:
 
   template <typename RequestWrapper, typename... Args>
   std::shared_ptr<typename RequestWrapper::ResponseT const>
-  sendRequest(Args... args)
+  sendRequest(Args&&... args)
   {
-      return std::dynamic_pointer_cast<typename RequestWrapper::ResponseT const>(sendRequest(std::make_shared<typename RequestWrapper::RequestT>(args...)));
+      return std::dynamic_pointer_cast<typename RequestWrapper::ResponseT const>(sendRequest(std::make_shared<typename RequestWrapper::RequestT>(std::forward<Args>(args)...)));
   }
 
 public:
@@ -59,6 +59,7 @@ private:
 
   uint8_t next_request_id_;
 
+
   std::recursive_mutex packets_mutex_;
   std::condition_variable_any packets_available_;
   std::deque<SerializableConstPtr> packets_;
@@ -66,7 +67,9 @@ private:
   std::recursive_mutex open_requests_mutex_;
   std::map<uint8_t, std::promise<ResponseConstPtr>*> open_requests_;
 
-  bool live_;
+  std::recursive_mutex running_mutex_;
+  std::atomic<bool> running_;
+  std::atomic<bool> live_;
 };
 
 }

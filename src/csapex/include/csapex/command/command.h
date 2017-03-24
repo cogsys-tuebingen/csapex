@@ -48,6 +48,7 @@ public:
 
     virtual void init(GraphFacade* graph_facade, CsApexCore& core);
     virtual bool isUndoable() const;
+    virtual bool isHidden() const;
 
     void setAfterSavepoint(bool save);
     bool isAfterSavepoint();

@@ -10,6 +10,7 @@
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
 #include <csapex/io/server.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #include <iostream>
@@ -46,27 +47,16 @@ int CsApexServer::run()
 {
     core = std::make_shared<CsApexCore>(settings, handler);
 
+    csapex::error_handling::stop_request().connect([this](){
+        core->shutdown();
+    });
+
     Server server(core, false);
 
     GraphFacadePtr root = core->getRoot();
-    csapex::error_handling::stop_request().connect([&server](){
-        server.stop();
-    });
     csapex::error_handling::init();
 
     core->startup();
-
-    settings.set("test-observer", std::string("nothing"));
-
-    param::ParameterPtr param = settings.get("test-observer");
-    param->parameter_changed.connect([this](param::Parameter* p) {
-        std::cerr << "test observer changed to " << p->as<std::string>() << std::endl;
-        if(p->as<std::string>() == "change request") {
-            p->set<std::string>("change has been processed");
-        }
-    });
-
-    settings.set("test-observer", std::string("initialized"));
 
     server.start();
 

@@ -11,6 +11,11 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/model/observer.h>
 
+/// SYSTEM
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
 namespace class_loader {
 class ClassLoader;
 }
@@ -31,6 +36,7 @@ public:
     void init();
     void boot();
     void startup();
+    void shutdown();
 
     void load(const std::string& file);
     void saveAs(const std::string& file, bool quiet = false);
@@ -80,6 +86,10 @@ public:
     slim_signal::Signal<void ()> begin_step;
     slim_signal::Signal<void ()> end_step;
 
+    slim_signal::Signal<void ()> startup_requested;
+    slim_signal::Signal<void ()> shutdown_requested;
+    slim_signal::Signal<void ()> shutdown_complete;
+
 private:
     CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator);
 
@@ -113,6 +123,11 @@ private:
 
     std::vector<BootstrapPluginPtr> boot_plugins_;
     std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
+
+    std::thread main_thread_;
+    std::mutex running_mutex_;
+    std::condition_variable running_changed_;
+    bool running_;
 
     bool init_;
     bool load_needs_reset_;

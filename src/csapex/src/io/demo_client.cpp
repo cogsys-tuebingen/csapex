@@ -11,25 +11,26 @@
 #include <csapex/core/settings/settings_remote.h>
 #include <csapex/io/protcol/parameter_changed.h>
 #include <csapex/io/session.h>
+#include <csapex/io/protcol/core_requests.h>
 
 using boost::asio::ip::tcp;
 using namespace csapex;
 
+class DemoClient;
 
-bool g_running;
+DemoClient* g_client = nullptr;
 
-void siginthandler(int param)
-{
-    g_running = false;
-}
+void siginthandler(int param);
 
 
 class DemoClient
 {
 public:
     DemoClient(int argc, char* argv[])
-        : s(io_service), resolver(io_service)
+        : s(io_service), resolver(io_service), running(false)
     {
+        g_client = this;
+
         signal(SIGINT, siginthandler);
 
         std::thread spinner;
@@ -47,20 +48,20 @@ public:
 
             session->start();
 
-            g_running = true;
+            running = true;
             spinner = std::thread([&](){
-                while(g_running) {
+                while(running) {
                     io_service.run();
                 }
             });
 
             session->stopped.connect([&](){
                 std::cerr << "The server disconnected." << std::endl;
-                g_running = false;
-                io_service.stop();
+                stop();
             });
 
             settings_= std::make_shared<SettingsRemote>(session);
+
             try {
                 param::ParameterPtr p = settings_->get("access-test");
                 std::cerr << p->as<std::string>() << std::endl;
@@ -93,7 +94,8 @@ public:
                 std::exit(2);
             }
 
-            while(g_running) {
+            int test_iterations = 3;
+            while(running) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
                 param::ParameterPtr test_observer = settings_->get("test-observer");
@@ -101,7 +103,13 @@ public:
                 apex_assert_equal_hard(std::string("change has been processed"), test_observer->as<std::string>());
 
                 apex_assert_equal_hard(std::string("change has been processed"), settings_->get<std::string>("test-observer"));
+
+                if(--test_iterations <= 0) {
+                    stop();
+                }
             }
+
+            session->sendRequest<CoreRequests>(CoreRequests::CoreRequestTarget::Core, CoreRequests::CoreRequestType::Save);
 
             csapex::command::Quit::Ptr quit = std::make_shared<csapex::command::Quit>();
             session->write(quit);
@@ -116,9 +124,15 @@ public:
             std::cerr << "Exception: " << e.what() << "\n";
         }
 
+        io_service.stop();
+
         spinner.join();
     }
 
+    void stop()
+    {
+        running = false;
+    }
 
     void handlePacket(SerializableConstPtr packet)
     {
@@ -160,8 +174,16 @@ private:
     SessionPtr session;
 
     std::shared_ptr<Settings> settings_;
+
+    bool running;
 };
 
+void siginthandler(int param)
+{
+    if(g_client) {
+        g_client->stop();
+    }
+}
 
 int main(int argc, char* argv[])
 {

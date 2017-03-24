@@ -8,6 +8,8 @@
 #include <csapex/io/protcol/request_parameter.h>
 #include <csapex/io/protcol/add_parameter.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/io/protcol/core_requests.h>
+#include <csapex/param/null_parameter.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -39,21 +41,14 @@ SettingsRemote::SettingsRemote(SessionPtr session)
 {
 }
 
-bool SettingsRemote::isQuiet() const
-{
-    return false;
-}
-
-void SettingsRemote::setQuiet(bool quiet)
-{
-}
-
 void SettingsRemote::save()
 {
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestTarget::Settings, CoreRequests::CoreRequestType::Save);
 }
 
 void SettingsRemote::load()
 {
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestTarget::Settings, CoreRequests::CoreRequestType::Load);
 }
 
 void SettingsRemote::add(csapex::param::Parameter::Ptr p, bool persistent)
@@ -93,6 +88,10 @@ csapex::param::Parameter::Ptr SettingsRemote::getNoThrow(const std::string &name
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + name));
     if(const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
         apex_assert_hard(response->getParameter());
+
+        if(response->getParameter()->ID() == param::NullParameter::NUMERICAL_ID) {
+            return nullptr;
+        }
 
         std::cerr << response->getParameter()->getUUID() << std::endl;
 

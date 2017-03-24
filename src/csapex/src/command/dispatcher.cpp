@@ -77,7 +77,9 @@ void CommandDispatcher::doExecute(Command::Ptr command)
     }
 
     if(success) {
-        setDirty();
+        if(!command->isHidden()) {
+            setDirty();
+        }
         state_changed();
     }
 }

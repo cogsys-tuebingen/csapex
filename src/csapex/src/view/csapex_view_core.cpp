@@ -31,30 +31,6 @@ CsApexViewCore::CsApexViewCore(CsApexCore& core)
     MessageRendererManager::instance().setPluginLocator(core_.getPluginLocator());
     node_adapter_factory_->loadPlugins();
 
-    observe(core_.saved, [this](){
-        dispatcher_->setClean();
-        dispatcher_->resetDirtyPoint();
-
-        bool recovery = core_.getSettings().get<bool>("config_recovery", false);
-        if(recovery) {
-            // delete recovery file
-            bf3::path recov_file = core_.getSettings().get<std::string>("config_recovery_file");
-            bf3::path current_config  = core_.getSettings().get<std::string>("config");
-            if(recov_file != current_config) {
-                bf3::remove(recov_file);
-                core_.getSettings().set("config_recovery", false);
-            }
-        }
-    });
-    observe(core_.loaded, [this](){
-        dispatcher_->setClean();
-        dispatcher_->resetDirtyPoint();
-    });
-    observe(core_.reset_requested, [this](){
-        dispatcher_->reset();
-        core_.getSettings().set("config_recovery", false);
-    });
-
     observe(core_.config_changed, config_changed);
     observe(core_.status_changed, status_changed);
     observe(core_.new_node_type, new_node_type);
@@ -231,9 +207,9 @@ void CsApexViewCore::step()
 }
 
 
-void CsApexViewCore::stop()
+void CsApexViewCore::shutdown()
 {
-    core_.getRoot()->stop();
+    core_.shutdown();
 }
 
 void CsApexViewCore::clearBlock()

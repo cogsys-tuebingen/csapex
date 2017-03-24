@@ -847,7 +847,7 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     settings.set("geometry", geometry.toStdString());
 
     try {
-        view_core_.stop();
+        view_core_.shutdown();
     } catch(const std::exception& e) {
         std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
     } catch(...) {

@@ -61,7 +61,7 @@ public:
 
     // TODO: add proxies
     GraphFacadePtr getRoot();
-    void stop();
+    void shutdown();
     void clearBlock();
     void resetActivity();
 

@@ -21,34 +21,44 @@ using boost::asio::ip::tcp;
 Session::Session(tcp::socket socket)
     : socket_(std::move(socket)),
       next_request_id_(1),
+      running_(false),
       live_(false)
 {
 }
 
 Session::~Session()
 {
-    if(live_) {
-        socket_.close();
+    {
+        std::unique_lock<std::recursive_mutex> running_lock(running_mutex_);
+        if(running_) {
+            stop();
+        }
+
+        apex_assert_hard(!packet_handler_thread_.joinable());
     }
 
-    if(packet_handler_thread_.joinable()) {
-        packet_handler_thread_.join();
-    }
+    socket_.close();
 }
 
 void Session::start()
 {
-    live_ = true;
+    {
+        std::unique_lock<std::recursive_mutex> running_lock(running_mutex_);
+        apex_assert_hard(!running_);
+        running_ = true;
+    }
     started();
 
     packet_handler_thread_ = std::thread([this](){
-        while(live_) {
+        live_ = true;
+
+        while(running_) {
             std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
-            while(packets_.empty()) {
+            while(running_ && packets_.empty()) {
                 packets_available_.wait_for(packet_lock, std::chrono::milliseconds(100));
             }
 
-            while(!packets_.empty()) {
+            while(running_ && !packets_.empty()) {
                 SerializableConstPtr next = packets_.front();
                 packets_.pop_front();
                 packet_lock.unlock();
@@ -62,6 +72,7 @@ void Session::start()
                 packet_lock.lock();
             }
         }
+        live_ = false;
     });
 
     read_async();
@@ -69,45 +80,64 @@ void Session::start()
 
 void Session::stop()
 {
-    live_ = false;
-    stopped();
+    apex_assert_hard(packet_handler_thread_.get_id() != std::this_thread::get_id());
+
+    std::unique_lock<std::recursive_mutex> running_lock(running_mutex_);
+
+//    if(!live_) {
+//        return;
+//    }
+    running_ = false;
 
     std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
     for(auto pair : open_requests_) {
         std::promise<ResponseConstPtr>* open_requests = pair.second;
         open_requests->set_value(nullptr);
     }
+
+    running_lock.unlock();
+
+    stopped();
+
+    if(live_) {
+        packet_handler_thread_.join();
+    }
+    apex_assert_hard(!live_);
 }
 
 
 ResponseConstPtr Session::sendRequest(RequestConstPtr request)
 {
-    request->overwriteRequestID(next_request_id_++);
+    if(live_) {
+        request->overwriteRequestID(next_request_id_++);
 
-    write(request);
+        write(request);
 
-    std::promise<ResponseConstPtr> promise;
+        std::promise<ResponseConstPtr> promise;
 
-    {
-        std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
-        open_requests_[request->getRequestID()] = &promise;
+        {
+            std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
+            open_requests_[request->getRequestID()] = &promise;
+        }
+
+        std::future<ResponseConstPtr> future = promise.get_future();
+
+        future.wait();
+
+        if(ResponseConstPtr response = future.get()) {
+            return response;
+        }
+
     }
-
-    std::future<ResponseConstPtr> future = promise.get_future();
-
-    future.wait();
-
-    if(ResponseConstPtr response = future.get()) {
-        return response;
-    }
-
     return nullptr;
 }
 
 void Session::write(const SerializableConstPtr &packet)
 {
-    SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
-    write_packet(buffer);
+    if(live_) {
+        SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
+        write_packet(buffer);
+    }
 }
 
 void Session::write(const std::string &message)
@@ -117,8 +147,10 @@ void Session::write(const std::string &message)
 
 void Session::read_async()
 {
-    if(!live_) {
-        return;
+    {
+        if(!running_) {
+            return;
+        }
     }
 
     std::shared_ptr<SerializationBuffer> message_data = std::make_shared<SerializationBuffer>();
@@ -190,7 +222,7 @@ void Session::write_packet(SerializationBuffer &buffer)
 
         apex_assert_hard(socket_.is_open());
 
-//        std::cerr << "sending:\n" << buffer.toString() << std::endl;
+        //        std::cerr << "sending:\n" << buffer.toString() << std::endl;
 
         boost::asio::async_write(socket_, boost::asio::buffer(buffer, buffer.size()),
                                  [](boost::system::error_code /*ec*/, std::size_t /*length*/){});

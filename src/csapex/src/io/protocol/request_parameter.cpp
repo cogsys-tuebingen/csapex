@@ -35,9 +35,7 @@ ResponsePtr RequestParameter::ParameterRequest::execute(CsApexCore &core) const
 
     if(id_.global()) {
         auto param = core.getSettings().getNoThrow(id_.globalName());
-        if(param) {
-            response = std::make_shared<ParameterResponse>(param, getRequestID());
-        }
+        response = std::make_shared<ParameterResponse>(param, getRequestID());
     } else {
         // TODO: get the parameter from the node
     }

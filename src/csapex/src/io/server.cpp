@@ -28,6 +28,9 @@ Server::Server(CsApexCorePtr core, bool spin_thread)
       running_(false),
       spin_thread_(spin_thread)
 {
+    observe(core_->shutdown_requested, [this](){
+        stop();
+    });
 }
 
 Server::~Server()
@@ -51,9 +54,9 @@ void Server::do_accept()
             SessionPtr session = std::make_shared<Session>(std::move(socket_));
 
             SessionWeakPtr w_session = session;
-            session->stopped.connect([this, w_session]() {
+            session->stopped.connect([this, session]() {
                 std::unique_lock<std::recursive_mutex> lock(session_mutex_);
-                auto pos = std::find(sessions_.begin(), sessions_.end(), w_session.lock());
+                auto pos = std::find(sessions_.begin(), sessions_.end(), session);
                 if(pos != sessions_.end()) {
                     sessions_.erase(pos);
                 }
@@ -159,12 +162,14 @@ void Server::stop()
     if(running_) {
         running_ = false;
 
-        std::unique_lock<std::recursive_mutex> lock(session_mutex_);
+        {
+            std::unique_lock<std::recursive_mutex> lock(session_mutex_);
 
-        for(SessionPtr session : sessions_) {
-            session->stop();
+            for(SessionPtr session : sessions_) {
+                session->stop();
+            }
+            sessions_.clear();
         }
-        sessions_.clear();
 
         io_service_.stop();
 

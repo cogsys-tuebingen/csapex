@@ -36,8 +36,8 @@ public:
     Settings();
     virtual ~Settings();
 
-    virtual bool isQuiet() const;
-    virtual void setQuiet(bool quiet);
+    bool isQuiet() const;
+    void setQuiet(bool quiet);
 
     virtual bool knows(const std::string& name) const = 0;
 

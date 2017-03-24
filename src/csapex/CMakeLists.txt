@@ -518,6 +518,7 @@ add_library(csapex_remote SHARED
     src/io/protocol/tick_message.cpp
     src/io/protocol/request_parameter.cpp
     src/io/protocol/add_parameter.cpp
+    src/io/protocol/core_requests.cpp
 
     src/serialization/request_serializer.cpp
     src/serialization/broadcast_message_serializer.cpp
@@ -533,6 +534,7 @@ generate_export_header(csapex_remote
              STATIC_DEFINE csapex_BUILT_AS_STATIC
                          )
 target_link_libraries(csapex_remote
+    csapex_serialization
     csapex_util
     csapex_profiling
     csapex_param

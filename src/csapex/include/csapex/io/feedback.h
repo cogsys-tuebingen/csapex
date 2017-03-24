@@ -2,7 +2,7 @@
 #define FEEDBACK_H
 
 /// PROJECT
-#include <csapex/serialization/serializable.h>
+#include <csapex/io/response.h>
 #include <csapex/core/csapex_core.h>
 
 /// SYSTEM
@@ -11,7 +11,7 @@
 namespace csapex
 {
 
-class Feedback : public Serializable
+class Feedback : public Response
 {
 public:
     Feedback(const std::string& message, uint8_t request_id);
@@ -20,20 +20,18 @@ public:
     static const uint8_t PACKET_TYPE_ID = 6;
 
     virtual uint8_t getPacketType() const override;
+    virtual std::string getType() const;
 
     std::string getMessage() const;
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(SerializationBuffer& data) override;
 
-    uint8_t getRequestID() const;
-
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const;
 
 private:
     std::string message_;
-    uint8_t request_id_;
 };
 
 }

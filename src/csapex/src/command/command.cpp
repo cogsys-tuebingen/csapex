@@ -55,6 +55,10 @@ bool Command::isUndoable() const
 {
     return true;
 }
+bool Command::isHidden() const
+{
+    return false;
+}
 
 bool Command::executeCommand(Command::Ptr cmd)
 {

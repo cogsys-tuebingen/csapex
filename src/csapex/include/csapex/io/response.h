@@ -23,7 +23,7 @@ public:
 
     uint8_t getRequestID() const;
 
-private:
+protected:
     uint8_t request_id_;
 };
 

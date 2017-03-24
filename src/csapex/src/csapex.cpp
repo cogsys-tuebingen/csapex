@@ -13,6 +13,7 @@
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/gui_exception_handler.h>
 #include <csapex/io/server.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #include <iostream>
@@ -95,12 +96,18 @@ int Main::runWithGui()
 
     csapex::error_handling::stop_request().connect([this](){
         static int request = 0;
-        if(request++ < 3) {
+        if(request == 0) {
+            core->shutdown();
             std::cout << "shutdown request" << std::endl;
-            QCoreApplication::postEvent(app.get(), new QCloseEvent);
-        } else {
+        } else if(request >= 3) {
             raise(SIGTERM);
         }
+
+        ++request;
+    });
+
+    core->shutdown_requested.connect([this](){
+        QCoreApplication::postEvent(app.get(), new QCloseEvent);
     });
 
     checkRecoveryFile(view_core, w);
@@ -122,6 +129,7 @@ int Main::runHeadless()
 {
     GraphFacadePtr root = core->getRoot();
     csapex::error_handling::stop_request().connect([this, root](){
+        core->shutdown();
         app->quit();
     });
     core->startup();
@@ -148,9 +156,6 @@ int Main::run()
     core = std::make_shared<CsApexCore>(settings, handler);
 
     Server server(core);
-    csapex::error_handling::stop_request().connect([&server](){
-        server.stop();
-    });
 
     server.start();
 

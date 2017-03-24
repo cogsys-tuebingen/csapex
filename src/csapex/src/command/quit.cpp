@@ -11,6 +11,7 @@
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/assert.h>
 #include <csapex/command/command_serializer.h>
+#include <csapex/core/csapex_core.h>
 
 /// SYSTEM
 #include <sstream>
@@ -31,6 +32,11 @@ bool Quit::isUndoable() const
     return false;
 }
 
+bool Quit::isHidden() const
+{
+    return true;
+}
+
 std::string Quit::getDescription() const
 {
     return "Quit Request";
@@ -38,7 +44,7 @@ std::string Quit::getDescription() const
 
 bool Quit::doExecute()
 {
-    csapex::error_handling::stop_request()();
+    core_->shutdown();
     return true;
 }
 

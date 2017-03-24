@@ -26,6 +26,7 @@ public:
 
     virtual std::string getDescription() const override;
 
+    virtual bool isHidden() const override;
     virtual bool isUndoable() const override;
 
 protected:

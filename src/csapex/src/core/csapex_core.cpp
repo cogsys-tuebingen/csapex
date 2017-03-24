@@ -31,6 +31,7 @@
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/serialization/snippet.h>
+#include <csapex/utility/thread.h>
 
 /// SYSTEM
 #include <fstream>
@@ -47,7 +48,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
       plugin_locator_(plugin_locator),
       exception_handler_(handler),
       node_factory_(nullptr),
-      root_uuid_provider_(std::make_shared<UUIDProvider>()),      
+      root_uuid_provider_(std::make_shared<UUIDProvider>()),
       dispatcher_(std::make_shared<CommandDispatcher>(*this)),
       profiler_(std::make_shared<Profiler>()),
       core_plugin_manager(nullptr),
@@ -60,6 +61,30 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
 
     observe(thread_pool_->begin_step, begin_step);
     observe(thread_pool_->end_step, end_step);
+
+    observe(saved, [this](){
+        dispatcher_->setClean();
+        dispatcher_->resetDirtyPoint();
+
+        bool recovery = settings_.get<bool>("config_recovery", false);
+        if(recovery) {
+            // delete recovery file
+            bf3::path recov_file = settings_.get<std::string>("config_recovery_file");
+            bf3::path current_config  = settings_.get<std::string>("config");
+            if(recov_file != current_config) {
+                bf3::remove(recov_file);
+                settings_.set("config_recovery", false);
+            }
+        }
+    });
+    observe(loaded, [this](){
+        dispatcher_->setClean();
+        dispatcher_->resetDirtyPoint();
+    });
+    observe(reset_requested, [this](){
+        dispatcher_->reset();
+        settings_.set("config_recovery", false);
+    });
 }
 
 CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
@@ -93,6 +118,9 @@ CsApexCore::CsApexCore(const CsApexCore& parent)
 
 CsApexCore::~CsApexCore()
 {
+    root_->stop();
+
+    std::unique_lock<std::mutex> lock(running_mutex_);
     if(!parent_) {
         if(root_) {
             root_->clear();
@@ -115,6 +143,12 @@ CsApexCore::~CsApexCore()
             boot_plugin_loaders_.erase(boot_plugin_loaders_.begin());
         }
     }
+
+    if(main_thread_.joinable()) {
+        main_thread_.join();
+    }
+
+    shutdown_complete();
 }
 
 void CsApexCore::setPause(bool pause)
@@ -203,13 +237,13 @@ void CsApexCore::init()
         thread_pool_->add(root_scheduler_.get());
 
         root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
-                                              root_->getGraph()->makeUUID("slot_save"), "save",
-                                              [this](const TokenPtr&) {
+                                                     root_->getGraph()->makeUUID("slot_save"), "save",
+                                                     [this](const TokenPtr&) {
             saveAs(getSettings().get<std::string>("config"));
         });
         root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
-                                              root_->getGraph()->makeUUID("slot_exit"), "exit",
-                                              [this](const TokenPtr&) {
+                                                     root_->getGraph()->makeUUID("slot_exit"), "exit",
+                                                     [this](const TokenPtr&) {
             // TODO: more graceful stopping
             csapex::error_handling::stop();
         });
@@ -292,6 +326,20 @@ void CsApexCore::boot()
 
 void CsApexCore::startup()
 {
+
+    settings_.set("test-observer", std::string("nothing"));
+
+    param::ParameterPtr param = settings_.get("test-observer");
+    param->parameter_changed.connect([this](param::Parameter* p) {
+        std::cerr << "test observer changed to " << p->as<std::string>() << std::endl;
+        if(p->as<std::string>() == "change request") {
+            p->set<std::string>("change has been processed");
+        }
+    });
+
+    settings_.set("test-observer", std::string("initialized"));
+
+
     status_changed("loading config");
     try {
         std::string cfg = settings_.get<std::string>("config", Settings::defaultConfigFile());
@@ -314,6 +362,27 @@ void CsApexCore::startup()
     status_changed("painting user interface");
 
     thread_pool_->start();
+
+    main_thread_ = std::thread([this]() {
+        csapex::thread::set_name("main");
+        startup_requested();
+
+        std::unique_lock<std::mutex> lock(running_mutex_);
+        running_ = true;
+        while(running_) {
+            running_changed_.wait(lock);
+        }
+
+        shutdown_requested();
+    });
+
+}
+
+void CsApexCore::shutdown()
+{
+    std::unique_lock<std::mutex> lock(running_mutex_);
+    running_ = false;
+    running_changed_.notify_all();
 }
 
 void CsApexCore::reset()
