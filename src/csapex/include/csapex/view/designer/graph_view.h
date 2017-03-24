@@ -208,7 +208,6 @@ private:
     void invalidateCache();
 
 private:
-    CsApexCore& core_;
     CsApexViewCore& view_core_;
 
     DesignerScene* scene_;

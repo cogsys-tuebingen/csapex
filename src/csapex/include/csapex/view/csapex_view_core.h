@@ -12,6 +12,8 @@
 #include <csapex/utility/notifier.h>
 #include <csapex/model/observer.h>
 #include <csapex/command/command_executor.h>
+#include <csapex/plugin/plugin_fwd.h>
+#include <csapex/profiling/profiling_fwd.h>
 
 namespace csapex
 {
@@ -58,6 +60,7 @@ public:
     bool isDirty() const;
 
     Settings& getSettings();
+    ExceptionHandler& getExceptionHandler() const;
 
     // TODO: add proxies
     GraphFacadePtr getRoot();
@@ -68,6 +71,8 @@ public:
     ThreadPoolPtr getThreadPool();
 
 
+    void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR);
+
 
     // TODO: only for direct sessions:
     CommandDispatcherPtr getCommandDispatcher();
@@ -77,7 +82,11 @@ public:
     // TODO: remove
     CsApexCore& getCore();
 
+    PluginLocatorPtr getPluginLocator() const;
+    NodeFactory &getNodeFactory() const;
+    SnippetFactory& getSnippetFactory() const;
 
+    ProfilerPtr getProfiler() const;
 
 
 
@@ -133,6 +142,8 @@ private:
     DesignerStyleable style;
 
     std::shared_ptr<DragIO> drag_io;
+
+    ExceptionHandler &exception_handler_;
 };
 
 }

@@ -104,8 +104,8 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
 void RewiringDialog::makeUI(const QString& stylesheet)
 {
     BoxDialog diag("Please enter the new node type.",
-                   view_core_temp_->getCore().getNodeFactory(), *view_core_temp_->getNodeAdapterFactory(),
-                   view_core_temp_->getCore().getSnippetFactory());
+                   view_core_temp_->getNodeFactory(), *view_core_temp_->getNodeAdapterFactory(),
+                   view_core_temp_->getSnippetFactory());
     diag.setWindowTitle("Select new node type.");
 
     int r = diag.exec();
@@ -128,8 +128,8 @@ void RewiringDialog::makeUI(const QString& stylesheet)
     setLayout(layout);
 
 
-    NodeFactory& node_factory = view_core_temp_->getCore().getNodeFactory();
-    executor = std::make_shared<ThreadPool>(view_core_temp_->getCore().getExceptionHandler(), false, false);
+    NodeFactory& node_factory = view_core_temp_->getNodeFactory();
+    executor = std::make_shared<ThreadPool>(view_core_temp_->getExceptionHandler(), false, false);
 
     graph_old_handle = node_factory.makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_.get());
     apex_assert_hard(graph_old_handle);

@@ -56,13 +56,13 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
 
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
-    NodeListGenerator node_generator(view_.core_.getNodeFactory(), *view_.view_core_.getNodeAdapterFactory());
+    NodeListGenerator node_generator(view_.getViewCore().getNodeFactory(), *view_.getViewCore().getNodeAdapterFactory());
     node_generator.insertAvailableNodeTypes(&add_node);
     menu.addMenu(&add_node);
 
     QMenu add_snippet("add snippet");
     add_snippet.setIcon(QIcon(":/snippet.png"));
-    SnippetListGenerator snippet_generator(view_.core_.getSnippetFactory());
+    SnippetListGenerator snippet_generator(view_.getViewCore().getSnippetFactory());
     snippet_generator.insertAvailableSnippets(&add_snippet);
     menu.addMenu(&add_snippet);
 
@@ -279,7 +279,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
         menu.addSeparator();
 
-        bool threading = !view_.core_.getSettings().get("threadless", false);
+        bool threading = !view_.getViewCore().getSettings().get("threadless", false);
         QMenu* thread_menu = menu.addMenu(QIcon(":/thread_group.png"), "thread grouping");
         thread_menu->setEnabled(threading);
 
@@ -431,12 +431,12 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
             handler[selectedItem]();
 
         } catch(const csapex::Failure& af) {
-            view_.getViewCore().getCore().getExceptionHandler().handleAssertionFailure(af);
+            view_.getViewCore().getExceptionHandler().handleAssertionFailure(af);
 
         } catch(const std::exception& e) {
             std::stringstream ss;
             ss << "Context menu failed: " << e.what();
-            view_.getViewCore().getCore().sendNotification(ss.str());
+            view_.getViewCore().sendNotification(ss.str());
         }
     }
 }

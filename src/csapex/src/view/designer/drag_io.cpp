@@ -266,7 +266,7 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        SnippetFactory& sf = src->getViewCore().getCore().getSnippetFactory();
+        SnippetFactory& sf = src->getViewCore().getSnippetFactory();
 
         SnippetPtr snippet = sf.getSnippet(type);
 
@@ -308,7 +308,7 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
             QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
             QPointF pos = src->mapToScene(e->pos()) + offset;
 
-            SnippetFactory& sf = src->getViewCore().getCore().getSnippetFactory();
+            SnippetFactory& sf = src->getViewCore().getSnippetFactory();
 
             SnippetPtr snippet = sf.getSnippet(type);
 

@@ -80,7 +80,7 @@
 using namespace csapex;
 
 GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_core, QWidget* parent)
-    : QGraphicsView(parent),  core_(view_core.getCore()), view_core_(view_core),
+    : QGraphicsView(parent), view_core_(view_core),
       scene_(new DesignerScene(graph_facade, view_core)),
       graph_facade_(graph_facade),
       scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr),
@@ -693,8 +693,8 @@ void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
-                   core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
-                   core_.getSnippetFactory());
+                   view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
+                   view_core_.getSnippetFactory());
 
     int r = diag.exec();
 
@@ -710,7 +710,7 @@ void GraphView::showNodeInsertDialog()
 
 void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, const QPoint &offset)
 {
-    NodeConstructorPtr c = core_.getNodeFactory().getConstructor(type);
+    NodeConstructorPtr c = view_core_.getNodeFactory().getConstructor(type);
     NodeHandlePtr handle = c->makePrototype();
 
     if(!state) {
@@ -736,11 +736,11 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
     bool is_note = type == "csapex::Note";
 
     if(is_note) {
-        box = new NoteBox(core_.getSettings(), handle,
+        box = new NoteBox(view_core_.getSettings(), handle,
                           QIcon(QString::fromStdString(c->getIcon())));
 
     } else {
-        box = new NodeBox(core_.getSettings(), handle,
+        box = new NodeBox(view_core_.getSettings(), handle,
                           QIcon(QString::fromStdString(c->getIcon())));
     }
     box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));
@@ -769,13 +769,13 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     NodeHandlePtr node_handle = node_worker->getNodeHandle();
     std::string type = node_handle->getType();
 
-    QIcon icon = QIcon(QString::fromStdString(core_.getNodeFactory().getConstructor(type)->getIcon()));
+    QIcon icon = QIcon(QString::fromStdString(view_core_.getNodeFactory().getConstructor(type)->getIcon()));
 
     NodeBox* box = nullptr;
     if(type == "csapex::Note") {
-        box = new NoteBox(core_.getSettings(), node_handle, node_worker, icon, this);
+        box = new NoteBox(view_core_.getSettings(), node_handle, node_worker, icon, this);
     } else {
-        box = new NodeBox(core_.getSettings(), node_handle, node_worker, icon, this);
+        box = new NodeBox(view_core_.getSettings(), node_handle, node_worker, icon, this);
     }
 
 
@@ -1252,7 +1252,7 @@ void GraphView::createNodes(const QPoint& global_pos, const std::string& type, c
         QPointF pos = mapToScene(mapFromGlobal(global_pos));
 
         AUUID graph_id = graph_facade_->getAbsoluteUUID();
-        CommandPtr cmd(new command::PasteGraph(graph_id, *core_.getSnippetFactory().getSnippet(type), Point (pos.x(), pos.y())));
+        CommandPtr cmd(new command::PasteGraph(graph_id, *view_core_.getSnippetFactory().getSnippet(type), Point (pos.x(), pos.y())));
 
         view_core_.execute(cmd);
     }
@@ -1434,7 +1434,7 @@ void GraphView::morphNode()
 
 Snippet GraphView::serializeSelection() const
 {
-    GraphIO io(graph_facade_->getSubgraphNode(), &core_.getNodeFactory());
+    GraphIO io(graph_facade_->getSubgraphNode(), &view_core_.getNodeFactory());
 
     std::vector<UUID> nodes;
     for(const NodeBox* box : selected_boxes_) {
@@ -1490,7 +1490,7 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
 
     std::string type = box_handle->getNodeHandle()->getType();
 
-    NodeConstructorPtr c = core_.getNodeFactory().getConstructor(type);
+    NodeConstructorPtr c = view_core_.getNodeFactory().getConstructor(type);
     NodeHandlePtr handle = c->makePrototype();
 
     apex_assert_hard(handle);
@@ -1509,11 +1509,11 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
     bool is_note = type == "csapex::Note";
 
     if(is_note) {
-        box = new NoteBox(core_.getSettings(), handle,
+        box = new NoteBox(view_core_.getSettings(), handle,
                           QIcon(QString::fromStdString(c->getIcon())));
 
     } else {
-        box = new NodeBox(core_.getSettings(), handle,
+        box = new NodeBox(view_core_.getSettings(), handle,
                           QIcon(QString::fromStdString(c->getIcon())));
     }
     box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));
@@ -1586,7 +1586,7 @@ void GraphView::makeSnippetFromSelected()
         }
     }
 
-    std::vector<std::string> snippet_dirs = core_.getPluginLocator()->getPluginPaths("snippets");
+    std::vector<std::string> snippet_dirs = view_core_.getPluginLocator()->getPluginPaths("snippets");
     std::string first_snippet_dir = snippet_dirs.front();
 
     QString save_to_path;
@@ -1639,7 +1639,7 @@ void GraphView::makeSnippetFromSelected()
         snippet.setDescription(description.toStdString());
         snippet.setTags(tags);
 
-        core_.getSnippetFactory().saveSnippet(snippet, file.fileName().toStdString());
+        view_core_.getSnippetFactory().saveSnippet(snippet, file.fileName().toStdString());
     }
 }
 

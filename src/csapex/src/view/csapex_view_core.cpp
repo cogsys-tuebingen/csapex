@@ -26,7 +26,8 @@ CsApexViewCore::CsApexViewCore(CsApexCore& core)
     : core_(core),
       node_adapter_factory_(std::make_shared<NodeAdapterFactory>(core_.getSettings(), core.getPluginLocator().get())),
       dispatcher_(core_.getCommandDispatcher()),
-      drag_io(std::make_shared<DragIO>(core_.getPluginLocator(), dispatcher_.get()))
+      drag_io(std::make_shared<DragIO>(core_.getPluginLocator(), dispatcher_.get())),
+      exception_handler_(core_.getExceptionHandler())
 {
     MessageRendererManager::instance().setPluginLocator(core_.getPluginLocator());
     node_adapter_factory_->loadPlugins();
@@ -62,7 +63,8 @@ CsApexViewCore::CsApexViewCore(CsApexCore& core)
 }
 
 CsApexViewCore::CsApexViewCore(CsApexViewCore& parent, CsApexCore& core, std::shared_ptr<CommandDispatcher> dispatcher)
-    : core_(core), node_adapter_factory_(parent.node_adapter_factory_), dispatcher_(dispatcher), drag_io(parent.drag_io)
+    : core_(core), node_adapter_factory_(parent.node_adapter_factory_), dispatcher_(dispatcher), drag_io(parent.drag_io),
+      exception_handler_(core_.getExceptionHandler())
 {
 
 }
@@ -110,6 +112,12 @@ CsApexCore& CsApexViewCore::getCore()
     return core_;
 }
 
+PluginLocatorPtr CsApexViewCore::getPluginLocator() const
+{
+    return core_.getPluginLocator();
+}
+
+
 NodeAdapterFactoryPtr CsApexViewCore::getNodeAdapterFactory()
 {
     return node_adapter_factory_;
@@ -127,6 +135,10 @@ std::shared_ptr<DragIO> CsApexViewCore::getDragIO()
 
 
 
+ExceptionHandler& CsApexViewCore::getExceptionHandler() const
+{
+    return exception_handler_;
+}
 
 
 /// PROXIES
@@ -140,6 +152,7 @@ Settings& CsApexViewCore::getSettings()
     return core_.getSettings();
 }
 
+
 GraphFacadePtr CsApexViewCore::getRoot()
 {
     return core_.getRoot();
@@ -148,6 +161,23 @@ GraphFacadePtr CsApexViewCore::getRoot()
 ThreadPoolPtr CsApexViewCore::getThreadPool()
 {
     return core_.getThreadPool();
+}
+NodeFactory& CsApexViewCore::getNodeFactory() const
+{
+    return core_.getNodeFactory();
+}
+SnippetFactory& CsApexViewCore::getSnippetFactory() const
+{
+    return core_.getSnippetFactory();
+}
+ProfilerPtr CsApexViewCore::getProfiler() const
+{
+    return core_.getProfiler();
+}
+
+void CsApexViewCore::sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level)
+{
+    core_.sendNotification(notification, error_level);
 }
 
 

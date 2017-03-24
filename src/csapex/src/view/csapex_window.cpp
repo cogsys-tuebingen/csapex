@@ -66,7 +66,7 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
       profiler_(std::make_shared<Profiler>()),
       ui(new Ui::CsApexWindow), designer_(new Designer(view_core)), minimap_(designer_->getMinimap()),
       activity_legend_(new ActivityLegend), activity_timeline_(new ActivityTimeline),
-      init_(false), style_sheet_watcher_(nullptr), plugin_locator_(view_core_.getCore().getPluginLocator())
+      init_(false), style_sheet_watcher_(nullptr), plugin_locator_(view_core_.getPluginLocator())
 {
     qRegisterMetaType < QImage > ("QImage");
     qRegisterMetaType < TokenPtr > ("Token::Ptr");
@@ -261,7 +261,7 @@ void CsApexWindow::setupDesigner()
     // models
     setupThreadManagement();
 
-    ui->startup->layout()->addWidget(new ProfilingWidget(view_core_.getCore().getProfiler(), "load graph"));
+    ui->startup->layout()->addWidget(new ProfilingWidget(view_core_.getProfiler(), "load graph"));
 }
 
 void CsApexWindow::setupThreadManagement()
@@ -429,7 +429,7 @@ void CsApexWindow::updateDebugInfo()
     for(NodeBox* box : selected) {
         NodeHandle* handle = box->getNodeHandle();
         handle->node_state_changed.connect([this](){ updateDebugInfo(); });
-        ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(&view_core_.getCore().getNodeFactory()));
+        ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(&view_core_.getNodeFactory()));
     }
 
     QTreeWidgetItemIterator it(ui->box_info);
@@ -465,7 +465,7 @@ void CsApexWindow::updateNodeInfo()
     for(QTreeWidgetItem* item : ui->node_info_tree->selectedItems()) {
         QString type = item->data(0, Qt::UserRole + 1).toString();
         if(!type.isEmpty()) {
-            NodeConstructor::Ptr n = view_core_.getCore().getNodeFactory().getConstructor(type.toStdString());
+            NodeConstructor::Ptr n = view_core_.getNodeFactory().getConstructor(type.toStdString());
 
             QString icon = QString::fromStdString(n->getIcon());
             QImage image = QIcon(icon).pixmap(QSize(16,16)).toImage();
@@ -630,7 +630,7 @@ void CsApexWindow::updateNodeTypes()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    NodeListGenerator generator(view_core_.getCore().getNodeFactory(), *designer_->getNodeAdapterFactory());
+    NodeListGenerator generator(view_core_.getNodeFactory(), *designer_->getNodeAdapterFactory());
 
     generator.insertAvailableNodeTypes(ui->nodes);
     generator.insertAvailableNodeTypes(ui->node_info_tree);
@@ -638,7 +638,7 @@ void CsApexWindow::updateNodeTypes()
 
 void CsApexWindow::updateSnippets()
 {
-    SnippetListGenerator generator(view_core_.getCore().getSnippetFactory());
+    SnippetListGenerator generator(view_core_.getSnippetFactory());
     ui->snippets->clear();
     generator.insertAvailableSnippets(ui->snippets);
 }
