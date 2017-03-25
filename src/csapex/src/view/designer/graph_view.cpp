@@ -434,7 +434,7 @@ void GraphView::enableSelection(bool enabled)
         cmd->add(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), box->getNodeHandle()->getUUID(), !enabled));
     }
 
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::updateSelection()
@@ -465,7 +465,7 @@ void GraphView::deleteSelected()
         }
     }
 
-    view_core_.execute(factory.deleteAllNodes(uuids));
+    view_core_.getCommandDispatcher()->execute(factory.deleteAllNodes(uuids));
 }
 
 void GraphView::keyPressEvent(QKeyEvent* e)
@@ -788,7 +788,7 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     QObject::connect(box, &NodeBox::portRemoved, this, &GraphView::removePort);
 
     NodeAdapter::Ptr adapter = view_core_.getNodeAdapterFactory()->makeNodeAdapter(node_handle, box);
-    adapter->executeCommand.connect(delegate::Delegate<void(const CommandPtr&)>(&view_core_, &CsApexViewCore::execute));
+    adapter->executeCommand.connect(delegate::Delegate<void(const CommandPtr&)>(view_core_.getCommandDispatcher().get(), &CommandExecutor::execute));
     box->setAdapter(adapter);
 
     box_map_[node_handle->getUUID()] = box;
@@ -823,7 +823,7 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
 
     UUID uuid = node_handle->getUUID();
     QObject::connect(box, &NodeBox::toggled, [this, uuid](bool checked) {
-        view_core_.execute(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), uuid, !checked));
+        view_core_.getCommandDispatcher()->execute(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), uuid, !checked));
     });
 
     Q_EMIT boxAdded(box);
@@ -1015,7 +1015,7 @@ void GraphView::createPort(CreateConnectorRequest request)
     CommandFactory factory(graph_facade_.get());
 
     CommandPtr cmd = factory.createVariadicPort(request.target, request.connector_type, request.type, request.label, request.optional);
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::createPortAndConnect(CreateConnectorRequest request, ConnectablePtr from)
@@ -1034,7 +1034,7 @@ void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable
                                                                         from->getUUID(), false, true);
     }
 
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::createPortAndMove(CreateConnectorRequest request, ConnectablePtr from)
@@ -1053,7 +1053,7 @@ void GraphView::createPortAndMove(CreateConnectorRequest request, ConnectablePtr
                                                                         from->getUUID(), true, true);
     }
 
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::addPort(Port *port)
@@ -1068,7 +1068,7 @@ void GraphView::addPort(Port *port)
         if(!adaptee) {
             return;
         }
-        view_core_.execute(CommandFactory(graph_facade_.get()).removeAllConnectionsCmd(adaptee));
+        view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).removeAllConnectionsCmd(adaptee));
     });
 
     QObject::connect(port, &Port::addConnectionRequest, [this, port](const ConnectablePtr& from) {
@@ -1077,7 +1077,7 @@ void GraphView::addPort(Port *port)
             return;
         }
         auto cmd = CommandFactory(graph_facade_.get()).addConnection(adaptee->getUUID(), from->getUUID(), false);
-        view_core_.execute(cmd);
+        view_core_.getCommandDispatcher()->execute(cmd);
     });
 
     QObject::connect(port, &Port::moveConnectionRequest, [this, port](const ConnectablePtr& from) {
@@ -1086,7 +1086,7 @@ void GraphView::addPort(Port *port)
             return;
         }
         Command::Ptr cmd = CommandFactory(graph_facade_.get()).moveConnections(from.get(), adaptee.get());
-        view_core_.execute(cmd);
+        view_core_.getCommandDispatcher()->execute(cmd);
     });
 
     QObject::connect(port, &Port::changePortRequest, [this, port](QString label) {
@@ -1095,7 +1095,7 @@ void GraphView::addPort(Port *port)
             return;
         }
         Command::Ptr cmd = std::make_shared<command::RenameConnector>(graph_facade_->getAbsoluteUUID(), adaptee->getUUID(), label.toStdString());
-        view_core_.execute(cmd);
+        view_core_.getCommandDispatcher()->execute(cmd);
     });
 }
 
@@ -1119,7 +1119,7 @@ void GraphView::renameBox(NodeBox *box)
             command::RenameNode::Ptr cmd(new command::RenameNode(graph->getAbsoluteUUID(),
                                                                  node->getUUID(),
                                                                  text.toStdString()));
-            view_core_.execute(cmd);
+            view_core_.getCommandDispatcher()->execute(cmd);
         }
     }
 }
@@ -1196,7 +1196,7 @@ void GraphView::movedBoxes(double dx, double dy)
                                                         Point(from.x(), from.y()), Point(to.x(), to.y()))));
         }
     }
-    view_core_.execute(meta);
+    view_core_.getCommandDispatcher()->execute(meta);
 
     invalidateCache();
 }
@@ -1245,7 +1245,7 @@ void GraphView::createNodes(const QPoint& global_pos, const std::string& type, c
         UUID uuid = graph_facade_->getGraph()->generateUUID(type);
         CommandPtr cmd(new command::AddNode(graph_id, type, Point (pos.x(), pos.y()), uuid, NodeStatePtr()));
 
-        view_core_.execute(cmd);
+        view_core_.getCommandDispatcher()->execute(cmd);
 
     } else if(mime == csapex::mime::snippet) {
         QPointF pos = mapToScene(mapFromGlobal(global_pos));
@@ -1253,7 +1253,7 @@ void GraphView::createNodes(const QPoint& global_pos, const std::string& type, c
         AUUID graph_id = graph_facade_->getAbsoluteUUID();
         CommandPtr cmd(new command::PasteGraph(graph_id, *view_core_.getSnippetFactory()->getSnippet(type), Point (pos.x(), pos.y())));
 
-        view_core_.execute(cmd);
+        view_core_.getCommandDispatcher()->execute(cmd);
     }
 }
 
@@ -1281,18 +1281,18 @@ void GraphView::showContextMenuForSelectedNodes(NodeBox* box, const QPoint &scen
 
 void GraphView::usePrivateThreadForSelectedNodes()
 {
-    view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), ThreadGroup::PRIVATE_THREAD));
+    view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), ThreadGroup::PRIVATE_THREAD));
 }
 
 
 void GraphView::useDefaultThreadForSelectedNodes()
 {
-    view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), ThreadGroup::DEFAULT_GROUP_ID));
+    view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), ThreadGroup::DEFAULT_GROUP_ID));
 }
 
 void GraphView::switchSelectedNodesToThread(int group_id)
 {
-    view_core_.execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), group_id));
+    view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).switchThreadRecursively(getSelectedUUIDs(), group_id));
 }
 
 void GraphView::createNewThreadGroupFor()
@@ -1306,7 +1306,7 @@ void GraphView::createNewThreadGroupFor()
         for(NodeBox* box : selected_boxes_) {
             cmd->add(Command::Ptr(new command::CreateThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), text.toStdString())));
         }
-        view_core_.execute(cmd);
+        view_core_.getCommandDispatcher()->execute(cmd);
     }
 }
 
@@ -1333,7 +1333,7 @@ void GraphView::chooseColor()
     for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::SetColor(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), r, g, b)));
     }
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::flipBox()
@@ -1342,7 +1342,7 @@ void GraphView::flipBox()
     for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::FlipSides(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID())));
     }
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::setExecutionMode(ExecutionMode mode)
@@ -1351,12 +1351,12 @@ void GraphView::setExecutionMode(ExecutionMode mode)
     for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::SetExecutionMode(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), mode)));
     }
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::setLoggerLevel(int level)
 {
-    view_core_.execute(CommandFactory(graph_facade_.get()).setLoggerLevelRecursively(getSelectedUUIDs(), level));
+    view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).setLoggerLevelRecursively(getSelectedUUIDs(), level));
 }
 
 
@@ -1374,13 +1374,13 @@ void GraphView::setMaximumFrequency()
 
     double max_f = QInputDialog::getDouble(QApplication::activeWindow(), "Maximum Frequency", "Please enter the maximum frequency.", current_f, 0.0001, 400.0, 5, &ok);
     if(ok) {
-        view_core_.execute(CommandFactory(graph_facade_.get()).setMaximumFrequencyRecursively(getSelectedUUIDs(), max_f));
+        view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).setMaximumFrequencyRecursively(getSelectedUUIDs(), max_f));
     }
 }
 
 void GraphView::setUnboundedMaximumFrequency()
 {
-    view_core_.execute(CommandFactory(graph_facade_.get()).setMaximumFrequencyRecursively(getSelectedUUIDs(), 0.0));
+    view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).setMaximumFrequencyRecursively(getSelectedUUIDs(), 0.0));
 }
 
 void GraphView::minimizeBox(bool muted)
@@ -1389,12 +1389,12 @@ void GraphView::minimizeBox(bool muted)
     for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::Minimize(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), muted)));
     }
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::muteBox(bool muted)
 {
-    view_core_.execute(CommandFactory(graph_facade_.get()).muteRecursively(getSelectedUUIDs(), muted));
+    view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).muteRecursively(getSelectedUUIDs(), muted));
 }
 
 void GraphView::morphNode()
@@ -1427,7 +1427,7 @@ void GraphView::morphNode()
                                                                        ci.from, ci.to, ci.active));
         }
 
-        view_core_.execute(morph);
+        view_core_.getCommandDispatcher()->execute(morph);
     }
 }
 
@@ -1547,7 +1547,7 @@ void GraphView::groupSelected()
         uuids.push_back(box->getNodeHandle()->getUUID());
     }
     CommandPtr cmd(new command::GroupNodes(graph_facade_->getAbsoluteUUID(),uuids));
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 
@@ -1556,7 +1556,7 @@ void GraphView::ungroupSelected()
     apex_assert_hard(selected_boxes_.size() == 1);
 
     CommandPtr cmd(new command::UngroupNodes(graph_facade_->getAbsoluteUUID(), selected_boxes_.front()->getNodeHandle()->getUUID()));
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::makeSnippetFromSelected()
@@ -1652,7 +1652,7 @@ void GraphView::paste()
     AUUID graph_id = graph_facade_->getAbsoluteUUID();
     CommandPtr cmd(new command::PasteGraph(graph_id, blueprint, Point (pos.x(), pos.y())));
 
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void GraphView::contextMenuEvent(QContextMenuEvent* event)

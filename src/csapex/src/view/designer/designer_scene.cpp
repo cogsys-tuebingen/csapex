@@ -542,7 +542,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
     if(!e->isAccepted() && e->button() == Qt::LeftButton) {
         if(highlight_connection_id_ >= 0) {
             QPoint pos = e->scenePos().toPoint();
-            view_core_.execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
+            view_core_.getCommandDispatcher()->execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
                                                                     highlight_connection_id_, highlight_connection_sub_id_,
                                                                     Point(pos.x(), pos.y()), Fulcrum::FULCRUM_LINEAR)));
             e->accept();
@@ -558,7 +558,7 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
     if(e->button() == Qt::MiddleButton && highlight_connection_id_ >= 0) {
         auto cmd = CommandFactory(graph_facade_.get()).deleteConnectionByIdCommand(highlight_connection_id_);
         if(cmd) {
-            view_core_.execute(cmd);
+            view_core_.getCommandDispatcher()->execute(cmd);
         }
         return;
     }
@@ -718,7 +718,7 @@ void DesignerScene::fulcrumAdded(Fulcrum * f)
     fulcrum_last_hout_[f] = f->handleOut();
 
     QObject::connect(w, &FulcrumWidget::deleteRequest, [this](Fulcrum* f){
-        view_core_.execute(Command::Ptr(new command::DeleteFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id())));
+        view_core_.getCommandDispatcher()->execute(Command::Ptr(new command::DeleteFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id())));
     });
 
 
@@ -729,7 +729,7 @@ void DesignerScene::fulcrumAdded(Fulcrum * f)
                                             f->connectionId(), f->id(),
                                             f->type(), f->handleIn(), f->handleOut(),
                                             type, f->handleIn(), f->handleOut()));
-        view_core_.execute(cmd);
+        view_core_.getCommandDispatcher()->execute(cmd);
     });
 
     clearSelection();
@@ -760,7 +760,7 @@ void DesignerScene::fulcrumMoved(void * fulcrum, bool dropped)
     Fulcrum* f = (Fulcrum*) fulcrum;
 
     if(dropped) {
-        view_core_.execute(Command::Ptr(new command::MoveFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(), fulcrum_last_pos_[f], f->pos())));
+        view_core_.getCommandDispatcher()->execute(Command::Ptr(new command::MoveFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(), fulcrum_last_pos_[f], f->pos())));
         fulcrum_last_pos_[f] = f->pos();
     }
     invalidateSchema();
@@ -771,7 +771,7 @@ void DesignerScene::fulcrumHandleMoved(void * fulcrum, bool dropped, int /*which
     Fulcrum* f = (Fulcrum*) fulcrum;
 
     if(dropped) {
-        view_core_.execute(Command::Ptr(new command::ModifyFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(),
+        view_core_.getCommandDispatcher()->execute(Command::Ptr(new command::ModifyFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(),
                                                                    fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
                                                                    f->type(), f->handleIn(), f->handleOut())));
         fulcrum_last_type_[f] = f->type();
@@ -1403,13 +1403,13 @@ bool DesignerScene::showConnectionContextMenu()
     QAction* selectedItem = menu.exec(QCursor::pos());
 
     if(selectedItem == del) {
-        view_core_.execute(CommandFactory(graph_facade_.get()).deleteConnectionByIdCommand(highlight_connection_id_));
+        view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).deleteConnectionByIdCommand(highlight_connection_id_));
 
     } else if(selectedItem == reset) {
-        view_core_.execute(CommandFactory(graph_facade_.get()).deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
+        view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).deleteAllConnectionFulcrumsCommand(highlight_connection_id_));
 
     } else if(selectedItem == active) {
-        view_core_.execute(CommandFactory(graph_facade_.get()).setConnectionActive(highlight_connection_id_, active->isChecked()));
+        view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).setConnectionActive(highlight_connection_id_, active->isChecked()));
     }
 
 

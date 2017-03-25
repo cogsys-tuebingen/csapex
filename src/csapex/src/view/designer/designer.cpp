@@ -105,7 +105,7 @@ void Designer::setup()
                         command::RenameNode::Ptr cmd(new command::RenameNode(parent->getAbsoluteUUID(),
                                                                              node->getUUID(),
                                                                              text.toStdString()));
-                        view_core_.execute(cmd);
+                        view_core_.getCommandDispatcher()->execute(cmd);
                     }
                 }
             }

@@ -6,6 +6,7 @@
 #include <csapex/command/command.h>
 #include <csapex/command/create_thread.h>
 #include <csapex/command/meta.h>
+#include <csapex/command/dispatcher.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
@@ -265,7 +266,7 @@ void CsApexWindow::setupDesigner()
 
 void CsApexWindow::setupThreadManagement()
 {
-    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getThreadPool(), view_core_);
+    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getThreadPool(), *view_core_.getCommandDispatcher());
     ui->thread_table->setModel(model);
 
     QItemSelectionModel* select = ui->thread_table->selectionModel();
@@ -318,7 +319,7 @@ void CsApexWindow::setupThreadManagement()
 
         if(ok && !text.isEmpty()) {
             Command::Ptr cmd(new command::CreateThread(view_core_.getRoot()->getAbsoluteUUID(), UUID::NONE, text.toStdString()));
-            view_core_.execute(cmd);
+            view_core_.getCommandDispatcher()->execute(cmd);
         }
     });
 
@@ -340,7 +341,7 @@ void CsApexWindow::setupThreadManagement()
                 }
             }
 
-            view_core_.execute(meta);
+            view_core_.getCommandDispatcher()->execute(meta);
         }
     });
 }
@@ -697,7 +698,7 @@ void CsApexWindow::start()
 
 void CsApexWindow::updateMenu()
 {
-    bool can_undo = view_core_.canUndo();
+    bool can_undo = view_core_.getCommandDispatcher()->canUndo();
     ui->actionUndo->setDisabled(!can_undo);
     if(can_undo) {
         if(CommandDispatcherPtr dispatcher = std::dynamic_pointer_cast<CommandDispatcher>(view_core_.getCommandDispatcher())) {
@@ -709,7 +710,7 @@ void CsApexWindow::updateMenu()
         ui->actionUndo->setText(QString("&Undo"));
     }
 
-    bool can_redo = view_core_.canRedo();
+    bool can_redo = view_core_.getCommandDispatcher()->canRedo();
     ui->actionRedo->setDisabled(!can_redo);
     if(can_redo) {
         if(CommandDispatcherPtr dispatcher = std::dynamic_pointer_cast<CommandDispatcher>(view_core_.getCommandDispatcher())) {
@@ -728,7 +729,7 @@ void CsApexWindow::updateTitle()
     std::stringstream window;
     window << "CS::APEX (" << getConfigFile() << ")";
 
-    if(view_core_.isDirty()) {
+    if(view_core_.getCommandDispatcher()->isDirty()) {
         window << " *";
     }
 
@@ -810,13 +811,14 @@ void CsApexWindow::updatePluginIgnored(const QObject* &action)
 
 void CsApexWindow::tick()
 {
-    view_core_.executeLater();
+    // TODO: move to core
+    view_core_.getCommandDispatcher()->executeLater();
     QApplication::processEvents();
 }
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    if(view_core_.isDirty()) {
+    if(view_core_.getCommandDispatcher()->isDirty()) {
         int r = QMessageBox::warning(this, tr("cs::APEX"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -941,17 +943,17 @@ void CsApexWindow::reset()
 void CsApexWindow::clear()
 {
     CommandPtr cmd = CommandFactory(view_core_.getRoot().get()).clearCommand();
-    view_core_.execute(cmd);
+    view_core_.getCommandDispatcher()->execute(cmd);
 }
 
 void CsApexWindow::undo()
 {
-    view_core_.undo();
+    view_core_.getCommandDispatcher()->undo();
 }
 
 void CsApexWindow::redo()
 {
-    view_core_.redo();
+    view_core_.getCommandDispatcher()->redo();
 }
 
 void CsApexWindow::makeScreenshot()

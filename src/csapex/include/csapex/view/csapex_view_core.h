@@ -25,11 +25,7 @@ class DesignerStyleable;
 class DesignerOptions;
 class DragIO;
 
-class CSAPEX_QT_EXPORT CsApexViewCore :
-        // abstract classes
-        public Observer, public Notifier,
-        // interfaces
-        public CommandExecutor
+class CSAPEX_QT_EXPORT CsApexViewCore : public Observer, public Notifier
 {
 public:
     CsApexViewCore(CsApexCorePtr core);
@@ -47,22 +43,10 @@ public:
     void setSteppingMode(bool stepping);
     void step();
 
-
-    /// TODO: change to proxy?
-    void execute(const CommandPtr& command);
-    void executeLater(const CommandPtr& command);
-    void executeLater();
-
-    void undo();
-    void redo();
-    bool canUndo() const;
-    bool canRedo() const;
-    bool isDirty() const;
-
     Settings& getSettings();
-    ExceptionHandler& getExceptionHandler() const;
 
     // TODO: add proxies
+    ExceptionHandler& getExceptionHandler() const;
     GraphFacadePtr getRoot();
     void shutdown();
     void clearBlock();

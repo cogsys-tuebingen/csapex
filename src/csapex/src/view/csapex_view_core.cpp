@@ -79,48 +79,6 @@ CsApexViewCore::CsApexViewCore(CsApexViewCore& parent, ExceptionHandler &excepti
     core_->init();
 }
 
-void CsApexViewCore::execute(const CommandPtr &command)
-{
-    dispatcher_->execute(command);
-}
-void CsApexViewCore::executeLater(const CommandPtr &command)
-{
-    dispatcher_->executeLater(command);
-}
-
-void CsApexViewCore::executeLater()
-{
-    dispatcher_->executeLater();
-}
-
-void CsApexViewCore::undo()
-{
-    dispatcher_->undo();
-}
-void CsApexViewCore::redo()
-{
-    dispatcher_->redo();
-}
-
-
-bool CsApexViewCore::canUndo() const
-{
-    return dispatcher_->canUndo();
-}
-bool CsApexViewCore::canRedo() const
-{
-    return dispatcher_->canRedo();
-}
-
-bool CsApexViewCore::isDirty() const
-{
-    return dispatcher_->isDirty();
-}
-
-PluginLocatorPtr CsApexViewCore::getPluginLocator() const
-{
-    return core_->getPluginLocator();
-}
 
 
 NodeAdapterFactoryPtr CsApexViewCore::getNodeAdapterFactory()
@@ -138,15 +96,18 @@ std::shared_ptr<DragIO> CsApexViewCore::getDragIO()
     return drag_io;
 }
 
-
-
+/// PROXIES
 ExceptionHandler& CsApexViewCore::getExceptionHandler() const
 {
     return exception_handler_;
 }
 
 
-/// PROXIES
+PluginLocatorPtr CsApexViewCore::getPluginLocator() const
+{
+    return core_->getPluginLocator();
+}
+
 CommandExecutorPtr CsApexViewCore::getCommandDispatcher()
 {
     return dispatcher_;
