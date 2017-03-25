@@ -53,6 +53,15 @@ OutputPtr OutputTransition::getOutput(const UUID& id) const
     return outputs_.at(id);
 }
 
+OutputPtr OutputTransition::getOutputNoThrow(const UUID& id) const noexcept
+{
+    auto pos = outputs_.find(id);
+    if(pos == outputs_.end()) {
+        return nullptr;
+    }
+    return pos->second;
+}
+
 void OutputTransition::addOutput(OutputPtr output)
 {    
     output->setOutputTransition(this);

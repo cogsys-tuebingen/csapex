@@ -71,10 +71,10 @@ public:
 
     ConnectablePtr getConnector(const UUID& uuid) const;
     ConnectablePtr getConnectorNoThrow(const UUID& uuid) const noexcept;
-    virtual InputPtr getInput(const UUID& uuid) const;
-    virtual OutputPtr getOutput(const UUID& uuid) const;
-    virtual SlotPtr getSlot(const UUID& uuid) const;
-    virtual EventPtr getEvent(const UUID& uuid) const;
+    virtual InputPtr getInput(const UUID& uuid) const noexcept;
+    virtual OutputPtr getOutput(const UUID& uuid) const noexcept;
+    virtual SlotPtr getSlot(const UUID& uuid) const noexcept;
+    virtual EventPtr getEvent(const UUID& uuid) const noexcept;
 
 
     void removeInput(const UUID& uuid) override;

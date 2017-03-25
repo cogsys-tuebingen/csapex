@@ -85,6 +85,11 @@ public:
     SlotPtr getForwardedSlotInternal(const UUID& internal_uuid) const;
     EventPtr getForwardedEventInternal(const UUID& internal_uuid) const;
 
+    InputPtr getForwardedInputInternalNoThrow(const UUID& internal_uuid) const noexcept;
+    OutputPtr getForwardedOutputInternalNoThrow(const UUID& internal_uuid) const noexcept;
+    SlotPtr getForwardedSlotInternalNoThrow(const UUID& internal_uuid) const noexcept;
+    EventPtr getForwardedEventInternalNoThrow(const UUID& internal_uuid) const noexcept;
+
     OutputPtr getRelayForInput(const UUID& external_uuid) const;
     InputPtr getRelayForOutput(const UUID& external_uuid) const;
     EventPtr getRelayForSlot(const UUID& external_uuid) const;

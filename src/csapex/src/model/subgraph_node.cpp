@@ -572,6 +572,36 @@ EventPtr SubgraphNode::getForwardedEventInternal(const UUID &internal_uuid) cons
     return internal_events_.at(internal_uuid);
 }
 
+InputPtr SubgraphNode::getForwardedInputInternalNoThrow(const UUID &internal_uuid) const noexcept
+{
+    return transition_relay_in_->getInputNoThrow(internal_uuid);
+}
+
+OutputPtr SubgraphNode::getForwardedOutputInternalNoThrow(const UUID &internal_uuid) const noexcept
+{
+    return transition_relay_out_->getOutputNoThrow(internal_uuid);
+}
+
+SlotPtr SubgraphNode::getForwardedSlotInternalNoThrow(const UUID &internal_uuid) const noexcept
+{
+    auto pos = internal_slots_.find(internal_uuid);
+    if(pos == internal_slots_.end()) {
+        return nullptr;
+    }
+
+    return pos->second;
+}
+
+EventPtr SubgraphNode::getForwardedEventInternalNoThrow(const UUID &internal_uuid) const noexcept
+{
+    auto pos = internal_events_.find(internal_uuid);
+    if(pos == internal_events_.end()) {
+        return nullptr;
+    }
+
+    return pos->second;
+}
+
 UUID SubgraphNode::getForwardedInputExternal(const UUID &internal_uuid) const
 {
     return relay_to_external_output_.at(internal_uuid);

@@ -18,6 +18,7 @@ public:
 
     std::vector<UUID> getOutputs() const;
     OutputPtr getOutput(const UUID& id) const;
+    OutputPtr getOutputNoThrow(const UUID& id) const noexcept;
 
     void addOutput(OutputPtr output);
     void removeOutput(OutputPtr output);

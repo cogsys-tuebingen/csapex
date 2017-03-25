@@ -30,6 +30,15 @@ InputPtr InputTransition::getInput(const UUID& id) const
     return inputs_.at(id);
 }
 
+InputPtr InputTransition::getInputNoThrow(const UUID& id) const noexcept
+{
+    auto pos = inputs_.find(id);
+    if(pos == inputs_.end()) {
+        return nullptr;
+    }
+    return pos->second;
+}
+
 std::vector<UUID> InputTransition::getInputs() const
 {
     std::vector<UUID> res;
