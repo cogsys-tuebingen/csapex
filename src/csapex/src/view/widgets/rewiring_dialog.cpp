@@ -32,24 +32,15 @@ RewiringDialog::RewiringDialog(NodeHandle* node, CsApexViewCore& view_core, QWid
     : QDialog(parent, f),
       view_core_(view_core),
 
-      core_temp_(std::make_shared<CsApexCore>(view_core.getCore())),
-      temp_dispatcher_(std::make_shared<CommandDispatcher>(*core_temp_)),
-      view_core_temp_(std::make_shared<CsApexViewCore>(view_core_, *core_temp_, temp_dispatcher_)),
+      view_core_old_(std::make_shared<CsApexViewCore>(view_core_, view_core_.getExceptionHandler())),
+      view_core_new_(std::make_shared<CsApexViewCore>(view_core_, view_core_.getExceptionHandler())),
       nh_(node)
 {
     root_uuid_provider_ = std::make_shared<UUIDProvider>();
-
-    core_temp_->init();
 }
 
 RewiringDialog::~RewiringDialog()
 {
-    //    graph_facade_old_.reset();
-    //    graph_facade_new_.reset();
-    //    graph_old.reset();
-    //    graph_new.reset();
-
-    //    executor.reset();
 }
 
 std::string RewiringDialog::getType() const
@@ -104,8 +95,8 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
 void RewiringDialog::makeUI(const QString& stylesheet)
 {
     BoxDialog diag("Please enter the new node type.",
-                   view_core_temp_->getNodeFactory(), *view_core_temp_->getNodeAdapterFactory(),
-                   view_core_temp_->getSnippetFactory());
+                   *view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
+                   *view_core_.getSnippetFactory());
     diag.setWindowTitle("Select new node type.");
 
     int r = diag.exec();
@@ -114,50 +105,44 @@ void RewiringDialog::makeUI(const QString& stylesheet)
         return;
     }
 
-    setStyleSheet(stylesheet);
-
     type_new_ = diag.getName();
 
-    setWindowIcon(QIcon(":/pencil.png"));
-    setWindowTitle(QString("Change Node to ") + QString::fromStdString(type_new_));
-
-    setFocusPolicy(Qt::StrongFocus);
-    setModal(true);
-
-    QVBoxLayout* layout = new QVBoxLayout;
-    setLayout(layout);
+    createGraphs(type_new_);
+    createConnections();
 
 
-    NodeFactory& node_factory = view_core_temp_->getNodeFactory();
-    executor = std::make_shared<ThreadPool>(view_core_temp_->getExceptionHandler(), false, false);
+    createUI(stylesheet);
+}
 
-    graph_old_handle = node_factory.makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_.get());
-    apex_assert_hard(graph_old_handle);
-    graph_old = std::dynamic_pointer_cast<SubgraphNode>(graph_old_handle->getNode().lock());
+void RewiringDialog::createGraphs(const std::string& type)
+{
+    NodeFactory& node_factory = *view_core_.getNodeFactory();
+
+    // old graph
+    graph_facade_old_ = view_core_old_->getRoot();
+    apex_assert_hard(graph_facade_old_);
+    graph_old = graph_facade_old_->getSubgraphNode();
     apex_assert_hard(graph_old);
-    graph_facade_old_ = std::make_shared<GraphFacade>(*executor, graph_old.get(), graph_old_handle.get());
+    graph_old->removeInternalPorts();
 
-    graph_facade_new_ = core_temp_->getRoot();
-    graph_new = graph_facade_new_->getSubgraphNode();
-
-    graph_new->removeInternalPorts();
-
-    NodePtr node = nh_->getNode().lock();
-
-    nh_old = node_factory.makeNode(nh_->getType(), nh_->getUUID(), graph_old.get());
-    NodePtr node_old = nh_old->getNode().lock();
-    for(param::ParameterPtr p : node->getPersistentParameters()) {
-        node_old->addPersistentParameter(param::ParameterFactory::clone(p));
-    }
-    for(param::ParameterPtr p : node->getTemporaryParameters()) {
-        node_old->addTemporaryParameter(param::ParameterFactory::clone(p));
-    }
+    nh_old = node_factory.makeNode(nh_->getType(), nh_->getUUID(), graph_old);
+    nh_old->setNodeState(nh_->getNodeStateCopy());
     graph_old->addNode(nh_old);
 
-    nh_new = node_factory.makeNode(type_new_, graph_new->generateUUID(type_new_), graph_new);
+
+    // new graph
+    graph_facade_new_ = view_core_new_->getRoot();
+    apex_assert_hard(graph_facade_new_);
+    graph_new = graph_facade_new_->getSubgraphNode();
+    apex_assert_hard(graph_new);
+    graph_new->removeInternalPorts();
+
+    nh_new = node_factory.makeNode(type, graph_new->generateUUID(type), graph_new);
     graph_new->addNode(nh_new);
+}
 
-
+void RewiringDialog::createConnections()
+{
     for(SlotPtr slot_original : nh_->getSlots()) {
         for(ConnectionPtr connection : slot_original->getConnections()) {
             SlotPtr slot_old = nh_old->getSlot(slot_original->getUUID());
@@ -188,10 +173,23 @@ void RewiringDialog::makeUI(const QString& stylesheet)
             updateConnection(output_old, connection);
         }
     }
+}
+
+void RewiringDialog::createUI(const QString& stylesheet)
+{
+    setStyleSheet(stylesheet);
+    setWindowIcon(QIcon(":/pencil.png"));
+    setWindowTitle(QString("Change Node to ") + QString::fromStdString(type_new_));
+
+    setFocusPolicy(Qt::StrongFocus);
+    setModal(true);
+
+    QVBoxLayout* layout = new QVBoxLayout;
+    setLayout(layout);
 
     layout->addWidget(new QLabel("Current node:"));
 
-    GraphView* view_old = new GraphView(graph_facade_old_, *view_core_temp_);
+    GraphView* view_old = new GraphView(graph_facade_old_, *view_core_old_);
     view_old->overwriteStyleSheet(stylesheet);
     view_old->setMinimumSize(500, 350);
     view_old->setInteractive(false);
@@ -199,7 +197,7 @@ void RewiringDialog::makeUI(const QString& stylesheet)
 
     layout->addWidget(new QLabel("New node:"));
 
-    GraphView* view_new = new GraphView(graph_facade_new_, *view_core_temp_);
+    GraphView* view_new = new GraphView(graph_facade_new_, *view_core_new_);
     view_new->overwriteStyleSheet(stylesheet);
     view_new->setMinimumSize(500, 350);
     layout->addWidget(view_new);
@@ -211,6 +209,7 @@ void RewiringDialog::makeUI(const QString& stylesheet)
     QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(finish()));
     QObject::connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
 }
+
 
 void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &connection)
 {
@@ -224,7 +223,6 @@ void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &conne
         uuid_cache_[original_uuid] = uuid_old;
         new_target_uuid_to_old_uuid_[uuid_old] = original_uuid;
     }
-
 
     UUID uuid_new = UUID::NONE;
     OutputPtr source_old = graph_old->findConnectorNoThrow<Output>(uuid_old);

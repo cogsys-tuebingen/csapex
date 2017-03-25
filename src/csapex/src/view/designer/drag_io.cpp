@@ -31,7 +31,7 @@ using namespace csapex;
 Q_DECLARE_METATYPE(ConnectablePtr)
 
 
-DragIO::DragIO(PluginLocatorPtr locator, CommandDispatcher* dispatcher)
+DragIO::DragIO(PluginLocatorPtr locator, CommandExecutor *dispatcher)
     : loaded_(false), plugin_locator_(locator), manager_(new PluginManager<DragIOHandler>("csapex::DragIOHandler")),
       dispatcher_(dispatcher)
 {
@@ -266,7 +266,7 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        SnippetFactory& sf = src->getViewCore().getSnippetFactory();
+        SnippetFactory& sf = *src->getViewCore().getSnippetFactory();
 
         SnippetPtr snippet = sf.getSnippet(type);
 
@@ -308,7 +308,7 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
             QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
             QPointF pos = src->mapToScene(e->pos()) + offset;
 
-            SnippetFactory& sf = src->getViewCore().getSnippetFactory();
+            SnippetFactory& sf = *src->getViewCore().getSnippetFactory();
 
             SnippetPtr snippet = sf.getSnippet(type);
 

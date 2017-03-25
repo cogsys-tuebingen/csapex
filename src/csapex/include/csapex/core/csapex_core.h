@@ -29,7 +29,7 @@ class CSAPEX_EXPORT CsApexCore : public Observer, public Notifier
 {
 public:
     CsApexCore(Settings& settings_, ExceptionHandler &handler);
-    CsApexCore(const CsApexCore& parent);
+    CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator, NodeFactoryPtr node_factory, SnippetFactoryPtr snippet_factory);
 
     virtual ~CsApexCore();
 
@@ -44,8 +44,8 @@ public:
     void reset();
 
     Settings& getSettings() const;
-    NodeFactory& getNodeFactory() const;
-    SnippetFactory& getSnippetFactory() const;
+    NodeFactoryPtr getNodeFactory() const;
+    SnippetFactoryPtr getSnippetFactory() const;
 
     GraphFacadePtr getRoot() const;
     ThreadPoolPtr getThreadPool() const;
@@ -92,11 +92,10 @@ public:
 
 private:
     CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator);
-
     CorePluginPtr makeCorePlugin(const std::string& name);
 
 private:
-    const CsApexCore* parent_;
+    bool is_root_;
 
     Settings& settings_;
     PluginLocatorPtr plugin_locator_;

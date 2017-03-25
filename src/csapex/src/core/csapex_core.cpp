@@ -43,8 +43,7 @@
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::PluginLocatorPtr plugin_locator)
-    : parent_(nullptr),
-      settings_(settings),
+    : settings_(settings),
       plugin_locator_(plugin_locator),
       exception_handler_(handler),
       node_factory_(nullptr),
@@ -54,6 +53,8 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
       core_plugin_manager(nullptr),
       init_(false), load_needs_reset_(false)
 {
+    is_root_ = true;
+
     thread_pool_ = std::make_shared<ThreadPool>(exception_handler_, !settings_.get<bool>("threadless"), settings_.get<bool>("thread_grouping"));
     thread_pool_->setPause(settings_.get<bool>("initially_paused"));
 
@@ -90,6 +91,8 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
 CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
     : CsApexCore(settings, handler, std::make_shared<PluginLocator>(settings))
 {
+    is_root_ = true;
+
     observe(settings.settings_changed, std::bind(&CsApexCore::settingsChanged, this));
 
     exception_handler_.setCore(this);
@@ -107,13 +110,14 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
     boot();
 }
 
-CsApexCore::CsApexCore(const CsApexCore& parent)
-    : CsApexCore(parent.getSettings(), parent.getExceptionHandler(), parent.getPluginLocator())
+CsApexCore::CsApexCore(Settings& settings, ExceptionHandler &handler, PluginLocatorPtr plugin_locator,
+                       NodeFactoryPtr node_factory, SnippetFactoryPtr snippet_factory)
+    : CsApexCore(settings, handler, plugin_locator)
 {
-    parent_ = &parent;
-    core_plugin_manager = parent.core_plugin_manager;
-    node_factory_ =  parent.node_factory_;
-    snippet_factory_ =  parent.snippet_factory_;
+    is_root_ = false;
+
+    node_factory_ =  node_factory;
+    snippet_factory_ =  snippet_factory;
 }
 
 CsApexCore::~CsApexCore()
@@ -121,7 +125,7 @@ CsApexCore::~CsApexCore()
     root_->stop();
 
     std::unique_lock<std::mutex> lock(running_mutex_);
-    if(!parent_) {
+    if(is_root_) {
         if(root_) {
             root_->clear();
         }
@@ -136,7 +140,7 @@ CsApexCore::~CsApexCore()
     core_plugins_.clear();
     core_plugin_manager.reset();
 
-    if(!parent_) {
+    if(is_root_) {
         boot_plugins_.clear();
         while(!boot_plugin_loaders_.empty()) {
             delete boot_plugin_loaders_.front();
@@ -195,25 +199,31 @@ void CsApexCore::init()
     if(!init_) {
         init_ = true;
 
-        status_changed("loading core plugins");
-        core_plugin_manager->load(plugin_locator_.get());
+        if(is_root_) {
+            status_changed("loading core plugins");
+            core_plugin_manager->load(plugin_locator_.get());
 
-        for(const auto& cp : core_plugin_manager->getConstructors()) {
-            makeCorePlugin(cp.first);
-        }
+            for(const auto& cp : core_plugin_manager->getConstructors()) {
+                makeCorePlugin(cp.first);
+            }
 
-        typedef const std::pair<std::string, CorePlugin::Ptr > PAIR;
-        for(PAIR plugin : core_plugins_) {
-            plugin.second->prepare(getSettings());
-        }
-        for(PAIR plugin : core_plugins_) {
-            plugin.second->init(*this);
+            for(auto plugin : core_plugins_) {
+                plugin.second->prepare(getSettings());
+            }
+            for(auto plugin : core_plugins_) {
+                plugin.second->init(*this);
+            }
         }
 
         status_changed("loading node plugins");
+        apex_assert_hard(node_factory_);
         observe(node_factory_->loaded, status_changed);
         observe(node_factory_->notification, notification);
-        node_factory_->loadPlugins();
+
+        if(is_root_) {
+            node_factory_->loadPlugins();
+        }
+
         observe(node_factory_->new_node_type, new_node_type);
         observe(node_factory_->node_constructed, [this](NodeHandlePtr n) {
             n->getNodeState()->setMaximumFrequency(settings_.get("default_frequency", 60));
@@ -244,16 +254,19 @@ void CsApexCore::init()
         root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
                                                      root_->getGraph()->makeUUID("slot_exit"), "exit",
                                                      [this](const TokenPtr&) {
-            // TODO: more graceful stopping
-            csapex::error_handling::stop();
+            shutdown();
         });
-        for(PAIR plugin : core_plugins_) {
-            plugin.second->setupGraph(root_->getSubgraphNode());
+
+        if(is_root_) {
+            for(auto plugin : core_plugins_) {
+                plugin.second->setupGraph(root_->getSubgraphNode());
+            }
+
+            status_changed("loading snippets");
+            snippet_factory_->loadSnippets();
+            observe(snippet_factory_->snippet_set_changed, new_snippet_type);
         }
 
-        status_changed("loading snippets");
-        snippet_factory_->loadSnippets();
-        observe(snippet_factory_->snippet_set_changed, new_snippet_type);
     }
 }
 
@@ -399,14 +412,14 @@ Settings &CsApexCore::getSettings() const
     return settings_;
 }
 
-NodeFactory &CsApexCore::getNodeFactory() const
+NodeFactoryPtr CsApexCore::getNodeFactory() const
 {
-    return *node_factory_;
+    return node_factory_;
 }
 
-SnippetFactory& CsApexCore::getSnippetFactory() const
+SnippetFactoryPtr CsApexCore::getSnippetFactory() const
 {
-    return *snippet_factory_;
+    return snippet_factory_;
 }
 
 GraphFacadePtr CsApexCore::getRoot() const

@@ -143,7 +143,7 @@ SubgraphNode* Command::getSubgraphNode()
 
 NodeFactory* Command::getNodeFactory()
 {
-    return &core_->getNodeFactory();
+    return core_->getNodeFactory().get();
 }
 
 GraphFacade* Command::getSubGraph(const UUID& graph_id)

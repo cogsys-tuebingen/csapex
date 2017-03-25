@@ -19,7 +19,7 @@ namespace csapex
 {
 
 class CsApexViewCore;
-class CommandDispatcher;
+class CommandExecutor;
 class CsApexCore;
 
 class CSAPEX_QT_EXPORT RewiringDialog : public QDialog
@@ -36,34 +36,40 @@ public:
 
     std::vector<ConnectionInformation> getConnections(const UUID &new_node_uuid);
 
+
+
 private Q_SLOTS:
     void finish();
 
+
 private:
+    void createGraphs(const std::string &type);
+
+    void createConnections();
     void updateConnection(InputPtr input, const ConnectionPtr& connection);
     void updateConnection(OutputPtr output, const ConnectionPtr& connection);
+
+    void createUI(const QString& stylesheet);
 
 private:
     CsApexViewCore& view_core_;
 
-    ThreadPoolPtr executor;
-
-    std::shared_ptr<CsApexCore> core_temp_;
-    std::shared_ptr<CommandDispatcher> temp_dispatcher_;
-    std::shared_ptr<CsApexViewCore> view_core_temp_;
+//    std::shared_ptr<CsApexCore> core_temp_;
+    std::shared_ptr<CsApexViewCore> view_core_old_;
+    std::shared_ptr<CsApexViewCore> view_core_new_;
 
     std::shared_ptr<UUIDProvider> root_uuid_provider_;
 
 
-    NodeHandlePtr graph_old_handle;
-    NodeHandlePtr graph_new_handle;
+//    NodeHandlePtr graph_old_handle;
+//    NodeHandlePtr graph_new_handle;
 
     NodeHandlePtr nh_old;
     NodeHandlePtr nh_new;
 
     NodeHandle* nh_;
 
-    SubgraphNodePtr graph_old;
+    SubgraphNode* graph_old;
     GraphFacadePtr graph_facade_old_;
 
     std::string type_new_;

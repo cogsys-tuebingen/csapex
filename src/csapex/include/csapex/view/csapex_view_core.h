@@ -32,8 +32,8 @@ class CSAPEX_QT_EXPORT CsApexViewCore :
         public CommandExecutor
 {
 public:
-    CsApexViewCore(CsApexCore& core);
-    CsApexViewCore(CsApexViewCore& parent, CsApexCore& core, std::shared_ptr<CommandDispatcher> dispatcher);
+    CsApexViewCore(CsApexCorePtr core);
+    CsApexViewCore(CsApexViewCore &parent, ExceptionHandler &exception_handler);
 
     // CORE
     void reset();
@@ -75,7 +75,7 @@ public:
 
 
     // TODO: only for direct sessions:
-    CommandDispatcherPtr getCommandDispatcher();
+    CommandExecutorPtr getCommandDispatcher();
 
 
 
@@ -83,8 +83,8 @@ public:
     CsApexCore& getCore();
 
     PluginLocatorPtr getPluginLocator() const;
-    NodeFactory &getNodeFactory() const;
-    SnippetFactory& getSnippetFactory() const;
+    NodeFactoryPtr getNodeFactory() const;
+    SnippetFactoryPtr getSnippetFactory() const;
 
     ProfilerPtr getProfiler() const;
 
@@ -134,10 +134,13 @@ public:
     slim_signal::Signal<void (bool)> undo_dirty_changed;
 
 private:
-    CsApexCore& core_;
+    CsApexCorePtr core_;
 
     std::shared_ptr<NodeAdapterFactory> node_adapter_factory_;
-    std::shared_ptr<CommandDispatcher> dispatcher_;
+    std::shared_ptr<CommandExecutor> dispatcher_;
+
+    std::shared_ptr<NodeFactory> node_factory_;
+    std::shared_ptr<SnippetFactory> snippet_factory_;
 
     DesignerStyleable style;
 

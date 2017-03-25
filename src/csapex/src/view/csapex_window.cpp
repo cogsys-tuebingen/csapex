@@ -429,7 +429,7 @@ void CsApexWindow::updateDebugInfo()
     for(NodeBox* box : selected) {
         NodeHandle* handle = box->getNodeHandle();
         handle->node_state_changed.connect([this](){ updateDebugInfo(); });
-        ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(&view_core_.getNodeFactory()));
+        ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(view_core_.getNodeFactory().get()));
     }
 
     QTreeWidgetItemIterator it(ui->box_info);
@@ -465,7 +465,7 @@ void CsApexWindow::updateNodeInfo()
     for(QTreeWidgetItem* item : ui->node_info_tree->selectedItems()) {
         QString type = item->data(0, Qt::UserRole + 1).toString();
         if(!type.isEmpty()) {
-            NodeConstructor::Ptr n = view_core_.getNodeFactory().getConstructor(type.toStdString());
+            NodeConstructor::Ptr n = view_core_.getNodeFactory()->getConstructor(type.toStdString());
 
             QString icon = QString::fromStdString(n->getIcon());
             QImage image = QIcon(icon).pixmap(QSize(16,16)).toImage();
@@ -517,7 +517,7 @@ void CsApexWindow::updateUndoInfo()
     ui->undo->clear();
     ui->redo->clear();
 
-    if(CommandDispatcherPtr dispatcher = view_core_.getCommandDispatcher()) {
+    if(CommandDispatcherPtr dispatcher = std::dynamic_pointer_cast<CommandDispatcher>(view_core_.getCommandDispatcher())) {
         std::deque<QTreeWidgetItem*> stack;
 
         auto iterator = [&stack](QTreeWidget* tree, int level, const Command& cmd) {
@@ -630,7 +630,7 @@ void CsApexWindow::updateNodeTypes()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    NodeListGenerator generator(view_core_.getNodeFactory(), *designer_->getNodeAdapterFactory());
+    NodeListGenerator generator(*view_core_.getNodeFactory(), *designer_->getNodeAdapterFactory());
 
     generator.insertAvailableNodeTypes(ui->nodes);
     generator.insertAvailableNodeTypes(ui->node_info_tree);
@@ -638,7 +638,7 @@ void CsApexWindow::updateNodeTypes()
 
 void CsApexWindow::updateSnippets()
 {
-    SnippetListGenerator generator(view_core_.getSnippetFactory());
+    SnippetListGenerator generator(*view_core_.getSnippetFactory());
     ui->snippets->clear();
     generator.insertAvailableSnippets(ui->snippets);
 }
@@ -701,7 +701,7 @@ void CsApexWindow::updateMenu()
     bool can_undo = view_core_.canUndo();
     ui->actionUndo->setDisabled(!can_undo);
     if(can_undo) {
-        if(CommandDispatcherPtr dispatcher = view_core_.getCommandDispatcher()) {
+        if(CommandDispatcherPtr dispatcher = std::dynamic_pointer_cast<CommandDispatcher>(view_core_.getCommandDispatcher())) {
             ui->actionUndo->setText(QString("&Undo ") + QString::fromStdString(dispatcher->getNextUndoCommand()->getType()));
         } else {
             ui->actionUndo->setText(QString("&Undo"));
@@ -713,7 +713,7 @@ void CsApexWindow::updateMenu()
     bool can_redo = view_core_.canRedo();
     ui->actionRedo->setDisabled(!can_redo);
     if(can_redo) {
-        if(CommandDispatcherPtr dispatcher = view_core_.getCommandDispatcher()) {
+        if(CommandDispatcherPtr dispatcher = std::dynamic_pointer_cast<CommandDispatcher>(view_core_.getCommandDispatcher())) {
             ui->actionRedo->setText(QString("&Redo ") + QString::fromStdString(dispatcher->getNextRedoCommand()->getType()));
         } else {
             ui->actionRedo->setText(QString("&Redo"));

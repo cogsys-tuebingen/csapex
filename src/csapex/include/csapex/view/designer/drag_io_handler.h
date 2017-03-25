@@ -21,9 +21,9 @@ public:
 
     virtual ~DragIOHandler();
 
-    virtual bool handleEnter(GraphView* view, CommandDispatcher* dispatcher, QDragEnterEvent* e);
-    virtual bool handleMove(GraphView* view, CommandDispatcher* dispatcher, QDragMoveEvent* e);
-    virtual bool handleDrop(GraphView* view, CommandDispatcher* dispatcher, QDropEvent* e, const QPointF& scene_pos);
+    virtual bool handleEnter(GraphView* view, CommandExecutor* dispatcher, QDragEnterEvent* e);
+    virtual bool handleMove(GraphView* view, CommandExecutor* dispatcher, QDragMoveEvent* e);
+    virtual bool handleDrop(GraphView* view, CommandExecutor* dispatcher, QDropEvent* e, const QPointF& scene_pos);
 
 protected:
     DragIOHandler();

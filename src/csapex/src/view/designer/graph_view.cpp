@@ -693,8 +693,8 @@ void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
-                   view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
-                   view_core_.getSnippetFactory());
+                   *view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
+                   *view_core_.getSnippetFactory());
 
     int r = diag.exec();
 
@@ -710,7 +710,7 @@ void GraphView::showNodeInsertDialog()
 
 void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, const QPoint &offset)
 {
-    NodeConstructorPtr c = view_core_.getNodeFactory().getConstructor(type);
+    NodeConstructorPtr c = view_core_.getNodeFactory()->getConstructor(type);
     NodeHandlePtr handle = c->makePrototype();
 
     if(!state) {
@@ -769,7 +769,7 @@ void GraphView::nodeAdded(NodeWorkerPtr node_worker)
     NodeHandlePtr node_handle = node_worker->getNodeHandle();
     std::string type = node_handle->getType();
 
-    QIcon icon = QIcon(QString::fromStdString(view_core_.getNodeFactory().getConstructor(type)->getIcon()));
+    QIcon icon = QIcon(QString::fromStdString(view_core_.getNodeFactory()->getConstructor(type)->getIcon()));
 
     NodeBox* box = nullptr;
     if(type == "csapex::Note") {
@@ -1252,7 +1252,7 @@ void GraphView::createNodes(const QPoint& global_pos, const std::string& type, c
         QPointF pos = mapToScene(mapFromGlobal(global_pos));
 
         AUUID graph_id = graph_facade_->getAbsoluteUUID();
-        CommandPtr cmd(new command::PasteGraph(graph_id, *view_core_.getSnippetFactory().getSnippet(type), Point (pos.x(), pos.y())));
+        CommandPtr cmd(new command::PasteGraph(graph_id, *view_core_.getSnippetFactory()->getSnippet(type), Point (pos.x(), pos.y())));
 
         view_core_.execute(cmd);
     }
@@ -1434,7 +1434,7 @@ void GraphView::morphNode()
 
 Snippet GraphView::serializeSelection() const
 {
-    GraphIO io(graph_facade_->getSubgraphNode(), &view_core_.getNodeFactory());
+    GraphIO io(graph_facade_->getSubgraphNode(), view_core_.getNodeFactory().get());
 
     std::vector<UUID> nodes;
     for(const NodeBox* box : selected_boxes_) {
@@ -1490,7 +1490,7 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
 
     std::string type = box_handle->getNodeHandle()->getType();
 
-    NodeConstructorPtr c = view_core_.getNodeFactory().getConstructor(type);
+    NodeConstructorPtr c = view_core_.getNodeFactory()->getConstructor(type);
     NodeHandlePtr handle = c->makePrototype();
 
     apex_assert_hard(handle);
@@ -1639,7 +1639,7 @@ void GraphView::makeSnippetFromSelected()
         snippet.setDescription(description.toStdString());
         snippet.setTags(tags);
 
-        view_core_.getSnippetFactory().saveSnippet(snippet, file.fileName().toStdString());
+        view_core_.getSnippetFactory()->saveSnippet(snippet, file.fileName().toStdString());
     }
 }
 

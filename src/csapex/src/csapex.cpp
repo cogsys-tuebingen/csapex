@@ -86,7 +86,7 @@ int Main::runWithGui()
 {
     app->processEvents();
 
-    CsApexViewCore view_core(*core);
+    CsApexViewCore view_core(core);
 
     CsApexWindow w(view_core);
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));

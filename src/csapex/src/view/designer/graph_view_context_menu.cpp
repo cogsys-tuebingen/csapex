@@ -56,13 +56,13 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
 
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
-    NodeListGenerator node_generator(view_.getViewCore().getNodeFactory(), *view_.getViewCore().getNodeAdapterFactory());
+    NodeListGenerator node_generator(*view_.getViewCore().getNodeFactory(), *view_.getViewCore().getNodeAdapterFactory());
     node_generator.insertAvailableNodeTypes(&add_node);
     menu.addMenu(&add_node);
 
     QMenu add_snippet("add snippet");
     add_snippet.setIcon(QIcon(":/snippet.png"));
-    SnippetListGenerator snippet_generator(view_.getViewCore().getSnippetFactory());
+    SnippetListGenerator snippet_generator(*view_.getViewCore().getSnippetFactory());
     snippet_generator.insertAvailableSnippets(&add_snippet);
     menu.addMenu(&add_snippet);
 
