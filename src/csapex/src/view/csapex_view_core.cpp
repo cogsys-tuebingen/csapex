@@ -117,11 +117,6 @@ bool CsApexViewCore::isDirty() const
     return dispatcher_->isDirty();
 }
 
-CsApexCore& CsApexViewCore::getCore()
-{
-    return *core_;
-}
-
 PluginLocatorPtr CsApexViewCore::getPluginLocator() const
 {
     return core_->getPluginLocator();

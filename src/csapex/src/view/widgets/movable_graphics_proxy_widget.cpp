@@ -10,7 +10,6 @@
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/node_state.h>
 #include <csapex/core/graphio.h>
-#include <csapex/core/csapex_core.h>
 #include <csapex/model/graph_facade.h>
 
 /// SYSTEM

@@ -27,7 +27,6 @@
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/command/delete_fulcrum.h>
-#include <csapex/core/csapex_core.h>
 #include <csapex/profiling/timer.h>
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/interlude.hpp>

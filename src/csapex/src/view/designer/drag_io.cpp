@@ -20,7 +20,6 @@
 #include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/model/node_state.h>
 #include <csapex/csapex_mime.h>
-#include <csapex/core/csapex_core.h>
 #include <csapex/factory/snippet_factory.h>
 
 /// SYSTEM

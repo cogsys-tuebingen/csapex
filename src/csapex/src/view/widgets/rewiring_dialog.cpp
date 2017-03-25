@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/view/designer/graph_view.h>
-#include <csapex/core/csapex_core.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/scheduling/thread_pool.h>

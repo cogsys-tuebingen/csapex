@@ -24,7 +24,6 @@
 #include <csapex/command/add_variadic_connector_and_connect.h>
 #include <csapex/command/set_execution_mode.h>
 #include <csapex/core/graphio.h>
-#include <csapex/core/csapex_core.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>

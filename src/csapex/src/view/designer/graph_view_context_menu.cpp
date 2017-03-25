@@ -2,11 +2,11 @@
 #include <csapex/view/designer/graph_view_context_menu.h>
 
 /// COMPONENT
-#include <csapex/core/csapex_core.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/core/settings.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/view/designer/graph_view.h>

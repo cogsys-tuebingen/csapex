@@ -80,8 +80,6 @@ public:
 
 
     // TODO: remove
-    CsApexCore& getCore();
-
     PluginLocatorPtr getPluginLocator() const;
     NodeFactoryPtr getNodeFactory() const;
     SnippetFactoryPtr getSnippetFactory() const;

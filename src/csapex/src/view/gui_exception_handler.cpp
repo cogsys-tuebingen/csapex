@@ -2,7 +2,6 @@
 #include <csapex/view/gui_exception_handler.h>
 
 /// PROJECT
-#include <csapex/core/csapex_core.h>
 #include <csapex/model/error_state.h>
 
 /// SYSTEM

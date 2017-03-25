@@ -10,7 +10,6 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_state.h>
-#include <csapex/core/csapex_core.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/node/box.h>
 #include <csapex/view/designer/graph_view.h>

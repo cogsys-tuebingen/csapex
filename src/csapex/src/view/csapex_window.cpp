@@ -6,7 +6,6 @@
 #include <csapex/command/command.h>
 #include <csapex/command/create_thread.h>
 #include <csapex/command/meta.h>
-#include <csapex/core/csapex_core.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
