@@ -19,14 +19,33 @@ public:
         SettingsSave,
         SettingsLoad,
         CoreSave,
-        CoreLoad
+        CoreLoad,
+        CoreStep,
+        CoreShutdown,
+        CoreResetActivity,
+        CoreClearBlock,
+        CoreReset,
+        CoreSetPause,
+        CoreSetSteppingMode,
+
+        CoreSendNotification,
+
+        CoreGetPause,
+        CoreGetSteppingMode
     };
 
     class CoreRequest : public RequestImplementation<CoreRequest>
     {
     public:
-        CoreRequest(CoreRequestType request_type);
         CoreRequest(uint8_t request_id);
+        CoreRequest(CoreRequestType request_type);
+
+        template <typename... Args>
+        CoreRequest(CoreRequestType request_type, Args&&... args)
+            : CoreRequest(request_type)
+        {
+            parameters_ = {args...};
+        }
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
@@ -40,17 +59,26 @@ public:
 
     private:
         CoreRequestType request_type_;
+
+        std::vector<boost::any> parameters_;
     };
 
 
     class CoreResponse : public ResponseImplementation<CoreResponse>
     {
     public:
-        CoreResponse(CoreRequestType request_type, uint8_t request_id);
         CoreResponse(uint8_t request_id);
+        CoreResponse(CoreRequestType request_type, uint8_t request_id);
+        CoreResponse(CoreRequestType request_type, boost::any result, uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
+
+        template <typename R>
+        R getResult() const
+        {
+            return boost::any_cast<R>(result_);
+        }
 
         std::string getType() const override
         {
@@ -59,6 +87,8 @@ public:
 
     private:
         CoreRequestType request_type_;
+
+        boost::any result_;
     };
 
 

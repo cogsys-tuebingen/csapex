@@ -811,8 +811,6 @@ void CsApexWindow::updatePluginIgnored(const QObject* &action)
 
 void CsApexWindow::tick()
 {
-    // TODO: move to core
-    view_core_.getCommandDispatcher()->executeLater();
     QApplication::processEvents();
 }
 

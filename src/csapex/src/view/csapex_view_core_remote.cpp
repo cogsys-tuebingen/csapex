@@ -11,6 +11,7 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/io/session.h>
+#include <csapex/io/protcol/core_requests.h>
 
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -32,7 +33,8 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port)
       resolver(io_service),
       resolver_iterator(boost::asio::connect(socket, resolver.resolve({ip, std::to_string(port)}))),
       session_(std::make_shared<Session>(std::move(socket))),
-      settings_(std::make_shared<SettingsRemote>(session_))
+      settings_(std::make_shared<SettingsRemote>(session_)),
+      node_adapter_factory_(std::make_shared<NodeAdapterFactory>(*settings_, getPluginLocator().get()))
 {
 }
 
@@ -51,7 +53,7 @@ std::shared_ptr<DragIO> CsApexViewCoreRemote::getDragIO()
 /// PROXIES
 ExceptionHandler& CsApexViewCoreRemote::getExceptionHandler() const
 {
-    //return exception_handler_;
+//    return exception_handler_;
 }
 
 
@@ -103,7 +105,7 @@ ProfilerPtr CsApexViewCoreRemote::getProfiler() const
 
 void CsApexViewCoreRemote::sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level)
 {
-    //core_->sendNotification(notification, error_level);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSendNotification, notification, static_cast<uint8_t>(error_level));
 }
 
 
@@ -112,58 +114,58 @@ void CsApexViewCoreRemote::sendNotification(const std::string& notification, Err
 
 void CsApexViewCoreRemote::reset()
 {
-    //core_->reset();
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreReset);
 }
 
 
 void CsApexViewCoreRemote::load(const std::string& file)
 {
-    //core_->load(file);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreLoad, file);
 }
 
 void CsApexViewCoreRemote::saveAs(const std::string& file, bool quiet)
 {
-    //core_->saveAs(file, quiet);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSave, file, quiet);
 }
 
 bool CsApexViewCoreRemote::isPaused() const
 {
-    return false; //core_->isPaused();
+    return session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetPause)->getResult<bool>();
 }
 
 void CsApexViewCoreRemote::setPause(bool paused)
 {
-    //core_->setPause(paused);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSetPause, paused);
 }
 
 
 bool CsApexViewCoreRemote::isSteppingMode() const
 {
-    return false; //core_->isSteppingMode();
+    return session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetSteppingMode)->getResult<bool>();
 }
 
 void CsApexViewCoreRemote::setSteppingMode(bool stepping)
 {
-    //core_->setSteppingMode(stepping);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSetSteppingMode, stepping);
 }
 
 void CsApexViewCoreRemote::step()
 {
-    //core_->step();
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreStep);
 }
 
 
 void CsApexViewCoreRemote::shutdown()
 {
-    //core_->shutdown();
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreShutdown);
 }
 
 void CsApexViewCoreRemote::clearBlock()
 {
-    //core_->getRoot()->clearBlock();
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreClearBlock);
 }
 
 void CsApexViewCoreRemote::resetActivity()
 {
-    //core_->getRoot()->resetActivity();
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreResetActivity);
 }

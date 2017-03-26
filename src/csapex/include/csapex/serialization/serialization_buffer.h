@@ -333,24 +333,27 @@ public:
         apex_assert_gte_hard(pos, HEADER_LENGTH);
 
         if(any.type() == typeid(int)) {
-            operator << ((uint8_t) 0);
+            operator << ((uint8_t) 1);
             operator << (boost::any_cast<int> (any));
 
         } else if(any.type() == typeid(double)) {
-            operator << ((uint8_t) 1);
+            operator << ((uint8_t) 2);
             operator << (boost::any_cast<double> (any));
 
         } else if(any.type() == typeid(bool)) {
-            operator << ((uint8_t) 2);
+            operator << ((uint8_t) 3);
             operator << (boost::any_cast<bool> (any));
 
         } else if(any.type() == typeid(std::string)) {
-            operator << ((uint8_t) 3);
+            operator << ((uint8_t) 4);
             operator << (boost::any_cast<std::string> (any));
 
         } else if(any.type() == typeid(long)) {
-            operator << ((uint8_t) 4);
+            operator << ((uint8_t) 5);
             operator << (boost::any_cast<long> (any));
+
+        } else {
+            operator << ((uint8_t) 0);
         }
 
         return *this;
@@ -364,35 +367,35 @@ public:
         operator >> (type);
 
         switch(type) {
-        case 0:
+        case 1:
         {
             int v;
             operator >> (v);
             any = v;
         }
             break;
-        case 1:
+        case 2:
         {
             double v;
             operator >> (v);
             any = v;
         }
             break;
-        case 2:
+        case 3:
         {
             bool v;
             operator >> (v);
             any = v;
         }
             break;
-        case 3:
+        case 4:
         {
             std::string v;
             operator >> (v);
             any = v;
         }
             break;
-        case 4:
+        case 5:
         {
             long v;
             operator >> (v);
@@ -403,7 +406,34 @@ public:
         return *this;
     }
 
+    /// VECTOR
+    template <typename S>
+    SerializationBuffer& operator << (const std::vector<S>& s)
+    {
+        apex_assert_gte_hard(pos, HEADER_LENGTH);
+        operator << (s.size());
+        for(const auto& elem : s) {
+            operator << (elem);
+        }
+        return *this;
+    }
 
+    template <typename S>
+    SerializationBuffer& operator >> (std::vector<S>& s)
+    {
+        apex_assert_gte_hard(pos, HEADER_LENGTH);
+        uint8_t len;
+        operator >> (len);
+        s.reserve(len);
+        for(uint8_t i = 0; i < len; ++i) {
+            S elem;
+            operator >> (elem);
+            s.emplace_back(elem);
+        }
+        return *this;
+    }
+
+private:
     std::size_t pos;
 };
 

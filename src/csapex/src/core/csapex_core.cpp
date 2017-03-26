@@ -383,7 +383,9 @@ void CsApexCore::startup()
         std::unique_lock<std::mutex> lock(running_mutex_);
         running_ = true;
         while(running_) {
-            running_changed_.wait(lock);
+            getCommandDispatcher()->executeLater();
+
+            running_changed_.wait_for(lock, std::chrono::milliseconds(10));
         }
 
         shutdown_requested();

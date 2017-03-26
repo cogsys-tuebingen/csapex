@@ -66,6 +66,8 @@ private:
 
     SessionPtr session_;
 
+    std::shared_ptr<SettingsRemote> settings_;
+
     std::shared_ptr<NodeAdapterFactory> node_adapter_factory_;
     std::shared_ptr<CommandExecutor> dispatcher_;
 
@@ -73,8 +75,6 @@ private:
     std::shared_ptr<SnippetFactory> snippet_factory_;
 
     std::shared_ptr<DragIO> drag_io;
-
-    std::shared_ptr<SettingsRemote> settings_;
 
 //    ExceptionHandler &exception_handler_;
 };
