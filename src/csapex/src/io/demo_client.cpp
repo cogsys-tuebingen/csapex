@@ -27,7 +27,7 @@ class DemoClient
 {
 public:
     DemoClient(int argc, char* argv[])
-        : s(io_service), resolver(io_service), running(false)
+        : socket(io_service), resolver(io_service), running(false)
     {
         g_client = this;
 
@@ -37,9 +37,9 @@ public:
 
         try
         {
-            boost::asio::connect(s, resolver.resolve({argv[1], argv[2]}));
+            boost::asio::connect(socket, resolver.resolve({argv[1], argv[2]}));
 
-            session = std::make_shared<Session>(std::move(s));
+            session = std::make_shared<Session>(std::move(socket));
 
             //        readPacket(s);
             session->packet_received.connect([this](SerializableConstPtr packet){
@@ -168,7 +168,7 @@ public:
 private:
     boost::asio::io_service io_service;
 
-    tcp::socket s;
+    tcp::socket socket;
     tcp::resolver resolver;
 
     SessionPtr session;

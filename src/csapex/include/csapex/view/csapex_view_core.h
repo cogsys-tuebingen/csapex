@@ -28,56 +28,49 @@ class DragIO;
 class CSAPEX_QT_EXPORT CsApexViewCore : public Observer, public Notifier
 {
 public:
-    CsApexViewCore(CsApexCorePtr core);
-    CsApexViewCore(CsApexViewCore &parent, ExceptionHandler &exception_handler);
+    CsApexViewCore();
+
+    virtual void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR) = 0;
 
     // CORE
-    void reset();
-    void load(const std::string& file);
-    void saveAs(const std::string& file, bool quiet = false);
+    virtual void reset() = 0;
+    virtual void load(const std::string& file) = 0;
+    virtual void saveAs(const std::string& file, bool quiet = false) = 0;
 
-    void setPause(bool paused);
-    bool isPaused() const;
+    virtual void setPause(bool paused) = 0;
+    virtual bool isPaused() const = 0;
 
-    bool isSteppingMode() const;
-    void setSteppingMode(bool stepping);
-    void step();
+    virtual bool isSteppingMode() const = 0;
+    virtual void setSteppingMode(bool stepping) = 0;
+    virtual void step() = 0;
 
-    Settings& getSettings();
+    virtual Settings& getSettings() const = 0;
 
-    // TODO: add proxies
-    ExceptionHandler& getExceptionHandler() const;
-    GraphFacadePtr getRoot();
-    void shutdown();
-    void clearBlock();
-    void resetActivity();
+    // TODO: add proxies or remove
+    virtual ExceptionHandler& getExceptionHandler() const = 0;
+    virtual GraphFacadePtr getRoot() = 0;
+    virtual void shutdown() = 0;
+    virtual void clearBlock() = 0;
+    virtual void resetActivity() = 0;
 
-    ThreadPoolPtr getThreadPool();
+    virtual ThreadPoolPtr getThreadPool() = 0;
 
+    virtual CommandExecutorPtr getCommandDispatcher() = 0;
 
-    void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR);
+    virtual PluginLocatorPtr getPluginLocator() const = 0;
+    virtual NodeFactoryPtr getNodeFactory() const = 0;
+    virtual SnippetFactoryPtr getSnippetFactory() const = 0;
 
+    virtual ProfilerPtr getProfiler() const = 0;
 
-    // TODO: only for direct sessions:
-    CommandExecutorPtr getCommandDispatcher();
+    virtual std::shared_ptr<DragIO> getDragIO() = 0;
 
-
-
-    // TODO: remove
-    PluginLocatorPtr getPluginLocator() const;
-    NodeFactoryPtr getNodeFactory() const;
-    SnippetFactoryPtr getSnippetFactory() const;
-
-    ProfilerPtr getProfiler() const;
+    virtual std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory() = 0;
 
 
-
-
-    std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory();
 
     DesignerStyleable& getStyle();
 
-    std::shared_ptr<DragIO> getDragIO();
 
     bool isDebug() const;
     bool isGridLockEnabled() const;
@@ -116,19 +109,7 @@ public:
     slim_signal::Signal<void (bool)> undo_dirty_changed;
 
 private:
-    CsApexCorePtr core_;
-
-    std::shared_ptr<NodeAdapterFactory> node_adapter_factory_;
-    std::shared_ptr<CommandExecutor> dispatcher_;
-
-    std::shared_ptr<NodeFactory> node_factory_;
-    std::shared_ptr<SnippetFactory> snippet_factory_;
-
     DesignerStyleable style;
-
-    std::shared_ptr<DragIO> drag_io;
-
-    ExceptionHandler &exception_handler_;
 };
 
 }

@@ -563,6 +563,8 @@ endif()
 add_library(csapex_qt SHARED
 
     src/view/csapex_view_core.cpp
+    src/view/csapex_view_core_local.cpp
+    src/view/csapex_view_core_remote.cpp
     src/view/csapex_window.cpp
     src/view/message_renderer.cpp
     src/view/gui_exception_handler.cpp

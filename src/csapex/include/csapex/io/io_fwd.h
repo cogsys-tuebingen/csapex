@@ -14,6 +14,7 @@
 
 namespace csapex
 {
+FWD(Server);
 FWD(Session);
 FWD(BroadcastMessage);
 FWD(Request);

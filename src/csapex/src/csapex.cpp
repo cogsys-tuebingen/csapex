@@ -9,7 +9,8 @@
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
-#include <csapex/view/csapex_view_core.h>
+#include <csapex/view/csapex_view_core_local.h>
+#include <csapex/view/csapex_view_core_remote.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/gui_exception_handler.h>
 #include <csapex/io/server.h>
@@ -86,7 +87,8 @@ int Main::runWithGui()
 {
     app->processEvents();
 
-    CsApexViewCore view_core(core);
+    CsApexViewCoreLocal view_core(core);
+//    CsApexViewCoreRemote view_core("localhost", 12345);
 
     CsApexWindow w(view_core);
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
@@ -155,9 +157,8 @@ int Main::run()
 
     core = std::make_shared<CsApexCore>(settings, handler);
 
-    Server server(core);
-
-    server.start();
+    server = std::make_shared<Server>(core);
+    server->start();
 
     if(headless) {
         return runHeadless();

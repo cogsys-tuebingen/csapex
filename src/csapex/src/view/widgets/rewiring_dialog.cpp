@@ -16,6 +16,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/param/parameter_factory.h>
+#include <csapex/view/csapex_view_core_local.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -31,8 +32,8 @@ RewiringDialog::RewiringDialog(NodeHandle* node, CsApexViewCore& view_core, QWid
     : QDialog(parent, f),
       view_core_(view_core),
 
-      view_core_old_(std::make_shared<CsApexViewCore>(view_core_, view_core_.getExceptionHandler())),
-      view_core_new_(std::make_shared<CsApexViewCore>(view_core_, view_core_.getExceptionHandler())),
+      view_core_old_(std::make_shared<CsApexViewCoreLocal>(view_core_, view_core_.getExceptionHandler())),
+      view_core_new_(std::make_shared<CsApexViewCoreLocal>(view_core_, view_core_.getExceptionHandler())),
       nh_(node)
 {
     root_uuid_provider_ = std::make_shared<UUIDProvider>();
