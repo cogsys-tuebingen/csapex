@@ -1131,15 +1131,15 @@ void GraphView::startProfiling(NodeWorker *node)
     NodeBox* box = getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
-    ProfilingWidget* prof = new ProfilingWidget(box->getNodeWorker()->getProfiler(), node->getUUID().getFullName());
+    QPointer<ProfilingWidget> prof = new ProfilingWidget(box->getNodeWorker()->getProfiler(), node->getUUID().getFullName());
     profiling_[box] = prof;
 
     if(QVBoxLayout* vbl = dynamic_cast<QVBoxLayout*>(prof->layout())) {
         vbl->addWidget(new QSizeGrip(prof), 0, Qt::AlignBottom | Qt::AlignRight);
     }
 
-    QObject::connect(box, &NodeBox::destroyed, prof, &ProfilingWidget::close);
-    QObject::connect(box, &NodeBox::destroyed, prof, &ProfilingWidget::deleteLater);
+    QObject::connect(box, &NodeBox::destroyed, prof.data(), &ProfilingWidget::close);
+    QObject::connect(box, &NodeBox::destroyed, prof.data(), &ProfilingWidget::deleteLater);
 
     QGraphicsProxyWidget* prof_proxy = scene_->addWidget(prof);
     prof_proxy->setPos(box->graphicsProxyWidget()->pos() + QPointF(0,box->height()));
@@ -1155,8 +1155,10 @@ void GraphView::startProfiling(NodeWorker *node)
 
     MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
     QObject::connect(proxy, &MovableGraphicsProxyWidget::moving, [box, prof](double, double){
-        QPointF pos = box->graphicsProxyWidget()->pos() + QPointF(0,box->height());
-        prof->graphicsProxyWidget()->setPos(pos);
+        if(!prof.isNull()) {
+            QPointF pos = box->graphicsProxyWidget()->pos() + QPointF(0,box->height());
+            prof->graphicsProxyWidget()->setPos(pos);
+        }
     });
 
     auto nw = box->getNodeWorker();
@@ -1174,7 +1176,7 @@ void GraphView::stopProfiling(NodeWorker *node)
     }
     profiling_connections_.erase(box);
 
-    std::map<NodeBox*, ProfilingWidget*>::iterator pos = profiling_.find(box);
+    auto pos = profiling_.find(box);
     apex_assert_hard(pos != profiling_.end());
 
     pos->second->deleteLater();

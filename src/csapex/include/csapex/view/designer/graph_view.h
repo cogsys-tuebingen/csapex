@@ -230,7 +230,7 @@ private:
     std::vector<NodeBox*> boxes_;
     std::vector<NodeBox*> selected_boxes_;
 
-    std::map<NodeBox*, ProfilingWidget*> profiling_;
+    std::map<NodeBox*, QPointer<ProfilingWidget>> profiling_;
     std::map<NodeBox*, std::vector<csapex::slim_signal::Connection>> profiling_connections_;
 
     int scalings_to_perform_;
