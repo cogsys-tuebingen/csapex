@@ -24,7 +24,11 @@ public:
         : CommandImplementation(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()),
           value(value)
     {
-        apex_assert(!parameter_uuid.empty());
+        if(parameter_uuid.global()) {
+            apex_assert_hard(!parameter_uuid.globalName().empty());
+        } else {
+            apex_assert(!parameter_uuid.empty());
+        }
     }
 
     virtual std::string getDescription() const override;

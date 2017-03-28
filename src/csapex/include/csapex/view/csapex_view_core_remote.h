@@ -5,6 +5,7 @@
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/core/settings/settings_remote.h>
 #include <boost/asio.hpp>
+#include <thread>
 
 namespace csapex
 {
@@ -19,7 +20,8 @@ class DragIO;
 class CSAPEX_QT_EXPORT CsApexViewCoreRemote : public CsApexViewCore
 {
 public:
-    CsApexViewCoreRemote(const std::string& ip, int port);
+    CsApexViewCoreRemote(const std::string& ip, int port, CsApexCorePtr core_tmp);
+    ~CsApexViewCoreRemote();
 
     void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR) override;
 
@@ -58,6 +60,9 @@ public:
     std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory() override;
 
 private:
+    void handlePacket(SerializableConstPtr packet);
+
+private:
 
     boost::asio::io_service io_service;
     boost::asio::ip::tcp::socket socket;
@@ -76,7 +81,14 @@ private:
 
     std::shared_ptr<DragIO> drag_io;
 
+
+    bool running;
+    std::thread spinner;
+
 //    ExceptionHandler &exception_handler_;
+
+    // TODO: remove
+    CsApexCorePtr core_tmp_;
 };
 
 }

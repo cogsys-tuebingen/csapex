@@ -111,6 +111,7 @@ void UpdateParameter::setParameter(const T& value)
 {
     if(uuid.global()) {
         // setting
+        apex_assert_hard(!uuid.globalName().empty());
         core_->getSettings().set(uuid.globalName(), value);
 
     } else {
@@ -140,6 +141,7 @@ bool UpdateParameter::doRedo()
 
 void UpdateParameter::serialize(SerializationBuffer &data) const
 {
+    apex_assert_hard(!uuid.globalName().empty());
     data << uuid;
     data << value;
 }
@@ -148,6 +150,7 @@ void UpdateParameter::deserialize(SerializationBuffer& data)
 {
     data >> uuid;
     data >> value;
+    apex_assert_hard(!uuid.globalName().empty());
 }
 
 void UpdateParameter::cloneFrom(const Command& other)

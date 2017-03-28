@@ -34,6 +34,7 @@ ResponsePtr RequestParameter::ParameterRequest::execute(CsApexCore &core) const
     std::shared_ptr<ParameterResponse> response;
 
     if(id_.global()) {
+        apex_assert_hard(!id_.globalName().empty());
         auto param = core.getSettings().getNoThrow(id_.globalName());
         response = std::make_shared<ParameterResponse>(param, getRequestID());
     } else {

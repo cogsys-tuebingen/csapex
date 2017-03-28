@@ -23,7 +23,7 @@ AddParameter::ParameterRequest::ParameterRequest(const AUUID &id, const std::str
       id_(id), name_(name), description_(description),
       value_(value), persistent_(persistent)
 {
-
+    apex_assert_hard(!name_.empty());
 }
 
 AddParameter::ParameterRequest::ParameterRequest(uint8_t request_id)
@@ -36,6 +36,7 @@ ResponsePtr AddParameter::ParameterRequest::execute(CsApexCore &core) const
 {
     std::shared_ptr<ParameterResponse> response;
 
+    apex_assert_hard(!name_.empty());
     param::Parameter::Ptr param = std::make_shared<param::ValueParameter>(name_, param::ParameterDescription(description_));
     param->set_unsafe(value_);
 
@@ -52,6 +53,8 @@ ResponsePtr AddParameter::ParameterRequest::execute(CsApexCore &core) const
 void AddParameter::ParameterRequest::serialize(SerializationBuffer &data) const
 {
     data << id_;
+    data << name_;
+    data << description_;
     data << value_;
     data << persistent_;
 }
@@ -59,6 +62,8 @@ void AddParameter::ParameterRequest::serialize(SerializationBuffer &data) const
 void AddParameter::ParameterRequest::deserialize(SerializationBuffer& data)
 {
     data >> id_;
+    data >> name_;
+    data >> description_;
     data >> value_;
     data >> persistent_;
 }

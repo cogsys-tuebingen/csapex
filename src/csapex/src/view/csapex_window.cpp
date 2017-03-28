@@ -733,7 +733,7 @@ void CsApexWindow::updateTitle()
         window << " *";
     }
 
-    bool recovery = view_core_.getSettings().get<bool>("config_recovery", false);
+    bool recovery = view_core_.getSettings().getTemporary("config_recovery", false);
     if(recovery) {
         window << " (recovery)";
     }

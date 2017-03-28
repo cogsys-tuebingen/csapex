@@ -329,11 +329,11 @@ void NodeBox::updateComponentInformation(Graph* graph)
         return;
     }
 
-    if(settings_.get("debug", false)) {
+    if(settings_.getTemporary("debug", false)) {
         changeColor();
     }
 
-    if(!settings_.get<bool>("display-graph-components", false)) {
+    if(!settings_.getPersistent<bool>("display-graph-components", false)) {
         info_compo->setVisible(false);
         return;
     } else {
@@ -369,7 +369,7 @@ void NodeBox::updateThreadInformation()
         return;
     }
 
-    if(!settings_.get<bool>("display-threads", false)) {
+    if(!settings_.getPersistent("display-threads", false)) {
         info_thread->setVisible(false);
         return;
     } else {
@@ -405,7 +405,7 @@ void NodeBox::updateFrequencyInformation()
         return;
     }
 
-    if(!settings_.get<bool>("display-frequencies", false)) {
+    if(!settings_.getPersistent("display-frequencies", false)) {
         info_frequency->setVisible(false);
 
         if(frequency_timer_ && frequency_timer_->isActive()) {
@@ -887,7 +887,7 @@ void NodeBox::updateStylesheetColor()
     QColor text_color = Qt::black;
 
     int r, g, b;
-    if(settings_.get("debug", false)) {
+    if(settings_.getTemporary("debug", false)) {
         r = 0; g = 0; b = 0;
         if(NodeHandlePtr nh = node_handle_.lock()) {
             graph::VertexPtr vertex = nh->getVertex();

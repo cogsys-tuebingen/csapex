@@ -65,7 +65,21 @@ public:
     }
 
     template <typename T>
-    T get(const std::string& name, T def)
+    T getPersistent(const std::string& name, T def)
+    {
+        auto param = getNoThrow(name);
+        if(!param) {
+            param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
+            p->set(def);
+            addPersistent(p);
+            return def;
+        }
+
+        return param->as<T>();
+    }
+
+    template <typename T>
+    T getTemporary(const std::string& name, T def)
     {
         auto param = getNoThrow(name);
         if(!param) {
@@ -90,6 +104,8 @@ public:
         } else {
             param->set<T>(val);
         }
+
+        settingsChanged(name);
     }
 
 
@@ -105,6 +121,8 @@ public:
         } else {
             param->set<T>(val);
         }
+
+        settingsChanged(name);
     }
 
 protected:

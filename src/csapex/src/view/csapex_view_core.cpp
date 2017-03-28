@@ -34,10 +34,10 @@ DesignerStyleable& CsApexViewCore::getStyle()
 
 bool CsApexViewCore::isDebug() const
 {
-    return getSettings().get<bool>("debug", false);
+    return getSettings().getTemporary<bool>("debug", false);
 }
 
 bool CsApexViewCore::isGridLockEnabled() const
 {
-    return getSettings().get<bool>("grid-lock", false);
+    return getSettings().getPersistent<bool>("grid-lock", false);
 }

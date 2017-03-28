@@ -22,7 +22,7 @@ using namespace csapex;
 using boost::asio::ip::tcp;
 
 Server::Server(CsApexCorePtr core, bool spin_thread)
-    : acceptor_(io_service_, tcp::endpoint(tcp::v4(), core->getSettings().get("port", 12345))),
+    : acceptor_(io_service_, tcp::endpoint(tcp::v4(), core->getSettings().getTemporary("port", 12345))),
       socket_(io_service_),
       core_(core),
       running_(false),

@@ -67,7 +67,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
         dispatcher_->setClean();
         dispatcher_->resetDirtyPoint();
 
-        bool recovery = settings_.get<bool>("config_recovery", false);
+        bool recovery = settings_.getTemporary<bool>("config_recovery", false);
         if(recovery) {
             // delete recovery file
             bf3::path recov_file = settings_.get<std::string>("config_recovery_file");
@@ -226,7 +226,7 @@ void CsApexCore::init()
 
         observe(node_factory_->new_node_type, new_node_type);
         observe(node_factory_->node_constructed, [this](NodeHandlePtr n) {
-            n->getNodeState()->setMaximumFrequency(settings_.get("default_frequency", 60));
+            n->getNodeState()->setMaximumFrequency(settings_.getPersistent("default_frequency", 60));
         });
 
         status_changed("make graph");
@@ -355,9 +355,9 @@ void CsApexCore::startup()
 
     status_changed("loading config");
     try {
-        std::string cfg = settings_.get<std::string>("config", Settings::defaultConfigFile());
+        std::string cfg = settings_.getTemporary<std::string>("config", Settings::defaultConfigFile());
 
-        bool recovery = settings_.get<bool>("config_recovery", false);
+        bool recovery = settings_.getTemporary<bool>("config_recovery", false);
         if(!recovery) {
             load(cfg);
 

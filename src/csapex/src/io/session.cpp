@@ -163,7 +163,9 @@ void Session::read_async()
         } else if(reply_length > 0) {
             // payload received
             if(reply_length == SerializationBuffer::HEADER_LENGTH) {
-                uint8_t message_length(message_data->at(0));
+                message_data->seek(0);
+                uint32_t message_length;
+                *message_data >> message_length;
 
                 if(message_length <= SerializationBuffer::HEADER_LENGTH) {
                     std::cerr << "got illegal message of length " << (int) message_length << std::endl;
@@ -222,7 +224,7 @@ void Session::write_packet(SerializationBuffer &buffer)
 
         apex_assert_hard(socket_.is_open());
 
-        //        std::cerr << "sending:\n" << buffer.toString() << std::endl;
+//                std::cerr << "sending:\n" << buffer.toString() << std::endl;
 
         boost::asio::async_write(socket_, boost::asio::buffer(buffer, buffer.size()),
                                  [](boost::system::error_code /*ec*/, std::size_t /*length*/){});

@@ -77,7 +77,19 @@ public:
 
     void finalize()
     {
-        at(0) = size();
+        uint32_t length = size();
+        apex_assert_lte_hard(length, std::numeric_limits<uint32_t>::max());
+
+        std::size_t nbytes = sizeof(uint32_t);
+        for(std::size_t byte = 0; byte < nbytes; ++byte) {
+            uint8_t part = (length >> (byte * 8)) & 0xFF;
+            at(byte) = part;
+        }
+    }
+
+    void seek(uint32_t p)
+    {
+        pos = p;
     }
 
     std::string toString() const
@@ -106,10 +118,7 @@ public:
                                       int>::type = 0>
     SerializationBuffer& operator << (T i)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-
         std::size_t nbytes = sizeof(T);
-        apex_assert_lte_hard(nbytes, 4);
         for(std::size_t byte = 0; byte < nbytes; ++byte) {
             uint8_t part = (i >> (byte * 8)) & 0xFF;
             push_back(part);
@@ -121,10 +130,7 @@ public:
                                       int>::type = 0>
     SerializationBuffer& operator >> (T& i)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-
         std::size_t nbytes = sizeof(T);
-        apex_assert_lte_hard(nbytes, 4);
         T res = 0;
         for(std::size_t byte = 0; byte < nbytes; ++byte) {
             uint8_t part = static_cast<T>(at(pos++));
@@ -138,7 +144,6 @@ public:
     // FLOATS
     SerializationBuffer& operator << (float f)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         _GFloatIEEE754 ieee;
         ieee.v_float = f;
 
@@ -163,8 +168,6 @@ public:
     }
     SerializationBuffer& operator >> (float& f)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-
         uint8_t bytes[4];
         for(uint8_t i = 0; i < 4; ++i) {
             bytes[i] = at(pos++);
@@ -187,7 +190,6 @@ public:
     // DOUBLES
     SerializationBuffer& operator << (double d)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         _GDoubleIEEE754 ieee;
         ieee.v_double = d;
 
@@ -218,8 +220,6 @@ public:
     }
     SerializationBuffer& operator >> (double& d)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-
         uint8_t bytes[8];
         for(uint8_t i = 0; i < 8; ++i) {
             bytes[i] = at(pos++);
@@ -251,7 +251,6 @@ public:
                                       int>::type = 0>
     SerializationBuffer& operator << (T i)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         push_back(static_cast<uint8_t>(i));
         return *this;
     }
@@ -260,7 +259,6 @@ public:
                                       int>::type = 0>
     SerializationBuffer& operator >> (T& i)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         i = static_cast<T>(at(pos++));
         return *this;
     }
@@ -269,9 +267,8 @@ public:
     // STRINGS
     SerializationBuffer& operator << (const std::string& s)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-        apex_assert_lt_hard(s.size(), std::numeric_limits<uint8_t>::max());
-        push_back(s.size());
+        apex_assert_lt_hard(s.size(), std::numeric_limits<uint16_t>::max());
+        operator << (static_cast<uint16_t>(s.size()));
         for(const char& ch : s) {
             push_back(ch);
         }
@@ -280,8 +277,8 @@ public:
 
     SerializationBuffer& operator >> (std::string& s)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-        uint8_t str_len = at(pos++);
+        uint16_t str_len;
+        operator >> (str_len);
         apex_assert_lte_hard(pos + str_len, size());
 
         s.resize(str_len, ' ');
@@ -295,14 +292,12 @@ public:
     // STRING STREAMS
     SerializationBuffer& operator << (const std::stringstream& s)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         operator << (s.str());
         return *this;
     }
 
     SerializationBuffer& operator >> (std::stringstream& s)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         std::string str;
         operator >> (str);
         s.str(str);
@@ -312,14 +307,12 @@ public:
     // UUID
     SerializationBuffer& operator << (const UUID& s)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         operator << (s.getFullName());
         return *this;
     }
 
     SerializationBuffer& operator >> (UUID& s)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         std::string full_name;
         operator >> (full_name);
         s = UUIDProvider::makeUUID_without_parent(full_name);
@@ -330,8 +323,6 @@ public:
     // BOOST ANY
     SerializationBuffer& operator << (const boost::any& any)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-
         if(any.type() == typeid(int)) {
             operator << ((uint8_t) 1);
             operator << (boost::any_cast<int> (any));
@@ -361,8 +352,6 @@ public:
 
     SerializationBuffer& operator >> (boost::any& any)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-
         uint8_t type;
         operator >> (type);
 
@@ -410,8 +399,8 @@ public:
     template <typename S>
     SerializationBuffer& operator << (const std::vector<S>& s)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
-        operator << (s.size());
+        apex_assert_lt_hard(s.size(), std::numeric_limits<uint8_t>::max());
+        operator << (static_cast<uint8_t>(s.size()));
         for(const auto& elem : s) {
             operator << (elem);
         }
@@ -421,7 +410,6 @@ public:
     template <typename S>
     SerializationBuffer& operator >> (std::vector<S>& s)
     {
-        apex_assert_gte_hard(pos, HEADER_LENGTH);
         uint8_t len;
         operator >> (len);
         s.reserve(len);

@@ -47,38 +47,38 @@ void DesignerOptions::setup(GraphView *view)
 
 bool DesignerOptions::isGridEnabled() const
 {
-    return settings_.get<bool>("grid", false);
+    return settings_.getTemporary<bool>("grid", false);
 }
 bool DesignerOptions::isGridLockEnabled() const
 {
-    return settings_.get<bool>("grid-lock", false);
+    return settings_.getTemporary<bool>("grid-lock", false);
 }
 bool DesignerOptions::isSchematicsEnabled() const
 {
-    return settings_.get<bool>("schematics", false);
+    return settings_.getTemporary<bool>("schematics", false);
 }
 
 bool DesignerOptions::isGraphComponentsEnabled() const
 {
-    return settings_.get<bool>("display-graph-components", false);
+    return settings_.getTemporary<bool>("display-graph-components", false);
 }
 bool DesignerOptions::isThreadsEnabled() const
 {
-    return settings_.get<bool>("display-threads", false);
+    return settings_.getTemporary<bool>("display-threads", false);
 }
 bool DesignerOptions::isFrequencyEnabled() const
 {
-    return settings_.get<bool>("display-frequencies", false);
+    return settings_.getTemporary<bool>("display-frequencies", false);
 }
 
 bool DesignerOptions::isMinimapEnabled() const
 {
-    return settings_.get<bool>("display-minimap", false);
+    return settings_.getTemporary<bool>("display-minimap", false);
 }
 
 bool DesignerOptions::isDebug() const
 {
-    return settings_.get<bool>("debug", false);
+    return settings_.getTemporary<bool>("debug", false);
 }
 
 
@@ -211,19 +211,19 @@ void DesignerOptions::enableDebug(bool debug)
 
 bool DesignerOptions::areMessageConnectionsVisibile() const
 {
-    return settings_.get<bool>("display-messages", true);
+    return settings_.getPersistent<bool>("display-messages", true);
 }
 bool DesignerOptions::areSignalConnectionsVisible() const
 {
-    return settings_.get<bool>("display-signals", true);
+    return settings_.getPersistent<bool>("display-signals", true);
 }
 bool DesignerOptions::areActiveConnectionsVisible() const
 {
-    return settings_.get<bool>("display-active", true);
+    return settings_.getPersistent<bool>("display-active", true);
 }
 bool DesignerOptions::areInactiveConnectionsVisibile() const
 {
-    return settings_.get<bool>("display-inactive", true);
+    return settings_.getPersistent<bool>("display-inactive", true);
 }
 
 void DesignerOptions::displaySignalConnections(bool display)

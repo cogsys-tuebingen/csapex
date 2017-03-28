@@ -12,6 +12,10 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/core_requests.h>
+#include <csapex/io/broadcast_message.h>
+#include <csapex/io/protcol/notification_message.h>
+#include <csapex/serialization/packet_serializer.h>
+#include <csapex/io/protcol/parameter_changed.h>
 
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -28,16 +32,58 @@ using boost::asio::ip::tcp;
 using namespace csapex;
 
 
-CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port)
+CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsApexCorePtr core_tmp)
     : socket(io_service),
       resolver(io_service),
       resolver_iterator(boost::asio::connect(socket, resolver.resolve({ip, std::to_string(port)}))),
       session_(std::make_shared<Session>(std::move(socket))),
       settings_(std::make_shared<SettingsRemote>(session_)),
-      node_adapter_factory_(std::make_shared<NodeAdapterFactory>(*settings_, getPluginLocator().get()))
+      node_adapter_factory_(std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get())),
+
+      core_tmp_(core_tmp)
 {
+    session_->start();
+
+    dispatcher_ = core_tmp_->getCommandDispatcher();
+    node_factory_ = core_tmp_->getNodeFactory();
+    snippet_factory_ = core_tmp_->getSnippetFactory();
+
+    session_->packet_received.connect([this](SerializableConstPtr packet){
+        handlePacket(packet);
+    });
+
+    running = true;
+    spinner = std::thread([&](){
+        while(running) {
+            io_service.run();
+        }
+    });
 }
 
+CsApexViewCoreRemote::~CsApexViewCoreRemote()
+{
+    if(spinner.joinable()) {
+        spinner.join();
+    }
+}
+
+
+void CsApexViewCoreRemote::handlePacket(SerializableConstPtr packet)
+{
+    if(packet) {
+        //                std::cout << "type=" << (int) serial->getPacketType() << std::endl;
+
+        switch(packet->getPacketType()) {
+        case BroadcastMessage::PACKET_TYPE_ID:
+            if(BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
+                if(auto notification_msg = std::dynamic_pointer_cast<NotificationMessage const>(broadcast)) {
+                    Notification n = notification_msg->getNotification();
+                    notification(n);
+                }
+            }
+        }
+    }
+}
 
 
 NodeAdapterFactoryPtr CsApexViewCoreRemote::getNodeAdapterFactory()
@@ -53,13 +99,13 @@ std::shared_ptr<DragIO> CsApexViewCoreRemote::getDragIO()
 /// PROXIES
 ExceptionHandler& CsApexViewCoreRemote::getExceptionHandler() const
 {
-//    return exception_handler_;
+    return core_tmp_->getExceptionHandler();
 }
 
 
 PluginLocatorPtr CsApexViewCoreRemote::getPluginLocator() const
 {
-    return nullptr;//core_->getPluginLocator();
+    return core_tmp_->getPluginLocator();
 }
 
 CommandExecutorPtr CsApexViewCoreRemote::getCommandDispatcher()
@@ -75,14 +121,14 @@ Settings& CsApexViewCoreRemote::getSettings() const
 
 GraphFacadePtr CsApexViewCoreRemote::getRoot()
 {
-    return nullptr;//core_->getRoot();
+    return core_tmp_->getRoot();
 }
 
 ThreadPoolPtr CsApexViewCoreRemote::getThreadPool()
 {
     // TODO: replace with proxy
     //apex_assert_hard(//core_->getThreadPool());
-    return nullptr;//core_->getThreadPool();
+    return core_tmp_->getThreadPool();
 }
 NodeFactoryPtr CsApexViewCoreRemote::getNodeFactory() const
 {
@@ -100,7 +146,7 @@ ProfilerPtr CsApexViewCoreRemote::getProfiler() const
 {
     // TODO: replace with proxy
     //apex_assert_hard(//core_->getProfiler() != nullptr);
-    return nullptr;//core_->getProfiler();
+    return core_tmp_->getProfiler();
 }
 
 void CsApexViewCoreRemote::sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level)
@@ -130,7 +176,9 @@ void CsApexViewCoreRemote::saveAs(const std::string& file, bool quiet)
 
 bool CsApexViewCoreRemote::isPaused() const
 {
-    return session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetPause)->getResult<bool>();
+    auto res = session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetPause);
+    apex_assert_hard(res);
+    return res->getResult<bool>();
 }
 
 void CsApexViewCoreRemote::setPause(bool paused)
@@ -141,7 +189,9 @@ void CsApexViewCoreRemote::setPause(bool paused)
 
 bool CsApexViewCoreRemote::isSteppingMode() const
 {
-    return session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetSteppingMode)->getResult<bool>();
+    auto res = session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetSteppingMode);
+    apex_assert_hard(res);
+    return res->getResult<bool>();
 }
 
 void CsApexViewCoreRemote::setSteppingMode(bool stepping)
@@ -158,6 +208,8 @@ void CsApexViewCoreRemote::step()
 void CsApexViewCoreRemote::shutdown()
 {
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreShutdown);
+    running = false;
+    io_service.stop();
 }
 
 void CsApexViewCoreRemote::clearBlock()

@@ -279,7 +279,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
         menu.addSeparator();
 
-        bool threading = !view_.getViewCore().getSettings().get("threadless", false);
+        bool threading = !view_.getViewCore().getSettings().getTemporary("threadless", false);
         QMenu* thread_menu = menu.addMenu(QIcon(":/thread_group.png"), "thread grouping");
         thread_menu->setEnabled(threading);
 

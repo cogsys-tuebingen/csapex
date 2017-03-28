@@ -88,7 +88,7 @@ int Main::runWithGui()
     app->processEvents();
 
 //    CsApexViewCoreLocal view_core(core);
-    CsApexViewCoreRemote view_core("localhost", 12345);
+    CsApexViewCoreRemote view_core("localhost", 12345, core);
 
     CsApexWindow w(view_core);
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
@@ -178,7 +178,7 @@ void Main::checkRecoveryFile(CsApexViewCore &view_core, CsApexWindow &w)
             w.statusBar()->showMessage(tr("Recovery file saved."));
         }
     });
-    timer->start(settings.get<int>("config_recovery_save_interval", 1000));
+    timer->start(settings.getPersistent("config_recovery_save_interval", 1000));
     observe(view_core.undo_state_changed, [&](){
         recover_needed = true;
     });
@@ -212,7 +212,7 @@ void Main::askForRecoveryConfig(const std::string& config_to_load)
 
 void Main::deleteRecoveryConfig()
 {
-    bool recovery = settings.get<bool>("config_recovery", false);
+    bool recovery = settings.getTemporary("config_recovery", false);
     if(!recovery) {
         bf3::path temp_file = settings.get("config")->as<std::string>() + ".recover";
         if(bf3::exists(temp_file)) {

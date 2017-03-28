@@ -53,11 +53,17 @@ void Parameter::deserialize(SerializationBuffer& data)
 
 void Parameter::setUUID(const UUID& uuid)
 {
+    if(uuid.global()) {
+        apex_assert_hard(!uuid.globalName().empty());
+    }
     uuid_ = uuid;
 }
 
 UUID Parameter::getUUID() const
 {
+    if(uuid_.global()) {
+        apex_assert_hard(!uuid_.globalName().empty());
+    }
     return uuid_;
 }
 
