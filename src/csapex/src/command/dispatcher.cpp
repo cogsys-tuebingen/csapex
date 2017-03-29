@@ -17,7 +17,6 @@ CommandDispatcher::CommandDispatcher(CsApexCore& core)
     : core_(core),
       dirty_(false)
 {
-    state_changed.connect([this](){ core_.getRoot()->getGraph()->state_changed(); });
 }
 
 void CommandDispatcher::reset()

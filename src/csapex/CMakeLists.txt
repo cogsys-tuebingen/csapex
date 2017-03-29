@@ -163,6 +163,7 @@ add_library(csapex_serialization SHARED
     src/serialization/node_serializer.cpp
     src/serialization/snippet.cpp
     src/serialization/packet_serializer.cpp
+    src/serialization/serialization_buffer.cpp
 
     ${csapex_serialization_HEADERS}
 )
@@ -326,7 +327,6 @@ add_library(csapex SHARED
 
     src/command/command.cpp
     src/command/dispatcher.cpp
-    src/command/meta.cpp
 
     src/data/point.cpp
 
@@ -435,6 +435,8 @@ add_library(csapex_command SHARED
     src/command/command_factory.cpp
     src/command/command_serializer.cpp
 
+    src/command/meta.cpp
+
     src/command/add_connection.cpp
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp
@@ -505,6 +507,7 @@ file(GLOB_RECURSE csapex_remote_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOL
 
 add_library(csapex_remote SHARED
     src/core/settings/settings_remote.cpp
+    src/command/dispatcher_remote.cpp
 
     src/io/server.cpp
     src/io/request.cpp
@@ -519,6 +522,8 @@ add_library(csapex_remote SHARED
     src/io/protocol/request_parameter.cpp
     src/io/protocol/add_parameter.cpp
     src/io/protocol/core_requests.cpp
+    src/io/protocol/command_requests.cpp
+    src/io/protocol/command_broadcasts.cpp
 
     src/serialization/request_serializer.cpp
     src/serialization/broadcast_message_serializer.cpp

@@ -18,6 +18,9 @@ class CSAPEX_COMMAND_EXPORT MoveBox : public CommandImplementation<MoveBox>
 public:
     MoveBox(const AUUID &graph_uuid, const UUID& node_uuid, Point from, Point to);
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
 protected:
     bool doExecute();
     bool doUndo();

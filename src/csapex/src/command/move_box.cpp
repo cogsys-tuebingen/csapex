@@ -5,12 +5,16 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(MoveBox)
 
 MoveBox::MoveBox(const AUUID& graph_uuid, const UUID& node_uuid, Point from, Point to)
     : CommandImplementation(graph_uuid), from(from), to(to), box_uuid(node_uuid)
@@ -54,3 +58,18 @@ bool MoveBox::doRedo()
 {
     return doExecute();
 }
+
+void MoveBox::serialize(SerializationBuffer &data) const
+{
+    data << from.x << from.y;
+    data << to.x << to.y;
+    data << box_uuid;
+}
+
+void MoveBox::deserialize(SerializationBuffer& data)
+{
+    data >> from.x >> from.y;
+    data >> to.x >> to.y;
+    data >> box_uuid;
+}
+

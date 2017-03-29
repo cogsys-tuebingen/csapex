@@ -162,6 +162,8 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->profiling_debug_enable, SIGNAL(toggled(bool)), this, SLOT(enableDebugProfiling(bool)));
 
+    QObject::connect(this, &CsApexWindow::updateMenuRequest, this, &CsApexWindow::updateMenu);
+
     observe(view_core_.reset_requested, [this](){ designer_->reset(); });
     observe(view_core_.reset_done, [this](){ designer_->reinitialize(); });
     observe(view_core_.config_changed, [this](){ updateTitle(); });
@@ -169,11 +171,11 @@ void CsApexWindow::construct()
     observe(view_core_.new_node_type, [this](){ updateNodeTypes(); });
     observe(view_core_.new_snippet_type, [this](){ updateSnippets(); });
 
-    observe(graph->state_changed, [this]() { updateMenu(); });
+    observe(graph->state_changed, [this]() { updateMenuRequest(); });
     observe(view_core_.panic, [this]() { clearBlock(); });
 
-    observe(view_core_.undo_state_changed, [this](){ updateUndoInfo(); });
-    observe(view_core_.undo_dirty_changed, [this](bool) { updateTitle(); });
+    observe(view_core_.undo_state_changed, [this](){ updateUndoInfo(); updateMenuRequest(); });
+    observe(view_core_.undo_dirty_changed, [this](bool) { updateTitle(); updateMenuRequest(); });
 
     observe(view_core_.paused, [this](bool pause) { ui->actionPause->setChecked(pause); });
 

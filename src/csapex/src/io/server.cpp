@@ -11,6 +11,7 @@
 #include <csapex/command/update_parameter.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/io/protcol/parameter_changed.h>
+#include <csapex/io/protcol/command_broadcasts.h>
 
 /// SYSTEM
 #include <cstdlib>
@@ -71,6 +72,16 @@ void Server::do_accept()
                     boost::any any;
                     p->get_unsafe(any);
                     session->write(std::make_shared<ParameterChanged>(id, any));
+                }
+            });
+            observe(core_->getCommandDispatcher()->state_changed, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendBroadcast<CommandBroadcasts>(CommandBroadcasts::CommandBroadcastType::StateChanged);
+                }
+            });
+            observe(core_->getCommandDispatcher()->dirty_changed, [this, w_session](bool dirty) {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendBroadcast<CommandBroadcasts>(CommandBroadcasts::CommandBroadcastType::DirtyChanged, dirty);
                 }
             });
 

@@ -59,8 +59,8 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexCorePtr core)
     observe(core_->getThreadPool()->group_removed, group_removed);
 
 
-    observe(core_->getCommandDispatcher()->state_changed, undo_state_changed);
-    observe(core_->getCommandDispatcher()->dirty_changed, undo_dirty_changed);
+    observe(dispatcher_->state_changed, undo_state_changed);
+    observe(dispatcher_->dirty_changed, undo_dirty_changed);
 
     observe(core_->notification, notification);
 }

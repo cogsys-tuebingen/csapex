@@ -102,6 +102,8 @@ Q_SIGNALS:
     void showNotificationRequest(const Notification& notification);
     void closed();
 
+    void updateMenuRequest();
+
 private:
     void construct();
     void setupDesigner();

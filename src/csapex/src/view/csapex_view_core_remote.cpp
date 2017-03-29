@@ -7,6 +7,7 @@
 #include <csapex/view/utility/message_renderer_manager.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/designer/drag_io.h>
+#include <csapex/command/dispatcher_remote.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/command/dispatcher.h>
@@ -16,6 +17,7 @@
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/io/protcol/parameter_changed.h>
+#include <csapex/io/protcol/command_broadcasts.h>
 
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -37,14 +39,17 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
       resolver(io_service),
       resolver_iterator(boost::asio::connect(socket, resolver.resolve({ip, std::to_string(port)}))),
       session_(std::make_shared<Session>(std::move(socket))),
-      settings_(std::make_shared<SettingsRemote>(session_)),
-      node_adapter_factory_(std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get())),
-
       core_tmp_(core_tmp)
 {
     session_->start();
 
-    dispatcher_ = core_tmp_->getCommandDispatcher();
+    // make the proxys only _after_ the session is started
+    settings_ = std::make_shared<SettingsRemote>(session_);
+    node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get());
+    dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);
+
+
+//    dispatcher_ = core_tmp_->getCommandDispatcher();
     node_factory_ = core_tmp_->getNodeFactory();
     snippet_factory_ = core_tmp_->getSnippetFactory();
 
@@ -58,6 +63,10 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
             io_service.run();
         }
     });
+
+
+    observe(dispatcher_->state_changed, undo_state_changed);
+    observe(dispatcher_->dirty_changed, undo_dirty_changed);
 }
 
 CsApexViewCoreRemote::~CsApexViewCoreRemote()
@@ -79,6 +88,9 @@ void CsApexViewCoreRemote::handlePacket(SerializableConstPtr packet)
                 if(auto notification_msg = std::dynamic_pointer_cast<NotificationMessage const>(broadcast)) {
                     Notification n = notification_msg->getNotification();
                     notification(n);
+
+                } else if(auto command_msg = std::dynamic_pointer_cast<CommandBroadcasts const>(broadcast)) {
+                    dispatcher_->handleBroadcast(command_msg);
                 }
             }
         }

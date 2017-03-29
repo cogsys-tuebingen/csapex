@@ -29,6 +29,10 @@ public:
 
     virtual void undo() = 0;
     virtual void redo() = 0;
+
+public:
+    slim_signal::Signal<void()> state_changed;
+    slim_signal::Signal<void(bool)> dirty_changed;
 };
 
 }

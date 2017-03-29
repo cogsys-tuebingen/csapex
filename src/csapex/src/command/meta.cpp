@@ -6,12 +6,16 @@
 #include <csapex/core/csapex_core.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <iostream>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(Meta)
 
 Meta::Meta(const AUUID &parent_uuid, const std::string &type, bool transaction)
     : CommandImplementation(parent_uuid), locked(false), transaction(transaction), type(type)
@@ -34,14 +38,9 @@ void Meta::accept(int level, std::function<void (int level, const Command &)> ca
     }
 }
 
-std::string Meta::getType() const
-{
-    return type;
-}
-
 std::string Meta::getDescription() const
 {
-    return "";
+    return type;
 }
 
 void Meta::clear()
@@ -121,4 +120,15 @@ bool Meta::doRedo()
         success &= s;
     }
     return success;
+}
+
+
+void Meta::serialize(SerializationBuffer &data) const
+{
+    data << nested;
+}
+
+void Meta::deserialize(SerializationBuffer& data)
+{
+    data >> nested;
 }

@@ -45,10 +45,6 @@ public:
     void resetDirtyPoint();
     void clearSavepoints();
 
-public:
-    slim_signal::Signal<void()> state_changed;
-    slim_signal::Signal<void(bool)> dirty_changed;
-
 private:
     void doExecute(Command::Ptr command);
     void setDirty(bool dirty);

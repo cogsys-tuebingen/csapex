@@ -4,7 +4,6 @@
 /// PROJECT
 #include <csapex/io/io_fwd.h>
 #include <csapex/core/csapex_core.h>
-#include <csapex/command/command.h>
 #include <csapex/io/request.h>
 #include <csapex/io/response.h>
 #include <csapex/io/feedback.h>

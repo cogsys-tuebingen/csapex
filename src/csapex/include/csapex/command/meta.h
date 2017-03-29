@@ -28,6 +28,9 @@ public:
 
     virtual void init(GraphFacade* root, CsApexCore& core) override;
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
 protected:
 
     bool doExecute() override;
@@ -36,7 +39,6 @@ protected:
 
     virtual void accept(int level, std::function<void (int, const Command &)> callback) const override;
 
-    virtual std::string getType() const override;
     virtual std::string getDescription() const override;
 
 protected:

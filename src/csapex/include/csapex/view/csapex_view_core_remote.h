@@ -11,7 +11,7 @@ namespace csapex
 {
 class CsApexCore;
 class NodeAdapterFactory;
-class CommandDispatcher;
+class CommandDispatcherRemote;
 
 class DesignerStyleable;
 class DesignerOptions;
@@ -74,7 +74,7 @@ private:
     std::shared_ptr<SettingsRemote> settings_;
 
     std::shared_ptr<NodeAdapterFactory> node_adapter_factory_;
-    std::shared_ptr<CommandExecutor> dispatcher_;
+    std::shared_ptr<CommandDispatcherRemote> dispatcher_;
 
     std::shared_ptr<NodeFactory> node_factory_;
     std::shared_ptr<SnippetFactory> snippet_factory_;

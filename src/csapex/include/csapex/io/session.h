@@ -27,6 +27,10 @@ public:
   void write(const SerializableConstPtr &packet);
   void write(const std::string &message);
 
+
+  ///
+  /// REQUEST
+  ///
   ResponseConstPtr sendRequest(RequestConstPtr request);
 
   template <typename RequestWrapper>
@@ -41,6 +45,16 @@ public:
   sendRequest(Args&&... args)
   {
       return std::dynamic_pointer_cast<typename RequestWrapper::ResponseT const>(sendRequest(std::make_shared<typename RequestWrapper::RequestT>(std::forward<Args>(args)...)));
+  }
+
+
+  ///
+  /// BROADCAST
+  ///
+  template <typename BroadcastWrapper, typename... Args>
+  void sendBroadcast(Args&&... args)
+  {
+      write(std::make_shared<BroadcastWrapper>(std::forward<Args>(args)...));
   }
 
 public:

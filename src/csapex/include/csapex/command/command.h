@@ -28,6 +28,7 @@ public:
     class CSAPEX_COMMAND_EXPORT Access {
         friend class Group;
         friend class CommandDispatcher;
+        friend class CommandDispatcherRemote;
         friend class command::Meta;
 
     private:
