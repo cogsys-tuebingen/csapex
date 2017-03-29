@@ -9,6 +9,7 @@
 #include <csapex/io/feedback.h>
 #include <csapex/serialization/serialization_buffer.h>
 #include <csapex/serialization/packet_serializer.h>
+#include <csapex/io/broadcast_message.h>
 
 /// SYSTEM
 #include <csapex/utility/error_handling.h>
@@ -58,12 +59,23 @@ void Session::start()
             }
 
             while(running_ && !packets_.empty()) {
-                SerializableConstPtr next = packets_.front();
+                SerializableConstPtr packet = packets_.front();
                 packets_.pop_front();
                 packet_lock.unlock();
 
                 try {
-                    packet_received(next);
+
+                    switch(packet->getPacketType()) {
+                    case BroadcastMessage::PACKET_TYPE_ID:
+                        if(BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
+                            broadcast_received(broadcast);
+                            break;
+                        }
+                    default:
+                        packet_received(packet);
+                        break;
+                    }
+
                 } catch(...) {
                     // silent death
                 }

@@ -62,6 +62,7 @@ public:
   slim_signal::Signal<void()> stopped;
 
   slim_signal::Signal<void(SerializableConstPtr)> packet_received;
+  slim_signal::Signal<void(BroadcastMessageConstPtr)> broadcast_received;
 
 private:
   void read_async();

@@ -10,6 +10,7 @@
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/io/protcol/core_requests.h>
 #include <csapex/param/null_parameter.h>
+#include <csapex/io/protcol/parameter_changed.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -38,7 +39,10 @@ using namespace csapex;
 
 SettingsRemote::SettingsRemote(SessionPtr session)
     : session_(session)
-{
+{    
+    session_->broadcast_received.connect([this](const BroadcastMessageConstPtr& message) {
+        handleBroadcast(message);
+    });
 }
 
 void SettingsRemote::save()
@@ -125,4 +129,21 @@ bool SettingsRemote::knows(const std::string &name) const
 {
     auto res = getNoThrow(name);
     return res != nullptr;
+}
+
+
+void SettingsRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
+{
+    if(auto parameter_change = std::dynamic_pointer_cast<ParameterChanged const>(message)) {
+        if(parameter_change->getUUID().global()) {
+            auto pos = cache_.find(parameter_change->getUUID().globalName());
+            if(pos != cache_.end()) {
+                param::ParameterPtr p = pos->second;
+                if(p->set_unsafe(parameter_change->getValue())) {
+                    p->triggerChange();
+                    std::cerr << "setting " << parameter_change->getUUID().globalName() << " changed to " << p->toString() << std::endl;
+                }
+            }
+        }
+    }
 }

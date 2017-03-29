@@ -16,8 +16,6 @@
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/serialization/packet_serializer.h>
-#include <csapex/io/protcol/parameter_changed.h>
-#include <csapex/io/protcol/command_broadcasts.h>
 
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -49,12 +47,15 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);
 
 
-//    dispatcher_ = core_tmp_->getCommandDispatcher();
+    //    dispatcher_ = core_tmp_->getCommandDispatcher();
     node_factory_ = core_tmp_->getNodeFactory();
     snippet_factory_ = core_tmp_->getSnippetFactory();
 
-    session_->packet_received.connect([this](SerializableConstPtr packet){
+    observe(session_->packet_received, [this](SerializableConstPtr packet){
         handlePacket(packet);
+    });
+    observe(session_->broadcast_received, [this](BroadcastMessageConstPtr packet){
+        handleBroadcast(packet);
     });
 
     running = true;
@@ -79,6 +80,10 @@ CsApexViewCoreRemote::~CsApexViewCoreRemote()
 
 void CsApexViewCoreRemote::handlePacket(SerializableConstPtr packet)
 {
+}
+
+void CsApexViewCoreRemote::handleBroadcast(BroadcastMessageConstPtr packet)
+{
     if(packet) {
         //                std::cout << "type=" << (int) serial->getPacketType() << std::endl;
 
@@ -88,9 +93,6 @@ void CsApexViewCoreRemote::handlePacket(SerializableConstPtr packet)
                 if(auto notification_msg = std::dynamic_pointer_cast<NotificationMessage const>(broadcast)) {
                     Notification n = notification_msg->getNotification();
                     notification(n);
-
-                } else if(auto command_msg = std::dynamic_pointer_cast<CommandBroadcasts const>(broadcast)) {
-                    dispatcher_->handleBroadcast(command_msg);
                 }
             }
         }

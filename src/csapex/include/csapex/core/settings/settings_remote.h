@@ -26,6 +26,8 @@ public:
 private:
     void createParameterProxy(const std::string &name, param::ParameterPtr proxy) const;
 
+    void handleBroadcast(const BroadcastMessageConstPtr& message);
+
 private:
     SessionPtr session_;
 

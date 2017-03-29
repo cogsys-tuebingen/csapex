@@ -61,6 +61,7 @@ public:
 
 private:
     void handlePacket(SerializableConstPtr packet);
+    void handleBroadcast(BroadcastMessageConstPtr packet);
 
 private:
 

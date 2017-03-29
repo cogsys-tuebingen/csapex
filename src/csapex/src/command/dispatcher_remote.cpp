@@ -14,6 +14,10 @@ CommandDispatcherRemote::CommandDispatcherRemote(SessionPtr session)
 {
     dirty_ = false;
     init_ = false;
+
+    session_->broadcast_received.connect([this](const BroadcastMessageConstPtr& message) {
+        handleBroadcast(message);
+    });
 }
 
 void CommandDispatcherRemote::execute(const CommandPtr &command)

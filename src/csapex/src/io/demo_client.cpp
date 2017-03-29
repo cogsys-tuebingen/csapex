@@ -62,57 +62,62 @@ public:
 
             settings_= std::make_shared<SettingsRemote>(session);
 
-            try {
-                param::ParameterPtr p = settings_->get("access-test");
-                std::cerr << p->as<std::string>() << std::endl;
-                apex_assert_equal_hard(std::string("access granted."), p->as<std::string>());
+//            try {
+//                param::ParameterPtr p = settings_->get("access-test");
+//                std::cerr << p->as<std::string>() << std::endl;
+//                apex_assert_equal_hard(std::string("access granted."), p->as<std::string>());
 
-                p->parameter_changed.connect([](param::Parameter*p) {
-                    std::cerr << "test observer has changed to " << p->as<std::string>() << std::endl;
-                });
-
-
-                param::ParameterPtr test_observer = settings_->get("test-observer");
-                std::cerr << test_observer->as<std::string>() << std::endl;
-                apex_assert_equal_hard(std::string("initialized"), test_observer->as<std::string>());
-
-                test_observer->set<std::string>("change request");
-                apex_assert_equal_hard(std::string("change request"), test_observer->as<std::string>());
+//                p->parameter_changed.connect([](param::Parameter*p) {
+//                    std::cerr << "test observer has changed to " << p->as<std::string>() << std::endl;
+//                });
 
 
-                apex_assert_hard(!settings_->knows("foo-bar_baz"));
-                settings_->set<std::string>("foo-bar_baz", "lorem-ipsum");
-                apex_assert_hard(settings_->knows("foo-bar_baz"));
-                apex_assert_equal_hard("lorem-ipsum", settings_->get<std::string>("foo-bar_baz"));
+//                param::ParameterPtr test_observer = settings_->get("test-observer");
+//                std::cerr << test_observer->as<std::string>() << std::endl;
+//                apex_assert_equal_hard(std::string("initialized"), test_observer->as<std::string>());
+
+//                test_observer->set<std::string>("change request");
+//                apex_assert_equal_hard(std::string("change request"), test_observer->as<std::string>());
 
 
-            } catch(const std::out_of_range& e) {
-                std::cerr << "no access to server settings" << std::endl;
-                std::exit(1);
-            } catch(const std::exception& e) {
-                std::cerr << "an unknown error occurred: " << e.what()  << std::endl;
-                std::exit(2);
-            }
+//                apex_assert_hard(!settings_->knows("foo-bar_baz"));
+//                settings_->set<std::string>("foo-bar_baz", "lorem-ipsum");
+//                apex_assert_hard(settings_->knows("foo-bar_baz"));
+//                apex_assert_equal_hard("lorem-ipsum", settings_->get<std::string>("foo-bar_baz"));
 
-            int test_iterations = 3;
+
+//            } catch(const std::out_of_range& e) {
+//                std::cerr << "no access to server settings" << std::endl;
+//                std::exit(1);
+//            } catch(const std::exception& e) {
+//                std::cerr << "an unknown error occurred: " << e.what()  << std::endl;
+//                std::exit(2);
+//            }
+
+//            int test_iterations = 3;
+//            while(running) {
+//                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+//                param::ParameterPtr test_observer = settings_->get("test-observer");
+//                std::cerr << test_observer->as<std::string>() << std::endl;
+//                apex_assert_equal_hard(std::string("change has been processed"), test_observer->as<std::string>());
+
+//                apex_assert_equal_hard(std::string("change has been processed"), settings_->get<std::string>("test-observer"));
+
+//                if(--test_iterations <= 0) {
+//                    stop();
+//                }
+//            }
+
             while(running) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-                param::ParameterPtr test_observer = settings_->get("test-observer");
-                std::cerr << test_observer->as<std::string>() << std::endl;
-                apex_assert_equal_hard(std::string("change has been processed"), test_observer->as<std::string>());
-
-                apex_assert_equal_hard(std::string("change has been processed"), settings_->get<std::string>("test-observer"));
-
-                if(--test_iterations <= 0) {
-                    stop();
-                }
             }
 
-            session->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSave);
 
-            csapex::command::Quit::Ptr quit = std::make_shared<csapex::command::Quit>();
-            session->write(quit);
+//            session->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSave);
+
+//            csapex::command::Quit::Ptr quit = std::make_shared<csapex::command::Quit>();
+//            session->write(quit);
         }
         catch (const csapex::HardAssertionFailure& e)
         {
@@ -146,18 +151,6 @@ public:
                         Notification notification = notification_msg->getNotification();
                         std::cout << "$ " << notification.auuid << ": " << notification.message.str() << std::endl;
 
-                    } else if(auto parameter_change = std::dynamic_pointer_cast<ParameterChanged const>(broadcast)) {
-                        AUUID uuid = parameter_change->getUUID();
-                        std::cerr << "parameter " << uuid << " changed" << std::endl;
-                        if(uuid.global()) {
-                            param::ParameterPtr p = settings_->get(uuid.globalName());
-                            if(p->set_unsafe(parameter_change->getValue())) {
-                                p->triggerChange();
-                                std::cerr << "setting " << uuid.globalName() << " changed to " << p->toString() << std::endl;
-                            }
-                        } else {
-                            //TODO: implement for general parameter
-                        }
                     }
                 }
             }
