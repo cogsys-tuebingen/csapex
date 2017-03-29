@@ -157,8 +157,12 @@ int Main::run()
 
     core = std::make_shared<CsApexCore>(settings, handler);
 
-    server = std::make_shared<Server>(core);
-    server->start();
+    try {
+        server = std::make_shared<Server>(core);
+        server->start();
+    } catch (const boost::system::system_error& ex) {
+        std::cerr << "Could not start command server: [" << ex.code() << "] " << ex.what() << std::endl;
+    }
 
     if(headless) {
         return runHeadless();
