@@ -147,12 +147,17 @@ int Main::run()
 
     core = std::make_shared<CsApexCore>(settings, handler);
 
-    Server server(core);
-    csapex::error_handling::stop_request().connect([&server](){
-        server.stop();
-    });
+    try {
+        Server server(core);
+        csapex::error_handling::stop_request().connect([&server]()
+                                                       {
+                                                           server.stop();
+                                                       });
 
-    server.start();
+        server.start();
+    } catch (const boost::system::system_error& ex) {
+        std::cerr << "Could not start command server: [" << ex.code() << "] " << ex.what() << std::endl;
+    }
 
     if(headless) {
         return runHeadless();
