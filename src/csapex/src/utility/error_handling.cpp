@@ -73,7 +73,6 @@ void csapex::error_handling::kill()
 void csapex::error_handling::stop()
 {
     stop_request()();
-    // TODO: kill on timeout!
 }
 
 void csapex::error_handling::siginthandler(int)

@@ -602,7 +602,6 @@ void Designer::saveView(SubgraphNode* graph, YAML::Node &doc)
 {
     DesignerIO designerio;
 
-    // TODO: this only saves the ui state for the main graph
     auto pos = graph_views_.find(graph);
     if(pos != graph_views_.end()) {
         designerio.saveBoxes(doc, graph, pos->second);

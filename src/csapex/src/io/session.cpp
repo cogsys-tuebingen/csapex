@@ -122,14 +122,14 @@ ResponseConstPtr Session::sendRequest(RequestConstPtr request)
     if(live_) {
         request->overwriteRequestID(next_request_id_++);
 
-        write(request);
-
         std::promise<ResponseConstPtr> promise;
 
         {
             std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
             open_requests_[request->getRequestID()] = &promise;
         }
+
+        write(request);
 
         std::future<ResponseConstPtr> future = promise.get_future();
 
@@ -198,6 +198,9 @@ void Session::read_async()
                                     std::promise<ResponseConstPtr>* promise = it->second;
                                     promise->set_value(nullptr);
                                     open_requests_.erase(it);
+
+                                } else {
+                                    std::cerr << "got feedback for unknown request " << (int) feedback->getRequestID() << std::endl;
                                 }
                             }
 
@@ -210,6 +213,9 @@ void Session::read_async()
                                 std::promise<ResponseConstPtr>* promise = it->second;
                                 promise->set_value(response);
                                 open_requests_.erase(it);
+
+                            } else {
+                                std::cerr << "got response for unknown request " << (int) response->getRequestID() << std::endl;
                             }
 
                         } else {

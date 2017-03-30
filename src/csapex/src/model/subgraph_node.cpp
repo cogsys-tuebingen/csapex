@@ -201,7 +201,9 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
                 iteration_count_ = m->nestedValueCount();
                 iteration_index_ = 1;
 
-                msg::publish(o.get(), m->nestedValue(0));
+                if(iteration_count_ > 0)  {
+                    msg::publish(o.get(), m->nestedValue(0));
+                }
 
             } else {
                 msg::publish(o.get(), m);
