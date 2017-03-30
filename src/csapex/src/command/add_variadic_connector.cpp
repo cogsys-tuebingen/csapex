@@ -12,9 +12,13 @@
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 using namespace command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(AddVariadicConnector)
 
 AddVariadicConnector::AddVariadicConnector(const AUUID& graph_id, const AUUID& node,
                                            const ConnectorType& connector_type,
@@ -168,4 +172,37 @@ bool AddVariadicConnector::doRedo()
 RelayMapping AddVariadicConnector::getMap() const
 {
     return map;
+}
+
+
+void AddVariadicConnector::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << connector_type;
+    data << token_type->typeName();
+
+    data << label_;
+    data << optional_;
+
+    data << node_id;
+    data << connector_id;
+}
+
+void AddVariadicConnector::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> connector_type;
+
+    std::string type_name;
+    data >> type_name;
+
+    token_type = MessageFactory::createMessage(type_name);
+
+    data >> label_;
+    data >> optional_;
+
+    data >> node_id;
+    data >> connector_id;
 }

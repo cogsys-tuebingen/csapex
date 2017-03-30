@@ -14,6 +14,10 @@
 #include <limits>
 #include <boost/any.hpp>
 
+namespace YAML
+{
+class Node;
+}
 
 namespace csapex
 {
@@ -207,6 +211,11 @@ public:
         }
         return *this;
     }
+
+
+    // YAML
+    SerializationBuffer& operator << (const YAML::Node& node);
+    SerializationBuffer& operator >> (YAML::Node& node);
 
 private:
     std::size_t pos;

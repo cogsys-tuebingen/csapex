@@ -10,6 +10,8 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/model/node_runner.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -19,6 +21,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteThread)
 
 
 DeleteThread::DeleteThread(int thread_id)
@@ -61,3 +65,20 @@ bool DeleteThread::doRedo()
     return doExecute();
 }
 
+
+
+void DeleteThread::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << id;
+    data << name;
+}
+
+void DeleteThread::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> id;
+    data >> name;
+}

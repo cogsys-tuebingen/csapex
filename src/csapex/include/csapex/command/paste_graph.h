@@ -28,15 +28,27 @@ public:
 
     std::unordered_map<UUID, UUID, UUID::Hasher> getMapping() const;
 
+    virtual std::string getDescription() const override;
+
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
+    std::string getType() const override
+    {
+        return typeName();
+    }
+    static std::string typeName()
+    {
+        return type2nameWithoutNamespace(typeid(PasteGraph));
+    }
+
 protected:
     bool doExecute() override;
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual std::string getDescription() const override;
-
 protected:
-    Snippet blueprint_;
+    SnippetPtr blueprint_;
     Point pos_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> id_mapping_;

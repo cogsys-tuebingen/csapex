@@ -6,12 +6,16 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/connection.h>
 #include <csapex/model/fulcrum.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteFulcrum)
 
 DeleteFulcrum::DeleteFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id)
     : CommandImplementation(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id)
@@ -47,4 +51,26 @@ bool DeleteFulcrum::doRedo()
     return doExecute();
 }
 
+void DeleteFulcrum::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
 
+    data << connection_id;
+    data << fulcrum_id;
+    data << pos.x << pos.y;
+    data << in.x << in.y;
+    data << out.x << out.y;
+    data << type;
+}
+
+void DeleteFulcrum::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> connection_id;
+    data >> fulcrum_id;
+    data >> pos.x >> pos.y;
+    data >> in.x >> in.y;
+    data >> out.x >> out.y;
+    data >> type;
+}

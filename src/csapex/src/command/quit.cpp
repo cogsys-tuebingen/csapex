@@ -57,3 +57,14 @@ bool Quit::doRedo()
 {
     return doExecute();
 }
+
+void Quit::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+}
+void Quit::deserialize(SerializationBuffer& data)
+{
+    Command::serialize(data);
+
+}

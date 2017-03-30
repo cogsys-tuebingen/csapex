@@ -6,6 +6,8 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -15,6 +17,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(FlipSides)
 
 FlipSides::FlipSides(const AUUID& parent_uuid, const UUID &node)
     : CommandImplementation(parent_uuid), uuid(node)
@@ -49,3 +53,18 @@ bool FlipSides::doRedo()
     return doExecute();
 }
 
+
+
+void FlipSides::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << uuid;
+}
+
+void FlipSides::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> uuid;
+}

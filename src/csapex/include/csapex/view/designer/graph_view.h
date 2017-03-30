@@ -97,8 +97,6 @@ public:
     void drawForeground(QPainter* painter, const QRectF& rect);
     void paintEvent(QPaintEvent* e);
 
-    void nodeAdded(NodeWorkerPtr node_worker);
-    void nodeRemoved(NodeHandlePtr node_handle);
 
     void startPlacingBox(const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
     void startCloningSelection(NodeBox *handle, const QPoint &offset = QPoint(0,0));
@@ -116,6 +114,9 @@ Q_SIGNALS:
     void boxAdded(NodeBox* box);
     void boxRemoved(NodeBox* box);
 
+    void nodeWorkerAdded(NodeWorkerPtr worker);
+    void nodeHandleRemoved(NodeHandlePtr handle);
+
     void startProfilingRequest(NodeWorker* box);
     void stopProfilingRequest(NodeWorker *box);
 
@@ -123,6 +124,9 @@ Q_SIGNALS:
     void triggerConnectorRemoved(ConnectablePtr connector);
 
 public Q_SLOTS:
+    void nodeAdded(NodeWorkerPtr node_worker);
+    void nodeRemoved(NodeHandlePtr node_handle);
+
     void showNodeInsertDialog();
 
     void addBox(NodeBox* box);

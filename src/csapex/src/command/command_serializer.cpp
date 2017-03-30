@@ -68,8 +68,12 @@ SerializablePtr CommandSerializer::deserialize(SerializationBuffer& data)
     return CommandPtr();
 }
 
-void CommandSerializer::registerSerializer(const std::string &type, std::shared_ptr<CommandSerializerInterface> serializer)
+void CommandSerializer::registerSerializer(const std::string &name, const std::string &type, std::shared_ptr<CommandSerializerInterface> serializer)
 {
-    std::cout << "registering serializer of type " << type << std::endl;
+    auto pos = instance().serializers_.find(type);
+    if(pos != instance().serializers_.end()) {
+        std::cerr << "Cannot register command '" << name << "': more than one command serializer of type " << type << " registered!" << std::endl;
+        std::abort();
+    }
     instance().serializers_[type] = serializer;
 }

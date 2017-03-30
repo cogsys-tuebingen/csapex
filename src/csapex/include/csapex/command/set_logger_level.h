@@ -20,6 +20,9 @@ public:
 
     virtual std::string getDescription() const override;
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
 protected:
     bool doExecute() override;
     bool doUndo() override;

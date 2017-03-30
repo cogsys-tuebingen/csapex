@@ -31,14 +31,12 @@ public:
         }
     }
 
-    virtual std::string getDescription() const override;
-
     virtual bool isUndoable() const override;
+
+    virtual std::string getDescription() const override;
 
     void serialize(SerializationBuffer &data) const override;
     void deserialize(SerializationBuffer& data) override;
-
-    virtual void cloneFrom(const Command& other);
 
 protected:
     bool doExecute() override;

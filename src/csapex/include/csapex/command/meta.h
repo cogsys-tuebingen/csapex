@@ -30,6 +30,7 @@ public:
 
     void serialize(SerializationBuffer &data) const override;
     void deserialize(SerializationBuffer& data) override;
+    void cloneFrom(const Command& other) override;
 
 protected:
 

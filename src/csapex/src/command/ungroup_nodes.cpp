@@ -21,6 +21,8 @@
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/utility/assert.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -28,6 +30,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(UngroupNodes)
 
 UngroupNodes::UngroupNodes(const AUUID& parent_uuid, const UUID &uuid)
     : GroupBase(parent_uuid, "UngroupNodes"), uuid(uuid)
@@ -179,3 +183,25 @@ bool UngroupNodes::doRedo()
     return doExecute();
 }
 
+
+void UngroupNodes::serialize(SerializationBuffer &data) const
+{
+    GroupBase::serialize(data);
+
+    data << uuid;
+}
+
+void UngroupNodes::deserialize(SerializationBuffer& data)
+{
+    GroupBase::deserialize(data);
+
+    data >> uuid;
+}
+
+void UngroupNodes::cloneFrom(const Command& other)
+{
+    const UngroupNodes* instance = dynamic_cast<const UngroupNodes*>(&other);
+    if(instance) {
+        uuid = instance->uuid;
+    }
+}

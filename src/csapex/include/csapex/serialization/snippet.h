@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 #include <csapex/serialization/serialization_fwd.h>
+#include <csapex/serialization/serializable.h>
 
 /// SYSTEM
 #include <string>
@@ -19,9 +20,11 @@ class Node;
 namespace csapex
 {
 
-class Snippet
+class Snippet : public Serializable
 {
 public:
+    static const uint8_t PACKET_TYPE_ID = 128;
+
     Snippet(const std::string& serialized);
     Snippet(const YAML::Node& yaml);
     Snippet(YAML::Node&& yaml);
@@ -40,6 +43,14 @@ public:
     std::vector<TagConstPtr> getTags() const;
 
     void toYAML(YAML::Node& out) const;
+
+    virtual uint8_t getPacketType() const;
+
+    virtual std::shared_ptr<Clonable> makeEmptyClone() const;
+    virtual void serialize(SerializationBuffer &data) const;
+    virtual void deserialize(SerializationBuffer& data);
+
+    static std::shared_ptr<Snippet>  makeEmpty();
 
 private:
     mutable std::shared_ptr<YAML::Node> yaml_;

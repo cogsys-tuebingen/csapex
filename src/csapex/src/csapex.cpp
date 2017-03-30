@@ -87,8 +87,8 @@ int Main::runWithGui()
 {
     app->processEvents();
 
-    CsApexViewCoreLocal view_core(core);
-//    CsApexViewCoreRemote view_core("localhost", 12345, core);
+//    CsApexViewCoreLocal view_core(core);
+    CsApexViewCoreRemote view_core("localhost", 12345, core);
 
     CsApexWindow w(view_core);
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));

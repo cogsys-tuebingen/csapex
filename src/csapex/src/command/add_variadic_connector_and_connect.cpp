@@ -12,9 +12,13 @@
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 using namespace command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(AddVariadicConnectorAndConnect)
 
 AddVariadicConnectorAndConnect::AddVariadicConnectorAndConnect(const AUUID& graph_id, const AUUID& node,
                                                                const ConnectorType& connector_type,
@@ -61,4 +65,28 @@ bool AddVariadicConnectorAndConnect::doUndo()
 bool AddVariadicConnectorAndConnect::doRedo()
 {
     return doExecute();
+}
+
+
+
+void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data) const
+{
+    AddVariadicConnector::serialize(data);
+
+    data << target_;
+    data << move_;
+    data << external_;
+
+    data << additional_work_;
+}
+
+void AddVariadicConnectorAndConnect::deserialize(SerializationBuffer& data)
+{
+    AddVariadicConnector::deserialize(data);
+
+    data >> target_;
+    data >> move_;
+    data >> external_;
+
+    data >> additional_work_;
 }

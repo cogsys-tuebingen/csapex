@@ -21,6 +21,19 @@ class CSAPEX_COMMAND_EXPORT DeleteNode : public Meta
 public:
     DeleteNode(const AUUID &graph_uuid, const UUID &uuid);
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
+
+    std::string getType() const override
+    {
+        return typeName();
+    }
+    static std::string typeName()
+    {
+        return type2nameWithoutNamespace(typeid(DeleteNode));
+    }
+
 protected:
     bool doExecute() override;
     bool doUndo() override;

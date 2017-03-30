@@ -24,13 +24,15 @@ public:
     void setLabel(const std::string& label);
     void setOptional(bool optional);
 
+    virtual std::string getDescription() const override;
+
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
 protected:
     bool doExecute() override;
     bool doUndo() override;
     bool doRedo() override;
-
-    virtual std::string getDescription() const override;
-
 
 private:
     ConnectorType connector_type;

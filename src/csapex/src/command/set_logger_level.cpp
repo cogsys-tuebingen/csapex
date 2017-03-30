@@ -6,6 +6,8 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -15,6 +17,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(SetLoggerLevel)
 
 SetLoggerLevel::SetLoggerLevel(const AUUID& parent_uuid, const UUID &node, int level)
     : CommandImplementation(parent_uuid), uuid(node), level(level)
@@ -73,3 +77,22 @@ bool SetLoggerLevel::doRedo()
     return doExecute();
 }
 
+
+
+void SetLoggerLevel::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << uuid;
+    data << was_level;
+    data << level;
+}
+
+void SetLoggerLevel::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> uuid;
+    data >> was_level;
+    data >> level;
+}

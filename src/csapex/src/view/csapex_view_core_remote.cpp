@@ -46,6 +46,7 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get());
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);
 
+    drag_io = std::make_shared<DragIO>(core_tmp->getPluginLocator(), dispatcher_.get());
 
     //    dispatcher_ = core_tmp_->getCommandDispatcher();
     node_factory_ = core_tmp_->getNodeFactory();
@@ -57,6 +58,9 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     observe(session_->broadcast_received, [this](BroadcastMessageConstPtr packet){
         handleBroadcast(packet);
     });
+
+    MessageRendererManager::instance().setPluginLocator(getPluginLocator());
+    node_adapter_factory_->loadPlugins();
 
     running = true;
     spinner = std::thread([&](){

@@ -10,6 +10,8 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/model/node_runner.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -19,6 +21,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(SwitchThread)
 
 SwitchThread::SwitchThread(const AUUID& parent_uuid, const UUID &node, int thread_id)
     : CommandImplementation(parent_uuid), uuid(node), old_id(-1), id(thread_id)
@@ -65,3 +69,23 @@ bool SwitchThread::doRedo()
     return doExecute();
 }
 
+
+void SwitchThread::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << uuid;
+    data << old_id;
+    data << id;
+    data << name;
+}
+
+void SwitchThread::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> uuid;
+    data >> old_id;
+    data >> id;
+    data >> name;
+}

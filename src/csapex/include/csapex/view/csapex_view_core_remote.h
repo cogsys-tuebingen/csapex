@@ -37,18 +37,18 @@ public:
     void setSteppingMode(bool stepping) override;
     void step() override;
 
-    Settings& getSettings() const override;
+    Settings& getSettings() const override;    
+    CommandExecutorPtr getCommandDispatcher() override;
 
-    // TODO: add proxies or remove
-    ExceptionHandler& getExceptionHandler() const override;
-    GraphFacadePtr getRoot() override;
     void shutdown() override;
     void clearBlock() override;
     void resetActivity() override;
 
-    ThreadPoolPtr getThreadPool() override;
+    // TODO: add proxies or remove
+    ExceptionHandler& getExceptionHandler() const override;
+    GraphFacadePtr getRoot() override;
 
-    CommandExecutorPtr getCommandDispatcher() override;
+    ThreadPoolPtr getThreadPool() override;
 
     PluginLocatorPtr getPluginLocator() const override;
     NodeFactoryPtr getNodeFactory() const override;

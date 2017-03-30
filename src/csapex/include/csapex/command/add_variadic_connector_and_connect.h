@@ -21,6 +21,18 @@ public:
     AddVariadicConnectorAndConnect(const AUUID &graph_id, const AUUID &node, const ConnectorType &connector_type, const TokenDataConstPtr& type, const std::string& label,
                                    const UUID &target, bool move, bool external);
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
+    std::string getType() const override
+    {
+        return typeName();
+    }
+    static std::string typeName()
+    {
+        return type2nameWithoutNamespace(typeid(AddVariadicConnectorAndConnect));
+    }
+
 protected:
     bool doExecute() override;
     bool doUndo() override;

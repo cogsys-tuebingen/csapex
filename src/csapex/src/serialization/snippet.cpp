@@ -3,12 +3,16 @@
 
 /// PROJECT
 #include <csapex/model/tag.h>
+#include <csapex/serialization/packet_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
 using namespace csapex;
+
+CREATE_DEFAULT_SERIALIZER(Snippet);
 
 Snippet::Snippet(const std::string &serialized)
     : yaml_(std::make_shared<YAML::Node>(YAML::Load(serialized)))
@@ -116,4 +120,36 @@ Snippet Snippet::load(const std::string &file)
     }
 
     return res;
+}
+
+uint8_t Snippet::getPacketType() const
+{
+    return PACKET_TYPE_ID;
+}
+
+
+void Snippet::serialize(SerializationBuffer &data) const
+{
+    data << *yaml_;
+    data << name_;
+    data << description_;
+    data << tags_;
+}
+void Snippet::deserialize(SerializationBuffer& data)
+{
+    yaml_.reset(new YAML::Node);
+    data >> *yaml_;
+    data >> name_;
+    data >> description_;
+    data >> tags_;
+}
+
+std::shared_ptr<Clonable> Snippet::makeEmptyClone() const
+{
+    return makeEmpty();
+}
+
+std::shared_ptr<Snippet> Snippet::makeEmpty()
+{
+    return std::make_shared<Snippet>();
 }

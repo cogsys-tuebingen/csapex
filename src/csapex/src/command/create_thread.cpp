@@ -10,6 +10,8 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/model/node_runner.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -19,6 +21,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(CreateThread)
 
 
 CreateThread::CreateThread(const AUUID& parent_uuid, const UUID &node, const std::string& name)
@@ -87,3 +91,24 @@ bool CreateThread::doRedo()
     }
 }
 
+
+
+void CreateThread::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << uuid;
+    data << name;
+    data << old_id;
+    data << new_id;
+}
+
+void CreateThread::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> uuid;
+    data >> name;
+    data >> old_id;
+    data >> new_id;
+}

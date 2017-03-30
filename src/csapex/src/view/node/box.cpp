@@ -807,7 +807,9 @@ void NodeBox::keyPressEvent(QKeyEvent *)
 void NodeBox::stop()
 {
     QObject::disconnect(this);
-    adapter_->stop();
+    if(adapter_) {
+        adapter_->stop();
+    }
 }
 
 void NodeBox::getInformation()

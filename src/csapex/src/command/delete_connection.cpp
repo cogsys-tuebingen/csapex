@@ -10,9 +10,13 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/msg/direct_connection.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteConnection)
 
 DeleteConnection::DeleteConnection(const AUUID &parent_uuid, Connectable* a, Connectable* b)
     : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
@@ -82,4 +86,27 @@ bool DeleteConnection::doUndo()
 bool DeleteConnection::doRedo()
 {
     return doExecute();
+}
+
+
+void DeleteConnection::serialize(SerializationBuffer &data) const
+{
+    Meta::serialize(data);
+
+    data << connection_id;
+    data << active_;
+
+    data << from_uuid;
+    data << to_uuid;
+}
+
+void DeleteConnection::deserialize(SerializationBuffer& data)
+{
+    Meta::deserialize(data);
+
+    data >> connection_id;
+    data >>active_;
+
+    data >> from_uuid;
+    data >> to_uuid;
 }

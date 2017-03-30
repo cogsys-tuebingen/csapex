@@ -13,12 +13,17 @@
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/command_factory.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/snippet.h>
 
 using namespace csapex;
 using namespace csapex::command;
 
+CSAPEX_REGISTER_COMMAND_SERIALIZER(PasteGraph)
+
 PasteGraph::PasteGraph(const AUUID &graph_id, const Snippet &blueprint, const Point& pos)
-    : Meta(graph_id, "PasteGraph"), blueprint_(blueprint), pos_(pos)
+    : Meta(graph_id, "PasteGraph"), blueprint_(std::make_shared<Snippet>(blueprint)), pos_(pos)
 {
 }
 std::string PasteGraph::getDescription() const
@@ -36,7 +41,7 @@ bool PasteGraph::doExecute()
 
     GraphIO io(graph, getNodeFactory());
 
-    id_mapping_ = io.loadIntoGraph(blueprint_, pos_);
+    id_mapping_ = io.loadIntoGraph(*blueprint_, pos_);
 
     graph_facade->pauseRequest(paused);
 
@@ -78,4 +83,21 @@ bool PasteGraph::doRedo()
 std::unordered_map<UUID, UUID, UUID::Hasher> PasteGraph::getMapping() const
 {
     return id_mapping_;
+}
+
+
+void PasteGraph::serialize(SerializationBuffer &data) const
+{
+    Meta::serialize(data);
+
+    data << blueprint_;
+    data << pos_.x << pos_.y;
+}
+
+void PasteGraph::deserialize(SerializationBuffer& data)
+{
+    Meta::deserialize(data);
+
+    data >> blueprint_;
+    data >> pos_.x >> pos_.y;
 }

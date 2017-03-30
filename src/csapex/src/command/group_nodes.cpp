@@ -18,12 +18,16 @@
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/utility/assert.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(GroupNodes)
 
 GroupNodes::GroupNodes(const AUUID& parent_uuid, const std::vector<UUID> &uuids)
     : GroupBase(parent_uuid, "GroupNodes"), uuids(uuids)
@@ -257,3 +261,30 @@ bool GroupNodes::doRedo()
     return doExecute();
 }
 
+
+
+void GroupNodes::serialize(SerializationBuffer &data) const
+{
+    GroupBase::serialize(data);
+
+    data << uuids;
+    data << sub_graph_uuid_;
+}
+
+void GroupNodes::deserialize(SerializationBuffer& data)
+{
+    GroupBase::deserialize(data);
+
+    data >> uuids;
+    data >> sub_graph_uuid_;
+}
+
+
+void GroupNodes::cloneFrom(const Command& other)
+{
+    const GroupNodes* instance = dynamic_cast<const GroupNodes*>(&other);
+    if(instance) {
+        uuids = instance->uuids;
+        sub_graph_uuid_ = instance->sub_graph_uuid_;
+    }
+}

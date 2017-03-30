@@ -3,10 +3,19 @@
 
 /// COMPONENT
 #include <csapex/utility/assert.h>
+#include <csapex/serialization/packet_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 
+CREATE_DEFAULT_SERIALIZER(Tag);
+
 Tag::Manager::Manager()
+{
+
+}
+
+Tag::Tag()
 {
 
 }
@@ -81,4 +90,30 @@ int Tag::compare(const Tag &tag) const
 bool Tag::operator < (const Tag& tag) const
 {
     return name_ < tag.getName();
+}
+
+
+uint8_t Tag::getPacketType() const
+{
+    return PACKET_TYPE_ID;
+}
+
+
+void Tag::serialize(SerializationBuffer &data) const
+{
+    data << name_;
+}
+void Tag::deserialize(SerializationBuffer& data)
+{
+    data >> name_;
+}
+
+std::shared_ptr<Clonable> Tag::makeEmptyClone() const
+{
+    return makeEmpty();
+}
+
+Tag::Ptr Tag::makeEmpty()
+{
+    return Ptr{new Tag};
 }

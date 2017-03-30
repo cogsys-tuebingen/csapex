@@ -17,6 +17,9 @@ class CSAPEX_COMMAND_EXPORT DeleteFulcrum : public CommandImplementation<DeleteF
 public:
     DeleteFulcrum(const AUUID &graph_uuid, int connection_id, int fulcrum_id);
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
 protected:
     bool doExecute() override;
     bool doUndo() override;

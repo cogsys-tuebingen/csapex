@@ -54,7 +54,7 @@ NodeRunner::~NodeRunner()
     stopObserving();
 
     if(scheduler_) {
-        //        detach();
+        detach();
     }
 
     guard_ = 0xDEADBEEF;

@@ -17,12 +17,15 @@ class CSAPEX_COMMAND_EXPORT DisableNode : public CommandImplementation<DisableNo
 public:
     DisableNode(const AUUID &graph_uuid, const UUID &uuid, bool disable = true);
 
-protected:
+public:
     bool doExecute() override;
     bool doUndo() override;
     bool doRedo() override;
 
     virtual std::string getDescription() const override;
+
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
 
 protected:
     UUID uuid;

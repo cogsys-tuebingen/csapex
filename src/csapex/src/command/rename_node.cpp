@@ -6,6 +6,8 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -15,6 +17,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(RenameNode)
 
 RenameNode::RenameNode(const AUUID& parent_uuid, const UUID &node, const std::string& new_name)
     : CommandImplementation(parent_uuid), uuid(node), new_name_(new_name)
@@ -57,3 +61,23 @@ bool RenameNode::doRedo()
     return doExecute();
 }
 
+
+
+
+void RenameNode::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << uuid;
+    data << new_name_;
+    data << old_name_;
+}
+
+void RenameNode::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> uuid;
+    data >> new_name_;
+    data >> old_name_;
+}

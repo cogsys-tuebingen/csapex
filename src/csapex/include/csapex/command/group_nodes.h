@@ -20,8 +20,20 @@ class CSAPEX_COMMAND_EXPORT GroupNodes : public GroupBase
 public:
     GroupNodes(const AUUID &graph_uuid, const std::vector<UUID>& nodes);
 
-    virtual std::string getDescription() const override;
+    virtual std::string getDescription() const override;    
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+    void cloneFrom(const Command& other) override;
+
+    std::string getType() const override
+    {
+        return typeName();
+    }
+    static std::string typeName()
+    {
+        return type2nameWithoutNamespace(typeid(GroupNodes));
+    }
 
 protected:
     bool doExecute() override;

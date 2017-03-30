@@ -11,17 +11,6 @@ namespace csapex
 template <typename I>
 class CommandImplementation : public Command
 {
-public:
-    void serialize(SerializationBuffer &/*data*/) const override
-    {
-        // by default, no need for serialization
-    }
-
-    void deserialize(SerializationBuffer& /*data*/) override
-    {
-        // by default, no need for serialization
-    }
-
 protected:
     CommandImplementation(const AUUID& graph_uuid)
         : Command(graph_uuid)
@@ -42,6 +31,16 @@ protected:
     {
         return typeName();
     }
+
+protected:
+    void cloneFrom(const Command& other) override
+    {
+        const I* instance = dynamic_cast<const I*>(&other);
+        if(instance) {
+            *this = *instance;
+        }
+    }
+
 public:
     static std::string typeName()
     {

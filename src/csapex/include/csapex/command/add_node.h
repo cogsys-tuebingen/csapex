@@ -19,6 +19,9 @@ class CSAPEX_COMMAND_EXPORT AddNode : public CommandImplementation<AddNode>
 public:
     AddNode(const AUUID &graph_uuid, const std::string& type, Point pos, const UUID& uuid_, NodeStatePtr state);
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
 protected:
     bool doExecute() override;
     bool doUndo() override;

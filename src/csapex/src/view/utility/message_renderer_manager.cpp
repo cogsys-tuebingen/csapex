@@ -20,6 +20,7 @@ MessageRendererManager::~MessageRendererManager()
 
 void MessageRendererManager::setPluginLocator(PluginLocatorPtr locator)
 {
+    apex_assert_hard(locator);
     plugin_locator_ = locator;
 }
 
@@ -35,6 +36,7 @@ void MessageRendererManager::loadPlugins()
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     apex_assert_hard(manager_);
+    apex_assert_hard(plugin_locator_);
 
     if(!manager_->pluginsLoaded()) {
         manager_->load(plugin_locator_.get());

@@ -6,6 +6,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/csapex_core.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 
@@ -164,12 +165,12 @@ uint8_t Command::getPacketType() const
 
 void Command::serialize(SerializationBuffer &data) const
 {
-    throw std::runtime_error("command is not serializable");
+    data << graph_uuid;
 }
 
 void Command::deserialize(SerializationBuffer& data)
 {
-    throw std::runtime_error("command is not serializable");
+    data >> graph_uuid;
 }
 
 std::shared_ptr<Clonable> Command::cloneRaw() const
@@ -177,9 +178,4 @@ std::shared_ptr<Clonable> Command::cloneRaw() const
     auto res = std::dynamic_pointer_cast<Command>(makeEmptyClone());
     res->cloneFrom(*this);
     return res;
-}
-
-void Command::cloneFrom(const Command& other)
-{
-
 }

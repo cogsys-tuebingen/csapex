@@ -5,6 +5,8 @@
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/connectable.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -14,6 +16,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(RenameConnector)
 
 RenameConnector::RenameConnector(const AUUID& parent_uuid, const UUID &connector, const std::string& new_name)
     : CommandImplementation(parent_uuid), uuid(connector), new_name_(new_name)
@@ -53,3 +57,22 @@ bool RenameConnector::doRedo()
     return doExecute();
 }
 
+
+
+void RenameConnector::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << uuid;
+    data << new_name_;
+    data << old_name_;
+}
+
+void RenameConnector::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> uuid;
+    data >> new_name_;
+    data >> old_name_;
+}

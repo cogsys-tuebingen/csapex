@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <inttypes.h>
+#include <iostream>
 
 namespace csapex
 {
@@ -27,7 +28,7 @@ public:
     void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override;
     SerializablePtr deserialize(SerializationBuffer &data) override;
 
-    static void registerSerializer(const std::string& type, std::shared_ptr<CommandSerializerInterface> serializer);
+    static void registerSerializer(const std::string &name, const std::string& type, std::shared_ptr<CommandSerializerInterface> serializer);
 
 private:
     std::map<std::string, std::shared_ptr<CommandSerializerInterface>> serializers_;
@@ -36,8 +37,8 @@ private:
 template <typename S>
 struct CommandSerializerRegistered
 {
-    CommandSerializerRegistered(const std::string& type) {
-        CommandSerializer::registerSerializer(type, std::make_shared<S>());
+    CommandSerializerRegistered(const std::string& name, const std::string& type) {
+        CommandSerializer::registerSerializer(name, type, std::make_shared<S>());
     }
 };
 }
@@ -65,7 +66,7 @@ struct CommandSerializerRegistered
         }\
     };\
     }\
-    CommandSerializerRegistered<Name##Serializer> g_CSAPEX_REGISTER_COMMAND_SERIALIZER_##Name##_(Name::typeName());\
+    CommandSerializerRegistered<Name##Serializer> g_CSAPEX_REGISTER_COMMAND_SERIALIZER_##Name##_(#Name, Name::typeName());\
     }
 
 #endif // COMMAND_SERIALIZER_H

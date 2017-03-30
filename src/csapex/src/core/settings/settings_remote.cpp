@@ -112,14 +112,15 @@ csapex::param::Parameter::Ptr SettingsRemote::getNoThrow(const std::string &name
 
 void SettingsRemote::createParameterProxy(const std::string &name, param::ParameterPtr proxy) const
 {
-    proxy->parameter_changed.connect([this](param::Parameter* param){
+    SettingsRemote* self = const_cast<SettingsRemote*>(this);
+    proxy->parameter_changed.connect([self](param::Parameter* param){
         // request to set the parameter
         boost::any raw;
         param->get_unsafe(raw);
         CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
-        session_->write(change);
+        self->session_->write(change);
 
-        settingsChanged(param->name());
+        self->settingsChanged(param->name());
     });
 
     cache_[name] = proxy;

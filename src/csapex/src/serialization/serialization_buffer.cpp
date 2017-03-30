@@ -5,6 +5,9 @@
 #include <csapex/serialization/serializable.h>
 #include <csapex/serialization/packet_serializer.h>
 
+/// SYSTEM
+#include <yaml-cpp/yaml.h>
+
 using namespace csapex;
 
 void SerializationBuffer::write(const SerializableConstPtr &i)
@@ -302,5 +305,22 @@ SerializationBuffer& SerializationBuffer::operator >> (UUID& s)
     std::string full_name;
     operator >> (full_name);
     s = UUIDProvider::makeUUID_without_parent(full_name);
+    return *this;
+}
+
+// YAML
+SerializationBuffer& SerializationBuffer::operator << (const YAML::Node& node)
+{
+    std::stringstream ss;
+    ss << node;
+    operator << (ss);
+    return *this;
+}
+
+SerializationBuffer& SerializationBuffer::operator >> (YAML::Node& node)
+{
+    std::stringstream ss;
+    operator >> (ss);
+    node = YAML::Load(ss);
     return *this;
 }

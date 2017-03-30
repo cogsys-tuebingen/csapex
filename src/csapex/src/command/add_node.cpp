@@ -12,9 +12,13 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(AddNode)
 
 AddNode::AddNode(const AUUID &parent_uuid, const std::string &type, Point pos, const UUID& uuid, NodeState::Ptr state)
     : CommandImplementation(parent_uuid), type_(type), pos_(pos), uuid_(uuid)
@@ -75,4 +79,23 @@ bool AddNode::doRedo()
     }
 
     return false;
+}
+
+
+void AddNode::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << type_;
+    data << pos_.x << pos_.y;
+    data << uuid_;
+}
+
+void AddNode::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> type_;
+    data >> pos_.x >> pos_.y;
+    data >> uuid_;
 }

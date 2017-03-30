@@ -14,11 +14,15 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
 #include <csapex/core/graphio.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteNode)
 
 DeleteNode::DeleteNode(const AUUID& parent_uuid, const UUID& uuid)
     : Meta(parent_uuid, "delete node and connections"), uuid(uuid)
@@ -98,4 +102,21 @@ bool DeleteNode::doRedo()
     }
 
     return false;
+}
+
+
+void DeleteNode::serialize(SerializationBuffer &data) const
+{
+    Meta::serialize(data);
+
+    data << uuid;
+    data << type;
+}
+
+void DeleteNode::deserialize(SerializationBuffer& data)
+{
+    Meta::deserialize(data);
+
+    data >> uuid;
+    data >> type;
 }

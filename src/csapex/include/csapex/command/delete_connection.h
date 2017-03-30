@@ -18,6 +18,18 @@ class CSAPEX_COMMAND_EXPORT DeleteConnection : public Meta
 public:
     DeleteConnection(const AUUID& graph_uuid, Connectable* a, Connectable* b);
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+
+    std::string getType() const override
+    {
+        return typeName();
+    }
+    static std::string typeName()
+    {
+        return type2nameWithoutNamespace(typeid(DeleteConnection));
+    }
+
 protected:
     virtual bool doExecute() override;
     virtual bool doRedo() override;

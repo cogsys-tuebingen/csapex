@@ -61,4 +61,26 @@ struct SerializerRegistered
 
 }
 
+
+
+
+#define CREATE_DEFAULT_SERIALIZER(Name) \
+class Name##Serializer : public Singleton<Name##Serializer>, public Serializer \
+{ \
+public: \
+    void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override \
+    { \
+        if(const std::shared_ptr<Name const>& res = std::dynamic_pointer_cast<Name const>(packet)) { \
+            res->serialize(data); \
+        } \
+    } \
+    SerializablePtr deserialize(SerializationBuffer &data) override \
+    { \
+        std::shared_ptr<Name> res = Name::makeEmpty(); \
+        res->deserialize(data); \
+        return res; \
+    } \
+}; \
+SerializerRegistered<Name##Serializer> g_CSAPEX_REGISTER_##NAME##_SERIALIZER_(Name::PACKET_TYPE_ID, &Name##Serializer::instance())
+
 #endif // PACKET_SERIALIZER_H

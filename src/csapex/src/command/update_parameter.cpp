@@ -98,7 +98,7 @@ bool UpdateParameter::doExecute()
     } else if(value.type() == typeid(std::pair<std::string, bool>)) {
         setParameter(boost::any_cast<std::pair<std::string, bool>> (value));
 
-    } else {
+    } else if(!value.empty()) {
         throw std::runtime_error(std::string("unsupported type: ") + value.type().name());
     }
 
@@ -141,23 +141,17 @@ bool UpdateParameter::doRedo()
 
 void UpdateParameter::serialize(SerializationBuffer &data) const
 {
-    apex_assert_hard(!uuid.globalName().empty());
+    Command::serialize(data);
+
     data << uuid;
     data << value;
 }
 
 void UpdateParameter::deserialize(SerializationBuffer& data)
 {
+    Command::deserialize(data);
+
     data >> uuid;
     data >> value;
-    apex_assert_hard(!uuid.globalName().empty());
 }
 
-void UpdateParameter::cloneFrom(const Command& other)
-{
-    const UpdateParameter* update = dynamic_cast<const UpdateParameter*>(&other);
-    if(update) {
-        uuid = update->uuid;
-        value = update->value;
-    }
-}

@@ -10,9 +10,13 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/direct_connection.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(AddConnection)
 
 AddConnection::AddConnection(const AUUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid, bool active)
     : CommandImplementation(parent_uuid), from_uuid(from_uuid), to_uuid(to_uuid), active(active)
@@ -59,4 +63,23 @@ bool AddConnection::doExecute()
     c->setActive(active);
 
     return graph->addConnection(c);
+}
+
+
+void AddConnection::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << from_uuid;
+    data << to_uuid;
+    data << active;
+}
+
+void AddConnection::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> from_uuid;
+    data >> to_uuid;
+    data >> active;
 }

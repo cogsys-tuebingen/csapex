@@ -6,12 +6,16 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/connection.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(MoveFulcrum)
 
 MoveFulcrum::MoveFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id, const Point &from, const Point &to)
     : CommandImplementation(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id), from(from), to(to)
@@ -40,4 +44,25 @@ bool MoveFulcrum::doRedo()
 {
     getGraph()->getConnectionWithId(connection_id)->moveFulcrum(fulcrum_id, to, false);
     return doExecute();
+}
+
+
+void MoveFulcrum::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << connection_id;
+    data << fulcrum_id;
+    data << from.x << from.y;
+    data << to.x << to.y;
+}
+
+void MoveFulcrum::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> connection_id;
+    data >> fulcrum_id;
+    data >> from.x >> from.y;
+    data >> to.x >> to.y;
 }

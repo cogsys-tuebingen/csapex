@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_export.h>
+#include <csapex/serialization/serializable.h>
 
 /// SYSTEM
 #include <string>
@@ -12,10 +13,12 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT Tag
+class CSAPEX_EXPORT Tag : public Serializable
 {
 public:
     typedef std::shared_ptr<Tag> Ptr;
+
+    static const uint8_t PACKET_TYPE_ID = 129;
 
 private:
     class Manager {
@@ -49,8 +52,17 @@ public:
     int compare (const Tag& tag) const;
     bool operator < (const Tag& tag) const;
 
+    virtual uint8_t getPacketType() const;
+
+    virtual std::shared_ptr<Clonable> makeEmptyClone() const;
+    virtual void serialize(SerializationBuffer &data) const;
+    virtual void deserialize(SerializationBuffer& data);
+
+    static Ptr makeEmpty();
+
 private:
     Tag(const std::string& name);
+    Tag();
 
 private:
     std::string name_;

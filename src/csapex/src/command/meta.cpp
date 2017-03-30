@@ -125,10 +125,36 @@ bool Meta::doRedo()
 
 void Meta::serialize(SerializationBuffer &data) const
 {
+    Command::serialize(data);
+
     data << nested;
+    data << type;
+    data << locked;
+    data << transaction;
 }
 
 void Meta::deserialize(SerializationBuffer& data)
 {
+    Command::deserialize(data);
+
     data >> nested;
+    data >> type;
+    data >> locked;
+    data >> transaction;
+}
+
+void Meta::cloneFrom(const Command& other)
+{
+    const Meta* instance = dynamic_cast<const Meta*>(&other);
+    if(instance) {
+        nested.clear();
+        nested.reserve(instance->nested.size());
+        for(const CommandPtr& cmd : instance->nested) {
+            nested.emplace_back(cmd->clone<Command>());
+        }
+
+        locked = instance->locked;
+        transaction = instance->transaction;
+        type = instance->type;
+    }
 }

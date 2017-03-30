@@ -21,6 +21,19 @@ public:
 
     virtual std::string getDescription() const override;
 
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(SerializationBuffer& data) override;
+    void cloneFrom(const Command& other) override;
+
+    std::string getType() const override
+    {
+        return typeName();
+    }
+    static std::string typeName()
+    {
+        return type2nameWithoutNamespace(typeid(UngroupNodes));
+    }
+
 protected:
     void unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid);
 

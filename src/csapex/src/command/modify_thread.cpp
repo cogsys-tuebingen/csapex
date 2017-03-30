@@ -7,6 +7,8 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -16,6 +18,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(ModifyThread)
 
 ModifyThread::ModifyThread(int thread_id, const std::string &name)
     : id(thread_id), name(name)
@@ -55,3 +59,22 @@ bool ModifyThread::doRedo()
     return doExecute();
 }
 
+
+
+void ModifyThread::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << id;
+    data << name;
+    data << old_name;
+}
+
+void ModifyThread::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> id;
+    data >> name;
+    data >> old_name;
+}

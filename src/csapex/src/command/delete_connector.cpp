@@ -9,9 +9,13 @@
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 using namespace command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteConnector)
 
 DeleteConnector::DeleteConnector(const AUUID& parent_uuid, Connectable *_c)
     : CommandImplementation(parent_uuid), in(_c->canInput()), c_uuid(_c->getUUID())
@@ -66,3 +70,22 @@ bool DeleteConnector::doRedo()
 }
 
 
+
+
+void DeleteConnector::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << in;
+    data << delete_connections;
+    data << c_uuid;
+}
+
+void DeleteConnector::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> in;
+    data >> delete_connections;
+    data >> c_uuid;
+}

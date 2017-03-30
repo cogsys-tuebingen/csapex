@@ -12,11 +12,15 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node_state.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(DisableNode)
 
 DisableNode::DisableNode(const AUUID& parent_uuid, const UUID& uuid, bool disable)
     : CommandImplementation(parent_uuid), uuid(uuid), disable_(disable)
@@ -56,4 +60,21 @@ bool DisableNode::doUndo()
 bool DisableNode::doRedo()
 {
     return doExecute();
+}
+
+
+void DisableNode::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << uuid;
+    data << disable_;
+}
+
+void DisableNode::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> uuid;
+    data >> disable_;
 }

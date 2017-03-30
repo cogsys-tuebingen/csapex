@@ -6,12 +6,16 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/connection.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(ModifyConnection)
 
 ModifyConnection::ModifyConnection(const AUUID& parent_uuid, int connection_id, bool active)
     : CommandImplementation(parent_uuid), connection_id(connection_id), active(active)
@@ -44,3 +48,22 @@ bool ModifyConnection::doRedo()
     return doExecute();
 }
 
+
+
+void ModifyConnection::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << connection_id;
+    data << active;
+    data << was_active;
+}
+
+void ModifyConnection::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> connection_id;
+    data >> active;
+    data >> was_active;
+}

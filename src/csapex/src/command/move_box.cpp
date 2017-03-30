@@ -61,6 +61,8 @@ bool MoveBox::doRedo()
 
 void MoveBox::serialize(SerializationBuffer &data) const
 {
+    Command::serialize(data);
+
     data << from.x << from.y;
     data << to.x << to.y;
     data << box_uuid;
@@ -68,6 +70,8 @@ void MoveBox::serialize(SerializationBuffer &data) const
 
 void MoveBox::deserialize(SerializationBuffer& data)
 {
+    Command::deserialize(data);
+
     data >> from.x >> from.y;
     data >> to.x >> to.y;
     data >> box_uuid;

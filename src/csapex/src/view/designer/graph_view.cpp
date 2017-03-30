@@ -122,9 +122,16 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, SIGNAL(triggerConnectorRemoved(ConnectablePtr)), this, SLOT(connectorRemoved(ConnectablePtr)));
 
     qRegisterMetaType < ConnectablePtr > ("ConnectablePtr");
+    qRegisterMetaType < NodeWorkerPtr > ("NodeWorkerPtr");
+    qRegisterMetaType < NodeHandlePtr > ("NodeHandlePtr");
 
-    observe(graph_facade_->node_worker_added, [this](NodeWorkerPtr n) { nodeAdded(n); });
-    observe(graph_facade_->node_removed, [this](NodeHandlePtr n) { nodeRemoved(n); });
+
+    observe(graph_facade_->node_worker_added, [this](NodeWorkerPtr n) { nodeWorkerAdded(n); });
+    observe(graph_facade_->node_removed, [this](NodeHandlePtr n) { nodeHandleRemoved(n); });
+
+    QObject::connect(this, &GraphView::nodeWorkerAdded, this, &GraphView::nodeAdded, Qt::QueuedConnection);
+    QObject::connect(this, &GraphView::nodeHandleRemoved, this, &GraphView::nodeRemoved, Qt::QueuedConnection);
+
 
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
 

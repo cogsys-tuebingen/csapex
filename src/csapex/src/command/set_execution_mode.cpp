@@ -6,6 +6,8 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -15,6 +17,8 @@
 
 using namespace csapex;
 using namespace csapex::command;
+
+CSAPEX_REGISTER_COMMAND_SERIALIZER(SetExecutionMode)
 
 SetExecutionMode::SetExecutionMode(const AUUID& parent_uuid, const UUID &node, ExecutionMode mode)
     : CommandImplementation(parent_uuid), uuid(node), mode(mode)
@@ -67,3 +71,22 @@ bool SetExecutionMode::doRedo()
     return doExecute();
 }
 
+
+
+void SetExecutionMode::serialize(SerializationBuffer &data) const
+{
+    Command::serialize(data);
+
+    data << uuid;
+    data << was_mode;
+    data << mode;
+}
+
+void SetExecutionMode::deserialize(SerializationBuffer& data)
+{
+    Command::deserialize(data);
+
+    data >> uuid;
+    data >> was_mode;
+    data >> mode;
+}
