@@ -24,23 +24,21 @@ class CsApexViewCore;
 class CsApexWindow;
 
 
-struct CsApexCoreApp : public QCoreApplication, public AppProxy
+struct CsApexCoreApp : public QCoreApplication
 {
     CsApexCoreApp(int& argc, char** argv, ExceptionHandler& handler);
 
     virtual bool notify(QObject* receiver, QEvent* event) override;
-    virtual bool doNotify(QObject* receiver, QEvent* event) override;
 
 private:
     ExceptionHandler& handler;
 };
 
-struct CsApexGuiApp : public QApplication, public AppProxy
+struct CsApexGuiApp : public QApplication
 {
     CsApexGuiApp(int& argc, char** argv, ExceptionHandler& handler);
 
     virtual bool notify(QObject* receiver, QEvent* event) override;
-    virtual bool doNotify(QObject* receiver, QEvent* event) override;
 
     void handleAssertionFailure(const csapex::Failure& assertion);
 

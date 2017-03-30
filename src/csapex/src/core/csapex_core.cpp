@@ -95,7 +95,9 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
 
     observe(settings.settings_changed, std::bind(&CsApexCore::settingsChanged, this));
 
-    exception_handler_.setCore(this);
+    observe(exception_handler_.assertion_failed, [this](){
+        setPause(true);
+    });
 
     settings_.save_request.connect([this](YAML::Node& n){ thread_pool_->saveSettings(n); });
     settings_.load_request.connect([this](YAML::Node& n){ thread_pool_->loadSettings(n); });

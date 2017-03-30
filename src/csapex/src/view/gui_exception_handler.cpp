@@ -26,11 +26,6 @@ GuiExceptionHandler::~GuiExceptionHandler()
     delete last_failure_;
 }
 
-bool GuiExceptionHandler::notifyImpl(AppProxy* app, QObject *receiver, QEvent *event)
-{
-    return ExceptionHandler::notifyImpl(app, receiver, event);
-}
-
 void GuiExceptionHandler::handleAssertionFailure(const Failure &failure)
 {
     pause();

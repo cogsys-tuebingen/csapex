@@ -45,21 +45,26 @@ CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, ExceptionHandler &handler)
     : QCoreApplication(argc, argv), handler(handler)
 {}
 
-bool CsApexGuiApp::doNotify(QObject* receiver, QEvent* event)
-{
-    return QApplication::notify(receiver, event);
-}
-
-bool CsApexCoreApp::doNotify(QObject *receiver, QEvent *event)
-{
-    return QCoreApplication::notify(receiver, event);
-}
-
 bool CsApexCoreApp::notify(QObject* receiver, QEvent* event) {
-    return handler.notifyImpl(this, receiver, event);
+    try {
+        return QCoreApplication::notify(receiver, event);
+
+    } catch(...) {
+        std::exception_ptr eptr = std::current_exception();
+        handler.handleException(eptr);
+        return true;
+    }
 }
+
 bool CsApexGuiApp::notify(QObject* receiver, QEvent* event) {
-    return handler.notifyImpl(this, receiver, event);
+    try {
+        return QApplication::notify(receiver, event);
+
+    } catch(...) {
+        std::exception_ptr eptr = std::current_exception();
+        handler.handleException(eptr);
+        return true;
+    }
 }
 
 

@@ -16,6 +16,7 @@
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/serialization/packet_serializer.h>
+#include <csapex/view/gui_exception_handler.h>
 
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -37,6 +38,8 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
       resolver(io_service),
       resolver_iterator(boost::asio::connect(socket, resolver.resolve({ip, std::to_string(port)}))),
       session_(std::make_shared<Session>(std::move(socket))),
+      exception_handler_(std::make_shared<GuiExceptionHandler>(false)),
+
       core_tmp_(core_tmp)
 {
     session_->start();
@@ -117,7 +120,7 @@ std::shared_ptr<DragIO> CsApexViewCoreRemote::getDragIO()
 /// PROXIES
 ExceptionHandler& CsApexViewCoreRemote::getExceptionHandler() const
 {
-    return core_tmp_->getExceptionHandler();
+    return *exception_handler_;
 }
 
 

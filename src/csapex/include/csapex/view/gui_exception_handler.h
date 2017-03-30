@@ -28,7 +28,6 @@ private Q_SLOTS:
     void showErrorDialog();
 
 protected:
-    virtual bool notifyImpl(AppProxy* app, QObject* receiver, QEvent* event) override;
     virtual void handleAssertionFailure(const csapex::Failure& assertion) override;
 
 private:

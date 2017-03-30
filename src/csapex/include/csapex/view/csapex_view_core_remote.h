@@ -4,6 +4,8 @@
 /// COMPONENT
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/core/settings/settings_remote.h>
+
+/// SYSTEM
 #include <boost/asio.hpp>
 #include <thread>
 
@@ -39,13 +41,13 @@ public:
 
     Settings& getSettings() const override;    
     CommandExecutorPtr getCommandDispatcher() override;
+    ExceptionHandler& getExceptionHandler() const override;
 
     void shutdown() override;
     void clearBlock() override;
     void resetActivity() override;
 
     // TODO: add proxies or remove
-    ExceptionHandler& getExceptionHandler() const override;
     GraphFacadePtr getRoot() override;
 
     ThreadPoolPtr getThreadPool() override;
@@ -86,7 +88,7 @@ private:
     bool running;
     std::thread spinner;
 
-//    ExceptionHandler &exception_handler_;
+    std::shared_ptr<ExceptionHandler> exception_handler_;
 
     // TODO: remove
     CsApexCorePtr core_tmp_;

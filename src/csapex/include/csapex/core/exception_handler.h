@@ -2,17 +2,9 @@
 #define EXCEPTION_HANDLER_H
 
 /// PROJECT
-#include <csapex/core/core_fwd.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/csapex_export.h>
-
-class QObject;
-class QEvent;
-
-struct CSAPEX_EXPORT AppProxy
-{
-    virtual bool doNotify(QObject* receiver, QEvent* event) = 0;
-};
+#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
@@ -24,18 +16,17 @@ public:
     virtual ~ExceptionHandler();
 
 
-    void setCore(csapex::CsApexCore* core);
-
-    virtual bool notifyImpl(AppProxy* app, QObject* receiver, QEvent* event);
+    virtual bool handleException(std::exception_ptr eptr);
     virtual void handleAssertionFailure(const csapex::Failure& assertion);
+
+public:
+    slim_signal::Signal<void()> assertion_failed;
 
 protected:
     void pause();
 
 protected:
     bool fatal_exceptions_;
-
-    csapex::CsApexCore* core_;
 };
 }
 

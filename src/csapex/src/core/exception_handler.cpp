@@ -10,7 +10,7 @@
 using namespace csapex;
 
 ExceptionHandler::ExceptionHandler(bool fatal_exceptions)
-    : fatal_exceptions_(fatal_exceptions), core_(nullptr)
+    : fatal_exceptions_(fatal_exceptions)
 {
 
 }
@@ -22,20 +22,16 @@ ExceptionHandler::~ExceptionHandler()
 
 void ExceptionHandler::pause()
 {
-    if(core_) {
-        core_->setPause(true);
-    }
+    assertion_failed();
 }
 
-void ExceptionHandler::setCore(CsApexCore *core)
-{
-    core_ = core;
-}
 
-bool ExceptionHandler::notifyImpl(AppProxy* app, QObject *receiver, QEvent *event)
+bool ExceptionHandler::handleException(std::exception_ptr eptr)
 {
     try {
-        return app->doNotify(receiver, event);
+        if (eptr) {
+            std::rethrow_exception(eptr);
+        }
 
     } catch(const std::exception& e) {
         if(fatal_exceptions_) {
