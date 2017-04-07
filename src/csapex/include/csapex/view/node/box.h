@@ -4,11 +4,12 @@
 /// COMPONENT
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/msg/msg_fwd.h>
 #include <csapex/model/memento.h>
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/error_state.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/utility/create_connector_request.h>
 #include <csapex/view/csapex_qt_export.h>
@@ -51,11 +52,11 @@ public:
 public:
     /// CONSTRUCTION
     NodeBox(Settings& settings,
-            NodeHandlePtr handle, NodeWorkerPtr worker,
+            NodeFacadePtr node_facade_,
             QIcon icon, GraphView* parent = 0);
-    NodeBox(Settings& settings,
-            NodeHandlePtr handle,
-            QIcon icon, GraphView* parent = 0);
+//    NodeBox(Settings& settings,
+//            NodeHandlePtr handle,
+//            QIcon icon, GraphView* parent = 0);
 
     void setAdapter(NodeAdapterPtr adapter);
 
@@ -185,8 +186,7 @@ protected:
 
     Settings& settings_;
 
-    NodeHandleWeakPtr node_handle_;
-    NodeWorkerWeakPtr node_worker_;
+    NodeFacadePtr node_facade_;
     NodeAdapterPtr adapter_;
 
     std::unordered_map<UUID, Port*, UUID::Hasher> port_map_;

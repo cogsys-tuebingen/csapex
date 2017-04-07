@@ -24,11 +24,7 @@ public:
 
 public:
     NoteBox(Settings& settings,
-            NodeHandlePtr handle, NodeWorkerPtr worker,
-            QIcon icon, GraphView* parent = 0);
-
-    NoteBox(Settings& settings,
-            NodeHandlePtr handle,
+            NodeFacadePtr node_facade_,
             QIcon icon, GraphView* parent = 0);
 
     ~NoteBox();

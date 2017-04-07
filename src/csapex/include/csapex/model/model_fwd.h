@@ -20,6 +20,7 @@ FWD(Vertex);
 FWD(Edge);
 }
 
+FWD(NodeFacade);
 FWD(NodeHandle);
 FWD(NodeConstructor);
 FWD(NodeStatistics);

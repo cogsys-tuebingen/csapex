@@ -59,6 +59,7 @@
 #include <csapex/view/widgets/rewiring_dialog.h>
 #include <csapex/csapex_mime.h>
 #include <csapex/plugin/plugin_locator.h>
+#include <csapex/model/node_facade.h>
 
 /// SYSTEM
 #include <iostream>
@@ -741,15 +742,17 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
     bool is_note = type == "csapex::Note";
 
+    NodeFacadePtr node_facade = std::make_shared<NodeFacade>(handle);
+
     if(is_note) {
-        box = new NoteBox(view_core_.getSettings(), handle,
+        box = new NoteBox(view_core_.getSettings(), node_facade,
                           QIcon(QString::fromStdString(c->getIcon())));
 
     } else {
-        box = new NodeBox(view_core_.getSettings(), handle,
+        box = new NodeBox(view_core_.getSettings(), node_facade,
                           QIcon(QString::fromStdString(c->getIcon())));
     }
-    box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));
+    box->setAdapter(std::make_shared<DefaultNodeAdapter>(node_facade->getNodeHandle(), box));
 
     if(state) {
         handle->setNodeState(state);
@@ -772,16 +775,20 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
 void GraphView::nodeAdded(NodeWorkerPtr node_worker)
 {
+    // TODO: already pass node facade
     NodeHandlePtr node_handle = node_worker->getNodeHandle();
     std::string type = node_handle->getType();
 
     QIcon icon = QIcon(QString::fromStdString(view_core_.getNodeFactory()->getConstructor(type)->getIcon()));
 
     NodeBox* box = nullptr;
+
+    NodeFacadePtr node_facade = std::make_shared<NodeFacade>(node_handle, node_worker);
+
     if(type == "csapex::Note") {
-        box = new NoteBox(view_core_.getSettings(), node_handle, node_worker, icon, this);
+        box = new NoteBox(view_core_.getSettings(), node_facade, icon, this);
     } else {
-        box = new NodeBox(view_core_.getSettings(), node_handle, node_worker, icon, this);
+        box = new NodeBox(view_core_.getSettings(), node_facade, icon, this);
     }
 
 
@@ -1516,12 +1523,14 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
 
     bool is_note = type == "csapex::Note";
 
+    NodeFacadePtr node_facade = std::make_shared<NodeFacade>(handle);
+
     if(is_note) {
-        box = new NoteBox(view_core_.getSettings(), handle,
+        box = new NoteBox(view_core_.getSettings(), node_facade,
                           QIcon(QString::fromStdString(c->getIcon())));
 
     } else {
-        box = new NodeBox(view_core_.getSettings(), handle,
+        box = new NodeBox(view_core_.getSettings(), node_facade,
                           QIcon(QString::fromStdString(c->getIcon())));
     }
     box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));

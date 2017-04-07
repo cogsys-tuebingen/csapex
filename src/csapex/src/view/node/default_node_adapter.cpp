@@ -136,13 +136,17 @@ DefaultNodeAdapter::DefaultNodeAdapter(NodeHandleWeakPtr adaptee, NodeBox* paren
 DefaultNodeAdapter::~DefaultNodeAdapter()
 {
     clear();
+    delete wrapper_layout_;
+    wrapper_layout_ = nullptr;
 }
 
 void DefaultNodeAdapter::clear()
 {
     bridge.disconnect();
 
-    QtHelper::clearLayout(wrapper_layout_);
+    if(wrapper_layout_) {
+        QtHelper::clearLayout(wrapper_layout_);
+    }
 
     for(QObject* cb : callbacks) {
         qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);

@@ -313,6 +313,7 @@ file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYM
 )
 
 add_library(csapex SHARED
+    src/model/node_facade.cpp
     src/model/node_handle.cpp
     src/model/node_worker.cpp
 

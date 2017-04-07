@@ -5,6 +5,7 @@
 #include <csapex/nodes/note.h>
 #include <csapex/model/node_state.h>
 #include <csapex/view/designer/graph_view.h>
+#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <QStyle>
@@ -18,17 +19,11 @@
 using namespace csapex;
 
 
-NoteBox::NoteBox(Settings &settings, NodeHandlePtr handle,
-                 NodeWorkerPtr worker, QIcon icon, GraphView *parent)
-    : NodeBox(settings, handle, worker, icon, parent)
+NoteBox::NoteBox(Settings &settings, NodeFacadePtr node_facade_, QIcon icon, GraphView *parent)
+    : NodeBox(settings, node_facade_, icon, parent)
 {
 }
 
-
-NoteBox::NoteBox(Settings &settings, NodeHandlePtr handle,
-                 QIcon icon, GraphView *parent)
-    : NoteBox(settings, handle, nullptr, icon, parent)
-{}
 
 NoteBox::~NoteBox()
 {
@@ -36,7 +31,7 @@ NoteBox::~NoteBox()
 
 void NoteBox::paintEvent(QPaintEvent* e)
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!adapter_) {
         return;
     }
@@ -68,7 +63,7 @@ void NoteBox::paintEvent(QPaintEvent* e)
     snap_path.addPolygon(snap);
 
     QColor col(255, 220, 100);
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(nh) {
         int r, g, b;
         nh->getNodeState()->getColor(r, g, b);
@@ -92,7 +87,7 @@ void NoteBox::paintEvent(QPaintEvent* e)
 
 void NoteBox::resizeEvent(QResizeEvent *e)
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -138,7 +133,7 @@ void NoteBox::construct()
 
 void NoteBox::init()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -155,7 +150,7 @@ void NoteBox::init()
     NodeBox::init();
 
     note->parameters_changed.connect([this](){
-        NodeHandlePtr nh = node_handle_.lock();
+        NodeHandlePtr nh = node_facade_->getNodeHandle();
         if(!nh) {
             return;
         }
@@ -169,7 +164,7 @@ void NoteBox::init()
     });
 
     QObject::connect(edit_, &QTextEdit::textChanged, [this](){
-        NodeHandlePtr nh = node_handle_.lock();
+        NodeHandlePtr nh = node_facade_->getNodeHandle();
         if(!nh) {
             return;
         }
@@ -183,7 +178,7 @@ void NoteBox::init()
     });
 
 
-    NodeState* state = node_handle_.lock()->getNodeState().get();
+    NodeState* state = node_facade_->getNodeHandle()->getNodeState().get();
     state->color_changed->connect([this, state](){
         changeColor();
     });
@@ -199,7 +194,7 @@ void NoteBox::startResize()
 }
 void NoteBox::stopResize()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -243,7 +238,7 @@ void NoteBox::setSelected(bool selected)
 void NoteBox::updateStylesheetColor()
 {
 
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }

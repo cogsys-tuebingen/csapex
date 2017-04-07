@@ -17,6 +17,7 @@
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/note_box.h>
 #include <csapex/view/utility/context_menu_handler.h>
+#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <sstream>

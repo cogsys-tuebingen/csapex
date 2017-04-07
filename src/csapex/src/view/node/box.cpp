@@ -41,8 +41,8 @@
 
 using namespace csapex;
 
-NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worker, QIcon icon, GraphView* parent)
-    : parent_(parent), ui(nullptr), grip_(nullptr), settings_(settings), node_handle_(handle), node_worker_(worker), adapter_(nullptr), icon_(icon),
+NodeBox::NodeBox(Settings& settings, NodeFacadePtr node_facade, QIcon icon, GraphView* parent)
+    : parent_(parent), ui(nullptr), grip_(nullptr), settings_(settings), node_facade_(node_facade), adapter_(nullptr), icon_(icon),
       info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_frequency(nullptr), info_error(nullptr), initialized_(false),
       frequency_timer_(nullptr)
 {
@@ -51,10 +51,10 @@ NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, NodeWorker::Ptr worke
     setVisible(false);
 }
 
-NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, QIcon icon, GraphView* parent)
-    : NodeBox(settings, handle, nullptr, icon, parent)
-{
-}
+//NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, QIcon icon, GraphView* parent)
+//    : NodeBox(settings, handle, nullptr, icon, parent)
+//{
+//}
 
 void NodeBox::setAdapter(NodeAdapter::Ptr adapter)
 {
@@ -69,6 +69,8 @@ NodeBox::~NodeBox()
 {
     destruct();
 
+    adapter_.reset();
+
     for(QObject* child : children()) {
         delete child;
     }
@@ -82,9 +84,6 @@ NodeBox::~NodeBox()
 void NodeBox::destruct()
 {
     QObject::disconnect(this);
-
-    node_worker_.reset();
-    adapter_.reset();
 }
 
 void NodeBox::setupUi()
@@ -155,7 +154,7 @@ void NodeBox::setupUi()
     }
 
 
-    NodeState* state = node_handle_.lock()->getNodeState().get();
+    NodeState* state = node_facade_->getNodeHandle()->getNodeState().get();
     observe(state->flipped_changed, std::bind(&NodeBox::triggerFlipSides, this));
     observe(state->minimized_changed, std::bind(&NodeBox::triggerMinimized, this));
     observe(state->active_changed, [this, state](){
@@ -194,7 +193,7 @@ void NodeBox::setupUi()
 
 void NodeBox::construct()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -236,7 +235,7 @@ void NodeBox::construct()
     observe(nh->connector_created, [this](ConnectablePtr c) { registerEvent(c.get()); });
     observe(nh->connector_removed, [this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(worker) {
         observe(worker->destroyed, [this](){ destruct(); });
 
@@ -262,7 +261,7 @@ void NodeBox::construct()
 
 bool NodeBox::isGraph() const
 {
-    if(NodeHandlePtr nh = node_handle_.lock()) {
+    if(NodeHandlePtr nh = node_facade_->getNodeHandle()) {
         return nh->isGraph();
     }
     return false;
@@ -270,7 +269,7 @@ bool NodeBox::isGraph() const
 
 NodeWorker* NodeBox::getNodeWorker() const
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!worker) {
         return nullptr;
     }
@@ -279,7 +278,7 @@ NodeWorker* NodeBox::getNodeWorker() const
 
 NodeHandle* NodeBox::getNodeHandle() const
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return nullptr;
     }
@@ -324,7 +323,7 @@ void setStyleForId(QLabel* label, int id) {
 
 void NodeBox::updateComponentInformation(Graph* graph)
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -364,7 +363,7 @@ void NodeBox::updateComponentInformation(Graph* graph)
 
 void NodeBox::updateThreadInformation()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -400,7 +399,7 @@ void NodeBox::updateThreadInformation()
 
 void NodeBox::updateFrequencyInformation()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -467,7 +466,7 @@ QBoxLayout* NodeBox::getEventLayout()
 
 bool NodeBox::isError() const
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!worker) {
         return false;
     }
@@ -475,7 +474,7 @@ bool NodeBox::isError() const
 }
 ErrorState::ErrorLevel NodeBox::errorLevel() const
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!worker) {
         return ErrorState::ErrorLevel::NONE;
     }
@@ -483,7 +482,7 @@ ErrorState::ErrorLevel NodeBox::errorLevel() const
 }
 std::string NodeBox::errorMessage() const
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!worker) {
         return "";
     }
@@ -492,7 +491,7 @@ std::string NodeBox::errorMessage() const
 
 void NodeBox::setLabel(const std::string& label)
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -506,7 +505,7 @@ void NodeBox::setLabel(const std::string& label)
 
 void NodeBox::setLabel(const QString &label)
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -517,7 +516,7 @@ void NodeBox::setLabel(const QString &label)
 
 std::string NodeBox::getLabel() const
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return "";
     }
@@ -555,7 +554,7 @@ void NodeBox::resizeEvent(QResizeEvent */*e*/)
 
 void NodeBox::init()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -681,7 +680,7 @@ void NodeBox::enabledChangeEvent(bool val)
 
 QString NodeBox::getNodeState()
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!worker) {
         return "";
     }
@@ -705,7 +704,7 @@ QString NodeBox::getNodeState()
 
 void NodeBox::paintEvent(QPaintEvent* /*e*/)
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!adapter_) {
         return;
     }
@@ -780,7 +779,7 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
 
 void NodeBox::moveEvent(QMoveEvent* e)
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -842,7 +841,7 @@ void NodeBox::refreshTopLevelStylesheet()
 
 void NodeBox::showProfiling(bool profiling)
 {
-    NodeWorkerPtr node = node_worker_.lock();
+    NodeWorkerPtr node = node_facade_->getNodeWorker();
     if(node->isProfiling() != profiling) {
         node->setProfiling(profiling);
     }
@@ -850,7 +849,7 @@ void NodeBox::showProfiling(bool profiling)
 
 void NodeBox::killContent()
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!worker) {
         return;
     }
@@ -859,7 +858,7 @@ void NodeBox::killContent()
 
 void NodeBox::triggerFlipSides()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -871,7 +870,7 @@ void NodeBox::triggerFlipSides()
 
 void NodeBox::triggerMinimized()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -883,7 +882,7 @@ void NodeBox::triggerMinimized()
 
 void NodeBox::updateStylesheetColor()
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -894,7 +893,7 @@ void NodeBox::updateStylesheetColor()
     int r, g, b;
     if(settings_.getTemporary("debug", false)) {
         r = 0; g = 0; b = 0;
-        if(NodeHandlePtr nh = node_handle_.lock()) {
+        if(NodeHandlePtr nh = node_facade_->getNodeHandle()) {
             graph::VertexPtr vertex = nh->getVertex();
 
             const auto& characteristics = vertex->getNodeCharacteristics();
@@ -966,7 +965,7 @@ void NodeBox::updateVisuals()
         return;
     }
 
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return;
     }
@@ -1052,7 +1051,7 @@ void NodeBox::updatePosition()
 
 bool NodeBox::isMinimizedSize() const
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return false;
     }
@@ -1062,7 +1061,7 @@ bool NodeBox::isMinimizedSize() const
 
 bool NodeBox::isFlipped() const
 {
-    NodeHandlePtr nh = node_handle_.lock();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
     if(!nh) {
         return false;
     }
@@ -1072,7 +1071,7 @@ bool NodeBox::isFlipped() const
 
 void NodeBox::nodeStateChangedEvent()
 {
-    NodeWorkerPtr worker = node_worker_.lock();
+    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!worker) {
         return;
     }

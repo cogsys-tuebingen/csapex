@@ -5,6 +5,7 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/rename_node.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/core/settings.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
