@@ -114,12 +114,19 @@ public:
     bool isSource() const override;
     bool isSink() const override;
 
+    bool isVariadic() const;
+    bool hasVariadicInputs() const;
+    bool hasVariadicOutputs() const;
+    bool hasVariadicEvents() const;
+    bool hasVariadicSlots() const;
+
     bool isActive() const;
     void setActive(bool active);
 
     void triggerNodeStateChanged();
 
     UUIDProvider* getUUIDProvider();
+    AUUID getSubgraphAUUID() const;
 
     bool isGraph() const;
 

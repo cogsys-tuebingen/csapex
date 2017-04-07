@@ -68,16 +68,14 @@ public:
     Port* createPort(ConnectableWeakPtr connector, QBoxLayout *layout);
     void removePort(ConnectableWeakPtr connector);
 
+    bool isGraph() const;
+
     /// ACCESSORS
-    Node* getNode() const;
     NodeWorker* getNodeWorker() const;
     NodeHandle* getNodeHandle() const;
     NodeAdapterPtr getNodeAdapter() const;
 
     GraphView* getGraphView() const;
-
-    bool hasSubGraph() const;
-    GraphFacade *getSubGraph() const;
 
     void setLabel(const std::string& label);
     void setLabel(const QString& label);
@@ -109,7 +107,6 @@ protected:
     void setupUi();
     void paintEvent(QPaintEvent* e);
     bool eventFilter(QObject*, QEvent*);
-
 
 public:
     void updateBoxInformation(Graph* graph);

@@ -120,30 +120,32 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_error);
     }
 
-    if(dynamic_cast<VariadicBase*>(getNode())) {
+    NodeHandle* nh = getNodeHandle();
+
+    if(nh->isVariadic()) {
         AUUID parent = getNodeHandle()->getUUID().getAbsoluteUUID();
-        if(dynamic_cast<VariadicInputs*>(getNode())) {
+        if(nh->hasVariadicInputs()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::INPUT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->input_panel->layout()->addWidget(meta_port);
         }
-        if(dynamic_cast<VariadicOutputs*>(getNode())) {
+        if(nh->hasVariadicOutputs()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::OUTPUT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->output_panel->layout()->addWidget(meta_port);
         }
-        if(dynamic_cast<VariadicSlots*>(getNode())) {
+        if(nh->hasVariadicSlots()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::SLOT_T, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->slot_panel->layout()->addWidget(meta_port);
         }
-        if(dynamic_cast<VariadicEvents*>(getNode())) {
+        if(nh->hasVariadicEvents()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::EVENT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
@@ -258,14 +260,12 @@ void NodeBox::construct()
     installEventFilter(this);
 }
 
-
-Node* NodeBox::getNode() const
+bool NodeBox::isGraph() const
 {
-    NodeHandlePtr nh = node_handle_.lock();
-    if(!nh) {
-        return nullptr;
+    if(NodeHandlePtr nh = node_handle_.lock()) {
+        return nh->isGraph();
     }
-    return nh->getNode().lock().get();
+    return false;
 }
 
 NodeWorker* NodeBox::getNodeWorker() const
@@ -582,7 +582,9 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
     ConnectablePtr adaptee = port->getAdaptee().lock();
     apex_assert_hard(adaptee == connector.lock());
 
-    if(dynamic_cast<VariadicBase*>(getNode())) {
+    NodeHandle* nh = getNodeHandle();
+
+    if(nh->isVariadic()) {
         std::vector<MetaPort*> metas;
         for(int i = 0; i < layout->count();) {
             MetaPort* meta = dynamic_cast<MetaPort*>(layout->itemAt(i)->widget());
@@ -629,8 +631,9 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
 {
     if(o == this) {
         if(e->type() == QEvent::MouseButtonDblClick) {
-            if(hasSubGraph()) {
-                Q_EMIT showSubGraphRequest(getSubGraph()->getAbsoluteUUID());
+            if(isGraph()) {
+                NodeHandle* nh = getNodeHandle();
+                Q_EMIT showSubGraphRequest(nh->getSubgraphAUUID());
                 return true;
             }
         }
@@ -1065,25 +1068,6 @@ bool NodeBox::isFlipped() const
     }
     NodeStatePtr state = nh->getNodeState();
     return state->isFlipped();
-}
-
-bool NodeBox::hasSubGraph() const
-{
-    return dynamic_cast<Graph*>(getNode()) != nullptr;
-}
-
-GraphFacade* NodeBox::getSubGraph() const
-{
-    NodeHandlePtr nh = node_handle_.lock();
-    if(nh) {
-        NodePtr node = nh->getNode().lock();
-        if(node) {
-            return parent_->getGraphFacade()->getSubGraph(node->getUUID());
-        }
-    }
-
-    throw std::logic_error("Called getSubGraph() on an invalid node. "
-                           "Check with hasSubGraph().");
 }
 
 void NodeBox::nodeStateChangedEvent()

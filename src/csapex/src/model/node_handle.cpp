@@ -146,6 +146,27 @@ bool NodeHandle::isSink() const
     return external_outputs_.empty() || !transition_out_->hasConnection();
 }
 
+bool NodeHandle::isVariadic() const
+{
+    return dynamic_cast<VariadicBase*>(node_.get());
+}
+bool NodeHandle::hasVariadicInputs() const
+{
+    return dynamic_cast<VariadicInputs*>(node_.get());
+}
+bool NodeHandle::hasVariadicOutputs() const
+{
+    return dynamic_cast<VariadicOutputs*>(node_.get());
+}
+bool NodeHandle::hasVariadicEvents() const
+{
+    return dynamic_cast<VariadicEvents*>(node_.get());
+}
+bool NodeHandle::hasVariadicSlots() const
+{
+    return dynamic_cast<VariadicSlots*>(node_.get());
+}
+
 void NodeHandle::setActive(bool active)
 {
     node_state_->setActive(active);
@@ -941,6 +962,13 @@ void NodeHandle::disconnectConnector(Connectable* c)
         connection.disconnect();
     }
     connections_[c].clear();
+}
+
+AUUID NodeHandle::getSubgraphAUUID() const
+{
+    SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_);
+    apex_assert_hard(graph);
+    return graph->getAbsoluteUUID();
 }
 
 UUIDProvider* NodeHandle::getUUIDProvider()

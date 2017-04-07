@@ -396,7 +396,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
     bool is_graph = false;
     if(view_.selected_boxes_.size() == 1) {
         NodeBox* box = view_.selected_boxes_.front();
-        is_graph = dynamic_cast<SubgraphNode*>(box->getNode());
+        is_graph = box->isGraph();
     }
 
     ungrp->setEnabled(is_graph);
