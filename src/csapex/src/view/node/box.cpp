@@ -714,6 +714,10 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         OutputTransition* ot = handle->getOutputTransition();
         InputTransition* it = handle->getInputTransition();
 
+        transition_state += ", source: ";
+        transition_state += handle->isSource() ? "yes" : "no";
+        transition_state += ", sink: ";
+        transition_state += handle->isSink() ? "yes" : "no";
         transition_state += ", it: ";
         transition_state += it->isEnabled() ? "enabled" : "disabled";
         transition_state += ", ot: ";

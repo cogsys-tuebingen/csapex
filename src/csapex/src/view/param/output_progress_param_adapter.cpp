@@ -35,12 +35,14 @@ QWidget* OutputProgressParameterAdapter::setup(QBoxLayout* layout, const std::st
     connectInGuiThread(op_p_->parameter_changed, [this, bar](param::Parameter*) {
         if(op_p_ && bar) {
             bar->setValue(op_p_->getProgress());
+            bar->setMaximum(op_p_->getProgressMaximum());
         }
     });
 
     // parameter scope changed -> update slider interval
     connectInGuiThread(op_p_->scope_changed, [this, bar](param::Parameter*) {
         if(op_p_ && bar) {
+            bar->setValue(op_p_->getProgress());
             bar->setMaximum(op_p_->getProgressMaximum());
         }
     });
