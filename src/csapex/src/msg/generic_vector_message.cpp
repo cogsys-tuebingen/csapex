@@ -17,6 +17,13 @@ GenericVectorMessage::GenericVectorMessage(EntryInterface::Ptr impl, const std::
 {
 }
 
+GenericVectorMessage::GenericVectorMessage()
+    : Message(type<GenericVectorMessage>::name(), "/", 0),
+      impl(std::make_shared<InstancedImplementation>(std::make_shared<AnyMessage>()))
+{
+
+}
+
 TokenData::Ptr GenericVectorMessage::clone() const
 {
     Ptr new_msg(new GenericVectorMessage(impl->cloneEntry(), frame_id, impl->stamp_micro_seconds));
