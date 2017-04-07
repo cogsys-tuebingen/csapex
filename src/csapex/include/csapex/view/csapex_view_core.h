@@ -93,10 +93,8 @@ public:
     slim_signal::Signal<void ()> end_step;
 
     /// GRAPH
-    slim_signal::Signal<void(NodeHandlePtr)> node_added;
-    slim_signal::Signal<void(NodeHandlePtr)> node_removed;
-    slim_signal::Signal<void(NodeWorkerPtr)> node_worker_added;
-    slim_signal::Signal<void(NodeWorkerPtr)> node_worker_removed;
+    slim_signal::Signal<void(NodeFacadePtr)> node_facade_added;
+    slim_signal::Signal<void(NodeFacadePtr)> node_facade_removed;
     slim_signal::Signal<void()> panic;
 
 

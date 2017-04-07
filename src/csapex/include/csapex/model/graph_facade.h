@@ -35,7 +35,7 @@ public:
     GraphFacade* getSubGraph(const UUID& uuid);
     ThreadPool* getThreadPool();
 
-    NodeWorkerPtr getNodeWorker(const NodeHandle* handle);
+    NodeFacadePtr getNodeFacade(const NodeHandle* handle);
 
     void addNode(NodeHandlePtr node);
 
@@ -83,11 +83,8 @@ public:
     slim_signal::Signal<void(GraphFacadePtr)> child_added;
     slim_signal::Signal<void(GraphFacadePtr)> child_removed;
 
-    slim_signal::Signal<void(NodeHandlePtr)> node_added;
-    slim_signal::Signal<void(NodeHandlePtr)> node_removed;
-
-    slim_signal::Signal<void(NodeWorkerPtr)> node_worker_added;
-    slim_signal::Signal<void(NodeWorkerPtr)> node_worker_removed;
+    slim_signal::Signal<void(NodeFacadePtr)> node_facade_added;
+    slim_signal::Signal<void(NodeFacadePtr)> node_facade_removed;
 
     slim_signal::Signal<void(TaskGeneratorPtr)> generator_added;
     slim_signal::Signal<void(TaskGeneratorPtr)> generator_removed;
@@ -112,7 +109,7 @@ private:
 
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
 
-    std::map<const NodeHandle*, NodeWorkerPtr> node_workers_;
+    std::map<const NodeHandle*, NodeFacadePtr> node_facades_;
 };
 
 }

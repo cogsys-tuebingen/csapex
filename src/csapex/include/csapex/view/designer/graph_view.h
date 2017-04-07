@@ -114,18 +114,18 @@ Q_SIGNALS:
     void boxAdded(NodeBox* box);
     void boxRemoved(NodeBox* box);
 
-    void nodeWorkerAdded(NodeWorkerPtr worker);
-    void nodeHandleRemoved(NodeHandlePtr handle);
+    void nodeFacadeAdded(NodeFacadePtr facade);
+    void nodeFacadeRemoved(NodeFacadePtr facade);
 
-    void startProfilingRequest(NodeWorker* box);
-    void stopProfilingRequest(NodeWorker *box);
+    void startProfilingRequest(NodeFacade* box);
+    void stopProfilingRequest(NodeFacade *box);
 
     void triggerConnectorCreated(ConnectablePtr connector);
     void triggerConnectorRemoved(ConnectablePtr connector);
 
 public Q_SLOTS:
-    void nodeAdded(NodeWorkerPtr node_worker);
-    void nodeRemoved(NodeHandlePtr node_handle);
+    void nodeAdded(NodeFacadePtr node_facade);
+    void nodeRemoved(NodeFacadePtr node_facade);
 
     void showNodeInsertDialog();
 
@@ -157,8 +157,8 @@ public Q_SLOTS:
     void showContextMenuGlobal(const QPoint& pos);
     void showContextMenuForSelectedNodes(NodeBox *box, const QPoint& pos);
 
-    void startProfiling(NodeWorker* box);
-    void stopProfiling(NodeWorker *box);
+    void startProfiling(NodeFacade* box);
+    void stopProfiling(NodeFacade *box);
 
     void reset();
 

@@ -6,6 +6,7 @@
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/connection.h>
@@ -61,7 +62,10 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
     }
 
     NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
-    node_workers_[nh.get()] = nw;
+
+    NodeFacadePtr facade = std::make_shared<NodeFacade>(nh, nw);
+
+    node_facades_[nh.get()] = facade;
 
     NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
     nh->setNodeRunner(runner);
@@ -76,8 +80,7 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
 
     generator_added(runner);
 
-    node_added(nh);
-    node_worker_added(nw);
+    node_facade_added(facade);
 
     nw->notification.connect(notification);
 
@@ -111,10 +114,9 @@ void GraphFacade::nodeRemovedHandler(graph::VertexPtr vertex)
     executor_.remove(runner.get());
     generator_removed(runner);
 
-    NodeWorkerPtr nw = node_workers_[nh.get()];
-    node_worker_removed(nw);
-    node_workers_.erase(nh.get());
-    node_removed(nh);
+    NodeFacadePtr facade = node_facades_[nh.get()];
+    node_facade_removed(facade);
+    node_facades_.erase(nh.get());
 
     if(nh->getType() == "csapex::Graph") {
         auto pos = children_.find(nh->getUUID());
@@ -135,6 +137,11 @@ Graph* GraphFacade::getGraph()
     return graph_;
 }
 
+NodeFacadePtr GraphFacade::getNodeFacade(const NodeHandle *handle)
+{
+    return node_facades_.at(handle);
+}
+
 SubgraphNode* GraphFacade::getSubgraphNode()
 {
     return dynamic_cast<SubgraphNode*>(graph_);
@@ -148,11 +155,6 @@ ThreadPool* GraphFacade::getThreadPool()
 NodeHandle* GraphFacade::getNodeHandle()
 {
     return graph_handle_;
-}
-
-NodeWorkerPtr GraphFacade::getNodeWorker(const NodeHandle *handle)
-{
-    return node_workers_[handle];
 }
 
 void GraphFacade::addNode(NodeHandlePtr nh)

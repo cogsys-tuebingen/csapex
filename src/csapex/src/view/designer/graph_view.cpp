@@ -113,8 +113,8 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     //    QObject::connect(&scalings_animation_timer_, SIGNAL(timeout()), this, SLOT(animateZoom()));
     QObject::connect(&scroll_animation_timer_, SIGNAL(timeout()), this, SLOT(animateScroll()));
 
-    QObject::connect(this, SIGNAL(startProfilingRequest(NodeWorker*)), this, SLOT(startProfiling(NodeWorker*)));
-    QObject::connect(this, SIGNAL(stopProfilingRequest(NodeWorker*)), this, SLOT(stopProfiling(NodeWorker*)));
+    QObject::connect(this, SIGNAL(startProfilingRequest(NodeFacade*)), this, SLOT(startProfiling(NodeFacade*)));
+    QObject::connect(this, SIGNAL(stopProfilingRequest(NodeFacade*)), this, SLOT(stopProfiling(NodeFacade*)));
 
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
@@ -123,15 +123,14 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, SIGNAL(triggerConnectorRemoved(ConnectablePtr)), this, SLOT(connectorRemoved(ConnectablePtr)));
 
     qRegisterMetaType < ConnectablePtr > ("ConnectablePtr");
-    qRegisterMetaType < NodeWorkerPtr > ("NodeWorkerPtr");
-    qRegisterMetaType < NodeHandlePtr > ("NodeHandlePtr");
+    qRegisterMetaType < NodeFacadePtr > ("NodeFacadePtr");
 
 
-    observe(graph_facade_->node_worker_added, [this](NodeWorkerPtr n) { nodeWorkerAdded(n); });
-    observe(graph_facade_->node_removed, [this](NodeHandlePtr n) { nodeHandleRemoved(n); });
+    observe(graph_facade_->node_facade_added, [this](NodeFacadePtr n) { nodeFacadeAdded(n); });
+    observe(graph_facade_->node_facade_removed, [this](NodeFacadePtr n) { nodeFacadeRemoved(n); });
 
-    QObject::connect(this, &GraphView::nodeWorkerAdded, this, &GraphView::nodeAdded, Qt::QueuedConnection);
-    QObject::connect(this, &GraphView::nodeHandleRemoved, this, &GraphView::nodeRemoved, Qt::QueuedConnection);
+    QObject::connect(this, &GraphView::nodeFacadeAdded, this, &GraphView::nodeAdded, Qt::QueuedConnection);
+    QObject::connect(this, &GraphView::nodeFacadeRemoved, this, &GraphView::nodeRemoved, Qt::QueuedConnection);
 
 
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
@@ -142,9 +141,9 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
         const NodeHandlePtr& nh = (*it)->getNodeHandle();
         apex_assert_hard(nh.get());
-        NodeWorkerPtr nw = graph_facade_->getNodeWorker(nh.get());
-        apex_assert_hard(nw);
-        nodeAdded(nw);
+        NodeFacadePtr facade = graph_facade_->getNodeFacade(nh.get());
+        apex_assert_hard(facade);
+        nodeAdded(facade);
     }
 
     setupWidgets();
@@ -773,17 +772,14 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 }
 
 
-void GraphView::nodeAdded(NodeWorkerPtr node_worker)
+void GraphView::nodeAdded(NodeFacadePtr node_facade)
 {
-    // TODO: already pass node facade
-    NodeHandlePtr node_handle = node_worker->getNodeHandle();
+    NodeHandlePtr node_handle = node_facade->getNodeHandle();
     std::string type = node_handle->getType();
 
     QIcon icon = QIcon(QString::fromStdString(view_core_.getNodeFactory()->getConstructor(type)->getIcon()));
 
     NodeBox* box = nullptr;
-
-    NodeFacadePtr node_facade = std::make_shared<NodeFacade>(node_handle, node_worker);
 
     if(type == "csapex::Note") {
         box = new NoteBox(view_core_.getSettings(), node_facade, icon, this);
@@ -937,9 +933,9 @@ void GraphView::focusOnNode(const csapex::UUID &uuid)
     }
 }
 
-void GraphView::nodeRemoved(NodeHandlePtr node_handle)
+void GraphView::nodeRemoved(NodeFacadePtr node_facade)
 {
-    UUID node_uuid = node_handle->getUUID();
+    UUID node_uuid = node_facade->getUUID();
     NodeBox* box = getBox(node_uuid);
     box->stop();
 
@@ -959,8 +955,9 @@ void GraphView::addBox(NodeBox *box)
 
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
-    NodeWorker* worker = box->getNodeWorker();
-    NodeHandle* handle = worker->getNodeHandle().get();
+    NodeFacadePtr facade = box->getNodeFacade();
+    NodeWorker* worker = facade->getNodeWorker().get();
+    NodeHandle* handle = facade->getNodeHandle().get();
 
     worker_connections_[worker].emplace_back(handle->connection_start.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnections(); }));
     worker_connections_[worker].emplace_back(handle->connection_in_prograss.connect([this](const ConnectablePtr& from, const ConnectablePtr& to) { scene_->previewConnection(from, to); }));
@@ -969,8 +966,8 @@ void GraphView::addBox(NodeBox *box)
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
 
-    worker_connections_[worker].emplace_back(worker->start_profiling.connect([this](NodeWorker* nw) { startProfilingRequest(nw); }));
-    worker_connections_[worker].emplace_back(worker->stop_profiling.connect([this](NodeWorker* nw) { stopProfilingRequest(nw); }));
+    worker_connections_[worker].emplace_back(facade->start_profiling.connect([this](NodeFacade* nw) { startProfilingRequest(nw); }));
+    worker_connections_[worker].emplace_back(facade->stop_profiling.connect([this](NodeFacade* nw) { stopProfilingRequest(nw); }));
 
 
     MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
@@ -1139,7 +1136,7 @@ void GraphView::renameBox(NodeBox *box)
 }
 
 
-void GraphView::startProfiling(NodeWorker *node)
+void GraphView::startProfiling(NodeFacade *node)
 {
     NodeBox* box = getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
@@ -1180,7 +1177,7 @@ void GraphView::startProfiling(NodeWorker *node)
     profiling_connections_[box].push_back(cp);
 }
 
-void GraphView::stopProfiling(NodeWorker *node)
+void GraphView::stopProfiling(NodeFacade *node)
 {
     NodeBox* box = getBox(node->getUUID());
 

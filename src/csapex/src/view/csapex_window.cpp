@@ -16,7 +16,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/token_data.h>
 #include <csapex/param/parameter_factory.h>
@@ -79,8 +79,8 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
 
     QObject::connect(activity_legend_, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), activity_timeline_, SLOT(setSelection(QList<NodeWorker*>)));
 
-    observe(view_core_.node_worker_added, [this](NodeWorkerPtr n) { activity_legend_->startTrackingNode(n); });
-    observe(view_core_.node_removed, [this](NodeHandlePtr n) { activity_legend_->stopTrackingNode(n); });
+    observe(view_core_.node_facade_added, [this](NodeFacadePtr n) { activity_legend_->startTrackingNode(n->getNodeWorker()); });
+    observe(view_core_.node_facade_removed, [this](NodeFacadePtr n) { activity_legend_->stopTrackingNode(n->getNodeHandle()); });
 
     QObject::connect(activity_legend_, SIGNAL(nodeAdded(NodeWorker*)), activity_timeline_, SLOT(addNode(NodeWorker*)));
     QObject::connect(activity_legend_, SIGNAL(nodeRemoved(NodeWorker*)), activity_timeline_, SLOT(removeNode(NodeWorker*)));

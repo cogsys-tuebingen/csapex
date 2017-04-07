@@ -267,6 +267,11 @@ bool NodeBox::isGraph() const
     return false;
 }
 
+NodeFacadePtr NodeBox::getNodeFacade() const
+{
+    return node_facade_;
+}
+
 NodeWorker* NodeBox::getNodeWorker() const
 {
     NodeWorkerPtr worker = node_facade_->getNodeWorker();

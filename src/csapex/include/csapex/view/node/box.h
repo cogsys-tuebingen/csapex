@@ -72,6 +72,7 @@ public:
     bool isGraph() const;
 
     /// ACCESSORS
+    NodeFacadePtr getNodeFacade() const;
     NodeWorker* getNodeWorker() const;
     NodeHandle* getNodeHandle() const;
     NodeAdapterPtr getNodeAdapter() const;

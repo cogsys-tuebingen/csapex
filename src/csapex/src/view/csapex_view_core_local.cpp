@@ -48,10 +48,8 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexCorePtr core)
     observe(core_->end_step, end_step);
 
 
-    observe(core_->getRoot()->node_added, node_added);
-    observe(core_->getRoot()->node_removed, node_removed);
-    observe(core_->getRoot()->node_worker_added, node_worker_added);
-    observe(core_->getRoot()->node_worker_removed, node_worker_removed);
+    observe(core_->getRoot()->node_facade_added, node_facade_added);
+    observe(core_->getRoot()->node_facade_removed, node_facade_removed);
     observe(core_->getRoot()->panic, panic);
 
 
