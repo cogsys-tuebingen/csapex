@@ -507,7 +507,7 @@ private:
     void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
-    std::map<param::Parameter*, std::vector<slim_signal::Connection> > connections_;
+    std::map<param::Parameter*, std::vector<slim_signal::Connection> > parameter_connections_;
     std::map<param::ParameterWeakPtr, std::function<bool()>, std::owner_less<param::ParameterWeakPtr>> conditions_;
 
     mutable std::recursive_mutex mutex_;

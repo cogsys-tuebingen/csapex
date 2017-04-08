@@ -227,8 +227,7 @@ private:
     PortPanel* events_widget_;
     QGraphicsProxyWidget* triggers_widget_proxy_;
 
-    std::map<NodeWorker*, std::vector<csapex::slim_signal::ScopedConnection>> worker_connections_;
-    std::map<NodeHandle*, std::vector<csapex::slim_signal::ScopedConnection>> handle_connections_;
+    std::map<NodeFacade*, std::vector<csapex::slim_signal::ScopedConnection>> facade_connections_;
 
     std::vector<NodeBox*> boxes_;
     std::vector<NodeBox*> selected_boxes_;

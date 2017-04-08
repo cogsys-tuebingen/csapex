@@ -119,10 +119,10 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_error);
     }
 
-    NodeHandle* nh = getNodeHandle();
+    NodeHandlePtr nh = node_facade_->getNodeHandle();
 
     if(nh->isVariadic()) {
-        AUUID parent = getNodeHandle()->getUUID().getAbsoluteUUID();
+        AUUID parent = node_facade_->getUUID().getAbsoluteUUID();
         if(nh->hasVariadicInputs()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::INPUT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
@@ -270,24 +270,6 @@ bool NodeBox::isGraph() const
 NodeFacadePtr NodeBox::getNodeFacade() const
 {
     return node_facade_;
-}
-
-NodeWorker* NodeBox::getNodeWorker() const
-{
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
-    if(!worker) {
-        return nullptr;
-    }
-    return worker.get();
-}
-
-NodeHandle* NodeBox::getNodeHandle() const
-{
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return nullptr;
-    }
-    return nh.get();
 }
 
 NodeAdapter::Ptr NodeBox::getNodeAdapter() const
@@ -586,7 +568,7 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
     ConnectablePtr adaptee = port->getAdaptee().lock();
     apex_assert_hard(adaptee == connector.lock());
 
-    NodeHandle* nh = getNodeHandle();
+    NodeHandlePtr nh = getNodeFacade()->getNodeHandle();
 
     if(nh->isVariadic()) {
         std::vector<MetaPort*> metas;
@@ -636,7 +618,7 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
     if(o == this) {
         if(e->type() == QEvent::MouseButtonDblClick) {
             if(isGraph()) {
-                NodeHandle* nh = getNodeHandle();
+                NodeHandlePtr nh = getNodeFacade()->getNodeHandle();
                 Q_EMIT showSubGraphRequest(nh->getSubgraphAUUID());
                 return true;
             }
@@ -1050,7 +1032,7 @@ void NodeBox::updateVisuals()
 
 void NodeBox::updatePosition()
 {
-    auto pt = getNodeHandle()->getNodeState()->getPos();
+    auto pt = getNodeFacade()->getNodeHandle()->getNodeState()->getPos();
     move(QPoint(pt.x, pt.y));
 }
 

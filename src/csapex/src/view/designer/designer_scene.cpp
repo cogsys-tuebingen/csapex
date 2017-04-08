@@ -413,7 +413,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
                 continue;
             }
 
-            NodeHandle* node_handle = box->getNodeHandle();
+            NodeHandlePtr node_handle = box->getNodeFacade()->getNodeHandle();
             if(!node_handle) {
                 continue;
             }

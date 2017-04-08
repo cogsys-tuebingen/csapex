@@ -42,7 +42,8 @@ public:
     virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
     virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
-    virtual void initialize(csapex::NodeHandle* node_handle) override;
+    virtual void initialize(csapex::NodeHandlePtr node_handle) override;
+    virtual void detach() override;
     virtual void reset() override;
     virtual void stateChanged() override;
     virtual void tearDown() override;

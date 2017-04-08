@@ -108,9 +108,9 @@ void Parameterizable::addParameterCallback(csapex::param::ParameterPtr param, st
     param_callbacks_[param.get()].push_back(cb);
 
     // register callback, if not already there
-    if(connections_.find(param.get()) == connections_.end()) {
+    if(parameter_connections_.find(param.get()) == parameter_connections_.end()) {
         param::ParameterWeakPtr pwp = param;
-        connections_[param.get()].push_back(param->parameter_changed.connect([this, pwp](csapex::param::Parameter* p) {
+        parameter_connections_[param.get()].push_back(param->parameter_changed.connect([this, pwp](csapex::param::Parameter* p) {
             if(param::Parameter::Ptr p = pwp.lock()) {
                 parameterChanged(p);
             }
@@ -139,7 +139,7 @@ void Parameterizable::removeParameterCallbacks(csapex::param::Parameter *param)
         }
     }
 
-    for(slim_signal::Connection c : connections_[param]) {
+    for(slim_signal::Connection c : parameter_connections_[param]) {
         c.disconnect();
     }
 }
@@ -316,12 +316,12 @@ void Parameterizable::addParameter(const csapex::param::Parameter::Ptr &param)
     parameter_state_->addParameter(param);
 
     param::ParameterWeakPtr pwp = param;
-    connections_[param.get()].push_back(param->parameter_changed.connect([this, pwp](csapex::param::Parameter* p) {
+    parameter_connections_[param.get()].push_back(param->parameter_changed.connect([this, pwp](csapex::param::Parameter* p) {
         if(param::Parameter::Ptr p = pwp.lock()) {
             parameterChanged(p);
         }
     }));
-    connections_[param.get()].push_back(param->parameter_enabled.connect([this](csapex::param::Parameter* p, bool e) { parameterEnabled(p, e); } ));
+    parameter_connections_[param.get()].push_back(param->parameter_enabled.connect([this](csapex::param::Parameter* p, bool e) { parameterEnabled(p, e); } ));
 }
 
 void Parameterizable::addParameter(const csapex::param::Parameter::Ptr &param, std::function<void (csapex::param::Parameter *)> cb)

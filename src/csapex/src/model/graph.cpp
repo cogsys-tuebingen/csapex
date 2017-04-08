@@ -34,7 +34,7 @@ Graph::~Graph()
 
 void Graph::resetActivity()
 {
-    auto connections = connections_;
+    auto connections = edges_;
     for(ConnectionPtr c : connections) {
         TokenPtr t = c->getToken();
         if(t) {
@@ -42,8 +42,8 @@ void Graph::resetActivity()
         }
     }
 
-    auto vertecies = vertices_;
-    for(graph::VertexPtr vertex : vertecies) {
+    auto vertices = vertices_;
+    for(graph::VertexPtr vertex : vertices) {
         NodeHandlePtr node = vertex->getNodeHandle();
         node->setActive(false);
     }
@@ -55,14 +55,14 @@ void Graph::clear()
 
     beginTransaction();
 
-    auto connections = connections_;
+    auto connections = edges_;
     for(ConnectionPtr c : connections) {
         deleteConnection(c);
     }
-    apex_assert_hard(connections_.empty());
+    apex_assert_hard(edges_.empty());
 
-    auto vertecies = vertices_;
-    for(graph::VertexPtr vertex : vertecies) {
+    auto vertices = vertices_;
+    for(graph::VertexPtr vertex : vertices) {
         NodeHandlePtr node = vertex->getNodeHandle();
         deleteNode(node->getUUID());
     }
@@ -91,7 +91,7 @@ void Graph::addNode(NodeHandlePtr nh)
 
 std::vector<ConnectionPtr> Graph::getConnections()
 {
-    return connections_;
+    return edges_;
 }
 
 void Graph::deleteNode(const UUID& uuid)
@@ -115,11 +115,21 @@ void Graph::deleteNode(const UUID& uuid)
         }
     }
 
+    apex_assert_hard(removed);
+    apex_assert_hard(removed == node_handle->getVertex());
+
     sources_.erase(removed);
     sinks_.erase(removed);
 
-    apex_assert_hard(removed);
-    apex_assert_hard(removed == node_handle->getVertex());
+    for(const graph::VertexPtr& source : sources_) {
+        apex_assert_neq(source, removed);
+    }
+    for(const graph::VertexPtr& sink : sinks_) {
+        apex_assert_neq(sink, removed);
+    }
+    for(const graph::VertexPtr& remaining : vertices_) {
+        apex_assert_neq(remaining, removed);
+    }
 
     //        if(NodePtr node = removed->getNode().lock()) {
     //            if(GraphPtr child = std::dynamic_pointer_cast<Graph>(node)) {
@@ -142,7 +152,7 @@ int Graph::countNodes()
 bool Graph::addConnection(ConnectionPtr connection)
 {
     apex_assert_hard(connection);
-    connections_.push_back(connection);
+    edges_.push_back(connection);
 
     connection_observations_[connection.get()].push_back(connection->connection_changed.connect([this]() {
         if(!in_transaction_) {
@@ -185,9 +195,9 @@ void Graph::deleteConnection(ConnectionPtr connection)
     connection_observations_[connection.get()].clear();
 
     if(connection->isDetached()) {
-        auto c = std::find(connections_.begin(), connections_.end(), connection);
-        if(c != connections_.end()) {
-            connections_.erase(c);
+        auto c = std::find(edges_.begin(), edges_.end(), connection);
+        if(c != edges_.end()) {
+            edges_.erase(c);
         }
         return;
     }
@@ -197,7 +207,7 @@ void Graph::deleteConnection(ConnectionPtr connection)
 
     out->removeConnection(in.get());
 
-    for(std::vector<ConnectionPtr>::iterator c = connections_.begin(); c != connections_.end();) {
+    for(std::vector<ConnectionPtr>::iterator c = edges_.begin(); c != edges_.end();) {
         if(*connection == **c) {
             ConnectablePtr to = connection->to();
             to->setError(false);
@@ -234,22 +244,34 @@ void Graph::deleteConnection(ConnectionPtr connection)
                         }
 
                         if(!n_from->getOutputTransition()->hasConnection()) {
-                            sinks_.insert(v_from);
+                            // verify that v_from is from this graph
+                            for(const graph::VertexPtr& vertex : vertices_) {
+                                if(vertex == v_from) {
+                                    sinks_.insert(v_from);
+                                    break;
+                                }
+                            }
                         }
                         if(!n_to->getInputTransition()->hasConnection()) {
-                            sources_.insert(v_to);
+                            // verify that v_to is from this graph
+                            for(const graph::VertexPtr& vertex : vertices_) {
+                                if(vertex == v_to) {
+                                    sources_.insert(v_to);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            connections_.erase(c);
+            edges_.erase(c);
 
             connection_removed(connection.get());
             if(!in_transaction_) {
                 analyzeGraph();
             }
-            for(const auto& c : connections_) {
+            for(const auto& c : edges_) {
                 apex_assert_hard(c);
             }
 
@@ -716,7 +738,7 @@ ConnectablePtr Graph::findConnectorNoThrow(const UUID &uuid) noexcept
 
 ConnectionPtr Graph::getConnectionWithId(int id)
 {
-    for(ConnectionPtr& connection : connections_) {
+    for(ConnectionPtr& connection : edges_) {
         if(connection->id() == id) {
             return connection;
         }
@@ -732,7 +754,7 @@ ConnectionPtr Graph::getConnection(Connectable* from, Connectable* to)
 
 ConnectionPtr Graph::getConnection(const UUID &from, const UUID &to)
 {
-    for(ConnectionPtr& connection : connections_) {
+    for(ConnectionPtr& connection : edges_) {
         if(connection->from()->getUUID() == from && connection->to()->getUUID() == to) {
             return connection;
         }

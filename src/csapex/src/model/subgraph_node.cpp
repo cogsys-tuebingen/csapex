@@ -28,12 +28,11 @@ SubgraphNode::SubgraphNode()
       guard_(-1)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &SubgraphNode::subgraphHasProducedAllMessages));
-    transition_relay_out_->messages_processed.connect(delegate::Delegate0<>(this, &SubgraphNode::currentIterationIsProcessed));
+    observe(transition_relay_out_->messages_processed, delegate::Delegate0<>(this, &SubgraphNode::currentIterationIsProcessed));
 }
 
 SubgraphNode::~SubgraphNode()
 {
-    clear();
     guard_ = 0xDEADBEEF;
 }
 
@@ -41,8 +40,9 @@ NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
 {
     apex_assert_hard(guard_ == -1);
     if(uuid.empty()) {
+        apex_assert_hard(node_handle_);
         apex_assert_hard(node_handle_->guard_ == -1);
-        return node_handle_;
+        return node_handle_.get();
     }
     return Graph::findNodeHandle(uuid);
 }
@@ -50,7 +50,7 @@ NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
 NodeHandle *SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.empty()) {
-        return node_handle_;
+        return node_handle_.get();
     }
     return Graph::findNodeHandleNoThrow(uuid);
 }
@@ -67,13 +67,19 @@ ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
     return Graph::findConnectorNoThrow(uuid);
 }
 
-void SubgraphNode::initialize(csapex::NodeHandle* node_handle)
+void SubgraphNode::initialize(NodeHandlePtr node_handle)
 {
     Node::initialize(node_handle);
 
     if(node_handle->getUUIDProvider()) {
         setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
     }
+}
+
+void SubgraphNode::detach()
+{
+    clear();
+    Node::detach();
 }
 
 void SubgraphNode::tearDown()
@@ -682,6 +688,7 @@ void SubgraphNode::notifyMessagesProcessed()
 
 void SubgraphNode::currentIterationIsProcessed()
 {
+    apex_assert(node_handle_);
     APEX_DEBUG_TRACE ainfo << "input activated" << std::endl;
 
     if(!is_subgraph_finished_) {

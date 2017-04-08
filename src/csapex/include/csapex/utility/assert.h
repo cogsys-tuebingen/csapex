@@ -3,9 +3,11 @@
 
 /// PROJECT
 #include <csapex/csapex_util_export.h>
+#include <csapex/utility/type.h>
 
 /// SYSTEM
 #include <string>
+#include <memory>
 
 #if WIN32
 #define APEX_FUNCTION_SIGNATURE() __FUNCSIG__
@@ -26,7 +28,17 @@ inline std::string universal_to_string(const char* string)
 }
 
 template <typename V>
-inline std::string universal_to_string(V value)
+inline std::string universal_to_string(const V* value)
+{
+    return std::string("[") + csapex::type2name(typeid(V)) + " = " + std::to_string((long) value) + "]";
+}
+template <typename V>
+inline std::string universal_to_string(const std::shared_ptr<V>& value)
+{
+    return universal_to_string(value.get());
+}
+template <typename V>
+inline std::string universal_to_string(const V& value)
 {
     return std::to_string(value);
 }
@@ -36,9 +48,17 @@ inline std::string universal_to_string(V value)
 #define apex_assert_hard_msg(assertion,msg)  _apex_assert_hard(static_cast<bool>(assertion), msg, #assertion, __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
 #define apex_assert_soft_msg(assertion,msg)  _apex_assert_soft(static_cast<bool>(assertion), msg, #assertion, __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
 
-#define apex_assert_equal(a,b)       apex_assert_msg(((a) == (b)), assert::universal_to_string(a) + " is not equal to " + assert::universal_to_string(b))
-#define apex_assert_equal_hard(a,b)  apex_assert_hard_msg(((a) == (b)), assert::universal_to_string(a) + " is not equal to " + assert::universal_to_string(b))
-#define apex_assert_equal_soft(a,b)  apex_assert_soft_msg(((a) == (b)), assert::universal_to_string(a) + " is not equal to " + assert::universal_to_string(b))
+#define apex_assert_eq(a,b)       apex_assert_msg(((a) == (b)), assert::universal_to_string(a) + " is not equal to " + assert::universal_to_string(b))
+#define apex_assert_eq_hard(a,b)  apex_assert_hard_msg(((a) == (b)), assert::universal_to_string(a) + " is not equal to " + assert::universal_to_string(b))
+#define apex_assert_eq_soft(a,b)  apex_assert_soft_msg(((a) == (b)), assert::universal_to_string(a) + " is not equal to " + assert::universal_to_string(b))
+
+#define apex_assert_neq(a,b)       apex_assert_msg(((a) != (b)), assert::universal_to_string(a) + " is equal to " + assert::universal_to_string(b))
+#define apex_assert_neq_hard(a,b)  apex_assert_hard_msg(((a) != (b)), assert::universal_to_string(a) + " is equal to " + assert::universal_to_string(b))
+#define apex_assert_neq_soft(a,b)  apex_assert_soft_msg(((a) != (b)), assert::universal_to_string(a) + " is equal to " + assert::universal_to_string(b))
+
+#define apex_assert_equal(a,b)       apex_assert_eq(a,b)
+#define apex_assert_equal_hard(a,b)  apex_assert_eq_hard(a,b)
+#define apex_assert_equal_soft(a,b)  apex_assert_eq_soft(a,b)
 
 #define apex_assert_lt(a,b)       apex_assert_msg(((a) < (b)), assert::universal_to_string(a) + " is not smaller than " + assert::universal_to_string(b))
 #define apex_assert_lt_hard(a,b)  apex_assert_hard_msg(((a) < (b)), assert::universal_to_string(a) + " is not smaller than " + assert::universal_to_string(b))

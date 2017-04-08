@@ -4,6 +4,9 @@
 /// PROJECT
 #include <csapex/model/node_handle.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 using namespace csapex::graph;
 

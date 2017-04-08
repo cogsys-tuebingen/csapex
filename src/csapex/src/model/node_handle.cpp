@@ -38,8 +38,6 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
       guard_(-1)
 {
-    node_->initialize(this);
-    
     node_state_->setLabel(uuid.getFullName());
     node_state_->setParent(this);
     
@@ -91,8 +89,6 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
 NodeHandle::~NodeHandle()
 {
-    node_->tearDown();
-
     while(!external_inputs_.empty()) {
         removeInput(external_inputs_.begin()->get());
     }
@@ -180,14 +176,18 @@ bool NodeHandle::isActive() const
 
 void NodeHandle::stop()
 {
+    stopped();
+
     node_->reset();
-    
+
     for(OutputPtr i : getExternalOutputs()) {
         i->stop();
     }
     for(InputPtr i : getExternalInputs()) {
         i->stop();
     }
+
+    node_->detach();
 }
 
 std::string NodeHandle::getType() const

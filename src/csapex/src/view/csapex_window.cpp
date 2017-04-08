@@ -372,7 +372,7 @@ void CsApexWindow::updateSelectionActions()
     ui->actionGroup->setEnabled(enabled);
 
     std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
-    bool is_graph = selected.size() == 1 && selected[0]->getNodeHandle()->getType() == "csapex::Graph";
+    bool is_graph = selected.size() == 1 && selected[0]->getNodeFacade()->getNodeHandle()->getType() == "csapex::Graph";
     ui->actionUngroup->setEnabled(is_graph);
 }
 
@@ -388,7 +388,7 @@ void CsApexWindow::showHelp(NodeBox *box)
     }
 
 
-    std::string node_type = box->getNodeHandle()->getType();
+    std::string node_type = box->getNodeFacade()->getType();
 
     QTreeWidgetItemIterator it(ui->node_info_tree);
     while (*it) {
@@ -429,9 +429,9 @@ void CsApexWindow::updateDebugInfo()
     std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
 
     for(NodeBox* box : selected) {
-        NodeHandle* handle = box->getNodeHandle();
+        NodeHandlePtr handle = box->getNodeFacade()->getNodeHandle();
         handle->node_state_changed.connect([this](){ updateDebugInfo(); });
-        ui->box_info->addTopLevelItem(NodeStatistics(handle).createDebugInformation(view_core_.getNodeFactory().get()));
+        ui->box_info->addTopLevelItem(NodeStatistics(handle.get()).createDebugInformation(view_core_.getNodeFactory().get()));
     }
 
     QTreeWidgetItemIterator it(ui->box_info);

@@ -5,43 +5,63 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
-NodeFacade::NodeFacade(NodeHandleWeakPtr nh, NodeWorkerWeakPtr nw)
+NodeFacade::NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw)
     : nh_(nh), nw_(nw)
 {
-    if(NodeWorkerPtr worker = nw.lock()) {
-        observe(worker->start_profiling, [this](NodeWorker*) {
-            start_profiling(this);
-        });
-        observe(worker->stop_profiling,  [this](NodeWorker*) {
-            stop_profiling(this);
-        });
-    }
+    observe(nw->start_profiling, [this](NodeWorker*) {
+        start_profiling(this);
+    });
+    observe(nw->stop_profiling,  [this](NodeWorker*) {
+        stop_profiling(this);
+    });
 }
 
-NodeFacade::NodeFacade(NodeHandleWeakPtr nh)
+NodeFacade::NodeFacade(NodeHandlePtr nh)
     : nh_(nh)
 {
 
 }
 
+NodeFacade::~NodeFacade()
+{
+}
+
+std::string NodeFacade::getType() const
+{
+    return nh_->getType();
+}
+
 UUID NodeFacade::getUUID() const
 {
-    if(NodeHandlePtr nh = nh_.lock()) {
-        return nh->getUUID();
-    }
+    return nh_->getUUID();
+}
 
-    throw std::runtime_error("state node handle");
+bool NodeFacade::isActive() const
+{
+    return nh_->isActive();
+}
+
+bool NodeFacade::isProcessingEnabled() const
+{
+    return nw_->isProcessingEnabled();
+}
+bool NodeFacade::isProfiling() const
+{
+    return nw_->isProfiling();
 }
 
 
 NodeWorkerPtr NodeFacade::getNodeWorker()
 {
-    return nw_.lock();
+    return nw_;
 }
 
 NodeHandlePtr NodeFacade::getNodeHandle()
 {
-    return nh_.lock();
+    return nh_;
 }

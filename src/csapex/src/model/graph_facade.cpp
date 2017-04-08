@@ -22,6 +22,9 @@
 #include <csapex/signal/slot.h>
 #include <csapex/model/graph/vertex.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNode* graph, NodeHandle* nh, GraphFacade *parent)
@@ -124,7 +127,6 @@ void GraphFacade::nodeRemovedHandler(graph::VertexPtr vertex)
         child_removed(pos->second);
         children_.erase(pos);
     }
-
 }
 
 AUUID GraphFacade::getAbsoluteUUID() const

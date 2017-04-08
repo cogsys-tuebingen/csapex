@@ -92,11 +92,12 @@ bool UngroupNodes::doExecute()
 
     CommandFactory cf(getGraphFacade());
 
+    insert_pos = nh->getNodeState()->getPos();
+
     CommandPtr del = cf.deleteAllNodes({uuid});
     executeCommand(del);
     add(del);
 
-    insert_pos = nh->getNodeState()->getPos();
 
     pasteSelection(graph_uuid);
 

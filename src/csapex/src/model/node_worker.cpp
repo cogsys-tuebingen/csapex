@@ -45,6 +45,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 {
     node_handle->setNodeWorker(this);
 
+//    observe(node_handle->stopped, [this](){
+//        stopObserving();
+//    });
+
     profiler_ = std::make_shared<Profiler>(false, 16);
 
     NodePtr node = node_handle_->getNode().lock();

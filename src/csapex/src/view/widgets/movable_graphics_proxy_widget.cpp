@@ -35,7 +35,7 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *
 
     long z = 0;
 
-    NodeHandle* nh = box_->getNodeHandle();
+    NodeHandlePtr nh = box_->getNodeFacade()->getNodeHandle();
     if(nh) {
         NodeStatePtr state = nh->getNodeState();
         z = state->getZ();
@@ -103,7 +103,7 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
         }
 
         setZValue(z);
-        NodeHandle* nh = box_->getNodeHandle();
+        NodeHandlePtr nh = box_->getNodeFacade()->getNodeHandle();
         if(nh) {
             NodeStatePtr state = nh->getNodeState();
             state->setZ(z);

@@ -85,7 +85,7 @@ void DefaultNodeAdapterBridge::connectInGuiThread(slim_signal::Signal<void (Para
 
 void DefaultNodeAdapterBridge::disconnect()
 {
-    for(const slim_signal::Connection& c : connections) {
+    for(slim_signal::Connection& c : connections) {
         c.disconnect();
     }
 

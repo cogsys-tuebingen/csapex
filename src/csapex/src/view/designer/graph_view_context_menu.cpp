@@ -98,7 +98,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 {
     std::stringstream title;
     if(view_.selected_boxes_.size() == 1) {
-        title << "Node: " << view_.selected_boxes_.front()->getNodeWorker()->getUUID().getShortName();
+        title << "Node: " << view_.selected_boxes_.front()->getNodeFacade()->getUUID().getShortName();
     } else {
         title << view_.selected_boxes_.size() << " selected nodes";
     }
@@ -145,7 +145,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         has_minimized |= minimized;
         has_maximized |= !minimized;
 
-        const auto& state = box->getNodeHandle()->getNodeState();
+        const auto& state = box->getNodeFacade()->getNodeHandle()->getNodeState();
 
         has_log_level[state->getLoggerLevel()] = true;
 
@@ -157,7 +157,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         has_unbounded |= max_f <= 0.0;
         has_bounded |= max_f > 0.0;
 
-        bool enabled = box->getNodeWorker()->isProcessingEnabled();
+        bool enabled = box->getNodeFacade()->isProcessingEnabled();
         has_enabled|= enabled;
         has_disabled |= !enabled;
 
@@ -346,7 +346,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         bool has_profiling = false;
         bool has_not_profiling = false;
         for(NodeBox* box : view_.selected_boxes_) {
-            bool p = box->getNodeWorker()->isProfiling();
+            bool p = box->getNodeFacade()->isProfiling();
             has_profiling |= p;
             has_not_profiling |= !p;
         }

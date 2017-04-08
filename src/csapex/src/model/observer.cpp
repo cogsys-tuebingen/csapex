@@ -10,15 +10,15 @@ Observer::~Observer()
 
 void Observer::stopObserving()
 {
-    connections_.clear();
+    observed_connections_.clear();
 }
 
 void Observer::manageConnection(slim_signal::ScopedConnection&& connection)
 {
-    connections_.emplace_back(std::move(connection));
+    observed_connections_.emplace_back(std::move(connection));
 }
 
 void Observer::manageConnection(const slim_signal::Connection& connection)
 {
-    connections_.emplace_back(connection);
+    observed_connections_.emplace_back(connection);
 }

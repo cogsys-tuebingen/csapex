@@ -59,7 +59,7 @@ protected:
     }
 
 private:
-    std::vector<slim_signal::ScopedConnection> connections_;
+    std::vector<slim_signal::ScopedConnection> observed_connections_;
 };
 
 }

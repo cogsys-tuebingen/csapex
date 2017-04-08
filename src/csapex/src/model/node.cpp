@@ -35,12 +35,12 @@ Node::~Node()
 
 NodeHandle* Node::getNodeHandle() const
 {
-    return node_handle_;
+    return node_handle_.get();
 }
 
-void Node::initialize(NodeHandle *node_handle)
+void Node::initialize(NodeHandlePtr node_handle)
 {
-    node_modifier_ = node_handle;
+    node_modifier_ = node_handle.get();
     node_handle_ = node_handle;
     parameters_ = this;
 
@@ -53,6 +53,15 @@ void Node::initialize(NodeHandle *node_handle)
     ainfo.setPrefix(p);
     awarn.setPrefix(p);
     aerr.setPrefix(p);
+}
+
+void Node::detach()
+{
+    stopObserving();
+    if(node_handle_) {
+        apex_assert_hard(node_handle_->guard_ == -1);
+    }
+    node_handle_.reset();
 }
 
 UUID Node::getUUID() const
@@ -91,6 +100,7 @@ bool Node::canProcess() const
 
 void Node::yield() const
 {
+    apex_assert(node_handle_);
     node_handle_->might_be_enabled();
 }
 

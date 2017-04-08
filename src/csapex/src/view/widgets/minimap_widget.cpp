@@ -171,7 +171,7 @@ void MinimapWidget::paintEvent(QPaintEvent* /*event*/)
     QPen pen_box(QBrush(QColor::fromRgb(0,0,0)), 1);
     painter.setPen(pen_box);
     for (NodeBox *box : boxes) {
-        if(box->getNodeHandle()->isActive()) {
+        if(box->getNodeFacade()->isActive()) {
             painter.setBrush(brush_box_active);
         } else {
             painter.setBrush(brush_box);

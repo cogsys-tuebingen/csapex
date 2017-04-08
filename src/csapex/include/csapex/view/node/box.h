@@ -73,8 +73,6 @@ public:
 
     /// ACCESSORS
     NodeFacadePtr getNodeFacade() const;
-    NodeWorker* getNodeWorker() const;
-    NodeHandle* getNodeHandle() const;
     NodeAdapterPtr getNodeAdapter() const;
 
     GraphView* getGraphView() const;

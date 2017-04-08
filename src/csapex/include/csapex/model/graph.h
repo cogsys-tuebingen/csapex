@@ -127,7 +127,7 @@ public:
 protected:
 //    std::vector<NodeHandlePtr> nodes_;
     std::vector<graph::VertexPtr> vertices_;
-    std::vector<ConnectionPtr> connections_;
+    std::vector<ConnectionPtr> edges_;
 
     std::map<Connection*, std::vector<slim_signal::ScopedConnection>> connection_observations_;
 

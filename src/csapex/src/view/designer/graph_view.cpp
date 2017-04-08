@@ -152,8 +152,7 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
 GraphView::~GraphView()
 {
-    handle_connections_.clear();
-    worker_connections_.clear();
+    facade_connections_.clear();
 
     delete scene_;
 }
@@ -426,7 +425,7 @@ std::vector<UUID> GraphView::getSelectedUUIDs() const
     std::vector<UUID> uuids;
     uuids.reserve(selected_boxes_.size());
     for(const auto& box : selected_boxes_) {
-        uuids.push_back(box->getNodeWorker()->getUUID());
+        uuids.push_back(box->getNodeFacade()->getUUID());
     }
     return uuids;
 }
@@ -438,7 +437,7 @@ void GraphView::enableSelection(bool enabled)
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(), enabled ? "enable nodes" : "disable nodes"));
 
     for(NodeBox* box: selected_boxes_) {
-        cmd->add(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), box->getNodeHandle()->getUUID(), !enabled));
+        cmd->add(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), box->getNodeFacade()->getUUID(), !enabled));
     }
 
     view_core_.getCommandDispatcher()->execute(cmd);
@@ -468,7 +467,7 @@ void GraphView::deleteSelected()
     for(QGraphicsItem* item : scene_->selectedItems()) {
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
-            uuids.push_back(proxy->getBox()->getNodeHandle()->getUUID());
+            uuids.push_back(proxy->getBox()->getNodeFacade()->getUUID());
         }
     }
 
@@ -801,8 +800,8 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
     adapter->executeCommand.connect(delegate::Delegate<void(const CommandPtr&)>(view_core_.getCommandDispatcher().get(), &CommandExecutor::execute));
     box->setAdapter(adapter);
 
-    box_map_[node_handle->getUUID()] = box;
-    proxy_map_[node_handle->getUUID()] = new MovableGraphicsProxyWidget(box, this, view_core_);
+    box_map_[node_facade->getUUID()] = box;
+    proxy_map_[node_facade->getUUID()] = new MovableGraphicsProxyWidget(box, this, view_core_);
 
     box->setStyleSheet(styleSheet());
 
@@ -826,9 +825,9 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
 
     // subscribe to coming connectors
     auto c1 = node_handle->connector_created.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
-    handle_connections_[node_handle.get()].emplace_back(c1);
+    facade_connections_[node_facade.get()].emplace_back(c1);
     auto c2 = node_handle->connector_removed.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
-    handle_connections_[node_handle.get()].emplace_back(c2);
+    facade_connections_[node_facade.get()].emplace_back(c2);
 
 
     UUID uuid = node_handle->getUUID();
@@ -956,21 +955,20 @@ void GraphView::addBox(NodeBox *box)
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
     NodeFacadePtr facade = box->getNodeFacade();
-    NodeWorker* worker = facade->getNodeWorker().get();
     NodeHandle* handle = facade->getNodeHandle().get();
 
-    worker_connections_[worker].emplace_back(handle->connection_start.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnections(); }));
-    worker_connections_[worker].emplace_back(handle->connection_in_prograss.connect([this](const ConnectablePtr& from, const ConnectablePtr& to) { scene_->previewConnection(from, to); }));
-    worker_connections_[worker].emplace_back(handle->connection_done.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    facade_connections_[facade.get()].emplace_back(handle->connection_start.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnections(); }));
+    facade_connections_[facade.get()].emplace_back(handle->connection_in_prograss.connect([this](const ConnectablePtr& from, const ConnectablePtr& to) { scene_->previewConnection(from, to); }));
+    facade_connections_[facade.get()].emplace_back(handle->connection_done.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
 
-    worker_connections_[worker].emplace_back(facade->start_profiling.connect([this](NodeFacade* nw) { startProfilingRequest(nw); }));
-    worker_connections_[worker].emplace_back(facade->stop_profiling.connect([this](NodeFacade* nw) { stopProfilingRequest(nw); }));
+    facade_connections_[facade.get()].emplace_back(facade->start_profiling.connect([this](NodeFacade* nw) { startProfilingRequest(nw); }));
+    facade_connections_[facade.get()].emplace_back(facade->stop_profiling.connect([this](NodeFacade* nw) { stopProfilingRequest(nw); }));
 
 
-    MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
+    MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeFacade()->getUUID());
     scene_->addItem(proxy);
 
     QObject::connect(proxy, &MovableGraphicsProxyWidget::moved, this, &GraphView::movedBoxes);
@@ -999,8 +997,7 @@ void GraphView::addBox(NodeBox *box)
 
 void GraphView::removeBox(NodeBox *box)
 {
-    handle_connections_.erase(box->getNodeHandle());
-    worker_connections_.erase(box->getNodeWorker());
+    facade_connections_.erase(box->getNodeFacade().get());
 
     box->setVisible(false);
     box->deleteLater();
@@ -1118,8 +1115,8 @@ void GraphView::removePort(Port *port)
 void GraphView::renameBox(NodeBox *box)
 {
     GraphFacade* graph = getGraphFacade();
-    NodeHandle* node = box->getNodeHandle();
-    NodeStatePtr state = node->getNodeState();
+    NodeFacadePtr node = box->getNodeFacade();
+    NodeStatePtr state = node->getNodeHandle()->getNodeState();
     QString old_name = QString::fromStdString(state->getLabel());
 
     bool ok = false;
@@ -1141,7 +1138,7 @@ void GraphView::startProfiling(NodeFacade *node)
     NodeBox* box = getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
-    QPointer<ProfilingWidget> prof = new ProfilingWidget(box->getNodeWorker()->getProfiler(), node->getUUID().getFullName());
+    QPointer<ProfilingWidget> prof = new ProfilingWidget(box->getNodeFacade()->getNodeWorker()->getProfiler(), node->getUUID().getFullName());
     profiling_[box] = prof;
 
     if(QVBoxLayout* vbl = dynamic_cast<QVBoxLayout*>(prof->layout())) {
@@ -1163,7 +1160,7 @@ void GraphView::startProfiling(NodeFacade *node)
         item->setScale(1.0);
     }
 
-    MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeWorker()->getUUID());
+    MovableGraphicsProxyWidget* proxy = getProxy(box->getNodeFacade()->getUUID());
     QObject::connect(proxy, &MovableGraphicsProxyWidget::moving, [box, prof](double, double){
         if(!prof.isNull()) {
             QPointF pos = box->graphicsProxyWidget()->pos() + QPointF(0,box->height());
@@ -1171,7 +1168,7 @@ void GraphView::startProfiling(NodeFacade *node)
         }
     });
 
-    auto nw = box->getNodeWorker();
+    auto nw = box->getNodeFacade()->getNodeWorker();
 
     auto cp = nw->messages_processed.connect([prof](){ prof->update(); });
     profiling_connections_[box].push_back(cp);
@@ -1205,7 +1202,7 @@ void GraphView::movedBoxes(double dx, double dy)
             QPointF to = proxy->pos();
             QPointF from = to - delta;
             meta->add(Command::Ptr(new command::MoveBox(graph_facade_->getAbsoluteUUID(),
-                                                        b->getNodeWorker()->getUUID(),
+                                                        b->getNodeFacade()->getUUID(),
                                                         Point(from.x(), from.y()), Point(to.x(), to.y()))));
         }
     }
@@ -1317,7 +1314,7 @@ void GraphView::createNewThreadGroupFor()
     if(ok && !text.isEmpty()) {
         command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(), "create new thread group"));
         for(NodeBox* box : selected_boxes_) {
-            cmd->add(Command::Ptr(new command::CreateThread(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), text.toStdString())));
+            cmd->add(Command::Ptr(new command::CreateThread(graph_facade_->getAbsoluteUUID(),box->getNodeFacade()->getUUID(), text.toStdString())));
         }
         view_core_.getCommandDispatcher()->execute(cmd);
     }
@@ -1344,7 +1341,7 @@ void GraphView::chooseColor()
 
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"flip boxes"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SetColor(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), r, g, b)));
+        cmd->add(Command::Ptr(new command::SetColor(graph_facade_->getAbsoluteUUID(),box->getNodeFacade()->getUUID(), r, g, b)));
     }
     view_core_.getCommandDispatcher()->execute(cmd);
 }
@@ -1353,7 +1350,7 @@ void GraphView::flipBox()
 {
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"flip boxes"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::FlipSides(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID())));
+        cmd->add(Command::Ptr(new command::FlipSides(graph_facade_->getAbsoluteUUID(),box->getNodeFacade()->getUUID())));
     }
     view_core_.getCommandDispatcher()->execute(cmd);
 }
@@ -1362,7 +1359,7 @@ void GraphView::setExecutionMode(ExecutionMode mode)
 {
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set execution mode"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::SetExecutionMode(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), mode)));
+        cmd->add(Command::Ptr(new command::SetExecutionMode(graph_facade_->getAbsoluteUUID(),box->getNodeFacade()->getUUID(), mode)));
     }
     view_core_.getCommandDispatcher()->execute(cmd);
 }
@@ -1380,7 +1377,7 @@ void GraphView::setMaximumFrequency()
     }
 
     bool ok = false;
-    double current_f = selected_boxes_.front()->getNodeHandle()->getNodeState()->getMaximumFrequency();
+    double current_f = selected_boxes_.front()->getNodeFacade()->getNodeHandle()->getNodeState()->getMaximumFrequency();
     if(current_f <= 0.0) {
         current_f = 30.0;
     }
@@ -1400,7 +1397,7 @@ void GraphView::minimizeBox(bool muted)
 {
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),(muted ? std::string("minimize") : std::string("maximize")) + " boxes"));
     for(NodeBox* box : selected_boxes_) {
-        cmd->add(Command::Ptr(new command::Minimize(graph_facade_->getAbsoluteUUID(),box->getNodeWorker()->getUUID(), muted)));
+        cmd->add(Command::Ptr(new command::Minimize(graph_facade_->getAbsoluteUUID(),box->getNodeFacade()->getUUID(), muted)));
     }
     view_core_.getCommandDispatcher()->execute(cmd);
 }
@@ -1416,7 +1413,7 @@ void GraphView::morphNode()
 
     const NodeBox* box = getSelectedBoxes()[0];
 
-    NodeHandle* nh = box->getNodeHandle();
+    NodeHandle* nh = box->getNodeFacade()->getNodeHandle().get();
 
     RewiringDialog diag(nh, view_core_);
     diag.makeUI(styleSheet());
@@ -1450,7 +1447,7 @@ Snippet GraphView::serializeSelection() const
 
     std::vector<UUID> nodes;
     for(const NodeBox* box : selected_boxes_) {
-        nodes.emplace_back(box->getNodeHandle()->getUUID());
+        nodes.emplace_back(box->getNodeFacade()->getUUID());
     }
 
     return io.saveSelectedGraph(nodes);
@@ -1478,10 +1475,10 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
     yaml_txt << yaml;
 
 
-    Point box_pos = box_handle->getNodeHandle()->getNodeState()->getPos();
+    Point box_pos = box_handle->getNodeFacade()->getNodeHandle()->getNodeState()->getPos();
     Point top_left = box_pos;
     for(NodeBox* box : selected_boxes_) {
-        Point pos = box->getNodeHandle()->getNodeState()->getPos();
+        Point pos = box->getNodeFacade()->getNodeHandle()->getNodeState()->getPos();
         if(pos.x < top_left.x) {
             top_left.x = pos.x;
         }
@@ -1500,7 +1497,7 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
     }
 
 
-    std::string type = box_handle->getNodeHandle()->getType();
+    std::string type = box_handle->getNodeFacade()->getType();
 
     NodeConstructorPtr c = view_core_.getNodeFactory()->getConstructor(type);
     NodeHandlePtr handle = c->makePrototype();
@@ -1532,7 +1529,7 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
     }
     box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));
 
-    handle->setNodeState(box_handle->getNodeHandle()->getNodeStateCopy());
+    handle->setNodeState(box_handle->getNodeFacade()->getNodeHandle()->getNodeStateCopy());
 
     box->setStyleSheet(styleSheet());
     box->construct();
@@ -1559,7 +1556,7 @@ void GraphView::groupSelected()
     std::vector<UUID> uuids;
     uuids.reserve(selected_boxes_.size());
     for(NodeBox* box : selected_boxes_) {
-        uuids.push_back(box->getNodeHandle()->getUUID());
+        uuids.push_back(box->getNodeFacade()->getUUID());
     }
     CommandPtr cmd(new command::GroupNodes(graph_facade_->getAbsoluteUUID(),uuids));
     view_core_.getCommandDispatcher()->execute(cmd);
@@ -1570,7 +1567,7 @@ void GraphView::ungroupSelected()
 {
     apex_assert_hard(selected_boxes_.size() == 1);
 
-    CommandPtr cmd(new command::UngroupNodes(graph_facade_->getAbsoluteUUID(), selected_boxes_.front()->getNodeHandle()->getUUID()));
+    CommandPtr cmd(new command::UngroupNodes(graph_facade_->getAbsoluteUUID(), selected_boxes_.front()->getNodeFacade()->getUUID()));
     view_core_.getCommandDispatcher()->execute(cmd);
 }
 

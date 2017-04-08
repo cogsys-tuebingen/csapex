@@ -71,7 +71,12 @@ public:
      *
      * @param node_handle is the associated node handle for the node instance
      */
-    virtual void initialize(csapex::NodeHandle* node_handle);
+    virtual void initialize(NodeHandlePtr node_handle);
+
+    /**
+     * @brief detach removes the node from its node handle.
+     */
+    virtual void detach();
 
     /**
      * @brief getNodeHandle gives access to the corresponding node handle.
@@ -280,7 +285,7 @@ public:
 protected:
     csapex::NodeModifier* node_modifier_;
     csapex::Parameterizable* parameters_;
-    csapex::NodeHandle* node_handle_;
+    csapex::NodeHandlePtr node_handle_;
 
     long guard_; ///< Memory corruption indicator
 };

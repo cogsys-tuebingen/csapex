@@ -140,6 +140,7 @@ public:
     void updateLoggerLevel();
 
 public:
+    slim_signal::Signal<void ()> stopped;
     slim_signal::Signal<void ()> node_removed;
 
     slim_signal::Signal<void (ConnectablePtr)> connector_created;

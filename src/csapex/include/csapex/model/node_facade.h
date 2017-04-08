@@ -13,10 +13,17 @@ namespace csapex
 class NodeFacade : public Observer
 {
 public:
-    NodeFacade(NodeHandleWeakPtr nh);
-    NodeFacade(NodeHandleWeakPtr nh, NodeWorkerWeakPtr nw);
+    NodeFacade(NodeHandlePtr nh);
+    NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw);
 
+    ~NodeFacade();
+
+    std::string getType() const;
     UUID getUUID() const;
+
+    bool isActive() const;
+    bool isProcessingEnabled() const;
+    bool isProfiling() const;
 
     NodeWorkerPtr getNodeWorker();
     NodeHandlePtr getNodeHandle();
@@ -26,8 +33,8 @@ public:
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
 
 private:
-    NodeHandleWeakPtr nh_;
-    NodeWorkerWeakPtr nw_;
+    NodeHandlePtr nh_;
+    NodeWorkerPtr nw_;
 };
 
 }
