@@ -2,8 +2,7 @@
 #include <csapex/view/widgets/activity_legend.h>
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
-#include <csapex/model/node_state.h>
+#include <csapex/model/node_facade.h>
 
 /// SYSTEM
 #include <QHeaderView>
@@ -45,33 +44,31 @@ void ActivityLegend::resizeToFit()
     setFixedHeight(rect.height());
 }
 
-void ActivityLegend::startTrackingNode(NodeWorkerPtr node)
+void ActivityLegend::startTrackingNode(NodeFacadePtr node)
 {
-    NodeWorker* worker = node.get();
-
-    worker->start_profiling.connect([this](NodeWorker* nw) { addNode(nw); });
-    worker->stop_profiling.connect([this](NodeWorker* nw) { removeNode(nw); });
+    observe(node->start_profiling, [this](NodeFacade* nw) { addNode(nw); });
+    observe(node->stop_profiling, [this](NodeFacade* nw) { removeNode(nw); });
 }
 
-void ActivityLegend::stopTrackingNode(NodeHandlePtr /*node*/)
+void ActivityLegend::stopTrackingNode(NodeFacadePtr /*node*/)
 {
 }
 
-void ActivityLegend::addNode(NodeWorker* node)
+void ActivityLegend::addNode(NodeFacade* node)
 {
     int row = rows_.size();
     rows_.push_back(node);
 
     QAbstractItemModel* m = model();
     m->insertRow(row);
-    m->setData(m->index(row, 0), QString::fromStdString(node->getNodeHandle()->getNodeState()->getLabel()));
+    m->setData(m->index(row, 0), QString::fromStdString(node->getLabel()));
 
     resizeToFit();
 
     Q_EMIT nodeAdded(node);
 }
 
-void ActivityLegend::removeNode(NodeWorker* node)
+void ActivityLegend::removeNode(NodeFacade* node)
 {
     bool found = false;
     int row = 0;
@@ -98,7 +95,7 @@ void ActivityLegend::removeNode(NodeWorker* node)
 
 void ActivityLegend::emitSelection()
 {
-    QList<NodeWorker*> list;
+    QList<NodeFacade*> list;
 
     for(QModelIndex i : selectedIndexes()) {
         list.push_back(rows_[i.row()]);

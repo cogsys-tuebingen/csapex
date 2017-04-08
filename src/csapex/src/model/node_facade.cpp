@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node_state.h>
 
 /// SYSTEM
 #include <iostream>
@@ -19,8 +20,16 @@ NodeFacade::NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw)
     observe(nw->stop_profiling,  [this](NodeWorker*) {
         stop_profiling(this);
     });
+
     observe(nw->destroyed, destroyed);
     observe(nw->notification, notification);
+
+    observe(nw->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
+        interval_start(this, type, stamp);
+    });
+    observe(nw->interval_end,  [this](NodeWorker*, std::shared_ptr<const Interval> stamp) {
+        interval_end(this, stamp);
+    });
 }
 
 NodeFacade::NodeFacade(NodeHandlePtr nh)
@@ -63,6 +72,11 @@ bool NodeFacade::isProfiling() const
     } else {
         return false;
     }
+}
+
+std::string NodeFacade::getLabel() const
+{
+    return nh_->getNodeState()->getLabel();
 }
 
 

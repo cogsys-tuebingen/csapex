@@ -2,15 +2,12 @@
 #include <csapex/view/widgets/activity_timeline.h>
 
 /// COMPONENT
-#include <csapex/model/node_handle.h>
-#include <csapex/model/node_state.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/profiling/interval.h>
 #include <csapex/view/widgets/activity_timeline_item.h>
 
 /// SYSTEM
 #include <QPainter>
-#include <QGraphicsLineItem>
-#include <QSignalMapper>
 #include <QTimer>
 #include <QDateTime>
 #include <QApplication>
@@ -176,7 +173,7 @@ void ActivityTimeline::stopTimer()
 }
 
 
-void ActivityTimeline::addNode(NodeWorker* node)
+void ActivityTimeline::addNode(NodeFacade* node)
 {
     if(rows_.empty()) {
         startTimer();
@@ -194,7 +191,7 @@ void ActivityTimeline::addNode(NodeWorker* node)
     node2connections_[node].emplace_back(node->interval_end.connect(this, &ActivityTimeline::updateRowStopRequest));
 }
 
-void ActivityTimeline::removeNode(NodeWorker* node)
+void ActivityTimeline::removeNode(NodeFacade* node)
 {
     bool found = false;
     for(std::size_t r = 0; r < rows_.size(); ++r) {
@@ -231,12 +228,12 @@ void ActivityTimeline::removeNode(NodeWorker* node)
     }
 }
 
-void ActivityTimeline::setSelection(QList<NodeWorker *> nodes)
+void ActivityTimeline::setSelection(QList<NodeFacade *> nodes)
 {
-    for(std::map<NodeWorker*,Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
+    for(std::map<NodeFacade*,Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         it->second->selected = false;
     }
-    for(NodeWorker* node : nodes) {
+    for(NodeFacade* node : nodes) {
         node2row.at(node)->selected = true;
     }
     refresh();
@@ -300,7 +297,7 @@ void ActivityTimeline::wheelEvent(QWheelEvent *we)
     }
 }
 
-void ActivityTimeline::updateRowStart(NodeWorker* node, int type, std::shared_ptr<const Interval> interval)
+void ActivityTimeline::updateRowStart(NodeFacade* node, ActivityType type, std::shared_ptr<const Interval> interval)
 {
     if(!recording_) {
         return;
@@ -309,13 +306,13 @@ void ActivityTimeline::updateRowStart(NodeWorker* node, int type, std::shared_pt
     Row* row = node2row.at(node);
 
     updateTime(interval->getStartMs());
-    row->activities_.push_back(new Activity(&params_, row, params_.time, static_cast<NodeWorker::ActivityType>(type), interval));
+    row->activities_.push_back(new Activity(&params_, row, params_.time, type, interval));
     row->active_activity_ = row->activities_.back();
 
     addItem(row->active_activity_->rect);
 }
 
-void ActivityTimeline::updateRowStop(NodeWorker* node, std::shared_ptr<const Interval> interval)
+void ActivityTimeline::updateRowStop(NodeFacade* node, std::shared_ptr<const Interval> interval)
 {
     if(!recording_) {
         return;
@@ -354,7 +351,7 @@ void ActivityTimeline::update()
 
     int i = 0;
 
-    for(std::map<NodeWorker*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
+    for(std::map<NodeFacade*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         Row* row = it->second;
 
         if(row->active_activity_) {
@@ -385,7 +382,7 @@ void ActivityTimeline::reset()
 void ActivityTimeline::refresh()
 {
     int i = 0;
-    for(std::map<NodeWorker*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
+    for(std::map<NodeFacade*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         Row* row = it->second;
         row->refresh();
         ++i;
@@ -393,7 +390,7 @@ void ActivityTimeline::refresh()
 }
 
 
-ActivityTimeline::Row::Row(Parameters& params, QGraphicsScene* /*scene*/, int row, NodeWorker* worker)
+ActivityTimeline::Row::Row(Parameters& params, QGraphicsScene* /*scene*/, int row, NodeFacade* worker)
     : params_(params), node_(worker), row(row), active_activity_(nullptr), selected(false)
 {
     top = row * row_height;
@@ -433,7 +430,7 @@ void ActivityTimeline::Row::clear()
     active_activity_ = nullptr;
 }
 
-ActivityTimeline::Activity::Activity(Parameters* params, Row *row, int start_time, NodeWorker::ActivityType type, std::shared_ptr<const Interval> interval)
+ActivityTimeline::Activity::Activity(Parameters* params, Row *row, int start_time, ActivityType type, std::shared_ptr<const Interval> interval)
     : params_(params), row(row), type_(type), interval_(interval), start_(start_time), stop_(start_time + 10)
 {
     rect = new ActivityTimelineItem(interval);
@@ -463,13 +460,13 @@ void ActivityTimeline::Activity::update()
     QColor color;
 
     switch(type_) {
-    case NodeWorker::PROCESS:
+    case ActivityType::PROCESS:
         color = QColor::fromRgbF(1.0, 0.15, 0.15, 1.0);
         break;
-    case NodeWorker::SLOT:
+    case ActivityType::SLOT_CALLBACK:
         color = QColor::fromRgbF(0.15, 0.15, 1.0, 1.0);
         break;
-    case NodeWorker::OTHER:
+    case ActivityType::OTHER:
         color = QColor::fromRgbF(0.15, 0.5, 0.5, 1.0);
         break;
     }

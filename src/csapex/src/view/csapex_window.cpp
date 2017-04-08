@@ -17,6 +17,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_facade.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/token_data.h>
 #include <csapex/param/parameter_factory.h>
@@ -68,6 +69,7 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
       activity_legend_(new ActivityLegend), activity_timeline_(new ActivityTimeline),
       init_(false), style_sheet_watcher_(nullptr), plugin_locator_(view_core_.getPluginLocator())
 {
+    qRegisterMetaType < ActivityType > ("ActivityType");
     qRegisterMetaType < QImage > ("QImage");
     qRegisterMetaType < TokenPtr > ("Token::Ptr");
     qRegisterMetaType < TokenConstPtr > ("Token::ConstPtr");
@@ -77,13 +79,13 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
     qRegisterMetaType < std::shared_ptr<const Interval> > ("std::shared_ptr<const Interval>");
     qRegisterMetaType < Notification > ("Notification");
 
-    QObject::connect(activity_legend_, SIGNAL(nodeSelectionChanged(QList<NodeWorker*>)), activity_timeline_, SLOT(setSelection(QList<NodeWorker*>)));
+    QObject::connect(activity_legend_, &ActivityLegend::nodeSelectionChanged, activity_timeline_, &ActivityTimeline::setSelection);
 
-    observe(view_core_.node_facade_added, [this](NodeFacadePtr n) { activity_legend_->startTrackingNode(n->getNodeWorker()); });
-    observe(view_core_.node_facade_removed, [this](NodeFacadePtr n) { activity_legend_->stopTrackingNode(n->getNodeHandle()); });
+    observe(view_core_.node_facade_added, [this](NodeFacadePtr n) { activity_legend_->startTrackingNode(n); });
+    observe(view_core_.node_facade_removed, [this](NodeFacadePtr n) { activity_legend_->stopTrackingNode(n); });
 
-    QObject::connect(activity_legend_, SIGNAL(nodeAdded(NodeWorker*)), activity_timeline_, SLOT(addNode(NodeWorker*)));
-    QObject::connect(activity_legend_, SIGNAL(nodeRemoved(NodeWorker*)), activity_timeline_, SLOT(removeNode(NodeWorker*)));
+    QObject::connect(activity_legend_, &ActivityLegend::nodeAdded, activity_timeline_, &ActivityTimeline::addNode);
+    QObject::connect(activity_legend_, &ActivityLegend::nodeRemoved, activity_timeline_, &ActivityTimeline::removeNode);
 
     QTextCodec *utfCodec = QTextCodec::codecForName("UTF-8");
     QTextCodec::setCodecForLocale(utfCodec);

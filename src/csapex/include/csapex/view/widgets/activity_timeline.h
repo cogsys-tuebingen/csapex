@@ -2,8 +2,10 @@
 #define ACTIVITY_TIMELINE_H
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
+#include <csapex/model/activity_type.h>
+#include <csapex/model/model_fwd.h>
 #include <csapex/view/csapex_qt_export.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -26,10 +28,10 @@ public:
     virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
 public Q_SLOTS:
-    void addNode(NodeWorker* node);
-    void removeNode(NodeWorker* node);
+    void addNode(NodeFacade* node);
+    void removeNode(NodeFacade* node);
 
-    void setSelection(QList<NodeWorker*>);
+    void setSelection(QList<NodeFacade*>);
 
     void updateRecording();
     void setRecording(bool recording);
@@ -40,8 +42,8 @@ public Q_SLOTS:
     void update();
     void updateTime();
     void updateTime(long stamp);
-    void updateRowStart(NodeWorker* worker, int type, std::shared_ptr<const Interval> profile);
-    void updateRowStop(NodeWorker* worker, std::shared_ptr<const Interval> profile);
+    void updateRowStart(NodeFacade* worker, ActivityType type, std::shared_ptr<const Interval> profile);
+    void updateRowStop(NodeFacade* worker, std::shared_ptr<const Interval> profile);
 
     void wheelEvent(QWheelEvent *we);
 
@@ -53,8 +55,8 @@ public Q_SLOTS:
 Q_SIGNALS:
     void recordingChanged(bool);
 
-    void updateRowStartRequest(NodeWorker* worker, int type, std::shared_ptr<const Interval> profile);
-    void updateRowStopRequest(NodeWorker* worker, std::shared_ptr<const Interval> profile);
+    void updateRowStartRequest(NodeFacade* worker, ActivityType type, std::shared_ptr<const Interval> profile);
+    void updateRowStopRequest(NodeFacade* worker, std::shared_ptr<const Interval> profile);
 
 private:
     void startTimer();
@@ -75,7 +77,7 @@ private:
 
     struct Activity
     {
-        Activity(Parameters* params, Row* row, int start_time, NodeWorker::ActivityType type, std::shared_ptr<Interval const> interval);
+        Activity(Parameters* params, Row* row, int start_time, ActivityType type, std::shared_ptr<Interval const> interval);
         ~Activity();
 
         void step(int time);
@@ -85,7 +87,7 @@ private:
         Parameters* params_;
         Row* row;
 
-        NodeWorker::ActivityType type_;
+        ActivityType type_;
         std::shared_ptr<Interval const> interval_;
 
         int start_;
@@ -96,7 +98,7 @@ private:
 
     struct Row
     {
-        Row(Parameters& params, QGraphicsScene* scene, int row, NodeWorker* worker);
+        Row(Parameters& params, QGraphicsScene* scene, int row, NodeFacade* worker);
         ~Row();
 
         void refresh();
@@ -104,7 +106,7 @@ private:
 
     public:
         Parameters& params_;
-        NodeWorker* node_;
+        NodeFacade* node_;
 
         int row;
         int top;
@@ -125,8 +127,8 @@ private:
     Parameters params_;
 
     std::vector<Row*> rows_;
-    std::map<NodeWorker*, Row*> node2row;
-    std::map<NodeWorker*, std::vector<csapex::slim_signal::Connection>> node2connections_;
+    std::map<NodeFacade*, Row*> node2row;
+    std::map<NodeFacade*, std::vector<csapex::slim_signal::ScopedConnection>> node2connections_;
 };
 
 }

@@ -518,7 +518,7 @@ bool NodeWorker::startProcessingMessages()
             Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
             timer->restart();
             timer->root->setActive(node_handle_->isActive());
-            interval_start(this, PROCESS, timer->root);
+            interval_start(this, ActivityType::PROCESS, timer->root);
         }
 
         bool sync = !node->isAsynchronous();
@@ -890,7 +890,7 @@ void NodeWorker::connectConnector(ConnectablePtr c)
                             timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
                             timer->restart();
                             timer->root->setActive(node_handle_->isActive());
-                            interval_start(this, SLOT, timer->root);
+                            interval_start(this, ActivityType::SLOT_CALLBACK, timer->root);
 
                             interlude = timer->step(std::string("slot ") + slot->getLabel());
                         }

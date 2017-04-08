@@ -13,6 +13,7 @@
 #include <csapex/model/execution_mode.h>
 #include <csapex/model/observer.h>
 #include <csapex/utility/notifier.h>
+#include <csapex/model/activity_type.h>
 
 /// SYSTEM
 #include <map>
@@ -31,11 +32,6 @@ class Interval;
 class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
 {
 public:
-    enum ActivityType {
-        PROCESS,
-        SLOT,
-        OTHER
-    };
 
 public:
     typedef std::shared_ptr<NodeWorker> Ptr;
@@ -112,7 +108,7 @@ public:
 
     slim_signal::Signal<void(bool)> enabled;
 
-    slim_signal::Signal<void(NodeWorker* worker, int type, std::shared_ptr<const Interval> stamp)> interval_start;
+    slim_signal::Signal<void(NodeWorker* worker, ActivityType type, std::shared_ptr<const Interval> stamp)> interval_start;
     slim_signal::Signal<void(NodeWorker* worker, std::shared_ptr<const Interval> stamp)> interval_end;
 
     slim_signal::Signal<void(NodeWorker* worker)> start_profiling;

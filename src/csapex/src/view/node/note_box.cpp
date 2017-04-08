@@ -31,7 +31,6 @@ NoteBox::~NoteBox()
 
 void NoteBox::paintEvent(QPaintEvent* e)
 {
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!adapter_) {
         return;
     }

@@ -2,7 +2,8 @@
 #define ACTIVITY_LEGEND_H
 
 /// COMPONENT
-#include <csapex/model/node_handle.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/model/observer.h>
 #include <csapex/view/csapex_qt_export.h>
 
 /// SYSTEM
@@ -12,7 +13,7 @@
 namespace csapex
 {
 
-class CSAPEX_QT_EXPORT ActivityLegend : public QTableWidget
+class CSAPEX_QT_EXPORT ActivityLegend : public QTableWidget, public Observer
 {
     Q_OBJECT
 
@@ -22,23 +23,23 @@ public:
     void resizeToFit();
 
 public Q_SLOTS:
-    void startTrackingNode(NodeWorkerPtr node);
-    void stopTrackingNode(NodeHandlePtr node);
+    void startTrackingNode(NodeFacadePtr node);
+    void stopTrackingNode(NodeFacadePtr node);
 
-    void addNode(NodeWorker* node);
-    void removeNode(NodeWorker* node);
+    void addNode(NodeFacade* node);
+    void removeNode(NodeFacade* node);
 
     void emitSelection();
 
 Q_SIGNALS:
-    void nodeSelectionChanged(QList<NodeWorker*>);
+    void nodeSelectionChanged(QList<NodeFacade*>);
 
-    void nodeAdded(NodeWorker*);
-    void nodeRemoved(NodeWorker*);
+    void nodeAdded(NodeFacade*);
+    void nodeRemoved(NodeFacade*);
 
 
 private:
-    std::vector<NodeWorker*> rows_;
+    std::vector<NodeFacade*> rows_;
 };
 
 }
