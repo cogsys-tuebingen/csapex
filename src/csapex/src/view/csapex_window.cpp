@@ -162,6 +162,8 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->profiling_debug_enable, SIGNAL(toggled(bool)), this, SLOT(enableDebugProfiling(bool)));
 
+    QObject::connect(this, &CsApexWindow::updateUndoInfoRequest, this, &CsApexWindow::updateUndoInfo);
+    QObject::connect(this, &CsApexWindow::updateTitleRequest, this, &CsApexWindow::updateTitle);
     QObject::connect(this, &CsApexWindow::updateMenuRequest, this, &CsApexWindow::updateMenu);
 
     observe(view_core_.reset_requested, [this](){ designer_->reset(); });
@@ -174,8 +176,8 @@ void CsApexWindow::construct()
     observe(graph->state_changed, [this]() { updateMenuRequest(); });
     observe(view_core_.panic, [this]() { clearBlock(); });
 
-    observe(view_core_.undo_state_changed, [this](){ updateUndoInfo(); updateMenuRequest(); });
-    observe(view_core_.undo_dirty_changed, [this](bool) { updateTitle(); updateMenuRequest(); });
+    observe(view_core_.undo_state_changed, [this](){ updateUndoInfoRequest(); updateMenuRequest(); });
+    observe(view_core_.undo_dirty_changed, [this](bool) { updateTitleRequest(); updateMenuRequest(); });
 
     observe(view_core_.paused, [this](bool pause) { ui->actionPause->setChecked(pause); });
 

@@ -19,6 +19,8 @@ NodeFacade::NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw)
     observe(nw->stop_profiling,  [this](NodeWorker*) {
         stop_profiling(this);
     });
+    observe(nw->destroyed, destroyed);
+    observe(nw->notification, notification);
 }
 
 NodeFacade::NodeFacade(NodeHandlePtr nh)
@@ -48,11 +50,19 @@ bool NodeFacade::isActive() const
 
 bool NodeFacade::isProcessingEnabled() const
 {
-    return nw_->isProcessingEnabled();
+    if(nw_) {
+        return nw_->isProcessingEnabled();
+    } else {
+        return false;
+    }
 }
 bool NodeFacade::isProfiling() const
 {
-    return nw_->isProfiling();
+    if(nw_) {
+        return nw_->isProfiling();
+    } else {
+        return false;
+    }
 }
 
 

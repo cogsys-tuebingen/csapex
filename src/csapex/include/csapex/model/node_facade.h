@@ -4,13 +4,14 @@
 /// COMPONENT
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/observer.h>
+#include <csapex/utility/notifier.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {
 
-class NodeFacade : public Observer
+class NodeFacade : public Observer, public Notifier
 {
 public:
     NodeFacade(NodeHandlePtr nh);
@@ -31,6 +32,8 @@ public:
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
+
+    slim_signal::Signal<void()> destroyed;
 
 private:
     NodeHandlePtr nh_;

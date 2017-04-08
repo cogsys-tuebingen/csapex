@@ -103,6 +103,8 @@ Q_SIGNALS:
     void closed();
 
     void updateMenuRequest();
+    void updateUndoInfoRequest();
+    void updateTitleRequest();
 
 private:
     void construct();

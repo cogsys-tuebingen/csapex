@@ -235,17 +235,12 @@ void NodeBox::construct()
     observe(nh->connector_created, [this](ConnectablePtr c) { registerEvent(c.get()); });
     observe(nh->connector_removed, [this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
-    if(worker) {
-        observe(worker->destroyed, [this](){ destruct(); });
+    observe(node_facade_->destroyed, [this](){ destruct(); });
 
-        enabledChangeEvent(worker->isProcessingEnabled());
-        //    nh->enabled.connect([this](bool e){ enabledChange(e); });
-        QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
+    enabledChangeEvent(node_facade_->isProcessingEnabled());
+    observe(node_facade_->notification, [this](Notification){ updateVisualsRequest(); });
 
-        observe(worker->notification, [this](Notification){ updateVisualsRequest(); });
-    }
-
+    QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
     for(auto input : nh->getExternalInputs()) {
         registerInputEvent(input.get());
