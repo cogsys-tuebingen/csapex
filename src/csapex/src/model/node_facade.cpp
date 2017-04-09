@@ -287,8 +287,9 @@ void NodeFacade::setParameter(const std::string& name, const T& value)
 {
     if(auto node = nh_->getNode().lock()){
         node->setParameter<T>(name, value);
+    } else {
+        throw std::runtime_error("tried to set a parameter from an invalid node");
     }
-    throw std::runtime_error("tried to set a parameter from an invalid node");
 }
 
 
