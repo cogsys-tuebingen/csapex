@@ -230,6 +230,10 @@ std::string NodeFacade::getDebugDescription() const
     InputTransition* it = nh_->getInputTransition();
 
     std::stringstream ss;
+    ss << ", source: ";
+    ss << (nh_->isSource() ? "yes" : "no");
+    ss << ", sink: ";
+    ss << (nh_->isSink() ? "yes" : "no");
     ss << ", it: ";
     ss << (it->isEnabled() ? "enabled" : "disabled");
     ss << ", ot: ";

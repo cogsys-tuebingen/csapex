@@ -589,8 +589,8 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         return;
     }
     QString state = getNodeState();
-    QString state_text;
     QString transition_state = QString::fromStdString(node_facade_->getDebugDescription());
+    QString state_text;
     state_text = "<img src=\":/node_";
     state_text += state + ".png\" />";
     if(node_facade_->getNodeState()->isMuted()) {

@@ -19,11 +19,25 @@
 #undef NDEBUG
 #include <assert.h>
 
+namespace YAML
+{
+template<typename T, typename S>
+struct as_if;
+}
+
+
 namespace csapex {
 namespace connection_types {
 
+template <typename Type>
+struct GenericPointerMessage;
+template <typename Type>
+struct GenericValueMessage;
+
 class CSAPEX_EXPORT GenericVectorMessage : public Message
 {
+    friend class YAML::as_if<GenericVectorMessage, void>;
+
 public:
     struct Anything {};
 
@@ -374,7 +388,11 @@ public:
 
     struct SupportedTypes : public Singleton<SupportedTypes> {
         static EntryInterface::Ptr make(const std::string& type) {
-            return instance().map_.at(type)->cloneEntry();
+            auto pos = instance().map_.find(type);
+            if(pos == instance().map_.end()) {
+                throw std::runtime_error(std::string("cannot make vector of type ") + type);
+            }
+            return pos->second->cloneEntry();
         }
 
         template <typename T>
@@ -581,6 +599,8 @@ public:
 private:
     GenericVectorMessage(EntryInterface::Ptr impl, const std::string &frame_id, Message::Stamp stamp_micro_seconds);
 
+    GenericVectorMessage();
+
 private:
     EntryInterface::Ptr impl;
 
@@ -601,6 +621,14 @@ inline std::shared_ptr<GenericVectorMessage> makeEmpty<GenericVectorMessage>()
 
 }
 }
+
+template <typename T>
+struct GenericVectorRegistered
+{
+    GenericVectorRegistered() {
+        csapex::connection_types::GenericVectorMessage::registerType<T>();
+    }
+};
 
 
 /// YAML
