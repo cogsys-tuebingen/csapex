@@ -28,7 +28,7 @@ public:
 
     virtual std::string getWrappedType() const = 0;
 
-    virtual NodeAdapterPtr build(NodeHandlePtr node, NodeBox* parent) const = 0;
+    virtual NodeAdapterPtr build(NodeFacadePtr node, NodeBox* parent) const = 0;
 
 private:
     std::string type_;

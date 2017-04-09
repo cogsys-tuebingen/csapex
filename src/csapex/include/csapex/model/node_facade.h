@@ -28,6 +28,21 @@ public:
     bool isActive() const;
     bool isProcessingEnabled() const;
 
+    bool isGraph() const;
+    AUUID getSubgraphAUUID() const;
+
+    bool isSource() const;
+    bool isSink() const;
+
+    bool isVariadic() const;
+    bool hasVariadicInputs() const;
+    bool hasVariadicOutputs() const;
+    bool hasVariadicEvents() const;
+    bool hasVariadicSlots() const;
+
+
+    NodeCharacteristics getNodeCharacteristics() const;
+
     bool isProfiling() const;
     void setProfiling(bool profiling);
 
@@ -37,22 +52,46 @@ public:
 
     ExecutionState getExecutionState() const;
 
+    std::string getLabel() const;
+
+    double getExecutionFrequency() const;
+    double getMaximumFrequency() const;
+
+    // TODO: proxies
+    ProfilerPtr getProfiler();
+    NodeStatePtr getNodeState() const;
+    NodeStatePtr getNodeStateCopy() const;
+
+    NodePtr getNode();
+
+    // TODO: remove
     NodeHandlePtr getNodeHandle();
 
-    ProfilerPtr getProfiler();
-
-    std::string getLabel() const;
+    std::string getDebugDescription() const;
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
 
+
+    slim_signal::Signal<void (ConnectablePtr)> connector_created;
+    slim_signal::Signal<void (ConnectablePtr)> connector_removed;
+
+    slim_signal::Signal<void (ConnectablePtr, ConnectablePtr)> connection_in_prograss;
+    slim_signal::Signal<void (ConnectablePtr)> connection_done;
+    slim_signal::Signal<void (ConnectablePtr)> connection_start;
+
     slim_signal::Signal<void()> messages_processed;
+
+    slim_signal::Signal<void()> node_state_changed;
 
     slim_signal::Signal<void()> destroyed;
 
     slim_signal::Signal<void(NodeFacade* facade, ActivityType type, std::shared_ptr<const Interval> stamp)> interval_start;
     slim_signal::Signal<void(NodeFacade* facade, std::shared_ptr<const Interval> stamp)> interval_end;
+
+    // TODO: replace for client server architecture
+    slim_signal::Signal<void(std::function<void()>)> execution_requested;
 
 private:
     NodeHandlePtr nh_;

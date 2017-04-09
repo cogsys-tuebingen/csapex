@@ -27,7 +27,7 @@ public:
     typedef std::shared_ptr<NodeAdapter> Ptr;
 
 protected:
-    NodeAdapter(NodeHandleWeakPtr adaptee, NodeBox* parent);
+    NodeAdapter(NodeFacadeWeakPtr adaptee, NodeBox* parent);
 
 public:
     virtual ~NodeAdapter();
@@ -61,7 +61,7 @@ protected:
     std::string current_display_name_;
     QBoxLayout* current_layout_;
 
-    NodeHandleWeakPtr node_;
+    NodeFacadeWeakPtr node_;
     NodeBox* parent_;
 
     std::vector<csapex::slim_signal::Connection> connections_;

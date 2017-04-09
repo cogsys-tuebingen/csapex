@@ -2,6 +2,7 @@
 #define REGISTER_NODE_ADAPTER_H
 
 /// COMPONENT
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/register_apex_plugin.h>
 #include <csapex/view/node/node_adapter_builder.h>
@@ -16,10 +17,10 @@ public: \
     { \
         return #Adaptee; \
     } \
-    virtual csapex::NodeAdapterPtr build(csapex::NodeHandlePtr handle, NodeBox* parent) const \
+    virtual csapex::NodeAdapterPtr build(csapex::NodeFacadePtr facade, NodeBox* parent) const \
     { \
-        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (handle->getNode().lock()); \
-        return std::make_shared<Adapter>(handle, parent, adaptee); \
+        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (facade->getNodeHandle()->getNode().lock()); \
+        return std::make_shared<Adapter>(facade, parent, adaptee); \
     } \
 }; \
 }\

@@ -7,6 +7,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/connection.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/generic_state.h>
 
@@ -15,8 +16,8 @@
 
 using namespace csapex;
 
-NodeStatistics::NodeStatistics(NodeHandle *node)
-    : node_handle_(node)
+NodeStatistics::NodeStatistics(NodeFacade *node)
+    : node_facade_(node)
 {
 
 }
@@ -48,15 +49,15 @@ QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(Connectable* c
 
 QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factory) const
 {
-    auto node = node_handle_->getNode().lock();
+    auto node = node_facade_->getNodeHandle()->getNode().lock();
     if(!node) {
         return nullptr;
     }
 
     QTreeWidgetItem* tl = new QTreeWidgetItem;
-    tl->setText(0, QString::fromStdString(node_handle_->getUUID().getFullName()));
+    tl->setText(0, QString::fromStdString(node_facade_->getUUID().getFullName()));
 
-    NodeConstructor::Ptr constructor = node_factory->getConstructor(node_handle_->getType());
+    NodeConstructor::Ptr constructor = node_factory->getConstructor(node_facade_->getType());
 
     tl->setIcon(0, QIcon(QString::fromStdString(constructor->getIcon())));
 
@@ -64,7 +65,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
 
-        for(auto input : node_handle_->getExternalInputs()) {
+        for(auto input : node_facade_->getNodeHandle()->getExternalInputs()) {
             QTreeWidgetItem* connector_widget = createDebugInformationConnector(input.get());
 
             QTreeWidgetItem* input_widget = new QTreeWidgetItem;
@@ -94,7 +95,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
 
-        for(auto output : node_handle_->getExternalOutputs()) {
+        for(auto output : node_facade_->getNodeHandle()->getExternalOutputs()) {
             QTreeWidgetItem* output_widget = createDebugInformationConnector(output.get());
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;

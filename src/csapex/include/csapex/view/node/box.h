@@ -142,7 +142,6 @@ Q_SIGNALS:
     void renameRequest(NodeBox*);
     void helpRequest(NodeBox*);
 
-    void changed(NodeBox*);
     void clicked(NodeBox*);
     void moveSelectionToBox(NodeBox*);
 
@@ -165,9 +164,6 @@ Q_SIGNALS:
 
 protected:
     void resizeEvent(QResizeEvent * e);
-
-    void registerInputEvent(Input* in);
-    void registerOutputEvent(Output* out);
 
     QString getNodeState();
 

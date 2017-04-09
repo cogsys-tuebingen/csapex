@@ -433,9 +433,8 @@ void CsApexWindow::updateDebugInfo()
     std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
 
     for(NodeBox* box : selected) {
-        NodeHandlePtr handle = box->getNodeFacade()->getNodeHandle();
-        handle->node_state_changed.connect([this](){ updateDebugInfo(); });
-        ui->box_info->addTopLevelItem(NodeStatistics(handle.get()).createDebugInformation(view_core_.getNodeFactory().get()));
+        box->getNodeFacade()->node_state_changed.connect([this](){ updateDebugInfo(); });
+        ui->box_info->addTopLevelItem(NodeStatistics(box->getNodeFacade().get()).createDebugInformation(view_core_.getNodeFactory().get()));
     }
 
     QTreeWidgetItemIterator it(ui->box_info);

@@ -23,7 +23,7 @@ public:
     NodeAdapterFactory(Settings& settings, csapex::PluginLocator* locator);
     ~NodeAdapterFactory();
 
-    NodeAdapterPtr makeNodeAdapter(NodeHandlePtr node, NodeBox* parent);
+    NodeAdapterPtr makeNodeAdapter(NodeFacadePtr node, NodeBox* parent);
     bool hasAdapter(const std::string& type) const;
 
     void loadPlugins();

@@ -101,7 +101,7 @@ void DefaultNodeAdapterBridge::executeModelCallback(Function cb)
 void DefaultNodeAdapterBridge::setupAdaptiveUi()
 {
     //    Timer timer("setup");
-    NodeHandlePtr node_handle = parent_->node_.lock();
+    NodeFacadePtr node_handle = parent_->node_.lock();
     if(!node_handle) {
         return;
     }
@@ -128,7 +128,7 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 
 
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(NodeHandleWeakPtr adaptee, NodeBox* parent)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadeWeakPtr adaptee, NodeBox* parent)
     : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
 {
 }
@@ -188,9 +188,9 @@ void setTooltip(QLayout* l, const QString& tooltip)
     }
 }
 
-void setDirection(QBoxLayout* layout, NodeHandleWeakPtr node)
+void setDirection(QBoxLayout* layout, NodeFacadeWeakPtr node)
 {
-    NodeHandlePtr n = node.lock();
+    NodeFacadePtr n = node.lock();
     if(n) {
         layout->setDirection(n->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
     }
@@ -222,12 +222,12 @@ struct install<TriggerParameter, void>
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
-    NodeHandlePtr node_handle = node_.lock();
-    if(!node_handle) {
+    NodeFacadePtr node_facade = node_.lock();
+    if(!node_facade) {
         return;
     }
 
-    auto node = node_handle->getNode().lock();
+    auto node = node_facade->getNodeHandle()->getNode().lock();
     if(!node) {
         return;
     }
@@ -330,14 +330,14 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         QPointer<QHBoxLayout> layout_ptr(new QHBoxLayout);
         current_layout_ = layout_ptr;
         setDirection(current_layout_, node_);
-        node_handle->getNodeState()->flipped_changed->connect([this, layout_ptr](){
+        node_facade->getNodeState()->flipped_changed->connect([this, layout_ptr](){
             if(!layout_ptr.isNull()) {
                 setDirection(layout_ptr, node_);
             }
         });
 
         // connect parameter input, if available
-        InputPtr param_in = node_handle->getParameterInput(current_name_).lock();
+        InputPtr param_in = node_facade->getNodeHandle()->getParameterInput(current_name_).lock();
         if(param_in) {
             QPointer<Port> port = parent_->createPort(param_in, current_layout_);
 
@@ -359,7 +359,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        OutputPtr param_out = node_handle->getParameterOutput(current_name_).lock();
+        OutputPtr param_out = node_facade->getNodeHandle()->getParameterOutput(current_name_).lock();
         if(param_out) {
             QPointer<Port> port = parent_->createPort(param_out, current_layout_);
 
@@ -391,7 +391,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 qt_helper::Call * DefaultNodeAdapter::makeModelCall(std::function<void()> cb)
 {
     qt_helper::Call* call = new qt_helper::Call([this, cb](){
-        NodeHandlePtr node = node_.lock();
+        NodeFacadePtr node = node_.lock();
         if(node) {
             node->execution_requested(cb);
         }

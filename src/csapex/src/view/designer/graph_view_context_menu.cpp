@@ -145,7 +145,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         has_minimized |= minimized;
         has_maximized |= !minimized;
 
-        const auto& state = box->getNodeFacade()->getNodeHandle()->getNodeState();
+        const auto& state = box->getNodeFacade()->getNodeState();
 
         has_log_level[state->getLoggerLevel()] = true;
 

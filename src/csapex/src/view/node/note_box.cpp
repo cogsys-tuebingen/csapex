@@ -62,10 +62,10 @@ void NoteBox::paintEvent(QPaintEvent* e)
     snap_path.addPolygon(snap);
 
     QColor col(255, 220, 100);
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(nh) {
+
+    {
         int r, g, b;
-        nh->getNodeState()->getColor(r, g, b);
+        node_facade_->getNodeState()->getColor(r, g, b);
         if(r >= 0 && g >= 0 && b >= 0) {
             col = QColor(r,g,b);
         }
@@ -86,12 +86,7 @@ void NoteBox::paintEvent(QPaintEvent* e)
 
 void NoteBox::resizeEvent(QResizeEvent *e)
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
-    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(nh->getNode().lock());
+    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
     if(!note) {
         return;
     }
@@ -103,8 +98,6 @@ void NoteBox::resizeEvent(QResizeEvent *e)
     if(note->hasParameter("h")) {
         note->setParameter("h", height());
     }
-
-    Q_EMIT changed(this);
 }
 
 void NoteBox::construct()
@@ -132,12 +125,7 @@ void NoteBox::construct()
 
 void NoteBox::init()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
-    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(nh->getNode().lock());
+    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
     if(!note) {
         return;
     }
@@ -149,12 +137,7 @@ void NoteBox::init()
     NodeBox::init();
 
     note->parameters_changed.connect([this](){
-        NodeHandlePtr nh = node_facade_->getNodeHandle();
-        if(!nh) {
-            return;
-        }
-
-        std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(nh->getNode().lock());
+        std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
         if(!note) {
             return;
         }
@@ -163,12 +146,7 @@ void NoteBox::init()
     });
 
     QObject::connect(edit_, &QTextEdit::textChanged, [this](){
-        NodeHandlePtr nh = node_facade_->getNodeHandle();
-        if(!nh) {
-            return;
-        }
-
-        std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(nh->getNode().lock());
+        std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
         if(!note) {
             return;
         }
@@ -177,7 +155,7 @@ void NoteBox::init()
     });
 
 
-    NodeState* state = node_facade_->getNodeHandle()->getNodeState().get();
+    NodeState* state = node_facade_->getNodeState().get();
     state->color_changed->connect([this, state](){
         changeColor();
     });
@@ -193,12 +171,7 @@ void NoteBox::startResize()
 }
 void NoteBox::stopResize()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
-    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(nh->getNode().lock());
+    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
     if(!note) {
         return;
     }
@@ -236,12 +209,7 @@ void NoteBox::setSelected(bool selected)
 
 void NoteBox::updateStylesheetColor()
 {
-
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
 
     QColor text_color = Qt::black;
 

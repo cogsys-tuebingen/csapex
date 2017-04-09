@@ -2,7 +2,7 @@
 #include <csapex/view/node/resizable_node_adapter.h>
 
 /// PROJECT
-#include <csapex/model/node_handle.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_state.h>
 
 /// SYSTEM
@@ -10,7 +10,7 @@
 
 using namespace csapex;
 
-ResizableNodeAdapter::ResizableNodeAdapter(NodeHandleWeakPtr worker, NodeBox* parent)
+ResizableNodeAdapter::ResizableNodeAdapter(NodeFacadeWeakPtr worker, NodeBox* parent)
     : DefaultNodeAdapter(worker, parent),
       initialized_(false)
 {
@@ -54,7 +54,7 @@ void ResizableNodeAdapter::setSize(int width, int height)
     size_.setWidth(width);
     size_.setHeight(height);
 
-    if(NodeHandlePtr node_handle = node_.lock()) {
+    if(NodeFacadePtr node_handle = node_.lock()) {
         NodeStatePtr node_state = node_handle->getNodeState();
         node_state->setDictionaryEntry("width", size_.width());
         node_state->setDictionaryEntry("height", size_.height());
@@ -63,7 +63,7 @@ void ResizableNodeAdapter::setSize(int width, int height)
 
 void ResizableNodeAdapter::readState()
 {
-    if(NodeHandlePtr node_handle = node_.lock()) {
+    if(NodeFacadePtr node_handle = node_.lock()) {
         NodeStatePtr node_state = node_handle->getNodeState();
         size_.setWidth(node_state->getDictionaryEntry("width", size_.width()));
         size_.setHeight(node_state->getDictionaryEntry("height", size_.height()));

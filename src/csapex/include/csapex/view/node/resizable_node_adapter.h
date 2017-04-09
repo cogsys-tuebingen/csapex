@@ -10,7 +10,7 @@ namespace csapex
 class CSAPEX_QT_EXPORT ResizableNodeAdapter : public DefaultNodeAdapter
 {
 public:
-    ResizableNodeAdapter(NodeHandleWeakPtr worker, NodeBox *parent);
+    ResizableNodeAdapter(NodeFacadeWeakPtr worker, NodeBox *parent);
 
     virtual void readLegacyYaml(const YAML::Node& node) override;
     virtual bool isResizable() const override;

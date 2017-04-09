@@ -5,8 +5,6 @@
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/note_box.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/node.h>
-#include <csapex/model/node_handle.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/node_state.h>
 #include <csapex/core/graphio.h>
@@ -33,13 +31,9 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *
 
     setWidget(box_);
 
-    long z = 0;
 
-    NodeHandlePtr nh = box_->getNodeFacade()->getNodeHandle();
-    if(nh) {
-        NodeStatePtr state = nh->getNodeState();
-        z = state->getZ();
-    }
+    NodeStateConstPtr state = box_->getNodeFacade()->getNodeState();
+    long z = state->getZ();
 
     if(z == 0){
         if(dynamic_cast<NoteBox*>(box_)) {
@@ -86,7 +80,7 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
     QPoint pt = event->pos().toPoint();
     QWidget* child = widget()->childAt(pt);
 
-//    bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
+    //    bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
     bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
 
     if(!shift) {
@@ -103,11 +97,8 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
         }
 
         setZValue(z);
-        NodeHandlePtr nh = box_->getNodeFacade()->getNodeHandle();
-        if(nh) {
-            NodeStatePtr state = nh->getNodeState();
-            state->setZ(z);
-        }
+        NodeStatePtr state = box_->getNodeFacade()->getNodeState();
+        state->setZ(z);
     }
 
     bool do_relay = child && child->objectName() != "boxframe" &&

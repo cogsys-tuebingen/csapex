@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/node.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/param/parameter.h>
 #include <csapex/view/node/box.h>
@@ -14,7 +15,7 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter(NodeHandleWeakPtr adaptee, NodeBox* parent)
+NodeAdapter::NodeAdapter(NodeFacadeWeakPtr adaptee, NodeBox* parent)
     : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent)
 {
 }

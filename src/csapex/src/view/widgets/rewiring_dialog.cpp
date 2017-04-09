@@ -8,6 +8,7 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/view/widgets/box_dialog.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
@@ -28,13 +29,13 @@
 using namespace csapex;
 
 
-RewiringDialog::RewiringDialog(NodeHandle* node, CsApexViewCore& view_core, QWidget *parent, Qt::WindowFlags f)
+RewiringDialog::RewiringDialog(NodeFacade* node, CsApexViewCore& view_core, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
       view_core_(view_core),
 
       view_core_old_(std::make_shared<CsApexViewCoreLocal>(view_core_, view_core_.getExceptionHandler())),
       view_core_new_(std::make_shared<CsApexViewCoreLocal>(view_core_, view_core_.getExceptionHandler())),
-      nh_(node)
+      node_facade_(node)
 {
     root_uuid_provider_ = std::make_shared<UUIDProvider>();
 }
@@ -125,8 +126,8 @@ void RewiringDialog::createGraphs(const std::string& type)
     apex_assert_hard(graph_old);
     graph_old->removeInternalPorts();
 
-    nh_old = node_factory.makeNode(nh_->getType(), nh_->getUUID(), graph_old);
-    nh_old->setNodeState(nh_->getNodeStateCopy());
+    nh_old = node_factory.makeNode(node_facade_->getType(), node_facade_->getUUID(), graph_old);
+    nh_old->setNodeState(node_facade_->getNodeStateCopy());
     graph_old->addNode(nh_old);
 
 
@@ -143,14 +144,14 @@ void RewiringDialog::createGraphs(const std::string& type)
 
 void RewiringDialog::createConnections()
 {
-    for(SlotPtr slot_original : nh_->getSlots()) {
+    for(SlotPtr slot_original : node_facade_->getNodeHandle()->getSlots()) {
         for(ConnectionPtr connection : slot_original->getConnections()) {
             SlotPtr slot_old = nh_old->getSlot(slot_original->getUUID());
             apex_assert_hard(slot_old);
             updateConnection(slot_old, connection);
         }
     }
-    for(InputPtr input_original : nh_->getExternalInputs()) {
+    for(InputPtr input_original : node_facade_->getNodeHandle()->getExternalInputs()) {
         for(ConnectionPtr connection : input_original->getConnections()) {
             InputPtr input_old = nh_old->getInput(input_original->getUUID());
             apex_assert_hard(input_old);
@@ -159,14 +160,14 @@ void RewiringDialog::createConnections()
     }
 
 
-    for(EventPtr event_original : nh_->getEvents()) {
+    for(EventPtr event_original : node_facade_->getNodeHandle()->getEvents()) {
         for(ConnectionPtr connection : event_original->getConnections()) {
             EventPtr event_old = nh_old->getEvent(event_original->getUUID());
             apex_assert_hard(event_old);
             updateConnection(event_old, connection);
         }
     }
-    for(OutputPtr output_original : nh_->getExternalOutputs()) {
+    for(OutputPtr output_original : node_facade_->getNodeHandle()->getExternalOutputs()) {
         for(ConnectionPtr connection : output_original->getConnections()) {
             OutputPtr output_old = nh_old->getOutput(output_original->getUUID());
             apex_assert_hard(output_old);

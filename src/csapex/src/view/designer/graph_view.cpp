@@ -749,7 +749,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
         box = new NodeBox(view_core_.getSettings(), node_facade,
                           QIcon(QString::fromStdString(c->getIcon())));
     }
-    box->setAdapter(std::make_shared<DefaultNodeAdapter>(node_facade->getNodeHandle(), box));
+    box->setAdapter(std::make_shared<DefaultNodeAdapter>(node_facade, box));
 
     if(state) {
         handle->setNodeState(state);
@@ -773,7 +773,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 void GraphView::nodeAdded(NodeFacadePtr node_facade)
 {
     NodeHandlePtr node_handle = node_facade->getNodeHandle();
-    std::string type = node_handle->getType();
+    std::string type = node_facade->getType();
 
     QIcon icon = QIcon(QString::fromStdString(view_core_.getNodeFactory()->getConstructor(type)->getIcon()));
 
@@ -795,7 +795,7 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
     QObject::connect(box, &NodeBox::portAdded, this, &GraphView::addPort);
     QObject::connect(box, &NodeBox::portRemoved, this, &GraphView::removePort);
 
-    NodeAdapter::Ptr adapter = view_core_.getNodeAdapterFactory()->makeNodeAdapter(node_handle, box);
+    NodeAdapter::Ptr adapter = view_core_.getNodeAdapterFactory()->makeNodeAdapter(node_facade, box);
     adapter->executeCommand.connect(delegate::Delegate<void(const CommandPtr&)>(view_core_.getCommandDispatcher().get(), &CommandExecutor::execute));
     box->setAdapter(adapter);
 
@@ -823,13 +823,13 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
     }
 
     // subscribe to coming connectors
-    auto c1 = node_handle->connector_created.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
+    auto c1 = node_facade->connector_created.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
     facade_connections_[node_facade.get()].emplace_back(c1);
-    auto c2 = node_handle->connector_removed.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
+    auto c2 = node_facade->connector_removed.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
     facade_connections_[node_facade.get()].emplace_back(c2);
 
 
-    UUID uuid = node_handle->getUUID();
+    UUID uuid = node_facade->getUUID();
     QObject::connect(box, &NodeBox::toggled, [this, uuid](bool checked) {
         view_core_.getCommandDispatcher()->execute(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), uuid, !checked));
     });
@@ -954,11 +954,10 @@ void GraphView::addBox(NodeBox *box)
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
     NodeFacadePtr facade = box->getNodeFacade();
-    NodeHandle* handle = facade->getNodeHandle().get();
 
-    facade_connections_[facade.get()].emplace_back(handle->connection_start.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnections(); }));
-    facade_connections_[facade.get()].emplace_back(handle->connection_in_prograss.connect([this](const ConnectablePtr& from, const ConnectablePtr& to) { scene_->previewConnection(from, to); }));
-    facade_connections_[facade.get()].emplace_back(handle->connection_done.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnections(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_in_prograss.connect([this](const ConnectablePtr& from, const ConnectablePtr& to) { scene_->previewConnection(from, to); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_done.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
@@ -1409,10 +1408,9 @@ void GraphView::morphNode()
     apex_assert_hard(getSelectedBoxes().size() == 1);
 
     const NodeBox* box = getSelectedBoxes()[0];
+    NodeFacadePtr facade = box->getNodeFacade();
 
-    NodeHandle* nh = box->getNodeFacade()->getNodeHandle().get();
-
-    RewiringDialog diag(nh, view_core_);
+    RewiringDialog diag(facade.get(), view_core_);
     diag.makeUI(styleSheet());
 
     int r = diag.exec();
@@ -1422,11 +1420,11 @@ void GraphView::morphNode()
         command::Meta::Ptr morph = std::make_shared<command::Meta>(graph_facade_->getAbsoluteUUID(), "change node type");
 
         CommandFactory factory(graph_facade_.get());
-        morph->add(factory.deleteAllNodes({nh->getUUID()}));
+        morph->add(factory.deleteAllNodes({facade->getUUID()}));
 
         UUID new_uuid = graph_facade_->getGraph()->generateUUID(type);
         CommandPtr add_new = std::make_shared<command::AddNode>(graph_facade_->getAbsoluteUUID(),
-                                                                type, nh->getNodeState()->getPos(), new_uuid, nullptr);
+                                                                type, facade->getNodeState()->getPos(), new_uuid, nullptr);
         morph->add(add_new);
 
         for(const ConnectionInformation& ci : diag.getConnections(new_uuid)) {
@@ -1472,10 +1470,10 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
     yaml_txt << yaml;
 
 
-    Point box_pos = box_handle->getNodeFacade()->getNodeHandle()->getNodeState()->getPos();
+    Point box_pos = box_handle->getNodeFacade()->getNodeState()->getPos();
     Point top_left = box_pos;
     for(NodeBox* box : selected_boxes_) {
-        Point pos = box->getNodeFacade()->getNodeHandle()->getNodeState()->getPos();
+        Point pos = box->getNodeFacade()->getNodeState()->getPos();
         if(pos.x < top_left.x) {
             top_left.x = pos.x;
         }
@@ -1524,9 +1522,9 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
         box = new NodeBox(view_core_.getSettings(), node_facade,
                           QIcon(QString::fromStdString(c->getIcon())));
     }
-    box->setAdapter(std::make_shared<DefaultNodeAdapter>(handle, box));
+    box->setAdapter(std::make_shared<DefaultNodeAdapter>(node_facade, box));
 
-    handle->setNodeState(box_handle->getNodeFacade()->getNodeHandle()->getNodeStateCopy());
+    handle->setNodeState(box_handle->getNodeFacade()->getNodeStateCopy());
 
     box->setStyleSheet(styleSheet());
     box->construct();

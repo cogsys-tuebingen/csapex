@@ -3,21 +3,9 @@
 
 /// COMPONENT
 #include "ui_box.h"
-#include <csapex/model/node.h>
-#include <csapex/factory/node_factory.h>
-#include <csapex/command/command_factory.h>
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
-#include <csapex/signal/event.h>
 #include <csapex/model/variadic_io.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph/vertex.h>
-#include <csapex/msg/input_transition.h>
-#include <csapex/msg/output_transition.h>
-#include <csapex/command/meta.h>
-#include <csapex/command/dispatcher.h>
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/view/utility/color.hpp>
 #include <csapex/core/settings.h>
@@ -119,32 +107,30 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_error);
     }
 
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-
-    if(nh->isVariadic()) {
+    if(node_facade_->isVariadic()) {
         AUUID parent = node_facade_->getUUID().getAbsoluteUUID();
-        if(nh->hasVariadicInputs()) {
+        if(node_facade_->hasVariadicInputs()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::INPUT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->input_panel->layout()->addWidget(meta_port);
         }
-        if(nh->hasVariadicOutputs()) {
+        if(node_facade_->hasVariadicOutputs()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::OUTPUT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->output_panel->layout()->addWidget(meta_port);
         }
-        if(nh->hasVariadicSlots()) {
+        if(node_facade_->hasVariadicSlots()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::SLOT_T, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->slot_panel->layout()->addWidget(meta_port);
         }
-        if(nh->hasVariadicEvents()) {
+        if(node_facade_->hasVariadicEvents()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::EVENT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
@@ -154,7 +140,7 @@ void NodeBox::setupUi()
     }
 
 
-    NodeState* state = node_facade_->getNodeHandle()->getNodeState().get();
+    NodeState* state = node_facade_->getNodeState().get();
     observe(state->flipped_changed, std::bind(&NodeBox::triggerFlipSides, this));
     observe(state->minimized_changed, std::bind(&NodeBox::triggerMinimized, this));
     observe(state->active_changed, [this, state](){
@@ -187,17 +173,10 @@ void NodeBox::setupUi()
     //    setBackgroundMode (Qt::NoBackground, true);
 
     updateVisuals();
-
-    Q_EMIT changed(this);
 }
 
 void NodeBox::construct()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
     ui = new Ui::Box;
     ui->setupUi(this);
 
@@ -205,14 +184,14 @@ void NodeBox::construct()
     ui->output_layout->addSpacerItem(new QSpacerItem(16, 0));
 
     ui->enablebtn->setCheckable(true);
-    ui->enablebtn->setChecked(nh->getNodeState()->isEnabled());
+    ui->enablebtn->setChecked(node_facade_->getNodeState()->isEnabled());
 
     QSize size(16, 16);
     ui->icon->setPixmap(icon_.pixmap(size));
 
     setFocusPolicy(Qt::ClickFocus);
 
-    const UUID& uuid = nh->getUUID();
+    const UUID& uuid = node_facade_->getUUID();
     setToolTip(QString::fromStdString(uuid.getFullName()));
 
     setObjectName(QString::fromStdString(uuid.getFullName()));
@@ -224,16 +203,16 @@ void NodeBox::construct()
         grip_->installEventFilter(this);
     }
 
-    setLabel(nh->getNodeState()->getLabel());
+    setLabel(node_facade_->getNodeState()->getLabel());
 
     QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 
 
-    observe(nh->node_state_changed, [this]() { nodeStateChanged(); });
+    observe(node_facade_->node_state_changed, [this]() { nodeStateChanged(); });
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
-    observe(nh->connector_created, [this](ConnectablePtr c) { registerEvent(c.get()); });
-    observe(nh->connector_removed, [this](ConnectablePtr c) { unregisterEvent(c.get()); });
+    observe(node_facade_->connector_created, [this](ConnectablePtr c) { registerEvent(c.get()); });
+    observe(node_facade_->connector_removed, [this](ConnectablePtr c) { unregisterEvent(c.get()); });
 
     observe(node_facade_->destroyed, [this](){ destruct(); });
 
@@ -242,13 +221,6 @@ void NodeBox::construct()
 
     QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
-    for(auto input : nh->getExternalInputs()) {
-        registerInputEvent(input.get());
-    }
-    for(auto output : nh->getExternalOutputs()) {
-        registerOutputEvent(output.get());
-    }
-
     setupUi();
 
     installEventFilter(this);
@@ -256,10 +228,7 @@ void NodeBox::construct()
 
 bool NodeBox::isGraph() const
 {
-    if(NodeHandlePtr nh = node_facade_->getNodeHandle()) {
-        return nh->isGraph();
-    }
-    return false;
+    return node_facade_->isGraph();
 }
 
 NodeFacadePtr NodeBox::getNodeFacade() const
@@ -305,11 +274,6 @@ void setStyleForId(QLabel* label, int id) {
 
 void NodeBox::updateComponentInformation(Graph* graph)
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
     if(settings_.getTemporary("debug", false)) {
         changeColor();
     }
@@ -322,17 +286,17 @@ void NodeBox::updateComponentInformation(Graph* graph)
     }
 
     if(info_compo->isVisible()) {
-        int compo = graph->getComponent(nh->getUUID());
-        int depth = graph->getDepth(nh->getUUID());
+        int compo = graph->getComponent(node_facade_->getUUID());
+        int depth = graph->getDepth(node_facade_->getUUID());
         std::stringstream info;
         info << "C:" << compo;
         info << "D:" << depth;
         info_compo->setText(info.str().c_str());
 
-        const auto& chara = nh->getVertex()->getNodeCharacteristics();
+        const NodeCharacteristics& chara = node_facade_->getNodeCharacteristics();
 
         QString tooltip("characteristics: ");
-//        tooltip += QString("vertex separator: ") + (chara.is_vertex_separator ? "yes" : "no") + ", ";
+        //        tooltip += QString("vertex separator: ") + (chara.is_vertex_separator ? "yes" : "no") + ", ";
         tooltip += QString("joining vertex: ") + (chara.is_joining_vertex ? "yes" : "no") + ", ";
         tooltip += QString("leading to joining vertex: ") + (chara.is_leading_to_joining_vertex ? "yes" : "no") + ", ";
         tooltip += QString("combined by joining vertex: ") + (chara.is_combined_by_joining_vertex ? "yes" : "no") + ", ";
@@ -345,11 +309,6 @@ void NodeBox::updateComponentInformation(Graph* graph)
 
 void NodeBox::updateThreadInformation()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
     if(!settings_.getPersistent("display-threads", false)) {
         info_thread->setVisible(false);
         return;
@@ -358,7 +317,7 @@ void NodeBox::updateThreadInformation()
     }
 
     if(info_thread->isVisible()) {
-        NodeStatePtr state = nh->getNodeState();
+        NodeStatePtr state = node_facade_->getNodeState();
         int id = state->getThreadId();
         std::stringstream info;
         if(settings_.get<bool>("threadless")) {
@@ -381,11 +340,6 @@ void NodeBox::updateThreadInformation()
 
 void NodeBox::updateFrequencyInformation()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
     if(!settings_.getPersistent("display-frequencies", false)) {
         info_frequency->setVisible(false);
 
@@ -406,10 +360,8 @@ void NodeBox::updateFrequencyInformation()
     }
 
     if(info_frequency->isVisible()) {
-        const Rate& rate = nh->getRate();
-        double max_f = nh->getNodeState()->getMaximumFrequency();
-
-        double f = rate.getEffectiveFrequency();
+        double max_f = node_facade_->getMaximumFrequency();
+        double f = node_facade_->getExecutionFrequency();
         std::stringstream info;
         info << "<i><b>";
         info << std::setprecision(4) << f;
@@ -461,11 +413,7 @@ std::string NodeBox::errorMessage() const
 
 void NodeBox::setLabel(const std::string& label)
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
 
     apex_assert_hard(state);
     state->setLabel(label);
@@ -475,61 +423,32 @@ void NodeBox::setLabel(const std::string& label)
 
 void NodeBox::setLabel(const QString &label)
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
     state->setLabel(label.toStdString());
     ui->label->setText(label);
 }
 
 std::string NodeBox::getLabel() const
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return "";
-    }
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
     return state->getLabel();
 }
 
 void NodeBox::registerEvent(Connectable* c)
 {
-    if(c->isOutput()) {
-        registerOutputEvent(dynamic_cast<Output*>(c));
-    } else {
-        registerInputEvent(dynamic_cast<Input*>(c));
-    }
 }
 
 void NodeBox::unregisterEvent(Connectable*)
 {
 }
 
-void NodeBox::registerInputEvent(Input* /*in*/)
-{
-    Q_EMIT changed(this);
-}
-
-void NodeBox::registerOutputEvent(Output* /*out*/)
-{
-    Q_EMIT changed(this);
-}
-
 void NodeBox::resizeEvent(QResizeEvent */*e*/)
 {
-    Q_EMIT changed(this);
 }
 
 void NodeBox::init()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
     updatePosition();
     (*state->pos_changed)();
 
@@ -551,9 +470,7 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
     ConnectablePtr adaptee = port->getAdaptee().lock();
     apex_assert_hard(adaptee == connector.lock());
 
-    NodeHandlePtr nh = getNodeFacade()->getNodeHandle();
-
-    if(nh->isVariadic()) {
+    if(node_facade_->isVariadic()) {
         std::vector<MetaPort*> metas;
         for(int i = 0; i < layout->count();) {
             MetaPort* meta = dynamic_cast<MetaPort*>(layout->itemAt(i)->widget());
@@ -601,8 +518,7 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
     if(o == this) {
         if(e->type() == QEvent::MouseButtonDblClick) {
             if(isGraph()) {
-                NodeHandlePtr nh = getNodeFacade()->getNodeHandle();
-                Q_EMIT showSubGraphRequest(nh->getSubgraphAUUID());
+                Q_EMIT showSubGraphRequest(node_facade_->getSubgraphAUUID());
                 return true;
             }
         }
@@ -674,28 +590,10 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     }
     QString state = getNodeState();
     QString state_text;
-    QString transition_state;
-
-    NodeHandlePtr handle = node_facade_->getNodeHandle();
-    OutputTransition* ot = handle->getOutputTransition();
-    InputTransition* it = handle->getInputTransition();
-
-    transition_state += ", it: ";
-    transition_state += it->isEnabled() ? "enabled" : "disabled";
-    transition_state += ", ot: ";
-    transition_state += ot->isEnabled() ? "enabled" : "disabled";
-    transition_state += ", events: ";
-    bool events_enabled = true;
-    for(EventPtr e : handle->getExternalEvents()){
-        if(!e->canReceiveToken()) {
-            events_enabled = false;
-            break;
-        }
-    }
-    transition_state += events_enabled ? "enabled" : "disabled";
+    QString transition_state = QString::fromStdString(node_facade_->getDebugDescription());
     state_text = "<img src=\":/node_";
     state_text += state + ".png\" />";
-    if(handle->getNodeState()->isMuted()) {
+    if(node_facade_->getNodeState()->isMuted()) {
         state_text += "<img src=\":/muted.png\" />";
     }
 
@@ -740,11 +638,6 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
 
 void NodeBox::moveEvent(QMoveEvent* e)
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
     eventFilter(this, e);
 }
 
@@ -807,57 +700,39 @@ void NodeBox::showProfiling(bool profiling)
 
 void NodeBox::triggerFlipSides()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
     bool flip = state->isFlipped();
     Q_EMIT flipped(flip);
 }
 
 void NodeBox::triggerMinimized()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
     bool minimize = state->isMinimized();
     Q_EMIT minimized(minimize);
 }
 
 void NodeBox::updateStylesheetColor()
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
 
     QColor text_color = Qt::black;
 
     int r, g, b;
     if(settings_.getTemporary("debug", false)) {
         r = 0; g = 0; b = 0;
-        if(NodeHandlePtr nh = node_facade_->getNodeHandle()) {
-            graph::VertexPtr vertex = nh->getVertex();
-
-            const auto& characteristics = vertex->getNodeCharacteristics();
-            if(characteristics.is_joining_vertex) {
-                r = 255;
-            }
-            if(characteristics.is_joining_vertex_counterpart) {
-                g = 255;
-            }
-            if(characteristics.is_leading_to_joining_vertex) {
-                b = 128;
-            }
-            if(characteristics.is_combined_by_joining_vertex) {
-                b = 255;
-            }
+        const NodeCharacteristics& characteristics = node_facade_->getNodeCharacteristics();
+        if(characteristics.is_joining_vertex) {
+            r = 255;
+        }
+        if(characteristics.is_joining_vertex_counterpart) {
+            g = 255;
+        }
+        if(characteristics.is_leading_to_joining_vertex) {
+            b = 128;
+        }
+        if(characteristics.is_combined_by_joining_vertex) {
+            b = 255;
         }
     } else {
         state->getColor(r, g, b);
@@ -914,11 +789,7 @@ void NodeBox::updateVisuals()
         return;
     }
 
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return;
-    }
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
 
     bool flip = state->isFlipped();
 
@@ -994,33 +865,25 @@ void NodeBox::updateVisuals()
 
 void NodeBox::updatePosition()
 {
-    auto pt = getNodeFacade()->getNodeHandle()->getNodeState()->getPos();
+    auto pt = getNodeFacade()->getNodeState()->getPos();
     move(QPoint(pt.x, pt.y));
 }
 
 bool NodeBox::isMinimizedSize() const
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return false;
-    }
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
     return state->isMinimized();
 }
 
 bool NodeBox::isFlipped() const
 {
-    NodeHandlePtr nh = node_facade_->getNodeHandle();
-    if(!nh) {
-        return false;
-    }
-    NodeStatePtr state = nh->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
     return state->isFlipped();
 }
 
 void NodeBox::nodeStateChangedEvent()
 {
-    NodeStatePtr state = node_facade_->getNodeHandle()->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeState();
 
     bool state_enabled = state->isEnabled();
     bool box_enabled = !property("disabled").toBool();

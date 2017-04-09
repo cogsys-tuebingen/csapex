@@ -2,7 +2,7 @@
 #include <csapex/view/node/node_adapter_factory.h>
 
 /// COMPONENT
-#include <csapex/model/node_handle.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/view/node/default_node_adapter.h>
 #include <csapex/plugin/plugin_manager.hpp>
@@ -50,7 +50,7 @@ bool NodeAdapterFactory::hasAdapter(const std::string &type) const
     return false;
 }
 
-NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeHandlePtr node, NodeBox* parent)
+NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node, NodeBox* parent)
 {
     std::string type = node->getType();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
