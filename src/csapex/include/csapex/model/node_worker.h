@@ -14,6 +14,7 @@
 #include <csapex/model/observer.h>
 #include <csapex/utility/notifier.h>
 #include <csapex/model/activity_type.h>
+#include <csapex/model/execution_state.h>
 
 /// SYSTEM
 #include <map>
@@ -32,16 +33,7 @@ class Interval;
 class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
 {
 public:
-
-public:
     typedef std::shared_ptr<NodeWorker> Ptr;
-
-    enum class State {
-        IDLE,
-        ENABLED,
-        FIRED,
-        PROCESSING
-    };
 
 public:
     NodeWorker(NodeHandlePtr node_handle);
@@ -59,8 +51,8 @@ public:
     void triggerTryProcess();
     void triggerPanic();
 
-    void setState(State state);
-    State getState() const;
+    void setState(ExecutionState state);
+    ExecutionState getExecutionState() const;
 
     std::shared_ptr<Profiler> getProfiler();
 
@@ -149,7 +141,7 @@ private:
     boost::optional<ExecutionMode> current_exec_mode_;
 
     bool is_setup_;
-    State state_;
+    ExecutionState state_;
 
     bool is_processing_;
 

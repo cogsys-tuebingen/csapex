@@ -448,27 +448,15 @@ QBoxLayout* NodeBox::getEventLayout()
 
 bool NodeBox::isError() const
 {
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
-    if(!worker) {
-        return false;
-    }
-    return worker->isError();
+    return node_facade_->isError();
 }
 ErrorState::ErrorLevel NodeBox::errorLevel() const
 {
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
-    if(!worker) {
-        return ErrorState::ErrorLevel::NONE;
-    }
-    return worker->errorLevel();
+    return node_facade_->errorLevel();
 }
 std::string NodeBox::errorMessage() const
 {
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
-    if(!worker) {
-        return "";
-    }
-    return worker->errorMessage();
+    return node_facade_->errorMessage();
 }
 
 void NodeBox::setLabel(const std::string& label)
@@ -662,20 +650,15 @@ void NodeBox::enabledChangeEvent(bool val)
 
 QString NodeBox::getNodeState()
 {
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
-    if(!worker) {
-        return "";
-    }
-
     QString state;
-    switch(worker->getState()) {
-    case NodeWorker::State::IDLE:
+    switch(node_facade_->getExecutionState()) {
+    case ExecutionState::IDLE:
         state = "idle"; break;
-    case NodeWorker::State::ENABLED:
+    case ExecutionState::ENABLED:
         state = "enabled"; break;
-    case NodeWorker::State::FIRED:
+    case ExecutionState::FIRED:
         state = "fired"; break;
-    case NodeWorker::State::PROCESSING:
+    case ExecutionState::PROCESSING:
         state = "processing"; break;
     default:
         state = "unknown"; break;
@@ -686,47 +669,43 @@ QString NodeBox::getNodeState()
 
 void NodeBox::paintEvent(QPaintEvent* /*e*/)
 {
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
     if(!adapter_) {
         return;
     }
     QString state = getNodeState();
     QString state_text;
     QString transition_state;
-    if(worker) {
-        NodeHandlePtr handle = worker->getNodeHandle();
-        OutputTransition* ot = handle->getOutputTransition();
-        InputTransition* it = handle->getInputTransition();
 
-        transition_state += ", it: ";
-        transition_state += it->isEnabled() ? "enabled" : "disabled";
-        transition_state += ", ot: ";
-        transition_state += ot->isEnabled() ? "enabled" : "disabled";
-        transition_state += ", events: ";
-        bool events_enabled = true;
-        for(EventPtr e : handle->getExternalEvents()){
-            if(!e->canReceiveToken()) {
-                events_enabled = false;
-                break;
-            }
-        }
-        transition_state += events_enabled ? "enabled" : "disabled";
-        state_text = "<img src=\":/node_";
-        state_text += state + ".png\" />";
-        if(handle->getNodeState()->isMuted()) {
-            state_text += "<img src=\":/muted.png\" />";
+    NodeHandlePtr handle = node_facade_->getNodeHandle();
+    OutputTransition* ot = handle->getOutputTransition();
+    InputTransition* it = handle->getInputTransition();
+
+    transition_state += ", it: ";
+    transition_state += it->isEnabled() ? "enabled" : "disabled";
+    transition_state += ", ot: ";
+    transition_state += ot->isEnabled() ? "enabled" : "disabled";
+    transition_state += ", events: ";
+    bool events_enabled = true;
+    for(EventPtr e : handle->getExternalEvents()){
+        if(!e->canReceiveToken()) {
+            events_enabled = false;
+            break;
         }
     }
+    transition_state += events_enabled ? "enabled" : "disabled";
+    state_text = "<img src=\":/node_";
+    state_text += state + ".png\" />";
+    if(handle->getNodeState()->isMuted()) {
+        state_text += "<img src=\":/muted.png\" />";
+    }
+
 
     info_exec->setText(state_text);
     info_exec->setToolTip(state + transition_state);
 
-    bool is_error = false;
-    bool is_warn = false;
-    if(worker) {
-        is_error = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::ERROR;
-        is_warn = worker->isError() && worker->errorLevel() == ErrorState::ErrorLevel::WARNING;
-    }
+    bool is_error = node_facade_->isError() && node_facade_->errorLevel() == ErrorState::ErrorLevel::ERROR;
+    bool is_warn = node_facade_->isError() && node_facade_->errorLevel() == ErrorState::ErrorLevel::WARNING;
+
 
     bool error_change = ui->boxframe->property("error").toBool() != is_error;
     bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;
@@ -736,12 +715,12 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
 
     if(error_change || warning_change) {
         if(is_error) {
-            QString msg = QString::fromStdString(worker->errorMessage());
+            QString msg = QString::fromStdString(node_facade_->errorMessage());
             setToolTip(msg);
             info_error->setToolTip(msg);
             info_error->setVisible(true);
         } else if(is_warn) {
-            QString msg = QString::fromStdString(worker->errorMessage());
+            QString msg = QString::fromStdString(node_facade_->errorMessage());
             setToolTip(msg);
             info_error->setToolTip(msg);
             info_error->setVisible(true);
@@ -823,19 +802,7 @@ void NodeBox::refreshTopLevelStylesheet()
 
 void NodeBox::showProfiling(bool profiling)
 {
-    NodeWorkerPtr node = node_facade_->getNodeWorker();
-    if(node->isProfiling() != profiling) {
-        node->setProfiling(profiling);
-    }
-}
-
-void NodeBox::killContent()
-{
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
-    if(!worker) {
-        return;
-    }
-    worker->killExecution();
+    node_facade_->setProfiling(profiling);
 }
 
 void NodeBox::triggerFlipSides()
@@ -1053,11 +1020,7 @@ bool NodeBox::isFlipped() const
 
 void NodeBox::nodeStateChangedEvent()
 {
-    NodeWorkerPtr worker = node_facade_->getNodeWorker();
-    if(!worker) {
-        return;
-    }
-    NodeStatePtr state = worker->getNodeHandle()->getNodeState();
+    NodeStatePtr state = node_facade_->getNodeHandle()->getNodeState();
 
     bool state_enabled = state->isEnabled();
     bool box_enabled = !property("disabled").toBool();
@@ -1067,7 +1030,7 @@ void NodeBox::nodeStateChangedEvent()
     }
 
     setLabel(state->getLabel());
-    ui->label->setToolTip(QString::fromStdString(worker->getUUID().getFullName()));
+    ui->label->setToolTip(QString::fromStdString(node_facade_->getUUID().getFullName()));
 
     updateThreadInformation();
 

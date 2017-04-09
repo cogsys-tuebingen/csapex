@@ -24,6 +24,8 @@ NodeFacade::NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw)
     observe(nw->destroyed, destroyed);
     observe(nw->notification, notification);
 
+    observe(nw->messages_processed, messages_processed);
+
     observe(nw->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
         interval_start(this, type, stamp);
     });
@@ -73,6 +75,46 @@ bool NodeFacade::isProfiling() const
         return false;
     }
 }
+void NodeFacade::setProfiling(bool profiling)
+{
+    if(nw_) {
+        nw_->setProfiling(profiling);
+    }
+}
+bool NodeFacade::isError() const
+{
+    if(nw_) {
+        return nw_->isError();
+    } else {
+        return false;
+    }
+}
+ErrorState::ErrorLevel NodeFacade::errorLevel() const
+{
+    if(nw_) {
+        return nw_->errorLevel();
+    } else {
+        return ErrorState::ErrorLevel::NONE;
+    }
+}
+std::string NodeFacade::errorMessage() const
+{
+    if(nw_) {
+        return nw_->errorMessage();
+    } else {
+        return {};
+    }
+}
+
+ExecutionState NodeFacade::getExecutionState() const
+{
+    if(nw_) {
+        return nw_->getExecutionState();
+    } else {
+        return ExecutionState::UNKNOWN;
+    }
+}
+
 
 std::string NodeFacade::getLabel() const
 {
@@ -80,12 +122,16 @@ std::string NodeFacade::getLabel() const
 }
 
 
-NodeWorkerPtr NodeFacade::getNodeWorker()
-{
-    return nw_;
-}
-
 NodeHandlePtr NodeFacade::getNodeHandle()
 {
     return nh_;
+}
+
+ProfilerPtr NodeFacade::getProfiler()
+{
+    if(nw_) {
+        return nw_->getProfiler();
+    } else {
+        return {};
+    }
 }

@@ -9,6 +9,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/profiling/profiling_fwd.h>
 #include <csapex/model/activity_type.h>
+#include <csapex/model/execution_state.h>
 
 namespace csapex
 {
@@ -26,16 +27,27 @@ public:
 
     bool isActive() const;
     bool isProcessingEnabled() const;
-    bool isProfiling() const;
 
-    NodeWorkerPtr getNodeWorker();
+    bool isProfiling() const;
+    void setProfiling(bool profiling);
+
+    bool isError() const;
+    ErrorState::ErrorLevel errorLevel() const;
+    std::string errorMessage() const;
+
+    ExecutionState getExecutionState() const;
+
     NodeHandlePtr getNodeHandle();
+
+    ProfilerPtr getProfiler();
 
     std::string getLabel() const;
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
+
+    slim_signal::Signal<void()> messages_processed;
 
     slim_signal::Signal<void()> destroyed;
 

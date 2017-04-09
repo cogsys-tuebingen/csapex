@@ -39,15 +39,15 @@ using namespace csapex;
 NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     : node_handle_(node_handle),
       is_setup_(false),
-      state_(State::IDLE), is_processing_(false),
+      state_(ExecutionState::IDLE), is_processing_(false),
       trigger_process_done_(nullptr),
       guard_(-1)
 {
     node_handle->setNodeWorker(this);
 
-//    observe(node_handle->stopped, [this](){
-//        stopObserving();
-//    });
+    //    observe(node_handle->stopped, [this](){
+    //        stopObserving();
+    //    });
 
     profiler_ = std::make_shared<Profiler>(false, 16);
 
@@ -172,12 +172,12 @@ NodePtr NodeWorker::getNode() const
     return node_handle_->getNode().lock();
 }
 
-NodeWorker::State NodeWorker::getState() const
+ExecutionState NodeWorker::getExecutionState() const
 {
     if(isEnabled()) {
-        return State::ENABLED;
+        return ExecutionState::ENABLED;
     } else if(is_processing_) {
-        return State::PROCESSING;
+        return ExecutionState::PROCESSING;
     }
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
     return state_;
@@ -195,7 +195,7 @@ bool NodeWorker::isEnabled() const
 bool NodeWorker::isIdle() const
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-    return state_ == State::IDLE;
+    return state_ == ExecutionState::IDLE;
 }
 bool NodeWorker::isProcessing() const
 {
@@ -205,10 +205,10 @@ bool NodeWorker::isProcessing() const
 bool NodeWorker::isFired() const
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
-    return state_ == State::FIRED;
+    return state_ == ExecutionState::FIRED;
 }
 
-void NodeWorker::setState(State state)
+void NodeWorker::setState(ExecutionState state)
 {
     std::unique_lock<std::recursive_mutex> lock(state_mutex_);
     //    switch(state) {
@@ -312,7 +312,7 @@ void NodeWorker::reset()
     setError(false);
 
     // set state without checking!
-    state_ = State::IDLE;
+    state_ = ExecutionState::IDLE;
 
     node_handle_->getOutputTransition()->reset();
     node_handle_->getInputTransition()->reset();
@@ -325,12 +325,14 @@ void NodeWorker::reset()
 
 void NodeWorker::setProfiling(bool profiling)
 {
-    profiler_->setEnabled(profiling);
+    if(isProfiling() != profiling) {
+        profiler_->setEnabled(profiling);
 
-    if(profiling) {
-        start_profiling(this);
-    } else {
-        stop_profiling(this);
+        if(profiling) {
+            start_profiling(this);
+        } else {
+            stop_profiling(this);
+        }
     }
 }
 
@@ -364,7 +366,7 @@ bool NodeWorker::startProcessingMessages()
             apex_assert_hard(c->getState() != Connection::State::UNREAD);
         }
     }
-    setState(State::FIRED);
+    setState(ExecutionState::FIRED);
 
     apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
 
@@ -590,7 +592,7 @@ void NodeWorker::signalExecutionFinished()
 
 void NodeWorker::signalMessagesProcessed(bool processing_aborted)
 {
-    setState(State::IDLE);
+    setState(ExecutionState::IDLE);
 
     bool is_pipelining = false;
     {
@@ -712,7 +714,7 @@ void NodeWorker::updateState()
     if(isEnabled()) {
         triggerTryProcess();
     } else {
-        setState(State::IDLE);
+        setState(ExecutionState::IDLE);
     }
 }
 

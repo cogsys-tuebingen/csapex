@@ -334,12 +334,6 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
             thread_menu->addMenu(choose_group_menu);
         }
 
-        //    QAction* term = new QAction("terminate thread", &menu);
-        //    term->setIcon(QIcon(":/stop.png"));
-        //    term->setIconVisibleInMenu(true);
-        //    handler[term] = std::bind(&NodeBox::killContent, box);
-        //    menu.addAction(term);
-
         menu.addSeparator();
 
 

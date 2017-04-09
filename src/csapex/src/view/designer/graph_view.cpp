@@ -31,7 +31,6 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/msg/input.h>
@@ -1138,7 +1137,7 @@ void GraphView::startProfiling(NodeFacade *node)
     NodeBox* box = getBox(node->getUUID());
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
-    QPointer<ProfilingWidget> prof = new ProfilingWidget(box->getNodeFacade()->getNodeWorker()->getProfiler(), node->getUUID().getFullName());
+    QPointer<ProfilingWidget> prof = new ProfilingWidget(box->getNodeFacade()->getProfiler(), node->getUUID().getFullName());
     profiling_[box] = prof;
 
     if(QVBoxLayout* vbl = dynamic_cast<QVBoxLayout*>(prof->layout())) {
@@ -1168,9 +1167,7 @@ void GraphView::startProfiling(NodeFacade *node)
         }
     });
 
-    auto nw = box->getNodeFacade()->getNodeWorker();
-
-    auto cp = nw->messages_processed.connect([prof](){ prof->update(); });
+    auto cp = box->getNodeFacade()->messages_processed.connect([prof](){ prof->update(); });
     profiling_connections_[box].push_back(cp);
 }
 
