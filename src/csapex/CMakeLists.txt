@@ -607,7 +607,7 @@ add_library(csapex_qt SHARED
     src/view/param/range_param_adapter.cpp
     src/view/param/value_param_adapter.cpp
 
-
+    src/view/param/trigger_param_adapter.cpp
     src/view/param/range_param_adapter.cpp
     src/view/param/interval_param_adapter.cpp
     src/view/param/set_param_adapter.cpp

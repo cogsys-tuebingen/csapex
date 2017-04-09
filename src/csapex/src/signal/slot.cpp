@@ -111,7 +111,7 @@ void Slot::notifyMessageProcessed()
 
 void Slot::tryNextToken()
 {
-    if(!isEnabled()) {
+    if(!isEnabled() && !isActive()) {
         std::vector<Connection*> connections;
         std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
         while(!available_connections_.empty()) {

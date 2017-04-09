@@ -90,9 +90,6 @@ public:
     slim_signal::Signal<void(NodeFacade* facade, ActivityType type, std::shared_ptr<const Interval> stamp)> interval_start;
     slim_signal::Signal<void(NodeFacade* facade, std::shared_ptr<const Interval> stamp)> interval_end;
 
-    // TODO: replace for client server architecture
-    slim_signal::Signal<void(std::function<void()>)> execution_requested;
-
 private:
     NodeHandlePtr nh_;
     NodeWorkerPtr nw_;

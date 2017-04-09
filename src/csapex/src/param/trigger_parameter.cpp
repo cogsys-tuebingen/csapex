@@ -43,7 +43,8 @@ void TriggerParameter::get_unsafe(boost::any& out) const
 
 bool TriggerParameter::set_unsafe(const boost::any &/*v*/)
 {
-    return false;
+    trigger();
+    return true;
 }
 
 

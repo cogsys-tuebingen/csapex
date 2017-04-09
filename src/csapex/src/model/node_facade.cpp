@@ -52,9 +52,6 @@ NodeFacade::NodeFacade(NodeHandlePtr nh)
     observe(nh->connection_in_prograss, connection_in_prograss);
     observe(nh->connection_done, connection_done);
     observe(nh->connection_start, connection_start);
-
-    // TODO: eliminate
-    observe(execution_requested, nh->execution_requested);
 }
 
 NodeFacade::~NodeFacade()

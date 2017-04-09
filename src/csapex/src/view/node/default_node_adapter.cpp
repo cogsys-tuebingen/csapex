@@ -30,6 +30,7 @@
 #include <csapex/view/param/range_param_adapter.h>
 #include <csapex/view/param/set_param_adapter.h>
 #include <csapex/view/param/value_param_adapter.h>
+#include <csapex/view/param/trigger_param_adapter.h>
 #include <csapex/view/utility/qsignal_relay.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/widgets/port.h>
@@ -207,17 +208,6 @@ struct install
     }
 };
 
-template <>
-struct install<TriggerParameter, void>
-{
-    static void execute(std::map<int, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> >& map)
-    {
-        map[TriggerParameter().ID()] = [](DefaultNodeAdapter* a, Parameter::Ptr p) {
-            a->setupParameter(std::dynamic_pointer_cast<TriggerParameter>(p));
-        };
-    }
-};
-
 }
 
 void DefaultNodeAdapter::setupAdaptiveUi()
@@ -234,7 +224,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     static std::map<int, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
-        install<TriggerParameter>::execute(mapping_);
+        install<TriggerParameter, TriggerParameterAdapter>::execute(mapping_);
 
         install<ColorParameter, ColorParameterAdapter>::execute(mapping_);
         install<PathParameter, PathParameterAdapter>::execute(mapping_);
@@ -386,30 +376,6 @@ void DefaultNodeAdapter::setupAdaptiveUi()
             wrapper_layout_->addLayout(current_layout_);
         }
     }
-}
-
-qt_helper::Call * DefaultNodeAdapter::makeModelCall(std::function<void()> cb)
-{
-    qt_helper::Call* call = new qt_helper::Call([this, cb](){
-        NodeFacadePtr node = node_.lock();
-        if(node) {
-            node->execution_requested(cb);
-        }
-    });
-    callbacks.push_back(call);
-    return call;
-}
-
-void DefaultNodeAdapter::setupParameter(TriggerParameterPtr p)
-{
-    QPointer<QPushButton> btn = new QPushButton(p->name().c_str());
-
-    QHBoxLayout* sub = new QHBoxLayout;
-    sub->addWidget(btn);
-    current_layout_->addLayout(QtHelper::wrap(current_display_name_, sub, new ParameterContextMenu(p)));
-
-    qt_helper::Call* call_trigger = makeModelCall(std::bind(&TriggerParameter::trigger, p));
-    QObject::connect(btn, SIGNAL(clicked()), call_trigger, SLOT(call()));
 }
 
 

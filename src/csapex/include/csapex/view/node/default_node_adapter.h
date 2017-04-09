@@ -72,8 +72,6 @@ public:
     virtual void stop();
 
 public:
-    void setupParameter(param::TriggerParameterPtr trigger_p);
-
     template <typename Parameter, typename Adapter>
     void setupParameter(std::shared_ptr<Parameter> adapter);
 
@@ -86,9 +84,6 @@ protected:
 
 public:
     DefaultNodeAdapterBridge bridge;
-
-private:
-    qt_helper::Call* makeModelCall(std::function<void()> cb);
 
 private:
     std::vector<csapex::slim_signal::ScopedConnection> connections_;

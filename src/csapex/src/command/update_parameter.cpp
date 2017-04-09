@@ -50,6 +50,9 @@ std::string UpdateParameter::getDescription() const
             ss << e << " ";
         }
 
+    } else if(value.type() == typeid(const char*)) {
+        ss << boost::any_cast<const char*> (value);
+
     } else if(value.type() == typeid(std::string)) {
         ss << boost::any_cast<std::string> (value);
 
@@ -85,6 +88,9 @@ bool UpdateParameter::doExecute()
 
     } else if(value.type() == typeid(std::string)) {
         setParameter(boost::any_cast<std::string> (value));
+
+    } else if(value.type() == typeid(const char*)) {
+        setParameter(std::string(boost::any_cast<const char*> (value)));
 
     } else if(value.type() == typeid(std::vector<int>)) {
         setParameter(boost::any_cast<std::vector<int>> (value));
