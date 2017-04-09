@@ -14,7 +14,7 @@
 namespace csapex
 {
 
-class NodeFacade : public Observer, public Notifier
+class CSAPEX_EXPORT NodeFacade : public Observer, public Notifier
 {
 public:
     NodeFacade(NodeHandlePtr nh);
@@ -57,17 +57,25 @@ public:
     double getExecutionFrequency() const;
     double getMaximumFrequency() const;
 
+    // Parameterizable
+    bool hasParameter(const std::string& name) const;
+    template <typename T>
+    T readParameter(const std::string& name) const;
+    template <typename T>
+    void setParameter(const std::string& name, const T& value);
+
+    // Debug Access
+    std::string getDebugDescription() const;
+    std::string getLoggerOutput(ErrorState::ErrorLevel level) const;
+
     // TODO: proxies
     ProfilerPtr getProfiler();
     NodeStatePtr getNodeState() const;
     NodeStatePtr getNodeStateCopy() const;
-
-    NodePtr getNode();
+    GenericStateConstPtr getParameterState() const;
 
     // TODO: remove
     NodeHandlePtr getNodeHandle();
-
-    std::string getDebugDescription() const;
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
@@ -84,6 +92,7 @@ public:
     slim_signal::Signal<void()> messages_processed;
 
     slim_signal::Signal<void()> node_state_changed;
+    slim_signal::Signal<void()> parameters_changed;
 
     slim_signal::Signal<void()> destroyed;
 

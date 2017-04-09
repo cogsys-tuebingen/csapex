@@ -49,11 +49,6 @@ QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(Connectable* c
 
 QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factory) const
 {
-    auto node = node_facade_->getNodeHandle()->getNode().lock();
-    if(!node) {
-        return nullptr;
-    }
-
     QTreeWidgetItem* tl = new QTreeWidgetItem;
     tl->setText(0, QString::fromStdString(node_facade_->getUUID().getFullName()));
 
@@ -118,7 +113,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
     {
         QTreeWidgetItem* parameters = new QTreeWidgetItem;
         parameters->setText(0, "Parameters");
-        GenericState::Ptr state = node->getParameterState();
+        GenericStateConstPtr state = node_facade_->getParameterState();
         for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
             csapex::param::Parameter* p = it->second.get();
 
@@ -169,21 +164,21 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* aout_w = new QTreeWidgetItem;
         aout_w->setText(0, "output");
         QTreeWidgetItem* aout_w_txt = new QTreeWidgetItem;
-        aout_w_txt->setText(0, node->ainfo.history().str().c_str());
+        aout_w_txt->setText(0, QString::fromStdString(node_facade_->getLoggerOutput(ErrorState::ErrorLevel::NONE)));
         aout_w->addChild(aout_w_txt);
         streams->addChild(aout_w);
 
         QTreeWidgetItem* awarn_w = new QTreeWidgetItem;
         awarn_w->setText(0, "warning");
         QTreeWidgetItem* awarn_w_txt = new QTreeWidgetItem;
-        awarn_w_txt->setText(0, node->awarn.history().str().c_str());
+        awarn_w_txt->setText(0, QString::fromStdString(node_facade_->getLoggerOutput(ErrorState::ErrorLevel::WARNING)));
         awarn_w->addChild(awarn_w_txt);
         streams->addChild(awarn_w);
 
         QTreeWidgetItem* aerr_w = new QTreeWidgetItem;
         aerr_w->setText(0, "error");
         QTreeWidgetItem* aerr_w_txt = new QTreeWidgetItem;
-        aerr_w_txt->setText(0, node->aerr.history().str().c_str());
+        aerr_w_txt->setText(0, QString::fromStdString(node_facade_->getLoggerOutput(ErrorState::ErrorLevel::ERROR)));
         aerr_w->addChild(aerr_w_txt);
         streams->addChild(aerr_w);
 

@@ -86,17 +86,12 @@ void NoteBox::paintEvent(QPaintEvent* e)
 
 void NoteBox::resizeEvent(QResizeEvent *e)
 {
-    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
-    if(!note) {
-        return;
+    if(node_facade_->hasParameter("w")) {
+        node_facade_->setParameter("w", width());
     }
 
-    if(note->hasParameter("w")) {
-        note->setParameter("w", width());
-    }
-
-    if(note->hasParameter("h")) {
-        note->setParameter("h", height());
+    if(node_facade_->hasParameter("h")) {
+        node_facade_->setParameter("h", height());
     }
 }
 
@@ -125,33 +120,18 @@ void NoteBox::construct()
 
 void NoteBox::init()
 {
-    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
-    if(!note) {
-        return;
-    }
-
-    edit_->setText(QString::fromStdString(note->readParameter<std::string>("text")));
+    edit_->setText(QString::fromStdString(node_facade_->readParameter<std::string>("text")));
 
     stopResize();
 
     NodeBox::init();
 
-    note->parameters_changed.connect([this](){
-        std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
-        if(!note) {
-            return;
-        }
-
-        edit_->setText(QString::fromStdString(note->readParameter<std::string>("text")));
+    node_facade_->parameters_changed.connect([this](){
+        edit_->setText(QString::fromStdString(node_facade_->readParameter<std::string>("text")));
     });
 
     QObject::connect(edit_, &QTextEdit::textChanged, [this](){
-        std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
-        if(!note) {
-            return;
-        }
-
-        note->setParameter("text", edit_->toPlainText().toStdString());
+        node_facade_->setParameter("text", edit_->toPlainText().toStdString());
     });
 
 
@@ -171,14 +151,9 @@ void NoteBox::startResize()
 }
 void NoteBox::stopResize()
 {
-    std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(node_facade_->getNode());
-    if(!note) {
-        return;
-    }
-
-    if(note->hasParameter("w") && note->hasParameter("h")) {
-        int w = note->readParameter<int>("w");
-        int h = note->readParameter<int>("h");
+    if(node_facade_->hasParameter("w") && node_facade_->hasParameter("h")) {
+        int w = node_facade_->readParameter<int>("w");
+        int h = node_facade_->readParameter<int>("h");
         setFixedSize(std::max(40, w), std::max(40, h));
     } else {
         setFixedSize(40, 40);
