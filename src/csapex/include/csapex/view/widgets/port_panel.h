@@ -9,7 +9,7 @@
 #include <csapex/view/view_fwd.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/utility/create_connector_request.h>
+#include <csapex/model/connector_description.h>
 
 /// SYSTEM
 #include <QFrame>
@@ -39,9 +39,9 @@ public:
     }
 
 Q_SIGNALS:
-    void createPortRequest(CreateConnectorRequest request);
-    void createPortAndConnectRequest(CreateConnectorRequest request, ConnectablePtr);
-    void createPortAndMoveRequest(CreateConnectorRequest request, ConnectablePtr);
+    void createPortRequest(ConnectorDescription request);
+    void createPortAndConnectRequest(ConnectorDescription request, ConnectablePtr);
+    void createPortAndMoveRequest(ConnectorDescription request, ConnectablePtr);
 
     void portAdded(Port*);
     void portRemoved(Port*);

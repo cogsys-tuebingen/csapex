@@ -50,7 +50,7 @@ void MetaPort::triggerCreatePort()
     bool optional = true;
 
     TokenDataPtr type(new connection_types::AnyMessage);
-    Q_EMIT createPortRequest(CreateConnectorRequest(target, port_type_, type, label.toStdString(), optional));
+    Q_EMIT createPortRequest(ConnectorDescription(target, port_type_, type, label.toStdString(), optional));
 }
 
 void MetaPort::dragEnterEvent(QDragEnterEvent* e)
@@ -84,7 +84,7 @@ void MetaPort::dropEvent(QDropEvent* e)
                 return;
             }
 
-            Q_EMIT createPortAndConnectRequest(CreateConnectorRequest(target, port_type_, type, label.toStdString()), from);
+            Q_EMIT createPortAndConnectRequest(ConnectorDescription(target, port_type_, type, label.toStdString()), from);
         }
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
@@ -100,7 +100,7 @@ void MetaPort::dropEvent(QDropEvent* e)
             }
 
 
-            Q_EMIT createPortAndMoveRequest(CreateConnectorRequest(target, port_type_, type, label.toStdString()), from);
+            Q_EMIT createPortAndMoveRequest(ConnectorDescription(target, port_type_, type, label.toStdString()), from);
         }
 
     }

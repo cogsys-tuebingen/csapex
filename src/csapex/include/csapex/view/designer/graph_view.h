@@ -12,7 +12,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
-#include <csapex/utility/create_connector_request.h>
+#include <csapex/model/connector_description.h>
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/profiling/profilable.h>
 #include <csapex/model/execution_mode.h>
@@ -132,9 +132,9 @@ public Q_SLOTS:
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
 
-    void createPort(CreateConnectorRequest request);
-    void createPortAndConnect(CreateConnectorRequest request, ConnectablePtr from);
-    void createPortAndMove(CreateConnectorRequest request, ConnectablePtr from);
+    void createPort(ConnectorDescription request);
+    void createPortAndConnect(ConnectorDescription request, ConnectablePtr from);
+    void createPortAndMove(ConnectorDescription request, ConnectablePtr from);
 
     void addPort(Port* port);
     void removePort(Port* port);

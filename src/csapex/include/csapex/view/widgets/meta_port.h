@@ -6,7 +6,7 @@
 
 /// PROJECT
 #include <csapex/view/widgets/port.h>
-#include <csapex/utility/create_connector_request.h>
+#include <csapex/model/connector_description.h>
 
 namespace csapex
 {
@@ -31,9 +31,9 @@ public:
     void dropEvent(QDropEvent* e);
 
 Q_SIGNALS:
-    void createPortRequest(CreateConnectorRequest request);
-    void createPortAndConnectRequest(CreateConnectorRequest request, ConnectablePtr);
-    void createPortAndMoveRequest(CreateConnectorRequest request, ConnectablePtr);
+    void createPortRequest(ConnectorDescription request);
+    void createPortAndConnectRequest(ConnectorDescription request, ConnectablePtr);
+    void createPortAndMoveRequest(ConnectorDescription request, ConnectablePtr);
 
 private Q_SLOTS:
     void triggerCreatePort();

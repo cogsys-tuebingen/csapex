@@ -1,5 +1,5 @@
-#ifndef CREATE_CONNECTOR_REQUEST_H
-#define CREATE_CONNECTOR_REQUEST_H
+#ifndef CONNECTOR_DESCRIPTION_H
+#define CONNECTOR_DESCRIPTION_H
 
 /// HEADER
 #include <csapex/utility/uuid.h>
@@ -10,7 +10,7 @@
 namespace csapex
 {
 
-struct CreateConnectorRequest
+struct ConnectorDescription
 {
     AUUID target;
     ConnectorType connector_type;
@@ -19,12 +19,12 @@ struct CreateConnectorRequest
 
     TokenDataConstPtr type;
 
-    CreateConnectorRequest(const AUUID& target, ConnectorType connector_type, const TokenDataConstPtr& type, const std::string& label, bool optional = true)
+    ConnectorDescription(const AUUID& target, ConnectorType connector_type, const TokenDataConstPtr& type, const std::string& label, bool optional = true)
         : target(target), connector_type(connector_type), label(label), optional(optional),
           type(type)
     {
     }
-    CreateConnectorRequest(const AUUID& target, ConnectorType connector_type, const std::string& label, bool optional = true)
+    ConnectorDescription(const AUUID& target, ConnectorType connector_type, const std::string& label, bool optional = true)
         : target(target), connector_type(connector_type), label(label), optional(optional)
     {
         type = connection_types::makeEmpty<connection_types::AnyMessage>();
@@ -33,4 +33,4 @@ struct CreateConnectorRequest
 
 }
 
-#endif // CREATE_CONNECTOR_REQUEST_H
+#endif // CONNECTOR_DESCRIPTION_H

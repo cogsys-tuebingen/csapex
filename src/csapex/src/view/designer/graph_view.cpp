@@ -1016,7 +1016,7 @@ void GraphView::removeBox(NodeBox *box)
 }
 
 
-void GraphView::createPort(CreateConnectorRequest request)
+void GraphView::createPort(ConnectorDescription request)
 {
     CommandFactory factory(graph_facade_.get());
 
@@ -1024,7 +1024,7 @@ void GraphView::createPort(CreateConnectorRequest request)
     view_core_.getCommandDispatcher()->execute(cmd);
 }
 
-void GraphView::createPortAndConnect(CreateConnectorRequest request, ConnectablePtr from)
+void GraphView::createPortAndConnect(ConnectorDescription request, ConnectablePtr from)
 {
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -1043,7 +1043,7 @@ void GraphView::createPortAndConnect(CreateConnectorRequest request, Connectable
     view_core_.getCommandDispatcher()->execute(cmd);
 }
 
-void GraphView::createPortAndMove(CreateConnectorRequest request, ConnectablePtr from)
+void GraphView::createPortAndMove(ConnectorDescription request, ConnectablePtr from)
 {
     SubgraphNode* graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();

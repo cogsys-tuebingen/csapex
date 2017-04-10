@@ -11,7 +11,7 @@
 #include <csapex/model/error_state.h>
 #include <csapex/model/node_facade.h>
 #include <csapex/model/connector_type.h>
-#include <csapex/utility/create_connector_request.h>
+#include <csapex/model/connector_description.h>
 #include <csapex/view/csapex_qt_export.h>
 #include <csapex/model/observer.h>
 
@@ -158,9 +158,9 @@ Q_SIGNALS:
     void portAdded(Port*);
     void portRemoved(Port*);
 
-    void createPortRequest(CreateConnectorRequest request);
-    void createPortAndConnectRequest(CreateConnectorRequest request, ConnectablePtr);
-    void createPortAndMoveRequest(CreateConnectorRequest request,  ConnectablePtr);
+    void createPortRequest(ConnectorDescription request);
+    void createPortAndConnectRequest(ConnectorDescription request, ConnectablePtr);
+    void createPortAndMoveRequest(ConnectorDescription request,  ConnectablePtr);
 
 protected:
     void resizeEvent(QResizeEvent * e);
