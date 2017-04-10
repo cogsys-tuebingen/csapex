@@ -3,7 +3,8 @@
 
 using namespace csapex;
 
-ConnectableOwner::ConnectableOwner()
+ConnectableOwner::ConnectableOwner(const UUID &uuid)
+    : Unique(uuid)
 {
 
 }

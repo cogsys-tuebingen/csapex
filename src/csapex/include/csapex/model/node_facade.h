@@ -10,6 +10,7 @@
 #include <csapex/profiling/profiling_fwd.h>
 #include <csapex/model/activity_type.h>
 #include <csapex/model/execution_state.h>
+#include <csapex/model/connector_description.h>
 
 namespace csapex
 {
@@ -40,6 +41,11 @@ public:
     bool hasVariadicEvents() const;
     bool hasVariadicSlots() const;
 
+
+    std::vector<ConnectorDescription> getInputs() const;
+    std::vector<ConnectorDescription> getOutputs() const;
+    std::vector<ConnectorDescription> getEvents() const;
+    std::vector<ConnectorDescription> getSlots() const;
 
     NodeCharacteristics getNodeCharacteristics() const;
 

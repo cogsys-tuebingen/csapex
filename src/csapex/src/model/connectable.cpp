@@ -6,6 +6,7 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/utility/debug.h>
+#include <csapex/model/connectable_owner.h>
 
 /// SYSTEM
 #include <iostream>
@@ -198,6 +199,20 @@ void Connectable::setType(TokenData::ConstPtr type)
 TokenData::ConstPtr Connectable::getType() const
 {
     return type_;
+}
+
+
+ConnectorDescription Connectable::getDescription() const
+{
+    ConnectorDescription res(getUUID().getAbsoluteUUID(), getConnectorType(), getType(), getLabel(), isOptional());
+    for(const ConnectionPtr& c : getConnections()) {
+        if(isOutput()) {
+            res.targets.push_back(c->target()->getUUID().getAbsoluteUUID());
+        } else {
+            res.targets.push_back(c->source()->getUUID().getAbsoluteUUID());
+        }
+    }
+    return res;
 }
 
 int Connectable::getCount() const

@@ -1020,7 +1020,7 @@ void GraphView::createPort(ConnectorDescription request)
 {
     CommandFactory factory(graph_facade_.get());
 
-    CommandPtr cmd = factory.createVariadicPort(request.target, request.connector_type, request.type, request.label, request.optional);
+    CommandPtr cmd = factory.createVariadicPort(request.owner, request.connector_type, request.token_type, request.label, request.optional);
     view_core_.getCommandDispatcher()->execute(cmd);
 }
 
@@ -1031,12 +1031,12 @@ void GraphView::createPortAndConnect(ConnectorDescription request, ConnectablePt
 
     std::shared_ptr<Command> cmd;
 
-    if(request.target == graph->getUUID().getAbsoluteUUID()) {
-        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.target, request.connector_type, request.type, request.label,
+    if(request.owner == graph->getUUID().getAbsoluteUUID()) {
+        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.owner, request.connector_type, request.token_type, request.label,
                                                                         from->getUUID(), false, false);
 
     } else {
-        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.target, request.connector_type, request.type, request.label,
+        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.owner, request.connector_type, request.token_type, request.label,
                                                                         from->getUUID(), false, true);
     }
 
@@ -1050,12 +1050,12 @@ void GraphView::createPortAndMove(ConnectorDescription request, ConnectablePtr f
 
     std::shared_ptr<Command> cmd;
 
-    if(request.target == graph->getUUID().getAbsoluteUUID()) {
-        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.target, request.connector_type, request.type, request.label,
+    if(request.owner == graph->getUUID().getAbsoluteUUID()) {
+        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.owner, request.connector_type, request.token_type, request.label,
                                                                         from->getUUID(), true, false);
 
     } else {
-        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.target, request.connector_type, request.type, request.label,
+        cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.owner, request.connector_type, request.token_type, request.label,
                                                                         from->getUUID(), true, true);
     }
 

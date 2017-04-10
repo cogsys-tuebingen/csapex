@@ -127,6 +127,27 @@ bool NodeFacade::hasVariadicSlots() const
 }
 
 
+std::vector<ConnectorDescription> NodeFacade::getInputs() const
+{
+    return nh_->getInputDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getOutputs() const
+{
+    return nh_->getOutputDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getEvents() const
+{
+    return nh_->getEventDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getSlots() const
+{
+    return nh_->getSlotDescriptions();
+}
+
+
 NodeCharacteristics NodeFacade::getNodeCharacteristics() const
 {
     return nh_->getVertex()->getNodeCharacteristics();

@@ -7,6 +7,7 @@
 #include <csapex/model/unique.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/connector_type.h>
+#include <csapex/model/connector_description.h>
 #include <csapex/csapex_export.h>
 
 /// SYSTEM
@@ -42,6 +43,9 @@ public:
     }
     virtual bool isInput() const {
         return false;
+    }    
+    virtual bool isOptional() const {
+        return false;
     }
 
     bool isVirtual() const;
@@ -64,6 +68,8 @@ public:
     TokenData::ConstPtr getType() const;
 
     virtual ConnectorType getConnectorType() const = 0;
+
+    virtual ConnectorDescription getDescription() const;
 
     bool isEnabled() const;
     void setEnabled(bool enabled);

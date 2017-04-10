@@ -40,6 +40,7 @@ FWD(NodeWorker);
 FWD(NodeModifier);
 FWD(Tag);
 FWD(NodeCharacteristics);
+FWD(ConnectorDescription);
 
 FWD(Connection);
 FWD(Fulcrum);

@@ -45,7 +45,7 @@ public:
 
     virtual void removeAllConnectionsNotUndoable() override;
 
-    bool isOptional() const;
+    virtual bool isOptional() const override;
     void setOptional(bool optional);
 
     virtual bool hasMessage() const;

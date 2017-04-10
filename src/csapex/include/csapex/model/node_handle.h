@@ -5,12 +5,13 @@
 #include <csapex/model/connectable_owner.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/node_modifier.h>
-#include <csapex/model/unique.h>
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/param/param_fwd.h>
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/utility/rate.h>
 #include <csapex/utility/slim_signal.hpp>
+#include <csapex/model/connector_description.h>
+#include <csapex/model/connectable_vector.h>
 
 /// SYSTEM
 #include <vector>
@@ -19,7 +20,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeHandle : public Unique, public NodeModifier, public ConnectableOwner, public std::enable_shared_from_this<NodeHandle>
+class CSAPEX_EXPORT NodeHandle : public NodeModifier, public ConnectableOwner, public std::enable_shared_from_this<NodeHandle>
 {
 public:
     NodeHandle(const std::string& type, const UUID &uuid,
@@ -91,16 +92,19 @@ public:
 
     std::vector<ConnectablePtr> getExternalConnectors() const override;
 
+    std::vector<ConnectorDescription> getInputDescriptions() const;
     std::vector<InputPtr> getExternalInputs() const override;
     std::vector<InputPtr> getInternalInputs() const;
 
+    std::vector<ConnectorDescription> getOutputDescriptions() const;
     std::vector<OutputPtr> getExternalOutputs() const override;
     std::vector<OutputPtr> getInternalOutputs() const;
 
+    std::vector<ConnectorDescription> getSlotDescriptions() const;
     std::vector<SlotPtr> getExternalSlots() const override;
     std::vector<SlotPtr> getInternalSlots() const;
 
-
+    std::vector<ConnectorDescription> getEventDescriptions() const;
     std::vector<EventPtr> getExternalEvents() const override;
     std::vector<EventPtr> getInternalEvents() const;
 
@@ -179,15 +183,15 @@ protected:
     NodeStatePtr node_state_;
     NodeRunnerWeakPtr node_runner_;
 
-    std::vector<InputPtr> external_inputs_;
-    std::vector<OutputPtr> external_outputs_;
-    std::vector<EventPtr> external_events_;
-    std::vector<SlotPtr> external_slots_;
+    ConnectableVector<Input> external_inputs_;
+    ConnectableVector<Output> external_outputs_;
+    ConnectableVector<Event> external_events_;
+    ConnectableVector<Slot> external_slots_;
 
-    std::vector<InputPtr> internal_inputs_;
-    std::vector<OutputPtr> internal_outputs_;
-    std::vector<EventPtr> internal_events_;
-    std::vector<SlotPtr> internal_slots_;
+    ConnectableVector<Input> internal_inputs_;
+    ConnectableVector<Output> internal_outputs_;
+    ConnectableVector<Event> internal_events_;
+    ConnectableVector<Slot> internal_slots_;
 
     std::string node_type_;
 

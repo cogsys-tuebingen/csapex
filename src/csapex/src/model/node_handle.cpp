@@ -26,7 +26,7 @@ using namespace csapex;
 NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
                        UUIDProvider *uuid_provider,
                        InputTransitionPtr transition_in, OutputTransitionPtr transition_out)
-    : Unique(uuid),
+    : ConnectableOwner(uuid),
       node_(node),
       node_state_(std::make_shared<NodeState>(this)),
       node_type_(type),
@@ -884,6 +884,11 @@ std::vector<ConnectablePtr> NodeHandle::getExternalConnectors() const
     return result;
 }
 
+std::vector<ConnectorDescription> NodeHandle::getInputDescriptions() const
+{
+    return external_inputs_.getDescription();
+}
+
 std::vector<InputPtr> NodeHandle::getExternalInputs() const
 {
     return external_inputs_;
@@ -894,6 +899,11 @@ std::vector<InputPtr> NodeHandle::getInternalInputs() const
 }
 
 
+
+std::vector<ConnectorDescription> NodeHandle::getOutputDescriptions() const
+{
+    return external_outputs_.getDescription();
+}
 
 std::vector<OutputPtr> NodeHandle::getExternalOutputs() const
 {
@@ -906,6 +916,11 @@ std::vector<OutputPtr> NodeHandle::getInternalOutputs() const
 
 
 
+std::vector<ConnectorDescription> NodeHandle::getSlotDescriptions() const
+{
+    return external_slots_.getDescription();
+}
+
 std::vector<SlotPtr> NodeHandle::getExternalSlots() const
 {
     return external_slots_;
@@ -916,6 +931,11 @@ std::vector<SlotPtr> NodeHandle::getInternalSlots() const
 }
 
 
+
+std::vector<ConnectorDescription> NodeHandle::getEventDescriptions() const
+{
+    return external_events_.getDescription();
+}
 
 std::vector<EventPtr> NodeHandle::getExternalEvents() const
 {

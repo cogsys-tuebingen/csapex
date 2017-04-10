@@ -20,7 +20,7 @@ public:
     QTreeWidgetItem* createDebugInformation(NodeFactory *node_factory) const;
 
 private:
-    QTreeWidgetItem * createDebugInformationConnector(Connectable *connector) const;
+    QTreeWidgetItem * createDebugInformationConnector(const csapex::ConnectorDescription &connector) const;
 
 private:
     NodeFacade* node_facade_;

@@ -1,12 +1,15 @@
 #ifndef CONNECTABLE_OWNER_H
 #define CONNECTABLE_OWNER_H
 
+/// PROJECT
+#include <csapex/model/unique.h>
+
 namespace csapex
 {
-class ConnectableOwner
+class ConnectableOwner : public Unique
 {
 protected:
-    ConnectableOwner();
+    ConnectableOwner(const UUID &uuid);
     virtual ~ConnectableOwner();
 };
 }

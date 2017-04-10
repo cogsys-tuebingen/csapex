@@ -12,22 +12,24 @@ namespace csapex
 
 struct ConnectorDescription
 {
-    AUUID target;
+    AUUID owner;
     ConnectorType connector_type;
     std::string label;
     bool optional;
 
-    TokenDataConstPtr type;
+    TokenDataConstPtr token_type;
 
-    ConnectorDescription(const AUUID& target, ConnectorType connector_type, const TokenDataConstPtr& type, const std::string& label, bool optional = true)
-        : target(target), connector_type(connector_type), label(label), optional(optional),
-          type(type)
+    std::vector<AUUID> targets;
+
+    ConnectorDescription(const AUUID& owner, ConnectorType connector_type, const TokenDataConstPtr& token_type, const std::string& label, bool optional = true)
+        : owner(owner), connector_type(connector_type), label(label), optional(optional),
+          token_type(token_type)
     {
     }
-    ConnectorDescription(const AUUID& target, ConnectorType connector_type, const std::string& label, bool optional = true)
-        : target(target), connector_type(connector_type), label(label), optional(optional)
+    ConnectorDescription(const AUUID& owner, ConnectorType connector_type, const std::string& label, bool optional = true)
+        : owner(owner), connector_type(connector_type), label(label), optional(optional)
     {
-        type = connection_types::makeEmpty<connection_types::AnyMessage>();
+        token_type = connection_types::makeEmpty<connection_types::AnyMessage>();
     }
 };
 

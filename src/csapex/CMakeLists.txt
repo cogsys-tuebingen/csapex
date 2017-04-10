@@ -344,6 +344,7 @@ add_library(csapex SHARED
     src/model/connectable.cpp
     src/model/connectable_owner.cpp
     src/model/connector_type.cpp
+    src/model/connectable_vector.cpp
     src/model/connection.cpp
     src/model/connection_information.cpp
     src/model/token.cpp

@@ -22,26 +22,26 @@ NodeStatistics::NodeStatistics(NodeFacade *node)
 
 }
 
-QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(Connectable* connector) const
+QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(const ConnectorDescription& connector) const
 {
     QTreeWidgetItem* connector_widget = new QTreeWidgetItem;
-    connector_widget->setText(0, connector->getUUID().getShortName().c_str());
+    connector_widget->setText(0, QString::fromStdString(connector.owner.getShortName()));
     connector_widget->setIcon(0, QIcon(":/connector.png"));
 
     QTreeWidgetItem* uuid = new QTreeWidgetItem;
     uuid->setText(0, "UUID");
-    uuid->setText(1, connector->getUUID().getFullName().c_str());
+    uuid->setText(1, QString::fromStdString(connector.owner.getFullName()));
     connector_widget->addChild(uuid);
 
     QTreeWidgetItem* label = new QTreeWidgetItem;
     label->setText(0, "Label");
-    label->setText(1, connector->getLabel().c_str());
+    label->setText(1, QString::fromStdString(connector.label));
     connector_widget->addChild(label);
 
 
     QTreeWidgetItem* type = new QTreeWidgetItem;
     type->setText(0, "Type");
-    type->setText(1, connector->getType()->descriptiveName().c_str());
+    type->setText(1, QString::fromStdString(connector.token_type->descriptiveName()));
     connector_widget->addChild(type);
 
     return connector_widget;
@@ -60,25 +60,20 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
 
-        for(auto input : node_facade_->getNodeHandle()->getExternalInputs()) {
-            QTreeWidgetItem* connector_widget = createDebugInformationConnector(input.get());
+        for(const ConnectorDescription& input : node_facade_->getInputs()) {
+            QTreeWidgetItem* connector_widget = createDebugInformationConnector(input);
 
             QTreeWidgetItem* input_widget = new QTreeWidgetItem;
             input_widget->setText(0, "Input");
 
-            QTreeWidgetItem* target_widget = new QTreeWidgetItem;
-            if(input->isConnected()) {
-                ConnectablePtr target = input->getSource();
-                target_widget->setText(0, QString::fromStdString(target->getUUID().getFullName()));
-                //target_widget->setIcon(1, target->getNode()->getIcon());
-                //target_widget->setText(1, target->getNode()->getType().c_str());
+            QTreeWidgetItem* targets = new QTreeWidgetItem;
+            for(const AUUID& output: input.targets) {
+                QTreeWidgetItem* target_widget = new QTreeWidgetItem;
+                target_widget->setText(0, QString::fromStdString(output.getFullName()));
                 target_widget->setIcon(1, QIcon(":/connector.png"));
-            } else {
-                target_widget->setText(0, "not connected");
-                target_widget->setIcon(1, QIcon(":/disconnected.png"));
+                targets->addChild(target_widget);
             }
-
-            input_widget->addChild(target_widget);
+            input_widget->addChild(targets);
 
             connector_widget->addChild(input_widget);
 
@@ -90,17 +85,14 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
 
-        for(auto output : node_facade_->getNodeHandle()->getExternalOutputs()) {
-            QTreeWidgetItem* output_widget = createDebugInformationConnector(output.get());
+        for(const ConnectorDescription& output : node_facade_->getNodeHandle()->getOutputDescriptions()) {
+            QTreeWidgetItem* output_widget = createDebugInformationConnector(output);
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
             targets->setText(0, "Target");
-            for(ConnectionPtr connection : output->getConnections()) {
+            for(const AUUID& input : output.targets) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
-                ConnectablePtr input = connection->to();
-                target_widget->setText(0, QString::fromStdString(input->getUUID().getFullName()));
-                //target_widget->setIcon(1, target->getNode()->getIcon());
-                //target_widget->setText(1, target->getNode()->getType().c_str());
+                target_widget->setText(0, QString::fromStdString(input.getFullName()));
                 target_widget->setIcon(1, QIcon(":/connector.png"));
                 targets->addChild(target_widget);
             }
