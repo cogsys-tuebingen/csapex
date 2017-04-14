@@ -208,7 +208,7 @@ void Main::askForRecoveryConfig(const std::string& config_to_load)
                 temp_file.filename().string() +
                 "</b>?<br />(last modified: " + mod_time + ")";
 
-        QMessageBox::StandardButton reply = QMessageBox::question(splash, "Configuration Recovery",
+        QMessageBox::StandardButton reply = QMessageBox::question(nullptr, "Configuration Recovery",
                                                                   QString::fromStdString(question),
                                                                   QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes) {
