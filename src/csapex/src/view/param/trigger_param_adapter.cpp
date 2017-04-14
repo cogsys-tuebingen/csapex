@@ -38,7 +38,7 @@ QWidget* TriggerParameterAdapter::setup(QBoxLayout* layout, const std::string& d
 
 
     auto cb = [this](){
-        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(AUUID(p_->getUUID()), "");
+        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(AUUID(p_->getUUID()), std::string(""));
         executeCommand(update_parameter);
     };
 
