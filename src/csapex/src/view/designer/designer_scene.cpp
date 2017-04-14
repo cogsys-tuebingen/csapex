@@ -361,7 +361,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
                     ConnectablePtr temp_from = temp.from.lock();
 
                     if(temp_from) {
-                        Port* fromp = getPort(temp_from.get());
+                        Port* fromp = getPort(temp_from->getUUID());
 
                         if(fromp) {
                             ccs.start_pos = UNDEFINED;
@@ -413,25 +413,21 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
                 continue;
             }
 
-            NodeHandlePtr node_handle = box->getNodeFacade()->getNodeHandle();
-            if(!node_handle) {
-                continue;
-            }
-
+            NodeFacadePtr node_facade = box->getNodeFacade();
 
             // draw port information (in)
-            for(auto input : node_handle->getExternalInputs()) {
-                if(!node_handle->isParameterInput(input.get())) {
-                    Port* p = getPort(input.get());
+            for(const ConnectorDescription& input : node_facade->getInputs()) {
+                if(!node_facade->isParameterInput(input.id)) {
+                    Port* p = getPort(input.id);
                     if(p) {
                         drawPort(painter, box->isSelected(), p);
                     }
                 }
             }
             // draw port information (out)
-            for(auto output : node_handle->getExternalOutputs()) {
-                if(!node_handle->isParameterOutput(output.get())) {
-                    Port* p = getPort(output.get());
+            for(const ConnectorDescription& output : node_facade->getOutputs()) {
+                if(!node_facade->isParameterOutput(output.id)) {
+                    Port* p = getPort(output.id);
                     if(p) {
                         drawPort(painter, box->isSelected(), p);
                     }
@@ -441,8 +437,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             // draw slots
             {
                 int i = 0;
-                for(auto slot : node_handle->getExternalSlots()) {
-                    Port* p = getPort(slot.get());
+                for(const ConnectorDescription& slot : node_facade->getSlots()) {
+                    Port* p = getPort(slot.id);
                     if(p) {
                         drawPort(painter, box->isSelected(), p, i++);
                     }
@@ -451,8 +447,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             // draw events
             {
                 int i = 0;
-                for(auto event : node_handle->getExternalEvents()) {
-                    Port* p = getPort(event.get());
+                for(const ConnectorDescription& event : node_facade->getEvents()) {
+                    Port* p = getPort(event.id);
                     if(p) {
                         drawPort(painter, box->isSelected(), p, i++);
                     }
@@ -468,8 +464,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
         if(nh) {
             {
                 int i = 0;
-                for(const InputPtr& input : nh->getInternalInputs()) {
-                    Port* p = getPort(input.get());
+                for(const ConnectorDescription& input : nh->getInternalInputDescriptions()) {
+                    Port* p = getPort(input.id);
                     if(p) {
                         drawPort(painter, false, p, i++);
                     }
@@ -477,8 +473,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
             {
                 int i = 0;
-                for(const OutputPtr& output : nh->getInternalOutputs()) {
-                    Port* p = getPort(output.get());
+                for(const ConnectorDescription& output : nh->getInternalOutputDescriptions()) {
+                    Port* p = getPort(output.id);
                     if(p) {
                         drawPort(painter, false, p, i++);
                     }
@@ -486,8 +482,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
             {
                 int i = 0;
-                for(const SlotPtr& slot : nh->getInternalSlots()) {
-                    Port* p = getPort(slot.get());
+                for(const ConnectorDescription& slot : nh->getInternalSlotDescriptions()) {
+                    Port* p = getPort(slot.id);
                     if(p) {
                         drawPort(painter, false, p, i++);
                     }
@@ -495,8 +491,8 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
             {
                 int i = 0;
-                for(const EventPtr& event : nh->getInternalEvents()) {
-                    Port* p = getPort(event.get());
+                for(const ConnectorDescription& event : nh->getInternalEventDescriptions()) {
+                    Port* p = getPort(event.id);
                     if(p) {
                         drawPort(painter, false, p, i++);
                     }
@@ -894,8 +890,8 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
                                                   Connectable *from, Connectable *to,
                                                   int id)
 {
-    Port* from_port = getPort(from);
-    Port* to_port = getPort(to);
+    Port* from_port = getPort(from->getUUID());
+    Port* to_port = getPort(to->getUUID());
 
     if(!from_port || !to_port) {
         return std::vector<QRectF>();
@@ -1207,9 +1203,9 @@ void DesignerScene::removePort(Port *port)
     }
 }
 
-Port* DesignerScene::getPort(Connectable *c)
+Port* DesignerScene::getPort(const UUID& connector_uuid)
 {
-    auto pos = port_map_.find(c->getUUID());
+    auto pos = port_map_.find(connector_uuid);
     if(pos != port_map_.end()) {
         return pos->second;
     } else {

@@ -25,12 +25,12 @@ NodeStatistics::NodeStatistics(NodeFacade *node)
 QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(const ConnectorDescription& connector) const
 {
     QTreeWidgetItem* connector_widget = new QTreeWidgetItem;
-    connector_widget->setText(0, QString::fromStdString(connector.owner.getShortName()));
+    connector_widget->setText(0, QString::fromStdString(connector.id.getShortName()));
     connector_widget->setIcon(0, QIcon(":/connector.png"));
 
     QTreeWidgetItem* uuid = new QTreeWidgetItem;
     uuid->setText(0, "UUID");
-    uuid->setText(1, QString::fromStdString(connector.owner.getFullName()));
+    uuid->setText(1, QString::fromStdString(connector.id.getFullName()));
     connector_widget->addChild(uuid);
 
     QTreeWidgetItem* label = new QTreeWidgetItem;
@@ -85,7 +85,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
 
-        for(const ConnectorDescription& output : node_facade_->getNodeHandle()->getOutputDescriptions()) {
+        for(const ConnectorDescription& output : node_facade_->getNodeHandle()->getExternalOutputDescriptions()) {
             QTreeWidgetItem* output_widget = createDebugInformationConnector(output);
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;

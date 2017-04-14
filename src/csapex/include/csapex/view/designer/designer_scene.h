@@ -50,7 +50,7 @@ public:
     std::vector<NodeBox*> getSelectedBoxes() const;
 
     void addPort(Port* port);
-    Port* getPort(Connectable* c);
+    Port* getPort(const UUID &connector_uuid);
     void removePort(Port* port);
 
     std::string makeStatusString() const;

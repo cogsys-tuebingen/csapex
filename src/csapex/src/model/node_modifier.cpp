@@ -6,6 +6,8 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/factory/message_factory.h>
 #include <csapex/msg/any_message.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 
 using namespace csapex;
 
@@ -51,7 +53,7 @@ std::vector<InputPtr> NodeModifier::getMessageInputs() const
     auto vec = getExternalInputs();
     std::vector<InputPtr> result;
     for(auto entry : vec) {
-        if(!isParameterInput(entry.get()))  {
+        if(!isParameterInput(entry->getUUID()))  {
             result.push_back(entry);
         }
     }
@@ -63,7 +65,7 @@ std::vector<OutputPtr> NodeModifier::getMessageOutputs() const
     auto vec = getExternalOutputs();
     std::vector<OutputPtr> result;
     for(auto entry : vec) {
-        if(!isParameterOutput(entry.get()))  {
+        if(!isParameterOutput(entry->getUUID()))  {
             result.push_back(entry);
         }
     }

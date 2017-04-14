@@ -16,6 +16,7 @@
 /// SYSTEM
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 namespace csapex
 {
@@ -49,11 +50,11 @@ public:
 
     Input* addInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
     void manageInput(InputPtr in);
-    bool isParameterInput(Input* in) const override;
+    bool isParameterInput(const UUID& id) const override;
 
     Output* addOutput(TokenDataConstPtr type, const std::string& label) override;
     void manageOutput(OutputPtr out);
-    bool isParameterOutput(Output* out) const override;
+    bool isParameterOutput(const UUID& id) const override;
 
     Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot*,const TokenPtr& )> callback, bool active, bool asynchronous) override;
     Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active, bool asynchronous) override;
@@ -92,27 +93,31 @@ public:
 
     std::vector<ConnectablePtr> getExternalConnectors() const override;
 
-    std::vector<ConnectorDescription> getInputDescriptions() const;
+    std::vector<ConnectorDescription> getExternalInputDescriptions() const;
     std::vector<InputPtr> getExternalInputs() const override;
+    std::vector<ConnectorDescription> getInternalInputDescriptions() const;
     std::vector<InputPtr> getInternalInputs() const;
 
-    std::vector<ConnectorDescription> getOutputDescriptions() const;
+    std::vector<ConnectorDescription> getExternalOutputDescriptions() const;
     std::vector<OutputPtr> getExternalOutputs() const override;
+    std::vector<ConnectorDescription> getInternalOutputDescriptions() const;
     std::vector<OutputPtr> getInternalOutputs() const;
 
-    std::vector<ConnectorDescription> getSlotDescriptions() const;
+    std::vector<ConnectorDescription> getExternalSlotDescriptions() const;
     std::vector<SlotPtr> getExternalSlots() const override;
+    std::vector<ConnectorDescription> getInternalSlotDescriptions() const;
     std::vector<SlotPtr> getInternalSlots() const;
 
-    std::vector<ConnectorDescription> getEventDescriptions() const;
+    std::vector<ConnectorDescription> getExternalEventDescriptions() const;
     std::vector<EventPtr> getExternalEvents() const override;
+    std::vector<ConnectorDescription> getInternalEventDescriptions() const;
     std::vector<EventPtr> getInternalEvents() const;
 
     std::map<std::string, InputWeakPtr>& paramToInputMap();
     std::map<std::string, OutputWeakPtr>& paramToOutputMap();
 
-    std::map<Input*,csapex::param::Parameter*>& inputToParamMap();
-    std::map<Output*,csapex::param::Parameter*>& outputToParamMap();
+    std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& inputToParamMap();
+    std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& outputToParamMap();
 
 
     bool isSource() const override;
@@ -201,8 +206,8 @@ protected:
     std::map<std::string, InputWeakPtr> param_2_input_;
     std::map<std::string, OutputWeakPtr> param_2_output_;
 
-    std::map<Input*,csapex::param::Parameter*> input_2_param_;
-    std::map<Output*,csapex::param::Parameter*> output_2_param_;
+    std::unordered_map<UUID,csapex::param::Parameter*, UUID::Hasher> input_2_param_;
+    std::unordered_map<UUID,csapex::param::Parameter*, UUID::Hasher> output_2_param_;
 
 private:
     UUIDProvider* uuid_provider_;

@@ -290,7 +290,7 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
         cin->setLabel(p->name());
         
         param_2_input_[p->name()] = cin;
-        input_2_param_[cin.get()] = p;
+        input_2_param_[cin->getUUID()] = p;
         
         manageInput(cin);
     }
@@ -300,7 +300,7 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
         cout->setLabel(p->name());
         
         param_2_output_[p->name()] = cout;
-        output_2_param_[cout.get()] = p;
+        output_2_param_[cout->getUUID()] = p;
         
         manageOutput(cout);
     }
@@ -390,10 +390,10 @@ void NodeHandle::makeParameterNotConnectable(csapex::param::ParameterPtr p)
     removeOutput(cout);
     
     apex_assert_hard(param_2_input_.erase(p->name()) != 0);
-    apex_assert_hard(input_2_param_.erase(cin) != 0);
+    apex_assert_hard(input_2_param_.erase(cin->getUUID()) != 0);
     
     apex_assert_hard(param_2_output_.erase(p->name()) != 0);
-    apex_assert_hard(output_2_param_.erase(cout) != 0);
+    apex_assert_hard(output_2_param_.erase(cout->getUUID()) != 0);
 }
 
 namespace {
@@ -413,7 +413,7 @@ void NodeHandle::updateParameterValue(Connectable *s)
     Input* source = dynamic_cast<Input*> (s);
     apex_assert_hard(source);
     
-    csapex::param::Parameter* p = input_2_param_.at(source);
+    csapex::param::Parameter* p = input_2_param_.at(source->getUUID());
 
     if(msg::isValue<int>(source)) {
         updateParameterValueFrom<int>(p, source);
@@ -718,14 +718,14 @@ void NodeHandle::manageOutput(OutputPtr out)
     transition_out_->addOutput(out);
 }
 
-bool NodeHandle::isParameterInput(Input *in) const
+bool NodeHandle::isParameterInput(const UUID &id) const
 {
-    return  input_2_param_.find(in) != input_2_param_.end();
+    return  input_2_param_.find(id) != input_2_param_.end();
 }
 
-bool NodeHandle::isParameterOutput(Output *out) const
+bool NodeHandle::isParameterOutput(const UUID &id) const
 {
-    return output_2_param_.find(out) != output_2_param_.end();
+    return output_2_param_.find(id) != output_2_param_.end();
 }
 
 void NodeHandle::manageSlot(SlotPtr s)
@@ -884,9 +884,14 @@ std::vector<ConnectablePtr> NodeHandle::getExternalConnectors() const
     return result;
 }
 
-std::vector<ConnectorDescription> NodeHandle::getInputDescriptions() const
+std::vector<ConnectorDescription> NodeHandle::getExternalInputDescriptions() const
 {
     return external_inputs_.getDescription();
+}
+
+std::vector<ConnectorDescription> NodeHandle::getInternalInputDescriptions() const
+{
+    return internal_inputs_.getDescription();
 }
 
 std::vector<InputPtr> NodeHandle::getExternalInputs() const
@@ -900,9 +905,14 @@ std::vector<InputPtr> NodeHandle::getInternalInputs() const
 
 
 
-std::vector<ConnectorDescription> NodeHandle::getOutputDescriptions() const
+std::vector<ConnectorDescription> NodeHandle::getExternalOutputDescriptions() const
 {
     return external_outputs_.getDescription();
+}
+
+std::vector<ConnectorDescription> NodeHandle::getInternalOutputDescriptions() const
+{
+    return internal_outputs_.getDescription();
 }
 
 std::vector<OutputPtr> NodeHandle::getExternalOutputs() const
@@ -916,9 +926,14 @@ std::vector<OutputPtr> NodeHandle::getInternalOutputs() const
 
 
 
-std::vector<ConnectorDescription> NodeHandle::getSlotDescriptions() const
+std::vector<ConnectorDescription> NodeHandle::getExternalSlotDescriptions() const
 {
     return external_slots_.getDescription();
+}
+
+std::vector<ConnectorDescription> NodeHandle::getInternalSlotDescriptions() const
+{
+    return internal_slots_.getDescription();
 }
 
 std::vector<SlotPtr> NodeHandle::getExternalSlots() const
@@ -932,9 +947,14 @@ std::vector<SlotPtr> NodeHandle::getInternalSlots() const
 
 
 
-std::vector<ConnectorDescription> NodeHandle::getEventDescriptions() const
+std::vector<ConnectorDescription> NodeHandle::getExternalEventDescriptions() const
 {
     return external_events_.getDescription();
+}
+
+std::vector<ConnectorDescription> NodeHandle::getInternalEventDescriptions() const
+{
+    return internal_events_.getDescription();
 }
 
 std::vector<EventPtr> NodeHandle::getExternalEvents() const
@@ -957,12 +977,12 @@ std::map<std::string, OutputWeakPtr>& NodeHandle::paramToOutputMap()
     return param_2_output_;
 }
 
-std::map<Input*,csapex::param::Parameter*>& NodeHandle::inputToParamMap()
+std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& NodeHandle::inputToParamMap()
 {
     return input_2_param_;
 }
 
-std::map<Output*,csapex::param::Parameter*>& NodeHandle::outputToParamMap()
+std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& NodeHandle::outputToParamMap()
 {
     return output_2_param_;
 }

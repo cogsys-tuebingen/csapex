@@ -865,12 +865,12 @@ void GraphView::connectorMessageAdded(ConnectablePtr connector)
     NodeHandle* node_worker = g->findNodeHandle(parent_uuid);
     if(node_worker) {
         Output* o = dynamic_cast<Output*>(connector.get());
-        if(o && node_worker->isParameterOutput(o)) {
+        if(o && node_worker->isParameterOutput(o->getUUID())) {
             return;
         }
 
         Input* i = dynamic_cast<Input*>(connector.get());
-        if(i && node_worker->isParameterInput(i)) {
+        if(i && node_worker->isParameterInput(i->getUUID())) {
             return;
         }
 

@@ -628,7 +628,7 @@ void NodeWorker::forwardMessages(bool send_parameters)
         for(auto pair : node_handle_->outputToParamMap()) {
             auto out = pair.first;
             auto p = pair.second;
-            publishParameterOn(*p, out);
+            publishParameterOn(*p, node_handle_->getOutput(out).get());
         }
     }
 

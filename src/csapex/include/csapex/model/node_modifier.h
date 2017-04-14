@@ -138,8 +138,8 @@ public:
         return addInput(multi_type::make<Types...>(), label, true);
     }
 
-    virtual bool isParameterInput(Input* in) const = 0;
-    virtual bool isParameterOutput(Output* in) const = 0;
+    virtual bool isParameterInput(const UUID& id) const = 0;
+    virtual bool isParameterOutput(const UUID& id) const = 0;
 
 
     /*

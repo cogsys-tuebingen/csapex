@@ -105,6 +105,16 @@ bool NodeFacade::isSink() const
     return nh_->isSink();
 }
 
+bool NodeFacade::isParameterInput(const UUID& id)
+{
+    return nh_->isParameterInput(id);
+}
+
+bool NodeFacade::isParameterOutput(const UUID& id)
+{
+    return nh_->isParameterOutput(id);
+}
+
 bool NodeFacade::isVariadic() const
 {
     return nh_->isVariadic();
@@ -129,22 +139,43 @@ bool NodeFacade::hasVariadicSlots() const
 
 std::vector<ConnectorDescription> NodeFacade::getInputs() const
 {
-    return nh_->getInputDescriptions();
+    return nh_->getExternalInputDescriptions();
 }
 
 std::vector<ConnectorDescription> NodeFacade::getOutputs() const
 {
-    return nh_->getOutputDescriptions();
+    return nh_->getExternalOutputDescriptions();
 }
 
 std::vector<ConnectorDescription> NodeFacade::getEvents() const
 {
-    return nh_->getEventDescriptions();
+    return nh_->getExternalEventDescriptions();
 }
 
 std::vector<ConnectorDescription> NodeFacade::getSlots() const
 {
-    return nh_->getSlotDescriptions();
+    return nh_->getExternalSlotDescriptions();
+}
+
+
+std::vector<ConnectorDescription> NodeFacade::getInternalInputs() const
+{
+    return nh_->getInternalInputDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getInternalOutputs() const
+{
+    return nh_->getInternalOutputDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getInternalEvents() const
+{
+    return nh_->getInternalEventDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getInternalSlots() const
+{
+    return nh_->getInternalSlotDescriptions();
 }
 
 

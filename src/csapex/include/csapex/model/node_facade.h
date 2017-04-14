@@ -35,17 +35,24 @@ public:
     bool isSource() const;
     bool isSink() const;
 
+    bool isParameterInput(const UUID& id);
+    bool isParameterOutput(const UUID& id);
+
     bool isVariadic() const;
     bool hasVariadicInputs() const;
     bool hasVariadicOutputs() const;
     bool hasVariadicEvents() const;
     bool hasVariadicSlots() const;
 
-
     std::vector<ConnectorDescription> getInputs() const;
     std::vector<ConnectorDescription> getOutputs() const;
     std::vector<ConnectorDescription> getEvents() const;
     std::vector<ConnectorDescription> getSlots() const;
+
+    std::vector<ConnectorDescription> getInternalInputs() const;
+    std::vector<ConnectorDescription> getInternalOutputs() const;
+    std::vector<ConnectorDescription> getInternalEvents() const;
+    std::vector<ConnectorDescription> getInternalSlots() const;
 
     NodeCharacteristics getNodeCharacteristics() const;
 

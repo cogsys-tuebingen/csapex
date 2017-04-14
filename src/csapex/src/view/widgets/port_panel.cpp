@@ -148,7 +148,7 @@ void PortPanel::removePortForConnector(ConnectablePtr c)
         return;
     }
 
-    Port* port = parent_->getPort(c.get());
+    Port* port = parent_->getPort(c->getUUID());
     port->setVisible(false);
 
     apex_assert_hard(port);
