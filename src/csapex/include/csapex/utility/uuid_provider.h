@@ -2,6 +2,7 @@
 #define UUID_PROVIDER_H
 
 /// COMPONENT
+#include <csapex/utility/utility_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_util_export.h>
 

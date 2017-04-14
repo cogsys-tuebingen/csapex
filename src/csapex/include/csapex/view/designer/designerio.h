@@ -29,7 +29,7 @@ public:
     void loadBoxes(YAML::Node& doc, GraphView *view);
 
 private:
-    void saveBox(NodeHandle *node, GraphView *view, YAML::Node &yaml);
+    void saveBox(NodeFacade *node, GraphView *view, YAML::Node &yaml);
 };
 
 }

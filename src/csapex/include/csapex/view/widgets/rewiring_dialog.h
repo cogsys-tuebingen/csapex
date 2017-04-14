@@ -10,6 +10,7 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connection_information.h>
+#include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
 #include <QDialog>
@@ -58,22 +59,22 @@ private:
     std::shared_ptr<CsApexViewCore> view_core_old_;
     std::shared_ptr<CsApexViewCore> view_core_new_;
 
-    std::shared_ptr<UUIDProvider> root_uuid_provider_;
+    UUIDProviderPtr root_uuid_provider_;
 
 
 //    NodeHandlePtr graph_old_handle;
 //    NodeHandlePtr graph_new_handle;
 
-    NodeHandlePtr nh_old;
-    NodeHandlePtr nh_new;
+    NodeFacadePtr nh_old;
+    NodeFacadePtr nh_new;
 
     NodeFacade* node_facade_;
 
-    SubgraphNode* graph_old;
+    SubgraphNodePtr graph_old;
     GraphFacadePtr graph_facade_old_;
 
     std::string type_new_;
-    SubgraphNode* graph_new;
+    SubgraphNodePtr graph_new;
     GraphFacadePtr graph_facade_new_;
 
     std::vector<ConnectionInformation> connections_;

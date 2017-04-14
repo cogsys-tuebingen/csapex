@@ -56,7 +56,7 @@ public:
     std::string getDescription() const;
 
     NodeHandlePtr makePrototype() const;
-    NodeHandlePtr makeNodeHandle(const UUID& uuid, UUIDProvider *uuid_provider) const;
+    NodeHandlePtr makeNodeHandle(const UUID& uuid, const UUIDProviderPtr &uuid_provider) const;
 
     NodePtr makeNode() const;
 

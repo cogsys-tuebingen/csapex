@@ -37,7 +37,7 @@ bool PasteGraph::doExecute()
     bool paused = graph_facade->isPaused();
     graph_facade->pauseRequest(true);
 
-    SubgraphNode* graph = graph_facade->getSubgraphNode();
+    SubgraphNodePtr graph = graph_facade->getSubgraphNode();
 
     GraphIO io(graph, getNodeFactory());
 

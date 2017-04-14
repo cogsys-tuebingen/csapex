@@ -42,13 +42,13 @@ void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, GraphView *view)
 {
     YAML::Node adapters(YAML::NodeType::Sequence);
     for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
-        NodeHandlePtr nh = (*it)->getNodeHandle();
+        NodeFacadePtr nh = (*it)->getNodeFacade();
         saveBox(nh.get(), view, adapters);
     }
     yaml["adapters"] = adapters;
 }
 
-void DesignerIO::saveBox(NodeHandle *node, GraphView *view, YAML::Node &yaml)
+void DesignerIO::saveBox(NodeFacade* node, GraphView *view, YAML::Node &yaml)
 {
     NodeBox* box = view->getBox(node->getUUID());
     NodeAdapter::Ptr na = box->getNodeAdapter();
@@ -67,7 +67,7 @@ void DesignerIO::saveBox(NodeHandle *node, GraphView *view, YAML::Node &yaml)
 
 void DesignerIO::loadBoxes(YAML::Node &doc, GraphView *view)
 {
-    std::shared_ptr<UUIDProvider> graph = view->getGraphFacade()->getGraph()->shared_from_this();
+    UUIDProviderPtr graph = view->getGraphFacade()->getGraph()->shared_from_this();
 
     if(doc["adapters"].IsDefined()) {
         const YAML::Node& adapters = doc["adapters"];

@@ -8,6 +8,7 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/param/param_fwd.h>
 #include <csapex/signal/signal_fwd.h>
+#include <csapex/utility/utility_fwd.h>
 #include <csapex/utility/rate.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/connector_description.h>
@@ -25,7 +26,7 @@ class CSAPEX_EXPORT NodeHandle : public NodeModifier, public ConnectableOwner, p
 {
 public:
     NodeHandle(const std::string& type, const UUID &uuid,
-               NodePtr node, UUIDProvider *uuid_provider,
+               NodePtr node, UUIDProviderPtr uuid_provider,
                InputTransitionPtr transition_in, OutputTransitionPtr transition_out);
     virtual ~NodeHandle();    
 
@@ -210,7 +211,7 @@ protected:
     std::unordered_map<UUID,csapex::param::Parameter*, UUID::Hasher> output_2_param_;
 
 private:
-    UUIDProvider* uuid_provider_;
+    UUIDProviderPtr uuid_provider_;
 
     graph::VertexWeakPtr vertex_;
 

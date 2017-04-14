@@ -10,6 +10,7 @@
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
@@ -44,8 +45,8 @@ void Graph::resetActivity()
 
     auto vertices = vertices_;
     for(graph::VertexPtr vertex : vertices) {
-        NodeHandlePtr node = vertex->getNodeHandle();
-        node->setActive(false);
+        NodeFacadePtr node = vertex->getNodeFacade();
+        node->getNodeHandle()->setActive(false);
     }
 }
 
@@ -63,7 +64,7 @@ void Graph::clear()
 
     auto vertices = vertices_;
     for(graph::VertexPtr vertex : vertices) {
-        NodeHandlePtr node = vertex->getNodeHandle();
+        NodeFacadePtr node = vertex->getNodeFacade();
         deleteNode(node->getUUID());
     }
     apex_assert_hard(vertices_.empty());
@@ -71,13 +72,16 @@ void Graph::clear()
     finalizeTransaction();
 }
 
-void Graph::addNode(NodeHandlePtr nh)
+void Graph::addNode(NodeFacadePtr nf)
 {
-    apex_assert_hard_msg(nh, "NodeHandle added is not null");
-    graph::VertexPtr vertex = std::make_shared<graph::Vertex>(nh);
+    apex_assert_hard_msg(nf, "NodeFacade added is not null");
+    apex_assert_hard_msg(nf->getNodeHandle(), "NodeHandle added is not null");
+    apex_assert_hard_msg(nf->getNodeRunner(), "NodeRunner added is not null");
+    apex_assert_hard_msg(nf->getNodeWorker(), "NodeWorker added is not null");
+    graph::VertexPtr vertex = std::make_shared<graph::Vertex>(nf);
     vertices_.push_back(vertex);
 
-    nh->setVertex(vertex);
+    nf->getNodeHandle()->setVertex(vertex);
 
     sources_.insert(vertex);
     sinks_.insert(vertex);
@@ -103,7 +107,7 @@ void Graph::deleteNode(const UUID& uuid)
     graph::VertexPtr removed;
 
     for(auto it = vertices_.begin(); it != vertices_.end();) {
-        NodeHandlePtr node = (*it)->getNodeHandle();
+        NodeFacadePtr node = (*it)->getNodeFacade();
         if(node->getUUID() == uuid) {
             removed = *it;
             vertices_.erase(it);
@@ -329,7 +333,7 @@ void Graph::buildConnectedComponents()
             graph::Vertex* front = Q.front();
             Q.pop_front();
 
-            checkNodeState(front->getNodeHandle().get());
+            checkNodeState(front->getNodeFacade()->getNodeHandle().get());
 
             auto it = std::find(unmarked.begin(), unmarked.end(), front);
             if(it == unmarked.end()) {
@@ -397,11 +401,11 @@ std::set<graph::Vertex *> Graph::findVerticesThatNeedMessages()
     std::set<graph::Vertex*> vertices_that_need_messages;
 
     for(const graph::VertexPtr v : vertices_) {
-        if(v->getNodeHandle()->getNode().lock()->processMessageMarkers()) {
+        if(v->getNodeFacade()->getNodeHandle()->getNode().lock()->processMessageMarkers()) {
             vertices_that_need_messages.insert(v.get());
             break;
         }
-        for(const ConnectionPtr c : v->getNodeHandle()->getOutputTransition()->getConnections()) {
+        for(const ConnectionPtr c : v->getNodeFacade()->getNodeHandle()->getOutputTransition()->getConnections()) {
             if(c->to()->isEssential()) {
                 vertices_that_need_messages.insert(v.get());
                 break;
@@ -656,9 +660,9 @@ NodeHandle *Graph::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 
     } else {
         for(const auto vertex : vertices_) {
-            NodeHandlePtr nh = vertex->getNodeHandle();
+            NodeFacadePtr nh = vertex->getNodeFacade();
             if(nh->getUUID() == uuid) {
-                return nh.get();
+                return nh->getNodeHandle().get();
             }
         }
     }
@@ -695,11 +699,11 @@ NodeHandle* Graph::findNodeHandleForConnectorNoThrow(const UUID &uuid) const noe
 NodeHandle* Graph::findNodeHandleWithLabel(const std::string& label) const
 {
     for(const auto vertex : vertices_) {
-        NodeHandlePtr nh = vertex->getNodeHandle();
+        NodeFacadePtr nh = vertex->getNodeFacade();
         NodeStatePtr state = nh->getNodeState();
         if(state) {
             if(state->getLabel() == label) {
-                return nh.get();
+                return nh->getNodeHandle().get();
             }
         }
     }
@@ -710,8 +714,8 @@ std::vector<NodeHandle*> Graph::getAllNodeHandles()
 {
     std::vector<NodeHandle*> node_handles;
     for(const auto& vertex : vertices_) {
-        NodeHandlePtr nh = vertex->getNodeHandle();
-        node_handles.push_back(nh.get());
+        NodeFacadePtr nh = vertex->getNodeFacade();
+        node_handles.push_back(nh->getNodeHandle().get());
     }
 
     return node_handles;

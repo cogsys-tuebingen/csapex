@@ -27,7 +27,7 @@
 
 using namespace csapex;
 
-GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNode* graph, NodeHandle* nh, GraphFacade *parent)
+GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNodePtr graph, NodeFacadePtr nh, GraphFacade *parent)
     : parent_(parent), absolute_uuid_(graph->getUUID()), graph_(graph), graph_handle_(nh), executor_(executor)
 {
     observe(graph->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeAddedHandler));
@@ -59,22 +59,20 @@ GraphFacade* GraphFacade::getParent() const
 
 void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
 {
-    NodeHandlePtr nh = vertex->getNodeHandle();
-    if(nh->isGraph()) {
-        createSubgraphFacade(nh);
+    NodeFacadePtr facade = vertex->getNodeFacade();
+    if(facade->isGraph()) {
+        createSubgraphFacade(vertex->getNodeFacade());
     }
 
-    NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
+    NodeWorkerPtr nw = facade->getNodeWorker();
 
-    NodeFacadePtr facade = std::make_shared<NodeFacade>(nh, nw);
+    node_facades_[facade->getUUID()] = facade;
 
-    node_facades_[nh.get()] = facade;
+    NodeRunnerPtr runner = facade->getNodeRunner();
+    apex_assert_hard(runner);
+    generators_[facade->getUUID()] = runner;
 
-    NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
-    nh->setNodeRunner(runner);
-    generators_[nh->getUUID()] = runner;
-
-    int thread_id = nh->getNodeState()->getThreadId();
+    int thread_id = facade->getNodeState()->getThreadId();
     if(thread_id >= 0) {
         executor_.addToGroup(runner.get(), thread_id);
     } else {
@@ -91,17 +89,17 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
     nw->panic.connect(panic);
 }
 
-void GraphFacade::createSubgraphFacade(NodeHandlePtr nh)
+void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
 {
-    NodePtr node = nh->getNode().lock();
+    NodePtr node = nf->getNodeHandle()->getNode().lock();
     apex_assert_hard(node);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(node);
     apex_assert_hard(sub_graph);
 
     NodeHandle* subnh = graph_->findNodeHandle(sub_graph->getUUID());;
-    apex_assert_hard(subnh == nh.get());
-    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph.get(), nh.get(), this);
-    children_[nh->getUUID()] = sub_graph_facade;
+    apex_assert_hard(subnh == nf->getNodeHandle().get());
+    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph, nf, this);
+    children_[nf->getUUID()] = sub_graph_facade;
 
     sub_graph_facade->notification.connect(notification);
 
@@ -110,16 +108,16 @@ void GraphFacade::createSubgraphFacade(NodeHandlePtr nh)
 
 void GraphFacade::nodeRemovedHandler(graph::VertexPtr vertex)
 {
-    NodeHandlePtr nh = vertex->getNodeHandle();
+    NodeFacadePtr nh = vertex->getNodeFacade();
 
     TaskGeneratorPtr runner = generators_[nh->getUUID()];
     generators_.erase(nh->getUUID());
     executor_.remove(runner.get());
     generator_removed(runner);
 
-    NodeFacadePtr facade = node_facades_[nh.get()];
+    NodeFacadePtr facade = node_facades_[nh->getUUID()];
     node_facade_removed(facade);
-    node_facades_.erase(nh.get());
+    node_facades_.erase(nh->getUUID());
 
     if(nh->getType() == "csapex::Graph") {
         auto pos = children_.find(nh->getUUID());
@@ -134,19 +132,14 @@ AUUID GraphFacade::getAbsoluteUUID() const
     return absolute_uuid_;
 }
 
-Graph* GraphFacade::getGraph()
+GraphPtr GraphFacade::getGraph()
 {
     return graph_;
 }
 
-NodeFacadePtr GraphFacade::getNodeFacade(const NodeHandle *handle)
+SubgraphNodePtr GraphFacade::getSubgraphNode()
 {
-    return node_facades_.at(handle);
-}
-
-SubgraphNode* GraphFacade::getSubgraphNode()
-{
-    return dynamic_cast<SubgraphNode*>(graph_);
+    return std::dynamic_pointer_cast<SubgraphNode>(graph_);
 }
 
 ThreadPool* GraphFacade::getThreadPool()
@@ -156,10 +149,15 @@ ThreadPool* GraphFacade::getThreadPool()
 
 NodeHandle* GraphFacade::getNodeHandle()
 {
+    return graph_handle_->getNodeHandle().get();
+}
+
+NodeFacadePtr GraphFacade::getNodeFacade()
+{
     return graph_handle_;
 }
 
-void GraphFacade::addNode(NodeHandlePtr nh)
+void GraphFacade::addNode(NodeFacadePtr nh)
 {
     graph_->addNode(nh);
 }

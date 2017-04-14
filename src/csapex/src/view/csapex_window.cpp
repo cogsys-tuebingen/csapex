@@ -107,7 +107,7 @@ void CsApexWindow::construct()
 
     setupTimeline();
 
-    Graph* graph = view_core_.getRoot()->getGraph();
+    GraphPtr graph = view_core_.getRoot()->getGraph();
 
     setupDesigner();
 

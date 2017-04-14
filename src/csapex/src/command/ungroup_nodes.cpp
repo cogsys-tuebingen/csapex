@@ -45,7 +45,7 @@ std::string UngroupNodes::getDescription() const
 
 bool UngroupNodes::doExecute()
 {
-    Graph* graph = getGraph();
+    GraphPtr graph = getGraph();
 
     NodeHandle* nh = graph->findNodeHandle(uuid);
     subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
@@ -57,7 +57,7 @@ bool UngroupNodes::doExecute()
     analyzeConnections(subgraph.get());
 
     {
-        GraphIO io(subgraph.get(), getNodeFactory());
+        GraphIO io(subgraph, getNodeFactory());
         io.setIgnoreForwardingConnections(true);
         serialized_snippet_ = io.saveGraph();
     }

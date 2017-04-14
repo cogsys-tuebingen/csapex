@@ -6,14 +6,13 @@
 #include <csapex/csapex_export.h>
 #include <csapex/param/value_parameter.h>
 #include <csapex/utility/slim_signal.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <string>
 
 namespace csapex
 {
-
-class SubgraphNode;
 
 class CSAPEX_EXPORT Settings
 {
@@ -135,8 +134,8 @@ public:
     csapex::slim_signal::Signal<void (YAML::Node& e)> save_request;
     csapex::slim_signal::Signal<void (YAML::Node& n)> load_request;
 
-    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& e)> save_detail_request;
-    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& n)> load_detail_request;
+    csapex::slim_signal::Signal<void (SubgraphNodePtr, YAML::Node& e)> save_detail_request;
+    csapex::slim_signal::Signal<void (SubgraphNodePtr, YAML::Node& n)> load_detail_request;
 
 protected:
     bool quiet_;

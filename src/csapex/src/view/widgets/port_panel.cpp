@@ -88,7 +88,7 @@ void PortPanel::enableMetaPort(const AUUID& target)
 void PortPanel::setup(GraphFacadePtr graph_facade)
 {
     graph_facade_ = graph_facade;
-    graph_ = graph_facade_->getSubgraphNode();
+    graph_ = graph_facade_->getSubgraphNode().get();
 
     switch(type_) {
     case ConnectorType::OUTPUT:

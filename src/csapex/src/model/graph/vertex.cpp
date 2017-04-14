@@ -10,7 +10,7 @@
 using namespace csapex;
 using namespace csapex::graph;
 
-Vertex::Vertex(NodeHandlePtr node)
+Vertex::Vertex(NodeFacadePtr node)
     : node_(node)
 {
 
@@ -38,7 +38,7 @@ void Vertex::detach()
     children_.clear();
 }
 
-NodeHandlePtr Vertex::getNodeHandle() const
+NodeFacadePtr Vertex::getNodeFacade() const
 {
     return node_;
 }

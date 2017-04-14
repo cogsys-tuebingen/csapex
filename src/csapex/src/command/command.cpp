@@ -132,12 +132,12 @@ GraphFacade* Command::getGraphFacade()
     return gf;
 }
 
-Graph* Command::getGraph()
+GraphPtr Command::getGraph()
 {
     return getGraphFacade()->getGraph();
 }
 
-SubgraphNode* Command::getSubgraphNode()
+SubgraphNodePtr Command::getSubgraphNode()
 {
     return getGraphFacade()->getSubgraphNode();
 }

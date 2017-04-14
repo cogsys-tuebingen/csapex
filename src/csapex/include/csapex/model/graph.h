@@ -87,7 +87,7 @@ public:
 
     int countNodes();
 
-    void addNode(NodeHandlePtr node);
+    void addNode(NodeFacadePtr node);
     void deleteNode(const UUID &uuid);
 
     bool addConnection(ConnectionPtr connection);

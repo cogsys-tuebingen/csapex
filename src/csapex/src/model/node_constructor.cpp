@@ -131,7 +131,7 @@ NodeHandlePtr NodeConstructor::makePrototype() const
     return makeNodeHandle(UUIDProvider::makeUUID_without_parent("prototype"), nullptr);
 }
 
-NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, csapex::UUIDProvider *uuid_provider) const
+NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, const UUIDProviderPtr& uuid_provider) const
 {
     try {
         NodePtr node = makeNode();

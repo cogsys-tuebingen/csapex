@@ -18,6 +18,7 @@ FWD(Buffer);
 FWD(Timer);
 FWD(Timable);
 FWD(UUID);
+FWD(UUIDProvider);
 
 class Notification;
 

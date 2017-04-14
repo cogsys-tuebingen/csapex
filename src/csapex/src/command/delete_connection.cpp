@@ -66,7 +66,7 @@ bool DeleteConnection::doExecute()
 
 bool DeleteConnection::doUndo()
 {
-    Graph* graph = getGraph();
+    GraphPtr graph = getGraph();
 
     ConnectablePtr from = graph->findConnector(from_uuid);
     ConnectablePtr to = graph->findConnector(to_uuid);

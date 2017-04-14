@@ -5,6 +5,7 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
@@ -37,7 +38,7 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    Graph* graph = getGraph();
+    GraphPtr graph = getGraph();
     NodeHandle* node_handle = graph->findNodeHandle(uuid);
 
     type = node_handle->getType();
@@ -54,7 +55,7 @@ bool DeleteNode::doExecute()
         SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_handle->getNode().lock());
         apex_assert_hard(g);
 
-        GraphIO io(g.get(), getNodeFactory());
+        GraphIO io(g, getNodeFactory());
         saved_graph = io.saveGraph();
     }
 
@@ -72,18 +73,18 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    Graph* graph = getGraph();
-    NodeHandlePtr node_handle = getNodeFactory()->makeNode(type, uuid, graph);
-    node_handle->setNodeState(saved_state);
+    GraphPtr graph = getGraph();
+    NodeFacadePtr node_facade = getNodeFactory()->makeNode(type, uuid, graph);
+    node_facade->getNodeHandle()->setNodeState(saved_state);
 
-    graph->addNode(node_handle);
+    graph->addNode(node_facade);
 
     //deserialize subgraph
-    if(node_handle->getType() == "csapex::Graph") {
-        SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_handle->getNode().lock());
+    if(node_facade->getType() == "csapex::Graph") {
+        SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_facade->getNodeHandle()->getNode().lock());
         apex_assert_hard(g);
 
-        GraphIO io(g.get(), getNodeFactory());
+        GraphIO io(g, getNodeFactory());
         io.loadGraph(saved_graph);
     }
 
@@ -93,7 +94,7 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        Graph* graph = getGraph();
+        GraphPtr graph = getGraph();
         NodeHandle* node_handle = graph->findNodeHandle(uuid);
         saved_state = node_handle->getNodeStateCopy();
 

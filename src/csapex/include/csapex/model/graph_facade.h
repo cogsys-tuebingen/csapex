@@ -24,20 +24,19 @@ public:
     typedef std::shared_ptr<GraphFacade> Ptr;
 
 public:
-    GraphFacade(ThreadPool& executor, SubgraphNode *graph, NodeHandle *nh = nullptr, GraphFacade* parent = nullptr);
+    GraphFacade(ThreadPool& executor, SubgraphNodePtr graph, NodeFacadePtr nh = nullptr, GraphFacade* parent = nullptr);
     ~GraphFacade();
 
     AUUID getAbsoluteUUID() const;
-    Graph* getGraph();
-    SubgraphNode* getSubgraphNode();
+    GraphPtr getGraph();
+    SubgraphNodePtr getSubgraphNode();
     NodeHandle* getNodeHandle();
+    NodeFacadePtr getNodeFacade();
     GraphFacade* getParent() const;
     GraphFacade* getSubGraph(const UUID& uuid);
     ThreadPool* getThreadPool();
 
-    NodeFacadePtr getNodeFacade(const NodeHandle* handle);
-
-    void addNode(NodeHandlePtr node);
+    void addNode(NodeFacadePtr node);
 
     ConnectionPtr connect(OutputPtr output, InputPtr input);
 
@@ -95,21 +94,21 @@ private:
     void nodeAddedHandler(graph::VertexPtr node);
     void nodeRemovedHandler(graph::VertexPtr node);
 
-    void createSubgraphFacade(NodeHandlePtr nh);
+    void createSubgraphFacade(NodeFacadePtr nh);
 
 private:
     GraphFacade* parent_;
 
     AUUID absolute_uuid_;
-    SubgraphNode* graph_;
-    NodeHandle* graph_handle_;
+    SubgraphNodePtr graph_;
+    NodeFacadePtr graph_handle_;
     ThreadPool& executor_;
 
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> children_;
 
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
 
-    std::map<const NodeHandle*, NodeFacadePtr> node_facades_;
+    std::unordered_map<UUID, NodeFacadePtr, UUID::Hasher> node_facades_;
 };
 
 }

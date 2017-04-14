@@ -17,10 +17,10 @@ namespace graph
 class Vertex
 {
 public:
-    Vertex(NodeHandlePtr node);
+    Vertex(NodeFacadePtr node);
     ~Vertex();
 
-    NodeHandlePtr getNodeHandle() const;
+    NodeFacadePtr getNodeFacade() const;
     NodeCharacteristics& getNodeCharacteristics() const;
 
     std::vector<VertexPtr> getParents() const;
@@ -34,7 +34,7 @@ public:
     void detach();
 
 private:
-    NodeHandlePtr node_;
+    NodeFacadePtr node_;
 
     mutable NodeCharacteristics characteristics_;
 

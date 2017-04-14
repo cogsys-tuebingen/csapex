@@ -30,7 +30,7 @@ std::string AddConnection::getDescription() const
 
 bool AddConnection::doUndo()
 {
-    Graph* graph = getGraph();
+    GraphPtr graph = getGraph();
 
     ConnectablePtr f = graph->findConnector(from_uuid);
     ConnectablePtr t = graph->findConnector(to_uuid);
@@ -50,7 +50,7 @@ bool AddConnection::doRedo()
 
 bool AddConnection::doExecute()
 {
-    Graph* graph = getGraph();
+    GraphPtr graph = getGraph();
 
     OutputPtr f = graph->findConnector<Output>(from_uuid);
     InputPtr t = graph->findConnector<Input>(to_uuid);

@@ -69,8 +69,8 @@ public:
     void saveSettings(YAML::Node& doc);
     void loadSettings(YAML::Node& doc);
 
-    void saveView(SubgraphNode *graph, YAML::Node &e);
-    void loadView(SubgraphNode *graph, YAML::Node& doc);
+    void saveView(SubgraphNodePtr graph, YAML::Node &e);
+    void loadView(SubgraphNodePtr graph, YAML::Node& doc);
 
 
     virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;

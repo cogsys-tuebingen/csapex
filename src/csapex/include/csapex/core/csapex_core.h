@@ -10,6 +10,7 @@
 #include <csapex/utility/notifier.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/model/observer.h>
+#include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
 #include <thread>
@@ -106,9 +107,9 @@ private:
 
     ThreadPoolPtr thread_pool_;
 
-    std::shared_ptr<UUIDProvider> root_uuid_provider_;
+    UUIDProviderPtr root_uuid_provider_;
     GraphFacadePtr root_;
-    NodeHandlePtr root_handle_;
+    NodeFacadePtr root_handle_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
 

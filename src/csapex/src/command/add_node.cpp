@@ -5,6 +5,7 @@
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_worker.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>
@@ -39,13 +40,13 @@ std::string AddNode::getDescription() const
 
 bool AddNode::doExecute()
 {
-    Graph* graph = getGraph();
+    GraphPtr graph = getGraph();
 
     if(uuid_.empty()) {
         uuid_ = graph->generateUUID(type_);
     }
 
-    NodeHandlePtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
+    NodeFacadePtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
 
     if(!node) {
         return false;
@@ -61,7 +62,7 @@ bool AddNode::doExecute()
 
 bool AddNode::doUndo()
 {
-    Graph* graph = getGraph();
+    GraphPtr graph = getGraph();
     NodeHandle* node_ = graph->findNodeHandle(uuid_);
 
     saved_state_ = node_->getNodeStateCopy();

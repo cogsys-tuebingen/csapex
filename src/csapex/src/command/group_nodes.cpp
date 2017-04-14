@@ -41,7 +41,7 @@ std::string GroupNodes::getDescription() const
 
 bool GroupNodes::doExecute()
 {
-    SubgraphNode* graph = getSubgraphNode();
+    SubgraphNodePtr graph = getSubgraphNode();
     {
         GraphIO io(graph, getNodeFactory());
         io.setIgnoreForwardingConnections(true);
@@ -49,7 +49,7 @@ bool GroupNodes::doExecute()
     }
 
 
-    findNodes(graph);
+    findNodes(graph.get());
 
     apex_assert_hard(!nodes.empty());
 
@@ -69,7 +69,7 @@ bool GroupNodes::doExecute()
     add(add_graph);
 
 
-    analyzeConnections(graph);
+    analyzeConnections(graph.get());
 
     CommandFactory cf(getGraphFacade());
 

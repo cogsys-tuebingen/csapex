@@ -4,34 +4,35 @@
 /// COMPONENT
 #include <csapex/core/bootstrap_plugin.h>
 #include <csapex/core/core_plugin.h>
+#include <csapex/core/exception_handler.h>
 #include <csapex/core/graphio.h>
-#include <csapex/model/subgraph_node.h>
-#include <csapex/info.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/node_state.h>
+#include <csapex/factory/message_factory.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
+#include <csapex/info.h>
+#include <csapex/manager/message_provider_manager.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/node_facade.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/model/node_runner.h>
+#include <csapex/model/node_state.h>
+#include <csapex/model/node_worker.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/model/tag.h>
-#include <csapex/factory/message_factory.h>
+#include <csapex/msg/any_message.h>
 #include <csapex/msg/message.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/plugin/plugin_manager.hpp>
+#include <csapex/profiling/profiler.h>
 #include <csapex/scheduling/thread_pool.h>
+#include <csapex/serialization/snippet.h>
 #include <csapex/utility/assert.h>
+#include <csapex/utility/error_handling.h>
 #include <csapex/utility/register_msg.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
-#include <csapex/utility/yaml_node_builder.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/model/node_worker.h>
-#include <csapex/core/exception_handler.h>
-#include <csapex/model/node_runner.h>
-#include <csapex/msg/any_message.h>
-#include <csapex/utility/error_handling.h>
-#include <csapex/profiling/profiler.h>
-#include <csapex/manager/message_provider_manager.h>
 #include <csapex/utility/stream_interceptor.h>
-#include <csapex/serialization/snippet.h>
 #include <csapex/utility/thread.h>
+#include <csapex/utility/yaml_node_builder.h>
 
 /// SYSTEM
 #include <fstream>
@@ -227,21 +228,21 @@ void CsApexCore::init()
         }
 
         observe(node_factory_->new_node_type, new_node_type);
-        observe(node_factory_->node_constructed, [this](NodeHandlePtr n) {
+        observe(node_factory_->node_constructed, [this](NodeFacadePtr n) {
             n->getNodeState()->setMaximumFrequency(settings_.getPersistent("default_frequency", 60));
         });
 
         status_changed("make graph");
 
-        root_handle_ = node_factory_->makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_.get());
+        root_handle_ = node_factory_->makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_);
         apex_assert_hard(root_handle_);
 
-        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNode().lock());
+        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNodeHandle()->getNode().lock());
         apex_assert_hard(graph);
 
-        root_worker_ = std::make_shared<NodeWorker>(root_handle_);
+        root_worker_ = root_handle_->getNodeWorker();
 
-        root_ = std::make_shared<GraphFacade>(*thread_pool_, graph.get(), root_handle_.get());
+        root_ = std::make_shared<GraphFacade>(*thread_pool_, graph, root_handle_);
         root_->notification.connect(notification);
 
 
@@ -261,7 +262,7 @@ void CsApexCore::init()
 
         if(is_root_) {
             for(auto plugin : core_plugins_) {
-                plugin.second->setupGraph(root_->getSubgraphNode());
+                plugin.second->setupGraph(root_->getSubgraphNode().get());
             }
 
             status_changed("loading snippets");

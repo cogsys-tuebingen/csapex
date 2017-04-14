@@ -45,15 +45,15 @@ public:
     NodeConstructorPtr getConstructor(const std::string& type);
     std::vector<NodeConstructorPtr> getConstructors();
 
-    NodeHandlePtr makeNode(const std::string& type, const UUID& uuid, UUIDProvider *uuid_provider);
-    NodeHandlePtr makeNode(const std::string& type, const UUID& uuid, UUIDProvider *uuid_provider, NodeStatePtr state);
+    NodeFacadePtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider);
+    NodeFacadePtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider, NodeStatePtr state);
 
     std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap();
 
 public:
     slim_signal::Signal<void(const std::string&)> loaded;
     slim_signal::Signal<void()> new_node_type;
-    slim_signal::Signal<void(NodeHandlePtr)> node_constructed;
+    slim_signal::Signal<void(NodeFacadePtr)> node_constructed;
     slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
 
 protected:

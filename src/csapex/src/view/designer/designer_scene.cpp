@@ -126,7 +126,7 @@ DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     setBackgroundBrush(QBrush(Qt::white));
 
-    Graph* graph = graph_facade_->getGraph();
+    GraphPtr graph = graph_facade_->getGraph();
 
     connections_.push_back(graph->connection_added.connect([this](Connection* c) { connectionAdded(c); }));
     connections_.push_back(graph->connection_removed.connect([this](Connection* c) { connectionDeleted(c); }));

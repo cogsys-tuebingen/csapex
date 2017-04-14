@@ -17,10 +17,13 @@
 
 using namespace csapex;
 
-NodeFacade::NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw)
+NodeFacade::NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr)
     : NodeFacade(nh)
 {
     nw_ = nw;
+    nr_ = nr;
+
+    nh->setNodeRunner(nr_);
 
     observe(nw->start_profiling, [this](NodeWorker*) {
         start_profiling(this);
@@ -251,6 +254,16 @@ double NodeFacade::getMaximumFrequency() const
 NodeHandlePtr NodeFacade::getNodeHandle()
 {
     return nh_;
+}
+
+NodeWorkerPtr NodeFacade::getNodeWorker()
+{
+    return nw_;
+}
+
+NodeRunnerPtr NodeFacade::getNodeRunner()
+{
+    return nr_;
 }
 
 NodeStatePtr NodeFacade::getNodeState() const

@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/direct_connection.h>
@@ -36,7 +37,7 @@ using namespace csapex;
 #define sendNotificationStreamGraphio(args) \
 { std::stringstream ss; ss << args; sendNotification(ss.str()); }
 
-GraphIO::GraphIO(SubgraphNode *graph, NodeFactory* node_factory)
+GraphIO::GraphIO(SubgraphNodePtr graph, NodeFactory* node_factory)
     : graph_(graph), node_factory_(node_factory),
       position_offset_x_(0.0), position_offset_y_(0.0),
 
@@ -280,7 +281,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
     std::string type = doc["type"].as<std::string>();
 
-    NodeHandlePtr node_handle = node_factory_->makeNode(type, uuid, graph_);
+    NodeFacadePtr node_handle = node_factory_->makeNode(type, uuid, graph_);
     if(!node_handle) {
         return;
     }
@@ -531,17 +532,17 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
         SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(node);
         if(subgraph) {
             YAML::Node subgraph_yaml;
-            GraphIO sub_graph_io(subgraph.get(), node_factory_);
+            GraphIO sub_graph_io(subgraph, node_factory_);
             sub_graph_io.saveGraphTo(subgraph_yaml);
             doc["subgraph"] = subgraph_yaml;
         }
     }
 }
 
-void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
+void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadePtr node_facade)
 {
 
-    NodeState::Ptr s = node_handle->getNodeStateCopy();
+    NodeState::Ptr s = node_facade->getNodeStateCopy();
     s->readYaml(doc);
 
     int x = doc["pos"][0].as<double>() + position_offset_x_;
@@ -550,19 +551,19 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle)
     if(x != 0 || y != 0) {
         s->setPos(Point(x,y));
     }
-    node_handle->setNodeState(s);
+    node_facade->getNodeHandle()->setNodeState(s);
 
     // hook for nodes to deserialize
-    auto node = node_handle->getNode().lock();
+    auto node = node_facade->getNodeHandle()->getNode().lock();
     apex_assert_hard(node);
 
     NodeSerializer::instance().deserialize(*node, doc);
 
-    graph_->addNode(node_handle);
+    graph_->addNode(node_facade);
 
     SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(node);
     if(subgraph) {
-        GraphIO sub_graph_io(subgraph.get(), node_factory_);
+        GraphIO sub_graph_io(subgraph, node_factory_);
         slim_signal::ScopedConnection connection = sub_graph_io.loadViewRequest.connect(loadViewRequest);
 
         sub_graph_io.loadGraph(doc["subgraph"]);

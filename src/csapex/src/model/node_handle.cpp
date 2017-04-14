@@ -24,7 +24,7 @@
 using namespace csapex;
 
 NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
-                       UUIDProvider *uuid_provider,
+                       UUIDProviderPtr uuid_provider,
                        InputTransitionPtr transition_in, OutputTransitionPtr transition_out)
     : ConnectableOwner(uuid),
       node_(node),
@@ -1013,7 +1013,7 @@ AUUID NodeHandle::getSubgraphAUUID() const
 
 UUIDProvider* NodeHandle::getUUIDProvider()
 {
-    return uuid_provider_;
+    return uuid_provider_.get();
 }
 
 bool NodeHandle::isGraph() const

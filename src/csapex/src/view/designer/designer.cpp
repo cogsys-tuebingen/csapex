@@ -43,8 +43,8 @@ Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
     observe(view_core_.getSettings().save_request, [this](YAML::Node& node){ saveSettings(node); });
     observe(view_core_.getSettings().load_request, [this](YAML::Node& node){ loadSettings(node); });
 
-    observe(view_core_.getSettings().save_detail_request, [this](SubgraphNode* graph, YAML::Node& node){ saveView(graph, node); });
-    observe(view_core_.getSettings().load_detail_request, [this](SubgraphNode* graph, YAML::Node& node){ loadView(graph, node); });
+    observe(view_core_.getSettings().save_detail_request, [this](SubgraphNodePtr graph, YAML::Node& node){ saveView(graph, node); });
+    observe(view_core_.getSettings().load_detail_request, [this](SubgraphNodePtr graph, YAML::Node& node){ loadView(graph, node); });
 
     observeGraph(view_core_.getRoot());
 }
@@ -119,12 +119,12 @@ void Designer::setup()
 void Designer::observeGraph(GraphFacadePtr graph)
 {
     apex_assert_hard(graph);
-    graph_connections_[graph->getSubgraphNode()].emplace_back(
+    graph_connections_[graph->getSubgraphNode().get()].emplace_back(
                 graph->child_added.connect([this](GraphFacadePtr child){
                     addGraph(child);
                     observeGraph(child);
                 }));
-    graph_connections_[graph->getSubgraphNode()].emplace_back(
+    graph_connections_[graph->getSubgraphNode().get()].emplace_back(
                 graph->child_removed.connect([this](GraphFacadePtr child){
                     removeGraph(child.get());
                 }));
@@ -145,7 +145,7 @@ void Designer::showNodeDialog()
 void Designer::showNodeSearchDialog()
 {
     if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
-        SearchDialog diag(current_view->getGraphFacade()->getGraph(), *view_core_.getNodeFactory(),
+        SearchDialog diag(current_view->getGraphFacade()->getGraph().get(), *view_core_.getNodeFactory(),
                           "Please enter the UUID, the label or the type of the node");
 
         int r = diag.exec();
@@ -197,18 +197,18 @@ QString generateTitle(GraphFacade* graph_facade)
 void Designer::showGraph(GraphFacadePtr graph_facade)
 {
     // check if it is already displayed
-    SubgraphNode* graph = graph_facade->getSubgraphNode();
-    auto pos = visible_graphs_.find(graph);
+    SubgraphNodePtr graph = graph_facade->getSubgraphNode();
+    auto pos = visible_graphs_.find(graph.get());
     if(pos != visible_graphs_.end()) {
         // switch to view
-        GraphView* view = graph_views_.at(graph_facade->getSubgraphNode());
+        GraphView* view = graph_views_.at(graph.get());
         ui->tabWidget->setCurrentWidget(view);
         return;
     }
 
     GraphView* graph_view = new GraphView(graph_facade, view_core_, this);
     graph_view->useProfiler(profiler_);
-    graph_views_[graph] = graph_view;
+    graph_views_[graph.get()] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();
     auuid_views_[graph_facade->getAbsoluteUUID()] = graph_view;
 
@@ -235,7 +235,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     graph_view->overwriteStyleSheet(styleSheet());
 
 
-    visible_graphs_.insert(graph);
+    visible_graphs_.insert(graph.get());
 
     ui->tabWidget->setCurrentIndex(tab);
 
@@ -269,17 +269,17 @@ void Designer::closeView(int page)
     if(view) {
         GraphFacade* graph_facade = view_graphs_.at(view);
 
-        SubgraphNode* graph = graph_facade->getSubgraphNode();
+        SubgraphNodePtr graph = graph_facade->getSubgraphNode();
 
         DesignerIO designerio;
         YAML::Node doc;
-        designerio.saveBoxes(doc, graph, graph_views_[graph]);
+        designerio.saveBoxes(doc, graph.get(), graph_views_[graph.get()]);
         states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
 
         ui->tabWidget->removeTab(page);
 
-        visible_graphs_.erase(graph);
-        graph_views_.erase(graph);
+        visible_graphs_.erase(graph.get());
+        graph_views_.erase(graph.get());
         view_graphs_.erase(view);
         auuid_views_.erase(graph_facade->getAbsoluteUUID());
 
@@ -291,10 +291,10 @@ void Designer::removeGraph(GraphFacade* graph_facade)
 {
     for(auto it = graphs_.begin(); it != graphs_.end(); ++it) {
         if(it->second.get() == graph_facade) {
-            SubgraphNode* graph = graph_facade->getSubgraphNode();
-            graph_connections_.erase(graph);
-            GraphView* view = graph_views_[graph];
-            graph_views_.erase(graph);
+            SubgraphNodePtr graph = graph_facade->getSubgraphNode();
+            graph_connections_.erase(graph.get());
+            GraphView* view = graph_views_[graph.get()];
+            graph_views_.erase(graph.get());
             view_graphs_.erase(view);
             graphs_.erase(it);
             delete view;
@@ -498,7 +498,7 @@ GraphView* Designer::getVisibleGraphView() const
 {
     GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
     if(!current_view) {
-        return graph_views_.at(view_core_.getRoot()->getSubgraphNode());
+        return graph_views_.at(view_core_.getRoot()->getSubgraphNode().get());
     }
     return current_view;
 }
@@ -599,24 +599,24 @@ void Designer::loadSettings(YAML::Node &doc)
 }
 
 
-void Designer::saveView(SubgraphNode* graph, YAML::Node &doc)
+void Designer::saveView(SubgraphNodePtr graph, YAML::Node &doc)
 {
     DesignerIO designerio;
 
-    auto pos = graph_views_.find(graph);
+    auto pos = graph_views_.find(graph.get());
     if(pos != graph_views_.end()) {
-        designerio.saveBoxes(doc, graph, pos->second);
+        designerio.saveBoxes(doc, graph.get(), pos->second);
         states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
     } else {
         doc["adapters"] = states_for_invisible_graphs_[graph->getUUID()];
     }
 }
 
-void Designer::loadView(SubgraphNode* graph, YAML::Node &doc)
+void Designer::loadView(SubgraphNodePtr graph, YAML::Node &doc)
 {
     DesignerIO designerio;
 
-    auto pos = graph_views_.find(graph);
+    auto pos = graph_views_.find(graph.get());
     if(pos != graph_views_.end()) {
         designerio.loadBoxes(doc, pos->second);
     }

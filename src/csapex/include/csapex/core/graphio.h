@@ -20,7 +20,7 @@ namespace csapex
 class CSAPEX_EXPORT GraphIO : public Profilable
 {
 public:
-    GraphIO(SubgraphNode *graph, NodeFactory* node_factory);
+    GraphIO(SubgraphNodePtr graph, NodeFactory* node_factory);
 
 public:
     // options
@@ -42,8 +42,8 @@ public:
     loadIntoGraph(const Snippet &blueprint, const csapex::Point &position);
 
 public:
-    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& e)> saveViewRequest;
-    csapex::slim_signal::Signal<void (SubgraphNode*, YAML::Node& n)> loadViewRequest;
+    csapex::slim_signal::Signal<void (SubgraphNodePtr, YAML::Node& e)> saveViewRequest;
+    csapex::slim_signal::Signal<void (SubgraphNodePtr, YAML::Node& n)> loadViewRequest;
 
 private:
 
@@ -66,7 +66,7 @@ protected:
     void saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr> &connections);
 
     void serializeNode(YAML::Node& doc, NodeHandle* node_handle);
-    void deserializeNode(const YAML::Node& doc, NodeHandlePtr node_handle);
+    void deserializeNode(const YAML::Node& doc, NodeFacadePtr node_handle);
 
     void loadConnection(ConnectablePtr from, const UUID &to_uuid, const std::string& connection_type);
 
@@ -74,7 +74,7 @@ protected:
     UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
 
 private:
-    SubgraphNode* graph_;
+    SubgraphNodePtr graph_;
     NodeFactory* node_factory_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> old_node_uuid_to_new_;

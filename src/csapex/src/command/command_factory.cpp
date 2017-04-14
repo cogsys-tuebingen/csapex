@@ -91,7 +91,7 @@ CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>
 Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to, bool active)
 {
     GraphFacade* graph_facade = getGraphFacade();
-    Graph* graph = graph_facade->getGraph();
+    GraphPtr graph = graph_facade->getGraph();
 
     auto from_c = graph->findConnectorNoThrow(from);
 
@@ -189,7 +189,7 @@ Command::Ptr CommandFactory::clearCommand()
 Command::Ptr CommandFactory::deleteConnectionByIdCommand(int id)
 {
     GraphFacade* graph_facade = getGraphFacade();
-    Graph* graph = graph_facade->getGraph();
+    GraphPtr graph = graph_facade->getGraph();
     for(const auto& connection : graph->getConnections()) {
         if(connection->id() == id) {
             OutputPtr out = connection->from();
@@ -214,7 +214,7 @@ Command::Ptr CommandFactory::deleteAllConnectionFulcrumsCommand(int connection)
 
     if(connection >= 0) {
         GraphFacade* graph_facade = getGraphFacade();
-        Graph* graph = graph_facade->getGraph();
+        GraphPtr graph = graph_facade->getGraph();
 
         int n = graph->getConnectionWithId(connection)->getFulcrumCount();
         for(int i = n - 1; i >= 0; --i) {
@@ -245,7 +245,7 @@ GraphFacade* CommandFactory::getGraphFacade() const
 
 Command::Ptr CommandFactory::moveConnections(const UUID& from, const UUID& to)
 {
-    Graph* graph = getGraphFacade()->getGraph();
+    GraphPtr graph = getGraphFacade()->getGraph();
     ConnectablePtr f = graph->findConnector(from);
     ConnectablePtr t = graph->findConnector(to);
     return moveConnections(f.get(), t.get());

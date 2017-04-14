@@ -90,9 +90,13 @@ bool Node::isIsolated() const
 
 bool Node::canProcess() const
 {
-    if(!node_handle_->getOutputTransition()->hasConnection() && !node_handle_->getInputTransition()->hasConnection()) {
+    if(!node_handle_) {
+        return false;
+
+    } else if(!node_handle_->getOutputTransition()->hasConnection() && !node_handle_->getInputTransition()->hasConnection()) {
         // by default, nodes without any synchronous ports should not be processed.
         return false;
+
     } else {
         return true;
     }

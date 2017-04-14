@@ -132,15 +132,13 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, &GraphView::nodeFacadeRemoved, this, &GraphView::nodeRemoved, Qt::QueuedConnection);
 
 
-    SubgraphNode* graph = graph_facade_->getSubgraphNode();
+    SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
 
     observe(graph->internalConnectionInProgress, [this](ConnectablePtr from, ConnectablePtr to) { scene_->previewConnection(from, to); });
     observe(graph->state_changed, [this](){ updateBoxInformation(); });
 
     for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
-        const NodeHandlePtr& nh = (*it)->getNodeHandle();
-        apex_assert_hard(nh.get());
-        NodeFacadePtr facade = graph_facade_->getNodeFacade(nh.get());
+        const NodeFacadePtr& facade = (*it)->getNodeFacade();
         apex_assert_hard(facade);
         nodeAdded(facade);
     }
@@ -270,7 +268,7 @@ void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
     QGraphicsView::drawForeground(painter, rect);
 
     if(view_core_.isDebug()) {
-        SubgraphNode* graph = graph_facade_->getSubgraphNode();
+        SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
 
         QString debug_info =  QString::fromStdString(graph->makeStatusString());
 
@@ -861,7 +859,7 @@ void GraphView::connectorMessageAdded(ConnectablePtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
 
-    Graph* g = graph_facade_->getGraph();
+    GraphPtr g = graph_facade_->getGraph();
     NodeHandle* node_worker = g->findNodeHandle(parent_uuid);
     if(node_worker) {
         Output* o = dynamic_cast<Output*>(connector.get());
@@ -949,7 +947,7 @@ void GraphView::nodeRemoved(NodeFacadePtr node_facade)
 
 void GraphView::addBox(NodeBox *box)
 {
-    Graph* graph = graph_facade_->getGraph();
+    GraphPtr graph = graph_facade_->getGraph();
 
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
@@ -982,7 +980,7 @@ void GraphView::addBox(NodeBox *box)
 
     box->init();
 
-    box->updateBoxInformation(graph);
+    box->updateBoxInformation(graph.get());
 
     if(graph_facade_->getGraph()->countNodes() > 0) {
         setCacheMode(QGraphicsView::CacheNone);
@@ -1026,7 +1024,7 @@ void GraphView::createPort(ConnectorDescription request)
 
 void GraphView::createPortAndConnect(ConnectorDescription request, ConnectablePtr from)
 {
-    SubgraphNode* graph = graph_facade_->getSubgraphNode();
+    SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
 
     std::shared_ptr<Command> cmd;
@@ -1045,7 +1043,7 @@ void GraphView::createPortAndConnect(ConnectorDescription request, ConnectablePt
 
 void GraphView::createPortAndMove(ConnectorDescription request, ConnectablePtr from)
 {
-    SubgraphNode* graph = graph_facade_->getSubgraphNode();
+    SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
 
     std::shared_ptr<Command> cmd;
@@ -1236,7 +1234,7 @@ void GraphView::updateBoxInformation()
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
             NodeBox* b = proxy->getBox();
-            b->updateBoxInformation(graph_facade_->getGraph());
+            b->updateBoxInformation(graph_facade_->getGraph().get());
         }
     }
 }

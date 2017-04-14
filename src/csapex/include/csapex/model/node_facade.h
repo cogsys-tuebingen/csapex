@@ -19,7 +19,7 @@ class CSAPEX_EXPORT NodeFacade : public Observer, public Notifier
 {
 public:
     NodeFacade(NodeHandlePtr nh);
-    NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw);
+    NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr);
 
     ~NodeFacade();
 
@@ -87,8 +87,10 @@ public:
     NodeStatePtr getNodeStateCopy() const;
     GenericStateConstPtr getParameterState() const;
 
-    // TODO: remove
+    // TODO: move to local access only!
     NodeHandlePtr getNodeHandle();
+    NodeWorkerPtr getNodeWorker();
+    NodeRunnerPtr getNodeRunner();
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
@@ -115,6 +117,7 @@ public:
 private:
     NodeHandlePtr nh_;
     NodeWorkerPtr nw_;
+    NodeRunnerPtr nr_;
 };
 
 }
