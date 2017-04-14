@@ -3,15 +3,9 @@
 
 /// COMPONENT
 #include <csapex/command/delete_node.h>
-#include <csapex/model/node_constructor.h>
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
-#include <csapex/model/graph.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/graphio.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/command/add_variadic_connector.h>
-#include <csapex/command/add_connection.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
@@ -23,7 +17,7 @@ using namespace csapex::command;
 CSAPEX_REGISTER_COMMAND_SERIALIZER(PasteGraph)
 
 PasteGraph::PasteGraph(const AUUID &graph_id, const Snippet &blueprint, const Point& pos)
-    : Meta(graph_id, "PasteGraph"), blueprint_(std::make_shared<Snippet>(blueprint)), pos_(pos)
+    : CommandImplementation(graph_id), blueprint_(std::make_shared<Snippet>(blueprint)), pos_(pos)
 {
 }
 std::string PasteGraph::getDescription() const
@@ -50,34 +44,27 @@ bool PasteGraph::doExecute()
 
 bool PasteGraph::doUndo()
 {
-    std::vector<UUID> uuids;
+    if(!delete_command_) {
 
-    GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
-    for(const auto& pair : id_mapping_) {
-        uuids.push_back(pair.second);
-//        CommandPtr del(new command::DeleteNode(graph_uuid, pair.second));
-//        del->init(graph_facade, *core_);
-//        executeCommand(del);
+        std::vector<UUID> uuids;
+
+        GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
+        for(const auto& pair : id_mapping_) {
+            uuids.push_back(pair.second);
+        }
+
+        delete_command_ = CommandFactory(graph_facade).deleteAllNodes(uuids);
     }
 
-    CommandFactory cf(graph_facade);
+    executeCommand(delete_command_);
 
-    CommandPtr del = cf.deleteAllNodes(uuids);
-    //        del->init(graph_facade, *core_);
-    executeCommand(del);
-
-
-    id_mapping_.clear();
-
-    Meta::doUndo();
 
     return true;
 }
 
 bool PasteGraph::doRedo()
 {
-    clear();
-    return doExecute();
+    return undoCommand(delete_command_);
 }
 
 std::unordered_map<UUID, UUID, UUID::Hasher> PasteGraph::getMapping() const
@@ -88,16 +75,12 @@ std::unordered_map<UUID, UUID, UUID::Hasher> PasteGraph::getMapping() const
 
 void PasteGraph::serialize(SerializationBuffer &data) const
 {
-    Meta::serialize(data);
-
     data << blueprint_;
     data << pos_.x << pos_.y;
 }
 
 void PasteGraph::deserialize(SerializationBuffer& data)
 {
-    Meta::deserialize(data);
-
     data >> blueprint_;
     data >> pos_.x >> pos_.y;
 }

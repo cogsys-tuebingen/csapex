@@ -2,12 +2,11 @@
 #define PASTE_GRAPH_H
 
 /// COMPONENT
-#include "meta.h"
+#include "command_impl.hpp"
 #include <csapex/model/model_fwd.h>
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/data/point.h>
-#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
 #include <unordered_map>
@@ -19,7 +18,7 @@ namespace csapex
 namespace command
 {
 
-class CSAPEX_COMMAND_EXPORT PasteGraph : public Meta
+class CSAPEX_COMMAND_EXPORT PasteGraph : public CommandImplementation<PasteGraph>
 {
     COMMAND_HEADER(PasteGraph);
 
@@ -50,6 +49,8 @@ protected:
 protected:
     SnippetPtr blueprint_;
     Point pos_;
+
+    CommandPtr delete_command_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> id_mapping_;
 };
