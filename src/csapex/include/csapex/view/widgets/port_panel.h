@@ -40,21 +40,21 @@ public:
 
 Q_SIGNALS:
     void createPortRequest(ConnectorDescription request);
-    void createPortAndConnectRequest(ConnectorDescription request, ConnectablePtr);
-    void createPortAndMoveRequest(ConnectorDescription request, ConnectablePtr);
+    void createPortAndConnectRequest(ConnectorDescription request, ConnectorPtr);
+    void createPortAndMoveRequest(ConnectorDescription request, ConnectorPtr);
 
     void portAdded(Port*);
     void portRemoved(Port*);
 
-    void connectorAdded(ConnectablePtr c);
-    void connectorRemoved(ConnectablePtr c);
+    void connectorAdded(ConnectorPtr c);
+    void connectorRemoved(ConnectorPtr c);
 
 public Q_SLOTS:
     virtual void setVisible(bool visible);
 
 private Q_SLOTS:
-    void addPortForConnector(ConnectablePtr c);
-    void removePortForConnector(ConnectablePtr c);
+    void addPortForConnector(ConnectorPtr c);
+    void removePortForConnector(ConnectorPtr c);
 
 private:
     void setupOutput();

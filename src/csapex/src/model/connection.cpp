@@ -46,7 +46,7 @@ Connection::~Connection()
 {
 }
 
-void Connection::detach(Connectable *c)
+void Connection::detach(Connector *c)
 {
     if(c == from_.get()) {
         from_.reset();
@@ -205,12 +205,12 @@ InputPtr Connection::to() const
 {
     return to_;
 }
-ConnectablePtr Connection::source() const
+ConnectorPtr Connection::source() const
 {
     return from_;
 }
 
-ConnectablePtr  Connection::target() const
+ConnectorPtr  Connection::target() const
 {
     return to_;
 }
@@ -220,7 +220,7 @@ int Connection::id() const
     return id_;
 }
 
-bool Connection::contains(Connectable *c) const
+bool Connection::contains(Connector *c) const
 {
     return from_.get() == c || to_.get() == c;
 }

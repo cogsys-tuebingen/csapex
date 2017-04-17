@@ -105,7 +105,7 @@ MessagePreviewWidget::~MessagePreviewWidget()
     }
 }
 
-void MessagePreviewWidget::connectTo(ConnectablePtr c)
+void MessagePreviewWidget::connectTo(ConnectorPtr c)
 {
     scene()->clear();
 
@@ -131,7 +131,7 @@ void MessagePreviewWidget::connectToImpl(OutputPtr out)
 void MessagePreviewWidget::connectToImpl(InputPtr in)
 {
     if(in->isConnected()) {
-        ConnectablePtr s = in->getSource()->shared_from_this();
+        ConnectorPtr s = in->getSource()->shared_from_this();
         if(OutputPtr source = std::dynamic_pointer_cast<Output>(s)) {
             connection_ = DirectConnection::connect(source, input_);
         }

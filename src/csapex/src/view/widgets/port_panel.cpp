@@ -108,8 +108,8 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
         throw std::logic_error("unsupported type");
     }
 
-    graph_->forwardingAdded.connect(delegate::Delegate<void(ConnectablePtr)>(this, &PortPanel::connectorAdded));
-    graph_->forwardingRemoved.connect(delegate::Delegate<void(ConnectablePtr)>(this, &PortPanel::connectorRemoved));
+    graph_->forwardingAdded.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorAdded));
+    graph_->forwardingRemoved.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorRemoved));
 }
 
 void PortPanel::updateLayouts()
@@ -122,7 +122,7 @@ void PortPanel::updateLayouts()
     adjustSize();
 }
 
-void PortPanel::addPortForConnector(ConnectablePtr c)
+void PortPanel::addPortForConnector(ConnectorPtr c)
 {
     if(c->getConnectorType() != type_) {
         return;
@@ -142,7 +142,7 @@ void PortPanel::addPortForConnector(ConnectablePtr c)
 }
 
 
-void PortPanel::removePortForConnector(ConnectablePtr c)
+void PortPanel::removePortForConnector(ConnectorPtr c)
 {
     if(c->getConnectorType() != type_) {
         return;

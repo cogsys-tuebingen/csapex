@@ -2,7 +2,7 @@
 #include <csapex/view/designer/designer_scene.h>
 
 /// COMPONENT
-#include <csapex/model/connectable.h>
+#include <csapex/model/connector.h>
 #include <csapex/model/graph.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/model/node.h>
@@ -351,14 +351,14 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
 
 
                 if(temp.is_connected) {
-                    ConnectablePtr temp_from = temp.from.lock();
-                    ConnectablePtr temp_to = temp.to_c.lock();
+                    ConnectorPtr temp_from = temp.from.lock();
+                    ConnectorPtr temp_to = temp.to_c.lock();
                     if(temp_from && temp_to) {
                         drawConnection(painter, temp_from.get(), temp_to.get(), -1);
                     }
 
                 } else {
-                    ConnectablePtr temp_from = temp.from.lock();
+                    ConnectorPtr temp_from = temp.from.lock();
 
                     if(temp_from) {
                         Port* fromp = getPort(temp_from->getUUID());
@@ -783,7 +783,7 @@ void DesignerScene::fulcrumTypeChanged(void */*f*/, int /*type*/)
     invalidateSchema();
 }
 
-void DesignerScene::addTemporaryConnection(ConnectablePtr from, const QPointF& end)
+void DesignerScene::addTemporaryConnection(ConnectorPtr from, const QPointF& end)
 {
     apex_assert_hard(from);
 
@@ -796,19 +796,19 @@ void DesignerScene::addTemporaryConnection(ConnectablePtr from, const QPointF& e
     update();
 }
 
-void DesignerScene::previewConnection(ConnectablePtr from, ConnectablePtr to)
+void DesignerScene::previewConnection(ConnectorPtr from, ConnectorPtr to)
 {
     addTemporaryConnection(from, to);
     update();
 }
 
-void DesignerScene::addTemporaryConnection(ConnectablePtr from, ConnectablePtr to)
+void DesignerScene::addTemporaryConnection(ConnectorPtr from, ConnectorPtr to)
 {
     apex_assert_hard(from);
     apex_assert_hard(to);
 
-    ConnectablePtr input;
-    ConnectablePtr output;
+    ConnectorPtr input;
+    ConnectorPtr output;
     if(from->isInput()) {
         input = from;
         output = to;
@@ -853,8 +853,8 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
         return;
     }
 
-    ConnectablePtr from = connection.from();
-    ConnectablePtr to = connection.to();
+    ConnectorPtr from = connection.from();
+    ConnectorPtr to = connection.to();
 
     int id = connection.id();
 
@@ -887,7 +887,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
 }
 
 std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
-                                                  Connectable *from, Connectable *to,
+                                                  Connector *from, Connector *to,
                                                   int id)
 {
     Port* from_port = getPort(from->getUUID());
@@ -1184,7 +1184,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
 void DesignerScene::addPort(Port *port)
 {
-    ConnectablePtr c = port->getAdaptee().lock();
+    ConnectorPtr c = port->getAdaptee().lock();
     if(c) {
         port_map_[c->getUUID()] = port;
     }
@@ -1233,7 +1233,7 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
         return;
     }
 
-    ConnectablePtr c = p->getAdaptee().lock();
+    ConnectorPtr c = p->getAdaptee().lock();
     if(!c) {
         return;
     }
@@ -1455,10 +1455,10 @@ std::string DesignerScene::makeStatusString() const
     ss << "Temporary connections: " << temp_.size() << '\n';
     if(!temp_.empty()) {
         for(const TempConnection& c : temp_) {
-            ConnectablePtr from = c.from.lock();
+            ConnectorPtr from = c.from.lock();
             if(from) {
                 if(c.is_connected) {
-                    ConnectablePtr to = c.to_c.lock();
+                    ConnectorPtr to = c.to_c.lock();
                     if(to) {
                         ss << " - " << from->getUUID() << " => " << to->getUUID() << '\n';
                     }

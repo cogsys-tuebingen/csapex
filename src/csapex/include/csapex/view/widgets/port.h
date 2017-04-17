@@ -5,7 +5,7 @@
 #include <csapex/view/csapex_qt_export.h>
 
 /// PROJECT
-#include <csapex/model/connectable.h>
+#include <csapex/model/connector.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/model/connector_type.h>
@@ -23,7 +23,7 @@ class CSAPEX_QT_EXPORT Port : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(ConnectableWeakPtr adaptee, QWidget *parent = nullptr);
+    Port(ConnectorWeakPtr adaptee, QWidget *parent = nullptr);
     virtual ~Port();
 
     bool event(QEvent *e);
@@ -56,7 +56,7 @@ public:
     bool isOutput() const;
     bool isInput() const;
 
-    ConnectableWeakPtr getAdaptee() const;
+    ConnectorWeakPtr getAdaptee() const;
 
     void refreshStylesheet();
 
@@ -65,8 +65,8 @@ Q_SIGNALS:
     void mouseOut(Port* port);
     void removeConnectionsRequest();
 
-    void addConnectionRequest(ConnectablePtr);
-    void moveConnectionRequest(ConnectablePtr);
+    void addConnectionRequest(ConnectorPtr);
+    void moveConnectionRequest(ConnectorPtr);
 
     void changePortRequest(QString label);
 
@@ -86,7 +86,7 @@ protected:
     void paintEvent(QPaintEvent *);
 
 protected:
-    ConnectableWeakPtr adaptee_;
+    ConnectorWeakPtr adaptee_;
     bool refresh_style_sheet_;
     bool minimized_;
     bool flipped_;

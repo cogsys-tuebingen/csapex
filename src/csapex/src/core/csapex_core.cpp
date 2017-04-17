@@ -237,7 +237,7 @@ void CsApexCore::init()
         root_handle_ = node_factory_->makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_);
         apex_assert_hard(root_handle_);
 
-        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNodeHandle()->getNode().lock());
+        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNode());
         apex_assert_hard(graph);
 
         root_worker_ = root_handle_->getNodeWorker();

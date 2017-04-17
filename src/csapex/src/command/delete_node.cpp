@@ -75,13 +75,13 @@ bool DeleteNode::doUndo()
 {
     GraphPtr graph = getGraph();
     NodeFacadePtr node_facade = getNodeFactory()->makeNode(type, uuid, graph);
-    node_facade->getNodeHandle()->setNodeState(saved_state);
+    node_facade->setNodeState(saved_state);
 
     graph->addNode(node_facade);
 
     //deserialize subgraph
     if(node_facade->getType() == "csapex::Graph") {
-        SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_facade->getNodeHandle()->getNode().lock());
+        SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_facade->getNode());
         apex_assert_hard(g);
 
         GraphIO io(g, getNodeFactory());

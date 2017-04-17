@@ -341,6 +341,7 @@ add_library(csapex SHARED
     src/model/graph/vertex.cpp
     src/model/graph/edge.cpp
 
+    src/model/connector.cpp
     src/model/connectable.cpp
     src/model/connectable_owner.cpp
     src/model/connector_type.cpp

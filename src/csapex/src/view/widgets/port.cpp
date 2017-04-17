@@ -30,7 +30,7 @@
 
 using namespace csapex;
 
-Q_DECLARE_METATYPE(ConnectablePtr)
+Q_DECLARE_METATYPE(ConnectorPtr)
 
 Port::Port(QWidget *parent)
     : QFrame(parent),
@@ -55,11 +55,11 @@ Port::Port(QWidget *parent)
     double_click_timer_->setInterval(200);
 }
 
-Port::Port(ConnectableWeakPtr adaptee, QWidget *parent)
+Port::Port(ConnectorWeakPtr adaptee, QWidget *parent)
     : Port(parent)
 {
     adaptee_ = adaptee;
-    ConnectablePtr adaptee_ptr = adaptee_.lock();
+    ConnectorPtr adaptee_ptr = adaptee_.lock();
     if(adaptee_ptr) {
         createToolTip();
 
@@ -95,7 +95,7 @@ bool Port::event(QEvent *e)
 
 bool Port::canOutput() const
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return false;
     }
@@ -104,7 +104,7 @@ bool Port::canOutput() const
 
 bool Port::canInput() const
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return false;
     }
@@ -113,7 +113,7 @@ bool Port::canInput() const
 
 bool Port::isOutput() const
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return false;
     }
@@ -122,14 +122,14 @@ bool Port::isOutput() const
 
 bool Port::isInput() const
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return false;
     }
     return adaptee->isInput();
 }
 
-ConnectableWeakPtr Port::getAdaptee() const
+ConnectorWeakPtr Port::getAdaptee() const
 {
     return adaptee_;
 }
@@ -137,7 +137,7 @@ ConnectableWeakPtr Port::getAdaptee() const
 
 void Port::paintEvent(QPaintEvent *e)
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return;
     }
@@ -199,7 +199,7 @@ bool Port::isHovered() const
 void Port::setEnabledFlag(bool processing_enabled)
 {
     bool enabled = processing_enabled;
-    if(ConnectablePtr adaptee = adaptee_.lock()) {
+    if(ConnectorPtr adaptee = adaptee_.lock()) {
         if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(adaptee)) {
             if(slot->isActive()) {
                 enabled = true;
@@ -219,7 +219,7 @@ void Port::setPortProperty(const std::string& name, bool b)
 
 void Port::createToolTip()
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return;
     }
@@ -264,7 +264,7 @@ void Port::createToolTip()
 
 void Port::startDrag()
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return;
     }
@@ -272,8 +272,9 @@ void Port::startDrag()
     bool left = (buttons_down_ & Qt::LeftButton) != 0;
     bool right = (buttons_down_ & Qt::RightButton) != 0;
 
-    bool create = adaptee->shouldCreate(left, right);
-    bool move = adaptee->shouldMove(left, right);
+    bool full_input = (adaptee->isInput() && adaptee->isConnected());
+    bool create = left && !full_input;
+    bool move = (right && adaptee->isConnected()) || (left && full_input);
 
     adaptee->connectionStart(adaptee);
 
@@ -283,7 +284,7 @@ void Port::startDrag()
 
         if(move) {
             mimeData->setData(QString::fromStdString(csapex::mime::connection_move), QByteArray());
-            mimeData->setProperty("connectable", qVariantFromValue(adaptee));
+            mimeData->setProperty("Connector", qVariantFromValue(adaptee));
 
             drag->setMimeData(mimeData);
 
@@ -291,7 +292,7 @@ void Port::startDrag()
 
         } else {
             mimeData->setData(QString::fromStdString(csapex::mime::connection_create), QByteArray());
-            mimeData->setProperty("connectable", qVariantFromValue(adaptee));
+            mimeData->setProperty("Connector", qVariantFromValue(adaptee));
 
             drag->setMimeData(mimeData);
 
@@ -355,12 +356,12 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
 
 void Port::dragEnterEvent(QDragEnterEvent* e)
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return;
     }
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
-        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
         if(from == adaptee) {
             return;
         }
@@ -372,7 +373,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
             }
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectablePtr original = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        ConnectorPtr original = e->mimeData()->property("Connector").value<ConnectorPtr>();
 
         if(original->targetsCanBeMovedTo(adaptee.get())) {
             e->acceptProposedAction();
@@ -382,7 +383,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 
 void Port::dragMoveEvent(QDragMoveEvent* e)
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return;
     }
@@ -390,7 +391,7 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
 
         from->connectionMovePreview(adaptee);
 
@@ -400,17 +401,17 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
 
 void Port::dropEvent(QDropEvent* e)
 {
-    ConnectablePtr adaptee = adaptee_.lock();
+    ConnectorPtr adaptee = adaptee_.lock();
     if(!adaptee) {
         return;
     }
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
-        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
         if(from && from != adaptee) {
             addConnectionRequest(from);
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
         if(from) {
             moveConnectionRequest(from);
             e->setDropAction(Qt::MoveAction);

@@ -41,7 +41,7 @@ void Input::reset()
     setSequenceNumber(0);
 }
 
-bool Input::isConnectionPossible(Connectable* other_side)
+bool Input::isConnectionPossible(Connector* other_side)
 {
     if(!other_side->canOutput()) {
         std::cerr << "cannot connect, other side can't output" << std::endl;
@@ -114,17 +114,17 @@ void Input::removeAllConnectionsNotUndoable()
     }
 }
 
-bool Input::canConnectTo(Connectable* other_side, bool move) const
+bool Input::canConnectTo(Connector *other_side, bool move) const
 {
     return Connectable::canConnectTo(other_side, move) && (move || !isConnected());
 }
 
-bool Input::targetsCanBeMovedTo(Connectable* other_side) const
+bool Input::targetsCanBeMovedTo(Connector* other_side) const
 {
     return getSource()->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
 }
 
-void Input::connectionMovePreview(ConnectablePtr other_side)
+void Input::connectionMovePreview(ConnectorPtr other_side)
 {
     connectionInProgress(getSource(), other_side);
 }

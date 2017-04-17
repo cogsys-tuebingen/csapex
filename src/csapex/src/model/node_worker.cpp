@@ -56,10 +56,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 
     try {
-        observe(node_handle_->connector_created, [this](ConnectablePtr c) {
+        observe(node_handle_->connector_created, [this](ConnectorPtr c) {
             connectConnector(c);
         });
-        observe(node_handle_->connector_removed, [this](ConnectablePtr c) {
+        observe(node_handle_->connector_removed, [this](ConnectorPtr c) {
             disconnectConnector(c.get());
         });
 
@@ -850,13 +850,13 @@ void NodeWorker::trySendEvents()
     sendEvents(node_handle_->isActive());
 }
 
-void NodeWorker::connectConnector(ConnectablePtr c)
+void NodeWorker::connectConnector(ConnectorPtr c)
 {
-    port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectablePtr&) {
+    port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectorPtr&) {
         triggerTryProcess();
     }));
     port_connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { triggerTryProcess(); }));
-    port_connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](const ConnectablePtr& ) { triggerTryProcess(); }));
+    port_connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](const ConnectorPtr& ) { triggerTryProcess(); }));
     port_connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { triggerTryProcess(); }));
 
     if(EventPtr event = std::dynamic_pointer_cast<Event>(c)) {
@@ -865,7 +865,7 @@ void NodeWorker::connectConnector(ConnectablePtr c)
                 sendEvents(node_handle_->isActive());
             });
         }));
-        port_connections_[c.get()].emplace_back(event->message_processed.connect([this](const ConnectablePtr&) {
+        port_connections_[c.get()].emplace_back(event->message_processed.connect([this](const ConnectorPtr&) {
             triggerTryProcess();
         }));
 
@@ -910,7 +910,7 @@ void NodeWorker::connectConnector(ConnectablePtr c)
     }
 }
 
-void NodeWorker::disconnectConnector(Connectable *c)
+void NodeWorker::disconnectConnector(Connector *c)
 {
     for(auto& connection : port_connections_[c]) {
         connection.disconnect();

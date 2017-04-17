@@ -132,10 +132,10 @@ private:
     void startNextIteration();
 
 public:
-    slim_signal::Signal<void(ConnectablePtr)> forwardingAdded;
-    slim_signal::Signal<void(ConnectablePtr)> forwardingRemoved;
+    slim_signal::Signal<void(ConnectorPtr)> forwardingAdded;
+    slim_signal::Signal<void(ConnectorPtr)> forwardingRemoved;
 
-    slim_signal::Signal<void(ConnectablePtr,ConnectablePtr)> internalConnectionInProgress;
+    slim_signal::Signal<void(ConnectorPtr,ConnectorPtr)> internalConnectionInProgress;
 
 protected:
     mutable std::recursive_mutex continuation_mutex_;

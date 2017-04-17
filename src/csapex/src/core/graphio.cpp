@@ -551,10 +551,10 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadePtr node_facade)
     if(x != 0 || y != 0) {
         s->setPos(Point(x,y));
     }
-    node_facade->getNodeHandle()->setNodeState(s);
+    node_facade->setNodeState(s);
 
     // hook for nodes to deserialize
-    auto node = node_facade->getNodeHandle()->getNode().lock();
+    auto node = node_facade->getNode();
     apex_assert_hard(node);
 
     NodeSerializer::instance().deserialize(*node, doc);

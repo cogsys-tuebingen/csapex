@@ -91,7 +91,7 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
 
 void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
 {
-    NodePtr node = nf->getNodeHandle()->getNode().lock();
+    NodePtr node = nf->getNode();
     apex_assert_hard(node);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(node);
     apex_assert_hard(sub_graph);
@@ -393,6 +393,50 @@ ConnectionPtr GraphFacade::connect(const UUID& output_id, const UUID& input_id)
     auto c = DirectConnection::connect(o, i);
     graph_->addConnection(c);
     return c;
+}
+
+
+ConnectionPtr GraphFacade::connect(NodeFacade* output, const std::string& output_name, NodeFacade* input, const std::string& input_name)
+{
+    return connect(output->getNodeHandle(), output_name, input->getNodeHandle(), input_name);
+}
+
+ConnectionPtr GraphFacade::connect(NodeFacadePtr output, const std::string& output_name, NodeFacadePtr input, const std::string& input_name)
+{
+    return connect(output->getNodeHandle(), output_name, input->getNodeHandle(), input_name);
+}
+ConnectionPtr GraphFacade::connect(NodeFacade* output, const std::string& output_name, const UUID& input_id)
+{
+    return connect(output->getNodeHandle(), output_name, input_id);
+}
+ConnectionPtr GraphFacade::connect(NodeFacadePtr output, const std::string& output_name, const UUID& input_id)
+{
+    return connect(output->getNodeHandle(), output_name, input_id);
+}
+ConnectionPtr GraphFacade::connect(const UUID& output_id, NodeFacade* input, const std::string& input_name)
+{
+    return connect(output_id, input->getNodeHandle(), input_name);
+}
+ConnectionPtr GraphFacade::connect(const UUID& output_id, NodeFacadePtr input, const std::string& input_name)
+{
+    return connect(output_id, input->getNodeHandle(), input_name);
+}
+ConnectionPtr GraphFacade::connect(const UUID& output_id, NodeFacadePtr input, int input_id)
+{
+    return connect(output_id, input->getNodeHandle(), input_id);
+}
+ConnectionPtr GraphFacade::connect(NodeFacadePtr output, int output_id, const UUID& input_id)
+{
+    return connect(output->getNodeHandle(), output_id, input_id);
+}
+
+ConnectionPtr GraphFacade::connect(NodeFacade* output, int output_id, NodeFacade* input, int input_id)
+{
+    return connect(output->getNodeHandle(), output_id, input->getNodeHandle(), input_id);
+}
+ConnectionPtr GraphFacade::connect(NodeFacadePtr output, int output_id, NodeFacadePtr input, int input_id)
+{
+    return connect(output->getNodeHandle(), output_id, input->getNodeHandle(), input_id);
 }
 
 TaskGenerator* GraphFacade::getTaskGenerator(const UUID &uuid)

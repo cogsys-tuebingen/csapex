@@ -26,8 +26,8 @@ public:
 
     CommandPtr addConnection(const UUID& from, const UUID& to, bool active);
 
-    CommandPtr removeAllConnectionsCmd(ConnectablePtr input);
-    CommandPtr removeAllConnectionsCmd(Connectable* input);
+    CommandPtr removeAllConnectionsCmd(ConnectorPtr input);
+    CommandPtr removeAllConnectionsCmd(Connector* input);
 
     CommandPtr removeAllConnectionsCmd(Input* input);
     CommandPtr removeAllConnectionsCmd(Output* output);
@@ -36,7 +36,7 @@ public:
 
 
     CommandPtr moveConnections(const UUID& from, const UUID& to);
-    CommandPtr moveConnections(Connectable* from, Connectable* to);
+    CommandPtr moveConnections(Connector* from, Connector* to);
 
 
     CommandPtr setConnectionActive(int connection, bool active);

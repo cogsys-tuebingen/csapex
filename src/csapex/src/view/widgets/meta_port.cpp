@@ -2,7 +2,7 @@
 #include <csapex/view/widgets/meta_port.h>
 
 /// COMPONENT
-#include <csapex/model/connectable.h>
+#include <csapex/model/connector.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/csapex_mime.h>
 
@@ -16,7 +16,7 @@
 
 using namespace csapex;
 
-Q_DECLARE_METATYPE(ConnectablePtr)
+Q_DECLARE_METATYPE(ConnectorPtr)
 
 MetaPort::MetaPort(ConnectorType port_type, const AUUID& target, QWidget *parent)
     : Port(parent), port_type_(port_type), target(target)
@@ -73,7 +73,7 @@ void MetaPort::dragMoveEvent(QDragMoveEvent* e)
 void MetaPort::dropEvent(QDropEvent* e)
 {
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
-        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
         if(from) {
             auto type = from->getType();
 
@@ -88,7 +88,7 @@ void MetaPort::dropEvent(QDropEvent* e)
         }
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectablePtr from = e->mimeData()->property("connectable").value<ConnectablePtr>();
+        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
         if(from) {
             auto type = from->getType();
 

@@ -44,7 +44,7 @@ public:
     void notifyMessageAvailable(Connection* connection) override;
     void notifyMessageProcessed() override;
 
-    bool canConnectTo(Connectable* other_side, bool move) const override;
+    bool canConnectTo(Connector* other_side, bool move) const override;
 
     virtual void enable() override;
     virtual void disable() override;

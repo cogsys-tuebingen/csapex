@@ -118,10 +118,10 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
 
-    QObject::connect(this, SIGNAL(triggerConnectorCreated(ConnectablePtr)), this, SLOT(connectorCreated(ConnectablePtr)));
-    QObject::connect(this, SIGNAL(triggerConnectorRemoved(ConnectablePtr)), this, SLOT(connectorRemoved(ConnectablePtr)));
+    QObject::connect(this, SIGNAL(triggerConnectorCreated(ConnectorPtr)), this, SLOT(connectorCreated(ConnectorPtr)));
+    QObject::connect(this, SIGNAL(triggerConnectorRemoved(ConnectorPtr)), this, SLOT(connectorRemoved(ConnectorPtr)));
 
-    qRegisterMetaType < ConnectablePtr > ("ConnectablePtr");
+    qRegisterMetaType < ConnectorPtr > ("ConnectorPtr");
     qRegisterMetaType < NodeFacadePtr > ("NodeFacadePtr");
 
 
@@ -134,7 +134,7 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
 
-    observe(graph->internalConnectionInProgress, [this](ConnectablePtr from, ConnectablePtr to) { scene_->previewConnection(from, to); });
+    observe(graph->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
     observe(graph->state_changed, [this](){ updateBoxInformation(); });
 
     for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
@@ -770,7 +770,6 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
 void GraphView::nodeAdded(NodeFacadePtr node_facade)
 {
-    NodeHandlePtr node_handle = node_facade->getNodeHandle();
     std::string type = node_facade->getType();
 
     QIcon icon = QIcon(QString::fromStdString(view_core_.getNodeFactory()->getConstructor(type)->getIcon()));
@@ -806,6 +805,7 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
 
     addBox(box);
 
+    NodeHandlePtr node_handle = node_facade->getNodeHandle();
     // add existing connectors
     for(auto input : node_handle->getExternalInputs()) {
         connectorMessageAdded(input);
@@ -821,9 +821,9 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
     }
 
     // subscribe to coming connectors
-    auto c1 = node_facade->connector_created.connect([this](ConnectablePtr c) { triggerConnectorCreated(c); });
+    auto c1 = node_facade->connector_created.connect([this](ConnectorPtr c) { triggerConnectorCreated(c); });
     facade_connections_[node_facade.get()].emplace_back(c1);
-    auto c2 = node_facade->connector_removed.connect([this](ConnectablePtr c) { triggerConnectorRemoved(c); });
+    auto c2 = node_facade->connector_removed.connect([this](ConnectorPtr c) { triggerConnectorRemoved(c); });
     facade_connections_[node_facade.get()].emplace_back(c2);
 
 
@@ -836,7 +836,7 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
 }
 
 
-void GraphView::connectorCreated(ConnectablePtr connector)
+void GraphView::connectorCreated(ConnectorPtr connector)
 {
     // TODO: dirty...
     if(dynamic_cast<Slot*> (connector.get()) || dynamic_cast<Event*>(connector.get())) {
@@ -846,7 +846,7 @@ void GraphView::connectorCreated(ConnectablePtr connector)
     }
 }
 
-void GraphView::connectorRemoved(ConnectablePtr connector)
+void GraphView::connectorRemoved(ConnectorPtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
     NodeBox* box = getBox(parent_uuid);
@@ -855,7 +855,7 @@ void GraphView::connectorRemoved(ConnectablePtr connector)
 }
 
 
-void GraphView::connectorMessageAdded(ConnectablePtr connector)
+void GraphView::connectorMessageAdded(ConnectorPtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
 
@@ -879,7 +879,7 @@ void GraphView::connectorMessageAdded(ConnectablePtr connector)
     }
 }
 
-void GraphView::connectorSignalAdded(ConnectablePtr connector)
+void GraphView::connectorSignalAdded(ConnectorPtr connector)
 {
     UUID parent_uuid = connector->getUUID().parentUUID();
     NodeBox* box = getBox(parent_uuid);
@@ -953,9 +953,9 @@ void GraphView::addBox(NodeBox *box)
 
     NodeFacadePtr facade = box->getNodeFacade();
 
-    facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnections(); }));
-    facade_connections_[facade.get()].emplace_back(facade->connection_in_prograss.connect([this](const ConnectablePtr& from, const ConnectablePtr& to) { scene_->previewConnection(from, to); }));
-    facade_connections_[facade.get()].emplace_back(facade->connection_done.connect([this](const ConnectablePtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectorPtr&) { scene_->deleteTemporaryConnections(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_in_prograss.connect([this](const ConnectorPtr& from, const ConnectorPtr& to) { scene_->previewConnection(from, to); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_done.connect([this](const ConnectorPtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
@@ -1022,7 +1022,7 @@ void GraphView::createPort(ConnectorDescription request)
     view_core_.getCommandDispatcher()->execute(cmd);
 }
 
-void GraphView::createPortAndConnect(ConnectorDescription request, ConnectablePtr from)
+void GraphView::createPortAndConnect(ConnectorDescription request, ConnectorPtr from)
 {
     SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -1041,7 +1041,7 @@ void GraphView::createPortAndConnect(ConnectorDescription request, ConnectablePt
     view_core_.getCommandDispatcher()->execute(cmd);
 }
 
-void GraphView::createPortAndMove(ConnectorDescription request, ConnectablePtr from)
+void GraphView::createPortAndMove(ConnectorDescription request, ConnectorPtr from)
 {
     SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
     AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
@@ -1068,15 +1068,15 @@ void GraphView::addPort(Port *port)
     QObject::connect(port, SIGNAL(mouseOut(Port*)), this, SLOT(stopPreview()));
 
     QObject::connect(port, &Port::removeConnectionsRequest, [this, port]() {
-        ConnectablePtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee().lock();
         if(!adaptee) {
             return;
         }
         view_core_.getCommandDispatcher()->execute(CommandFactory(graph_facade_.get()).removeAllConnectionsCmd(adaptee));
     });
 
-    QObject::connect(port, &Port::addConnectionRequest, [this, port](const ConnectablePtr& from) {
-        ConnectablePtr adaptee = port->getAdaptee().lock();
+    QObject::connect(port, &Port::addConnectionRequest, [this, port](const ConnectorPtr& from) {
+        ConnectorPtr adaptee = port->getAdaptee().lock();
         if(!adaptee) {
             return;
         }
@@ -1084,8 +1084,8 @@ void GraphView::addPort(Port *port)
         view_core_.getCommandDispatcher()->execute(cmd);
     });
 
-    QObject::connect(port, &Port::moveConnectionRequest, [this, port](const ConnectablePtr& from) {
-        ConnectablePtr adaptee = port->getAdaptee().lock();
+    QObject::connect(port, &Port::moveConnectionRequest, [this, port](const ConnectorPtr& from) {
+        ConnectorPtr adaptee = port->getAdaptee().lock();
         if(!adaptee) {
             return;
         }
@@ -1094,7 +1094,7 @@ void GraphView::addPort(Port *port)
     });
 
     QObject::connect(port, &Port::changePortRequest, [this, port](QString label) {
-        ConnectablePtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee().lock();
         if(!adaptee) {
             return;
         }
@@ -1112,7 +1112,7 @@ void GraphView::renameBox(NodeBox *box)
 {
     GraphFacade* graph = getGraphFacade();
     NodeFacadePtr node = box->getNodeFacade();
-    NodeStatePtr state = node->getNodeHandle()->getNodeState();
+    NodeStatePtr state = node->getNodeState();
     QString old_name = QString::fromStdString(state->getLabel());
 
     bool ok = false;

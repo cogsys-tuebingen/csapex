@@ -217,7 +217,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         return;
     }
 
-    auto node = node_facade->getNodeHandle()->getNode().lock();
+    auto node = node_facade->getNode();
     if(!node) {
         return;
     }

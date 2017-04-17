@@ -34,7 +34,7 @@ void Output::removeOutputTransition()
     transition_ = nullptr;
 }
 
-void Output::removeConnection(Connectable *other_side)
+void Output::removeConnection(Connector *other_side)
 {
     Connectable::removeConnection(other_side);
     if(connections_.empty()) {
@@ -107,7 +107,7 @@ void Output::disable()
     Connectable::disable();
 }
 
-bool Output::isConnectionPossible(Connectable *other_side)
+bool Output::isConnectionPossible(Connector *other_side)
 {
     if(!other_side->canInput()) {
         std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", other side can't input" << std::endl;
@@ -121,7 +121,7 @@ bool Output::isConnectionPossible(Connectable *other_side)
     return true;
 }
 
-bool Output::targetsCanBeMovedTo(Connectable* other_side) const
+bool Output::targetsCanBeMovedTo(Connector* other_side) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(ConnectionPtr connection : connections_) {
@@ -137,7 +137,7 @@ bool Output::isConnected() const
     return !connections_.empty();
 }
 
-void Output::connectionMovePreview(ConnectablePtr other_side)
+void Output::connectionMovePreview(ConnectorPtr other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(ConnectionPtr connection : connections_) {

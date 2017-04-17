@@ -6,7 +6,7 @@
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/connectable.h>
+#include <csapex/model/connector.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -27,7 +27,7 @@
 
 using namespace csapex;
 
-Q_DECLARE_METATYPE(ConnectablePtr)
+Q_DECLARE_METATYPE(ConnectorPtr)
 
 
 DragIO::DragIO(PluginLocatorPtr locator, CommandExecutor *dispatcher)
@@ -153,7 +153,7 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
 
         if(!e->isAccepted()) {
-            ConnectablePtr c = e->mimeData()->property("connectable").value<ConnectablePtr>();
+            ConnectorPtr c = e->mimeData()->property("Connector").value<ConnectorPtr>();
             e->acceptProposedAction();
 
             DesignerScene* scene = src->designerScene();
@@ -166,7 +166,7 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         if(!e->isAccepted()) {
-            ConnectablePtr c = e->mimeData()->property("connectable").value<ConnectablePtr>();
+            ConnectorPtr c = e->mimeData()->property("Connector").value<ConnectorPtr>();
             e->acceptProposedAction();
 
             DesignerScene* scene = src->designerScene();

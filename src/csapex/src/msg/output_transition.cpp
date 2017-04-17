@@ -82,7 +82,7 @@ void OutputTransition::addOutput(OutputPtr output)
     });
     output_signal_connections_[output.get()].push_back(cf);
 
-    auto cp = output->message_processed.connect([this](const ConnectablePtr&) {
+    auto cp = output->message_processed.connect([this](const ConnectorPtr&) {
         tokenProcessed();
     });
     output_signal_connections_[output.get()].push_back(cp);

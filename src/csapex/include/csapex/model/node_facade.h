@@ -27,6 +27,8 @@ public:
     UUID getUUID() const;
 
     bool isActive() const;
+    void setActive(bool active);
+
     bool isProcessingEnabled() const;
 
     bool isGraph() const;
@@ -83,26 +85,30 @@ public:
 
     // TODO: proxies
     ProfilerPtr getProfiler();
+
     NodeStatePtr getNodeState() const;
     NodeStatePtr getNodeStateCopy() const;
+    void setNodeState(NodeStatePtr memento);
+
     GenericStateConstPtr getParameterState() const;
 
     // TODO: move to local access only!
     NodeHandlePtr getNodeHandle();
     NodeWorkerPtr getNodeWorker();
     NodeRunnerPtr getNodeRunner();
+    NodePtr getNode();
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
 
 
-    slim_signal::Signal<void (ConnectablePtr)> connector_created;
-    slim_signal::Signal<void (ConnectablePtr)> connector_removed;
+    slim_signal::Signal<void (ConnectorPtr)> connector_created;
+    slim_signal::Signal<void (ConnectorPtr)> connector_removed;
 
-    slim_signal::Signal<void (ConnectablePtr, ConnectablePtr)> connection_in_prograss;
-    slim_signal::Signal<void (ConnectablePtr)> connection_done;
-    slim_signal::Signal<void (ConnectablePtr)> connection_start;
+    slim_signal::Signal<void (ConnectorPtr, ConnectorPtr)> connection_in_prograss;
+    slim_signal::Signal<void (ConnectorPtr)> connection_done;
+    slim_signal::Signal<void (ConnectorPtr)> connection_start;
 
     slim_signal::Signal<void()> messages_processed;
 

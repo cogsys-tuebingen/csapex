@@ -40,29 +40,29 @@ public:
 
     ConnectionPtr connect(OutputPtr output, InputPtr input);
 
-    ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name,
-                          NodeHandlePtr input, const std::string& inputput_name);
-    ConnectionPtr connect(NodeHandle* output, const std::string& output_name,
-                          NodeHandle* input, const std::string& input_name);
-    ConnectionPtr connect(const UUID& output_id,
-                          NodeHandle* input, const std::string& input_name);
-    ConnectionPtr connect(NodeHandle* output, const std::string& output_name,
-                          const UUID& input_id);
-    ConnectionPtr connect(const UUID& output_id,
-                          NodeHandlePtr input, const std::string& input_name);
-    ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name,
-                          const UUID& input_id);
-
     ConnectionPtr connect(const UUID& output_id, const UUID& input_id);
 
-    ConnectionPtr connect(const UUID& output_id,
-                          NodeHandlePtr input, int input_id);
-    ConnectionPtr connect(NodeHandlePtr output, int output_id,
-                          const UUID& input_id);
-    ConnectionPtr connect(NodeHandlePtr output, int output_id,
-                          NodeHandlePtr input, int input_id);
-    ConnectionPtr connect(NodeHandle* output, int output_id,
-                          NodeHandle* input, int input_id);
+    ConnectionPtr connect(NodeHandle* output, const std::string& output_name, NodeHandle* input, const std::string& input_name);
+    ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name, NodeHandlePtr input, const std::string& input_name);
+    ConnectionPtr connect(NodeHandle* output, const std::string& output_name, const UUID& input_id);
+    ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name, const UUID& input_id);
+    ConnectionPtr connect(const UUID& output_id, NodeHandle* input, const std::string& input_name);
+    ConnectionPtr connect(const UUID& output_id, NodeHandlePtr input, const std::string& input_name);
+    ConnectionPtr connect(const UUID& output_id, NodeHandlePtr input, int input_id);
+    ConnectionPtr connect(NodeHandlePtr output, int output_id, const UUID& input_id);
+    ConnectionPtr connect(NodeHandle* output, int output_id, NodeHandle* input, int input_id);
+    ConnectionPtr connect(NodeHandlePtr output, int output_id, NodeHandlePtr input, int input_id);
+
+    ConnectionPtr connect(NodeFacade* output, const std::string& output_name, NodeFacade* input, const std::string& input_name);
+    ConnectionPtr connect(NodeFacadePtr output, const std::string& output_name, NodeFacadePtr input, const std::string& input_name);
+    ConnectionPtr connect(NodeFacade* output, const std::string& output_name, const UUID& input_id);
+    ConnectionPtr connect(NodeFacadePtr output, const std::string& output_name, const UUID& input_id);
+    ConnectionPtr connect(const UUID& output_id, NodeFacade* input, const std::string& input_name);
+    ConnectionPtr connect(const UUID& output_id, NodeFacadePtr input, const std::string& input_name);
+    ConnectionPtr connect(const UUID& output_id, NodeFacadePtr input, int input_id);
+    ConnectionPtr connect(NodeFacadePtr output, int output_id, const UUID& input_id);
+    ConnectionPtr connect(NodeFacade* output, int output_id, NodeFacade* input, int input_id);
+    ConnectionPtr connect(NodeFacadePtr output, int output_id, NodeFacadePtr input, int input_id);
 
     TaskGenerator* getTaskGenerator(const UUID& uuid);
 

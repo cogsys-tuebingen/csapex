@@ -127,8 +127,8 @@ private:
 
     void sendEvents(bool active);
 
-    void connectConnector(ConnectablePtr c);
-    void disconnectConnector(Connectable *c);
+    void connectConnector(ConnectorPtr c);
+    void disconnectConnector(Connector *c);
 
     bool hasActiveOutputConnection();
 
@@ -150,7 +150,7 @@ private:
     Event* trigger_activated_;
     Event* trigger_deactivated_;
 
-    std::map<Connectable*, std::vector<slim_signal::Connection>> port_connections_;
+    std::map<Connector*, std::vector<slim_signal::Connection>> port_connections_;
 
     mutable std::recursive_mutex state_mutex_;
 

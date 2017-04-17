@@ -709,9 +709,9 @@ void NodeHandle::manageOutput(OutputPtr out)
     
     connectConnector(out.get());
     
-    connections_[out.get()].emplace_back(out->message_processed.connect([this](const ConnectablePtr&) { might_be_enabled(); }));
-    connections_[out.get()].emplace_back(out->connection_removed_to.connect([this](const ConnectablePtr&) { might_be_enabled(); }));
-    connections_[out.get()].emplace_back(out->connection_added_to.connect([this](const ConnectablePtr&) { might_be_enabled(); }));
+    connections_[out.get()].emplace_back(out->message_processed.connect([this](const ConnectorPtr&) { might_be_enabled(); }));
+    connections_[out.get()].emplace_back(out->connection_removed_to.connect([this](const ConnectorPtr&) { might_be_enabled(); }));
+    connections_[out.get()].emplace_back(out->connection_added_to.connect([this](const ConnectorPtr&) { might_be_enabled(); }));
     connections_[out.get()].emplace_back(out->connectionEnabled.connect([this](bool) { might_be_enabled(); }));
     
     connector_created(out);

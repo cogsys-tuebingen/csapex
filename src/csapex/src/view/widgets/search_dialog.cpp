@@ -115,7 +115,7 @@ void SearchDialog::addNodes(Graph *graph, QStandardItemModel *model)
         NodeFacadePtr nf = (*it)->getNodeFacade();
         NodeHandlePtr nh = nf->getNodeHandle();
 
-        NodePtr node = nh->getNode().lock();
+        NodePtr node = nf->getNode();
         if(GraphPtr subgraph = std::dynamic_pointer_cast<Graph>(node)) {
             addNodes(subgraph.get(), model);
         }

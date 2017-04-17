@@ -1,13 +1,10 @@
-#ifndef CONNECTOR_H
-#define CONNECTOR_H
+#ifndef CONNECTABLE_H
+#define CONNECTABLE_H
 
 /// COMPONENT
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/token_data.h>
-#include <csapex/model/unique.h>
-#include <csapex/model/error_state.h>
-#include <csapex/model/connector_type.h>
-#include <csapex/model/connector_description.h>
+#include <csapex/model/connector.h>
 #include <csapex/csapex_export.h>
 
 /// SYSTEM
@@ -20,7 +17,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT Connectable : public ErrorState, public Unique, public std::enable_shared_from_this<Connectable>
+class CSAPEX_EXPORT Connectable : public Connector
 {
     friend class Graph;
     friend class Connection;
@@ -30,7 +27,7 @@ public:
 
     int getCount() const;
 
-    virtual bool canConnectTo(Connectable* other_side, bool move) const;
+    virtual bool canConnectTo(Connector* other_side, bool move) const;
 
     virtual bool canOutput() const {
         return false;
@@ -58,7 +55,7 @@ public:
     void setEssential(bool essential);
 
     virtual void addConnection(ConnectionPtr connection);
-    virtual void removeConnection(Connectable* other_side);
+    virtual void removeConnection(Connector* other_side);
     virtual void fadeConnection(ConnectionPtr connection);
 
     void setLabel(const std::string& label);
@@ -69,8 +66,6 @@ public:
 
     virtual ConnectorType getConnectorType() const = 0;
 
-    virtual ConnectorDescription getDescription() const;
-
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
@@ -79,8 +74,6 @@ public:
 
     int countConnections();
     std::vector<ConnectionPtr> getConnections() const;
-
-    ConnectableOwnerPtr getOwner() const;
 
     bool hasActiveConnection() const;
 
@@ -93,40 +86,6 @@ public:
     virtual void stop();
 
     virtual void notifyMessageProcessed();
-
-    /*REFACTOR*/ virtual bool shouldMove(bool left, bool right);
-    /*REFACTOR*/ virtual bool shouldCreate(bool left, bool right);
-
-public:
-    slim_signal::Signal<void(bool)> enabled_changed;
-
-    slim_signal::Signal<void()> essential_changed;
-
-    slim_signal::Signal<void(ConnectablePtr)> disconnected;
-    slim_signal::Signal<void(ConnectablePtr)> connectionStart;
-    slim_signal::Signal<void(ConnectablePtr,ConnectablePtr)> connectionInProgress;
-
-    slim_signal::Signal<void(ConnectablePtr)> connection_added_to;
-    slim_signal::Signal<void(ConnectablePtr)> connection_removed_to;
-
-    slim_signal::Signal<void(ConnectionPtr)> connection_added;
-    slim_signal::Signal<void(ConnectionPtr)> connection_faded;
-
-    slim_signal::Signal<void(bool)> connectionEnabled;
-    slim_signal::Signal<void(ConnectablePtr)> message_processed;
-    slim_signal::Signal<void(bool, std::string, int)> connectableError;
-
-    slim_signal::Signal<void()> typeChanged;
-    slim_signal::Signal<void(std::string)> labelChanged;
-
-public:
-    /**
-     * INTERFACE
-     */
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const = 0;
-    virtual bool isConnectionPossible(Connectable* other_side) = 0;
-    virtual void validateConnections();
-    virtual void connectionMovePreview(ConnectablePtr other_side) = 0;
 
 protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
@@ -142,8 +101,6 @@ protected:
 protected:
     mutable std::recursive_mutex io_mutex;
     mutable std::recursive_mutex sync_mutex;
-
-    ConnectableOwnerWeakPtr owner_;
 
     std::string label_;
 
@@ -163,4 +120,4 @@ private:
 
 }
 
-#endif // CONNECTOR_H
+#endif // CONNECTABLE_H

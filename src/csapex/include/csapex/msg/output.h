@@ -29,7 +29,7 @@ public:
     void setOutputTransition(OutputTransition* ot);
     void removeOutputTransition();
 
-    virtual void removeConnection(Connectable* other_side) override;
+    virtual void removeConnection(Connector* other_side) override;
 
     void notifyMessageProcessed();
     void notifyMessageProcessed(Connection *connection);
@@ -63,10 +63,10 @@ public:
     virtual TokenPtr getToken() const = 0;
     virtual TokenPtr getAddedToken() = 0;
 
-    virtual bool targetsCanBeMovedTo(Connectable *other_side) const override;
+    virtual bool targetsCanBeMovedTo(Connector *other_side) const override;
     virtual bool isConnected() const override;
 
-    virtual void connectionMovePreview(ConnectablePtr other_side) override;
+    virtual void connectionMovePreview(ConnectorPtr other_side) override;
     virtual void validateConnections() override;
 
     std::vector<ConnectionPtr> getConnections() const;
@@ -77,7 +77,7 @@ public:
     virtual void reset() override;
     virtual void clearBuffer() = 0;
 
-    virtual bool isConnectionPossible(Connectable* other_side) override;
+    virtual bool isConnectionPossible(Connector *other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
 public:

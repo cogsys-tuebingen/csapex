@@ -19,7 +19,7 @@ public: \
     } \
     virtual csapex::NodeAdapterPtr build(csapex::NodeFacadePtr facade, NodeBox* parent) const \
     { \
-        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (facade->getNodeHandle()->getNode().lock()); \
+        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (facade->getNode()); \
         return std::make_shared<Adapter>(facade, parent, adaptee); \
     } \
 }; \

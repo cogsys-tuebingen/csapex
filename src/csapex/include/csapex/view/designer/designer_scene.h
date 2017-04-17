@@ -64,9 +64,9 @@ public Q_SLOTS:
 
 
 public Q_SLOTS:
-    void addTemporaryConnection(ConnectablePtr from, ConnectablePtr to);
-    void previewConnection(ConnectablePtr from, ConnectablePtr to);
-    void addTemporaryConnection(ConnectablePtr from, const QPointF &end);
+    void addTemporaryConnection(ConnectorPtr from, ConnectorPtr to);
+    void previewConnection(ConnectorPtr from, ConnectorPtr to);
+    void addTemporaryConnection(ConnectorPtr from, const QPointF &end);
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();
 
@@ -105,10 +105,10 @@ private:
 
         bool is_connected;
 
-        ConnectableWeakPtr from;
+        ConnectorWeakPtr from;
 
         QPointF to_p;
-        ConnectableWeakPtr to_c;
+        ConnectorWeakPtr to_c;
     };
 
     enum Position {
@@ -154,7 +154,7 @@ private:
 
 private:
     void drawConnection(QPainter *painter, const Connection &connection);
-    std::vector<QRectF> drawConnection(QPainter *painter, Connectable* from, Connectable* to, int id);
+    std::vector<QRectF> drawConnection(QPainter *painter, Connector* from, Connector* to, int id);
     std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
     void drawPort(QPainter *painter, bool selected, Port* p, int pos = -1);

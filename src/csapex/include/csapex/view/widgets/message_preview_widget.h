@@ -40,7 +40,7 @@ public:
     ~MessagePreviewWidget();
 
 public:
-    void connectTo(ConnectablePtr c);
+    void connectTo(ConnectorPtr c);
     void disconnect();
 
     void setCallback(std::function<void(TokenData::ConstPtr)> cb);

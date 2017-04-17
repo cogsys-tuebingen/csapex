@@ -32,8 +32,8 @@ public:
 
 Q_SIGNALS:
     void createPortRequest(ConnectorDescription request);
-    void createPortAndConnectRequest(ConnectorDescription request, ConnectablePtr);
-    void createPortAndMoveRequest(ConnectorDescription request, ConnectablePtr);
+    void createPortAndConnectRequest(ConnectorDescription request, ConnectorPtr);
+    void createPortAndMoveRequest(ConnectorDescription request, ConnectorPtr);
 
 private Q_SLOTS:
     void triggerCreatePort();

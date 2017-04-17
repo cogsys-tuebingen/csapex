@@ -46,18 +46,18 @@ protected:
 public:
     virtual ~Connection();
 
-    void detach(Connectable* c);
+    void detach(Connector* c);
     bool isDetached() const;
 
     OutputPtr from() const;
     InputPtr to() const;
 
-    ConnectablePtr source() const;
-    ConnectablePtr target() const;
+    ConnectorPtr source() const;
+    ConnectorPtr target() const;
 
     int id() const;
 
-    bool contains(Connectable* c) const;
+    bool contains(Connector* c) const;
 
     virtual void setToken(const TokenPtr &msg);
 

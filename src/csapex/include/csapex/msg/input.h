@@ -31,14 +31,14 @@ public:
         return ConnectorType::INPUT;
     }
 
-    bool canConnectTo(Connectable* other_side, bool move) const override;
+    bool canConnectTo(Connector* other_side, bool move) const override;
 
     virtual void setToken(TokenPtr message);
     virtual TokenPtr getToken() const;
 
-    virtual bool targetsCanBeMovedTo(Connectable* other_side) const override;
+    virtual bool targetsCanBeMovedTo(Connector* other_side) const override;
 
-    virtual void connectionMovePreview(ConnectablePtr other_side) override;
+    virtual void connectionMovePreview(ConnectorPtr other_side) override;
     virtual void validateConnections() override;
 
     OutputPtr getSource() const;
@@ -66,7 +66,7 @@ public:
     slim_signal::Signal<void(Connection* )> message_available;
 
 protected:
-    virtual bool isConnectionPossible(Connectable* other_side) override;
+    virtual bool isConnectionPossible(Connector* other_side) override;
 
 protected:
     InputTransition* transition_;

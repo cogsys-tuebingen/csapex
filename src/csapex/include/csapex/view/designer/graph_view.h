@@ -120,8 +120,8 @@ Q_SIGNALS:
     void startProfilingRequest(NodeFacade* box);
     void stopProfilingRequest(NodeFacade *box);
 
-    void triggerConnectorCreated(ConnectablePtr connector);
-    void triggerConnectorRemoved(ConnectablePtr connector);
+    void triggerConnectorCreated(ConnectorPtr connector);
+    void triggerConnectorRemoved(ConnectorPtr connector);
 
 public Q_SLOTS:
     void nodeAdded(NodeFacadePtr node_facade);
@@ -133,18 +133,18 @@ public Q_SLOTS:
     void removeBox(NodeBox* box);
 
     void createPort(ConnectorDescription request);
-    void createPortAndConnect(ConnectorDescription request, ConnectablePtr from);
-    void createPortAndMove(ConnectorDescription request, ConnectablePtr from);
+    void createPortAndConnect(ConnectorDescription request, ConnectorPtr from);
+    void createPortAndMove(ConnectorDescription request, ConnectorPtr from);
 
     void addPort(Port* port);
     void removePort(Port* port);
 
     void renameBox(NodeBox* box);
 
-    void connectorCreated(ConnectablePtr connector);
-    void connectorRemoved(ConnectablePtr connector);
-    void connectorSignalAdded(ConnectablePtr connector);
-    void connectorMessageAdded(ConnectablePtr connector);
+    void connectorCreated(ConnectorPtr connector);
+    void connectorRemoved(ConnectorPtr connector);
+    void connectorSignalAdded(ConnectorPtr connector);
+    void connectorMessageAdded(ConnectorPtr connector);
 
     void centerOnPoint(QPointF point);
 

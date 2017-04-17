@@ -103,13 +103,13 @@ Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to, boo
     return nullptr;
 }
 
-Command::Ptr CommandFactory::removeAllConnectionsCmd(ConnectablePtr c)
+Command::Ptr CommandFactory::removeAllConnectionsCmd(ConnectorPtr c)
 {
     return removeAllConnectionsCmd(c.get());
 }
 
 
-Command::Ptr CommandFactory::removeAllConnectionsCmd(Connectable* c)
+Command::Ptr CommandFactory::removeAllConnectionsCmd(Connector* c)
 {
     if(Input* input = dynamic_cast<Input*>(c)) {
         return removeAllConnectionsCmd(input);
@@ -252,7 +252,7 @@ Command::Ptr CommandFactory::moveConnections(const UUID& from, const UUID& to)
 }
 
 
-Command::Ptr CommandFactory::moveConnections(Connectable *from, Connectable *to)
+Command::Ptr CommandFactory::moveConnections(Connector *from, Connector *to)
 {
     apex_assert_hard(from);
     apex_assert_hard(to);

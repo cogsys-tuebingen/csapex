@@ -66,8 +66,8 @@ public:
     virtual void init();
 
     /// MODIFIER
-    Port* createPort(ConnectableWeakPtr connector, QBoxLayout *layout);
-    void removePort(ConnectableWeakPtr connector);
+    Port* createPort(ConnectorWeakPtr connector, QBoxLayout *layout);
+    void removePort(ConnectorWeakPtr connector);
 
     bool isGraph() const;
 
@@ -125,8 +125,8 @@ public Q_SLOTS:
     virtual void updateFrequencyInformation();
     void contextMenuEvent(QContextMenuEvent* e);
 
-    void registerEvent(Connectable*);
-    void unregisterEvent(Connectable*);
+    void registerEvent(Connector*);
+    void unregisterEvent(Connector*);
 
     void nodeStateChangedEvent();
     void enabledChangeEvent(bool val);
@@ -159,8 +159,8 @@ Q_SIGNALS:
     void portRemoved(Port*);
 
     void createPortRequest(ConnectorDescription request);
-    void createPortAndConnectRequest(ConnectorDescription request, ConnectablePtr);
-    void createPortAndMoveRequest(ConnectorDescription request,  ConnectablePtr);
+    void createPortAndConnectRequest(ConnectorDescription request, ConnectorPtr);
+    void createPortAndMoveRequest(ConnectorDescription request,  ConnectorPtr);
 
 protected:
     void resizeEvent(QResizeEvent * e);

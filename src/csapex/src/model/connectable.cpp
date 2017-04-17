@@ -20,8 +20,7 @@ using namespace csapex;
 
 
 Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
-    : Unique(uuid),
-      owner_(owner),
+    : Connector(uuid, owner),
       count_(0), seq_no_(-1),
       virtual_(false),
       graph_port_(false),
@@ -104,10 +103,6 @@ void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel leve
     connectableError(error,msg,static_cast<int>(level));
 }
 
-void Connectable::validateConnections()
-{
-
-}
 
 void Connectable::disable()
 {
@@ -139,7 +134,7 @@ bool Connectable::isEnabled() const
     return enabled_;
 }
 
-bool Connectable::canConnectTo(Connectable* other_side, bool) const
+bool Connectable::canConnectTo(Connector* other_side, bool) const
 {
     if(other_side == this) {
         return false;
@@ -149,19 +144,6 @@ bool Connectable::canConnectTo(Connectable* other_side, bool) const
     bool compability = getType()->canConnectTo(other_side->getType().get());
 
     return in_out && compability;
-}
-
-
-bool Connectable::shouldCreate(bool left, bool)
-{
-    bool full_input = isInput() && isConnected();
-    return left && !full_input;
-}
-
-bool Connectable::shouldMove(bool left, bool right)
-{
-    bool full_input = isInput() && isConnected();
-    return (right && isConnected()) || (left && full_input);
 }
 
 std::string Connectable::getLabel() const
@@ -202,19 +184,6 @@ TokenData::ConstPtr Connectable::getType() const
 }
 
 
-ConnectorDescription Connectable::getDescription() const
-{
-    ConnectorDescription res(getOwner()->getUUID().getAbsoluteUUID(), getUUID(), getConnectorType(), getType(), getLabel(), isOptional());
-    for(const ConnectionPtr& c : getConnections()) {
-        if(isOutput()) {
-            res.targets.push_back(c->target()->getUUID().getAbsoluteUUID());
-        } else {
-            res.targets.push_back(c->source()->getUUID().getAbsoluteUUID());
-        }
-    }
-    return res;
-}
-
 int Connectable::getCount() const
 {
     return count_;
@@ -230,13 +199,13 @@ void Connectable::setSequenceNumber(int seq_no)
     seq_no_ = seq_no;
 }
 
-void Connectable::removeConnection(Connectable* other_side)
+void Connectable::removeConnection(Connector* other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
         ConnectionPtr c = *i;
-        Connectable* f = c->source().get();
-        Connectable* t = c->target().get();
+        Connector* f = c->source().get();
+        Connector* t = c->target().get();
         if((t == other_side) || (f == other_side)) {
             apex_assert_hard((this == t) ^ (this == f));
 
@@ -287,11 +256,6 @@ int Connectable::countConnections()
 std::vector<ConnectionPtr> Connectable::getConnections() const
 {
     return connections_;
-}
-
-ConnectableOwnerPtr Connectable::getOwner() const
-{
-    return owner_.lock();
 }
 
 bool Connectable::hasActiveConnection() const

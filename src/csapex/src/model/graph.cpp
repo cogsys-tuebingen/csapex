@@ -46,7 +46,7 @@ void Graph::resetActivity()
     auto vertices = vertices_;
     for(graph::VertexPtr vertex : vertices) {
         NodeFacadePtr node = vertex->getNodeFacade();
-        node->getNodeHandle()->setActive(false);
+        node->setActive(false);
     }
 }
 
@@ -401,7 +401,7 @@ std::set<graph::Vertex *> Graph::findVerticesThatNeedMessages()
     std::set<graph::Vertex*> vertices_that_need_messages;
 
     for(const graph::VertexPtr v : vertices_) {
-        if(v->getNodeFacade()->getNodeHandle()->getNode().lock()->processMessageMarkers()) {
+        if(v->getNodeFacade()->getNode()->processMessageMarkers()) {
             vertices_that_need_messages.insert(v.get());
             break;
         }

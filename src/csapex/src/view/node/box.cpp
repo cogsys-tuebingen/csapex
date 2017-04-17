@@ -211,8 +211,8 @@ void NodeBox::construct()
     observe(node_facade_->node_state_changed, [this]() { nodeStateChanged(); });
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
-    observe(node_facade_->connector_created, [this](ConnectablePtr c) { registerEvent(c.get()); });
-    observe(node_facade_->connector_removed, [this](ConnectablePtr c) { unregisterEvent(c.get()); });
+    observe(node_facade_->connector_created, [this](ConnectorPtr c) { registerEvent(c.get()); });
+    observe(node_facade_->connector_removed, [this](ConnectorPtr c) { unregisterEvent(c.get()); });
 
     observe(node_facade_->destroyed, [this](){ destruct(); });
 
@@ -434,11 +434,11 @@ std::string NodeBox::getLabel() const
     return state->getLabel();
 }
 
-void NodeBox::registerEvent(Connectable* c)
+void NodeBox::registerEvent(Connector* c)
 {
 }
 
-void NodeBox::unregisterEvent(Connectable*)
+void NodeBox::unregisterEvent(Connector*)
 {
 }
 
@@ -455,7 +455,7 @@ void NodeBox::init()
     setVisible(true);
 }
 
-Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
+Port* NodeBox::createPort(ConnectorWeakPtr connector, QBoxLayout *layout)
 {
     apex_assert_hard(QApplication::instance()->thread() == QThread::currentThread());
 
@@ -467,7 +467,7 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
     QObject::connect(this, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
     QObject::connect(this, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
 
-    ConnectablePtr adaptee = port->getAdaptee().lock();
+    ConnectorPtr adaptee = port->getAdaptee().lock();
     apex_assert_hard(adaptee == connector.lock());
 
     if(node_facade_->isVariadic()) {
@@ -498,9 +498,9 @@ Port* NodeBox::createPort(ConnectableWeakPtr connector, QBoxLayout *layout)
     return port;
 }
 
-void NodeBox::removePort(ConnectableWeakPtr connector)
+void NodeBox::removePort(ConnectorWeakPtr connector)
 {
-    ConnectablePtr adaptee = connector.lock();
+    ConnectorPtr adaptee = connector.lock();
     apex_assert_hard(adaptee);
 
     Port* port = port_map_.at(adaptee->getUUID());

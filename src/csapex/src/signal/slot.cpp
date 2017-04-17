@@ -199,8 +199,7 @@ bool Slot::isAsynchronous() const
     return asynchronous_;
 }
 
-
-bool Slot::canConnectTo(Connectable* other_side, bool move) const
+bool Slot::canConnectTo(Connector *other_side, bool move) const
 {
     return Connectable::canConnectTo(other_side, move);
 }

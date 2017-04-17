@@ -127,7 +127,7 @@ void RewiringDialog::createGraphs(const std::string& type)
     graph_old->removeInternalPorts();
 
     nh_old = node_factory.makeNode(node_facade_->getType(), node_facade_->getUUID(), graph_old);
-    nh_old->getNodeHandle()->setNodeState(node_facade_->getNodeStateCopy());
+    nh_old->setNodeState(node_facade_->getNodeStateCopy());
     graph_old->addNode(nh_old);
 
 

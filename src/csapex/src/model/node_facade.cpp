@@ -80,6 +80,11 @@ bool NodeFacade::isActive() const
     return nh_->isActive();
 }
 
+void NodeFacade::setActive(bool active)
+{
+    nh_->setActive(active);
+}
+
 bool NodeFacade::isProcessingEnabled() const
 {
     if(nw_) {
@@ -256,6 +261,11 @@ NodeHandlePtr NodeFacade::getNodeHandle()
     return nh_;
 }
 
+NodePtr NodeFacade::getNode()
+{
+    return nh_->getNode().lock();
+}
+
 NodeWorkerPtr NodeFacade::getNodeWorker()
 {
     return nw_;
@@ -273,6 +283,11 @@ NodeStatePtr NodeFacade::getNodeState() const
 NodeStatePtr NodeFacade::getNodeStateCopy() const
 {
     return nh_->getNodeStateCopy();
+}
+
+void NodeFacade::setNodeState(NodeStatePtr memento)
+{
+    nh_->setNodeState(memento);
 }
 
 GenericStateConstPtr NodeFacade::getParameterState() const
