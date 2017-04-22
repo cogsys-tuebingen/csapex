@@ -7,7 +7,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_runner.h>
-#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/plugin/plugin_manager.hpp>
@@ -255,12 +255,12 @@ std::vector<NodeConstructorPtr> NodeFactory::getConstructors()
     return constructors_;
 }
 
-NodeFacadePtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider)
+NodeFacadeLocalPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider)
 {
     return makeNode(target_type, uuid, uuid_provider, nullptr);
 }
 
-NodeFacadePtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider,
+NodeFacadeLocalPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider,
                                     NodeStatePtr state)
 {
     apex_assert_hard(target_type == "csapex::Graph" || !uuid.empty());
@@ -270,7 +270,7 @@ NodeFacadePtr NodeFactory::makeNode(const std::string& target_type, const UUID& 
         NodeHandlePtr nh = p->makeNodeHandle(uuid, uuid_provider);
         NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
         NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
-        NodeFacadePtr result = std::make_shared<NodeFacade>(nh, nw, runner);
+        NodeFacadeLocalPtr result = std::make_shared<NodeFacadeLocal>(nh, nw, runner);
 
         if(state) {
             nh->setNodeState(state);

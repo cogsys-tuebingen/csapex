@@ -5,7 +5,7 @@
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/factory/node_factory.h>

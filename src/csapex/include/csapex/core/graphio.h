@@ -66,7 +66,7 @@ protected:
     void saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr> &connections);
 
     void serializeNode(YAML::Node& doc, NodeHandle* node_handle);
-    void deserializeNode(const YAML::Node& doc, NodeFacadePtr node_handle);
+    void deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_handle);
 
     void loadConnection(ConnectablePtr from, const UUID &to_uuid, const std::string& connection_type);
 

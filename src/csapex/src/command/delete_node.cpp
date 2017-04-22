@@ -5,7 +5,7 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
@@ -51,7 +51,7 @@ bool DeleteNode::doExecute()
     }
 
     // serialize sub graph
-    if(node_handle->getType() == "csapex::Graph") {
+    if(node_handle->isGraph()) {
         SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_handle->getNode().lock());
         apex_assert_hard(g);
 
@@ -74,13 +74,13 @@ bool DeleteNode::doExecute()
 bool DeleteNode::doUndo()
 {
     GraphPtr graph = getGraph();
-    NodeFacadePtr node_facade = getNodeFactory()->makeNode(type, uuid, graph);
+    NodeFacadeLocalPtr node_facade = getNodeFactory()->makeNode(type, uuid, graph);
     node_facade->setNodeState(saved_state);
 
     graph->addNode(node_facade);
 
     //deserialize subgraph
-    if(node_facade->getType() == "csapex::Graph") {
+    if(node_facade->isGraph()) {
         SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_facade->getNode());
         apex_assert_hard(g);
 

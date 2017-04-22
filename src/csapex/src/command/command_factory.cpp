@@ -276,7 +276,7 @@ Command::Ptr CommandFactory::moveConnections(Connector *from, Connector *to)
                     continue;
                 }
                 InputPtr input = c->to();
-                if(input) {
+                if(!input->isVirtual()) {
                     meta->add(Command::Ptr(new DeleteConnection(parent_uuid, out, input.get())));
                     meta->add(Command::Ptr(new AddConnection(parent_uuid, to_uuid, input->getUUID(), c->isActive())));
                 }
@@ -292,8 +292,10 @@ Command::Ptr CommandFactory::moveConnections(Connector *from, Connector *to)
                     continue;
                 }
                 OutputPtr output = c->from();
-                meta->add(Command::Ptr(new DeleteConnection(parent_uuid, output.get(), in)));
-                meta->add(Command::Ptr(new AddConnection(parent_uuid, output->getUUID(), to_uuid, c->isActive())));
+                if(!output->isVirtual()) {
+                    meta->add(Command::Ptr(new DeleteConnection(parent_uuid, output.get(), in)));
+                    meta->add(Command::Ptr(new AddConnection(parent_uuid, output->getUUID(), to_uuid, c->isActive())));
+                }
             }
         }
     }

@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/direct_connection.h>
@@ -281,7 +281,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
     std::string type = doc["type"].as<std::string>();
 
-    NodeFacadePtr node_handle = node_factory_->makeNode(type, uuid, graph_);
+    NodeFacadeLocalPtr node_handle = node_factory_->makeNode(type, uuid, graph_);
     if(!node_handle) {
         return;
     }
@@ -539,7 +539,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
     }
 }
 
-void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadePtr node_facade)
+void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_facade)
 {
 
     NodeState::Ptr s = node_facade->getNodeStateCopy();

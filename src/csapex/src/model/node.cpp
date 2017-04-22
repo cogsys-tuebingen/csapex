@@ -46,6 +46,7 @@ void Node::initialize(NodeHandlePtr node_handle)
 
     UUID uuid = node_handle->getUUID();
 
+    apex_assert_hard(node_handle->isGraph() || !uuid.empty());
     parameter_state_->setParentUUID(uuid);
 
     std::string p = uuid.getFullName();

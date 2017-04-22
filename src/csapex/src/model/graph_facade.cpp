@@ -6,7 +6,7 @@
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/connection.h>
@@ -91,15 +91,18 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
 
 void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
 {
-    NodePtr node = nf->getNode();
+    NodeFacadeLocalPtr facade = std::dynamic_pointer_cast<NodeFacadeLocal>(nf);
+    apex_assert_hard(facade);
+
+    NodePtr node = facade->getNode();
     apex_assert_hard(node);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(node);
     apex_assert_hard(sub_graph);
 
-    NodeHandle* subnh = graph_->findNodeHandle(sub_graph->getUUID());;
-    apex_assert_hard(subnh == nf->getNodeHandle().get());
-    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph, nf, this);
-    children_[nf->getUUID()] = sub_graph_facade;
+    NodeHandle* subnh = graph_->findNodeHandle(facade->getUUID());
+    apex_assert_hard(subnh == facade->getNodeHandle().get());
+    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph, facade, this);
+    children_[facade->getUUID()] = sub_graph_facade;
 
     sub_graph_facade->notification.connect(notification);
 
@@ -119,7 +122,7 @@ void GraphFacade::nodeRemovedHandler(graph::VertexPtr vertex)
     node_facade_removed(facade);
     node_facades_.erase(nh->getUUID());
 
-    if(nh->getType() == "csapex::Graph") {
+    if(nh->isGraph()) {
         auto pos = children_.find(nh->getUUID());
         apex_assert_hard(pos != children_.end());
         child_removed(pos->second);

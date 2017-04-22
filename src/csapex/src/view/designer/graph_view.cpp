@@ -29,6 +29,7 @@
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/tag.h>
@@ -58,7 +59,6 @@
 #include <csapex/view/widgets/rewiring_dialog.h>
 #include <csapex/csapex_mime.h>
 #include <csapex/plugin/plugin_locator.h>
-#include <csapex/model/node_facade.h>
 
 /// SYSTEM
 #include <iostream>
@@ -737,7 +737,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
     bool is_note = type == "csapex::Note";
 
-    NodeFacadePtr node_facade = std::make_shared<NodeFacade>(handle);
+    NodeFacadePtr node_facade = std::make_shared<NodeFacadeLocal>(handle);
 
     if(is_note) {
         box = new NoteBox(view_core_.getSettings(), node_facade,
@@ -1510,7 +1510,7 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
 
     bool is_note = type == "csapex::Note";
 
-    NodeFacadePtr node_facade = std::make_shared<NodeFacade>(handle);
+    NodeFacadePtr node_facade = std::make_shared<NodeFacadeLocal>(handle);
 
     if(is_note) {
         box = new NoteBox(view_core_.getSettings(), node_facade,

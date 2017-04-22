@@ -11,92 +11,100 @@
 #include <csapex/model/activity_type.h>
 #include <csapex/model/execution_state.h>
 #include <csapex/model/connector_description.h>
+#include <csapex/param/param_fwd.h>
 
 namespace csapex
 {
 
 class CSAPEX_EXPORT NodeFacade : public Observer, public Notifier
 {
-public:
-    NodeFacade(NodeHandlePtr nh);
-    NodeFacade(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr);
+protected:
+    NodeFacade();
 
+public:
     ~NodeFacade();
 
-    std::string getType() const;
-    UUID getUUID() const;
+    virtual std::string getType() const = 0;
+    virtual UUID getUUID() const = 0;
 
-    bool isActive() const;
-    void setActive(bool active);
+    virtual bool isActive() const = 0;
+    virtual void setActive(bool active) = 0;
 
-    bool isProcessingEnabled() const;
+    virtual bool isProcessingEnabled() const = 0;
 
-    bool isGraph() const;
-    AUUID getSubgraphAUUID() const;
+    virtual bool isGraph() const = 0;
+    virtual AUUID getSubgraphAUUID() const = 0;
 
-    bool isSource() const;
-    bool isSink() const;
+    virtual bool isSource() const = 0;
+    virtual bool isSink() const = 0;
+    virtual bool isProcessingNothingMessages() const = 0;
 
-    bool isParameterInput(const UUID& id);
-    bool isParameterOutput(const UUID& id);
+    virtual bool isParameterInput(const UUID& id) = 0;
+    virtual bool isParameterOutput(const UUID& id) = 0;
 
-    bool isVariadic() const;
-    bool hasVariadicInputs() const;
-    bool hasVariadicOutputs() const;
-    bool hasVariadicEvents() const;
-    bool hasVariadicSlots() const;
+    virtual bool isVariadic() const = 0;
+    virtual bool hasVariadicInputs() const = 0;
+    virtual bool hasVariadicOutputs() const = 0;
+    virtual bool hasVariadicEvents() const = 0;
+    virtual bool hasVariadicSlots() const = 0;
 
-    std::vector<ConnectorDescription> getInputs() const;
-    std::vector<ConnectorDescription> getOutputs() const;
-    std::vector<ConnectorDescription> getEvents() const;
-    std::vector<ConnectorDescription> getSlots() const;
+    virtual std::vector<ConnectorDescription> getInputs() const = 0;
+    virtual std::vector<ConnectorDescription> getOutputs() const = 0;
+    virtual std::vector<ConnectorDescription> getEvents() const = 0;
+    virtual std::vector<ConnectorDescription> getSlots() const = 0;
 
-    std::vector<ConnectorDescription> getInternalInputs() const;
-    std::vector<ConnectorDescription> getInternalOutputs() const;
-    std::vector<ConnectorDescription> getInternalEvents() const;
-    std::vector<ConnectorDescription> getInternalSlots() const;
+    virtual std::vector<ConnectorDescription> getInternalInputs() const = 0;
+    virtual std::vector<ConnectorDescription> getInternalOutputs() const = 0;
+    virtual std::vector<ConnectorDescription> getInternalEvents() const = 0;
+    virtual std::vector<ConnectorDescription> getInternalSlots() const = 0;
 
-    NodeCharacteristics getNodeCharacteristics() const;
+    virtual NodeCharacteristics getNodeCharacteristics() const = 0;
 
-    bool isProfiling() const;
-    void setProfiling(bool profiling);
 
-    bool isError() const;
-    ErrorState::ErrorLevel errorLevel() const;
-    std::string errorMessage() const;
+    virtual bool isProfiling() const = 0;
+    virtual void setProfiling(bool profiling) = 0;
 
-    ExecutionState getExecutionState() const;
+    virtual bool isError() const = 0;
+    virtual ErrorState::ErrorLevel errorLevel() const = 0;
+    virtual std::string errorMessage() const = 0;
 
-    std::string getLabel() const;
+    virtual ExecutionState getExecutionState() const = 0;
 
-    double getExecutionFrequency() const;
-    double getMaximumFrequency() const;
+    virtual std::string getLabel() const = 0;
+
+    virtual double getExecutionFrequency() const = 0;
+    virtual double getMaximumFrequency() const = 0;
 
     // Parameterizable
-    bool hasParameter(const std::string& name) const;
+    virtual std::vector<param::ParameterPtr> getParameters() const = 0;
+    virtual param::ParameterPtr getParameter(const std::string& name) const = 0;
+    virtual bool hasParameter(const std::string& name) const = 0;
+
+    // Debug Access
+    virtual std::string getDebugDescription() const = 0;
+    virtual std::string getLoggerOutput(ErrorState::ErrorLevel level) const = 0;
+
+    // TODO: proxies
+    virtual ProfilerPtr getProfiler() = 0;
+
+    virtual NodeStatePtr getNodeState() const = 0;
+    virtual NodeStatePtr getNodeStateCopy() const = 0;
+    virtual void setNodeState(NodeStatePtr memento) = 0;
+
+    virtual GenericStateConstPtr getParameterState() const = 0;
+
+
+
     template <typename T>
     T readParameter(const std::string& name) const;
     template <typename T>
     void setParameter(const std::string& name, const T& value);
 
-    // Debug Access
-    std::string getDebugDescription() const;
-    std::string getLoggerOutput(ErrorState::ErrorLevel level) const;
-
-    // TODO: proxies
-    ProfilerPtr getProfiler();
-
-    NodeStatePtr getNodeState() const;
-    NodeStatePtr getNodeStateCopy() const;
-    void setNodeState(NodeStatePtr memento);
-
-    GenericStateConstPtr getParameterState() const;
-
-    // TODO: move to local access only!
-    NodeHandlePtr getNodeHandle();
-    NodeWorkerPtr getNodeWorker();
-    NodeRunnerPtr getNodeRunner();
-    NodePtr getNode();
+    // TODO: remove or add proxies for all of them
+    virtual NodeHandlePtr getNodeHandle() const = 0;
+    virtual NodeWorkerPtr getNodeWorker() const = 0;
+    virtual NodeRunnerPtr getNodeRunner() const = 0;
+    virtual NodePtr getNode() const = 0;
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
@@ -119,11 +127,6 @@ public:
 
     slim_signal::Signal<void(NodeFacade* facade, ActivityType type, std::shared_ptr<const Interval> stamp)> interval_start;
     slim_signal::Signal<void(NodeFacade* facade, std::shared_ptr<const Interval> stamp)> interval_end;
-
-private:
-    NodeHandlePtr nh_;
-    NodeWorkerPtr nw_;
-    NodeRunnerPtr nr_;
 };
 
 }

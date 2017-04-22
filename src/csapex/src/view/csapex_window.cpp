@@ -376,7 +376,7 @@ void CsApexWindow::updateSelectionActions()
     ui->actionGroup->setEnabled(enabled);
 
     std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
-    bool is_graph = selected.size() == 1 && selected[0]->getNodeFacade()->getNodeHandle()->getType() == "csapex::Graph";
+    bool is_graph = selected.size() == 1 && selected[0]->getNodeFacade()->isGraph();
     ui->actionUngroup->setEnabled(is_graph);
 }
 

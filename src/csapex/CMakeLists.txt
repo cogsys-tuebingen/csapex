@@ -314,6 +314,8 @@ file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYM
 
 add_library(csapex SHARED
     src/model/node_facade.cpp
+    src/model/node_facade_local.cpp
+
     src/model/node_handle.cpp
     src/model/node_worker.cpp
 
@@ -512,6 +514,8 @@ add_library(csapex_remote SHARED
     src/core/settings/settings_remote.cpp
     src/command/dispatcher_remote.cpp
 
+    src/model/node_facade_remote.cpp
+
     src/io/server.cpp
     src/io/request.cpp
     src/io/response.cpp
@@ -563,7 +567,7 @@ file(GLOB_RECURSE csapex_qt_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_
 if(NOT WIN32)
     # for visual studio, we want the headers in the library
     # however, with ubuntu that doesn't compile due to auto moc'ing
-#    add_custom_target(csapex_qt_headers SOURCES ${csapex_qt_HEADERS})
+    add_custom_target(csapex_qt_headers SOURCES ${csapex_qt_HEADERS})
     set(csapex_qt_HEADERS)
 endif()
 

@@ -9,11 +9,14 @@
 
 using namespace csapex;
 
+namespace {
+static const QString valid_types[] { "xcsapex/node-list", "text/yaml", "text/plain" };
+}
+
 bool ClipBoard::canPaste()
 {
     const QMimeData* data = QApplication::clipboard()->mimeData();
 
-    static QString valid_types[] { "text/plain", "text/yaml", "xcsapex/node-list" };
     for(const auto& valid_type : valid_types) {
         if(data->hasFormat(valid_type)) {
             return true;
@@ -30,9 +33,9 @@ void ClipBoard::set(const YAML::Node &serialized)
     yaml_txt << serialized;
 
     auto data = QString::fromStdString(yaml_txt.str()).toUtf8();
-    mime->setData("text/plain", data);
-    mime->setData("text/yaml", data);
-    mime->setData("xcsapex/node-list", data);
+    for(const QString& type : valid_types) {
+        mime->setData(type, data);
+    }
 
     QApplication::clipboard()->setMimeData(mime, QClipboard::Clipboard);
 }
@@ -40,6 +43,12 @@ void ClipBoard::set(const YAML::Node &serialized)
 std::string ClipBoard::get()
 {
     const QMimeData* mime = QApplication::clipboard()->mimeData();
-    QString data = mime->data("xcsapex/node-list");
-    return data.toStdString();
+
+    for(const QString& type : valid_types) {
+        if(mime->hasFormat(type)) {
+            return mime->data(type).toStdString();
+        }
+    }
+
+    return {};
 }

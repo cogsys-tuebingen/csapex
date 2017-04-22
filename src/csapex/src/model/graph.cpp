@@ -401,7 +401,7 @@ std::set<graph::Vertex *> Graph::findVerticesThatNeedMessages()
     std::set<graph::Vertex*> vertices_that_need_messages;
 
     for(const graph::VertexPtr v : vertices_) {
-        if(v->getNodeFacade()->getNode()->processMessageMarkers()) {
+        if(v->getNodeFacade()->isProcessingNothingMessages()) {
             vertices_that_need_messages.insert(v.get());
             break;
         }

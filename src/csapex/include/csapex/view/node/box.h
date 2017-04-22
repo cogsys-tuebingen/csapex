@@ -51,12 +51,7 @@ public:
 
 public:
     /// CONSTRUCTION
-    NodeBox(Settings& settings,
-            NodeFacadePtr node_facade_,
-            QIcon icon, GraphView* parent = 0);
-//    NodeBox(Settings& settings,
-//            NodeHandlePtr handle,
-//            QIcon icon, GraphView* parent = 0);
+    NodeBox(Settings& settings, NodeFacadePtr node_facade, QIcon icon, GraphView* parent = 0);
 
     void setAdapter(NodeAdapterPtr adapter);
 

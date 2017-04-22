@@ -12,7 +12,7 @@
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/model/node_state.h>

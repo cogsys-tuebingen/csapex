@@ -8,7 +8,7 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/view/widgets/box_dialog.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>

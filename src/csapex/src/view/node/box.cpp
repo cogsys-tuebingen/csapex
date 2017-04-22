@@ -39,11 +39,6 @@ NodeBox::NodeBox(Settings& settings, NodeFacadePtr node_facade, QIcon icon, Grap
     setVisible(false);
 }
 
-//NodeBox::NodeBox(Settings& settings, NodeHandlePtr handle, QIcon icon, GraphView* parent)
-//    : NodeBox(settings, handle, nullptr, icon, parent)
-//{
-//}
-
 void NodeBox::setAdapter(NodeAdapter::Ptr adapter)
 {
     adapter_ = adapter;

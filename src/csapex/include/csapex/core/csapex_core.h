@@ -109,7 +109,7 @@ private:
 
     UUIDProviderPtr root_uuid_provider_;
     GraphFacadePtr root_;
-    NodeFacadePtr root_handle_;
+    NodeFacadeLocalPtr root_handle_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
 

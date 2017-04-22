@@ -217,11 +217,6 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         return;
     }
 
-    auto node = node_facade->getNode();
-    if(!node) {
-        return;
-    }
-
     static std::map<int, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> > mapping_;
     if(mapping_.empty()) {
         install<TriggerParameter, TriggerParameterAdapter>::execute(mapping_);
@@ -243,9 +238,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     current_layout_ = wrapper_layout_;
 
-    std::vector<Parameter::Ptr> params = node->getParameters();
+    std::vector<Parameter::Ptr> params = node_facade->getParameters();
 
-    GenericState::Ptr state = std::dynamic_pointer_cast<GenericState>(node->getParameterState());
+    GenericStateConstPtr state = node_facade->getParameterState();
     if(state) {
         state->parameter_set_changed->disconnectAll();
         state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
