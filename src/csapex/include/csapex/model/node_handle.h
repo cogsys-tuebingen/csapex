@@ -182,6 +182,9 @@ private:
     template <typename T>
     void makeParameterConnectableImpl(csapex::param::ParameterPtr);
 
+    template <typename T>
+    void makeParameterConnectableTyped(csapex::param::ParameterPtr);
+
 protected:
     mutable std::recursive_mutex sync;
 
