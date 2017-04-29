@@ -255,7 +255,7 @@ void SetParameter::doDeserialize(const YAML::Node& n)
     if(n["txt"].IsDefined()) {
         txt_ = n["txt"].as<std::string>();
     } else {
-        // backward compability
+        // backward compatibility
         txt_ = "unknown";
     }
 

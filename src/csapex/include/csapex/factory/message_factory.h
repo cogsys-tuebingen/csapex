@@ -30,6 +30,8 @@ public:
     typedef std::function<TokenData::Ptr()>  Constructor;
 
 public:
+    bool isMessageRegistered(const std::string& type) const;
+
     template <typename M>
     static TokenData::Ptr createMessage() {
         return connection_types::makeEmpty<M>();
@@ -52,9 +54,13 @@ public:
     template <template <typename> class Wrapper, typename M>
     static void registerDirectMessage()
     {
-        MessageFactory::instance().registerMessage(connection_types::serializationName< Wrapper<M> >(),
-                                                   std::type_index(typeid(Wrapper<M>)),
-                                                   std::bind(&MessageFactory::createDirectMessage<Wrapper, M>));
+        MessageFactory& instance = MessageFactory::instance();
+        std::string type = connection_types::serializationName< Wrapper<M> >();
+        if(!instance.isMessageRegistered(type)) {
+            instance.registerMessage(type,
+                                     std::type_index(typeid(Wrapper<M>)),
+                                     std::bind(&MessageFactory::createDirectMessage<Wrapper, M>));
+        }
     }
 
     template <typename M>

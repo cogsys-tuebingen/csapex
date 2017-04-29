@@ -12,6 +12,7 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
+#include <iostream>
 
 using namespace csapex;
 
@@ -70,6 +71,11 @@ void MessageFactory::writeMessage(YAML::Emitter &yaml, const TokenData& msg)
     yaml << MessageSerializer::instance().serializeMessage(msg);
 }
 
+bool MessageFactory::isMessageRegistered(const std::string &type) const
+{
+    std::map<std::string, Constructor>::const_iterator it = type_to_constructor.find(type);
+    return it != type_to_constructor.end();
+}
 
 void MessageFactory::registerMessage(std::string type, std::type_index typeindex, Constructor constructor)
 {

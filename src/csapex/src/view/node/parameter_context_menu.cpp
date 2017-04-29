@@ -34,17 +34,17 @@ void ParameterContextMenu::doShowContextMenu(const QPoint& global_pt)
         menu.addSeparator();
     }
 
-    QAction* Connector = new QAction("make Connector", &menu);
-    Connector->setCheckable(true);
-    Connector->setChecked(param->isInteractive());
-    Connector->setIcon(QIcon(":/connector.png"));
+    QAction* connector = new QAction("make connectable", &menu);
+    connector->setCheckable(true);
+    connector->setChecked(param->isInteractive());
+    connector->setIcon(QIcon(":/connector.png"));
 
-    Connector->setIconVisibleInMenu(true);
-    menu.addAction(Connector);
+    connector->setIconVisibleInMenu(true);
+    menu.addAction(connector);
 
     QAction* selectedItem = menu.exec(global_pt);
     if (selectedItem) {
-        if(selectedItem == Connector) {
+        if(selectedItem == connector) {
             param->setInteractive(!param->isInteractive());
         } else {
             actions_[selectedItem]();

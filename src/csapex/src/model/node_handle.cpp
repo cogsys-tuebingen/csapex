@@ -274,6 +274,12 @@ NodeState::Ptr NodeHandle::getNodeState()
 template <typename T>
 void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
 {
+    makeParameterConnectableTyped<connection_types::GenericValueMessage<T>>(param);
+}
+
+template <typename T>
+void NodeHandle::makeParameterConnectableTyped(csapex::param::ParameterPtr param)
+{
     apex_assert_hard(uuid_provider_);
     csapex::param::Parameter* p = param.get();
     
@@ -285,7 +291,7 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
     
     {
         InputPtr cin = std::make_shared<Input>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("in_") + p->name()), shared_from_this());
-        cin->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
+        cin->setType(connection_types::makeEmpty<T>());
         cin->setOptional(true);
         cin->setLabel(p->name());
         
@@ -296,7 +302,7 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
     }
     {
         OutputPtr cout = std::make_shared<StaticOutput>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("out_") + p->name()), shared_from_this());
-        cout->setType(connection_types::makeEmpty<connection_types::GenericValueMessage<T> >());
+        cout->setType(connection_types::makeEmpty<T>());
         cout->setLabel(p->name());
         
         param_2_output_[p->name()] = cout;
@@ -328,8 +334,9 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
         makeParameterConnectableImpl<std::pair<int, int> >(p);
     } else if(p->is<std::pair<double, double> >()) {
         makeParameterConnectableImpl<std::pair<double, double> >(p);
+    } else {
+        makeParameterConnectableTyped<connection_types::AnyMessage>(p);
     }
-    // else: do nothing and ignore the parameter
     
     param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
     if(t) {
@@ -758,7 +765,7 @@ ConnectablePtr NodeHandle::getConnector(const UUID &uuid) const
 {
     ConnectablePtr res = getConnectorNoThrow(uuid);
     if(!res) {
-        throw std::logic_error(std::string("the connector type '") + uuid.type() + "' is unknown.");
+        throw std::logic_error(std::string("the connector '") + uuid.getFullName() + "' is unknown.");
     }
     return res;
 }
