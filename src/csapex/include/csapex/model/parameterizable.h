@@ -70,10 +70,10 @@ public:
      *            when it changes.
      * @warning The name of the parameter has to be unique for the node.
      */
-    template <typename T>
+    template <typename T, typename R = T>
     void addParameter(const param::ParameterPtr& param, T& target)
     {
-        addParameter(param, [&](param::Parameter* p) { target = p->as<T>(); });
+        addParameter(param, [&](param::Parameter* p) { target = p->as<R>(); });
     }
 
     /**
@@ -111,10 +111,10 @@ public:
      * @warning The name of the parameter has to be unique for the node.
      * @see addParameterCondition
      */
-    template <typename T>
+    template <typename T, typename R = T>
     void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition, T& target)
     {
-        addConditionalParameter(param, enable_condition, [&](param::Parameter* p) { target = p->as<T>(); });
+        addConditionalParameter(param, enable_condition, [&](param::Parameter* p) { target = p->as<R>(); });
     }
 
     /**
@@ -151,10 +151,10 @@ public:
      * @warning The name of the parameter has to be unique for the node.
      * @see addParameterCondition
      */
-    template <typename T>
+    template <typename T, typename R = T>
     void addConditionalParameter(const param::ParameterPtr& param, bool& condition_variable, T& target)
     {
-        addConditionalParameter(param, condition_variable, [&](param::Parameter* p) { target = p->as<T>(); });
+        addConditionalParameter(param, condition_variable, [&](param::Parameter* p) { target = p->as<R>(); });
     }
 
 
@@ -182,10 +182,10 @@ public:
      *             when it changes.
      * @warning The name of the parameter has to be unique for the node.
      */
-    template <typename T>
+    template <typename T, typename R = T>
     void addHiddenParameter(const param::ParameterPtr& param, T& target)
     {
-        addHiddenParameter(param, [&](param::Parameter* p) { target = p->as<T>(); });
+        addHiddenParameter(param, [&](param::Parameter* p) { target = p->as<R>(); });
     }
 
     /**
@@ -241,10 +241,10 @@ public:
      *             when it changes.
      * @warning The name of the parameter has to be unique for the node.
      */
-    template <typename T>
+    template <typename T, typename R = T>
     void addTemporaryParameter(const param::ParameterPtr& param, T& target)
     {
-        addTemporaryParameter(param, [&](param::Parameter* p) { target = p->as<T>(); });
+        addTemporaryParameter(param, [&](param::Parameter* p) { target = p->as<R>(); });
     }
 
 

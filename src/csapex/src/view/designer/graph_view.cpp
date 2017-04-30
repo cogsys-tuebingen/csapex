@@ -132,12 +132,14 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, &GraphView::nodeFacadeRemoved, this, &GraphView::nodeRemoved, Qt::QueuedConnection);
 
 
-    SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
+    SubgraphNodePtr sub_graph = graph_facade_->getSubgraphNode();
+    GraphPtr graph = sub_graph;
 
-    observe(graph->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
+    observe(sub_graph->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
     observe(graph->state_changed, [this](){ updateBoxInformation(); });
 
     for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
+        //todo: this should be a remote node facade when in network mode
         const NodeFacadePtr& facade = (*it)->getNodeFacade();
         apex_assert_hard(facade);
         nodeAdded(facade);
