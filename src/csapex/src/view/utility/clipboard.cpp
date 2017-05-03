@@ -46,7 +46,8 @@ std::string ClipBoard::get()
 
     for(const QString& type : valid_types) {
         if(mime->hasFormat(type)) {
-            return mime->data(type).toStdString();
+            QString s = mime->data(type);
+            return s.toStdString();
         }
     }
 
