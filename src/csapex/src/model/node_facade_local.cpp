@@ -22,39 +22,50 @@ NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerP
 {
     nh->setNodeRunner(nr_);
 
-    observe(nw->start_profiling, [this](NodeWorker*) {
+    connectNodeHandle();
+    connectNodeWorker();
+}
+NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh)
+{
+    connectNodeHandle();
+}
+
+
+void NodeFacadeLocal::connectNodeHandle()
+{
+    observe(nh_->connector_created, connector_created);
+    observe(nh_->connector_removed, connector_removed);
+    observe(nh_->node_state_changed, node_state_changed);
+
+
+    observe(nh_->connection_in_prograss, connection_in_prograss);
+    observe(nh_->connection_done, connection_done);
+    observe(nh_->connection_start, connection_start);
+
+
+    observe(nh_->parameters_changed, parameters_changed);
+}
+
+void NodeFacadeLocal::connectNodeWorker()
+{
+    observe(nw_->start_profiling, [this](NodeWorker*) {
         start_profiling(this);
     });
-    observe(nw->stop_profiling,  [this](NodeWorker*) {
+    observe(nw_->stop_profiling,  [this](NodeWorker*) {
         stop_profiling(this);
     });
 
-    observe(nw->destroyed, destroyed);
-    observe(nw->notification, notification);
+    observe(nw_->destroyed, destroyed);
+    observe(nw_->notification, notification);
 
-    observe(nw->messages_processed, messages_processed);
+    observe(nw_->messages_processed, messages_processed);
 
-    observe(nw->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
+    observe(nw_->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
         interval_start(this, type, stamp);
     });
-    observe(nw->interval_end,  [this](NodeWorker*, std::shared_ptr<const Interval> stamp) {
+    observe(nw_->interval_end,  [this](NodeWorker*, std::shared_ptr<const Interval> stamp) {
         interval_end(this, stamp);
     });
-}
-
-NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh)
-{
-    observe(nh->connector_created, connector_created);
-    observe(nh->connector_removed, connector_removed);
-    observe(nh->node_state_changed, node_state_changed);
-
-
-    observe(nh->connection_in_prograss, connection_in_prograss);
-    observe(nh->connection_done, connection_done);
-    observe(nh->connection_start, connection_start);
-
-
-    observe(nh->parameters_changed, parameters_changed);
 }
 
 NodeFacadeLocal::~NodeFacadeLocal()

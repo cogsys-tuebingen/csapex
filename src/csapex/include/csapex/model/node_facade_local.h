@@ -93,6 +93,10 @@ public:
     NodePtr getNode() const;
 
 private:
+    void connectNodeHandle();
+    void connectNodeWorker();
+
+private:
     NodeHandlePtr nh_;
     NodeWorkerPtr nw_;
     NodeRunnerPtr nr_;
