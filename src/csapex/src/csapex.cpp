@@ -115,6 +115,7 @@ int Main::runWithGui()
 
     core->shutdown_requested.connect([this](){
         QCoreApplication::postEvent(app.get(), new QCloseEvent);
+        app->quit();
     });
 
     checkRecoveryFile(view_core, w);
@@ -124,6 +125,8 @@ int Main::runWithGui()
 
     w.show();
     splash->finish(&w);
+
+    core->startMainLoop();
 
     int res = runImpl();
 

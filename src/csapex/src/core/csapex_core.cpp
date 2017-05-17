@@ -373,18 +373,22 @@ void CsApexCore::startup()
         std::cerr << "error loading the config: " << e.what() << std::endl;
     }
 
-    root_->getSubgraphNode()->activation();
 
     status_changed("painting user interface");
+}
 
-    thread_pool_->start();
-
+void CsApexCore::startMainLoop()
+{
     main_thread_ = std::thread([this]() {
         csapex::thread::set_name("main");
         startup_requested();
 
         std::unique_lock<std::mutex> lock(running_mutex_);
         running_ = true;
+
+        root_->getSubgraphNode()->activation();
+        thread_pool_->start();
+
         while(running_) {
             getCommandDispatcher()->executeLater();
 
@@ -393,7 +397,6 @@ void CsApexCore::startup()
 
         shutdown_requested();
     });
-
 }
 
 void CsApexCore::shutdown()
