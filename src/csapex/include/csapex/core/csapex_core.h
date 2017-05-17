@@ -39,6 +39,8 @@ public:
     void startup();
     void shutdown();
 
+    void startMainLoop();
+
     void load(const std::string& file);
     void saveAs(const std::string& file, bool quiet = false);
 
@@ -90,7 +92,7 @@ public:
     slim_signal::Signal<void ()> startup_requested;
     slim_signal::Signal<void ()> shutdown_requested;
     slim_signal::Signal<void ()> shutdown_complete;
-
+    
 private:
     CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator);
     CorePluginPtr makeCorePlugin(const std::string& name);
