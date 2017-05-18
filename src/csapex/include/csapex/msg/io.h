@@ -181,7 +181,8 @@ bool isValue(Input* input) {
 CSAPEX_EXPORT void publish(Output* output, TokenDataConstPtr message);
 
 template <typename T,
-          typename = typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type>
+          typename = typename std::enable_if<connection_types::should_use_pointer_message<T>::value &&
+                                             !connection_types::is_std_vector<T>::value>::type>
 void publish(Output* output,
              typename std::shared_ptr<T> message,
              std::string frame_id = "/")
@@ -219,6 +220,12 @@ void publish(Output* output,
     typename std::shared_ptr<Container> msg(Container::template make<T>());
     msg->template set<T>(message);
     publish(output, msg);
+}
+
+template<typename T>
+void publish(Output* output,
+             const std::shared_ptr<std::vector<T>>& message) {
+    publish<connection_types::GenericVectorMessage, T>(output, message);
 }
 }
 }

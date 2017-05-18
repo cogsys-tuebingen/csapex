@@ -31,6 +31,7 @@ template <typename Type>
 struct GenericPointerMessage;
 template <typename Type>
 struct GenericValueMessage;
+FWD(GenericVectorMessage);
 }
 }
 
