@@ -35,9 +35,11 @@ inline std::shared_ptr<TokenData> makeEmpty<TokenData>()
     return std::shared_ptr<TokenData>(new TokenData("empty"));
 }
 
+template <typename M, bool is_message>
+struct MessageContainer;
 
 template <typename M>
-struct MessageContainer
+struct MessageContainer<M, true>
 {
     typedef M type;
 
@@ -48,6 +50,7 @@ struct MessageContainer
         return msg;
     }
 };
+
 
 template <template <class> class Container, typename T, class Enable = void>
 class MessageConversionHook

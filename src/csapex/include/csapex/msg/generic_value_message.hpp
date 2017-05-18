@@ -57,6 +57,18 @@ struct type<GenericValueMessage<T> > {
     }
 };
 
+template <typename V>
+struct MessageContainer<V, false>
+{
+    typedef GenericValueMessage<V> type;
+
+    static V& access(GenericValueMessage<V>& msg) {
+        return msg.value;
+    }
+    static const V& accessConst(const GenericValueMessage<V>& msg) {
+        return msg.value;
+    }
+};
 }
 }
 

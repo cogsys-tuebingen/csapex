@@ -208,18 +208,17 @@ private:
         struct apply
         {
             typedef typename std::decay<I>::type RawType;
-            typedef typename connection_types::MessageContainer<RawType>::type Msg;
+            typedef typename connection_types::MessageContainer<RawType, std::is_base_of<TokenData, RawType>::value>::type Msg;
 
             static_assert(!std::is_pointer<I>::value, "type is not a pointer");
             static_assert(std::is_base_of<TokenData, Msg>::value ||
-                          std::is_integral<I>::value ||
-                          std::is_floating_point<I>::value ||
+                          std::is_integral<RawType>::value ||
+                          std::is_floating_point<RawType>::value ||
                           std::is_same<std::string, Msg>::value,
-                          "type is usable");
+                          "type is not usable");
 
-            typedef typename boost::mpl::if_< std::is_reference<I>,
-            typename boost::mpl::if_<
-                std::is_const<typename std::remove_reference<I>::type>,
+            typedef typename boost::mpl::if_< std::is_reference<typename std::remove_const<I>::type>,
+                typename boost::mpl::if_< std::is_const<typename std::remove_reference<I>::type>,
                     GenericInput<Msg>,
                     GenericOutput<Msg> >::type,
                 GenericParameter<RawType>
@@ -256,11 +255,11 @@ struct GenerateParameter
         >::type* = 0)
     {
         typedef typename Types<no>::decay_type dt;
-        typedef typename connection_types::MessageContainer<dt>::type msg_t;
+        typedef typename connection_types::MessageContainer<dt, std::is_base_of<TokenData, dt>::value>::type msg_t;
         typedef typename Types<no>::type expected;
 
         msg_t& msg = dynamic_cast<msg_t&>(*instance->out_msg_[no]);
-        auto& val = connection_types::MessageContainer<dt>::access(msg);
+        auto& val = connection_types::MessageContainer<dt, std::is_base_of<TokenData, dt>::value>::access(msg);
         return std::ref(static_cast<expected>(val));
     }
 
@@ -275,11 +274,11 @@ struct GenerateParameter
         >::type* = 0)
     {
         typedef typename Types<no>::decay_type dt;
-        typedef typename connection_types::MessageContainer<dt>::type msg_t;
+        typedef typename connection_types::MessageContainer<dt, std::is_base_of<TokenData, dt>::value>::type msg_t;
         typedef typename Types<no>::type expected;
 
         const msg_t& msg = dynamic_cast<const msg_t&>(*instance->in_msg_[no]);
-        auto& val = connection_types::MessageContainer<dt>::accessConst(msg);
+        auto& val = connection_types::MessageContainer<dt, std::is_base_of<TokenData, dt>::value>::accessConst(msg);
         return std::ref(static_cast<expected const>(val));
     }
 
