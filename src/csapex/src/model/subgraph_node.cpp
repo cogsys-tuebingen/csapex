@@ -44,7 +44,7 @@ NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
         apex_assert_hard(node_handle_->guard_ == -1);
         return node_handle_.get();
     }
-    return Graph::findNodeHandle(uuid);
+    return GraphLocal::findNodeHandle(uuid);
 }
 
 NodeHandle *SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
@@ -52,7 +52,7 @@ NodeHandle *SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
     if(uuid.empty()) {
         return node_handle_.get();
     }
-    return Graph::findNodeHandleNoThrow(uuid);
+    return GraphLocal::findNodeHandleNoThrow(uuid);
 }
 
 ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
@@ -64,7 +64,7 @@ ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
         return internal_events_.at(uuid);
     }
 
-    return Graph::findConnectorNoThrow(uuid);
+    return GraphLocal::findConnectorNoThrow(uuid);
 }
 
 void SubgraphNode::initialize(NodeHandlePtr node_handle)

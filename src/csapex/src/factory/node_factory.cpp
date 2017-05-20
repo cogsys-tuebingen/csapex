@@ -8,6 +8,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_remote.h>
 #include <csapex/model/tag.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/plugin/plugin_manager.hpp>
@@ -255,12 +256,23 @@ std::vector<NodeConstructorPtr> NodeFactory::getConstructors()
     return constructors_;
 }
 
-NodeFacadeLocalPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider)
+NodeFacadePtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider)
 {
     return makeNode(target_type, uuid, uuid_provider, nullptr);
 }
 
-NodeFacadeLocalPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider,
+NodeFacadePtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider,
+                                    NodeStatePtr state)
+{
+    return makeNodeLocal(target_type, uuid, uuid_provider, state);
+}
+
+NodeFacadeLocalPtr NodeFactory::makeNodeLocal(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider)
+{
+    return makeNodeLocal(target_type, uuid, uuid_provider, nullptr);
+}
+
+NodeFacadeLocalPtr NodeFactory::makeNodeLocal(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider,
                                     NodeStatePtr state)
 {
     apex_assert_hard(target_type == "csapex::Graph" || !uuid.empty());

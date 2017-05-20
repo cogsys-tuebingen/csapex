@@ -4,7 +4,6 @@
 /// PROJECT
 #include <csapex/model/node_facade.h>
 
-#if 0
 namespace csapex
 {
 
@@ -28,6 +27,7 @@ public:
 
     bool isSource() const override;
     bool isSink() const override;
+    bool isProcessingNothingMessages() const override;
 
     bool isParameterInput(const UUID& id) override;
     bool isParameterOutput(const UUID& id) override;
@@ -65,6 +65,8 @@ public:
     double getMaximumFrequency() const override;
 
     // Parameterizable
+    virtual std::vector<param::ParameterPtr> getParameters() const override;
+    param::ParameterPtr getParameter(const std::string& name) const override;
     bool hasParameter(const std::string& name) const override;
 
 //    template <typename T>
@@ -91,12 +93,15 @@ public:
     NodePtr getNode() const;
 
 private:
+    void connectNodeHandle();
+    void connectNodeWorker();
+
+private:
     NodeHandlePtr nh_;
     NodeWorkerPtr nw_;
     NodeRunnerPtr nr_;
 };
 
 }
-#endif
 
 #endif // NODE_FACADE_REMOTE_H

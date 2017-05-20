@@ -74,7 +74,7 @@ bool DeleteNode::doExecute()
 bool DeleteNode::doUndo()
 {
     GraphPtr graph = getGraph();
-    NodeFacadeLocalPtr node_facade = getNodeFactory()->makeNode(type, uuid, graph);
+    NodeFacadeLocalPtr node_facade = getNodeFactory()->makeNodeLocal(type, uuid, graph);
     node_facade->setNodeState(saved_state);
 
     graph->addNode(node_facade);

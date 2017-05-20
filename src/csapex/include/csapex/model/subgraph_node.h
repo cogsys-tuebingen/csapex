@@ -2,7 +2,7 @@
 #define SUBGRAPH_NODE_H
 
 /// COMPONENT
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node.h>
 #include <csapex/model/variadic_io.h>
 #include <csapex/utility/uuid.h>
@@ -21,21 +21,21 @@ struct RelayMapping
 };
 
 
-class CSAPEX_EXPORT SubgraphNode : public Graph, public Node, public Variadic
+class CSAPEX_EXPORT SubgraphNode : public GraphLocal, public Node, public Variadic
 {
 public:
     SubgraphNode();
     ~SubgraphNode();
 
     template <typename T = Connectable>
-    std::shared_ptr<T> findConnector(const UUID &uuid)
+    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
     {
-        return std::dynamic_pointer_cast<T>(Graph::findConnector(uuid));
+        return std::dynamic_pointer_cast<T>(findConnector(uuid));
     }
     template <typename T = Connectable>
-    std::shared_ptr<T> findConnectorNoThrow(const UUID &uuid) noexcept
+    std::shared_ptr<T> findTypedConnectorNoThrow(const UUID &uuid) noexcept
     {
-        return std::dynamic_pointer_cast<T>(Graph::findConnectorNoThrow(uuid));
+        return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
     }
 
     virtual NodeHandle*findNodeHandle(const UUID& uuid) const override;

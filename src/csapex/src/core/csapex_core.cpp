@@ -234,7 +234,7 @@ void CsApexCore::init()
 
         status_changed("make graph");
 
-        root_handle_ = node_factory_->makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_);
+        root_handle_ = node_factory_->makeNodeLocal("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_);
         apex_assert_hard(root_handle_);
 
         SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNode());

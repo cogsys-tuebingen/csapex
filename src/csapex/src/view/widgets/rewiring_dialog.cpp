@@ -226,8 +226,8 @@ void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &conne
     }
 
     UUID uuid_new = UUID::NONE;
-    OutputPtr source_old = graph_old->findConnectorNoThrow<Output>(uuid_old);
-    OutputPtr source_new = graph_new->findConnectorNoThrow<Output>(uuid_old);
+    OutputPtr source_old = graph_old->findTypedConnectorNoThrow<Output>(uuid_old);
+    OutputPtr source_new = graph_new->findTypedConnectorNoThrow<Output>(uuid_old);
     if(std::dynamic_pointer_cast<Event>(out_original)) {
         if(!source_old) {
             source_old = graph_old->createInternalEvent(out_original->getType(), uuid_old, out_original->getLabel());
@@ -280,8 +280,8 @@ void RewiringDialog::updateConnection(OutputPtr output, const ConnectionPtr &con
     }
 
     UUID uuid_new = UUID::NONE;
-    InputPtr sink_old = graph_old->findConnectorNoThrow<Input>(uuid_old);
-    InputPtr sink_new = graph_new->findConnectorNoThrow<Input>(uuid_old);
+    InputPtr sink_old = graph_old->findTypedConnectorNoThrow<Input>(uuid_old);
+    InputPtr sink_new = graph_new->findTypedConnectorNoThrow<Input>(uuid_old);
     if(std::dynamic_pointer_cast<Slot>(in_original)) {
         if(!sink_old) {
             sink_old = graph_old->createInternalSlot(in_original->getType(), uuid_old, in_original->getLabel(), [](const TokenPtr&){});

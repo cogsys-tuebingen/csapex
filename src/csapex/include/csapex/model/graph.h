@@ -41,79 +41,72 @@ public:
     typedef std::vector<graph::VertexPtr>::const_iterator vertex_const_iterator;
 
 public:
-    Graph();
     virtual ~Graph();
 
-    int getComponent(const UUID& node_uuid) const;
-    int getDepth(const UUID& node_uuid) const;
+    virtual int getComponent(const UUID& node_uuid) const = 0;
+    virtual int getDepth(const UUID& node_uuid) const = 0;
 
-    void resetActivity();
+    virtual void resetActivity() = 0;
 
-    void clear();
+    virtual void clear() = 0;
 
-    Node* findNode(const UUID& uuid) const;
-    Node* findNodeNoThrow(const UUID& uuid) const noexcept;
-    Node* findNodeForConnector(const UUID &uuid) const;
+    virtual Node* findNode(const UUID& uuid) const = 0;
+    virtual Node* findNodeNoThrow(const UUID& uuid) const noexcept = 0;
+    virtual Node* findNodeForConnector(const UUID &uuid) const = 0;
 
-    virtual NodeHandle* findNodeHandle(const UUID& uuid) const;
-    virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept;
-    NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
-    NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept;
-    NodeHandle* findNodeHandleWithLabel(const std::string& label) const;
+    virtual NodeHandle* findNodeHandle(const UUID& uuid) const = 0;
+    virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept = 0;
+    virtual NodeHandle* findNodeHandleForConnector(const UUID &uuid) const = 0;
+    virtual NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
+    virtual NodeHandle* findNodeHandleWithLabel(const std::string& label) const = 0;
 
-    std::vector<NodeHandle*> getAllNodeHandles();
+    virtual std::vector<NodeHandle*> getAllNodeHandles() = 0;
 
 
-    virtual ConnectablePtr findConnector(const UUID &uuid);
-    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept;
+    virtual ConnectablePtr findConnector(const UUID &uuid) = 0;
+    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
 
     template <typename T>
-    std::shared_ptr<T> findConnector(const UUID &uuid)
+    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
     {
         return std::dynamic_pointer_cast<T>(findConnector(uuid));
     }
     template <typename T>
-    std::shared_ptr<T> findConnectorNoThrow(const UUID &uuid) noexcept
+    std::shared_ptr<T> findTypedConnectorNoThrow(const UUID &uuid) noexcept
     {
         return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
     }
 
-    ConnectionPtr getConnectionWithId(int id);
-    ConnectionPtr getConnection(const UUID& from, const UUID& to);
-    ConnectionPtr getConnection(Connectable* from, Connectable* to);
-    int getConnectionId(ConnectionPtr);
+    virtual ConnectionPtr getConnectionWithId(int id) = 0;
+    virtual ConnectionPtr getConnection(const UUID& from, const UUID& to) = 0;
+    virtual ConnectionPtr getConnection(Connectable* from, Connectable* to) = 0;
+    virtual int getConnectionId(ConnectionPtr) = 0;
 
-    std::vector<ConnectionPtr> getConnections();
+    virtual std::vector<ConnectionPtr> getConnections() = 0;
 
-    int countNodes();
+    virtual int countNodes() = 0;
 
-    void addNode(NodeFacadePtr node);
-    void deleteNode(const UUID &uuid);
+    virtual void addNode(NodeFacadePtr node) = 0;
+    virtual void deleteNode(const UUID &uuid) = 0;
 
-    bool addConnection(ConnectionPtr connection);
-    void deleteConnection(ConnectionPtr connection);
+    virtual bool addConnection(ConnectionPtr connection) = 0;
+    virtual void deleteConnection(ConnectionPtr connection) = 0;
 
-    void beginTransaction();
-    void finalizeTransaction();
+    virtual void beginTransaction() = 0;
+    virtual void finalizeTransaction() = 0;
 
-    void analyzeGraph();
+    virtual void analyzeGraph() = 0;
 
     // iterators
-    vertex_iterator beginVertices();
-    const vertex_const_iterator beginVertices() const;
+    virtual vertex_iterator beginVertices() = 0;
+    virtual const vertex_const_iterator beginVertices() const = 0;
 
-    vertex_iterator endVertices();
-    const vertex_const_iterator endVertices() const;
+    virtual vertex_iterator endVertices() = 0;
+    virtual const vertex_const_iterator endVertices() const = 0;
 
 
-private:
-    void checkNodeState(NodeHandle* nh);
-
-    void buildConnectedComponents();
-    void calculateDepths();
-
-    std::set<graph::Vertex *> findVerticesThatNeedMessages();
-    std::set<graph::Vertex *> findVerticesThatJoinStreams();
+protected:
+    Graph();
 
 public:
     slim_signal::Signal<void()> state_changed;
@@ -123,18 +116,6 @@ public:
 
     slim_signal::Signal<void(graph::VertexPtr)> vertex_added;
     slim_signal::Signal<void(graph::VertexPtr)> vertex_removed;
-
-protected:
-//    std::vector<NodeHandlePtr> nodes_;
-    std::vector<graph::VertexPtr> vertices_;
-    std::vector<ConnectionPtr> edges_;
-
-    std::map<Connection*, std::vector<slim_signal::ScopedConnection>> connection_observations_;
-
-    std::set<graph::VertexPtr> sources_;
-    std::set<graph::VertexPtr> sinks_;
-
-    bool in_transaction_;
 };
 
 }

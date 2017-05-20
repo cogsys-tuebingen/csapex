@@ -16,52 +16,57 @@
 #include <sstream>
 
 using namespace csapex;
+using namespace csapex;
 
-#if 0
 NodeFacadeRemote::NodeFacadeRemote(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr)
+    : nh_(nh), nw_(nw), nr_(nr)
 {
-    nw_ = nw;
-    nr_ = nr;
-
     nh->setNodeRunner(nr_);
 
-    observe(nw->start_profiling, [this](NodeWorker*) {
-        start_profiling(this);
-    });
-    observe(nw->stop_profiling,  [this](NodeWorker*) {
-        stop_profiling(this);
-    });
-
-    observe(nw->destroyed, destroyed);
-    observe(nw->notification, notification);
-
-    observe(nw->messages_processed, messages_processed);
-
-    observe(nw->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
-        interval_start(this, type, stamp);
-    });
-    observe(nw->interval_end,  [this](NodeWorker*, std::shared_ptr<const Interval> stamp) {
-        interval_end(this, stamp);
-    });
+    connectNodeHandle();
+    connectNodeWorker();
 }
-
-//NodeFacadeRemote::NodeFacadeRemote(NodeHandlePtr nh)
-//{
-//    observe(nh->connector_created, connector_created);
-//    observe(nh->connector_removed, connector_removed);
-//    observe(nh->node_state_changed, node_state_changed);
-
-
-//    observe(nh->connection_in_prograss, connection_in_prograss);
-//    observe(nh->connection_done, connection_done);
-//    observe(nh->connection_start, connection_start);
-
-
-//    observe(nh->parameters_changed, parameters_changed);
-//}
 
 NodeFacadeRemote::~NodeFacadeRemote()
 {
+
+}
+
+void NodeFacadeRemote::connectNodeHandle()
+{
+    observe(nh_->connector_created, connector_created);
+    observe(nh_->connector_removed, connector_removed);
+    observe(nh_->node_state_changed, node_state_changed);
+
+
+    observe(nh_->connection_in_prograss, connection_in_prograss);
+    observe(nh_->connection_done, connection_done);
+    observe(nh_->connection_start, connection_start);
+
+
+    observe(nh_->parameters_changed, parameters_changed);
+}
+
+void NodeFacadeRemote::connectNodeWorker()
+{
+    observe(nw_->start_profiling, [this](NodeWorker*) {
+        start_profiling(this);
+    });
+    observe(nw_->stop_profiling,  [this](NodeWorker*) {
+        stop_profiling(this);
+    });
+
+    observe(nw_->destroyed, destroyed);
+    observe(nw_->notification, notification);
+
+    observe(nw_->messages_processed, messages_processed);
+
+    observe(nw_->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
+        interval_start(this, type, stamp);
+    });
+    observe(nw_->interval_end,  [this](NodeWorker*, std::shared_ptr<const Interval> stamp) {
+        interval_end(this, stamp);
+    });
 }
 
 std::string NodeFacadeRemote::getType() const
@@ -110,6 +115,11 @@ bool NodeFacadeRemote::isSource() const
 bool NodeFacadeRemote::isSink() const
 {
     return nh_->isSink();
+}
+
+bool NodeFacadeRemote::isProcessingNothingMessages() const
+{
+    return getNode()->processMessageMarkers();
 }
 
 bool NodeFacadeRemote::isParameterInput(const UUID& id)
@@ -189,6 +199,18 @@ std::vector<ConnectorDescription> NodeFacadeRemote::getInternalSlots() const
 NodeCharacteristics NodeFacadeRemote::getNodeCharacteristics() const
 {
     return nh_->getVertex()->getNodeCharacteristics();
+}
+
+
+
+std::vector<param::ParameterPtr> NodeFacadeRemote::getParameters() const
+{
+    return getNode()->getParameters();
+}
+
+param::ParameterPtr NodeFacadeRemote::getParameter(const std::string &name) const
+{
+    return getNode()->getParameter(name);
 }
 
 bool NodeFacadeRemote::isProfiling() const
@@ -351,47 +373,3 @@ bool NodeFacadeRemote::hasParameter(const std::string &name) const
     }
     throw std::runtime_error("tried to check a parameter from an invalid node");
 }
-
-//template <typename T>
-//T NodeFacadeRemote::readParameter(const std::string& name) const
-//{
-//    if(auto node = nh_->getNode().lock()){
-//        return node->readParameter<T>(name);
-//    }
-//    throw std::runtime_error("tried to read a parameter from an invalid node");
-//}
-
-//template <typename T>
-//void NodeFacadeRemote::setParameter(const std::string& name, const T& value)
-//{
-//    if(auto node = nh_->getNode().lock()){
-//        node->setParameter<T>(name, value);
-//    } else {
-//        throw std::runtime_error("tried to set a parameter from an invalid node");
-//    }
-//}
-
-
-
-//template CSAPEX_EXPORT bool NodeFacadeRemote::readParameter<bool>(const std::string& name) const;
-//template CSAPEX_EXPORT double NodeFacadeRemote::readParameter<double>(const std::string& name) const;
-//template CSAPEX_EXPORT int NodeFacadeRemote::readParameter<int>(const std::string& name) const;
-//template CSAPEX_EXPORT std::string NodeFacadeRemote::readParameter<std::string>(const std::string& name) const;
-//template CSAPEX_EXPORT std::pair<int,int> NodeFacadeRemote::readParameter<std::pair<int,int> >(const std::string& name) const;
-//template CSAPEX_EXPORT std::pair<double,double> NodeFacadeRemote::readParameter<std::pair<double,double> >(const std::string& name) const;
-//template CSAPEX_EXPORT std::pair<std::string, bool> NodeFacadeRemote::readParameter<std::pair<std::string, bool> >(const std::string& name) const;
-//template CSAPEX_EXPORT std::vector<double> NodeFacadeRemote::readParameter<std::vector<double> >(const std::string& name) const;
-//template CSAPEX_EXPORT std::vector<int> NodeFacadeRemote::readParameter<std::vector<int> >(const std::string& name) const;
-
-
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<bool>(const std::string& name, const bool& value);
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<double>(const std::string& name, const double& value);
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<int>(const std::string& name, const int& value);
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<std::string>(const std::string& name, const std::string& value);
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<std::pair<std::string, bool> >(const std::string& name, const std::pair<std::string, bool>& value);
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
-//template CSAPEX_EXPORT void NodeFacadeRemote::setParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
-
-#endif

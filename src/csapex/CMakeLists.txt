@@ -356,6 +356,7 @@ add_library(csapex SHARED
     src/model/fulcrum.cpp
     src/model/generic_state.cpp
     src/model/graph.cpp
+    src/model/graph/graph_local.cpp
     src/model/subgraph_node.cpp
     src/model/graph_facade.cpp
     src/model/memento.cpp
@@ -515,6 +516,7 @@ add_library(csapex_remote SHARED
     src/command/dispatcher_remote.cpp
 
     src/model/node_facade_remote.cpp
+    src/model/graph/graph_remote.cpp
 
     src/io/server.cpp
     src/io/request.cpp

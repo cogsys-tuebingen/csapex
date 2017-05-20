@@ -52,8 +52,8 @@ bool AddConnection::doExecute()
 {
     GraphPtr graph = getGraph();
 
-    OutputPtr f = graph->findConnector<Output>(from_uuid);
-    InputPtr t = graph->findConnector<Input>(to_uuid);
+    OutputPtr f = graph->findTypedConnector<Output>(from_uuid);
+    InputPtr t = graph->findTypedConnector<Input>(to_uuid);
 
     apex_assert_hard(f);
     apex_assert_hard(t);

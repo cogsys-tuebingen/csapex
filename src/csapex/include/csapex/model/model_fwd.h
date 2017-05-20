@@ -22,6 +22,7 @@ FWD(Edge);
 
 FWD(NodeFacade);
 FWD(NodeFacadeLocal);
+FWD(NodeFacadeRemote);
 FWD(NodeHandle);
 FWD(NodeConstructor);
 FWD(NodeStatistics);

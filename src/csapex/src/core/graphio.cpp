@@ -281,7 +281,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
     std::string type = doc["type"].as<std::string>();
 
-    NodeFacadeLocalPtr node_handle = node_factory_->makeNode(type, uuid, graph_);
+    NodeFacadeLocalPtr node_handle = node_factory_->makeNodeLocal(type, uuid, graph_);
     if(!node_handle) {
         return;
     }
