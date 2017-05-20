@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <string>
 #include <type_traits>
+#include <vector>
 
 namespace csapex {
 namespace connection_types {
@@ -79,6 +80,9 @@ std::shared_ptr<typename std::remove_const<T>::type > makeEmptyMessage(
 
 HAS_MEM_TYPE(Ptr, has_ptr_member);
 HAS_MEM_TYPE(element_type, has_elem_type_member);
+
+template<typename T> struct is_std_vector : std::false_type {};
+template<typename T, typename Allocator> struct is_std_vector<std::vector<T, Allocator>> : std::true_type {};
 
 template <typename M>
 struct should_use_pointer_message {
