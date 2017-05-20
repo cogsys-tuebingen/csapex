@@ -242,7 +242,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     QObject::connect(graph_view, &GraphView::boxAdded, this, &Designer::addBox);
     QObject::connect(graph_view, &GraphView::boxRemoved, this, &Designer::removeBox);
 
-    for(const auto& nh : graph->getAllNodeHandles()) {
+    for(const auto& nh : graph->getGraph()->getAllNodeHandles()) {
         NodeBox* box = graph_view->getBox(nh->getUUID());
         addBox(box);
     }
@@ -273,7 +273,7 @@ void Designer::closeView(int page)
 
         DesignerIO designerio;
         YAML::Node doc;
-        designerio.saveBoxes(doc, graph.get(), graph_views_[graph.get()]);
+        designerio.saveBoxes(doc, graph->getGraph().get(), graph_views_[graph.get()]);
         states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
 
         ui->tabWidget->removeTab(page);
@@ -605,7 +605,7 @@ void Designer::saveView(SubgraphNodePtr graph, YAML::Node &doc)
 
     auto pos = graph_views_.find(graph.get());
     if(pos != graph_views_.end()) {
-        designerio.saveBoxes(doc, graph.get(), pos->second);
+        designerio.saveBoxes(doc, graph->getGraph().get(), pos->second);
         states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
     } else {
         doc["adapters"] = states_for_invisible_graphs_[graph->getUUID()];

@@ -27,8 +27,8 @@
 
 using namespace csapex;
 
-GraphFacade::GraphFacade(ThreadPool &executor, SubgraphNodePtr graph, NodeFacadePtr nh, GraphFacade *parent)
-    : parent_(parent), absolute_uuid_(graph->getUUID()), graph_(graph), graph_handle_(nh), executor_(executor)
+GraphFacade::GraphFacade(ThreadPool &executor, GraphPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh, GraphFacade *parent)
+    : parent_(parent), absolute_uuid_(graph_node->getUUID()), graph_(graph), graph_node_(graph_node), graph_handle_(nh), executor_(executor)
 {
     observe(graph->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacade::nodeAddedHandler));
 
@@ -99,9 +99,9 @@ void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(node);
     apex_assert_hard(sub_graph);
 
-    NodeHandle* subnh = graph_->findNodeHandle(facade->getUUID());
+    NodeHandle* subnh = graph_node_->getGraph()->findNodeHandle(facade->getUUID());
     apex_assert_hard(subnh == facade->getNodeHandle().get());
-    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph, facade, this);
+    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph->getGraph(), sub_graph, facade, this);
     children_[facade->getUUID()] = sub_graph_facade;
 
     sub_graph_facade->notification.connect(notification);
@@ -142,7 +142,7 @@ GraphPtr GraphFacade::getGraph()
 
 SubgraphNodePtr GraphFacade::getSubgraphNode()
 {
-    return std::dynamic_pointer_cast<SubgraphNode>(graph_);
+    return std::dynamic_pointer_cast<SubgraphNode>(graph_node_);
 }
 
 ThreadPool* GraphFacade::getThreadPool()
@@ -504,7 +504,7 @@ void GraphFacade::resetActivity()
     }
 
     if(!parent_) {
-        graph_->activation();
+        graph_node_->activation();
     }
 
     pauseRequest(pause);

@@ -70,11 +70,13 @@ private:
 
     NodeFacade* node_facade_;
 
-    SubgraphNodePtr graph_old;
+    SubgraphNodePtr graph_node_old;
+    GraphPtr graph_old;
     GraphFacadePtr graph_facade_old_;
 
     std::string type_new_;
-    SubgraphNodePtr graph_new;
+    SubgraphNodePtr graph_node_new;
+    GraphPtr graph_new;
     GraphFacadePtr graph_facade_new_;
 
     std::vector<ConnectionInformation> connections_;

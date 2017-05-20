@@ -18,6 +18,7 @@
 #include <csapex/msg/direct_connection.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/view/csapex_view_core_local.h>
+#include <csapex/model/graph.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -122,9 +123,11 @@ void RewiringDialog::createGraphs(const std::string& type)
     // old graph
     graph_facade_old_ = view_core_old_->getRoot();
     apex_assert_hard(graph_facade_old_);
-    graph_old = graph_facade_old_->getSubgraphNode();
+    graph_node_old = graph_facade_old_->getSubgraphNode();
+    apex_assert_hard(graph_node_old);
+    graph_old = graph_node_old->getGraph();
     apex_assert_hard(graph_old);
-    graph_old->removeInternalPorts();
+    graph_node_old->removeInternalPorts();
 
     nh_old = node_factory.makeNode(node_facade_->getType(), node_facade_->getUUID(), graph_old);
     nh_old->setNodeState(node_facade_->getNodeStateCopy());
@@ -134,9 +137,11 @@ void RewiringDialog::createGraphs(const std::string& type)
     // new graph
     graph_facade_new_ = view_core_new_->getRoot();
     apex_assert_hard(graph_facade_new_);
-    graph_new = graph_facade_new_->getSubgraphNode();
+    graph_node_new = graph_facade_new_->getSubgraphNode();
+    apex_assert_hard(graph_node_new);
+    graph_new = graph_node_new->getGraph();
     apex_assert_hard(graph_new);
-    graph_new->removeInternalPorts();
+    graph_node_new->removeInternalPorts();
 
     nh_new = node_factory.makeNode(type, graph_new->generateUUID(type), graph_new);
     graph_new->addNode(nh_new);
@@ -230,17 +235,17 @@ void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &conne
     OutputPtr source_new = graph_new->findTypedConnectorNoThrow<Output>(uuid_old);
     if(std::dynamic_pointer_cast<Event>(out_original)) {
         if(!source_old) {
-            source_old = graph_old->createInternalEvent(out_original->getType(), uuid_old, out_original->getLabel());
+            source_old = graph_node_old->createInternalEvent(out_original->getType(), uuid_old, out_original->getLabel());
         }
         if(!source_new) {
-            source_new = graph_new->createInternalEvent(out_original->getType(), uuid_old, out_original->getLabel());
+            source_new = graph_node_new->createInternalEvent(out_original->getType(), uuid_old, out_original->getLabel());
         }
     } else {
         if(!source_old) {
-            source_old = graph_old->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel());
+            source_old = graph_node_old->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel());
         }
         if(!source_new) {
-            source_new = graph_new->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel());
+            source_new = graph_node_new->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel());
         }
     }
 
@@ -284,17 +289,17 @@ void RewiringDialog::updateConnection(OutputPtr output, const ConnectionPtr &con
     InputPtr sink_new = graph_new->findTypedConnectorNoThrow<Input>(uuid_old);
     if(std::dynamic_pointer_cast<Slot>(in_original)) {
         if(!sink_old) {
-            sink_old = graph_old->createInternalSlot(in_original->getType(), uuid_old, in_original->getLabel(), [](const TokenPtr&){});
+            sink_old = graph_node_old->createInternalSlot(in_original->getType(), uuid_old, in_original->getLabel(), [](const TokenPtr&){});
         }
         if(!sink_new) {
-            sink_new = graph_new->createInternalSlot(in_original->getType(), uuid_old, in_original->getLabel(), [](const TokenPtr&){});
+            sink_new = graph_node_new->createInternalSlot(in_original->getType(), uuid_old, in_original->getLabel(), [](const TokenPtr&){});
         }
     } else {
         if(!sink_old) {
-            sink_old = graph_old->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isOptional());
+            sink_old = graph_node_old->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isOptional());
         }
         if(!sink_new) {
-            sink_new = graph_new->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isOptional());
+            sink_new = graph_node_new->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isOptional());
         }
     }
 

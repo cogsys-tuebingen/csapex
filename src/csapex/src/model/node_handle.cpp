@@ -17,6 +17,7 @@
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/model/generic_state.h>
+#include <csapex/model/graph.h>
 
 /// SYSTEM
 #include <iostream>
@@ -1015,7 +1016,7 @@ AUUID NodeHandle::getSubgraphAUUID() const
 {
     SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_);
     apex_assert_hard(graph);
-    return graph->getAbsoluteUUID();
+    return graph->getGraph()->getAbsoluteUUID();
 }
 
 UUIDProvider* NodeHandle::getUUIDProvider()

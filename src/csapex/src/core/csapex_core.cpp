@@ -242,7 +242,7 @@ void CsApexCore::init()
 
         root_worker_ = root_handle_->getNodeWorker();
 
-        root_ = std::make_shared<GraphFacade>(*thread_pool_, graph, root_handle_);
+        root_ = std::make_shared<GraphFacade>(*thread_pool_, graph->getGraph(), graph, root_handle_);
         root_->notification.connect(notification);
 
 

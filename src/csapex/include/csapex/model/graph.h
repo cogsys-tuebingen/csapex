@@ -80,7 +80,6 @@ public:
     virtual ConnectionPtr getConnectionWithId(int id) = 0;
     virtual ConnectionPtr getConnection(const UUID& from, const UUID& to) = 0;
     virtual ConnectionPtr getConnection(Connectable* from, Connectable* to) = 0;
-    virtual int getConnectionId(ConnectionPtr) = 0;
 
     virtual std::vector<ConnectionPtr> getConnections() = 0;
 

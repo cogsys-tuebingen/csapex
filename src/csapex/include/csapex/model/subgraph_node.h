@@ -2,7 +2,6 @@
 #define SUBGRAPH_NODE_H
 
 /// COMPONENT
-#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node.h>
 #include <csapex/model/variadic_io.h>
 #include <csapex/utility/uuid.h>
@@ -21,26 +20,28 @@ struct RelayMapping
 };
 
 
-class CSAPEX_EXPORT SubgraphNode : public GraphLocal, public Node, public Variadic
+class CSAPEX_EXPORT SubgraphNode : public Node, public Variadic
 {
 public:
-    SubgraphNode();
+    SubgraphNode(GraphLocalPtr graph);
     ~SubgraphNode();
 
-    template <typename T = Connectable>
-    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
-    {
-        return std::dynamic_pointer_cast<T>(findConnector(uuid));
-    }
-    template <typename T = Connectable>
-    std::shared_ptr<T> findTypedConnectorNoThrow(const UUID &uuid) noexcept
-    {
-        return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
-    }
+    GraphPtr getGraph() const;
 
-    virtual NodeHandle*findNodeHandle(const UUID& uuid) const override;
-    virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
-    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
+//    template <typename T = Connectable>
+//    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
+//    {
+//        return std::dynamic_pointer_cast<T>(findConnector(uuid));
+//    }
+//    template <typename T = Connectable>
+//    std::shared_ptr<T> findTypedConnectorNoThrow(const UUID &uuid) noexcept
+//    {
+//        return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
+//    }
+
+//    virtual NodeHandle*findNodeHandle(const UUID& uuid) const override;
+//    virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
+//    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     virtual void initialize(csapex::NodeHandlePtr node_handle) override;
     virtual void detach() override;
@@ -138,6 +139,8 @@ public:
     slim_signal::Signal<void(ConnectorPtr,ConnectorPtr)> internalConnectionInProgress;
 
 protected:
+    GraphLocalPtr graph_;
+
     mutable std::recursive_mutex continuation_mutex_;
     Continuation continuation_;
 

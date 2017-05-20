@@ -20,6 +20,7 @@
 #include <csapex/model/connectable.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph/vertex.h>
+#include <csapex/model/graph/graph_local.h>
 
 #include "gtest/gtest.h"
 #include "test_exception_handler.h"
@@ -235,7 +236,8 @@ protected:
     }
 
     virtual void SetUp() override {
-        graph = std::make_shared<SubgraphNode>();
+        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
+        graph = graph_node->getGraph();
 
         abort_connection = error_handling::stop_request().connect([this](){
             for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
@@ -269,14 +271,15 @@ protected:
     
     ThreadPool executor;
 
-    SubgraphNodePtr graph;
+    SubgraphNodePtr graph_node;
+    GraphPtr graph;
 
     slim_signal::Connection abort_connection;
 };
 
 
 TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
-    GraphFacade main_graph_facade(executor, graph);
+    GraphFacade main_graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -295,18 +298,18 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
     NodeFacadePtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
-    GraphFacade sub_graph_facade(executor, sub_graph);
+    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr n2 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph);
+    NodeFacadePtr n2 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
-    NodeFacadePtr n3 = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("n3"), sub_graph);
+    NodeFacadePtr n3 = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("n3"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n3);
     sub_graph_facade.addNode(n3);
-    NodeFacadePtr src2 = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src2"), sub_graph);
+    NodeFacadePtr src2 = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src2);
-    NodeFacadePtr n4 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph);
+    NodeFacadePtr n4 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n4);
     sub_graph_facade.addNode(n4);
 
@@ -346,7 +349,7 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
 }
 
 TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
-    GraphFacade main_graph_facade(executor, graph);
+    GraphFacade main_graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -367,18 +370,18 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
     apex_assert_hard(sub_graph);
 
     ThreadPool sub_executor(&executor, eh, executor.isThreadingEnabled(), executor.isGroupingEnabled());
-    GraphFacade sub_graph_facade(sub_executor, sub_graph);
+    GraphFacade sub_graph_facade(sub_executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr n2 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph);
+    NodeFacadePtr n2 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
-    NodeFacadePtr n3 = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("n3"), sub_graph);
+    NodeFacadePtr n3 = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("n3"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n3);
     sub_graph_facade.addNode(n3);
-    NodeFacadePtr src2 = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src2"), sub_graph);
+    NodeFacadePtr src2 = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src2);
-    NodeFacadePtr n4 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph);
+    NodeFacadePtr n4 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n4);
     sub_graph_facade.addNode(n4);
 
@@ -418,7 +421,7 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
 }
 
 TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
-    GraphFacade main_graph_facade(executor, graph);
+    GraphFacade main_graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -447,9 +450,9 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph);
+    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr m = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("m"), sub_graph);
+    NodeFacadePtr m = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("m"), sub_graph->getGraph());
     ASSERT_NE(nullptr, m);
     sub_graph_facade.addNode(m);
 
@@ -492,7 +495,7 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
 
 
 TEST_F(NestingTest, NestedUUIDs) {
-    GraphFacade main_graph_facade(executor, graph);
+    GraphFacade main_graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -574,7 +577,7 @@ TEST_F(NestingTest, NestedUUIDs) {
 }
 
 TEST_F(NestingTest, GroupCanBeSource) {
-    GraphFacade main_graph_facade(executor, graph);
+    GraphFacade main_graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -590,11 +593,11 @@ TEST_F(NestingTest, GroupCanBeSource) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph);
+    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     NodeFacadePtr src = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
-    sub_graph->addNode(src);
+    sub_graph_facade.addNode(src);
 
 
     apex_assert_hard(sub_graph_node_facade);

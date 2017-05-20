@@ -18,6 +18,7 @@
 #include <csapex/model/node.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/subgraph_node.h>
+#include <csapex/model/graph/graph_local.h>
 
 #include "gtest/gtest.h"
 #include "mockup_nodes.h"
@@ -51,7 +52,8 @@ protected:
     // and cleaning up each test, you can define the following methods:
 
     virtual void SetUp() override {
-        graph = std::make_shared<SubgraphNode>();
+        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
+        graph = graph_node->getGraph();
     }
 
     virtual void TearDown() override {
@@ -76,11 +78,12 @@ protected:
     TestExceptionHandler eh;
     ThreadPool executor;
 
-    SubgraphNodePtr graph;
+    SubgraphNodePtr graph_node;
+    GraphPtr graph;
 };
 
 TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
-    GraphFacade graph_facade(executor, graph);
+    GraphFacade graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -121,7 +124,7 @@ TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
 }
 
 TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
-    GraphFacade graph_facade(executor, graph);
+    GraphFacade graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -161,7 +164,7 @@ TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
 }
 
 TEST_F(CodeApiTest, GraphBuildingUsingUUID) {
-    GraphFacade graph_facade(executor, graph);
+    GraphFacade graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 

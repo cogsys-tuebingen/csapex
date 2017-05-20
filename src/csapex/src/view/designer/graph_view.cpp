@@ -133,7 +133,7 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
 
     SubgraphNodePtr sub_graph = graph_facade_->getSubgraphNode();
-    GraphPtr graph = sub_graph;
+    GraphPtr graph = sub_graph->getGraph();
 
     observe(sub_graph->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
     observe(graph->state_changed, [this](){ updateBoxInformation(); });

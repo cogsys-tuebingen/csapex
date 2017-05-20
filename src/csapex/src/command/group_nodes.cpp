@@ -56,7 +56,7 @@ bool GroupNodes::doExecute()
     insert_pos = findTopLeftPoint();
 
     if(sub_graph_uuid_.empty()) {
-        sub_graph_uuid_ = graph->generateUUID("csapex::Graph");
+        sub_graph_uuid_ = graph->getGraph()->generateUUID("csapex::Graph");
     }
 
     AUUID parent_auuid = getGraphFacade()->getAbsoluteUUID();
@@ -69,7 +69,7 @@ bool GroupNodes::doExecute()
     add(add_graph);
 
 
-    analyzeConnections(graph.get());
+    analyzeConnections(graph->getGraph().get());
 
     CommandFactory cf(getGraphFacade());
 
@@ -88,7 +88,7 @@ void GroupNodes::findNodes(SubgraphNode* graph)
 {
     std::vector<NodeHandle*> n;
     for(const UUID& uuid : uuids) {
-        NodeHandle* nh = graph->findNodeHandle(uuid);
+        NodeHandle* nh = graph->getGraph()->findNodeHandle(uuid);
         n.push_back(nh);
     }
 

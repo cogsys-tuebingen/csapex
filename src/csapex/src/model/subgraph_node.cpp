@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/model/node.h>
@@ -18,8 +19,9 @@
 
 using namespace csapex;
 
-SubgraphNode::SubgraphNode()
-    : transition_relay_in_(new InputTransition),
+SubgraphNode::SubgraphNode(GraphLocalPtr graph)
+    : graph_(graph),
+      transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition),
       is_subgraph_finished_(false),
       is_iterating_(false), has_sent_current_iteration_(false),
@@ -36,49 +38,56 @@ SubgraphNode::~SubgraphNode()
     guard_ = 0xDEADBEEF;
 }
 
-NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
+GraphPtr SubgraphNode::getGraph() const
 {
-    apex_assert_hard(guard_ == -1);
-    if(uuid.empty()) {
-        apex_assert_hard(node_handle_);
-        apex_assert_hard(node_handle_->guard_ == -1);
-        return node_handle_.get();
-    }
-    return GraphLocal::findNodeHandle(uuid);
+    return graph_;
 }
 
-NodeHandle *SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
-{
-    if(uuid.empty()) {
-        return node_handle_.get();
-    }
-    return GraphLocal::findNodeHandleNoThrow(uuid);
-}
+//NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
+//{
+//    apex_assert_hard(guard_ == -1);
+//    if(uuid.empty()) {
+//        apex_assert_hard(node_handle_);
+//        apex_assert_hard(node_handle_->guard_ == -1);
+//        return node_handle_.get();
+//    }
+//    return GraphLocal::findNodeHandle(uuid);
+//}
 
-ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
-{
-    if(internal_slots_.find(uuid) != internal_slots_.end()) {
-        return internal_slots_.at(uuid);
-    }
-    if(internal_events_.find(uuid) != internal_events_.end()) {
-        return internal_events_.at(uuid);
-    }
+//NodeHandle *SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
+//{
+//    if(uuid.empty()) {
+//        return node_handle_.get();
+//    }
+//    return GraphLocal::findNodeHandleNoThrow(uuid);
+//}
 
-    return GraphLocal::findConnectorNoThrow(uuid);
-}
+//ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
+//{
+//    if(internal_slots_.find(uuid) != internal_slots_.end()) {
+//        return internal_slots_.at(uuid);
+//    }
+//    if(internal_events_.find(uuid) != internal_events_.end()) {
+//        return internal_events_.at(uuid);
+//    }
+
+//    return GraphLocal::findConnectorNoThrow(uuid);
+//}
 
 void SubgraphNode::initialize(NodeHandlePtr node_handle)
 {
     Node::initialize(node_handle);
 
+    graph_->setNodeHandle(node_handle.get());
+
     if(node_handle->getUUIDProvider()) {
-        setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
+        graph_->setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
     }
 }
 
 void SubgraphNode::detach()
 {
-    clear();
+    graph_->clear();
     Node::detach();
 }
 
@@ -91,7 +100,7 @@ void SubgraphNode::reset()
 {
     Node::reset();
 
-    resetActivity();
+    graph_->resetActivity();
 
     {
         std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
@@ -114,8 +123,8 @@ void SubgraphNode::setup(NodeModifier &modifier)
 {
     setupVariadic(modifier);
 
-    activation_event_ = createInternalEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), makeUUID("event_activation"), "activation");
-    deactivation_event_ = createInternalEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), makeUUID("event_deactivation"), "deactivation");
+    activation_event_ = createInternalEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), graph_->makeUUID("event_activation"), "activation");
+    deactivation_event_ = createInternalEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), graph_->makeUUID("event_deactivation"), "deactivation");
 }
 
 void SubgraphNode::activation()
@@ -278,7 +287,7 @@ void SubgraphNode::removeVariadicInput(InputPtr input)
 RelayMapping SubgraphNode::addForwardingInput(const TokenDataConstPtr& type,
                                               const std::string& label, bool optional)
 {
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relayout");
+    UUID internal_uuid = graph_->generateDerivedUUID(UUID(),"relayout");
     UUID external_uuid = addForwardingInput(internal_uuid, type, label, optional);
 
     return {external_uuid, internal_uuid};
@@ -286,7 +295,7 @@ RelayMapping SubgraphNode::addForwardingInput(const TokenDataConstPtr& type,
 
 UUID  SubgraphNode::addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional)
 {
-    registerUUID(internal_uuid);
+    graph_->registerUUID(internal_uuid);
 
     Input* external_input = VariadicInputs::createVariadicInput(type, label, optional);
 
@@ -351,7 +360,7 @@ void SubgraphNode::removeVariadicOutput(OutputPtr output)
 RelayMapping SubgraphNode::addForwardingOutput(const TokenDataConstPtr& type,
                                                const std::string& label)
 {
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relayin");
+    UUID internal_uuid = graph_->generateDerivedUUID(UUID(),"relayin");
     UUID external_uuid = addForwardingOutput(internal_uuid, type, label);
 
     return {external_uuid, internal_uuid};
@@ -359,7 +368,7 @@ RelayMapping SubgraphNode::addForwardingOutput(const TokenDataConstPtr& type,
 
 UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type,  const std::string& label)
 {
-    registerUUID(internal_uuid);
+    graph_->registerUUID(internal_uuid);
 
     Output* external_output = VariadicOutputs::createVariadicOutput(type, label);
 
@@ -437,7 +446,7 @@ void SubgraphNode::removeVariadicSlot(SlotPtr slot)
 
 RelayMapping SubgraphNode::addForwardingSlot(const TokenDataConstPtr& type, const std::string& label)
 {
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relayevent");
+    UUID internal_uuid = graph_->generateDerivedUUID(UUID(),"relayevent");
     UUID external_uuid = addForwardingSlot(internal_uuid, type, label);
 
     return {external_uuid, internal_uuid};
@@ -445,7 +454,7 @@ RelayMapping SubgraphNode::addForwardingSlot(const TokenDataConstPtr& type, cons
 
 UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label)
 {
-    registerUUID(internal_uuid);
+    graph_->registerUUID(internal_uuid);
 
     EventPtr relay = createInternalEvent(type, internal_uuid, label);
 
@@ -508,7 +517,7 @@ void SubgraphNode::removeVariadicEvent(EventPtr event)
 
 RelayMapping SubgraphNode::addForwardingEvent(const TokenDataConstPtr& type, const std::string& label)
 {
-    UUID internal_uuid = generateDerivedUUID(UUID(),"relayslot");
+    UUID internal_uuid = graph_->generateDerivedUUID(UUID(),"relayslot");
     UUID external_uuid = addForwardingEvent(internal_uuid, type, label);
 
     return {external_uuid, internal_uuid};
@@ -516,7 +525,7 @@ RelayMapping SubgraphNode::addForwardingEvent(const TokenDataConstPtr& type, con
 
 UUID SubgraphNode::addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label)
 {
-    registerUUID(internal_uuid);
+    graph_->registerUUID(internal_uuid);
 
     Event* external_event = VariadicEvents::createVariadicEvent(type, label);
 

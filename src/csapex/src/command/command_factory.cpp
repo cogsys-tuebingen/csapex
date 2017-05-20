@@ -227,7 +227,7 @@ Command::Ptr CommandFactory::deleteAllConnectionFulcrumsCommand(int connection)
 
 Command::Ptr CommandFactory::deleteAllConnectionFulcrumsCommand(ConnectionPtr connection)
 {
-    return deleteAllConnectionFulcrumsCommand(root_->getGraph()->getConnectionId(connection));
+    return deleteAllConnectionFulcrumsCommand(connection->id());
 }
 
 GraphFacade* CommandFactory::getGraphFacade() const

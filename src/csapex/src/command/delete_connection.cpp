@@ -50,7 +50,7 @@ bool DeleteConnection::doExecute()
 
     active_ = connection->isActive();
 
-    connection_id = graph->getConnectionId(connection);
+    connection_id = connection->id();
 
     locked = false;
     clear();

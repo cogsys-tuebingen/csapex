@@ -14,6 +14,7 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
+#include <csapex/model/graph.h>
 
 using namespace csapex;
 using namespace command;

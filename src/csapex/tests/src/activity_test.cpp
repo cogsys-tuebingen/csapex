@@ -16,6 +16,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/model/subgraph_node.h>
+#include <csapex/model/graph/graph_local.h>
 
 #include "gtest/gtest.h"
 #include "test_exception_handler.h"
@@ -193,8 +194,9 @@ protected:
     // and cleaning up each test, you can define the following methods:
 
     virtual void SetUp() override {
-        graph = std::make_shared<SubgraphNode>();
-        graph_facade = std::make_shared<GraphFacade>(executor, graph);
+        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
+        graph = graph_node->getGraph();
+        graph_facade = std::make_shared<GraphFacade>(executor, graph, graph_node);
 
         executor.setSteppingMode(true);
 
@@ -231,7 +233,8 @@ protected:
     
     ThreadPool executor;
 
-    SubgraphNodePtr graph;
+    SubgraphNodePtr graph_node;
+    GraphPtr graph;
     GraphFacade::Ptr graph_facade;
 
     NodeFacadePtr source_p;

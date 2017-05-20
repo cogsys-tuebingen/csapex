@@ -15,6 +15,7 @@
 #include <csapex/model/subgraph_node.h>
 #include <csapex/nodes/note.h>
 #include <csapex/param/string_list_parameter.h>
+#include <csapex/model/graph/graph_local.h>
 
 using namespace csapex;
 
@@ -35,11 +36,16 @@ NodeFactory::NodeFactory(Settings& settings, PluginLocator* locator)
       node_manager_(std::make_shared<PluginManager<Node>> ("csapex::Node")),
       tag_map_has_to_be_rebuilt_(false)
 {
-    NodeConstructorPtr provider = std::make_shared<NodeConstructor>("csapex::Graph", []{ return std::make_shared<SubgraphNode>(); });
+    NodeConstructorPtr provider = std::make_shared<NodeConstructor>("csapex::Graph", []{
+        GraphLocalPtr graph = std::make_shared<GraphLocal>();
+        return std::make_shared<SubgraphNode>(graph);
+    });
     provider->setIcon(":/group.png");
     registerNodeType(provider, true);
 
-    NodeConstructorPtr note = std::make_shared<NodeConstructor>("csapex::Note", []{ return std::make_shared<Note>(); });
+    NodeConstructorPtr note = std::make_shared<NodeConstructor>("csapex::Note", []{
+        return std::make_shared<Note>();
+    });
     note->setIcon(":/note.png");
     note->setDescription("A sticky note to keep information.");
     registerNodeType(note, true);

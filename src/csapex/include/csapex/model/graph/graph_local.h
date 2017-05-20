@@ -39,7 +39,6 @@ public:
     ConnectionPtr getConnectionWithId(int id) override;
     ConnectionPtr getConnection(const UUID& from, const UUID& to) override;
     ConnectionPtr getConnection(Connectable* from, Connectable* to) override;
-    int getConnectionId(ConnectionPtr) override;
 
     std::vector<ConnectionPtr> getConnections() override;
 
@@ -55,6 +54,8 @@ public:
     void finalizeTransaction() override;
 
     void analyzeGraph() override;
+
+    void setNodeHandle(NodeHandle* nh);
 
     // iterators
     vertex_iterator beginVertices() override;
@@ -83,6 +84,8 @@ protected:
     std::set<graph::VertexPtr> sinks_;
 
     bool in_transaction_;
+
+    NodeHandle* nh_;
 };
 
 }

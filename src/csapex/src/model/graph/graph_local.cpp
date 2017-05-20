@@ -17,11 +17,12 @@
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/graph/edge.h>
 #include <csapex/model/node.h>
+#include <csapex/model/subgraph_node.h>
 
 using namespace csapex;
 
 GraphLocal::GraphLocal()
-    : in_transaction_(false)
+    : in_transaction_(false), nh_(nullptr)
 {
 
 }
@@ -29,6 +30,11 @@ GraphLocal::GraphLocal()
 GraphLocal::~GraphLocal()
 {
     clear();
+}
+
+void GraphLocal::setNodeHandle(NodeHandle *nh)
+{
+    nh_ = nh;
 }
 
 void GraphLocal::resetActivity()
@@ -618,6 +624,11 @@ Node* GraphLocal::findNode(const UUID& uuid) const
 
 NodeHandle* GraphLocal::findNodeHandle(const UUID& uuid) const
 {
+    if(uuid.empty()) {
+        apex_assert_hard(nh_);
+        apex_assert_hard(nh_->guard_ == -1);
+        return nh_;
+    }
     NodeHandle* node_handle = findNodeHandleNoThrow(uuid);
     if(node_handle) {
         apex_assert_hard(node_handle->guard_ == -1);
@@ -642,6 +653,11 @@ Node* GraphLocal::findNodeNoThrow(const UUID& uuid) const noexcept
 
 NodeHandle *GraphLocal::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
+    if(uuid.empty()) {
+        apex_assert_hard(nh_);
+        apex_assert_hard(nh_->guard_ == -1);
+        return nh_;
+    }
     if(uuid.composite()) {
         UUID root = uuid.rootUUID();
 
@@ -649,9 +665,9 @@ NodeHandle *GraphLocal::findNodeHandleNoThrow(const UUID& uuid) const noexcept
         if(root_nh) {
             NodePtr root_node = root_nh->getNode().lock();
             if(root_node) {
-                GraphPtr graph = std::dynamic_pointer_cast<Graph>(root_node);
+                SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_node);
                 if(graph) {
-                    return graph->findNodeHandle(uuid.nestedUUID());
+                    return graph->getGraph()->findNodeHandle(uuid.nestedUUID());
                 }
             }
         }
@@ -763,15 +779,6 @@ ConnectionPtr GraphLocal::getConnection(const UUID &from, const UUID &to)
     }
 
     return nullptr;
-}
-
-int GraphLocal::getConnectionId(ConnectionPtr c)
-{
-    if(c != nullptr) {
-        return c->id();
-    }
-
-    return -1;
 }
 
 Graph::vertex_iterator GraphLocal::beginVertices()

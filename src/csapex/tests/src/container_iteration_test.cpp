@@ -20,6 +20,7 @@
 #include <csapex/model/connectable.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/model/subgraph_node.h>
+#include <csapex/model/graph/graph_local.h>
 
 #include "gtest/gtest.h"
 #include "test_exception_handler.h"
@@ -227,7 +228,8 @@ protected:
     }
 
     virtual void SetUp() override {
-        graph = std::make_shared<SubgraphNode>();
+        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
+        graph = graph_node->getGraph();
     }
 
     virtual void TearDown() override {
@@ -251,11 +253,12 @@ protected:
     
     ThreadPool executor;
 
-    SubgraphNodePtr graph;
+    SubgraphNodePtr graph_node;
+    GraphPtr graph;
 };
 
 TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
-    GraphFacade main_graph_facade(executor, graph);
+    GraphFacade main_graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -279,9 +282,9 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph);
+    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph);
+    NodeFacadePtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
 
@@ -328,7 +331,7 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
 }
 
 TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
-    GraphFacade main_graph_facade(executor, graph);
+    GraphFacade main_graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -347,7 +350,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph);
+    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -386,7 +389,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
 }
 
 TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
-    GraphFacade main_graph_facade(executor, graph);
+    GraphFacade main_graph_facade(executor, graph, graph_node);
 
     executor.setSteppingMode(true);
 
@@ -410,9 +413,9 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph);
+    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph);
+    NodeFacadePtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
 

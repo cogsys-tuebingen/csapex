@@ -6,6 +6,7 @@
 #include <csapex/core/settings/settings_local.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/subgraph_node.h>
+#include <csapex/model/graph/graph_local.h>
 
 #include "gtest/gtest.h"
 
@@ -61,7 +62,8 @@ protected:
 };
 
 TEST_F(GraphTest, NodeCanBeFound) {
-    SubgraphNodePtr graph = std::make_shared<SubgraphNode>();
+    SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
+    GraphPtr graph = graph_node->getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     NodeFacadePtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
@@ -73,7 +75,8 @@ TEST_F(GraphTest, NodeCanBeFound) {
 }
 
 TEST_F(GraphTest, NodeCanBeDeleted) {
-    SubgraphNodePtr graph = std::make_shared<SubgraphNode>();
+    SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
+    GraphPtr graph = graph_node->getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     NodeFacadePtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
@@ -84,17 +87,19 @@ TEST_F(GraphTest, NodeCanBeDeleted) {
 }
 
 TEST_F(GraphTest, UnknownNodeCannotBeFound) {
-    SubgraphNode graph;
+    SubgraphNode graph_node(std::make_shared<GraphLocal>());
+    GraphPtr graph = graph_node.getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
 
-    ASSERT_THROW(graph.findNode(node_id), Graph::NodeNotFoundException);
+    ASSERT_THROW(graph->findNode(node_id), Graph::NodeNotFoundException);
 }
 
 TEST_F(GraphTest, nullptr) {
-    SubgraphNode graph;
+    SubgraphNode graph_node(std::make_shared<GraphLocal>());
+    GraphPtr graph = graph_node.getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
 
-    Node* node_found = graph.findNodeNoThrow(node_id);
+    Node* node_found = graph->findNodeNoThrow(node_id);
     ASSERT_TRUE(node_found == nullptr);
 }
 
