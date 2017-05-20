@@ -20,6 +20,7 @@ before_script:
 
 stages:
   - build
+  - test
 
 indigo:
   stage: build
@@ -53,3 +54,7 @@ kinetic:
     - source devel/setup.bash
     - rosdep install --all -y
     - catkin_make
+
+test:
+  stage: test
+  script: rosrun csapex csapex_test
