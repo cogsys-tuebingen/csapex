@@ -55,6 +55,17 @@ kinetic:
     - rosdep install --all -y
     - catkin_make
 
-test:
+test-indigo:
   stage: test
+  image: ros:indigo
+  script: rosrun csapex csapex_test
+
+test-jade:
+  stage: test
+  image: ros:jade
+  script: rosrun csapex csapex_test
+
+test-kinetic:
+  stage: test
+  image: ros:kinetic
   script: rosrun csapex csapex_test
