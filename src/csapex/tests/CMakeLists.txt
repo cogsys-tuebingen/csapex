@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 2.8.11)
 
+set(PROJECT_TEST_NAME csapex_tests)
+
+enable_testing()
+
+SET(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+SET(CMAKE_C_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+
 ## Enforce that we use C++11
 if (CMAKE_VERSION VERSION_LESS "3.1")
   include(CheckCXXCompilerFlag)
@@ -19,12 +26,6 @@ else ()
   set (CMAKE_CXX_STANDARD 11)
 endif ()
 
-set(PROJECT_TEST_NAME csapex_tests)
-
-enable_testing()
-
-SET(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
-SET(CMAKE_C_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
 
 #find_package(GTest REQUIRED)
 include( CTest )
