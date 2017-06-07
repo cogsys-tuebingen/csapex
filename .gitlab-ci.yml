@@ -1,8 +1,7 @@
 before_script:
   # Install ssh-agent if not already installed, it is required by Docker.
   # (change apt-get to yum if you use a CentOS-based image)
-  - 'apt-get -qq update -y'
-  - 'apt-get -qq install build-essential openssh-client sudo -y'
+  - 'apt-get -qq update -y && apt-get -qq install build-essential openssh-client sudo -y'
 
   # Run ssh-agent (inside the build environment)
   - eval $(ssh-agent -s)
@@ -16,65 +15,33 @@ before_script:
   # you will overwrite your user's SSH config.
   - mkdir -p ~/.ssh
   - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-
+  - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
+  - apt-get install -y $(rosdep install --from-paths -i -y -s src | grep 'sudo -H apt-get install -y' |cut -c 30- | paste -s)
 
 stages:
-  - build
-  - test
+  - build_and_test
 
 indigo:
-  stage: build
+  stage: build_and_test
   image: ros:indigo
   script:
-    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
-    # run catkin once to generate the devel space, ignore the result
-    - catkin_make --force-cmake || true 
-    - source devel/setup.bash
-    - rosdep install --all -y
-    - catkin_make
+  - catkin_make
+  - source devel/setup.bash
+  - rosrun csapex csapex_test
 
 jade:
-  stage: build
+  stage: build_and_test
   image: ros:jade
   script:
-    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
-    # run catkin once to generate the devel space, ignore the result
-    - catkin_make --force-cmake || true
-    - source devel/setup.bash
-    - rosdep install --all -y
     - catkin_make
+    - source devel/setup.bash
+    - rosrun csapex csapex_test
 
 kinetic:
-  stage: build
+  stage: build_and_test
   image: ros:kinetic
   script:
-    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
-    # run catkin once to generate the devel space, ignore the result
-    - catkin_make --force-cmake || true
-    - source devel/setup.bash
-    - rosdep install --all -y
-    - catkin_make
-
-test-indigo:
-  stage: test
-  image: ros:indigo
-  script:
-  - pwd
-  - ls -laht
-  - find . -name csapex
+  - catkin_make
   - source devel/setup.bash
   - rosrun csapex csapex_test
 
-test-jade:
-  stage: test
-  image: ros:jade
-  script:
-  - source devel/setup.bash
-  - rosrun csapex csapex_test
-
-test-kinetic:
-  stage: test
-  image: ros:kinetic
-  script:
-  - source devel/setup.bash
-  - rosrun csapex csapex_test
