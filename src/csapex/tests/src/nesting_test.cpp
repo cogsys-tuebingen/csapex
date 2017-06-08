@@ -240,7 +240,7 @@ protected:
         graph = graph_node->getGraph();
 
         abort_connection = error_handling::stop_request().connect([this](){
-            for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
+            for(auto it = graph->begin(); it != graph->end(); ++it) {
                 NodeFacadePtr nf = (*it)->getNodeFacade();
                 if(std::shared_ptr<MultiplierSink> mp = std::dynamic_pointer_cast<MultiplierSink>(nf->getNode())) {
                     mp->abort();

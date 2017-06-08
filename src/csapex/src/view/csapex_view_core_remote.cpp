@@ -17,6 +17,9 @@
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/view/gui_exception_handler.h>
+#include <csapex/model/graph/graph_remote.h>
+#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade.h>
 
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -43,6 +46,13 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
       core_tmp_(core_tmp)
 {
     session_->start();
+
+    const auto& local_facade = core_tmp_->getRoot();
+    std::shared_ptr<GraphRemote> remote_root_graph = std::make_shared<GraphRemote>(*std::dynamic_pointer_cast<GraphLocal>(local_facade->getGraph()));
+    remote_root_ = std::make_shared<GraphFacade>(*local_facade->getThreadPool(),
+                                                 remote_root_graph,
+                                                 local_facade->getSubgraphNode(),
+                                                 local_facade->getNodeFacade());
 
     // make the proxys only _after_ the session is started
     settings_ = std::make_shared<SettingsRemote>(session_);
@@ -142,7 +152,7 @@ Settings& CsApexViewCoreRemote::getSettings() const
 
 GraphFacadePtr CsApexViewCoreRemote::getRoot()
 {
-    return core_tmp_->getRoot();
+    return remote_root_;
 }
 
 ThreadPoolPtr CsApexViewCoreRemote::getThreadPool()

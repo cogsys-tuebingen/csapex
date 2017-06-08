@@ -97,11 +97,11 @@ public:
     virtual void analyzeGraph() = 0;
 
     // iterators
-    virtual vertex_iterator beginVertices() = 0;
-    virtual const vertex_const_iterator beginVertices() const = 0;
+    virtual vertex_iterator begin() = 0;
+    virtual const vertex_const_iterator begin() const = 0;
 
-    virtual vertex_iterator endVertices() = 0;
-    virtual const vertex_const_iterator endVertices() const = 0;
+    virtual vertex_iterator end() = 0;
+    virtual const vertex_const_iterator end() const = 0;
 
 
 protected:

@@ -781,23 +781,23 @@ ConnectionPtr GraphLocal::getConnection(const UUID &from, const UUID &to)
     return nullptr;
 }
 
-Graph::vertex_iterator GraphLocal::beginVertices()
+Graph::vertex_iterator GraphLocal::begin()
 {
     return vertices_.begin();
 }
 
-const Graph::vertex_const_iterator GraphLocal::beginVertices() const
+const Graph::vertex_const_iterator GraphLocal::begin() const
 {
     return vertices_.cbegin();
 }
 
 
-Graph::vertex_iterator GraphLocal::endVertices()
+Graph::vertex_iterator GraphLocal::end()
 {
     return vertices_.end();
 }
 
-const Graph::vertex_const_iterator GraphLocal::endVertices() const
+const Graph::vertex_const_iterator GraphLocal::end() const
 {
     return vertices_.cend();
 }

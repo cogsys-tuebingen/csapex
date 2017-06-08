@@ -60,11 +60,11 @@ public:
     /*REMOVE*/ void analyzeGraph() override;
 
     // iterators
-    vertex_iterator beginVertices() override;
-    const vertex_const_iterator beginVertices() const override;
+    vertex_iterator begin() override;
+    const vertex_const_iterator begin() const override;
 
-    vertex_iterator endVertices() override;
-    const vertex_const_iterator endVertices() const override;
+    vertex_iterator end() override;
+    const vertex_const_iterator end() const override;
 
 private:
     GraphLocal& temp_reference;
