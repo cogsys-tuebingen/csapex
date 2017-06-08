@@ -25,9 +25,9 @@ indigo:
   stage: build_and_test
   image: ros:indigo
   script:
-  - catkin_make
-  - source devel/setup.bash
-  - rosrun csapex csapex_test
+    - catkin_make
+    - source devel/setup.bash
+    - rosrun csapex csapex_test
 
 jade:
   stage: build_and_test
@@ -41,7 +41,7 @@ kinetic:
   stage: build_and_test
   image: ros:kinetic
   script:
-  - catkin_make
-  - source devel/setup.bash
-  - rosrun csapex csapex_test
+    - catkin_make
+    - source devel/setup.bash
+    - rosrun csapex csapex_test
 
