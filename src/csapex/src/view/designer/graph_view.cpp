@@ -138,9 +138,9 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     observe(sub_graph->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
     observe(graph->state_changed, [this](){ updateBoxInformation(); });
 
-    for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
+    for(const graph::VertexPtr& vertex : *graph) {
         //todo: this should be a remote node facade when in network mode
-        const NodeFacadePtr& facade = (*it)->getNodeFacade();
+        const NodeFacadePtr& facade = vertex->getNodeFacade();
         apex_assert_hard(facade);
         nodeAdded(facade);
     }

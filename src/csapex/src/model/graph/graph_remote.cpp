@@ -165,23 +165,23 @@ ConnectionPtr GraphRemote::getConnection(const UUID &from, const UUID &to)
     return temp_reference.getConnection(from, to);
 }
 
-Graph::vertex_iterator GraphRemote::beginVertices()
+Graph::vertex_iterator GraphRemote::begin()
 {
-    return temp_reference.beginVertices();
+    return temp_reference.begin();
 }
 
-const Graph::vertex_const_iterator GraphRemote::beginVertices() const
+const Graph::vertex_const_iterator GraphRemote::begin() const
 {
-    return temp_reference.beginVertices();
+    return temp_reference.begin();
 }
 
 
-Graph::vertex_iterator GraphRemote::endVertices()
+Graph::vertex_iterator GraphRemote::end()
 {
-    return temp_reference.endVertices();
+    return temp_reference.end();
 }
 
-const Graph::vertex_const_iterator GraphRemote::endVertices() const
+const Graph::vertex_const_iterator GraphRemote::end() const
 {
-    return temp_reference.endVertices();
+    return temp_reference.end();
 }

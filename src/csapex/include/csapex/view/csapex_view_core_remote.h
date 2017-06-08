@@ -90,6 +90,8 @@ private:
 
     std::shared_ptr<ExceptionHandler> exception_handler_;
 
+    GraphFacadePtr remote_root_;
+
     // TODO: remove
     CsApexCorePtr core_tmp_;
 };

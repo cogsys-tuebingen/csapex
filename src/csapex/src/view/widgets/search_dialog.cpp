@@ -111,7 +111,7 @@ QAbstractItemModel* SearchDialog::listNodes()
 
 void SearchDialog::addNodes(Graph *graph, QStandardItemModel *model)
 {
-    for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
+    for(auto it = graph->begin(); it != graph->end(); ++it) {
         NodeFacadePtr nf = (*it)->getNodeFacade();
         NodeHandlePtr nh = nf->getNodeHandle();
 

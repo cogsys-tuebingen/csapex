@@ -41,7 +41,7 @@ void DesignerIO::loadSettings(YAML::Node &/*doc*/)
 void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, GraphView *view)
 {
     YAML::Node adapters(YAML::NodeType::Sequence);
-    for(auto it = graph->beginVertices(); it != graph->endVertices(); ++it) {
+    for(auto it = graph->begin(); it != graph->end(); ++it) {
         NodeFacadePtr nh = (*it)->getNodeFacade();
         saveBox(nh.get(), view, adapters);
     }
