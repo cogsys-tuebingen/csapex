@@ -34,6 +34,25 @@ protected:
 
 TEST_F(UUIDTest, UUIDsAreGeneratedCorrectly)
 {
+    UUID uuid1 = uuid_provider->makeUUID("foo");
+    ASSERT_EQ("foo", uuid1.getFullName());
+
+    try {
+        uuid_provider->makeUUID("foo");
+        FAIL();
+
+    } catch(const std::exception& e) {
+        SUCCEED();
+    }
+
+    UUID uuid2 = uuid_provider->generateUUID("bar");
+    ASSERT_EQ("bar_0", uuid2.getFullName());
+
+    ASSERT_EQ(1, uuid_provider->getUUIDMap()["bar"]);
+}
+
+TEST_F(UUIDTest, UUIDsAreUnique)
+{
     UUID uuid1 = uuid_provider->generateUUID("foo");
     ASSERT_EQ("foo_0", uuid1.getFullName());
 
@@ -103,4 +122,52 @@ TEST_F(UUIDTest, UUIDsCanBeDeconstructed)
     ASSERT_EQ("foo_0", foo.rootUUID());
     ASSERT_EQ("foo_0", bar.rootUUID());
     ASSERT_EQ("foo_0", baz.rootUUID());
+}
+
+TEST_F(UUIDTest, MakeTypedUUIDWithIntegerId)
+{
+    UUID parent = uuid_provider->generateUUID("foo");
+    UUID bar = uuid_provider->makeTypedUUID(parent, "bar", 23);
+
+    ASSERT_EQ("foo_0:|:bar_23", bar.getFullName());
+}
+
+TEST_F(UUIDTest, MakeTypedUUIDWithStringId)
+{
+    UUID parent = uuid_provider->generateUUID("foo");
+    UUID bar = uuid_provider->makeTypedUUID(parent, "bar", "baz");
+
+    ASSERT_EQ("foo_0:|:bar_baz", bar.getFullName());
+}
+
+
+TEST_F(UUIDTest, MakeTypedUUIDWithoutParent)
+{
+    UUID bar = uuid_provider->makeTypedUUID(UUID::NONE, "bar", 23);
+
+    ASSERT_EQ(UUID::NONE, bar);
+}
+
+
+TEST_F(UUIDTest, MakeForcedTypedUUIDWithoutParent)
+{
+    UUID bar = uuid_provider->makeTypedUUID_forced(UUID::NONE, "bar", 23);
+
+    ASSERT_EQ(UUID::NONE, bar);
+}
+
+
+TEST_F(UUIDTest, GenerateTypedUUID)
+{
+    UUID parent = uuid_provider->generateUUID("foo");
+    UUID bar = uuid_provider->generateTypedUUID(parent, "bar");
+
+    ASSERT_EQ("foo_0:|:bar_0", bar.getFullName());
+}
+
+TEST_F(UUIDTest, GenerateTypedUUIDWithoutParent)
+{
+    UUID bar = uuid_provider->generateTypedUUID(UUID::NONE, "bar");
+
+    ASSERT_EQ(UUID::NONE, bar);
 }

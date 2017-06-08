@@ -126,6 +126,20 @@ else()
 				    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
 endif()	
 
+#
+# COVERAGE
+#
+if(ENABLE_COVERAGE)
+    message("generating coverage information")
+
+    SET(GCC_COVERAGE_COMPILE_FLAGS "--coverage -fno-inline -fno-inline-small-functions -fno-default-inline")
+    SET(GCC_COVERAGE_LINK_FLAGS    "-lgcov")
+
+    SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
+    SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
+endif()
+
+
 ###########
 ## Build ##
 ###########
@@ -771,6 +785,7 @@ add_custom_command(TARGET cfg POST_BUILD
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests/CMakeLists.txt)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
 endif()
+
 
 #
 # INSTALL
