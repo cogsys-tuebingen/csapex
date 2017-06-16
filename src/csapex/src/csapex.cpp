@@ -144,6 +144,8 @@ int Main::runHeadless()
     });
     core->startup();
 
+    core->startMainLoop();
+
     return runImpl();
 }
 
