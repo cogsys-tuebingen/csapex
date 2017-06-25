@@ -42,8 +42,8 @@ public:
     loadIntoGraph(const Snippet &blueprint, const csapex::Point &position);
 
 public:
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, YAML::Node& e)> saveViewRequest;
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, YAML::Node& n)> loadViewRequest;
+    csapex::slim_signal::Signal<void (SubgraphNodeConstPtr, YAML::Node& e)> saveViewRequest;
+    csapex::slim_signal::Signal<void (SubgraphNodePtr, const YAML::Node& n)> loadViewRequest;
 
 private:
 

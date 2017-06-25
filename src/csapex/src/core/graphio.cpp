@@ -534,6 +534,8 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
         if(subgraph) {
             YAML::Node subgraph_yaml;
             GraphIO sub_graph_io(subgraph, node_factory_);
+            slim_signal::ScopedConnection connection = sub_graph_io.saveViewRequest.connect(saveViewRequest);
+
             sub_graph_io.saveGraphTo(subgraph_yaml);
             doc["subgraph"] = subgraph_yaml;
         }

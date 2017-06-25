@@ -47,6 +47,11 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexCorePtr core)
     observe(core_->begin_step, begin_step);
     observe(core_->end_step, end_step);
 
+    observe(core_->save_detail_request, save_detail_request);
+    observe(core_->load_detail_request, load_detail_request);
+
+    observe(core_->notification, notification);
+
 
     observe(core_->getRoot()->node_facade_added, node_facade_added);
     observe(core_->getRoot()->node_facade_removed, node_facade_removed);
@@ -59,8 +64,6 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexCorePtr core)
 
     observe(dispatcher_->state_changed, undo_state_changed);
     observe(dispatcher_->dirty_changed, undo_dirty_changed);
-
-    observe(core_->notification, notification);
 }
 
 CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexViewCore &parent, ExceptionHandler &exception_handler)

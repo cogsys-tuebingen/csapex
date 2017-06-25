@@ -22,11 +22,8 @@ class CSAPEX_QT_EXPORT DesignerIO
 public:
     DesignerIO();
 
-    void saveSettings(YAML::Node& yaml);
-    void loadSettings(YAML::Node& doc);
-
     void saveBoxes(YAML::Node &yaml, Graph* graph, GraphView *view);
-    void loadBoxes(YAML::Node& doc, GraphView *view);
+    void loadBoxes(const YAML::Node &doc, GraphView *view);
 
 private:
     void saveBox(NodeFacade *node, GraphView *view, YAML::Node &yaml);

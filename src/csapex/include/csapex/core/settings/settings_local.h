@@ -22,8 +22,11 @@ public:
     csapex::param::ParameterPtr get(const std::string& name) const override;
     csapex::param::ParameterPtr getNoThrow(const std::string& name) const override;
 
-    void save() override;
-    void load() override;
+    void savePersistent() override;
+    void loadPersistent() override;
+
+    void saveTemporary(YAML::Node& node) override;
+    void loadTemporary(YAML::Node& node) override;
 
 private:
     struct Entry

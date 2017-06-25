@@ -16,8 +16,8 @@ public:
 
     enum class CoreRequestType
     {
-        SettingsSave,
-        SettingsLoad,
+        SettingsSavePersistent,
+        SettingsLoadPersistent,
         CoreSave,
         CoreLoad,
         CoreStep,

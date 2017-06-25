@@ -86,6 +86,7 @@ void NodeFactory::rebuildPrototypes()
 
     bool dirty = false;
 
+    int plugin_count = 0;
     for(const auto& p : node_manager_->getConstructors()) {
         const PluginConstructor<Node>& plugin_constructor = p.second;
 
@@ -128,12 +129,15 @@ void NodeFactory::rebuildPrototypes()
         }
 
         registerNodeType(constructor, true);
+        ++plugin_count;
     }
+
+    std::cout << "loaded " << plugin_count << " plugins" << std::endl;
 
     settings_.setQuiet(false);
 
     if(dirty) {
-        settings_.save();
+        settings_.savePersistent();
     }
 }
 

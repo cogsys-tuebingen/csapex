@@ -48,7 +48,9 @@ public:
     explicit CsApexWindow(CsApexViewCore &core, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
-    void closeEvent(QCloseEvent* event);
+    void closeEvent(QCloseEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void moveEvent(QMoveEvent* event) override;
 
 private Q_SLOTS:
     void updateMenu();
@@ -64,6 +66,8 @@ private Q_SLOTS:
     void updateClipboardActions();
 
     void updatePluginIgnored(const QObject *&action);
+
+    void addStateToSettings();
 
 public Q_SLOTS:
     void save();
@@ -120,6 +124,9 @@ private:
 
     std::string getConfigFile();
 
+    void restoreWindowState();
+    bool isDirty() const;
+
 private:
     CsApexViewCore& view_core_;
 
@@ -133,11 +140,14 @@ private:
     ActivityTimeline* activity_timeline_;
 
     QTimer timer;
+    QTimer auto_save_state_timer;
 
     bool init_;
+    bool state_changed_;
 
     QFileSystemWatcher* style_sheet_watcher_;
     PluginLocatorPtr plugin_locator_;
+
 };
 
 } /// NAMESPACE

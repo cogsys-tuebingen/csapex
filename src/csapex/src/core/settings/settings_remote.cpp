@@ -45,14 +45,24 @@ SettingsRemote::SettingsRemote(SessionPtr session)
     });
 }
 
-void SettingsRemote::save()
+void SettingsRemote::savePersistent()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsSave);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsSavePersistent);
 }
 
-void SettingsRemote::load()
+void SettingsRemote::loadPersistent()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsLoad);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsLoadPersistent);
+}
+
+void SettingsRemote::saveTemporary(YAML::Node& node)
+{
+    throw std::runtime_error("saving temporary settings not implemented for remote settings");
+}
+
+void SettingsRemote::loadTemporary(YAML::Node& node)
+{
+    throw std::runtime_error("loading temporary settings not implemented for remote settings");
 }
 
 void SettingsRemote::add(csapex::param::Parameter::Ptr p, bool persistent)

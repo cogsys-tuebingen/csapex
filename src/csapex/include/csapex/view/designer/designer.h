@@ -66,11 +66,8 @@ public:
 
     bool hasSelection() const;
 
-    void saveSettings(YAML::Node& doc);
-    void loadSettings(YAML::Node& doc);
-
-    void saveView(SubgraphNodePtr graph, YAML::Node &e);
-    void loadView(SubgraphNodePtr graph, YAML::Node& doc);
+    void saveView(SubgraphNodeConstPtr graph, YAML::Node &e);
+    void loadView(SubgraphNodePtr graph, const YAML::Node& doc);
 
 
     virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
@@ -129,7 +126,7 @@ private:
     std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> graphs_;
 
     std::set<SubgraphNode*> visible_graphs_;
-    std::map<SubgraphNode*, GraphView*> graph_views_;
+    std::map<const SubgraphNode*, GraphView*> graph_views_;
     std::map<AUUID, GraphView*> auuid_views_;
     std::map<GraphView*, GraphFacade*> view_graphs_;
     std::map<SubgraphNode*, std::vector<slim_signal::ScopedConnection>> graph_connections_;

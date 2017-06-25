@@ -30,14 +30,6 @@ DesignerIO::DesignerIO()
 {
 }
 
-void DesignerIO::saveSettings(YAML::Node& /*yaml*/)
-{
-}
-
-void DesignerIO::loadSettings(YAML::Node &/*doc*/)
-{
-}
-
 void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, GraphView *view)
 {
     YAML::Node adapters(YAML::NodeType::Sequence);
@@ -65,7 +57,7 @@ void DesignerIO::saveBox(NodeFacade* node, GraphView *view, YAML::Node &yaml)
     }
 }
 
-void DesignerIO::loadBoxes(YAML::Node &doc, GraphView *view)
+void DesignerIO::loadBoxes(const YAML::Node &doc, GraphView *view)
 {
     UUIDProviderPtr graph = view->getGraphFacade()->getGraph()->shared_from_this();
 

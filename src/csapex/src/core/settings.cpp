@@ -69,7 +69,8 @@ std::string Settings::defaultConfigFile()
 }
 
 Settings::Settings()
-    : quiet_(false)
+    : dirty_(false),
+      quiet_(false)
 {
 }
 
@@ -87,6 +88,15 @@ void Settings::addTemporary(csapex::param::Parameter::Ptr p)
     add(p, false);
 }
 
+bool Settings::isDirty() const
+{
+    return dirty_;
+}
+
+void Settings::setNotDirty()
+{
+    dirty_ = false;
+}
 
 bool Settings::isQuiet() const
 {
@@ -103,7 +113,7 @@ void Settings::setQuiet(bool quiet)
                 setting_changed(key);
             }
             changes_.clear();
-            settings_changed();
+            triggerSettingsChanged();
         }
     }
 }
@@ -115,6 +125,12 @@ void Settings::settingsChanged(const std::string &key)
 
     } else {
         setting_changed(key);
-        settings_changed();
+        triggerSettingsChanged();
     }
+}
+
+void Settings::triggerSettingsChanged()
+{
+    dirty_ = true;
+    settings_changed();
 }

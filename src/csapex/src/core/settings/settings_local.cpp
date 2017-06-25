@@ -36,11 +36,11 @@ SettingsLocal SettingsLocal::NoSettings(false);
 SettingsLocal::SettingsLocal(bool load_from_config)
 {
     if(load_from_config) {
-        load();
+        loadPersistent();
     }
 }
 
-void SettingsLocal::save()
+void SettingsLocal::savePersistent()
 {
     YAML::Emitter yaml;
     yaml << YAML::BeginSeq;
@@ -74,7 +74,7 @@ void SettingsLocal::save()
     bf3::remove(tmp_file);
 }
 
-void SettingsLocal::load()
+void SettingsLocal::loadPersistent()
 {
     if(!bf3::exists(settings_file)) {
         return;
@@ -96,6 +96,54 @@ void SettingsLocal::load()
         entry.persistent = true;
     }
 }
+
+void SettingsLocal::saveTemporary(YAML::Node& node)
+{
+    YAML::Node yaml(YAML::NodeType::Sequence);
+
+    for(auto it = settings_.begin(); it != settings_.end(); ++it) {
+        Entry& entry = it->second;
+        if(!entry.persistent) {
+            YAML::Node n;
+            csapex::param::Parameter::Ptr p = entry.parameter;
+            p->serialize_yaml(n);
+
+            yaml.push_back(n);
+        }
+    }
+
+    setNotDirty();
+
+    node["settings"] = yaml;
+}
+
+void SettingsLocal::loadTemporary(YAML::Node& node)
+{
+    YAML::Node doc = node["settings"];
+    if(doc.IsDefined()) {
+        if(doc.Type() != YAML::NodeType::Sequence) {
+            std::cerr << "cannot read the temporary settings" << std::endl;
+            return;
+        }
+
+        for(std::size_t i = 0, n = doc.size(); i < n; ++i) {
+            csapex::param::Parameter::Ptr p = doc[i].as<csapex::param::Parameter::Ptr>();
+            p->setUUID(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
+
+            if(knows(p->name())) {
+                Entry& entry = settings_[p->name()];
+                entry.parameter->setValueFrom(*p);
+            } else {
+                Entry& entry = settings_[p->name()];
+                entry.parameter = p;
+                entry.persistent = false;
+            }
+        }
+    }
+
+    dirty_ = false;
+}
+
 
 void SettingsLocal::add(csapex::param::Parameter::Ptr p, bool persistent)
 {

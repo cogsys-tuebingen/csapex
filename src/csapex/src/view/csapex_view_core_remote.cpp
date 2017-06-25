@@ -83,6 +83,22 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     });
 
 
+    observe(core_tmp_->config_changed, config_changed);
+    observe(core_tmp_->status_changed, status_changed);
+    observe(core_tmp_->new_node_type, new_node_type);
+    observe(core_tmp_->new_snippet_type, new_snippet_type);
+    observe(core_tmp_->reset_requested, reset_requested);
+    observe(core_tmp_->reset_done, reset_done);
+    observe(core_tmp_->saved, saved);
+    observe(core_tmp_->loaded, loaded);
+    observe(core_tmp_->paused, paused);
+    observe(core_tmp_->begin_step, begin_step);
+    observe(core_tmp_->end_step, end_step);
+
+    observe(core_tmp_->save_detail_request, save_detail_request);
+    observe(core_tmp_->load_detail_request, load_detail_request);
+
+
     observe(dispatcher_->state_changed, undo_state_changed);
     observe(dispatcher_->dirty_changed, undo_dirty_changed);
 }

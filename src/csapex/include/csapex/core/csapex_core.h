@@ -92,6 +92,9 @@ public:
     slim_signal::Signal<void ()> startup_requested;
     slim_signal::Signal<void ()> shutdown_requested;
     slim_signal::Signal<void ()> shutdown_complete;
+
+    csapex::slim_signal::Signal<void (SubgraphNodeConstPtr, YAML::Node& e)> save_detail_request;
+    csapex::slim_signal::Signal<void (SubgraphNodePtr, const YAML::Node& n)> load_detail_request;
     
 private:
     CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator);

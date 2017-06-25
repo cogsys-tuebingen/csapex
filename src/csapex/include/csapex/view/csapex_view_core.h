@@ -15,6 +15,11 @@
 #include <csapex/plugin/plugin_fwd.h>
 #include <csapex/profiling/profiling_fwd.h>
 
+namespace YAML
+{
+class Node;
+}
+
 namespace csapex
 {
 class CsApexCore;
@@ -91,6 +96,9 @@ public:
 
     slim_signal::Signal<void ()> begin_step;
     slim_signal::Signal<void ()> end_step;
+
+    csapex::slim_signal::Signal<void (SubgraphNodeConstPtr, YAML::Node& e)> save_detail_request;
+    csapex::slim_signal::Signal<void (SubgraphNodePtr, const YAML::Node& n)> load_detail_request;
 
     /// GRAPH
     slim_signal::Signal<void(NodeFacadePtr)> node_facade_added;

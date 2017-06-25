@@ -100,9 +100,6 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
         setPause(true);
     });
 
-    settings_.save_request.connect([this](YAML::Node& n){ thread_pool_->saveSettings(n); });
-    settings_.load_request.connect([this](YAML::Node& n){ thread_pool_->loadSettings(n); });
-
     StreamInterceptor::instance().start();
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
 
@@ -462,7 +459,7 @@ std::shared_ptr<Profiler> CsApexCore::getProfiler() const
 
 void CsApexCore::settingsChanged()
 {
-    settings_.save();
+    settings_.savePersistent();
     config_changed();
 }
 
@@ -485,13 +482,12 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     YAML::Node node_map(YAML::NodeType::Map);
 
     GraphIO graphio(root_->getSubgraphNode(),  node_factory_.get());
+    slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(save_detail_request);
 
-    slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(settings_.save_detail_request);
-
-    settings_.save_request(node_map);
+    settings_.saveTemporary(node_map);
+    thread_pool_->saveSettings(node_map);
 
     graphio.saveSettings(node_map);
-
     graphio.saveGraphTo(node_map);
 
     YAML::Emitter yaml;
@@ -525,18 +521,18 @@ void CsApexCore::load(const std::string &file)
     apex_assert_hard(root_->getGraph()->countNodes() == 0);
 
     GraphIO graphio(root_->getSubgraphNode(), node_factory_.get());
+    slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(load_detail_request);
+
     graphio.useProfiler(profiler_);
 
-    slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(settings_.load_detail_request);
-
-
     if(bf3::exists(file)) {
-        YAML::Node doc = YAML::LoadFile(file.c_str());
+        YAML::Node node_map = YAML::LoadFile(file.c_str());
 
-        graphio.loadSettings(doc);
-        graphio.loadGraphFrom(doc);
+        settings_.loadTemporary(node_map);
+        thread_pool_->loadSettings(node_map);
 
-        settings_.load_request(doc);
+        graphio.loadSettings(node_map);
+        graphio.loadGraphFrom(node_map);
     }
 
     load_needs_reset_ = true;

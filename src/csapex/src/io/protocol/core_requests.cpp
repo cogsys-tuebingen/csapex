@@ -36,11 +36,11 @@ ResponsePtr CoreRequests::CoreRequest::execute(CsApexCore &core) const
 {
     switch(request_type_)
     {
-    case CoreRequestType::SettingsSave:
-        core.getSettings().save();
+    case CoreRequestType::SettingsSavePersistent:
+        core.getSettings().savePersistent();
         break;
-    case CoreRequestType::SettingsLoad:
-        core.getSettings().load();
+    case CoreRequestType::SettingsLoadPersistent:
+        core.getSettings().loadPersistent();
         break;
     case CoreRequestType::CoreSave: {
         int args = parameters_.size();

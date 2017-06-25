@@ -67,7 +67,8 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
       profiler_(std::make_shared<Profiler>()),
       ui(new Ui::CsApexWindow), designer_(new Designer(view_core)), minimap_(designer_->getMinimap()),
       activity_legend_(new ActivityLegend), activity_timeline_(new ActivityTimeline),
-      init_(false), style_sheet_watcher_(nullptr), plugin_locator_(view_core_.getPluginLocator())
+      init_(false), state_changed_(false),
+      style_sheet_watcher_(nullptr), plugin_locator_(view_core_.getPluginLocator())
 {
     qRegisterMetaType < ActivityType > ("ActivityType");
     qRegisterMetaType < QImage > ("QImage");
@@ -175,6 +176,10 @@ void CsApexWindow::construct()
     observe(view_core_.new_node_type, [this](){ updateNodeTypes(); });
     observe(view_core_.new_snippet_type, [this](){ updateSnippets(); });
 
+
+    observe(view_core_.save_detail_request, [this](SubgraphNodeConstPtr graph, YAML::Node &doc){ designer_->saveView(graph, doc);});
+    observe(view_core_.load_detail_request, [this](SubgraphNodePtr graph, const YAML::Node &doc){ designer_->loadView(graph, doc);});
+
     observe(graph->state_changed, [this]() { updateMenuRequest(); });
     observe(view_core_.panic, [this]() { clearBlock(); });
 
@@ -190,6 +195,7 @@ void CsApexWindow::construct()
     observe(view_core_.end_step, [this](){ ui->actionStep->setEnabled(view_core_.isSteppingMode()); });
 
     observe(view_core_.group_created, [this](const ThreadGroupPtr& /*group*/) { updateThreadInfo(); });
+    observe(view_core_.loaded, [this](){ restoreWindowState(); });
 
     updateMenu();
     updateTitle();
@@ -204,6 +210,11 @@ void CsApexWindow::construct()
     timer.start();
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+
+    auto_save_state_timer.setInterval(100);
+    auto_save_state_timer.setSingleShot(true);
+
+    QObject::connect(&auto_save_state_timer, SIGNAL(timeout()), this, SLOT(addStateToSettings()));
 }
 
 
@@ -734,7 +745,7 @@ void CsApexWindow::updateTitle()
     std::stringstream window;
     window << "CS::APEX (" << getConfigFile() << ")";
 
-    if(view_core_.getCommandDispatcher()->isDirty()) {
+    if(isDirty()) {
         window << " *";
     }
 
@@ -744,6 +755,11 @@ void CsApexWindow::updateTitle()
     }
 
     setWindowTitle(window.str().c_str());
+}
+
+bool CsApexWindow::isDirty() const
+{
+    return view_core_.getCommandDispatcher()->isDirty() || view_core_.getSettings().isDirty();
 }
 
 void CsApexWindow::createPluginsMenu()
@@ -817,11 +833,46 @@ void CsApexWindow::updatePluginIgnored(const QObject* &action)
 void CsApexWindow::tick()
 {
     QApplication::processEvents();
+
+    addStateToSettings();
+}
+
+void CsApexWindow::resizeEvent(QResizeEvent* event)
+{
+    state_changed_ = true;
+}
+
+void CsApexWindow::moveEvent(QMoveEvent* event)
+{
+    state_changed_ = true;
+}
+
+void CsApexWindow::addStateToSettings()
+{
+    if(state_changed_) {
+        QString geometry(saveGeometry().toBase64());
+        QString uistate(saveState().toBase64());
+
+        Settings& settings = view_core_.getSettings();
+        if(!settings.knows("uistate")) {
+            settings.addTemporary(csapex::param::ParameterFactory::declareText("uistate", ""));
+        }
+        if(!settings.knows("geometry")) {
+            settings.addTemporary(csapex::param::ParameterFactory::declareText("geometry", geometry.toStdString()));
+        }
+
+        settings.set("uistate", uistate.toStdString());
+        settings.set("geometry", geometry.toStdString());
+
+        state_changed_ = false;
+    }
 }
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    if(view_core_.getCommandDispatcher()->isDirty()) {
+    addStateToSettings();
+
+    if(isDirty()) {
         int r = QMessageBox::warning(this, tr("cs::APEX"),
                                      tr("Do you want to save the layout before closing?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -835,20 +886,6 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
             return;
         }
     }
-
-    QString geometry(saveGeometry().toBase64());
-    QString uistate(saveState().toBase64());
-
-    Settings& settings = view_core_.getSettings();
-    if(!settings.knows("uistate")) {
-        settings.addTemporary(csapex::param::ParameterFactory::declareText("uistate", ""));
-    }
-    if(!settings.knows("geometry")) {
-        settings.addTemporary(csapex::param::ParameterFactory::declareText("geometry", geometry.toStdString()));
-    }
-
-    settings.set("uistate", uistate.toStdString());
-    settings.set("geometry", geometry.toStdString());
 
     try {
         view_core_.shutdown();
@@ -881,6 +918,11 @@ void CsApexWindow::init()
     updateSnippets();
     //    designer_->show();
 
+    restoreWindowState();
+}
+
+void CsApexWindow::restoreWindowState()
+{
     Settings& settings = view_core_.getSettings();
     if(settings.knows("uistate")) {
         std::string uistate = settings.get<std::string>("uistate");
@@ -895,6 +937,8 @@ void CsApexWindow::init()
         restoreGeometry(QByteArray::fromBase64(geometry.data()));
     }
 }
+
+
 
 std::string CsApexWindow::getConfigFile()
 {

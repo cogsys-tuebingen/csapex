@@ -30,6 +30,7 @@
 #include <QResizeEvent>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
+#include <iostream>
 
 using namespace csapex;
 
@@ -40,12 +41,6 @@ Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
       view_core_(view_core), is_init_(false),
       notification_animation_(nullptr)
 {
-    observe(view_core_.getSettings().save_request, [this](YAML::Node& node){ saveSettings(node); });
-    observe(view_core_.getSettings().load_request, [this](YAML::Node& node){ loadSettings(node); });
-
-    observe(view_core_.getSettings().save_detail_request, [this](SubgraphNodePtr graph, YAML::Node& node){ saveView(graph, node); });
-    observe(view_core_.getSettings().load_detail_request, [this](SubgraphNodePtr graph, YAML::Node& node){ loadView(graph, node); });
-
     observeGraph(view_core_.getRoot());
 }
 
@@ -586,20 +581,7 @@ void Designer::focusOnNode(const AUUID &id)
 }
 
 
-void Designer::saveSettings(YAML::Node& doc)
-{
-    DesignerIO designerio;
-    designerio.saveSettings(doc);
-}
-
-void Designer::loadSettings(YAML::Node &doc)
-{
-    DesignerIO designerio;
-    designerio.loadSettings(doc);
-}
-
-
-void Designer::saveView(SubgraphNodePtr graph, YAML::Node &doc)
+void Designer::saveView(SubgraphNodeConstPtr graph, YAML::Node &doc)
 {
     DesignerIO designerio;
 
@@ -612,7 +594,7 @@ void Designer::saveView(SubgraphNodePtr graph, YAML::Node &doc)
     }
 }
 
-void Designer::loadView(SubgraphNodePtr graph, YAML::Node &doc)
+void Designer::loadView(SubgraphNodePtr graph, const YAML::Node &doc)
 {
     DesignerIO designerio;
 
@@ -620,7 +602,13 @@ void Designer::loadView(SubgraphNodePtr graph, YAML::Node &doc)
     if(pos != graph_views_.end()) {
         designerio.loadBoxes(doc, pos->second);
     }
-    states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
+
+    const YAML::Node& adapters = doc["adapters"];
+    if(adapters.IsDefined()) {
+        states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
+    } else {
+        std::cerr << "cannot load adapters from YAML Node: " << doc << std::endl;;
+    }
 }
 
 void Designer::useProfiler(std::shared_ptr<Profiler> profiler)

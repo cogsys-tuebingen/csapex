@@ -35,6 +35,8 @@ public:
     Settings();
     virtual ~Settings();
 
+    bool isDirty() const;
+
     bool isQuiet() const;
     void setQuiet(bool quiet);
 
@@ -47,10 +49,11 @@ public:
     void addTemporary(csapex::param::Parameter::Ptr p);
     void addPersistent(csapex::param::Parameter::Ptr p);
 
-    virtual void save() = 0;
-    virtual void load() = 0;
+    virtual void savePersistent() = 0;
+    virtual void loadPersistent() = 0;
 
-
+    virtual void saveTemporary(YAML::Node& node) = 0;
+    virtual void loadTemporary(YAML::Node& node) = 0;
 
     template <typename T>
     T get(const std::string& name) const
@@ -125,20 +128,19 @@ public:
     }
 
 protected:
+    void setNotDirty();
     void settingsChanged(const std::string& key);
+
+    virtual void triggerSettingsChanged();
 
 public:
     csapex::slim_signal::Signal<void(const std::string&)> setting_changed;
     csapex::slim_signal::Signal<void()> settings_changed;
 
-    csapex::slim_signal::Signal<void (YAML::Node& e)> save_request;
-    csapex::slim_signal::Signal<void (YAML::Node& n)> load_request;
-
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, YAML::Node& e)> save_detail_request;
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, YAML::Node& n)> load_detail_request;
-
 protected:
+    bool dirty_;
     bool quiet_;
+
     std::vector<std::string> changes_;
 };
 
