@@ -26,6 +26,7 @@ NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerP
     connectNodeWorker();
 }
 NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh)
+    : nh_(nh)
 {
     connectNodeHandle();
 }
