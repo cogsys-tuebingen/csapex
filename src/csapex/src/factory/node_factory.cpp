@@ -290,6 +290,11 @@ NodeFacadeLocalPtr NodeFactory::makeNodeLocal(const std::string& target_type, co
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {
         NodeHandlePtr nh = p->makeNodeHandle(uuid, uuid_provider);
+        if(!nh) {
+            NOTIFICATION("error: cannot make node of type '" << target_type);
+            return nullptr;
+        }
+
         NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
         NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
         NodeFacadeLocalPtr result = std::make_shared<NodeFacadeLocal>(nh, nw, runner);

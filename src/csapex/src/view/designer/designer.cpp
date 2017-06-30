@@ -307,8 +307,8 @@ void Designer::updateMinimap()
 
 void Designer::showNotification(const Notification &notification)
 {
-    auto pos = named_notifications_.find(notification.auuid);
-    if(pos == named_notifications_.end()) {
+    std::unordered_map<UUID, NotificationWidget*, UUID::Hasher>::iterator pos;
+    if(notification.auuid.empty() || (pos = named_notifications_.find(notification.auuid)) == named_notifications_.end()) {
         if(notification.error == ErrorState::ErrorLevel::NONE) {
             // for now we only show error messages
             return;
