@@ -56,6 +56,7 @@
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/widgets/profiling_widget.h>
 #include <csapex/view/widgets/port_panel.h>
+#include <csapex/view/widgets/meta_port.h>
 #include <csapex/view/widgets/rewiring_dialog.h>
 #include <csapex/csapex_mime.h>
 #include <csapex/plugin/plugin_locator.h>
@@ -1066,8 +1067,10 @@ void GraphView::addPort(Port *port)
 {
     scene_->addPort(port);
 
-    QObject::connect(port, SIGNAL(mouseOver(Port*)), this, SLOT(showPreview(Port*)));
-    QObject::connect(port, SIGNAL(mouseOut(Port*)), this, SLOT(stopPreview()));
+    if(!dynamic_cast<MetaPort*>(port)) {
+        QObject::connect(port, SIGNAL(mouseOver(Port*)), this, SLOT(showPreview(Port*)));
+        QObject::connect(port, SIGNAL(mouseOut(Port*)), this, SLOT(stopPreview()));
+    }
 
     QObject::connect(port, &Port::removeConnectionsRequest, [this, port]() {
         ConnectorPtr adaptee = port->getAdaptee().lock();

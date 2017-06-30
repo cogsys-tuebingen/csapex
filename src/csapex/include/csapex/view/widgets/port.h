@@ -70,6 +70,7 @@ Q_SIGNALS:
 
     void changePortRequest(QString label);
 
+
 public Q_SLOTS:
     void setMinimizedSize(bool mini);
     void setFlipped(bool flipped);

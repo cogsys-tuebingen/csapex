@@ -269,6 +269,8 @@ void Port::startDrag()
         return;
     }
 
+    Q_EMIT mouseOut(this);
+
     bool left = (buttons_down_ & Qt::LeftButton) != 0;
     bool right = (buttons_down_ & Qt::RightButton) != 0;
 
