@@ -146,8 +146,11 @@ protected:
 
     InputTransitionPtr transition_relay_in_;
     OutputTransitionPtr transition_relay_out_;
+
     std::unordered_map<UUID, SlotPtr, UUID::Hasher> internal_slots_;
+    std::vector<UUID> internal_slot_ids_;
     std::unordered_map<UUID, EventPtr, UUID::Hasher> internal_events_;
+    std::vector<UUID> internal_event_ids_;
 
     std::unordered_map<UUID, OutputPtr, UUID::Hasher> external_to_internal_outputs_;
     std::unordered_map<UUID, InputPtr, UUID::Hasher> external_to_internal_inputs_;

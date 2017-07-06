@@ -13,6 +13,9 @@
 #include <csapex/msg/io.h>
 #include <csapex/param/string_list_parameter.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 VariadicBase::VariadicBase(TokenDataConstPtr type)
@@ -93,7 +96,7 @@ Input *VariadicInputs::createVariadicInput(TokenDataConstPtr type, const std::st
         variadic_inputs_.push_back(std::dynamic_pointer_cast<Input>(result->shared_from_this()));
         input_count_->set((int) variadic_inputs_.size());
 
-        if(variadic_inputs_.size() >= input_names_->count()) {
+        if(variadic_inputs_.size() > input_names_->count()) {
             input_names_->add(label);
         }
         int index = variadic_inputs_.size() - 1;
@@ -204,7 +207,7 @@ Output *VariadicOutputs::createVariadicOutput(TokenDataConstPtr type, const std:
         variadic_outputs_.emplace_back(std::dynamic_pointer_cast<Output>(result->shared_from_this()));
         output_count_->set((int) variadic_outputs_.size());
 
-        if(variadic_outputs_.size() >= output_names_->count()) {
+        if(variadic_outputs_.size() > output_names_->count()) {
             output_names_->add(label);
         }
         int index = variadic_outputs_.size() - 1;
@@ -334,7 +337,7 @@ Event *VariadicEvents::createVariadicEvent(TokenDataConstPtr type, const std::st
         variadic_events_.emplace_back(std::dynamic_pointer_cast<Event>(result->shared_from_this()));
         event_count_->set((int) variadic_events_.size());
 
-        if(variadic_events_.size() >= event_names_->count()) {
+        if(variadic_events_.size() > event_names_->count()) {
             event_names_->add(label);
         }
         int index = variadic_events_.size() - 1;
@@ -477,7 +480,7 @@ void VariadicSlots::registerSlot(Slot* slot)
         variadic_slots_.emplace_back(std::dynamic_pointer_cast<Slot>(slot->shared_from_this()));
         slot_count_->set((int) variadic_slots_.size());
 
-        if(variadic_slots_.size() >= slot_names_->count()) {
+        if(variadic_slots_.size() > slot_names_->count()) {
             slot_names_->add(slot->getLabel());
         }
 

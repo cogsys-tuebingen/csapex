@@ -420,6 +420,7 @@ SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UU
     slot->connectionInProgress.connect(internalConnectionInProgress);
 
     internal_slots_[internal_uuid] = slot;
+    internal_slot_ids_.push_back(slot->getUUID());
 
     return slot;
 }
@@ -436,6 +437,11 @@ void SubgraphNode::removeVariadicSlot(SlotPtr slot)
     external_to_internal_events_.erase(slot->getUUID());
 
     internal_events_.erase(relay->getUUID());
+
+    auto it = std::find(internal_event_ids_.begin(), internal_event_ids_.end(), relay->getUUID());
+    if(it != internal_event_ids_.end()) {
+        internal_event_ids_.erase(it);
+    }
 
     forwardingRemoved(relay);
 
@@ -488,6 +494,8 @@ EventPtr SubgraphNode::createInternalEvent(const TokenDataConstPtr& type, const 
 
     internal_events_[internal_uuid] = event;
 
+    internal_event_ids_.push_back(event->getUUID());
+
     //    event->triggered.connect([this]() {
     //        std::cerr << "tigger internal event" << std::endl;
     //    });
@@ -507,6 +515,11 @@ void SubgraphNode::removeVariadicEvent(EventPtr event)
     external_to_internal_slots_.erase(event->getUUID());
 
     internal_slots_.erase(relay->getUUID());
+
+    auto it = std::find(internal_slot_ids_.begin(), internal_slot_ids_.end(), relay->getUUID());
+    if(it != internal_slot_ids_.end()) {
+        internal_slot_ids_.erase(it);
+    }
 
     forwardingRemoved(relay);
 
@@ -649,19 +662,11 @@ std::vector<UUID> SubgraphNode::getInternalInputs() const
 }
 std::vector<UUID> SubgraphNode::getInternalSlots() const
 {
-    std::vector<UUID> res;
-    for(const auto& pair : internal_slots_) {
-        res.push_back(pair.second->getUUID());
-    }
-    return res;
+    return internal_slot_ids_;
 }
 std::vector<UUID> SubgraphNode::getInternalEvents() const
 {
-    std::vector<UUID> res;
-    for(const auto& pair : internal_events_) {
-        res.push_back(pair.second->getUUID());
-    }
-    return res;
+    return internal_event_ids_;
 }
 
 void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool enabled)
