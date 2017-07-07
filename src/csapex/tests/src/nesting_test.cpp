@@ -119,6 +119,11 @@ public:
         msg::publish(out, i++);
     }
 
+    int getValue() const
+    {
+        return i;
+    }
+
 private:
     Output* out;
 
@@ -615,14 +620,77 @@ TEST_F(NestingTest, GroupCanBeSource) {
 
     executor.start();
 
+    auto source = std::dynamic_pointer_cast<MultiplierSource>(src->getNode());
+    apex_assert_hard(source);
+
+    std::mutex step_done_mutex;
+    std::condition_variable step_done;
+    executor.end_step.connect([&]() {
+        step_done.notify_all();
+    });
+
     // execution
+    std::unique_lock<std::mutex> lock(step_done_mutex);
     ASSERT_EQ(-1, sink->getValue());
     for(int iter = 0; iter < 23; ++iter) {
-        sink->setWaiting(true);
         executor.step();
-        sink->wait();
 
+        step_done.wait_for(lock, std::chrono::milliseconds(50));
+
+        ASSERT_EQ(iter + 1, source->getValue());
         ASSERT_EQ(iter , sink->getValue());
+    }
+}
+
+TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
+    GraphFacade main_graph_facade(executor, graph, graph_node);
+
+    executor.setSteppingMode(true);
+
+    // NESTED GRAPH
+    NodeFacadePtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
+    SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
+    apex_assert_hard(sub_graph);
+
+    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+
+    NodeFacadePtr src = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src"), graph);
+    ASSERT_NE(nullptr, src);
+    sub_graph_facade.addNode(src);
+
+
+    apex_assert_hard(sub_graph_node_facade);
+    graph->addNode(sub_graph_node_facade);
+
+    auto type = connection_types::makeEmptyMessage<connection_types::GenericValueMessage<int> >();
+
+    auto out_map = sub_graph->addForwardingOutput(type, "forwarding");
+
+    // forwarding connections
+    sub_graph_facade.connect(src, "output", out_map.internal);
+
+    executor.start();
+
+    auto source = std::dynamic_pointer_cast<MultiplierSource>(src->getNode());
+    apex_assert_hard(source);
+
+    std::mutex step_done_mutex;
+    std::condition_variable step_done;
+    executor.end_step.connect([&]() {
+        step_done.notify_all();
+    });
+
+    // execution
+    std::unique_lock<std::mutex> lock(step_done_mutex);
+
+    for(int iter = 0; iter < 23; ++iter) {
+//        ASSERT_EQ(iter, source->getValue());
+
+        executor.step();
+
+        step_done.wait_for(lock, std::chrono::milliseconds(50));
+
+        ASSERT_EQ(iter + 1, source->getValue());
     }
 }
 }

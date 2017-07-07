@@ -713,6 +713,7 @@ void SubgraphNode::currentIterationIsProcessed()
 
 void SubgraphNode::subgraphHasProducedAllMessages()
 {
+    APEX_DEBUG_TRACE ainfo << "subgraphHasProducedAllMessages" << std::endl;
     if(transition_relay_in_->isEnabled()) { // TODO: check this in checkIfEnabled
         APEX_DEBUG_TRACE ainfo << "output activated" << std::endl;
 
@@ -725,6 +726,7 @@ void SubgraphNode::subgraphHasProducedAllMessages()
 
 void SubgraphNode::tryFinishSubgraph()
 {
+    APEX_DEBUG_TRACE ainfo << "tryFinishSubgraph" << std::endl;
     bool can_start_next_iteration = node_handle_->isSink() || has_sent_current_iteration_;
     if(can_start_next_iteration) {
         bool last_iteration = !is_iterating_ || iteration_index_ >= iteration_count_;
@@ -751,19 +753,26 @@ void SubgraphNode::finishSubgraph()
 
 void SubgraphNode::notifySubgraphProcessed()
 {
-    std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
-    if(continuation_) {
-        auto cnt = continuation_;
-        continuation_ = Continuation();
-        lock.unlock();
+    APEX_DEBUG_TRACE ainfo << "notifySubgraphProcessed" << std::endl;
 
-        cnt([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+    if(node_handle_->isSource() && node_handle_->isSink()) {
+        notifyMessagesProcessed();
+
+    } else {
+        std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
+        if(continuation_) {
+            auto cnt = continuation_;
+            continuation_ = Continuation();
+            lock.unlock();
+
+            cnt([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
+        }
     }
 }
 
 void SubgraphNode::sendCurrentIteration()
 {
-    APEX_DEBUG_TRACE ainfo << "forward_messages" << std::endl;
+    APEX_DEBUG_TRACE ainfo << "sendCurrentIteration" << std::endl;
     transition_relay_in_->forwardMessages();
 
     has_sent_current_iteration_ = true;
@@ -775,6 +784,7 @@ void SubgraphNode::sendCurrentIteration()
 
 void SubgraphNode::startNextIteration()
 {
+    APEX_DEBUG_TRACE ainfo << "startNextIteration" << std::endl;
     for(InputPtr i : node_modifier_->getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i.get());
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
