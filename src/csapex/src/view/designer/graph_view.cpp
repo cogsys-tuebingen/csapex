@@ -129,8 +129,14 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     observe(graph_facade_->node_facade_added, [this](NodeFacadePtr n) { nodeFacadeAdded(n); });
     observe(graph_facade_->node_facade_removed, [this](NodeFacadePtr n) { nodeFacadeRemoved(n); });
 
+    observe(graph_facade_->child_node_facade_added, [this](NodeFacadePtr n) { childNodeFacadeAdded(n); });
+    observe(graph_facade_->child_node_facade_removed, [this](NodeFacadePtr n) { childNodeFacadeRemoved(n); });
+
     QObject::connect(this, &GraphView::nodeFacadeAdded, this, &GraphView::nodeAdded, Qt::QueuedConnection);
     QObject::connect(this, &GraphView::nodeFacadeRemoved, this, &GraphView::nodeRemoved, Qt::QueuedConnection);
+
+    QObject::connect(this, &GraphView::childNodeFacadeAdded, this, &GraphView::childNodeAdded, Qt::QueuedConnection);
+    QObject::connect(this, &GraphView::childNodeFacadeRemoved, this, &GraphView::childNodeRemoved, Qt::QueuedConnection);
 
 
     SubgraphNodePtr sub_graph = graph_facade_->getSubgraphNode();
@@ -838,6 +844,33 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
     Q_EMIT boxAdded(box);
 }
 
+void GraphView::nodeRemoved(NodeFacadePtr node_facade)
+{
+    UUID node_uuid = node_facade->getUUID();
+    NodeBox* box = getBox(node_uuid);
+    box->stop();
+
+    box_map_.erase(box_map_.find(node_uuid));
+    proxy_map_.erase(proxy_map_.find(node_uuid));
+
+    removeBox(box);
+
+    box->deleteLater();
+
+    Q_EMIT boxRemoved(box);
+}
+
+void GraphView::childNodeAdded(NodeFacadePtr facade)
+{
+    facade_connections_[facade.get()].emplace_back(facade->start_profiling.connect([this](NodeFacade* nw) { startProfilingRequest(nw); }));
+    facade_connections_[facade.get()].emplace_back(facade->stop_profiling.connect([this](NodeFacade* nw) { stopProfilingRequest(nw); }));
+}
+
+void GraphView::childNodeRemoved(NodeFacadePtr facade)
+{
+}
+
+
 
 void GraphView::connectorCreated(ConnectorPtr connector)
 {
@@ -930,22 +963,6 @@ void GraphView::focusOnNode(const csapex::UUID &uuid)
         scene_->setSelection(box);
         centerOn(box->graphicsProxyWidget());
     }
-}
-
-void GraphView::nodeRemoved(NodeFacadePtr node_facade)
-{
-    UUID node_uuid = node_facade->getUUID();
-    NodeBox* box = getBox(node_uuid);
-    box->stop();
-
-    box_map_.erase(box_map_.find(node_uuid));
-    proxy_map_.erase(proxy_map_.find(node_uuid));
-
-    removeBox(box);
-
-    box->deleteLater();
-
-    Q_EMIT boxRemoved(box);
 }
 
 void GraphView::addBox(NodeBox *box)
@@ -1137,6 +1154,10 @@ void GraphView::renameBox(NodeBox *box)
 void GraphView::startProfiling(NodeFacade *node)
 {
     NodeBox* box = getBox(node->getUUID());
+    if(!box) {
+        return;
+    }
+
     apex_assert_hard(profiling_.find(box) == profiling_.end());
 
     QPointer<ProfilingWidget> prof = new ProfilingWidget(box->getNodeFacade()->getProfiler(), node->getUUID().getFullName());
@@ -1176,6 +1197,9 @@ void GraphView::startProfiling(NodeFacade *node)
 void GraphView::stopProfiling(NodeFacade *node)
 {
     NodeBox* box = getBox(node->getUUID());
+    if(!box) {
+        return;
+    }
 
     for(auto& connection : profiling_connections_[box]) {
         connection.disconnect();

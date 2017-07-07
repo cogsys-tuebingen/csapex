@@ -85,6 +85,9 @@ public:
     slim_signal::Signal<void(NodeFacadePtr)> node_facade_added;
     slim_signal::Signal<void(NodeFacadePtr)> node_facade_removed;
 
+    slim_signal::Signal<void(NodeFacadePtr)> child_node_facade_added;
+    slim_signal::Signal<void(NodeFacadePtr)> child_node_facade_removed;
+
     slim_signal::Signal<void(TaskGeneratorPtr)> generator_added;
     slim_signal::Signal<void(TaskGeneratorPtr)> generator_removed;
 

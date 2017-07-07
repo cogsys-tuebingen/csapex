@@ -117,6 +117,9 @@ Q_SIGNALS:
     void nodeFacadeAdded(NodeFacadePtr facade);
     void nodeFacadeRemoved(NodeFacadePtr facade);
 
+    void childNodeFacadeAdded(NodeFacadePtr facade);
+    void childNodeFacadeRemoved(NodeFacadePtr facade);
+
     void startProfilingRequest(NodeFacade* box);
     void stopProfilingRequest(NodeFacade *box);
 
@@ -126,6 +129,8 @@ Q_SIGNALS:
 public Q_SLOTS:
     void nodeAdded(NodeFacadePtr node_facade);
     void nodeRemoved(NodeFacadePtr node_facade);
+    void childNodeAdded(NodeFacadePtr node_facade);
+    void childNodeRemoved(NodeFacadePtr node_facade);
 
     void showNodeInsertDialog();
 
@@ -233,7 +238,7 @@ private:
     std::vector<NodeBox*> selected_boxes_;
 
     std::map<NodeBox*, QPointer<ProfilingWidget>> profiling_;
-    std::map<NodeBox*, std::vector<csapex::slim_signal::Connection>> profiling_connections_;
+    std::map<NodeBox*, std::vector<csapex::slim_signal::ScopedConnection>> profiling_connections_;
 
     int scalings_to_perform_;
     QTimer scalings_animation_timer_;

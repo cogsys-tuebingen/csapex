@@ -79,14 +79,14 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
         executor_.add(runner.get());
     }
 
-    generator_added(runner);
-
-    node_facade_added(facade);
 
     nw->notification.connect(notification);
 
     nw->initialize();
     nw->panic.connect(panic);
+
+    generator_added(runner);
+    node_facade_added(facade);
 }
 
 void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
@@ -104,7 +104,11 @@ void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
     GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph->getGraph(), sub_graph, facade, this);
     children_[facade->getUUID()] = sub_graph_facade;
 
-    sub_graph_facade->notification.connect(notification);
+    observe(sub_graph_facade->notification, notification);
+    observe(sub_graph_facade->node_facade_added, child_node_facade_added);
+    observe(sub_graph_facade->node_facade_removed, child_node_facade_removed);
+    observe(sub_graph_facade->child_node_facade_added, child_node_facade_added);
+    observe(sub_graph_facade->child_node_facade_removed, child_node_facade_removed);
 
     child_added(sub_graph_facade);
 }

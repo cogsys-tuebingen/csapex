@@ -303,13 +303,18 @@ void ActivityTimeline::updateRowStart(NodeFacade* node, ActivityType type, std::
         return;
     }
 
-    Row* row = node2row.at(node);
+    try {
+        Row* row = node2row.at(node);
 
-    updateTime(interval->getStartMs());
-    row->activities_.push_back(new Activity(&params_, row, params_.time, type, interval));
-    row->active_activity_ = row->activities_.back();
+        updateTime(interval->getStartMs());
+        row->activities_.push_back(new Activity(&params_, row, params_.time, type, interval));
+        row->active_activity_ = row->activities_.back();
 
-    addItem(row->active_activity_->rect);
+        addItem(row->active_activity_->rect);
+
+    } catch(const std::out_of_range& e) {
+        // ignore
+    }
 }
 
 void ActivityTimeline::updateRowStop(NodeFacade* node, std::shared_ptr<const Interval> interval)

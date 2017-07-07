@@ -55,6 +55,8 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexCorePtr core)
 
     observe(core_->getRoot()->node_facade_added, node_facade_added);
     observe(core_->getRoot()->node_facade_removed, node_facade_removed);
+    observe(core_->getRoot()->child_node_facade_added, node_facade_added);
+    observe(core_->getRoot()->child_node_facade_removed, node_facade_removed);
     observe(core_->getRoot()->panic, panic);
 
 
