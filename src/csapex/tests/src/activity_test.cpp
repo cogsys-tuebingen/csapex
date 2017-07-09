@@ -67,7 +67,7 @@ public:
 
     void setup(NodeModifier& node_modifier) override
     {
-        out = node_modifier.addOutput<int>("generator");
+        out = node_modifier.addOutput<int>("output");
         e = node_modifier.addEvent("event");
     }
 
@@ -119,7 +119,7 @@ public:
 
     void setup(NodeModifier& node_modifier)
     {
-        in = node_modifier.addInput<int>("sink");
+        in = node_modifier.addInput<int>("input");
         s = node_modifier.addTypedSlot<connection_types::AnyMessage>("slot", [this](const TokenConstPtr& token) {
             std::unique_lock<std::recursive_mutex> lock(wait_mutex);
             waiting = false;
@@ -251,10 +251,10 @@ TEST_F(ActivityTest, ActivityIsConveyedViaMessages) {
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = graph_facade->connect(source_p->getNodeHandle().get(), "generator",
+    ConnectionPtr c1 = graph_facade->connect(source_p->getNodeHandle().get(), "output",
                                              state->getNodeHandle().get(), "input");
     ConnectionPtr c2 = graph_facade->connect(state->getNodeHandle().get(), "output",
-                                             sink_p->getNodeHandle().get(), "sink");
+                                             sink_p->getNodeHandle().get(), "input");
 
     c1->setActive(true);
     c2->setActive(true);
@@ -298,10 +298,10 @@ TEST_F(ActivityTest, ActivityIsConveyedViaMessagesOnlyForActiveConnections) {
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = graph_facade->connect(source_p->getNodeHandle().get(), "generator",
+    ConnectionPtr c1 = graph_facade->connect(source_p->getNodeHandle().get(), "output",
                                              state->getNodeHandle().get(), "input");
     graph_facade->connect(state->getNodeHandle().get(), "output",
-                          sink_p->getNodeHandle().get(), "sink");
+                          sink_p->getNodeHandle().get(), "input");
 
     c1->setActive(true);
 
@@ -439,7 +439,7 @@ TEST_F(ActivityTest, ActivityIsConveyedViaEventsAndMessages) {
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = graph_facade->connect(source_p->getNodeHandle().get(), "generator",
+    ConnectionPtr c1 = graph_facade->connect(source_p->getNodeHandle().get(), "output",
                                              state->getNodeHandle().get(), "input");
     ConnectionPtr c2 = graph_facade->connect(state->getNodeHandle().get(), "event",
                                              sink_p->getNodeHandle().get(), "slot");
@@ -485,7 +485,7 @@ TEST_F(ActivityTest, ActivityTriggersEvents) {
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = graph_facade->connect(source_p->getNodeHandle().get(), "generator",
+    ConnectionPtr c1 = graph_facade->connect(source_p->getNodeHandle().get(), "output",
                                              state->getNodeHandle().get(), "input");
     ConnectionPtr c2 = graph_facade->connect(state->getNodeHandle().get(), "event",
                                              sink_p->getNodeHandle().get(), "slot");

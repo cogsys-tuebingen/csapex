@@ -51,6 +51,7 @@ add_executable(csapex_test
     src/parameter_test.cpp
     src/activity_test.cpp
     src/container_iteration_test.cpp
+    src/scheduling_test.cpp
 )
 
 add_test(NAME ${PROJECT_TEST_NAME} COMMAND csapex_test)

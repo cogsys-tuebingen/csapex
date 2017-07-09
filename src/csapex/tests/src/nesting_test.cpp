@@ -1,285 +1,14 @@
-#include <csapex/model/graph.h>
+#include "node_constructing_test.h"
+
 #include <csapex/model/graph_facade.h>
-#include <csapex/model/node.h>
-#include <csapex/model/node.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/model/node_facade_local.h>
-#include <csapex/factory/node_factory.h>
-#include <csapex/factory/node_wrapper.hpp>
-#include <csapex/core/settings/settings_local.h>
-#include <csapex/model/node_modifier.h>
 #include <csapex/msg/generic_value_message.hpp>
-#include <csapex/msg/io.h>
-#include <csapex/scheduling/thread_group.h>
-#include <csapex/scheduling/thread_pool.h>
-#include <csapex/core/exception_handler.h>
-#include <csapex/msg/output_transition.h>
-#include <csapex/msg/input_transition.h>
-#include <csapex/msg/output.h>
-#include <csapex/msg/input.h>
-#include <csapex/model/connectable.h>
-#include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph/vertex.h>
 #include <csapex/model/graph/graph_local.h>
 
-#include "gtest/gtest.h"
-#include "test_exception_handler.h"
 
 namespace csapex {
 
-class Multiplier
+class NestingTest : public NodeConstructingTest
 {
-public:
-    Multiplier()
-    {
-    }
-
-    void setup(csapex::NodeModifier& node_modifier)
-    {
-        input_ = node_modifier.addInput<int>("input");
-        output_ = node_modifier.addOutput<int>("output");
-    }
-
-    void setupParameters(Parameterizable& /*parameters*/)
-    {
-
-    }
-
-    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
-    {
-        int a = msg::getValue<int>(input_);
-//        std::cerr << " < multiply " << a << " by two" << std::endl;
-        int v = a * 2;;
-        msg::publish(output_, v);
-    }
-
-private:
-    Input* input_;
-    Output* output_;
-};
-
-
-class Multiplier2
-{
-public:
-    Multiplier2()
-    {
-    }
-
-    void setup(csapex::NodeModifier& node_modifier)
-    {
-        input_a_ = node_modifier.addInput<int>("input_a");
-        input_b_ = node_modifier.addInput<int>("input_b");
-        output_ = node_modifier.addOutput<int>("output");
-    }
-
-    void setupParameters(Parameterizable& /*parameters*/)
-    {
-
-    }
-
-    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
-    {
-        int a = msg::getValue<int>(input_a_);
-        int b = msg::getValue<int>(input_b_);
-//        std::cerr << " < multiply " << a << " by " << b << std::endl;
-        msg::publish(output_, a * b);
-    }
-
-private:
-    Input* input_a_;
-    Input* input_b_;
-    Output* output_;
-};
-
-
-class MultiplierSource : public Node
-{
-public:
-    MultiplierSource()
-        : i(0)
-    {
-
-    }
-
-    void setup(NodeModifier& node_modifier) override
-    {
-        out = node_modifier.addOutput<int>("output");
-    }
-
-    void setupParameters(Parameterizable& /*parameters*/) override
-    {
-
-    }
-
-
-    void process() override
-    {
-       // std::cerr << " < publish " << i << std::endl;
-        msg::publish(out, i++);
-    }
-
-    int getValue() const
-    {
-        return i;
-    }
-
-private:
-    Output* out;
-
-    int i;
-};
-
-
-class MultiplierSink
-{
-public:
-    MultiplierSink()
-        : aborted(false),
-          waiting(false), value(-1)
-    {
-
-    }
-
-    void setup(NodeModifier& node_modifier)
-    {
-        in = node_modifier.addInput<int>("input");
-        in->setEssential(true);
-    }
-
-    void setupParameters(Parameterizable& /*parameters*/)
-    {
-
-    }
-
-    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
-    {
-        int i = msg::getValue<int>(in);
-      //  std::cerr << " < sink " << i << std::endl;
-        value = i;
-
-        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-        waiting = false;
-        stepping_done.notify_all();
-    }
-
-    int getValue() const
-    {
-        return value;
-    }
-
-    void setWaiting(bool w)
-    {
-        waiting = w;
-    }
-
-    void wait()
-    {
-        if(aborted) {
-            return;
-        }
-        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-        while(waiting) {
-            stepping_done.wait(lock);
-        }
-    }
-
-    void abort()
-    {
-        aborted = true;
-
-        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-        if(waiting) {
-            waiting = false;
-            stepping_done.notify_all();
-        }
-    }
-
-private:
-    Input* in;
-
-    bool aborted;
-    bool waiting;
-
-    std::recursive_mutex wait_mutex;
-    std::condition_variable_any stepping_done;
-
-    int value;
-};
-
-
-class NestingTest : public ::testing::Test {
-protected:
-    NestingTest()
-        : factory(SettingsLocal::NoSettings, nullptr),
-          executor(eh, false, false)
-    {
-        std::vector<TagPtr> tags;
-        {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("Multiplier",
-                                                                                 std::bind(&NestingTest::makeMockup)));
-            factory.registerNodeType(constructor);
-        }
-        {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("Multiplier2",
-                                                                                 std::bind(&NestingTest::makeMockup2)));
-            factory.registerNodeType(constructor);
-        }
-        {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("MultiplierSource",
-                                                                                 std::bind(&NestingTest::makeSource)));
-            factory.registerNodeType(constructor);
-        }
-        {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("MultiplierSink",
-                                                                                 std::bind(&NestingTest::makeSink)));
-            factory.registerNodeType(constructor);
-        }
-    }
-
-    virtual ~NestingTest() {
-    }
-
-    virtual void SetUp() override {
-        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-        graph = graph_node->getGraph();
-
-        abort_connection = error_handling::stop_request().connect([this](){
-            for(auto it = graph->begin(); it != graph->end(); ++it) {
-                NodeFacadePtr nf = (*it)->getNodeFacade();
-                if(std::shared_ptr<MultiplierSink> mp = std::dynamic_pointer_cast<MultiplierSink>(nf->getNode())) {
-                    mp->abort();
-                }
-            }
-        });
-    }
-
-    virtual void TearDown() override {
-        abort_connection.disconnect();
-    }
-
-    static NodePtr makeMockup() {
-        return NodePtr(new NodeWrapper<Multiplier>());
-    }
-    static NodePtr makeMockup2() {
-        return NodePtr(new NodeWrapper<Multiplier2>());
-    }
-    static NodePtr makeSource() {
-        return NodePtr(new MultiplierSource());
-    }
-    static NodePtr makeSink() {
-        return NodePtr(new NodeWrapper<MultiplierSink>());
-    }
-
-    NodeFactory factory;
-    TestExceptionHandler eh;
-    
-    ThreadPool executor;
-
-    SubgraphNodePtr graph_node;
-    GraphPtr graph;
-
-    slim_signal::Connection abort_connection;
 };
 
 
@@ -289,13 +18,13 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
     executor.setSteppingMode(true);
 
     // MAIN GRAPH
-    NodeFacadePtr src = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src"), graph);
+    NodeFacadePtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     graph->addNode(src);
 
-    NodeFacadePtr sink_p = factory.makeNode("MultiplierSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
+    NodeFacadePtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
     main_graph_facade.addNode(sink_p);
-    std::shared_ptr<MultiplierSink> sink = std::dynamic_pointer_cast<MultiplierSink>(sink_p->getNode());
+    std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
 
@@ -305,16 +34,16 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
     apex_assert_hard(sub_graph);
     GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr n2 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
+    NodeFacadePtr n2 = factory.makeNode("StaticMultiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
-    NodeFacadePtr n3 = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("n3"), sub_graph->getGraph());
+    NodeFacadePtr n3 = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("n3"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n3);
     sub_graph_facade.addNode(n3);
-    NodeFacadePtr src2 = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src2"), sub_graph->getGraph());
+    NodeFacadePtr src2 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src2);
-    NodeFacadePtr n4 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph->getGraph());
+    NodeFacadePtr n4 = factory.makeNode("StaticMultiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n4);
     sub_graph_facade.addNode(n4);
 
@@ -359,13 +88,13 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
     executor.setSteppingMode(true);
 
     // MAIN GRAPH
-    NodeFacadePtr src = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src"), graph);
+    NodeFacadePtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     graph->addNode(src);
 
-    NodeFacadePtr sink_p = factory.makeNode("MultiplierSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
+    NodeFacadePtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
     main_graph_facade.addNode(sink_p);
-    std::shared_ptr<MultiplierSink> sink = std::dynamic_pointer_cast<MultiplierSink>(sink_p->getNode());
+    std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
 
@@ -377,16 +106,16 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
     ThreadPool sub_executor(&executor, eh, executor.isThreadingEnabled(), executor.isGroupingEnabled());
     GraphFacade sub_graph_facade(sub_executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr n2 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
+    NodeFacadePtr n2 = factory.makeNode("StaticMultiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
-    NodeFacadePtr n3 = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("n3"), sub_graph->getGraph());
+    NodeFacadePtr n3 = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("n3"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n3);
     sub_graph_facade.addNode(n3);
-    NodeFacadePtr src2 = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src2"), sub_graph->getGraph());
+    NodeFacadePtr src2 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src2);
-    NodeFacadePtr n4 = factory.makeNode("Multiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph->getGraph());
+    NodeFacadePtr n4 = factory.makeNode("StaticMultiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n4);
     sub_graph_facade.addNode(n4);
 
@@ -431,22 +160,22 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
     executor.setSteppingMode(true);
 
     // MAIN GRAPH
-    NodeFacadePtr src1 = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src1"), graph);
+    NodeFacadePtr src1 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src1"), graph);
     ASSERT_NE(nullptr, src1);
     main_graph_facade.addNode(src1);
 
-    NodeFacadePtr src2 = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src2"), graph);
+    NodeFacadePtr src2 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src2"), graph);
     ASSERT_NE(nullptr, src2);
     main_graph_facade.addNode(src2);
 
 
-    NodeFacadePtr combiner = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("combiner"), graph);
+    NodeFacadePtr combiner = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph);
     ASSERT_NE(nullptr, combiner);
     main_graph_facade.addNode(combiner);
 
-    NodeFacadePtr sink_p = factory.makeNode("MultiplierSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
+    NodeFacadePtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
     main_graph_facade.addNode(sink_p);
-    std::shared_ptr<MultiplierSink> sink = std::dynamic_pointer_cast<MultiplierSink>(sink_p->getNode());
+    std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
 
@@ -457,7 +186,7 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
 
     GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr m = factory.makeNode("Multiplier2", UUIDProvider::makeUUID_without_parent("m"), sub_graph->getGraph());
+    NodeFacadePtr m = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("m"), sub_graph->getGraph());
     ASSERT_NE(nullptr, m);
     sub_graph_facade.addNode(m);
 
@@ -505,7 +234,7 @@ TEST_F(NestingTest, NestedUUIDs) {
     executor.setSteppingMode(true);
 
     // MAIN GRAPH
-    NodeFacadePtr m1 = factory.makeNode("Multiplier", graph->generateUUID("src"), graph);
+    NodeFacadePtr m1 = factory.makeNode("StaticMultiplier", graph->generateUUID("src"), graph);
     ASSERT_NE(nullptr, m1);
     graph->addNode(m1);
 
@@ -531,7 +260,7 @@ TEST_F(NestingTest, NestedUUIDs) {
     GraphPtr sub_graph_2 = sub_graph_2_facade_ptr->getGraph();
 
 
-    NodeFacadePtr m2 = factory.makeNode("Multiplier", sub_graph_2->generateUUID("src"), sub_graph_2);
+    NodeFacadePtr m2 = factory.makeNode("StaticMultiplier", sub_graph_2->generateUUID("src"), sub_graph_2);
     ASSERT_NE(nullptr, m2);
     sub_graph_2_facade.addNode(m2);
 
@@ -549,7 +278,7 @@ TEST_F(NestingTest, NestedUUIDs) {
     GraphPtr sub_graph_3 = sub_graph_3_facade_ptr->getGraph();
 
 
-    NodeFacadePtr m3 = factory.makeNode("Multiplier", sub_graph_3->generateUUID("src"), sub_graph_3);
+    NodeFacadePtr m3 = factory.makeNode("StaticMultiplier", sub_graph_3->generateUUID("src"), sub_graph_3);
     ASSERT_NE(nullptr, m3);
     sub_graph_3_facade.addNode(m3);
 
@@ -587,9 +316,9 @@ TEST_F(NestingTest, GroupCanBeSource) {
     executor.setSteppingMode(true);
 
     // MAIN GRAPH
-    NodeFacadePtr sink_p = factory.makeNode("MultiplierSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
+    NodeFacadePtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
     main_graph_facade.addNode(sink_p);
-    std::shared_ptr<MultiplierSink> sink = std::dynamic_pointer_cast<MultiplierSink>(sink_p->getNode());
+    std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
 
@@ -600,7 +329,7 @@ TEST_F(NestingTest, GroupCanBeSource) {
 
     GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr src = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src"), graph);
+    NodeFacadePtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src);
 
@@ -620,7 +349,7 @@ TEST_F(NestingTest, GroupCanBeSource) {
 
     executor.start();
 
-    auto source = std::dynamic_pointer_cast<MultiplierSource>(src->getNode());
+    auto source = std::dynamic_pointer_cast<MockupSource>(src->getNode());
     apex_assert_hard(source);
 
     std::mutex step_done_mutex;
@@ -654,7 +383,7 @@ TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
 
     GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
-    NodeFacadePtr src = factory.makeNode("MultiplierSource", UUIDProvider::makeUUID_without_parent("src"), graph);
+    NodeFacadePtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src);
 
@@ -671,7 +400,7 @@ TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
 
     executor.start();
 
-    auto source = std::dynamic_pointer_cast<MultiplierSource>(src->getNode());
+    auto source = std::dynamic_pointer_cast<MockupSource>(src->getNode());
     apex_assert_hard(source);
 
     std::mutex step_done_mutex;
