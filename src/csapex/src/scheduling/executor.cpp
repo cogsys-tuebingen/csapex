@@ -1,10 +1,14 @@
 /// HEADER
 #include <csapex/scheduling/executor.h>
 
+/// SYSTEM
+#include <stdexcept>
+#include <iostream>
+
 using namespace csapex;
 
 Executor::Executor()
-    : paused_(false), stepping_(false)
+    : paused_(false), stepping_(false), step_done_(true)
 {
 
 }
@@ -67,6 +71,10 @@ void Executor::setSteppingMode(bool stepping)
 
 void Executor::step()
 {
+    if(!step_done_) {
+        throw std::logic_error("cannot step, last step is not done!");
+    }
+
     begin_step();
 
     performStep();
@@ -75,12 +83,15 @@ void Executor::step()
         child->step();
     }
 
+    step_done_ = false;
+
     checkIfStepIsDone();
 }
 
 void Executor::checkIfStepIsDone()
 {
-    if(!isStepDone()) {
+    //TRACE std::cerr << " E CHECK =========== " << step_done_ << std::endl;
+    if(step_done_ || !isStepDone()) {
         return;
     }
 
@@ -90,6 +101,9 @@ void Executor::checkIfStepIsDone()
         }
     }
 
+    //TRACE std::cerr << ">>> done!" << std::endl;
+
+    step_done_ = true;
     end_step();
 }
 

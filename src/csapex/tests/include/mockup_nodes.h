@@ -93,6 +93,7 @@ public:
 
     void process() override
     {
+//        ainfo << "publish " << i << std::endl;
         msg::publish(out, i++);
     }
 
@@ -112,7 +113,8 @@ class MockupSink
 public:
     MockupSink()
         : aborted(false),
-          waiting(false), value(-1)
+//          waiting(false),
+          value(-1)
     {
 
     }
@@ -134,9 +136,9 @@ public:
       //  std::cerr << " < sink " << i << std::endl;
         value = i;
 
-        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-        waiting = false;
-        stepping_done.notify_all();
+//        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
+//        waiting = false;
+//        stepping_done.notify_all();
     }
 
     int getValue() const
@@ -144,41 +146,41 @@ public:
         return value;
     }
 
-    void setWaiting(bool w)
-    {
-        waiting = w;
-    }
+//    void setWaiting(bool w)
+//    {
+//        waiting = w;
+//    }
 
-    void wait()
-    {
-        if(aborted) {
-            return;
-        }
-        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-        while(waiting) {
-            stepping_done.wait(lock);
-        }
-    }
+//    void wait()
+//    {
+//        if(aborted) {
+//            return;
+//        }
+//        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
+//        while(waiting) {
+//            stepping_done.wait(lock);
+//        }
+//    }
 
     void abort()
     {
         aborted = true;
 
-        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-        if(waiting) {
-            waiting = false;
-            stepping_done.notify_all();
-        }
+//        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
+//        if(waiting) {
+//            waiting = false;
+//            stepping_done.notify_all();
+//        }
     }
 
 private:
     Input* in;
 
     bool aborted;
-    bool waiting;
+//    bool waiting;
 
-    std::recursive_mutex wait_mutex;
-    std::condition_variable_any stepping_done;
+//    std::recursive_mutex wait_mutex;
+//    std::condition_variable_any stepping_done;
 
     int value;
 };

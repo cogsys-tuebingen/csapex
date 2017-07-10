@@ -138,8 +138,15 @@ bool ThreadGroup::isStepping() const
 
 bool ThreadGroup::isStepDone() const
 {
+    //TRACE std::cerr << " TG =========== " << std::endl;
     for(auto generator : generators_) {
         if(!generator->isStepDone()) {
+            //TRACE std::cerr << "++++ " << std::endl;
+            //TRACE for(const TaskGeneratorConstPtr& g : generators_) {
+                //TRACE if(!g->isStepDone()) {
+                    //TRACE std::cerr << g->getUUID() << " is not done" << std::endl;
+                //TRACE }
+            //TRACE }
             return false;
         }
     }
@@ -246,6 +253,7 @@ void ThreadGroup::add(TaskGeneratorPtr generator, const std::vector<TaskPtr> &in
 
 void ThreadGroup::checkIfStepIsDone()
 {
+    //TRACE std::cerr << " TG CHECK =========== " << std::endl;
     if(isStepDone()) {
         end_step();
     }

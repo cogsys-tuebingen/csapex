@@ -19,7 +19,7 @@ using namespace csapex;
 
 NodeRunner::NodeRunner(NodeWorkerPtr worker)
     : worker_(worker), scheduler_(nullptr),
-      paused_(false), stepping_(false), can_step_(false),
+      paused_(false), stepping_(false), can_step_(0), step_done_(false),
       guard_(-1),
       waiting_(false)
 {
@@ -99,6 +99,14 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
         scheduleProcess();
     });
 
+
+    observe(worker_->messages_processed, [this](){
+        measureFrequency();
+        step_done_ = true;
+        //TRACE worker_->getNode()->ainfo << "end step" << std::endl;
+        end_step();
+    });
+
     // parameter change
     observe(worker_->getNodeHandle()->parameters_changed, [this]() {
         schedule(check_parameters_);
@@ -134,7 +142,6 @@ void NodeRunner::scheduleProcess()
         if(!source || !stepping_ || can_step_) {
             //execute_->setPriority(std::max<long>(0, worker_->getSequenceNumber()));
             //if(worker_->canExecute()) {
-                can_step_ = false;
                 if(!waiting_) {
                     schedule(execute_);
                 }
@@ -145,6 +152,10 @@ void NodeRunner::scheduleProcess()
 
 void NodeRunner::execute()
 {
+    if(stepping_ && !can_step_) {
+        return;
+    }
+
     apex_assert_hard(guard_ == -1);
     if(worker_->canExecute()) {
         if(max_frequency_ > 0.0) {
@@ -167,13 +178,17 @@ void NodeRunner::execute()
 
         worker_->getNodeHandle()->getRate().startCycle();
 
-        if(worker_->execute()) {
-            measureFrequency();
-        } else {
-            can_step_ = true;
+        if(stepping_) {
+            apex_assert_hard(can_step_);
+        }
+        can_step_--;
+
+        if(!worker_->execute()) {
+            //TRACE worker_->getNode()->ainfo << "execute failed" << std::endl;
+            can_step_++;
         }
     } else {
-        can_step_ = true;
+        can_step_++;
         waiting_ = false;
     }
 }
@@ -224,7 +239,7 @@ void NodeRunner::setPause(bool pause)
 void NodeRunner::setSteppingMode(bool stepping)
 {
     stepping_ = stepping;
-    can_step_ = false;
+    can_step_ = 0;
     if(!stepping_) {
         scheduleProcess();
     }
@@ -232,13 +247,26 @@ void NodeRunner::setSteppingMode(bool stepping)
 
 void NodeRunner::step()
 {
-    if(worker_->getNodeHandle()->isSource() && worker_->isProcessingEnabled()) {
-        begin_step();
-        can_step_ = true;
-        scheduleProcess();
-    } else {
-        can_step_ = false;
+    can_step_++;
+
+    step_done_ = false;
+    begin_step();
+
+    bool source = worker_->getNodeHandle()->isSource();
+
+    bool can_process = worker_->isProcessingEnabled();
+    can_process &= source || worker_->getNodeHandle()->hasConnectionsIncoming();
+
+    if(!can_process) {
+        //TRACE worker_->getNode()->ainfo << "cannot step" << std::endl;
+        step_done_ = true;
         end_step();
+        return;
+    }
+
+    //TRACE worker_->getNode()->ainfo << "step" << std::endl;
+    if(source) {
+        scheduleProcess();
     }
 }
 
@@ -249,7 +277,7 @@ bool NodeRunner::isStepping() const
 
 bool NodeRunner::isStepDone() const
 {
-    return !can_step_;
+    return step_done_;
 }
 
 UUID NodeRunner::getUUID() const

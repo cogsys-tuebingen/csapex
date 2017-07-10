@@ -486,6 +486,7 @@ bool NodeWorker::startProcessingMessages()
             }
 
         } else {
+            //TRACE getNode()->ainfo << "got no message" << std::endl;
             if(node->processMessageMarkers()) {
                 node->processMarker(marker);
             }
@@ -499,14 +500,17 @@ bool NodeWorker::startProcessingMessages()
             bool can_drop_marker = node_handle_->getVertex()->getNodeCharacteristics().is_vertex_separator
                     && !node_handle_->getVertex()->getNodeCharacteristics().is_leading_to_essential_vertex;
             if(can_drop_marker) {
+                //TRACE getNode()->ainfo << "no marker -> drop messages" << std::endl;
                 signalMessagesProcessed(true);
             } else {
+                //TRACE getNode()->ainfo << "no messagemarker -> forward messages" << std::endl;
                 forwardMessages(false);
                 signalMessagesProcessed();
             }
 
         } else {
             // no processing because a non-NoMessage marker is received
+            //TRACE getNode()->ainfo << "marker -> forward messages" << std::endl;
             forwardMessages(false);
             signalMessagesProcessed();
         }
@@ -527,20 +531,24 @@ bool NodeWorker::startProcessingMessages()
 
         try {
             if(sync) {
+                //TRACE node->ainfo << "process sync" << std::endl;
                 node->process(*node_handle_, *node);
 
             } else {
                 try {
+                    //TRACE node->ainfo << "process async" << std::endl;
                     node->process(*node_handle_, *node, [this, node](ProcessingFunction f) {
                         node_handle_->execution_requested([this, f, node]() {
                             if(f) {
                                 f(*node_handle_, *node);
                             }
+                            //TRACE getNode()->ainfo << "async process done -> finish processing" << std::endl;
                             finishProcessing();
                         });
                     });
                 } catch(...) {
                     // if flow is aborted -> call continuation anyway
+                    //TRACE getNode()->ainfo << "async process has thrown -> finish processing" << std::endl;
                     finishProcessing();
                     throw;
                 }
@@ -557,11 +565,13 @@ bool NodeWorker::startProcessingMessages()
         }
         if(sync) {
             lock.unlock();
+            //TRACE getNode()->ainfo << "sync process done -> finish processing" << std::endl;
             finishProcessing();
         }
 
     } else {
         lock.unlock();
+        //TRACE getNode()->ainfo << "node disabled -> finish processing" << std::endl;
         finishProcessing();
     }
 
@@ -570,8 +580,11 @@ bool NodeWorker::startProcessingMessages()
 
 void NodeWorker::finishProcessing()
 {
+    //TRACE getNode()->ainfo << "finish processing" << std::endl;
     if(isProcessing()) {
         signalExecutionFinished();
+
+        //TRACE getNode()->ainfo << "finish processing -> forward messages" << std::endl;
         forwardMessages(true);
         signalMessagesProcessed();
 
@@ -614,6 +627,7 @@ void NodeWorker::signalMessagesProcessed(bool processing_aborted)
         //            current_exec_mode_.reset();
     }
 
+    //TRACE getNode()->ainfo << "done processing" << std::endl;
     messages_processed();
 }
 
@@ -636,6 +650,7 @@ void NodeWorker::forwardMessages(bool send_parameters)
     bool active = node_handle_->isActive();
 
     lock.unlock();
+    //TRACE getNode()->ainfo << "send messages" << std::endl;
     bool has_sent_activator_message = node_handle_->getOutputTransition()->sendMessages(active);
     lock.lock();
 

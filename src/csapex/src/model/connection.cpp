@@ -95,7 +95,8 @@ void Connection::setTokenProcessed()
         std::unique_lock<std::recursive_mutex> lock(sync);
         setState(State::DONE);
     }
-    APEX_DEBUG_CERR <<*this << " is done" << std::endl;
+
+    //TRACE std::cout << *this << " is done" << std::endl;
     notifyMessageProcessed();
 }
 

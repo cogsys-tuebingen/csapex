@@ -27,19 +27,17 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "node_constructing_test.h"
+#include "stepping_test.h"
 
 namespace csapex {
 
-class CodeApiTest : public NodeConstructingTest
+class CodeApiTest : public SteppingTest
 {
 
 };
 
 TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
     GraphFacade graph_facade(executor, graph, graph_node);
-
-    executor.setSteppingMode(true);
 
     NodeFacadePtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);
@@ -66,11 +64,8 @@ TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
     ASSERT_EQ(-1, sink->getValue());
 
     executor.start();
-
     for(int iter = 0; iter < 23; ++iter) {
-        sink->setWaiting(true);
-        executor.step();
-        sink->wait();
+        ASSERT_NO_FATAL_FAILURE(step());
 
 //        std::cerr << "done waiting: " << iter << " // " << iter * 4 * 7 << " // " << sink->getValue() << std::endl;
         ASSERT_EQ(iter * 4 * 7, sink->getValue());
@@ -79,8 +74,6 @@ TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
 
 TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
     GraphFacade graph_facade(executor, graph, graph_node);
-
-    executor.setSteppingMode(true);
 
     NodeFacadePtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);
@@ -109,9 +102,7 @@ TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
     executor.start();
 
     for(int iter = 0; iter < 23; ++iter) {
-        sink->setWaiting(true);
-        executor.step();
-        sink->wait();
+        ASSERT_NO_FATAL_FAILURE(step());
 
         ASSERT_EQ(iter * 4 * 7, sink->getValue());
     }
@@ -119,8 +110,6 @@ TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
 
 TEST_F(CodeApiTest, GraphBuildingUsingUUID) {
     GraphFacade graph_facade(executor, graph, graph_node);
-
-    executor.setSteppingMode(true);
 
     NodeFacadePtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);
@@ -149,9 +138,7 @@ TEST_F(CodeApiTest, GraphBuildingUsingUUID) {
     executor.start();
 
     for(int iter = 0; iter < 23; ++iter) {
-        sink->setWaiting(true);
-        executor.step();
-        sink->wait();
+        ASSERT_NO_FATAL_FAILURE(step());
 
         ASSERT_EQ(iter * 4 * 7, sink->getValue());
     }

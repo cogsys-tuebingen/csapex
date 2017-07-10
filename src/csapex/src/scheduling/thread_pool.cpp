@@ -338,6 +338,7 @@ void ThreadPool::removeGroup(ThreadGroup *group)
 
 bool ThreadPool::isStepDone()
 {
+    //TRACE std::cerr << " TP CHECK =========== " << std::endl;
     if(!default_group_->isStepDone()) {
         return false;
     }

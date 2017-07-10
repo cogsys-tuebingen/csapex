@@ -47,11 +47,11 @@ add_executable(csapex_test
     src/yaml_serialization_test.cpp
     src/binary_serialization_test.cpp
     src/slim_signals_test.cpp
+    src/scheduling_test.cpp
     src/nesting_test.cpp
     src/parameter_test.cpp
     src/activity_test.cpp
     src/container_iteration_test.cpp
-    src/scheduling_test.cpp
 )
 
 add_test(NAME ${PROJECT_TEST_NAME} COMMAND csapex_test)

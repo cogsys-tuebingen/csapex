@@ -132,6 +132,12 @@ bool OutputTransition::canStartSendingMessages() const
         OutputPtr output = pair.second;
         if(output->isEnabled() && output->isConnected()) {
             if(output->getState() != Output::State::IDLE) {
+                //TRACE for(auto pair : outputs_) {
+                    //TRACE OutputPtr output = pair.second;
+                    //TRACE if(output->isEnabled() && output->isConnected()) {
+                        //TRACE std::cout << "output " << output->getUUID() << " is not idle" << std::endl;
+                    //TRACE }
+                //TRACE }
                 return false;
             }
         }
@@ -146,8 +152,6 @@ bool OutputTransition::sendMessages(bool is_active)
     apex_assert_hard(areAllConnections(Connection::State::NOT_INITIALIZED));
 
     bool has_sent_activator_message = false;
-
-    //        std::cerr << "commit messages output transition: " << node_->getUUID() << std::endl;
 
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
@@ -241,6 +245,7 @@ void OutputTransition::clearBuffer()
 
 void OutputTransition::setOutputsIdle()
 {
+    //TRACE std::cout << "set outputs idle" << std::endl;
     std::unique_lock<std::recursive_mutex> lock(sync);
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;

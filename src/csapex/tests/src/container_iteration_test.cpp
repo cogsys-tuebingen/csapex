@@ -24,6 +24,7 @@
 
 #include "gtest/gtest.h"
 #include "test_exception_handler.h"
+#include "stepping_test.h"
 
 namespace csapex {
 
@@ -50,7 +51,7 @@ public:
     {
         int a = msg::getValue<int>(input_a_);
         int b = msg::getValue<int>(input_b_);
-//        std::cerr << " < multiply " << a << " by " << b << std::endl;
+        //TRACEstd::cerr << " < multiply " << a << " by " << b << std::endl;
         msg::publish(output_, a * b);
     }
 
@@ -83,7 +84,7 @@ public:
 
     void process() override
     {
-//        std::cerr << " < publish " << i << std::endl;
+        //TRACEstd::cerr << " < publish " << i << std::endl;
         auto vector = std::make_shared<std::vector<int>>();
         for(int j = 0; j < 8; ++j) {
             vector->push_back(j * i);
@@ -122,7 +123,7 @@ public:
 
     void process() override
     {
-//        std::cerr << " < publish contant " << i << std::endl;
+        //TRACEstd::cerr << " < publish contant " << i << std::endl;
         msg::publish(out, i);
 
         ++i;
@@ -139,7 +140,6 @@ class IterationSink
 {
 public:
     IterationSink()
-        : waiting(false)
     {
 
     }
@@ -159,11 +159,7 @@ public:
         auto i = msg::getMessage<connection_types::GenericVectorMessage, int>(in);
         value = *i;
 
-//        std::cerr << "got vector of size " << value.size() << std::endl;
-
-        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-        waiting = false;
-        stepping_done.notify_all();
+        //TRACEstd::cerr << "got vector of size " << value.size() << std::endl;
     }
 
     std::vector<int> getValue() const
@@ -171,36 +167,18 @@ public:
         return value;
     }
 
-    void setWaiting(bool w)
-    {
-        waiting = w;
-    }
-
-    void wait()
-    {
-        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-        while(waiting) {
-            stepping_done.wait(lock);
-        }
-    }
-
 private:
     Input* in;
-
-    bool waiting;
-
-    std::recursive_mutex wait_mutex;
-    std::condition_variable_any stepping_done;
 
     std::vector<int> value;
 };
 
 
-class ContainerIterationTest : public ::testing::Test {
+class ContainerIterationTest : public SteppingTest
+{
+
 protected:
     ContainerIterationTest()
-        : factory(SettingsLocal::NoSettings, nullptr),
-          executor(eh, false, false)
     {
         {
             csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationCombiner",
@@ -228,12 +206,12 @@ protected:
     }
 
     virtual void SetUp() override {
+        SteppingTest::SetUp();
+
         graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
         graph = graph_node->getGraph();
     }
 
-    virtual void TearDown() override {
-    }
 
     static NodePtr makeCombiner() {
         return NodePtr(new NodeWrapper<IterationCombiner>());
@@ -247,20 +225,10 @@ protected:
     static NodePtr makeSink() {
         return NodePtr(new NodeWrapper<IterationSink>());
     }
-
-    NodeFactory factory;
-    TestExceptionHandler eh;
-    
-    ThreadPool executor;
-
-    SubgraphNodePtr graph_node;
-    GraphPtr graph;
 };
 
 TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
     GraphFacade main_graph_facade(executor, graph, graph_node);
-
-    executor.setSteppingMode(true);
 
     // MAIN GRAPH
     NodeFacadePtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
@@ -314,9 +282,7 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
     // execution
     ASSERT_TRUE(sink->getValue().empty());
     for(int iter = 0; iter < 23; ++iter) {
-        sink->setWaiting(true);
-        executor.step();
-        sink->wait();
+        step();
 
         std::vector<int> res = sink->getValue();
 
@@ -332,8 +298,6 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
 
 TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
     GraphFacade main_graph_facade(executor, graph, graph_node);
-
-    executor.setSteppingMode(true);
 
     // MAIN GRAPH
     NodeFacadePtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
@@ -374,9 +338,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
     // execution
     ASSERT_TRUE(sink->getValue().empty());
     for(int iter = 0; iter < 23; ++iter) {
-        sink->setWaiting(true);
-        executor.step();
-        sink->wait();
+        step();
 
         std::vector<int> res = sink->getValue();
 
@@ -390,8 +352,6 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
 
 TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
     GraphFacade main_graph_facade(executor, graph, graph_node);
-
-    executor.setSteppingMode(true);
 
     // MAIN GRAPH
     NodeFacadePtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
@@ -431,8 +391,9 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
     sub_graph->setIterationEnabled(in_vec_map.external, true);
 
     // forwarding connections
-    sub_graph_facade.connect(in_vec_map.internal, n2, "input_a");
-    sub_graph_facade.connect(in_const_map.internal, n2, "input_b");
+    sub_graph_facade.connect(in_vec_map.internal, n2, "input_a"); //   these
+    sub_graph_facade.connect(in_const_map.internal, n2, "input_b"); // two
+//                                                                       make problems... need one more step than necessary...
     sub_graph_facade.connect(in_vec_map.internal, out_map.internal);
 
     // crossing connections
@@ -445,9 +406,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
     // execution
     ASSERT_TRUE(sink->getValue().empty());
     for(int iter = 0; iter < 23; ++iter) {
-        sink->setWaiting(true);
-        executor.step();
-        sink->wait();
+        step();
 
         std::vector<int> res = sink->getValue();
 

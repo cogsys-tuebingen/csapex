@@ -44,6 +44,7 @@ void Output::removeConnection(Connector *other_side)
 
 void Output::notifyMessageProcessed()
 {
+    //TRACE std::cout << getUUID() << " notified" << std::endl;
     setState(State::IDLE);
     message_processed(shared_from_this());
 }
@@ -56,7 +57,7 @@ void Output::notifyMessageProcessed(Connection* connection)
         }
     }
 
-    APEX_DEBUG_CERR << getUUID() << " is processed" << std::endl;
+    //TRACE std::cout << getUUID() << " is processed" << std::endl;
 
     notifyMessageProcessed();
 }
@@ -68,6 +69,14 @@ void Output::activate()
 
 void Output::setState(State s)
 {
+    if(state_ == s) {
+        return;
+    }
+    if(s == State::IDLE) {
+        //TRACE std::cout << "output " << getUUID() << " is now idle" << std::endl;
+    } else {
+        //TRACE std::cout << "output " << getUUID() << " is now active" << std::endl;
+    }
     state_ = s;
 }
 

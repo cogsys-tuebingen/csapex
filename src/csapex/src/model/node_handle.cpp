@@ -140,7 +140,16 @@ bool NodeHandle::isSource() const
 
 bool NodeHandle::isSink() const
 {
-    return external_outputs_.empty() || !transition_out_->hasConnection();
+    return external_outputs_.empty() || !hasConnectionsOutgoing();
+}
+
+bool NodeHandle::hasConnectionsIncoming() const
+{
+    return transition_in_->hasConnection();
+}
+bool NodeHandle::hasConnectionsOutgoing() const
+{
+    return transition_out_->hasConnection();
 }
 
 bool NodeHandle::isVariadic() const

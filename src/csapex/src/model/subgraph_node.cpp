@@ -150,13 +150,14 @@ void SubgraphNode::deactivation()
 bool SubgraphNode::canProcess() const
 {
     if(!is_initialized_) {
+        //TRACE ainfo << "cannot process: not initialized" << std::endl;
         return false;
     }
     if(!transition_relay_out_->canStartSendingMessages()) {
-        APEX_DEBUG_TRACE ainfo << "cannot process, out relay cannot send" << std::endl;
+        /*//TRACE */ainfo << "cannot process, out relay cannot send" << std::endl;
         return false;
     }
-    return Node::canProcess();
+    return true;
 }
 
 
@@ -195,6 +196,7 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
         std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
         continuation_ = continuation;
     }
+    //TRACE ainfo << "start process with continuation" << std::endl;
 
     apex_assert_hard(is_initialized_);
 
@@ -227,9 +229,13 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
     }
 
     if(transition_relay_out_->hasConnection()) {
+        //TRACE ainfo << "send internal output messages" << std::endl;
         transition_relay_out_->sendMessages(node_handle_->isActive());
     }
+
+    tryFinishSubgraph();
     if(transition_relay_in_->areMessagesForwarded()) {
+        //TRACE ainfo << "process: all messages forwarded -> finish subgraph" << std::endl;
         finishSubgraph();
     }
 }
@@ -695,27 +701,24 @@ void SubgraphNode::removeInternalPorts()
 
 void SubgraphNode::notifyMessagesProcessed()
 {
+    //TRACE ainfo << "messages processed" << std::endl;
     //    tryFinishProcessing();
-    APEX_DEBUG_TRACE ainfo << "is notified" << std::endl;
     transition_relay_in_->notifyMessageProcessed();
 }
 
 void SubgraphNode::currentIterationIsProcessed()
 {
+    //TRACE ainfo << "current iteration processed" << std::endl;
     apex_assert(node_handle_);
-    APEX_DEBUG_TRACE ainfo << "input activated" << std::endl;
 
-    if(!is_subgraph_finished_) {
-        tryFinishSubgraph();
-    }
+    tryFinishSubgraph();
+
     yield();
 }
 
 void SubgraphNode::subgraphHasProducedAllMessages()
 {
-    APEX_DEBUG_TRACE ainfo << "subgraphHasProducedAllMessages" << std::endl;
     if(transition_relay_in_->isEnabled()) { // TODO: check this in checkIfEnabled
-        APEX_DEBUG_TRACE ainfo << "output activated" << std::endl;
 
         apex_assert_hard(!has_sent_current_iteration_);
         sendCurrentIteration();
@@ -726,11 +729,12 @@ void SubgraphNode::subgraphHasProducedAllMessages()
 
 void SubgraphNode::tryFinishSubgraph()
 {
-    APEX_DEBUG_TRACE ainfo << "tryFinishSubgraph" << std::endl;
+    //TRACE ainfo << "try finish" << std::endl;
     bool can_start_next_iteration = node_handle_->isSink() || has_sent_current_iteration_;
     if(can_start_next_iteration) {
         bool last_iteration = !is_iterating_ || iteration_index_ >= iteration_count_;
         if(last_iteration) {
+            //TRACE ainfo << "last iteration -> finish subgraph: " << is_iterating_ << ", " << iteration_index_ << " >= " << iteration_count_ << std::endl;
             finishSubgraph();
         } else {
             if(transition_relay_out_->canStartSendingMessages()) {
@@ -743,48 +747,70 @@ void SubgraphNode::tryFinishSubgraph()
 
 void SubgraphNode::finishSubgraph()
 {
-    is_subgraph_finished_ = true;
-    is_iterating_ = false;
-    has_sent_current_iteration_ = false;
+    //TRACE ainfo << "called finish" << std::endl;
+    if(is_subgraph_finished_) {
+        return;
+    }
 
-    notifySubgraphProcessed();
+    // if transition_relay_in is connected, we need to make sure all connections have received...
+    if(transition_relay_in_->hasConnection()) {
+        if(!transition_relay_in_->areMessagesForwarded()) {
+            return;
+        }
+    }
+
+    //TRACE ainfo << "finish" << std::endl;
+    if(!is_subgraph_finished_) {
+        is_subgraph_finished_ = true;
+        //is_iterating_ = false;
+        has_sent_current_iteration_ = false;
+
+        notifySubgraphProcessed();
+    }
 }
 
 
 void SubgraphNode::notifySubgraphProcessed()
 {
-    APEX_DEBUG_TRACE ainfo << "notifySubgraphProcessed" << std::endl;
+//    if(node_handle_->isSource() && node_handle_->isSink()) {
+//        notifyMessagesProcessed();
 
-    if(node_handle_->isSource() && node_handle_->isSink()) {
-        notifyMessagesProcessed();
-
-    } else {
+//    } else {
         std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
         if(continuation_) {
             auto cnt = continuation_;
             continuation_ = Continuation();
             lock.unlock();
 
+            //TRACEainfo << "continuation" << std::endl;
             cnt([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
         }
-    }
+//    }
 }
 
 void SubgraphNode::sendCurrentIteration()
 {
-    APEX_DEBUG_TRACE ainfo << "sendCurrentIteration" << std::endl;
+    //TRACE ainfo << "send current iteration " << iteration_index_ << " < " << iteration_count_<< std::endl;
     transition_relay_in_->forwardMessages();
 
     has_sent_current_iteration_ = true;
-    if(is_iterating_) {
+    if(is_iterating_ && iteration_index_ < iteration_count_) {
+        //TRACE ainfo << "mark read" << std::endl;
         transition_relay_in_->notifyMessageRead();
         transition_relay_in_->notifyMessageProcessed();
+        // allow another step for all nested nodes...
+        // only do this once ALL NODES are done stepping
+        for(NodeHandle* nh : graph_->getAllNodeHandles()){
+            nh->getNodeRunner()->step();
+        }
     }
+
+
 }
 
 void SubgraphNode::startNextIteration()
 {
-    APEX_DEBUG_TRACE ainfo << "startNextIteration" << std::endl;
+    //TRACE ainfo << "start iteration " << iteration_index_ << std::endl;
     for(InputPtr i : node_modifier_->getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i.get());
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
@@ -800,6 +826,7 @@ void SubgraphNode::startNextIteration()
 
     ++iteration_index_;
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
+    //TRACE ainfo << "send internal output messages in next iteration" << std::endl;
     transition_relay_out_->sendMessages(node_handle_->isActive());
 }
 

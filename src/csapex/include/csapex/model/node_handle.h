@@ -123,6 +123,8 @@ public:
 
     bool isSource() const override;
     bool isSink() const override;
+    bool hasConnectionsIncoming() const;
+    bool hasConnectionsOutgoing() const;
 
     bool isVariadic() const;
     bool hasVariadicInputs() const;

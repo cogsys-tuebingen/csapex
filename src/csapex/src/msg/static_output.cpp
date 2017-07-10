@@ -71,6 +71,7 @@ TokenPtr StaticOutput::getToken() const
 
 bool StaticOutput::commitMessages(bool is_activated)
 {
+    //TRACE std::cout << getUUID() << " commit / activate" << std::endl;
     activate();
 
     bool send_activator = is_activated;

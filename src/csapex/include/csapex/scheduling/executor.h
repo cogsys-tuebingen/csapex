@@ -52,6 +52,7 @@ public:
 private:
     bool paused_;
     bool stepping_;
+    bool step_done_;
 
     std::vector<Executor*> children_;
 };
