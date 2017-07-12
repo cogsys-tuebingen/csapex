@@ -45,47 +45,56 @@ void GuiExceptionHandler::showErrorDialog()
     std::stringstream msg_stream;
     last_failure_->stackTrace(msg_stream, 12);
 
-    QString msg = QString::fromStdString(msg_stream.str());
+    std::string msg = msg_stream.str();
+    std::string failure = last_failure_->type();
 
-    QString failure_type = QString::fromStdString(last_failure_->type());
-
-    int reply = QMessageBox::critical(window, failure_type,
-                                      msg, "&Ignore", "&Report (Email)",
-                                      "&Create Issue");
+    int reply = QMessageBox::critical(window, QString::fromStdString(failure),
+                                      QString::fromStdString(msg),
+                                      "&Ignore", "&Report (Email)", "&Create Issue");
 
     switch(reply) {
     case 0: // ignore
         break;
     case 1: // report
-    {
-        QString mail = "mailto:sebastian.buck@uni-tuebingen.de?";
-        mail += "subject=[CS::APEX] Bug Report&body=" + msg;
-        QDesktopServices::openUrl(QUrl(mail, QUrl::TolerantMode));
-    }
+        reportEmail(failure, msg);
         break;
     case 2: // issue on github or gitlab
+        reportIssue(failure, msg);
+        break;
+    }
+}
+
+void GuiExceptionHandler::reportIssue(const std::string& failure, const std::string& message)
+{
+    int which = QMessageBox::question(QApplication::activeWindow(), "Please select a target.", "Please choose where to post the new issue:",
+                                      "github.com", "gitlab.cs.uni-tuebingen.de", 0);
+
+    QString failure_type = QString::fromStdString(failure);
+    QString msg = QString::fromStdString(message);
+
+    switch(which)
     {
-        int which = QMessageBox::question(window, "Please select a target.", "Please choose where to post the new issue:",
-                                          "github.com", "gitlab.cs.uni-tuebingen.de", 0);
-
-        switch(which)
-        {
-        case 0: {
-            QString issue_github = "https://github.com/cogsys-tuebingen/csapex/issues/new?title=";
-            issue_github += failure_type + "&body=" + msg;
-            QDesktopServices::openUrl(QUrl(issue_github, QUrl::TolerantMode));
-        }
-            break;
-
-        case 1: {
-            QString issue_gitlab = "https://gitlab.cs.uni-tuebingen.de/csapex/csapex/issues/new?issue[assignee_id]=&issue[milestone_id]=&issue[title]=";
-            issue_gitlab += failure_type + "&issue[description]=" + msg;
-            QDesktopServices::openUrl(QUrl(issue_gitlab, QUrl::TolerantMode));
-        }
-            break;
-        }
+    case 0: {
+        QString issue_github = "https://github.com/cogsys-tuebingen/csapex/issues/new?title=";
+        issue_github += failure_type + "&body=" + msg;
+        QDesktopServices::openUrl(QUrl(issue_github, QUrl::TolerantMode));
     }
+        break;
+
+    case 1: {
+        QString issue_gitlab = "https://gitlab.cs.uni-tuebingen.de/csapex/csapex/issues/new?issue[assignee_id]=&issue[milestone_id]=&issue[title]=";
+        issue_gitlab += failure_type + "&issue[description]=" + msg;
+        QDesktopServices::openUrl(QUrl(issue_gitlab, QUrl::TolerantMode));
     }
+        break;
+    }
+}
+
+void GuiExceptionHandler::reportEmail(const std::string &failure_type, const std::string &msg)
+{
+    QString mail = "mailto:sebastian.buck@uni-tuebingen.de?";
+    mail += "subject=[CS::APEX] Bug Report&body=" + QString::fromStdString(msg);
+    QDesktopServices::openUrl(QUrl(mail, QUrl::TolerantMode));
 }
 
 /// MOC

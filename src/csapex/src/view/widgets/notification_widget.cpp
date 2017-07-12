@@ -5,6 +5,7 @@
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
+#include <csapex/view/gui_exception_handler.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -52,11 +53,19 @@ NotificationWidget::NotificationWidget(const Notification &notification, QWidget
     label_ = new QLabel;
     layout->addWidget(label_, 0, 1);
 
-    QPushButton* btn = new QPushButton;
-    btn->setIcon(QIcon(":/hide.png"));
-    layout->addWidget(btn, 0, 2);
+    QPushButton* report_btn = new QPushButton;
+    report_btn->setIcon(QIcon(":/pencil.png"));
+    layout->addWidget(report_btn, 0, 2);
 
-    QObject::connect(btn, &QPushButton::clicked, [this](){
+    QObject::connect(report_btn, &QPushButton::clicked, [this](){
+        GuiExceptionHandler::reportIssue("Notification Issue", getRawText().toStdString());
+    });
+
+    QPushButton* close_btn = new QPushButton;
+    close_btn->setIcon(QIcon(":/hide.png"));
+    layout->addWidget(close_btn, 0, 3);
+
+    QObject::connect(close_btn, &QPushButton::clicked, [this](){
         fadeout();
     });
 
@@ -120,21 +129,42 @@ void NotificationWidget::paintEvent(QPaintEvent* event)
     style()->drawPrimitive(QStyle::PE_PanelButtonBevel, &opt, &painter, this);
 }
 
+QString NotificationWidget::getText()
+{
+    QString s;
+    QTextStream ss(&s);
+    ss << "<b>";
+    if(!notification_.auuid.empty()) {
+        ss << QString::fromStdString(notification_.auuid.getFullName()) << "</b>:<br /> ";
+    }
+    ss << QString::fromStdString(notification_msg_);
+
+    return s;
+}
+QString NotificationWidget::getRawText()
+{
+    QString s;
+    QTextStream ss(&s);
+    if(!notification_.auuid.empty()) {
+        ss << QString::fromStdString(notification_.auuid.getFullName()) << ": ";
+    }
+    ss << QString::fromStdString(notification_msg_);
+
+    return s;
+}
+
 void NotificationWidget::setNotification(const Notification &notification)
 {
     bool is_error = notification.error != ErrorState::ErrorLevel::NONE;
     bool was_error = notification_.error != ErrorState::ErrorLevel::NONE;
 
     notification_ = notification;
+    if(!notification.message.str().empty()) {
+        notification_msg_ = notification_.message.str();
+    }
 
     if(is_error) {
-        QString s;
-        QTextStream ss(&s);
-        ss << "<b>";
-        if(!notification_.auuid.empty()) {
-            ss << QString::fromStdString(notification_.auuid.getFullName()) << "</b>:<br /> ";
-        }
-        ss << QString::fromStdString(notification_.message.str());
+        QString s = getText();
         label_->setText(s);
 
         if(notification.error == ErrorState::ErrorLevel::ERROR) {

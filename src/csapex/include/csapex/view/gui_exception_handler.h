@@ -21,11 +21,15 @@ public:
     GuiExceptionHandler(bool fatal_exceptions);
     ~GuiExceptionHandler();
 
+    static void reportEmail(const std::string &failure_type, const std::string &msg);
+    static void reportIssue(const std::string &failure, const std::string &msg);
+
 Q_SIGNALS:
     void fatalError();
 
 private Q_SLOTS:
     void showErrorDialog();
+
 
 protected:
     virtual void handleAssertionFailure(const csapex::Failure& assertion) override;

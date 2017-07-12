@@ -43,12 +43,15 @@ protected:
     void mouseReleaseEvent(QMouseEvent* me);
 
     void updateNotification();
+    QString getText();
+    QString getRawText();
 
 private:
     QTimer* timer_;
     QGraphicsOpacityEffect *eff;
 
     Notification notification_;
+    std::string notification_msg_;
 
     QLabel* icon_;
     QLabel* label_;
