@@ -108,6 +108,16 @@ void ThreadGroup::setSteppingMode(bool stepping)
     }
 }
 
+bool ThreadGroup::canStartStepping() const
+{
+    for(auto generator : generators_) {
+        if(!generator->canStartStepping()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void ThreadGroup::step()
 {
     begin_step();

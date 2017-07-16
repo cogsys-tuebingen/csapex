@@ -49,7 +49,6 @@ bool Executor::isPaused() const
     return paused_;
 }
 
-
 void Executor::setSteppingMode(bool stepping)
 {
     if(stepping == stepping_) {

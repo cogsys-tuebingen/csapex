@@ -70,6 +70,8 @@ protected:
 
     bool isStepDone() override;
 
+    void checkIfStepCanBeDone();
+
 private:
     void assignGeneratorToGroup(TaskGenerator* task, ThreadGroup* group);
 
@@ -91,6 +93,7 @@ private:
 
     std::vector<ThreadGroupPtr> groups_;
     std::map<TaskGenerator*, ThreadGroup*> group_assignment_;
+    std::map<TaskGenerator*, slim_signal::ScopedConnection> group_connection_;
 };
 
 }

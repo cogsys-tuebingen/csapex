@@ -23,6 +23,7 @@ public:
 
     virtual void setPause(bool pause) = 0;
 
+    virtual bool canStartStepping() const = 0;
     virtual void setSteppingMode(bool stepping) = 0;
     virtual bool isStepping() const = 0;
     virtual bool isStepDone() const = 0;
@@ -42,8 +43,9 @@ public:
     virtual void scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time) = 0;
 
 public:
-    slim_signal::Signal<void()> begin_step;
-    slim_signal::Signal<void()> end_step;
+    slim_signal::Signal<void ()> stepping_enabled;
+    slim_signal::Signal<void ()> begin_step;
+    slim_signal::Signal<void ()> end_step;
 
     slim_signal::Signal<void ()> scheduler_changed;
 };

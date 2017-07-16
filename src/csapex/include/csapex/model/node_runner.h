@@ -29,6 +29,7 @@ public:
     virtual bool isPaused() const override;
     virtual void setPause(bool pause) override;
 
+    virtual bool canStartStepping() const override;
     virtual void setSteppingMode(bool stepping) override;
     virtual void step() override;
     virtual bool isStepping() const override;
@@ -69,7 +70,10 @@ private:
     long guard_;
     double max_frequency_;
 
-    bool waiting_;
+    bool waiting_for_execution_;
+
+    bool waiting_for_step_;
+    slim_signal::ScopedConnection wait_for_step_connection_;
 };
 
 }

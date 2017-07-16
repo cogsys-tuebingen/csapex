@@ -245,6 +245,11 @@ bool SubgraphNode::isAsynchronous() const
     return true;
 }
 
+bool SubgraphNode::isIterating() const
+{
+    return is_iterating_;
+}
+
 namespace {
 void crossConnectLabelChange(Connectable* a, Connectable* b)
 {

@@ -123,7 +123,6 @@ void ThreadPool::steppingChanged(bool step)
     }
 }
 
-
 void ThreadPool::add(TaskGenerator *schedulable)
 {
     if(enable_threading_) {
@@ -138,12 +137,31 @@ void ThreadPool::add(TaskGenerator *schedulable)
         // we need this to make the ui responsive
         useDefaultThreadFor(schedulable);
     }
+
+    group_connection_[schedulable] = schedulable->stepping_enabled.connect([this](){
+        checkIfStepCanBeDone();
+    });
+}
+
+void ThreadPool::checkIfStepCanBeDone()
+{
+    if(!default_group_->canStartStepping()) {
+        return;
+    }
+    for(auto group : groups_) {
+        if(!group->canStartStepping()) {
+            return;
+        }
+    }
+
+    stepping_enabled();
 }
 
 void ThreadPool::remove(TaskGenerator *task)
 {
     task->detach();
     group_assignment_.erase(task);
+    group_connection_.erase(task);
 }
 
 std::size_t ThreadPool::getGroupCount() const

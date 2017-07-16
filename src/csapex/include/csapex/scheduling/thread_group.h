@@ -48,6 +48,7 @@ public:
     virtual void setPause(bool pause) override;
     virtual void setSteppingMode(bool stepping) override;
 
+    virtual bool canStartStepping() const override;
     virtual void step() override;
     virtual bool isStepping() const override;
     virtual bool isStepDone() const override;

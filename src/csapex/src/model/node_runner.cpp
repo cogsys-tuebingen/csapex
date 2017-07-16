@@ -10,6 +10,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/model/node_state.h>
 #include <csapex/utility/thread.h>
+#include <csapex/model/subgraph_node.h>
 
 /// SYSTEM
 #include <memory>
@@ -21,7 +22,8 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
     : worker_(worker), scheduler_(nullptr),
       paused_(false), stepping_(false), can_step_(0), step_done_(false),
       guard_(-1),
-      waiting_(false)
+      waiting_for_execution_(false),
+      waiting_for_step_(false)
 {
     NodeHandlePtr handle = worker_->getNodeHandle();
 
@@ -115,7 +117,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     // processing enabled change
     observe(worker_->getNodeHandle()->getNodeState()->enabled_changed, [this]() {
         if(!worker_->getNodeHandle()->getNodeState()->isEnabled()) {
-            waiting_ = false;
+            waiting_for_execution_ = false;
         }
     });
 
@@ -142,7 +144,7 @@ void NodeRunner::scheduleProcess()
         if(!source || !stepping_ || can_step_) {
             //execute_->setPriority(std::max<long>(0, worker_->getSequenceNumber()));
             //if(worker_->canExecute()) {
-                if(!waiting_) {
+                if(!waiting_for_execution_) {
                     schedule(execute_);
                 }
             //}
@@ -152,7 +154,7 @@ void NodeRunner::scheduleProcess()
 
 void NodeRunner::execute()
 {
-    if(stepping_ && !can_step_) {
+    if(stepping_ && can_step_ <= 0) {
         return;
     }
 
@@ -168,13 +170,13 @@ void NodeRunner::execute()
 
                 if(next_process > now) {
                     scheduleDelayed(execute_, next_process);
-                    waiting_ = true;
+                    waiting_for_execution_ = true;
                     return;
                 }
             }
         }
 
-        waiting_ = false;
+        waiting_for_execution_ = false;
 
         worker_->getNodeHandle()->getRate().startCycle();
 
@@ -189,7 +191,7 @@ void NodeRunner::execute()
         }
     } else {
         can_step_++;
-        waiting_ = false;
+        waiting_for_execution_ = false;
     }
 }
 
@@ -236,17 +238,47 @@ void NodeRunner::setPause(bool pause)
     }
 }
 
+bool NodeRunner::canStartStepping() const
+{
+    if(auto subgraph = std::dynamic_pointer_cast<SubgraphNode>(worker_->getNode())) {
+        // if the node is an iterating sub graph, we need to wait until the current iteration is done...
+        return subgraph->isIterating();
+    }
+    return true;
+}
+
 void NodeRunner::setSteppingMode(bool stepping)
 {
+    bool can_start_stepping = true;
+    if(stepping) {
+        if(!canStartStepping()){
+            can_start_stepping = false;
+            waiting_for_step_ = true;
+            wait_for_step_connection_ = worker_->messages_processed.connect([this]() {
+                stepping_enabled();
+            });
+        }
+    }
+
     stepping_ = stepping;
     can_step_ = 0;
-    if(!stepping_) {
+
+    if(stepping_) {
+        if(can_start_stepping) {
+            stepping_enabled();
+        }
+
+    } else {
         scheduleProcess();
     }
 }
 
 void NodeRunner::step()
 {
+    if(waiting_for_step_) {
+        wait_for_step_connection_.disconnect();
+    }
+
     can_step_++;
 
     step_done_ = false;

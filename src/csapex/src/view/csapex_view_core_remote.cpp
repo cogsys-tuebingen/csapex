@@ -92,6 +92,7 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     observe(core_tmp_->saved, saved);
     observe(core_tmp_->loaded, loaded);
     observe(core_tmp_->paused, paused);
+    observe(core_tmp_->stepping_enabled, stepping_enabled);
     observe(core_tmp_->begin_step, begin_step);
     observe(core_tmp_->end_step, end_step);
 

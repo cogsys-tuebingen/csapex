@@ -44,6 +44,7 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexCorePtr core)
     observe(core_->saved, saved);
     observe(core_->loaded, loaded);
     observe(core_->paused, paused);
+    observe(core_->stepping_enabled, stepping_enabled);
     observe(core_->begin_step, begin_step);
     observe(core_->end_step, end_step);
 

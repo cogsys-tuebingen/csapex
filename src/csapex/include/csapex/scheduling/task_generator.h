@@ -24,6 +24,7 @@ public:
     virtual bool isPaused() const = 0;
     virtual void setPause(bool pause) = 0;
 
+    virtual bool canStartStepping() const = 0;
     virtual void setSteppingMode(bool stepping) = 0;
     virtual void step() = 0;
     virtual bool isStepping() const = 0;
@@ -36,6 +37,7 @@ public:
     virtual void reset() = 0;
 
 public:
+    slim_signal::Signal<void()> stepping_enabled;
     slim_signal::Signal<void()> begin_step;
     slim_signal::Signal<void()> end_step;
 };

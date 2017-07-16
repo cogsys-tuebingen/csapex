@@ -127,8 +127,14 @@ void CsApexWindow::construct()
 
     QObject::connect(ui->actionPause, &QAction::triggered, [this](bool pause) { view_core_.setPause(pause); });
 
-    QObject::connect(ui->actionSteppingMode, &QAction::triggered, [this](bool step) { view_core_.setSteppingMode(step); });
-    QObject::connect(ui->actionStep, &QAction::triggered, [this](bool) { view_core_.step(); });
+    QObject::connect(ui->actionSteppingMode, &QAction::triggered, [this](bool step) {
+        ui->actionStep->setEnabled(false);
+        view_core_.setSteppingMode(step);
+    });
+    QObject::connect(ui->actionStep, &QAction::triggered, [this](bool) {
+        ui->actionStep->setEnabled(false);
+        view_core_.step();
+    });
 
 
     QObject::connect(ui->actionClearBlock, SIGNAL(triggered(bool)), this, SLOT(clearBlock()));
@@ -191,7 +197,8 @@ void CsApexWindow::construct()
     QObject::connect(this, &CsApexWindow::showNotificationRequest, this, &CsApexWindow::showNotification);
     observe(view_core_.notification, [this](Notification notification){ showNotificationRequest(notification); });
 
-    observe(view_core_.begin_step, [this](){ ui->actionStep->setEnabled(false); });
+    observe(view_core_.stepping_enabled, [this](){ ui->actionStep->setEnabled(true); });
+    observe(view_core_.begin_step, [this](){  });
     observe(view_core_.end_step, [this](){ ui->actionStep->setEnabled(view_core_.isSteppingMode()); });
 
     observe(view_core_.group_created, [this](const ThreadGroupPtr& /*group*/) { updateThreadInfo(); });
@@ -210,9 +217,6 @@ void CsApexWindow::construct()
     timer.start();
 
     QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
-
-    auto_save_state_timer.setInterval(100);
-    auto_save_state_timer.setSingleShot(true);
 
     QObject::connect(&auto_save_state_timer, SIGNAL(timeout()), this, SLOT(addStateToSettings()));
 }
@@ -279,6 +283,30 @@ void CsApexWindow::setupDesigner()
     setupThreadManagement();
 
     ui->startup->layout()->addWidget(new ProfilingWidget(view_core_.getProfiler(), "load graph"));
+
+
+    for(auto dw : findChildren<QDockWidget*>()) {
+        dw->installEventFilter(this);
+    }
+}
+
+
+bool CsApexWindow::eventFilter(QObject* o, QEvent* e)
+{
+    if(dynamic_cast<QDockWidget*>(o)) {
+        switch(e->type()) {
+        case QEvent::Resize:
+        case QEvent::Move:
+        case QEvent::Show:
+        case QEvent::Hide:
+        case QEvent::ParentChange:
+            setStateChanged();
+            break;
+        default:
+            break;
+        }
+    }
+    return false;
 }
 
 void CsApexWindow::setupThreadManagement()
@@ -833,18 +861,27 @@ void CsApexWindow::updatePluginIgnored(const QObject* &action)
 void CsApexWindow::tick()
 {
     QApplication::processEvents();
-
-    addStateToSettings();
 }
 
 void CsApexWindow::resizeEvent(QResizeEvent* event)
 {
-    state_changed_ = true;
+    setStateChanged();
 }
 
 void CsApexWindow::moveEvent(QMoveEvent* event)
 {
+    setStateChanged();
+}
+
+void CsApexWindow::setStateChanged()
+{
+    auto_save_state_timer.stop();
+
+    auto_save_state_timer.setInterval(500);
+    auto_save_state_timer.setSingleShot(true);
+
     state_changed_ = true;
+    auto_save_state_timer.start();
 }
 
 void CsApexWindow::addStateToSettings()

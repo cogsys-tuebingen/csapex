@@ -114,6 +114,8 @@ public:
 
     std::string makeStatusString() const;
 
+    bool isIterating() const;
+
 private:
     UUID addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional);
     UUID addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label);

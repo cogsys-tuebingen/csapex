@@ -114,6 +114,7 @@ private:
     void construct();
     void setupDesigner();
 
+    bool eventFilter(QObject*, QEvent*);
 
     void createPluginsMenu();
     void createTutorialsMenu();
@@ -124,6 +125,7 @@ private:
 
     std::string getConfigFile();
 
+    void setStateChanged();
     void restoreWindowState();
     bool isDirty() const;
 

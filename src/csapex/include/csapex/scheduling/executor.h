@@ -46,6 +46,8 @@ protected:
 public:
     slim_signal::Signal<void (bool)> paused;
 
+
+    slim_signal::Signal<void ()> stepping_enabled;
     slim_signal::Signal<void ()> begin_step;
     slim_signal::Signal<void ()> end_step;
 

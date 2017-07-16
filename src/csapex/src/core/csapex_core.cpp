@@ -61,6 +61,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
 
     observe(thread_pool_->paused, paused);
 
+    observe(thread_pool_->stepping_enabled, stepping_enabled);
     observe(thread_pool_->begin_step, begin_step);
     observe(thread_pool_->end_step, end_step);
 
@@ -174,12 +175,20 @@ bool CsApexCore::isSteppingMode() const
 
 void CsApexCore::setSteppingMode(bool stepping)
 {
+    if(stepping) {
+        drainPipeline();
+    }
     thread_pool_->setSteppingMode(stepping);
 }
 
 void CsApexCore::step()
 {
     thread_pool_->step();
+}
+
+void CsApexCore::drainPipeline()
+{
+    // TODO: implement
 }
 
 void CsApexCore::setStatusMessage(const std::string &msg)
