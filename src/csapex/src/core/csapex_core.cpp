@@ -536,11 +536,15 @@ void CsApexCore::load(const std::string &file)
     if(bf3::exists(file)) {
         YAML::Node node_map = YAML::LoadFile(file.c_str());
 
+        // first load settings
         settings_.loadTemporary(node_map);
-        thread_pool_->loadSettings(node_map);
 
+        // then load the graph
         graphio.loadSettings(node_map);
         graphio.loadGraphFrom(node_map);
+
+        // finally load thread affinities, _after_ the nodes are loaded
+        thread_pool_->loadSettings(node_map);
     }
 
     load_needs_reset_ = true;
