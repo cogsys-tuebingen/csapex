@@ -29,6 +29,7 @@ SetParameterAdapter::SetParameterAdapter(param::SetParameter::Ptr p)
 QWidget* SetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QPointer<QComboBox> combo = new QComboBox;
+    combo->setMaximumWidth(200);
 
     updateSetParameterScope(combo);
     layout->addLayout(QtHelper::wrap(display_name, combo, context_handler));
