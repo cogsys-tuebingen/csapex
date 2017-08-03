@@ -49,7 +49,6 @@ public:
 
 
     slim_signal::Signal<void()> begin;
-    slim_signal::Signal<void()> no_more_messages;
 
 protected:
     MessageProvider();
