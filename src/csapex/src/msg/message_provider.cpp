@@ -70,3 +70,8 @@ std::string MessageProvider::getLabel(std::size_t /*slot*/) const
 {
     return getType()->descriptiveName();
 }
+
+void MessageProvider::prepareNext()
+{
+
+}

@@ -32,6 +32,7 @@ public:
     virtual std::string getLabel(std::size_t slot) const;
 
     virtual bool hasNext() = 0;
+    virtual void prepareNext();
     virtual connection_types::Message::Ptr next(std::size_t slot) = 0;
 
     virtual void restart();
