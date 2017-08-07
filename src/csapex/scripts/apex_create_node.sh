@@ -50,6 +50,9 @@ fi
 cd $PREFIX
 
 DIR=${WORKING_DIR:${#PREFIX}}
+if [[ "$DIR" == "" ]] ; then
+    DIR="."
+fi
 
 ###
 ### CMAKELISTS EXISTS, BEGIN PARSING
@@ -73,16 +76,38 @@ if [[ ! -f $PACKAGEXML ]]; then
     exit
 fi
 
+LIBRARY=($(cat $CMAKELIST | grep "^[^#]*add_library"))
+echo $LIBRARY
+if [[ ! $LIBRARY ]]; then
+    echo "make library entry"
+    # uncomment library
+    perl -0777 -i.original -pe 's/# add_library([^\n]*)\n# ([^\n]*)\n# \)/add_library$1\n $2\n\)/igs' $CMAKELIST
+fi
 
+###
+### DETERMINE THE PROJECT NAME
+###
+PROJECT_NAME=$(cat $CMAKELIST | grep "project(" | sed "s/project(\(.*\))/\\1/");
 
 ###
 ### FIND PLUGIN XML INSIDE PACKAGE XML
 ###
 PLUGINXML=$(cat $PACKAGEXML | grep "csapex" | grep "plugin=" | grep -Po 'plugin="\K[^"]*' | \
             sed -e "s|\${prefix}|${PREFIX}|")
+if [[ "$PLUGINXML" == "" ]]; then
+    echo "no plugin xml file found, creating one"
+    LIB=$(cat $CMAKELIST | grep "^add_library" | sed "s/add_library(\(.*\)/lib\1.so/")
+    LIBRARY_NAME=$(eval echo $LIB)
+    PLUGINXML="plugin.xml"
+    sed 's/.*<export>.*/&\n    <csapex plugin="${prefix}\/plugins.xml" \/>/' $PACKAGEXML -i
+fi
+
 if [[ ! -f $PLUGINXML ]]; then
-    echo "ERROR: cannot locate the plugin xml file: $PLUGINXML"
-    exit
+    echo "Cannot locate the plugin xml file: $PLUGINXML, creating it"
+    LIB=$(cat $CMAKELIST | grep "^add_library" | sed "s/add_library(\(.*\)/lib\1.so/")
+    LIBRARY_NAME=$(eval echo $LIB)
+    echo "<library path=\"$LIBRARY_NAME\">
+</library>" > $PLUGINXML
 fi
 
 ###
@@ -93,10 +118,6 @@ if [[ `cat $PLUGINXML | grep "type=.*$FULLNAME\"" | wc -l` != 0 ]]; then
     exit
 fi
 
-###
-### DETERMINE THE PROJECT NAME
-###
-PROJECT_NAME=$(cat $CMAKELIST | grep "project" | sed "s/project(\(.*\))/\\1/");
 
 ###
 ### FIND NAME OF THE PLUGIN LIBRARY
@@ -223,4 +244,6 @@ CSAPEX_REGISTER_CLASS($FULLNAME, csapex::Node)
 ###
 ### ADD TO GIT
 ###
-git add $DIR/$NEW_FILE
+if [[ -f $DIR/.git ]] || [[ -d $DIR/.git ]]; then
+    git add $DIR/$NEW_FILE
+fi
