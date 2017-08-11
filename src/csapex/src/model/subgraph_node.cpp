@@ -701,7 +701,9 @@ void SubgraphNode::removeInternalPorts()
 {
     node_handle_->removeInternalPorts();
     internal_events_.clear();
+    internal_event_ids_.clear();
     internal_slots_.clear();
+    internal_slot_ids_.clear();
 }
 
 void SubgraphNode::notifyMessagesProcessed()
