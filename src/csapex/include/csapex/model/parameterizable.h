@@ -70,10 +70,15 @@ public:
      *            when it changes.
      * @warning The name of the parameter has to be unique for the node.
      */
-    template <typename T, typename R = T>
+    template <typename T, typename R = T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     void addParameter(const param::ParameterPtr& param, T& target)
     {
         addParameter(param, [&](param::Parameter* p) { target = p->as<R>(); });
+    }
+    template <typename T, typename R = T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    void addParameter(const param::ParameterPtr& param, T& target)
+    {
+        addParameter(param, [&](param::Parameter* p) { target = static_cast<R>(p->as<int>()); });
     }
 
     /**

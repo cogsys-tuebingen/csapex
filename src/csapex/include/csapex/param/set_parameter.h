@@ -71,6 +71,12 @@ protected:
     virtual void get_unsafe(boost::any& out) const override;
     virtual bool set_unsafe(const boost::any& v) override;
 
+
+    template <typename T>
+    void doSerializeImplementation(const std::string& type_name, YAML::Node& e) const;
+    template <typename T>
+    void doDeserializeImplementation(const std::string& type_name, const YAML::Node& n);
+
     std::string convertToString(const boost::any& v) const;
 
 private:

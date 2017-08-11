@@ -7,6 +7,9 @@
 #include <csapex/param/parameter_description.h>
 #include <csapex/csapex_param_export.h>
 
+/// SYSTEM
+#include <type_traits>
+
 namespace csapex
 {
 namespace param
@@ -253,17 +256,30 @@ public:
      * @param def default value
      * @return
      */
-    template <typename T>
+    template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description,
                                               const std::map<std::string, T> & set_values,
                                               const T& def);
+    template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description,
+                                              const std::map<std::string, T> & set_values,
+                                              const T& def)
+    {
+        std::map<std::string, int> int_map;
+        for(const auto& entry : set_values) {
+            int_map[entry.first] = static_cast<int>(entry.second);
+        }
+        return declareParameterSetImpl(name, description, int_map, static_cast<int>(def));
+    }
+
     template <typename T>
     static ParameterBuilder declareParameterSet(const std::string& name,
                                               const std::map<std::string, T> & set,
                                               const T& def)
     {
-        return declareParameterSet(name, ParameterDescription(), set, def);
+        return declareParameterSetImpl(name, ParameterDescription(), set, def);
     }
+
 
 
 
@@ -345,6 +361,20 @@ public:
      * @return
      */
     static ParameterBuilder declareOutputText(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
+
+private:
+    template <typename T>
+    static ParameterBuilder declareParameterSetImpl(const std::string& name, const ParameterDescription& description,
+                                              const std::map<std::string, T> & set_values,
+                                              const T& def);
+    template <typename T>
+    static ParameterBuilder declareParameterSetImpl(const std::string& name,
+                                              const std::map<std::string, T> & set,
+                                              const T& def)
+    {
+        return declareParameterSetImpl(name, ParameterDescription(), set, def);
+    }
+
 };
 
 }
