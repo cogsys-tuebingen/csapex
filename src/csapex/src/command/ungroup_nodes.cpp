@@ -52,9 +52,8 @@ bool UngroupNodes::doExecute()
 
     apex_assert_hard(subgraph);
 
-    setNodes(graph->getAllNodeHandles());
-
-    analyzeConnections(graph.get());
+    setNodes(subgraph->getGraph()->getAllNodeHandles());
+    analyzeConnections(subgraph->getGraph().get());
 
     {
         GraphIO io(subgraph, getNodeFactory());
