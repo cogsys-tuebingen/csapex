@@ -6,12 +6,26 @@
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/command/modify_thread.h>
 #include <csapex/command/command_executor.h>
+#include <csapex/core/settings.h>
 
 using namespace csapex;
 
-ThreadGroupTableModel::ThreadGroupTableModel(ThreadPoolPtr thread_pool, CommandExecutor& dispatcher)
-    : thread_pool_(thread_pool), cmd_executor_(dispatcher)
+ThreadGroupTableModel::ThreadGroupTableModel(Settings& settings, ThreadPoolPtr thread_pool, CommandExecutor& dispatcher)
+    : settings_(settings), thread_pool_(thread_pool), cmd_executor_(dispatcher)
 {
+    observe(settings_.setting_changed, [this](const std::string& name) {
+        if(name == "debug") {
+            refresh();
+        }
+    });
+
+    observe(thread_pool_->begin_step, [this](){
+        refresh();
+    });
+    observe(thread_pool_->end_step, [this](){
+        refresh();
+    });
+
     observe(thread_pool_->group_created, [this](ThreadGroupPtr group){
         refresh();
 
@@ -35,17 +49,22 @@ ThreadGroupTableModel::ThreadGroupTableModel(ThreadPoolPtr thread_pool, CommandE
 
 int ThreadGroupTableModel::rowCount(const QModelIndex &/*parent*/) const
 {
-    return thread_pool_->getGroupCount();
+    return thread_pool_->getGroupCount() + 1;
 }
 
 int ThreadGroupTableModel::columnCount(const QModelIndex &/*parent*/) const
 {
-    return 2;
+    return settings_.get<bool>("debug") ? 3 : 2;
+}
+
+ThreadGroup * ThreadGroupTableModel::getThreadGroup(int row) const
+{
+    return row == 0 ? thread_pool_->getDefaultGroup() : thread_pool_->getGroupAt(row - 1);
 }
 
 bool ThreadGroupTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    ThreadGroup* group = thread_pool_->getGroupAt(index.row());
+    ThreadGroup* group = getThreadGroup(index.row());
 
     switch(index.column()) {
     case 0:
@@ -71,7 +90,7 @@ bool ThreadGroupTableModel::setData(const QModelIndex &index, const QVariant &va
 
 QVariant ThreadGroupTableModel::data(const QModelIndex &index, int role) const
 {
-    ThreadGroup* group = thread_pool_->getGroupAt(index.row());
+    ThreadGroup* group = getThreadGroup(index.row());
 
     switch(role) {
     case Qt::DisplayRole:
@@ -83,6 +102,16 @@ QVariant ThreadGroupTableModel::data(const QModelIndex &index, int role) const
             return QString::fromStdString(group->getName());
         case 1:
             return QVariant::fromValue(group->size());
+        case 2:
+        {
+            QString res;
+            res += "(";
+            res += QString::number(group->isStepDone());
+            res += ", ";
+            res += QString::number(group->canStartStepping());
+            res += ")";
+            return res;
+        }
         default:
             break;
         }
@@ -97,6 +126,16 @@ QVariant ThreadGroupTableModel::data(const QModelIndex &index, int role) const
 
 QVariant ThreadGroupTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    if (role == Qt::ToolTipRole) {
+        if(orientation == Qt::Horizontal) {
+            switch(section) {
+            case 2: return "isStepDone(), canStartStepping()";
+            default:
+                break;
+            }
+        }
+        return QVariant();
+    }
     if (role != Qt::DisplayRole) {
         return QVariant();
     }
@@ -105,6 +144,7 @@ QVariant ThreadGroupTableModel::headerData(int section, Qt::Orientation orientat
         switch(section) {
         case 0: return "Name";
         case 1: return "Nodes";
+        case 2: return "States";
         default:
             break;
         }

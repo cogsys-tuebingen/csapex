@@ -284,6 +284,11 @@ void NodeWorker::triggerPanic()
     panic();
 }
 
+void NodeWorker::ioChanged()
+{
+    triggerTryProcess();
+}
+
 void NodeWorker::triggerTryProcess()
 {
     try_process_changed();
@@ -868,11 +873,11 @@ void NodeWorker::trySendEvents()
 void NodeWorker::connectConnector(ConnectorPtr c)
 {
     port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectorPtr&) {
-        triggerTryProcess();
+        ioChanged();
     }));
-    port_connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { triggerTryProcess(); }));
-    port_connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](const ConnectorPtr& ) { triggerTryProcess(); }));
-    port_connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { triggerTryProcess(); }));
+    port_connections_[c.get()].emplace_back(c->connectionEnabled.connect([this](bool) { ioChanged(); }));
+    port_connections_[c.get()].emplace_back(c->connection_removed_to.connect([this](const ConnectorPtr& ) { ioChanged(); }));
+    port_connections_[c.get()].emplace_back(c->enabled_changed.connect([this](bool) { ioChanged(); }));
 
     if(EventPtr event = std::dynamic_pointer_cast<Event>(c)) {
         port_connections_[c.get()].emplace_back(event->triggered.connect([this]() {

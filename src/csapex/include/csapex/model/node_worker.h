@@ -48,6 +48,9 @@ public:
     void initialize();
     void reset();
 
+    void ioChanged();
+
+
     void triggerTryProcess();
     void triggerPanic();
 

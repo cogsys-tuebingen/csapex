@@ -230,18 +230,19 @@ void SetParameter::doSerialize(YAML::Node& n) const
     n["txt"] = getText();
 
     if(value_.type() == typeid(int)) {
-        n["int"] = boost::any_cast<int> (value_);
+        doSerializeImplementation<int>("int", n);
 
     } else if(value_.type() == typeid(double)) {
-        n["double"] = boost::any_cast<double> (value_);
+        doSerializeImplementation<double>("double", n);
 
     } else if(value_.type() == typeid(bool)) {
-        n["bool"] = boost::any_cast<bool> (value_);
+        doSerializeImplementation<bool>("bool", n);
 
     } else if(value_.type() == typeid(std::string)) {
-        n["string"] = boost::any_cast<std::string> (value_);
+        doSerializeImplementation<std::string>("string", n);
     }
 }
+
 
 namespace {
 template <typename T>
@@ -260,18 +261,60 @@ void SetParameter::doDeserialize(const YAML::Node& n)
     }
 
     if(n["int"].IsDefined()) {
-        value_ = __read<int>(n["int"]);
+        doDeserializeImplementation<int>("int", n);
 
     } else if(n["double"].IsDefined()) {
-        value_ = __read<double>(n["double"]);
+        doDeserializeImplementation<double>("double", n);
 
     } else if(n["bool"].IsDefined()) {
-        value_ = __read<bool>(n["bool"]);
+        doDeserializeImplementation<bool>("bool", n);
 
     } else if(n["string"].IsDefined()) {
-        value_ = __read<std::string>(n["string"]);
+        doDeserializeImplementation<std::string>("string", n);
     }
-    set_[name_] = value_;
+}
+
+
+template <typename T>
+void SetParameter::doSerializeImplementation(const std::string& type_name, YAML::Node& n) const
+{
+    n["txt"] = getText();
+
+    n[type_name] = boost::any_cast<T>(value_);
+
+    std::vector<std::pair<std::string, T>> values;
+    for(const std::pair<std::string, boost::any>& pair : set_) {
+        values.push_back(std::make_pair(pair.first, boost::any_cast<T>(pair.second)));
+    }
+
+    n["values"] = values;
+}
+
+template <typename T>
+void SetParameter::doDeserializeImplementation(const std::string& type_name, const YAML::Node& n)
+{
+    T value = __read<T>(n[type_name]);
+    value_ = value;
+
+    if(n["values"].IsDefined()) {
+        auto values = n["values"].as<std::vector<std::pair<std::string, T>>>();
+
+        bool found = false;
+        for(const std::pair<std::string, T>& v : values) {
+            set_[v.first] = v.second;
+            if(v.second == value) {
+                found = true;
+            }
+        }
+
+        if(!found) {
+            set_[name_] = value_;
+        }
+
+    } else {
+        set_[name_] = value_;
+    }
+
 }
 
 bool SetParameter::accepts(const std::type_info& type) const

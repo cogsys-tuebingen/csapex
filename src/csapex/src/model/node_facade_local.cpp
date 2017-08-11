@@ -351,7 +351,8 @@ std::string NodeFacadeLocal::getDebugDescription() const
             break;
         }
     }
-    ss << (events_enabled ? "enabled" : "disabled");
+    ss << (events_enabled ? "enabled" : "disabled") << ", ";
+    ss << (nr_->canStartStepping() ? "canStartStepping" : "!canStartStepping");
     return ss.str();
 }
 

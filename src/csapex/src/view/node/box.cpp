@@ -5,6 +5,7 @@
 #include "ui_box.h"
 #include <csapex/model/variadic_io.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/node_runner.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/view/utility/color.hpp>
@@ -249,8 +250,8 @@ void NodeBox::updateBoxInformation(Graph* graph)
     updateFrequencyInformation();
 }
 
-namespace {
-void setStyleForId(QLabel* label, int id) {
+void NodeBox::setStyleForId(QLabel* label, int id)
+{
     // set color using HSV rotation
     double hue =  (id * 77) % 360;
     double r = 0, g = 0, b = 0;
@@ -262,9 +263,18 @@ void setStyleForId(QLabel* label, int id) {
         fr = fb = fg = 255;
     }
     std::stringstream ss;
+
+
+    if(settings_.getTemporary("debug", false)) {
+        r = b = g = 128;
+        if(node_facade_->getNodeRunner()->canStartStepping()) {
+            g = 255;
+        } else {
+            r = 255;
+        }
+    }
     ss << "QLabel { background-color : rgb(" << r << "," << g << "," << b << "); color: rgb(" << fr << "," << fg << "," << fb << ");}";
     label->setStyleSheet(ss.str().c_str());
-}
 }
 
 void NodeBox::updateComponentInformation(Graph* graph)

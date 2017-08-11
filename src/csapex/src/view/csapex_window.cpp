@@ -311,7 +311,7 @@ bool CsApexWindow::eventFilter(QObject* o, QEvent* e)
 
 void CsApexWindow::setupThreadManagement()
 {
-    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getThreadPool(), *view_core_.getCommandDispatcher());
+    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getSettings(), view_core_.getThreadPool(), *view_core_.getCommandDispatcher());
     ui->thread_table->setModel(model);
 
     QItemSelectionModel* select = ui->thread_table->selectionModel();

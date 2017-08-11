@@ -5,6 +5,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/model/observer.h>
+#include <csapex/core/core_fwd.h>
 
 /// SYTEM
 #include <QAbstractTableModel>
@@ -15,7 +16,7 @@ namespace csapex
 class ThreadGroupTableModel : public QAbstractTableModel, public Observer
 {
 public:
-    ThreadGroupTableModel(ThreadPoolPtr thread_pool, CommandExecutor& dispatcher);
+    ThreadGroupTableModel(Settings &settings, ThreadPoolPtr thread_pool, CommandExecutor& dispatcher);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -28,8 +29,10 @@ public:
 
 private:
     void refresh();
+    ThreadGroup * getThreadGroup(int row) const;
 
 private:
+    Settings& settings_;
     ThreadPoolPtr thread_pool_;
     CommandExecutor& cmd_executor_;
 };

@@ -44,6 +44,11 @@ Connection::Connection(OutputPtr from, InputPtr to, int id)
 
 Connection::~Connection()
 {
+    if(from_) {
+        if(state_ != Connection::State::DONE) {
+            notifyMessageProcessed();
+        }
+    }
 }
 
 void Connection::detach(Connector *c)

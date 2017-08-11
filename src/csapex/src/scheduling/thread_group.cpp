@@ -209,7 +209,8 @@ void ThreadGroup::stop()
         }
 
         apex_assert_hard(generators_.empty());
-        apex_assert_hard(generator_connections_.empty());
+
+        generator_connections_.clear();
 
         clear();
     }
@@ -263,8 +264,9 @@ void ThreadGroup::add(TaskGeneratorPtr generator, const std::vector<TaskPtr> &in
 
 void ThreadGroup::checkIfStepIsDone()
 {
-    //TRACE std::cerr << " TG CHECK =========== " << std::endl;
+    //TRACE std::cerr << " TG CHECK =========== " << getName() << std::endl;
     if(isStepDone()) {
+        //TRACE std::cerr << " TG END STEP " << getName() << std::endl;
         end_step();
     }
 }
@@ -298,7 +300,7 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
 
     work_available_.notify_all();
 
-    generator_connections_.clear();
+    generator_connections_[generator].clear();
 
     generator_removed(removed);
 

@@ -158,6 +158,7 @@ Q_SIGNALS:
     void createPortAndMoveRequest(ConnectorDescription request,  ConnectorPtr);
 
 protected:
+    void setStyleForId(QLabel* label, int id);
     void resizeEvent(QResizeEvent * e);
 
     QString getNodeState();

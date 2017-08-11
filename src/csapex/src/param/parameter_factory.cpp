@@ -322,7 +322,7 @@ ParameterBuilder ParameterFactory::declareInterval(const std::string& name,
 
 
 template <typename T>
-ParameterBuilder ParameterFactory::declareParameterSet(const std::string& name, const ParameterDescription& description,
+ParameterBuilder ParameterFactory::declareParameterSetImpl(const std::string& name, const ParameterDescription& description,
                                           const std::map<std::string, T> & set_values,
                                           const T& def)
 {
@@ -353,7 +353,7 @@ template<typename T, typename U> struct argument_type<T(U)> { typedef U type; };
 }
 
 #define INSTANTIATE(T) \
-    template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareParameterSet(const std::string&, const ParameterDescription&, const std::map<std::string, argument_type<void(T)>::type> &, const argument_type<void(T)>::type&); \
+    template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareParameterSetImpl(const std::string&, const ParameterDescription&, const std::map<std::string, argument_type<void(T)>::type> &, const argument_type<void(T)>::type&); \
     template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareValue(const std::string&, const ParameterDescription&, const argument_type<void(T)>::type&);
 
 

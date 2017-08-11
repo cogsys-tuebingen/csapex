@@ -242,7 +242,7 @@ bool NodeRunner::canStartStepping() const
 {
     if(auto subgraph = std::dynamic_pointer_cast<SubgraphNode>(worker_->getNode())) {
         // if the node is an iterating sub graph, we need to wait until the current iteration is done...
-        return subgraph->isIterating();
+        return !subgraph->isIterating();
     }
     return true;
 }
@@ -290,16 +290,16 @@ void NodeRunner::step()
     can_process &= source || worker_->getNodeHandle()->hasConnectionsIncoming();
 
     if(!can_process) {
-        //TRACE worker_->getNode()->ainfo << "cannot step" << std::endl;
+        worker_->getNode()->ainfo << "cannot step" << std::endl;
         step_done_ = true;
         end_step();
         return;
     }
 
-    //TRACE worker_->getNode()->ainfo << "step" << std::endl;
-    if(source) {
+    worker_->getNode()->ainfo << "step" << std::endl;
+//    if(source) {
         scheduleProcess();
-    }
+//    }
 }
 
 bool NodeRunner::isStepping() const

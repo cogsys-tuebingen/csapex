@@ -40,6 +40,7 @@ public:
     ThreadGroup* getGroupAt(std::size_t pos);
 
     std::vector<ThreadGroupPtr> getGroups();
+    ThreadGroup* getDefaultGroup();
     ThreadGroup* getGroup(int id);
     ThreadGroup* getGroupFor(TaskGenerator* generator);
 

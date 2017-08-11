@@ -179,7 +179,12 @@ std::vector<ThreadGroupPtr> ThreadPool::getGroups()
     return groups_;
 }
 
-ThreadGroup *ThreadPool::getGroup(int id)
+ThreadGroup* ThreadPool::getDefaultGroup()
+{
+    return default_group_.get();
+}
+
+ThreadGroup* ThreadPool::getGroup(int id)
 {
     for(auto group : groups_) {
         if(group->id() == id) {

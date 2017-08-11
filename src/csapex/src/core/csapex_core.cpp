@@ -189,6 +189,10 @@ void CsApexCore::step()
 void CsApexCore::drainPipeline()
 {
     // TODO: implement
+    // forbid all sources to process
+    // for each graph component:
+    //  while at least one edge is unread:
+    //  backtrack all done connections and allow the sources to tick once
 }
 
 void CsApexCore::setStatusMessage(const std::string &msg)
@@ -538,6 +542,8 @@ void CsApexCore::load(const std::string &file)
 
         // first load settings
         settings_.loadTemporary(node_map);
+        // make sure the config setting is correct
+        settings_.set("config", file);
 
         // then load the graph
         graphio.loadSettings(node_map);
