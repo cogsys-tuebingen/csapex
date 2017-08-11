@@ -21,7 +21,7 @@ public:
     typedef std::shared_ptr<Meta> Ptr;
 
     Meta(const AUUID& graph_uuid, const std::string& type, bool transaction = false);
-    void clear();
+    virtual void clear();
     void add(Command::Ptr cmd);
 
     int commands() const;

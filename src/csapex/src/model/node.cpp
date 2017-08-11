@@ -40,6 +40,7 @@ NodeHandle* Node::getNodeHandle() const
 
 void Node::initialize(NodeHandlePtr node_handle)
 {
+    apex_assert_hard(node_handle);
     node_modifier_ = node_handle.get();
     node_handle_ = node_handle;
     parameters_ = this;

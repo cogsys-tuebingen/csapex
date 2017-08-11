@@ -34,6 +34,8 @@ public:
         return type2nameWithoutNamespace(typeid(UngroupNodes));
     }
 
+    virtual void clear() override;
+
 protected:
     void unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid);
 

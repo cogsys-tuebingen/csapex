@@ -535,6 +535,7 @@ bool NodeWorker::startProcessingMessages()
         bool sync = !node->isAsynchronous();
 
         try {
+            apex_assert_hard(node->getNodeHandle());
             if(sync) {
                 //TRACE node->ainfo << "process sync" << std::endl;
                 node->process(*node_handle_, *node);

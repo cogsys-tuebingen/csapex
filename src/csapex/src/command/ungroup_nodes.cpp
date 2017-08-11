@@ -205,3 +205,15 @@ void UngroupNodes::cloneFrom(const Command& other)
         uuid = instance->uuid;
     }
 }
+
+void UngroupNodes::clear()
+{
+    GroupBase::clear();
+
+    old_connections_in.clear();
+
+    old_connections_out.clear();
+
+    old_signals_in.clear();
+    old_signals_out.clear();
+}

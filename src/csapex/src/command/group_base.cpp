@@ -127,3 +127,16 @@ void GroupBase::pasteSelection(AUUID sub_graph_auuid)
 
     old_uuid_to_new = paste->getMapping();
 }
+
+void GroupBase::clear()
+{
+    Meta::clear();
+
+    connections_going_in.clear();
+    connections_going_out.clear();
+
+    signals_going_in.clear();
+    signals_going_out.clear();
+
+    old_uuid_to_new.clear();
+}
