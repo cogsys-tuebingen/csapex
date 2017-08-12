@@ -118,7 +118,12 @@ bool Transition::isOneConnection(Connection::State state) const
 bool Transition::hasConnection() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    return !connections_.empty();
+    for(ConnectionPtr connection : connections_) {
+        if(connection->isEnabled()) {
+            return true;
+        }
+    }
+    return false;
 }
 bool Transition::hasConnection(const ConnectionPtr& c) const
 {

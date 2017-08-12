@@ -75,6 +75,7 @@ public:
     int countConnections();
     std::vector<ConnectionPtr> getConnections() const;
 
+    bool hasEnabledConnection() const;
     bool hasActiveConnection() const;
 
     virtual bool isConnected() const;

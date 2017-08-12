@@ -259,7 +259,11 @@ public:
     template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description,
                                               const std::map<std::string, T> & set_values,
-                                              const T& def);
+                                              const T& def)
+    {
+        return declareParameterSetImpl(name, description, set_values, def);
+    }
+
     template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
     static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description,
                                               const std::map<std::string, T> & set_values,

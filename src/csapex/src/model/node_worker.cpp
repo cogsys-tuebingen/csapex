@@ -101,6 +101,13 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             observe(node_handle_->getNodeState()->enabled_changed, [this](){
                 bool e = isProcessingEnabled();
 
+                for(const UUID& in : node_handle_->getInputTransition()->getInputs()) {
+                    node_handle_->getInputTransition()->getInput(in)->setEnabled(e);
+                }
+                for(const UUID& out : node_handle_->getOutputTransition()->getOutputs()) {
+                    node_handle_->getOutputTransition()->getOutput(out)->setEnabled(e);
+                }
+
                 for(SlotPtr slot : node_handle_->getSlots()) {
                     slot->setEnabled(e);
                 }
@@ -250,8 +257,17 @@ bool NodeWorker::canProcess() const
 bool NodeWorker::canReceive() const
 {
     for(InputPtr i : node_handle_->getExternalInputs()) {
-        if(!i->isConnected() && !i->isOptional()) {
-            return false;
+        if(i->isOptional()) {
+            // optional -> do nothing
+        } else {
+            if(!i->isConnected() ) {
+                // !optional, !connected
+                return false;
+            } else if(!i->hasEnabledConnection()) {
+                // !optional, connected, !enabled
+                return false;
+            }
+
         }
     }
     return true;

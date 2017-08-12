@@ -128,7 +128,7 @@ void InputTransition::connectionAdded(Connection *connection)
 
 bool InputTransition::isEnabled() const
 {
-    if(connections_.empty()) {
+    if(inputs_.empty()) {
         return true;
     }
 
@@ -136,6 +136,19 @@ bool InputTransition::isEnabled() const
         APEX_DEBUG_CERR <<"not enabled because already forwarded" << std::endl;
         return false;
     }
+
+//    for(const auto& pair: inputs_) {
+//        InputPtr input = pair.second;
+//        if(input->isOptional()) {
+//            if(input->isConnected() && !input->hasEnabledConnection()) {
+//                return false;
+//            }
+//        } else {
+//            if(!input->isConnected() || !input->hasEnabledConnection()) {
+//                return false;
+//            }
+//        }
+//    }
 
     if(!areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/)) {
         APEX_DEBUG_CERR <<"not enabled because not all connections read or unread" << std::endl;
@@ -255,7 +268,7 @@ void InputTransition::forwardMessages()
         for(auto pair : inputs_) {
             InputPtr input = pair.second;
 
-            if(input->isConnected()) {
+            if(input->hasEnabledConnection()) {
                 auto connections = input->getConnections();
                 apex_assert_hard(connections.size() == 1);
                 ConnectionPtr connection = connections.front();
@@ -271,16 +284,20 @@ void InputTransition::forwardMessages()
         }
 
         for(auto& c : connections_) {
-            auto s = c->getState();
-            //        apex_assert_hard(c->isEstablished());
-            apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
-            apex_assert_hard(s == Connection::State::UNREAD ||
-                             s == Connection::State::READ);
+            if(c->isEnabled()) {
+                auto s = c->getState();
+                //        apex_assert_hard(c->isEstablished());
+                apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
+                apex_assert_hard(s == Connection::State::UNREAD ||
+                                 s == Connection::State::READ);
+            }
         }
 
         apex_assert_hard(!areAllConnections(Connection::State::DONE));
         for(auto& c : connections_) {
-            c->setState(Connection::State::READ);
+            if(c->isEnabled()) {
+                c->setState(Connection::State::READ);
+            }
         }
         apex_assert_hard(areAllConnections(Connection::State::READ));
     }

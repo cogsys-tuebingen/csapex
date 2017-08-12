@@ -155,7 +155,9 @@ bool OutputTransition::sendMessages(bool is_active)
 
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
-        has_sent_activator_message |= output->commitMessages(is_active);
+        if(output->isEnabled()) {
+            has_sent_activator_message |= output->commitMessages(is_active);
+        }
     }
 
     long seq_no = -1;
@@ -220,16 +222,18 @@ void OutputTransition::fillConnections()
     for(auto pair : outputs_) {
         OutputPtr out = pair.second;
         apex_assert_hard(out);
-
-        out->publish();
+        if(out->isEnabled()) {
+            out->publish();
+        }
     }
 
     for(auto pair : outputs_) {
         OutputPtr out = pair.second;
         apex_assert_hard(out);
-
-        if(!out->isConnected()) {
-            out->notifyMessageProcessed();
+        if(out->isEnabled()) {
+            if(!out->isConnected()) {
+                out->notifyMessageProcessed();
+            }
         }
     }
 }

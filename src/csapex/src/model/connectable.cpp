@@ -269,6 +269,17 @@ bool Connectable::hasActiveConnection() const
     return false;
 }
 
+bool Connectable::hasEnabledConnection() const
+{
+    for(const ConnectionPtr& c : connections_) {
+        if(c->isEnabled()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Connectable::isConnected() const
 {
     return !connections_.empty();

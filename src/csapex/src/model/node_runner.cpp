@@ -279,24 +279,30 @@ void NodeRunner::step()
         wait_for_step_connection_.disconnect();
     }
 
-    can_step_++;
+    bool is_enabled = worker_->isProcessingEnabled();
+
+    if(is_enabled) {
+        can_step_++;
+    }
 
     step_done_ = false;
     begin_step();
 
-    bool source = worker_->getNodeHandle()->isSource();
+    bool can_perform_step = is_enabled && worker_->canProcess();
 
-    bool can_process = worker_->isProcessingEnabled();
-    can_process &= source || worker_->getNodeHandle()->hasConnectionsIncoming();
-
-    if(!can_process) {
-        worker_->getNode()->ainfo << "cannot step" << std::endl;
+    if(!can_perform_step) {
+        //TRACE worker_->getNode()->ainfo << "cannot step: "
+        //TRACE                           << (worker_->canProcess() ? "can" : "cannot") << " process,"
+        //TRACE                           << (worker_->canSend() ? "can" : "cannot") << " send,"
+        //TRACE                           << (worker_->canReceive() ? "can" : "cannot") << " receive,"
+        //TRACE                           << "processing " << (worker_->isProcessingEnabled() ? "is" : "is not") << " enabled"
+        //TRACE                           << std::endl;
         step_done_ = true;
         end_step();
         return;
     }
 
-    worker_->getNode()->ainfo << "step" << std::endl;
+    //TRACE worker_->getNode()->ainfo << "step" << std::endl;
 //    if(source) {
         scheduleProcess();
 //    }
