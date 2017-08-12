@@ -322,9 +322,6 @@ void NodeWorker::reset()
     node_handle_->getOutputTransition()->reset();
     node_handle_->getInputTransition()->reset();
 
-    apex_assert_hard(canReceive());
-    apex_assert_hard(canSend());
-
     triggerTryProcess();
 }
 
