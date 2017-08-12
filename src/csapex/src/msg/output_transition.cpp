@@ -27,12 +27,12 @@ OutputTransition::OutputTransition()
 void OutputTransition::reset()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
+    for(ConnectionPtr connection : connections_) {
+        connection->reset();
+    }
     for(auto pair : outputs_) {
         OutputPtr output = pair.second;
         output->reset();
-    }
-    for(ConnectionPtr connection : connections_) {
-        connection->reset();
     }
 
     Transition::reset();

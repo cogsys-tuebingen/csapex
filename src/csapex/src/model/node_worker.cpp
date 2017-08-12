@@ -317,7 +317,9 @@ void NodeWorker::reset()
     setError(false);
 
     // set state without checking!
-    state_ = ExecutionState::IDLE;
+//    state_ = ExecutionState::IDLE;
+    setState(ExecutionState::IDLE);
+    is_processing_ = false;
 
     node_handle_->getOutputTransition()->reset();
     node_handle_->getInputTransition()->reset();
@@ -722,7 +724,7 @@ void NodeWorker::outgoingMessagesProcessed()
         triggerTryProcess();
 
     } else {
-        getNode()->aerr << "cannot notify, no current exec mode" << std::endl;
+        APEX_DEBUG_TRACE getNode()->aerr << "cannot notify, no current exec mode" << std::endl;
     }
 }
 
