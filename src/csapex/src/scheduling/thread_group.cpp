@@ -6,12 +6,14 @@
 #include <csapex/utility/thread.h>
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/utility/assert.h>
+#include <csapex/utility/cpu_affinity.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/scheduling/timed_queue.h>
 
 /// SYSTEM
 #include <iostream>
+#include <yaml-cpp/yaml.h>
 
 using namespace csapex;
 
@@ -20,17 +22,21 @@ int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
 ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler& handler, int id, std::string name)
     : handler_(handler), destroyed_(false),
       id_(id), name_(name),
+      cpu_affinity_(new CpuAffinity),
       timed_queue_(timed_queue),
       running_(false), pause_(false), stepping_(false)
 {
     next_id_ = std::max(next_id_, id + 1);
+    setup();
 }
 ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler &handler, std::string name)
     : handler_(handler), destroyed_(false),
       id_(next_id_++), name_(name),
+      cpu_affinity_(new CpuAffinity),
       timed_queue_(timed_queue),
       running_(false), pause_(false), stepping_(false)
 {
+    setup();
 }
 
 ThreadGroup::~ThreadGroup()
@@ -43,6 +49,37 @@ ThreadGroup::~ThreadGroup()
         stop();
     }
     destroyed_ = true;
+}
+
+void ThreadGroup::setup()
+{
+    cpu_affinity_->affinity_changed.connect([this](const CpuAffinity*){
+        updateAffinity();
+    });
+}
+
+void ThreadGroup::updateAffinity()
+{
+    if(!scheduler_thread_.joinable()) {
+        return;
+    }
+
+#if WIN32
+    // TODO: implement for other platforms
+#else
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    const std::vector<bool>& cpus = getCpuAffinity()->get();
+    for(std::size_t cpu = 0, n = cpus.size(); cpu < n; ++cpu) {
+        if(cpus[cpu]) {
+            CPU_SET(cpu, &cpuset);
+        }
+    }
+    int rc = pthread_setaffinity_np(scheduler_thread_.native_handle(), sizeof(cpu_set_t), &cpuset);
+    if(rc != 0) {
+        std::cerr << "failed to set cpu affinity in thread " << name_ << std::endl;
+    }
+#endif
 }
 
 int ThreadGroup::nextId()
@@ -65,6 +102,11 @@ void ThreadGroup::setName(const std::string &name)
         name_ = name;
         scheduler_changed();
     }
+}
+
+CpuAffinityPtr ThreadGroup::getCpuAffinity() const
+{
+    return cpu_affinity_;
 }
 
 const std::thread& ThreadGroup::thread() const
@@ -179,6 +221,8 @@ void ThreadGroup::start()
 
     scheduler_thread_ = std::thread ([this]() {
         csapex::thread::set_name((name_).c_str());
+        updateAffinity();
+
         schedulingLoop();
     });
 }
@@ -343,6 +387,16 @@ void ThreadGroup::schedulingLoop()
             handlePause();
 
             keep_executing = executeNextTask();
+//            int cpu = sched_getcpu();
+//            if(!getCpuAffinity()->isCpuUsed(cpu)) {
+//                std::stringstream ss;
+//                const std::vector<bool>& cpus = getCpuAffinity()->get();
+//                for(std::size_t cpu = 0, n = cpus.size(); cpu < n; ++cpu) {
+//                    bool on = cpus[cpu];
+//                    ss << (int) on << " ";
+//                }
+//                std::cout << "Thread #" << name_ << ": on CPU " << cpu << " with affinity " << ss.str() << std::endl;
+//            }
         }
     }
 }
@@ -435,4 +489,19 @@ std::vector<TaskGeneratorPtr>::iterator ThreadGroup::end()
 std::vector<TaskGeneratorPtr>::const_iterator ThreadGroup::end() const
 {
     return generators_.end();
+}
+
+
+void ThreadGroup::saveSettings(YAML::Node& node)
+{
+    node["affinity"] = cpu_affinity_->get();
+}
+
+
+void ThreadGroup::loadSettings(const YAML::Node& node)
+{
+    if(node["affinity"].IsDefined()) {
+        std::vector<bool> affinity = node["affinity"].as<std::vector<bool>>();
+        cpu_affinity_->set(affinity);
+    }
 }

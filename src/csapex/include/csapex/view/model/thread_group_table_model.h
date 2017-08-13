@@ -27,9 +27,10 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+    ThreadGroup * getThreadGroup(int row) const;
+
 private:
     void refresh();
-    ThreadGroup * getThreadGroup(int row) const;
 
 private:
     Settings& settings_;

@@ -31,7 +31,7 @@ void _apex_assert_hard(bool assertion, const std::string& msg, const std::string
     }
 }
 
-void _apex_assert_soft(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const char *sig)
+void _apex_assert_soft(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig)
 {
     if(!assertion) {
         std::cerr << "[cs::APEX - SOFT ASSERTION FAILED] ";

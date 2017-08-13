@@ -7,6 +7,7 @@
 #include <csapex/command/modify_thread.h>
 #include <csapex/command/command_executor.h>
 #include <csapex/core/settings.h>
+#include <csapex/view/widgets/cpu_affinity_widget.h>
 
 using namespace csapex;
 
@@ -40,9 +41,19 @@ ThreadGroupTableModel::ThreadGroupTableModel(Settings& settings, ThreadPoolPtr t
         observe(group->generator_removed, [this](TaskGeneratorPtr){
             refresh();
         });
+
+        observe(group->getCpuAffinity()->affinity_changed, [this](const CpuAffinity*){
+            refresh();
+        });
+
     });
 
     observe(thread_pool_->group_removed, [this](ThreadGroupPtr group){
+        refresh();
+    });
+
+    // handle default group
+    observe(thread_pool->getDefaultGroup()->getCpuAffinity()->affinity_changed, [this](const CpuAffinity*){
         refresh();
     });
 }
@@ -54,7 +65,7 @@ int ThreadGroupTableModel::rowCount(const QModelIndex &/*parent*/) const
 
 int ThreadGroupTableModel::columnCount(const QModelIndex &/*parent*/) const
 {
-    return settings_.get<bool>("debug") ? 3 : 2;
+    return settings_.get<bool>("debug") ? 4 : 3;
 }
 
 ThreadGroup * ThreadGroupTableModel::getThreadGroup(int row) const
@@ -70,12 +81,24 @@ bool ThreadGroupTableModel::setData(const QModelIndex &index, const QVariant &va
     case 0:
     {
         QString var = value.toString();
-//        group->setName(var.toStdString());
-
-        command::ModifyThread::Ptr modify(new command::ModifyThread(group->id(), var.toStdString()));
-        cmd_executor_.execute(modify);
-    }
+        std::string name = var.toStdString();
+        if(name != group->getName()) {
+            command::ModifyThread::Ptr modify(new command::ModifyThread(group->id(), name, {}));
+            cmd_executor_.execute(modify);
+        }
         break;
+    }
+    case 2:
+    {
+        CpuAffinityRenderer var = qvariant_cast<CpuAffinityRenderer>(value);
+        std::vector<bool> affinity = var.getCpuAffinity().get();
+
+        if(affinity != group->getCpuAffinity()->get()) {
+            command::ModifyThread::Ptr modify(new command::ModifyThread(group->id(), {}, affinity));
+            cmd_executor_.execute(modify);
+        }
+        break;
+    }
     default:
         break;
     }
@@ -103,6 +126,8 @@ QVariant ThreadGroupTableModel::data(const QModelIndex &index, int role) const
         case 1:
             return QVariant::fromValue(group->size());
         case 2:
+            return QVariant::fromValue(CpuAffinityRenderer(*group->getCpuAffinity()));
+        case 3:
         {
             QString res;
             res += "(";
@@ -144,7 +169,8 @@ QVariant ThreadGroupTableModel::headerData(int section, Qt::Orientation orientat
         switch(section) {
         case 0: return "Name";
         case 1: return "Nodes";
-        case 2: return "States";
+        case 2: return "CPU Affinity";
+        case 3: return "States";
         default:
             break;
         }
@@ -160,7 +186,14 @@ Qt::ItemFlags ThreadGroupTableModel::flags(const QModelIndex &index) const
 {
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
-    if(index.column() == 0) {
+    auto c = index.column();
+    if(c == 0) {
+        ThreadGroup* group = getThreadGroup(index.row());
+        if(group->id() != ThreadGroup::PRIVATE_THREAD) {
+            flags |= Qt::ItemIsEditable;
+        }
+    }
+    if(c == 2) {
         flags |= Qt::ItemIsEditable;
     }
 

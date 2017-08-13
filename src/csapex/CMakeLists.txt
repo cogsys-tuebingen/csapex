@@ -201,6 +201,7 @@ add_library(csapex_util SHARED
     src/utility/yaml_node_builder.cpp
     src/utility/slim_signal_implementations.cpp
     src/utility/ticker.cpp
+    src/utility/cpu_affinity.cpp
 
     ${csapex_util_HEADERS}
 )
@@ -631,6 +632,7 @@ add_library(csapex_qt SHARED
     src/view/utility/node_list_generator.cpp
     src/view/utility/snippet_list_generator.cpp
     src/view/utility/context_menu_handler.cpp
+    src/view/utility/cpu_affinity_delegate.cpp
     src/view/utility/html_delegate.cpp
     src/view/utility/qsignal_bridges.cpp
     src/view/utility/qsignal_relay.cpp
@@ -659,6 +661,7 @@ add_library(csapex_qt SHARED
     src/view/widgets/movable_graphics_proxy_widget.cpp
     src/view/widgets/message_preview_widget.cpp
     src/view/widgets/notification_widget.cpp
+    src/view/widgets/cpu_affinity_widget.cpp
 
     ${csapex_qt_HEADERS}
 

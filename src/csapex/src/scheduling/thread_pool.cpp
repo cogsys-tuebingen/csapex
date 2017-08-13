@@ -8,6 +8,7 @@
 #include <csapex/scheduling/task.h>
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/scheduling/timed_queue.h>
+#include <csapex/utility/cpu_affinity.h>
 
 /// SYSTEM
 #include <set>
@@ -19,30 +20,34 @@ using namespace csapex;
 ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool grouping)
     : handler_(handler),
       timed_queue_(new TimedQueue),
-      enable_threading_(enable_threading), grouping_(grouping)
+      enable_threading_(enable_threading), grouping_(grouping),
+      private_group_cpu_affinity_(new CpuAffinity)
+{
+    setup();
+}
+
+ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_threading, bool grouping)
+    : handler_(handler), enable_threading_(enable_threading), grouping_(grouping),
+      private_group_cpu_affinity_(new CpuAffinity)
+{
+    setup();
+    parent->addChild(this);
+}
+void ThreadPool::setup()
 {
     default_group_ = std::make_shared<ThreadGroup>(timed_queue_,
                                                    handler_,
                                                    ThreadGroup::DEFAULT_GROUP_ID, "default");
-    default_group_->end_step.connect([this]() {
+    observe(default_group_->end_step, [this]() {
         checkIfStepIsDone();
+    });
+
+    observe(private_group_cpu_affinity_->affinity_changed, [this](const CpuAffinity*){
+        private_group_cpu_affinity_changed();
     });
 
     setPause(false);
     setSteppingMode(false);
-}
-ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_threading, bool grouping)
-    : handler_(handler), enable_threading_(enable_threading), grouping_(grouping)
-{
-    default_group_ = std::make_shared<ThreadGroup>(timed_queue_,
-                                                   handler_,
-                                                   ThreadGroup::DEFAULT_GROUP_ID, "default");
-    default_group_->end_step.connect([this]() {
-        checkIfStepIsDone();
-    });
-
-    //parent->begin_step.connect(delegate::Delegate<void()>(this, &ThreadPool::step));
-    parent->addChild(this);
 }
 
 ThreadPool::~ThreadPool()
@@ -222,6 +227,7 @@ void ThreadPool::assignGeneratorToGroup(TaskGenerator *task, ThreadGroup *group)
 
         if(old_group) {
             if(old_group->id() == ThreadGroup::PRIVATE_THREAD) {
+                private_group_connections_[old_group].clear();
                 removeGroup(old_group);
             }
         }
@@ -245,9 +251,12 @@ bool ThreadPool::isInGroup(TaskGenerator *task, int id) const
 void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
 {
     if(!isInPrivateThread(task)) {
-        auto group = std::make_shared<ThreadGroup>(timed_queue_,
-                                                   handler_, ThreadGroup::PRIVATE_THREAD,
-                                                   task->getUUID().getShortName());
+        ThreadGroupPtr group = std::make_shared<ThreadGroup>(timed_queue_,
+                                                             handler_, ThreadGroup::PRIVATE_THREAD,
+                                                             task->getUUID().getShortName());
+
+        group->getCpuAffinity()->set(private_group_cpu_affinity_->get());
+
         group->setPause(isPaused());
 
         groups_.push_back(group);
@@ -256,6 +265,19 @@ void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
         });
 
         assignGeneratorToGroup(task, group.get());
+
+        ThreadGroupWeakPtr group_weak = group;
+        private_group_connections_[group.get()].push_back(
+                    group->getCpuAffinity()->affinity_changed.connect([this](const CpuAffinity* affinity) {
+            private_group_cpu_affinity_->set(affinity->get());
+        }));
+
+        private_group_connections_[group.get()].push_back(
+                    private_group_cpu_affinity_changed.connect([this, group_weak](){
+                        if(ThreadGroupPtr group = group_weak.lock()) {
+                            group->getCpuAffinity()->set(private_group_cpu_affinity_->get());
+                        }
+                    }));
 
         if(isRunning()) {
             group->start();
@@ -375,21 +397,6 @@ bool ThreadPool::isStepDone()
     return true;
 }
 
-//void ThreadPool::clearGroup(ThreadGroup* g)
-//{
-//    for(auto it = groups_.begin(); it != groups_.end(); ++it) {
-//        auto group = *it;
-//        if(group.get() == g) {
-//            if(group->isEmpty()) {
-//                group->stop();
-////                groups_.erase(it);
-//            }
-//            return;
-//        }
-//    }
-//    throw std::runtime_error("attempted to delete non-existing thread group");
-//}
-
 std::string ThreadPool::nextName()
 {
     std::stringstream name;
@@ -397,21 +404,41 @@ std::string ThreadPool::nextName()
     return name.str();
 }
 
+void ThreadPool::setPrivateThreadGroupCpuAffinity(const std::vector<bool>& affinity)
+{
+    private_group_cpu_affinity_->set(affinity);
+}
+
+std::vector<bool> ThreadPool::getPrivateThreadGroupCpuAffinity() const
+{
+    return private_group_cpu_affinity_->get();
+}
+
 void ThreadPool::saveSettings(YAML::Node& node)
 {
     YAML::Node threads(YAML::NodeType::Map);
 
     YAML::Node groups;
+
+    {
+        YAML::Node group;
+        group["id"] = (int) ThreadGroup::DEFAULT_GROUP_ID;
+        getDefaultGroup()->saveSettings(group);
+        groups.push_back(group);
+    }
+
     for(std::size_t i = 0, total =  groups_.size(); i < total; ++i) {
         YAML::Node group;
         int id = groups_[i]->id();
-        if(id >= ThreadGroup::MINIMUM_THREAD_ID) {
-            group["id"] =  id;
+        group["id"] =  id;
+        if(id >= ThreadGroup::MINIMUM_THREAD_ID ) {
             group["name"] =  groups_[i]->getName();
+            groups_[i]->saveSettings(group);
             groups.push_back(group);
         }
     }
     threads["groups"] = groups;
+    threads["private_affinity"] = private_group_cpu_affinity_->get();
 
     YAML::Node assignments;
     for(std::map<TaskGenerator*, ThreadGroup*>::const_iterator it = group_assignment_.begin();
@@ -432,6 +459,12 @@ void ThreadPool::loadSettings(YAML::Node& node)
 {
     const YAML::Node& threads = node["threads"];
     if(threads.IsDefined()) {
+        const YAML::Node& private_affinity = threads["private_affinity"];
+        if(private_affinity.IsDefined()){
+            std::vector<bool> a = private_affinity.as<std::vector<bool>>();
+            private_group_cpu_affinity_->set(a);
+        }
+
         const YAML::Node& groups = threads["groups"];
         if(groups.IsDefined()) {
             for(std::size_t i = 0, total = groups.size(); i < total; ++i) {
@@ -439,6 +472,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
 
                 int group_id = group["id"].as<int>();
 
+                ThreadGroup* group_ptr = nullptr;
                 if(group_id >= ThreadGroup::MINIMUM_THREAD_ID) {
                     std::string group_name = group["name"].as<std::string>();
 
@@ -451,6 +485,17 @@ void ThreadPool::loadSettings(YAML::Node& node)
                     });
 
                     group_created(g);
+
+                    group_ptr = g.get();
+
+                } else if(group_id == ThreadGroup::DEFAULT_GROUP_ID) {
+                    group_ptr = getDefaultGroup();
+                } else if(group_id == ThreadGroup::PRIVATE_THREAD) {
+                    // private thread settings are not supported
+                }
+
+                if(group_ptr) {
+                    group_ptr->loadSettings(group);
                 }
             }
         }

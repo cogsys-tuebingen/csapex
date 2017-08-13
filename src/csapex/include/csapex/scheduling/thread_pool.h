@@ -5,6 +5,8 @@
 #include <csapex/scheduling/executor.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/core/exception_handler.h>
+#include <csapex/utility/utility_fwd.h>
+#include <csapex/model/observer.h>
 
 /// SYSTEM
 #include <map>
@@ -18,7 +20,7 @@ namespace csapex
 
 class CsApexCore;
 
-class CSAPEX_EXPORT ThreadPool : public Executor
+class CSAPEX_EXPORT ThreadPool : public Executor, public Observer
 {
 public:
     ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
@@ -61,9 +63,15 @@ public:
     void saveSettings(YAML::Node&);
     void loadSettings(YAML::Node&);
 
+    void setPrivateThreadGroupCpuAffinity(const std::vector<bool>& affinity);
+    std::vector<bool> getPrivateThreadGroupCpuAffinity() const;
+
 public:
     slim_signal::Signal<void (ThreadGroupPtr)> group_created;
     slim_signal::Signal<void (ThreadGroupPtr)> group_removed;
+
+private:
+    slim_signal::Signal<void ()> private_group_cpu_affinity_changed;
 
 protected:
     void pauseChanged(bool pause) override;
@@ -74,6 +82,7 @@ protected:
     void checkIfStepCanBeDone();
 
 private:
+    void setup();
     void assignGeneratorToGroup(TaskGenerator* task, ThreadGroup* group);
 
     bool isInPrivateThread(TaskGenerator* task) const;
@@ -95,6 +104,9 @@ private:
     std::vector<ThreadGroupPtr> groups_;
     std::map<TaskGenerator*, ThreadGroup*> group_assignment_;
     std::map<TaskGenerator*, slim_signal::ScopedConnection> group_connection_;
+
+    CpuAffinityPtr private_group_cpu_affinity_;
+    std::map<ThreadGroup*, std::vector<slim_signal::ScopedConnection>> private_group_connections_;
 };
 
 }

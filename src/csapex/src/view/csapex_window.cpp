@@ -36,6 +36,7 @@
 #include <csapex/view/utility/node_list_generator.h>
 #include <csapex/view/utility/snippet_list_generator.h>
 #include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/utility/cpu_affinity_delegate.h>
 #include <csapex/view/widgets/activity_legend.h>
 #include <csapex/view/widgets/activity_timeline.h>
 #include <csapex/view/widgets/minimap_widget.h>
@@ -313,6 +314,7 @@ void CsApexWindow::setupThreadManagement()
 {
     ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getSettings(), view_core_.getThreadPool(), *view_core_.getCommandDispatcher());
     ui->thread_table->setModel(model);
+    ui->thread_table->setItemDelegate(new CpuAffinityDelegate(ui->thread_table));
 
     QItemSelectionModel* select = ui->thread_table->selectionModel();
 
@@ -326,6 +328,8 @@ void CsApexWindow::setupThreadManagement()
         ui->thread_assign->setEnabled(rows == 1);
         ui->thread_remove->setEnabled(rows > 0);
     });
+
+    ui->thread_table->resizeColumnsToContents();
 
     select->selectionChanged(QItemSelection(), QItemSelection());
 

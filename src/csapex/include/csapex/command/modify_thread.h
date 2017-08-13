@@ -15,22 +15,30 @@ class CSAPEX_COMMAND_EXPORT ModifyThread : public CommandImplementation<ModifyTh
     COMMAND_HEADER(ModifyThread);
 
 public:
-    ModifyThread(int thread_id, const std::string& name);
+    ModifyThread(int thread_id, const std::string& name, std::vector<bool> cpu_affinity);
 
     virtual std::string getDescription() const override;
 
     void serialize(SerializationBuffer &data) const override;
     void deserialize(SerializationBuffer& data) override;
 
+
 protected:
     bool doExecute() override;
     bool doUndo() override;
     bool doRedo() override;
 
+    ThreadGroup *getGroup();
+
 private:
     int id;
+
     std::string name;
+    std::vector<bool> affinity;
+
+    // cache
     std::string old_name;
+    std::vector<bool> old_affinity;
 };
 
 }

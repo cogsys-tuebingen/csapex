@@ -5,6 +5,7 @@
 #include <csapex/scheduling/scheduler.h>
 #include <csapex/scheduling/task.h>
 #include <csapex/core/core_fwd.h>
+#include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
 #include <string>
@@ -14,6 +15,11 @@
 #include <condition_variable>
 #include <deque>
 #include <set>
+
+namespace YAML
+{
+class Node;
+}
 
 namespace csapex
 {
@@ -39,6 +45,8 @@ public:
 
     std::string getName() const override;
     void setName(const std::string& name) override;
+
+    CpuAffinityPtr getCpuAffinity() const;
 
     const std::thread &thread() const;
 
@@ -72,12 +80,17 @@ public:
     std::vector<TaskGeneratorPtr>::iterator end();
     std::vector<TaskGeneratorPtr>::const_iterator end() const;
 
+    void saveSettings(YAML::Node&);
+    void loadSettings(const YAML::Node &);
+
 public:
     slim_signal::Signal<void (TaskGeneratorPtr)> generator_added;
     slim_signal::Signal<void (TaskGeneratorPtr)> generator_removed;
 
 private:
+    void setup();
     void schedulingLoop();
+    void updateAffinity();
 
     bool waitForTasks();
     void handlePause();
@@ -96,6 +109,8 @@ private:
 
     int id_;
     std::string name_;
+
+    CpuAffinityPtr cpu_affinity_;
 
     TimedQueuePtr timed_queue_;
 

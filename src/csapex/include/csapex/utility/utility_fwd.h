@@ -19,6 +19,7 @@ FWD(Timer);
 FWD(Timable);
 FWD(UUID);
 FWD(UUIDProvider);
+FWD(CpuAffinity);
 
 class Notification;
 
