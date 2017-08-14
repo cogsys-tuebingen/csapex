@@ -207,7 +207,7 @@ public:
         for(uint8_t i = 0; i < len; ++i) {
             S elem;
             operator >> (elem);
-            s.emplace_back(elem);
+            s.push_back(elem);
         }
         return *this;
     }
