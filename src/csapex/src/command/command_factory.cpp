@@ -348,12 +348,12 @@ void foreachNode(GraphFacade* graph_facade, const UUID &node_uuid, Lambda fn)
 
     // recursive call into child graphs
     if(nh->isGraph()) {
-        GraphPtr child_graph = std::dynamic_pointer_cast<Graph>(nh->getNode().lock());
+        SubgraphNodePtr child_graph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
         apex_assert_hard(child_graph);
         GraphFacade* child_facade = graph_facade->getSubGraph(node_uuid);
         apex_assert_hard(child_facade);
 
-        for(NodeHandle* child : child_graph->getAllNodeHandles()) {
+        for(NodeHandle* child : child_graph->getGraph()->getAllNodeHandles()) {
             foreachNode(child_facade, child->getUUID(), fn);
         }
     }

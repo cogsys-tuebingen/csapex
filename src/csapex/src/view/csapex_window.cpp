@@ -318,14 +318,21 @@ void CsApexWindow::setupThreadManagement()
 
     QItemSelectionModel* select = ui->thread_table->selectionModel();
 
-    QObject::connect(select, &QItemSelectionModel::selectionChanged, [this](const QItemSelection &, const QItemSelection &) {
+    QObject::connect(select, &QItemSelectionModel::selectionChanged, [this, model](const QItemSelection &, const QItemSelection &) {
         QItemSelectionModel* select = ui->thread_table->selectionModel();
         int rows = 0;
         for(const auto& entry : select->selection()) {
             rows += entry.bottom() - entry.top() + 1;
         }
 
-        ui->thread_assign->setEnabled(rows == 1);
+        bool can_be_assigned = false;
+
+        if(rows == 1) {
+            int row = select->selection().first().top();
+            can_be_assigned = model->getThreadGroup(row)->id() != ThreadGroup::PRIVATE_THREAD;
+        }
+
+        ui->thread_assign->setEnabled(can_be_assigned);
         ui->thread_remove->setEnabled(rows > 0);
     });
 
