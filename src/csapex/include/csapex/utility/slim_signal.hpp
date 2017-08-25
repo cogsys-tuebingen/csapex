@@ -159,6 +159,16 @@ Connection Signal<Signature>::connect(Signal<Signature>& signal)
     return Connection(this, makeSignalDeleter(this, &signal));
 }
 
+template <typename Signature>
+bool Signal<Signature>::isConnected() const
+{
+    if(SignalBase::isConnected()) {
+        return true;
+    }
+
+    return !functions_.empty() || !children_.empty() || !delegates_.empty();
+}
+
 
 template <typename Signature>
 void Signal<Signature>::disconnectAll()

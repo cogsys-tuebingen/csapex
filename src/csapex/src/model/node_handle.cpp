@@ -34,7 +34,7 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
       
       transition_in_(transition_in),
       transition_out_(transition_out),
-      
+
       uuid_provider_(uuid_provider),
 
       guard_(-1)
@@ -125,6 +125,7 @@ void NodeHandle::updateLoggerLevel()
 
     triggerNodeStateChanged();
 }
+
 
 bool NodeHandle::isSource() const
 {

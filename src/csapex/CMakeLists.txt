@@ -520,6 +520,7 @@ add_library(csapex_remote SHARED
     src/model/graph/graph_remote.cpp
 
     src/io/server.cpp
+    src/io/raw_message.cpp
     src/io/request.cpp
     src/io/response.cpp
     src/io/feedback.cpp

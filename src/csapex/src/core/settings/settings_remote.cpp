@@ -73,7 +73,7 @@ void SettingsRemote::add(csapex::param::Parameter::Ptr p, bool persistent)
     if(const auto& response = session_->sendRequest<AddParameter>(param_id, p->name(), p->description().toString(), value, persistent))
     {
         if(response->getParameter()) {
-            std::cerr << "created parameter " << response->getParameter()->getUUID() << std::endl;
+            //std::cerr << "created parameter " << response->getParameter()->getUUID() << std::endl;
 
             // make a new parameter, when it gets changed relay the change to the remote server
             param::ParameterPtr proxy = response->getParameter()->clone<param::Parameter>();
@@ -107,7 +107,7 @@ csapex::param::Parameter::Ptr SettingsRemote::getNoThrow(const std::string &name
             return nullptr;
         }
 
-        std::cerr << response->getParameter()->getUUID() << std::endl;
+        //std::cerr << response->getParameter()->getUUID() << std::endl;
 
         // make a new parameter, when it gets changed relay the change to the remote server
         param::ParameterPtr proxy = response->getParameter()->clone<param::Parameter>();

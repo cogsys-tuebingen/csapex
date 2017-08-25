@@ -50,13 +50,13 @@ bool NodeAdapterFactory::hasAdapter(const std::string &type) const
     return false;
 }
 
-NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node, NodeBox* parent)
+NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node_facade, NodeBox* parent)
 {
-    std::string type = node->getType();
+    std::string type = node_facade->getType();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
         auto builder = node_adapter_builders_[type];
         if(builder) {
-            return builder->build(node, parent);
+            return builder->build(node_facade, parent);
         }
 
     } else {
@@ -66,7 +66,7 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node, NodeBox
                 auto builder = constructor->construct();
                 if(builder->getWrappedType() == type) {
                     node_adapter_builders_[type] = builder;
-                    return builder->build(node, parent);
+                    return builder->build(node_facade, parent);
                 }
             } else {
                 node_adapter_builders_[type] = nullptr;
@@ -77,7 +77,7 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node, NodeBox
         }
     }
 
-    return NodeAdapter::Ptr(new DefaultNodeAdapter(node, parent));
+    return NodeAdapter::Ptr(new DefaultNodeAdapter(node_facade, parent));
 }
 
 void NodeAdapterFactory::loadPlugins()

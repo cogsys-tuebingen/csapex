@@ -205,7 +205,7 @@ void Session::read_async()
                             }
 
                         } else if(ResponseConstPtr response = std::dynamic_pointer_cast<Response const>(serial)) {
-                            std::cerr << "got response #" << (int) response->getRequestID() << std::endl;
+                            //std::cerr << "got response #" << (int) response->getRequestID() << std::endl;
 
                             std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
                             auto it = open_requests_.find(response->getRequestID());

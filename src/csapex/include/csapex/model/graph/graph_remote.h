@@ -68,6 +68,8 @@ public:
 
 private:
     GraphLocal& temp_reference;
+
+    std::vector<graph::VertexPtr> remote_vertices_;
 };
 
 }

@@ -13,6 +13,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/connector_description.h>
 #include <csapex/model/connectable_vector.h>
+#include <csapex/serialization/serialization_fwd.h>
 
 /// SYSTEM
 #include <vector>
@@ -120,7 +121,6 @@ public:
     std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& inputToParamMap();
     std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& outputToParamMap();
 
-
     bool isSource() const override;
     bool isSink() const override;
     bool hasConnectionsIncoming() const;
@@ -171,6 +171,10 @@ public:
     slim_signal::Signal<void()> might_be_enabled;
 
     slim_signal::Signal<void(std::function<void()>)> execution_requested;
+
+    slim_signal::Signal<void(SerializableConstPtr)> remote_data_connection;
+
+
 
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);

@@ -91,26 +91,29 @@ void GraphFacade::nodeAddedHandler(graph::VertexPtr vertex)
 
 void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
 {
-    NodeFacadeLocalPtr facade = std::dynamic_pointer_cast<NodeFacadeLocal>(nf);
-    apex_assert_hard(facade);
+    if(NodeFacadeLocalPtr local_facade = std::dynamic_pointer_cast<NodeFacadeLocal>(nf)) {
+        NodePtr node = local_facade->getNode();
+        apex_assert_hard(node);
+        SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(node);
+        apex_assert_hard(sub_graph);
 
-    NodePtr node = facade->getNode();
-    apex_assert_hard(node);
-    SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(node);
-    apex_assert_hard(sub_graph);
+        NodeHandle* subnh = graph_node_->getGraph()->findNodeHandle(local_facade->getUUID());
+        apex_assert_hard(subnh == local_facade->getNodeHandle().get());
+        GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph->getGraph(), sub_graph, local_facade, this);
+        children_[local_facade->getUUID()] = sub_graph_facade;
 
-    NodeHandle* subnh = graph_node_->getGraph()->findNodeHandle(facade->getUUID());
-    apex_assert_hard(subnh == facade->getNodeHandle().get());
-    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph->getGraph(), sub_graph, facade, this);
-    children_[facade->getUUID()] = sub_graph_facade;
+        observe(sub_graph_facade->notification, notification);
+        observe(sub_graph_facade->node_facade_added, child_node_facade_added);
+        observe(sub_graph_facade->node_facade_removed, child_node_facade_removed);
+        observe(sub_graph_facade->child_node_facade_added, child_node_facade_added);
+        observe(sub_graph_facade->child_node_facade_removed, child_node_facade_removed);
 
-    observe(sub_graph_facade->notification, notification);
-    observe(sub_graph_facade->node_facade_added, child_node_facade_added);
-    observe(sub_graph_facade->node_facade_removed, child_node_facade_removed);
-    observe(sub_graph_facade->child_node_facade_added, child_node_facade_added);
-    observe(sub_graph_facade->child_node_facade_removed, child_node_facade_removed);
+        child_added(sub_graph_facade);
 
-    child_added(sub_graph_facade);
+    } else {
+        // TODO: implement client server
+
+    }
 }
 
 void GraphFacade::nodeRemovedHandler(graph::VertexPtr vertex)

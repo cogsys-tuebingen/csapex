@@ -3,7 +3,10 @@
 
 /// PROJECT
 #include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/vertex.h>
 #include <csapex/model/connectable.h>
+#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_remote.h>
 
 using namespace csapex;
 
@@ -15,8 +18,23 @@ GraphRemote::GraphRemote(GraphLocal &temp_reference)
     observe(temp_reference.connection_added, connection_added);
     observe(temp_reference.connection_removed, connection_removed);
 
-    observe(temp_reference.vertex_added, vertex_added);
-    observe(temp_reference.vertex_removed, vertex_removed);
+    observe(temp_reference.vertex_added, [this](graph::VertexPtr vertex) {
+        std::shared_ptr<NodeFacadeRemote> remote_node_facade = std::make_shared<NodeFacadeRemote>(
+                    vertex->getNodeFacade()->getNodeHandle(),
+                    vertex->getNodeFacade()->getNodeWorker(),
+                    vertex->getNodeFacade()->getNodeRunner()
+                    );
+        graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
+        remote_vertices_.push_back(remote_vertex);
+        vertex_added(remote_vertex);
+    });
+    observe(temp_reference.vertex_removed,  [this](graph::VertexPtr vertex) {
+        auto pos = std::find(remote_vertices_.begin(), remote_vertices_.end(), vertex);
+        if(pos != remote_vertices_.end()) {
+            vertex_removed(*pos);
+            remote_vertices_.erase(pos);
+        }
+    });
 
 }
 
@@ -57,7 +75,7 @@ int GraphRemote::countNodes()
 
 bool GraphRemote::addConnection(ConnectionPtr connection)
 {
-   return temp_reference.addConnection(connection);
+    return temp_reference.addConnection(connection);
 }
 
 void GraphRemote::deleteConnection(ConnectionPtr connection)
@@ -142,12 +160,12 @@ std::vector<NodeHandle*> GraphRemote::getAllNodeHandles()
 
 ConnectablePtr GraphRemote::findConnector(const UUID &uuid)
 {
-   return temp_reference.findConnector(uuid);
+    return temp_reference.findConnector(uuid);
 }
 
 ConnectablePtr GraphRemote::findConnectorNoThrow(const UUID &uuid) noexcept
 {
-    return findConnectorNoThrow(uuid);
+    return temp_reference.findConnectorNoThrow(uuid);
 }
 
 ConnectionPtr GraphRemote::getConnectionWithId(int id)

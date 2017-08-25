@@ -31,7 +31,7 @@ public:
     virtual ~SignalBase();
 
     virtual void disconnectAll();
-    bool isConnected() const;
+    virtual bool isConnected() const;
 
 protected:
     SignalBase();
@@ -128,6 +128,8 @@ public:
     Connection connect(Class* that, Signature Class::*mem) {
         return connect(std::move(delegate::Delegate<Signature>(that, mem)));
     }
+
+    virtual bool isConnected() const override;
 
     template <typename... Args>
     Signal& operator () (Args... args);
