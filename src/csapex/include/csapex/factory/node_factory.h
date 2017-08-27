@@ -45,11 +45,8 @@ public:
     NodeConstructorPtr getConstructor(const std::string& type);
     std::vector<NodeConstructorPtr> getConstructors();
 
-    NodeFacadePtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider);
-    NodeFacadePtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider, NodeStatePtr state);
-
-    NodeFacadeLocalPtr makeNodeLocal(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider);
-    NodeFacadeLocalPtr makeNodeLocal(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider, NodeStatePtr state);
+    NodeFacadeLocalPtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider);
+    NodeFacadeLocalPtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider, NodeStatePtr state);
 
     std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap();
 

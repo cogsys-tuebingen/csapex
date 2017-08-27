@@ -39,16 +39,16 @@ class CodeApiTest : public SteppingTest
 TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
     GraphFacade graph_facade(executor, graph, graph_node);
 
-    NodeFacadePtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
+    NodeFacadeLocalPtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);
 
-    NodeFacadePtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
+    NodeFacadeLocalPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
     graph_facade.addNode(times_4);
 
-    NodeFacadePtr times_7 = factory.makeNode("StaticMultiplier7", UUIDProvider::makeUUID_without_parent("StaticMultiplier7"), graph);
+    NodeFacadeLocalPtr times_7 = factory.makeNode("StaticMultiplier7", UUIDProvider::makeUUID_without_parent("StaticMultiplier7"), graph);
     graph_facade.addNode(times_7);
 
-    NodeFacadePtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("MockupSink"), graph);
+    NodeFacadeLocalPtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("MockupSink"), graph);
     graph_facade.addNode(sink_p);
 
     std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
@@ -75,16 +75,16 @@ TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
 TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
     GraphFacade graph_facade(executor, graph, graph_node);
 
-    NodeFacadePtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
+    NodeFacadeLocalPtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);
 
-    NodeFacadePtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
+    NodeFacadeLocalPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
     graph_facade.addNode(times_4);
 
-    NodeFacadePtr times_7 = factory.makeNode("StaticMultiplier7", UUIDProvider::makeUUID_without_parent("StaticMultiplier7"), graph);
+    NodeFacadeLocalPtr times_7 = factory.makeNode("StaticMultiplier7", UUIDProvider::makeUUID_without_parent("StaticMultiplier7"), graph);
     graph_facade.addNode(times_7);
 
-    NodeFacadePtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("MockupSink"), graph);
+    NodeFacadeLocalPtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("MockupSink"), graph);
     graph_facade.addNode(sink_p);
 
     std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
@@ -111,16 +111,16 @@ TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
 TEST_F(CodeApiTest, GraphBuildingUsingUUID) {
     GraphFacade graph_facade(executor, graph, graph_node);
 
-    NodeFacadePtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
+    NodeFacadeLocalPtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);
 
-    NodeFacadePtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
+    NodeFacadeLocalPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
     graph_facade.addNode(times_4);
 
-    NodeFacadePtr times_7 = factory.makeNode("StaticMultiplier7", UUIDProvider::makeUUID_without_parent("StaticMultiplier7"), graph);
+    NodeFacadeLocalPtr times_7 = factory.makeNode("StaticMultiplier7", UUIDProvider::makeUUID_without_parent("StaticMultiplier7"), graph);
     graph_facade.addNode(times_7);
 
-    NodeFacadePtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("MockupSink"), graph);
+    NodeFacadeLocalPtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("MockupSink"), graph);
     graph_facade.addNode(sink_p);
 
     std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());

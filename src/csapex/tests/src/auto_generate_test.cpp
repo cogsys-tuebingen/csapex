@@ -73,7 +73,7 @@ TEST_F(AutoGenerateTest, ExplicitTypesAreDetected) {
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f1, "f1"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node = factory.makeNode("f1", node_id, uuid_provider);
+    NodeFacadeLocalPtr node = factory.makeNode("f1", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());
@@ -132,7 +132,7 @@ TEST_F(AutoGenerateTest, ImplicitTypesAreDetected) {
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f2, "f2"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node = factory.makeNode("f2", node_id, uuid_provider);
+    NodeFacadeLocalPtr node = factory.makeNode("f2", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());
@@ -191,7 +191,7 @@ TEST_F(AutoGenerateTest, OrderDoesNotMatterTypesAreDetected) {
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f3, "f3"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node = factory.makeNode("f3", node_id, uuid_provider);
+    NodeFacadeLocalPtr node = factory.makeNode("f3", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());

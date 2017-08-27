@@ -34,6 +34,8 @@ public:
     NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept override;
     NodeHandle* findNodeHandleWithLabel(const std::string& label) const override;
 
+    Graph* findSubgraph(const UUID& uuid) const override;
+
     std::vector<NodeHandle*> getAllNodeHandles() override;
 
 

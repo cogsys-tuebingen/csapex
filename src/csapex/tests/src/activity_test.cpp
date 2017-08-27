@@ -226,9 +226,9 @@ protected:
     }
 
 
-    NodeFacadePtr source_p;
-    NodeFacadePtr state;
-    NodeFacadePtr sink_p;
+    NodeFacadeLocalPtr source_p;
+    NodeFacadeLocalPtr state;
+    NodeFacadeLocalPtr sink_p;
 
 };
 

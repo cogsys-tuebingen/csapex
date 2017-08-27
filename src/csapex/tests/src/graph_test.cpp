@@ -65,7 +65,7 @@ TEST_F(GraphTest, NodeCanBeFound) {
     SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
     GraphPtr graph = graph_node->getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node = factory.makeNode("MockupNode", node_id, graph);
+    NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
 
     NodeHandle* node_found = graph->findNodeHandle(node_id);
@@ -78,7 +78,7 @@ TEST_F(GraphTest, NodeCanBeDeleted) {
     SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
     GraphPtr graph = graph_node->getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node = factory.makeNode("MockupNode", node_id, graph);
+    NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
 
     graph->deleteNode(node_id);

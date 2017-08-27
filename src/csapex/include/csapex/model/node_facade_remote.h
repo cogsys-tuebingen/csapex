@@ -19,6 +19,7 @@ public:
 
     std::string getType() const override;
     UUID getUUID() const override;
+    AUUID getAUUID() const override;
 
     bool isActive() const override;
     void setActive(bool active) override;
@@ -72,11 +73,6 @@ public:
     param::ParameterPtr getParameter(const std::string& name) const override;
     bool hasParameter(const std::string& name) const override;
 
-//    template <typename T>
-//    T readParameter(const std::string& name) const;
-//    template <typename T>
-//    void setParameter(const std::string& name, const T& value);
-
     // Debug Access
     std::string getDebugDescription() const override;
     std::string getLoggerOutput(ErrorState::ErrorLevel level) const override;
@@ -93,7 +89,6 @@ public:
     NodeHandlePtr getNodeHandle() const;
     NodeWorkerPtr getNodeWorker() const;
     NodeRunnerPtr getNodeRunner() const;
-    NodePtr getNode() const;
 
 public:
     slim_signal::ObservableSignal<void(SerializableConstPtr)> remote_data_connection;

@@ -44,8 +44,9 @@ protected:
         graph = graph_node->getGraph();
 
         abort_connection = error_handling::stop_request().connect([this](){
-            for(auto it = graph->begin(); it != graph->end(); ++it) {
-                NodeFacadePtr nf = (*it)->getNodeFacade();
+            for(graph::VertexPtr vtx : *graph) {
+                NodeFacadeLocalPtr nf = std::dynamic_pointer_cast<NodeFacadeLocal>(vtx->getNodeFacade());
+                apex_assert_hard(nf);
                 if(std::shared_ptr<MockupSink> mp = std::dynamic_pointer_cast<MockupSink>(nf->getNode())) {
                     mp->abort();
                 }

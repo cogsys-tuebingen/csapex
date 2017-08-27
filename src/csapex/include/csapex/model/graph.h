@@ -60,6 +60,8 @@ public:
     virtual NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
     virtual NodeHandle* findNodeHandleWithLabel(const std::string& label) const = 0;
 
+    virtual Graph* findSubgraph(const UUID& uuid) const = 0;
+
     virtual std::vector<NodeHandle*> getAllNodeHandles() = 0;
 
 

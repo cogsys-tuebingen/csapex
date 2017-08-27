@@ -26,6 +26,7 @@ public:
 
     virtual std::string getType() const = 0;
     virtual UUID getUUID() const = 0;
+    virtual AUUID getAUUID() const = 0;
 
     virtual bool isActive() const = 0;
     virtual void setActive(bool active) = 0;
@@ -104,7 +105,6 @@ public:
     virtual NodeHandlePtr getNodeHandle() const = 0;
     virtual NodeWorkerPtr getNodeWorker() const = 0;
     virtual NodeRunnerPtr getNodeRunner() const = 0;
-    virtual NodePtr getNode() const = 0;
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;

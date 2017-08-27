@@ -111,28 +111,33 @@ QAbstractItemModel* SearchDialog::listNodes()
 
 void SearchDialog::addNodes(Graph *graph, QStandardItemModel *model)
 {
-    for(auto it = graph->begin(); it != graph->end(); ++it) {
-        NodeFacadePtr nf = (*it)->getNodeFacade();
-        NodeHandlePtr nh = nf->getNodeHandle();
+    for(const graph::VertexPtr& vtx : *graph) {
+        NodeFacadePtr nf = vtx->getNodeFacade();
 
-        NodePtr node = nf->getNode();
-        if(GraphPtr subgraph = std::dynamic_pointer_cast<Graph>(node)) {
-            addNodes(subgraph.get(), model);
+        AUUID auuid = nf->getAUUID();
+        std::string type = nf->getType();
+        std::string label = nf->getLabel();
+
+        if(nf->isGraph()) {
+            Graph* subgraph = graph->findSubgraph(nf->getUUID());
+            addNodes(subgraph, model);
         }
 
-        QString name = QString::fromStdString(nh->getNodeState()->getLabel());
-        QString auuid(QString::fromStdString(nh->getUUID().getAbsoluteUUID().getFullName()));
-        QString type = QString::fromStdString(nh->getType());
+        NodeConstructorPtr constr = node_factory_.getConstructor(type);
 
-        QString auuid_html = auuid;
+        QIcon icon = QIcon(QString::fromStdString(constr->getIcon()));
+        QString label_s = QString::fromStdString(label);
+        QString auuid_s = QString::fromStdString(auuid.getFullName());
+        QString type_s = QString::fromStdString(type);
+
+        QString auuid_html = auuid_s;
         auuid_html.replace(QString::fromStdString(UUID::namespace_separator),  " <b>&gt;</b> ");
 
-        NodeConstructorPtr constr = node_factory_.getConstructor(nh->getType());
 
-        QStandardItem* item = new QStandardItem(QIcon(QString::fromStdString(constr->getIcon())), auuid);
+        QStandardItem* item = new QStandardItem(icon, auuid_s);
         item->setData(auuid_html, Qt::UserRole);
-        item->setData(type, Qt::UserRole + 1);
-        item->setData(name, Qt::UserRole + 2);
+        item->setData(type_s, Qt::UserRole + 1);
+        item->setData(label_s, Qt::UserRole + 2);
 
         model->appendRow(item);
     }

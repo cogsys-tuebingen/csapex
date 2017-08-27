@@ -83,6 +83,11 @@ UUID NodeFacadeLocal::getUUID() const
     return nh_->getUUID();
 }
 
+AUUID NodeFacadeLocal::getAUUID() const
+{
+    return nh_->getUUID().getAbsoluteUUID();
+}
+
 bool NodeFacadeLocal::isActive() const
 {
     return nh_->isActive();

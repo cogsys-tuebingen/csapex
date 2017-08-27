@@ -96,6 +96,11 @@ UUID NodeFacadeRemote::getUUID() const
     return nh_->getUUID();
 }
 
+AUUID NodeFacadeRemote::getAUUID() const
+{
+    return nh_->getUUID().getAbsoluteUUID();
+}
+
 bool NodeFacadeRemote::isActive() const
 {
     return nh_->isActive();
@@ -136,7 +141,7 @@ bool NodeFacadeRemote::isSink() const
 
 bool NodeFacadeRemote::isProcessingNothingMessages() const
 {
-    return getNode()->processMessageMarkers();
+    return nh_->getNode().lock()->processMessageMarkers();
 }
 
 bool NodeFacadeRemote::isParameterInput(const UUID& id)
@@ -222,12 +227,12 @@ NodeCharacteristics NodeFacadeRemote::getNodeCharacteristics() const
 
 std::vector<param::ParameterPtr> NodeFacadeRemote::getParameters() const
 {
-    return getNode()->getParameters();
+    return nh_->getNode().lock()->getParameters();
 }
 
 param::ParameterPtr NodeFacadeRemote::getParameter(const std::string &name) const
 {
-    return getNode()->getParameter(name);
+    return nh_->getNode().lock()->getParameter(name);
 }
 
 bool NodeFacadeRemote::isProfiling() const
@@ -299,10 +304,6 @@ NodeHandlePtr NodeFacadeRemote::getNodeHandle() const
     return nh_;
 }
 
-NodePtr NodeFacadeRemote::getNode() const
-{
-    return nh_->getNode().lock();
-}
 
 NodeWorkerPtr NodeFacadeRemote::getNodeWorker() const
 {

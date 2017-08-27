@@ -724,6 +724,16 @@ NodeHandle* GraphLocal::findNodeHandleWithLabel(const std::string& label) const
     return nullptr;
 }
 
+Graph* GraphLocal::findSubgraph(const UUID& uuid) const
+{
+    NodeHandle* nh = findNodeHandle(uuid);
+    if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock())) {
+        return graph->getGraph().get();
+    }
+
+    throw std::runtime_error(std::string("cannot find graph \"") + uuid.getFullName() + "\"");
+}
+
 std::vector<NodeHandle*> GraphLocal::getAllNodeHandles()
 {
     std::vector<NodeHandle*> node_handles;

@@ -16,6 +16,7 @@ public:
 
     std::string getType() const override;
     UUID getUUID() const override;
+    AUUID getAUUID() const override;
 
     bool isActive() const override;
     void setActive(bool active) override;

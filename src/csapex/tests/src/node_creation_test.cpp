@@ -79,7 +79,7 @@ protected:
 
 TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node = factory.makeNode("MockupNode", node_id, uuid_provider);
+    NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());
@@ -87,7 +87,7 @@ TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
 
 TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
+    NodeFacadeLocalPtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
     ASSERT_TRUE(node_facade != nullptr);
 
     ASSERT_TRUE(node_facade->getNodeHandle() != nullptr);
@@ -108,7 +108,7 @@ TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
 TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz2");
 
-    NodeFacadePtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
+    NodeFacadeLocalPtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
     ASSERT_TRUE(node_facade != nullptr);
 
     NodePtr node = node_facade->getNode();

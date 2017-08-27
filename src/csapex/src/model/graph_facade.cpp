@@ -112,7 +112,6 @@ void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
 
     } else {
         // TODO: implement client server
-
     }
 }
 

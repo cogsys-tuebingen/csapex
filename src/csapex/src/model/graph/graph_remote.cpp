@@ -156,6 +156,11 @@ NodeHandle* GraphRemote::findNodeHandleWithLabel(const std::string& label) const
     return temp_reference.findNodeHandleWithLabel(label);
 }
 
+Graph* GraphRemote::findSubgraph(const UUID &uuid) const
+{
+    return temp_reference.findSubgraph(uuid);
+}
+
 std::vector<NodeHandle*> GraphRemote::getAllNodeHandles()
 {
     return temp_reference.getAllNodeHandles();
