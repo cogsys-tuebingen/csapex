@@ -122,7 +122,7 @@ void Server::handlePacket(const SessionPtr& session, const SerializableConstPtr&
     } else if(RequestConstPtr request = std::dynamic_pointer_cast<Request const>(packet)) {
         SerializableConstPtr response;
         try {
-            response = request->execute(*core_);
+            response = request->execute(session, *core_);
 
         } catch(const std::exception& e) {
             response = std::make_shared<Feedback>(std::string("Request has thrown an exception: ") + e.what(), request->getRequestID());
@@ -186,7 +186,11 @@ void Server::stop()
 
         if(std::this_thread::get_id() != worker_thread_.get_id()) {
             if(spin_thread_ && worker_thread_.joinable()) {
-                worker_thread_.join();
+                try {
+                    worker_thread_.join();
+                } catch(const std::runtime_error& e) {
+                    std::cerr << "failed to join server thread: " << e.what() << std::endl;
+                }
             }
         }
     }

@@ -6,11 +6,13 @@
 #include <csapex/serialization/serialization_fwd.h>
 #include <csapex/model/observer.h>
 #include <csapex/io/io_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <boost/asio.hpp>
 #include <deque>
 #include <future>
+#include <unordered_map>
 
 namespace csapex
 {
@@ -26,7 +28,6 @@ public:
 
   void write(const SerializableConstPtr &packet);
   void write(const std::string &message);
-
 
   ///
   /// REQUEST
@@ -64,6 +65,8 @@ public:
   slim_signal::Signal<void(SerializableConstPtr)> packet_received;
   slim_signal::Signal<void(BroadcastMessageConstPtr)> broadcast_received;
 
+  slim_signal::Signal<void (RawMessageConstPtr)> &raw_packet_received(const AUUID& uuid);
+
 private:
   void read_async();
 
@@ -85,6 +88,8 @@ private:
   std::recursive_mutex running_mutex_;
   std::atomic<bool> running_;
   std::atomic<bool> live_;
+
+  std::unordered_map<AUUID, std::shared_ptr<slim_signal::Signal<void(RawMessageConstPtr)>>, AUUID::Hasher> auuid_to_signal_;
 };
 
 }

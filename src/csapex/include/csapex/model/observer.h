@@ -31,6 +31,11 @@ protected:
     {
         manageConnection(std::move(signal.connect(compatible_signal)));
     }
+    template <typename Signature, typename CompatibleSignature>
+    void observe(slim_signal::Signal<Signature>& signal, slim_signal::ObservableSignal<CompatibleSignature>& compatible_signal)
+    {
+        manageConnection(std::move(signal.connect(compatible_signal)));
+    }
     template <typename Signature, typename Lambda>
     void observe(slim_signal::Signal<Signature>* signal, Lambda callback)
     {

@@ -22,7 +22,7 @@ public:
     virtual uint8_t getPacketType() const override;
     virtual std::string getType() const = 0;
 
-    virtual ResponsePtr execute(CsApexCore& core) const = 0;
+    virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const = 0;
 
     void overwriteRequestID(uint8_t id) const;
     uint8_t getRequestID() const;

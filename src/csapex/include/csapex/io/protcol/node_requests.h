@@ -1,5 +1,5 @@
-#ifndef REQUEST_PARAMETER_H
-#define REQUEST_PARAMETER_H
+#ifndef NODE_REQUESTS_H
+#define NODE_REQUESTS_H
 
 /// PROJECT
 #include <csapex/io/request_impl.hpp>
@@ -10,14 +10,21 @@
 namespace csapex
 {
 
-class RequestParameter
+class NodeRequests
 {
 public:
-    class ParameterRequest : public RequestImplementation<ParameterRequest>
+
+    enum class NodeRequestType
+    {
+        AddClient,
+        RemoveClient
+    };
+
+    class NodeRequest : public RequestImplementation<NodeRequest>
     {
     public:
-        ParameterRequest(const AUUID& id);
-        ParameterRequest(uint8_t request_id);
+        NodeRequest(uint8_t request_id);
+        NodeRequest(NodeRequestType request_type, const AUUID& uuid);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
@@ -26,41 +33,39 @@ public:
 
         std::string getType() const override
         {
-            return "RequestParameter";
+            return "NodeRequests";
         }
 
     private:
-        AUUID id_;
+        NodeRequestType request_type_;
+        AUUID uuid_;
     };
 
 
-    class ParameterResponse : public ResponseImplementation<ParameterResponse>
+    class NodeResponse : public ResponseImplementation<NodeResponse>
     {
     public:
-        ParameterResponse(const param::ParameterConstPtr &parameter, uint8_t request_id);
-        ParameterResponse(uint8_t request_id);
+        NodeResponse(uint8_t request_id);
+        NodeResponse(NodeRequestType request_type, uint8_t request_id, const AUUID& uuid);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
 
-        param::ParameterConstPtr getParameter() const;
-
         std::string getType() const override
         {
-            return "RequestParameter";
+            return "NodeRequests";
         }
 
-
     private:
-        param::ParameterConstPtr param_;
+        NodeRequestType request_type_;
+        AUUID uuid_;
     };
 
 
 public:
-    using RequestT = ParameterRequest;
-    using ResponseT = ParameterResponse;
+    using RequestT = NodeRequest;
+    using ResponseT = NodeResponse;
 };
 
 }
-
-#endif // REQUEST_PARAMETER_H
+#endif // NODE_REQUESTS_H

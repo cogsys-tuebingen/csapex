@@ -16,14 +16,15 @@ class RawMessage : public Serializable
 {
 public:
     RawMessage();
-    RawMessage(std::vector<uint8_t> data);
-    RawMessage(const char *data, std::size_t len);
+    RawMessage(std::vector<uint8_t> data, const AUUID& target);
+    RawMessage(const char *data, std::size_t len, const AUUID& target);
 
     static const uint8_t PACKET_TYPE_ID = 10;
 
     virtual uint8_t getPacketType() const override;
 
     std::vector<uint8_t> getData() const;
+    AUUID getUUID() const;
 
     virtual void serialize(SerializationBuffer &data) const;
     virtual void deserialize(SerializationBuffer& data);
@@ -33,6 +34,7 @@ private:
 
 private:
     mutable std::vector<uint8_t> data_;
+    AUUID uuid_;
 };
 
 }

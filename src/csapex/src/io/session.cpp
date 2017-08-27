@@ -10,6 +10,7 @@
 #include <csapex/serialization/serialization_buffer.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/io/broadcast_message.h>
+#include <csapex/io/raw_message.h>
 
 /// SYSTEM
 #include <csapex/utility/error_handling.h>
@@ -70,6 +71,11 @@ void Session::start()
                         if(BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
                             broadcast_received(broadcast);
                             break;
+                        }
+                    case RawMessage::PACKET_TYPE_ID:
+                        if(RawMessageConstPtr raw_message = std::dynamic_pointer_cast<RawMessage const>(packet)) {
+                            auto& signal = raw_packet_received(raw_message->getUUID());
+                            signal(raw_message);
                         }
                     default:
                         packet_received(packet);
@@ -253,4 +259,14 @@ void Session::write_packet(SerializationBuffer &buffer)
         std::cerr << "the session has crashed with an unknown cause." << std::endl;
         stop();
     }
+}
+
+
+slim_signal::Signal<void(RawMessageConstPtr)>& Session::raw_packet_received(const AUUID& uuid)
+{
+    auto& res = auuid_to_signal_[uuid];
+    if(res == nullptr) {
+        res.reset(new slim_signal::Signal<void(RawMessageConstPtr)>);
+    }
+    return *res;
 }

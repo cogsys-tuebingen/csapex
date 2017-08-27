@@ -3,6 +3,8 @@
 
 /// PROJECT
 #include <csapex/model/node_facade.h>
+#include <csapex/io/io_fwd.h>
+#include <csapex/serialization/serializable.h>
 
 namespace csapex
 {
@@ -10,7 +12,8 @@ namespace csapex
 class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade
 {
 public:
-    NodeFacadeRemote(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr);
+    NodeFacadeRemote(SessionPtr session,
+                     NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr);
 
     ~NodeFacadeRemote();
 
@@ -92,11 +95,16 @@ public:
     NodeRunnerPtr getNodeRunner() const;
     NodePtr getNode() const;
 
+public:
+    slim_signal::ObservableSignal<void(SerializableConstPtr)> remote_data_connection;
+
 private:
     void connectNodeHandle();
     void connectNodeWorker();
 
 private:
+    SessionPtr session_;
+
     NodeHandlePtr nh_;
     NodeWorkerPtr nw_;
     NodeRunnerPtr nr_;

@@ -78,11 +78,11 @@ endif()
 #
 # CCACHE
 #
-set(USE_CCACHE 0 CACHE BOOL "optimize compile using ccache?")
-if(${USE_CCACHE})
-SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif()
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
 
 ###########
 ## INFO  ##
@@ -534,9 +534,11 @@ add_library(csapex_remote SHARED
     src/io/protocol/add_parameter.cpp
     src/io/protocol/core_requests.cpp
     src/io/protocol/command_requests.cpp
+    src/io/protocol/node_requests.cpp
     src/io/protocol/command_broadcasts.cpp
 
     src/serialization/request_serializer.cpp
+    src/serialization/raw_message_serializer.cpp
     src/serialization/broadcast_message_serializer.cpp
     src/serialization/feedback_serializer.cpp
 

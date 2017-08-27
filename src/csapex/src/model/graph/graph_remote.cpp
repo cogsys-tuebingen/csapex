@@ -7,11 +7,13 @@
 #include <csapex/model/connectable.h>
 #include <csapex/model/node_facade.h>
 #include <csapex/model/node_facade_remote.h>
+#include <csapex/io/session.h>
 
 using namespace csapex;
 
-GraphRemote::GraphRemote(GraphLocal &temp_reference)
-    : temp_reference(temp_reference)
+GraphRemote::GraphRemote(SessionPtr session, GraphLocal &temp_reference)
+    : session_(session),
+      temp_reference(temp_reference)
 {
     observe(temp_reference.state_changed, state_changed);
 
@@ -20,6 +22,7 @@ GraphRemote::GraphRemote(GraphLocal &temp_reference)
 
     observe(temp_reference.vertex_added, [this](graph::VertexPtr vertex) {
         std::shared_ptr<NodeFacadeRemote> remote_node_facade = std::make_shared<NodeFacadeRemote>(
+                    session_,
                     vertex->getNodeFacade()->getNodeHandle(),
                     vertex->getNodeFacade()->getNodeWorker(),
                     vertex->getNodeFacade()->getNodeRunner()

@@ -48,7 +48,7 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     session_->start();
 
     const auto& local_facade = core_tmp_->getRoot();
-    std::shared_ptr<GraphRemote> remote_root_graph = std::make_shared<GraphRemote>(*std::dynamic_pointer_cast<GraphLocal>(local_facade->getGraph()));
+    std::shared_ptr<GraphRemote> remote_root_graph = std::make_shared<GraphRemote>(session_, *std::dynamic_pointer_cast<GraphLocal>(local_facade->getGraph()));
     remote_root_ = std::make_shared<GraphFacade>(*local_facade->getThreadPool(),
                                                  remote_root_graph,
                                                  local_facade->getSubgraphNode(),

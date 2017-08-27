@@ -33,7 +33,7 @@ CommandRequests::CommandRequest::CommandRequest(uint8_t request_id)
 
 }
 
-ResponsePtr CommandRequests::CommandRequest::execute(CsApexCore &core) const
+ResponsePtr CommandRequests::CommandRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     CommandDispatcherPtr dispatcher = core.getCommandDispatcher();
     switch(request_type_)

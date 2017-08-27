@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/graph.h>
 #include <csapex/model/observer.h>
+#include <csapex/io/io_fwd.h>
 
 namespace csapex
 {
@@ -13,7 +14,7 @@ class GraphLocal;
 class GraphRemote : public Graph, public Observer
 {
 public:
-    GraphRemote(GraphLocal& temp_reference);
+    GraphRemote(SessionPtr session, GraphLocal& temp_reference);
     ~GraphRemote();
 
     int getComponent(const UUID& node_uuid) const override;
@@ -67,6 +68,7 @@ public:
     const vertex_const_iterator end() const override;
 
 private:
+    SessionPtr session_;
     GraphLocal& temp_reference;
 
     std::vector<graph::VertexPtr> remote_vertices_;

@@ -10,6 +10,9 @@
 #include <csapex/signal/event.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/node.h>
+#include <csapex/io/session.h>
+#include <csapex/io/protcol/node_requests.h>
+#include <csapex/io/raw_message.h>
 
 /// SYSTEM
 #include <iostream>
@@ -18,18 +21,32 @@
 using namespace csapex;
 using namespace csapex;
 
-NodeFacadeRemote::NodeFacadeRemote(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr)
-    : nh_(nh), nw_(nw), nr_(nr)
+NodeFacadeRemote::NodeFacadeRemote(SessionPtr session,
+                                   NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr)
+    : session_(session),
+      nh_(nh), nw_(nw), nr_(nr)
 {
     nh->setNodeRunner(nr_);
 
     connectNodeHandle();
     connectNodeWorker();
+
+
+    observe(remote_data_connection.first_connected, [this]() {
+        session_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::AddClient, getUUID().getAbsoluteUUID());
+    });
+
+    observe(remote_data_connection.last_disconnected, [this]() {
+        session_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::RemoveClient, getUUID().getAbsoluteUUID());
+    });
+
+    observe(session->raw_packet_received(getUUID().getAbsoluteUUID()), [this](const RawMessageConstPtr& data) {
+        remote_data_connection(data);
+    });
 }
 
 NodeFacadeRemote::~NodeFacadeRemote()
 {
-
 }
 
 void NodeFacadeRemote::connectNodeHandle()

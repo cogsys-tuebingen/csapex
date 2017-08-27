@@ -32,7 +32,7 @@ CoreRequests::CoreRequest::CoreRequest(uint8_t request_id)
 
 }
 
-ResponsePtr CoreRequests::CoreRequest::execute(CsApexCore &core) const
+ResponsePtr CoreRequests::CoreRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     switch(request_type_)
     {

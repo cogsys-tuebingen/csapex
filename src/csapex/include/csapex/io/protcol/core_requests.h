@@ -50,7 +50,7 @@ public:
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
 
-        virtual ResponsePtr execute(CsApexCore& core) const override;
+        virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
         std::string getType() const override
         {

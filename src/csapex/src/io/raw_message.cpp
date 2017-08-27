@@ -19,13 +19,13 @@ RawMessage::RawMessage()
 
 }
 
-RawMessage::RawMessage(std::vector<uint8_t> data)
-    : data_(data)
+RawMessage::RawMessage(std::vector<uint8_t> data, const AUUID& target)
+    : data_(data), uuid_(target)
 {
 
 }
-RawMessage::RawMessage(const char* data, std::size_t len)
-    : data_(len)
+RawMessage::RawMessage(const char* data, std::size_t len, const AUUID& target)
+    : data_(len), uuid_(target)
 {
     uint8_t* dst = data_.data();
     const char* src = data;
@@ -39,10 +39,14 @@ std::vector<uint8_t> RawMessage::getData() const
     return data_;
 }
 
-
+AUUID RawMessage::getUUID() const
+{
+    return uuid_;
+}
 
 void RawMessage::serialize(SerializationBuffer &data) const
 {
+    data << uuid_;
     std::size_t n = data_.size();
     data << n;
 
@@ -53,6 +57,7 @@ void RawMessage::serialize(SerializationBuffer &data) const
 }
 void RawMessage::deserialize(SerializationBuffer& data)
 {
+    data >> uuid_;
     std::size_t n;
     data >> n;
 

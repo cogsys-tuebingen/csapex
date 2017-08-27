@@ -29,7 +29,7 @@ RequestParameter::ParameterRequest::ParameterRequest(uint8_t request_id)
 
 }
 
-ResponsePtr RequestParameter::ParameterRequest::execute(CsApexCore &core) const
+ResponsePtr RequestParameter::ParameterRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     std::shared_ptr<ParameterResponse> response;
 
