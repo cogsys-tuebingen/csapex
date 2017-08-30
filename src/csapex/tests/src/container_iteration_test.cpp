@@ -228,7 +228,7 @@ protected:
 };
 
 TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
     NodeFacadeLocalPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
@@ -250,7 +250,7 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     NodeFacadeLocalPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
@@ -297,7 +297,7 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
 }
 
 TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
     NodeFacadeLocalPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
@@ -314,7 +314,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -351,7 +351,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
 }
 
 TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
     NodeFacadeLocalPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
@@ -373,7 +373,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     NodeFacadeLocalPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);

@@ -19,6 +19,8 @@
 #include <csapex/view/gui_exception_handler.h>
 #include <csapex/model/graph/graph_remote.h>
 #include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade_remote.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/model/graph_facade.h>
 
 /// SYSTEM
@@ -47,14 +49,8 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
 {
     session_->start();
 
-    const auto& local_facade = core_tmp_->getRoot();
-    std::shared_ptr<GraphRemote> remote_root_graph = std::make_shared<GraphRemote>(session_, *std::dynamic_pointer_cast<GraphLocal>(local_facade->getGraph()));
-    remote_root_ = std::make_shared<GraphFacade>(*local_facade->getThreadPool(),
-                                                 remote_root_graph,
-                                                 local_facade->getSubgraphNode(),
-                                                 local_facade->getNodeFacade());
-
     // make the proxys only _after_ the session is started
+    remote_root_ = std::make_shared<GraphFacadeRemote>(session_, *std::dynamic_pointer_cast<GraphFacadeLocal>(core_tmp_->getRoot()));
     settings_ = std::make_shared<SettingsRemote>(session_);
     node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get());
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);

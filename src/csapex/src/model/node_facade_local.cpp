@@ -222,6 +222,11 @@ param::ParameterPtr NodeFacadeLocal::getParameter(const std::string &name) const
     return getNode()->getParameter(name);
 }
 
+bool NodeFacadeLocal::canStartStepping() const
+{
+    return nr_->canStartStepping();
+}
+
 bool NodeFacadeLocal::isProfiling() const
 {
     if(nw_) {

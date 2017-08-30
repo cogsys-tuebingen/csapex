@@ -116,7 +116,7 @@ private:
     ThreadPoolPtr thread_pool_;
 
     UUIDProviderPtr root_uuid_provider_;
-    GraphFacadePtr root_;
+    GraphFacadeLocalPtr root_;
     NodeFacadeLocalPtr root_handle_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;

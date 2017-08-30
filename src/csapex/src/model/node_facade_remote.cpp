@@ -235,6 +235,11 @@ param::ParameterPtr NodeFacadeRemote::getParameter(const std::string &name) cons
     return nh_->getNode().lock()->getParameter(name);
 }
 
+bool NodeFacadeRemote::canStartStepping() const
+{
+    return nr_->canStartStepping();
+}
+
 bool NodeFacadeRemote::isProfiling() const
 {
     if(nw_) {

@@ -61,6 +61,7 @@ public:
 
     virtual NodeCharacteristics getNodeCharacteristics() const = 0;
 
+    virtual bool canStartStepping() const = 0;
 
     virtual bool isProfiling() const = 0;
     virtual void setProfiling(bool profiling) = 0;

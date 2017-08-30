@@ -14,7 +14,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/subgraph_node.h>
@@ -37,7 +37,7 @@ class CodeApiTest : public SteppingTest
 };
 
 TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
-    GraphFacade graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal graph_facade(executor, graph, graph_node);
 
     NodeFacadeLocalPtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);
@@ -73,7 +73,7 @@ TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
 }
 
 TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
-    GraphFacade graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal graph_facade(executor, graph, graph_node);
 
     NodeFacadeLocalPtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);
@@ -109,7 +109,7 @@ TEST_F(CodeApiTest, GraphBuildingUsingLabels) {
 }
 
 TEST_F(CodeApiTest, GraphBuildingUsingUUID) {
-    GraphFacade graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal graph_facade(executor, graph, graph_node);
 
     NodeFacadeLocalPtr source = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("MockupSource"), graph);
     graph_facade.addNode(source);

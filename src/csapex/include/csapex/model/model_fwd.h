@@ -34,6 +34,7 @@ FWD(Graph);
 FWD(GraphLocal);
 FWD(SubgraphNode);
 FWD(GraphFacade);
+FWD(GraphFacadeLocal);
 FWD(TokenData);
 FWD(Token);
 FWD(GenericState);

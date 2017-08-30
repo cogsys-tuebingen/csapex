@@ -374,6 +374,7 @@ add_library(csapex SHARED
     src/model/graph/graph_local.cpp
     src/model/subgraph_node.cpp
     src/model/graph_facade.cpp
+    src/model/graph_facade_local.cpp
     src/model/memento.cpp
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
@@ -531,7 +532,9 @@ add_library(csapex_remote SHARED
     src/command/dispatcher_remote.cpp
 
     src/model/node_facade_remote.cpp
+
     src/model/graph/graph_remote.cpp
+    src/model/graph_facade_remote.cpp
 
     src/io/server.cpp
     src/io/raw_message.cpp

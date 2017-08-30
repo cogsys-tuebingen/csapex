@@ -51,6 +51,8 @@ public:
 
     NodeCharacteristics getNodeCharacteristics() const override;
 
+    bool canStartStepping() const override;
+
     bool isProfiling() const override;
     void setProfiling(bool profiling) override;
 

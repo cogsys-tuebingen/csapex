@@ -13,7 +13,7 @@ class NestingTest : public SteppingTest
 
 
 TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
     NodeFacadeLocalPtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
@@ -30,7 +30,7 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
     NodeFacadeLocalPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
-    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     NodeFacadeLocalPtr n2 = factory.makeNode("StaticMultiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
@@ -79,7 +79,7 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
 }
 
 TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
     NodeFacadeLocalPtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
@@ -98,7 +98,7 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
     apex_assert_hard(sub_graph);
 
     ThreadPool sub_executor(&executor, eh, executor.isThreadingEnabled(), executor.isGroupingEnabled());
-    GraphFacade sub_graph_facade(sub_executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(sub_executor, sub_graph->getGraph(), sub_graph);
 
     NodeFacadeLocalPtr n2 = factory.makeNode("StaticMultiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
     ASSERT_NE(nullptr, n2);
@@ -147,7 +147,7 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
 }
 
 TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
     NodeFacadeLocalPtr src1 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src1"), graph);
@@ -174,7 +174,7 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     NodeFacadeLocalPtr m = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("m"), sub_graph->getGraph());
     ASSERT_NE(nullptr, m);
@@ -217,7 +217,7 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
 
 
 TEST_F(NestingTest, NestedUUIDs) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
     NodeFacadeLocalPtr m1 = factory.makeNode("StaticMultiplier", graph->generateUUID("src"), graph);
@@ -239,9 +239,9 @@ TEST_F(NestingTest, NestedUUIDs) {
     ASSERT_NE(nullptr, sub_graph_2_handle);
     main_graph_facade.addNode(sub_graph_2_handle);
 
-    GraphFacade* sub_graph_2_facade_ptr = main_graph_facade.getSubGraph(sub_graph_2_uuid);
+    GraphFacadeLocal* sub_graph_2_facade_ptr = dynamic_cast<GraphFacadeLocal*>(main_graph_facade.getSubGraph(sub_graph_2_uuid));
     ASSERT_NE(nullptr, sub_graph_2_facade_ptr);
-    GraphFacade& sub_graph_2_facade = *sub_graph_2_facade_ptr;
+    GraphFacadeLocal& sub_graph_2_facade = *sub_graph_2_facade_ptr;
 
     GraphPtr sub_graph_2 = sub_graph_2_facade_ptr->getGraph();
 
@@ -257,9 +257,9 @@ TEST_F(NestingTest, NestedUUIDs) {
     ASSERT_NE(nullptr, sub_graph_3_handle);
     sub_graph_2_facade.addNode(sub_graph_3_handle);
 
-    GraphFacade* sub_graph_3_facade_ptr = sub_graph_2_facade.getSubGraph(sub_graph_3_uuid);
+    GraphFacadeLocal* sub_graph_3_facade_ptr = dynamic_cast<GraphFacadeLocal*>(sub_graph_2_facade.getSubGraph(sub_graph_3_uuid));
     ASSERT_NE(nullptr, sub_graph_3_facade_ptr);
-    GraphFacade& sub_graph_3_facade = *sub_graph_3_facade_ptr;
+    GraphFacadeLocal& sub_graph_3_facade = *sub_graph_3_facade_ptr;
 
     GraphPtr sub_graph_3 = sub_graph_3_facade_ptr->getGraph();
 
@@ -297,7 +297,7 @@ TEST_F(NestingTest, NestedUUIDs) {
 }
 
 TEST_F(NestingTest, GroupCanBeSource) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
     NodeFacadeLocalPtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
@@ -311,7 +311,7 @@ TEST_F(NestingTest, GroupCanBeSource) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     NodeFacadeLocalPtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
@@ -347,14 +347,14 @@ TEST_F(NestingTest, GroupCanBeSource) {
 }
 
 TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
-    GraphFacade main_graph_facade(executor, graph, graph_node);
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
 
     // NESTED GRAPH
     NodeFacadeLocalPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacade sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
 
     NodeFacadeLocalPtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);

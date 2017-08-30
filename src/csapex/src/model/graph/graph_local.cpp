@@ -79,9 +79,6 @@ void GraphLocal::clear()
 void GraphLocal::addNode(NodeFacadePtr nf)
 {
     apex_assert_hard_msg(nf, "NodeFacade added is not null");
-    apex_assert_hard_msg(nf->getNodeHandle(), "NodeHandle added is not null");
-    apex_assert_hard_msg(nf->getNodeRunner(), "NodeRunner added is not null");
-    apex_assert_hard_msg(nf->getNodeWorker(), "NodeWorker added is not null");
     graph::VertexPtr vertex = std::make_shared<graph::Vertex>(nf);
     vertices_.push_back(vertex);
 

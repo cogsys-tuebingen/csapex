@@ -11,7 +11,7 @@
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_runner.h>
@@ -253,7 +253,7 @@ void CsApexCore::init(bool create_global_ports)
 
         root_worker_ = root_handle_->getNodeWorker();
 
-        root_ = std::make_shared<GraphFacade>(*thread_pool_, graph->getGraph(), graph, root_handle_);
+        root_ = std::make_shared<GraphFacadeLocal>(*thread_pool_, graph->getGraph(), graph, root_handle_);
         root_->notification.connect(notification);
 
 

@@ -5,6 +5,7 @@
 #include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/connectable.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/model/node_facade.h>
 #include <csapex/model/node_facade_remote.h>
 #include <csapex/io/session.h>
@@ -25,7 +26,7 @@ GraphRemote::GraphRemote(SessionPtr session, GraphLocal &temp_reference)
                     session_,
                     vertex->getNodeFacade()->getNodeHandle(),
                     vertex->getNodeFacade()->getNodeWorker(),
-                    vertex->getNodeFacade()->getNodeRunner()
+                    vertex->getNodeFacade()->getNodeHandle()->getNodeRunner()
                     );
         graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
         remote_vertices_.push_back(remote_vertex);

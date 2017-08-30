@@ -267,7 +267,7 @@ void NodeBox::setStyleForId(QLabel* label, int id)
 
     if(settings_.getTemporary("debug", false)) {
         r = b = g = 128;
-        if(node_facade_->getNodeRunner()->canStartStepping()) {
+        if(node_facade_->canStartStepping()) {
             g = 255;
         } else {
             r = 255;

@@ -82,9 +82,9 @@ protected:
     virtual bool doUndo() = 0;
     virtual bool doRedo() = 0;
 
-    GraphFacade* getRoot();
+    GraphFacadeLocal *getRoot();
 
-    GraphFacade* getGraphFacade();
+    GraphFacadeLocal *getGraphFacade();
     GraphPtr getGraph();
     SubgraphNodePtr getSubgraphNode();
 

@@ -13,6 +13,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/node_facade_local.h>
+#include <csapex/model/graph_facade_local.h>
 
 #include "gtest/gtest.h"
 

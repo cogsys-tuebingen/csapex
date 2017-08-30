@@ -7,7 +7,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/core/settings.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/command/command_serializer.h>

@@ -5,7 +5,7 @@
 #include <csapex/command/delete_node.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/graphio.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>

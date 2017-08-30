@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/serialization/serialization_buffer.h>
@@ -108,12 +108,14 @@ void Command::accept(int level, std::function<void (int level, const Command &)>
     callback(level, *this);
 }
 
-GraphFacade* Command::getRoot()
+GraphFacadeLocal* Command::getRoot()
 {
-    return root_graph_facade_;
+    GraphFacadeLocal* gfl = dynamic_cast<GraphFacadeLocal*>(root_graph_facade_);
+    apex_assert_hard(gfl);
+    return gfl;
 }
 
-GraphFacade* Command::getGraphFacade()
+GraphFacadeLocal* Command::getGraphFacade()
 {
     GraphFacade* gf = nullptr;
 
@@ -129,7 +131,11 @@ GraphFacade* Command::getGraphFacade()
         gf = getRoot()->getSubGraph(graph_uuid);
         apex_assert_hard(gf);
     }
-    return gf;
+
+    GraphFacadeLocal* gfl = dynamic_cast<GraphFacadeLocal*>(gf);
+    apex_assert_hard(gfl);
+
+    return gfl;
 }
 
 GraphPtr Command::getGraph()

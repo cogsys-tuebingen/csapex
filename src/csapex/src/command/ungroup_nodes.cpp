@@ -10,7 +10,7 @@
 #include <csapex/command/add_node.h>
 #include <csapex/command/paste_graph.h>
 #include <csapex/command/command_factory.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>

@@ -21,7 +21,7 @@ public:
     {
         NodeConstructingTest::SetUp();
 
-        main_graph_facade = std::make_shared<GraphFacade>(executor, graph, graph_node);
+        main_graph_facade = std::make_shared<GraphFacadeLocal>(executor, graph, graph_node);
 
         executor.setSteppingMode(true);
 
@@ -92,7 +92,7 @@ protected:
     std::recursive_mutex end_step_called_mutex;
     std::condition_variable_any step_done;
 
-    GraphFacadePtr main_graph_facade;
+    GraphFacadeLocalPtr main_graph_facade;
 };
 
 }
