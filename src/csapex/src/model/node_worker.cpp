@@ -247,7 +247,11 @@ bool NodeWorker::canProcess() const
     if(isProcessing()) {
         return false;
     }
-    if(!getNode()->canProcess()) {
+    NodePtr node = getNode();
+    if(!node) {
+        return false;
+    }
+    if(!node->canProcess()) {
         return false;
     }
 

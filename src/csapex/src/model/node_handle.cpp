@@ -190,7 +190,9 @@ void NodeHandle::stop()
 {
     stopped();
 
-    node_->reset();
+    if(node_) {
+        node_->reset();
+    }
 
     for(OutputPtr i : getExternalOutputs()) {
         i->stop();
@@ -199,7 +201,10 @@ void NodeHandle::stop()
         i->stop();
     }
 
-    node_->detach();
+    if(node_) {
+        node_->detach();
+        node_.reset();
+    }
 }
 
 std::string NodeHandle::getType() const

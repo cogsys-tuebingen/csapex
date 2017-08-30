@@ -32,10 +32,13 @@ GraphRemote::GraphRemote(SessionPtr session, GraphLocal &temp_reference)
         vertex_added(remote_vertex);
     });
     observe(temp_reference.vertex_removed,  [this](graph::VertexPtr vertex) {
-        auto pos = std::find(remote_vertices_.begin(), remote_vertices_.end(), vertex);
-        if(pos != remote_vertices_.end()) {
-            vertex_removed(*pos);
-            remote_vertices_.erase(pos);
+        for(auto it = remote_vertices_.begin() ; it != remote_vertices_.end(); ++it) {
+            graph::VertexPtr remote_vertex = *it;
+            if(remote_vertex->getNodeFacade()->getUUID() == vertex->getNodeFacade()->getUUID()) {
+                vertex_removed(remote_vertex);
+                remote_vertices_.erase(it);
+                return;
+            }
         }
     });
 
