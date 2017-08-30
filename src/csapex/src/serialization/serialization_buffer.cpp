@@ -51,6 +51,18 @@ SerializationBuffer& SerializationBuffer::writeAny (const boost::any& any)
         operator << ((uint8_t) 5);
         operator << (boost::any_cast<long> (any));
 
+    } else if(any.type() == typeid(std::pair<std::string, bool>)) {
+        operator << ((uint8_t) 6);
+        operator << (boost::any_cast<std::pair<std::string, bool>> (any));
+
+    } else if(any.type() == typeid(std::pair<int, int>)) {
+        operator << ((uint8_t) 7);
+        operator << (boost::any_cast<std::pair<std::string, bool>> (any));
+
+    } else if(any.type() == typeid(std::pair<double, double>)) {
+        operator << ((uint8_t) 8);
+        operator << (boost::any_cast<std::pair<std::string, bool>> (any));
+
     } else {
         operator << ((uint8_t) 0);
     }
@@ -95,6 +107,27 @@ SerializationBuffer& SerializationBuffer::readAny (boost::any& any)
     case 5:
     {
         long v;
+        operator >> (v);
+        any = v;
+    }
+        break;
+    case 6:
+    {
+        std::pair<std::string, bool> v;
+        operator >> (v);
+        any = v;
+    }
+        break;
+    case 7:
+    {
+        std::pair<int, int> v;
+        operator >> (v);
+        any = v;
+    }
+        break;
+    case 8:
+    {
+        std::pair<double, double> v;
         operator >> (v);
         any = v;
     }

@@ -186,7 +186,7 @@ public:
     SerializationBuffer& writeAny(const boost::any& any);
     SerializationBuffer& readAny(boost::any& any);
 
-    /// VECTOR
+    // VECTOR
     template <typename S>
     SerializationBuffer& operator << (const std::vector<S>& s)
     {
@@ -209,6 +209,24 @@ public:
             operator >> (elem);
             s.push_back(elem);
         }
+        return *this;
+    }
+
+
+    // PAIR
+    template <typename S, typename T>
+    SerializationBuffer& operator << (const std::pair<S, T>& s)
+    {
+        operator << (s.first);
+        operator << (s.second);
+        return *this;
+    }
+
+    template <typename S, typename T>
+    SerializationBuffer& operator >> (std::pair<S, T>& s)
+    {
+        operator >> (s.first);
+        operator >> (s.second);
         return *this;
     }
 
