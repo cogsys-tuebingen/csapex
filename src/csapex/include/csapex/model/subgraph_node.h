@@ -75,8 +75,6 @@ public:
     virtual void removeVariadicEvent(EventPtr input) override;
     virtual void removeVariadicSlot(SlotPtr input) override;
 
-    void removeInternalPorts();
-
     RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
     RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);
     RelayMapping addForwardingSlot(const TokenDataConstPtr& type, const std::string& label);

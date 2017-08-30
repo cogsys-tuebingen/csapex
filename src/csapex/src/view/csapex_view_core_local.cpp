@@ -80,7 +80,7 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexViewCore &parent, ExceptionHandle
     node_adapter_factory_ = parent.getNodeAdapterFactory();
     drag_io = parent.getDragIO();
 
-    core_->init();
+    core_->init(false);
 }
 
 

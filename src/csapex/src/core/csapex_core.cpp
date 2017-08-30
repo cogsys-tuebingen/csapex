@@ -207,7 +207,7 @@ void CsApexCore::sendNotification(const std::string& msg, ErrorState::ErrorLevel
     notification(n);
 }
 
-void CsApexCore::init()
+void CsApexCore::init(bool create_global_ports)
 {
     if(!init_) {
         init_ = true;
@@ -244,7 +244,8 @@ void CsApexCore::init()
 
         status_changed("make graph");
 
-        root_handle_ = node_factory_->makeNode("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_);
+        root_handle_ = node_factory_->makeGraph(UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_,
+                                                nullptr, create_global_ports);
         apex_assert_hard(root_handle_);
 
         SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNode());
@@ -259,16 +260,18 @@ void CsApexCore::init()
         root_scheduler_ = std::make_shared<NodeRunner>(root_worker_);
         thread_pool_->add(root_scheduler_.get());
 
-        root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
-                                                     root_->getGraph()->makeUUID("slot_save"), "save",
-                                                     [this](const TokenPtr&) {
-            saveAs(getSettings().get<std::string>("config"));
-        });
-        root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
-                                                     root_->getGraph()->makeUUID("slot_exit"), "exit",
-                                                     [this](const TokenPtr&) {
-            shutdown();
-        });
+        if(is_root_) {
+            root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+                                                         root_->getGraph()->makeUUID("slot_save"), "save",
+                                                         [this](const TokenPtr&) {
+                saveAs(getSettings().get<std::string>("config"));
+            });
+            root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+                                                         root_->getGraph()->makeUUID("slot_exit"), "exit",
+                                                         [this](const TokenPtr&) {
+                shutdown();
+            });
+        }
 
         if(is_root_) {
             for(auto plugin : core_plugins_) {

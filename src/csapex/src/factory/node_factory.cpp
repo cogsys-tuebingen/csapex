@@ -275,7 +275,9 @@ NodeFacadeLocalPtr NodeFactory::makeNode(const std::string& target_type, const U
 NodeFacadeLocalPtr NodeFactory::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider,
                                     NodeStatePtr state)
 {
-    apex_assert_hard(target_type == "csapex::Graph" || !uuid.empty());
+    if(target_type == "csapex::Graph") {
+        return makeGraph(uuid, uuid_provider, state, true);
+    }
 
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {
@@ -301,4 +303,30 @@ NodeFacadeLocalPtr NodeFactory::makeNode(const std::string& target_type, const U
         NOTIFICATION("error: cannot make node, type '" << target_type << "' is unknown");
         return nullptr;
     }
+}
+
+NodeFacadeLocalPtr NodeFactory::makeGraph(const UUID& uuid, const UUIDProviderPtr& uuid_provider)
+{
+    return makeGraph(uuid, uuid_provider, nullptr, true);
+}
+
+NodeFacadeLocalPtr NodeFactory::makeGraph(const UUID& uuid, const UUIDProviderPtr& uuid_provider,
+                                          NodeStatePtr state, bool create_global_ports)
+{
+    NodeConstructorPtr p = getConstructor("csapex::Graph");
+    apex_assert_hard(p);
+    NodeHandlePtr nh = p->makeNodeHandle(uuid, uuid_provider);
+    apex_assert_hard(nh);
+
+    NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
+    NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
+    NodeFacadeLocalPtr result = std::make_shared<NodeFacadeLocal>(nh, nw, runner);
+
+    if(state) {
+        nh->setNodeState(state);
+    }
+
+    node_constructed(result);
+
+    return result;
 }

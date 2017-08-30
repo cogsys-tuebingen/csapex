@@ -34,7 +34,7 @@ public:
 
     virtual ~CsApexCore();
 
-    void init();
+    void init(bool create_global_ports = true);
     void boot();
     void startup();
     void shutdown();

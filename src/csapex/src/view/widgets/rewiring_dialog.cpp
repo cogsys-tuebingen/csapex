@@ -125,9 +125,8 @@ void RewiringDialog::createGraphs(const std::string& type)
     apex_assert_hard(graph_facade_old_);
     graph_node_old = graph_facade_old_->getSubgraphNode();
     apex_assert_hard(graph_node_old);
-    graph_old = graph_node_old->getGraph();
+    graph_old = graph_facade_old_->getGraph();
     apex_assert_hard(graph_old);
-    graph_node_old->removeInternalPorts();
 
     nh_old = node_factory.makeNode(node_facade_->getType(), node_facade_->getUUID(), graph_old);
     nh_old->setNodeState(node_facade_->getNodeStateCopy());
@@ -139,9 +138,8 @@ void RewiringDialog::createGraphs(const std::string& type)
     apex_assert_hard(graph_facade_new_);
     graph_node_new = graph_facade_new_->getSubgraphNode();
     apex_assert_hard(graph_node_new);
-    graph_new = graph_node_new->getGraph();
+    graph_new = graph_facade_new_->getGraph();
     apex_assert_hard(graph_new);
-    graph_node_new->removeInternalPorts();
 
     nh_new = node_factory.makeNode(type, graph_new->generateUUID(type), graph_new);
     graph_new->addNode(nh_new);

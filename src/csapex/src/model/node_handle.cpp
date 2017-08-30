@@ -586,14 +586,6 @@ EventPtr NodeHandle::addInternalEvent(const TokenDataConstPtr& type, const UUID&
     return event;
 }
 
-void NodeHandle::removeInternalPorts()
-{
-    internal_outputs_.clear();
-    internal_inputs_.clear();
-    internal_slots_.clear();
-    internal_events_.clear();
-}
-
 InputWeakPtr NodeHandle::getParameterInput(const std::string &name) const
 {
     auto it = param_2_input_.find(name);

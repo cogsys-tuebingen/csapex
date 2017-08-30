@@ -27,6 +27,9 @@ SubgraphNode::SubgraphNode(GraphLocalPtr graph)
       is_iterating_(false), has_sent_current_iteration_(false),
       is_initialized_(false),
 
+      activation_event_(nullptr),
+      deactivation_event_(nullptr),
+
       guard_(-1)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &SubgraphNode::subgraphHasProducedAllMessages));
@@ -695,15 +698,6 @@ void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool ena
     } else {
         iterated_inputs_.erase(external_input_uuid);
     }
-}
-
-void SubgraphNode::removeInternalPorts()
-{
-    node_handle_->removeInternalPorts();
-    internal_events_.clear();
-    internal_event_ids_.clear();
-    internal_slots_.clear();
-    internal_slot_ids_.clear();
 }
 
 void SubgraphNode::notifyMessagesProcessed()

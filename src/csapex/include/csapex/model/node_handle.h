@@ -71,8 +71,6 @@ public:
     SlotPtr addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback);
     EventPtr addInternalEvent(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label);
 
-    void removeInternalPorts();
-
     ConnectablePtr getConnector(const UUID& uuid) const;
     ConnectablePtr getConnectorNoThrow(const UUID& uuid) const noexcept;
     virtual InputPtr getInput(const UUID& uuid) const noexcept;

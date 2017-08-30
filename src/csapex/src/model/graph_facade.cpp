@@ -97,7 +97,7 @@ void GraphFacade::createSubgraphFacade(NodeFacadePtr nf)
         SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(node);
         apex_assert_hard(sub_graph);
 
-        NodeHandle* subnh = graph_node_->getGraph()->findNodeHandle(local_facade->getUUID());
+        NodeHandle* subnh = graph_->findNodeHandle(local_facade->getUUID());
         apex_assert_hard(subnh == local_facade->getNodeHandle().get());
         GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacade>(executor_, sub_graph->getGraph(), sub_graph, local_facade, this);
         children_[local_facade->getUUID()] = sub_graph_facade;

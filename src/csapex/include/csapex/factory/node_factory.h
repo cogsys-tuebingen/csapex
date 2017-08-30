@@ -48,6 +48,10 @@ public:
     NodeFacadeLocalPtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider);
     NodeFacadeLocalPtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider, NodeStatePtr state);
 
+    NodeFacadeLocalPtr makeGraph(const UUID& uuid, const UUIDProviderPtr &uuid_provider);
+    NodeFacadeLocalPtr makeGraph(const UUID& uuid, const UUIDProviderPtr &uuid_provider,
+                                 NodeStatePtr state, bool create_global_ports);
+
     std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap();
 
 public:
