@@ -218,6 +218,13 @@ void CsApexViewCoreRemote::saveAs(const std::string& file, bool quiet)
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSave, file, quiet);
 }
 
+SnippetPtr CsApexViewCoreRemote::serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const
+{
+    auto res = session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSerialize, graph_id, nodes);
+    apex_assert_hard(res);
+    return res->getResult<SnippetPtr>();
+}
+
 bool CsApexViewCoreRemote::isPaused() const
 {
     auto res = session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetPause);

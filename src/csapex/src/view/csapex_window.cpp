@@ -184,8 +184,8 @@ void CsApexWindow::construct()
     observe(view_core_.new_snippet_type, [this](){ updateSnippets(); });
 
 
-    observe(view_core_.save_detail_request, [this](SubgraphNodeConstPtr graph, YAML::Node &doc){ designer_->saveView(graph, doc);});
-    observe(view_core_.load_detail_request, [this](SubgraphNodePtr graph, const YAML::Node &doc){ designer_->loadView(graph, doc);});
+    observe(view_core_.save_detail_request, [this](const GraphFacade& graph, YAML::Node &doc){ designer_->saveView(graph, doc);});
+    observe(view_core_.load_detail_request, [this](GraphFacade& graph, const YAML::Node &doc){ designer_->loadView(graph, doc);});
 
     observe(graph->state_changed, [this]() { updateMenuRequest(); });
     observe(view_core_.panic, [this]() { clearBlock(); });

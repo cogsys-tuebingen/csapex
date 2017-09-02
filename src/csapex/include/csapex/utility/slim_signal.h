@@ -135,7 +135,7 @@ public:
     virtual int countAllConnections() const override;
 
     template <typename... Args>
-    Signal& operator () (Args... args);
+    Signal& operator () (Args&&... args);
 
     virtual void disconnectAll() override;
 

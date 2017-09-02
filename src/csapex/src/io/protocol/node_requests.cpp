@@ -6,7 +6,7 @@
 #include <csapex/serialization/serialization_buffer.h>
 #include <csapex/io/feedback.h>
 #include <csapex/utility/uuid_provider.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>

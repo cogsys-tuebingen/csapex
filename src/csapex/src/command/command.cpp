@@ -41,7 +41,7 @@ bool Command::Access::redoCommand(Command::Ptr cmd)
     return cmd->redoCommand(cmd);
 }
 
-void Command::init(GraphFacade* graph_facade, CsApexCore& core)
+void Command::init(GraphFacadeLocal *graph_facade, CsApexCore& core)
 {
     apex_assert_hard(graph_facade);
 

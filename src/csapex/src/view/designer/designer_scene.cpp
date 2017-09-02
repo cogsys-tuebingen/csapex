@@ -460,11 +460,11 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
     // augment graph ports
     {
         INTERLUDE("port augmentations");
-        NodeHandle* nh = graph_facade_->getNodeHandle();
-        if(nh) {
+        NodeFacadePtr nf = graph_facade_->getNodeFacade();
+        if(nf) {
             {
                 int i = 0;
-                for(const ConnectorDescription& input : nh->getInternalInputDescriptions()) {
+                for(const ConnectorDescription& input : nf->getInternalInputs()) {
                     Port* p = getPort(input.id);
                     if(p) {
                         drawPort(painter, false, p, i++);
@@ -473,7 +473,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
             {
                 int i = 0;
-                for(const ConnectorDescription& output : nh->getInternalOutputDescriptions()) {
+                for(const ConnectorDescription& output : nf->getInternalOutputs()) {
                     Port* p = getPort(output.id);
                     if(p) {
                         drawPort(painter, false, p, i++);
@@ -482,7 +482,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
             {
                 int i = 0;
-                for(const ConnectorDescription& slot : nh->getInternalSlotDescriptions()) {
+                for(const ConnectorDescription& slot : nf->getInternalSlots()) {
                     Port* p = getPort(slot.id);
                     if(p) {
                         drawPort(painter, false, p, i++);
@@ -491,7 +491,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             }
             {
                 int i = 0;
-                for(const ConnectorDescription& event : nh->getInternalEventDescriptions()) {
+                for(const ConnectorDescription& event : nf->getInternalEvents()) {
                     Port* p = getPort(event.id);
                     if(p) {
                         drawPort(painter, false, p, i++);

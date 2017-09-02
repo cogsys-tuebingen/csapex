@@ -34,9 +34,16 @@ public:
     NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept override;
     NodeHandle* findNodeHandleWithLabel(const std::string& label) const override;
 
+    NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
+    NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const override;
+    NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
+
     Graph* findSubgraph(const UUID& uuid) const override;
 
     std::vector<NodeHandle*> getAllNodeHandles() override;
+    std::vector<NodeFacadePtr> getAllNodeFacades() override;
 
 
     ConnectablePtr findConnector(const UUID &uuid) override;

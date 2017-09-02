@@ -42,6 +42,8 @@ public:
     virtual void load(const std::string& file) = 0;
     virtual void saveAs(const std::string& file, bool quiet = false) = 0;
 
+    virtual SnippetPtr serializeNodes(const AUUID& graph_id, const std::vector<UUID>& nodes) const = 0;
+
     virtual void setPause(bool paused) = 0;
     virtual bool isPaused() const = 0;
 
@@ -98,8 +100,8 @@ public:
     slim_signal::Signal<void ()> begin_step;
     slim_signal::Signal<void ()> end_step;
 
-    csapex::slim_signal::Signal<void (SubgraphNodeConstPtr, YAML::Node& e)> save_detail_request;
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, const YAML::Node& n)> load_detail_request;
+    csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> save_detail_request;
+    csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> load_detail_request;
 
     /// GRAPH
     slim_signal::Signal<void(NodeFacadePtr)> node_facade_added;

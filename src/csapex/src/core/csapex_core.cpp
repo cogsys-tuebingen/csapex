@@ -11,6 +11,7 @@
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph_facade_local.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
@@ -244,16 +245,18 @@ void CsApexCore::init(bool create_global_ports)
 
         status_changed("make graph");
 
-        root_handle_ = node_factory_->makeGraph(UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_,
+        root_facade_ = node_factory_->makeGraph(UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_,
                                                 nullptr, create_global_ports);
-        apex_assert_hard(root_handle_);
+        apex_assert_hard(root_facade_);
 
-        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNode());
+        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_facade_->getNode());
         apex_assert_hard(graph);
 
-        root_worker_ = root_handle_->getNodeWorker();
+        root_worker_ = root_facade_->getNodeWorker();
 
-        root_ = std::make_shared<GraphFacadeLocal>(*thread_pool_, graph->getGraph(), graph, root_handle_);
+        GraphLocalPtr graph_local = graph->getLocalGraph();
+
+        root_ = std::make_shared<GraphFacadeLocal>(*thread_pool_, graph_local, graph, root_facade_);
         root_->notification.connect(notification);
 
 
@@ -442,9 +445,14 @@ SnippetFactoryPtr CsApexCore::getSnippetFactory() const
     return snippet_factory_;
 }
 
-GraphFacadePtr CsApexCore::getRoot() const
+GraphFacadeLocalPtr CsApexCore::getRoot() const
 {
     return root_;
+}
+
+NodeFacadeLocalPtr CsApexCore::getRootNode() const
+{
+    return root_facade_;
 }
 
 ThreadPoolPtr CsApexCore::getThreadPool() const
@@ -496,7 +504,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     YAML::Node node_map(YAML::NodeType::Map);
 
-    GraphIO graphio(root_->getSubgraphNode(),  node_factory_.get());
+    GraphIO graphio(*root_,  node_factory_.get());
     slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(save_detail_request);
 
     settings_.saveTemporary(node_map);
@@ -519,6 +527,12 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     }
 }
 
+SnippetPtr CsApexCore::serializeNodes(const AUUID& graph_id, const std::vector<UUID> &nodes) const
+{
+    GraphFacadeLocalPtr gf = root_->getLocalSubGraph(graph_id);
+    GraphIO io(*gf, getNodeFactory().get());
+    return std::make_shared<Snippet>(io.saveSelectedGraph(nodes));
+}
 
 void CsApexCore::load(const std::string &file)
 {
@@ -535,7 +549,7 @@ void CsApexCore::load(const std::string &file)
 
     apex_assert_hard(root_->getGraph()->countNodes() == 0);
 
-    GraphIO graphio(root_->getSubgraphNode(), node_factory_.get());
+    GraphIO graphio(*root_, node_factory_.get());
     slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(load_detail_request);
 
     graphio.useProfiler(profiler_);

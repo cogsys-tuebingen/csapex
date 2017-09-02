@@ -273,7 +273,7 @@ void Signal<Signature>::removeChild(Signal<Signature>* child)
 
 template <typename Signature>
 template <typename... Args>
-Signal<Signature>& Signal<Signature>::operator () (Args... args)
+Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
 {
     apex_assert_hard(guard_ == -1);
 
@@ -281,13 +281,13 @@ Signal<Signature>& Signal<Signature>::operator () (Args... args)
 
     for(auto& s : children_) {
         apex_assert_hard(s->guard_ == -1);
-        (*s)(args...);
+        (*s)(std::forward<Args>(args)...);
     }
     for(auto& callback : delegates_) {
-        callback.second(args...);
+        callback.second(std::forward<Args>(args)...);
     }
     for(auto& fn : functions_) {
-        fn.second(args...);
+        fn.second(std::forward<Args>(args)...);
     }
 
     applyModifications();

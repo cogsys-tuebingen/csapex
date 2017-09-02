@@ -10,7 +10,7 @@
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
 #include <csapex/io/server.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 
 /// SYSTEM
 #include <iostream>

@@ -218,6 +218,28 @@ std::vector<ConnectorDescription> NodeFacadeRemote::getInternalSlots() const
 }
 
 
+
+std::vector<ConnectorDescription> NodeFacadeRemote::getExternalInputs() const
+{
+    return nh_->getExternalInputDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacadeRemote::getExternalOutputs() const
+{
+    return nh_->getExternalOutputDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacadeRemote::getExternalEvents() const
+{
+    return nh_->getExternalEventDescriptions();
+}
+
+std::vector<ConnectorDescription> NodeFacadeRemote::getExternalSlots() const
+{
+    return nh_->getExternalSlotDescriptions();
+}
+
+
 NodeCharacteristics NodeFacadeRemote::getNodeCharacteristics() const
 {
     return nh_->getVertex()->getNodeCharacteristics();

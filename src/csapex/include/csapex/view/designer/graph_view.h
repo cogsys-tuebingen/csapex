@@ -212,7 +212,7 @@ private:
 
     void showProfiling(bool visible);
 
-    Snippet serializeSelection() const;
+    SnippetPtr serializeSelection() const;
 
     void invalidateCache();
 

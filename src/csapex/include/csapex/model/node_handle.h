@@ -91,27 +91,25 @@ public:
     OutputWeakPtr getParameterOutput(const std::string& name) const;
 
 
-    std::vector<ConnectablePtr> getExternalConnectors() const override;
-
     std::vector<ConnectorDescription> getExternalInputDescriptions() const;
-    std::vector<InputPtr> getExternalInputs() const override;
     std::vector<ConnectorDescription> getInternalInputDescriptions() const;
-    std::vector<InputPtr> getInternalInputs() const;
-
     std::vector<ConnectorDescription> getExternalOutputDescriptions() const;
-    std::vector<OutputPtr> getExternalOutputs() const override;
     std::vector<ConnectorDescription> getInternalOutputDescriptions() const;
-    std::vector<OutputPtr> getInternalOutputs() const;
-
     std::vector<ConnectorDescription> getExternalSlotDescriptions() const;
-    std::vector<SlotPtr> getExternalSlots() const override;
     std::vector<ConnectorDescription> getInternalSlotDescriptions() const;
-    std::vector<SlotPtr> getInternalSlots() const;
-
     std::vector<ConnectorDescription> getExternalEventDescriptions() const;
-    std::vector<EventPtr> getExternalEvents() const override;
     std::vector<ConnectorDescription> getInternalEventDescriptions() const;
+
+    std::vector<InputPtr> getExternalInputs() const override;
+    std::vector<InputPtr> getInternalInputs() const;
+    std::vector<OutputPtr> getExternalOutputs() const override;
+    std::vector<OutputPtr> getInternalOutputs() const;
+    std::vector<SlotPtr> getExternalSlots() const override;
+    std::vector<SlotPtr> getInternalSlots() const;
+    std::vector<EventPtr> getExternalEvents() const override;
     std::vector<EventPtr> getInternalEvents() const;
+
+    std::vector<ConnectablePtr> getExternalConnectors() const override;
 
     std::map<std::string, InputWeakPtr>& paramToInputMap();
     std::map<std::string, OutputWeakPtr>& paramToOutputMap();

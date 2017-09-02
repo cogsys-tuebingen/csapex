@@ -47,7 +47,7 @@ public:
 public:
     Command(const AUUID& graph_uuid);
 
-    virtual void init(GraphFacade* graph_facade, CsApexCore& core);
+    virtual void init(GraphFacadeLocal* graph_facade, CsApexCore& core);
     virtual bool isUndoable() const;
     virtual bool isHidden() const;
 
@@ -97,7 +97,7 @@ protected:
     AUUID graph_uuid;
     CsApexCore* core_;
 
-    GraphFacade* root_graph_facade_;
+    GraphFacadeLocal* root_graph_facade_;
 
 private:
     static std::vector<Command::Ptr> undo_later;

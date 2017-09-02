@@ -56,7 +56,8 @@ bool UngroupNodes::doExecute()
     analyzeConnections(subgraph->getGraph().get());
 
     {
-        GraphIO io(subgraph, getNodeFactory());
+        GraphFacadeLocalPtr g = root_graph_facade_->getLocalSubGraph(nh->getUUID());
+        GraphIO io(*g, getNodeFactory());
         io.setIgnoreForwardingConnections(true);
         serialized_snippet_ = io.saveGraph();
     }

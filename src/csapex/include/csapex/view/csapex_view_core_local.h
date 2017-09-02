@@ -19,6 +19,8 @@ public:
     void load(const std::string& file) override;
     void saveAs(const std::string& file, bool quiet = false) override;
 
+    SnippetPtr serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const override;
+
     void setPause(bool paused) override;
     bool isPaused() const override;
 

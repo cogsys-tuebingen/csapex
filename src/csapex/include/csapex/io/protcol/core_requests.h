@@ -20,6 +20,7 @@ public:
         SettingsLoadPersistent,
         CoreSave,
         CoreLoad,
+        CoreSerialize,
         CoreStep,
         CoreShutdown,
         CoreResetActivity,

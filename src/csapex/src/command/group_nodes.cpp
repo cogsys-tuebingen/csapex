@@ -43,7 +43,7 @@ bool GroupNodes::doExecute()
 {
     SubgraphNodePtr graph = getSubgraphNode();
     {
-        GraphIO io(graph, getNodeFactory());
+        GraphIO io(*getGraphFacade(), getNodeFactory());
         io.setIgnoreForwardingConnections(true);
         serialized_snippet_ = io.saveSelectedGraph(uuids);
     }

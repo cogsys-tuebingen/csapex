@@ -20,7 +20,7 @@ namespace csapex
 class CSAPEX_EXPORT GraphIO : public Profilable
 {
 public:
-    GraphIO(SubgraphNodePtr graph, NodeFactory* node_factory);
+    GraphIO(GraphFacadeLocal& graph, NodeFactory* node_factory);
 
 public:
     // options
@@ -42,8 +42,8 @@ public:
     loadIntoGraph(const Snippet &blueprint, const csapex::Point &position);
 
 public:
-    csapex::slim_signal::Signal<void (SubgraphNodeConstPtr, YAML::Node& e)> saveViewRequest;
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, const YAML::Node& n)> loadViewRequest;
+    csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> saveViewRequest;
+    csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> loadViewRequest;
 
 private:
 
@@ -62,10 +62,10 @@ private:
     void sendNotification(const std::string& notification);
 
 protected:
-    void saveNodes(YAML::Node &yaml, const std::vector<NodeHandle *> &nodes);
+    void saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeLocalPtr> &nodes);
     void saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr> &connections);
 
-    void serializeNode(YAML::Node& doc, NodeHandle* node_handle);
+    void serializeNode(YAML::Node& doc, NodeFacadeLocalConstPtr node_handle);
     void deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_handle);
 
     void loadConnection(ConnectablePtr from, const UUID &to_uuid, const std::string& connection_type);
@@ -74,7 +74,7 @@ protected:
     UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
 
 private:
-    SubgraphNodePtr graph_;
+    GraphFacadeLocal& graph_;
     NodeFactory* node_factory_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> old_node_uuid_to_new_;

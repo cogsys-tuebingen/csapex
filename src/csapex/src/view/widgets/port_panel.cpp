@@ -8,6 +8,7 @@
 #include <csapex/signal/event.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/node_handle.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/widgets/meta_port.h>
@@ -88,7 +89,6 @@ void PortPanel::enableMetaPort(const AUUID& target)
 void PortPanel::setup(GraphFacadePtr graph_facade)
 {
     graph_facade_ = graph_facade;
-    graph_ = graph_facade_->getSubgraphNode().get();
 
     switch(type_) {
     case ConnectorType::OUTPUT:
@@ -108,8 +108,8 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
         throw std::logic_error("unsupported type");
     }
 
-    graph_->forwardingAdded.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorAdded));
-    graph_->forwardingRemoved.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorRemoved));
+    graph_facade_->forwardingAdded.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorAdded));
+    graph_facade_->forwardingRemoved.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorRemoved));
 }
 
 void PortPanel::updateLayouts()
@@ -164,6 +164,8 @@ void PortPanel::removePortForConnector(ConnectorPtr c)
 
 void PortPanel::setupOutput()
 {
+    // TODO: reimplement!
+    SubgraphNodePtr graph_ = std::dynamic_pointer_cast<SubgraphNode>(graph_facade_->getNodeHandle()->getNode().lock());
     for(const UUID& uuid : graph_->getInternalOutputs()) {
         addPortForConnector(graph_->getForwardedOutputInternal(uuid));
     }
@@ -171,6 +173,8 @@ void PortPanel::setupOutput()
 
 void PortPanel::setupInput()
 {
+    // TODO: reimplement!
+    SubgraphNodePtr graph_ = std::dynamic_pointer_cast<SubgraphNode>(graph_facade_->getNodeHandle()->getNode().lock());
     for(const UUID& uuid : graph_->getInternalInputs()) {
         addPortForConnector(graph_->getForwardedInputInternal(uuid));
     }
@@ -178,6 +182,8 @@ void PortPanel::setupInput()
 
 void PortPanel::setupSlot()
 {
+    // TODO: reimplement!
+    SubgraphNodePtr graph_ = std::dynamic_pointer_cast<SubgraphNode>(graph_facade_->getNodeHandle()->getNode().lock());
     for(const UUID& uuid : graph_->getInternalSlots()) {
         addPortForConnector(graph_->getForwardedSlotInternal(uuid));
     }
@@ -185,6 +191,8 @@ void PortPanel::setupSlot()
 
 void PortPanel::setupEvent()
 {
+    // TODO: reimplement!
+    SubgraphNodePtr graph_ = std::dynamic_pointer_cast<SubgraphNode>(graph_facade_->getNodeHandle()->getNode().lock());
     for(const UUID& uuid : graph_->getInternalEvents()) {
         addPortForConnector(graph_->getForwardedEventInternal(uuid));
     }

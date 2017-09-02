@@ -123,7 +123,8 @@ void RewiringDialog::createGraphs(const std::string& type)
     // old graph
     graph_facade_old_ = view_core_old_->getRoot();
     apex_assert_hard(graph_facade_old_);
-    graph_node_old = graph_facade_old_->getSubgraphNode();
+    graph_node_old = std::dynamic_pointer_cast<SubgraphNode>(
+                graph_facade_old_->getNodeFacade()->getNodeHandle()->getNode().lock());
     apex_assert_hard(graph_node_old);
     graph_old = graph_facade_old_->getGraph();
     apex_assert_hard(graph_old);
@@ -136,7 +137,8 @@ void RewiringDialog::createGraphs(const std::string& type)
     // new graph
     graph_facade_new_ = view_core_new_->getRoot();
     apex_assert_hard(graph_facade_new_);
-    graph_node_new = graph_facade_new_->getSubgraphNode();
+    graph_node_new = std::dynamic_pointer_cast<SubgraphNode>(
+                graph_facade_new_->getNodeFacade()->getNodeHandle()->getNode().lock());
     apex_assert_hard(graph_node_new);
     graph_new = graph_facade_new_->getGraph();
     apex_assert_hard(graph_new);

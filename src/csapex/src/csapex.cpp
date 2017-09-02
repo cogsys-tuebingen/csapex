@@ -14,7 +14,7 @@
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/gui_exception_handler.h>
 #include <csapex/io/server.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 
 /// SYSTEM
 #include <iostream>
@@ -92,11 +92,14 @@ int Main::runWithGui()
 {
     app->processEvents();
 
-#if 0
-    CsApexViewCoreLocal view_core(core);
-#else
-    CsApexViewCoreRemote view_core("localhost", 12345, core);
-#endif
+    std::unique_ptr<CsApexViewCore> main;
+    if(settings.getTemporary("start-server", false)) {
+        main.reset(new CsApexViewCoreRemote ("localhost", 12345, core));
+    } else {
+        main.reset(new CsApexViewCoreLocal (core));
+    }
+
+    CsApexViewCore& view_core = *main;
 
     CsApexWindow w(view_core);
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
@@ -265,6 +268,7 @@ int main(int argc, char** argv)
             ("fatal_exceptions", "abort execution on exception")
             ("disable_thread_grouping", "by default create one thread per node")
             ("input", "config file to load")
+            ("start-server", "start tcp server")
             ;
 
     po::positional_options_description p;
@@ -381,6 +385,7 @@ int main(int argc, char** argv)
     settings.set("thread_grouping", vm.count("disable_thread_grouping") == 0);
     settings.set("additional_args", additional_args);
     settings.set("initially_paused", vm.count("paused") > 0);
+    settings.set("start-server", vm.count("start-server") > 0);
 
     settings.set("access-test", std::string("access granted."));
 

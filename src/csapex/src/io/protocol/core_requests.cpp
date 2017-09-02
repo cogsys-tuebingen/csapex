@@ -6,8 +6,9 @@
 #include <csapex/serialization/serialization_buffer.h>
 #include <csapex/io/feedback.h>
 #include <csapex/utility/uuid_provider.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
 #include <iostream>
@@ -61,6 +62,15 @@ ResponsePtr CoreRequests::CoreRequest::execute(const SessionPtr &session, CsApex
 
         } else {
             core.load(boost::any_cast<std::string>(parameters_.at(0)));
+        }
+    }
+        break;
+    case CoreRequestType::CoreSerialize: {
+        int args = parameters_.size();
+        if(args == 2) {
+            SnippetPtr snippet = core.serializeNodes(boost::any_cast<AUUID>(parameters_.at(0)),
+                                                     boost::any_cast<std::vector<UUID>>(parameters_.at(1)));
+            return std::make_shared<CoreResponse>(request_type_, snippet, getRequestID());
         }
     }
         break;

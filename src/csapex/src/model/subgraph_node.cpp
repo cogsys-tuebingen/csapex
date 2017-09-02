@@ -46,6 +46,11 @@ GraphPtr SubgraphNode::getGraph() const
     return graph_;
 }
 
+GraphLocalPtr SubgraphNode::getLocalGraph() const
+{
+    return graph_;
+}
+
 //NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
 //{
 //    apex_assert_hard(guard_ == -1);
@@ -81,11 +86,14 @@ void SubgraphNode::initialize(NodeHandlePtr node_handle)
 {
     Node::initialize(node_handle);
 
-    graph_->setNodeHandle(node_handle.get());
-
     if(node_handle->getUUIDProvider()) {
         graph_->setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
     }
+}
+
+void SubgraphNode::setNodeFacade(csapex::NodeFacadePtr graph_node_facade)
+{
+    graph_->setNodeFacade(graph_node_facade);
 }
 
 void SubgraphNode::detach()

@@ -10,7 +10,7 @@
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_facade.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
@@ -22,7 +22,7 @@
 using namespace csapex;
 
 GraphLocal::GraphLocal()
-    : in_transaction_(false), nh_(nullptr)
+    : in_transaction_(false)
 {
 
 }
@@ -32,9 +32,9 @@ GraphLocal::~GraphLocal()
     clear();
 }
 
-void GraphLocal::setNodeHandle(NodeHandle *nh)
+void GraphLocal::setNodeFacade(NodeFacadeWeakPtr nf)
 {
-    nh_ = nh;
+    nf_ = nf;
 }
 
 void GraphLocal::resetActivity()
@@ -608,6 +608,8 @@ int GraphLocal::getDepth(const UUID &node_uuid) const
     return vertex->getNodeCharacteristics().depth;
 }
 
+// *** NODE **** /
+
 Node* GraphLocal::findNode(const UUID& uuid) const
 {
     Node* node = findNodeNoThrow(uuid);
@@ -617,22 +619,6 @@ Node* GraphLocal::findNode(const UUID& uuid) const
     throw NodeNotFoundException(uuid.getFullName());
 }
 
-
-
-NodeHandle* GraphLocal::findNodeHandle(const UUID& uuid) const
-{
-    if(uuid.empty()) {
-        apex_assert_hard(nh_);
-        apex_assert_hard(nh_->guard_ == -1);
-        return nh_;
-    }
-    NodeHandle* node_handle = findNodeHandleNoThrow(uuid);
-    if(node_handle) {
-        apex_assert_hard(node_handle->guard_ == -1);
-        return node_handle;
-    }
-    throw NodeHandleNotFoundException(uuid.getFullName());
-}
 
 Node* GraphLocal::findNodeNoThrow(const UUID& uuid) const noexcept
 {
@@ -648,12 +634,53 @@ Node* GraphLocal::findNodeNoThrow(const UUID& uuid) const noexcept
 }
 
 
+Node* GraphLocal::findNodeForConnector(const UUID &uuid) const
+{
+    try {
+        return findNode(uuid.parentUUID());
+
+    } catch(const std::exception& e) {
+        throw std::runtime_error(std::string("cannot find node of connector \"") + uuid.getFullName() + ": " + e.what());
+    }
+}
+
+
+// *** NODE HANDLE **** /
+
+NodeHandle* GraphLocal::findNodeHandleForConnector(const UUID &uuid) const
+{
+    try {
+        return findNodeHandle(uuid.parentUUID());
+
+    } catch(const std::exception& e) {
+        throw std::runtime_error(std::string("cannot find handle of connector \"") + uuid.getFullName());
+    }
+}
+
+
+NodeHandle* GraphLocal::findNodeHandle(const UUID& uuid) const
+{
+    if(uuid.empty()) {
+        NodeFacadePtr nf = nf_.lock();
+        apex_assert_hard(nf);
+        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
+        return nf->getNodeHandle().get();
+    }
+    NodeHandle* node_handle = findNodeHandleNoThrow(uuid);
+    if(node_handle) {
+        apex_assert_hard(node_handle->guard_ == -1);
+        return node_handle;
+    }
+    throw NodeHandleNotFoundException(uuid.getFullName());
+}
+
 NodeHandle *GraphLocal::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.empty()) {
-        apex_assert_hard(nh_);
-        apex_assert_hard(nh_->guard_ == -1);
-        return nh_;
+        NodeFacadePtr nf = nf_.lock();
+        apex_assert_hard(nf);
+        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
+        return nf->getNodeHandle().get();
     }
     if(uuid.composite()) {
         UUID root = uuid.rootUUID();
@@ -681,27 +708,6 @@ NodeHandle *GraphLocal::findNodeHandleNoThrow(const UUID& uuid) const noexcept
     return nullptr;
 }
 
-Node* GraphLocal::findNodeForConnector(const UUID &uuid) const
-{
-    try {
-        return findNode(uuid.parentUUID());
-
-    } catch(const std::exception& e) {
-        throw std::runtime_error(std::string("cannot find node of connector \"") + uuid.getFullName() + ": " + e.what());
-    }
-}
-
-
-NodeHandle* GraphLocal::findNodeHandleForConnector(const UUID &uuid) const
-{
-    try {
-        return findNodeHandle(uuid.parentUUID());
-
-    } catch(const std::exception& e) {
-        throw std::runtime_error(std::string("cannot find handle of connector \"") + uuid.getFullName());
-    }
-}
-
 NodeHandle* GraphLocal::findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept
 {
     return findNodeHandleNoThrow(uuid.parentUUID());
@@ -720,6 +726,94 @@ NodeHandle* GraphLocal::findNodeHandleWithLabel(const std::string& label) const
     }
     return nullptr;
 }
+
+
+
+// *** NODE FACADE **** /
+
+
+NodeFacadePtr GraphLocal::findNodeFacadeForConnector(const UUID &uuid) const
+{
+    try {
+        return findNodeFacade(uuid.parentUUID());
+
+    } catch(const std::exception& e) {
+        throw std::runtime_error(std::string("cannot find handle of connector \"") + uuid.getFullName());
+    }
+}
+
+
+NodeFacadePtr GraphLocal::findNodeFacade(const UUID& uuid) const
+{
+    if(uuid.empty()) {
+        NodeFacadePtr nf = nf_.lock();
+        apex_assert_hard(nf);
+        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
+        return nf;
+    }
+    NodeFacadePtr node_facade = findNodeFacadeNoThrow(uuid);
+    if(node_facade) {
+        return node_facade;
+    }
+    throw NodeFacadeNotFoundException(uuid.getFullName());
+}
+
+NodeFacadePtr GraphLocal::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
+{
+    if(uuid.empty()) {
+        NodeFacadePtr nf = nf_.lock();
+        apex_assert_hard(nf);
+        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
+        return nf;
+    }
+    if(uuid.composite()) {
+        UUID root = uuid.rootUUID();
+
+        NodeFacadePtr root_nf = findNodeFacadeNoThrow(root);
+        if(root_nf) {
+            NodePtr root_node = root_nf->getNodeHandle()->getNode().lock();
+            if(root_node) {
+                SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_node);
+                if(graph) {
+                    return graph->getGraph()->findNodeFacade(uuid.nestedUUID());
+                }
+            }
+        }
+
+    } else {
+        for(const auto vertex : vertices_) {
+            NodeFacadePtr nf = vertex->getNodeFacade();
+            if(nf->getUUID() == uuid) {
+                return nf;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+NodeFacadePtr GraphLocal::findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept
+{
+    return findNodeFacadeNoThrow(uuid.parentUUID());
+}
+
+NodeFacadePtr GraphLocal::findNodeFacadeWithLabel(const std::string& label) const
+{
+    for(const auto vertex : vertices_) {
+        NodeFacadePtr nf = vertex->getNodeFacade();
+        NodeStatePtr state = nf->getNodeState();
+        if(state) {
+            if(state->getLabel() == label) {
+                return nf;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+// ******* /
+
 
 Graph* GraphLocal::findSubgraph(const UUID& uuid) const
 {
@@ -740,6 +834,28 @@ std::vector<NodeHandle*> GraphLocal::getAllNodeHandles()
     }
 
     return node_handles;
+}
+
+std::vector<NodeFacadePtr> GraphLocal::getAllNodeFacades()
+{
+    std::vector<NodeFacadePtr> node_facades;
+    for(const graph::VertexPtr& vertex : vertices_) {
+        NodeFacadePtr nf = vertex->getNodeFacade();
+        node_facades.push_back(nf);
+    }
+
+    return node_facades;
+}
+std::vector<NodeFacadeLocalPtr> GraphLocal::getAllLocalNodeFacades()
+{
+    std::vector<NodeFacadeLocalPtr> node_facades;
+    for(const graph::VertexPtr& vertex : vertices_) {
+        NodeFacadeLocalPtr nf = std::dynamic_pointer_cast<NodeFacadeLocal>(vertex->getNodeFacade());
+        apex_assert_hard(nf);
+        node_facades.push_back(nf);
+    }
+
+    return node_facades;
 }
 
 ConnectablePtr GraphLocal::findConnector(const UUID &uuid)

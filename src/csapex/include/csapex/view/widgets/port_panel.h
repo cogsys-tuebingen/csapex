@@ -66,7 +66,6 @@ private:
 
 private:
     GraphFacadePtr graph_facade_;
-    SubgraphNode* graph_;
     ConnectorType type_;
     DesignerScene *parent_;
 

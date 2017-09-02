@@ -59,6 +59,11 @@ public:
     virtual std::vector<ConnectorDescription> getInternalEvents() const = 0;
     virtual std::vector<ConnectorDescription> getInternalSlots() const = 0;
 
+    virtual std::vector<ConnectorDescription> getExternalInputs() const = 0;
+    virtual std::vector<ConnectorDescription> getExternalOutputs() const = 0;
+    virtual std::vector<ConnectorDescription> getExternalEvents() const = 0;
+    virtual std::vector<ConnectorDescription> getExternalSlots() const = 0;
+
     virtual NodeCharacteristics getNodeCharacteristics() const = 0;
 
     virtual bool canStartStepping() const = 0;

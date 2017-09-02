@@ -24,29 +24,29 @@ public:
     typedef std::shared_ptr<GraphFacade> Ptr;
 
 protected:
-    GraphFacade(ThreadPool& executor, GraphPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh = nullptr);
+    GraphFacade(NodeFacadePtr nh = nullptr);
 
 public:
     virtual ~GraphFacade();
 
-    GraphFacade* getSubGraph(const UUID& uuid);
+    virtual GraphFacade* getSubGraph(const UUID& uuid) = 0;
     virtual GraphFacade* getParent() const = 0;
 
-    AUUID getAbsoluteUUID() const;
-    GraphPtr getGraph();
-    SubgraphNodePtr getSubgraphNode();
+    virtual AUUID getAbsoluteUUID() const = 0;
+    virtual GraphPtr getGraph() const = 0;
     NodeHandle* getNodeHandle();
     NodeFacadePtr getNodeFacade();
-    ThreadPool* getThreadPool();
 
-    void stop();
+    virtual void stop() = 0;
     virtual void clearBlock() = 0;
     virtual void resetActivity() = 0;
 
-    bool isPaused() const;
-    void pauseRequest(bool pause);
+    virtual bool isPaused() const = 0;
+    virtual void pauseRequest(bool pause) = 0;
 
-    virtual void clear();
+    virtual void clear() = 0;
+
+    virtual std::string makeStatusString() = 0;
 
 public:
     slim_signal::Signal<void (bool)> paused;
@@ -62,6 +62,11 @@ public:
     slim_signal::Signal<void(NodeFacadePtr)> child_node_facade_removed;
 
     slim_signal::Signal<void()> panic;
+
+    slim_signal::Signal<void(ConnectorPtr)> forwardingAdded;
+    slim_signal::Signal<void(ConnectorPtr)> forwardingRemoved;
+
+    slim_signal::Signal<void(ConnectorPtr,ConnectorPtr)> internalConnectionInProgress;
     
 protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) = 0;
@@ -71,15 +76,7 @@ protected:
 
 protected:
     // TODO: move all of this into the implementation class
-    AUUID absolute_uuid_;
-    GraphPtr graph_;
-    SubgraphNodePtr graph_node_;
     NodeFacadePtr graph_handle_;
-    ThreadPool& executor_;
-
-    std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> children_;
-
-    std::unordered_map<UUID, NodeFacadePtr, UUID::Hasher> node_facades_;
 };
 
 }

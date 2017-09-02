@@ -20,6 +20,7 @@ namespace csapex
 {
 
 class CsApexViewCore;
+class CsApexViewCoreLocal;
 class CommandExecutor;
 class CsApexCore;
 
@@ -56,8 +57,8 @@ private:
     CsApexViewCore& view_core_;
 
 //    std::shared_ptr<CsApexCore> core_temp_;
-    std::shared_ptr<CsApexViewCore> view_core_old_;
-    std::shared_ptr<CsApexViewCore> view_core_new_;
+    std::shared_ptr<CsApexViewCoreLocal> view_core_old_;
+    std::shared_ptr<CsApexViewCoreLocal> view_core_new_;
 
     UUIDProviderPtr root_uuid_provider_;
 

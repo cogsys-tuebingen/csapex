@@ -22,6 +22,7 @@ public:
         NodeConstructingTest::SetUp();
 
         main_graph_facade = std::make_shared<GraphFacadeLocal>(executor, graph, graph_node);
+        graph->setNodeFacade(main_graph_facade->getNodeFacade());
 
         executor.setSteppingMode(true);
 

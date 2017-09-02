@@ -30,9 +30,19 @@ public:
     NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept override;
     NodeHandle* findNodeHandleWithLabel(const std::string& label) const override;
 
+    NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
+    NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const override;
+    NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
+
+
     Graph* findSubgraph(const UUID& uuid) const override;
 
     std::vector<NodeHandle*> getAllNodeHandles() override;
+
+    std::vector<NodeFacadePtr> getAllNodeFacades() override;
+    std::vector<NodeFacadeLocalPtr> getAllLocalNodeFacades();
 
 
     ConnectablePtr findConnector(const UUID &uuid) override;
@@ -57,7 +67,7 @@ public:
 
     void analyzeGraph() override;
 
-    void setNodeHandle(NodeHandle* nh);
+    void setNodeFacade(NodeFacadeWeakPtr nf);
 
     // iterators
     vertex_iterator begin() override;
@@ -87,7 +97,7 @@ protected:
 
     bool in_transaction_;
 
-    NodeHandle* nh_;
+    NodeFacadeWeakPtr nf_;
 };
 
 }

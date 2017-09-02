@@ -8,18 +8,32 @@ namespace csapex
 class GraphFacadeLocal : public GraphFacade
 {
 public:
-    GraphFacadeLocal(ThreadPool& executor, GraphPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh = nullptr, GraphFacadeLocal* parent = nullptr);
+    GraphFacadeLocal(ThreadPool& executor, GraphLocalPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh = nullptr, GraphFacadeLocal* parent = nullptr);
 
+    virtual AUUID getAbsoluteUUID() const override;
+
+    virtual GraphFacade* getSubGraph(const UUID& uuid) override;
+    GraphFacadeLocalPtr getLocalSubGraph(const UUID& uuid);
     virtual GraphFacade* getParent() const override;
+
+    virtual GraphPtr getGraph() const override;
+    GraphLocalPtr getLocalGraph() const;
+
     GraphFacadeLocal* getLocalParent() const;
 
+    SubgraphNodePtr getSubgraphNode();
     TaskGenerator* getTaskGenerator(const UUID& uuid);
+    ThreadPool* getThreadPool();
 
     void addNode(NodeFacadePtr node);
 
     virtual void clear() override;
+    virtual void stop() override;
     virtual void clearBlock() override;
     virtual void resetActivity() override;
+
+    virtual bool isPaused() const override;
+    virtual void pauseRequest(bool pause) override;
 
     ConnectionPtr connect(OutputPtr output, InputPtr input);
 
@@ -48,6 +62,8 @@ public:
     ConnectionPtr connect(NodeFacadePtr output, int output_id, NodeFacadePtr input, int input_id);
 
 
+    virtual std::string makeStatusString() override;
+
 protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) override;
     virtual void nodeRemovedHandler(graph::VertexPtr node) override;
@@ -55,9 +71,18 @@ protected:
     virtual void createSubgraphFacade(NodeFacadePtr nf) override;
 
 private:
+    AUUID absolute_uuid_;
+
     GraphFacadeLocal* parent_;
+    ThreadPool& executor_;
+    GraphLocalPtr graph_;
+    SubgraphNodePtr graph_node_;
 
     std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
+
+    std::unordered_map<UUID, GraphFacadeLocalPtr, UUID::Hasher> children_;
+
+    std::unordered_map<UUID, NodeFacadePtr, UUID::Hasher> node_facades_;
 
 };
 

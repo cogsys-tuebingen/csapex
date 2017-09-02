@@ -10,6 +10,9 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/command/dispatcher.h>
 
+/// TEMPORARY
+#include <csapex/model/graph_facade_local.h>
+
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/filesystem.hpp>
@@ -171,6 +174,11 @@ void CsApexViewCoreLocal::load(const std::string& file)
 void CsApexViewCoreLocal::saveAs(const std::string& file, bool quiet)
 {
     core_->saveAs(file, quiet);
+}
+
+SnippetPtr CsApexViewCoreLocal::serializeNodes(const AUUID& graph_id, const std::vector<UUID>& nodes) const
+{
+    return core_->serializeNodes(graph_id, nodes);
 }
 
 bool CsApexViewCoreLocal::isPaused() const

@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node.h>
 #include <csapex/model/subgraph_node.h>

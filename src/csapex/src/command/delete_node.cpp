@@ -17,6 +17,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
+#include <csapex/model/graph_facade_local.h>
 
 /// SYSTEM
 
@@ -52,10 +53,10 @@ bool DeleteNode::doExecute()
 
     // serialize sub graph
     if(node_handle->isGraph()) {
-        SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_handle->getNode().lock());
+        GraphFacadeLocalPtr g = root_graph_facade_->getLocalSubGraph(node_handle->getUUID());
         apex_assert_hard(g);
 
-        GraphIO io(g, getNodeFactory());
+        GraphIO io(*g, getNodeFactory());
         saved_graph = io.saveGraph();
     }
 
@@ -81,10 +82,10 @@ bool DeleteNode::doUndo()
 
     //deserialize subgraph
     if(node_facade->isGraph()) {
-        SubgraphNodePtr g = std::dynamic_pointer_cast<SubgraphNode>(node_facade->getNode());
+        GraphFacadeLocalPtr g = root_graph_facade_->getLocalSubGraph(node_facade->getUUID());
         apex_assert_hard(g);
 
-        GraphIO io(g, getNodeFactory());
+        GraphIO io(*g, getNodeFactory());
         io.loadGraph(saved_graph);
     }
 

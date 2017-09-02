@@ -44,13 +44,16 @@ public:
     void load(const std::string& file);
     void saveAs(const std::string& file, bool quiet = false);
 
+    SnippetPtr serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const;
+
     void reset();
 
     Settings& getSettings() const;
     NodeFactoryPtr getNodeFactory() const;
     SnippetFactoryPtr getSnippetFactory() const;
 
-    GraphFacadePtr getRoot() const;
+    GraphFacadeLocalPtr getRoot() const;
+    NodeFacadeLocalPtr getRootNode() const;
     ThreadPoolPtr getThreadPool() const;
 
     PluginLocatorPtr getPluginLocator() const;
@@ -96,8 +99,8 @@ public:
     slim_signal::Signal<void ()> shutdown_requested;
     slim_signal::Signal<void ()> shutdown_complete;
 
-    csapex::slim_signal::Signal<void (SubgraphNodeConstPtr, YAML::Node& e)> save_detail_request;
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, const YAML::Node& n)> load_detail_request;
+    csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> save_detail_request;
+    csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> load_detail_request;
     
 private:
     CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator);
@@ -117,7 +120,7 @@ private:
 
     UUIDProviderPtr root_uuid_provider_;
     GraphFacadeLocalPtr root_;
-    NodeFacadeLocalPtr root_handle_;
+    NodeFacadeLocalPtr root_facade_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
 

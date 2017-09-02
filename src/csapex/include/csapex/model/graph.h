@@ -37,6 +37,13 @@ public:
         {}
     };
 
+    struct NodeFacadeNotFoundException : public std::logic_error
+    {
+        NodeFacadeNotFoundException(const std::string& name)
+            : std::logic_error("node facade for node " + name + " cannot be found")
+        {}
+    };
+
     typedef std::vector<graph::VertexPtr>::iterator vertex_iterator;
     typedef std::vector<graph::VertexPtr>::const_iterator vertex_const_iterator;
 
@@ -60,9 +67,16 @@ public:
     virtual NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
     virtual NodeHandle* findNodeHandleWithLabel(const std::string& label) const = 0;
 
+    virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const = 0;
+    virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
+    virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const = 0;
+
     virtual Graph* findSubgraph(const UUID& uuid) const = 0;
 
     virtual std::vector<NodeHandle*> getAllNodeHandles() = 0;
+    virtual std::vector<NodeFacadePtr> getAllNodeFacades() = 0;
 
 
     virtual ConnectablePtr findConnector(const UUID &uuid) = 0;

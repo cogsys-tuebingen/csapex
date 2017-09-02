@@ -27,13 +27,11 @@ std::string PasteGraph::getDescription() const
 
 bool PasteGraph::doExecute()
 {
-    GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
+    GraphFacadeLocal* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
     bool paused = graph_facade->isPaused();
     graph_facade->pauseRequest(true);
 
-    SubgraphNodePtr graph = graph_facade->getSubgraphNode();
-
-    GraphIO io(graph, getNodeFactory());
+    GraphIO io(*graph_facade, getNodeFactory());
 
     id_mapping_ = io.loadIntoGraph(*blueprint_, pos_);
 

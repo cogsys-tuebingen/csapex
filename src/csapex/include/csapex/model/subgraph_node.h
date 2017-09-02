@@ -27,6 +27,7 @@ public:
     ~SubgraphNode();
 
     GraphPtr getGraph() const;
+    GraphLocalPtr getLocalGraph() const;
 
 //    template <typename T = Connectable>
 //    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
@@ -44,6 +45,9 @@ public:
 //    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     virtual void initialize(csapex::NodeHandlePtr node_handle) override;
+    void setNodeFacade(csapex::NodeFacadePtr graph_node_facade);
+
+
     virtual void detach() override;
     virtual void reset() override;
     virtual void stateChanged() override;

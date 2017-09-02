@@ -209,7 +209,7 @@ protected:
         SteppingTest::SetUp();
 
         graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-        graph = graph_node->getGraph();
+        graph = graph_node->getLocalGraph();
     }
 
 
@@ -250,9 +250,9 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
-    NodeFacadeLocalPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
+    NodeFacadeLocalPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getLocalGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
 
@@ -314,7 +314,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -373,9 +373,9 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getGraph(), sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
-    NodeFacadeLocalPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getGraph());
+    NodeFacadeLocalPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getLocalGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
 

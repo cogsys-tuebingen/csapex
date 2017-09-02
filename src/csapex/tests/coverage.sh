@@ -2,14 +2,19 @@
 echo "running test coverage"
 
 THISDIR=$(pwd)
+SRCDIR=$(cd ..; pwd)
 ROOT=$(cd ../../../../../; pwd)
 DIR=$THISDIR/traces
 
 # build
 cd $ROOT
-mkdir -p build_coverage
-cd $ROOT/build_coverage
-cmake ../src -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=1
+if ! [[ -d build_coverage ]]; then
+	mkdir -p build_coverage
+	cd $ROOT/build_coverage
+	cmake ../src -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=1
+else
+	cd $ROOT/build_coverage
+fi
 make -j 12
 
 # clean
@@ -23,6 +28,9 @@ rm *.info
 #lcov --zerocounters --directory $DIR
 echo "generating baseline"
 lcov -c -i -d $ROOT/build_coverage -o test_base.info --no-external -b $ROOT > /dev/null
+lcov -r test_base.info $ROOT/build_coverage/\* $THISDIR/\* \
+         $SRCDIR/external/\* $SRCDIR/src/view/\* $SRCDIR/include/csapex/view/\* \
+         -o test_base_clean.info
 
 # run tests
 cd $THISDIR
@@ -35,9 +43,12 @@ make test
 cd $THISDIR
 #find $ROOT/build_coverage -iname *.gcda | xargs mv -t $DIR
 echo "capturing coverage data"
-lcov -c -d $ROOT/build_coverage -o test.info --no-external -b $ROOT > /dev/null 
+lcov -c -d $ROOT/build_coverage -o test.info --no-external -b $ROOT > /dev/null
+lcov -r test.info $ROOT/build_coverage/\* $THISDIR/\* \
+         $SRCDIR/external/\* $SRCDIR/src/view/\* $SRCDIR/include/csapex/view/\* \
+         -o test_clean.info
 echo "calculating coverage"
-lcov -a test_base.info -a test.info -o test_extracted.info > /dev/null
+lcov -a test_base_clean.info -a test_clean.info -o test_extracted.info > /dev/null
 
 # output
 cd $THISDIR

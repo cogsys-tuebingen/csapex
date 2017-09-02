@@ -23,11 +23,11 @@
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_variadic_connector_and_connect.h>
 #include <csapex/command/set_execution_mode.h>
-#include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
@@ -139,10 +139,9 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, &GraphView::childNodeFacadeRemoved, this, &GraphView::childNodeRemoved, Qt::QueuedConnection);
 
 
-    SubgraphNodePtr sub_graph = graph_facade_->getSubgraphNode();
-    GraphPtr graph = sub_graph->getGraph();
+    GraphPtr graph = graph_facade_->getGraph();
 
-    observe(sub_graph->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
+    observe(graph_facade_->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
     observe(graph->state_changed, [this](){ updateBoxInformation(); });
 
     for(const graph::VertexPtr& vertex : *graph) {
@@ -277,9 +276,7 @@ void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
     QGraphicsView::drawForeground(painter, rect);
 
     if(view_core_.isDebug()) {
-        SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
-
-        QString debug_info =  QString::fromStdString(graph->makeStatusString());
+        QString debug_info =  QString::fromStdString(graph_facade_->makeStatusString());
 
         debug_info += QString::fromStdString(scene_->makeStatusString());
 
@@ -1044,12 +1041,11 @@ void GraphView::createPort(ConnectorDescription request)
 
 void GraphView::createPortAndConnect(ConnectorDescription request, ConnectorPtr from)
 {
-    SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
-    AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
+    AUUID graph_uuid = graph_facade_->getAbsoluteUUID();
 
     std::shared_ptr<Command> cmd;
 
-    if(request.owner == graph->getUUID().getAbsoluteUUID()) {
+    if(request.owner == graph_facade_->getAbsoluteUUID()) {
         cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.owner, request.connector_type, request.token_type, request.label,
                                                                         from->getUUID(), false, false);
 
@@ -1063,12 +1059,11 @@ void GraphView::createPortAndConnect(ConnectorDescription request, ConnectorPtr 
 
 void GraphView::createPortAndMove(ConnectorDescription request, ConnectorPtr from)
 {
-    SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
-    AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
+    AUUID graph_uuid = graph_facade_->getAbsoluteUUID();
 
     std::shared_ptr<Command> cmd;
 
-    if(request.owner == graph->getUUID().getAbsoluteUUID()) {
+    if(request.owner == graph_facade_->getAbsoluteUUID()) {
         cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.owner, request.connector_type, request.token_type, request.label,
                                                                         from->getUUID(), true, false);
 
@@ -1331,8 +1326,16 @@ void GraphView::switchSelectedNodesToThread(int group_id)
 void GraphView::createNewThreadGroupFor()
 {
     bool ok;
-    ThreadPool* thread_pool = graph_facade_->getThreadPool();
-    QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
+
+    std::string next_name = "Thread";
+    GraphFacadeLocal* local_facade = dynamic_cast<GraphFacadeLocal*>(graph_facade_.get());
+    if(local_facade) {
+        ThreadPool* thread_pool = local_facade->getThreadPool();
+        next_name = thread_pool->nextName();
+    }
+
+
+    QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(next_name), &ok);
 
     if(ok && !text.isEmpty()) {
         command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(), "create new thread group"));
@@ -1463,23 +1466,21 @@ void GraphView::morphNode()
     }
 }
 
-Snippet GraphView::serializeSelection() const
+SnippetPtr GraphView::serializeSelection() const
 {
-    GraphIO io(graph_facade_->getSubgraphNode(), view_core_.getNodeFactory().get());
-
     std::vector<UUID> nodes;
     for(const NodeBox* box : selected_boxes_) {
         nodes.emplace_back(box->getNodeFacade()->getUUID());
     }
 
-    return io.saveSelectedGraph(nodes);
+    return view_core_.serializeNodes(graph_facade_->getAbsoluteUUID(), nodes);
 }
 
 void GraphView::copySelected()
 {
-    Snippet s = serializeSelection();
+    SnippetPtr s = serializeSelection();
     YAML::Node yaml;
-    s.toYAML(yaml);
+    s->toYAML(yaml);
     ClipBoard::set(yaml);
 }
 
@@ -1490,9 +1491,9 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
         selected_boxes_.push_back(box_handle);
     }
 
-    Snippet snippet = serializeSelection();
+    SnippetPtr snippet = serializeSelection();
     YAML::Node yaml;
-    snippet.toYAML(yaml);
+    snippet->toYAML(yaml);
     std::stringstream yaml_txt;
     yaml_txt << yaml;
 
@@ -1666,13 +1667,13 @@ void GraphView::makeSnippetFromSelected()
             }
         }
 
-        Snippet snippet = serializeSelection();
+        SnippetPtr snippet = serializeSelection();
 
-        snippet.setName(name.toStdString());
-        snippet.setDescription(description.toStdString());
-        snippet.setTags(tags);
+        snippet->setName(name.toStdString());
+        snippet->setDescription(description.toStdString());
+        snippet->setTags(tags);
 
-        view_core_.getSnippetFactory()->saveSnippet(snippet, file.fileName().toStdString());
+        view_core_.getSnippetFactory()->saveSnippet(*snippet, file.fileName().toStdString());
     }
 }
 

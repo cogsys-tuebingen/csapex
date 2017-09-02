@@ -160,6 +160,29 @@ NodeHandle* GraphRemote::findNodeHandleWithLabel(const std::string& label) const
     return temp_reference.findNodeHandleWithLabel(label);
 }
 
+
+NodeFacadePtr GraphRemote::findNodeFacade(const UUID& uuid) const
+{
+    return temp_reference.findNodeFacade(uuid);
+}
+NodeFacadePtr GraphRemote::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
+{
+    return temp_reference.findNodeFacadeNoThrow(uuid);
+}
+NodeFacadePtr GraphRemote::findNodeFacadeForConnector(const UUID &uuid) const
+{
+    return temp_reference.findNodeFacadeForConnector(uuid);
+}
+NodeFacadePtr GraphRemote::findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept
+{
+    return temp_reference.findNodeFacadeForConnectorNoThrow(uuid);
+}
+NodeFacadePtr GraphRemote::findNodeFacadeWithLabel(const std::string& label) const
+{
+    return temp_reference.findNodeFacadeWithLabel(label);
+}
+
+
 Graph* GraphRemote::findSubgraph(const UUID &uuid) const
 {
     return temp_reference.findSubgraph(uuid);
@@ -168,6 +191,10 @@ Graph* GraphRemote::findSubgraph(const UUID &uuid) const
 std::vector<NodeHandle*> GraphRemote::getAllNodeHandles()
 {
     return temp_reference.getAllNodeHandles();
+}
+std::vector<NodeFacadePtr> GraphRemote::getAllNodeFacades()
+{
+    return temp_reference.getAllNodeFacades();
 }
 
 ConnectablePtr GraphRemote::findConnector(const UUID &uuid)

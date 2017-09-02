@@ -21,10 +21,22 @@
 
 using namespace csapex;
 
-GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh, GraphFacadeLocal *parent)
-    : GraphFacade(executor, graph, graph_node, nh),
-      parent_(parent)
+GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh, GraphFacadeLocal *parent)
+    : GraphFacade(nh),
+      absolute_uuid_(graph_node->getUUID()),
+      parent_(parent),
+      executor_(executor),
+      graph_(graph),
+      graph_node_(graph_node)
 {
+    observe(graph->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeLocal::nodeAddedHandler));
+    observe(graph->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeLocal::nodeRemovedHandler));
+    observe(graph->notification, notification);
+
+    observe(graph_node_->forwardingAdded, forwardingAdded);
+    observe(graph_node_->forwardingRemoved, forwardingRemoved);
+    observe(graph_node_->internalConnectionInProgress, internalConnectionInProgress);
+
     if(parent_) {
         // TODO: refactor!
         apex_assert_hard(graph_handle_);
@@ -37,14 +49,71 @@ GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphPtr graph, Subgrap
     }
 }
 
+AUUID GraphFacadeLocal::getAbsoluteUUID() const
+{
+    return absolute_uuid_;
+}
+
 GraphFacade *GraphFacadeLocal::getParent() const
 {
     return parent_;
 }
+
+GraphFacade* GraphFacadeLocal::getSubGraph(const UUID &uuid)
+{
+    if(uuid.empty()) {
+        throw std::logic_error("cannot get subgraph for empty UUID");
+    }
+
+    if(uuid.composite()) {
+        GraphFacadePtr facade = children_[uuid.rootUUID()];
+        return facade->getSubGraph(uuid.nestedUUID());
+    } else {
+        GraphFacadePtr facade = children_[uuid];
+        return facade.get();
+    }
+}
+
+GraphFacadeLocalPtr GraphFacadeLocal::getLocalSubGraph(const UUID &uuid)
+{
+    if(uuid.empty()) {
+        throw std::logic_error("cannot get subgraph for empty UUID");
+    }
+
+    if(uuid.composite()) {
+        GraphFacadeLocalPtr facade = children_[uuid.rootUUID()];
+        return facade->getLocalSubGraph(uuid.nestedUUID());
+    } else {
+        return children_[uuid];
+    }
+}
+
+SubgraphNodePtr GraphFacadeLocal::getSubgraphNode()
+{
+    return std::dynamic_pointer_cast<SubgraphNode>(graph_node_);
+}
+
+
+GraphPtr GraphFacadeLocal::getGraph() const
+{
+    return graph_;
+}
+
+GraphLocalPtr GraphFacadeLocal::getLocalGraph() const
+{
+    return graph_;
+}
+
+
 GraphFacadeLocal *GraphFacadeLocal::getLocalParent() const
 {
     return parent_;
 }
+ThreadPool* GraphFacadeLocal::getThreadPool()
+{
+    return &executor_;
+}
+
 
 TaskGenerator* GraphFacadeLocal::getTaskGenerator(const UUID &uuid)
 {
@@ -58,9 +127,22 @@ void GraphFacadeLocal::addNode(NodeFacadePtr nh)
 
 void GraphFacadeLocal::clear()
 {
-    GraphFacadeLocal::clear();
+    stop();
+    graph_->clear();
 
     generators_.clear();
+}
+
+
+void GraphFacadeLocal::stop()
+{
+    for(NodeHandle* nw : graph_->getAllNodeHandles()) {
+        nw->stop();
+    }
+
+    executor_.stop();
+
+    stopped();
 }
 
 
@@ -388,7 +470,10 @@ void GraphFacadeLocal::createSubgraphFacade(NodeFacadePtr nf)
 
     NodeHandle* subnh = graph_->findNodeHandle(local_facade->getUUID());
     apex_assert_hard(subnh == local_facade->getNodeHandle().get());
-    GraphFacadePtr sub_graph_facade = std::make_shared<GraphFacadeLocal>(executor_, sub_graph->getGraph(), sub_graph, local_facade, this);
+
+    GraphLocalPtr graph_local = sub_graph->getLocalGraph();
+
+    GraphFacadeLocalPtr sub_graph_facade = std::make_shared<GraphFacadeLocal>(executor_, graph_local, sub_graph, local_facade, this);
     children_[local_facade->getUUID()] = sub_graph_facade;
 
     observe(sub_graph_facade->notification, notification);
@@ -423,4 +508,26 @@ void GraphFacadeLocal::resetActivity()
     }
 
     pauseRequest(pause);
+}
+
+
+bool GraphFacadeLocal::isPaused() const
+{
+    return executor_.isPaused();
+}
+
+void GraphFacadeLocal::pauseRequest(bool pause)
+{
+    if(executor_.isPaused() == pause) {
+        return;
+    }
+
+    executor_.setPause(pause);
+
+    paused(pause);
+}
+
+std::string GraphFacadeLocal::makeStatusString()
+{
+    return graph_node_->makeStatusString();
 }

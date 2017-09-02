@@ -42,7 +42,7 @@ protected:
 
     virtual void SetUp() override {
         graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-        graph = graph_node->getGraph();
+        graph = graph_node->getLocalGraph();
 
         abort_connection = error_handling::stop_request().connect([this](){
             for(graph::VertexPtr vtx : *graph) {
@@ -79,7 +79,7 @@ protected:
     ThreadPool executor;
 
     SubgraphNodePtr graph_node;
-    GraphPtr graph;
+    GraphLocalPtr graph;
 
     slim_signal::Connection abort_connection;
 };

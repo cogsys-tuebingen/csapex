@@ -199,7 +199,7 @@ void NodeBox::construct()
         grip_->installEventFilter(this);
     }
 
-    setLabel(node_facade_->getNodeState()->getLabel());
+    setLabel(node_facade_->getLabel());
 
     QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 

@@ -8,7 +8,8 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/msg/direct_connection.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -24,7 +25,6 @@
 #include <csapex/utility/exceptions.h>
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/timer.h>
-#include <csapex/model/graph.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -38,7 +38,7 @@ using namespace csapex;
 #define sendNotificationStreamGraphio(args) \
 { std::stringstream ss; ss << args; sendNotification(ss.str()); }
 
-GraphIO::GraphIO(SubgraphNodePtr graph, NodeFactory* node_factory)
+GraphIO::GraphIO(GraphFacadeLocal &graph, NodeFactory* node_factory)
     : graph_(graph), node_factory_(node_factory),
       position_offset_x_(0.0), position_offset_y_(0.0),
 
@@ -54,13 +54,13 @@ void GraphIO::setIgnoreForwardingConnections(bool ignore)
 
 void GraphIO::saveSettings(YAML::Node& doc)
 {
-    doc["uuid_map"] = graph_->getGraph()->getUUIDMap();
+    doc["uuid_map"] = graph_.getGraph()->getUUIDMap();
 }
 
 void GraphIO::loadSettings(const YAML::Node &doc)
 {
     if(doc["uuid_map"].IsDefined()) {
-        graph_->getGraph()->uuids_ = doc["uuid_map"].as<std::map<std::string, int> >();
+        graph_.getGraph()->uuids_ = doc["uuid_map"].as<std::map<std::string, int> >();
     }
 }
 
@@ -94,7 +94,7 @@ void GraphIO::loadGraphFrom(const YAML::Node& doc)
     TimerPtr timer = getProfiler()->getTimer("load graph");
     timer->restart();
 
-    graph_->getGraph()->beginTransaction();
+    graph_.getGraph()->beginTransaction();
     {
         auto interlude = timer->step("load nodes");
         loadNodes(doc);
@@ -104,7 +104,7 @@ void GraphIO::loadGraphFrom(const YAML::Node& doc)
         auto interlude = timer->step("load connections");
         loadConnections(doc);
     }
-    graph_->getGraph()->finalizeTransaction();
+    graph_.getGraph()->finalizeTransaction();
 
     {
         auto interlude = timer->step("load view");
@@ -121,17 +121,19 @@ Snippet GraphIO::saveSelectedGraph(const std::vector<UUID> &uuids)
 
     std::set<UUID> node_set(uuids.begin(), uuids.end());
 
-    std::vector<NodeHandle*> nodes;
+    std::vector<NodeFacadeLocalPtr> nodes;
     std::vector<ConnectionPtr> connections;
 
     for(const UUID& uuid : uuids) {
-        NodeHandle* node = graph_->getGraph()->findNodeHandle(uuid);
+        NodeFacadePtr nf = graph_.getGraph()->findNodeFacade(uuid);
+        NodeFacadeLocalPtr node = std::dynamic_pointer_cast<NodeFacadeLocal>(nf);
+        apex_assert_hard(node);
         nodes.push_back(node);
 
-        for(const ConnectablePtr& connectable : node->getExternalConnectors()) {
+        for(const ConnectablePtr& connectable : node->getNodeHandle()->getExternalConnectors()) {
             if(connectable->isOutput()) {
                 for(const ConnectionPtr& connection : connectable->getConnections()) {
-                    auto target = graph_->getGraph()->findNodeHandleForConnector(connection->to()->getUUID());
+                    auto target = graph_.getGraph()->findNodeHandleForConnector(connection->to()->getUUID());
                     if(node_set.find(target->getUUID()) != node_set.end()) {
                         connections.push_back(connection);
                     }
@@ -161,7 +163,7 @@ GraphIO::loadIntoGraph(const Snippet &snippet, const Point& position)
             const YAML::Node& n = nodes[i];
 
             std::string type = n["type"].as<std::string>();
-            UUID new_uuid = graph_->getGraph()->generateUUID(type);
+            UUID new_uuid = graph_.getGraph()->generateUUID(type);
             UUID blue_print_uuid = UUIDProvider::makeUUID_without_parent(n["uuid"].as<std::string>());
 
             old_node_uuid_to_new_[blue_print_uuid] = new_uuid;
@@ -201,12 +203,12 @@ GraphIO::loadIntoGraph(const Snippet &snippet, const Point& position)
 
 void GraphIO::saveNodes(YAML::Node &yaml)
 {
-    saveNodes(yaml, graph_->getGraph()->getAllNodeHandles());
+    saveNodes(yaml, graph_.getLocalGraph()->getAllLocalNodeFacades());
 }
 
-void GraphIO::saveNodes(YAML::Node &yaml, const std::vector<NodeHandle*>& nodes)
+void GraphIO::saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeLocalPtr> &nodes)
 {
-    for(NodeHandle* node : nodes) {
+    for(const NodeFacadeLocalPtr& node : nodes) {
         try {
             YAML::Node yaml_node;
             serializeNode(yaml_node, node);
@@ -270,7 +272,7 @@ UUID GraphIO::readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::
         if(pos != old_node_uuid_to_new_.end()) {
             parent = old_node_uuid_to_new_[parent];
 
-            uuid = graph_->getGraph()->makeDerivedUUID_forced(parent, uuid.id().getFullName());
+            uuid = graph_.getGraph()->makeDerivedUUID_forced(parent, uuid.id().getFullName());
         }
     }
     return uuid;
@@ -278,11 +280,11 @@ UUID GraphIO::readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::
 
 void GraphIO::loadNode(const YAML::Node& doc)
 {
-    UUID uuid = readNodeUUID(graph_->getGraph()->shared_from_this(), doc["uuid"]);
+    UUID uuid = readNodeUUID(graph_.getGraph()->shared_from_this(), doc["uuid"]);
 
     std::string type = doc["type"].as<std::string>();
 
-    NodeFacadeLocalPtr node_handle = node_factory_->makeNode(type, uuid, graph_->getGraph());
+    NodeFacadeLocalPtr node_handle = node_factory_->makeNode(type, uuid, graph_.getGraph());
     if(!node_handle) {
         return;
     }
@@ -297,7 +299,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    saveConnections(yaml, graph_->getGraph()->getConnections());
+    saveConnections(yaml, graph_.getGraph()->getConnections());
 }
 
 void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>& connections)
@@ -375,7 +377,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
 void GraphIO::loadConnection(const YAML::Node& connection)
 {
-    UUID from_uuid =  readConnectorUUID(graph_->getGraph()->shared_from_this(), connection["uuid"]);
+    UUID from_uuid =  readConnectorUUID(graph_.getGraph()->shared_from_this(), connection["uuid"]);
 
     const YAML::Node& targets = connection["targets"];
     apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
@@ -384,7 +386,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
     apex_assert_hard(!types.IsDefined() || (types.Type() == YAML::NodeType::Sequence && targets.size() == types.size()));
 
     for(unsigned j=0; j<targets.size(); ++j) {
-        UUID to_uuid = readConnectorUUID(graph_->getGraph()->shared_from_this(), targets[j]);
+        UUID to_uuid = readConnectorUUID(graph_.getGraph()->shared_from_this(), targets[j]);
 
         std::string connection_type;
         if(!types.IsDefined()) {
@@ -393,7 +395,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
             connection_type = types[j].as<std::string>();
         }
 
-        ConnectablePtr from = graph_->getGraph()->findConnectorNoThrow(from_uuid);
+        ConnectablePtr from = graph_.getGraph()->findConnectorNoThrow(from_uuid);
         if(from) {
             loadConnection(from, to_uuid, connection_type);
         } else {
@@ -447,22 +449,22 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     std::string from_uuid_tmp = from_node.as<std::string>();
     std::string to_uuid_tmp = to_node.as<std::string>();
 
-    UUID from_uuid = UUIDProvider::makeUUID_forced(graph_->getGraph()->shared_from_this(), from_uuid_tmp);
-    UUID to_uuid = UUIDProvider::makeUUID_forced(graph_->getGraph()->shared_from_this(), to_uuid_tmp);
+    UUID from_uuid = UUIDProvider::makeUUID_forced(graph_.getGraph()->shared_from_this(), from_uuid_tmp);
+    UUID to_uuid = UUIDProvider::makeUUID_forced(graph_.getGraph()->shared_from_this(), to_uuid_tmp);
 
-    ConnectablePtr from = graph_->getGraph()->findConnector(from_uuid);
+    ConnectablePtr from = graph_.getGraph()->findConnector(from_uuid);
     if(from == nullptr) {
         sendNotificationStreamGraphio("cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist.");
         return;
     }
 
-    ConnectablePtr to = graph_->getGraph()->findConnector(to_uuid);
+    ConnectablePtr to = graph_.getGraph()->findConnector(to_uuid);
     if(to == nullptr) {
         sendNotificationStreamGraphio("cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist.");
         return;
     }
 
-    ConnectionPtr connection = graph_->getGraph()->getConnection(from.get(), to.get());
+    ConnectionPtr connection = graph_.getGraph()->getConnection(from.get(), to.get());
 
     std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
 
@@ -494,7 +496,7 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
 void GraphIO::loadConnection(ConnectablePtr from, const UUID& to_uuid, const std::string& connection_type)
 {
     try {
-        NodeHandle* target = graph_->getGraph()->findNodeHandleForConnector(to_uuid);
+        NodeHandle* target = graph_.getGraph()->findNodeHandleForConnector(to_uuid);
 
         InputPtr in = std::dynamic_pointer_cast<Input>(target->getConnector(to_uuid));
         if(!in) {
@@ -510,7 +512,7 @@ void GraphIO::loadConnection(ConnectablePtr from, const UUID& to_uuid, const std
             if(connection_type == "active") {
                 c->setActive(true);
             }
-            graph_->getGraph()->addConnection(c);
+            graph_.getGraph()->addConnection(c);
         }
 
     } catch(const std::exception& e) {
@@ -521,23 +523,25 @@ void GraphIO::loadConnection(ConnectablePtr from, const UUID& to_uuid, const std
 }
 
 
-void GraphIO::serializeNode(YAML::Node& doc, NodeHandle* node_handle)
+void GraphIO::serializeNode(YAML::Node& doc, NodeFacadeLocalConstPtr node_facade)
 {
-    node_handle->getNodeState()->writeYaml(doc);
+    node_facade->getNodeState()->writeYaml(doc);
 
-    auto node = node_handle->getNode().lock();
+    auto node = node_facade->getNode();
     if(node) {
         // hook for nodes to serialize
         NodeSerializer::instance().serialize(*node, doc);
 
-        SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(node);
-        if(subgraph) {
-            YAML::Node subgraph_yaml;
-            GraphIO sub_graph_io(subgraph, node_factory_);
-            slim_signal::ScopedConnection connection = sub_graph_io.saveViewRequest.connect(saveViewRequest);
+        if(node_facade->isGraph()) {
+            GraphFacadeLocalPtr subgraph = graph_.getLocalSubGraph(node_facade->getUUID());
+            if(subgraph) {
+                YAML::Node subgraph_yaml;
+                GraphIO sub_graph_io(*subgraph, node_factory_);
+                slim_signal::ScopedConnection connection = sub_graph_io.saveViewRequest.connect(saveViewRequest);
 
-            sub_graph_io.saveGraphTo(subgraph_yaml);
-            doc["subgraph"] = subgraph_yaml;
+                sub_graph_io.saveGraphTo(subgraph_yaml);
+                doc["subgraph"] = subgraph_yaml;
+            }
         }
     }
 }
@@ -562,18 +566,20 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_fac
 
     NodeSerializer::instance().deserialize(*node, doc);
 
-    graph_->getGraph()->addNode(node_facade);
+    graph_.getGraph()->addNode(node_facade);
 
-    SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(node);
-    if(subgraph) {
-        GraphIO sub_graph_io(subgraph, node_factory_);
-        slim_signal::ScopedConnection connection = sub_graph_io.loadViewRequest.connect(loadViewRequest);
+    if(node_facade->isGraph()) {
+        GraphFacadeLocalPtr subgraph = graph_.getLocalSubGraph(node_facade->getUUID());
+        if(subgraph) {
+            GraphIO sub_graph_io(*subgraph, node_factory_);
+            slim_signal::ScopedConnection connection = sub_graph_io.loadViewRequest.connect(loadViewRequest);
 
-        sub_graph_io.loadGraph(doc["subgraph"]);
+            sub_graph_io.loadGraph(doc["subgraph"]);
+        }
     }
 }
 
 void GraphIO::sendNotification(const std::string &notification)
 {
-    graph_->getGraph()->notification(Notification(graph_->getGraph()->getAbsoluteUUID(), notification));
+    graph_.getGraph()->notification(Notification(graph_.getGraph()->getAbsoluteUUID(), notification));
 }
