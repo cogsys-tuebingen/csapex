@@ -5,6 +5,7 @@
 #include <csapex/model/observer.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/io/io_fwd.h>
+#include <csapex/model/model_fwd.h>
 #include <csapex/serialization/serialization_fwd.h>
 
 /// SYSTEM
@@ -27,6 +28,12 @@ public:
 private:
     void spin();
     void do_accept();
+
+    void startObserving(SessionWeakPtr session, const GraphFacadePtr& graph);
+    void stopObserving(SessionWeakPtr session, const GraphFacadePtr& graph);
+
+    void startObserving(SessionWeakPtr session, const NodeFacadePtr& node);
+    void stopObserving(SessionWeakPtr session, const NodeFacadePtr& node);
 
     void handlePacket(const SessionPtr &session, const SerializableConstPtr &packet);
 

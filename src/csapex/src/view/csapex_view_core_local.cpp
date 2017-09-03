@@ -126,6 +126,11 @@ GraphFacadePtr CsApexViewCoreLocal::getRoot()
     return core_->getRoot();
 }
 
+GraphFacadeLocalPtr CsApexViewCoreLocal::getLocalRoot()
+{
+    return core_->getRoot();
+}
+
 ThreadPoolPtr CsApexViewCoreLocal::getThreadPool()
 {
     // TODO: replace with proxy

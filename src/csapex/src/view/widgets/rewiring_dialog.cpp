@@ -4,8 +4,8 @@
 /// COMPONENT
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/connection.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/subgraph_node.h>
@@ -121,12 +121,12 @@ void RewiringDialog::createGraphs(const std::string& type)
     NodeFactory& node_factory = *view_core_.getNodeFactory();
 
     // old graph
-    graph_facade_old_ = view_core_old_->getRoot();
+    graph_facade_old_ = view_core_old_->getLocalRoot();
     apex_assert_hard(graph_facade_old_);
     graph_node_old = std::dynamic_pointer_cast<SubgraphNode>(
                 graph_facade_old_->getNodeFacade()->getNodeHandle()->getNode().lock());
     apex_assert_hard(graph_node_old);
-    graph_old = graph_facade_old_->getGraph();
+    graph_old = graph_facade_old_->getLocalGraph();
     apex_assert_hard(graph_old);
 
     nf_old = node_factory.makeNode(node_facade_->getType(), node_facade_->getUUID(), graph_old);
@@ -135,12 +135,12 @@ void RewiringDialog::createGraphs(const std::string& type)
 
 
     // new graph
-    graph_facade_new_ = view_core_new_->getRoot();
+    graph_facade_new_ = view_core_new_->getLocalRoot();
     apex_assert_hard(graph_facade_new_);
     graph_node_new = std::dynamic_pointer_cast<SubgraphNode>(
                 graph_facade_new_->getNodeFacade()->getNodeHandle()->getNode().lock());
     apex_assert_hard(graph_node_new);
-    graph_new = graph_facade_new_->getGraph();
+    graph_new = graph_facade_new_->getLocalGraph();
     apex_assert_hard(graph_new);
 
     nf_new = node_factory.makeNode(type, graph_new->generateUUID(type), graph_new);

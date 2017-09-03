@@ -94,7 +94,7 @@ void GraphIO::loadGraphFrom(const YAML::Node& doc)
     TimerPtr timer = getProfiler()->getTimer("load graph");
     timer->restart();
 
-    graph_.getGraph()->beginTransaction();
+    graph_.getLocalGraph()->beginTransaction();
     {
         auto interlude = timer->step("load nodes");
         loadNodes(doc);
@@ -104,7 +104,7 @@ void GraphIO::loadGraphFrom(const YAML::Node& doc)
         auto interlude = timer->step("load connections");
         loadConnections(doc);
     }
-    graph_.getGraph()->finalizeTransaction();
+    graph_.getLocalGraph()->finalizeTransaction();
 
     {
         auto interlude = timer->step("load view");
@@ -512,7 +512,7 @@ void GraphIO::loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::
             if(connection_type == "active") {
                 c->setActive(true);
             }
-            graph_.getGraph()->addConnection(c);
+            graph_.getLocalGraph()->addConnection(c);
         }
 
     } catch(const std::exception& e) {
@@ -566,7 +566,7 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_fac
 
     NodeSerializer::instance().deserialize(*node, doc);
 
-    graph_.getGraph()->addNode(node_facade);
+    graph_.getLocalGraph()->addNode(node_facade);
 
     if(node_facade->isGraph()) {
         GraphFacadeLocalPtr subgraph = graph_.getLocalSubGraph(node_facade->getUUID());

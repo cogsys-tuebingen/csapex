@@ -58,18 +58,6 @@ public:
 
     int countNodes() override;
 
-    void addNode(NodeFacadePtr node) override;
-    void deleteNode(const UUID &uuid) override;
-
-    bool addConnection(ConnectionPtr connection) override;
-    void deleteConnection(ConnectionPtr connection) override;
-
-
-    /*REMOVE*/ void beginTransaction() override;
-    /*REMOVE*/ void finalizeTransaction() override;
-
-    /*REMOVE*/ void analyzeGraph() override;
-
     // iterators
     vertex_iterator begin() override;
     const vertex_const_iterator begin() const override;

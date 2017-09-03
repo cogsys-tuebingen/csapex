@@ -81,8 +81,6 @@ protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) = 0;
     virtual void nodeRemovedHandler(graph::VertexPtr node) = 0;
 
-    virtual void createSubgraphFacade(NodeFacadePtr nh) = 0;
-
 protected:
     // TODO: move all of this into the implementation class
     NodeFacadePtr graph_handle_;

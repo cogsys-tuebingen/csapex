@@ -138,9 +138,9 @@ GraphFacadeLocal* Command::getGraphFacade()
     return gfl;
 }
 
-GraphPtr Command::getGraph()
+GraphLocalPtr Command::getGraph()
 {
-    return getGraphFacade()->getGraph();
+    return getGraphFacade()->getLocalGraph();
 }
 
 SubgraphNodePtr Command::getSubgraphNode()

@@ -63,6 +63,10 @@ SerializationBuffer& SerializationBuffer::writeAny (const boost::any& any)
         operator << ((uint8_t) 8);
         operator << (boost::any_cast<std::pair<std::string, bool>> (any));
 
+    } else if(any.type() == typeid(UUID)) {
+        operator << ((uint8_t) 9);
+        operator << (boost::any_cast<UUID> (any));
+
     } else {
         operator << ((uint8_t) 0);
     }
@@ -128,6 +132,13 @@ SerializationBuffer& SerializationBuffer::readAny (boost::any& any)
     case 8:
     {
         std::pair<double, double> v;
+        operator >> (v);
+        any = v;
+    }
+        break;
+    case 9:
+    {
+        UUID v;
         operator >> (v);
         any = v;
     }

@@ -104,17 +104,6 @@ public:
 
     virtual int countNodes() = 0;
 
-    virtual void addNode(NodeFacadePtr node) = 0;
-    virtual void deleteNode(const UUID &uuid) = 0;
-
-    virtual bool addConnection(ConnectionPtr connection) = 0;
-    virtual void deleteConnection(ConnectionPtr connection) = 0;
-
-    virtual void beginTransaction() = 0;
-    virtual void finalizeTransaction() = 0;
-
-    virtual void analyzeGraph() = 0;
-
     // iterators
     virtual vertex_iterator begin() = 0;
     virtual const vertex_const_iterator begin() const = 0;

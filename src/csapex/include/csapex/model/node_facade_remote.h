@@ -106,6 +106,8 @@ public:
     slim_signal::ObservableSignal<void(SerializableConstPtr)> remote_data_connection;
 
 private:
+    void handleBroadcast(const BroadcastMessageConstPtr& message);
+
     void connectNodeHandle();
     void connectNodeWorker();
 

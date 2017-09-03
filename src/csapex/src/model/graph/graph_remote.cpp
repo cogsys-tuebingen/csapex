@@ -68,50 +68,14 @@ void GraphRemote::clear()
     temp_reference.clear();
 }
 
-void GraphRemote::addNode(NodeFacadePtr nf)
-{
-    temp_reference.addNode(nf);
-}
-
 std::vector<ConnectionPtr> GraphRemote::getConnections()
 {
     return temp_reference.getConnections();
 }
 
-void GraphRemote::deleteNode(const UUID& uuid)
-{
-    temp_reference.deleteNode(uuid);
-}
-
 int GraphRemote::countNodes()
 {
     return temp_reference.countNodes();
-}
-
-
-bool GraphRemote::addConnection(ConnectionPtr connection)
-{
-    return temp_reference.addConnection(connection);
-}
-
-void GraphRemote::deleteConnection(ConnectionPtr connection)
-{
-    temp_reference.deleteConnection(connection);
-}
-
-void GraphRemote::beginTransaction()
-{
-    temp_reference.beginTransaction();
-}
-
-void GraphRemote::finalizeTransaction()
-{
-    temp_reference.finalizeTransaction();
-}
-
-void GraphRemote::analyzeGraph()
-{
-    temp_reference.analyzeGraph();
 }
 
 

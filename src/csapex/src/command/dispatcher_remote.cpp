@@ -80,12 +80,17 @@ void CommandDispatcherRemote::redo()
 void CommandDispatcherRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
 {
     if(auto command_msg = std::dynamic_pointer_cast<CommandBroadcasts const>(message)) {
-        if(command_msg->getBroadcastType() == CommandBroadcasts::CommandBroadcastType::StateChanged) {
+        switch(command_msg->getBroadcastType()) {
+        case CommandBroadcasts::CommandBroadcastType::StateChanged:
             state_changed();
+            break;
 
-        } else if(command_msg->getBroadcastType() == CommandBroadcasts::CommandBroadcastType::DirtyChanged) {
+        case CommandBroadcasts::CommandBroadcastType::DirtyChanged:
             dirty_ = command_msg->getFlag();
             dirty_changed(dirty_);
+            break;
+        default:
+            break;
         }
     }
 }

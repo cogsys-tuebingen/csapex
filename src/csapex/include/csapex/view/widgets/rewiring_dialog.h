@@ -61,19 +61,19 @@ private:
 
     UUIDProviderPtr root_uuid_provider_;
 
-    NodeFacadePtr nf_old;
-    NodeFacadePtr nf_new;
+    NodeFacadeLocalPtr nf_old;
+    NodeFacadeLocalPtr nf_new;
 
     NodeFacade* node_facade_;
 
     SubgraphNodePtr graph_node_old;
-    GraphPtr graph_old;
-    GraphFacadePtr graph_facade_old_;
+    GraphLocalPtr graph_old;
+    GraphFacadeLocalPtr graph_facade_old_;
 
     std::string type_new_;
     SubgraphNodePtr graph_node_new;
-    GraphPtr graph_new;
-    GraphFacadePtr graph_facade_new_;
+    GraphLocalPtr graph_new;
+    GraphFacadeLocalPtr graph_facade_new_;
 
     std::vector<ConnectionInformation> connections_;
 

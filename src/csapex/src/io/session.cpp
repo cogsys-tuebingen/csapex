@@ -152,8 +152,12 @@ ResponseConstPtr Session::sendRequest(RequestConstPtr request)
 void Session::write(const SerializableConstPtr &packet)
 {
     if(live_) {
-        SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
-        write_packet(buffer);
+        try {
+            SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
+            write_packet(buffer);
+        } catch(const std::exception& e) {
+            std::cerr << "error writing packet: " << e.what() << std::endl;
+        }
     }
 }
 

@@ -9,6 +9,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
@@ -39,7 +40,7 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    GraphPtr graph = getGraph();
+    GraphLocalPtr graph = getGraph();
     NodeHandle* node_handle = graph->findNodeHandle(uuid);
 
     type = node_handle->getType();
@@ -74,7 +75,7 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    GraphPtr graph = getGraph();
+    GraphLocalPtr graph = getGraph();
     NodeFacadeLocalPtr node_facade = getNodeFactory()->makeNode(type, uuid, graph);
     node_facade->setNodeState(saved_state);
 
@@ -95,7 +96,7 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        GraphPtr graph = getGraph();
+        GraphLocalPtr graph = getGraph();
         NodeHandle* node_handle = graph->findNodeHandle(uuid);
         saved_state = node_handle->getNodeStateCopy();
 

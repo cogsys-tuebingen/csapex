@@ -1,4 +1,4 @@
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_facade_local.h>
@@ -67,7 +67,7 @@ protected:
 
 TEST_F(GraphTest, NodeCanBeFound) {
     SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-    GraphPtr graph = graph_node->getGraph();
+    GraphLocalPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
@@ -89,7 +89,7 @@ TEST_F(GraphTest, NodeCanBeFound) {
 
 TEST_F(GraphTest, NodeCanBeFoundWithAConnector) {
     SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-    GraphPtr graph = graph_node->getGraph();
+    GraphLocalPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
@@ -118,7 +118,7 @@ TEST_F(GraphTest, NodeCanBeFoundWithAConnector) {
 
 TEST_F(GraphTest, NodeCanBeDeleted) {
     SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-    GraphPtr graph = graph_node->getGraph();
+    GraphLocalPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
@@ -155,7 +155,7 @@ TEST_F(GraphTest, nullptr) {
 
 TEST_F(GraphTest, NestedNodeCanBeFound) {
     SubgraphNodePtr main_graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-    GraphPtr graph = main_graph_node->getGraph();
+    GraphLocalPtr graph = main_graph_node->getLocalGraph();
 
     NodeFacadeLocalPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());

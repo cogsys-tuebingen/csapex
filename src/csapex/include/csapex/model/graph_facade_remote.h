@@ -37,13 +37,15 @@ protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) override;
     virtual void nodeRemovedHandler(graph::VertexPtr node) override;
 
-    virtual void createSubgraphFacade(NodeFacadePtr nf) override;
+    void handleBroadcast(const BroadcastMessageConstPtr& message);
 
 private:
     SessionPtr session_;
 
     GraphFacadeRemote* parent_;
     std::shared_ptr<GraphRemote> graph_;
+
+    std::unordered_map<UUID, std::shared_ptr<GraphFacadeRemote>, UUID::Hasher> children_;
 
     GraphFacadeLocal& tmp_ref_;
 };

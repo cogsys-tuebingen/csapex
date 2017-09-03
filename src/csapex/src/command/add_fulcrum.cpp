@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/connection.h>

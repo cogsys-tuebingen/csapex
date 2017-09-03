@@ -12,6 +12,7 @@
 #include <csapex/model/node.h>
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/node_requests.h>
+#include <csapex/io/protcol/node_broadcasts.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/model/connector_remote.h>
 
@@ -28,13 +29,20 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
       uuid_(uuid),
       nh_(nh), nw_(nw), nr_(nr)
 {
+    session_->broadcast_received.connect([this](const BroadcastMessageConstPtr& message) {
+        handleBroadcast(message);
+    });
+
     if(nr_) {
         nh->setNodeRunner(nr_);
     }
 
     if(nh_) {
         connectNodeHandle();
+    } else {
+
     }
+
     if(nw_) {
         connectNodeWorker();
     }
@@ -57,6 +65,15 @@ NodeFacadeRemote::~NodeFacadeRemote()
 {
 }
 
+void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
+{
+    if(auto node_msg = std::dynamic_pointer_cast<NodeBroadcasts const>(message)) {
+        switch(node_msg->getBroadcastType()) {
+        default:
+            break;
+        }
+    }
+}
 void NodeFacadeRemote::connectNodeHandle()
 {
     observe(nh_->connector_created, [this](ConnectorPtr connector) {
@@ -271,10 +288,6 @@ NodeCharacteristics NodeFacadeRemote::getNodeCharacteristics() const
 
 ConnectorPtr NodeFacadeRemote::getConnector(const UUID &id) const
 {
-    if(!nh_) {
-        // TODO: remove
-        return nullptr;
-    }
     return remote_connectors_.at(id);
 }
 
@@ -405,29 +418,9 @@ ProfilerPtr NodeFacadeRemote::getProfiler()
 
 std::string NodeFacadeRemote::getDebugDescription() const
 {
-    OutputTransition* ot = nh_->getOutputTransition();
-    InputTransition* it = nh_->getInputTransition();
-
-    std::stringstream ss;
-    ss << ", source: ";
-    ss << (nh_->isSource() ? "yes" : "no");
-    ss << ", sink: ";
-    ss << (nh_->isSink() ? "yes" : "no");
-    ss << ", it: ";
-    ss << (it->isEnabled() ? "enabled" : "disabled");
-    ss << ", ot: ";
-    ss << (ot->isEnabled() ? "enabled" : "disabled");
-    ss << ", events: ";
-    bool events_enabled = true;
-    for(EventPtr e : nh_->getExternalEvents()){
-        if(!e->canReceiveToken()) {
-            events_enabled = false;
-            break;
-        }
-    }
-    ss << (events_enabled ? "enabled" : "disabled") << ", ";
-    ss << (nr_->canStartStepping() ? "canStartStepping" : "!canStartStepping");
-    return ss.str();
+    auto res = session_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::GetDebugDescription, getUUID().getAbsoluteUUID());
+    apex_assert_hard(res);
+    return res->getResult<std::string>() + " from remote!";
 }
 
 std::string NodeFacadeRemote::getLoggerOutput(ErrorState::ErrorLevel level) const

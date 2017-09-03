@@ -2,17 +2,18 @@
 #include <csapex/io/protcol/node_requests.h>
 
 /// PROJECT
+#include <csapex/command/command.h>
+#include <csapex/io/feedback.h>
+#include <csapex/io/raw_message.h>
+#include <csapex/io/session.h>
+#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph.h>
+#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
-#include <csapex/io/feedback.h>
 #include <csapex/utility/uuid_provider.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/serialization/parameter_serializer.h>
-#include <csapex/command/command.h>
-#include <csapex/model/graph.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/io/session.h>
-#include <csapex/io/raw_message.h>
 
 /// SYSTEM
 #include <iostream>
@@ -40,7 +41,9 @@ NodeRequests::NodeRequest::NodeRequest(uint8_t request_id)
 
 ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
-    NodeHandle* nh = core.getRoot()->getGraph()->findNodeHandle(uuid_);
+    NodeFacadePtr nf = core.getRoot()->getGraph()->findNodeFacade(uuid_);
+    NodeHandlePtr nh = nf->getNodeHandle();
+
     switch(request_type_)
     {
     case NodeRequestType::AddClient:
@@ -55,6 +58,9 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
     case NodeRequestType::RemoveClient:
         // TODO
         break;
+
+    case NodeRequestType::GetDebugDescription:
+        return std::make_shared<NodeResponse>(request_type_, nf->getDebugDescription(), getRequestID(), uuid_);
 
     default:
         return std::make_shared<Feedback>(std::string("unknown node request type ") + std::to_string((int)request_type_),
@@ -84,6 +90,14 @@ NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, uint8_t r
     : ResponseImplementation(request_id),
       request_type_(request_type),
       uuid_(uuid)
+{
+
+}
+NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid)
+    : ResponseImplementation(request_id),
+      request_type_(request_type),
+      uuid_(uuid),
+      result_(result)
 {
 
 }

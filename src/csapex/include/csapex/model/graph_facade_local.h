@@ -68,7 +68,7 @@ protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) override;
     virtual void nodeRemovedHandler(graph::VertexPtr node) override;
 
-    virtual void createSubgraphFacade(NodeFacadePtr nf) override;
+    void createSubgraphFacade(NodeFacadePtr nf);
 
 private:
     AUUID absolute_uuid_;

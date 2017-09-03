@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/connectable.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>

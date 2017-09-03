@@ -8,7 +8,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node_state.h>

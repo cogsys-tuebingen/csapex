@@ -17,7 +17,9 @@ public:
     enum class NodeRequestType
     {
         AddClient,
-        RemoveClient
+        RemoveClient,
+
+        GetDebugDescription
     };
 
     class NodeRequest : public RequestImplementation<NodeRequest>
@@ -47,6 +49,7 @@ public:
     public:
         NodeResponse(uint8_t request_id);
         NodeResponse(NodeRequestType request_type, uint8_t request_id, const AUUID& uuid);
+        NodeResponse(NodeRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
@@ -54,11 +57,20 @@ public:
         std::string getType() const override
         {
             return "NodeRequests";
+        }        
+
+        template <typename R>
+        R getResult() const
+        {
+            return boost::any_cast<R>(result_);
         }
+
 
     private:
         NodeRequestType request_type_;
         AUUID uuid_;
+
+        boost::any result_;
     };
 
 

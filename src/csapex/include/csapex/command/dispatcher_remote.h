@@ -34,6 +34,7 @@ public:
     void undo();
     void redo();
 
+private:
     void handleBroadcast(const BroadcastMessageConstPtr& message);
 
 private:

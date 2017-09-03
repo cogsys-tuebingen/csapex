@@ -5,7 +5,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
 
@@ -71,7 +71,7 @@ bool Meta::doExecute()
     locked = true;
 
     if(transaction) {
-        root_graph_facade_->getGraph()->beginTransaction();
+        root_graph_facade_->getLocalGraph()->beginTransaction();
     }
 
     bool success = true;
@@ -85,7 +85,7 @@ bool Meta::doExecute()
     }
 
     if(transaction) {
-        root_graph_facade_->getGraph()->finalizeTransaction();
+        root_graph_facade_->getLocalGraph()->finalizeTransaction();
     }
 
     return success;
@@ -94,7 +94,7 @@ bool Meta::doExecute()
 bool Meta::doUndo()
 {
     if(transaction) {
-        root_graph_facade_->getGraph()->beginTransaction();
+        root_graph_facade_->getLocalGraph()->beginTransaction();
     }
 
     for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
@@ -105,7 +105,7 @@ bool Meta::doUndo()
     }
 
     if(transaction) {
-        root_graph_facade_->getGraph()->finalizeTransaction();
+        root_graph_facade_->getLocalGraph()->finalizeTransaction();
     }
 
 

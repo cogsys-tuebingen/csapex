@@ -5,7 +5,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>

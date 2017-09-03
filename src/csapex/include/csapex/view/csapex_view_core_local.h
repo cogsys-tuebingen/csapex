@@ -33,6 +33,7 @@ public:
     // TODO: add proxies or remove
     ExceptionHandler& getExceptionHandler() const override;
     GraphFacadePtr getRoot() override;
+    GraphFacadeLocalPtr getLocalRoot();
     void shutdown() override;
     void clearBlock() override;
     void resetActivity() override;

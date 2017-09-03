@@ -57,16 +57,16 @@ public:
 
     int countNodes() override;
 
-    void addNode(NodeFacadePtr node) override;
-    void deleteNode(const UUID &uuid) override;
+    void addNode(NodeFacadePtr node);
+    void deleteNode(const UUID &uuid);
 
-    bool addConnection(ConnectionPtr connection) override;
-    void deleteConnection(ConnectionPtr connection) override;
+    bool addConnection(ConnectionPtr connection);
+    void deleteConnection(ConnectionPtr connection);
 
-    void beginTransaction() override;
-    void finalizeTransaction() override;
+    void beginTransaction();
+    void finalizeTransaction();
 
-    void analyzeGraph() override;
+    void analyzeGraph();
 
     void setNodeFacade(NodeFacadeWeakPtr nf);
 

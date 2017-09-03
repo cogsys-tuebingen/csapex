@@ -85,7 +85,7 @@ protected:
     GraphFacadeLocal *getRoot();
 
     GraphFacadeLocal *getGraphFacade();
-    GraphPtr getGraph();
+    GraphLocalPtr getGraph();
     SubgraphNodePtr getSubgraphNode();
 
     NodeFactory* getNodeFactory();
