@@ -2,23 +2,23 @@
 #include <csapex/view/widgets/rewiring_dialog.h>
 
 /// COMPONENT
-#include <csapex/view/designer/graph_view.h>
-#include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/scheduling/thread_pool.h>
-#include <csapex/view/widgets/box_dialog.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/model/connection.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/signal/slot.h>
-#include <csapex/signal/event.h>
-#include <csapex/msg/output.h>
-#include <csapex/msg/input.h>
-#include <csapex/model/connection.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/msg/direct_connection.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/param/parameter_factory.h>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/signal/event.h>
+#include <csapex/signal/slot.h>
 #include <csapex/view/csapex_view_core_local.h>
-#include <csapex/model/graph.h>
+#include <csapex/view/designer/graph_view.h>
+#include <csapex/view/widgets/box_dialog.h>
 
 /// SYSTEM
 #include <QLabel>
@@ -52,7 +52,7 @@ std::string RewiringDialog::getType() const
 
 std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& new_node_uuid)
 {
-    for(SlotPtr slot_new : nh_new->getNodeHandle()->getSlots()) {
+    for(SlotPtr slot_new : nf_new->getNodeHandle()->getSlots()) {
         for(ConnectionPtr connection : slot_new->getConnections()) {
             UUID to_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, slot_new->getUUID().id().getFullName());
             connections_.push_back(ConnectionInformation(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()),
@@ -61,7 +61,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
                                                          connection->isActive()));
         }
     }
-    for(InputPtr input_new : nh_new->getNodeHandle()->getExternalInputs()) {
+    for(InputPtr input_new : nf_new->getNodeHandle()->getExternalInputs()) {
         for(ConnectionPtr connection : input_new->getConnections()) {
             UUID to_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, input_new->getUUID().id().getFullName());
             connections_.push_back(ConnectionInformation(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()),
@@ -72,7 +72,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
     }
 
 
-    for(EventPtr event_new : nh_new->getNodeHandle()->getEvents()) {
+    for(EventPtr event_new : nf_new->getNodeHandle()->getEvents()) {
         for(ConnectionPtr connection : event_new->getConnections()) {
             UUID from_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, event_new->getUUID().id().getFullName());
             connections_.push_back(ConnectionInformation(from_uuid,
@@ -81,7 +81,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
                                                          connection->isActive()));
         }
     }
-    for(OutputPtr output_new : nh_new->getNodeHandle()->getExternalOutputs()) {
+    for(OutputPtr output_new : nf_new->getNodeHandle()->getExternalOutputs()) {
         for(ConnectionPtr connection : output_new->getConnections()) {
             UUID from_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, output_new->getUUID().id().getFullName());
             connections_.push_back(ConnectionInformation(from_uuid,
@@ -129,9 +129,9 @@ void RewiringDialog::createGraphs(const std::string& type)
     graph_old = graph_facade_old_->getGraph();
     apex_assert_hard(graph_old);
 
-    nh_old = node_factory.makeNode(node_facade_->getType(), node_facade_->getUUID(), graph_old);
-    nh_old->setNodeState(node_facade_->getNodeStateCopy());
-    graph_old->addNode(nh_old);
+    nf_old = node_factory.makeNode(node_facade_->getType(), node_facade_->getUUID(), graph_old);
+    nf_old->setNodeState(node_facade_->getNodeStateCopy());
+    graph_old->addNode(nf_old);
 
 
     // new graph
@@ -143,22 +143,22 @@ void RewiringDialog::createGraphs(const std::string& type)
     graph_new = graph_facade_new_->getGraph();
     apex_assert_hard(graph_new);
 
-    nh_new = node_factory.makeNode(type, graph_new->generateUUID(type), graph_new);
-    graph_new->addNode(nh_new);
+    nf_new = node_factory.makeNode(type, graph_new->generateUUID(type), graph_new);
+    graph_new->addNode(nf_new);
 }
 
 void RewiringDialog::createConnections()
 {
     for(SlotPtr slot_original : node_facade_->getNodeHandle()->getSlots()) {
         for(ConnectionPtr connection : slot_original->getConnections()) {
-            SlotPtr slot_old = nh_old->getNodeHandle()->getSlot(slot_original->getUUID());
+            SlotPtr slot_old = nf_old->getNodeHandle()->getSlot(slot_original->getUUID());
             apex_assert_hard(slot_old);
             updateConnection(slot_old, connection);
         }
     }
     for(InputPtr input_original : node_facade_->getNodeHandle()->getExternalInputs()) {
         for(ConnectionPtr connection : input_original->getConnections()) {
-            InputPtr input_old = nh_old->getNodeHandle()->getInput(input_original->getUUID());
+            InputPtr input_old = nf_old->getNodeHandle()->getInput(input_original->getUUID());
             apex_assert_hard(input_old);
             updateConnection(input_old, connection);
         }
@@ -167,14 +167,14 @@ void RewiringDialog::createConnections()
 
     for(EventPtr event_original : node_facade_->getNodeHandle()->getEvents()) {
         for(ConnectionPtr connection : event_original->getConnections()) {
-            EventPtr event_old = nh_old->getNodeHandle()->getEvent(event_original->getUUID());
+            EventPtr event_old = nf_old->getNodeHandle()->getEvent(event_original->getUUID());
             apex_assert_hard(event_old);
             updateConnection(event_old, connection);
         }
     }
     for(OutputPtr output_original : node_facade_->getNodeHandle()->getExternalOutputs()) {
         for(ConnectionPtr connection : output_original->getConnections()) {
-            OutputPtr output_old = nh_old->getNodeHandle()->getOutput(output_original->getUUID());
+            OutputPtr output_old = nf_old->getNodeHandle()->getOutput(output_original->getUUID());
             apex_assert_hard(output_old);
             updateConnection(output_old, connection);
         }
@@ -251,15 +251,15 @@ void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &conne
 
     graph_old->addConnection(DirectConnection::connect(source_old, input));
 
-    uuid_new = UUIDProvider::makeDerivedUUID_forced(nh_new->getUUID(), input->getUUID().id().getFullName());
+    uuid_new = UUIDProvider::makeDerivedUUID_forced(nf_new->getUUID(), input->getUUID().id().getFullName());
 
     ConnectionPtr c;
-    if(InputPtr in_new = nh_new->getNodeHandle()->getInput(uuid_new)) {
+    if(InputPtr in_new = nf_new->getNodeHandle()->getInput(uuid_new)) {
         if(!source_new->isConnectionPossible(in_new.get())) {
             return;
         }
         c = DirectConnection::connect(source_new, in_new);
-    } else if(SlotPtr slot_new = nh_new->getNodeHandle()->getSlot(uuid_new)) {
+    } else if(SlotPtr slot_new = nf_new->getNodeHandle()->getSlot(uuid_new)) {
         if(!source_new->isConnectionPossible(slot_new.get())) {
             return;
         }
@@ -305,12 +305,12 @@ void RewiringDialog::updateConnection(OutputPtr output, const ConnectionPtr &con
 
     graph_old->addConnection(DirectConnection::connect(output, sink_old));
 
-    uuid_new = UUIDProvider::makeDerivedUUID_forced(nh_new->getUUID(), output->getUUID().id().getFullName());
+    uuid_new = UUIDProvider::makeDerivedUUID_forced(nf_new->getUUID(), output->getUUID().id().getFullName());
 
     ConnectionPtr c;
-    if(OutputPtr out_new = nh_new->getNodeHandle()->getOutput(uuid_new)) {
+    if(OutputPtr out_new = nf_new->getNodeHandle()->getOutput(uuid_new)) {
         c = DirectConnection::connect(out_new, sink_new);
-    } else if(EventPtr event_new = nh_new->getNodeHandle()->getEvent(uuid_new)) {
+    } else if(EventPtr event_new = nf_new->getNodeHandle()->getEvent(uuid_new)) {
         c = DirectConnection::connect(event_new, sink_new);
     }
 

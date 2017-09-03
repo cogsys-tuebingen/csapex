@@ -56,18 +56,13 @@ private:
 private:
     CsApexViewCore& view_core_;
 
-//    std::shared_ptr<CsApexCore> core_temp_;
     std::shared_ptr<CsApexViewCoreLocal> view_core_old_;
     std::shared_ptr<CsApexViewCoreLocal> view_core_new_;
 
     UUIDProviderPtr root_uuid_provider_;
 
-
-//    NodeHandlePtr graph_old_handle;
-//    NodeHandlePtr graph_new_handle;
-
-    NodeFacadePtr nh_old;
-    NodeFacadePtr nh_new;
+    NodeFacadePtr nf_old;
+    NodeFacadePtr nf_new;
 
     NodeFacade* node_facade_;
 

@@ -2,19 +2,18 @@
 #include <csapex/view/node/box.h>
 
 /// COMPONENT
-#include "ui_box.h"
-#include <csapex/model/variadic_io.h>
-#include <csapex/model/node_state.h>
-#include <csapex/model/node_runner.h>
+#include <csapex/core/settings.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/model/graph/vertex.h>
+#include <csapex/model/node_state.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/view/utility/color.hpp>
-#include <csapex/core/settings.h>
-#include <csapex/view/widgets/port.h>
-#include <csapex/view/designer/graph_view.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/view/widgets/meta_port.h>
 #include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/widgets/meta_port.h>
+#include <csapex/view/widgets/port.h>
+
+#include "ui_box.h"
 
 /// SYSTEM
 #include <QMenu>

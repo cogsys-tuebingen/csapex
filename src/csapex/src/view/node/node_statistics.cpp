@@ -2,14 +2,11 @@
 #include <csapex/view/node/node_statistics.h>
 
 /// COMPONENT
-#include <csapex/model/node.h>
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
-#include <csapex/model/connection.h>
 #include <csapex/factory/node_factory.h>
-#include <csapex/model/node_facade.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/model/connection.h>
 #include <csapex/model/generic_state.h>
+#include <csapex/model/node_facade.h>
+#include <csapex/param/parameter.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -85,7 +82,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
 
-        for(const ConnectorDescription& output : node_facade_->getNodeHandle()->getExternalOutputDescriptions()) {
+        for(const ConnectorDescription& output : node_facade_->getExternalOutputs()){
             QTreeWidgetItem* output_widget = createDebugInformationConnector(output);
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
@@ -106,8 +103,8 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* parameters = new QTreeWidgetItem;
         parameters->setText(0, "Parameters");
         GenericStateConstPtr state = node_facade_->getParameterState();
-        for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
-            csapex::param::Parameter* p = it->second.get();
+        for(std::map<std::string, param::ParameterPtr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
+            param::Parameter* p = it->second.get();
 
             QTreeWidgetItem* param = new QTreeWidgetItem;
             param->setText(0, p->name().c_str());

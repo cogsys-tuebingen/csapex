@@ -58,6 +58,8 @@ public:
     NodeHandlePtr makePrototype() const;
     NodeHandlePtr makeNodeHandle(const UUID& uuid, const UUIDProviderPtr &uuid_provider) const;
 
+    std::vector<param::ParameterPtr> getParameters() const;
+
     NodePtr makeNode() const;
 
 protected:

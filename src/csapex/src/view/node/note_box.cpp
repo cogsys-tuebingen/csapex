@@ -5,7 +5,6 @@
 #include <csapex/nodes/note.h>
 #include <csapex/model/node_state.h>
 #include <csapex/view/designer/graph_view.h>
-#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <QStyle>

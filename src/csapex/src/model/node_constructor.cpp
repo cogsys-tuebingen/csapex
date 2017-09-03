@@ -8,6 +8,7 @@
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/model/tag.h>
+#include <csapex/param/parameter.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/delegate_bind.h>
 
@@ -149,6 +150,16 @@ NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, const UUIDProvid
         std::cerr << "cannot construct node with UUID " << uuid.getFullName() << ": " << e.what() << std::endl;
         return nullptr;
     }
+}
+
+std::vector<csapex::param::ParameterPtr> NodeConstructor::getParameters() const
+{
+    if(auto node = makePrototype()->getNode().lock()) {
+        node->setupParameters(*node);
+        return node->getParameters();
+    }
+
+    return {};
 }
 
 Node::Ptr NodeConstructor::makeNode() const

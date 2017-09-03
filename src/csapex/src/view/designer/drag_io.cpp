@@ -3,24 +3,23 @@
 
 /// PROJECT
 #include <csapex/command/add_node.h>
-#include <csapex/command/paste_graph.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/command/paste_graph.h>
+#include <csapex/csapex_mime.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/factory/snippet_factory.h>
+#include <csapex/model/connection.h>
 #include <csapex/model/connector.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/node_state.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/connection.h>
+#include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
-#include <csapex/model/node.h>
-#include <csapex/view/node/box.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/graph_view.h>
-#include <csapex/plugin/plugin_manager.hpp>
-#include <csapex/model/node_state.h>
-#include <csapex/csapex_mime.h>
-#include <csapex/factory/snippet_factory.h>
+#include <csapex/view/node/box.h>
 
 /// SYSTEM
 #include <QMimeData>

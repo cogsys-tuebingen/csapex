@@ -2,35 +2,28 @@
 #include <csapex/view/designer/designer_scene.h>
 
 /// COMPONENT
-#include <csapex/model/connector.h>
-#include <csapex/model/graph.h>
-#include <csapex/view/widgets/port.h>
-#include <csapex/model/node.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/model/node_state.h>
-#include <csapex/model/connection.h>
-#include <csapex/view/node/box.h>
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
-#include <csapex/signal/slot.h>
-#include <csapex/signal/event.h>
-#include <csapex/core/settings.h>
-#include <csapex/command/dispatcher.h>
-#include <csapex/command/command_factory.h>
 #include <csapex/command/add_fulcrum.h>
-#include <csapex/command/move_fulcrum.h>
-#include <csapex/command/modify_fulcrum.h>
-#include <csapex/view/designer/fulcrum_widget.h>
-#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
-#include <csapex/utility/assert.h>
-#include <csapex/model/fulcrum.h>
-#include <csapex/view/widgets/message_preview_widget.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/command/delete_fulcrum.h>
-#include <csapex/profiling/timer.h>
-#include <csapex/profiling/profiler.h>
-#include <csapex/profiling/interlude.hpp>
+#include <csapex/command/dispatcher.h>
+#include <csapex/command/modify_fulcrum.h>
+#include <csapex/command/move_fulcrum.h>
+#include <csapex/core/settings.h>
+#include <csapex/model/connection.h>
+#include <csapex/model/connector.h>
+#include <csapex/model/fulcrum.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph.h>
 #include <csapex/msg/marker_message.h>
+#include <csapex/profiling/interlude.hpp>
+#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/timer.h>
+#include <csapex/utility/assert.h>
+#include <csapex/view/designer/fulcrum_widget.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/widgets/message_preview_widget.h>
+#include <csapex/view/widgets/movable_graphics_proxy_widget.h>
+#include <csapex/view/widgets/port.h>
 
 /// SYSTEM
 #include <QtGui>
@@ -871,12 +864,7 @@ void DesignerScene::drawConnection(QPainter *painter, const Connection& connecti
     ccs.full_unread = /*!marker && */connection.getState() == Connection::State::UNREAD;
     ccs.active = connection.isActive();
     ccs.active_token = connection.holdsActiveToken();
-    if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to->getOwner())) {
-        ccs.target_is_pipelining = node->getNodeState()->getExecutionMode() == ExecutionMode::PIPELINING;
-
-    } else {
-        ccs.target_is_pipelining = false;
-    }
+    ccs.target_is_pipelining = connection.isPipelining();
 
     if(debug_){
         ccs.label = QString::number(connection.from()->sequenceNumber()) +
@@ -897,13 +885,13 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
         return std::vector<QRectF>();
     }
 
-    if(dynamic_cast<Slot*>(to)) {
+    if(to->isAsynchronous()) {
         if(!display_signals_) {
             return std::vector<QRectF>();
         }
         ccs.type = TokenType::SIG;
 
-    } else if(dynamic_cast<Input*>(to)) {
+    } else {
         if(!display_messages_) {
             return std::vector<QRectF>();
         }
@@ -923,12 +911,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     ccs.selected_from = from_port->property("focused").toBool();
     ccs.selected_to = to_port->property("focused").toBool();
 
-    if(dynamic_cast<Event*>(from)) {
+    if(from->isAsynchronous()) {
         ccs.start_pos = BOTTOM;
     } else {
         ccs.start_pos = from_port->isFlipped() ? LEFT : RIGHT;
     }
-    if(dynamic_cast<Slot*>(to)) {
+    if(to->isAsynchronous()) {
         ccs.end_pos = TOP;
     } else {
         ccs.end_pos = to_port->isFlipped() ? RIGHT : LEFT;

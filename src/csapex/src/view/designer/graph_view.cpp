@@ -28,7 +28,6 @@
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph_facade_local.h>
-#include <csapex/model/node.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
@@ -1395,7 +1394,7 @@ void GraphView::setMaximumFrequency()
     }
 
     bool ok = false;
-    double current_f = selected_boxes_.front()->getNodeFacade()->getNodeHandle()->getNodeState()->getMaximumFrequency();
+    double current_f = selected_boxes_.front()->getNodeFacade()->getNodeState()->getMaximumFrequency();
     if(current_f <= 0.0) {
         current_f = 30.0;
     }

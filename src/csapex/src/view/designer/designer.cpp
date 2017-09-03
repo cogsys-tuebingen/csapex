@@ -5,24 +5,24 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/rename_node.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/node_state.h>
+#include <csapex/model/node_facade.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/node.h>
-#include <csapex/model/node_state.h>
-#include <csapex/view/utility/qt_helper.hpp>
-#include <csapex/view/node/box.h>
-#include <csapex/view/designer/graph_view.h>
-#include <csapex/view/designer/designer_scene.h>
-#include <csapex/view/widgets/minimap_widget.h>
-#include <csapex/core/graphio.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/subgraph_node.h>
 #include <csapex/view/designer/designerio.h>
-#include "ui_designer.h"
-#include <csapex/view/widgets/search_dialog.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/designer/graph_view.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/notification_widget.h>
+#include <csapex/view/widgets/search_dialog.h>
+
+#include "ui_designer.h"
 
 /// SYSTEM
 #include <QTabWidget>
@@ -236,8 +236,8 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     QObject::connect(graph_view, &GraphView::boxAdded, this, &Designer::addBox);
     QObject::connect(graph_view, &GraphView::boxRemoved, this, &Designer::removeBox);
 
-    for(const auto& nh : graph_facade->getGraph()->getAllNodeHandles()) {
-        NodeBox* box = graph_view->getBox(nh->getUUID());
+    for(const auto& nf : graph_facade->getGraph()->getAllNodeFacades()) {
+        NodeBox* box = graph_view->getBox(nf->getUUID());
         addBox(box);
     }
 

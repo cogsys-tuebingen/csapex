@@ -15,9 +15,7 @@
 #include <csapex/view/utility/message_renderer_manager.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/node.h>
 #include <csapex/model/node_facade.h>
-#include <csapex/model/node_handle.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/token_data.h>
 #include <csapex/param/parameter_factory.h>
@@ -520,45 +518,37 @@ void CsApexWindow::updateNodeInfo()
     for(QTreeWidgetItem* item : ui->node_info_tree->selectedItems()) {
         QString type = item->data(0, Qt::UserRole + 1).toString();
         if(!type.isEmpty()) {
-            NodeConstructor::Ptr n = view_core_.getNodeFactory()->getConstructor(type.toStdString());
+            NodeConstructor::Ptr constructor = view_core_.getNodeFactory()->getConstructor(type.toStdString());
 
-            QString icon = QString::fromStdString(n->getIcon());
+            QString icon = QString::fromStdString(constructor->getIcon());
             QImage image = QIcon(icon).pixmap(QSize(16,16)).toImage();
-            QUrl uri ( QString::fromStdString(n->getType()));
+            QUrl uri ( QString::fromStdString(constructor->getType()));
             ui->node_info_text->document()->addResource( QTextDocument::ImageResource, uri, QVariant ( image ) );
 
-            ss << "<h1> <img src=\"" << uri.toString().toStdString() << "\" /> " << n->getType() << "</h1>";
+            ss << "<h1> <img src=\"" << uri.toString().toStdString() << "\" /> " << constructor->getType() << "</h1>";
             ss << "<p>Tags: <i>";
             int i = 0;
-            for(const Tag::Ptr& tag : n->getTags()) {
+            for(const Tag::Ptr& tag : constructor->getTags()) {
                 if(i++ > 0) {
                     ss << ", ";
                 }
                 ss << tag->getName();
             }
             ss << "</p>";
-            ss << "<h3>" << n->getDescription() << "</h3>";
+            ss << "<h3>" << constructor->getDescription() << "</h3>";
 
             ss << "<hr />";
             ss << "<h1>Parameters:</h1>";
 
-
-            auto node = n->makePrototype()->getNode().lock();
-            if(node) {
-                node->setupParameters(*node);
-                std::vector<csapex::param::Parameter::Ptr> params = node->getParameters();
-
-                for(const csapex::param::Parameter::Ptr& p : params) {
-                    if(!p->isHidden()) {
-                        ss << "<h2>" << p->name() << "</h2>";
-                        ss << "<p>" << p->description().toString() << "</p>";
-                        ss << "<p>" << p->toString() << "</p>";
-                    }
+            for(const csapex::param::Parameter::Ptr& p : constructor->getParameters()) {
+                if(!p->isHidden()) {
+                    ss << "<h2>" << p->name() << "</h2>";
+                    ss << "<p>" << p->description().toString() << "</p>";
+                    ss << "<p>" << p->toString() << "</p>";
                 }
             }
         }
     }
-
 
     ui->node_info_text->setHtml(QString::fromStdString(ss.str()));
 }

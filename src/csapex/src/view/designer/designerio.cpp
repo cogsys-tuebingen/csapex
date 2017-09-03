@@ -2,18 +2,15 @@
 #include <csapex/view/designer/designerio.h>
 
 /// PROJECT
-#include <csapex/view/designer/designer.h>
-#include <csapex/model/graph.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/view/node/box.h>
-#include <csapex/view/node/node_adapter.h>
-#include <csapex/utility/assert.h>
-#include <csapex/utility/yaml_io.hpp>
-#include <csapex/view/designer/graph_view.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph/vertex.h>
-
+#include <csapex/utility/assert.h>
+#include <csapex/utility/yaml_io.hpp>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/designer/graph_view.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/node/node_adapter.h>
 
 /// SYSTEM
 #include <QMessageBox>

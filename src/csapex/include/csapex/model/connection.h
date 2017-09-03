@@ -79,6 +79,8 @@ public:
     bool isSourceEnabled() const;
     bool isSinkEnabled() const;
 
+    bool isPipelining() const;
+
     State getState() const;
     void setState(State s);
 

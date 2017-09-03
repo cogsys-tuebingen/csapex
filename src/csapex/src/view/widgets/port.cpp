@@ -2,7 +2,6 @@
 #include <csapex/view/widgets/port.h>
 
 /// COMPONENT
-#include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/command_factory.h>

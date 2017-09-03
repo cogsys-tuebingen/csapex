@@ -5,7 +5,6 @@
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
-#include <csapex/model/node_handle.h>
 
 /// SYSTEM
 #include <QPainter>

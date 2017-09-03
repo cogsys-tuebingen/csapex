@@ -2,22 +2,19 @@
 #include <csapex/view/designer/graph_view_context_menu.h>
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
-#include <csapex/model/node_state.h>
-#include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph_facade_local.h>
 #include <csapex/core/settings.h>
+#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/node_state.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/view/designer/graph_view.h>
-#include <csapex/view/utility/clipboard.h>
-#include <csapex/view/utility/snippet_list_generator.h>
-#include <csapex/view/utility/node_list_generator.h>
 #include <csapex/view/csapex_view_core.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/note_box.h>
+#include <csapex/view/utility/clipboard.h>
 #include <csapex/view/utility/context_menu_handler.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/view/utility/node_list_generator.h>
+#include <csapex/view/utility/snippet_list_generator.h>
 
 /// SYSTEM
 #include <sstream>
@@ -332,7 +329,6 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
             QAction* new_group = new QAction("new thread group", &menu);
             new_group->setIcon(QIcon(":/thread_group_add.png"));
             new_group->setIconVisibleInMenu(true);
-            //        handler[new_group] = std::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
             handler[new_group] = std::bind(&GraphView::createNewThreadGroupFor, &view_);
 
             choose_group_menu->addAction(new_group);

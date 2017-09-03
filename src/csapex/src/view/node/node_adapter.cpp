@@ -2,9 +2,7 @@
 #include <csapex/view/node/node_adapter.h>
 
 /// COMPONENT
-#include <csapex/model/node.h>
 #include <csapex/model/node_facade.h>
-#include <csapex/model/node_handle.h>
 #include <csapex/param/parameter.h>
 #include <csapex/view/node/box.h>
 

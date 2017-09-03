@@ -12,6 +12,8 @@
 #include <csapex/utility/assert.h>
 #include <csapex/msg/no_message.h>
 #include <csapex/utility/debug.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/model/node_state.h>
 
 /// SYSTEM
 #include <cmath>
@@ -171,6 +173,13 @@ bool Connection::isSinkEnabled() const
     return to()->isEnabled();
 }
 
+bool Connection::isPipelining() const
+{
+    if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to_->getOwner())) {
+        return node->getNodeState()->getExecutionMode() == ExecutionMode::PIPELINING;
+    }
+    return false;
+}
 
 Connection::State Connection::getState() const
 {
