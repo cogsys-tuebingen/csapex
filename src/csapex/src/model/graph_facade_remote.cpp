@@ -17,16 +17,12 @@ using namespace csapex;
 
 GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, GraphFacadeLocal& tmp_ref, GraphFacadeRemote* parent)
     : GraphFacade(tmp_ref.getNodeFacade()),
-      session_(session),
+      Remote(session),
       parent_(parent),
       graph_(std::make_shared<GraphRemote>(session, tmp_ref.getAbsoluteUUID(),
                                            *std::dynamic_pointer_cast<GraphLocal>(tmp_ref.getGraph()))),
       tmp_ref_(tmp_ref)
 {
-    session_->broadcast_received.connect([this](const BroadcastMessageConstPtr& message) {
-        handleBroadcast(message);
-    });
-
     observe(graph_->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeAddedHandler));
     observe(graph_->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeRemovedHandler));
 

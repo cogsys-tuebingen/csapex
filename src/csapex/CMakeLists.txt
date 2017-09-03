@@ -537,6 +537,7 @@ add_library(csapex_remote SHARED
     src/model/graph/graph_remote.cpp
     src/model/graph_facade_remote.cpp
 
+    src/io/remote.cpp
     src/io/server.cpp
     src/io/raw_message.cpp
     src/io/request.cpp
@@ -544,6 +545,7 @@ add_library(csapex_remote SHARED
     src/io/feedback.cpp
     src/io/broadcast_message.cpp
     src/io/session.cpp
+    src/io/session_client.cpp
 
     src/io/protocol/notification_message.cpp
     src/io/protocol/parameter_changed.cpp
@@ -551,6 +553,7 @@ add_library(csapex_remote SHARED
     src/io/protocol/request_parameter.cpp
     src/io/protocol/add_parameter.cpp
     src/io/protocol/core_requests.cpp
+    src/io/protocol/connector_requests.cpp
     src/io/protocol/node_requests.cpp
     src/io/protocol/node_broadcasts.cpp
     src/io/protocol/graph_broadcasts.cpp
@@ -573,10 +576,10 @@ generate_export_header(csapex_remote
                          )
 target_link_libraries(csapex_remote
     csapex_serialization
-    csapex_util
     csapex_profiling
     csapex_param
     csapex_command
+    csapex_util
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
     ${TinyXML_LIBRARIES}

@@ -46,6 +46,7 @@ public:
     std::vector<NodeFacadePtr> getAllNodeFacades() override;
     std::vector<NodeFacadeLocalPtr> getAllLocalNodeFacades();
 
+    ConnectablePtr findConnectable(const UUID &uuid);
 
     ConnectorPtr findConnector(const UUID &uuid) override;
     ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept override;

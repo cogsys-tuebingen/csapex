@@ -10,14 +10,10 @@
 using namespace csapex;
 
 CommandDispatcherRemote::CommandDispatcherRemote(SessionPtr session)
-    : session_(session)
+    : Remote(session)
 {
     dirty_ = false;
     init_ = false;
-
-    session_->broadcast_received.connect([this](const BroadcastMessageConstPtr& message) {
-        handleBroadcast(message);
-    });
 }
 
 void CommandDispatcherRemote::execute(const CommandPtr &command)
@@ -38,9 +34,7 @@ void CommandDispatcherRemote::executeLater()
 bool CommandDispatcherRemote::isDirty() const
 {
     if(!init_) {
-        auto res = session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::IsDirty);
-        apex_assert_hard(res);
-        dirty_ = res->getResult();
+        dirty_ = request<bool, CommandRequests>(CommandRequests::CommandRequestType::IsDirty);
         init_ = true;
     }
 
@@ -49,16 +43,12 @@ bool CommandDispatcherRemote::isDirty() const
 
 bool CommandDispatcherRemote::canUndo() const
 {
-    auto res = session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::CanUndo);
-    apex_assert_hard(res);
-    return res->getResult();
+    return request<bool, CommandRequests>(CommandRequests::CommandRequestType::CanUndo);
 }
 
 bool CommandDispatcherRemote::canRedo() const
 {
-    auto res = session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::CanRedo);
-    apex_assert_hard(res);
-    return res->getResult();
+    return request<bool, CommandRequests>(CommandRequests::CommandRequestType::CanRedo);
 }
 
 void CommandDispatcherRemote::undo()

@@ -3,13 +3,14 @@
 
 #include <csapex/model/graph_facade.h>
 #include <csapex/io/io_fwd.h>
+#include <csapex/io/remote.h>
 
 namespace csapex
 {
 class GraphFacadeLocal;
 class GraphRemote;
 
-class GraphFacadeRemote : public GraphFacade
+class GraphFacadeRemote : public GraphFacade, public Remote
 {
 public:
     GraphFacadeRemote(SessionPtr session, GraphFacadeLocal& tmp_ref, GraphFacadeRemote *parent = nullptr);
@@ -37,11 +38,9 @@ protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) override;
     virtual void nodeRemovedHandler(graph::VertexPtr node) override;
 
-    void handleBroadcast(const BroadcastMessageConstPtr& message);
+    void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
 private:
-    SessionPtr session_;
-
     GraphFacadeRemote* parent_;
     std::shared_ptr<GraphRemote> graph_;
 

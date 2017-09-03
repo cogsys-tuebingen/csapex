@@ -38,11 +38,8 @@ namespace bf3 = boost::filesystem3;
 using namespace csapex;
 
 SettingsRemote::SettingsRemote(SessionPtr session)
-    : session_(session)
-{    
-    session_->broadcast_received.connect([this](const BroadcastMessageConstPtr& message) {
-        handleBroadcast(message);
-    });
+    : Remote(session)
+{
 }
 
 void SettingsRemote::savePersistent()

@@ -66,7 +66,8 @@ public:
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
 
-        bool getResult() const
+        template <typename R>
+        R getResult() const
         {
             return result_;
         }

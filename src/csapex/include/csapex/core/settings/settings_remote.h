@@ -5,11 +5,12 @@
 #include <csapex_remote_export.h>
 #include <csapex/core/settings.h>
 #include <csapex/io/io_fwd.h>
+#include <csapex/io/remote.h>
 
 namespace csapex
 {
 
-class CSAPEX_REMOTE_EXPORT SettingsRemote : public Settings
+class CSAPEX_REMOTE_EXPORT SettingsRemote : public Settings, public Remote
 {
 public:
     SettingsRemote(SessionPtr session);
@@ -29,11 +30,9 @@ public:
 private:
     void createParameterProxy(const std::string &name, param::ParameterPtr proxy) const;
 
-    void handleBroadcast(const BroadcastMessageConstPtr& message);
+    void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
 private:
-    SessionPtr session_;
-
     mutable std::map<std::string, param::ParameterPtr> cache_;
 };
 

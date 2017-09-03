@@ -861,6 +861,12 @@ std::vector<NodeFacadeLocalPtr> GraphLocal::getAllLocalNodeFacades()
     return node_facades;
 }
 
+ConnectablePtr GraphLocal::findConnectable(const UUID &uuid)
+{
+    ConnectorPtr connector = findConnector(uuid);
+    return std::dynamic_pointer_cast<Connectable>(connector);
+}
+
 ConnectorPtr GraphLocal::findConnector(const UUID &uuid)
 {
     ConnectorPtr res = findConnectorNoThrow(uuid);

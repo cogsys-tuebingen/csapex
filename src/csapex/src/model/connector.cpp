@@ -17,11 +17,6 @@ Connector::Connector(const UUID &uuid, ConnectableOwnerWeakPtr owner)
 
 }
 
-void Connector::validateConnections()
-{
-
-}
-
 bool Connector::isSynchronous() const
 {
     return true;

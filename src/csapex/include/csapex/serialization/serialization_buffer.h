@@ -5,6 +5,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/serialization/serialization_fwd.h>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <vector>
@@ -12,6 +13,7 @@
 #include <string>
 #include <sstream>
 #include <limits>
+#include <typeindex>
 #include <boost/any.hpp>
 
 namespace YAML
@@ -30,49 +32,12 @@ class SerializationBuffer : public std::vector<uint8_t>
 public:
     static const uint8_t HEADER_LENGTH = 4;
 public:
-    SerializationBuffer()
-        : pos(HEADER_LENGTH)
-    {
-        // the header is always 4 byte
-        insert(end(), HEADER_LENGTH, 0);
-    }
+    SerializationBuffer();
 
-    void finalize()
-    {
-        uint32_t length = size();
-        apex_assert_lte_hard(length, std::numeric_limits<uint32_t>::max());
+    void finalize();
+    void seek(uint32_t p);
 
-        std::size_t nbytes = sizeof(uint32_t);
-        for(std::size_t byte = 0; byte < nbytes; ++byte) {
-            uint8_t part = (length >> (byte * 8)) & 0xFF;
-            at(byte) = part;
-        }
-    }
-
-    void seek(uint32_t p)
-    {
-        pos = p;
-    }
-
-    std::string toString() const
-    {
-        std::stringstream res;
-        for(std::size_t i = 0; i < size(); ++i) {
-            if((i%8) == 0) {
-                res << std::hex << i << ":\t\t" << std::dec;
-            }
-
-            res << (int) at(i);
-
-
-            if((i%8) != 7) {
-                res << '\t';
-            } else {
-                res << '\n';
-            }
-        }
-        return res.str();
-    }
+    std::string toString() const;
 
     // SERIALIZABLES
     void write (const SerializableConstPtr &i);
@@ -165,6 +130,10 @@ public:
     SerializationBuffer& operator << (const UUID& s);
     SerializationBuffer& operator >> (UUID& s);
 
+    // Token Data
+    SerializationBuffer& operator << (const TokenData& s);
+    SerializationBuffer& operator >> (TokenData& s);
+
 
     // BOOST ANY
     template <typename T,
@@ -230,13 +199,15 @@ public:
         return *this;
     }
 
-
     // YAML
     SerializationBuffer& operator << (const YAML::Node& node);
     SerializationBuffer& operator >> (YAML::Node& node);
 
 private:
     std::size_t pos;
+
+    std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const boost::any& a)>> any_serializer;
+    std::map<uint8_t, std::function<void(SerializationBuffer& buffer, boost::any& a)>> any_deserializer;
 };
 
 }

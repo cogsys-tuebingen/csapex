@@ -27,6 +27,8 @@ public:
 
     int getCount() const;
 
+    virtual void validateConnections();
+
     virtual bool canConnectTo(Connector* other_side, bool move) const;
 
     virtual bool canOutput() const {
@@ -58,7 +60,7 @@ public:
     void setEssential(bool essential);
 
     virtual void addConnection(ConnectionPtr connection);
-    virtual void removeConnection(Connector* other_side);
+    virtual void removeConnection(Connectable* other_side);
     virtual void fadeConnection(ConnectionPtr connection);
 
     void setLabel(const std::string& label);
@@ -75,7 +77,7 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
-    int countConnections();
+    int countConnections() const override;
     std::vector<ConnectionPtr> getConnections() const;
 
     bool hasEnabledConnection() const;

@@ -4,11 +4,88 @@
 /// PROJECT
 #include <csapex/serialization/serializable.h>
 #include <csapex/serialization/packet_serializer.h>
+#include <csapex/model/connector_type.h>
+#include <csapex/model/token_data.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <iostream>
 
 using namespace csapex;
+
+SerializationBuffer::SerializationBuffer()
+    : pos(HEADER_LENGTH)
+{
+    // the header is always 4 byte
+    insert(end(), HEADER_LENGTH, 0);
+
+#define ADD_ANY_TYPE(...) { \
+    auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
+        buffer << ((uint8_t) id); \
+        buffer << (boost::any_cast<__VA_ARGS__> (any)); \
+    };\
+    auto deserializer = [id](SerializationBuffer& buffer, boost::any& any){ \
+        __VA_ARGS__ v; \
+        buffer >> (v); \
+        any = v; \
+    };\
+    any_serializer[std::type_index(typeid(__VA_ARGS__))] = serializer; \
+    any_deserializer[id] = deserializer; \
+    }\
+    ++id
+
+    int id = 1;
+    ADD_ANY_TYPE(int);
+    ADD_ANY_TYPE(double);
+    ADD_ANY_TYPE(bool);
+    ADD_ANY_TYPE(std::string);
+    ADD_ANY_TYPE(long);
+    ADD_ANY_TYPE(UUID);
+    ADD_ANY_TYPE(std::pair<std::string,bool>);
+    ADD_ANY_TYPE(std::pair<std::string,bool>);
+    ADD_ANY_TYPE(std::pair<int,int>);
+    ADD_ANY_TYPE(std::pair<std::string,bool>);
+    ADD_ANY_TYPE(std::pair<double,double>);
+    ADD_ANY_TYPE(ConnectorType);
+//    ADD_ANY_TYPE(TokenData);
+}
+
+void SerializationBuffer::finalize()
+{
+    uint32_t length = size();
+    apex_assert_lte_hard(length, std::numeric_limits<uint32_t>::max());
+
+    std::size_t nbytes = sizeof(uint32_t);
+    for(std::size_t byte = 0; byte < nbytes; ++byte) {
+        uint8_t part = (length >> (byte * 8)) & 0xFF;
+        at(byte) = part;
+    }
+}
+
+void SerializationBuffer::seek(uint32_t p)
+{
+    pos = p;
+}
+
+std::string SerializationBuffer::toString() const
+{
+    std::stringstream res;
+    for(std::size_t i = 0; i < size(); ++i) {
+        if((i%8) == 0) {
+            res << std::hex << i << ":\t\t" << std::dec;
+        }
+
+        res << (int) at(i);
+
+
+        if((i%8) != 7) {
+            res << '\t';
+        } else {
+            res << '\n';
+        }
+    }
+    return res.str();
+}
 
 void SerializationBuffer::write(const SerializableConstPtr &i)
 {
@@ -31,43 +108,13 @@ SerializablePtr SerializationBuffer::read()
 
 SerializationBuffer& SerializationBuffer::writeAny (const boost::any& any)
 {
-    if(any.type() == typeid(int)) {
-        operator << ((uint8_t) 1);
-        operator << (boost::any_cast<int> (any));
-
-    } else if(any.type() == typeid(double)) {
-        operator << ((uint8_t) 2);
-        operator << (boost::any_cast<double> (any));
-
-    } else if(any.type() == typeid(bool)) {
-        operator << ((uint8_t) 3);
-        operator << (boost::any_cast<bool> (any));
-
-    } else if(any.type() == typeid(std::string)) {
-        operator << ((uint8_t) 4);
-        operator << (boost::any_cast<std::string> (any));
-
-    } else if(any.type() == typeid(long)) {
-        operator << ((uint8_t) 5);
-        operator << (boost::any_cast<long> (any));
-
-    } else if(any.type() == typeid(std::pair<std::string, bool>)) {
-        operator << ((uint8_t) 6);
-        operator << (boost::any_cast<std::pair<std::string, bool>> (any));
-
-    } else if(any.type() == typeid(std::pair<int, int>)) {
-        operator << ((uint8_t) 7);
-        operator << (boost::any_cast<std::pair<std::string, bool>> (any));
-
-    } else if(any.type() == typeid(std::pair<double, double>)) {
-        operator << ((uint8_t) 8);
-        operator << (boost::any_cast<std::pair<std::string, bool>> (any));
-
-    } else if(any.type() == typeid(UUID)) {
-        operator << ((uint8_t) 9);
-        operator << (boost::any_cast<UUID> (any));
-
+    auto fn = any_serializer.find(any.type());
+    if(fn != any_serializer.end()) {
+        fn->second(*this, any);
     } else {
+        if(!any.empty()) {
+            std::cerr << "cannot serialize boost::any containing " << type2name(any.type()) << std::endl;
+        }
         operator << ((uint8_t) 0);
     }
 
@@ -79,71 +126,18 @@ SerializationBuffer& SerializationBuffer::readAny (boost::any& any)
     uint8_t type;
     operator >> (type);
 
-    switch(type) {
-    case 1:
-    {
-        int v;
-        operator >> (v);
-        any = v;
+    if(type == 0) {
+        // empty boost::any
+        return *this;
     }
-        break;
-    case 2:
-    {
-        double v;
-        operator >> (v);
-        any = v;
+
+    auto fn = any_deserializer.find(type);
+    if(fn != any_deserializer.end()) {
+        fn->second(*this, any);
+    } else {
+        std::cerr << "cannot deserialize boost::any with type " << (int) type << std::endl;
     }
-        break;
-    case 3:
-    {
-        bool v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    case 4:
-    {
-        std::string v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    case 5:
-    {
-        long v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    case 6:
-    {
-        std::pair<std::string, bool> v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    case 7:
-    {
-        std::pair<int, int> v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    case 8:
-    {
-        std::pair<double, double> v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    case 9:
-    {
-        UUID v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    }
+
     return *this;
 }
 
@@ -349,6 +343,17 @@ SerializationBuffer& SerializationBuffer::operator >> (UUID& s)
     std::string full_name;
     operator >> (full_name);
     s = UUIDProvider::makeUUID_without_parent(full_name);
+    return *this;
+}
+
+// TokenData
+SerializationBuffer& SerializationBuffer::operator << (const TokenData& s)
+{
+    return *this;
+}
+
+SerializationBuffer& SerializationBuffer::operator >> (TokenData& s)
+{
     return *this;
 }
 

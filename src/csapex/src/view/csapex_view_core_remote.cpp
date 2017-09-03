@@ -11,7 +11,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/io/session.h>
+#include <csapex/io/session_client.h>
 #include <csapex/io/protcol/core_requests.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/protcol/notification_message.h>
@@ -34,17 +34,12 @@ namespace bf3 = boost::filesystem;
 namespace bf3 = boost::filesystem3;
 #endif
 
-using boost::asio::ip::tcp;
 using namespace csapex;
 
 
 CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsApexCorePtr core_tmp)
-    : socket(io_service),
-      resolver(io_service),
-      resolver_iterator(boost::asio::connect(socket, resolver.resolve({ip, std::to_string(port)}))),
-      session_(std::make_shared<Session>(std::move(socket))),
+    : Remote(std::make_shared<SessionClient>(ip, port)),
       exception_handler_(std::make_shared<GuiExceptionHandler>(false)),
-
       core_tmp_(core_tmp)
 {
     session_->start();
@@ -74,7 +69,7 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     running = true;
     spinner = std::thread([&](){
         while(running) {
-            io_service.run();
+            session_->run();
         }
     });
 
@@ -220,16 +215,12 @@ void CsApexViewCoreRemote::saveAs(const std::string& file, bool quiet)
 
 SnippetPtr CsApexViewCoreRemote::serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const
 {
-    auto res = session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSerialize, graph_id, nodes);
-    apex_assert_hard(res);
-    return res->getResult<SnippetPtr>();
+    return request<SnippetPtr, CoreRequests>(CoreRequests::CoreRequestType::CoreSerialize, graph_id, nodes);
 }
 
 bool CsApexViewCoreRemote::isPaused() const
 {
-    auto res = session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetPause);
-    apex_assert_hard(res);
-    return res->getResult<bool>();
+    return request<bool, CoreRequests>(CoreRequests::CoreRequestType::CoreGetPause);
 }
 
 void CsApexViewCoreRemote::setPause(bool paused)
@@ -240,9 +231,7 @@ void CsApexViewCoreRemote::setPause(bool paused)
 
 bool CsApexViewCoreRemote::isSteppingMode() const
 {
-    auto res = session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreGetSteppingMode);
-    apex_assert_hard(res);
-    return res->getResult<bool>();
+    return request<bool, CoreRequests>(CoreRequests::CoreRequestType::CoreGetSteppingMode);
 }
 
 void CsApexViewCoreRemote::setSteppingMode(bool stepping)
@@ -260,7 +249,7 @@ void CsApexViewCoreRemote::shutdown()
 {
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreShutdown);
     running = false;
-    io_service.stop();
+    session_->shutdown();
 }
 
 void CsApexViewCoreRemote::clearBlock()

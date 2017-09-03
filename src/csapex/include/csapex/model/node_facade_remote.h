@@ -5,6 +5,7 @@
 #include <csapex/model/node_facade.h>
 #include <csapex/io/io_fwd.h>
 #include <csapex/serialization/serializable.h>
+#include <csapex/io/remote.h>
 
 /// SYSTEM
 #include <unordered_map>
@@ -12,7 +13,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade
+class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade, public Remote
 {
 public:
     NodeFacadeRemote(SessionPtr session, AUUID uuid,
@@ -106,7 +107,7 @@ public:
     slim_signal::ObservableSignal<void(SerializableConstPtr)> remote_data_connection;
 
 private:
-    void handleBroadcast(const BroadcastMessageConstPtr& message);
+    void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
     void connectNodeHandle();
     void connectNodeWorker();
@@ -114,8 +115,6 @@ private:
     void createConnectorProxy(const ConnectorPtr& connector);
 
 private:
-    SessionPtr session_;
-
     AUUID uuid_;
 
     NodeHandlePtr nh_;

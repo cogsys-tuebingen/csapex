@@ -112,10 +112,12 @@ void NodeRequests::NodeResponse::serialize(SerializationBuffer &data) const
 {
     data << request_type_;
     data << uuid_;
+    data << result_;
 }
 
 void NodeRequests::NodeResponse::deserialize(SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;
+    data >> result_;
 }

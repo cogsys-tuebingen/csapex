@@ -14,7 +14,7 @@ using namespace csapex;
 
 GraphRemote::GraphRemote(SessionPtr session, const AUUID& auuid,
                          GraphLocal &temp_reference)
-    : session_(session),
+    : Remote(session),
       temp_reference(temp_reference),
       nf_(std::make_shared<NodeFacadeRemote>(session, auuid, nullptr, nullptr, nullptr))
 {

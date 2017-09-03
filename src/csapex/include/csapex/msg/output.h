@@ -29,7 +29,7 @@ public:
     void setOutputTransition(OutputTransition* ot);
     void removeOutputTransition();
 
-    virtual void removeConnection(Connector* other_side) override;
+    virtual void removeConnection(Connectable* other_side) override;
 
     void notifyMessageProcessed();
     void notifyMessageProcessed(Connection *connection);

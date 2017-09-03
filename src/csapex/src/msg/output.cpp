@@ -35,7 +35,7 @@ void Output::removeOutputTransition()
     transition_ = nullptr;
 }
 
-void Output::removeConnection(Connector *other_side)
+void Output::removeConnection(Connectable *other_side)
 {
     Connectable::removeConnection(other_side);
     if(connections_.empty()) {

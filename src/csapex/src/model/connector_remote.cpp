@@ -1,12 +1,16 @@
 /// HEADER
 #include <csapex/model/connector_remote.h>
 
+/// PROJECT
+#include <csapex/io/protcol/connector_requests.h>
+
 using namespace csapex;
+
 
 ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
                                  SessionPtr session, ConnectorPtr tmp_connector)
     : Connector(uuid, owner),
-      session_(session),
+      Remote(session),
       tmp_connector_(tmp_connector)
 {
     observe(tmp_connector_->enabled_changed, enabled_changed);
@@ -44,181 +48,47 @@ bool ConnectorRemote::isConnectionPossible(Connector* other_side)
 {
     return tmp_connector_->isConnectionPossible(other_side);
 }
-void ConnectorRemote::validateConnections()
-{
-    tmp_connector_->validateConnections();
-}
+
 void ConnectorRemote::connectionMovePreview(ConnectorPtr other_side)
 {
     tmp_connector_->connectionMovePreview(other_side);
-}
-
-int ConnectorRemote::getCount() const
-{
-    return tmp_connector_->getCount();
-}
-
-bool ConnectorRemote::canOutput() const
-{
-    return tmp_connector_->canOutput();
-}
-bool ConnectorRemote::canInput() const
-{
-    return tmp_connector_->canInput();
-}
-bool ConnectorRemote::isOutput() const
-{
-    return tmp_connector_->isOutput();
-}
-bool ConnectorRemote::isInput() const
-{
-    return tmp_connector_->isInput();
-}
-bool ConnectorRemote::isOptional() const
-{
-    return tmp_connector_->isOptional();
-}
-bool ConnectorRemote::isSynchronous() const
-{
-    return tmp_connector_->isSynchronous();
-}
-
-bool ConnectorRemote::isVirtual() const
-{
-    return tmp_connector_->isVirtual();
-}
-
-bool ConnectorRemote::isParameter() const
-{
-    return tmp_connector_->isParameter();
-}
-
-void ConnectorRemote::setVirtual(bool _virtual)
-{
-    tmp_connector_->setVirtual(_virtual);
-}
-
-bool ConnectorRemote::isGraphPort() const
-{
-    return tmp_connector_->isGraphPort();
-}
-void ConnectorRemote::setGraphPort(bool graph)
-{
-    tmp_connector_->setGraphPort(graph);
-}
-
-bool ConnectorRemote::isEssential() const
-{
-    return tmp_connector_->isEssential();
-}
-void ConnectorRemote::setEssential(bool essential)
-{
-    tmp_connector_->setEssential(essential);
-}
-
-void ConnectorRemote::addConnection(ConnectionPtr connection)
-{
-    tmp_connector_->addConnection(connection);
-}
-void ConnectorRemote::removeConnection(Connector* other_side)
-{
-    tmp_connector_->removeConnection(other_side);
-}
-void ConnectorRemote::fadeConnection(ConnectionPtr connection)
-{
-    tmp_connector_->fadeConnection(connection);
-}
-
-void ConnectorRemote::setLabel(const std::string& label)
-{
-    tmp_connector_->setLabel(label);
-}
-std::string ConnectorRemote::getLabel() const
-{
-    return tmp_connector_->getLabel();
-}
-
-void ConnectorRemote::setType(TokenData::ConstPtr type)
-{
-    tmp_connector_->setType(type);
-}
-TokenData::ConstPtr ConnectorRemote::getType() const
-{
-    return tmp_connector_->getType();
-}
-
-ConnectorType ConnectorRemote::getConnectorType() const
-{
-    return tmp_connector_->getConnectorType();
-}
-
-ConnectorDescription ConnectorRemote::getDescription() const
-{
-    return tmp_connector_->getDescription();
-}
-
-bool ConnectorRemote::isEnabled() const
-{
-    return tmp_connector_->isEnabled();
-}
-
-void ConnectorRemote::setEnabled(bool enabled)
-{
-    tmp_connector_->setEnabled(enabled);
-}
-
-int ConnectorRemote::sequenceNumber() const
-{
-    return tmp_connector_->sequenceNumber();
-}
-void ConnectorRemote::setSequenceNumber(int seq_no)
-{
-    tmp_connector_->setSequenceNumber(seq_no);
-}
-
-int ConnectorRemote::countConnections()
-{
-    return tmp_connector_->countConnections();
 }
 std::vector<ConnectionPtr> ConnectorRemote::getConnections() const
 {
     return tmp_connector_->getConnections();
 }
 
-bool ConnectorRemote::hasActiveConnection() const
-{
-    return tmp_connector_->hasActiveConnection();
+
+#define GENERATE_GETTER(type, function, _enum) \
+type ConnectorRemote::function() const\
+{\
+    return request<type, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::_enum, getUUID().getAbsoluteUUID());\
 }
 
-bool ConnectorRemote::isConnected() const
-{
-    return tmp_connector_->isConnected();
-}
+GENERATE_GETTER(int, getCount, GetCount)
+GENERATE_GETTER(bool, canOutput, CanOutput)
+GENERATE_GETTER(bool, canInput, CanInput)
+GENERATE_GETTER(bool, isOutput, IsOutput)
+GENERATE_GETTER(bool, isInput, IsInput)
+GENERATE_GETTER(bool, isOptional, IsOptional)
+GENERATE_GETTER(bool, isSynchronous, IsSynchronous)
+GENERATE_GETTER(bool, isVirtual, IsVirtual)
+GENERATE_GETTER(bool, isParameter, IsParameter)
+GENERATE_GETTER(bool, isGraphPort, IsGraphPort)
+GENERATE_GETTER(bool, isEssential, IsEssential)
+GENERATE_GETTER(std::string, getLabel, GetLabel)
+GENERATE_GETTER(ConnectorType, getConnectorType, GetConnectorType)
+GENERATE_GETTER(ConnectorDescription, getDescription, GetDescription)
+GENERATE_GETTER(bool, isEnabled, IsEnabled)
+GENERATE_GETTER(int, sequenceNumber, GetSequenceNumber)
+GENERATE_GETTER(int, countConnections, GetConnectionCount)
+GENERATE_GETTER(bool, hasActiveConnection, HasActiveConnection)
+GENERATE_GETTER(bool, isConnected, IsConnected)
+GENERATE_GETTER(std::string, makeStatusString, MakeStatusString)
 
-void ConnectorRemote::disable()
+TokenData::ConstPtr ConnectorRemote::getType() const
 {
-    tmp_connector_->disable();
-}
-void ConnectorRemote::enable()
-{
-    tmp_connector_->enable();
-}
-
-void ConnectorRemote::reset()
-{
-    tmp_connector_->reset();
-}
-void ConnectorRemote::stop()
-{
-    tmp_connector_->stop();
-}
-
-void ConnectorRemote::notifyMessageProcessed()
-{
-    tmp_connector_->notifyMessageProcessed();
-}
-
-std::string ConnectorRemote::makeStatusString() const
-{
-    return tmp_connector_->makeStatusString();
+//    TokenData res = request<TokenData, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::GetType, getUUID().getAbsoluteUUID());
+//    return std::make_shared<TokenData>(res);
+    return tmp_connector_->getType();
 }

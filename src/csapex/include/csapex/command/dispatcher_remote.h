@@ -6,6 +6,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/command/command_executor.h>
 #include <csapex/io/io_fwd.h>
+#include <csapex/io/remote.h>
 
 /// SYSTEM
 #include <deque>
@@ -14,7 +15,7 @@
 namespace csapex
 {
 
-class CSAPEX_COMMAND_EXPORT CommandDispatcherRemote : public CommandExecutor
+class CSAPEX_COMMAND_EXPORT CommandDispatcherRemote : public CommandExecutor, public Remote
 {
 public:
     typedef std::shared_ptr<CommandDispatcherRemote> Ptr;
@@ -35,11 +36,9 @@ public:
     void redo();
 
 private:
-    void handleBroadcast(const BroadcastMessageConstPtr& message);
+    void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
 private:
-    SessionPtr session_;
-
     mutable bool init_;
     mutable bool dirty_;
 };

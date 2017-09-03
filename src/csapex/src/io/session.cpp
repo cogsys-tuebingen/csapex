@@ -19,12 +19,20 @@
 using namespace csapex;
 using boost::asio::ip::tcp;
 
-Session::Session(tcp::socket socket)
-    : socket_(std::move(socket)),
+Session::Session(Socket socket)
+    : socket_(new Socket(std::move(socket))),
       next_request_id_(1),
       running_(false),
       live_(false)
 {
+}
+
+Session::Session()
+    : next_request_id_(1),
+      running_(false),
+      live_(false)
+{
+
 }
 
 Session::~Session()
@@ -38,7 +46,17 @@ Session::~Session()
         apex_assert_hard(!packet_handler_thread_.joinable());
     }
 
-    socket_.close();
+    socket_->close();
+}
+
+void Session::run()
+{
+
+}
+
+void Session::shutdown()
+{
+
 }
 
 void Session::start()
@@ -175,7 +193,7 @@ void Session::read_async()
     }
 
     std::shared_ptr<SerializationBuffer> message_data = std::make_shared<SerializationBuffer>();
-    boost::asio::async_read(socket_, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH),
+    boost::asio::async_read(*socket_, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH),
                             [this, message_data](boost::system::error_code ec, std::size_t reply_length){
         if ((ec  == boost::asio::error::eof) || (ec == boost::asio::error::connection_reset)) {
             // disconnect
@@ -193,7 +211,7 @@ void Session::read_async()
 
                 } else {
                     message_data->resize(message_length, ' ');
-                    reply_length = boost::asio::read(socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
+                    reply_length = boost::asio::read(*socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
                     apex_assert_equal_hard((int) reply_length, ((int) (message_length - SerializationBuffer::HEADER_LENGTH)));
 
                     SerializablePtr serial = PacketSerializer::deserializePacket(*message_data);
@@ -249,11 +267,11 @@ void Session::write_packet(SerializationBuffer &buffer)
     try {
         buffer.finalize();
 
-        apex_assert_hard(socket_.is_open());
+        apex_assert_hard(socket_->is_open());
 
 //                std::cerr << "sending:\n" << buffer.toString() << std::endl;
 
-        boost::asio::async_write(socket_, boost::asio::buffer(buffer, buffer.size()),
+        boost::asio::async_write(*socket_, boost::asio::buffer(buffer, buffer.size()),
                                  [](boost::system::error_code /*ec*/, std::size_t /*length*/){});
 
     } catch(const std::exception& e) {
@@ -266,11 +284,11 @@ void Session::write_packet(SerializationBuffer &buffer)
 }
 
 
-slim_signal::Signal<void(RawMessageConstPtr)>& Session::raw_packet_received(const AUUID& uuid)
+slim_signal::Signal<void (const RawMessageConstPtr &)> &Session::raw_packet_received(const AUUID& uuid)
 {
     auto& res = auuid_to_signal_[uuid];
     if(res == nullptr) {
-        res.reset(new slim_signal::Signal<void(RawMessageConstPtr)>);
+        res.reset(new slim_signal::Signal<void(const RawMessageConstPtr&)>);
     }
     return *res;
 }

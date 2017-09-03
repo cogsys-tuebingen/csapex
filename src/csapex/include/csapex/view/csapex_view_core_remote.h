@@ -4,9 +4,9 @@
 /// COMPONENT
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/core/settings/settings_remote.h>
+#include <csapex/io/remote.h>
 
 /// SYSTEM
-#include <boost/asio.hpp>
 #include <thread>
 
 namespace csapex
@@ -19,7 +19,7 @@ class DesignerStyleable;
 class DesignerOptions;
 class DragIO;
 
-class CSAPEX_QT_EXPORT CsApexViewCoreRemote : public CsApexViewCore
+class CSAPEX_QT_EXPORT CsApexViewCoreRemote : public CsApexViewCore, public Remote
 {
 public:
     CsApexViewCoreRemote(const std::string& ip, int port, CsApexCorePtr core_tmp);
@@ -68,14 +68,6 @@ private:
     void handleBroadcast(BroadcastMessageConstPtr packet);
 
 private:
-
-    boost::asio::io_service io_service;
-    boost::asio::ip::tcp::socket socket;
-    boost::asio::ip::tcp::resolver resolver;
-    boost::asio::ip::tcp::resolver::iterator resolver_iterator;
-
-    SessionPtr session_;
-
     std::shared_ptr<SettingsRemote> settings_;
 
     std::shared_ptr<NodeAdapterFactory> node_adapter_factory_;

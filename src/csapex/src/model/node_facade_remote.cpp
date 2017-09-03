@@ -25,22 +25,16 @@ using namespace csapex;
 
 NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
                                    NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr)
-    : session_(session),
+    : Remote(session),
       uuid_(uuid),
       nh_(nh), nw_(nw), nr_(nr)
 {
-    session_->broadcast_received.connect([this](const BroadcastMessageConstPtr& message) {
-        handleBroadcast(message);
-    });
-
     if(nr_) {
         nh->setNodeRunner(nr_);
     }
 
     if(nh_) {
         connectNodeHandle();
-    } else {
-
     }
 
     if(nw_) {

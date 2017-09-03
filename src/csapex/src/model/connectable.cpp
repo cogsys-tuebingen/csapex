@@ -189,6 +189,11 @@ void Connectable::setType(TokenData::ConstPtr type)
     }
 }
 
+void Connectable::validateConnections()
+{
+
+}
+
 TokenData::ConstPtr Connectable::getType() const
 {
     return type_;
@@ -210,7 +215,7 @@ void Connectable::setSequenceNumber(int seq_no)
     seq_no_ = seq_no;
 }
 
-void Connectable::removeConnection(Connector* other_side)
+void Connectable::removeConnection(Connectable* other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
@@ -260,7 +265,7 @@ void Connectable::fadeConnection(ConnectionPtr connection)
     connection_faded(connection);
 }
 
-int Connectable::countConnections()
+int Connectable::countConnections() const
 {
     return connections_.size();
 }
