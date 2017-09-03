@@ -811,19 +811,9 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
 
     addBox(box);
 
-    NodeHandlePtr node_handle = node_facade->getNodeHandle();
     // add existing connectors
-    for(auto input : node_handle->getExternalInputs()) {
-        connectorMessageAdded(input);
-    }
-    for(auto output : node_handle->getExternalOutputs()) {
-        connectorMessageAdded(output);
-    }
-    for(auto slot : node_handle->getExternalSlots()) {
-        connectorSignalAdded(slot);
-    }
-    for(auto event : node_handle->getExternalEvents()) {
-        connectorSignalAdded(event);
+    for(ConnectorDescription description : node_facade->getExternalConnectors()) {
+        addConnector(description);
     }
 
     // subscribe to coming connectors
@@ -871,56 +861,58 @@ void GraphView::childNodeRemoved(NodeFacadePtr facade)
 
 void GraphView::connectorCreated(ConnectorPtr connector)
 {
-    // TODO: dirty...
-    if(dynamic_cast<Slot*> (connector.get()) || dynamic_cast<Event*>(connector.get())) {
-        connectorSignalAdded(connector);
-    } else {
-        connectorMessageAdded(connector);
-    }
+    addConnector(connector->getDescription());
 }
 
 void GraphView::connectorRemoved(ConnectorPtr connector)
 {
-    UUID parent_uuid = connector->getUUID().parentUUID();
-    NodeBox* box = getBox(parent_uuid);
-
-    box->removePort(connector);
+    removeConnector(connector->getDescription());
 }
 
 
-void GraphView::connectorMessageAdded(ConnectorPtr connector)
+void GraphView::addConnector(const ConnectorDescription &connector)
 {
-    UUID parent_uuid = connector->getUUID().parentUUID();
-
-    GraphPtr g = graph_facade_->getGraph();
-    NodeHandle* node_worker = g->findNodeHandle(parent_uuid);
-    if(node_worker) {
-        Output* o = dynamic_cast<Output*>(connector.get());
-        if(o && node_worker->isParameterOutput(o->getUUID())) {
-            return;
-        }
-
-        Input* i = dynamic_cast<Input*>(connector.get());
-        if(i && node_worker->isParameterInput(i->getUUID())) {
-            return;
-        }
-
-        NodeBox* box = getBox(parent_uuid);
-        QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
-
-        box->createPort(connector, layout);
+    if(connector.is_parameter) {
+        return;
     }
-}
 
-void GraphView::connectorSignalAdded(ConnectorPtr connector)
-{
-    UUID parent_uuid = connector->getUUID().parentUUID();
+    UUID parent_uuid = connector.id.parentUUID();
     NodeBox* box = getBox(parent_uuid);
     if(box) {
-        QBoxLayout* layout = dynamic_cast<Event*>(connector.get()) ? box->getEventLayout() : box->getSlotLayout();
+        QBoxLayout* layout = nullptr;
+        switch(connector.connector_type) {
+        case ConnectorType::EVENT:
+            layout = box->getEventLayout();
+            break;
+        case ConnectorType::SLOT_T:
+            layout = box->getSlotLayout();
+            break;
+        case ConnectorType::INPUT:
+            layout = box->getInputLayout();
+            break;
+        case ConnectorType::OUTPUT:
+            layout = box->getOutputLayout();
+            break;
+        default:
+            throw std::logic_error("unknown connector type");
+        }
 
-        box->createPort(connector, layout);
+        ConnectorPtr ctor = getGraphFacade()->getGraph()->findConnector(connector.id);
+        box->createPort(ctor, layout);
     }
+}
+
+void GraphView::removeConnector(const ConnectorDescription &connector)
+{
+    if(connector.is_parameter) {
+        return;
+    }
+
+    UUID parent_uuid = connector.id.parentUUID();
+    NodeBox* box = getBox(parent_uuid);
+
+    ConnectorPtr ctor = getGraphFacade()->getGraph()->findConnector(connector.id);
+    box->removePort(ctor);
 }
 
 NodeBox* GraphView::getBox(const csapex::UUID &node_id)
@@ -1085,7 +1077,7 @@ void GraphView::addPort(Port *port)
     }
 
     QObject::connect(port, &Port::removeConnectionsRequest, [this, port]() {
-        ConnectorPtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
             return;
         }
@@ -1093,7 +1085,7 @@ void GraphView::addPort(Port *port)
     });
 
     QObject::connect(port, &Port::addConnectionRequest, [this, port](const ConnectorPtr& from) {
-        ConnectorPtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
             return;
         }
@@ -1102,7 +1094,7 @@ void GraphView::addPort(Port *port)
     });
 
     QObject::connect(port, &Port::moveConnectionRequest, [this, port](const ConnectorPtr& from) {
-        ConnectorPtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
             return;
         }
@@ -1111,7 +1103,7 @@ void GraphView::addPort(Port *port)
     });
 
     QObject::connect(port, &Port::changePortRequest, [this, port](QString label) {
-        ConnectorPtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
             return;
         }
@@ -1724,7 +1716,7 @@ void GraphView::showPreview(Port* port)
     preview_widget_->move(pos.toPoint());
 
     if(!preview_widget_->isConnected()) {
-        preview_widget_->connectTo(port->getAdaptee().lock());
+        preview_widget_->connectTo(port->getAdaptee());
     }
 }
 

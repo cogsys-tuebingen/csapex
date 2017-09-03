@@ -11,6 +11,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <sstream>
 
 using namespace csapex;
 
@@ -192,5 +193,20 @@ void Output::publish()
         if(connection->isEnabled()) {
             connection->setToken(msg);
         }
+    }
+}
+
+void Output::addStatusInformation(std::stringstream &status_stream) const
+{
+    status_stream << ", state: ";
+    switch(getState()) {
+    case Output::State::ACTIVE:
+        status_stream << "ACTIVE";
+        break;
+    case Output::State::IDLE:
+        status_stream << "IDLE";
+        break;
+    default:
+        status_stream << "UNKNOWN";
     }
 }

@@ -10,6 +10,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <sstream>
 
 using namespace csapex;
 
@@ -196,4 +197,12 @@ void Input::notifyMessageAvailable(Connection* connection)
         connection->setTokenProcessed();
         //this causes problems.....
     }
+}
+
+void Input::addStatusInformation(std::stringstream &status_stream) const
+{
+    if(TokenPtr token = getToken()) {
+        status_stream << ", Last Message Type: " << token->getTokenData()->descriptiveName();
+    }
+    status_stream << ", optional: " << isOptional();
 }

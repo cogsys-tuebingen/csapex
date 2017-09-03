@@ -148,8 +148,10 @@ public Q_SLOTS:
 
     void connectorCreated(ConnectorPtr connector);
     void connectorRemoved(ConnectorPtr connector);
-    void connectorSignalAdded(ConnectorPtr connector);
-    void connectorMessageAdded(ConnectorPtr connector);
+
+    void addConnector(const ConnectorDescription& connector);
+    void removeConnector(const ConnectorDescription& connector);
+
 
     void centerOnPoint(QPointF point);
 

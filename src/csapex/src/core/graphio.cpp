@@ -395,7 +395,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
             connection_type = types[j].as<std::string>();
         }
 
-        ConnectablePtr from = graph_.getGraph()->findConnectorNoThrow(from_uuid);
+        ConnectorPtr from = graph_.getGraph()->findConnectorNoThrow(from_uuid);
         if(from) {
             loadConnection(from, to_uuid, connection_type);
         } else {
@@ -452,19 +452,19 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     UUID from_uuid = UUIDProvider::makeUUID_forced(graph_.getGraph()->shared_from_this(), from_uuid_tmp);
     UUID to_uuid = UUIDProvider::makeUUID_forced(graph_.getGraph()->shared_from_this(), to_uuid_tmp);
 
-    ConnectablePtr from = graph_.getGraph()->findConnector(from_uuid);
+    ConnectorPtr from = graph_.getGraph()->findConnector(from_uuid);
     if(from == nullptr) {
         sendNotificationStreamGraphio("cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist.");
         return;
     }
 
-    ConnectablePtr to = graph_.getGraph()->findConnector(to_uuid);
+    ConnectorPtr to = graph_.getGraph()->findConnector(to_uuid);
     if(to == nullptr) {
         sendNotificationStreamGraphio("cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist.");
         return;
     }
 
-    ConnectionPtr connection = graph_.getGraph()->getConnection(from.get(), to.get());
+    ConnectionPtr connection = graph_.getGraph()->getConnection(from->getUUID(), to->getUUID());
 
     std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
 
@@ -493,7 +493,7 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
 }
 
 
-void GraphIO::loadConnection(ConnectablePtr from, const UUID& to_uuid, const std::string& connection_type)
+void GraphIO::loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::string& connection_type)
 {
     try {
         NodeHandle* target = graph_.getGraph()->findNodeHandleForConnector(to_uuid);

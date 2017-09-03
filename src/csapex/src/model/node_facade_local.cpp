@@ -226,6 +226,10 @@ std::vector<ConnectorDescription> NodeFacadeLocal::getExternalSlots() const
     return nh_->getExternalSlotDescriptions();
 }
 
+ConnectorPtr NodeFacadeLocal::getConnector(const UUID &id) const
+{
+    return nh_->getConnector(id);
+}
 
 NodeCharacteristics NodeFacadeLocal::getNodeCharacteristics() const
 {

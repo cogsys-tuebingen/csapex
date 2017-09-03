@@ -460,7 +460,7 @@ void NodeBox::init()
     setVisible(true);
 }
 
-Port* NodeBox::createPort(ConnectorWeakPtr connector, QBoxLayout *layout)
+Port* NodeBox::createPort(ConnectorPtr connector, QBoxLayout *layout)
 {
     apex_assert_hard(QApplication::instance()->thread() == QThread::currentThread());
 
@@ -472,8 +472,8 @@ Port* NodeBox::createPort(ConnectorWeakPtr connector, QBoxLayout *layout)
     QObject::connect(this, SIGNAL(minimized(bool)), port, SLOT(setMinimizedSize(bool)));
     QObject::connect(this, SIGNAL(flipped(bool)), port, SLOT(setFlipped(bool)));
 
-    ConnectorPtr adaptee = port->getAdaptee().lock();
-    apex_assert_hard(adaptee == connector.lock());
+    ConnectorPtr adaptee = port->getAdaptee();
+    apex_assert_hard(adaptee == connector);
 
     if(node_facade_->isVariadic()) {
         std::vector<MetaPort*> metas;

@@ -64,25 +64,48 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    InputPtr createInternalInput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool optional);
-    OutputPtr createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
-    EventPtr createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
-    SlotPtr createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr &)> callback);
+    InputPtr createInternalInput(const TokenDataConstPtr& type,
+                                 const UUID& internal_uuid,
+                                 const std::string& label,
+                                 bool optional);
+    OutputPtr createInternalOutput(const TokenDataConstPtr& type,
+                                   const UUID& internal_uuid,
+                                   const std::string& label);
+    EventPtr createInternalEvent(const TokenDataConstPtr& type,
+                                 const UUID& internal_uuid,
+                                 const std::string& label);
+    SlotPtr createInternalSlot(const TokenDataConstPtr& type,
+                               const UUID& internal_uuid,
+                               const std::string& label,
+                               std::function<void (const TokenPtr &)> callback);
 
-    virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
-    virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
-    virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label) override;
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active, bool asynchronous) override;
+    virtual Input* createVariadicInput(TokenDataConstPtr type,
+                                       const std::string& label,
+                                       bool optional) override;
+    virtual Output* createVariadicOutput(TokenDataConstPtr type,
+                                         const std::string& label) override;
+    virtual Event* createVariadicEvent(TokenDataConstPtr type,
+                                       const std::string& label) override;
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type,
+                                     const std::string& label,
+                                     std::function<void(const TokenPtr&)> callback,
+                                     bool active,
+                                     bool blocking) override;
 
     virtual void removeVariadicInput(InputPtr input) override;
     virtual void removeVariadicOutput(OutputPtr input) override;
     virtual void removeVariadicEvent(EventPtr input) override;
     virtual void removeVariadicSlot(SlotPtr input) override;
 
-    RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
-    RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);
-    RelayMapping addForwardingSlot(const TokenDataConstPtr& type, const std::string& label);
-    RelayMapping addForwardingEvent(const TokenDataConstPtr& type, const std::string& label);
+    RelayMapping addForwardingInput(const TokenDataConstPtr& type,
+                                    const std::string& label,
+                                    bool optional);
+    RelayMapping addForwardingOutput(const TokenDataConstPtr& type,
+                                     const std::string& label);
+    RelayMapping addForwardingSlot(const TokenDataConstPtr& type,
+                                   const std::string& label);
+    RelayMapping addForwardingEvent(const TokenDataConstPtr& type,
+                                    const std::string& label);
 
     InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
     OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;

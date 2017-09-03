@@ -6,6 +6,9 @@
 #include <csapex/io/io_fwd.h>
 #include <csapex/serialization/serializable.h>
 
+/// SYSTEM
+#include <unordered_map>
+
 namespace csapex
 {
 
@@ -57,6 +60,8 @@ public:
     std::vector<ConnectorDescription> getExternalEvents() const override;
     std::vector<ConnectorDescription> getExternalSlots() const override;
 
+    ConnectorPtr getConnector(const UUID& id) const override;
+
     NodeCharacteristics getNodeCharacteristics() const override;
 
     bool canStartStepping() const override;
@@ -104,12 +109,16 @@ private:
     void connectNodeHandle();
     void connectNodeWorker();
 
+    void createConnectorProxy(const ConnectorPtr& connector);
+
 private:
     SessionPtr session_;
 
     NodeHandlePtr nh_;
     NodeWorkerPtr nw_;
     NodeRunnerPtr nr_;
+
+    std::unordered_map<UUID, ConnectorPtr, UUID::Hasher> remote_connectors_;
 };
 
 }

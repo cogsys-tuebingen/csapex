@@ -312,6 +312,7 @@ void NodeHandle::makeParameterConnectableTyped(csapex::param::ParameterPtr param
         cin->setType(connection_types::makeEmpty<T>());
         cin->setOptional(true);
         cin->setLabel(p->name());
+        cin->setParameter(true);
         
         param_2_input_[p->name()] = cin;
         input_2_param_[cin->getUUID()] = p;
@@ -322,6 +323,7 @@ void NodeHandle::makeParameterConnectableTyped(csapex::param::ParameterPtr param
         OutputPtr cout = std::make_shared<StaticOutput>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("out_") + p->name()), shared_from_this());
         cout->setType(connection_types::makeEmpty<T>());
         cout->setLabel(p->name());
+        cout->setParameter(true);
         
         param_2_output_[p->name()] = cout;
         output_2_param_[cout->getUUID()] = p;
@@ -485,11 +487,11 @@ Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label)
     return c.get();
 }
 
-Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void()> callback, bool active, bool asynchronous)
+Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void()> callback, bool active, bool blocking)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
-    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, asynchronous, shared_from_this());
+    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, blocking, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
 
@@ -498,11 +500,11 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
     return slot.get();
 }
 
-Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr& )> callback, bool active, bool asynchronous)
+Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr& )> callback, bool active, bool blocking)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
-    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, asynchronous, shared_from_this());
+    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, blocking, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
 
@@ -511,11 +513,11 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
     return slot.get();
 }
 
-Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(Slot*, const TokenPtr& )> callback, bool active, bool asynchronous)
+Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(Slot*, const TokenPtr& )> callback, bool active, bool blocking)
 {
     apex_assert_hard(uuid_provider_);
     UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
-    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, asynchronous, shared_from_this());
+    SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, blocking, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
 
@@ -563,7 +565,7 @@ OutputPtr NodeHandle::addInternalOutput(const TokenDataConstPtr& type, const UUI
 SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string &label, std::function<void (const TokenPtr &)> callback)
 {
     apex_assert_hard(uuid_provider_);
-    SlotPtr slot = std::make_shared<Slot>(callback, internal_uuid, false, true, shared_from_this());
+    SlotPtr slot = std::make_shared<Slot>(callback, internal_uuid, false, false, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
     
@@ -737,7 +739,7 @@ void NodeHandle::manageOutput(OutputPtr out)
 
 bool NodeHandle::isParameterInput(const UUID &id) const
 {
-    return  input_2_param_.find(id) != input_2_param_.end();
+    return input_2_param_.find(id) != input_2_param_.end();
 }
 
 bool NodeHandle::isParameterOutput(const UUID &id) const

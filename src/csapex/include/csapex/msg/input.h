@@ -68,6 +68,8 @@ public:
 protected:
     virtual bool isConnectionPossible(Connector* other_side) override;
 
+    virtual void addStatusInformation(std::stringstream& status_stream) const override;
+
 protected:
     InputTransition* transition_;
 

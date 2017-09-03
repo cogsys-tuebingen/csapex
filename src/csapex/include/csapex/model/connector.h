@@ -33,6 +33,10 @@ public:
     virtual bool isOutput() const = 0;
     virtual bool isInput() const = 0;
     virtual bool isOptional() const = 0;
+    virtual bool isParameter() const = 0;
+
+    virtual bool isSynchronous() const;
+    virtual bool isAsynchronous() const;
 
     virtual bool isVirtual() const = 0;
     virtual void setVirtual(bool _virtual) = 0;
@@ -78,6 +82,10 @@ public:
 
     virtual void notifyMessageProcessed() = 0;
 
+
+    // DEBUG INFORMATION
+    virtual std::string makeStatusString() const;
+
 public:
     slim_signal::Signal<void(bool)> enabled_changed;
 
@@ -102,6 +110,8 @@ public:
 
 protected:
     Connector(const UUID &uuid, ConnectableOwnerWeakPtr owner);
+
+    virtual void addStatusInformation(std::stringstream& status_stream) const;
 
 protected:
     ConnectableOwnerWeakPtr owner_;

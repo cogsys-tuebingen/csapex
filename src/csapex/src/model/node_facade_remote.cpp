@@ -13,6 +13,7 @@
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/node_requests.h>
 #include <csapex/io/raw_message.h>
+#include <csapex/model/connector_remote.h>
 
 /// SYSTEM
 #include <iostream>
@@ -51,7 +52,14 @@ NodeFacadeRemote::~NodeFacadeRemote()
 
 void NodeFacadeRemote::connectNodeHandle()
 {
-    observe(nh_->connector_created, connector_created);
+    observe(nh_->connector_created, [this](ConnectorPtr connector) {
+        createConnectorProxy(connector);
+    });
+    for(ConnectorPtr c : nh_->getExternalConnectors()) {
+        createConnectorProxy(c);
+    }
+
+
     observe(nh_->connector_removed, connector_removed);
     observe(nh_->node_state_changed, node_state_changed);
 
@@ -84,6 +92,15 @@ void NodeFacadeRemote::connectNodeWorker()
     observe(nw_->interval_end,  [this](NodeWorker*, std::shared_ptr<const Interval> stamp) {
         interval_end(this, stamp);
     });
+}
+
+void NodeFacadeRemote::createConnectorProxy(const ConnectorPtr &connector)
+{
+    UUID uuid = connector->getUUID();
+    ConnectableOwnerPtr owner;
+    std::shared_ptr<ConnectorRemote> proxy = std::make_shared<ConnectorRemote>(uuid, owner, session_, connector);
+    remote_connectors_[uuid] = proxy;
+    connector_created(proxy);
 }
 
 std::string NodeFacadeRemote::getType() const
@@ -243,6 +260,11 @@ std::vector<ConnectorDescription> NodeFacadeRemote::getExternalSlots() const
 NodeCharacteristics NodeFacadeRemote::getNodeCharacteristics() const
 {
     return nh_->getVertex()->getNodeCharacteristics();
+}
+
+ConnectorPtr NodeFacadeRemote::getConnector(const UUID &id) const
+{
+    return remote_connectors_.at(id);
 }
 
 

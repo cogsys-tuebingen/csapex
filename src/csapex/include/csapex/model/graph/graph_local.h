@@ -45,12 +45,11 @@ public:
     std::vector<NodeFacadeLocalPtr> getAllLocalNodeFacades();
 
 
-    ConnectablePtr findConnector(const UUID &uuid) override;
-    ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
+    ConnectorPtr findConnector(const UUID &uuid) override;
+    ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     ConnectionPtr getConnectionWithId(int id) override;
     ConnectionPtr getConnection(const UUID& from, const UUID& to) override;
-    ConnectionPtr getConnection(Connectable* from, Connectable* to) override;
 
     std::vector<ConnectionPtr> getConnections() override;
 

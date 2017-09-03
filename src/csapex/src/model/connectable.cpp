@@ -23,6 +23,7 @@ Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
     : Connector(uuid, owner),
       count_(0), seq_no_(-1),
       virtual_(false),
+      parameter_(false),
       graph_port_(false),
       essential_(false),
       enabled_(true)
@@ -38,6 +39,16 @@ bool Connectable::isVirtual() const
 void Connectable::setVirtual(bool _virtual)
 {
     virtual_ = _virtual;
+}
+
+bool Connectable::isParameter() const
+{
+    return parameter_;
+}
+
+void Connectable::setParameter(bool parameter)
+{
+    parameter_ = parameter;
 }
 
 

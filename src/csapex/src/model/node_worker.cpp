@@ -82,10 +82,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
                 setProcessingEnabled(true);
-            }, true, false);
+            }, true, true);
             node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", [this](){
                 setProcessingEnabled(false);
-            }, false, false);
+            }, false, true);
 
 
             trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"activated");

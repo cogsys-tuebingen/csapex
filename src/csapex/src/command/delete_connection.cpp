@@ -69,8 +69,8 @@ bool DeleteConnection::doUndo()
 {
     GraphPtr graph = getGraph();
 
-    ConnectablePtr from = graph->findConnector(from_uuid);
-    ConnectablePtr to = graph->findConnector(to_uuid);
+    ConnectorPtr from = graph->findConnector(from_uuid);
+    ConnectorPtr to = graph->findConnector(to_uuid);
 
     OutputPtr output = std::dynamic_pointer_cast<Output>(from);
     InputPtr input = std::dynamic_pointer_cast<Input>(to);

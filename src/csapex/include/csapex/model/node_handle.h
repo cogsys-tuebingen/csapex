@@ -58,9 +58,9 @@ public:
     void manageOutput(OutputPtr out);
     bool isParameterOutput(const UUID& id) const override;
 
-    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot*,const TokenPtr& )> callback, bool active, bool asynchronous) override;
-    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active, bool asynchronous) override;
-    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void ()> callback, bool active, bool asynchronous) override;
+    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot*,const TokenPtr& )> callback, bool active, bool blocking) override;
+    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active, bool blocking) override;
+    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void ()> callback, bool active, bool blocking) override;
     void manageSlot(SlotPtr s);
 
     Event* addEvent(TokenDataConstPtr type, const std::string& label) override;

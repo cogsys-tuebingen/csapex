@@ -32,8 +32,8 @@ bool AddConnection::doUndo()
 {
     GraphPtr graph = getGraph();
 
-    ConnectablePtr f = graph->findConnector(from_uuid);
-    ConnectablePtr t = graph->findConnector(to_uuid);
+    ConnectorPtr f = graph->findConnector(from_uuid);
+    ConnectorPtr t = graph->findConnector(to_uuid);
 
     apex_assert_hard((f->isOutput() && t->isInput()));
 

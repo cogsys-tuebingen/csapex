@@ -61,7 +61,7 @@ public:
     virtual void init();
 
     /// MODIFIER
-    Port* createPort(ConnectorWeakPtr connector, QBoxLayout *layout);
+    Port* createPort(ConnectorPtr connector, QBoxLayout *layout);
     void removePort(ConnectorWeakPtr connector);
 
     bool isGraph() const;

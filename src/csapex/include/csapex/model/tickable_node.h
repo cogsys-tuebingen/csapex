@@ -7,10 +7,10 @@
 #include <csapex/utility/ticker.h>
 
 #ifndef IGNORE_TICKABLE_NODE_WARNING
-#warning TickableNode is deprecated and may not work correctly anymore!
-#warning  - if you used it to implement a source, just derive from Node directly and implement process()
-#warning  - if you used it to implement a frequency limit source, just derive from ThrottledNode directly and implement process()
-#warning  - if you used it to get a tick() callback periodically, use multiple inheritance and derive from Node and Ticker
+#pragma message "TickableNode is deprecated and may not work correctly anymore!"
+#pragma message "  - if you used it to implement a source, just derive from Node directly and implement process()"
+#pragma message "  - if you used it to implement a frequency limit source, just derive from ThrottledNode directly and implement process()"
+#pragma message "  - if you used it to get a tick() callback periodically, use multiple inheritance and derive from Node and Ticker"
 #endif
 
 namespace csapex

@@ -14,13 +14,13 @@
 
 namespace csapex
 {
-FWD(Executor);
-FWD(Scheduler);
-FWD(TaskGenerator);
-FWD(ThreadPool);
-FWD(ThreadGroup);
-FWD(Task);
-FWD(TimedQueue);
+FWD(Executor)
+FWD(Scheduler)
+FWD(TaskGenerator)
+FWD(ThreadPool)
+FWD(ThreadGroup)
+FWD(Task)
+FWD(TimedQueue)
 }
 
 #undef FWD

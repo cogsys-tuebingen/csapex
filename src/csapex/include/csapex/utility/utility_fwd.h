@@ -14,12 +14,12 @@
 
 namespace csapex
 {
-FWD(Buffer);
-FWD(Timer);
-FWD(Timable);
-FWD(UUID);
-FWD(UUIDProvider);
-FWD(CpuAffinity);
+FWD(Buffer)
+FWD(Timer)
+FWD(Timable)
+FWD(UUID)
+FWD(UUIDProvider)
+FWD(CpuAffinity)
 
 class Notification;
 

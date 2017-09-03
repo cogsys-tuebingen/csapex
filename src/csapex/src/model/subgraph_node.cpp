@@ -447,7 +447,7 @@ SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UU
     return slot;
 }
 
-Slot* SubgraphNode::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> /*callback*/, bool /*active*/, bool /*asynchronous*/)
+Slot* SubgraphNode::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> /*callback*/, bool /*active*/, bool /*blocking*/)
 {
     auto pair = addForwardingSlot(type, label);
     return node_handle_->getSlot(pair.external).get();
@@ -491,7 +491,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
         relay->message_processed(relay);
     };
 
-    Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb, false, true);
+    Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb, false, false);
 
     relay->message_processed.connect(std::bind(&Slot::notifyEventHandled, external_slot));
 

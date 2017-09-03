@@ -64,9 +64,9 @@ public:
         return addEvent(Container::template make<T>(), label);
     }
     template <typename Container, typename T>
-    Slot* addSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool asynchronous = false) {
+    Slot* addSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool blocking = true) {
         Container::template registerType<T>();
-        return addSlot(Container::template make<T>(), label, callback, active);
+        return addSlot(Container::template make<T>(), label, callback, active, blocking);
     }
 
 
@@ -145,18 +145,18 @@ public:
     /*
      * SIGNALING
      */
-    Slot* addActiveSlot(const std::string& label, std::function<void()> callback, bool asynchronous = false);
-    Slot* addSlot(const std::string& label, std::function<void()> callback, bool active = false, bool asynchronous = false);
+    Slot* addActiveSlot(const std::string& label, std::function<void()> callback, bool blocking = true);
+    Slot* addSlot(const std::string& label, std::function<void()> callback, bool active = false, bool blocking = true);
 
     template <typename T>
-    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool asynchronous = false)
+    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool blocking = true)
     {
-        return addSlot(connection_types::makeEmptyMessage<T>(), label, callback, active, asynchronous);
+        return addSlot(connection_types::makeEmptyMessage<T>(), label, callback, active, blocking);
     }    
     template <typename Container, typename T>
-    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool asynchronous = false) {
+    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool blocking = true) {
         Container::template registerType<T>();
-        return addSlot(Container::template make<T>(), label, callback, active, asynchronous);
+        return addSlot(Container::template make<T>(), label, callback, active, blocking);
     }
 
     template <typename T>
@@ -200,9 +200,9 @@ public:
      */
     virtual Input* addInput(TokenDataConstPtr type, const std::string& label, bool optional) = 0;
     virtual Output* addOutput(TokenDataConstPtr type, const std::string& label) = 0;
-    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot*, const TokenPtr& )> callback, bool active, bool asynchronous) = 0;
-    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active, bool asynchronous) = 0;
-    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void ()> callback, bool active, bool asynchronous) = 0;
+    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot*, const TokenPtr& )> callback, bool active, bool blocking) = 0;
+    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active, bool blocking) = 0;
+    virtual Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void ()> callback, bool active, bool blocking) = 0;
     virtual Event* addEvent(TokenDataConstPtr type, const std::string& label) = 0;
 
 protected:

@@ -163,23 +163,80 @@ NodeHandle* GraphRemote::findNodeHandleWithLabel(const std::string& label) const
 
 NodeFacadePtr GraphRemote::findNodeFacade(const UUID& uuid) const
 {
-    return temp_reference.findNodeFacade(uuid);
+    if(uuid.empty()) {
+        // TODO: implement for C/S
+        return temp_reference.findNodeFacade(uuid);
+//        NodeFacadePtr nf = nf_.lock();
+//        apex_assert_hard(nf);
+//        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
+//        return nf;
+    }
+    NodeFacadePtr node_facade = findNodeFacadeNoThrow(uuid);
+    if(node_facade) {
+        return node_facade;
+    }
+    throw NodeFacadeNotFoundException(uuid.getFullName());
 }
 NodeFacadePtr GraphRemote::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
 {
-    return temp_reference.findNodeFacadeNoThrow(uuid);
+    if(uuid.empty()) {
+        // TODO: implement for C/S
+        return temp_reference.findNodeFacade(uuid);
+//        NodeFacadePtr nf = nf_.lock();
+//        apex_assert_hard(nf);
+//        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
+//        return nf;
+    }
+    if(uuid.composite()) {
+        // TODO: implement for C/S
+        return temp_reference.findNodeFacade(uuid);
+//        UUID root = uuid.rootUUID();
+
+//        NodeFacadePtr root_nf = findNodeFacadeNoThrow(root);
+//        if(root_nf) {
+//            NodePtr root_node = root_nf->getNodeHandle()->getNode().lock();
+//            if(root_node) {
+//                SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_node);
+//                if(graph) {
+//                    return graph->getGraph()->findNodeFacade(uuid.nestedUUID());
+//                }
+//            }
+//        }
+
+    } else {
+        for(const auto vertex : remote_vertices_) {
+            NodeFacadePtr nf = vertex->getNodeFacade();
+            if(nf->getUUID() == uuid) {
+                return nf;
+            }
+        }
+    }
+
+    return nullptr;
 }
 NodeFacadePtr GraphRemote::findNodeFacadeForConnector(const UUID &uuid) const
 {
-    return temp_reference.findNodeFacadeForConnector(uuid);
+    try {
+        return findNodeFacade(uuid.parentUUID());
+
+    } catch(const std::exception& e) {
+        throw std::runtime_error(std::string("cannot find handle of connector \"") + uuid.getFullName());
+    }
 }
 NodeFacadePtr GraphRemote::findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept
 {
-    return temp_reference.findNodeFacadeForConnectorNoThrow(uuid);
+    return findNodeFacadeNoThrow(uuid.parentUUID());
 }
 NodeFacadePtr GraphRemote::findNodeFacadeWithLabel(const std::string& label) const
 {
-    return temp_reference.findNodeFacadeWithLabel(label);
+    for(const auto vertex : remote_vertices_) {
+        NodeFacadePtr nf = vertex->getNodeFacade();
+        if(nf->getLabel() == label) {
+            return nf;
+        }
+    }
+
+    return nullptr;
 }
 
 
@@ -197,24 +254,30 @@ std::vector<NodeFacadePtr> GraphRemote::getAllNodeFacades()
     return temp_reference.getAllNodeFacades();
 }
 
-ConnectablePtr GraphRemote::findConnector(const UUID &uuid)
+ConnectorPtr GraphRemote::findConnector(const UUID &uuid)
 {
-    return temp_reference.findConnector(uuid);
+    ConnectorPtr res = findConnectorNoThrow(uuid);
+    if(!res) {
+        throw std::runtime_error(std::string("cannot find connector with UUID=") + uuid.getFullName());
+    }
+    return res;
 }
 
-ConnectablePtr GraphRemote::findConnectorNoThrow(const UUID &uuid) noexcept
+ConnectorPtr GraphRemote::findConnectorNoThrow(const UUID &uuid) noexcept
 {
-    return temp_reference.findConnectorNoThrow(uuid);
+    NodeFacadePtr owner = findNodeFacadeNoThrow(uuid.parentUUID());
+    if(!owner) {
+        return nullptr;
+    }
+    NodeFacadeRemotePtr owner_remote = std::dynamic_pointer_cast<NodeFacadeRemote>(owner);
+    apex_assert_hard(owner_remote);
+
+    return owner->getConnector(uuid);
 }
 
 ConnectionPtr GraphRemote::getConnectionWithId(int id)
 {
     return temp_reference.getConnectionWithId(id);
-}
-
-ConnectionPtr GraphRemote::getConnection(Connectable* from, Connectable* to)
-{
-    return getConnection(from->getUUID(), to->getUUID());
 }
 
 ConnectionPtr GraphRemote::getConnection(const UUID &from, const UUID &to)

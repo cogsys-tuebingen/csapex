@@ -19,9 +19,9 @@ class CSAPEX_EXPORT Slot : public Input
     friend class Event;
 
 public:
-    Slot(std::function<void()> callback, const UUID &uuid, bool active, bool asynchronous = false, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool asynchronous = false, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    Slot(std::function<void(Slot*,const TokenPtr&)> callback, const UUID &uuid, bool active, bool asynchronous = false, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void()> callback, const UUID &uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void(Slot*,const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
 
     template <typename TokenType>
     Slot(std::function<void(const std::shared_ptr<TokenType const>&)> callback, const UUID &uuid, bool active)
@@ -39,7 +39,9 @@ public:
     }
 
     bool isActive() const;
-    bool isAsynchronous() const;
+    bool isBlocking() const;
+
+    virtual bool isSynchronous() const;
 
     void notifyMessageAvailable(Connection* connection) override;
     void notifyMessageProcessed() override;
@@ -59,6 +61,8 @@ public:
     slim_signal::Signal<void(const TokenPtr&)> token_set;
     slim_signal::Signal<void()> triggered;
 
+protected:
+    virtual void addStatusInformation(std::stringstream& status_stream) const override;
 
 private:
     void tryNextToken();
@@ -67,7 +71,7 @@ protected:
     std::function<void(Slot*,const TokenPtr&)> callback_;
 
     bool active_;
-    bool asynchronous_;
+    bool blocking_;
 
     long guard_;
 

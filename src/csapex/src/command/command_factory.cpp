@@ -246,8 +246,8 @@ GraphFacade* CommandFactory::getGraphFacade() const
 Command::Ptr CommandFactory::moveConnections(const UUID& from, const UUID& to)
 {
     GraphPtr graph = getGraphFacade()->getGraph();
-    ConnectablePtr f = graph->findConnector(from);
-    ConnectablePtr t = graph->findConnector(to);
+    ConnectorPtr f = graph->findConnector(from);
+    ConnectorPtr t = graph->findConnector(to);
     return moveConnections(f.get(), t.get());
 }
 

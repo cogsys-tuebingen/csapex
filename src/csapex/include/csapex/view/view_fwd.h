@@ -14,15 +14,15 @@
 
 namespace csapex
 {
-FWD(ActivityTimeline);
-FWD(ActivityLegend);
-FWD(NodeBox);
-FWD(MessageRenderer);
-FWD(NodeAdapter);
-FWD(NodeAdapterBuilder);
-FWD(NodeAdapterFactory);
-FWD(Port);
-FWD(ParameterAdapter);
+FWD(ActivityTimeline)
+FWD(ActivityLegend)
+FWD(NodeBox)
+FWD(MessageRenderer)
+FWD(NodeAdapter)
+FWD(NodeAdapterBuilder)
+FWD(NodeAdapterFactory)
+FWD(Port)
+FWD(ParameterAdapter)
 
 class CsApexViewCore;
 
@@ -39,7 +39,7 @@ class ProfilingWidget;
 class MessagePreviewWidget;
 
 class DragIO;
-FWD(DragIOHandler);
+FWD(DragIOHandler)
 }
 
 #undef FWD

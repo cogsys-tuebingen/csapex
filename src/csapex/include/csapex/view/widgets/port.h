@@ -23,7 +23,7 @@ class CSAPEX_QT_EXPORT Port : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(ConnectorWeakPtr adaptee, QWidget *parent = nullptr);
+    Port(ConnectorPtr adaptee, QWidget *parent = nullptr);
     virtual ~Port();
 
     bool event(QEvent *e);
@@ -56,7 +56,7 @@ public:
     bool isOutput() const;
     bool isInput() const;
 
-    ConnectorWeakPtr getAdaptee() const;
+    ConnectorPtr getAdaptee() const;
 
     void refreshStylesheet();
 
@@ -87,7 +87,7 @@ protected:
     void paintEvent(QPaintEvent *);
 
 protected:
-    ConnectorWeakPtr adaptee_;
+    ConnectorPtr adaptee_;
     bool refresh_style_sheet_;
     bool minimized_;
     bool flipped_;

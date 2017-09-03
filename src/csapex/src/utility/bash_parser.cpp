@@ -15,7 +15,7 @@ std::string BashParser::toHtml(const std::string &input)
 {
     std::string result = input;
 
-    static const boost::regex bash_fmt(".*(\e\\[[^m]+m).*");
+    static const boost::regex bash_fmt(".*(\\e\\[[^m]+m).*");
 
     int levels = 0;
     boost::match_results<std::string::const_iterator> results;

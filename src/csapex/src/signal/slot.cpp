@@ -14,19 +14,19 @@
 
 using namespace csapex;
 
-Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active, bool asynchronous, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr&){callback();}), active_(active), asynchronous_(asynchronous), guard_(-1)
+Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
+    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr&){callback();}), active_(active), blocking_(blocking), guard_(-1)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
-Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool asynchronous, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr& token){callback(token);}), active_(active), asynchronous_(asynchronous), guard_(-1)
+Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
+    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr& token){callback(token);}), active_(active), blocking_(blocking), guard_(-1)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
 
-Slot::Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID &uuid, bool active, bool asynchronous, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_(callback), active_(active), asynchronous_(asynchronous), guard_(-1)
+Slot::Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
+    : Input(uuid, owner), callback_(callback), active_(active), blocking_(blocking), guard_(-1)
 {
     setType(connection_types::makeEmpty<connection_types::AnyMessage>());
 }
@@ -170,7 +170,7 @@ void Slot::handleEvent()
         }
     }
 
-    if(!asynchronous_) {
+    if(!blocking_) {
         notifyEventHandled();
     }
 }
@@ -194,12 +194,23 @@ bool Slot::isActive() const
     return active_;
 }
 
-bool Slot::isAsynchronous() const
+bool Slot::isBlocking() const
 {
-    return asynchronous_;
+    return blocking_;
+}
+
+bool Slot::isSynchronous() const
+{
+    return false;
 }
 
 bool Slot::canConnectTo(Connector *other_side, bool move) const
 {
     return Connectable::canConnectTo(other_side, move);
+}
+
+
+void Slot::addStatusInformation(std::stringstream &status_stream) const
+{
+    status_stream << ", blocking: " << isBlocking();
 }

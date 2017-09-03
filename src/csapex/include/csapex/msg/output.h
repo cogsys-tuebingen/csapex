@@ -42,6 +42,7 @@ public:
     {
         return true;
     }
+
     virtual ConnectorType getConnectorType() const override
     {
         return ConnectorType::OUTPUT;
@@ -83,6 +84,8 @@ public:
 public:
     slim_signal::Signal<void(Connectable*)> messageSent;
 
+protected:
+    virtual void addStatusInformation(std::stringstream& status_stream) const override;
 
 protected:
     OutputTransition* transition_;

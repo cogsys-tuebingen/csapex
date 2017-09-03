@@ -801,11 +801,8 @@ NodeFacadePtr GraphLocal::findNodeFacadeWithLabel(const std::string& label) cons
 {
     for(const auto vertex : vertices_) {
         NodeFacadePtr nf = vertex->getNodeFacade();
-        NodeStatePtr state = nf->getNodeState();
-        if(state) {
-            if(state->getLabel() == label) {
-                return nf;
-            }
+        if(nf->getLabel() == label) {
+            return nf;
         }
     }
 
@@ -858,16 +855,16 @@ std::vector<NodeFacadeLocalPtr> GraphLocal::getAllLocalNodeFacades()
     return node_facades;
 }
 
-ConnectablePtr GraphLocal::findConnector(const UUID &uuid)
+ConnectorPtr GraphLocal::findConnector(const UUID &uuid)
 {
-    ConnectablePtr res = findConnectorNoThrow(uuid);
+    ConnectorPtr res = findConnectorNoThrow(uuid);
     if(!res) {
         throw std::runtime_error(std::string("cannot find connector with UUID=") + uuid.getFullName());
     }
     return res;
 }
 
-ConnectablePtr GraphLocal::findConnectorNoThrow(const UUID &uuid) noexcept
+ConnectorPtr GraphLocal::findConnectorNoThrow(const UUID &uuid) noexcept
 {
     NodeHandle* owner = findNodeHandleNoThrow(uuid.parentUUID());
     if(!owner) {
@@ -886,11 +883,6 @@ ConnectionPtr GraphLocal::getConnectionWithId(int id)
     }
 
     return nullptr;
-}
-
-ConnectionPtr GraphLocal::getConnection(Connectable* from, Connectable* to)
-{
-    return getConnection(from->getUUID(), to->getUUID());
 }
 
 ConnectionPtr GraphLocal::getConnection(const UUID &from, const UUID &to)

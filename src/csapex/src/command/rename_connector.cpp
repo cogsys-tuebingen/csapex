@@ -33,7 +33,7 @@ std::string RenameConnector::getDescription() const
 
 bool RenameConnector::doExecute()
 {
-    ConnectablePtr connector = getGraph()->findConnector(uuid);
+    ConnectorPtr connector = getGraph()->findConnector(uuid);
     apex_assert_hard(connector);
 
     old_name_ = connector->getLabel();
@@ -44,7 +44,7 @@ bool RenameConnector::doExecute()
 
 bool RenameConnector::doUndo()
 {
-    ConnectablePtr connector = getGraph()->findConnector(uuid);
+    ConnectorPtr connector = getGraph()->findConnector(uuid);
     apex_assert_hard(connector);
 
     connector->setLabel(old_name_);

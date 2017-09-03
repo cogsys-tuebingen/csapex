@@ -1184,7 +1184,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
 void DesignerScene::addPort(Port *port)
 {
-    ConnectorPtr c = port->getAdaptee().lock();
+    ConnectorPtr c = port->getAdaptee();
     if(c) {
         port_map_[c->getUUID()] = port;
     }
@@ -1233,12 +1233,12 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
         return;
     }
 
-    ConnectorPtr c = p->getAdaptee().lock();
+    ConnectorPtr c = p->getAdaptee();
     if(!c) {
         return;
     }
 
-    bool is_message = (dynamic_cast<Slot*>(c.get()) == nullptr && dynamic_cast<Event*>(c.get()) == nullptr);
+    bool is_message = c->isSynchronous();
 
     if(!p->isMinimizedSize())  {
         INTERLUDE("overlays");

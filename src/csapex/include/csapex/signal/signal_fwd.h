@@ -15,7 +15,7 @@ namespace csapex
 {
 namespace connection_types
 {
-FWD(Signal);
+FWD(Signal)
 }
 
 }

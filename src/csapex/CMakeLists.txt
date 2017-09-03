@@ -532,6 +532,7 @@ add_library(csapex_remote SHARED
     src/command/dispatcher_remote.cpp
 
     src/model/node_facade_remote.cpp
+    src/model/connector_remote.cpp
 
     src/model/graph/graph_remote.cpp
     src/model/graph_facade_remote.cpp

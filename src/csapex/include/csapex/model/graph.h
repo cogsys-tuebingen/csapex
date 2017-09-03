@@ -57,6 +57,7 @@ public:
 
     virtual void clear() = 0;
 
+    /// BEGIN  - REMOVE!
     virtual Node* findNode(const UUID& uuid) const = 0;
     virtual Node* findNodeNoThrow(const UUID& uuid) const noexcept = 0;
     virtual Node* findNodeForConnector(const UUID &uuid) const = 0;
@@ -66,6 +67,7 @@ public:
     virtual NodeHandle* findNodeHandleForConnector(const UUID &uuid) const = 0;
     virtual NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
     virtual NodeHandle* findNodeHandleWithLabel(const std::string& label) const = 0;
+    /// END - REMOVE!
 
     virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const = 0;
     virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept = 0;
@@ -79,8 +81,8 @@ public:
     virtual std::vector<NodeFacadePtr> getAllNodeFacades() = 0;
 
 
-    virtual ConnectablePtr findConnector(const UUID &uuid) = 0;
-    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
+    virtual ConnectorPtr findConnector(const UUID &uuid) = 0;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
 
     template <typename T>
     std::shared_ptr<T> findTypedConnector(const UUID &uuid)
@@ -95,7 +97,6 @@ public:
 
     virtual ConnectionPtr getConnectionWithId(int id) = 0;
     virtual ConnectionPtr getConnection(const UUID& from, const UUID& to) = 0;
-    virtual ConnectionPtr getConnection(Connectable* from, Connectable* to) = 0;
 
     virtual std::vector<ConnectionPtr> getConnections() = 0;
 

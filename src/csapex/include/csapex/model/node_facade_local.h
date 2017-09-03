@@ -54,6 +54,8 @@ public:
     std::vector<ConnectorDescription> getExternalEvents() const override;
     std::vector<ConnectorDescription> getExternalSlots() const override;
 
+    ConnectorPtr getConnector(const UUID& id) const override;
+
     NodeCharacteristics getNodeCharacteristics() const override;
 
     bool canStartStepping() const override;

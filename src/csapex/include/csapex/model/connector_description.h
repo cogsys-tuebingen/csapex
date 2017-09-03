@@ -16,27 +16,55 @@ struct ConnectorDescription
     ConnectorType connector_type;
     std::string label;
     bool optional;
+    bool is_parameter;
 
     TokenDataConstPtr token_type;
 
     UUID id;
     std::vector<AUUID> targets;
 
-    ConnectorDescription(const AUUID& owner, ConnectorType connector_type, const TokenDataConstPtr& token_type, const std::string& label, bool optional = true)
-        : owner(owner), connector_type(connector_type), label(label), optional(optional),
+    ConnectorDescription(const AUUID& owner,
+                         ConnectorType connector_type,
+                         const TokenDataConstPtr& token_type,
+                         const std::string& label,
+                         bool optional = true,
+                         bool is_parameter = false)
+        : owner(owner),
+          connector_type(connector_type),
+          label(label),
+          optional(optional),
+          is_parameter(is_parameter),
           token_type(token_type)
     {
         id = UUID::NONE;
     }
-    ConnectorDescription(const AUUID& owner, ConnectorType connector_type, const std::string& label, bool optional = true)
-        : owner(owner), connector_type(connector_type), label(label), optional(optional)
+    ConnectorDescription(const AUUID& owner,
+                         ConnectorType connector_type,
+                         const std::string& label,
+                         bool optional = true,
+                         bool is_parameter = false)
+        : owner(owner),
+          connector_type(connector_type),
+          label(label),
+          optional(optional),
+          is_parameter(is_parameter)
     {
         token_type = connection_types::makeEmpty<connection_types::AnyMessage>();
         id = UUID::NONE;
     }
 
-    ConnectorDescription(const AUUID& owner, const UUID& uuid, ConnectorType connector_type, const TokenDataConstPtr& token_type, const std::string& label, bool optional = true)
-        : owner(owner), connector_type(connector_type), label(label), optional(optional),
+    ConnectorDescription(const AUUID& owner,
+                         const UUID& uuid,
+                         ConnectorType connector_type,
+                         const TokenDataConstPtr& token_type,
+                         const std::string& label,
+                         bool optional = true,
+                         bool is_parameter = false)
+        : owner(owner),
+          connector_type(connector_type),
+          label(label),
+          optional(optional),
+          is_parameter(is_parameter),
           token_type(token_type),
           id(uuid)
     {
