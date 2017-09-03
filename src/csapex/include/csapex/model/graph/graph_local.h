@@ -13,6 +13,8 @@ public:
     GraphLocal();
     ~GraphLocal();
 
+    AUUID getAbsoluteUUID() const override;
+
     int getComponent(const UUID& node_uuid) const override;
     int getDepth(const UUID& node_uuid) const override;
 

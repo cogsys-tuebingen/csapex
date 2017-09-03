@@ -896,7 +896,7 @@ void GraphView::addConnector(const ConnectorDescription &connector)
             throw std::logic_error("unknown connector type");
         }
 
-        ConnectorPtr ctor = getGraphFacade()->getGraph()->findConnector(connector.id);
+        ConnectorPtr ctor = getGraphFacade()->findConnector(connector.id);
         box->createPort(ctor, layout);
     }
 }
@@ -910,7 +910,7 @@ void GraphView::removeConnector(const ConnectorDescription &connector)
     UUID parent_uuid = connector.id.parentUUID();
     NodeBox* box = getBox(parent_uuid);
 
-    ConnectorPtr ctor = getGraphFacade()->getGraph()->findConnector(connector.id);
+    ConnectorPtr ctor = getGraphFacade()->findConnector(connector.id);
     box->removePort(ctor);
 }
 

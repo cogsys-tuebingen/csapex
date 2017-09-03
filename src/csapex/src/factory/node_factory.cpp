@@ -322,6 +322,7 @@ NodeFacadeLocalPtr NodeFactory::makeGraph(const UUID& uuid, const UUIDProviderPt
     NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
     NodeFacadeLocalPtr result = std::make_shared<NodeFacadeLocal>(nh, nw, runner);
 
+    // TODO: can this be done more elegantly?
     SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
     apex_assert_hard(subgraph);
     subgraph->setNodeFacade(result);

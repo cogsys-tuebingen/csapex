@@ -14,8 +14,10 @@ class GraphLocal;
 class GraphRemote : public Graph, public Observer
 {
 public:
-    GraphRemote(SessionPtr session, GraphLocal& temp_reference);
+    GraphRemote(SessionPtr session, const AUUID &auuid, GraphLocal& temp_reference);
     ~GraphRemote();
+
+    AUUID getAbsoluteUUID() const override;
 
     int getComponent(const UUID& node_uuid) const override;
     int getDepth(const UUID& node_uuid) const override;
@@ -80,6 +82,8 @@ private:
     GraphLocal& temp_reference;
 
     std::vector<graph::VertexPtr> remote_vertices_;
+
+    NodeFacadeRemotePtr nf_;
 };
 
 }

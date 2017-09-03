@@ -15,7 +15,7 @@ namespace csapex
 class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade
 {
 public:
-    NodeFacadeRemote(SessionPtr session,
+    NodeFacadeRemote(SessionPtr session, AUUID uuid,
                      NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr);
 
     ~NodeFacadeRemote();
@@ -113,6 +113,8 @@ private:
 
 private:
     SessionPtr session_;
+
+    AUUID uuid_;
 
     NodeHandlePtr nh_;
     NodeWorkerPtr nw_;

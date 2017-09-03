@@ -50,6 +50,8 @@ public:
 public:
     virtual ~Graph();
 
+    virtual AUUID getAbsoluteUUID() const = 0;
+
     virtual int getComponent(const UUID& node_uuid) const = 0;
     virtual int getDepth(const UUID& node_uuid) const = 0;
 
@@ -75,14 +77,14 @@ public:
     virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
     virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const = 0;
 
+    virtual ConnectorPtr findConnector(const UUID &uuid) = 0;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
+
     virtual Graph* findSubgraph(const UUID& uuid) const = 0;
 
     virtual std::vector<NodeHandle*> getAllNodeHandles() = 0;
     virtual std::vector<NodeFacadePtr> getAllNodeFacades() = 0;
 
-
-    virtual ConnectorPtr findConnector(const UUID &uuid) = 0;
-    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
 
     template <typename T>
     std::shared_ptr<T> findTypedConnector(const UUID &uuid)

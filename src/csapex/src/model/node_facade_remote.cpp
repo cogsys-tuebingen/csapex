@@ -22,15 +22,22 @@
 using namespace csapex;
 using namespace csapex;
 
-NodeFacadeRemote::NodeFacadeRemote(SessionPtr session,
+NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
                                    NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr)
     : session_(session),
+      uuid_(uuid),
       nh_(nh), nw_(nw), nr_(nr)
 {
-    nh->setNodeRunner(nr_);
+    if(nr_) {
+        nh->setNodeRunner(nr_);
+    }
 
-    connectNodeHandle();
-    connectNodeWorker();
+    if(nh_) {
+        connectNodeHandle();
+    }
+    if(nw_) {
+        connectNodeWorker();
+    }
 
 
     observe(remote_data_connection.first_connected, [this]() {
@@ -110,12 +117,12 @@ std::string NodeFacadeRemote::getType() const
 
 UUID NodeFacadeRemote::getUUID() const
 {
-    return nh_->getUUID();
+    return uuid_.id();
 }
 
 AUUID NodeFacadeRemote::getAUUID() const
 {
-    return nh_->getUUID().getAbsoluteUUID();
+    return uuid_;
 }
 
 bool NodeFacadeRemote::isActive() const
@@ -264,6 +271,10 @@ NodeCharacteristics NodeFacadeRemote::getNodeCharacteristics() const
 
 ConnectorPtr NodeFacadeRemote::getConnector(const UUID &id) const
 {
+    if(!nh_) {
+        // TODO: remove
+        return nullptr;
+    }
     return remote_connectors_.at(id);
 }
 

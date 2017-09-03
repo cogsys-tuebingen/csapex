@@ -170,7 +170,7 @@ void Slot::handleEvent()
         }
     }
 
-    if(!blocking_) {
+    if(blocking_) {
         notifyEventHandled();
     }
 }

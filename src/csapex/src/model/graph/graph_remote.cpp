@@ -12,9 +12,11 @@
 
 using namespace csapex;
 
-GraphRemote::GraphRemote(SessionPtr session, GraphLocal &temp_reference)
+GraphRemote::GraphRemote(SessionPtr session, const AUUID& auuid,
+                         GraphLocal &temp_reference)
     : session_(session),
-      temp_reference(temp_reference)
+      temp_reference(temp_reference),
+      nf_(std::make_shared<NodeFacadeRemote>(session, auuid, nullptr, nullptr, nullptr))
 {
     observe(temp_reference.state_changed, state_changed);
 
@@ -24,6 +26,7 @@ GraphRemote::GraphRemote(SessionPtr session, GraphLocal &temp_reference)
     observe(temp_reference.vertex_added, [this](graph::VertexPtr vertex) {
         std::shared_ptr<NodeFacadeRemote> remote_node_facade = std::make_shared<NodeFacadeRemote>(
                     session_,
+                    vertex->getNodeFacade()->getAUUID(),
                     vertex->getNodeFacade()->getNodeHandle(),
                     vertex->getNodeFacade()->getNodeWorker(),
                     vertex->getNodeFacade()->getNodeHandle()->getNodeRunner()
@@ -48,6 +51,12 @@ GraphRemote::GraphRemote(SessionPtr session, GraphLocal &temp_reference)
 GraphRemote::~GraphRemote()
 {
 }
+
+AUUID GraphRemote::getAbsoluteUUID() const
+{
+    return nf_->getUUID().getAbsoluteUUID();
+}
+
 
 void GraphRemote::resetActivity()
 {
@@ -164,12 +173,7 @@ NodeHandle* GraphRemote::findNodeHandleWithLabel(const std::string& label) const
 NodeFacadePtr GraphRemote::findNodeFacade(const UUID& uuid) const
 {
     if(uuid.empty()) {
-        // TODO: implement for C/S
-        return temp_reference.findNodeFacade(uuid);
-//        NodeFacadePtr nf = nf_.lock();
-//        apex_assert_hard(nf);
-//        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
-//        return nf;
+        return nf_;
     }
     NodeFacadePtr node_facade = findNodeFacadeNoThrow(uuid);
     if(node_facade) {
@@ -180,12 +184,7 @@ NodeFacadePtr GraphRemote::findNodeFacade(const UUID& uuid) const
 NodeFacadePtr GraphRemote::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.empty()) {
-        // TODO: implement for C/S
-        return temp_reference.findNodeFacade(uuid);
-//        NodeFacadePtr nf = nf_.lock();
-//        apex_assert_hard(nf);
-//        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
-//        return nf;
+        return nf_;
     }
     if(uuid.composite()) {
         // TODO: implement for C/S
@@ -198,7 +197,7 @@ NodeFacadePtr GraphRemote::findNodeFacadeNoThrow(const UUID& uuid) const noexcep
 //            if(root_node) {
 //                SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_node);
 //                if(graph) {
-//                    return graph->getGraph()->findNodeFacade(uuid.nestedUUID());
+//                    return graph->findNodeFacade(uuid.nestedUUID());
 //                }
 //            }
 //        }
@@ -272,7 +271,11 @@ ConnectorPtr GraphRemote::findConnectorNoThrow(const UUID &uuid) noexcept
     NodeFacadeRemotePtr owner_remote = std::dynamic_pointer_cast<NodeFacadeRemote>(owner);
     apex_assert_hard(owner_remote);
 
-    return owner->getConnector(uuid);
+    try {
+        return owner->getConnector(uuid);
+    } catch(...) {
+        return nullptr;
+    }
 }
 
 ConnectionPtr GraphRemote::getConnectionWithId(int id)

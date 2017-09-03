@@ -30,7 +30,16 @@ public:
     virtual ~GraphFacade();
 
     virtual GraphFacade* getSubGraph(const UUID& uuid) = 0;
-    virtual GraphFacade* getParent() const = 0;
+    virtual GraphFacade* getParent() const = 0;    
+
+    NodeFacadePtr findNodeFacade(const UUID& uuid) const;
+    NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept;
+    NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const;
+    NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept;
+    NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const;
+
+    ConnectorPtr findConnector(const UUID &uuid);
+    ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept;
 
     virtual AUUID getAbsoluteUUID() const = 0;
     virtual GraphPtr getGraph() const = 0;

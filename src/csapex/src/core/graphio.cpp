@@ -125,7 +125,7 @@ Snippet GraphIO::saveSelectedGraph(const std::vector<UUID> &uuids)
     std::vector<ConnectionPtr> connections;
 
     for(const UUID& uuid : uuids) {
-        NodeFacadePtr nf = graph_.getGraph()->findNodeFacade(uuid);
+        NodeFacadePtr nf = graph_.findNodeFacade(uuid);
         NodeFacadeLocalPtr node = std::dynamic_pointer_cast<NodeFacadeLocal>(nf);
         apex_assert_hard(node);
         nodes.push_back(node);
@@ -395,7 +395,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
             connection_type = types[j].as<std::string>();
         }
 
-        ConnectorPtr from = graph_.getGraph()->findConnectorNoThrow(from_uuid);
+        ConnectorPtr from = graph_.findConnectorNoThrow(from_uuid);
         if(from) {
             loadConnection(from, to_uuid, connection_type);
         } else {
@@ -452,13 +452,13 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     UUID from_uuid = UUIDProvider::makeUUID_forced(graph_.getGraph()->shared_from_this(), from_uuid_tmp);
     UUID to_uuid = UUIDProvider::makeUUID_forced(graph_.getGraph()->shared_from_this(), to_uuid_tmp);
 
-    ConnectorPtr from = graph_.getGraph()->findConnector(from_uuid);
+    ConnectorPtr from = graph_.findConnector(from_uuid);
     if(from == nullptr) {
         sendNotificationStreamGraphio("cannot load fulcrum, connector with uuid '" << from_uuid << "' doesn't exist.");
         return;
     }
 
-    ConnectorPtr to = graph_.getGraph()->findConnector(to_uuid);
+    ConnectorPtr to = graph_.findConnector(to_uuid);
     if(to == nullptr) {
         sendNotificationStreamGraphio("cannot load fulcrum, connector with uuid '" << to_uuid << "' doesn't exist.");
         return;

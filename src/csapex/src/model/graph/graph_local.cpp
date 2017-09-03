@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/connection.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
@@ -30,6 +31,11 @@ GraphLocal::GraphLocal()
 GraphLocal::~GraphLocal()
 {
     clear();
+}
+
+AUUID GraphLocal::getAbsoluteUUID() const
+{
+    return nf_.lock()->getUUID().getAbsoluteUUID();
 }
 
 void GraphLocal::setNodeFacade(NodeFacadeWeakPtr nf)
