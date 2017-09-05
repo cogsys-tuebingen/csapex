@@ -57,6 +57,7 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE(double);
     ADD_ANY_TYPE(bool);
     ADD_ANY_TYPE(std::string);
+    ADD_ANY_TYPE(std::vector<std::string>);
     ADD_ANY_TYPE(long);
     ADD_ANY_TYPE(UUID);
     ADD_ANY_TYPE(std::pair<std::string,bool>);

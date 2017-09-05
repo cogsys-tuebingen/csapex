@@ -78,7 +78,9 @@ public:
     void setSequenceNumber(int seq_no_);
 
     int countConnections() const override;
-    std::vector<ConnectionPtr> getConnections() const;
+    virtual std::vector<ConnectionPtr> getConnections() const;
+
+    virtual ConnectorDescription getDescription() const override;
 
     bool hasEnabledConnection() const;
     bool hasActiveConnection() const;
@@ -92,6 +94,8 @@ public:
     virtual void stop();
 
     virtual void notifyMessageProcessed();
+
+    virtual std::string makeStatusString() const override;
 
 protected:
     virtual void removeAllConnectionsNotUndoable() = 0;

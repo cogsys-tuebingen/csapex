@@ -42,18 +42,17 @@ public:
     virtual std::string getLabel() const = 0;
     virtual TokenData::ConstPtr getType() const = 0;
     virtual ConnectorType getConnectorType() const = 0;
-    virtual ConnectorDescription getDescription() const;
+    virtual ConnectorDescription getDescription() const = 0;
 
     virtual bool isEnabled() const = 0;
     virtual int sequenceNumber() const = 0;
     virtual int countConnections() const = 0;
-    virtual std::vector<ConnectionPtr> getConnections() const = 0;
 
     virtual bool hasActiveConnection() const = 0;
     virtual bool isConnected() const = 0;
 
     // DEBUG INFORMATION
-    virtual std::string makeStatusString() const;
+    virtual std::string makeStatusString() const = 0;
 
 public:
     slim_signal::Signal<void(bool)> enabled_changed;

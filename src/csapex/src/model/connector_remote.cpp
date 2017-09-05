@@ -53,11 +53,6 @@ void ConnectorRemote::connectionMovePreview(ConnectorPtr other_side)
 {
     tmp_connector_->connectionMovePreview(other_side);
 }
-std::vector<ConnectionPtr> ConnectorRemote::getConnections() const
-{
-    return tmp_connector_->getConnections();
-}
-
 
 /**
  * begin: generate getters

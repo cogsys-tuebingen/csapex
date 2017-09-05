@@ -42,7 +42,6 @@ public:
     virtual bool isEnabled() const override;
     virtual int sequenceNumber() const override;
     virtual int countConnections() const override;
-    virtual std::vector<ConnectionPtr> getConnections() const override;
     virtual bool hasActiveConnection() const override;
     virtual bool isConnected() const override;
 
