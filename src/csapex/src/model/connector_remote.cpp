@@ -59,36 +59,22 @@ std::vector<ConnectionPtr> ConnectorRemote::getConnections() const
 }
 
 
-#define GENERATE_GETTER(type, function, _enum) \
+/**
+ * begin: generate getters
+ **/
+#define HANDLE_ACCESSOR(type, function, _enum) \
 type ConnectorRemote::function() const\
 {\
     return request<type, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::_enum, getUUID().getAbsoluteUUID());\
 }
 
-GENERATE_GETTER(int, getCount, GetCount)
-GENERATE_GETTER(bool, canOutput, CanOutput)
-GENERATE_GETTER(bool, canInput, CanInput)
-GENERATE_GETTER(bool, isOutput, IsOutput)
-GENERATE_GETTER(bool, isInput, IsInput)
-GENERATE_GETTER(bool, isOptional, IsOptional)
-GENERATE_GETTER(bool, isSynchronous, IsSynchronous)
-GENERATE_GETTER(bool, isVirtual, IsVirtual)
-GENERATE_GETTER(bool, isParameter, IsParameter)
-GENERATE_GETTER(bool, isGraphPort, IsGraphPort)
-GENERATE_GETTER(bool, isEssential, IsEssential)
-GENERATE_GETTER(std::string, getLabel, GetLabel)
-GENERATE_GETTER(ConnectorType, getConnectorType, GetConnectorType)
-GENERATE_GETTER(ConnectorDescription, getDescription, GetDescription)
-GENERATE_GETTER(bool, isEnabled, IsEnabled)
-GENERATE_GETTER(int, sequenceNumber, GetSequenceNumber)
-GENERATE_GETTER(int, countConnections, GetConnectionCount)
-GENERATE_GETTER(bool, hasActiveConnection, HasActiveConnection)
-GENERATE_GETTER(bool, isConnected, IsConnected)
-GENERATE_GETTER(std::string, makeStatusString, MakeStatusString)
+#include <csapex/model/connector_remote_accessors.hpp>
+/**
+ * end: generate getters
+ **/
 
 TokenData::ConstPtr ConnectorRemote::getType() const
 {
-//    TokenData res = request<TokenData, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::GetType, getUUID().getAbsoluteUUID());
-//    return std::make_shared<TokenData>(res);
-    return tmp_connector_->getType();
+    TokenData res = request<TokenData, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::GetType, getUUID().getAbsoluteUUID());
+    return std::make_shared<TokenData>(res);
 }

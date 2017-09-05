@@ -19,6 +19,12 @@ SerializationBuffer::SerializationBuffer()
     // the header is always 4 byte
     insert(end(), HEADER_LENGTH, 0);
 
+
+#define ADD(...) \
+    any_serializer[std::type_index(typeid(__VA_ARGS__))] = serializer; \
+    any_deserializer[id] = deserializer; \
+    }\
+    ++id
 #define ADD_ANY_TYPE(...) { \
     auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
         buffer << ((uint8_t) id); \
@@ -29,10 +35,22 @@ SerializationBuffer::SerializationBuffer()
         buffer >> (v); \
         any = v; \
     };\
-    any_serializer[std::type_index(typeid(__VA_ARGS__))] = serializer; \
-    any_deserializer[id] = deserializer; \
-    }\
-    ++id
+    ADD(__VA_ARGS__)
+
+#define ADD_ANY_TYPE_1(P1, GET_P1, ...) { \
+    auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
+        buffer << ((uint8_t) id); \
+        buffer << (boost::any_cast<__VA_ARGS__> (any)).GET_P1; \
+        buffer << (boost::any_cast<__VA_ARGS__> (any)); \
+    };\
+    auto deserializer = [id](SerializationBuffer& buffer, boost::any& any){ \
+        P1 p1; \
+        buffer >> (p1); \
+        __VA_ARGS__ v(p1); \
+        buffer >> (v); \
+        any = v; \
+    };\
+    ADD(__VA_ARGS__)
 
     int id = 1;
     ADD_ANY_TYPE(int);
@@ -47,7 +65,9 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE(std::pair<std::string,bool>);
     ADD_ANY_TYPE(std::pair<double,double>);
     ADD_ANY_TYPE(ConnectorType);
-//    ADD_ANY_TYPE(TokenData);
+    ADD_ANY_TYPE(YAML::Node);
+    ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
+    //ADD_ANY_TYPE(TokenDataConstPtr);
 }
 
 void SerializationBuffer::finalize()

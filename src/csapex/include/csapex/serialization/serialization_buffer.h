@@ -6,6 +6,7 @@
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/serialization/serialization_fwd.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/msg/token_traits.h>
 
 /// SYSTEM
 #include <vector>
@@ -196,6 +197,26 @@ public:
     {
         operator >> (s.first);
         operator >> (s.second);
+        return *this;
+    }
+
+    // SHARED POINTER
+    template <typename T,
+              typename std::enable_if<!std::is_base_of<Serializable, T>::value,
+                                      int>::type = 0>
+    SerializationBuffer& operator << (const std::shared_ptr<T>& s)
+    {
+        operator << (*s);
+        return *this;
+    }
+
+    template <typename T,
+              typename std::enable_if<!std::is_base_of<Serializable, T>::value,
+                                      int>::type = 0>
+    SerializationBuffer& operator >> (std::shared_ptr<T>& s)
+    {
+        s = connection_types::makeEmpty<T>();
+        operator >> (*s);
         return *this;
     }
 

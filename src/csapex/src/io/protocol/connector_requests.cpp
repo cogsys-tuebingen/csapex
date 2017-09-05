@@ -55,31 +55,17 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
     case ConnectorRequests::ConnectorRequestType::GetType:
         return std::make_shared<NodeResponse>(request_type_, *c->getType(), getRequestID(), uuid_);
 
-#define GENERATE_GETTER(type, function, _enum) \
+        /**
+         * begin: generate cases
+         **/
+#define HANDLE_ACCESSOR(type, function, _enum) \
     case ConnectorRequests::ConnectorRequestType::_enum:\
         return std::make_shared<NodeResponse>(request_type_, c->function(), getRequestID(), uuid_);
 
-    GENERATE_GETTER(int, getCount, GetCount)
-    GENERATE_GETTER(bool, canOutput, CanOutput)
-    GENERATE_GETTER(bool, canInput, CanInput)
-    GENERATE_GETTER(bool, isOutput, IsOutput)
-    GENERATE_GETTER(bool, isInput, IsInput)
-    GENERATE_GETTER(bool, isOptional, IsOptional)
-    GENERATE_GETTER(bool, isSynchronous, IsSynchronous)
-    GENERATE_GETTER(bool, isVirtual, IsVirtual)
-    GENERATE_GETTER(bool, isParameter, IsParameter)
-    GENERATE_GETTER(bool, isGraphPort, IsGraphPort)
-    GENERATE_GETTER(bool, isEssential, IsEssential)
-    GENERATE_GETTER(std::string, getLabel, GetLabel)
-    GENERATE_GETTER(ConnectorType, getConnectorType, GetConnectorType)
-    GENERATE_GETTER(ConnectorDescription, getDescription, GetDescription)
-    GENERATE_GETTER(bool, isEnabled, IsEnabled)
-    GENERATE_GETTER(int, sequenceNumber, GetSequenceNumber)
-    GENERATE_GETTER(int, countConnections, GetConnectionCount)
-    GENERATE_GETTER(bool, hasActiveConnection, HasActiveConnection)
-    GENERATE_GETTER(bool, isConnected, IsConnected)
-    GENERATE_GETTER(std::string, makeStatusString, MakeStatusString)
-
+    #include <csapex/model/connector_remote_accessors.hpp>
+        /**
+         * end: generate cases
+         **/
 
     default:
         return std::make_shared<Feedback>(std::string("unknown node request type ") + std::to_string((int)request_type_),
