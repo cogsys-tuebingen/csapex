@@ -20,7 +20,7 @@ HANDLE_ACCESSOR(int, countConnections, GetConnectionCount)
 HANDLE_ACCESSOR(bool, hasActiveConnection, HasActiveConnection)
 HANDLE_ACCESSOR(bool, isConnected, IsConnected)
 HANDLE_ACCESSOR(std::string, makeStatusString, MakeStatusString)
-//HANDLE_ACCESSOR(TokenDataConstPtr, getType, GetType)
+HANDLE_ACCESSOR(TokenDataConstPtr, getType, GetType)
 
 #else
 #pragma message "Cannot generate accessors!"

@@ -67,7 +67,7 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE(ConnectorType);
     ADD_ANY_TYPE(YAML::Node);
     ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
-    //ADD_ANY_TYPE(TokenDataConstPtr);
+    ADD_ANY_TYPE(TokenDataConstPtr);
 }
 
 void SerializationBuffer::finalize()

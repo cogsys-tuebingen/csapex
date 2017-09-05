@@ -200,7 +200,7 @@ public:
         return *this;
     }
 
-    // SHARED POINTER
+    // SHARED POINTER (of non-serializable type)
     template <typename T,
               typename std::enable_if<!std::is_base_of<Serializable, T>::value,
                                       int>::type = 0>
@@ -215,8 +215,11 @@ public:
                                       int>::type = 0>
     SerializationBuffer& operator >> (std::shared_ptr<T>& s)
     {
-        s = connection_types::makeEmpty<T>();
-        operator >> (*s);
+        // in case T is const, we need to strip that, otherwise we cannot deserialize
+        using TT = typename std::remove_const<T>::type;
+        std::shared_ptr<TT> res = connection_types::makeEmpty<TT>();
+        operator >> (*res);
+        s = res;
         return *this;
     }
 

@@ -72,9 +72,3 @@ type ConnectorRemote::function() const\
 /**
  * end: generate getters
  **/
-
-TokenData::ConstPtr ConnectorRemote::getType() const
-{
-    TokenData res = request<TokenData, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::GetType, getUUID().getAbsoluteUUID());
-    return std::make_shared<TokenData>(res);
-}

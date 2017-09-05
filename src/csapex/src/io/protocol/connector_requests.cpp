@@ -52,9 +52,6 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
 
     switch(request_type_)
     {
-    case ConnectorRequests::ConnectorRequestType::GetType:
-        return std::make_shared<NodeResponse>(request_type_, *c->getType(), getRequestID(), uuid_);
-
         /**
          * begin: generate cases
          **/
