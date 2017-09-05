@@ -51,8 +51,6 @@ public:
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
 
-    bool canOutput() const;
-    bool canInput() const;
     bool isOutput() const;
     bool isInput() const;
 

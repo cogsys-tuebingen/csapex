@@ -18,9 +18,6 @@ public:
     {
         GetCount,
 
-        CanOutput,
-        CanInput,
-
         IsOutput,
         IsInput,
         IsOptional,

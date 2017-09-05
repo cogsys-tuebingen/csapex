@@ -87,16 +87,6 @@ bool Port::event(QEvent *e)
     return QWidget::event(e);
 }
 
-bool Port::canOutput() const
-{
-    return adaptee_->canOutput();
-}
-
-bool Port::canInput() const
-{
-    return adaptee_->canInput();
-}
-
 bool Port::isOutput() const
 {
     return adaptee_->isOutput();
@@ -288,8 +278,8 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
             return;
         }
 
-        if(from->canConnectTo(adaptee_.get(), false)) {
-            if(adaptee_->canConnectTo(from.get(), false)) {
+        if(from->isCompatibleWith(adaptee_.get())) {
+            if(adaptee_->isCompatibleWith(from.get())) {
                 adaptee_->connectionInProgress(adaptee_, from);
                 e->acceptProposedAction();
             }

@@ -24,6 +24,11 @@ Input::~Input()
     free();
 }
 
+int Input::maxConnectionCount() const
+{
+    return 1;
+}
+
 void Input::setInputTransition(InputTransition *it)
 {
     transition_ = it;
@@ -44,7 +49,7 @@ void Input::reset()
 
 bool Input::isConnectionPossible(Connector* other_side)
 {
-    if(!other_side->canOutput()) {
+    if(!other_side->isOutput()) {
         std::cerr << "cannot connect, other side can't output" << std::endl;
         return false;
     }
@@ -115,14 +120,9 @@ void Input::removeAllConnectionsNotUndoable()
     }
 }
 
-bool Input::canConnectTo(Connector *other_side, bool move) const
-{
-    return Connectable::canConnectTo(other_side, move) && (move || !isConnected());
-}
-
 bool Input::targetsCanBeMovedTo(Connector* other_side) const
 {
-    return getSource()->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
+    return getSource()->isCompatibleWith(other_side) /*&& canConnectTo(getConnected())*/;
 }
 
 void Input::connectionMovePreview(ConnectorPtr other_side)

@@ -33,6 +33,8 @@ public:
 
     virtual void setToken(TokenPtr message) override;
 
+    int maxConnectionCount() const override;
+
     virtual ConnectorType getConnectorType() const override
     {
         return ConnectorType::SLOT_T;
@@ -45,8 +47,6 @@ public:
 
     void notifyMessageAvailable(Connection* connection) override;
     void notifyMessageProcessed() override;
-
-    bool canConnectTo(Connector* other_side, bool move) const override;
 
     virtual void enable() override;
     virtual void disable() override;

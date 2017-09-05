@@ -36,9 +36,9 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
 }
 
 
-bool ConnectorRemote::canConnectTo(Connector* other_side, bool move) const
+bool ConnectorRemote::isCompatibleWith(Connector* other_side) const
 {
-    return tmp_connector_->canConnectTo(other_side, move);
+    return tmp_connector_->isCompatibleWith(other_side);
 }
 bool ConnectorRemote::targetsCanBeMovedTo(Connector* other_side) const
 {

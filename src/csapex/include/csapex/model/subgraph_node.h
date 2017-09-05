@@ -189,6 +189,8 @@ protected:
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_slot_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_event_;
 
+    std::unordered_map<UUID, TokenDataConstPtr, UUID::Hasher> original_types_;
+
     std::set<UUID> iterated_inputs_;
     param::BitSetParameterPtr iterated_inputs_param_;
     bool is_subgraph_finished_;

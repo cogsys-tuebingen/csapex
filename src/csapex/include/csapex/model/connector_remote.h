@@ -16,15 +16,13 @@ public:
     ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner, SessionPtr session,
                     ConnectorPtr tmp_connector);
 
-    virtual bool canConnectTo(Connector* other_side, bool move) const override;
+    virtual bool isCompatibleWith(Connector* other_side) const override;
     virtual bool targetsCanBeMovedTo(Connector* other_side) const override;
     virtual bool isConnectionPossible(Connector* other_side) override;
     virtual void connectionMovePreview(ConnectorPtr other_side) override;
 
     virtual int getCount() const override;
 
-    virtual bool canOutput() const override;
-    virtual bool canInput() const override;
     virtual bool isOutput() const override;
     virtual bool isInput() const override;
     virtual bool isOptional() const override;

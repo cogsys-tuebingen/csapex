@@ -36,6 +36,11 @@ Slot::~Slot()
     guard_ = 0xDEADBEEF;
 }
 
+int Slot::maxConnectionCount() const
+{
+    return -1;
+}
+
 void Slot::reset()
 {
     setSequenceNumber(0);
@@ -203,12 +208,6 @@ bool Slot::isSynchronous() const
 {
     return false;
 }
-
-bool Slot::canConnectTo(Connector *other_side, bool move) const
-{
-    return Connectable::canConnectTo(other_side, move);
-}
-
 
 void Slot::addStatusInformation(std::stringstream &status_stream) const
 {

@@ -17,6 +17,9 @@
 #include <csapex/utility/debug.h>
 #include <csapex/model/node_worker.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 SubgraphNode::SubgraphNode(GraphLocalPtr graph)
@@ -694,17 +697,40 @@ std::vector<UUID> SubgraphNode::getInternalEvents() const
 void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool enabled)
 {
     if(enabled) {
+        // only one iteration is allowed for now
+        apex_assert_eq(0, iterated_inputs_.size());
+
         iterated_inputs_.insert(external_input_uuid);
         InputPtr i = node_handle_->getInput(external_input_uuid);
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
+        // change the output type of the subgraph
         TokenDataConstPtr vector_type = i->getType();
         if(vector_type->isContainer()) {
             o->setType(vector_type->nestedType());
         }
 
+        // change the input type of the subgraph
+        for(const UUID& id: transition_relay_in_->getInputs()) {
+            InputPtr i = transition_relay_in_->getInput(id);
+
+            TokenDataConstPtr type = i->getType();
+
+            original_types_[id] = type;
+
+            if(auto vector = std::dynamic_pointer_cast<const connection_types::GenericVectorMessage>(type)) {
+                i->setType(vector->nestedType());
+            }
+        }
+
     } else {
         iterated_inputs_.erase(external_input_uuid);
+
+        // change back the input type of the subgraph
+        for(const UUID& id: transition_relay_in_->getInputs()) {
+            InputPtr i = transition_relay_in_->getInput(id);
+            i->setType(original_types_[id]);
+        }
     }
 }
 

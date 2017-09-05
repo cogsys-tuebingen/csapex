@@ -53,6 +53,51 @@ Connection::~Connection()
     }
 }
 
+bool Connection::isCompatibleWith(Connectable *from, Connectable *to)
+{
+    return from->getType()->canConnectTo(to->getType().get());
+}
+
+bool Connection::canBeConnectedTo(Connectable *from, Connectable *to)
+{
+    if(!isCompatibleWith(from, to)) {
+        return false;
+    }
+
+    bool in_out = (from->isOutput() && to->isInput()) ||
+            (from->isInput() && to->isOutput());
+
+    if(!in_out) {
+        return false;
+    }
+
+    if(from->maxConnectionCount() >= 0 && from->countConnections() >= from->maxConnectionCount()) {
+        return false;
+    }
+    if(to->maxConnectionCount() >= 0 && to->countConnections() >= to->maxConnectionCount()) {
+        return false;
+    }
+
+
+    Input* input;
+    Output* output;
+    if(from->isOutput()) {
+        output = dynamic_cast<Output*>(from);
+        input = dynamic_cast<Input*>(to);
+    } else {
+        output = dynamic_cast<Output*>(to);
+        input = dynamic_cast<Input*>(from);
+    }
+
+    for(const ConnectionPtr& c : from->getConnections()) {
+        if(c->from().get() == output && c->to().get() == input) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void Connection::detach(Connector *c)
 {
     if(c == from_.get()) {

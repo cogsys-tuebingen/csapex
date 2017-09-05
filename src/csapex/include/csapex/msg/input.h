@@ -20,18 +20,16 @@ public:
     void setInputTransition(InputTransition* it);
     void removeInputTransition();
 
-    virtual bool canInput() const override {
-        return true;
-    }
     virtual bool isInput() const override {
         return true;
     }
+
+    int maxConnectionCount() const override;
+
     virtual ConnectorType getConnectorType() const override
     {
         return ConnectorType::INPUT;
     }
-
-    bool canConnectTo(Connector* other_side, bool move) const override;
 
     virtual void setToken(TokenPtr message);
     virtual TokenPtr getToken() const;

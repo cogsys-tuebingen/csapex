@@ -44,6 +44,10 @@ protected:
     Connection(OutputPtr from, InputPtr to, int id);
 
 public:
+    static bool isCompatibleWith(Connectable* from, Connectable* to);
+    static bool canBeConnectedTo(Connectable* from, Connectable* to);
+
+public:
     virtual ~Connection();
 
     void detach(Connector* c);

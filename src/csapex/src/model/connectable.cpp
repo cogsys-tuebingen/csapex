@@ -145,13 +145,13 @@ bool Connectable::isEnabled() const
     return enabled_;
 }
 
-bool Connectable::canConnectTo(Connector* other_side, bool) const
+bool Connectable::isCompatibleWith(Connector* other_side) const
 {
     if(other_side == this) {
         return false;
     }
 
-    bool in_out = (canOutput() && other_side->canInput()) || (canInput() && other_side->canOutput());
+    bool in_out = (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
     bool compability = getType()->canConnectTo(other_side->getType().get());
 
     return in_out && compability;
@@ -269,6 +269,11 @@ int Connectable::countConnections() const
 {
     return connections_.size();
 }
+int Connectable::maxConnectionCount() const
+{
+    return -1;
+}
+
 std::vector<ConnectionPtr> Connectable::getConnections() const
 {
     return connections_;

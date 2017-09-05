@@ -1,8 +1,6 @@
 #ifdef HANDLE_ACCESSOR
 
 HANDLE_ACCESSOR(int, getCount, GetCount)
-HANDLE_ACCESSOR(bool, canOutput, CanOutput)
-HANDLE_ACCESSOR(bool, canInput, CanInput)
 HANDLE_ACCESSOR(bool, isOutput, IsOutput)
 HANDLE_ACCESSOR(bool, isInput, IsInput)
 HANDLE_ACCESSOR(bool, isOptional, IsOptional)

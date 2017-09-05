@@ -34,10 +34,6 @@ public:
     void notifyMessageProcessed();
     void notifyMessageProcessed(Connection *connection);
 
-    virtual bool canOutput() const override
-    {
-        return true;
-    }
     virtual bool isOutput() const override
     {
         return true;

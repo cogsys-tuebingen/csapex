@@ -265,7 +265,19 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
     auto in_const_map = sub_graph->addForwardingInput(connection_types::makeEmpty<connection_types::GenericValueMessage<int>>(), "forwarding_const", false);
     auto out_map = sub_graph->addForwardingOutput(type, "forwarding");
 
+    ConnectorPtr n2_out = n2->getConnector(UUIDProvider::makeUUID_without_parent(std::string("n2") + UUID::namespace_separator + "out_0"));
+    ASSERT_NE(n2_out, nullptr);
+    ASSERT_EQ("Value<int>", n2_out->getType()->typeName());
+
     sub_graph->setIterationEnabled(in_vec_map.external, true);
+
+    ConnectorPtr graph_out = sub_graph_node_facade->getConnector(in_vec_map.external);
+    ASSERT_NE(graph_out, nullptr);
+    ASSERT_EQ("Vector", graph_out->getType()->typeName());
+
+    ConnectorPtr graph_out_f = sub_graph_node_facade->getConnector(out_map.internal);
+    ASSERT_NE(graph_out_f, nullptr);
+    ASSERT_EQ("Value<int>", graph_out_f->getType()->typeName());
 
     // forwarding connections
     sub_graph_facade.connect(in_vec_map.internal, n2, "input_a");

@@ -119,11 +119,11 @@ void Output::disable()
 
 bool Output::isConnectionPossible(Connector *other_side)
 {
-    if(!other_side->canInput()) {
+    if(!other_side->isInput()) {
         std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", other side can't input" << std::endl;
         return false;
     }
-    if(!other_side->canConnectTo(this, false)) {
+    if(!other_side->isCompatibleWith(this)) {
         std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", not compatible" << std::endl;
         return false;
     }
@@ -135,7 +135,7 @@ bool Output::targetsCanBeMovedTo(Connector* other_side) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(ConnectionPtr connection : connections_) {
-        if(!connection->to()->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
+        if(!connection->to()->isCompatibleWith(other_side)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }

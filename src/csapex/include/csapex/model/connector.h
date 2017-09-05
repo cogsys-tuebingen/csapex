@@ -20,15 +20,13 @@ class CSAPEX_EXPORT Connector : public Unique, public ErrorState, public std::en
 public:
     ConnectableOwnerPtr getOwner() const;
 
-    virtual bool canConnectTo(Connector* other_side, bool move) const = 0;
+    virtual bool isCompatibleWith(Connector* other_side) const = 0;
     virtual bool targetsCanBeMovedTo(Connector* other_side) const = 0;
     virtual bool isConnectionPossible(Connector* other_side) = 0;
     virtual void connectionMovePreview(ConnectorPtr other_side) = 0;
 
     virtual int getCount() const = 0;
 
-    virtual bool canOutput() const = 0;
-    virtual bool canInput() const = 0;
     virtual bool isOutput() const = 0;
     virtual bool isInput() const = 0;
     virtual bool isOptional() const = 0;

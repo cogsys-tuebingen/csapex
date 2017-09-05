@@ -19,7 +19,7 @@ using namespace command;
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteConnector)
 
 DeleteConnector::DeleteConnector(const AUUID& parent_uuid, Connectable *_c)
-    : CommandImplementation(parent_uuid), in(_c->canInput()), c_uuid(_c->getUUID())
+    : CommandImplementation(parent_uuid), in(_c->isInput()), c_uuid(_c->getUUID())
 {
 }
 
