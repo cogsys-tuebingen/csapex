@@ -74,8 +74,6 @@ public:
 
     slim_signal::Signal<void(ConnectorPtr)> forwardingAdded;
     slim_signal::Signal<void(ConnectorPtr)> forwardingRemoved;
-
-    slim_signal::Signal<void(ConnectorPtr,ConnectorPtr)> internalConnectionInProgress;
     
 protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) = 0;

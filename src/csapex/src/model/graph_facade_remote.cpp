@@ -35,7 +35,6 @@ GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, GraphFacadeLocal& tmp_r
 
     observe(tmp_ref.forwardingAdded, forwardingAdded);
     observe(tmp_ref.forwardingRemoved, forwardingRemoved);
-    observe(tmp_ref.internalConnectionInProgress, internalConnectionInProgress);
 
 
     //TODO: these have to be translated

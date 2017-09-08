@@ -281,7 +281,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 
         if(Connection::isCompatibleWith(from.get(), adaptee_.get())) {
             if(Connection::isCompatibleWith(adaptee_.get(), from.get())) {
-                adaptee_->connectionInProgress(adaptee_, from);
+                addConnectionPreview(from);
                 e->acceptProposedAction();
             }
         }
@@ -289,6 +289,7 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
 
         if(Connection::targetsCanBeMovedTo(from.get(), adaptee_.get())) {
+            moveConnectionPreview(from);
             e->acceptProposedAction();
         }
     }
@@ -300,10 +301,6 @@ void Port::dragMoveEvent(QDragMoveEvent* e)
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-
-        from->connectionMovePreview(adaptee_);
-
         e->acceptProposedAction();
     }
 }

@@ -62,7 +62,6 @@ public:
 
     virtual bool isConnected() const override;
 
-    virtual void connectionMovePreview(ConnectorPtr other_side) override;
     virtual void validateConnections() override;
 
     std::vector<ConnectionPtr> getConnections() const;

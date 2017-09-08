@@ -82,6 +82,8 @@ public:
     virtual bool isConnected() const;
     virtual bool isConnectedTo(const UUID& other) const override;
 
+    virtual std::vector<UUID> getConnectedPorts() const override;
+
     virtual void disable();
     virtual void enable();
 

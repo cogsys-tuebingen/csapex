@@ -19,7 +19,6 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
 
     observe(tmp_connector_->disconnected, disconnected);
     observe(tmp_connector_->connectionStart, connectionStart);
-    observe(tmp_connector_->connectionInProgress, connectionInProgress);
 
     observe(tmp_connector_->connection_added_to, connection_added_to);
     observe(tmp_connector_->connection_removed_to, connection_removed_to);
@@ -33,12 +32,6 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
 
     observe(tmp_connector_->typeChanged, typeChanged);
     observe(tmp_connector_->labelChanged, labelChanged);
-}
-
-
-void ConnectorRemote::connectionMovePreview(ConnectorPtr other_side)
-{
-    tmp_connector_->connectionMovePreview(other_side);
 }
 
 bool ConnectorRemote::isConnectedTo(const UUID &other) const

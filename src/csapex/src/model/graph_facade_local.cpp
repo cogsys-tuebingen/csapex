@@ -35,7 +35,6 @@ GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, Su
 
     observe(graph_node_->forwardingAdded, forwardingAdded);
     observe(graph_node_->forwardingRemoved, forwardingRemoved);
-    observe(graph_node_->internalConnectionInProgress, internalConnectionInProgress);
 
     if(parent_) {
         // TODO: refactor!

@@ -137,10 +137,8 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, &GraphView::childNodeFacadeAdded, this, &GraphView::childNodeAdded, Qt::QueuedConnection);
     QObject::connect(this, &GraphView::childNodeFacadeRemoved, this, &GraphView::childNodeRemoved, Qt::QueuedConnection);
 
-
     GraphPtr graph = graph_facade_->getGraph();
 
-    observe(graph_facade_->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
     observe(graph->state_changed, [this](){ updateBoxInformation(); });
 
     for(const graph::VertexPtr& vertex : *graph) {
@@ -962,7 +960,6 @@ void GraphView::addBox(NodeBox *box)
     NodeFacadePtr facade = box->getNodeFacade();
 
     facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectorPtr&) { scene_->deleteTemporaryConnections(); }));
-    facade_connections_[facade.get()].emplace_back(facade->connection_in_prograss.connect([this](const ConnectorPtr& from, const ConnectorPtr& to) { scene_->previewConnection(from, to); }));
     facade_connections_[facade.get()].emplace_back(facade->connection_done.connect([this](const ConnectorPtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
@@ -1092,6 +1089,15 @@ void GraphView::addPort(Port *port)
         view_core_.getCommandDispatcher()->execute(cmd);
     });
 
+    QObject::connect(port, &Port::addConnectionPreview, [this, port](const ConnectorPtr& from) {
+        ConnectorPtr adaptee = port->getAdaptee();
+        if(!adaptee) {
+            return;
+        }
+        scene_->deleteTemporaryConnections();
+        scene_->addTemporaryConnection(adaptee, from);
+    });
+
     QObject::connect(port, &Port::moveConnectionRequest, [this, port](const ConnectorPtr& from) {
         ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
@@ -1099,6 +1105,21 @@ void GraphView::addPort(Port *port)
         }
         Command::Ptr cmd = CommandFactory(graph_facade_.get()).moveConnections(from.get(), adaptee.get());
         view_core_.getCommandDispatcher()->execute(cmd);
+    });
+
+
+    QObject::connect(port, &Port::moveConnectionPreview, [this, port](const ConnectorPtr& from) {
+        ConnectorPtr adaptee = port->getAdaptee();
+        if(!adaptee) {
+            return;
+        }
+
+        scene_->deleteTemporaryConnections();
+        for(const UUID& other_id: from->getConnectedPorts()) {
+            if(ConnectorPtr p = graph_facade_->findConnectorNoThrow(other_id)) {
+                scene_->addTemporaryConnection(adaptee, p);
+            }
+        }
     });
 
     QObject::connect(port, &Port::changePortRequest, [this, port](QString label) {

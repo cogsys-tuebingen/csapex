@@ -39,7 +39,6 @@ void NodeFacadeLocal::connectNodeHandle()
     observe(nh_->node_state_changed, node_state_changed);
 
 
-    observe(nh_->connection_in_prograss, connection_in_prograss);
     observe(nh_->connection_done, connection_done);
     observe(nh_->connection_start, connection_start);
 

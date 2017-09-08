@@ -122,14 +122,6 @@ bool Output::isConnected() const
     return !connections_.empty();
 }
 
-void Output::connectionMovePreview(ConnectorPtr other_side)
-{
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    for(ConnectionPtr connection : connections_) {
-        connectionInProgress(connection->to(), other_side);
-    }
-}
-
 void Output::validateConnections()
 {
     for(ConnectionPtr connection : connections_) {

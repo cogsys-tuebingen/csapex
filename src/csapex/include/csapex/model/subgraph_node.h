@@ -163,8 +163,6 @@ public:
     slim_signal::Signal<void(ConnectorPtr)> forwardingAdded;
     slim_signal::Signal<void(ConnectorPtr)> forwardingRemoved;
 
-    slim_signal::Signal<void(ConnectorPtr,ConnectorPtr)> internalConnectionInProgress;
-
 protected:
     GraphLocalPtr graph_;
 

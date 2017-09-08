@@ -8,11 +8,13 @@
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/any_message.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <QApplication>
 #include <QGraphicsPixmapItem>
 #include <QFocusEvent>
+#include <iostream>
 
 using namespace csapex;
 using namespace csapex::impl;
@@ -124,7 +126,15 @@ void MessagePreviewWidget::connectTo(ConnectorPtr c)
 
 void MessagePreviewWidget::connectToImpl(OutputPtr out)
 {
-    connection_ = DirectConnection::connect(out, input_);
+    try {
+        connection_ = DirectConnection::connect(out, input_);
+    } catch(const csapex::Failure& e) {
+        std::cerr << "connecting preview panel to " << out->getUUID() << " caused an assertion error: " << e.what() << std::endl;
+    } catch(const std::exception& e) {
+        std::cerr << "connecting preview panel to " << out->getUUID() << " failed: " << e.what() << std::endl;
+    } catch(...) {
+        std::cerr << "connecting preview panel to " << out->getUUID() << " failed with unknown cause" << std::endl;
+    }
 }
 
 

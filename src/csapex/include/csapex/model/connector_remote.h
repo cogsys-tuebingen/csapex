@@ -16,8 +16,6 @@ public:
     ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner, SessionPtr session,
                     ConnectorPtr tmp_connector);
 
-    virtual void connectionMovePreview(ConnectorPtr other_side) override;
-
     virtual bool isConnectedTo(const UUID &other) const override;
 
     /**

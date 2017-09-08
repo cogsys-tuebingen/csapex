@@ -18,9 +18,9 @@ HANDLE_ACCESSOR(GetConnectionCount,  int, countConnections)
 HANDLE_ACCESSOR(MaxConnectionCount,   int, maxConnectionCount)
 HANDLE_ACCESSOR(HasActiveConnection, bool, hasActiveConnection)
 HANDLE_ACCESSOR(IsConnected,         bool, isConnected)
-//HANDLE_ACCESSOR(IsConnectedTo,       bool, isConnectedTo)
 HANDLE_ACCESSOR(MakeStatusString,    std::string, makeStatusString)
 HANDLE_ACCESSOR(GetType,             TokenDataConstPtr, getType)
+HANDLE_ACCESSOR(GetConnectedPorts,   std::vector<UUID>, getConnectedPorts)
 
 #else
 #pragma message "Cannot generate accessors!"

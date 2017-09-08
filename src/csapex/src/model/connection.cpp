@@ -89,14 +89,17 @@ bool Connection::areConnectorsConnected(Connector *from, Connector *to)
 
 bool Connection::targetsCanBeMovedTo(Connector *from, Connector *to)
 {
-    Output* out = dynamic_cast<Output*>(from);
-    apex_assert_hard(out);
-    for(ConnectionPtr connection : out->getConnections()){
-        if(!isCompatibleWith(connection->to().get(), to)/* || !canConnectTo(*it)*/) {
-            return false;
-        }
+    if(from == to) {
+        return false;
     }
-    return true;
+    if(from->isOutput() != to->isOutput()) {
+        return false;
+    }
+    if(to->maxConnectionCount() >= 0 &&
+            to->countConnections() >= to->maxConnectionCount()) {
+        return false;
+    }
+    return from->getType()->canConnectTo(to->getType().get());
 }
 
 

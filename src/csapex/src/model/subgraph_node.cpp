@@ -290,8 +290,6 @@ InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const 
 
     transition_relay_in_->addInput(input);
 
-    input->connectionInProgress.connect(internalConnectionInProgress);
-
     return input;
 }
 
@@ -361,8 +359,6 @@ OutputPtr SubgraphNode::createInternalOutput(const TokenDataConstPtr& type, cons
     output->setEssential(true);
 
     transition_relay_out_->addOutput(output);
-
-    output->connectionInProgress.connect(internalConnectionInProgress);
 
     return output;
 }
@@ -442,8 +438,6 @@ SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UU
     slot->setGraphPort(true);
     slot->setEssential(true);
 
-    slot->connectionInProgress.connect(internalConnectionInProgress);
-
     internal_slots_[internal_uuid] = slot;
     internal_slot_ids_.push_back(slot->getUUID());
 
@@ -514,8 +508,6 @@ EventPtr SubgraphNode::createInternalEvent(const TokenDataConstPtr& type, const 
     EventPtr event = node_handle_->addInternalEvent(type, internal_uuid, label);
     event->setGraphPort(true);
     event->setEssential(true);
-
-    event->connectionInProgress.connect(internalConnectionInProgress);
 
     internal_events_[internal_uuid] = event;
 

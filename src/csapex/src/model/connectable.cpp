@@ -306,6 +306,22 @@ bool Connectable::isConnectedTo(const UUID& other) const
 }
 
 
+std::vector<UUID> Connectable::getConnectedPorts() const
+{
+    std::vector<UUID> res;
+    res.reserve(connections_.size());
+    for(const ConnectionPtr& c : connections_) {
+        ConnectorPtr other_port = isInput() ? c->source() : c->target();
+        UUID uuid = other_port->getUUID();
+        if(!uuid.empty()) {
+            res.push_back(uuid);
+        }
+    }
+
+    return res;
+}
+
+
 std::string Connectable::makeStatusString() const
 {
     std::stringstream status_stream;

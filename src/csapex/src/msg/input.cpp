@@ -110,12 +110,6 @@ void Input::removeAllConnectionsNotUndoable()
     }
 }
 
-void Input::connectionMovePreview(ConnectorPtr other_side)
-{
-    connectionInProgress(getSource(), other_side);
-}
-
-
 void Input::validateConnections()
 {
     bool e = false;

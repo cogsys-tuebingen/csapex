@@ -20,8 +20,6 @@ class CSAPEX_EXPORT Connector : public Unique, public ErrorState, public std::en
 public:
     ConnectableOwnerPtr getOwner() const;
 
-    virtual void connectionMovePreview(ConnectorPtr other_side) = 0;
-
     virtual int getCount() const = 0;
 
     virtual bool isOutput() const = 0;
@@ -48,6 +46,8 @@ public:
     virtual bool isConnected() const = 0;
     virtual bool isConnectedTo(const UUID& other) const = 0;
 
+    virtual std::vector<UUID> getConnectedPorts() const = 0;
+
     // DEBUG INFORMATION
     virtual std::string makeStatusString() const = 0;
 
@@ -58,7 +58,6 @@ public:
 
     slim_signal::Signal<void(ConnectorPtr)> disconnected;
     slim_signal::Signal<void(ConnectorPtr)> connectionStart;
-    slim_signal::Signal<void(ConnectorPtr,ConnectorPtr)> connectionInProgress;
 
     slim_signal::Signal<void(ConnectorPtr)> connection_added_to;
     slim_signal::Signal<void(ConnectorPtr)> connection_removed_to;
