@@ -47,16 +47,6 @@ void Input::reset()
     setSequenceNumber(0);
 }
 
-bool Input::isConnectionPossible(Connector* other_side)
-{
-    if(!other_side->isOutput()) {
-        std::cerr << "cannot connect, other side can't output" << std::endl;
-        return false;
-    }
-
-    return other_side->isConnectionPossible(this);
-}
-
 void Input::setOptional(bool optional)
 {
     optional_ = optional;
@@ -118,11 +108,6 @@ void Input::removeAllConnectionsNotUndoable()
         setError(false);
         disconnected(shared_from_this());
     }
-}
-
-bool Input::targetsCanBeMovedTo(Connector* other_side) const
-{
-    return getSource()->isCompatibleWith(other_side) /*&& canConnectTo(getConnected())*/;
 }
 
 void Input::connectionMovePreview(ConnectorPtr other_side)

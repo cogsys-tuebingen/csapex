@@ -34,8 +34,6 @@ public:
     virtual void setToken(TokenPtr message);
     virtual TokenPtr getToken() const;
 
-    virtual bool targetsCanBeMovedTo(Connector* other_side) const override;
-
     virtual void connectionMovePreview(ConnectorPtr other_side) override;
     virtual void validateConnections() override;
 
@@ -64,8 +62,6 @@ public:
     slim_signal::Signal<void(Connection* )> message_available;
 
 protected:
-    virtual bool isConnectionPossible(Connector* other_side) override;
-
     virtual void addStatusInformation(std::stringstream& status_stream) const override;
 
 protected:

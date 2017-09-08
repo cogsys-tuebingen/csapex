@@ -60,7 +60,6 @@ public:
     virtual TokenPtr getToken() const = 0;
     virtual TokenPtr getAddedToken() = 0;
 
-    virtual bool targetsCanBeMovedTo(Connector *other_side) const override;
     virtual bool isConnected() const override;
 
     virtual void connectionMovePreview(ConnectorPtr other_side) override;
@@ -74,7 +73,6 @@ public:
     virtual void reset() override;
     virtual void clearBuffer() = 0;
 
-    virtual bool isConnectionPossible(Connector *other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
 public:

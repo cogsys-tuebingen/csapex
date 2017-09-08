@@ -7,6 +7,7 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
+#include <csapex/model/connection.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/view/designer/designer_scene.h>
@@ -278,16 +279,16 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
             return;
         }
 
-        if(from->isCompatibleWith(adaptee_.get())) {
-            if(adaptee_->isCompatibleWith(from.get())) {
+        if(Connection::isCompatibleWith(from.get(), adaptee_.get())) {
+            if(Connection::isCompatibleWith(adaptee_.get(), from.get())) {
                 adaptee_->connectionInProgress(adaptee_, from);
                 e->acceptProposedAction();
             }
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectorPtr original = e->mimeData()->property("Connector").value<ConnectorPtr>();
+        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
 
-        if(original->targetsCanBeMovedTo(adaptee_.get())) {
+        if(Connection::targetsCanBeMovedTo(from.get(), adaptee_.get())) {
             e->acceptProposedAction();
         }
     }
@@ -312,7 +313,7 @@ void Port::dropEvent(QDropEvent* e)
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
         if(from && from != adaptee_) {
-            addConnectionRequest(adaptee_);
+            addConnectionRequest(from);
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();

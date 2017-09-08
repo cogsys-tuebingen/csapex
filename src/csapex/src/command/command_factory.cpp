@@ -95,9 +95,9 @@ Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to, boo
 
     auto from_c = graph->findConnectorNoThrow(from);
 
-    if(std::dynamic_pointer_cast<Output>(from_c)) {
+    if(from_c->isOutput()) {
         return std::make_shared<AddConnection>(graph_uuid, from, to, active);
-    } else if(std::dynamic_pointer_cast<Input>(from_c)) {
+    } else if(from_c->isInput()) {
         return std::make_shared<AddConnection>(graph_uuid, to, from, active);
     }
     return nullptr;

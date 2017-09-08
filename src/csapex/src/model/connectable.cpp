@@ -145,18 +145,6 @@ bool Connectable::isEnabled() const
     return enabled_;
 }
 
-bool Connectable::isCompatibleWith(Connector* other_side) const
-{
-    if(other_side == this) {
-        return false;
-    }
-
-    bool in_out = (isOutput() && other_side->isInput()) || (isInput() && other_side->isOutput());
-    bool compability = getType()->canConnectTo(other_side->getType().get());
-
-    return in_out && compability;
-}
-
 std::string Connectable::getLabel() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
@@ -304,6 +292,17 @@ bool Connectable::hasEnabledConnection() const
 bool Connectable::isConnected() const
 {
     return !connections_.empty();
+}
+
+bool Connectable::isConnectedTo(const UUID& other) const
+{
+    for(const ConnectionPtr& c : connections_) {
+        ConnectorPtr other_port = isInput() ? c->source() : c->target();
+        if(other_port->getUUID() == other) {
+            return true;
+        }
+    }
+    return false;
 }
 
 

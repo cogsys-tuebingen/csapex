@@ -33,6 +33,15 @@ ConnectorRequests::ConnectorRequest::ConnectorRequest(ConnectorRequestType reque
 
 }
 
+ConnectorRequests::ConnectorRequest::ConnectorRequest(ConnectorRequestType request_type, const AUUID &uuid, const boost::any &payload)
+    : RequestImplementation(0),
+      request_type_(request_type),
+      uuid_(uuid),
+      payload_(payload)
+{
+
+}
+
 ConnectorRequests::ConnectorRequest::ConnectorRequest(uint8_t request_id)
     : RequestImplementation(request_id)
 {
@@ -52,10 +61,16 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
 
     switch(request_type_)
     {
+    case ConnectorRequests::ConnectorRequestType::IsConnectedTo:
+    {
+        AUUID other_id = boost::any_cast<AUUID>(payload_);
+        return std::make_shared<NodeResponse>(request_type_, c->isConnectedTo(other_id), getRequestID(), uuid_);
+    }
+
         /**
          * begin: generate cases
          **/
-#define HANDLE_ACCESSOR(type, function, _enum) \
+#define HANDLE_ACCESSOR(_enum, type, function) \
     case ConnectorRequests::ConnectorRequestType::_enum:\
         return std::make_shared<NodeResponse>(request_type_, c->function(), getRequestID(), uuid_);
 
@@ -76,12 +91,14 @@ void ConnectorRequests::ConnectorRequest::serialize(SerializationBuffer &data) c
 {
     data << request_type_;
     data << uuid_;
+    data << payload_;
 }
 
 void ConnectorRequests::ConnectorRequest::deserialize(SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;
+    data >> payload_;
 }
 
 ///

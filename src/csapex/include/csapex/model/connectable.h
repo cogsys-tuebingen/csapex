@@ -29,8 +29,6 @@ public:
 
     virtual void validateConnections();
 
-    virtual bool isCompatibleWith(Connector* other_side) const;
-
     virtual bool isOutput() const {
         return false;
     }
@@ -72,7 +70,7 @@ public:
     void setSequenceNumber(int seq_no_);
 
     int countConnections() const override;
-    virtual int maxConnectionCount() const;
+    virtual int maxConnectionCount() const override;
 
     virtual std::vector<ConnectionPtr> getConnections() const;
 
@@ -82,6 +80,7 @@ public:
     bool hasActiveConnection() const;
 
     virtual bool isConnected() const;
+    virtual bool isConnectedTo(const UUID& other) const override;
 
     virtual void disable();
     virtual void enable();

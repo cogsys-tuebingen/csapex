@@ -255,12 +255,12 @@ void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &conne
 
     ConnectionPtr c;
     if(InputPtr in_new = nf_new->getNodeHandle()->getInput(uuid_new)) {
-        if(!source_new->isConnectionPossible(in_new.get())) {
+        if(!Connection::isCompatibleWith(source_new.get(), in_new.get())) {
             return;
         }
         c = DirectConnection::connect(source_new, in_new);
     } else if(SlotPtr slot_new = nf_new->getNodeHandle()->getSlot(uuid_new)) {
-        if(!source_new->isConnectionPossible(slot_new.get())) {
+        if(!Connection::isCompatibleWith(source_new.get(), slot_new.get())) {
             return;
         }
         c = DirectConnection::connect(source_new, slot_new);

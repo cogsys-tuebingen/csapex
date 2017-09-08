@@ -50,17 +50,14 @@ TEST_F(ConnectionTest, DirectConnectionCompatibility) {
     Input i(uuid_provider->makeUUID("in"));
 
     // non typed should always be connectable!
-    ASSERT_TRUE(o.isCompatibleWith(&i));
     ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 
     o.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
     i.setType(connection_types::makeEmpty<GenericValueMessage<float>>());
-    ASSERT_FALSE(o.isCompatibleWith(&i));
     ASSERT_FALSE(Connection::isCompatibleWith(&o, &i));
 
     o.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
     i.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
-    ASSERT_TRUE(o.isCompatibleWith(&i));
     ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 }
 
@@ -144,6 +141,8 @@ TEST_F(ConnectionTest, InputsCanBeConnectedToOnlyOneOutput) {
     ASSERT_THROW(DirectConnection::connect(o2, i), csapex::Failure);
     ASSERT_THROW(DirectConnection::connect(o1, i), csapex::Failure);
 }
+
+//test moving connections as well...
 
 TEST_F(ConnectionTest, OutputsCanHaveManyConnections) {
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o"));

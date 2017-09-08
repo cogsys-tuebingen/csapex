@@ -16,28 +16,10 @@ public:
 
     enum class ConnectorRequestType
     {
-        GetCount,
-
-        IsOutput,
-        IsInput,
-        IsOptional,
-        IsSynchronous,
-        IsVirtual,
-        IsParameter,
-        IsGraphPort,
-        IsEssential,
-
-        GetLabel,
-        GetType,
-        GetConnectorType,
-        GetDescription,
-        IsEnabled,
-        GetSequenceNumber,
-        GetConnectionCount,
-        HasActiveConnection,
-        IsConnected,
-
-        MakeStatusString
+#define HANDLE_ACCESSOR(_enum, type, function) _enum,
+#include <csapex/model/connector_remote_accessors.hpp>
+#undef HANDLE_ACCESSOR
+        IsConnectedTo,
     };
 
     class ConnectorRequest : public RequestImplementation<ConnectorRequest>
@@ -45,6 +27,7 @@ public:
     public:
         ConnectorRequest(uint8_t request_id);
         ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid);
+        ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid, const boost::any& payload);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
@@ -56,9 +39,15 @@ public:
             return "ConnectorRequests";
         }
 
+        boost::any getPayload() const
+        {
+            return payload_;
+        }
+
     private:
         ConnectorRequestType request_type_;
         AUUID uuid_;
+        boost::any payload_;
     };
 
 

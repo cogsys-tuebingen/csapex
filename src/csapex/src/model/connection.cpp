@@ -53,12 +53,12 @@ Connection::~Connection()
     }
 }
 
-bool Connection::isCompatibleWith(Connectable *from, Connectable *to)
+bool Connection::isCompatibleWith(Connector *from, Connector *to)
 {
     return from->getType()->canConnectTo(to->getType().get());
 }
 
-bool Connection::canBeConnectedTo(Connectable *from, Connectable *to)
+bool Connection::canBeConnectedTo(Connector *from, Connector *to)
 {
     if(!isCompatibleWith(from, to)) {
         return false;
@@ -79,24 +79,26 @@ bool Connection::canBeConnectedTo(Connectable *from, Connectable *to)
     }
 
 
-    Input* input;
-    Output* output;
-    if(from->isOutput()) {
-        output = dynamic_cast<Output*>(from);
-        input = dynamic_cast<Input*>(to);
-    } else {
-        output = dynamic_cast<Output*>(to);
-        input = dynamic_cast<Input*>(from);
-    }
+    return !Connection::areConnectorsConnected(from, to);
+}
 
-    for(const ConnectionPtr& c : from->getConnections()) {
-        if(c->from().get() == output && c->to().get() == input) {
+bool Connection::areConnectorsConnected(Connector *from, Connector *to)
+{
+    return from->isConnectedTo(to->getUUID().getAbsoluteUUID());
+}
+
+bool Connection::targetsCanBeMovedTo(Connector *from, Connector *to)
+{
+    Output* out = dynamic_cast<Output*>(from);
+    apex_assert_hard(out);
+    for(ConnectionPtr connection : out->getConnections()){
+        if(!isCompatibleWith(connection->to().get(), to)/* || !canConnectTo(*it)*/) {
             return false;
         }
     }
-
     return true;
 }
+
 
 void Connection::detach(Connector *c)
 {

@@ -36,28 +36,20 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
 }
 
 
-bool ConnectorRemote::isCompatibleWith(Connector* other_side) const
-{
-    return tmp_connector_->isCompatibleWith(other_side);
-}
-bool ConnectorRemote::targetsCanBeMovedTo(Connector* other_side) const
-{
-    return tmp_connector_->targetsCanBeMovedTo(other_side);
-}
-bool ConnectorRemote::isConnectionPossible(Connector* other_side)
-{
-    return tmp_connector_->isConnectionPossible(other_side);
-}
-
 void ConnectorRemote::connectionMovePreview(ConnectorPtr other_side)
 {
     tmp_connector_->connectionMovePreview(other_side);
 }
 
+bool ConnectorRemote::isConnectedTo(const UUID &other) const
+{
+    return request<bool, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::IsConnectedTo, getUUID().getAbsoluteUUID(), other);
+}
+
 /**
  * begin: generate getters
  **/
-#define HANDLE_ACCESSOR(type, function, _enum) \
+#define HANDLE_ACCESSOR(_enum, type, function) \
 type ConnectorRemote::function() const\
 {\
     return request<type, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::_enum, getUUID().getAbsoluteUUID());\
