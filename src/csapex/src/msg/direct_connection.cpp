@@ -52,11 +52,4 @@ DirectConnection::DirectConnection(OutputPtr from, InputPtr to, int id)
 void DirectConnection::setToken(const TokenPtr &msg)
 {
     Connection::setToken(msg);
-
-//    dynamic_cast<Input*>(to())->inputMessage(msg);
-
-//    setState(Connection::State::READ);
-////    setState(Connection::State::DONE);
-
-//    setMessageProcessed();
 }

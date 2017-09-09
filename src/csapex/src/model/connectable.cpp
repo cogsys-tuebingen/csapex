@@ -305,6 +305,17 @@ bool Connectable::isConnectedTo(const UUID& other) const
     return false;
 }
 
+bool Connectable::isActivelyConnectedTo(const UUID& other) const
+{
+    for(const ConnectionPtr& c : connections_) {
+        ConnectorPtr other_port = isInput() ? c->source() : c->target();
+        if(other_port->getUUID() == other) {
+            return c->isActive();
+        }
+    }
+    return false;
+}
+
 
 std::vector<UUID> Connectable::getConnectedPorts() const
 {

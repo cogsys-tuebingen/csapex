@@ -63,8 +63,13 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
     {
     case ConnectorRequests::ConnectorRequestType::IsConnectedTo:
     {
-        AUUID other_id = boost::any_cast<AUUID>(payload_);
+        UUID other_id = boost::any_cast<UUID>(payload_);
         return std::make_shared<NodeResponse>(request_type_, c->isConnectedTo(other_id), getRequestID(), uuid_);
+    }
+    case ConnectorRequests::ConnectorRequestType::IsActivelyConnectedTo:
+    {
+        UUID other_id = boost::any_cast<UUID>(payload_);
+        return std::make_shared<NodeResponse>(request_type_, c->isActivelyConnectedTo(other_id), getRequestID(), uuid_);
     }
 
         /**

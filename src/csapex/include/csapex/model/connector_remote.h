@@ -17,6 +17,7 @@ public:
                     ConnectorPtr tmp_connector);
 
     virtual bool isConnectedTo(const UUID &other) const override;
+    virtual bool isActivelyConnectedTo(const UUID &other) const override;
 
     /**
      * begin: generate getters

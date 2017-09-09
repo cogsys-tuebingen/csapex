@@ -20,6 +20,7 @@ public:
 #include <csapex/model/connector_remote_accessors.hpp>
 #undef HANDLE_ACCESSOR
         IsConnectedTo,
+        IsActivelyConnectedTo,
     };
 
     class ConnectorRequest : public RequestImplementation<ConnectorRequest>

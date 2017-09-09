@@ -16,7 +16,7 @@ class CSAPEX_COMMAND_EXPORT DeleteConnection : public Meta
     COMMAND_HEADER(DeleteConnection);
 
 public:
-    DeleteConnection(const AUUID& graph_uuid, Connectable* a, Connectable* b);
+    DeleteConnection(const AUUID& graph_uuid, const UUID& from, const UUID& to);
 
     void serialize(SerializationBuffer &data) const override;
     void deserialize(SerializationBuffer& data) override;

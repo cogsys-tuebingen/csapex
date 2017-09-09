@@ -169,25 +169,16 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
             e->acceptProposedAction();
 
             DesignerScene* scene = src->designerScene();
-            scene->deleteTemporaryConnections();
+            GraphFacade* graph_facade = src->getGraphFacade();
 
-            if(c->isOutput()) {
-                OutputPtr out = std::dynamic_pointer_cast<Output> (c);
-                if(out) {
-                    for(ConnectionPtr c : out->getConnections()) {
-                        if(!c) {
-                            continue;
-                        }
-                        InputPtr input = c->to();
-                        if(input) {
-                            scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
-                        }
+            scene->deleteTemporaryConnections();
+            for(const UUID& other_id : c->getConnectedPorts()) {
+                if(ConnectorPtr p = graph_facade->findConnectorNoThrow(other_id)) {
+                    if(c->isOutput()) {
+                        scene->addTemporaryConnection(p, src->mapToScene(e->pos()));
+                    } else {
+                        scene->addTemporaryConnection(p, src->mapToScene(e->pos()));
                     }
-                }
-            } else {
-                InputPtr in = std::dynamic_pointer_cast<Input> (c);
-                if(in) {
-                    scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
                 }
             }
             scene->update();

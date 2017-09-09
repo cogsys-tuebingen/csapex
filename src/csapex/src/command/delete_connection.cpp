@@ -20,20 +20,9 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteConnection)
 
-DeleteConnection::DeleteConnection(const AUUID &parent_uuid, Connectable* a, Connectable* b)
-    : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
+DeleteConnection::DeleteConnection(const AUUID &parent_uuid, const UUID& from, const UUID&  to)
+    : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(from), to_uuid(to)
 {
-    apex_assert_hard(!a->isVirtual());
-    apex_assert_hard(!b->isVirtual());
-
-    if((a->isOutput() && b->isInput())) {
-        from_uuid = a->getUUID();
-        to_uuid =  b->getUUID();
-
-    } else if(a->isInput() && b->isOutput()) {
-        from_uuid = b->getUUID();
-        to_uuid =  a->getUUID();
-    }
 }
 
 std::string DeleteConnection::getDescription() const

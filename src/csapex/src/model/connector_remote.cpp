@@ -39,6 +39,11 @@ bool ConnectorRemote::isConnectedTo(const UUID &other) const
     return request<bool, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::IsConnectedTo, getUUID().getAbsoluteUUID(), other);
 }
 
+bool ConnectorRemote::isActivelyConnectedTo(const UUID &other) const
+{
+    return request<bool, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::IsActivelyConnectedTo, getUUID().getAbsoluteUUID(), other);
+}
+
 /**
  * begin: generate getters
  **/

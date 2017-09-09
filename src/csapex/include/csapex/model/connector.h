@@ -45,6 +45,7 @@ public:
     virtual bool hasActiveConnection() const = 0;
     virtual bool isConnected() const = 0;
     virtual bool isConnectedTo(const UUID& other) const = 0;
+    virtual bool isActivelyConnectedTo(const UUID& other) const = 0;
 
     virtual std::vector<UUID> getConnectedPorts() const = 0;
 

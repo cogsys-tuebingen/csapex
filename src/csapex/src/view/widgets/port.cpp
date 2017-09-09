@@ -65,8 +65,7 @@ Port::Port(ConnectorPtr adaptee, QWidget *parent)
     connections_.push_back(adaptee_->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
     connections_.push_back(adaptee_->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
 
-    bool opt = dynamic_cast<Input*>(adaptee_.get()) && dynamic_cast<Input*>(adaptee_.get())->isOptional();
-    setProperty("optional", opt);
+    setProperty("optional", adaptee_->isOptional());
 
     setProperty("type", QString::fromStdString(port_type::name(adaptee_->getConnectorType())));
 }

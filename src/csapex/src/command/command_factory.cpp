@@ -78,7 +78,9 @@ CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>
 
     for(ConnectionPtr c : connections) {
         if(!c->from()->isVirtual() && !c->to()->isVirtual()) {
-            meta->add(std::make_shared<DeleteConnection>(graph_uuid, c->from().get(), c->to().get()));
+            meta->add(std::make_shared<DeleteConnection>(graph_uuid,
+                                                         c->source()->getUUID(),
+                                                         c->target()->getUUID()));
         }
     }
     return meta;
@@ -111,59 +113,27 @@ Command::Ptr CommandFactory::removeAllConnectionsCmd(ConnectorPtr c)
 
 Command::Ptr CommandFactory::removeAllConnectionsCmd(Connector* c)
 {
-    if(Input* input = dynamic_cast<Input*>(c)) {
-        return removeAllConnectionsCmd(input);
-    }
-    if(Output* output = dynamic_cast<Output*>(c)) {
-        return removeAllConnectionsCmd(output);
-    }
-    if(Slot* slot = dynamic_cast<Slot*>(c)) {
-        return removeAllConnectionsCmd(slot);
-    }
-    if(Event* trigger = dynamic_cast<Event*>(c)) {
-        return removeAllConnectionsCmd(trigger);
-    }
-    return nullptr;
-}
-
-Command::Ptr CommandFactory::removeAllConnectionsCmd(Input* input)
-{
     Meta::Ptr removeAll(new Meta(graph_uuid, "Remove All Connections", true));
 
-    for(ConnectionPtr connection : input->getConnections()) {
-        OutputPtr output = connection->from();
-        if(!output->isVirtual() && !input->isVirtual()) {
-            Command::Ptr removeThis(new DeleteConnection(graph_uuid, output.get(), input));
-            removeAll->add(removeThis);
+    UUID this_side = c->getUUID();
+    for(const UUID& other_side : c->getConnectedPorts()) {
+        if(c->isOutput()) {
+            removeAll->add(std::make_shared<DeleteConnection>(graph_uuid, this_side, other_side));
+
+        } else {
+            removeAll->add(std::make_shared<DeleteConnection>(graph_uuid, other_side, this_side));
         }
     }
-
 
     return removeAll;
 }
 
-Command::Ptr CommandFactory::removeConnectionCmd(Output* output, Connection* connection) {
+Command::Ptr CommandFactory::removeConnectionCmd(Connector* output, Connection* connection) {
     apex_assert_hard(!output->isVirtual());
     InputPtr input = connection->to();
     apex_assert_hard(!input->isVirtual());
-    return Command::Ptr (new DeleteConnection(graph_uuid, output, input.get()));
+    return Command::Ptr (new DeleteConnection(graph_uuid, output->getUUID(), input->getUUID()));
 }
-
-Command::Ptr CommandFactory::removeAllConnectionsCmd(Output* output)
-{
-    Meta::Ptr removeAll(new Meta(graph_uuid, "Remove All Connections", true));
-
-    for(ConnectionPtr connection : output->getConnections()) {
-        InputPtr input = connection->to();
-        if(!output->isVirtual() && !input->isVirtual()) {
-            Command::Ptr removeThis(new DeleteConnection(graph_uuid, output, input.get()));
-            removeAll->add(removeThis);
-        }
-    }
-
-    return removeAll;
-}
-
 
 
 /// graph_
@@ -192,10 +162,9 @@ Command::Ptr CommandFactory::deleteConnectionByIdCommand(int id)
     GraphPtr graph = graph_facade->getGraph();
     for(const auto& connection : graph->getConnections()) {
         if(connection->id() == id) {
-            OutputPtr out = connection->from();
-            InputPtr in = connection->to();
-
-            return Command::Ptr(new DeleteConnection(graph_uuid, out.get(), in.get()));
+            return Command::Ptr(new DeleteConnection(graph_uuid,
+                                                     connection->source()->getUUID(),
+                                                     connection->target()->getUUID()));
 
         }
     }
@@ -259,8 +228,6 @@ Command::Ptr CommandFactory::moveConnections(Connector *from, Connector *to)
     apex_assert_hard((from->isOutput() && to->isOutput()) ||
                      (from->isInput() && to->isInput()));
 
-    bool is_output = from->isOutput();
-
     //    UUID from_uuid = from->getUUID();
     UUID to_uuid = to->getUUID();
 
@@ -268,34 +235,15 @@ Command::Ptr CommandFactory::moveConnections(Connector *from, Connector *to)
 
     Meta::Ptr meta(new Meta(parent_uuid, "MoveConnection", true));
 
-    if(is_output) {
-        Output* out = dynamic_cast<Output*>(from);
-        if(out) {
-            for(ConnectionPtr c : out->getConnections()) {
-                if(!c) {
-                    continue;
-                }
-                InputPtr input = c->to();
-                if(!input->isVirtual()) {
-                    meta->add(Command::Ptr(new DeleteConnection(parent_uuid, out, input.get())));
-                    meta->add(Command::Ptr(new AddConnection(parent_uuid, to_uuid, input->getUUID(), c->isActive())));
-                }
-            }
-        }
-
-    } else {
-        Input* in = dynamic_cast<Input*>(from);
-
-        if(in) {
-            for(ConnectionPtr c : in->getConnections()) {
-                if(!c) {
-                    continue;
-                }
-                OutputPtr output = c->from();
-                if(!output->isVirtual()) {
-                    meta->add(Command::Ptr(new DeleteConnection(parent_uuid, output.get(), in)));
-                    meta->add(Command::Ptr(new AddConnection(parent_uuid, output->getUUID(), to_uuid, c->isActive())));
-                }
+    for(const UUID& other_id : from->getConnectedPorts()) {
+        if(ConnectorPtr c = root_->findConnectorNoThrow(other_id)) {
+            bool is_active = from->isActivelyConnectedTo(other_id);
+            if(from->isOutput()) {
+                meta->add(Command::Ptr(new DeleteConnection(parent_uuid, from->getUUID(), c->getUUID())));
+                meta->add(Command::Ptr(new AddConnection(parent_uuid, to_uuid, c->getUUID(), is_active)));
+            } else {
+                meta->add(Command::Ptr(new DeleteConnection(parent_uuid, c->getUUID(), from->getUUID())));
+                meta->add(Command::Ptr(new AddConnection(parent_uuid, c->getUUID(), to_uuid, is_active)));
             }
         }
     }

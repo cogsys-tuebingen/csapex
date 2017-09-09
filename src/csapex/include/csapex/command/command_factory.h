@@ -29,10 +29,7 @@ public:
     CommandPtr removeAllConnectionsCmd(ConnectorPtr input);
     CommandPtr removeAllConnectionsCmd(Connector* input);
 
-    CommandPtr removeAllConnectionsCmd(Input* input);
-    CommandPtr removeAllConnectionsCmd(Output* output);
-
-    CommandPtr removeConnectionCmd(Output* output, Connection* connection);
+    CommandPtr removeConnectionCmd(Connector* output, Connection* connection);
 
 
     CommandPtr moveConnections(const UUID& from, const UUID& to);
