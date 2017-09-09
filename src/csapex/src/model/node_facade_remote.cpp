@@ -283,7 +283,15 @@ ConnectorPtr NodeFacadeRemote::getConnector(const UUID &id) const
 {
     return remote_connectors_.at(id);
 }
-
+ConnectorPtr NodeFacadeRemote::getConnectorNoThrow(const UUID& id) const noexcept
+{
+    auto pos = remote_connectors_.find(id);
+    if(pos == remote_connectors_.end()) {
+        return nullptr;
+    } else {
+        return pos->second;
+    }
+}
 
 
 std::vector<param::ParameterPtr> NodeFacadeRemote::getParameters() const

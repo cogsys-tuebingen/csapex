@@ -7,11 +7,13 @@
 #include <csapex/io/io_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/serialization/serialization_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <boost/asio.hpp>
 #include <thread>
 #include <mutex>
+#include <map>
 
 namespace csapex
 {
@@ -29,12 +31,6 @@ private:
     void spin();
     void do_accept();
 
-    void startObserving(SessionWeakPtr session, const GraphFacadePtr& graph);
-    void stopObserving(SessionWeakPtr session, const GraphFacadePtr& graph);
-
-    void startObserving(SessionWeakPtr session, const NodeFacadePtr& node);
-    void stopObserving(SessionWeakPtr session, const NodeFacadePtr& node);
-
     void handlePacket(const SessionPtr &session, const SerializableConstPtr &packet);
 
     boost::asio::io_service io_service_;
@@ -50,6 +46,8 @@ private:
 
     std::recursive_mutex session_mutex_;
     std::vector<SessionPtr> sessions_;
+
+    std::map<Session*, GraphServerPtr> graph_servers_;
 };
 
 }

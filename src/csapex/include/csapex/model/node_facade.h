@@ -67,6 +67,7 @@ public:
     virtual std::vector<ConnectorDescription> getExternalConnectors() const;
 
     virtual ConnectorPtr getConnector(const UUID& id) const = 0;
+    virtual ConnectorPtr getConnectorNoThrow(const UUID& id) const noexcept = 0;
 
     virtual NodeCharacteristics getNodeCharacteristics() const = 0;
 

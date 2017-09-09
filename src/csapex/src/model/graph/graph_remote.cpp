@@ -235,11 +235,7 @@ ConnectorPtr GraphRemote::findConnectorNoThrow(const UUID &uuid) noexcept
     NodeFacadeRemotePtr owner_remote = std::dynamic_pointer_cast<NodeFacadeRemote>(owner);
     apex_assert_hard(owner_remote);
 
-    try {
-        return owner->getConnector(uuid);
-    } catch(...) {
-        return nullptr;
-    }
+    return owner->getConnectorNoThrow(uuid);
 }
 
 ConnectionPtr GraphRemote::getConnectionWithId(int id)

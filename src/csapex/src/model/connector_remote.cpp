@@ -13,6 +13,13 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
       Remote(session),
       tmp_connector_(tmp_connector)
 {
+//    continue: relay these signals generically
+//            - Graph Channel
+//            - Node Channel
+//            ....
+//            - Channel<GraphFacade>
+//            - Channel<NodeFacade>
+//            - Channel<Connector> (Channel<GraphFacade>) instead of Session in this class
     observe(tmp_connector_->enabled_changed, enabled_changed);
 
     observe(tmp_connector_->essential_changed, essential_changed);

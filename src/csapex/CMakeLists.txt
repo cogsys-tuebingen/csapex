@@ -538,7 +538,6 @@ add_library(csapex_remote SHARED
     src/model/graph_facade_remote.cpp
 
     src/io/remote.cpp
-    src/io/server.cpp
     src/io/raw_message.cpp
     src/io/request.cpp
     src/io/response.cpp
@@ -546,6 +545,10 @@ add_library(csapex_remote SHARED
     src/io/broadcast_message.cpp
     src/io/session.cpp
     src/io/session_client.cpp
+
+    src/io/server.cpp
+    src/io/graph_server.cpp
+    src/io/node_server.cpp
 
     src/io/protocol/notification_message.cpp
     src/io/protocol/parameter_changed.cpp

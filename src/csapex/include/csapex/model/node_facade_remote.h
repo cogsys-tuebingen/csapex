@@ -62,6 +62,7 @@ public:
     std::vector<ConnectorDescription> getExternalSlots() const override;
 
     ConnectorPtr getConnector(const UUID& id) const override;
+    ConnectorPtr getConnectorNoThrow(const UUID& id) const noexcept override;
 
     NodeCharacteristics getNodeCharacteristics() const override;
 

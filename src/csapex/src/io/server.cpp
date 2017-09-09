@@ -15,6 +15,7 @@
 #include <csapex/io/protcol/parameter_changed.h>
 #include <csapex/io/protcol/command_broadcasts.h>
 #include <csapex/io/protcol/graph_broadcasts.h>
+#include <csapex/io/graph_server.h>
 
 /// SYSTEM
 #include <cstdlib>
@@ -97,7 +98,9 @@ void Server::do_accept()
             });
 
             // graphs and nodes
-            startObserving(session, core_->getRoot());
+            GraphServerPtr graph_server = std::make_shared<GraphServer>(session);
+            graph_servers_[session.get()] = graph_server;
+            graph_server->startObserving(core_->getRoot());
 
             session->start();
 
@@ -108,59 +111,6 @@ void Server::do_accept()
         do_accept();
     });
 }
-
-void Server::startObserving(SessionWeakPtr session, const GraphFacadePtr &graph)
-{
-    std::cerr << "start observing graph: " << graph->getAbsoluteUUID() << std::endl;
-    AUUID graph_id = graph->getAbsoluteUUID();
-
-    observe(graph->node_facade_added, [this, session, graph_id](const NodeFacadePtr& node) {
-        startObserving(session, node);
-        if(SessionPtr s = session.lock()) {
-            s->sendBroadcast<GraphBroadcasts>(GraphBroadcasts::GraphBroadcastType::NodeCreated,
-                                              graph_id,
-                                              node->getUUID());
-        }
-    });
-    observe(graph->node_facade_removed, [this, session, graph_id](const NodeFacadePtr& node) {
-        stopObserving(session, node);
-        if(SessionPtr s = session.lock()) {
-            s->sendBroadcast<GraphBroadcasts>(GraphBroadcasts::GraphBroadcastType::NodeDestroyed,
-                                              graph_id,
-                                              node->getUUID());
-        }
-    });
-    observe(graph->child_added, [this, session](const GraphFacadePtr& graph) {
-        startObserving(session, graph);
-        if(SessionPtr s = session.lock()) {
-            s->sendBroadcast<GraphBroadcasts>(GraphBroadcasts::GraphBroadcastType::GraphCreated,
-                                              graph->getAbsoluteUUID());
-        }
-    });
-    observe(graph->child_removed, [this, session](const GraphFacadePtr& graph) {
-        stopObserving(session, graph);
-        if(SessionPtr s = session.lock()) {
-            s->sendBroadcast<GraphBroadcasts>(GraphBroadcasts::GraphBroadcastType::GraphDestroyed,
-                                              graph->getAbsoluteUUID());
-        }
-    });
-}
-
-void Server::stopObserving(SessionWeakPtr session, const GraphFacadePtr &graph)
-{
-    std::cerr << "stop observing graph: " << graph->getAbsoluteUUID() << std::endl;
-}
-
-void Server::startObserving(SessionWeakPtr session, const NodeFacadePtr &node)
-{
-    std::cerr << "start observing node: " << node->getAUUID() << std::endl;
-}
-
-void Server::stopObserving(SessionWeakPtr session, const NodeFacadePtr &node)
-{
-    std::cerr << "stop observing node: " << node->getAUUID() << std::endl;
-}
-
 void Server::handlePacket(const SessionPtr& session, const SerializableConstPtr& packet)
 {
     if(CommandConstPtr cmd = std::dynamic_pointer_cast<Command const>(packet)) {

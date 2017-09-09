@@ -230,6 +230,11 @@ ConnectorPtr NodeFacadeLocal::getConnector(const UUID &id) const
     return nh_->getConnector(id);
 }
 
+ConnectorPtr NodeFacadeLocal::getConnectorNoThrow(const UUID& id) const noexcept
+{
+    return nh_->getConnectorNoThrow(id);
+}
+
 NodeCharacteristics NodeFacadeLocal::getNodeCharacteristics() const
 {
     return nh_->getVertex()->getNodeCharacteristics();
@@ -413,46 +418,3 @@ bool NodeFacadeLocal::hasParameter(const std::string &name) const
     }
     throw std::runtime_error("tried to check a parameter from an invalid node");
 }
-
-//template <typename T>
-//T NodeFacadeLocal::readParameter(const std::string& name) const
-//{
-//    if(auto node = nh_->getNode().lock()){
-//        return node->readParameter<T>(name);
-//    }
-//    throw std::runtime_error("tried to read a parameter from an invalid node");
-//}
-
-//template <typename T>
-//void NodeFacadeLocal::setParameter(const std::string& name, const T& value)
-//{
-//    if(auto node = nh_->getNode().lock()){
-//        node->setParameter<T>(name, value);
-//    } else {
-//        throw std::runtime_error("tried to set a parameter from an invalid node");
-//    }
-//}
-
-
-
-//template CSAPEX_EXPORT bool NodeFacadeLocal::readParameter<bool>(const std::string& name) const;
-//template CSAPEX_EXPORT double NodeFacadeLocal::readParameter<double>(const std::string& name) const;
-//template CSAPEX_EXPORT int NodeFacadeLocal::readParameter<int>(const std::string& name) const;
-//template CSAPEX_EXPORT std::string NodeFacadeLocal::readParameter<std::string>(const std::string& name) const;
-//template CSAPEX_EXPORT std::pair<int,int> NodeFacadeLocal::readParameter<std::pair<int,int> >(const std::string& name) const;
-//template CSAPEX_EXPORT std::pair<double,double> NodeFacadeLocal::readParameter<std::pair<double,double> >(const std::string& name) const;
-//template CSAPEX_EXPORT std::pair<std::string, bool> NodeFacadeLocal::readParameter<std::pair<std::string, bool> >(const std::string& name) const;
-//template CSAPEX_EXPORT std::vector<double> NodeFacadeLocal::readParameter<std::vector<double> >(const std::string& name) const;
-//template CSAPEX_EXPORT std::vector<int> NodeFacadeLocal::readParameter<std::vector<int> >(const std::string& name) const;
-
-
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<bool>(const std::string& name, const bool& value);
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<double>(const std::string& name, const double& value);
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<int>(const std::string& name, const int& value);
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<std::string>(const std::string& name, const std::string& value);
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<std::pair<int,int> > (const std::string& name, const std::pair<int,int>& value);
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<std::pair<double,double> >(const std::string& name, const std::pair<double,double>& value);
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<std::pair<std::string, bool> >(const std::string& name, const std::pair<std::string, bool>& value);
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
-//template CSAPEX_EXPORT void NodeFacadeLocal::setParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
-
