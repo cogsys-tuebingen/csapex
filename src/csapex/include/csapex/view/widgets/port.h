@@ -77,9 +77,6 @@ public Q_SLOTS:
     void setFlipped(bool flipped);
     void setEnabledFlag(bool disabled);
 
-    void setError(bool e, const std::string& msg);
-    void setError(bool e, const std::string& msg, int level);
-
 protected:
     Port(QWidget *parent = nullptr);
 

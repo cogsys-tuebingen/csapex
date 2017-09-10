@@ -903,7 +903,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
     QPointF p2 = centerPoint(to_port);
 
     ccs.highlighted = (highlight_connection_id_ == id);
-    ccs.error = (to->isError() || from->isError());
+    ccs.error = false;
     ccs.minimized_from = from_port->isMinimizedSize();
     ccs.minimized_to = to_port->isMinimizedSize();
     ccs.hidden_from = !from_port->isVisible();

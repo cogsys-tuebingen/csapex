@@ -105,25 +105,8 @@ void Input::removeAllConnectionsNotUndoable()
     if(!connections_.empty()) {
         getSource()->removeConnection(this);
         connections_.clear();
-        setError(false);
         disconnected(shared_from_this());
     }
-}
-
-void Input::validateConnections()
-{
-    bool e = false;
-    if(isConnected()) {
-        TokenData::ConstPtr target_type = getSource()->getType();
-        TokenData::ConstPtr type = getType();
-        if(!target_type) {
-            e = true;
-        } else if(!target_type->canConnectTo(type.get())) {
-            e = true;
-        }
-    }
-
-    setError(e);
 }
 
 OutputPtr Input::getSource() const

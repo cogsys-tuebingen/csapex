@@ -73,10 +73,10 @@ void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
 void NodeFacadeRemote::connectNodeHandle()
 {
     observe(nh_->connector_created, [this](ConnectorPtr connector) {
-        createConnectorProxy(connector);
+        createConnectorProxy(connector->getUUID());
     });
     for(ConnectorPtr c : nh_->getExternalConnectors()) {
-        createConnectorProxy(c);
+        createConnectorProxy(c->getUUID());
     }
 
 
@@ -118,11 +118,10 @@ void NodeFacadeRemote::connectNodeWorker()
     });
 }
 
-void NodeFacadeRemote::createConnectorProxy(const ConnectorPtr &connector)
+void NodeFacadeRemote::createConnectorProxy(const UUID &uuid)
 {
-    UUID uuid = connector->getUUID();
     ConnectableOwnerPtr owner;
-    std::shared_ptr<ConnectorRemote> proxy = std::make_shared<ConnectorRemote>(uuid, owner, session_, connector);
+    std::shared_ptr<ConnectorRemote> proxy = std::make_shared<ConnectorRemote>(uuid, owner, session_);
     remote_connectors_[uuid] = proxy;
     connector_created(proxy);
 }

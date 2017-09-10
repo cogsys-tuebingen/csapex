@@ -113,7 +113,7 @@ private:
     void connectNodeHandle();
     void connectNodeWorker();
 
-    void createConnectorProxy(const ConnectorPtr& connector);
+    void createConnectorProxy(const UUID &uuid);
 
 private:
     AUUID uuid_;

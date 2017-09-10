@@ -27,8 +27,6 @@ public:
 
     int getCount() const;
 
-    virtual void validateConnections();
-
     virtual bool isOutput() const {
         return false;
     }
@@ -115,9 +113,6 @@ protected:
     Connectable(const UUID &uuid, ConnectableOwnerWeakPtr owner);
 
     void init();
-
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
-
 
 protected:
     mutable std::recursive_mutex io_mutex;

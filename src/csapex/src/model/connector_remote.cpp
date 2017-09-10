@@ -12,12 +12,9 @@
 using namespace csapex;
 
 
-ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
-                                 SessionPtr session,
-                                 ConnectorPtr tmp_connector)
+ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner, SessionPtr session)
     : Connector(uuid, owner),
       Remote(session),
-      tmp_connector_(tmp_connector),
       /**
        * begin: initialize caches
        **/
@@ -35,8 +32,6 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
     channel_ = session->openChannel(uuid.getAbsoluteUUID());
 
     observe(channel_->note_received, [this](const io::NoteConstPtr& note){
-        std::cerr << "note received: " << note->getType() << std::endl;
-
         if(const std::shared_ptr<ConnectorNote const>& cn = std::dynamic_pointer_cast<ConnectorNote const>(note)) {
             switch(cn->getNoteType()) {
                 /**
@@ -61,20 +56,6 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
         }
 
     });
-
-
-//    observe(tmp_connector_->disconnected, disconnected);
-//    observe(tmp_connector_->connectionStart, connectionStart);
-
-//    observe(tmp_connector_->connection_added_to, connection_added_to);
-//    observe(tmp_connector_->connection_removed_to, connection_removed_to);
-
-//    observe(tmp_connector_->connection_added, connection_added);
-//    observe(tmp_connector_->connection_faded, connection_faded);
-
-//    observe(tmp_connector_->connectionEnabled, connectionEnabled);
-//    observe(tmp_connector_->message_processed, message_processed);
-//    observe(tmp_connector_->connectableError, connectableError);
 }
 
 bool ConnectorRemote::isConnectedTo(const UUID &other) const

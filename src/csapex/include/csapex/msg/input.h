@@ -34,8 +34,6 @@ public:
     virtual void setToken(TokenPtr message);
     virtual TokenPtr getToken() const;
 
-    virtual void validateConnections() override;
-
     OutputPtr getSource() const;
 
     virtual void removeAllConnectionsNotUndoable() override;

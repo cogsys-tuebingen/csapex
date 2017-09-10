@@ -304,6 +304,17 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
             pasteGraph(src, pos, *snippet);
         }
 
+
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+        e->ignore();
+        DesignerScene* scene = src->designerScene();
+        scene->deleteTemporaryConnections();
+
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+        e->ignore();
+        DesignerScene* scene = src->designerScene();
+        scene->deleteTemporaryConnections();
+
     } else {
         for(auto h : handler_) {
             if(h->handleDrop(src, dispatcher_, e, scene_pos)) {

@@ -221,7 +221,6 @@ void GraphLocal::deleteConnection(ConnectionPtr connection)
     for(std::vector<ConnectionPtr>::iterator c = edges_.begin(); c != edges_.end();) {
         if(*connection == **c) {
             ConnectablePtr to = connection->to();
-            to->setError(false);
 
             UUID from_uuid = connection->from()->getUUID();
             NodeHandle* n_from = findNodeHandleForConnector(from_uuid);

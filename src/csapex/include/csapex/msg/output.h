@@ -62,8 +62,6 @@ public:
 
     virtual bool isConnected() const override;
 
-    virtual void validateConnections() override;
-
     std::vector<ConnectionPtr> getConnections() const;
 
     virtual bool hasMessage() = 0;

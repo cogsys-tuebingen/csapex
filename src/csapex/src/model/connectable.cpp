@@ -109,12 +109,6 @@ Connectable::~Connectable()
     }
 }
 
-void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
-{
-    connectableError(error,msg,static_cast<int>(level));
-}
-
-
 void Connectable::disable()
 {
     if(enabled_) {
@@ -170,16 +164,10 @@ void Connectable::setType(TokenData::ConstPtr type)
 
     if(!compatible || (is_any != will_be_any)) {
         type_ = type;
-        validateConnections();
         lock.unlock();
 
         typeChanged(type);
     }
-}
-
-void Connectable::validateConnections()
-{
-
 }
 
 TokenData::ConstPtr Connectable::getType() const

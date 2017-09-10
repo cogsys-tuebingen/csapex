@@ -122,13 +122,6 @@ bool Output::isConnected() const
     return !connections_.empty();
 }
 
-void Output::validateConnections()
-{
-    for(ConnectionPtr connection : connections_) {
-        connection->to()->validateConnections();
-    }
-}
-
 bool Output::canReceiveToken() const
 {
     for(const ConnectionPtr& connection : connections_) {

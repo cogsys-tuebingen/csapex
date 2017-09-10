@@ -63,7 +63,6 @@ Port::Port(ConnectorPtr adaptee, QWidget *parent)
     createToolTip();
 
     connections_.push_back(adaptee_->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
-    connections_.push_back(adaptee_->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
 
     setProperty("optional", adaptee_->isOptional());
 
@@ -115,17 +114,6 @@ void Port::paintEvent(QPaintEvent *e)
 void Port::refreshStylesheet()
 {
     refresh_style_sheet_ = true;
-}
-
-void Port::setError(bool error, const std::string& msg)
-{
-    setError(error, msg, static_cast<int>(ErrorState::ErrorLevel::ERROR));
-}
-
-void Port::setError(bool error, const std::string& /*msg*/, int /*level*/)
-{
-    setProperty("error", error);
-    refreshStylesheet();
 }
 
 void Port::setMinimizedSize(bool mini)
