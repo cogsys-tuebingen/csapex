@@ -28,7 +28,8 @@ FWD(ConnectorServer)
 
 namespace io
 {
-FWD(Channel)
+    FWD(Note)
+    FWD(Channel)
 }
 
 }

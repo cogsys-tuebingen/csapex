@@ -94,6 +94,9 @@ protected:
 class CSAPEX_UTILS_EXPORT AUUID : public UUID
 {
 public:
+    static AUUID NONE;
+
+public:
     AUUID() = default;
     AUUID(const AUUID& uuid) = default;
     explicit AUUID(const UUID& uuid);

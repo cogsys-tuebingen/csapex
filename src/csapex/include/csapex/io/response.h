@@ -3,7 +3,6 @@
 
 /// PROJECT
 #include <csapex/serialization/serializable.h>
-#include <csapex/core/csapex_core.h>
 
 /// SYSTEM
 #include <string>

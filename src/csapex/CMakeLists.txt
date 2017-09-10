@@ -542,6 +542,7 @@ add_library(csapex_remote SHARED
     src/io/request.cpp
     src/io/response.cpp
     src/io/feedback.cpp
+    src/io/note.cpp
     src/io/broadcast_message.cpp
     src/io/session.cpp
     src/io/session_client.cpp
@@ -552,22 +553,24 @@ add_library(csapex_remote SHARED
     src/io/node_server.cpp
     src/io/connector_server.cpp
 
+    src/io/protocol/tick_message.cpp
     src/io/protocol/notification_message.cpp
     src/io/protocol/parameter_changed.cpp
-    src/io/protocol/tick_message.cpp
     src/io/protocol/request_parameter.cpp
     src/io/protocol/add_parameter.cpp
     src/io/protocol/core_requests.cpp
-    src/io/protocol/connector_requests.cpp
     src/io/protocol/node_requests.cpp
     src/io/protocol/node_broadcasts.cpp
     src/io/protocol/graph_broadcasts.cpp
     src/io/protocol/command_requests.cpp
     src/io/protocol/command_broadcasts.cpp
+    src/io/protocol/connector_requests.cpp
+    src/io/protocol/connector_notes.cpp
 
     src/serialization/request_serializer.cpp
     src/serialization/raw_message_serializer.cpp
     src/serialization/broadcast_message_serializer.cpp
+    src/serialization/note_serializer.cpp
     src/serialization/feedback_serializer.cpp
 
     ${csapex_remote_HEADERS}

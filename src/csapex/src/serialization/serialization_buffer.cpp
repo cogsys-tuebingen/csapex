@@ -372,11 +372,20 @@ SerializationBuffer& SerializationBuffer::operator >> (UUID& s)
 // TokenData
 SerializationBuffer& SerializationBuffer::operator << (const TokenData& s)
 {
+    operator << (s.typeName());
+    operator << (s.descriptiveName());
+    // TODO: implement fully!
     return *this;
 }
 
 SerializationBuffer& SerializationBuffer::operator >> (TokenData& s)
 {
+    std::string name;
+    operator >> (name);
+    std::string descriptive_name;
+    operator >> (descriptive_name);
+    // TODO: implement fully!
+    s = TokenData(name, descriptive_name);
     return *this;
 }
 

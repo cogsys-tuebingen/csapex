@@ -18,6 +18,7 @@ public:
 
 public:
     TokenData(const std::string &type_name);
+    TokenData(const std::string &type_name, const std::string& descriptive_name);
     virtual ~TokenData();
 
     virtual TokenData::Ptr clone() const;

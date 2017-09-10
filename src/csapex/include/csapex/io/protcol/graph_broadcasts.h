@@ -7,6 +7,9 @@
 #include <csapex/param/parameter.h>
 #include <csapex/serialization/serialization_fwd.h>
 
+/// SYSTEM
+#include <boost/any.hpp>
+
 namespace csapex
 {
 

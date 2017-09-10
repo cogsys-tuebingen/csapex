@@ -7,6 +7,7 @@
 #include <csapex/io/request.h>
 #include <csapex/io/response.h>
 #include <csapex/io/feedback.h>
+#include <csapex/io/note.h>
 #include <csapex/serialization/serialization_buffer.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/io/broadcast_message.h>
@@ -89,13 +90,24 @@ void Session::start()
                     case BroadcastMessage::PACKET_TYPE_ID:
                         if(BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
                             broadcast_received(broadcast);
-                            break;
                         }
+                        break;
                     case RawMessage::PACKET_TYPE_ID:
                         if(RawMessageConstPtr raw_message = std::dynamic_pointer_cast<RawMessage const>(packet)) {
                             auto& signal = raw_packet_received(raw_message->getUUID()); // move this to node server
                             signal(raw_message);
                         }
+                        break;
+                    case io::Note::PACKET_TYPE_ID:
+                        if(io::NoteConstPtr note = std::dynamic_pointer_cast<io::Note const>(packet)) {
+                            apex_assert(!note->getAUUID().empty());
+                            auto pos = channels_.find(note->getAUUID());
+                            if(pos != channels_.end()) {
+                                io::ChannelPtr channel = pos->second;
+                                channel->handleNote(note);
+                            }
+                        }
+                        break;
                     default:
                         packet_received(packet);
                         break;
@@ -166,6 +178,11 @@ ResponseConstPtr Session::sendRequest(RequestConstPtr request)
 
     }
     return nullptr;
+}
+
+void Session::sendNote(io::NoteConstPtr note)
+{
+    write(note);
 }
 
 void Session::write(const SerializableConstPtr &packet)

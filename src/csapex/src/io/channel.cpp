@@ -9,3 +9,8 @@ Channel::Channel(Session& session, const AUUID &name)
 {
     observe(session.raw_packet_received(name), raw_packet_received);
 }
+
+void Channel::handleNote(const io::NoteConstPtr &note)
+{
+    note_received(note);
+}

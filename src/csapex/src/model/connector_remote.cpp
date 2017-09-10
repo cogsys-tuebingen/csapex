@@ -3,6 +3,11 @@
 
 /// PROJECT
 #include <csapex/io/protcol/connector_requests.h>
+#include <csapex/io/protcol/connector_notes.h>
+#include <csapex/io/channel.h>
+
+/// SYSTEM
+#include <iostream>
 
 using namespace csapex;
 
@@ -28,13 +33,35 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
       connected_(false)
 {
     channel_ = session->openChannel(uuid.getAbsoluteUUID());
-//    continue: relay these signals generically with the channel
 
-//    when a signal is received, update the cache values, then reemit.
+    observe(channel_->note_received, [this](const io::NoteConstPtr& note){
+        std::cerr << "note received: " << note->getType() << std::endl;
 
-    observe(tmp_connector_->enabled_changed, enabled_changed);
+        if(const std::shared_ptr<ConnectorNote const>& cn = std::dynamic_pointer_cast<ConnectorNote const>(note)) {
+            switch(cn->getNoteType()) {
+                /**
+                 * begin: connect signals
+                 **/
+                #define HANDLE_ACCESSOR(_enum, type, function)
+                #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
+                #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+                    case ConnectorNoteType::function##Changed: \
+                    { \
+                        std::cerr << "received connector update: " << #function << " changed" << std::endl; \
+                        auto new_value = boost::any_cast<type>(cn->getPayload()); \
+                        value_##function##_ = new_value;\
+                        signal(new_value); \
+                    } \
+                    break;
+                #include <csapex/model/connector_remote_accessors.hpp>
+                /**
+                 * end: connect signals
+                 **/
+            }
+        }
 
-    observe(tmp_connector_->essential_changed, essential_changed);
+    });
+
 
     observe(tmp_connector_->disconnected, disconnected);
     observe(tmp_connector_->connectionStart, connectionStart);
@@ -48,24 +75,6 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
     observe(tmp_connector_->connectionEnabled, connectionEnabled);
     observe(tmp_connector_->message_processed, message_processed);
     observe(tmp_connector_->connectableError, connectableError);
-
-    observe(tmp_connector_->typeChanged, typeChanged);
-    observe(tmp_connector_->labelChanged, labelChanged);
-
-    /**
-     * begin: connect signals
-     **/
-    #define HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
-    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-    observe(tmp_connector_->signal, [this](const type& new_value) { \
-        value_##function##_ = new_value;\
-        signal(new_value); \
-    });
-    #include <csapex/model/connector_remote_accessors.hpp>
-    /**
-     * end: connect signals
-     **/
 }
 
 bool ConnectorRemote::isConnectedTo(const UUID &other) const

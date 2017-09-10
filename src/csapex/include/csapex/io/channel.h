@@ -31,8 +31,22 @@ public:
         session_.sendRequest<Request>(type, name_, std::forward<Args>(args)...);
     }
 
+
+
+    //
+    // NOTE
+    //
+    template <typename Request, typename Type, typename... Args>
+    void sendNote(Type type, Args&&... args) const
+    {
+        session_.sendNote<Request>(type, name_, std::forward<Args>(args)...);
+    }
+
+    void handleNote(const io::NoteConstPtr& note);
+
 public:
     slim_signal::Signal<void(const RawMessageConstPtr&)> raw_packet_received;
+    slim_signal::Signal<void(const io::NoteConstPtr&)> note_received;
 
 private:
     Session& session_;

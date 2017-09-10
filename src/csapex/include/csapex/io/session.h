@@ -58,6 +58,17 @@ public:
 
 
     //
+    // NOTE
+    //
+    void sendNote(io::NoteConstPtr note);
+
+    template <typename NoteWrapper, typename... Args>
+    void sendNote(Args&&... args)
+    {
+        sendNote(std::make_shared<NoteWrapper>(std::forward<Args>(args)...));
+    }
+
+    //
     // BROADCAST
     //
     template <typename BroadcastWrapper, typename... Args>
