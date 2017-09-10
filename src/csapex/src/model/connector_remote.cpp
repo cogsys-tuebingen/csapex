@@ -63,18 +63,18 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner,
     });
 
 
-    observe(tmp_connector_->disconnected, disconnected);
-    observe(tmp_connector_->connectionStart, connectionStart);
+//    observe(tmp_connector_->disconnected, disconnected);
+//    observe(tmp_connector_->connectionStart, connectionStart);
 
-    observe(tmp_connector_->connection_added_to, connection_added_to);
-    observe(tmp_connector_->connection_removed_to, connection_removed_to);
+//    observe(tmp_connector_->connection_added_to, connection_added_to);
+//    observe(tmp_connector_->connection_removed_to, connection_removed_to);
 
-    observe(tmp_connector_->connection_added, connection_added);
-    observe(tmp_connector_->connection_faded, connection_faded);
+//    observe(tmp_connector_->connection_added, connection_added);
+//    observe(tmp_connector_->connection_faded, connection_faded);
 
-    observe(tmp_connector_->connectionEnabled, connectionEnabled);
-    observe(tmp_connector_->message_processed, message_processed);
-    observe(tmp_connector_->connectableError, connectableError);
+//    observe(tmp_connector_->connectionEnabled, connectionEnabled);
+//    observe(tmp_connector_->message_processed, message_processed);
+//    observe(tmp_connector_->connectableError, connectableError);
 }
 
 bool ConnectorRemote::isConnectedTo(const UUID &other) const

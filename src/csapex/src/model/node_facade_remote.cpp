@@ -80,13 +80,18 @@ void NodeFacadeRemote::connectNodeHandle()
     }
 
 
-    observe(nh_->connector_removed, connector_removed);
+    observe(nh_->connector_removed, [this](ConnectablePtr c) {
+        connector_removed(c);
+    });
     observe(nh_->node_state_changed, node_state_changed);
 
 
-    observe(nh_->connection_done, connection_done);
-    observe(nh_->connection_start, connection_start);
-
+    observe(nh_->connection_done, [this](ConnectablePtr c) {
+        connection_done(c);
+    });
+    observe(nh_->connection_start, [this](ConnectablePtr c) {
+        connection_start(c);
+    });
 
     observe(nh_->parameters_changed, parameters_changed);
 }

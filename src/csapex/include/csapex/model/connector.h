@@ -15,7 +15,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT Connector : public Unique, public ErrorState, public std::enable_shared_from_this<Connector>
+class CSAPEX_EXPORT Connector : public Unique, public ErrorState
 {
 public:
     ConnectableOwnerPtr getOwner() const;
@@ -54,20 +54,8 @@ public:
 
 public:
     slim_signal::Signal<void(bool)> enabled_changed;
-
     slim_signal::Signal<void(bool)> essential_changed;
 
-    slim_signal::Signal<void(ConnectorPtr)> disconnected;
-    slim_signal::Signal<void(ConnectorPtr)> connectionStart;
-
-    slim_signal::Signal<void(ConnectorPtr)> connection_added_to;
-    slim_signal::Signal<void(ConnectorPtr)> connection_removed_to;
-
-    slim_signal::Signal<void(ConnectionPtr)> connection_added;
-    slim_signal::Signal<void(ConnectionPtr)> connection_faded;
-
-    slim_signal::Signal<void(bool)> connectionEnabled;
-    slim_signal::Signal<void(ConnectorPtr)> message_processed;
     slim_signal::Signal<void(bool, std::string, int)> connectableError;
 
     slim_signal::Signal<void(TokenDataConstPtr)> typeChanged;

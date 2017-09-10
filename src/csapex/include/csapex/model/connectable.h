@@ -17,7 +17,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT Connectable : public Connector
+class CSAPEX_EXPORT Connectable : public Connector, public std::enable_shared_from_this<Connectable>
 {
     friend class Graph;
     friend class Connection;
@@ -94,6 +94,19 @@ public:
     virtual void notifyMessageProcessed();
 
     virtual std::string makeStatusString() const override;
+
+public:
+    slim_signal::Signal<void(ConnectablePtr)> connectionStart;
+    slim_signal::Signal<void(ConnectablePtr)> disconnected;
+
+    slim_signal::Signal<void(ConnectablePtr)> connection_added_to;
+    slim_signal::Signal<void(ConnectablePtr)> connection_removed_to;
+
+    slim_signal::Signal<void(ConnectionPtr)> connection_added;
+    slim_signal::Signal<void(ConnectionPtr)> connection_faded;
+
+    slim_signal::Signal<void(ConnectablePtr)> message_processed;
+    slim_signal::Signal<void(bool)> connectionEnabled;
 
 protected:
     virtual void removeAllConnectionsNotUndoable() = 0;

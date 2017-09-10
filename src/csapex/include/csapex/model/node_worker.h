@@ -130,7 +130,7 @@ private:
 
     void sendEvents(bool active);
 
-    void connectConnector(ConnectorPtr c);
+    void connectConnector(ConnectablePtr c);
     void disconnectConnector(Connector *c);
 
     bool hasActiveOutputConnection();

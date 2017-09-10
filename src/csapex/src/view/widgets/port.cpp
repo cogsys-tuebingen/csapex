@@ -196,8 +196,6 @@ void Port::startDrag()
     bool create = left && !full_input;
     bool move = (right && adaptee_->isConnected()) || (left && full_input);
 
-    adaptee_->connectionStart(adaptee_);
-
     if(create || move) {
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
@@ -219,7 +217,7 @@ void Port::startDrag()
             drag->exec();
         }
 
-        adaptee_->connection_added_to(adaptee_);
+//        adaptee_->connection_added_to(adaptee_);
         buttons_down_ = Qt::NoButton;
     }
 }

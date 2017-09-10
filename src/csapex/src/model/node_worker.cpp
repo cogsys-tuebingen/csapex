@@ -56,10 +56,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 
     try {
-        observe(node_handle_->connector_created, [this](ConnectorPtr c) {
+        observe(node_handle_->connector_created, [this](ConnectablePtr c) {
             connectConnector(c);
         });
-        observe(node_handle_->connector_removed, [this](ConnectorPtr c) {
+        observe(node_handle_->connector_removed, [this](ConnectablePtr c) {
             disconnectConnector(c.get());
         });
 
@@ -890,7 +890,7 @@ void NodeWorker::trySendEvents()
     sendEvents(node_handle_->isActive());
 }
 
-void NodeWorker::connectConnector(ConnectorPtr c)
+void NodeWorker::connectConnector(ConnectablePtr c)
 {
     port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectorPtr&) {
         ioChanged();
