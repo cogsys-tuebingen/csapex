@@ -1,5 +1,5 @@
-#ifndef NODE_SERVER_H
-#define NODE_SERVER_H
+#ifndef CONNECTOR_SERVER_H
+#define CONNECTOR_SERVER_H
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
@@ -12,22 +12,20 @@
 
 namespace csapex
 {
-class NodeServer : public Observer
+class ConnectorServer : public Observer
 {
 public:
-    NodeServer(SessionPtr session);
-    ~NodeServer();
+    ConnectorServer(SessionPtr session);
+    ~ConnectorServer();
 
-    void startObserving(const NodeFacadeLocalPtr &graph);
-    void stopObserving(const NodeFacadeLocalPtr& graph);
+    void startObserving(const ConnectablePtr &connector);
+    void stopObserving(const ConnectablePtr& connector);
 
 private:
     SessionPtr session_;
-    ConnectorServerPtr connector_server_;
 
     std::unordered_map<AUUID, io::ChannelPtr, AUUID::Hasher> channels_;
-
 };
 }
 
-#endif // NODE_SERVER_H
+#endif // CONNECTOR_SERVER_H

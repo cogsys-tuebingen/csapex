@@ -78,6 +78,8 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
 #define HANDLE_ACCESSOR(_enum, type, function) \
     case ConnectorRequests::ConnectorRequestType::_enum:\
         return std::make_shared<NodeResponse>(request_type_, c->function(), getRequestID(), uuid_);
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
 
     #include <csapex/model/connector_remote_accessors.hpp>
         /**

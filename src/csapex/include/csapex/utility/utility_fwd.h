@@ -17,6 +17,7 @@ namespace csapex
 FWD(Buffer)
 FWD(Timer)
 FWD(Timable)
+FWD(AUUID)
 FWD(UUID)
 FWD(UUIDProvider)
 FWD(CpuAffinity)

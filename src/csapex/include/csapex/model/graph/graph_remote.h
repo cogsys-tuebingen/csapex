@@ -67,6 +67,10 @@ public:
     const vertex_const_iterator end() const override;
 
 private:
+    void vertexAdded(graph::VertexPtr vertex);
+    void vertexRemoved(graph::VertexPtr vertex);
+
+private:
     GraphLocal& temp_reference;
 
     std::vector<graph::VertexPtr> remote_vertices_;

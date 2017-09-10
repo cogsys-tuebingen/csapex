@@ -37,9 +37,9 @@ public:
     void write(const SerializableConstPtr &packet);
     void write(const std::string &message);
 
-    ///
-    /// REQUEST
-    ///
+    //
+    // REQUEST
+    //
     ResponseConstPtr sendRequest(RequestConstPtr request);
 
     template <typename RequestWrapper>
@@ -57,14 +57,19 @@ public:
     }
 
 
-    ///
-    /// BROADCAST
-    ///
+    //
+    // BROADCAST
+    //
     template <typename BroadcastWrapper, typename... Args>
     void sendBroadcast(Args&&... args)
     {
         write(std::make_shared<BroadcastWrapper>(std::forward<Args>(args)...));
     }
+
+    //
+    // CHANNEL
+    //
+    io::ChannelPtr openChannel(const AUUID& name);
 
 protected:
     Session();
@@ -100,7 +105,10 @@ protected:
     std::atomic<bool> running_;
     std::atomic<bool> live_;
 
+    // TODO: use the more general channel
     std::unordered_map<AUUID, std::shared_ptr<slim_signal::Signal<void(const RawMessageConstPtr&)>>, AUUID::Hasher> auuid_to_signal_;
+
+    std::unordered_map<AUUID, io::ChannelPtr, AUUID::Hasher> channels_;
 };
 
 }

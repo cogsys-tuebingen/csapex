@@ -23,6 +23,15 @@ struct ConnectorDescription
     UUID id;
     std::vector<AUUID> targets;
 
+    bool valid;
+
+    ConnectorDescription()
+        : connector_type(ConnectorType::NONE),
+          optional(false),
+          is_parameter(false),
+          valid(false)
+    {}
+
     ConnectorDescription(const AUUID& owner,
                          ConnectorType connector_type,
                          const TokenDataConstPtr& token_type,
@@ -34,9 +43,10 @@ struct ConnectorDescription
           label(label),
           optional(optional),
           is_parameter(is_parameter),
-          token_type(token_type)
+          token_type(token_type),
+          id(UUID::NONE),
+          valid(true)
     {
-        id = UUID::NONE;
     }
     ConnectorDescription(const AUUID& owner,
                          ConnectorType connector_type,
@@ -47,10 +57,11 @@ struct ConnectorDescription
           connector_type(connector_type),
           label(label),
           optional(optional),
-          is_parameter(is_parameter)
+          is_parameter(is_parameter),
+          token_type(connection_types::makeEmpty<connection_types::AnyMessage>()),
+          id(UUID::NONE),
+          valid(true)
     {
-        token_type = connection_types::makeEmpty<connection_types::AnyMessage>();
-        id = UUID::NONE;
     }
 
     ConnectorDescription(const AUUID& owner,
@@ -66,7 +77,8 @@ struct ConnectorDescription
           optional(optional),
           is_parameter(is_parameter),
           token_type(token_type),
-          id(uuid)
+          id(uuid),
+          valid(true)
     {
     }
 };

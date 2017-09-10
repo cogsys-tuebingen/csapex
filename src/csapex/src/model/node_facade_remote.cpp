@@ -15,6 +15,7 @@
 #include <csapex/io/protcol/node_broadcasts.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/model/connector_remote.h>
+#include <csapex/io/channel.h>
 
 /// SYSTEM
 #include <iostream>
@@ -41,16 +42,17 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
         connectNodeWorker();
     }
 
+    node_channel_ = session->openChannel(uuid);
 
     observe(remote_data_connection.first_connected, [this]() {
-        session_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::AddClient, getUUID().getAbsoluteUUID());
+        node_channel_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::AddClient);
     });
 
     observe(remote_data_connection.last_disconnected, [this]() {
-        session_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::RemoveClient, getUUID().getAbsoluteUUID());
+        node_channel_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::RemoveClient);
     });
 
-    observe(session->raw_packet_received(getUUID().getAbsoluteUUID()), [this](const RawMessageConstPtr& data) {
+    observe(node_channel_->raw_packet_received, [this](const RawMessageConstPtr& data) {
         remote_data_connection(data);
     });
 }

@@ -60,14 +60,14 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
         break;
 
     case NodeRequestType::GetDebugDescription:
-        return std::make_shared<NodeResponse>(request_type_, nf->getDebugDescription(), getRequestID(), uuid_);
+        return std::make_shared<NodeResponse>(request_type_, uuid_, nf->getDebugDescription(), getRequestID());
 
     default:
         return std::make_shared<Feedback>(std::string("unknown node request type ") + std::to_string((int)request_type_),
                                           getRequestID());
     }
 
-    return std::make_shared<NodeResponse>(request_type_, getRequestID(), uuid_);
+    return std::make_shared<NodeResponse>(request_type_, uuid_, getRequestID());
 }
 
 void NodeRequests::NodeRequest::serialize(SerializationBuffer &data) const
@@ -86,14 +86,14 @@ void NodeRequests::NodeRequest::deserialize(SerializationBuffer& data)
 /// RESPONSE
 ///
 
-NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, uint8_t request_id, const AUUID& uuid)
+NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, const AUUID& uuid, uint8_t request_id)
     : ResponseImplementation(request_id),
       request_type_(request_type),
       uuid_(uuid)
 {
 
 }
-NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid)
+NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id)
     : ResponseImplementation(request_id),
       request_type_(request_type),
       uuid_(uuid),

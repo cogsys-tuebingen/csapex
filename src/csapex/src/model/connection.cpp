@@ -37,8 +37,8 @@ Connection::Connection(OutputPtr from, InputPtr to, int id)
     from->enabled_changed.connect(source_enable_changed);
     to->enabled_changed.connect(sink_enabled_changed);
 
-    to->essential_changed.connect(connection_changed);
-    from->essential_changed.connect(connection_changed);
+    to->essential_changed.connect([this](bool) { connection_changed(); });
+    from->essential_changed.connect([this](bool) { connection_changed(); });
 
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());

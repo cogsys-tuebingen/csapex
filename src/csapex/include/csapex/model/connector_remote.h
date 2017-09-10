@@ -25,15 +25,37 @@ public:
     #define HANDLE_ACCESSOR(_enum, type, function) \
     virtual type function() const override;
 
+    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
+    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
+
     #include <csapex/model/connector_remote_accessors.hpp>
-    #undef HANDLE_ACCESSOR
     /**
      * end: generate getters
      **/
 
 
 private:
+    io::ChannelPtr channel_;
     ConnectorPtr tmp_connector_;
+
+    /**
+     * begin: generate caches
+     **/
+    #define HANDLE_ACCESSOR(_enum, type, function)
+    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
+    mutable bool has_##function##_; \
+    mutable type cache_##function##_;
+    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+    mutable bool has_##function##_; \
+    mutable type value_##function##_;
+
+    #include <csapex/model/connector_remote_accessors.hpp>
+    #undef HANDLE_ACCESSOR
+    /**
+     * end: generate caches
+     **/
+
+    bool connected_;
 };
 
 }

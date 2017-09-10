@@ -55,7 +55,7 @@ public:
 public:
     slim_signal::Signal<void(bool)> enabled_changed;
 
-    slim_signal::Signal<void()> essential_changed;
+    slim_signal::Signal<void(bool)> essential_changed;
 
     slim_signal::Signal<void(ConnectorPtr)> disconnected;
     slim_signal::Signal<void(ConnectorPtr)> connectionStart;
@@ -70,7 +70,7 @@ public:
     slim_signal::Signal<void(ConnectorPtr)> message_processed;
     slim_signal::Signal<void(bool, std::string, int)> connectableError;
 
-    slim_signal::Signal<void()> typeChanged;
+    slim_signal::Signal<void(TokenDataConstPtr)> typeChanged;
     slim_signal::Signal<void(std::string)> labelChanged;
 
 protected:

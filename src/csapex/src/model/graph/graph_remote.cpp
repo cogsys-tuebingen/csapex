@@ -24,26 +24,10 @@ GraphRemote::GraphRemote(SessionPtr session, const AUUID& auuid,
     observe(temp_reference.connection_removed, connection_removed);
 
     observe(temp_reference.vertex_added, [this](graph::VertexPtr vertex) {
-        std::shared_ptr<NodeFacadeRemote> remote_node_facade = std::make_shared<NodeFacadeRemote>(
-                    session_,
-                    vertex->getNodeFacade()->getAUUID(),
-                    vertex->getNodeFacade()->getNodeHandle(),
-                    vertex->getNodeFacade()->getNodeWorker(),
-                    vertex->getNodeFacade()->getNodeHandle()->getNodeRunner()
-                    );
-        graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
-        remote_vertices_.push_back(remote_vertex);
-        vertex_added(remote_vertex);
+        vertexAdded(vertex);
     });
     observe(temp_reference.vertex_removed,  [this](graph::VertexPtr vertex) {
-        for(auto it = remote_vertices_.begin() ; it != remote_vertices_.end(); ++it) {
-            graph::VertexPtr remote_vertex = *it;
-            if(remote_vertex->getNodeFacade()->getUUID() == vertex->getNodeFacade()->getUUID()) {
-                vertex_removed(remote_vertex);
-                remote_vertices_.erase(it);
-                return;
-            }
-        }
+        vertexRemoved(vertex);
     });
 
 }
@@ -52,6 +36,32 @@ GraphRemote::~GraphRemote()
 {
 }
 
+
+void GraphRemote::vertexAdded(graph::VertexPtr vertex)
+{
+    std::shared_ptr<NodeFacadeRemote> remote_node_facade = std::make_shared<NodeFacadeRemote>(
+                session_,
+                vertex->getNodeFacade()->getAUUID(),
+                vertex->getNodeFacade()->getNodeHandle(),
+                vertex->getNodeFacade()->getNodeWorker(),
+                vertex->getNodeFacade()->getNodeHandle()->getNodeRunner()
+                );
+    graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
+    remote_vertices_.push_back(remote_vertex);
+    vertex_added(remote_vertex);
+}
+
+void GraphRemote::vertexRemoved(graph::VertexPtr vertex)
+{
+    for(auto it = remote_vertices_.begin() ; it != remote_vertices_.end(); ++it) {
+        graph::VertexPtr remote_vertex = *it;
+        if(remote_vertex->getNodeFacade()->getUUID() == vertex->getNodeFacade()->getUUID()) {
+            vertex_removed(remote_vertex);
+            remote_vertices_.erase(it);
+            return;
+        }
+    }
+}
 AUUID GraphRemote::getAbsoluteUUID() const
 {
     return nf_->getUUID().getAbsoluteUUID();
@@ -268,3 +278,4 @@ const Graph::vertex_const_iterator GraphRemote::end() const
 {
     return temp_reference.end();
 }
+

@@ -27,7 +27,7 @@ GraphServer::~GraphServer()
 
 void GraphServer::startObserving(const GraphFacadeLocalPtr &graph)
 {
-    std::cerr << "start observing graph: " << graph->getAbsoluteUUID() << std::endl;
+    std::cerr << "start serving graph: " << graph->getAbsoluteUUID() << std::endl;
     AUUID graph_id = graph->getAbsoluteUUID();
 
     observe(graph->node_facade_added, [this, graph_id](const NodeFacadePtr& node) {
@@ -57,5 +57,5 @@ void GraphServer::startObserving(const GraphFacadeLocalPtr &graph)
 
 void GraphServer::stopObserving(const GraphFacadeLocalPtr &graph)
 {
-    std::cerr << "stop observing graph: " << graph->getAbsoluteUUID() << std::endl;
+    std::cerr << "stop serving graph: " << graph->getAbsoluteUUID() << std::endl;
 }

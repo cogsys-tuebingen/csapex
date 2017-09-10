@@ -17,6 +17,7 @@ public:
     virtual ~Unique();
 
     UUID getUUID() const;
+    AUUID getAUUID() const;
 
 protected:
     virtual void setUUID(const UUID &uuid);

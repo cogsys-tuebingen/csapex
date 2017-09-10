@@ -71,7 +71,7 @@ void Connectable::setEssential(bool essential)
 {
     if(essential != essential_) {
         essential_ = essential;
-        essential_changed();
+        essential_changed(essential_);
     }
 }
 
@@ -173,7 +173,7 @@ void Connectable::setType(TokenData::ConstPtr type)
         validateConnections();
         lock.unlock();
 
-        typeChanged();
+        typeChanged(type);
     }
 }
 

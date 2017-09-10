@@ -11,6 +11,7 @@
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/raw_message.h>
+#include <csapex/io/channel.h>
 
 /// SYSTEM
 #include <csapex/utility/error_handling.h>
@@ -92,7 +93,7 @@ void Session::start()
                         }
                     case RawMessage::PACKET_TYPE_ID:
                         if(RawMessageConstPtr raw_message = std::dynamic_pointer_cast<RawMessage const>(packet)) {
-                            auto& signal = raw_packet_received(raw_message->getUUID());
+                            auto& signal = raw_packet_received(raw_message->getUUID()); // move this to node server
                             signal(raw_message);
                         }
                     default:
@@ -291,4 +292,12 @@ slim_signal::Signal<void (const RawMessageConstPtr &)> &Session::raw_packet_rece
         res.reset(new slim_signal::Signal<void(const RawMessageConstPtr&)>);
     }
     return *res;
+}
+
+io::ChannelPtr Session::openChannel(const AUUID &name)
+{
+    std::cout << "!!!! open channel " << name << std::endl;
+    io::ChannelPtr channel = std::make_shared<io::Channel>(*this, name);
+    channels_[name] = channel;
+    return channel;
 }

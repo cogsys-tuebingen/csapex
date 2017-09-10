@@ -48,8 +48,8 @@ public:
     {
     public:
         NodeResponse(uint8_t request_id);
-        NodeResponse(NodeRequestType request_type, uint8_t request_id, const AUUID& uuid);
-        NodeResponse(NodeRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid);
+        NodeResponse(NodeRequestType request_type, const AUUID& uuid, uint8_t request_id);
+        NodeResponse(NodeRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;

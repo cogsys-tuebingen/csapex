@@ -45,6 +45,10 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
         layout->setSpacing(32);
 
         break;
+
+    default:
+        throw std::runtime_error("tried to create a connector of type 'NONE'");
+        break;
     }
 
     mainlayout->setMargin(2);

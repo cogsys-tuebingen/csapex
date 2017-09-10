@@ -545,10 +545,12 @@ add_library(csapex_remote SHARED
     src/io/broadcast_message.cpp
     src/io/session.cpp
     src/io/session_client.cpp
+    src/io/channel.cpp
 
     src/io/server.cpp
     src/io/graph_server.cpp
     src/io/node_server.cpp
+    src/io/connector_server.cpp
 
     src/io/protocol/notification_message.cpp
     src/io/protocol/parameter_changed.cpp

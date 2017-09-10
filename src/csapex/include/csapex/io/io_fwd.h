@@ -24,6 +24,13 @@ FWD(Feedback)
 FWD(Server)
 FWD(GraphServer)
 FWD(NodeServer)
+FWD(ConnectorServer)
+
+namespace io
+{
+FWD(Channel)
+}
+
 }
 
 #undef FWD

@@ -118,6 +118,8 @@ private:
 private:
     AUUID uuid_;
 
+    io::ChannelPtr node_channel_;
+
     NodeHandlePtr nh_;
     NodeWorkerPtr nw_;
     NodeRunnerPtr nr_;

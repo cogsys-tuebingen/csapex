@@ -9,6 +9,7 @@
 #include <csapex/model/node_facade_local.h>
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/graph_broadcasts.h>
+#include <csapex/model/graph/vertex.h>
 
 /// SYSTEM
 #include <iostream>
@@ -42,8 +43,8 @@ GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, GraphFacadeLocal& tmp_r
     observe(tmp_ref.child_added, child_added);
     observe(tmp_ref.child_removed, child_removed);
 
-    observe(tmp_ref.node_facade_added, node_facade_added);
-    observe(tmp_ref.node_facade_removed, node_facade_removed);
+//    observe(tmp_ref.node_facade_added, node_facade_added);
+//    observe(tmp_ref.node_facade_removed, node_facade_removed);
 
     observe(tmp_ref.child_node_facade_added, child_node_facade_added);
     observe(tmp_ref.child_node_facade_removed, child_node_facade_removed);
@@ -78,6 +79,14 @@ GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, GraphFacadeLocal& tmp_r
 //            children_.erase(pos);
 //        }
 //    });
+
+    observe(graph_->vertex_added, [this](graph::VertexPtr vertex) {
+        node_facade_added(vertex->getNodeFacade());
+    });
+
+    observe(graph_->vertex_removed, [this](graph::VertexPtr vertex) {
+        node_facade_removed(vertex->getNodeFacade());
+    });
 
 //    observe(tmp_ref.node_facade_added, [this](NodeFacadePtr node) {
 //        NodeFacadeLocalPtr tmp_node = std::dynamic_pointer_cast<NodeFacadeLocal>(node);
