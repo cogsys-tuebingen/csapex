@@ -6,6 +6,7 @@
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/model/token_data.h>
+#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -71,6 +72,7 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE(YAML::Node);
     ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
     ADD_ANY_TYPE(TokenDataConstPtr);
+    ADD_ANY_TYPE(SnippetPtr);
 }
 
 void SerializationBuffer::finalize()
