@@ -25,7 +25,7 @@ using namespace csapex;
 using namespace csapex;
 
 NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
-                                   NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr)
+                                   NodeHandlePtr nh, NodeWorker* nw, NodeRunnerPtr nr)
     : Remote(session),
       uuid_(uuid),
       nh_(nh), nw_(nw), nr_(nr)
@@ -382,17 +382,6 @@ double NodeFacadeRemote::getMaximumFrequency() const
 NodeHandlePtr NodeFacadeRemote::getNodeHandle() const
 {
     return nh_;
-}
-
-
-NodeWorkerPtr NodeFacadeRemote::getNodeWorker() const
-{
-    return nw_;
-}
-
-NodeRunnerPtr NodeFacadeRemote::getNodeRunner() const
-{
-    return nr_;
 }
 
 NodeStatePtr NodeFacadeRemote::getNodeState() const

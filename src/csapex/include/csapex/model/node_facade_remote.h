@@ -17,7 +17,7 @@ class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade, public Remote
 {
 public:
     NodeFacadeRemote(SessionPtr session, AUUID uuid,
-                     NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr);
+                     NodeHandlePtr nh, NodeWorker *nw, NodeRunnerPtr nr);
 
     ~NodeFacadeRemote();
 
@@ -101,8 +101,6 @@ public:
     GenericStateConstPtr getParameterState() const override;
 
     NodeHandlePtr getNodeHandle() const;
-    NodeWorkerPtr getNodeWorker() const;
-    NodeRunnerPtr getNodeRunner() const;
 
 public:
     slim_signal::ObservableSignal<void(SerializableConstPtr)> remote_data_connection;
@@ -121,7 +119,7 @@ private:
     io::ChannelPtr node_channel_;
 
     NodeHandlePtr nh_;
-    NodeWorkerPtr nw_;
+    NodeWorker* nw_;
     NodeRunnerPtr nr_;
 
     std::unordered_map<UUID, ConnectorPtr, UUID::Hasher> remote_connectors_;

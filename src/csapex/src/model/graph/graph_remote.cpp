@@ -43,7 +43,7 @@ void GraphRemote::vertexAdded(graph::VertexPtr vertex)
                 session_,
                 vertex->getNodeFacade()->getAUUID(),
                 vertex->getNodeFacade()->getNodeHandle(),
-                vertex->getNodeFacade()->getNodeWorker(),
+                vertex->getNodeFacade()->getNodeHandle()->getNodeWorker(),
                 vertex->getNodeFacade()->getNodeHandle()->getNodeRunner()
                 );
     graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);

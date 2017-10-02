@@ -408,9 +408,10 @@ ConnectionPtr GraphFacadeLocal::connect(NodeFacadePtr output, int output_id, Nod
 }
 void GraphFacadeLocal::nodeAddedHandler(graph::VertexPtr vertex)
 {
-    NodeFacadePtr facade = vertex->getNodeFacade();
+    NodeFacadeLocalPtr facade = std::dynamic_pointer_cast<NodeFacadeLocal>(vertex->getNodeFacade());
+    apex_assert_hard(facade);
     if(facade->isGraph()) {
-        createSubgraphFacade(vertex->getNodeFacade());
+        createSubgraphFacade(facade);
     }
 
     NodeWorkerPtr nw = facade->getNodeWorker();

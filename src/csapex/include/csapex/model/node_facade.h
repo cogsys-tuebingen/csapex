@@ -114,8 +114,6 @@ public:
 
     // TODO: remove or add proxies for all of them
     virtual NodeHandlePtr getNodeHandle() const = 0;
-    virtual NodeWorkerPtr getNodeWorker() const = 0;
-    virtual NodeRunnerPtr getNodeRunner() const = 0;
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
