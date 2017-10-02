@@ -47,7 +47,7 @@ bool AddNode::doExecute()
         uuid_ = graph->generateUUID(type_);
     }
 
-    NodeFacadePtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
+    NodeFacadeLocalPtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
 
     if(!node) {
         return false;

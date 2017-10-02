@@ -82,7 +82,7 @@ void GraphLocal::clear()
     finalizeTransaction();
 }
 
-void GraphLocal::addNode(NodeFacadePtr nf)
+void GraphLocal::addNode(NodeFacadeLocalPtr nf)
 {
     apex_assert_hard_msg(nf, "NodeFacade added is not null");
     graph::VertexPtr vertex = std::make_shared<graph::Vertex>(nf);

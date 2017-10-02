@@ -27,7 +27,7 @@ public:
     TaskGenerator* getTaskGenerator(const UUID& uuid);
     ThreadPool* getThreadPool();
 
-    void addNode(NodeFacadePtr node);
+    void addNode(NodeFacadeLocalPtr node);
 
     virtual void clear() override;
     virtual void stop() override;
@@ -71,6 +71,23 @@ protected:
     virtual void nodeRemovedHandler(graph::VertexPtr node) override;
 
     void createSubgraphFacade(NodeFacadePtr nf);
+
+private:
+    UUID getOutputUUID(NodeFacade* node, const std::string& label);
+    UUID getInputUUID(NodeFacade* node, const std::string& label);
+
+    UUID getOutputUUID(NodeHandle* node, const std::string& label);
+    UUID getInputUUID(NodeHandle* node, const std::string& label);
+
+    template <class Container>
+    UUID getOutputUUID(Container* node, int id);
+    template <class Container>
+    UUID getInputUUID(Container* node, int id);
+
+    OutputPtr getOutput(const UUID& uuid);
+    InputPtr getInput(const UUID& uuid);
+
+    ConnectablePtr getConnectable(const UUID& uuid);
 
 private:
     AUUID absolute_uuid_;

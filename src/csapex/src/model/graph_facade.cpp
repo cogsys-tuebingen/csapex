@@ -37,11 +37,6 @@ GraphFacade::~GraphFacade()
     stopObserving();
 }
 
-NodeHandle* GraphFacade::getNodeHandle()
-{
-    return graph_handle_->getNodeHandle().get();
-}
-
 NodeFacadePtr GraphFacade::getNodeFacade()
 {
     return graph_handle_;

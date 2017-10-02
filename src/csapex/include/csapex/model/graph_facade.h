@@ -46,7 +46,7 @@ public:
 
     virtual AUUID getAbsoluteUUID() const = 0;
     virtual GraphPtr getGraph() const = 0;
-    NodeHandle* getNodeHandle();
+
     NodeFacadePtr getNodeFacade();
 
     virtual void stop() = 0;
