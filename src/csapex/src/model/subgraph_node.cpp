@@ -54,37 +54,6 @@ GraphLocalPtr SubgraphNode::getLocalGraph() const
     return graph_;
 }
 
-//NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
-//{
-//    apex_assert_hard(guard_ == -1);
-//    if(uuid.empty()) {
-//        apex_assert_hard(node_handle_);
-//        apex_assert_hard(node_handle_->guard_ == -1);
-//        return node_handle_.get();
-//    }
-//    return GraphLocal::findNodeHandle(uuid);
-//}
-
-//NodeHandle *SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
-//{
-//    if(uuid.empty()) {
-//        return node_handle_.get();
-//    }
-//    return GraphLocal::findNodeHandleNoThrow(uuid);
-//}
-
-//ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
-//{
-//    if(internal_slots_.find(uuid) != internal_slots_.end()) {
-//        return internal_slots_.at(uuid);
-//    }
-//    if(internal_events_.find(uuid) != internal_events_.end()) {
-//        return internal_events_.at(uuid);
-//    }
-
-//    return GraphLocal::findConnectorNoThrow(uuid);
-//}
-
 void SubgraphNode::initialize(NodeHandlePtr node_handle)
 {
     Node::initialize(node_handle);
@@ -94,7 +63,7 @@ void SubgraphNode::initialize(NodeHandlePtr node_handle)
     }
 }
 
-void SubgraphNode::setNodeFacade(csapex::NodeFacadePtr graph_node_facade)
+void SubgraphNode::setNodeFacade(csapex::NodeFacadeLocalPtr graph_node_facade)
 {
     graph_->setNodeFacade(graph_node_facade);
 }

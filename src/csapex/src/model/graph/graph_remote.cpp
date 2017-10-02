@@ -8,6 +8,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_facade.h>
 #include <csapex/model/node_facade_remote.h>
+#include <csapex/model/node_facade_local.h>
 #include <csapex/io/session.h>
 
 using namespace csapex;
@@ -39,12 +40,13 @@ GraphRemote::~GraphRemote()
 
 void GraphRemote::vertexAdded(graph::VertexPtr vertex)
 {
+    NodeFacadeLocalPtr tmp = std::dynamic_pointer_cast<NodeFacadeLocal>(vertex->getNodeFacade());
     std::shared_ptr<NodeFacadeRemote> remote_node_facade = std::make_shared<NodeFacadeRemote>(
                 session_,
                 vertex->getNodeFacade()->getAUUID(),
-                vertex->getNodeFacade()->getNodeHandle(),
-                vertex->getNodeFacade()->getNodeHandle()->getNodeWorker(),
-                vertex->getNodeFacade()->getNodeHandle()->getNodeRunner()
+                tmp->getNodeHandle(),
+                tmp->getNodeHandle()->getNodeWorker(),
+                tmp->getNodeHandle()->getNodeRunner()
                 );
     graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
     remote_vertices_.push_back(remote_vertex);

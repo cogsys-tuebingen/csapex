@@ -2,6 +2,7 @@
 #define STEPPING_TEST_H
 
 #include "node_constructing_test.h"
+#include <csapex/model/node_facade_local.h>
 
 namespace csapex
 {
@@ -22,7 +23,7 @@ public:
         NodeConstructingTest::SetUp();
 
         main_graph_facade = std::make_shared<GraphFacadeLocal>(executor, graph, graph_node);
-        graph->setNodeFacade(main_graph_facade->getNodeFacade());
+        graph->setNodeFacade(main_graph_facade->getLocalNodeFacade());
 
         executor.setSteppingMode(true);
 

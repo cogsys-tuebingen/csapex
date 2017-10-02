@@ -42,7 +42,9 @@ NodeRequests::NodeRequest::NodeRequest(uint8_t request_id)
 ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     NodeFacadePtr nf = core.getRoot()->getGraph()->findNodeFacade(uuid_);
-    NodeHandlePtr nh = nf->getNodeHandle();
+    NodeFacadeLocalPtr nf_local = std::dynamic_pointer_cast<NodeFacadeLocal>(nf);
+    apex_assert_hard(nf_local);
+    NodeHandlePtr nh = nf_local->getNodeHandle();
 
     switch(request_type_)
     {

@@ -8,6 +8,8 @@
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/signal/event.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/node.h>
 
@@ -241,6 +243,16 @@ NodeCharacteristics NodeFacadeLocal::getNodeCharacteristics() const
 }
 
 
+ConnectorPtr NodeFacadeLocal::getParameterInput(const std::string& name) const
+{
+    return nh_->getParameterInput(name).lock();
+}
+ConnectorPtr NodeFacadeLocal::getParameterOutput(const std::string& name) const
+{
+    return nh_->getParameterOutput(name).lock();
+}
+
+
 
 std::vector<param::ParameterPtr> NodeFacadeLocal::getParameters() const
 {
@@ -254,6 +266,9 @@ param::ParameterPtr NodeFacadeLocal::getParameter(const std::string &name) const
 
 bool NodeFacadeLocal::canStartStepping() const
 {
+    if(!nr_) {
+        return false;
+    }
     return nr_->canStartStepping();
 }
 

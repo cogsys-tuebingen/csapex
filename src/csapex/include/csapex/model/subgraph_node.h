@@ -45,7 +45,7 @@ public:
 //    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     virtual void initialize(csapex::NodeHandlePtr node_handle) override;
-    void setNodeFacade(csapex::NodeFacadePtr graph_node_facade);
+    void setNodeFacade(NodeFacadeLocalPtr graph_node_facade);
 
 
     virtual void detach() override;

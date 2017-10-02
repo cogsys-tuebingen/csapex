@@ -108,6 +108,12 @@ GraphFacadeLocal *GraphFacadeLocal::getLocalParent() const
 {
     return parent_;
 }
+
+NodeFacadeLocalPtr GraphFacadeLocal::getLocalNodeFacade() const
+{
+    return std::dynamic_pointer_cast<NodeFacadeLocal>(graph_handle_);
+}
+
 ThreadPool* GraphFacadeLocal::getThreadPool()
 {
     return &executor_;
@@ -235,15 +241,17 @@ ConnectionPtr GraphFacadeLocal::connect(const UUID& output_id, const UUID& input
 
 ConnectionPtr GraphFacadeLocal::connect(const UUID& output_id, NodeFacade* input, const std::string& input_name)
 {
-    return connect(output_id, input->getNodeHandle(), input_name);
+    UUID i = getInputUUID(input, input_name);
+    return connect(output_id, i);
 }
 ConnectionPtr GraphFacadeLocal::connect(const UUID& output_id, NodeFacadePtr input, const std::string& input_name)
 {
-    return connect(output_id, input->getNodeHandle(), input_name);
+    return connect(output_id, input.get(), input_name);
 }
 ConnectionPtr GraphFacadeLocal::connect(const UUID& output_id, NodeFacadePtr input, int input_id)
 {
-    return connect(output_id, input->getNodeHandle(), input_id);
+    UUID i = getInputUUID(input.get(), input_id);
+    return connect(output_id, i);
 }
 
 ConnectionPtr GraphFacadeLocal::connect(NodeFacade* output, const std::string& output_name, NodeFacade* input, const std::string& input_name)

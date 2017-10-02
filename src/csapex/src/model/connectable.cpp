@@ -348,9 +348,9 @@ ConnectorDescription Connectable::getDescription() const
 
     for(const ConnectionPtr& c : getConnections()) {
         if(isOutput()) {
-            res.targets.push_back(c->target()->getUUID().getAbsoluteUUID());
+            res.targets.emplace_back(c->target()->getUUID().getAbsoluteUUID(), c->isActive());
         } else {
-            res.targets.push_back(c->source()->getUUID().getAbsoluteUUID());
+            res.targets.emplace_back(c->source()->getUUID().getAbsoluteUUID(), c->isActive());
         }
     }
     return res;

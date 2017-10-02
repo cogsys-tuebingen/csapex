@@ -21,7 +21,22 @@ struct ConnectorDescription
     TokenDataConstPtr token_type;
 
     UUID id;
-    std::vector<AUUID> targets;
+
+    // connected connectors (UUID, is_active)
+    struct Target
+    {
+        AUUID id;
+        bool active;
+
+        Target()
+            : id(UUID::NONE), active(false)
+        {}
+        Target(AUUID id, bool active)
+            : id(id), active(active)
+        {}
+    };
+
+    std::vector<Target> targets;
 
     bool valid;
 

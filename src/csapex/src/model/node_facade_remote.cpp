@@ -299,6 +299,17 @@ ConnectorPtr NodeFacadeRemote::getConnectorNoThrow(const UUID& id) const noexcep
     }
 }
 
+ConnectorPtr NodeFacadeRemote::getParameterInput(const std::string& name) const
+{
+    return getConnector(UUIDProvider::makeDerivedUUID_forced(getUUID(), "in_" + name));
+}
+
+ConnectorPtr NodeFacadeRemote::getParameterOutput(const std::string& name) const
+{
+    return getConnector(UUIDProvider::makeDerivedUUID_forced(getUUID(), "out_" + name));
+}
+
+
 
 std::vector<param::ParameterPtr> NodeFacadeRemote::getParameters() const
 {

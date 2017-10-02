@@ -20,6 +20,7 @@ public:
     GraphLocalPtr getLocalGraph() const;
 
     GraphFacadeLocal* getLocalParent() const;
+    NodeFacadeLocalPtr getLocalNodeFacade() const;
 
     virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
 

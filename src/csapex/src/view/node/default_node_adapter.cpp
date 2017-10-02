@@ -322,7 +322,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         });
 
         // connect parameter input, if available
-        InputPtr param_in = node_facade->getNodeHandle()->getParameterInput(current_name_).lock();
+        ConnectorPtr param_in = node_facade->getParameterInput(current_name_);
         if(param_in) {
             QPointer<Port> port = parent_->createPort(param_in, current_layout_);
 
@@ -344,7 +344,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // connect parameter output, if available
-        OutputPtr param_out = node_facade->getNodeHandle()->getParameterOutput(current_name_).lock();
+        ConnectorPtr param_out = node_facade->getParameterOutput(current_name_);
         if(param_out) {
             QPointer<Port> port = parent_->createPort(param_out, current_layout_);
 

@@ -57,6 +57,10 @@ public:
     ConnectorPtr getConnector(const UUID& id) const override;
     ConnectorPtr getConnectorNoThrow(const UUID& id) const noexcept override;
 
+    ConnectorPtr getParameterInput(const std::string& name) const override;
+    ConnectorPtr getParameterOutput(const std::string& name) const override;
+
+
     NodeCharacteristics getNodeCharacteristics() const override;
 
     bool canStartStepping() const override;

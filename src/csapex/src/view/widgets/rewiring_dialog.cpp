@@ -127,8 +127,10 @@ void RewiringDialog::createGraphs(const std::string& type)
     // old graph
     graph_facade_old_ = view_core_old_->getLocalRoot();
     apex_assert_hard(graph_facade_old_);
+    NodeFacadeLocalPtr gnf_old = std::dynamic_pointer_cast<NodeFacadeLocal>(graph_facade_old_->getNodeFacade());
+    apex_assert_hard(gnf_old);
     graph_node_old = std::dynamic_pointer_cast<SubgraphNode>(
-                graph_facade_old_->getNodeFacade()->getNodeHandle()->getNode().lock());
+                gnf_old->getNodeHandle()->getNode().lock());
     apex_assert_hard(graph_node_old);
     graph_old = graph_facade_old_->getLocalGraph();
     apex_assert_hard(graph_old);
@@ -141,8 +143,10 @@ void RewiringDialog::createGraphs(const std::string& type)
     // new graph
     graph_facade_new_ = view_core_new_->getLocalRoot();
     apex_assert_hard(graph_facade_new_);
+    NodeFacadeLocalPtr gnf_new = std::dynamic_pointer_cast<NodeFacadeLocal>(graph_facade_new_->getNodeFacade());
+    apex_assert_hard(gnf_new);
     graph_node_new = std::dynamic_pointer_cast<SubgraphNode>(
-                graph_facade_new_->getNodeFacade()->getNodeHandle()->getNode().lock());
+                gnf_new->getNodeHandle()->getNode().lock());
     apex_assert_hard(graph_node_new);
     graph_new = graph_facade_new_->getLocalGraph();
     apex_assert_hard(graph_new);
@@ -153,34 +157,33 @@ void RewiringDialog::createGraphs(const std::string& type)
 
 void RewiringDialog::createConnections()
 {
-    for(SlotPtr slot_original : node_facade_->getNodeHandle()->getSlots()) {
-        for(ConnectionPtr connection : slot_original->getConnections()) {
-            SlotPtr slot_old = nf_old->getNodeHandle()->getSlot(slot_original->getUUID());
+    for(const ConnectorDescription& slot_original : node_facade_->getSlots()) {
+        for(const ConnectorDescription::Target& target : slot_original.targets) {
+            SlotPtr slot_old = nf_old->getNodeHandle()->getSlot(slot_original.id);
             apex_assert_hard(slot_old);
-            updateConnection(slot_old, connection);
+            updateConnection(slot_old, slot_original, target.id, target.active);
         }
     }
-    for(InputPtr input_original : node_facade_->getNodeHandle()->getExternalInputs()) {
-        for(ConnectionPtr connection : input_original->getConnections()) {
-            InputPtr input_old = nf_old->getNodeHandle()->getInput(input_original->getUUID());
+    for(const ConnectorDescription& input_original : node_facade_->getExternalInputs()) {
+        for(const ConnectorDescription::Target& target : input_original.targets) {
+            InputPtr input_old = nf_old->getNodeHandle()->getInput(input_original.id);
             apex_assert_hard(input_old);
-            updateConnection(input_old, connection);
+            updateConnection(input_old, input_original, target.id, target.active);
         }
     }
 
 
-    for(EventPtr event_original : node_facade_->getNodeHandle()->getEvents()) {
-        for(ConnectionPtr connection : event_original->getConnections()) {
-            EventPtr event_old = nf_old->getNodeHandle()->getEvent(event_original->getUUID());
+    for(const ConnectorDescription& event_original : node_facade_->getEvents()) {
+        for(const ConnectorDescription::Target& target : event_original.targets) {
+            EventPtr event_old = nf_old->getNodeHandle()->getEvent(event_original.id);
             apex_assert_hard(event_old);
-            updateConnection(event_old, connection);
+            updateConnection(event_old, event_original, target.id, target.active);
         }
     }
-    for(OutputPtr output_original : node_facade_->getNodeHandle()->getExternalOutputs()) {
-        for(ConnectionPtr connection : output_original->getConnections()) {
-            OutputPtr output_old = nf_old->getNodeHandle()->getOutput(output_original->getUUID());
-            apex_assert_hard(output_old);
-            updateConnection(output_old, connection);
+    for(const ConnectorDescription& output_original : node_facade_->getExternalOutputs()) {
+        for(const ConnectorDescription::Target& target : output_original.targets) {
+            OutputPtr output_old = nf_old->getNodeHandle()->getOutput(output_original.id);
+            updateConnection(output_old, output_original, target.id, target.active);
         }
     }
 }
@@ -221,10 +224,9 @@ void RewiringDialog::createUI(const QString& stylesheet)
 }
 
 
-void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &connection)
+void RewiringDialog::updateConnection(InputPtr input, const ConnectorDescription &connector, const AUUID& target, bool active)
 {
-    OutputPtr out_original = connection->from();
-    UUID original_uuid = out_original->getUUID();
+    UUID original_uuid = target;
     UUID uuid_old;
     if(uuid_cache_.find(original_uuid) != uuid_cache_.end()) {
         uuid_old = uuid_cache_.at(original_uuid);
@@ -237,19 +239,19 @@ void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &conne
     UUID uuid_new = UUID::NONE;
     OutputPtr source_old = graph_old->findTypedConnectorNoThrow<Output>(uuid_old);
     OutputPtr source_new = graph_new->findTypedConnectorNoThrow<Output>(uuid_old);
-    if(std::dynamic_pointer_cast<Event>(out_original)) {
+    if(target.type() == "event" || target.type() == "relayevent") {
         if(!source_old) {
-            source_old = graph_node_old->createInternalEvent(out_original->getType(), uuid_old, out_original->getLabel());
+            source_old = graph_node_old->createInternalEvent(connector.token_type, uuid_old, connector.label);
         }
         if(!source_new) {
-            source_new = graph_node_new->createInternalEvent(out_original->getType(), uuid_old, out_original->getLabel());
+            source_new = graph_node_new->createInternalEvent(connector.token_type, uuid_old, connector.label);
         }
     } else {
         if(!source_old) {
-            source_old = graph_node_old->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel());
+            source_old = graph_node_old->createInternalOutput(connector.token_type, uuid_old, connector.label);
         }
         if(!source_new) {
-            source_new = graph_node_new->createInternalOutput(out_original->getType(), uuid_old, out_original->getLabel());
+            source_new = graph_node_new->createInternalOutput(connector.token_type, uuid_old, connector.label);
         }
     }
 
@@ -270,16 +272,15 @@ void RewiringDialog::updateConnection(InputPtr input, const ConnectionPtr &conne
         c = DirectConnection::connect(source_new, slot_new);
     }
     if(c) {
-        c->setActive(connection->isActive());
+        c->setActive(active);
         graph_new->addConnection(c);
     }
 }
 
-void RewiringDialog::updateConnection(OutputPtr output, const ConnectionPtr &connection)
+void RewiringDialog::updateConnection(OutputPtr output, const ConnectorDescription &connector, const AUUID &target, bool active)
 {
-    InputPtr in_original = connection->to();
     UUID uuid_old;
-    UUID original_uuid = in_original->getUUID();
+    UUID original_uuid = target;
     if(uuid_cache_.find(original_uuid) != uuid_cache_.end()) {
         uuid_old = uuid_cache_.at(original_uuid);
     } else {
@@ -291,19 +292,19 @@ void RewiringDialog::updateConnection(OutputPtr output, const ConnectionPtr &con
     UUID uuid_new = UUID::NONE;
     InputPtr sink_old = graph_old->findTypedConnectorNoThrow<Input>(uuid_old);
     InputPtr sink_new = graph_new->findTypedConnectorNoThrow<Input>(uuid_old);
-    if(std::dynamic_pointer_cast<Slot>(in_original)) {
+    if(target.type() == "slot" || target.type() == "relayslot") {
         if(!sink_old) {
-            sink_old = graph_node_old->createInternalSlot(in_original->getType(), uuid_old, in_original->getLabel(), [](const TokenPtr&){});
+            sink_old = graph_node_old->createInternalSlot(connector.token_type, uuid_old, connector.label, [](const TokenPtr&){});
         }
         if(!sink_new) {
-            sink_new = graph_node_new->createInternalSlot(in_original->getType(), uuid_old, in_original->getLabel(), [](const TokenPtr&){});
+            sink_new = graph_node_new->createInternalSlot(connector.token_type, uuid_old, connector.label, [](const TokenPtr&){});
         }
     } else {
         if(!sink_old) {
-            sink_old = graph_node_old->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isOptional());
+            sink_old = graph_node_old->createInternalInput(connector.token_type, uuid_old, connector.label, connector.optional);
         }
         if(!sink_new) {
-            sink_new = graph_node_new->createInternalInput(in_original->getType(), uuid_old, in_original->getLabel(), in_original->isOptional());
+            sink_new = graph_node_new->createInternalInput(connector.token_type, uuid_old, connector.label, connector.optional);
         }
     }
 
@@ -319,7 +320,7 @@ void RewiringDialog::updateConnection(OutputPtr output, const ConnectionPtr &con
     }
 
     if(c) {
-        c->setActive(connection->isActive());
+        c->setActive(active);
         graph_new->addConnection(c);
     }
 }

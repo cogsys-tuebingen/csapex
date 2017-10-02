@@ -38,7 +38,7 @@ AUUID GraphLocal::getAbsoluteUUID() const
     return nf_.lock()->getUUID().getAbsoluteUUID();
 }
 
-void GraphLocal::setNodeFacade(NodeFacadeWeakPtr nf)
+void GraphLocal::setNodeFacade(NodeFacadeLocalWeakPtr nf)
 {
     nf_ = nf;
 }
@@ -339,7 +339,10 @@ void GraphLocal::buildConnectedComponents()
             graph::Vertex* front = Q.front();
             Q.pop_front();
 
-            checkNodeState(front->getNodeFacade()->getNodeHandle().get());
+            NodeFacadeLocalPtr local_facade = std::dynamic_pointer_cast<NodeFacadeLocal>(front->getNodeFacade());
+            apex_assert_hard(local_facade);
+
+            checkNodeState(local_facade->getNodeHandle().get());
 
             auto it = std::find(unmarked.begin(), unmarked.end(), front);
             if(it == unmarked.end()) {
@@ -411,7 +414,11 @@ std::set<graph::Vertex *> GraphLocal::findVerticesThatNeedMessages()
             vertices_that_need_messages.insert(v.get());
             break;
         }
-        for(const ConnectionPtr c : v->getNodeFacade()->getNodeHandle()->getOutputTransition()->getConnections()) {
+
+        NodeFacadeLocalPtr local_facade = std::dynamic_pointer_cast<NodeFacadeLocal>(v->getNodeFacade());
+        apex_assert_hard(local_facade);
+
+        for(const ConnectionPtr c : local_facade->getNodeHandle()->getOutputTransition()->getConnections()) {
             if(c->to()->isEssential()) {
                 vertices_that_need_messages.insert(v.get());
                 break;
@@ -666,7 +673,7 @@ NodeHandle* GraphLocal::findNodeHandleForConnector(const UUID &uuid) const
 NodeHandle* GraphLocal::findNodeHandle(const UUID& uuid) const
 {
     if(uuid.empty()) {
-        NodeFacadePtr nf = nf_.lock();
+        NodeFacadeLocalPtr nf = nf_.lock();
         apex_assert_hard(nf);
         apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
         return nf->getNodeHandle().get();
@@ -682,7 +689,7 @@ NodeHandle* GraphLocal::findNodeHandle(const UUID& uuid) const
 NodeHandle *GraphLocal::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.empty()) {
-        NodeFacadePtr nf = nf_.lock();
+        NodeFacadeLocalPtr nf = nf_.lock();
         apex_assert_hard(nf);
         apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
         return nf->getNodeHandle().get();
@@ -703,9 +710,11 @@ NodeHandle *GraphLocal::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 
     } else {
         for(const auto vertex : vertices_) {
-            NodeFacadePtr nh = vertex->getNodeFacade();
-            if(nh->getUUID() == uuid) {
-                return nh->getNodeHandle().get();
+            NodeFacadePtr facade = vertex->getNodeFacade();
+            if(facade->getUUID() == uuid) {
+                NodeFacadeLocalPtr local_facade = std::dynamic_pointer_cast<NodeFacadeLocal>(facade);
+                apex_assert_hard(local_facade);
+                return local_facade->getNodeHandle().get();
             }
         }
     }
@@ -721,11 +730,13 @@ NodeHandle* GraphLocal::findNodeHandleForConnectorNoThrow(const UUID &uuid) cons
 NodeHandle* GraphLocal::findNodeHandleWithLabel(const std::string& label) const
 {
     for(const auto vertex : vertices_) {
-        NodeFacadePtr nh = vertex->getNodeFacade();
-        NodeStatePtr state = nh->getNodeState();
+        NodeFacadePtr facade = vertex->getNodeFacade();
+        NodeStatePtr state = facade->getNodeState();
         if(state) {
             if(state->getLabel() == label) {
-                return nh->getNodeHandle().get();
+                NodeFacadeLocalPtr local_facade = std::dynamic_pointer_cast<NodeFacadeLocal>(facade);
+                apex_assert_hard(local_facade);
+                return local_facade->getNodeHandle().get();
             }
         }
     }
@@ -753,7 +764,6 @@ NodeFacadePtr GraphLocal::findNodeFacade(const UUID& uuid) const
     if(uuid.empty()) {
         NodeFacadePtr nf = nf_.lock();
         apex_assert_hard(nf);
-        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
         return nf;
     }
     NodeFacadePtr node_facade = findNodeFacadeNoThrow(uuid);
@@ -768,13 +778,12 @@ NodeFacadePtr GraphLocal::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
     if(uuid.empty()) {
         NodeFacadePtr nf = nf_.lock();
         apex_assert_hard(nf);
-        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
         return nf;
     }
     if(uuid.composite()) {
         UUID root = uuid.rootUUID();
 
-        NodeFacadePtr root_nf = findNodeFacadeNoThrow(root);
+        NodeFacadeLocalPtr root_nf = std::dynamic_pointer_cast<NodeFacadeLocal>(findNodeFacadeNoThrow(root));
         if(root_nf) {
             NodePtr root_node = root_nf->getNodeHandle()->getNode().lock();
             if(root_node) {
@@ -831,8 +840,10 @@ std::vector<NodeHandle*> GraphLocal::getAllNodeHandles()
 {
     std::vector<NodeHandle*> node_handles;
     for(const auto& vertex : vertices_) {
-        NodeFacadePtr nh = vertex->getNodeFacade();
-        node_handles.push_back(nh->getNodeHandle().get());
+        NodeFacadePtr facade = vertex->getNodeFacade();
+        NodeFacadeLocalPtr local_facade = std::dynamic_pointer_cast<NodeFacadeLocal>(facade);
+        apex_assert_hard(local_facade);
+        node_handles.push_back(local_facade->getNodeHandle().get());
     }
 
     return node_handles;

@@ -69,6 +69,9 @@ public:
     virtual ConnectorPtr getConnector(const UUID& id) const = 0;
     virtual ConnectorPtr getConnectorNoThrow(const UUID& id) const noexcept = 0;
 
+    virtual ConnectorPtr getParameterInput(const std::string& name) const = 0;
+    virtual ConnectorPtr getParameterOutput(const std::string& name) const = 0;
+
     virtual NodeCharacteristics getNodeCharacteristics() const = 0;
 
     virtual bool canStartStepping() const = 0;
@@ -111,9 +114,6 @@ public:
     T readParameter(const std::string& name) const;
     template <typename T>
     void setParameter(const std::string& name, const T& value);
-
-    // TODO: remove or add proxies for all of them
-    virtual NodeHandlePtr getNodeHandle() const = 0;
 
 public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;

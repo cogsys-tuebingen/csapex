@@ -48,8 +48,8 @@ private:
     void createGraphs(const std::string &type);
 
     void createConnections();
-    void updateConnection(InputPtr input, const ConnectionPtr& connection);
-    void updateConnection(OutputPtr output, const ConnectionPtr& connection);
+    void updateConnection(InputPtr input, const ConnectorDescription &connector, const AUUID &connected, bool active);
+    void updateConnection(OutputPtr output, const ConnectorDescription &connector, const AUUID& connected, bool active);
 
     void createUI(const QString& stylesheet);
 

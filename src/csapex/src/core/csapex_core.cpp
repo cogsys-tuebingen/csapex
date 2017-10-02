@@ -529,7 +529,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
 SnippetPtr CsApexCore::serializeNodes(const AUUID& graph_id, const std::vector<UUID> &nodes) const
 {
-    GraphFacadeLocalPtr gf = root_->getLocalSubGraph(graph_id);
+    GraphFacadeLocalPtr gf = graph_id.empty() ? root_ : root_->getLocalSubGraph(graph_id);
     GraphIO io(*gf, getNodeFactory().get());
     return std::make_shared<Snippet>(io.saveSelectedGraph(nodes));
 }
