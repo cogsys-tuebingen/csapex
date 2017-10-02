@@ -231,5 +231,12 @@ void GraphFacadeRemote::pauseRequest(bool pause)
 
 std::string GraphFacadeRemote::makeStatusString()
 {
+    // TODO: implement client server
     return tmp_ref_.makeStatusString();
+}
+
+std::vector<ConnectionInformation> GraphFacadeRemote::enumerateAllConnections() const
+{
+    // TODO: implement client server
+    return tmp_ref_.enumerateAllConnections();
 }

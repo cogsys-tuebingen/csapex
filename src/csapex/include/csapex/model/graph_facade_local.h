@@ -21,6 +21,8 @@ public:
 
     GraphFacadeLocal* getLocalParent() const;
 
+    virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
+
     SubgraphNodePtr getSubgraphNode();
     TaskGenerator* getTaskGenerator(const UUID& uuid);
     ThreadPool* getThreadPool();

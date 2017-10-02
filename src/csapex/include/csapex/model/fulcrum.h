@@ -34,7 +34,8 @@ public:
     };
 
 public:
-    Fulcrum(Connection* parent, const Point& p, int type, const Point& handle_in, const Point& handle_out);
+    Fulcrum(int connection_id, const Point& p, int type, const Point& handle_in, const Point& handle_out);
+    Fulcrum(const Fulcrum& copy);
 
     void move(const Point& pos, bool dropped);
     Point pos() const;
@@ -53,15 +54,14 @@ public:
     int type() const;
     void setType(int type);
 
-    Connection* connection() const;
-
 public:
     slim_signal::Signal<void (Fulcrum*, bool dropped)> moved;
     slim_signal::Signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
     slim_signal::Signal<void (Fulcrum*, int type)> typeChanged;
 
 private:
-    Connection* parent_;
+    int connection_id_;
+
     int id_;
     int type_;
     Point pos_;

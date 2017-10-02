@@ -9,6 +9,7 @@
 #include <csapex/data/point.h>
 #include <csapex/profiling/profilable.h>
 #include <csapex/serialization/serialization_fwd.h>
+#include <csapex/model/connection_information.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -56,14 +57,14 @@ private:
     void loadConnections(const YAML::Node& doc);
     void loadConnection(const YAML::Node& connection);
 
-    void saveFulcrums(YAML::Node& fulcrum, const Connection* connection);
+    void saveFulcrums(YAML::Node& fulcrum, const ConnectionInformation &connection);
     void loadFulcrum(const YAML::Node& fulcrum);
 
     void sendNotification(const std::string& notification);
 
 protected:
     void saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeLocalPtr> &nodes);
-    void saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr> &connections);
+    void saveConnections(YAML::Node &yaml, const std::vector<ConnectionInformation> &connections);
 
     void serializeNode(YAML::Node& doc, NodeFacadeLocalConstPtr node_handle);
     void deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_handle);

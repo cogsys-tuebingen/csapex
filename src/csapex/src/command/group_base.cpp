@@ -63,7 +63,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 NodeHandle* source = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c(output.get(), input.get(), output->getType(), connection->isActive());
+                ConnectionInformation c = connection->getDescription();
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     connections_going_in.push_back(c);
@@ -80,7 +80,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c(output.get(), input.get(), input->getType(), connection->isActive());
+                    ConnectionInformation c = connection->getDescription();
                     connections_going_out.push_back(c);
                 }
             }
@@ -96,7 +96,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c(output.get(), slot.get(), output->getType(), connection->isActive());
+                    ConnectionInformation c = connection->getDescription();
                     signals_going_in.push_back(c);
                 }
             }
@@ -109,7 +109,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 NodeHandle* source = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c(trigger.get(), input.get(), input->getType(), connection->isActive());
+                ConnectionInformation c = connection->getDescription();
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     signals_going_out.push_back(c);

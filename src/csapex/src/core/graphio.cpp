@@ -11,6 +11,7 @@
 #include <csapex/model/graph_facade_local.h>
 #include <csapex/model/graph/graph_local.h>
 #include <csapex/model/subgraph_node.h>
+#include <csapex/model/connection_information.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
@@ -122,7 +123,7 @@ Snippet GraphIO::saveSelectedGraph(const std::vector<UUID> &uuids)
     std::set<UUID> node_set(uuids.begin(), uuids.end());
 
     std::vector<NodeFacadeLocalPtr> nodes;
-    std::vector<ConnectionPtr> connections;
+    std::vector<ConnectionInformation> connections;
 
     for(const UUID& uuid : uuids) {
         NodeFacadePtr nf = graph_.findNodeFacade(uuid);
@@ -135,7 +136,7 @@ Snippet GraphIO::saveSelectedGraph(const std::vector<UUID> &uuids)
                 for(const ConnectionPtr& connection : connectable->getConnections()) {
                     auto target = graph_.getGraph()->findNodeHandleForConnector(connection->to()->getUUID());
                     if(node_set.find(target->getUUID()) != node_set.end()) {
-                        connections.push_back(connection);
+                        connections.push_back(connection->getDescription());
                     }
                 }
             }
@@ -299,30 +300,30 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
-    saveConnections(yaml, graph_.getGraph()->getConnections());
+    saveConnections(yaml, graph_.enumerateAllConnections());
 }
 
-void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr>& connections)
+void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionInformation>& connections)
 {
     std::unordered_map<UUID, std::vector<std::pair<UUID, std::string>>, UUID::Hasher> connection_map;
 
-    for(const ConnectionPtr& connection : connections) {
+    for(const ConnectionInformation& connection : connections) {
         if(ignore_forwarding_connections_) {
-            if(connection->from()->getUUID().type() == "relayout" ||
-                    connection->to()->getUUID().type() == "relayin" ||
-                    connection->from()->getUUID().type() == "relayevent" ||
-                    connection->to()->getUUID().type() == "relayslot") {
+            if(connection.from.type() == "relayout" ||
+                    connection.to.type() == "relayin" ||
+                    connection.from.type() == "relayevent" ||
+                    connection.to.type() == "relayslot") {
                 continue;
             }
         }
 
-        std::string type = connection->isActive() ? "active" : "default";
+        std::string type = connection.active ? "active" : "default";
 
-        connection_map[connection->from()->getUUID()].push_back(std::make_pair(connection->to()->getUUID(), type));
+        connection_map[connection.from].push_back(std::make_pair(connection.to, type));
 
-        if(connection->getFulcrumCount() > 0) {
+        if(!connection.fulcrums.empty()) {
             YAML::Node fulcrum;
-            saveFulcrums(fulcrum, connection.get());
+            saveFulcrums(fulcrum, connection);
             yaml["fulcrums"].push_back(fulcrum);
         }
     }
@@ -405,31 +406,31 @@ void GraphIO::loadConnection(const YAML::Node& connection)
     }
 }
 
-void GraphIO::saveFulcrums(YAML::Node &fulcrum, const Connection *connection)
+void GraphIO::saveFulcrums(YAML::Node &fulcrum, const ConnectionInformation& connection)
 {
-    fulcrum["from"] = connection->from()->getUUID().getFullName();
-    fulcrum["to"] = connection->to()->getUUID().getFullName();
+    fulcrum["from"] = connection.from.getFullName();
+    fulcrum["to"] = connection.to.getFullName();
 
-    for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
+    for(const Fulcrum& f : connection.fulcrums) {
         YAML::Node pt;
-        pt.push_back(f->pos().x);
-        pt.push_back(f->pos().y);
+        pt.push_back(f.pos().x);
+        pt.push_back(f.pos().y);
 
         fulcrum["pts"].push_back(pt);
     }
 
-    for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
+    for(const Fulcrum& f : connection.fulcrums) {
         YAML::Node handle;
-        handle.push_back(f->handleIn().x);
-        handle.push_back(f->handleIn().y);
-        handle.push_back(f->handleOut().x);
-        handle.push_back(f->handleOut().y);
+        handle.push_back(f.handleIn().x);
+        handle.push_back(f.handleIn().y);
+        handle.push_back(f.handleOut().x);
+        handle.push_back(f.handleOut().y);
 
         fulcrum["handles"].push_back(handle);
     }
 
-    for(const Fulcrum::Ptr& f : connection->getFulcrums()) {
-        fulcrum["types"].push_back(f->type());
+    for(const Fulcrum& f : connection.fulcrums) {
+        fulcrum["types"].push_back(f.type());
     }
 
 }

@@ -285,6 +285,14 @@ int Connection::id() const
     return id_;
 }
 
+
+ConnectionInformation Connection::getDescription() const
+{
+    return ConnectionInformation(from_->getUUID(), to_->getUUID(),
+                                 message_->getTokenData(), isActive(),
+                                 getFulcrumsCopy());
+}
+
 bool Connection::contains(Connector *c) const
 {
     return from_.get() == c || to_.get() == c;
@@ -300,6 +308,16 @@ std::vector<Fulcrum::Ptr> Connection::getFulcrums() const
     return fulcrums_;
 }
 
+std::vector<Fulcrum> Connection::getFulcrumsCopy() const
+{
+    std::vector<Fulcrum> result;
+    result.reserve(fulcrums_.size());
+    for(const FulcrumPtr& f : fulcrums_) {
+        result.push_back(*f);
+    }
+    return result;
+}
+
 int Connection::getFulcrumCount() const
 {
     return fulcrums_.size();
@@ -313,7 +331,7 @@ Fulcrum::Ptr Connection::getFulcrum(int fulcrum_id)
 void Connection::addFulcrum(int fulcrum_id, const Point &pos, int type, const Point &handle_in, const Point &handle_out)
 {
     // create the new fulcrum
-    Fulcrum::Ptr fulcrum(new Fulcrum(this, pos, type, handle_in, handle_out));
+    Fulcrum::Ptr fulcrum(new Fulcrum(id(), pos, type, handle_in, handle_out));
     Fulcrum* f = fulcrum.get();
 
     f->setId(fulcrum_id);

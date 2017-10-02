@@ -24,6 +24,8 @@ public:
 
     GraphFacadeRemote* getRemoteParent() const;
 
+    virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
+
     virtual void stop() override;
     virtual void clear() override;
     virtual void clearBlock() override;

@@ -6,11 +6,8 @@
 
 using namespace csapex;
 
-ConnectionInformation::ConnectionInformation(Connectable *from, Connectable *to, const TokenDataConstPtr& type, bool active)
-    : from(from->getUUID()), to(to->getUUID()), from_label(from->getLabel()), to_label(to->getLabel()), type(type), active(active)
-{
-}
-ConnectionInformation::ConnectionInformation(const UUID& from, const UUID& to, const TokenDataConstPtr& type, bool active)
-    : from(from), to(to), from_label(""), to_label(""), type(type), active(active)
+ConnectionInformation::ConnectionInformation(const UUID& from, const UUID& to, const TokenDataConstPtr& type, bool active, const std::vector<Fulcrum> &fulcrums)
+    : from(from), to(to), from_label(""), to_label(""), type(type), active(active),
+      fulcrums(fulcrums)
 {
 }

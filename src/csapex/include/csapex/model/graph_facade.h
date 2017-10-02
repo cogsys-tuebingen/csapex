@@ -11,6 +11,7 @@
 #include <csapex/utility/notification.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/observer.h>
+#include <csapex/model/connection_information.h>
 
 /// SYSTEM
 #include <unordered_map>
@@ -40,6 +41,8 @@ public:
 
     ConnectorPtr findConnector(const UUID &uuid);
     ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept;
+
+    virtual std::vector<ConnectionInformation> enumerateAllConnections() const = 0;
 
     virtual AUUID getAbsoluteUUID() const = 0;
     virtual GraphPtr getGraph() const = 0;

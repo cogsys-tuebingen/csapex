@@ -7,9 +7,14 @@
 using namespace csapex;
 
 
-Fulcrum::Fulcrum(Connection* parent, const Point& p, int type, const Point &handle_in, const Point &handle_out)
-    : parent_(parent), type_(type), pos_(p), handle_in_(handle_in), handle_out_(handle_out)
+Fulcrum::Fulcrum(int connection_id, const Point& p, int type, const Point &handle_in, const Point &handle_out)
+    : connection_id_(connection_id), type_(type), pos_(p), handle_in_(handle_in), handle_out_(handle_out)
 {}
+
+Fulcrum::Fulcrum(const Fulcrum& copy)
+    : connection_id_(copy.connection_id_), type_(copy.type_), pos_(copy.pos_), handle_in_(copy.handle_in_), handle_out_(copy.handle_out_)
+{
+}
 
 void Fulcrum::move(const Point& pos, bool dropped)
 {
@@ -65,7 +70,7 @@ int Fulcrum::id() const
 
 int Fulcrum::connectionId() const
 {
-    return parent_->id();
+    return connection_id_;
 }
 
 void Fulcrum::setId(int id)
@@ -82,9 +87,4 @@ void Fulcrum::setType(int type)
 {
     type_ = type;
     typeChanged(this, type);
-}
-
-Connection* Fulcrum::connection() const
-{
-    return parent_;
 }

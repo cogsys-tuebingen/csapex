@@ -977,7 +977,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     double mindist_for_slack = 60.0;
     double slack_smooth_distance = 300.0;
 
-    Fulcrum::Ptr first(new Fulcrum(nullptr, convert(from), Fulcrum::FULCRUM_OUT, convert(from), convert(from)));
+    Fulcrum::Ptr first(new Fulcrum(-1, convert(from), Fulcrum::FULCRUM_OUT, convert(from), convert(from)));
     Fulcrum::Ptr current = first;
     Fulcrum::Ptr last = current;
 
@@ -986,7 +986,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
         ConnectionPtr connection = graph_facade_->getGraph()->getConnectionWithId(id);
         targets = connection->getFulcrums();
     }
-    targets.push_back(Fulcrum::Ptr(new Fulcrum(nullptr, convert(to), Fulcrum::FULCRUM_IN, convert(to), convert(to))));
+    targets.push_back(Fulcrum::Ptr(new Fulcrum(-1, convert(to), Fulcrum::FULCRUM_IN, convert(to), convert(to))));
 
     int sub_section = 0;
 

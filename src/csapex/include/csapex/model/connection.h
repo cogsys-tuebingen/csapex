@@ -9,6 +9,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/token.h>
 #include <csapex/csapex_export.h>
+#include <csapex/model/connection_information.h>
 
 /// SYSTEM
 #include <memory>
@@ -66,6 +67,8 @@ public:
 
     int id() const;
 
+    ConnectionInformation getDescription() const;
+
     bool contains(Connector* c) const;
 
     virtual void setToken(const TokenPtr &msg);
@@ -112,6 +115,8 @@ public:
     bool operator == (const Connection& c) const;
 
     std::vector<FulcrumPtr> getFulcrums() const;
+    std::vector<Fulcrum> getFulcrumsCopy() const;
+
     int getFulcrumCount() const;
     FulcrumPtr getFulcrum(int fulcrum_id);
 

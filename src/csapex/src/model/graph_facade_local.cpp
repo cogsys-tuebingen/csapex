@@ -531,3 +531,14 @@ std::string GraphFacadeLocal::makeStatusString()
 {
     return graph_node_->makeStatusString();
 }
+
+std::vector<ConnectionInformation> GraphFacadeLocal::enumerateAllConnections() const
+{
+    std::vector<ConnectionInformation> result;
+    auto connections = graph_->getConnections();
+    result.reserve(connections.size());
+    for(const ConnectionPtr& c : connections) {
+        result.push_back(c->getDescription());
+    }
+    return result;
+}
