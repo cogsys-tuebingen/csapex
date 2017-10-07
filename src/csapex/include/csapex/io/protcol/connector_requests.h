@@ -54,12 +54,12 @@ public:
     };
 
 
-    class NodeResponse : public ResponseImplementation<NodeResponse>
+    class ConnectorResponse : public ResponseImplementation<ConnectorResponse>
     {
     public:
-        NodeResponse(uint8_t request_id);
-        NodeResponse(ConnectorRequestType request_type, uint8_t request_id, const AUUID& uuid);
-        NodeResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid);
+        ConnectorResponse(uint8_t request_id);
+        ConnectorResponse(ConnectorRequestType request_type, uint8_t request_id, const AUUID& uuid);
+        ConnectorResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(SerializationBuffer& data) override;
@@ -86,7 +86,7 @@ public:
 
 public:
     using RequestT = ConnectorRequest;
-    using ResponseT = NodeResponse;
+    using ResponseT = ConnectorResponse;
 };
 
 }

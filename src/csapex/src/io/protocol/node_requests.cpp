@@ -61,8 +61,21 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
         // TODO
         break;
 
-    case NodeRequestType::GetDebugDescription:
-        return std::make_shared<NodeResponse>(request_type_, uuid_, nf->getDebugDescription(), getRequestID());
+
+        /**
+         * begin: generate cases
+         **/
+#define HANDLE_ACCESSOR(_enum, type, function) \
+    case NodeRequests::NodeRequestType::_enum:\
+        return std::make_shared<NodeResponse>(request_type_, uuid_, nf->function(), getRequestID());
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
+
+    #include <csapex/model/node_facade_remote_accessors.hpp>
+        /**
+         * end: generate cases
+         **/
+
 
     default:
         return std::make_shared<Feedback>(std::string("unknown node request type ") + std::to_string((int)request_type_),

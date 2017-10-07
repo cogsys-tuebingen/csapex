@@ -64,12 +64,12 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
     case ConnectorRequests::ConnectorRequestType::IsConnectedTo:
     {
         UUID other_id = boost::any_cast<UUID>(payload_);
-        return std::make_shared<NodeResponse>(request_type_, c->isConnectedTo(other_id), getRequestID(), uuid_);
+        return std::make_shared<ConnectorResponse>(request_type_, c->isConnectedTo(other_id), getRequestID(), uuid_);
     }
     case ConnectorRequests::ConnectorRequestType::IsActivelyConnectedTo:
     {
         UUID other_id = boost::any_cast<UUID>(payload_);
-        return std::make_shared<NodeResponse>(request_type_, c->isActivelyConnectedTo(other_id), getRequestID(), uuid_);
+        return std::make_shared<ConnectorResponse>(request_type_, c->isActivelyConnectedTo(other_id), getRequestID(), uuid_);
     }
 
         /**
@@ -77,7 +77,7 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
          **/
 #define HANDLE_ACCESSOR(_enum, type, function) \
     case ConnectorRequests::ConnectorRequestType::_enum:\
-        return std::make_shared<NodeResponse>(request_type_, c->function(), getRequestID(), uuid_);
+        return std::make_shared<ConnectorResponse>(request_type_, c->function(), getRequestID(), uuid_);
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
 
@@ -91,7 +91,7 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
                                           getRequestID());
     }
 
-    return std::make_shared<NodeResponse>(request_type_, getRequestID(), uuid_);
+    return std::make_shared<ConnectorResponse>(request_type_, getRequestID(), uuid_);
 }
 
 void ConnectorRequests::ConnectorRequest::serialize(SerializationBuffer &data) const
@@ -112,14 +112,14 @@ void ConnectorRequests::ConnectorRequest::deserialize(SerializationBuffer& data)
 /// RESPONSE
 ///
 
-ConnectorRequests::NodeResponse::NodeResponse(ConnectorRequestType request_type, uint8_t request_id, const AUUID& uuid)
+ConnectorRequests::ConnectorResponse::ConnectorResponse(ConnectorRequestType request_type, uint8_t request_id, const AUUID& uuid)
     : ResponseImplementation(request_id),
       request_type_(request_type),
       uuid_(uuid)
 {
 
 }
-ConnectorRequests::NodeResponse::NodeResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid)
+ConnectorRequests::ConnectorResponse::ConnectorResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid)
     : ResponseImplementation(request_id),
       request_type_(request_type),
       uuid_(uuid),
@@ -128,20 +128,20 @@ ConnectorRequests::NodeResponse::NodeResponse(ConnectorRequestType request_type,
 
 }
 
-ConnectorRequests::NodeResponse::NodeResponse(uint8_t request_id)
+ConnectorRequests::ConnectorResponse::ConnectorResponse(uint8_t request_id)
     : ResponseImplementation(request_id)
 {
 
 }
 
-void ConnectorRequests::NodeResponse::serialize(SerializationBuffer &data) const
+void ConnectorRequests::ConnectorResponse::serialize(SerializationBuffer &data) const
 {
     data << request_type_;
     data << uuid_;
     data << result_;
 }
 
-void ConnectorRequests::NodeResponse::deserialize(SerializationBuffer& data)
+void ConnectorRequests::ConnectorResponse::deserialize(SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;

@@ -25,14 +25,11 @@ using namespace csapex;
 using namespace csapex;
 
 NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
-                                   NodeHandlePtr nh, NodeWorker* nw, NodeRunnerPtr nr)
+                                   NodeHandlePtr nh, NodeWorker* nw)
     : Remote(session),
       uuid_(uuid),
-      nh_(nh), nw_(nw), nr_(nr)
+      nh_(nh), nw_(nw)
 {
-    if(nr_) {
-        nh->setNodeRunner(nr_);
-    }
 
     if(nh_) {
         connectNodeHandle();
@@ -323,7 +320,9 @@ param::ParameterPtr NodeFacadeRemote::getParameter(const std::string &name) cons
 
 bool NodeFacadeRemote::canStartStepping() const
 {
-    return nr_->canStartStepping();
+    auto res = session_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::CanStartStepping, getUUID().getAbsoluteUUID());
+    apex_assert_hard(res);
+    return res->getResult<bool>();
 }
 
 bool NodeFacadeRemote::isProfiling() const

@@ -17,7 +17,7 @@ class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade, public Remote
 {
 public:
     NodeFacadeRemote(SessionPtr session, AUUID uuid,
-                     NodeHandlePtr nh, NodeWorker *nw, NodeRunnerPtr nr);
+                     NodeHandlePtr nh, NodeWorker *nw);
 
     ~NodeFacadeRemote();
 
@@ -123,7 +123,6 @@ private:
 
     NodeHandlePtr nh_;
     NodeWorker* nw_;
-    NodeRunnerPtr nr_;
 
     std::unordered_map<UUID, ConnectorPtr, UUID::Hasher> remote_connectors_;
 };
