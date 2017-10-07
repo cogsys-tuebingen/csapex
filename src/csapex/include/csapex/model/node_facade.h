@@ -29,7 +29,6 @@ public:
     virtual AUUID getAUUID() const = 0;
 
     virtual bool isActive() const = 0;
-    virtual void setActive(bool active) = 0;
 
     virtual bool isProcessingEnabled() const = 0;
 
@@ -104,7 +103,6 @@ public:
 
     virtual NodeStatePtr getNodeState() const = 0;
     virtual NodeStatePtr getNodeStateCopy() const = 0;
-    virtual void setNodeState(NodeStatePtr memento) = 0;
 
     virtual GenericStateConstPtr getParameterState() const = 0;
 

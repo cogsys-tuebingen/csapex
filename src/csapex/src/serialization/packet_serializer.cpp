@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/assert.h>
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 #include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
@@ -16,7 +16,7 @@ Serializer::~Serializer()
 {
 
 }
-SerializationBuffer PacketSerializer::serializePacket(const SerializableConstPtr &packet)
+SerializationBuffer PacketSerializer::serializePacket(const StreamableConstPtr &packet)
 {
     SerializationBuffer data;
     instance().serialize(packet, data);
@@ -24,7 +24,7 @@ SerializationBuffer PacketSerializer::serializePacket(const SerializableConstPtr
     return data;
 }
 
-SerializablePtr PacketSerializer::deserializePacket(SerializationBuffer& serial)
+StreamablePtr PacketSerializer::deserializePacket(SerializationBuffer& serial)
 {
     return instance().deserialize(serial);
 }
@@ -35,7 +35,7 @@ void PacketSerializer::registerSerializer(uint8_t type, Serializer *serializer)
 }
 
 
-void PacketSerializer::serialize(const SerializableConstPtr& packet, SerializationBuffer &data)
+void PacketSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer &data)
 {
     // determine packet type
     uint8_t type = packet->getPacketType();
@@ -49,7 +49,7 @@ void PacketSerializer::serialize(const SerializableConstPtr& packet, Serializati
     }
 }
 
-SerializablePtr PacketSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr PacketSerializer::deserialize(SerializationBuffer& data)
 {
     // determine packet type
     uint8_t type;
@@ -65,5 +65,5 @@ SerializablePtr PacketSerializer::deserialize(SerializationBuffer& data)
         std::cerr << "cannot deserialize packet of type: " << (int) type << std::endl;
     }
 
-    return SerializablePtr();
+    return StreamablePtr();
 }

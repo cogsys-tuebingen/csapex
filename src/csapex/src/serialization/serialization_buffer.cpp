@@ -2,11 +2,13 @@
 #include <csapex/serialization/serialization_buffer.h>
 
 /// PROJECT
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/model/token_data.h>
 #include <csapex/serialization/snippet.h>
+#include <csapex/model/connector_description.h>
+#include <csapex/model/execution_state.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -73,6 +75,8 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
     ADD_ANY_TYPE(TokenDataConstPtr);
     ADD_ANY_TYPE(SnippetPtr);
+    ADD_ANY_TYPE(std::vector<ConnectorDescription>);
+    ADD_ANY_TYPE(ExecutionState);
 }
 
 void SerializationBuffer::finalize()
@@ -112,7 +116,7 @@ std::string SerializationBuffer::toString() const
     return res.str();
 }
 
-void SerializationBuffer::write(const SerializableConstPtr &i)
+void SerializationBuffer::write(const StreamableConstPtr &i)
 {
     bool null = (i == nullptr);
     operator << (null);
@@ -121,7 +125,7 @@ void SerializationBuffer::write(const SerializableConstPtr &i)
     }
 }
 
-SerializablePtr SerializationBuffer::read()
+StreamablePtr SerializationBuffer::read()
 {
     bool null;
     operator >> (null);
@@ -129,6 +133,19 @@ SerializablePtr SerializationBuffer::read()
         return PacketSerializer::instance().deserialize(*this);
     }
     return nullptr;
+}
+
+
+SerializationBuffer& SerializationBuffer::operator << (const Serializable& s)
+{
+    s.serialize(*this);
+    return *this;
+}
+
+SerializationBuffer& SerializationBuffer::operator >> (Serializable& s)
+{
+    s.deserialize(*this);
+    return *this;
 }
 
 SerializationBuffer& SerializationBuffer::writeAny (const boost::any& any)

@@ -24,8 +24,8 @@ public:
 class ParameterSerializer : public Singleton<ParameterSerializer>, public Serializer
 {
 public:
-    void serialize(const SerializableConstPtr &packet, SerializationBuffer &data) override;
-    SerializablePtr deserialize(SerializationBuffer &data) override;
+    void serialize(const StreamableConstPtr &packet, SerializationBuffer &data) override;
+    StreamablePtr deserialize(SerializationBuffer &data) override;
 
     static void registerSerializer(uint8_t type, std::shared_ptr<ParameterSerializerInterface> serializer);
 

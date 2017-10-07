@@ -19,7 +19,7 @@ CommandSerializerInterface::~CommandSerializerInterface()
 
 }
 
-void CommandSerializer::serialize(const SerializableConstPtr& packet, SerializationBuffer& data)
+void CommandSerializer::serialize(const StreamableConstPtr& packet, SerializationBuffer& data)
 {
 
     if(const CommandConstPtr& cmd = std::dynamic_pointer_cast<Command const>(packet)) {
@@ -43,7 +43,7 @@ void CommandSerializer::serialize(const SerializableConstPtr& packet, Serializat
     }
 }
 
-SerializablePtr CommandSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr CommandSerializer::deserialize(SerializationBuffer& data)
 {
     std::string type;
     data >> type;

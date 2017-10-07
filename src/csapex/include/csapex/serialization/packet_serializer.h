@@ -18,8 +18,8 @@ class Serializer
 public:
     virtual ~Serializer();
 
-    virtual void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) = 0;
-    virtual SerializablePtr deserialize(SerializationBuffer& data) = 0;
+    virtual void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) = 0;
+    virtual StreamablePtr deserialize(SerializationBuffer& data) = 0;
 };
 
 /**
@@ -35,13 +35,13 @@ class PacketSerializer : public Singleton<PacketSerializer>, public Serializer
     friend class Singleton<PacketSerializer>;
 
 public:
-    static SerializationBuffer serializePacket(const SerializableConstPtr& packet);
-    static SerializablePtr deserializePacket(SerializationBuffer &serial);
+    static SerializationBuffer serializePacket(const StreamableConstPtr& packet);
+    static StreamablePtr deserializePacket(SerializationBuffer &serial);
     static void registerSerializer(uint8_t type, Serializer* serializer);
 
 public:
-    void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override;
-    SerializablePtr deserialize(SerializationBuffer &data) override;
+    void serialize(const StreamableConstPtr &packet, SerializationBuffer &data) override;
+    StreamablePtr deserialize(SerializationBuffer &data) override;
 
 
 private:
@@ -68,13 +68,13 @@ struct SerializerRegistered
 class Name##Serializer : public Singleton<Name##Serializer>, public Serializer \
 { \
 public: \
-    void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override \
+    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override \
     { \
         if(const std::shared_ptr<Name const>& res = std::dynamic_pointer_cast<Name const>(packet)) { \
             res->serialize(data); \
         } \
     } \
-    SerializablePtr deserialize(SerializationBuffer &data) override \
+    StreamablePtr deserialize(SerializationBuffer &data) override \
     { \
         std::shared_ptr<Name> res = Name::makeEmpty(); \
         res->deserialize(data); \

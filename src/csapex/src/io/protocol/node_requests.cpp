@@ -8,6 +8,7 @@
 #include <csapex/io/session.h>
 #include <csapex/model/graph_facade_local.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/node_characteristics.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/serialization/parameter_serializer.h>
@@ -49,7 +50,7 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
     switch(request_type_)
     {
     case NodeRequestType::AddClient:
-        nh->remote_data_connection.connect([session](SerializableConstPtr data){
+        nh->remote_data_connection.connect([session](StreamableConstPtr data){
             if(RawMessageConstPtr msg = std::dynamic_pointer_cast<RawMessage const>(data)) {
                 session->write(msg);
             } else {
@@ -61,6 +62,29 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
         // TODO
         break;
 
+    case NodeRequestType::SetProfiling:
+        nf->setProfiling(getArgument<bool>(0));
+        break;
+
+    case NodeRequestType::GetLoggerOutput:
+    {
+        auto result = nf->getLoggerOutput(getArgument<ErrorState::ErrorLevel>(0));
+        return std::make_shared<NodeResponse>(request_type_, uuid_, result, getRequestID());
+    }
+
+
+
+    case NodeRequestType::IsParameterInput:
+    {
+        auto result = nf->isParameterInput(getArgument<UUID>(0));
+        return std::make_shared<NodeResponse>(request_type_, uuid_, result, getRequestID());
+    }
+
+    case NodeRequestType::IsParameterOutput:
+    {
+        auto result = nf->isParameterOutput(getArgument<UUID>(0));
+        return std::make_shared<NodeResponse>(request_type_, uuid_, result, getRequestID());
+    }
 
         /**
          * begin: generate cases
@@ -89,12 +113,14 @@ void NodeRequests::NodeRequest::serialize(SerializationBuffer &data) const
 {
     data << request_type_;
     data << uuid_;
+    data << arguments_;
 }
 
 void NodeRequests::NodeRequest::deserialize(SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;
+    data >> arguments_;
 }
 
 ///

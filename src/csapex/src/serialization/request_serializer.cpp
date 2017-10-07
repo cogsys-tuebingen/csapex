@@ -22,7 +22,7 @@ RequestSerializerInterface::~RequestSerializerInterface()
 
 }
 
-void RequestSerializer::serialize(const SerializableConstPtr &packet, SerializationBuffer& data)
+void RequestSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
 {
     if(const RequestConstPtr& request = std::dynamic_pointer_cast<Request const>(packet)) {
         std::string type = request->getType();
@@ -66,7 +66,7 @@ void RequestSerializer::serialize(const SerializableConstPtr &packet, Serializat
     }
 }
 
-SerializablePtr RequestSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr RequestSerializer::deserialize(SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Request" << std::endl;
 

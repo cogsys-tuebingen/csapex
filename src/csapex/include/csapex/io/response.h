@@ -2,7 +2,7 @@
 #define RESPONSE_H
 
 /// PROJECT
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 
 /// SYSTEM
 #include <string>
@@ -10,7 +10,7 @@
 namespace csapex
 {
 
-class Response : public Serializable
+class Response : public Streamable
 {
 public:
     Response(uint8_t id);

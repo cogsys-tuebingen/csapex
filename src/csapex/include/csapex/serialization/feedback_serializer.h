@@ -14,8 +14,8 @@ namespace csapex
 class FeedbackSerializer : public Singleton<FeedbackSerializer>, public Serializer
 {
 public:
-    void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override;
-    SerializablePtr deserialize(SerializationBuffer &data) override;
+    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
+    StreamablePtr deserialize(SerializationBuffer &data) override;
 };
 
 }

@@ -2,7 +2,7 @@
 #define RAW_MESSAGE_H
 
 /// PROJECT
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/io/io_fwd.h>
 
@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class RawMessage : public Serializable
+class RawMessage : public Streamable
 {
 public:
     RawMessage();

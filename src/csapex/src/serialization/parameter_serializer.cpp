@@ -21,7 +21,7 @@ ParameterSerializerInterface::~ParameterSerializerInterface()
 
 }
 
-void ParameterSerializer::serialize(const SerializableConstPtr& packet, SerializationBuffer& data)
+void ParameterSerializer::serialize(const StreamableConstPtr& packet, SerializationBuffer& data)
 {
     if(!packet) {
         data << (uint8_t) param::NullParameter::NUMERICAL_ID;
@@ -48,7 +48,7 @@ void ParameterSerializer::serialize(const SerializableConstPtr& packet, Serializ
     }
 }
 
-SerializablePtr ParameterSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr ParameterSerializer::deserialize(SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Parameter" << std::endl;
 

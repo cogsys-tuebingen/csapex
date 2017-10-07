@@ -34,7 +34,7 @@ public:
     void start();
     void stop();
 
-    void write(const SerializableConstPtr &packet);
+    void write(const StreamableConstPtr &packet);
     void write(const std::string &message);
 
     //
@@ -89,7 +89,7 @@ public:
     slim_signal::Signal<void()> started;
     slim_signal::Signal<void()> stopped;
 
-    slim_signal::Signal<void(const SerializableConstPtr&)> packet_received;
+    slim_signal::Signal<void(const StreamableConstPtr&)> packet_received;
     slim_signal::Signal<void(const BroadcastMessageConstPtr&)> broadcast_received;
 
     slim_signal::Signal<void(const RawMessageConstPtr&)> &raw_packet_received(const AUUID& uuid);
@@ -107,7 +107,7 @@ protected:
 
     std::recursive_mutex packets_mutex_;
     std::condition_variable_any packets_available_;
-    std::deque<SerializableConstPtr> packets_;
+    std::deque<StreamableConstPtr> packets_;
 
     std::recursive_mutex open_requests_mutex_;
     std::map<uint8_t, std::promise<ResponseConstPtr>*> open_requests_;

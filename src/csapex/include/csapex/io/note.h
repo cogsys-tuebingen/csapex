@@ -2,7 +2,7 @@
 #define NOTE_H
 
 /// PROJECT
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
@@ -14,7 +14,7 @@ namespace csapex
 namespace io
 {
 
-class Note : public Serializable
+class Note : public Streamable
 {
 public:
     Note(AUUID uuid);

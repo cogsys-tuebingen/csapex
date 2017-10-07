@@ -6,7 +6,7 @@
 #include <csapex/core/core_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_command_export.h>
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
@@ -22,7 +22,7 @@ namespace csapex
 
 class Designer;
 
-class CSAPEX_COMMAND_EXPORT Command : public Serializable
+class CSAPEX_COMMAND_EXPORT Command : public Streamable
 {
 public:
     class CSAPEX_COMMAND_EXPORT Access {

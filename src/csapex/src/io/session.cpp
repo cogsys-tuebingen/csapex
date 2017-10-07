@@ -80,7 +80,7 @@ void Session::start()
             }
 
             while(running_ && !packets_.empty()) {
-                SerializableConstPtr packet = packets_.front();
+                StreamableConstPtr packet = packets_.front();
                 packets_.pop_front();
                 packet_lock.unlock();
 
@@ -185,7 +185,7 @@ void Session::sendNote(io::NoteConstPtr note)
     write(note);
 }
 
-void Session::write(const SerializableConstPtr &packet)
+void Session::write(const StreamableConstPtr &packet)
 {
     if(live_) {
         try {
@@ -232,7 +232,7 @@ void Session::read_async()
                     reply_length = boost::asio::read(*socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
                     apex_assert_equal_hard((int) reply_length, ((int) (message_length - SerializationBuffer::HEADER_LENGTH)));
 
-                    SerializablePtr serial = PacketSerializer::deserializePacket(*message_data);
+                    StreamablePtr serial = PacketSerializer::deserializePacket(*message_data);
 
                     if(serial) {
                         if(FeedbackConstPtr feedback = std::dynamic_pointer_cast<Feedback const>(serial)) {

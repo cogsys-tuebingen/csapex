@@ -5,12 +5,12 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/model/model_fwd.h>
-#include <csapex/msg/any_message.h>
+#include <csapex/serialization/serializable.h>
 
 namespace csapex
 {
 
-struct ConnectorDescription
+struct ConnectorDescription : public Serializable
 {
     AUUID owner;
     ConnectorType connector_type;
@@ -40,44 +40,20 @@ struct ConnectorDescription
 
     bool valid;
 
-    ConnectorDescription()
-        : connector_type(ConnectorType::NONE),
-          optional(false),
-          is_parameter(false),
-          valid(false)
-    {}
+    ConnectorDescription();
 
     ConnectorDescription(const AUUID& owner,
                          ConnectorType connector_type,
                          const TokenDataConstPtr& token_type,
                          const std::string& label,
                          bool optional = true,
-                         bool is_parameter = false)
-        : owner(owner),
-          connector_type(connector_type),
-          label(label),
-          optional(optional),
-          is_parameter(is_parameter),
-          token_type(token_type),
-          id(UUID::NONE),
-          valid(true)
-    {
-    }
+                         bool is_parameter = false);
+
     ConnectorDescription(const AUUID& owner,
                          ConnectorType connector_type,
                          const std::string& label,
                          bool optional = true,
-                         bool is_parameter = false)
-        : owner(owner),
-          connector_type(connector_type),
-          label(label),
-          optional(optional),
-          is_parameter(is_parameter),
-          token_type(connection_types::makeEmpty<connection_types::AnyMessage>()),
-          id(UUID::NONE),
-          valid(true)
-    {
-    }
+                         bool is_parameter = false);
 
     ConnectorDescription(const AUUID& owner,
                          const UUID& uuid,
@@ -85,17 +61,13 @@ struct ConnectorDescription
                          const TokenDataConstPtr& token_type,
                          const std::string& label,
                          bool optional = true,
-                         bool is_parameter = false)
-        : owner(owner),
-          connector_type(connector_type),
-          label(label),
-          optional(optional),
-          is_parameter(is_parameter),
-          token_type(token_type),
-          id(uuid),
-          valid(true)
-    {
-    }
+                         bool is_parameter = false);
+
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(SerializationBuffer& data) override;
+
+protected:
+    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
 };
 
 }

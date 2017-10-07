@@ -123,10 +123,6 @@ void NodeFacadeRemote::createConnectorProxy(const UUID &uuid)
     connector_created(proxy);
 }
 
-std::string NodeFacadeRemote::getType() const
-{
-    return nh_->getType();
-}
 
 UUID NodeFacadeRemote::getUUID() const
 {
@@ -138,148 +134,14 @@ AUUID NodeFacadeRemote::getAUUID() const
     return uuid_;
 }
 
-bool NodeFacadeRemote::isActive() const
-{
-    return nh_->isActive();
-}
-
-void NodeFacadeRemote::setActive(bool active)
-{
-    nh_->setActive(active);
-}
-
-bool NodeFacadeRemote::isProcessingEnabled() const
-{
-    if(nw_) {
-        return nw_->isProcessingEnabled();
-    } else {
-        return false;
-    }
-}
-
-bool NodeFacadeRemote::isGraph() const
-{
-    return nh_->isGraph();
-}
-
-AUUID NodeFacadeRemote::getSubgraphAUUID() const
-{
-    return nh_->getSubgraphAUUID();
-}
-
-bool NodeFacadeRemote::isSource() const
-{
-    return nh_->isSource();
-}
-bool NodeFacadeRemote::isSink() const
-{
-    return nh_->isSink();
-}
-
-bool NodeFacadeRemote::isProcessingNothingMessages() const
-{
-    return nh_->getNode().lock()->processMessageMarkers();
-}
-
 bool NodeFacadeRemote::isParameterInput(const UUID& id)
 {
-    return nh_->isParameterInput(id);
+    return node_channel_->request<bool, NodeRequests>(NodeRequests::NodeRequestType::IsParameterInput, id);
 }
 
 bool NodeFacadeRemote::isParameterOutput(const UUID& id)
 {
-    return nh_->isParameterOutput(id);
-}
-
-bool NodeFacadeRemote::isVariadic() const
-{
-    return nh_->isVariadic();
-}
-bool NodeFacadeRemote::hasVariadicInputs() const
-{
-    return nh_->hasVariadicInputs();
-}
-bool NodeFacadeRemote::hasVariadicOutputs() const
-{
-    return nh_->hasVariadicOutputs();
-}
-bool NodeFacadeRemote::hasVariadicEvents() const
-{
-    return nh_->hasVariadicEvents();
-}
-bool NodeFacadeRemote::hasVariadicSlots() const
-{
-    return nh_->hasVariadicSlots();
-}
-
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getInputs() const
-{
-    return nh_->getExternalInputDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getOutputs() const
-{
-    return nh_->getExternalOutputDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getEvents() const
-{
-    return nh_->getExternalEventDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getSlots() const
-{
-    return nh_->getExternalSlotDescriptions();
-}
-
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getInternalInputs() const
-{
-    return nh_->getInternalInputDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getInternalOutputs() const
-{
-    return nh_->getInternalOutputDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getInternalEvents() const
-{
-    return nh_->getInternalEventDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getInternalSlots() const
-{
-    return nh_->getInternalSlotDescriptions();
-}
-
-
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getExternalInputs() const
-{
-    return nh_->getExternalInputDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getExternalOutputs() const
-{
-    return nh_->getExternalOutputDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getExternalEvents() const
-{
-    return nh_->getExternalEventDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeRemote::getExternalSlots() const
-{
-    return nh_->getExternalSlotDescriptions();
-}
-
-
-NodeCharacteristics NodeFacadeRemote::getNodeCharacteristics() const
-{
-    return nh_->getVertex()->getNodeCharacteristics();
+    return node_channel_->request<bool, NodeRequests>(NodeRequests::NodeRequestType::IsParameterOutput, id);
 }
 
 ConnectorPtr NodeFacadeRemote::getConnector(const UUID &id) const
@@ -318,80 +180,9 @@ param::ParameterPtr NodeFacadeRemote::getParameter(const std::string &name) cons
     return nh_->getNode().lock()->getParameter(name);
 }
 
-bool NodeFacadeRemote::canStartStepping() const
-{
-    auto res = session_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::CanStartStepping, getUUID().getAbsoluteUUID());
-    apex_assert_hard(res);
-    return res->getResult<bool>();
-}
-
-bool NodeFacadeRemote::isProfiling() const
-{
-    if(nw_) {
-        return nw_->isProfiling();
-    } else {
-        return false;
-    }
-}
 void NodeFacadeRemote::setProfiling(bool profiling)
 {
-    if(nw_) {
-        nw_->setProfiling(profiling);
-    }
-}
-bool NodeFacadeRemote::isError() const
-{
-    if(nw_) {
-        return nw_->isError();
-    } else {
-        return false;
-    }
-}
-ErrorState::ErrorLevel NodeFacadeRemote::errorLevel() const
-{
-    if(nw_) {
-        return nw_->errorLevel();
-    } else {
-        return ErrorState::ErrorLevel::NONE;
-    }
-}
-std::string NodeFacadeRemote::errorMessage() const
-{
-    if(nw_) {
-        return nw_->errorMessage();
-    } else {
-        return {};
-    }
-}
-
-ExecutionState NodeFacadeRemote::getExecutionState() const
-{
-    if(nw_) {
-        return nw_->getExecutionState();
-    } else {
-        return ExecutionState::UNKNOWN;
-    }
-}
-
-
-std::string NodeFacadeRemote::getLabel() const
-{
-    return nh_->getNodeState()->getLabel();
-}
-
-double NodeFacadeRemote::getExecutionFrequency() const
-{
-    return nh_->getRate().getEffectiveFrequency();
-}
-
-double NodeFacadeRemote::getMaximumFrequency() const
-{
-    return nh_->getNodeState()->getMaximumFrequency();
-}
-
-NodeHandlePtr NodeFacadeRemote::getNodeHandle() const
-{
-    return nh_;
+    node_channel_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::SetProfiling, profiling);
 }
 
 NodeStatePtr NodeFacadeRemote::getNodeState() const
@@ -401,11 +192,6 @@ NodeStatePtr NodeFacadeRemote::getNodeState() const
 NodeStatePtr NodeFacadeRemote::getNodeStateCopy() const
 {
     return nh_->getNodeStateCopy();
-}
-
-void NodeFacadeRemote::setNodeState(NodeStatePtr memento)
-{
-    nh_->setNodeState(memento);
 }
 
 GenericStateConstPtr NodeFacadeRemote::getParameterState() const
@@ -421,27 +207,9 @@ ProfilerPtr NodeFacadeRemote::getProfiler()
         return {};
     }
 }
-
-std::string NodeFacadeRemote::getDebugDescription() const
-{
-    auto res = session_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::GetDebugDescription, getUUID().getAbsoluteUUID());
-    apex_assert_hard(res);
-    return res->getResult<std::string>() + " from remote!";
-}
-
 std::string NodeFacadeRemote::getLoggerOutput(ErrorState::ErrorLevel level) const
 {
-    if(NodePtr node = nh_->getNode().lock()){
-        switch(level) {
-        case ErrorState::ErrorLevel::ERROR:
-            return node->aerr.history().str();
-        case ErrorState::ErrorLevel::WARNING:
-            return node->awarn.history().str();
-        case ErrorState::ErrorLevel::NONE:
-            return node->ainfo.history().str();
-        }
-    }
-    return {};
+    return node_channel_->request<std::string, NodeRequests>(NodeRequests::NodeRequestType::GetLoggerOutput, level);
 }
 
 bool NodeFacadeRemote::hasParameter(const std::string &name) const
@@ -451,3 +219,37 @@ bool NodeFacadeRemote::hasParameter(const std::string &name) const
     }
     throw std::runtime_error("tried to check a parameter from an invalid node");
 }
+
+
+
+/**
+ * begin: generate getters
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function) \
+type NodeFacadeRemote::function() const\
+{\
+    return request<type, NodeRequests>(NodeRequests::NodeRequestType::_enum, getUUID().getAbsoluteUUID());\
+}
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
+type NodeFacadeRemote::function() const\
+{\
+    if(!has_##function##_) { \
+        cache_##function##_ = request<type, NodeRequests>(NodeRequests::NodeRequestType::_enum, getUUID().getAbsoluteUUID());\
+        has_##function##_ = true; \
+    } \
+    return cache_##function##_; \
+}
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+type NodeFacadeRemote::function() const\
+{\
+    if(!has_##function##_) { \
+        value_##function##_ = request<type, NodeRequests>(NodeRequests::NodeRequestType::_enum, getUUID().getAbsoluteUUID());\
+        has_##function##_ = true; \
+    } \
+    return value_##function##_; \
+}
+
+#include <csapex/model/node_facade_remote_accessors.hpp>
+/**
+ * end: generate getters
+ **/

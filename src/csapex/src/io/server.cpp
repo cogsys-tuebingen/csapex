@@ -67,7 +67,7 @@ void Server::do_accept()
                 }
             });
 
-            observe(session->packet_received, [this, w_session](const SerializableConstPtr& packet){
+            observe(session->packet_received, [this, w_session](const StreamableConstPtr& packet){
                 if(SessionPtr session = w_session.lock()) {
                     handlePacket(session, packet);
                 }
@@ -111,7 +111,7 @@ void Server::do_accept()
         do_accept();
     });
 }
-void Server::handlePacket(const SessionPtr& session, const SerializableConstPtr& packet)
+void Server::handlePacket(const SessionPtr& session, const StreamableConstPtr& packet)
 {
     if(CommandConstPtr cmd = std::dynamic_pointer_cast<Command const>(packet)) {
         if(!cmd) {
@@ -122,7 +122,7 @@ void Server::handlePacket(const SessionPtr& session, const SerializableConstPtr&
         }
 
     } else if(RequestConstPtr request = std::dynamic_pointer_cast<Request const>(packet)) {
-        SerializableConstPtr response;
+        StreamableConstPtr response;
         try {
             response = request->execute(session, *core_);
 

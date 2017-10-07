@@ -19,7 +19,7 @@ public:
     AUUID getAUUID() const override;
 
     bool isActive() const override;
-    void setActive(bool active) override;
+    void setActive(bool active);
 
     bool isProcessingEnabled() const override;
 
@@ -98,7 +98,7 @@ public:
 
     NodeStatePtr getNodeState() const override;
     NodeStatePtr getNodeStateCopy() const override;
-    void setNodeState(NodeStatePtr memento) override;
+    void setNodeState(NodeStatePtr memento);
 
     GenericStateConstPtr getParameterState() const override;
 

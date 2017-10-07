@@ -41,11 +41,14 @@ public:
     std::string toString() const;
 
     // SERIALIZABLES
-    void write (const SerializableConstPtr &i);
-    SerializablePtr read ();
+    void write (const StreamableConstPtr &i);
+    StreamablePtr read ();
+
+    SerializationBuffer& operator << (const Serializable& s);
+    SerializationBuffer& operator >> (Serializable& s);
 
     template <typename T,
-              typename std::enable_if<std::is_base_of<Serializable, T>::value,
+              typename std::enable_if<std::is_base_of<Streamable, T>::value,
                                       int>::type = 0>
     SerializationBuffer& operator << (const std::shared_ptr<T>& i)
     {
@@ -53,7 +56,7 @@ public:
         return *this;
     }
     template <typename T,
-              typename std::enable_if<std::is_base_of<Serializable, T>::value,
+              typename std::enable_if<std::is_base_of<Streamable, T>::value,
                                       int>::type = 0>
     SerializationBuffer& operator >> (std::shared_ptr<T>& i)
     {
@@ -202,7 +205,7 @@ public:
 
     // SHARED POINTER (of non-serializable type)
     template <typename T,
-              typename std::enable_if<!std::is_base_of<Serializable, T>::value,
+              typename std::enable_if<!std::is_base_of<Streamable, T>::value,
                                       int>::type = 0>
     SerializationBuffer& operator << (const std::shared_ptr<T>& s)
     {
@@ -211,7 +214,7 @@ public:
     }
 
     template <typename T,
-              typename std::enable_if<!std::is_base_of<Serializable, T>::value,
+              typename std::enable_if<!std::is_base_of<Streamable, T>::value,
                                       int>::type = 0>
     SerializationBuffer& operator >> (std::shared_ptr<T>& s)
     {

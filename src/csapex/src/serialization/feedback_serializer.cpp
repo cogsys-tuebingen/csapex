@@ -15,12 +15,12 @@ using namespace csapex;
 SerializerRegistered<FeedbackSerializer> g_register_Feedback_serializer_(Feedback::PACKET_TYPE_ID, &FeedbackSerializer::instance());
 
 
-void FeedbackSerializer::serialize(const SerializableConstPtr &packet, SerializationBuffer& data)
+void FeedbackSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
 {
     packet->serialize(data);
 }
 
-SerializablePtr FeedbackSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr FeedbackSerializer::deserialize(SerializationBuffer& data)
 {
     FeedbackPtr res = std::make_shared<Feedback>("");
     res->deserialize(data);

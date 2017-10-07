@@ -20,7 +20,7 @@ NoteSerializerInterface::~NoteSerializerInterface()
 
 }
 
-void NoteSerializer::serialize(const SerializableConstPtr &packet, SerializationBuffer& data)
+void NoteSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
 {
     if(const NoteConstPtr& note = std::dynamic_pointer_cast<Note const>(packet)) {
 //        std::cerr << "serializing Note" << std::endl;
@@ -42,7 +42,7 @@ void NoteSerializer::serialize(const SerializableConstPtr &packet, Serialization
     }
 }
 
-SerializablePtr NoteSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr NoteSerializer::deserialize(SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Note" << std::endl;
 

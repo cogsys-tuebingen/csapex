@@ -15,12 +15,12 @@ using namespace csapex;
 SerializerRegistered<RawMessageSerializer> g_register_RawMessage_serializer_(RawMessage::PACKET_TYPE_ID, &RawMessageSerializer::instance());
 
 
-void RawMessageSerializer::serialize(const SerializableConstPtr &packet, SerializationBuffer& data)
+void RawMessageSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
 {
     packet->serialize(data);
 }
 
-SerializablePtr RawMessageSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr RawMessageSerializer::deserialize(SerializationBuffer& data)
 {
     RawMessagePtr res = std::make_shared<RawMessage>();
     res->deserialize(data);

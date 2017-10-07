@@ -55,7 +55,8 @@ void GraphLocal::resetActivity()
 
     auto vertices = vertices_;
     for(graph::VertexPtr vertex : vertices) {
-        NodeFacadePtr node = vertex->getNodeFacade();
+        NodeFacadeLocalPtr node = std::dynamic_pointer_cast<NodeFacadeLocal>(vertex->getNodeFacade());
+        apex_assert_hard(node);
         node->setActive(false);
     }
 }

@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/model/node_facade.h>
 #include <csapex/io/io_fwd.h>
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 #include <csapex/io/remote.h>
 
 /// SYSTEM
@@ -21,45 +21,14 @@ public:
 
     ~NodeFacadeRemote();
 
-    std::string getType() const override;
     UUID getUUID() const override;
     AUUID getAUUID() const override;
 
-    bool isActive() const override;
-    void setActive(bool active) override;
-
-    bool isProcessingEnabled() const override;
-
-    bool isGraph() const override;
-    AUUID getSubgraphAUUID() const override;
-
-    bool isSource() const override;
-    bool isSink() const override;
-    bool isProcessingNothingMessages() const override;
+    void setProfiling(bool profiling) override;
 
     bool isParameterInput(const UUID& id) override;
     bool isParameterOutput(const UUID& id) override;
 
-    bool isVariadic() const override;
-    bool hasVariadicInputs() const override;
-    bool hasVariadicOutputs() const override;
-    bool hasVariadicEvents() const override;
-    bool hasVariadicSlots() const override;
-
-    std::vector<ConnectorDescription> getInputs() const override;
-    std::vector<ConnectorDescription> getOutputs() const override;
-    std::vector<ConnectorDescription> getEvents() const override;
-    std::vector<ConnectorDescription> getSlots() const override;
-
-    std::vector<ConnectorDescription> getInternalInputs() const override;
-    std::vector<ConnectorDescription> getInternalOutputs() const override;
-    std::vector<ConnectorDescription> getInternalEvents() const override;
-    std::vector<ConnectorDescription> getInternalSlots() const override;
-
-    std::vector<ConnectorDescription> getExternalInputs() const override;
-    std::vector<ConnectorDescription> getExternalOutputs() const override;
-    std::vector<ConnectorDescription> getExternalEvents() const override;
-    std::vector<ConnectorDescription> getExternalSlots() const override;
 
     ConnectorPtr getConnector(const UUID& id) const override;
     ConnectorPtr getConnectorNoThrow(const UUID& id) const noexcept override;
@@ -67,23 +36,6 @@ public:
     ConnectorPtr getParameterInput(const std::string& name) const override;
     ConnectorPtr getParameterOutput(const std::string& name) const override;
 
-    NodeCharacteristics getNodeCharacteristics() const override;
-
-    bool canStartStepping() const override;
-
-    bool isProfiling() const override;
-    void setProfiling(bool profiling) override;
-
-    bool isError() const override;
-    ErrorState::ErrorLevel errorLevel() const override;
-    std::string errorMessage() const override;
-
-    ExecutionState getExecutionState() const override;
-
-    std::string getLabel() const override;
-
-    double getExecutionFrequency() const override;
-    double getMaximumFrequency() const override;
 
     // Parameterizable
     virtual std::vector<param::ParameterPtr> getParameters() const override;
@@ -91,7 +43,6 @@ public:
     bool hasParameter(const std::string& name) const override;
 
     // Debug Access
-    std::string getDebugDescription() const override;
     std::string getLoggerOutput(ErrorState::ErrorLevel level) const override;
 
     // TODO: proxies
@@ -99,14 +50,26 @@ public:
 
     NodeStatePtr getNodeState() const override;
     NodeStatePtr getNodeStateCopy() const override;
-    void setNodeState(NodeStatePtr memento) override;
 
     GenericStateConstPtr getParameterState() const override;
 
-    NodeHandlePtr getNodeHandle() const;
+    /**
+     * begin: generate getters
+     **/
+    #define HANDLE_ACCESSOR(_enum, type, function) \
+    virtual type function() const override;
+
+    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
+    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
+
+    #include <csapex/model/node_facade_remote_accessors.hpp>
+    /**
+     * end: generate getters
+     **/
+
 
 public:
-    slim_signal::ObservableSignal<void(SerializableConstPtr)> remote_data_connection;
+    slim_signal::ObservableSignal<void(StreamableConstPtr)> remote_data_connection;
 
 private:
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
@@ -120,6 +83,24 @@ private:
     AUUID uuid_;
 
     io::ChannelPtr node_channel_;
+
+    /**
+     * begin: generate caches
+     **/
+    #define HANDLE_ACCESSOR(_enum, type, function)
+    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
+    mutable bool has_##function##_; \
+    mutable type cache_##function##_;
+    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+    mutable bool has_##function##_; \
+    mutable type value_##function##_;
+
+    #include <csapex/model/node_facade_remote_accessors.hpp>
+    #undef HANDLE_ACCESSOR
+    /**
+     * end: generate caches
+     **/
+
 
     NodeHandlePtr nh_;
     NodeWorker* nw_;

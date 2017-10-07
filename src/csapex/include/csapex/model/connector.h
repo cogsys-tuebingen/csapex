@@ -33,7 +33,7 @@ public:
     virtual bool isEssential() const = 0;
 
     virtual std::string getLabel() const = 0;
-    virtual TokenData::ConstPtr getType() const = 0;
+    virtual TokenDataConstPtr getType() const = 0;
     virtual ConnectorType getConnectorType() const = 0;
     virtual ConnectorDescription getDescription() const = 0;
 

@@ -2,7 +2,7 @@
 #define REQUEST_H
 
 /// PROJECT
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/io/io_fwd.h>
 
@@ -12,7 +12,7 @@
 namespace csapex
 {
 
-class Request : public Serializable
+class Request : public Streamable
 {
 public:
     Request(uint8_t id);

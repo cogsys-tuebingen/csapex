@@ -1,5 +1,5 @@
-#ifndef PACKET_H
-#define PACKET_H
+#ifndef SERIALIZABLE_H
+#define SERIALIZABLE_H
 
 /// PROJECT
 #include <csapex/serialization/serialization_fwd.h>
@@ -16,8 +16,6 @@ class Serializable : public Clonable
 {
 public:
     virtual ~Serializable();
-
-    virtual uint8_t getPacketType() const = 0;
 
     virtual void serialize(SerializationBuffer &data) const = 0;
     virtual void deserialize(SerializationBuffer& data) = 0;

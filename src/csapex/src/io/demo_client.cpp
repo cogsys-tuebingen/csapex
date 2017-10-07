@@ -42,7 +42,7 @@ public:
             session = std::make_shared<Session>(std::move(socket));
 
             //        readPacket(s);
-            session->packet_received.connect([this](SerializableConstPtr packet){
+            session->packet_received.connect([this](StreamableConstPtr packet){
                 handlePacket(packet);
             });
 
@@ -139,7 +139,7 @@ public:
         running = false;
     }
 
-    void handlePacket(SerializableConstPtr packet)
+    void handlePacket(StreamableConstPtr packet)
     {
         if(packet) {
             //                std::cout << "type=" << (int) serial->getPacketType() << std::endl;

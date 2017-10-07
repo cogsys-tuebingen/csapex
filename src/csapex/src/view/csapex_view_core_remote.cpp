@@ -56,7 +56,7 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     node_factory_ = core_tmp_->getNodeFactory();
     snippet_factory_ = core_tmp_->getSnippetFactory();
 
-    observe(session_->packet_received, [this](SerializableConstPtr packet){
+    observe(session_->packet_received, [this](StreamableConstPtr packet){
         handlePacket(packet);
     });
     observe(session_->broadcast_received, [this](BroadcastMessageConstPtr packet){
@@ -103,7 +103,7 @@ CsApexViewCoreRemote::~CsApexViewCoreRemote()
 }
 
 
-void CsApexViewCoreRemote::handlePacket(SerializableConstPtr packet)
+void CsApexViewCoreRemote::handlePacket(StreamableConstPtr packet)
 {
 }
 

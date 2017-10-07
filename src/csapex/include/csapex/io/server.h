@@ -31,7 +31,7 @@ private:
     void spin();
     void do_accept();
 
-    void handlePacket(const SessionPtr &session, const SerializableConstPtr &packet);
+    void handlePacket(const SessionPtr &session, const StreamableConstPtr &packet);
 
     boost::asio::io_service io_service_;
     boost::asio::ip::tcp::acceptor acceptor_;

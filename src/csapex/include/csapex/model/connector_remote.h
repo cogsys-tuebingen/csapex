@@ -35,7 +35,6 @@ public:
 
 private:
     io::ChannelPtr channel_;
-    ConnectorPtr tmp_connector_;
 
     /**
      * begin: generate caches

@@ -64,7 +64,7 @@ public:
     std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory() override;
 
 private:
-    void handlePacket(SerializableConstPtr packet);
+    void handlePacket(StreamableConstPtr packet);
     void handleBroadcast(BroadcastMessageConstPtr packet);
 
 private:

@@ -25,8 +25,8 @@ public:
 class CommandSerializer : public Singleton<CommandSerializer>, public Serializer
 {
 public:
-    void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override;
-    SerializablePtr deserialize(SerializationBuffer &data) override;
+    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
+    StreamablePtr deserialize(SerializationBuffer &data) override;
 
     static void registerSerializer(const std::string &name, const std::string& type, std::shared_ptr<CommandSerializerInterface> serializer);
 

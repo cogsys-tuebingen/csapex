@@ -19,7 +19,7 @@ BroadcastMessageSerializerInterface::~BroadcastMessageSerializerInterface()
 
 }
 
-void BroadcastMessageSerializer::serialize(const SerializableConstPtr &packet, SerializationBuffer& data)
+void BroadcastMessageSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
 {
     if(const BroadcastMessageConstPtr& cmd = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
 //        std::cerr << "serializing BroadcastMessage" << std::endl;
@@ -41,7 +41,7 @@ void BroadcastMessageSerializer::serialize(const SerializableConstPtr &packet, S
     }
 }
 
-SerializablePtr BroadcastMessageSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr BroadcastMessageSerializer::deserialize(SerializationBuffer& data)
 {
 //    std::cerr << "deserializing BroadcastMessage" << std::endl;
 
