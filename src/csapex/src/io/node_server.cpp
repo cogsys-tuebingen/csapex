@@ -7,6 +7,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/io/session.h>
 #include <csapex/io/connector_server.h>
+#include <csapex/io/channel.h>
+#include <csapex/io/protcol/node_notes.h>
 
 /// SYSTEM
 #include <iostream>
@@ -33,6 +35,26 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
         ConnectorPtr c = node->getConnector(cd.id);
         connector_server_->startObserving(std::dynamic_pointer_cast<Connectable>(c));
     }
+
+
+    /**
+     * begin: connect signals
+     **/
+    #define HANDLE_ACCESSOR(_enum, type, function)
+    #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
+    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+    observe(node->signal, [this, channel](const type& new_value){ \
+        channel->sendNote<NodeNote>(NodeNoteType::function##Changed, new_value);  \
+    });
+    #define HANDLE_SIGNAL(_enum, signal) \
+    observe(node->signal, [this, channel](){ \
+        channel->sendNote<NodeNote>(NodeNoteType::_enum##Triggered);  \
+    });
+
+    #include <csapex/model/node_facade_remote_accessors.hpp>
+    /**
+     * end: connect signals
+     **/
 
     channels_[node->getAUUID()] = channel;
 }

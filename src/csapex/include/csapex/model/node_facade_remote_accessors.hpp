@@ -40,8 +40,13 @@ HANDLE_STATIC_ACCESSOR (IsGraph,               bool,        isGraph)
 HANDLE_STATIC_ACCESSOR (GetSubgraphAUUID,      AUUID,       getSubgraphAUUID)
 HANDLE_STATIC_ACCESSOR (GetType,               std::string, getType)
 
+HANDLE_SIGNAL (MessagesProcessed,              messages_processed)
+HANDLE_SIGNAL (NodeStateChanged,               node_state_changed)
+HANDLE_SIGNAL (ParametersChanged,              parameters_changed)
+HANDLE_SIGNAL (Destroyed,                      destroyed)
 
 
 #undef HANDLE_DYNAMIC_ACCESSOR
 #undef HANDLE_STATIC_ACCESSOR
 #undef HANDLE_ACCESSOR
+#undef HANDLE_SIGNAL

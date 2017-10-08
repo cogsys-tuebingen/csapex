@@ -94,6 +94,7 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
         return std::make_shared<NodeResponse>(request_type_, uuid_, nf->function(), getRequestID());
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_SIGNAL(_enum, signal)
 
     #include <csapex/model/node_facade_remote_accessors.hpp>
         /**

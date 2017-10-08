@@ -13,6 +13,7 @@
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/node_requests.h>
 #include <csapex/io/protcol/node_broadcasts.h>
+#include <csapex/io/protcol/node_notes.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/model/connector_remote.h>
 #include <csapex/io/channel.h>
@@ -30,6 +31,39 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
       uuid_(uuid),
       nh_(nh), nw_(nw)
 {
+    node_channel_ = session->openChannel(uuid.getAbsoluteUUID());
+
+    observe(node_channel_->note_received, [this](const io::NoteConstPtr& note){
+        if(const std::shared_ptr<NodeNote const>& cn = std::dynamic_pointer_cast<NodeNote const>(note)) {
+            switch(cn->getNoteType()) {
+            /**
+             * begin: connect signals
+             **/
+            #define HANDLE_ACCESSOR(_enum, type, function)
+            #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
+            #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+                case NodeNoteType::function##Changed: \
+                { \
+                    std::cerr << "received node facade update: " << #function << " changed" << std::endl; \
+                    auto new_value = boost::any_cast<type>(cn->getPayload()); \
+                    value_##function##_ = new_value;\
+                    signal(new_value); \
+                } \
+                break;
+            #define HANDLE_SIGNAL(_enum, signal) \
+                case NodeNoteType::_enum##Triggered: \
+                { \
+                    signal(); \
+                } \
+                break;
+
+                #include <csapex/model/node_facade_remote_accessors.hpp>
+            /**
+             * end: connect signals
+             **/
+            }
+        }
+    });
 
     if(nh_) {
         connectNodeHandle();
@@ -38,8 +72,6 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
     if(nw_) {
         connectNodeWorker();
     }
-
-    node_channel_ = session->openChannel(uuid);
 
     observe(remote_data_connection.first_connected, [this]() {
         node_channel_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::AddClient);
@@ -248,6 +280,7 @@ type NodeFacadeRemote::function() const\
     } \
     return value_##function##_; \
 }
+#define HANDLE_SIGNAL(_enum, signal)
 
 #include <csapex/model/node_facade_remote_accessors.hpp>
 /**

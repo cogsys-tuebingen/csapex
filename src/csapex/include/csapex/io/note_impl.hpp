@@ -1,5 +1,5 @@
-#ifndef BROADCAST_IMPL_HPP
-#define BROADCAST_IMPL_HPP
+#ifndef NOTE_IMPL_HPP
+#define NOTE_IMPL_HPP
 
 /// PROJECT
 #include <csapex/io/note.h>
@@ -40,4 +40,4 @@ public:
 
 }
 
-#endif // BROADCAST_IMPL_HPP
+#endif // NOTE_IMPL_HPP
