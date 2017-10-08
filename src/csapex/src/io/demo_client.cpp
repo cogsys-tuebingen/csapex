@@ -39,7 +39,7 @@ public:
         {
             boost::asio::connect(socket, resolver.resolve({argv[1], argv[2]}));
 
-            session = std::make_shared<Session>(std::move(socket));
+            session = std::make_shared<Session>(std::move(socket), "demo_client");
 
             //        readPacket(s);
             session->packet_received.connect([this](StreamableConstPtr packet){

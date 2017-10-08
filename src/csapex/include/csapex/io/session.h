@@ -25,7 +25,7 @@ public:
     using Socket = boost::asio::ip::tcp::socket;
 
 public:
-    Session(Socket socket);
+    Session(Socket socket, const std::string& name);
     ~Session();
 
     virtual void run();
@@ -83,7 +83,7 @@ public:
     io::ChannelPtr openChannel(const AUUID& name);
 
 protected:
-    Session();
+    Session(const std::string& name);
 
 public:
     slim_signal::Signal<void()> started;
@@ -99,6 +99,7 @@ protected:
 
     void write_packet(SerializationBuffer &buffer);
 
+protected:
     std::thread packet_handler_thread_;
     std::unique_ptr<Socket> socket_;
 
@@ -107,7 +108,8 @@ protected:
 
     std::recursive_mutex packets_mutex_;
     std::condition_variable_any packets_available_;
-    std::deque<StreamableConstPtr> packets_;
+    std::deque<StreamableConstPtr> packets_received_;
+    std::deque<StreamableConstPtr> packets_to_send_;
 
     std::recursive_mutex open_requests_mutex_;
     std::map<uint8_t, std::promise<ResponseConstPtr>*> open_requests_;
@@ -120,6 +122,9 @@ protected:
     std::unordered_map<AUUID, std::shared_ptr<slim_signal::Signal<void(const RawMessageConstPtr&)>>, AUUID::Hasher> auuid_to_signal_;
 
     std::unordered_map<AUUID, io::ChannelPtr, AUUID::Hasher> channels_;
+
+private:
+    std::string name_;
 };
 
 }

@@ -118,16 +118,17 @@ public:
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
 
 
-    slim_signal::Signal<void (ConnectorPtr)> connector_created;
-    slim_signal::Signal<void (ConnectorPtr)> connector_removed;
+    slim_signal::Signal<void (ConnectorDescription)> connector_created;
+    slim_signal::Signal<void (ConnectorDescription)> connector_removed;
 
-    slim_signal::Signal<void (ConnectorPtr)> connection_done;
-    slim_signal::Signal<void (ConnectorPtr)> connection_start;
+    slim_signal::Signal<void (ConnectorDescription)> connection_done;
+    slim_signal::Signal<void (ConnectorDescription)> connection_start;
 
     slim_signal::Signal<void()> messages_processed;
 
     slim_signal::Signal<void()> node_state_changed;
     slim_signal::Signal<void()> parameters_changed;
+    slim_signal::Signal<void()> activation_changed;
 
     slim_signal::Signal<void()> destroyed;
 

@@ -13,6 +13,7 @@
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/io/channel.h>
+#include <csapex/utility/thread.h>
 
 /// SYSTEM
 #include <csapex/utility/error_handling.h>
@@ -21,18 +22,20 @@
 using namespace csapex;
 using boost::asio::ip::tcp;
 
-Session::Session(Socket socket)
+Session::Session(Socket socket, const std::string &name)
     : socket_(new Socket(std::move(socket))),
       next_request_id_(1),
       running_(false),
-      live_(false)
+      live_(false),
+      name_(name)
 {
 }
 
-Session::Session()
+Session::Session(const std::string& name)
     : next_request_id_(1),
       running_(false),
-      live_(false)
+      live_(false),
+      name_(name)
 {
 
 }
@@ -71,17 +74,29 @@ void Session::start()
     started();
 
     packet_handler_thread_ = std::thread([this](){
+        csapex::thread::set_name(name_.c_str());
         live_ = true;
 
         while(running_) {
             std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
-            while(running_ && packets_.empty()) {
+            while(running_ && (packets_received_.empty() && packets_to_send_.empty())) {
                 packets_available_.wait_for(packet_lock, std::chrono::milliseconds(100));
             }
 
-            while(running_ && !packets_.empty()) {
-                StreamableConstPtr packet = packets_.front();
-                packets_.pop_front();
+            while(running_ && !packets_to_send_.empty()) {
+                StreamableConstPtr packet = packets_to_send_.front();
+                packets_to_send_.pop_front();
+                packet_lock.unlock();
+
+                SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
+                write_packet(buffer);
+
+                packet_lock.lock();
+            }
+
+            while(running_ && !packets_received_.empty()) {
+                StreamableConstPtr packet = packets_received_.front();
+                packets_received_.pop_front();
                 packet_lock.unlock();
 
                 try {
@@ -188,12 +203,17 @@ void Session::sendNote(io::NoteConstPtr note)
 void Session::write(const StreamableConstPtr &packet)
 {
     if(live_) {
-        try {
-            SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
-            write_packet(buffer);
-        } catch(const std::exception& e) {
-            std::cerr << "error writing packet: " << e.what() << std::endl;
+        {
+            if(packet_handler_thread_.get_id() != std::this_thread::get_id()) {
+                std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
+                packets_to_send_.push_back(packet);
+            } else {
+                SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
+                write_packet(buffer);
+            }
         }
+
+        packets_available_.notify_all();
     }
 }
 
@@ -266,7 +286,7 @@ void Session::read_async()
 
                         } else {
                             std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
-                            packets_.push_back(serial);
+                            packets_received_.push_back(serial);
                             packets_available_.notify_all();
                         }
                     }
@@ -313,7 +333,6 @@ slim_signal::Signal<void (const RawMessageConstPtr &)> &Session::raw_packet_rece
 
 io::ChannelPtr Session::openChannel(const AUUID &name)
 {
-    std::cout << "!!!! open channel " << name << std::endl;
     io::ChannelPtr channel = std::make_shared<io::Channel>(*this, name);
     channels_[name] = channel;
     return channel;

@@ -338,7 +338,11 @@ std::string Connectable::makeStatusString() const
 
 ConnectorDescription Connectable::getDescription() const
 {
-    ConnectorDescription res(getOwner()->getUUID().getAbsoluteUUID(),
+    auto owner = getOwner();
+    if(!owner) {
+        return {};
+    }
+    ConnectorDescription res(owner->getUUID().getAbsoluteUUID(),
                              getUUID(),
                              getConnectorType(),
                              getType(),

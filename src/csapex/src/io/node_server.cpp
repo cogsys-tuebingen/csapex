@@ -28,7 +28,6 @@ NodeServer::~NodeServer()
 
 void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
 {
-    std::cerr << "start serving node: " << node->getAUUID() << " with " << node->getExternalConnectors().size() << " connectors" << std::endl;
     io::ChannelPtr channel = session_->openChannel(node->getAUUID());
 
     for(const ConnectorDescription& cd : node->getExternalConnectors()) {
@@ -55,6 +54,23 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
     /**
      * end: connect signals
      **/
+
+
+    observe(node->connector_created, [this, channel](ConnectorDescription c){
+        channel->sendNote<NodeNote>(NodeNoteType::ConnectorCreatedTriggered, c);
+    });
+
+    observe(node->connector_removed, [this, channel](ConnectorDescription c){
+        channel->sendNote<NodeNote>(NodeNoteType::ConnectorRemovedTriggered, c);
+    });
+
+    observe(node->connection_start, [this, channel](ConnectorDescription c){
+        channel->sendNote<NodeNote>(NodeNoteType::ConnectionStartTriggered, c);
+    });
+
+    observe(node->connection_done, [this, channel](ConnectorDescription c){
+        channel->sendNote<NodeNote>(NodeNoteType::ConnectionDoneTriggered, c);
+    });
 
     channels_[node->getAUUID()] = channel;
 }

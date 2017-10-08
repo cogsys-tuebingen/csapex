@@ -36,13 +36,14 @@ NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh)
 
 void NodeFacadeLocal::connectNodeHandle()
 {
-    observe(nh_->connector_created, [this](ConnectablePtr c) { connector_created(c); });
-    observe(nh_->connector_removed, [this](ConnectablePtr c) { connector_removed(c); });
+    observe(nh_->connector_created, [this](ConnectablePtr c) { connector_created(c->getDescription()); });
+    observe(nh_->connector_removed, [this](ConnectablePtr c) { connector_removed(c->getDescription()); });
     observe(nh_->node_state_changed, node_state_changed);
+    observe(nh_->activation_changed, activation_changed);
 
 
-    observe(nh_->connection_done, [this](ConnectablePtr c) { connection_done(c); });
-    observe(nh_->connection_start, [this](ConnectablePtr c) { connection_start(c); });
+    observe(nh_->connection_done, [this](ConnectablePtr c) { connection_done(c->getDescription()); });
+    observe(nh_->connection_start, [this](ConnectablePtr c) { connection_start(c->getDescription()); });
 
 
     observe(nh_->parameters_changed, parameters_changed);

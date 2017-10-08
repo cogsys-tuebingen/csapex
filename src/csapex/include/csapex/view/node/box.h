@@ -120,9 +120,6 @@ public Q_SLOTS:
     virtual void updateFrequencyInformation();
     void contextMenuEvent(QContextMenuEvent* e);
 
-    void registerEvent(Connector*);
-    void unregisterEvent(Connector*);
-
     void nodeStateChangedEvent();
     void enabledChangeEvent(bool val);
 

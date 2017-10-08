@@ -75,10 +75,10 @@ public:
 private:
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
-    void connectNodeHandle();
     void connectNodeWorker();
 
     void createConnectorProxy(const UUID &uuid);
+    void removeConnectorProxy(const UUID &uuid);
 
 private:
     AUUID uuid_;

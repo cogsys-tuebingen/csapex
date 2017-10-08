@@ -42,7 +42,6 @@ ConnectorRemote::ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner, SessionPt
                 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
                     case ConnectorNoteType::function##Changed: \
                     { \
-                        std::cerr << "received connector update: " << #function << " changed" << std::endl; \
                         auto new_value = boost::any_cast<type>(cn->getPayload()); \
                         value_##function##_ = new_value;\
                         signal(new_value); \

@@ -27,6 +27,12 @@ enum class NodeNoteType
     /**
      * end: connect signals
      **/
+
+    ConnectorCreatedTriggered,
+    ConnectorRemovedTriggered,
+
+    ConnectionStartTriggered,
+    ConnectionDoneTriggered
 };
 
 
@@ -35,7 +41,13 @@ class NodeNote : public NoteImplementation<NodeNote>
 public:
     NodeNote();
     NodeNote(NodeNoteType request_type, const AUUID& uuid);
-    NodeNote(NodeNoteType request_type, const AUUID& uuid, const boost::any& payload);
+    NodeNote(NodeNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
+
+    template <typename... Args>
+    NodeNote(NodeNoteType request_type, const AUUID& uuid, Args... args)
+        : NodeNote(request_type, uuid, {std::forward<Args>(args)...})
+    {
+    }
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(SerializationBuffer& data) override;
@@ -45,14 +57,20 @@ public:
         return note_type_;
     }
 
-    boost::any getPayload() const
+    std::size_t countPayload() const
     {
-        return payload_;
+        return payload_.size();
+    }
+
+    template <typename T>
+    T getPayload(const std::size_t pos) const
+    {
+        return boost::any_cast<T>(payload_.at(pos));
     }
 
 private:
     NodeNoteType note_type_;
-    boost::any payload_;
+    std::vector<boost::any> payload_;
 };
 
 }

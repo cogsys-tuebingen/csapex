@@ -123,8 +123,8 @@ Q_SIGNALS:
     void startProfilingRequest(NodeFacade* box);
     void stopProfilingRequest(NodeFacade *box);
 
-    void triggerConnectorCreated(ConnectorPtr connector);
-    void triggerConnectorRemoved(ConnectorPtr connector);
+    void triggerConnectorCreated(const ConnectorDescription& connector);
+    void triggerConnectorRemoved(const ConnectorDescription& connector);
 
 public Q_SLOTS:
     void nodeAdded(NodeFacadePtr node_facade);
@@ -146,8 +146,8 @@ public Q_SLOTS:
 
     void renameBox(NodeBox* box);
 
-    void connectorCreated(ConnectorPtr connector);
-    void connectorRemoved(ConnectorPtr connector);
+    void connectorCreated(const ConnectorDescription& connector);
+    void connectorRemoved(const ConnectorDescription& connector);
 
     void addConnector(const ConnectorDescription& connector);
     void removeConnector(const ConnectorDescription& connector);

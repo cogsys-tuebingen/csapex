@@ -75,6 +75,7 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
     ADD_ANY_TYPE(TokenDataConstPtr);
     ADD_ANY_TYPE(SnippetPtr);
+    ADD_ANY_TYPE(ConnectorDescription);
     ADD_ANY_TYPE(std::vector<ConnectorDescription>);
     ADD_ANY_TYPE(ExecutionState);
 }

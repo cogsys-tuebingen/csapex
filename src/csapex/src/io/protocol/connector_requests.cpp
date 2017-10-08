@@ -30,7 +30,7 @@ ConnectorRequests::ConnectorRequest::ConnectorRequest(ConnectorRequestType reque
       request_type_(request_type),
       uuid_(uuid)
 {
-
+    apex_assert(uuid_ != UUID::NONE);
 }
 
 ConnectorRequests::ConnectorRequest::ConnectorRequest(ConnectorRequestType request_type, const AUUID &uuid, const boost::any &payload)
@@ -39,7 +39,7 @@ ConnectorRequests::ConnectorRequest::ConnectorRequest(ConnectorRequestType reque
       uuid_(uuid),
       payload_(payload)
 {
-
+    apex_assert(uuid_ != UUID::NONE);
 }
 
 ConnectorRequests::ConnectorRequest::ConnectorRequest(uint8_t request_id)

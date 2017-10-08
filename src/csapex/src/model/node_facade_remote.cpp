@@ -25,6 +25,77 @@
 using namespace csapex;
 using namespace csapex;
 
+namespace detail
+{
+template <int pos, typename Arg, typename... Args>
+struct ArgumentExtractor
+{
+    using type = typename ArgumentExtractor<pos-1, Args...>::type;
+};
+
+
+template <typename Arg, typename... Args>
+struct ArgumentExtractor<0, Arg, Args...>
+{
+    using type = Arg;
+};
+
+
+template <int pos, typename Signature>
+struct FunctionArgumentExtractor
+{
+    using type = Signature;
+};
+
+template <int pos, typename Result, typename... Args>
+struct FunctionArgumentExtractor<pos, Result(Args...)>
+{
+    using type = typename ArgumentExtractor<pos, Args...>::type;
+};
+}
+
+template <int pos, typename Signature>
+struct FunctionArgumentExtractor
+{
+    using type = typename detail::FunctionArgumentExtractor<pos, Signature>::type;
+};
+
+
+
+
+template <int N, int arg_count>
+struct SignalInvoker
+{
+public:
+    template <typename Signature, typename... PartialArgs>
+    static void doInvoke(csapex::slim_signal::Signal<Signature>& s, const NodeNote& note, PartialArgs... arguments)
+    {
+        using ArgN = typename FunctionArgumentExtractor<N, Signature>::type;
+//        std::cerr << "invoke argument " << N << ": " << type2name(typeid(ArgN)) << std::endl;
+        SignalInvoker<N + 1, arg_count - 1>::doInvoke(s, note, arguments..., note.getPayload<ArgN>(N));
+    }
+};
+
+template <int N>
+struct SignalInvoker<N, 0>
+{
+
+    template <typename... Args>
+    static void doInvoke(csapex::slim_signal::Signal<void(Args...)>& s, const NodeNote& note, Args... arguments)
+    {
+//        std::cerr << "invoking signal with " << sizeof...(Args) << " arguments" << std::endl;
+        s(arguments...);
+    }
+};
+
+
+template <typename... Args>
+static void invokeSignal(csapex::slim_signal::Signal<void(Args...)>& s, const NodeNote& note)
+{
+//    std::cerr << "trying to invoke signal with " << sizeof...(Args) << " arguments" << std::endl;
+    SignalInvoker<0, sizeof...(Args)>::doInvoke(s, note);
+}
+
 NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
                                    NodeHandlePtr nh, NodeWorker* nw)
     : Remote(session),
@@ -53,7 +124,7 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
             #define HANDLE_SIGNAL(_enum, signal) \
                 case NodeNoteType::_enum##Triggered: \
                 { \
-                    signal(); \
+                    invokeSignal(signal, *cn); \
                 } \
                 break;
 
@@ -61,12 +132,34 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
             /**
              * end: connect signals
              **/
+            case NodeNoteType::ConnectorCreatedTriggered:
+            {
+                ConnectorDescription info = cn->getPayload<ConnectorDescription>(0);
+                createConnectorProxy(info.id);
+            }
+                break;
+            case NodeNoteType::ConnectorRemovedTriggered:
+            {
+                ConnectorDescription info = cn->getPayload<ConnectorDescription>(0);
+                removeConnectorProxy(info.id);
+            }
+                break;
+            case NodeNoteType::ConnectionStartTriggered:
+            {
+                invokeSignal(connection_start, *cn);
+            }
+                break;
+            case NodeNoteType::ConnectionDoneTriggered:
+            {
+                invokeSignal(connection_done, *cn);
+            }
+                break;
             }
         }
     });
 
-    if(nh_) {
-        connectNodeHandle();
+    for(const ConnectorDescription& c : getExternalConnectors()) {
+        createConnectorProxy(c.id);
     }
 
     if(nw_) {
@@ -99,31 +192,6 @@ void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
         }
     }
 }
-void NodeFacadeRemote::connectNodeHandle()
-{
-    observe(nh_->connector_created, [this](ConnectorPtr connector) {
-        createConnectorProxy(connector->getUUID());
-    });
-    for(ConnectorPtr c : nh_->getExternalConnectors()) {
-        createConnectorProxy(c->getUUID());
-    }
-
-
-    observe(nh_->connector_removed, [this](ConnectablePtr c) {
-        connector_removed(c);
-    });
-    observe(nh_->node_state_changed, node_state_changed);
-
-
-    observe(nh_->connection_done, [this](ConnectablePtr c) {
-        connection_done(c);
-    });
-    observe(nh_->connection_start, [this](ConnectablePtr c) {
-        connection_start(c);
-    });
-
-    observe(nh_->parameters_changed, parameters_changed);
-}
 
 void NodeFacadeRemote::connectNodeWorker()
 {
@@ -152,7 +220,16 @@ void NodeFacadeRemote::createConnectorProxy(const UUID &uuid)
     ConnectableOwnerPtr owner;
     std::shared_ptr<ConnectorRemote> proxy = std::make_shared<ConnectorRemote>(uuid, owner, session_);
     remote_connectors_[uuid] = proxy;
-    connector_created(proxy);
+    connector_created(proxy->getDescription());
+}
+void NodeFacadeRemote::removeConnectorProxy(const UUID &uuid)
+{
+    auto pos = remote_connectors_.find(uuid);
+    if(pos != remote_connectors_.end()) {
+        auto proxy = pos->second;
+        remote_connectors_.erase(pos);
+        connector_removed(proxy->getDescription());
+    }
 }
 
 

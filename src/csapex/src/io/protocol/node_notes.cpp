@@ -20,7 +20,7 @@ NodeNote::NodeNote(NodeNoteType request_type, const AUUID &uuid)
 
 }
 
-NodeNote::NodeNote(NodeNoteType request_type, const AUUID &uuid, const boost::any &payload)
+NodeNote::NodeNote(NodeNoteType request_type, const AUUID &uuid, const std::vector<boost::any> &payload)
     : NoteImplementation(uuid),
       note_type_(request_type),
       payload_(payload)

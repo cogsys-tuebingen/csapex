@@ -56,7 +56,7 @@ void Server::do_accept()
 
         if (!ec)
         {
-            SessionPtr session = std::make_shared<Session>(std::move(socket_));
+            SessionPtr session = std::make_shared<Session>(std::move(socket_), "server");
 
             SessionWeakPtr w_session = session;
             session->stopped.connect([this, session]() {

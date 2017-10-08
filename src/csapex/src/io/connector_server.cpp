@@ -26,7 +26,6 @@ ConnectorServer::~ConnectorServer()
 
 void ConnectorServer::startObserving(const ConnectablePtr &connector)
 {
-    std::cerr << "start serving connector: " << connector->getAUUID()  << std::endl;
     io::ChannelPtr channel = session_->openChannel(connector->getAUUID());
 
 

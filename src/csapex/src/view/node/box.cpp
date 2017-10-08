@@ -206,9 +206,6 @@ void NodeBox::construct()
     observe(node_facade_->node_state_changed, [this]() { nodeStateChanged(); });
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
-    observe(node_facade_->connector_created, [this](ConnectorPtr c) { registerEvent(c.get()); });
-    observe(node_facade_->connector_removed, [this](ConnectorPtr c) { unregisterEvent(c.get()); });
-
     observe(node_facade_->destroyed, [this](){ destruct(); });
 
     enabledChangeEvent(node_facade_->isProcessingEnabled());
@@ -436,14 +433,6 @@ std::string NodeBox::getLabel() const
 {
     NodeStatePtr state = node_facade_->getNodeState();
     return state->getLabel();
-}
-
-void NodeBox::registerEvent(Connector* c)
-{
-}
-
-void NodeBox::unregisterEvent(Connector*)
-{
 }
 
 void NodeBox::resizeEvent(QResizeEvent */*e*/)

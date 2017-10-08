@@ -44,6 +44,13 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
 {
     session_->start();
 
+    running = true;
+    spinner = std::thread([&](){
+        while(running) {
+            session_->run();
+        }
+    });
+
     // make the proxys only _after_ the session is started
     remote_root_ = std::make_shared<GraphFacadeRemote>(session_, *std::dynamic_pointer_cast<GraphFacadeLocal>(core_tmp_->getRoot()));
     settings_ = std::make_shared<SettingsRemote>(session_);
@@ -65,13 +72,6 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
 
     MessageRendererManager::instance().setPluginLocator(getPluginLocator());
     node_adapter_factory_->loadPlugins();
-
-    running = true;
-    spinner = std::thread([&](){
-        while(running) {
-            session_->run();
-        }
-    });
 
 
     observe(core_tmp_->config_changed, config_changed);

@@ -118,9 +118,10 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
 
-    QObject::connect(this, SIGNAL(triggerConnectorCreated(ConnectorPtr)), this, SLOT(connectorCreated(ConnectorPtr)));
-    QObject::connect(this, SIGNAL(triggerConnectorRemoved(ConnectorPtr)), this, SLOT(connectorRemoved(ConnectorPtr)));
+    QObject::connect(this, &GraphView::triggerConnectorCreated, this, &GraphView::connectorCreated);
+    QObject::connect(this, &GraphView::triggerConnectorRemoved, this, &GraphView::connectorRemoved);
 
+    qRegisterMetaType < ConnectorDescription > ("ConnectorDescription");
     qRegisterMetaType < ConnectorPtr > ("ConnectorPtr");
     qRegisterMetaType < NodeFacadePtr > ("NodeFacadePtr");
 
@@ -814,9 +815,9 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
     }
 
     // subscribe to coming connectors
-    auto c1 = node_facade->connector_created.connect([this](ConnectorPtr c) { triggerConnectorCreated(c); });
+    auto c1 = node_facade->connector_created.connect([this](const ConnectorDescription& c) { triggerConnectorCreated(c); });
     facade_connections_[node_facade.get()].emplace_back(c1);
-    auto c2 = node_facade->connector_removed.connect([this](ConnectorPtr c) { triggerConnectorRemoved(c); });
+    auto c2 = node_facade->connector_removed.connect([this](const ConnectorDescription& c) { triggerConnectorRemoved(c); });
     facade_connections_[node_facade.get()].emplace_back(c2);
 
 
@@ -856,14 +857,14 @@ void GraphView::childNodeRemoved(NodeFacadePtr facade)
 
 
 
-void GraphView::connectorCreated(ConnectorPtr connector)
+void GraphView::connectorCreated(const ConnectorDescription& connector)
 {
-    addConnector(connector->getDescription());
+    addConnector(connector);
 }
 
-void GraphView::connectorRemoved(ConnectorPtr connector)
+void GraphView::connectorRemoved(const ConnectorDescription &connector)
 {
-    removeConnector(connector->getDescription());
+    removeConnector(connector);
 }
 
 
@@ -959,8 +960,8 @@ void GraphView::addBox(NodeBox *box)
 
     NodeFacadePtr facade = box->getNodeFacade();
 
-    facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectorPtr&) { scene_->deleteTemporaryConnections(); }));
-    facade_connections_[facade.get()].emplace_back(facade->connection_done.connect([this](const ConnectorPtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectorDescription&) { scene_->deleteTemporaryConnections(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_done.connect([this](const ConnectorDescription&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
