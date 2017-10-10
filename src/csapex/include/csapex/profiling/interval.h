@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_profiling_export.h>
+#include <csapex/serialization/serializable.h>
 
 /// SYSTEM
 #include <map>
@@ -14,8 +15,10 @@ namespace csapex
 {
 class Timer;
 
-class CSAPEX_PROFILING_EXPORT Interval {
+class CSAPEX_PROFILING_EXPORT Interval : public Serializable
+{
     friend class Timer;
+    friend class SerializationBuffer;
 
 public:
     typedef std::shared_ptr<Interval> Ptr;
@@ -40,6 +43,15 @@ public:
 
     void setActive(bool active);
     bool isActive() const;
+
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(SerializationBuffer& data) override;
+
+protected:
+    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+
+private:
+    Interval();
 
 public:
     std::map<std::string, Interval::Ptr> sub;

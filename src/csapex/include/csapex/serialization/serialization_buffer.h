@@ -203,6 +203,34 @@ public:
         return *this;
     }
 
+    // MAP
+    template <typename Key, typename Value>
+    SerializationBuffer& operator << (const std::map<Key, Value>& m)
+    {
+        uint64_t size = m.size();
+        operator << (size);
+        for(const auto& pair : m) {
+            operator << (pair.first);
+            operator << (pair.second);
+        }
+        return *this;
+    }
+
+    template <typename Key, typename Value>
+    SerializationBuffer& operator >> (std::map<Key, Value>& m)
+    {
+        uint64_t size;
+        operator >> (size);
+        for(uint64_t i = 0; i < size; ++i) {
+            Key key;
+            operator >> (key);
+            Value val;
+            operator >> (val);
+            m.insert(std::make_pair(key, val));
+        }
+        return *this;
+    }
+
     // SHARED POINTER (of non-serializable type)
     template <typename T,
               typename std::enable_if<!std::is_base_of<Streamable, T>::value,
@@ -214,7 +242,8 @@ public:
     }
 
     template <typename T,
-              typename std::enable_if<!std::is_base_of<Streamable, T>::value,
+              typename std::enable_if<!std::is_base_of<Streamable, T>::value &&
+                                      std::is_base_of<TokenData, T>::value,
                                       int>::type = 0>
     SerializationBuffer& operator >> (std::shared_ptr<T>& s)
     {
@@ -225,6 +254,38 @@ public:
         s = res;
         return *this;
     }
+
+    template <typename T,
+              typename std::enable_if<!std::is_base_of<Streamable, T>::value &&
+                                      !std::is_base_of<TokenData, T>::value &&
+                                      std::is_default_constructible<T>::value,
+                                      int>::type = 0>
+    SerializationBuffer& operator >> (std::shared_ptr<T>& s)
+    {
+        // in case T is const, we need to strip that, otherwise we cannot deserialize
+        using TT = typename std::remove_const<T>::type;
+        std::shared_ptr<TT> res = std::make_shared<TT>();
+        operator >> (*res);
+        s = res;
+        return *this;
+    }
+
+    template <typename T,
+              typename std::enable_if<!std::is_base_of<Streamable, T>::value &&
+                                      !std::is_base_of<TokenData, T>::value &&
+                                      !std::is_default_constructible<T>::value,
+                                      int>::type = 0>
+    SerializationBuffer& operator >> (std::shared_ptr<T>& s)
+    {
+        // in case T is const, we need to strip that, otherwise we cannot deserialize
+        using TT = typename std::remove_const<T>::type;
+        // SerializationBuffer needs to be a friend of T for this to work with private default constructors!
+        std::shared_ptr<TT> res(new TT);
+        operator >> (*res);
+        s = res;
+        return *this;
+    }
+
 
     // YAML
     SerializationBuffer& operator << (const YAML::Node& node);

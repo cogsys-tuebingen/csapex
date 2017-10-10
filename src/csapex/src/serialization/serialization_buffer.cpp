@@ -9,6 +9,8 @@
 #include <csapex/serialization/snippet.h>
 #include <csapex/model/connector_description.h>
 #include <csapex/model/execution_state.h>
+#include <csapex/profiling/interval.h>
+#include <csapex/model/activity_type.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -55,6 +57,21 @@ SerializationBuffer::SerializationBuffer()
     };\
     ADD(__VA_ARGS__)
 
+#define ADD_ANY_TYPE_1PC(P1, GET_P1, ...) { \
+    auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
+        buffer << ((uint8_t) id); \
+        buffer << (boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any))->GET_P1; \
+        buffer << *(boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any)); \
+    };\
+    auto deserializer = [id](SerializationBuffer& buffer, boost::any& any){ \
+        P1 p1; \
+        buffer >> (p1); \
+        auto v = std::make_shared<__VA_ARGS__>(p1); \
+        buffer >> (*v); \
+        any = std::shared_ptr<__VA_ARGS__ const>(v); \
+    };\
+    ADD(std::shared_ptr<__VA_ARGS__ const>)
+
     int id = 1;
     ADD_ANY_TYPE(int);
     ADD_ANY_TYPE(double);
@@ -78,6 +95,8 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE(ConnectorDescription);
     ADD_ANY_TYPE(std::vector<ConnectorDescription>);
     ADD_ANY_TYPE(ExecutionState);
+    ADD_ANY_TYPE(ActivityType);
+    ADD_ANY_TYPE_1PC(std::string, name(), Interval);
 }
 
 void SerializationBuffer::finalize()

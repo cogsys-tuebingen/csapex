@@ -154,6 +154,16 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
                 invokeSignal(connection_done, *cn);
             }
                 break;
+            case NodeNoteType::IntervalStartTriggered:
+            {
+                interval_start(this, cn->getPayload<ActivityType>(0), cn->getPayload<std::shared_ptr<const Interval>>(1));
+            }
+                break;
+            case NodeNoteType::IntervalEndTriggered:
+            {
+                interval_end(this, cn->getPayload<std::shared_ptr<const Interval>>(0));
+            }
+                break;
             }
         }
     });
@@ -195,24 +205,7 @@ void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
 
 void NodeFacadeRemote::connectNodeWorker()
 {
-    observe(nw_->start_profiling, [this](NodeWorker*) {
-        start_profiling(this);
-    });
-    observe(nw_->stop_profiling,  [this](NodeWorker*) {
-        stop_profiling(this);
-    });
-
-    observe(nw_->destroyed, destroyed);
     observe(nw_->notification, notification);
-
-    observe(nw_->messages_processed, messages_processed);
-
-    observe(nw_->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
-        interval_start(this, type, stamp);
-    });
-    observe(nw_->interval_end,  [this](NodeWorker*, std::shared_ptr<const Interval> stamp) {
-        interval_end(this, stamp);
-    });
 }
 
 void NodeFacadeRemote::createConnectorProxy(const UUID &uuid)

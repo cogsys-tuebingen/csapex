@@ -72,6 +72,14 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
         channel->sendNote<NodeNote>(NodeNoteType::ConnectionDoneTriggered, c);
     });
 
+    observe(node->interval_start, [this, channel](NodeFacade* facade, ActivityType type, std::shared_ptr<const Interval> stamp){
+        channel->sendNote<NodeNote>(NodeNoteType::IntervalStartTriggered, type, stamp);
+    });
+
+    observe(node->interval_end, [this, channel](NodeFacade* facade, std::shared_ptr<const Interval> stamp){
+        channel->sendNote<NodeNote>(NodeNoteType::IntervalEndTriggered, stamp);
+    });
+
     channels_[node->getAUUID()] = channel;
 }
 

@@ -28,6 +28,9 @@ enum class NodeNoteType
      * end: connect signals
      **/
 
+    IntervalStartTriggered,
+    IntervalEndTriggered,
+
     ConnectorCreatedTriggered,
     ConnectorRemovedTriggered,
 
