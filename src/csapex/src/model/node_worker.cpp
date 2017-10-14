@@ -56,10 +56,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 
     try {
-        observe(node_handle_->connector_created, [this](ConnectablePtr c) {
+        observe(node_handle_->connector_created, [this](ConnectablePtr c, bool internal) {
             connectConnector(c);
         });
-        observe(node_handle_->connector_removed, [this](ConnectablePtr c) {
+        observe(node_handle_->connector_removed, [this](ConnectablePtr c, bool internal) {
             disconnectConnector(c.get());
         });
 
@@ -230,6 +230,10 @@ void NodeWorker::setState(ExecutionState state)
     //    }
 
     state_ = state;
+
+    lock.unlock();
+
+    execution_state_changed();
 }
 
 bool NodeWorker::isProcessingEnabled() const

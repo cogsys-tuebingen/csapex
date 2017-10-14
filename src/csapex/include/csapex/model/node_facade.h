@@ -16,7 +16,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeFacade : public Observer, public Notifier
+class CSAPEX_EXPORT NodeFacade : public Observer, public Notifier, public ErrorState
 {
 protected:
     NodeFacade();
@@ -48,10 +48,10 @@ public:
     virtual bool hasVariadicEvents() const = 0;
     virtual bool hasVariadicSlots() const = 0;
 
-    virtual std::vector<ConnectorDescription> getInputs() const = 0;
-    virtual std::vector<ConnectorDescription> getOutputs() const = 0;
-    virtual std::vector<ConnectorDescription> getEvents() const = 0;
-    virtual std::vector<ConnectorDescription> getSlots() const = 0;
+    virtual std::vector<ConnectorDescription> getInputs() const;
+    virtual std::vector<ConnectorDescription> getOutputs() const;
+    virtual std::vector<ConnectorDescription> getEvents() const;
+    virtual std::vector<ConnectorDescription> getSlots() const;
 
     virtual std::vector<ConnectorDescription> getInternalInputs() const = 0;
     virtual std::vector<ConnectorDescription> getInternalOutputs() const = 0;
@@ -77,10 +77,6 @@ public:
 
     virtual bool isProfiling() const = 0;
     virtual void setProfiling(bool profiling) = 0;
-
-    virtual bool isError() const = 0;
-    virtual ErrorState::ErrorLevel errorLevel() const = 0;
-    virtual std::string errorMessage() const = 0;
 
     virtual ExecutionState getExecutionState() const = 0;
 
@@ -126,9 +122,24 @@ public:
 
     slim_signal::Signal<void()> messages_processed;
 
+    slim_signal::Signal<void(std::string)> label_changed;
+
     slim_signal::Signal<void()> node_state_changed;
     slim_signal::Signal<void()> parameters_changed;
     slim_signal::Signal<void()> activation_changed;
+
+    slim_signal::Signal<void (ExecutionState)> execution_state_changed;
+
+
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_inputs_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_outputs_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_events_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_slots_changed;
+
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_inputs_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_outputs_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_events_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_slots_changed;
 
     slim_signal::Signal<void()> destroyed;
 

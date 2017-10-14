@@ -151,8 +151,8 @@ public:
     slim_signal::Signal<void ()> stopped;
     slim_signal::Signal<void ()> node_removed;
 
-    slim_signal::Signal<void (ConnectablePtr)> connector_created;
-    slim_signal::Signal<void (ConnectablePtr)> connector_removed;
+    slim_signal::Signal<void (ConnectablePtr, bool)> connector_created;
+    slim_signal::Signal<void (ConnectablePtr, bool)> connector_removed;
 
     slim_signal::Signal<void (ConnectablePtr)> connection_done;
     slim_signal::Signal<void (ConnectablePtr)> connection_start;

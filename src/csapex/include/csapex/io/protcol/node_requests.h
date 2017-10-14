@@ -22,7 +22,6 @@ public:
         SetProfiling,
         GetLoggerOutput,
 
-
         IsParameterInput,
         IsParameterOutput,
 

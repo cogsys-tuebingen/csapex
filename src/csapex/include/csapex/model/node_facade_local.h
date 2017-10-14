@@ -39,11 +39,6 @@ public:
     bool hasVariadicEvents() const override;
     bool hasVariadicSlots() const override;
 
-    std::vector<ConnectorDescription> getInputs() const override;
-    std::vector<ConnectorDescription> getOutputs() const override;
-    std::vector<ConnectorDescription> getEvents() const override;
-    std::vector<ConnectorDescription> getSlots() const override;
-
     std::vector<ConnectorDescription> getInternalInputs() const override;
     std::vector<ConnectorDescription> getInternalOutputs() const override;
     std::vector<ConnectorDescription> getInternalEvents() const override;
@@ -67,10 +62,6 @@ public:
 
     bool isProfiling() const override;
     void setProfiling(bool profiling) override;
-
-    bool isError() const override;
-    ErrorState::ErrorLevel errorLevel() const override;
-    std::string errorMessage() const override;
 
     ExecutionState getExecutionState() const override;
 
@@ -110,6 +101,9 @@ public:
 private:
     void connectNodeHandle();
     void connectNodeWorker();
+
+    void triggerExternalConnectorsChanged(const ConnectableConstPtr& connector);
+    void triggerInternalConnectorsChanged(const ConnectableConstPtr& connector);
 
 private:
     NodeHandlePtr nh_;

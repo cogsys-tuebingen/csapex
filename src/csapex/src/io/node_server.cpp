@@ -79,6 +79,9 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
     observe(node->interval_end, [this, channel](NodeFacade* facade, std::shared_ptr<const Interval> stamp){
         channel->sendNote<NodeNote>(NodeNoteType::IntervalEndTriggered, stamp);
     });
+    observe(node->error_event, [this, channel](bool e, const std::string& msg, ErrorState::ErrorLevel level){
+        channel->sendNote<NodeNote>(NodeNoteType::ErrorEvent, e, msg, level);
+    });
 
     channels_[node->getAUUID()] = channel;
 }

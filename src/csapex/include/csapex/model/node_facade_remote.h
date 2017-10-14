@@ -53,6 +53,7 @@ public:
 
     GenericStateConstPtr getParameterState() const override;
 
+
     /**
      * begin: generate getters
      **/
@@ -107,6 +108,10 @@ private:
     NodeWorker* nw_;
 
     std::unordered_map<UUID, ConnectorPtr, UUID::Hasher> remote_connectors_;
+
+    // TODO: auto generate
+    std::unordered_map<UUID, bool, UUID::Hasher> is_parameter_output_;
+    std::unordered_map<UUID, bool, UUID::Hasher> is_parameter_input_;
 };
 
 }

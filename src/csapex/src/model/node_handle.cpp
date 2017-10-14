@@ -548,6 +548,8 @@ InputPtr NodeHandle::addInternalInput(const TokenDataConstPtr& type, const UUID 
     in->setOptional(optional);
     
     internal_inputs_.push_back(in);
+
+    connector_created(in, true);
     
     return in;
 }
@@ -559,7 +561,9 @@ OutputPtr NodeHandle::addInternalOutput(const TokenDataConstPtr& type, const UUI
     out->setLabel(label);
     
     internal_outputs_.push_back(out);
-    
+
+    connector_created(out, true);
+
     return out;
 }
 
@@ -574,7 +578,7 @@ SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &i
     
     connectConnector(slot.get());
     
-    connector_created(slot);
+    connector_created(slot, true);
     
     return slot;
 }
@@ -590,7 +594,7 @@ EventPtr NodeHandle::addInternalEvent(const TokenDataConstPtr& type, const UUID&
     
     connectConnector(event.get());
     
-    connector_created(event);
+    connector_created(event, true);
     
     return event;
 }
@@ -632,7 +636,7 @@ void NodeHandle::removeInput(Input* in)
         external_inputs_.erase(it);
         
         disconnectConnector(input.get());
-        connector_removed(input);
+        connector_removed(input, false);
         
     } else {
         std::cerr << "ERROR: cannot remove input " << in->getUUID().getFullName() << std::endl;
@@ -655,7 +659,7 @@ void NodeHandle::removeOutput(Output* out)
         external_outputs_.erase(it);
         
         disconnectConnector(output.get());
-        connector_removed(output);        
+        connector_removed(output, false);
 
     } else {
         std::cerr << "ERROR: cannot remove output " << out->getUUID().getFullName() << std::endl;
@@ -679,7 +683,7 @@ void NodeHandle::removeSlot(Slot* s)
         external_slots_.erase(it);
         
         disconnectConnector(slot.get());
-        connector_removed(slot);
+        connector_removed(slot, false);
     }
     
 }
@@ -699,7 +703,7 @@ void NodeHandle::removeEvent(Event* t)
         external_events_.erase(it);
         
         disconnectConnector(trigger.get());
-        connector_removed(trigger);
+        connector_removed(trigger, false);
     }
 }
 
@@ -715,7 +719,7 @@ void NodeHandle::manageInput(InputPtr in)
 
     connections_[in.get()].emplace_back(in->message_available.connect([this](Connection*) { might_be_enabled(); }));
     
-    connector_created(in);
+    connector_created(in, false);
     transition_in_->addInput(in);
 }
 
@@ -734,7 +738,7 @@ void NodeHandle::manageOutput(OutputPtr out)
     connections_[out.get()].emplace_back(out->connection_added_to.connect([this](const ConnectorPtr&) { might_be_enabled(); }));
     connections_[out.get()].emplace_back(out->connectionEnabled.connect([this](bool) { might_be_enabled(); }));
     
-    connector_created(out);
+    connector_created(out, false);
     transition_out_->addOutput(out);
 }
 
@@ -758,7 +762,7 @@ void NodeHandle::manageSlot(SlotPtr s)
     
     connectConnector(s.get());
     
-    connector_created(s);
+    connector_created(s, false);
 }
 
 void NodeHandle::manageEvent(EventPtr t)
@@ -771,7 +775,7 @@ void NodeHandle::manageEvent(EventPtr t)
     
     connectConnector(t.get());
     
-    connector_created(t);
+    connector_created(t, false);
 }
 
 ConnectablePtr NodeHandle::getConnector(const UUID &uuid) const

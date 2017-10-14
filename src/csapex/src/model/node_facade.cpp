@@ -80,3 +80,22 @@ template CSAPEX_EXPORT void NodeFacade::setParameter<std::pair<std::string, bool
 template CSAPEX_EXPORT void NodeFacade::setParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
 template CSAPEX_EXPORT void NodeFacade::setParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
 
+std::vector<ConnectorDescription> NodeFacade::getInputs() const
+{
+    return getExternalInputs();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getOutputs() const
+{
+    return getExternalOutputs();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getEvents() const
+{
+    return getExternalEvents();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getSlots() const
+{
+    return getExternalSlots();
+}

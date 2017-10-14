@@ -115,10 +115,8 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
             #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
                 case NodeNoteType::function##Changed: \
                 { \
-                    std::cerr << "received node facade update: " << #function << " changed" << std::endl; \
-                    auto new_value = boost::any_cast<type>(cn->getPayload()); \
-                    value_##function##_ = new_value;\
-                    signal(new_value); \
+                    value_##function##_ = cn->getPayload<type>(0);\
+                    signal(value_##function##_); \
                 } \
                 break;
             #define HANDLE_SIGNAL(_enum, signal) \
@@ -162,6 +160,14 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
             case NodeNoteType::IntervalEndTriggered:
             {
                 interval_end(this, cn->getPayload<std::shared_ptr<const Interval>>(0));
+            }
+                break;
+            case NodeNoteType::ErrorEvent:
+            {
+                bool e = cn->getPayload<bool>(0);
+                std::string msg = cn->getPayload<std::string>(1);
+                ErrorState::ErrorLevel level = cn->getPayload<ErrorState::ErrorLevel>(2);
+                setError(e, msg, level);
             }
                 break;
             }
@@ -238,12 +244,28 @@ AUUID NodeFacadeRemote::getAUUID() const
 
 bool NodeFacadeRemote::isParameterInput(const UUID& id)
 {
-    return node_channel_->request<bool, NodeRequests>(NodeRequests::NodeRequestType::IsParameterInput, id);
+    auto pos = is_parameter_input_.find(id);
+    if(pos == is_parameter_input_.end()) {
+        bool result = node_channel_->request<bool, NodeRequests>(NodeRequests::NodeRequestType::IsParameterInput, id);
+        is_parameter_input_[id] = result;
+        return result;
+
+    } else {
+        return pos->second;
+    }
 }
 
 bool NodeFacadeRemote::isParameterOutput(const UUID& id)
 {
-    return node_channel_->request<bool, NodeRequests>(NodeRequests::NodeRequestType::IsParameterOutput, id);
+    auto pos = is_parameter_output_.find(id);
+    if(pos == is_parameter_output_.end()) {
+        bool result = node_channel_->request<bool, NodeRequests>(NodeRequests::NodeRequestType::IsParameterOutput, id);
+        is_parameter_output_[id] = result;
+        return result;
+
+    } else {
+        return pos->second;
+    }
 }
 
 ConnectorPtr NodeFacadeRemote::getConnector(const UUID &id) const
@@ -313,6 +335,7 @@ std::string NodeFacadeRemote::getLoggerOutput(ErrorState::ErrorLevel level) cons
 {
     return node_channel_->request<std::string, NodeRequests>(NodeRequests::NodeRequestType::GetLoggerOutput, level);
 }
+
 
 bool NodeFacadeRemote::hasParameter(const std::string &name) const
 {

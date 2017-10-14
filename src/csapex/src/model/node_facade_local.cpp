@@ -36,8 +36,24 @@ NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh)
 
 void NodeFacadeLocal::connectNodeHandle()
 {
-    observe(nh_->connector_created, [this](ConnectablePtr c) { connector_created(c->getDescription()); });
-    observe(nh_->connector_removed, [this](ConnectablePtr c) { connector_removed(c->getDescription()); });
+    observe(nh_->connector_created, [this](ConnectablePtr c, bool internal) {
+        connector_created(c->getDescription());
+        if(internal) {
+            triggerInternalConnectorsChanged(c);
+        } else {
+            triggerExternalConnectorsChanged(c);
+        }
+    });
+    observe(nh_->connector_removed, [this](ConnectablePtr c, bool internal) {
+        connector_removed(c->getDescription());
+        if(internal) {
+            triggerInternalConnectorsChanged(c);
+        } else {
+            triggerExternalConnectorsChanged(c);
+        }
+    });
+
+
     observe(nh_->node_state_changed, node_state_changed);
     observe(nh_->activation_changed, activation_changed);
 
@@ -47,6 +63,12 @@ void NodeFacadeLocal::connectNodeHandle()
 
 
     observe(nh_->parameters_changed, parameters_changed);
+
+    NodeStatePtr state = nh_->getNodeState();
+
+    observe(*(state->label_changed), [this]() {
+        label_changed(getLabel());
+    });
 }
 
 void NodeFacadeLocal::connectNodeWorker()
@@ -63,11 +85,19 @@ void NodeFacadeLocal::connectNodeWorker()
 
     observe(nw_->messages_processed, messages_processed);
 
+    observe(nw_->execution_state_changed, [this]() {
+        execution_state_changed(nw_->getExecutionState());
+    });
+
     observe(nw_->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
         interval_start(this, type, stamp);
     });
     observe(nw_->interval_end,  [this](NodeWorker*, std::shared_ptr<const Interval> stamp) {
         interval_end(this, stamp);
+    });
+
+    observe(nw_->error_event, [this](bool error, const std::string& msg, ErrorLevel level) {
+        setError(error, msg, level);
     });
 }
 
@@ -162,27 +192,6 @@ bool NodeFacadeLocal::hasVariadicEvents() const
 bool NodeFacadeLocal::hasVariadicSlots() const
 {
     return nh_->hasVariadicSlots();
-}
-
-
-std::vector<ConnectorDescription> NodeFacadeLocal::getInputs() const
-{
-    return nh_->getExternalInputDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeLocal::getOutputs() const
-{
-    return nh_->getExternalOutputDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeLocal::getEvents() const
-{
-    return nh_->getExternalEventDescriptions();
-}
-
-std::vector<ConnectorDescription> NodeFacadeLocal::getSlots() const
-{
-    return nh_->getExternalSlotDescriptions();
 }
 
 
@@ -285,30 +294,6 @@ void NodeFacadeLocal::setProfiling(bool profiling)
 {
     if(nw_) {
         nw_->setProfiling(profiling);
-    }
-}
-bool NodeFacadeLocal::isError() const
-{
-    if(nw_) {
-        return nw_->isError();
-    } else {
-        return false;
-    }
-}
-ErrorState::ErrorLevel NodeFacadeLocal::errorLevel() const
-{
-    if(nw_) {
-        return nw_->errorLevel();
-    } else {
-        return ErrorState::ErrorLevel::NONE;
-    }
-}
-std::string NodeFacadeLocal::errorMessage() const
-{
-    if(nw_) {
-        return nw_->errorMessage();
-    } else {
-        return {};
     }
 }
 
@@ -433,4 +418,40 @@ bool NodeFacadeLocal::hasParameter(const std::string &name) const
         return node->hasParameter(name);
     }
     throw std::runtime_error("tried to check a parameter from an invalid node");
+}
+
+void NodeFacadeLocal::triggerExternalConnectorsChanged(const ConnectableConstPtr& connector)
+{
+    if(connector->isInput()) {
+        if(connector->isSynchronous()) {
+            external_inputs_changed(nh_->getExternalInputDescriptions());
+        } else {
+            external_slots_changed(nh_->getExternalSlotDescriptions());
+        }
+
+    } else {
+        if(connector->isSynchronous()) {
+            external_outputs_changed(nh_->getExternalOutputDescriptions());
+        } else {
+            external_events_changed(nh_->getExternalEventDescriptions());
+        }
+    }
+}
+
+void NodeFacadeLocal::triggerInternalConnectorsChanged(const ConnectableConstPtr& connector)
+{
+    if(connector->isInput()) {
+        if(connector->isSynchronous()) {
+            internal_inputs_changed(nh_->getExternalInputDescriptions());
+        } else {
+            internal_slots_changed(nh_->getExternalSlotDescriptions());
+        }
+
+    } else {
+        if(connector->isSynchronous()) {
+            internal_outputs_changed(nh_->getExternalOutputDescriptions());
+        } else {
+            internal_events_changed(nh_->getExternalEventDescriptions());
+        }
+    }
 }

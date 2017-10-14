@@ -35,7 +35,9 @@ enum class NodeNoteType
     ConnectorRemovedTriggered,
 
     ConnectionStartTriggered,
-    ConnectionDoneTriggered
+    ConnectionDoneTriggered,
+
+    ErrorEvent
 };
 
 
