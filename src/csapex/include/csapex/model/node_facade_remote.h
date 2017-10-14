@@ -76,8 +76,6 @@ public:
 private:
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
-    void connectNodeWorker();
-
     void createConnectorProxy(const UUID &uuid);
     void removeConnectorProxy(const UUID &uuid);
 

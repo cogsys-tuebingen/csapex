@@ -91,6 +91,8 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     observe(core_tmp_->load_detail_request, load_detail_request);
 
 
+    observe(core_tmp_->notification, notification);
+
     observe(dispatcher_->state_changed, undo_state_changed);
     observe(dispatcher_->dirty_changed, undo_dirty_changed);
 }

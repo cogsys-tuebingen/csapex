@@ -186,7 +186,7 @@ GraphFacadeRemote* GraphFacadeRemote::getRemoteParent() const
 
 void GraphFacadeRemote::nodeAddedHandler(graph::VertexPtr vertex)
 {
-    // TODO: implement client server
+    vertex->getNodeFacade()->notification.connect(notification);
 }
 
 void GraphFacadeRemote::nodeRemovedHandler(graph::VertexPtr vertex)

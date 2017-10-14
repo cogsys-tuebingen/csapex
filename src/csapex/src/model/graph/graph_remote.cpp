@@ -47,6 +47,7 @@ void GraphRemote::vertexAdded(graph::VertexPtr vertex)
                 tmp->getNodeHandle(),
                 tmp->getNodeHandle()->getNodeWorker()
                 );
+
     graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
     remote_vertices_.push_back(remote_vertex);
     vertex_added(remote_vertex);

@@ -82,6 +82,9 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
     observe(node->error_event, [this, channel](bool e, const std::string& msg, ErrorState::ErrorLevel level){
         channel->sendNote<NodeNote>(NodeNoteType::ErrorEvent, e, msg, level);
     });
+    observe(node->notification, [this, channel](Notification n){
+        channel->sendNote<NodeNote>(NodeNoteType::Notification, n);
+    });
 
     channels_[node->getAUUID()] = channel;
 }

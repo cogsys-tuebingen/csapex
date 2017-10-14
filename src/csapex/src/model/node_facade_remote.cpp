@@ -170,16 +170,17 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
                 setError(e, msg, level);
             }
                 break;
+            case NodeNoteType::Notification:
+            {
+                notification(cn->getPayload<Notification>(0));
+            }
+                break;
             }
         }
     });
 
     for(const ConnectorDescription& c : getExternalConnectors()) {
         createConnectorProxy(c.id);
-    }
-
-    if(nw_) {
-        connectNodeWorker();
     }
 
     observe(remote_data_connection.first_connected, [this]() {
@@ -207,11 +208,6 @@ void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
             break;
         }
     }
-}
-
-void NodeFacadeRemote::connectNodeWorker()
-{
-    observe(nw_->notification, notification);
 }
 
 void NodeFacadeRemote::createConnectorProxy(const UUID &uuid)

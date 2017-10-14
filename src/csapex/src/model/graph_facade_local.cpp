@@ -422,7 +422,8 @@ void GraphFacadeLocal::nodeAddedHandler(graph::VertexPtr vertex)
     }
 
 
-    nw->notification.connect(notification);
+//    nw->notification.connect(notification);
+    vertex->getNodeFacade()->notification.connect(notification);
 
     nw->initialize();
     nw->panic.connect(panic);
