@@ -13,11 +13,12 @@
 namespace csapex
 {
 
+class ProfilerRemote;
+
 class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade, public Remote
 {
 public:
-    NodeFacadeRemote(SessionPtr session, AUUID uuid,
-                     NodeHandlePtr nh, NodeWorker *nw);
+    NodeFacadeRemote(SessionPtr session, AUUID uuid, NodeHandlePtr nh);
 
     ~NodeFacadeRemote();
 
@@ -45,9 +46,9 @@ public:
     // Debug Access
     std::string getLoggerOutput(ErrorState::ErrorLevel level) const override;
 
-    // TODO: proxies
     ProfilerPtr getProfiler() override;
 
+    // TODO: proxies
     NodeStatePtr getNodeState() const override;
     NodeStatePtr getNodeStateCopy() const override;
 
@@ -103,7 +104,8 @@ private:
 
 
     NodeHandlePtr nh_;
-    NodeWorker* nw_;
+
+    std::shared_ptr<ProfilerRemote> profiler_proxy_;
 
     std::unordered_map<UUID, ConnectorPtr, UUID::Hasher> remote_connectors_;
 

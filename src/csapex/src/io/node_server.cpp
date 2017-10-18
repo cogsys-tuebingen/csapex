@@ -9,6 +9,8 @@
 #include <csapex/io/connector_server.h>
 #include <csapex/io/channel.h>
 #include <csapex/io/protcol/node_notes.h>
+#include <csapex/io/protcol/profiler_note.h>
+#include <csapex/profiling/profiler.h>
 
 /// SYSTEM
 #include <iostream>
@@ -84,6 +86,20 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
     });
     observe(node->notification, [this, channel](Notification n){
         channel->sendNote<NodeNote>(NodeNoteType::Notification, n);
+    });
+
+
+    observe(node->start_profiling, [this, channel](NodeFacade*){
+        channel->sendNote<NodeNote>(NodeNoteType::ProfilingStartTriggered);
+    });
+    observe(node->stop_profiling, [this, channel](NodeFacade*){
+        channel->sendNote<NodeNote>(NodeNoteType::ProfilingStopTriggered);
+    });
+
+
+    ProfilerPtr profiler = node->getProfiler();
+    observe(profiler->enabled_changed, [this, channel](bool enabled){
+        channel->sendNote<ProfilerNote>(ProfilerNoteType::EnabledChanged, enabled);
     });
 
     channels_[node->getAUUID()] = channel;

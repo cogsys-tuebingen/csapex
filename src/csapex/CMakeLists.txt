@@ -293,6 +293,7 @@ add_library(csapex_profiling SHARED
     src/profiling/profile.cpp
     src/profiling/timer.cpp
     src/profiling/profiler.cpp
+    src/profiling/profiler_local.cpp
     src/profiling/timable.cpp
     src/profiling/profilable.cpp
 
@@ -539,6 +540,8 @@ add_library(csapex_remote SHARED
     src/model/graph/graph_remote.cpp
     src/model/graph_facade_remote.cpp
 
+    src/profiling/profiler_remote.cpp
+
     src/io/remote.cpp
     src/io/raw_message.cpp
     src/io/request.cpp
@@ -569,6 +572,8 @@ add_library(csapex_remote SHARED
     src/io/protocol/command_broadcasts.cpp
     src/io/protocol/connector_requests.cpp
     src/io/protocol/connector_notes.cpp
+    src/io/protocol/profiler_requests.cpp
+    src/io/protocol/profiler_note.cpp
 
     src/serialization/request_serializer.cpp
     src/serialization/raw_message_serializer.cpp

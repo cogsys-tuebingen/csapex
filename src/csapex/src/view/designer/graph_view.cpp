@@ -847,8 +847,12 @@ void GraphView::nodeRemoved(NodeFacadePtr node_facade)
 
 void GraphView::childNodeAdded(NodeFacadePtr facade)
 {
-    facade_connections_[facade.get()].emplace_back(facade->start_profiling.connect([this](NodeFacade* nw) { startProfilingRequest(nw); }));
-    facade_connections_[facade.get()].emplace_back(facade->stop_profiling.connect([this](NodeFacade* nw) { stopProfilingRequest(nw); }));
+    facade_connections_[facade.get()].emplace_back(facade->start_profiling.connect([this](NodeFacade* nw) {
+                                                       startProfilingRequest(nw);
+                                                   }));
+    facade_connections_[facade.get()].emplace_back(facade->stop_profiling.connect([this](NodeFacade* nw) {
+                                                       stopProfilingRequest(nw);
+                                                   }));
 }
 
 void GraphView::childNodeRemoved(NodeFacadePtr facade)

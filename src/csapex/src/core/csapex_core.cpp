@@ -24,7 +24,7 @@
 #include <csapex/msg/message.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/plugin/plugin_manager.hpp>
-#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/profiler_local.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/serialization/snippet.h>
 #include <csapex/utility/assert.h>
@@ -51,7 +51,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
       node_factory_(nullptr),
       root_uuid_provider_(std::make_shared<UUIDProvider>()),
       dispatcher_(std::make_shared<CommandDispatcher>(*this)),
-      profiler_(std::make_shared<Profiler>()),
+      profiler_(std::make_shared<ProfilerLocal>()),
       core_plugin_manager(nullptr),
       init_(false), load_needs_reset_(false)
 {

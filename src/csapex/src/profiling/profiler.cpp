@@ -6,6 +6,7 @@ using namespace csapex;
 Profiler::Profiler(bool enabled, int history)
     : enabled_(false), history_length_(history)
 {
+    apex_assert_hard(history > 0);
     setEnabled(enabled);
 }
 
@@ -25,18 +26,7 @@ const Profile& Profiler::getProfile(const std::string& key)
         profile.timer->finished.connect([this](Interval::Ptr) { updated(); });
 
         observe(profile.timer->finished, [this, &profile](Interval::Ptr interval){
-            profile.timer_history_[profile.timer_history_pos_] = interval;
-
-            if(++profile.timer_history_pos_ >= (int) profile.timer_history_.size()) {
-                profile.timer_history_pos_ = 0;
-            }
-
-            std::vector<std::pair<std::string, double> > entries;
-            interval->entries(entries);
-            for(const auto& it : entries) {
-                profile.steps_acc_[it.first](it.second);
-            }
-            ++profile.count_;
+            profile.addInterval(interval);
         });
 
         return profile;
@@ -44,14 +34,21 @@ const Profile& Profiler::getProfile(const std::string& key)
 
     return pos->second;
 }
+
 void Profiler::setEnabled(bool enabled)
 {
+    if(enabled == enabled_) {
+        return;
+    }
+
     enabled_ = enabled;
     for(auto& pair : profiles_) {
         Profile& profile = pair.second;
         Timer::Ptr timer = profile.timer;
         timer->setEnabled(enabled_);
     }
+
+    enabled_changed(enabled_);
 }
 
 bool Profiler::isEnabled() const

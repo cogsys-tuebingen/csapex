@@ -17,7 +17,7 @@ GraphRemote::GraphRemote(SessionPtr session, const AUUID& auuid,
                          GraphLocal &temp_reference)
     : Remote(session),
       temp_reference(temp_reference),
-      nf_(std::make_shared<NodeFacadeRemote>(session, auuid, nullptr, nullptr))
+      nf_(std::make_shared<NodeFacadeRemote>(session, auuid, nullptr))
 {
     observe(temp_reference.state_changed, state_changed);
 
@@ -44,8 +44,7 @@ void GraphRemote::vertexAdded(graph::VertexPtr vertex)
     std::shared_ptr<NodeFacadeRemote> remote_node_facade = std::make_shared<NodeFacadeRemote>(
                 session_,
                 vertex->getNodeFacade()->getAUUID(),
-                tmp->getNodeHandle(),
-                tmp->getNodeHandle()->getNodeWorker()
+                tmp->getNodeHandle()
                 );
 
     graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);

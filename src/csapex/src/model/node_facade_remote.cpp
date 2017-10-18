@@ -16,6 +16,7 @@
 #include <csapex/io/protcol/node_notes.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/model/connector_remote.h>
+#include <csapex/profiling/profiler_remote.h>
 #include <csapex/io/channel.h>
 
 /// SYSTEM
@@ -97,12 +98,14 @@ static void invokeSignal(csapex::slim_signal::Signal<void(Args...)>& s, const No
 }
 
 NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
-                                   NodeHandlePtr nh, NodeWorker* nw)
+                                   NodeHandlePtr nh)
     : Remote(session),
       uuid_(uuid),
-      nh_(nh), nw_(nw)
+      nh_(nh)
 {
     node_channel_ = session->openChannel(uuid.getAbsoluteUUID());
+
+    profiler_proxy_ = std::make_shared<ProfilerRemote>(node_channel_);
 
     observe(node_channel_->note_received, [this](const io::NoteConstPtr& note){
         if(const std::shared_ptr<NodeNote const>& cn = std::dynamic_pointer_cast<NodeNote const>(note)) {
@@ -152,6 +155,16 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
                 invokeSignal(connection_done, *cn);
             }
                 break;
+            case NodeNoteType::ProfilingStartTriggered:
+            {
+                start_profiling(this);
+            }
+                break;
+            case NodeNoteType::ProfilingStopTriggered:
+            {
+                stop_profiling(this);
+            }
+                break;
             case NodeNoteType::IntervalStartTriggered:
             {
                 interval_start(this, cn->getPayload<ActivityType>(0), cn->getPayload<std::shared_ptr<const Interval>>(1));
@@ -159,7 +172,9 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
                 break;
             case NodeNoteType::IntervalEndTriggered:
             {
-                interval_end(this, cn->getPayload<std::shared_ptr<const Interval>>(0));
+                std::shared_ptr<const Interval> interval = cn->getPayload<std::shared_ptr<const Interval>>(0);
+                profiler_proxy_->updateInterval(interval);
+                interval_end(this, interval);
             }
                 break;
             case NodeNoteType::ErrorEvent:
@@ -321,11 +336,7 @@ GenericStateConstPtr NodeFacadeRemote::getParameterState() const
 
 ProfilerPtr NodeFacadeRemote::getProfiler()
 {
-    if(nw_) {
-        return nw_->getProfiler();
-    } else {
-        return {};
-    }
+    return profiler_proxy_;
 }
 std::string NodeFacadeRemote::getLoggerOutput(ErrorState::ErrorLevel level) const
 {
@@ -340,7 +351,6 @@ bool NodeFacadeRemote::hasParameter(const std::string &name) const
     }
     throw std::runtime_error("tried to check a parameter from an invalid node");
 }
-
 
 
 /**

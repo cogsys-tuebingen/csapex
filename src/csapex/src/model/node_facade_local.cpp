@@ -12,6 +12,7 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/node.h>
+#include <csapex/profiling/profiler_local.h>
 
 /// SYSTEM
 #include <iostream>

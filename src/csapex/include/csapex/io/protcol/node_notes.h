@@ -28,6 +28,9 @@ enum class NodeNoteType
      * end: connect signals
      **/
 
+    ProfilingStartTriggered,
+    ProfilingStopTriggered,
+
     IntervalStartTriggered,
     IntervalEndTriggered,
 

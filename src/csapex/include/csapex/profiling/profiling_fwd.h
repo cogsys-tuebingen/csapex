@@ -15,6 +15,7 @@
 namespace csapex
 {
 FWD(Profiler)
+FWD(ProfilerLocal)
 FWD(Interval)
 }
 

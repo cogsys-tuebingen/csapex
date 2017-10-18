@@ -20,7 +20,7 @@
 #include <csapex/model/token_data.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/plugin/plugin_locator.h>
-#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/profiler_local.h>
 #include <csapex/profiling/timer.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>
@@ -63,7 +63,7 @@ using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
     : QMainWindow(parent), view_core_(view_core),
-      profiler_(std::make_shared<Profiler>()),
+      profiler_(std::make_shared<ProfilerLocal>()),
       ui(new Ui::CsApexWindow), designer_(new Designer(view_core)), minimap_(designer_->getMinimap()),
       activity_legend_(new ActivityLegend), activity_timeline_(new ActivityTimeline),
       init_(false), state_changed_(false),
