@@ -20,6 +20,9 @@ public:
     explicit OutputProgressParameter(const std::string& name, const ParameterDescription& description);
     virtual ~OutputProgressParameter();
 
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(SerializationBuffer& data) override;
+
     virtual std::string TYPE() const override { return "progress"; }
 
     void setProgress(int progress, int maximum);

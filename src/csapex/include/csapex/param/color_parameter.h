@@ -32,13 +32,11 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(SerializationBuffer& data) override;
+
     std::vector<int> def() const;
     std::vector<int> value() const;
-
-    template<class Archive>
-    void serialize(Archive& ar, const unsigned int /*file_version*/) {
-        ar & colors_;
-    }
 
 protected:
     virtual void get_unsafe(boost::any& out) const override;

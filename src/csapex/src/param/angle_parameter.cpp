@@ -1,9 +1,15 @@
 /// HEADER
 #include <csapex/param/angle_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(AngleParameter)
 
 using namespace csapex;
 using namespace param;
@@ -107,3 +113,21 @@ void AngleParameter::doDeserialize(const YAML::Node& n)
     //max_ = n["max"].as<double>();
 }
 
+
+void AngleParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << angle_;
+    data << min_;
+    data << max_;
+}
+
+void AngleParameter::deserialize(SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> angle_;
+    data >> min_;
+    data >> max_;
+}

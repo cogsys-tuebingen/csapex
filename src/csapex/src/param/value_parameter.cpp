@@ -187,6 +187,7 @@ void ValueParameter::serialize(SerializationBuffer &data) const
     Parameter::serialize(data);
 
     data << value_;
+    data << def_;
 }
 
 void ValueParameter::deserialize(SerializationBuffer& data)
@@ -194,5 +195,6 @@ void ValueParameter::deserialize(SerializationBuffer& data)
     Parameter::deserialize(data);
 
     data >> value_;
+    data >> def_;
 }
 

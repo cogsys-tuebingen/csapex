@@ -1,9 +1,15 @@
 /// HEADER
 #include <csapex/param/output_progress_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(OutputProgressParameter)
 
 using namespace csapex;
 using namespace param;
@@ -100,4 +106,21 @@ double OutputProgressParameter::getProgress() const
 double OutputProgressParameter::getProgressMaximum() const
 {
     return maximum;
+}
+
+
+void OutputProgressParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << value;
+    data << maximum;
+}
+
+void OutputProgressParameter::deserialize(SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> value;
+    data >> maximum;
 }

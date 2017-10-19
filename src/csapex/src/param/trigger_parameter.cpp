@@ -1,8 +1,14 @@
 /// HEADER
 #include <csapex/param/trigger_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(TriggerParameter)
 
 using namespace csapex;
 using namespace param;

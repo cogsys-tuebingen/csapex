@@ -1,10 +1,16 @@
 /// HEADER
 #include <csapex/param/interval_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #undef NDEBUG
 #include <assert.h>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(IntervalParameter)
 
 using namespace csapex;
 using namespace param;
@@ -203,3 +209,26 @@ void IntervalParameter::doDeserialize(const YAML::Node& n)
         throw std::runtime_error("cannot read interval");
     }
 }
+
+void IntervalParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << values_;
+    data << min_;
+    data << max_;
+    data << def_;
+    data << step_;
+}
+
+void IntervalParameter::deserialize(SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> values_;
+    data >> min_;
+    data >> max_;
+    data >> def_;
+    data >> step_;
+}
+

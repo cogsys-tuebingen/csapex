@@ -1,9 +1,15 @@
 /// HEADER
 #include <csapex/param/bitset_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(BitSetParameter)
 
 using namespace csapex;
 using namespace param;
@@ -218,4 +224,23 @@ void BitSetParameter::doDeserialize(const YAML::Node& n)
     if(n["int"].IsDefined()) {
         value_ = n["int"].as<int>();
     }
+}
+
+
+void BitSetParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << value_;
+    data << set_;
+    data << def_;
+}
+
+void BitSetParameter::deserialize(SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> value_;
+    data >> set_;
+    data >> def_;
 }
