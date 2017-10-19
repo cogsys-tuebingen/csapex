@@ -325,11 +325,6 @@ NodeStatePtr NodeFacadeRemote::getNodeStateCopy() const
     return getNodeState()->clone<NodeState>();
 }
 
-GenericStateConstPtr NodeFacadeRemote::getParameterState() const
-{
-    return nh_->getNode().lock()->getParameterStateClone();
-}
-
 ProfilerPtr NodeFacadeRemote::getProfiler()
 {
     return profiler_proxy_;

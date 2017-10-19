@@ -100,9 +100,6 @@ public:
     virtual NodeStatePtr getNodeState() const = 0;
     virtual NodeStatePtr getNodeStateCopy() const = 0;
 
-    virtual GenericStateConstPtr getParameterState() const = 0;
-
-
 
     template <typename T>
     T readParameter(const std::string& name) const;
@@ -126,6 +123,7 @@ public:
 
     slim_signal::Signal<void(NodeStatePtr state)> node_state_changed;
     slim_signal::Signal<void()> parameters_changed;
+    slim_signal::Signal<void()> parameter_set_changed;
     slim_signal::Signal<void()> activation_changed;
 
     slim_signal::Signal<void (ExecutionState)> execution_state_changed;

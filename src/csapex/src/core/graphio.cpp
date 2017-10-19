@@ -550,7 +550,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeFacadeLocalConstPtr node_facade
 void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_facade)
 {
 
-    NodeState::Ptr s = node_facade->getNodeStateCopy();
+    NodeState::Ptr s = node_facade->getNodeState();
     s->readYaml(doc);
 
     int x = doc["pos"][0].as<double>() + position_offset_x_;
@@ -559,7 +559,6 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_fac
     if(x != 0 || y != 0) {
         s->setPos(Point(x,y));
     }
-    node_facade->setNodeState(s);
 
     // hook for nodes to deserialize
     auto node = node_facade->getNode();

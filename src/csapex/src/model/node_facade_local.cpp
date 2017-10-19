@@ -13,6 +13,7 @@
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/node.h>
 #include <csapex/profiling/profiler_local.h>
+#include <csapex/model/generic_state.h>
 
 /// SYSTEM
 #include <iostream>
@@ -72,6 +73,14 @@ void NodeFacadeLocal::connectNodeHandle()
     observe(*(state->label_changed), [this]() {
         label_changed(getLabel());
     });
+
+    GenericStatePtr paramstate = state->getParameterState();
+
+    if(paramstate) {
+        observe(*(paramstate->parameter_set_changed), [this]() {
+            parameter_set_changed();
+        });
+    }
 }
 
 void NodeFacadeLocal::connectNodeWorker()
@@ -357,11 +366,6 @@ NodeStatePtr NodeFacadeLocal::getNodeStateCopy() const
 void NodeFacadeLocal::setNodeState(NodeStatePtr memento)
 {
     nh_->setNodeState(memento);
-}
-
-GenericStateConstPtr NodeFacadeLocal::getParameterState() const
-{
-    return nh_->getNode().lock()->getParameterStateClone();
 }
 
 ProfilerPtr NodeFacadeLocal::getProfiler()

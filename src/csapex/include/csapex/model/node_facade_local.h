@@ -91,8 +91,6 @@ public:
     NodeStatePtr getNodeStateCopy() const override;
     void setNodeState(NodeStatePtr memento);
 
-    GenericStateConstPtr getParameterState() const override;
-
     NodeHandlePtr getNodeHandle() const;
     NodeWorkerPtr getNodeWorker() const;
     NodeRunnerPtr getNodeRunner() const;

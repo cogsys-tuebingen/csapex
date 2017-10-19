@@ -240,11 +240,8 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
     std::vector<Parameter::Ptr> params = node_facade->getParameters();
 
-    GenericStateConstPtr state = node_facade->getParameterState();
-    if(state) {
-        state->parameter_set_changed->disconnectAll();
-        state->parameter_set_changed->connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
-    }
+    node_facade->parameter_set_changed.disconnectAll();
+    node_facade->parameter_set_changed.connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
 
     for(Parameter::Ptr p : params) {
         Parameter* parameter = p.get();

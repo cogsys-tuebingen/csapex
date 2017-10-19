@@ -38,6 +38,7 @@ HANDLE_STATIC_ACCESSOR (GetType,               std::string, getType)
 
 HANDLE_SIGNAL (MessagesProcessed,              messages_processed)
 HANDLE_SIGNAL (ParametersChanged,              parameters_changed)
+HANDLE_SIGNAL (ParameterSetChanged,            parameter_set_changed)
 HANDLE_SIGNAL (ActivationChanged,              activation_changed)
 HANDLE_SIGNAL (Destroyed,                      destroyed)
 

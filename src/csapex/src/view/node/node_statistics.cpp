@@ -102,9 +102,8 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
     {
         QTreeWidgetItem* parameters = new QTreeWidgetItem;
         parameters->setText(0, "Parameters");
-        GenericStateConstPtr state = node_facade_->getParameterState();
-        for(std::map<std::string, param::ParameterPtr>::const_iterator it = state->params.begin(), end = state->params.end(); it != end; ++it ) {
-            param::Parameter* p = it->second.get();
+
+        for(param::ParameterPtr p : node_facade_->getParameters()) {
 
             QTreeWidgetItem* param = new QTreeWidgetItem;
             param->setText(0, p->name().c_str());

@@ -36,7 +36,16 @@ NodeState::NodeState(const NodeHandle *parent)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
+        if(NodePtr node = parent->getNode().lock()) {
+            parameter_state = node->getParameterState();
+        } else {
+            apex_fail("cannot get node in node state");
+        }
+
+    } else {
+        parameter_state = std::make_shared<GenericState>();
     }
+
 }
 
 NodeState::NodeState()
@@ -70,6 +79,8 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     logger_level_ = rhs.logger_level_;
 
     dictionary = rhs.dictionary;
+
+    parameter_state->setFrom(*rhs.parameter_state);
 
     // then trigger the signals
     (*max_frequency_changed)();
@@ -232,7 +243,7 @@ GenericStatePtr NodeState::getParameterState() const
 
 void NodeState::setParameterState(const GenericStatePtr &value)
 {
-    parameter_state = value;
+    *parameter_state = *value;
 }
 
 const NodeHandle *NodeState::getParent() const
@@ -345,26 +356,12 @@ void NodeState::writeYaml(YAML::Node &out) const
     }
 
     try {
-        if(parent_) {
-            auto node = parent_->getNode().lock();
-            if(node) {
-                parameter_state = node->getParameterStateClone();
-            }
-        }
+        YAML::Node sub_node;
+        parameter_state->writeYaml(sub_node);
+        out["state"] = sub_node;
     } catch(const std::exception& e) {
-        std::cerr << "cannot clone child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
+        std::cerr << "cannot save child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
         throw e;
-    }
-
-    if(parameter_state.get()) {
-        try {
-            YAML::Node sub_node;
-            parameter_state->writeYaml(sub_node);
-            out["state"] = sub_node;
-        } catch(const std::exception& e) {
-            std::cerr << "cannot save child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
-            throw e;
-        }
     }
 }
 
@@ -456,11 +453,8 @@ void NodeState::readYaml(const YAML::Node &node)
         if(!node) {
             return;
         }
-        parameter_state = node->getParameterStateClone();
 
-        if(parameter_state) {
-            parameter_state->readYaml(state_map);
-        }
+        parameter_state->readYaml(state_map);
     }
 }
 
@@ -493,9 +487,7 @@ void NodeState::serialize(SerializationBuffer &data) const
     data << exec_mode_;
 
     YAML::Node yaml;
-    if(parameter_state) {
-        parameter_state->writeYaml(yaml);
-    }
+    parameter_state->writeYaml(yaml);
     data << yaml;
 }
 
@@ -530,7 +522,6 @@ void NodeState::deserialize(SerializationBuffer& data)
     data >> yaml;
 
     if(yaml.IsDefined()) {
-        parameter_state = std::make_shared<GenericState>();
         parameter_state->readYaml(yaml);
     }
 }

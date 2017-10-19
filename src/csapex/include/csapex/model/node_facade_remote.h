@@ -50,9 +50,6 @@ public:
 
     NodeStatePtr getNodeStateCopy() const override;
 
-    GenericStateConstPtr getParameterState() const override;
-
-
     /**
      * begin: generate getters
      **/
