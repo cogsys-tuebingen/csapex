@@ -48,8 +48,6 @@ public:
 
     ProfilerPtr getProfiler() override;
 
-    // TODO: proxies
-    NodeStatePtr getNodeState() const override;
     NodeStatePtr getNodeStateCopy() const override;
 
     GenericStateConstPtr getParameterState() const override;

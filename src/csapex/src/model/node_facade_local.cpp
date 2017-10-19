@@ -55,7 +55,9 @@ void NodeFacadeLocal::connectNodeHandle()
     });
 
 
-    observe(nh_->node_state_changed, node_state_changed);
+    observe(nh_->node_state_changed, [this]() {
+        node_state_changed(nh_->getNodeState());
+    });
     observe(nh_->activation_changed, activation_changed);
 
 

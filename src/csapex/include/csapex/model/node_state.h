@@ -6,16 +6,19 @@
 #include <csapex/data/point.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/execution_mode.h>
+#include <csapex/utility/slim_signal.h>
+#include <csapex/serialization/serializable.h>
 
 /// SYSTEM
-#include <csapex/utility/slim_signal.h>
 #include <boost/any.hpp>
 
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeState : public Memento
+class CSAPEX_EXPORT NodeState : public Memento, public Serializable
 {
+    friend class SerializationBuffer;
+
 public:
     typedef std::shared_ptr<NodeState> Ptr;
     typedef slim_signal::Signal<void()> SignalImpl;
@@ -28,6 +31,9 @@ public:
 
     virtual void writeYaml(YAML::Node& out) const override;
     virtual void readYaml(const YAML::Node& node) override;
+
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(SerializationBuffer& data) override;
 
 public:
     double getMaximumFrequency() const;
@@ -88,8 +94,8 @@ public:
     void setParent(const NodeHandle *value);
     Signal parent_changed;
 
-    Memento::Ptr getParameterState() const;
-    void setParameterState(const Memento::Ptr &value);
+    GenericStatePtr getParameterState() const;
+    void setParameterState(const GenericStatePtr &value);
 
     bool hasDictionaryEntry(const std::string& key) const;
     void deleteDictionaryEntry(const std::string& key);
@@ -110,10 +116,16 @@ public:
     template <typename T>
     void setDictionaryEntry(const std::string& key, const T& value);
 
+
+protected:
+    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+
+    NodeState();
+
 private:
     const NodeHandle* parent_;
 
-    mutable Memento::Ptr child_state_;
+    mutable GenericStatePtr parameter_state;
 
     double max_frequency_;
 

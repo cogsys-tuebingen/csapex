@@ -481,7 +481,9 @@ void CsApexWindow::updateDebugInfo()
     std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
 
     for(NodeBox* box : selected) {
-        box->getNodeFacade()->node_state_changed.connect([this](){ updateDebugInfo(); });
+        box->getNodeFacade()->node_state_changed.connect([this](NodeStatePtr){
+            updateDebugInfo();
+        });
         ui->box_info->addTopLevelItem(NodeStatistics(box->getNodeFacade().get()).createDebugInformation(view_core_.getNodeFactory().get()));
     }
 

@@ -320,13 +320,9 @@ void NodeFacadeRemote::setProfiling(bool profiling)
     node_channel_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::SetProfiling, profiling);
 }
 
-NodeStatePtr NodeFacadeRemote::getNodeState() const
-{
-    return nh_->getNodeState();
-}
 NodeStatePtr NodeFacadeRemote::getNodeStateCopy() const
 {
-    return nh_->getNodeStateCopy();
+    return getNodeState()->clone<NodeState>();
 }
 
 GenericStateConstPtr NodeFacadeRemote::getParameterState() const

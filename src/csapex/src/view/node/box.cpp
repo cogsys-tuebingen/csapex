@@ -203,7 +203,9 @@ void NodeBox::construct()
     QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 
 
-    observe(node_facade_->node_state_changed, [this]() { nodeStateChanged(); });
+    observe(node_facade_->node_state_changed, [this](NodeStatePtr) {
+        nodeStateChanged();
+    });
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
     observe(node_facade_->destroyed, [this](){ destruct(); });

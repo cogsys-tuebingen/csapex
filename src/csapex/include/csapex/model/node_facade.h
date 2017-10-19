@@ -124,7 +124,7 @@ public:
 
     slim_signal::Signal<void(std::string)> label_changed;
 
-    slim_signal::Signal<void()> node_state_changed;
+    slim_signal::Signal<void(NodeStatePtr state)> node_state_changed;
     slim_signal::Signal<void()> parameters_changed;
     slim_signal::Signal<void()> activation_changed;
 

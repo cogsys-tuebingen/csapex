@@ -12,6 +12,7 @@
 #include <csapex/profiling/interval.h>
 #include <csapex/model/activity_type.h>
 #include <csapex/model/error_state.h>
+#include <csapex/model/node_state.h>
 #include <csapex/utility/notification.h>
 
 /// SYSTEM
@@ -98,6 +99,7 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE(std::vector<ConnectorDescription>);
     ADD_ANY_TYPE(ExecutionState);
     ADD_ANY_TYPE(Notification);
+    ADD_ANY_TYPE(NodeStatePtr);
     ADD_ANY_TYPE(ActivityType);
     ADD_ANY_TYPE(ErrorState::ErrorLevel);
     ADD_ANY_TYPE_1PC(std::string, name(), Interval);
