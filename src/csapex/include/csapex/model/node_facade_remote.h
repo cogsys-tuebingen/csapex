@@ -18,7 +18,7 @@ class ProfilerRemote;
 class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade, public Remote
 {
 public:
-    NodeFacadeRemote(SessionPtr session, AUUID uuid, NodeHandlePtr nh);
+    NodeFacadeRemote(SessionPtr session, AUUID uuid);
 
     ~NodeFacadeRemote();
 
@@ -75,6 +75,8 @@ private:
     void createConnectorProxy(const UUID &uuid);
     void removeConnectorProxy(const UUID &uuid);
 
+    void createParameterProxy(param::ParameterPtr proxy) const;
+
 private:
     AUUID uuid_;
 
@@ -100,6 +102,8 @@ private:
 
     NodeHandlePtr nh_;
 
+    mutable std::vector<param::ParameterPtr> parameters_;
+    mutable std::map<std::string, param::ParameterPtr> parameter_cache_;
     std::shared_ptr<ProfilerRemote> profiler_proxy_;
 
     std::unordered_map<UUID, ConnectorPtr, UUID::Hasher> remote_connectors_;

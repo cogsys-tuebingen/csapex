@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/node_handle.h>
+#include <csapex/model/node_facade.h>
 
 /// SYSTEM
 #include <iostream>
@@ -19,6 +20,15 @@ Vertex::Vertex(NodeFacadePtr node)
 Vertex::~Vertex()
 {
     detach();
+}
+
+UUID Vertex::getUUID() const
+{
+    return node_->getUUID();
+}
+AUUID Vertex::getAUUID() const
+{
+    return node_->getAUUID();
 }
 
 void Vertex::detach()

@@ -19,6 +19,8 @@ public:
         AddClient,
         RemoveClient,
 
+        GetParameters,
+
         SetProfiling,
         GetLoggerOutput,
 

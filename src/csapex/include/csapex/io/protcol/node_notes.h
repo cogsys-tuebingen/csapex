@@ -28,6 +28,10 @@ enum class NodeNoteType
      * end: connect signals
      **/
 
+    ParameterAddedTriggered,
+    ParameterChangedTriggered,
+    ParameterRemovedTriggered,
+
     ProfilingStartTriggered,
     ProfilingStopTriggered,
 

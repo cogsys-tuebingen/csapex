@@ -13,6 +13,7 @@
 #include <csapex/model/activity_type.h>
 #include <csapex/model/error_state.h>
 #include <csapex/model/node_state.h>
+#include <csapex/param/parameter.h>
 #include <csapex/utility/notification.h>
 
 /// SYSTEM
@@ -33,7 +34,7 @@ SerializationBuffer::SerializationBuffer()
     any_deserializer[id] = deserializer; \
     }\
     ++id
-#define ADD_ANY_TYPE(...) { \
+#define ADD_ANY_TYPE_IMPL(...) { \
     auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
         buffer << ((uint8_t) id); \
         buffer << (boost::any_cast<__VA_ARGS__> (any)); \
@@ -44,6 +45,11 @@ SerializationBuffer::SerializationBuffer()
         any = v; \
     };\
     ADD(__VA_ARGS__)
+
+
+#define ADD_ANY_TYPE(...) \
+    ADD_ANY_TYPE_IMPL(__VA_ARGS__);\
+    ADD_ANY_TYPE_IMPL(std::vector<__VA_ARGS__>)
 
 #define ADD_ANY_TYPE_1(P1, GET_P1, ...) { \
     auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
@@ -84,7 +90,6 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE(long);
     ADD_ANY_TYPE(UUID);
     ADD_ANY_TYPE(AUUID);
-    ADD_ANY_TYPE(std::vector<UUID>);
     ADD_ANY_TYPE(std::pair<std::string,bool>);
     ADD_ANY_TYPE(std::pair<std::string,bool>);
     ADD_ANY_TYPE(std::pair<int,int>);
@@ -96,10 +101,10 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE(TokenDataConstPtr);
     ADD_ANY_TYPE(SnippetPtr);
     ADD_ANY_TYPE(ConnectorDescription);
-    ADD_ANY_TYPE(std::vector<ConnectorDescription>);
     ADD_ANY_TYPE(ExecutionState);
     ADD_ANY_TYPE(Notification);
     ADD_ANY_TYPE(NodeStatePtr);
+    ADD_ANY_TYPE(param::ParameterPtr);
     ADD_ANY_TYPE(ActivityType);
     ADD_ANY_TYPE(ErrorState::ErrorLevel);
     ADD_ANY_TYPE_1PC(std::string, name(), Interval);

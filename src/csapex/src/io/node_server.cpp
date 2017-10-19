@@ -58,6 +58,16 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
      **/
 
 
+    observe(node->parameter_added, [this, channel](const param::ParameterPtr& p){
+        channel->sendNote<NodeNote>(NodeNoteType::ParameterAddedTriggered);
+    });
+    observe(node->parameter_changed, [this, channel](const param::ParameterPtr& p){
+        channel->sendNote<NodeNote>(NodeNoteType::ParameterChangedTriggered);
+    });
+    observe(node->parameter_removed, [this, channel](const param::ParameterPtr& p){
+        channel->sendNote<NodeNote>(NodeNoteType::ParameterRemovedTriggered);
+    });
+
     observe(node->connector_created, [this, channel](ConnectorDescription c){
         channel->sendNote<NodeNote>(NodeNoteType::ConnectorCreatedTriggered, c);
     });

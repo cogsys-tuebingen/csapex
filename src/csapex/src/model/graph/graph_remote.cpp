@@ -17,7 +17,7 @@ GraphRemote::GraphRemote(SessionPtr session, const AUUID& auuid,
                          GraphLocal &temp_reference)
     : Remote(session),
       temp_reference(temp_reference),
-      nf_(std::make_shared<NodeFacadeRemote>(session, auuid, nullptr))
+      nf_(std::make_shared<NodeFacadeRemote>(session, auuid))
 {
     observe(temp_reference.state_changed, state_changed);
 
@@ -40,12 +40,8 @@ GraphRemote::~GraphRemote()
 
 void GraphRemote::vertexAdded(graph::VertexPtr vertex)
 {
-    NodeFacadeLocalPtr tmp = std::dynamic_pointer_cast<NodeFacadeLocal>(vertex->getNodeFacade());
-    std::shared_ptr<NodeFacadeRemote> remote_node_facade = std::make_shared<NodeFacadeRemote>(
-                session_,
-                vertex->getNodeFacade()->getAUUID(),
-                tmp->getNodeHandle()
-                );
+    std::shared_ptr<NodeFacadeRemote> remote_node_facade =
+            std::make_shared<NodeFacadeRemote>(session_, vertex->getAUUID());
 
     graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
     remote_vertices_.push_back(remote_vertex);
@@ -56,7 +52,7 @@ void GraphRemote::vertexRemoved(graph::VertexPtr vertex)
 {
     for(auto it = remote_vertices_.begin() ; it != remote_vertices_.end(); ++it) {
         graph::VertexPtr remote_vertex = *it;
-        if(remote_vertex->getNodeFacade()->getUUID() == vertex->getNodeFacade()->getUUID()) {
+        if(remote_vertex->getNodeFacade()->getUUID() == vertex->getUUID()) {
             vertex_removed(remote_vertex);
             remote_vertices_.erase(it);
             return;

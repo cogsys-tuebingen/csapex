@@ -68,6 +68,8 @@ void NodeFacadeLocal::connectNodeHandle()
 
     observe(nh_->parameters_changed, parameters_changed);
 
+
+
     NodeStatePtr state = nh_->getNodeState();
 
     observe(*(state->label_changed), [this]() {
@@ -77,6 +79,20 @@ void NodeFacadeLocal::connectNodeHandle()
     GenericStatePtr paramstate = state->getParameterState();
 
     if(paramstate) {
+        observe(*(paramstate->parameter_added), [this](const param::ParameterPtr& p) {
+            parameter_added(p);
+        });
+        observe(*(paramstate->parameter_changed), [this](const param::Parameter* p) {
+            if(parameter_changed.isConnected()) {
+                NodeStatePtr state = nh_->getNodeState();
+                GenericStatePtr paramstate = state->getParameterState();
+                parameter_changed(paramstate->getParameter(p->name()));
+            }
+        });
+        observe(*(paramstate->parameter_removed), [this](const param::ParameterPtr& p) {
+            parameter_removed(p);
+        });
+
         observe(*(paramstate->parameter_set_changed), [this]() {
             parameter_set_changed();
         });

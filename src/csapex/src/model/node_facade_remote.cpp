@@ -2,28 +2,24 @@
 #include <csapex/model/node_facade_remote.h>
 
 /// PROJECT
-#include <csapex/model/node_handle.h>
-#include <csapex/model/node_worker.h>
-#include <csapex/model/node_state.h>
-#include <csapex/msg/input_transition.h>
-#include <csapex/msg/output_transition.h>
-#include <csapex/signal/event.h>
-#include <csapex/model/graph/vertex.h>
-#include <csapex/model/node.h>
-#include <csapex/io/session.h>
-#include <csapex/io/protcol/node_requests.h>
+#include <csapex/command/update_parameter.h>
+#include <csapex/io/channel.h>
 #include <csapex/io/protcol/node_broadcasts.h>
 #include <csapex/io/protcol/node_notes.h>
+#include <csapex/io/protcol/node_requests.h>
+#include <csapex/io/protcol/parameter_changed.h>
+#include <csapex/io/protcol/request_parameter.h>
 #include <csapex/io/raw_message.h>
+#include <csapex/io/session.h>
 #include <csapex/model/connector_remote.h>
+#include <csapex/model/node_characteristics.h>
+#include <csapex/model/node_state.h>
 #include <csapex/profiling/profiler_remote.h>
-#include <csapex/io/channel.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <iostream>
-#include <sstream>
 
-using namespace csapex;
 using namespace csapex;
 
 namespace detail
@@ -97,11 +93,9 @@ static void invokeSignal(csapex::slim_signal::Signal<void(Args...)>& s, const No
     SignalInvoker<0, sizeof...(Args)>::doInvoke(s, note);
 }
 
-NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
-                                   NodeHandlePtr nh)
+NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid)
     : Remote(session),
-      uuid_(uuid),
-      nh_(nh)
+      uuid_(uuid)
 {
     node_channel_ = session->openChannel(uuid.getAbsoluteUUID());
 
@@ -133,6 +127,49 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
             /**
              * end: connect signals
              **/
+
+            case NodeNoteType::ParameterAddedTriggered:
+            {
+                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0)->clone<param::Parameter>();
+                createParameterProxy(p);
+                parameter_added(p);
+            }
+                break;
+            case NodeNoteType::ParameterChangedTriggered:
+            {
+                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0);
+                auto pos = parameter_cache_.find(p->name());
+                if(pos == parameter_cache_.end()) {
+                    createParameterProxy(p);
+                    parameter_added(p);
+
+                } else {
+                    param::ParameterPtr proxy = pos->second;
+                    proxy->setValueFrom(*p);
+                    parameter_changed(proxy);
+                }
+
+            }
+                break;
+            case NodeNoteType::ParameterRemovedTriggered:
+            {
+                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0);
+                std::string name = p->name();
+
+                auto pos = parameter_cache_.find(name);
+                if(pos != parameter_cache_.end()) {
+                    parameter_removed(pos->second);
+                    for(auto it = parameters_.begin(); it != parameters_.end(); ++it) {
+                        if((*it)->name() == name) {
+                            parameters_.erase(it);
+                            break;
+                        }
+                    }
+                    parameter_cache_.erase(pos);
+                }
+            }
+                break;
+
             case NodeNoteType::ConnectorCreatedTriggered:
             {
                 ConnectorDescription info = cn->getPayload<ConnectorDescription>(0);
@@ -193,6 +230,12 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid,
             }
         }
     });
+
+    auto params = node_channel_->request<std::vector<param::ParameterPtr>, NodeRequests>(NodeRequests::NodeRequestType::GetParameters);
+    for(param::ParameterPtr& p : params) {
+        createParameterProxy(p);
+        parameter_added(p);
+    }
 
     for(const ConnectorDescription& c : getExternalConnectors()) {
         createConnectorProxy(c.id);
@@ -307,12 +350,12 @@ ConnectorPtr NodeFacadeRemote::getParameterOutput(const std::string& name) const
 
 std::vector<param::ParameterPtr> NodeFacadeRemote::getParameters() const
 {
-    return nh_->getNode().lock()->getParameters();
+    return parameters_;
 }
 
 param::ParameterPtr NodeFacadeRemote::getParameter(const std::string &name) const
 {
-    return nh_->getNode().lock()->getParameter(name);
+    return parameter_cache_.at(name);
 }
 
 void NodeFacadeRemote::setProfiling(bool profiling)
@@ -337,10 +380,23 @@ std::string NodeFacadeRemote::getLoggerOutput(ErrorState::ErrorLevel level) cons
 
 bool NodeFacadeRemote::hasParameter(const std::string &name) const
 {
-    if(auto node = nh_->getNode().lock()){
-        return node->hasParameter(name);
-    }
-    throw std::runtime_error("tried to check a parameter from an invalid node");
+    auto pos = parameter_cache_.find(name);
+    return pos != parameter_cache_.end();
+}
+
+void NodeFacadeRemote::createParameterProxy(param::ParameterPtr proxy) const
+{
+    NodeFacadeRemote* self = const_cast<NodeFacadeRemote*>(this);
+    proxy->parameter_changed.connect([self](param::Parameter* param){
+        // request to set the parameter
+        boost::any raw;
+        param->get_unsafe(raw);
+        CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
+        self->session_->write(change);
+    });
+
+    parameters_.push_back(proxy);
+    parameter_cache_[proxy->name()] = proxy;
 }
 
 

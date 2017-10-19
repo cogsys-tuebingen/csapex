@@ -117,7 +117,7 @@ public:
     slim_signal::Signal<void (ConnectorDescription)> connection_done;
     slim_signal::Signal<void (ConnectorDescription)> connection_start;
 
-    slim_signal::Signal<void()> messages_processed;
+    slim_signal::Signal<void ()> messages_processed;
 
     slim_signal::Signal<void(std::string)> label_changed;
 
@@ -128,6 +128,9 @@ public:
 
     slim_signal::Signal<void (ExecutionState)> execution_state_changed;
 
+    slim_signal::Signal<void(param::ParameterPtr)> parameter_added;
+    slim_signal::Signal<void(param::ParameterPtr)> parameter_changed;
+    slim_signal::Signal<void(param::ParameterPtr)> parameter_removed;
 
     slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_inputs_changed;
     slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_outputs_changed;

@@ -42,7 +42,7 @@ void ParameterSerializer::serialize(const StreamableConstPtr& packet, Serializat
             serializer->serialize(parameter, data);
 
         } else {
-            std::cerr << "cannot serialize Parameter of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
+            std::cerr << "cannot serialize Parameter of type " << (int) type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
         }
 
     }
@@ -69,7 +69,7 @@ StreamablePtr ParameterSerializer::deserialize(SerializationBuffer& data)
         return serializer->deserialize(data);
 
     } else {
-        std::cerr << "cannot deserialize Parameter of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
+        std::cerr << "cannot deserialize Parameter of type " << (int) type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
     }
 
 
