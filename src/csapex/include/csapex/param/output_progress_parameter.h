@@ -22,6 +22,7 @@ public:
 
     virtual std::string TYPE() const override { return "progress"; }
 
+    void advanceProgress(int step = 1);
     void setProgress(int progress, int maximum);
     double getProgress() const;
     double getProgressMaximum() const;
