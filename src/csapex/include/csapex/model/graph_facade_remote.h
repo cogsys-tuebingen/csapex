@@ -13,7 +13,7 @@ class GraphRemote;
 class GraphFacadeRemote : public GraphFacade, public Remote
 {
 public:
-    GraphFacadeRemote(SessionPtr session, GraphFacadeLocal& tmp_ref, GraphFacadeRemote *parent = nullptr);
+    GraphFacadeRemote(SessionPtr session, AUUID uuid, GraphFacadeLocal& tmp_ref, GraphFacadeRemote *parent = nullptr);
 
     virtual AUUID getAbsoluteUUID() const override;
 
@@ -45,6 +45,28 @@ protected:
 private:
     GraphFacadeRemote* parent_;
     std::shared_ptr<GraphRemote> graph_;
+
+    AUUID uuid_;
+
+    io::ChannelPtr graph_channel_;
+
+    /**
+     * begin: generate caches
+     **/
+    #define HANDLE_ACCESSOR(_enum, type, function)
+    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
+    mutable bool has_##function##_; \
+    mutable type cache_##function##_;
+    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+    mutable bool has_##function##_; \
+    mutable type value_##function##_;
+    #define HANDLE_SIGNAL(_enum, signal)
+
+    #include <csapex/model/graph_facade_remote_accessors.hpp>
+    /**
+     * end: generate caches
+     **/
+
 
     std::unordered_map<UUID, std::shared_ptr<GraphFacadeRemote>, UUID::Hasher> children_;
 

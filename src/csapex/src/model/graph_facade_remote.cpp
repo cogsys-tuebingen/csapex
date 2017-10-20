@@ -7,8 +7,10 @@
 #include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node_facade_remote.h>
 #include <csapex/model/node_facade_local.h>
+#include <csapex/io/channel.h>
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/graph_broadcasts.h>
+#include <csapex/io/protcol/graph_notes.h>
 #include <csapex/model/graph/vertex.h>
 
 /// SYSTEM
@@ -16,18 +18,52 @@
 
 using namespace csapex;
 
-GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, GraphFacadeLocal& tmp_ref, GraphFacadeRemote* parent)
+GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, AUUID uuid, GraphFacadeLocal& tmp_ref, GraphFacadeRemote* parent)
     : GraphFacade(tmp_ref.getNodeFacade()),
       Remote(session),
       parent_(parent),
-      graph_(std::make_shared<GraphRemote>(session, tmp_ref.getAbsoluteUUID(),
+      graph_(std::make_shared<GraphRemote>(session, uuid,
                                            *std::dynamic_pointer_cast<GraphLocal>(tmp_ref.getGraph()))),
+      uuid_(uuid),
       tmp_ref_(tmp_ref)
 {
+    graph_channel_ = session->openChannel(uuid.getAbsoluteUUID());
+
     observe(graph_->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeAddedHandler));
     observe(graph_->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeRemovedHandler));
 
     observe(graph_->notification, notification);
+
+
+    observe(graph_channel_->note_received, [this](const io::NoteConstPtr& note){
+        if(const std::shared_ptr<GraphNote const>& cn = std::dynamic_pointer_cast<GraphNote const>(note)) {
+
+            /**
+             * begin: connect signals
+             **/
+            #define HANDLE_ACCESSOR(_enum, type, function)
+            #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
+            #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+                case GraphNoteType::function##Changed: \
+                { \
+                    value_##function##_ = cn->getPayload<type>(0);\
+                    signal(value_##function##_); \
+                } \
+                break;
+            #define HANDLE_SIGNAL(_enum, signal) \
+                case GraphNoteType::_enum##Triggered: \
+                { \
+                    invokeSignal(signal, *cn); \
+                } \
+                break;
+
+                #include <csapex/model/graph_facade_remote_accessors.hpp>
+            /**
+             * end: connect signals
+             **/
+
+        }
+    });
 
     observe(tmp_ref.paused, paused);
     observe(tmp_ref.stopped, stopped);
@@ -225,7 +261,7 @@ bool GraphFacadeRemote::isPaused() const
 void GraphFacadeRemote::pauseRequest(bool pause)
 {
     // TODO: implement client server
-    tmp_ref_.pauseRequest(pause);
+//    tmp_ref_.pauseRequest(pause);
 }
 
 
@@ -240,3 +276,38 @@ std::vector<ConnectionInformation> GraphFacadeRemote::enumerateAllConnections() 
     // TODO: implement client server
     return tmp_ref_.enumerateAllConnections();
 }
+
+
+/**
+ * begin: generate getters
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function) \
+type GraphFacadeRemote::function() const\
+{\
+    return request<type, GraphRequests>(GraphRequests::GraphRequestType::_enum, getUUID().getAbsoluteUUID());\
+}
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
+type GraphFacadeRemote::function() const\
+{\
+    if(!has_##function##_) { \
+        cache_##function##_ = request<type, GraphRequests>(GraphRequests::GraphRequestType::_enum, getUUID().getAbsoluteUUID());\
+        has_##function##_ = true; \
+    } \
+    return cache_##function##_; \
+}
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+type GraphFacadeRemote::function() const\
+{\
+    if(!has_##function##_) { \
+        value_##function##_ = request<type, GraphRequests>(GraphRequests::GraphRequestType::_enum, getUUID().getAbsoluteUUID());\
+        has_##function##_ = true; \
+    } \
+    return value_##function##_; \
+}
+#define HANDLE_SIGNAL(_enum, signal)
+
+#include <csapex/model/graph_facade_remote_accessors.hpp>
+/**
+ * end: generate getters
+ **/
+

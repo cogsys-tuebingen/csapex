@@ -52,7 +52,8 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     });
 
     // make the proxys only _after_ the session is started
-    remote_root_ = std::make_shared<GraphFacadeRemote>(session_, *std::dynamic_pointer_cast<GraphFacadeLocal>(core_tmp_->getRoot()));
+    remote_root_ = std::make_shared<GraphFacadeRemote>(session_, core_tmp_->getRoot()->getAbsoluteUUID(),
+                                                       *std::dynamic_pointer_cast<GraphFacadeLocal>(core_tmp_->getRoot()));
     settings_ = std::make_shared<SettingsRemote>(session_);
     node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get());
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);
