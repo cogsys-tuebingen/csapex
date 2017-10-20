@@ -19,7 +19,7 @@ public:
     DeleteConnector(const AUUID &graph_uuid, Connectable *_c);
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
 
 protected:
     bool doExecute() override;

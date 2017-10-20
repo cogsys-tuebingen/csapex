@@ -42,10 +42,10 @@ public:
 
     // SERIALIZABLES
     void write (const StreamableConstPtr &i);
-    StreamablePtr read ();
+    StreamablePtr read () const;
 
     SerializationBuffer& operator << (const Serializable& s);
-    SerializationBuffer& operator >> (Serializable& s);
+    const SerializationBuffer& operator >> (Serializable& s) const;
 
     template <typename T,
               typename std::enable_if<std::is_base_of<Streamable, T>::value,
@@ -58,7 +58,7 @@ public:
     template <typename T,
               typename std::enable_if<std::is_base_of<Streamable, T>::value,
                                       int>::type = 0>
-    SerializationBuffer& operator >> (std::shared_ptr<T>& i)
+    const SerializationBuffer& operator >> (std::shared_ptr<T>& i) const
     {
         i = std::dynamic_pointer_cast<T>(read());
         return *this;
@@ -80,7 +80,7 @@ public:
     template <typename T,
               typename std::enable_if<std::is_integral<T>::value,
                                       int>::type = 0>
-    SerializationBuffer& operator >> (T& i)
+    const SerializationBuffer& operator >> (T& i) const
     {
         std::size_t nbytes = sizeof(T);
         T res = 0;
@@ -95,11 +95,11 @@ public:
 
     // FLOATS
     SerializationBuffer& operator << (float f);
-    SerializationBuffer& operator >> (float& f);
+    const SerializationBuffer& operator >> (float& f) const;
 
     // DOUBLES
     SerializationBuffer& operator << (double d);
-    SerializationBuffer& operator >> (double& d);
+    const SerializationBuffer& operator >> (double& d) const;
 
 
     // ENUMS
@@ -114,7 +114,7 @@ public:
     template <typename T,
               typename std::enable_if<std::is_enum<T>::value,
                                       int>::type = 0>
-    SerializationBuffer& operator >> (T& i)
+    const SerializationBuffer& operator >> (T& i) const
     {
         i = static_cast<T>(at(pos++));
         return *this;
@@ -123,20 +123,20 @@ public:
 
     // STRINGS
     SerializationBuffer& operator << (const std::string& s);
-    SerializationBuffer& operator >> (std::string& s);
+    const SerializationBuffer& operator >> (std::string& s) const;
 
 
     // STRING STREAMS
     SerializationBuffer& operator << (const std::stringstream& s);
-    SerializationBuffer& operator >> (std::stringstream& s);
+    const SerializationBuffer& operator >> (std::stringstream& s) const;
 
     // UUID
     SerializationBuffer& operator << (const UUID& s);
-    SerializationBuffer& operator >> (UUID& s);
+    const SerializationBuffer& operator >> (UUID& s) const;
 
     // Token Data
     SerializationBuffer& operator << (const TokenData& s);
-    SerializationBuffer& operator >> (TokenData& s);
+    const SerializationBuffer& operator >> (TokenData& s) const;
 
 
     // BOOST ANY
@@ -151,13 +151,13 @@ public:
     template <typename T,
               typename std::enable_if<std::is_same<T, boost::any>::value,
                                       int>::type = 0>
-    SerializationBuffer& operator >> (T& any)
+    const SerializationBuffer& operator >> (T& any) const
     {
         return readAny(any);
     }
 
     SerializationBuffer& writeAny(const boost::any& any);
-    SerializationBuffer& readAny(boost::any& any);
+    const SerializationBuffer& readAny(boost::any& any) const;
 
     // VECTOR
     template <typename S>
@@ -172,7 +172,7 @@ public:
     }
 
     template <typename S>
-    SerializationBuffer& operator >> (std::vector<S>& s)
+    const SerializationBuffer& operator >> (std::vector<S>& s) const
     {
         uint8_t len;
         operator >> (len);
@@ -196,7 +196,7 @@ public:
     }
 
     template <typename S, typename T>
-    SerializationBuffer& operator >> (std::pair<S, T>& s)
+    const SerializationBuffer& operator >> (std::pair<S, T>& s) const
     {
         operator >> (s.first);
         operator >> (s.second);
@@ -217,7 +217,7 @@ public:
     }
 
     template <typename Key, typename Value>
-    SerializationBuffer& operator >> (std::map<Key, Value>& m)
+    const SerializationBuffer& operator >> (std::map<Key, Value>& m) const
     {
         uint64_t size;
         operator >> (size);
@@ -245,7 +245,7 @@ public:
               typename std::enable_if<!std::is_base_of<Streamable, T>::value &&
                                       std::is_base_of<TokenData, T>::value,
                                       int>::type = 0>
-    SerializationBuffer& operator >> (std::shared_ptr<T>& s)
+    const SerializationBuffer& operator >> (std::shared_ptr<T>& s) const
     {
         // in case T is const, we need to strip that, otherwise we cannot deserialize
         using TT = typename std::remove_const<T>::type;
@@ -260,7 +260,7 @@ public:
                                       !std::is_base_of<TokenData, T>::value &&
                                       std::is_default_constructible<T>::value,
                                       int>::type = 0>
-    SerializationBuffer& operator >> (std::shared_ptr<T>& s)
+    const SerializationBuffer& operator >> (std::shared_ptr<T>& s) const
     {
         // in case T is const, we need to strip that, otherwise we cannot deserialize
         using TT = typename std::remove_const<T>::type;
@@ -275,7 +275,7 @@ public:
                                       !std::is_base_of<TokenData, T>::value &&
                                       !std::is_default_constructible<T>::value,
                                       int>::type = 0>
-    SerializationBuffer& operator >> (std::shared_ptr<T>& s)
+    const SerializationBuffer& operator >> (std::shared_ptr<T>& s) const
     {
         // in case T is const, we need to strip that, otherwise we cannot deserialize
         using TT = typename std::remove_const<T>::type;
@@ -289,13 +289,13 @@ public:
 
     // YAML
     SerializationBuffer& operator << (const YAML::Node& node);
-    SerializationBuffer& operator >> (YAML::Node& node);
+    const SerializationBuffer& operator >> (YAML::Node& node) const;
 
 private:
-    std::size_t pos;
+    mutable std::size_t pos;
 
     std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const boost::any& a)>> any_serializer;
-    std::map<uint8_t, std::function<void(SerializationBuffer& buffer, boost::any& a)>> any_deserializer;
+    std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, boost::any& a)>> any_deserializer;
 };
 
 }

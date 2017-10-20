@@ -59,7 +59,7 @@ void ModifyConnection::serialize(SerializationBuffer &data) const
     data << was_active;
 }
 
-void ModifyConnection::deserialize(SerializationBuffer& data)
+void ModifyConnection::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

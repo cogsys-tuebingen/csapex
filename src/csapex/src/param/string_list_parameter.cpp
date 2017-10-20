@@ -138,7 +138,7 @@ void StringListParameter::serialize(SerializationBuffer &data) const
     data << list_;
 }
 
-void StringListParameter::deserialize(SerializationBuffer& data)
+void StringListParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

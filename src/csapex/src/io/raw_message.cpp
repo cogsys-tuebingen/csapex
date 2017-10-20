@@ -55,7 +55,7 @@ void RawMessage::serialize(SerializationBuffer &data) const
         data << *src;
     }
 }
-void RawMessage::deserialize(SerializationBuffer& data)
+void RawMessage::deserialize(const SerializationBuffer& data)
 {
     data >> uuid_;
     std::size_t n;

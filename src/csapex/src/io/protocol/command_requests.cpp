@@ -82,7 +82,7 @@ void CommandRequests::CommandRequest::serialize(SerializationBuffer &data) const
     data << command_;
 }
 
-void CommandRequests::CommandRequest::deserialize(SerializationBuffer& data)
+void CommandRequests::CommandRequest::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> command_;
@@ -119,7 +119,7 @@ void CommandRequests::CommandResponse::serialize(SerializationBuffer &data) cons
     data << result_;
 }
 
-void CommandRequests::CommandResponse::deserialize(SerializationBuffer& data)
+void CommandRequests::CommandResponse::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> result_;

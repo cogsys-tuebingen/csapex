@@ -57,7 +57,7 @@ public:
     virtual uint8_t getPacketType() const override;
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     void setValueFrom(const Parameter& other);
     void cloneFrom(const Parameter& other);

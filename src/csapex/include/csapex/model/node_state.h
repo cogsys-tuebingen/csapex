@@ -33,7 +33,7 @@ public:
     virtual void readYaml(const YAML::Node& node) override;
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
 public:
     double getMaximumFrequency() const;

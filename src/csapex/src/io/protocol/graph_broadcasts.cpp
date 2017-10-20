@@ -49,7 +49,7 @@ void GraphBroadcasts::serialize(SerializationBuffer &data) const
     data << payload_;
 }
 
-void GraphBroadcasts::deserialize(SerializationBuffer& data)
+void GraphBroadcasts::deserialize(const SerializationBuffer& data)
 {
     data >> broadcast_type_;
     data >> graph_uuid_;

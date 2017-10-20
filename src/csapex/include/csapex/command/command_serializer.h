@@ -18,7 +18,7 @@ public:
     virtual ~CommandSerializerInterface();
 
     virtual void serialize(const CommandConstPtr& packet, SerializationBuffer &data) = 0;
-    virtual CommandPtr deserialize(SerializationBuffer& data) = 0;
+    virtual CommandPtr deserialize(const SerializationBuffer& data) = 0;
 };
 
 
@@ -26,7 +26,7 @@ class CommandSerializer : public Singleton<CommandSerializer>, public Serializer
 {
 public:
     void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
-    StreamablePtr deserialize(SerializationBuffer &data) override;
+    StreamablePtr deserialize(const SerializationBuffer &data) override;
 
     static void registerSerializer(const std::string &name, const std::string& type, std::shared_ptr<CommandSerializerInterface> serializer);
 
@@ -58,7 +58,7 @@ struct CommandSerializerRegistered
                 impl->serialize(data);\
             }\
         }\
-        virtual CommandPtr deserialize(SerializationBuffer& data) override\
+        virtual CommandPtr deserialize(const SerializationBuffer& data) override\
         {\
             CommandPtr res = std::make_shared<Name>();\
             res->deserialize(data);\

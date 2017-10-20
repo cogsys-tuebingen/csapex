@@ -21,7 +21,7 @@ public:
     virtual ~OutputProgressParameter();
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     virtual std::string TYPE() const override { return "progress"; }
 

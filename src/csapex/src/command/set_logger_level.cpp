@@ -88,7 +88,7 @@ void SetLoggerLevel::serialize(SerializationBuffer &data) const
     data << level;
 }
 
-void SetLoggerLevel::deserialize(SerializationBuffer& data)
+void SetLoggerLevel::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

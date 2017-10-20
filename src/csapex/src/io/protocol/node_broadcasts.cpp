@@ -43,7 +43,7 @@ void NodeBroadcasts::serialize(SerializationBuffer &data) const
     data << uuid_;
 }
 
-void NodeBroadcasts::deserialize(SerializationBuffer& data)
+void NodeBroadcasts::deserialize(const SerializationBuffer& data)
 {
     data >> broadcast_type_;
     data >> uuid_;

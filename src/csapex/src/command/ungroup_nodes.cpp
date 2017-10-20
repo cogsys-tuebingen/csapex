@@ -193,7 +193,7 @@ void UngroupNodes::serialize(SerializationBuffer &data) const
     data << uuid;
 }
 
-void UngroupNodes::deserialize(SerializationBuffer& data)
+void UngroupNodes::deserialize(const SerializationBuffer& data)
 {
     GroupBase::deserialize(data);
 

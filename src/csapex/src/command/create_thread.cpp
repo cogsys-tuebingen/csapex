@@ -103,7 +103,7 @@ void CreateThread::serialize(SerializationBuffer &data) const
     data << new_id;
 }
 
-void CreateThread::deserialize(SerializationBuffer& data)
+void CreateThread::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

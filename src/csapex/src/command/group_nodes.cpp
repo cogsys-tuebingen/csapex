@@ -271,7 +271,7 @@ void GroupNodes::serialize(SerializationBuffer &data) const
     data << sub_graph_uuid_;
 }
 
-void GroupNodes::deserialize(SerializationBuffer& data)
+void GroupNodes::deserialize(const SerializationBuffer& data)
 {
     GroupBase::deserialize(data);
 

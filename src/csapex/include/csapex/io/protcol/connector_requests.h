@@ -33,7 +33,7 @@ public:
         ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid, const boost::any& payload);
 
         virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(SerializationBuffer& data) override;
+        virtual void deserialize(const SerializationBuffer& data) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
@@ -62,7 +62,7 @@ public:
         ConnectorResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid);
 
         virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(SerializationBuffer& data) override;
+        virtual void deserialize(const SerializationBuffer& data) override;
 
         std::string getType() const override
         {

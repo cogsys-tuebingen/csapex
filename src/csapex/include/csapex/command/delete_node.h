@@ -22,7 +22,7 @@ public:
     DeleteNode(const AUUID &graph_uuid, const UUID &uuid);
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
 
 
     std::string getType() const override

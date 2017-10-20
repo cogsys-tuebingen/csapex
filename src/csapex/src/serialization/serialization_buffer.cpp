@@ -39,7 +39,7 @@ SerializationBuffer::SerializationBuffer()
         buffer << ((uint8_t) id); \
         buffer << (boost::any_cast<__VA_ARGS__> (any)); \
     };\
-    auto deserializer = [id](SerializationBuffer& buffer, boost::any& any){ \
+    auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
         __VA_ARGS__ v; \
         buffer >> (v); \
         any = v; \
@@ -57,7 +57,7 @@ SerializationBuffer::SerializationBuffer()
         buffer << (boost::any_cast<__VA_ARGS__> (any)).GET_P1; \
         buffer << (boost::any_cast<__VA_ARGS__> (any)); \
     };\
-    auto deserializer = [id](SerializationBuffer& buffer, boost::any& any){ \
+    auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
         P1 p1; \
         buffer >> (p1); \
         __VA_ARGS__ v(p1); \
@@ -72,7 +72,7 @@ SerializationBuffer::SerializationBuffer()
         buffer << (boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any))->GET_P1; \
         buffer << *(boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any)); \
     };\
-    auto deserializer = [id](SerializationBuffer& buffer, boost::any& any){ \
+    auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
         P1 p1; \
         buffer >> (p1); \
         auto v = std::make_shared<__VA_ARGS__>(p1); \
@@ -156,7 +156,7 @@ void SerializationBuffer::write(const StreamableConstPtr &i)
     }
 }
 
-StreamablePtr SerializationBuffer::read()
+StreamablePtr SerializationBuffer::read() const
 {
     bool null;
     operator >> (null);
@@ -173,7 +173,7 @@ SerializationBuffer& SerializationBuffer::operator << (const Serializable& s)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (Serializable& s)
+const SerializationBuffer& SerializationBuffer::operator >> (Serializable& s) const
 {
     s.deserialize(*this);
     return *this;
@@ -194,7 +194,7 @@ SerializationBuffer& SerializationBuffer::writeAny (const boost::any& any)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::readAny (boost::any& any)
+const SerializationBuffer& SerializationBuffer::readAny (boost::any& any) const
 {
     uint8_t type;
     operator >> (type);
@@ -285,7 +285,8 @@ SerializationBuffer& SerializationBuffer::operator << (float f)
 
     return *this;
 }
-SerializationBuffer& SerializationBuffer::operator >> (float& f)
+
+const SerializationBuffer& SerializationBuffer::operator >> (float& f) const
 {
     uint8_t bytes[4];
     for(uint8_t i = 0; i < 4; ++i) {
@@ -337,7 +338,8 @@ SerializationBuffer& SerializationBuffer::operator << (double d)
 
     return *this;
 }
-SerializationBuffer& SerializationBuffer::operator >> (double& d)
+
+const SerializationBuffer& SerializationBuffer::operator >> (double& d) const
 {
     uint8_t bytes[8];
     for(uint8_t i = 0; i < 8; ++i) {
@@ -375,7 +377,7 @@ SerializationBuffer& SerializationBuffer::operator << (const std::string& s)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (std::string& s)
+const SerializationBuffer& SerializationBuffer::operator >> (std::string& s) const
 {
     uint16_t str_len;
     operator >> (str_len);
@@ -396,7 +398,7 @@ SerializationBuffer& SerializationBuffer::operator << (const std::stringstream& 
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (std::stringstream& s)
+const SerializationBuffer& SerializationBuffer::operator >> (std::stringstream& s) const
 {
     std::string str;
     operator >> (str);
@@ -411,7 +413,7 @@ SerializationBuffer& SerializationBuffer::operator << (const UUID& s)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (UUID& s)
+const SerializationBuffer& SerializationBuffer::operator >> (UUID& s) const
 {
     std::string full_name;
     operator >> (full_name);
@@ -428,7 +430,7 @@ SerializationBuffer& SerializationBuffer::operator << (const TokenData& s)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (TokenData& s)
+const SerializationBuffer& SerializationBuffer::operator >> (TokenData& s) const
 {
     std::string name;
     operator >> (name);
@@ -448,7 +450,7 @@ SerializationBuffer& SerializationBuffer::operator << (const YAML::Node& node)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (YAML::Node& node)
+const SerializationBuffer& SerializationBuffer::operator >> (YAML::Node& node) const
 {
     std::stringstream ss;
     operator >> (ss);

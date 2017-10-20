@@ -35,7 +35,7 @@ public:
     }
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const override;

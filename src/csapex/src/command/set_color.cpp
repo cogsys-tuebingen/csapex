@@ -70,7 +70,7 @@ void SetColor::serialize(SerializationBuffer &data) const
     data << r_orig << g_orig << b_orig;
 }
 
-void SetColor::deserialize(SerializationBuffer& data)
+void SetColor::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

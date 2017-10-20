@@ -181,7 +181,7 @@ void RangeParameter::serialize(SerializationBuffer &data) const
     data << step_;
 }
 
-void RangeParameter::deserialize(SerializationBuffer& data)
+void RangeParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

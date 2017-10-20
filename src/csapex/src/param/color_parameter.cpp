@@ -126,7 +126,7 @@ void ColorParameter::serialize(SerializationBuffer &data) const
     data << def_;
 }
 
-void ColorParameter::deserialize(SerializationBuffer& data)
+void ColorParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

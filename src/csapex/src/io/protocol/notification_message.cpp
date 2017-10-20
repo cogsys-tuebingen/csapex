@@ -29,7 +29,7 @@ void NotificationMessage::serialize(SerializationBuffer &data) const
     data << notification;
 }
 
-void NotificationMessage::deserialize(SerializationBuffer& data)
+void NotificationMessage::deserialize(const SerializationBuffer& data)
 {
     data >> notification;
 }

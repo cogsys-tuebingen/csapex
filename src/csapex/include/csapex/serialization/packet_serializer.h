@@ -19,7 +19,7 @@ public:
     virtual ~Serializer();
 
     virtual void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) = 0;
-    virtual StreamablePtr deserialize(SerializationBuffer& data) = 0;
+    virtual StreamablePtr deserialize(const SerializationBuffer& data) = 0;
 };
 
 /**
@@ -41,7 +41,7 @@ public:
 
 public:
     void serialize(const StreamableConstPtr &packet, SerializationBuffer &data) override;
-    StreamablePtr deserialize(SerializationBuffer &data) override;
+    StreamablePtr deserialize(const SerializationBuffer &data) override;
 
 
 private:
@@ -74,7 +74,7 @@ public: \
             res->serialize(data); \
         } \
     } \
-    StreamablePtr deserialize(SerializationBuffer &data) override \
+    StreamablePtr deserialize(const SerializationBuffer &data) override \
     { \
         std::shared_ptr<Name> res = Name::makeEmpty(); \
         res->deserialize(data); \

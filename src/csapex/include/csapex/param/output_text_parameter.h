@@ -25,7 +25,7 @@ public:
     virtual const std::type_info &type() const override;
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
 protected:
     virtual void get_unsafe(boost::any& out) const override;

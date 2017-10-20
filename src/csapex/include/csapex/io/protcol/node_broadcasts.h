@@ -24,7 +24,7 @@ public:
     NodeBroadcasts(NodeBroadcastType Broadcast_type, AUUID uuid);
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     std::string getType() const override
     {

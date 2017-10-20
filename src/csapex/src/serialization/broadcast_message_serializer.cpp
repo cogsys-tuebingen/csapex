@@ -41,7 +41,7 @@ void BroadcastMessageSerializer::serialize(const StreamableConstPtr &packet, Ser
     }
 }
 
-StreamablePtr BroadcastMessageSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr BroadcastMessageSerializer::deserialize(const SerializationBuffer& data)
 {
 //    std::cerr << "deserializing BroadcastMessage" << std::endl;
 

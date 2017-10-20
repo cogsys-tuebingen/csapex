@@ -43,7 +43,7 @@ void CommandSerializer::serialize(const StreamableConstPtr& packet, Serializatio
     }
 }
 
-StreamablePtr CommandSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr CommandSerializer::deserialize(const SerializationBuffer& data)
 {
     std::string type;
     data >> type;

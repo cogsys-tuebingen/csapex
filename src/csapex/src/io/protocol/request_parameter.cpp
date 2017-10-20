@@ -49,7 +49,7 @@ void RequestParameter::ParameterRequest::serialize(SerializationBuffer &data) co
     data << id_;
 }
 
-void RequestParameter::ParameterRequest::deserialize(SerializationBuffer& data)
+void RequestParameter::ParameterRequest::deserialize(const SerializationBuffer& data)
 {
     data >> id_;
 }
@@ -74,7 +74,7 @@ void RequestParameter::ParameterResponse::serialize(SerializationBuffer &data) c
     ParameterSerializer::instance().serialize(param_, data);
 }
 
-void RequestParameter::ParameterResponse::deserialize(SerializationBuffer& data)
+void RequestParameter::ParameterResponse::deserialize(const SerializationBuffer& data)
 {
     param_ = std::dynamic_pointer_cast<param::Parameter>(ParameterSerializer::instance().deserialize(data));
 }

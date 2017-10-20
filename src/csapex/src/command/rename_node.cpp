@@ -73,7 +73,7 @@ void RenameNode::serialize(SerializationBuffer &data) const
     data << old_name_;
 }
 
-void RenameNode::deserialize(SerializationBuffer& data)
+void RenameNode::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

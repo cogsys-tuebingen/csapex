@@ -77,7 +77,7 @@ void PasteGraph::serialize(SerializationBuffer &data) const
     data << pos_.x << pos_.y;
 }
 
-void PasteGraph::deserialize(SerializationBuffer& data)
+void PasteGraph::deserialize(const SerializationBuffer& data)
 {
     data >> blueprint_;
     data >> pos_.x >> pos_.y;

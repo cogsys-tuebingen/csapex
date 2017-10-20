@@ -80,7 +80,7 @@ void SwitchThread::serialize(SerializationBuffer &data) const
     data << name;
 }
 
-void SwitchThread::deserialize(SerializationBuffer& data)
+void SwitchThread::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

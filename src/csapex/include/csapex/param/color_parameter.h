@@ -33,7 +33,7 @@ public:
     void doDeserialize(const YAML::Node& n) override;
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     std::vector<int> def() const;
     std::vector<int> value() const;

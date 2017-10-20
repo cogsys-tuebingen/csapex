@@ -48,7 +48,7 @@ public:
         }
 
         virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(SerializationBuffer& data) override;
+        virtual void deserialize(const SerializationBuffer& data) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
@@ -78,7 +78,7 @@ public:
         NodeResponse(NodeRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(SerializationBuffer& data) override;
+        virtual void deserialize(const SerializationBuffer& data) override;
 
         std::string getType() const override
         {

@@ -174,7 +174,7 @@ void Command::serialize(SerializationBuffer &data) const
     data << graph_uuid;
 }
 
-void Command::deserialize(SerializationBuffer& data)
+void Command::deserialize(const SerializationBuffer& data)
 {
     data >> graph_uuid;
 }

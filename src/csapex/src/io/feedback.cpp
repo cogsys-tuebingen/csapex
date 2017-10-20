@@ -39,7 +39,7 @@ void Feedback::serialize(SerializationBuffer &data) const
     data << request_id_;
     data << message_;
 }
-void Feedback::deserialize(SerializationBuffer& data)
+void Feedback::deserialize(const SerializationBuffer& data)
 {
     data >> request_id_;
     data >> message_;

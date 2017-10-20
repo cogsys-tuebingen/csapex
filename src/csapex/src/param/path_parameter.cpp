@@ -131,7 +131,7 @@ void PathParameter::serialize(SerializationBuffer &data) const
     data << output_;
 }
 
-void PathParameter::deserialize(SerializationBuffer& data)
+void PathParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

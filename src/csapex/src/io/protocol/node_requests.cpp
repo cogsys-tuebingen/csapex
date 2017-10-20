@@ -123,7 +123,7 @@ void NodeRequests::NodeRequest::serialize(SerializationBuffer &data) const
     data << arguments_;
 }
 
-void NodeRequests::NodeRequest::deserialize(SerializationBuffer& data)
+void NodeRequests::NodeRequest::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;
@@ -163,7 +163,7 @@ void NodeRequests::NodeResponse::serialize(SerializationBuffer &data) const
     data << result_;
 }
 
-void NodeRequests::NodeResponse::deserialize(SerializationBuffer& data)
+void NodeRequests::NodeResponse::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;

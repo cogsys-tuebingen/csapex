@@ -153,7 +153,7 @@ void UpdateParameter::serialize(SerializationBuffer &data) const
     data << value;
 }
 
-void UpdateParameter::deserialize(SerializationBuffer& data)
+void UpdateParameter::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

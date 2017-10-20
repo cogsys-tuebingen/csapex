@@ -91,7 +91,7 @@ void DeleteConnection::serialize(SerializationBuffer &data) const
     data << to_uuid;
 }
 
-void DeleteConnection::deserialize(SerializationBuffer& data)
+void DeleteConnection::deserialize(const SerializationBuffer& data)
 {
     Meta::deserialize(data);
 

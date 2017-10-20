@@ -19,7 +19,7 @@ public:
     DeleteConnection(const AUUID& graph_uuid, const UUID& from, const UUID& to);
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
 
     std::string getType() const override
     {

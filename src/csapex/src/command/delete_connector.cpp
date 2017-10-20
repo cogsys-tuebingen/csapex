@@ -82,7 +82,7 @@ void DeleteConnector::serialize(SerializationBuffer &data) const
     data << c_uuid;
 }
 
-void DeleteConnector::deserialize(SerializationBuffer& data)
+void DeleteConnector::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

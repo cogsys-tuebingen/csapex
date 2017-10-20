@@ -340,7 +340,7 @@ void SetParameter::serialize(SerializationBuffer &data) const
     data << def_;
 }
 
-void SetParameter::deserialize(SerializationBuffer& data)
+void SetParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

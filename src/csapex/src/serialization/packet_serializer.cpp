@@ -49,7 +49,7 @@ void PacketSerializer::serialize(const StreamableConstPtr &packet, Serialization
     }
 }
 
-StreamablePtr PacketSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr PacketSerializer::deserialize(const SerializationBuffer& data)
 {
     // determine packet type
     uint8_t type;

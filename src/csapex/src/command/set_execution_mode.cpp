@@ -82,7 +82,7 @@ void SetExecutionMode::serialize(SerializationBuffer &data) const
     data << mode;
 }
 
-void SetExecutionMode::deserialize(SerializationBuffer& data)
+void SetExecutionMode::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

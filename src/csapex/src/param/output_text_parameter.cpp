@@ -104,7 +104,7 @@ void OutputTextParameter::serialize(SerializationBuffer &data) const
     data << text_;
 }
 
-void OutputTextParameter::deserialize(SerializationBuffer& data)
+void OutputTextParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

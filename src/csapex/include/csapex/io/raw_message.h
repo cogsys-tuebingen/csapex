@@ -27,7 +27,7 @@ public:
     AUUID getUUID() const;
 
     virtual void serialize(SerializationBuffer &data) const;
-    virtual void deserialize(SerializationBuffer& data);
+    virtual void deserialize(const SerializationBuffer& data);
 
 private:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const;

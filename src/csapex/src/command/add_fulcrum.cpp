@@ -62,7 +62,7 @@ void AddFulcrum::serialize(SerializationBuffer &data) const
     data << type;
 }
 
-void AddFulcrum::deserialize(SerializationBuffer& data)
+void AddFulcrum::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

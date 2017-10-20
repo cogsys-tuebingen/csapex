@@ -118,7 +118,7 @@ void CoreRequests::CoreRequest::serialize(SerializationBuffer &data) const
     data << parameters_;
 }
 
-void CoreRequests::CoreRequest::deserialize(SerializationBuffer& data)
+void CoreRequests::CoreRequest::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> parameters_;
@@ -153,7 +153,7 @@ void CoreRequests::CoreResponse::serialize(SerializationBuffer &data) const
     data << result_;
 }
 
-void CoreRequests::CoreResponse::deserialize(SerializationBuffer& data)
+void CoreRequests::CoreResponse::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> result_;

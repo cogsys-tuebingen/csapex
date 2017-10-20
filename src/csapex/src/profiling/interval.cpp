@@ -107,7 +107,7 @@ void Interval::serialize(SerializationBuffer &data) const
 
     data << sub;
 }
-void Interval::deserialize(SerializationBuffer& data)
+void Interval::deserialize(const SerializationBuffer& data)
 {
     data >> name_;
 

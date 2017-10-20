@@ -33,7 +33,7 @@ void Notification::serialize(SerializationBuffer &data) const
     data << error;
 }
 
-void Notification::deserialize(SerializationBuffer& data)
+void Notification::deserialize(const SerializationBuffer& data)
 {
     data >> auuid;
     data >> message;

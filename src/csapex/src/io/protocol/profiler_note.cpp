@@ -36,7 +36,7 @@ void ProfilerNote::serialize(SerializationBuffer &data) const
     data << payload_;
 }
 
-void ProfilerNote::deserialize(SerializationBuffer& data)
+void ProfilerNote::deserialize(const SerializationBuffer& data)
 {
     Note::deserialize(data);
 

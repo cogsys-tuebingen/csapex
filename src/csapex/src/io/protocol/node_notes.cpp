@@ -36,7 +36,7 @@ void NodeNote::serialize(SerializationBuffer &data) const
     data << payload_;
 }
 
-void NodeNote::deserialize(SerializationBuffer& data)
+void NodeNote::deserialize(const SerializationBuffer& data)
 {
     Note::deserialize(data);
 

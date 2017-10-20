@@ -62,7 +62,7 @@ void FlipSides::serialize(SerializationBuffer &data) const
     data << uuid;
 }
 
-void FlipSides::deserialize(SerializationBuffer& data)
+void FlipSides::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

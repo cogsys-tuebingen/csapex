@@ -36,7 +36,7 @@ public:
     ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid, const boost::any& payload);
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     ConnectorNoteType getNoteType() const
     {

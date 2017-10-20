@@ -74,7 +74,7 @@ void MuteNode::serialize(SerializationBuffer &data) const
     data << executed;
 }
 
-void MuteNode::deserialize(SerializationBuffer& data)
+void MuteNode::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

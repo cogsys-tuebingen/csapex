@@ -123,7 +123,7 @@ void AngleParameter::serialize(SerializationBuffer &data) const
     data << max_;
 }
 
-void AngleParameter::deserialize(SerializationBuffer& data)
+void AngleParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

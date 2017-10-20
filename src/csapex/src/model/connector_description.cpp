@@ -83,7 +83,7 @@ void ConnectorDescription::serialize(SerializationBuffer &data) const
 
     data << id;
 }
-void ConnectorDescription::deserialize(SerializationBuffer& data)
+void ConnectorDescription::deserialize(const SerializationBuffer& data)
 {
     data >> owner;
     data >> connector_type;

@@ -29,7 +29,7 @@ public:
     virtual void init(GraphFacadeLocal* root, CsApexCore& core) override;
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
     void cloneFrom(const Command& other) override;
 
 protected:

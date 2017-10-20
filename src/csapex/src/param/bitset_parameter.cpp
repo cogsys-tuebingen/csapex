@@ -236,7 +236,7 @@ void BitSetParameter::serialize(SerializationBuffer &data) const
     data << def_;
 }
 
-void BitSetParameter::deserialize(SerializationBuffer& data)
+void BitSetParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

@@ -42,7 +42,7 @@ void NoteSerializer::serialize(const StreamableConstPtr &packet, SerializationBu
     }
 }
 
-StreamablePtr NoteSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr NoteSerializer::deserialize(const SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Note" << std::endl;
 

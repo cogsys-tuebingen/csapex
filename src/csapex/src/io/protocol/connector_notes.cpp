@@ -36,7 +36,7 @@ void ConnectorNote::serialize(SerializationBuffer &data) const
     data << payload_;
 }
 
-void ConnectorNote::deserialize(SerializationBuffer& data)
+void ConnectorNote::deserialize(const SerializationBuffer& data)
 {
     Note::deserialize(data);
 

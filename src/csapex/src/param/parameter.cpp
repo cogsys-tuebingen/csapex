@@ -56,7 +56,7 @@ void Parameter::serialize(SerializationBuffer &data) const
 
 }
 
-void Parameter::deserialize(SerializationBuffer& data)
+void Parameter::deserialize(const SerializationBuffer& data)
 {
     data >> name_;
     data >> uuid_;

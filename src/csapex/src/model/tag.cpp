@@ -103,7 +103,7 @@ void Tag::serialize(SerializationBuffer &data) const
 {
     data << name_;
 }
-void Tag::deserialize(SerializationBuffer& data)
+void Tag::deserialize(const SerializationBuffer& data)
 {
     data >> name_;
 }

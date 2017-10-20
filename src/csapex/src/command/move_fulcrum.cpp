@@ -57,7 +57,7 @@ void MoveFulcrum::serialize(SerializationBuffer &data) const
     data << to.x << to.y;
 }
 
-void MoveFulcrum::deserialize(SerializationBuffer& data)
+void MoveFulcrum::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

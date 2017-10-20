@@ -117,7 +117,7 @@ void OutputProgressParameter::serialize(SerializationBuffer &data) const
     data << maximum;
 }
 
-void OutputProgressParameter::deserialize(SerializationBuffer& data)
+void OutputProgressParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

@@ -46,7 +46,7 @@ public:
     void doDeserialize(const YAML::Node& n) override;
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     template <typename T>
     void setLower(T v) {

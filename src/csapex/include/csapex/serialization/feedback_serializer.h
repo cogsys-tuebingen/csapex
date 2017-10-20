@@ -15,7 +15,7 @@ class FeedbackSerializer : public Singleton<FeedbackSerializer>, public Serializ
 {
 public:
     void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
-    StreamablePtr deserialize(SerializationBuffer &data) override;
+    StreamablePtr deserialize(const SerializationBuffer &data) override;
 };
 
 }

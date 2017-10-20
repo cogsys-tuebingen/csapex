@@ -20,7 +20,7 @@ void FeedbackSerializer::serialize(const StreamableConstPtr &packet, Serializati
     packet->serialize(data);
 }
 
-StreamablePtr FeedbackSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr FeedbackSerializer::deserialize(const SerializationBuffer& data)
 {
     FeedbackPtr res = std::make_shared<Feedback>("");
     res->deserialize(data);

@@ -63,7 +63,7 @@ public:
     }
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     NodeNoteType getNoteType() const
     {

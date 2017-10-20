@@ -71,7 +71,7 @@ void ProfilerRequests::ProfilerRequest::serialize(SerializationBuffer &data) con
     data << arguments_;
 }
 
-void ProfilerRequests::ProfilerRequest::deserialize(SerializationBuffer& data)
+void ProfilerRequests::ProfilerRequest::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;
@@ -111,7 +111,7 @@ void ProfilerRequests::ProfilerResponse::serialize(SerializationBuffer &data) co
     data << result_;
 }
 
-void ProfilerRequests::ProfilerResponse::deserialize(SerializationBuffer& data)
+void ProfilerRequests::ProfilerResponse::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;

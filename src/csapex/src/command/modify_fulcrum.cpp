@@ -69,7 +69,7 @@ void ModifyFulcrum::serialize(SerializationBuffer &data) const
     data << t_out.x << t_out.y;
 }
 
-void ModifyFulcrum::deserialize(SerializationBuffer& data)
+void ModifyFulcrum::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

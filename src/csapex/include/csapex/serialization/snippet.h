@@ -48,7 +48,7 @@ public:
 
     virtual std::shared_ptr<Clonable> makeEmptyClone() const;
     virtual void serialize(SerializationBuffer &data) const;
-    virtual void deserialize(SerializationBuffer& data);
+    virtual void deserialize(const SerializationBuffer& data);
 
     static std::shared_ptr<Snippet>  makeEmpty();
 

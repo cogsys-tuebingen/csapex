@@ -71,7 +71,7 @@ void DisableNode::serialize(SerializationBuffer &data) const
     data << disable_;
 }
 
-void DisableNode::deserialize(SerializationBuffer& data)
+void DisableNode::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

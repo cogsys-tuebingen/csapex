@@ -75,7 +75,7 @@ void AddConnection::serialize(SerializationBuffer &data) const
     data << active;
 }
 
-void AddConnection::deserialize(SerializationBuffer& data)
+void AddConnection::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

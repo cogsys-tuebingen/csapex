@@ -221,7 +221,7 @@ void IntervalParameter::serialize(SerializationBuffer &data) const
     data << step_;
 }
 
-void IntervalParameter::deserialize(SerializationBuffer& data)
+void IntervalParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

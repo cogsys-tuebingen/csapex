@@ -117,7 +117,7 @@ void ModifyThread::serialize(SerializationBuffer &data) const
     data << affinity;
 }
 
-void ModifyThread::deserialize(SerializationBuffer& data)
+void ModifyThread::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

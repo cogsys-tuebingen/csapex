@@ -66,7 +66,7 @@ void RequestSerializer::serialize(const StreamableConstPtr &packet, Serializatio
     }
 }
 
-StreamablePtr RequestSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr RequestSerializer::deserialize(const SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Request" << std::endl;
 

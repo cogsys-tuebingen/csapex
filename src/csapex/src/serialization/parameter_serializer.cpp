@@ -48,7 +48,7 @@ void ParameterSerializer::serialize(const StreamableConstPtr& packet, Serializat
     }
 }
 
-StreamablePtr ParameterSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Parameter" << std::endl;
 

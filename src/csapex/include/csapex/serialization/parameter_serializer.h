@@ -17,7 +17,7 @@ public:
     virtual ~ParameterSerializerInterface();
 
     virtual void serialize(const param::ParameterConstPtr& packet, SerializationBuffer &data) const = 0;
-    virtual param::ParameterPtr deserialize(SerializationBuffer& data) = 0;
+    virtual param::ParameterPtr deserialize(const SerializationBuffer& data) = 0;
 };
 
 
@@ -25,7 +25,7 @@ class ParameterSerializer : public Singleton<ParameterSerializer>, public Serial
 {
 public:
     void serialize(const StreamableConstPtr &packet, SerializationBuffer &data) override;
-    StreamablePtr deserialize(SerializationBuffer &data) override;
+    StreamablePtr deserialize(const SerializationBuffer &data) override;
 
     static void registerSerializer(uint8_t type, std::shared_ptr<ParameterSerializerInterface> serializer);
 
@@ -57,7 +57,7 @@ struct ParameterSerializerRegistered
         { \
             packet->serialize(data); \
         } \
-        virtual ParameterPtr deserialize(SerializationBuffer& data) override \
+        virtual ParameterPtr deserialize(const SerializationBuffer& data) override \
         { \
             auto result = std::make_shared<Name>(); \
             result->deserialize(data); \

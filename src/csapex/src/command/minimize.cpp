@@ -76,7 +76,7 @@ void Minimize::serialize(SerializationBuffer &data) const
     data << executed;
 }
 
-void Minimize::deserialize(SerializationBuffer& data)
+void Minimize::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

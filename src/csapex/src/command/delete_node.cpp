@@ -116,7 +116,7 @@ void DeleteNode::serialize(SerializationBuffer &data) const
     data << type;
 }
 
-void DeleteNode::deserialize(SerializationBuffer& data)
+void DeleteNode::deserialize(const SerializationBuffer& data)
 {
     Meta::deserialize(data);
 

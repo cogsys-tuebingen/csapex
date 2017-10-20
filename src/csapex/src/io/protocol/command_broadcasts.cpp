@@ -43,7 +43,7 @@ void CommandBroadcasts::serialize(SerializationBuffer &data) const
     data << flag_;
 }
 
-void CommandBroadcasts::deserialize(SerializationBuffer& data)
+void CommandBroadcasts::deserialize(const SerializationBuffer& data)
 {
     data >> broadcast_type_;
     data >> flag_;

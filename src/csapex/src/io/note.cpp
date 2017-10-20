@@ -28,7 +28,7 @@ void Note::serialize(SerializationBuffer &data) const
     data << uuid_;
 }
 
-void Note::deserialize(SerializationBuffer& data)
+void Note::deserialize(const SerializationBuffer& data)
 {
     data >> uuid_;
 }

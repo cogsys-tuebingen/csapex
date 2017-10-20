@@ -15,7 +15,7 @@ class RawMessageSerializer : public Singleton<RawMessageSerializer>, public Seri
 {
 public:
     void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
-    StreamablePtr deserialize(SerializationBuffer &data) override;
+    StreamablePtr deserialize(const SerializationBuffer &data) override;
 };
 
 }

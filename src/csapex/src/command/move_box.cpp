@@ -68,7 +68,7 @@ void MoveBox::serialize(SerializationBuffer &data) const
     data << box_uuid;
 }
 
-void MoveBox::deserialize(SerializationBuffer& data)
+void MoveBox::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

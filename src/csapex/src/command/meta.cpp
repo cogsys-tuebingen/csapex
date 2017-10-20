@@ -133,7 +133,7 @@ void Meta::serialize(SerializationBuffer &data) const
     data << transaction;
 }
 
-void Meta::deserialize(SerializationBuffer& data)
+void Meta::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

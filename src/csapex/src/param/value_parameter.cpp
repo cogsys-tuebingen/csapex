@@ -190,7 +190,7 @@ void ValueParameter::serialize(SerializationBuffer &data) const
     data << def_;
 }
 
-void ValueParameter::deserialize(SerializationBuffer& data)
+void ValueParameter::deserialize(const SerializationBuffer& data)
 {
     Parameter::deserialize(data);
 

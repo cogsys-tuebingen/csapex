@@ -190,7 +190,7 @@ void AddVariadicConnector::serialize(SerializationBuffer &data) const
     data << connector_id;
 }
 
-void AddVariadicConnector::deserialize(SerializationBuffer& data)
+void AddVariadicConnector::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

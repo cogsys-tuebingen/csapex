@@ -18,7 +18,7 @@ public:
     virtual ~Serializable();
 
     virtual void serialize(SerializationBuffer &data) const = 0;
-    virtual void deserialize(SerializationBuffer& data) = 0;
+    virtual void deserialize(const SerializationBuffer& data) = 0;
 };
 
 }

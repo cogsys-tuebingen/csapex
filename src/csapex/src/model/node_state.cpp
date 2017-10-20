@@ -491,7 +491,7 @@ void NodeState::serialize(SerializationBuffer &data) const
     data << yaml;
 }
 
-void NodeState::deserialize(SerializationBuffer& data)
+void NodeState::deserialize(const SerializationBuffer& data)
 {
     data >> max_frequency_;
 

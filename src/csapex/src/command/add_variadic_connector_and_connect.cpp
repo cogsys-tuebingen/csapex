@@ -80,7 +80,7 @@ void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data) const
     data << additional_work_;
 }
 
-void AddVariadicConnectorAndConnect::deserialize(SerializationBuffer& data)
+void AddVariadicConnectorAndConnect::deserialize(const SerializationBuffer& data)
 {
     AddVariadicConnector::deserialize(data);
 

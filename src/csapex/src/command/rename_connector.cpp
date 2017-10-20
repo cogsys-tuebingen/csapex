@@ -68,7 +68,7 @@ void RenameConnector::serialize(SerializationBuffer &data) const
     data << old_name_;
 }
 
-void RenameConnector::deserialize(SerializationBuffer& data)
+void RenameConnector::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

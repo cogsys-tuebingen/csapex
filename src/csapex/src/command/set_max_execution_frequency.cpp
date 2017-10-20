@@ -72,7 +72,7 @@ void SetMaximumExecutionFrequency::serialize(SerializationBuffer &data) const
     data << frequency;
 }
 
-void SetMaximumExecutionFrequency::deserialize(SerializationBuffer& data)
+void SetMaximumExecutionFrequency::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

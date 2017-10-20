@@ -93,7 +93,7 @@ void AddNode::serialize(SerializationBuffer &data) const
     data << uuid_;
 }
 
-void AddNode::deserialize(SerializationBuffer& data)
+void AddNode::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

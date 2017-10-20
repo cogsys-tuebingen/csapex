@@ -69,7 +69,7 @@ public:
     virtual void cloneFrom(const Command& other) = 0;
 
     virtual void serialize(SerializationBuffer &data) const override = 0;
-    virtual void deserialize(SerializationBuffer& data) override = 0;
+    virtual void deserialize(const SerializationBuffer& data) override = 0;
 
 protected:
     Command();

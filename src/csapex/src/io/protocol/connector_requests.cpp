@@ -101,7 +101,7 @@ void ConnectorRequests::ConnectorRequest::serialize(SerializationBuffer &data) c
     data << payload_;
 }
 
-void ConnectorRequests::ConnectorRequest::deserialize(SerializationBuffer& data)
+void ConnectorRequests::ConnectorRequest::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;
@@ -141,7 +141,7 @@ void ConnectorRequests::ConnectorResponse::serialize(SerializationBuffer &data) 
     data << result_;
 }
 
-void ConnectorRequests::ConnectorResponse::deserialize(SerializationBuffer& data)
+void ConnectorRequests::ConnectorResponse::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> uuid_;

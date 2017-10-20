@@ -20,7 +20,7 @@ void RawMessageSerializer::serialize(const StreamableConstPtr &packet, Serializa
     packet->serialize(data);
 }
 
-StreamablePtr RawMessageSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr RawMessageSerializer::deserialize(const SerializationBuffer& data)
 {
     RawMessagePtr res = std::make_shared<RawMessage>();
     res->deserialize(data);
