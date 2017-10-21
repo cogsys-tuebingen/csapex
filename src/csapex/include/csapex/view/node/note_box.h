@@ -34,7 +34,7 @@ public:
 
     void setSelected(bool selected) override;
 
-    void updateComponentInformation(Graph* graph) override;
+    void updateComponentInformation(GraphFacade* graph) override;
     void updateThreadInformation() override;
     void updateFrequencyInformation() override;
 

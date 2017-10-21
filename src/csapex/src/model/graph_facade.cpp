@@ -42,34 +42,3 @@ NodeFacadePtr GraphFacade::getNodeFacade()
     return graph_handle_;
 }
 
-
-
-NodeFacadePtr GraphFacade::findNodeFacade(const UUID& uuid) const
-{
-    return getGraph()->findNodeFacade(uuid);
-}
-NodeFacadePtr GraphFacade::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
-{
-    return getGraph()->findNodeFacadeNoThrow(uuid);
-}
-NodeFacadePtr GraphFacade::findNodeFacadeForConnector(const UUID &uuid) const
-{
-    return getGraph()->findNodeFacadeForConnector(uuid);
-}
-NodeFacadePtr GraphFacade::findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept
-{
-    return getGraph()->findNodeFacadeForConnectorNoThrow(uuid);
-}
-NodeFacadePtr GraphFacade::findNodeFacadeWithLabel(const std::string& label) const
-{
-    return getGraph()->findNodeFacadeWithLabel(label);
-}
-
-ConnectorPtr GraphFacade::findConnector(const UUID &uuid)
-{
-    return getGraph()->findConnector(uuid);
-}
-ConnectorPtr GraphFacade::findConnectorNoThrow(const UUID &uuid) noexcept
-{
-    return getGraph()->findConnectorNoThrow(uuid);
-}

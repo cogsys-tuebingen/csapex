@@ -5,6 +5,7 @@
 #include <csapex/data/point.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/csapex_export.h>
+#include <csapex/serialization/serializable.h>
 
 /// SYSTEM
 #include <memory>
@@ -12,7 +13,7 @@
 
 namespace csapex
 {
-class CSAPEX_EXPORT Fulcrum
+class CSAPEX_EXPORT Fulcrum : public Serializable
 {
 public:
     typedef std::shared_ptr<Fulcrum> Ptr;
@@ -36,6 +37,9 @@ public:
 public:
     Fulcrum(int connection_id, const Point& p, int type, const Point& handle_in, const Point& handle_out);
     Fulcrum(const Fulcrum& copy);
+    Fulcrum(Fulcrum&& moved);
+    Fulcrum& operator=(const Fulcrum& copy);
+    Fulcrum& operator=(Fulcrum&& moved);
 
     void move(const Point& pos, bool dropped);
     Point pos() const;
@@ -54,10 +58,20 @@ public:
     int type() const;
     void setType(int type);
 
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(const SerializationBuffer& data) override;
+
 public:
     slim_signal::Signal<void (Fulcrum*, bool dropped)> moved;
     slim_signal::Signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
     slim_signal::Signal<void (Fulcrum*, int type)> typeChanged;
+
+protected:
+    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+
+private:
+    friend class SerializationBuffer;
+    Fulcrum();
 
 private:
     int connection_id_;

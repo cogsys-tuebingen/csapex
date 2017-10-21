@@ -237,7 +237,12 @@ public:
                                       int>::type = 0>
     SerializationBuffer& operator << (const std::shared_ptr<T>& s)
     {
-        operator << (*s);
+        if(s) {
+            operator << (true);
+            operator << (*s);
+        } else {
+            operator << (false);
+        }
         return *this;
     }
 
@@ -247,6 +252,12 @@ public:
                                       int>::type = 0>
     const SerializationBuffer& operator >> (std::shared_ptr<T>& s) const
     {
+        bool valid;
+        operator >>(valid);
+        if(!valid) {
+            return *this;
+        }
+
         // in case T is const, we need to strip that, otherwise we cannot deserialize
         using TT = typename std::remove_const<T>::type;
         std::shared_ptr<TT> res = connection_types::makeEmpty<TT>();
@@ -262,6 +273,12 @@ public:
                                       int>::type = 0>
     const SerializationBuffer& operator >> (std::shared_ptr<T>& s) const
     {
+        bool valid;
+        operator >>(valid);
+        if(!valid) {
+            return *this;
+        }
+
         // in case T is const, we need to strip that, otherwise we cannot deserialize
         using TT = typename std::remove_const<T>::type;
         std::shared_ptr<TT> res = std::make_shared<TT>();
@@ -277,6 +294,12 @@ public:
                                       int>::type = 0>
     const SerializationBuffer& operator >> (std::shared_ptr<T>& s) const
     {
+        bool valid;
+        operator >>(valid);
+        if(!valid) {
+            return *this;
+        }
+
         // in case T is const, we need to strip that, otherwise we cannot deserialize
         using TT = typename std::remove_const<T>::type;
         // SerializationBuffer needs to be a friend of T for this to work with private default constructors!

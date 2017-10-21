@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/model/node_characteristics.h>
 
+/// PROJECT
+#include <csapex/serialization/serialization_buffer.h>
+
 using namespace csapex;
 
 NodeCharacteristics::NodeCharacteristics()
@@ -16,4 +19,33 @@ NodeCharacteristics::NodeCharacteristics()
       is_leading_to_essential_vertex(false)
 {
 
+}
+
+
+std::shared_ptr<Clonable> NodeCharacteristics::makeEmptyClone() const
+{
+    return std::make_shared<NodeCharacteristics>();
+}
+
+void NodeCharacteristics::serialize(SerializationBuffer &data) const
+{
+    data << depth;
+    data << component;
+    data << is_vertex_separator;
+    data << is_joining_vertex;
+    data << is_joining_vertex_counterpart;
+    data << is_combined_by_joining_vertex;
+    data << is_leading_to_joining_vertex;
+    data << is_leading_to_essential_vertex;
+}
+void NodeCharacteristics::deserialize(const SerializationBuffer& data)
+{
+    data >> depth;
+    data >> component;
+    data >> is_vertex_separator;
+    data >> is_joining_vertex;
+    data >> is_joining_vertex_counterpart;
+    data >> is_combined_by_joining_vertex;
+    data >> is_leading_to_joining_vertex;
+    data >> is_leading_to_essential_vertex;
 }

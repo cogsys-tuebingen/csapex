@@ -243,7 +243,7 @@ TEST_F(NestingTest, NestedUUIDs) {
     ASSERT_NE(nullptr, sub_graph_2_facade_ptr);
     GraphFacadeLocal& sub_graph_2_facade = *sub_graph_2_facade_ptr;
 
-    GraphPtr sub_graph_2 = sub_graph_2_facade_ptr->getGraph();
+    GraphPtr sub_graph_2 = sub_graph_2_facade_ptr->getLocalGraph();
 
 
     NodeFacadeLocalPtr m2 = factory.makeNode("StaticMultiplier", sub_graph_2->generateUUID("src"), sub_graph_2);
@@ -261,7 +261,7 @@ TEST_F(NestingTest, NestedUUIDs) {
     ASSERT_NE(nullptr, sub_graph_3_facade_ptr);
     GraphFacadeLocal& sub_graph_3_facade = *sub_graph_3_facade_ptr;
 
-    GraphPtr sub_graph_3 = sub_graph_3_facade_ptr->getGraph();
+    GraphPtr sub_graph_3 = sub_graph_3_facade_ptr->getLocalGraph();
 
 
     NodeFacadeLocalPtr m3 = factory.makeNode("StaticMultiplier", sub_graph_3->generateUUID("src"), sub_graph_3);

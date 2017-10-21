@@ -266,7 +266,7 @@ InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const 
 void SubgraphNode::removeVariadicInput(InputPtr input)
 {
     OutputPtr relay = external_to_internal_outputs_[input->getUUID()];
-    forwardingRemoved(relay);
+    forwarding_connector_removed(relay);
 
     VariadicInputs::removeVariadicInput(input);
 
@@ -299,7 +299,7 @@ UUID  SubgraphNode::addForwardingInput(const UUID& internal_uuid, const TokenDat
 
     relay_to_external_input_[internal_uuid] = external_input->getUUID();
 
-    forwardingAdded(relay);
+    forwarding_connector_added(relay);
 
     std::map<std::string, int> possibly_iterated_inputs;
     for(auto& pair : iterated_inputs_param_->getBitSet()) {
@@ -335,7 +335,7 @@ OutputPtr SubgraphNode::createInternalOutput(const TokenDataConstPtr& type, cons
 void SubgraphNode::removeVariadicOutput(OutputPtr output)
 {
     InputPtr relay = external_to_internal_inputs_[output->getUUID()];
-    forwardingRemoved(relay);
+    forwarding_connector_removed(relay);
 
     relay->message_set.disconnectAll();
 
@@ -394,7 +394,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
 
     relay_to_external_output_[internal_uuid] = external_output->getUUID();
 
-    forwardingAdded(relay);
+    forwarding_connector_added(relay);
 
     return external_output->getUUID();
 }
@@ -431,7 +431,7 @@ void SubgraphNode::removeVariadicSlot(SlotPtr slot)
         internal_event_ids_.erase(it);
     }
 
-    forwardingRemoved(relay);
+    forwarding_connector_removed(relay);
 
     VariadicSlots::removeVariadicSlot(slot);
 
@@ -467,7 +467,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
 
     relay_to_external_slot_[internal_uuid] = external_slot->getUUID();
 
-    forwardingAdded(relay);
+    forwarding_connector_added(relay);
 
     return external_slot->getUUID();
 }
@@ -507,7 +507,7 @@ void SubgraphNode::removeVariadicEvent(EventPtr event)
         internal_slot_ids_.erase(it);
     }
 
-    forwardingRemoved(relay);
+    forwarding_connector_removed(relay);
 
     VariadicEvents::removeVariadicEvent(event);
 
@@ -546,7 +546,7 @@ UUID SubgraphNode::addForwardingEvent(const UUID& internal_uuid, const TokenData
 
     relay_to_external_event_[internal_uuid] = external_event->getUUID();
 
-    forwardingAdded(relay);
+    forwarding_connector_added(relay);
 
     return external_event->getUUID();
 }

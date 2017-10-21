@@ -67,6 +67,8 @@ public:
 
     std::string getLabel() const override;
 
+    int getSchedulerId() const override;
+
     double getExecutionFrequency() const override;
     double getMaximumFrequency() const override;
 

@@ -1015,7 +1015,8 @@ std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& NodeHandle::out
 void NodeHandle::connectConnector(Connectable *c)
 {
     connections_[c].emplace_back(c->connectionStart.connect(connection_start));
-    connections_[c].emplace_back(c->connection_added_to.connect(connection_done));
+    connections_[c].emplace_back(c->connection_added_to.connect(connection_added));
+    connections_[c].emplace_back(c->connection_removed_to.connect(connection_removed));
 }
 
 

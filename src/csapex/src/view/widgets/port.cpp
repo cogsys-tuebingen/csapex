@@ -175,6 +175,10 @@ void Port::createToolTip()
 
 void Port::startDrag()
 {
+    if(!adaptee_) {
+        return;
+    }
+
     Q_EMIT mouseOut(this);
 
     bool left = (buttons_down_ & Qt::LeftButton) != 0;
@@ -223,6 +227,10 @@ void Port::mouseMoveEvent(QMouseEvent* e)
 
 void Port::mouseDoubleClickEvent(QMouseEvent *e)
 {
+    if(!adaptee_) {
+        return;
+    }
+
     e->accept();
 
     double_click_timer_->stop();

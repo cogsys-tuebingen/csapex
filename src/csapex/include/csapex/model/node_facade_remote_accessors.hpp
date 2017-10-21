@@ -8,6 +8,7 @@ HANDLE_ACCESSOR (IsProcessingNothingMessages,  bool,           isProcessingNothi
 HANDLE_DYNAMIC_ACCESSOR (GetExecutionState,    execution_state_changed, ExecutionState, getExecutionState)
 
 HANDLE_DYNAMIC_ACCESSOR (GetLabel,             label_changed, std::string, getLabel)
+HANDLE_DYNAMIC_ACCESSOR (GetSchedulerId,       scheduler_changed, int, getSchedulerId)
 
 HANDLE_ACCESSOR (GetExecutionFrequency,        double, getExecutionFrequency)
 HANDLE_ACCESSOR (GetMaximumFrequency,          double, getMaximumFrequency)

@@ -95,7 +95,24 @@ static void invokeSignal(csapex::slim_signal::Signal<void(Args...)>& s, const No
 
 NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid)
     : Remote(session),
-      uuid_(uuid)
+      uuid_(uuid),
+
+      /**
+       * begin: initialize caches
+       **/
+      #define HANDLE_ACCESSOR(_enum, type, function)
+      #define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
+      has_##function##_(false),
+      #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+      has_##function##_(false),
+      #define HANDLE_SIGNAL(_enum, signal)
+
+      #include <csapex/model/node_facade_remote_accessors.hpp>
+      /**
+       * end: initialize caches
+       **/
+
+      guard_(-1)
 {
     node_channel_ = session->openChannel(uuid.getAbsoluteUUID());
 
@@ -187,9 +204,16 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid)
                 invokeSignal(connection_start, *cn);
             }
                 break;
-            case NodeNoteType::ConnectionDoneTriggered:
+            case NodeNoteType::ConnectionCreatedTriggered:
             {
-                invokeSignal(connection_done, *cn);
+                ConnectorDescription ci = cn->getPayload<ConnectorDescription>(0);
+                connection_added(ci);
+            }
+                break;
+            case NodeNoteType::ConnectionRemovedTriggered:
+            {
+                ConnectorDescription ci = cn->getPayload<ConnectorDescription>(0);
+                connection_removed(ci);
             }
                 break;
             case NodeNoteType::ProfilingStartTriggered:
@@ -256,6 +280,7 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid)
 
 NodeFacadeRemote::~NodeFacadeRemote()
 {
+    guard_ = 0xDEADBEEF;
 }
 
 void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)

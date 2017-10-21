@@ -33,19 +33,30 @@ public:
     virtual GraphFacade* getSubGraph(const UUID& uuid) = 0;
     virtual GraphFacade* getParent() const = 0;    
 
-    NodeFacadePtr findNodeFacade(const UUID& uuid) const;
-    NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept;
-    NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const;
-    NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept;
-    NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const;
+    virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const = 0;
+    virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
+    virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const = 0;
 
-    ConnectorPtr findConnector(const UUID &uuid);
-    ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept;
+    virtual ConnectorPtr findConnector(const UUID &uuid) = 0;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
 
+    virtual bool isConnected(const UUID& from, const UUID& to) const = 0;
+    virtual ConnectionInformation getConnection(const UUID& from, const UUID& to) const = 0;
+    virtual ConnectionInformation getConnectionWithId(int id) const = 0;
+
+    virtual std::vector<UUID> enumerateAllNodes() const = 0;
     virtual std::vector<ConnectionInformation> enumerateAllConnections() const = 0;
 
     virtual AUUID getAbsoluteUUID() const = 0;
-    virtual GraphPtr getGraph() const = 0;
+
+    virtual UUID generateUUID(const std::string& prefix) = 0;
+
+    virtual std::size_t countNodes() const = 0;
+
+    virtual int getComponent(const UUID& node_uuid) const = 0;
+    virtual int getDepth(const UUID& node_uuid) const = 0;
 
     NodeFacadePtr getNodeFacade();
 
@@ -74,9 +85,13 @@ public:
     slim_signal::Signal<void(NodeFacadePtr)> child_node_facade_removed;
 
     slim_signal::Signal<void()> panic;
+    slim_signal::Signal<void()> state_changed;
 
-    slim_signal::Signal<void(ConnectorPtr)> forwardingAdded;
-    slim_signal::Signal<void(ConnectorPtr)> forwardingRemoved;
+    slim_signal::Signal<void(ConnectionInformation)> connection_added;
+    slim_signal::Signal<void(ConnectionInformation)> connection_removed;
+
+    slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_added;
+    slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_removed;
     
 protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) = 0;

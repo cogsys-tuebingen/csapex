@@ -12,16 +12,36 @@ public:
 
     virtual AUUID getAbsoluteUUID() const override;
 
+    virtual UUID generateUUID(const std::string& prefix) override;
+
     virtual GraphFacade* getSubGraph(const UUID& uuid) override;
     GraphFacadeLocalPtr getLocalSubGraph(const UUID& uuid);
     virtual GraphFacade* getParent() const override;
 
-    virtual GraphPtr getGraph() const override;
+    virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
+    virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
+    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const override;
+    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept override;
+    virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
+
+    virtual ConnectorPtr findConnector(const UUID &uuid) override;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept override;
+
+    virtual bool isConnected(const UUID& from, const UUID& to) const override;
+    virtual ConnectionInformation getConnection(const UUID& from, const UUID& to) const override;
+    virtual ConnectionInformation getConnectionWithId(int id) const override;
+
+    virtual std::size_t countNodes() const override;
+
+    virtual int getComponent(const UUID& node_uuid) const override;
+    virtual int getDepth(const UUID& node_uuid) const override;
+
     GraphLocalPtr getLocalGraph() const;
 
     GraphFacadeLocal* getLocalParent() const;
     NodeFacadeLocalPtr getLocalNodeFacade() const;
 
+    virtual std::vector<UUID> enumerateAllNodes() const override;
     virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
 
     SubgraphNodePtr getSubgraphNode();

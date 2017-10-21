@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 using namespace csapex;
 
@@ -11,8 +12,44 @@ Fulcrum::Fulcrum(int connection_id, const Point& p, int type, const Point &handl
     : connection_id_(connection_id), type_(type), pos_(p), handle_in_(handle_in), handle_out_(handle_out)
 {}
 
-Fulcrum::Fulcrum(const Fulcrum& copy)
-    : connection_id_(copy.connection_id_), type_(copy.type_), pos_(copy.pos_), handle_in_(copy.handle_in_), handle_out_(copy.handle_out_)
+Fulcrum::Fulcrum(const Fulcrum& moved)
+    : connection_id_(moved.connection_id_),
+      type_(moved.type_),
+      pos_(moved.pos_),
+      handle_in_(moved.handle_in_),
+      handle_out_(moved.handle_out_)
+{
+}
+
+Fulcrum::Fulcrum(Fulcrum&& copy)
+    : connection_id_(std::move(copy.connection_id_)),
+      type_(std::move(copy.type_)),
+      pos_(std::move(copy.pos_)),
+      handle_in_(std::move(copy.handle_in_)),
+      handle_out_(std::move(copy.handle_out_))
+{
+}
+
+Fulcrum& Fulcrum::operator=(const Fulcrum& copy)
+{
+    connection_id_ = copy.connection_id_;
+    type_ = copy.type_;
+    pos_ = copy.pos_;
+    handle_in_ = copy.handle_in_;
+    handle_out_ = copy.handle_out_;
+    return *this;
+}
+Fulcrum& Fulcrum::operator=(Fulcrum&& moved)
+{
+    connection_id_ = std::move(moved.connection_id_);
+    type_ = std::move(moved.type_);
+    pos_ = std::move(moved.pos_);
+    handle_in_ = std::move(moved.handle_in_);
+    handle_out_ = std::move(moved.handle_out_);
+    return *this;
+}
+
+Fulcrum::Fulcrum()
 {
 }
 
@@ -87,4 +124,28 @@ void Fulcrum::setType(int type)
 {
     type_ = type;
     typeChanged(this, type);
+}
+
+std::shared_ptr<Clonable> Fulcrum::makeEmptyClone() const
+{
+    return std::shared_ptr<Clonable>(new Fulcrum);
+}
+
+void Fulcrum::serialize(SerializationBuffer &data) const
+{
+    data << connection_id_;
+    data << id_;
+    data << type_;
+    data << pos_.x << pos_.y;
+    data << handle_in_.x << handle_in_.y;
+    data << handle_out_.x << handle_out_.y;
+}
+void Fulcrum::deserialize(const SerializationBuffer& data)
+{
+    data >> connection_id_;
+    data >> id_;
+    data >> type_;
+    data >> pos_.x >> pos_.y;
+    data >> handle_in_.x >> handle_in_.y;
+    data >> handle_out_.x >> handle_out_.y;
 }

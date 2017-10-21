@@ -2,36 +2,37 @@
 #include <csapex/command/command_factory.h>
 
 /// COMPONENT
-#include <csapex/command/command.h>
-#include <csapex/command/delete_node.h>
-#include <csapex/command/delete_connection.h>
-#include <csapex/command/delete_fulcrum.h>
-#include <csapex/command/modify_connection.h>
-#include <csapex/command/mute_node.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/add_variadic_connector.h>
-#include <csapex/command/switch_thread.h>
-#include <csapex/command/set_max_execution_frequency.h>
-#include <csapex/command/set_logger_level.h>
-#include <csapex/command/switch_thread.h>
+#include <csapex/command/command.h>
+#include <csapex/command/clear_graph.h>
+#include <csapex/command/delete_connection.h>
+#include <csapex/command/delete_fulcrum.h>
+#include <csapex/command/delete_node.h>
 #include <csapex/command/delete_thread.h>
+#include <csapex/command/meta.h>
+#include <csapex/command/modify_connection.h>
+#include <csapex/command/mute_node.h>
+#include <csapex/command/set_logger_level.h>
+#include <csapex/command/set_max_execution_frequency.h>
+#include <csapex/command/switch_thread.h>
+#include <csapex/command/switch_thread.h>
+#include <csapex/model/connection.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph.h>
+#include <csapex/model/node_facade.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/model/node_runner.h>
+#include <csapex/model/node_runner.h>
+#include <csapex/model/node_state.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/signal/event.h>
-#include <csapex/signal/slot.h>
-#include <csapex/model/connection.h>
-#include <csapex/command/meta.h>
-#include <csapex/command/delete_connection.h>
-#include <csapex/model/graph.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/utility/assert.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/node_runner.h>
-#include <csapex/model/node_state.h>
 #include <csapex/scheduling/scheduler.h>
 #include <csapex/scheduling/thread_group.h>
-#include <csapex/model/node_runner.h>
+#include <csapex/signal/event.h>
+#include <csapex/signal/slot.h>
+#include <csapex/utility/assert.h>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -64,25 +65,23 @@ CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>
 {
     command::Meta::Ptr meta(new command::Meta(root_->getAbsoluteUUID(), "delete connections from boxes", true));
 
-
-    std::set<ConnectionPtr> connections;
+    std::set<std::pair<UUID, UUID>> connections;
 
     for(const UUID& uuid : uuids) {
-        NodeHandle* nh = root_->getGraph()->findNodeHandle(uuid);
-        for(ConnectablePtr connectable : nh->getExternalConnectors()) {
-            for(ConnectionPtr c : connectable->getConnections()) {
-                connections.insert(c);
+        NodeFacadePtr nf = root_->findNodeFacade(uuid);
+        for(const ConnectorDescription& connectable : nf->getExternalConnectors()) {
+            for(const ConnectorDescription::Target& target : connectable.targets) {
+                UUID out = connectable.isOutput() ? connectable.id : target.id;
+                UUID in = connectable.isOutput() ? target.id : connectable.id;
+                connections.insert(std::make_pair(out, in));
             }
         }
     }
 
-    for(ConnectionPtr c : connections) {
-        if(!c->from()->isVirtual() && !c->to()->isVirtual()) {
-            meta->add(std::make_shared<DeleteConnection>(graph_uuid,
-                                                         c->source()->getUUID(),
-                                                         c->target()->getUUID()));
-        }
+    for(const auto& pair : connections) {
+        meta->add(std::make_shared<DeleteConnection>(graph_uuid, pair.first, pair.second));
     }
+
     return meta;
 }
 
@@ -92,10 +91,7 @@ CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>
 
 Command::Ptr CommandFactory::addConnection(const UUID &from, const UUID &to, bool active)
 {
-    GraphFacade* graph_facade = getGraphFacade();
-    GraphPtr graph = graph_facade->getGraph();
-
-    auto from_c = graph->findConnectorNoThrow(from);
+    auto from_c = getGraphFacade()->findConnectorNoThrow(from);
 
     if(from_c->isOutput()) {
         return std::make_shared<AddConnection>(graph_uuid, from, to, active);
@@ -147,24 +143,16 @@ Command::Ptr CommandFactory::setConnectionActive(int connection, bool active)
 
 Command::Ptr CommandFactory::clearCommand()
 {
-    Meta::Ptr clear(new Meta(graph_uuid, "Clear graph_", true));
-
-    for(auto node : root_->getGraph()->getAllNodeHandles()) {
-        clear->add(Command::Ptr (new DeleteNode(graph_uuid, node->getUUID())));
-    }
-
-    return clear;
+    return std::make_shared<ClearGraph>(graph_uuid);
 }
 
 Command::Ptr CommandFactory::deleteConnectionByIdCommand(int id)
 {
     GraphFacade* graph_facade = getGraphFacade();
-    GraphPtr graph = graph_facade->getGraph();
-    for(const auto& connection : graph->getConnections()) {
-        if(connection->id() == id) {
-            return Command::Ptr(new DeleteConnection(graph_uuid,
-                                                     connection->source()->getUUID(),
-                                                     connection->target()->getUUID()));
+
+    for(const ConnectionInformation& connection : graph_facade->enumerateAllConnections()) {
+        if(connection.id == id) {
+            return Command::Ptr(new DeleteConnection(graph_uuid, connection.from, connection.to));
 
         }
     }
@@ -183,11 +171,11 @@ Command::Ptr CommandFactory::deleteAllConnectionFulcrumsCommand(int connection)
 
     if(connection >= 0) {
         GraphFacade* graph_facade = getGraphFacade();
-        GraphPtr graph = graph_facade->getGraph();
 
-        int n = graph->getConnectionWithId(connection)->getFulcrumCount();
+        ConnectionInformation ci = graph_facade->getConnectionWithId(connection);
+        int n = ci.fulcrums.size();
         for(int i = n - 1; i >= 0; --i) {
-            meta->add(deleteConnectionFulcrumCommand(connection, i));
+            meta->add(std::make_shared<DeleteFulcrum>(graph_uuid, connection, i));
         }
     }
 
@@ -214,7 +202,7 @@ GraphFacade* CommandFactory::getGraphFacade() const
 
 Command::Ptr CommandFactory::moveConnections(const UUID& from, const UUID& to)
 {
-    GraphPtr graph = getGraphFacade()->getGraph();
+    GraphFacade* graph = getGraphFacade();
     ConnectorPtr f = graph->findConnector(from);
     ConnectorPtr t = graph->findConnector(to);
     return moveConnections(f.get(), t.get());
@@ -290,19 +278,20 @@ template <typename Lambda>
 void foreachNode(GraphFacade* graph_facade, const UUID &node_uuid, Lambda fn)
 {
     // evalute at the node
-    NodeHandle* nh = graph_facade->getGraph()->findNodeHandle(node_uuid);
-    apex_assert_hard(nh);
-    fn(graph_facade, nh);
+    NodeFacadePtr nf = graph_facade->findNodeFacade(node_uuid);
+    apex_assert_hard(nf);
+    fn(graph_facade, nf);
 
     // recursive call into child graphs
-    if(nh->isGraph()) {
-        SubgraphNodePtr child_graph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
-        apex_assert_hard(child_graph);
-        GraphFacade* child_facade = graph_facade->getSubGraph(node_uuid);
-        apex_assert_hard(child_facade);
+    if(nf->isGraph()) {
+        GraphFacade* subgraph = graph_facade->getSubGraph(nf->getUUID());
+        if(subgraph) {
+            GraphFacade* child_facade = graph_facade->getSubGraph(node_uuid);
+            apex_assert_hard(child_facade);
 
-        for(NodeHandle* child : child_graph->getGraph()->getAllNodeHandles()) {
-            foreachNode(child_facade, child->getUUID(), fn);
+            for(const UUID& child : graph_facade->enumerateAllNodes()) {
+                foreachNode(child_facade, child, fn);
+            }
         }
     }
 }
@@ -321,18 +310,14 @@ CommandPtr CommandFactory::switchThreadRecursively(const std::vector<UUID> &node
 {
     command::Meta::Ptr cmd(new command::Meta(graph_uuid, "change thread"));
     for(const UUID& uuid: node_uuids) {
-        NodeHandle* node = root_->getGraph()->findNodeHandle(uuid);
-        if(NodeRunnerPtr runner = node->getNodeRunner()) {
-            int old_thread_id = runner->getScheduler()->id();
+        NodeFacadePtr node = root_->findNodeFacade(uuid);
+        int old_thread_id = node->getSchedulerId();
 
-            foreachNode(root_, uuid, [&](GraphFacade* graph_facade, NodeHandle* nh) {
-                if(NodeRunnerPtr runner = nh->getNodeRunner()) {
-                    if(runner->getScheduler()->id() == old_thread_id)  {
-                        cmd->add(Command::Ptr(new command::SwitchThread(graph_facade->getAbsoluteUUID(), nh->getUUID(), id)));
-                    }
-                }
-            });
-        }
+        foreachNode(root_, uuid, [&](GraphFacade* graph_facade, const NodeFacadePtr& nf) {
+            if(node->getSchedulerId() == old_thread_id)  {
+                cmd->add(Command::Ptr(new command::SwitchThread(graph_facade->getAbsoluteUUID(), nf->getUUID(), id)));
+            }
+        });
     }
     return cmd;
 }
@@ -340,7 +325,7 @@ CommandPtr CommandFactory::switchThreadRecursively(const std::vector<UUID> &node
 CommandPtr CommandFactory::muteRecursively(const std::vector<UUID> &node_uuids, bool muted)
 {
     command::Meta::Ptr cmd(new command::Meta(graph_uuid, muted ? "mute nodes" : "unmute nodes"));
-    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, NodeHandle* nh) {
+    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, const NodeFacadePtr& nh) {
         if(nh->getNodeState()->isMuted() != muted) {
             cmd->add(Command::Ptr(new command::MuteNode(graph_facade->getAbsoluteUUID(), nh->getUUID(), muted)));
         }
@@ -351,7 +336,7 @@ CommandPtr CommandFactory::muteRecursively(const std::vector<UUID> &node_uuids, 
 CommandPtr CommandFactory::setMaximumFrequencyRecursively(const std::vector<UUID> &node_uuids, double frequency)
 {
     command::Meta::Ptr cmd(new command::Meta(graph_uuid, frequency == 0.0 ? "set unbounded frequency" : "set maximum frequency"));
-    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, NodeHandle* nh) {
+    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, const NodeFacadePtr& nh) {
         cmd->add(Command::Ptr(new command::SetMaximumExecutionFrequency(graph_facade->getAbsoluteUUID(), nh->getUUID(), frequency)));
     });
     return cmd;
@@ -360,7 +345,7 @@ CommandPtr CommandFactory::setMaximumFrequencyRecursively(const std::vector<UUID
 CommandPtr CommandFactory::setLoggerLevelRecursively(const std::vector<UUID> &node_uuids, int level)
 {
     command::Meta::Ptr cmd(new command::Meta(graph_uuid, "set logger level"));
-    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, NodeHandle* nh) {
+    foreachNode(root_, node_uuids, [&](GraphFacade* graph_facade, const NodeFacadePtr& nh) {
         cmd->add(Command::Ptr(new command::SetLoggerLevel(graph_facade->getAbsoluteUUID(), nh->getUUID(), level)));
     });
     return cmd;

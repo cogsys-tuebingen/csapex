@@ -66,6 +66,11 @@ ConnectorDescription::ConnectorDescription(const AUUID& owner,
 {
 }
 
+bool ConnectorDescription::isOutput() const
+{
+    return connector_type == ConnectorType::OUTPUT || connector_type == ConnectorType::EVENT;
+}
+
 std::shared_ptr<Clonable> ConnectorDescription::makeEmptyClone() const
 {
     return std::make_shared<ConnectorDescription>();
@@ -82,6 +87,9 @@ void ConnectorDescription::serialize(SerializationBuffer &data) const
     data << token_type;
 
     data << id;
+
+    data << targets;
+    data << valid;
 }
 void ConnectorDescription::deserialize(const SerializationBuffer& data)
 {
@@ -94,4 +102,26 @@ void ConnectorDescription::deserialize(const SerializationBuffer& data)
     data >> token_type;
 
     data >> id;
+
+    data >> targets;
+    data >> valid;
+}
+
+
+
+void ConnectorDescription::Target::serialize(SerializationBuffer &data) const
+{
+    data << id;
+    data << active;
+}
+
+void ConnectorDescription::Target::deserialize(const SerializationBuffer& data)
+{
+    data >> id;
+    data >> active;
+}
+
+std::shared_ptr<Clonable> ConnectorDescription::Target::makeEmptyClone() const
+{
+    return std::make_shared<Target>();
 }

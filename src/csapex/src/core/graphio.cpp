@@ -55,13 +55,13 @@ void GraphIO::setIgnoreForwardingConnections(bool ignore)
 
 void GraphIO::saveSettings(YAML::Node& doc)
 {
-    doc["uuid_map"] = graph_.getGraph()->getUUIDMap();
+    doc["uuid_map"] = graph_.getLocalGraph()->getUUIDMap();
 }
 
 void GraphIO::loadSettings(const YAML::Node &doc)
 {
     if(doc["uuid_map"].IsDefined()) {
-        graph_.getGraph()->uuids_ = doc["uuid_map"].as<std::map<std::string, int> >();
+        graph_.getLocalGraph()->uuids_ = doc["uuid_map"].as<std::map<std::string, int> >();
     }
 }
 
@@ -134,7 +134,7 @@ Snippet GraphIO::saveSelectedGraph(const std::vector<UUID> &uuids)
         for(const ConnectablePtr& connectable : node->getNodeHandle()->getExternalConnectors()) {
             if(connectable->isOutput()) {
                 for(const ConnectionPtr& connection : connectable->getConnections()) {
-                    auto target = graph_.getGraph()->findNodeHandleForConnector(connection->to()->getUUID());
+                    auto target = graph_.getLocalGraph()->findNodeHandleForConnector(connection->to()->getUUID());
                     if(node_set.find(target->getUUID()) != node_set.end()) {
                         connections.push_back(connection->getDescription());
                     }
@@ -164,7 +164,7 @@ GraphIO::loadIntoGraph(const Snippet &snippet, const Point& position)
             const YAML::Node& n = nodes[i];
 
             std::string type = n["type"].as<std::string>();
-            UUID new_uuid = graph_.getGraph()->generateUUID(type);
+            UUID new_uuid = graph_.getLocalGraph()->generateUUID(type);
             UUID blue_print_uuid = UUIDProvider::makeUUID_without_parent(n["uuid"].as<std::string>());
 
             old_node_uuid_to_new_[blue_print_uuid] = new_uuid;
@@ -273,7 +273,7 @@ UUID GraphIO::readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::
         if(pos != old_node_uuid_to_new_.end()) {
             parent = old_node_uuid_to_new_[parent];
 
-            uuid = graph_.getGraph()->makeDerivedUUID_forced(parent, uuid.id().getFullName());
+            uuid = graph_.getLocalGraph()->makeDerivedUUID_forced(parent, uuid.id().getFullName());
         }
     }
     return uuid;
@@ -281,11 +281,11 @@ UUID GraphIO::readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::
 
 void GraphIO::loadNode(const YAML::Node& doc)
 {
-    UUID uuid = readNodeUUID(graph_.getGraph()->shared_from_this(), doc["uuid"]);
+    UUID uuid = readNodeUUID(graph_.getLocalGraph()->shared_from_this(), doc["uuid"]);
 
     std::string type = doc["type"].as<std::string>();
 
-    NodeFacadeLocalPtr node_handle = node_factory_->makeNode(type, uuid, graph_.getGraph());
+    NodeFacadeLocalPtr node_handle = node_factory_->makeNode(type, uuid, graph_.getLocalGraph());
     if(!node_handle) {
         return;
     }
@@ -378,7 +378,7 @@ void GraphIO::loadConnections(const YAML::Node &doc)
 
 void GraphIO::loadConnection(const YAML::Node& connection)
 {
-    UUID from_uuid =  readConnectorUUID(graph_.getGraph()->shared_from_this(), connection["uuid"]);
+    UUID from_uuid =  readConnectorUUID(graph_.getLocalGraph()->shared_from_this(), connection["uuid"]);
 
     const YAML::Node& targets = connection["targets"];
     apex_assert_hard(targets.Type() == YAML::NodeType::Sequence);
@@ -387,7 +387,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
     apex_assert_hard(!types.IsDefined() || (types.Type() == YAML::NodeType::Sequence && targets.size() == types.size()));
 
     for(unsigned j=0; j<targets.size(); ++j) {
-        UUID to_uuid = readConnectorUUID(graph_.getGraph()->shared_from_this(), targets[j]);
+        UUID to_uuid = readConnectorUUID(graph_.getLocalGraph()->shared_from_this(), targets[j]);
 
         std::string connection_type;
         if(!types.IsDefined()) {
@@ -450,8 +450,8 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     std::string from_uuid_tmp = from_node.as<std::string>();
     std::string to_uuid_tmp = to_node.as<std::string>();
 
-    UUID from_uuid = UUIDProvider::makeUUID_forced(graph_.getGraph()->shared_from_this(), from_uuid_tmp);
-    UUID to_uuid = UUIDProvider::makeUUID_forced(graph_.getGraph()->shared_from_this(), to_uuid_tmp);
+    UUID from_uuid = UUIDProvider::makeUUID_forced(graph_.getLocalGraph()->shared_from_this(), from_uuid_tmp);
+    UUID to_uuid = UUIDProvider::makeUUID_forced(graph_.getLocalGraph()->shared_from_this(), to_uuid_tmp);
 
     ConnectorPtr from = graph_.findConnector(from_uuid);
     if(from == nullptr) {
@@ -465,7 +465,7 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
         return;
     }
 
-    ConnectionPtr connection = graph_.getGraph()->getConnection(from->getUUID(), to->getUUID());
+    ConnectionPtr connection = graph_.getLocalGraph()->getConnection(from->getUUID(), to->getUUID());
 
     std::vector< std::vector<double> > pts = fulcrum["pts"].as<std::vector< std::vector<double> > >();
 
@@ -497,7 +497,7 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
 void GraphIO::loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::string& connection_type)
 {
     try {
-        NodeHandle* target = graph_.getGraph()->findNodeHandleForConnector(to_uuid);
+        NodeHandle* target = graph_.getLocalGraph()->findNodeHandleForConnector(to_uuid);
 
         InputPtr in = std::dynamic_pointer_cast<Input>(target->getConnector(to_uuid));
         if(!in) {
@@ -581,5 +581,5 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_fac
 
 void GraphIO::sendNotification(const std::string &notification)
 {
-    graph_.getGraph()->notification(Notification(graph_.getGraph()->getAbsoluteUUID(), notification));
+    graph_.getLocalGraph()->notification(Notification(graph_.getLocalGraph()->getAbsoluteUUID(), notification));
 }

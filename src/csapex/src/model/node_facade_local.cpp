@@ -14,6 +14,7 @@
 #include <csapex/model/node.h>
 #include <csapex/profiling/profiler_local.h>
 #include <csapex/model/generic_state.h>
+#include <csapex/scheduling/scheduler.h>
 
 /// SYSTEM
 #include <iostream>
@@ -62,8 +63,17 @@ void NodeFacadeLocal::connectNodeHandle()
     observe(nh_->activation_changed, activation_changed);
 
 
-    observe(nh_->connection_done, [this](ConnectablePtr c) { connection_done(c->getDescription()); });
-    observe(nh_->connection_start, [this](ConnectablePtr c) { connection_start(c->getDescription()); });
+    observe(nh_->connection_added, [this](ConnectablePtr c) {
+        connection_added(c->getDescription());
+        triggerExternalConnectorsChanged(c);
+    });
+    observe(nh_->connection_removed, [this](ConnectablePtr c) {
+        connection_removed(c->getDescription());
+        triggerExternalConnectorsChanged(c);
+    });
+    observe(nh_->connection_start, [this](ConnectablePtr c) {
+        connection_start(c->getDescription());
+    });
 
 
     observe(nh_->parameters_changed, parameters_changed);
@@ -74,6 +84,10 @@ void NodeFacadeLocal::connectNodeHandle()
 
     observe(*(state->label_changed), [this]() {
         label_changed(getLabel());
+    });
+
+    observe(*(state->thread_changed), [this]() {
+        scheduler_changed(getSchedulerId());
     });
 
     GenericStatePtr paramstate = state->getParameterState();
@@ -338,6 +352,15 @@ ExecutionState NodeFacadeLocal::getExecutionState() const
 std::string NodeFacadeLocal::getLabel() const
 {
     return nh_->getNodeState()->getLabel();
+}
+
+int NodeFacadeLocal::getSchedulerId() const
+{
+    if(auto scheduler = nr_->getScheduler()) {
+        return scheduler->id();
+    } else {
+        return -1;
+    }
 }
 
 double NodeFacadeLocal::getExecutionFrequency() const

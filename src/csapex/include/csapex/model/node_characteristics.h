@@ -1,10 +1,13 @@
 #ifndef NODE_CHARACTERISTICS_H
 #define NODE_CHARACTERISTICS_H
 
+/// PROJECT
+#include <csapex/serialization/serializable.h>
+
 namespace csapex
 {
 
-class NodeCharacteristics
+class NodeCharacteristics : public Serializable
 {
 public:
     NodeCharacteristics();
@@ -22,6 +25,12 @@ public:
     bool is_leading_to_joining_vertex;
 
     bool is_leading_to_essential_vertex;
+
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(const SerializationBuffer& data) override;
+
+protected:
+    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
 };
 
 }

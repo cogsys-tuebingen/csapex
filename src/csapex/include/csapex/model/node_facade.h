@@ -82,6 +82,8 @@ public:
 
     virtual std::string getLabel() const = 0;
 
+    virtual int getSchedulerId() const = 0;
+
     virtual double getExecutionFrequency() const = 0;
     virtual double getMaximumFrequency() const = 0;
 
@@ -114,12 +116,14 @@ public:
     slim_signal::Signal<void (ConnectorDescription)> connector_created;
     slim_signal::Signal<void (ConnectorDescription)> connector_removed;
 
-    slim_signal::Signal<void (ConnectorDescription)> connection_done;
+    slim_signal::Signal<void (ConnectorDescription)> connection_added;
+    slim_signal::Signal<void (ConnectorDescription)> connection_removed;
     slim_signal::Signal<void (ConnectorDescription)> connection_start;
 
     slim_signal::Signal<void ()> messages_processed;
 
     slim_signal::Signal<void(std::string)> label_changed;
+    slim_signal::Signal<void(int)> scheduler_changed;
 
     slim_signal::Signal<void(NodeStatePtr state)> node_state_changed;
     slim_signal::Signal<void()> parameters_changed;

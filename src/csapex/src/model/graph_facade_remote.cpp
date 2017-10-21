@@ -23,9 +23,26 @@ GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, AUUID uuid, GraphFacade
       Remote(session),
       parent_(parent),
       graph_(std::make_shared<GraphRemote>(session, uuid,
-                                           *std::dynamic_pointer_cast<GraphLocal>(tmp_ref.getGraph()))),
+                                           *tmp_ref.getLocalGraph())),
       uuid_(uuid),
-      tmp_ref_(tmp_ref)
+      tmp_ref_(tmp_ref),
+
+      /**
+       * begin: initialize caches
+       **/
+      #define HANDLE_ACCESSOR(_enum, type, function)
+      #define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
+      has_##function##_(false),
+      #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
+      has_##function##_(false),
+      #define HANDLE_SIGNAL(_enum, signal)
+
+      #include <csapex/model/graph_facade_remote_accessors.hpp>
+      /**
+       * end: initialize caches
+       **/
+
+      guard_(-1)
 {
     graph_channel_ = session->openChannel(uuid.getAbsoluteUUID());
 
@@ -33,7 +50,6 @@ GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, AUUID uuid, GraphFacade
     observe(graph_->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeRemovedHandler));
 
     observe(graph_->notification, notification);
-
 
     observe(graph_channel_->note_received, [this](const io::NoteConstPtr& note){
         if(const std::shared_ptr<GraphNote const>& cn = std::dynamic_pointer_cast<GraphNote const>(note)) {
@@ -68,13 +84,17 @@ GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, AUUID uuid, GraphFacade
     observe(tmp_ref.paused, paused);
     observe(tmp_ref.stopped, stopped);
 
+    observe(tmp_ref.state_changed, state_changed);
     observe(tmp_ref.panic, panic);
 
-    observe(tmp_ref.forwardingAdded, forwardingAdded);
-    observe(tmp_ref.forwardingRemoved, forwardingRemoved);
+//    observe(tmp_ref.forwarding_connector_added, forwarding_connector_added);
+//    observe(tmp_ref.forwarding_connector_removed, forwarding_connector_removed);
 
 
     //TODO: these have to be translated
+
+    observe(tmp_ref.connection_added, connection_added);
+    observe(tmp_ref.connection_removed, connection_removed);
 
     observe(tmp_ref.child_added, child_added);
     observe(tmp_ref.child_removed, child_removed);
@@ -154,6 +174,10 @@ GraphFacadeRemote::GraphFacadeRemote(SessionPtr session, AUUID uuid, GraphFacade
 //    });
 }
 
+GraphFacadeRemote::~GraphFacadeRemote()
+{
+    guard_ = 0xDEADBEEF;
+}
 
 void GraphFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
 {
@@ -190,6 +214,11 @@ AUUID GraphFacadeRemote::getAbsoluteUUID() const
     return tmp_ref_.getAbsoluteUUID();
 }
 
+UUID GraphFacadeRemote::generateUUID(const std::string& prefix)
+{
+    return tmp_ref_.generateUUID(prefix);
+}
+
 GraphFacade* GraphFacadeRemote::getParent() const
 {
     return parent_;
@@ -210,9 +239,63 @@ GraphFacade* GraphFacadeRemote::getSubGraph(const UUID &uuid)
     }
 }
 
-GraphPtr GraphFacadeRemote::getGraph() const
+
+NodeFacadePtr GraphFacadeRemote::findNodeFacade(const UUID& uuid) const
 {
-    return graph_;
+    return graph_->findNodeFacade(uuid);
+}
+NodeFacadePtr GraphFacadeRemote::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
+{
+    return graph_->findNodeFacadeNoThrow(uuid);
+}
+NodeFacadePtr GraphFacadeRemote::findNodeFacadeForConnector(const UUID &uuid) const
+{
+    return graph_->findNodeFacadeForConnector(uuid);
+}
+NodeFacadePtr GraphFacadeRemote::findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept
+{
+    return graph_->findNodeFacadeForConnectorNoThrow(uuid);
+}
+NodeFacadePtr GraphFacadeRemote::findNodeFacadeWithLabel(const std::string& label) const
+{
+    return graph_->findNodeFacadeWithLabel(label);
+}
+
+ConnectorPtr GraphFacadeRemote::findConnector(const UUID &uuid)
+{
+    return graph_->findConnector(uuid);
+}
+ConnectorPtr GraphFacadeRemote::findConnectorNoThrow(const UUID &uuid) noexcept
+{
+    return graph_->findConnectorNoThrow(uuid);
+}
+bool GraphFacadeRemote::isConnected(const UUID& from, const UUID& to) const
+{
+    return tmp_ref_.isConnected(from, to);
+}
+
+ConnectionInformation GraphFacadeRemote::getConnection(const UUID& from, const UUID& to) const
+{
+    return tmp_ref_.getConnection(from, to);
+}
+
+ConnectionInformation GraphFacadeRemote::getConnectionWithId(int id) const
+{
+    return tmp_ref_.getConnectionWithId(id);
+}
+
+std::size_t GraphFacadeRemote::countNodes() const
+{
+    return tmp_ref_.countNodes();
+}
+
+int GraphFacadeRemote::getComponent(const UUID& node_uuid) const
+{
+    return tmp_ref_.getComponent(node_uuid);
+}
+int GraphFacadeRemote::getDepth(const UUID& node_uuid) const
+{
+    return tmp_ref_.getDepth(node_uuid);
 }
 
 GraphFacadeRemote* GraphFacadeRemote::getRemoteParent() const
@@ -261,7 +344,7 @@ bool GraphFacadeRemote::isPaused() const
 void GraphFacadeRemote::pauseRequest(bool pause)
 {
     // TODO: implement client server
-//    tmp_ref_.pauseRequest(pause);
+    tmp_ref_.pauseRequest(pause);
 }
 
 
@@ -270,7 +353,11 @@ std::string GraphFacadeRemote::makeStatusString()
     // TODO: implement client server
     return tmp_ref_.makeStatusString();
 }
-
+std::vector<UUID> GraphFacadeRemote::enumerateAllNodes() const
+{
+    // TODO: implement client server
+    return tmp_ref_.enumerateAllNodes();
+}
 std::vector<ConnectionInformation> GraphFacadeRemote::enumerateAllConnections() const
 {
     // TODO: implement client server

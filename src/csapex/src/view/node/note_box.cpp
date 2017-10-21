@@ -160,7 +160,7 @@ void NoteBox::stopResize()
 }
 
 
-void NoteBox::updateComponentInformation(Graph* graph)
+void NoteBox::updateComponentInformation(GraphFacade *graph)
 {
 
 }

@@ -51,7 +51,13 @@ Session::~Session()
         apex_assert_hard(!packet_handler_thread_.joinable());
     }
 
-    socket_->close();
+    boost::system::error_code ec;
+    socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+    if (ec) {
+        throw std::runtime_error("cannot shutdown server connection");
+    } else {
+        socket_->close();
+    }
 }
 
 void Session::run()

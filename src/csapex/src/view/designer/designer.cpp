@@ -140,7 +140,7 @@ void Designer::showNodeDialog()
 void Designer::showNodeSearchDialog()
 {
     if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
-        SearchDialog diag(current_view->getGraphFacade()->getGraph().get(), *view_core_.getNodeFactory(),
+        SearchDialog diag(current_view->getGraphFacade(), *view_core_.getNodeFactory(),
                           "Please enter the UUID, the label or the type of the node");
 
         int r = diag.exec();
@@ -236,8 +236,8 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     QObject::connect(graph_view, &GraphView::boxAdded, this, &Designer::addBox);
     QObject::connect(graph_view, &GraphView::boxRemoved, this, &Designer::removeBox);
 
-    for(const auto& nf : graph_facade->getGraph()->getAllNodeFacades()) {
-        NodeBox* box = graph_view->getBox(nf->getUUID());
+    for(const UUID& uuid : graph_facade->enumerateAllNodes()){
+        NodeBox* box = graph_view->getBox(uuid);
         addBox(box);
     }
 
@@ -265,7 +265,7 @@ void Designer::closeView(int page)
 
         DesignerIO designerio;
         YAML::Node doc;
-        designerio.saveBoxes(doc, graph_facade->getGraph().get(), graph_views_[graph_facade]);
+        designerio.saveBoxes(doc, graph_facade, graph_views_[graph_facade]);
         states_for_invisible_graphs_[graph_facade->getAbsoluteUUID()] = doc["adapters"];
 
         ui->tabWidget->removeTab(page);
@@ -583,7 +583,7 @@ void Designer::saveView(const GraphFacade& graph, YAML::Node &doc)
 
     auto pos = graph_views_.find(&graph);
     if(pos != graph_views_.end()) {
-        designerio.saveBoxes(doc, graph.getGraph().get(), pos->second);
+        designerio.saveBoxes(doc, &graph, pos->second);
         states_for_invisible_graphs_[graph.getAbsoluteUUID()] = doc["adapters"];
     } else {
         doc["adapters"] = states_for_invisible_graphs_[graph.getAbsoluteUUID()];

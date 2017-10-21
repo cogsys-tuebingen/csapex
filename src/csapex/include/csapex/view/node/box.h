@@ -104,7 +104,7 @@ protected:
     bool eventFilter(QObject*, QEvent*);
 
 public:
-    void updateBoxInformation(Graph* graph);
+    void updateBoxInformation(GraphFacade *graph);
 
 public Q_SLOTS:
     void getInformation();
@@ -115,7 +115,7 @@ public Q_SLOTS:
     void triggerFlipSides();
     void showProfiling(bool show);
 
-    virtual void updateComponentInformation(Graph* graph);
+    virtual void updateComponentInformation(GraphFacade* graph);
     virtual void updateThreadInformation();
     virtual void updateFrequencyInformation();
     void contextMenuEvent(QContextMenuEvent* e);

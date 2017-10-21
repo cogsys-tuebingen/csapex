@@ -2,18 +2,20 @@
 #include <csapex/serialization/serialization_buffer.h>
 
 /// PROJECT
-#include <csapex/serialization/streamable.h>
-#include <csapex/serialization/packet_serializer.h>
-#include <csapex/model/connector_type.h>
-#include <csapex/model/token_data.h>
-#include <csapex/serialization/snippet.h>
-#include <csapex/model/connector_description.h>
-#include <csapex/model/execution_state.h>
-#include <csapex/profiling/interval.h>
 #include <csapex/model/activity_type.h>
+#include <csapex/model/connection_information.h>
+#include <csapex/model/connector_description.h>
+#include <csapex/model/connector_type.h>
 #include <csapex/model/error_state.h>
+#include <csapex/model/execution_state.h>
+#include <csapex/model/node_characteristics.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/token_data.h>
 #include <csapex/param/parameter.h>
+#include <csapex/profiling/interval.h>
+#include <csapex/serialization/packet_serializer.h>
+#include <csapex/serialization/snippet.h>
+#include <csapex/serialization/streamable.h>
 #include <csapex/utility/notification.h>
 
 /// SYSTEM
@@ -100,9 +102,12 @@ SerializationBuffer::SerializationBuffer()
     ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
     ADD_ANY_TYPE(TokenDataConstPtr);
     ADD_ANY_TYPE(SnippetPtr);
+    ADD_ANY_TYPE(NodeCharacteristics);
     ADD_ANY_TYPE(ConnectorDescription);
+    ADD_ANY_TYPE(ConnectionInformation);
     ADD_ANY_TYPE(ExecutionState);
     ADD_ANY_TYPE(Notification);
+    ADD_ANY_TYPE(Fulcrum);
     ADD_ANY_TYPE(NodeStatePtr);
     ADD_ANY_TYPE(param::ParameterPtr);
     ADD_ANY_TYPE(ActivityType);

@@ -466,6 +466,7 @@ add_library(csapex_command SHARED
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp
     src/command/create_thread.cpp
+    src/command/clear_graph.cpp
     src/command/delete_connection.cpp
     src/command/delete_connector.cpp
     src/command/delete_fulcrum.cpp

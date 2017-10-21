@@ -241,7 +241,7 @@ GraphView* NodeBox::getGraphView() const
 }
 
 
-void NodeBox::updateBoxInformation(Graph* graph)
+void NodeBox::updateBoxInformation(GraphFacade* graph)
 {
     updateComponentInformation(graph);
     updateThreadInformation();
@@ -275,7 +275,7 @@ void NodeBox::setStyleForId(QLabel* label, int id)
     label->setStyleSheet(ss.str().c_str());
 }
 
-void NodeBox::updateComponentInformation(Graph* graph)
+void NodeBox::updateComponentInformation(GraphFacade* graph)
 {
     if(settings_.getTemporary("debug", false)) {
         changeColor();

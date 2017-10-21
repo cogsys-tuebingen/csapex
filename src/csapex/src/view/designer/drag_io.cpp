@@ -329,8 +329,7 @@ void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
                         NodeStatePtr state)
 {
     GraphFacade* gf = src->getGraphFacade();
-    GraphPtr graph = gf->getGraph();
-    UUID uuid = graph->generateUUID(type);
+    UUID uuid = gf->generateUUID(type);
 
     dispatcher_->executeLater(Command::Ptr(new command::AddNode(gf->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
 }
@@ -338,8 +337,7 @@ void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
 void DragIO::pasteGraph(GraphView *src, const QPointF &pos, const Snippet &blueprint)
 {
     GraphFacade* gf = src->getGraphFacade();
-    GraphPtr graph = gf->getGraph();
-    CommandPtr cmd(new command::PasteGraph(graph->getAbsoluteUUID(), blueprint, Point (pos.x(), pos.y())));
+    CommandPtr cmd(new command::PasteGraph(gf->getAbsoluteUUID(), blueprint, Point (pos.x(), pos.y())));
 
     dispatcher_->executeLater(cmd);
 }

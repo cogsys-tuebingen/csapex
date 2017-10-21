@@ -13,6 +13,8 @@
 #include <csapex/model/connector.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph.h>
 #include <csapex/msg/marker_message.h>
 #include <csapex/profiling/interlude.hpp>
@@ -119,13 +121,15 @@ DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     setBackgroundBrush(QBrush(Qt::white));
 
-    GraphPtr graph = graph_facade_->getGraph();
+    connections_.push_back(graph_facade_->connection_added.connect([this](const ConnectionInformation& ci) {
+        connectionAdded(ci);
+    }));
+    connections_.push_back(graph_facade_->connection_removed.connect([this](const ConnectionInformation& ci) {
+        connectionDeleted(ci);
+    }));
 
-    connections_.push_back(graph->connection_added.connect([this](Connection* c) { connectionAdded(c); }));
-    connections_.push_back(graph->connection_removed.connect([this](Connection* c) { connectionDeleted(c); }));
-
-    for(const auto& connection : graph->getConnections()) {
-        connectionAdded(connection.get());
+    for(const ConnectionInformation& ci : graph_facade_->enumerateAllConnections()){
+        connectionAdded(ci);
     }
 }
 
@@ -382,10 +386,10 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             return false;
         };
 
-        for(ConnectionPtr connection : graph_facade_->getGraph()->getConnections()) {
-            auto pos = connection_bb_.find(connection.get());
+        for(const ConnectionInformation& connection : graph_facade_->enumerateAllConnections()) {
+            auto pos = connection_bb_.find(connection.id);
             if(pos == connection_bb_.end() || intersects_any(pos->second, rect)) {
-                drawConnection(painter, *connection);
+                drawConnection(painter, connection);
             }
         }
     }
@@ -532,8 +536,8 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
         if(highlight_connection_id_ >= 0) {
             QPoint pos = e->scenePos().toPoint();
             view_core_.getCommandDispatcher()->execute(Command::Ptr(new command::AddFulcrum(graph_facade_->getAbsoluteUUID(),
-                                                                    highlight_connection_id_, highlight_connection_sub_id_,
-                                                                    Point(pos.x(), pos.y()), Fulcrum::FULCRUM_LINEAR)));
+                                                                                            highlight_connection_id_, highlight_connection_sub_id_,
+                                                                                            Point(pos.x(), pos.y()), Fulcrum::FULCRUM_LINEAR)));
             e->accept();
 
             // allow moving the fulcrum directly
@@ -586,38 +590,22 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             highlight_connection_sub_id_ = data.second;
         }
 
-        auto c = graph_facade_->getGraph()->getConnectionWithId(highlight_connection_id_);
-        if(!c) {
-            return;
-        }
-        auto m = c->getToken();
+        const ConnectionInformation& c = graph_facade_->getConnectionWithId(highlight_connection_id_);
+
         if(debug_){
             QString descr("Connection #");
-            descr += QString::number(c->id());
+            descr += QString::number(c.id);
             descr += " (";
-            descr += QString::fromStdString(c->from()->getUUID().getShortName());
+            descr += QString::fromStdString(c.from.getShortName());
             descr += " -> ";
-            descr += QString::fromStdString(c->to()->getUUID().getShortName());
-            descr += "), state: ";
+            descr += QString::fromStdString(c.to.getShortName());
+            descr += ") ";
 
-            switch (c->getState()) {
-            case Connection::State::DONE:
-                descr += "NOT_INITIALIZED / DONE";
-                break;
-            case Connection::State::UNREAD:
-                descr += "UNREAD";
-                break;
-            case Connection::State::READ:
-                descr += "READ";
-                break;
-            default:
-                break;
-            }
-
+            TokenDataConstPtr m = c.type;
             if(m) {
                 descr += ", Message: ";
-                descr += QString::fromStdString(m->getTokenData()->descriptiveName());
-                descr += ", # " + QString::number(m->getSequenceNumber());
+                descr += QString::fromStdString(m->descriptiveName());
+//                descr += ", # " + QString::number(m->getSequenceNumber());
             } else {
                 descr += " (no message)";
             }
@@ -640,7 +628,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
         preview_->move(preview_pos.toPoint());
 
         if(!preview_->isConnected()) {
-            preview_->connectTo(c->from());
+            preview_->connectTo(graph_facade_->findConnector(c.from));
         }
 
         update();
@@ -668,25 +656,40 @@ int DesignerScene::getHighlightedConnectionId() const
 
 bool DesignerScene::isEmpty() const
 {
-    return graph_facade_->getGraph()->countNodes() == 0;
+    return graph_facade_->countNodes() == 0;
 }
 
-void DesignerScene::connectionAdded(Connection* c)
+void DesignerScene::connectionAdded(const ConnectionInformation& ci)
 {
-    for(FulcrumPtr f : c->getFulcrums()) {
-        fulcrumAdded(f.get());
+    for(const Fulcrum& f : ci.fulcrums) {
+        connection_2_fulcrum_[ci.id].push_back(f);
+        Fulcrum* proxy = &connection_2_fulcrum_[ci.id].back();
+        fulcrumAdded(proxy);
     }
 
-    c->fulcrum_added.connect(std::bind(&DesignerScene::fulcrumAdded, this, std::placeholders::_1));
-    c->fulcrum_deleted.connect(std::bind(&DesignerScene::fulcrumDeleted, this, std::placeholders::_1));
-    c->fulcrum_moved.connect(std::bind(&DesignerScene::fulcrumMoved, this, std::placeholders::_1, std::placeholders::_2));
-    c->fulcrum_moved_handle.connect(std::bind(&DesignerScene::fulcrumHandleMoved, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    c->fulcrum_type_changed.connect(std::bind(&DesignerScene::fulcrumTypeChanged, this, std::placeholders::_1, std::placeholders::_2));
+
+    if(GraphFacadeLocalPtr gfl = std::dynamic_pointer_cast<GraphFacadeLocal>(graph_facade_)) {
+        ConnectionPtr connection = gfl->getLocalGraph()->getConnection(ci.from, ci.to);
+
+        connection->fulcrum_added.connect(
+                    std::bind(&DesignerScene::fulcrumAdded, this, std::placeholders::_1));
+        connection->fulcrum_deleted.connect(
+                    std::bind(&DesignerScene::fulcrumDeleted, this, std::placeholders::_1));
+        connection->fulcrum_moved.connect(
+                    std::bind(&DesignerScene::fulcrumMoved, this, std::placeholders::_1, std::placeholders::_2));
+        connection->fulcrum_moved_handle.connect(
+                    std::bind(&DesignerScene::fulcrumHandleMoved, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+        connection->fulcrum_type_changed.connect(
+                    std::bind(&DesignerScene::fulcrumTypeChanged, this, std::placeholders::_1, std::placeholders::_2));
+
+    } else {
+        // TODO: implement fulcrum manipulation for remote connections!
+    }
 
     invalidateSchema();
 }
 
-void DesignerScene::connectionDeleted(Connection*)
+void DesignerScene::connectionDeleted(const ConnectionInformation& ci)
 {
     invalidateSchema();
 }
@@ -761,8 +764,8 @@ void DesignerScene::fulcrumHandleMoved(void * fulcrum, bool dropped, int /*which
 
     if(dropped) {
         view_core_.getCommandDispatcher()->execute(Command::Ptr(new command::ModifyFulcrum(graph_facade_->getAbsoluteUUID(), f->connectionId(), f->id(),
-                                                                   fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
-                                                                   f->type(), f->handleIn(), f->handleOut())));
+                                                                                           fulcrum_last_type_[f], fulcrum_last_hin_[f], fulcrum_last_hout_[f],
+                                                                                           f->type(), f->handleIn(), f->handleOut())));
         fulcrum_last_type_[f] = f->type();
         fulcrum_last_hin_[f] = f->handleIn();
         fulcrum_last_hout_[f] = f->handleOut();
@@ -833,45 +836,47 @@ void DesignerScene::deleteTemporaryConnectionsAndRepaint()
     update();
 }
 
-void DesignerScene::drawConnection(QPainter *painter, const Connection& connection)
+void DesignerScene::drawConnection(QPainter *painter, const ConnectionInformation& ci)
 {
-    if(!connection.from()->isOutput() || !connection.to()->isInput()) {
+    if(ci.active && !display_active_) {
+        return;
+    }
+    if(!ci.active && !display_inactive_) {
         return;
     }
 
-    if(connection.isActive() && !display_active_) {
-        return;
-    }
-    if(!connection.isActive() && !display_inactive_) {
-        return;
-    }
-
-    ConnectorPtr from = connection.from();
-    ConnectorPtr to = connection.to();
-
-    int id = connection.id();
+    ConnectorPtr from = graph_facade_->findConnector(ci.from);
+    ConnectorPtr to = graph_facade_->findConnector(ci.to);
 
     ccs = CurrentConnectionState();
 
-//    bool marker = false;
-//    TokenPtr token = connection.getToken();
-//    if(token) {
-//        marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(token->getTokenData()) != nullptr;
-//    }
+    //    bool marker = false;
+    //    TokenPtr token = connection.getToken();
+    //    if(token) {
+    //        marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(token->getTokenData()) != nullptr;
+    //    }
 
-    ccs.disabled = !(connection.isSourceEnabled() && connection.isSinkEnabled());
-    ccs.full_read = /*!marker && */connection.getState() == Connection::State::READ;
-    ccs.full_unread = /*!marker && */connection.getState() == Connection::State::UNREAD;
-    ccs.active = connection.isActive();
-    ccs.active_token = connection.holdsActiveToken();
-    ccs.target_is_pipelining = connection.isPipelining();
+    if(GraphFacadeLocalPtr gfl = std::dynamic_pointer_cast<GraphFacadeLocal>(graph_facade_)) {
+        ConnectionPtr connection = gfl->getLocalGraph()->getConnection(ci.from, ci.to);
 
-    if(debug_){
-        ccs.label = QString::number(connection.from()->sequenceNumber()) +
-                " -> " +
-                QString::number(connection.to()->sequenceNumber());
+        ccs.disabled = !(from->isEnabled() && to->isEnabled());
+        ccs.full_read = connection->getState() == Connection::State::READ;
+        ccs.full_unread = connection->getState() == Connection::State::UNREAD;
+        ccs.active = connection->isActive();
+        ccs.active_token = connection->holdsActiveToken();
+        ccs.target_is_pipelining = connection->isPipelining();
+
+    } else {
+        ccs.disabled = !(from->isEnabled() && to->isEnabled());
+        // TODO: implement state forwarding for connections
+        ccs.full_read = false;
+        ccs.full_unread = false;
+        ccs.active = ci.active;
+        ccs.active_token = false;
+        ccs.target_is_pipelining = false;
     }
-    connection_bb_[&connection] = drawConnection(painter, from.get(), to.get(), id);
+
+    connection_bb_[ci.id] = drawConnection(painter, from.get(), to.get(), ci.id);
 }
 
 std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter,
@@ -962,7 +967,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     }
 
     if(ccs.type == TokenType::SIG) {
-//        scale_factor *= 0.5;
+        //        scale_factor *= 0.5;
     }
 
     if(ccs.active) {
@@ -977,16 +982,16 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
     double mindist_for_slack = 60.0;
     double slack_smooth_distance = 300.0;
 
-    Fulcrum::Ptr first(new Fulcrum(-1, convert(from), Fulcrum::FULCRUM_OUT, convert(from), convert(from)));
-    Fulcrum::Ptr current = first;
-    Fulcrum::Ptr last = current;
+    Fulcrum first(-1, convert(from), Fulcrum::FULCRUM_OUT, convert(from), convert(from));
+    const Fulcrum* current = &first;
+//    const Fulcrum* last = current;
 
-    std::vector<Fulcrum::Ptr> targets;
+    std::vector<Fulcrum> targets;
     if(id >= 0) {
-        ConnectionPtr connection = graph_facade_->getGraph()->getConnectionWithId(id);
-        targets = connection->getFulcrums();
+        ConnectionInformation connection = graph_facade_->getConnectionWithId(id);
+        targets = connection.fulcrums;
     }
-    targets.push_back(Fulcrum::Ptr(new Fulcrum(-1, convert(to), Fulcrum::FULCRUM_IN, convert(to), convert(to))));
+    targets.emplace_back(-1, convert(to), Fulcrum::FULCRUM_IN, convert(to), convert(to));
 
     int sub_section = 0;
 
@@ -998,10 +1003,10 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
     // generate lines
     for(std::size_t i = 0; i < targets.size(); ++i) {
-        const Fulcrum::Ptr& next = targets[i];
+        const Fulcrum& next = targets[i];
 
         QPointF current_pos = convert(current->pos());
-        QPointF next_pos = convert(next->pos());
+        QPointF next_pos = convert(next.pos());
 
         QPointF diff = (next_pos - current_pos);
         double direct_length = hypot(diff.x(), diff.y());
@@ -1024,25 +1029,25 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
             cp1 = offset(current_pos, ccs.end_pos, x_offset) + y_offset;
 
         } else {
-            const Fulcrum::Ptr& last = targets[sub_section-1];
-            if(last->type() == Fulcrum::FULCRUM_LINEAR) {
+            const Fulcrum& last = targets[sub_section-1];
+            if(last.type() == Fulcrum::FULCRUM_LINEAR) {
                 cp1 = current_pos;
             } else {
                 cp1 = current_pos + convert(current->handleOut());
             }
         }
 
-        if(next->type() == Fulcrum::FULCRUM_OUT) {
+        if(next.type() == Fulcrum::FULCRUM_OUT) {
             cp2 = offset(next_pos, ccs.start_pos, x_offset) + y_offset;
 
-        } else if(next->type() == Fulcrum::FULCRUM_IN) {
+        } else if(next.type() == Fulcrum::FULCRUM_IN) {
             cp2 = offset(next_pos, ccs.end_pos, x_offset) + y_offset;
 
         } else {
-            if(next->type() == Fulcrum::FULCRUM_LINEAR) {
+            if(next.type() == Fulcrum::FULCRUM_LINEAR) {
                 cp2 = next_pos;
             } else {
-                cp2 = next_pos + convert(next->handleIn());
+                cp2 = next_pos + convert(next.handleIn());
             }
         }
 
@@ -1050,8 +1055,8 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
         paths.push_back(std::make_pair(path, sub_section));
 
-        last = current;
-        current = next;
+//        last = current;
+        current = &next;
         ++sub_section;
     }
 
@@ -1369,7 +1374,7 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
 
 bool DesignerScene::showConnectionContextMenu()
 {
-    ConnectionConstPtr c = graph_facade_->getGraph()->getConnectionWithId(highlight_connection_id_);
+    ConnectionInformation c = graph_facade_->getConnectionWithId(highlight_connection_id_);
 
     QMenu menu;
     QAction* reset = new QAction("reset connection", &menu);
@@ -1381,7 +1386,7 @@ bool DesignerScene::showConnectionContextMenu()
 
     QAction* active = new QAction("allow active tokens", &menu);
     active->setCheckable(true);
-    active->setChecked(c->isActive());
+    active->setChecked(c.active);
     menu.addAction(active);
 
     QAction* selectedItem = menu.exec(QCursor::pos());

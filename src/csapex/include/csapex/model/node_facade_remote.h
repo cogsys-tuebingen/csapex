@@ -100,7 +100,7 @@ private:
      **/
 
 
-    NodeHandlePtr nh_;
+    long guard_;
 
     mutable std::vector<param::ParameterPtr> parameters_;
     mutable std::map<std::string, param::ParameterPtr> parameter_cache_;

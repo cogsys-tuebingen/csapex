@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
@@ -123,7 +123,7 @@ void UpdateParameter::setParameter(const T& value)
     } else {
         UUID node_uuid = uuid.parentUUID();
 
-        NodeHandle* node_handle = getRoot()->getGraph()->findNodeHandle(node_uuid);
+        NodeHandle* node_handle = getRoot()->getLocalGraph()->findNodeHandle(node_uuid);
         apex_assert_hard(node_handle);
 
 

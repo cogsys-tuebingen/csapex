@@ -42,7 +42,8 @@ enum class NodeNoteType
     ConnectorRemovedTriggered,
 
     ConnectionStartTriggered,
-    ConnectionDoneTriggered,
+    ConnectionCreatedTriggered,
+    ConnectionRemovedTriggered,
 
     ErrorEvent,
     Notification

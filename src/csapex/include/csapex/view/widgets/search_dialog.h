@@ -22,7 +22,7 @@ class QStandardItemModel;
 namespace csapex
 {
 class NodeFilterProxyModel;
-class Graph;
+class GraphFacade;
 class NodeFactory;
 
 class CSAPEX_QT_EXPORT SearchDialog : public QDialog
@@ -30,7 +30,7 @@ class CSAPEX_QT_EXPORT SearchDialog : public QDialog
     Q_OBJECT
 
 public:
-    SearchDialog(Graph* root, csapex::NodeFactory &node_factory, QString message, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SearchDialog(GraphFacade* root, csapex::NodeFactory &node_factory, QString message, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
     AUUID getAUUID();
 
@@ -47,10 +47,10 @@ private:
     void makeUI();
     QAbstractItemModel* listNodes();
 
-    void addNodes(Graph* graph, QStandardItemModel* model);
+    void addNodes(GraphFacade* graph, QStandardItemModel* model);
 
 private:
-    Graph* root_;
+    GraphFacade* root_;
     csapex::NodeFactory &node_factory_;
 
     CompletedLineEdit * name_edit_;

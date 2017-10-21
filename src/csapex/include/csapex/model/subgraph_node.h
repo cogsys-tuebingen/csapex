@@ -160,8 +160,8 @@ private:
     void startNextIteration();
 
 public:
-    slim_signal::Signal<void(ConnectorPtr)> forwardingAdded;
-    slim_signal::Signal<void(ConnectorPtr)> forwardingRemoved;
+    slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_added;
+    slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_removed;
 
 protected:
     GraphLocalPtr graph_;

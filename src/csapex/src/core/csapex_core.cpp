@@ -265,12 +265,12 @@ void CsApexCore::init(bool create_global_ports)
 
         if(is_root_) {
             root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
-                                                         root_->getGraph()->makeUUID("slot_save"), "save",
+                                                         root_->getLocalGraph()->makeUUID("slot_save"), "save",
                                                          [this](const TokenPtr&) {
                 saveAs(getSettings().get<std::string>("config"));
             });
             root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
-                                                         root_->getGraph()->makeUUID("slot_exit"), "exit",
+                                                         root_->getLocalGraph()->makeUUID("slot_exit"), "exit",
                                                          [this](const TokenPtr&) {
                 shutdown();
             });
@@ -547,7 +547,7 @@ void CsApexCore::load(const std::string &file)
         reset();
     }
 
-    apex_assert_hard(root_->getGraph()->countNodes() == 0);
+    apex_assert_hard(root_->getLocalGraph()->countNodes() == 0);
 
     GraphIO graphio(*root_, node_factory_.get());
     slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(load_detail_request);

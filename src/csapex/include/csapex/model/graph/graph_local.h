@@ -41,8 +41,8 @@ public:
 
     Graph* findSubgraph(const UUID& uuid) const override;
 
+    std::vector<UUID> getAllNodeUUIDs() const;
     std::vector<NodeHandle*> getAllNodeHandles() override;
-
     std::vector<NodeFacadePtr> getAllNodeFacades() override;
     std::vector<NodeFacadeLocalPtr> getAllLocalNodeFacades();
 

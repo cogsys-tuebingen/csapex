@@ -29,6 +29,9 @@ enum class GraphNoteType
      **/
 
 
+    ForwardingCreatedTriggered,
+    forwarding_connector_removedTriggered
+
 };
 
 

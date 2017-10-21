@@ -58,6 +58,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
             connections_.push_back(ConnectionInformation(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()),
                                                          to_uuid,
                                                          slot_new->getType(),
+                                                         connection->id(),
                                                          connection->isActive(),
                                                          connection->getFulcrumsCopy()));
         }
@@ -68,6 +69,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
             connections_.push_back(ConnectionInformation(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()),
                                                          to_uuid,
                                                          input_new->getType(),
+                                                         connection->id(),
                                                          connection->isActive(),
                                                          connection->getFulcrumsCopy()));
         }
@@ -80,6 +82,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
             connections_.push_back(ConnectionInformation(from_uuid,
                                                          new_target_uuid_to_old_uuid_.at(connection->to()->getUUID()),
                                                          event_new->getType(),
+                                                         connection->id(),
                                                          connection->isActive(),
                                                          connection->getFulcrumsCopy()));
         }
@@ -90,6 +93,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
             connections_.push_back(ConnectionInformation(from_uuid,
                                                          new_target_uuid_to_old_uuid_.at(connection->to()->getUUID()),
                                                          output_new->getType(),
+                                                         connection->id(),
                                                          connection->isActive(),
                                                          connection->getFulcrumsCopy()));
         }

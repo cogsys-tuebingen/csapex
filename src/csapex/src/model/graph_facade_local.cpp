@@ -33,8 +33,17 @@ GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, Su
     observe(graph->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeLocal::nodeRemovedHandler));
     observe(graph->notification, notification);
 
-    observe(graph_node_->forwardingAdded, forwardingAdded);
-    observe(graph_node_->forwardingRemoved, forwardingRemoved);
+    observe(graph->connection_added, [this](Connection* c) {
+        connection_added(c->getDescription());
+    });
+    observe(graph->connection_removed, [this](Connection* c) {
+        connection_removed(c->getDescription());
+    });
+    observe(graph->state_changed, state_changed);
+
+    observe(graph_node_->forwarding_connector_added, forwarding_connector_added);
+    observe(graph_node_->forwarding_connector_removed, forwarding_connector_removed);
+
 
     if(parent_) {
         // TODO: refactor!
@@ -51,6 +60,11 @@ GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, Su
 AUUID GraphFacadeLocal::getAbsoluteUUID() const
 {
     return absolute_uuid_;
+}
+
+UUID GraphFacadeLocal::generateUUID(const std::string& prefix)
+{
+    return graph_->generateUUID(prefix);
 }
 
 GraphFacade *GraphFacadeLocal::getParent() const
@@ -93,9 +107,69 @@ SubgraphNodePtr GraphFacadeLocal::getSubgraphNode()
 }
 
 
-GraphPtr GraphFacadeLocal::getGraph() const
+NodeFacadePtr GraphFacadeLocal::findNodeFacade(const UUID& uuid) const
 {
-    return graph_;
+    return graph_->findNodeFacade(uuid);
+}
+NodeFacadePtr GraphFacadeLocal::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
+{
+    return graph_->findNodeFacadeNoThrow(uuid);
+}
+NodeFacadePtr GraphFacadeLocal::findNodeFacadeForConnector(const UUID &uuid) const
+{
+    return graph_->findNodeFacadeForConnector(uuid);
+}
+NodeFacadePtr GraphFacadeLocal::findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept
+{
+    return graph_->findNodeFacadeForConnectorNoThrow(uuid);
+}
+NodeFacadePtr GraphFacadeLocal::findNodeFacadeWithLabel(const std::string& label) const
+{
+    return graph_->findNodeFacadeWithLabel(label);
+}
+
+ConnectorPtr GraphFacadeLocal::findConnector(const UUID &uuid)
+{
+    return graph_->findConnector(uuid);
+}
+ConnectorPtr GraphFacadeLocal::findConnectorNoThrow(const UUID &uuid) noexcept
+{
+    return graph_->findConnectorNoThrow(uuid);
+}
+
+bool GraphFacadeLocal::isConnected(const UUID& from, const UUID& to) const
+{
+    return graph_->getConnection(from, to) != nullptr;
+}
+
+ConnectionInformation GraphFacadeLocal::getConnection(const UUID& from, const UUID& to) const
+{
+    ConnectionPtr c = graph_->getConnection(from, to);
+    if(!c) {
+        throw std::runtime_error("unknown connection requested");
+    }
+
+    return c->getDescription();
+}
+
+ConnectionInformation GraphFacadeLocal::getConnectionWithId(int id) const
+{
+    return graph_->getConnectionWithId(id)->getDescription();
+}
+
+std::size_t GraphFacadeLocal::countNodes() const
+{
+    return graph_->countNodes();
+}
+
+
+int GraphFacadeLocal::getComponent(const UUID& node_uuid) const
+{
+    return graph_->getComponent(node_uuid);
+}
+int GraphFacadeLocal::getDepth(const UUID& node_uuid) const
+{
+    return graph_->getDepth(node_uuid);
 }
 
 GraphLocalPtr GraphFacadeLocal::getLocalGraph() const
@@ -523,6 +597,11 @@ void GraphFacadeLocal::pauseRequest(bool pause)
 std::string GraphFacadeLocal::makeStatusString()
 {
     return graph_node_->makeStatusString();
+}
+
+std::vector<UUID> GraphFacadeLocal::enumerateAllNodes() const
+{
+    return graph_->getAllNodeUUIDs();
 }
 
 std::vector<ConnectionInformation> GraphFacadeLocal::enumerateAllConnections() const

@@ -1,7 +1,7 @@
 #ifndef CONNECTOR_DESCRIPTION_H
 #define CONNECTOR_DESCRIPTION_H
 
-/// HEADER
+/// PROJECT
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/model/model_fwd.h>
@@ -23,7 +23,7 @@ struct ConnectorDescription : public Serializable
     UUID id;
 
     // connected connectors (UUID, is_active)
-    struct Target
+    struct Target : public Serializable
     {
         AUUID id;
         bool active;
@@ -34,6 +34,12 @@ struct ConnectorDescription : public Serializable
         Target(AUUID id, bool active)
             : id(id), active(active)
         {}
+
+        virtual void serialize(SerializationBuffer &data) const override;
+        virtual void deserialize(const SerializationBuffer& data) override;
+
+    protected:
+        virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
     };
 
     std::vector<Target> targets;
@@ -62,6 +68,8 @@ struct ConnectorDescription : public Serializable
                          const std::string& label,
                          bool optional = true,
                          bool is_parameter = false);
+
+    bool isOutput() const;
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;

@@ -5,6 +5,7 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/model/graph.h>
+#include <csapex/model/graph_facade.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/node_facade.h>
 #include <csapex/view/node/node_filter_proxy_model.h>
@@ -22,7 +23,7 @@
 using namespace csapex;
 
 
-SearchDialog::SearchDialog(Graph *root, csapex::NodeFactory &node_factory, QString message, QWidget *parent, Qt::WindowFlags f)
+SearchDialog::SearchDialog(GraphFacade *root, csapex::NodeFactory &node_factory, QString message, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
       root_(root),
       node_factory_(node_factory),
@@ -105,17 +106,17 @@ QAbstractItemModel* SearchDialog::listNodes()
     return model;
 }
 
-void SearchDialog::addNodes(Graph *graph, QStandardItemModel *model)
+void SearchDialog::addNodes(GraphFacade *graph, QStandardItemModel *model)
 {
-    for(const graph::VertexPtr& vtx : *graph) {
-        NodeFacadePtr nf = vtx->getNodeFacade();
+    for(const UUID& uuid : graph->enumerateAllNodes()) {
+        NodeFacadePtr nf = graph->findNodeFacade(uuid);
 
         AUUID auuid = nf->getAUUID();
         std::string type = nf->getType();
         std::string label = nf->getLabel();
 
         if(nf->isGraph()) {
-            Graph* subgraph = graph->findSubgraph(nf->getUUID());
+            GraphFacade* subgraph = graph->getSubGraph(nf->getUUID());
             addNodes(subgraph, model);
         }
 

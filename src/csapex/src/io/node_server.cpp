@@ -80,8 +80,12 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
         channel->sendNote<NodeNote>(NodeNoteType::ConnectionStartTriggered, c);
     });
 
-    observe(node->connection_done, [this, channel](ConnectorDescription c){
-        channel->sendNote<NodeNote>(NodeNoteType::ConnectionDoneTriggered, c);
+    observe(node->connection_added, [this, channel](ConnectorDescription c){
+        channel->sendNote<NodeNote>(NodeNoteType::ConnectionCreatedTriggered, c);
+    });
+
+    observe(node->connection_removed, [this, channel](ConnectorDescription c){
+        channel->sendNote<NodeNote>(NodeNoteType::ConnectionRemovedTriggered, c);
     });
 
     observe(node->interval_start, [this, channel](NodeFacade* facade, ActivityType type, std::shared_ptr<const Interval> stamp){

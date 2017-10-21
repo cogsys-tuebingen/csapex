@@ -837,6 +837,15 @@ Graph* GraphLocal::findSubgraph(const UUID& uuid) const
     throw std::runtime_error(std::string("cannot find graph \"") + uuid.getFullName() + "\"");
 }
 
+std::vector<UUID> GraphLocal::getAllNodeUUIDs() const
+{
+    std::vector<UUID> uuids;
+    for(const auto& vertex : vertices_) {
+        uuids.push_back(vertex->getUUID());
+    }
+    return uuids;
+}
+
 std::vector<NodeHandle*> GraphLocal::getAllNodeHandles()
 {
     std::vector<NodeHandle*> node_handles;

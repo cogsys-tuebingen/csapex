@@ -138,13 +138,10 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, &GraphView::childNodeFacadeAdded, this, &GraphView::childNodeAdded, Qt::QueuedConnection);
     QObject::connect(this, &GraphView::childNodeFacadeRemoved, this, &GraphView::childNodeRemoved, Qt::QueuedConnection);
 
-    GraphPtr graph = graph_facade_->getGraph();
+    observe(graph_facade_->state_changed, [this](){ updateBoxInformation(); });
 
-    observe(graph->state_changed, [this](){ updateBoxInformation(); });
-
-    for(const graph::VertexPtr& vertex : *graph) {
-        //todo: this should be a remote node facade when in network mode
-        const NodeFacadePtr& facade = vertex->getNodeFacade();
+    for(const UUID& uuid : graph_facade_->enumerateAllNodes()) {
+        const NodeFacadePtr& facade = graph_facade->findNodeFacade(uuid);
         apex_assert_hard(facade);
         nodeAdded(facade);
     }
@@ -958,14 +955,12 @@ void GraphView::focusOnNode(const csapex::UUID &uuid)
 
 void GraphView::addBox(NodeBox *box)
 {
-    GraphPtr graph = graph_facade_->getGraph();
-
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
     NodeFacadePtr facade = box->getNodeFacade();
 
     facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectorDescription&) { scene_->deleteTemporaryConnections(); }));
-    facade_connections_[facade.get()].emplace_back(facade->connection_done.connect([this](const ConnectorDescription&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_added.connect([this](const ConnectorDescription&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
@@ -990,9 +985,9 @@ void GraphView::addBox(NodeBox *box)
 
     box->init();
 
-    box->updateBoxInformation(graph.get());
+    box->updateBoxInformation(graph_facade_.get());
 
-    if(graph_facade_->getGraph()->countNodes() > 0) {
+    if(graph_facade_->countNodes() > 0) {
         setCacheMode(QGraphicsView::CacheNone);
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
@@ -1014,7 +1009,7 @@ void GraphView::removeBox(NodeBox *box)
     }
     profiling_.erase(box);
 
-    if(graph_facade_->getGraph()->countNodes() == 0) {
+    if(graph_facade_->countNodes() == 0) {
         setCacheMode(QGraphicsView::CacheNone);
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
@@ -1275,7 +1270,7 @@ void GraphView::updateBoxInformation()
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
             NodeBox* b = proxy->getBox();
-            b->updateBoxInformation(graph_facade_->getGraph().get());
+            b->updateBoxInformation(graph_facade_.get());
         }
     }
 }
@@ -1287,7 +1282,7 @@ void GraphView::createNodes(const QPoint& global_pos, const std::string& type, c
 
         AUUID graph_id = graph_facade_->getAbsoluteUUID();
 
-        UUID uuid = graph_facade_->getGraph()->generateUUID(type);
+        UUID uuid = graph_facade_->generateUUID(type);
         CommandPtr cmd(new command::AddNode(graph_id, type, Point (pos.x(), pos.y()), uuid, NodeStatePtr()));
 
         view_core_.getCommandDispatcher()->execute(cmd);
@@ -1469,7 +1464,7 @@ void GraphView::morphNode()
         CommandFactory factory(graph_facade_.get());
         morph->add(factory.deleteAllNodes({facade->getUUID()}));
 
-        UUID new_uuid = graph_facade_->getGraph()->generateUUID(type);
+        UUID new_uuid = graph_facade_->generateUUID(type);
         CommandPtr add_new = std::make_shared<command::AddNode>(graph_facade_->getAbsoluteUUID(),
                                                                 type, facade->getNodeState()->getPos(), new_uuid, nullptr);
         morph->add(add_new);
