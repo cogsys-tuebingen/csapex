@@ -571,6 +571,8 @@ add_library(csapex_remote SHARED
     src/io/protocol/graph_requests.cpp
     src/io/protocol/graph_notes.cpp
     src/io/protocol/graph_broadcasts.cpp
+    src/io/protocol/graph_facade_requests.cpp
+    src/io/protocol/graph_facade_notes.cpp
     src/io/protocol/command_requests.cpp
     src/io/protocol/command_broadcasts.cpp
     src/io/protocol/connector_requests.cpp

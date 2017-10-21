@@ -18,19 +18,19 @@ public:
     int getComponent(const UUID& node_uuid) const override;
     int getDepth(const UUID& node_uuid) const override;
 
-    void resetActivity() override;
+    void resetActivity();
 
-    void clear() override;
+    void clear();
 
-    Node* findNode(const UUID& uuid) const override;
-    Node* findNodeNoThrow(const UUID& uuid) const noexcept override;
-    Node* findNodeForConnector(const UUID &uuid) const override;
+    Node* findNode(const UUID& uuid) const;
+    Node* findNodeNoThrow(const UUID& uuid) const noexcept;
+    Node* findNodeForConnector(const UUID &uuid) const;
 
-    NodeHandle* findNodeHandle(const UUID& uuid) const override;
-    NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
-    NodeHandle* findNodeHandleForConnector(const UUID &uuid) const override;
-    NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept override;
-    NodeHandle* findNodeHandleWithLabel(const std::string& label) const override;
+    NodeHandle* findNodeHandle(const UUID& uuid) const;
+    NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept;
+    NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
+    NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept;
+    NodeHandle* findNodeHandleWithLabel(const std::string& label) const;
 
     NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
     NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
@@ -39,11 +39,11 @@ public:
     NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
 
 
-    Graph* findSubgraph(const UUID& uuid) const override;
+    Graph* findSubgraph(const UUID& uuid) const;
 
-    std::vector<UUID> getAllNodeUUIDs() const;
-    std::vector<NodeHandle*> getAllNodeHandles() override;
+    std::vector<UUID> getAllNodeUUIDs() const override;
     std::vector<NodeFacadePtr> getAllNodeFacades() override;
+    std::vector<NodeHandle*> getAllNodeHandles();
     std::vector<NodeFacadeLocalPtr> getAllLocalNodeFacades();
 
     ConnectablePtr findConnectable(const UUID &uuid);
@@ -51,10 +51,12 @@ public:
     ConnectorPtr findConnector(const UUID &uuid) override;
     ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
-    ConnectionPtr getConnectionWithId(int id) override;
-    ConnectionPtr getConnection(const UUID& from, const UUID& to) override;
+    bool isConnected(const UUID& from, const UUID& to) const override;
+    ConnectionPtr getConnectionWithId(int id);
+    ConnectionPtr getConnection(const UUID& from, const UUID& to);
 
-    std::vector<ConnectionPtr> getConnections() override;
+    std::vector<ConnectionPtr> getConnections();
+    virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
 
     int countNodes() override;
 
@@ -72,11 +74,11 @@ public:
     void setNodeFacade(NodeFacadeLocalWeakPtr nf);
 
     // iterators
-    vertex_iterator begin() override;
-    const vertex_const_iterator begin() const override;
+    vertex_iterator begin();
+    const vertex_const_iterator begin() const;
 
-    vertex_iterator end() override;
-    const vertex_const_iterator end() const override;
+    vertex_iterator end();
+    const vertex_const_iterator end() const;
 
 private:
     void checkNodeState(NodeHandle* nh);
@@ -88,7 +90,6 @@ private:
     std::set<graph::Vertex *> findVerticesThatJoinStreams();
 
 protected:
-//    std::vector<NodeHandlePtr> nodes_;
     std::vector<graph::VertexPtr> vertices_;
     std::vector<ConnectionPtr> edges_;
 

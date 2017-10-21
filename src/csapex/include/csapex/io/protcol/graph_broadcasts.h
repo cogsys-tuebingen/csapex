@@ -19,13 +19,7 @@ public:
 
     enum class GraphBroadcastType
     {
-        None,
-
-        GraphCreated,
-        GraphDestroyed,
-
-        NodeCreated,
-        NodeDestroyed
+        None
     };
 
     GraphBroadcasts();

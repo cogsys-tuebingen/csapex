@@ -18,7 +18,7 @@ class ProfilerRemote;
 class CSAPEX_EXPORT NodeFacadeRemote : public NodeFacade, public Remote
 {
 public:
-    NodeFacadeRemote(SessionPtr session, AUUID uuid);
+    NodeFacadeRemote(Session& session, AUUID uuid);
 
     ~NodeFacadeRemote();
 

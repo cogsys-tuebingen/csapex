@@ -4,6 +4,9 @@
 /// PROJECT
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/settings/settings_local.h>
+#include <csapex/io/server.h>
+#include <csapex/io/session_client.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/error_handling.h>
@@ -13,8 +16,6 @@
 #include <csapex/view/csapex_view_core_remote.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/gui_exception_handler.h>
-#include <csapex/io/server.h>
-#include <csapex/model/graph_facade_local.h>
 
 /// SYSTEM
 #include <iostream>
@@ -93,8 +94,10 @@ int Main::runWithGui()
     app->processEvents();
 
     std::unique_ptr<CsApexViewCore> main;
+    SessionPtr session;
     if(settings.getTemporary("start-server", false)) {
-        main.reset(new CsApexViewCoreRemote ("localhost", 12345, core));
+        session = std::make_shared<SessionClient>("localhost", 12345);
+        main.reset(new CsApexViewCoreRemote (*session, core));
     } else {
         main.reset(new CsApexViewCoreLocal (core));
     }

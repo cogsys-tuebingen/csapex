@@ -46,14 +46,15 @@ std::string UngroupNodes::getDescription() const
 
 bool UngroupNodes::doExecute()
 {
-    GraphPtr graph = getGraph();
+    GraphLocalPtr graph = std::dynamic_pointer_cast<GraphLocal>(getGraph());
+    apex_assert_hard(graph);
 
     NodeHandle* nh = graph->findNodeHandle(uuid);
     subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
 
     apex_assert_hard(subgraph);
 
-    setNodes(subgraph->getGraph()->getAllNodeHandles());
+    setNodes(subgraph->getLocalGraph()->getAllNodeHandles());
     analyzeConnections(subgraph->getGraph().get());
 
     {

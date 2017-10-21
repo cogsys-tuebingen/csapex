@@ -133,12 +133,12 @@ TEST_F(GraphTest, UnknownNodeCannotBeFound) {
     GraphPtr graph = graph_node.getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
 
-    ASSERT_THROW(graph->findNode(node_id), Graph::NodeNotFoundException);
+    ASSERT_THROW(graph->findNodeFacade(node_id), Graph::NodeFacadeNotFoundException);
 }
 
-TEST_F(GraphTest, nullptr) {
+TEST_F(GraphTest, NullPtr) {
     SubgraphNode graph_node(std::make_shared<GraphLocal>());
-    GraphPtr graph = graph_node.getGraph();
+    GraphLocalPtr graph = graph_node.getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
 
     NodeFacadePtr node_facade_found = graph->findNodeFacadeNoThrow(node_id);
@@ -202,7 +202,7 @@ TEST_F(GraphTest, RootCanBeFound) {
     SubgraphNodePtr graph_node = std::dynamic_pointer_cast<SubgraphNode>(main_facade->getNode());
     ASSERT_NE(nullptr, graph_node);
 
-    GraphPtr graph = graph_node->getGraph();
+    GraphLocalPtr graph = graph_node->getLocalGraph();
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("~");
 

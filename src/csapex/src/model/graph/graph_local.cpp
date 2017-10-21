@@ -106,6 +106,16 @@ std::vector<ConnectionPtr> GraphLocal::getConnections()
     return edges_;
 }
 
+std::vector<ConnectionInformation> GraphLocal::enumerateAllConnections() const
+{
+    std::vector<ConnectionInformation> result;
+    result.reserve(edges_.size());
+    for(const ConnectionPtr& c : edges_) {
+        result.push_back(c->getDescription());
+    }
+    return result;
+}
+
 void GraphLocal::deleteNode(const UUID& uuid)
 {
     NodeHandle* node_handle = findNodeHandle(uuid);
@@ -193,7 +203,9 @@ bool GraphLocal::addConnection(ConnectionPtr connection)
         }
     }
 
-    connection_added(connection.get());
+    if(connection_added.isConnected()) {
+        connection_added(connection->getDescription());
+    }
     if(!in_transaction_) {
         analyzeGraph();
     }
@@ -278,7 +290,9 @@ void GraphLocal::deleteConnection(ConnectionPtr connection)
 
             edges_.erase(c);
 
-            connection_removed(connection.get());
+            if(connection_removed.isConnected()) {
+                connection_removed(connection->getDescription());
+            }
             if(!in_transaction_) {
                 analyzeGraph();
             }
@@ -704,7 +718,7 @@ NodeHandle *GraphLocal::findNodeHandleNoThrow(const UUID& uuid) const noexcept
             if(root_node) {
                 SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_node);
                 if(graph) {
-                    return graph->getGraph()->findNodeHandle(uuid.nestedUUID());
+                    return graph->getLocalGraph()->findNodeHandle(uuid.nestedUUID());
                 }
             }
         }
@@ -904,6 +918,17 @@ ConnectorPtr GraphLocal::findConnectorNoThrow(const UUID &uuid) noexcept
     }
 
     return owner->getConnectorNoThrow(uuid);
+}
+
+bool GraphLocal::isConnected(const UUID &from, const UUID &to) const
+{
+    for(const ConnectionConstPtr& connection : edges_) {
+        if(connection->from()->getUUID() == from && connection->to()->getUUID() == to) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 ConnectionPtr GraphLocal::getConnectionWithId(int id)

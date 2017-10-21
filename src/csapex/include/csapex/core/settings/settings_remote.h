@@ -13,7 +13,7 @@ namespace csapex
 class CSAPEX_REMOTE_EXPORT SettingsRemote : public Settings, public Remote
 {
 public:
-    SettingsRemote(SessionPtr session);
+    SettingsRemote(Session &session);
 
     bool knows(const std::string& name) const override;
 

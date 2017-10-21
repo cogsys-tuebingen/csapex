@@ -2,24 +2,25 @@
 #include <csapex/command/group_nodes.h>
 
 /// COMPONENT
+#include <csapex/command/add_connection.h>
+#include <csapex/command/add_node.h>
+#include <csapex/command/add_variadic_connector.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/command/command.h>
-#include <csapex/model/subgraph_node.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/command/delete_node.h>
+#include <csapex/core/graphio.h>
+#include <csapex/model/connection.h>
+#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
-#include <csapex/command/delete_node.h>
-#include <csapex/command/command_factory.h>
-#include <csapex/command/add_node.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/scheduling/thread_pool.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/connection.h>
-#include <csapex/core/graphio.h>
-#include <csapex/command/add_variadic_connector.h>
-#include <csapex/command/add_connection.h>
-#include <csapex/utility/assert.h>
-#include <csapex/command/command_serializer.h>
+#include <csapex/scheduling/thread_pool.h>
 #include <csapex/serialization/serialization_buffer.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <sstream>
@@ -88,7 +89,7 @@ void GroupNodes::findNodes(SubgraphNode* graph)
 {
     std::vector<NodeHandle*> n;
     for(const UUID& uuid : uuids) {
-        NodeHandle* nh = graph->getGraph()->findNodeHandle(uuid);
+        NodeHandle* nh = graph->getLocalGraph()->findNodeHandle(uuid);
         n.push_back(nh);
     }
 

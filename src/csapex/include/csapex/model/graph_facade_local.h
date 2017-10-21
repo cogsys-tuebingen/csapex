@@ -50,8 +50,8 @@ public:
 
     void addNode(NodeFacadeLocalPtr node);
 
-    virtual void clear() override;
-    virtual void stop() override;
+    void clear();
+    void stop();
     virtual void clearBlock() override;
     virtual void resetActivity() override;
 
@@ -85,7 +85,7 @@ public:
     ConnectionPtr connect(NodeFacadePtr output, int output_id, NodeFacadePtr input, int input_id);
 
 
-    virtual std::string makeStatusString() override;
+    virtual std::string makeStatusString() const override;
 
 protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) override;

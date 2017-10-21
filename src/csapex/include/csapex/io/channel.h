@@ -44,6 +44,8 @@ public:
 
     void handleNote(const io::NoteConstPtr& note);
 
+    Session &getSession();
+
 public:
     slim_signal::Signal<void(const RawMessageConstPtr&)> raw_packet_received;
     slim_signal::Signal<void(const io::NoteConstPtr&)> note_received;

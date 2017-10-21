@@ -22,7 +22,7 @@ class DragIO;
 class CSAPEX_QT_EXPORT CsApexViewCoreRemote : public CsApexViewCore, public Remote
 {
 public:
-    CsApexViewCoreRemote(const std::string& ip, int port, CsApexCorePtr core_tmp);
+    CsApexViewCoreRemote(Session &session, CsApexCorePtr core_tmp);
     ~CsApexViewCoreRemote();
 
     void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR) override;

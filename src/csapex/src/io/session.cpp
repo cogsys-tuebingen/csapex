@@ -121,7 +121,7 @@ void Session::start()
                         break;
                     case io::Note::PACKET_TYPE_ID:
                         if(io::NoteConstPtr note = std::dynamic_pointer_cast<io::Note const>(packet)) {
-                            apex_assert(!note->getAUUID().empty());
+//                            apex_assert(!note->getAUUID().empty());
                             auto pos = channels_.find(note->getAUUID());
                             if(pos != channels_.end()) {
                                 io::ChannelPtr channel = pos->second;
@@ -339,6 +339,11 @@ slim_signal::Signal<void (const RawMessageConstPtr &)> &Session::raw_packet_rece
 
 io::ChannelPtr Session::openChannel(const AUUID &name)
 {
+    auto pos = channels_.find(name);
+    if(pos != channels_.end()) {
+        return pos->second;
+    }
+
     io::ChannelPtr channel = std::make_shared<io::Channel>(*this, name);
     channels_[name] = channel;
     return channel;

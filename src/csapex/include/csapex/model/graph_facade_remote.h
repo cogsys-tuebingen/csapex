@@ -13,7 +13,7 @@ class GraphRemote;
 class GraphFacadeRemote : public GraphFacade, public Remote
 {
 public:
-    GraphFacadeRemote(SessionPtr session, AUUID uuid, GraphFacadeLocal& tmp_ref, GraphFacadeRemote *parent = nullptr);
+    GraphFacadeRemote(Session &session, AUUID uuid, GraphFacadeRemote *parent = nullptr);
     ~GraphFacadeRemote();
 
     virtual AUUID getAbsoluteUUID() const override;
@@ -46,15 +46,26 @@ public:
     virtual std::vector<UUID> enumerateAllNodes() const override;
     virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
 
-    virtual void stop() override;
-    virtual void clear() override;
     virtual void clearBlock() override;
     virtual void resetActivity() override;
 
-    virtual bool isPaused() const override;
     virtual void pauseRequest(bool pause) override;
 
-    virtual std::string makeStatusString() override;
+
+    /**
+     * begin: generate getters
+     **/
+    #define HANDLE_ACCESSOR(_enum, type, function) \
+    virtual type function() const override;
+
+    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
+    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
+    #define HANDLE_SIGNAL(_enum, signal)
+
+    #include <csapex/model/graph_facade_remote_accessors.hpp>
+    /**
+     * end: generate getters
+     **/
 
 protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) override;
@@ -62,13 +73,15 @@ protected:
 
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
+    void createSubgraphFacade(NodeFacadePtr nf);
+
 private:
     GraphFacadeRemote* parent_;
+    io::ChannelPtr graph_channel_;
+
     std::shared_ptr<GraphRemote> graph_;
 
     AUUID uuid_;
-
-    io::ChannelPtr graph_channel_;
 
     /**
      * begin: generate caches
@@ -87,10 +100,7 @@ private:
      * end: generate caches
      **/
 
-
     std::unordered_map<UUID, std::shared_ptr<GraphFacadeRemote>, UUID::Hasher> children_;
-
-    GraphFacadeLocal& tmp_ref_;
 
     long guard_;
 };

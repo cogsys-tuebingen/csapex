@@ -2,7 +2,7 @@
 #include <csapex/command/group_base.h>
 
 /// PROJECT
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/msg/input.h>
@@ -47,8 +47,11 @@ Point GroupBase::findTopLeftPoint() const
 
 
 
-void GroupBase::analyzeConnections(Graph* graph)
+void GroupBase::analyzeConnections(Graph* graph_i)
 {
+    GraphLocal* graph = dynamic_cast<GraphLocal*>(graph_i);
+    apex_assert_hard(graph);
+
     connections_going_in.clear();
     connections_going_out.clear();
     signals_going_in.clear();

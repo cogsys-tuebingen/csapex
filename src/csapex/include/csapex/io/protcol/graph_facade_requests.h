@@ -1,5 +1,5 @@
-#ifndef GRAPH_REQUESTS_H
-#define GRAPH_REQUESTS_H
+#ifndef GRAPH_FACADE_REQUESTS_H
+#define GRAPH_FACADE_REQUESTS_H
 
 /// PROJECT
 #include <csapex/io/request_impl.hpp>
@@ -10,31 +10,34 @@
 namespace csapex
 {
 
-class GraphRequests
+class GraphFacadeRequests
 {
 public:
 
-    enum class GraphRequestType
+    enum class GraphFacadeRequestType
     {
-        GetAllNodes,
-        GetAllConnections,
+        SetPause,
+        ResetActivity,
+        ClearBlock,
+
+        GenerateUUID,
 
 #define HANDLE_ACCESSOR(_enum, type, function) _enum,
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_SIGNAL(_enum, signal)
-#include <csapex/model/graph_remote_accessors.hpp>
+#include <csapex/model/graph_facade_remote_accessors.hpp>
     };
 
-    class GraphRequest : public RequestImplementation<GraphRequest>
+    class GraphFacadeRequest : public RequestImplementation<GraphFacadeRequest>
     {
     public:
-        GraphRequest(uint8_t request_id);
-        GraphRequest(GraphRequestType request_type, const AUUID& uuid);
+        GraphFacadeRequest(uint8_t request_id);
+        GraphFacadeRequest(GraphFacadeRequestType request_type, const AUUID& uuid);
 
         template <typename... Args>
-        GraphRequest(GraphRequestType request_type, const AUUID& uuid, Args&&... args)
-            : GraphRequest(request_type, uuid)
+        GraphFacadeRequest(GraphFacadeRequestType request_type, const AUUID& uuid, Args&&... args)
+            : GraphFacadeRequest(request_type, uuid)
         {
             arguments_ = { args... };
         }
@@ -46,7 +49,7 @@ public:
 
         std::string getType() const override
         {
-            return "GraphRequests";
+            return "GraphFacadeRequests";
         }
 
         template <typename R>
@@ -56,25 +59,25 @@ public:
         }
 
     private:
-        GraphRequestType request_type_;
+        GraphFacadeRequestType request_type_;
         AUUID uuid_;
         std::vector<boost::any> arguments_;
     };
 
 
-    class GraphResponse : public ResponseImplementation<GraphResponse>
+    class GraphFacadeResponse : public ResponseImplementation<GraphFacadeResponse>
     {
     public:
-        GraphResponse(uint8_t request_id);
-        GraphResponse(GraphRequestType request_type, const AUUID& uuid, uint8_t request_id);
-        GraphResponse(GraphRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
+        GraphFacadeResponse(uint8_t request_id);
+        GraphFacadeResponse(GraphFacadeRequestType request_type, const AUUID& uuid, uint8_t request_id);
+        GraphFacadeResponse(GraphFacadeRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
         virtual void deserialize(const SerializationBuffer& data) override;
 
         std::string getType() const override
         {
-            return "GraphRequests";
+            return "GraphFacadeRequests";
         }
 
         template <typename R>
@@ -85,7 +88,7 @@ public:
 
 
     private:
-        GraphRequestType request_type_;
+        GraphFacadeRequestType request_type_;
         AUUID uuid_;
 
         boost::any result_;
@@ -93,9 +96,9 @@ public:
 
 
 public:
-    using RequestT = GraphRequest;
-    using ResponseT = GraphResponse;
+    using RequestT = GraphFacadeRequest;
+    using ResponseT = GraphFacadeResponse;
 };
 
 }
-#endif // GRAPH_REQUESTS_H
+#endif // GRAPH_FACADE_REQUESTS_H

@@ -13,7 +13,7 @@ namespace csapex
 class ConnectorRemote : public Connector, public Observer, public Remote
 {
 public:
-    ConnectorRemote(UUID uuid, ConnectableOwnerPtr owner, SessionPtr session);
+    ConnectorRemote(Session &session, UUID uuid, ConnectableOwnerPtr owner);
 
     virtual bool isConnectedTo(const UUID &other) const override;
     virtual bool isActivelyConnectedTo(const UUID &other) const override;

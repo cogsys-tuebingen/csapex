@@ -29,8 +29,14 @@ struct CSAPEX_EXPORT ConnectionInformation : public Serializable
                           const TokenDataConstPtr &type, int id,
                           bool active, const std::vector<Fulcrum>& fulcrums);
 
+    ConnectionInformation(const ConnectionInformation& other);
+
+    ConnectionInformation& operator = (const ConnectionInformation& other);
+
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
+
+    bool operator == (const ConnectionInformation& other) const;
 
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const override;

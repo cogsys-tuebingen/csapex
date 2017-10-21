@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/connectable.h>
 #include <csapex/serialization/serialization_buffer.h>
+#include <csapex/model/fulcrum.h>
 
 using namespace csapex;
 
@@ -17,8 +18,35 @@ ConnectionInformation::ConnectionInformation(const UUID& from, const UUID& to,
 {
 }
 
+ConnectionInformation::ConnectionInformation(const ConnectionInformation& other)
+    : from(other.from), to(other.to), from_label(other.from_label), to_label(other.to_label), type(other.type),
+      id(other.id), active(other.active),
+      fulcrums(other.fulcrums)
+{
+}
+
 ConnectionInformation::ConnectionInformation()
 {
+}
+
+
+ConnectionInformation& ConnectionInformation::operator = (const ConnectionInformation& other)
+{
+    from = other.from;
+    to = other.to;
+    from_label = other.from_label;
+    to_label = other.to_label;
+    type = other.type;
+    id = other.id;
+    active = other.active;
+    fulcrums = other.fulcrums;
+
+    return *this;
+}
+
+bool ConnectionInformation:: operator == (const ConnectionInformation& other) const
+{
+    return from == other.from && to_label == other.to_label;
 }
 
 std::shared_ptr<Clonable> ConnectionInformation::makeEmptyClone() const

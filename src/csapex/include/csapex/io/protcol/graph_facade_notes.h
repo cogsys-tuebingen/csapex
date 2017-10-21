@@ -1,5 +1,5 @@
-#ifndef GRAPH_NOTES_H
-#define GRAPH_NOTES_H
+#ifndef GRAPH_FACADE_NOTES_H
+#define GRAPH_FACADE_NOTES_H
 
 /// PROJECT
 #include <csapex/io/note_impl.hpp>
@@ -12,13 +12,16 @@
 namespace csapex
 {
 
-enum class GraphNoteType
+enum class GraphFacadeNoteType
 {
-    ConnectionAdded,
-    ConnectionRemoved,
+    ChildAdded,
+    ChildRemoved,
 
-    VertexAdded,
-    VertexRemoved,
+    ChildNodeFacadeAdded,
+    ChildNodeFacadeRemoved,
+
+    PauseChanged,
+    Notification,
 
     /**
      * begin: connect signals
@@ -29,30 +32,30 @@ enum class GraphNoteType
         function##Changed,
     #define HANDLE_SIGNAL(_enum, signal) \
         _enum##Triggered,
-    #include <csapex/model/graph_remote_accessors.hpp>
+    #include <csapex/model/graph_facade_remote_accessors.hpp>
     /**
      * end: connect signals
      **/
 };
 
 
-class GraphNote : public NoteImplementation<GraphNote>
+class GraphFacadeNote : public NoteImplementation<GraphFacadeNote>
 {
 public:
-    GraphNote();
-    GraphNote(GraphNoteType request_type, const AUUID& uuid);
-    GraphNote(GraphNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
+    GraphFacadeNote();
+    GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid);
+    GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
 
     template <typename... Args>
-    GraphNote(GraphNoteType request_type, const AUUID& uuid, Args... args)
-        : GraphNote(request_type, uuid, {std::forward<Args>(args)...})
+    GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, Args... args)
+        : GraphFacadeNote(request_type, uuid, {std::forward<Args>(args)...})
     {
     }
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
 
-    GraphNoteType getNoteType() const
+    GraphFacadeNoteType getNoteType() const
     {
         return note_type_;
     }
@@ -69,10 +72,10 @@ public:
     }
 
 private:
-    GraphNoteType note_type_;
+    GraphFacadeNoteType note_type_;
     std::vector<boost::any> payload_;
 };
 
 }
 
-#endif // GRAPH_NOTES_H
+#endif // GRAPH_FACADE_NOTES_H

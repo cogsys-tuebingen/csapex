@@ -53,6 +53,20 @@ Fulcrum::Fulcrum()
 {
 }
 
+bool Fulcrum::operator==(const Fulcrum& other) const
+{
+    if(connection_id_ == other.connection_id_ &&
+            type_ == other.type_ &&
+            pos_ == other.pos_ &&
+            handle_in_ == other.handle_in_ &&
+            handle_out_ == other.handle_out_)
+    {
+        return true;
+    }
+    return false;
+}
+
+
 void Fulcrum::move(const Point& pos, bool dropped)
 {
     pos_ = pos;

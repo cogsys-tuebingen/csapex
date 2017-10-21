@@ -3,25 +3,24 @@
 
 
 /// COMPONENT
-#include <csapex/core/csapex_core.h>
-#include <csapex/view/utility/message_renderer_manager.h>
-#include <csapex/view/node/node_adapter_factory.h>
-#include <csapex/view/designer/drag_io.h>
-#include <csapex/command/dispatcher_remote.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/scheduling/thread_pool.h>
 #include <csapex/command/dispatcher.h>
-#include <csapex/io/session_client.h>
-#include <csapex/io/protcol/core_requests.h>
+#include <csapex/command/dispatcher_remote.h>
+#include <csapex/core/csapex_core.h>
 #include <csapex/io/broadcast_message.h>
+#include <csapex/io/protcol/core_requests.h>
 #include <csapex/io/protcol/notification_message.h>
-#include <csapex/serialization/packet_serializer.h>
-#include <csapex/view/gui_exception_handler.h>
-#include <csapex/model/graph/graph_remote.h>
-#include <csapex/model/graph/graph_local.h>
-#include <csapex/model/graph_facade_remote.h>
-#include <csapex/model/graph_facade_local.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_remote.h>
+#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_remote.h>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/serialization/packet_serializer.h>
+#include <csapex/view/designer/drag_io.h>
+#include <csapex/view/gui_exception_handler.h>
+#include <csapex/view/node/node_adapter_factory.h>
+#include <csapex/view/utility/message_renderer_manager.h>
 
 /// SYSTEM
 #define BOOST_NO_CXX11_SCOPED_ENUMS
@@ -37,23 +36,22 @@ namespace bf3 = boost::filesystem3;
 using namespace csapex;
 
 
-CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsApexCorePtr core_tmp)
-    : Remote(std::make_shared<SessionClient>(ip, port)),
+CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_tmp)
+    : Remote(session),
       exception_handler_(std::make_shared<GuiExceptionHandler>(false)),
       core_tmp_(core_tmp)
 {
-    session_->start();
+    session_.start();
 
     running = true;
     spinner = std::thread([&](){
         while(running) {
-            session_->run();
+            session_.run();
         }
     });
 
     // make the proxys only _after_ the session is started
-    remote_root_ = std::make_shared<GraphFacadeRemote>(session_, core_tmp_->getRoot()->getAbsoluteUUID(),
-                                                       *std::dynamic_pointer_cast<GraphFacadeLocal>(core_tmp_->getRoot()));
+    remote_root_ = std::make_shared<GraphFacadeRemote>(session_, core_tmp_->getRoot()->getAbsoluteUUID());
     settings_ = std::make_shared<SettingsRemote>(session_);
     node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get());
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);
@@ -64,10 +62,10 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const std::string &ip, int port, CsAp
     node_factory_ = core_tmp_->getNodeFactory();
     snippet_factory_ = core_tmp_->getSnippetFactory();
 
-    observe(session_->packet_received, [this](StreamableConstPtr packet){
+    observe(session_.packet_received, [this](StreamableConstPtr packet){
         handlePacket(packet);
     });
-    observe(session_->broadcast_received, [this](BroadcastMessageConstPtr packet){
+    observe(session_.broadcast_received, [this](BroadcastMessageConstPtr packet){
         handleBroadcast(packet);
     });
 
@@ -193,7 +191,7 @@ ProfilerPtr CsApexViewCoreRemote::getProfiler() const
 
 void CsApexViewCoreRemote::sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level)
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSendNotification, notification, static_cast<uint8_t>(error_level));
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSendNotification, notification, static_cast<uint8_t>(error_level));
 }
 
 
@@ -202,18 +200,18 @@ void CsApexViewCoreRemote::sendNotification(const std::string& notification, Err
 
 void CsApexViewCoreRemote::reset()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreReset);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreReset);
 }
 
 
 void CsApexViewCoreRemote::load(const std::string& file)
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreLoad, file);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreLoad, file);
 }
 
 void CsApexViewCoreRemote::saveAs(const std::string& file, bool quiet)
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSave, file, quiet);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSave, file, quiet);
 }
 
 SnippetPtr CsApexViewCoreRemote::serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const
@@ -228,7 +226,7 @@ bool CsApexViewCoreRemote::isPaused() const
 
 void CsApexViewCoreRemote::setPause(bool paused)
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSetPause, paused);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSetPause, paused);
 }
 
 
@@ -239,28 +237,28 @@ bool CsApexViewCoreRemote::isSteppingMode() const
 
 void CsApexViewCoreRemote::setSteppingMode(bool stepping)
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSetSteppingMode, stepping);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSetSteppingMode, stepping);
 }
 
 void CsApexViewCoreRemote::step()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreStep);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreStep);
 }
 
 
 void CsApexViewCoreRemote::shutdown()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreShutdown);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreShutdown);
     running = false;
-    session_->shutdown();
+    session_.shutdown();
 }
 
 void CsApexViewCoreRemote::clearBlock()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreClearBlock);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreClearBlock);
 }
 
 void CsApexViewCoreRemote::resetActivity()
 {
-    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreResetActivity);
+    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreResetActivity);
 }

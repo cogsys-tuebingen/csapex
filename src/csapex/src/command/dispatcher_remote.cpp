@@ -9,7 +9,7 @@
 
 using namespace csapex;
 
-CommandDispatcherRemote::CommandDispatcherRemote(SessionPtr session)
+CommandDispatcherRemote::CommandDispatcherRemote(Session& session)
     : Remote(session)
 {
     dirty_ = false;
@@ -18,17 +18,17 @@ CommandDispatcherRemote::CommandDispatcherRemote(SessionPtr session)
 
 void CommandDispatcherRemote::execute(const CommandPtr &command)
 {
-    session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Execute, command);
+    session_.sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Execute, command);
 }
 
 void CommandDispatcherRemote::executeLater(const CommandPtr &command)
 {
-    session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::ExecuteLater, command);
+    session_.sendRequest<CommandRequests>(CommandRequests::CommandRequestType::ExecuteLater, command);
 }
 
 void CommandDispatcherRemote::executeLater()
 {
-    session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::ExecuteLater);
+    session_.sendRequest<CommandRequests>(CommandRequests::CommandRequestType::ExecuteLater);
 }
 
 bool CommandDispatcherRemote::isDirty() const
@@ -56,7 +56,7 @@ void CommandDispatcherRemote::undo()
     if(!canUndo()) {
         return;
     }
-    session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Undo);
+    session_.sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Undo);
 }
 
 void CommandDispatcherRemote::redo()
@@ -64,7 +64,7 @@ void CommandDispatcherRemote::redo()
     if(!canRedo()) {
         return;
     }
-    session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Redo);
+    session_.sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Redo);
 }
 
 void CommandDispatcherRemote::handleBroadcast(const BroadcastMessageConstPtr& message)

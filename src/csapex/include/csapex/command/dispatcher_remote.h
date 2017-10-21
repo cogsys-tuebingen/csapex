@@ -21,7 +21,7 @@ public:
     typedef std::shared_ptr<CommandDispatcherRemote> Ptr;
 
 public:
-    CommandDispatcherRemote(SessionPtr session);
+    CommandDispatcherRemote(Session &session);
 
     void execute(const CommandPtr& command);
     void executeLater(const CommandPtr&  command);

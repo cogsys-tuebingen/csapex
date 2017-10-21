@@ -33,11 +33,11 @@ GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, Su
     observe(graph->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeLocal::nodeRemovedHandler));
     observe(graph->notification, notification);
 
-    observe(graph->connection_added, [this](Connection* c) {
-        connection_added(c->getDescription());
+    observe(graph->connection_added, [this](const ConnectionInformation& ci) {
+        connection_added(ci);
     });
-    observe(graph->connection_removed, [this](Connection* c) {
-        connection_removed(c->getDescription());
+    observe(graph->connection_removed, [this](const ConnectionInformation& ci) {
+        connection_removed(ci);
     });
     observe(graph->state_changed, state_changed);
 
@@ -594,7 +594,7 @@ void GraphFacadeLocal::pauseRequest(bool pause)
     paused(pause);
 }
 
-std::string GraphFacadeLocal::makeStatusString()
+std::string GraphFacadeLocal::makeStatusString() const
 {
     return graph_node_->makeStatusString();
 }

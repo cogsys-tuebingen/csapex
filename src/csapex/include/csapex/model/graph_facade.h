@@ -60,16 +60,13 @@ public:
 
     NodeFacadePtr getNodeFacade();
 
-    virtual void stop() = 0;
     virtual void clearBlock() = 0;
     virtual void resetActivity() = 0;
 
     virtual bool isPaused() const = 0;
     virtual void pauseRequest(bool pause) = 0;
 
-    virtual void clear() = 0;
-
-    virtual std::string makeStatusString() = 0;
+    virtual std::string makeStatusString() const = 0;
 
 public:
     slim_signal::Signal<void (bool)> paused;

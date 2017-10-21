@@ -16,84 +16,15 @@
 #include <csapex/model/node_state.h>
 #include <csapex/profiling/profiler_remote.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/utility/slim_signal_invoker.hpp>
 
 /// SYSTEM
 #include <iostream>
 
 using namespace csapex;
 
-namespace detail
-{
-template <int pos, typename Arg, typename... Args>
-struct ArgumentExtractor
-{
-    using type = typename ArgumentExtractor<pos-1, Args...>::type;
-};
 
-
-template <typename Arg, typename... Args>
-struct ArgumentExtractor<0, Arg, Args...>
-{
-    using type = Arg;
-};
-
-
-template <int pos, typename Signature>
-struct FunctionArgumentExtractor
-{
-    using type = Signature;
-};
-
-template <int pos, typename Result, typename... Args>
-struct FunctionArgumentExtractor<pos, Result(Args...)>
-{
-    using type = typename ArgumentExtractor<pos, Args...>::type;
-};
-}
-
-template <int pos, typename Signature>
-struct FunctionArgumentExtractor
-{
-    using type = typename detail::FunctionArgumentExtractor<pos, Signature>::type;
-};
-
-
-
-
-template <int N, int arg_count>
-struct SignalInvoker
-{
-public:
-    template <typename Signature, typename... PartialArgs>
-    static void doInvoke(csapex::slim_signal::Signal<Signature>& s, const NodeNote& note, PartialArgs... arguments)
-    {
-        using ArgN = typename FunctionArgumentExtractor<N, Signature>::type;
-//        std::cerr << "invoke argument " << N << ": " << type2name(typeid(ArgN)) << std::endl;
-        SignalInvoker<N + 1, arg_count - 1>::doInvoke(s, note, arguments..., note.getPayload<ArgN>(N));
-    }
-};
-
-template <int N>
-struct SignalInvoker<N, 0>
-{
-
-    template <typename... Args>
-    static void doInvoke(csapex::slim_signal::Signal<void(Args...)>& s, const NodeNote& note, Args... arguments)
-    {
-//        std::cerr << "invoking signal with " << sizeof...(Args) << " arguments" << std::endl;
-        s(arguments...);
-    }
-};
-
-
-template <typename... Args>
-static void invokeSignal(csapex::slim_signal::Signal<void(Args...)>& s, const NodeNote& note)
-{
-//    std::cerr << "trying to invoke signal with " << sizeof...(Args) << " arguments" << std::endl;
-    SignalInvoker<0, sizeof...(Args)>::doInvoke(s, note);
-}
-
-NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid)
+NodeFacadeRemote::NodeFacadeRemote(Session &session, AUUID uuid)
     : Remote(session),
       uuid_(uuid),
 
@@ -114,7 +45,7 @@ NodeFacadeRemote::NodeFacadeRemote(SessionPtr session, AUUID uuid)
 
       guard_(-1)
 {
-    node_channel_ = session->openChannel(uuid.getAbsoluteUUID());
+    node_channel_ = session.openChannel(uuid.getAbsoluteUUID());
 
     profiler_proxy_ = std::make_shared<ProfilerRemote>(node_channel_);
 
@@ -296,7 +227,7 @@ void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
 void NodeFacadeRemote::createConnectorProxy(const UUID &uuid)
 {
     ConnectableOwnerPtr owner;
-    std::shared_ptr<ConnectorRemote> proxy = std::make_shared<ConnectorRemote>(uuid, owner, session_);
+    std::shared_ptr<ConnectorRemote> proxy = std::make_shared<ConnectorRemote>(session_, uuid, owner);
     remote_connectors_[uuid] = proxy;
     connector_created(proxy->getDescription());
 }
@@ -417,7 +348,7 @@ void NodeFacadeRemote::createParameterProxy(param::ParameterPtr proxy) const
         boost::any raw;
         param->get_unsafe(raw);
         CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
-        self->session_->write(change);
+        self->session_.write(change);
     });
 
     parameters_.push_back(proxy);
