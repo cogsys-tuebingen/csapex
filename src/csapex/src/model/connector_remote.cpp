@@ -57,6 +57,14 @@ ConnectorRemote::ConnectorRemote(Session& session, UUID uuid, ConnectableOwnerPt
     });
 }
 
+
+ConnectorRemote::ConnectorRemote(Session& session, UUID uuid, ConnectableOwnerPtr owner, const ConnectorDescription& cd)
+    : ConnectorRemote(session, uuid, owner)
+{
+    cache_getDescription_ = cd;
+    has_getDescription_ = true;
+}
+
 bool ConnectorRemote::isConnectedTo(const UUID &other) const
 {
     return request<bool, ConnectorRequests>(ConnectorRequests::ConnectorRequestType::IsConnectedTo, getUUID().getAbsoluteUUID(), other);

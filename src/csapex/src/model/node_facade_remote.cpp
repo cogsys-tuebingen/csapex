@@ -121,13 +121,13 @@ NodeFacadeRemote::NodeFacadeRemote(Session &session, AUUID uuid)
             case NodeNoteType::ConnectorCreatedTriggered:
             {
                 ConnectorDescription info = cn->getPayload<ConnectorDescription>(0);
-                createConnectorProxy(info.id);
+                createConnectorProxy(info);
             }
                 break;
             case NodeNoteType::ConnectorRemovedTriggered:
             {
                 ConnectorDescription info = cn->getPayload<ConnectorDescription>(0);
-                removeConnectorProxy(info.id);
+                removeConnectorProxy(info);
             }
                 break;
             case NodeNoteType::ConnectionStartTriggered:
@@ -193,7 +193,10 @@ NodeFacadeRemote::NodeFacadeRemote(Session &session, AUUID uuid)
     }
 
     for(const ConnectorDescription& c : getExternalConnectors()) {
-        createConnectorProxy(c.id);
+        createConnectorProxy(c);
+    }
+    for(const ConnectorDescription& c : getInternalConnectors()) {
+        createConnectorProxy(c);
     }
 
     observe(remote_data_connection.first_connected, [this]() {
@@ -224,22 +227,23 @@ void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
     }
 }
 
-void NodeFacadeRemote::createConnectorProxy(const UUID &uuid)
+void NodeFacadeRemote::createConnectorProxy(const ConnectorDescription &cd)
 {
     ConnectableOwnerPtr owner;
-    std::shared_ptr<ConnectorRemote> proxy = std::make_shared<ConnectorRemote>(session_, uuid, owner);
-    remote_connectors_[uuid] = proxy;
-    connector_created(proxy->getDescription());
+    std::shared_ptr<ConnectorRemote> proxy = std::make_shared<ConnectorRemote>(session_, cd.getAUUID(), owner, cd);
+    remote_connectors_[cd.id] = proxy;
+    connector_created(cd);
 }
-void NodeFacadeRemote::removeConnectorProxy(const UUID &uuid)
+
+void NodeFacadeRemote::removeConnectorProxy(const ConnectorDescription &cd)
 {
-    auto pos = remote_connectors_.find(uuid);
+    auto pos = remote_connectors_.find(cd.id);
     if(pos != remote_connectors_.end()) {
-        auto proxy = pos->second;
         remote_connectors_.erase(pos);
-        connector_removed(proxy->getDescription());
+        connector_removed(cd);
     }
 }
+
 
 
 UUID NodeFacadeRemote::getUUID() const
@@ -277,6 +281,14 @@ bool NodeFacadeRemote::isParameterOutput(const UUID& id)
         return pos->second;
     }
 }
+
+
+GraphPtr NodeFacadeRemote::getSubgraph() const
+{
+    apex_fail("Implement remote subgraph access!");
+    return nullptr;
+}
+
 
 ConnectorPtr NodeFacadeRemote::getConnector(const UUID &id) const
 {

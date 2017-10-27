@@ -11,6 +11,56 @@ class NestingTest : public SteppingTest
 
 };
 
+TEST_F(NestingTest, InternalGraphPortsCanBeFound) {
+    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
+
+    UUID subgraph_id = graph->generateUUID("subgraph");
+
+    NodeFacadeLocalPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", subgraph_id, graph);
+    SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
+    apex_assert_hard(sub_graph);
+    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
+
+    main_graph_facade.addNode(sub_graph_node_facade);
+
+    SubgraphNodePtr sub_graph_node = sub_graph_facade.getSubgraphNode();
+    TokenDataConstPtr type(new connection_types::AnyMessage);
+    sub_graph_node->addForwardingOutput(type, "relay");
+    sub_graph_node->addForwardingInput(type, "relay", false);
+    sub_graph_node->addForwardingSlot(type, "relay");
+    sub_graph_node->addForwardingEvent(type, "relay");
+
+    UUID subgraph_id_expected = UUIDProvider::makeUUID_without_parent("subgraph_0");
+    NodeFacadePtr nf = main_graph_facade.findNodeFacadeNoThrow(subgraph_id_expected);
+    ASSERT_NE(nullptr, nf);
+
+    {
+        UUID relay_in_expected = UUIDProvider::makeUUID_without_parent("subgraph_0:|:relayin_0");
+        ASSERT_NE(nullptr, main_graph_facade.findConnector(relay_in_expected));
+
+        UUID relay_out_expected = UUIDProvider::makeUUID_without_parent("subgraph_0:|:relayout_0");
+        ASSERT_NE(nullptr, main_graph_facade.findConnector(relay_out_expected));
+
+        UUID relay_slot_expected = UUIDProvider::makeUUID_without_parent("subgraph_0:|:relayslot_0");
+        ASSERT_NE(nullptr, main_graph_facade.findConnector(relay_slot_expected));
+
+        UUID relay_evevent_expected = UUIDProvider::makeUUID_without_parent("subgraph_0:|:relayevent_0");
+        ASSERT_NE(nullptr, main_graph_facade.findConnector(relay_evevent_expected));
+    }
+    {
+        UUID relay_in_expected = UUIDProvider::makeUUID_without_parent("relayin_0");
+        ASSERT_NE(nullptr, sub_graph_facade.findConnector(relay_in_expected));
+
+        UUID relay_out_expected = UUIDProvider::makeUUID_without_parent("relayout_0");
+        ASSERT_NE(nullptr, sub_graph_facade.findConnector(relay_out_expected));
+
+        UUID relay_slot_expected = UUIDProvider::makeUUID_without_parent("relayslot_0");
+        ASSERT_NE(nullptr, sub_graph_facade.findConnector(relay_slot_expected));
+
+        UUID relay_evevent_expected = UUIDProvider::makeUUID_without_parent("relayevent_0");
+        ASSERT_NE(nullptr, sub_graph_facade.findConnector(relay_evevent_expected));
+    }
+}
 
 TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
     GraphFacadeLocal main_graph_facade(executor, graph, graph_node);

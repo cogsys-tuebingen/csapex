@@ -8,11 +8,14 @@ namespace csapex
 class GraphFacadeLocal : public GraphFacade
 {
 public:
-    GraphFacadeLocal(ThreadPool& executor, GraphLocalPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh = nullptr, GraphFacadeLocal* parent = nullptr);
+    GraphFacadeLocal(ThreadPool& executor, GraphLocalPtr graph, SubgraphNodePtr graph_node,
+                     NodeFacadeLocalPtr nh = nullptr, GraphFacadeLocal* parent = nullptr);
 
     virtual AUUID getAbsoluteUUID() const override;
 
     virtual UUID generateUUID(const std::string& prefix) override;
+
+    virtual NodeFacadePtr getNodeFacade() const override;
 
     virtual GraphFacade* getSubGraph(const UUID& uuid) override;
     GraphFacadeLocalPtr getLocalSubGraph(const UUID& uuid);
@@ -114,6 +117,7 @@ private:
     AUUID absolute_uuid_;
 
     GraphFacadeLocal* parent_;
+    NodeFacadeLocalPtr graph_handle_;
     ThreadPool& executor_;
     GraphLocalPtr graph_;
     SubgraphNodePtr graph_node_;

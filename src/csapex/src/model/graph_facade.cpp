@@ -27,8 +27,7 @@
 
 using namespace csapex;
 
-GraphFacade::GraphFacade(NodeFacadePtr nh)
-    : graph_handle_(nh)
+GraphFacade::GraphFacade()
 {
 }
 
@@ -36,9 +35,3 @@ GraphFacade::~GraphFacade()
 {
     stopObserving();
 }
-
-NodeFacadePtr GraphFacade::getNodeFacade()
-{
-    return graph_handle_;
-}
-

@@ -52,6 +52,10 @@ public:
 
 public:
     UUID();
+    UUID(const UUID& other);
+    virtual ~UUID();
+
+    UUID& operator = (const UUID& other);
 
     void free();
 
@@ -63,6 +67,8 @@ public:
     bool composite() const;
     UUID nestedUUID() const;
     UUID rootUUID() const;
+
+    UUID reshape(std::size_t depth) const;
 
     bool contains(const std::string& sub) const;
 
@@ -77,7 +83,7 @@ public:
     bool global() const;
     std::string globalName() const;
 
-    AUUID getAbsoluteUUID() const;
+    virtual AUUID getAbsoluteUUID() const;
 
 private:
     explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::string& representation);
@@ -106,6 +112,8 @@ public:
     AUUID& operator = (const AUUID& uuid) = default;
     AUUID& operator = (const UUID& uuid);
 
+
+    virtual AUUID getAbsoluteUUID() const;
 
     bool operator < (const AUUID& rhs) const;
 

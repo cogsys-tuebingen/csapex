@@ -25,14 +25,14 @@ struct ConnectorDescription : public Serializable
     // connected connectors (UUID, is_active)
     struct Target : public Serializable
     {
-        AUUID id;
+        AUUID auuid;
         bool active;
 
         Target()
-            : id(UUID::NONE), active(false)
+            : auuid(UUID::NONE), active(false)
         {}
         Target(AUUID id, bool active)
-            : id(id), active(active)
+            : auuid(id), active(active)
         {}
 
         virtual void serialize(SerializationBuffer &data) const override;
@@ -70,6 +70,8 @@ struct ConnectorDescription : public Serializable
                          bool is_parameter = false);
 
     bool isOutput() const;
+
+    AUUID getAUUID() const;
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;

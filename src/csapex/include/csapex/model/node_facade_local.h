@@ -25,6 +25,7 @@ public:
 
     bool isGraph() const override;
     AUUID getSubgraphAUUID() const override;
+    GraphPtr getSubgraph() const override;
 
     bool isSource() const override;
     bool isSink() const override;    

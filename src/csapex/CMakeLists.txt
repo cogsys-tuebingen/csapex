@@ -617,8 +617,8 @@ file(GLOB_RECURSE csapex_qt_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_
 if(NOT WIN32)
     # for visual studio, we want the headers in the library
     # however, with ubuntu that doesn't compile due to auto moc'ing
-    add_custom_target(csapex_qt_headers SOURCES ${csapex_qt_HEADERS})
-    set(csapex_qt_HEADERS)
+    #add_custom_target(csapex_qt_headers SOURCES ${csapex_qt_HEADERS})
+    #set(csapex_qt_HEADERS)
 endif()
 
 # Library for the app itself

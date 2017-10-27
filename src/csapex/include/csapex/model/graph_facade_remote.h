@@ -13,12 +13,14 @@ class GraphRemote;
 class GraphFacadeRemote : public GraphFacade, public Remote
 {
 public:
-    GraphFacadeRemote(Session &session, AUUID uuid, GraphFacadeRemote *parent = nullptr);
+    GraphFacadeRemote(Session &session, NodeFacadeRemotePtr remote_facade, GraphFacadeRemote *parent = nullptr);
     ~GraphFacadeRemote();
 
     virtual AUUID getAbsoluteUUID() const override;
 
     virtual UUID generateUUID(const std::string& prefix) override;
+
+    virtual NodeFacadePtr getNodeFacade() const override;
 
     virtual GraphFacade* getSubGraph(const UUID& uuid) override;
     virtual GraphFacade* getParent() const override;
@@ -73,11 +75,16 @@ protected:
 
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
+    void createInternalConnector(const ConnectorDescription& cd);
+    void removeInternalConnector(const ConnectorDescription& cd);
+
     void createSubgraphFacade(NodeFacadePtr nf);
 
 private:
     GraphFacadeRemote* parent_;
     io::ChannelPtr graph_channel_;
+
+    NodeFacadeRemotePtr graph_handle_;
 
     std::shared_ptr<GraphRemote> graph_;
 

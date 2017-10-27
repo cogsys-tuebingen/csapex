@@ -52,6 +52,25 @@ UUID::UUID()
 {
 }
 
+
+UUID::UUID(const UUID& other) :
+    parent_(other.parent_),
+    representation_(other.representation_)
+{
+}
+
+UUID::~UUID()
+{
+}
+
+
+UUID& UUID::operator = (const UUID& other)
+{
+    parent_ = other.parent_;
+    representation_ = other.representation_;
+    return *this;
+}
+
 UUID::UUID(std::weak_ptr<UUIDProvider> parent, const std::vector<std::string> &representation)
     : parent_(parent), representation_(representation)
 {
@@ -190,6 +209,16 @@ UUID UUID::rootUUID() const
     }
 }
 
+UUID UUID::reshape(std::size_t depth) const
+{
+    UUID result = *this;
+    while(result.representation_.size() > depth) {
+        result.representation_.erase(--result.representation_.end());
+    }
+
+    return result;
+}
+
 UUID UUID::id() const
 {
     UUID res = *this;
@@ -290,6 +319,12 @@ AUUID AUUID::parentAUUID() const
     }
 
     return parent;
+}
+
+
+AUUID AUUID::getAbsoluteUUID() const
+{
+    return *this;
 }
 
 namespace csapex

@@ -2,19 +2,21 @@
 #include <csapex/model/node_facade_local.h>
 
 /// PROJECT
-#include <csapex/model/node_handle.h>
-#include <csapex/model/node_worker.h>
-#include <csapex/model/node_state.h>
-#include <csapex/msg/input_transition.h>
-#include <csapex/msg/output_transition.h>
-#include <csapex/signal/event.h>
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
+#include <csapex/model/generic_state.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/node.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/model/node_state.h>
+#include <csapex/model/node_worker.h>
+#include <csapex/model/subgraph_node.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/input_transition.h>
+#include <csapex/msg/output.h>
+#include <csapex/msg/output_transition.h>
 #include <csapex/profiling/profiler_local.h>
-#include <csapex/model/generic_state.h>
 #include <csapex/scheduling/scheduler.h>
+#include <csapex/signal/event.h>
 
 /// SYSTEM
 #include <iostream>
@@ -189,6 +191,11 @@ bool NodeFacadeLocal::isGraph() const
 AUUID NodeFacadeLocal::getSubgraphAUUID() const
 {
     return nh_->getSubgraphAUUID();
+}
+
+GraphPtr NodeFacadeLocal::getSubgraph() const
+{
+    return std::dynamic_pointer_cast<SubgraphNode>(nh_->getNode().lock())->getLocalGraph();
 }
 
 bool NodeFacadeLocal::isSource() const

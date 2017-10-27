@@ -14,6 +14,7 @@
 #include <csapex/io/raw_message.h>
 #include <csapex/io/channel.h>
 #include <csapex/utility/thread.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <csapex/utility/error_handling.h>
@@ -194,8 +195,10 @@ ResponseConstPtr Session::sendRequest(RequestConstPtr request)
         future.wait();
 
         if(ResponseConstPtr response = future.get()) {
+            apex_assert_hard(response);
             return response;
         }
+        apex_fail(std::string("The request ") + std::to_string(request->getRequestID()) + " failed to produce a response");
 
     }
     return nullptr;
@@ -268,7 +271,7 @@ void Session::read_async()
                                 auto it = open_requests_.find(feedback->getRequestID());
                                 if(it != open_requests_.end()) {
                                     std::promise<ResponseConstPtr>* promise = it->second;
-                                    promise->set_value(nullptr);
+                                    promise->set_value(feedback);
                                     open_requests_.erase(it);
 
                                 } else {
@@ -283,6 +286,7 @@ void Session::read_async()
                             auto it = open_requests_.find(response->getRequestID());
                             if(it != open_requests_.end()) {
                                 std::promise<ResponseConstPtr>* promise = it->second;
+                                apex_assert_hard(response);
                                 promise->set_value(response);
                                 open_requests_.erase(it);
 
@@ -327,6 +331,12 @@ void Session::write_packet(SerializationBuffer &buffer)
     }
 }
 
+void Session::handleFeedback(const ResponseConstPtr &res)
+{
+    if(auto feedback = std::dynamic_pointer_cast<Feedback const>(res)) {
+        throw Failure(feedback->getMessage());
+    }
+}
 
 slim_signal::Signal<void (const RawMessageConstPtr &)> &Session::raw_packet_received(const AUUID& uuid)
 {

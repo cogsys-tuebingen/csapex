@@ -7,6 +7,7 @@
 #include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/connection.h>
+#include <csapex/model/connector.h>
 #include <csapex/io/node_server.h>
 #include <csapex/io/channel.h>
 #include <csapex/io/session.h>
@@ -35,25 +36,23 @@ void GraphServer::startObserving(const GraphFacadeLocalPtr &graph_facade)
 {
     io::ChannelPtr channel = session_->openChannel(graph_facade->getAbsoluteUUID());
 
-    AUUID graph_id = graph_facade->getAbsoluteUUID();
-
-    observe(graph_facade->node_facade_added, [this, graph_id](const NodeFacadePtr& node) {
+    observe(graph_facade->node_facade_added, [this, channel](const NodeFacadePtr& node) {
         node_server_->startObserving(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
-        session_->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildNodeFacadeAdded, node->getAUUID());
+        channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildNodeFacadeAdded, node->getAUUID());
 
     });
-    observe(graph_facade->node_facade_removed, [this, graph_id](const NodeFacadePtr& node) {
+    observe(graph_facade->node_facade_removed, [this, channel](const NodeFacadePtr& node) {
         node_server_->stopObserving(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
-        session_->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildNodeFacadeRemoved, node->getAUUID());
+        channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildNodeFacadeRemoved, node->getAUUID());
     });
     observe(graph_facade->child_added, [this, channel](const GraphFacadePtr& graph) {
         startObserving(std::dynamic_pointer_cast<GraphFacadeLocal>(graph));
-        session_->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildAdded, graph->getAbsoluteUUID());
+        channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildAdded, graph->getAbsoluteUUID());
 
     });
     observe(graph_facade->child_removed, [this, channel](const GraphFacadePtr& graph) {
         startObserving(std::dynamic_pointer_cast<GraphFacadeLocal>(graph));
-        session_->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildRemoved, graph->getAbsoluteUUID());
+        channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildRemoved, graph->getAbsoluteUUID());
     });
 
     observe(graph_facade->paused, [this, channel](bool pause) {
@@ -61,6 +60,14 @@ void GraphServer::startObserving(const GraphFacadeLocalPtr &graph_facade)
     });
     observe(graph_facade->notification, [this, channel](Notification n){
         channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::Notification, n);
+    });
+
+    observe(graph_facade->forwarding_connector_added, [this, channel](const ConnectorPtr& c) {
+        channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ForwardingConnectorAdded, c->getDescription());
+
+    });
+    observe(graph_facade->forwarding_connector_removed, [this, channel](const ConnectorPtr& c) {
+        channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ForwardingConnectorRemoved, c->getDescription());
     });
 
     /**

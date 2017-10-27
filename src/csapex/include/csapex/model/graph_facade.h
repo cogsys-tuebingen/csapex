@@ -25,7 +25,7 @@ public:
     typedef std::shared_ptr<GraphFacade> Ptr;
 
 protected:
-    GraphFacade(NodeFacadePtr nh = nullptr);
+    GraphFacade();
 
 public:
     virtual ~GraphFacade();
@@ -58,7 +58,7 @@ public:
     virtual int getComponent(const UUID& node_uuid) const = 0;
     virtual int getDepth(const UUID& node_uuid) const = 0;
 
-    NodeFacadePtr getNodeFacade();
+    virtual NodeFacadePtr getNodeFacade() const = 0;
 
     virtual void clearBlock() = 0;
     virtual void resetActivity() = 0;
@@ -93,10 +93,6 @@ public:
 protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) = 0;
     virtual void nodeRemovedHandler(graph::VertexPtr node) = 0;
-
-protected:
-    // TODO: move all of this into the implementation class
-    NodeFacadePtr graph_handle_;
 };
 
 }

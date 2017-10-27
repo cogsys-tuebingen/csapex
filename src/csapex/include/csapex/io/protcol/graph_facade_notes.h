@@ -20,6 +20,9 @@ enum class GraphFacadeNoteType
     ChildNodeFacadeAdded,
     ChildNodeFacadeRemoved,
 
+    ForwardingConnectorAdded,
+    ForwardingConnectorRemoved,
+
     PauseChanged,
     Notification,
 

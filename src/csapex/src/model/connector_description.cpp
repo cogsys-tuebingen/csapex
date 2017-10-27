@@ -111,17 +111,22 @@ void ConnectorDescription::deserialize(const SerializationBuffer& data)
 
 void ConnectorDescription::Target::serialize(SerializationBuffer &data) const
 {
-    data << id;
+    data << auuid;
     data << active;
 }
 
 void ConnectorDescription::Target::deserialize(const SerializationBuffer& data)
 {
-    data >> id;
+    data >> auuid;
     data >> active;
 }
 
 std::shared_ptr<Clonable> ConnectorDescription::Target::makeEmptyClone() const
 {
     return std::make_shared<Target>();
+}
+
+AUUID ConnectorDescription::getAUUID() const
+{
+    return AUUID(UUIDProvider::makeDerivedUUID_forced(owner, id.id()));
 }

@@ -21,10 +21,11 @@
 
 using namespace csapex;
 
-GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh, GraphFacadeLocal *parent)
-    : GraphFacade(nh),
-      absolute_uuid_(graph_node->getUUID()),
+GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, SubgraphNodePtr graph_node,
+                                   NodeFacadeLocalPtr nh, GraphFacadeLocal *parent)
+    : absolute_uuid_(graph_node->getUUID()),
       parent_(parent),
+      graph_handle_(nh),
       executor_(executor),
       graph_(graph),
       graph_node_(graph_node)
@@ -55,6 +56,12 @@ GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, Su
                                                                         absolute_uuid_.getFullName()));
         }
     }
+}
+
+
+NodeFacadePtr GraphFacadeLocal::getNodeFacade() const
+{
+    return graph_handle_;
 }
 
 AUUID GraphFacadeLocal::getAbsoluteUUID() const
@@ -94,10 +101,10 @@ GraphFacadeLocalPtr GraphFacadeLocal::getLocalSubGraph(const UUID &uuid)
     }
 
     if(uuid.composite()) {
-        GraphFacadeLocalPtr facade = children_[uuid.rootUUID()];
+        GraphFacadeLocalPtr facade = children_.at(uuid.rootUUID());
         return facade->getLocalSubGraph(uuid.nestedUUID());
     } else {
-        return children_[uuid];
+        return children_.at(uuid);
     }
 }
 
@@ -185,7 +192,7 @@ GraphFacadeLocal *GraphFacadeLocal::getLocalParent() const
 
 NodeFacadeLocalPtr GraphFacadeLocal::getLocalNodeFacade() const
 {
-    return std::dynamic_pointer_cast<NodeFacadeLocal>(graph_handle_);
+    return graph_handle_;
 }
 
 ThreadPool* GraphFacadeLocal::getThreadPool()

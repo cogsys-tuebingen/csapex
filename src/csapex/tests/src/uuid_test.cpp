@@ -171,3 +171,17 @@ TEST_F(UUIDTest, GenerateTypedUUIDWithoutParent)
 
     ASSERT_EQ(UUID::NONE, bar);
 }
+
+TEST_F(UUIDTest, AbsoluteUUIDSAreAbsolute)
+{
+    UUIDProviderPtr parent = std::make_shared<UUIDProvider>();
+    UUID parent_id = parent->generateUUID("foo");
+
+    UUIDProviderPtr child = std::make_shared<UUIDProvider>();
+    child->setParent(parent, AUUID(parent_id));
+    UUID child_id = child->generateUUID("bar");
+
+    ASSERT_EQ("bar_0", child_id.getFullName());
+    ASSERT_EQ("foo_0:|:bar_0", child_id.getAbsoluteUUID().getFullName());
+    ASSERT_EQ("foo_0:|:bar_0", child_id.getAbsoluteUUID().getAbsoluteUUID().getAbsoluteUUID().getFullName());
+}

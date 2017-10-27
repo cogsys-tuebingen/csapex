@@ -15,7 +15,7 @@ class GraphLocal;
 class GraphRemote : public Graph, public Observer
 {
 public:
-    GraphRemote(io::ChannelPtr channel, const AUUID &auuid);
+    GraphRemote(io::ChannelPtr channel, const AUUID &auuid, NodeFacadeRemotePtr &node_facade);
     ~GraphRemote();
 
     AUUID getAbsoluteUUID() const override;
@@ -44,6 +44,8 @@ public:
 
     ConnectionInformation getConnection(const UUID& from, const UUID& to) const;
     ConnectionInformation getConnectionWithId(int id) const;
+
+    void reload();
 
     /**
      * begin: generate getters

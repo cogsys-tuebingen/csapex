@@ -21,13 +21,13 @@
 
 using namespace csapex;
 
-GraphFacadeRemote::GraphFacadeRemote(Session& session, AUUID uuid, GraphFacadeRemote* parent)
-    : GraphFacade(std::make_shared<NodeFacadeRemote>(session, uuid)),
-      Remote(session),
+GraphFacadeRemote::GraphFacadeRemote(Session& session, NodeFacadeRemotePtr remote_facade, GraphFacadeRemote* parent)
+    : Remote(session),
       parent_(parent),
-      graph_channel_(session.openChannel(uuid.getAbsoluteUUID())),
-      graph_(std::make_shared<GraphRemote>(graph_channel_, uuid)),
-      uuid_(uuid),
+      graph_channel_(session.openChannel(remote_facade->getAUUID())),
+      graph_handle_(remote_facade),
+      graph_(std::make_shared<GraphRemote>(graph_channel_, remote_facade->getAUUID(), remote_facade)),
+      uuid_(remote_facade->getAUUID()),
 
       /**
        * begin: initialize caches
@@ -46,6 +46,11 @@ GraphFacadeRemote::GraphFacadeRemote(Session& session, AUUID uuid, GraphFacadeRe
 
       guard_(-1)
 {
+    if(parent_) {
+        graph_->setParent(parent_->graph_, remote_facade->getAUUID());
+    }
+    graph_->reload();
+
     observe(graph_->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeAddedHandler));
     observe(graph_->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeRemovedHandler));
 
@@ -81,6 +86,18 @@ GraphFacadeRemote::GraphFacadeRemote(Session& session, AUUID uuid, GraphFacadeRe
                 AUUID uuid = cn->getPayload<AUUID>(0);
                 std::cerr << "Remote node " << uuid << " has been removed" << std::endl;
                 //child_node_facade_removed();
+            }
+                break;
+            case GraphFacadeNoteType::ForwardingConnectorAdded:
+            {
+                ConnectorDescription cd = cn->getPayload<ConnectorDescription>(0);
+                createInternalConnector(cd);
+            }
+                break;
+            case GraphFacadeNoteType::ForwardingConnectorRemoved:
+            {
+                ConnectorDescription cd = cn->getPayload<ConnectorDescription>(0);
+                removeInternalConnector(cd);
             }
                 break;
             case GraphFacadeNoteType::PauseChanged:
@@ -121,6 +138,11 @@ GraphFacadeRemote::GraphFacadeRemote(Session& session, AUUID uuid, GraphFacadeRe
         }
     });
 
+
+    for(const ConnectorDescription& c : graph_handle_->getInternalConnectors()){
+        createInternalConnector(c);
+    }
+
     //TODO: these have to be translated
 
     observe(graph_->connection_added, connection_added);
@@ -142,14 +164,16 @@ GraphFacadeRemote::GraphFacadeRemote(Session& session, AUUID uuid, GraphFacadeRe
     observe(graph_->vertex_removed, [this](graph::VertexPtr vertex) {
         node_facade_removed(vertex->getNodeFacade());
     });
-
-//    observe(graph_node_->forwarding_connector_added, forwarding_connector_added);
-//    observe(graph_node_->forwarding_connector_removed, forwarding_connector_removed);
 }
 
 GraphFacadeRemote::~GraphFacadeRemote()
 {
     guard_ = 0xDEADBEEF;
+}
+
+NodeFacadePtr GraphFacadeRemote::getNodeFacade() const
+{
+    return graph_handle_;
 }
 
 void GraphFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
@@ -161,12 +185,29 @@ void GraphFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
         }
     }
 }
+
+void GraphFacadeRemote::createInternalConnector(const ConnectorDescription& cd)
+{
+    std::cerr << "Remote graph connector added: " << cd.id << " at " << getAbsoluteUUID() << std::endl;
+    graph_handle_->createConnectorProxy(cd);
+    ConnectorPtr connector = graph_handle_->getConnector(cd.id);
+    forwarding_connector_added(connector);
+
+}
+void GraphFacadeRemote::removeInternalConnector(const ConnectorDescription& cd)
+{
+    std::cerr << "Remote graph connector removed: " << cd.id << " at " << getAbsoluteUUID()  << std::endl;
+    ConnectorPtr connector = graph_handle_->getConnector(cd.id);
+    graph_handle_->removeConnectorProxy(cd);
+    forwarding_connector_removed(connector);
+}
+
 void GraphFacadeRemote::createSubgraphFacade(NodeFacadePtr nf)
 {
     NodeFacadeRemotePtr remote_facade = std::dynamic_pointer_cast<NodeFacadeRemote>(nf);
     apex_assert_hard(remote_facade);
 
-    std::shared_ptr<GraphFacadeRemote> sub_graph_facade = std::make_shared<GraphFacadeRemote>(session_, nf->getAUUID(), this);
+    std::shared_ptr<GraphFacadeRemote> sub_graph_facade = std::make_shared<GraphFacadeRemote>(session_, remote_facade, this);
     children_[remote_facade->getUUID()] = sub_graph_facade;
 
     observe(sub_graph_facade->notification, notification);

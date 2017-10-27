@@ -14,6 +14,7 @@ class ConnectorRemote : public Connector, public Observer, public Remote
 {
 public:
     ConnectorRemote(Session &session, UUID uuid, ConnectableOwnerPtr owner);
+    ConnectorRemote(Session &session, UUID uuid, ConnectableOwnerPtr owner, const ConnectorDescription& cd);
 
     virtual bool isConnectedTo(const UUID &other) const override;
     virtual bool isActivelyConnectedTo(const UUID &other) const override;

@@ -53,7 +53,14 @@ public:
     std::shared_ptr<typename RequestWrapper::ResponseT const>
     sendRequest(Args&&... args)
     {
-        return std::dynamic_pointer_cast<typename RequestWrapper::ResponseT const>(sendRequest(std::make_shared<typename RequestWrapper::RequestT>(std::forward<Args>(args)...)));
+        auto res = sendRequest(std::make_shared<typename RequestWrapper::RequestT>(std::forward<Args>(args)...));
+        apex_assert_hard(res);
+        if(auto casted = std::dynamic_pointer_cast<typename RequestWrapper::ResponseT const>(res)) {
+            return casted;
+        } else {
+            handleFeedback(res);
+        }
+        return nullptr;
     }
 
 
@@ -84,6 +91,8 @@ public:
 
 protected:
     Session(const std::string& name);
+
+    void handleFeedback(const ResponseConstPtr& fb);
 
 public:
     slim_signal::Signal<void()> started;

@@ -51,9 +51,16 @@ ConnectorRequests::ConnectorRequest::ConnectorRequest(uint8_t request_id)
 
 ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
+    AUUID parent_uuid = uuid_.parentAUUID();
+    AUUID graph_uuid = parent_uuid.parentAUUID();
     GraphFacadeLocalPtr gf = core.getRoot();
+    if(!graph_uuid.empty()) {
+        gf = gf->getLocalSubGraph(graph_uuid);
+    }
 
-    ConnectorPtr c = gf->findConnectorNoThrow(uuid_);
+    UUID connector_uuid = uuid_.reshape(2);
+
+    ConnectorPtr c = gf->findConnectorNoThrow(connector_uuid);
     if(!c) {
         return std::make_shared<Feedback>(std::string("unknown connector id ") + uuid_.getFullName(),
                                           getRequestID());

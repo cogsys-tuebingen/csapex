@@ -15,6 +15,7 @@
 #include <csapex/model/graph_facade_remote.h>
 #include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph/graph_remote.h>
+#include <csapex/model/node_facade_remote.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/view/designer/drag_io.h>
@@ -51,7 +52,8 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_
     });
 
     // make the proxys only _after_ the session is started
-    remote_root_ = std::make_shared<GraphFacadeRemote>(session_, core_tmp_->getRoot()->getAbsoluteUUID());
+    NodeFacadeRemotePtr remote_facade = std::make_shared<NodeFacadeRemote>(session_, core_tmp_->getRoot()->getAbsoluteUUID());
+    remote_root_ = std::make_shared<GraphFacadeRemote>(session_, remote_facade);
     settings_ = std::make_shared<SettingsRemote>(session_);
     node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get());
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);

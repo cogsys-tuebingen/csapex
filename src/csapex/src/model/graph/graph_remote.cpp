@@ -21,7 +21,7 @@
 
 using namespace csapex;
 
-GraphRemote::GraphRemote(io::ChannelPtr channel, const AUUID& auuid)
+GraphRemote::GraphRemote(io::ChannelPtr channel, const AUUID& auuid, NodeFacadeRemotePtr& node_facade)
     : graph_channel_(channel),
 
       /**
@@ -39,18 +39,9 @@ GraphRemote::GraphRemote(io::ChannelPtr channel, const AUUID& auuid)
        * end: initialize caches
        **/
 
-      nf_(std::make_shared<NodeFacadeRemote>(channel->getSession(), auuid))
+      nf_(node_facade)
 
 {
-    auto nodes = graph_channel_->request<std::vector<UUID>, GraphRequests>(GraphRequests::GraphRequestType::GetAllNodes);
-    for(const UUID& id : nodes) {
-        vertexAdded(id);
-    }
-    auto connections = graph_channel_->request<std::vector<ConnectionInformation>, GraphRequests>(GraphRequests::GraphRequestType::GetAllConnections);
-    for(const ConnectionInformation& ci : connections) {
-        connectionAdded(ci);
-    }
-
     observe(graph_channel_->note_received, [this](const io::NoteConstPtr& note){
         if(const std::shared_ptr<GraphNote const>& cn = std::dynamic_pointer_cast<GraphNote const>(note)) {
             switch(cn->getNoteType())
@@ -109,11 +100,26 @@ GraphRemote::~GraphRemote()
 {
 }
 
+void GraphRemote::reload()
+{
+    auto nodes = graph_channel_->request<std::vector<UUID>, GraphRequests>(GraphRequests::GraphRequestType::GetAllNodes);
+    for(const UUID& id : nodes) {
+        vertexAdded(id);
+    }
+    auto connections = graph_channel_->request<std::vector<ConnectionInformation>, GraphRequests>(GraphRequests::GraphRequestType::GetAllConnections);
+    for(const ConnectionInformation& ci : connections) {
+        connectionAdded(ci);
+    }
+}
+
 
 void GraphRemote::vertexAdded(const UUID &id)
 {
+    AUUID auuid(makeUUID_forced(shared_from_this(), id.getFullName()).getAbsoluteUUID());
+    std::cerr << " >> " << auuid << std::endl;
+    //this getAbsoluteUUID() doesnt work because no parent is set
     std::shared_ptr<NodeFacadeRemote> remote_node_facade =
-            std::make_shared<NodeFacadeRemote>(graph_channel_->getSession(), id.getAbsoluteUUID());
+            std::make_shared<NodeFacadeRemote>(graph_channel_->getSession(), auuid);
 
     graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
     remote_vertices_.push_back(remote_vertex);
@@ -190,28 +196,15 @@ NodeFacadePtr GraphRemote::findNodeFacadeNoThrow(const UUID& uuid) const noexcep
         return nf_;
     }
     if(uuid.composite()) {
-        // TODO: implement for C/S
+        NodeFacadePtr root = findNodeFacadeNoThrow(uuid.rootUUID());
+        if(root && root->isGraph()) {
+            GraphPtr graph = root->getSubgraph();
+            apex_assert_hard(graph);
 
-//        for(const auto vertex : remote_vertices_) {
-//            NodeFacadePtr nf = vertex->getNodeFacade();
-//            if(nf->getUUID() == uuid.parentUUID()) {
-//                return nf;
-//            }
-//        }
+            return graph->findNodeFacadeForConnectorNoThrow(uuid.nestedUUID());
+        }
 
         return nullptr;
-//        UUID root = uuid.rootUUID();
-
-//        NodeFacadePtr root_nf = findNodeFacadeNoThrow(root);
-//        if(root_nf) {
-//            NodePtr root_node = root_nf->getNodeHandle()->getNode().lock();
-//            if(root_node) {
-//                SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_node);
-//                if(graph) {
-//                    return graph->findNodeFacade(uuid.nestedUUID());
-//                }
-//            }
-//        }
 
     } else {
         for(const auto vertex : remote_vertices_) {

@@ -165,14 +165,14 @@ void RewiringDialog::createConnections()
         for(const ConnectorDescription::Target& target : slot_original.targets) {
             SlotPtr slot_old = nf_old->getNodeHandle()->getSlot(slot_original.id);
             apex_assert_hard(slot_old);
-            updateConnection(slot_old, slot_original, target.id, target.active);
+            updateConnection(slot_old, slot_original, target.auuid, target.active);
         }
     }
     for(const ConnectorDescription& input_original : node_facade_->getExternalInputs()) {
         for(const ConnectorDescription::Target& target : input_original.targets) {
             InputPtr input_old = nf_old->getNodeHandle()->getInput(input_original.id);
             apex_assert_hard(input_old);
-            updateConnection(input_old, input_original, target.id, target.active);
+            updateConnection(input_old, input_original, target.auuid, target.active);
         }
     }
 
@@ -181,13 +181,13 @@ void RewiringDialog::createConnections()
         for(const ConnectorDescription::Target& target : event_original.targets) {
             EventPtr event_old = nf_old->getNodeHandle()->getEvent(event_original.id);
             apex_assert_hard(event_old);
-            updateConnection(event_old, event_original, target.id, target.active);
+            updateConnection(event_old, event_original, target.auuid, target.active);
         }
     }
     for(const ConnectorDescription& output_original : node_facade_->getExternalOutputs()) {
         for(const ConnectorDescription::Target& target : output_original.targets) {
             OutputPtr output_old = nf_old->getNodeHandle()->getOutput(output_original.id);
-            updateConnection(output_old, output_original, target.id, target.active);
+            updateConnection(output_old, output_original, target.auuid, target.active);
         }
     }
 }

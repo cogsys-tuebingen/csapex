@@ -18,6 +18,7 @@
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/graph/edge.h>
 #include <csapex/model/node.h>
+#include <csapex/model/graph_facade_local.h>
 #include <csapex/model/subgraph_node.h>
 
 using namespace csapex;
@@ -712,15 +713,12 @@ NodeHandle *GraphLocal::findNodeHandleNoThrow(const UUID& uuid) const noexcept
     if(uuid.composite()) {
         UUID root = uuid.rootUUID();
 
-        NodeHandle* root_nh = findNodeHandleNoThrow(root);
-        if(root_nh) {
-            NodePtr root_node = root_nh->getNode().lock();
-            if(root_node) {
-                SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_node);
-                if(graph) {
-                    return graph->getLocalGraph()->findNodeHandle(uuid.nestedUUID());
-                }
-            }
+        NodeFacadePtr nf = findNodeFacade(root);
+        if(nf->isGraph()) {
+            GraphLocalPtr local_graph = std::dynamic_pointer_cast<GraphLocal>(nf->getSubgraph());
+            apex_assert_hard(local_graph);
+
+            return local_graph->findNodeHandleNoThrow(uuid.nestedUUID());
         }
 
     } else {
@@ -796,17 +794,12 @@ NodeFacadePtr GraphLocal::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
         return nf;
     }
     if(uuid.composite()) {
-        UUID root = uuid.rootUUID();
+        NodeFacadePtr root = findNodeFacadeNoThrow(uuid.rootUUID());
+        if(root && root->isGraph()) {
+            GraphPtr graph = root->getSubgraph();
+            apex_assert_hard(graph);
 
-        NodeFacadeLocalPtr root_nf = std::dynamic_pointer_cast<NodeFacadeLocal>(findNodeFacadeNoThrow(root));
-        if(root_nf) {
-            NodePtr root_node = root_nf->getNodeHandle()->getNode().lock();
-            if(root_node) {
-                SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_node);
-                if(graph) {
-                    return graph->getGraph()->findNodeFacade(uuid.nestedUUID());
-                }
-            }
+            return graph->findNodeFacadeNoThrow(uuid.nestedUUID());
         }
 
     } else {

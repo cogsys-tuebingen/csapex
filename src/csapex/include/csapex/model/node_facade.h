@@ -34,6 +34,7 @@ public:
 
     virtual bool isGraph() const = 0;
     virtual AUUID getSubgraphAUUID() const = 0;
+    virtual GraphPtr getSubgraph() const = 0;
 
     virtual bool isSource() const = 0;
     virtual bool isSink() const = 0;
@@ -64,6 +65,7 @@ public:
     virtual std::vector<ConnectorDescription> getExternalSlots() const = 0;
 
     virtual std::vector<ConnectorDescription> getExternalConnectors() const;
+    virtual std::vector<ConnectorDescription> getInternalConnectors() const;
 
     virtual ConnectorPtr getConnector(const UUID& id) const = 0;
     virtual ConnectorPtr getConnectorNoThrow(const UUID& id) const noexcept = 0;

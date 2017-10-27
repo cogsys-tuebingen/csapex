@@ -66,7 +66,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
             QTreeWidgetItem* targets = new QTreeWidgetItem;
             for(const ConnectorDescription::Target& output: input.targets) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
-                target_widget->setText(0, QString::fromStdString(output.id.getFullName()));
+                target_widget->setText(0, QString::fromStdString(output.auuid.getFullName()));
                 target_widget->setIcon(1, QIcon(":/connector.png"));
                 targets->addChild(target_widget);
             }
@@ -89,7 +89,7 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
             targets->setText(0, "Target");
             for(const ConnectorDescription::Target& input : output.targets) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
-                target_widget->setText(0, QString::fromStdString(input.id.getFullName()));
+                target_widget->setText(0, QString::fromStdString(input.auuid.getFullName()));
                 target_widget->setIcon(1, QIcon(":/connector.png"));
                 targets->addChild(target_widget);
             }

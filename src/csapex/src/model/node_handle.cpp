@@ -813,7 +813,7 @@ InputPtr NodeHandle::getInput(const UUID& uuid) const noexcept
     }
     
     if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
-        return graph->getForwardedInputInternalNoThrow(uuid);
+        return graph->getForwardedInputInternalNoThrow(uuid.id());
     }
     
     return nullptr;
@@ -828,7 +828,7 @@ OutputPtr NodeHandle::getOutput(const UUID& uuid) const noexcept
     }
 
     if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
-        return graph->getForwardedOutputInternalNoThrow(uuid);
+        return graph->getForwardedOutputInternalNoThrow(uuid.id());
     }
     
     return nullptr;
@@ -844,7 +844,7 @@ SlotPtr NodeHandle::getSlot(const UUID& uuid) const noexcept
     }
 
     if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
-        return graph->getForwardedSlotInternalNoThrow(uuid);
+        return graph->getForwardedSlotInternalNoThrow(uuid.id());
     }
     
     return nullptr;
@@ -860,7 +860,7 @@ EventPtr NodeHandle::getEvent(const UUID& uuid) const noexcept
     }
 
     if(SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(node_)) {
-        return graph->getForwardedEventInternalNoThrow(uuid);
+        return graph->getForwardedEventInternalNoThrow(uuid.id());
     }
     
     return nullptr;

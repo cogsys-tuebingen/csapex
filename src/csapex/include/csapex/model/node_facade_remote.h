@@ -30,6 +30,7 @@ public:
     bool isParameterInput(const UUID& id) override;
     bool isParameterOutput(const UUID& id) override;
 
+    GraphPtr getSubgraph() const override;
 
     ConnectorPtr getConnector(const UUID& id) const override;
     ConnectorPtr getConnectorNoThrow(const UUID& id) const noexcept override;
@@ -65,6 +66,8 @@ public:
      * end: generate getters
      **/
 
+    void createConnectorProxy(const ConnectorDescription &cd);
+    void removeConnectorProxy(const ConnectorDescription &cd);
 
 public:
     slim_signal::ObservableSignal<void(StreamableConstPtr)> remote_data_connection;
@@ -72,8 +75,6 @@ public:
 private:
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
-    void createConnectorProxy(const UUID &uuid);
-    void removeConnectorProxy(const UUID &uuid);
 
     void createParameterProxy(param::ParameterPtr proxy) const;
 

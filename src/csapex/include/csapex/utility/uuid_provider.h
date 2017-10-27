@@ -28,6 +28,7 @@ public:
     UUID makeUUID(const std::string& name);
     UUID generateUUID(const std::string& prefix);
 
+    UUID makeDerivedUUID(const UUID& parent, const UUID& child);
     UUID makeDerivedUUID(const UUID& parent, const std::string& name);
     UUID generateDerivedUUID(const UUID& parent, const std::string& name);
 
@@ -39,6 +40,7 @@ public:
 
     static UUID makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const std::string& representation);
     static UUID makeDerivedUUID_forced(const UUID& parent, const std::string& name);
+    static UUID makeDerivedUUID_forced(const UUID& parent, const UUID& child);
     static UUID makeTypedUUID_forced(const UUID &parent, const std::string &type, int sub_id);
     static UUID makeTypedUUID_forced(const UUID &parent, const std::string &type, const std::string& sub_id);
 
