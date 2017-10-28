@@ -19,6 +19,8 @@ class DesignerStyleable;
 class DesignerOptions;
 class DragIO;
 
+class ProfilerRemote;
+
 class CSAPEX_QT_EXPORT CsApexViewCoreRemote : public CsApexViewCore, public Remote
 {
 public:
@@ -51,6 +53,8 @@ public:
 
     GraphFacadePtr getRoot() override;
 
+    ProfilerPtr getProfiler() const override;
+
     // TODO: add proxies or remove
     ThreadPoolPtr getThreadPool() override;
 
@@ -58,7 +62,6 @@ public:
     NodeFactoryPtr getNodeFactory() const override;
     SnippetFactoryPtr getSnippetFactory() const override;
 
-    ProfilerPtr getProfiler() const override;
 
     std::shared_ptr<DragIO> getDragIO() override;
     std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory() override;
@@ -80,6 +83,7 @@ private:
 
     std::shared_ptr<DragIO> drag_io;
 
+    std::shared_ptr<ProfilerRemote> profiler_proxy_;
 
     bool running;
     std::thread spinner;

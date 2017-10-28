@@ -20,6 +20,7 @@
 #include <csapex/model/node_facade_remote.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/serialization/packet_serializer.h>
+#include <csapex/profiling/profiler_remote.h>
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/view/gui_exception_handler.h>
 #include <csapex/view/node/node_adapter_factory.h>
@@ -54,6 +55,8 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_
     });
 
     core_channel_ = session_.openChannel(AUUID::NONE);
+
+    profiler_proxy_ = std::make_shared<ProfilerRemote>(core_channel_);
 
     observe(core_channel_->note_received, [this](const io::NoteConstPtr& note){
         if(const std::shared_ptr<CoreNote const>& cn = std::dynamic_pointer_cast<CoreNote const>(note)) {
@@ -227,9 +230,7 @@ SnippetFactoryPtr CsApexViewCoreRemote::getSnippetFactory() const
 }
 ProfilerPtr CsApexViewCoreRemote::getProfiler() const
 {
-    // TODO: replace with proxy
-    //apex_assert_hard(//core_->getProfiler() != nullptr);
-    return core_tmp_->getProfiler();
+    return profiler_proxy_;
 }
 
 void CsApexViewCoreRemote::sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level)
