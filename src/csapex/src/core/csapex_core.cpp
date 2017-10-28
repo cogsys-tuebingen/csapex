@@ -2,26 +2,21 @@
 #include <csapex/core/csapex_core.h>
 
 /// COMPONENT
-#include <csapex/core/bootstrap_plugin.h>
+#include <csapex/core/bootstrap.h>
 #include <csapex/core/core_plugin.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/core/graphio.h>
-#include <csapex/factory/message_factory.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
-#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node_facade_local.h>
-#include <csapex/model/node_handle.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/subgraph_node.h>
-#include <csapex/model/tag.h>
 #include <csapex/msg/any_message.h>
-#include <csapex/msg/message.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/profiling/profiler_local.h>
@@ -29,23 +24,21 @@
 #include <csapex/serialization/snippet.h>
 #include <csapex/utility/assert.h>
 #include <csapex/utility/error_handling.h>
-#include <csapex/utility/register_msg.h>
-#include <csapex/utility/shared_ptr_tools.hpp>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/utility/thread.h>
-#include <csapex/utility/yaml_node_builder.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <fstream>
 #ifdef WIN32
 #include <direct.h>
 #endif
-#include <boost/filesystem.hpp>
 
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::PluginLocatorPtr plugin_locator)
-    : settings_(settings),
+    : bootstrap_(std::make_shared<Bootstrap>()),
+      settings_(settings),
       plugin_locator_(plugin_locator),
       exception_handler_(handler),
       node_factory_(nullptr),
@@ -143,11 +136,7 @@ CsApexCore::~CsApexCore()
     core_plugin_manager.reset();
 
     if(is_root_) {
-        boot_plugins_.clear();
-        while(!boot_plugin_loaders_.empty()) {
-            delete boot_plugin_loaders_.front();
-            boot_plugin_loaders_.erase(boot_plugin_loaders_.begin());
-        }
+        bootstrap_.reset();
     }
 
     if(main_thread_.joinable()) {
@@ -311,47 +300,8 @@ void CsApexCore::boot()
 {
     status_changed("booting up");
 
-    std::string dir_string = csapex::info::CSAPEX_BOOT_PLUGIN_DIR;
-
-    boost::filesystem::path directory(dir_string);
-
-    boost::filesystem::directory_iterator dir(directory);
-    boost::filesystem::directory_iterator end;
-
-    for(; dir != end; ++dir) {
-        boost::filesystem::path path = dir->path();
-
-        boot_plugin_loaders_.push_back(new class_loader::ClassLoader(path.string()));
-        class_loader::ClassLoader* loader = boot_plugin_loaders_.back();
-
-        try {
-            apex_assert_hard(loader->isLibraryLoaded());
-            std::vector<std::string> classes = loader->getAvailableClasses<BootstrapPlugin>();
-            for(std::size_t c = 0; c < classes.size(); ++c){
-                auto boost_plugin = loader->createInstance<BootstrapPlugin>(classes[c]);
-                std::shared_ptr<BootstrapPlugin> plugin = shared_ptr_tools::to_std_shared(boost_plugin);
-                boot_plugins_.push_back(plugin);
-
-                plugin->boot(plugin_locator_.get());
-            }
-        } catch(const std::exception& e) {
-            NOTIFICATION("boot plugin " << path << " failed: " << e.what());
-        }
-    }
-
-    if (boot_plugins_.empty()) {
-        std::cerr << "there is no boot plugin in directory " << dir_string << '\n';
-        std::cerr << "please create it by either" << '\n';
-        std::cerr << "a) running the following command:" << '\n';
-        std::cerr << "   for dir in ${LD_LIBRARY_PATH//:/ }; do \\\n"
-                     "     path=$(find $dir -name libcsapex_ros_boot.so);\\\n"
-                     "     if [ $path ]; then mkdir -p ~/.csapex/boot &&  ln -sf $path ~/.csapex/boot/libcsapex_ros_boot.so; fi;\\\n"
-                     "   done" << '\n';
-        std::cerr << "b) creating a link by hand in ~/.csapex/boot/ to the library 'libcsapex_ros_boot.so' " << '\n';
-        std::cerr << "c) recompiling csapex_ros" << '\n';
-        std::cerr << std::flush;
-        std::abort();
-    }
+    bootstrap_->bootFrom(csapex::info::CSAPEX_BOOT_PLUGIN_DIR,
+                         plugin_locator_.get());
 
     init();
 }

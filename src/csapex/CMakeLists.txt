@@ -338,6 +338,7 @@ add_library(csapex SHARED
 
     src/core/csapex_core.cpp
     src/core/core_plugin.cpp
+    src/core/bootstrap.cpp
     src/core/bootstrap_plugin.cpp
     src/core/graphio.cpp
     src/core/exception_handler.cpp

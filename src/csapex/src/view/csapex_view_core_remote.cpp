@@ -20,6 +20,7 @@
 #include <csapex/model/node_facade_remote.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/serialization/packet_serializer.h>
+#include <csapex/plugin/plugin_locator.h>
 #include <csapex/profiling/profiler_remote.h>
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/view/gui_exception_handler.h>
@@ -118,7 +119,10 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_
     NodeFacadeRemotePtr remote_facade = std::make_shared<NodeFacadeRemote>(session_, AUUID::NONE);
     remote_root_ = std::make_shared<GraphFacadeRemote>(session_, remote_facade);
     settings_ = std::make_shared<SettingsRemote>(session_);
-    node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp_->getPluginLocator().get());
+    remote_plugin_locator_ = std::make_shared<PluginLocator>(core_tmp->getSettings());//(*settings_);
+    //boot remote_plugin_locator_
+
+    node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, remote_plugin_locator_.get());
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);
 
     drag_io = std::make_shared<DragIO>(core_tmp_->getPluginLocator(), dispatcher_.get());
@@ -147,6 +151,7 @@ CsApexViewCoreRemote::~CsApexViewCoreRemote()
     if(spinner.joinable()) {
         spinner.join();
     }
+    remote_plugin_locator_->shutdown();
 }
 
 

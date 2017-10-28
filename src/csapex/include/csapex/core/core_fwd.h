@@ -16,6 +16,7 @@ namespace csapex
 {
 FWD(CsApexCore)
 FWD(CorePlugin)
+FWD(Bootstrap)
 FWD(BootstrapPlugin)
 FWD(ExceptionHandler)
 

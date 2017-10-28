@@ -55,16 +55,14 @@ public:
 
     ProfilerPtr getProfiler() const override;
 
-    // TODO: add proxies or remove
-    ThreadPoolPtr getThreadPool() override;
-
-    PluginLocatorPtr getPluginLocator() const override;
-    NodeFactoryPtr getNodeFactory() const override;
-    SnippetFactoryPtr getSnippetFactory() const override;
-
-
     std::shared_ptr<DragIO> getDragIO() override;
     std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory() override;
+
+    // TODO: add proxies or remove
+    SnippetFactoryPtr getSnippetFactory() const override;
+    NodeFactoryPtr getNodeFactory() const override;
+    ThreadPoolPtr getThreadPool() override;
+    PluginLocatorPtr getPluginLocator() const override;
 
 private:
     void handlePacket(StreamableConstPtr packet);
@@ -72,6 +70,8 @@ private:
 
 private:
     io::ChannelPtr core_channel_;
+
+    PluginLocatorPtr remote_plugin_locator_;
 
     std::shared_ptr<SettingsRemote> settings_;
 

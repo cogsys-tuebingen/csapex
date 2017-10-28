@@ -2,15 +2,15 @@
 #define CSAPEX_CORE_H
 
 /// COMPONENT
-#include <csapex/plugin/plugin_fwd.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
-#include <csapex/utility/uuid.h>
 #include <csapex/csapex_export.h>
+#include <csapex/model/observer.h>
+#include <csapex/plugin/plugin_fwd.h>
 #include <csapex/utility/notifier.h>
 #include <csapex/utility/slim_signal.h>
-#include <csapex/model/observer.h>
 #include <csapex/utility/utility_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <thread>
@@ -110,6 +110,8 @@ private:
 private:
     bool is_root_;
 
+    BootstrapPtr bootstrap_;
+
     Settings& settings_;
     PluginLocatorPtr plugin_locator_;
     ExceptionHandler &exception_handler_;
@@ -132,9 +134,6 @@ private:
     std::shared_ptr<PluginManager<CorePlugin>> core_plugin_manager;
     std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
     std::map<std::string, bool> core_plugins_connected_;
-
-    std::vector<BootstrapPluginPtr> boot_plugins_;
-    std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
 
     std::thread main_thread_;
     std::mutex running_mutex_;
