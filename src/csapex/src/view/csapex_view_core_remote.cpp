@@ -5,11 +5,13 @@
 /// COMPONENT
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/dispatcher_remote.h>
+#include <csapex/core/bootstrap.h>
 #include <csapex/core/csapex_core.h>
+#include <csapex/info.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/channel.h>
-#include <csapex/io/protcol/core_requests.h>
 #include <csapex/io/protcol/core_notes.h>
+#include <csapex/io/protcol/core_requests.h>
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph_facade.h>
@@ -18,31 +20,21 @@
 #include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph/graph_remote.h>
 #include <csapex/model/node_facade_remote.h>
-#include <csapex/scheduling/thread_pool.h>
-#include <csapex/serialization/packet_serializer.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/profiling/profiler_remote.h>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/serialization/packet_serializer.h>
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/view/gui_exception_handler.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/utility/message_renderer_manager.h>
-
-/// SYSTEM
-#define BOOST_NO_CXX11_SCOPED_ENUMS
-#include <boost/filesystem.hpp>
-#undef BOOST_NO_CXX11_SCOPED_ENUMS
-#include <boost/version.hpp>
-#if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 54
-namespace bf3 = boost::filesystem;
-#else
-namespace bf3 = boost::filesystem3;
-#endif
 
 using namespace csapex;
 
 
 CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_tmp)
     : Remote(session),
+      bootstrap_(std::make_shared<Bootstrap>()),
       exception_handler_(std::make_shared<GuiExceptionHandler>(false)),
       core_tmp_(core_tmp)
 {
@@ -120,12 +112,14 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_
     remote_root_ = std::make_shared<GraphFacadeRemote>(session_, remote_facade);
     settings_ = std::make_shared<SettingsRemote>(session_);
     remote_plugin_locator_ = std::make_shared<PluginLocator>(core_tmp->getSettings());//(*settings_);
-    //boot remote_plugin_locator_
+
+    bootstrap_->bootFrom(csapex::info::CSAPEX_BOOT_PLUGIN_DIR,
+                         remote_plugin_locator_.get());
 
     node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, remote_plugin_locator_.get());
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);
 
-    drag_io = std::make_shared<DragIO>(core_tmp_->getPluginLocator(), dispatcher_.get());
+    drag_io = std::make_shared<DragIO>(remote_plugin_locator_, dispatcher_.get());
 
     //    dispatcher_ = core_tmp_->getCommandDispatcher();
     node_factory_ = core_tmp_->getNodeFactory();
@@ -138,7 +132,7 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_
         handleBroadcast(packet);
     });
 
-    MessageRendererManager::instance().setPluginLocator(getPluginLocator());
+    MessageRendererManager::instance().setPluginLocator(remote_plugin_locator_);
     node_adapter_factory_->loadPlugins();
 
 
@@ -196,7 +190,7 @@ ExceptionHandler& CsApexViewCoreRemote::getExceptionHandler() const
 
 PluginLocatorPtr CsApexViewCoreRemote::getPluginLocator() const
 {
-    return core_tmp_->getPluginLocator();
+    return remote_plugin_locator_;
 }
 
 CommandExecutorPtr CsApexViewCoreRemote::getCommandDispatcher()

@@ -56,7 +56,7 @@ Session::~Session()
     socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
     if (ec) {
         throw std::runtime_error("cannot shutdown server connection");
-    } else {
+    } else if(socket_->is_open()) {
         socket_->close();
     }
 }

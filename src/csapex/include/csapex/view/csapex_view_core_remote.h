@@ -5,6 +5,7 @@
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/core/settings/settings_remote.h>
 #include <csapex/io/remote.h>
+#include <csapex/core/core_fwd.h>
 
 /// SYSTEM
 #include <thread>
@@ -69,6 +70,8 @@ private:
     void handleBroadcast(BroadcastMessageConstPtr packet);
 
 private:
+    BootstrapPtr bootstrap_;
+
     io::ChannelPtr core_channel_;
 
     PluginLocatorPtr remote_plugin_locator_;

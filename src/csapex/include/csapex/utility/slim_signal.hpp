@@ -205,11 +205,18 @@ void Signal<Signature>::clear()
         removeParent(parents_.front());
     }
 
-    while(!children_to_remove_.empty()) {
-        removeChild(children_to_remove_.front());
-    }
-    while(!children_.empty()) {
-        removeChild(children_.front());
+    if(execution_mutex_.try_lock()) {
+        while(!children_to_remove_.empty()) {
+            removeChild(children_to_remove_.front());
+        }
+        while(!children_.empty()) {
+            removeChild(children_.front());
+        }
+        execution_mutex_.unlock();
+
+    } else {
+        children_to_remove_.clear();
+        children_.clear();
     }
 
     onDisconnect();
