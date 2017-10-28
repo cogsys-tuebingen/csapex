@@ -26,7 +26,7 @@ GraphFacadeRemote::GraphFacadeRemote(Session& session, NodeFacadeRemotePtr remot
       parent_(parent),
       graph_channel_(session.openChannel(remote_facade->getAUUID())),
       graph_handle_(remote_facade),
-      graph_(std::make_shared<GraphRemote>(graph_channel_, remote_facade->getAUUID(), remote_facade)),
+      graph_(std::make_shared<GraphRemote>(graph_channel_, remote_facade)),
       uuid_(remote_facade->getAUUID()),
 
       /**
@@ -143,17 +143,8 @@ GraphFacadeRemote::GraphFacadeRemote(Session& session, NodeFacadeRemotePtr remot
         createInternalConnector(c);
     }
 
-    //TODO: these have to be translated
-
     observe(graph_->connection_added, connection_added);
     observe(graph_->connection_removed, connection_removed);
-
-//    observe(tmp_ref.child_added, child_added);
-//    observe(tmp_ref.child_removed, child_removed);
-
-//    observe(tmp_ref.child_node_facade_added, child_node_facade_added);
-//    observe(tmp_ref.child_node_facade_removed, child_node_facade_removed);
-
 
     observe(graph_->state_changed, state_changed);
 
@@ -180,7 +171,7 @@ void GraphFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
 {
     if(auto graph_msg = std::dynamic_pointer_cast<GraphBroadcasts const>(message)) {
         switch(graph_msg->getBroadcastType()) {
-        default:
+        case GraphBroadcasts::GraphBroadcastType::None:
             break;
         }
     }
@@ -217,6 +208,16 @@ void GraphFacadeRemote::createSubgraphFacade(NodeFacadePtr nf)
     observe(sub_graph_facade->child_node_facade_removed, child_node_facade_removed);
 
     child_added(sub_graph_facade);
+}
+
+void GraphFacadeRemote::destroySubgraphFacade(NodeFacadePtr nf)
+{
+    auto pos = children_.find(nf->getUUID());
+    if(pos != children_.end()) {
+        std::shared_ptr<GraphFacadeRemote> subgraph = pos->second;
+        children_.erase(pos);
+        child_removed(subgraph);
+    }
 }
 
 AUUID GraphFacadeRemote::getAbsoluteUUID() const
@@ -326,7 +327,10 @@ void GraphFacadeRemote::nodeAddedHandler(graph::VertexPtr vertex)
 
 void GraphFacadeRemote::nodeRemovedHandler(graph::VertexPtr vertex)
 {
-    // TODO: implement client server
+    NodeFacadePtr facade = vertex->getNodeFacade();
+    if(facade->isGraph()) {
+        destroySubgraphFacade(facade);
+    }
 }
 
 

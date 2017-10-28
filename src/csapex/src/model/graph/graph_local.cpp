@@ -166,7 +166,7 @@ void GraphLocal::deleteNode(const UUID& uuid)
     }
 }
 
-int GraphLocal::countNodes()
+std::size_t GraphLocal::countNodes()
 {
     return vertices_.size();
 }

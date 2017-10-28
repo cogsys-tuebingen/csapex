@@ -58,7 +58,7 @@ public:
     std::vector<ConnectionPtr> getConnections();
     virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
 
-    int countNodes() override;
+    std::size_t countNodes() override;
 
     void addNode(NodeFacadeLocalPtr node);
     void deleteNode(const UUID &uuid);

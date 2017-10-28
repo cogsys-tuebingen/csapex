@@ -79,6 +79,7 @@ protected:
     void removeInternalConnector(const ConnectorDescription& cd);
 
     void createSubgraphFacade(NodeFacadePtr nf);
+    void destroySubgraphFacade(NodeFacadePtr nf);
 
 private:
     GraphFacadeRemote* parent_;

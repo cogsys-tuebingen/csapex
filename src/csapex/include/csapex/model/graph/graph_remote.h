@@ -15,7 +15,7 @@ class GraphLocal;
 class GraphRemote : public Graph, public Observer
 {
 public:
-    GraphRemote(io::ChannelPtr channel, const AUUID &auuid, NodeFacadeRemotePtr &node_facade);
+    GraphRemote(io::ChannelPtr channel, NodeFacadeRemotePtr &node_facade);
     ~GraphRemote();
 
     AUUID getAbsoluteUUID() const override;
@@ -40,7 +40,7 @@ public:
 
     virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
 
-    int countNodes() override;
+    std::size_t countNodes() override;
 
     ConnectionInformation getConnection(const UUID& from, const UUID& to) const;
     ConnectionInformation getConnectionWithId(int id) const;

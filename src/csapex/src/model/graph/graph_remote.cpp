@@ -21,7 +21,7 @@
 
 using namespace csapex;
 
-GraphRemote::GraphRemote(io::ChannelPtr channel, const AUUID& auuid, NodeFacadeRemotePtr& node_facade)
+GraphRemote::GraphRemote(io::ChannelPtr channel, NodeFacadeRemotePtr& node_facade)
     : graph_channel_(channel),
 
       /**
@@ -157,7 +157,7 @@ AUUID GraphRemote::getAbsoluteUUID() const
     return nf_->getUUID().getAbsoluteUUID();
 }
 
-int GraphRemote::countNodes()
+std::size_t GraphRemote::countNodes()
 {
     return remote_vertices_.size();
 }
@@ -207,7 +207,7 @@ NodeFacadePtr GraphRemote::findNodeFacadeNoThrow(const UUID& uuid) const noexcep
         return nullptr;
 
     } else {
-        for(const auto vertex : remote_vertices_) {
+        for(const auto& vertex : remote_vertices_) {
             NodeFacadePtr nf = vertex->getNodeFacade();
             if(nf->getUUID() == uuid) {
                 return nf;
@@ -232,7 +232,7 @@ NodeFacadePtr GraphRemote::findNodeFacadeForConnectorNoThrow(const UUID &uuid) c
 }
 NodeFacadePtr GraphRemote::findNodeFacadeWithLabel(const std::string& label) const
 {
-    for(const auto vertex : remote_vertices_) {
+    for(const auto& vertex : remote_vertices_) {
         NodeFacadePtr nf = vertex->getNodeFacade();
         if(nf->getLabel() == label) {
             return nf;

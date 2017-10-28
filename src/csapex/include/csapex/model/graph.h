@@ -81,7 +81,7 @@ public:
 
     virtual bool isConnected(const UUID& from, const UUID& to) const = 0;
 
-    virtual int countNodes() = 0;
+    virtual std::size_t countNodes() = 0;
 
     virtual std::vector<ConnectionInformation> enumerateAllConnections() const = 0;
 
