@@ -185,3 +185,32 @@ TEST_F(UUIDTest, AbsoluteUUIDSAreAbsolute)
     ASSERT_EQ("foo_0:|:bar_0", child_id.getAbsoluteUUID().getFullName());
     ASSERT_EQ("foo_0:|:bar_0", child_id.getAbsoluteUUID().getAbsoluteUUID().getAbsoluteUUID().getFullName());
 }
+
+TEST_F(UUIDTest, UUIDsCanBeReshaped)
+{
+    UUID foo = uuid_provider->generateUUID("foo");
+    UUID bar = uuid_provider->generateDerivedUUID(foo, "bar");
+    UUID baz = uuid_provider->generateDerivedUUID(bar, "baz");
+
+    ASSERT_EQ("foo_0:|:bar_0:|:baz_0", baz.getFullName());
+
+    ASSERT_EQ(3, baz.reshape(3).depth());
+    ASSERT_EQ("foo_0:|:bar_0:|:baz_0", baz.reshape(3).getFullName());
+
+    ASSERT_EQ(2, baz.reshape(2).depth());
+    ASSERT_EQ("bar_0:|:baz_0", baz.reshape(2).getFullName());
+
+    ASSERT_EQ(1, baz.reshape(1).depth());
+    ASSERT_EQ("baz_0", baz.reshape(1).getFullName());
+
+    ASSERT_EQ(0, baz.reshape(0).depth());
+    ASSERT_TRUE(baz.reshape(0).empty());
+
+    ASSERT_THROW(baz.reshape(4), std::invalid_argument);
+    ASSERT_THROW(baz.reshape(1000), std::invalid_argument);
+}
+
+
+//test reshaping thoroughly
+//refactor other methods to use reshape
+//implement reshape more efficiently

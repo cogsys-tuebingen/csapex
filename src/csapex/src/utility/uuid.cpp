@@ -26,6 +26,11 @@ bool UUID::empty() const
 {
     return representation_.empty();
 }
+std::size_t UUID::depth() const
+{
+    return representation_.size();
+}
+
 bool UUID::global() const
 {
     if(empty() || composite()) {
@@ -193,12 +198,7 @@ UUID UUID::parentUUID() const
 
 UUID UUID::nestedUUID() const
 {
-    UUID parent = *this;
-    if(!representation_.empty()) {
-        parent.representation_.erase(--parent.representation_.end());
-    }
-
-    return parent;
+    return reshape(depth()-1);
 }
 UUID UUID::rootUUID() const
 {
@@ -209,24 +209,20 @@ UUID UUID::rootUUID() const
     }
 }
 
-UUID UUID::reshape(std::size_t depth) const
+UUID UUID::reshape(std::size_t _depth) const
 {
-    UUID result = *this;
-    while(result.representation_.size() > depth) {
-        result.representation_.erase(--result.representation_.end());
+    if(_depth > depth()) {
+        throw std::invalid_argument("cannot reshape UUID to a larger size");
     }
-
+    UUID result;
+    result.representation_.assign(representation_.begin(),
+                                  representation_.begin() + static_cast<long>(_depth));
     return result;
 }
 
 UUID UUID::id() const
 {
-    UUID res = *this;
-    res.representation_.clear();
-    if(!representation_.empty()) {
-        res.representation_.push_back(representation_.front());
-    }
-    return res;
+    return reshape(1);
 }
 
 std::string UUID::type() const
@@ -245,8 +241,6 @@ std::string UUID::name() const
 AUUID UUID::getAbsoluteUUID() const
 {
     if(auto parent = parent_.lock()) {
-//        return AUUID(parent->makeDerivedUUID_forced(parent->getAbsoluteUUID(), id()));
-
         UUID parent_uuid = parent->getAbsoluteUUID();
         UUID uuid = *this;
         for(const std::string& part : parent_uuid.representation_) {

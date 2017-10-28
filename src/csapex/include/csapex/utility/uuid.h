@@ -79,6 +79,7 @@ public:
     std::string type() const;
 
     bool empty() const;
+    std::size_t depth() const;
 
     bool global() const;
     std::string globalName() const;
