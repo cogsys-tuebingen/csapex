@@ -30,12 +30,13 @@ void OutputTransition::reset()
     for(ConnectionPtr connection : connections_) {
         connection->reset();
     }
-    for(auto pair : outputs_) {
+    auto outputs_copy = outputs_;
+    lock.unlock();
+
+    for(auto pair : outputs_copy) {
         OutputPtr output = pair.second;
         output->reset();
     }
-
-    Transition::reset();
 }
 
 std::vector<UUID> OutputTransition::getOutputs() const

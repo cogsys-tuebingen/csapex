@@ -144,6 +144,8 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 NodeWorker::~NodeWorker()
 {
+    stopObserving();
+
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     destroyed();
