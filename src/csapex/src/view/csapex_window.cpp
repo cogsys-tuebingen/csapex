@@ -171,6 +171,7 @@ void CsApexWindow::construct()
     QObject::connect(this, &CsApexWindow::updateUndoInfoRequest, this, &CsApexWindow::updateUndoInfo);
     QObject::connect(this, &CsApexWindow::updateTitleRequest, this, &CsApexWindow::updateTitle);
     QObject::connect(this, &CsApexWindow::updateMenuRequest, this, &CsApexWindow::updateMenu);
+    QObject::connect(this, &CsApexWindow::restoreWindowStateRequest, this, &CsApexWindow::restoreWindowState);
 
     observe(view_core_.reset_requested, [this](){ designer_->reset(); });
     observe(view_core_.reset_done, [this](){ designer_->reinitialize(); });
@@ -199,7 +200,7 @@ void CsApexWindow::construct()
     observe(view_core_.end_step, [this](){ ui->actionStep->setEnabled(view_core_.isSteppingMode()); });
 
     observe(view_core_.group_created, [this](const ThreadGroupPtr& /*group*/) { updateThreadInfo(); });
-    observe(view_core_.loaded, [this](){ restoreWindowState(); });
+    observe(view_core_.loaded, [this](){ restoreWindowStateRequest(); });
 
     updateMenu();
     updateTitle();

@@ -116,8 +116,6 @@ void GraphRemote::reload()
 void GraphRemote::vertexAdded(const UUID &id)
 {
     AUUID auuid(makeUUID_forced(shared_from_this(), id.getFullName()).getAbsoluteUUID());
-    std::cerr << " >> " << auuid << std::endl;
-    //this getAbsoluteUUID() doesnt work because no parent is set
     std::shared_ptr<NodeFacadeRemote> remote_node_facade =
             std::make_shared<NodeFacadeRemote>(graph_channel_->getSession(), auuid);
 

@@ -61,32 +61,12 @@ GraphFacadeRemote::GraphFacadeRemote(Session& session, NodeFacadeRemotePtr remot
             switch(cn->getNoteType())
             {
             case GraphFacadeNoteType::ChildAdded:
-            {
-                AUUID uuid = cn->getPayload<AUUID>(0);
-                std::cerr << "Remote graph " << uuid << " has been created" << std::endl;
-                //child_added();
-            }
                 break;
             case GraphFacadeNoteType::ChildRemoved:
-            {
-                AUUID uuid = cn->getPayload<AUUID>(0);
-                std::cerr << "Remote graph " << uuid << " has been removed" << std::endl;
-                //child_removed();
-            }
                 break;
             case GraphFacadeNoteType::ChildNodeFacadeAdded:
-            {
-                AUUID uuid = cn->getPayload<AUUID>(0);
-                std::cerr << "Remote node " << uuid << " has been created" << std::endl;
-                //child_node_facade_added();
-            }
                 break;
             case GraphFacadeNoteType::ChildNodeFacadeRemoved:
-            {
-                AUUID uuid = cn->getPayload<AUUID>(0);
-                std::cerr << "Remote node " << uuid << " has been removed" << std::endl;
-                //child_node_facade_removed();
-            }
                 break;
             case GraphFacadeNoteType::ForwardingConnectorAdded:
             {
@@ -179,7 +159,6 @@ void GraphFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
 
 void GraphFacadeRemote::createInternalConnector(const ConnectorDescription& cd)
 {
-    std::cerr << "Remote graph connector added: " << cd.id << " at " << getAbsoluteUUID() << std::endl;
     graph_handle_->createConnectorProxy(cd);
     ConnectorPtr connector = graph_handle_->getConnector(cd.id);
     forwarding_connector_added(connector);
@@ -187,7 +166,6 @@ void GraphFacadeRemote::createInternalConnector(const ConnectorDescription& cd)
 }
 void GraphFacadeRemote::removeInternalConnector(const ConnectorDescription& cd)
 {
-    std::cerr << "Remote graph connector removed: " << cd.id << " at " << getAbsoluteUUID()  << std::endl;
     ConnectorPtr connector = graph_handle_->getConnector(cd.id);
     graph_handle_->removeConnectorProxy(cd);
     forwarding_connector_removed(connector);
@@ -320,7 +298,6 @@ void GraphFacadeRemote::nodeAddedHandler(graph::VertexPtr vertex)
     facade->notification.connect(notification);
 
     if(facade->isGraph()) {
-        std::cerr << "subgraph added: " << facade->getUUID() << std::endl;
         createSubgraphFacade(facade);
     }
 }

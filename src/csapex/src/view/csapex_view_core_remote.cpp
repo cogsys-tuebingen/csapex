@@ -35,8 +35,7 @@ using namespace csapex;
 CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_tmp)
     : Remote(session),
       bootstrap_(std::make_shared<Bootstrap>()),
-      exception_handler_(std::make_shared<GuiExceptionHandler>(false)),
-      core_tmp_(core_tmp)
+      exception_handler_(std::make_shared<GuiExceptionHandler>(false))
 {
     session_.start();
 
@@ -121,9 +120,10 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_
 
     drag_io = std::make_shared<DragIO>(remote_plugin_locator_, dispatcher_.get());
 
-    //    dispatcher_ = core_tmp_->getCommandDispatcher();
-    node_factory_ = core_tmp_->getNodeFactory();
-    snippet_factory_ = core_tmp_->getSnippetFactory();
+    // TODO: replace with proxies
+    node_factory_ = core_tmp->getNodeFactory();
+    snippet_factory_ = core_tmp->getSnippetFactory();
+    thread_pool_ = core_tmp->getThreadPool();
 
     observe(session_.packet_received, [this](StreamableConstPtr packet){
         handlePacket(packet);
@@ -211,19 +211,16 @@ GraphFacadePtr CsApexViewCoreRemote::getRoot()
 
 ThreadPoolPtr CsApexViewCoreRemote::getThreadPool()
 {
-    // TODO: replace with proxy
-    //apex_assert_hard(//core_->getThreadPool());
-    return core_tmp_->getThreadPool();
+    apex_assert_hard(thread_pool_);
+    return thread_pool_;
 }
 NodeFactoryPtr CsApexViewCoreRemote::getNodeFactory() const
 {
-    // TODO: replace with proxy
     apex_assert_hard(node_factory_);
     return node_factory_;
 }
 SnippetFactoryPtr CsApexViewCoreRemote::getSnippetFactory() const
 {
-    // TODO: replace with proxy
     apex_assert_hard(snippet_factory_);
     return snippet_factory_;
 }

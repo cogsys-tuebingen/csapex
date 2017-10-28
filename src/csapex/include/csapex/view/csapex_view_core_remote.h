@@ -81,6 +81,7 @@ private:
     std::shared_ptr<NodeAdapterFactory> node_adapter_factory_;
     std::shared_ptr<CommandDispatcherRemote> dispatcher_;
 
+    std::shared_ptr<ThreadPool> thread_pool_;
     std::shared_ptr<NodeFactory> node_factory_;
     std::shared_ptr<SnippetFactory> snippet_factory_;
 
@@ -94,9 +95,6 @@ private:
     std::shared_ptr<ExceptionHandler> exception_handler_;
 
     GraphFacadePtr remote_root_;
-
-    // TODO: remove
-    CsApexCorePtr core_tmp_;
 };
 
 }

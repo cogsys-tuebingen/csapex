@@ -149,7 +149,6 @@ void SettingsRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
                 param::ParameterPtr p = pos->second;
                 if(p->set_unsafe(parameter_change->getValue())) {
                     p->triggerChange();
-                    std::cerr << "setting " << parameter_change->getUUID().globalName() << " changed to " << p->toString() << std::endl;
                 }
             }
         }

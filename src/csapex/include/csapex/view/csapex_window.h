@@ -68,6 +68,7 @@ private Q_SLOTS:
     void updatePluginIgnored(const QObject *&action);
 
     void addStateToSettings();
+    void restoreWindowState();
 
 public Q_SLOTS:
     void save();
@@ -109,6 +110,7 @@ Q_SIGNALS:
     void updateMenuRequest();
     void updateUndoInfoRequest();
     void updateTitleRequest();
+    void restoreWindowStateRequest();
 
 private:
     void construct();
@@ -126,7 +128,6 @@ private:
     std::string getConfigFile();
 
     void setStateChanged();
-    void restoreWindowState();
     bool isDirty() const;
 
 private:
