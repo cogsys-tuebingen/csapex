@@ -7,7 +7,9 @@
 #include <csapex/command/dispatcher_remote.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/io/broadcast_message.h>
+#include <csapex/io/channel.h>
 #include <csapex/io/protcol/core_requests.h>
+#include <csapex/io/protcol/core_notes.h>
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph_facade.h>
@@ -51,14 +53,72 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_
         }
     });
 
+    core_channel_ = session_.openChannel(AUUID::NONE);
+
+    observe(core_channel_->note_received, [this](const io::NoteConstPtr& note){
+        if(const std::shared_ptr<CoreNote const>& cn = std::dynamic_pointer_cast<CoreNote const>(note)) {
+            switch(cn->getNoteType()) {
+            case CoreNoteType::ConfigChanged:
+                config_changed();
+                break;
+            case CoreNoteType::StepBegin:
+                begin_step();
+                break;
+            case CoreNoteType::StepEnd:
+                end_step();
+                break;
+
+            case CoreNoteType::StatusChanged:
+                status_changed(cn->getPayload<std::string>(0));
+                break;
+            case CoreNoteType::NewNodeType:
+                new_node_type();
+                break;
+            case CoreNoteType::NewSnippetType:
+                new_snippet_type();
+                break;
+            case CoreNoteType::ResetRequested:
+                reset_requested();
+                break;
+            case CoreNoteType::ResetDone:
+                reset_done();
+                break;
+            case CoreNoteType::Saved:
+                saved();
+                break;
+            case CoreNoteType::Loaded:
+                loaded();
+                break;
+            case CoreNoteType::Paused:
+                paused(cn->getPayload<bool>(0));
+                break;
+            case CoreNoteType::SteppingEnabled:
+                stepping_enabled();
+                break;
+
+                // TODO: support this
+//            case CoreNoteType::SaveDetailRequest:
+//                save_detail_request();
+//                break;
+//            case CoreNoteType::LoadDetailRequest:
+//                load_detail_request();
+//                break;
+
+            case CoreNoteType::Notification:
+                notification(cn->getPayload<Notification>(0));
+                break;
+            }
+        }
+    });
+
     // make the proxys only _after_ the session is started
-    NodeFacadeRemotePtr remote_facade = std::make_shared<NodeFacadeRemote>(session_, core_tmp_->getRoot()->getAbsoluteUUID());
+    NodeFacadeRemotePtr remote_facade = std::make_shared<NodeFacadeRemote>(session_, AUUID::NONE);
     remote_root_ = std::make_shared<GraphFacadeRemote>(session_, remote_facade);
     settings_ = std::make_shared<SettingsRemote>(session_);
-    node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp->getPluginLocator().get());
+    node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, core_tmp_->getPluginLocator().get());
     dispatcher_ = std::make_shared<CommandDispatcherRemote>(session_);
 
-    drag_io = std::make_shared<DragIO>(core_tmp->getPluginLocator(), dispatcher_.get());
+    drag_io = std::make_shared<DragIO>(core_tmp_->getPluginLocator(), dispatcher_.get());
 
     //    dispatcher_ = core_tmp_->getCommandDispatcher();
     node_factory_ = core_tmp_->getNodeFactory();
@@ -74,25 +134,6 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(Session& session, CsApexCorePtr core_
     MessageRendererManager::instance().setPluginLocator(getPluginLocator());
     node_adapter_factory_->loadPlugins();
 
-
-    observe(core_tmp_->config_changed, config_changed);
-    observe(core_tmp_->status_changed, status_changed);
-    observe(core_tmp_->new_node_type, new_node_type);
-    observe(core_tmp_->new_snippet_type, new_snippet_type);
-    observe(core_tmp_->reset_requested, reset_requested);
-    observe(core_tmp_->reset_done, reset_done);
-    observe(core_tmp_->saved, saved);
-    observe(core_tmp_->loaded, loaded);
-    observe(core_tmp_->paused, paused);
-    observe(core_tmp_->stepping_enabled, stepping_enabled);
-    observe(core_tmp_->begin_step, begin_step);
-    observe(core_tmp_->end_step, end_step);
-
-    observe(core_tmp_->save_detail_request, save_detail_request);
-    observe(core_tmp_->load_detail_request, load_detail_request);
-
-
-    observe(core_tmp_->notification, notification);
 
     observe(dispatcher_->state_changed, undo_state_changed);
     observe(dispatcher_->dirty_changed, undo_dirty_changed);

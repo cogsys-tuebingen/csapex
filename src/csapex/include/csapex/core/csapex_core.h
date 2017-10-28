@@ -99,6 +99,7 @@ public:
     slim_signal::Signal<void ()> shutdown_requested;
     slim_signal::Signal<void ()> shutdown_complete;
 
+    // TODO: refactor this to support remote clients
     csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> save_detail_request;
     csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> load_detail_request;
     

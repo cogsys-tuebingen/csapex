@@ -214,10 +214,10 @@ UUID UUID::reshape(std::size_t _depth) const
     if(_depth > depth()) {
         throw std::invalid_argument("cannot reshape UUID to a larger size");
     }
-    UUID result;
-    result.representation_.assign(representation_.begin(),
-                                  representation_.begin() + static_cast<long>(_depth));
-    return result;
+    return UUID (parent_, std::vector<std::string>(
+                     representation_.begin(),
+                     representation_.begin() + static_cast<long>(_depth)
+                     ));
 }
 
 UUID UUID::id() const

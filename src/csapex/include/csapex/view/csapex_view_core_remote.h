@@ -49,9 +49,9 @@ public:
     void clearBlock() override;
     void resetActivity() override;
 
-    // TODO: add proxies or remove
     GraphFacadePtr getRoot() override;
 
+    // TODO: add proxies or remove
     ThreadPoolPtr getThreadPool() override;
 
     PluginLocatorPtr getPluginLocator() const override;
@@ -68,6 +68,8 @@ private:
     void handleBroadcast(BroadcastMessageConstPtr packet);
 
 private:
+    io::ChannelPtr core_channel_;
+
     std::shared_ptr<SettingsRemote> settings_;
 
     std::shared_ptr<NodeAdapterFactory> node_adapter_factory_;

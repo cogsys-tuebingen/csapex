@@ -248,7 +248,11 @@ void NodeFacadeRemote::removeConnectorProxy(const ConnectorDescription &cd)
 
 UUID NodeFacadeRemote::getUUID() const
 {
-    return uuid_.id();
+    if(uuid_.empty()) {
+        return UUID::NONE;
+    } else {
+        return uuid_.id();
+    }
 }
 
 AUUID NodeFacadeRemote::getAUUID() const

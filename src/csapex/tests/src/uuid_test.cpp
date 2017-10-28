@@ -186,6 +186,19 @@ TEST_F(UUIDTest, AbsoluteUUIDSAreAbsolute)
     ASSERT_EQ("foo_0:|:bar_0", child_id.getAbsoluteUUID().getAbsoluteUUID().getAbsoluteUUID().getFullName());
 }
 
+TEST_F(UUIDTest, ParentsAreMaintained)
+{
+    UUIDProviderPtr parent = std::make_shared<UUIDProvider>();
+    UUID parent_id = parent->generateUUID("foo");
+
+    UUIDProviderPtr child = std::make_shared<UUIDProvider>();
+    child->setParent(parent, AUUID(parent_id));
+    UUID child_id = child->generateUUID("bar");
+
+    ASSERT_EQ("foo_0:|:bar_0", child_id.getAbsoluteUUID().getFullName());
+    ASSERT_EQ("foo_0:|:bar_0", child_id.id().getAbsoluteUUID().getFullName());
+}
+
 TEST_F(UUIDTest, UUIDsCanBeReshaped)
 {
     UUID foo = uuid_provider->generateUUID("foo");

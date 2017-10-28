@@ -15,6 +15,7 @@
 #include <csapex/io/protcol/parameter_changed.h>
 #include <csapex/io/protcol/command_broadcasts.h>
 #include <csapex/io/protcol/graph_broadcasts.h>
+#include <csapex/io/protcol/core_notes.h>
 #include <csapex/io/graph_server.h>
 
 /// SYSTEM
@@ -94,6 +95,90 @@ void Server::do_accept()
             observe(core_->getCommandDispatcher()->dirty_changed, [this, w_session](bool dirty) {
                 if(SessionPtr session = w_session.lock()) {
                     session->sendBroadcast<CommandBroadcasts>(CommandBroadcasts::CommandBroadcastType::DirtyChanged, dirty);
+                }
+            });
+            observe(core_->getCommandDispatcher()->dirty_changed, [this, w_session](bool dirty) {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendBroadcast<CommandBroadcasts>(CommandBroadcasts::CommandBroadcastType::DirtyChanged, dirty);
+                }
+            });
+
+            observe(core_->config_changed, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::ConfigChanged);
+                }
+            });
+            observe(core_->begin_step, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::StepBegin);
+                }
+            });
+            observe(core_->end_step, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::StepEnd);
+                }
+            });
+
+
+            observe(core_->status_changed, [this, w_session](const std::string& msg) {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::StatusChanged, msg);
+                }
+            });
+
+            observe(core_->new_node_type, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::NewNodeType);
+                }
+            });
+            observe(core_->new_snippet_type, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::NewSnippetType);
+                }
+            });
+            observe(core_->reset_requested, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::ResetRequested);
+                }
+            });
+            observe(core_->reset_done, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::ResetDone);
+                }
+            });
+            observe(core_->saved, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::Saved);
+                }
+            });
+            observe(core_->loaded, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::Loaded);
+                }
+            });
+            observe(core_->paused, [this, w_session](bool paused) {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::Paused, paused);
+                }
+            });
+            observe(core_->stepping_enabled, [this, w_session]() {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::SteppingEnabled);
+                }
+            });
+//            observe(core_->save_detail_request, [this, w_session]() {
+//                if(SessionPtr session = w_session.lock()) {
+//                    session->sendNote<CoreNote>(CoreNoteType::SaveDetailRequest);
+//                }
+//            });
+//            observe(core_->load_detail_request, [this, w_session]() {
+//                if(SessionPtr session = w_session.lock()) {
+//                    session->sendNote<CoreNote>(CoreNoteType::LoadDetailRequest);
+//                }
+//            });
+            observe(core_->notification, [this, w_session](const Notification& n) {
+                if(SessionPtr session = w_session.lock()) {
+                    session->sendNote<CoreNote>(CoreNoteType::Notification, n);
                 }
             });
 

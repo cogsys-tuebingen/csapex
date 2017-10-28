@@ -122,7 +122,6 @@ void Session::start()
                         break;
                     case io::Note::PACKET_TYPE_ID:
                         if(io::NoteConstPtr note = std::dynamic_pointer_cast<io::Note const>(packet)) {
-//                            apex_assert(!note->getAUUID().empty());
                             auto pos = channels_.find(note->getAUUID());
                             if(pos != channels_.end()) {
                                 io::ChannelPtr channel = pos->second;

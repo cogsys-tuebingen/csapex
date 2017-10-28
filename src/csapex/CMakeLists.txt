@@ -565,6 +565,7 @@ add_library(csapex_remote SHARED
     src/io/protocol/request_parameter.cpp
     src/io/protocol/add_parameter.cpp
     src/io/protocol/core_requests.cpp
+    src/io/protocol/core_notes.cpp
     src/io/protocol/node_requests.cpp
     src/io/protocol/node_notes.cpp
     src/io/protocol/node_broadcasts.cpp
