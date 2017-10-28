@@ -39,6 +39,7 @@ public:
     static UUID makeUUID_without_parent(const std::string& representation);
 
     static UUID makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const std::string& representation);
+    static UUID makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const UUID& copy);
     static UUID makeDerivedUUID_forced(const UUID& parent, const std::string& name);
     static UUID makeDerivedUUID_forced(const UUID& parent, const UUID& child);
     static UUID makeTypedUUID_forced(const UUID &parent, const std::string &type, int sub_id);

@@ -358,6 +358,9 @@ bool NodeFacadeRemote::hasParameter(const std::string &name) const
 
 void NodeFacadeRemote::createParameterProxy(param::ParameterPtr proxy) const
 {
+    UUID uuid = UUIDProvider::makeUUID_forced(uuid_.getParent(), proxy->getUUID());
+    proxy->setUUID(uuid);
+
     NodeFacadeRemote* self = const_cast<NodeFacadeRemote*>(this);
     proxy->parameter_changed.connect([self](param::Parameter* param){
         // request to set the parameter

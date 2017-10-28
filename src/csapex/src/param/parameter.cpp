@@ -76,6 +76,8 @@ void Parameter::setUUID(const UUID& uuid)
 {
     if(uuid.global()) {
         apex_assert_hard(!uuid.globalName().empty());
+    } else {
+        apex_assert_soft(uuid.hasParent() || uuid.empty());
     }
     uuid_ = uuid;
 }

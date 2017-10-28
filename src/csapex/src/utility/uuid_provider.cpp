@@ -150,6 +150,12 @@ UUID UUIDProvider::makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const std
     return UUID (parent, representation);
 }
 
+UUID UUIDProvider::makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const UUID &copy)
+{
+    return UUID (parent, copy);
+}
+
+
 UUID UUIDProvider::generateTypedUUID(const UUID &parent, const std::string& type)
 {
     if(parent.empty()) {

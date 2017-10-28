@@ -76,6 +76,11 @@ UUID& UUID::operator = (const UUID& other)
     return *this;
 }
 
+UUID::UUID(std::weak_ptr<UUIDProvider> parent, const UUID &copy)
+    : UUID(parent, copy.representation_)
+{
+}
+
 UUID::UUID(std::weak_ptr<UUIDProvider> parent, const std::vector<std::string> &representation)
     : parent_(parent), representation_(representation)
 {
@@ -252,6 +257,16 @@ AUUID UUID::getAbsoluteUUID() const
     }
 }
 
+bool UUID::hasParent() const
+{
+    return parent_.lock() != nullptr;
+}
+
+std::shared_ptr<UUIDProvider> UUID::getParent() const
+{
+    return parent_.lock();
+}
+
 namespace csapex
 {
 bool operator == (const std::string& str, const UUID& uuid_) {
@@ -334,3 +349,4 @@ bool AUUID::operator <(const AUUID& other) const
 {
     return UUID::operator <(other);
 }
+

@@ -86,9 +86,13 @@ public:
 
     virtual AUUID getAbsoluteUUID() const;
 
+    bool hasParent() const;
+    std::shared_ptr<UUIDProvider> getParent() const;
+
 private:
     explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::string& representation);
     explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::vector<std::string>& representation);
+    explicit UUID(std::weak_ptr<UUIDProvider> parent, const UUID& representation);
 
 protected:
     std::weak_ptr<UUIDProvider> parent_;
