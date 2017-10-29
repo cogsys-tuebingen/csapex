@@ -46,17 +46,15 @@ std::vector<ConnectorDescription> NodeFacade::getExternalConnectors() const
 std::vector<ConnectorDescription> NodeFacade::getInternalConnectors() const
 {
     std::vector<ConnectorDescription> result;
-    if(getAUUID() != AUUID::NONE) {
-        auto insert = [&result](const std::vector<ConnectorDescription>& vec)
-        {
-            result.insert(result.end(), vec.begin(), vec.end());
-        };
+    auto insert = [&result](const std::vector<ConnectorDescription>& vec)
+    {
+        result.insert(result.end(), vec.begin(), vec.end());
+    };
 
-        insert(getInternalInputs());
-        insert(getInternalOutputs());
-        insert(getInternalSlots());
-        insert(getInternalEvents());
-    }
+    insert(getInternalInputs());
+    insert(getInternalOutputs());
+    insert(getInternalSlots());
+    insert(getInternalEvents());
 
     return result;
 }

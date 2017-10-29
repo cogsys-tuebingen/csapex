@@ -58,7 +58,12 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
         gf = gf->getLocalSubGraph(graph_uuid);
     }
 
-    UUID connector_uuid = uuid_.reshape(2);
+    UUID connector_uuid;
+    if(uuid_.depth() >= 2) {
+        connector_uuid = uuid_.reshape(2);
+    } else {
+        connector_uuid = uuid_;
+    }
 
     ConnectorPtr c = gf->findConnectorNoThrow(connector_uuid);
     if(!c) {
