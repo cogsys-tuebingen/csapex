@@ -4,25 +4,18 @@
 /// PROJECT
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/node_factory_local.h>
+#include <csapex/io/remote.h>
 
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeFactoryRemote: public NodeFactory
+class CSAPEX_EXPORT NodeFactoryRemote: public NodeFactory, public Remote
 {
 public:
-    NodeFactoryRemote(NodeFactoryLocal& tmp_ref);
+    NodeFactoryRemote(const SessionPtr &session);
 
-
-    virtual bool isValidType(const std::string& type) const override;
-
-    virtual NodeConstructorPtr getConstructor(const std::string& type) override;
-    virtual std::vector<NodeConstructorPtr> getConstructors() override;
-
-    virtual std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap() override;
-
-private:
-    NodeFactoryLocal& tmp_ref_;
+protected:
+    void ensureLoaded() override;
 };
 
 }

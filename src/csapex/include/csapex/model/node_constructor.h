@@ -2,12 +2,13 @@
 #define NODE_CONSTRUCTOR_H
 
 /// COMPONENT
-#include <csapex/utility/utility_fwd.h>
-#include <csapex/param/param_fwd.h>
 #include <csapex/command/command_fwd.h>
-#include <csapex/model/model_fwd.h>
-#include <csapex/utility/uuid.h>
 #include <csapex/csapex_export.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/param/param_fwd.h>
+#include <csapex/serialization/serializable.h>
+#include <csapex/utility/utility_fwd.h>
+#include <csapex/utility/uuid.h>
 
 /// SYSTEM
 #include <typeinfo>
@@ -17,18 +18,16 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeConstructor
+class CSAPEX_EXPORT NodeConstructor : public Serializable
 {
     friend class command::AddNode;
     friend class NodeFactory;
+    friend class SerializationBuffer;
 
 public:
     struct NodeConstructionException : public std::runtime_error
     {
-        NodeConstructionException(const std::string& what)
-            : std::runtime_error(what)
-        {
-        }
+        NodeConstructionException(const std::string& what);
     };
 
 public:
@@ -62,8 +61,15 @@ public:
 
     NodePtr makeNode() const;
 
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(const SerializationBuffer& data) override;
+
+protected:
+    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+
 protected:
     NodeConstructor(const std::string& type);
+    NodeConstructor();
 
 protected:
     std::string type_;

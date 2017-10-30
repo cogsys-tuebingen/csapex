@@ -8,17 +8,14 @@
 #include <csapex/core/bootstrap.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/info.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_remote.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/channel.h>
 #include <csapex/io/protcol/core_notes.h>
 #include <csapex/io/protcol/core_requests.h>
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/graph_facade_local.h>
 #include <csapex/model/graph_facade_remote.h>
-#include <csapex/model/graph/graph_local.h>
 #include <csapex/model/graph/graph_remote.h>
 #include <csapex/model/node_facade_remote.h>
 #include <csapex/plugin/plugin_locator.h>
@@ -33,7 +30,7 @@
 using namespace csapex;
 
 
-CsApexViewCoreRemote::CsApexViewCoreRemote(const SessionPtr& session, CsApexCorePtr core_tmp)
+CsApexViewCoreRemote::CsApexViewCoreRemote(const SessionPtr& session)
     : Remote(session),
       bootstrap_(std::make_shared<Bootstrap>()),
       thread_active_(false),
@@ -114,7 +111,7 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const SessionPtr& session, CsApexCore
     NodeFacadeRemotePtr remote_facade = std::make_shared<NodeFacadeRemote>(session_, AUUID::NONE);
     remote_root_ = std::make_shared<GraphFacadeRemote>(session_, remote_facade);
     settings_ = std::make_shared<SettingsRemote>(session_);
-    remote_plugin_locator_ = std::make_shared<PluginLocator>(core_tmp->getSettings());//(*settings_);
+    remote_plugin_locator_ = std::make_shared<PluginLocator>(*settings_);
 
     bootstrap_->bootFrom(csapex::info::CSAPEX_BOOT_PLUGIN_DIR,
                          remote_plugin_locator_.get());
@@ -125,7 +122,7 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const SessionPtr& session, CsApexCore
     drag_io = std::make_shared<DragIO>(remote_plugin_locator_, dispatcher_.get());
 
     // TODO: replace with proxies
-    node_factory_ = core_tmp->getNodeFactory();
+    node_factory_ = std::make_shared<NodeFactoryRemote>(session_);
     // thread_pool_ = ...
     // snippet_factory_ = ...
 

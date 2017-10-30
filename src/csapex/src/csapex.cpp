@@ -97,7 +97,7 @@ int Main::runWithGui()
     SessionPtr session;
     if(settings.getTemporary("start-server", false)) {
         session = std::make_shared<SessionClient>("localhost", 12345);
-        main.reset(new CsApexViewCoreRemote (session, core));
+        main.reset(new CsApexViewCoreRemote (session));
     } else {
         main.reset(new CsApexViewCoreLocal (core));
     }

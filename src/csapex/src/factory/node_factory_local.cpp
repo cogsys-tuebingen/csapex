@@ -177,12 +177,6 @@ void NodeFactoryLocal::rebuildMap()
     tag_map_has_to_be_rebuilt_ = false;
 }
 
-std::map<std::string, std::vector<NodeConstructorPtr> > NodeFactoryLocal::getTagMap()
-{
-    ensureLoaded();
-    return tag_map_;
-}
-
 void NodeFactoryLocal::ensureLoaded()
 {
     if(plugin_locator_) {
@@ -211,55 +205,6 @@ void NodeFactoryLocal::registerNodeType(NodeConstructor::Ptr provider, bool supp
     }
 }
 
-bool NodeFactoryLocal::isValidType(const std::string &type) const
-{
-    for(NodeConstructor::Ptr p : constructors_) {
-        if(p->getType() == type) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-NodeConstructor::Ptr NodeFactoryLocal::getConstructor(const std::string &target_type)
-{
-    ensureLoaded();
-
-    std::string type = target_type;
-    if(type.find_first_of(" ") != type.npos) {
-        NOTIFICATION_WARN("type '" << type << "' contains spaces, stripping them!");
-        while(type.find(" ") != type.npos) {
-            type.replace(type.find(" "), 1, "");
-        }
-    }
-
-    for(NodeConstructor::Ptr p : constructors_) {
-        if(p->getType() == type) {
-            return p;
-        }
-    }
-
-    // cannot make box, type is unknown, trying different namespace
-    std::string type_wo_ns = UUID::stripNamespace(type);
-
-    for(NodeConstructor::Ptr p : constructors_) {
-        std::string p_type_wo_ns = UUID::stripNamespace(p->getType());
-
-        if(p_type_wo_ns == type_wo_ns) {
-            return p;
-        }
-    }
-
-    return nullptr;
-}
-
-std::vector<NodeConstructorPtr> NodeFactoryLocal::getConstructors()
-{
-    ensureLoaded();
-
-    return constructors_;
-}
 
 
 NodeFacadeLocalPtr NodeFactoryLocal::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider)

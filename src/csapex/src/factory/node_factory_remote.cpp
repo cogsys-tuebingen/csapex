@@ -1,29 +1,37 @@
 /// HEADER
 #include <csapex/factory/node_factory_remote.h>
 
+/// PROJECT
+#include <csapex/io/protcol/request_nodes.h>
+#include <csapex/model/node_constructor.h>
+
 using namespace csapex;
 
-NodeFactoryRemote::NodeFactoryRemote(NodeFactoryLocal &tmp_ref)
-    : tmp_ref_(tmp_ref)
+NodeFactoryRemote::NodeFactoryRemote(const SessionPtr& session)
+    : Remote(session)
 {
-
 }
 
-bool NodeFactoryRemote::isValidType(const std::string& type) const
+void NodeFactoryRemote::ensureLoaded()
 {
-    return tmp_ref_.isValidType(type);
-}
+    if(tag_map_.empty()) {
+        if(const auto& response = session_->sendRequest<RequestNodes>()) {
+            std::map<std::string, NodeConstructorPtr> temp_mapping;
 
-NodeConstructorPtr NodeFactoryRemote::getConstructor(const std::string& type)
-{
-    return tmp_ref_.getConstructor(type);
-}
-std::vector<NodeConstructorPtr> NodeFactoryRemote::getConstructors()
-{
-    return tmp_ref_.getConstructors();
-}
+            // build node constructor list
+            for(const auto& pair : response->getTagMap()) {
+                const std::string& tag = pair.first;
+                for(const NodeConstructorPtr& constructor : pair.second) {
 
-std::map<std::string, std::vector<NodeConstructor::Ptr> > NodeFactoryRemote::getTagMap()
-{
-    return tmp_ref_.getTagMap();
+                    auto pos = temp_mapping.find(constructor->getType());
+                    if(pos == temp_mapping.end()) {
+                        constructors_.push_back(constructor);
+                        temp_mapping.insert(std::make_pair(constructor->getType(), constructor));
+                    }
+
+                    tag_map_[tag].push_back(temp_mapping[constructor->getType()]);
+                }
+            }
+        }
+    }
 }

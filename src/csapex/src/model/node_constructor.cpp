@@ -5,18 +5,23 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
+#include <csapex/model/tag.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
-#include <csapex/model/tag.h>
-#include <csapex/param/parameter.h>
-#include <csapex/utility/uuid_provider.h>
+#include <csapex/serialization/serialization_buffer.h>
 #include <csapex/utility/delegate_bind.h>
+#include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
 using namespace csapex;
+
+NodeConstructor::NodeConstructionException::NodeConstructionException(const std::string& what)
+    : std::runtime_error(what)
+{
+}
 
 NodeConstructor::NodeConstructor(const std::string &type, std::function<NodePtr()> c)
     : type_(type), icon_(":/no_icon.png"), properties_loaded_(false), c(c)
@@ -27,6 +32,12 @@ NodeConstructor::NodeConstructor(const std::string &type)
     : type_(type), icon_(":/no_icon.png"), properties_loaded_(false)
 {
 }
+
+NodeConstructor::NodeConstructor()
+    : type_("unnamed"), icon_(":/no_icon.png"), properties_loaded_(false)
+{
+}
+
 
 NodeConstructor::~NodeConstructor()
 {
@@ -165,4 +176,29 @@ std::vector<csapex::param::ParameterPtr> NodeConstructor::getParameters() const
 Node::Ptr NodeConstructor::makeNode() const
 {
     return c();
+}
+
+
+void NodeConstructor::serialize(SerializationBuffer &data) const
+{
+    data << type_;
+    data << descr_;
+    data << icon_;
+    data << tags_;
+    data << properties_;
+    data << true;
+}
+void NodeConstructor::deserialize(const SerializationBuffer& data)
+{
+    data >> type_;
+    data >> descr_;
+    data >> icon_;
+    data >> tags_;
+    data >> properties_;
+    data >> properties_loaded_;
+}
+
+std::shared_ptr<Clonable> NodeConstructor::makeEmptyClone() const
+{
+    return std::shared_ptr<Clonable>(new NodeConstructor(""));
 }

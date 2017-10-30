@@ -25,7 +25,7 @@ class ProfilerRemote;
 class CSAPEX_QT_EXPORT CsApexViewCoreRemote : public CsApexViewCore, public Remote
 {
 public:
-    CsApexViewCoreRemote(const SessionPtr &session, CsApexCorePtr core_tmp);
+    CsApexViewCoreRemote(const SessionPtr &session);
     ~CsApexViewCoreRemote();
 
     void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR) override;

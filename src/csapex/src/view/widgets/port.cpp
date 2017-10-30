@@ -272,11 +272,13 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
             return;
         }
 
-        if(Connection::isCompatibleWith(from.get(), adaptee_.get())) {
-            if(Connection::isCompatibleWith(adaptee_.get(), from.get())) {
-                addConnectionPreview(from);
-                e->acceptProposedAction();
-            }
+        bool compatible = Connection::isCompatibleWith(from.get(), adaptee_.get()) &&
+                Connection::isCompatibleWith(adaptee_.get(), from.get());
+
+        bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
+        if(compatible || shift) {
+            addConnectionPreview(from);
+            e->acceptProposedAction();
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();

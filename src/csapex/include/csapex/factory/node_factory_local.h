@@ -18,6 +18,8 @@
 #include <csapex/utility/slim_signal.h>
 #include <unordered_map>
 
+class TiXmlElement;
+
 namespace csapex
 {
 
@@ -39,14 +41,6 @@ public:
                                  NodeStatePtr state, bool create_global_ports);
 
 
-
-    virtual bool isValidType(const std::string& type) const override;
-
-    virtual NodeConstructorPtr getConstructor(const std::string& type) override;
-    virtual std::vector<NodeConstructorPtr> getConstructors() override;
-
-    virtual std::map<std::string, std::vector<NodeConstructor::Ptr> > getTagMap() override;
-
 public:
     slim_signal::Signal<void(const std::string&)> loaded;
     slim_signal::Signal<void()> new_node_type;
@@ -54,16 +48,13 @@ public:
     slim_signal::Signal<void(const std::string& file, const TiXmlElement* document)> manifest_loaded;
 
 protected:
-    void ensureLoaded();
+    void ensureLoaded() override;
     void rebuildPrototypes();
     void rebuildMap();
 
 protected:
     Settings &settings_;
     csapex::PluginLocator* plugin_locator_;
-
-    std::map<std::string, std::vector<NodeConstructor::Ptr> > tag_map_;
-    std::vector<NodeConstructor::Ptr> constructors_;
 
     std::shared_ptr<PluginManager<Node>> node_manager_;
 

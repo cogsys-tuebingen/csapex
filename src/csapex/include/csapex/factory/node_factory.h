@@ -12,8 +12,6 @@
 #include <string>
 #include <map>
 
-class TiXmlElement;
-
 namespace csapex
 {
 
@@ -23,12 +21,20 @@ public:
     typedef std::shared_ptr<NodeFactory> Ptr;
 
 public:
-    virtual bool isValidType(const std::string& type) const = 0;
+    bool isValidType(const std::string& type);
 
-    virtual NodeConstructorPtr getConstructor(const std::string& type) = 0;
-    virtual std::vector<NodeConstructorPtr> getConstructors() = 0;
+    NodeConstructorPtr getConstructor(const std::string& type);
 
-    virtual std::map<std::string, std::vector<NodeConstructorPtr> > getTagMap() = 0;
+    std::vector<NodeConstructorPtr> getConstructors();
+
+    std::map<std::string, std::vector<NodeConstructorPtr> > getTagMap();
+
+protected:
+    virtual void ensureLoaded() = 0;
+
+protected:
+    std::map<std::string, std::vector<NodeConstructorPtr> > tag_map_;
+    std::vector<NodeConstructorPtr> constructors_;
 };
 
 }
