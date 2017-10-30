@@ -29,8 +29,13 @@ class Profiler;
 class CSAPEX_EXPORT CsApexCore : public Observer, public Notifier
 {
 public:
-    CsApexCore(Settings& settings_, ExceptionHandler &handler);
-    CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator, NodeFactoryPtr node_factory, SnippetFactoryPtr snippet_factory);
+    CsApexCore(Settings& settings_,
+               ExceptionHandler &handler);
+    CsApexCore(Settings& settings_,
+               ExceptionHandler &handler,
+               PluginLocatorPtr plugin_locator,
+               NodeFactoryPtr node_factory,
+               SnippetFactoryPtr snippet_factory);
 
     virtual ~CsApexCore();
 
@@ -49,7 +54,7 @@ public:
     void reset();
 
     Settings& getSettings() const;
-    NodeFactoryPtr getNodeFactory() const;
+    NodeFactoryLocalPtr getNodeFactory() const;
     SnippetFactoryPtr getSnippetFactory() const;
 
     GraphFacadeLocalPtr getRoot() const;
@@ -116,7 +121,7 @@ private:
     PluginLocatorPtr plugin_locator_;
     ExceptionHandler &exception_handler_;
 
-    NodeFactoryPtr node_factory_;
+    NodeFactoryLocalPtr node_factory_;
     SnippetFactoryPtr snippet_factory_;
 
     ThreadPoolPtr thread_pool_;

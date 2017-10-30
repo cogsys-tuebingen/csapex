@@ -21,7 +21,7 @@ namespace csapex
 class CSAPEX_EXPORT GraphIO : public Profilable
 {
 public:
-    GraphIO(GraphFacadeLocal& graph, NodeFactory* node_factory);
+    GraphIO(GraphFacadeLocal& graph, NodeFactoryLocal* node_factory);
 
 public:
     // options
@@ -76,7 +76,7 @@ protected:
 
 private:
     GraphFacadeLocal& graph_;
-    NodeFactory* node_factory_;
+    NodeFactoryLocal* node_factory_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> old_node_uuid_to_new_;
     double position_offset_x_;

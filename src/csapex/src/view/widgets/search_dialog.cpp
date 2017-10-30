@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/factory/node_factory.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/model/node_constructor.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph/vertex.h>
@@ -23,7 +23,11 @@
 using namespace csapex;
 
 
-SearchDialog::SearchDialog(GraphFacade *root, csapex::NodeFactory &node_factory, QString message, QWidget *parent, Qt::WindowFlags f)
+SearchDialog::SearchDialog(GraphFacade *root,
+                           csapex::NodeFactory &node_factory,
+                           QString message,
+                           QWidget *parent,
+                           Qt::WindowFlags f)
     : QDialog(parent, f),
       root_(root),
       node_factory_(node_factory),

@@ -2,7 +2,7 @@
 #include <csapex/view/node/node_statistics.h>
 
 /// COMPONENT
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/model/connection.h>
 #include <csapex/model/generic_state.h>
 #include <csapex/model/node_facade.h>

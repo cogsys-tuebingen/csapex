@@ -6,7 +6,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/model/graph_facade_local.h>
 #include <csapex/model/graph/graph_local.h>
@@ -39,7 +39,7 @@ using namespace csapex;
 #define sendNotificationStreamGraphio(args) \
 { std::stringstream ss; ss << args; sendNotification(ss.str()); }
 
-GraphIO::GraphIO(GraphFacadeLocal &graph, NodeFactory* node_factory)
+GraphIO::GraphIO(GraphFacadeLocal &graph, NodeFactoryLocal* node_factory)
     : graph_(graph), node_factory_(node_factory),
       position_offset_x_(0.0), position_offset_y_(0.0),
 

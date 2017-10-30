@@ -28,6 +28,7 @@
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph_facade_local.h>
+#include <csapex/model/node_constructor.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>

@@ -18,7 +18,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/param/trigger_parameter.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/delegate_bind.h>

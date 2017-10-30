@@ -5,6 +5,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/graph_facade_local.h>
 #include <csapex/utility/assert.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/serialization/serialization_buffer.h>
 
@@ -148,7 +149,7 @@ SubgraphNodePtr Command::getSubgraphNode()
     return getGraphFacade()->getSubgraphNode();
 }
 
-NodeFactory* Command::getNodeFactory()
+NodeFactoryLocal* Command::getNodeFactory()
 {
     return core_->getNodeFactory().get();
 }

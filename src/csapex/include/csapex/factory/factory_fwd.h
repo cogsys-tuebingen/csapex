@@ -15,6 +15,7 @@
 namespace csapex
 {
 FWD(NodeFactory)
+FWD(NodeFactoryLocal)
 FWD(SnippetFactory)
 FWD(MessageFactory)
 }

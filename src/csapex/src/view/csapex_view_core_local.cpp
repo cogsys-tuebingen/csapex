@@ -9,6 +9,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/factory/node_factory_local.h>
 
 /// TEMPORARY
 #include <csapex/model/graph_facade_local.h>
@@ -133,25 +134,22 @@ GraphFacadeLocalPtr CsApexViewCoreLocal::getLocalRoot()
 
 ThreadPoolPtr CsApexViewCoreLocal::getThreadPool()
 {
-    // TODO: replace with proxy
     apex_assert_hard(core_->getThreadPool());
     return core_->getThreadPool();
 }
 NodeFactoryPtr CsApexViewCoreLocal::getNodeFactory() const
 {
-    // TODO: replace with proxy
     apex_assert_hard(node_factory_);
     return node_factory_;
 }
+
 SnippetFactoryPtr CsApexViewCoreLocal::getSnippetFactory() const
 {
-    // TODO: replace with proxy
     apex_assert_hard(snippet_factory_);
     return snippet_factory_;
 }
 ProfilerPtr CsApexViewCoreLocal::getProfiler() const
 {
-    // TODO: replace with proxy
     apex_assert_hard(core_->getProfiler() != nullptr);
     return core_->getProfiler();
 }

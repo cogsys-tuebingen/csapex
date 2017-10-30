@@ -8,7 +8,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/graph/graph_local.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>

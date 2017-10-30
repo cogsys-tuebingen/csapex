@@ -2,7 +2,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_facade_local.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/core/settings/settings_local.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/subgraph_node.h>
@@ -31,7 +31,7 @@ public:
 
 class GraphTest : public ::testing::Test {
 protected:
-    NodeFactory factory;
+    NodeFactoryLocal factory;
 
     GraphTest()
         : factory(SettingsLocal::NoSettings, nullptr)

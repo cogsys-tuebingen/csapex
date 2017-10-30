@@ -88,7 +88,7 @@ protected:
     GraphLocalPtr getGraph();
     SubgraphNodePtr getSubgraphNode();
 
-    NodeFactory* getNodeFactory();
+    NodeFactoryLocal *getNodeFactory();
 
     GraphFacade* getSubGraph(const UUID& graph_id);
     ThreadPool* getRootThreadPool();

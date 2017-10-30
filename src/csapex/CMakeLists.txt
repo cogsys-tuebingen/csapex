@@ -353,6 +353,7 @@ add_library(csapex SHARED
 
     src/factory/generic_node_factory.cpp
     src/factory/node_factory.cpp
+    src/factory/node_factory_local.cpp
     src/factory/message_factory.cpp
     src/factory/snippet_factory.cpp
 
@@ -541,6 +542,8 @@ add_library(csapex_remote SHARED
 
     src/model/graph/graph_remote.cpp
     src/model/graph_facade_remote.cpp
+
+    src/factory/node_factory_remote.cpp
 
     src/profiling/profiler_remote.cpp
 

@@ -6,7 +6,7 @@
 #include <csapex/core/core_plugin.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/core/graphio.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
@@ -99,7 +99,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
 
     core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
-    node_factory_ = std::make_shared<NodeFactory>(settings_, plugin_locator_.get());
+    node_factory_ = std::make_shared<NodeFactoryLocal>(settings_, plugin_locator_.get());
     snippet_factory_ = std::make_shared<SnippetFactory>(plugin_locator_.get());
 
     boot();
@@ -111,7 +111,8 @@ CsApexCore::CsApexCore(Settings& settings, ExceptionHandler &handler, PluginLoca
 {
     is_root_ = false;
 
-    node_factory_ =  node_factory;
+    node_factory_ =  std::dynamic_pointer_cast<NodeFactoryLocal>(node_factory);
+    apex_assert_hard(node_factory);
     snippet_factory_ =  snippet_factory;
 }
 
@@ -385,7 +386,7 @@ Settings &CsApexCore::getSettings() const
     return settings_;
 }
 
-NodeFactoryPtr CsApexCore::getNodeFactory() const
+NodeFactoryLocalPtr CsApexCore::getNodeFactory() const
 {
     return node_factory_;
 }

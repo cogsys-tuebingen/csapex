@@ -2,7 +2,7 @@
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/factory/generic_node_factory.hpp>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -42,7 +42,7 @@ void functionToBeWrappedIntoANode(const GenericValueMessage<int>& input, const G
 
 class NodeCreationTest : public ::testing::Test {
 protected:
-    NodeFactory factory;
+    NodeFactoryLocal factory;
 
     NodeCreationTest()
         : factory(SettingsLocal::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())

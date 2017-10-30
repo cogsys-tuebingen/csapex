@@ -2,7 +2,7 @@
 #define NODE_CONSTRUCTING_TEST_H
 
 #include <csapex/model/model_fwd.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/factory/node_wrapper.hpp>
 #include <csapex/core/settings/settings_local.h>
 #include <csapex/scheduling/thread_pool.h>
@@ -73,7 +73,7 @@ protected:
         return NodePtr(new NodeWrapper<MockupSink>());
     }
 
-    NodeFactory factory;
+    NodeFactoryLocal factory;
     TestExceptionHandler eh;
 
     ThreadPool executor;

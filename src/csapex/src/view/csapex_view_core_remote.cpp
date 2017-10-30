@@ -8,6 +8,7 @@
 #include <csapex/core/bootstrap.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/info.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/channel.h>
 #include <csapex/io/protcol/core_notes.h>

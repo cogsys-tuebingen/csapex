@@ -2,7 +2,7 @@
 #include <csapex/view/widgets/rewiring_dialog.h>
 
 /// COMPONENT
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/model/connection.h>
 #include <csapex/model/graph_facade_local.h>
 #include <csapex/model/graph/graph_local.h>
@@ -105,7 +105,8 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
 void RewiringDialog::makeUI(const QString& stylesheet)
 {
     BoxDialog diag("Please enter the new node type.",
-                   *view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
+                   *view_core_.getNodeFactory(),
+                   *view_core_.getNodeAdapterFactory(),
                    view_core_.getSnippetFactory());
     diag.setWindowTitle("Select new node type.");
 
@@ -126,7 +127,11 @@ void RewiringDialog::makeUI(const QString& stylesheet)
 
 void RewiringDialog::createGraphs(const std::string& type)
 {
-    NodeFactory& node_factory = *view_core_.getNodeFactory();
+    NodeFactoryLocalPtr nfl = std::dynamic_pointer_cast<NodeFactoryLocal>(view_core_.getNodeFactory());
+    if(!nfl) {
+        throw std::runtime_error("currently not supported");
+    }
+    NodeFactoryLocal& node_factory = *nfl;
 
     // old graph
     graph_facade_old_ = view_core_old_->getLocalRoot();

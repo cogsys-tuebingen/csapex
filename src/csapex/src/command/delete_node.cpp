@@ -10,7 +10,7 @@
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph/graph_local.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>

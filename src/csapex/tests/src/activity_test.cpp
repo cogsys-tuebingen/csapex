@@ -2,7 +2,7 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_facade_local.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_local.h>
 #include <csapex/factory/node_wrapper.hpp>
 #include <csapex/core/settings/settings_local.h>
 #include <csapex/utility/uuid_provider.h>
