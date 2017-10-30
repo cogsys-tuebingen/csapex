@@ -37,19 +37,19 @@ namespace bf3 = boost::filesystem3;
 
 using namespace csapex;
 
-SettingsRemote::SettingsRemote(Session& session)
+SettingsRemote::SettingsRemote(const SessionPtr& session)
     : Remote(session)
 {
 }
 
 void SettingsRemote::savePersistent()
 {
-    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsSavePersistent);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsSavePersistent);
 }
 
 void SettingsRemote::loadPersistent()
 {
-    session_.sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsLoadPersistent);
+    session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::SettingsLoadPersistent);
 }
 
 void SettingsRemote::saveTemporary(YAML::Node& node)
@@ -67,7 +67,7 @@ void SettingsRemote::add(csapex::param::Parameter::Ptr p, bool persistent)
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
     boost::any value;
     p->get_unsafe(value);
-    if(const auto& response = session_.sendRequest<AddParameter>(param_id, p->name(), p->description().toString(), value, persistent))
+    if(const auto& response = session_->sendRequest<AddParameter>(param_id, p->name(), p->description().toString(), value, persistent))
     {
         if(response->getParameter()) {
             //std::cerr << "created parameter " << response->getParameter()->getUUID() << std::endl;
@@ -97,7 +97,7 @@ csapex::param::Parameter::Ptr SettingsRemote::getNoThrow(const std::string &name
     }
 
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + name));
-    if(const auto& response = session_.sendRequest<RequestParameter>(param_id)) {
+    if(const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
         apex_assert_hard(response->getParameter());
 
         if(response->getParameter()->ID() == param::NullParameter::NUMERICAL_ID) {
@@ -125,7 +125,7 @@ void SettingsRemote::createParameterProxy(const std::string &name, param::Parame
         boost::any raw;
         param->get_unsafe(raw);
         CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
-        self->session_.write(change);
+        self->session_->write(change);
 
         self->settingsChanged(param->name());
     });

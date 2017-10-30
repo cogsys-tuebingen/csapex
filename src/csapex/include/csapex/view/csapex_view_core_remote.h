@@ -25,7 +25,7 @@ class ProfilerRemote;
 class CSAPEX_QT_EXPORT CsApexViewCoreRemote : public CsApexViewCore, public Remote
 {
 public:
-    CsApexViewCoreRemote(Session &session, CsApexCorePtr core_tmp);
+    CsApexViewCoreRemote(const SessionPtr &session, CsApexCorePtr core_tmp);
     ~CsApexViewCoreRemote();
 
     void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR) override;
@@ -59,11 +59,22 @@ public:
     std::shared_ptr<DragIO> getDragIO() override;
     std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory() override;
 
-    // TODO: add proxies or remove
-    SnippetFactoryPtr getSnippetFactory() const override;
-    NodeFactoryPtr getNodeFactory() const override;
-    ThreadPoolPtr getThreadPool() override;
     PluginLocatorPtr getPluginLocator() const override;
+
+    // TODO: add proxies or remove
+    NodeFactoryPtr getNodeFactory() const override;
+
+    /**
+     * @brief getThreadPool
+     * @return nullptr, iff no thread pool exists
+     */
+    ThreadPoolPtr getThreadPool() override;
+
+    /**
+     * @brief getSnippetFactory
+     * @return nullptr, iff no factory exists
+     */
+    SnippetFactoryPtr getSnippetFactory() const override;
 
 private:
     void handlePacket(StreamableConstPtr packet);
@@ -90,6 +101,7 @@ private:
     std::shared_ptr<ProfilerRemote> profiler_proxy_;
 
     bool running;
+    bool thread_active_;
     std::thread spinner;
 
     std::shared_ptr<ExceptionHandler> exception_handler_;

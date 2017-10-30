@@ -309,7 +309,13 @@ bool CsApexWindow::eventFilter(QObject* o, QEvent* e)
 
 void CsApexWindow::setupThreadManagement()
 {
-    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getSettings(), view_core_.getThreadPool(), *view_core_.getCommandDispatcher());
+    ThreadPoolPtr thread_pool = view_core_.getThreadPool();
+    if(!thread_pool) {
+        ui->ThreadManagement->setEnabled(false);
+        return;
+    }
+
+    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getSettings(), thread_pool, *view_core_.getCommandDispatcher());
     ui->thread_table->setModel(model);
     ui->thread_table->setItemDelegate(new CpuAffinityDelegate(ui->thread_table));
 
@@ -348,7 +354,9 @@ void CsApexWindow::setupThreadManagement()
     QObject::connect(ui->thread_assign, &QPushButton::clicked, [this](bool) {
         if(GraphView* view = designer_->getVisibleGraphView()) {
             QItemSelectionModel* select = ui->thread_table->selectionModel();
-            ThreadGroup* group = view_core_.getThreadPool()->getGroupAt(select->currentIndex().row());
+            ThreadPoolPtr thread_pool = view_core_.getThreadPool();
+            apex_assert_hard(thread_pool);
+            ThreadGroup* group = thread_pool->getGroupAt(select->currentIndex().row());
             view->switchSelectedNodesToThread(group->id());
         }
     });
@@ -368,6 +376,8 @@ void CsApexWindow::setupThreadManagement()
     QObject::connect(ui->thread_create, &QPushButton::clicked, [this](bool) {
         bool ok;
         ThreadPool* thread_pool = view_core_.getThreadPool().get();
+        apex_assert_hard(thread_pool);
+
         QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
 
         if(ok && !text.isEmpty()) {
@@ -386,6 +396,7 @@ void CsApexWindow::setupThreadManagement()
             CommandFactory factory(view_core_.getRoot().get());
 
             ThreadPoolPtr thread_pool = view_core_.getThreadPool();
+            apex_assert_hard(thread_pool);
 
             for(const auto& entry : selection) {
                 for(int row = entry.top(); row <= entry.bottom(); ++row) {
@@ -684,9 +695,18 @@ void CsApexWindow::updateNodeTypes()
 
 void CsApexWindow::updateSnippets()
 {
-    SnippetListGenerator generator(*view_core_.getSnippetFactory());
     ui->snippets->clear();
-    generator.insertAvailableSnippets(ui->snippets);
+
+    if(SnippetFactoryPtr snippet_factory = view_core_.getSnippetFactory()) {
+        SnippetListGenerator generator(*snippet_factory);
+        generator.insertAvailableSnippets(ui->snippets);
+
+    } else {
+        QTreeWidgetItem* submenu = new QTreeWidgetItem;
+        submenu->setText(0, QString::fromStdString("not yet supported in remote view"));
+        ui->snippets->addTopLevelItem(submenu);
+        ui->snippets->setEnabled(false);
+    }
 }
 
 

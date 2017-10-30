@@ -712,7 +712,7 @@ add_library(csapex_qt SHARED
     src/view/widgets/notification_widget.cpp
     src/view/widgets/cpu_affinity_widget.cpp
 
-    ${csapex_qt_HEADERS}
+    #${csapex_qt_HEADERS}
 
     ${QT_RESOURCES}
 

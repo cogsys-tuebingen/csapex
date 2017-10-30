@@ -12,7 +12,7 @@
 using namespace csapex;
 
 
-ConnectorRemote::ConnectorRemote(Session& session, UUID uuid, ConnectableOwnerPtr owner)
+ConnectorRemote::ConnectorRemote(const SessionPtr& session, UUID uuid, ConnectableOwnerPtr owner)
     : Connector(uuid, owner),
       Remote(session),
       /**
@@ -29,7 +29,7 @@ ConnectorRemote::ConnectorRemote(Session& session, UUID uuid, ConnectableOwnerPt
        **/
       connected_(false)
 {
-    channel_ = session_.openChannel(uuid.getAbsoluteUUID());
+    channel_ = session_->openChannel(uuid.getAbsoluteUUID());
 
     observe(channel_->note_received, [this](const io::NoteConstPtr& note){
         if(const std::shared_ptr<ConnectorNote const>& cn = std::dynamic_pointer_cast<ConnectorNote const>(note)) {
@@ -58,7 +58,7 @@ ConnectorRemote::ConnectorRemote(Session& session, UUID uuid, ConnectableOwnerPt
 }
 
 
-ConnectorRemote::ConnectorRemote(Session& session, UUID uuid, ConnectableOwnerPtr owner, const ConnectorDescription& cd)
+ConnectorRemote::ConnectorRemote(const SessionPtr& session, UUID uuid, ConnectableOwnerPtr owner, const ConnectorDescription& cd)
     : ConnectorRemote(session, uuid, owner)
 {
     cache_getDescription_ = cd;

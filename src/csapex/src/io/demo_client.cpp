@@ -60,7 +60,7 @@ public:
                 stop();
             });
 
-            settings_= std::make_shared<SettingsRemote>(*session);
+            settings_= std::make_shared<SettingsRemote>(session);
 
 //            try {
 //                param::ParameterPtr p = settings_->get("access-test");

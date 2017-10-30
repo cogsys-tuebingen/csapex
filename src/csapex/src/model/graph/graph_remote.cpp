@@ -117,7 +117,7 @@ void GraphRemote::vertexAdded(const UUID &id)
 {
     AUUID auuid(makeUUID_forced(shared_from_this(), id.getFullName()).getAbsoluteUUID());
     std::shared_ptr<NodeFacadeRemote> remote_node_facade =
-            std::make_shared<NodeFacadeRemote>(graph_channel_->getSession(), auuid);
+            std::make_shared<NodeFacadeRemote>(graph_channel_->getSession().shared_from_this(), auuid);
 
     graph::VertexPtr remote_vertex = std::make_shared<graph::Vertex>(remote_node_facade);
     remote_vertices_.push_back(remote_vertex);

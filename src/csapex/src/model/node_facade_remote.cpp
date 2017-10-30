@@ -24,7 +24,7 @@
 using namespace csapex;
 
 
-NodeFacadeRemote::NodeFacadeRemote(Session &session, AUUID uuid)
+NodeFacadeRemote::NodeFacadeRemote(const SessionPtr &session, AUUID uuid)
     : Remote(session),
       uuid_(uuid),
 
@@ -45,7 +45,7 @@ NodeFacadeRemote::NodeFacadeRemote(Session &session, AUUID uuid)
 
       guard_(-1)
 {
-    node_channel_ = session.openChannel(uuid.getAbsoluteUUID());
+    node_channel_ = session->openChannel(uuid.getAbsoluteUUID());
 
     profiler_proxy_ = std::make_shared<ProfilerRemote>(node_channel_);
 
@@ -367,7 +367,7 @@ void NodeFacadeRemote::createParameterProxy(param::ParameterPtr proxy) const
         boost::any raw;
         param->get_unsafe(raw);
         CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
-        self->session_.write(change);
+        self->session_->write(change);
     });
 
     parameters_.push_back(proxy);

@@ -59,9 +59,14 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
     menu.addMenu(&add_node);
 
     QMenu add_snippet("add snippet");
-    add_snippet.setIcon(QIcon(":/snippet.png"));
-    SnippetListGenerator snippet_generator(*view_.getViewCore().getSnippetFactory());
-    snippet_generator.insertAvailableSnippets(&add_snippet);
+    if(SnippetFactoryPtr snippet_factory = view_.getViewCore().getSnippetFactory()) {
+        add_snippet.setIcon(QIcon(":/snippet.png"));
+        SnippetListGenerator snippet_generator(*snippet_factory);
+        snippet_generator.insertAvailableSnippets(&add_snippet);
+    } else {
+        add_snippet.setEnabled(false);
+        add_snippet.setToolTip("Not available");
+    }
     menu.addMenu(&add_snippet);
 
     QAction* selectedItem = menu.exec(global_pos);

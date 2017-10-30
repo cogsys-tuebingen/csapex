@@ -3,10 +3,10 @@
 
 using namespace csapex;
 
-Remote::Remote(Session& session)
+Remote::Remote(const SessionPtr &session)
     : session_(session)
 {
-    broadcast_connection_ = session_.broadcast_received.connect(this, &Remote::handleBroadcast);
+    broadcast_connection_ = session_->broadcast_received.connect(this, &Remote::handleBroadcast);
 }
 
 Remote::~Remote()

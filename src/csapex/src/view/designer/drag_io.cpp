@@ -255,11 +255,11 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        SnippetFactory& sf = *src->getViewCore().getSnippetFactory();
+        if(SnippetFactoryPtr sf = src->getViewCore().getSnippetFactory()) {
+            SnippetPtr snippet = sf->getSnippet(type);
 
-        SnippetPtr snippet = sf.getSnippet(type);
-
-        pasteGraph(src, pos, *snippet);
+            pasteGraph(src, pos, *snippet);
+        }
 
     } else if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
@@ -297,11 +297,11 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
             QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
             QPointF pos = src->mapToScene(e->pos()) + offset;
 
-            SnippetFactory& sf = *src->getViewCore().getSnippetFactory();
+            if(SnippetFactoryPtr sf = src->getViewCore().getSnippetFactory()) {
+                SnippetPtr snippet = sf->getSnippet(type);
 
-            SnippetPtr snippet = sf.getSnippet(type);
-
-            pasteGraph(src, pos, *snippet);
+                pasteGraph(src, pos, *snippet);
+            }
         }
 
 

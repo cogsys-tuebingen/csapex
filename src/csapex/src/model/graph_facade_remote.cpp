@@ -21,10 +21,10 @@
 
 using namespace csapex;
 
-GraphFacadeRemote::GraphFacadeRemote(Session& session, NodeFacadeRemotePtr remote_facade, GraphFacadeRemote* parent)
+GraphFacadeRemote::GraphFacadeRemote(const SessionPtr& session, NodeFacadeRemotePtr remote_facade, GraphFacadeRemote* parent)
     : Remote(session),
       parent_(parent),
-      graph_channel_(session.openChannel(remote_facade->getAUUID())),
+      graph_channel_(session->openChannel(remote_facade->getAUUID())),
       graph_handle_(remote_facade),
       graph_(std::make_shared<GraphRemote>(graph_channel_, remote_facade)),
       uuid_(remote_facade->getAUUID()),

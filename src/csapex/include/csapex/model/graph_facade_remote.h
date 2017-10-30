@@ -13,7 +13,7 @@ class GraphRemote;
 class GraphFacadeRemote : public GraphFacade, public Remote
 {
 public:
-    GraphFacadeRemote(Session &session, NodeFacadeRemotePtr remote_facade, GraphFacadeRemote *parent = nullptr);
+    GraphFacadeRemote(const SessionPtr &session, NodeFacadeRemotePtr remote_facade, GraphFacadeRemote *parent = nullptr);
     ~GraphFacadeRemote();
 
     virtual AUUID getAbsoluteUUID() const override;

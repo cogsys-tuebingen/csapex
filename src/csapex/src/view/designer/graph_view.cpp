@@ -683,9 +683,9 @@ void GraphView::dragLeaveEvent(QDragLeaveEvent* e)
 void GraphView::animateScroll()
 {
     QScrollBar* h = horizontalScrollBar();
-    h->setValue(h->value() + scroll_offset_x_);
+    h->setValue(h->value() + static_cast<int>(scroll_offset_x_));
     QScrollBar* v = verticalScrollBar();
-    v->setValue(v->value() + scroll_offset_y_);
+    v->setValue(v->value() + static_cast<int>(scroll_offset_y_));
 
     if(move_event_) {
         view_core_.getDragIO()->dragMoveEvent(this, move_event_);
@@ -696,8 +696,9 @@ void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
-                   *view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
-                   *view_core_.getSnippetFactory());
+                   *view_core_.getNodeFactory(),
+                   *view_core_.getNodeAdapterFactory(),
+                   view_core_.getSnippetFactory());
 
     int r = diag.exec();
 
@@ -727,7 +728,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
     mimeData->setData(QString::fromStdString(csapex::mime::node), type.c_str());
     if(state) {
-        QVariant payload = qVariantFromValue((void *) &state);
+        QVariant payload = qVariantFromValue(static_cast<void *>(&state));
         mimeData->setProperty("state", payload);
     }
     mimeData->setProperty("ox", offset.x());
@@ -1288,12 +1289,14 @@ void GraphView::createNodes(const QPoint& global_pos, const std::string& type, c
         view_core_.getCommandDispatcher()->execute(cmd);
 
     } else if(mime == csapex::mime::snippet) {
-        QPointF pos = mapToScene(mapFromGlobal(global_pos));
+        if(SnippetFactoryPtr snippet_factory = view_core_.getSnippetFactory()) {
+            QPointF pos = mapToScene(mapFromGlobal(global_pos));
 
-        AUUID graph_id = graph_facade_->getAbsoluteUUID();
-        CommandPtr cmd(new command::PasteGraph(graph_id, *view_core_.getSnippetFactory()->getSnippet(type), Point (pos.x(), pos.y())));
+            AUUID graph_id = graph_facade_->getAbsoluteUUID();
+            CommandPtr cmd(new command::PasteGraph(graph_id, *snippet_factory->getSnippet(type), Point (pos.x(), pos.y())));
 
-        view_core_.getCommandDispatcher()->execute(cmd);
+            view_core_.getCommandDispatcher()->execute(cmd);
+        }
     }
 }
 
@@ -1608,6 +1611,11 @@ void GraphView::ungroupSelected()
 
 void GraphView::makeSnippetFromSelected()
 {
+    SnippetFactoryPtr snippet_factory = view_core_.getSnippetFactory();
+    if(!snippet_factory) {
+        throw std::runtime_error("cannot save snippet, no factory exists");
+    }
+
     if(selected_boxes_.empty()) {
         return;
     }
@@ -1685,7 +1693,7 @@ void GraphView::makeSnippetFromSelected()
         snippet->setDescription(description.toStdString());
         snippet->setTags(tags);
 
-        view_core_.getSnippetFactory()->saveSnippet(*snippet, file.fileName().toStdString());
+        snippet_factory->saveSnippet(*snippet, file.fileName().toStdString());
     }
 }
 

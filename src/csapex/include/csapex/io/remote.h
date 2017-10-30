@@ -12,7 +12,7 @@ namespace csapex
 class Remote
 {
 public:
-    Remote(Session &session);
+    Remote(const SessionPtr &session);
     virtual ~Remote();
 
 protected:
@@ -22,13 +22,13 @@ protected:
     template <typename Result, typename Request, typename Type, typename... Args>
     Result request(Type type, Args&&... args) const
     {
-        auto res = session_.sendRequest<Request>(type, std::forward<Args>(args)...);
+        auto res = session_->sendRequest<Request>(type, std::forward<Args>(args)...);
         apex_assert_hard(res);
         return res->template getResult<Result>();
     }
 
 protected:
-    Session& session_;
+    SessionPtr session_;
 
     slim_signal::ScopedConnection broadcast_connection_;
 };
