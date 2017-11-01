@@ -217,12 +217,22 @@ void BitSetParameter::doClone(const Parameter &other)
 void BitSetParameter::doSerialize(YAML::Node& n) const
 {
     n["int"] = boost::any_cast<int> (value_);
+    n["values"] = set_;
 }
 
 void BitSetParameter::doDeserialize(const YAML::Node& n)
 {
     if(n["int"].IsDefined()) {
         value_ = n["int"].as<int>();
+    }
+
+    if (n["values"].IsDefined()) {
+        set_ = n["values"].as<std::map<std::string, int>>();
+        int full_mask = 0;
+        for (auto& entry : set_)
+            full_mask |= entry.second;
+
+        value_ &= full_mask;
     }
 }
 

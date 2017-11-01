@@ -84,6 +84,10 @@ void OutputProgressParameter::doClone(const Parameter& other)
     }
 }
 
+void OutputProgressParameter::advanceProgress(int step)
+{
+    setProgress(value + step, maximum);
+}
 
 void OutputProgressParameter::setProgress(int progress, int m)
 {
