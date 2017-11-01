@@ -2,10 +2,11 @@
 #define NODE_ADAPTER_H
 
 /// COMPONENT
-#include <csapex/view/csapex_qt_export.h>
-#include <csapex/model/model_fwd.h>
-#include <csapex/view/view_fwd.h>
 #include <csapex/command/command_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/model/observer.h>
+#include <csapex/view/csapex_qt_export.h>
+#include <csapex/view/view_fwd.h>
 
 /// SYSTEM
 #include <QLayout>
@@ -21,13 +22,13 @@ class Node;
 
 namespace csapex
 {
-class CSAPEX_QT_EXPORT NodeAdapter
+class CSAPEX_QT_EXPORT NodeAdapter : public Observer
 {
 public:
     typedef std::shared_ptr<NodeAdapter> Ptr;
 
 protected:
-    NodeAdapter(NodeFacadeWeakPtr adaptee, NodeBox* parent);
+    NodeAdapter(NodeFacadePtr adaptee, NodeBox* parent);
 
 public:
     virtual ~NodeAdapter();
@@ -51,8 +52,6 @@ protected:
     virtual void setupUi(QBoxLayout* layout) = 0;
     void invalidate();
 
-    void trackConnection(const csapex::slim_signal::Connection &c);
-
 protected:
     QBoxLayout *layout_;
     bool is_gui_setup_;
@@ -63,8 +62,6 @@ protected:
 
     NodeFacadeWeakPtr node_;
     NodeBox* parent_;
-
-    std::vector<csapex::slim_signal::Connection> connections_;
 };
 
 }

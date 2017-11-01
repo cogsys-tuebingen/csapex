@@ -28,6 +28,8 @@ public:
     CsApexViewCoreRemote(const SessionPtr &session);
     ~CsApexViewCoreRemote();
 
+    bool isRemote() const override;
+
     void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR) override;
 
     // CORE

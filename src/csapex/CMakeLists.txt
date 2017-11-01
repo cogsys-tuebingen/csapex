@@ -780,6 +780,17 @@ target_link_libraries(csapex_server
 
 
 
+add_executable(csapex_client
+        src/csapex_client.cpp)
+
+set_target_properties(csapex_client PROPERTIES AUTOMOC TRUE)
+target_link_libraries(csapex_client
+    csapex_remote
+    csapex_qt
+    ${Boost_LIBRARIES})
+
+
+
 add_executable(csapex_demo_client
     src/io/demo_client.cpp)
 

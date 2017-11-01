@@ -129,7 +129,7 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 
 
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadeWeakPtr adaptee, NodeBox* parent)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent)
     : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
 {
 }
@@ -189,12 +189,9 @@ void setTooltip(QLayout* l, const QString& tooltip)
     }
 }
 
-void setDirection(QBoxLayout* layout, NodeFacadeWeakPtr node)
+void setDirection(QBoxLayout* layout, NodeFacadePtr node)
 {
-    NodeFacadePtr n = node.lock();
-    if(n) {
-        layout->setDirection(n->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
-    }
+    layout->setDirection(node->getNodeState()->isFlipped() ? QHBoxLayout::RightToLeft : QHBoxLayout::LeftToRight);
 }
 
 template <typename P, typename Adapter = void>
@@ -311,10 +308,12 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         QPointer<QHBoxLayout> layout_ptr(new QHBoxLayout);
         current_layout_ = layout_ptr;
-        setDirection(current_layout_, node_);
+        setDirection(current_layout_, node_facade);
         node_facade->getNodeState()->flipped_changed->connect([this, layout_ptr](){
             if(!layout_ptr.isNull()) {
-                setDirection(layout_ptr, node_);
+                if(auto node = node_.lock()) {
+                    setDirection(layout_ptr, node);
+                }
             }
         });
 

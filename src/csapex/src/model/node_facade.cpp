@@ -25,6 +25,11 @@ NodeFacade::~NodeFacade()
 {
 }
 
+bool NodeFacade::isRemote() const
+{
+    return false;
+}
+
 std::vector<ConnectorDescription> NodeFacade::getExternalConnectors() const
 {
     std::vector<ConnectorDescription> result;

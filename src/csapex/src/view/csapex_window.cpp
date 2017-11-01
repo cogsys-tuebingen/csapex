@@ -948,7 +948,16 @@ void CsApexWindow::closeEvent(QCloseEvent* event)
     }
 
     try {
-        view_core_.shutdown();
+        if(view_core_.isRemote()) {
+            int r = QMessageBox::warning(this, tr("cs::APEX"),
+                                         tr("Do you want to stop the server?"),
+                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if(r == QMessageBox::Yes) {
+                view_core_.shutdown();
+            }
+        } else {
+            view_core_.shutdown();
+        }
     } catch(const std::exception& e) {
         std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
     } catch(...) {

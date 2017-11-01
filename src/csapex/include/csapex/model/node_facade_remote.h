@@ -22,6 +22,8 @@ public:
 
     ~NodeFacadeRemote();
 
+    bool isRemote() const override;
+
     UUID getUUID() const override;
     AUUID getAUUID() const override;
 

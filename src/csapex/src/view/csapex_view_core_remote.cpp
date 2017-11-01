@@ -155,6 +155,11 @@ CsApexViewCoreRemote::~CsApexViewCoreRemote()
 }
 
 
+bool CsApexViewCoreRemote::isRemote() const
+{
+    return true;
+}
+
 void CsApexViewCoreRemote::handlePacket(StreamableConstPtr packet)
 {
     (void) packet;

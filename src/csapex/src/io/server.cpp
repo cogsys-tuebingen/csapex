@@ -264,7 +264,9 @@ void Server::stop()
             std::unique_lock<std::recursive_mutex> lock(session_mutex_);
 
             for(SessionPtr session : sessions_) {
-                session->stop();
+                if(session) {
+                    session->stop();
+                }
             }
             sessions_.clear();
         }

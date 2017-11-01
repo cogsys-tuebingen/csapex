@@ -30,6 +30,8 @@ public:
 
     virtual bool isActive() const = 0;
 
+    virtual bool isRemote() const;
+
     virtual bool isProcessingEnabled() const = 0;
 
     virtual bool isGraph() const = 0;

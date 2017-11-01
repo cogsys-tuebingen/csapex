@@ -217,6 +217,11 @@ NodeFacadeRemote::~NodeFacadeRemote()
     guard_ = 0xDEADBEEF;
 }
 
+bool NodeFacadeRemote::isRemote() const
+{
+    return true;
+}
+
 void NodeFacadeRemote::handleBroadcast(const BroadcastMessageConstPtr& message)
 {
     if(auto node_msg = std::dynamic_pointer_cast<NodeBroadcasts const>(message)) {
