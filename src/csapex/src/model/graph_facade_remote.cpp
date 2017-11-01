@@ -51,8 +51,8 @@ GraphFacadeRemote::GraphFacadeRemote(const SessionPtr& session, NodeFacadeRemote
     }
     graph_->reload();
 
-    observe(graph_->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeAddedHandler));
-    observe(graph_->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeRemote::nodeRemovedHandler));
+    observe(graph_->vertex_added, this, &GraphFacadeRemote::nodeAddedHandler);
+    observe(graph_->vertex_removed, this, &GraphFacadeRemote::nodeRemovedHandler);
 
     observe(graph_->notification, notification);
 

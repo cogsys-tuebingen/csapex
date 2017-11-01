@@ -136,16 +136,16 @@ void NodeBox::setupUi()
 
 
     NodeState* state = node_facade_->getNodeState().get();
-    observe(state->flipped_changed, std::bind(&NodeBox::triggerFlipSides, this));
-    observe(state->minimized_changed, std::bind(&NodeBox::triggerMinimized, this));
+    observe(state->flipped_changed, this, &NodeBox::triggerFlipSides);
+    observe(state->minimized_changed, this, &NodeBox::triggerMinimized);
     observe(state->active_changed, [this, state](){
         setProperty("active", state->isActive());
         updateVisualsRequest();
     });
     setProperty("active", state->isActive());
 
-    observe(state->color_changed, std::bind(&NodeBox::changeColor, this));
-    observe(state->pos_changed, std::bind(&NodeBox::updatePosition, this));
+    observe(state->color_changed, this, &NodeBox::changeColor);
+    observe(state->pos_changed, this, &NodeBox::updatePosition);
 
     observe(settings_.setting_changed, [this](const std::string& name) {
         if(name == "debug") {

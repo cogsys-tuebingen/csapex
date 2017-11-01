@@ -30,8 +30,8 @@ GraphFacadeLocal::GraphFacadeLocal(ThreadPool &executor, GraphLocalPtr graph, Su
       graph_(graph),
       graph_node_(graph_node)
 {
-    observe(graph->vertex_added, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeLocal::nodeAddedHandler));
-    observe(graph->vertex_removed, delegate::Delegate<void(graph::VertexPtr)>(this, &GraphFacadeLocal::nodeRemovedHandler));
+    observe(graph->vertex_added, this, &GraphFacadeLocal::nodeAddedHandler);
+    observe(graph->vertex_removed, this, &GraphFacadeLocal::nodeRemovedHandler);
     observe(graph->notification, notification);
 
     observe(graph->connection_added, [this](const ConnectionInformation& ci) {

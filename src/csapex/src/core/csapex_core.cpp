@@ -89,7 +89,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
 {
     is_root_ = true;
 
-    observe(settings.settings_changed, std::bind(&CsApexCore::settingsChanged, this));
+    observe(settings.settings_changed, this, &CsApexCore::settingsChanged);
 
     observe(exception_handler_.assertion_failed, [this](){
         setPause(true);
