@@ -603,7 +603,7 @@ void Designer::loadView(GraphFacade &graph, const YAML::Node &doc)
     if(adapters.IsDefined()) {
         states_for_invisible_graphs_[graph.getAbsoluteUUID()] = doc["adapters"];
     } else {
-        std::cerr << "cannot load adapters from YAML Node: " << doc << std::endl;;
+        NOTIFICATION("cannot load adapters, none are specified");
     }
 }
 

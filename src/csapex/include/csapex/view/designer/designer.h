@@ -35,7 +35,7 @@ namespace csapex
 class NodeFactory;
 class NotificationWidget;
 
-class CSAPEX_QT_EXPORT Designer : public QWidget, public Profilable, public Observer
+class CSAPEX_QT_EXPORT Designer : public QWidget, public Profilable, public Observer, public Notifier
 {
     Q_OBJECT
 

@@ -195,6 +195,7 @@ void CsApexWindow::construct()
 
     QObject::connect(this, &CsApexWindow::showNotificationRequest, this, &CsApexWindow::showNotification);
     observe(view_core_.notification, [this](Notification notification){ showNotificationRequest(notification); });
+    observe(designer_->notification, [this](Notification notification){ showNotificationRequest(notification); });
 
     observe(view_core_.stepping_enabled, [this](){ ui->actionStep->setEnabled(true); });
     observe(view_core_.begin_step, [this](){  });

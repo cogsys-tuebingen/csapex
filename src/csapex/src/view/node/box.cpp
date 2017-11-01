@@ -34,7 +34,7 @@ NodeBox::NodeBox(Settings& settings, NodeFacadePtr node_facade, QIcon icon, Grap
       info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_frequency(nullptr), info_error(nullptr), initialized_(false),
       frequency_timer_(nullptr)
 {
-    QObject::connect(this, SIGNAL(updateVisualsRequest()), this, SLOT(updateVisuals()));
+    QObject::connect(this, &NodeBox::updateVisualsRequest, this, &NodeBox::updateVisuals);
 
     setVisible(false);
 }
@@ -136,18 +136,18 @@ void NodeBox::setupUi()
 
 
     NodeState* state = node_facade_->getNodeState().get();
-    observe(state->flipped_changed, this, &NodeBox::triggerFlipSides);
-    observe(state->minimized_changed, this, &NodeBox::triggerMinimized);
-    observe(state->active_changed, [this, state](){
+    observer_.observeQueued(state->flipped_changed, this, &NodeBox::triggerFlipSides);
+    observer_.observeQueued(state->minimized_changed, this, &NodeBox::triggerMinimized);
+    observer_.observeQueued(state->active_changed, [this, state](){
         setProperty("active", state->isActive());
         updateVisualsRequest();
     });
     setProperty("active", state->isActive());
 
-    observe(state->color_changed, this, &NodeBox::changeColor);
-    observe(state->pos_changed, this, &NodeBox::updatePosition);
+    observer_.observeQueued(state->color_changed, this, &NodeBox::changeColor);
+    observer_.observeQueued(state->pos_changed, this, &NodeBox::updatePosition);
 
-    observe(settings_.setting_changed, [this](const std::string& name) {
+    observer_.observeQueued(settings_.setting_changed, [this](const std::string& name) {
         if(name == "debug") {
             changeColor();
         }
@@ -203,15 +203,15 @@ void NodeBox::construct()
     QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 
 
-    observe(node_facade_->node_state_changed, [this](NodeStatePtr) {
+    observer_.observeQueued(node_facade_->node_state_changed, [this](NodeStatePtr) {
         nodeStateChanged();
     });
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
-    observe(node_facade_->destroyed, [this](){ destruct(); });
+    observer_.observeQueued(node_facade_->destroyed, [this](){ destruct(); });
 
     enabledChangeEvent(node_facade_->isProcessingEnabled());
-    observe(node_facade_->notification, [this](Notification){ updateVisualsRequest(); });
+    observer_.observeQueued(node_facade_->notification, [this](Notification){ updateVisualsRequest(); });
 
     QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 

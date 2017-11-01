@@ -47,6 +47,7 @@ protected:
         manageConnection(std::move(signal->connect(callback)));
     }
 
+    // MEMBER FUNCTIONS
     template <typename Receiver, typename Result, typename... Args>
     void observe(slim_signal::Signal<Result(Args...)>& signal,
                  Receiver* instance,
@@ -65,6 +66,8 @@ protected:
                                                        instance, function))));
     }
 
+
+    // RELAYING
     template <typename Signature>
     void observe(slim_signal::Signal<Signature>& signal, slim_signal::Signal<Signature>& relay)
     {

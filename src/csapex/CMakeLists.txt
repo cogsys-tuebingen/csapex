@@ -687,6 +687,7 @@ add_library(csapex_qt SHARED
     src/view/utility/context_menu_handler.cpp
     src/view/utility/cpu_affinity_delegate.cpp
     src/view/utility/html_delegate.cpp
+    src/view/utility/qobserver.cpp
     src/view/utility/qsignal_bridges.cpp
     src/view/utility/qsignal_relay.cpp
     src/view/utility/qt_helper.cpp

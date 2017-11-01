@@ -13,7 +13,7 @@
 #include <csapex/model/connector_type.h>
 #include <csapex/model/connector_description.h>
 #include <csapex/view/csapex_qt_export.h>
-#include <csapex/model/observer.h>
+#include <csapex/view/utility/qobserver.h>
 
 /// SYSTEM
 #include <memory>
@@ -153,7 +153,6 @@ Q_SIGNALS:
     void createPortRequest(ConnectorDescription request);
     void createPortAndConnectRequest(ConnectorDescription request, ConnectorPtr);
     void createPortAndMoveRequest(ConnectorDescription request,  ConnectorPtr);
-
 protected:
     void setStyleForId(QLabel* label, int id);
     void resizeEvent(QResizeEvent * e);
@@ -167,6 +166,8 @@ protected:
 
 protected:
     GraphView* parent_;
+
+    QObserver observer_;
 
     Ui::Box* ui;
     QSizeGrip* grip_;
