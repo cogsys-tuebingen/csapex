@@ -51,6 +51,7 @@ public:
 
     ProfilerPtr getProfiler() override;
 
+    NodeStatePtr getNodeState() const override;
     NodeStatePtr getNodeStateCopy() const override;
 
     /**
@@ -104,6 +105,8 @@ private:
 
 
     long guard_;
+
+    NodeStatePtr state_proxy_;
 
     mutable std::vector<param::ParameterPtr> parameters_;
     mutable std::map<std::string, param::ParameterPtr> parameter_cache_;

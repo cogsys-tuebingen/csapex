@@ -200,9 +200,9 @@ void Server::handlePacket(const SessionPtr& session, const StreamableConstPtr& p
 {
     if(CommandConstPtr cmd = std::dynamic_pointer_cast<Command const>(packet)) {
         if(!cmd) {
-            session->write("unknown command received");
+            StreamableConstPtr response = std::make_shared<Feedback>("unknown command received: ");
+            session->write(response);
         } else {
-            session->write(cmd->getDescription());
             core_->getCommandDispatcher()->execute(cmd->clone<Command>());
         }
 

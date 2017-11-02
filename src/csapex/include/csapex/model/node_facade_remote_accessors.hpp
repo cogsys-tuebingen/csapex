@@ -24,10 +24,6 @@ HANDLE_DYNAMIC_ACCESSOR (GetInternalEvents,    internal_events_changed, std::vec
 HANDLE_DYNAMIC_ACCESSOR (GetInternalSlots,     internal_slots_changed, std::vector<ConnectorDescription>, getInternalSlots)
 HANDLE_ACCESSOR (IsProfiling,                  bool, isProfiling)
 
-
-HANDLE_DYNAMIC_ACCESSOR (GetNodeState,         node_state_changed, NodeStatePtr, getNodeState)
-
-
 HANDLE_STATIC_ACCESSOR (HasVariadicInputs,     bool,        hasVariadicInputs)
 HANDLE_STATIC_ACCESSOR (HasVariadicOutputs,    bool,        hasVariadicOutputs)
 HANDLE_STATIC_ACCESSOR (HasVariadicEvents,     bool,        hasVariadicEvents)

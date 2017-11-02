@@ -142,7 +142,7 @@ public:
     void handlePacket(StreamableConstPtr packet)
     {
         if(packet) {
-            //                std::cout << "type=" << (int) serial->getPacketType() << std::endl;
+            std::cout << "packet type: " << (int) packet->getPacketType() << std::endl;
 
             switch(packet->getPacketType()) {
             case BroadcastMessage::PACKET_TYPE_ID:

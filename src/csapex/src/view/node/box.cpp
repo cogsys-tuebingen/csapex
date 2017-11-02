@@ -138,6 +138,7 @@ void NodeBox::setupUi()
     NodeState* state = node_facade_->getNodeState().get();
     observer_.observeQueued(state->flipped_changed, this, &NodeBox::triggerFlipSides);
     observer_.observeQueued(state->minimized_changed, this, &NodeBox::triggerMinimized);
+    observer_.observeQueued(state->enabled_changed, this, &NodeBox::triggerEnabledChanged);
     observer_.observeQueued(state->active_changed, [this, state](){
         setProperty("active", state->isActive());
         updateVisualsRequest();
@@ -203,7 +204,7 @@ void NodeBox::construct()
     QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 
 
-    observer_.observeQueued(node_facade_->node_state_changed, [this](NodeStatePtr) {
+    observer_.observeQueued(node_facade_->node_state_changed, [this](NodeStatePtr state) {
         nodeStateChanged();
     });
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
@@ -709,6 +710,18 @@ void NodeBox::triggerMinimized()
     Q_EMIT minimized(minimize);
 }
 
+void NodeBox::triggerEnabledChanged()
+{
+    NodeStatePtr state = node_facade_->getNodeState();
+
+    bool state_enabled = state->isEnabled();
+    bool box_enabled = !property("disabled").toBool();
+    if(state_enabled != box_enabled) {
+        ui->label->setEnabled(state_enabled);
+        enabledChange(state_enabled);
+    }
+}
+
 void NodeBox::updateStylesheetColor()
 {
     NodeStatePtr state = node_facade_->getNodeState();
@@ -880,15 +893,9 @@ bool NodeBox::isFlipped() const
 
 void NodeBox::nodeStateChangedEvent()
 {
+    triggerEnabledChanged();
+
     NodeStatePtr state = node_facade_->getNodeState();
-
-    bool state_enabled = state->isEnabled();
-    bool box_enabled = !property("disabled").toBool();
-    if(state_enabled != box_enabled) {
-        ui->label->setEnabled(state_enabled);
-        enabledChange(state_enabled);
-    }
-
     setLabel(state->getLabel());
     ui->label->setToolTip(QString::fromStdString(node_facade_->getUUID().getFullName()));
 

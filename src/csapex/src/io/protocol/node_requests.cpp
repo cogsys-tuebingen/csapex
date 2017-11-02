@@ -67,6 +67,11 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
         auto result = nf->getParameters();
         return std::make_shared<NodeResponse>(request_type_, uuid_, result, getRequestID());
     }
+    case NodeRequestType::GetNodeState:
+    {
+        auto result = nf->getNodeState();
+        return std::make_shared<NodeResponse>(request_type_, uuid_, result, getRequestID());
+    }
 
     case NodeRequestType::SetProfiling:
         nf->setProfiling(getArgument<bool>(0));

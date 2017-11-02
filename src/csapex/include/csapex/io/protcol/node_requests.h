@@ -19,6 +19,7 @@ public:
         AddClient,
         RemoveClient,
 
+        GetNodeState,
         GetParameters,
 
         SetProfiling,

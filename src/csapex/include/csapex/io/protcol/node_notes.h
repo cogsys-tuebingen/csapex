@@ -32,6 +32,8 @@ enum class NodeNoteType
     ParameterChangedTriggered,
     ParameterRemovedTriggered,
 
+    NodeStateChanged,
+
     ProfilingStartTriggered,
     ProfilingStopTriggered,
 

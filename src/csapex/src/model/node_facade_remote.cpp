@@ -49,6 +49,8 @@ NodeFacadeRemote::NodeFacadeRemote(const SessionPtr &session, AUUID uuid)
 
     profiler_proxy_ = std::make_shared<ProfilerRemote>(node_channel_);
 
+    state_proxy_ = node_channel_->request<NodeStatePtr, NodeRequests>(NodeRequests::NodeRequestType::GetNodeState);
+
     observe(node_channel_->note_received, [this](const io::NoteConstPtr& note){
         if(const std::shared_ptr<NodeNote const>& cn = std::dynamic_pointer_cast<NodeNote const>(note)) {
             switch(cn->getNoteType()) {
@@ -75,6 +77,13 @@ NodeFacadeRemote::NodeFacadeRemote(const SessionPtr &session, AUUID uuid)
             /**
              * end: connect signals
              **/
+            case NodeNoteType::NodeStateChanged:
+            {
+                NodeStatePtr state = cn->getPayload<NodeStatePtr>(0);
+                apex_assert_hard(state);
+                *state_proxy_ = *state;
+            }
+                break;
 
             case NodeNoteType::ParameterAddedTriggered:
             {
@@ -85,7 +94,8 @@ NodeFacadeRemote::NodeFacadeRemote(const SessionPtr &session, AUUID uuid)
                 break;
             case NodeNoteType::ParameterChangedTriggered:
             {
-                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0);
+                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0)->clone<param::Parameter>();
+                apex_assert_hard(p);
                 auto pos = parameter_cache_.find(p->name());
                 if(pos == parameter_cache_.end()) {
                     createParameterProxy(p);
@@ -340,9 +350,14 @@ void NodeFacadeRemote::setProfiling(bool profiling)
     node_channel_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::SetProfiling, profiling);
 }
 
+NodeStatePtr NodeFacadeRemote::getNodeState() const
+{
+    return state_proxy_;
+}
+
 NodeStatePtr NodeFacadeRemote::getNodeStateCopy() const
 {
-    return getNodeState()->clone<NodeState>();
+    return state_proxy_->clone<NodeState>();
 }
 
 ProfilerPtr NodeFacadeRemote::getProfiler()

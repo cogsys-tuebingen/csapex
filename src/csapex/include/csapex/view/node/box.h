@@ -109,6 +109,7 @@ public:
 public Q_SLOTS:
     void getInformation();
     void triggerMinimized();
+    void triggerEnabledChanged();
     void changeColor();
     void refreshStylesheet();
     void refreshTopLevelStylesheet();

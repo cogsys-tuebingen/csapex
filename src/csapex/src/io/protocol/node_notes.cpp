@@ -9,6 +9,8 @@ CSAPEX_REGISTER_NOTE_SERIALIZER(NodeNote)
 
 using namespace csapex;
 
+//why are nodenotes not getting through at all?????!?!?!?!?
+//are any notes getting through?????
 NodeNote::NodeNote()
 {
 }

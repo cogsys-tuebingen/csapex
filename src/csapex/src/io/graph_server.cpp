@@ -36,6 +36,10 @@ void GraphServer::startObserving(const GraphFacadeLocalPtr &graph_facade)
 {
     io::ChannelPtr channel = session_->openChannel(graph_facade->getAbsoluteUUID());
 
+    for(const UUID& uuid : graph_facade->enumerateAllNodes()) {
+        const auto& node = graph_facade->findNodeFacade(uuid);
+        node_server_->startObserving(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
+    }
     observe(graph_facade->node_facade_added, [this, channel](const NodeFacadePtr& node) {
         node_server_->startObserving(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
         channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildNodeFacadeAdded, node->getAUUID());

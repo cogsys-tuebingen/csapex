@@ -38,7 +38,6 @@ Session::Session(const std::string& name)
       live_(false),
       name_(name)
 {
-
 }
 
 Session::~Session()
@@ -252,13 +251,11 @@ void Session::read_async()
                 uint32_t message_length;
                 *message_data >> message_length;
 
-                if(message_length <= SerializationBuffer::HEADER_LENGTH) {
-                    std::cerr << "got illegal message of length " << (int) message_length << std::endl;
-
-                } else {
+                if(message_length > SerializationBuffer::HEADER_LENGTH) {
                     message_data->resize(message_length, ' ');
                     reply_length = boost::asio::read(*socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
                     apex_assert_equal_hard((int) reply_length, ((int) (message_length - SerializationBuffer::HEADER_LENGTH)));
+
 
                     StreamablePtr serial = PacketSerializer::deserializePacket(*message_data);
 
@@ -298,12 +295,17 @@ void Session::read_async()
                             packets_received_.push_back(serial);
                             packets_available_.notify_all();
                         }
+                    } else {
+                        std::cerr << "could not deserialize message of length " << (int) message_length << std::endl;
                     }
+                } else {
+                    std::cerr << "got illegal message of length " << (int) message_length << std::endl;
                 }
-
             } else {
                 std::cerr << "got illegal header of length " << (int) reply_length << std::endl;
             }
+        } else {
+            std::cerr << "got an illegal reply of length " << (int) reply_length << std::endl;
         }
         read_async();
     });
@@ -315,11 +317,13 @@ void Session::write_packet(SerializationBuffer &buffer)
         buffer.finalize();
 
         apex_assert_hard(socket_->is_open());
+        //std::cerr << (long) this << " is sending:\n" << buffer.toString() << std::endl;
 
-//                std::cerr << "sending:\n" << buffer.toString() << std::endl;
+        std::size_t written_bytes = boost::asio::write(*socket_, boost::asio::buffer(buffer, buffer.size()));
 
-        boost::asio::async_write(*socket_, boost::asio::buffer(buffer, buffer.size()),
-                                 [](boost::system::error_code /*ec*/, std::size_t /*length*/){});
+        apex_assert_eq_hard(buffer.size(), written_bytes);
+
+        //std::cerr << (long) this << " has sent " << written_bytes << " bytes" << std::endl;
 
     } catch(const std::exception& e) {
         std::cerr << "the session has thrown an exception: " << e.what() << std::endl;
