@@ -224,6 +224,13 @@ UUID UUID::reshape(std::size_t _depth) const
                      representation_.begin() + static_cast<long>(_depth)
                      ));
 }
+UUID UUID::reshapeSoft(std::size_t max_depth) const
+{
+    return UUID (parent_, std::vector<std::string>(
+                     representation_.begin(),
+                     representation_.begin() + static_cast<long>(std::min(depth(), max_depth))
+                     ));
+}
 
 UUID UUID::id() const
 {

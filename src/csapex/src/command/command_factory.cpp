@@ -71,8 +71,8 @@ CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>
         NodeFacadePtr nf = root_->findNodeFacade(uuid);
         for(const ConnectorDescription& connectable : nf->getExternalConnectors()) {
             for(const ConnectorDescription::Target& target : connectable.targets) {
-                UUID out = connectable.isOutput() ? connectable.id : target.auuid.reshape(2);
-                UUID in = connectable.isOutput() ? target.auuid.reshape(2) : connectable.id;
+                UUID out = connectable.isOutput() ? connectable.id : target.auuid.reshapeSoft(2);
+                UUID in = connectable.isOutput() ? target.auuid.reshapeSoft(2) : connectable.id;
                 connections.insert(std::make_pair(out, in));
             }
         }

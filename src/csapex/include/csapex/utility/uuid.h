@@ -69,6 +69,7 @@ public:
     UUID rootUUID() const;
 
     UUID reshape(std::size_t depth) const;
+    UUID reshapeSoft(std::size_t max_depth) const;
 
     bool contains(const std::string& sub) const;
 
