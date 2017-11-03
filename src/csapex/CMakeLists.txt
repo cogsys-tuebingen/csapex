@@ -805,7 +805,10 @@ add_custom_target(cfg ALL DEPENDS cfg/style.css)
 add_custom_command(TARGET cfg POST_BUILD
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
         ${CATKIN_DEVEL_PREFIX}
-        ${PROJECT_NAME}/csapex_main
+        ${PROJECT_NAME}
+        csapex_main
+        csapex_server
+        csapex_client
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 

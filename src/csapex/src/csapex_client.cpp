@@ -88,6 +88,7 @@ int Main::runWithGui()
     CsApexViewCore& view_core = *main;
 
     CsApexWindow w(view_core);
+    w.setWindowIcon(QIcon(":/apex_logo_client.png"));
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
     app->connect(&w, &CsApexWindow::closed, app.get(), &QCoreApplication::quit);

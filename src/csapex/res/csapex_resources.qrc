@@ -74,5 +74,6 @@
         <file>activity_add.png</file>
         <file>activity_remove.png</file>
         <file>thread_group_delete.png</file>
+        <file>apex_logo_client.png</file>
     </qresource>
 </RCC>

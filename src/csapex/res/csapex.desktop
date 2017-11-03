@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=csapex
+Name=${name} 
 GenericName=CS::APEX
 MimeType=application/x-csapex
 Comment=Algorithm Prototyper and EXperimentor
