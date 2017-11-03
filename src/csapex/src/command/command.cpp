@@ -129,7 +129,7 @@ GraphFacadeLocal* Command::getGraphFacade()
         apex_assert_hard(gf);
 
     } else {
-        gf = getRoot()->getSubGraph(graph_uuid);
+        gf = getRoot()->getSubGraph(graph_uuid).get();
         apex_assert_hard(gf);
     }
 
@@ -156,7 +156,7 @@ NodeFactoryLocal* Command::getNodeFactory()
 
 GraphFacade* Command::getSubGraph(const UUID& graph_id)
 {
-    return getRoot()->getSubGraph(graph_id);
+    return getRoot()->getSubGraph(graph_id).get();
 }
 
 ThreadPool* Command::getRootThreadPool()

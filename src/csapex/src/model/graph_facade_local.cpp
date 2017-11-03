@@ -79,7 +79,7 @@ GraphFacade *GraphFacadeLocal::getParent() const
     return parent_;
 }
 
-GraphFacade* GraphFacadeLocal::getSubGraph(const UUID &uuid)
+GraphFacadePtr GraphFacadeLocal::getSubGraph(const UUID &uuid)
 {
     if(uuid.empty()) {
         throw std::logic_error("cannot get subgraph for empty UUID");
@@ -90,7 +90,7 @@ GraphFacade* GraphFacadeLocal::getSubGraph(const UUID &uuid)
         return facade->getSubGraph(uuid.nestedUUID());
     } else {
         GraphFacadePtr facade = children_[uuid];
-        return facade.get();
+        return facade;
     }
 }
 

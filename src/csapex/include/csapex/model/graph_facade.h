@@ -30,7 +30,7 @@ protected:
 public:
     virtual ~GraphFacade();
 
-    virtual GraphFacade* getSubGraph(const UUID& uuid) = 0;
+    virtual GraphFacadePtr getSubGraph(const UUID& uuid) = 0;
     virtual GraphFacade* getParent() const = 0;    
 
     virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const = 0;

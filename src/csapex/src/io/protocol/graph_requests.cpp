@@ -39,8 +39,8 @@ GraphRequests::GraphRequest::GraphRequest(uint8_t request_id)
 
 ResponsePtr GraphRequests::GraphRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
-    GraphFacade* gf = uuid_.empty() ? core.getRoot().get() : core.getRoot()->getSubGraph(uuid_);
-    GraphFacadeLocal* gf_local = dynamic_cast<GraphFacadeLocal*>(gf);
+    GraphFacadePtr gf = uuid_.empty() ? core.getRoot() : core.getRoot()->getSubGraph(uuid_);
+    GraphFacadeLocalPtr gf_local = std::dynamic_pointer_cast<GraphFacadeLocal>(gf);
     apex_assert_hard(gf_local);
 
     GraphLocalPtr graph = gf_local->getLocalGraph();
@@ -51,12 +51,10 @@ ResponsePtr GraphRequests::GraphRequest::execute(const SessionPtr &session, CsAp
     {
         return std::make_shared<GraphResponse>(request_type_, uuid_, graph->getAllNodeUUIDs(), getRequestID());
     }
-        break;
     case GraphRequestType::GetAllConnections:
     {
         return std::make_shared<GraphResponse>(request_type_, uuid_, graph->enumerateAllConnections(), getRequestID());
     }
-        break;
         /**
          * begin: generate cases
          **/

@@ -177,7 +177,7 @@ void IntervalParameterAdapter::genericSetup()
             return;
         }
         auto value = Extractor<T, Slider>::makePair(slider);
-        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(AUUID(interval_p_->getUUID()), value);
+        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(interval_p_->getUUID().getAbsoluteUUID(), value);
         executeCommand(update_parameter);
     };
 

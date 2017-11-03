@@ -120,8 +120,8 @@ void SearchDialog::addNodes(GraphFacade *graph, QStandardItemModel *model)
         std::string label = nf->getLabel();
 
         if(nf->isGraph()) {
-            GraphFacade* subgraph = graph->getSubGraph(nf->getUUID());
-            addNodes(subgraph, model);
+            GraphFacadePtr subgraph = graph->getSubGraph(nf->getUUID());
+            addNodes(subgraph.get(), model);
         }
 
         NodeConstructorPtr constr = node_factory_.getConstructor(type);

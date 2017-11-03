@@ -196,7 +196,7 @@ GraphFacade* CommandFactory::getGraphFacade() const
         return root_;
 
     } else {
-        return root_->getSubGraph(graph_uuid);
+        return root_->getSubGraph(graph_uuid).get();
     }
 }
 
@@ -284,13 +284,13 @@ void foreachNode(GraphFacade* graph_facade, const UUID &node_uuid, Lambda fn)
 
     // recursive call into child graphs
     if(nf->isGraph()) {
-        GraphFacade* subgraph = graph_facade->getSubGraph(nf->getUUID());
+        GraphFacadePtr subgraph = graph_facade->getSubGraph(nf->getUUID());
         if(subgraph) {
-            GraphFacade* child_facade = graph_facade->getSubGraph(node_uuid);
+            GraphFacadePtr child_facade = graph_facade->getSubGraph(node_uuid);
             apex_assert_hard(child_facade);
 
             for(const UUID& child : graph_facade->enumerateAllNodes()) {
-                foreachNode(child_facade, child, fn);
+                foreachNode(child_facade.get(), child, fn);
             }
         }
     }

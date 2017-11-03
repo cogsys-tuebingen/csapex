@@ -175,6 +175,6 @@ void AngleParameterAdapter::setupContextMenu(ParameterContextMenu *context_handl
 
 void AngleParameterAdapter::set(double angle)
 {
-    command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(AUUID(p_->getUUID()), angle);
+    command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), angle);
     executeCommand(update_parameter);
 }

@@ -49,7 +49,6 @@ GraphFacadeRemote::GraphFacadeRemote(const SessionPtr& session, NodeFacadeRemote
     if(parent_) {
         graph_->setParent(parent_->graph_, remote_facade->getAUUID());
     }
-    graph_->reload();
 
     observe(graph_->vertex_added, this, &GraphFacadeRemote::nodeAddedHandler);
     observe(graph_->vertex_removed, this, &GraphFacadeRemote::nodeRemovedHandler);
@@ -128,13 +127,7 @@ GraphFacadeRemote::GraphFacadeRemote(const SessionPtr& session, NodeFacadeRemote
 
     observe(graph_->state_changed, state_changed);
 
-    observe(graph_->vertex_added, [this](graph::VertexPtr vertex) {
-        node_facade_added(vertex->getNodeFacade());
-    });
-
-    observe(graph_->vertex_removed, [this](graph::VertexPtr vertex) {
-        node_facade_removed(vertex->getNodeFacade());
-    });
+    graph_->reload();
 }
 
 GraphFacadeRemote::~GraphFacadeRemote()
@@ -213,7 +206,7 @@ GraphFacade* GraphFacadeRemote::getParent() const
     return parent_;
 }
 
-GraphFacade* GraphFacadeRemote::getSubGraph(const UUID &uuid)
+GraphFacadePtr GraphFacadeRemote::getSubGraph(const UUID &uuid)
 {
     if(uuid.empty()) {
         throw std::logic_error("cannot get subgraph for empty UUID");
@@ -224,7 +217,7 @@ GraphFacade* GraphFacadeRemote::getSubGraph(const UUID &uuid)
         return facade->getSubGraph(uuid.nestedUUID());
     } else {
         GraphFacadePtr facade = children_[uuid];
-        return facade.get();
+        return facade;
     }
 }
 
@@ -300,6 +293,8 @@ void GraphFacadeRemote::nodeAddedHandler(graph::VertexPtr vertex)
     if(facade->isGraph()) {
         createSubgraphFacade(facade);
     }
+
+    node_facade_added(facade);
 }
 
 void GraphFacadeRemote::nodeRemovedHandler(graph::VertexPtr vertex)
@@ -308,6 +303,8 @@ void GraphFacadeRemote::nodeRemovedHandler(graph::VertexPtr vertex)
     if(facade->isGraph()) {
         destroySubgraphFacade(facade);
     }
+
+    node_facade_removed(facade);
 }
 
 

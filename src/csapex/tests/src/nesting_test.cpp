@@ -289,7 +289,7 @@ TEST_F(NestingTest, NestedUUIDs) {
     ASSERT_NE(nullptr, sub_graph_2_handle);
     main_graph_facade.addNode(sub_graph_2_handle);
 
-    GraphFacadeLocal* sub_graph_2_facade_ptr = dynamic_cast<GraphFacadeLocal*>(main_graph_facade.getSubGraph(sub_graph_2_uuid));
+    GraphFacadeLocalPtr sub_graph_2_facade_ptr = std::dynamic_pointer_cast<GraphFacadeLocal>(main_graph_facade.getSubGraph(sub_graph_2_uuid));
     ASSERT_NE(nullptr, sub_graph_2_facade_ptr);
     GraphFacadeLocal& sub_graph_2_facade = *sub_graph_2_facade_ptr;
 
@@ -307,7 +307,7 @@ TEST_F(NestingTest, NestedUUIDs) {
     ASSERT_NE(nullptr, sub_graph_3_handle);
     sub_graph_2_facade.addNode(sub_graph_3_handle);
 
-    GraphFacadeLocal* sub_graph_3_facade_ptr = dynamic_cast<GraphFacadeLocal*>(sub_graph_2_facade.getSubGraph(sub_graph_3_uuid));
+    GraphFacadeLocalPtr sub_graph_3_facade_ptr = std::dynamic_pointer_cast<GraphFacadeLocal>(sub_graph_2_facade.getSubGraph(sub_graph_3_uuid));
     ASSERT_NE(nullptr, sub_graph_3_facade_ptr);
     GraphFacadeLocal& sub_graph_3_facade = *sub_graph_3_facade_ptr;
 

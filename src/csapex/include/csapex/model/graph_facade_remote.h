@@ -22,7 +22,7 @@ public:
 
     virtual NodeFacadePtr getNodeFacade() const override;
 
-    virtual GraphFacade* getSubGraph(const UUID& uuid) override;
+    virtual GraphFacadePtr getSubGraph(const UUID& uuid) override;
     virtual GraphFacade* getParent() const override;
 
     virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const override;

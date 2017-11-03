@@ -158,6 +158,14 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
 
     graphs_[uuid] = graph_facade;
 
+    for(const UUID& child : graph_facade->enumerateAllNodes()) {
+        NodeFacadePtr nf = graph_facade->findNodeFacade(child);
+        if(nf->isGraph()) {
+            GraphFacadePtr subgraph = graph_facade->getSubGraph(child);
+            addGraph(subgraph);
+        }
+    }
+
     if(graph_facade == view_core_.getRoot()) {
         showGraph(graph_facade);
     }

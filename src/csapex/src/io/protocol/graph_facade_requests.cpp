@@ -39,8 +39,8 @@ GraphFacadeRequests::GraphFacadeRequest::GraphFacadeRequest(uint8_t request_id)
 
 ResponsePtr GraphFacadeRequests::GraphFacadeRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
-    GraphFacade* gf = uuid_.empty() ? core.getRoot().get() : core.getRoot()->getSubGraph(uuid_);
-    GraphFacadeLocal* gf_local = dynamic_cast<GraphFacadeLocal*>(gf);
+    GraphFacadePtr gf = uuid_.empty() ? core.getRoot() : core.getRoot()->getSubGraph(uuid_);
+    GraphFacadeLocalPtr gf_local = std::dynamic_pointer_cast<GraphFacadeLocal>(gf);
     apex_assert_hard(gf_local);
 
     switch(request_type_)

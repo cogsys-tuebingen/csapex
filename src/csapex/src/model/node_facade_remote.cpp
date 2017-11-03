@@ -87,14 +87,16 @@ NodeFacadeRemote::NodeFacadeRemote(const SessionPtr &session, AUUID uuid)
 
             case NodeNoteType::ParameterAddedTriggered:
             {
-                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0)->clone<param::Parameter>();
-                createParameterProxy(p);
-                parameter_added(p);
+                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0);
+                apex_assert_hard(p);
+                param::ParameterPtr proxy = p->clone<param::Parameter>();
+                createParameterProxy(proxy);
+                parameter_added(proxy);
             }
                 break;
             case NodeNoteType::ParameterChangedTriggered:
             {
-                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0)->clone<param::Parameter>();
+                param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0);
                 apex_assert_hard(p);
                 auto pos = parameter_cache_.find(p->name());
                 if(pos == parameter_cache_.end()) {
