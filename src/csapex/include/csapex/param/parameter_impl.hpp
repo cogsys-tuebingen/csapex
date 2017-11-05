@@ -27,7 +27,7 @@ protected:
 
     }
 
-    std::shared_ptr<Clonable> makeEmptyClone() const
+    std::shared_ptr<Clonable> makeEmptyClone() const override
     {
         return std::make_shared<I>();
     }

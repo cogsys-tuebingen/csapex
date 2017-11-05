@@ -343,12 +343,12 @@ private:
     {
         AnythingImplementation();
 
-        virtual EntryInterface::Ptr cloneEntry() const;
+        virtual EntryInterface::Ptr cloneEntry() const override;
         virtual TokenData::Ptr toType() const override;
         virtual bool canConnectTo(const TokenData* other_side) const override;
         virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
-        virtual void encode(YAML::Node& node) const;
-        virtual void decode(const YAML::Node& node);
+        virtual void encode(YAML::Node& node) const override;
+        virtual void decode(const YAML::Node& node) override;
     };
 
     struct CSAPEX_EXPORT InstancedImplementation : public EntryInterface
@@ -357,12 +357,12 @@ private:
 
         InstancedImplementation(TokenData::ConstPtr type);
 
-        virtual EntryInterface::Ptr cloneEntry() const;
+        virtual EntryInterface::Ptr cloneEntry() const override;
         virtual TokenData::Ptr toType() const override;
         virtual bool canConnectTo(const TokenData* other_side) const override;
         virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
-        virtual void encode(YAML::Node& node) const;
-        virtual void decode(const YAML::Node& node);
+        virtual void encode(YAML::Node& node) const override;
+        virtual void decode(const YAML::Node& node) override;
 
         TokenData::Ptr nestedType() const override;
 

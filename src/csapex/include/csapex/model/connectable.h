@@ -25,12 +25,14 @@ class CSAPEX_EXPORT Connectable : public Connector, public std::enable_shared_fr
 public:
     virtual ~Connectable();
 
-    int getCount() const;
+    int getCount() const override;
 
-    virtual bool isOutput() const {
+    virtual bool isOutput() const override
+    {
         return false;
     }
-    virtual bool isInput() const {
+    virtual bool isInput() const  override
+    {
         return false;
     }    
     virtual bool isOptional() const {

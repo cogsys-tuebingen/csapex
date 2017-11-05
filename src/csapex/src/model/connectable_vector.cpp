@@ -19,7 +19,10 @@ std::vector<ConnectorDescription> ConnectableVector<T>::getDescription() const
     return res;
 }
 
+namespace csapex
+{
 template class ConnectableVector<Input>;
 template class ConnectableVector<Output>;
 template class ConnectableVector<Event>;
 template class ConnectableVector<Slot>;
+}

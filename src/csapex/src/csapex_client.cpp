@@ -59,8 +59,8 @@ bool CsApexGuiApp::notify(QObject* receiver, QEvent* event) {
 }
 
 
-Main::Main(std::unique_ptr<QCoreApplication> &&a, Settings& settings, ExceptionHandler& handler)
-    : app(std::move(a)), settings(settings), handler(handler), splash(nullptr)
+Main::Main(QCoreApplication* a, Settings& settings, ExceptionHandler& handler)
+    : app(a), settings(settings), handler(handler), splash(nullptr)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -82,35 +82,37 @@ int Main::runImpl()
 int Main::runWithGui()
 {
     app->processEvents();
+//    SessionClient ("localhost", 12345);
+    CsApexViewCoreRemote main(std::make_shared<SessionClient>("localhost", 12345));
+    return 0;
 
-    std::unique_ptr<CsApexViewCore> main(new CsApexViewCoreRemote (std::make_shared<SessionClient>("localhost", 12345)));
+//    CsApexViewCore& view_core = main;
 
-    CsApexViewCore& view_core = *main;
 
-    CsApexWindow w(view_core);
-    w.setWindowIcon(QIcon(":/apex_logo_client.png"));
-    QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
+//    CsApexWindow w(view_core);
+//    w.setWindowIcon(QIcon(":/apex_logo_client.png"));
+//    QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
-    app->connect(&w, &CsApexWindow::closed, app.get(), &QCoreApplication::quit);
-    app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
+//    app->connect(&w, &CsApexWindow::closed, app, &QCoreApplication::quit);
+//    app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
 
-    csapex::error_handling::stop_request().connect([this](){
-        static int request = 0;
-        if(request == 0) {
-            raise(SIGTERM);
-        }
+//    csapex::error_handling::stop_request().connect([this](){
+//        static int request = 0;
+//        if(request == 0) {
+//            raise(SIGTERM);
+//        }
 
-        ++request;
-    });
+//        ++request;
+//    });
 
-    w.start();
+//    w.start();
 
-    w.show();
-    splash->finish(&w);
+//    w.show();
+//    splash->finish(&w);
 
-    int res = runImpl();
+//    int res = runImpl();
 
-    return res;
+//    return res;
 }
 
 int Main::run()
@@ -151,7 +153,7 @@ int main(int argc, char** argv)
     std::shared_ptr<GuiExceptionHandler> h(new GuiExceptionHandler(false));
 
     handler = h;
-    std::unique_ptr<QCoreApplication> app(new CsApexGuiApp(effective_argc, argv, *handler));
+    QCoreApplication* app = new CsApexGuiApp(effective_argc, argv, *handler);
 
     h->moveToThread(app->thread());
 
@@ -196,7 +198,7 @@ int main(int argc, char** argv)
     }
 
     // start the app
-    Main m(std::move(app), settings, *handler);
+    Main m(app, settings, *handler);
     try {
         return m.run();
 

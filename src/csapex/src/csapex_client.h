@@ -51,7 +51,7 @@ struct Main : public QObject, public Observer
     Q_OBJECT
 
 public:
-    Main(std::unique_ptr<QCoreApplication> &&app, Settings &settings, ExceptionHandler &handler);
+    Main(QCoreApplication *app, Settings &settings, ExceptionHandler &handler);
     ~Main();
 
     int run();
@@ -64,7 +64,7 @@ private:
     int runImpl();
 
 private:
-    std::unique_ptr<QCoreApplication> app;
+    QCoreApplication* app;
     Settings& settings;
 
     ExceptionHandler& handler;

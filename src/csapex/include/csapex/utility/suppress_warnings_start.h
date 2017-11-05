@@ -2,6 +2,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wall"
 #pragma clang diagnostic ignored "-Wpedantic"
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 #elif defined(__GNUC__) || defined(__GNUG__)
 #pragma GCC diagnostic push

@@ -158,7 +158,7 @@ include_directories(include
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_definitions(--system-header-prefix=/usr/include)
+    #add_definitions(--system-header-prefix=/usr/include)
 endif()
 
 #
