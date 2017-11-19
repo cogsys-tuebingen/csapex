@@ -9,8 +9,8 @@
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
-#include <csapex/io/server.h>
 #include <csapex/model/graph_facade_local.h>
+#include <csapex/io/tcp_server.h>
 
 /// SYSTEM
 #include <iostream>
@@ -51,14 +51,16 @@ int CsApexServer::run()
         core->shutdown();
     });
 
-    Server server(core, false);
 
     GraphFacadePtr root = core->getRoot();
     csapex::error_handling::init();
 
     core->startup();
 
-    server.start();
+    core->setServerFactory([this]() {
+        return std::make_shared<TcpServer>(*core, false);
+    });
+    core->startServer();
 
     return 0;
 }

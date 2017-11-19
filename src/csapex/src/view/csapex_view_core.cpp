@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/core/csapex_core.h>
-#include <csapex/view/utility/message_renderer_manager.h>
+#include <csapex/manager/message_renderer_manager.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/model/graph_facade.h>

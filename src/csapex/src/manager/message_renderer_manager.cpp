@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/utility/message_renderer_manager.h>
+#include <csapex/manager/message_renderer_manager.h>
 
 /// COMPONENT
 #include <csapex/plugin/plugin_manager.hpp>

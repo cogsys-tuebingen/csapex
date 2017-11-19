@@ -25,7 +25,7 @@
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/view/gui_exception_handler.h>
 #include <csapex/view/node/node_adapter_factory.h>
-#include <csapex/view/utility/message_renderer_manager.h>
+#include <csapex/manager/message_renderer_manager.h>
 
 using namespace csapex;
 
@@ -38,13 +38,14 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const SessionPtr& session)
 {
     session_->start();
 
-    running = true;
     spinner = std::thread([&](){
         thread_active_ = true;
-        while(running) {
-            session_->run();
-        }
+
+        session_->run();
+
         thread_active_ = false;
+
+        server_shutdown();
     });
 
     core_channel_ = session_->openChannel(AUUID::NONE);
@@ -144,7 +145,6 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const SessionPtr& session)
 CsApexViewCoreRemote::~CsApexViewCoreRemote()
 {
     if(thread_active_) {
-        running = false;
         session_->shutdown();
     }
 
@@ -300,7 +300,6 @@ void CsApexViewCoreRemote::step()
 void CsApexViewCoreRemote::shutdown()
 {
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreShutdown);
-    running = false;
     session_->shutdown();
 }
 

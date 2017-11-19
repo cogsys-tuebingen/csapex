@@ -12,6 +12,7 @@
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/raw_message.h>
+#include <csapex/io/protcol/core_notes.h>
 #include <csapex/io/channel.h>
 #include <csapex/utility/thread.h>
 #include <csapex/utility/exceptions.h>
@@ -27,7 +28,8 @@ Session::Session(Socket socket, const std::string &name)
     : socket_(new Socket(std::move(socket))),
       next_request_id_(1),
       running_(false),
-      live_(false),
+      is_live_(false),
+      was_live_(false),
       name_(name)
 {
 }
@@ -35,7 +37,8 @@ Session::Session(Socket socket, const std::string &name)
 Session::Session(const std::string& name)
     : next_request_id_(1),
       running_(false),
-      live_(false),
+      is_live_(false),
+      was_live_(false),
       name_(name)
 {
 }
@@ -45,18 +48,20 @@ Session::~Session()
     {
         std::unique_lock<std::recursive_mutex> running_lock(running_mutex_);
         if(running_) {
-            stop();
+            stopForced();
         }
 
         apex_assert_hard(!packet_handler_thread_.joinable());
     }
 
-    boost::system::error_code ec;
-    socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
-    if (ec) {
-        throw std::runtime_error("cannot shutdown server connection");
-    } else if(socket_->is_open()) {
-        socket_->close();
+    if(socket_) {
+        boost::system::error_code ec;
+        socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+        if (ec) {
+            throw std::runtime_error("cannot shutdown server connection");
+        } else if(socket_->is_open()) {
+            socket_->close();
+        }
     }
 }
 
@@ -81,69 +86,87 @@ void Session::start()
 
     packet_handler_thread_ = std::thread([this](){
         csapex::thread::set_name(name_.c_str());
-        live_ = true;
+        is_live_ = true;
+        was_live_ = true;
 
-        while(running_) {
-            std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
-            while(running_ && (packets_received_.empty() && packets_to_send_.empty())) {
-                packets_available_.wait_for(packet_lock, std::chrono::milliseconds(100));
-            }
-
-            while(running_ && !packets_to_send_.empty()) {
-                StreamableConstPtr packet = packets_to_send_.front();
-                packets_to_send_.pop_front();
-                packet_lock.unlock();
-
-                SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
-                write_packet(buffer);
-
-                packet_lock.lock();
-            }
-
-            while(running_ && !packets_received_.empty()) {
-                StreamableConstPtr packet = packets_received_.front();
-                packets_received_.pop_front();
-                packet_lock.unlock();
-
-                try {
-
-                    switch(packet->getPacketType()) {
-                    case BroadcastMessage::PACKET_TYPE_ID:
-                        if(BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
-                            broadcast_received(broadcast);
-                        }
-                        break;
-                    case RawMessage::PACKET_TYPE_ID:
-                        if(RawMessageConstPtr raw_message = std::dynamic_pointer_cast<RawMessage const>(packet)) {
-                            auto& signal = raw_packet_received(raw_message->getUUID()); // move this to node server
-                            signal(raw_message);
-                        }
-                        break;
-                    case io::Note::PACKET_TYPE_ID:
-                        if(io::NoteConstPtr note = std::dynamic_pointer_cast<io::Note const>(packet)) {
-                            auto pos = channels_.find(note->getAUUID());
-                            if(pos != channels_.end()) {
-                                io::ChannelPtr channel = pos->second;
-                                channel->handleNote(note);
-                            }
-                        }
-                        break;
-                    default:
-                        packet_received(packet);
-                        break;
-                    }
-
-                } catch(...) {
-                    // silent death
-                }
-
-                packet_lock.lock();
-            }
+        try {
+            mainLoop();
         }
-        live_ = false;
+        catch(const std::exception& e) {
+            std::cerr << "there was an error in the session: " << e.what() << std::endl;
+        }
+        catch(const csapex::Failure& e) {
+            std::cerr << "there was a failure in the session: " << e.what() << std::endl;
+        }
+        catch(...) {
+            std::cerr << "there was an unknown error in the session" << std::endl;
+        }
+
+        is_live_ = false;
     });
 
     read_async();
+}
+
+void Session::mainLoop()
+{
+    while(running_) {
+        std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
+        while(running_ && (packets_received_.empty() && packets_to_send_.empty())) {
+            packets_available_.wait_for(packet_lock, std::chrono::milliseconds(100));
+        }
+
+        while(running_ && !packets_to_send_.empty()) {
+            StreamableConstPtr packet = packets_to_send_.front();
+            packets_to_send_.pop_front();
+            packet_lock.unlock();
+
+            SerializationBuffer buffer = PacketSerializer::serializePacket(packet);
+            write_packet(buffer);
+
+            packet_lock.lock();
+        }
+
+        while(running_ && !packets_received_.empty()) {
+            StreamableConstPtr packet = packets_received_.front();
+            packets_received_.pop_front();
+            packet_lock.unlock();
+
+            try {
+
+                switch(packet->getPacketType()) {
+                case BroadcastMessage::PACKET_TYPE_ID:
+                    if(BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
+                        broadcast_received(broadcast);
+                    }
+                    break;
+                case RawMessage::PACKET_TYPE_ID:
+                    if(RawMessageConstPtr raw_message = std::dynamic_pointer_cast<RawMessage const>(packet)) {
+                        auto& signal = raw_packet_received(raw_message->getUUID()); // move this to node server
+                        signal(raw_message);
+                    }
+                    break;
+                case io::Note::PACKET_TYPE_ID:
+                    if(io::NoteConstPtr note = std::dynamic_pointer_cast<io::Note const>(packet)) {
+                        auto pos = channels_.find(note->getAUUID());
+                        if(pos != channels_.end()) {
+                            io::ChannelPtr channel = pos->second;
+                            channel->handleNote(note);
+                        }
+                    }
+                    break;
+                default:
+                    packet_received(packet);
+                    break;
+                }
+
+            } catch(...) {
+                // silent death
+            }
+
+            packet_lock.lock();
+        }
+    }
 }
 
 void Session::stop()
@@ -167,16 +190,25 @@ void Session::stop()
 
     stopped();
 
-    if(live_) {
+    if(is_live_) {
         packet_handler_thread_.join();
     }
-    apex_assert_hard(!live_);
+    apex_assert_hard(!is_live_);
+}
+
+void Session::stopForced()
+{
+    if(packet_handler_thread_.get_id() != std::this_thread::get_id()) {
+        stop();
+    } else {
+        throw std::runtime_error("stopping in an active session");
+    }
 }
 
 
 ResponseConstPtr Session::sendRequest(RequestConstPtr request)
 {
-    if(live_) {
+    if(is_live_) {
         request->overwriteRequestID(next_request_id_++);
 
         std::promise<ResponseConstPtr> promise;
@@ -198,18 +230,31 @@ ResponseConstPtr Session::sendRequest(RequestConstPtr request)
         }
         apex_fail(std::string("The request ") + std::to_string(request->getRequestID()) + " failed to produce a response");
 
+
+    } else {
+        if(was_live_) {
+            throw NoConnectionException();
+        }
     }
+
     return nullptr;
 }
 
 void Session::sendNote(io::NoteConstPtr note)
 {
-    write(note);
+    try {
+        write(note);
+    } catch(const NoConnectionException& nce) {
+        // ignore notes sent
+        std::cerr << "cannot send note " <<
+                     note->getType() <<
+                     " via a closed session" << std::endl;
+    }
 }
 
 void Session::write(const StreamableConstPtr &packet)
 {
-    if(live_) {
+    if(is_live_) {
         {
             if(packet_handler_thread_.get_id() != std::this_thread::get_id()) {
                 std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
@@ -221,6 +266,11 @@ void Session::write(const StreamableConstPtr &packet)
         }
 
         packets_available_.notify_all();
+
+    } else {
+        if(was_live_) {
+            throw NoConnectionException();
+        }
     }
 }
 
@@ -327,10 +377,10 @@ void Session::write_packet(SerializationBuffer &buffer)
 
     } catch(const std::exception& e) {
         std::cerr << "the session has thrown an exception: " << e.what() << std::endl;
-        stop();
+        stopForced();
     } catch(...) {
         std::cerr << "the session has crashed with an unknown cause." << std::endl;
-        stop();
+        stopForced();
     }
 }
 

@@ -29,38 +29,39 @@ GraphServer::GraphServer(SessionPtr session)
 
 GraphServer::~GraphServer()
 {
+    stopObserving();
 }
 
 
-void GraphServer::startObserving(const GraphFacadeLocalPtr &graph_facade)
+void GraphServer::startObservingGraph(const GraphFacadeLocalPtr &graph_facade)
 {
     io::ChannelPtr channel = session_->openChannel(graph_facade->getAbsoluteUUID());
 
     for(const UUID& uuid : graph_facade->enumerateAllNodes()) {
         const auto& node = graph_facade->findNodeFacade(uuid);
-        node_server_->startObserving(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
+        node_server_->startObservingNode(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
 
         if(node->isGraph()) {
-            startObserving(graph_facade->getLocalSubGraph(uuid));
+            startObservingGraph(graph_facade->getLocalSubGraph(uuid));
         }
     }
 
     observe(graph_facade->node_facade_added, [this, channel](const NodeFacadePtr& node) {
-        node_server_->startObserving(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
+        node_server_->startObservingNode(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
         channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildNodeFacadeAdded, node->getAUUID());
 
     });
     observe(graph_facade->node_facade_removed, [this, channel](const NodeFacadePtr& node) {
-        node_server_->stopObserving(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
+        node_server_->stopObservingNode(std::dynamic_pointer_cast<NodeFacadeLocal>(node));
         channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildNodeFacadeRemoved, node->getAUUID());
     });
     observe(graph_facade->child_added, [this, channel](const GraphFacadePtr& graph) {
-        startObserving(std::dynamic_pointer_cast<GraphFacadeLocal>(graph));
+        startObservingGraph(std::dynamic_pointer_cast<GraphFacadeLocal>(graph));
         channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildAdded, graph->getAbsoluteUUID());
 
     });
     observe(graph_facade->child_removed, [this, channel](const GraphFacadePtr& graph) {
-        startObserving(std::dynamic_pointer_cast<GraphFacadeLocal>(graph));
+        startObservingGraph(std::dynamic_pointer_cast<GraphFacadeLocal>(graph));
         channel->sendNote<GraphFacadeNote>(GraphFacadeNoteType::ChildRemoved, graph->getAbsoluteUUID());
     });
 
@@ -134,7 +135,7 @@ void GraphServer::startObserving(const GraphFacadeLocalPtr &graph_facade)
 
 }
 
-void GraphServer::stopObserving(const GraphFacadeLocalPtr &graph)
+void GraphServer::stopObservingGraph(const GraphFacadeLocalPtr &graph)
 {
     std::cerr << "stop serving graph: " << graph->getAbsoluteUUID() << std::endl;
 }

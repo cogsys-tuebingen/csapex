@@ -406,16 +406,6 @@ Connection::Deleter Signal<Signature>::makeSignalDeleter(Signal<Signature>* pare
     };
 }
 
-template <typename Signature>
-void Signal<Signature>::onConnect()
-{
-}
-
-template <typename Signature>
-void Signal<Signature>::onDisconnect()
-{
-}
-
 
 
 

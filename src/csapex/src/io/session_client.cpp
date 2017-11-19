@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/io/session_client.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 using boost::asio::ip::tcp;
 

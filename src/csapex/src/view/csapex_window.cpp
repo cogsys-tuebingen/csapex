@@ -16,6 +16,7 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_facade.h>
+#include <csapex/core/csapex_core.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/token_data.h>
 #include <csapex/param/parameter_factory.h>
@@ -24,6 +25,7 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/thread_pool.h>
+#include <csapex/view/csapex_view_core_local.h>
 #include <csapex/view/designer/designer.h>
 #include <csapex/view/designer/designerio.h>
 #include <csapex/view/designer/graph_view.h>
@@ -34,7 +36,7 @@
 #include <csapex/view/utility/clipboard.h>
 #include <csapex/view/utility/cpu_affinity_delegate.h>
 #include <csapex/view/utility/html_delegate.h>
-#include <csapex/view/utility/message_renderer_manager.h>
+#include <csapex/manager/message_renderer_manager.h>
 #include <csapex/view/utility/node_list_generator.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/utility/snippet_list_generator.h>
@@ -68,6 +70,7 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
       ui(new Ui::CsApexWindow), designer_(new Designer(view_core)), minimap_(designer_->getMinimap()),
       activity_legend_(new ActivityLegend), activity_timeline_(new ActivityTimeline),
       init_(false), state_changed_(false),
+      disconnected_(false),
       style_sheet_watcher_(nullptr), plugin_locator_(view_core_.getPluginLocator())
 {
     qRegisterMetaType < ActivityType > ("ActivityType");
@@ -111,6 +114,15 @@ void CsApexWindow::construct()
     setupDesigner();
 
     ui->actionPause->setChecked(view_core_.isPaused());
+
+    if(view_core_.isRemote()) {
+        ui->actionServer_StartStop->setEnabled(false);
+    } else {
+        CsApexViewCoreLocal& local_view_core = dynamic_cast<CsApexViewCoreLocal&>(view_core_);
+        ui->actionServer_StartStop->setChecked(local_view_core.getCore()->isServerActive());
+    }
+    QObject::connect(ui->actionServer_StartStop, &QAction::triggered, this, &CsApexWindow::startStopServer);
+
     ui->menuBar->setVisible(true);
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
@@ -931,39 +943,26 @@ void CsApexWindow::addStateToSettings()
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    addStateToSettings();
+    if(!disconnected_) {
+        addStateToSettings();
 
-    if(isDirty()) {
-        int r = QMessageBox::warning(this, tr("cs::APEX"),
-                                     tr("Do you want to save the layout before closing?"),
-                                     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        if(r == QMessageBox::Save) {
-            save();
-            event->accept();
-        } else if(r == QMessageBox::Discard) {
-            event->accept();
-        } else {
-            event->ignore();
-            return;
-        }
-    }
-
-    try {
-        if(view_core_.isRemote()) {
+        if(isDirty()) {
             int r = QMessageBox::warning(this, tr("cs::APEX"),
-                                         tr("Do you want to stop the server?"),
-                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-            if(r == QMessageBox::Yes) {
-                view_core_.shutdown();
+                                         tr("Do you want to save the layout before closing?"),
+                                         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+            if(r == QMessageBox::Save) {
+                save();
+                event->accept();
+            } else if(r == QMessageBox::Discard) {
+                event->accept();
+            } else {
+                event->ignore();
+                return;
             }
-        } else {
-            view_core_.shutdown();
         }
-    } catch(const std::exception& e) {
-        std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
-    } catch(...) {
-        throw;
     }
+
+
 
     event->accept();
     closed();
@@ -1013,6 +1012,20 @@ void CsApexWindow::restoreWindowState()
 std::string CsApexWindow::getConfigFile()
 {
     return view_core_.getSettings().get<std::string>("config");
+}
+
+void CsApexWindow::startStopServer()
+{
+    apex_assert_hard(!view_core_.isRemote());
+
+    CsApexViewCoreLocal& local_view_core = dynamic_cast<CsApexViewCoreLocal&>(view_core_);
+    CsApexCore& core = *local_view_core.getCore();
+    if(core.isServerActive()) {
+        core.stopServer();
+
+    } else {
+        core.startServer();
+    }
 }
 
 void CsApexWindow::save()
@@ -1071,6 +1084,12 @@ void CsApexWindow::undo()
 void CsApexWindow::redo()
 {
     view_core_.getCommandDispatcher()->redo();
+}
+
+void CsApexWindow::disconnectEvent()
+{
+    disconnected_ = true;
+    close();
 }
 
 void CsApexWindow::makeScreenshot()

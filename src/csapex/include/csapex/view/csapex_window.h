@@ -62,6 +62,8 @@ private Q_SLOTS:
     void showHelp(NodeBox* box);
     void showHowToInstall();
 
+    void startStopServer();
+
     void updateSelectionActions();
     void updateClipboardActions();
 
@@ -80,6 +82,8 @@ public Q_SLOTS:
     void clear();
     void undo();
     void redo();
+
+    void disconnectEvent();
 
     void makeScreenshot();
 
@@ -147,6 +151,8 @@ private:
 
     bool init_;
     bool state_changed_;
+
+    bool disconnected_;
 
     QFileSystemWatcher* style_sheet_watcher_;
     PluginLocatorPtr plugin_locator_;

@@ -102,6 +102,7 @@ public:
 private:
     void connectNodeHandle();
     void connectNodeWorker();
+    void connectNodeRunner();
 
     void triggerExternalConnectorsChanged(const ConnectableConstPtr& connector);
     void triggerInternalConnectorsChanged(const ConnectableConstPtr& connector);

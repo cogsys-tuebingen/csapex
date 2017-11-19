@@ -16,6 +16,7 @@
 #include <csapex/view/csapex_view_core_remote.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/gui_exception_handler.h>
+#include <csapex/io/tcp_server.h>
 
 /// SYSTEM
 #include <iostream>
@@ -93,19 +94,31 @@ int Main::runWithGui()
 {
     app->processEvents();
 
-    std::unique_ptr<CsApexViewCore> main;
-    SessionPtr session;
-    if(settings.getTemporary("start-server", false)) {
-//        session = std::make_shared<SessionClient>("localhost", 12345);
-    }
-    main.reset(new CsApexViewCoreLocal (core));
+    std::unique_ptr<CsApexViewCore> main(new CsApexViewCoreLocal (core));
 
     CsApexViewCore& view_core = *main;
 
     CsApexWindow w(view_core);
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
-    app->connect(&w, &CsApexWindow::closed, app.get(), &QCoreApplication::quit);
+    app->connect(&w, &CsApexWindow::closed, [&]() {
+        try {
+            bool headless = settings.get<bool>("headless");
+            if(!headless) {
+                int r = QMessageBox::warning(&w, tr("cs::APEX"),
+                                             tr("Do you want to stop the server?"),
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                if(r == QMessageBox::Yes) {
+                    view_core.shutdown();
+                }
+            }
+        } catch(const std::exception& e) {
+            std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
+        } catch(...) {
+            throw;
+        }
+        app->quit();
+    });
     app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
     csapex::error_handling::stop_request().connect([this](){
@@ -118,11 +131,6 @@ int Main::runWithGui()
         }
 
         ++request;
-    });
-
-    core->shutdown_requested.connect([this](){
-        QCoreApplication::postEvent(app.get(), new QCloseEvent);
-        app->quit();
     });
 
     checkRecoveryFile(view_core, w);
@@ -145,6 +153,7 @@ int Main::runWithGui()
 int Main::runHeadless()
 {
     GraphFacadePtr root = core->getRoot();
+
     csapex::error_handling::stop_request().connect([this, root](){
         core->shutdown();
         app->quit();
@@ -174,12 +183,19 @@ int Main::run()
 
     core = std::make_shared<CsApexCore>(settings, handler);
 
-    try {
-        server = std::make_shared<Server>(core);
-        server->start();
-    } catch (const boost::system::system_error& ex) {
-        std::cerr << "Could not start command server: [" << ex.code() << "] " << ex.what() << std::endl;
+    core->setServerFactory([this](){
+        return std::make_shared<TcpServer>(*core, true);
+    });
+
+    if(settings.getTemporary("start-server", false)) {
+        core->startServer();
     }
+
+    core->shutdown_requested.connect([this](){
+        QCoreApplication::postEvent(app.get(), new QCloseEvent);
+        app->quit();
+    });
+
 
     if(headless) {
         return runHeadless();

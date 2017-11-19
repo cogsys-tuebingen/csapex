@@ -50,6 +50,7 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
     switch(request_type_)
     {
     case NodeRequestType::AddClient:
+    {
         nh->remote_data_connection.connect([session](StreamableConstPtr data){
             if(RawMessageConstPtr msg = std::dynamic_pointer_cast<RawMessage const>(data)) {
                 session->write(msg);
@@ -57,9 +58,18 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
                 // TODO: what to do here? we need a uuid
             }
         });
+        NodeHandle* nhp = nh.get();
+        session->stopped.connect([nhp](){
+            // TODO: disconnect only the appropriate client...
+            nhp->remote_data_connection.disconnectAll();
+        });
+    }
         break;
     case NodeRequestType::RemoveClient:
-        // TODO
+    {
+        // TODO: disconnect only the appropriate client...
+        nh->remote_data_connection.disconnectAll();
+    }
         break;
 
     case NodeRequestType::GetParameters:

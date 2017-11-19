@@ -11,6 +11,7 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/utility/utility_fwd.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/io/io_fwd.h>
 
 /// SYSTEM
 #include <thread>
@@ -45,6 +46,11 @@ public:
     void shutdown();
 
     void startMainLoop();
+
+    bool isServerActive() const;
+    void setServerFactory(std::function<ServerPtr()> server);
+    bool startServer();
+    bool stopServer();
 
     void load(const std::string& file);
     void saveAs(const std::string& file, bool quiet = false);
@@ -123,6 +129,9 @@ private:
 
     NodeFactoryLocalPtr node_factory_;
     SnippetFactoryPtr snippet_factory_;
+
+    std::function<ServerPtr()> server_factory_;
+    ServerPtr server_;
 
     ThreadPoolPtr thread_pool_;
 

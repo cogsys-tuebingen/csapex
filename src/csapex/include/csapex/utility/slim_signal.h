@@ -45,6 +45,10 @@ protected:
     virtual int countAllConnections() const = 0;
 
 protected:
+    virtual void onConnect();
+    virtual void onDisconnect();
+
+protected:
     mutable std::recursive_mutex mutex_;
 
 private:
@@ -152,9 +156,6 @@ private:
     void applyModifications();
 
 private:
-    virtual void onConnect();
-    virtual void onDisconnect();
-
     Connection::Deleter makeFunctionDeleter(Signal<Signature>* parent, int id);
     Connection::Deleter makeDelegateDeleter(Signal<Signature>* parent, int id);
     Connection::Deleter makeSignalDeleter(Signal<Signature>* parent, Signal<Signature>* sig);

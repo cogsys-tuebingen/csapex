@@ -168,7 +168,7 @@ public:
 
     slim_signal::Signal<void(std::function<void()>)> execution_requested;
 
-    slim_signal::Signal<void(StreamableConstPtr)> remote_data_connection;
+    slim_signal::ObservableSignal<void(StreamableConstPtr)> remote_data_connection;
 
 
 

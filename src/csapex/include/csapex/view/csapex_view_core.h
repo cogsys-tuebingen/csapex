@@ -102,6 +102,8 @@ public:
     slim_signal::Signal<void ()> begin_step;
     slim_signal::Signal<void ()> end_step;
 
+    slim_signal::Signal<void ()> server_shutdown;
+
     csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> save_detail_request;
     csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> load_detail_request;
 

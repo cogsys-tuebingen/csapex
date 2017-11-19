@@ -30,6 +30,8 @@ public:
 
     Settings& getSettings() const override;
 
+    CsApexCorePtr getCore() const;
+
     // TODO: add proxies or remove
     ExceptionHandler& getExceptionHandler() const override;
     GraphFacadePtr getRoot() override;

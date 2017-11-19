@@ -3,7 +3,6 @@
 
 /// COMPONENT
 #include <csapex/core/csapex_core.h>
-#include <csapex/view/utility/message_renderer_manager.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/model/graph_facade.h>
@@ -36,7 +35,6 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexCorePtr core)
       drag_io(std::make_shared<DragIO>(core_->getPluginLocator(), dispatcher_.get())),
       exception_handler_(core_->getExceptionHandler())
 {
-    MessageRendererManager::instance().setPluginLocator(core_->getPluginLocator());
     node_adapter_factory_->loadPlugins();
 
     observe(core_->config_changed, config_changed);
@@ -87,7 +85,10 @@ CsApexViewCoreLocal::CsApexViewCoreLocal(CsApexViewCore &parent, ExceptionHandle
     core_->init(false);
 }
 
-
+CsApexCorePtr CsApexViewCoreLocal::getCore() const
+{
+    return core_;
+}
 
 NodeAdapterFactoryPtr CsApexViewCoreLocal::getNodeAdapterFactory()
 {

@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/csapex_qt_export.h>
-#include <csapex/view/message_renderer.h>
+#include <csapex/msg/message_renderer.h>
 
 /// PROJECT
 #include <csapex/view/view_fwd.h>

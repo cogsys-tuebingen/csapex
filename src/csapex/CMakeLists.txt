@@ -358,6 +358,7 @@ add_library(csapex SHARED
     src/factory/snippet_factory.cpp
 
     src/manager/message_provider_manager.cpp
+    src/manager/message_renderer_manager.cpp
 
     src/model/graph/vertex.cpp
     src/model/graph/edge.cpp
@@ -415,6 +416,7 @@ add_library(csapex SHARED
     src/msg/transition.cpp
     src/msg/direct_connection.cpp
     src/msg/generic_vector_message.cpp
+    src/msg/message_renderer.cpp
 
     src/plugin/plugin_locator.cpp
 
@@ -428,6 +430,8 @@ add_library(csapex SHARED
 
     src/signal/slot.cpp
     src/signal/event.cpp
+
+    src/io/server.cpp
 
     ${csapex_HEADERS}
 )
@@ -558,7 +562,7 @@ add_library(csapex_remote SHARED
     src/io/session_client.cpp
     src/io/channel.cpp
 
-    src/io/server.cpp
+    src/io/tcp_server.cpp
     src/io/graph_server.cpp
     src/io/node_server.cpp
     src/io/connector_server.cpp
@@ -634,10 +638,7 @@ add_library(csapex_qt SHARED
     src/view/csapex_view_core_local.cpp
     src/view/csapex_view_core_remote.cpp
     src/view/csapex_window.cpp
-    src/view/message_renderer.cpp
     src/view/gui_exception_handler.cpp
-
-    src/view/utility/message_renderer_manager.cpp
 
     src/view/model/thread_group_table_model.cpp
 

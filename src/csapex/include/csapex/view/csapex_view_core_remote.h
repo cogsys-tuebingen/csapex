@@ -102,7 +102,6 @@ private:
 
     std::shared_ptr<ProfilerRemote> profiler_proxy_;
 
-    bool running;
     bool thread_active_;
     std::thread spinner;
 

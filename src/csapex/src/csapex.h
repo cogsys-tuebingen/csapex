@@ -9,7 +9,6 @@
 #include <csapex/utility/exceptions.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/model/observer.h>
-#include <csapex/io/io_fwd.h>
 
 /// SYSTEM
 #include <QApplication>
@@ -76,7 +75,6 @@ private:
     CsApexSplashScreen* splash;
 
     CsApexCorePtr core;
-    ServerPtr server;
 
     bool recover_needed;
 };

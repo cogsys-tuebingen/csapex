@@ -31,6 +31,7 @@ NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerP
 
     connectNodeHandle();
     connectNodeWorker();
+    connectNodeRunner();
 }
 NodeFacadeLocal::NodeFacadeLocal(NodeHandlePtr nh)
     : nh_(nh)
@@ -144,6 +145,11 @@ void NodeFacadeLocal::connectNodeWorker()
     observe(nw_->error_event, [this](bool error, const std::string& msg, ErrorLevel level) {
         setError(error, msg, level);
     });
+}
+
+void NodeFacadeLocal::connectNodeRunner()
+{
+    observe(nr_->notification, notification);
 }
 
 NodeFacadeLocal::~NodeFacadeLocal()

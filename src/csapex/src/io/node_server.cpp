@@ -25,10 +25,11 @@ NodeServer::NodeServer(SessionPtr session)
 
 NodeServer::~NodeServer()
 {
+    stopObserving();
 }
 
 
-void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
+void NodeServer::startObservingNode(const NodeFacadeLocalPtr &node)
 {
     io::ChannelPtr channel = session_->openChannel(node->getAUUID());
 
@@ -122,7 +123,7 @@ void NodeServer::startObserving(const NodeFacadeLocalPtr &node)
     channels_[node->getAUUID()] = channel;
 }
 
-void NodeServer::stopObserving(const NodeFacadeLocalPtr &node)
+void NodeServer::stopObservingNode(const NodeFacadeLocalPtr &node)
 {
     std::cerr << "stop serving node: " << node->getAUUID() << std::endl;
 

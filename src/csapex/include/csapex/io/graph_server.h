@@ -18,8 +18,8 @@ public:
     GraphServer(SessionPtr session);
     ~GraphServer();
 
-    void startObserving(const GraphFacadeLocalPtr &graph);
-    void stopObserving(const GraphFacadeLocalPtr& graph);
+    void startObservingGraph(const GraphFacadeLocalPtr &graph);
+    void stopObservingGraph(const GraphFacadeLocalPtr& graph);
 
 private:
     SessionPtr session_;

@@ -10,6 +10,7 @@
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
+#include <csapex/manager/message_renderer_manager.h>
 #include <csapex/model/graph_facade_local.h>
 #include <csapex/model/graph/graph_local.h>
 #include <csapex/model/node_facade_local.h>
@@ -27,6 +28,7 @@
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/utility/thread.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/io/server.h>
 
 /// SYSTEM
 #include <fstream>
@@ -97,6 +99,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
 
     StreamInterceptor::instance().start();
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
+    MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 
     core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
     node_factory_ = std::make_shared<NodeFactoryLocal>(settings_, plugin_locator_.get());
@@ -363,6 +366,42 @@ void CsApexCore::startMainLoop()
 
         shutdown_requested();
     });
+}
+
+bool CsApexCore::isServerActive() const
+{
+    return server_ != nullptr && server_->isRunning();
+}
+void CsApexCore::setServerFactory(std::function<ServerPtr()> server)
+{
+    server_factory_ = server;
+}
+
+bool CsApexCore::startServer()
+{
+    try {
+        server_ = server_factory_();
+        apex_assert_hard(server_);
+        server_->start();
+        return true;
+
+    } catch (const boost::system::system_error& ex) {
+        std::cerr << "Could not start server: [" << ex.code() << "] " << ex.what() << std::endl;
+    }
+    return false;
+}
+
+bool CsApexCore::stopServer()
+{
+    apex_assert_hard(server_);
+    try {
+        server_->stop();
+        return true;
+
+    } catch (const boost::system::system_error& ex) {
+        std::cerr << "Could not stop server: [" << ex.code() << "] " << ex.what() << std::endl;
+    }
+    return true;
 }
 
 void CsApexCore::shutdown()

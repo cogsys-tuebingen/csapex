@@ -24,6 +24,14 @@ class Session : public Observer, public std::enable_shared_from_this<Session>
 public:
     using Socket = boost::asio::ip::tcp::socket;
 
+    class NoConnectionException : public std::runtime_error
+    {
+    public:
+        NoConnectionException()
+            : std::runtime_error("No active connection.")
+        {}
+    };
+
 public:
     Session(Socket socket, const std::string& name);
     ~Session();
@@ -33,6 +41,8 @@ public:
 
     void start();
     void stop();
+
+    void stopForced();
 
     void write(const StreamableConstPtr &packet);
     void write(const std::string &message);
@@ -104,6 +114,8 @@ public:
     slim_signal::Signal<void(const RawMessageConstPtr&)> &raw_packet_received(const AUUID& uuid);
 
 protected:
+    void mainLoop();
+
     void read_async();
 
     void write_packet(SerializationBuffer &buffer);
@@ -125,7 +137,8 @@ protected:
 
     std::recursive_mutex running_mutex_;
     std::atomic<bool> running_;
-    std::atomic<bool> live_;
+    std::atomic<bool> is_live_;
+    std::atomic<bool> was_live_;
 
     // TODO: use the more general channel
     std::unordered_map<AUUID, std::shared_ptr<slim_signal::Signal<void(const RawMessageConstPtr&)>>, AUUID::Hasher> auuid_to_signal_;
