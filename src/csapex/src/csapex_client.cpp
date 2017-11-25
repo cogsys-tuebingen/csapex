@@ -85,7 +85,10 @@ int Main::runWithGui()
 
     SessionPtr session;
     try {
-        session = std::make_shared<SessionClient>("localhost", 12345);
+        std::string host = settings.get<std::string>("host");
+        int port = settings.get<int>("port");
+        session = std::make_shared<SessionClient>(host, port);
+
     } catch(const boost::system::system_error& se) {
         std::cerr << "Connection to server failed:\n" << se.what() << std::endl;
         return 1;
@@ -176,6 +179,8 @@ int main(int argc, char** argv)
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "show help message")
+            ("host", po::value<std::string>()->default_value("localhost"), "Host")
+            ("port", po::value<int>()->default_value(42123), "Port")
             ;
     po::positional_options_description p;
 
@@ -228,6 +233,10 @@ int main(int argc, char** argv)
         std::cerr << desc << std::endl;
         return 1;
     }
+
+    // server settings
+    settings.set("host", vm["host"].as<std::string>());
+    settings.set("port", vm["port"].as<int>());
 
     // start the app
     Main m(app, settings, *handler);

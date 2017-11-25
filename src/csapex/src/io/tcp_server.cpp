@@ -29,7 +29,7 @@ using boost::asio::ip::tcp;
 
 TcpServer::TcpServer(CsApexCore &core, bool spin_thread)
     : Server(core),
-      acceptor_(io_service_, tcp::endpoint(tcp::v4(), core.getSettings().getTemporary("port", 12345))),
+      acceptor_(io_service_, tcp::endpoint(tcp::v4(), core.getSettings().get<int>("port"))),
       socket_(io_service_),
       running_(false),
       spin_thread_(spin_thread)

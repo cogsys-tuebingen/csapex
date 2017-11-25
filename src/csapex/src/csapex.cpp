@@ -286,6 +286,7 @@ int main(int argc, char** argv)
             ("disable_thread_grouping", "by default create one thread per node")
             ("input", "config file to load")
             ("start-server", "start tcp server")
+            ("port", po::value<int>()->default_value(42123), "tcp server port")
             ;
 
     po::positional_options_description p;
@@ -403,8 +404,7 @@ int main(int argc, char** argv)
     settings.set("additional_args", additional_args);
     settings.set("initially_paused", vm.count("paused") > 0);
     settings.set("start-server", vm.count("start-server") > 0);
-
-    settings.set("access-test", std::string("access granted."));
+    settings.set("port", vm["port"].as<int>());
 
     // start the app
     Main m(std::move(app), settings, *handler);

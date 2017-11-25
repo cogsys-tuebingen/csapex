@@ -96,6 +96,7 @@ int main(int argc, char** argv)
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "show help message")
+            ("port", po::value<int>()->default_value(42123), "tcp server port")
             ("debug", "enable debug output")
             ("dump", "show variables")
             ("paused", "start paused")
@@ -206,8 +207,7 @@ int main(int argc, char** argv)
     settings.set("thread_grouping", vm.count("disable_thread_grouping") == 0);
     settings.set("additional_args", additional_args);
     settings.set("initially_paused", vm.count("paused") > 0);
-
-    settings.set("access-test", std::string("access granted."));
+    settings.set("port", vm["port"].as<int>());
 
     // start the app
     CsApexServer m(settings, *handler);
