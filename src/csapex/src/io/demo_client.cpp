@@ -55,7 +55,8 @@ public:
                 }
             });
 
-            session->stopped.connect([&](){
+            session->stopped.connect([&](Session* session){
+                (void) session;
                 std::cerr << "The server disconnected." << std::endl;
                 stop();
             });

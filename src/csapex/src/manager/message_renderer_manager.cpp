@@ -29,6 +29,7 @@ void MessageRendererManager::shutdown()
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 	plugin_locator_.reset();
     renderers.clear();
+    manager_.reset();
 }
 
 void MessageRendererManager::loadPlugins()

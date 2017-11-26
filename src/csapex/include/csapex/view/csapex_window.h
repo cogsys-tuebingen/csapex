@@ -83,7 +83,7 @@ public Q_SLOTS:
     void undo();
     void redo();
 
-    void disconnectEvent();
+    void triggerDisconnectEvent();
 
     void makeScreenshot();
 
@@ -115,6 +115,8 @@ Q_SIGNALS:
     void updateUndoInfoRequest();
     void updateTitleRequest();
     void restoreWindowStateRequest();
+
+    void disconnectEvent();
 
 private:
     void construct();

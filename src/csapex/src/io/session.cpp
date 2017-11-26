@@ -30,7 +30,8 @@ Session::Session(Socket socket, const std::string &name)
       running_(false),
       is_live_(false),
       was_live_(false),
-      name_(name)
+      name_(name),
+      is_valid_(true)
 {
 }
 
@@ -39,26 +40,27 @@ Session::Session(const std::string& name)
       running_(false),
       is_live_(false),
       was_live_(false),
-      name_(name)
+      name_(name),
+      is_valid_(true)
 {
 }
 
 Session::~Session()
 {
+    is_valid_ = false;
     {
         std::unique_lock<std::recursive_mutex> running_lock(running_mutex_);
         if(running_) {
-            stopForced();
+            running_ = false;
+            packet_handler_thread_.join();
         }
-
-        apex_assert_hard(!packet_handler_thread_.joinable());
     }
 
     if(socket_) {
         boost::system::error_code ec;
         socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
-        if (ec) {
-            throw std::runtime_error("cannot shutdown server connection");
+        if (ec && ec != boost::asio::error::not_connected) {
+            throw std::runtime_error(std::string("cannot shutdown server connection: ") + ec.message());
         } else if(socket_->is_open()) {
             socket_->close();
         }
@@ -68,6 +70,11 @@ Session::~Session()
 void Session::run()
 {
 
+}
+
+bool Session::isRunning() const
+{
+    return running_;
 }
 
 void Session::shutdown()
@@ -82,7 +89,7 @@ void Session::start()
         apex_assert_hard(!running_);
         running_ = true;
     }
-    started();
+    started(this);
 
     packet_handler_thread_ = std::thread([this](){
         csapex::thread::set_name(name_.c_str());
@@ -173,6 +180,10 @@ void Session::stop()
 {
     apex_assert_hard(packet_handler_thread_.get_id() != std::this_thread::get_id());
 
+    if(is_valid_) {
+        stopped(this);
+    }
+
     std::unique_lock<std::recursive_mutex> running_lock(running_mutex_);
 
 //    if(!live_) {
@@ -187,8 +198,6 @@ void Session::stop()
     }
 
     running_lock.unlock();
-
-    stopped();
 
     if(is_live_) {
         packet_handler_thread_.join();
@@ -287,12 +296,21 @@ void Session::read_async()
         }
     }
 
+    SessionWeakPtr self = shared_from_this();
+
     std::shared_ptr<SerializationBuffer> message_data = std::make_shared<SerializationBuffer>();
     boost::asio::async_read(*socket_, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH),
-                            [this, message_data](boost::system::error_code ec, std::size_t reply_length){
-        if ((ec  == boost::asio::error::eof) || (ec == boost::asio::error::connection_reset)) {
+                            [this, message_data, self](boost::system::error_code ec, std::size_t reply_length){
+        if (ec  == boost::asio::error::eof) {
+            // do nothing
+            return;
+
+        } else if (ec == boost::asio::error::connection_reset) {
             // disconnect
-            stop();
+            if(SessionPtr session = self.lock()) {
+                stop();
+            }
+            return;
 
         } else if(reply_length > 0) {
             // payload received
@@ -357,6 +375,7 @@ void Session::read_async()
         } else {
             std::cerr << "got an illegal reply of length " << (int) reply_length << std::endl;
         }
+
         read_async();
     });
 }

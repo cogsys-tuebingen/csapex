@@ -137,5 +137,4 @@ void GraphServer::startObservingGraph(const GraphFacadeLocalPtr &graph_facade)
 
 void GraphServer::stopObservingGraph(const GraphFacadeLocalPtr &graph)
 {
-    std::cerr << "stop serving graph: " << graph->getAbsoluteUUID() << std::endl;
 }

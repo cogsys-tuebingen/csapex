@@ -48,6 +48,11 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const SessionPtr& session)
         server_shutdown();
     });
 
+    // busy waiting for the spinning thread
+    while(!session_->isRunning()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
     core_channel_ = session_->openChannel(AUUID::NONE);
 
     profiler_proxy_ = std::make_shared<ProfilerRemote>(core_channel_);
@@ -144,9 +149,9 @@ CsApexViewCoreRemote::CsApexViewCoreRemote(const SessionPtr& session)
 
 CsApexViewCoreRemote::~CsApexViewCoreRemote()
 {
-    if(thread_active_) {
-        session_->shutdown();
-    }
+    MessageRendererManager::instance().shutdown();
+
+    session_->shutdown();
 
     if(spinner.joinable()) {
         spinner.join();
@@ -300,7 +305,6 @@ void CsApexViewCoreRemote::step()
 void CsApexViewCoreRemote::shutdown()
 {
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreShutdown);
-    session_->shutdown();
 }
 
 void CsApexViewCoreRemote::clearBlock()

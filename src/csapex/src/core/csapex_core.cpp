@@ -133,6 +133,8 @@ CsApexCore::~CsApexCore()
         thread_pool_->clear();
     }
 
+    MessageRendererManager::instance().shutdown();
+
     for(std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
         it->second->shutdown();
     }

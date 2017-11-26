@@ -32,7 +32,7 @@ public:
 
 protected:
     void startSession(SessionPtr session);
-    void stopSession(SessionPtr session);
+    void stopSession(Session *session);
 
 private:
     void spin();

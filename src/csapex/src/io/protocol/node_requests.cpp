@@ -59,7 +59,8 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
             }
         });
         NodeHandle* nhp = nh.get();
-        session->stopped.connect([nhp](){
+        session->stopped.connect([nhp](Session* session){
+            (void) session;
             // TODO: disconnect only the appropriate client...
             nhp->remote_data_connection.disconnectAll();
         });

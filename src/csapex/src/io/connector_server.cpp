@@ -49,8 +49,6 @@ void ConnectorServer::startObserving(const ConnectablePtr &connector)
 
 void ConnectorServer::stopObserving(const ConnectablePtr &connector)
 {
-    std::cerr << "stop serving connector: " << connector->getAUUID() << std::endl;
-
     auto pos = channels_.find(connector->getAUUID());
     if(pos != channels_.end()) {
         channels_.erase(pos);

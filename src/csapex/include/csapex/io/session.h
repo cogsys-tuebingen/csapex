@@ -39,6 +39,8 @@ public:
     virtual void run();
     virtual void shutdown();
 
+    virtual bool isRunning() const;
+
     void start();
     void stop();
 
@@ -105,8 +107,8 @@ protected:
     void handleFeedback(const ResponseConstPtr& fb);
 
 public:
-    slim_signal::Signal<void()> started;
-    slim_signal::Signal<void()> stopped;
+    slim_signal::Signal<void(Session*)> started;
+    slim_signal::Signal<void(Session*)> stopped;
 
     slim_signal::Signal<void(const StreamableConstPtr&)> packet_received;
     slim_signal::Signal<void(const BroadcastMessageConstPtr&)> broadcast_received;
@@ -147,6 +149,7 @@ protected:
 
 private:
     std::string name_;
+    bool is_valid_;
 };
 
 }

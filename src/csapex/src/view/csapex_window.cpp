@@ -185,6 +185,7 @@ void CsApexWindow::construct()
     QObject::connect(this, &CsApexWindow::updateTitleRequest, this, &CsApexWindow::updateTitle);
     QObject::connect(this, &CsApexWindow::updateMenuRequest, this, &CsApexWindow::updateMenu);
     QObject::connect(this, &CsApexWindow::restoreWindowStateRequest, this, &CsApexWindow::restoreWindowState);
+    QObject::connect(this, &CsApexWindow::disconnectEvent, this, &CsApexWindow::close);
 
     observe(view_core_.reset_requested, [this](){ designer_->reset(); });
     observe(view_core_.reset_done, [this](){ designer_->reinitialize(); });
@@ -1086,7 +1087,7 @@ void CsApexWindow::redo()
     view_core_.getCommandDispatcher()->redo();
 }
 
-void CsApexWindow::disconnectEvent()
+void CsApexWindow::triggerDisconnectEvent()
 {
     disconnected_ = true;
     close();

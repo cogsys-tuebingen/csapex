@@ -125,8 +125,6 @@ void NodeServer::startObservingNode(const NodeFacadeLocalPtr &node)
 
 void NodeServer::stopObservingNode(const NodeFacadeLocalPtr &node)
 {
-    std::cerr << "stop serving node: " << node->getAUUID() << std::endl;
-
     auto pos = channels_.find(node->getAUUID());
     if(pos != channels_.end()) {
         channels_.erase(pos);

@@ -227,6 +227,7 @@ NodeFacadeRemote::NodeFacadeRemote(const SessionPtr &session, AUUID uuid)
 NodeFacadeRemote::~NodeFacadeRemote()
 {
     guard_ = 0xDEADBEEF;
+    stopObserving();
 }
 
 bool NodeFacadeRemote::isRemote() const

@@ -66,7 +66,7 @@ void TcpServer::do_accept()
 void TcpServer::startSession(SessionPtr session)
 {
     SessionWeakPtr w_session = session;
-    session->stopped.connect([this, session]() {
+    observe(session->stopped, [this, w_session](Session* session) {
         stopSession(session);
     });
 
@@ -195,14 +195,14 @@ void TcpServer::startSession(SessionPtr session)
     sessions_.push_back(session);
 }
 
-void TcpServer::stopSession(SessionPtr session)
+void TcpServer::stopSession(Session* session)
 {
     std::unique_lock<std::recursive_mutex> lock(session_mutex_);
-    auto pos = std::find(sessions_.begin(), sessions_.end(), session);
+    auto pos = std::find(sessions_.begin(), sessions_.end(), session->shared_from_this());
     if(pos != sessions_.end()) {
         sessions_.erase(pos);
 
-        graph_servers_.erase(session.get());
+        graph_servers_.erase(session);
     }
 }
 

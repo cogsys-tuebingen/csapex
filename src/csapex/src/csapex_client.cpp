@@ -93,61 +93,70 @@ int Main::runWithGui()
         std::cerr << "Connection to server failed:\n" << se.what() << std::endl;
         return 1;
     }
+
+    int return_status = 0;
+    bool shutdown_server_on_exit = false;
+    bool server_has_been_shutdown = false;
+
     CsApexViewCoreRemote main(session);
 
-    CsApexViewCore& view_core = main;
+    {
+        CsApexViewCore& view_core = main;
 
+        CsApexWindow w(view_core);
+        w.setWindowIcon(QIcon(":/apex_logo_client.png"));
+        QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
-    CsApexWindow w(view_core);
-    w.setWindowIcon(QIcon(":/apex_logo_client.png"));
-    QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
+        app->connect(&w, &CsApexWindow::closed, [&]() {
+            if(!server_has_been_shutdown) {
+                // we have closed the window -> avoid notification of server shutdown
+                view_core.server_shutdown.disconnectAll();
 
-    app->connect(&w, &CsApexWindow::closed, [&]() {
-        // we have closed the window -> avoid notification of server shutdown
-        view_core.server_shutdown.disconnectAll();
-
-        try {
-            int r = QMessageBox::warning(&w, tr("cs::APEX"),
-                                         tr("Do you want to stop the server?"),
-                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-            if(r == QMessageBox::Yes) {
-                // shutdown server
-                main.shutdown();
+                try {
+                    int r = QMessageBox::warning(&w, tr("cs::APEX"),
+                                                 tr("Do you want to stop the server?"),
+                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                    if(r == QMessageBox::Yes) {
+                        shutdown_server_on_exit = true;
+                    }
+                } catch(const std::exception& e) {
+                    std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
+                } catch(...) {
+                    throw;
+                }
             }
-        } catch(const std::exception& e) {
-            std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
-        } catch(...) {
-            throw;
-        }
-        app->quit();
-    });
-    app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
+            app->quit();
+        });
 
-    csapex::error_handling::stop_request().connect([this](){
-        static int request = 0;
-        if(request == 0) {
-            raise(SIGTERM);
-        }
+        csapex::error_handling::stop_request().connect([this](){
+            static int request = 0;
+            if(request == 0) {
+                raise(SIGTERM);
+            }
 
-        ++request;
-    });
+            ++request;
+        });
 
-    view_core.server_shutdown.connect([&w](){
+        view_core.server_shutdown.connect([&](){
+            std::cerr << "the server has been shut down." << std::endl;
+            server_has_been_shutdown = true;
+            w.triggerDisconnectEvent();
+        });
 
-        QMessageBox::warning(&w,
-                             "Server shutdown",
-                             "The server has been shut down. The client will now be closed");
-        w.disconnectEvent();
-    });
+        w.start();
 
-    w.start();
+        w.show();
+        splash->finish(&w);
 
-    w.show();
-    splash->finish(&w);
+        return_status = runImpl();
 
-    int res = runImpl();
+    }
 
-    return res;
+    if(shutdown_server_on_exit) {
+        main.shutdown();
+    }
+
+    return return_status;
 }
 
 int Main::run()

@@ -288,13 +288,34 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
 
     for(auto& s : children_) {
         apex_assert_hard(s->guard_ == -1);
-        (*s)(std::forward<Args>(args)...);
+        try {
+            (*s)(std::forward<Args>(args)...);
+        } catch(const std::exception& e) {
+            printf("signal forwarding has thrown an error: %s\n", e.what());
+        } catch(...) {
+            printf("signal forwarding has thrown an unknown error\n");
+            throw;
+        }
     }
     for(auto& callback : delegates_) {
-        callback.second(std::forward<Args>(args)...);
+        try {
+            callback.second(std::forward<Args>(args)...);
+        } catch(const std::exception& e) {
+            printf("signal processing delegate has thrown an error: %s\n", e.what());
+        } catch(...) {
+            printf("signal processing delegate has thrown an unknown error\n");
+            throw;
+        }
     }
     for(auto& fn : functions_) {
-        fn.second(std::forward<Args>(args)...);
+        try {
+            fn.second(std::forward<Args>(args)...);
+        } catch(const std::exception& e) {
+            printf("signal processing function has thrown an error: %s\n", e.what());
+        } catch(...) {
+            printf("signal processing function has thrown an unknown error\n");
+            throw;
+        }
     }
 
     applyModifications();
