@@ -590,7 +590,7 @@ bool NodeWorker::startProcessingMessages()
         } catch(const std::exception& e) {
             setError(true, e.what());
         } catch(const Failure& f) {
-            throw;
+            throw f;
         } catch(...) {
             throw Failure("Unknown exception caught in NodeWorker.");
         }

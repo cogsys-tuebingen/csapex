@@ -82,6 +82,7 @@ void NodeFacadeLocal::connectNodeHandle()
 
     observe(nh_->parameters_changed, parameters_changed);
 
+    observe(nh_->raw_data_connection, raw_data_connection);
 
 
     NodeStatePtr state = nh_->getNodeState();

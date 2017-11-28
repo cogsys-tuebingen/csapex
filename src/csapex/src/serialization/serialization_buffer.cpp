@@ -24,13 +24,34 @@
 
 using namespace csapex;
 
+bool SerializationBuffer::initialized_ = false;
+std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const boost::any& a)>> SerializationBuffer::any_serializer;
+std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, boost::any& a)>> SerializationBuffer::any_deserializer;
+
 SerializationBuffer::SerializationBuffer()
     : pos(HEADER_LENGTH)
 {
     // the header is always 4 byte
     insert(end(), HEADER_LENGTH, 0);
 
+    init();
+}
 
+
+SerializationBuffer::SerializationBuffer(const std::vector<uint8_t>& copy)
+    : pos(HEADER_LENGTH)
+{
+    // the header is always 4 byte
+    insert(end(), HEADER_LENGTH, 0);
+
+    insert(end(), copy.begin(), copy.end());
+
+    init();
+}
+
+void SerializationBuffer::init()
+{
+    if(!initialized_) {
 #define ADD(...) \
     any_serializer[std::type_index(typeid(__VA_ARGS__))] = serializer; \
     any_deserializer[id] = deserializer; \
@@ -38,13 +59,13 @@ SerializationBuffer::SerializationBuffer()
     ++id
 #define ADD_ANY_TYPE_IMPL(...) { \
     auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
-        buffer << ((uint8_t) id); \
-        buffer << (boost::any_cast<__VA_ARGS__> (any)); \
+    buffer << ((uint8_t) id); \
+    buffer << (boost::any_cast<__VA_ARGS__> (any)); \
     };\
     auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
-        __VA_ARGS__ v; \
-        buffer >> (v); \
-        any = v; \
+    __VA_ARGS__ v; \
+    buffer >> (v); \
+    any = v; \
     };\
     ADD(__VA_ARGS__)
 
@@ -55,64 +76,67 @@ SerializationBuffer::SerializationBuffer()
 
 #define ADD_ANY_TYPE_1(P1, GET_P1, ...) { \
     auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
-        buffer << ((uint8_t) id); \
-        buffer << (boost::any_cast<__VA_ARGS__> (any)).GET_P1; \
-        buffer << (boost::any_cast<__VA_ARGS__> (any)); \
+    buffer << ((uint8_t) id); \
+    buffer << (boost::any_cast<__VA_ARGS__> (any)).GET_P1; \
+    buffer << (boost::any_cast<__VA_ARGS__> (any)); \
     };\
     auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
-        P1 p1; \
-        buffer >> (p1); \
-        __VA_ARGS__ v(p1); \
-        buffer >> (v); \
-        any = v; \
+    P1 p1; \
+    buffer >> (p1); \
+    __VA_ARGS__ v(p1); \
+    buffer >> (v); \
+    any = v; \
     };\
     ADD(__VA_ARGS__)
 
 #define ADD_ANY_TYPE_1PC(P1, GET_P1, ...) { \
     auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
-        buffer << ((uint8_t) id); \
-        buffer << (boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any))->GET_P1; \
-        buffer << *(boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any)); \
+    buffer << ((uint8_t) id); \
+    buffer << (boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any))->GET_P1; \
+    buffer << *(boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any)); \
     };\
     auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
-        P1 p1; \
-        buffer >> (p1); \
-        auto v = std::make_shared<__VA_ARGS__>(p1); \
-        buffer >> (*v); \
-        any = std::shared_ptr<__VA_ARGS__ const>(v); \
+    P1 p1; \
+    buffer >> (p1); \
+    auto v = std::make_shared<__VA_ARGS__>(p1); \
+    buffer >> (*v); \
+    any = std::shared_ptr<__VA_ARGS__ const>(v); \
     };\
     ADD(std::shared_ptr<__VA_ARGS__ const>)
 
-    int id = 1;
-    ADD_ANY_TYPE(int);
-    ADD_ANY_TYPE(double);
-    ADD_ANY_TYPE(bool);
-    ADD_ANY_TYPE(std::string);
-    ADD_ANY_TYPE(std::vector<std::string>);
-    ADD_ANY_TYPE(long);
-    ADD_ANY_TYPE(UUID);
-    ADD_ANY_TYPE(AUUID);
-    ADD_ANY_TYPE(std::pair<std::string,bool>);
-    ADD_ANY_TYPE(std::pair<std::string,bool>);
-    ADD_ANY_TYPE(std::pair<int,int>);
-    ADD_ANY_TYPE(std::pair<std::string,bool>);
-    ADD_ANY_TYPE(std::pair<double,double>);
-    ADD_ANY_TYPE(ConnectorType);
-    ADD_ANY_TYPE(YAML::Node);
-    ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
-    ADD_ANY_TYPE(TokenDataConstPtr);
-    ADD_ANY_TYPE(SnippetPtr);
-    ADD_ANY_TYPE(NodeCharacteristics);
-    ADD_ANY_TYPE(ConnectorDescription);
-    ADD_ANY_TYPE(ConnectionInformation);
-    ADD_ANY_TYPE(ExecutionState);
-    ADD_ANY_TYPE(Notification);
-    ADD_ANY_TYPE(Fulcrum);
-    ADD_ANY_TYPE(NodeStatePtr);
-    ADD_ANY_TYPE(param::ParameterPtr);
-    ADD_ANY_TYPE(ActivityType);
-    ADD_ANY_TYPE(ErrorState::ErrorLevel);
-    ADD_ANY_TYPE_1PC(std::string, name(), Interval);
+        int id = 1;
+        ADD_ANY_TYPE(int);
+        ADD_ANY_TYPE(double);
+        ADD_ANY_TYPE(bool);
+        ADD_ANY_TYPE(std::string);
+        ADD_ANY_TYPE(std::vector<std::string>);
+        ADD_ANY_TYPE(long);
+        ADD_ANY_TYPE(UUID);
+        ADD_ANY_TYPE(AUUID);
+        ADD_ANY_TYPE(std::pair<std::string,bool>);
+        ADD_ANY_TYPE(std::pair<std::string,bool>);
+        ADD_ANY_TYPE(std::pair<int,int>);
+        ADD_ANY_TYPE(std::pair<std::string,bool>);
+        ADD_ANY_TYPE(std::pair<double,double>);
+        ADD_ANY_TYPE(ConnectorType);
+        ADD_ANY_TYPE(YAML::Node);
+        ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
+        ADD_ANY_TYPE(TokenDataConstPtr);
+        ADD_ANY_TYPE(SnippetPtr);
+        ADD_ANY_TYPE(NodeCharacteristics);
+        ADD_ANY_TYPE(ConnectorDescription);
+        ADD_ANY_TYPE(ConnectionInformation);
+        ADD_ANY_TYPE(ExecutionState);
+        ADD_ANY_TYPE(Notification);
+        ADD_ANY_TYPE(Fulcrum);
+        ADD_ANY_TYPE(NodeStatePtr);
+        ADD_ANY_TYPE(param::ParameterPtr);
+        ADD_ANY_TYPE(ActivityType);
+        ADD_ANY_TYPE(ErrorState::ErrorLevel);
+        ADD_ANY_TYPE_1PC(std::string, name(), Interval);
+
+        initialized_ = true;
+    }
 }
 
 void SerializationBuffer::finalize()
@@ -225,42 +249,42 @@ const SerializationBuffer& SerializationBuffer::readAny (boost::any& any) const
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
 union _GFloatIEEE754
 {
-  float v_float;
-  struct {
-    uint mantissa : 23;
-    uint biased_exponent : 8;
-    uint sign : 1;
-  } mpn;
+    float v_float;
+    struct {
+        uint mantissa : 23;
+        uint biased_exponent : 8;
+        uint sign : 1;
+    } mpn;
 };
 union _GDoubleIEEE754
 {
-  double v_double;
-  struct {
-    uint mantissa_low : 32;
-    uint mantissa_high : 20;
-    uint biased_exponent : 11;
-    uint sign : 1;
-  } mpn;
+    double v_double;
+    struct {
+        uint mantissa_low : 32;
+        uint mantissa_high : 20;
+        uint biased_exponent : 11;
+        uint sign : 1;
+    } mpn;
 };
 #elif G_BYTE_ORDER == G_BIG_ENDIAN
 union _GFloatIEEE754
 {
-  float v_float;
-  struct {
-    uint sign : 1;
-    uint biased_exponent : 8;
-    uint mantissa : 23;
-  } mpn;
+    float v_float;
+    struct {
+        uint sign : 1;
+        uint biased_exponent : 8;
+        uint mantissa : 23;
+    } mpn;
 };
 union _GDoubleIEEE754
 {
-  double v_double;
-  struct {
-    uint sign : 1;
-    uint biased_exponent : 11;
-    uint mantissa_high : 20;
-    uint mantissa_low : 32;
-  } mpn;
+    double v_double;
+    struct {
+        uint sign : 1;
+        uint biased_exponent : 11;
+        uint mantissa_high : 20;
+        uint mantissa_low : 32;
+    } mpn;
 };
 #else /* !G_LITTLE_ENDIAN && !G_BIG_ENDIAN */
 #error unknown ENDIAN type

@@ -61,21 +61,24 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node_facade, 
 
     } else {
         try {
-            std::string name = type + "Adapter";
-            if(node_facade->isRemote()) {
-                name += "Remote";
+            std::string name = type + "AdapterBuilder";
+            if(!node_facade->isRemote()) {
+                std::string direct_name = type + "DirectAdapterBuilder";
+                if(node_adapter_manager_->hasConstructor(direct_name)) {
+                    name = direct_name;
+                }
             }
-            name += "Builder";
 
-            const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(name);
-            if(constructor) {
+
+            if(node_adapter_manager_->hasConstructor(name)) {
+                const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(name);
+
                 auto builder = constructor->construct();
                 if(builder->getWrappedType() == type) {
                     node_adapter_builders_[type] = builder;
                     return builder->build(node_facade, parent);
                 }
             }
-
             node_adapter_builders_[type] = nullptr;
 
         } catch(const std::exception& e) {

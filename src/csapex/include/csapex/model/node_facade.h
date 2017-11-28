@@ -113,6 +113,9 @@ public:
     void setParameter(const std::string& name, const T& value);
 
 public:
+    /// access to data for node adapters
+    slim_signal::ObservableSignal<void(StreamableConstPtr)> raw_data_connection;
+
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
 

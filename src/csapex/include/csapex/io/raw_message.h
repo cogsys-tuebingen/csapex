@@ -16,7 +16,7 @@ class RawMessage : public Streamable
 {
 public:
     RawMessage();
-    RawMessage(std::vector<uint8_t> data, const AUUID& target);
+    RawMessage(const std::vector<uint8_t>& data, const AUUID& target);
     RawMessage(const char *data, std::size_t len, const AUUID& target);
 
     static const uint8_t PACKET_TYPE_ID = 10;

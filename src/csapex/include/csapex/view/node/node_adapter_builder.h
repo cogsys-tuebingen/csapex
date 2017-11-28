@@ -85,8 +85,7 @@ public:
     }
     virtual csapex::NodeAdapterPtr build(csapex::NodeFacadePtr facade, csapex::NodeBox* parent) const
     {
-        NodeFacadeRemotePtr remote_facade = impl::castToRemote(facade);
-        return std::make_shared<Adapter>(castToRemote(facade), parent);
+        return std::make_shared<Adapter>(facade, parent);
     }
 
 private:

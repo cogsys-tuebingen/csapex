@@ -72,9 +72,6 @@ public:
     void createConnectorProxy(const ConnectorDescription &cd);
     void removeConnectorProxy(const ConnectorDescription &cd);
 
-public:
-    slim_signal::ObservableSignal<void(StreamableConstPtr)> remote_data_connection;
-
 private:
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 

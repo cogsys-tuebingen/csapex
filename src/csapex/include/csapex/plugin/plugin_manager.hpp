@@ -362,6 +362,12 @@ public:
         }
     }
 
+    bool hasConstructor(const std::string& key)
+    {
+        std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
+        auto pos = instance->available_classes.find(key);
+        return pos != instance->available_classes.end();
+    }
 
     std::time_t getLastModification(const std::string& class_name)
     {

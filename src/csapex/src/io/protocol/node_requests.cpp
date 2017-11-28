@@ -51,7 +51,7 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
     {
     case NodeRequestType::AddClient:
     {
-        nh->remote_data_connection.connect([session](StreamableConstPtr data){
+        nh->raw_data_connection.connect([session](StreamableConstPtr data){
             if(RawMessageConstPtr msg = std::dynamic_pointer_cast<RawMessage const>(data)) {
                 session->write(msg);
             } else {
@@ -62,14 +62,14 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
         session->stopped.connect([nhp](Session* session){
             (void) session;
             // TODO: disconnect only the appropriate client...
-            nhp->remote_data_connection.disconnectAll();
+            nhp->raw_data_connection.disconnectAll();
         });
     }
         break;
     case NodeRequestType::RemoveClient:
     {
         // TODO: disconnect only the appropriate client...
-        nh->remote_data_connection.disconnectAll();
+        nh->raw_data_connection.disconnectAll();
     }
         break;
 

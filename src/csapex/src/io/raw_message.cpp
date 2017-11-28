@@ -6,6 +6,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <cstring>
 
 using namespace csapex;
 
@@ -19,19 +20,16 @@ RawMessage::RawMessage()
 
 }
 
-RawMessage::RawMessage(std::vector<uint8_t> data, const AUUID& target)
+RawMessage::RawMessage(const std::vector<uint8_t>& data, const AUUID& target)
     : data_(data), uuid_(target)
 {
 
 }
+
 RawMessage::RawMessage(const char* data, std::size_t len, const AUUID& target)
     : data_(len), uuid_(target)
 {
-    uint8_t* dst = data_.data();
-    const char* src = data;
-    for(std::size_t i = 0; i < len; ++i, ++src, ++dst) {
-        *dst = *src;
-    }
+    std::memcpy(data_.data(), data, len);
 }
 
 std::vector<uint8_t> RawMessage::getData() const

@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/utility/slim_signal.h>
 #include <csapex/utility/assert.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <algorithm>
@@ -292,6 +293,9 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
             (*s)(std::forward<Args>(args)...);
         } catch(const std::exception& e) {
             printf("signal forwarding has thrown an error: %s\n", e.what());
+        } catch(const csapex::Failure& e) {
+            printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
+            throw e;
         } catch(...) {
             printf("signal forwarding has thrown an unknown error\n");
             throw;
@@ -302,6 +306,9 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
             callback.second(std::forward<Args>(args)...);
         } catch(const std::exception& e) {
             printf("signal processing delegate has thrown an error: %s\n", e.what());
+        } catch(const csapex::Failure& e) {
+            printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
+            throw e;
         } catch(...) {
             printf("signal processing delegate has thrown an unknown error\n");
             throw;
@@ -312,6 +319,9 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
             fn.second(std::forward<Args>(args)...);
         } catch(const std::exception& e) {
             printf("signal processing function has thrown an error: %s\n", e.what());
+        } catch(const csapex::Failure& e) {
+            printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
+            throw e;
         } catch(...) {
             printf("signal processing function has thrown an unknown error\n");
             throw;

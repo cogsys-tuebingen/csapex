@@ -34,6 +34,7 @@ public:
     static const uint8_t HEADER_LENGTH = 4;
 public:
     SerializationBuffer();
+    SerializationBuffer(const std::vector<uint8_t>& copy);
 
     void finalize();
     void seek(uint32_t p);
@@ -315,10 +316,14 @@ public:
     const SerializationBuffer& operator >> (YAML::Node& node) const;
 
 private:
+    static void init();
+
+private:
     mutable std::size_t pos;
 
-    std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const boost::any& a)>> any_serializer;
-    std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, boost::any& a)>> any_deserializer;
+    static bool initialized_;
+    static std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const boost::any& a)>> any_serializer;
+    static std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, boost::any& a)>> any_deserializer;
 };
 
 }

@@ -211,16 +211,16 @@ NodeFacadeRemote::NodeFacadeRemote(const SessionPtr &session, AUUID uuid)
         createConnectorProxy(c);
     }
 
-    observe(remote_data_connection.first_connected, [this]() {
+    observe(raw_data_connection.first_connected, [this]() {
         node_channel_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::AddClient);
     });
 
-    observe(remote_data_connection.last_disconnected, [this]() {
+    observe(raw_data_connection.last_disconnected, [this]() {
         node_channel_->sendRequest<NodeRequests>(NodeRequests::NodeRequestType::RemoveClient);
     });
 
     observe(node_channel_->raw_packet_received, [this](const RawMessageConstPtr& data) {
-        remote_data_connection(data);
+        raw_data_connection(data);
     });
 }
 
