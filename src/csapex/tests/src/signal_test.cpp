@@ -1,6 +1,6 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/msg/message.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>

@@ -6,10 +6,10 @@
 #include <csapex/io/feedback.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/io/session.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_characteristics.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
@@ -43,7 +43,7 @@ NodeRequests::NodeRequest::NodeRequest(uint8_t request_id)
 ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     NodeFacadePtr nf = core.getRoot()->getLocalGraph()->findNodeFacade(uuid_);
-    NodeFacadeLocalPtr nf_local = std::dynamic_pointer_cast<NodeFacadeLocal>(nf);
+    NodeFacadeImplementationPtr nf_local = std::dynamic_pointer_cast<NodeFacadeImplementation>(nf);
     apex_assert_hard(nf_local);
     NodeHandlePtr nh = nf_local->getNodeHandle();
 
@@ -118,7 +118,7 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_SIGNAL(_enum, signal)
 
-    #include <csapex/model/node_facade_remote_accessors.hpp>
+    #include <csapex/model/node_facade_proxy_accessors.hpp>
         /**
          * end: generate cases
          **/

@@ -1,10 +1,10 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/factory/node_wrapper.hpp>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/node.h>
 #include <csapex/msg/io.h>
@@ -16,7 +16,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 
 #include "gtest/gtest.h"
 #include "test_exception_handler.h"
@@ -226,9 +226,9 @@ protected:
     }
 
 
-    NodeFacadeLocalPtr source_p;
-    NodeFacadeLocalPtr state;
-    NodeFacadeLocalPtr sink_p;
+    NodeFacadeImplementationPtr source_p;
+    NodeFacadeImplementationPtr state;
+    NodeFacadeImplementationPtr sink_p;
 
 };
 

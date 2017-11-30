@@ -21,11 +21,11 @@
 #include <csapex/model/token_data.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/plugin/plugin_locator.h>
-#include <csapex/profiling/profiler_local.h>
+#include <csapex/profiling/profiler_impl.h>
 #include <csapex/profiling/timer.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/view/csapex_view_core_local.h>
+#include <csapex/view/csapex_view_core_impl.h>
 #include <csapex/view/designer/designer.h>
 #include <csapex/view/designer/designerio.h>
 #include <csapex/view/designer/graph_view.h>
@@ -66,7 +66,7 @@ using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
     : QMainWindow(parent), view_core_(view_core),
-      profiler_(std::make_shared<ProfilerLocal>()),
+      profiler_(std::make_shared<ProfilerImplementation>()),
       ui(new Ui::CsApexWindow), designer_(new Designer(view_core)), minimap_(designer_->getMinimap()),
       activity_legend_(new ActivityLegend), activity_timeline_(new ActivityTimeline),
       init_(false), state_changed_(false),
@@ -115,10 +115,10 @@ void CsApexWindow::construct()
 
     ui->actionPause->setChecked(view_core_.isPaused());
 
-    if(view_core_.isRemote()) {
+    if(view_core_.isProxy()) {
         ui->actionServer_StartStop->setEnabled(false);
     } else {
-        CsApexViewCoreLocal& local_view_core = dynamic_cast<CsApexViewCoreLocal&>(view_core_);
+        CsApexViewCoreImplementation& local_view_core = dynamic_cast<CsApexViewCoreImplementation&>(view_core_);
         ui->actionServer_StartStop->setChecked(local_view_core.getCore()->isServerActive());
     }
     QObject::connect(ui->actionServer_StartStop, &QAction::triggered, this, &CsApexWindow::startStopServer);
@@ -1017,9 +1017,9 @@ std::string CsApexWindow::getConfigFile()
 
 void CsApexWindow::startStopServer()
 {
-    apex_assert_hard(!view_core_.isRemote());
+    apex_assert_hard(!view_core_.isProxy());
 
-    CsApexViewCoreLocal& local_view_core = dynamic_cast<CsApexViewCoreLocal&>(view_core_);
+    CsApexViewCoreImplementation& local_view_core = dynamic_cast<CsApexViewCoreImplementation&>(view_core_);
     CsApexCore& core = *local_view_core.getCore();
     if(core.isServerActive()) {
         core.stopServer();

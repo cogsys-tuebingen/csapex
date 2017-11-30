@@ -30,7 +30,7 @@ public:
 
     virtual bool isActive() const = 0;
 
-    virtual bool isRemote() const;
+    virtual bool isProxy() const;
 
     virtual bool isProcessingEnabled() const = 0;
 

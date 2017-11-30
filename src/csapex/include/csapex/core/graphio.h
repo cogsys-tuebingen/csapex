@@ -21,7 +21,7 @@ namespace csapex
 class CSAPEX_EXPORT GraphIO : public Profilable
 {
 public:
-    GraphIO(GraphFacadeLocal& graph, NodeFactoryLocal* node_factory);
+    GraphIO(GraphFacadeImplementation& graph, NodeFactoryImplementation* node_factory);
 
 public:
     // options
@@ -63,11 +63,11 @@ private:
     void sendNotification(const std::string& notification);
 
 protected:
-    void saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeLocalPtr> &nodes);
+    void saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeImplementationPtr> &nodes);
     void saveConnections(YAML::Node &yaml, const std::vector<ConnectionInformation> &connections);
 
-    void serializeNode(YAML::Node& doc, NodeFacadeLocalConstPtr node_handle);
-    void deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_handle);
+    void serializeNode(YAML::Node& doc, NodeFacadeImplementationConstPtr node_handle);
+    void deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr node_handle);
 
     void loadConnection(ConnectorPtr from, const UUID &to_uuid, const std::string& connection_type);
 
@@ -75,8 +75,8 @@ protected:
     UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
 
 private:
-    GraphFacadeLocal& graph_;
-    NodeFactoryLocal* node_factory_;
+    GraphFacadeImplementation& graph_;
+    NodeFactoryImplementation* node_factory_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> old_node_uuid_to_new_;
     double position_offset_x_;

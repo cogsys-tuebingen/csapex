@@ -1,12 +1,12 @@
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/model/node_facade_local.h>
-#include <csapex/factory/node_factory_local.h>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/model/node_facade_impl.h>
+#include <csapex/factory/node_factory_impl.h>
+#include <csapex/core/settings/settings_impl.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 
@@ -31,10 +31,10 @@ public:
 
 class GraphTest : public ::testing::Test {
 protected:
-    NodeFactoryLocal factory;
+    NodeFactoryImplementation factory;
 
     GraphTest()
-        : factory(SettingsLocal::NoSettings, nullptr)
+        : factory(SettingsImplementation::NoSettings, nullptr)
     {
         std::vector<TagPtr> tags;
         csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("MockupNode",
@@ -66,10 +66,10 @@ protected:
 };
 
 TEST_F(GraphTest, NodeCanBeFound) {
-    SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-    GraphLocalPtr graph = graph_node->getLocalGraph();
+    SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
+    GraphImplementationPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, graph);
+    NodeFacadeImplementationPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
 
     Node* node_found = graph->findNode(node_id);
@@ -88,10 +88,10 @@ TEST_F(GraphTest, NodeCanBeFound) {
 }
 
 TEST_F(GraphTest, NodeCanBeFoundWithAConnector) {
-    SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-    GraphLocalPtr graph = graph_node->getLocalGraph();
+    SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
+    GraphImplementationPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, graph);
+    NodeFacadeImplementationPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
 
     //UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
@@ -117,10 +117,10 @@ TEST_F(GraphTest, NodeCanBeFoundWithAConnector) {
 }
 
 TEST_F(GraphTest, NodeCanBeDeleted) {
-    SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-    GraphLocalPtr graph = graph_node->getLocalGraph();
+    SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
+    GraphImplementationPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadeLocalPtr node = factory.makeNode("MockupNode", node_id, graph);
+    NodeFacadeImplementationPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
 
     graph->deleteNode(node_id);
@@ -129,7 +129,7 @@ TEST_F(GraphTest, NodeCanBeDeleted) {
 }
 
 TEST_F(GraphTest, UnknownNodeCannotBeFound) {
-    SubgraphNode graph_node(std::make_shared<GraphLocal>());
+    SubgraphNode graph_node(std::make_shared<GraphImplementation>());
     GraphPtr graph = graph_node.getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
 
@@ -137,8 +137,8 @@ TEST_F(GraphTest, UnknownNodeCannotBeFound) {
 }
 
 TEST_F(GraphTest, NullPtr) {
-    SubgraphNode graph_node(std::make_shared<GraphLocal>());
-    GraphLocalPtr graph = graph_node.getLocalGraph();
+    SubgraphNode graph_node(std::make_shared<GraphImplementation>());
+    GraphImplementationPtr graph = graph_node.getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
 
     NodeFacadePtr node_facade_found = graph->findNodeFacadeNoThrow(node_id);
@@ -154,15 +154,15 @@ TEST_F(GraphTest, NullPtr) {
 
 
 TEST_F(GraphTest, NestedNodeCanBeFound) {
-    SubgraphNodePtr main_graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
-    GraphLocalPtr graph = main_graph_node->getLocalGraph();
+    SubgraphNodePtr main_graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
+    GraphImplementationPtr graph = main_graph_node->getLocalGraph();
 
-    NodeFacadeLocalPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
+    NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     graph->addNode(sub_graph_node_facade);
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadeLocalPtr node_facade = factory.makeNode("MockupNode", node_id, sub_graph->getLocalGraph());
+    NodeFacadeImplementationPtr node_facade = factory.makeNode("MockupNode", node_id, sub_graph->getLocalGraph());
     sub_graph->getLocalGraph()->addNode(node_facade);
 
     NodeHandle* node_handle_found = graph->findNodeHandleNoThrow(node_id);
@@ -197,12 +197,12 @@ TEST_F(GraphTest, NestedNodeCanBeFound) {
 
 TEST_F(GraphTest, RootCanBeFound) {
     UUIDProviderPtr root_provider(new UUIDProvider);
-    NodeFacadeLocalPtr main_facade = factory.makeGraph(root_provider->generateUUID("graph"), root_provider);
+    NodeFacadeImplementationPtr main_facade = factory.makeGraph(root_provider->generateUUID("graph"), root_provider);
 
     SubgraphNodePtr graph_node = std::dynamic_pointer_cast<SubgraphNode>(main_facade->getNode());
     ASSERT_NE(nullptr, graph_node);
 
-    GraphLocalPtr graph = graph_node->getLocalGraph();
+    GraphImplementationPtr graph = graph_node->getLocalGraph();
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("~");
 

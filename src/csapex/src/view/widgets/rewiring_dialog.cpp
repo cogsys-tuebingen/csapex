@@ -2,11 +2,11 @@
 #include <csapex/view/widgets/rewiring_dialog.h>
 
 /// COMPONENT
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/model/connection.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/direct_connection.h>
@@ -16,7 +16,7 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
-#include <csapex/view/csapex_view_core_local.h>
+#include <csapex/view/csapex_view_core_impl.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/box_dialog.h>
 
@@ -34,8 +34,8 @@ RewiringDialog::RewiringDialog(NodeFacade* node, CsApexViewCore& view_core, QWid
     : QDialog(parent, f),
       view_core_(view_core),
 
-      view_core_old_(std::make_shared<CsApexViewCoreLocal>(view_core_, view_core_.getExceptionHandler())),
-      view_core_new_(std::make_shared<CsApexViewCoreLocal>(view_core_, view_core_.getExceptionHandler())),
+      view_core_old_(std::make_shared<CsApexViewCoreImplementation>(view_core_, view_core_.getExceptionHandler())),
+      view_core_new_(std::make_shared<CsApexViewCoreImplementation>(view_core_, view_core_.getExceptionHandler())),
       node_facade_(node)
 {
     root_uuid_provider_ = std::make_shared<UUIDProvider>();
@@ -127,16 +127,16 @@ void RewiringDialog::makeUI(const QString& stylesheet)
 
 void RewiringDialog::createGraphs(const std::string& type)
 {
-    NodeFactoryLocalPtr nfl = std::dynamic_pointer_cast<NodeFactoryLocal>(view_core_.getNodeFactory());
+    NodeFactoryImplementationPtr nfl = std::dynamic_pointer_cast<NodeFactoryImplementation>(view_core_.getNodeFactory());
     if(!nfl) {
         throw std::runtime_error("currently not supported");
     }
-    NodeFactoryLocal& node_factory = *nfl;
+    NodeFactoryImplementation& node_factory = *nfl;
 
     // old graph
     graph_facade_old_ = view_core_old_->getLocalRoot();
     apex_assert_hard(graph_facade_old_);
-    NodeFacadeLocalPtr gnf_old = std::dynamic_pointer_cast<NodeFacadeLocal>(graph_facade_old_->getNodeFacade());
+    NodeFacadeImplementationPtr gnf_old = std::dynamic_pointer_cast<NodeFacadeImplementation>(graph_facade_old_->getNodeFacade());
     apex_assert_hard(gnf_old);
     graph_node_old = std::dynamic_pointer_cast<SubgraphNode>(
                 gnf_old->getNodeHandle()->getNode().lock());
@@ -152,7 +152,7 @@ void RewiringDialog::createGraphs(const std::string& type)
     // new graph
     graph_facade_new_ = view_core_new_->getLocalRoot();
     apex_assert_hard(graph_facade_new_);
-    NodeFacadeLocalPtr gnf_new = std::dynamic_pointer_cast<NodeFacadeLocal>(graph_facade_new_->getNodeFacade());
+    NodeFacadeImplementationPtr gnf_new = std::dynamic_pointer_cast<NodeFacadeImplementation>(graph_facade_new_->getNodeFacade());
     apex_assert_hard(gnf_new);
     graph_node_new = std::dynamic_pointer_cast<SubgraphNode>(
                 gnf_new->getNodeHandle()->getNode().lock());

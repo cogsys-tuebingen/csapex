@@ -3,10 +3,10 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/model/node_facade_local.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/model/node_facade_impl.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/factory/node_wrapper.hpp>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/io.h>
@@ -20,7 +20,7 @@
 #include <csapex/model/connectable.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 
 #include "gtest/gtest.h"
 #include "test_exception_handler.h"
@@ -208,7 +208,7 @@ protected:
     virtual void SetUp() override {
         SteppingTest::SetUp();
 
-        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
+        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
         graph = graph_node->getLocalGraph();
     }
 
@@ -228,31 +228,31 @@ protected:
 };
 
 TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
-    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
+    GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
-    NodeFacadeLocalPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
+    NodeFacadeImplementationPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     graph->addNode(src);
 
-    NodeFacadeLocalPtr constant = factory.makeNode("IterationConstant", UUIDProvider::makeUUID_without_parent("const"), graph);
+    NodeFacadeImplementationPtr constant = factory.makeNode("IterationConstant", UUIDProvider::makeUUID_without_parent("const"), graph);
     ASSERT_NE(nullptr, constant);
     graph->addNode(constant);
 
-    NodeFacadeLocalPtr sink_p = factory.makeNode("IterationSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
+    NodeFacadeImplementationPtr sink_p = factory.makeNode("IterationSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<IterationSink> sink = std::dynamic_pointer_cast<IterationSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
 
     // NESTED GRAPH
-    NodeFacadeLocalPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
+    NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
+    GraphFacadeImplementation sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
-    NodeFacadeLocalPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getLocalGraph());
+    NodeFacadeImplementationPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getLocalGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
 
@@ -309,24 +309,24 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
 }
 
 TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
-    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
+    GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
-    NodeFacadeLocalPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
+    NodeFacadeImplementationPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     graph->addNode(src);
-    NodeFacadeLocalPtr sink_p = factory.makeNode("IterationSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
+    NodeFacadeImplementationPtr sink_p = factory.makeNode("IterationSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<IterationSink> sink = std::dynamic_pointer_cast<IterationSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
 
     // NESTED GRAPH
-    NodeFacadeLocalPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
+    NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
+    GraphFacadeImplementation sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -363,31 +363,31 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
 }
 
 TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
-    GraphFacadeLocal main_graph_facade(executor, graph, graph_node);
+    GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
-    NodeFacadeLocalPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
+    NodeFacadeImplementationPtr src = factory.makeNode("IterationSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     graph->addNode(src);
 
-    NodeFacadeLocalPtr constant = factory.makeNode("IterationConstant", UUIDProvider::makeUUID_without_parent("const"), graph);
+    NodeFacadeImplementationPtr constant = factory.makeNode("IterationConstant", UUIDProvider::makeUUID_without_parent("const"), graph);
     ASSERT_NE(nullptr, constant);
     graph->addNode(constant);
 
-    NodeFacadeLocalPtr sink_p = factory.makeNode("IterationSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
+    NodeFacadeImplementationPtr sink_p = factory.makeNode("IterationSink", UUIDProvider::makeUUID_without_parent("Sink"), graph);
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<IterationSink> sink = std::dynamic_pointer_cast<IterationSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
 
     // NESTED GRAPH
-    NodeFacadeLocalPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
+    NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    GraphFacadeLocal sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
+    GraphFacadeImplementation sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
-    NodeFacadeLocalPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getLocalGraph());
+    NodeFacadeImplementationPtr n2 = factory.makeNode("IterationCombiner", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getLocalGraph());
     ASSERT_NE(nullptr, n2);
     sub_graph_facade.addNode(n2);
 

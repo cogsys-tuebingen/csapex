@@ -293,7 +293,7 @@ add_library(csapex_profiling SHARED
     src/profiling/profile.cpp
     src/profiling/timer.cpp
     src/profiling/profiler.cpp
-    src/profiling/profiler_local.cpp
+    src/profiling/profiler_impl.cpp
     src/profiling/timable.cpp
     src/profiling/profilable.cpp
 
@@ -331,7 +331,7 @@ file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYM
 
 add_library(csapex SHARED
     src/model/node_facade.cpp
-    src/model/node_facade_local.cpp
+    src/model/node_facade_impl.cpp
 
     src/model/node_handle.cpp
     src/model/node_worker.cpp
@@ -344,7 +344,7 @@ add_library(csapex SHARED
     src/core/exception_handler.cpp
 
     src/core/settings.cpp
-    src/core/settings/settings_local.cpp
+    src/core/settings/settings_impl.cpp
 
     src/command/command.cpp
     src/command/dispatcher.cpp
@@ -353,7 +353,7 @@ add_library(csapex SHARED
 
     src/factory/generic_node_factory.cpp
     src/factory/node_factory.cpp
-    src/factory/node_factory_local.cpp
+    src/factory/node_factory_impl.cpp
     src/factory/message_factory.cpp
     src/factory/snippet_factory.cpp
 
@@ -377,10 +377,10 @@ add_library(csapex SHARED
     src/model/fulcrum.cpp
     src/model/generic_state.cpp
     src/model/graph.cpp
-    src/model/graph/graph_local.cpp
+    src/model/graph/graph_impl.cpp
     src/model/subgraph_node.cpp
     src/model/graph_facade.cpp
-    src/model/graph_facade_local.cpp
+    src/model/graph_facade_impl.cpp
     src/model/memento.cpp
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
@@ -538,20 +538,20 @@ file(GLOB_RECURSE csapex_remote_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOL
 )
 
 add_library(csapex_remote SHARED
-    src/core/settings/settings_remote.cpp
-    src/command/dispatcher_remote.cpp
+    src/core/settings/settings_proxy.cpp
+    src/command/dispatcher_proxy.cpp
 
-    src/model/node_facade_remote.cpp
-    src/model/connector_remote.cpp
+    src/model/node_facade_proxy.cpp
+    src/model/connector_proxy.cpp
 
-    src/model/graph/graph_remote.cpp
-    src/model/graph_facade_remote.cpp
+    src/model/graph/graph_proxy.cpp
+    src/model/graph_facade_proxy.cpp
 
-    src/factory/node_factory_remote.cpp
+    src/factory/node_factory_proxy.cpp
 
-    src/profiling/profiler_remote.cpp
+    src/profiling/profiler_proxy.cpp
 
-    src/io/remote.cpp
+    src/io/proxy.cpp
     src/io/raw_message.cpp
     src/io/request.cpp
     src/io/response.cpp
@@ -635,8 +635,8 @@ endif()
 add_library(csapex_qt SHARED
 
     src/view/csapex_view_core.cpp
-    src/view/csapex_view_core_local.cpp
-    src/view/csapex_view_core_remote.cpp
+    src/view/csapex_view_core_impl.cpp
+    src/view/csapex_view_core_proxy.cpp
     src/view/csapex_window.cpp
     src/view/gui_exception_handler.cpp
 

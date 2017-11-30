@@ -1,8 +1,8 @@
 #include <csapex/model/node.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/factory/generic_node_factory.hpp>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -11,7 +11,7 @@
 #include <csapex/msg/marker_message.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/token.h>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
 
 #include "gtest/gtest.h"
 
@@ -42,10 +42,10 @@ void f3(int parameter1,
 
 class AutoGenerateTest : public ::testing::Test {
 protected:
-    NodeFactoryLocal factory;
+    NodeFactoryImplementation factory;
 
     AutoGenerateTest()
-        : factory(SettingsLocal::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
+        : factory(SettingsImplementation::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
     {
     }
 
@@ -73,7 +73,7 @@ TEST_F(AutoGenerateTest, ExplicitTypesAreDetected) {
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f1, "f1"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadeLocalPtr node = factory.makeNode("f1", node_id, uuid_provider);
+    NodeFacadeImplementationPtr node = factory.makeNode("f1", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());
@@ -132,7 +132,7 @@ TEST_F(AutoGenerateTest, ImplicitTypesAreDetected) {
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f2, "f2"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadeLocalPtr node = factory.makeNode("f2", node_id, uuid_provider);
+    NodeFacadeImplementationPtr node = factory.makeNode("f2", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());
@@ -191,7 +191,7 @@ TEST_F(AutoGenerateTest, OrderDoesNotMatterTypesAreDetected) {
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f3, "f3"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadeLocalPtr node = factory.makeNode("f3", node_id, uuid_provider);
+    NodeFacadeImplementationPtr node = factory.makeNode("f3", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());

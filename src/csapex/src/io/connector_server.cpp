@@ -2,7 +2,7 @@
 #include <csapex/io/connector_server.h>
 
 /// PROJECT
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/io/session.h>
 #include <csapex/io/channel.h>
@@ -39,7 +39,7 @@ void ConnectorServer::startObserving(const ConnectablePtr &connector)
         channel->sendNote<ConnectorNote>(ConnectorNoteType::function##Changed, new_value);  \
     });
 
-    #include <csapex/model/connector_remote_accessors.hpp>
+    #include <csapex/model/connector_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/

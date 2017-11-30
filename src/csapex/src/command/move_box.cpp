@@ -2,7 +2,7 @@
 #include <csapex/command/move_box.h>
 
 /// COMPONENT
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/command/command_serializer.h>

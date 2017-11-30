@@ -2,14 +2,14 @@
 #include <csapex/view/node/node_adapter_builder.h>
 
 /// PROJECT
-#include <csapex/model/node_facade_local.h>
-#include <csapex/model/node_facade_remote.h>
+#include <csapex/model/node_facade_impl.h>
+#include <csapex/model/node_facade_proxy.h>
 
 using namespace csapex;
 
 NodePtr csapex::impl::getNode(const NodeFacadePtr& facade)
 {
-    auto lf = castToLocal(facade);
+    auto lf = castToImplementation(facade);
     if(lf) {
         return lf->getNode();
     } else {
@@ -18,13 +18,13 @@ NodePtr csapex::impl::getNode(const NodeFacadePtr& facade)
 }
 
 
-NodeFacadeRemotePtr csapex::impl::castToRemote(const NodeFacadePtr& facade)
+NodeFacadeProxyPtr csapex::impl::castToProxy(const NodeFacadePtr& facade)
 {
-    return std::dynamic_pointer_cast<csapex::NodeFacadeRemote>(facade);
+    return std::dynamic_pointer_cast<csapex::NodeFacadeProxy>(facade);
 }
-NodeFacadeLocalPtr csapex::impl::castToLocal(const NodeFacadePtr& facade)
+NodeFacadeImplementationPtr csapex::impl::castToImplementation(const NodeFacadePtr& facade)
 {
-    return std::dynamic_pointer_cast<csapex::NodeFacadeLocal>(facade);
+    return std::dynamic_pointer_cast<csapex::NodeFacadeImplementation>(facade);
 }
 
 

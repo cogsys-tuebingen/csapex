@@ -62,7 +62,7 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node_facade, 
     } else {
         try {
             std::string name = type + "AdapterBuilder";
-            if(!node_facade->isRemote()) {
+            if(!node_facade->isProxy()) {
                 std::string direct_name = type + "DirectAdapterBuilder";
                 if(node_adapter_manager_->hasConstructor(direct_name)) {
                     name = direct_name;

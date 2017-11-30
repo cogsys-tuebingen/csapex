@@ -18,7 +18,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/param/trigger_parameter.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/delegate_bind.h>
@@ -27,7 +27,7 @@
 #include <csapex/msg/no_message.h>
 #include <csapex/msg/end_of_sequence_message.h>
 #include <csapex/utility/exceptions.h>
-#include <csapex/profiling/profiler_local.h>
+#include <csapex/profiling/profiler_impl.h>
 #include <csapex/utility/debug.h>
 
 /// SYSTEM
@@ -49,7 +49,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     //        stopObserving();
     //    });
 
-    profiler_ = std::make_shared<ProfilerLocal>(false, 16);
+    profiler_ = std::make_shared<ProfilerImplementation>(false, 16);
 
     NodePtr node = node_handle_->getNode().lock();
     node->useTimer(profiler_->getTimer(node_handle->getUUID().getFullName()));
@@ -192,7 +192,7 @@ ExecutionState NodeWorker::getExecutionState() const
     return state_;
 }
 
-std::shared_ptr<ProfilerLocal> NodeWorker::getProfiler()
+std::shared_ptr<ProfilerImplementation> NodeWorker::getProfiler()
 {
     return profiler_;
 }

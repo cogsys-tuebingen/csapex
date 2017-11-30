@@ -35,7 +35,7 @@ class CSAPEX_QT_EXPORT CsApexViewCore : public Observer, public Notifier
 public:
     CsApexViewCore();
 
-    virtual bool isRemote() const;
+    virtual bool isProxy() const;
 
     virtual void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR) = 0;
 

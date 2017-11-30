@@ -19,7 +19,7 @@ public:
 #define HANDLE_ACCESSOR(_enum, type, function) _enum,
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
-#include <csapex/model/connector_remote_accessors.hpp>
+#include <csapex/model/connector_proxy_accessors.hpp>
 
         IsConnectedTo,
         IsActivelyConnectedTo,

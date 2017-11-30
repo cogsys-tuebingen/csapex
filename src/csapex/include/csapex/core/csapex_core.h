@@ -60,11 +60,11 @@ public:
     void reset();
 
     Settings& getSettings() const;
-    NodeFactoryLocalPtr getNodeFactory() const;
+    NodeFactoryImplementationPtr getNodeFactory() const;
     SnippetFactoryPtr getSnippetFactory() const;
 
-    GraphFacadeLocalPtr getRoot() const;
-    NodeFacadeLocalPtr getRootNode() const;
+    GraphFacadeImplementationPtr getRoot() const;
+    NodeFacadeImplementationPtr getRootNode() const;
     ThreadPoolPtr getThreadPool() const;
 
     PluginLocatorPtr getPluginLocator() const;
@@ -127,7 +127,7 @@ private:
     PluginLocatorPtr plugin_locator_;
     ExceptionHandler &exception_handler_;
 
-    NodeFactoryLocalPtr node_factory_;
+    NodeFactoryImplementationPtr node_factory_;
     SnippetFactoryPtr snippet_factory_;
 
     std::function<ServerPtr()> server_factory_;
@@ -136,8 +136,8 @@ private:
     ThreadPoolPtr thread_pool_;
 
     UUIDProviderPtr root_uuid_provider_;
-    GraphFacadeLocalPtr root_;
-    NodeFacadeLocalPtr root_facade_;
+    GraphFacadeImplementationPtr root_;
+    NodeFacadeImplementationPtr root_facade_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
 

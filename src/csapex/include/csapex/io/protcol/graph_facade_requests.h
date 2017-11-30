@@ -26,7 +26,7 @@ public:
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_SIGNAL(_enum, signal)
-#include <csapex/model/graph_facade_remote_accessors.hpp>
+#include <csapex/model/graph_facade_proxy_accessors.hpp>
     };
 
     class GraphFacadeRequest : public RequestImplementation<GraphFacadeRequest>

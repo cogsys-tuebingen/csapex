@@ -23,11 +23,11 @@ struct RelayMapping
 class CSAPEX_EXPORT SubgraphNode : public Node, public Variadic
 {
 public:
-    SubgraphNode(GraphLocalPtr graph);
+    SubgraphNode(GraphImplementationPtr graph);
     ~SubgraphNode();
 
     GraphPtr getGraph() const;
-    GraphLocalPtr getLocalGraph() const;
+    GraphImplementationPtr getLocalGraph() const;
 
 //    template <typename T = Connectable>
 //    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
@@ -45,7 +45,7 @@ public:
 //    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     virtual void initialize(csapex::NodeHandlePtr node_handle) override;
-    void setNodeFacade(NodeFacadeLocalPtr graph_node_facade);
+    void setNodeFacade(NodeFacadeImplementationPtr graph_node_facade);
 
 
     virtual void detach() override;
@@ -164,7 +164,7 @@ public:
     slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_removed;
 
 protected:
-    GraphLocalPtr graph_;
+    GraphImplementationPtr graph_;
 
     mutable std::recursive_mutex continuation_mutex_;
     Continuation continuation_;

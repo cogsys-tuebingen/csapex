@@ -8,7 +8,7 @@
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>

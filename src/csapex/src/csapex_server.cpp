@@ -3,13 +3,13 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/io/tcp_server.h>
 
 /// SYSTEM
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 {
     std::set_terminate (csapex_terminate);
 
-    SettingsLocal settings;
+    SettingsImplementation settings;
 
     int effective_argc = argc;
     std::string path_to_bin(argv[0]);

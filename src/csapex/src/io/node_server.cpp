@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/connectable.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/io/session.h>
 #include <csapex/io/connector_server.h>
@@ -29,7 +29,7 @@ NodeServer::~NodeServer()
 }
 
 
-void NodeServer::startObservingNode(const NodeFacadeLocalPtr &node)
+void NodeServer::startObservingNode(const NodeFacadeImplementationPtr &node)
 {
     io::ChannelPtr channel = session_->openChannel(node->getAUUID());
 
@@ -53,7 +53,7 @@ void NodeServer::startObservingNode(const NodeFacadeLocalPtr &node)
         channel->sendNote<NodeNote>(NodeNoteType::_enum##Triggered);  \
     });
 
-    #include <csapex/model/node_facade_remote_accessors.hpp>
+    #include <csapex/model/node_facade_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/
@@ -123,7 +123,7 @@ void NodeServer::startObservingNode(const NodeFacadeLocalPtr &node)
     channels_[node->getAUUID()] = channel;
 }
 
-void NodeServer::stopObservingNode(const NodeFacadeLocalPtr &node)
+void NodeServer::stopObservingNode(const NodeFacadeImplementationPtr &node)
 {
     auto pos = channels_.find(node->getAUUID());
     if(pos != channels_.end()) {

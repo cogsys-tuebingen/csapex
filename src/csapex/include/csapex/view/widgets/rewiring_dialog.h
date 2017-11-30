@@ -20,7 +20,7 @@ namespace csapex
 {
 
 class CsApexViewCore;
-class CsApexViewCoreLocal;
+class CsApexViewCoreImplementation;
 class CommandExecutor;
 class CsApexCore;
 
@@ -56,24 +56,24 @@ private:
 private:
     CsApexViewCore& view_core_;
 
-    std::shared_ptr<CsApexViewCoreLocal> view_core_old_;
-    std::shared_ptr<CsApexViewCoreLocal> view_core_new_;
+    std::shared_ptr<CsApexViewCoreImplementation> view_core_old_;
+    std::shared_ptr<CsApexViewCoreImplementation> view_core_new_;
 
     UUIDProviderPtr root_uuid_provider_;
 
-    NodeFacadeLocalPtr nf_old;
-    NodeFacadeLocalPtr nf_new;
+    NodeFacadeImplementationPtr nf_old;
+    NodeFacadeImplementationPtr nf_new;
 
     NodeFacade* node_facade_;
 
     SubgraphNodePtr graph_node_old;
-    GraphLocalPtr graph_old;
-    GraphFacadeLocalPtr graph_facade_old_;
+    GraphImplementationPtr graph_old;
+    GraphFacadeImplementationPtr graph_facade_old_;
 
     std::string type_new_;
     SubgraphNodePtr graph_node_new;
-    GraphLocalPtr graph_new;
-    GraphFacadeLocalPtr graph_facade_new_;
+    GraphImplementationPtr graph_new;
+    GraphFacadeImplementationPtr graph_facade_new_;
 
     std::vector<ConnectionInformation> connections_;
 

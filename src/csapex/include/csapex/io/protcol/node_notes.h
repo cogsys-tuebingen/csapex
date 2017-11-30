@@ -23,7 +23,7 @@ enum class NodeNoteType
         function##Changed,
     #define HANDLE_SIGNAL(_enum, signal) \
         _enum##Triggered,
-    #include <csapex/model/node_facade_remote_accessors.hpp>
+    #include <csapex/model/node_facade_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/

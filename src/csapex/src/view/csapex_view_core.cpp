@@ -42,7 +42,7 @@ bool CsApexViewCore::isGridLockEnabled() const
     return getSettings().getPersistent<bool>("grid-lock", false);
 }
 
-bool CsApexViewCore::isRemote() const
+bool CsApexViewCore::isProxy() const
 {
     return false;
 }

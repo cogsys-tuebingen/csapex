@@ -6,9 +6,9 @@
 #include <csapex/io/feedback.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/io/session.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
@@ -53,7 +53,7 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
 {
     AUUID parent_uuid = uuid_.parentAUUID();
     AUUID graph_uuid = parent_uuid.parentAUUID();
-    GraphFacadeLocalPtr gf = core.getRoot();
+    GraphFacadeImplementationPtr gf = core.getRoot();
     if(!graph_uuid.empty()) {
         gf = gf->getLocalSubGraph(graph_uuid);
     }
@@ -93,7 +93,7 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
 
-    #include <csapex/model/connector_remote_accessors.hpp>
+    #include <csapex/model/connector_proxy_accessors.hpp>
         /**
          * end: generate cases
          **/

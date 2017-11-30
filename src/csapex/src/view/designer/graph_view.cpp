@@ -27,9 +27,9 @@
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/node_constructor.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/tag.h>
@@ -740,7 +740,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
     bool is_note = type == "csapex::Note";
 
-    NodeFacadePtr node_facade = std::make_shared<NodeFacadeLocal>(handle);
+    NodeFacadePtr node_facade = std::make_shared<NodeFacadeImplementation>(handle);
 
     if(is_note) {
         box = new NoteBox(view_core_.getSettings(), node_facade,
@@ -1344,7 +1344,7 @@ void GraphView::createNewThreadGroupFor()
     bool ok;
 
     std::string next_name = "Thread";
-    GraphFacadeLocal* local_facade = dynamic_cast<GraphFacadeLocal*>(graph_facade_.get());
+    GraphFacadeImplementation* local_facade = dynamic_cast<GraphFacadeImplementation*>(graph_facade_.get());
     if(local_facade) {
         ThreadPool* thread_pool = local_facade->getThreadPool();
         next_name = thread_pool->nextName();
@@ -1556,7 +1556,7 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
 
     bool is_note = type == "csapex::Note";
 
-    NodeFacadePtr node_facade = std::make_shared<NodeFacadeLocal>(handle);
+    NodeFacadePtr node_facade = std::make_shared<NodeFacadeImplementation>(handle);
 
     if(is_note) {
         box = new NoteBox(view_core_.getSettings(), node_facade,

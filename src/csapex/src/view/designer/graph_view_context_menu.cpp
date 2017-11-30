@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/core/settings.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/node_state.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/thread_pool.h>
@@ -305,7 +305,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
 
             // TODO: implement for client server
-            GraphFacadeLocal* local_facade = dynamic_cast<GraphFacadeLocal*>(view_.graph_facade_.get());
+            GraphFacadeImplementation* local_facade = dynamic_cast<GraphFacadeImplementation*>(view_.graph_facade_.get());
             if(local_facade) {
                 ThreadPool* thread_pool = local_facade->getThreadPool();
 

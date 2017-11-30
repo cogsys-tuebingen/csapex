@@ -4,12 +4,12 @@
 /// PROJECT
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/msg/direct_connection.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/connection_information.h>
 #include <csapex/msg/input.h>
@@ -39,7 +39,7 @@ using namespace csapex;
 #define sendNotificationStreamGraphio(args) \
 { std::stringstream ss; ss << args; sendNotification(ss.str()); }
 
-GraphIO::GraphIO(GraphFacadeLocal &graph, NodeFactoryLocal* node_factory)
+GraphIO::GraphIO(GraphFacadeImplementation &graph, NodeFactoryImplementation* node_factory)
     : graph_(graph), node_factory_(node_factory),
       position_offset_x_(0.0), position_offset_y_(0.0),
 
@@ -122,12 +122,12 @@ Snippet GraphIO::saveSelectedGraph(const std::vector<UUID> &uuids)
 
     std::set<UUID> node_set(uuids.begin(), uuids.end());
 
-    std::vector<NodeFacadeLocalPtr> nodes;
+    std::vector<NodeFacadeImplementationPtr> nodes;
     std::vector<ConnectionInformation> connections;
 
     for(const UUID& uuid : uuids) {
         NodeFacadePtr nf = graph_.findNodeFacade(uuid);
-        NodeFacadeLocalPtr node = std::dynamic_pointer_cast<NodeFacadeLocal>(nf);
+        NodeFacadeImplementationPtr node = std::dynamic_pointer_cast<NodeFacadeImplementation>(nf);
         apex_assert_hard(node);
         nodes.push_back(node);
 
@@ -207,9 +207,9 @@ void GraphIO::saveNodes(YAML::Node &yaml)
     saveNodes(yaml, graph_.getLocalGraph()->getAllLocalNodeFacades());
 }
 
-void GraphIO::saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeLocalPtr> &nodes)
+void GraphIO::saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeImplementationPtr> &nodes)
 {
-    for(const NodeFacadeLocalPtr& node : nodes) {
+    for(const NodeFacadeImplementationPtr& node : nodes) {
         try {
             YAML::Node yaml_node;
             serializeNode(yaml_node, node);
@@ -285,7 +285,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
     std::string type = doc["type"].as<std::string>();
 
-    NodeFacadeLocalPtr node_handle = node_factory_->makeNode(type, uuid, graph_.getLocalGraph());
+    NodeFacadeImplementationPtr node_handle = node_factory_->makeNode(type, uuid, graph_.getLocalGraph());
     if(!node_handle) {
         return;
     }
@@ -524,7 +524,7 @@ void GraphIO::loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::
 }
 
 
-void GraphIO::serializeNode(YAML::Node& doc, NodeFacadeLocalConstPtr node_facade)
+void GraphIO::serializeNode(YAML::Node& doc, NodeFacadeImplementationConstPtr node_facade)
 {
     node_facade->getNodeState()->writeYaml(doc);
 
@@ -534,7 +534,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeFacadeLocalConstPtr node_facade
         NodeSerializer::instance().serialize(*node, doc);
 
         if(node_facade->isGraph()) {
-            GraphFacadeLocalPtr subgraph = graph_.getLocalSubGraph(node_facade->getUUID());
+            GraphFacadeImplementationPtr subgraph = graph_.getLocalSubGraph(node_facade->getUUID());
             if(subgraph) {
                 YAML::Node subgraph_yaml;
                 GraphIO sub_graph_io(*subgraph, node_factory_);
@@ -547,7 +547,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeFacadeLocalConstPtr node_facade
     }
 }
 
-void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_facade)
+void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr node_facade)
 {
 
     NodeState::Ptr s = node_facade->getNodeState();
@@ -569,7 +569,7 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_fac
     graph_.getLocalGraph()->addNode(node_facade);
 
     if(node_facade->isGraph()) {
-        GraphFacadeLocalPtr subgraph = graph_.getLocalSubGraph(node_facade->getUUID());
+        GraphFacadeImplementationPtr subgraph = graph_.getLocalSubGraph(node_facade->getUUID());
         if(subgraph) {
             GraphIO sub_graph_io(*subgraph, node_factory_);
             slim_signal::ScopedConnection connection = sub_graph_io.loadViewRequest.connect(loadViewRequest);

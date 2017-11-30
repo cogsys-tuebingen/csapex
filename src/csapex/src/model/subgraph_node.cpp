@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/model/node.h>
@@ -22,7 +22,7 @@
 
 using namespace csapex;
 
-SubgraphNode::SubgraphNode(GraphLocalPtr graph)
+SubgraphNode::SubgraphNode(GraphImplementationPtr graph)
     : graph_(graph),
       transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition),
@@ -49,7 +49,7 @@ GraphPtr SubgraphNode::getGraph() const
     return graph_;
 }
 
-GraphLocalPtr SubgraphNode::getLocalGraph() const
+GraphImplementationPtr SubgraphNode::getLocalGraph() const
 {
     return graph_;
 }
@@ -63,7 +63,7 @@ void SubgraphNode::initialize(NodeHandlePtr node_handle)
     }
 }
 
-void SubgraphNode::setNodeFacade(csapex::NodeFacadeLocalPtr graph_node_facade)
+void SubgraphNode::setNodeFacade(csapex::NodeFacadeImplementationPtr graph_node_facade)
 {
     graph_->setNodeFacade(graph_node_facade);
 }

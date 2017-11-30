@@ -12,8 +12,8 @@
 #include <csapex/command/paste_graph.h>
 #include <csapex/core/graphio.h>
 #include <csapex/model/connection.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/subgraph_node.h>
@@ -46,7 +46,7 @@ std::string UngroupNodes::getDescription() const
 
 bool UngroupNodes::doExecute()
 {
-    GraphLocalPtr graph = std::dynamic_pointer_cast<GraphLocal>(getGraph());
+    GraphImplementationPtr graph = std::dynamic_pointer_cast<GraphImplementation>(getGraph());
     apex_assert_hard(graph);
 
     NodeHandle* nh = graph->findNodeHandle(uuid);
@@ -58,7 +58,7 @@ bool UngroupNodes::doExecute()
     analyzeConnections(subgraph->getGraph().get());
 
     {
-        GraphFacadeLocalPtr g = root_graph_facade_->getLocalSubGraph(nh->getUUID());
+        GraphFacadeImplementationPtr g = root_graph_facade_->getLocalSubGraph(nh->getUUID());
         GraphIO io(*g, getNodeFactory());
         io.setIgnoreForwardingConnections(true);
         serialized_snippet_ = io.saveGraph();

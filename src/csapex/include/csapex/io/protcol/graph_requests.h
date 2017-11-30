@@ -23,7 +23,7 @@ public:
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_SIGNAL(_enum, signal)
-#include <csapex/model/graph_remote_accessors.hpp>
+#include <csapex/model/graph_proxy_accessors.hpp>
     };
 
     class GraphRequest : public RequestImplementation<GraphRequest>

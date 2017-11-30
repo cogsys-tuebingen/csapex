@@ -5,13 +5,13 @@
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/model/graph/graph_local.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/model/graph/graph_impl.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
 #include <csapex/command/command_serializer.h>
@@ -41,13 +41,13 @@ std::string AddNode::getDescription() const
 
 bool AddNode::doExecute()
 {
-    GraphLocalPtr graph = getGraph();
+    GraphImplementationPtr graph = getGraph();
 
     if(uuid_.empty()) {
         uuid_ = graph->generateUUID(type_);
     }
 
-    NodeFacadeLocalPtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
+    NodeFacadeImplementationPtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
 
     if(!node) {
         return false;
@@ -63,7 +63,7 @@ bool AddNode::doExecute()
 
 bool AddNode::doUndo()
 {
-    GraphLocalPtr graph = getGraph();
+    GraphImplementationPtr graph = getGraph();
     NodeHandle* node_ = graph->findNodeHandle(uuid_);
 
     saved_state_ = node_->getNodeStateCopy();

@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/connectable.h>
 #include <csapex/model/generic_state.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_state.h>

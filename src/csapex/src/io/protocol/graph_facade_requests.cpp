@@ -6,7 +6,7 @@
 #include <csapex/io/feedback.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/io/session.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/graph.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
@@ -40,7 +40,7 @@ GraphFacadeRequests::GraphFacadeRequest::GraphFacadeRequest(uint8_t request_id)
 ResponsePtr GraphFacadeRequests::GraphFacadeRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     GraphFacadePtr gf = uuid_.empty() ? core.getRoot() : core.getRoot()->getSubGraph(uuid_);
-    GraphFacadeLocalPtr gf_local = std::dynamic_pointer_cast<GraphFacadeLocal>(gf);
+    GraphFacadeImplementationPtr gf_local = std::dynamic_pointer_cast<GraphFacadeImplementation>(gf);
     apex_assert_hard(gf_local);
 
     switch(request_type_)
@@ -77,7 +77,7 @@ ResponsePtr GraphFacadeRequests::GraphFacadeRequest::execute(const SessionPtr &s
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_SIGNAL(_enum, signal)
 
-    #include <csapex/model/graph_facade_remote_accessors.hpp>
+    #include <csapex/model/graph_facade_proxy_accessors.hpp>
         /**
          * end: generate cases
          **/

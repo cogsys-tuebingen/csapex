@@ -5,7 +5,7 @@
 #include <csapex/command/delete_node.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/graphio.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
@@ -27,7 +27,7 @@ std::string PasteGraph::getDescription() const
 
 bool PasteGraph::doExecute()
 {
-    GraphFacadeLocal* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
+    GraphFacadeImplementation* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
     bool paused = graph_facade->isPaused();
     graph_facade->pauseRequest(true);
 

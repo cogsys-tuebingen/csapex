@@ -26,7 +26,7 @@ public:
 
     int commands() const;
 
-    virtual void init(GraphFacadeLocal* root, CsApexCore& core) override;
+    virtual void init(GraphFacadeImplementation* root, CsApexCore& core) override;
 
     void serialize(SerializationBuffer &data) const override;
     void deserialize(const SerializationBuffer& data) override;

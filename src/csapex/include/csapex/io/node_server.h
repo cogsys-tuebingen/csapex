@@ -18,8 +18,8 @@ public:
     NodeServer(SessionPtr session);
     ~NodeServer();
 
-    void startObservingNode(const NodeFacadeLocalPtr &graph);
-    void stopObservingNode(const NodeFacadeLocalPtr& graph);
+    void startObservingNode(const NodeFacadeImplementationPtr &graph);
+    void stopObservingNode(const NodeFacadeImplementationPtr& graph);
 
 private:
     SessionPtr session_;

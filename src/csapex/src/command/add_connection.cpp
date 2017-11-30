@@ -6,7 +6,7 @@
 #include <csapex/model/node_constructor.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/direct_connection.h>
@@ -30,7 +30,7 @@ std::string AddConnection::getDescription() const
 
 bool AddConnection::doUndo()
 {
-    GraphLocalPtr graph = getGraph();
+    GraphImplementationPtr graph = getGraph();
 
     ConnectorPtr f = graph->findConnector(from_uuid);
     ConnectorPtr t = graph->findConnector(to_uuid);
@@ -50,7 +50,7 @@ bool AddConnection::doRedo()
 
 bool AddConnection::doExecute()
 {
-    GraphLocalPtr graph = getGraph();
+    GraphImplementationPtr graph = getGraph();
 
     OutputPtr f = graph->findTypedConnector<Output>(from_uuid);
     InputPtr t = graph->findTypedConnector<Input>(to_uuid);

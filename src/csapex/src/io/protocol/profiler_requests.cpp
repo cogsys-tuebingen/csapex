@@ -6,10 +6,10 @@
 #include <csapex/io/feedback.h>
 #include <csapex/io/raw_message.h>
 #include <csapex/io/session.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_characteristics.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/profiling/profiler.h>
 #include <csapex/serialization/parameter_serializer.h>
@@ -44,7 +44,7 @@ ProfilerRequests::ProfilerRequest::ProfilerRequest(uint8_t request_id)
 ResponsePtr ProfilerRequests::ProfilerRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     NodeFacadePtr nf = core.getRoot()->getLocalGraph()->findNodeFacade(uuid_);
-    NodeFacadeLocalPtr nf_local = std::dynamic_pointer_cast<NodeFacadeLocal>(nf);
+    NodeFacadeImplementationPtr nf_local = std::dynamic_pointer_cast<NodeFacadeImplementation>(nf);
     apex_assert_hard(nf_local);
     NodeHandlePtr nh = nf_local->getNodeHandle();
 

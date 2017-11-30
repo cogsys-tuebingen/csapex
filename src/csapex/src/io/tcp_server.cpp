@@ -9,8 +9,8 @@
 #include <csapex/io/response.h>
 #include <csapex/io/feedback.h>
 #include <csapex/command/update_parameter.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/io/protcol/parameter_changed.h>
 #include <csapex/io/protcol/command_broadcasts.h>

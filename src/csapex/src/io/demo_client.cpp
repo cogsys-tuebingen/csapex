@@ -8,7 +8,7 @@
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/serialization/packet_serializer.h>
-#include <csapex/core/settings/settings_remote.h>
+#include <csapex/core/settings/settings_proxy.h>
 #include <csapex/io/protcol/parameter_changed.h>
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/core_requests.h>
@@ -61,7 +61,7 @@ public:
                 stop();
             });
 
-            settings_= std::make_shared<SettingsRemote>(session);
+            settings_= std::make_shared<SettingsProxy>(session);
 
 //            try {
 //                param::ParameterPtr p = settings_->get("access-test");

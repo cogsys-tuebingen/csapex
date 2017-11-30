@@ -19,11 +19,11 @@ CSAPEX_REGISTER_CLASS(MAKE_NS_CLASS(Namespace,Adapter),csapex::NodeAdapterBuilde
 CSAPEX_REGISTER_LOCAL_NODE_ADAPTER_NS(csapex,Adapter,Adaptee)
 
 
-/// RemoteNodeAdapter registration
+/// ProxyNodeAdapter registration
 #define CSAPEX_REGISTER_NODE_ADAPTER_NS(Namespace, Adapter, Adaptee) \
 namespace Namespace { \
-class MAKE_CLASS(Adapter) : public impl::RemoteAdapterBuilder<Adapter> {\
-    public: MAKE_CLASS(Adapter)() : impl::RemoteAdapterBuilder<Adapter>(#Adaptee) {} \
+class MAKE_CLASS(Adapter) : public impl::ProxyAdapterBuilder<Adapter> {\
+    public: MAKE_CLASS(Adapter)() : impl::ProxyAdapterBuilder<Adapter>(#Adaptee) {} \
 }; \
 } \
 CSAPEX_REGISTER_CLASS(MAKE_NS_CLASS(Namespace,Adapter),csapex::NodeAdapterBuilder)

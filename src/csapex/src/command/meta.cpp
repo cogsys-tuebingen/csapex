@@ -4,8 +4,8 @@
 /// PROJECT
 #include <csapex/utility/assert.h>
 #include <csapex/core/csapex_core.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
 
@@ -22,7 +22,7 @@ Meta::Meta(const AUUID &parent_uuid, const std::string &type, bool transaction)
 {
 }
 
-void Meta::init(GraphFacadeLocal *root, CsApexCore& core)
+void Meta::init(GraphFacadeImplementation *root, CsApexCore& core)
 {
     Command::init(root, core);
     for(Command::Ptr cmd : nested) {

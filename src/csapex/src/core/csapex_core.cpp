@@ -6,21 +6,21 @@
 #include <csapex/core/core_plugin.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/core/graphio.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
 #include <csapex/manager/message_renderer_manager.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/plugin/plugin_manager.hpp>
-#include <csapex/profiling/profiler_local.h>
+#include <csapex/profiling/profiler_impl.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/serialization/snippet.h>
 #include <csapex/utility/assert.h>
@@ -46,7 +46,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
       node_factory_(nullptr),
       root_uuid_provider_(std::make_shared<UUIDProvider>()),
       dispatcher_(std::make_shared<CommandDispatcher>(*this)),
-      profiler_(std::make_shared<ProfilerLocal>()),
+      profiler_(std::make_shared<ProfilerImplementation>()),
       core_plugin_manager(nullptr),
       init_(false), load_needs_reset_(false)
 {
@@ -102,7 +102,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
     MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 
     core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
-    node_factory_ = std::make_shared<NodeFactoryLocal>(settings_, plugin_locator_.get());
+    node_factory_ = std::make_shared<NodeFactoryImplementation>(settings_, plugin_locator_.get());
     snippet_factory_ = std::make_shared<SnippetFactory>(plugin_locator_.get());
 
     boot();
@@ -114,7 +114,7 @@ CsApexCore::CsApexCore(Settings& settings, ExceptionHandler &handler, PluginLoca
 {
     is_root_ = false;
 
-    node_factory_ =  std::dynamic_pointer_cast<NodeFactoryLocal>(node_factory);
+    node_factory_ =  std::dynamic_pointer_cast<NodeFactoryImplementation>(node_factory);
     apex_assert_hard(node_factory);
     snippet_factory_ =  snippet_factory;
 }
@@ -249,9 +249,9 @@ void CsApexCore::init(bool create_global_ports)
 
         root_worker_ = root_facade_->getNodeWorker();
 
-        GraphLocalPtr graph_local = graph->getLocalGraph();
+        GraphImplementationPtr graph_local = graph->getLocalGraph();
 
-        root_ = std::make_shared<GraphFacadeLocal>(*thread_pool_, graph_local, graph, root_facade_);
+        root_ = std::make_shared<GraphFacadeImplementation>(*thread_pool_, graph_local, graph, root_facade_);
         root_->notification.connect(notification);
 
 
@@ -428,7 +428,7 @@ Settings &CsApexCore::getSettings() const
     return settings_;
 }
 
-NodeFactoryLocalPtr CsApexCore::getNodeFactory() const
+NodeFactoryImplementationPtr CsApexCore::getNodeFactory() const
 {
     return node_factory_;
 }
@@ -438,12 +438,12 @@ SnippetFactoryPtr CsApexCore::getSnippetFactory() const
     return snippet_factory_;
 }
 
-GraphFacadeLocalPtr CsApexCore::getRoot() const
+GraphFacadeImplementationPtr CsApexCore::getRoot() const
 {
     return root_;
 }
 
-NodeFacadeLocalPtr CsApexCore::getRootNode() const
+NodeFacadeImplementationPtr CsApexCore::getRootNode() const
 {
     return root_facade_;
 }
@@ -522,7 +522,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
 SnippetPtr CsApexCore::serializeNodes(const AUUID& graph_id, const std::vector<UUID> &nodes) const
 {
-    GraphFacadeLocalPtr gf = graph_id.empty() ? root_ : root_->getLocalSubGraph(graph_id);
+    GraphFacadeImplementationPtr gf = graph_id.empty() ? root_ : root_->getLocalSubGraph(graph_id);
     GraphIO io(*gf, getNodeFactory().get());
     return std::make_shared<Snippet>(io.saveSelectedGraph(nodes));
 }

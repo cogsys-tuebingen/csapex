@@ -27,7 +27,7 @@
 
 namespace csapex {
 
-class ProfilerLocal;
+class ProfilerImplementation;
 class Interval;
 
 class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
@@ -57,7 +57,7 @@ public:
     void setState(ExecutionState state);
     ExecutionState getExecutionState() const;
 
-    std::shared_ptr<ProfilerLocal> getProfiler();
+    std::shared_ptr<ProfilerImplementation> getProfiler();
 
     bool isEnabled() const;
     bool isIdle() const;
@@ -163,7 +163,7 @@ private:
     std::recursive_mutex timer_mutex_;
 
     //TimerPtr profiling_timer_;
-    std::shared_ptr<ProfilerLocal> profiler_;
+    std::shared_ptr<ProfilerImplementation> profiler_;
 
     long guard_;
 };

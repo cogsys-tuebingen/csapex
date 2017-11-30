@@ -22,7 +22,7 @@ struct ProfilerStats
 struct CSAPEX_PROFILING_EXPORT Profile
 {
     friend class Profiler;
-    friend class ProfilerRemote;
+    friend class ProfilerProxy;
 
 public:
     Profile(const std::string &key, int timer_history_length = 1, bool enabled = true);

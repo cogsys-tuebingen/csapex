@@ -25,7 +25,7 @@ NodeFacade::~NodeFacade()
 {
 }
 
-bool NodeFacade::isRemote() const
+bool NodeFacade::isProxy() const
 {
     return false;
 }

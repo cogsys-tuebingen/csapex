@@ -35,7 +35,7 @@ enum class GraphFacadeNoteType
         function##Changed,
     #define HANDLE_SIGNAL(_enum, signal) \
         _enum##Triggered,
-    #include <csapex/model/graph_facade_remote_accessors.hpp>
+    #include <csapex/model/graph_facade_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/

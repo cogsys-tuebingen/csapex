@@ -5,12 +5,12 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/graph/graph_local.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/model/graph/graph_impl.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -18,7 +18,7 @@
 #include <csapex/core/graphio.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 
 /// SYSTEM
 
@@ -40,7 +40,7 @@ std::string DeleteNode::getDescription() const
 
 bool DeleteNode::doExecute()
 {
-    GraphLocalPtr graph = getGraph();
+    GraphImplementationPtr graph = getGraph();
     NodeHandle* node_handle = graph->findNodeHandle(uuid);
 
     type = node_handle->getType();
@@ -54,7 +54,7 @@ bool DeleteNode::doExecute()
 
     // serialize sub graph
     if(node_handle->isGraph()) {
-        GraphFacadeLocalPtr g = root_graph_facade_->getLocalSubGraph(node_handle->getUUID());
+        GraphFacadeImplementationPtr g = root_graph_facade_->getLocalSubGraph(node_handle->getUUID());
         apex_assert_hard(g);
 
         GraphIO io(*g, getNodeFactory());
@@ -75,15 +75,15 @@ bool DeleteNode::doExecute()
 
 bool DeleteNode::doUndo()
 {
-    GraphLocalPtr graph = getGraph();
-    NodeFacadeLocalPtr node_facade = getNodeFactory()->makeNode(type, uuid, graph);
+    GraphImplementationPtr graph = getGraph();
+    NodeFacadeImplementationPtr node_facade = getNodeFactory()->makeNode(type, uuid, graph);
     node_facade->setNodeState(saved_state);
 
     graph->addNode(node_facade);
 
     //deserialize subgraph
     if(node_facade->isGraph()) {
-        GraphFacadeLocalPtr g = root_graph_facade_->getLocalSubGraph(node_facade->getUUID());
+        GraphFacadeImplementationPtr g = root_graph_facade_->getLocalSubGraph(node_facade->getUUID());
         apex_assert_hard(g);
 
         GraphIO io(*g, getNodeFactory());
@@ -96,7 +96,7 @@ bool DeleteNode::doUndo()
 bool DeleteNode::doRedo()
 {
     if(Meta::doRedo()) {
-        GraphLocalPtr graph = getGraph();
+        GraphImplementationPtr graph = getGraph();
         NodeHandle* node_handle = graph->findNodeHandle(uuid);
         saved_state = node_handle->getNodeStateCopy();
 

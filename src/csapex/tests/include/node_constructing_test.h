@@ -2,9 +2,9 @@
 #define NODE_CONSTRUCTING_TEST_H
 
 #include <csapex/model/model_fwd.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/factory/node_wrapper.hpp>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/msg/output.h>
 #include <csapex/msg/input.h>
@@ -12,8 +12,8 @@
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph/vertex.h>
-#include <csapex/model/node_facade_local.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
+#include <csapex/model/graph_facade_impl.h>
 
 #include "gtest/gtest.h"
 
@@ -26,7 +26,7 @@ namespace csapex
 class NodeConstructingTest : public ::testing::Test {
 protected:
     NodeConstructingTest()
-        : factory(SettingsLocal::NoSettings, nullptr),
+        : factory(SettingsImplementation::NoSettings, nullptr),
           executor(eh, false, false)
     {
         factory.registerNodeType(std::make_shared<NodeConstructor>("StaticMultiplier", std::bind(&NodeConstructingTest::makeStaticMultiplier<2>)));
@@ -41,12 +41,12 @@ protected:
     }
 
     virtual void SetUp() override {
-        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphLocal>());
+        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
         graph = graph_node->getLocalGraph();
 
         abort_connection = error_handling::stop_request().connect([this](){
             for(graph::VertexPtr vtx : *graph) {
-                NodeFacadeLocalPtr nf = std::dynamic_pointer_cast<NodeFacadeLocal>(vtx->getNodeFacade());
+                NodeFacadeImplementationPtr nf = std::dynamic_pointer_cast<NodeFacadeImplementation>(vtx->getNodeFacade());
                 apex_assert_hard(nf);
                 if(std::shared_ptr<MockupSink> mp = std::dynamic_pointer_cast<MockupSink>(nf->getNode())) {
                     mp->abort();
@@ -73,13 +73,13 @@ protected:
         return NodePtr(new NodeWrapper<MockupSink>());
     }
 
-    NodeFactoryLocal factory;
+    NodeFactoryImplementation factory;
     TestExceptionHandler eh;
 
     ThreadPool executor;
 
     SubgraphNodePtr graph_node;
-    GraphLocalPtr graph;
+    GraphImplementationPtr graph;
 
     slim_signal::Connection abort_connection;
 };

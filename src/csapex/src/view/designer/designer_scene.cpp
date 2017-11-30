@@ -13,8 +13,8 @@
 #include <csapex/model/connector.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/model/graph_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/graph.h>
 #include <csapex/msg/marker_message.h>
 #include <csapex/profiling/interlude.hpp>
@@ -668,7 +668,7 @@ void DesignerScene::connectionAdded(const ConnectionInformation& ci)
     }
 
 
-    if(GraphFacadeLocalPtr gfl = std::dynamic_pointer_cast<GraphFacadeLocal>(graph_facade_)) {
+    if(GraphFacadeImplementationPtr gfl = std::dynamic_pointer_cast<GraphFacadeImplementation>(graph_facade_)) {
         ConnectionPtr connection = gfl->getLocalGraph()->getConnection(ci.from, ci.to);
 
         connection->fulcrum_added.connect(
@@ -856,7 +856,7 @@ void DesignerScene::drawConnection(QPainter *painter, const ConnectionInformatio
     //        marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(token->getTokenData()) != nullptr;
     //    }
 
-    if(GraphFacadeLocalPtr gfl = std::dynamic_pointer_cast<GraphFacadeLocal>(graph_facade_)) {
+    if(GraphFacadeImplementationPtr gfl = std::dynamic_pointer_cast<GraphFacadeImplementation>(graph_facade_)) {
         ConnectionPtr connection = gfl->getLocalGraph()->getConnection(ci.from, ci.to);
 
         ccs.disabled = !(from->isEnabled() && to->isEnabled());

@@ -2,7 +2,7 @@
 #define STEPPING_TEST_H
 
 #include "node_constructing_test.h"
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 
 namespace csapex
 {
@@ -22,7 +22,7 @@ public:
     {
         NodeConstructingTest::SetUp();
 
-        main_graph_facade = std::make_shared<GraphFacadeLocal>(executor, graph, graph_node);
+        main_graph_facade = std::make_shared<GraphFacadeImplementation>(executor, graph, graph_node);
         graph->setNodeFacade(main_graph_facade->getLocalNodeFacade());
 
         executor.setSteppingMode(true);
@@ -94,7 +94,7 @@ protected:
     std::recursive_mutex end_step_called_mutex;
     std::condition_variable_any step_done;
 
-    GraphFacadeLocalPtr main_graph_facade;
+    GraphFacadeImplementationPtr main_graph_facade;
 };
 
 }

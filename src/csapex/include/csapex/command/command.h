@@ -28,7 +28,7 @@ public:
     class CSAPEX_COMMAND_EXPORT Access {
         friend class Group;
         friend class CommandDispatcher;
-        friend class CommandDispatcherRemote;
+        friend class CommandDispatcherProxy;
         friend class command::Meta;
 
     private:
@@ -47,7 +47,7 @@ public:
 public:
     Command(const AUUID& graph_uuid);
 
-    virtual void init(GraphFacadeLocal* graph_facade, CsApexCore& core);
+    virtual void init(GraphFacadeImplementation* graph_facade, CsApexCore& core);
     virtual bool isUndoable() const;
     virtual bool isHidden() const;
 
@@ -82,13 +82,13 @@ protected:
     virtual bool doUndo() = 0;
     virtual bool doRedo() = 0;
 
-    GraphFacadeLocal *getRoot();
+    GraphFacadeImplementation *getRoot();
 
-    GraphFacadeLocal *getGraphFacade();
-    GraphLocalPtr getGraph();
+    GraphFacadeImplementation *getGraphFacade();
+    GraphImplementationPtr getGraph();
     SubgraphNodePtr getSubgraphNode();
 
-    NodeFactoryLocal *getNodeFactory();
+    NodeFactoryImplementation *getNodeFactory();
 
     GraphFacade* getSubGraph(const UUID& graph_id);
     ThreadPool* getRootThreadPool();
@@ -97,7 +97,7 @@ protected:
     AUUID graph_uuid;
     CsApexCore* core_;
 
-    GraphFacadeLocal* root_graph_facade_;
+    GraphFacadeImplementation* root_graph_facade_;
 
 private:
     static std::vector<Command::Ptr> undo_later;

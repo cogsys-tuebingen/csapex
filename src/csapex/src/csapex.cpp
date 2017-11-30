@@ -3,17 +3,17 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
 #include <csapex/io/server.h>
 #include <csapex/io/session_client.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
-#include <csapex/view/csapex_view_core_local.h>
-#include <csapex/view/csapex_view_core_remote.h>
+#include <csapex/view/csapex_view_core_impl.h>
+#include <csapex/view/csapex_view_core_proxy.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/gui_exception_handler.h>
 #include <csapex/io/tcp_server.h>
@@ -94,7 +94,7 @@ int Main::runWithGui()
 {
     app->processEvents();
 
-    std::unique_ptr<CsApexViewCore> main(new CsApexViewCoreLocal (core));
+    std::unique_ptr<CsApexViewCore> main(new CsApexViewCoreImplementation (core));
 
     CsApexViewCore& view_core = *main;
 
@@ -269,7 +269,7 @@ void Main::showMessage(const QString& msg)
 
 int main(int argc, char** argv)
 {
-    SettingsLocal settings;
+    SettingsImplementation settings;
 
     int effective_argc = argc;
     std::string path_to_bin(argv[0]);

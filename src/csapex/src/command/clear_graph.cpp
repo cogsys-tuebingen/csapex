@@ -6,13 +6,13 @@
 #include <csapex/command/delete_node.h>
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_facade_local.h>
-#include <csapex/model/graph/graph_local.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/model/node_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 
 /// SYSTEM
 
@@ -34,7 +34,7 @@ std::string ClearGraph::getDescription() const
 
 bool ClearGraph::doExecute()
 {
-    GraphFacadeLocal* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
+    GraphFacadeImplementation* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
     bool paused = graph_facade->isPaused();
     graph_facade->pauseRequest(true);
 

@@ -3,9 +3,9 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/utility/assert.h>
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/serialization/serialization_buffer.h>
 
@@ -42,7 +42,7 @@ bool Command::Access::redoCommand(Command::Ptr cmd)
     return cmd->redoCommand(cmd);
 }
 
-void Command::init(GraphFacadeLocal *graph_facade, CsApexCore& core)
+void Command::init(GraphFacadeImplementation *graph_facade, CsApexCore& core)
 {
     apex_assert_hard(graph_facade);
 
@@ -109,14 +109,14 @@ void Command::accept(int level, std::function<void (int level, const Command &)>
     callback(level, *this);
 }
 
-GraphFacadeLocal* Command::getRoot()
+GraphFacadeImplementation* Command::getRoot()
 {
-    GraphFacadeLocal* gfl = dynamic_cast<GraphFacadeLocal*>(root_graph_facade_);
+    GraphFacadeImplementation* gfl = dynamic_cast<GraphFacadeImplementation*>(root_graph_facade_);
     apex_assert_hard(gfl);
     return gfl;
 }
 
-GraphFacadeLocal* Command::getGraphFacade()
+GraphFacadeImplementation* Command::getGraphFacade()
 {
     GraphFacade* gf = nullptr;
 
@@ -133,13 +133,13 @@ GraphFacadeLocal* Command::getGraphFacade()
         apex_assert_hard(gf);
     }
 
-    GraphFacadeLocal* gfl = dynamic_cast<GraphFacadeLocal*>(gf);
+    GraphFacadeImplementation* gfl = dynamic_cast<GraphFacadeImplementation*>(gf);
     apex_assert_hard(gfl);
 
     return gfl;
 }
 
-GraphLocalPtr Command::getGraph()
+GraphImplementationPtr Command::getGraph()
 {
     return getGraphFacade()->getLocalGraph();
 }
@@ -149,7 +149,7 @@ SubgraphNodePtr Command::getSubgraphNode()
     return getGraphFacade()->getSubgraphNode();
 }
 
-NodeFactoryLocal* Command::getNodeFactory()
+NodeFactoryImplementation* Command::getNodeFactory()
 {
     return core_->getNodeFactory().get();
 }

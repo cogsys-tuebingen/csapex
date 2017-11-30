@@ -29,7 +29,7 @@ enum class GraphNoteType
         function##Changed,
     #define HANDLE_SIGNAL(_enum, signal) \
         _enum##Triggered,
-    #include <csapex/model/graph_remote_accessors.hpp>
+    #include <csapex/model/graph_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/

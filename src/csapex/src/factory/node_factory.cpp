@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/factory/node_factory_local.h>
+#include <csapex/factory/node_factory_impl.h>
 
 using namespace csapex;
 
