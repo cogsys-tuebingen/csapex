@@ -34,7 +34,7 @@ public:
     static const uint8_t HEADER_LENGTH = 4;
 public:
     SerializationBuffer();
-    SerializationBuffer(const std::vector<uint8_t>& copy);
+    SerializationBuffer(const std::vector<uint8_t>& copy, bool insert_header = false);
 
     void finalize();
     void seek(uint32_t p);

@@ -38,13 +38,17 @@ SerializationBuffer::SerializationBuffer()
 }
 
 
-SerializationBuffer::SerializationBuffer(const std::vector<uint8_t>& copy)
+SerializationBuffer::SerializationBuffer(const std::vector<uint8_t>& copy, bool insert_header)
     : pos(HEADER_LENGTH)
 {
-    // the header is always 4 byte
-    insert(end(), HEADER_LENGTH, 0);
+    if(insert_header) {
+        // the header is always 4 byte
+        insert(end(), HEADER_LENGTH, 0);
+        insert(end(), copy.begin(), copy.end());
 
-    insert(end(), copy.begin(), copy.end());
+    } else {
+        assign(copy.begin(), copy.end());
+    }
 
     init();
 }
