@@ -25,6 +25,45 @@ NodeFacade::~NodeFacade()
 {
 }
 
+bool NodeFacade::isProxy() const
+{
+    return false;
+}
+
+std::vector<ConnectorDescription> NodeFacade::getExternalConnectors() const
+{
+    std::vector<ConnectorDescription> result;
+    if(getAUUID() != AUUID::NONE) {
+        auto insert = [&result](const std::vector<ConnectorDescription>& vec)
+        {
+            result.insert(result.end(), vec.begin(), vec.end());
+        };
+
+        insert(getExternalInputs());
+        insert(getExternalOutputs());
+        insert(getExternalSlots());
+        insert(getExternalEvents());
+    }
+
+    return result;
+}
+
+std::vector<ConnectorDescription> NodeFacade::getInternalConnectors() const
+{
+    std::vector<ConnectorDescription> result;
+    auto insert = [&result](const std::vector<ConnectorDescription>& vec)
+    {
+        result.insert(result.end(), vec.begin(), vec.end());
+    };
+
+    insert(getInternalInputs());
+    insert(getInternalOutputs());
+    insert(getInternalSlots());
+    insert(getInternalEvents());
+
+    return result;
+}
+
 template <typename T>
 T NodeFacade::readParameter(const std::string& name) const
 {
@@ -62,3 +101,22 @@ template CSAPEX_EXPORT void NodeFacade::setParameter<std::pair<std::string, bool
 template CSAPEX_EXPORT void NodeFacade::setParameter<std::vector<int> >(const std::string& name, const std::vector<int>& value);
 template CSAPEX_EXPORT void NodeFacade::setParameter<std::vector<double> >(const std::string& name, const std::vector<double>& value);
 
+std::vector<ConnectorDescription> NodeFacade::getInputs() const
+{
+    return getExternalInputs();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getOutputs() const
+{
+    return getExternalOutputs();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getEvents() const
+{
+    return getExternalEvents();
+}
+
+std::vector<ConnectorDescription> NodeFacade::getSlots() const
+{
+    return getExternalSlots();
+}

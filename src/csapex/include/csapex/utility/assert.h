@@ -80,6 +80,10 @@ inline std::string universal_to_string(const V& value)
 #define apex_assert_hard(assertion)  apex_assert_hard_msg(assertion,"")
 #define apex_assert_soft(assertion)  apex_assert_soft_msg(assertion,"")
 
+
+#define apex_fail(msg) _apex_fail(msg, "", __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
+
+void CSAPEX_UTILS_EXPORT _apex_fail(const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig);
 void CSAPEX_UTILS_EXPORT _apex_assert(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig);
 void CSAPEX_UTILS_EXPORT _apex_assert_hard(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig);
 void CSAPEX_UTILS_EXPORT _apex_assert_soft(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig);

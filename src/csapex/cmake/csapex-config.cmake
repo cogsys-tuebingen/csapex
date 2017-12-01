@@ -102,7 +102,7 @@ IF(NOT CSAPEX_FOUND)
     ENDIF(CSAPEX_FIND_REQUIRED)
   ENDIF(CSAPEX_FIND_QUIETLY)
 ELSE(NOT CSAPEX_FOUND)
-  SET(csapex_LIBRARIES ${CSAPEX_LIB} 
+  SET(csapex_LIBRARIES ${CSAPEX_LIB}
   ${csapex_LIBRARY_DIR}/csapex_util.lib
   ${csapex_LIBRARY_DIR}/csapex_param.lib
   ${csapex_LIBRARY_DIR}/csapex_profiling.lib 

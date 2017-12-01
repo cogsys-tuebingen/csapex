@@ -13,7 +13,7 @@
 #include <csapex/model/connector_type.h>
 #include <csapex/model/connector_description.h>
 #include <csapex/view/csapex_qt_export.h>
-#include <csapex/model/observer.h>
+#include <csapex/view/utility/qobserver.h>
 
 /// SYSTEM
 #include <memory>
@@ -61,7 +61,7 @@ public:
     virtual void init();
 
     /// MODIFIER
-    Port* createPort(ConnectorWeakPtr connector, QBoxLayout *layout);
+    Port* createPort(ConnectorPtr connector, QBoxLayout *layout);
     void removePort(ConnectorWeakPtr connector);
 
     bool isGraph() const;
@@ -104,24 +104,22 @@ protected:
     bool eventFilter(QObject*, QEvent*);
 
 public:
-    void updateBoxInformation(Graph* graph);
+    void updateBoxInformation(GraphFacade *graph);
 
 public Q_SLOTS:
     void getInformation();
     void triggerMinimized();
+    void triggerEnabledChanged();
     void changeColor();
     void refreshStylesheet();
     void refreshTopLevelStylesheet();
     void triggerFlipSides();
     void showProfiling(bool show);
 
-    virtual void updateComponentInformation(Graph* graph);
+    virtual void updateComponentInformation(GraphFacade* graph);
     virtual void updateThreadInformation();
     virtual void updateFrequencyInformation();
     void contextMenuEvent(QContextMenuEvent* e);
-
-    void registerEvent(Connector*);
-    void unregisterEvent(Connector*);
 
     void nodeStateChangedEvent();
     void enabledChangeEvent(bool val);
@@ -156,7 +154,6 @@ Q_SIGNALS:
     void createPortRequest(ConnectorDescription request);
     void createPortAndConnectRequest(ConnectorDescription request, ConnectorPtr);
     void createPortAndMoveRequest(ConnectorDescription request,  ConnectorPtr);
-
 protected:
     void setStyleForId(QLabel* label, int id);
     void resizeEvent(QResizeEvent * e);
@@ -170,6 +167,8 @@ protected:
 
 protected:
     GraphView* parent_;
+
+    QObserver observer_;
 
     Ui::Box* ui;
     QSizeGrip* grip_;

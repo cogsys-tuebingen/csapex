@@ -22,6 +22,7 @@ struct ProfilerStats
 struct CSAPEX_PROFILING_EXPORT Profile
 {
     friend class Profiler;
+    friend class ProfilerProxy;
 
 public:
     Profile(const std::string &key, int timer_history_length = 1, bool enabled = true);
@@ -37,6 +38,9 @@ public:
 
     ProfilerStats getStats(const std::string &name) const;
     void reset();
+
+protected:
+    void addInterval(Interval::Ptr interval);
 
 private:
     Timer::Ptr timer;

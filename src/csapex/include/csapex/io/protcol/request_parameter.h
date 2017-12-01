@@ -20,9 +20,9 @@ public:
         ParameterRequest(uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(SerializationBuffer& data) override;
+        virtual void deserialize(const SerializationBuffer& data) override;
 
-        virtual ResponsePtr execute(CsApexCore& core) const override;
+        virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
         std::string getType() const override
         {
@@ -41,7 +41,7 @@ public:
         ParameterResponse(uint8_t request_id);
 
         virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(SerializationBuffer& data) override;
+        virtual void deserialize(const SerializationBuffer& data) override;
 
         param::ParameterConstPtr getParameter() const;
 

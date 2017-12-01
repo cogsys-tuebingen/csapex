@@ -16,7 +16,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeFacade : public Observer, public Notifier
+class CSAPEX_EXPORT NodeFacade : public Observer, public Notifier, public ErrorState
 {
 protected:
     NodeFacade();
@@ -26,14 +26,17 @@ public:
 
     virtual std::string getType() const = 0;
     virtual UUID getUUID() const = 0;
+    virtual AUUID getAUUID() const = 0;
 
     virtual bool isActive() const = 0;
-    virtual void setActive(bool active) = 0;
+
+    virtual bool isProxy() const;
 
     virtual bool isProcessingEnabled() const = 0;
 
     virtual bool isGraph() const = 0;
     virtual AUUID getSubgraphAUUID() const = 0;
+    virtual GraphPtr getSubgraph() const = 0;
 
     virtual bool isSource() const = 0;
     virtual bool isSink() const = 0;
@@ -48,29 +51,42 @@ public:
     virtual bool hasVariadicEvents() const = 0;
     virtual bool hasVariadicSlots() const = 0;
 
-    virtual std::vector<ConnectorDescription> getInputs() const = 0;
-    virtual std::vector<ConnectorDescription> getOutputs() const = 0;
-    virtual std::vector<ConnectorDescription> getEvents() const = 0;
-    virtual std::vector<ConnectorDescription> getSlots() const = 0;
+    virtual std::vector<ConnectorDescription> getInputs() const;
+    virtual std::vector<ConnectorDescription> getOutputs() const;
+    virtual std::vector<ConnectorDescription> getEvents() const;
+    virtual std::vector<ConnectorDescription> getSlots() const;
 
     virtual std::vector<ConnectorDescription> getInternalInputs() const = 0;
     virtual std::vector<ConnectorDescription> getInternalOutputs() const = 0;
     virtual std::vector<ConnectorDescription> getInternalEvents() const = 0;
     virtual std::vector<ConnectorDescription> getInternalSlots() const = 0;
 
+    virtual std::vector<ConnectorDescription> getExternalInputs() const = 0;
+    virtual std::vector<ConnectorDescription> getExternalOutputs() const = 0;
+    virtual std::vector<ConnectorDescription> getExternalEvents() const = 0;
+    virtual std::vector<ConnectorDescription> getExternalSlots() const = 0;
+
+    virtual std::vector<ConnectorDescription> getExternalConnectors() const;
+    virtual std::vector<ConnectorDescription> getInternalConnectors() const;
+
+    virtual ConnectorPtr getConnector(const UUID& id) const = 0;
+    virtual ConnectorPtr getConnectorNoThrow(const UUID& id) const noexcept = 0;
+
+    virtual ConnectorPtr getParameterInput(const std::string& name) const = 0;
+    virtual ConnectorPtr getParameterOutput(const std::string& name) const = 0;
+
     virtual NodeCharacteristics getNodeCharacteristics() const = 0;
 
+    virtual bool canStartStepping() const = 0;
 
     virtual bool isProfiling() const = 0;
     virtual void setProfiling(bool profiling) = 0;
 
-    virtual bool isError() const = 0;
-    virtual ErrorState::ErrorLevel errorLevel() const = 0;
-    virtual std::string errorMessage() const = 0;
-
     virtual ExecutionState getExecutionState() const = 0;
 
     virtual std::string getLabel() const = 0;
+
+    virtual int getSchedulerId() const = 0;
 
     virtual double getExecutionFrequency() const = 0;
     virtual double getMaximumFrequency() const = 0;
@@ -89,10 +105,6 @@ public:
 
     virtual NodeStatePtr getNodeState() const = 0;
     virtual NodeStatePtr getNodeStateCopy() const = 0;
-    virtual void setNodeState(NodeStatePtr memento) = 0;
-
-    virtual GenericStateConstPtr getParameterState() const = 0;
-
 
 
     template <typename T>
@@ -100,28 +112,46 @@ public:
     template <typename T>
     void setParameter(const std::string& name, const T& value);
 
-    // TODO: remove or add proxies for all of them
-    virtual NodeHandlePtr getNodeHandle() const = 0;
-    virtual NodeWorkerPtr getNodeWorker() const = 0;
-    virtual NodeRunnerPtr getNodeRunner() const = 0;
-    virtual NodePtr getNode() const = 0;
-
 public:
+    /// access to data for node adapters
+    slim_signal::ObservableSignal<void(StreamableConstPtr)> raw_data_connection;
+
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
 
 
-    slim_signal::Signal<void (ConnectorPtr)> connector_created;
-    slim_signal::Signal<void (ConnectorPtr)> connector_removed;
+    slim_signal::Signal<void (ConnectorDescription)> connector_created;
+    slim_signal::Signal<void (ConnectorDescription)> connector_removed;
 
-    slim_signal::Signal<void (ConnectorPtr, ConnectorPtr)> connection_in_prograss;
-    slim_signal::Signal<void (ConnectorPtr)> connection_done;
-    slim_signal::Signal<void (ConnectorPtr)> connection_start;
+    slim_signal::Signal<void (ConnectorDescription)> connection_added;
+    slim_signal::Signal<void (ConnectorDescription)> connection_removed;
+    slim_signal::Signal<void (ConnectorDescription)> connection_start;
 
-    slim_signal::Signal<void()> messages_processed;
+    slim_signal::Signal<void ()> messages_processed;
 
-    slim_signal::Signal<void()> node_state_changed;
+    slim_signal::Signal<void(std::string)> label_changed;
+    slim_signal::Signal<void(int)> scheduler_changed;
+
+    slim_signal::Signal<void(NodeStatePtr state)> node_state_changed;
     slim_signal::Signal<void()> parameters_changed;
+    slim_signal::Signal<void()> parameter_set_changed;
+    slim_signal::Signal<void()> activation_changed;
+
+    slim_signal::Signal<void (ExecutionState)> execution_state_changed;
+
+    slim_signal::Signal<void(param::ParameterPtr)> parameter_added;
+    slim_signal::Signal<void(param::ParameterPtr)> parameter_changed;
+    slim_signal::Signal<void(param::ParameterPtr)> parameter_removed;
+
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_inputs_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_outputs_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_events_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_slots_changed;
+
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_inputs_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_outputs_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_events_changed;
+    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_slots_changed;
 
     slim_signal::Signal<void()> destroyed;
 

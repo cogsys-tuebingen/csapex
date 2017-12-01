@@ -22,7 +22,7 @@ public:
     virtual std::string getDescription() const override;
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
     void cloneFrom(const Command& other) override;
 
     std::string getType() const override

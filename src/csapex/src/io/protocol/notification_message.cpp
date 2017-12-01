@@ -26,25 +26,12 @@ NotificationMessage::NotificationMessage()
 
 void NotificationMessage::serialize(SerializationBuffer &data) const
 {
-//    std::cerr << "serializing Notification" << std::endl;
-    data << notification.auuid;
-
-    data << notification.error;
-    data << notification.message;
+    data << notification;
 }
 
-void NotificationMessage::deserialize(SerializationBuffer& data)
+void NotificationMessage::deserialize(const SerializationBuffer& data)
 {
-//    std::cerr << "deserializing Notification" << std::endl;
-    data >> notification.auuid;
-
-//    std::cerr << "full name: " << full_name << std::endl;
-
-    data >> notification.error;
-//    std::cerr << "error level: " << (int) notification.error << std::endl;
-
-    data >> notification.message;
-//    std::cerr << "message: " << notification.message.str() << std::endl;
+    data >> notification;
 }
 
 const Notification& NotificationMessage::getNotification() const

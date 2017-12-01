@@ -69,7 +69,21 @@ void SignalBase::disconnectAll()
         c->disconnect();
     }
     connections_.clear();
+
+    lock.unlock();
+    onDisconnect();
+    lock.lock();
 }
+
+void SignalBase::onConnect()
+{
+}
+
+void SignalBase::onDisconnect()
+{
+}
+
+
 
 
 Connection::Connection(SignalBase* parent, const Deleter& del)

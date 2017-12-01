@@ -46,7 +46,7 @@ private:
 
     std::string supported_types_;
 
-    PluginManager<MessageProvider>* manager_;
+    std::unique_ptr<PluginManager<MessageProvider>> manager_;
 };
 
 }

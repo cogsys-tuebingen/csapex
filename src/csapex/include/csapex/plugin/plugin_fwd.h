@@ -17,7 +17,7 @@ namespace csapex
 template <typename T>
 class PluginManager;
 
-FWD(PluginLocator);
+FWD(PluginLocator)
 }
 
 #undef FWD

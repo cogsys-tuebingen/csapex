@@ -5,7 +5,7 @@
 #include <csapex/command/delete_node.h>
 #include <csapex/utility/assert.h>
 #include <csapex/core/graphio.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
@@ -27,13 +27,11 @@ std::string PasteGraph::getDescription() const
 
 bool PasteGraph::doExecute()
 {
-    GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
+    GraphFacadeImplementation* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
     bool paused = graph_facade->isPaused();
     graph_facade->pauseRequest(true);
 
-    SubgraphNodePtr graph = graph_facade->getSubgraphNode();
-
-    GraphIO io(graph, getNodeFactory());
+    GraphIO io(*graph_facade, getNodeFactory());
 
     id_mapping_ = io.loadIntoGraph(*blueprint_, pos_);
 
@@ -79,7 +77,7 @@ void PasteGraph::serialize(SerializationBuffer &data) const
     data << pos_.x << pos_.y;
 }
 
-void PasteGraph::deserialize(SerializationBuffer& data)
+void PasteGraph::deserialize(const SerializationBuffer& data)
 {
     data >> blueprint_;
     data >> pos_.x >> pos_.y;

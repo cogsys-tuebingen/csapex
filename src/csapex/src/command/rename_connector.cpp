@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/connectable.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
@@ -33,7 +33,7 @@ std::string RenameConnector::getDescription() const
 
 bool RenameConnector::doExecute()
 {
-    ConnectablePtr connector = getGraph()->findConnector(uuid);
+    ConnectablePtr connector = getGraph()->findConnectable(uuid);
     apex_assert_hard(connector);
 
     old_name_ = connector->getLabel();
@@ -44,7 +44,7 @@ bool RenameConnector::doExecute()
 
 bool RenameConnector::doUndo()
 {
-    ConnectablePtr connector = getGraph()->findConnector(uuid);
+    ConnectablePtr connector = getGraph()->findConnectable(uuid);
     apex_assert_hard(connector);
 
     connector->setLabel(old_name_);
@@ -68,7 +68,7 @@ void RenameConnector::serialize(SerializationBuffer &data) const
     data << old_name_;
 }
 
-void RenameConnector::deserialize(SerializationBuffer& data)
+void RenameConnector::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

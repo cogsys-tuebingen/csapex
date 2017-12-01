@@ -10,6 +10,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <sstream>
 
 using namespace csapex;
 
@@ -21,6 +22,11 @@ Input::Input(const UUID &uuid, ConnectableOwnerWeakPtr owner)
 Input::~Input()
 {
     free();
+}
+
+int Input::maxConnectionCount() const
+{
+    return 1;
 }
 
 void Input::setInputTransition(InputTransition *it)
@@ -39,16 +45,6 @@ void Input::reset()
 
     free();
     setSequenceNumber(0);
-}
-
-bool Input::isConnectionPossible(Connector* other_side)
-{
-    if(!other_side->canOutput()) {
-        std::cerr << "cannot connect, other side can't output" << std::endl;
-        return false;
-    }
-
-    return other_side->isConnectionPossible(this);
 }
 
 void Input::setOptional(bool optional)
@@ -109,41 +105,8 @@ void Input::removeAllConnectionsNotUndoable()
     if(!connections_.empty()) {
         getSource()->removeConnection(this);
         connections_.clear();
-        setError(false);
         disconnected(shared_from_this());
     }
-}
-
-bool Input::canConnectTo(Connector *other_side, bool move) const
-{
-    return Connectable::canConnectTo(other_side, move) && (move || !isConnected());
-}
-
-bool Input::targetsCanBeMovedTo(Connector* other_side) const
-{
-    return getSource()->canConnectTo(other_side, true) /*&& canConnectTo(getConnected())*/;
-}
-
-void Input::connectionMovePreview(ConnectorPtr other_side)
-{
-    connectionInProgress(getSource(), other_side);
-}
-
-
-void Input::validateConnections()
-{
-    bool e = false;
-    if(isConnected()) {
-        TokenData::ConstPtr target_type = getSource()->getType();
-        TokenData::ConstPtr type = getType();
-        if(!target_type) {
-            e = true;
-        } else if(!target_type->canConnectTo(type.get())) {
-            e = true;
-        }
-    }
-
-    setError(e);
 }
 
 OutputPtr Input::getSource() const
@@ -196,4 +159,12 @@ void Input::notifyMessageAvailable(Connection* connection)
         connection->setTokenProcessed();
         //this causes problems.....
     }
+}
+
+void Input::addStatusInformation(std::stringstream &status_stream) const
+{
+    if(TokenPtr token = getToken()) {
+        status_stream << ", Last Message Type: " << token->getTokenData()->descriptiveName();
+    }
+    status_stream << ", optional: " << isOptional();
 }

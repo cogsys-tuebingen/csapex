@@ -6,7 +6,7 @@
 #include <csapex/core/core_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_command_export.h>
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>
@@ -22,13 +22,13 @@ namespace csapex
 
 class Designer;
 
-class CSAPEX_COMMAND_EXPORT Command : public Serializable
+class CSAPEX_COMMAND_EXPORT Command : public Streamable
 {
 public:
     class CSAPEX_COMMAND_EXPORT Access {
         friend class Group;
         friend class CommandDispatcher;
-        friend class CommandDispatcherRemote;
+        friend class CommandDispatcherProxy;
         friend class command::Meta;
 
     private:
@@ -47,7 +47,7 @@ public:
 public:
     Command(const AUUID& graph_uuid);
 
-    virtual void init(GraphFacade* graph_facade, CsApexCore& core);
+    virtual void init(GraphFacadeImplementation* graph_facade, CsApexCore& core);
     virtual bool isUndoable() const;
     virtual bool isHidden() const;
 
@@ -69,7 +69,7 @@ public:
     virtual void cloneFrom(const Command& other) = 0;
 
     virtual void serialize(SerializationBuffer &data) const override = 0;
-    virtual void deserialize(SerializationBuffer& data) override = 0;
+    virtual void deserialize(const SerializationBuffer& data) override = 0;
 
 protected:
     Command();
@@ -82,13 +82,13 @@ protected:
     virtual bool doUndo() = 0;
     virtual bool doRedo() = 0;
 
-    GraphFacade* getRoot();
+    GraphFacadeImplementation *getRoot();
 
-    GraphFacade* getGraphFacade();
-    GraphPtr getGraph();
+    GraphFacadeImplementation *getGraphFacade();
+    GraphImplementationPtr getGraph();
     SubgraphNodePtr getSubgraphNode();
 
-    NodeFactory* getNodeFactory();
+    NodeFactoryImplementation *getNodeFactory();
 
     GraphFacade* getSubGraph(const UUID& graph_id);
     ThreadPool* getRootThreadPool();
@@ -97,7 +97,7 @@ protected:
     AUUID graph_uuid;
     CsApexCore* core_;
 
-    GraphFacade* root_graph_facade_;
+    GraphFacadeImplementation* root_graph_facade_;
 
 private:
     static std::vector<Command::Ptr> undo_later;

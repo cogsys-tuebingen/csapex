@@ -5,12 +5,13 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
+#include <csapex/model/graph_facade_impl.h>
 
 using namespace csapex;
 using namespace command;
@@ -18,7 +19,7 @@ using namespace command;
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteConnector)
 
 DeleteConnector::DeleteConnector(const AUUID& parent_uuid, Connectable *_c)
-    : CommandImplementation(parent_uuid), in(_c->canInput()), c_uuid(_c->getUUID())
+    : CommandImplementation(parent_uuid), in(_c->isInput()), c_uuid(_c->getUUID())
 {
 }
 
@@ -81,7 +82,7 @@ void DeleteConnector::serialize(SerializationBuffer &data) const
     data << c_uuid;
 }
 
-void DeleteConnector::deserialize(SerializationBuffer& data)
+void DeleteConnector::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

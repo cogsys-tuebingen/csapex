@@ -2,12 +2,9 @@
 #include <csapex/view/widgets/port_panel.h>
 
 /// PROJECT
-#include <csapex/msg/output.h>
-#include <csapex/msg/input.h>
-#include <csapex/signal/slot.h>
-#include <csapex/signal/event.h>
-#include <csapex/model/subgraph_node.h>
+#include <csapex/model/graph.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/node_facade.h>
 #include <csapex/view/widgets/port.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/widgets/meta_port.h>
@@ -47,6 +44,10 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
         layout = new QHBoxLayout;
         layout->setSpacing(32);
 
+        break;
+
+    default:
+        throw std::runtime_error("tried to create a connector of type 'NONE'");
         break;
     }
 
@@ -88,7 +89,6 @@ void PortPanel::enableMetaPort(const AUUID& target)
 void PortPanel::setup(GraphFacadePtr graph_facade)
 {
     graph_facade_ = graph_facade;
-    graph_ = graph_facade_->getSubgraphNode().get();
 
     switch(type_) {
     case ConnectorType::OUTPUT:
@@ -108,8 +108,8 @@ void PortPanel::setup(GraphFacadePtr graph_facade)
         throw std::logic_error("unsupported type");
     }
 
-    graph_->forwardingAdded.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorAdded));
-    graph_->forwardingRemoved.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorRemoved));
+    graph_facade_->forwarding_connector_added.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorAdded));
+    graph_facade_->forwarding_connector_removed.connect(delegate::Delegate<void(ConnectorPtr)>(this, &PortPanel::connectorRemoved));
 }
 
 void PortPanel::updateLayouts()
@@ -124,6 +124,9 @@ void PortPanel::updateLayouts()
 
 void PortPanel::addPortForConnector(ConnectorPtr c)
 {
+    if(!c) {
+        return;
+    }
     if(c->getConnectorType() != type_) {
         return;
     }
@@ -164,29 +167,29 @@ void PortPanel::removePortForConnector(ConnectorPtr c)
 
 void PortPanel::setupOutput()
 {
-    for(const UUID& uuid : graph_->getInternalOutputs()) {
-        addPortForConnector(graph_->getForwardedOutputInternal(uuid));
+    for(const ConnectorDescription& connector : graph_facade_->getNodeFacade()->getInternalOutputs()) {
+        addPortForConnector(graph_facade_->findConnectorNoThrow(connector.id));
     }
 }
 
 void PortPanel::setupInput()
 {
-    for(const UUID& uuid : graph_->getInternalInputs()) {
-        addPortForConnector(graph_->getForwardedInputInternal(uuid));
+    for(const ConnectorDescription& connector : graph_facade_->getNodeFacade()->getInternalInputs()) {
+        addPortForConnector(graph_facade_->findConnectorNoThrow(connector.id));
     }
 }
 
 void PortPanel::setupSlot()
 {
-    for(const UUID& uuid : graph_->getInternalSlots()) {
-        addPortForConnector(graph_->getForwardedSlotInternal(uuid));
+    for(const ConnectorDescription& connector : graph_facade_->getNodeFacade()->getInternalSlots()) {
+        addPortForConnector(graph_facade_->findConnectorNoThrow(connector.id));
     }
 }
 
 void PortPanel::setupEvent()
 {
-    for(const UUID& uuid : graph_->getInternalEvents()) {
-        addPortForConnector(graph_->getForwardedEventInternal(uuid));
+    for(const ConnectorDescription& connector : graph_facade_->getNodeFacade()->getInternalEvents()) {
+        addPortForConnector(graph_facade_->findConnectorNoThrow(connector.id));
     }
 }
 

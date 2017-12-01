@@ -14,12 +14,24 @@
 
 namespace csapex
 {
-FWD(Server);
-FWD(Session);
-FWD(BroadcastMessage);
-FWD(Request);
-FWD(Response);
-FWD(Feedback);
+FWD(Session)
+FWD(BroadcastMessage)
+FWD(RawMessage)
+FWD(Request)
+FWD(Response)
+FWD(Feedback)
+
+FWD(Server)
+FWD(GraphServer)
+FWD(NodeServer)
+FWD(ConnectorServer)
+
+namespace io
+{
+    FWD(Note)
+    FWD(Channel)
+}
+
 }
 
 #undef FWD

@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 #include <csapex/serialization/serialization_fwd.h>
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 
 /// SYSTEM
 #include <string>
@@ -20,7 +20,7 @@ class Node;
 namespace csapex
 {
 
-class Snippet : public Serializable
+class Snippet : public Streamable
 {
 public:
     static const uint8_t PACKET_TYPE_ID = 128;
@@ -48,7 +48,7 @@ public:
 
     virtual std::shared_ptr<Clonable> makeEmptyClone() const;
     virtual void serialize(SerializationBuffer &data) const;
-    virtual void deserialize(SerializationBuffer& data);
+    virtual void deserialize(const SerializationBuffer& data);
 
     static std::shared_ptr<Snippet>  makeEmpty();
 

@@ -10,7 +10,8 @@
 
 namespace QWrapper
 {
-class CSAPEX_QT_EXPORT QSpinBoxExt : public QSpinBox {
+class CSAPEX_QT_EXPORT QSpinBoxExt : public QSpinBox
+{
 
     Q_OBJECT
 
@@ -21,7 +22,8 @@ public Q_SLOTS:
     }
 };
 
-class CSAPEX_QT_EXPORT QDoubleSpinBoxExt : public QDoubleSpinBox {
+class CSAPEX_QT_EXPORT QDoubleSpinBoxExt : public QDoubleSpinBox
+{
 
     Q_OBJECT
 

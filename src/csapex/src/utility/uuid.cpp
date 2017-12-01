@@ -16,6 +16,7 @@ using namespace csapex;
 
 const std::string UUID::namespace_separator = ":|:";
 UUID UUID::NONE;
+AUUID AUUID::NONE;
 
 std::size_t UUID::Hasher::operator()(const UUID& k) const {
     return k.hash();
@@ -25,6 +26,11 @@ bool UUID::empty() const
 {
     return representation_.empty();
 }
+std::size_t UUID::depth() const
+{
+    return representation_.size();
+}
+
 bool UUID::global() const
 {
     if(empty() || composite()) {
@@ -48,6 +54,30 @@ std::string UUID::stripNamespace(const std::string &name)
 
 
 UUID::UUID()
+{
+}
+
+
+UUID::UUID(const UUID& other) :
+    parent_(other.parent_),
+    representation_(other.representation_)
+{
+}
+
+UUID::~UUID()
+{
+}
+
+
+UUID& UUID::operator = (const UUID& other)
+{
+    parent_ = other.parent_;
+    representation_ = other.representation_;
+    return *this;
+}
+
+UUID::UUID(std::weak_ptr<UUIDProvider> parent, const UUID &copy)
+    : UUID(parent, copy.representation_)
 {
 }
 
@@ -173,12 +203,7 @@ UUID UUID::parentUUID() const
 
 UUID UUID::nestedUUID() const
 {
-    UUID parent = *this;
-    if(!representation_.empty()) {
-        parent.representation_.erase(--parent.representation_.end());
-    }
-
-    return parent;
+    return reshape(depth()-1);
 }
 UUID UUID::rootUUID() const
 {
@@ -189,14 +214,27 @@ UUID UUID::rootUUID() const
     }
 }
 
+UUID UUID::reshape(std::size_t _depth) const
+{
+    if(_depth > depth()) {
+        throw std::invalid_argument("cannot reshape UUID to a larger size");
+    }
+    return UUID (parent_, std::vector<std::string>(
+                     representation_.begin(),
+                     representation_.begin() + static_cast<long>(_depth)
+                     ));
+}
+UUID UUID::reshapeSoft(std::size_t max_depth) const
+{
+    return UUID (parent_, std::vector<std::string>(
+                     representation_.begin(),
+                     representation_.begin() + static_cast<long>(std::min(depth(), max_depth))
+                     ));
+}
+
 UUID UUID::id() const
 {
-    UUID res = *this;
-    res.representation_.clear();
-    if(!representation_.empty()) {
-        res.representation_.push_back(representation_.front());
-    }
-    return res;
+    return reshape(1);
 }
 
 std::string UUID::type() const
@@ -215,8 +253,6 @@ std::string UUID::name() const
 AUUID UUID::getAbsoluteUUID() const
 {
     if(auto parent = parent_.lock()) {
-//        return AUUID(parent->makeDerivedUUID_forced(parent->getAbsoluteUUID(), id()));
-
         UUID parent_uuid = parent->getAbsoluteUUID();
         UUID uuid = *this;
         for(const std::string& part : parent_uuid.representation_) {
@@ -226,6 +262,16 @@ AUUID UUID::getAbsoluteUUID() const
     } else {
         return AUUID(*this);
     }
+}
+
+bool UUID::hasParent() const
+{
+    return parent_.lock() != nullptr;
+}
+
+std::shared_ptr<UUIDProvider> UUID::getParent() const
+{
+    return parent_.lock();
 }
 
 namespace csapex
@@ -291,6 +337,12 @@ AUUID AUUID::parentAUUID() const
     return parent;
 }
 
+
+AUUID AUUID::getAbsoluteUUID() const
+{
+    return *this;
+}
+
 namespace csapex
 {
 
@@ -304,3 +356,4 @@ bool AUUID::operator <(const AUUID& other) const
 {
     return UUID::operator <(other);
 }
+

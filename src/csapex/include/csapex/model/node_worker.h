@@ -27,7 +27,7 @@
 
 namespace csapex {
 
-class Profiler;
+class ProfilerImplementation;
 class Interval;
 
 class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
@@ -57,7 +57,7 @@ public:
     void setState(ExecutionState state);
     ExecutionState getExecutionState() const;
 
-    std::shared_ptr<Profiler> getProfiler();
+    std::shared_ptr<ProfilerImplementation> getProfiler();
 
     bool isEnabled() const;
     bool isIdle() const;
@@ -103,6 +103,9 @@ public:
 
     slim_signal::Signal<void(bool)> enabled;
 
+    slim_signal::Signal<void()> execution_state_changed;
+
+
     slim_signal::Signal<void(NodeWorker* worker, ActivityType type, std::shared_ptr<const Interval> stamp)> interval_start;
     slim_signal::Signal<void(NodeWorker* worker, std::shared_ptr<const Interval> stamp)> interval_end;
 
@@ -130,7 +133,7 @@ private:
 
     void sendEvents(bool active);
 
-    void connectConnector(ConnectorPtr c);
+    void connectConnector(ConnectablePtr c);
     void disconnectConnector(Connector *c);
 
     bool hasActiveOutputConnection();
@@ -160,7 +163,7 @@ private:
     std::recursive_mutex timer_mutex_;
 
     //TimerPtr profiling_timer_;
-    std::shared_ptr<Profiler> profiler_;
+    std::shared_ptr<ProfilerImplementation> profiler_;
 
     long guard_;
 };

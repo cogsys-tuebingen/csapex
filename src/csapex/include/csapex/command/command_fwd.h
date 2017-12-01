@@ -15,10 +15,10 @@
 namespace csapex
 {
 
-FWD(Command);
-FWD(CommandExecutor);
-FWD(CommandDispatcher);
-FWD(CommandFactory);
+FWD(Command)
+FWD(CommandExecutor)
+FWD(CommandDispatcher)
+FWD(CommandFactory)
 
 namespace command
 {

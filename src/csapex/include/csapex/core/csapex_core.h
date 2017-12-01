@@ -2,15 +2,16 @@
 #define CSAPEX_CORE_H
 
 /// COMPONENT
-#include <csapex/plugin/plugin_fwd.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/core/settings.h>
-#include <csapex/utility/uuid.h>
 #include <csapex/csapex_export.h>
+#include <csapex/model/observer.h>
+#include <csapex/plugin/plugin_fwd.h>
 #include <csapex/utility/notifier.h>
 #include <csapex/utility/slim_signal.h>
-#include <csapex/model/observer.h>
 #include <csapex/utility/utility_fwd.h>
+#include <csapex/utility/uuid.h>
+#include <csapex/io/io_fwd.h>
 
 /// SYSTEM
 #include <thread>
@@ -29,28 +30,41 @@ class Profiler;
 class CSAPEX_EXPORT CsApexCore : public Observer, public Notifier
 {
 public:
-    CsApexCore(Settings& settings_, ExceptionHandler &handler);
-    CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator, NodeFactoryPtr node_factory, SnippetFactoryPtr snippet_factory);
+    CsApexCore(Settings& settings_,
+               ExceptionHandler &handler);
+    CsApexCore(Settings& settings_,
+               ExceptionHandler &handler,
+               PluginLocatorPtr plugin_locator,
+               NodeFactoryPtr node_factory,
+               SnippetFactoryPtr snippet_factory);
 
     virtual ~CsApexCore();
 
-    void init();
+    void init(bool create_global_ports = true);
     void boot();
     void startup();
     void shutdown();
 
     void startMainLoop();
 
+    bool isServerActive() const;
+    void setServerFactory(std::function<ServerPtr()> server);
+    bool startServer();
+    bool stopServer();
+
     void load(const std::string& file);
     void saveAs(const std::string& file, bool quiet = false);
+
+    SnippetPtr serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const;
 
     void reset();
 
     Settings& getSettings() const;
-    NodeFactoryPtr getNodeFactory() const;
+    NodeFactoryImplementationPtr getNodeFactory() const;
     SnippetFactoryPtr getSnippetFactory() const;
 
-    GraphFacadePtr getRoot() const;
+    GraphFacadeImplementationPtr getRoot() const;
+    NodeFacadeImplementationPtr getRootNode() const;
     ThreadPoolPtr getThreadPool() const;
 
     PluginLocatorPtr getPluginLocator() const;
@@ -96,8 +110,9 @@ public:
     slim_signal::Signal<void ()> shutdown_requested;
     slim_signal::Signal<void ()> shutdown_complete;
 
-    csapex::slim_signal::Signal<void (SubgraphNodeConstPtr, YAML::Node& e)> save_detail_request;
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, const YAML::Node& n)> load_detail_request;
+    // TODO: refactor this to support remote clients
+    csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> save_detail_request;
+    csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> load_detail_request;
     
 private:
     CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator);
@@ -106,18 +121,23 @@ private:
 private:
     bool is_root_;
 
+    BootstrapPtr bootstrap_;
+
     Settings& settings_;
     PluginLocatorPtr plugin_locator_;
     ExceptionHandler &exception_handler_;
 
-    NodeFactoryPtr node_factory_;
+    NodeFactoryImplementationPtr node_factory_;
     SnippetFactoryPtr snippet_factory_;
+
+    std::function<ServerPtr()> server_factory_;
+    ServerPtr server_;
 
     ThreadPoolPtr thread_pool_;
 
     UUIDProviderPtr root_uuid_provider_;
-    GraphFacadePtr root_;
-    NodeFacadeLocalPtr root_handle_;
+    GraphFacadeImplementationPtr root_;
+    NodeFacadeImplementationPtr root_facade_;
     NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
 
@@ -128,9 +148,6 @@ private:
     std::shared_ptr<PluginManager<CorePlugin>> core_plugin_manager;
     std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
     std::map<std::string, bool> core_plugins_connected_;
-
-    std::vector<BootstrapPluginPtr> boot_plugins_;
-    std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
 
     std::thread main_thread_;
     std::mutex running_mutex_;

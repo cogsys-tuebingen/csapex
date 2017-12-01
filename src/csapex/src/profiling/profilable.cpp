@@ -2,12 +2,12 @@
 #include <csapex/profiling/profilable.h>
 
 /// COMPONENT
-#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/profiler_impl.h>
 
 using namespace csapex;
 
 Profilable::Profilable()
-    : profiler_(std::make_shared<Profiler>())
+    : profiler_(std::make_shared<ProfilerImplementation>())
 {
 
 }

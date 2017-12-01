@@ -2,22 +2,19 @@
 #include <csapex/view/designer/graph_view_context_menu.h>
 
 /// COMPONENT
-#include <csapex/model/node_worker.h>
-#include <csapex/model/node_state.h>
-#include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph_facade.h>
 #include <csapex/core/settings.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/node_state.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/view/designer/graph_view.h>
-#include <csapex/view/utility/clipboard.h>
-#include <csapex/view/utility/snippet_list_generator.h>
-#include <csapex/view/utility/node_list_generator.h>
 #include <csapex/view/csapex_view_core.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/note_box.h>
+#include <csapex/view/utility/clipboard.h>
 #include <csapex/view/utility/context_menu_handler.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/view/utility/node_list_generator.h>
+#include <csapex/view/utility/snippet_list_generator.h>
 
 /// SYSTEM
 #include <sstream>
@@ -62,9 +59,14 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
     menu.addMenu(&add_node);
 
     QMenu add_snippet("add snippet");
-    add_snippet.setIcon(QIcon(":/snippet.png"));
-    SnippetListGenerator snippet_generator(*view_.getViewCore().getSnippetFactory());
-    snippet_generator.insertAvailableSnippets(&add_snippet);
+    if(SnippetFactoryPtr snippet_factory = view_.getViewCore().getSnippetFactory()) {
+        add_snippet.setIcon(QIcon(":/snippet.png"));
+        SnippetListGenerator snippet_generator(*snippet_factory);
+        snippet_generator.insertAvailableSnippets(&add_snippet);
+    } else {
+        add_snippet.setEnabled(false);
+        add_snippet.setToolTip("Not available");
+    }
     menu.addMenu(&add_snippet);
 
     QAction* selectedItem = menu.exec(global_pos);
@@ -302,23 +304,29 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
             QMenu* choose_group_menu = new QMenu("thread group", &menu);
 
 
-            ThreadPool* thread_pool = view_.graph_facade_->getThreadPool();
+            // TODO: implement for client server
+            GraphFacadeImplementation* local_facade = dynamic_cast<GraphFacadeImplementation*>(view_.graph_facade_.get());
+            if(local_facade) {
+                ThreadPool* thread_pool = local_facade->getThreadPool();
 
-            std::vector<ThreadGroupPtr> thread_groups = thread_pool->getGroups();
-            for(std::size_t i = 0; i < thread_groups.size(); ++i) {
-                const ThreadGroup& group = *thread_groups[i];
+                std::vector<ThreadGroupPtr> thread_groups = thread_pool->getGroups();
+                for(std::size_t i = 0; i < thread_groups.size(); ++i) {
+                    const ThreadGroup& group = *thread_groups[i];
 
-                if(group.id() == ThreadGroup::PRIVATE_THREAD) {
-                    continue;
+                    if(group.id() == ThreadGroup::PRIVATE_THREAD) {
+                        continue;
+                    }
+
+                    std::stringstream ss;
+                    ss << "(" << group.id() << ") " << group.getName();
+                    QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
+                    switch_thread->setIcon(QIcon(":/thread_group.png"));
+                    switch_thread->setIconVisibleInMenu(true);
+                    handler[switch_thread] = std::bind(&GraphView::switchSelectedNodesToThread, &view_, group.id());
+                    choose_group_menu->addAction(switch_thread);
                 }
-
-                std::stringstream ss;
-                ss << "(" << group.id() << ") " << group.getName();
-                QAction* switch_thread = new QAction(QString::fromStdString(ss.str()), &menu);
-                switch_thread->setIcon(QIcon(":/thread_group.png"));
-                switch_thread->setIconVisibleInMenu(true);
-                handler[switch_thread] = std::bind(&GraphView::switchSelectedNodesToThread, &view_, group.id());
-                choose_group_menu->addAction(switch_thread);
+            } else {
+                choose_group_menu->setDisabled(true);
             }
 
             choose_group_menu->addSeparator();
@@ -326,7 +334,6 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
             QAction* new_group = new QAction("new thread group", &menu);
             new_group->setIcon(QIcon(":/thread_group_add.png"));
             new_group->setIconVisibleInMenu(true);
-            //        handler[new_group] = std::bind(&ThreadPool::createNewThreadGroupFor, &thread_pool_,  box->getNodeWorker());
             handler[new_group] = std::bind(&GraphView::createNewThreadGroupFor, &view_);
 
             choose_group_menu->addAction(new_group);

@@ -5,6 +5,7 @@
 #include <csapex/view/csapex_qt_export.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/view_fwd.h>
+#include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
 #include <map>
@@ -22,11 +23,11 @@ class CSAPEX_QT_EXPORT DesignerIO
 public:
     DesignerIO();
 
-    void saveBoxes(YAML::Node &yaml, Graph* graph, GraphView *view);
+    void saveBoxes(YAML::Node &yaml, const GraphFacade *graph, GraphView *view);
     void loadBoxes(const YAML::Node &doc, GraphView *view);
 
 private:
-    void saveBox(NodeFacade *node, GraphView *view, YAML::Node &yaml);
+    void saveBox(const UUID &node_uuid, GraphView *view, YAML::Node &yaml);
 };
 
 }

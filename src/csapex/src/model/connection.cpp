@@ -12,6 +12,8 @@
 #include <csapex/utility/assert.h>
 #include <csapex/msg/no_message.h>
 #include <csapex/utility/debug.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/model/node_state.h>
 
 /// SYSTEM
 #include <cmath>
@@ -35,8 +37,8 @@ Connection::Connection(OutputPtr from, InputPtr to, int id)
     from->enabled_changed.connect(source_enable_changed);
     to->enabled_changed.connect(sink_enabled_changed);
 
-    to->essential_changed.connect(connection_changed);
-    from->essential_changed.connect(connection_changed);
+    to->essential_changed.connect([this](bool) { connection_changed(); });
+    from->essential_changed.connect([this](bool) { connection_changed(); });
 
     apex_assert_hard(from->isOutput());
     apex_assert_hard(to->isInput());
@@ -50,6 +52,56 @@ Connection::~Connection()
         }
     }
 }
+
+bool Connection::isCompatibleWith(Connector *from, Connector *to)
+{
+    return from->getType()->canConnectTo(to->getType().get());
+}
+
+bool Connection::canBeConnectedTo(Connector *from, Connector *to)
+{
+    if(!isCompatibleWith(from, to)) {
+        return false;
+    }
+
+    bool in_out = (from->isOutput() && to->isInput()) ||
+            (from->isInput() && to->isOutput());
+
+    if(!in_out) {
+        return false;
+    }
+
+    if(from->maxConnectionCount() >= 0 && from->countConnections() >= from->maxConnectionCount()) {
+        return false;
+    }
+    if(to->maxConnectionCount() >= 0 && to->countConnections() >= to->maxConnectionCount()) {
+        return false;
+    }
+
+
+    return !Connection::areConnectorsConnected(from, to);
+}
+
+bool Connection::areConnectorsConnected(Connector *from, Connector *to)
+{
+    return from->isConnectedTo(to->getUUID().getAbsoluteUUID());
+}
+
+bool Connection::targetsCanBeMovedTo(Connector *from, Connector *to)
+{
+    if(from == to) {
+        return false;
+    }
+    if(from->isOutput() != to->isOutput()) {
+        return false;
+    }
+    if(to->maxConnectionCount() >= 0 &&
+            to->countConnections() >= to->maxConnectionCount()) {
+        return false;
+    }
+    return from->getType()->canConnectTo(to->getType().get());
+}
+
 
 void Connection::detach(Connector *c)
 {
@@ -171,6 +223,13 @@ bool Connection::isSinkEnabled() const
     return to()->isEnabled();
 }
 
+bool Connection::isPipelining() const
+{
+    if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to_->getOwner())) {
+        return node->getNodeState()->getExecutionMode() == ExecutionMode::PIPELINING;
+    }
+    return false;
+}
 
 Connection::State Connection::getState() const
 {
@@ -226,6 +285,15 @@ int Connection::id() const
     return id_;
 }
 
+
+ConnectionInformation Connection::getDescription() const
+{
+    TokenDataConstPtr type = message_ ? message_->getTokenData() : connection_types::makeEmpty<connection_types::AnyMessage>();
+    return ConnectionInformation(from_->getUUID(), to_->getUUID(),
+                                 type, id_, isActive(),
+                                 getFulcrumsCopy());
+}
+
 bool Connection::contains(Connector *c) const
 {
     return from_.get() == c || to_.get() == c;
@@ -241,6 +309,16 @@ std::vector<Fulcrum::Ptr> Connection::getFulcrums() const
     return fulcrums_;
 }
 
+std::vector<Fulcrum> Connection::getFulcrumsCopy() const
+{
+    std::vector<Fulcrum> result;
+    result.reserve(fulcrums_.size());
+    for(const FulcrumPtr& f : fulcrums_) {
+        result.push_back(*f);
+    }
+    return result;
+}
+
 int Connection::getFulcrumCount() const
 {
     return fulcrums_.size();
@@ -254,7 +332,7 @@ Fulcrum::Ptr Connection::getFulcrum(int fulcrum_id)
 void Connection::addFulcrum(int fulcrum_id, const Point &pos, int type, const Point &handle_in, const Point &handle_out)
 {
     // create the new fulcrum
-    Fulcrum::Ptr fulcrum(new Fulcrum(this, pos, type, handle_in, handle_out));
+    Fulcrum::Ptr fulcrum(new Fulcrum(id(), pos, type, handle_in, handle_out));
     Fulcrum* f = fulcrum.get();
 
     f->setId(fulcrum_id);

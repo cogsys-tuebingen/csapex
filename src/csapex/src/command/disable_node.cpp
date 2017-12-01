@@ -7,8 +7,8 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
-#include <csapex/factory/node_factory.h>
-#include <csapex/model/graph.h>
+#include <csapex/factory/node_factory_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/model/node_state.h>
@@ -71,7 +71,7 @@ void DisableNode::serialize(SerializationBuffer &data) const
     data << disable_;
 }
 
-void DisableNode::deserialize(SerializationBuffer& data)
+void DisableNode::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

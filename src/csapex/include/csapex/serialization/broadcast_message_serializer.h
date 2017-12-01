@@ -17,15 +17,15 @@ public:
     virtual ~BroadcastMessageSerializerInterface();
 
     virtual void serialize(const BroadcastMessageConstPtr& packet, SerializationBuffer &data) = 0;
-    virtual BroadcastMessagePtr deserialize(SerializationBuffer& data) = 0;
+    virtual BroadcastMessagePtr deserialize(const SerializationBuffer& data) = 0;
 };
 
 
 class BroadcastMessageSerializer : public Singleton<BroadcastMessageSerializer>, public Serializer
 {
 public:
-    void serialize(const SerializableConstPtr& packet, SerializationBuffer &data) override;
-    SerializablePtr deserialize(SerializationBuffer &data) override;
+    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
+    StreamablePtr deserialize(const SerializationBuffer &data) override;
 
     static void registerSerializer(const std::string& type, std::shared_ptr<BroadcastMessageSerializerInterface> serializer);
 
@@ -57,7 +57,7 @@ struct BroadcastMessageSerializerRegistered
         { \
             packet->serialize(data); \
         } \
-        virtual BroadcastMessagePtr deserialize(SerializationBuffer& data) override \
+        virtual BroadcastMessagePtr deserialize(const SerializationBuffer& data) override \
         { \
             auto result = std::make_shared<Name>(); \
             result->deserialize(data); \

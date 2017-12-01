@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/node_characteristics.h>
+#include <csapex/utility/uuid.h>
 
 /// SYTEM
 #include <vector>
@@ -19,6 +20,9 @@ class Vertex
 public:
     Vertex(NodeFacadePtr node);
     ~Vertex();
+
+    UUID getUUID() const;
+    AUUID getAUUID() const;
 
     NodeFacadePtr getNodeFacade() const;
     NodeCharacteristics& getNodeCharacteristics() const;

@@ -2,7 +2,7 @@
 #include <csapex/command/move_box.h>
 
 /// COMPONENT
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/command/command_serializer.h>
@@ -68,7 +68,7 @@ void MoveBox::serialize(SerializationBuffer &data) const
     data << box_uuid;
 }
 
-void MoveBox::deserialize(SerializationBuffer& data)
+void MoveBox::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

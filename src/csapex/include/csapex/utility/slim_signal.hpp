@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/utility/slim_signal.h>
 #include <csapex/utility/assert.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <algorithm>
@@ -29,27 +30,6 @@ Signal<Signature>::~Signal()
 }
 
 
-template <typename Signature>
-void Signal<Signature>::removeParent(Signal<Signature>* parent)
-{
-    apex_assert_hard(guard_ == -1);
-    apex_assert_hard(parent != nullptr);
-    apex_assert_hard(parent->guard_ == -1);
-
-    std::unique_lock<std::recursive_mutex> lock(mutex_);
-
-    for(auto it = parents_.begin(); it != parents_.end();) {
-        Signal<Signature>* c = *it;
-        apex_assert_hard(c->guard_ == -1);
-        if(c == parent) {
-            it =  parents_.erase(it);
-            c->removeChild(this);
-        } else {
-            ++it;
-        }
-    }
-}
-
 
 template <typename Signature>
 Connection Signal<Signature>::connect(const delegate::Delegate<Signature>& delegate)
@@ -60,8 +40,10 @@ Connection Signal<Signature>::connect(const delegate::Delegate<Signature>& deleg
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         int id = next_del_id_++;
         delegates_.emplace(id, delegate);
-
         execution_mutex_.unlock();
+
+        onConnect();
+
         return Connection(this, makeDelegateDeleter(this, id));
 
     } else {
@@ -84,6 +66,8 @@ Connection Signal<Signature>::connect(delegate::Delegate<Signature>&& delegate)
         delegates_.emplace(id, std::move(delegate));
         execution_mutex_.unlock();
 
+        onConnect();
+
         return Connection(this, makeDelegateDeleter(this, id));
     } else {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
@@ -91,39 +75,6 @@ Connection Signal<Signature>::connect(delegate::Delegate<Signature>&& delegate)
         delegates_to_add_.emplace(id, std::move(delegate));
 
         return Connection(this, makeDelegateDeleter(this, id));
-    }
-}
-
-template <typename Signature>
-void Signal<Signature>::removeDelegate(int id)
-{
-    apex_assert_hard(guard_ == -1);
-
-    if(execution_mutex_.try_lock()) {
-        std::unique_lock<std::recursive_mutex> lock(mutex_);
-        delegates_.erase(id);
-        execution_mutex_.unlock();
-
-    } else {
-        std::unique_lock<std::recursive_mutex> lock(mutex_);
-        delegates_to_remove_.push_back(id);
-    }
-}
-
-
-template <typename Signature>
-void Signal<Signature>::removeFunction(int id)
-{
-    apex_assert_hard(guard_ == -1);
-
-    if(execution_mutex_.try_lock()) {
-        std::unique_lock<std::recursive_mutex> lock(mutex_);
-        functions_.erase(id);
-        execution_mutex_.unlock();
-
-    } else {
-        std::unique_lock<std::recursive_mutex> lock(mutex_);
-        functions_to_remove_.push_back(id);
     }
 }
 
@@ -136,8 +87,10 @@ Connection Signal<Signature>::connect(const std::function<Signature>& fn)
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         int id = next_fn_id_++;
         functions_.emplace(id, fn);
-
         execution_mutex_.unlock();
+
+        onConnect();
+
         return Connection(this, makeFunctionDeleter(this, id));
 
     } else {
@@ -159,6 +112,81 @@ Connection Signal<Signature>::connect(Signal<Signature>& signal)
     return Connection(this, makeSignalDeleter(this, &signal));
 }
 
+template <typename Signature>
+bool Signal<Signature>::isConnected() const
+{
+    if(SignalBase::isConnected()) {
+        return true;
+    }
+
+    return countAllConnections() > 0;
+}
+
+template <typename Signature>
+int Signal<Signature>::countAllConnections() const
+{
+    return functions_.size() + delegates_.size() + children_.size();
+}
+
+
+template <typename Signature>
+void Signal<Signature>::removeParent(Signal<Signature>* parent)
+{
+    apex_assert_hard(guard_ == -1);
+    apex_assert_hard(parent != nullptr);
+    apex_assert_hard(parent->guard_ == -1);
+
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+
+    for(auto it = parents_.begin(); it != parents_.end();) {
+        Signal<Signature>* c = *it;
+        apex_assert_hard(c->guard_ == -1);
+        if(c == parent) {
+            it =  parents_.erase(it);
+            c->removeChild(this);
+
+        } else {
+            ++it;
+        }
+    }
+}
+
+template <typename Signature>
+void Signal<Signature>::removeDelegate(int id)
+{
+    apex_assert_hard(guard_ == -1);
+
+    if(execution_mutex_.try_lock()) {
+        std::unique_lock<std::recursive_mutex> lock(mutex_);
+        delegates_.erase(id);
+        execution_mutex_.unlock();
+
+        onDisconnect();
+
+    } else {
+        std::unique_lock<std::recursive_mutex> lock(mutex_);
+        delegates_to_remove_.push_back(id);
+    }
+}
+
+
+template <typename Signature>
+void Signal<Signature>::removeFunction(int id)
+{
+    apex_assert_hard(guard_ == -1);
+
+    if(execution_mutex_.try_lock()) {
+        std::unique_lock<std::recursive_mutex> lock(mutex_);
+        functions_.erase(id);
+        execution_mutex_.unlock();
+
+        onDisconnect();
+
+    } else {
+        std::unique_lock<std::recursive_mutex> lock(mutex_);
+        functions_to_remove_.push_back(id);
+    }
+}
 
 template <typename Signature>
 void Signal<Signature>::disconnectAll()
@@ -178,12 +206,21 @@ void Signal<Signature>::clear()
         removeParent(parents_.front());
     }
 
-    while(!children_to_remove_.empty()) {
-        removeChild(children_to_remove_.front());
+    if(execution_mutex_.try_lock()) {
+        while(!children_to_remove_.empty()) {
+            removeChild(children_to_remove_.front());
+        }
+        while(!children_.empty()) {
+            removeChild(children_.front());
+        }
+        execution_mutex_.unlock();
+
+    } else {
+        children_to_remove_.clear();
+        children_.clear();
     }
-    while(!children_.empty()) {
-        removeChild(children_.front());
-    }
+
+    onDisconnect();
 
     functions_.clear();
     functions_to_remove_.clear();
@@ -200,8 +237,9 @@ void Signal<Signature>::addChild(Signal *child)
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         children_.push_back(child);
         child->parents_.push_back(this);
-
         execution_mutex_.unlock();
+
+        onConnect();
 
     } else {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
@@ -231,6 +269,8 @@ void Signal<Signature>::removeChild(Signal<Signature>* child)
 
         execution_mutex_.unlock();
 
+        onDisconnect();
+
     } else {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         children_to_remove_.push_back(child);
@@ -241,7 +281,7 @@ void Signal<Signature>::removeChild(Signal<Signature>* child)
 
 template <typename Signature>
 template <typename... Args>
-Signal<Signature>& Signal<Signature>::operator () (Args... args)
+Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
 {
     apex_assert_hard(guard_ == -1);
 
@@ -249,13 +289,43 @@ Signal<Signature>& Signal<Signature>::operator () (Args... args)
 
     for(auto& s : children_) {
         apex_assert_hard(s->guard_ == -1);
-        (*s)(args...);
+        try {
+            (*s)(std::forward<Args>(args)...);
+        } catch(const std::exception& e) {
+            printf("signal forwarding has thrown an error: %s\n", e.what());
+        } catch(const csapex::Failure& e) {
+            printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
+            throw e;
+        } catch(...) {
+            printf("signal forwarding has thrown an unknown error\n");
+            throw;
+        }
     }
     for(auto& callback : delegates_) {
-        callback.second(args...);
+        try {
+            callback.second(std::forward<Args>(args)...);
+        } catch(const std::exception& e) {
+            printf("signal processing delegate has thrown an error: %s\n", e.what());
+        } catch(const csapex::Failure& e) {
+            printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
+            throw e;
+        } catch(...) {
+            printf("signal processing delegate has thrown an unknown error\n");
+            throw;
+        }
     }
     for(auto& fn : functions_) {
-        fn.second(args...);
+        try {
+            fn.second(std::forward<Args>(args)...);
+        } catch(const std::exception& e) {
+            printf("signal processing function has thrown an error: %s\n", e.what());
+        } catch(const csapex::Failure& e) {
+            printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
+            throw e;
+        } catch(...) {
+            printf("signal processing function has thrown an unknown error\n");
+            throw;
+        }
     }
 
     applyModifications();
@@ -272,6 +342,10 @@ void Signal<Signature>::applyModifications()
     for(auto& s : children_to_add_) {
         children_.push_back(s);
         s->parents_.push_back(this);
+
+        lock.unlock();
+        onConnect();
+        lock.lock();
     }
     children_to_add_.clear();
 
@@ -279,6 +353,10 @@ void Signal<Signature>::applyModifications()
         for(auto it = children_.begin(); it != children_.end();) {
             if(*it == child) {
                 it = children_.erase(it);
+
+                lock.unlock();
+                onDisconnect();
+                lock.lock();
             } else {
                 ++it;
             }
@@ -289,22 +367,38 @@ void Signal<Signature>::applyModifications()
     // FUNCTIONS
     for(auto& s : functions_to_add_) {
         functions_[s.first] = std::move(s.second);
+
+        lock.unlock();
+        onConnect();
+        lock.lock();
     }
     functions_to_add_.clear();
 
     for(int id : functions_to_remove_) {
         functions_.erase(id);
+
+        lock.unlock();
+        onDisconnect();
+        lock.lock();
     }
     functions_to_remove_.clear();
 
     // DELEGATES
     for(auto& s : delegates_to_add_) {
         delegates_.emplace(s);
+
+        lock.unlock();
+        onConnect();
+        lock.lock();
     }
     delegates_to_add_.clear();
 
     for(int id : delegates_to_remove_) {
         delegates_.erase(id);
+
+        lock.unlock();
+        onDisconnect();
+        lock.lock();
     }
     delegates_to_remove_.clear();
 }
@@ -341,6 +435,29 @@ Connection::Deleter Signal<Signature>::makeSignalDeleter(Signal<Signature>* pare
         apex_assert_hard(parent->guard_ == -1);
         parent->removeChild(sig);
     };
+}
+
+
+
+
+template <typename Signature>
+void ObservableSignal<Signature>::onConnect()
+{
+    if(Signal<Signature>::countAllConnections() == 1) {
+        first_connected();
+    }
+
+    connected();
+}
+
+template <typename Signature>
+void ObservableSignal<Signature>::onDisconnect()
+{
+    disconnected();
+
+    if(Signal<Signature>::countAllConnections() == 0)  {
+        last_disconnected();
+    }
 }
 
 }

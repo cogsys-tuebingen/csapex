@@ -11,6 +11,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <sstream>
 
 using namespace csapex;
 
@@ -34,7 +35,7 @@ void Output::removeOutputTransition()
     transition_ = nullptr;
 }
 
-void Output::removeConnection(Connector *other_side)
+void Output::removeConnection(Connectable *other_side)
 {
     Connectable::removeConnection(other_side);
     if(connections_.empty()) {
@@ -116,49 +117,9 @@ void Output::disable()
     Connectable::disable();
 }
 
-bool Output::isConnectionPossible(Connector *other_side)
-{
-    if(!other_side->canInput()) {
-        std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", other side can't input" << std::endl;
-        return false;
-    }
-    if(!other_side->canConnectTo(this, false)) {
-        std::cerr << "cannot connect " << getUUID() << " to " << other_side->getUUID() << ", not compatible" << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool Output::targetsCanBeMovedTo(Connector* other_side) const
-{
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    for(ConnectionPtr connection : connections_) {
-        if(!connection->to()->canConnectTo(other_side, true)/* || !canConnectTo(*it)*/) {
-            return false;
-        }
-    }
-    return true;
-}
-
 bool Output::isConnected() const
 {
     return !connections_.empty();
-}
-
-void Output::connectionMovePreview(ConnectorPtr other_side)
-{
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    for(ConnectionPtr connection : connections_) {
-        connectionInProgress(connection->to(), other_side);
-    }
-}
-
-void Output::validateConnections()
-{
-    for(ConnectionPtr connection : connections_) {
-        connection->to()->validateConnections();
-    }
 }
 
 bool Output::canReceiveToken() const
@@ -192,5 +153,20 @@ void Output::publish()
         if(connection->isEnabled()) {
             connection->setToken(msg);
         }
+    }
+}
+
+void Output::addStatusInformation(std::stringstream &status_stream) const
+{
+    status_stream << ", state: ";
+    switch(getState()) {
+    case Output::State::ACTIVE:
+        status_stream << "ACTIVE";
+        break;
+    case Output::State::IDLE:
+        status_stream << "IDLE";
+        break;
+    default:
+        status_stream << "UNKNOWN";
     }
 }

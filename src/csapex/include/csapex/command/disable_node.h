@@ -25,7 +25,7 @@ public:
     virtual std::string getDescription() const override;
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
 
 protected:
     UUID uuid;

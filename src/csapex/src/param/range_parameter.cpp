@@ -1,9 +1,15 @@
 /// HEADER
 #include <csapex/param/range_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <iostream>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(RangeParameter)
 
 using namespace csapex;
 using namespace param;
@@ -159,6 +165,33 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
 
     if(def_value_.empty())
         def_value_ = value_;
+}
+
+
+void RangeParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << value_;
+    data << min_;
+    data << max_;
+    data << def_value_;
+    data << def_min_;
+    data << def_max_;
+    data << step_;
+}
+
+void RangeParameter::deserialize(const SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> value_;
+    data >> min_;
+    data >> max_;
+    data >> def_value_;
+    data >> def_min_;
+    data >> def_max_;
+    data >> step_;
 }
 
 

@@ -5,6 +5,9 @@
 #include <csapex/model/connectable_owner.h>
 #include <csapex/model/connection.h>
 
+/// SYSTEM
+#include <sstream>
+
 using namespace csapex;
 
 Connector::Connector(const UUID &uuid, ConnectableOwnerWeakPtr owner)
@@ -14,26 +17,22 @@ Connector::Connector(const UUID &uuid, ConnectableOwnerWeakPtr owner)
 
 }
 
-void Connector::validateConnections()
+bool Connector::isSynchronous() const
 {
-
+    return true;
 }
-
-ConnectorDescription Connector::getDescription() const
+bool Connector::isAsynchronous() const
 {
-    ConnectorDescription res(getOwner()->getUUID().getAbsoluteUUID(), getUUID(), getConnectorType(), getType(), getLabel(), isOptional());
-    for(const ConnectionPtr& c : getConnections()) {
-        if(isOutput()) {
-            res.targets.push_back(c->target()->getUUID().getAbsoluteUUID());
-        } else {
-            res.targets.push_back(c->source()->getUUID().getAbsoluteUUID());
-        }
-    }
-    return res;
+    return !isSynchronous();
 }
 
 
 ConnectableOwnerPtr Connector::getOwner() const
 {
     return owner_.lock();
+}
+
+void Connector::addStatusInformation(std::stringstream& status_stream) const
+{
+    // do nothing in base class
 }

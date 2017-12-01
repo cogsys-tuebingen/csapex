@@ -2,15 +2,185 @@
 #include <csapex/serialization/serialization_buffer.h>
 
 /// PROJECT
-#include <csapex/serialization/serializable.h>
+#include <csapex/model/activity_type.h>
+#include <csapex/model/connection_information.h>
+#include <csapex/model/connector_description.h>
+#include <csapex/model/connector_type.h>
+#include <csapex/model/error_state.h>
+#include <csapex/model/execution_state.h>
+#include <csapex/model/node_characteristics.h>
+#include <csapex/model/node_state.h>
+#include <csapex/model/token_data.h>
+#include <csapex/param/parameter.h>
+#include <csapex/profiling/interval.h>
 #include <csapex/serialization/packet_serializer.h>
+#include <csapex/serialization/snippet.h>
+#include <csapex/serialization/streamable.h>
+#include <csapex/utility/notification.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+#include <iostream>
 
 using namespace csapex;
 
-void SerializationBuffer::write(const SerializableConstPtr &i)
+bool SerializationBuffer::initialized_ = false;
+std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const boost::any& a)>> SerializationBuffer::any_serializer;
+std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, boost::any& a)>> SerializationBuffer::any_deserializer;
+
+SerializationBuffer::SerializationBuffer()
+    : pos(HEADER_LENGTH)
+{
+    // the header is always 4 byte
+    insert(end(), HEADER_LENGTH, 0);
+
+    init();
+}
+
+
+SerializationBuffer::SerializationBuffer(const std::vector<uint8_t>& copy, bool insert_header)
+    : pos(HEADER_LENGTH)
+{
+    if(insert_header) {
+        // the header is always 4 byte
+        insert(end(), HEADER_LENGTH, 0);
+        insert(end(), copy.begin(), copy.end());
+
+    } else {
+        assign(copy.begin(), copy.end());
+    }
+
+    init();
+}
+
+void SerializationBuffer::init()
+{
+    if(!initialized_) {
+#define ADD(...) \
+    any_serializer[std::type_index(typeid(__VA_ARGS__))] = serializer; \
+    any_deserializer[id] = deserializer; \
+    }\
+    ++id
+#define ADD_ANY_TYPE_IMPL(...) { \
+    auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
+    buffer << ((uint8_t) id); \
+    buffer << (boost::any_cast<__VA_ARGS__> (any)); \
+    };\
+    auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
+    __VA_ARGS__ v; \
+    buffer >> (v); \
+    any = v; \
+    };\
+    ADD(__VA_ARGS__)
+
+
+#define ADD_ANY_TYPE(...) \
+    ADD_ANY_TYPE_IMPL(__VA_ARGS__);\
+    ADD_ANY_TYPE_IMPL(std::vector<__VA_ARGS__>)
+
+#define ADD_ANY_TYPE_1(P1, GET_P1, ...) { \
+    auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
+    buffer << ((uint8_t) id); \
+    buffer << (boost::any_cast<__VA_ARGS__> (any)).GET_P1; \
+    buffer << (boost::any_cast<__VA_ARGS__> (any)); \
+    };\
+    auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
+    P1 p1; \
+    buffer >> (p1); \
+    __VA_ARGS__ v(p1); \
+    buffer >> (v); \
+    any = v; \
+    };\
+    ADD(__VA_ARGS__)
+
+#define ADD_ANY_TYPE_1PC(P1, GET_P1, ...) { \
+    auto serializer = [id](SerializationBuffer& buffer, const boost::any& any){ \
+    buffer << ((uint8_t) id); \
+    buffer << (boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any))->GET_P1; \
+    buffer << *(boost::any_cast<std::shared_ptr<__VA_ARGS__ const>> (any)); \
+    };\
+    auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any){ \
+    P1 p1; \
+    buffer >> (p1); \
+    auto v = std::make_shared<__VA_ARGS__>(p1); \
+    buffer >> (*v); \
+    any = std::shared_ptr<__VA_ARGS__ const>(v); \
+    };\
+    ADD(std::shared_ptr<__VA_ARGS__ const>)
+
+        int id = 1;
+        ADD_ANY_TYPE(int);
+        ADD_ANY_TYPE(double);
+        ADD_ANY_TYPE(bool);
+        ADD_ANY_TYPE(std::string);
+        ADD_ANY_TYPE(std::vector<std::string>);
+        ADD_ANY_TYPE(long);
+        ADD_ANY_TYPE(UUID);
+        ADD_ANY_TYPE(AUUID);
+        ADD_ANY_TYPE(std::pair<std::string,bool>);
+        ADD_ANY_TYPE(std::pair<std::string,bool>);
+        ADD_ANY_TYPE(std::pair<int,int>);
+        ADD_ANY_TYPE(std::pair<std::string,bool>);
+        ADD_ANY_TYPE(std::pair<double,double>);
+        ADD_ANY_TYPE(ConnectorType);
+        ADD_ANY_TYPE(YAML::Node);
+        ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
+        ADD_ANY_TYPE(TokenDataConstPtr);
+        ADD_ANY_TYPE(SnippetPtr);
+        ADD_ANY_TYPE(NodeCharacteristics);
+        ADD_ANY_TYPE(ConnectorDescription);
+        ADD_ANY_TYPE(ConnectionInformation);
+        ADD_ANY_TYPE(ExecutionState);
+        ADD_ANY_TYPE(Notification);
+        ADD_ANY_TYPE(Fulcrum);
+        ADD_ANY_TYPE(NodeStatePtr);
+        ADD_ANY_TYPE(param::ParameterPtr);
+        ADD_ANY_TYPE(ActivityType);
+        ADD_ANY_TYPE(ErrorState::ErrorLevel);
+        ADD_ANY_TYPE_1PC(std::string, name(), Interval);
+
+        initialized_ = true;
+    }
+}
+
+void SerializationBuffer::finalize()
+{
+    uint32_t length = size();
+    apex_assert_lte_hard(length, std::numeric_limits<uint32_t>::max());
+
+    std::size_t nbytes = sizeof(uint32_t);
+    for(std::size_t byte = 0; byte < nbytes; ++byte) {
+        uint8_t part = (length >> (byte * 8)) & 0xFF;
+        at(byte) = part;
+    }
+}
+
+void SerializationBuffer::seek(uint32_t p)
+{
+    pos = p;
+}
+
+std::string SerializationBuffer::toString() const
+{
+    std::stringstream res;
+    for(std::size_t i = 0; i < size(); ++i) {
+        if((i%8) == 0) {
+            res << std::hex << i << ":\t\t" << std::dec;
+        }
+
+        res << (int) at(i);
+
+
+        if((i%8) != 7) {
+            res << '\t';
+        } else {
+            res << '\n';
+        }
+    }
+    return res.str();
+}
+
+void SerializationBuffer::write(const StreamableConstPtr &i)
 {
     bool null = (i == nullptr);
     operator << (null);
@@ -19,7 +189,7 @@ void SerializationBuffer::write(const SerializableConstPtr &i)
     }
 }
 
-SerializablePtr SerializationBuffer::read()
+StreamablePtr SerializationBuffer::read() const
 {
     bool null;
     operator >> (null);
@@ -29,77 +199,51 @@ SerializablePtr SerializationBuffer::read()
     return nullptr;
 }
 
+
+SerializationBuffer& SerializationBuffer::operator << (const Serializable& s)
+{
+    s.serialize(*this);
+    return *this;
+}
+
+const SerializationBuffer& SerializationBuffer::operator >> (Serializable& s) const
+{
+    s.deserialize(*this);
+    return *this;
+}
+
 SerializationBuffer& SerializationBuffer::writeAny (const boost::any& any)
 {
-    if(any.type() == typeid(int)) {
-        operator << ((uint8_t) 1);
-        operator << (boost::any_cast<int> (any));
-
-    } else if(any.type() == typeid(double)) {
-        operator << ((uint8_t) 2);
-        operator << (boost::any_cast<double> (any));
-
-    } else if(any.type() == typeid(bool)) {
-        operator << ((uint8_t) 3);
-        operator << (boost::any_cast<bool> (any));
-
-    } else if(any.type() == typeid(std::string)) {
-        operator << ((uint8_t) 4);
-        operator << (boost::any_cast<std::string> (any));
-
-    } else if(any.type() == typeid(long)) {
-        operator << ((uint8_t) 5);
-        operator << (boost::any_cast<long> (any));
-
+    auto fn = any_serializer.find(any.type());
+    if(fn != any_serializer.end()) {
+        fn->second(*this, any);
     } else {
+        if(!any.empty()) {
+            std::cerr << "cannot serialize boost::any containing " << type2name(any.type()) << std::endl;
+        }
         operator << ((uint8_t) 0);
     }
 
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::readAny (boost::any& any)
+const SerializationBuffer& SerializationBuffer::readAny (boost::any& any) const
 {
     uint8_t type;
     operator >> (type);
 
-    switch(type) {
-    case 1:
-    {
-        int v;
-        operator >> (v);
-        any = v;
+    if(type == 0) {
+        // empty boost::any
+        return *this;
     }
-        break;
-    case 2:
-    {
-        double v;
-        operator >> (v);
-        any = v;
+
+    auto fn = any_deserializer.find(type);
+    if(fn != any_deserializer.end()) {
+        fn->second(*this, any);
+    } else {
+        std::cerr << "cannot deserialize boost::any with type " << (int) type << std::endl;
     }
-        break;
-    case 3:
-    {
-        bool v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    case 4:
-    {
-        std::string v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    case 5:
-    {
-        long v;
-        operator >> (v);
-        any = v;
-    }
-        break;
-    }
+
     return *this;
 }
 
@@ -109,42 +253,42 @@ SerializationBuffer& SerializationBuffer::readAny (boost::any& any)
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
 union _GFloatIEEE754
 {
-  float v_float;
-  struct {
-    uint mantissa : 23;
-    uint biased_exponent : 8;
-    uint sign : 1;
-  } mpn;
+    float v_float;
+    struct {
+        uint mantissa : 23;
+        uint biased_exponent : 8;
+        uint sign : 1;
+    } mpn;
 };
 union _GDoubleIEEE754
 {
-  double v_double;
-  struct {
-    uint mantissa_low : 32;
-    uint mantissa_high : 20;
-    uint biased_exponent : 11;
-    uint sign : 1;
-  } mpn;
+    double v_double;
+    struct {
+        uint mantissa_low : 32;
+        uint mantissa_high : 20;
+        uint biased_exponent : 11;
+        uint sign : 1;
+    } mpn;
 };
 #elif G_BYTE_ORDER == G_BIG_ENDIAN
 union _GFloatIEEE754
 {
-  float v_float;
-  struct {
-    uint sign : 1;
-    uint biased_exponent : 8;
-    uint mantissa : 23;
-  } mpn;
+    float v_float;
+    struct {
+        uint sign : 1;
+        uint biased_exponent : 8;
+        uint mantissa : 23;
+    } mpn;
 };
 union _GDoubleIEEE754
 {
-  double v_double;
-  struct {
-    uint sign : 1;
-    uint biased_exponent : 11;
-    uint mantissa_high : 20;
-    uint mantissa_low : 32;
-  } mpn;
+    double v_double;
+    struct {
+        uint sign : 1;
+        uint biased_exponent : 11;
+        uint mantissa_high : 20;
+        uint mantissa_low : 32;
+    } mpn;
 };
 #else /* !G_LITTLE_ENDIAN && !G_BIG_ENDIAN */
 #error unknown ENDIAN type
@@ -174,7 +318,8 @@ SerializationBuffer& SerializationBuffer::operator << (float f)
 
     return *this;
 }
-SerializationBuffer& SerializationBuffer::operator >> (float& f)
+
+const SerializationBuffer& SerializationBuffer::operator >> (float& f) const
 {
     uint8_t bytes[4];
     for(uint8_t i = 0; i < 4; ++i) {
@@ -226,7 +371,8 @@ SerializationBuffer& SerializationBuffer::operator << (double d)
 
     return *this;
 }
-SerializationBuffer& SerializationBuffer::operator >> (double& d)
+
+const SerializationBuffer& SerializationBuffer::operator >> (double& d) const
 {
     uint8_t bytes[8];
     for(uint8_t i = 0; i < 8; ++i) {
@@ -264,7 +410,7 @@ SerializationBuffer& SerializationBuffer::operator << (const std::string& s)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (std::string& s)
+const SerializationBuffer& SerializationBuffer::operator >> (std::string& s) const
 {
     uint16_t str_len;
     operator >> (str_len);
@@ -285,7 +431,7 @@ SerializationBuffer& SerializationBuffer::operator << (const std::stringstream& 
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (std::stringstream& s)
+const SerializationBuffer& SerializationBuffer::operator >> (std::stringstream& s) const
 {
     std::string str;
     operator >> (str);
@@ -300,11 +446,31 @@ SerializationBuffer& SerializationBuffer::operator << (const UUID& s)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (UUID& s)
+const SerializationBuffer& SerializationBuffer::operator >> (UUID& s) const
 {
     std::string full_name;
     operator >> (full_name);
     s = UUIDProvider::makeUUID_without_parent(full_name);
+    return *this;
+}
+
+// TokenData
+SerializationBuffer& SerializationBuffer::operator << (const TokenData& s)
+{
+    operator << (s.typeName());
+    operator << (s.descriptiveName());
+    // TODO: implement fully!
+    return *this;
+}
+
+const SerializationBuffer& SerializationBuffer::operator >> (TokenData& s) const
+{
+    std::string name;
+    operator >> (name);
+    std::string descriptive_name;
+    operator >> (descriptive_name);
+    // TODO: implement fully!
+    s = TokenData(name, descriptive_name);
     return *this;
 }
 
@@ -317,7 +483,7 @@ SerializationBuffer& SerializationBuffer::operator << (const YAML::Node& node)
     return *this;
 }
 
-SerializationBuffer& SerializationBuffer::operator >> (YAML::Node& node)
+const SerializationBuffer& SerializationBuffer::operator >> (YAML::Node& node) const
 {
     std::stringstream ss;
     operator >> (ss);

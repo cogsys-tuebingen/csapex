@@ -5,45 +5,46 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command.h>
 #include <csapex/command/create_thread.h>
-#include <csapex/command/meta.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/command/meta.h>
 #include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
-#include <csapex/view/utility/message_renderer_manager.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/node.h>
+#include <csapex/model/node_constructor.h>
 #include <csapex/model/node_facade.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/core/csapex_core.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/token_data.h>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/plugin/plugin_locator.h>
-#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/profiler_impl.h>
 #include <csapex/profiling/timer.h>
-#include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/view/csapex_view_core_impl.h>
 #include <csapex/view/designer/designer.h>
 #include <csapex/view/designer/designerio.h>
+#include <csapex/view/designer/graph_view.h>
 #include <csapex/view/designer/tutorial_tree_model.h>
+#include <csapex/view/model/thread_group_table_model.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/node_statistics.h>
 #include <csapex/view/utility/clipboard.h>
-#include <csapex/view/utility/html_delegate.h>
-#include <csapex/view/utility/node_list_generator.h>
-#include <csapex/view/utility/snippet_list_generator.h>
-#include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/utility/cpu_affinity_delegate.h>
+#include <csapex/view/utility/html_delegate.h>
+#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/view/utility/node_list_generator.h>
+#include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/utility/snippet_list_generator.h>
 #include <csapex/view/widgets/activity_legend.h>
 #include <csapex/view/widgets/activity_timeline.h>
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/profiling_widget.h>
 #include <csapex/view/widgets/screenshot_dialog.h>
-#include <csapex/view/model/thread_group_table_model.h>
-#include <csapex/view/designer/graph_view.h>
 #include "ui_csapex_window.h"
 
 /// SYSTEM
@@ -65,10 +66,11 @@ using namespace csapex;
 
 CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget *parent)
     : QMainWindow(parent), view_core_(view_core),
-      profiler_(std::make_shared<Profiler>()),
+      profiler_(std::make_shared<ProfilerImplementation>()),
       ui(new Ui::CsApexWindow), designer_(new Designer(view_core)), minimap_(designer_->getMinimap()),
       activity_legend_(new ActivityLegend), activity_timeline_(new ActivityTimeline),
       init_(false), state_changed_(false),
+      disconnected_(false),
       style_sheet_watcher_(nullptr), plugin_locator_(view_core_.getPluginLocator())
 {
     qRegisterMetaType < ActivityType > ("ActivityType");
@@ -109,11 +111,18 @@ void CsApexWindow::construct()
 
     setupTimeline();
 
-    GraphPtr graph = view_core_.getRoot()->getGraph();
-
     setupDesigner();
 
     ui->actionPause->setChecked(view_core_.isPaused());
+
+    if(view_core_.isProxy()) {
+        ui->actionServer_StartStop->setEnabled(false);
+    } else {
+        CsApexViewCoreImplementation& local_view_core = dynamic_cast<CsApexViewCoreImplementation&>(view_core_);
+        ui->actionServer_StartStop->setChecked(local_view_core.getCore()->isServerActive());
+    }
+    QObject::connect(ui->actionServer_StartStop, &QAction::triggered, this, &CsApexWindow::startStopServer);
+
     ui->menuBar->setVisible(true);
 
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
@@ -175,6 +184,8 @@ void CsApexWindow::construct()
     QObject::connect(this, &CsApexWindow::updateUndoInfoRequest, this, &CsApexWindow::updateUndoInfo);
     QObject::connect(this, &CsApexWindow::updateTitleRequest, this, &CsApexWindow::updateTitle);
     QObject::connect(this, &CsApexWindow::updateMenuRequest, this, &CsApexWindow::updateMenu);
+    QObject::connect(this, &CsApexWindow::restoreWindowStateRequest, this, &CsApexWindow::restoreWindowState);
+    QObject::connect(this, &CsApexWindow::disconnectEvent, this, &CsApexWindow::close);
 
     observe(view_core_.reset_requested, [this](){ designer_->reset(); });
     observe(view_core_.reset_done, [this](){ designer_->reinitialize(); });
@@ -184,10 +195,10 @@ void CsApexWindow::construct()
     observe(view_core_.new_snippet_type, [this](){ updateSnippets(); });
 
 
-    observe(view_core_.save_detail_request, [this](SubgraphNodeConstPtr graph, YAML::Node &doc){ designer_->saveView(graph, doc);});
-    observe(view_core_.load_detail_request, [this](SubgraphNodePtr graph, const YAML::Node &doc){ designer_->loadView(graph, doc);});
+    observe(view_core_.save_detail_request, [this](const GraphFacade& graph, YAML::Node &doc){ designer_->saveView(graph, doc);});
+    observe(view_core_.load_detail_request, [this](GraphFacade& graph, const YAML::Node &doc){ designer_->loadView(graph, doc);});
 
-    observe(graph->state_changed, [this]() { updateMenuRequest(); });
+    observe(view_core_.getRoot()->state_changed, [this]() { updateMenuRequest(); });
     observe(view_core_.panic, [this]() { clearBlock(); });
 
     observe(view_core_.undo_state_changed, [this](){ updateUndoInfoRequest(); updateMenuRequest(); });
@@ -197,13 +208,14 @@ void CsApexWindow::construct()
 
     QObject::connect(this, &CsApexWindow::showNotificationRequest, this, &CsApexWindow::showNotification);
     observe(view_core_.notification, [this](Notification notification){ showNotificationRequest(notification); });
+    observe(designer_->notification, [this](Notification notification){ showNotificationRequest(notification); });
 
     observe(view_core_.stepping_enabled, [this](){ ui->actionStep->setEnabled(true); });
     observe(view_core_.begin_step, [this](){  });
     observe(view_core_.end_step, [this](){ ui->actionStep->setEnabled(view_core_.isSteppingMode()); });
 
     observe(view_core_.group_created, [this](const ThreadGroupPtr& /*group*/) { updateThreadInfo(); });
-    observe(view_core_.loaded, [this](){ restoreWindowState(); });
+    observe(view_core_.loaded, [this](){ restoreWindowStateRequest(); });
 
     updateMenu();
     updateTitle();
@@ -312,20 +324,33 @@ bool CsApexWindow::eventFilter(QObject* o, QEvent* e)
 
 void CsApexWindow::setupThreadManagement()
 {
-    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getSettings(), view_core_.getThreadPool(), *view_core_.getCommandDispatcher());
+    ThreadPoolPtr thread_pool = view_core_.getThreadPool();
+    if(!thread_pool) {
+        ui->ThreadManagement->setEnabled(false);
+        return;
+    }
+
+    ThreadGroupTableModel* model = new ThreadGroupTableModel(view_core_.getSettings(), thread_pool, *view_core_.getCommandDispatcher());
     ui->thread_table->setModel(model);
     ui->thread_table->setItemDelegate(new CpuAffinityDelegate(ui->thread_table));
 
     QItemSelectionModel* select = ui->thread_table->selectionModel();
 
-    QObject::connect(select, &QItemSelectionModel::selectionChanged, [this](const QItemSelection &, const QItemSelection &) {
+    QObject::connect(select, &QItemSelectionModel::selectionChanged, [this, model](const QItemSelection &, const QItemSelection &) {
         QItemSelectionModel* select = ui->thread_table->selectionModel();
         int rows = 0;
         for(const auto& entry : select->selection()) {
             rows += entry.bottom() - entry.top() + 1;
         }
 
-        ui->thread_assign->setEnabled(rows == 1);
+        bool can_be_assigned = false;
+
+        if(rows == 1) {
+            int row = select->selection().first().top();
+            can_be_assigned = model->getThreadGroup(row)->id() != ThreadGroup::PRIVATE_THREAD;
+        }
+
+        ui->thread_assign->setEnabled(can_be_assigned);
         ui->thread_remove->setEnabled(rows > 0);
     });
 
@@ -344,7 +369,9 @@ void CsApexWindow::setupThreadManagement()
     QObject::connect(ui->thread_assign, &QPushButton::clicked, [this](bool) {
         if(GraphView* view = designer_->getVisibleGraphView()) {
             QItemSelectionModel* select = ui->thread_table->selectionModel();
-            ThreadGroup* group = view_core_.getThreadPool()->getGroupAt(select->currentIndex().row());
+            ThreadPoolPtr thread_pool = view_core_.getThreadPool();
+            apex_assert_hard(thread_pool);
+            ThreadGroup* group = thread_pool->getGroupAt(select->currentIndex().row());
             view->switchSelectedNodesToThread(group->id());
         }
     });
@@ -364,6 +391,8 @@ void CsApexWindow::setupThreadManagement()
     QObject::connect(ui->thread_create, &QPushButton::clicked, [this](bool) {
         bool ok;
         ThreadPool* thread_pool = view_core_.getThreadPool().get();
+        apex_assert_hard(thread_pool);
+
         QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
 
         if(ok && !text.isEmpty()) {
@@ -382,6 +411,7 @@ void CsApexWindow::setupThreadManagement()
             CommandFactory factory(view_core_.getRoot().get());
 
             ThreadPoolPtr thread_pool = view_core_.getThreadPool();
+            apex_assert_hard(thread_pool);
 
             for(const auto& entry : selection) {
                 for(int row = entry.top(); row <= entry.bottom(); ++row) {
@@ -476,7 +506,9 @@ void CsApexWindow::updateDebugInfo()
     std::vector<NodeBox*> selected = designer_->getSelectedBoxes();
 
     for(NodeBox* box : selected) {
-        box->getNodeFacade()->node_state_changed.connect([this](){ updateDebugInfo(); });
+        box->getNodeFacade()->node_state_changed.connect([this](NodeStatePtr){
+            updateDebugInfo();
+        });
         ui->box_info->addTopLevelItem(NodeStatistics(box->getNodeFacade().get()).createDebugInformation(view_core_.getNodeFactory().get()));
     }
 
@@ -513,45 +545,37 @@ void CsApexWindow::updateNodeInfo()
     for(QTreeWidgetItem* item : ui->node_info_tree->selectedItems()) {
         QString type = item->data(0, Qt::UserRole + 1).toString();
         if(!type.isEmpty()) {
-            NodeConstructor::Ptr n = view_core_.getNodeFactory()->getConstructor(type.toStdString());
+            NodeConstructor::Ptr constructor = view_core_.getNodeFactory()->getConstructor(type.toStdString());
 
-            QString icon = QString::fromStdString(n->getIcon());
+            QString icon = QString::fromStdString(constructor->getIcon());
             QImage image = QIcon(icon).pixmap(QSize(16,16)).toImage();
-            QUrl uri ( QString::fromStdString(n->getType()));
+            QUrl uri ( QString::fromStdString(constructor->getType()));
             ui->node_info_text->document()->addResource( QTextDocument::ImageResource, uri, QVariant ( image ) );
 
-            ss << "<h1> <img src=\"" << uri.toString().toStdString() << "\" /> " << n->getType() << "</h1>";
+            ss << "<h1> <img src=\"" << uri.toString().toStdString() << "\" /> " << constructor->getType() << "</h1>";
             ss << "<p>Tags: <i>";
             int i = 0;
-            for(const Tag::Ptr& tag : n->getTags()) {
+            for(const Tag::Ptr& tag : constructor->getTags()) {
                 if(i++ > 0) {
                     ss << ", ";
                 }
                 ss << tag->getName();
             }
             ss << "</p>";
-            ss << "<h3>" << n->getDescription() << "</h3>";
+            ss << "<h3>" << constructor->getDescription() << "</h3>";
 
             ss << "<hr />";
             ss << "<h1>Parameters:</h1>";
 
-
-            auto node = n->makePrototype()->getNode().lock();
-            if(node) {
-                node->setupParameters(*node);
-                std::vector<csapex::param::Parameter::Ptr> params = node->getParameters();
-
-                for(const csapex::param::Parameter::Ptr& p : params) {
-                    if(!p->isHidden()) {
-                        ss << "<h2>" << p->name() << "</h2>";
-                        ss << "<p>" << p->description().toString() << "</p>";
-                        ss << "<p>" << p->toString() << "</p>";
-                    }
+            for(const csapex::param::Parameter::Ptr& p : constructor->getParameters()) {
+                if(!p->isHidden()) {
+                    ss << "<h2>" << p->name() << "</h2>";
+                    ss << "<p>" << p->description().toString() << "</p>";
+                    ss << "<p>" << p->toString() << "</p>";
                 }
             }
         }
     }
-
 
     ui->node_info_text->setHtml(QString::fromStdString(ss.str()));
 }
@@ -686,9 +710,18 @@ void CsApexWindow::updateNodeTypes()
 
 void CsApexWindow::updateSnippets()
 {
-    SnippetListGenerator generator(*view_core_.getSnippetFactory());
     ui->snippets->clear();
-    generator.insertAvailableSnippets(ui->snippets);
+
+    if(SnippetFactoryPtr snippet_factory = view_core_.getSnippetFactory()) {
+        SnippetListGenerator generator(*snippet_factory);
+        generator.insertAvailableSnippets(ui->snippets);
+
+    } else {
+        QTreeWidgetItem* submenu = new QTreeWidgetItem;
+        submenu->setText(0, QString::fromStdString("not yet supported in remote view"));
+        ui->snippets->addTopLevelItem(submenu);
+        ui->snippets->setEnabled(false);
+    }
 }
 
 
@@ -911,30 +944,26 @@ void CsApexWindow::addStateToSettings()
 
 void CsApexWindow::closeEvent(QCloseEvent* event)
 {
-    addStateToSettings();
+    if(!disconnected_) {
+        addStateToSettings();
 
-    if(isDirty()) {
-        int r = QMessageBox::warning(this, tr("cs::APEX"),
-                                     tr("Do you want to save the layout before closing?"),
-                                     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        if(r == QMessageBox::Save) {
-            save();
-            event->accept();
-        } else if(r == QMessageBox::Discard) {
-            event->accept();
-        } else {
-            event->ignore();
-            return;
+        if(isDirty()) {
+            int r = QMessageBox::warning(this, tr("cs::APEX"),
+                                         tr("Do you want to save the layout before closing?"),
+                                         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+            if(r == QMessageBox::Save) {
+                save();
+                event->accept();
+            } else if(r == QMessageBox::Discard) {
+                event->accept();
+            } else {
+                event->ignore();
+                return;
+            }
         }
     }
 
-    try {
-        view_core_.shutdown();
-    } catch(const std::exception& e) {
-        std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
-    } catch(...) {
-        throw;
-    }
+
 
     event->accept();
     closed();
@@ -984,6 +1013,20 @@ void CsApexWindow::restoreWindowState()
 std::string CsApexWindow::getConfigFile()
 {
     return view_core_.getSettings().get<std::string>("config");
+}
+
+void CsApexWindow::startStopServer()
+{
+    apex_assert_hard(!view_core_.isProxy());
+
+    CsApexViewCoreImplementation& local_view_core = dynamic_cast<CsApexViewCoreImplementation&>(view_core_);
+    CsApexCore& core = *local_view_core.getCore();
+    if(core.isServerActive()) {
+        core.stopServer();
+
+    } else {
+        core.startServer();
+    }
 }
 
 void CsApexWindow::save()
@@ -1042,6 +1085,12 @@ void CsApexWindow::undo()
 void CsApexWindow::redo()
 {
     view_core_.getCommandDispatcher()->redo();
+}
+
+void CsApexWindow::triggerDisconnectEvent()
+{
+    disconnected_ = true;
+    close();
 }
 
 void CsApexWindow::makeScreenshot()

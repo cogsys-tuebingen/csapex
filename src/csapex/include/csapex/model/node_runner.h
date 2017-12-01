@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/model/model_fwd.h>
+#include <csapex/utility/notifier.h>
 #include <csapex/csapex_export.h>
 #include <csapex/model/observer.h>
 
@@ -16,7 +17,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT NodeRunner : public TaskGenerator, public Observer
+class CSAPEX_EXPORT NodeRunner : public TaskGenerator, public Observer, public Notifier
 {
 public:
     NodeRunner(NodeWorkerPtr worker);

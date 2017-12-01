@@ -1,8 +1,14 @@
 /// HEADER
 #include <csapex/param/set_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(SetParameter)
 
 using namespace csapex;
 using namespace param;
@@ -320,4 +326,26 @@ void SetParameter::doDeserializeImplementation(const std::string& type_name, con
 bool SetParameter::accepts(const std::type_info& type) const
 {
     return type == value_.type() || type == typeid(std::pair<std::string, bool>);
+}
+
+
+
+void SetParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << value_;
+    data << txt_;
+    data << set_;
+    data << def_;
+}
+
+void SetParameter::deserialize(const SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> value_;
+    data >> txt_;
+    data >> set_;
+    data >> def_;
 }

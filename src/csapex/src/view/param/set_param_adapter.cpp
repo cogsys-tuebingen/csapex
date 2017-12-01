@@ -44,7 +44,7 @@ QWidget* SetParameterAdapter::setup(QBoxLayout* layout, const std::string& displ
         if(!val.isEmpty()) {
 //            p->setByName(combo->currentText().toStdString());
             command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>
-                    (AUUID(p_->getUUID()), std::make_pair(val.toStdString(), true));
+                    (p_->getUUID().getAbsoluteUUID(), std::make_pair(val.toStdString(), true));
             executeCommand(update_parameter);
         }
     });

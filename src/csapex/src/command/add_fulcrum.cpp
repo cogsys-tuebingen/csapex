@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/model/connection.h>
@@ -62,7 +62,7 @@ void AddFulcrum::serialize(SerializationBuffer &data) const
     data << type;
 }
 
-void AddFulcrum::deserialize(SerializationBuffer& data)
+void AddFulcrum::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

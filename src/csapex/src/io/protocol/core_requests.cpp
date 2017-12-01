@@ -6,8 +6,9 @@
 #include <csapex/serialization/serialization_buffer.h>
 #include <csapex/io/feedback.h>
 #include <csapex/utility/uuid_provider.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/snippet.h>
 
 /// SYSTEM
 #include <iostream>
@@ -32,7 +33,7 @@ CoreRequests::CoreRequest::CoreRequest(uint8_t request_id)
 
 }
 
-ResponsePtr CoreRequests::CoreRequest::execute(CsApexCore &core) const
+ResponsePtr CoreRequests::CoreRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     switch(request_type_)
     {
@@ -61,6 +62,15 @@ ResponsePtr CoreRequests::CoreRequest::execute(CsApexCore &core) const
 
         } else {
             core.load(boost::any_cast<std::string>(parameters_.at(0)));
+        }
+    }
+        break;
+    case CoreRequestType::CoreSerialize: {
+        int args = parameters_.size();
+        if(args == 2) {
+            SnippetPtr snippet = core.serializeNodes(boost::any_cast<AUUID>(parameters_.at(0)),
+                                                     boost::any_cast<std::vector<UUID>>(parameters_.at(1)));
+            return std::make_shared<CoreResponse>(request_type_, snippet, getRequestID());
         }
     }
         break;
@@ -108,7 +118,7 @@ void CoreRequests::CoreRequest::serialize(SerializationBuffer &data) const
     data << parameters_;
 }
 
-void CoreRequests::CoreRequest::deserialize(SerializationBuffer& data)
+void CoreRequests::CoreRequest::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> parameters_;
@@ -143,7 +153,7 @@ void CoreRequests::CoreResponse::serialize(SerializationBuffer &data) const
     data << result_;
 }
 
-void CoreRequests::CoreResponse::deserialize(SerializationBuffer& data)
+void CoreRequests::CoreResponse::deserialize(const SerializationBuffer& data)
 {
     data >> request_type_;
     data >> result_;

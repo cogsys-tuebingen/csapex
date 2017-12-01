@@ -52,15 +52,17 @@ ThreadGroupTableModel::ThreadGroupTableModel(Settings& settings, ThreadPoolPtr t
         refresh();
     });
 
-    // handle default group
-    observe(thread_pool->getDefaultGroup()->getCpuAffinity()->affinity_changed, [this](const CpuAffinity*){
-        refresh();
-    });
+    // handle existing groups
+    for(std::size_t i = 0, n = thread_pool->getGroupCount(); i < n; ++i) {
+        observe(thread_pool->getGroupAt(i)->getCpuAffinity()->affinity_changed, [this](const CpuAffinity*){
+            refresh();
+        });
+    }
 }
 
 int ThreadGroupTableModel::rowCount(const QModelIndex &/*parent*/) const
 {
-    return thread_pool_->getGroupCount() + 1;
+    return thread_pool_->getGroupCount();
 }
 
 int ThreadGroupTableModel::columnCount(const QModelIndex &/*parent*/) const
@@ -70,7 +72,7 @@ int ThreadGroupTableModel::columnCount(const QModelIndex &/*parent*/) const
 
 ThreadGroup * ThreadGroupTableModel::getThreadGroup(int row) const
 {
-    return row == 0 ? thread_pool_->getDefaultGroup() : thread_pool_->getGroupAt(row - 1);
+    return thread_pool_->getGroupAt(row);
 }
 
 bool ThreadGroupTableModel::setData(const QModelIndex &index, const QVariant &value, int role)

@@ -6,7 +6,7 @@
 #include <csapex/model/node_constructor.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/utility/assert.h>
 #include <csapex/msg/direct_connection.h>
@@ -30,10 +30,10 @@ std::string AddConnection::getDescription() const
 
 bool AddConnection::doUndo()
 {
-    GraphPtr graph = getGraph();
+    GraphImplementationPtr graph = getGraph();
 
-    ConnectablePtr f = graph->findConnector(from_uuid);
-    ConnectablePtr t = graph->findConnector(to_uuid);
+    ConnectorPtr f = graph->findConnector(from_uuid);
+    ConnectorPtr t = graph->findConnector(to_uuid);
 
     apex_assert_hard((f->isOutput() && t->isInput()));
 
@@ -50,7 +50,7 @@ bool AddConnection::doRedo()
 
 bool AddConnection::doExecute()
 {
-    GraphPtr graph = getGraph();
+    GraphImplementationPtr graph = getGraph();
 
     OutputPtr f = graph->findTypedConnector<Output>(from_uuid);
     InputPtr t = graph->findTypedConnector<Input>(to_uuid);
@@ -75,7 +75,7 @@ void AddConnection::serialize(SerializationBuffer &data) const
     data << active;
 }
 
-void AddConnection::deserialize(SerializationBuffer& data)
+void AddConnection::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

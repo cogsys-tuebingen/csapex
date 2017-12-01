@@ -2,9 +2,7 @@
 #include <csapex/view/node/node_adapter.h>
 
 /// COMPONENT
-#include <csapex/model/node.h>
 #include <csapex/model/node_facade.h>
-#include <csapex/model/node_handle.h>
 #include <csapex/param/parameter.h>
 #include <csapex/view/node/box.h>
 
@@ -15,18 +13,14 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter(NodeFacadeWeakPtr adaptee, NodeBox* parent)
+NodeAdapter::NodeAdapter(NodeFacadePtr adaptee, NodeBox* parent)
     : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent)
 {
 }
 
 NodeAdapter::~NodeAdapter()
 {
-    for(auto& c : connections_) {
-        c.disconnect();
-    }
-
-    connections_.clear();
+    stopObserving();
 }
 
 
@@ -78,9 +72,4 @@ void NodeAdapter::setManualResize(bool manual)
 bool NodeAdapter::isResizable() const
 {
     return false;
-}
-
-void NodeAdapter::trackConnection(const slim_signal::Connection &c)
-{
-    connections_.push_back(c);
 }

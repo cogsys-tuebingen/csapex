@@ -20,26 +20,19 @@ public:
     void setInputTransition(InputTransition* it);
     void removeInputTransition();
 
-    virtual bool canInput() const override {
-        return true;
-    }
     virtual bool isInput() const override {
         return true;
     }
+
+    int maxConnectionCount() const override;
+
     virtual ConnectorType getConnectorType() const override
     {
         return ConnectorType::INPUT;
     }
 
-    bool canConnectTo(Connector* other_side, bool move) const override;
-
     virtual void setToken(TokenPtr message);
     virtual TokenPtr getToken() const;
-
-    virtual bool targetsCanBeMovedTo(Connector* other_side) const override;
-
-    virtual void connectionMovePreview(ConnectorPtr other_side) override;
-    virtual void validateConnections() override;
 
     OutputPtr getSource() const;
 
@@ -66,7 +59,7 @@ public:
     slim_signal::Signal<void(Connection* )> message_available;
 
 protected:
-    virtual bool isConnectionPossible(Connector* other_side) override;
+    virtual void addStatusInformation(std::stringstream& status_stream) const override;
 
 protected:
     InputTransition* transition_;

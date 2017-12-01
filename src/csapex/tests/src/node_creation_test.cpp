@@ -1,8 +1,8 @@
 #include <csapex/model/node.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_worker.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/factory/generic_node_factory.hpp>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
@@ -11,7 +11,7 @@
 #include <csapex/msg/marker_message.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/token.h>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
 
 #include "gtest/gtest.h"
 
@@ -42,10 +42,10 @@ void functionToBeWrappedIntoANode(const GenericValueMessage<int>& input, const G
 
 class NodeCreationTest : public ::testing::Test {
 protected:
-    NodeFactory factory;
+    NodeFactoryImplementation factory;
 
     NodeCreationTest()
-        : factory(SettingsLocal::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
+        : factory(SettingsImplementation::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
     {
         csapex::NodeConstructor::Ptr mockup_constructor(new csapex::NodeConstructor("MockupNode", std::bind(&NodeCreationTest::makeMockup)));
         factory.registerNodeType(mockup_constructor);
@@ -79,7 +79,7 @@ protected:
 
 TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node = factory.makeNode("MockupNode", node_id, uuid_provider);
+    NodeFacadeImplementationPtr node = factory.makeNode("MockupNode", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
     EXPECT_EQ(node_id, node->getUUID());
@@ -87,7 +87,7 @@ TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
 
 TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
-    NodeFacadePtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
+    NodeFacadeImplementationPtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
     ASSERT_TRUE(node_facade != nullptr);
 
     ASSERT_TRUE(node_facade->getNodeHandle() != nullptr);
@@ -108,7 +108,7 @@ TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
 TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz2");
 
-    NodeFacadePtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
+    NodeFacadeImplementationPtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
     ASSERT_TRUE(node_facade != nullptr);
 
     NodePtr node = node_facade->getNode();

@@ -30,7 +30,7 @@ void ParameterChanged::serialize(SerializationBuffer &data) const
     data << value;
 }
 
-void ParameterChanged::deserialize(SerializationBuffer& data)
+void ParameterChanged::deserialize(const SerializationBuffer& data)
 {
     data >> uuid;
     data >> value;

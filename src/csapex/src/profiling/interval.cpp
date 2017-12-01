@@ -1,12 +1,21 @@
 /// HEADER
 #include <csapex/profiling/interval.h>
 
+/// PROJECT
+#include <csapex/serialization/serialization_buffer.h>
+
 using namespace csapex;
 
 Interval::Interval(const std::string &name)
     : name_(name), length_micro_seconds_(0), active_(false)
 {
     start();
+}
+
+Interval::Interval()
+    : Interval("empty")
+{
+
 }
 
 bool Interval::isActive() const
@@ -76,4 +85,44 @@ void Interval::stop()
 {
     end_ = std::chrono::high_resolution_clock::now();
     length_micro_seconds_ += std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
+}
+
+
+std::shared_ptr<Clonable> Interval::makeEmptyClone() const
+{
+    return std::shared_ptr<Interval>(new Interval);
+}
+
+void Interval::serialize(SerializationBuffer &data) const
+{
+    data << name_;
+
+    uint64_t start = std::chrono::nanoseconds(start_.time_since_epoch()).count();
+    uint64_t end = std::chrono::nanoseconds(end_.time_since_epoch()).count();
+    data << start;
+    data << end;
+
+    data << length_micro_seconds_;
+    data << active_;
+
+    data << sub;
+}
+void Interval::deserialize(const SerializationBuffer& data)
+{
+    data >> name_;
+
+    uint64_t start;
+    uint64_t end;
+    data >> start;
+    data >> end;
+
+    using tp = std::chrono::time_point<std::chrono::high_resolution_clock>;
+
+    start_ = tp(std::chrono::nanoseconds(start));
+    end_ = tp(std::chrono::nanoseconds(end));
+
+    data >> length_micro_seconds_;
+    data >> active_;
+
+    data >> sub;
 }

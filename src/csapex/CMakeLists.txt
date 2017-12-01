@@ -78,11 +78,11 @@ endif()
 #
 # CCACHE
 #
-set(USE_CCACHE 0 CACHE BOOL "optimize compile using ccache?")
-if(${USE_CCACHE})
-SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif()
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
 
 ###########
 ## INFO  ##
@@ -126,6 +126,20 @@ else()
 				    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
 endif()	
 
+#
+# COVERAGE
+#
+if(ENABLE_COVERAGE)
+    message("generating coverage information")
+
+    SET(GCC_COVERAGE_COMPILE_FLAGS "--coverage -fno-inline -fno-inline-small-functions -fno-default-inline")
+    SET(GCC_COVERAGE_LINK_FLAGS    "-lgcov")
+
+    SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
+    SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
+endif()
+
+
 ###########
 ## Build ##
 ###########
@@ -144,7 +158,7 @@ include_directories(include
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_definitions(--system-header-prefix=/usr/include)
+    #add_definitions(--system-header-prefix=/usr/include)
 endif()
 
 #
@@ -194,6 +208,7 @@ add_library(csapex_util SHARED
     src/utility/singleton.cpp
     src/utility/thread.cpp
     src/utility/rate.cpp
+    src/utility/notification.cpp
     src/utility/notifier.cpp
     src/utility/type.cpp
     src/utility/uuid.cpp
@@ -278,6 +293,7 @@ add_library(csapex_profiling SHARED
     src/profiling/profile.cpp
     src/profiling/timer.cpp
     src/profiling/profiler.cpp
+    src/profiling/profiler_impl.cpp
     src/profiling/timable.cpp
     src/profiling/profilable.cpp
 
@@ -315,19 +331,20 @@ file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYM
 
 add_library(csapex SHARED
     src/model/node_facade.cpp
-    src/model/node_facade_local.cpp
+    src/model/node_facade_impl.cpp
 
     src/model/node_handle.cpp
     src/model/node_worker.cpp
 
     src/core/csapex_core.cpp
     src/core/core_plugin.cpp
+    src/core/bootstrap.cpp
     src/core/bootstrap_plugin.cpp
     src/core/graphio.cpp
     src/core/exception_handler.cpp
 
     src/core/settings.cpp
-    src/core/settings/settings_local.cpp
+    src/core/settings/settings_impl.cpp
 
     src/command/command.cpp
     src/command/dispatcher.cpp
@@ -336,10 +353,12 @@ add_library(csapex SHARED
 
     src/factory/generic_node_factory.cpp
     src/factory/node_factory.cpp
+    src/factory/node_factory_impl.cpp
     src/factory/message_factory.cpp
     src/factory/snippet_factory.cpp
 
     src/manager/message_provider_manager.cpp
+    src/manager/message_renderer_manager.cpp
 
     src/model/graph/vertex.cpp
     src/model/graph/edge.cpp
@@ -348,6 +367,7 @@ add_library(csapex SHARED
     src/model/connectable.cpp
     src/model/connectable_owner.cpp
     src/model/connector_type.cpp
+    src/model/connector_description.cpp
     src/model/connectable_vector.cpp
     src/model/connection.cpp
     src/model/connection_information.cpp
@@ -357,9 +377,10 @@ add_library(csapex SHARED
     src/model/fulcrum.cpp
     src/model/generic_state.cpp
     src/model/graph.cpp
-    src/model/graph/graph_local.cpp
+    src/model/graph/graph_impl.cpp
     src/model/subgraph_node.cpp
     src/model/graph_facade.cpp
+    src/model/graph_facade_impl.cpp
     src/model/memento.cpp
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
@@ -395,6 +416,7 @@ add_library(csapex SHARED
     src/msg/transition.cpp
     src/msg/direct_connection.cpp
     src/msg/generic_vector_message.cpp
+    src/msg/message_renderer.cpp
 
     src/plugin/plugin_locator.cpp
 
@@ -408,6 +430,8 @@ add_library(csapex SHARED
 
     src/signal/slot.cpp
     src/signal/event.cpp
+
+    src/io/server.cpp
 
     ${csapex_HEADERS}
 )
@@ -448,6 +472,7 @@ add_library(csapex_command SHARED
     src/command/add_fulcrum.cpp
     src/command/add_node.cpp
     src/command/create_thread.cpp
+    src/command/clear_graph.cpp
     src/command/delete_connection.cpp
     src/command/delete_connector.cpp
     src/command/delete_fulcrum.cpp
@@ -513,30 +538,62 @@ file(GLOB_RECURSE csapex_remote_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOL
 )
 
 add_library(csapex_remote SHARED
-    src/core/settings/settings_remote.cpp
-    src/command/dispatcher_remote.cpp
+    src/core/settings/settings_proxy.cpp
+    src/command/dispatcher_proxy.cpp
 
-    src/model/node_facade_remote.cpp
-    src/model/graph/graph_remote.cpp
+    src/model/node_facade_proxy.cpp
+    src/model/connector_proxy.cpp
 
-    src/io/server.cpp
+    src/model/graph/graph_proxy.cpp
+    src/model/graph_facade_proxy.cpp
+
+    src/factory/node_factory_proxy.cpp
+
+    src/profiling/profiler_proxy.cpp
+
+    src/io/proxy.cpp
+    src/io/raw_message.cpp
     src/io/request.cpp
     src/io/response.cpp
     src/io/feedback.cpp
+    src/io/note.cpp
     src/io/broadcast_message.cpp
     src/io/session.cpp
+    src/io/session_client.cpp
+    src/io/channel.cpp
 
+    src/io/tcp_server.cpp
+    src/io/graph_server.cpp
+    src/io/node_server.cpp
+    src/io/connector_server.cpp
+
+    src/io/protocol/tick_message.cpp
     src/io/protocol/notification_message.cpp
     src/io/protocol/parameter_changed.cpp
-    src/io/protocol/tick_message.cpp
+    src/io/protocol/request_nodes.cpp
     src/io/protocol/request_parameter.cpp
     src/io/protocol/add_parameter.cpp
     src/io/protocol/core_requests.cpp
+    src/io/protocol/core_notes.cpp
+    src/io/protocol/node_requests.cpp
+    src/io/protocol/node_notes.cpp
+    src/io/protocol/node_broadcasts.cpp
+    src/io/protocol/graph_requests.cpp
+    src/io/protocol/graph_notes.cpp
+    src/io/protocol/graph_broadcasts.cpp
+    src/io/protocol/graph_facade_requests.cpp
+    src/io/protocol/graph_facade_notes.cpp
     src/io/protocol/command_requests.cpp
     src/io/protocol/command_broadcasts.cpp
+    src/io/protocol/connector_requests.cpp
+    src/io/protocol/connector_notes.cpp
+    src/io/protocol/profiler_requests.cpp
+    src/io/protocol/profiler_note.cpp
 
     src/serialization/request_serializer.cpp
+    src/serialization/raw_message_serializer.cpp
     src/serialization/broadcast_message_serializer.cpp
+    src/serialization/note_serializer.cpp
     src/serialization/feedback_serializer.cpp
 
     ${csapex_remote_HEADERS}
@@ -550,10 +607,10 @@ generate_export_header(csapex_remote
                          )
 target_link_libraries(csapex_remote
     csapex_serialization
-    csapex_util
     csapex_profiling
     csapex_param
     csapex_command
+    csapex_util
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
     ${TinyXML_LIBRARIES}
@@ -570,21 +627,18 @@ file(GLOB_RECURSE csapex_qt_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_
 if(NOT WIN32)
     # for visual studio, we want the headers in the library
     # however, with ubuntu that doesn't compile due to auto moc'ing
-    add_custom_target(csapex_qt_headers SOURCES ${csapex_qt_HEADERS})
-    set(csapex_qt_HEADERS)
+    #add_custom_target(csapex_qt_headers SOURCES ${csapex_qt_HEADERS})
+    #set(csapex_qt_HEADERS)
 endif()
 
 # Library for the app itself
 add_library(csapex_qt SHARED
 
     src/view/csapex_view_core.cpp
-    src/view/csapex_view_core_local.cpp
-    src/view/csapex_view_core_remote.cpp
+    src/view/csapex_view_core_impl.cpp
+    src/view/csapex_view_core_proxy.cpp
     src/view/csapex_window.cpp
-    src/view/message_renderer.cpp
     src/view/gui_exception_handler.cpp
-
-    src/view/utility/message_renderer_manager.cpp
 
     src/view/model/thread_group_table_model.cpp
 
@@ -634,6 +688,7 @@ add_library(csapex_qt SHARED
     src/view/utility/context_menu_handler.cpp
     src/view/utility/cpu_affinity_delegate.cpp
     src/view/utility/html_delegate.cpp
+    src/view/utility/qobserver.cpp
     src/view/utility/qsignal_bridges.cpp
     src/view/utility/qsignal_relay.cpp
     src/view/utility/qt_helper.cpp
@@ -663,7 +718,7 @@ add_library(csapex_qt SHARED
     src/view/widgets/notification_widget.cpp
     src/view/widgets/cpu_affinity_widget.cpp
 
-    ${csapex_qt_HEADERS}
+    #${csapex_qt_HEADERS}
 
     ${QT_RESOURCES}
 
@@ -727,6 +782,17 @@ target_link_libraries(csapex_server
 
 
 
+add_executable(csapex_client
+        src/csapex_client.cpp)
+
+set_target_properties(csapex_client PROPERTIES AUTOMOC TRUE)
+target_link_libraries(csapex_client
+    csapex_remote
+    csapex_qt
+    ${Boost_LIBRARIES})
+
+
+
 add_executable(csapex_demo_client
     src/io/demo_client.cpp)
 
@@ -740,7 +806,10 @@ add_custom_target(cfg ALL DEPENDS cfg/style.css)
 add_custom_command(TARGET cfg POST_BUILD
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
         ${CATKIN_DEVEL_PREFIX}
-        ${PROJECT_NAME}/csapex_main
+        ${PROJECT_NAME}
+        csapex_main
+        csapex_server
+        csapex_client
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -768,6 +837,7 @@ add_custom_command(TARGET cfg POST_BUILD
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests/CMakeLists.txt)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
 endif()
+
 
 #
 # INSTALL

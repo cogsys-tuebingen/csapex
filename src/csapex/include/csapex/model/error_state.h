@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_export.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <string>
@@ -24,12 +25,15 @@ public:
 
 
 public:
-    virtual void setError(bool e, const std::string& msg = "", ErrorLevel level = ErrorLevel::ERROR);
+    void setError(bool e, const std::string& msg = "", ErrorLevel level = ErrorLevel::ERROR);
     void setErrorSilent(bool e, const std::string& msg = "", ErrorLevel level = ErrorLevel::ERROR);
 
-    bool isError() const;
-    ErrorLevel errorLevel() const;
-    std::string errorMessage() const;
+    virtual bool isError() const;
+    virtual ErrorLevel errorLevel() const;
+    virtual std::string errorMessage() const;
+
+public:
+    slim_signal::Signal<void(bool, const std::string& msg, ErrorLevel level)> error_event;
 
 protected:
     ErrorState();

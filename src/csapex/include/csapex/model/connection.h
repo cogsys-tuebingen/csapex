@@ -9,6 +9,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/token.h>
 #include <csapex/csapex_export.h>
+#include <csapex/model/connection_information.h>
 
 /// SYSTEM
 #include <memory>
@@ -44,6 +45,15 @@ protected:
     Connection(OutputPtr from, InputPtr to, int id);
 
 public:
+    static bool isCompatibleWith(Connector *from, Connector* to);
+
+    static bool canBeConnectedTo(Connector* from, Connector* to);
+    static bool targetsCanBeMovedTo(Connector* from, Connector* to);
+
+
+    static bool areConnectorsConnected(Connector* from, Connector* to);
+
+public:
     virtual ~Connection();
 
     void detach(Connector* c);
@@ -56,6 +66,8 @@ public:
     ConnectorPtr target() const;
 
     int id() const;
+
+    ConnectionInformation getDescription() const;
 
     bool contains(Connector* c) const;
 
@@ -79,6 +91,8 @@ public:
     bool isSourceEnabled() const;
     bool isSinkEnabled() const;
 
+    bool isPipelining() const;
+
     State getState() const;
     void setState(State s);
 
@@ -101,6 +115,8 @@ public:
     bool operator == (const Connection& c) const;
 
     std::vector<FulcrumPtr> getFulcrums() const;
+    std::vector<Fulcrum> getFulcrumsCopy() const;
+
     int getFulcrumCount() const;
     FulcrumPtr getFulcrum(int fulcrum_id);
 

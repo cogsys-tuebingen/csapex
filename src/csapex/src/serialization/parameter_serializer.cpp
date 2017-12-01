@@ -21,7 +21,7 @@ ParameterSerializerInterface::~ParameterSerializerInterface()
 
 }
 
-void ParameterSerializer::serialize(const SerializableConstPtr& packet, SerializationBuffer& data)
+void ParameterSerializer::serialize(const StreamableConstPtr& packet, SerializationBuffer& data)
 {
     if(!packet) {
         data << (uint8_t) param::NullParameter::NUMERICAL_ID;
@@ -42,13 +42,13 @@ void ParameterSerializer::serialize(const SerializableConstPtr& packet, Serializ
             serializer->serialize(parameter, data);
 
         } else {
-            std::cerr << "cannot serialize Parameter of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
+            std::cerr << "cannot serialize Parameter of type " << (int) type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
         }
 
     }
 }
 
-SerializablePtr ParameterSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Parameter" << std::endl;
 
@@ -69,7 +69,7 @@ SerializablePtr ParameterSerializer::deserialize(SerializationBuffer& data)
         return serializer->deserialize(data);
 
     } else {
-        std::cerr << "cannot deserialize Parameter of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
+        std::cerr << "cannot deserialize Parameter of type " << (int) type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
     }
 
 

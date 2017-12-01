@@ -22,14 +22,14 @@ RequestSerializerInterface::~RequestSerializerInterface()
 
 }
 
-void RequestSerializer::serialize(const SerializableConstPtr &packet, SerializationBuffer& data)
+void RequestSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
 {
     if(const RequestConstPtr& request = std::dynamic_pointer_cast<Request const>(packet)) {
         std::string type = request->getType();
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
 
-            std::cerr << "serializing Request (type=" << type << ")" << std::endl;
+           // std::cerr << "serializing Request (type=" << type << ")" << std::endl;
             data << type;
 
             data << (uint8_t) 0;
@@ -49,7 +49,7 @@ void RequestSerializer::serialize(const SerializableConstPtr &packet, Serializat
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
 
-            std::cerr << "serializing Response (type=" << type << ")" << std::endl;
+            //std::cerr << "serializing Response (type=" << type << ")" << std::endl;
             data << type;
 
             data << (uint8_t) 1;
@@ -66,7 +66,7 @@ void RequestSerializer::serialize(const SerializableConstPtr &packet, Serializat
     }
 }
 
-SerializablePtr RequestSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr RequestSerializer::deserialize(const SerializationBuffer& data)
 {
 //    std::cerr << "deserializing Request" << std::endl;
 
@@ -83,14 +83,14 @@ SerializablePtr RequestSerializer::deserialize(SerializationBuffer& data)
         data >> id;
 
         if(direction == 0) {
-            std::cerr << "deserializing Request (type=" << type << ")" << std::endl;
+            //std::cerr << "deserializing Request (type=" << type << ")" << std::endl;
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
             return serializer->deserializeRequest(data, id);
 
         } else if(direction == 1) {
-            std::cerr << "deserializing Response (type=" << type << ")" << std::endl;
+            //std::cerr << "deserializing Response (type=" << type << ")" << std::endl;
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;

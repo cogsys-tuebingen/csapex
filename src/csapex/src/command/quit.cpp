@@ -63,8 +63,7 @@ void Quit::serialize(SerializationBuffer &data) const
     Command::serialize(data);
 
 }
-void Quit::deserialize(SerializationBuffer& data)
+void Quit::deserialize(const SerializationBuffer& data)
 {
-    Command::serialize(data);
-
+    Command::deserialize(data);
 }

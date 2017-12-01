@@ -23,7 +23,7 @@ class CSAPEX_QT_EXPORT Port : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(ConnectorWeakPtr adaptee, QWidget *parent = nullptr);
+    Port(ConnectorPtr adaptee, QWidget *parent = nullptr);
     virtual ~Port();
 
     bool event(QEvent *e);
@@ -51,12 +51,10 @@ public:
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
 
-    bool canOutput() const;
-    bool canInput() const;
     bool isOutput() const;
     bool isInput() const;
 
-    ConnectorWeakPtr getAdaptee() const;
+    ConnectorPtr getAdaptee() const;
 
     void refreshStylesheet();
 
@@ -65,7 +63,10 @@ Q_SIGNALS:
     void mouseOut(Port* port);
     void removeConnectionsRequest();
 
+    void addConnectionPreview(ConnectorPtr);
     void addConnectionRequest(ConnectorPtr);
+
+    void moveConnectionPreview(ConnectorPtr);
     void moveConnectionRequest(ConnectorPtr);
 
     void changePortRequest(QString label);
@@ -76,9 +77,6 @@ public Q_SLOTS:
     void setFlipped(bool flipped);
     void setEnabledFlag(bool disabled);
 
-    void setError(bool e, const std::string& msg);
-    void setError(bool e, const std::string& msg, int level);
-
 protected:
     Port(QWidget *parent = nullptr);
 
@@ -87,7 +85,7 @@ protected:
     void paintEvent(QPaintEvent *);
 
 protected:
-    ConnectorWeakPtr adaptee_;
+    ConnectorPtr adaptee_;
     bool refresh_style_sheet_;
     bool minimized_;
     bool flipped_;

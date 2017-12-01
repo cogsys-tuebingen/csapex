@@ -58,7 +58,10 @@ public:
     void doClone(const Parameter& other) override;
 
     void doSerialize(YAML::Node& e) const override;
-    void doDeserialize(const YAML::Node& n) override;
+    void doDeserialize(const YAML::Node& n) override;    
+
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     template <typename T>
     T min() const { return read<T>(min_); }

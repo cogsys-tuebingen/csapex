@@ -22,9 +22,12 @@ void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
         }
 
         setErrorSilent(e, msg, level);
+
     }
 
     errorEvent(error_, msg, level_);
+
+    error_event(error_, msg, level_);
 }
 
 void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)

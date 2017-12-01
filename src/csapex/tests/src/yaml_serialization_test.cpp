@@ -57,7 +57,7 @@ struct convert<csapex::connection_types::MockMessage>
 };
 }
 
-CSAPEX_REGISTER_MESSAGE(csapex::connection_types::MockMessage);
+CSAPEX_REGISTER_MESSAGE(csapex::connection_types::MockMessage)
 
 class YAMLSerializationTest : public ::testing::Test
 {

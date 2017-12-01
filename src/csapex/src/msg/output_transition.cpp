@@ -30,12 +30,13 @@ void OutputTransition::reset()
     for(ConnectionPtr connection : connections_) {
         connection->reset();
     }
-    for(auto pair : outputs_) {
+    auto outputs_copy = outputs_;
+    lock.unlock();
+
+    for(auto pair : outputs_copy) {
         OutputPtr output = pair.second;
         output->reset();
     }
-
-    Transition::reset();
 }
 
 std::vector<UUID> OutputTransition::getOutputs() const
@@ -167,7 +168,7 @@ bool OutputTransition::sendMessages(bool is_active)
         if(seq_no == -1) {
             seq_no = s;
         } else {
-            apex_assert_hard(seq_no == s);
+            apex_assert_soft(seq_no == s);
         }
     }
 

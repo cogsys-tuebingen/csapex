@@ -13,6 +13,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/connector_description.h>
 #include <csapex/model/connectable_vector.h>
+#include <csapex/serialization/serialization_fwd.h>
 
 /// SYSTEM
 #include <vector>
@@ -57,9 +58,9 @@ public:
     void manageOutput(OutputPtr out);
     bool isParameterOutput(const UUID& id) const override;
 
-    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot*,const TokenPtr& )> callback, bool active, bool asynchronous) override;
-    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active, bool asynchronous) override;
-    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void ()> callback, bool active, bool asynchronous) override;
+    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot*,const TokenPtr& )> callback, bool active, bool blocking) override;
+    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void (const TokenPtr& )> callback, bool active, bool blocking) override;
+    Slot* addSlot(TokenDataConstPtr type, const std::string& label, std::function<void ()> callback, bool active, bool blocking) override;
     void manageSlot(SlotPtr s);
 
     Event* addEvent(TokenDataConstPtr type, const std::string& label) override;
@@ -69,8 +70,6 @@ public:
     OutputPtr addInternalOutput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label);
     SlotPtr addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback);
     EventPtr addInternalEvent(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label);
-
-    void removeInternalPorts();
 
     ConnectablePtr getConnector(const UUID& uuid) const;
     ConnectablePtr getConnectorNoThrow(const UUID& uuid) const noexcept;
@@ -92,34 +91,31 @@ public:
     OutputWeakPtr getParameterOutput(const std::string& name) const;
 
 
-    std::vector<ConnectablePtr> getExternalConnectors() const override;
-
     std::vector<ConnectorDescription> getExternalInputDescriptions() const;
-    std::vector<InputPtr> getExternalInputs() const override;
     std::vector<ConnectorDescription> getInternalInputDescriptions() const;
-    std::vector<InputPtr> getInternalInputs() const;
-
     std::vector<ConnectorDescription> getExternalOutputDescriptions() const;
-    std::vector<OutputPtr> getExternalOutputs() const override;
     std::vector<ConnectorDescription> getInternalOutputDescriptions() const;
-    std::vector<OutputPtr> getInternalOutputs() const;
-
     std::vector<ConnectorDescription> getExternalSlotDescriptions() const;
-    std::vector<SlotPtr> getExternalSlots() const override;
     std::vector<ConnectorDescription> getInternalSlotDescriptions() const;
-    std::vector<SlotPtr> getInternalSlots() const;
-
     std::vector<ConnectorDescription> getExternalEventDescriptions() const;
-    std::vector<EventPtr> getExternalEvents() const override;
     std::vector<ConnectorDescription> getInternalEventDescriptions() const;
+
+    std::vector<InputPtr> getExternalInputs() const override;
+    std::vector<InputPtr> getInternalInputs() const;
+    std::vector<OutputPtr> getExternalOutputs() const override;
+    std::vector<OutputPtr> getInternalOutputs() const;
+    std::vector<SlotPtr> getExternalSlots() const override;
+    std::vector<SlotPtr> getInternalSlots() const;
+    std::vector<EventPtr> getExternalEvents() const override;
     std::vector<EventPtr> getInternalEvents() const;
+
+    std::vector<ConnectablePtr> getExternalConnectors() const override;
 
     std::map<std::string, InputWeakPtr>& paramToInputMap();
     std::map<std::string, OutputWeakPtr>& paramToOutputMap();
 
     std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& inputToParamMap();
     std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& outputToParamMap();
-
 
     bool isSource() const override;
     bool isSink() const override;
@@ -155,12 +151,12 @@ public:
     slim_signal::Signal<void ()> stopped;
     slim_signal::Signal<void ()> node_removed;
 
-    slim_signal::Signal<void (ConnectorPtr)> connector_created;
-    slim_signal::Signal<void (ConnectorPtr)> connector_removed;
+    slim_signal::Signal<void (ConnectablePtr, bool)> connector_created;
+    slim_signal::Signal<void (ConnectablePtr, bool)> connector_removed;
 
-    slim_signal::Signal<void (ConnectorPtr, ConnectorPtr)> connection_in_prograss;
-    slim_signal::Signal<void (ConnectorPtr)> connection_done;
-    slim_signal::Signal<void (ConnectorPtr)> connection_start;
+    slim_signal::Signal<void (ConnectablePtr)> connection_added;
+    slim_signal::Signal<void (ConnectablePtr)> connection_removed;
+    slim_signal::Signal<void (ConnectablePtr)> connection_start;
 
     slim_signal::Signal<void()> parameters_changed;
 
@@ -171,6 +167,10 @@ public:
     slim_signal::Signal<void()> might_be_enabled;
 
     slim_signal::Signal<void(std::function<void()>)> execution_requested;
+
+    slim_signal::ObservableSignal<void(StreamableConstPtr)> raw_data_connection;
+
+
 
     void connectConnector(Connectable* c);
     void disconnectConnector(Connectable* c);

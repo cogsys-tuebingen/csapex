@@ -16,14 +16,10 @@ namespace csapex
 class CSAPEX_PROFILING_EXPORT Profiler : public Observer
 {
 public:
-
-public:
     slim_signal::Signal<void()> updated;
 
 public:
-    Profiler(bool enabled = true, int history = 1);
-
-    void setEnabled(bool enabled);
+    virtual void setEnabled(bool enabled);
     bool isEnabled() const;
 
     void reset();
@@ -31,7 +27,13 @@ public:
     Timer::Ptr getTimer(const std::string& key);
     const Profile& getProfile(const std::string& key);
 
-private:
+public:
+    slim_signal::Signal<void(bool)> enabled_changed;
+
+protected:
+    Profiler(bool enabled, int history);
+
+protected:
     std::map<std::string, Profile> profiles_;
 
     bool enabled_;

@@ -46,3 +46,7 @@ void Event::triggerWith(TokenPtr token)
     triggered();
 }
 
+bool Event::isSynchronous() const
+{
+    return false;
+}

@@ -22,7 +22,7 @@ public:
     AddConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid, bool active);
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
 
 protected:
     bool doUndo() override;

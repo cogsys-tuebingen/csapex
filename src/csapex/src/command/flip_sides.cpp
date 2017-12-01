@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/command_serializer.h>
@@ -62,7 +62,7 @@ void FlipSides::serialize(SerializationBuffer &data) const
     data << uuid;
 }
 
-void FlipSides::deserialize(SerializationBuffer& data)
+void FlipSides::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

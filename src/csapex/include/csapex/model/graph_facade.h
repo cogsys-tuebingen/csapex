@@ -11,6 +11,7 @@
 #include <csapex/utility/notification.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/observer.h>
+#include <csapex/model/connection_information.h>
 
 /// SYSTEM
 #include <unordered_map>
@@ -23,57 +24,49 @@ class CSAPEX_EXPORT GraphFacade : public Observer, public Notifier
 public:
     typedef std::shared_ptr<GraphFacade> Ptr;
 
+protected:
+    GraphFacade();
+
 public:
-    GraphFacade(ThreadPool& executor, GraphPtr graph, SubgraphNodePtr graph_node, NodeFacadePtr nh = nullptr, GraphFacade* parent = nullptr);
-    ~GraphFacade();
+    virtual ~GraphFacade();
 
-    AUUID getAbsoluteUUID() const;
-    GraphPtr getGraph();
-    SubgraphNodePtr getSubgraphNode();
-    NodeHandle* getNodeHandle();
-    NodeFacadePtr getNodeFacade();
-    GraphFacade* getParent() const;
-    GraphFacade* getSubGraph(const UUID& uuid);
-    ThreadPool* getThreadPool();
+    virtual GraphFacadePtr getSubGraph(const UUID& uuid) = 0;
+    virtual GraphFacade* getParent() const = 0;    
 
-    void addNode(NodeFacadePtr node);
+    virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const = 0;
+    virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
+    virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const = 0;
 
-    ConnectionPtr connect(OutputPtr output, InputPtr input);
+    virtual ConnectorPtr findConnector(const UUID &uuid) = 0;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
 
-    ConnectionPtr connect(const UUID& output_id, const UUID& input_id);
+    virtual bool isConnected(const UUID& from, const UUID& to) const = 0;
+    virtual ConnectionInformation getConnection(const UUID& from, const UUID& to) const = 0;
+    virtual ConnectionInformation getConnectionWithId(int id) const = 0;
 
-    ConnectionPtr connect(NodeHandle* output, const std::string& output_name, NodeHandle* input, const std::string& input_name);
-    ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name, NodeHandlePtr input, const std::string& input_name);
-    ConnectionPtr connect(NodeHandle* output, const std::string& output_name, const UUID& input_id);
-    ConnectionPtr connect(NodeHandlePtr output, const std::string& output_name, const UUID& input_id);
-    ConnectionPtr connect(const UUID& output_id, NodeHandle* input, const std::string& input_name);
-    ConnectionPtr connect(const UUID& output_id, NodeHandlePtr input, const std::string& input_name);
-    ConnectionPtr connect(const UUID& output_id, NodeHandlePtr input, int input_id);
-    ConnectionPtr connect(NodeHandlePtr output, int output_id, const UUID& input_id);
-    ConnectionPtr connect(NodeHandle* output, int output_id, NodeHandle* input, int input_id);
-    ConnectionPtr connect(NodeHandlePtr output, int output_id, NodeHandlePtr input, int input_id);
+    virtual std::vector<UUID> enumerateAllNodes() const = 0;
+    virtual std::vector<ConnectionInformation> enumerateAllConnections() const = 0;
 
-    ConnectionPtr connect(NodeFacade* output, const std::string& output_name, NodeFacade* input, const std::string& input_name);
-    ConnectionPtr connect(NodeFacadePtr output, const std::string& output_name, NodeFacadePtr input, const std::string& input_name);
-    ConnectionPtr connect(NodeFacade* output, const std::string& output_name, const UUID& input_id);
-    ConnectionPtr connect(NodeFacadePtr output, const std::string& output_name, const UUID& input_id);
-    ConnectionPtr connect(const UUID& output_id, NodeFacade* input, const std::string& input_name);
-    ConnectionPtr connect(const UUID& output_id, NodeFacadePtr input, const std::string& input_name);
-    ConnectionPtr connect(const UUID& output_id, NodeFacadePtr input, int input_id);
-    ConnectionPtr connect(NodeFacadePtr output, int output_id, const UUID& input_id);
-    ConnectionPtr connect(NodeFacade* output, int output_id, NodeFacade* input, int input_id);
-    ConnectionPtr connect(NodeFacadePtr output, int output_id, NodeFacadePtr input, int input_id);
+    virtual AUUID getAbsoluteUUID() const = 0;
 
-    TaskGenerator* getTaskGenerator(const UUID& uuid);
+    virtual UUID generateUUID(const std::string& prefix) = 0;
 
-    void stop();
-    void clearBlock();
-    void resetActivity();
+    virtual std::size_t countNodes() const = 0;
 
-    bool isPaused() const;
-    void pauseRequest(bool pause);
+    virtual int getComponent(const UUID& node_uuid) const = 0;
+    virtual int getDepth(const UUID& node_uuid) const = 0;
 
-    void clear();
+    virtual NodeFacadePtr getNodeFacade() const = 0;
+
+    virtual void clearBlock() = 0;
+    virtual void resetActivity() = 0;
+
+    virtual bool isPaused() const = 0;
+    virtual void pauseRequest(bool pause) = 0;
+
+    virtual std::string makeStatusString() const = 0;
 
 public:
     slim_signal::Signal<void (bool)> paused;
@@ -88,31 +81,18 @@ public:
     slim_signal::Signal<void(NodeFacadePtr)> child_node_facade_added;
     slim_signal::Signal<void(NodeFacadePtr)> child_node_facade_removed;
 
-    slim_signal::Signal<void(TaskGeneratorPtr)> generator_added;
-    slim_signal::Signal<void(TaskGeneratorPtr)> generator_removed;
-
     slim_signal::Signal<void()> panic;
+    slim_signal::Signal<void()> state_changed;
+
+    slim_signal::Signal<void(ConnectionInformation)> connection_added;
+    slim_signal::Signal<void(ConnectionInformation)> connection_removed;
+
+    slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_added;
+    slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_removed;
     
-private:
-    void nodeAddedHandler(graph::VertexPtr node);
-    void nodeRemovedHandler(graph::VertexPtr node);
-
-    void createSubgraphFacade(NodeFacadePtr nh);
-
-private:
-    GraphFacade* parent_;
-
-    AUUID absolute_uuid_;
-    GraphPtr graph_;
-    SubgraphNodePtr graph_node_;
-    NodeFacadePtr graph_handle_;
-    ThreadPool& executor_;
-
-    std::unordered_map<UUID, GraphFacadePtr, UUID::Hasher> children_;
-
-    std::unordered_map<UUID, TaskGeneratorPtr, UUID::Hasher> generators_;
-
-    std::unordered_map<UUID, NodeFacadePtr, UUID::Hasher> node_facades_;
+protected:
+    virtual void nodeAddedHandler(graph::VertexPtr node) = 0;
+    virtual void nodeRemovedHandler(graph::VertexPtr node) = 0;
 };
 
 }

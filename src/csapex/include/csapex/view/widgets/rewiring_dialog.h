@@ -20,6 +20,7 @@ namespace csapex
 {
 
 class CsApexViewCore;
+class CsApexViewCoreImplementation;
 class CommandExecutor;
 class CsApexCore;
 
@@ -47,37 +48,32 @@ private:
     void createGraphs(const std::string &type);
 
     void createConnections();
-    void updateConnection(InputPtr input, const ConnectionPtr& connection);
-    void updateConnection(OutputPtr output, const ConnectionPtr& connection);
+    void updateConnection(InputPtr input, const ConnectorDescription &connector, const AUUID &connected, bool active);
+    void updateConnection(OutputPtr output, const ConnectorDescription &connector, const AUUID& connected, bool active);
 
     void createUI(const QString& stylesheet);
 
 private:
     CsApexViewCore& view_core_;
 
-//    std::shared_ptr<CsApexCore> core_temp_;
-    std::shared_ptr<CsApexViewCore> view_core_old_;
-    std::shared_ptr<CsApexViewCore> view_core_new_;
+    std::shared_ptr<CsApexViewCoreImplementation> view_core_old_;
+    std::shared_ptr<CsApexViewCoreImplementation> view_core_new_;
 
     UUIDProviderPtr root_uuid_provider_;
 
-
-//    NodeHandlePtr graph_old_handle;
-//    NodeHandlePtr graph_new_handle;
-
-    NodeFacadePtr nh_old;
-    NodeFacadePtr nh_new;
+    NodeFacadeImplementationPtr nf_old;
+    NodeFacadeImplementationPtr nf_new;
 
     NodeFacade* node_facade_;
 
     SubgraphNodePtr graph_node_old;
-    GraphPtr graph_old;
-    GraphFacadePtr graph_facade_old_;
+    GraphImplementationPtr graph_old;
+    GraphFacadeImplementationPtr graph_facade_old_;
 
     std::string type_new_;
     SubgraphNodePtr graph_node_new;
-    GraphPtr graph_new;
-    GraphFacadePtr graph_facade_new_;
+    GraphImplementationPtr graph_new;
+    GraphFacadeImplementationPtr graph_facade_new_;
 
     std::vector<ConnectionInformation> connections_;
 

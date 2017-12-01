@@ -1,12 +1,18 @@
 /// HEADER
 #include <csapex/param/string_list_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
 
 using namespace csapex;
 using namespace param;
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(StringListParameter)
 
 StringListParameter::StringListParameter()
     : ParameterImplementation("noname", ParameterDescription())
@@ -124,3 +130,18 @@ std::vector<std::string> StringListParameter::getValues() const
 {
     return list_;
 }
+
+void StringListParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << list_;
+}
+
+void StringListParameter::deserialize(const SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> list_;
+}
+

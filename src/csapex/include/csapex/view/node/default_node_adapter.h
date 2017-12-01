@@ -66,7 +66,7 @@ class CSAPEX_QT_EXPORT DefaultNodeAdapter : public NodeAdapter
     friend class DefaultNodeAdapterBridge;
 
 public:
-    DefaultNodeAdapter(NodeFacadeWeakPtr adaptee, NodeBox* parent);
+    DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent);
     virtual ~DefaultNodeAdapter();
 
     virtual void stop();

@@ -15,20 +15,20 @@ namespace csapex {
 namespace param
 {
 
-FWD(Parameter);
-FWD(BitSetParameter);
-FWD(SetParameter);
-FWD(PathParameter);
-FWD(RangeParameter);
-FWD(TriggerParameter);
-FWD(ValueParameter);
-FWD(IntervalParameter);
-FWD(ColorParameter);
-FWD(AngleParameter);
-FWD(StringListParameter);
+FWD(Parameter)
+FWD(BitSetParameter)
+FWD(SetParameter)
+FWD(PathParameter)
+FWD(RangeParameter)
+FWD(TriggerParameter)
+FWD(ValueParameter)
+FWD(IntervalParameter)
+FWD(ColorParameter)
+FWD(AngleParameter)
+FWD(StringListParameter)
 
-FWD(OutputProgressParameter);
-FWD(OutputTextParameter);
+FWD(OutputProgressParameter)
+FWD(OutputTextParameter)
 
 }
 }

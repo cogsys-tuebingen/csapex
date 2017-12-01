@@ -26,10 +26,10 @@ public:
 
     int commands() const;
 
-    virtual void init(GraphFacade* root, CsApexCore& core) override;
+    virtual void init(GraphFacadeImplementation* root, CsApexCore& core) override;
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
     void cloneFrom(const Command& other) override;
 
 protected:

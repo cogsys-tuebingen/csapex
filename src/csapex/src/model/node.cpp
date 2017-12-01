@@ -63,7 +63,7 @@ void Node::detach()
     if(node_handle_) {
         apex_assert_hard(node_handle_->guard_ == -1);
     }
-    node_handle_.reset();
+    //node_handle_.reset();
 }
 
 UUID Node::getUUID() const

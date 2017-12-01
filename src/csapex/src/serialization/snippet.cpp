@@ -135,7 +135,7 @@ void Snippet::serialize(SerializationBuffer &data) const
     data << description_;
     data << tags_;
 }
-void Snippet::deserialize(SerializationBuffer& data)
+void Snippet::deserialize(const SerializationBuffer& data)
 {
     yaml_.reset(new YAML::Node);
     data >> *yaml_;

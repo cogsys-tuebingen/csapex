@@ -23,13 +23,13 @@
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_variadic_connector_and_connect.h>
 #include <csapex/command/set_execution_mode.h>
-#include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/model/graph_facade.h>
-#include <csapex/model/node.h>
-#include <csapex/model/node_facade_local.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/node_constructor.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/tag.h>
@@ -119,9 +119,10 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
 
-    QObject::connect(this, SIGNAL(triggerConnectorCreated(ConnectorPtr)), this, SLOT(connectorCreated(ConnectorPtr)));
-    QObject::connect(this, SIGNAL(triggerConnectorRemoved(ConnectorPtr)), this, SLOT(connectorRemoved(ConnectorPtr)));
+    QObject::connect(this, &GraphView::triggerConnectorCreated, this, &GraphView::connectorCreated);
+    QObject::connect(this, &GraphView::triggerConnectorRemoved, this, &GraphView::connectorRemoved);
 
+    qRegisterMetaType < ConnectorDescription > ("ConnectorDescription");
     qRegisterMetaType < ConnectorPtr > ("ConnectorPtr");
     qRegisterMetaType < NodeFacadePtr > ("NodeFacadePtr");
 
@@ -138,16 +139,10 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, &GraphView::childNodeFacadeAdded, this, &GraphView::childNodeAdded, Qt::QueuedConnection);
     QObject::connect(this, &GraphView::childNodeFacadeRemoved, this, &GraphView::childNodeRemoved, Qt::QueuedConnection);
 
+    observe(graph_facade_->state_changed, [this](){ updateBoxInformation(); });
 
-    SubgraphNodePtr sub_graph = graph_facade_->getSubgraphNode();
-    GraphPtr graph = sub_graph->getGraph();
-
-    observe(sub_graph->internalConnectionInProgress, [this](ConnectorPtr from, ConnectorPtr to) { scene_->previewConnection(from, to); });
-    observe(graph->state_changed, [this](){ updateBoxInformation(); });
-
-    for(const graph::VertexPtr& vertex : *graph) {
-        //todo: this should be a remote node facade when in network mode
-        const NodeFacadePtr& facade = vertex->getNodeFacade();
+    for(const UUID& uuid : graph_facade_->enumerateAllNodes()) {
+        const NodeFacadePtr& facade = graph_facade->findNodeFacade(uuid);
         apex_assert_hard(facade);
         nodeAdded(facade);
     }
@@ -277,9 +272,7 @@ void GraphView::drawForeground(QPainter *painter, const QRectF &rect)
     QGraphicsView::drawForeground(painter, rect);
 
     if(view_core_.isDebug()) {
-        SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
-
-        QString debug_info =  QString::fromStdString(graph->makeStatusString());
+        QString debug_info =  QString::fromStdString(graph_facade_->makeStatusString());
 
         debug_info += QString::fromStdString(scene_->makeStatusString());
 
@@ -691,9 +684,9 @@ void GraphView::dragLeaveEvent(QDragLeaveEvent* e)
 void GraphView::animateScroll()
 {
     QScrollBar* h = horizontalScrollBar();
-    h->setValue(h->value() + scroll_offset_x_);
+    h->setValue(h->value() + static_cast<int>(scroll_offset_x_));
     QScrollBar* v = verticalScrollBar();
-    v->setValue(v->value() + scroll_offset_y_);
+    v->setValue(v->value() + static_cast<int>(scroll_offset_y_));
 
     if(move_event_) {
         view_core_.getDragIO()->dragMoveEvent(this, move_event_);
@@ -704,8 +697,9 @@ void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
     BoxDialog diag("Please enter the type of node to add.",
-                   *view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(),
-                   *view_core_.getSnippetFactory());
+                   *view_core_.getNodeFactory(),
+                   *view_core_.getNodeAdapterFactory(),
+                   view_core_.getSnippetFactory());
 
     int r = diag.exec();
 
@@ -735,7 +729,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
     mimeData->setData(QString::fromStdString(csapex::mime::node), type.c_str());
     if(state) {
-        QVariant payload = qVariantFromValue((void *) &state);
+        QVariant payload = qVariantFromValue(static_cast<void *>(&state));
         mimeData->setProperty("state", payload);
     }
     mimeData->setProperty("ox", offset.x());
@@ -746,7 +740,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
 
     bool is_note = type == "csapex::Note";
 
-    NodeFacadePtr node_facade = std::make_shared<NodeFacadeLocal>(handle);
+    NodeFacadePtr node_facade = std::make_shared<NodeFacadeImplementation>(handle);
 
     if(is_note) {
         box = new NoteBox(view_core_.getSettings(), node_facade,
@@ -814,25 +808,15 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
 
     addBox(box);
 
-    NodeHandlePtr node_handle = node_facade->getNodeHandle();
     // add existing connectors
-    for(auto input : node_handle->getExternalInputs()) {
-        connectorMessageAdded(input);
-    }
-    for(auto output : node_handle->getExternalOutputs()) {
-        connectorMessageAdded(output);
-    }
-    for(auto slot : node_handle->getExternalSlots()) {
-        connectorSignalAdded(slot);
-    }
-    for(auto event : node_handle->getExternalEvents()) {
-        connectorSignalAdded(event);
+    for(ConnectorDescription description : node_facade->getExternalConnectors()) {
+        addConnector(description);
     }
 
     // subscribe to coming connectors
-    auto c1 = node_facade->connector_created.connect([this](ConnectorPtr c) { triggerConnectorCreated(c); });
+    auto c1 = node_facade->connector_created.connect([this](const ConnectorDescription& c) { triggerConnectorCreated(c); });
     facade_connections_[node_facade.get()].emplace_back(c1);
-    auto c2 = node_facade->connector_removed.connect([this](ConnectorPtr c) { triggerConnectorRemoved(c); });
+    auto c2 = node_facade->connector_removed.connect([this](const ConnectorDescription& c) { triggerConnectorRemoved(c); });
     facade_connections_[node_facade.get()].emplace_back(c2);
 
 
@@ -862,8 +846,12 @@ void GraphView::nodeRemoved(NodeFacadePtr node_facade)
 
 void GraphView::childNodeAdded(NodeFacadePtr facade)
 {
-    facade_connections_[facade.get()].emplace_back(facade->start_profiling.connect([this](NodeFacade* nw) { startProfilingRequest(nw); }));
-    facade_connections_[facade.get()].emplace_back(facade->stop_profiling.connect([this](NodeFacade* nw) { stopProfilingRequest(nw); }));
+    facade_connections_[facade.get()].emplace_back(facade->start_profiling.connect([this](NodeFacade* nw) {
+                                                       startProfilingRequest(nw);
+                                                   }));
+    facade_connections_[facade.get()].emplace_back(facade->stop_profiling.connect([this](NodeFacade* nw) {
+                                                       stopProfilingRequest(nw);
+                                                   }));
 }
 
 void GraphView::childNodeRemoved(NodeFacadePtr facade)
@@ -872,58 +860,60 @@ void GraphView::childNodeRemoved(NodeFacadePtr facade)
 
 
 
-void GraphView::connectorCreated(ConnectorPtr connector)
+void GraphView::connectorCreated(const ConnectorDescription& connector)
 {
-    // TODO: dirty...
-    if(dynamic_cast<Slot*> (connector.get()) || dynamic_cast<Event*>(connector.get())) {
-        connectorSignalAdded(connector);
-    } else {
-        connectorMessageAdded(connector);
+    addConnector(connector);
+}
+
+void GraphView::connectorRemoved(const ConnectorDescription &connector)
+{
+    removeConnector(connector);
+}
+
+
+void GraphView::addConnector(const ConnectorDescription &connector)
+{
+    if(connector.is_parameter) {
+        return;
     }
-}
 
-void GraphView::connectorRemoved(ConnectorPtr connector)
-{
-    UUID parent_uuid = connector->getUUID().parentUUID();
-    NodeBox* box = getBox(parent_uuid);
-
-    box->removePort(connector);
-}
-
-
-void GraphView::connectorMessageAdded(ConnectorPtr connector)
-{
-    UUID parent_uuid = connector->getUUID().parentUUID();
-
-    GraphPtr g = graph_facade_->getGraph();
-    NodeHandle* node_worker = g->findNodeHandle(parent_uuid);
-    if(node_worker) {
-        Output* o = dynamic_cast<Output*>(connector.get());
-        if(o && node_worker->isParameterOutput(o->getUUID())) {
-            return;
-        }
-
-        Input* i = dynamic_cast<Input*>(connector.get());
-        if(i && node_worker->isParameterInput(i->getUUID())) {
-            return;
-        }
-
-        NodeBox* box = getBox(parent_uuid);
-        QBoxLayout* layout = connector->isInput() ? box->getInputLayout() : box->getOutputLayout();
-
-        box->createPort(connector, layout);
-    }
-}
-
-void GraphView::connectorSignalAdded(ConnectorPtr connector)
-{
-    UUID parent_uuid = connector->getUUID().parentUUID();
+    UUID parent_uuid = connector.id.parentUUID();
     NodeBox* box = getBox(parent_uuid);
     if(box) {
-        QBoxLayout* layout = dynamic_cast<Event*>(connector.get()) ? box->getEventLayout() : box->getSlotLayout();
+        QBoxLayout* layout = nullptr;
+        switch(connector.connector_type) {
+        case ConnectorType::EVENT:
+            layout = box->getEventLayout();
+            break;
+        case ConnectorType::SLOT_T:
+            layout = box->getSlotLayout();
+            break;
+        case ConnectorType::INPUT:
+            layout = box->getInputLayout();
+            break;
+        case ConnectorType::OUTPUT:
+            layout = box->getOutputLayout();
+            break;
+        default:
+            throw std::logic_error("unknown connector type");
+        }
 
-        box->createPort(connector, layout);
+        ConnectorPtr ctor = getGraphFacade()->findConnector(connector.id);
+        box->createPort(ctor, layout);
     }
+}
+
+void GraphView::removeConnector(const ConnectorDescription &connector)
+{
+    if(connector.is_parameter) {
+        return;
+    }
+
+    UUID parent_uuid = connector.id.parentUUID();
+    NodeBox* box = getBox(parent_uuid);
+
+    ConnectorPtr ctor = getGraphFacade()->findConnector(connector.id);
+    box->removePort(ctor);
 }
 
 NodeBox* GraphView::getBox(const csapex::UUID &node_id)
@@ -967,15 +957,12 @@ void GraphView::focusOnNode(const csapex::UUID &uuid)
 
 void GraphView::addBox(NodeBox *box)
 {
-    GraphPtr graph = graph_facade_->getGraph();
-
     QObject::connect(box, SIGNAL(renameRequest(NodeBox*)), this, SLOT(renameBox(NodeBox*)));
 
     NodeFacadePtr facade = box->getNodeFacade();
 
-    facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectorPtr&) { scene_->deleteTemporaryConnections(); }));
-    facade_connections_[facade.get()].emplace_back(facade->connection_in_prograss.connect([this](const ConnectorPtr& from, const ConnectorPtr& to) { scene_->previewConnection(from, to); }));
-    facade_connections_[facade.get()].emplace_back(facade->connection_done.connect([this](const ConnectorPtr&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_start.connect([this](const ConnectorDescription&) { scene_->deleteTemporaryConnections(); }));
+    facade_connections_[facade.get()].emplace_back(facade->connection_added.connect([this](const ConnectorDescription&) { scene_->deleteTemporaryConnectionsAndRepaint(); }));
 
 
     QObject::connect(box, SIGNAL(showContextMenuForBox(NodeBox*,QPoint)), this, SLOT(showContextMenuForSelectedNodes(NodeBox*,QPoint)));
@@ -1000,9 +987,9 @@ void GraphView::addBox(NodeBox *box)
 
     box->init();
 
-    box->updateBoxInformation(graph.get());
+    box->updateBoxInformation(graph_facade_.get());
 
-    if(graph_facade_->getGraph()->countNodes() > 0) {
+    if(graph_facade_->countNodes() > 0) {
         setCacheMode(QGraphicsView::CacheNone);
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
@@ -1024,7 +1011,7 @@ void GraphView::removeBox(NodeBox *box)
     }
     profiling_.erase(box);
 
-    if(graph_facade_->getGraph()->countNodes() == 0) {
+    if(graph_facade_->countNodes() == 0) {
         setCacheMode(QGraphicsView::CacheNone);
         scene_->invalidate();
         setCacheMode(QGraphicsView::CacheBackground);
@@ -1044,12 +1031,11 @@ void GraphView::createPort(ConnectorDescription request)
 
 void GraphView::createPortAndConnect(ConnectorDescription request, ConnectorPtr from)
 {
-    SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
-    AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
+    AUUID graph_uuid = graph_facade_->getAbsoluteUUID();
 
     std::shared_ptr<Command> cmd;
 
-    if(request.owner == graph->getUUID().getAbsoluteUUID()) {
+    if(request.owner == graph_facade_->getAbsoluteUUID()) {
         cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.owner, request.connector_type, request.token_type, request.label,
                                                                         from->getUUID(), false, false);
 
@@ -1063,12 +1049,11 @@ void GraphView::createPortAndConnect(ConnectorDescription request, ConnectorPtr 
 
 void GraphView::createPortAndMove(ConnectorDescription request, ConnectorPtr from)
 {
-    SubgraphNodePtr graph = graph_facade_->getSubgraphNode();
-    AUUID graph_uuid = graph->getUUID().getAbsoluteUUID();
+    AUUID graph_uuid = graph_facade_->getAbsoluteUUID();
 
     std::shared_ptr<Command> cmd;
 
-    if(request.owner == graph->getUUID().getAbsoluteUUID()) {
+    if(request.owner == graph_facade_->getAbsoluteUUID()) {
         cmd = std::make_shared<command::AddVariadicConnectorAndConnect>(graph_uuid, request.owner, request.connector_type, request.token_type, request.label,
                                                                         from->getUUID(), true, false);
 
@@ -1090,7 +1075,7 @@ void GraphView::addPort(Port *port)
     }
 
     QObject::connect(port, &Port::removeConnectionsRequest, [this, port]() {
-        ConnectorPtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
             return;
         }
@@ -1098,7 +1083,7 @@ void GraphView::addPort(Port *port)
     });
 
     QObject::connect(port, &Port::addConnectionRequest, [this, port](const ConnectorPtr& from) {
-        ConnectorPtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
             return;
         }
@@ -1106,8 +1091,17 @@ void GraphView::addPort(Port *port)
         view_core_.getCommandDispatcher()->execute(cmd);
     });
 
+    QObject::connect(port, &Port::addConnectionPreview, [this, port](const ConnectorPtr& from) {
+        ConnectorPtr adaptee = port->getAdaptee();
+        if(!adaptee) {
+            return;
+        }
+        scene_->deleteTemporaryConnections();
+        scene_->addTemporaryConnection(adaptee, from);
+    });
+
     QObject::connect(port, &Port::moveConnectionRequest, [this, port](const ConnectorPtr& from) {
-        ConnectorPtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
             return;
         }
@@ -1115,8 +1109,23 @@ void GraphView::addPort(Port *port)
         view_core_.getCommandDispatcher()->execute(cmd);
     });
 
+
+    QObject::connect(port, &Port::moveConnectionPreview, [this, port](const ConnectorPtr& from) {
+        ConnectorPtr adaptee = port->getAdaptee();
+        if(!adaptee) {
+            return;
+        }
+
+        scene_->deleteTemporaryConnections();
+        for(const UUID& other_id: from->getConnectedPorts()) {
+            if(ConnectorPtr p = graph_facade_->findConnectorNoThrow(other_id)) {
+                scene_->addTemporaryConnection(adaptee, p);
+            }
+        }
+    });
+
     QObject::connect(port, &Port::changePortRequest, [this, port](QString label) {
-        ConnectorPtr adaptee = port->getAdaptee().lock();
+        ConnectorPtr adaptee = port->getAdaptee();
         if(!adaptee) {
             return;
         }
@@ -1263,7 +1272,7 @@ void GraphView::updateBoxInformation()
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if(proxy) {
             NodeBox* b = proxy->getBox();
-            b->updateBoxInformation(graph_facade_->getGraph().get());
+            b->updateBoxInformation(graph_facade_.get());
         }
     }
 }
@@ -1275,18 +1284,20 @@ void GraphView::createNodes(const QPoint& global_pos, const std::string& type, c
 
         AUUID graph_id = graph_facade_->getAbsoluteUUID();
 
-        UUID uuid = graph_facade_->getGraph()->generateUUID(type);
+        UUID uuid = graph_facade_->generateUUID(type);
         CommandPtr cmd(new command::AddNode(graph_id, type, Point (pos.x(), pos.y()), uuid, NodeStatePtr()));
 
         view_core_.getCommandDispatcher()->execute(cmd);
 
     } else if(mime == csapex::mime::snippet) {
-        QPointF pos = mapToScene(mapFromGlobal(global_pos));
+        if(SnippetFactoryPtr snippet_factory = view_core_.getSnippetFactory()) {
+            QPointF pos = mapToScene(mapFromGlobal(global_pos));
 
-        AUUID graph_id = graph_facade_->getAbsoluteUUID();
-        CommandPtr cmd(new command::PasteGraph(graph_id, *view_core_.getSnippetFactory()->getSnippet(type), Point (pos.x(), pos.y())));
+            AUUID graph_id = graph_facade_->getAbsoluteUUID();
+            CommandPtr cmd(new command::PasteGraph(graph_id, *snippet_factory->getSnippet(type), Point (pos.x(), pos.y())));
 
-        view_core_.getCommandDispatcher()->execute(cmd);
+            view_core_.getCommandDispatcher()->execute(cmd);
+        }
     }
 }
 
@@ -1331,8 +1342,16 @@ void GraphView::switchSelectedNodesToThread(int group_id)
 void GraphView::createNewThreadGroupFor()
 {
     bool ok;
-    ThreadPool* thread_pool = graph_facade_->getThreadPool();
-    QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(thread_pool->nextName()), &ok);
+
+    std::string next_name = "Thread";
+    GraphFacadeImplementation* local_facade = dynamic_cast<GraphFacadeImplementation*>(graph_facade_.get());
+    if(local_facade) {
+        ThreadPool* thread_pool = local_facade->getThreadPool();
+        next_name = thread_pool->nextName();
+    }
+
+
+    QString text = QInputDialog::getText(this, "Group Name", "Enter new name", QLineEdit::Normal, QString::fromStdString(next_name), &ok);
 
     if(ok && !text.isEmpty()) {
         command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(), "create new thread group"));
@@ -1400,7 +1419,7 @@ void GraphView::setMaximumFrequency()
     }
 
     bool ok = false;
-    double current_f = selected_boxes_.front()->getNodeFacade()->getNodeHandle()->getNodeState()->getMaximumFrequency();
+    double current_f = selected_boxes_.front()->getNodeFacade()->getNodeState()->getMaximumFrequency();
     if(current_f <= 0.0) {
         current_f = 30.0;
     }
@@ -1449,7 +1468,7 @@ void GraphView::morphNode()
         CommandFactory factory(graph_facade_.get());
         morph->add(factory.deleteAllNodes({facade->getUUID()}));
 
-        UUID new_uuid = graph_facade_->getGraph()->generateUUID(type);
+        UUID new_uuid = graph_facade_->generateUUID(type);
         CommandPtr add_new = std::make_shared<command::AddNode>(graph_facade_->getAbsoluteUUID(),
                                                                 type, facade->getNodeState()->getPos(), new_uuid, nullptr);
         morph->add(add_new);
@@ -1463,23 +1482,21 @@ void GraphView::morphNode()
     }
 }
 
-Snippet GraphView::serializeSelection() const
+SnippetPtr GraphView::serializeSelection() const
 {
-    GraphIO io(graph_facade_->getSubgraphNode(), view_core_.getNodeFactory().get());
-
     std::vector<UUID> nodes;
     for(const NodeBox* box : selected_boxes_) {
         nodes.emplace_back(box->getNodeFacade()->getUUID());
     }
 
-    return io.saveSelectedGraph(nodes);
+    return view_core_.serializeNodes(graph_facade_->getAbsoluteUUID(), nodes);
 }
 
 void GraphView::copySelected()
 {
-    Snippet s = serializeSelection();
+    SnippetPtr s = serializeSelection();
     YAML::Node yaml;
-    s.toYAML(yaml);
+    s->toYAML(yaml);
     ClipBoard::set(yaml);
 }
 
@@ -1490,9 +1507,9 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
         selected_boxes_.push_back(box_handle);
     }
 
-    Snippet snippet = serializeSelection();
+    SnippetPtr snippet = serializeSelection();
     YAML::Node yaml;
-    snippet.toYAML(yaml);
+    snippet->toYAML(yaml);
     std::stringstream yaml_txt;
     yaml_txt << yaml;
 
@@ -1539,7 +1556,7 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
 
     bool is_note = type == "csapex::Note";
 
-    NodeFacadePtr node_facade = std::make_shared<NodeFacadeLocal>(handle);
+    NodeFacadePtr node_facade = std::make_shared<NodeFacadeImplementation>(handle);
 
     if(is_note) {
         box = new NoteBox(view_core_.getSettings(), node_facade,
@@ -1595,6 +1612,11 @@ void GraphView::ungroupSelected()
 
 void GraphView::makeSnippetFromSelected()
 {
+    SnippetFactoryPtr snippet_factory = view_core_.getSnippetFactory();
+    if(!snippet_factory) {
+        throw std::runtime_error("cannot save snippet, no factory exists");
+    }
+
     if(selected_boxes_.empty()) {
         return;
     }
@@ -1666,13 +1688,13 @@ void GraphView::makeSnippetFromSelected()
             }
         }
 
-        Snippet snippet = serializeSelection();
+        SnippetPtr snippet = serializeSelection();
 
-        snippet.setName(name.toStdString());
-        snippet.setDescription(description.toStdString());
-        snippet.setTags(tags);
+        snippet->setName(name.toStdString());
+        snippet->setDescription(description.toStdString());
+        snippet->setTags(tags);
 
-        view_core_.getSnippetFactory()->saveSnippet(snippet, file.fileName().toStdString());
+        snippet_factory->saveSnippet(*snippet, file.fileName().toStdString());
     }
 }
 
@@ -1723,7 +1745,7 @@ void GraphView::showPreview(Port* port)
     preview_widget_->move(pos.toPoint());
 
     if(!preview_widget_->isConnected()) {
-        preview_widget_->connectTo(port->getAdaptee().lock());
+        preview_widget_->connectTo(port->getAdaptee());
     }
 }
 

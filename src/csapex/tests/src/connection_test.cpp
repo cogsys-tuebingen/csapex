@@ -1,9 +1,11 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/msg/message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
+#include <csapex/signal/event.h>
+#include <csapex/signal/slot.h>
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/msg/direct_connection.h>
@@ -48,17 +50,16 @@ TEST_F(ConnectionTest, DirectConnectionCompatibility) {
     Input i(uuid_provider->makeUUID("in"));
 
     // non typed should always be connectable!
-    ASSERT_TRUE(o.canConnectTo(&i, false));
+    ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 
     o.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
     i.setType(connection_types::makeEmpty<GenericValueMessage<float>>());
-    ASSERT_FALSE(o.canConnectTo(&i, false));
+    ASSERT_FALSE(Connection::isCompatibleWith(&o, &i));
 
     o.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
     i.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
-    ASSERT_TRUE(o.canConnectTo(&i, false));
+    ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 }
-
 
 TEST_F(ConnectionTest, DirectConnectionIsPossible) {
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("out"));
@@ -121,15 +122,149 @@ TEST_F(ConnectionTest, InputsCanBeConnectedToOnlyOneOutput) {
 
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
+    // is compatible
+    ASSERT_TRUE(Connection::isCompatibleWith(o1.get(), i.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(i.get(), o1.get()));
+    // can be connected
+    ASSERT_TRUE(Connection::canBeConnectedTo(o1.get(), i.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(i.get(), o1.get()));
+
     DirectConnection::connect(o1, i);
 
-    try {
-        DirectConnection::connect(o2, i);
-        FAIL();
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(o1.get(), i.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(i.get(), o1.get()));
+    // cannot have more than one connection
+    ASSERT_FALSE(Connection::canBeConnectedTo(o2.get(), i.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(i.get(), o2.get()));
 
-    } catch(const csapex::Failure& e) {
-        SUCCEED();
-    }
+    ASSERT_THROW(DirectConnection::connect(o2, i), csapex::Failure);
+    ASSERT_THROW(DirectConnection::connect(o1, i), csapex::Failure);
+}
+
+//test moving connections as well...
+
+TEST_F(ConnectionTest, OutputsCanHaveManyConnections) {
+    OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o"));
+
+    InputPtr i1 = std::make_shared<Input>(uuid_provider->makeUUID("i1"));
+    InputPtr i2 = std::make_shared<Input>(uuid_provider->makeUUID("i2"));
+
+    // is compatible
+    ASSERT_TRUE(Connection::isCompatibleWith(o.get(), i1.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(i1.get(), o.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(o.get(), i2.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(i2.get(), o.get()));
+    // can be connected
+    ASSERT_TRUE(Connection::canBeConnectedTo(o.get(), i1.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(i1.get(), o.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(o.get(), i2.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(i2.get(), o.get()));
+
+    DirectConnection::connect(o, i1);
+
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(o.get(), i1.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(i1.get(), o.get()));
+
+    // can have more than one connection
+    ASSERT_TRUE(Connection::canBeConnectedTo(o.get(), i2.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(i2.get(), o.get()));
+
+    DirectConnection::connect(o, i2);
+
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(o.get(), i1.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(i1.get(), o.get()));
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(o.get(), i2.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(i2.get(), o.get()));
+
+    // connecting twice throws
+    ASSERT_THROW(DirectConnection::connect(o, i1), csapex::Failure);
+    ASSERT_THROW(DirectConnection::connect(o, i2), csapex::Failure);
+}
+
+TEST_F(ConnectionTest, EventsCanHaveManyConnections) {
+    EventPtr e = std::make_shared<Event>(uuid_provider->makeUUID("e"));
+
+    SlotPtr s1 = std::make_shared<Slot>([](const TokenConstPtr& ){}, uuid_provider->makeUUID("s1"), false);
+    SlotPtr s2 = std::make_shared<Slot>([](const TokenConstPtr& ){}, uuid_provider->makeUUID("s2"), false);
+
+    // is compatible
+    ASSERT_TRUE(Connection::isCompatibleWith(e.get(), s1.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(s1.get(), e.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(e.get(), s2.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(s2.get(), e.get()));
+    // can be connected
+    ASSERT_TRUE(Connection::canBeConnectedTo(e.get(), s1.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(s1.get(), e.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(e.get(), s2.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(s2.get(), e.get()));
+
+    DirectConnection::connect(e, s1);
+
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(e.get(), s1.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(s1.get(), e.get()));
+
+    // can have more than one connection
+    ASSERT_TRUE(Connection::canBeConnectedTo(e.get(), s2.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(s2.get(), e.get()));
+
+    DirectConnection::connect(e, s2);
+
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(e.get(), s1.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(s1.get(), e.get()));
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(e.get(), s2.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(s2.get(), e.get()));
+
+    // connecting twice throws
+    ASSERT_THROW(DirectConnection::connect(e, s1), csapex::Failure);
+    ASSERT_THROW(DirectConnection::connect(e, s2), csapex::Failure);
+}
+
+TEST_F(ConnectionTest, SlotsCanHaveManyConnections) {
+    EventPtr e1 = std::make_shared<Event>(uuid_provider->makeUUID("e1"));
+    EventPtr e2 = std::make_shared<Event>(uuid_provider->makeUUID("e2"));
+
+    SlotPtr s = std::make_shared<Slot>([](const TokenConstPtr& ){}, uuid_provider->makeUUID("s"), false);
+
+    // is compatible
+    ASSERT_TRUE(Connection::isCompatibleWith(e1.get(), s.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(s.get(), e1.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(e2.get(), s.get()));
+    ASSERT_TRUE(Connection::isCompatibleWith(s.get(), e2.get()));
+    // can be connected
+    ASSERT_TRUE(Connection::canBeConnectedTo(e1.get(), s.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(s.get(), e1.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(e2.get(), s.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(s.get(), e2.get()));
+
+    DirectConnection::connect(e1, s);
+
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(e1.get(), s.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(s.get(), e1.get()));
+
+    // can have more than one connection
+    ASSERT_TRUE(Connection::canBeConnectedTo(e2.get(), s.get()));
+    ASSERT_TRUE(Connection::canBeConnectedTo(s.get(), e2.get()));
+
+    DirectConnection::connect(e2, s);
+
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(e1.get(), s.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(s.get(), e1.get()));
+    // cannot connect twice
+    ASSERT_FALSE(Connection::canBeConnectedTo(e2.get(), s.get()));
+    ASSERT_FALSE(Connection::canBeConnectedTo(s.get(), e2.get()));
+
+    // connecting twice throws
+    ASSERT_THROW(DirectConnection::connect(e1, s), csapex::Failure);
+    ASSERT_THROW(DirectConnection::connect(e2, s), csapex::Failure);
 }
 
 

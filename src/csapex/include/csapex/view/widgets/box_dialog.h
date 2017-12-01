@@ -21,6 +21,7 @@ class NodeFactory;
 class NodeFilterProxyModel;
 
 class SnippetFactory;
+typedef std::shared_ptr<SnippetFactory> SnippetFactoryPtr;
 
 
 class CSAPEX_QT_EXPORT BoxDialog : public QDialog
@@ -28,7 +29,11 @@ class CSAPEX_QT_EXPORT BoxDialog : public QDialog
     Q_OBJECT
 
 public:
-    BoxDialog(QString message, csapex::NodeFactory &node_factory, NodeAdapterFactory& adapter_factory, SnippetFactory& snippet_factory, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    BoxDialog(QString message, csapex::NodeFactory &node_factory,
+              NodeAdapterFactory& adapter_factory,
+              SnippetFactoryPtr snippet_factory,
+              QWidget *parent = 0,
+              Qt::WindowFlags f = 0);
 
     std::string getMIME();
     std::string getName();
@@ -51,7 +56,7 @@ private:
     NodeFactory& node_factory_;
     NodeAdapterFactory& adapter_factory_;
 
-    SnippetFactory& snippet_factory_;
+    SnippetFactoryPtr snippet_factory_;
 
     QProgressBar* loading_;
 

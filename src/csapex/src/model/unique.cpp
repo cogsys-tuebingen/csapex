@@ -23,3 +23,8 @@ UUID Unique::getUUID() const
 {
     return uuid_;
 }
+
+AUUID Unique::getAUUID() const
+{
+    return uuid_.getAbsoluteUUID();
+}

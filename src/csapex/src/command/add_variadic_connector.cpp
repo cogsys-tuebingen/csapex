@@ -2,19 +2,19 @@
 #include <csapex/command/add_variadic_connector.h>
 
 /// COMPONENT
-#include <csapex/model/node_handle.h>
-#include <csapex/msg/input.h>
-#include <csapex/msg/output.h>
-#include <csapex/signal/event.h>
-#include <csapex/signal/slot.h>
-#include <csapex/model/subgraph_node.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/node.h>
-#include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
+#include <csapex/command/dispatcher.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
+#include <csapex/model/node.h>
+#include <csapex/model/node_handle.h>
+#include <csapex/model/subgraph_node.h>
+#include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
 #include <csapex/serialization/serialization_buffer.h>
-#include <csapex/model/graph.h>
+#include <csapex/signal/event.h>
+#include <csapex/signal/slot.h>
 
 using namespace csapex;
 using namespace command;
@@ -46,7 +46,7 @@ std::string AddVariadicConnector::getDescription() const
 
 bool AddVariadicConnector::doExecute()
 {
-    NodeHandle* nh = getRoot()->getGraph()->findNodeHandle(node_id);
+    NodeHandle* nh = getRoot()->getLocalGraph()->findNodeHandle(node_id);
     NodePtr node = nh->getNode().lock();
 
     switch(connector_type) {
@@ -126,7 +126,7 @@ bool AddVariadicConnector::doExecute()
 
 bool AddVariadicConnector::doUndo()
 {
-    NodeHandle* nh = getRoot()->getGraph()->findNodeHandle(node_id);
+    NodeHandle* nh = getRoot()->getLocalGraph()->findNodeHandle(node_id);
     NodePtr node = nh->getNode().lock();
 
     switch(connector_type) {
@@ -190,7 +190,7 @@ void AddVariadicConnector::serialize(SerializationBuffer &data) const
     data << connector_id;
 }
 
-void AddVariadicConnector::deserialize(SerializationBuffer& data)
+void AddVariadicConnector::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

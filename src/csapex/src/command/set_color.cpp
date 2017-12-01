@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/command_serializer.h>
@@ -70,7 +70,7 @@ void SetColor::serialize(SerializationBuffer &data) const
     data << r_orig << g_orig << b_orig;
 }
 
-void SetColor::deserialize(SerializationBuffer& data)
+void SetColor::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

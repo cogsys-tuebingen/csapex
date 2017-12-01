@@ -131,7 +131,7 @@ void RangeParameterAdapter::genericSetup()
             return;
         }
 
-        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(AUUID(p_->getUUID()), value);
+        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), value);
         executeCommand(update_parameter);
     });
 

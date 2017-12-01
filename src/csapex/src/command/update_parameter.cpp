@@ -3,11 +3,11 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/core/settings.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/command/command_serializer.h>
@@ -123,7 +123,7 @@ void UpdateParameter::setParameter(const T& value)
     } else {
         UUID node_uuid = uuid.parentUUID();
 
-        NodeHandle* node_handle = getRoot()->getGraph()->findNodeHandle(node_uuid);
+        NodeHandle* node_handle = getRoot()->getLocalGraph()->findNodeHandle(node_uuid);
         apex_assert_hard(node_handle);
 
 
@@ -153,7 +153,7 @@ void UpdateParameter::serialize(SerializationBuffer &data) const
     data << value;
 }
 
-void UpdateParameter::deserialize(SerializationBuffer& data)
+void UpdateParameter::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

@@ -4,10 +4,12 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/command/command_factory.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node.h>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/command/command_serializer.h>
@@ -18,20 +20,9 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteConnection)
 
-DeleteConnection::DeleteConnection(const AUUID &parent_uuid, Connectable* a, Connectable* b)
-    : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(UUID::NONE), to_uuid(UUID::NONE)
+DeleteConnection::DeleteConnection(const AUUID &parent_uuid, const UUID& from, const UUID&  to)
+    : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(from), to_uuid(to)
 {
-    apex_assert_hard(!a->isVirtual());
-    apex_assert_hard(!b->isVirtual());
-
-    if((a->isOutput() && b->isInput())) {
-        from_uuid = a->getUUID();
-        to_uuid =  b->getUUID();
-
-    } else if(a->isInput() && b->isOutput()) {
-        from_uuid = b->getUUID();
-        to_uuid =  a->getUUID();
-    }
 }
 
 std::string DeleteConnection::getDescription() const
@@ -66,10 +57,10 @@ bool DeleteConnection::doExecute()
 
 bool DeleteConnection::doUndo()
 {
-    GraphPtr graph = getGraph();
+    GraphImplementationPtr graph = getGraph();
 
-    ConnectablePtr from = graph->findConnector(from_uuid);
-    ConnectablePtr to = graph->findConnector(to_uuid);
+    ConnectorPtr from = graph->findConnector(from_uuid);
+    ConnectorPtr to = graph->findConnector(to_uuid);
 
     OutputPtr output = std::dynamic_pointer_cast<Output>(from);
     InputPtr input = std::dynamic_pointer_cast<Input>(to);
@@ -100,7 +91,7 @@ void DeleteConnection::serialize(SerializationBuffer &data) const
     data << to_uuid;
 }
 
-void DeleteConnection::deserialize(SerializationBuffer& data)
+void DeleteConnection::deserialize(const SerializationBuffer& data)
 {
     Meta::deserialize(data);
 

@@ -78,6 +78,25 @@ UUID UUIDProvider::generateUUID(const std::string &prefix)
     return r;
 }
 
+UUID UUIDProvider::makeDerivedUUID(const UUID &parent, const UUID &child)
+{
+    UUID result = child;
+    for(const std::string& level : parent.representation_) {
+        result.representation_.push_back(level);
+    }
+    registerUUID(result);
+    return result;
+}
+
+UUID UUIDProvider::makeDerivedUUID_forced(const UUID &parent, const UUID &child)
+{
+    UUID result = child;
+    for(const std::string& level : parent.representation_) {
+        result.representation_.push_back(level);
+    }
+    return result;
+}
+
 UUID UUIDProvider::makeDerivedUUID(const UUID &parent, const std::string &name)
 {
     return makeUUID(parent.getFullName() + UUID::namespace_separator + name);
@@ -130,6 +149,12 @@ UUID UUIDProvider::makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const std
 {
     return UUID (parent, representation);
 }
+
+UUID UUIDProvider::makeUUID_forced(std::weak_ptr<UUIDProvider> parent, const UUID &copy)
+{
+    return UUID (parent, copy);
+}
+
 
 UUID UUIDProvider::generateTypedUUID(const UUID &parent, const std::string& type)
 {

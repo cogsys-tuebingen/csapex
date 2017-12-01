@@ -3,8 +3,9 @@
 
 /// COMPONENT
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/utility/assert.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/serialization/serialization_buffer.h>
 
@@ -41,7 +42,7 @@ bool Command::Access::redoCommand(Command::Ptr cmd)
     return cmd->redoCommand(cmd);
 }
 
-void Command::init(GraphFacade* graph_facade, CsApexCore& core)
+void Command::init(GraphFacadeImplementation *graph_facade, CsApexCore& core)
 {
     apex_assert_hard(graph_facade);
 
@@ -108,12 +109,14 @@ void Command::accept(int level, std::function<void (int level, const Command &)>
     callback(level, *this);
 }
 
-GraphFacade* Command::getRoot()
+GraphFacadeImplementation* Command::getRoot()
 {
-    return root_graph_facade_;
+    GraphFacadeImplementation* gfl = dynamic_cast<GraphFacadeImplementation*>(root_graph_facade_);
+    apex_assert_hard(gfl);
+    return gfl;
 }
 
-GraphFacade* Command::getGraphFacade()
+GraphFacadeImplementation* Command::getGraphFacade()
 {
     GraphFacade* gf = nullptr;
 
@@ -126,15 +129,19 @@ GraphFacade* Command::getGraphFacade()
         apex_assert_hard(gf);
 
     } else {
-        gf = getRoot()->getSubGraph(graph_uuid);
+        gf = getRoot()->getSubGraph(graph_uuid).get();
         apex_assert_hard(gf);
     }
-    return gf;
+
+    GraphFacadeImplementation* gfl = dynamic_cast<GraphFacadeImplementation*>(gf);
+    apex_assert_hard(gfl);
+
+    return gfl;
 }
 
-GraphPtr Command::getGraph()
+GraphImplementationPtr Command::getGraph()
 {
-    return getGraphFacade()->getGraph();
+    return getGraphFacade()->getLocalGraph();
 }
 
 SubgraphNodePtr Command::getSubgraphNode()
@@ -142,14 +149,14 @@ SubgraphNodePtr Command::getSubgraphNode()
     return getGraphFacade()->getSubgraphNode();
 }
 
-NodeFactory* Command::getNodeFactory()
+NodeFactoryImplementation* Command::getNodeFactory()
 {
     return core_->getNodeFactory().get();
 }
 
 GraphFacade* Command::getSubGraph(const UUID& graph_id)
 {
-    return getRoot()->getSubGraph(graph_id);
+    return getRoot()->getSubGraph(graph_id).get();
 }
 
 ThreadPool* Command::getRootThreadPool()
@@ -168,7 +175,7 @@ void Command::serialize(SerializationBuffer &data) const
     data << graph_uuid;
 }
 
-void Command::deserialize(SerializationBuffer& data)
+void Command::deserialize(const SerializationBuffer& data)
 {
     data >> graph_uuid;
 }

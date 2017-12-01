@@ -34,7 +34,11 @@ public:
      */
     void triggerWith(TokenPtr token);
 
+
+    virtual bool isSynchronous() const override;
+
     void reset();
+
 
 public:
     slim_signal::Signal<void()> triggered;

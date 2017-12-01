@@ -4,8 +4,8 @@
 /// PROJECT
 #include <csapex/utility/assert.h>
 #include <csapex/core/csapex_core.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/serialization_buffer.h>
 
@@ -22,7 +22,7 @@ Meta::Meta(const AUUID &parent_uuid, const std::string &type, bool transaction)
 {
 }
 
-void Meta::init(GraphFacade* root, CsApexCore& core)
+void Meta::init(GraphFacadeImplementation *root, CsApexCore& core)
 {
     Command::init(root, core);
     for(Command::Ptr cmd : nested) {
@@ -71,7 +71,7 @@ bool Meta::doExecute()
     locked = true;
 
     if(transaction) {
-        root_graph_facade_->getGraph()->beginTransaction();
+        root_graph_facade_->getLocalGraph()->beginTransaction();
     }
 
     bool success = true;
@@ -85,7 +85,7 @@ bool Meta::doExecute()
     }
 
     if(transaction) {
-        root_graph_facade_->getGraph()->finalizeTransaction();
+        root_graph_facade_->getLocalGraph()->finalizeTransaction();
     }
 
     return success;
@@ -94,7 +94,7 @@ bool Meta::doExecute()
 bool Meta::doUndo()
 {
     if(transaction) {
-        root_graph_facade_->getGraph()->beginTransaction();
+        root_graph_facade_->getLocalGraph()->beginTransaction();
     }
 
     for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
@@ -105,7 +105,7 @@ bool Meta::doUndo()
     }
 
     if(transaction) {
-        root_graph_facade_->getGraph()->finalizeTransaction();
+        root_graph_facade_->getLocalGraph()->finalizeTransaction();
     }
 
 
@@ -133,7 +133,7 @@ void Meta::serialize(SerializationBuffer &data) const
     data << transaction;
 }
 
-void Meta::deserialize(SerializationBuffer& data)
+void Meta::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

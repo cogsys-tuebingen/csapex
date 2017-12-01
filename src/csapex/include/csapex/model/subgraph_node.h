@@ -23,10 +23,11 @@ struct RelayMapping
 class CSAPEX_EXPORT SubgraphNode : public Node, public Variadic
 {
 public:
-    SubgraphNode(GraphLocalPtr graph);
+    SubgraphNode(GraphImplementationPtr graph);
     ~SubgraphNode();
 
     GraphPtr getGraph() const;
+    GraphImplementationPtr getLocalGraph() const;
 
 //    template <typename T = Connectable>
 //    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
@@ -44,6 +45,9 @@ public:
 //    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     virtual void initialize(csapex::NodeHandlePtr node_handle) override;
+    void setNodeFacade(NodeFacadeImplementationPtr graph_node_facade);
+
+
     virtual void detach() override;
     virtual void reset() override;
     virtual void stateChanged() override;
@@ -60,27 +64,48 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    InputPtr createInternalInput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool optional);
-    OutputPtr createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
-    EventPtr createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
-    SlotPtr createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr &)> callback);
+    InputPtr createInternalInput(const TokenDataConstPtr& type,
+                                 const UUID& internal_uuid,
+                                 const std::string& label,
+                                 bool optional);
+    OutputPtr createInternalOutput(const TokenDataConstPtr& type,
+                                   const UUID& internal_uuid,
+                                   const std::string& label);
+    EventPtr createInternalEvent(const TokenDataConstPtr& type,
+                                 const UUID& internal_uuid,
+                                 const std::string& label);
+    SlotPtr createInternalSlot(const TokenDataConstPtr& type,
+                               const UUID& internal_uuid,
+                               const std::string& label,
+                               std::function<void (const TokenPtr &)> callback);
 
-    virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
-    virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
-    virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label) override;
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active, bool asynchronous) override;
+    virtual Input* createVariadicInput(TokenDataConstPtr type,
+                                       const std::string& label,
+                                       bool optional) override;
+    virtual Output* createVariadicOutput(TokenDataConstPtr type,
+                                         const std::string& label) override;
+    virtual Event* createVariadicEvent(TokenDataConstPtr type,
+                                       const std::string& label) override;
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type,
+                                     const std::string& label,
+                                     std::function<void(const TokenPtr&)> callback,
+                                     bool active,
+                                     bool blocking) override;
 
     virtual void removeVariadicInput(InputPtr input) override;
     virtual void removeVariadicOutput(OutputPtr input) override;
     virtual void removeVariadicEvent(EventPtr input) override;
     virtual void removeVariadicSlot(SlotPtr input) override;
 
-    void removeInternalPorts();
-
-    RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
-    RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);
-    RelayMapping addForwardingSlot(const TokenDataConstPtr& type, const std::string& label);
-    RelayMapping addForwardingEvent(const TokenDataConstPtr& type, const std::string& label);
+    RelayMapping addForwardingInput(const TokenDataConstPtr& type,
+                                    const std::string& label,
+                                    bool optional);
+    RelayMapping addForwardingOutput(const TokenDataConstPtr& type,
+                                     const std::string& label);
+    RelayMapping addForwardingSlot(const TokenDataConstPtr& type,
+                                   const std::string& label);
+    RelayMapping addForwardingEvent(const TokenDataConstPtr& type,
+                                    const std::string& label);
 
     InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
     OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
@@ -135,13 +160,11 @@ private:
     void startNextIteration();
 
 public:
-    slim_signal::Signal<void(ConnectorPtr)> forwardingAdded;
-    slim_signal::Signal<void(ConnectorPtr)> forwardingRemoved;
-
-    slim_signal::Signal<void(ConnectorPtr,ConnectorPtr)> internalConnectionInProgress;
+    slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_added;
+    slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_removed;
 
 protected:
-    GraphLocalPtr graph_;
+    GraphImplementationPtr graph_;
 
     mutable std::recursive_mutex continuation_mutex_;
     Continuation continuation_;
@@ -163,6 +186,8 @@ protected:
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_input_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_slot_;
     std::unordered_map<UUID, UUID, UUID::Hasher> relay_to_external_event_;
+
+    std::unordered_map<UUID, TokenDataConstPtr, UUID::Hasher> original_types_;
 
     std::set<UUID> iterated_inputs_;
     param::BitSetParameterPtr iterated_inputs_param_;

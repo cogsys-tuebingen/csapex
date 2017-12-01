@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/command_serializer.h>
@@ -72,7 +72,7 @@ void SetMaximumExecutionFrequency::serialize(SerializationBuffer &data) const
     data << frequency;
 }
 
-void SetMaximumExecutionFrequency::deserialize(SerializationBuffer& data)
+void SetMaximumExecutionFrequency::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

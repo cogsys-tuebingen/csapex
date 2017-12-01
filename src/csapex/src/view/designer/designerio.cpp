@@ -2,18 +2,15 @@
 #include <csapex/view/designer/designerio.h>
 
 /// PROJECT
-#include <csapex/view/designer/designer.h>
-#include <csapex/model/graph.h>
-#include <csapex/model/node_handle.h>
-#include <csapex/view/node/box.h>
-#include <csapex/view/node/node_adapter.h>
-#include <csapex/utility/assert.h>
-#include <csapex/utility/yaml_io.hpp>
-#include <csapex/view/designer/graph_view.h>
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph/vertex.h>
-
+#include <csapex/utility/assert.h>
+#include <csapex/utility/yaml_io.hpp>
+#include <csapex/view/designer/designer.h>
+#include <csapex/view/designer/graph_view.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/node/node_adapter.h>
 
 /// SYSTEM
 #include <QMessageBox>
@@ -30,24 +27,23 @@ DesignerIO::DesignerIO()
 {
 }
 
-void DesignerIO::saveBoxes(YAML::Node& yaml, Graph* graph, GraphView *view)
+void DesignerIO::saveBoxes(YAML::Node& yaml, const GraphFacade* graph, GraphView *view)
 {
     YAML::Node adapters(YAML::NodeType::Sequence);
-    for(auto it = graph->begin(); it != graph->end(); ++it) {
-        NodeFacadePtr nh = (*it)->getNodeFacade();
-        saveBox(nh.get(), view, adapters);
+    for(const UUID& uuid : graph->enumerateAllNodes()) {
+        saveBox(uuid, view, adapters);
     }
     yaml["adapters"] = adapters;
 }
 
-void DesignerIO::saveBox(NodeFacade* node, GraphView *view, YAML::Node &yaml)
+void DesignerIO::saveBox(const UUID& node_uuid, GraphView *view, YAML::Node &yaml)
 {
-    NodeBox* box = view->getBox(node->getUUID());
+    NodeBox* box = view->getBox(node_uuid);
     NodeAdapter::Ptr na = box->getNodeAdapter();
     Memento::Ptr m = na->getState();
     if(m) {
         YAML::Node doc;
-        doc["uuid"] = node->getUUID().getFullName();
+        doc["uuid"] = node_uuid.getFullName();
 
         YAML::Node state;
         m->writeYaml(state);
@@ -59,8 +55,6 @@ void DesignerIO::saveBox(NodeFacade* node, GraphView *view, YAML::Node &yaml)
 
 void DesignerIO::loadBoxes(const YAML::Node &doc, GraphView *view)
 {
-    UUIDProviderPtr graph = view->getGraphFacade()->getGraph()->shared_from_this();
-
     if(doc["adapters"].IsDefined()) {
         const YAML::Node& adapters = doc["adapters"];
         for(std::size_t i = 0; i < adapters.size(); ++i) {
@@ -69,7 +63,7 @@ void DesignerIO::loadBoxes(const YAML::Node &doc, GraphView *view)
             YAML::Node x = e["uuid"];
             apex_assert_hard(x.Type() == YAML::NodeType::Scalar);
 
-            UUID uuid = UUIDProvider::makeUUID_forced(graph, e["uuid"].as<std::string>());
+            UUID uuid = UUIDProvider::makeUUID_without_parent(e["uuid"].as<std::string>());
 
             NodeBox* box = view->getBox(uuid);
             if(box) {

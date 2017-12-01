@@ -14,24 +14,24 @@
 
 namespace csapex
 {
-FWD(Input);
-FWD(Output);
-FWD(Event);
-FWD(Slot);
-FWD(InputTransition);
-FWD(OutputTransition);
-FWD(MessageProvider);
+FWD(Input)
+FWD(Output)
+FWD(Event)
+FWD(Slot)
+FWD(InputTransition)
+FWD(OutputTransition)
+FWD(MessageProvider)
 
 
 namespace connection_types
 {
-FWD(Message);
-FWD(MarkerMessage);
+FWD(Message)
+FWD(MarkerMessage)
 template <typename Type>
 struct GenericPointerMessage;
 template <typename Type>
 struct GenericValueMessage;
-FWD(GenericVectorMessage);
+FWD(GenericVectorMessage)
 }
 }
 

@@ -23,6 +23,7 @@ Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
     : Connector(uuid, owner),
       count_(0), seq_no_(-1),
       virtual_(false),
+      parameter_(false),
       graph_port_(false),
       essential_(false),
       enabled_(true)
@@ -38,6 +39,16 @@ bool Connectable::isVirtual() const
 void Connectable::setVirtual(bool _virtual)
 {
     virtual_ = _virtual;
+}
+
+bool Connectable::isParameter() const
+{
+    return parameter_;
+}
+
+void Connectable::setParameter(bool parameter)
+{
+    parameter_ = parameter;
 }
 
 
@@ -60,7 +71,7 @@ void Connectable::setEssential(bool essential)
 {
     if(essential != essential_) {
         essential_ = essential;
-        essential_changed();
+        essential_changed(essential_);
     }
 }
 
@@ -98,12 +109,6 @@ Connectable::~Connectable()
     }
 }
 
-void Connectable::errorEvent(bool error, const std::string& msg, ErrorLevel level)
-{
-    connectableError(error,msg,static_cast<int>(level));
-}
-
-
 void Connectable::disable()
 {
     if(enabled_) {
@@ -134,18 +139,6 @@ bool Connectable::isEnabled() const
     return enabled_;
 }
 
-bool Connectable::canConnectTo(Connector* other_side, bool) const
-{
-    if(other_side == this) {
-        return false;
-    }
-
-    bool in_out = (canOutput() && other_side->canInput()) || (canInput() && other_side->canOutput());
-    bool compability = getType()->canConnectTo(other_side->getType().get());
-
-    return in_out && compability;
-}
-
 std::string Connectable::getLabel() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
@@ -171,10 +164,9 @@ void Connectable::setType(TokenData::ConstPtr type)
 
     if(!compatible || (is_any != will_be_any)) {
         type_ = type;
-        validateConnections();
         lock.unlock();
 
-        typeChanged();
+        typeChanged(type);
     }
 }
 
@@ -199,7 +191,7 @@ void Connectable::setSequenceNumber(int seq_no)
     seq_no_ = seq_no;
 }
 
-void Connectable::removeConnection(Connector* other_side)
+void Connectable::removeConnection(Connectable* other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
@@ -249,10 +241,15 @@ void Connectable::fadeConnection(ConnectionPtr connection)
     connection_faded(connection);
 }
 
-int Connectable::countConnections()
+int Connectable::countConnections() const
 {
     return connections_.size();
 }
+int Connectable::maxConnectionCount() const
+{
+    return -1;
+}
+
 std::vector<ConnectionPtr> Connectable::getConnections() const
 {
     return connections_;
@@ -283,4 +280,82 @@ bool Connectable::hasEnabledConnection() const
 bool Connectable::isConnected() const
 {
     return !connections_.empty();
+}
+
+bool Connectable::isConnectedTo(const UUID& other) const
+{
+    for(const ConnectionPtr& c : connections_) {
+        ConnectorPtr other_port = isInput() ? c->source() : c->target();
+        if(other_port->getUUID() == other) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Connectable::isActivelyConnectedTo(const UUID& other) const
+{
+    for(const ConnectionPtr& c : connections_) {
+        ConnectorPtr other_port = isInput() ? c->source() : c->target();
+        if(other_port->getUUID() == other) {
+            return c->isActive();
+        }
+    }
+    return false;
+}
+
+
+std::vector<UUID> Connectable::getConnectedPorts() const
+{
+    std::vector<UUID> res;
+    res.reserve(connections_.size());
+    for(const ConnectionPtr& c : connections_) {
+        ConnectorPtr other_port = isInput() ? c->source() : c->target();
+        UUID uuid = other_port->getUUID();
+        if(!uuid.empty()) {
+            res.push_back(uuid);
+        }
+    }
+
+    return res;
+}
+
+
+std::string Connectable::makeStatusString() const
+{
+    std::stringstream status_stream;
+    status_stream << "UUID: " << getUUID();
+    status_stream << ", Type: " << getType()->descriptiveName();
+    status_stream << ", Connections: " << getConnections().size();
+    status_stream << ", Messages: " << getCount();
+    status_stream << ", Enabled: " << isEnabled();
+    status_stream << ", #: " << sequenceNumber();
+
+    addStatusInformation(status_stream);
+
+    return status_stream.str();
+}
+
+ConnectorDescription Connectable::getDescription() const
+{
+    auto owner = getOwner();
+    if(!owner) {
+        return {};
+    }
+    ConnectorDescription res(owner->getUUID().getAbsoluteUUID(),
+                             getUUID(),
+                             getConnectorType(),
+                             getType(),
+                             getLabel(),
+                             isOptional(),
+                             isParameter());
+
+    for(const ConnectionPtr& c : getConnections()) {
+        if(isOutput()) {
+            res.targets.emplace_back(c->target()->getUUID().getAbsoluteUUID(), c->isActive());
+        } else {
+            res.targets.emplace_back(c->source()->getUUID().getAbsoluteUUID(), c->isActive());
+        }
+    }
+    return res;
 }

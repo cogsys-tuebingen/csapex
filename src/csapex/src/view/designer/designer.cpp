@@ -5,24 +5,24 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/meta.h>
 #include <csapex/command/rename_node.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/core/graphio.h>
 #include <csapex/core/settings.h>
+#include <csapex/model/graph_facade.h>
+#include <csapex/model/node_state.h>
+#include <csapex/model/node_facade.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/node.h>
-#include <csapex/model/node_state.h>
-#include <csapex/view/utility/qt_helper.hpp>
-#include <csapex/view/node/box.h>
-#include <csapex/view/designer/graph_view.h>
-#include <csapex/view/designer/designer_scene.h>
-#include <csapex/view/widgets/minimap_widget.h>
-#include <csapex/core/graphio.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/subgraph_node.h>
 #include <csapex/view/designer/designerio.h>
-#include "ui_designer.h"
-#include <csapex/view/widgets/search_dialog.h>
+#include <csapex/view/designer/designer_scene.h>
+#include <csapex/view/designer/graph_view.h>
+#include <csapex/view/node/box.h>
+#include <csapex/view/utility/qt_helper.hpp>
+#include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/notification_widget.h>
+#include <csapex/view/widgets/search_dialog.h>
+
+#include "ui_designer.h"
 
 /// SYSTEM
 #include <QTabWidget>
@@ -91,7 +91,7 @@ void Designer::setup()
             GraphFacade* graph = view->getGraphFacade();
             GraphFacade* parent = graph->getParent();
             if(parent) {
-                NodeHandle* node = graph->getNodeHandle();
+                NodeFacadePtr node = graph->getNodeFacade();
                 NodeStatePtr state = node->getNodeState();
                 QString old_name = QString::fromStdString(state->getLabel());
                 QString text = QInputDialog::getText(this, "Graph Label", "Enter new name",
@@ -114,12 +114,12 @@ void Designer::setup()
 void Designer::observeGraph(GraphFacadePtr graph)
 {
     apex_assert_hard(graph);
-    graph_connections_[graph->getSubgraphNode().get()].emplace_back(
+    graph_connections_[graph.get()].emplace_back(
                 graph->child_added.connect([this](GraphFacadePtr child){
                     addGraph(child);
                     observeGraph(child);
                 }));
-    graph_connections_[graph->getSubgraphNode().get()].emplace_back(
+    graph_connections_[graph.get()].emplace_back(
                 graph->child_removed.connect([this](GraphFacadePtr child){
                     removeGraph(child.get());
                 }));
@@ -140,7 +140,7 @@ void Designer::showNodeDialog()
 void Designer::showNodeSearchDialog()
 {
     if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
-        SearchDialog diag(current_view->getGraphFacade()->getGraph().get(), *view_core_.getNodeFactory(),
+        SearchDialog diag(current_view->getGraphFacade(), *view_core_.getNodeFactory(),
                           "Please enter the UUID, the label or the type of the node");
 
         int r = diag.exec();
@@ -158,6 +158,14 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
 
     graphs_[uuid] = graph_facade;
 
+    for(const UUID& child : graph_facade->enumerateAllNodes()) {
+        NodeFacadePtr nf = graph_facade->findNodeFacade(child);
+        if(nf->isGraph()) {
+            GraphFacadePtr subgraph = graph_facade->getSubGraph(child);
+            addGraph(subgraph);
+        }
+    }
+
     if(graph_facade == view_core_.getRoot()) {
         showGraph(graph_facade);
     }
@@ -168,10 +176,10 @@ QString generateTitle(GraphFacade* graph_facade)
 {
     QString title;
     for(GraphFacade* parent = graph_facade; parent != nullptr; parent = parent->getParent()) {
-        NodeHandle* nh = parent->getNodeHandle();
-        if(!nh) break;
+        NodeFacadePtr nf = parent->getNodeFacade();
+        if(!nf) break;
 
-        QString label = QString::fromStdString(nh->getNodeState()->getLabel());
+        QString label = QString::fromStdString(nf->getLabel());
         if(!title.isEmpty()) {
             title = label + " / " + title;
 
@@ -192,18 +200,17 @@ QString generateTitle(GraphFacade* graph_facade)
 void Designer::showGraph(GraphFacadePtr graph_facade)
 {
     // check if it is already displayed
-    SubgraphNodePtr graph = graph_facade->getSubgraphNode();
-    auto pos = visible_graphs_.find(graph.get());
+    auto pos = visible_graphs_.find(graph_facade.get());
     if(pos != visible_graphs_.end()) {
         // switch to view
-        GraphView* view = graph_views_.at(graph.get());
+        GraphView* view = graph_views_.at(graph_facade.get());
         ui->tabWidget->setCurrentWidget(view);
         return;
     }
 
     GraphView* graph_view = new GraphView(graph_facade, view_core_, this);
     graph_view->useProfiler(profiler_);
-    graph_views_[graph.get()] = graph_view;
+    graph_views_[graph_facade.get()] = graph_view;
     view_graphs_[graph_view] = graph_facade.get();
     auuid_views_[graph_facade->getAbsoluteUUID()] = graph_view;
 
@@ -217,7 +224,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     } else {
         tab = ui->tabWidget->addTab(graph_view, generateTitle(graph_facade.get()));
 
-        view_connections_[graph_view].emplace_back(graph_facade->getNodeHandle()->getNodeState()->label_changed->connect([this]() {
+        view_connections_[graph_view].emplace_back(graph_facade->getNodeFacade()->getNodeState()->label_changed->connect([this]() {
             for(int i = 0; i < ui->tabWidget->count(); ++i) {
                 GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(i));
                 if(view) {
@@ -230,15 +237,15 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     graph_view->overwriteStyleSheet(styleSheet());
 
 
-    visible_graphs_.insert(graph.get());
+    visible_graphs_.insert(graph_facade.get());
 
     ui->tabWidget->setCurrentIndex(tab);
 
     QObject::connect(graph_view, &GraphView::boxAdded, this, &Designer::addBox);
     QObject::connect(graph_view, &GraphView::boxRemoved, this, &Designer::removeBox);
 
-    for(const auto& nh : graph->getGraph()->getAllNodeHandles()) {
-        NodeBox* box = graph_view->getBox(nh->getUUID());
+    for(const UUID& uuid : graph_facade->enumerateAllNodes()){
+        NodeBox* box = graph_view->getBox(uuid);
         addBox(box);
     }
 
@@ -264,17 +271,15 @@ void Designer::closeView(int page)
     if(view) {
         GraphFacade* graph_facade = view_graphs_.at(view);
 
-        SubgraphNodePtr graph = graph_facade->getSubgraphNode();
-
         DesignerIO designerio;
         YAML::Node doc;
-        designerio.saveBoxes(doc, graph->getGraph().get(), graph_views_[graph.get()]);
-        states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
+        designerio.saveBoxes(doc, graph_facade, graph_views_[graph_facade]);
+        states_for_invisible_graphs_[graph_facade->getAbsoluteUUID()] = doc["adapters"];
 
         ui->tabWidget->removeTab(page);
 
-        visible_graphs_.erase(graph.get());
-        graph_views_.erase(graph.get());
+        visible_graphs_.erase(graph_facade);
+        graph_views_.erase(graph_facade);
         view_graphs_.erase(view);
         auuid_views_.erase(graph_facade->getAbsoluteUUID());
 
@@ -286,10 +291,9 @@ void Designer::removeGraph(GraphFacade* graph_facade)
 {
     for(auto it = graphs_.begin(); it != graphs_.end(); ++it) {
         if(it->second.get() == graph_facade) {
-            SubgraphNodePtr graph = graph_facade->getSubgraphNode();
-            graph_connections_.erase(graph.get());
-            GraphView* view = graph_views_[graph.get()];
-            graph_views_.erase(graph.get());
+            graph_connections_.erase(graph_facade);
+            GraphView* view = graph_views_[graph_facade];
+            graph_views_.erase(graph_facade);
             view_graphs_.erase(view);
             graphs_.erase(it);
             delete view;
@@ -493,7 +497,7 @@ GraphView* Designer::getVisibleGraphView() const
 {
     GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
     if(!current_view) {
-        return graph_views_.at(view_core_.getRoot()->getSubgraphNode().get());
+        return graph_views_.at(view_core_.getRoot().get());
     }
     return current_view;
 }
@@ -581,33 +585,33 @@ void Designer::focusOnNode(const AUUID &id)
 }
 
 
-void Designer::saveView(SubgraphNodeConstPtr graph, YAML::Node &doc)
+void Designer::saveView(const GraphFacade& graph, YAML::Node &doc)
 {
     DesignerIO designerio;
 
-    auto pos = graph_views_.find(graph.get());
+    auto pos = graph_views_.find(&graph);
     if(pos != graph_views_.end()) {
-        designerio.saveBoxes(doc, graph->getGraph().get(), pos->second);
-        states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
+        designerio.saveBoxes(doc, &graph, pos->second);
+        states_for_invisible_graphs_[graph.getAbsoluteUUID()] = doc["adapters"];
     } else {
-        doc["adapters"] = states_for_invisible_graphs_[graph->getUUID()];
+        doc["adapters"] = states_for_invisible_graphs_[graph.getAbsoluteUUID()];
     }
 }
 
-void Designer::loadView(SubgraphNodePtr graph, const YAML::Node &doc)
+void Designer::loadView(GraphFacade &graph, const YAML::Node &doc)
 {
     DesignerIO designerio;
 
-    auto pos = graph_views_.find(graph.get());
+    auto pos = graph_views_.find(&graph);
     if(pos != graph_views_.end()) {
         designerio.loadBoxes(doc, pos->second);
     }
 
     const YAML::Node& adapters = doc["adapters"];
     if(adapters.IsDefined()) {
-        states_for_invisible_graphs_[graph->getUUID()] = doc["adapters"];
+        states_for_invisible_graphs_[graph.getAbsoluteUUID()] = doc["adapters"];
     } else {
-        std::cerr << "cannot load adapters from YAML Node: " << doc << std::endl;;
+        NOTIFICATION("cannot load adapters, none are specified");
     }
 }
 

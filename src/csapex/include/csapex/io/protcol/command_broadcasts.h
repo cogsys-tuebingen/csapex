@@ -27,7 +27,7 @@ public:
     CommandBroadcasts(CommandBroadcastType Broadcast_type, bool flag_);
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     std::string getType() const override
     {

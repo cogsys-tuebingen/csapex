@@ -22,8 +22,16 @@ using namespace csapex;
 
 
 
-BoxDialog::BoxDialog(QString message, NodeFactory& node_factory, NodeAdapterFactory &adapter_factory, SnippetFactory& snippet_factory, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f), node_factory_(node_factory), adapter_factory_(adapter_factory), snippet_factory_(snippet_factory),
+BoxDialog::BoxDialog(QString message,
+                     NodeFactory& node_factory,
+                     NodeAdapterFactory &adapter_factory,
+                     SnippetFactoryPtr snippet_factory,
+                     QWidget *parent,
+                     Qt::WindowFlags f)
+    : QDialog(parent, f),
+      node_factory_(node_factory),
+      adapter_factory_(adapter_factory),
+      snippet_factory_(snippet_factory),
       message_(message)
 {
     makeUI();
@@ -67,8 +75,10 @@ void BoxDialog::showEvent(QShowEvent * e)
             NodeListGenerator node_generator(node_factory_, adapter_factory_);
             node_generator.listAvailableNodeTypes(model_);
 
-            SnippetListGenerator snippet_generator(snippet_factory_);
-            snippet_generator.listAvailableSnippets(model_);
+            if(snippet_factory_) {
+                SnippetListGenerator snippet_generator(*snippet_factory_);
+                snippet_generator.listAvailableSnippets(model_);
+            }
 
             model_->sort(0);
 

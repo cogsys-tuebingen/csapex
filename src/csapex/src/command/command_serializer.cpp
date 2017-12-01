@@ -19,18 +19,18 @@ CommandSerializerInterface::~CommandSerializerInterface()
 
 }
 
-void CommandSerializer::serialize(const SerializableConstPtr& packet, SerializationBuffer& data)
+void CommandSerializer::serialize(const StreamableConstPtr& packet, SerializationBuffer& data)
 {
 
     if(const CommandConstPtr& cmd = std::dynamic_pointer_cast<Command const>(packet)) {
         std::string type = cmd->getType();
         data << type;
 
-        std::cerr << "trying to serialize command of type " << type << std::endl;
+        //std::cerr << "trying to serialize command of type " << type << std::endl;
 
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
-            std::cerr << "serializing command (type=" << type << ")" << std::endl;
+            //std::cerr << "serializing command (type=" << type << ")" << std::endl;
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<CommandSerializerInterface> serializer = it->second;
@@ -43,17 +43,17 @@ void CommandSerializer::serialize(const SerializableConstPtr& packet, Serializat
     }
 }
 
-SerializablePtr CommandSerializer::deserialize(SerializationBuffer& data)
+StreamablePtr CommandSerializer::deserialize(const SerializationBuffer& data)
 {
     std::string type;
     data >> type;
 
-    std::cerr << "trying to deserialize command of type " << type << std::endl;
+    //std::cerr << "trying to deserialize command of type " << type << std::endl;
 
     auto it = serializers_.find(type);
     if(it != serializers_.end()) {
 
-        std::cerr << "deserializing command (type=" << type << ")" << std::endl;
+        //std::cerr << "deserializing command (type=" << type << ")" << std::endl;
 
         // TODO: use boost serialization!
         // defer serialization to the corresponding serializer

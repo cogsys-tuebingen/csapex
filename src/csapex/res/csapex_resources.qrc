@@ -74,5 +74,10 @@
         <file>activity_add.png</file>
         <file>activity_remove.png</file>
         <file>thread_group_delete.png</file>
+        <file>apex_logo_client.png</file>
+        <file>remote_go.png</file>
+        <file>remote_error.png</file>
+        <file>remote_edit.png</file>
+        <file>remote.png</file>
     </qresource>
 </RCC>

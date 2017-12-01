@@ -29,13 +29,13 @@ void NodeModifier::setNodeWorker(NodeWorker *worker)
 }
 
 
-Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback, bool active, bool asynchronous)
+Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback, bool active, bool blocking)
 {
-    return addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, active, asynchronous);
+    return addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, active, blocking);
 }
-Slot* NodeModifier::addActiveSlot(const std::string& label, std::function<void()> callback, bool asynchronous)
+Slot* NodeModifier::addActiveSlot(const std::string& label, std::function<void()> callback, bool blocking)
 {
-    return addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, true, asynchronous);
+    return addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, true, blocking);
 }
 
 

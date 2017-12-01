@@ -3,14 +3,14 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
-#include <csapex/io/server.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/io/tcp_server.h>
 
 /// SYSTEM
 #include <iostream>
@@ -51,14 +51,16 @@ int CsApexServer::run()
         core->shutdown();
     });
 
-    Server server(core, false);
 
     GraphFacadePtr root = core->getRoot();
     csapex::error_handling::init();
 
     core->startup();
 
-    server.start();
+    core->setServerFactory([this]() {
+        return std::make_shared<TcpServer>(*core, false);
+    });
+    core->startServer();
 
     return 0;
 }
@@ -86,7 +88,7 @@ int main(int argc, char** argv)
 {
     std::set_terminate (csapex_terminate);
 
-    SettingsLocal settings;
+    SettingsImplementation settings;
 
     int effective_argc = argc;
     std::string path_to_bin(argv[0]);
@@ -94,6 +96,7 @@ int main(int argc, char** argv)
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "show help message")
+            ("port", po::value<int>()->default_value(42123), "tcp server port")
             ("debug", "enable debug output")
             ("dump", "show variables")
             ("paused", "start paused")
@@ -204,8 +207,7 @@ int main(int argc, char** argv)
     settings.set("thread_grouping", vm.count("disable_thread_grouping") == 0);
     settings.set("additional_args", additional_args);
     settings.set("initially_paused", vm.count("paused") > 0);
-
-    settings.set("access-test", std::string("access granted."));
+    settings.set("port", vm["port"].as<int>());
 
     // start the app
     CsApexServer m(settings, *handler);

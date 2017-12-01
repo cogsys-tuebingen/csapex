@@ -18,7 +18,7 @@
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/param/trigger_parameter.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/model/node_modifier.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/delegate_bind.h>
@@ -27,7 +27,7 @@
 #include <csapex/msg/no_message.h>
 #include <csapex/msg/end_of_sequence_message.h>
 #include <csapex/utility/exceptions.h>
-#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/profiler_impl.h>
 #include <csapex/utility/debug.h>
 
 /// SYSTEM
@@ -49,17 +49,17 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     //        stopObserving();
     //    });
 
-    profiler_ = std::make_shared<Profiler>(false, 16);
+    profiler_ = std::make_shared<ProfilerImplementation>(false, 16);
 
     NodePtr node = node_handle_->getNode().lock();
     node->useTimer(profiler_->getTimer(node_handle->getUUID().getFullName()));
 
 
     try {
-        observe(node_handle_->connector_created, [this](ConnectorPtr c) {
+        observe(node_handle_->connector_created, [this](ConnectablePtr c, bool internal) {
             connectConnector(c);
         });
-        observe(node_handle_->connector_removed, [this](ConnectorPtr c) {
+        observe(node_handle_->connector_removed, [this](ConnectablePtr c, bool internal) {
             disconnectConnector(c.get());
         });
 
@@ -82,10 +82,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
             node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
                 setProcessingEnabled(true);
-            }, true, false);
+            }, true, true);
             node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", [this](){
                 setProcessingEnabled(false);
-            }, false, false);
+            }, false, true);
 
 
             trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"activated");
@@ -144,6 +144,8 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
 NodeWorker::~NodeWorker()
 {
+    stopObserving();
+
     std::unique_lock<std::recursive_mutex> lock(sync);
 
     destroyed();
@@ -190,7 +192,7 @@ ExecutionState NodeWorker::getExecutionState() const
     return state_;
 }
 
-std::shared_ptr<Profiler> NodeWorker::getProfiler()
+std::shared_ptr<ProfilerImplementation> NodeWorker::getProfiler()
 {
     return profiler_;
 }
@@ -230,6 +232,10 @@ void NodeWorker::setState(ExecutionState state)
     //    }
 
     state_ = state;
+
+    lock.unlock();
+
+    execution_state_changed();
 }
 
 bool NodeWorker::isProcessingEnabled() const
@@ -247,7 +253,11 @@ bool NodeWorker::canProcess() const
     if(isProcessing()) {
         return false;
     }
-    if(!getNode()->canProcess()) {
+    NodePtr node = getNode();
+    if(!node) {
+        return false;
+    }
+    if(!node->canProcess()) {
         return false;
     }
 
@@ -580,7 +590,7 @@ bool NodeWorker::startProcessingMessages()
         } catch(const std::exception& e) {
             setError(true, e.what());
         } catch(const Failure& f) {
-            throw;
+            throw f;
         } catch(...) {
             throw Failure("Unknown exception caught in NodeWorker.");
         }
@@ -886,7 +896,7 @@ void NodeWorker::trySendEvents()
     sendEvents(node_handle_->isActive());
 }
 
-void NodeWorker::connectConnector(ConnectorPtr c)
+void NodeWorker::connectConnector(ConnectablePtr c)
 {
     port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectorPtr&) {
         ioChanged();

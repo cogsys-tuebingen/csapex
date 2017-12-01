@@ -8,7 +8,7 @@
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/protcol/notification_message.h>
 #include <csapex/serialization/packet_serializer.h>
-#include <csapex/core/settings/settings_remote.h>
+#include <csapex/core/settings/settings_proxy.h>
 #include <csapex/io/protcol/parameter_changed.h>
 #include <csapex/io/session.h>
 #include <csapex/io/protcol/core_requests.h>
@@ -39,10 +39,10 @@ public:
         {
             boost::asio::connect(socket, resolver.resolve({argv[1], argv[2]}));
 
-            session = std::make_shared<Session>(std::move(socket));
+            session = std::make_shared<Session>(std::move(socket), "demo_client");
 
             //        readPacket(s);
-            session->packet_received.connect([this](SerializableConstPtr packet){
+            session->packet_received.connect([this](StreamableConstPtr packet){
                 handlePacket(packet);
             });
 
@@ -55,12 +55,13 @@ public:
                 }
             });
 
-            session->stopped.connect([&](){
+            session->stopped.connect([&](Session* session){
+                (void) session;
                 std::cerr << "The server disconnected." << std::endl;
                 stop();
             });
 
-            settings_= std::make_shared<SettingsRemote>(session);
+            settings_= std::make_shared<SettingsProxy>(session);
 
 //            try {
 //                param::ParameterPtr p = settings_->get("access-test");
@@ -139,10 +140,10 @@ public:
         running = false;
     }
 
-    void handlePacket(SerializableConstPtr packet)
+    void handlePacket(StreamableConstPtr packet)
     {
         if(packet) {
-            //                std::cout << "type=" << (int) serial->getPacketType() << std::endl;
+            std::cout << "packet type: " << (int) packet->getPacketType() << std::endl;
 
             switch(packet->getPacketType()) {
             case BroadcastMessage::PACKET_TYPE_ID:

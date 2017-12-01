@@ -31,7 +31,7 @@ public:
     virtual ~SignalBase();
 
     virtual void disconnectAll();
-    bool isConnected() const;
+    virtual bool isConnected() const;
 
 protected:
     SignalBase();
@@ -41,6 +41,12 @@ protected:
 
     void addConnection(Connection* connection);
     void removeConnection(const Connection* connection);
+
+    virtual int countAllConnections() const = 0;
+
+protected:
+    virtual void onConnect();
+    virtual void onDisconnect();
 
 protected:
     mutable std::recursive_mutex mutex_;
@@ -129,8 +135,11 @@ public:
         return connect(std::move(delegate::Delegate<Signature>(that, mem)));
     }
 
+    virtual bool isConnected() const override;
+    virtual int countAllConnections() const override;
+
     template <typename... Args>
-    Signal& operator () (Args... args);
+    Signal& operator () (Args&&... args);
 
     virtual void disconnectAll() override;
 
@@ -169,6 +178,24 @@ private:
     std::vector<Signal<Signature>*> children_to_remove_;
 
     std::vector<Signal<Signature>*> parents_;
+};
+
+/**
+ * @brief The ObservableSignal template implements a signal that emits special signals itself
+ */
+template <typename Signature>
+class ObservableSignal : public Signal<Signature>
+{
+public:
+    Signal<void()> connected;
+    Signal<void()> disconnected;
+
+    Signal<void()> first_connected;
+    Signal<void()> last_disconnected;
+
+private:
+    virtual void onConnect() override;
+    virtual void onDisconnect() override;
 };
 
 }

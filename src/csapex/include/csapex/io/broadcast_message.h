@@ -2,7 +2,7 @@
 #define BROADCAST_MESSAGE_H
 
 /// PROJECT
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 
 /// SYSTEM
 #include <string>
@@ -10,7 +10,7 @@
 namespace csapex
 {
 
-class BroadcastMessage : public Serializable
+class BroadcastMessage : public Streamable
 {
 public:
     static const uint8_t PACKET_TYPE_ID = 5;

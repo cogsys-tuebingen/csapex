@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/graph.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/scheduling/thread_pool.h>
@@ -103,7 +103,7 @@ void CreateThread::serialize(SerializationBuffer &data) const
     data << new_id;
 }
 
-void CreateThread::deserialize(SerializationBuffer& data)
+void CreateThread::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

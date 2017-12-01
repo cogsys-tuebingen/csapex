@@ -11,6 +11,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/utility/thread.h>
 #include <csapex/model/subgraph_node.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <memory>
@@ -185,9 +186,17 @@ void NodeRunner::execute()
         }
         can_step_--;
 
-        if(!worker_->execute()) {
-            //TRACE worker_->getNode()->ainfo << "execute failed" << std::endl;
-            can_step_++;
+        try {
+            if(!worker_->execute()) {
+                //TRACE worker_->getNode()->ainfo << "execute failed" << std::endl;
+                can_step_++;
+            }
+        } catch(const std::exception& e) {
+            NOTIFICATION(std::string("Node could not be executed: ") + e.what());
+        } catch(const Failure& e) {
+            NOTIFICATION(std::string("Node experienced failure: ") + e.what());
+        } catch(...) {
+            NOTIFICATION("Node could not be executed: Unknown exception");
         }
     } else {
         can_step_++;

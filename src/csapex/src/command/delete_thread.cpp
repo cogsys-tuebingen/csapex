@@ -75,7 +75,7 @@ void DeleteThread::serialize(SerializationBuffer &data) const
     data << name;
 }
 
-void DeleteThread::deserialize(SerializationBuffer& data)
+void DeleteThread::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

@@ -10,6 +10,7 @@
 namespace csapex
 {
 enum class ConnectorType {
+    NONE,
     OUTPUT, INPUT, SLOT_T, EVENT
 };
 

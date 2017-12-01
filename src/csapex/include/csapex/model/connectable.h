@@ -17,7 +17,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT Connectable : public Connector
+class CSAPEX_EXPORT Connectable : public Connector, public std::enable_shared_from_this<Connectable>
 {
     friend class Graph;
     friend class Connection;
@@ -25,20 +25,14 @@ class CSAPEX_EXPORT Connectable : public Connector
 public:
     virtual ~Connectable();
 
-    int getCount() const;
+    int getCount() const override;
 
-    virtual bool canConnectTo(Connector* other_side, bool move) const;
-
-    virtual bool canOutput() const {
+    virtual bool isOutput() const override
+    {
         return false;
     }
-    virtual bool canInput() const {
-        return false;
-    }
-    virtual bool isOutput() const {
-        return false;
-    }
-    virtual bool isInput() const {
+    virtual bool isInput() const  override
+    {
         return false;
     }    
     virtual bool isOptional() const {
@@ -48,6 +42,9 @@ public:
     bool isVirtual() const;
     void setVirtual(bool _virtual);
 
+    bool isParameter() const;
+    void setParameter(bool parameter);
+
     bool isGraphPort() const;
     void setGraphPort(bool graph);
 
@@ -55,7 +52,7 @@ public:
     void setEssential(bool essential);
 
     virtual void addConnection(ConnectionPtr connection);
-    virtual void removeConnection(Connector* other_side);
+    virtual void removeConnection(Connectable* other_side);
     virtual void fadeConnection(ConnectionPtr connection);
 
     void setLabel(const std::string& label);
@@ -72,13 +69,21 @@ public:
     int sequenceNumber() const;
     void setSequenceNumber(int seq_no_);
 
-    int countConnections();
-    std::vector<ConnectionPtr> getConnections() const;
+    int countConnections() const override;
+    virtual int maxConnectionCount() const override;
+
+    virtual std::vector<ConnectionPtr> getConnections() const;
+
+    virtual ConnectorDescription getDescription() const override;
 
     bool hasEnabledConnection() const;
     bool hasActiveConnection() const;
 
     virtual bool isConnected() const;
+    virtual bool isConnectedTo(const UUID& other) const override;
+    virtual bool isActivelyConnectedTo(const UUID& other) const override;
+
+    virtual std::vector<UUID> getConnectedPorts() const override;
 
     virtual void disable();
     virtual void enable();
@@ -88,6 +93,21 @@ public:
 
     virtual void notifyMessageProcessed();
 
+    virtual std::string makeStatusString() const override;
+
+public:
+    slim_signal::Signal<void(ConnectablePtr)> connectionStart;
+    slim_signal::Signal<void(ConnectablePtr)> disconnected;
+
+    slim_signal::Signal<void(ConnectablePtr)> connection_added_to;
+    slim_signal::Signal<void(ConnectablePtr)> connection_removed_to;
+
+    slim_signal::Signal<void(ConnectionPtr)> connection_added;
+    slim_signal::Signal<void(ConnectionPtr)> connection_faded;
+
+    slim_signal::Signal<void(ConnectablePtr)> message_processed;
+    slim_signal::Signal<void(bool)> connectionEnabled;
+
 protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
 
@@ -95,9 +115,6 @@ protected:
     Connectable(const UUID &uuid, ConnectableOwnerWeakPtr owner);
 
     void init();
-
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
-
 
 protected:
     mutable std::recursive_mutex io_mutex;
@@ -112,6 +129,7 @@ protected:
     std::atomic<int> seq_no_;
 
     bool virtual_;
+    bool parameter_;
     bool graph_port_;
     bool essential_;
 

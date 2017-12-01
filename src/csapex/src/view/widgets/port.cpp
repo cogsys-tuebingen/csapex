@@ -2,12 +2,12 @@
 #include <csapex/view/widgets/port.h>
 
 /// COMPONENT
-#include <csapex/model/node.h>
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/add_connection.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/static_output.h>
+#include <csapex/model/connection.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/widgets/message_preview_widget.h>
 #include <csapex/view/designer/designer_scene.h>
@@ -55,25 +55,18 @@ Port::Port(QWidget *parent)
     double_click_timer_->setInterval(200);
 }
 
-Port::Port(ConnectorWeakPtr adaptee, QWidget *parent)
+Port::Port(ConnectorPtr adaptee, QWidget *parent)
     : Port(parent)
 {
     adaptee_ = adaptee;
-    ConnectorPtr adaptee_ptr = adaptee_.lock();
-    if(adaptee_ptr) {
-        createToolTip();
 
-        connections_.push_back(adaptee_ptr->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
-        connections_.push_back(adaptee_ptr->connectableError.connect([this](bool error,std::string msg,int level) { setError(error, msg, level); }));
+    createToolTip();
 
-        bool opt = dynamic_cast<Input*>(adaptee_ptr.get()) && dynamic_cast<Input*>(adaptee_ptr.get())->isOptional();
-        setProperty("optional", opt);
+    connections_.push_back(adaptee_->enabled_changed.connect([this](bool e) { setEnabledFlag(e); }));
 
-        setProperty("type", QString::fromStdString(port_type::name(adaptee_ptr->getConnectorType())));
+    setProperty("optional", adaptee_->isOptional());
 
-    } else {
-        std::cerr << "creating empty port!" << std::endl;
-    }
+    setProperty("type", QString::fromStdString(port_type::name(adaptee_->getConnectorType())));
 }
 
 
@@ -93,43 +86,17 @@ bool Port::event(QEvent *e)
     return QWidget::event(e);
 }
 
-bool Port::canOutput() const
-{
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return false;
-    }
-    return adaptee->canOutput();
-}
-
-bool Port::canInput() const
-{
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return false;
-    }
-    return adaptee->canInput();
-}
-
 bool Port::isOutput() const
 {
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return false;
-    }
-    return adaptee->isOutput();
+    return adaptee_->isOutput();
 }
 
 bool Port::isInput() const
 {
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return false;
-    }
-    return adaptee->isInput();
+    return adaptee_->isInput();
 }
 
-ConnectorWeakPtr Port::getAdaptee() const
+ConnectorPtr Port::getAdaptee() const
 {
     return adaptee_;
 }
@@ -137,11 +104,6 @@ ConnectorWeakPtr Port::getAdaptee() const
 
 void Port::paintEvent(QPaintEvent *e)
 {
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return;
-    }
-
     if(refresh_style_sheet_) {
         refresh_style_sheet_ = false;
         setStyleSheet(styleSheet());
@@ -152,17 +114,6 @@ void Port::paintEvent(QPaintEvent *e)
 void Port::refreshStylesheet()
 {
     refresh_style_sheet_ = true;
-}
-
-void Port::setError(bool error, const std::string& msg)
-{
-    setError(error, msg, static_cast<int>(ErrorState::ErrorLevel::ERROR));
-}
-
-void Port::setError(bool error, const std::string& /*msg*/, int /*level*/)
-{
-    setProperty("error", error);
-    refreshStylesheet();
 }
 
 void Port::setMinimizedSize(bool mini)
@@ -199,11 +150,9 @@ bool Port::isHovered() const
 void Port::setEnabledFlag(bool processing_enabled)
 {
     bool enabled = processing_enabled;
-    if(ConnectorPtr adaptee = adaptee_.lock()) {
-        if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(adaptee)) {
-            if(slot->isActive()) {
-                enabled = true;
-            }
+    if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(adaptee_)) {
+        if(slot->isActive()) {
+            enabled = true;
         }
     }
     setPortProperty("enabled", enabled);
@@ -219,53 +168,14 @@ void Port::setPortProperty(const std::string& name, bool b)
 
 void Port::createToolTip()
 {
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return;
-    }
+    std::string tooltip = adaptee_->makeStatusString();
 
-    std::stringstream tooltip;
-    tooltip << "UUID: " << adaptee->getUUID();
-    tooltip << ", Type: " << adaptee->getType()->descriptiveName();
-    if(InputPtr i = std::dynamic_pointer_cast<Input>(adaptee)) {
-        if(TokenPtr token = i->getToken()) {
-            tooltip << ", Last Message Type: " << token->getTokenData()->descriptiveName();
-        }
-    }
-    tooltip << ", Connections: " << adaptee->getConnections().size();
-    tooltip << ", Messages: " << adaptee->getCount();
-    tooltip << ", Enabled: " << adaptee->isEnabled();
-    tooltip << ", #: " << adaptee->sequenceNumber();
-    tooltip << ", use_count: " << adaptee.use_count() - 1; // -1 for the local variable
-
-    if(InputPtr in = std::dynamic_pointer_cast<Input>(adaptee)) {
-        tooltip << ", optional: " << in->isOptional();
-
-    }
-    if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(adaptee)) {
-        tooltip << ", asynchronous: " << slot->isAsynchronous();
-    }
-
-    if(OutputPtr out = std::dynamic_pointer_cast<Output>(adaptee)) {
-        tooltip << ", state: ";
-        switch(out->getState()) {
-        case Output::State::ACTIVE:
-            tooltip << "ACTIVE";
-            break;
-        case Output::State::IDLE:
-            tooltip << "IDLE";
-            break;
-        default:
-            tooltip << "UNKNOWN";
-        }
-    }
-    setToolTip(tooltip.str().c_str());
+    setToolTip(QString::fromStdString(tooltip));
 }
 
 void Port::startDrag()
 {
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
+    if(!adaptee_) {
         return;
     }
 
@@ -274,11 +184,9 @@ void Port::startDrag()
     bool left = (buttons_down_ & Qt::LeftButton) != 0;
     bool right = (buttons_down_ & Qt::RightButton) != 0;
 
-    bool full_input = (adaptee->isInput() && adaptee->isConnected());
+    bool full_input = (adaptee_->isInput() && adaptee_->isConnected());
     bool create = left && !full_input;
-    bool move = (right && adaptee->isConnected()) || (left && full_input);
-
-    adaptee->connectionStart(adaptee);
+    bool move = (right && adaptee_->isConnected()) || (left && full_input);
 
     if(create || move) {
         QDrag* drag = new QDrag(this);
@@ -286,7 +194,7 @@ void Port::startDrag()
 
         if(move) {
             mimeData->setData(QString::fromStdString(csapex::mime::connection_move), QByteArray());
-            mimeData->setProperty("Connector", qVariantFromValue(adaptee));
+            mimeData->setProperty("Connector", qVariantFromValue(adaptee_));
 
             drag->setMimeData(mimeData);
 
@@ -294,14 +202,14 @@ void Port::startDrag()
 
         } else {
             mimeData->setData(QString::fromStdString(csapex::mime::connection_create), QByteArray());
-            mimeData->setProperty("Connector", qVariantFromValue(adaptee));
+            mimeData->setProperty("Connector", qVariantFromValue(adaptee_));
 
             drag->setMimeData(mimeData);
 
             drag->exec();
         }
 
-        adaptee->connection_added_to(adaptee);
+//        adaptee_->connection_added_to(adaptee_);
         buttons_down_ = Qt::NoButton;
     }
 }
@@ -319,19 +227,19 @@ void Port::mouseMoveEvent(QMouseEvent* e)
 
 void Port::mouseDoubleClickEvent(QMouseEvent *e)
 {
+    if(!adaptee_) {
+        return;
+    }
+
     e->accept();
 
     double_click_timer_->stop();
 
-    auto adaptee = adaptee_.lock();
-
-    if(adaptee) {
-        bool ok = false;
-        QString label = QInputDialog::getText(QApplication::activeWindow(), "Rename Port", "Enter a new name",
-                                              QLineEdit::Normal, QString::fromStdString(adaptee->getLabel()), &ok);
-        if(ok) {
-            changePortRequest(label);
-        }
+    bool ok = false;
+    QString label = QInputDialog::getText(QApplication::activeWindow(), "Rename Port", "Enter a new name",
+                                          QLineEdit::Normal, QString::fromStdString(adaptee_->getLabel()), &ok);
+    if(ok) {
+        changePortRequest(label);
     }
     buttons_down_ = e->buttons();
 }
@@ -358,26 +266,25 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
 
 void Port::dragEnterEvent(QDragEnterEvent* e)
 {
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return;
-    }
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-        if(from == adaptee) {
+        if(from == adaptee_) {
             return;
         }
 
-        if(from->canConnectTo(adaptee.get(), false)) {
-            if(adaptee->canConnectTo(from.get(), false)) {
-                adaptee->connectionInProgress(adaptee, from);
-                e->acceptProposedAction();
-            }
+        bool compatible = Connection::isCompatibleWith(from.get(), adaptee_.get()) &&
+                Connection::isCompatibleWith(adaptee_.get(), from.get());
+
+        bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
+        if(compatible || shift) {
+            addConnectionPreview(from);
+            e->acceptProposedAction();
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectorPtr original = e->mimeData()->property("Connector").value<ConnectorPtr>();
+        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
 
-        if(original->targetsCanBeMovedTo(adaptee.get())) {
+        if(Connection::targetsCanBeMovedTo(from.get(), adaptee_.get())) {
+            moveConnectionPreview(from);
             e->acceptProposedAction();
         }
     }
@@ -385,31 +292,19 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 
 void Port::dragMoveEvent(QDragMoveEvent* e)
 {
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return;
-    }
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         e->acceptProposedAction();
 
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-
-        from->connectionMovePreview(adaptee);
-
         e->acceptProposedAction();
     }
 }
 
 void Port::dropEvent(QDropEvent* e)
 {
-    ConnectorPtr adaptee = adaptee_.lock();
-    if(!adaptee) {
-        return;
-    }
     if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-        if(from && from != adaptee) {
+        if(from && from != adaptee_) {
             addConnectionRequest(from);
         }
     } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {

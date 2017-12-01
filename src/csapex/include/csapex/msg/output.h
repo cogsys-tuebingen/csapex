@@ -29,19 +29,16 @@ public:
     void setOutputTransition(OutputTransition* ot);
     void removeOutputTransition();
 
-    virtual void removeConnection(Connector* other_side) override;
+    virtual void removeConnection(Connectable* other_side) override;
 
     void notifyMessageProcessed();
     void notifyMessageProcessed(Connection *connection);
 
-    virtual bool canOutput() const override
-    {
-        return true;
-    }
     virtual bool isOutput() const override
     {
         return true;
     }
+
     virtual ConnectorType getConnectorType() const override
     {
         return ConnectorType::OUTPUT;
@@ -63,11 +60,7 @@ public:
     virtual TokenPtr getToken() const = 0;
     virtual TokenPtr getAddedToken() = 0;
 
-    virtual bool targetsCanBeMovedTo(Connector *other_side) const override;
     virtual bool isConnected() const override;
-
-    virtual void connectionMovePreview(ConnectorPtr other_side) override;
-    virtual void validateConnections() override;
 
     std::vector<ConnectionPtr> getConnections() const;
 
@@ -77,12 +70,13 @@ public:
     virtual void reset() override;
     virtual void clearBuffer() = 0;
 
-    virtual bool isConnectionPossible(Connector *other_side) override;
     virtual void removeAllConnectionsNotUndoable() override;
 
 public:
     slim_signal::Signal<void(Connectable*)> messageSent;
 
+protected:
+    virtual void addStatusInformation(std::stringstream& status_stream) const override;
 
 protected:
     OutputTransition* transition_;

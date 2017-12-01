@@ -2,27 +2,28 @@
 #include <csapex/command/ungroup_nodes.h>
 
 /// COMPONENT
+#include <csapex/command/add_connection.h>
+#include <csapex/command/add_node.h>
+#include <csapex/command/add_variadic_connector.h>
+#include <csapex/command/command_factory.h>
 #include <csapex/command/command.h>
-#include <csapex/model/subgraph_node.h>
+#include <csapex/command/command_serializer.h>
+#include <csapex/command/delete_node.h>
+#include <csapex/command/paste_graph.h>
+#include <csapex/core/graphio.h>
+#include <csapex/model/connection.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
-#include <csapex/command/delete_node.h>
-#include <csapex/command/add_node.h>
-#include <csapex/command/paste_graph.h>
-#include <csapex/command/command_factory.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/scheduling/thread_pool.h>
+#include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
+#include <csapex/scheduling/thread_pool.h>
+#include <csapex/serialization/serialization_buffer.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
-#include <csapex/model/connection.h>
-#include <csapex/core/graphio.h>
-#include <csapex/command/add_variadic_connector.h>
-#include <csapex/command/add_connection.h>
 #include <csapex/utility/assert.h>
-#include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -45,18 +46,20 @@ std::string UngroupNodes::getDescription() const
 
 bool UngroupNodes::doExecute()
 {
-    GraphPtr graph = getGraph();
+    GraphImplementationPtr graph = std::dynamic_pointer_cast<GraphImplementation>(getGraph());
+    apex_assert_hard(graph);
 
     NodeHandle* nh = graph->findNodeHandle(uuid);
     subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
 
     apex_assert_hard(subgraph);
 
-    setNodes(subgraph->getGraph()->getAllNodeHandles());
+    setNodes(subgraph->getLocalGraph()->getAllNodeHandles());
     analyzeConnections(subgraph->getGraph().get());
 
     {
-        GraphIO io(subgraph, getNodeFactory());
+        GraphFacadeImplementationPtr g = root_graph_facade_->getLocalSubGraph(nh->getUUID());
+        GraphIO io(*g, getNodeFactory());
         io.setIgnoreForwardingConnections(true);
         serialized_snippet_ = io.saveGraph();
     }
@@ -191,7 +194,7 @@ void UngroupNodes::serialize(SerializationBuffer &data) const
     data << uuid;
 }
 
-void UngroupNodes::deserialize(SerializationBuffer& data)
+void UngroupNodes::deserialize(const SerializationBuffer& data)
 {
     GroupBase::deserialize(data);
 

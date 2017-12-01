@@ -52,6 +52,10 @@ public:
 
 public:
     UUID();
+    UUID(const UUID& other);
+    virtual ~UUID();
+
+    UUID& operator = (const UUID& other);
 
     void free();
 
@@ -64,6 +68,9 @@ public:
     UUID nestedUUID() const;
     UUID rootUUID() const;
 
+    UUID reshape(std::size_t depth) const;
+    UUID reshapeSoft(std::size_t max_depth) const;
+
     bool contains(const std::string& sub) const;
 
     UUID parentUUID() const;
@@ -73,15 +80,20 @@ public:
     std::string type() const;
 
     bool empty() const;
+    std::size_t depth() const;
 
     bool global() const;
     std::string globalName() const;
 
-    AUUID getAbsoluteUUID() const;
+    virtual AUUID getAbsoluteUUID() const;
+
+    bool hasParent() const;
+    std::shared_ptr<UUIDProvider> getParent() const;
 
 private:
     explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::string& representation);
     explicit UUID(std::weak_ptr<UUIDProvider> parent, const std::vector<std::string>& representation);
+    explicit UUID(std::weak_ptr<UUIDProvider> parent, const UUID& representation);
 
 protected:
     std::weak_ptr<UUIDProvider> parent_;
@@ -94,6 +106,9 @@ protected:
 class CSAPEX_UTILS_EXPORT AUUID : public UUID
 {
 public:
+    static AUUID NONE;
+
+public:
     AUUID() = default;
     AUUID(const AUUID& uuid) = default;
     explicit AUUID(const UUID& uuid);
@@ -103,6 +118,8 @@ public:
     AUUID& operator = (const AUUID& uuid) = default;
     AUUID& operator = (const UUID& uuid);
 
+
+    virtual AUUID getAbsoluteUUID() const;
 
     bool operator < (const AUUID& rhs) const;
 

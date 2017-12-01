@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/command/command.h>
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/command_serializer.h>
@@ -76,7 +76,7 @@ void Minimize::serialize(SerializationBuffer &data) const
     data << executed;
 }
 
-void Minimize::deserialize(SerializationBuffer& data)
+void Minimize::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

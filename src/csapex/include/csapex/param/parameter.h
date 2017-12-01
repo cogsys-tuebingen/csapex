@@ -6,7 +6,7 @@
 #include <csapex/param/parameter_description.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_param_export.h>
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 
 /// SYSTEM
 #include <memory>
@@ -26,7 +26,7 @@ class any;
 namespace csapex {
 namespace param {
 
-class CSAPEX_PARAM_EXPORT Parameter : public Serializable
+class CSAPEX_PARAM_EXPORT Parameter : public Streamable
 {
 public:
     friend class ParameterFactory;
@@ -57,7 +57,7 @@ public:
     virtual uint8_t getPacketType() const override;
 
     virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(SerializationBuffer& data) override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     void setValueFrom(const Parameter& other);
     void cloneFrom(const Parameter& other);

@@ -49,9 +49,16 @@ void GenericState::writeYaml(YAML::Node& out) const {
 
 void GenericState::readYaml(const YAML::Node& node) {
     if(node["params"].IsDefined()) {
-        params = node["params"].as<std::map<std::string, csapex::param::Parameter::Ptr> >();
-        for(auto pair : params) {
+        auto serialized_params = node["params"].as<std::map<std::string, csapex::param::Parameter::Ptr> >();
+        for(auto pair : serialized_params) {
             apex_assert_hard(pair.first == pair.second->name());
+            auto pos = params.find(pair.first);
+            if(pos == params.end()) {
+                params[pair.first] = pair.second;
+            } else {
+                param::ParameterPtr p = pos->second;
+                p->setValueFrom(*pair.second);
+            }
             legacy.insert(pair.first);
         }
     }

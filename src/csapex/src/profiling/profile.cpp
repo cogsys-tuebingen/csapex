@@ -6,9 +6,11 @@ using namespace csapex;
 
 Profile::Profile(const std::string& key, int timer_history_length, bool enabled)
     : timer(std::make_shared<Timer>(key, enabled)),
+      timer_history_length(timer_history_length),
       timer_history_pos_(0),
       count_(0)
 {
+    apex_assert_hard(timer_history_length > 0);
     timer_history_.resize(timer_history_length);
     apex_assert_hard((int) timer_history_.size() == timer_history_length);
     apex_assert_hard((int) timer_history_.capacity() == timer_history_length);
@@ -60,4 +62,20 @@ ProfilerStats Profile::getStats(const std::string& name) const
     res.mean = boost::accumulators::mean(steps_acc_.at(name));
     res.stddev = std::sqrt(boost::accumulators::variance(steps_acc_.at(name)));
     return res;
+}
+
+void Profile::addInterval(Interval::Ptr interval)
+{
+    timer_history_[timer_history_pos_] = interval;
+
+    if(++timer_history_pos_ >= (int) timer_history_.size()) {
+        timer_history_pos_ = 0;
+    }
+
+    std::vector<std::pair<std::string, double> > entries;
+    interval->entries(entries);
+    for(const auto& it : entries) {
+        steps_acc_[it.first](it.second);
+    }
+    ++count_;
 }

@@ -3,18 +3,20 @@
 
 /// PROJECT
 #include <csapex/core/csapex_core.h>
-#include <csapex/core/settings/settings_local.h>
+#include <csapex/core/settings/settings_impl.h>
+#include <csapex/io/server.h>
+#include <csapex/io/session_client.h>
+#include <csapex/model/graph_facade_impl.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/error_handling.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
-#include <csapex/view/csapex_view_core_local.h>
-#include <csapex/view/csapex_view_core_remote.h>
+#include <csapex/view/csapex_view_core_impl.h>
+#include <csapex/view/csapex_view_core_proxy.h>
 #include <csapex/view/csapex_window.h>
 #include <csapex/view/gui_exception_handler.h>
-#include <csapex/io/server.h>
-#include <csapex/model/graph_facade.h>
+#include <csapex/io/tcp_server.h>
 
 /// SYSTEM
 #include <iostream>
@@ -92,13 +94,31 @@ int Main::runWithGui()
 {
     app->processEvents();
 
-    CsApexViewCoreLocal view_core(core);
-//    CsApexViewCoreRemote view_core("localhost", 12345, core);
+    std::unique_ptr<CsApexViewCore> main(new CsApexViewCoreImplementation (core));
+
+    CsApexViewCore& view_core = *main;
 
     CsApexWindow w(view_core);
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
-    app->connect(&w, &CsApexWindow::closed, app.get(), &QCoreApplication::quit);
+    app->connect(&w, &CsApexWindow::closed, [&]() {
+        try {
+            bool headless = settings.get<bool>("headless");
+            if(!headless) {
+                int r = QMessageBox::warning(&w, tr("cs::APEX"),
+                                             tr("Do you want to stop the server?"),
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                if(r == QMessageBox::Yes) {
+                    view_core.shutdown();
+                }
+            }
+        } catch(const std::exception& e) {
+            std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
+        } catch(...) {
+            throw;
+        }
+        app->quit();
+    });
     app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
     csapex::error_handling::stop_request().connect([this](){
@@ -111,11 +131,6 @@ int Main::runWithGui()
         }
 
         ++request;
-    });
-
-    core->shutdown_requested.connect([this](){
-        QCoreApplication::postEvent(app.get(), new QCloseEvent);
-        app->quit();
     });
 
     checkRecoveryFile(view_core, w);
@@ -138,6 +153,7 @@ int Main::runWithGui()
 int Main::runHeadless()
 {
     GraphFacadePtr root = core->getRoot();
+
     csapex::error_handling::stop_request().connect([this, root](){
         core->shutdown();
         app->quit();
@@ -167,12 +183,19 @@ int Main::run()
 
     core = std::make_shared<CsApexCore>(settings, handler);
 
-    try {
-        server = std::make_shared<Server>(core);
-        server->start();
-    } catch (const boost::system::system_error& ex) {
-        std::cerr << "Could not start command server: [" << ex.code() << "] " << ex.what() << std::endl;
+    core->setServerFactory([this](){
+        return std::make_shared<TcpServer>(*core, true);
+    });
+
+    if(settings.getTemporary("start-server", false)) {
+        core->startServer();
     }
+
+    core->shutdown_requested.connect([this](){
+        QCoreApplication::postEvent(app.get(), new QCloseEvent);
+        app->quit();
+    });
+
 
     if(headless) {
         return runHeadless();
@@ -246,7 +269,7 @@ void Main::showMessage(const QString& msg)
 
 int main(int argc, char** argv)
 {
-    SettingsLocal settings;
+    SettingsImplementation settings;
 
     int effective_argc = argc;
     std::string path_to_bin(argv[0]);
@@ -262,6 +285,8 @@ int main(int argc, char** argv)
             ("fatal_exceptions", "abort execution on exception")
             ("disable_thread_grouping", "by default create one thread per node")
             ("input", "config file to load")
+            ("start-server", "start tcp server")
+            ("port", po::value<int>()->default_value(42123), "tcp server port")
             ;
 
     po::positional_options_description p;
@@ -378,8 +403,8 @@ int main(int argc, char** argv)
     settings.set("thread_grouping", vm.count("disable_thread_grouping") == 0);
     settings.set("additional_args", additional_args);
     settings.set("initially_paused", vm.count("paused") > 0);
-
-    settings.set("access-test", std::string("access granted."));
+    settings.set("start-server", vm.count("start-server") > 0);
+    settings.set("port", vm["port"].as<int>());
 
     // start the app
     Main m(std::move(app), settings, *handler);

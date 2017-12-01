@@ -6,6 +6,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/yaml_io.hpp>
 #include <csapex/model/generic_state.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <iostream>
@@ -35,7 +36,22 @@ NodeState::NodeState(const NodeHandle *parent)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
+        if(NodePtr node = parent->getNode().lock()) {
+            parameter_state = node->getParameterState();
+        } else {
+            apex_fail("cannot get node in node state");
+        }
+
+    } else {
+        parameter_state = std::make_shared<GenericState>();
     }
+
+}
+
+NodeState::NodeState()
+    : NodeState(nullptr)
+{
+
 }
 
 NodeState::~NodeState()
@@ -63,6 +79,8 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     logger_level_ = rhs.logger_level_;
 
     dictionary = rhs.dictionary;
+
+    parameter_state->setFrom(*rhs.parameter_state);
 
     // then trigger the signals
     (*max_frequency_changed)();
@@ -218,14 +236,14 @@ void NodeState::setFlipped(bool value)
         (*flipped_changed)();
     }
 }
-Memento::Ptr NodeState::getParameterState() const
+GenericStatePtr NodeState::getParameterState() const
 {
-    return child_state_;
+    return parameter_state;
 }
 
-void NodeState::setParameterState(const Memento::Ptr &value)
+void NodeState::setParameterState(const GenericStatePtr &value)
 {
-    child_state_ = value;
+    *parameter_state = *value;
 }
 
 const NodeHandle *NodeState::getParent() const
@@ -338,26 +356,12 @@ void NodeState::writeYaml(YAML::Node &out) const
     }
 
     try {
-        if(parent_) {
-            auto node = parent_->getNode().lock();
-            if(node) {
-                child_state_ = node->getParameterStateClone();
-            }
-        }
+        YAML::Node sub_node;
+        parameter_state->writeYaml(sub_node);
+        out["state"] = sub_node;
     } catch(const std::exception& e) {
-        std::cerr << "cannot clone child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
+        std::cerr << "cannot save child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
         throw e;
-    }
-
-    if(child_state_.get()) {
-        try {
-            YAML::Node sub_node;
-            child_state_->writeYaml(sub_node);
-            out["state"] = sub_node;
-        } catch(const std::exception& e) {
-            std::cerr << "cannot save child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
-            throw e;
-        }
     }
 }
 
@@ -449,11 +453,76 @@ void NodeState::readYaml(const YAML::Node &node)
         if(!node) {
             return;
         }
-        child_state_ = node->getParameterStateClone();
 
-        if(child_state_) {
-            child_state_->readYaml(state_map);
-        }
+        parameter_state->readYaml(state_map);
+    }
+}
+
+
+void NodeState::serialize(SerializationBuffer &data) const
+{
+    data << max_frequency_;
+
+    data << label_;
+    data << pos_.x << pos_.y;
+    data << z_;
+
+    data << minimized_;
+    data << muted_;
+    data << enabled_;
+    data << active_;
+    data << flipped_;
+
+    data << logger_level_;
+
+    data << thread_id_;
+    data << thread_name_;
+
+    data << r_;
+    data << g_;
+    data << b_;
+
+    data << dictionary;
+
+    data << exec_mode_;
+
+    YAML::Node yaml;
+    parameter_state->writeYaml(yaml);
+    data << yaml;
+}
+
+void NodeState::deserialize(const SerializationBuffer& data)
+{
+    data >> max_frequency_;
+
+    data >> label_;
+    data >> pos_.x >> pos_.y;
+    data >> z_;
+
+    data >> minimized_;
+    data >> muted_;
+    data >> enabled_;
+    data >> active_;
+    data >> flipped_;
+
+    data >> logger_level_;
+
+    data >> thread_id_;
+    data >> thread_name_;
+
+    data >> r_;
+    data >> g_;
+    data >> b_;
+
+    data >> dictionary;
+
+    data >> exec_mode_;
+
+    YAML::Node yaml;
+    data >> yaml;
+
+    if(yaml.IsDefined()) {
+        parameter_state->readYaml(yaml);
     }
 }
 
@@ -491,4 +560,9 @@ template double NodeState::getDictionaryEntry<double>(const std::string&) const;
 template bool NodeState::getDictionaryEntry<bool>(const std::string&) const;
 template std::string NodeState::getDictionaryEntry<std::string>(const std::string&) const;
 template std::vector<std::string> NodeState::getDictionaryEntry<std::vector<std::string>>(const std::string&) const;
+}
+
+std::shared_ptr<Clonable> NodeState::makeEmptyClone() const
+{
+    return std::shared_ptr<NodeState>(new NodeState(nullptr));
 }

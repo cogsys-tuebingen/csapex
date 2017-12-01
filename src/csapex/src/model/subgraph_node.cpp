@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
-#include <csapex/model/graph/graph_local.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/signal/slot.h>
 #include <csapex/signal/event.h>
 #include <csapex/model/node.h>
@@ -17,15 +17,21 @@
 #include <csapex/utility/debug.h>
 #include <csapex/model/node_worker.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
-SubgraphNode::SubgraphNode(GraphLocalPtr graph)
+SubgraphNode::SubgraphNode(GraphImplementationPtr graph)
     : graph_(graph),
       transition_relay_in_(new InputTransition),
       transition_relay_out_(new OutputTransition),
       is_subgraph_finished_(false),
       is_iterating_(false), has_sent_current_iteration_(false),
       is_initialized_(false),
+
+      activation_event_(nullptr),
+      deactivation_event_(nullptr),
 
       guard_(-1)
 {
@@ -43,46 +49,23 @@ GraphPtr SubgraphNode::getGraph() const
     return graph_;
 }
 
-//NodeHandle* SubgraphNode::findNodeHandle(const UUID& uuid) const
-//{
-//    apex_assert_hard(guard_ == -1);
-//    if(uuid.empty()) {
-//        apex_assert_hard(node_handle_);
-//        apex_assert_hard(node_handle_->guard_ == -1);
-//        return node_handle_.get();
-//    }
-//    return GraphLocal::findNodeHandle(uuid);
-//}
-
-//NodeHandle *SubgraphNode::findNodeHandleNoThrow(const UUID& uuid) const noexcept
-//{
-//    if(uuid.empty()) {
-//        return node_handle_.get();
-//    }
-//    return GraphLocal::findNodeHandleNoThrow(uuid);
-//}
-
-//ConnectablePtr SubgraphNode::findConnectorNoThrow(const UUID &uuid) noexcept
-//{
-//    if(internal_slots_.find(uuid) != internal_slots_.end()) {
-//        return internal_slots_.at(uuid);
-//    }
-//    if(internal_events_.find(uuid) != internal_events_.end()) {
-//        return internal_events_.at(uuid);
-//    }
-
-//    return GraphLocal::findConnectorNoThrow(uuid);
-//}
+GraphImplementationPtr SubgraphNode::getLocalGraph() const
+{
+    return graph_;
+}
 
 void SubgraphNode::initialize(NodeHandlePtr node_handle)
 {
     Node::initialize(node_handle);
 
-    graph_->setNodeHandle(node_handle.get());
-
     if(node_handle->getUUIDProvider()) {
         graph_->setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
     }
+}
+
+void SubgraphNode::setNodeFacade(csapex::NodeFacadeImplementationPtr graph_node_facade)
+{
+    graph_->setNodeFacade(graph_node_facade);
 }
 
 void SubgraphNode::detach()
@@ -276,8 +259,6 @@ InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const 
 
     transition_relay_in_->addInput(input);
 
-    input->connectionInProgress.connect(internalConnectionInProgress);
-
     return input;
 }
 
@@ -285,7 +266,7 @@ InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const 
 void SubgraphNode::removeVariadicInput(InputPtr input)
 {
     OutputPtr relay = external_to_internal_outputs_[input->getUUID()];
-    forwardingRemoved(relay);
+    forwarding_connector_removed(relay);
 
     VariadicInputs::removeVariadicInput(input);
 
@@ -318,7 +299,7 @@ UUID  SubgraphNode::addForwardingInput(const UUID& internal_uuid, const TokenDat
 
     relay_to_external_input_[internal_uuid] = external_input->getUUID();
 
-    forwardingAdded(relay);
+    forwarding_connector_added(relay);
 
     std::map<std::string, int> possibly_iterated_inputs;
     for(auto& pair : iterated_inputs_param_->getBitSet()) {
@@ -348,15 +329,13 @@ OutputPtr SubgraphNode::createInternalOutput(const TokenDataConstPtr& type, cons
 
     transition_relay_out_->addOutput(output);
 
-    output->connectionInProgress.connect(internalConnectionInProgress);
-
     return output;
 }
 
 void SubgraphNode::removeVariadicOutput(OutputPtr output)
 {
     InputPtr relay = external_to_internal_inputs_[output->getUUID()];
-    forwardingRemoved(relay);
+    forwarding_connector_removed(relay);
 
     relay->message_set.disconnectAll();
 
@@ -415,7 +394,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
 
     relay_to_external_output_[internal_uuid] = external_output->getUUID();
 
-    forwardingAdded(relay);
+    forwarding_connector_added(relay);
 
     return external_output->getUUID();
 }
@@ -428,15 +407,13 @@ SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UU
     slot->setGraphPort(true);
     slot->setEssential(true);
 
-    slot->connectionInProgress.connect(internalConnectionInProgress);
-
     internal_slots_[internal_uuid] = slot;
     internal_slot_ids_.push_back(slot->getUUID());
 
     return slot;
 }
 
-Slot* SubgraphNode::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> /*callback*/, bool /*active*/, bool /*asynchronous*/)
+Slot* SubgraphNode::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> /*callback*/, bool /*active*/, bool /*blocking*/)
 {
     auto pair = addForwardingSlot(type, label);
     return node_handle_->getSlot(pair.external).get();
@@ -454,7 +431,7 @@ void SubgraphNode::removeVariadicSlot(SlotPtr slot)
         internal_event_ids_.erase(it);
     }
 
-    forwardingRemoved(relay);
+    forwarding_connector_removed(relay);
 
     VariadicSlots::removeVariadicSlot(slot);
 
@@ -480,7 +457,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
         relay->message_processed(relay);
     };
 
-    Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb, false, true);
+    Slot* external_slot = VariadicSlots::createVariadicSlot(type, label, cb, false, false);
 
     relay->message_processed.connect(std::bind(&Slot::notifyEventHandled, external_slot));
 
@@ -490,7 +467,7 @@ UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataC
 
     relay_to_external_slot_[internal_uuid] = external_slot->getUUID();
 
-    forwardingAdded(relay);
+    forwarding_connector_added(relay);
 
     return external_slot->getUUID();
 }
@@ -500,8 +477,6 @@ EventPtr SubgraphNode::createInternalEvent(const TokenDataConstPtr& type, const 
     EventPtr event = node_handle_->addInternalEvent(type, internal_uuid, label);
     event->setGraphPort(true);
     event->setEssential(true);
-
-    event->connectionInProgress.connect(internalConnectionInProgress);
 
     internal_events_[internal_uuid] = event;
 
@@ -532,7 +507,7 @@ void SubgraphNode::removeVariadicEvent(EventPtr event)
         internal_slot_ids_.erase(it);
     }
 
-    forwardingRemoved(relay);
+    forwarding_connector_removed(relay);
 
     VariadicEvents::removeVariadicEvent(event);
 
@@ -571,7 +546,7 @@ UUID SubgraphNode::addForwardingEvent(const UUID& internal_uuid, const TokenData
 
     relay_to_external_event_[internal_uuid] = external_event->getUUID();
 
-    forwardingAdded(relay);
+    forwarding_connector_added(relay);
 
     return external_event->getUUID();
 }
@@ -683,27 +658,41 @@ std::vector<UUID> SubgraphNode::getInternalEvents() const
 void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool enabled)
 {
     if(enabled) {
+        // only one iteration is allowed for now
+        apex_assert_eq(0, iterated_inputs_.size());
+
         iterated_inputs_.insert(external_input_uuid);
         InputPtr i = node_handle_->getInput(external_input_uuid);
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
+        // change the output type of the subgraph
         TokenDataConstPtr vector_type = i->getType();
         if(vector_type->isContainer()) {
             o->setType(vector_type->nestedType());
         }
 
+        // change the input type of the subgraph
+        for(const UUID& id: transition_relay_in_->getInputs()) {
+            InputPtr i = transition_relay_in_->getInput(id);
+
+            TokenDataConstPtr type = i->getType();
+
+            original_types_[id] = type;
+
+            if(auto vector = std::dynamic_pointer_cast<const connection_types::GenericVectorMessage>(type)) {
+                i->setType(vector->nestedType());
+            }
+        }
+
     } else {
         iterated_inputs_.erase(external_input_uuid);
-    }
-}
 
-void SubgraphNode::removeInternalPorts()
-{
-    node_handle_->removeInternalPorts();
-    internal_events_.clear();
-    internal_event_ids_.clear();
-    internal_slots_.clear();
-    internal_slot_ids_.clear();
+        // change back the input type of the subgraph
+        for(const UUID& id: transition_relay_in_->getInputs()) {
+            InputPtr i = transition_relay_in_->getInput(id);
+            i->setType(original_types_[id]);
+        }
+    }
 }
 
 void SubgraphNode::notifyMessagesProcessed()

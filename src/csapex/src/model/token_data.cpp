@@ -17,6 +17,11 @@ TokenData::TokenData(const std::string& type_name)
     setDescriptiveName(type_name);
 }
 
+TokenData::TokenData(const std::string& type_name, const std::string& descriptive_name)
+    : type_name_(type_name), descriptive_name_(descriptive_name)
+{
+}
+
 TokenData::~TokenData()
 {
 }

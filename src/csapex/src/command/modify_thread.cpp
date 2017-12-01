@@ -51,8 +51,6 @@ ThreadGroup* ModifyThread::getGroup()
     {
     case ThreadGroup::PRIVATE_THREAD:
         throw std::runtime_error("cannot get private groups");
-    case ThreadGroup::DEFAULT_GROUP_ID:
-        return getRootThreadPool()->getDefaultGroup();
     default:
         return getRootThreadPool()->getGroup(id);
     }
@@ -119,7 +117,7 @@ void ModifyThread::serialize(SerializationBuffer &data) const
     data << affinity;
 }
 
-void ModifyThread::deserialize(SerializationBuffer& data)
+void ModifyThread::deserialize(const SerializationBuffer& data)
 {
     Command::deserialize(data);
 

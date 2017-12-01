@@ -50,34 +50,43 @@ bool NodeAdapterFactory::hasAdapter(const std::string &type) const
     return false;
 }
 
-NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node, NodeBox* parent)
+NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node_facade, NodeBox* parent)
 {
-    std::string type = node->getType();
+    std::string type = node_facade->getType();
     if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
-        auto builder = node_adapter_builders_[type];
+        auto& builder = node_adapter_builders_[type];
         if(builder) {
-            return builder->build(node, parent);
+            return builder->build(node_facade, parent);
         }
 
     } else {
         try {
-            const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(type + "AdapterBuilder");
-            if(constructor) {
+            std::string name = type + "AdapterBuilder";
+            if(!node_facade->isProxy()) {
+                std::string direct_name = type + "DirectAdapterBuilder";
+                if(node_adapter_manager_->hasConstructor(direct_name)) {
+                    name = direct_name;
+                }
+            }
+
+
+            if(node_adapter_manager_->hasConstructor(name)) {
+                const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(name);
+
                 auto builder = constructor->construct();
                 if(builder->getWrappedType() == type) {
                     node_adapter_builders_[type] = builder;
-                    return builder->build(node, parent);
+                    return builder->build(node_facade, parent);
                 }
-            } else {
-                node_adapter_builders_[type] = nullptr;
             }
+            node_adapter_builders_[type] = nullptr;
 
         } catch(const std::exception& e) {
             std::cerr << "adapter " << type << " cannot be built: " << e.what() << std::endl;
         }
     }
 
-    return NodeAdapter::Ptr(new DefaultNodeAdapter(node, parent));
+    return NodeAdapter::Ptr(new DefaultNodeAdapter(node_facade, parent));
 }
 
 void NodeAdapterFactory::loadPlugins()

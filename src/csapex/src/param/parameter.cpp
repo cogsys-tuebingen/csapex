@@ -43,18 +43,41 @@ uint8_t Parameter::getPacketType() const
 
 void Parameter::serialize(SerializationBuffer &data) const
 {
+    data << name_;
     data << uuid_;
+
+    data << description_.toString();
+
+    data << enabled_;
+    data << temporary_;
+    data << hidden_;
+    data << interactive_;
+    data << dict_;
+
 }
 
-void Parameter::deserialize(SerializationBuffer& data)
+void Parameter::deserialize(const SerializationBuffer& data)
 {
+    data >> name_;
     data >> uuid_;
+
+    std::string description;
+    data >> description;
+    description_ = ParameterDescription(description);
+
+    data >> enabled_;
+    data >> temporary_;
+    data >> hidden_;
+    data >> interactive_;
+    data >> dict_;
 }
 
 void Parameter::setUUID(const UUID& uuid)
 {
     if(uuid.global()) {
         apex_assert_hard(!uuid.globalName().empty());
+    } else {
+        apex_assert_soft(uuid.hasParent() || uuid.empty());
     }
     uuid_ = uuid;
 }

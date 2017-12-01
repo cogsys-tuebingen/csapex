@@ -1,9 +1,15 @@
 /// HEADER
 #include <csapex/param/output_text_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(OutputTextParameter)
 
 using namespace csapex;
 using namespace param;
@@ -87,5 +93,21 @@ void OutputTextParameter::doClone(const Parameter& other)
     } else {
         throw std::runtime_error("bad clone, invalid types");
     }
+}
+
+
+
+void OutputTextParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << text_;
+}
+
+void OutputTextParameter::deserialize(const SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> text_;
 }
 

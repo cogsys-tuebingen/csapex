@@ -2,7 +2,7 @@
 #include <csapex/command/group_base.h>
 
 /// PROJECT
-#include <csapex/model/graph.h>
+#include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/msg/input.h>
@@ -47,8 +47,11 @@ Point GroupBase::findTopLeftPoint() const
 
 
 
-void GroupBase::analyzeConnections(Graph* graph)
+void GroupBase::analyzeConnections(Graph* graph_i)
 {
+    GraphImplementation* graph = dynamic_cast<GraphImplementation*>(graph_i);
+    apex_assert_hard(graph);
+
     connections_going_in.clear();
     connections_going_out.clear();
     signals_going_in.clear();
@@ -63,7 +66,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 NodeHandle* source = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c(output.get(), input.get(), output->getType(), connection->isActive());
+                ConnectionInformation c = connection->getDescription();
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     connections_going_in.push_back(c);
@@ -80,7 +83,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c(output.get(), input.get(), input->getType(), connection->isActive());
+                    ConnectionInformation c = connection->getDescription();
                     connections_going_out.push_back(c);
                 }
             }
@@ -96,7 +99,7 @@ void GroupBase::analyzeConnections(Graph* graph)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c(output.get(), slot.get(), output->getType(), connection->isActive());
+                    ConnectionInformation c = connection->getDescription();
                     signals_going_in.push_back(c);
                 }
             }
@@ -109,7 +112,7 @@ void GroupBase::analyzeConnections(Graph* graph)
                 NodeHandle* source = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c(trigger.get(), input.get(), input->getType(), connection->isActive());
+                ConnectionInformation c = connection->getDescription();
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     signals_going_out.push_back(c);

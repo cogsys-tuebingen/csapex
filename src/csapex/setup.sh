@@ -5,14 +5,35 @@ if [[ ${XDG_CURRENT_DESKTOP} == "Unity" ]]; then
 	DIR=$(pwd)
         mkdir -p $DIR/.local/share/applications 2> /dev/null
         mkdir -p $DIR/.local/share/icons 2> /dev/null
-	cd -
-	sed "s|\${ws}|$1|" res/csapex.desktop | \
-		sed "s|\${exe}|$1/lib/$2|" | \
-			sed "s|\${img}|$DIR/.local/share/icons/application-x-csapex.png|" > \
-			$DIR/.local/share/applications/csapex.desktop
-	chmod +x $DIR/.local/share/applications/csapex.desktop
+        cd -
+        # main
+        sed "s|\${ws}|$1|" res/csapex.desktop | \
+            sed "s|\${name}|$3|" | \
+                sed "s|\${exe}|$1/lib/$2/$3|" | \
+                        sed "s|\${img}|$DIR/.local/share/icons/application-x-csapex.png|" > \
+                        $DIR/.local/share/applications/csapex.desktop
+        chmod +x $DIR/.local/share/applications/csapex.desktop
         cp res/apex_logo.png $DIR/.local/share/icons/application-x-csapex.png
 
+        # server
+        sed "s|\${ws}|$1|" res/csapex.desktop | \
+            sed "s|\${name}|$4|" | \
+                sed "s|\${exe}|$1/lib/$2/$4|" | \
+                        sed "s|\${img}|$DIR/.local/share/icons/application-x-csapex-server.png|" > \
+                        $DIR/.local/share/applications/csapex-server.desktop
+        chmod +x $DIR/.local/share/applications/csapex-server.desktop
+        cp res/apex_logo_client.png $DIR/.local/share/icons/application-x-csapex-server.png
+
+        # client
+        sed "s|\${ws}|$1|" res/csapex.desktop | \
+            sed "s|\${name}|$5|" | \
+                sed "s|\${exe}|$1/lib/$2/$5|" | \
+                        sed "s|\${img}|$DIR/.local/share/icons/application-x-csapex-client.png|" > \
+                        $DIR/.local/share/applications/csapex-client.desktop
+        chmod +x $DIR/.local/share/applications/csapex-client.desktop
+        cp res/apex_logo_server.png $DIR/.local/share/icons/application-x-csapex-client.png
+
+        # mime
 	mkdir -p $DIR/.local/share/mime/packages
 	touch $DIR/.local/share/mime/packages/application-x-csapex.xml
 

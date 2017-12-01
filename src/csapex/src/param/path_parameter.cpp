@@ -1,9 +1,15 @@
 /// HEADER
 #include <csapex/param/path_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(PathParameter)
 
 using namespace csapex;
 using namespace param;
@@ -109,4 +115,31 @@ bool PathParameter::isInput() const
 bool PathParameter::isOutput() const
 {
     return output_;
+}
+
+
+void PathParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << value_;
+    data << def_;
+
+    data << filter_;
+    data << is_file_;
+    data << input_;
+    data << output_;
+}
+
+void PathParameter::deserialize(const SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> value_;
+    data >> def_;
+
+    data >> filter_;
+    data >> is_file_;
+    data >> input_;
+    data >> output_;
 }

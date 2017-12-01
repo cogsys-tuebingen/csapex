@@ -14,10 +14,11 @@
 
 namespace csapex
 {
-FWD(CsApexCore);
-FWD(CorePlugin);
-FWD(BootstrapPlugin);
-FWD(ExceptionHandler);
+FWD(CsApexCore)
+FWD(CorePlugin)
+FWD(Bootstrap)
+FWD(BootstrapPlugin)
+FWD(ExceptionHandler)
 
 class Settings;
 }

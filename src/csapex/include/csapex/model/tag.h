@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/csapex_export.h>
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 
 /// SYSTEM
 #include <string>
@@ -13,7 +13,7 @@
 namespace csapex
 {
 
-class CSAPEX_EXPORT Tag : public Serializable
+class CSAPEX_EXPORT Tag : public Streamable
 {
 public:
     typedef std::shared_ptr<Tag> Ptr;
@@ -56,7 +56,7 @@ public:
 
     virtual std::shared_ptr<Clonable> makeEmptyClone() const;
     virtual void serialize(SerializationBuffer &data) const;
-    virtual void deserialize(SerializationBuffer& data);
+    virtual void deserialize(const SerializationBuffer& data);
 
     static Ptr makeEmpty();
 

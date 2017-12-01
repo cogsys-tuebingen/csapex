@@ -9,6 +9,7 @@
 #include <csapex/data/point.h>
 #include <csapex/profiling/profilable.h>
 #include <csapex/serialization/serialization_fwd.h>
+#include <csapex/model/connection_information.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -20,7 +21,7 @@ namespace csapex
 class CSAPEX_EXPORT GraphIO : public Profilable
 {
 public:
-    GraphIO(SubgraphNodePtr graph, NodeFactory* node_factory);
+    GraphIO(GraphFacadeImplementation& graph, NodeFactoryImplementation* node_factory);
 
 public:
     // options
@@ -42,8 +43,8 @@ public:
     loadIntoGraph(const Snippet &blueprint, const csapex::Point &position);
 
 public:
-    csapex::slim_signal::Signal<void (SubgraphNodeConstPtr, YAML::Node& e)> saveViewRequest;
-    csapex::slim_signal::Signal<void (SubgraphNodePtr, const YAML::Node& n)> loadViewRequest;
+    csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> saveViewRequest;
+    csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> loadViewRequest;
 
 private:
 
@@ -56,26 +57,26 @@ private:
     void loadConnections(const YAML::Node& doc);
     void loadConnection(const YAML::Node& connection);
 
-    void saveFulcrums(YAML::Node& fulcrum, const Connection* connection);
+    void saveFulcrums(YAML::Node& fulcrum, const ConnectionInformation &connection);
     void loadFulcrum(const YAML::Node& fulcrum);
 
     void sendNotification(const std::string& notification);
 
 protected:
-    void saveNodes(YAML::Node &yaml, const std::vector<NodeHandle *> &nodes);
-    void saveConnections(YAML::Node &yaml, const std::vector<ConnectionPtr> &connections);
+    void saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeImplementationPtr> &nodes);
+    void saveConnections(YAML::Node &yaml, const std::vector<ConnectionInformation> &connections);
 
-    void serializeNode(YAML::Node& doc, NodeHandle* node_handle);
-    void deserializeNode(const YAML::Node& doc, NodeFacadeLocalPtr node_handle);
+    void serializeNode(YAML::Node& doc, NodeFacadeImplementationConstPtr node_handle);
+    void deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr node_handle);
 
-    void loadConnection(ConnectablePtr from, const UUID &to_uuid, const std::string& connection_type);
+    void loadConnection(ConnectorPtr from, const UUID &to_uuid, const std::string& connection_type);
 
     UUID readNodeUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
     UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
 
 private:
-    SubgraphNodePtr graph_;
-    NodeFactory* node_factory_;
+    GraphFacadeImplementation& graph_;
+    NodeFactoryImplementation* node_factory_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> old_node_uuid_to_new_;
     double position_offset_x_;

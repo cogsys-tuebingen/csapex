@@ -19,7 +19,6 @@ MessageProviderManager::MessageProviderManager()
 
 MessageProviderManager::~MessageProviderManager()
 {
-    delete manager_;
 }
 
 void MessageProviderManager::setPluginLocator(PluginLocatorPtr locator)
@@ -30,9 +29,8 @@ void MessageProviderManager::setPluginLocator(PluginLocatorPtr locator)
 void MessageProviderManager::shutdown()
 {
 	classes.clear();
-	plugin_locator_.reset();
-    delete manager_;
-    manager_ = nullptr;
+    plugin_locator_.reset();
+    manager_.reset();
 }
 
 void MessageProviderManager::loadPlugins()

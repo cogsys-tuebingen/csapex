@@ -62,12 +62,15 @@ private Q_SLOTS:
     void showHelp(NodeBox* box);
     void showHowToInstall();
 
+    void startStopServer();
+
     void updateSelectionActions();
     void updateClipboardActions();
 
     void updatePluginIgnored(const QObject *&action);
 
     void addStateToSettings();
+    void restoreWindowState();
 
 public Q_SLOTS:
     void save();
@@ -79,6 +82,8 @@ public Q_SLOTS:
     void clear();
     void undo();
     void redo();
+
+    void triggerDisconnectEvent();
 
     void makeScreenshot();
 
@@ -109,6 +114,9 @@ Q_SIGNALS:
     void updateMenuRequest();
     void updateUndoInfoRequest();
     void updateTitleRequest();
+    void restoreWindowStateRequest();
+
+    void disconnectEvent();
 
 private:
     void construct();
@@ -126,7 +134,6 @@ private:
     std::string getConfigFile();
 
     void setStateChanged();
-    void restoreWindowState();
     bool isDirty() const;
 
 private:
@@ -146,6 +153,8 @@ private:
 
     bool init_;
     bool state_changed_;
+
+    bool disconnected_;
 
     QFileSystemWatcher* style_sheet_watcher_;
     PluginLocatorPtr plugin_locator_;

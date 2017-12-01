@@ -32,7 +32,7 @@ AddParameter::ParameterRequest::ParameterRequest(uint8_t request_id)
 
 }
 
-ResponsePtr AddParameter::ParameterRequest::execute(CsApexCore &core) const
+ResponsePtr AddParameter::ParameterRequest::execute(const SessionPtr &session, CsApexCore &core) const
 {
     std::shared_ptr<ParameterResponse> response;
 
@@ -59,7 +59,7 @@ void AddParameter::ParameterRequest::serialize(SerializationBuffer &data) const
     data << persistent_;
 }
 
-void AddParameter::ParameterRequest::deserialize(SerializationBuffer& data)
+void AddParameter::ParameterRequest::deserialize(const SerializationBuffer& data)
 {
     data >> id_;
     data >> name_;
@@ -88,7 +88,7 @@ void AddParameter::ParameterResponse::serialize(SerializationBuffer &data) const
     ParameterSerializer::instance().serialize(param_, data);
 }
 
-void AddParameter::ParameterResponse::deserialize(SerializationBuffer& data)
+void AddParameter::ParameterResponse::deserialize(const SerializationBuffer& data)
 {
     param_ = std::dynamic_pointer_cast<param::Parameter>(ParameterSerializer::instance().deserialize(data));
 }

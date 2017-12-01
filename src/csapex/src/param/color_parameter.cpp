@@ -1,9 +1,15 @@
 /// HEADER
 #include <csapex/param/color_parameter.h>
 
+/// PROJECT
+#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/serialization/serialization_buffer.h>
+
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
+
+CSAPEX_REGISTER_PARAMETER_SERIALIZER(ColorParameter)
 
 using namespace csapex;
 using namespace param;
@@ -110,4 +116,20 @@ void ColorParameter::doDeserialize(const YAML::Node& n)
     if(n["values"].IsDefined()) {
         colors_ = n["values"].as< std::vector<int> >();
     }
+}
+
+void ColorParameter::serialize(SerializationBuffer &data) const
+{
+    Parameter::serialize(data);
+
+    data << colors_;
+    data << def_;
+}
+
+void ColorParameter::deserialize(const SerializationBuffer& data)
+{
+    Parameter::deserialize(data);
+
+    data >> colors_;
+    data >> def_;
 }

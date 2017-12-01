@@ -3,24 +3,23 @@
 
 /// PROJECT
 #include <csapex/command/add_node.h>
-#include <csapex/command/paste_graph.h>
 #include <csapex/command/dispatcher.h>
+#include <csapex/command/paste_graph.h>
+#include <csapex/csapex_mime.h>
 #include <csapex/factory/node_factory.h>
+#include <csapex/factory/snippet_factory.h>
+#include <csapex/model/connection.h>
 #include <csapex/model/connector.h>
 #include <csapex/model/graph_facade.h>
+#include <csapex/model/node_state.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/model/connection.h>
+#include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
-#include <csapex/model/node.h>
-#include <csapex/view/node/box.h>
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/graph_view.h>
-#include <csapex/plugin/plugin_manager.hpp>
-#include <csapex/model/node_state.h>
-#include <csapex/csapex_mime.h>
-#include <csapex/factory/snippet_factory.h>
+#include <csapex/view/node/box.h>
 
 /// SYSTEM
 #include <QMimeData>
@@ -170,25 +169,16 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
             e->acceptProposedAction();
 
             DesignerScene* scene = src->designerScene();
-            scene->deleteTemporaryConnections();
+            GraphFacade* graph_facade = src->getGraphFacade();
 
-            if(c->isOutput()) {
-                OutputPtr out = std::dynamic_pointer_cast<Output> (c);
-                if(out) {
-                    for(ConnectionPtr c : out->getConnections()) {
-                        if(!c) {
-                            continue;
-                        }
-                        InputPtr input = c->to();
-                        if(input) {
-                            scene->addTemporaryConnection(input, src->mapToScene(e->pos()));
-                        }
+            scene->deleteTemporaryConnections();
+            for(const UUID& other_id : c->getConnectedPorts()) {
+                if(ConnectorPtr p = graph_facade->findConnectorNoThrow(other_id)) {
+                    if(c->isOutput()) {
+                        scene->addTemporaryConnection(p, src->mapToScene(e->pos()));
+                    } else {
+                        scene->addTemporaryConnection(p, src->mapToScene(e->pos()));
                     }
-                }
-            } else {
-                InputPtr in = std::dynamic_pointer_cast<Input> (c);
-                if(in) {
-                    scene->addTemporaryConnection(in->getSource(), src->mapToScene(e->pos()));
                 }
             }
             scene->update();
@@ -265,11 +255,11 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
         QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        SnippetFactory& sf = *src->getViewCore().getSnippetFactory();
+        if(SnippetFactoryPtr sf = src->getViewCore().getSnippetFactory()) {
+            SnippetPtr snippet = sf->getSnippet(type);
 
-        SnippetPtr snippet = sf.getSnippet(type);
-
-        pasteGraph(src, pos, *snippet);
+            pasteGraph(src, pos, *snippet);
+        }
 
     } else if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
@@ -307,12 +297,23 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
             QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
             QPointF pos = src->mapToScene(e->pos()) + offset;
 
-            SnippetFactory& sf = *src->getViewCore().getSnippetFactory();
+            if(SnippetFactoryPtr sf = src->getViewCore().getSnippetFactory()) {
+                SnippetPtr snippet = sf->getSnippet(type);
 
-            SnippetPtr snippet = sf.getSnippet(type);
-
-            pasteGraph(src, pos, *snippet);
+                pasteGraph(src, pos, *snippet);
+            }
         }
+
+
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+        e->ignore();
+        DesignerScene* scene = src->designerScene();
+        scene->deleteTemporaryConnections();
+
+    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+        e->ignore();
+        DesignerScene* scene = src->designerScene();
+        scene->deleteTemporaryConnections();
 
     } else {
         for(auto h : handler_) {
@@ -328,8 +329,7 @@ void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
                         NodeStatePtr state)
 {
     GraphFacade* gf = src->getGraphFacade();
-    GraphPtr graph = gf->getGraph();
-    UUID uuid = graph->generateUUID(type);
+    UUID uuid = gf->generateUUID(type);
 
     dispatcher_->executeLater(Command::Ptr(new command::AddNode(gf->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
 }
@@ -337,8 +337,7 @@ void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
 void DragIO::pasteGraph(GraphView *src, const QPointF &pos, const Snippet &blueprint)
 {
     GraphFacade* gf = src->getGraphFacade();
-    GraphPtr graph = gf->getGraph();
-    CommandPtr cmd(new command::PasteGraph(graph->getAbsoluteUUID(), blueprint, Point (pos.x(), pos.y())));
+    CommandPtr cmd(new command::PasteGraph(gf->getAbsoluteUUID(), blueprint, Point (pos.x(), pos.y())));
 
     dispatcher_->executeLater(cmd);
 }

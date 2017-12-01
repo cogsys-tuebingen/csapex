@@ -19,7 +19,7 @@ public:
     AddFulcrum(const AUUID& graph_uuid, int connection_id, int sub_section_to_split, const Point& pos, int type);
 
     void serialize(SerializationBuffer &data) const override;
-    void deserialize(SerializationBuffer& data) override;
+    void deserialize(const SerializationBuffer& data) override;
 protected:
     bool doExecute() override;
     bool doUndo() override;

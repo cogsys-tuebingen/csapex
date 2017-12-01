@@ -93,7 +93,7 @@ QWidget* ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
 
             btn->setStyleSheet(toColorSS(v));
 
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(AUUID(p_->getUUID()), v);
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), v);
             executeCommand(update_parameter);
         }
     });

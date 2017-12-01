@@ -38,6 +38,9 @@ void ThreadPool::setup()
     default_group_ = std::make_shared<ThreadGroup>(timed_queue_,
                                                    handler_,
                                                    ThreadGroup::DEFAULT_GROUP_ID, "default");
+
+    groups_.push_back(default_group_);
+
     observe(default_group_->end_step, [this]() {
         checkIfStepIsDone();
     });
@@ -67,8 +70,7 @@ bool ThreadPool::isGroupingEnabled() const
 
 void ThreadPool::performStep()
 {
-    if(!default_group_->isEmpty() || !groups_.empty()) {
-        default_group_->step();
+    if(!default_group_->isEmpty() || groups_.size() > 1) {
         for(auto g : groups_) {
             g->step();
         }
@@ -77,7 +79,6 @@ void ThreadPool::performStep()
 
 void ThreadPool::start()
 {
-    default_group_->start();
     for(auto g : groups_) {
         g->start();
     }
@@ -85,12 +86,12 @@ void ThreadPool::start()
 
 void ThreadPool::stop()
 {
-    default_group_->stop();
     for(auto g : groups_) {
         g->stop();
     }
     group_assignment_.clear();
     groups_.clear();
+    default_group_.reset();
     apex_assert_hard(group_assignment_.empty());
     apex_assert_hard(groups_.empty());
 }
@@ -104,7 +105,6 @@ void ThreadPool::clear()
 {
     bool p = isPaused();
     setPause(true);
-    default_group_->clear();
     for(auto g : groups_) {
         g->clear();
     }
@@ -113,7 +113,6 @@ void ThreadPool::clear()
 
 void ThreadPool::pauseChanged(bool pause)
 {
-    default_group_->setPause(pause);
     for(auto g : groups_) {
         g->setPause(pause);
     }
@@ -122,7 +121,6 @@ void ThreadPool::pauseChanged(bool pause)
 
 void ThreadPool::steppingChanged(bool step)
 {
-    default_group_->setSteppingMode(step);
     for(auto g : groups_) {
         g->setSteppingMode(step);
     }
@@ -150,9 +148,6 @@ void ThreadPool::add(TaskGenerator *schedulable)
 
 void ThreadPool::checkIfStepCanBeDone()
 {
-    if(!default_group_->canStartStepping()) {
-        return;
-    }
     for(auto group : groups_) {
         if(!group->canStartStepping()) {
             return;
@@ -384,10 +379,6 @@ void ThreadPool::removeGroup(ThreadGroup *group)
 bool ThreadPool::isStepDone()
 {
     //TRACE std::cerr << " TP CHECK =========== " << std::endl;
-    if(!default_group_->isStepDone()) {
-        return false;
-    }
-
     for(auto group : groups_) {
         if(!group->isStepDone()) {
             return false;
@@ -420,18 +411,11 @@ void ThreadPool::saveSettings(YAML::Node& node)
 
     YAML::Node groups;
 
-    {
-        YAML::Node group;
-        group["id"] = (int) ThreadGroup::DEFAULT_GROUP_ID;
-        getDefaultGroup()->saveSettings(group);
-        groups.push_back(group);
-    }
-
     for(std::size_t i = 0, total =  groups_.size(); i < total; ++i) {
         YAML::Node group;
         int id = groups_[i]->id();
         group["id"] =  id;
-        if(id >= ThreadGroup::MINIMUM_THREAD_ID ) {
+        if(id != ThreadGroup::PRIVATE_THREAD ) {
             group["name"] =  groups_[i]->getName();
             groups_[i]->saveSettings(group);
             groups.push_back(group);

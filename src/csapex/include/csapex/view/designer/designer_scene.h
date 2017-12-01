@@ -23,6 +23,7 @@
 namespace csapex
 {
 
+class ConnectionInformation;
 class Timer;
 
 class CSAPEX_QT_EXPORT DesignerScene : public QGraphicsScene, public Profilable
@@ -70,8 +71,8 @@ public Q_SLOTS:
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();
 
-    void connectionAdded(Connection*);
-    void connectionDeleted(Connection*);
+    void connectionAdded(const ConnectionInformation& ci);
+    void connectionDeleted(const ConnectionInformation& ci);
 
     bool showConnectionContextMenu();
 
@@ -153,7 +154,7 @@ private:
     };
 
 private:
-    void drawConnection(QPainter *painter, const Connection &connection);
+    void drawConnection(QPainter *painter, const ConnectionInformation &connection);
     std::vector<QRectF> drawConnection(QPainter *painter, Connector* from, Connector* to, int id);
     std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 
@@ -178,8 +179,9 @@ private:
     std::vector<TempConnection> temp_;
 
     std::vector<csapex::slim_signal::Connection> connections_;
-    std::map<const Connection*,std::vector<QRectF> > connection_bb_;
+    std::map<int ,std::vector<QRectF> > connection_bb_;
 
+    std::map<int, std::vector<Fulcrum>> connection_2_fulcrum_;
     std::map<Fulcrum*,FulcrumWidget*> fulcrum_2_widget_;
     std::map<Fulcrum*,Point> fulcrum_last_pos_;
     std::map<Fulcrum*,int> fulcrum_last_type_;

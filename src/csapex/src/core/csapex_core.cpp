@@ -2,55 +2,51 @@
 #include <csapex/core/csapex_core.h>
 
 /// COMPONENT
-#include <csapex/core/bootstrap_plugin.h>
+#include <csapex/core/bootstrap.h>
 #include <csapex/core/core_plugin.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/core/graphio.h>
-#include <csapex/factory/message_factory.h>
-#include <csapex/factory/node_factory.h>
+#include <csapex/factory/node_factory_impl.h>
 #include <csapex/factory/snippet_factory.h>
 #include <csapex/info.h>
 #include <csapex/manager/message_provider_manager.h>
-#include <csapex/model/graph_facade.h>
-#include <csapex/model/node_facade_local.h>
-#include <csapex/model/node_handle.h>
+#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/model/graph_facade_impl.h>
+#include <csapex/model/graph/graph_impl.h>
+#include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/subgraph_node.h>
-#include <csapex/model/tag.h>
 #include <csapex/msg/any_message.h>
-#include <csapex/msg/message.h>
 #include <csapex/plugin/plugin_locator.h>
 #include <csapex/plugin/plugin_manager.hpp>
-#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/profiler_impl.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/serialization/snippet.h>
 #include <csapex/utility/assert.h>
 #include <csapex/utility/error_handling.h>
-#include <csapex/utility/register_msg.h>
-#include <csapex/utility/shared_ptr_tools.hpp>
 #include <csapex/utility/stream_interceptor.h>
 #include <csapex/utility/thread.h>
-#include <csapex/utility/yaml_node_builder.h>
+#include <csapex/utility/uuid_provider.h>
+#include <csapex/io/server.h>
 
 /// SYSTEM
 #include <fstream>
 #ifdef WIN32
 #include <direct.h>
 #endif
-#include <boost/filesystem.hpp>
 
 using namespace csapex;
 
 CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::PluginLocatorPtr plugin_locator)
-    : settings_(settings),
+    : bootstrap_(std::make_shared<Bootstrap>()),
+      settings_(settings),
       plugin_locator_(plugin_locator),
       exception_handler_(handler),
       node_factory_(nullptr),
       root_uuid_provider_(std::make_shared<UUIDProvider>()),
       dispatcher_(std::make_shared<CommandDispatcher>(*this)),
-      profiler_(std::make_shared<Profiler>()),
+      profiler_(std::make_shared<ProfilerImplementation>()),
       core_plugin_manager(nullptr),
       init_(false), load_needs_reset_(false)
 {
@@ -95,7 +91,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
 {
     is_root_ = true;
 
-    observe(settings.settings_changed, std::bind(&CsApexCore::settingsChanged, this));
+    observe(settings.settings_changed, this, &CsApexCore::settingsChanged);
 
     observe(exception_handler_.assertion_failed, [this](){
         setPause(true);
@@ -103,9 +99,10 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
 
     StreamInterceptor::instance().start();
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
+    MessageRendererManager::instance().setPluginLocator(plugin_locator_);
 
     core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
-    node_factory_ = std::make_shared<NodeFactory>(settings_, plugin_locator_.get());
+    node_factory_ = std::make_shared<NodeFactoryImplementation>(settings_, plugin_locator_.get());
     snippet_factory_ = std::make_shared<SnippetFactory>(plugin_locator_.get());
 
     boot();
@@ -117,7 +114,8 @@ CsApexCore::CsApexCore(Settings& settings, ExceptionHandler &handler, PluginLoca
 {
     is_root_ = false;
 
-    node_factory_ =  node_factory;
+    node_factory_ =  std::dynamic_pointer_cast<NodeFactoryImplementation>(node_factory);
+    apex_assert_hard(node_factory);
     snippet_factory_ =  snippet_factory;
 }
 
@@ -135,6 +133,8 @@ CsApexCore::~CsApexCore()
         thread_pool_->clear();
     }
 
+    MessageRendererManager::instance().shutdown();
+
     for(std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
         it->second->shutdown();
     }
@@ -142,11 +142,7 @@ CsApexCore::~CsApexCore()
     core_plugin_manager.reset();
 
     if(is_root_) {
-        boot_plugins_.clear();
-        while(!boot_plugin_loaders_.empty()) {
-            delete boot_plugin_loaders_.front();
-            boot_plugin_loaders_.erase(boot_plugin_loaders_.begin());
-        }
+        bootstrap_.reset();
     }
 
     if(main_thread_.joinable()) {
@@ -207,7 +203,7 @@ void CsApexCore::sendNotification(const std::string& msg, ErrorState::ErrorLevel
     notification(n);
 }
 
-void CsApexCore::init()
+void CsApexCore::init(bool create_global_ports)
 {
     if(!init_) {
         init_ = true;
@@ -244,31 +240,36 @@ void CsApexCore::init()
 
         status_changed("make graph");
 
-        root_handle_ = node_factory_->makeNodeLocal("csapex::Graph", UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_);
-        apex_assert_hard(root_handle_);
+        root_facade_ = node_factory_->makeGraph(UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_,
+                                                nullptr, create_global_ports);
+        apex_assert_hard(root_facade_);
 
-        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_handle_->getNode());
+        SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_facade_->getNode());
         apex_assert_hard(graph);
 
-        root_worker_ = root_handle_->getNodeWorker();
+        root_worker_ = root_facade_->getNodeWorker();
 
-        root_ = std::make_shared<GraphFacade>(*thread_pool_, graph->getGraph(), graph, root_handle_);
+        GraphImplementationPtr graph_local = graph->getLocalGraph();
+
+        root_ = std::make_shared<GraphFacadeImplementation>(*thread_pool_, graph_local, graph, root_facade_);
         root_->notification.connect(notification);
 
 
         root_scheduler_ = std::make_shared<NodeRunner>(root_worker_);
         thread_pool_->add(root_scheduler_.get());
 
-        root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
-                                                     root_->getGraph()->makeUUID("slot_save"), "save",
-                                                     [this](const TokenPtr&) {
-            saveAs(getSettings().get<std::string>("config"));
-        });
-        root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
-                                                     root_->getGraph()->makeUUID("slot_exit"), "exit",
-                                                     [this](const TokenPtr&) {
-            shutdown();
-        });
+        if(is_root_) {
+            root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+                                                         root_->getLocalGraph()->makeUUID("slot_save"), "save",
+                                                         [this](const TokenPtr&) {
+                saveAs(getSettings().get<std::string>("config"));
+            });
+            root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+                                                         root_->getLocalGraph()->makeUUID("slot_exit"), "exit",
+                                                         [this](const TokenPtr&) {
+                shutdown();
+            });
+        }
 
         if(is_root_) {
             for(auto plugin : core_plugins_) {
@@ -305,47 +306,8 @@ void CsApexCore::boot()
 {
     status_changed("booting up");
 
-    std::string dir_string = csapex::info::CSAPEX_BOOT_PLUGIN_DIR;
-
-    boost::filesystem::path directory(dir_string);
-
-    boost::filesystem::directory_iterator dir(directory);
-    boost::filesystem::directory_iterator end;
-
-    for(; dir != end; ++dir) {
-        boost::filesystem::path path = dir->path();
-
-        boot_plugin_loaders_.push_back(new class_loader::ClassLoader(path.string()));
-        class_loader::ClassLoader* loader = boot_plugin_loaders_.back();
-
-        try {
-            apex_assert_hard(loader->isLibraryLoaded());
-            std::vector<std::string> classes = loader->getAvailableClasses<BootstrapPlugin>();
-            for(std::size_t c = 0; c < classes.size(); ++c){
-                auto boost_plugin = loader->createInstance<BootstrapPlugin>(classes[c]);
-                std::shared_ptr<BootstrapPlugin> plugin = shared_ptr_tools::to_std_shared(boost_plugin);
-                boot_plugins_.push_back(plugin);
-
-                plugin->boot(plugin_locator_.get());
-            }
-        } catch(const std::exception& e) {
-            NOTIFICATION("boot plugin " << path << " failed: " << e.what());
-        }
-    }
-
-    if (boot_plugins_.empty()) {
-        std::cerr << "there is no boot plugin in directory " << dir_string << '\n';
-        std::cerr << "please create it by either" << '\n';
-        std::cerr << "a) running the following command:" << '\n';
-        std::cerr << "   for dir in ${LD_LIBRARY_PATH//:/ }; do \\\n"
-                     "     path=$(find $dir -name libcsapex_ros_boot.so);\\\n"
-                     "     if [ $path ]; then mkdir -p ~/.csapex/boot &&  ln -sf $path ~/.csapex/boot/libcsapex_ros_boot.so; fi;\\\n"
-                     "   done" << '\n';
-        std::cerr << "b) creating a link by hand in ~/.csapex/boot/ to the library 'libcsapex_ros_boot.so' " << '\n';
-        std::cerr << "c) recompiling csapex_ros" << '\n';
-        std::cerr << std::flush;
-        std::abort();
-    }
+    bootstrap_->bootFrom(csapex::info::CSAPEX_BOOT_PLUGIN_DIR,
+                         plugin_locator_.get());
 
     init();
 }
@@ -408,6 +370,43 @@ void CsApexCore::startMainLoop()
     });
 }
 
+bool CsApexCore::isServerActive() const
+{
+    return server_ != nullptr && server_->isRunning();
+}
+void CsApexCore::setServerFactory(std::function<ServerPtr()> server)
+{
+    server_factory_ = server;
+}
+
+bool CsApexCore::startServer()
+{
+    try {
+        server_ = server_factory_();
+        apex_assert_hard(server_);
+        server_->start();
+        return true;
+
+    } catch (const boost::system::system_error& ex) {
+        std::cerr << "Could not start server: [" << ex.code() << "] " << ex.what() << std::endl;
+        std::exit(23);
+    }
+    return false;
+}
+
+bool CsApexCore::stopServer()
+{
+    apex_assert_hard(server_);
+    try {
+        server_->stop();
+        return true;
+
+    } catch (const boost::system::system_error& ex) {
+        std::cerr << "Could not stop server: [" << ex.code() << "] " << ex.what() << std::endl;
+    }
+    return true;
+}
+
 void CsApexCore::shutdown()
 {
     std::unique_lock<std::mutex> lock(running_mutex_);
@@ -429,7 +428,7 @@ Settings &CsApexCore::getSettings() const
     return settings_;
 }
 
-NodeFactoryPtr CsApexCore::getNodeFactory() const
+NodeFactoryImplementationPtr CsApexCore::getNodeFactory() const
 {
     return node_factory_;
 }
@@ -439,9 +438,14 @@ SnippetFactoryPtr CsApexCore::getSnippetFactory() const
     return snippet_factory_;
 }
 
-GraphFacadePtr CsApexCore::getRoot() const
+GraphFacadeImplementationPtr CsApexCore::getRoot() const
 {
     return root_;
+}
+
+NodeFacadeImplementationPtr CsApexCore::getRootNode() const
+{
+    return root_facade_;
 }
 
 ThreadPoolPtr CsApexCore::getThreadPool() const
@@ -493,7 +497,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     YAML::Node node_map(YAML::NodeType::Map);
 
-    GraphIO graphio(root_->getSubgraphNode(),  node_factory_.get());
+    GraphIO graphio(*root_,  node_factory_.get());
     slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(save_detail_request);
 
     settings_.saveTemporary(node_map);
@@ -516,6 +520,12 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     }
 }
 
+SnippetPtr CsApexCore::serializeNodes(const AUUID& graph_id, const std::vector<UUID> &nodes) const
+{
+    GraphFacadeImplementationPtr gf = graph_id.empty() ? root_ : root_->getLocalSubGraph(graph_id);
+    GraphIO io(*gf, getNodeFactory().get());
+    return std::make_shared<Snippet>(io.saveSelectedGraph(nodes));
+}
 
 void CsApexCore::load(const std::string &file)
 {
@@ -530,9 +540,9 @@ void CsApexCore::load(const std::string &file)
         reset();
     }
 
-    apex_assert_hard(root_->getGraph()->countNodes() == 0);
+    apex_assert_hard(root_->getLocalGraph()->countNodes() == 0);
 
-    GraphIO graphio(root_->getSubgraphNode(), node_factory_.get());
+    GraphIO graphio(*root_, node_factory_.get());
     slim_signal::ScopedConnection connection = graphio.loadViewRequest.connect(load_detail_request);
 
     graphio.useProfiler(profiler_);
