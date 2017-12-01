@@ -115,7 +115,7 @@ int Main::runWithGui()
                 try {
                     int r = QMessageBox::warning(&w, tr("cs::APEX"),
                                                  tr("Do you want to stop the server?"),
-                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
                     if(r == QMessageBox::Yes) {
                         shutdown_server_on_exit = true;
                     }

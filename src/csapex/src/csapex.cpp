@@ -107,7 +107,7 @@ int Main::runWithGui()
             if(!headless) {
                 int r = QMessageBox::warning(&w, tr("cs::APEX"),
                                              tr("Do you want to stop the server?"),
-                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
                 if(r == QMessageBox::Yes) {
                     view_core.shutdown();
                 }
