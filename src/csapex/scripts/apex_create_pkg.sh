@@ -69,6 +69,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(\44{PROJECT_NAME}_node
+
     )
 
 ## Specify libraries to link a library or executable target against
@@ -105,7 +106,7 @@ for dep in ${dependencies[@]}; do
         i=$((i+1))
 done
 
-printf "<?xml version="1.0"?>
+printf "<?xml version=\"1.0\"?>
 <package>
   <name>$pkg_name</name>
   <version>0.0.0</version>
@@ -114,7 +115,7 @@ printf "<?xml version="1.0"?>
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="$USER@todo.todo">$USER</maintainer>
+  <maintainer email="\"$USER@todo.todo\"">$USER</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -152,7 +153,7 @@ printf "<?xml version="1.0"?>
  
 $pkg_dep_list
   <export>
-  <csapex plugin=""\44"{prefix}/plugins.xml" />
+  <csapex plugin=\"\44{prefix}/plugins.xml\" />
   </export>
 </package>">package.xml
 
