@@ -91,7 +91,6 @@ void ThreadPool::stop()
     }
     group_assignment_.clear();
     groups_.clear();
-    default_group_.reset();
     apex_assert_hard(group_assignment_.empty());
     apex_assert_hard(groups_.empty());
 }
@@ -284,6 +283,7 @@ void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
 
 void ThreadPool::useDefaultThreadFor(TaskGenerator *task)
 {
+    apex_assert_hard(default_group_);
     assignGeneratorToGroup(task, default_group_.get());
 }
 

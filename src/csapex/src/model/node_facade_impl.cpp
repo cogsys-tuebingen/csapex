@@ -371,6 +371,9 @@ std::string NodeFacadeImplementation::getLabel() const
 
 int NodeFacadeImplementation::getSchedulerId() const
 {
+    if(!nr_) {
+        return -1;
+    }
     if(auto scheduler = nr_->getScheduler()) {
         return scheduler->id();
     } else {

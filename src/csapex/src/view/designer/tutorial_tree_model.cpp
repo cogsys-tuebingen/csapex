@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/core/settings.h>
+#include <csapex/plugin/plugin_locator.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -19,8 +20,8 @@ namespace bfs = boost::filesystem3;
 
 using namespace csapex;
 
-TutorialTreeModel::TutorialTreeModel(Settings& settings)
-    : settings_(settings), tree_(nullptr)
+TutorialTreeModel::TutorialTreeModel(Settings& settings, PluginLocator& plugin_locator)
+    : settings_(settings), plugin_locator_(plugin_locator), tree_(nullptr)
 {
 }
 
@@ -36,6 +37,10 @@ void TutorialTreeModel::fill(QTreeWidget *tree)
     bfs::path tutorial_dir(cfg_dir + "cfg/tutorials/");
     if(bfs::exists(tutorial_dir)) {
         importDirectory(nullptr, tutorial_dir);
+    }
+
+    for(const std::string& path : plugin_locator_.getPluginPaths("tutorials")) {
+        importDirectory(nullptr, path);
     }
 }
 
@@ -79,8 +84,16 @@ void TutorialTreeModel::importDirectory(QTreeWidgetItem *parent, const Path& p)
             id = "tutorial_id";
         }
 
-        QTreeWidgetItem* item = new QTreeWidgetItem;
-        item->setText(0, rm.title);
+        QTreeWidgetItem* item = nullptr;
+        auto pos = top_level_.find(rm.title);
+        if(pos == top_level_.end()) {
+            item = new QTreeWidgetItem;
+            item->setText(0, rm.title);
+            top_level_[rm.title] = item;
+
+        } else {
+            item = *pos;
+        }
 
         if(contains_apex_file) {
             item->setIcon(0, QIcon(":/play.png"));

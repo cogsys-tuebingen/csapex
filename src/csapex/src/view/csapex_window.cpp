@@ -866,7 +866,7 @@ void CsApexWindow::createTutorialsMenu()
     tree->setUniformRowHeights(false);
     tree->setItemDelegate(new HTMLDelegate);
 
-    TutorialTreeModel tutorials(view_core_.getSettings());
+    TutorialTreeModel tutorials(view_core_.getSettings(), *plugin_locator_);
     tutorials.fill(tree);
 
     QObject::connect(tree, &QTreeWidget::activated,

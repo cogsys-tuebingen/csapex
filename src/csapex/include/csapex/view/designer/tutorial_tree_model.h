@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/csapex_qt_export.h>
+#include <csapex/plugin/plugin_fwd.h>
 
 /// SYSTEM
 #include <QStandardItemModel>
@@ -27,7 +28,7 @@ public:
     };
 
 public:
-    TutorialTreeModel(Settings &settings);
+    TutorialTreeModel(Settings &settings, PluginLocator& plugin_locator);
     ~TutorialTreeModel();
 
     void fill(QTreeWidget* tree);
@@ -40,7 +41,10 @@ private:
 
 private:
     Settings &settings_;
+    PluginLocator& plugin_locator_;
     QTreeWidget *tree_;
+
+    QMap<QString, QTreeWidgetItem*> top_level_;
 };
 
 }
