@@ -102,24 +102,27 @@ int Main::runWithGui()
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
     app->connect(&w, &CsApexWindow::closed, [&]() {
-        try {
-            bool headless = settings.get<bool>("headless");
-            if(!headless) {
-                int r = QMessageBox::warning(&w, tr("cs::APEX"),
-                                             tr("Do you want to stop the server?"),
-                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-                if(r == QMessageBox::Yes) {
-                    view_core.shutdown();
+        if(core->isServerActive()) {
+            try {
+                bool headless = settings.get<bool>("headless");
+                if(!headless) {
+                    int r = QMessageBox::warning(&w, tr("cs::APEX"),
+                                                 tr("Do you want to stop the server?"),
+                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                    if(r == QMessageBox::No) {
+                        return;
+                    }
                 }
+            } catch(const std::exception& e) {
+                std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
+            } catch(...) {
+                throw;
             }
-        } catch(const std::exception& e) {
-            std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
-        } catch(...) {
-            throw;
         }
+        view_core.shutdown();
         app->quit();
     });
-    app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
+//    app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
     csapex::error_handling::stop_request().connect([this](){
         static int request = 0;
@@ -146,6 +149,8 @@ int Main::runWithGui()
     int res = runImpl();
 
     deleteRecoveryConfig();
+
+    core->joinMainLoop();
 
     return res;
 }

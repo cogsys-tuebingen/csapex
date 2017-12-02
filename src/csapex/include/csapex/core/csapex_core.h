@@ -46,6 +46,7 @@ public:
     void shutdown();
 
     void startMainLoop();
+    void joinMainLoop();
 
     bool isServerActive() const;
     void setServerFactory(std::function<ServerPtr()> server);

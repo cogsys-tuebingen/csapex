@@ -145,9 +145,9 @@ CsApexCore::~CsApexCore()
         bootstrap_.reset();
     }
 
-    if(main_thread_.joinable()) {
-        main_thread_.join();
-    }
+    lock.unlock();
+
+    joinMainLoop();
 
     shutdown_complete();
 }
@@ -368,6 +368,13 @@ void CsApexCore::startMainLoop()
 
         shutdown_requested();
     });
+}
+
+void CsApexCore::joinMainLoop()
+{
+    if(main_thread_.joinable()) {
+        main_thread_.join();
+    }
 }
 
 bool CsApexCore::isServerActive() const
