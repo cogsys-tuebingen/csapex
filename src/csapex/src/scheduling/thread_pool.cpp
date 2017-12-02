@@ -93,6 +93,7 @@ void ThreadPool::stop()
     groups_.clear();
     apex_assert_hard(group_assignment_.empty());
     apex_assert_hard(groups_.empty());
+    groups_.push_back(default_group_);
 }
 
 bool ThreadPool::isRunning() const
