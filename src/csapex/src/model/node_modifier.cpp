@@ -108,16 +108,22 @@ void NodeModifier::setNoError()
         node_worker_->setError(false);
     }
 }
-void NodeModifier::setError(const std::string &msg)
+void NodeModifier::setInfo(const std::string &msg)
 {
     if(node_worker_) {
-        node_worker_->setError(true, msg, ErrorState::ErrorLevel::ERROR);
+        node_worker_->setError(true, msg, ErrorState::ErrorLevel::INFO);
     }
 }
 void NodeModifier::setWarning(const std::string &msg)
 {
     if(node_worker_) {
         node_worker_->setError(true, msg, ErrorState::ErrorLevel::WARNING);
+    }
+}
+void NodeModifier::setError(const std::string &msg)
+{
+    if(node_worker_) {
+        node_worker_->setError(true, msg, ErrorState::ErrorLevel::ERROR);
     }
 }
 

@@ -53,13 +53,15 @@ NotificationWidget::NotificationWidget(const Notification &notification, QWidget
     label_ = new QLabel;
     layout->addWidget(label_, 0, 1);
 
-    QPushButton* report_btn = new QPushButton;
-    report_btn->setIcon(QIcon(":/pencil.png"));
-    layout->addWidget(report_btn, 0, 2);
-
-    QObject::connect(report_btn, &QPushButton::clicked, [this](){
-        GuiExceptionHandler::reportIssue("Notification Issue", getRawText().toStdString());
-    });
+    if(notification.error != ErrorState::ErrorLevel::NONE &&
+            notification.error != ErrorState::ErrorLevel::INFO) {
+        QPushButton* report_btn = new QPushButton;
+        report_btn->setIcon(QIcon(":/pencil.png"));
+        layout->addWidget(report_btn, 0, 2);
+        QObject::connect(report_btn, &QPushButton::clicked, [this](){
+            GuiExceptionHandler::reportIssue("Notification Issue", getRawText().toStdString());
+        });
+    }
 
     QPushButton* close_btn = new QPushButton;
     close_btn->setIcon(QIcon(":/hide.png"));

@@ -19,8 +19,9 @@ class CSAPEX_EXPORT ErrorState
 public:
     enum class ErrorLevel {
         NONE = 0,
-        ERROR = 1,
-        WARNING = 2
+        INFO = 1,
+        ERROR = 2,
+        WARNING = 3
     };
 
 

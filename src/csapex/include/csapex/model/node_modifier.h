@@ -190,8 +190,9 @@ public:
 
     bool isError() const;
     void setNoError();
-    void setError(const std::string& msg);
+    void setInfo(const std::string& msg);
     void setWarning(const std::string& msg);
+    void setError(const std::string& msg);
 
     NodeWorker* getNodeWorker() const;
 

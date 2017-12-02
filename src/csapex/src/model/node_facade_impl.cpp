@@ -466,6 +466,8 @@ std::string NodeFacadeImplementation::getLoggerOutput(ErrorState::ErrorLevel lev
             return node->aerr.history().str();
         case ErrorState::ErrorLevel::WARNING:
             return node->awarn.history().str();
+        case ErrorState::ErrorLevel::INFO:
+            return node->ainfo.history().str();
         case ErrorState::ErrorLevel::NONE:
             return node->ainfo.history().str();
         }
