@@ -235,7 +235,7 @@ void NodeWorker::setState(ExecutionState state)
 
     lock.unlock();
 
-    execution_state_changed();
+    execution_state_changed(state_);
 }
 
 bool NodeWorker::isProcessingEnabled() const

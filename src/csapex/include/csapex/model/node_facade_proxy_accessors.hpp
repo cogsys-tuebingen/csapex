@@ -5,7 +5,7 @@ HANDLE_ACCESSOR (IsActive,                     bool,           isActive)
 HANDLE_ACCESSOR (IsSource,                     bool,           isSource)
 HANDLE_ACCESSOR (IsSink,                       bool,           isSink)
 HANDLE_ACCESSOR (IsProcessingNothingMessages,  bool,           isProcessingNothingMessages)
-HANDLE_DYNAMIC_ACCESSOR (GetExecutionState,    execution_state_changed, ExecutionState, getExecutionState)
+HANDLE_ACCESSOR (GetExecutionState,            ExecutionState, getExecutionState)
 
 HANDLE_DYNAMIC_ACCESSOR (GetLabel,             label_changed, std::string, getLabel)
 HANDLE_DYNAMIC_ACCESSOR (GetSchedulerId,       scheduler_changed, int, getSchedulerId)

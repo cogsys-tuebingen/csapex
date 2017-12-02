@@ -123,7 +123,13 @@ void Session::mainLoop()
             packets_available_.wait_for(packet_lock, std::chrono::milliseconds(100));
         }
 
-        while(running_ && !packets_to_send_.empty()) {
+        // so as not to starve the clients, we limit the max amount of packets to send
+        // before receiving other packets
+        const int max_operations_per_iteration = 32;
+        for(int i = 0;
+            i < max_operations_per_iteration && running_ && !packets_to_send_.empty();
+            ++i)
+        {
             StreamableConstPtr packet = packets_to_send_.front();
             packets_to_send_.pop_front();
             packet_lock.unlock();
@@ -134,7 +140,10 @@ void Session::mainLoop()
             packet_lock.lock();
         }
 
-        while(running_ && !packets_received_.empty()) {
+        for(int i = 0;
+            i < max_operations_per_iteration && running_ && !packets_received_.empty();
+            ++i)
+        {
             StreamableConstPtr packet = packets_received_.front();
             packets_received_.pop_front();
             packet_lock.unlock();

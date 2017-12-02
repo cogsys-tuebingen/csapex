@@ -29,10 +29,13 @@
 
 using namespace csapex;
 
+const std::chrono::milliseconds NodeBox::cache_update_rate_(500);
+
 NodeBox::NodeBox(Settings& settings, NodeFacadePtr node_facade, QIcon icon, GraphView* parent)
     : parent_(parent), ui(nullptr), grip_(nullptr), settings_(settings), node_facade_(node_facade), adapter_(nullptr), icon_(icon),
       info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_frequency(nullptr), info_error(nullptr), initialized_(false),
-      frequency_timer_(nullptr)
+      frequency_timer_(nullptr),
+      last_state_request_(std::chrono::milliseconds(0))
 {
     QObject::connect(this, &NodeBox::updateVisualsRequest, this, &NodeBox::updateVisuals);
 
@@ -563,7 +566,14 @@ void NodeBox::enabledChangeEvent(bool val)
 QString NodeBox::getNodeState()
 {
     QString state;
-    switch(node_facade_->getExecutionState()) {
+
+    auto now = std::chrono::high_resolution_clock::now();
+    if(now - last_state_request_ > cache_update_rate_) {
+        cached_state_ = node_facade_->getExecutionState();
+        last_state_request_ = now;
+    }
+
+    switch(cached_state_) {
     case ExecutionState::IDLE:
         state = "idle"; break;
     case ExecutionState::ENABLED:

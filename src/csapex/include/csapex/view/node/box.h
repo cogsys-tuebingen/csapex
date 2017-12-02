@@ -195,6 +195,11 @@ protected:
     bool moved_;
 
     QTimer* frequency_timer_;
+
+    ExecutionState cached_state_;
+    using stamp_t = std::chrono::high_resolution_clock::time_point;
+    static const std::chrono::milliseconds cache_update_rate_;
+    stamp_t last_state_request_;
 };
 
 }

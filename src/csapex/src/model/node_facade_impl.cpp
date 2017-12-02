@@ -132,8 +132,8 @@ void NodeFacadeImplementation::connectNodeWorker()
 
     observe(nw_->messages_processed, messages_processed);
 
-    observe(nw_->execution_state_changed, [this]() {
-        execution_state_changed(nw_->getExecutionState());
+    observe(nw_->execution_state_changed, [this](ExecutionState s) {
+        execution_state_changed(s);
     });
 
     observe(nw_->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
