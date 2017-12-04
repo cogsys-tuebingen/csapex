@@ -48,7 +48,7 @@ FWD(ConnectorDescription)
 FWD(Connector)
 
 FWD(Connection)
-FWD(ConnectionInformation)
+FWD(ConnectionDescription)
 FWD(Fulcrum)
 }
 

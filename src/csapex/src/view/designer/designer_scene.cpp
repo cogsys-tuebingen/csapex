@@ -121,14 +121,14 @@ DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CsApexViewCore& view_c
 
     setBackgroundBrush(QBrush(Qt::white));
 
-    connections_.push_back(graph_facade_->connection_added.connect([this](const ConnectionInformation& ci) {
+    connections_.push_back(graph_facade_->connection_added.connect([this](const ConnectionDescription& ci) {
         connectionAdded(ci);
     }));
-    connections_.push_back(graph_facade_->connection_removed.connect([this](const ConnectionInformation& ci) {
+    connections_.push_back(graph_facade_->connection_removed.connect([this](const ConnectionDescription& ci) {
         connectionDeleted(ci);
     }));
 
-    for(const ConnectionInformation& ci : graph_facade_->enumerateAllConnections()){
+    for(const ConnectionDescription& ci : graph_facade_->enumerateAllConnections()){
         connectionAdded(ci);
     }
 }
@@ -386,7 +386,7 @@ void DesignerScene::drawForeground(QPainter *painter, const QRectF &rect)
             return false;
         };
 
-        for(const ConnectionInformation& connection : graph_facade_->enumerateAllConnections()) {
+        for(const ConnectionDescription& connection : graph_facade_->enumerateAllConnections()) {
             auto pos = connection_bb_.find(connection.id);
             if(pos == connection_bb_.end() || intersects_any(pos->second, rect)) {
                 drawConnection(painter, connection);
@@ -590,7 +590,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             highlight_connection_sub_id_ = data.second;
         }
 
-        const ConnectionInformation& c = graph_facade_->getConnectionWithId(highlight_connection_id_);
+        const ConnectionDescription& c = graph_facade_->getConnectionWithId(highlight_connection_id_);
 
         if(debug_){
             QString descr("Connection #");
@@ -659,7 +659,7 @@ bool DesignerScene::isEmpty() const
     return graph_facade_->countNodes() == 0;
 }
 
-void DesignerScene::connectionAdded(const ConnectionInformation& ci)
+void DesignerScene::connectionAdded(const ConnectionDescription& ci)
 {
     for(const Fulcrum& f : ci.fulcrums) {
         connection_2_fulcrum_[ci.id].push_back(f);
@@ -689,7 +689,7 @@ void DesignerScene::connectionAdded(const ConnectionInformation& ci)
     invalidateSchema();
 }
 
-void DesignerScene::connectionDeleted(const ConnectionInformation& ci)
+void DesignerScene::connectionDeleted(const ConnectionDescription& ci)
 {
     invalidateSchema();
 }
@@ -836,7 +836,7 @@ void DesignerScene::deleteTemporaryConnectionsAndRepaint()
     update();
 }
 
-void DesignerScene::drawConnection(QPainter *painter, const ConnectionInformation& ci)
+void DesignerScene::drawConnection(QPainter *painter, const ConnectionDescription& ci)
 {
     if(ci.active && !display_active_) {
         return;
@@ -988,7 +988,7 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter *painter, const QPoin
 
     std::vector<Fulcrum> targets;
     if(id >= 0) {
-        ConnectionInformation connection = graph_facade_->getConnectionWithId(id);
+        ConnectionDescription connection = graph_facade_->getConnectionWithId(id);
         targets = connection.fulcrums;
     }
     targets.emplace_back(-1, convert(to), Fulcrum::FULCRUM_IN, convert(to), convert(to));
@@ -1374,7 +1374,7 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
 
 bool DesignerScene::showConnectionContextMenu()
 {
-    ConnectionInformation c = graph_facade_->getConnectionWithId(highlight_connection_id_);
+    ConnectionDescription c = graph_facade_->getConnectionWithId(highlight_connection_id_);
 
     QMenu menu;
     QAction* reset = new QAction("reset connection", &menu);

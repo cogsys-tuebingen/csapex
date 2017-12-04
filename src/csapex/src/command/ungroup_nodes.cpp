@@ -113,7 +113,7 @@ bool UngroupNodes::doExecute()
 
 void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 {
-    for(const ConnectionInformation& ci : connections_going_in) {
+    for(const ConnectionDescription& ci : connections_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id().getFullName();
         UUID to = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -126,7 +126,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         add(add_connection);
     }
 
-    for(const ConnectionInformation& ci : connections_going_out) {
+    for(const ConnectionDescription& ci : connections_going_out) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
         std::string child = ci.from.id().getFullName();
         UUID from = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -142,7 +142,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         }
     }
 
-    for(const ConnectionInformation& ci : signals_going_in) {
+    for(const ConnectionDescription& ci : signals_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id().getFullName();
         UUID to = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -158,7 +158,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         }
     }
 
-    for(const ConnectionInformation& ci : signals_going_out) {
+    for(const ConnectionDescription& ci : signals_going_out) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
         std::string child = ci.from.id().getFullName();
         UUID from = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);

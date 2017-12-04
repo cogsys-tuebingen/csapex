@@ -66,7 +66,7 @@ void GroupBase::analyzeConnections(Graph* graph_i)
                 NodeHandle* source = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c = connection->getDescription();
+                ConnectionDescription c = connection->getDescription();
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     connections_going_in.push_back(c);
@@ -83,7 +83,7 @@ void GroupBase::analyzeConnections(Graph* graph_i)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c = connection->getDescription();
+                    ConnectionDescription c = connection->getDescription();
                     connections_going_out.push_back(c);
                 }
             }
@@ -99,7 +99,7 @@ void GroupBase::analyzeConnections(Graph* graph_i)
 
                 if(node_set.find(target) == node_set.end()) {
                     // going out
-                    ConnectionInformation c = connection->getDescription();
+                    ConnectionDescription c = connection->getDescription();
                     signals_going_in.push_back(c);
                 }
             }
@@ -112,7 +112,7 @@ void GroupBase::analyzeConnections(Graph* graph_i)
                 NodeHandle* source = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(source);
 
-                ConnectionInformation c = connection->getDescription();
+                ConnectionDescription c = connection->getDescription();
                 if(node_set.find(source) == node_set.end()) {
                     // coming in
                     signals_going_out.push_back(c);

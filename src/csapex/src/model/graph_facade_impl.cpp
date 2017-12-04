@@ -34,10 +34,10 @@ GraphFacadeImplementation::GraphFacadeImplementation(ThreadPool &executor, Graph
     observe(graph->vertex_removed, this, &GraphFacadeImplementation::nodeRemovedHandler);
     observe(graph->notification, notification);
 
-    observe(graph->connection_added, [this](const ConnectionInformation& ci) {
+    observe(graph->connection_added, [this](const ConnectionDescription& ci) {
         connection_added(ci);
     });
-    observe(graph->connection_removed, [this](const ConnectionInformation& ci) {
+    observe(graph->connection_removed, [this](const ConnectionDescription& ci) {
         connection_removed(ci);
     });
     observe(graph->state_changed, state_changed);
@@ -149,7 +149,7 @@ bool GraphFacadeImplementation::isConnected(const UUID& from, const UUID& to) co
     return graph_->getConnection(from, to) != nullptr;
 }
 
-ConnectionInformation GraphFacadeImplementation::getConnection(const UUID& from, const UUID& to) const
+ConnectionDescription GraphFacadeImplementation::getConnection(const UUID& from, const UUID& to) const
 {
     ConnectionPtr c = graph_->getConnection(from, to);
     if(!c) {
@@ -159,7 +159,7 @@ ConnectionInformation GraphFacadeImplementation::getConnection(const UUID& from,
     return c->getDescription();
 }
 
-ConnectionInformation GraphFacadeImplementation::getConnectionWithId(int id) const
+ConnectionDescription GraphFacadeImplementation::getConnectionWithId(int id) const
 {
     return graph_->getConnectionWithId(id)->getDescription();
 }
@@ -611,9 +611,9 @@ std::vector<UUID> GraphFacadeImplementation::enumerateAllNodes() const
     return graph_->getAllNodeUUIDs();
 }
 
-std::vector<ConnectionInformation> GraphFacadeImplementation::enumerateAllConnections() const
+std::vector<ConnectionDescription> GraphFacadeImplementation::enumerateAllConnections() const
 {
-    std::vector<ConnectionInformation> result;
+    std::vector<ConnectionDescription> result;
     auto connections = graph_->getConnections();
     result.reserve(connections.size());
     for(const ConnectionPtr& c : connections) {

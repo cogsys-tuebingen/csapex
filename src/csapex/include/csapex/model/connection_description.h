@@ -1,5 +1,5 @@
-#ifndef CONNECTION_INFORMATION_H
-#define CONNECTION_INFORMATION_H
+#ifndef CONNECTION_DESCRIPTION_H
+#define CONNECTION_DESCRIPTION_H
 
 /// COMPONENT
 #include <csapex/serialization/serializable.h>
@@ -11,7 +11,7 @@
 namespace csapex
 {
 
-struct CSAPEX_EXPORT ConnectionInformation : public Serializable
+struct CSAPEX_EXPORT ConnectionDescription : public Serializable
 {
     UUID from;
     UUID to;
@@ -25,27 +25,27 @@ struct CSAPEX_EXPORT ConnectionInformation : public Serializable
 
     std::vector<Fulcrum> fulcrums;
 
-    ConnectionInformation(const UUID& from, const UUID& to,
+    ConnectionDescription(const UUID& from, const UUID& to,
                           const TokenDataConstPtr &type, int id,
                           bool active, const std::vector<Fulcrum>& fulcrums);
 
-    ConnectionInformation(const ConnectionInformation& other);
+    ConnectionDescription(const ConnectionDescription& other);
 
-    ConnectionInformation& operator = (const ConnectionInformation& other);
+    ConnectionDescription& operator = (const ConnectionDescription& other);
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
 
-    bool operator == (const ConnectionInformation& other) const;
+    bool operator == (const ConnectionDescription& other) const;
 
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
 
 private:
     friend class SerializationBuffer;
-    ConnectionInformation();
+    ConnectionDescription();
 };
 
 }
 
-#endif // CONNECTION_INFORMATION_H
+#endif // CONNECTION_DESCRIPTION_H

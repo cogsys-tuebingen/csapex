@@ -9,7 +9,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/model/connection_information.h>
+#include <csapex/model/connection_description.h>
 #include <csapex/utility/utility_fwd.h>
 
 /// SYSTEM
@@ -36,7 +36,7 @@ public:
 
     std::string getType() const;
 
-    std::vector<ConnectionInformation> getConnections(const UUID &new_node_uuid);
+    std::vector<ConnectionDescription> getConnections(const UUID &new_node_uuid);
 
 
 
@@ -75,7 +75,7 @@ private:
     GraphImplementationPtr graph_new;
     GraphFacadeImplementationPtr graph_facade_new_;
 
-    std::vector<ConnectionInformation> connections_;
+    std::vector<ConnectionDescription> connections_;
 
     std::unordered_map<UUID, UUID, UUID::Hasher> new_target_uuid_to_old_uuid_;
     std::unordered_map<UUID, UUID, UUID::Hasher> uuid_cache_;

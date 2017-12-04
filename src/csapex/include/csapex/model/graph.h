@@ -83,7 +83,7 @@ public:
 
     virtual std::size_t countNodes() = 0;
 
-    virtual std::vector<ConnectionInformation> enumerateAllConnections() const = 0;
+    virtual std::vector<ConnectionDescription> enumerateAllConnections() const = 0;
 
 protected:
     Graph();
@@ -91,8 +91,8 @@ protected:
 public:
     slim_signal::Signal<void()> state_changed;
 
-    slim_signal::Signal<void(ConnectionInformation)> connection_added;
-    slim_signal::Signal<void(ConnectionInformation)> connection_removed;
+    slim_signal::Signal<void(ConnectionDescription)> connection_added;
+    slim_signal::Signal<void(ConnectionDescription)> connection_removed;
 
     slim_signal::Signal<void(graph::VertexPtr)> vertex_added;
     slim_signal::Signal<void(graph::VertexPtr)> vertex_removed;

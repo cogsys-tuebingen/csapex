@@ -102,10 +102,10 @@ void GraphServer::startObservingGraph(const GraphFacadeImplementationPtr &graph_
 
     GraphImplementationPtr graph = graph_facade->getLocalGraph();
 
-    observe(graph->connection_added, [this, channel](const ConnectionInformation& ci){
+    observe(graph->connection_added, [this, channel](const ConnectionDescription& ci){
         channel->sendNote<GraphNote>(GraphNoteType::ConnectionAdded, ci);
     });
-    observe(graph->connection_removed, [this, channel](const ConnectionInformation& ci){
+    observe(graph->connection_removed, [this, channel](const ConnectionDescription& ci){
         channel->sendNote<GraphNote>(GraphNoteType::ConnectionRemoved, ci);
     });
     observe(graph->vertex_added, [this, channel](const graph::VertexPtr& vertex){

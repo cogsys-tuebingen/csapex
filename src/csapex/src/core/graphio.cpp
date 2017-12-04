@@ -11,7 +11,7 @@
 #include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/subgraph_node.h>
-#include <csapex/model/connection_information.h>
+#include <csapex/model/connection_description.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
@@ -123,7 +123,7 @@ Snippet GraphIO::saveSelectedGraph(const std::vector<UUID> &uuids)
     std::set<UUID> node_set(uuids.begin(), uuids.end());
 
     std::vector<NodeFacadeImplementationPtr> nodes;
-    std::vector<ConnectionInformation> connections;
+    std::vector<ConnectionDescription> connections;
 
     for(const UUID& uuid : uuids) {
         NodeFacadePtr nf = graph_.findNodeFacade(uuid);
@@ -303,11 +303,11 @@ void GraphIO::saveConnections(YAML::Node &yaml)
     saveConnections(yaml, graph_.enumerateAllConnections());
 }
 
-void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionInformation>& connections)
+void GraphIO::saveConnections(YAML::Node &yaml, const std::vector<ConnectionDescription>& connections)
 {
     std::unordered_map<UUID, std::vector<std::pair<UUID, std::string>>, UUID::Hasher> connection_map;
 
-    for(const ConnectionInformation& connection : connections) {
+    for(const ConnectionDescription& connection : connections) {
         if(ignore_forwarding_connections_) {
             if(connection.from.type() == "relayout" ||
                     connection.to.type() == "relayin" ||
@@ -406,7 +406,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
     }
 }
 
-void GraphIO::saveFulcrums(YAML::Node &fulcrum, const ConnectionInformation& connection)
+void GraphIO::saveFulcrums(YAML::Node &fulcrum, const ConnectionDescription& connection)
 {
     fulcrum["from"] = connection.from.getFullName();
     fulcrum["to"] = connection.to.getFullName();

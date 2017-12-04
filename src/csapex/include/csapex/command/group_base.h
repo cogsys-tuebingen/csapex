@@ -5,7 +5,7 @@
 #include "meta.h"
 #include <csapex/data/point.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/model/connection_information.h>
+#include <csapex/model/connection_description.h>
 #include <csapex/serialization/snippet.h>
 
 /// SYSTEM
@@ -38,10 +38,10 @@ protected:
 
     Point insert_pos;
 
-    std::vector<ConnectionInformation> connections_going_in;
-    std::vector<ConnectionInformation> connections_going_out;
-    std::vector<ConnectionInformation> signals_going_in;
-    std::vector<ConnectionInformation> signals_going_out;
+    std::vector<ConnectionDescription> connections_going_in;
+    std::vector<ConnectionDescription> connections_going_out;
+    std::vector<ConnectionDescription> signals_going_in;
+    std::vector<ConnectionDescription> signals_going_out;
 
 
     Snippet serialized_snippet_;

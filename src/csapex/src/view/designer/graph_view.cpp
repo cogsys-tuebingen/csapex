@@ -1473,7 +1473,7 @@ void GraphView::morphNode()
                                                                 type, facade->getNodeState()->getPos(), new_uuid, nullptr);
         morph->add(add_new);
 
-        for(const ConnectionInformation& ci : diag.getConnections(new_uuid)) {
+        for(const ConnectionDescription& ci : diag.getConnections(new_uuid)) {
             morph->add(std::make_shared<command::AddConnection>(graph_facade_->getAbsoluteUUID(),
                                                                        ci.from, ci.to, ci.active));
         }

@@ -9,7 +9,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/token.h>
 #include <csapex/csapex_export.h>
-#include <csapex/model/connection_information.h>
+#include <csapex/model/connection_description.h>
 
 /// SYSTEM
 #include <memory>
@@ -67,7 +67,7 @@ public:
 
     int id() const;
 
-    ConnectionInformation getDescription() const;
+    ConnectionDescription getDescription() const;
 
     bool contains(Connector* c) const;
 

@@ -108,7 +108,7 @@ void GroupNodes::mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 void GroupNodes::mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 {
     std::unordered_map<UUID, RelayMapping, UUID::Hasher> cache;
-    for(const ConnectionInformation& ci : connections_going_in) {
+    for(const ConnectionDescription& ci : connections_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id().getFullName();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -145,7 +145,7 @@ void GroupNodes::mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 void GroupNodes::mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 {
     std::unordered_map<UUID, RelayMapping, UUID::Hasher> cache;
-    for(const ConnectionInformation& ci : connections_going_out) {
+    for(const ConnectionDescription& ci : connections_going_out) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
         std::string child = ci.from.id().getFullName();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -181,7 +181,7 @@ void GroupNodes::mapMessageGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 void GroupNodes::mapSignalGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 {
     std::unordered_map<UUID, RelayMapping, UUID::Hasher> cache;
-    for(const ConnectionInformation& ci : signals_going_in) {
+    for(const ConnectionDescription& ci : signals_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id().getFullName();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -216,7 +216,7 @@ void GroupNodes::mapSignalGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid)
 void GroupNodes::mapSignalGoingOut(AUUID parent_auuid, AUUID sub_graph_auuid)
 {
     std::unordered_map<UUID, RelayMapping, UUID::Hasher> cache;
-    for(const ConnectionInformation& ci : signals_going_out) {
+    for(const ConnectionDescription& ci : signals_going_out) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
         std::string child = ci.from.id().getFullName();
         UUID nested_connector_uuid = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);

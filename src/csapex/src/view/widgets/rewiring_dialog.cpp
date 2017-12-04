@@ -50,12 +50,12 @@ std::string RewiringDialog::getType() const
     return type_new_;
 }
 
-std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& new_node_uuid)
+std::vector<ConnectionDescription> RewiringDialog::getConnections(const UUID& new_node_uuid)
 {
     for(SlotPtr slot_new : nf_new->getNodeHandle()->getSlots()) {
         for(ConnectionPtr connection : slot_new->getConnections()) {
             UUID to_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, slot_new->getUUID().id().getFullName());
-            connections_.push_back(ConnectionInformation(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()),
+            connections_.push_back(ConnectionDescription(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()),
                                                          to_uuid,
                                                          slot_new->getType(),
                                                          connection->id(),
@@ -66,7 +66,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
     for(InputPtr input_new : nf_new->getNodeHandle()->getExternalInputs()) {
         for(ConnectionPtr connection : input_new->getConnections()) {
             UUID to_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, input_new->getUUID().id().getFullName());
-            connections_.push_back(ConnectionInformation(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()),
+            connections_.push_back(ConnectionDescription(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()),
                                                          to_uuid,
                                                          input_new->getType(),
                                                          connection->id(),
@@ -79,7 +79,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
     for(EventPtr event_new : nf_new->getNodeHandle()->getEvents()) {
         for(ConnectionPtr connection : event_new->getConnections()) {
             UUID from_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, event_new->getUUID().id().getFullName());
-            connections_.push_back(ConnectionInformation(from_uuid,
+            connections_.push_back(ConnectionDescription(from_uuid,
                                                          new_target_uuid_to_old_uuid_.at(connection->to()->getUUID()),
                                                          event_new->getType(),
                                                          connection->id(),
@@ -90,7 +90,7 @@ std::vector<ConnectionInformation> RewiringDialog::getConnections(const UUID& ne
     for(OutputPtr output_new : nf_new->getNodeHandle()->getExternalOutputs()) {
         for(ConnectionPtr connection : output_new->getConnections()) {
             UUID from_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, output_new->getUUID().id().getFullName());
-            connections_.push_back(ConnectionInformation(from_uuid,
+            connections_.push_back(ConnectionDescription(from_uuid,
                                                          new_target_uuid_to_old_uuid_.at(connection->to()->getUUID()),
                                                          output_new->getType(),
                                                          connection->id(),

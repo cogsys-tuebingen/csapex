@@ -256,12 +256,12 @@ bool GraphFacadeProxy::isConnected(const UUID& from, const UUID& to) const
     return graph_->isConnected(from, to);
 }
 
-ConnectionInformation GraphFacadeProxy::getConnection(const UUID& from, const UUID& to) const
+ConnectionDescription GraphFacadeProxy::getConnection(const UUID& from, const UUID& to) const
 {
     return graph_->getConnection(from, to);
 }
 
-ConnectionInformation GraphFacadeProxy::getConnectionWithId(int id) const
+ConnectionDescription GraphFacadeProxy::getConnectionWithId(int id) const
 {
     return graph_->getConnectionWithId(id);
 }
@@ -328,7 +328,7 @@ std::vector<UUID> GraphFacadeProxy::enumerateAllNodes() const
 {
     return graph_->getAllNodeUUIDs();
 }
-std::vector<ConnectionInformation> GraphFacadeProxy::enumerateAllConnections() const
+std::vector<ConnectionDescription> GraphFacadeProxy::enumerateAllConnections() const
 {
     return graph_->enumerateAllConnections();
 }

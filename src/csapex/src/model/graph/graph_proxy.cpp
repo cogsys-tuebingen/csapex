@@ -5,7 +5,7 @@
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/graph/vertex.h>
 #include <csapex/model/connectable.h>
-#include <csapex/model/connection_information.h>
+#include <csapex/model/connection_description.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_facade.h>
 #include <csapex/model/node_facade_proxy.h>
@@ -49,12 +49,12 @@ GraphProxy::GraphProxy(io::ChannelPtr channel, NodeFacadeProxyPtr& node_facade)
 
             case GraphNoteType::ConnectionAdded:
             {
-                connectionAdded(cn->getPayload<ConnectionInformation>(0));
+                connectionAdded(cn->getPayload<ConnectionDescription>(0));
             }
                 break;
             case GraphNoteType::ConnectionRemoved:
             {
-                connectionRemoved(cn->getPayload<ConnectionInformation>(0));
+                connectionRemoved(cn->getPayload<ConnectionDescription>(0));
             }
                 break;
             case GraphNoteType::VertexAdded:
@@ -106,8 +106,8 @@ void GraphProxy::reload()
     for(const UUID& id : nodes) {
         vertexAdded(id);
     }
-    auto connections = graph_channel_->request<std::vector<ConnectionInformation>, GraphRequests>(GraphRequests::GraphRequestType::GetAllConnections);
-    for(const ConnectionInformation& ci : connections) {
+    auto connections = graph_channel_->request<std::vector<ConnectionDescription>, GraphRequests>(GraphRequests::GraphRequestType::GetAllConnections);
+    for(const ConnectionDescription& ci : connections) {
         connectionAdded(ci);
     }
 }
@@ -136,12 +136,12 @@ void GraphProxy::vertexRemoved(const UUID& id)
     }
 }
 
-void GraphProxy::connectionAdded(const ConnectionInformation& ci)
+void GraphProxy::connectionAdded(const ConnectionDescription& ci)
 {
     edges_.push_back(ci);
     connection_added(ci);
 }
-void GraphProxy::connectionRemoved(const ConnectionInformation& ci)
+void GraphProxy::connectionRemoved(const ConnectionDescription& ci)
 {
     auto pos = std::find(edges_.begin(), edges_.end(), ci);
     if(pos != edges_.end()) {
@@ -282,18 +282,18 @@ ConnectorPtr GraphProxy::findConnectorNoThrow(const UUID &uuid) noexcept
     return owner->getConnectorNoThrow(uuid);
 }
 
-ConnectionInformation GraphProxy::getConnection(const UUID& from, const UUID& to) const
+ConnectionDescription GraphProxy::getConnection(const UUID& from, const UUID& to) const
 {
-    for(const ConnectionInformation& ci : edges_) {
+    for(const ConnectionDescription& ci : edges_) {
         if(ci.from == from && ci.to == to) {
             return ci;
         }
     }
     throw std::runtime_error(from.getFullName() + " and " + to.getFullName() + " are not connected");
 }
-ConnectionInformation GraphProxy::getConnectionWithId(int id) const
+ConnectionDescription GraphProxy::getConnectionWithId(int id) const
 {
-    for(const ConnectionInformation& ci : edges_) {
+    for(const ConnectionDescription& ci : edges_) {
         if(ci.id == id) {
             return ci;
         }
@@ -303,7 +303,7 @@ ConnectionInformation GraphProxy::getConnectionWithId(int id) const
 
 bool GraphProxy::isConnected(const UUID &from, const UUID &to) const
 {
-    for(const ConnectionInformation& ci : edges_) {
+    for(const ConnectionDescription& ci : edges_) {
         if(ci.from == from && ci.to == to) {
             return true;
         }
@@ -311,7 +311,7 @@ bool GraphProxy::isConnected(const UUID &from, const UUID &to) const
     return false;
 }
 
-std::vector<ConnectionInformation> GraphProxy::enumerateAllConnections() const
+std::vector<ConnectionDescription> GraphProxy::enumerateAllConnections() const
 {
     return edges_;
 }

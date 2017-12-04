@@ -11,7 +11,7 @@
 #include <csapex/utility/notification.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/observer.h>
-#include <csapex/model/connection_information.h>
+#include <csapex/model/connection_description.h>
 
 /// SYSTEM
 #include <unordered_map>
@@ -43,11 +43,11 @@ public:
     virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
 
     virtual bool isConnected(const UUID& from, const UUID& to) const = 0;
-    virtual ConnectionInformation getConnection(const UUID& from, const UUID& to) const = 0;
-    virtual ConnectionInformation getConnectionWithId(int id) const = 0;
+    virtual ConnectionDescription getConnection(const UUID& from, const UUID& to) const = 0;
+    virtual ConnectionDescription getConnectionWithId(int id) const = 0;
 
     virtual std::vector<UUID> enumerateAllNodes() const = 0;
-    virtual std::vector<ConnectionInformation> enumerateAllConnections() const = 0;
+    virtual std::vector<ConnectionDescription> enumerateAllConnections() const = 0;
 
     virtual AUUID getAbsoluteUUID() const = 0;
 
@@ -84,8 +84,8 @@ public:
     slim_signal::Signal<void()> panic;
     slim_signal::Signal<void()> state_changed;
 
-    slim_signal::Signal<void(ConnectionInformation)> connection_added;
-    slim_signal::Signal<void(ConnectionInformation)> connection_removed;
+    slim_signal::Signal<void(ConnectionDescription)> connection_added;
+    slim_signal::Signal<void(ConnectionDescription)> connection_removed;
 
     slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_added;
     slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_removed;

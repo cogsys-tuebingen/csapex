@@ -370,7 +370,7 @@ add_library(csapex SHARED
     src/model/connector_description.cpp
     src/model/connectable_vector.cpp
     src/model/connection.cpp
-    src/model/connection_information.cpp
+    src/model/connection_description.cpp
     src/model/token.cpp
     src/model/token_data.cpp
     src/model/error_state.cpp

@@ -38,12 +38,12 @@ public:
 
     bool isConnected(const UUID& from, const UUID& to) const override;
 
-    virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
+    virtual std::vector<ConnectionDescription> enumerateAllConnections() const override;
 
     std::size_t countNodes() override;
 
-    ConnectionInformation getConnection(const UUID& from, const UUID& to) const;
-    ConnectionInformation getConnectionWithId(int id) const;
+    ConnectionDescription getConnection(const UUID& from, const UUID& to) const;
+    ConnectionDescription getConnectionWithId(int id) const;
 
     void reload();
 
@@ -66,14 +66,14 @@ private:
     void vertexAdded(const UUID &id);
     void vertexRemoved(const UUID &id);
 
-    void connectionAdded(const ConnectionInformation& id);
-    void connectionRemoved(const ConnectionInformation& id);
+    void connectionAdded(const ConnectionDescription& id);
+    void connectionRemoved(const ConnectionDescription& id);
 
 private:
     io::ChannelPtr graph_channel_;
 
     std::vector<graph::VertexPtr> remote_vertices_;
-    std::vector<ConnectionInformation> edges_;
+    std::vector<ConnectionDescription> edges_;
 
     /**
      * begin: generate caches

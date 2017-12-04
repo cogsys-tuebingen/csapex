@@ -23,7 +23,7 @@
 namespace csapex
 {
 
-class ConnectionInformation;
+class ConnectionDescription;
 class Timer;
 
 class CSAPEX_QT_EXPORT DesignerScene : public QGraphicsScene, public Profilable
@@ -71,8 +71,8 @@ public Q_SLOTS:
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();
 
-    void connectionAdded(const ConnectionInformation& ci);
-    void connectionDeleted(const ConnectionInformation& ci);
+    void connectionAdded(const ConnectionDescription& ci);
+    void connectionDeleted(const ConnectionDescription& ci);
 
     bool showConnectionContextMenu();
 
@@ -154,7 +154,7 @@ private:
     };
 
 private:
-    void drawConnection(QPainter *painter, const ConnectionInformation &connection);
+    void drawConnection(QPainter *painter, const ConnectionDescription &connection);
     std::vector<QRectF> drawConnection(QPainter *painter, Connector* from, Connector* to, int id);
     std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
 

@@ -31,8 +31,8 @@ public:
     virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     virtual bool isConnected(const UUID& from, const UUID& to) const override;
-    virtual ConnectionInformation getConnection(const UUID& from, const UUID& to) const override;
-    virtual ConnectionInformation getConnectionWithId(int id) const override;
+    virtual ConnectionDescription getConnection(const UUID& from, const UUID& to) const override;
+    virtual ConnectionDescription getConnectionWithId(int id) const override;
 
     virtual std::size_t countNodes() const override;
 
@@ -45,7 +45,7 @@ public:
     NodeFacadeImplementationPtr getLocalNodeFacade() const;
 
     virtual std::vector<UUID> enumerateAllNodes() const override;
-    virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
+    virtual std::vector<ConnectionDescription> enumerateAllConnections() const override;
 
     SubgraphNodePtr getSubgraphNode();
     TaskGenerator* getTaskGenerator(const UUID& uuid);

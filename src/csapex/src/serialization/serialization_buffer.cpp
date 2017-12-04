@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/activity_type.h>
-#include <csapex/model/connection_information.h>
+#include <csapex/model/connection_description.h>
 #include <csapex/model/connector_description.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/model/error_state.h>
@@ -129,7 +129,7 @@ void SerializationBuffer::init()
         ADD_ANY_TYPE(SnippetPtr);
         ADD_ANY_TYPE(NodeCharacteristics);
         ADD_ANY_TYPE(ConnectorDescription);
-        ADD_ANY_TYPE(ConnectionInformation);
+        ADD_ANY_TYPE(ConnectionDescription);
         ADD_ANY_TYPE(ExecutionState);
         ADD_ANY_TYPE(Notification);
         ADD_ANY_TYPE(Fulcrum);

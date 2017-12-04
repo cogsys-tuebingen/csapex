@@ -56,7 +56,7 @@ public:
     ConnectionPtr getConnection(const UUID& from, const UUID& to);
 
     std::vector<ConnectionPtr> getConnections();
-    virtual std::vector<ConnectionInformation> enumerateAllConnections() const override;
+    virtual std::vector<ConnectionDescription> enumerateAllConnections() const override;
 
     std::size_t countNodes() override;
 

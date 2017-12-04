@@ -107,9 +107,9 @@ std::vector<ConnectionPtr> GraphImplementation::getConnections()
     return edges_;
 }
 
-std::vector<ConnectionInformation> GraphImplementation::enumerateAllConnections() const
+std::vector<ConnectionDescription> GraphImplementation::enumerateAllConnections() const
 {
-    std::vector<ConnectionInformation> result;
+    std::vector<ConnectionDescription> result;
     result.reserve(edges_.size());
     for(const ConnectionPtr& c : edges_) {
         result.push_back(c->getDescription());

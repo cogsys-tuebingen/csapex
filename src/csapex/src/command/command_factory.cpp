@@ -150,7 +150,7 @@ Command::Ptr CommandFactory::deleteConnectionByIdCommand(int id)
 {
     GraphFacade* graph_facade = getGraphFacade();
 
-    for(const ConnectionInformation& connection : graph_facade->enumerateAllConnections()) {
+    for(const ConnectionDescription& connection : graph_facade->enumerateAllConnections()) {
         if(connection.id == id) {
             return Command::Ptr(new DeleteConnection(graph_uuid, connection.from, connection.to));
 
@@ -172,7 +172,7 @@ Command::Ptr CommandFactory::deleteAllConnectionFulcrumsCommand(int connection)
     if(connection >= 0) {
         GraphFacade* graph_facade = getGraphFacade();
 
-        ConnectionInformation ci = graph_facade->getConnectionWithId(connection);
+        ConnectionDescription ci = graph_facade->getConnectionWithId(connection);
         int n = ci.fulcrums.size();
         for(int i = n - 1; i >= 0; --i) {
             meta->add(std::make_shared<DeleteFulcrum>(graph_uuid, connection, i));
