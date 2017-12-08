@@ -27,6 +27,8 @@ public:
 
         executor.setSteppingMode(true);
 
+        executor.setSuppressExceptions(false);
+
         end_step_called_more_than_once = false;
         end_step_called = false;
         executor.end_step.connect([&]() {

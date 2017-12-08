@@ -34,6 +34,8 @@ public:
 
     virtual bool isRunning() const = 0;
 
+    virtual void setSuppressExceptions(bool suppress_exceptions) = 0;
+
 protected:
     virtual void pauseChanged(bool pause) = 0;
     virtual void steppingChanged(bool performStep) = 0;

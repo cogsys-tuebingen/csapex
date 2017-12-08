@@ -8,7 +8,6 @@
 #include <csapex/signal/slot.h>
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/direct_connection.h>
-#include <csapex/msg/direct_connection.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/exceptions.h>
 

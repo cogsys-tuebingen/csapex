@@ -4,8 +4,6 @@
 /// COMPONENT
 #include <csapex/signal/signal_fwd.h>
 #include <csapex/msg/static_output.h>
-#include <csapex/msg/generic_pointer_message.hpp>
-#include <csapex/msg/generic_value_message.hpp>
 
 namespace csapex
 {

@@ -66,6 +66,8 @@ public:
     void setPrivateThreadGroupCpuAffinity(const std::vector<bool>& affinity);
     std::vector<bool> getPrivateThreadGroupCpuAffinity() const;
 
+    void setSuppressExceptions(bool suppress_exceptions) override;
+
 public:
     slim_signal::Signal<void (ThreadGroupPtr)> group_created;
     slim_signal::Signal<void (ThreadGroupPtr)> group_removed;
@@ -107,6 +109,8 @@ private:
 
     CpuAffinityPtr private_group_cpu_affinity_;
     std::map<ThreadGroup*, std::vector<slim_signal::ScopedConnection>> private_group_connections_;
+
+    bool suppress_exceptions_;
 };
 
 }

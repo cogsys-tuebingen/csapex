@@ -45,6 +45,8 @@ public:
     void schedule(TaskPtr task);
     void scheduleDelayed(TaskPtr task, std::chrono::system_clock::time_point time);
 
+    void setSuppressExceptions(bool suppress_exceptions);
+
 private:
     void measureFrequency();
 
@@ -75,6 +77,8 @@ private:
 
     bool waiting_for_step_;
     slim_signal::ScopedConnection wait_for_step_connection_;
+
+    bool suppress_exceptions_;
 };
 
 }

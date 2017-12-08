@@ -10,9 +10,11 @@
 #include <csapex/model/node_state.h>
 #include <csapex/model/node_worker.h>
 #include <csapex/model/subgraph_node.h>
+#include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/io.h>
+#include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/marker_message.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/msg/static_output.h>

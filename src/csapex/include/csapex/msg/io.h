@@ -52,7 +52,7 @@ CSAPEX_EXPORT void triggerWith(Event* event, const TokenPtr& token);
 
 /// CASTING
 
-template <typename R, typename S, typename Selector = void>
+template <typename R, typename S>
 struct DefaultMessageCaster
 {
     static std::shared_ptr<R const> constcast(const std::shared_ptr<S const>& msg)
@@ -65,28 +65,28 @@ struct DefaultMessageCaster
     }
 };
 
-template <typename R, typename S, typename Selector = void>
+template <typename R, typename S, typename Enable = void>
 struct MessageCaster
 {
     static std::shared_ptr<R const> constcast(const std::shared_ptr<S const>& msg)
     {
-        return DefaultMessageCaster<R,S,Selector>::constcast(msg);
+        return DefaultMessageCaster<R,S>::constcast(msg);
     }
     static std::shared_ptr<R> cast(const std::shared_ptr<S>& msg)
     {
-        return DefaultMessageCaster<R,S,Selector>::cast(msg);
+        return DefaultMessageCaster<R,S>::cast(msg);
     }
 };
 
-template <typename R, typename S, typename Selector = void>
+template <typename R, typename S>
 std::shared_ptr<R const> message_cast(const std::shared_ptr<S const>& msg)
 {
-    return MessageCaster<typename std::remove_const<R>::type,typename std::remove_const<S>::type,Selector>::constcast(msg);
+    return MessageCaster<typename std::remove_const<R>::type, typename std::remove_const<S>::type>::constcast(msg);
 }
-template <typename R, typename S, typename Selector = void>
+template <typename R, typename S>
 std::shared_ptr<R> message_cast(const std::shared_ptr<S>& msg)
 {
-    return MessageCaster<typename std::remove_const<R>::type,typename std::remove_const<S>::type,Selector>::cast(msg);
+    return MessageCaster<typename std::remove_const<R>::type, typename std::remove_const<S>::type>::cast(msg);
 }
 
 /// INPUT

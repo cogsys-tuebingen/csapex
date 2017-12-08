@@ -36,6 +36,7 @@ public:
 
     virtual void reset() = 0;
 
+    virtual void setSuppressExceptions(bool suppress_exceptions) = 0;
 public:
     slim_signal::Signal<void()> stepping_enabled;
     slim_signal::Signal<void()> begin_step;

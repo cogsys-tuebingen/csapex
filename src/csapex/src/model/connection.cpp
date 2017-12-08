@@ -2,6 +2,7 @@
 #include <csapex/model/connection.h>
 
 /// COMPONENT
+#include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/msg/output_transition.h>

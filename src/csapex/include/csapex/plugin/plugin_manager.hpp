@@ -306,9 +306,9 @@ public:
     {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
         if(i_count == 0) {
-            ++i_count;
             instance = new Parent(full_name);
         }
+        ++i_count;
         instance->loaded.connect(loaded);
         instance->manifest_loaded.connect(manifest_loaded);
     }
@@ -316,6 +316,7 @@ public:
     virtual ~PluginManager()
     {
         std::unique_lock<std::mutex> lock(PluginManagerLocker::getMutex());
+        apex_assert_hard(i_count > 0);
         --i_count;
         if(i_count == 0) {
             delete instance;

@@ -24,7 +24,8 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
       paused_(false), stepping_(false), can_step_(0), step_done_(false),
       guard_(-1),
       waiting_for_execution_(false),
-      waiting_for_step_(false)
+      waiting_for_step_(false),
+      suppress_exceptions_(true)
 {
     NodeHandlePtr handle = worker_->getNodeHandle();
 
@@ -192,11 +193,20 @@ void NodeRunner::execute()
                 can_step_++;
             }
         } catch(const std::exception& e) {
-            NOTIFICATION(std::string("Node could not be executed: ") + e.what());
+            if(!suppress_exceptions_)
+                throw;
+            else
+                NOTIFICATION(std::string("Node could not be executed: ") + e.what());
         } catch(const Failure& e) {
-            NOTIFICATION(std::string("Node experienced failure: ") + e.what());
+            if(!suppress_exceptions_)
+                throw;
+            else
+                NOTIFICATION(std::string("Node experienced failure: ") + e.what());
         } catch(...) {
-            NOTIFICATION("Node could not be executed: Unknown exception");
+            if(!suppress_exceptions_)
+                throw;
+            else
+                NOTIFICATION("Node could not be executed: Unknown exception");
         }
     } else {
         can_step_++;
@@ -336,4 +346,9 @@ void NodeRunner::setError(const std::string &msg)
 {
     std::cerr << "error happened: " << msg << std::endl;
     worker_->setError(true, msg);
+}
+
+void NodeRunner::setSuppressExceptions(bool suppress_exceptions)
+{
+    suppress_exceptions_ = suppress_exceptions;
 }

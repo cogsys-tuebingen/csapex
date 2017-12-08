@@ -15,6 +15,7 @@
 #include <csapex/serialization/serialization_buffer.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
+#include <csapex/factory/message_factory.h>
 
 using namespace csapex;
 using namespace command;

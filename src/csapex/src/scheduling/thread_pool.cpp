@@ -21,14 +21,16 @@ ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool gr
     : handler_(handler),
       timed_queue_(new TimedQueue),
       enable_threading_(enable_threading), grouping_(grouping),
-      private_group_cpu_affinity_(new CpuAffinity)
+      private_group_cpu_affinity_(new CpuAffinity),
+      suppress_exceptions_(true)
 {
     setup();
 }
 
 ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_threading, bool grouping)
     : handler_(handler), enable_threading_(enable_threading), grouping_(grouping),
-      private_group_cpu_affinity_(new CpuAffinity)
+      private_group_cpu_affinity_(new CpuAffinity),
+      suppress_exceptions_(true)
 {
     setup();
     parent->addChild(this);
@@ -144,6 +146,8 @@ void ThreadPool::add(TaskGenerator *schedulable)
     group_connection_[schedulable] = schedulable->stepping_enabled.connect([this](){
         checkIfStepCanBeDone();
     });
+
+    schedulable->setSuppressExceptions(suppress_exceptions_);
 }
 
 void ThreadPool::checkIfStepCanBeDone()
@@ -269,10 +273,10 @@ void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
 
         private_group_connections_[group.get()].push_back(
                     private_group_cpu_affinity_changed.connect([this, group_weak](){
-                        if(ThreadGroupPtr group = group_weak.lock()) {
-                            group->getCpuAffinity()->set(private_group_cpu_affinity_->get());
-                        }
-                    }));
+            if(ThreadGroupPtr group = group_weak.lock()) {
+                group->getCpuAffinity()->set(private_group_cpu_affinity_->get());
+            }
+        }));
 
         if(isRunning()) {
             group->start();
@@ -509,6 +513,18 @@ void ThreadPool::loadSettings(YAML::Node& node)
             if(assignment_map.find(task->getUUID().getAbsoluteUUID()) != assignment_map.end()) {
                 int id = assignment_map.at(task->getUUID().getAbsoluteUUID());
                 addToGroup(task, id);
+            }
+        }
+    }
+}
+
+void ThreadPool::setSuppressExceptions(bool suppress_exceptions)
+{
+    if(suppress_exceptions_ != suppress_exceptions) {
+        suppress_exceptions_ = suppress_exceptions;
+        for(ThreadGroupPtr& group : groups_) {
+            for(TaskGeneratorPtr task : *group) {
+                task->setSuppressExceptions(suppress_exceptions);
             }
         }
     }

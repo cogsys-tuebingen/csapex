@@ -11,6 +11,7 @@
 
 /// SYSTEM
 #include <iostream>
+#include <sstream>
 
 using namespace csapex;
 
