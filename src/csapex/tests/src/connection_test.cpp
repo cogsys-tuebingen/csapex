@@ -52,10 +52,6 @@ TEST_F(ConnectionTest, DirectConnectionCompatibility) {
     ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 
     o.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
-    i.setType(connection_types::makeEmpty<GenericValueMessage<float>>());
-    ASSERT_FALSE(Connection::isCompatibleWith(&o, &i));
-
-    o.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
     i.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
     ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 }
