@@ -40,6 +40,7 @@ add_executable(csapex_test
 
     src/graph_test.cpp
     src/polymorphic_msgs_test.cpp
+    src/polymorphic_value_test.cpp
     src/node_creation_test.cpp
     src/connection_test.cpp
     src/signal_test.cpp

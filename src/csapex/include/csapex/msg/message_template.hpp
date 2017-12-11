@@ -48,9 +48,7 @@ private:
 };
 
 struct MessageTemplateBase
-{
-
-};
+{};
 
 template <typename Type, class Instance>
 class MessageTemplate : public Message, public MessageTemplateContainer<Type, std::is_integral<Type>::value>, public MessageTemplateBase
