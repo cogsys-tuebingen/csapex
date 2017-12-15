@@ -9,6 +9,7 @@
 #include <condition_variable>
 #include <chrono>
 #include <set>
+#include <atomic>
 
 namespace csapex
 {
@@ -19,12 +20,12 @@ public:
     TimedQueue();
     ~TimedQueue();
 
-    void start();
-    void stop();
-
     void schedule(SchedulerPtr scheduler, TaskPtr schedulable, std::chrono::system_clock::time_point time);
 
 private:
+    void start();
+    void stop();
+
     void loop();
     void sleep();
 
@@ -32,8 +33,8 @@ private:
     std::thread scheduling_thread_;
     std::thread sleeping_thread_;
 
-    bool scheduling_running_;
-    bool sleeping_running_;
+    std::atomic<bool> scheduling_running_;
+    std::atomic<bool> sleeping_running_;
 
     struct Unit {
         SchedulerPtr scheduler;

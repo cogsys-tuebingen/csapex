@@ -285,7 +285,11 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
 {
     apex_assert_hard(guard_ == -1);
 
-    std::unique_lock<std::recursive_mutex> lock(execution_mutex_);
+    std::lock(execution_mutex_, mutex_);
+
+    std::unique_lock<std::recursive_mutex> exec_lock(execution_mutex_, std::adopt_lock);
+
+    std::unique_lock<std::recursive_mutex> data_lock(mutex_, std::adopt_lock);
 
     for(auto& s : children_) {
         apex_assert_hard(s->guard_ == -1);
@@ -327,6 +331,8 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
             throw;
         }
     }
+
+    data_lock.unlock();
 
     applyModifications();
 
