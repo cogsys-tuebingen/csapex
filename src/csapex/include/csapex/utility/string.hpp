@@ -36,7 +36,7 @@ inline std::string universal_to_string(const V& value,
 template <typename V>
 inline std::string universal_to_string(const std::vector<V>& value)
 {
-    return std::string("[vector of length ") + value.size() + "]";
+    return std::string("[vector of length ") + std::to_string(value.size()) + "]";
 }
 template <typename V>
 inline std::string universal_to_string(const std::pair<V,V>& value)
