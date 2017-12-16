@@ -117,6 +117,7 @@ include_directories(${GTEST_INCLUDE_DIR} ../include)
 
 add_executable(${PROJECT_NAME}_tests
     tests/slim_signals_test.cpp
+    tests/uuid_test.cpp
 )
 
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME}_tests)

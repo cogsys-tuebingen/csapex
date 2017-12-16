@@ -45,7 +45,6 @@ add_executable(${PROJECT_NAME}
     src/connection_test.cpp
     src/signal_test.cpp
     src/transition_test.cpp
-    src/uuid_test.cpp
     src/yaml_serialization_test.cpp
     src/binary_serialization_test.cpp
     src/scheduling_test.cpp
