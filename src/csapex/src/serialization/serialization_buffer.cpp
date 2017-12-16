@@ -16,7 +16,7 @@
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/serialization/snippet.h>
 #include <csapex/serialization/streamable.h>
-#include <csapex/utility/notification.h>
+#include <csapex/model/notification.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>

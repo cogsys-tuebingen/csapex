@@ -148,7 +148,7 @@ TEST_F(SignalTest, MixingEventsAndInputs) {
     GenericValueMessage<int>::ConstPtr value_message = std::dynamic_pointer_cast<GenericValueMessage<int> const>(raw_message->getTokenData());
     ASSERT_TRUE(value_message != nullptr);
 
-    EXPECT_EQ(42, value_message->value);
+    ASSERT_EQ(42, value_message->value);
 }
 
 TEST_F(SignalTest, MixingOutputsAndSlots) {

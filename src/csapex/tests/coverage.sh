@@ -15,7 +15,7 @@ if ! [[ -d build_coverage ]]; then
 else
 	cd $ROOT/build_coverage
 fi
-make -j 12
+make -j $(nproc)
 
 # clean
 cd $THISDIR

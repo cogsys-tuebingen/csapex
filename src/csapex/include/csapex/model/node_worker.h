@@ -9,10 +9,10 @@
 #include <csapex/param/parameter.h>
 #include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
-#include <csapex/utility/notification.h>
+#include <csapex/model/notification.h>
 #include <csapex/model/execution_mode.h>
 #include <csapex/model/observer.h>
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 #include <csapex/model/activity_type.h>
 #include <csapex/model/execution_state.h>
 

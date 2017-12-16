@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/utility/notification.h>
+#include <csapex/model/notification.h>
 
 /// PROJECT
 #include <csapex/serialization/serialization_buffer.h>

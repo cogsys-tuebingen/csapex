@@ -75,7 +75,7 @@ TEST_F(ConnectionTest, DirectConnectionIsPossible) {
     GenericValueMessage<int>::ConstPtr value_message = std::dynamic_pointer_cast<GenericValueMessage<int> const>(raw_message->getTokenData());
     ASSERT_TRUE(value_message != nullptr);
 
-    EXPECT_EQ(msg->value, value_message->value);
+    ASSERT_EQ(msg->value, value_message->value);
 }
 
 
@@ -101,7 +101,7 @@ TEST_F(ConnectionTest, DirectConnectionCanBeRepeated) {
         GenericValueMessage<int>::ConstPtr value_message = std::dynamic_pointer_cast<GenericValueMessage<int> const>(raw_message->getTokenData());
         ASSERT_TRUE(value_message != nullptr);
 
-        EXPECT_EQ(expected, value_message->value);
+        ASSERT_EQ(expected, value_message->value);
     };
 
     send(42);

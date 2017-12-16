@@ -2,7 +2,7 @@
 #define NODE_FACTORY_H
 
 /// PROJECT
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/csapex_export.h>

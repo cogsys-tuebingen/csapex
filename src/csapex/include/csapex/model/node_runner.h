@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/scheduling/task_generator.h>
 #include <csapex/model/model_fwd.h>
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 #include <csapex/csapex_export.h>
 #include <csapex/model/observer.h>
 

@@ -4,12 +4,14 @@
 /// PROJECT
 #include <csapex/csapex_util_export.h>
 #include <csapex/utility/delegate.h>
+#include <csapex/utility/function_traits.hpp>
 
 /// SYSTEM
 #include <vector>
 #include <map>
 #include <functional>
 #include <mutex>
+#include <type_traits>
 
 namespace csapex
 {
@@ -110,12 +112,16 @@ public:
     void operator = (ScopedConnection&& c) noexcept;
 };
 
+
 /**
  * @brief The Signal template is the class implementing a signal for a specific function type
  */
 template <typename Signature>
 class Signal : public SignalBase
 {
+public:
+    using signature_t = Signature;
+
 public:
     Signal();
 
@@ -124,15 +130,34 @@ public:
 
     ~Signal();
 
+    // connections with matching signatures
     Connection connect(const delegate::Delegate<Signature>& delegate);
     Connection connect(delegate::Delegate<Signature>&& delegate);
     Connection connect(const std::function<Signature>& fn);
 
-    Connection connect(Signal<Signature>& signal);
+    Connection connect(Signal<Signature> &signal);
 
     template <typename Class>
     Connection connect(Class* that, Signature Class::*mem) {
         return connect(std::move(delegate::Delegate<Signature>(that, mem)));
+    }
+
+    // generic connections with fewer parameters than available
+    template <typename Callable>
+    Connection connect(Callable function,
+                       typename std::enable_if<!std::is_base_of<SignalBase, Callable>::value>::type* = 0)
+    {
+        return connectAny(function, tag_is_function<
+                          std::is_base_of<SignalBase, Callable>::value,
+                          std::is_bind_expression<Callable>::value
+                          >());
+    }
+
+    template <typename MatchingSignature>
+    Connection connect(Signal<MatchingSignature>& signal,
+                       typename std::enable_if<!std::is_same<Signature, MatchingSignature>::value>::type* = 0)
+    {
+        return connectAny(signal, tag_is_function<true, false>());
     }
 
     virtual bool isConnected() const override;
@@ -144,6 +169,18 @@ public:
     virtual void disconnectAll() override;
 
 private:
+    template <bool signal, bool bind>
+    struct tag_is_function {};
+
+    template <typename Callable>
+    Connection connectAny(Callable& function, tag_is_function<false, false>);
+
+    template <typename Callable>
+    Connection connectAny(Callable& function, tag_is_function<true, false>);
+
+    template <typename Callable>
+    Connection connectAny(Callable& function, tag_is_function<false, true>);
+
     void clear();
     void removeParent(Signal* parent);
 
@@ -199,6 +236,7 @@ private:
 };
 
 }
+
 }
 
 #endif // SLIM_SIGNAL_H

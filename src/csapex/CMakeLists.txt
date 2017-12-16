@@ -36,6 +36,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if(${catkin_FOUND})
     catkin_package(
        INCLUDE_DIRS include
+       LIBRARIES csapex
        DEPENDS Boost
        CATKIN_DEPENDS class_loader
        CFG_EXTRAS csapex-extras.cmake
@@ -188,6 +189,7 @@ generate_export_header( csapex_serialization
              STATIC_DEFINE csapex_serialization_BUILT_AS_STATIC
                          )
 target_link_libraries(csapex_serialization
+    csapex_util
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
 )
@@ -195,44 +197,8 @@ target_link_libraries(csapex_serialization
 list(APPEND csapex_LIBRARIES csapex_serialization)
 
 
-file(GLOB_RECURSE csapex_util_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex/utility/*.h*)
-
-add_library(csapex_util SHARED
-    src/utility/slim_signal.cpp
-    src/utility/assert.cpp
-    src/utility/exceptions.cpp
-    src/utility/bash_parser.cpp
-    src/utility/error_handling.cpp
-    src/utility/stream_interceptor.cpp
-    src/utility/stream_relay.cpp
-    src/utility/singleton.cpp
-    src/utility/thread.cpp
-    src/utility/rate.cpp
-    src/utility/notification.cpp
-    src/utility/notifier.cpp
-    src/utility/type.cpp
-    src/utility/uuid.cpp
-    src/utility/uuid_provider.cpp
-    src/utility/yaml_node_builder.cpp
-    src/utility/slim_signal_implementations.cpp
-    src/utility/ticker.cpp
-    src/utility/cpu_affinity.cpp
-
-    ${csapex_util_HEADERS}
-)
-generate_export_header( csapex_util
-             BASE_NAME csapex_util
-             EXPORT_MACRO_NAME CSAPEX_UTILS_EXPORT
-             EXPORT_FILE_NAME csapex_util_export.h
-             STATIC_DEFINE csapex_util_BUILT_AS_STATIC
-			 )
-target_link_libraries(csapex_util
-    ${Boost_LIBRARIES}
-    ${YAML-CPP_LIBRARY}
-)
-
-list(APPEND csapex_LIBRARIES csapex_util)
-
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src/utility)
+#list(APPEND csapex_LIBRARIES csapex_util)
 
 
 file(GLOB_RECURSE csapex_param_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex/param/*.h*)
@@ -382,6 +348,8 @@ add_library(csapex SHARED
     src/model/graph_facade.cpp
     src/model/graph_facade_impl.cpp
     src/model/memento.cpp
+    src/model/notification.cpp
+    src/model/notifier.cpp
     src/model/multi_connection_type.cpp
     src/model/node_constructor.cpp
     src/model/node.cpp
@@ -443,12 +411,15 @@ generate_export_header( csapex
              STATIC_DEFINE csapex_BUILT_AS_STATIC
 			 )
 target_link_libraries(csapex
+    PUBLIC
     csapex_util
     csapex_profiling
     csapex_param
     csapex_serialization
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
+
+    PRIVATE
     ${TinyXML_LIBRARIES}
     ${class_loader_LIBRARIES}
     ${console_bridge_LIBRARIES} 
@@ -834,9 +805,8 @@ add_custom_command(TARGET cfg POST_BUILD
 #
 # TESTS
 #
-if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/tests/CMakeLists.txt)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
-endif()
+
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
 
 
 #
@@ -859,11 +829,11 @@ endforeach()
 
 if(WIN32)
 	install(DIRECTORY include/${PROJECT_NAME}/
-			DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
+                DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
 else()
 	install(DIRECTORY include/${PROJECT_NAME}/
-                        #LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-			DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+                #LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 endif()
 
 install(TARGETS csapex_main ${csapex_LIBRARIES}

@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 
 using namespace csapex;
 

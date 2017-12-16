@@ -2,7 +2,7 @@
 #define NOTIFIER_H
 
 /// COMPONENT
-#include <csapex/utility/notification.h>
+#include <csapex/model/notification.h>
 #include <csapex/utility/slim_signal.hpp>
 
 namespace csapex

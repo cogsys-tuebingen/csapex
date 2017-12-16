@@ -76,12 +76,12 @@ TEST_F(AutoGenerateTest, ExplicitTypesAreDetected) {
     NodeFacadeImplementationPtr node = factory.makeNode("f1", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
-    EXPECT_EQ(node_id, node->getUUID());
+    ASSERT_EQ(node_id, node->getUUID());
 
-    EXPECT_EQ(node->getParameters().size(), 1);
+    ASSERT_EQ(node->getParameters().size(), 1);
 
-    EXPECT_EQ(node->getInputs().size(), 2 + node->getParameters().size());
-    EXPECT_EQ(node->getOutputs().size(), 1 + node->getParameters().size());
+    ASSERT_EQ(node->getInputs().size(), 2 + node->getParameters().size());
+    ASSERT_EQ(node->getOutputs().size(), 1 + node->getParameters().size());
 
     GenericValueMessage<int>::Ptr a(new GenericValueMessage<int>);
     GenericValueMessage<int>::Ptr b(new GenericValueMessage<int>);
@@ -124,7 +124,7 @@ TEST_F(AutoGenerateTest, ExplicitTypesAreDetected) {
     GenericValueMessage<int>::ConstPtr result = std::dynamic_pointer_cast<GenericValueMessage<int> const>(to->getTokenData());
     ASSERT_TRUE(result != nullptr);
 
-    EXPECT_EQ((a->value + b->value + vp->as<int>()), result->value);
+    ASSERT_EQ((a->value + b->value + vp->as<int>()), result->value);
 }
 
 
@@ -135,12 +135,12 @@ TEST_F(AutoGenerateTest, ImplicitTypesAreDetected) {
     NodeFacadeImplementationPtr node = factory.makeNode("f2", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
-    EXPECT_EQ(node_id, node->getUUID());
+    ASSERT_EQ(node_id, node->getUUID());
 
-    EXPECT_EQ(node->getParameters().size(), 1);
+    ASSERT_EQ(node->getParameters().size(), 1);
 
-    EXPECT_EQ(node->getInputs().size(), 2 + node->getParameters().size());
-    EXPECT_EQ(node->getOutputs().size(), 1 + node->getParameters().size());
+    ASSERT_EQ(node->getInputs().size(), 2 + node->getParameters().size());
+    ASSERT_EQ(node->getOutputs().size(), 1 + node->getParameters().size());
 
     GenericValueMessage<int>::Ptr a(new GenericValueMessage<int>);
     GenericValueMessage<int>::Ptr b(new GenericValueMessage<int>);
@@ -183,7 +183,7 @@ TEST_F(AutoGenerateTest, ImplicitTypesAreDetected) {
     GenericValueMessage<int>::ConstPtr result = std::dynamic_pointer_cast<GenericValueMessage<int> const>(to->getTokenData());
     ASSERT_TRUE(result != nullptr);
 
-    EXPECT_EQ((a->value + b->value + vp->as<int>()), result->value);
+    ASSERT_EQ((a->value + b->value + vp->as<int>()), result->value);
 }
 
 
@@ -194,12 +194,12 @@ TEST_F(AutoGenerateTest, OrderDoesNotMatterTypesAreDetected) {
     NodeFacadeImplementationPtr node = factory.makeNode("f3", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
-    EXPECT_EQ(node_id, node->getUUID());
+    ASSERT_EQ(node_id, node->getUUID());
 
-    EXPECT_EQ(node->getParameters().size(), 3);
+    ASSERT_EQ(node->getParameters().size(), 3);
 
-    EXPECT_EQ(node->getInputs().size(), 2 + node->getParameters().size());
-    EXPECT_EQ(node->getOutputs().size(), 1 + node->getParameters().size());
+    ASSERT_EQ(node->getInputs().size(), 2 + node->getParameters().size());
+    ASSERT_EQ(node->getOutputs().size(), 1 + node->getParameters().size());
 
     GenericValueMessage<int>::Ptr a(new GenericValueMessage<int>);
     GenericValueMessage<double>::Ptr b(new GenericValueMessage<double>);
@@ -246,5 +246,5 @@ TEST_F(AutoGenerateTest, OrderDoesNotMatterTypesAreDetected) {
     GenericValueMessage<std::string>::ConstPtr result = std::dynamic_pointer_cast<GenericValueMessage<std::string> const>(to->getTokenData());
     ASSERT_TRUE(result != nullptr);
 
-    EXPECT_EQ("1411", result->value);
+    ASSERT_EQ("1411", result->value);
 }

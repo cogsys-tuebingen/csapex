@@ -5,7 +5,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/csapex_export.h>
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>

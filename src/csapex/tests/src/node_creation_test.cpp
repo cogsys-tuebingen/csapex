@@ -82,7 +82,7 @@ TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
     NodeFacadeImplementationPtr node = factory.makeNode("MockupNode", node_id, uuid_provider);
 
     ASSERT_TRUE(node != nullptr);
-    EXPECT_EQ(node_id, node->getUUID());
+    ASSERT_EQ(node_id, node->getUUID());
 }
 
 TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {

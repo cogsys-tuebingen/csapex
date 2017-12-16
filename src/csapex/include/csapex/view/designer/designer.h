@@ -11,7 +11,7 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/profiling/profilable.h>
-#include <csapex/utility/notification.h>
+#include <csapex/model/notification.h>
 #include <csapex/model/observer.h>
 
 /// SYSTEM

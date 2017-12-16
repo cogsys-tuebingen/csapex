@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/io/broadcast_impl.hpp>
-#include <csapex/utility/notification.h>
+#include <csapex/model/notification.h>
 #include <csapex/serialization/serialization_fwd.h>
 
 namespace csapex

@@ -5,6 +5,7 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/utility/assert.h>
 #include <csapex/utility/exceptions.h>
+#include <csapex/utility/pack_traits.hpp>
 
 /// SYSTEM
 #include <algorithm>
@@ -407,6 +408,138 @@ void Signal<Signature>::applyModifications()
         lock.lock();
     }
     delegates_to_remove_.clear();
+}
+
+
+/**
+ * @brief Helper class
+ */
+namespace detail
+{
+template <typename Signature,
+          std::size_t pos, std::size_t max,
+          typename... AdditionalParameters>
+struct MatchingConnector
+{
+    template <typename ActualResult, typename... ActualParameters>
+    static constexpr Connection connect(
+            Signal<Signature>* signal,
+            const std::function<ActualResult(ActualParameters...)>& fn)
+    {
+        const std::size_t end = csapex::function_traits<Signature>::arity;
+        using Type = typename csapex::function_traits<Signature>:: template arg<end-pos-1>::type;
+        return MatchingConnector<Signature, pos+1, max-1, Type, AdditionalParameters...>::connect(signal, fn);
+    }
+
+    template <typename ActualResult, typename... ActualParameters>
+    static constexpr Connection connect(
+            Signal<Signature>* signal,
+            const Signal<ActualResult(ActualParameters...)>& fn)
+    {
+        const std::size_t end = csapex::function_traits<Signature>::arity;
+        using Type = typename csapex::function_traits<Signature>:: template arg<end-pos-1>::type;
+        return MatchingConnector<Signature, pos+1, max-1, Type, AdditionalParameters...>::connect(signal, fn);
+    }
+};
+
+
+template <typename Signature,
+          std::size_t pos,
+          typename... AdditionalParameters>
+struct MatchingConnector<Signature, pos, 0, AdditionalParameters...>
+{
+    template <typename ActualResult, typename... ActualParameters>
+    static constexpr Connection connect(
+            Signal<Signature>* signal,
+            const std::function<ActualResult(ActualParameters...)>& fn,
+            typename std::enable_if<sizeof...(ActualParameters) == function_traits<Signature>::arity, int>::type* = 0)
+    {
+        return signal->connect(static_cast<std::function<Signature>>(fn));
+    }
+
+
+    template <typename ActualResult, typename... ActualParameters>
+    static constexpr Connection connect(
+            Signal<Signature>* signal,
+            const std::function<ActualResult(ActualParameters...)>& fn,
+            typename std::enable_if<sizeof...(ActualParameters) < function_traits<Signature>::arity, int>::type* = 0)
+    {
+        using ReturnType = typename csapex::function_traits<Signature>::result_type;
+        std::function<Signature> callback = [fn](ActualParameters... params, AdditionalParameters... /*drop*/) -> ReturnType
+        {
+            fn(params...);
+        };
+        return signal->connect(callback);
+    }
+
+
+    template <typename ActualResult, typename... ActualParameters>
+    static constexpr Connection connect(
+            Signal<Signature>* signal,
+            Signal<ActualResult(ActualParameters...)>& sig,
+            typename std::enable_if<is_signature_equal<Signature, ActualResult, ActualParameters...>::value, int>::type* = 0)
+    {
+        static_assert(is_signature_equal<Signature, ActualResult, ActualParameters...>::value, "Signals match");
+        return signal->connect(sig);
+    }
+
+
+    template <typename ActualResult, typename... ActualParameters>
+    static constexpr Connection connect(
+            Signal<Signature>* signal,
+            Signal<ActualResult(ActualParameters...)>& sig,
+            typename std::enable_if<!is_signature_equal<Signature, ActualResult, ActualParameters...>::value, int>::type* = 0)
+    {
+        static_assert(!is_signature_equal<Signature, ActualResult, ActualParameters...>::value, "Signals don't match");
+
+        using ReturnType = typename csapex::function_traits<Signature>::result_type;
+        std::function<Signature> callback = [&sig](ActualParameters... params, AdditionalParameters... /*drop*/) -> ReturnType
+        {
+            sig(params...);
+        };
+        return signal->connect(callback);
+    }
+};
+}
+
+template <typename Signature>
+template <typename Callable>
+Connection Signal<Signature>::connectAny(Callable &function,
+                                         tag_is_function<false, false>)
+{
+    static_assert(!std::is_base_of<SignalBase, Callable>::value, "SignalBase assert");
+    static_assert(!std::is_bind_expression<Callable>::value, "Bind assert");
+
+    using FunctionType = typename std::decay<decltype(function)>::type;
+    const std::size_t available = csapex::function_traits<Signature>::arity;
+    const std::size_t needed = csapex::function_traits<FunctionType>::arity;
+
+    std::function<typename function_traits<FunctionType>::signature> fn = function;
+    return std::move(detail::MatchingConnector<Signature, 0, available-needed>::connect(this, fn));
+}
+
+template <typename Signature>
+template <typename Callable>
+Connection Signal<Signature>::connectAny(Callable &function,
+                                         tag_is_function<false, true>)
+{
+    std::function<Signature> fn = function;
+    return std::move(connect(fn));
+}
+
+template <typename Signature>
+template <typename Callable>
+Connection Signal<Signature>::connectAny(Callable &signal,
+                                         tag_is_function<true, false>)
+{
+    static_assert(std::is_base_of<SignalBase, Callable>::value, "SignalBase assert");
+    static_assert(!std::is_bind_expression<Callable>::value, "Bind assert");
+
+    using FunctionType = typename Callable::signature_t;
+    const std::size_t available = csapex::function_traits<Signature>::arity;
+    const std::size_t needed = csapex::function_traits<FunctionType>::arity;
+
+    return std::move(detail::MatchingConnector<Signature, 0, available-needed>::connect(this, signal));
 }
 
 template <typename Signature>

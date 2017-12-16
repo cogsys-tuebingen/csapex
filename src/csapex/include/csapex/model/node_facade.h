@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/observer.h>
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/profiling/profiling_fwd.h>

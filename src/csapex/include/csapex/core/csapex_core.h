@@ -7,7 +7,7 @@
 #include <csapex/csapex_export.h>
 #include <csapex/model/observer.h>
 #include <csapex/plugin/plugin_fwd.h>
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/utility/utility_fwd.h>
 #include <csapex/utility/uuid.h>

@@ -74,17 +74,17 @@ TEST_F(GraphTest, NodeCanBeFound) {
 
     Node* node_found = graph->findNode(node_id);
     ASSERT_NE(nullptr, node_found);
-    EXPECT_EQ(node->getNode().get(), node_found);
+    ASSERT_EQ(node->getNode().get(), node_found);
 
     NodeHandle* node_handle_found = graph->findNodeHandle(node_id);
     ASSERT_NE(nullptr, node_handle_found);
-    EXPECT_EQ(node_id, node_handle_found->getUUID());
-    EXPECT_EQ(node->getNodeHandle().get(), node_handle_found);
+    ASSERT_EQ(node_id, node_handle_found->getUUID());
+    ASSERT_EQ(node->getNodeHandle().get(), node_handle_found);
 
     NodeFacadePtr node_facade_found = graph->findNodeFacade(node_id);
     ASSERT_NE(nullptr, node_facade_found);
-    EXPECT_EQ(node_id, node_facade_found->getUUID());
-    EXPECT_EQ(node, node_facade_found);
+    ASSERT_EQ(node_id, node_facade_found->getUUID());
+    ASSERT_EQ(node, node_facade_found);
 }
 
 TEST_F(GraphTest, NodeCanBeFoundWithAConnector) {
@@ -103,17 +103,17 @@ TEST_F(GraphTest, NodeCanBeFoundWithAConnector) {
 
     Node* node_found = graph->findNodeForConnector(search_node_id);
     ASSERT_NE(nullptr, node_found);
-    EXPECT_EQ(node->getNode().get(), node_found);
+    ASSERT_EQ(node->getNode().get(), node_found);
 
     NodeHandle* node_handle_found = graph->findNodeHandleForConnector(search_node_id);
     ASSERT_NE(nullptr, node_handle_found);
-    EXPECT_EQ(node_id, node_handle_found->getUUID());
-    EXPECT_EQ(node->getNodeHandle().get(), node_handle_found);
+    ASSERT_EQ(node_id, node_handle_found->getUUID());
+    ASSERT_EQ(node->getNodeHandle().get(), node_handle_found);
 
     NodeFacadePtr node_facade_found = graph->findNodeFacadeForConnector(search_node_id);
     ASSERT_NE(nullptr, node_facade_found);
-    EXPECT_EQ(node_id, node_facade_found->getUUID());
-    EXPECT_EQ(node, node_facade_found);
+    ASSERT_EQ(node_id, node_facade_found->getUUID());
+    ASSERT_EQ(node, node_facade_found);
 }
 
 TEST_F(GraphTest, NodeCanBeDeleted) {
@@ -177,22 +177,22 @@ TEST_F(GraphTest, NestedNodeCanBeFound) {
     Node* node_found = graph->findNode(nested_id);
     ASSERT_NE(nullptr, node_found);
 
-    EXPECT_EQ(node_id, node_found->getUUID());
-    EXPECT_EQ(node_found, node_facade->getNode().get());
+    ASSERT_EQ(node_id, node_found->getUUID());
+    ASSERT_EQ(node_found, node_facade->getNode().get());
 
 
     node_handle_found = graph->findNodeHandle(nested_id);
     ASSERT_NE(nullptr, node_handle_found);
 
-    EXPECT_EQ(node_id, node_handle_found->getUUID());
-    EXPECT_EQ(node_handle_found, node_facade->getNodeHandle().get());
+    ASSERT_EQ(node_id, node_handle_found->getUUID());
+    ASSERT_EQ(node_handle_found, node_facade->getNodeHandle().get());
 
 
     NodeFacadePtr node_facade_found = graph->findNodeFacade(nested_id);
     ASSERT_NE(nullptr, node_facade_found);
 
-    EXPECT_EQ(node_id, node_facade_found->getUUID());
-    EXPECT_EQ(node_facade_found, node_facade);
+    ASSERT_EQ(node_id, node_facade_found->getUUID());
+    ASSERT_EQ(node_facade_found, node_facade);
 }
 
 TEST_F(GraphTest, RootCanBeFound) {
@@ -208,18 +208,18 @@ TEST_F(GraphTest, RootCanBeFound) {
 
     Node* node_found = graph->findNode(node_id);
     ASSERT_NE(nullptr, node_found);
-    EXPECT_EQ(graph_node->getUUID(), node_found->getUUID());
-    EXPECT_EQ(graph_node.get(), node_found);
+    ASSERT_EQ(graph_node->getUUID(), node_found->getUUID());
+    ASSERT_EQ(graph_node.get(), node_found);
 
     NodeHandle* nodehandle_found = graph->findNodeHandle(node_id);
     ASSERT_NE(nullptr, nodehandle_found);
-    EXPECT_EQ(graph_node->getUUID(), nodehandle_found->getUUID());
-    EXPECT_EQ(graph_node->getNodeHandle(), nodehandle_found);
+    ASSERT_EQ(graph_node->getUUID(), nodehandle_found->getUUID());
+    ASSERT_EQ(graph_node->getNodeHandle(), nodehandle_found);
 
     NodeFacadePtr  nodefacade_found = graph->findNodeFacade(node_id);
     ASSERT_NE(nullptr, nodefacade_found);
-    EXPECT_EQ(main_facade->getUUID(), nodefacade_found->getUUID());
-    EXPECT_EQ(main_facade, nodefacade_found);
+    ASSERT_EQ(main_facade->getUUID(), nodefacade_found->getUUID());
+    ASSERT_EQ(main_facade, nodefacade_found);
 
 }
 

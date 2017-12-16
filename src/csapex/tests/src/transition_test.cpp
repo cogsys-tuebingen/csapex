@@ -100,28 +100,28 @@ TEST_F(TransitionTest, TestOutputTransitionSequenceIds)
     ot.addOutput(o1);
     ot.addOutput(o2);
 
-    auto EXPECT_SEQ_NO = [&](int i) {
-        EXPECT_EQ(i, ot.getSequenceNumber());
-        EXPECT_EQ(i, o1->sequenceNumber());
-        EXPECT_EQ(i, o2->sequenceNumber());
+    auto ASSERT_SEQ_NO = [&](int i) {
+        ASSERT_EQ(i, ot.getSequenceNumber());
+        ASSERT_EQ(i, o1->sequenceNumber());
+        ASSERT_EQ(i, o2->sequenceNumber());
     };
 
     // initial
-    EXPECT_SEQ_NO(-1);
+    ASSERT_SEQ_NO(-1);
 
     sendMessage(*o1,1);
     sendMessage(*o2,1);
 
     ot.sendMessages(false);
 
-    EXPECT_SEQ_NO(0);
+    ASSERT_SEQ_NO(0);
 
     sendMessage(*o1,2);
     sendMessage(*o2,2);
 
     ot.sendMessages(false);
 
-    EXPECT_SEQ_NO(1);
+    ASSERT_SEQ_NO(1);
 
 
     sendMessage(*o1,3);
@@ -132,7 +132,7 @@ TEST_F(TransitionTest, TestOutputTransitionSequenceIds)
 
     ot.sendMessages(false);
 
-    EXPECT_SEQ_NO(42);
+    ASSERT_SEQ_NO(42);
 }
 
 
@@ -145,30 +145,30 @@ TEST_F(TransitionTest, TestOutputTransitionSequenceIdsConnected)
     ConnectionPtr c_1a_1 = DirectConnection::connect(o1, i1);
     ConnectionPtr c_1b_2 = DirectConnection::connect(o2, i2);
 
-    auto EXPECT_SEQ_NO = [&](int i) {
-        EXPECT_EQ(i, i1->sequenceNumber());
-        EXPECT_EQ(i, i2->sequenceNumber());
-        EXPECT_EQ(i, ot.getSequenceNumber());
-        EXPECT_EQ(i, o1->sequenceNumber());
-        EXPECT_EQ(i, o2->sequenceNumber());
+    auto ASSERT_SEQ_NO = [&](int i) {
+        ASSERT_EQ(i, i1->sequenceNumber());
+        ASSERT_EQ(i, i2->sequenceNumber());
+        ASSERT_EQ(i, ot.getSequenceNumber());
+        ASSERT_EQ(i, o1->sequenceNumber());
+        ASSERT_EQ(i, o2->sequenceNumber());
     };
 
     // initial
-    EXPECT_SEQ_NO(-1);
+    ASSERT_SEQ_NO(-1);
 
     sendMessage(*o1,1);
     sendMessage(*o2,1);
 
     ot.sendMessages(false);
 
-    EXPECT_SEQ_NO(0);
+    ASSERT_SEQ_NO(0);
 
     sendMessage(*o1,2);
     sendMessage(*o2,2);
 
     ot.sendMessages(false);
 
-    EXPECT_SEQ_NO(1);
+    ASSERT_SEQ_NO(1);
 
 
     sendMessage(*o1,3);
@@ -179,7 +179,7 @@ TEST_F(TransitionTest, TestOutputTransitionSequenceIdsConnected)
 
     ot.sendMessages(false);
 
-    EXPECT_SEQ_NO(42);
+    ASSERT_SEQ_NO(42);
 }
 
 TEST_F(TransitionTest, TestOutputTransition)

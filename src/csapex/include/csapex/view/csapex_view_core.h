@@ -9,7 +9,7 @@
 #include <csapex/view/designer/designer_options.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/utility/slim_signal.h>
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 #include <csapex/model/observer.h>
 #include <csapex/command/command_executor.h>
 #include <csapex/plugin/plugin_fwd.h>

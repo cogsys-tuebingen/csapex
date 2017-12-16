@@ -94,7 +94,7 @@ TEST_F(YAMLSerializationTest, YamlSerializationWorks)
 
     ASSERT_TRUE(node["data"].IsDefined());
     ASSERT_TRUE(node["data"]["payload"].IsDefined());
-    EXPECT_EQ("foo", node["data"]["payload"].as<std::string>());
+    ASSERT_EQ("foo", node["data"]["payload"].as<std::string>());
 }
 
 TEST_F(YAMLSerializationTest, YamlDeserializationWorks)
@@ -109,5 +109,5 @@ TEST_F(YAMLSerializationTest, YamlDeserializationWorks)
     MockMessage::Ptr mockmsg = msg::message_cast<MockMessage>(msg);
     ASSERT_NE(nullptr, msg);
 
-    EXPECT_EQ("bar", mockmsg->value.payload);
+    ASSERT_EQ("bar", mockmsg->value.payload);
 }

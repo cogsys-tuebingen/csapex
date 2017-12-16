@@ -7,8 +7,8 @@
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/csapex_export.h>
-#include <csapex/utility/notifier.h>
-#include <csapex/utility/notification.h>
+#include <csapex/model/notifier.h>
+#include <csapex/model/notification.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/model/observer.h>
 #include <csapex/model/connection_description.h>

@@ -7,7 +7,7 @@
 #include <csapex/utility/uuid.h>
 
 /// PROJECT
-#include <csapex/utility/notifier.h>
+#include <csapex/model/notifier.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/plugin/plugin_fwd.h>
