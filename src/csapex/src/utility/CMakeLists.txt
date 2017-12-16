@@ -4,6 +4,8 @@ project(csapex_utility)
 
 enable_testing()
 
+include (GenerateExportHeader)
+
 SET(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
 SET(CMAKE_C_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
 
@@ -65,8 +67,8 @@ generate_export_header( csapex_util
              BASE_NAME csapex_util
              EXPORT_MACRO_NAME CSAPEX_UTILS_EXPORT
              EXPORT_FILE_NAME csapex_util_export.h
-             STATIC_DEFINE csapex_util_BUILT_AS_STATIC
-                         )
+             STATIC_DEFINE csapex_util_BUILT_AS_STATIC)
+
 target_link_libraries(csapex_util
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
@@ -77,6 +79,17 @@ target_link_libraries(csapex_util
 # INSTALL
 #
 
+if(WIN32)
+    file(COPY ${CMAKE_CURRENT_BINARY_DIR}/csapex_util_export.h
+         DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
+            install(FILES ${PROJECT_BINARY_DIR}/csapex_util_export.h
+                            DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
+else()
+    file(COPY ${CMAKE_CURRENT_BINARY_DIR}/csapex_util_export.h
+         DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
+            install(FILES ${PROJECT_BINARY_DIR}/csapex_util_export.h
+                            DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+endif()
 
 install(TARGETS csapex_util
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

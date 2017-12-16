@@ -27,7 +27,7 @@ indigo:
   script:
     - catkin_make
     - source devel/setup.bash
-    - rosrun csapex csapex_test
+    - cd build && make test
 
 jade:
   stage: build_and_test
@@ -35,7 +35,7 @@ jade:
   script:
     - catkin_make
     - source devel/setup.bash
-    - rosrun csapex csapex_test
+    - cd build && make test
 
 kinetic:
   stage: build_and_test
@@ -43,5 +43,5 @@ kinetic:
   script:
     - catkin_make
     - source devel/setup.bash
-    - rosrun csapex csapex_test
+    - cd build && make test
 
