@@ -172,8 +172,20 @@ bool isMessage(Input* input,
 }
 
 template <typename R>
+bool isExactMessage(Input* input)
+{
+    auto msg = getMessage(input);
+    return typeid(*msg) == typeid(R);
+}
+
+template <typename R>
 bool isValue(Input* input) {
     return isMessage< connection_types::GenericValueMessage<R> >(input);
+}
+
+template <typename R>
+bool isExactValue(Input* input) {
+    return isExactMessage< connection_types::GenericValueMessage<R> >(input);
 }
 
 

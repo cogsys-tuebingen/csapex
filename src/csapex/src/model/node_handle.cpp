@@ -449,17 +449,17 @@ void NodeHandle::updateParameterValue(Connectable *s)
     
     csapex::param::Parameter* p = input_2_param_.at(source->getUUID());
 
-    if(msg::isValue<int>(source)) {
+    if(msg::isExactValue<int>(source)) {
         updateParameterValueFrom<int>(p, source);
-    } else if(msg::isValue<bool>(source)) {
+    } else if(msg::isExactValue<bool>(source)) {
         updateParameterValueFrom<bool>(p, source);
-    } else if(msg::isValue<double>(source)) {
+    } else if(msg::isExactValue<double>(source)) {
         updateParameterValueFrom<double>(p, source);
-    } else if(msg::isValue<std::string>(source)) {
+    } else if(msg::isExactValue<std::string>(source)) {
         updateParameterValueFrom<std::string>(p, source);
-    } else if(msg::isValue<std::pair<int,int>>(source)) {
+    } else if(msg::isExactValue<std::pair<int,int>>(source)) {
         updateParameterValueFrom<std::pair<int, int>>(p, source);
-    } else if(msg::isValue<std::pair<double,double>>(source)) {
+    } else if(msg::isExactValue<std::pair<double,double>>(source)) {
         updateParameterValueFrom<std::pair<double, double>>(p, source);
     } else if(msg::hasMessage(source) && !msg::isMessage<connection_types::MarkerMessage>(source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
