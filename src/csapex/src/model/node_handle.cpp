@@ -192,6 +192,10 @@ bool NodeHandle::isActive() const
 
 void NodeHandle::stop()
 {
+    if(node_) {
+        node_->tearDown();
+    }
+
     stopped();
 
     if(node_) {
