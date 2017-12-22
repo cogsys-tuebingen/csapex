@@ -215,7 +215,6 @@ void NodeBox::construct()
     observer_.observeQueued(node_facade_->destroyed, [this](){ destruct(); });
 
     enabledChangeEvent(node_facade_->isProcessingEnabled());
-    observer_.observeQueued(node_facade_->notification, [this](Notification){ updateVisualsRequest(); });
 
     QObject::connect(this, &NodeBox::enabledChange, this, &NodeBox::enabledChangeEvent, Qt::QueuedConnection);
 
