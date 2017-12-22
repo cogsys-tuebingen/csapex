@@ -12,6 +12,7 @@
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/connection_description.h>
+#include <csapex/model/generic_state.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/signal/event.h>
@@ -552,6 +553,7 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr
 
     NodeState::Ptr s = node_facade->getNodeState();
     s->readYaml(doc);
+    s->getParameterState()->initializePersistentParameters();
 
     int x = doc["pos"][0].as<double>() + position_offset_x_;
     int y = doc["pos"][1].as<double>() + position_offset_y_;
