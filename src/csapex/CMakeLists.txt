@@ -35,7 +35,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## CATKIN
 if(${catkin_FOUND})
     catkin_package(
-       INCLUDE_DIRS include
+       INCLUDE_DIRS
+          include
+          src/utility/include
        LIBRARIES csapex
        DEPENDS Boost
        CATKIN_DEPENDS class_loader
