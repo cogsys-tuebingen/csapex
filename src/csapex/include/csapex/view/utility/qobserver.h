@@ -71,7 +71,7 @@ public:
                 std::unique_lock<std::recursive_mutex> lock(observation_queue_mutex_);
 
 #if USE_GCC47_WORKAROUND
-                std::tuple<Args...> args_tuple(args...);
+                std::tuple<typename std::decay<Args>::type...> args_tuple(args...);
 #endif //USE_GCC47_WORKAROUND
 
                 observation_queue_.emplace_back([=](){
@@ -97,7 +97,7 @@ public:
                 std::unique_lock<std::recursive_mutex> lock(observation_queue_mutex_);
 
 #if USE_GCC47_WORKAROUND
-                std::tuple<Args...> args_tuple(args...);
+                std::tuple<typename std::decay<Args>::type...> args_tuple(args...);
 #endif //USE_GCC47_WORKAROUND
 
                 observation_queue_.emplace_back([=](){
@@ -127,7 +127,7 @@ public:
                 std::unique_lock<std::recursive_mutex> lock(observation_queue_mutex_);
 
 #if USE_GCC47_WORKAROUND
-                std::tuple<Args...> args_tuple(args...);
+                std::tuple<typename std::decay<Args>::type...> args_tuple(args...);
 #endif //USE_GCC47_WORKAROUND
 
                 observation_queue_.emplace_back([=](){
@@ -154,7 +154,7 @@ public:
                 std::unique_lock<std::recursive_mutex> lock(observation_queue_mutex_);
 
 #if USE_GCC47_WORKAROUND
-                std::tuple<Args...> args_tuple(args...);
+                std::tuple<typename std::decay<Args>::type...> args_tuple(args...);
 #endif //USE_GCC47_WORKAROUND
 
                 observation_queue_.emplace_back([=](){
