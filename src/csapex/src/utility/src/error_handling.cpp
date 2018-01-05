@@ -249,6 +249,9 @@ void csapex::error_handling::sigsegvhandler(int sig_num, siginfo_t * info, void 
 
     free(messages);
 
-    raise(SIGKILL);
+    // no longer listen to the signal
+    signal(sig_num, SIG_DFL);
+    // trigger it again -> allows core dumps
+    ::kill(getpid(), sig_num);
 }
 #endif
