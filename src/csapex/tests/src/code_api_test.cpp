@@ -63,6 +63,11 @@ TEST_F(CodeApiTest, GraphBuildingUsingIndices) {
 
     ASSERT_EQ(-1, sink->getValue());
 
+    ASSERT_TRUE(source->getNodeWorker()->canProcess());
+    ASSERT_TRUE(times_4->getNodeWorker()->canProcess());
+    ASSERT_TRUE(times_7->getNodeWorker()->canProcess());
+    ASSERT_TRUE(sink_p->getNodeWorker()->canProcess());
+
     executor.start();
     for(int iter = 0; iter < 23; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());

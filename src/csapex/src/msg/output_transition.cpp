@@ -213,6 +213,11 @@ bool OutputTransition::areOutputsIdle() const
     return true;
 }
 
+int OutputTransition::getPortCount() const
+{
+    return outputs_.size();
+}
+
 void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);

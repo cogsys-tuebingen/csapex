@@ -16,6 +16,8 @@ public:
     OutputTransition(delegate::Delegate0<> activation_fn);
     OutputTransition();
 
+    int getPortCount() const override;
+
     std::vector<UUID> getOutputs() const;
     OutputPtr getOutput(const UUID& id) const;
     OutputPtr getOutputNoThrow(const UUID& id) const noexcept;

@@ -18,6 +18,8 @@ public:
     InputTransition(delegate::Delegate0<> activation_fn);
     InputTransition();
 
+    int getPortCount() const override;
+
     InputPtr getInput(const UUID& id) const;
     InputPtr getInputNoThrow(const UUID& id) const noexcept;
     std::vector<UUID> getInputs() const;

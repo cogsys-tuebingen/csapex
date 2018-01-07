@@ -20,6 +20,8 @@ public:
 
     virtual ~Transition();
 
+    virtual int getPortCount() const = 0;
+
     void setActivationFunction(delegate::Delegate0<> activation_fn);
 
     void addConnection(ConnectionPtr connection);
@@ -41,7 +43,7 @@ public:
     bool areAllConnections(Connection::State a, /*or*/ Connection::State b, /*or*/ Connection::State c) const;
     bool isOneConnection(Connection::State state) const;
 
-    std::vector<ConnectionPtr> getConnections() const;
+    std::vector<ConnectionPtr> getConnections() const;    
 
 public:
     slim_signal::Signal<void()> enabled_changed;

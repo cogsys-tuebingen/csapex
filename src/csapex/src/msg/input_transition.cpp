@@ -314,3 +314,8 @@ bool InputTransition::areMessagesForwarded() const
 {
     return forwarded_;
 }
+
+int InputTransition::getPortCount() const
+{
+    return inputs_.size();
+}
