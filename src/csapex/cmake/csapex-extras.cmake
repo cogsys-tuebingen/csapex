@@ -3,7 +3,7 @@ if(WIN32)
 else()
 add_definitions(-W -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function
     -Wno-deprecated-register -Wno-deprecated-register
-    -Wpedantic)
+    -pedantic)
 endif()
 
 
