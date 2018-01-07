@@ -13,7 +13,7 @@ find_package(catkin QUIET)
 find_package(class_loader REQUIRED)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED)
-find_package(Boost COMPONENTS program_options filesystem system regex serialization thread iostreams REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem system regex  iostreams REQUIRED)
 
 find_package(OpenGL REQUIRED)
 find_package(TinyXML REQUIRED)
@@ -771,7 +771,8 @@ add_executable(csapex_demo_client
 
 target_link_libraries(csapex_demo_client
     csapex_qt
-    ${Boost_LIBRARIES})
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES})
 
 
 
