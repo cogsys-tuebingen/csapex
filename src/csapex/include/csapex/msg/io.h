@@ -89,6 +89,25 @@ std::shared_ptr<R> message_cast(const std::shared_ptr<S>& msg)
     return MessageCaster<typename std::remove_const<R>::type, typename std::remove_const<S>::type>::cast(msg);
 }
 
+/// TOKEN CREATION
+template <typename T>
+TokenPtr createToken(T&& v,
+                     typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0)
+{
+    auto msg = std::make_shared<connection_types::GenericValueMessage<T>>(v);
+    return std::make_shared<Token>(msg);
+}
+
+template <typename T>
+TokenPtr createToken(T&& v,
+                     typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0)
+{
+    auto msg = std::make_shared<connection_types::GenericPointerMessage<T>>();
+    msg->value = std::make_shared<T>(std::move(v));
+    return std::make_shared<Token>(msg);
+}
+
+
 /// INPUT
 CSAPEX_EXPORT TokenDataConstPtr getMessage(Input* input);
 
@@ -221,8 +240,7 @@ void publish(Output* output,
              T message,
              std::string frame_id = "/")
 {
-    typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(frame_id));
-    msg->value = message;
+    typename connection_types::GenericValueMessage<T>::Ptr msg(new connection_types::GenericValueMessage<T>(message, frame_id));
     publish(output, message_cast<TokenData>(msg));
 }
 

@@ -24,6 +24,11 @@ struct GenericPointerMessage : public Message
 
         setDescriptiveName(type2name(typeid(Type)));
     }
+    GenericPointerMessage(const std::shared_ptr<Type>& ptr, const std::string& frame_id = "/", Message::Stamp stamp = 0)
+        : GenericPointerMessage(frame_id, stamp)
+    {
+        value = ptr;
+    }
 
     virtual TokenData::Ptr clone() const override
     {

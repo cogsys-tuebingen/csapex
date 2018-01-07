@@ -27,8 +27,9 @@ struct GenericValueMessage : public Message, public ValueMessageBase
     typedef std::shared_ptr<GenericValueMessage<Type> > Ptr;
     typedef std::shared_ptr<GenericValueMessage<Type> const> ConstPtr;
 
-    GenericValueMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0)
-        : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp)
+    GenericValueMessage(const Type& value = Type(), const std::string& frame_id = "/", Message::Stamp stamp = 0)
+        : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp),
+          value(value)
     {
         static csapex::DirectMessageConstructorRegistered<connection_types::GenericValueMessage, Type> reg_c;
         static csapex::DirectMessageSerializerRegistered<connection_types::GenericValueMessage, Type> reg_s;
@@ -36,15 +37,12 @@ struct GenericValueMessage : public Message, public ValueMessageBase
 
     virtual TokenData::Ptr clone() const override
     {
-        Ptr new_msg(new GenericValueMessage<Type>(frame_id, stamp_micro_seconds));
-        new_msg->value = value;
-        return new_msg;
+        return std::make_shared<GenericValueMessage<Type>>(value, frame_id, stamp_micro_seconds);
     }
 
     virtual TokenData::Ptr toType() const override
     {
-        Ptr new_msg(new GenericValueMessage<Type>("/"));
-        return new_msg;
+        return std::make_shared<GenericValueMessage<Type>>();
     }
 
     bool acceptsConnectionFrom(const TokenData* other_side) const override
