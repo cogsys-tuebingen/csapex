@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(csapex_utility)
 
+find_package(Boost COMPONENTS regex system REQUIRED)
+
 enable_testing()
 
 include (GenerateExportHeader)
@@ -53,6 +55,9 @@ add_library(csapex_util SHARED
 
     ${csapex_util_HEADERS}
 )
+
+# link rt library for shared memory
+target_link_libraries(csapex_util -lrt)
 
 # Define headers for this library. PUBLIC headers are used for
 # compiling the library, and will be added to consumers' build
@@ -118,6 +123,7 @@ include_directories(${GTEST_INCLUDE_DIR} ../include)
 add_executable(${PROJECT_NAME}_tests
     tests/slim_signals_test.cpp
     tests/uuid_test.cpp
+    tests/shared_memory_test.cpp
 )
 
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME}_tests)
