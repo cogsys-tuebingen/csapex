@@ -37,7 +37,7 @@ include_directories(${GTEST_INCLUDE_DIR} include)
 add_executable(${PROJECT_NAME}
     src/code_api_test.cpp
     src/auto_generate_test.cpp
-
+    src/processing_test.cpp
     src/message_template_test.cpp
     src/graph_test.cpp
     src/polymorphic_msgs_test.cpp
