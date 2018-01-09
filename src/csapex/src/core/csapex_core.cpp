@@ -255,8 +255,6 @@ void CsApexCore::init(bool create_global_ports)
         root_->notification.connect(notification);
 
 
-        root_scheduler_ = std::make_shared<NodeRunner>(root_worker_);
-        thread_pool_->add(root_scheduler_.get());
 
         if(is_root_) {
             root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),

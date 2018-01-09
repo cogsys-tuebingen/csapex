@@ -430,6 +430,23 @@ void NodeHandle::makeParameterNotConnectable(csapex::param::ParameterPtr p)
     apex_assert_hard(output_2_param_.erase(cout->getUUID()) != 0);
 }
 
+bool NodeHandle::updateParameterValues()
+{
+    bool change = false;
+    for(auto pair : param_2_input_) {
+        InputPtr cin = pair.second.lock();
+        if(cin) {
+            apex_assert_hard(cin->isOptional());
+            if(msg::hasMessage(cin.get())) {
+                updateParameterValue(cin.get());
+                change = true;
+            }
+        }
+    }
+
+    return change;
+}
+
 namespace {
 template <typename V>
 void updateParameterValueFrom(csapex::param::Parameter* p, Input* source)

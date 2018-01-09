@@ -10,7 +10,6 @@ NodeCharacteristics::NodeCharacteristics()
     : depth(-1),
       component(-1),
 
-      is_vertex_separator(false),
       is_joining_vertex(false),
       is_joining_vertex_counterpart(false),
       is_combined_by_joining_vertex(false),
@@ -31,7 +30,6 @@ void NodeCharacteristics::serialize(SerializationBuffer &data) const
 {
     data << depth;
     data << component;
-    data << is_vertex_separator;
     data << is_joining_vertex;
     data << is_joining_vertex_counterpart;
     data << is_combined_by_joining_vertex;
@@ -42,7 +40,6 @@ void NodeCharacteristics::deserialize(const SerializationBuffer& data)
 {
     data >> depth;
     data >> component;
-    data >> is_vertex_separator;
     data >> is_joining_vertex;
     data >> is_joining_vertex_counterpart;
     data >> is_combined_by_joining_vertex;

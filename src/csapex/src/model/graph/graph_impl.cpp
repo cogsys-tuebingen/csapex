@@ -596,11 +596,6 @@ void GraphImplementation::calculateDepths()
         //        todo:
         //        - remember for each of vertex join counterpart, which children are enclosed -> only send NoMessage to non-enclosed children.
     }
-
-    for(graph::VertexPtr& vertex : vertices_) {
-        NodeCharacteristics& c = vertex->getNodeCharacteristics();
-        c.is_vertex_separator = !c.is_leading_to_joining_vertex;
-    }
 }
 
 

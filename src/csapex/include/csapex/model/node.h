@@ -196,7 +196,7 @@ public:
      *
      * @see Node::processMarker
      */
-    virtual bool processMessageMarkers() const;
+    virtual bool processNothingMarkers() const;
 
     /**
      * @brief processMarker is called, whenever a connection_types::MarkerMessage is received.

@@ -15,6 +15,7 @@
 #include <csapex/model/notifier.h>
 #include <csapex/model/activity_type.h>
 #include <csapex/model/execution_state.h>
+#include <csapex/model/activity_modifier.h>
 
 /// SYSTEM
 #include <map>
@@ -50,11 +51,11 @@ public:
 
     void ioChanged();
 
+    void handleChangedParameters();
 
     void triggerTryProcess();
     void triggerPanic();
 
-    void setState(ExecutionState state);
     ExecutionState getExecutionState() const;
 
     std::shared_ptr<ProfilerImplementation> getProfiler();
@@ -62,16 +63,12 @@ public:
     bool isEnabled() const;
     bool isIdle() const;
     bool isProcessing() const;
-    bool isFired() const;
-
 
     bool isProcessingEnabled() const;
     void setProcessingEnabled(bool e);
 
     void setProfiling(bool profiling);
     bool isProfiling() const;
-
-    void setIOError(bool error);
 
     /* REMOVE => UI*/ void setMinimized(bool min);
 
@@ -85,11 +82,9 @@ public:
 
 public:
     bool startProcessingMessages();
-    void forwardMessages(bool send_parameters);
+    void forwardMessages();
 
     bool execute();
-
-    void checkParameters();
 
     void triggerError(bool e, const std::string& what);
 
@@ -103,9 +98,6 @@ public:
 
     slim_signal::Signal<void(bool)> enabled;
 
-    slim_signal::Signal<void(ExecutionState)> execution_state_changed;
-
-
     slim_signal::Signal<void(NodeWorker* worker, ActivityType type, std::shared_ptr<const Interval> stamp)> interval_start;
     slim_signal::Signal<void(NodeWorker* worker, std::shared_ptr<const Interval> stamp)> interval_end;
 
@@ -117,17 +109,25 @@ public:
     slim_signal::Signal<void()> try_process_changed;
 
 private:
+    void updateParameterValues();
+
+    void publishParameters();
     void publishParameter(csapex::param::Parameter *p);
     void publishParameterOn(const csapex::param::Parameter &p, Output *out);
 
     void finishTimer(TimerPtr t);
 
     void signalExecutionFinished();
-    void signalMessagesProcessed(bool processing_aborted = false);
+    void signalMessagesProcessed(bool processing_aborted);
 
     void updateState();
 
+    void pruneExecution();
+    void skipExecution();
     void finishProcessing();
+
+    void setProcessing(bool processing);
+    void processNode();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
 
@@ -137,6 +137,19 @@ private:
     void disconnectConnector(Connector *c);
 
     bool hasActiveOutputConnection();
+    bool allInputsArePresent();
+
+    std::vector<ActivityModifier> getIncomingActivityModifiers();
+    void applyActivityModifiers(std::vector<ActivityModifier> activity_modifiers);
+
+    connection_types::MarkerMessageConstPtr getFirstMarkerMessage();
+    bool processMarker(const connection_types::MarkerMessageConstPtr& marker);
+
+    void rememberExecutionMode();
+
+    void startProfilerInterval(ActivityType type);
+    void stopActiveProfilerInterval();
+
 
 private:
     mutable std::recursive_mutex sync;
@@ -147,8 +160,8 @@ private:
     boost::optional<ExecutionMode> current_exec_mode_;
 
     bool is_setup_;
-    ExecutionState state_;
 
+    mutable std::recursive_mutex state_mutex_;
     bool is_processing_;
 
     Event* trigger_process_done_;
@@ -157,8 +170,6 @@ private:
     Event* trigger_deactivated_;
 
     std::map<Connector*, std::vector<slim_signal::Connection>> port_connections_;
-
-    mutable std::recursive_mutex state_mutex_;
 
     std::recursive_mutex timer_mutex_;
 

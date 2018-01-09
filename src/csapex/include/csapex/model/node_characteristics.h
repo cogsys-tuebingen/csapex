@@ -16,8 +16,6 @@ public:
     int depth;
     int component;
 
-    bool is_vertex_separator;
-
     bool is_joining_vertex;
     bool is_joining_vertex_counterpart;
 

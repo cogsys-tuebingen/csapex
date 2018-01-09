@@ -141,7 +141,7 @@ void Node::reset()
 {
 }
 
-bool Node::processMessageMarkers() const
+bool Node::processNothingMarkers() const
 {
     return false;
 }

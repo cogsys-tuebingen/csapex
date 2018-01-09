@@ -43,10 +43,10 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
     handle->getRate().setFrequency(max_frequency_);
 
     check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + handle->getUUID().getFullName(),
-                                               std::bind(&NodeWorker::checkParameters, worker),
+                                               std::bind(&NodeWorker::handleChangedParameters, worker),
                                                0,
                                                this);
-    execute_ = std::make_shared<Task>(std::string("check ") + handle->getUUID().getFullName(),
+    execute_ = std::make_shared<Task>(std::string("process ") + handle->getUUID().getFullName(),
                                       [this]()
     {
         execute();
@@ -73,6 +73,13 @@ void NodeRunner::measureFrequency()
 
 void NodeRunner::reset()
 {
+    waiting_for_execution_ = false;
+    waiting_for_step_ = false;
+    remaining_tasks_.clear();
+
+    execute_->setScheduled(false);
+    check_parameters_->setScheduled(false);
+
     worker_->reset();
 }
 

@@ -141,10 +141,9 @@ public:
     Rate& getRate();
     const Rate& getRate() const;
 
-public:
-    // TODO: get rid of
-    void updateParameterValue(Connectable* source);
+    bool updateParameterValues();
 
+public:
     void updateLoggerLevel();
 
 public:
@@ -186,6 +185,8 @@ private:
 
     template <typename T>
     void makeParameterConnectableTyped(csapex::param::ParameterPtr);
+
+    void updateParameterValue(Connectable* source);
 
 protected:
     mutable std::recursive_mutex sync;

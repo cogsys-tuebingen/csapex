@@ -137,8 +137,6 @@ public:
     slim_signal::Signal<void()> parameter_set_changed;
     slim_signal::Signal<void()> activation_changed;
 
-    slim_signal::Signal<void (ExecutionState)> execution_state_changed;
-
     slim_signal::Signal<void(param::ParameterPtr)> parameter_added;
     slim_signal::Signal<void(param::ParameterPtr)> parameter_changed;
     slim_signal::Signal<void(param::ParameterPtr)> parameter_removed;

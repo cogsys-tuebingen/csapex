@@ -132,10 +132,6 @@ void NodeFacadeImplementation::connectNodeWorker()
 
     observe(nw_->messages_processed, messages_processed);
 
-    observe(nw_->execution_state_changed, [this](ExecutionState s) {
-        execution_state_changed(s);
-    });
-
     observe(nw_->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) {
         interval_start(this, type, stamp);
     });
@@ -217,7 +213,7 @@ bool NodeFacadeImplementation::isSink() const
 
 bool NodeFacadeImplementation::isProcessingNothingMessages() const
 {
-    return getNode()->processMessageMarkers();
+    return getNode()->processNothingMarkers();
 }
 
 bool NodeFacadeImplementation::isParameterInput(const UUID& id)
