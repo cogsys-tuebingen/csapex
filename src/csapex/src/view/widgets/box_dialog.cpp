@@ -97,7 +97,7 @@ void BoxDialog::setupTextBox()
     filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    QObject::connect(name_edit_, &CompletedLineEdit::textChanged, filter, &NodeFilterProxyModel::setFilterFixedString);;
+    QObject::connect(name_edit_, &CompletedLineEdit::textChanged, filter, &NodeFilterProxyModel::setFilterFixedString);
     QObject::connect(name_edit_, &CompletedLineEdit::textChanged, filter, &NodeFilterProxyModel::invalidate);
 
     name_edit_->setModel(filter);

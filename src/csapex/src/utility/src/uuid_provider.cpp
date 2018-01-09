@@ -128,7 +128,7 @@ void UUIDProvider::free(const UUID &uuid)
 {
     std::unique_lock<std::recursive_mutex > lock(hash_mutex_);
 
-    apex_assert_hard(!uuid.representation_.empty());;
+    apex_assert_hard(!uuid.representation_.empty());
     std::map<std::string, int>::iterator it = hash_.find(uuid.getFullName());
     if(it != hash_.end()) {
         hash_.erase(it);

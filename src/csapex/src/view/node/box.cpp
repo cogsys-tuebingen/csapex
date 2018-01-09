@@ -301,7 +301,7 @@ void NodeBox::updateComponentInformation(GraphFacade* graph)
 
         const NodeCharacteristics& chara = node_facade_->getNodeCharacteristics();
 
-        QString tooltip("characteristics: ");;
+        QString tooltip("characteristics: ");
         tooltip += QString("joining vertex: ") + (chara.is_joining_vertex ? "yes" : "no") + ", ";
         tooltip += QString("leading to joining vertex: ") + (chara.is_leading_to_joining_vertex ? "yes" : "no") + ", ";
         tooltip += QString("combined by joining vertex: ") + (chara.is_combined_by_joining_vertex ? "yes" : "no") + ", ";

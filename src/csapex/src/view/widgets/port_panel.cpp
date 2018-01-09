@@ -29,7 +29,7 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
     switch(type) {
     case ConnectorType::INPUT:
     case ConnectorType::OUTPUT:
-        mainlayout =  new QVBoxLayout;;
+        mainlayout =  new QVBoxLayout;
         mainlayout->setSpacing(16);
         layout = new QVBoxLayout;
         layout->setSpacing(16);
@@ -39,7 +39,7 @@ PortPanel::PortPanel(ConnectorType type, DesignerScene* parent)
 
     case ConnectorType::SLOT_T:
     case ConnectorType::EVENT:
-        mainlayout =  new QHBoxLayout;;
+        mainlayout =  new QHBoxLayout;
         mainlayout->setSpacing(32);
         layout = new QHBoxLayout;
         layout->setSpacing(32);

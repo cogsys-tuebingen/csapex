@@ -1284,7 +1284,7 @@ void DesignerScene::drawPort(QPainter *painter, bool selected, Port *p, int pos)
 
         enum class Direction {
             UP, RIGHT, DOWN, LEFT
-        };;
+        };
 
         Direction dir = Direction::LEFT;
 
