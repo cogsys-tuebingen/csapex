@@ -70,13 +70,10 @@ public:
     void setProfiling(bool profiling);
     bool isProfiling() const;
 
-    /* REMOVE => UI*/ void setMinimized(bool min);
-
     bool canExecute();
     bool canProcess() const;
     bool canReceive() const;
     bool canSend() const;
-    bool areAllInputsAvailable() const;
 
     void trySendEvents();
 
@@ -86,11 +83,10 @@ public:
 
     bool execute();
 
-    void triggerError(bool e, const std::string& what);
-
     void killExecution();
 
     void outgoingMessagesProcessed();
+
 
 public:
     slim_signal::Signal<void()> destroyed;
@@ -136,7 +132,6 @@ private:
     void connectConnector(ConnectablePtr c);
     void disconnectConnector(Connector *c);
 
-    bool hasActiveOutputConnection();
     bool allInputsArePresent();
 
     std::vector<ActivityModifier> getIncomingActivityModifiers();

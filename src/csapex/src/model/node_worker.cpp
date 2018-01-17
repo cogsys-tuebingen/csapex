@@ -271,12 +271,6 @@ bool NodeWorker::canSend() const
         }
     }
 
-    //    for(EventPtr e : node_handle_->getInternalEvents()){
-    //        if(!e->canReceiveToken()) {
-    //            return false;
-    //        }
-    //    }
-
     return true;
 }
 
@@ -706,31 +700,6 @@ void NodeWorker::forwardMessages()
     }
 }
 
-bool NodeWorker::areAllInputsAvailable() const
-{
-    std::unique_lock<std::recursive_mutex> lock(sync);
-
-    // check if all inputs have messages
-    for(InputPtr cin : node_handle_->getExternalInputs()) {
-        if(!cin->hasReceived()) {
-            // connector doesn't have a message
-            if(cin->isOptional()) {
-                if(cin->isConnected()) {
-                    // c is optional and connected, so we have to wait for a message
-                    return false;
-                } else {
-                    // c is optional and not connected, so we can proceed
-                    /* do nothing */
-                }
-            } else {
-                // c is mandatory, so we have to wait for a message
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
 
 void NodeWorker::finishTimer(Timer::Ptr t)
 {
@@ -840,20 +809,6 @@ void NodeWorker::publishParameterOn(const csapex::param::Parameter& p, Output* o
         else if(p.is<std::pair<double, double>>())
             msg::publish(out, p.as<std::pair<double, double>>());
     }
-}
-bool NodeWorker::hasActiveOutputConnection()
-{
-    if(node_handle_->getOutputTransition()->hasActiveConnection()) {
-        return true;
-    }
-    for(EventPtr e : node_handle_->getEvents()){
-        for(const ConnectionPtr& c : e->getConnections()) {
-            if(c->isEnabled() && c->isActive()) {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 void NodeWorker::sendEvents(bool active)
@@ -986,15 +941,6 @@ void NodeWorker::disconnectConnector(Connector *c)
         connection.disconnect();
     }
     port_connections_[c].clear();
-}
-
-void NodeWorker::triggerError(bool e, const std::string &what)
-{
-    setError(e, what);
-}
-void NodeWorker::setMinimized(bool min)
-{
-    node_handle_->getNodeState()->setMinimized(min);
 }
 
 void NodeWorker::errorEvent(bool error, const std::string& msg, ErrorLevel level)
