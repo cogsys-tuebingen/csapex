@@ -10,7 +10,7 @@ class QTextEdit;
 namespace csapex
 {
 
-class CSAPEX_QT_EXPORT NoteBox : public NodeBox
+class CSAPEX_QT_EXPORT StickyNoteBox : public NodeBox
 {
     Q_OBJECT
 
@@ -23,11 +23,11 @@ public:
 
 
 public:
-    NoteBox(Settings& settings,
+    StickyNoteBox(Settings& settings,
             NodeFacadePtr node_facade_,
             QIcon icon, GraphView* parent = 0);
 
-    ~NoteBox();
+    ~StickyNoteBox();
 
     void construct() override;
     void init() override;
@@ -42,12 +42,18 @@ protected:
     void paintEvent(QPaintEvent* e) override;
     void resizeEvent(QResizeEvent* e) override;
 
-    virtual void updateStylesheetColor() override;
-    virtual void startResize() override;
-    virtual void stopResize() override;
+    void refreshTopLevelStylesheet() override;
+    void updateStylesheetColor() override;
+    void startResize() override;
+    void stopResize() override;
 
 private:
     slim_signal::Connection connection_;
+
+    QObserver observer_;
+
+    QColor default_bg_color_;
+    const int border_color_difference_;
 
     QTextEdit* edit_;
 };

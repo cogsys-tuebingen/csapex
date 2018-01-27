@@ -1,8 +1,8 @@
 /// HEADER
-#include <csapex/view/node/note_box.h>
+#include <csapex/view/node/sticky_note_box.h>
 
 /// COMPONENT
-#include <csapex/nodes/note.h>
+#include <csapex/nodes/sticky_note.h>
 #include <csapex/model/node_state.h>
 #include <csapex/view/designer/graph_view.h>
 
@@ -18,17 +18,19 @@
 using namespace csapex;
 
 
-NoteBox::NoteBox(Settings &settings, NodeFacadePtr node_facade_, QIcon icon, GraphView *parent)
-    : NodeBox(settings, node_facade_, icon, parent)
+StickyNoteBox::StickyNoteBox(Settings &settings, NodeFacadePtr node_facade_, QIcon icon, GraphView *parent)
+    : NodeBox(settings, node_facade_, icon, parent),
+      default_bg_color_(255, 220, 100),
+      border_color_difference_(120)
 {
 }
 
 
-NoteBox::~NoteBox()
+StickyNoteBox::~StickyNoteBox()
 {
 }
 
-void NoteBox::paintEvent(QPaintEvent* e)
+void StickyNoteBox::paintEvent(QPaintEvent* e)
 {
     if(!adapter_) {
         return;
@@ -60,7 +62,7 @@ void NoteBox::paintEvent(QPaintEvent* e)
     QPainterPath snap_path;
     snap_path.addPolygon(snap);
 
-    QColor col(255, 220, 100);
+    QColor col = default_bg_color_;
 
     {
         int r, g, b;
@@ -83,7 +85,7 @@ void NoteBox::paintEvent(QPaintEvent* e)
 
 }
 
-void NoteBox::resizeEvent(QResizeEvent *e)
+void StickyNoteBox::resizeEvent(QResizeEvent *e)
 {
     if(node_facade_->hasParameter("w")) {
         node_facade_->setParameter("w", width());
@@ -94,7 +96,7 @@ void NoteBox::resizeEvent(QResizeEvent *e)
     }
 }
 
-void NoteBox::construct()
+void StickyNoteBox::construct()
 {
     setFocusPolicy(Qt::ClickFocus);
     setWindowFlags(Qt::SubWindow);
@@ -117,9 +119,10 @@ void NoteBox::construct()
     setLayout(layout);
 }
 
-void NoteBox::init()
+void StickyNoteBox::init()
 {
-    edit_->setText(QString::fromStdString(node_facade_->readParameter<std::string>("text")));
+    std::string text = node_facade_->readParameter<std::string>("text");
+    edit_->setText(QString::fromStdString(text));
 
     stopResize();
 
@@ -135,20 +138,19 @@ void NoteBox::init()
 
 
     NodeState* state = node_facade_->getNodeState().get();
-    state->color_changed->connect([this, state](){
-        changeColor();
-    });
+    observer_.observeQueued<StickyNoteBox>(state->color_changed, this, static_cast<void (StickyNoteBox::*)()>(&NodeBox::changeColor));
+    observer_.observeQueued<StickyNoteBox>(state->pos_changed, this, static_cast<void (StickyNoteBox::*)()>(&NodeBox::updatePosition));
 
     updateStylesheetColor();
     updateVisualsRequest();
 }
 
-void NoteBox::startResize()
+void StickyNoteBox::startResize()
 {
     setMinimumSize(40, 40);
     setMaximumSize(10000, 10000);
 }
-void NoteBox::stopResize()
+void StickyNoteBox::stopResize()
 {
     if(node_facade_->hasParameter("w") && node_facade_->hasParameter("h")) {
         int w = node_facade_->readParameter<int>("w");
@@ -160,53 +162,67 @@ void NoteBox::stopResize()
 }
 
 
-void NoteBox::updateComponentInformation(GraphFacade *graph)
+void StickyNoteBox::updateComponentInformation(GraphFacade *graph)
 {
 
 }
 
-void NoteBox::updateThreadInformation()
+void StickyNoteBox::updateThreadInformation()
 {
 
 }
 
-void NoteBox::updateFrequencyInformation()
+void StickyNoteBox::updateFrequencyInformation()
 {
 
 }
 
-void NoteBox::setSelected(bool selected)
+void StickyNoteBox::setSelected(bool selected)
 {
     setProperty("focused",selected);
     refreshStylesheet();
 }
 
-void NoteBox::updateStylesheetColor()
+void StickyNoteBox::refreshTopLevelStylesheet()
+{
+    style()->polish(this);
+    update();
+}
+
+
+void StickyNoteBox::updateStylesheetColor()
 {
     NodeStatePtr state = node_facade_->getNodeState();
-
-    QColor text_color = Qt::black;
 
     int r, g, b;
     state->getColor(r, g, b);
 
     QString style = parent_ ? parent_->styleSheet() : styleSheet();
 
+    QColor text_color = Qt::black;
+    QColor border_color = default_bg_color_.darker(border_color_difference_);
     if(r >= 0 && g >= 0 && b >= 0) {
         QColor background(r,g,b);
 
         bool light = (background.lightness() > 128);
         text_color = light ? Qt::black: Qt::white;
+        border_color = light ? background.darker(border_color_difference_): background.lighter(border_color_difference_);
     }
 
-    style += "csapex--NoteBox QTextEdit { ";
+    style += "csapex--StickyNoteBox QTextEdit { ";
     style += "color: rgb(" + QString::number(text_color.red()) + ", " +
             QString::number(text_color.green()) + ", " +
             QString::number(text_color.blue()) + ") !important;";
+    style += "border-right: 1px dotted rgb(" + QString::number(border_color.red()) + ", " +
+            QString::number(border_color.green()) + ", " +
+            QString::number(border_color.blue()) + ") !important;";
+    style += "border-bottom: 1px dotted rgb(" + QString::number(border_color.red()) + ", " +
+            QString::number(border_color.green()) + ", " +
+            QString::number(border_color.blue()) + ") !important;";
     style += "}";
 
     setStyleSheet(style);
 }
 
 /// MOC
-#include "../../../include/csapex/view/node/moc_note_box.cpp"
+#include "../../../include/csapex/view/node/moc_sticky_note_box.cpp"

@@ -117,6 +117,8 @@ public:
     std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& inputToParamMap();
     std::unordered_map<UUID,csapex::param::Parameter*,UUID::Hasher>& outputToParamMap();
 
+    bool isIsolated() const;
+
     bool isSource() const override;
     bool isSink() const override;
     bool hasConnectionsIncoming() const;

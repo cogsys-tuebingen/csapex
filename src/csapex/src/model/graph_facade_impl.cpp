@@ -487,45 +487,47 @@ void GraphFacadeImplementation::nodeAddedHandler(graph::VertexPtr vertex)
         createSubgraphFacade(facade);
     }
 
-    NodeWorkerPtr nw = facade->getNodeWorker();
-
     node_facades_[facade->getUUID()] = facade;
 
-    NodeRunnerPtr runner = facade->getNodeRunner();
-    apex_assert_hard(runner);
-    generators_[facade->getUUID()] = runner;
+    if(!facade->getNodeHandle()->isIsolated()) {
+        NodeWorkerPtr nw = facade->getNodeWorker();
+        NodeRunnerPtr runner = facade->getNodeRunner();
+        apex_assert_hard(runner);
+        generators_[facade->getUUID()] = runner;
 
-    int thread_id = facade->getNodeState()->getThreadId();
-    if(thread_id >= 0) {
-        executor_.addToGroup(runner.get(), thread_id);
-    } else {
-        executor_.add(runner.get());
+        int thread_id = facade->getNodeState()->getThreadId();
+        if(thread_id >= 0) {
+            executor_.addToGroup(runner.get(), thread_id);
+        } else {
+            executor_.add(runner.get());
+        }
+
+        nw->initialize();
+        nw->panic.connect(panic);
     }
 
-
-//    nw->notification.connect(notification);
     vertex->getNodeFacade()->notification.connect(notification);
-
-    nw->initialize();
-    nw->panic.connect(panic);
 
     node_facade_added(facade);
 }
 
 void GraphFacadeImplementation::nodeRemovedHandler(graph::VertexPtr vertex)
 {
-    NodeFacadePtr nh = vertex->getNodeFacade();
+    NodeFacadeImplementationPtr facade = std::dynamic_pointer_cast<NodeFacadeImplementation>(vertex->getNodeFacade());
 
-    TaskGeneratorPtr runner = generators_[nh->getUUID()];
-    generators_.erase(nh->getUUID());
-    executor_.remove(runner.get());
+    auto pos = generators_.find(facade->getUUID());
+    if(pos != generators_.end()) {
+        TaskGeneratorPtr runner = pos->second;
+        generators_.erase(facade->getUUID());
+        executor_.remove(runner.get());
+    }
 
-    NodeFacadePtr facade = node_facades_[nh->getUUID()];
-    node_facade_removed(facade);
-    node_facades_.erase(nh->getUUID());
+    NodeFacadePtr facade_ptr = node_facades_[facade->getUUID()];
+    node_facade_removed(facade_ptr);
+    node_facades_.erase(facade_ptr->getUUID());
 
-    if(nh->isGraph()) {
-        auto pos = children_.find(nh->getUUID());
+    if(facade->isGraph()) {
+        auto pos = children_.find(facade->getUUID());
         apex_assert_hard(pos != children_.end());
         child_removed(pos->second);
         children_.erase(pos);

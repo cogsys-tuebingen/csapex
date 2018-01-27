@@ -367,7 +367,7 @@ add_library(csapex SHARED
     src/model/unique.cpp
     src/model/variadic_io.cpp
 
-    src/nodes/note.cpp
+    src/nodes/sticky_note.cpp
 
     src/msg/apex_message_provider.cpp
     src/msg/input.cpp
@@ -636,7 +636,7 @@ add_library(csapex_qt SHARED
     src/view/node/node_filter_proxy_model.cpp
     src/view/node/parameter_context_menu.cpp
     src/view/node/box.cpp
-    src/view/node/note_box.cpp
+    src/view/node/sticky_note_box.cpp
     src/view/node/node_statistics.cpp
 
     src/view/param/param_adapter.cpp

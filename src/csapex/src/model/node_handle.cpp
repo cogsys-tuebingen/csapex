@@ -131,6 +131,10 @@ void NodeHandle::updateLoggerLevel()
     triggerNodeStateChanged();
 }
 
+bool NodeHandle::isIsolated() const
+{
+    return node_->isIsolated();
+}
 
 bool NodeHandle::isSource() const
 {

@@ -45,7 +45,7 @@
 #include <csapex/view/designer/drag_io.h>
 #include <csapex/view/designer/graph_view_context_menu.h>
 #include <csapex/view/node/box.h>
-#include <csapex/view/node/note_box.h>
+#include <csapex/view/node/sticky_note_box.h>
 #include <csapex/view/node/default_node_adapter.h>
 #include <csapex/view/node/node_adapter_factory.h>
 #include <csapex/view/node/node_adapter.h>
@@ -743,7 +743,7 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
     NodeFacadePtr node_facade = std::make_shared<NodeFacadeImplementation>(handle);
 
     if(is_note) {
-        box = new NoteBox(view_core_.getSettings(), node_facade,
+        box = new StickyNoteBox(view_core_.getSettings(), node_facade,
                           QIcon(QString::fromStdString(c->getIcon())));
 
     } else {
@@ -780,7 +780,7 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
     NodeBox* box = nullptr;
 
     if(type == "csapex::Note") {
-        box = new NoteBox(view_core_.getSettings(), node_facade, icon, this);
+        box = new StickyNoteBox(view_core_.getSettings(), node_facade, icon, this);
     } else {
         box = new NodeBox(view_core_.getSettings(), node_facade, icon, this);
     }
@@ -1559,7 +1559,7 @@ void GraphView::startCloningSelection(NodeBox* box_handle, const QPoint &offset)
     NodeFacadePtr node_facade = std::make_shared<NodeFacadeImplementation>(handle);
 
     if(is_note) {
-        box = new NoteBox(view_core_.getSettings(), node_facade,
+        box = new StickyNoteBox(view_core_.getSettings(), node_facade,
                           QIcon(QString::fromStdString(c->getIcon())));
 
     } else {

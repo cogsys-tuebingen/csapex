@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/view/node/box.h>
-#include <csapex/view/node/note_box.h>
+#include <csapex/view/node/sticky_note_box.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/model/node_state.h>
@@ -36,14 +36,14 @@ MovableGraphicsProxyWidget::MovableGraphicsProxyWidget(NodeBox *box, GraphView *
     long z = state->getZ();
 
     if(z == 0){
-        if(dynamic_cast<NoteBox*>(box_)) {
+        if(dynamic_cast<StickyNoteBox*>(box_)) {
             z = std::numeric_limits<long>::min();
         } else {
             z = 1;
         }
     }
 
-    if(dynamic_cast<NoteBox*>(box_)) {
+    if(dynamic_cast<StickyNoteBox*>(box_)) {
         next_note_z = std::max(z, next_note_z);
     } else {
         next_box_z = std::max(z, next_box_z);
@@ -90,7 +90,7 @@ void MovableGraphicsProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *event
     if(event->type() == QEvent::GraphicsSceneMousePress) {
         long z;
 
-        if(dynamic_cast<NoteBox*>(box_)) {
+        if(dynamic_cast<StickyNoteBox*>(box_)) {
             z = ++next_note_z;
         } else {
             z = ++next_box_z;

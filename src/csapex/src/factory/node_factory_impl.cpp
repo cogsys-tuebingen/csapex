@@ -13,7 +13,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/model/subgraph_node.h>
-#include <csapex/nodes/note.h>
+#include <csapex/nodes/sticky_note.h>
 #include <csapex/param/string_list_parameter.h>
 #include <csapex/model/graph/graph_impl.h>
 
@@ -227,9 +227,17 @@ NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::strin
             return nullptr;
         }
 
-        NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
-        NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
-        NodeFacadeImplementationPtr result = std::make_shared<NodeFacadeImplementation>(nh, nw, runner);
+        NodeFacadeImplementationPtr result;
+        if(!nh->isIsolated()) {
+            NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
+            NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
+            result = std::make_shared<NodeFacadeImplementation>(nh, nw, runner);
+
+        } else {
+            NodePtr node = nh->getNode().lock();
+            node->setupParameters(*node);
+            result = std::make_shared<NodeFacadeImplementation>(nh);
+        }
 
         if(state) {
             nh->setNodeState(state);

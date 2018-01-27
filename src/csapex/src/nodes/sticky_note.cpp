@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/nodes/note.h>
+#include <csapex/nodes/sticky_note.h>
 
 /// PROJECT
 #include <csapex/param/parameter_factory.h>

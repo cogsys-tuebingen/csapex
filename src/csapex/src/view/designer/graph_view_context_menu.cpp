@@ -10,7 +10,7 @@
 #include <csapex/view/csapex_view_core.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
-#include <csapex/view/node/note_box.h>
+#include <csapex/view/node/sticky_note_box.h>
 #include <csapex/view/utility/clipboard.h>
 #include <csapex/view/utility/context_menu_handler.h>
 #include <csapex/view/utility/node_list_generator.h>
@@ -163,7 +163,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         has_enabled|= enabled;
         has_disabled |= !enabled;
 
-        bool note = dynamic_cast<NoteBox*>(box);
+        bool note = dynamic_cast<StickyNoteBox*>(box);
         has_note |= note;
         has_box |= !note;
 

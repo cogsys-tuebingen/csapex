@@ -112,7 +112,7 @@ public Q_SLOTS:
     void triggerEnabledChanged();
     void changeColor();
     void refreshStylesheet();
-    void refreshTopLevelStylesheet();
+    virtual void refreshTopLevelStylesheet();
     void triggerFlipSides();
     void showProfiling(bool show);
 

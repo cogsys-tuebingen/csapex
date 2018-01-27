@@ -131,20 +131,20 @@ csapex--NodeBox[active="true"] QFrame#boxframe {
 }
 
 /* note */
-csapex--NoteBox {
+csapex--StickyNoteBox {
         padding: 0;
 }
-csapex--NoteBox[focused="true"] {
+csapex--StickyNoteBox[focused="true"] {
 }
-csapex--NoteBox QSizeGrip {
+csapex--StickyNoteBox QSizeGrip {
         background: rgba(0, 0, 0, 0);
         width: 16px;
         height: 16px;
 }
 
-csapex--NoteBox QTextEdit {
+csapex--StickyNoteBox QTextEdit {
         background: rgba(0, 0, 0, 0);
-        border: none;
+        border: 0;
         padding: 0;
 	margin: 0;
 	font: bold 12px;	
