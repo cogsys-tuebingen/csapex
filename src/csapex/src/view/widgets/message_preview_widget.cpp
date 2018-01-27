@@ -128,6 +128,8 @@ void MessagePreviewWidget::connectToImpl(OutputPtr out)
 {
     try {
         connection_ = DirectConnection::connect(out, input_);
+        apex_assert_soft_msg(connection_, "could not connect preview widget");
+
     } catch(const csapex::Failure& e) {
         std::cerr << "connecting preview panel to " << out->getUUID() << " caused an assertion error: " << e.what() << std::endl;
     } catch(const std::exception& e) {

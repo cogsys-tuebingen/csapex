@@ -15,7 +15,9 @@ ConnectionPtr DirectConnection::connect(OutputPtr from, InputPtr to)
 {
     apex_assert_hard(from);
     apex_assert_hard(to);
-    apex_assert_hard(Connection::canBeConnectedTo(from.get(), to.get()));
+    if(!Connection::canBeConnectedTo(from.get(), to.get())) {
+        return nullptr;
+    }
     ConnectionPtr r(new DirectConnection(from, to));
     from->addConnection(r);
     to->addConnection(r);
@@ -25,7 +27,9 @@ ConnectionPtr DirectConnection::connect(OutputPtr from, InputPtr to, int id)
 {
     apex_assert_hard(from);
     apex_assert_hard(to);
-    apex_assert_hard(Connection::canBeConnectedTo(from.get(), to.get()));
+    if(!Connection::canBeConnectedTo(from.get(), to.get())) {
+        return nullptr;
+    }
     ConnectionPtr r(new DirectConnection(from, to, id));
     from->addConnection(r);
     to->addConnection(r);
