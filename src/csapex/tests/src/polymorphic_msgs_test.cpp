@@ -251,7 +251,7 @@ TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChild) {
     ASSERT_FALSE(Connection::canBeConnectedTo(o.get(), i.get())); // would involve down-cast
     ASSERT_TRUE(Connection::canBeConnectedTo(i.get(), o.get())); // needs upcast (ok)
 
-    ASSERT_THROW(DirectConnection::connect(o, i), csapex::HardAssertionFailure);
+    ASSERT_EQ(nullptr, DirectConnection::connect(o, i));
 }
 
 TEST_F(PolymorphicMsgsTest, BaseCanBeConnectedToBaseViaNodes) {

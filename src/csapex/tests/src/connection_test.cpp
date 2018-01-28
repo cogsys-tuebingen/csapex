@@ -133,8 +133,9 @@ TEST_F(ConnectionTest, InputsCanBeConnectedToOnlyOneOutput) {
     ASSERT_FALSE(Connection::canBeConnectedTo(o2.get(), i.get()));
     ASSERT_FALSE(Connection::canBeConnectedTo(i.get(), o2.get()));
 
-    ASSERT_THROW(DirectConnection::connect(o2, i), csapex::Failure);
-    ASSERT_THROW(DirectConnection::connect(o1, i), csapex::Failure);
+    // connecting twice does not work
+    ASSERT_EQ(nullptr, DirectConnection::connect(o2, i));
+    ASSERT_EQ(nullptr, DirectConnection::connect(o1, i));
 }
 
 //test moving connections as well...
@@ -175,9 +176,9 @@ TEST_F(ConnectionTest, OutputsCanHaveManyConnections) {
     ASSERT_FALSE(Connection::canBeConnectedTo(o.get(), i2.get()));
     ASSERT_FALSE(Connection::canBeConnectedTo(i2.get(), o.get()));
 
-    // connecting twice throws
-    ASSERT_THROW(DirectConnection::connect(o, i1), csapex::Failure);
-    ASSERT_THROW(DirectConnection::connect(o, i2), csapex::Failure);
+    // connecting twice does not work
+    ASSERT_EQ(nullptr, DirectConnection::connect(o, i1));
+    ASSERT_EQ(nullptr, DirectConnection::connect(o, i2));
 }
 
 TEST_F(ConnectionTest, EventsCanHaveManyConnections) {
@@ -216,9 +217,9 @@ TEST_F(ConnectionTest, EventsCanHaveManyConnections) {
     ASSERT_FALSE(Connection::canBeConnectedTo(e.get(), s2.get()));
     ASSERT_FALSE(Connection::canBeConnectedTo(s2.get(), e.get()));
 
-    // connecting twice throws
-    ASSERT_THROW(DirectConnection::connect(e, s1), csapex::Failure);
-    ASSERT_THROW(DirectConnection::connect(e, s2), csapex::Failure);
+    // connecting twice does not work
+    ASSERT_EQ(nullptr, DirectConnection::connect(e, s1));
+    ASSERT_EQ(nullptr, DirectConnection::connect(e, s2));
 }
 
 TEST_F(ConnectionTest, SlotsCanHaveManyConnections) {
@@ -257,9 +258,9 @@ TEST_F(ConnectionTest, SlotsCanHaveManyConnections) {
     ASSERT_FALSE(Connection::canBeConnectedTo(e2.get(), s.get()));
     ASSERT_FALSE(Connection::canBeConnectedTo(s.get(), e2.get()));
 
-    // connecting twice throws
-    ASSERT_THROW(DirectConnection::connect(e1, s), csapex::Failure);
-    ASSERT_THROW(DirectConnection::connect(e2, s), csapex::Failure);
+    // connecting twice does not work
+    ASSERT_EQ(nullptr, DirectConnection::connect(e1, s));
+    ASSERT_EQ(nullptr, DirectConnection::connect(e2, s));
 }
 
 
