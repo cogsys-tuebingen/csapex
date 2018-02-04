@@ -70,17 +70,16 @@ void SubprocessNodeWorker::initialize()
     NodeWorker::initialize();
 }
 
+
 void SubprocessNodeWorker::runSubprocessLoop()
 {
     NodePtr node = getNode();
 
     try {
-        std::vector<param::Parameter*> changed_parameters;
         observe(node->getParameterState()->parameter_changed, [&](param::Parameter* p){
-            changed_parameters.push_back(p);
+            changed_parameters_.push_back(p);
         });
 
-        const ShmAllocator<int> alloc_inst (shm_segment->get_segment_manager());
         scoped_lock<interprocess_mutex> lock(shm_block_->m);
 
         while(shm_block_->active){
@@ -99,97 +98,14 @@ void SubprocessNodeWorker::runSubprocessLoop()
             {
             case ShmBlock::MessageType::PARAMETER_UPDATE:
             {
-                // TODO: generalize! exactly the same as in parent process!!!
-                std::pair<shared_buffer*, managed_shared_memory::size_type> input
-                        = shm_segment->find<shared_buffer> ("parameter");
-
-                if(input.first) {
-                    SerializationBuffer buffer(input.first->data(), input.first->size());
-
-                    param::ParameterPtr p = std::dynamic_pointer_cast<param::Parameter>(PacketSerializer::deserializePacket(buffer));
-
-                    param::ParameterPtr existing = node->getParameter(p->name());
-                    existing->setValueFrom(*p);
-                }
-
-                shm_segment->destroy<shared_string>("parameter");
-                shm_block_->message_processed.notify_all();
+                handleParameterUpdate();
 
             }
                 break;
 
             case ShmBlock::MessageType::PROCESS:
             {
-                YAML::Emitter result_emitter;
-
-                try {
-                    std::pair<shared_string*, managed_shared_memory::size_type> input
-                            = shm_segment->find<shared_string> ("input_yaml");
-
-                    if(input.first) {
-                        YAML::Node yaml = YAML::Load(input.first->c_str());
-
-                        for(const YAML::Node& node : yaml) {
-                            UUID uuid = node["uuid"].as<UUID>();
-                            auto msg = MessageSerializer::deserializeMessage(node["data"]);
-
-                            InputPtr input = node_handle_->getInput(uuid);
-                            input->setToken(std::make_shared<Token>(msg));
-                        };
-                    }
-
-                    shm_segment->destroy<shared_string>("input_yaml");
-
-                    node->process(*node_handle_, *node);
-
-                    // send parameter updates
-                    for(param::Parameter* p : changed_parameters) {
-                        param::ParameterPtr para = getNode()->getParameter(p->name());
-                        SerializationBuffer buffer = PacketSerializer::serializePacket(para);
-
-                        shm_segment->construct<shared_buffer>
-                                ("parameter")
-                                (buffer.data(), buffer.size(), alloc_inst);
-
-                        shm_block_->message_type = ShmBlock::MessageType::PARAMETER_UPDATE;
-                        shm_block_->has_message = true;
-                        shm_block_->message_processed.notify_all();
-                        shm_block_->message_available.wait(lock);
-                    }
-
-                    changed_parameters.clear();
-
-
-                    // send result
-                    YAML::Node yaml(YAML::NodeType::Sequence);
-
-                    for(OutputPtr& output : node_handle_->getExternalOutputs()) {
-                        auto msg = output->getAddedToken();
-
-                        if(msg) {
-                            YAML::Node node(YAML::NodeType::Map);
-                            node["uuid"] = output->getUUID();
-                            // TODO serialize token! (+ activity, ...)
-                            node["data"] = MessageSerializer::serializeMessage(*msg->getTokenData());
-
-                            YAML::Emitter emitter;
-                            emitter << node;
-
-                            yaml.push_back(node);
-                        }
-                    }
-
-                    result_emitter << yaml;
-
-                } catch(const std::exception& e) {
-                    std::cout << getUUID() << " >> error: " << e.what() << std::endl;
-                }
-
-                shm_block_->has_message = false;
-                shm_block_->message_type = ShmBlock::MessageType::PROCESS;
-                shm_segment->construct<shared_string>
-                        ("result_yaml")
-                        (result_emitter.c_str(), alloc_inst);
+                handleProcessChild(lock);
             }
                 break;
             }
@@ -206,6 +122,79 @@ void SubprocessNodeWorker::runSubprocessLoop()
     } catch(const std::exception& e) {
         std::cout << "subprocess " << getUUID() << " >> error: " << e.what() << std::endl;
     }
+}
+
+
+void SubprocessNodeWorker::handleProcessChild(scoped_lock<interprocess_mutex>& lock)
+{
+    const ShmAllocator<int> alloc_inst (shm_segment->get_segment_manager());
+
+    NodePtr node = getNode();
+
+    YAML::Emitter result_emitter;
+
+    try {
+        std::pair<shared_string*, managed_shared_memory::size_type> input
+                = shm_segment->find<shared_string> ("input_yaml");
+
+        if(input.first) {
+            YAML::Node yaml = YAML::Load(input.first->c_str());
+
+            for(const YAML::Node& node : yaml) {
+                UUID uuid = node["uuid"].as<UUID>();
+                auto msg = MessageSerializer::deserializeMessage(node["data"]);
+
+                InputPtr input = node_handle_->getInput(uuid);
+                input->setToken(std::make_shared<Token>(msg));
+            };
+        }
+
+        shm_segment->destroy<shared_string>("input_yaml");
+
+        node->process(*node_handle_, *node);
+
+        shm_block_->message_processed.notify_all();
+        shm_block_->message_available.wait(lock);
+
+        // send parameter updates
+        for(param::Parameter* parameter : changed_parameters_) {
+            transmitParameter(lock, getNode()->getParameter(parameter->name()));
+        }
+
+        changed_parameters_.clear();
+
+
+        // send result
+        YAML::Node yaml(YAML::NodeType::Sequence);
+
+        for(OutputPtr& output : node_handle_->getExternalOutputs()) {
+            auto msg = output->getAddedToken();
+
+            if(msg) {
+                YAML::Node node(YAML::NodeType::Map);
+                node["uuid"] = output->getUUID();
+                // TODO serialize token! (+ activity, ...)
+                node["data"] = MessageSerializer::serializeMessage(*msg->getTokenData());
+
+                YAML::Emitter emitter;
+                emitter << node;
+
+                yaml.push_back(node);
+            }
+        }
+
+        result_emitter << yaml;
+
+    } catch(const std::exception& e) {
+        std::cout << getUUID() << " >> error: " << e.what() << std::endl;
+    }
+
+    shm_block_->has_message = false;
+    shm_block_->message_type = ShmBlock::MessageType::PROCESS;
+    shm_segment->construct<shared_string>
+            ("result_yaml")
+            (result_emitter.c_str(), alloc_inst);
+    shm_block_->message_available.notify_all();
 }
 
 void SubprocessNodeWorker::allocateSharedMemory()
@@ -239,6 +228,52 @@ SubprocessNodeWorker::~SubprocessNodeWorker()
     shared_memory_object::remove(getUUID().getFullName().c_str());
 }
 
+
+void SubprocessNodeWorker::handleParameterUpdate()
+{
+    NodePtr node = getNode();
+
+    std::pair<shared_buffer*, managed_shared_memory::size_type> input
+            = shm_segment->find<shared_buffer> ("parameter");
+
+    if(input.first) {
+        SerializationBuffer buffer(input.first->data(), input.first->size());
+
+        param::ParameterPtr p = std::dynamic_pointer_cast<param::Parameter>(PacketSerializer::deserializePacket(buffer));
+
+        param::ParameterPtr existing = node->getParameter(p->name());
+        existing->setValueFrom(*p);
+    }
+
+    shm_segment->destroy<shared_string>("parameter");
+
+    shm_block_->message_available.notify_all();
+}
+
+bool SubprocessNodeWorker::handleProcessParent()
+{
+    std::pair<shared_string*, managed_shared_memory::size_type> result
+            = shm_segment->find<shared_string> ("result_yaml");
+
+    if(result.first) {
+        YAML::Node yaml = YAML::Load(result.first->c_str());
+
+        for(const YAML::Node& node : yaml) {
+            UUID uuid = node["uuid"].as<UUID>();
+            auto msg = MessageSerializer::deserializeMessage(node["data"]);
+
+            OutputPtr output = node_handle_->getOutput(uuid);
+            YAML::Emitter emitter;
+            emitter << node["data"];
+            msg::publish(output.get(), msg);
+        };
+    }
+
+    //Deallocate previously allocated memory
+    shm_segment->destroy<shared_string>("result_yaml");
+
+    return true;
+}
 
 void SubprocessNodeWorker::processNode()
 {
@@ -290,67 +325,37 @@ void SubprocessNodeWorker::processNode()
             shm_block_->has_message = true;
             shm_block_->message_available.notify_all();
 
-            bool done_processing = false;;
+            shm_block_->message_processed.wait(lock);
+            shm_block_->message_available.notify_all();
+
+            bool done_processing = false;
+
+            // wait for the end of processing
 
             while(!done_processing) {
-                shm_block_->message_processed.wait(lock);
-
+                shm_block_->message_available.wait(lock);
                 switch(shm_block_->message_type)
                 {
                 case ShmBlock::MessageType::PARAMETER_UPDATE:
                 {
-
-                    // TODO: generalize! exactly the same as in child process!!!
-                    std::pair<shared_buffer*, managed_shared_memory::size_type> input
-                            = shm_segment->find<shared_buffer> ("parameter");
-
-                    if(input.first) {
-                        SerializationBuffer buffer(input.first->data(), input.first->size());
-
-                        param::ParameterPtr p = std::dynamic_pointer_cast<param::Parameter>(PacketSerializer::deserializePacket(buffer));
-
-                        param::ParameterPtr existing = node->getParameter(p->name());
-                        existing->setValueFrom(*p);
-                    }
-
-                    shm_segment->destroy<shared_string>("parameter");
-
-                    shm_block_->message_available.notify_all();
+                    handleParameterUpdate();
                 }
                     break;
 
                 case ShmBlock::MessageType::PROCESS:
                 {
-                    std::pair<shared_string*, managed_shared_memory::size_type> result
-                            = shm_segment->find<shared_string> ("result_yaml");
-
-
-                    if(result.first) {
-                        YAML::Node yaml = YAML::Load(result.first->c_str());
-
-                        for(const YAML::Node& node : yaml) {
-                            UUID uuid = node["uuid"].as<UUID>();
-                            auto msg = MessageSerializer::deserializeMessage(node["data"]);
-
-                            OutputPtr output = node_handle_->getOutput(uuid);
-                            YAML::Emitter emitter;
-                            emitter << node["data"];
-                            msg::publish(output.get(), msg);
-                        };
-                    }
-
-                    done_processing = true;
-
-                    //Deallocate previously allocated memory
-                    shm_segment->destroy<shared_string>("result_yaml");
+                    done_processing = handleProcessParent();
                 }
                     break;
                 }
+
+                shm_block_->message_processed.notify_all();
             }
 
         } else {
             // TODO: Implement this in subprocess, for now just call it directly
             try {
+//                throw std::runtime_error("foo");
                 //TRACE node->ainfo << "process async" << std::endl;
                 node->process(*node_handle_, *node, [this, node](ProcessingFunction f) {
                     node_handle_->execution_requested([this, f, node]() {
@@ -385,7 +390,21 @@ void SubprocessNodeWorker::processNode()
     }
 }
 
+void SubprocessNodeWorker::transmitParameter(Lock &lock, const param::ParameterPtr &p)
+{
+    const ShmAllocator<int> alloc_inst (shm_segment->get_segment_manager());
 
+    SerializationBuffer buffer = PacketSerializer::serializePacket(p);
+
+    shm_segment->construct<shared_buffer>
+            ("parameter")
+            (buffer.data(), buffer.size(), alloc_inst);
+
+    shm_block_->message_type = ShmBlock::MessageType::PARAMETER_UPDATE;
+    shm_block_->has_message = true;
+    shm_block_->message_available.notify_all();
+    shm_block_->message_processed.wait(lock);
+}
 
 void SubprocessNodeWorker::handleChangedParametersImpl(const Parameterizable::ChangedParameterList &changed_params)
 {
@@ -399,20 +418,9 @@ void SubprocessNodeWorker::handleChangedParametersImpl(const Parameterizable::Ch
     //    apex_assert_msg(pid != 0, "handleChangedParametersImpl called in subprocess");
     // this method can be used in both directions!
 
-    const ShmAllocator<int> alloc_inst (shm_segment->get_segment_manager());
-
     for(auto pair : changed_params) {
         if(param::ParameterPtr p = pair.first.lock()) {
-            SerializationBuffer buffer = PacketSerializer::serializePacket(p);
-
-            shm_segment->construct<shared_buffer>
-                    ("parameter")
-                    (buffer.data(), buffer.size(), alloc_inst);
-
-            shm_block_->message_type = ShmBlock::MessageType::PARAMETER_UPDATE;
-            shm_block_->has_message = true;
-            shm_block_->message_available.notify_all();
-            shm_block_->message_processed.wait(lock);
+            transmitParameter(lock, p);
         }
     }
 }

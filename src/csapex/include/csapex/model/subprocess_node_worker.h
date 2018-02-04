@@ -45,6 +45,9 @@ using ShmAllocator = boost::interprocess::allocator<T, boost::interprocess::mana
 
 class CSAPEX_EXPORT SubprocessNodeWorker : public NodeWorker
 {
+private:
+    using Lock = boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex>;
+
 public:
     SubprocessNodeWorker(NodeHandlePtr node_handle);
     ~SubprocessNodeWorker();
@@ -58,6 +61,13 @@ protected:
 private:
     void allocateSharedMemory();
     void runSubprocessLoop();
+
+    void handleParameterUpdate();
+
+    bool handleProcessParent();
+    void handleProcessChild(Lock &lock);
+
+    void transmitParameter(Lock &lock, const param::ParameterPtr& p);
 
 private:
     std::shared_ptr<boost::interprocess::managed_shared_memory> shm_segment;
@@ -91,6 +101,8 @@ private:
 
     ShmBlock* shm_block_;
     pid_t pid_;
+
+    std::vector<param::Parameter*> changed_parameters_;
 };
 
 }
