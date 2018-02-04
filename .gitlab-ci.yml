@@ -23,7 +23,7 @@ stages:
 
 indigo:
   stage: build_and_test
-  image: ros:indigo
+  image: ros:indigo-perception
   script:
     - catkin_make
     - source devel/setup.bash
@@ -31,7 +31,7 @@ indigo:
 
 jade:
   stage: build_and_test
-  image: ros:jade
+  image: ros:jade-perception
   script:
     - catkin_make
     - source devel/setup.bash
@@ -39,7 +39,15 @@ jade:
 
 kinetic:
   stage: build_and_test
-  image: ros:kinetic
+  image: ros:kinetic-perception
+  script:
+    - catkin_make
+    - source devel/setup.bash
+    - cd build && make test
+
+lunar:
+  stage: build_and_test
+  image: ros:lunar-perception
   script:
     - catkin_make
     - source devel/setup.bash
