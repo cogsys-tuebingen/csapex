@@ -4,9 +4,11 @@
 /// COMPONENT
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/direct_node_worker.h>
+#include <csapex/model/subprocess_node_worker.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_runner.h>
+#include <csapex/model/node_state.h>
 #include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_facade_proxy.h>
 #include <csapex/model/tag.h>
@@ -207,18 +209,20 @@ void NodeFactoryImplementation::registerNodeType(NodeConstructor::Ptr provider, 
 
 
 
-NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider)
+NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type,
+                                                                const UUID& uuid,
+                                                                const UUIDProviderPtr& uuid_provider,
+                                                                const ExecutionType exec_type)
 {
-    return makeNode(target_type, uuid, uuid_provider, nullptr);
+    return makeNode(target_type, uuid, uuid_provider, exec_type, nullptr);
 }
 
-NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider,
-                                    NodeStatePtr state)
+NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type,
+                                                                const UUID& uuid,
+                                                                const UUIDProviderPtr& uuid_provider,
+                                                                const ExecutionType default_exec_type,
+                                                                NodeStatePtr state)
 {
-    if(target_type == "csapex::Graph") {
-        return makeGraph(uuid, uuid_provider, state, true);
-    }
-
     NodeConstructorPtr p = getConstructor(target_type);
     if(p) {
         NodeHandlePtr nh = p->makeNodeHandle(uuid, uuid_provider);
@@ -227,21 +231,54 @@ NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::strin
             return nullptr;
         }
 
+        ExecutionType exec_type = state ? state->getExecutionType() : default_exec_type;
+
         NodeFacadeImplementationPtr result;
+        NodeWorkerPtr nw;
         if(!nh->isIsolated()) {
-            NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
+
+            switch(exec_type) {
+            case ExecutionType::AUTO:
+            case ExecutionType::DIRECT:
+                nw = std::make_shared<DirectNodeWorker>(nh);
+                break;
+            case ExecutionType::SUBPROCESS:
+                nw = std::make_shared<SubprocessNodeWorker>(nh);
+                break;
+            }
+
             NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
             result = std::make_shared<NodeFacadeImplementation>(nh, nw, runner);
 
+
         } else {
-            NodePtr node = nh->getNode().lock();
-            node->setupParameters(*node);
             result = std::make_shared<NodeFacadeImplementation>(nh);
+        }
+
+        NodePtr node = result->getNode();
+        try {
+            node->setupParameters(*node);
+            node->setup(*nh);
+
+        } catch(const std::exception& e) {
+            node->aerr << "setup failed: " << e.what() << std::endl;
+        }
+
+        if(nw) {
+            nw->initialize();
+        }
+        // TODO: can this be done more elegantly?
+        SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
+        if(subgraph) {
+            apex_assert_hard(subgraph);
+            subgraph->setNodeFacade(result);
         }
 
         if(state) {
             nh->setNodeState(state);
         }
+
+        nh->getNodeState()->setExecutionType(exec_type);
 
         node_constructed(result);
 
@@ -255,31 +292,10 @@ NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::strin
 
 NodeFacadeImplementationPtr NodeFactoryImplementation::makeGraph(const UUID& uuid, const UUIDProviderPtr& uuid_provider)
 {
-    return makeGraph(uuid, uuid_provider, nullptr, true);
+    return makeNode("csapex::Graph", uuid, uuid_provider);
 }
 
-NodeFacadeImplementationPtr NodeFactoryImplementation::makeGraph(const UUID& uuid, const UUIDProviderPtr& uuid_provider,
-                                          NodeStatePtr state, bool create_global_ports)
+NodeFacadeImplementationPtr NodeFactoryImplementation::makeGraph(const UUID& uuid, const UUIDProviderPtr& uuid_provider, NodeStatePtr state)
 {
-    NodeConstructorPtr p = getConstructor("csapex::Graph");
-    apex_assert_hard(p);
-    NodeHandlePtr nh = p->makeNodeHandle(uuid, uuid_provider);
-    apex_assert_hard(nh);
-
-    NodeWorkerPtr nw = std::make_shared<NodeWorker>(nh);
-    NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
-    NodeFacadeImplementationPtr result = std::make_shared<NodeFacadeImplementation>(nh, nw, runner);
-
-    // TODO: can this be done more elegantly?
-    SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
-    apex_assert_hard(subgraph);
-    subgraph->setNodeFacade(result);
-
-    if(state) {
-        nh->setNodeState(state);
-    }
-
-    node_constructed(result);
-
-    return result;
+    return makeNode("csapex::Graph", uuid, uuid_provider, ExecutionType::DIRECT, state);
 }

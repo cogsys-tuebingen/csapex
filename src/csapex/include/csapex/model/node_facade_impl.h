@@ -61,6 +61,10 @@ public:
 
     bool canStartStepping() const override;
 
+    bool canProcess() const;
+    bool isProcessing() const;
+    bool startProcessingMessages();
+
     bool isProfiling() const override;
     void setProfiling(bool profiling) override;
 
@@ -95,11 +99,15 @@ public:
     void setNodeState(NodeStatePtr memento);
 
     NodeHandlePtr getNodeHandle() const;
-    NodeWorkerPtr getNodeWorker() const;
     NodeRunnerPtr getNodeRunner() const;
     NodePtr getNode() const;
 
+
+    void replaceNodeWorker(NodeWorkerPtr worker);
+
 private:
+    void setNodeWorker(NodeWorkerPtr worker);
+
     void connectNodeHandle();
     void connectNodeWorker();
     void connectNodeRunner();

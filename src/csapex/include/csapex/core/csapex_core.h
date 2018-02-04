@@ -40,7 +40,7 @@ public:
 
     virtual ~CsApexCore();
 
-    void init(bool create_global_ports = true);
+    void init();
     void boot();
     void startup();
     void shutdown();
@@ -139,7 +139,6 @@ private:
     UUIDProviderPtr root_uuid_provider_;
     GraphFacadeImplementationPtr root_;
     NodeFacadeImplementationPtr root_facade_;
-    NodeWorkerPtr root_worker_;
     TaskGeneratorPtr root_scheduler_;
 
     std::shared_ptr<CommandDispatcher> dispatcher_;

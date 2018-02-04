@@ -5,7 +5,6 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_facade_impl.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/factory/node_factory_impl.h>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/model/graph_facade_impl.h>

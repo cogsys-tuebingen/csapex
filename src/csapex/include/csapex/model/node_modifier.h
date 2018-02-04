@@ -194,8 +194,6 @@ public:
     void setWarning(const std::string& msg);
     void setError(const std::string& msg);
 
-    NodeWorker* getNodeWorker() const;
-
     /**
      * Raw construction, handle with care!
      */

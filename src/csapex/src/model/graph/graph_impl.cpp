@@ -604,9 +604,6 @@ void GraphImplementation::checkNodeState(NodeHandle *nh)
     // check if the node should be enabled
     nh->getInputTransition()->checkIfEnabled();
     nh->getOutputTransition()->checkIfEnabled();
-    if(NodeWorker* worker = nh->getNodeWorker()) {
-        worker->triggerTryProcess();
-    }
 }
 
 int GraphImplementation::getComponent(const UUID &node_uuid) const

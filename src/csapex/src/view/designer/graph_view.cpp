@@ -779,7 +779,8 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
 
     NodeBox* box = nullptr;
 
-    if(type == "csapex::Note") {
+    bool is_note = type == "csapex::Note";
+    if(is_note) {
         box = new StickyNoteBox(view_core_.getSettings(), node_facade, icon, this);
     } else {
         box = new NodeBox(view_core_.getSettings(), node_facade, icon, this);
@@ -808,22 +809,24 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
 
     addBox(box);
 
-    // add existing connectors
-    for(ConnectorDescription description : node_facade->getExternalConnectors()) {
-        addConnector(description);
+    if(!is_note) {
+        // add existing connectors
+        for(ConnectorDescription description : node_facade->getExternalConnectors()) {
+            addConnector(description);
+        }
+
+        // subscribe to coming connectors
+        auto c1 = node_facade->connector_created.connect([this](const ConnectorDescription& c) { triggerConnectorCreated(c); });
+        facade_connections_[node_facade.get()].emplace_back(c1);
+        auto c2 = node_facade->connector_removed.connect([this](const ConnectorDescription& c) { triggerConnectorRemoved(c); });
+        facade_connections_[node_facade.get()].emplace_back(c2);
+
+
+        UUID uuid = node_facade->getUUID();
+        QObject::connect(box, &NodeBox::toggled, [this, uuid](bool checked) {
+            view_core_.getCommandDispatcher()->execute(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), uuid, !checked));
+        });
     }
-
-    // subscribe to coming connectors
-    auto c1 = node_facade->connector_created.connect([this](const ConnectorDescription& c) { triggerConnectorCreated(c); });
-    facade_connections_[node_facade.get()].emplace_back(c1);
-    auto c2 = node_facade->connector_removed.connect([this](const ConnectorDescription& c) { triggerConnectorRemoved(c); });
-    facade_connections_[node_facade.get()].emplace_back(c2);
-
-
-    UUID uuid = node_facade->getUUID();
-    QObject::connect(box, &NodeBox::toggled, [this, uuid](bool checked) {
-        view_core_.getCommandDispatcher()->execute(std::make_shared<command::DisableNode>(graph_facade_->getAbsoluteUUID(), uuid, !checked));
-    });
 
     Q_EMIT boxAdded(box);
 }

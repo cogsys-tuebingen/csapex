@@ -26,14 +26,17 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
+#include <csapex/serialization/serialization_buffer.h>
 #include <csapex/utility/debug.h>
 #include <csapex/utility/delegate_bind.h>
 #include <csapex/utility/exceptions.h>
 #include <csapex/utility/thread.h>
+#include <csapex/serialization/packet_serializer.h>
 
 /// SYSTEM
 #include <thread>
 #include <iostream>
+#include <cstdlib>
 
 using namespace csapex;
 
@@ -44,7 +47,7 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
       trigger_process_done_(nullptr),
       guard_(-1)
 {
-    node_handle->setNodeWorker(this);
+//    node_handle->setNodeWorker(this);
 
     //    observe(node_handle->stopped, [this](){
     //        stopObserving();
@@ -52,95 +55,83 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
     profiler_ = std::make_shared<ProfilerImplementation>(false, 16);
 
-    NodePtr node = node_handle_->getNode().lock();
-    node->useTimer(profiler_->getTimer(node_handle->getUUID().getFullName()));
 
 
-    try {
-        observe(node_handle_->connector_created, [this](ConnectablePtr c, bool internal) {
-            connectConnector(c);
-        });
-        observe(node_handle_->connector_removed, [this](ConnectablePtr c, bool internal) {
-            disconnectConnector(c.get());
-        });
-
-        node->setupParameters(*node);
-
-        if(!node->isIsolated()) {
-
-            node->setup(*node_handle);
-
-            observe(node_handle_->getInputTransition()->enabled_changed, [this](){
-                updateState();
-            });
-            observe(node_handle_->getOutputTransition()->enabled_changed, [this](){
-                updateState();
-            });
-
-            observe(node_handle_->getOutputTransition()->messages_processed, [this](){
-                outgoingMessagesProcessed();
-            });
-
-            node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
-                setProcessingEnabled(true);
-            }, true, true);
-            node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", [this](){
-                setProcessingEnabled(false);
-            }, false, true);
+    observe(node_handle_->connector_created, [this](ConnectablePtr c, bool internal) {
+        connectConnector(c);
+    });
+    observe(node_handle_->connector_removed, [this](ConnectablePtr c, bool internal) {
+        disconnectConnector(c.get());
+    });
 
 
-            trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"activated");
-            trigger_deactivated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"deactivated");
+    observe(node_handle_->getInputTransition()->enabled_changed, [this](){
+        updateState();
+    });
+    observe(node_handle_->getOutputTransition()->enabled_changed, [this](){
+        updateState();
+    });
 
-            trigger_process_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"inputs processed");
+    observe(node_handle_->getOutputTransition()->messages_processed, [this](){
+        outgoingMessagesProcessed();
+    });
 
-            is_setup_ = true;
 
-            observe(node_handle_->might_be_enabled, [this]() {
-                triggerTryProcess();
-            });
-            observe(node_handle_->getNodeState()->enabled_changed, [this](){
-                bool e = isProcessingEnabled();
+    trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"activated");
+    trigger_deactivated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"deactivated");
 
-                for(const UUID& in : node_handle_->getInputTransition()->getInputs()) {
-                    node_handle_->getInputTransition()->getInput(in)->setEnabled(e);
-                }
-                for(const UUID& out : node_handle_->getOutputTransition()->getOutputs()) {
-                    node_handle_->getOutputTransition()->getOutput(out)->setEnabled(e);
-                }
+    trigger_process_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"inputs processed");
 
-                for(SlotPtr slot : node_handle_->getSlots()) {
-                    slot->setEnabled(e);
-                }
-                for(EventPtr event : node_handle_->getEvents()) {
-                    event->setEnabled(e);
-                }
 
-                if(!e) {
-                    setError(false);
-                } else {
-                    triggerTryProcess();
-                }
-                enabled(e);
-            });
-            observe(node_handle_->activation_changed, [this](){
-                if(node_handle_->isActive()) {
-                    msg::trigger(trigger_activated_);
-                } else {
-                    msg::trigger(trigger_deactivated_);
-                }
-            });
+    node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
+        setProcessingEnabled(true);
+    }, true, true);
+    node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", [this](){
+        setProcessingEnabled(false);
+    }, false, true);
 
-            observe(node->getParameterState()->parameter_changed, [this](param::Parameter*){
-                triggerTryProcess();
-            });
+    observe(node_handle_->activation_changed, [this](){
+        if(node_handle_->isActive()) {
+            msg::trigger(trigger_activated_);
+        } else {
+            msg::trigger(trigger_deactivated_);
+        }
+    });
+
+    observe(node_handle_->might_be_enabled, [this]() {
+        triggerTryProcess();
+    });
+    observe(node_handle_->getNodeState()->enabled_changed, [this](){
+        bool e = isProcessingEnabled();
+
+        for(const UUID& in : node_handle_->getInputTransition()->getInputs()) {
+            node_handle_->getInputTransition()->getInput(in)->setEnabled(e);
+        }
+        for(const UUID& out : node_handle_->getOutputTransition()->getOutputs()) {
+            node_handle_->getOutputTransition()->getOutput(out)->setEnabled(e);
         }
 
-        sendEvents(node_handle_->isActive());
+        for(SlotPtr slot : node_handle_->getSlots()) {
+            slot->setEnabled(e);
+        }
+        for(EventPtr event : node_handle_->getEvents()) {
+            event->setEnabled(e);
+        }
 
-    } catch(const std::exception& e) {
-        node->aerr << "setup failed: " << e.what() << std::endl;
-    }
+        if(!e) {
+            setError(false);
+        } else {
+            triggerTryProcess();
+        }
+        enabled(e);
+    });
+
+    NodePtr node = node_handle_->getNode().lock();
+
+    observe(node->getParameterState()->parameter_changed, [this](param::Parameter* p){
+        triggerTryProcess();
+    });
+    node->useTimer(profiler_->getTimer(node_handle->getUUID().getFullName()));
 }
 
 NodeWorker::~NodeWorker()
@@ -274,11 +265,6 @@ bool NodeWorker::canSend() const
     return true;
 }
 
-void NodeWorker::triggerPanic()
-{
-    panic();
-}
-
 void NodeWorker::ioChanged()
 {
     triggerTryProcess();
@@ -291,14 +277,11 @@ void NodeWorker::triggerTryProcess()
 
 void NodeWorker::initialize()
 {
+    is_setup_ = true;
+
     handleChangedParameters();
 
-    NodePtr node = node_handle_->getNode().lock();
-    if(!node) {
-        return;
-    }
-
-    node->finishSetup();
+    sendEvents(node_handle_->isActive());
 }
 
 void NodeWorker::setProcessing(bool processing)
@@ -442,7 +425,6 @@ void NodeWorker::processNode()
     try {
         apex_assert_hard(node->getNodeHandle());
         if(sync) {
-            //TRACE node->ainfo << "process sync" << std::endl;
             node->process(*node_handle_, *node);
 
         } else {
@@ -722,17 +704,17 @@ void NodeWorker::outgoingMessagesProcessed()
     std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
     if(current_exec_mode_) {
         if(current_exec_mode_.get() == ExecutionMode::SEQUENTIAL) {
-            APEX_DEBUG_TRACE getNode()->ainfo << "done" << std::endl;
+            //TRACE APEX_DEBUG_TRACE getNode()->ainfo << "done" << std::endl;
             node_handle_->getInputTransition()->notifyMessageProcessed();
 
             //            current_exec_mode_.reset();
         }
 
-        APEX_DEBUG_TRACE getNode()->ainfo << "notify, try process" << std::endl;
+        //TRACE APEX_DEBUG_TRACE getNode()->ainfo << "notify, try process" << std::endl;
         triggerTryProcess();
 
     } else {
-        APEX_DEBUG_TRACE getNode()->aerr << "cannot notify, no current exec mode" << std::endl;
+        //TRACE APEX_DEBUG_TRACE getNode()->aerr << "cannot notify, no current exec mode" << std::endl;
     }
 }
 
@@ -855,23 +837,29 @@ void NodeWorker::handleChangedParameters()
     // check if a parameter was changed
     Parameterizable::ChangedParameterList changed_params = node->getChangedParameters();
     if(!changed_params.empty()) {
-        for(auto pair : changed_params) {
-            if(param::ParameterPtr p = pair.first.lock()) {
-                try {
-                    //if(p->isEnabled()) {
-                    for(auto& cb : pair.second) {
-                        cb(p.get());
-                    }
-                    //}
+        handleChangedParametersImpl(changed_params);
 
-                } catch(const std::exception& e) {
-                    NOTIFICATION("parameter callback failed: " << e.what());
-                }
-            }
-        }
     }
 
     node->checkConditions(false);
+}
+
+void NodeWorker::handleChangedParametersImpl(const Parameterizable::ChangedParameterList &changed_params)
+{
+    for(auto pair : changed_params) {
+        if(param::ParameterPtr p = pair.first.lock()) {
+            try {
+                //if(p->isEnabled()) {
+                for(auto& cb : pair.second) {
+                    cb(p.get());
+                }
+                //}
+
+            } catch(const std::exception& e) {
+                NOTIFICATION("parameter callback failed: " << e.what());
+            }
+        }
+    }
 }
 
 void NodeWorker::trySendEvents()

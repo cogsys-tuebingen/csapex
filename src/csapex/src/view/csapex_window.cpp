@@ -199,7 +199,6 @@ void CsApexWindow::construct()
     observe(view_core_.load_detail_request, [this](GraphFacade& graph, const YAML::Node &doc){ designer_->loadView(graph, doc);});
 
     observe(view_core_.getRoot()->state_changed, [this]() { updateMenuRequest(); });
-    observe(view_core_.panic, [this]() { clearBlock(); });
 
     observe(view_core_.undo_state_changed, [this](){ updateUndoInfoRequest(); updateMenuRequest(); });
     observe(view_core_.undo_dirty_changed, [this](bool) { updateTitleRequest(); updateMenuRequest(); });

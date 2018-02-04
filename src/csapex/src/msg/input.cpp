@@ -60,7 +60,7 @@ bool Input::isOptional() const
 bool Input::hasReceived() const
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
-    return isConnected() && message_ != nullptr;
+    return message_ != nullptr;
 }
 
 bool Input::hasMessage() const

@@ -53,6 +53,21 @@ SerializationBuffer::SerializationBuffer(const std::vector<uint8_t>& copy, bool 
     init();
 }
 
+SerializationBuffer::SerializationBuffer(const uint8_t *raw_data, const std::size_t length, bool insert_header)
+    : pos(HEADER_LENGTH)
+{
+    if(insert_header) {
+        // the header is always 4 byte
+        insert(end(), HEADER_LENGTH, 0);
+        insert(end(), raw_data, raw_data + length);
+
+    } else {
+        assign(raw_data, raw_data + length);
+    }
+
+    init();
+}
+
 void SerializationBuffer::init()
 {
     if(!initialized_) {

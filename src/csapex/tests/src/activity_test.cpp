@@ -157,6 +157,7 @@ public:
 
     bool wait()
     {
+//        TODO: implement activity support for subprocesses!
         std::unique_lock<std::recursive_mutex> lock(wait_mutex);
         auto wait_start = std::chrono::system_clock::now();
         while(waiting) {

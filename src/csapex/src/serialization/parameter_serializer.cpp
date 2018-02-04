@@ -29,12 +29,9 @@ void ParameterSerializer::serialize(const StreamableConstPtr& packet, Serializat
     }
 
     if(const ParameterConstPtr& parameter = std::dynamic_pointer_cast<Parameter const>(packet)) {
-//        std::cerr << "serializing Parameter" << std::endl;
         uint8_t type = parameter->ID();
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
-
-//            std::cerr << "serializing Parameter (type=" << type << ")" << std::endl;
             data << type;
 
             // defer serialization to the corresponding serializer
@@ -50,8 +47,6 @@ void ParameterSerializer::serialize(const StreamableConstPtr& packet, Serializat
 
 StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
 {
-//    std::cerr << "deserializing Parameter" << std::endl;
-
     uint8_t type;
     data >> type;
 
@@ -61,9 +56,6 @@ StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
 
     auto it = serializers_.find(type);
     if(it != serializers_.end()) {
-
-//        std::cerr << "deserializing Parameter (type=" << type << ")" << std::endl;
-
         // defer serialization to the corresponding serializer
         std::shared_ptr<ParameterSerializerInterface> serializer = it->second;
         return serializer->deserialize(data);
@@ -78,6 +70,5 @@ StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
 
 void ParameterSerializer::registerSerializer(uint8_t type, std::shared_ptr<ParameterSerializerInterface> serializer)
 {
-//    std::cout << "registering serializer of type " << type << std::endl;
     instance().serializers_[type] = serializer;
 }

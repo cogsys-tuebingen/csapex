@@ -29,8 +29,9 @@ NodeFacadeImplementation::NodeFacadeImplementation(NodeHandlePtr nh, NodeWorkerP
 {
     nh->setNodeRunner(nr_);
 
+    setNodeWorker(nw);
+
     connectNodeHandle();
-    connectNodeWorker();
     connectNodeRunner();
 }
 NodeFacadeImplementation::NodeFacadeImplementation(NodeHandlePtr nh)
@@ -335,6 +336,31 @@ bool NodeFacadeImplementation::canStartStepping() const
     return nr_->canStartStepping();
 }
 
+bool NodeFacadeImplementation::canProcess() const
+{
+    if(nw_) {
+        return nw_->canProcess();
+    } else {
+        return false;
+    }
+}
+bool NodeFacadeImplementation::isProcessing() const
+{
+    if(nw_) {
+        return nw_->isProcessing();
+    } else {
+        return false;
+    }
+}
+bool NodeFacadeImplementation::startProcessingMessages()
+{
+    if(nw_) {
+        return nw_->startProcessingMessages();
+    } else {
+        return false;
+    }
+}
+
 bool NodeFacadeImplementation::isProfiling() const
 {
     if(nw_) {
@@ -397,14 +423,26 @@ NodePtr NodeFacadeImplementation::getNode() const
     return nh_->getNode().lock();
 }
 
-NodeWorkerPtr NodeFacadeImplementation::getNodeWorker() const
-{
-    return nw_;
-}
-
 NodeRunnerPtr NodeFacadeImplementation::getNodeRunner() const
 {
     return nr_;
+}
+
+void NodeFacadeImplementation::setNodeWorker(NodeWorkerPtr worker)
+{
+    nw_ = worker;
+    connectNodeWorker();
+
+    nh_->setNodeWorker(worker.get());
+    nr_->setNodeWorker(worker);
+}
+
+
+void NodeFacadeImplementation::replaceNodeWorker(NodeWorkerPtr worker)
+{
+    setNodeWorker(worker);
+
+    worker->initialize();
 }
 
 NodeStatePtr NodeFacadeImplementation::getNodeState() const

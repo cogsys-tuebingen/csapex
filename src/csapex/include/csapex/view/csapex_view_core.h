@@ -110,8 +110,6 @@ public:
     /// GRAPH
     slim_signal::Signal<void(NodeFacadePtr)> node_facade_added;
     slim_signal::Signal<void(NodeFacadePtr)> node_facade_removed;
-    slim_signal::Signal<void()> panic;
-
 
     /// THREAD POOL
     slim_signal::Signal<void (ThreadGroupPtr)> group_created;

@@ -8,7 +8,6 @@
 #include <csapex/model/graph.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>

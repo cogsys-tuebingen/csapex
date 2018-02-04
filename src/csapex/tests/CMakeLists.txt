@@ -34,25 +34,12 @@ include_directories(${GTEST_INCLUDE_DIR} include)
 
 
 # tests that are not yet distributed across the project
+file(GLOB tests_SRC
+    "src/*.cpp"
+)
+
 add_executable(${PROJECT_NAME}
-    src/code_api_test.cpp
-    src/auto_generate_test.cpp
-    src/processing_test.cpp
-    src/message_template_test.cpp
-    src/graph_test.cpp
-    src/polymorphic_msgs_test.cpp
-    src/polymorphic_value_test.cpp
-    src/node_creation_test.cpp
-    src/connection_test.cpp
-    src/signal_test.cpp
-    src/transition_test.cpp
-    src/yaml_serialization_test.cpp
-    src/binary_serialization_test.cpp
-    src/scheduling_test.cpp
-    src/nesting_test.cpp
-    src/parameter_test.cpp
-    src/activity_test.cpp
-    src/container_iteration_test.cpp
+    ${tests_SRC}
 )
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})

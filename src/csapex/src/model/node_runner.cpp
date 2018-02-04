@@ -20,33 +20,32 @@
 using namespace csapex;
 
 NodeRunner::NodeRunner(NodeWorkerPtr worker)
-    : worker_(worker), scheduler_(nullptr),
+    : worker_(worker), nh_(worker->getNodeHandle()), scheduler_(nullptr),
       paused_(false), stepping_(false), can_step_(0), step_done_(false),
       guard_(-1),
       waiting_for_execution_(false),
       waiting_for_step_(false),
       suppress_exceptions_(true)
 {
-    NodeHandlePtr handle = worker_->getNodeHandle();
-
-    handle->getNodeState()->max_frequency_changed->connect([this](){
-        NodeHandlePtr handle = worker_->getNodeHandle();
-        max_frequency_ = handle->getNodeState()->getMaximumFrequency();
+    nh_->getNodeState()->max_frequency_changed->connect([this](){
+        max_frequency_ = nh_->getNodeState()->getMaximumFrequency();
 
         if(max_frequency_ > 0.0) {
-            handle->getRate().setFrequency(max_frequency_);
+            nh_->getRate().setFrequency(max_frequency_);
         } else {
-            handle->getRate().setFrequency(0.0);
+            nh_->getRate().setFrequency(0.0);
         }
     });
-    max_frequency_ = handle->getNodeState()->getMaximumFrequency();
-    handle->getRate().setFrequency(max_frequency_);
+    max_frequency_ = nh_->getNodeState()->getMaximumFrequency();
+    nh_->getRate().setFrequency(max_frequency_);
 
-    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + handle->getUUID().getFullName(),
-                                               std::bind(&NodeWorker::handleChangedParameters, worker),
-                                               0,
-                                               this);
-    execute_ = std::make_shared<Task>(std::string("process ") + handle->getUUID().getFullName(),
+    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + nh_->getUUID().getFullName(),
+                                               [this]()
+    {
+        checkParameters();
+    }, 0,
+    this);
+    execute_ = std::make_shared<Task>(std::string("process ") + nh_->getUUID().getFullName(),
                                       [this]()
     {
         execute();
@@ -67,7 +66,7 @@ NodeRunner::~NodeRunner()
 void NodeRunner::measureFrequency()
 {
     if(worker_->isProcessingEnabled()) {
-        worker_->getNodeHandle()->getRate().tick();
+        nh_->getRate().tick();
     }
 }
 
@@ -83,29 +82,8 @@ void NodeRunner::reset()
     worker_->reset();
 }
 
-void NodeRunner::assignToScheduler(Scheduler *scheduler)
+void NodeRunner::connectNodeWorker()
 {
-    std::unique_lock<std::recursive_mutex> lock(mutex_);
-
-    apex_assert_hard(scheduler_ == nullptr);
-    apex_assert_hard(scheduler != nullptr);
-
-    scheduler_ = scheduler;
-
-    scheduler_->add(shared_from_this(), remaining_tasks_);
-    worker_->getNodeHandle()->getNodeState()->setThread(scheduler->getName(), scheduler->id());
-
-    remaining_tasks_.clear();
-
-    stopObserving();
-
-    // signals
-    observe(scheduler->scheduler_changed, [this](){
-        NodeHandlePtr nh = worker_->getNodeHandle();
-        nh->getNodeState()->setThread(scheduler_->getName(), scheduler_->id());
-    });
-
-    // node tasks
     observe(worker_->try_process_changed, [this]() {
         scheduleProcess();
     });
@@ -117,15 +95,41 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
         //TRACE worker_->getNode()->ainfo << "end step" << std::endl;
         end_step();
     });
+}
+
+void NodeRunner::assignToScheduler(Scheduler *scheduler)
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
+
+    apex_assert_hard(scheduler_ == nullptr);
+    apex_assert_hard(scheduler != nullptr);
+
+    scheduler_ = scheduler;
+
+    scheduler_->add(shared_from_this(), remaining_tasks_);
+    nh_->getNodeState()->setThread(scheduler->getName(), scheduler->id());
+
+    remaining_tasks_.clear();
+
+    stopObserving();
+
+    // signals
+    observe(scheduler->scheduler_changed, [this](){
+        NodeHandlePtr nh = nh_;
+        nh->getNodeState()->setThread(scheduler_->getName(), scheduler_->id());
+    });
+
+    // node tasks
+    connectNodeWorker();
 
     // parameter change
-    observe(worker_->getNodeHandle()->parameters_changed, [this]() {
+    observe(nh_->parameters_changed, [this]() {
         schedule(check_parameters_);
     });
 
     // processing enabled change
-    observe(worker_->getNodeHandle()->getNodeState()->enabled_changed, [this]() {
-        if(!worker_->getNodeHandle()->getNodeState()->isEnabled()) {
+    observe(nh_->getNodeState()->enabled_changed, [this]() {
+        if(!nh_->getNodeState()->isEnabled()) {
             waiting_for_execution_ = false;
         }
     });
@@ -134,7 +138,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
 
 
     // generic task
-    observe(worker_->getNodeHandle()->execution_requested, [this](std::function<void()> cb) {
+    observe(nh_->execution_requested, [this](std::function<void()> cb) {
         schedule(std::make_shared<Task>("anonymous", cb, 0, this));
     });
 }
@@ -149,16 +153,21 @@ void NodeRunner::scheduleProcess()
 {
     apex_assert_hard(guard_ == -1);
     if(!paused_) {
-        bool source = worker_->getNodeHandle()->isSource();
+        bool source = nh_->isSource();
         if(!source || !stepping_ || can_step_) {
             //execute_->setPriority(std::max<long>(0, worker_->getSequenceNumber()));
             //if(worker_->canExecute()) {
-                if(!waiting_for_execution_) {
-                    schedule(execute_);
-                }
+            if(!waiting_for_execution_) {
+                schedule(execute_);
+            }
             //}
         }
     }
+}
+
+void NodeRunner::checkParameters()
+{
+    worker_->handleChangedParameters();
 }
 
 void NodeRunner::execute()
@@ -170,7 +179,7 @@ void NodeRunner::execute()
     apex_assert_hard(guard_ == -1);
     if(worker_->canExecute()) {
         if(max_frequency_ > 0.0) {
-            const Rate& rate = worker_->getNodeHandle()->getRate();
+            const Rate& rate = nh_->getRate();
             double f = rate.getEffectiveFrequency();
             if(f > max_frequency_) {
                 auto next_process = rate.endOfCycle();
@@ -187,7 +196,7 @@ void NodeRunner::execute()
 
         waiting_for_execution_ = false;
 
-        worker_->getNodeHandle()->getRate().startCycle();
+        nh_->getRate().startCycle();
 
         if(stepping_) {
             apex_assert_hard(can_step_);
@@ -329,9 +338,9 @@ void NodeRunner::step()
     }
 
     //TRACE worker_->getNode()->ainfo << "step" << std::endl;
-//    if(source) {
-        scheduleProcess();
-//    }
+    //    if(source) {
+    scheduleProcess();
+    //    }
 }
 
 bool NodeRunner::isStepping() const
@@ -358,4 +367,10 @@ void NodeRunner::setError(const std::string &msg)
 void NodeRunner::setSuppressExceptions(bool suppress_exceptions)
 {
     suppress_exceptions_ = suppress_exceptions;
+}
+
+void NodeRunner::setNodeWorker(NodeWorkerPtr worker)
+{
+    worker_ = worker;
+    connectNodeWorker();
 }

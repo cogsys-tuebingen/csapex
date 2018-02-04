@@ -7,7 +7,6 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_handle.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/factory/node_factory_impl.h>

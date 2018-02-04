@@ -11,7 +11,6 @@
 #include <csapex/model/node_runner.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/input.h>
@@ -222,8 +221,8 @@ void GraphFacadeImplementation::clear()
 
 void GraphFacadeImplementation::stop()
 {
-    for(NodeHandle* nw : graph_->getAllNodeHandles()) {
-        nw->stop();
+    for(NodeHandle* nh : graph_->getAllNodeHandles()) {
+        nh->stop();
     }
 
     executor_.stop();
@@ -490,7 +489,6 @@ void GraphFacadeImplementation::nodeAddedHandler(graph::VertexPtr vertex)
     node_facades_[facade->getUUID()] = facade;
 
     if(!facade->getNodeHandle()->isIsolated()) {
-        NodeWorkerPtr nw = facade->getNodeWorker();
         NodeRunnerPtr runner = facade->getNodeRunner();
         apex_assert_hard(runner);
         generators_[facade->getUUID()] = runner;
@@ -502,8 +500,7 @@ void GraphFacadeImplementation::nodeAddedHandler(graph::VertexPtr vertex)
             executor_.add(runner.get());
         }
 
-        nw->initialize();
-        nw->panic.connect(panic);
+        facade->getNode()->finishSetup();
     }
 
     vertex->getNodeFacade()->notification.connect(notification);

@@ -26,13 +26,14 @@ NodeState::NodeState(const NodeHandle *parent)
       flipped_changed(new SignalImpl),
       thread_changed(new SignalImpl),
       execution_mode_changed(new SignalImpl),
+      execution_type_changed(new SignalImpl),
       logger_level_changed(new SignalImpl),
       parent_changed(new SignalImpl),
       parent_(parent),
 
       max_frequency_(0.0), z_(0), minimized_(false), muted_(false), enabled_(true), active_(false), flipped_(false),
       logger_level_(1), thread_id_(-1),
-      r_(-1), g_(-1), b_(-1), exec_mode_(ExecutionMode::SEQUENTIAL)
+      r_(-1), g_(-1), b_(-1), exec_mode_(ExecutionMode::SEQUENTIAL), exec_type_(ExecutionType::AUTO)
 {
     if(parent) {
         label_ = parent->getUUID().getFullName();
@@ -76,6 +77,7 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     thread_name_ = rhs.thread_name_;
     thread_id_ = rhs.thread_id_;
     exec_mode_ = rhs.exec_mode_;
+    exec_type_ = rhs.exec_type_;
     logger_level_ = rhs.logger_level_;
 
     dictionary = rhs.dictionary;
@@ -95,6 +97,7 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     (*label_changed)();
     (*thread_changed)();
     (*execution_mode_changed)();
+    (*execution_type_changed)();
     (*logger_level_changed)();
 
     return *this;
@@ -293,6 +296,19 @@ void NodeState::setExecutionMode(ExecutionMode mode)
     }
 }
 
+ExecutionType NodeState::getExecutionType() const
+{
+    return exec_type_;
+}
+void NodeState::setExecutionType(ExecutionType type)
+{
+    if(exec_type_!= type) {
+        exec_type_= type;
+
+        (*execution_type_changed)();
+    }
+}
+
 int NodeState::getLoggerLevel() const
 {
     return logger_level_;
@@ -325,6 +341,7 @@ void NodeState::writeYaml(YAML::Node &out) const
     out["enabled"] = enabled_;
     out["flipped"] = flipped_;
     out["exec_mode"] = (int) exec_mode_;
+    out["exec_type"] = (int) exec_type_;
     out["logger_level"] = logger_level_;
 
     if(!dictionary.empty()) {
@@ -390,6 +407,9 @@ void NodeState::readYaml(const YAML::Node &node)
 
     if(node["exec_mode"].IsDefined()) {
         setExecutionMode(static_cast<ExecutionMode>(node["exec_mode"].as<int>()));
+    }
+    if(node["exec_type"].IsDefined()) {
+        setExecutionType(static_cast<ExecutionType>(node["exec_type"].as<int>()));
     }
 
     if(node["label"].IsDefined()) {
@@ -485,6 +505,7 @@ void NodeState::serialize(SerializationBuffer &data) const
     data << dictionary;
 
     data << exec_mode_;
+    data << exec_type_;
 
     YAML::Node yaml;
     parameter_state->writeYaml(yaml);
@@ -517,6 +538,7 @@ void NodeState::deserialize(const SerializationBuffer& data)
     data >> dictionary;
 
     data >> exec_mode_;
+    data >> exec_type_;
 
     YAML::Node yaml;
     data >> yaml;

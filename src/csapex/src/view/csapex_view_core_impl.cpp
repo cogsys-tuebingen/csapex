@@ -60,8 +60,6 @@ CsApexViewCoreImplementation::CsApexViewCoreImplementation(CsApexCorePtr core)
     observe(core_->getRoot()->node_facade_removed, node_facade_removed);
     observe(core_->getRoot()->child_node_facade_added, node_facade_added);
     observe(core_->getRoot()->child_node_facade_removed, node_facade_removed);
-    observe(core_->getRoot()->panic, panic);
-
 
     observe(core_->getThreadPool()->group_created, group_created);
     observe(core_->getThreadPool()->group_removed, group_removed);
@@ -82,7 +80,7 @@ CsApexViewCoreImplementation::CsApexViewCoreImplementation(CsApexViewCore &paren
     node_adapter_factory_ = parent.getNodeAdapterFactory();
     drag_io = parent.getDragIO();
 
-    core_->init(false);
+    core_->init();
 }
 
 CsApexCorePtr CsApexViewCoreImplementation::getCore() const

@@ -35,6 +35,7 @@ public:
 public:
     SerializationBuffer();
     SerializationBuffer(const std::vector<uint8_t>& copy, bool insert_header = false);
+    SerializationBuffer(const uint8_t* raw_data, const std::size_t length, bool insert_header = false);
 
     void finalize();
     void seek(uint32_t p);

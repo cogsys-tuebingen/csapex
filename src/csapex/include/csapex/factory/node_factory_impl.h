@@ -12,6 +12,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/plugin/plugin_fwd.h>
 #include <csapex/csapex_export.h>
+#include <csapex/model/execution_type.h>
 
 /// SYSTEM
 #include <vector>
@@ -33,12 +34,21 @@ public:
 
     void registerNodeType(NodeConstructor::Ptr provider, bool suppress_signals = false);
 
-    NodeFacadeImplementationPtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider);
-    NodeFacadeImplementationPtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr &uuid_provider, NodeStatePtr state);
+    NodeFacadeImplementationPtr makeNode(const std::string& type,
+                                         const UUID& uuid,
+                                         const UUIDProviderPtr &uuid_provider,
+                                         const ExecutionType exec_type = ExecutionType::AUTO);
+    NodeFacadeImplementationPtr makeNode(const std::string& type,
+                                         const UUID& uuid,
+                                         const UUIDProviderPtr &uuid_provider,
+                                         const ExecutionType exec_type,
+                                         NodeStatePtr state);
 
-    NodeFacadeImplementationPtr makeGraph(const UUID& uuid, const UUIDProviderPtr &uuid_provider);
-    NodeFacadeImplementationPtr makeGraph(const UUID& uuid, const UUIDProviderPtr &uuid_provider,
-                                 NodeStatePtr state, bool create_global_ports);
+    NodeFacadeImplementationPtr makeGraph(const UUID& uuid,
+                                          const UUIDProviderPtr &uuid_provider);
+    NodeFacadeImplementationPtr makeGraph(const UUID& uuid,
+                                          const UUIDProviderPtr &uuid_provider,
+                                          NodeStatePtr state);
 
 
 public:

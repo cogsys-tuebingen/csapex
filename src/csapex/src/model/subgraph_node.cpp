@@ -531,7 +531,7 @@ UUID SubgraphNode::addForwardingEvent(const UUID& internal_uuid, const TokenData
     auto cb = [this, external_event](const TokenPtr& token){
         if(external_event->isConnected()) {
             external_event->triggerWith(token);
-            node_handle_->getNodeWorker()->trySendEvents();
+//            node_handle_->getNodeWorker()->trySendEvents();
         } else {
             external_event->notifyMessageProcessed();
         }
@@ -662,6 +662,7 @@ void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool ena
         apex_assert_eq(0, iterated_inputs_.size());
 
         iterated_inputs_.insert(external_input_uuid);
+
         InputPtr i = node_handle_->getInput(external_input_uuid);
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
@@ -786,7 +787,7 @@ void SubgraphNode::notifySubgraphProcessed()
 
 void SubgraphNode::sendCurrentIteration()
 {
-    //TRACE ainfo << "send current iteration " << iteration_index_ << " < " << iteration_count_<< std::endl;
+//    ainfo << "send current iteration " << iteration_index_ << " < " << iteration_count_<< std::endl;
     transition_relay_in_->forwardMessages();
 
     has_sent_current_iteration_ = true;
@@ -806,7 +807,7 @@ void SubgraphNode::sendCurrentIteration()
 
 void SubgraphNode::startNextIteration()
 {
-    //TRACE ainfo << "start iteration " << iteration_index_ << std::endl;
+//    ainfo << "start iteration " << iteration_index_ << std::endl;
     for(InputPtr i : node_modifier_->getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i.get());
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());

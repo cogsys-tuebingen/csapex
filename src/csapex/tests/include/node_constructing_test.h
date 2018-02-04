@@ -70,7 +70,7 @@ protected:
         return NodePtr(new MockupSource());
     }
     static NodePtr makeSink() {
-        return NodePtr(new NodeWrapper<MockupSink>());
+        return NodePtr(new MockupSink());
     }
 
     NodeFactoryImplementation factory;

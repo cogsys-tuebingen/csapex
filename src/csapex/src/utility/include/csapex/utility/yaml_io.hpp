@@ -70,17 +70,17 @@ struct convert< std::shared_ptr<T const> > {
   }
 };
 
-//template<>
-//struct convert<csapex::UUID> {
-//    static Node encode(const csapex::UUID& rhs) {
-//        return Node (rhs.getFullName());
-//    }
+template<>
+struct convert<csapex::UUID> {
+    static Node encode(const csapex::UUID& rhs) {
+        return Node (rhs.getFullName());
+    }
 
-//    static bool decode(const Node& node, csapex::UUID& rhs) {
-//        rhs = csapex::UUIDProvider::makeUUID_forced(std::weak_ptr<csapex::UUIDProvider>(), node.as<std::string>());
-//        return true;
-//    }
-//};
+    static bool decode(const Node& node, csapex::UUID& rhs) {
+        rhs = csapex::UUIDProvider::makeUUID_forced(std::weak_ptr<csapex::UUIDProvider>(), node.as<std::string>());
+        return true;
+    }
+};
 
 }
 

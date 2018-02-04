@@ -126,8 +126,3 @@ void NodeModifier::setError(const std::string &msg)
         node_worker_->setError(true, msg, ErrorState::ErrorLevel::ERROR);
     }
 }
-
-NodeWorker* NodeModifier::getNodeWorker() const
-{
-    return node_worker_;
-}

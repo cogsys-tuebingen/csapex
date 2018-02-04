@@ -203,7 +203,7 @@ void CsApexCore::sendNotification(const std::string& msg, ErrorState::ErrorLevel
     notification(n);
 }
 
-void CsApexCore::init(bool create_global_ports)
+void CsApexCore::init()
 {
     if(!init_) {
         init_ = true;
@@ -240,14 +240,11 @@ void CsApexCore::init(bool create_global_ports)
 
         status_changed("make graph");
 
-        root_facade_ = node_factory_->makeGraph(UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_,
-                                                nullptr, create_global_ports);
+        root_facade_ = node_factory_->makeGraph(UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_);
         apex_assert_hard(root_facade_);
 
         SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_facade_->getNode());
         apex_assert_hard(graph);
-
-        root_worker_ = root_facade_->getNodeWorker();
 
         GraphImplementationPtr graph_local = graph->getLocalGraph();
 

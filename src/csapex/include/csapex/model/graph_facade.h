@@ -81,7 +81,6 @@ public:
     slim_signal::Signal<void(NodeFacadePtr)> child_node_facade_added;
     slim_signal::Signal<void(NodeFacadePtr)> child_node_facade_removed;
 
-    slim_signal::Signal<void()> panic;
     slim_signal::Signal<void()> state_changed;
 
     slim_signal::Signal<void(ConnectionDescription)> connection_added;

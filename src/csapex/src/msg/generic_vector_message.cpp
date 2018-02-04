@@ -67,11 +67,12 @@ GenericVectorMessage::EntryInterface::Ptr GenericVectorMessage::AnythingImplemen
 
 void GenericVectorMessage::AnythingImplementation::encode(YAML::Node& node) const
 {
+    std::cout << "encode any" << std::endl;
 
 }
 void GenericVectorMessage::AnythingImplementation::decode(const YAML::Node& node)
 {
-
+    std::cout << "decode any" << std::endl;
 }
 
 
@@ -154,12 +155,16 @@ bool GenericVectorMessage::InstancedImplementation::acceptsConnectionFrom(const 
 
 void GenericVectorMessage::InstancedImplementation::encode(YAML::Node& node) const
 {
+    std::cout << "vector instance: encode" << std::endl;
     node["value_type"] = type_->typeName();
     node["values"] = value;
 }
 
 void GenericVectorMessage::InstancedImplementation::decode(const YAML::Node& node)
 {
+    YAML::Emitter emitter;
+    emitter << node;
+    std::cout << "vector instance: decode " << emitter.c_str() << std::endl;
     value = node["values"].as< std::vector<TokenData::Ptr> >();
 }
 

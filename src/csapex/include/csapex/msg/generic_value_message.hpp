@@ -8,6 +8,9 @@
 #include <csapex/msg/io.h>
 #include <csapex/utility/string.hpp>
 
+// TODO remove
+#include <iostream>
+
 namespace csapex {
 namespace connection_types {
 

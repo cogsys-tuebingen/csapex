@@ -160,9 +160,6 @@ include_directories(include
     ${console_bridge_INCLUDE_DIRS}
 )
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    #add_definitions(--system-header-prefix=/usr/include)
-endif()
 
 #
 # BUILD THE LIBRARIES
@@ -303,6 +300,8 @@ add_library(csapex SHARED
 
     src/model/node_handle.cpp
     src/model/node_worker.cpp
+    src/model/direct_node_worker.cpp
+    src/model/subprocess_node_worker.cpp
 
     src/core/csapex_core.cpp
     src/core/core_plugin.cpp
@@ -361,7 +360,6 @@ add_library(csapex SHARED
     src/model/node_characteristics.cpp
     src/model/observer.cpp
     src/model/parameterizable.cpp
-    src/model/tickable_node.cpp
     src/model/throttled_node.cpp
     src/model/tag.cpp
     src/model/unique.cpp
@@ -790,20 +788,20 @@ add_custom_command(TARGET cfg POST_BUILD
 ##
 ## Enable IWYU
 ##
-#if(${CMAKE_VERSION} VERSION_GREATER 3.2)
-#  find_program(iwyu_path NAMES include-what-you-use iwyu)
-#  if(NOT iwyu_path)
-#    message(FATAL_ERROR "Could not find the program include-what-you-use")
-#  endif()
-#
-#  message("Using include-what-you-use from ${iwyu_path}")
-#
-#  set_property(TARGET csapex_util PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-#  set_property(TARGET csapex_param PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-#  set_property(TARGET csapex_profiling PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-#  set_property(TARGET csapex PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-#  set_property(TARGET csapex_qt PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-#endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if(${CMAKE_VERSION} VERSION_GREATER 3.2)
+        find_program(iwyu_path NAMES include-what-you-use iwyu)
+        if(iwyu_path)
+            message("Using include-what-you-use from ${iwyu_path}")
+            add_definitions(--system-header-prefix=/usr/include)
+
+            foreach(lib ${csapex_LIBRARIES})
+                set_property(TARGET ${lib} PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+            endforeach()
+        endif()
+    endif()
+endif()
 
 #
 # TESTS

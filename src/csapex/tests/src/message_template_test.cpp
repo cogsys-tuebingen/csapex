@@ -59,11 +59,27 @@ CSAPEX_REGISTER_MESSAGE(VectorMessage)
 /// YAML
 namespace YAML {
 template<>
+struct CSAPEX_EXPORT convert<csapex::Foo> {
+  static Node encode(const csapex::Foo& rhs){
+      Node node;
+      node["value"] = rhs.value;
+      return node;
+  }
+  static bool decode(const Node& node, csapex::Foo& rhs){
+      rhs.value = node["value"].as<int>();
+      return true;
+  }
+};
+
+template<>
 struct CSAPEX_EXPORT convert<csapex::connection_types::VectorMessage> {
   static Node encode(const csapex::connection_types::VectorMessage& rhs){
-      return {};
+      Node node;
+      node["value"] = rhs.value;
+      return node;
   }
   static bool decode(const Node& node, csapex::connection_types::VectorMessage& rhs){
+      rhs.value = node["value"].as<std::vector<csapex::Foo>>();
       return true;
   }
 };

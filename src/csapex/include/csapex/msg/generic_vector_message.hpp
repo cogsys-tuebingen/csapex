@@ -19,6 +19,9 @@
 #undef NDEBUG
 #include <assert.h>
 
+// TODO REMOVE
+#include <iostream>
+
 namespace YAML
 {
 template<typename T, typename S>
@@ -138,12 +141,16 @@ private:
 
         void encode(YAML::Node& node) const override
         {
+            std::cout << "vector<"<< typeid(Payload).name() <<" < impl" << std::endl;
             node["value_type"] = type2name(typeid(T));
             node["values"] = *value;
         }
 
         void decode(const YAML::Node& node) override
         {
+            YAML::Emitter emitter;
+            emitter << node;
+            std::cout << "vector<"<< typeid(Payload).name() <<" > impl: " << emitter.c_str() << std::endl;
             value.reset(new std::vector<Payload>);
             *value = node["values"].as< std::vector<Payload> >();
         }
@@ -337,6 +344,37 @@ private:
         static typename Self::Ptr make() {
             return Self::Ptr (new Self);
         }
+
+        virtual EntryInterface::Ptr cloneEntry() const override
+        {
+            auto r = std::make_shared<MessageImplementation<T>>();
+            *r->value = *value;
+            return r;
+        }
+
+
+        void encode(YAML::Node& node) const override
+        {
+            std::cout << "encode message" << std::endl;
+            node["values"] = YAML::Node(YAML::NodeType::Sequence);
+            for(const auto& entry : *value) {
+                node["values"].push_back(MessageSerializer::serializeMessage(entry));
+            }
+        }
+        void decode(const YAML::Node& node) override
+        {
+            std::cout << "decode message" << std::endl;
+            YAML::Emitter emitter;
+            emitter << node;
+            std::cout << emitter.c_str() << std::endl;
+            for(const YAML::Node& entry : node["values"]) {
+                YAML::Emitter emitter;
+                emitter << entry;
+                std::cout << emitter.c_str() << std::endl;
+                auto msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeMessage(entry));
+                value->push_back(*msg);
+            }
+        }
     };
 
     struct CSAPEX_EXPORT AnythingImplementation : public EntryInterface
@@ -386,22 +424,64 @@ public:
         typedef std::shared_ptr<type const> ConstPtr;
     };
 
+    template <typename T, class Enable = void>
+    struct Adder
+    {
+        static void addToMap(std::map<std::string, EntryInterface::Ptr>& map, const std::string& type_name)
+        {
+            map[type_name].reset(new InstancedImplementation(T()));
+        }
+    };
+
+    template <typename T>
+    struct Adder<T, typename std::enable_if<std::is_base_of<TokenData, T>::value>::type>
+    {
+        static void addToMap(std::map<std::string, EntryInterface::Ptr>& map, const std::string& type_name)
+        {
+            map[type_name].reset(new MessageImplementation<T>());
+        }
+    };
+
+    template <typename T>
+    struct Adder<T, typename std::enable_if<!std::is_base_of<TokenData, T>::value && !std::is_same<T, Anything>::value>::type>
+    {
+        static void addToMap(std::map<std::string, EntryInterface::Ptr>& map, const std::string& type_name)
+        {
+            map[type_name].reset(new Implementation<T>());
+        }
+    };
+
+    template <typename T>
+    struct Adder<T, typename std::enable_if<std::is_same<Anything, T>::value>::type>
+    {
+        static void addToMap(std::map<std::string, EntryInterface::Ptr>& map, const std::string& type_name)
+        {
+            map[type_name].reset(new AnythingImplementation());
+        }
+    };
+
+
+
     struct SupportedTypes : public Singleton<SupportedTypes> {
         static EntryInterface::Ptr make(const std::string& type) {
             auto pos = instance().map_.find(type);
             if(pos == instance().map_.end()) {
+                for(auto pair : instance().map_) {
+                    std::cout << "supported: " << pair.first << std::endl;
+                }
                 throw std::runtime_error(std::string("cannot make vector of type ") + type);
             }
+            std::cout << "!!!! make vector of type " << type << ": " << pos->second->typeName() << std::endl;;
             return pos->second->cloneEntry();
         }
 
         template <typename T>
-        static void registerType()
+        static void registerType(const std::string& type_name = "")
         {
-            std::string type = type2name(typeid(T));
+            std::string type = type_name.empty() ? type2name(typeid(T)) : type_name;
             std::map<std::string, EntryInterface::Ptr>& map = instance().map_;
             if(map.find(type) == map.end()) {
-                map[type].reset(new Implementation<T>());
+                Adder<T>::addToMap(instance().map_, type);
             }
         }
 
@@ -415,9 +495,9 @@ public:
     };
 
     template <typename T>
-    static void registerType()
+    static void registerType(const std::string& type_name = "")
     {
-        SupportedTypes::registerType<T>();
+        SupportedTypes::registerType<T>(type_name);
     }
 
     template <typename T>
@@ -461,7 +541,8 @@ public:
             }
             return res;
         } else {
-            throw std::runtime_error("cannot make the vector shared");
+            std::cout << "type is " << type2name<T>() << std::endl;
+            throw std::runtime_error("cannot make the msg vector shared");
         }
     }
     template <typename T>
@@ -473,8 +554,16 @@ public:
             auto res = std::make_shared<std::vector<T>>();
             makeSharedValue(i.get(), res);
             return res;
+        } else if(auto i = std::dynamic_pointer_cast< MessageImplementation<GenericValueMessage<T>> >  (impl)) {
+            auto res = std::make_shared<std::vector<T>>();
+            for(auto entry : *i->value) {
+                res->push_back(entry.value);
+            }
+            return res;
         } else {
-            throw std::runtime_error("cannot make the vector shared");
+            std::cout << "instance is " << type2name(typeid(*impl)) << std::endl;
+            std::cout << "type is " << type2name<T>() << std::endl;
+            throw std::runtime_error("cannot make the direct vector shared");
         }
     }
 
@@ -561,6 +650,7 @@ public:
         std::string type = node["value_type"].as<std::string>();
         impl = SupportedTypes::make(type);
         assert(impl);
+
         impl->decode(node);
     }
 

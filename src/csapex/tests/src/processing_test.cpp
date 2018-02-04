@@ -73,13 +73,12 @@ TEST_F(ProcessingTest, CallToProcessViaNodeWorker)
     NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
     Node& node = *times_4->getNode();
     NodeHandle& nh = *times_4->getNodeHandle();
-    NodeWorker& nw = *times_4->getNodeWorker();
 
     // no inputs are sent yet -> expect an assertion failure
     ASSERT_TRUE(node.canProcess());
-    ASSERT_FALSE(nw.isProcessing());
-    ASSERT_FALSE(nw.canProcess());
-    ASSERT_THROW(nw.startProcessingMessages(), csapex::HardAssertionFailure);
+    ASSERT_FALSE(times_4->isProcessing());
+    ASSERT_FALSE(times_4->canProcess());
+    ASSERT_THROW(times_4->startProcessingMessages(), csapex::HardAssertionFailure);
 
     // create a temporary output and connect it to the input
     OutputPtr tmp_out = std::make_shared<StaticOutput>(UUIDProvider::makeUUID_without_parent("tmp_out"));
@@ -95,15 +94,13 @@ TEST_F(ProcessingTest, CallToProcessViaNodeWorker)
     tmp_out->publish();
 
     ASSERT_TRUE(node.canProcess());
-    ASSERT_TRUE(nw.canReceive()); // connection is there
-    ASSERT_TRUE(nw.canSend());
-    ASSERT_TRUE(nw.canProcess());
+    ASSERT_TRUE(times_4->canProcess());
     ASSERT_TRUE(nh.getInputTransition()->isEnabled());
     ASSERT_TRUE(nh.getOutputTransition()->isEnabled());
 
     // no inputs are sent now -> node should multiply the input by 4
-    ASSERT_FALSE(nw.isProcessing());
-    ASSERT_TRUE(nw.startProcessingMessages());
+    ASSERT_FALSE(times_4->isProcessing());
+    ASSERT_TRUE(times_4->startProcessingMessages());
 
     // commit the messages produced by the node
     OutputPtr output = nh.getOutput(UUIDProvider::makeUUID_without_parent("StaticMultiplier4:|:out_0"));

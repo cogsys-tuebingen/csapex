@@ -15,6 +15,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/utility/register_msg.h>
 #include <csapex/msg/generic_value_message.hpp>
+#include <csapex/param/parameter_factory.h>
 
 #include "stepping_test.h"
 
@@ -35,18 +36,35 @@ public:
     {
     }
 
-    virtual void setup(csapex::NodeModifier& node_modifier) override
+    void setupParameters(Parameterizable& params) override
+    {
+        params.addHiddenParameter(param::ParameterFactory::declareValue<M>("value", {}));
+    }
+
+    void setup(csapex::NodeModifier& node_modifier) override
     {
         output = node_modifier.addOutput<M>("output");
     }
 
     void process() override
     {
+        M value = readParameter<M>("value");
+//        ainfo << getpid() << " send value: " << value << std::endl;
         msg::publish(output, value);
     }
 
-public:
-    M value;
+    bool canProcess() const override
+    {
+        return Node::canProcess();
+    }
+
+    void setValue(M val)
+    {
+        auto param = getParameter("value");
+
+//        ainfo << "set value: " << val << std::endl;
+        param->set(val);
+    }
 
 private:
     Output* output;
@@ -61,19 +79,31 @@ public:
     {
     }
 
-    virtual void setup(csapex::NodeModifier& node_modifier) override
+    void setupParameters(Parameterizable& params) override
+    {
+        params.addHiddenParameter(param::ParameterFactory::declareValue<M>("value", {}));
+    }
+
+    void setup(csapex::NodeModifier& node_modifier) override
     {
         input = node_modifier.addInput<M>("input");
     }
 
     void process() override
     {
+        ASSERT_TRUE(input->hasReceived());
         ASSERT_TRUE(msg::hasMessage(input));
 
-        value = msg::getValue<M>(input);
+//        ainfo << "RECEIVED: " << msg::getValue<M>(input) << std::endl;
+
+        setParameter("value", msg::getValue<M>(input));
     }
-public:
-    M value;
+
+    M getValue() const
+    {
+        return readParameter<M>("value");
+    }
+
 
 private:
     Input* input;
@@ -264,9 +294,9 @@ TEST_F(PolymorphicValuesTest, IntCanBeConnectedToIntViaNodes) {
     ASSERT_NE(nullptr, receiver);
 
     for(int iter = 0; iter < 23; ++iter) {
-        sender->value = iter;
+        sender->setValue(iter);
         ASSERT_NO_FATAL_FAILURE(step());
-        ASSERT_EQ(iter, receiver->value);
+        ASSERT_EQ(iter, receiver->getValue());
     }
 }
 
@@ -294,9 +324,9 @@ TEST_F(PolymorphicValuesTest, DoubleCanBeConnectedToDoubleViaNodes) {
     ASSERT_NE(nullptr, receiver);
 
     for(int iter = 0; iter < 23; ++iter) {
-        sender->value = iter + 0.5;
+        sender->setValue(iter + 0.5);
         ASSERT_NO_FATAL_FAILURE(step());
-        ASSERT_EQ(iter + 0.5, receiver->value);
+        ASSERT_EQ(iter + 0.5, receiver->getValue());
     }
 }
 
@@ -324,9 +354,9 @@ TEST_F(PolymorphicValuesTest, DoubleCanBeConnectedToIntViaNodes) {
     ASSERT_NE(nullptr, receiver);
 
     for(int iter = 0; iter < 23; ++iter) {
-        sender->value = iter + 0.25;
+        sender->setValue(iter + 0.25);
         ASSERT_NO_FATAL_FAILURE(step());
-        ASSERT_EQ(iter, receiver->value);
+        ASSERT_EQ(iter, receiver->getValue());
     }
 }
 
@@ -355,9 +385,9 @@ TEST_F(PolymorphicValuesTest, IntCanBeConnectedToDoubleViaNodes) {
     ASSERT_NE(nullptr, receiver);
 
     for(int iter = 0; iter < 23; ++iter) {
-        sender->value = iter;
+        sender->setValue(iter);
         ASSERT_NO_FATAL_FAILURE(step());
-        ASSERT_NEAR(iter, receiver->value, 0.001);
+        ASSERT_NEAR(iter, receiver->getValue(), 0.001);
     }
 }
 
@@ -386,9 +416,9 @@ TEST_F(PolymorphicValuesTest, DoubleCanBeConnectedToBoolViaNodes) {
     ASSERT_NE(nullptr, receiver);
 
     for(int iter = 0; iter < 23; ++iter) {
-        sender->value = iter;
+        sender->setValue(iter);
         ASSERT_NO_FATAL_FAILURE(step());
-        ASSERT_EQ(iter != 0, receiver->value);
+        ASSERT_EQ(iter != 0, receiver->getValue());
     }
 }
 
@@ -417,14 +447,14 @@ TEST_F(PolymorphicValuesTest, BoolCanBeConnectedToDoubleViaNodes) {
     ASSERT_NE(nullptr, receiver);
 
     for(int iter = 0; iter < 23; ++iter) {
-        sender->value = (iter % 2) == 0;
+        sender->setValue((iter % 2) == 0);
         ASSERT_NO_FATAL_FAILURE(step());
 
         if((iter % 2) == 0) {
-            ASSERT_NEAR(1.0, receiver->value, 0.0001);
+            ASSERT_NEAR(1.0, receiver->getValue(), 0.0001);
 
         } else {
-            ASSERT_NEAR(0.0, receiver->value, 0.0001);
+            ASSERT_NEAR(0.0, receiver->getValue(), 0.0001);
         }
     }
 }
@@ -455,14 +485,14 @@ TEST_F(PolymorphicValuesTest, BoolCanBeConnectedToStringViaNodes) {
     ASSERT_NE(nullptr, receiver);
 
     for(int iter = 0; iter < 23; ++iter) {
-        sender->value = (iter % 2) == 0;
+        sender->setValue((iter % 2) == 0);
         ASSERT_NO_FATAL_FAILURE(step());
 
         if((iter % 2) == 0) {
-            ASSERT_EQ("true", receiver->value);
+            ASSERT_EQ("true", receiver->getValue());
 
         } else {
-            ASSERT_EQ("false", receiver->value);
+            ASSERT_EQ("false", receiver->getValue());
         }
     }
 }

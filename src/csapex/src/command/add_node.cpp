@@ -4,7 +4,6 @@
 /// COMPONENT
 #include <csapex/command/command.h>
 #include <csapex/model/node_constructor.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/node_facade_impl.h>
 #include <csapex/model/node_state.h>
 #include <csapex/model/graph_facade.h>
@@ -47,7 +46,7 @@ bool AddNode::doExecute()
         uuid_ = graph->generateUUID(type_);
     }
 
-    NodeFacadeImplementationPtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
+    NodeFacadeImplementationPtr node = getNodeFactory()->makeNode(type_, uuid_, graph, ExecutionType::AUTO, saved_state_);
 
     if(!node) {
         return false;

@@ -3,7 +3,6 @@
 
 /// PROJECT
 #include <csapex/model/node_handle.h>
-#include <csapex/model/node_worker.h>
 #include <csapex/model/node_state.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>

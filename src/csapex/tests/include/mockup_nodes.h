@@ -6,6 +6,9 @@
 #include <csapex/model/node_modifier.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/input.h>
+#include <csapex/msg/output.h>
+#include <csapex/model/token.h>
+#include <csapex/param/parameter_factory.h>
 
 namespace csapex
 {
@@ -77,7 +80,6 @@ class MockupSource : public Node
 {
 public:
     MockupSource()
-        : i(0)
     {
     }
 
@@ -86,102 +88,70 @@ public:
         out = node_modifier.addOutput<int>("output");
     }
 
-    void setupParameters(Parameterizable& /*parameters*/) override
+    void setupParameters(Parameterizable& parameters) override
     {
-
+        parameters.addHiddenParameter(param::ParameterFactory::declareValue<int>("value", 0));
     }
 
     void process() override
     {
+        int i = readParameter<int>("value");
 //        ainfo << "publish " << i << std::endl;
-        msg::publish(out, i++);
+        msg::publish(out, i);
+        setParameter("value", i+1);
     }
 
     int getValue() const
     {
-        return i;
+        return readParameter<int>("value");
     }
 
 private:
     Output* out;
-
-    int i;
 };
 
-class MockupSink
+class MockupSink : public Node
 {
 public:
     MockupSink()
         : aborted(false),
-//          waiting(false),
           value(-1)
     {
 
     }
 
-    void setup(NodeModifier& node_modifier)
+    void setup(NodeModifier& node_modifier) override
     {
         in = node_modifier.addInput<int>("input");
         in->setEssential(true);
     }
 
-    void setupParameters(Parameterizable& /*parameters*/)
+    void setupParameters(Parameterizable& parameters) override
     {
-
+        parameters.addHiddenParameter(param::ParameterFactory::declareValue<int>("value", -1));
     }
 
-    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
+    void process(NodeModifier& node_modifier, Parameterizable& parameters) override
     {
         int i = msg::getValue<int>(in);
-      //  std::cerr << " < sink " << i << std::endl;
-        value = i;
-
-//        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-//        waiting = false;
-//        stepping_done.notify_all();
+        setParameter("value", i);
     }
 
     int getValue() const
     {
-        return value;
+        return readParameter<int>("value");
     }
 
-//    void setWaiting(bool w)
-//    {
-//        waiting = w;
-//    }
-
-//    void wait()
-//    {
-//        if(aborted) {
-//            return;
-//        }
-//        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-//        while(waiting) {
-//            stepping_done.wait(lock);
-//        }
-//    }
 
     void abort()
     {
         aborted = true;
-
-//        std::unique_lock<std::recursive_mutex> lock(wait_mutex);
-//        if(waiting) {
-//            waiting = false;
-//            stepping_done.notify_all();
-//        }
     }
 
 private:
     Input* in;
 
     bool aborted;
-//    bool waiting;
-
-//    std::recursive_mutex wait_mutex;
-//    std::condition_variable_any stepping_done;
-
     int value;
 };
 

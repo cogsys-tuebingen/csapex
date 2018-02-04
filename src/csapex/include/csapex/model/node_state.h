@@ -6,6 +6,7 @@
 #include <csapex/data/point.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/execution_mode.h>
+#include <csapex/model/execution_type.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/serialization/serializable.h>
 
@@ -85,6 +86,10 @@ public:
     void setExecutionMode(ExecutionMode mode);
     Signal execution_mode_changed;
 
+    ExecutionType getExecutionType() const;
+    void setExecutionType(ExecutionType type);
+    Signal execution_type_changed;
+
     int getLoggerLevel() const;
     void setLoggerLevel(int level);
     Signal logger_level_changed;
@@ -151,6 +156,7 @@ private:
     std::map<std::string, boost::any> dictionary;
 
     ExecutionMode exec_mode_;
+    ExecutionType exec_type_;
 };
 
 }

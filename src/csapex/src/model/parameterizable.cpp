@@ -164,28 +164,31 @@ void Parameterizable::parameterChanged(param::ParameterPtr parameter)
         checkConditions(false);
     }
 
-    auto pos = param_callbacks_.find(parameter.get());
-    if(pos != param_callbacks_.end()) {
-        std::vector<std::function<void(param::Parameter*)>>& callbacks = pos->second;
-        {
-            std::unique_lock<std::recursive_mutex> lock(mutex_);
-            std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
+    {
+        std::unique_lock<std::recursive_mutex> lock(mutex_);
+        std::unique_lock<std::recursive_mutex > clock(changed_params_mutex_);
 
-            for(auto it = changed_params_.begin(); it != changed_params_.end();) {
-                param::ParameterWeakPtr pw = it->first;
-                param::ParameterPtr p = pw.lock();
-                if(p == parameter) {
-                    it = changed_params_.erase(it);
-                } else {
-                    ++it;
-                }
+        for(auto it = changed_params_.begin(); it != changed_params_.end();) {
+            param::ParameterWeakPtr pw = it->first;
+            param::ParameterPtr p = pw.lock();
+            if(p == parameter) {
+                it = changed_params_.erase(it);
+            } else {
+                ++it;
             }
-            changed_params_.push_back(std::make_pair(parameter, callbacks));
         }
 
-        if(!silent_) {
-            parameters_changed();
+        auto pos = param_callbacks_.find(parameter.get());
+        if(pos != param_callbacks_.end()) {
+            std::vector<std::function<void(param::Parameter*)>>& callbacks = pos->second;
+            changed_params_.push_back(std::make_pair(parameter, callbacks));
+        } else {
+            changed_params_.push_back(std::make_pair(parameter, std::vector<std::function<void(param::Parameter*)>>{}));
         }
+    }
+
+    if(!silent_) {
+        parameters_changed();
     }
 }
 

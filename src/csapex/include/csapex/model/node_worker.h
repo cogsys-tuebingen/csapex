@@ -16,6 +16,7 @@
 #include <csapex/model/activity_type.h>
 #include <csapex/model/execution_state.h>
 #include <csapex/model/activity_modifier.h>
+#include <csapex/model/parameterizable.h>
 
 /// SYSTEM
 #include <map>
@@ -31,13 +32,13 @@ namespace csapex {
 class ProfilerImplementation;
 class Interval;
 
+
 class CSAPEX_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
 {
 public:
     typedef std::shared_ptr<NodeWorker> Ptr;
 
 public:
-    NodeWorker(NodeHandlePtr node_handle);
     ~NodeWorker();
 
     NodeHandlePtr getNodeHandle() const;
@@ -46,7 +47,7 @@ public:
 
     long getSequenceNumber() const;
 
-    void initialize();
+    virtual void initialize();
     void reset();
 
     void ioChanged();
@@ -54,7 +55,6 @@ public:
     void handleChangedParameters();
 
     void triggerTryProcess();
-    void triggerPanic();
 
     ExecutionState getExecutionState() const;
 
@@ -77,7 +77,6 @@ public:
 
     void trySendEvents();
 
-public:
     bool startProcessingMessages();
     void forwardMessages();
 
@@ -90,7 +89,6 @@ public:
 
 public:
     slim_signal::Signal<void()> destroyed;
-    slim_signal::Signal<void()> panic;
 
     slim_signal::Signal<void(bool)> enabled;
 
@@ -103,6 +101,14 @@ public:
     slim_signal::Signal<void()> messages_processed;
     slim_signal::Signal<void()> processRequested;
     slim_signal::Signal<void()> try_process_changed;
+
+protected:
+    NodeWorker(NodeHandlePtr node_handle);
+
+    virtual void processNode();
+    virtual void handleChangedParametersImpl(const Parameterizable::ChangedParameterList& changed_params);
+
+    void finishProcessing();
 
 private:
     void updateParameterValues();
@@ -120,10 +126,8 @@ private:
 
     void pruneExecution();
     void skipExecution();
-    void finishProcessing();
 
     void setProcessing(bool processing);
-    void processNode();
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
 
@@ -145,8 +149,7 @@ private:
     void startProfilerInterval(ActivityType type);
     void stopActiveProfilerInterval();
 
-
-private:
+protected:
     mutable std::recursive_mutex sync;
 
     NodeHandlePtr node_handle_;
@@ -156,6 +159,7 @@ private:
 
     bool is_setup_;
 
+private:
     mutable std::recursive_mutex state_mutex_;
     bool is_processing_;
 

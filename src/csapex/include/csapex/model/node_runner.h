@@ -47,15 +47,19 @@ public:
 
     void setSuppressExceptions(bool suppress_exceptions);
 
+    void setNodeWorker(NodeWorkerPtr worker);
+
 private:
+    void connectNodeWorker();
+
     void measureFrequency();
-
     void scheduleProcess();
-
+    void checkParameters();
     void execute();
 
 private:
     NodeWorkerPtr worker_;
+    NodeHandlePtr nh_;
     Scheduler* scheduler_;
 
     mutable std::recursive_mutex mutex_;
