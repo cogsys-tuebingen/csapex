@@ -52,6 +52,8 @@ add_library(csapex_util SHARED
     src/slim_signal_implementations.cpp
     src/ticker.cpp
     src/cpu_affinity.cpp
+    src/subprocess_channel.cpp
+    src/subprocess.cpp
 
     ${csapex_util_HEADERS}
 )

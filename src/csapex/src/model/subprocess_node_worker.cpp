@@ -47,25 +47,20 @@ using namespace boost::interprocess;
 
 SubprocessNodeWorker::SubprocessNodeWorker(NodeHandlePtr node_handle)
     : NodeWorker(node_handle),
-      shm_block_(nullptr),
-      pid_(-1)
+      pid_(-1),
+      subprocess_(node_handle->getUUID().getFullName())
 {
 }
 
 void SubprocessNodeWorker::initialize()
 {
-    allocateSharedMemory();
-
     // ... generalize.......
     connection_types::GenericVectorMessage::registerType<connection_types::GenericValueMessage<int>>();
     connection_types::GenericVectorMessage::registerType<connection_types::GenericValueMessage<int>>(connection_types::type<connection_types::GenericValueMessage<int>>::name());
 
-    pid_ = fork();
-
-    if (pid_ == 0) {
-        // NODE
+    pid_ = subprocess_.fork([this](){
         runSubprocessLoop();
-    }
+    });
 
     NodeWorker::initialize();
 }
@@ -80,37 +75,27 @@ void SubprocessNodeWorker::runSubprocessLoop()
             changed_parameters_.push_back(p);
         });
 
-        scoped_lock<interprocess_mutex> lock(shm_block_->m);
-
-        while(shm_block_->active){
+        while(subprocess_.isActive()) {
 
             // wait for a message
-            while(!shm_block_->has_message) {
-                shm_block_->message_available.wait(lock);
-                if(!shm_block_->active) {
-                    std::quick_exit(0);
-                }
+            SubprocessChannel::Message msg = subprocess_.in.read();
+            if(msg.type == SubprocessChannel::MessageType::SHUTDOWN) {
+                return;
             }
 
-            shm_block_->has_message = false;
-
-            switch(shm_block_->message_type)
+            switch(msg.type)
             {
-            case ShmBlock::MessageType::PARAMETER_UPDATE:
-            {
-                handleParameterUpdate();
-
-            }
+            case SubprocessChannel::MessageType::PARAMETER_UPDATE:
+                handleParameterUpdate(msg);
                 break;
 
-            case ShmBlock::MessageType::PROCESS:
-            {
-                handleProcessChild(lock);
-            }
+            case SubprocessChannel::MessageType::PROCESS:
+                handleProcessChild(msg);
+                break;
+
+            default:
                 break;
             }
-
-            shm_block_->message_processed.notify_all();
         }
 
         std::quick_exit(0);
@@ -125,20 +110,15 @@ void SubprocessNodeWorker::runSubprocessLoop()
 }
 
 
-void SubprocessNodeWorker::handleProcessChild(scoped_lock<interprocess_mutex>& lock)
+void SubprocessNodeWorker::handleProcessChild(const SubprocessChannel::Message& msg)
 {
-    const ShmAllocator<int> alloc_inst (shm_segment->get_segment_manager());
-
     NodePtr node = getNode();
 
     YAML::Emitter result_emitter;
 
     try {
-        std::pair<shared_string*, managed_shared_memory::size_type> input
-                = shm_segment->find<shared_string> ("input_yaml");
-
-        if(input.first) {
-            YAML::Node yaml = YAML::Load(input.first->c_str());
+        if(msg.data) {
+            YAML::Node yaml = YAML::Load(msg.toString());
 
             for(const YAML::Node& node : yaml) {
                 UUID uuid = node["uuid"].as<UUID>();
@@ -149,16 +129,11 @@ void SubprocessNodeWorker::handleProcessChild(scoped_lock<interprocess_mutex>& l
             };
         }
 
-        shm_segment->destroy<shared_string>("input_yaml");
-
         node->process(*node_handle_, *node);
-
-        shm_block_->message_processed.notify_all();
-        shm_block_->message_available.wait(lock);
 
         // send parameter updates
         for(param::Parameter* parameter : changed_parameters_) {
-            transmitParameter(lock, getNode()->getParameter(parameter->name()));
+            transmitParameter(getNode()->getParameter(parameter->name()));
         }
 
         changed_parameters_.clear();
@@ -189,74 +164,34 @@ void SubprocessNodeWorker::handleProcessChild(scoped_lock<interprocess_mutex>& l
         std::cout << getUUID() << " >> error: " << e.what() << std::endl;
     }
 
-    shm_block_->has_message = false;
-    shm_block_->message_type = ShmBlock::MessageType::PROCESS;
-    shm_segment->construct<shared_string>
-            ("result_yaml")
-            (result_emitter.c_str(), alloc_inst);
-    shm_block_->message_available.notify_all();
-}
 
-void SubprocessNodeWorker::allocateSharedMemory()
-{
-    try {
-        //        std::cout << "try to create shared memory object " << getUUID() << std::endl;
-        shm_segment.reset(new managed_shared_memory(create_only, getUUID().getFullName().c_str(), 65536));
-
-    } catch(const boost::interprocess::interprocess_exception& e) {
-        //        std::cout << "could not create shared memory object: " << e.what() << std::endl;
-        //        std::cout << "removing shared memory object " << getUUID() << std::endl;
-        shared_memory_object::remove(getUUID().getFullName().c_str());
-        shm_segment.reset(new managed_shared_memory(create_only, getUUID().getFullName().c_str(), 65536));
-    }
-
-
-    //Create a managed shared memory segment
-    shm_block_ = shm_segment->construct<ShmBlock>("shm")();
+    subprocess_.out.write({SubprocessChannel::MessageType::PROCESS, result_emitter.c_str()});
 }
 
 SubprocessNodeWorker::~SubprocessNodeWorker()
 {
     stopObserving();
-
-    std::unique_lock<std::recursive_mutex> lock(sync);
-
-    shm_block_->active = false;
-    shm_block_->message_available.notify_all();
-
-    using namespace boost::interprocess;
-    shared_memory_object::remove(getUUID().getFullName().c_str());
 }
 
 
-void SubprocessNodeWorker::handleParameterUpdate()
+void SubprocessNodeWorker::handleParameterUpdate(const SubprocessChannel::Message &msg)
 {
-    NodePtr node = getNode();
+    if(msg.data) {
+        NodePtr node = getNode();
 
-    std::pair<shared_buffer*, managed_shared_memory::size_type> input
-            = shm_segment->find<shared_buffer> ("parameter");
-
-    if(input.first) {
-        SerializationBuffer buffer(input.first->data(), input.first->size());
+        SerializationBuffer buffer((const uint8_t*) msg.data, msg.length);
 
         param::ParameterPtr p = std::dynamic_pointer_cast<param::Parameter>(PacketSerializer::deserializePacket(buffer));
 
         param::ParameterPtr existing = node->getParameter(p->name());
         existing->setValueFrom(*p);
     }
-
-    shm_segment->destroy<shared_string>("parameter");
-
-    shm_block_->message_available.notify_all();
 }
 
-bool SubprocessNodeWorker::handleProcessParent()
+bool SubprocessNodeWorker::handleProcessParent(const SubprocessChannel::Message& msg)
 {
-    std::pair<shared_string*, managed_shared_memory::size_type> result
-            = shm_segment->find<shared_string> ("result_yaml");
-
-    if(result.first) {
-        YAML::Node yaml = YAML::Load(result.first->c_str());
+    if(msg.data) {
+        YAML::Node yaml = YAML::Load(msg.toString());
 
         for(const YAML::Node& node : yaml) {
             UUID uuid = node["uuid"].as<UUID>();
@@ -268,9 +203,6 @@ bool SubprocessNodeWorker::handleProcessParent()
             msg::publish(output.get(), msg);
         };
     }
-
-    //Deallocate previously allocated memory
-    shm_segment->destroy<shared_string>("result_yaml");
 
     return true;
 }
@@ -289,15 +221,9 @@ void SubprocessNodeWorker::processNode()
     try {
         apex_assert_hard(node->getNodeHandle());
         if(sync) {
-            using namespace boost::interprocess;
-
-            const ShmAllocator<int> alloc_inst (shm_segment->get_segment_manager());
-
             apex_assert_msg(pid_ != 0, "processNode called in subprocess");
 
             // APEX
-            scoped_lock<interprocess_mutex> lock(shm_block_->m);
-
             YAML::Node yaml(YAML::NodeType::Sequence);
 
             for(InputPtr& input : node_handle_->getExternalInputs()) {
@@ -317,39 +243,28 @@ void SubprocessNodeWorker::processNode()
             YAML::Emitter emitter;
             emitter << yaml;
 
-            shm_segment->construct<shared_string>
-                    ("input_yaml")
-                    (emitter.c_str(), alloc_inst);
-
-            shm_block_->message_type = ShmBlock::MessageType::PROCESS;
-            shm_block_->has_message = true;
-            shm_block_->message_available.notify_all();
-
-            shm_block_->message_processed.wait(lock);
-            shm_block_->message_available.notify_all();
+            subprocess_.in.write({SubprocessChannel::MessageType::PROCESS, emitter.c_str()});
 
             bool done_processing = false;
 
             // wait for the end of processing
 
             while(!done_processing) {
-                shm_block_->message_available.wait(lock);
-                switch(shm_block_->message_type)
+                SubprocessChannel::Message msg = subprocess_.out.read();
+                switch(msg.type)
                 {
-                case ShmBlock::MessageType::PARAMETER_UPDATE:
-                {
-                    handleParameterUpdate();
-                }
+                case SubprocessChannel::MessageType::PARAMETER_UPDATE:
+                    handleParameterUpdate(msg);
                     break;
 
-                case ShmBlock::MessageType::PROCESS:
-                {
-                    done_processing = handleProcessParent();
-                }
+                case SubprocessChannel::MessageType::PROCESS:
+                    done_processing = handleProcessParent(msg);
+                    break;
+
+                default:
+                    node->awarn << "Unhandled subprocess message: " << (int) msg.type << std::endl;
                     break;
                 }
-
-                shm_block_->message_processed.notify_all();
             }
 
         } else {
@@ -390,37 +305,22 @@ void SubprocessNodeWorker::processNode()
     }
 }
 
-void SubprocessNodeWorker::transmitParameter(Lock &lock, const param::ParameterPtr &p)
+void SubprocessNodeWorker::transmitParameter(const param::ParameterPtr &p)
 {
-    const ShmAllocator<int> alloc_inst (shm_segment->get_segment_manager());
+    SubprocessChannel& channel = subprocess_.isChild() ? subprocess_.out : subprocess_.in;
 
     SerializationBuffer buffer = PacketSerializer::serializePacket(p);
 
-    shm_segment->construct<shared_buffer>
-            ("parameter")
-            (buffer.data(), buffer.size(), alloc_inst);
-
-    shm_block_->message_type = ShmBlock::MessageType::PARAMETER_UPDATE;
-    shm_block_->has_message = true;
-    shm_block_->message_available.notify_all();
-    shm_block_->message_processed.wait(lock);
+    channel.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, buffer.data(), buffer.size()});
 }
 
 void SubprocessNodeWorker::handleChangedParametersImpl(const Parameterizable::ChangedParameterList &changed_params)
 {
     NodeWorker::handleChangedParametersImpl(changed_params);
 
-    using namespace boost::interprocess;
-    apex_assert_hard(shm_block_);
-
-    scoped_lock<interprocess_mutex> lock(shm_block_->m);
-
-    //    apex_assert_msg(pid != 0, "handleChangedParametersImpl called in subprocess");
-    // this method can be used in both directions!
-
     for(auto pair : changed_params) {
         if(param::ParameterPtr p = pair.first.lock()) {
-            transmitParameter(lock, p);
+            transmitParameter(p);
         }
     }
 }

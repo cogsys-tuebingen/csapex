@@ -19,6 +19,7 @@
 #include <csapex/model/activity_type.h>
 #include <csapex/model/execution_state.h>
 #include <csapex/model/activity_modifier.h>
+#include <csapex/utility/subprocess.h>
 
 /// SYSTEM
 #include <map>
@@ -27,20 +28,12 @@
 #include <vector>
 #include <atomic>
 #include <csapex/utility/slim_signal.hpp>
-#include <boost/optional.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/containers/string.hpp>
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
-#include <boost/interprocess/sync/interprocess_condition.hpp>
 
 
 namespace csapex {
 
 class ProfilerImplementation;
 class Interval;
-
-template <typename T>
-using ShmAllocator = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
 
 
 class CSAPEX_EXPORT SubprocessNodeWorker : public NodeWorker
@@ -59,48 +52,19 @@ protected:
     void handleChangedParametersImpl(const Parameterizable::ChangedParameterList& changed_params) override;
 
 private:
-    void allocateSharedMemory();
     void runSubprocessLoop();
 
-    void handleParameterUpdate();
+    void handleParameterUpdate(const SubprocessChannel::Message& msg);
 
-    bool handleProcessParent();
-    void handleProcessChild(Lock &lock);
+    bool handleProcessParent(const SubprocessChannel::Message &msg);
+    void handleProcessChild(const SubprocessChannel::Message& msg);
 
-    void transmitParameter(Lock &lock, const param::ParameterPtr& p);
+    void transmitParameter(const param::ParameterPtr& p);
 
 private:
-    std::shared_ptr<boost::interprocess::managed_shared_memory> shm_segment;
-
-    using shared_string = typename boost::interprocess::basic_string<char, std::char_traits<char>, ShmAllocator<char>>;
-    using shared_buffer = typename boost::interprocess::basic_string<uint8_t, std::char_traits<uint8_t>, ShmAllocator<uint8_t>>;
-
-    struct ShmBlock
-    {
-        ShmBlock()
-            : has_message(false),
-              active(true)
-        {
-        }
-
-        boost::interprocess::interprocess_mutex m;
-        boost::interprocess::interprocess_condition message_available;
-        boost::interprocess::interprocess_condition message_processed;
-
-        enum class MessageType
-        {
-            PROCESS,
-            PARAMETER_UPDATE
-        };
-
-        MessageType message_type;
-
-        bool has_message;
-        bool active;
-    };
-
-    ShmBlock* shm_block_;
     pid_t pid_;
+
+    Subprocess subprocess_;
 
     std::vector<param::Parameter*> changed_parameters_;
 };
