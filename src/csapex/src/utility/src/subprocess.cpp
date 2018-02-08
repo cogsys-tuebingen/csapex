@@ -3,6 +3,12 @@
 
 /// SYSTEM
 #include <iostream>
+#include <boost/optional.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/containers/string.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+#include <boost/interprocess/sync/interprocess_condition.hpp>
+#include <unistd.h>
 
 using namespace csapex;
 

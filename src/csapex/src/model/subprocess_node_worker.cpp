@@ -40,10 +40,9 @@
 #include <scoped_allocator>
 #include <future>
 #include <csignal>
+#include <boost/interprocess/exceptions.hpp>
 
 using namespace csapex;
-
-//ros import, e.g., cannot be subprocessed .... -> ros init
 
 SubprocessNodeWorker::SubprocessNodeWorker(NodeHandlePtr node_handle)
     : NodeWorker(node_handle),
@@ -157,12 +156,15 @@ void SubprocessNodeWorker::runSubprocessLoop()
 
         std::quick_exit(0);
 
+    } catch(const SubprocessChannel::ShutdownException& e) {
+        // ignore
+
     } catch(const boost::interprocess::interprocess_exception& e) {
         std::cout << "interprocess exception " << getUUID() << " >> error: " << e.what() << std::endl;
         std::cout << "native error: " << e.get_native_error() << std::endl;
         std::cout << "error code:   " << e.get_error_code() << std::endl;
     } catch(const std::exception& e) {
-        // ignore
+        std::cout << "subprocess " << getUUID() << " >> error: " << e.what() << std::endl;
     }
 }
 
