@@ -85,7 +85,7 @@ AddParameter::ParameterResponse::ParameterResponse(uint8_t request_id)
 
 void AddParameter::ParameterResponse::serialize(SerializationBuffer &data) const
 {
-    ParameterSerializer::instance().serialize(param_, data);
+    ParameterSerializer::instance().serialize(*param_, data);
 }
 
 void AddParameter::ParameterResponse::deserialize(const SerializationBuffer& data)

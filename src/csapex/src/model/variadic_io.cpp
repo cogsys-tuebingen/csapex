@@ -36,6 +36,7 @@ VariadicBase::~VariadicBase()
 void VariadicBase::setupVariadic(NodeModifier& modifier)
 {
     variadic_modifier_ = &modifier;
+    variadic_modifier_->setVariadic(true);
 }
 
 void VariadicBase::portCountChanged()

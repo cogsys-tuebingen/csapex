@@ -22,9 +22,9 @@ RequestSerializerInterface::~RequestSerializerInterface()
 
 }
 
-void RequestSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
+void RequestSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    if(const RequestConstPtr& request = std::dynamic_pointer_cast<Request const>(packet)) {
+    if(const Request* request = dynamic_cast<const Request*>(&packet)) {
         std::string type = request->getType();
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
@@ -38,13 +38,13 @@ void RequestSerializer::serialize(const StreamableConstPtr &packet, Serializatio
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
-            serializer->serializeRequest(request, data);
+            serializer->serializeRequest(*request, data);
 
         } else {
             std::cerr << "cannot serialize Request of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
         }
 
-    } else if(const ResponseConstPtr& response = std::dynamic_pointer_cast<Response const>(packet)) {
+    } else if(const Response* response = dynamic_cast<const Response*>(&packet)) {
         std::string type = response->getType();
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
@@ -58,7 +58,7 @@ void RequestSerializer::serialize(const StreamableConstPtr &packet, Serializatio
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
-            serializer->serializeResponse(response, data);
+            serializer->serializeResponse(*response, data);
 
         } else {
             std::cerr << "cannot serialize Response of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;

@@ -16,7 +16,7 @@ class BroadcastMessageSerializerInterface
 public:
     virtual ~BroadcastMessageSerializerInterface();
 
-    virtual void serialize(const BroadcastMessageConstPtr& packet, SerializationBuffer &data) = 0;
+    virtual void serialize(const BroadcastMessage& packet, SerializationBuffer &data) = 0;
     virtual BroadcastMessagePtr deserialize(const SerializationBuffer& data) = 0;
 };
 
@@ -24,7 +24,7 @@ public:
 class BroadcastMessageSerializer : public Singleton<BroadcastMessageSerializer>, public Serializer
 {
 public:
-    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
+    void serialize(const Streamable& packet, SerializationBuffer &data) override;
     StreamablePtr deserialize(const SerializationBuffer &data) override;
 
     static void registerSerializer(const std::string& type, std::shared_ptr<BroadcastMessageSerializerInterface> serializer);
@@ -53,9 +53,9 @@ struct BroadcastMessageSerializerRegistered
     { \
     class Name##Serializer : public BroadcastMessageSerializerInterface \
     { \
-        virtual void serialize(const BroadcastMessageConstPtr& packet, SerializationBuffer &data) override \
+        virtual void serialize(const BroadcastMessage& packet, SerializationBuffer &data) override \
         { \
-            packet->serialize(data); \
+            packet.serialize(data); \
         } \
         virtual BroadcastMessagePtr deserialize(const SerializationBuffer& data) override \
         { \

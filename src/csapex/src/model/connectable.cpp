@@ -24,6 +24,7 @@ Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
       count_(0), seq_no_(-1),
       virtual_(false),
       parameter_(false),
+      variadic_(false),
       graph_port_(false),
       essential_(false),
       enabled_(true)
@@ -39,6 +40,17 @@ bool Connectable::isVirtual() const
 void Connectable::setVirtual(bool _virtual)
 {
     virtual_ = _virtual;
+}
+
+
+bool Connectable::isVariadic() const
+{
+    return variadic_;
+}
+
+void Connectable::setVariadic(bool variadic)
+{
+    variadic_ = variadic;
 }
 
 bool Connectable::isParameter() const
@@ -346,9 +358,10 @@ ConnectorDescription Connectable::getDescription() const
                              getUUID(),
                              getConnectorType(),
                              getType(),
-                             getLabel(),
-                             isOptional(),
-                             isParameter());
+                             getLabel());
+    res.setParameter(isParameter())
+            .setOptional(isOptional())
+            .setVariadic(isVariadic());
 
     for(const ConnectionPtr& c : getConnections()) {
         if(isOutput()) {

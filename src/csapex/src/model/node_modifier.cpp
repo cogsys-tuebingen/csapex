@@ -12,7 +12,8 @@
 using namespace csapex;
 
 NodeModifier::NodeModifier()
-    : node_worker_(nullptr)
+    : node_worker_(nullptr),
+      variadic_(false)
 {
 }
 NodeModifier::~NodeModifier()
@@ -26,6 +27,11 @@ void NodeModifier::setNodeWorker(NodeWorker *worker)
     node_worker_->destroyed.connect([this]() {
         node_worker_ = nullptr;
     });
+}
+
+void NodeModifier::setVariadic(bool variadic)
+{
+    variadic_ = variadic;
 }
 
 

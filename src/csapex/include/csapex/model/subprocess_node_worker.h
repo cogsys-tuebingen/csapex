@@ -27,6 +27,7 @@
 #include <mutex>
 #include <vector>
 #include <atomic>
+#include <future>
 #include <csapex/utility/slim_signal.hpp>
 
 
@@ -48,7 +49,13 @@ public:
     void initialize() override;
     void processNode() override;
 
+
+
 protected:
+    void startSubprocess(const SubprocessChannel::MessageType type);
+    void finishSubprocess();
+
+    void finishProcessing() override;
     void handleChangedParametersImpl(const Parameterizable::ChangedParameterList& changed_params) override;
 
 private:
@@ -58,6 +65,7 @@ private:
 
     bool handleProcessParent(const SubprocessChannel::Message &msg);
     void handleProcessChild(const SubprocessChannel::Message& msg);
+    void finishHandleProcessChild();
 
     void transmitParameter(const param::ParameterPtr& p);
 
@@ -67,6 +75,8 @@ private:
     Subprocess subprocess_;
 
     std::vector<param::Parameter*> changed_parameters_;
+
+    std::future<void> async_future_;
 };
 
 }

@@ -17,6 +17,7 @@ struct ConnectorDescription : public Serializable
     std::string label;
     bool optional;
     bool is_parameter;
+    bool is_variadic;
 
     TokenDataConstPtr token_type;
 
@@ -51,23 +52,22 @@ struct ConnectorDescription : public Serializable
     ConnectorDescription(const AUUID& owner,
                          ConnectorType connector_type,
                          const TokenDataConstPtr& token_type,
-                         const std::string& label,
-                         bool optional = true,
-                         bool is_parameter = false);
+                         const std::string& label);
 
     ConnectorDescription(const AUUID& owner,
                          ConnectorType connector_type,
-                         const std::string& label,
-                         bool optional = true,
-                         bool is_parameter = false);
+                         const std::string& label);
 
     ConnectorDescription(const AUUID& owner,
                          const UUID& uuid,
                          ConnectorType connector_type,
                          const TokenDataConstPtr& token_type,
-                         const std::string& label,
-                         bool optional = true,
-                         bool is_parameter = false);
+                         const std::string& label);
+
+    ConnectorDescription& setOptional(bool optional);
+    ConnectorDescription& setParameter(bool parameter);
+    ConnectorDescription& setVariadic(bool variadic);
+
 
     bool isOutput() const;
 

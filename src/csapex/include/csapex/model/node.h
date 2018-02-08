@@ -252,6 +252,15 @@ public:
     virtual bool isIsolated() const;
 
     /**
+     * @brief canRunInSeparateProcess specifies whether this node can be executed in a sub process
+     *
+     * This means that the node cannot access global variables.
+     *
+     * @return <b>true</b>, iff the node can run in a sub process.
+     */
+    virtual bool canRunInSeparateProcess() const;
+
+    /**
      * @brief stateChanged is an event function that is called, when the NodeState has changed.
      */
     virtual void stateChanged();

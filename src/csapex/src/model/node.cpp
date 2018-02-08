@@ -89,6 +89,10 @@ bool Node::isIsolated() const
 {
     return false;
 }
+bool Node::canRunInSeparateProcess() const
+{
+    return true;
+}
 
 bool Node::canProcess() const
 {

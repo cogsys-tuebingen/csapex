@@ -16,12 +16,16 @@ Serializer::~Serializer()
 {
 
 }
-SerializationBuffer PacketSerializer::serializePacket(const StreamableConstPtr &packet)
+SerializationBuffer PacketSerializer::serializePacket(const Streamable& packet)
 {
     SerializationBuffer data;
     instance().serialize(packet, data);
     data.finalize();
     return data;
+}
+SerializationBuffer PacketSerializer::serializePacket(const StreamableConstPtr &packet)
+{
+    return serializePacket(*packet);
 }
 
 StreamablePtr PacketSerializer::deserializePacket(SerializationBuffer& serial)
@@ -34,11 +38,10 @@ void PacketSerializer::registerSerializer(uint8_t type, Serializer *serializer)
     instance().serializers_[type] = serializer;
 }
 
-
-void PacketSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer &data)
+void PacketSerializer::serialize(const Streamable& packet, SerializationBuffer &data)
 {
     // determine packet type
-    uint8_t type = packet->getPacketType();
+    uint8_t type = packet.getPacketType();
     auto it = serializers_.find(type);
     if(it != serializers_.end()) {
         data << type;

@@ -14,7 +14,7 @@ namespace csapex
 class RawMessageSerializer : public Singleton<RawMessageSerializer>, public Serializer
 {
 public:
-    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
+    void serialize(const Streamable& packet, SerializationBuffer &data) override;
     StreamablePtr deserialize(const SerializationBuffer &data) override;
 };
 

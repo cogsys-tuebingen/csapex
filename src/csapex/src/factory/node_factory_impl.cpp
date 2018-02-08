@@ -231,7 +231,15 @@ NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::strin
             return nullptr;
         }
 
-        ExecutionType exec_type = state ? state->getExecutionType() : default_exec_type;
+        ExecutionType exec_type = default_exec_type;
+        if(!nh->getNode().lock()->canRunInSeparateProcess()) {
+            exec_type = ExecutionType::DIRECT;
+        } else {
+            if(state) {
+                exec_type = state->getExecutionType();
+            }
+        }
+
 
         NodeFacadeImplementationPtr result;
         NodeWorkerPtr nw;
@@ -264,9 +272,6 @@ NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::strin
             node->aerr << "setup failed: " << e.what() << std::endl;
         }
 
-        if(nw) {
-            nw->initialize();
-        }
         // TODO: can this be done more elegantly?
         SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
         if(subgraph) {
@@ -279,6 +284,10 @@ NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::strin
         }
 
         nh->getNodeState()->setExecutionType(exec_type);
+
+        if(nw) {
+            nw->initialize();
+        }
 
         node_constructed(result);
 

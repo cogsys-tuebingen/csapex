@@ -18,7 +18,7 @@ class Serializer
 public:
     virtual ~Serializer();
 
-    virtual void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) = 0;
+    virtual void serialize(const Streamable& packet, SerializationBuffer &data) = 0;
     virtual StreamablePtr deserialize(const SerializationBuffer& data) = 0;
 };
 
@@ -35,14 +35,14 @@ class PacketSerializer : public Singleton<PacketSerializer>, public Serializer
     friend class Singleton<PacketSerializer>;
 
 public:
+    static SerializationBuffer serializePacket(const Streamable& packet);
     static SerializationBuffer serializePacket(const StreamableConstPtr& packet);
     static StreamablePtr deserializePacket(SerializationBuffer &serial);
     static void registerSerializer(uint8_t type, Serializer* serializer);
 
 public:
-    void serialize(const StreamableConstPtr &packet, SerializationBuffer &data) override;
+    void serialize(const Streamable& packet, SerializationBuffer &data) override;
     StreamablePtr deserialize(const SerializationBuffer &data) override;
-
 
 private:
     std::map<uint8_t, Serializer*> serializers_;
@@ -68,9 +68,9 @@ struct SerializerRegistered
 class Name##Serializer : public Singleton<Name##Serializer>, public Serializer \
 { \
 public: \
-    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override \
+    void serialize(const Streamable& packet, SerializationBuffer &data) override \
     { \
-        if(const std::shared_ptr<Name const>& res = std::dynamic_pointer_cast<Name const>(packet)) { \
+        if(auto* res = dynamic_cast<const Name*>(&packet)) { \
             res->serialize(data); \
         } \
     } \

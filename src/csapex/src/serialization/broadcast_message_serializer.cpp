@@ -19,20 +19,19 @@ BroadcastMessageSerializerInterface::~BroadcastMessageSerializerInterface()
 
 }
 
-void BroadcastMessageSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
+void BroadcastMessageSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    if(const BroadcastMessageConstPtr& cmd = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
+    if(const BroadcastMessage* broadcast = dynamic_cast<const BroadcastMessage*>(&packet)) {
 //        std::cerr << "serializing BroadcastMessage" << std::endl;
-        std::string type = cmd->getType();
+        std::string type = broadcast->getType();
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
 
-//            std::cerr << "serializing BroadcastMessage (type=" << type << ")" << std::endl;
             data << type;
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<BroadcastMessageSerializerInterface> serializer = it->second;
-            serializer->serialize(cmd, data);
+            serializer->serialize(*broadcast, data);
 
         } else {
             std::cerr << "cannot serialize BroadcastMessage of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;

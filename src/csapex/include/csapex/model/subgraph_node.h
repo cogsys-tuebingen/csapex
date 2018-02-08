@@ -26,6 +26,8 @@ public:
     SubgraphNode(GraphImplementationPtr graph);
     ~SubgraphNode();
 
+    bool canRunInSeparateProcess() const override;
+
     GraphPtr getGraph() const;
     GraphImplementationPtr getLocalGraph() const;
 

@@ -495,6 +495,7 @@ Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bo
     c->setLabel(label);
     c->setOptional(optional);
     c->setType(type);
+    c->setVariadic(variadic_);
     
     manageInput(c);
     
@@ -509,6 +510,7 @@ Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label)
 
     c->setLabel(label);
     c->setType(type);
+    c->setVariadic(variadic_);
     
     manageOutput(c);
     return c.get();
@@ -521,6 +523,7 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
     SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, blocking, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
+    slot->setVariadic(variadic_);
 
     manageSlot(slot);
 
@@ -534,6 +537,7 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
     SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, blocking, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
+    slot->setVariadic(variadic_);
 
     manageSlot(slot);
 

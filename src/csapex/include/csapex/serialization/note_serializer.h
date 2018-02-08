@@ -16,7 +16,7 @@ class NoteSerializerInterface
 public:
     virtual ~NoteSerializerInterface();
 
-    virtual void serialize(const io::NoteConstPtr& packet, SerializationBuffer &data) = 0;
+    virtual void serialize(const io::Note& packet, SerializationBuffer &data) = 0;
     virtual io::NotePtr deserialize(const SerializationBuffer& data) = 0;
 };
 
@@ -24,7 +24,7 @@ public:
 class NoteSerializer : public Singleton<NoteSerializer>, public Serializer
 {
 public:
-    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
+    void serialize(const Streamable& packet, SerializationBuffer &data) override;
     StreamablePtr deserialize(const SerializationBuffer &data) override;
 
     static void registerSerializer(const std::string& type, std::shared_ptr<NoteSerializerInterface> serializer);
@@ -53,9 +53,9 @@ struct NoteSerializerRegistered
     { \
     class Name##Serializer : public NoteSerializerInterface \
     { \
-        virtual void serialize(const io::NoteConstPtr& packet, SerializationBuffer &data) override \
+        virtual void serialize(const io::Note& packet, SerializationBuffer &data) override \
         { \
-            packet->serialize(data); \
+            packet.serialize(data); \
         } \
         virtual io::NotePtr deserialize(const SerializationBuffer& data) override \
         { \

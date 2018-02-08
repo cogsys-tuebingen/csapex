@@ -194,6 +194,8 @@ public:
     void setWarning(const std::string& msg);
     void setError(const std::string& msg);
 
+    void setVariadic(bool variadic);
+
     /**
      * Raw construction, handle with care!
      */
@@ -210,6 +212,9 @@ protected:
     virtual std::vector<OutputPtr> getExternalOutputs() const = 0;
     virtual std::vector<SlotPtr> getExternalSlots() const = 0;
     virtual std::vector<EventPtr> getExternalEvents() const = 0;
+
+protected:
+    bool variadic_;
 
 private:
     mutable NodeWorker* node_worker_;

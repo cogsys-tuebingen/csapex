@@ -42,6 +42,9 @@ public:
     bool isVirtual() const;
     void setVirtual(bool _virtual);
 
+    bool isVariadic() const;
+    void setVariadic(bool variadic);
+
     bool isParameter() const;
     void setParameter(bool parameter);
 
@@ -130,6 +133,7 @@ protected:
 
     bool virtual_;
     bool parameter_;
+    bool variadic_;
     bool graph_port_;
     bool essential_;
 

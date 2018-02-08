@@ -12,15 +12,14 @@ ConnectorDescription::ConnectorDescription()
     : connector_type(ConnectorType::NONE),
       optional(false),
       is_parameter(false),
+      is_variadic(false),
       valid(false)
 {}
 
 ConnectorDescription::ConnectorDescription(const AUUID& owner,
-                     ConnectorType connector_type,
-                     const TokenDataConstPtr& token_type,
-                     const std::string& label,
-                     bool optional,
-                     bool is_parameter)
+                                           ConnectorType connector_type,
+                                           const TokenDataConstPtr& token_type,
+                                           const std::string& label)
     : owner(owner),
       connector_type(connector_type),
       label(label),
@@ -33,15 +32,14 @@ ConnectorDescription::ConnectorDescription(const AUUID& owner,
 }
 
 ConnectorDescription::ConnectorDescription(const AUUID& owner,
-                     ConnectorType connector_type,
-                     const std::string& label,
-                     bool optional,
-                     bool is_parameter)
+                                           ConnectorType connector_type,
+                                           const std::string& label)
     : owner(owner),
       connector_type(connector_type),
       label(label),
-      optional(optional),
-      is_parameter(is_parameter),
+      optional(false),
+      is_parameter(false),
+      is_variadic(false),
       token_type(connection_types::makeEmpty<connection_types::AnyMessage>()),
       id(UUID::NONE),
       valid(true)
@@ -49,21 +47,37 @@ ConnectorDescription::ConnectorDescription(const AUUID& owner,
 }
 
 ConnectorDescription::ConnectorDescription(const AUUID& owner,
-                     const UUID& uuid,
-                     ConnectorType connector_type,
-                     const TokenDataConstPtr& token_type,
-                     const std::string& label,
-                     bool optional,
-                     bool is_parameter)
+                                           const UUID& uuid,
+                                           ConnectorType connector_type,
+                                           const TokenDataConstPtr& token_type,
+                                           const std::string& label)
     : owner(owner),
       connector_type(connector_type),
       label(label),
       optional(optional),
-      is_parameter(is_parameter),
-      token_type(token_type),
+      is_parameter(false),
+      is_variadic(false),
+      token_type(false),
       id(uuid),
       valid(true)
 {
+}
+
+
+ConnectorDescription& ConnectorDescription::setOptional(bool optional)
+{
+    this->optional = optional;
+    return *this;
+}
+ConnectorDescription& ConnectorDescription::setParameter(bool parameter)
+{
+    is_parameter = parameter;
+    return *this;
+}
+ConnectorDescription& ConnectorDescription::setVariadic(bool variadic)
+{
+    is_variadic = variadic;
+    return *this;
 }
 
 bool ConnectorDescription::isOutput() const
@@ -83,6 +97,7 @@ void ConnectorDescription::serialize(SerializationBuffer &data) const
     data << label;
     data << optional;
     data << is_parameter;
+    data << is_variadic;
 
     data << token_type;
 
@@ -98,6 +113,7 @@ void ConnectorDescription::deserialize(const SerializationBuffer& data)
     data >> label;
     data >> optional;
     data >> is_parameter;
+    data >> is_variadic;
 
     data >> token_type;
 

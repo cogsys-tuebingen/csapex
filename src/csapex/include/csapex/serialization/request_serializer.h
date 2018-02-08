@@ -16,10 +16,10 @@ class RequestSerializerInterface
 public:
     virtual ~RequestSerializerInterface();
 
-    virtual void serializeRequest(const RequestConstPtr& packet, SerializationBuffer &data) = 0;
+    virtual void serializeRequest(const Request& packet, SerializationBuffer &data) = 0;
     virtual RequestPtr deserializeRequest(const SerializationBuffer& data, uint8_t request_id) = 0;
 
-    virtual void serializeResponse(const ResponseConstPtr& packet, SerializationBuffer &data) = 0;
+    virtual void serializeResponse(const Response& packet, SerializationBuffer &data) = 0;
     virtual ResponsePtr deserializeResponse(const SerializationBuffer& data, uint8_t request_id) = 0;
 };
 
@@ -27,7 +27,7 @@ public:
 class RequestSerializer : public Singleton<RequestSerializer>, public Serializer
 {
 public:
-    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
+    void serialize(const Streamable& packet, SerializationBuffer &data) override;
     StreamablePtr deserialize(const SerializationBuffer &data) override;
 
     static void registerSerializer(const std::string& type, std::shared_ptr<RequestSerializerInterface> serializer);
@@ -54,9 +54,9 @@ struct RequestSerializerRegistered
      \
     class Name##Serializer : public RequestSerializerInterface \
     { \
-        virtual void serializeRequest(const RequestConstPtr& packet, SerializationBuffer &data) override \
+        virtual void serializeRequest(const Request& packet, SerializationBuffer &data) override \
         { \
-            packet->serialize(data); \
+            packet.serialize(data); \
         } \
         virtual RequestPtr deserializeRequest(const SerializationBuffer& data, uint8_t request_id) override \
         { \
@@ -64,9 +64,9 @@ struct RequestSerializerRegistered
             result->deserialize(data); \
             return result; \
         } \
-        virtual void serializeResponse(const ResponseConstPtr& packet, SerializationBuffer &data) override \
+        virtual void serializeResponse(const Response& packet, SerializationBuffer &data) override \
         { \
-            packet->serialize(data); \
+            packet.serialize(data); \
         } \
         virtual ResponsePtr deserializeResponse(const SerializationBuffer& data, uint8_t request_id) override \
         { \

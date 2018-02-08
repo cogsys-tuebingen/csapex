@@ -19,10 +19,10 @@ CommandSerializerInterface::~CommandSerializerInterface()
 
 }
 
-void CommandSerializer::serialize(const StreamableConstPtr& packet, SerializationBuffer& data)
+void CommandSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
 
-    if(const CommandConstPtr& cmd = std::dynamic_pointer_cast<Command const>(packet)) {
+    if(const Command* cmd = dynamic_cast<const Command*>(&packet)) {
         std::string type = cmd->getType();
         data << type;
 
@@ -34,7 +34,7 @@ void CommandSerializer::serialize(const StreamableConstPtr& packet, Serializatio
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<CommandSerializerInterface> serializer = it->second;
-            serializer->serialize(cmd, data);
+            serializer->serialize(*cmd, data);
 
         } else {
             std::cerr << "cannot serialize command of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;

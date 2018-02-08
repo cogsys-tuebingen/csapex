@@ -17,7 +17,7 @@ class CommandSerializerInterface
 public:
     virtual ~CommandSerializerInterface();
 
-    virtual void serialize(const CommandConstPtr& packet, SerializationBuffer &data) = 0;
+    virtual void serialize(const Command& packet, SerializationBuffer &data) = 0;
     virtual CommandPtr deserialize(const SerializationBuffer& data) = 0;
 };
 
@@ -25,7 +25,7 @@ public:
 class CommandSerializer : public Singleton<CommandSerializer>, public Serializer
 {
 public:
-    void serialize(const StreamableConstPtr& packet, SerializationBuffer &data) override;
+    void serialize(const Streamable& packet, SerializationBuffer &data) override;
     StreamablePtr deserialize(const SerializationBuffer &data) override;
 
     static void registerSerializer(const std::string &name, const std::string& type, std::shared_ptr<CommandSerializerInterface> serializer);
@@ -52,9 +52,9 @@ struct CommandSerializerRegistered
     \
     class Name##Serializer : public CommandSerializerInterface\
     {\
-        virtual void serialize(const CommandConstPtr& packet, SerializationBuffer &data) override\
+        virtual void serialize(const Command& packet, SerializationBuffer &data) override\
         {\
-            if(auto impl = std::dynamic_pointer_cast<Name const>(packet)) {\
+            if(auto impl = dynamic_cast<const Name*>(&packet)) {\
                 impl->serialize(data);\
             }\
         }\

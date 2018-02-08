@@ -43,6 +43,7 @@ public:
     std::string toString() const;
 
     // SERIALIZABLES
+    void write (const Streamable &i);
     void write (const StreamableConstPtr &i);
     StreamablePtr read () const;
 

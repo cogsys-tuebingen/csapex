@@ -50,7 +50,7 @@ void MetaPort::triggerCreatePort()
     bool optional = true;
 
     TokenDataPtr type(new connection_types::AnyMessage);
-    Q_EMIT createPortRequest(ConnectorDescription(target, port_type_, type, label.toStdString(), optional));
+    Q_EMIT createPortRequest(ConnectorDescription(target, port_type_, type, label.toStdString()).setOptional(optional));
 }
 
 void MetaPort::dragEnterEvent(QDragEnterEvent* e)

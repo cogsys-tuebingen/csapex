@@ -20,9 +20,9 @@ NoteSerializerInterface::~NoteSerializerInterface()
 
 }
 
-void NoteSerializer::serialize(const StreamableConstPtr &packet, SerializationBuffer& data)
+void NoteSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    if(const NoteConstPtr& note = std::dynamic_pointer_cast<Note const>(packet)) {
+    if(const Note* note = dynamic_cast<const Note*>(&packet)) {
 //        std::cerr << "serializing Note" << std::endl;
         std::string type = note->getType();
         auto it = serializers_.find(type);
@@ -33,7 +33,7 @@ void NoteSerializer::serialize(const StreamableConstPtr &packet, SerializationBu
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<NoteSerializerInterface> serializer = it->second;
-            serializer->serialize(note, data);
+            serializer->serialize(*note, data);
 
         } else {
             std::cerr << "cannot serialize Note of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;

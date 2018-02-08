@@ -195,12 +195,18 @@ std::string SerializationBuffer::toString() const
     return res.str();
 }
 
+void SerializationBuffer::write(const Streamable &i)
+{
+    bool null = false;
+    operator << (null);
+    PacketSerializer::instance().serialize(i, *this);
+}
 void SerializationBuffer::write(const StreamableConstPtr &i)
 {
     bool null = (i == nullptr);
     operator << (null);
     if(!null) {
-        PacketSerializer::instance().serialize(i, *this);
+        PacketSerializer::instance().serialize(*i, *this);
     }
 }
 

@@ -21,14 +21,9 @@ ParameterSerializerInterface::~ParameterSerializerInterface()
 
 }
 
-void ParameterSerializer::serialize(const StreamableConstPtr& packet, SerializationBuffer& data)
+void ParameterSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    if(!packet) {
-        data << (uint8_t) param::NullParameter::NUMERICAL_ID;
-        return;
-    }
-
-    if(const ParameterConstPtr& parameter = std::dynamic_pointer_cast<Parameter const>(packet)) {
+    if(const Parameter* parameter = dynamic_cast<const Parameter*>(&packet)) {
         uint8_t type = parameter->ID();
         auto it = serializers_.find(type);
         if(it != serializers_.end()) {
@@ -36,7 +31,7 @@ void ParameterSerializer::serialize(const StreamableConstPtr& packet, Serializat
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<ParameterSerializerInterface> serializer = it->second;
-            serializer->serialize(parameter, data);
+            serializer->serialize(*parameter, data);
 
         } else {
             std::cerr << "cannot serialize Parameter of type " << (int) type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;

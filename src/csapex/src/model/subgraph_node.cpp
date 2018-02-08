@@ -44,6 +44,11 @@ SubgraphNode::~SubgraphNode()
     guard_ = 0xDEADBEEF;
 }
 
+bool SubgraphNode::canRunInSeparateProcess() const
+{
+    return false;
+}
+
 GraphPtr SubgraphNode::getGraph() const
 {
     return graph_;
