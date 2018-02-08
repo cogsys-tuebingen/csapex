@@ -25,10 +25,16 @@ public:
     enum class MessageType
     {
         NONE,
-        PROCESS,
+        PROCESS_SYNC,
+        PROCESS_ASYNC,
+        PROCESS_FINISHED,
+
         PARAMETER_UPDATE,
+        PORT_ADD,
+        NODE_STATE_CHANGED,
 
         SHUTDOWN,
+        CHILD_SIGNAL,
         CHILD_EXIT
     };
 

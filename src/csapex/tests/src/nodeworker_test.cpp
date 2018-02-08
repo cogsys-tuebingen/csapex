@@ -148,5 +148,9 @@ TEST_F(NodeWorkerTest, SubprocessNodeWorkerCanHandleSegmentationFault)
 {
     // TODO
 }
+TEST_F(NodeWorkerTest, SubprocessNodeWorkerReceivesErrorMessagesFromSubprocess)
+{
+    // TODO
+}
 }
 

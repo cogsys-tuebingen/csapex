@@ -62,8 +62,8 @@ bool Subprocess::isParent() const
 void Subprocess::handleSignal(int signal)
 {
     if(active_) {
-        out.write({SubprocessChannel::MessageType::CHILD_EXIT, std::to_string(signal)});
-        ctrl_out.write({SubprocessChannel::MessageType::CHILD_EXIT, std::to_string(signal)});
+        out.write({SubprocessChannel::MessageType::CHILD_SIGNAL, std::to_string(signal)});
+        ctrl_out.write({SubprocessChannel::MessageType::CHILD_SIGNAL, std::to_string(signal)});
     }
 }
 

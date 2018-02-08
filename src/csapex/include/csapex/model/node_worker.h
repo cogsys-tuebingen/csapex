@@ -108,7 +108,7 @@ protected:
     virtual void processNode();
     virtual void handleChangedParametersImpl(const Parameterizable::ChangedParameterList& changed_params);
 
-    void finishProcessing();
+    virtual void finishProcessing();
 
 private:
     void updateParameterValues();

@@ -246,11 +246,11 @@ TEST_F(SharedMemoryTest, WritingAndReadingIsSynchronizedInChild)
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
         sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "done"});
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        sp.out.write({SubprocessChannel::MessageType::PROCESS, "done"});
+        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
     });
 
     ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.out.read().type);
-    ASSERT_EQ(SubprocessChannel::MessageType::PROCESS, sp.out.read().type);
+    ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, sp.out.read().type);
 }
 
 TEST_F(SharedMemoryTest, WritingAndReadingIsSynchronizedInParent)
@@ -258,13 +258,13 @@ TEST_F(SharedMemoryTest, WritingAndReadingIsSynchronizedInParent)
     Subprocess sp("test");
     sp.fork([&sp](){
         sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "done"});
-        sp.out.write({SubprocessChannel::MessageType::PROCESS, "done"});
+        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
     });
 
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
     ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.out.read().type);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    ASSERT_EQ(SubprocessChannel::MessageType::PROCESS, sp.out.read().type);
+    ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, sp.out.read().type);
 }
 
 
@@ -273,7 +273,7 @@ TEST_F(SharedMemoryTest, ReadingTwiceBlocks)
     Subprocess sp("test");
 
     sp.fork([&sp](){
-        sp.out.write({SubprocessChannel::MessageType::PROCESS, "done"});
+        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
         sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "param1"});
     });
 
@@ -293,7 +293,7 @@ TEST_F(SharedMemoryTest, ReadingTwiceBlocks)
     {
         SubprocessChannel::Message msg = sp.out.read();
 
-        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS, msg.type);
+        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, msg.type);
 
         wait.notify_all();
 
@@ -302,7 +302,7 @@ TEST_F(SharedMemoryTest, ReadingTwiceBlocks)
 
         ASSERT_FALSE(thread_has_read_from_channel);
 
-        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS, msg.type);
+        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, msg.type);
         ASSERT_EQ("done", msg.toString());
     }
 
@@ -326,10 +326,10 @@ TEST_F(SharedMemoryTest, SubprocessChannelCommunication)
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.in.read().type);
 
         auto msg = sp.in.read();
-        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS, msg.type);
+        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, msg.type);
         ASSERT_EQ("process", msg.toString());
 
-        sp.out.write({SubprocessChannel::MessageType::PROCESS, "done"});
+        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
         sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "param1"});
         sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "param2"});
         sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "param3"});
@@ -339,11 +339,11 @@ TEST_F(SharedMemoryTest, SubprocessChannelCommunication)
     sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg2"});
     sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg3"});
     sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg4"});
-    sp.in.write({SubprocessChannel::MessageType::PROCESS, "process"});
+    sp.in.write({SubprocessChannel::MessageType::PROCESS_SYNC, "process"});
 
     {
         auto msg = sp.out.read();
-        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS, msg.type);
+        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, msg.type);
         ASSERT_EQ("done", msg.toString());
     }
 
@@ -380,7 +380,7 @@ TEST_F(SharedMemoryTest, SequentialWriteIn)
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
         }
 
-        sp.out.write({SubprocessChannel::MessageType::PROCESS, "done"});
+        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
     });
 
     sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
@@ -390,7 +390,7 @@ TEST_F(SharedMemoryTest, SequentialWriteIn)
 
     {
         auto msg = sp.out.read();
-        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS, msg.type);
+        ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, msg.type);
         ASSERT_EQ("done", msg.toString());
     }
 }
@@ -486,7 +486,7 @@ TEST_F(SharedMemoryTest, MessageHandleActsAsRAII)
         }
 
         if(as_expected) {
-            sp.out.write({SubprocessChannel::MessageType::PROCESS, "done"});
+            sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
         } else {
             sp.out.write({SubprocessChannel::MessageType::SHUTDOWN, "done"});
         }
@@ -497,6 +497,6 @@ TEST_F(SharedMemoryTest, MessageHandleActsAsRAII)
         sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, msg});
     }
 
-    ASSERT_EQ(SubprocessChannel::MessageType::PROCESS, sp.out.read().type);
+    ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, sp.out.read().type);
 }
 
