@@ -279,7 +279,7 @@ TEST_F(SharedMemoryTest, SigtermInChildDoesNotStopSubprocessChannelCommunication
     sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
 
     auto msg = sp.out.read();
-    ASSERT_EQ(SubprocessChannel::MessageType::CHILD_EXIT, msg.type);
+    ASSERT_EQ(SubprocessChannel::MessageType::CHILD_SIGNAL, msg.type);
     std::string str = std::to_string(SIGTERM);
     ASSERT_EQ(str.c_str(), msg.toString());
 }
@@ -296,7 +296,7 @@ TEST_F(SharedMemoryTest, SegfaultInChildDoesNotStopSubprocessChannelCommunicatio
     sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
 
     auto msg = sp.out.read();
-    ASSERT_EQ(SubprocessChannel::MessageType::CHILD_EXIT, msg.type);
+    ASSERT_EQ(SubprocessChannel::MessageType::CHILD_SIGNAL, msg.type);
     std::string str = std::to_string(SIGSEGV);
     ASSERT_EQ(str.c_str(), msg.toString());
 }

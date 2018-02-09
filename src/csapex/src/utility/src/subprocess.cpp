@@ -43,7 +43,9 @@ Subprocess::~Subprocess()
 
         if(ctrl_out.hasMessage()) {
             SubprocessChannel::Message message = ctrl_out.read();
-            if(message.type == SubprocessChannel::MessageType::CHILD_EXIT) {
+            if(message.type == SubprocessChannel::MessageType::CHILD_EXIT ||
+                    message.type == SubprocessChannel::MessageType::CHILD_SIGNAL)
+            {
                 is_shutdown = true;
             }
         }
