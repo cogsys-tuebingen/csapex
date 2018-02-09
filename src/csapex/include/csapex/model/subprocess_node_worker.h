@@ -63,7 +63,7 @@ private:
 
     void handleParameterUpdate(const SubprocessChannel::Message& msg);
 
-    bool handleProcessParent(const SubprocessChannel::Message &msg);
+    void handleProcessParent(const SubprocessChannel::Message &msg);
     void handleProcessChild(const SubprocessChannel::Message& msg);
     void finishHandleProcessChild();
 

@@ -1,6 +1,9 @@
 /// HEADER
 #include <csapex/utility/subprocess_channel.h>
 
+/// PROJECT
+#include <csapex/utility/assert.h>
+
 /// SYSTEM
 #include <iostream>
 #include <boost/optional.hpp>
@@ -10,6 +13,7 @@
 #include <boost/interprocess/sync/interprocess_condition.hpp>
 
 using namespace csapex;
+using namespace boost::interprocess;
 
 namespace csapex
 {
@@ -71,6 +75,8 @@ SubprocessChannel::Message& SubprocessChannel::Message::operator = (SubprocessCh
 SubprocessChannel::Message::~Message()
 {
     if(parent) {
+        scoped_lock<interprocess_mutex> lock(parent->shm_block_->m);
+
         parent->shm_segment->destroy<impl::shared_buffer>("data");
         parent->shm_block_->is_full = false;
         parent->is_locked_ = false;
@@ -101,7 +107,7 @@ SubprocessChannel::Message::Message(SubprocessChannel* parent)
 
 
 SubprocessChannel::SubprocessChannel(const std::string& name_space, bool is_control_channel, int32_t size)
-    : name_space_(name_space), size_(size), is_control_channel_(is_control_channel),
+    : name_space_(std::to_string(getpid()) + "_" + name_space), size_(size), is_control_channel_(is_control_channel),
       is_locked_(false)
 {
     allocate();
@@ -109,13 +115,11 @@ SubprocessChannel::SubprocessChannel(const std::string& name_space, bool is_cont
 
 SubprocessChannel::~SubprocessChannel()
 {
-    using namespace boost::interprocess;
     shared_memory_object::remove(name_space_.c_str());
 }
 
 void SubprocessChannel::allocate()
 {
-    using namespace boost::interprocess;
     try {
         //        std::cout << "try to create shared memory object " << getUUID() << std::endl;
         shm_segment.reset(new managed_shared_memory(create_only, name_space_.c_str(), size_));
@@ -136,8 +140,6 @@ bool SubprocessChannel::hasMessage() const
 {
     std::unique_lock<std::recursive_mutex> channel_lock(channel_mutex_);
 
-    using namespace boost::interprocess;
-
     scoped_lock<interprocess_mutex> lock(shm_block_->m);
 
     return shm_block_->is_full;
@@ -145,8 +147,6 @@ bool SubprocessChannel::hasMessage() const
 
 SubprocessChannel::Message SubprocessChannel::read()
 {
-    using namespace boost::interprocess;
-
     std::unique_lock<std::recursive_mutex> channel_lock(channel_mutex_);
 
     scoped_lock<interprocess_mutex> lock(shm_block_->m);
@@ -182,8 +182,6 @@ SubprocessChannel::Message SubprocessChannel::read()
 
 void SubprocessChannel::write(const Message& message)
 {
-    using namespace boost::interprocess;
-
     std::unique_lock<std::recursive_mutex> channel_lock(channel_mutex_);
 
     const impl::ShmAllocator<int> alloc_inst (shm_segment->get_segment_manager());
@@ -193,6 +191,8 @@ void SubprocessChannel::write(const Message& message)
     while(shm_block_->is_full) {
         shm_block_->message_read.wait(lock);
     }
+
+    apex_assert_hard(!is_locked_);
 
     shm_segment->construct<impl::shared_buffer>
             ("data")
@@ -206,8 +206,6 @@ void SubprocessChannel::write(const Message& message)
 
 void SubprocessChannel::shutdown()
 {
-    using namespace boost::interprocess;
-
     if(channel_mutex_.try_lock()) {
         // nothing blocked, so nothing to do
     } else {

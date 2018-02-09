@@ -219,7 +219,7 @@ protected:
     std::unordered_map<UUID,csapex::param::Parameter*, UUID::Hasher> output_2_param_;
 
 private:
-    UUIDProviderPtr uuid_provider_;
+    UUIDProviderWeakPtr uuid_provider_;
 
     graph::VertexWeakPtr vertex_;
 

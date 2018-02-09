@@ -277,7 +277,7 @@ void SubprocessNodeWorker::handleParameterUpdate(const SubprocessChannel::Messag
     }
 }
 
-bool SubprocessNodeWorker::handleProcessParent(const SubprocessChannel::Message& msg)
+void SubprocessNodeWorker::handleProcessParent(const SubprocessChannel::Message& msg)
 {
     if(msg.data) {
         YAML::Node yaml = YAML::Load(msg.toString());
@@ -292,8 +292,6 @@ bool SubprocessNodeWorker::handleProcessParent(const SubprocessChannel::Message&
             msg::publish(output.get(), msg);
         };
     }
-
-    return true;
 }
 
 
@@ -375,7 +373,8 @@ void SubprocessNodeWorker::finishSubprocess()
             break;
 
         case SubprocessChannel::MessageType::PROCESS_FINISHED:
-            done_processing = handleProcessParent(msg);
+            handleProcessParent(msg);
+            done_processing = true;
             break;
 
         case SubprocessChannel::MessageType::CHILD_SIGNAL:

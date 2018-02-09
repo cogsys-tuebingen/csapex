@@ -308,7 +308,8 @@ void NodeHandle::makeParameterConnectableImpl(csapex::param::ParameterPtr param)
 template <typename T>
 void NodeHandle::makeParameterConnectableTyped(csapex::param::ParameterPtr param)
 {
-    apex_assert_hard(uuid_provider_);
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    apex_assert_hard(uuid_provider);
     csapex::param::Parameter* p = param.get();
     
     auto pos = param_2_input_.find(p->name());
@@ -318,7 +319,7 @@ void NodeHandle::makeParameterConnectableTyped(csapex::param::ParameterPtr param
     
     
     {
-        InputPtr cin = std::make_shared<Input>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("in_") + p->name()), shared_from_this());
+        InputPtr cin = std::make_shared<Input>(uuid_provider->makeDerivedUUID(getUUID(), std::string("in_") + p->name()), shared_from_this());
         cin->setType(connection_types::makeEmpty<T>());
         cin->setOptional(true);
         cin->setLabel(p->name());
@@ -330,7 +331,7 @@ void NodeHandle::makeParameterConnectableTyped(csapex::param::ParameterPtr param
         manageInput(cin);
     }
     {
-        OutputPtr cout = std::make_shared<StaticOutput>(uuid_provider_->makeDerivedUUID(getUUID(), std::string("out_") + p->name()), shared_from_this());
+        OutputPtr cout = std::make_shared<StaticOutput>(uuid_provider->makeDerivedUUID(getUUID(), std::string("out_") + p->name()), shared_from_this());
         cout->setType(connection_types::makeEmpty<T>());
         cout->setLabel(p->name());
         cout->setParameter(true);
@@ -344,7 +345,8 @@ void NodeHandle::makeParameterConnectableTyped(csapex::param::ParameterPtr param
 
 void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
 {
-    if(!uuid_provider_) {
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    if(!uuid_provider) {
         return;
     }
     
@@ -488,8 +490,9 @@ void NodeHandle::updateParameterValue(Connectable *s)
 
 Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
-    apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "in");
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    apex_assert_hard(uuid_provider);
+    UUID uuid = uuid_provider->generateTypedUUID(getUUID(), "in");
     InputPtr c = std::make_shared<Input>(uuid, shared_from_this());
 
     c->setLabel(label);
@@ -504,8 +507,9 @@ Input* NodeHandle::addInput(TokenDataConstPtr type, const std::string& label, bo
 
 Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label)
 {
-    apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "out");
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    apex_assert_hard(uuid_provider);
+    UUID uuid = uuid_provider->generateTypedUUID(getUUID(), "out");
     OutputPtr c = std::make_shared<StaticOutput>(uuid, shared_from_this());
 
     c->setLabel(label);
@@ -518,8 +522,9 @@ Output* NodeHandle::addOutput(TokenDataConstPtr type, const std::string& label)
 
 Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void()> callback, bool active, bool blocking)
 {
-    apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    apex_assert_hard(uuid_provider);
+    UUID uuid = uuid_provider->generateTypedUUID(getUUID(), "slot");
     SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, blocking, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
@@ -532,8 +537,9 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
 
 Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr& )> callback, bool active, bool blocking)
 {
-    apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    apex_assert_hard(uuid_provider);
+    UUID uuid = uuid_provider->generateTypedUUID(getUUID(), "slot");
     SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, blocking, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
@@ -546,8 +552,9 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
 
 Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std::function<void(Slot*, const TokenPtr& )> callback, bool active, bool blocking)
 {
-    apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "slot");
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    apex_assert_hard(uuid_provider);
+    UUID uuid = uuid_provider->generateTypedUUID(getUUID(), "slot");
     SlotPtr slot = std::make_shared<Slot>(callback, uuid, active, blocking, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
@@ -559,8 +566,9 @@ Slot* NodeHandle::addSlot(TokenDataConstPtr type, const std::string& label, std:
 
 Event* NodeHandle::addEvent(TokenDataConstPtr type, const std::string& label)
 {
-    apex_assert_hard(uuid_provider_);
-    UUID uuid = uuid_provider_->generateTypedUUID(getUUID(), "event");
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    apex_assert_hard(uuid_provider);
+    UUID uuid = uuid_provider->generateTypedUUID(getUUID(), "event");
     EventPtr event = std::make_shared<Event>(uuid, shared_from_this());
     event->setLabel(label);
     event->setType(type);
@@ -599,7 +607,6 @@ OutputPtr NodeHandle::addInternalOutput(const TokenDataConstPtr& type, const UUI
 
 SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string &label, std::function<void (const TokenPtr &)> callback)
 {
-    apex_assert_hard(uuid_provider_);
     SlotPtr slot = std::make_shared<Slot>(callback, internal_uuid, false, false, shared_from_this());
     slot->setLabel(label);
     slot->setType(type);
@@ -615,7 +622,6 @@ SlotPtr NodeHandle::addInternalSlot(const TokenDataConstPtr& type, const UUID &i
 
 EventPtr NodeHandle::addInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
-    apex_assert_hard(uuid_provider_);
     EventPtr event = std::make_shared<Event>(internal_uuid, shared_from_this());
     event->setLabel(label);
     event->setType(type);
@@ -1067,7 +1073,9 @@ AUUID NodeHandle::getSubgraphAUUID() const
 
 UUIDProvider* NodeHandle::getUUIDProvider()
 {
-    return uuid_provider_.get();
+    UUIDProviderPtr uuid_provider = uuid_provider_.lock();
+    apex_assert_hard(uuid_provider);
+    return uuid_provider.get();
 }
 
 bool NodeHandle::isGraph() const
