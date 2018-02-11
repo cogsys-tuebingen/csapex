@@ -1,8 +1,8 @@
 # GENERATED #
 #############
-src/csapex/include/csapex/info.h
+src/csapex_core/include/csapex/info.h
 *export.h
-src/csapex/reports
+src/csapex_core/reports
 
 # TESTS #
 #########

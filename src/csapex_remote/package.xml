@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>csapex_remote</name>
+  <version>0.9.5</version>
+  <description>The csapex package provides the remote access framework of CS::APEX</description>
+
+  <maintainer email="mail@betwo.eu">Sebastian Buck</maintainer>
+
+  <license>BSD</license>
+
+  <author email="mail@betwo.eu">Sebastian Buck</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>csapex_core</build_depend>
+  <run_depend>csapex_core</run_depend>
+</package>

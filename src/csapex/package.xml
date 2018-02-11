@@ -19,21 +19,13 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>qtbase5-dev</build_depend>
-  <build_depend>libqt5-opengl-dev</build_depend>
-  <build_depend>class_loader</build_depend>
-  <build_depend>tinyxml</build_depend>
-  <build_depend>yaml-cpp</build_depend>
-  <build_depend>opengl</build_depend>
+  <build_depend>csapex_core</build_depend>
+  <build_depend>csapex_remote</build_depend>
+  <build_depend>csapex_qt</build_depend>
 
-  <run_depend>class_loader</run_depend>
-  <run_depend>libqt5-core</run_depend>
-  <run_depend>libqt5-gui</run_depend>
-  <run_depend>libqt5-widgets</run_depend>
-  <run_depend>libqt5-opengl</run_depend>
-  <run_depend>tinyxml</run_depend>
-  <run_depend>yaml-cpp</run_depend>
-  <run_depend>opengl</run_depend>
+  <run_depend>csapex_core</run_depend>
+  <run_depend>csapex_remote</run_depend>
+  <run_depend>csapex_qt</run_depend>
 
   <export>
     <rosdoc config="rosdoc.yaml" />

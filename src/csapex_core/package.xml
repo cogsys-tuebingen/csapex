@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package>
+  <name>csapex_core</name>
+  <version>0.9.5</version>
+  <description>The csapex package provides the core implemation for the cs::APEX framework</description>
+
+  <maintainer email="mail@betwo.eu">Sebastian Buck</maintainer>
+  <maintainer email="adrian.zwiener@uni-tuebingen.de">Adrian Zwiener</maintainer>
+  <maintainer email="richard.hanten@uni-tuebingen.de">Richard Hanten</maintainer>
+
+
+  <license>BSD</license>
+
+  <url type="website">http://www.ra.cs.uni-tuebingen.de/forschung/apex/</url>
+  <url type="repository">https://github.com/cogsys-tuebingen/csapex</url>
+  <url type="bugtracker">https://github.com/cogsys-tuebingen/csapex/issues</url>
+
+  <author email="mail@betwo.eu">Sebastian Buck</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>class_loader</build_depend>
+  <build_depend>tinyxml</build_depend>
+  <build_depend>yaml-cpp</build_depend>
+
+  <run_depend>class_loader</run_depend>
+  <run_depend>tinyxml</run_depend>
+  <run_depend>yaml-cpp</run_depend>
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
+</package>
