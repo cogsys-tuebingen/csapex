@@ -1,15 +1,12 @@
 cmake_minimum_required(VERSION 2.8.11)
 
-project(csapex_utility)
+project(csapex_util)
 
 find_package(Boost COMPONENTS regex system REQUIRED)
 
 enable_testing()
 
 include (GenerateExportHeader)
-
-SET(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
-SET(CMAKE_C_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
 
 ## Enforce that we use C++11
 if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -30,11 +27,23 @@ else ()
   set (CMAKE_CXX_STANDARD 11)
 endif ()
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+
+catkin_package(
+   INCLUDE_DIRS
+      include
+      ${CMAKE_CURRENT_BINARY_DIR}
+   LIBRARIES
+      ${PROJECT_NAME}
+   DEPENDS
+      Boost
+)
 
 #
 # LIB
 #
-add_library(csapex_util SHARED
+add_library(${PROJECT_NAME} SHARED
     src/slim_signal.cpp
     src/assert.cpp
     src/exceptions.cpp
@@ -59,24 +68,24 @@ add_library(csapex_util SHARED
 )
 
 # link rt library for shared memory
-target_link_libraries(csapex_util -lrt)
+target_link_libraries(${PROJECT_NAME} -lrt)
 
 # Define headers for this library. PUBLIC headers are used for
 # compiling the library, and will be added to consumers' build
 # paths.
-target_include_directories(csapex_util PUBLIC
+target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     PRIVATE src)
 
 
-generate_export_header( csapex_util
-             BASE_NAME csapex_util
+generate_export_header( ${PROJECT_NAME}
+             BASE_NAME ${PROJECT_NAME}
              EXPORT_MACRO_NAME CSAPEX_UTILS_EXPORT
-             EXPORT_FILE_NAME csapex_util_export.h
-             STATIC_DEFINE csapex_util_BUILT_AS_STATIC)
+             EXPORT_FILE_NAME ${PROJECT_NAME}_export.h
+             STATIC_DEFINE ${PROJECT_NAME}_BUILT_AS_STATIC)
 
-target_link_libraries(csapex_util
+target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
 )

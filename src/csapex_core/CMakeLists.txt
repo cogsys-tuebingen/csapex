@@ -11,6 +11,7 @@ include (GenerateExportHeader)
 find_package(catkin QUIET)
 
 find_package(class_loader REQUIRED)
+find_package(csapex_util REQUIRED)
 
 find_package(Boost COMPONENTS program_options filesystem system regex  iostreams REQUIRED)
 
@@ -20,23 +21,17 @@ find_package(YAML-CPP REQUIRED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/utility)
 
-# temporary, until csapex_utils is a separate project
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/utility)
 
 ## CATKIN
 if(${catkin_FOUND})
     catkin_package(
        INCLUDE_DIRS
           include
-          src/utility/include
           ${CMAKE_CURRENT_BINARY_DIR}
-          ${CMAKE_CURRENT_BINARY_DIR}/src/utility
           ${YAML-CPP_INCLUDE_DIR}
        LIBRARIES
           ${PROJECT_NAME}
-          csapex_util
           csapex_param
           csapex_serialization
           csapex_command
@@ -45,6 +40,7 @@ if(${catkin_FOUND})
        DEPENDS
           Boost
        CATKIN_DEPENDS
+          csapex_util
           class_loader
 
        CFG_EXTRAS csapex-extras.cmake
@@ -157,6 +153,7 @@ include_directories(include
     ${YAML-CPP_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
+    ${csapex_util_INCLUDE_DIRS}
     ${class_loader_INCLUDE_DIRS}
     ${console_bridge_INCLUDE_DIRS}
 )
@@ -189,16 +186,12 @@ generate_export_header( csapex_serialization
              STATIC_DEFINE csapex_serialization_BUILT_AS_STATIC
                          )
 target_link_libraries(csapex_serialization
-    csapex_util
+    ${csapex_util_LIBRARIES}
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
 )
 
 list(APPEND csapex_LIBRARIES csapex_serialization)
-
-
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src/utility)
-#list(APPEND csapex_LIBRARIES csapex_util)
 
 
 file(GLOB_RECURSE csapex_param_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/csapex/param/*.h*)
@@ -239,7 +232,7 @@ generate_export_header( csapex_param
              STATIC_DEFINE csapex_param_BUILT_AS_STATIC
 			 )
 target_link_libraries(csapex_param
-    csapex_util
+    ${csapex_util_LIBRARIES}
     csapex_serialization
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
@@ -273,7 +266,7 @@ generate_export_header( csapex_profiling
 			 )
 
 target_link_libraries(csapex_profiling
-    csapex_util
+    ${csapex_util_LIBRARIES}
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
 )
@@ -413,7 +406,7 @@ generate_export_header( ${PROJECT_NAME}
 			 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-    csapex_util
+    ${csapex_util_LIBRARIES}
     csapex_profiling
     csapex_param
     csapex_serialization
@@ -486,13 +479,13 @@ generate_export_header( csapex_command
              STATIC_DEFINE csapex_command_BUILT_AS_STATIC
 )
 target_link_libraries(csapex_command
-    csapex_util
+    ${csapex_util_LIBRARIES}
     csapex_param
     csapex_serialization
     ${PROJECT_NAME}
 
     ${Boost_LIBRARIES}
-    ${catkin_LIBRARIES}
+    ${csapex_util_LIBRARIES}
     ${YAML-CPP_LIBRARY}
     ${TinyXML_LIBRARIES}
     ${class_loader_LIBRARIES}

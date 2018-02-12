@@ -19,10 +19,12 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>csapex_util</build_depend>
   <build_depend>class_loader</build_depend>
   <build_depend>tinyxml</build_depend>
   <build_depend>yaml-cpp</build_depend>
 
+  <run_depend>csapex_util</run_depend>
   <run_depend>class_loader</run_depend>
   <run_depend>tinyxml</run_depend>
   <run_depend>yaml-cpp</run_depend>
