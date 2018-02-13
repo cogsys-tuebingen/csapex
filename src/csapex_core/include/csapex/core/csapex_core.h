@@ -140,7 +140,6 @@ private:
     UUIDProviderPtr root_uuid_provider_;
     GraphFacadeImplementationPtr root_;
     NodeFacadeImplementationPtr root_facade_;
-    TaskGeneratorPtr root_scheduler_;
 
     std::shared_ptr<CommandDispatcher> dispatcher_;
 

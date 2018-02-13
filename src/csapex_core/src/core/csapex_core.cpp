@@ -249,6 +249,8 @@ void CsApexCore::init()
         root_facade_ = node_factory_->makeGraph(UUIDProvider::makeUUID_without_parent("~"), root_uuid_provider_);
         apex_assert_hard(root_facade_);
 
+        thread_pool_->add(root_facade_->getNodeRunner().get());
+
         SubgraphNodePtr graph = std::dynamic_pointer_cast<SubgraphNode>(root_facade_->getNode());
         apex_assert_hard(graph);
 

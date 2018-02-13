@@ -293,6 +293,8 @@ void GraphIO::loadNode(const YAML::Node& doc)
     try {
         deserializeNode(doc, node_handle);
 
+        node_handle->handleChangedParameters();
+
     } catch(const std::exception& e) {
         sendNotificationStreamGraphio("cannot load state for box " << uuid << ": " << type2name(typeid(e)) << ", what=" << e.what());
     }

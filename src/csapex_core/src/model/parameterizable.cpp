@@ -438,7 +438,7 @@ void Parameterizable::triggerParameterSetChanged()
 
 bool Parameterizable::hasChangedParameters() const
 {
-    return !param_updates_.empty();
+    return !changed_params_.empty();
 }
 
 Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()

@@ -223,9 +223,6 @@ bool NodeWorker::canProcess() const
     if(!node) {
         return false;
     }
-    if(node->hasChangedParameters()) {
-        return false;
-    }
     if(!node->canProcess()) {
         return false;
     }
@@ -534,6 +531,13 @@ bool NodeWorker::processMarker(const connection_types::MarkerMessageConstPtr &ma
 
 bool NodeWorker::startProcessingMessages()
 {
+    NodePtr node = node_handle_->getNode().lock();
+    apex_assert_hard(node);
+
+    if(node->hasChangedParameters()) {
+        handleChangedParameters();
+    }
+
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
         apex_assert_hard(isEnabled());
@@ -566,8 +570,6 @@ bool NodeWorker::startProcessingMessages()
         return true;
     }
 
-    NodePtr node = node_handle_->getNode().lock();
-    apex_assert_hard(node);
 
     rememberExecutionMode();
 
