@@ -16,13 +16,13 @@
 #include <csapex/utility/uuid_provider.h>
 
 #include "gtest/gtest.h"
-#include <csapex/test/mockup_nodes.h>
-#include <csapex/test/test_exception_handler.h>
+#include <csapex_testing/mockup_nodes.h>
+#include <csapex_testing/test_exception_handler.h>
 
 #include <mutex>
 #include <condition_variable>
 
-#include <csapex/test/stepping_test.h>
+#include <csapex_testing/stepping_test.h>
 
 namespace csapex
 {

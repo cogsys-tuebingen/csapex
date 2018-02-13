@@ -2,9 +2,9 @@
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/model/graph/graph_impl.h>
 
-#include <csapex/test/test_exception_handler.h>
-#include <csapex/test/mockup_nodes.h>
-#include <csapex/test/stepping_test.h>
+#include <csapex_testing/test_exception_handler.h>
+#include <csapex_testing/mockup_nodes.h>
+#include <csapex_testing/stepping_test.h>
 
 namespace csapex {
 

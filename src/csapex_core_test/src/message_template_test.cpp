@@ -15,7 +15,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/utility/register_msg.h>
 
-#include <csapex/test/stepping_test.h>
+#include <csapex_testing/stepping_test.h>
 
 #include "gtest/gtest.h"
 

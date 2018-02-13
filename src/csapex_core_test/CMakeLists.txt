@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11)
 
-project(csapex_main_tests)
+project(csapex_core_test)
 
 enable_testing()
 
@@ -26,7 +26,11 @@ else ()
   set (CMAKE_CXX_STANDARD 11)
 endif ()
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS csapex_testing)
+
+csapex_package()
+
+include_directories(${catkin_INCLUDE_DIRS})
 
 #find_package(GTest REQUIRED)
 include( CTest )
@@ -41,5 +45,5 @@ add_executable(${PROJECT_NAME}
 )
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}
-    csapex_test
+    ${catkin_LIBRARIES}
     gtest gtest_main)

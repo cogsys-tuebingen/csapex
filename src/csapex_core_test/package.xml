@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>csapex_main_tests</name>
+  <name>csapex_core_test</name>
   <version>0.9.5</version>
   <description>The csapex package provides main tests of cs::APEX</description>
 
@@ -12,7 +12,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>csapex_test</build_depend>
+  <build_depend>csapex_testing</build_depend>
 
-  <run_depend>csapex_test</run_depend>
+  <run_depend>csapex_testing</run_depend>
 </package>

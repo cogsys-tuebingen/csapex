@@ -17,7 +17,7 @@
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/param/parameter_factory.h>
 
-#include <csapex/test/stepping_test.h>
+#include <csapex_testing/stepping_test.h>
 
 #include "gtest/gtest.h"
 
