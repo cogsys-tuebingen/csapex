@@ -52,7 +52,6 @@ Subprocess::~Subprocess()
 
         if(!is_shutdown) {
             ctrl_in.write({SubprocessChannel::MessageType::SHUTDOWN, "shutdown"});
-            SubprocessChannel::Message m = ctrl_out.read();
         }
     }
 }
