@@ -35,7 +35,6 @@ TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
         type = node["type"].as<std::string>();
 
     } catch(const std::exception& e) {
-        std::cerr << "node: " << node << std::endl;
         throw DeserializationError("cannot get type");
     }
 

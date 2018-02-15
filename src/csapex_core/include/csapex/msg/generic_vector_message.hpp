@@ -355,7 +355,6 @@ private:
 
         void encode(YAML::Node& node) const override
         {
-            std::cout << "encode message" << std::endl;
             node["values"] = YAML::Node(YAML::NodeType::Sequence);
             for(const auto& entry : *value) {
                 node["values"].push_back(MessageSerializer::serializeMessage(entry));
@@ -363,15 +362,17 @@ private:
         }
         void decode(const YAML::Node& node) override
         {
-            std::cout << "decode message" << std::endl;
-            YAML::Emitter emitter;
-            emitter << node;
-            std::cout << emitter.c_str() << std::endl;
-            for(const YAML::Node& entry : node["values"]) {
-                YAML::Emitter emitter;
-                emitter << entry;
-                std::cout << emitter.c_str() << std::endl;
-                auto msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeMessage(entry));
+            for(const YAML::Node& centry : node["values"]) {
+                std::shared_ptr<T> msg;
+                if(!centry["type"].IsDefined()) {
+                    // assume legacy messages
+                    YAML::Node entry = centry;
+                    entry["type"] = node["value_type"];
+                    entry["data"] = centry;
+                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeMessage(entry));
+                } else {
+                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeMessage(centry));
+                }
                 value->push_back(*msg);
             }
         }
