@@ -42,13 +42,25 @@ TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
         throw DeserializationError("no connection types registered!");
     }
 
+    std::string converter_type = type;
+
     if(i.type_to_converter.find(type) == i.type_to_converter.end()) {
-        throw DeserializationError(std::string("cannot deserialize, no such type (") + type + ")");
+        bool found_substr = false;
+        for(auto pair : i.type_to_converter){
+            if(type.find(pair.first) != std::string::npos){
+                converter_type = pair.first;
+                found_substr = true;
+                break;
+            }
+        }
+        if(!found_substr){
+            throw DeserializationError(std::string("cannot deserialize, no such type (") + type + ")");
+        }
     }
 
-    TokenData::Ptr msg = MessageFactory::createMessage(type);
+    TokenData::Ptr msg = MessageFactory::createMessage(converter_type);
     try {
-        i.type_to_converter.at(type).decoder(node["data"], *msg);
+        i.type_to_converter.at(converter_type).decoder(node["data"], *msg);
     } catch(const YAML::Exception& e) {
         throw DeserializationError(std::string("error while deserializing: ") + e.msg);
     }

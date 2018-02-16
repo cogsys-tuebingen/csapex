@@ -466,13 +466,21 @@ public:
     struct SupportedTypes : public Singleton<SupportedTypes> {
         static EntryInterface::Ptr make(const std::string& type) {
             auto pos = instance().map_.find(type);
+            bool found_sub_str = false;
             if(pos == instance().map_.end()) {
                 for(auto pair : instance().map_) {
-                    std::cout << "supported: " << pair.first << std::endl;
+                    if(pair.first.find(type)!= std::string::npos){
+                        found_sub_str = true;
+                        pos = instance().map_.find(pair.first);
+                        break;
+                    }
+//                    std::cout << "supported: " << pair.first << std::endl;
                 }
-                throw std::runtime_error(std::string("cannot make vector of type ") + type);
+                if(!found_sub_str){
+                    throw std::runtime_error(std::string("cannot make vector of type ") + type);
+                }
             }
-            std::cout << "!!!! make vector of type " << type << ": " << pos->second->typeName() << std::endl;;
+//            std::cout << "!!!! make vector of type " << type << ": " << pos->second->typeName() << std::endl;;
             return pos->second->cloneEntry();
         }
 
