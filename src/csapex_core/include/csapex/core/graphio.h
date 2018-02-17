@@ -21,7 +21,8 @@ namespace csapex
 class CSAPEX_CORE_EXPORT GraphIO : public Profilable
 {
 public:
-    GraphIO(GraphFacadeImplementation& graph, NodeFactoryImplementation* node_factory);
+    GraphIO(GraphFacadeImplementation& graph, NodeFactoryImplementation* node_factory,
+            bool throw_on_error = false);
 
 public:
     // options
@@ -83,6 +84,7 @@ private:
     double position_offset_y_;
 
     bool ignore_forwarding_connections_;
+    bool throw_on_error_;
 };
 
 }

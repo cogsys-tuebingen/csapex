@@ -39,11 +39,11 @@ using namespace csapex;
 #define sendNotificationStreamGraphio(args) \
 { std::stringstream ss; ss << args; sendNotification(ss.str()); }
 
-GraphIO::GraphIO(GraphFacadeImplementation &graph, NodeFactoryImplementation* node_factory)
+GraphIO::GraphIO(GraphFacadeImplementation &graph, NodeFactoryImplementation* node_factory, bool throw_on_error)
     : graph_(graph), node_factory_(node_factory),
       position_offset_x_(0.0), position_offset_y_(0.0),
-
-      ignore_forwarding_connections_(false)
+      ignore_forwarding_connections_(false),
+      throw_on_error_(throw_on_error)
 {
 }
 
@@ -285,15 +285,13 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
     std::string type = doc["type"].as<std::string>();
 
-    NodeFacadeImplementationPtr node_handle = node_factory_->makeNode(type, uuid, graph_.getLocalGraph());
-    if(!node_handle) {
+    NodeFacadeImplementationPtr node_facade = node_factory_->makeNode(type, uuid, graph_.getLocalGraph());
+    if(!node_facade) {
         return;
     }
 
     try {
-        deserializeNode(doc, node_handle);
-
-        node_handle->handleChangedParameters();
+        deserializeNode(doc, node_facade);
 
     } catch(const std::exception& e) {
         sendNotificationStreamGraphio("cannot load state for box " << uuid << ": " << type2name(typeid(e)) << ", what=" << e.what());
@@ -571,10 +569,12 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr
 
     graph_.getLocalGraph()->addNode(node_facade);
 
+    node_facade->handleChangedParameters();
+
     if(node_facade->isGraph()) {
         GraphFacadeImplementationPtr subgraph = graph_.getLocalSubGraph(node_facade->getUUID());
         if(subgraph) {
-            GraphIO sub_graph_io(*subgraph, node_factory_);
+            GraphIO sub_graph_io(*subgraph, node_factory_, throw_on_error_);
             slim_signal::ScopedConnection connection = sub_graph_io.loadViewRequest.connect(loadViewRequest);
 
             sub_graph_io.loadGraph(doc["subgraph"]);
@@ -584,5 +584,9 @@ void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr
 
 void GraphIO::sendNotification(const std::string &notification)
 {
-    graph_.getLocalGraph()->notification(Notification(graph_.getLocalGraph()->getAbsoluteUUID(), notification));
+    if(throw_on_error_) {
+        throw std::logic_error(notification);
+    } else {
+        graph_.getLocalGraph()->notification(Notification(graph_.getLocalGraph()->getAbsoluteUUID(), notification));
+    }
 }
