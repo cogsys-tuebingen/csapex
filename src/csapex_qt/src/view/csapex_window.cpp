@@ -1024,7 +1024,11 @@ void CsApexWindow::startStopServer()
         core.stopServer();
 
     } else {
-        core.startServer();
+        if(!core.startServer()) {
+            showNotification(Notification("The server could not be started. \n"
+                                          "Is there another instance of cs::APEX server with the same settings (TCP port, ...)?)"));
+            ui->actionServer_StartStop->setChecked(false);
+        }
     }
 }
 

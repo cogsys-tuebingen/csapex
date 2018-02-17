@@ -60,7 +60,11 @@ int CsApexServer::run()
     core->setServerFactory([this]() {
         return std::make_shared<TcpServer>(*core, false);
     });
-    core->startServer();
+    if(!core->startServer()) {
+        std::cerr << "Server could not be started, shutting down." << '\n'
+                  << "Is there another instance of cs::APEX server with the same settings (TCP port, ...)?" << std::endl;
+        return 23;
+    }
 
     return 0;
 }

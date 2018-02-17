@@ -401,7 +401,6 @@ bool CsApexCore::startServer()
 
     } catch (const boost::system::system_error& ex) {
         std::cerr << "Could not start server: [" << ex.code() << "] " << ex.what() << std::endl;
-        std::exit(23);
     }
     return false;
 }
