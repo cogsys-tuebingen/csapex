@@ -160,7 +160,11 @@ ConnectionDescription GraphFacadeImplementation::getConnection(const UUID& from,
 
 ConnectionDescription GraphFacadeImplementation::getConnectionWithId(int id) const
 {
-    return graph_->getConnectionWithId(id)->getDescription();
+    ConnectionPtr c = graph_->getConnectionWithId(id);
+    if(!c) {
+        throw std::runtime_error("Cannot get connection with id " + std::to_string(id));
+    }
+    return c->getDescription();
 }
 
 std::size_t GraphFacadeImplementation::countNodes() const

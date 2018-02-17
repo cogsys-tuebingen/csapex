@@ -590,48 +590,53 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             highlight_connection_sub_id_ = data.second;
         }
 
-        const ConnectionDescription& c = graph_facade_->getConnectionWithId(highlight_connection_id_);
+        try {
+            const ConnectionDescription& c = graph_facade_->getConnectionWithId(highlight_connection_id_);
 
-        if(debug_){
-            QString descr("Connection #");
-            descr += QString::number(c.id);
-            descr += " (";
-            descr += QString::fromStdString(c.from.getShortName());
-            descr += " -> ";
-            descr += QString::fromStdString(c.to.getShortName());
-            descr += ") ";
+            if(debug_){
+                QString descr("Connection #");
+                descr += QString::number(c.id);
+                descr += " (";
+                descr += QString::fromStdString(c.from.getShortName());
+                descr += " -> ";
+                descr += QString::fromStdString(c.to.getShortName());
+                descr += ") ";
 
-            TokenDataConstPtr m = c.type;
-            if(m) {
-                descr += ", Message: ";
-                descr += QString::fromStdString(m->descriptiveName());
-//                descr += ", # " + QString::number(m->getSequenceNumber());
-            } else {
-                descr += " (no message)";
+                TokenDataConstPtr m = c.type;
+                if(m) {
+                    descr += ", Message: ";
+                    descr += QString::fromStdString(m->descriptiveName());
+                    //                descr += ", # " + QString::number(m->getSequenceNumber());
+                } else {
+                    descr += " (no message)";
+                }
+
+                descr += ")";
+
+                for(auto v : views()) {
+                    v->setToolTip(descr);
+                }
             }
 
-            descr += ")";
+            QPointF preview_pos = QCursor::pos() + QPointF(20, 20);
 
-            for(auto v : views()) {
-                v->setToolTip(descr);
+            if(!preview_) {
+                preview_ = new MessagePreviewWidget;
+                preview_->hide();
             }
+
+            preview_->setWindowTitle(QString::fromStdString("Output"));
+            preview_->move(preview_pos.toPoint());
+
+            if(!preview_->isConnected()) {
+                preview_->connectTo(graph_facade_->findConnector(c.from));
+            }
+
+            update();
+
+        } catch(const std::exception& e) {
+            std::cerr << "Error handling connection: " << e.what() << std::endl;
         }
-
-        QPointF preview_pos = QCursor::pos() + QPointF(20, 20);
-
-        if(!preview_) {
-            preview_ = new MessagePreviewWidget;
-            preview_->hide();
-        }
-
-        preview_->setWindowTitle(QString::fromStdString("Output"));
-        preview_->move(preview_pos.toPoint());
-
-        if(!preview_->isConnected()) {
-            preview_->connectTo(graph_facade_->findConnector(c.from));
-        }
-
-        update();
 
     } else if(highlight_connection_id_ >= 0)  {
         highlight_connection_id_ = -1;
