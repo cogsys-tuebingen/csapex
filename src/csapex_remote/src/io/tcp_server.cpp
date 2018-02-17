@@ -239,15 +239,35 @@ void TcpServer::handlePacket(const SessionPtr& session, const StreamableConstPtr
     }
 }
 
+namespace tcpimpl
+{
+bool g_killed = false;
+void sighandler( const boost::system::error_code& error , int signal_number )
+{
+    if(signal_number == SIGINT) {
+        g_killed = true;
+    }
+}
+
+}
+
 void TcpServer::spin()
 {
     do_accept();
 
+    boost::asio::signal_set sig_handler(io_service_, SIGINT);
+    sig_handler.async_wait( tcpimpl::sighandler );
+
     while(running_) {
         try {
-            io_service_.run();
+            io_service_.run_one();
         } catch(const std::exception& e) {
             std::cerr << "the tcp server has thrown an exception: " << e.what() << std::endl;
+        }
+
+        if(tcpimpl::g_killed) {
+            std::cerr << "the tcp server has been interrupted" << std::endl;
+            return;
         }
     }
 }

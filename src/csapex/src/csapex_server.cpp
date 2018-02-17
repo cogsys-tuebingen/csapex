@@ -48,7 +48,16 @@ int CsApexServer::run()
     core = std::make_shared<CsApexCore>(settings, handler);
 
     csapex::error_handling::stop_request().connect([this](){
-        core->shutdown();
+        static int request = 0;
+        if(request == 0) {
+            std::cout << "request shutdown" << std::endl;
+            core->shutdown();
+            std::cout << "shutdown request" << std::endl;
+        } else if(request >= 3) {
+            raise(SIGTERM);
+        }
+
+        ++request;
     });
 
 
