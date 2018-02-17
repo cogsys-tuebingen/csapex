@@ -22,7 +22,7 @@
 using namespace csapex;
 
 NotificationWidget::NotificationWidget(const Notification &notification, QWidget *parent)
-    : QWidget(parent), timer_(nullptr), notification_(notification)
+    : QWidget(parent), timer_(nullptr), notification_(notification), fading_(false)
 {
     timer_ = new QTimer;
     timer_->setSingleShot(true);
@@ -87,12 +87,15 @@ NotificationWidget::~NotificationWidget()
 void NotificationWidget::shutdown()
 {
     hide();
+    fade_end();
     deleteLater();
 }
 
 void NotificationWidget::fadeout()
 {
-    timeout();
+    fading_ = true;
+
+    fade_start();
 
     delete timer_;
     timer_ = nullptr;
@@ -188,6 +191,16 @@ void NotificationWidget::setNotification(const Notification &notification)
     if(notification_.error == ErrorState::ErrorLevel::NONE) {
         timer_->start(1 * 1000);
     }
+}
+
+const Notification& NotificationWidget::getNotification()
+{
+    return notification_;
+}
+
+bool NotificationWidget::isFading() const
+{
+    return fading_;
 }
 
 /// MOC

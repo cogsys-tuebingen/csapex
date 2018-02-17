@@ -141,8 +141,7 @@ private:
     bool is_init_;
 
     QParallelAnimationGroup* notification_animation_;
-    std::unordered_map<UUID, NotificationWidget*, UUID::Hasher> named_notifications_;
-    std::deque<NotificationWidget*> sorted_notifications_;
+    std::deque<QPointer<NotificationWidget>> sorted_notifications_;
 };
 
 }

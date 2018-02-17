@@ -312,39 +312,31 @@ void Designer::updateMinimap()
 void Designer::showNotification(const Notification &notification)
 {
     std::unordered_map<UUID, NotificationWidget*, UUID::Hasher>::iterator pos;
-    if(notification.auuid.empty() || (pos = named_notifications_.find(notification.auuid)) == named_notifications_.end()) {
-        if(notification.error == ErrorState::ErrorLevel::NONE) {
-            // for now we only show error messages
-            return;
-        }
-
-        NotificationWidget* widget = new NotificationWidget(notification, this);
-        named_notifications_[notification.auuid] = widget;
-
-        QObject::connect(widget, &NotificationWidget::activated, this, &Designer::focusOnNode);
-        QObject::connect(widget, &NotificationWidget::timeout, [this, notification](){
-            removeNotification(notification);
-        });
-        int y = 0;
-        for(NotificationWidget* nw : sorted_notifications_) {
-            y += nw->height();
-        }
-
-        widget->move(widget->pos().x(), y);
-
-        sorted_notifications_.push_back(widget);
-
-        widget->show();
-    } else {
-        pos->second->setNotification(notification);
+    if(notification.error == ErrorState::ErrorLevel::NONE) {
+        // for now we only show error messages
+        return;
     }
+
+    NotificationWidget* widget = new NotificationWidget(notification, this);
+
+    QObject::connect(widget, &NotificationWidget::activated, this, &Designer::focusOnNode);
+    QObject::connect(widget, &NotificationWidget::fade_start, [this, notification](){
+        removeNotification(notification);
+    });
+    int y = 0;
+    for(NotificationWidget* nw : sorted_notifications_) {
+        y += nw->height();
+    }
+
+    widget->move(widget->pos().x(), y);
+
+    sorted_notifications_.push_back(widget);
+
+    widget->show();
 }
 
 void Designer::removeNotification(const Notification &notification)
 {
-    NotificationWidget* widget = named_notifications_.at(notification.auuid);
-    named_notifications_.erase(notification.auuid);
-
     int offset_y = 0;
 
     if(notification_animation_) {
@@ -353,11 +345,11 @@ void Designer::removeNotification(const Notification &notification)
     }
     notification_animation_ = new QParallelAnimationGroup;
 
-    for(auto it = sorted_notifications_.begin(); it != sorted_notifications_.end();) {
-        NotificationWidget* nw = *it;
-        if(nw == widget) {
-            it = sorted_notifications_.erase(it);
+    std::vector<NotificationWidget*> to_remove;
 
+    for(QPointer<NotificationWidget> nw : sorted_notifications_) {
+        if(nw.isNull() || nw->isHidden() || nw->isFading()) {
+            to_remove.push_back(nw);
         } else {
             QRect rect = nw->geometry();
             QRect rect_to = rect;
@@ -373,9 +365,13 @@ void Designer::removeNotification(const Notification &notification)
 
             notification_animation_->addAnimation(animation);
 
-            ++it;
             offset_y += nw->height();
         }
+    }
+
+    for(NotificationWidget* nw : to_remove) {
+        auto pos = std::find(sorted_notifications_.begin(), sorted_notifications_.end(), nw);
+        sorted_notifications_.erase(pos);
     }
 
     if(notification_animation_->animationCount() == 0) {

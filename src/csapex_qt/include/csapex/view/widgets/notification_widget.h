@@ -27,12 +27,16 @@ public:
     ~NotificationWidget();
 
     void setNotification(const Notification& notification);
+    const Notification& getNotification();
 
     bool eventFilter(QObject *, QEvent *);
 
+    bool isFading() const;
+
 Q_SIGNALS:
     void activated(AUUID id);
-    void timeout();
+    void fade_start();
+    void fade_end();
 
 private Q_SLOTS:
     void fadeout();
@@ -55,6 +59,8 @@ private:
 
     QLabel* icon_;
     QLabel* label_;
+
+    bool fading_;
 };
 
 }
