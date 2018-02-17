@@ -180,6 +180,7 @@ public:
         uint8_t len;
         operator >> (len);
         s.reserve(len);
+        s.clear();
         for(uint8_t i = 0; i < len; ++i) {
             S elem;
             operator >> (elem);
