@@ -20,6 +20,7 @@
 #include <QFileSystemWatcher>
 #include <QBoxLayout>
 
+/// FORWARD DECLARATIONS
 namespace Ui
 {
 class CsApexWindow;
@@ -29,6 +30,8 @@ namespace YAML
 {
 class Node;
 }
+
+class QLabel;
 
 namespace csapex
 {
@@ -63,6 +66,7 @@ private Q_SLOTS:
     void showHowToInstall();
 
     void startStopServer();
+    void updateServerOptions();
 
     void updateSelectionActions();
     void updateClipboardActions();
@@ -147,6 +151,7 @@ private:
     MinimapWidget* minimap_;
     ActivityLegend* activity_legend_;
     ActivityTimeline* activity_timeline_;
+    QLabel* server_options_label_;
 
     QTimer timer;
     QTimer auto_save_state_timer;

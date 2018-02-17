@@ -150,16 +150,9 @@
      </property>
      <addaction name="actionServer_StartStop"/>
      <addaction name="separator"/>
-     <addaction name="actionServer_ShowClients"/>
-    </widget>
-    <widget class="QMenu" name="menuClient">
-     <property name="title">
-      <string>Client</string>
-     </property>
-     <addaction name="actionServer_Information"/>
+     <addaction name="actionServer_Options"/>
     </widget>
     <addaction name="menuServer"/>
-    <addaction name="menuClient"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -195,6 +188,7 @@
    <addaction name="actionReset_Activity"/>
    <addaction name="separator"/>
    <addaction name="actionServer_StartStop"/>
+   <addaction name="actionServer_Options"/>
    <addaction name="separator"/>
    <addaction name="actionGrid"/>
    <addaction name="actionSchematics"/>
@@ -1405,14 +1399,13 @@ p, li { white-space: pre-wrap; }
     <string>Start Server</string>
    </property>
   </action>
-  <action name="actionServer_ShowClients">
-   <property name="text">
-    <string>Active Clients</string>
+  <action name="actionServer_Options">
+   <property name="icon">
+    <iconset resource="../res/csapex_resources.qrc">
+     <normaloff>:/remote_edit.png</normaloff>:/remote_edit.png</iconset>
    </property>
-  </action>
-  <action name="actionServer_Information">
    <property name="text">
-    <string>Server Information</string>
+    <string>Server Options</string>
    </property>
   </action>
  </widget>

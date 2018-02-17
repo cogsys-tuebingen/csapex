@@ -122,6 +122,7 @@ void CsApexWindow::construct()
         ui->actionServer_StartStop->setChecked(local_view_core.getCore()->isServerActive());
     }
     QObject::connect(ui->actionServer_StartStop, &QAction::triggered, this, &CsApexWindow::startStopServer);
+    QObject::connect(ui->actionServer_Options, &QAction::triggered, this, &CsApexWindow::updateServerOptions);
 
     ui->menuBar->setVisible(true);
 
@@ -254,7 +255,7 @@ void CsApexWindow::setupDesigner()
     minimap_->setVisible(opt->isMinimapEnabled());
     ui->actionDisplay_Minimap->setChecked(opt->isMinimapEnabled());
 
-    /// tools
+    // tools
     QObject::connect(ui->actionGrid, SIGNAL(toggled(bool)), opt,  SLOT(enableGrid(bool)));
     QObject::connect(opt, SIGNAL(gridEnabled(bool)), ui->actionGrid, SLOT(setChecked(bool)));
     QObject::connect(ui->actionSchematics, SIGNAL(toggled(bool)), opt,  SLOT(enableSchematics(bool)));
@@ -272,6 +273,9 @@ void CsApexWindow::setupDesigner()
     QObject::connect(ui->actionLock_to_Grid, SIGNAL(toggled(bool)),opt,  SLOT(enableGridLock(bool)));
     QObject::connect(opt, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
 
+    // server
+    server_options_label_ = new QLabel("Server not running");
+    ui->Tools->insertWidget(ui->actionServer_Options, server_options_label_);
 
     // filters
     ui->Filters->insertWidget(ui->actionMessage_Connections, new QLabel("Show connections: "));
@@ -1030,7 +1034,28 @@ void CsApexWindow::startStopServer()
         }
     }
 
-    ui->actionServer_StartStop->setChecked(core.isServerActive());
+    bool running = core.isServerActive();
+    if(running) {
+        server_options_label_->setText(QString("Server running at port ") + QString::number(view_core_.getSettings().get("port", 42123)));
+    } else {
+        server_options_label_->setText("Server not running");
+    }
+    ui->actionServer_StartStop->setChecked(running);
+}
+
+void CsApexWindow::updateServerOptions()
+{
+    bool ok;
+    const int min_port = 1024;
+    const int max_port = 49151;
+
+    Settings& settings = view_core_.getSettings();
+    int port = settings.get("port", 42123);
+    port = QInputDialog::getInt(this, "TCP Server Options", "TCP ServerPort", port, min_port, max_port, 1, &ok);
+
+    if(ok) {
+        settings.set("port", port);
+    }
 }
 
 void CsApexWindow::save()
