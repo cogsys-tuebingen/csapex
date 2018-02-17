@@ -393,6 +393,7 @@ void CsApexCore::setServerFactory(std::function<ServerPtr()> server)
 
 bool CsApexCore::startServer()
 {
+    apex_assert_hard(!server_);
     try {
         server_ = server_factory_();
         apex_assert_hard(server_);
@@ -410,12 +411,13 @@ bool CsApexCore::stopServer()
     apex_assert_hard(server_);
     try {
         server_->stop();
+        server_.reset();
         return true;
 
     } catch (const boost::system::system_error& ex) {
         std::cerr << "Could not stop server: [" << ex.code() << "] " << ex.what() << std::endl;
     }
-    return true;
+    return false;
 }
 
 void CsApexCore::shutdown()
