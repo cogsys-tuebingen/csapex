@@ -317,6 +317,17 @@ void Designer::showNotification(const Notification &notification)
         return;
     }
 
+    for(QPointer<NotificationWidget> nw : sorted_notifications_) {
+        if(nw.isNull() || nw->isHidden() || nw->isFading()) {
+            // nothing
+        } else {
+            if(nw->getNotification() == notification) {
+                // do nothing but reset notification
+                nw->setNotification(notification);
+                return;
+            }
+        }
+    }
     NotificationWidget* widget = new NotificationWidget(notification, this);
 
     QObject::connect(widget, &NotificationWidget::activated, this, &Designer::focusOnNode);

@@ -12,8 +12,11 @@ Notification::Notification(const Notification& copy)
 void Notification::operator = (const Notification& copy)
 {
     auuid = copy.auuid;
-    message.str(copy.message.str());
     error = copy.error;
+
+    msg_cache_ = copy.getMessage();
+    message.str(msg_cache_);
+    msg_dirty_ = false;
 }
 
 Notification::Notification(const std::string& message)
@@ -23,7 +26,7 @@ Notification::Notification(AUUID uuid, const std::string& message)
     : Notification(uuid, message, ErrorState::ErrorLevel::ERROR)
 {}
 Notification::Notification(AUUID uuid, const std::string& message, ErrorState::ErrorLevel error)
-    : auuid(uuid), message(message),error(error)
+    : auuid(uuid), message(message), error(error), msg_dirty_(false), msg_cache_(message)
 {}
 
 void Notification::serialize(SerializationBuffer &data) const
@@ -43,4 +46,21 @@ void Notification::deserialize(const SerializationBuffer& data)
 std::shared_ptr<Clonable> Notification::makeEmptyClone() const
 {
     return std::shared_ptr<Notification>(new Notification);
+}
+
+bool Notification::operator == (const Notification& other) const
+{
+    return auuid == other.auuid &&
+            error == other.error &&
+            getMessage() == other.getMessage();
+}
+
+std::string Notification::getMessage() const
+{
+    if(msg_dirty_) {
+        msg_cache_ = message.str();
+        msg_dirty_ = false;
+    }
+
+    return msg_cache_;
 }

@@ -164,8 +164,11 @@ void NotificationWidget::setNotification(const Notification &notification)
     bool was_error = notification_.error != ErrorState::ErrorLevel::NONE;
 
     notification_ = notification;
-    if(!notification.message.str().empty()) {
-        notification_msg_ = notification_.message.str();
+    {
+        std::string msg = notification.getMessage();
+        if(!msg.empty()) {
+            notification_msg_ = msg;
+        }
     }
 
     if(is_error) {

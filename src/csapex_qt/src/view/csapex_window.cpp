@@ -980,7 +980,7 @@ void CsApexWindow::showStatusMessage(const std::string &msg)
 void CsApexWindow::showNotification(const Notification &notification)
 {
     designer_->showNotification(notification);
-    statusBar()->showMessage(QString::fromStdString(notification.auuid.getFullName() + ": " + notification.message.str()));
+    statusBar()->showMessage(QString::fromStdString(notification.auuid.getFullName() + ": " + notification.getMessage()));
 }
 
 void CsApexWindow::init()

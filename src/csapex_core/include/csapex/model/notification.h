@@ -31,14 +31,23 @@ public:
     Notification& operator << (const T& val)
     {
         message << val;
+        msg_dirty_ = true;
         return *this;
     }
+
+    bool operator == (const Notification& other) const;
+
+    std::string getMessage() const;
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
 
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+
+private:
+    mutable bool msg_dirty_;
+    mutable std::string msg_cache_;
 };
 
 }
