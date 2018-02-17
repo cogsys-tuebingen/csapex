@@ -27,7 +27,7 @@ indigo:
   script:
     - catkin_make
     - source devel/setup.bash
-    - cd build && make test
+    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
 jade:
   stage: build_and_test
@@ -35,7 +35,7 @@ jade:
   script:
     - catkin_make
     - source devel/setup.bash
-    - cd build && make test
+    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
 kinetic:
   stage: build_and_test
@@ -43,7 +43,7 @@ kinetic:
   script:
     - catkin_make
     - source devel/setup.bash
-    - cd build && make test
+    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
 lunar:
   stage: build_and_test
@@ -51,5 +51,5 @@ lunar:
   script:
     - catkin_make
     - source devel/setup.bash
-    - cd build && make test
+    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
