@@ -7,7 +7,7 @@
 using namespace csapex;
 
 Notification::Notification(const Notification& copy)
-    : auuid(copy.auuid), message(copy.message.str()), error(copy.error)
+    : auuid(copy.auuid), message(copy.message.str()), error(copy.error), msg_dirty_(true)
 {}
 void Notification::operator = (const Notification& copy)
 {
