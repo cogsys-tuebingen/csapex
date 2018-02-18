@@ -81,6 +81,9 @@ void ThreadPool::performStep()
 
 void ThreadPool::start()
 {
+    if(timed_queue_) {
+        timed_queue_->start();
+    }
     for(auto g : groups_) {
         g->start();
     }
@@ -88,6 +91,9 @@ void ThreadPool::start()
 
 void ThreadPool::stop()
 {
+    if(timed_queue_) {
+        timed_queue_->stop();
+    }
     for(auto g : groups_) {
         g->stop();
     }

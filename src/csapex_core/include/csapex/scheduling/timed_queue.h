@@ -22,10 +22,10 @@ public:
 
     void schedule(SchedulerPtr scheduler, TaskPtr schedulable, std::chrono::system_clock::time_point time);
 
-private:
     void start();
     void stop();
 
+private:
     void loop();
     void sleep();
 

@@ -3,18 +3,14 @@
 
 /// COMPONENT
 #include <csapex/scheduling/scheduler.h>
+#include <csapex/scheduling/task.h>
 #include <csapex/utility/thread.h>
-
-/// SYSTEM
-#include <iostream>
 
 using namespace csapex;
 
 TimedQueue::TimedQueue()
     : scheduling_running_(false), sleeping_running_(false)
 {
-    next_wake_up_ = std::chrono::system_clock::now();
-    start();
 }
 TimedQueue::~TimedQueue()
 {
@@ -23,6 +19,8 @@ TimedQueue::~TimedQueue()
 
 void TimedQueue::start()
 {
+    next_wake_up_ = std::chrono::system_clock::now();
+
     // this thread schedules tasks that have expired
     scheduling_running_ = true;
     scheduling_thread_ = std::thread([this](){
