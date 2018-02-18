@@ -56,8 +56,46 @@ TEST_F(SharedMemoryTest, EmptySubprocess)
 {
     Subprocess sp("test");
     sp.fork([](){});
+}
 
-    SUCCEED();
+TEST_F(SharedMemoryTest, EmptySubprocessCanBeJoined)
+{
+    Subprocess sp("test");
+    sp.fork([](){});
+
+    ASSERT_EQ(0, sp.join());
+}
+
+
+TEST_F(SharedMemoryTest, OutputCanBeGrabbed)
+{
+    Subprocess sp("test");
+    sp.fork([](){
+        std::cerr << "B";
+        std::cout << "Foo" << std::endl;
+        std::cerr << "ar";
+    });
+
+    sp.join();
+
+    ASSERT_EQ("Foo\n", sp.getChildStdOut());
+    ASSERT_EQ("Bar", sp.getChildStdErr());
+}
+
+
+TEST_F(SharedMemoryTest, ReturnCode)
+{
+    Subprocess empty("test");
+    empty.fork([](){});
+
+    ASSERT_EQ(0, empty.join());
+
+    Subprocess ret1("test");
+    ret1.fork([]() -> int {
+        return 123;
+    });
+
+    ASSERT_EQ(123, ret1.join());
 }
 
 TEST_F(SharedMemoryTest, SubprocessChannelSendsMessage)
@@ -243,7 +281,7 @@ TEST_F(SharedMemoryTest, ExceptionDoesNotStopSubprocessChannelCommunication)
     });
 
     sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
-    ASSERT_EQ(SubprocessChannel::MessageType::CHILD_EXIT, sp.out.read().type);
+    ASSERT_EQ(SubprocessChannel::MessageType::CHILD_ERROR, sp.out.read().type);
 }
 
 

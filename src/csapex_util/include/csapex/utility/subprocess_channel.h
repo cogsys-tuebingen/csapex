@@ -31,6 +31,7 @@ public:
 
         SHUTDOWN,
         CHILD_SIGNAL,
+        CHILD_ERROR,
         CHILD_EXIT
     };
 
