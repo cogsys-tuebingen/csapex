@@ -146,13 +146,18 @@ int Main::runWithGui()
 
     core->startMainLoop();
 
-    int res = runImpl();
+    auto qt_res = runImpl();
 
     deleteRecoveryConfig();
 
     core->joinMainLoop();
 
-    return res;
+    if(qt_res != 0) {
+        return qt_res;
+
+    } else {
+        return core->getReturnCode();
+    }
 }
 
 int Main::runHeadless()
@@ -167,7 +172,13 @@ int Main::runHeadless()
 
     core->startMainLoop();
 
-    return runImpl();
+    auto qt_res = runImpl();
+    if(qt_res != 0) {
+        return qt_res;
+
+    } else {
+        return core->getReturnCode();
+    }
 }
 
 int Main::run()

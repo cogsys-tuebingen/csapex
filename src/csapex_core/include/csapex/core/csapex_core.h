@@ -45,8 +45,10 @@ public:
     void boot();
     void startup();
     void shutdown();
+    void abort();
 
     void startMainLoop();
+    bool isMainLoopRunning() const;
     void joinMainLoop();
 
     bool isServerActive() const;
@@ -60,6 +62,8 @@ public:
     SnippetPtr serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const;
 
     void reset();
+
+    int getReturnCode() const;
 
     Settings& getSettings() const;
     NodeFactoryImplementationPtr getNodeFactory() const;
@@ -156,6 +160,7 @@ private:
 
     bool init_;
     bool load_needs_reset_;
+    int return_code_;
 };
 
 }

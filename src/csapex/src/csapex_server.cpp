@@ -75,7 +75,7 @@ int CsApexServer::run()
         return 23;
     }
 
-    return 0;
+    return core->getReturnCode();
 }
 
 void csapex_terminate () {

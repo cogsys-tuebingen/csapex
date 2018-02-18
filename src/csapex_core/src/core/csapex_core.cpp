@@ -48,7 +48,7 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
       dispatcher_(std::make_shared<CommandDispatcher>(*this)),
       profiler_(std::make_shared<ProfilerImplementation>()),
       core_plugin_manager(nullptr),
-      init_(false), load_needs_reset_(false)
+      init_(false), load_needs_reset_(false), return_code_(0)
 {
     is_root_ = true;
 
@@ -272,6 +272,11 @@ void CsApexCore::init()
                                                          [this](const TokenPtr&) {
                 shutdown();
             });
+            root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+                                                         root_->getLocalGraph()->makeUUID("slot_abort"), "abort",
+                                                         [this](const TokenPtr&) {
+                abort();
+            });
         }
 
         if(is_root_) {
@@ -319,19 +324,6 @@ void CsApexCore::boot()
 
 void CsApexCore::startup()
 {
-    settings_.set("test-observer", std::string("nothing"));
-
-    param::ParameterPtr param = settings_.get("test-observer");
-    param->parameter_changed.connect([this](param::Parameter* p) {
-//        std::cerr << "test observer changed to " << p->as<std::string>() << std::endl;
-        if(p->as<std::string>() == "change request") {
-            p->set<std::string>("change has been processed");
-        }
-    });
-
-    settings_.set("test-observer", std::string("initialized"));
-
-
     status_changed("loading config");
     try {
         std::string cfg = settings_.getTemporary<std::string>("config", Settings::defaultConfigFile());
@@ -373,6 +365,11 @@ void CsApexCore::startMainLoop()
 
         shutdown_requested();
     });
+}
+
+bool CsApexCore::isMainLoopRunning() const
+{
+    return running_;
 }
 
 void CsApexCore::joinMainLoop()
@@ -425,6 +422,13 @@ void CsApexCore::shutdown()
     std::unique_lock<std::mutex> lock(running_mutex_);
     running_ = false;
     running_changed_.notify_all();
+}
+
+void CsApexCore::abort()
+{
+    shutdown();
+
+    return_code_ = 1;
 }
 
 void CsApexCore::reset()
@@ -583,4 +587,9 @@ void CsApexCore::load(const std::string &file)
     if(running) {
         thread_pool_->start();
     }
+}
+
+int CsApexCore::getReturnCode() const
+{
+    return return_code_;
 }
