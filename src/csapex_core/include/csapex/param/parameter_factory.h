@@ -54,8 +54,8 @@ public:
      */
     template <typename T>
     static ParameterBuilder declareRange(const std::string& name,
-                                       const ParameterDescription& description,
-                                       T min, T max, T def, T step);
+                                         const ParameterDescription& description,
+                                         T min, T max, T def, T step);
 
     template <typename T>
     static ParameterBuilder declareRange(const std::string& name, T min, T max, T def, T step)
@@ -79,8 +79,8 @@ public:
      */
     template <typename T>
     static ParameterBuilder declareInterval(const std::string& name,
-                                          const ParameterDescription& description,
-                                          T min, T max, T def_min, T def_max, T step);
+                                            const ParameterDescription& description,
+                                            T min, T max, T def_min, T def_max, T step);
 
     template <typename T>
     static ParameterBuilder declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
@@ -129,7 +129,7 @@ public:
      * @return
      */
     static ParameterBuilder declarePath(const std::string& name, const ParameterDescription& description,
-                                      bool is_file, const std::string& def, const std::string& filter = "", bool input = false, bool output = false);
+                                        bool is_file, const std::string& def, const std::string& filter = "", bool input = false, bool output = false);
 
 
 
@@ -258,16 +258,16 @@ public:
      */
     template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description,
-                                              const std::map<std::string, T> & set_values,
-                                              const T& def)
+                                                const std::map<std::string, T> & set_values,
+                                                const T& def)
     {
         return declareParameterSetImpl(name, description, set_values, def);
     }
 
     template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
     static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description,
-                                              const std::map<std::string, T> & set_values,
-                                              const T& def)
+                                                const std::map<std::string, T> & set_values,
+                                                const T& def)
     {
         std::map<std::string, int> int_map;
         for(const auto& entry : set_values) {
@@ -276,12 +276,20 @@ public:
         return declareParameterSetImpl(name, description, int_map, static_cast<int>(def));
     }
 
-    template <typename T>
+    template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     static ParameterBuilder declareParameterSet(const std::string& name,
-                                              const std::map<std::string, T> & set,
-                                              const T& def)
+                                                const std::map<std::string, T> & set,
+                                                const T& def)
     {
-        return declareParameterSetImpl(name, ParameterDescription(), set, def);
+        return declareParameterSet(name, ParameterDescription(), set, def);
+    }
+
+    template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    static ParameterBuilder declareParameterSet(const std::string& name,
+                                                const std::map<std::string, T> & set,
+                                                const T& def)
+    {
+        return declareParameterSet(name, ParameterDescription(), set, def);
     }
 
 
@@ -296,12 +304,12 @@ public:
      * @return
      */
     static ParameterBuilder declareParameterStringSet(const std::string& name,
-                                                    const ParameterDescription& description,
-                                                    const std::vector<std::string> & set,
-                                                    const std::string &def = "");
+                                                      const ParameterDescription& description,
+                                                      const std::vector<std::string> & set,
+                                                      const std::string &def = "");
     static ParameterBuilder declareParameterStringSet(const std::string& name,
-                                                    const std::vector<std::string> & set,
-                                                    const std::string &def = "");
+                                                      const std::vector<std::string> & set,
+                                                      const std::string &def = "");
 
 
 
@@ -369,12 +377,12 @@ public:
 private:
     template <typename T>
     static ParameterBuilder declareParameterSetImpl(const std::string& name, const ParameterDescription& description,
-                                              const std::map<std::string, T> & set_values,
-                                              const T& def);
+                                                    const std::map<std::string, T> & set_values,
+                                                    const T& def);
     template <typename T>
     static ParameterBuilder declareParameterSetImpl(const std::string& name,
-                                              const std::map<std::string, T> & set,
-                                              const T& def)
+                                                    const std::map<std::string, T> & set,
+                                                    const T& def)
     {
         return declareParameterSetImpl(name, ParameterDescription(), set, def);
     }
