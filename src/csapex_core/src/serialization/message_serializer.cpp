@@ -43,19 +43,13 @@ TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
     }
 
     std::string converter_type = type;
+    const std::string ns = "csapex::connection_types::";
+    if(type.find(ns) != std::string::npos){
+        converter_type.erase(0,ns.size());
+    }
 
-    if(i.type_to_converter.find(type) == i.type_to_converter.end()) {
-        bool found_substr = false;
-        for(auto pair : i.type_to_converter){
-            if(type.find(pair.first) != std::string::npos){
-                converter_type = pair.first;
-                found_substr = true;
-                break;
-            }
-        }
-        if(!found_substr){
+    if(i.type_to_converter.find(converter_type) == i.type_to_converter.end()) {
             throw DeserializationError(std::string("cannot deserialize, no such type (") + type + ")");
-        }
     }
 
     TokenData::Ptr msg = MessageFactory::createMessage(converter_type);
