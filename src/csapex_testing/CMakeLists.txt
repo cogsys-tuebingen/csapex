@@ -59,6 +59,14 @@ target_link_libraries(${PROJECT_NAME}
     ${csapex_LIBRARIES}
 )
 
+# regression tester
+add_executable(csapex_regression_tester
+    src/regression_tester.cpp
+)
+add_test(NAME csapex_regression_test COMMAND csapex_regression_tester)
+target_link_libraries(csapex_regression_tester
+    ${catkin_LIBRARIES})
+
 #
 # INSTALL
 #
