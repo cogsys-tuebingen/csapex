@@ -197,14 +197,14 @@ private:
             value->push_back(*casted);
         }
 
-//        template <typename MsgType>
-//        void addCastedEntry(std::vector<std::shared_ptr<MsgType>>& ,
-//                            const TokenData::ConstPtr& ptr,
-//                            typename std::enable_if<!std::is_base_of<TokenData, MsgType>::value>::type* = 0)
-//        {
-//            // internal: vector of non-msg pointers
-//            auto casted = std::dynamic_pointer_cast<MsgType const>(ptr);
-//        }
+        //        template <typename MsgType>
+        //        void addCastedEntry(std::vector<std::shared_ptr<MsgType>>& ,
+        //                            const TokenData::ConstPtr& ptr,
+        //                            typename std::enable_if<!std::is_base_of<TokenData, MsgType>::value>::type* = 0)
+        //        {
+        //            // internal: vector of non-msg pointers
+        //            auto casted = std::dynamic_pointer_cast<MsgType const>(ptr);
+        //        }
         template <typename MsgType>
         void addCastedEntry(std::vector<std::shared_ptr<MsgType>>& ,
                             const TokenData::ConstPtr& ptr,
@@ -465,22 +465,19 @@ public:
 
     struct SupportedTypes : public Singleton<SupportedTypes> {
         static EntryInterface::Ptr make(const std::string& type) {
-            auto pos = instance().map_.find(type);
-            bool found_sub_str = false;
+            const std::string ns = "csapex::connection_types::";
+            std::string ns_type = type;
+            if(type.find(ns) == std::string::npos){
+                ns_type = ns + type;
+            }
+            auto pos = instance().map_.find(ns_type);
             if(pos == instance().map_.end()) {
                 for(auto pair : instance().map_) {
-                    if(pair.first.find(type)!= std::string::npos){
-                        found_sub_str = true;
-                        pos = instance().map_.find(pair.first);
-                        break;
-                    }
-//                    std::cout << "supported: " << pair.first << std::endl;
+                    std::cout << "supported: " << pair.first << std::endl;
                 }
-                if(!found_sub_str){
-                    throw std::runtime_error(std::string("cannot make vector of type ") + type);
-                }
+                throw std::runtime_error(std::string("cannot make vector of type ") + type);
             }
-//            std::cout << "!!!! make vector of type " << type << ": " << pos->second->typeName() << std::endl;;
+            //            std::cout << "!!!! make vector of type " << type << ": " << pos->second->typeName() << std::endl;;
             return pos->second->cloneEntry();
         }
 
