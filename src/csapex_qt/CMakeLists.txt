@@ -26,7 +26,7 @@ catkin_package(
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
+qt5_add_resources(QT_RESOURCES res/csapex_qt_resources.qrc)
 qt5_wrap_ui(QT_UI
     ui/box.ui
     ui/csapex_window.ui
@@ -176,6 +176,22 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC TRUE)
+
+
+#
+# CFG
+#
+add_custom_target(${PROJECT_NAME}_cfg ALL DEPENDS cfg/style.css)
+add_custom_command(TARGET ${PROJECT_NAME}_cfg POST_BUILD
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
+        ${CATKIN_DEVEL_PREFIX}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
+
+#
+# INSTALL
+#
 
 
 install(DIRECTORY include/csapex/

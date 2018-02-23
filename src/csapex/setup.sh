@@ -50,6 +50,3 @@ if [[ ${XDG_CURRENT_DESKTOP} == "Unity" ]]; then
 	update-desktop-database ~/.local/share/applications
 	update-mime-database    ~/.local/share/mime
 fi
-
-mkdir -p ~/.csapex/cfg
-cp -r cfg/* ~/.csapex/cfg/

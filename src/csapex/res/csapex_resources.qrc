@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>apex_logo.png</file>
+        <file>apex_icon.ico</file>
+        <file>apex_logo_client.png</file>
+        <file>apex_logo_server.png</file>
+    </qresource>
+</RCC>

@@ -8,6 +8,8 @@ find_package(catkin QUIET)
 find_package(Qt5 COMPONENTS Core REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
+
 ## CATKIN
 if(${catkin_FOUND})
     find_package(catkin REQUIRED COMPONENTS csapex_core csapex_remote csapex_qt)
@@ -71,7 +73,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(WIN32)
         add_executable(csapex_main
                 src/csapex.cpp
-                res/csapex.rc
+                res/csapex.rc                
+                ${QT_RESOURCES}
         )
 else()
         add_executable(csapex_main
@@ -95,13 +98,32 @@ target_link_libraries(csapex_server
 
 
 add_executable(csapex_client
-        src/csapex_client.cpp)
+        src/csapex_client.cpp
+
+        ${QT_RESOURCES}
+)
 
 set_target_properties(csapex_client PROPERTIES
     AUTOMOC TRUE
     COMPILE_FLAGS "-fPIC")
 target_link_libraries(csapex_client
     ${catkin_LIBRARIES})
+
+
+#
+# CFG
+#
+add_custom_target(${PROJECT_NAME}_cfg ALL DEPENDS res/csapex.desktop)
+add_custom_command(TARGET csapex_main POST_BUILD
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
+        ${CATKIN_DEVEL_PREFIX}
+        ${PROJECT_NAME}
+        csapex_main
+        csapex_server
+        csapex_client
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
 
 #
 # INSTALL
