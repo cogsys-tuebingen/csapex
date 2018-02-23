@@ -164,9 +164,11 @@ private:
     bool is_processing_;
 
     Event* trigger_process_done_;
-
     Event* trigger_activated_;
     Event* trigger_deactivated_;
+
+    Slot* slot_enable_;
+    Slot* slot_disable_;
 
     std::map<Connector*, std::vector<slim_signal::Connection>> port_connections_;
 

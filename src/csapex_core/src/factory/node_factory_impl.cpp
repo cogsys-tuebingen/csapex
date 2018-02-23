@@ -215,16 +215,14 @@ void NodeFactoryImplementation::registerNodeType(NodeConstructor::Ptr provider, 
 
 NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type,
                                                                 const UUID& uuid,
-                                                                const UUIDProviderPtr& uuid_provider,
-                                                                const ExecutionType exec_type)
+                                                                const UUIDProviderPtr& uuid_provider)
 {
-    return makeNode(target_type, uuid, uuid_provider, exec_type, nullptr);
+    return makeNode(target_type, uuid, uuid_provider, nullptr);
 }
 
 NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type,
                                                                 const UUID& uuid,
                                                                 const UUIDProviderPtr& uuid_provider,
-                                                                const ExecutionType default_exec_type,
                                                                 NodeStatePtr state)
 {
     NodeConstructorPtr p = getConstructor(target_type);
@@ -235,63 +233,11 @@ NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::strin
             return nullptr;
         }
 
-        ExecutionType exec_type = default_exec_type;
-        if(!nh->getNode().lock()->canRunInSeparateProcess()) {
-            exec_type = ExecutionType::DIRECT;
-        } else {
-            if(state) {
-                exec_type = state->getExecutionType();
-            }
-        }
-
-
-        NodeFacadeImplementationPtr result;
-        NodeWorkerPtr nw;
-        if(!nh->isIsolated()) {
-
-            switch(exec_type) {
-            case ExecutionType::AUTO:
-            case ExecutionType::DIRECT:
-                nw = std::make_shared<DirectNodeWorker>(nh);
-                break;
-            case ExecutionType::SUBPROCESS:
-                nw = std::make_shared<SubprocessNodeWorker>(nh);
-                break;
-            }
-
-            NodeRunnerPtr runner = std::make_shared<NodeRunner>(nw);
-            result = std::make_shared<NodeFacadeImplementation>(nh, nw, runner);
-
-
-        } else {
-            result = std::make_shared<NodeFacadeImplementation>(nh);
-        }
-
-        NodePtr node = result->getNode();
-        try {
-            node->setupParameters(*node);
-            node->setup(*nh);
-
-        } catch(const std::exception& e) {
-            node->aerr << "setup failed: " << e.what() << std::endl;
-        }
-
-        // TODO: can this be done more elegantly?
-        SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(nh->getNode().lock());
-        if(subgraph) {
-            apex_assert_hard(subgraph);
-            subgraph->setNodeFacade(result);
-        }
-
         if(state) {
             nh->setNodeState(state);
         }
 
-        nh->getNodeState()->setExecutionType(exec_type);
-
-        if(nw) {
-            nw->initialize();
-        }
+        NodeFacadeImplementationPtr result = std::make_shared<NodeFacadeImplementation>(nh);
 
         node_constructed(result);
 
@@ -310,5 +256,5 @@ NodeFacadeImplementationPtr NodeFactoryImplementation::makeGraph(const UUID& uui
 
 NodeFacadeImplementationPtr NodeFactoryImplementation::makeGraph(const UUID& uuid, const UUIDProviderPtr& uuid_provider, NodeStatePtr state)
 {
-    return makeNode("csapex::Graph", uuid, uuid_provider, ExecutionType::DIRECT, state);
+    return makeNode("csapex::Graph", uuid, uuid_provider, state);
 }

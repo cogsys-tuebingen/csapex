@@ -12,7 +12,6 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/plugin/plugin_fwd.h>
 #include <csapex_core/csapex_core_export.h>
-#include <csapex/model/execution_type.h>
 
 /// SYSTEM
 #include <vector>
@@ -38,12 +37,10 @@ public:
 
     NodeFacadeImplementationPtr makeNode(const std::string& type,
                                          const UUID& uuid,
-                                         const UUIDProviderPtr &uuid_provider,
-                                         const ExecutionType exec_type = ExecutionType::AUTO);
+                                         const UUIDProviderPtr &uuid_provider);
     NodeFacadeImplementationPtr makeNode(const std::string& type,
                                          const UUID& uuid,
                                          const UUIDProviderPtr &uuid_provider,
-                                         const ExecutionType exec_type,
                                          NodeStatePtr state);
 
     NodeFacadeImplementationPtr makeGraph(const UUID& uuid,

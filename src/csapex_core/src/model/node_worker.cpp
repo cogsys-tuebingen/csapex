@@ -45,6 +45,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
       is_setup_(false),
       is_processing_(false),
       trigger_process_done_(nullptr),
+      trigger_activated_(nullptr),
+      trigger_deactivated_(nullptr),
+      slot_enable_(nullptr),
+      slot_disable_(nullptr),
       guard_(-1)
 {
 //    node_handle->setNodeWorker(this);
@@ -55,7 +59,14 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
 
     profiler_ = std::make_shared<ProfilerImplementation>(false, 16);
 
-
+    for(auto& port : node_handle_->getInternalInputs())
+        connectConnector(port);
+    for(auto& port : node_handle_->getInternalOutputs())
+        connectConnector(port);
+    for(auto& port : node_handle_->getInternalSlots())
+        connectConnector(port);
+    for(auto& port : node_handle_->getInternalEvents())
+        connectConnector(port);
 
     observe(node_handle_->connector_created, [this](ConnectablePtr c, bool internal) {
         connectConnector(c);
@@ -76,19 +87,38 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
         outgoingMessagesProcessed();
     });
 
+    for(const EventPtr& e : node_handle->getEvents()) {
+        const std::string& label = e->getLabel();
+        if(!trigger_activated_ && label == "activated")
+            trigger_activated_ = e.get();
+        else if(!trigger_deactivated_ && label == "deactivated")
+            trigger_deactivated_ = e.get();
+        else if(!trigger_process_done_ && label == "inputs processed")
+            trigger_process_done_ = e.get();
+    }
 
-    trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"activated");
-    trigger_deactivated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"deactivated");
+    if(!trigger_activated_)
+        trigger_activated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), "activated");
+    if(!trigger_deactivated_)
+        trigger_deactivated_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), "deactivated");
+    if(!trigger_process_done_)
+        trigger_process_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), "inputs processed");
 
-    trigger_process_done_ = node_handle_->addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(),"inputs processed");
 
-
-    node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
-        setProcessingEnabled(true);
-    }, true, true);
-    node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", [this](){
-        setProcessingEnabled(false);
-    }, false, true);
+    for(const SlotPtr& s : node_handle->getSlots()) {
+        if(!slot_enable_ && s->getLabel() == "enable")
+            slot_enable_ = s.get();
+        if(!slot_disable_ && s->getLabel() == "disable")
+            slot_disable_ = s.get();
+    }
+    if(!slot_enable_)
+        slot_enable_ = node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "enable", [this](){
+            setProcessingEnabled(true);
+        }, true, true);
+    if(!slot_disable_)
+        slot_disable_ = node_handle_->addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), "disable", [this](){
+            setProcessingEnabled(false);
+        }, false, true);
 
     observe(node_handle_->activation_changed, [this](){
         if(node_handle_->isActive()) {

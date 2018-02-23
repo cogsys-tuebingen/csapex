@@ -24,7 +24,7 @@
 using namespace csapex;
 
 GraphImplementation::GraphImplementation()
-    : in_transaction_(false)
+    : in_transaction_(false), nf_(nullptr)
 {
 
 }
@@ -36,10 +36,10 @@ GraphImplementation::~GraphImplementation()
 
 AUUID GraphImplementation::getAbsoluteUUID() const
 {
-    return nf_.lock()->getUUID().getAbsoluteUUID();
+    return nf_->getUUID().getAbsoluteUUID();
 }
 
-void GraphImplementation::setNodeFacade(NodeFacadeImplementationWeakPtr nf)
+void GraphImplementation::setNodeFacade(NodeFacadeImplementation* nf)
 {
     nf_ = nf;
 }
@@ -681,10 +681,9 @@ NodeHandle* GraphImplementation::findNodeHandleForConnector(const UUID &uuid) co
 NodeHandle* GraphImplementation::findNodeHandle(const UUID& uuid) const
 {
     if(uuid.empty()) {
-        NodeFacadeImplementationPtr nf = nf_.lock();
-        apex_assert_hard(nf);
-        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
-        return nf->getNodeHandle().get();
+        apex_assert_hard(nf_);
+        apex_assert_hard(nf_->getNodeHandle()->guard_ == -1);
+        return nf_->getNodeHandle().get();
     }
     NodeHandle* node_handle = findNodeHandleNoThrow(uuid);
     if(node_handle) {
@@ -697,10 +696,9 @@ NodeHandle* GraphImplementation::findNodeHandle(const UUID& uuid) const
 NodeHandle *GraphImplementation::findNodeHandleNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.empty()) {
-        NodeFacadeImplementationPtr nf = nf_.lock();
-        apex_assert_hard(nf);
-        apex_assert_hard(nf->getNodeHandle()->guard_ == -1);
-        return nf->getNodeHandle().get();
+        apex_assert_hard(nf_);
+        apex_assert_hard(nf_->getNodeHandle()->guard_ == -1);
+        return nf_->getNodeHandle().get();
     }
     if(uuid.composite()) {
         UUID root = uuid.rootUUID();
@@ -767,9 +765,8 @@ NodeFacadePtr GraphImplementation::findNodeFacadeForConnector(const UUID &uuid) 
 NodeFacadePtr GraphImplementation::findNodeFacade(const UUID& uuid) const
 {
     if(uuid.empty()) {
-        NodeFacadePtr nf = nf_.lock();
-        apex_assert_hard(nf);
-        return nf;
+        apex_assert_hard(nf_);
+        return nf_->shared_from_this();
     }
     NodeFacadePtr node_facade = findNodeFacadeNoThrow(uuid);
     if(node_facade) {
@@ -781,9 +778,8 @@ NodeFacadePtr GraphImplementation::findNodeFacade(const UUID& uuid) const
 NodeFacadePtr GraphImplementation::findNodeFacadeNoThrow(const UUID& uuid) const noexcept
 {
     if(uuid.empty()) {
-        NodeFacadePtr nf = nf_.lock();
-        apex_assert_hard(nf);
-        return nf;
+        apex_assert_hard(nf_);
+        return nf_->shared_from_this();
     }
     if(uuid.composite()) {
         NodeFacadePtr root = findNodeFacadeNoThrow(uuid.rootUUID());

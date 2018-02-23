@@ -14,22 +14,7 @@
 using namespace csapex;
 
 NodeState::NodeState(const NodeHandle *parent)
-    : max_frequency_changed(new SignalImpl),
-      pos_changed(new SignalImpl),
-      z_changed(new SignalImpl),
-      color_changed(new SignalImpl),
-      label_changed(new SignalImpl),
-      minimized_changed(new SignalImpl),
-      muted_changed(new SignalImpl),
-      enabled_changed(new SignalImpl),
-      active_changed(new SignalImpl),
-      flipped_changed(new SignalImpl),
-      thread_changed(new SignalImpl),
-      execution_mode_changed(new SignalImpl),
-      execution_type_changed(new SignalImpl),
-      logger_level_changed(new SignalImpl),
-      parent_changed(new SignalImpl),
-      parent_(parent),
+    : parent_(parent),
 
       max_frequency_(0.0), z_(0), minimized_(false), muted_(false), enabled_(true), active_(false), flipped_(false),
       logger_level_(1), thread_id_(-1),
@@ -85,20 +70,20 @@ NodeState& NodeState::operator = (const NodeState& rhs)
     parameter_state->setFrom(*rhs.parameter_state);
 
     // then trigger the signals
-    (*max_frequency_changed)();
-    (*pos_changed)();
-    (*enabled_changed)();
-    (*active_changed)();
-    (*z_changed)();
-    (*color_changed)();
-    (*minimized_changed)();
-    (*muted_changed)();
-    (*flipped_changed)();
-    (*label_changed)();
-    (*thread_changed)();
-    (*execution_mode_changed)();
-    (*execution_type_changed)();
-    (*logger_level_changed)();
+    (max_frequency_changed)();
+    (pos_changed)();
+    (enabled_changed)();
+    (active_changed)();
+    (z_changed)();
+    (color_changed)();
+    (minimized_changed)();
+    (muted_changed)();
+    (flipped_changed)();
+    (label_changed)();
+    (thread_changed)();
+    (execution_mode_changed)();
+    (execution_type_changed)();
+    (logger_level_changed)();
 
     return *this;
 }
@@ -107,7 +92,7 @@ void NodeState::setMaximumFrequency(double f)
 {
     if(max_frequency_ != f) {
         max_frequency_ = f;
-        (*max_frequency_changed)();
+        (max_frequency_changed)();
     }
 }
 
@@ -126,7 +111,7 @@ void NodeState::setPos(const Point &value, bool quiet)
     if(pos_ != value) {
         pos_ = value;
         if(!quiet) {
-            (*pos_changed)();
+            (pos_changed)();
         }
     }
 }
@@ -141,7 +126,7 @@ void NodeState::setZ(long value)
 {
     if(z_ != value) {
         z_ = value;
-        (*z_changed)();
+        (z_changed)();
     }
 }
 
@@ -158,7 +143,7 @@ void NodeState::setColor(int r, int g, int b)
         r_ = r;
         g_ = g;
         b_ = b;
-        (*color_changed)();
+        (color_changed)();
     }
 }
 
@@ -172,7 +157,7 @@ void NodeState::setLabel(const std::string &label)
 {
     if(label_ != label) {
         label_ = label;
-        (*label_changed)();
+        (label_changed)();
     }
 }
 
@@ -185,7 +170,7 @@ void NodeState::setMinimized(bool value)
 {
     if(minimized_ != value) {
         minimized_ = value;
-        (*minimized_changed)();
+        (minimized_changed)();
     }
 }
 
@@ -198,7 +183,7 @@ void NodeState::setMuted(bool value)
 {
     if(muted_ != value) {
         muted_ = value;
-        (*muted_changed)();
+        (muted_changed)();
     }
 }
 bool NodeState::isEnabled() const
@@ -210,7 +195,7 @@ void NodeState::setEnabled(bool value)
 {
     if(enabled_ != value) {
         enabled_ = value;
-        (*enabled_changed)();
+        (enabled_changed)();
     }
 }
 
@@ -223,7 +208,7 @@ void NodeState::setActive(bool value)
 {
     if(active_ != value) {
         active_ = value;
-        (*active_changed)();
+        (active_changed)();
     }
 }
 
@@ -236,7 +221,7 @@ void NodeState::setFlipped(bool value)
 {
     if(flipped_ != value) {
         flipped_ = value;
-        (*flipped_changed)();
+        (flipped_changed)();
     }
 }
 GenericStatePtr NodeState::getParameterState() const
@@ -246,7 +231,7 @@ GenericStatePtr NodeState::getParameterState() const
 
 void NodeState::setParameterState(const GenericStatePtr &value)
 {
-    *parameter_state = *value;
+    parameter_state->setFrom(*value);
 }
 
 const NodeHandle *NodeState::getParent() const
@@ -258,7 +243,7 @@ void NodeState::setParent(const NodeHandle *value)
 {
     if(parent_ != value) {
         parent_ = value;
-        (*parent_changed)();
+        (parent_changed)();
     }
 }
 
@@ -278,7 +263,7 @@ void NodeState::setThread(const std::string& name, int id)
         thread_id_ = id;
         thread_name_ = name;
 
-        (*thread_changed)();
+        (thread_changed)();
     }
 }
 
@@ -292,7 +277,7 @@ void NodeState::setExecutionMode(ExecutionMode mode)
     if(exec_mode_ != mode) {
         exec_mode_ = mode;
 
-        (*execution_mode_changed)();
+        (execution_mode_changed)();
     }
 }
 
@@ -305,7 +290,7 @@ void NodeState::setExecutionType(ExecutionType type)
     if(exec_type_!= type) {
         exec_type_= type;
 
-        (*execution_type_changed)();
+        (execution_type_changed)();
     }
 }
 
@@ -318,7 +303,7 @@ void NodeState::setLoggerLevel(int level)
     if(logger_level_ != level) {
         logger_level_ = level;
 
-        (*logger_level_changed)();
+        (logger_level_changed)();
     }
 }
 

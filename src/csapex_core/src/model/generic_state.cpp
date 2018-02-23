@@ -13,13 +13,34 @@
 using namespace csapex;
 
 GenericState::GenericState()
-    : silent_(false),
-      parameter_set_changed(new slim_signal::Signal<void()>),
-      parameter_added(new slim_signal::Signal<void(csapex::param::ParameterPtr)>),
-      parameter_changed(new slim_signal::Signal<void(csapex::param::Parameter*)>),
-      parameter_removed(new slim_signal::Signal<void(csapex::param::ParameterPtr)>)
+    : silent_(false)
 {
 
+}
+
+GenericState::GenericState(const GenericState& move)
+    : GenericState()
+{
+    params = move.params;
+    param_valid_name_cache = move.param_valid_name_cache;
+    temporary = move.temporary;
+    cached_parameter = move.cached_parameter;
+    persistent = move.persistent;
+    legacy = move.legacy;
+    order = move.order;
+}
+
+
+GenericState::GenericState(GenericState&& move)
+    : GenericState()
+{
+    params = std::move(move.params);
+    param_valid_name_cache = std::move(move.param_valid_name_cache);
+    temporary = std::move(move.temporary);
+    cached_parameter = std::move(move.cached_parameter);
+    persistent = std::move(move.persistent);
+    legacy = std::move(move.legacy);
+    order = std::move(move.order);
 }
 
 void GenericState::setParentUUID(const UUID &parent_uuid)
@@ -36,6 +57,7 @@ void GenericState::setParentUUID(const UUID &parent_uuid)
 GenericState::Ptr GenericState::clone() const
 {
     GenericState::Ptr r(new GenericState(*this));
+
     return r;
 }
 
@@ -73,7 +95,7 @@ void GenericState::initializePersistentParameters()
     for(const std::string& name : persistent) {
         param::ParameterPtr param = params[name];
         param->setUUID(UUIDProvider::makeTypedUUID_forced(parent_uuid_, "param", param->name()));
-        (*parameter_added)(param);
+        (parameter_added)(param);
     }
 }
 
@@ -112,7 +134,7 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
 
     param_valid_name_cache[valid_name] = param_name;
 
-    param->parameter_changed.connect(*parameter_changed);
+    param->parameter_changed.connect(parameter_changed);
 }
 
 void GenericState::removeParameter(csapex::param::ParameterPtr param)
@@ -135,7 +157,7 @@ void GenericState::setParameterSetSilence(bool silent)
 void GenericState::triggerParameterSetChanged()
 {
     if(!silent_) {
-        (*parameter_set_changed)();
+        (parameter_set_changed)();
     }
 }
 
@@ -185,7 +207,7 @@ void GenericState::removeTemporaryParameters()
 
         cached_parameter[name] = true;
 
-        (*parameter_removed)(p);
+        (parameter_removed)(p);
     }
 
     temporary.clear();
@@ -211,7 +233,7 @@ void GenericState::removePersistentParameters()
         removePersistentParameter(p);
 
         p->removed(p);
-        (*parameter_removed)(p);
+        (parameter_removed)(p);
     }
 
     apex_assert_hard(persistent.empty());
@@ -233,7 +255,7 @@ void GenericState::registerParameter(const csapex::param::Parameter::Ptr &param)
 
     param->setUUID(UUIDProvider::makeTypedUUID_forced(parent_uuid_, "param", param->name()));
 
-    (*parameter_added)(param);
+    (parameter_added)(param);
     triggerParameterSetChanged();
 }
 
@@ -241,7 +263,7 @@ void GenericState::unregisterParameter(const csapex::param::Parameter::Ptr &para
 {
     params.erase(param->name());
 
-    (*parameter_removed)(param);
+    (parameter_removed)(param);
     triggerParameterSetChanged();
 }
 

@@ -8,7 +8,8 @@
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
-#include <csapex/model/node_worker.h>
+#include <csapex/model/direct_node_worker.h>
+#include <csapex/model/subprocess_node_worker.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/input_transition.h>
@@ -24,20 +25,83 @@
 
 using namespace csapex;
 
-NodeFacadeImplementation::NodeFacadeImplementation(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr)
-    : nh_(nh), nw_(nw), nr_(nr)
-{
-    nh->setNodeRunner(nr_);
-
-    setNodeWorker(nw);
-
-    connectNodeHandle();
-    connectNodeRunner();
-}
 NodeFacadeImplementation::NodeFacadeImplementation(NodeHandlePtr nh)
     : nh_(nh)
 {
-    connectNodeHandle();
+
+    if(!nh->isIsolated()) {
+        nw_ = createNodeWorker();
+
+        nr_ = std::make_shared<NodeRunner>(nw_);
+        nh->setNodeRunner(nr_);
+
+        setupNode();
+
+        connectNodeWorker();
+
+        nh_->setNodeWorker(nw_.get());
+        nr_->setNodeWorker(nw_);
+
+        connectNodeHandle();
+        connectNodeRunner();
+
+        nw_->initialize();
+
+    } else {
+        setupNode();
+        connectNodeHandle();
+    }
+}
+
+void NodeFacadeImplementation::setupNode()
+{
+    NodePtr node = getNode();
+    try {
+        node->setupParameters(*node);
+        node->setup(*nh_);
+
+    } catch(const std::exception& e) {
+        node->aerr << "setup failed: " << e.what() << std::endl;
+    }
+
+    // TODO: can this be done more elegantly?
+    SubgraphNodePtr subgraph = std::dynamic_pointer_cast<SubgraphNode>(node);
+    if(subgraph) {
+        apex_assert_hard(subgraph);
+        subgraph->setNodeFacade(this);
+    }
+
+}
+
+NodeWorkerPtr NodeFacadeImplementation::createNodeWorker()
+{
+    NodeStatePtr state = getNodeState();
+
+    ExecutionType exec_type;
+    if(!getNode()->canRunInSeparateProcess()) {
+        exec_type = ExecutionType::DIRECT;
+    } else {
+        if(state) {
+            exec_type = state->getExecutionType();
+        }
+    }
+
+    if(state) {
+        state->setExecutionType(exec_type);
+    }
+
+    NodeWorkerPtr nw;
+    switch(exec_type) {
+    case ExecutionType::AUTO:
+    case ExecutionType::DIRECT:
+        nw = std::make_shared<DirectNodeWorker>(nh_);
+        break;
+    case ExecutionType::SUBPROCESS:
+        nw = std::make_shared<SubprocessNodeWorker>(nh_);
+        break;
+    }
+
+    return nw;
 }
 
 
@@ -88,32 +152,36 @@ void NodeFacadeImplementation::connectNodeHandle()
 
     NodeStatePtr state = nh_->getNodeState();
 
-    observe(*(state->label_changed), [this]() {
+    observe((state->label_changed), [this]() {
         label_changed(getLabel());
     });
 
-    observe(*(state->thread_changed), [this]() {
+    observe((state->thread_changed), [this]() {
         scheduler_changed(getSchedulerId());
+    });
+
+    observe(state->execution_type_changed, [this]() {
+        replaceNodeWorker(createNodeWorker());
     });
 
     GenericStatePtr paramstate = state->getParameterState();
 
     if(paramstate) {
-        observe(*(paramstate->parameter_added), [this](const param::ParameterPtr& p) {
+        observe((paramstate->parameter_added), [this](const param::ParameterPtr& p) {
             parameter_added(p);
         });
-        observe(*(paramstate->parameter_changed), [this](const param::Parameter* p) {
+        observe((paramstate->parameter_changed), [this](const param::Parameter* p) {
             if(parameter_changed.isConnected()) {
                 NodeStatePtr state = nh_->getNodeState();
                 GenericStatePtr paramstate = state->getParameterState();
                 parameter_changed(paramstate->getParameter(p->name()));
             }
         });
-        observe(*(paramstate->parameter_removed), [this](const param::ParameterPtr& p) {
+        observe((paramstate->parameter_removed), [this](const param::ParameterPtr& p) {
             parameter_removed(p);
         });
 
-        observe(*(paramstate->parameter_set_changed), [this]() {
+        observe((paramstate->parameter_set_changed), [this]() {
             parameter_set_changed();
         });
     }
@@ -341,6 +409,7 @@ bool NodeFacadeImplementation::canProcess() const
     if(nw_) {
         return nw_->canProcess();
     } else {
+        std::cout << "no nodeworker!" << std::endl;
         return false;
     }
 }
@@ -449,7 +518,12 @@ void NodeFacadeImplementation::replaceNodeWorker(NodeWorkerPtr worker)
 {
     setNodeWorker(worker);
 
-    worker->initialize();
+    nw_->initialize();
+}
+
+NodeWorkerWeakPtr NodeFacadeImplementation::getNodeWorker() const
+{
+    return nw_;
 }
 
 NodeStatePtr NodeFacadeImplementation::getNodeState() const

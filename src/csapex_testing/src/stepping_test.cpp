@@ -19,7 +19,7 @@ void SteppingTest::SetUp()
     NodeConstructingTest::SetUp();
 
     main_graph_facade = std::make_shared<GraphFacadeImplementation>(executor, graph, graph_node);
-    graph->setNodeFacade(main_graph_facade->getLocalNodeFacade());
+    graph->setNodeFacade(main_graph_facade->getLocalNodeFacade().get());
 
     executor.setSteppingMode(true);
 

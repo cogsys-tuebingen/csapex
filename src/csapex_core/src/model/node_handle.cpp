@@ -46,8 +46,8 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
     node_state_->setLabel(uuid.getFullName());
     node_state_->setParent(this);
     
-    node_state_->enabled_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->active_changed->connect([this](){
+    node_state_->enabled_changed.connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->active_changed.connect([this](){
         activation_changed();
         if(isActive()) {
             node_->activation();
@@ -55,15 +55,15 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
             node_->deactivation();
         }
     });
-    node_state_->flipped_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->label_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->minimized_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->parent_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->pos_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->thread_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
-    node_state_->color_changed->connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->flipped_changed.connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->label_changed.connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->minimized_changed.connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->parent_changed.connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->pos_changed.connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->thread_changed.connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
+    node_state_->color_changed.connect(std::bind(&NodeHandle::triggerNodeStateChanged, this));
     
-    node_state_->label_changed->connect([this]() {
+    node_state_->label_changed.connect([this]() {
         std::string label = node_state_->getLabel();
         if(label.empty()) {
             label = getUUID().getShortName();
@@ -77,19 +77,19 @@ NodeHandle::NodeHandle(const std::string &type, const UUID& uuid, NodePtr node,
 
         triggerNodeStateChanged();
     });
-    node_state_->logger_level_changed->connect([this](){
+    node_state_->logger_level_changed.connect([this](){
         updateLoggerLevel();
     });
-    node_state_->muted_changed->connect([this](){
+    node_state_->muted_changed.connect([this](){
         updateLoggerLevel();
     });
     
     //    triggerNodeStateChanged();
     
     node_->parameters_changed.connect(parameters_changed);
-    node_->getParameterState()->parameter_set_changed->connect(parameters_changed);
-    node_->getParameterState()->parameter_added->connect(std::bind(&NodeHandle::makeParameterConnectable, this, std::placeholders::_1));
-    node_->getParameterState()->parameter_removed->connect(std::bind(&NodeHandle::makeParameterNotConnectable, this, std::placeholders::_1));
+    node_->getParameterState()->parameter_set_changed.connect(parameters_changed);
+    node_->getParameterState()->parameter_added.connect(std::bind(&NodeHandle::makeParameterConnectable, this, std::placeholders::_1));
+    node_->getParameterState()->parameter_removed.connect(std::bind(&NodeHandle::makeParameterNotConnectable, this, std::placeholders::_1));
 }
 
 NodeHandle::~NodeHandle()

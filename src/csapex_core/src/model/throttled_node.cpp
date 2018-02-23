@@ -20,7 +20,7 @@ void ThrottledNode::setupParameter(csapex::Parameterizable& params, const std::s
                         [this](param::Parameter* p) {
         node_handle_->getNodeState()->setMaximumFrequency(p->as<double>());
     });
-    node_handle_->getNodeState()->max_frequency_changed->connect([name, this]() {
+    node_handle_->getNodeState()->max_frequency_changed.connect([name, this]() {
         double max_f = node_handle_->getNodeState()->getMaximumFrequency();
         setParameter(name, max_f);
     });

@@ -72,7 +72,7 @@ private:
 private:
     pid_t pid_;
 
-    Subprocess subprocess_;
+    std::unique_ptr<Subprocess> subprocess_;
 
     std::vector<param::Parameter*> changed_parameters_;
 

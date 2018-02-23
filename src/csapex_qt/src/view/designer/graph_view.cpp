@@ -23,6 +23,7 @@
 #include <csapex/command/add_variadic_connector.h>
 #include <csapex/command/add_variadic_connector_and_connect.h>
 #include <csapex/command/set_execution_mode.h>
+#include <csapex/command/set_isolated_execution.h>
 #include <csapex/core/settings.h>
 #include <csapex/factory/node_factory.h>
 #include <csapex/factory/snippet_factory.h>
@@ -1405,6 +1406,15 @@ void GraphView::setExecutionMode(ExecutionMode mode)
     command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set execution mode"));
     for(NodeBox* box : selected_boxes_) {
         cmd->add(Command::Ptr(new command::SetExecutionMode(graph_facade_->getAbsoluteUUID(),box->getNodeFacade()->getUUID(), mode)));
+    }
+    view_core_.getCommandDispatcher()->execute(cmd);
+}
+
+void GraphView::setExecutionType(ExecutionType type)
+{
+    command::Meta::Ptr cmd(new command::Meta(graph_facade_->getAbsoluteUUID(),"set isolated execution"));
+    for(NodeBox* box : selected_boxes_) {
+        cmd->add(Command::Ptr(new command::SetIsolatedExecution(graph_facade_->getAbsoluteUUID(),box->getNodeFacade()->getUUID(), type)));
     }
     view_core_.getCommandDispatcher()->execute(cmd);
 }

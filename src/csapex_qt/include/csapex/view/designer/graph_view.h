@@ -2,22 +2,23 @@
 #define GRAPH_VIEW_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
-#include <csapex/view/view_fwd.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/core/core_fwd.h>
-#include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/model/connector_description.h>
+#include <csapex/model/connector_type.h>
+#include <csapex/model/execution_mode.h>
+#include <csapex/model/execution_type.h>
 #include <csapex/model/model_fwd.h>
-#include <csapex/view/designer/designer_styleable.h>
+#include <csapex/model/observer.h>
+#include <csapex/profiling/profilable.h>
+#include <csapex_qt_export.h>
+#include <csapex/scheduling/scheduling_fwd.h>
+#include <csapex/serialization/snippet.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/utility/uuid.h>
-#include <csapex/model/connector_type.h>
-#include <csapex/model/connector_description.h>
 #include <csapex/view/csapex_view_core.h>
-#include <csapex/profiling/profilable.h>
-#include <csapex/model/execution_mode.h>
-#include <csapex/serialization/snippet.h>
-#include <csapex/model/observer.h>
+#include <csapex/view/designer/designer_styleable.h>
+#include <csapex/view/view_fwd.h>
 
 /// SYSTEM
 #include <QGraphicsView>
@@ -203,6 +204,7 @@ private:
 
     void flipBox();
     void setExecutionMode(ExecutionMode mode);
+    void setExecutionType(ExecutionType typed);
     void setLoggerLevel(int level);
     void setMaximumFrequency();
     void setUnboundedMaximumFrequency();

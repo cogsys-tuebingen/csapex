@@ -464,6 +464,7 @@ add_library(csapex_command SHARED
     src/command/set_color.cpp
     src/command/update_parameter.cpp
     src/command/set_execution_mode.cpp
+    src/command/set_isolated_execution.cpp
     src/command/set_logger_level.cpp
     src/command/set_max_execution_frequency.cpp
 
@@ -511,6 +512,17 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         endif()
     endif()
 endif()
+
+
+#
+# CFG
+#
+add_custom_target(${PROJECT_NAME}_cfg ALL DEPENDS cfg/intro.html)
+add_custom_command(TARGET ${PROJECT_NAME}_cfg POST_BUILD
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup.sh
+        ${CATKIN_DEVEL_PREFIX}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
 
 
 #

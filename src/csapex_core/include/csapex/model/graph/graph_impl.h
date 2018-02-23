@@ -71,7 +71,7 @@ public:
 
     void analyzeGraph();
 
-    void setNodeFacade(NodeFacadeImplementationWeakPtr nf);
+    void setNodeFacade(NodeFacadeImplementation *nf);
 
     // iterators
     vertex_iterator begin();
@@ -100,7 +100,7 @@ protected:
 
     bool in_transaction_;
 
-    NodeFacadeImplementationWeakPtr nf_;
+    NodeFacadeImplementation* nf_;
 };
 
 }

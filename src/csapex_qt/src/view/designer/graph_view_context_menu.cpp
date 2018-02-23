@@ -343,6 +343,14 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
         menu.addSeparator();
 
+        QAction* subprocess = new QAction("isolated execution", &menu);
+        subprocess->setIcon(QIcon(":/subprocess.png"));
+        subprocess->setIconVisibleInMenu(true);
+        handler[subprocess] = std::bind(&GraphView::setExecutionType, &view_, ExecutionType::SUBPROCESS);
+        menu.addAction(subprocess);
+
+        menu.addSeparator();
+
 
         bool has_profiling = false;
         bool has_not_profiling = false;

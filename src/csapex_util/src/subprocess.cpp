@@ -64,11 +64,11 @@ Subprocess::~Subprocess()
             ctrl_in.write({SubprocessChannel::MessageType::SHUTDOWN, "shutdown"});
         }
 
-        join();
-
         close(pipe_err[1]);
         close(pipe_out[0]);
         close(pipe_in[0]);
+
+        join();
     }
 }
 
@@ -85,6 +85,10 @@ bool Subprocess::isParent() const
 void Subprocess::handleSignal(int signal)
 {
     if(active_) {
+        close(pipe_in[0]);
+        close(pipe_out[1]);
+        close(pipe_err[1]);
+
         out.write({SubprocessChannel::MessageType::CHILD_SIGNAL, std::to_string(signal)});
         ctrl_out.write({SubprocessChannel::MessageType::CHILD_SIGNAL, std::to_string(signal)});
     }
@@ -103,12 +107,41 @@ pid_t Subprocess::fork(std::function<int()> child)
         dup2(pipe_err[1], 2);
 
         detail::g_sp_instance = this;
-        std::signal(SIGABRT, detail::sp_signal_handler);
-        std::signal(SIGFPE, detail::sp_signal_handler);
-        std::signal(SIGILL, detail::sp_signal_handler);
-        std::signal(SIGINT, detail::sp_signal_handler);
-        std::signal(SIGSEGV, detail::sp_signal_handler);
-        std::signal(SIGTERM, detail::sp_signal_handler);
+        std::signal(SIGHUP	 , detail::sp_signal_handler);
+        std::signal(SIGINT	 , detail::sp_signal_handler);
+        std::signal(SIGQUIT	 , detail::sp_signal_handler);
+        std::signal(SIGILL	 , detail::sp_signal_handler);
+        std::signal(SIGTRAP	 , detail::sp_signal_handler);
+        std::signal(SIGABRT	 , detail::sp_signal_handler);
+        std::signal(SIGIOT	 , detail::sp_signal_handler);
+        std::signal(SIGBUS	 , detail::sp_signal_handler);
+        std::signal(SIGFPE	 , detail::sp_signal_handler);
+        std::signal(SIGKILL	 , detail::sp_signal_handler);
+        std::signal(SIGUSR1	 , detail::sp_signal_handler);
+        std::signal(SIGSEGV	 , detail::sp_signal_handler);
+        std::signal(SIGUSR2	 , detail::sp_signal_handler);
+        std::signal(SIGPIPE	 , detail::sp_signal_handler);
+        std::signal(SIGALRM	 , detail::sp_signal_handler);
+        std::signal(SIGTERM	 , detail::sp_signal_handler);
+        std::signal(SIGSTKFLT, detail::sp_signal_handler);
+        std::signal(SIGCLD	 , detail::sp_signal_handler);
+        std::signal(SIGCHLD	 , detail::sp_signal_handler);
+        std::signal(SIGCONT	 , detail::sp_signal_handler);
+        std::signal(SIGSTOP	 , detail::sp_signal_handler);
+        std::signal(SIGTSTP	 , detail::sp_signal_handler);
+        std::signal(SIGTTIN	 , detail::sp_signal_handler);
+        std::signal(SIGTTOU	 , detail::sp_signal_handler);
+        std::signal(SIGURG	 , detail::sp_signal_handler);
+        std::signal(SIGXCPU	 , detail::sp_signal_handler);
+        std::signal(SIGXFSZ	 , detail::sp_signal_handler);
+        std::signal(SIGVTALRM, detail::sp_signal_handler);
+        std::signal(SIGPROF	 , detail::sp_signal_handler);
+        std::signal(SIGWINCH , detail::sp_signal_handler);
+        std::signal(SIGPOLL	 , detail::sp_signal_handler);
+        std::signal(SIGIO	 , detail::sp_signal_handler);
+        std::signal(SIGPWR	 , detail::sp_signal_handler);
+        std::signal(SIGSYS	 , detail::sp_signal_handler);
+        std::signal(SIGUNUSED, detail::sp_signal_handler);
 
         subprocess_worker_ = std::thread([this](){
             while(active_) {
@@ -143,6 +176,10 @@ pid_t Subprocess::fork(std::function<int()> child)
         ctrl_in.shutdown();
         subprocess_worker_.join();
 
+        close(pipe_in[0]);
+        close(pipe_out[1]);
+        close(pipe_err[1]);
+
         // then send the end of program signal
         ctrl_out.write({SubprocessChannel::MessageType::CHILD_EXIT, std::to_string(return_code)});
 
@@ -157,7 +194,7 @@ pid_t Subprocess::fork(std::function<int()> child)
             while(active_) {
                 const std::size_t N = 1;
                 char buf[N+1];
-                std::size_t r;
+                int r;
                 while((r = read(pipe_out[0], &buf, N)) > 0) {
                     buf[r] = 0;
                     child_cout << buf;
@@ -166,6 +203,7 @@ pid_t Subprocess::fork(std::function<int()> child)
                     buf[r] = 0;
                     child_cerr << buf;
                 }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         });
     }

@@ -1,6 +1,8 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/model/graph/graph_impl.h>
+#include <csapex/model/execution_type.h>
+#include <csapex/model/node_state.h>
 
 #include <csapex_testing/test_exception_handler.h>
 #include <csapex_testing/mockup_nodes.h>
@@ -12,35 +14,45 @@ namespace csapex {
 class SchedulingTest : public SteppingTest
 {
 protected:
+    NodeFacadeImplementationPtr makeNode(const std::string& type, const UUID& id, GraphPtr graph, ExecutionType exec_type)
+    {
+        NodeStatePtr state = std::make_shared<NodeState>(nullptr);
+        state->setExecutionType(exec_type);
+        NodeFacadeImplementationPtr nf = factory.makeNode(type, id, graph, state);
+
+        EXPECT_NE(nullptr, nf);
+
+        return nf;
+    }
+
     void testStepping(ExecutionType exec_type)
     {
-        NodeFacadeImplementationPtr src1 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src1"), graph, exec_type);
-        ASSERT_NE(nullptr, src1);
+        NodeFacadeImplementationPtr src1 = makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src1"), graph, exec_type);
         main_graph_facade->addNode(src1);
 
-        NodeFacadeImplementationPtr src2 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src2"), graph, exec_type);
+        NodeFacadeImplementationPtr src2 = makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src2"), graph, exec_type);
         ASSERT_NE(nullptr, src2);
         main_graph_facade->addNode(src2);
 
 
-        NodeFacadeImplementationPtr combiner = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph, exec_type);
+        NodeFacadeImplementationPtr combiner = makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph, exec_type);
         ASSERT_NE(nullptr, combiner);
         main_graph_facade->addNode(combiner);
 
-        NodeFacadeImplementationPtr sink_p = factory.makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("Sink"), graph, exec_type);
+        NodeFacadeImplementationPtr sink_p = makeNode("MockupSink", UUIDProvider::makeUUID_without_parent("Sink"), graph, exec_type);
         main_graph_facade->addNode(sink_p);
         std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
         ASSERT_NE(nullptr, sink);
 
 
         // NESTED GRAPH
-        NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph, exec_type);
+        NodeFacadeImplementationPtr sub_graph_node_facade = makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph, exec_type);
         SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
         apex_assert_hard(sub_graph);
 
         GraphFacadeImplementation sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
-        NodeFacadeImplementationPtr m = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("m"), sub_graph->getLocalGraph(), exec_type);
+        NodeFacadeImplementationPtr m = makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("m"), sub_graph->getLocalGraph(), exec_type);
         ASSERT_NE(nullptr, m);
         sub_graph_facade.addNode(m);
 

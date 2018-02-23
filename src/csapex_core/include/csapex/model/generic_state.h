@@ -23,6 +23,8 @@ public:
 
 public:
     GenericState();
+    GenericState(const GenericState& move);
+    GenericState(GenericState&& move);
     GenericState::Ptr clone() const;
 
     void setParentUUID(const UUID& parent_uuid);
@@ -78,10 +80,10 @@ public:
 
     bool silent_;
 
-    std::shared_ptr<slim_signal::Signal<void()> > parameter_set_changed;
-    std::shared_ptr<slim_signal::Signal<void(param::ParameterPtr)> > parameter_added;
-    std::shared_ptr<slim_signal::Signal<void(param::Parameter*)>> parameter_changed;
-    std::shared_ptr<slim_signal::Signal<void(param::ParameterPtr)> > parameter_removed;
+    slim_signal::Signal<void()> parameter_set_changed;
+    slim_signal::Signal<void(param::ParameterPtr)> parameter_added;
+    slim_signal::Signal<void(param::Parameter*)> parameter_changed;
+    slim_signal::Signal<void(param::ParameterPtr)> parameter_removed;
 };
 
 }

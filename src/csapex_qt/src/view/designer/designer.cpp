@@ -224,7 +224,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     } else {
         tab = ui->tabWidget->addTab(graph_view, generateTitle(graph_facade.get()));
 
-        view_connections_[graph_view].emplace_back(graph_facade->getNodeFacade()->getNodeState()->label_changed->connect([this]() {
+        view_connections_[graph_view].emplace_back(graph_facade->getNodeFacade()->getNodeState()->label_changed.connect([this]() {
             for(int i = 0; i < ui->tabWidget->count(); ++i) {
                 GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(i));
                 if(view) {

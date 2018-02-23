@@ -69,17 +69,19 @@ TEST_F(SharedMemoryTest, EmptySubprocessCanBeJoined)
 
 TEST_F(SharedMemoryTest, OutputCanBeGrabbed)
 {
-    Subprocess sp("test");
-    sp.fork([](){
-        std::cerr << "B";
-        std::cout << "Foo" << std::endl;
-        std::cerr << "ar";
-    });
+    for(int i = 0; i < 16; ++i) {
+        Subprocess sp("test");
+        sp.fork([](){
+            std::cerr << "B";
+            std::cout << "Foo" << std::endl;
+            std::cerr << "ar";
+        });
 
-    sp.join();
+        sp.join();
 
-    ASSERT_EQ("Foo\n", sp.getChildStdOut());
-    ASSERT_EQ("Bar", sp.getChildStdErr());
+        ASSERT_EQ("Foo\n", sp.getChildStdOut());
+        ASSERT_EQ("Bar", sp.getChildStdErr());
+    }
 }
 
 
@@ -92,8 +94,8 @@ TEST_F(SharedMemoryTest, ReturnCode)
 
     Subprocess ret1("test");
     ret1.fork([]() -> int {
-        return 123;
-    });
+                  return 123;
+              });
 
     ASSERT_EQ(123, ret1.join());
 }
@@ -235,24 +237,24 @@ TEST_F(SharedMemoryTest, SequentialWriteIn)
 
     sp.fork([&sp](){
         {
-        SubprocessChannel::Message m = sp.in.read();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
+            SubprocessChannel::Message m = sp.in.read();
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
         }
         {
-        SubprocessChannel::Message m = sp.in.read();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
+            SubprocessChannel::Message m = sp.in.read();
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
         }
         {
-        SubprocessChannel::Message m = sp.in.read();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
+            SubprocessChannel::Message m = sp.in.read();
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
         }
         {
-        SubprocessChannel::Message m = sp.in.read();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
+            SubprocessChannel::Message m = sp.in.read();
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
         }
 
         sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});

@@ -22,8 +22,8 @@ class CSAPEX_CORE_EXPORT NodeState : public Memento, public Serializable
 
 public:
     typedef std::shared_ptr<NodeState> Ptr;
-    typedef slim_signal::Signal<void()> SignalImpl;
-    typedef std::shared_ptr< SignalImpl > Signal;
+    typedef slim_signal::Signal<void()> Signal;//Impl;
+//    typedef std::shared_ptr< SignalImpl > Signal;
 
     NodeState(const NodeHandle *parent);
     ~NodeState();

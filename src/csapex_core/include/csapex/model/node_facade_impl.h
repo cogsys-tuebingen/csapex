@@ -7,10 +7,9 @@
 namespace csapex
 {
 
-class CSAPEX_CORE_EXPORT NodeFacadeImplementation : public NodeFacade
+class CSAPEX_CORE_EXPORT NodeFacadeImplementation : public NodeFacade, public std::enable_shared_from_this<NodeFacadeImplementation>
 {
 public:
-    NodeFacadeImplementation(NodeHandlePtr nh, NodeWorkerPtr nw, NodeRunnerPtr nr);
     NodeFacadeImplementation(NodeHandlePtr nh);
     ~NodeFacadeImplementation();
 
@@ -104,10 +103,12 @@ public:
     NodeRunnerPtr getNodeRunner() const;
     NodePtr getNode() const;
 
-
     void replaceNodeWorker(NodeWorkerPtr worker);
+    NodeWorkerWeakPtr getNodeWorker() const;
 
 private:
+    void setupNode();
+    NodeWorkerPtr createNodeWorker();
     void setNodeWorker(NodeWorkerPtr worker);
 
     void connectNodeHandle();

@@ -27,7 +27,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
       waiting_for_step_(false),
       suppress_exceptions_(true)
 {
-    nh_->getNodeState()->max_frequency_changed->connect([this](){
+    nh_->getNodeState()->max_frequency_changed.connect([this](){
         max_frequency_ = nh_->getNodeState()->getMaximumFrequency();
 
         if(max_frequency_ > 0.0) {

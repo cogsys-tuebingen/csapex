@@ -1,0 +1,213 @@
+/* GLOBAL */
+* {
+   font-size: 8pt;
+}
+
+/* box labels */
+QFrame#boxframe QLabel#label {
+  font-weight: bold;
+}
+
+/* box */
+csapex--NodeBox QFrame#boxframe {
+        background: rgb(200, 220, 200);
+        border: 2px solid rgb(90, 135, 80);
+        border-radius: 24px;
+        padding: 0;
+}
+csapex--NodeBox[flipped="false"] QFrame#boxframe {
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 0px;
+}
+csapex--NodeBox[flipped="true"] QFrame#boxframe {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 0px;
+}
+
+
+csapex--NodeBox QFrame#boxframe QSizeGrip {
+        image: url(:/sizegrip.png);
+        width: 16px;
+        height: 16px;
+}
+
+csapex--NodeBox QFrame#boxframe QGroupBox {
+        font-weight: bold;
+        border: 2px solid rgba(0,0,0,0);
+        border-left: 2px solid rgba(0,0,0,40);
+        padding-left: 5px;
+        margin-top: 20px;
+}
+csapex--NodeBox[hidden="true"] QFrame#boxframe QGroupBox {
+        border: none;
+        margin-top: 0;
+}
+csapex--NodeBox QFrame#boxframe QGroupBox::title {
+        subcontrol-origin: margin;
+        padding: 0 0;
+}
+csapex--NodeBox QFrame#boxframe QGroupBox::indicator {
+        border-left: 2px solid rgba(0,0,0,0);
+}
+
+csapex--NodeBox QFrame#boxframe QGroupBox::indicator:unchecked {
+        image: url(:/show.png);
+}
+csapex--NodeBox QFrame#boxframe QGroupBox::indicator:checked {
+        image: url(:/hide.png);
+}
+
+csapex--NodeBox QFrame#boxframe QLabel[component="true"] {
+        border: 1px solid black;
+        font-size: 8pt;
+        border-radius: 5px;
+        padding: 0px;
+        font-weight: bold;
+}
+csapex--NodeBox QFrame#boxframe QLabel[threadgroup="true"] {
+        border: 1px dotted black;
+        font-size: 8pt;
+        border-radius: 5px;
+        padding: 0px;
+        font-weight: bold;
+}
+csapex--NodeBox QFrame#boxframe QLabel[custom="true"] {
+        border: 1px solid black;
+        border-radius: 5px;
+        padding: 1px;
+        font-weight: bold;
+}
+
+csapex--NodeBox QCheckBox::indicator:unchecked {
+     image: url(:/checkbox_unchecked.png);
+ }
+
+csapex--NodeBox  QCheckBox::indicator:checked {
+     image: url(:/checkbox_checked.png);
+ }
+
+/* minimized box */
+csapex--NodeBox[content_minimized="true"] QFrame#boxframe {
+}
+
+/* error box */
+csapex--NodeBox[error="true"] QFrame#boxframe {
+        background: rgb(255, 100, 100);
+        border-color: rgb(100,0,0);
+}
+
+/* warning box */
+csapex--NodeBox[warning="true"] QFrame#boxframe {
+        background: rgb(240, 230, 200);
+        border-color: rgb(255,200,0);
+}
+
+/* blocked box */
+csapex--NodeBox[blocked="true"] QFrame#boxframe {
+}
+
+/* subprocess box */
+csapex--NodeBox[subprocess="true"] QFrame#boxframe {
+        border-style: dotted;
+}
+
+/* selected box */
+csapex--NodeBox[focused="true"] QFrame#boxframe {
+        background: rgb(140, 180, 140);
+        border: 2px solid rgb(70, 115, 60);
+}
+
+csapex--NodeBox[focused="true"][error="true"] QFrame#boxframe {
+        background: rgb(255, 150, 150);
+        border-color: rgb(100,0,0);
+}
+
+
+/* disabled box */
+csapex--NodeBox[disabled="true"] QFrame#boxframe {
+        background: rgb(200,200,200)
+}
+csapex--NodeBox[disabled="true"] QFrame#boxframe  QLabel {
+}
+/* active box */
+csapex--NodeBox[active="true"] QFrame#boxframe {
+        border-width: 5px;
+}
+
+/* note */
+csapex--StickyNoteBox {
+        padding: 0;
+}
+csapex--StickyNoteBox[focused="true"] {
+}
+csapex--StickyNoteBox QSizeGrip {
+        background: rgba(0, 0, 0, 0);
+        width: 16px;
+        height: 16px;
+}
+
+csapex--StickyNoteBox QTextEdit {
+        background: rgba(0, 0, 0, 0);
+        border: 0;
+        padding: 0;
+	margin: 0;
+	font: bold 12px;	
+}
+/* connectors */
+csapex--Port {
+        /*border: 1px solid rgb(200, 200, 200);
+        background: rgb(255,255,255);
+        border-radius: 8px;*/
+}
+csapex--Port[dynamic="true"] {
+        border: 2px solid rgb(0, 0, 0);
+        background: rgb(255,255,255);
+        border-radius: 0px;
+}
+csapex--Port[disabled="true"]  {
+        border: 2px solid rgb(128, 128, 128);
+        background: rgb(200,200,200);
+}
+csapex--Port[error="true"]  {
+        border: 2px solid rgb(165,30,55);
+        background: rgb(255,200,200);
+        border-radius: 8px;
+}
+csapex--Port[type="input"]  {
+        image: url(:/port_input.png);
+}
+csapex--Port[type="output"]  {
+        image: url(:/port_output.png);
+}
+csapex--Port[type="event"]  {
+        image: url(:/port_event.png);
+}
+csapex--Port[type="slot"]  {
+        image: url(:/port_slot.png);
+}
+csapex--Port[optional="true"]  {
+        image: url(:/port_input_optional.png);
+}
+csapex--Port[blocked="true"]  {
+        border: 2px solid rgb(255,200,0)!important;
+}
+
+csapex--MetaPort {
+        image: url(:/add.png);
+}
+
+csapex--PortPanel {
+        background: rgb(200, 220, 200);
+        border: 1px solid rgb(90, 135, 80);
+        padding: 0;
+}
+
+/* connection */
+csapex--GraphView  {
+        qproperty-lineColor: rgb(0,0,0);
+        qproperty-lineColorError: rgb(255,0,0);
+        qproperty-lineColorBlocked: rgb(255,200,0);
+        qproperty-lineColorDisabled: rgb(200,200,200);
+        qproperty-lineWidth: 5;
+        qproperty-balloonColor: rgb(90, 135, 80);
+}

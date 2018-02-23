@@ -309,7 +309,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         QPointer<QHBoxLayout> layout_ptr(new QHBoxLayout);
         current_layout_ = layout_ptr;
         setDirection(current_layout_, node_facade);
-        node_facade->getNodeState()->flipped_changed->connect([this, layout_ptr](){
+        node_facade->getNodeState()->flipped_changed.connect([this, layout_ptr](){
             if(!layout_ptr.isNull()) {
                 if(auto node = node_.lock()) {
                     setDirection(layout_ptr, node);

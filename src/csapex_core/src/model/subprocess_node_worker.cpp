@@ -47,7 +47,7 @@ using namespace csapex;
 SubprocessNodeWorker::SubprocessNodeWorker(NodeHandlePtr node_handle)
     : NodeWorker(node_handle),
       pid_(-1),
-      subprocess_(node_handle->getUUID().getFullName())
+      subprocess_(new Subprocess(node_handle->getUUID().getFullName()))
 {
 }
 
@@ -57,21 +57,25 @@ void SubprocessNodeWorker::initialize()
     connection_types::GenericVectorMessage::registerType<connection_types::GenericValueMessage<int>>();
     connection_types::GenericVectorMessage::registerType<connection_types::GenericValueMessage<int>>(connection_types::type<connection_types::GenericValueMessage<int>>::name());
 
-    pid_ = subprocess_.fork([this](){
+    pid_ = subprocess_->fork([this](){
         runSubprocessLoop();
     });
 
     observe(node_handle_->connector_created, [this](ConnectablePtr c, bool internal){
         if(!internal) {
-            SerializationBuffer msg;
-            c->getDescription().serialize(msg);
-            subprocess_.in.write({SubprocessChannel::MessageType::PORT_ADD, msg.data(), msg.size()});
+            node_handle_->execution_requested([this, c](){
+                SerializationBuffer msg;
+                c->getDescription().serialize(msg);
+                subprocess_->in.write({SubprocessChannel::MessageType::PORT_ADD, msg.data(), msg.size()});
+            });
         }
     });
     observe(node_handle_->node_state_changed, [this](){
-        SerializationBuffer msg;
-        getNodeHandle()->getNodeState()->serialize(msg);
-        subprocess_.in.write({SubprocessChannel::MessageType::NODE_STATE_CHANGED, msg.data(), msg.size()});
+        node_handle_->execution_requested([this](){
+            SerializationBuffer msg;
+            getNodeHandle()->getNodeState()->serialize(msg);
+            subprocess_->in.write({SubprocessChannel::MessageType::NODE_STATE_CHANGED, msg.data(), msg.size()});
+        });
     });
 
     NodeWorker::initialize();
@@ -87,10 +91,10 @@ void SubprocessNodeWorker::runSubprocessLoop()
             changed_parameters_.push_back(p);
         });
 
-        while(subprocess_.isActive()) {
+        while(subprocess_->isActive()) {
 
             // wait for a message
-            SubprocessChannel::Message msg = subprocess_.in.read();
+            SubprocessChannel::Message msg = subprocess_->in.read();
             if(msg.type == SubprocessChannel::MessageType::SHUTDOWN) {
                 return;
             }
@@ -171,6 +175,8 @@ void SubprocessNodeWorker::runSubprocessLoop()
 
 void SubprocessNodeWorker::handleProcessChild(const SubprocessChannel::Message& msg)
 {
+    handleChangedParameters();
+
     NodePtr node = getNode();
 
     apex_assert_hard(node->canRunInSeparateProcess());
@@ -254,7 +260,7 @@ void SubprocessNodeWorker::finishHandleProcessChild()
         node->aerr << "unknown error in subprocess" << std::endl;
     }
 
-    subprocess_.out.write({SubprocessChannel::MessageType::PROCESS_FINISHED, result_emitter.c_str()});
+    subprocess_->out.write({SubprocessChannel::MessageType::PROCESS_FINISHED, result_emitter.c_str()});
 }
 
 SubprocessNodeWorker::~SubprocessNodeWorker()
@@ -314,9 +320,9 @@ void SubprocessNodeWorker::processNode()
 
         } else {
             async_future_ = std::async(std::launch::async, [this](){
-               startSubprocess(SubprocessChannel::MessageType::PROCESS_ASYNC);
-               finishSubprocess();
-               finishProcessing();
+                startSubprocess(SubprocessChannel::MessageType::PROCESS_ASYNC);
+                finishSubprocess();
+                finishProcessing();
             });
         }
 
@@ -356,16 +362,18 @@ void SubprocessNodeWorker::startSubprocess(const SubprocessChannel::MessageType 
     YAML::Emitter emitter;
     emitter << yaml;
 
-    subprocess_.in.write({type, emitter.c_str()});
+    subprocess_->in.write({type, emitter.c_str()});
 }
+
 void SubprocessNodeWorker::finishSubprocess()
 {
     bool done_processing = false;
+    bool crashed = false;
 
     // wait for the end of processing
 
     while(!done_processing) {
-        SubprocessChannel::Message msg = subprocess_.out.read();
+        SubprocessChannel::Message msg = subprocess_->out.read();
         switch(msg.type)
         {
         case SubprocessChannel::MessageType::PARAMETER_UPDATE:
@@ -378,32 +386,57 @@ void SubprocessNodeWorker::finishSubprocess()
             break;
 
         case SubprocessChannel::MessageType::CHILD_SIGNAL:
-            getNode()->aerr << "Child has raised signal: " << strsignal(atoi(msg.toString().c_str())) << std::endl;
+            setError(true, std::string("Child has raised signal: ") + strsignal(atoi(msg.toString().c_str())), ErrorLevel::ERROR);
+            crashed = true;
             done_processing = true;
             break;
 
         case SubprocessChannel::MessageType::CHILD_EXIT:
-            getNode()->aerr << "Child unexpectedly quit" << std::endl;
+            setError(true, "Child unexpectedly quit", ErrorLevel::ERROR);
+            crashed = true;
             done_processing = true;
             break;
 
         default:
-            getNode()->awarn << "Unhandled subprocess message: " << (int) msg.type << std::endl;
+            setError(true, std::string("Unhandled subprocess message: ") + std::to_string((int) msg.type ), ErrorLevel::WARNING);
             break;
         }
+    }
+
+    if(crashed) {
+        getNode()->aerr << "*** node crashed! ***" << std::endl;
+
+        std::string out = subprocess_->getChildStdOut();
+        if(!out.empty()) {
+            getNode()->aerr << "*** STDOUT: ***" << std::endl;
+            getNode()->aerr << out << std::endl;
+        }
+
+        std::string err = subprocess_->getChildStdErr();
+        if(!err.empty()) {
+            getNode()->aerr << "*** STDERR: ***" << std::endl;
+            getNode()->aerr << err << std::endl;
+        }
+
+        getNode()->aerr << "*** restarting subprocess ***" << std::endl;
+
+        subprocess_.reset(new Subprocess(getUUID().getFullName()));
+        pid_ = subprocess_->fork([this](){
+            runSubprocessLoop();
+        });
     }
 }
 
 void SubprocessNodeWorker::finishProcessing()
 {
-//    finishSubprocess();
+    //    finishSubprocess();
 
     NodeWorker::finishProcessing();
 }
 
 void SubprocessNodeWorker::transmitParameter(const param::ParameterPtr &p)
 {
-    SubprocessChannel& channel = subprocess_.isChild() ? subprocess_.out : subprocess_.in;
+    SubprocessChannel& channel = subprocess_->isChild() ? subprocess_->out : subprocess_->in;
 
     SerializationBuffer buffer = PacketSerializer::serializePacket(p);
 

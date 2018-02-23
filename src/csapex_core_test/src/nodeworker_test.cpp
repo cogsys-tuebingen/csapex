@@ -33,10 +33,12 @@ class NodeWorkerTest : public SteppingTest
 
 };
 
-void runTest(NodeFacadeImplementationPtr node_facade)
+void runTest(NodeFacadeImplementationPtr node_facade, int value = 23)
 {
     Node& node = *node_facade->getNode();
     NodeHandle& nh = *node_facade->getNodeHandle();
+    NodeWorkerPtr nw = node_facade->getNodeWorker().lock();
+    ASSERT_NE(nullptr, nw);
 
     ASSERT_TRUE(node.canProcess());
     ASSERT_FALSE(node_facade->isProcessing());
@@ -52,7 +54,7 @@ void runTest(NodeFacadeImplementationPtr node_facade)
     ConnectionPtr connection = DirectConnection::connect(tmp_out, input);
 
     // set the input message
-    msg::publish(tmp_out.get(), 23);
+    msg::publish(tmp_out.get(), value);
 
     // mark the messages as committed
     tmp_out->commitMessages(false);
@@ -76,10 +78,14 @@ void runTest(NodeFacadeImplementationPtr node_facade)
     TokenDataConstPtr data_out = token_out->getTokenData();
     ASSERT_NE(nullptr, data_out);
 
+    output->notifyMessageProcessed();
+
     auto msg_out = std::dynamic_pointer_cast<connection_types::GenericValueMessage<int> const>(data_out);
     ASSERT_NE(nullptr, msg_out);
 
-    ASSERT_EQ(23 * 4, msg_out->value);
+    ASSERT_EQ(value * 4, msg_out->value);
+
+    input->removeConnection(tmp_out.get());
 }
 
 
@@ -89,23 +95,31 @@ TEST_F(NodeWorkerTest, NodeWorkerProcessing)
                                                            UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
                                                            graph);
 
-    runTest(times_4);
+    runTest(times_4, 23);
+    runTest(times_4, 42);
 }
 
 
 TEST_F(NodeWorkerTest, NodeWorkerCanBeSetOnInitialization)
 {
-    NodeFacadeImplementationPtr direct_times_4 = factory.makeNode("StaticMultiplier4",
-                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                           graph,
-                                                           ExecutionType::DIRECT);
-    ASSERT_EQ(ExecutionType::DIRECT, direct_times_4->getNodeState()->getExecutionType());
-
-    NodeFacadeImplementationPtr sp_times_4 = factory.makeNode("StaticMultiplier4",
-                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                           graph,
-                                                           ExecutionType::SUBPROCESS);
-    ASSERT_EQ(ExecutionType::SUBPROCESS, sp_times_4->getNodeState()->getExecutionType());
+    {
+        NodeStatePtr state = std::make_shared<NodeState>(nullptr);
+        state->setExecutionType(ExecutionType::DIRECT);
+        NodeFacadeImplementationPtr direct_times_4 = factory.makeNode("StaticMultiplier4",
+                                                                      UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
+                                                                      graph,
+                                                                      state);
+        ASSERT_EQ(ExecutionType::DIRECT, direct_times_4->getNodeState()->getExecutionType());
+    }
+    {
+        NodeStatePtr state = std::make_shared<NodeState>(nullptr);
+        state->setExecutionType(ExecutionType::SUBPROCESS);
+        NodeFacadeImplementationPtr sp_times_4 = factory.makeNode("StaticMultiplier4",
+                                                                  UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
+                                                                  graph,
+                                                                  state);
+        ASSERT_EQ(ExecutionType::SUBPROCESS, sp_times_4->getNodeState()->getExecutionType());
+    }
 }
 
 TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedAfterConstruction)
@@ -116,41 +130,92 @@ TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedAfterConstruction)
 
     times_4->replaceNodeWorker(std::make_shared<DirectNodeWorker>(times_4->getNodeHandle()));
 
-    runTest(times_4);
+    runTest(times_4, 23);
+    runTest(times_4, 42);
 }
 
 TEST_F(NodeWorkerTest, DirectNodeWorkerWorks)
 {
+    NodeStatePtr state = std::make_shared<NodeState>(nullptr);
+    state->setExecutionType(ExecutionType::DIRECT);
     NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
                                                            UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
                                                            graph,
-                                                           ExecutionType::DIRECT);
+                                                           state);
 
-    runTest(times_4);
+    runTest(times_4, 23);
+    runTest(times_4, 42);
 }
 
 
 TEST_F(NodeWorkerTest, SubprocessNodeWorkerWorks)
 {
+    NodeStatePtr state = std::make_shared<NodeState>(nullptr);
+    state->setExecutionType(ExecutionType::SUBPROCESS);
     NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
                                                            UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
                                                            graph,
-                                                           ExecutionType::SUBPROCESS);
+                                                           state);
 
-    runTest(times_4);
+    runTest(times_4, 23);
+    runTest(times_4, 42);
 }
 
 TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedOnTheFly)
 {
-    // TODO
+    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
+                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
+                                                           graph);
+
+    runTest(times_4, 23);
+
+    times_4->replaceNodeWorker(std::make_shared<SubprocessNodeWorker>(times_4->getNodeHandle()));
+
+    runTest(times_4, 42);
 }
+
+TEST_F(NodeWorkerTest, ChangingNodeWorkerDoesNotChangePorts)
+{
+    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
+                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
+                                                           graph);
+
+    int inputs = times_4->getInputs().size();
+    int outputs = times_4->getOutputs().size();
+    int events = times_4->getEvents().size();
+    int slots_ = times_4->getSlots().size();
+
+    ASSERT_EQ(inputs , times_4->getNodeHandle()->getExternalInputs().size());
+    ASSERT_EQ(outputs, times_4->getNodeHandle()->getExternalOutputs().size());
+    ASSERT_EQ(events , times_4->getNodeHandle()->getExternalEvents().size());
+    ASSERT_EQ(slots_ , times_4->getNodeHandle()->getExternalSlots().size());
+
+    times_4->replaceNodeWorker(std::make_shared<SubprocessNodeWorker>(times_4->getNodeHandle()));
+
+    ASSERT_EQ(inputs , times_4->getNodeHandle()->getExternalInputs().size());
+    ASSERT_EQ(outputs, times_4->getNodeHandle()->getExternalOutputs().size());
+    ASSERT_EQ(events , times_4->getNodeHandle()->getExternalEvents().size());
+    ASSERT_EQ(slots_ , times_4->getNodeHandle()->getExternalSlots().size());
+
+    ASSERT_EQ(inputs , times_4->getInputs().size());
+    ASSERT_EQ(outputs, times_4->getOutputs().size());
+    ASSERT_EQ(events , times_4->getEvents().size());
+    ASSERT_EQ(slots_ , times_4->getSlots().size());
+}
+
 TEST_F(NodeWorkerTest, SubprocessNodeWorkerCanHandleSegmentationFault)
 {
     // TODO
 }
+
 TEST_F(NodeWorkerTest, SubprocessNodeWorkerReceivesErrorMessagesFromSubprocess)
 {
     // TODO
+}
+
+TEST_F(NodeWorkerTest, SubprocessNodeWorkerForwardsParameterUpdates)
+{
+    // TODO: currently changed parameters are not forwarded!
 }
 }
 

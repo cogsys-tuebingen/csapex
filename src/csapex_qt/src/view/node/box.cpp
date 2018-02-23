@@ -447,7 +447,7 @@ void NodeBox::init()
 {
     NodeStatePtr state = node_facade_->getNodeState();
     updatePosition();
-    (*state->pos_changed)();
+    (state->pos_changed)();
 
     setVisible(true);
 }
@@ -809,8 +809,9 @@ void NodeBox::updateVisuals()
 
     NodeStatePtr state = node_facade_->getNodeState();
 
-    bool flip = state->isFlipped();
+    setProperty("subprocess", state->getExecutionType() == ExecutionType::SUBPROCESS);
 
+    bool flip = state->isFlipped();
     setProperty("flipped", flip);
 
     if(ui && ui->boxframe) {

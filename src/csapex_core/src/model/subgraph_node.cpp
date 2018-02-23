@@ -68,7 +68,7 @@ void SubgraphNode::initialize(NodeHandlePtr node_handle)
     }
 }
 
-void SubgraphNode::setNodeFacade(csapex::NodeFacadeImplementationPtr graph_node_facade)
+void SubgraphNode::setNodeFacade(csapex::NodeFacadeImplementation* graph_node_facade)
 {
     graph_->setNodeFacade(graph_node_facade);
 }
