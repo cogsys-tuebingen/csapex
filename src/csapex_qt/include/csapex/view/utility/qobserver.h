@@ -132,7 +132,7 @@ public:
 
                 observation_queue_.emplace_back([=](){
 #if USE_GCC47_WORKAROUND
-                    gcc47::call(typename gcc47::generateSequence<sizeof...(Args)+1>::type(), instance, function, args_tuple);
+                    gcc47::call(typename gcc47::generateSequence<sizeof...(Args)>::type(), instance, function, args_tuple);
 #else  //USE_GCC47_WORKAROUND
                     (instance->*function)(args...);
 #endif //USE_GCC47_WORKAROUND
