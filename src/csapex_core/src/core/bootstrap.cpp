@@ -35,33 +35,35 @@ void Bootstrap::bootFrom(const std::string& dir_name,
 {
     boost::filesystem::path directory(dir_name);
 
-    boost::filesystem::directory_iterator dir(directory);
-    boost::filesystem::directory_iterator end;
+    if(boost::filesystem::exists(directory)) {
+        boost::filesystem::directory_iterator dir(directory);
+        boost::filesystem::directory_iterator end;
 
-    for(; dir != end; ++dir) {
-        boost::filesystem::path path = dir->path();
+        for(; dir != end; ++dir) {
+            boost::filesystem::path path = dir->path();
 
-        Bootstrap::boot_plugin_loaders_.push_back(new class_loader::ClassLoader(path.string()));
-        class_loader::ClassLoader* loader = Bootstrap::boot_plugin_loaders_.back();
+            Bootstrap::boot_plugin_loaders_.push_back(new class_loader::ClassLoader(path.string()));
+            class_loader::ClassLoader* loader = Bootstrap::boot_plugin_loaders_.back();
 
-        try {
-            apex_assert_hard(loader->isLibraryLoaded());
-            std::vector<std::string> classes = loader->getAvailableClasses<BootstrapPlugin>();
-            for(std::size_t c = 0; c < classes.size(); ++c){
-                auto boost_plugin = loader->createInstance<BootstrapPlugin>(classes[c]);
-                std::shared_ptr<BootstrapPlugin> plugin = shared_ptr_tools::to_std_shared(boost_plugin);
-                Bootstrap::boot_plugins_.push_back(plugin);
+            try {
+                apex_assert_hard(loader->isLibraryLoaded());
+                std::vector<std::string> classes = loader->getAvailableClasses<BootstrapPlugin>();
+                for(std::size_t c = 0; c < classes.size(); ++c){
+                    auto boost_plugin = loader->createInstance<BootstrapPlugin>(classes[c]);
+                    std::shared_ptr<BootstrapPlugin> plugin = shared_ptr_tools::to_std_shared(boost_plugin);
+                    Bootstrap::boot_plugins_.push_back(plugin);
 
-                plugin->boot(plugin_locator);
+                    plugin->boot(plugin_locator);
+                }
+            } catch(const std::exception& e) {
+                std::cerr << "boot plugin " << path << " failed: " << e.what() << std::endl;
+                std::abort();
             }
-        } catch(const std::exception& e) {
-            std::cerr << "boot plugin " << path << " failed: " << e.what() << std::endl;
-            std::abort();
         }
     }
 
     if (Bootstrap::boot_plugins_.empty()) {
-        std::cerr << "there is no boot plugin in directory " << dir_name << '\n';
+        std::cerr << "SEVERE WARNING: there is no boot plugin in directory " << dir_name << '\n';
         std::cerr << "please create it by either" << '\n';
         std::cerr << "a) running the following command:" << '\n';
         std::cerr << "   for dir in ${LD_LIBRARY_PATH//:/ }; do \\\n"
@@ -71,6 +73,5 @@ void Bootstrap::bootFrom(const std::string& dir_name,
         std::cerr << "b) creating a link by hand in ~/.csapex/boot/ to the library 'libcsapex_ros_boot.so' " << '\n';
         std::cerr << "c) recompiling csapex_ros" << '\n';
         std::cerr << std::flush;
-        std::abort();
     }
 }

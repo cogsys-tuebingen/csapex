@@ -17,30 +17,8 @@ namespace bf3 = boost::filesystem3;
 
 using namespace csapex;
 
-int main(int argc, char *argv[])
+bool run_tests(CsApexCore& core, const std::vector<bf3::path>& reg_test_files)
 {
-    ExceptionHandler eh(false);
-    SettingsImplementation settings;
-
-    std::string path_to_bin(argv[0]);
-    settings.set("path_to_bin", path_to_bin);
-
-    CsApexCore core(settings, eh);
-    PluginLocatorPtr locator = core.getPluginLocator();
-
-    std::vector<bf3::path> reg_test_files;
-    for(const std::string& dir_string : locator->getPluginPaths("regression_tests")) {
-
-        boost::filesystem::path directory(dir_string);
-
-        boost::filesystem::directory_iterator dir(directory);
-        boost::filesystem::directory_iterator end;
-
-        for(; dir != end; ++dir) {
-            boost::filesystem::path path = dir->path();
-            reg_test_files.push_back(path);
-        }
-    }
 
     bool error_happened = false;
 
@@ -114,5 +92,33 @@ int main(int argc, char *argv[])
         }
     }
 
-    return error_happened ? 1 : 0;
+   return error_happened;
+}
+
+int main(int argc, char *argv[])
+{
+    ExceptionHandler eh(false);
+    SettingsImplementation settings;
+
+    std::string path_to_bin(argv[0]);
+    settings.set("path_to_bin", path_to_bin);
+
+    CsApexCore core(settings, eh);
+    PluginLocatorPtr locator = core.getPluginLocator();
+
+    std::vector<bf3::path> reg_test_files;
+    for(const std::string& dir_string : locator->getPluginPaths("regression_tests")) {
+
+        boost::filesystem::path directory(dir_string);
+
+        boost::filesystem::directory_iterator dir(directory);
+        boost::filesystem::directory_iterator end;
+
+        for(; dir != end; ++dir) {
+            boost::filesystem::path path = dir->path();
+            reg_test_files.push_back(path);
+        }
+    }
+
+    return run_tests(core, reg_test_files) ? 1 : 0;
 }
