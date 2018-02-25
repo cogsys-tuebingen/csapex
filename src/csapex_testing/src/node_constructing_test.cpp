@@ -30,6 +30,10 @@ template <int factor>
 NodePtr makeStaticMultiplier() {
     return NodePtr(new NodeWrapper<MockupStaticMultiplierNode<factor>>());
 }
+template <int factor>
+NodePtr makeAsyncStaticMultiplier() {
+    return NodePtr(new NodeWrapper<MockupAsyncStaticMultiplierNode<factor>>());
+}
 template <typename T>
 NodePtr makeNode() {
     return NodePtr(new T());
@@ -44,6 +48,7 @@ NodeConstructingTest::NodeConstructingTest()
 {
     factory.registerNodeType(std::make_shared<NodeConstructor>("StaticMultiplier", std::bind(&detail::makeStaticMultiplier<2>)));
     factory.registerNodeType(std::make_shared<NodeConstructor>("StaticMultiplier4", std::bind(&detail::makeStaticMultiplier<4>)));
+    factory.registerNodeType(std::make_shared<NodeConstructor>("AsyncStaticMultiplier4", std::bind(&detail::makeAsyncStaticMultiplier<4>)));
     factory.registerNodeType(std::make_shared<NodeConstructor>("StaticMultiplier7", std::bind(&detail::makeStaticMultiplier<7>)));
     factory.registerNodeType(std::make_shared<NodeConstructor>("DynamicMultiplier", std::bind(&detail::makeNode<NodeWrapper<MockupDynamicMultiplierNode>>)));
     factory.registerNodeType(std::make_shared<NodeConstructor>("MockupSource", std::bind(&detail::makeNode<MockupSource>)));

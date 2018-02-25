@@ -204,9 +204,11 @@ void NodeRunner::execute()
         can_step_--;
 
         try {
-            if(!worker_->execute()) {
-                //TRACE worker_->getNode()->ainfo << "execute failed" << std::endl;
-                can_step_++;
+            if(worker_->canExecute()) {
+                if(!worker_->startProcessingMessages()) {
+                    //TRACE worker_->getNode()->ainfo << "execute failed" << std::endl;
+                    can_step_++;
+                }
             }
         } catch(const std::exception& e) {
             if(!suppress_exceptions_)

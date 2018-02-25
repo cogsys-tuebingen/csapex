@@ -47,7 +47,7 @@ CSAPEX_CORE_EXPORT void throwError(const TokenDataConstPtr& msg, const std::type
 
 CSAPEX_CORE_EXPORT void trigger(Event* event);
 CSAPEX_CORE_EXPORT void trigger(Event* event, const TokenPtr& token);
-CSAPEX_CORE_EXPORT void triggerWith(Event* event, const TokenPtr& token);
+CSAPEX_CORE_EXPORT void trigger(Event* event, const TokenDataConstPtr& token_data);
 
 
 /// CASTING

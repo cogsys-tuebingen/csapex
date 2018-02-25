@@ -110,6 +110,11 @@ void SubprocessNodeWorker::runSubprocessLoop()
                 handleProcessChild(msg);
                 break;
 
+
+            case SubprocessChannel::MessageType::PROCESS_SLOT:
+                handleProcessSlotChild(msg);
+                break;
+
             case SubprocessChannel::MessageType::NODE_STATE_CHANGED:
                 node->stateChanged();
                 break;
@@ -217,6 +222,37 @@ void SubprocessNodeWorker::handleProcessChild(const SubprocessChannel::Message& 
     }
 }
 
+
+void SubprocessNodeWorker::handleProcessSlotChild(const SubprocessChannel::Message& msg)
+{
+    handleChangedParameters();
+
+    NodePtr node = getNode();
+    apex_assert_hard(node->canRunInSeparateProcess());
+
+    try {
+        if(msg.data) {
+            YAML::Node yaml = YAML::Load(msg.toString());
+            UUID uuid = yaml["uuid"].as<UUID>();
+            auto msg = MessageSerializer::deserializeMessage(yaml["data"]);
+
+            SlotPtr slot = node_handle_->getSlot(uuid);
+            apex_assert_hard_msg(slot, std::string("could not get slot ") + uuid.getFullName());
+
+            slot->setToken(std::make_shared<Token>(msg));
+            slot->handleEvent();
+        }
+
+    } catch(const std::exception& e) {
+        node->aerr << "handleProcessSlotChild: " << e.what() << std::endl;
+    } catch(const Failure& f) {
+        node->aerr << "handleProcessSlotChild failure: " << f.what() << std::endl;
+    } catch(...) {
+        node->aerr << "unknown error in handleProcessSlotChild" << std::endl;
+    }
+    finishHandleProcessChild();
+}
+
 void SubprocessNodeWorker::finishHandleProcessChild()
 {
     NodePtr node = getNode();
@@ -250,15 +286,33 @@ void SubprocessNodeWorker::finishHandleProcessChild()
             }
         }
 
+        for(EventPtr& event: node_handle_->getExternalEvents()) {
+            auto msg = event->getAddedToken();
+
+            if(msg) {
+                YAML::Node node(YAML::NodeType::Map);
+                node["uuid"] = event->getUUID();
+                // TODO serialize token! (+ activity, ...)
+                node["data"] = MessageSerializer::serializeMessage(*msg->getTokenData());
+
+                YAML::Emitter emitter;
+                emitter << node;
+
+                yaml.push_back(node);
+            }
+        }
+
         result_emitter << yaml;
 
     } catch(const std::exception& e) {
-        node->aerr << "subprocess: " << e.what() << std::endl;
+        node->aerr << "finishHandleProcessChild: " << e.what() << std::endl;
     } catch(const Failure& f) {
-        node->aerr << "subprocess failure: " << f.what() << std::endl;
+        node->aerr << "finishHandleProcessChild failure: " << f.what() << std::endl;
     } catch(...) {
-        node->aerr << "unknown error in subprocess" << std::endl;
+        node->aerr << "unknown error in finishHandleProcessChild" << std::endl;
     }
+
+    subprocess_->flush();
 
     subprocess_->out.write({SubprocessChannel::MessageType::PROCESS_FINISHED, result_emitter.c_str()});
 }
@@ -292,10 +346,14 @@ void SubprocessNodeWorker::handleProcessParent(const SubprocessChannel::Message&
             UUID uuid = node["uuid"].as<UUID>();
             auto msg = MessageSerializer::deserializeMessage(node["data"]);
 
-            OutputPtr output = node_handle_->getOutput(uuid);
-            YAML::Emitter emitter;
-            emitter << node["data"];
-            msg::publish(output.get(), msg);
+            ConnectorPtr connector = node_handle_->getConnector(uuid);
+            if(OutputPtr output = std::dynamic_pointer_cast<Output>(connector)) {
+                msg::publish(output.get(), msg);
+
+            } else if(EventPtr event = std::dynamic_pointer_cast<Event>(connector)){
+                TokenPtr token = std::make_shared<Token>(msg);
+                event->triggerWith(token);
+            }
         };
     }
 }
@@ -365,6 +423,47 @@ void SubprocessNodeWorker::startSubprocess(const SubprocessChannel::MessageType 
     subprocess_->in.write({type, emitter.c_str()});
 }
 
+void SubprocessNodeWorker::processSlot(const SlotWeakPtr &slot_w)
+{
+    apex_assert_msg(pid_ != 0, "processSlot called in subprocess");
+
+    SlotPtr slot = slot_w.lock();
+    apex_assert_hard(slot);
+
+    try {
+        startSubprocessSlot(slot);
+
+    } catch(const std::exception& e) {
+        setError(true, e.what());
+    } catch(const Failure& f) {
+        throw f;
+    } catch(...) {
+        throw Failure("Unknown exception caught in SubprocessNodeWorker.");
+    }
+}
+
+void SubprocessNodeWorker::startSubprocessSlot(const SlotPtr& slot)
+{
+    TokenPtr token = slot->getToken();
+    apex_assert_hard(token);
+
+    auto msg = msg::getMessage(slot.get());
+
+    if(msg) {
+        YAML::Node yaml(YAML::NodeType::Map);
+        yaml["uuid"] = slot->getUUID();
+        // TODO serialize token! (+ activity, ...)
+        yaml["data"] = MessageSerializer::serializeMessage(*msg);
+
+        YAML::Emitter emitter;
+        emitter << yaml;
+
+        subprocess_->in.write({SubprocessChannel::MessageType::PROCESS_SLOT, emitter.c_str()});
+
+        finishSubprocess();
+    }
+}
+
 void SubprocessNodeWorker::finishSubprocess()
 {
     bool done_processing = false;
@@ -424,6 +523,17 @@ void SubprocessNodeWorker::finishSubprocess()
         pid_ = subprocess_->fork([this](){
             runSubprocessLoop();
         });
+
+    } else {
+        std::string out = subprocess_->getChildStdOut();
+        if(!out.empty()) {
+            getNode()->ainfo << out << std::endl;
+        }
+
+        std::string err = subprocess_->getChildStdErr();
+        if(!err.empty()) {
+            getNode()->aerr << err << std::endl;
+        }
     }
 }
 

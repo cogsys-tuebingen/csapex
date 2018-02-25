@@ -23,6 +23,7 @@ public:
         NONE,
         PROCESS_SYNC,
         PROCESS_ASYNC,
+        PROCESS_SLOT,
         PROCESS_FINISHED,
 
         PARAMETER_UPDATE,

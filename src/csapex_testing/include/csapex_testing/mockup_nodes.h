@@ -5,7 +5,9 @@
 #include <csapex/model/node.h>
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/model/node_modifier.h>
+#include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/io.h>
+#include <csapex/model/token.h>
 
 namespace csapex
 {
@@ -37,6 +39,39 @@ public:
 private:
     Input* in;
     Output* out;
+};
+
+template <int factor>
+class MockupAsyncStaticMultiplierNode
+{
+public:
+    void setup(NodeModifier& node_modifier)
+    {
+        in = node_modifier.addTypedSlot<connection_types::GenericValueMessage<int>>("input", [this](TokenPtr token) {
+            processSlot(token);
+        });
+        out = node_modifier.addEvent("output");
+    }
+
+    void processSlot(TokenPtr token)
+    {
+        auto input_msg = std::dynamic_pointer_cast<connection_types::GenericValueMessage<int> const>(token->getTokenData());
+        TokenDataConstPtr value_msg = std::make_shared<connection_types::GenericValueMessage<int>>(input_msg->value * factor);
+        msg::trigger(out, value_msg);
+    }
+
+    void setupParameters(Parameterizable& /*parameters*/)
+    {
+
+    }
+
+    void process(NodeModifier& /*node_modifier*/, Parameterizable& /*parameters*/)
+    {
+    }
+
+private:
+    Slot* in;
+    Event* out;
 };
 
 

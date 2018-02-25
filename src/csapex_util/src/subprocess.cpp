@@ -85,6 +85,8 @@ bool Subprocess::isParent() const
 void Subprocess::handleSignal(int signal)
 {
     if(active_) {
+        flush();
+
         close(pipe_in[0]);
         close(pipe_out[1]);
         close(pipe_err[1]);
@@ -190,26 +192,44 @@ pid_t Subprocess::fork(std::function<int()> child)
         close(pipe_out[1]);
         close(pipe_err[1]);
 
-        parent_worker_ = std::thread([&]() {
+        const std::size_t N = 1;
+
+        // TODO: extract "pipe" class
+        parent_worker_cout_ = std::thread([&]() {
             while(active_) {
-                const std::size_t N = 1;
                 char buf[N+1];
                 int r;
                 while((r = read(pipe_out[0], &buf, N)) > 0) {
                     buf[r] = 0;
                     child_cout << buf;
                 }
+            }
+        });
+
+        parent_worker_cerr_ = std::thread([&]() {
+            while(active_) {
+                char buf[N+1];
+                int r;
                 while((r = read(pipe_err[0], &buf, N)) > 0) {
                     buf[r] = 0;
                     child_cerr << buf;
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         });
     }
 
 
     return pid_;
+}
+
+void Subprocess::flush()
+{
+    if(isChild()) {
+        fflush(stdout);
+        fflush(stderr);
+    } else {
+        apex_assert_hard(active_);
+    }
 }
 
 std::string Subprocess::getChildStdOut() const
@@ -252,8 +272,11 @@ int Subprocess::join()
     }
 
     active_ = false;
-    if(parent_worker_.joinable()) {
-        parent_worker_.join();
+    if(parent_worker_cerr_.joinable()) {
+        parent_worker_cerr_.join();
+    }
+    if(parent_worker_cout_.joinable()) {
+        parent_worker_cout_.join();
     }
 
     return return_code;

@@ -47,12 +47,13 @@ public:
     ~SubprocessNodeWorker();
 
     void initialize() override;
-    void processNode() override;
-
-
 
 protected:
+    void processNode() override;
+    void processSlot(const SlotWeakPtr& slot) override;
+
     void startSubprocess(const SubprocessChannel::MessageType type);
+    void startSubprocessSlot(const SlotPtr &slot);
     void finishSubprocess();
 
     void finishProcessing() override;
@@ -65,6 +66,7 @@ private:
 
     void handleProcessParent(const SubprocessChannel::Message &msg);
     void handleProcessChild(const SubprocessChannel::Message& msg);
+    void handleProcessSlotChild(const SubprocessChannel::Message& msg);
     void finishHandleProcessChild();
 
     void transmitParameter(const param::ParameterPtr& p);

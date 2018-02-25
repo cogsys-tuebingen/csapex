@@ -100,6 +100,7 @@ void Connectable::notifyMessageProcessed()
 
 void Connectable::reset()
 {
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     message_processed(shared_from_this());
 }
 

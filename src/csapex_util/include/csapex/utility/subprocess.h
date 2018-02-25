@@ -52,6 +52,8 @@ public:
     bool isParent() const;
     bool isChild() const;
 
+    void flush();
+
     int join();
 
 public:
@@ -70,7 +72,8 @@ private:
     bool active_;
 
     std::thread subprocess_worker_;
-    std::thread parent_worker_;
+    std::thread parent_worker_cout_;
+    std::thread parent_worker_cerr_;
 
     std::stringstream child_cout;
     std::stringstream child_cerr;

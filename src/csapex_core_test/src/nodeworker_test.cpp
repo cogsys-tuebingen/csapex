@@ -10,6 +10,8 @@
 #include <csapex/model/subprocess_node_worker.h>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/msg/generic_value_message.hpp>
+#include <csapex/signal/event.h>
+#include <csapex/signal/slot.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/io.h>
@@ -33,7 +35,7 @@ class NodeWorkerTest : public SteppingTest
 
 };
 
-void runTest(NodeFacadeImplementationPtr node_facade, int value = 23)
+void runSyncTest(NodeFacadeImplementationPtr node_facade, int value = 23)
 {
     Node& node = *node_facade->getNode();
     NodeHandle& nh = *node_facade->getNodeHandle();
@@ -95,8 +97,8 @@ TEST_F(NodeWorkerTest, NodeWorkerProcessing)
                                                            UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
                                                            graph);
 
-    runTest(times_4, 23);
-    runTest(times_4, 42);
+    runSyncTest(times_4, 23);
+    runSyncTest(times_4, 42);
 }
 
 
@@ -130,8 +132,8 @@ TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedAfterConstruction)
 
     times_4->replaceNodeWorker(std::make_shared<DirectNodeWorker>(times_4->getNodeHandle()));
 
-    runTest(times_4, 23);
-    runTest(times_4, 42);
+    runSyncTest(times_4, 23);
+    runSyncTest(times_4, 42);
 }
 
 TEST_F(NodeWorkerTest, DirectNodeWorkerWorks)
@@ -143,8 +145,8 @@ TEST_F(NodeWorkerTest, DirectNodeWorkerWorks)
                                                            graph,
                                                            state);
 
-    runTest(times_4, 23);
-    runTest(times_4, 42);
+    runSyncTest(times_4, 23);
+    runSyncTest(times_4, 42);
 }
 
 
@@ -157,8 +159,8 @@ TEST_F(NodeWorkerTest, SubprocessNodeWorkerWorks)
                                                            graph,
                                                            state);
 
-    runTest(times_4, 23);
-    runTest(times_4, 42);
+    runSyncTest(times_4, 23);
+    runSyncTest(times_4, 42);
 }
 
 TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedOnTheFly)
@@ -167,11 +169,11 @@ TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedOnTheFly)
                                                            UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
                                                            graph);
 
-    runTest(times_4, 23);
+    runSyncTest(times_4, 23);
 
     times_4->replaceNodeWorker(std::make_shared<SubprocessNodeWorker>(times_4->getNodeHandle()));
 
-    runTest(times_4, 42);
+    runSyncTest(times_4, 42);
 }
 
 TEST_F(NodeWorkerTest, ChangingNodeWorkerDoesNotChangePorts)
@@ -213,9 +215,108 @@ TEST_F(NodeWorkerTest, SubprocessNodeWorkerReceivesErrorMessagesFromSubprocess)
     // TODO
 }
 
-TEST_F(NodeWorkerTest, SubprocessNodeWorkerForwardsParameterUpdates)
+TEST_F(NodeWorkerTest, SubprocessHandlesSynchronousPorts)
 {
-    // TODO: currently changed parameters are not forwarded!
+    NodeFacadeImplementationPtr node_facade = factory.makeNode("AsyncStaticMultiplier4",
+                                                               UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4"),
+                                                               graph);
+
+    NodeHandle& nh = *node_facade->getNodeHandle();
+    NodeWorkerPtr nw = node_facade->getNodeWorker().lock();
+    ASSERT_NE(nullptr, nw);
+
+    ASSERT_FALSE(node_facade->isProcessing());
+
+    // create a temporary output and connect it to the input
+    OutputPtr tmp_out = std::make_shared<StaticOutput>(UUIDProvider::makeUUID_without_parent("tmp_out"));
+
+    // the first three slots are auto generated
+    SlotPtr slot = nh.getSlot(UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4:|:slot_2"));
+    ASSERT_NE(nullptr, slot);
+    ConnectionPtr connection = DirectConnection::connect(tmp_out, slot);
+
+    // set the input message
+    msg::publish(tmp_out.get(), 23);
+
+    // mark the messages as committed
+    tmp_out->commitMessages(false);
+    tmp_out->publish();
+
+    nw->startProcessingSlot(slot);
+
+    // commit the messages produced by the node
+    EventPtr event = nh.getEvent(UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4:|:event_3"));
+    ASSERT_NE(nullptr, event);
+
+    event->commitMessages(false);
+
+    // view outputs
+    TokenPtr token_out = event->getToken();
+    ASSERT_NE(nullptr, token_out);
+    TokenDataConstPtr data_out = token_out->getTokenData();
+    ASSERT_NE(nullptr, data_out);
+
+    event->notifyMessageProcessed();
+
+    auto msg_out = std::dynamic_pointer_cast<connection_types::GenericValueMessage<int> const>(data_out);
+    ASSERT_NE(nullptr, msg_out);
+
+    ASSERT_EQ(23 * 4, msg_out->value);
+
+    slot->removeConnection(tmp_out.get());
+}
+
+TEST_F(NodeWorkerTest, SubprocessHandlesAsynchronousPorts)
+{
+    NodeFacadeImplementationPtr node_facade = factory.makeNode("AsyncStaticMultiplier4",
+                                                               UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4"),
+                                                               graph);
+
+    node_facade->replaceNodeWorker(std::make_shared<SubprocessNodeWorker>(node_facade->getNodeHandle()));
+
+    NodeHandle& nh = *node_facade->getNodeHandle();
+    NodeWorkerPtr nw = node_facade->getNodeWorker().lock();
+    ASSERT_NE(nullptr, nw);
+
+    ASSERT_FALSE(node_facade->isProcessing());
+
+    // create a temporary output and connect it to the input
+    OutputPtr tmp_out = std::make_shared<StaticOutput>(UUIDProvider::makeUUID_without_parent("tmp_out"));
+
+    // the first three slots are auto generated
+    SlotPtr slot = nh.getSlot(UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4:|:slot_2"));
+    ASSERT_NE(nullptr, slot);
+    ConnectionPtr connection = DirectConnection::connect(tmp_out, slot);
+
+    // set the input message
+    msg::publish(tmp_out.get(), 23);
+
+    // mark the messages as committed
+    tmp_out->commitMessages(false);
+    tmp_out->publish();
+
+    nw->startProcessingSlot(slot);
+
+    // commit the messages produced by the node
+    EventPtr event = nh.getEvent(UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4:|:event_3"));
+    ASSERT_NE(nullptr, event);
+
+    event->commitMessages(false);
+
+    // view outputs
+    TokenPtr token_out = event->getToken();
+    ASSERT_NE(nullptr, token_out);
+    TokenDataConstPtr data_out = token_out->getTokenData();
+    ASSERT_NE(nullptr, data_out);
+
+    event->notifyMessageProcessed();
+
+    auto msg_out = std::dynamic_pointer_cast<connection_types::GenericValueMessage<int> const>(data_out);
+    ASSERT_NE(nullptr, msg_out);
+
+    ASSERT_EQ(23 * 4, msg_out->value);
+
+    slot->removeConnection(tmp_out.get());
 }
 }
 

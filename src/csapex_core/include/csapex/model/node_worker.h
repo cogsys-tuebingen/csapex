@@ -41,28 +41,21 @@ public:
 public:
     ~NodeWorker();
 
-    NodeHandlePtr getNodeHandle() const;
-    NodePtr getNode() const;
-    UUID getUUID() const;
-
-    long getSequenceNumber() const;
 
     virtual void initialize();
     void reset();
-
-    void ioChanged();
-
     void handleChangedParameters();
 
-    void triggerTryProcess();
+    bool startProcessingMessages();
+    bool startProcessingSlot(const SlotWeakPtr &slot);
 
+    NodeHandlePtr getNodeHandle() const;
+    NodePtr getNode() const;
+    UUID getUUID() const;
+    std::shared_ptr<ProfilerImplementation> getProfiler();
     ExecutionState getExecutionState() const;
 
-    std::shared_ptr<ProfilerImplementation> getProfiler();
-
-    bool isEnabled() const;
-    bool isIdle() const;
-    bool isProcessing() const;
+    long getSequenceNumber() const;
 
     bool isProcessingEnabled() const;
     void setProcessingEnabled(bool e);
@@ -70,21 +63,14 @@ public:
     void setProfiling(bool profiling);
     bool isProfiling() const;
 
+    bool isEnabled() const;
+    bool isIdle() const;
+    bool isProcessing() const;
+
     bool canExecute();
     bool canProcess() const;
     bool canReceive() const;
     bool canSend() const;
-
-    void trySendEvents();
-
-    bool startProcessingMessages();
-    void forwardMessages();
-
-    bool execute();
-
-    void killExecution();
-
-    void outgoingMessagesProcessed();
 
 
 public:
@@ -105,12 +91,19 @@ public:
 protected:
     NodeWorker(NodeHandlePtr node_handle);
 
-    virtual void processNode();
     virtual void handleChangedParametersImpl(const Parameterizable::ChangedParameterList& changed_params);
 
+    virtual void processNode();
     virtual void finishProcessing();
 
+    virtual void processSlot(const SlotWeakPtr &slot);
+
 private:
+    void triggerTryProcess();
+
+    void outgoingMessagesProcessed();
+    void ioChanged();
+
     void updateParameterValues();
 
     void publishParameters();
@@ -131,6 +124,7 @@ private:
 
     void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
 
+    void forwardMessages();
     void sendEvents(bool active);
 
     void connectConnector(ConnectablePtr c);

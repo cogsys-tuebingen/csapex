@@ -103,10 +103,11 @@ void csapex::msg::trigger(Event *event)
 
 void csapex::msg::trigger(Event *event, const TokenPtr& token)
 {
-    triggerWith(event, token);
+    event->triggerWith(token);
 }
 
-void csapex::msg::triggerWith(Event *event, const TokenPtr& token)
+void csapex::msg::trigger(Event *event, const TokenDataConstPtr& data)
 {
+    auto token = std::make_shared<Token>(data);
     event->triggerWith(token);
 }

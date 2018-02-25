@@ -354,13 +354,6 @@ bool NodeWorker::isProfiling() const
     return profiler_->isEnabled();
 }
 
-void NodeWorker::killExecution()
-{
-    // TODO: implement
-    triggerTryProcess();
-}
-
-
 
 bool NodeWorker::allInputsArePresent()
 {
@@ -493,6 +486,37 @@ void NodeWorker::processNode()
     }
 }
 
+void NodeWorker::processSlot(const SlotWeakPtr& slot_w)
+{
+    if(SlotPtr slot = slot_w.lock()) {
+        TokenPtr token = slot->getToken();
+        if(token) {
+            if(!slot->isGraphPort() && token->hasActivityModifier()) {
+                if(token->getActivityModifier() == ActivityModifier::ACTIVATE) {
+                    node_handle_->setActive(true);
+
+                } else if(token->getActivityModifier() == ActivityModifier::DEACTIVATE) {
+                    node_handle_->setActive(false);
+                }
+            }
+
+            Timer::Ptr timer;
+            Interlude::Ptr interlude;
+
+            startProfilerInterval(ActivityType::SLOT_CALLBACK);
+            if(profiler_->isEnabled()) {
+                interlude = timer->step(std::string("slot ") + slot->getLabel());
+            }
+
+            slot->handleEvent();
+
+            interlude.reset();
+
+            finishTimer(timer);
+        }
+    }
+}
+
 void NodeWorker::rememberExecutionMode()
 {
     std::unique_lock<std::recursive_mutex> lock(current_exec_mode_mutex_);
@@ -561,6 +585,8 @@ bool NodeWorker::processMarker(const connection_types::MarkerMessageConstPtr &ma
 
 bool NodeWorker::startProcessingMessages()
 {
+    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
+
     NodePtr node = node_handle_->getNode().lock();
     apex_assert_hard(node);
 
@@ -636,6 +662,12 @@ bool NodeWorker::startProcessingMessages()
         processNode();
         return true;
     }
+}
+
+bool NodeWorker::startProcessingSlot(const SlotWeakPtr &slot)
+{
+    processSlot(slot);
+    return true;
 }
 
 void NodeWorker::pruneExecution()
@@ -772,18 +804,6 @@ bool NodeWorker::canExecute()
     }
 }
 
-bool NodeWorker::execute()
-{
-    if(!canExecute()) {
-        return false;
-    }
-
-    apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-
-    return startProcessingMessages();
-}
-
-
 void NodeWorker::publishParameters()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -897,11 +917,6 @@ void NodeWorker::handleChangedParametersImpl(const Parameterizable::ChangedParam
     }
 }
 
-void NodeWorker::trySendEvents()
-{
-    sendEvents(node_handle_->isActive());
-}
-
 void NodeWorker::connectConnector(ConnectablePtr c)
 {
     port_connections_[c.get()].emplace_back(c->connection_added_to.connect([this](const ConnectorPtr&) {
@@ -923,35 +938,9 @@ void NodeWorker::connectConnector(ConnectablePtr c)
 
     } else if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(c)) {
         SlotWeakPtr slot_w = slot;
-        auto connection = slot->triggered.connect([this, slot_w]() {
-            node_handle_->execution_requested([this, slot_w]() {
-                if(SlotPtr slot = slot_w.lock()) {
-                    TokenPtr token = slot->getToken();
-                    if(token) {
-                        if(!slot->isGraphPort() && token->hasActivityModifier()) {
-                            if(token->getActivityModifier() == ActivityModifier::ACTIVATE) {
-                                node_handle_->setActive(true);
-
-                            } else if(token->getActivityModifier() == ActivityModifier::DEACTIVATE) {
-                                node_handle_->setActive(false);
-                            }
-                        }
-
-                        Timer::Ptr timer;
-                        Interlude::Ptr interlude;
-
-                        startProfilerInterval(ActivityType::SLOT_CALLBACK);
-                        if(profiler_->isEnabled()) {
-                            interlude = timer->step(std::string("slot ") + slot->getLabel());
-                        }
-
-                        slot->handleEvent();
-
-                        interlude.reset();
-
-                        finishTimer(timer);
-                    }
-                }
+        auto connection = slot->triggered.connect([this, slot_w]() {            
+            getNodeHandle()->execution_requested([this, slot_w]() {
+                processSlot(slot_w);
             });
         });
         port_connections_[c.get()].emplace_back(connection);
