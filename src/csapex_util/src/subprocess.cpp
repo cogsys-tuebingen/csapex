@@ -271,6 +271,9 @@ int Subprocess::join()
         readCtrlOut();
     }
 
+    close(pipe_out[0]);
+    close(pipe_err[0]);
+
     active_ = false;
     if(parent_worker_cerr_.joinable()) {
         parent_worker_cerr_.join();
