@@ -21,10 +21,6 @@ public:
 
     void setNodeWorker(NodeWorker* worker);
 
-    /*
-     * MESSAGES
-     */
-
     /// "real" messages
     template <typename T>
     Input* addInput(const std::string& label,
@@ -68,7 +64,6 @@ public:
         Container::template registerType<T>();
         return addSlot(Container::template make<T>(), label, callback, active, blocking);
     }
-
 
 
     /// "direct" messages
@@ -149,14 +144,9 @@ public:
     Slot* addSlot(const std::string& label, std::function<void()> callback, bool active = false, bool blocking = true);
 
     template <typename T>
-    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool blocking = true)
+    Slot* addSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool blocking = true)
     {
         return addSlot(connection_types::makeEmptyMessage<T>(), label, callback, active, blocking);
-    }    
-    template <typename Container, typename T>
-    Slot* addTypedSlot(const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool blocking = true) {
-        Container::template registerType<T>();
-        return addSlot(Container::template make<T>(), label, callback, active, blocking);
     }
 
     template <typename T>
@@ -167,16 +157,21 @@ public:
     Event* addEvent(const std::string& label);
 
 
-    std::vector<InputPtr> getMessageInputs() const;
-    std::vector<OutputPtr> getMessageOutputs() const;
-    std::vector<SlotPtr> getSlots() const;
-    std::vector<EventPtr> getEvents() const;
 
     virtual void removeInput(const UUID& uuid) = 0;
     virtual void removeOutput(const UUID& uuid) = 0;
     virtual void removeEvent(const UUID& uuid) = 0;
     virtual void removeSlot(const UUID& uuid) = 0;
 
+
+    /*
+     * Accessors
+     */
+
+    std::vector<InputPtr> getMessageInputs() const;
+    std::vector<OutputPtr> getMessageOutputs() const;
+    std::vector<SlotPtr> getSlots() const;
+    std::vector<EventPtr> getEvents() const;
 
     /*
      * MISCELLANEOUS

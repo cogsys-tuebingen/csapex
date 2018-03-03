@@ -33,7 +33,7 @@ public:
         out = node_modifier.addOutput<int>("output");
 
         e = node_modifier.addEvent("event");
-        s = node_modifier.addTypedSlot<connection_types::AnyMessage>("slot", [this](const TokenPtr& token) {
+        s = node_modifier.addSlot<connection_types::AnyMessage>("slot", [this](const TokenPtr& token) {
             e->triggerWith(token);
         });
     }
@@ -123,7 +123,7 @@ public:
     void setup(NodeModifier& node_modifier)
     {
         in = node_modifier.addInput<int>("input");
-        s = node_modifier.addTypedSlot<connection_types::AnyMessage>("slot", [this](const TokenConstPtr& token) {
+        s = node_modifier.addSlot<connection_types::AnyMessage>("slot", [this](const TokenConstPtr& token) {
             std::unique_lock<std::recursive_mutex> lock(wait_mutex);
             waiting = false;
             stepping_done.notify_all();

@@ -47,17 +47,16 @@ class MockupAsyncStaticMultiplierNode
 public:
     void setup(NodeModifier& node_modifier)
     {
-        in = node_modifier.addTypedSlot<connection_types::GenericValueMessage<int>>("input", [this](TokenPtr token) {
-            processSlot(token);
-        });
+        //in = node_modifier.addSlot<int>("input", [this](const int value) {
+       //     processSlot(value);
+       // });
         out = node_modifier.addEvent("output");
     }
 
-    void processSlot(TokenPtr token)
+    void processSlot(const int value)
     {
-        auto input_msg = std::dynamic_pointer_cast<connection_types::GenericValueMessage<int> const>(token->getTokenData());
-        TokenDataConstPtr value_msg = std::make_shared<connection_types::GenericValueMessage<int>>(input_msg->value * factor);
-        msg::trigger(out, value_msg);
+       // TokenDataConstPtr value_msg = std::make_shared<connection_types::GenericValueMessage<int>>(value * factor);
+      //  msg::trigger(out, value_msg);
     }
 
     void setupParameters(Parameterizable& /*parameters*/)
