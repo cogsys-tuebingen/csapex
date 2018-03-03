@@ -101,6 +101,15 @@ struct should_use_value_message {
             !std::is_base_of<TokenData, M>::value;
 };
 
+template <typename M>
+struct should_use_no_generic_message {
+    static constexpr bool value =
+            !should_use_pointer_message<M>::value &&
+            !should_use_value_message<M>::value;
+};
+
+
+
 }
 }
 

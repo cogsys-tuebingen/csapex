@@ -49,6 +49,21 @@ CSAPEX_CORE_EXPORT void trigger(Event* event);
 CSAPEX_CORE_EXPORT void trigger(Event* event, const TokenPtr& token);
 CSAPEX_CORE_EXPORT void trigger(Event* event, const TokenDataConstPtr& token_data);
 
+template <typename T>
+void trigger(Event* input, const T value,
+             typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0)
+{
+    auto message = std::make_shared<connection_types::GenericValueMessage<T>>(value);
+    trigger(input, message);
+}
+template <typename T>
+void trigger(Event* input, const T value,
+             typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0)
+{
+    auto message = std::make_shared<connection_types::GenericPointerMessage<T>>(value);
+    trigger(input, message);
+}
+
 
 /// CASTING
 

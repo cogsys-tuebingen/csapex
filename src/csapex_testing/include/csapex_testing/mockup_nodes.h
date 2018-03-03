@@ -47,16 +47,13 @@ class MockupAsyncStaticMultiplierNode
 public:
     void setup(NodeModifier& node_modifier)
     {
-        //in = node_modifier.addSlot<int>("input", [this](const int value) {
-       //     processSlot(value);
-       // });
+        in2 = node_modifier.addSlot<int>("input", this, &MockupAsyncStaticMultiplierNode<factor>::processSlot);
         out = node_modifier.addEvent("output");
     }
 
-    void processSlot(const int value)
+    void processSlot(int value)
     {
-       // TokenDataConstPtr value_msg = std::make_shared<connection_types::GenericValueMessage<int>>(value * factor);
-      //  msg::trigger(out, value_msg);
+        msg::trigger(out, value * factor);
     }
 
     void setupParameters(Parameterizable& /*parameters*/)
@@ -70,6 +67,7 @@ public:
 
 private:
     Slot* in;
+    Slot* in2;
     Event* out;
 };
 
