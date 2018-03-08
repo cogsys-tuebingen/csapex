@@ -3,7 +3,7 @@ echo "running test coverage"
 
 THISDIR=$(pwd)
 SRCDIR=$(cd ..; pwd)
-ROOT=$(cd ../../../../../; pwd)
+ROOT=$(cd ../../../../; pwd)
 DIR=$THISDIR/traces
 
 # build
@@ -29,7 +29,7 @@ rm *.info
 echo "generating baseline"
 lcov -c -i -d $ROOT/build_coverage -o test_base.info --no-external -b $ROOT > /dev/null
 lcov -r test_base.info $ROOT/build_coverage/\* $THISDIR/\* \
-         $SRCDIR/external/\* $SRCDIR/src/view/\* $SRCDIR/include/csapex/view/\* \
+         \*/csapex_qt/\* \
          -o test_base_clean.info
 
 # run tests
@@ -45,7 +45,7 @@ cd $THISDIR
 echo "capturing coverage data"
 lcov -c -d $ROOT/build_coverage -o test.info --no-external -b $ROOT > /dev/null
 lcov -r test.info $ROOT/build_coverage/\* $THISDIR/\* \
-         $SRCDIR/external/\* $SRCDIR/src/view/\* $SRCDIR/include/csapex/view/\* \
+         \*/csapex_qt/\* \
          -o test_clean.info
 echo "calculating coverage"
 lcov -a test_base_clean.info -a test_clean.info -o test_extracted.info > /dev/null

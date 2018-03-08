@@ -12,6 +12,7 @@
 #include <functional>
 #include <mutex>
 #include <type_traits>
+#include <atomic>
 
 namespace csapex
 {
@@ -199,6 +200,8 @@ private:
 
 private:
     mutable std::recursive_mutex execution_mutex_;
+
+    std::atomic<bool> dirty_;
 
     int next_del_id_ = 0;
     std::map<int, delegate::Delegate<Signature>> delegates_;

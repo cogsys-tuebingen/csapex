@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/model/token_data.h>
 #include <csapex/utility/tmp.hpp>
+#include <csapex/model/model_fwd.h>
 
 /// SYSTEM
 #include <string>
@@ -18,14 +19,16 @@ template <typename T>
 struct type;
 
 template <typename T>
-std::string serializationName()
+inline std::string serializationName()
 {
     typedef typename std::remove_const<T>::type TT;
     return type<TT>::name();
 }
 
+TokenPtr makeToken(const TokenDataConstPtr& data);
+
 template <typename T>
-std::shared_ptr<T> makeEmpty()
+inline std::shared_ptr<T> makeEmpty()
 {
     return std::make_shared<T>();
 }
@@ -35,6 +38,15 @@ inline std::shared_ptr<TokenData> makeEmpty<TokenData>()
 {
     return std::shared_ptr<TokenData>(new TokenData("empty"));
 }
+
+
+template <typename T>
+inline TokenPtr makeEmptyToken()
+{
+    return makeToken(connection_types::makeEmpty<T>());
+}
+
+
 
 template <typename M, bool is_message>
 struct MessageContainer;

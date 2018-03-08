@@ -27,13 +27,13 @@ OutputTransition::OutputTransition()
 void OutputTransition::reset()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(ConnectionPtr connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         connection->reset();
     }
     auto outputs_copy = outputs_;
     lock.unlock();
 
-    for(auto pair : outputs_copy) {
+    for(const auto& pair : outputs_copy) {
         OutputPtr output = pair.second;
         output->reset();
     }
@@ -111,7 +111,7 @@ void OutputTransition::setSequenceNumber(long seq_no)
 {
     sequence_number_ = seq_no;
 
-    for(auto pair : outputs_) {
+    for(const auto& pair : outputs_) {
         OutputPtr output = pair.second;
         output->setSequenceNumber(sequence_number_);
     }
@@ -129,11 +129,11 @@ bool OutputTransition::isEnabled() const
 
 bool OutputTransition::canStartSendingMessages() const
 {
-    for(auto pair : outputs_) {
-        OutputPtr output = pair.second;
+    for(const auto& pair : outputs_) {
+        const OutputPtr& output = pair.second;
         if(output->isEnabled() && output->isConnected()) {
             if(output->getState() != Output::State::IDLE) {
-                //TRACE for(auto pair : outputs_) {
+                //TRACE for(const auto& pair : outputs_) {
                     //TRACE OutputPtr output = pair.second;
                     //TRACE if(output->isEnabled() && output->isConnected()) {
                         //TRACE std::cout << "output " << output->getUUID() << " is not idle" << std::endl;
@@ -154,16 +154,16 @@ bool OutputTransition::sendMessages(bool is_active)
 
     bool has_sent_activator_message = false;
 
-    for(auto pair : outputs_) {
-        OutputPtr output = pair.second;
+    for(const auto& pair : outputs_) {
+        const OutputPtr& output = pair.second;
         if(output->isEnabled()) {
             has_sent_activator_message |= output->commitMessages(is_active);
         }
     }
 
     long seq_no = -1;
-    for(auto pair : outputs_) {
-        OutputPtr output = pair.second;
+    for(const auto& pair : outputs_) {
+        const OutputPtr& output = pair.second;
         long s = output->sequenceNumber();
         if(seq_no == -1) {
             seq_no = s;
@@ -204,7 +204,7 @@ void OutputTransition::tokenProcessed()
 bool OutputTransition::areOutputsIdle() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(auto pair : outputs_) {
+    for(const auto& pair : outputs_) {
         OutputPtr output = pair.second;
         if(output->getState() != Output::State::IDLE) {
             return false;
@@ -225,7 +225,7 @@ void OutputTransition::fillConnections()
 
     apex_assert_hard(areAllConnections(Connection::State::NOT_INITIALIZED));
 
-    for(auto pair : outputs_) {
+    for(const auto& pair : outputs_) {
         OutputPtr out = pair.second;
         apex_assert_hard(out);
         if(out->isEnabled()) {
@@ -233,7 +233,7 @@ void OutputTransition::fillConnections()
         }
     }
 
-    for(auto pair : outputs_) {
+    for(const auto& pair : outputs_) {
         OutputPtr out = pair.second;
         apex_assert_hard(out);
         if(out->isEnabled()) {
@@ -247,7 +247,7 @@ void OutputTransition::fillConnections()
 void OutputTransition::clearBuffer()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(auto pair : outputs_) {
+    for(const auto& pair : outputs_) {
         OutputPtr output = pair.second;
         output->clearBuffer();
     }
@@ -257,7 +257,7 @@ void OutputTransition::setOutputsIdle()
 {
     //TRACE std::cout << "set outputs idle" << std::endl;
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(auto pair : outputs_) {
+    for(const auto& pair : outputs_) {
         OutputPtr output = pair.second;
         output->setState(Output::State::IDLE);
     }

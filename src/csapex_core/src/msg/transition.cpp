@@ -58,13 +58,10 @@ void Transition::reset()
 
 void Transition::checkIfEnabled()
 {
-    //    if(isEnabled()) { // TODO: check here if enabled
-    if(activation_fn_) {
-        activation_fn_();
-    }
-    //    }
-
     if(isEnabled()) {
+        if(activation_fn_) {
+            activation_fn_();
+        }
         enabled_changed();
     }
 }
@@ -72,7 +69,7 @@ void Transition::checkIfEnabled()
 bool Transition::areAllConnections(Connection::State state) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(ConnectionPtr connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         if(connection->isEnabled() && connection->getState() != state) {
             return false;
         }
@@ -83,7 +80,7 @@ bool Transition::areAllConnections(Connection::State state) const
 bool Transition::areAllConnections(Connection::State a, Connection::State b) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(ConnectionPtr connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         auto s = connection->getState();
         if(connection->isEnabled() && s != a && s != b) {
             return false;
@@ -95,7 +92,7 @@ bool Transition::areAllConnections(Connection::State a, Connection::State b) con
 bool Transition::areAllConnections(Connection::State a, Connection::State b, Connection::State c) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(ConnectionPtr connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         auto s = connection->getState();
         if(connection->isEnabled() && s != a && s != b && s != c) {
             return false;
@@ -107,7 +104,7 @@ bool Transition::areAllConnections(Connection::State a, Connection::State b, Con
 bool Transition::isOneConnection(Connection::State state) const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(ConnectionPtr connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         if(connection->isEnabled() && connection->getState() == state) {
             return true;
         }
@@ -118,7 +115,7 @@ bool Transition::isOneConnection(Connection::State state) const
 bool Transition::hasConnection() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(ConnectionPtr connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         if(connection->isEnabled()) {
             return true;
         }
@@ -142,7 +139,7 @@ bool Transition::hasConnection(Connection* connection) const
 bool Transition::hasActiveConnection() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(ConnectionPtr connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         if(connection->isEnabled() && connection->isActive()) {
             return true;
         }

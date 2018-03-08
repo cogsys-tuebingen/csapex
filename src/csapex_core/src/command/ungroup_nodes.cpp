@@ -64,30 +64,30 @@ bool UngroupNodes::doExecute()
         serialized_snippet_ = io.saveGraph();
     }
 
-    for(InputPtr in : nh->getExternalInputs()) {
+    for(const InputPtr& in : nh->getExternalInputs()) {
         auto source = in->getSource();
         if(source) {
             old_connections_in[in->getUUID()] = source->getUUID();
         }
     }
-    for(OutputPtr out : nh->getExternalOutputs()) {
+    for(const OutputPtr& out : nh->getExternalOutputs()) {
         auto& vec = old_connections_out[out->getUUID()];
-        for(ConnectionPtr c : out->getConnections()) {
+        for(const ConnectionPtr& c : out->getConnections()) {
             vec.push_back(c->to()->getUUID());
         }
     }
 
 
-    for(SlotPtr slot : nh->getExternalSlots()) {
+    for(const SlotPtr& slot : nh->getExternalSlots()) {
         auto& vec = old_signals_in[slot->getUUID()];
-        for(ConnectionPtr c : slot->getConnections()) {
+        for(const ConnectionPtr& c : slot->getConnections()) {
             vec.push_back(c->from()->getUUID());
         }
     }
 
-    for(EventPtr trigger : nh->getExternalEvents()) {
+    for(const EventPtr& trigger : nh->getExternalEvents()) {
         auto& vec = old_signals_out[trigger->getUUID()];
-        for(ConnectionPtr c : trigger->getConnections()) {
+        for(const ConnectionPtr& c : trigger->getConnections()) {
             vec.push_back(c->to()->getUUID());
         }
     }

@@ -86,7 +86,8 @@ protected:
         for(int iter = 0; iter < 100; ++iter) {
             ASSERT_NO_FATAL_FAILURE(step());
 
-            ASSERT_EQ(std::pow(iter * iter, 2) , sink->getValue());
+            int v = (iter * iter) * (iter * iter);
+            ASSERT_EQ(v, sink->getValue());
         }
     }
 

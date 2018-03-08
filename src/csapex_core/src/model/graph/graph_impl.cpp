@@ -47,7 +47,7 @@ void GraphImplementation::setNodeFacade(NodeFacadeImplementation* nf)
 void GraphImplementation::resetActivity()
 {
     auto connections = edges_;
-    for(ConnectionPtr c : connections) {
+    for(const ConnectionPtr& c : connections) {
         TokenPtr t = c->getToken();
         if(t) {
             t->setActivityModifier(ActivityModifier::NONE);
@@ -69,7 +69,7 @@ void GraphImplementation::clear()
     beginTransaction();
 
     auto connections = edges_;
-    for(ConnectionPtr c : connections) {
+    for(const ConnectionPtr& c : connections) {
         deleteConnection(c);
     }
     apex_assert_hard(edges_.empty());
@@ -249,7 +249,7 @@ void GraphImplementation::deleteConnection(ConnectionPtr connection)
                     if(v_from && v_to) {
 
                         bool still_connected = false;
-                        for(ConnectionPtr c : n_from->getOutputTransition()->getConnections()) {
+                        for(const ConnectionPtr& c : n_from->getOutputTransition()->getConnections()) {
                             if(c->isDetached()) {
                                 continue;
                             }
@@ -914,7 +914,7 @@ bool GraphImplementation::isConnected(const UUID &from, const UUID &to) const
 
 ConnectionPtr GraphImplementation::getConnectionWithId(int id)
 {
-    for(ConnectionPtr& connection : edges_) {
+    for(const ConnectionPtr& connection : edges_) {
         if(connection->id() == id) {
             return connection;
         }
@@ -925,7 +925,7 @@ ConnectionPtr GraphImplementation::getConnectionWithId(int id)
 
 ConnectionPtr GraphImplementation::getConnection(const UUID &from, const UUID &to)
 {
-    for(ConnectionPtr& connection : edges_) {
+    for(const ConnectionPtr& connection : edges_) {
         if(connection->from()->getUUID() == from && connection->to()->getUUID() == to) {
             return connection;
         }

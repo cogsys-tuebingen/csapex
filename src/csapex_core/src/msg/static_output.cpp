@@ -63,7 +63,7 @@ TokenPtr StaticOutput::getToken() const
     std::unique_lock<std::recursive_mutex> lock(message_mutex_);
 
     if(!committed_message_) {
-        return Token::makeEmpty<connection_types::NoMessage>();
+        return connection_types::makeEmptyToken<connection_types::NoMessage>();
     } else {
         return committed_message_;
     }
@@ -98,7 +98,7 @@ bool StaticOutput::commitMessages(bool is_activated)
             if(!connections_.empty()) {
                 //            std::cout << getUUID() << " sends empty message" << std::endl;
             }
-            committed_message_ = Token::makeEmpty<connection_types::NoMessage>();
+            committed_message_ = connection_types::makeEmptyToken<connection_types::NoMessage>();
         }
 
         ++seq_no_;

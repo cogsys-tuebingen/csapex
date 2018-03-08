@@ -565,7 +565,7 @@ std::string NodeFacadeImplementation::getDebugDescription() const
     ss << (ot->isEnabled() ? "enabled" : "disabled");
     ss << ", events: ";
     bool events_enabled = true;
-    for(EventPtr e : nh_->getExternalEvents()){
+    for(const EventPtr& e : nh_->getExternalEvents()){
         if(!e->canReceiveToken()) {
             events_enabled = false;
             break;

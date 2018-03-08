@@ -137,7 +137,7 @@ bool NodeHandle::isIsolated() const
 
 bool NodeHandle::isSource() const
 {
-    for(InputPtr in : external_inputs_) {
+    for(const InputPtr& in : external_inputs_) {
         if(!in->isOptional() || in->isConnected()) {
             return false;
         }
@@ -205,10 +205,10 @@ void NodeHandle::stop()
         node_->reset();
     }
 
-    for(OutputPtr i : getExternalOutputs()) {
-        i->stop();
+    for(const OutputPtr& o : getExternalOutputs()) {
+        o->stop();
     }
-    for(InputPtr i : getExternalInputs()) {
+    for(const InputPtr& i : getExternalInputs()) {
         i->stop();
     }
 
@@ -842,7 +842,7 @@ ConnectablePtr NodeHandle::getConnectorNoThrow(const UUID &uuid) const noexcept
 
 InputPtr NodeHandle::getInput(const UUID& uuid) const noexcept
 {
-    for(InputPtr in : external_inputs_) {
+    for(const InputPtr& in : external_inputs_) {
         if(in->getUUID() == uuid) {
             return in;
         }
@@ -857,7 +857,7 @@ InputPtr NodeHandle::getInput(const UUID& uuid) const noexcept
 
 OutputPtr NodeHandle::getOutput(const UUID& uuid) const noexcept
 {
-    for(OutputPtr out : external_outputs_) {
+    for(const OutputPtr& out : external_outputs_) {
         if(out->getUUID() == uuid) {
             return out;
         }
@@ -873,7 +873,7 @@ OutputPtr NodeHandle::getOutput(const UUID& uuid) const noexcept
 
 SlotPtr NodeHandle::getSlot(const UUID& uuid) const noexcept
 {
-    for(SlotPtr s : external_slots_) {
+    for(const SlotPtr& s : external_slots_) {
         if(s->getUUID() == uuid) {
             return s;
         }
@@ -889,7 +889,7 @@ SlotPtr NodeHandle::getSlot(const UUID& uuid) const noexcept
 
 EventPtr NodeHandle::getEvent(const UUID& uuid) const noexcept
 {
-    for(EventPtr t : external_events_) {
+    for(const EventPtr& t : external_events_) {
         if(t->getUUID() == uuid) {
             return t;
         }

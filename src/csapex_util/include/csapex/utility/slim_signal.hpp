@@ -17,6 +17,7 @@ namespace slim_signal
 
 template <typename Signature>
 Signal<Signature>::Signal()
+    : dirty_(false)
 {
     children_.reserve(4);
 }
@@ -51,6 +52,7 @@ Connection Signal<Signature>::connect(const delegate::Delegate<Signature>& deleg
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         int id = next_del_id_++;
         delegates_to_add_.emplace(id, delegate);
+        dirty_ = true;
 
         return Connection(this, makeDelegateDeleter(this, id));
     }
@@ -74,6 +76,7 @@ Connection Signal<Signature>::connect(delegate::Delegate<Signature>&& delegate)
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         int id = next_del_id_++;
         delegates_to_add_.emplace(id, std::move(delegate));
+        dirty_ = true;
 
         return Connection(this, makeDelegateDeleter(this, id));
     }
@@ -98,6 +101,7 @@ Connection Signal<Signature>::connect(const std::function<Signature>& fn)
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         int id = next_fn_id_++;
         functions_to_add_.emplace(id, fn);
+        dirty_ = true;
         return Connection(this, makeFunctionDeleter(this, id));
     }
 }
@@ -167,6 +171,7 @@ void Signal<Signature>::removeDelegate(int id)
     } else {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         delegates_to_remove_.push_back(id);
+        dirty_ = true;
     }
 }
 
@@ -186,6 +191,7 @@ void Signal<Signature>::removeFunction(int id)
     } else {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         functions_to_remove_.push_back(id);
+        dirty_ = true;
     }
 }
 
@@ -225,6 +231,8 @@ void Signal<Signature>::clear()
 
     functions_.clear();
     functions_to_remove_.clear();
+
+    dirty_ = false;
 }
 
 template <typename Signature>
@@ -245,6 +253,7 @@ void Signal<Signature>::addChild(Signal *child)
     } else {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         children_to_add_.push_back(child);
+        dirty_ = true;
     }
 }
 template <typename Signature>
@@ -275,6 +284,7 @@ void Signal<Signature>::removeChild(Signal<Signature>* child)
     } else {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         children_to_remove_.push_back(child);
+        dirty_ = true;
     }
 }
 
@@ -284,8 +294,6 @@ template <typename Signature>
 template <typename... Args>
 Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
 {
-    apex_assert_hard(guard_ == -1);
-
     std::lock(execution_mutex_, mutex_);
 
     std::unique_lock<std::recursive_mutex> exec_lock(execution_mutex_, std::adopt_lock);
@@ -293,7 +301,6 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
     std::unique_lock<std::recursive_mutex> data_lock(mutex_, std::adopt_lock);
 
     for(auto& s : children_) {
-        apex_assert_hard(s->guard_ == -1);
         try {
             (*s)(std::forward<Args>(args)...);
         } catch(const std::exception& e) {
@@ -343,71 +350,89 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
 template <typename Signature>
 void Signal<Signature>::applyModifications()
 {
+    if(!dirty_) {
+        return;
+    }
+
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     // SIGNALS
-    for(auto& s : children_to_add_) {
-        children_.push_back(s);
-        s->parents_.push_back(this);
+    if(!children_to_add_.empty()) {
+        for(auto& s : children_to_add_) {
+            children_.push_back(s);
+            s->parents_.push_back(this);
 
-        lock.unlock();
-        onConnect();
-        lock.lock();
+            lock.unlock();
+            onConnect();
+            lock.lock();
+        }
+        children_to_add_.clear();
     }
-    children_to_add_.clear();
 
-    for(auto& child : children_to_remove_) {
-        for(auto it = children_.begin(); it != children_.end();) {
-            if(*it == child) {
-                it = children_.erase(it);
+    if(!children_to_remove_.empty()) {
+        for(auto& child : children_to_remove_) {
+            for(auto it = children_.begin(); it != children_.end();) {
+                if(*it == child) {
+                    it = children_.erase(it);
 
-                lock.unlock();
-                onDisconnect();
-                lock.lock();
-            } else {
-                ++it;
+                    lock.unlock();
+                    onDisconnect();
+                    lock.lock();
+                } else {
+                    ++it;
+                }
             }
         }
+        children_to_remove_.clear();
     }
-    children_to_remove_.clear();
 
     // FUNCTIONS
-    for(auto& s : functions_to_add_) {
-        functions_[s.first] = std::move(s.second);
+    if(!functions_to_add_.empty()) {
+        for(auto& s : functions_to_add_) {
+            functions_[s.first] = std::move(s.second);
 
-        lock.unlock();
-        onConnect();
-        lock.lock();
+            lock.unlock();
+            onConnect();
+            lock.lock();
+        }
+        functions_to_add_.clear();
     }
-    functions_to_add_.clear();
 
-    for(int id : functions_to_remove_) {
-        functions_.erase(id);
+    if(!functions_to_remove_.empty()) {
+        for(int id : functions_to_remove_) {
+            functions_.erase(id);
 
-        lock.unlock();
-        onDisconnect();
-        lock.lock();
+            lock.unlock();
+            onDisconnect();
+            lock.lock();
+        }
+        functions_to_remove_.clear();
     }
-    functions_to_remove_.clear();
 
     // DELEGATES
-    for(auto& s : delegates_to_add_) {
-        delegates_.emplace(s);
+    if(!delegates_to_add_.empty()) {
+        for(auto& s : delegates_to_add_) {
+            delegates_.emplace(s);
 
-        lock.unlock();
-        onConnect();
-        lock.lock();
+            lock.unlock();
+            onConnect();
+            lock.lock();
+        }
+        delegates_to_add_.clear();
     }
-    delegates_to_add_.clear();
 
-    for(int id : delegates_to_remove_) {
-        delegates_.erase(id);
+    if(!delegates_to_remove_.empty()) {
+        for(int id : delegates_to_remove_) {
+            delegates_.erase(id);
 
-        lock.unlock();
-        onDisconnect();
-        lock.lock();
+            lock.unlock();
+            onDisconnect();
+            lock.lock();
+        }
+        delegates_to_remove_.clear();
     }
-    delegates_to_remove_.clear();
+
+    dirty_ = false;
 }
 
 

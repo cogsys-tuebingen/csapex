@@ -93,7 +93,7 @@ void Connectable::notifyMessageProcessed()
 
     APEX_DEBUG_CERR <<"connectable " << getUUID() << " notified" << std::endl;
 
-    for(ConnectionPtr& c : connections_) {
+    for(const ConnectionPtr& c : connections_) {
         c->setTokenProcessed();
     }
 }
@@ -117,7 +117,7 @@ void Connectable::init()
 
 Connectable::~Connectable()
 {
-    for(ConnectionPtr& c : connections_) {
+    for(const ConnectionPtr& c : connections_) {
         c->detach(this);
     }
 }

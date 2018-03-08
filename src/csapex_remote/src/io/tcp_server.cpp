@@ -293,7 +293,7 @@ void TcpServer::stop()
         {
             std::unique_lock<std::recursive_mutex> lock(session_mutex_);
 
-            for(SessionPtr session : sessions_) {
+            for(const SessionPtr& session : sessions_) {
                 if(session) {
                     session->stop();
                 }

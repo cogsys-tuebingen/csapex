@@ -528,8 +528,8 @@ void ThreadPool::setSuppressExceptions(bool suppress_exceptions)
 {
     if(suppress_exceptions_ != suppress_exceptions) {
         suppress_exceptions_ = suppress_exceptions;
-        for(ThreadGroupPtr& group : groups_) {
-            for(TaskGeneratorPtr task : *group) {
+        for(const ThreadGroupPtr& group : groups_) {
+            for(const TaskGeneratorPtr& task : *group) {
                 task->setSuppressExceptions(suppress_exceptions);
             }
         }

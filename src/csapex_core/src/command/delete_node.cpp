@@ -47,7 +47,7 @@ bool DeleteNode::doExecute()
     locked = false;
     clear();
 
-    for(ConnectablePtr connectable : node_handle->getExternalConnectors()) {
+    for(const ConnectablePtr& connectable : node_handle->getExternalConnectors()) {
         apex_assert(!connectable->isConnected());
     }
 

@@ -540,7 +540,7 @@ public:
             return i->value;
         } else if(auto i = std::dynamic_pointer_cast< InstancedImplementation > (impl)) {
             auto res = std::make_shared<std::vector<T>>();
-            for(TokenDataConstPtr td : i->value) {
+            for(const TokenDataConstPtr& td : i->value) {
                 if(auto v = std::dynamic_pointer_cast<T const>(td)) {
                     res->push_back(*v);
                 }
@@ -577,7 +577,7 @@ public:
     static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<T>>& res,
                                 typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0)
     {
-        for(TokenDataConstPtr td : i->value) {
+        for(const TokenDataConstPtr& td : i->value) {
             res->push_back(*std::dynamic_pointer_cast<T const>(td));
         }
     }
@@ -585,7 +585,7 @@ public:
     static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<std::shared_ptr<T>>>& res,
                                 typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0)
     {
-        for(TokenDataConstPtr td : i->value) {
+        for(const TokenDataConstPtr& td : i->value) {
             res->push_back(std::dynamic_pointer_cast<T>(td));
         }
     }
@@ -593,7 +593,7 @@ public:
     static void makeSharedValue(InstancedImplementation* i, std::shared_ptr<std::vector<std::shared_ptr<T const>>>& res,
                                 typename std::enable_if<std::is_base_of<TokenData, T>::value >::type* = 0)
     {
-        for(TokenDataConstPtr td : i->value) {
+        for(const TokenDataConstPtr& td : i->value) {
             res->push_back(std::dynamic_pointer_cast<T const>(td));
         }
     }
@@ -603,7 +603,7 @@ public:
                                 typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0)
     {
         static_assert(!std::is_base_of<TokenData, T>::value, "not applicable to messages");
-        for(TokenDataConstPtr td : i->value) {
+        for(const TokenDataConstPtr& td : i->value) {
             res->push_back(*std::dynamic_pointer_cast<GenericPointerMessage<T> const>(td)->value);
         }
     }
@@ -612,7 +612,7 @@ public:
                                 typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0)
     {
         static_assert(!std::is_base_of<TokenData, T>::value, "not applicable to messages");
-        for(TokenDataConstPtr td : i->value) {
+        for(const TokenDataConstPtr& td : i->value) {
             res->push_back(std::dynamic_pointer_cast<GenericPointerMessage<T> const>(td)->value);
         }
     }
@@ -621,7 +621,7 @@ public:
                                 typename std::enable_if<connection_types::should_use_pointer_message<T>::value >::type* = 0)
     {
         static_assert(!std::is_base_of<TokenData, T>::value, "not applicable to messages");
-        for(TokenDataConstPtr td : i->value) {
+        for(const TokenDataConstPtr& td : i->value) {
             res->push_back(std::dynamic_pointer_cast<GenericPointerMessage<T const> const>(td)->value);
         }
     }
@@ -631,7 +631,7 @@ public:
                                 typename std::enable_if<connection_types::should_use_value_message<T>::value >::type* = 0)
     {
         static_assert(!std::is_base_of<TokenData, T>::value, "not applicable to messages");
-        for(TokenDataConstPtr td : i->value) {
+        for(const TokenDataConstPtr& td : i->value) {
             res->push_back(std::dynamic_pointer_cast<GenericValueMessage<T> const>(td)->value);
         }
     }

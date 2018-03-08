@@ -25,12 +25,21 @@ public:
     bool canConnectTo(const TokenData* other_side) const override;
     bool acceptsConnectionFrom(const TokenData* other_side) const override;
 };
+
 template <>
 struct type<AnyMessage> {
     static std::string name() {
         return "Anything";
     }
 };
+
+template <>
+inline std::shared_ptr<AnyMessage> makeEmpty<AnyMessage>()
+{
+    static std::shared_ptr<AnyMessage> instance(new AnyMessage);
+    return instance;
+}
+
 }
 }
 

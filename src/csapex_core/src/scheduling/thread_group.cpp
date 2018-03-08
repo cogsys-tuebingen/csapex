@@ -42,7 +42,7 @@ ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler &handler, s
 ThreadGroup::~ThreadGroup()
 {
     std::vector<TaskGeneratorPtr> generators_copy = generators_;
-    for(TaskGeneratorPtr tg : generators_copy) {
+    for(const TaskGeneratorPtr& tg : generators_copy) {
         tg->detach();
     }
     if(running_ || scheduler_thread_.joinable()) {
@@ -248,7 +248,7 @@ void ThreadGroup::stop()
         }
 
         auto gen = generators_;
-        for(TaskGeneratorPtr tg : gen) {
+        for(const TaskGeneratorPtr& tg : gen) {
             tg->detach();
         }
 
@@ -299,7 +299,7 @@ void ThreadGroup::add(TaskGeneratorPtr generator, const std::vector<TaskPtr> &in
     add(generator);
 
     std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
-    for(TaskPtr t: initial_tasks) {
+    for(const TaskPtr& t: initial_tasks) {
         schedule(t);
     }
 
@@ -358,7 +358,7 @@ void ThreadGroup::schedule(TaskPtr task)
     std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
 
     if(!tasks_.empty()) {
-//        for(TaskPtr t : tasks_) {
+//        for(const TaskPtr& t : tasks_) {
         for(auto it = tasks_.begin(); it != tasks_.end(); ++it) {
             const TaskPtr& t = *it;
             if(t.get() == task.get()) {

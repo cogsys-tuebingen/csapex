@@ -40,6 +40,20 @@ if (UNIX AND NOT APPLE)
 endif()
 
 
+#
+# COVERAGE
+#
+if(ENABLE_COVERAGE)
+    message("generating coverage information")
+
+    SET(GCC_COVERAGE_COMPILE_FLAGS "--coverage -fno-inline -fno-inline-small-functions -fno-default-inline")
+    SET(GCC_COVERAGE_LINK_FLAGS    "-lgcov")
+
+    SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
+    SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
+endif()
+
+
 macro(csapex_package)
 
         find_package(catkin QUIET)

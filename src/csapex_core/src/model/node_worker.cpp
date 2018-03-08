@@ -141,10 +141,10 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
             node_handle_->getOutputTransition()->getOutput(out)->setEnabled(e);
         }
 
-        for(SlotPtr slot : node_handle_->getSlots()) {
+        for(const SlotPtr& slot : node_handle_->getSlots()) {
             slot->setEnabled(e);
         }
-        for(EventPtr event : node_handle_->getEvents()) {
+        for(const EventPtr& event : node_handle_->getEvents()) {
             event->setEnabled(e);
         }
 
@@ -262,7 +262,7 @@ bool NodeWorker::canProcess() const
 
 bool NodeWorker::canReceive() const
 {
-    for(InputPtr i : node_handle_->getExternalInputs()) {
+    for(const InputPtr& i : node_handle_->getExternalInputs()) {
         if(i->isOptional()) {
             // optional -> do nothing
         } else {
@@ -286,7 +286,7 @@ bool NodeWorker::canSend() const
         return false;
     }
 
-    for(EventPtr e : node_handle_->getExternalEvents()){
+    for(const EventPtr& e : node_handle_->getExternalEvents()){
         if(!e->canReceiveToken()) {
             return false;
         }
@@ -359,7 +359,7 @@ bool NodeWorker::allInputsArePresent()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    for(InputPtr cin : node_handle_->getExternalInputs()) {
+    for(const InputPtr& cin : node_handle_->getExternalInputs()) {
         apex_assert_hard(cin->hasReceived() || (cin->isOptional() && !cin->isConnected()));
         if(!cin->isOptional() && !msg::hasMessage(cin.get())) {
             return false;
@@ -381,7 +381,7 @@ connection_types::MarkerMessageConstPtr NodeWorker::getFirstMarkerMessage()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-    for(InputPtr cin : node_handle_->getExternalInputs()) {
+    for(const InputPtr& cin : node_handle_->getExternalInputs()) {
         apex_assert_hard(cin->hasReceived() || (cin->isOptional() && !cin->isConnected()));
         if(cin->hasReceived()) {
             if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(cin->getToken()->getTokenData())) {
@@ -399,7 +399,7 @@ std::vector<ActivityModifier> NodeWorker::getIncomingActivityModifiers()
 {
     std::vector<ActivityModifier> activity_modifiers;
 
-    for(auto input : node_handle_->getExternalInputs()) {
+    for(const auto& input : node_handle_->getExternalInputs()) {
         for(const ConnectionPtr& c : input->getConnections()) {
             if(c->holdsActiveToken()) {
                 activity_modifiers.push_back(c->getToken()->getActivityModifier());
@@ -489,7 +489,7 @@ void NodeWorker::processNode()
 void NodeWorker::processSlot(const SlotWeakPtr& slot_w)
 {
     if(SlotPtr slot = slot_w.lock()) {
-        TokenPtr token = slot->getToken();
+        const TokenPtr& token = slot->getToken();
         if(token) {
             if(!slot->isGraphPort() && token->hasActivityModifier()) {
                 if(token->getActivityModifier() == ActivityModifier::ACTIVATE) {
@@ -576,7 +576,7 @@ bool NodeWorker::processMarker(const connection_types::MarkerMessageConstPtr &ma
         node->processMarker(marker);
 
         // forward it to all outputs
-        for(OutputPtr out : node_handle_->getExternalOutputs()) {
+        for(const OutputPtr& out : node_handle_->getExternalOutputs()) {
             msg::publish(out.get(), marker);
         }
         return false;
@@ -605,8 +605,8 @@ bool NodeWorker::startProcessingMessages()
         apex_assert_hard(node_handle_->getInputTransition()->areMessagesComplete());
 
         apex_assert_hard(node_handle_->getOutputTransition()->canStartSendingMessages());
-        for(EventPtr e : node_handle_->getEvents()) {
-            for(ConnectionPtr c : e->getConnections()) {
+        for(const EventPtr& e : node_handle_->getEvents()) {
+            for(const ConnectionPtr& c : e->getConnections()) {
                 apex_assert_hard(c->getState() != Connection::State::UNREAD);
             }
         }
@@ -851,7 +851,7 @@ void NodeWorker::publishParameterOn(const csapex::param::Parameter& p, Output* o
 void NodeWorker::sendEvents(bool active)
 {
     bool sent_active_external = false;
-    for(EventPtr e : node_handle_->getExternalEvents()){
+    for(const EventPtr& e : node_handle_->getExternalEvents()){
         if(e->hasMessage() && e->isConnected()) {
             if(!e->canReceiveToken()) {
                 continue;
@@ -865,7 +865,7 @@ void NodeWorker::sendEvents(bool active)
             }
         }
     }
-    for(EventPtr e : node_handle_->getInternalEvents()){
+    for(const EventPtr& e : node_handle_->getInternalEvents()){
         if(e->hasMessage() && e->isConnected()) {
             if(!e->canReceiveToken()) {
                 continue;

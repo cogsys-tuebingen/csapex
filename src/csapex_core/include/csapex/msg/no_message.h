@@ -29,6 +29,14 @@ struct type<NoMessage> {
     }
 };
 
+template <>
+inline std::shared_ptr<NoMessage> makeEmpty<NoMessage>()
+{
+    static std::shared_ptr<NoMessage> instance(new NoMessage);
+    return instance;
+}
+
+
 }
 }
 

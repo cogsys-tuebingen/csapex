@@ -238,7 +238,7 @@ void NodeRunner::schedule(TaskPtr task)
     remaining_tasks_.push_back(task);
 
     if(scheduler_) {
-        for(TaskPtr t : remaining_tasks_) {
+        for(const TaskPtr& t : remaining_tasks_) {
             scheduler_->schedule(t);
         }
         remaining_tasks_.clear();

@@ -16,9 +16,15 @@
 #define APEX_FUNCTION_SIGNATURE() __PRETTY_FUNCTION__
 #endif
 
-#define apex_assert_msg(assertion,msg)       _apex_assert(static_cast<bool>(assertion),      msg, #assertion, __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
-#define apex_assert_hard_msg(assertion,msg)  _apex_assert_hard(static_cast<bool>(assertion), msg, #assertion, __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
-#define apex_assert_soft_msg(assertion,msg)  _apex_assert_soft(static_cast<bool>(assertion), msg, #assertion, __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
+#ifndef CSAPEX_NO_ASSERTIONS
+    #define apex_assert_msg(assertion,msg)       _apex_assert(static_cast<bool>(assertion),      msg, #assertion, __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
+    #define apex_assert_hard_msg(assertion,msg)  _apex_assert_hard(static_cast<bool>(assertion), msg, #assertion, __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
+    #define apex_assert_soft_msg(assertion,msg)  _apex_assert_soft(static_cast<bool>(assertion), msg, #assertion, __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
+#else
+    #define apex_assert_msg(assertion,msg)
+    #define apex_assert_hard_msg(assertion,msg)
+    #define apex_assert_soft_msg(assertion,msg)
+#endif
 
 #define apex_assert_eq(a,b)       apex_assert_msg(((a) == (b)), universal_to_string(a) + " is not equal to " + universal_to_string(b))
 #define apex_assert_eq_hard(a,b)  apex_assert_hard_msg(((a) == (b)), universal_to_string(a) + " is not equal to " + universal_to_string(b))
@@ -28,9 +34,6 @@
 #define apex_assert_neq_hard(a,b)  apex_assert_hard_msg(((a) != (b)), universal_to_string(a) + " is equal to " + universal_to_string(b))
 #define apex_assert_neq_soft(a,b)  apex_assert_soft_msg(((a) != (b)), universal_to_string(a) + " is equal to " + universal_to_string(b))
 
-#define apex_assert_equal(a,b)       apex_assert_eq(a,b)
-#define apex_assert_equal_hard(a,b)  apex_assert_eq_hard(a,b)
-#define apex_assert_equal_soft(a,b)  apex_assert_eq_soft(a,b)
 
 #define apex_assert_lt(a,b)       apex_assert_msg(((a) < (b)), universal_to_string(a) + " is not smaller than " + universal_to_string(b))
 #define apex_assert_lt_hard(a,b)  apex_assert_hard_msg(((a) < (b)), universal_to_string(a) + " is not smaller than " + universal_to_string(b))
@@ -52,6 +55,9 @@
 #define apex_assert_hard(assertion)  apex_assert_hard_msg(assertion,"")
 #define apex_assert_soft(assertion)  apex_assert_soft_msg(assertion,"")
 
+#define apex_assert_equal(a,b)       apex_assert_eq(a,b)
+#define apex_assert_equal_hard(a,b)  apex_assert_eq_hard(a,b)
+#define apex_assert_equal_soft(a,b)  apex_assert_eq_soft(a,b)
 
 #define apex_fail(msg) _apex_fail(msg, "", __FILE__, __LINE__, APEX_FUNCTION_SIGNATURE())
 

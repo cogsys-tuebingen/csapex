@@ -32,7 +32,7 @@ void Event::reset()
 
 void Event::trigger()
 {
-    TokenPtr token = Token::makeEmpty<connection_types::AnyMessage>();
+    TokenPtr token = connection_types::makeEmptyToken<connection_types::AnyMessage>();
     triggerWith(token);
 }
 

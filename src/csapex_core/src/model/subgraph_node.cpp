@@ -196,7 +196,7 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
     has_sent_current_iteration_ = false;
     is_subgraph_finished_ = false;
 
-    for(InputPtr i : node_modifier.getMessageInputs()) {
+    for(const InputPtr& i : node_modifier.getMessageInputs()) {
         if(msg::hasMessage(i.get())) {
             TokenDataConstPtr m = msg::getMessage(i.get());
             OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
@@ -813,7 +813,7 @@ void SubgraphNode::sendCurrentIteration()
 void SubgraphNode::startNextIteration()
 {
 //    ainfo << "start iteration " << iteration_index_ << std::endl;
-    for(InputPtr i : node_modifier_->getMessageInputs()) {
+    for(const InputPtr& i : node_modifier_->getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i.get());
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 

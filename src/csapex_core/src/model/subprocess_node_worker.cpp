@@ -270,7 +270,7 @@ void SubprocessNodeWorker::finishHandleProcessChild()
         // send result
         YAML::Node yaml(YAML::NodeType::Sequence);
 
-        for(OutputPtr& output : node_handle_->getExternalOutputs()) {
+        for(const OutputPtr& output : node_handle_->getExternalOutputs()) {
             auto msg = output->getAddedToken();
 
             if(msg) {
@@ -286,7 +286,7 @@ void SubprocessNodeWorker::finishHandleProcessChild()
             }
         }
 
-        for(EventPtr& event: node_handle_->getExternalEvents()) {
+        for(const EventPtr& event: node_handle_->getExternalEvents()) {
             auto msg = event->getAddedToken();
 
             if(msg) {
@@ -403,7 +403,7 @@ void SubprocessNodeWorker::startSubprocess(const SubprocessChannel::MessageType 
 {
     YAML::Node yaml(YAML::NodeType::Sequence);
 
-    for(InputPtr& input : node_handle_->getExternalInputs()) {
+    for(const InputPtr& input : node_handle_->getExternalInputs()) {
         if(msg::hasMessage(input.get())) {
             auto msg = msg::getMessage(input.get());
 

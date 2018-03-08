@@ -98,7 +98,7 @@ void InputTransition::reset()
         InputPtr input = pair.second;
         input->reset();
     }
-    for(ConnectionPtr connection : connections_) {
+    for(const ConnectionPtr& connection : connections_) {
         connection->reset();
     }
 
@@ -119,7 +119,7 @@ void InputTransition::connectionAdded(Connection *connection)
     bool needs_message = has_read_or_unread && connection->getState() == Connection::State::NOT_INITIALIZED;
 
     if(needs_message) {
-        connection->setToken(Token::makeEmpty<connection_types::NoMessage>());
+        connection->setToken(connection_types::makeEmptyToken<connection_types::NoMessage>());
         if(!unread) {
             connection->setState(Connection::State::READ);
         }
@@ -209,7 +209,7 @@ void InputTransition::notifyMessageRead()
     }
     //    apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
 
-    //    for(ConnectionPtr& c : connections_) {
+    //    for(const ConnectionPtr& c : connections_) {
     //        c->setTokenRead();
     //    }
     //    forwarded_ = false;
@@ -226,7 +226,7 @@ void InputTransition::notifyMessageProcessed()
         APEX_DEBUG_CERR <<"input transition notified" << std::endl;
         forwarded_ = false;
         processed_ = true;
-        for(ConnectionPtr& c : connections_) {
+        for(const ConnectionPtr& c : connections_) {
             c->setTokenProcessed();
         }
 
@@ -279,7 +279,7 @@ void InputTransition::forwardMessages()
                 apex_assert_hard(token != nullptr);
                 input->setToken(token);
             } else {
-                input->setToken(Token::makeEmpty<connection_types::NoMessage>());
+                input->setToken(connection_types::makeEmptyToken<connection_types::NoMessage>());
             }
         }
 

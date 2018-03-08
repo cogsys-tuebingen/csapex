@@ -13,12 +13,6 @@ namespace csapex {
 class CSAPEX_CORE_EXPORT Token
 {
 public:
-    template <typename DataType>
-    static TokenPtr makeEmpty() {
-        return std::make_shared<Token>(connection_types::makeEmpty<DataType>());
-    }
-
-public:
     Token(const TokenDataConstPtr& token);
 
     void setActivityModifier(ActivityModifier active);
