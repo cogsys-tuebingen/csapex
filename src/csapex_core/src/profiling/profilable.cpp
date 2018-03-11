@@ -24,7 +24,7 @@ void Profilable::useProfiler(std::shared_ptr<Profiler> profiler)
     profiler_ = profiler;
 }
 
-std::shared_ptr<Profiler> Profilable::getProfiler()
+std::shared_ptr<Profiler> Profilable::getProfiler() const
 {
     return profiler_;
 }

@@ -10,6 +10,8 @@
 #include <csapex/utility/exceptions.h>
 #include <csapex/core/exception_handler.h>
 #include <csapex/scheduling/timed_queue.h>
+#include <csapex/profiling/profiler.h>
+#include <csapex/profiling/interlude.h>
 
 /// SYSTEM
 #include <iostream>
@@ -387,16 +389,6 @@ void ThreadGroup::schedulingLoop()
             handlePause();
 
             keep_executing = executeNextTask();
-//            int cpu = sched_getcpu();
-//            if(!getCpuAffinity()->isCpuUsed(cpu)) {
-//                std::stringstream ss;
-//                const std::vector<bool>& cpus = getCpuAffinity()->get();
-//                for(std::size_t cpu = 0, n = cpus.size(); cpu < n; ++cpu) {
-//                    bool on = cpus[cpu];
-//                    ss << (int) on << " ";
-//                }
-//                std::cout << "Thread #" << name_ << ": on CPU " << cpu << " with affinity " << ss.str() << std::endl;
-//            }
         }
     }
 }
@@ -452,6 +444,13 @@ void ThreadGroup::executeTask(const TaskPtr& task)
 {
     try {
         std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
+        ProfilerPtr profiler = getProfiler();
+        Interlude::Ptr interlude;
+        if(profiler && profiler->isEnabled()) {
+            TimerPtr timer = profiler->getTimer(getName());
+            interlude = std::make_shared<Interlude>(timer, task->getName());
+        }
+
         task->execute();
 
     } catch(const std::exception& e) {

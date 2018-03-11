@@ -7,6 +7,7 @@
 #include <csapex/core/exception_handler.h>
 #include <csapex/utility/utility_fwd.h>
 #include <csapex/model/observer.h>
+#include <csapex/profiling/profilable.h>
 
 /// SYSTEM
 #include <map>
@@ -20,7 +21,7 @@ namespace csapex
 
 class CsApexCore;
 
-class CSAPEX_CORE_EXPORT ThreadPool : public Executor, public Observer
+class CSAPEX_CORE_EXPORT ThreadPool : public Executor, public Observer, public Profilable
 {
 public:
     ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
@@ -67,6 +68,8 @@ public:
     std::vector<bool> getPrivateThreadGroupCpuAffinity() const;
 
     void setSuppressExceptions(bool suppress_exceptions) override;
+
+    void useProfiler(std::shared_ptr<Profiler> profiler) override;
 
 public:
     slim_signal::Signal<void (ThreadGroupPtr)> group_created;

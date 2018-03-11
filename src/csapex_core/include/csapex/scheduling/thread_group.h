@@ -6,6 +6,8 @@
 #include <csapex/scheduling/task.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/utility/utility_fwd.h>
+#include <csapex/profiling/profiling_fwd.h>
+#include <csapex/profiling/profilable.h>
 
 /// SYSTEM
 #include <string>
@@ -24,7 +26,10 @@ class Node;
 namespace csapex
 {
 
-class CSAPEX_CORE_EXPORT ThreadGroup : public Scheduler, public std::enable_shared_from_this<ThreadGroup>
+class CSAPEX_CORE_EXPORT ThreadGroup :
+        public Scheduler,
+        public Profilable,
+        public std::enable_shared_from_this<ThreadGroup>
 {
 public:
     enum {

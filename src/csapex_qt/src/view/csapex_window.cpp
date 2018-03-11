@@ -17,6 +17,7 @@
 #include <csapex/model/node_constructor.h>
 #include <csapex/model/node_facade.h>
 #include <csapex/core/csapex_core.h>
+#include <csapex/manager/message_renderer_manager.h>
 #include <csapex/model/tag.h>
 #include <csapex/model/token_data.h>
 #include <csapex/param/parameter_factory.h>
@@ -31,12 +32,13 @@
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/designer/tutorial_tree_model.h>
 #include <csapex/view/model/thread_group_table_model.h>
+#include <csapex/view/model/thread_group_profiling_model.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/node_statistics.h>
 #include <csapex/view/utility/clipboard.h>
 #include <csapex/view/utility/cpu_affinity_delegate.h>
 #include <csapex/view/utility/html_delegate.h>
-#include <csapex/manager/message_renderer_manager.h>
+#include <csapex/view/utility/thread_group_profiling_delegate.h>
 #include <csapex/view/utility/node_list_generator.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/utility/snippet_list_generator.h>
@@ -110,6 +112,7 @@ void CsApexWindow::construct()
     ui->setupUi(this);
 
     setupTimeline();
+    setupProfiling();
 
     setupDesigner();
 
@@ -179,8 +182,6 @@ void CsApexWindow::construct()
     QObject::connect(ui->actionCopyright_Notices, SIGNAL(triggered()), this, SLOT(copyRight()));
 
     QObject::connect(ui->node_info_tree, SIGNAL(itemSelectionChanged()), this, SLOT(updateNodeInfo()));
-
-    QObject::connect(ui->profiling_debug_enable, SIGNAL(toggled(bool)), this, SLOT(enableDebugProfiling(bool)));
 
     QObject::connect(this, &CsApexWindow::updateUndoInfoRequest, this, &CsApexWindow::updateUndoInfo);
     QObject::connect(this, &CsApexWindow::updateTitleRequest, this, &CsApexWindow::updateTitle);
@@ -441,6 +442,59 @@ void CsApexWindow::setupTimeline()
 
     QObject::connect(ui->timeline_record, SIGNAL(toggled(bool)), activity_timeline_, SLOT(setRecording(bool)));
     QObject::connect(activity_timeline_, SIGNAL(recordingChanged(bool)), ui->timeline_record, SLOT(setChecked(bool)));
+}
+
+void CsApexWindow::setupProfiling()
+{
+    QObject::connect(ui->profiling_debug_enable, SIGNAL(toggled(bool)), this, SLOT(enableDebugProfiling(bool)));
+
+
+    ThreadPoolPtr thread_pool = view_core_.getThreadPool();
+    if(!thread_pool) {
+        return;
+    }
+
+    thread_pool->getProfiler()->setEnabled(false);
+
+    ThreadGroupProfilingModel* model = new ThreadGroupProfilingModel(view_core_.getSettings(), thread_pool);
+    ui->thread_profiling_table->setModel(model);
+    ui->thread_profiling_table->setItemDelegate(new ThreadGroupProfilingDelegate(ui->thread_profiling_table));
+    ui->thread_profiling_table->setMouseTracking(true);
+
+    ui->thread_profiling_table->resizeColumnToContents(0);
+    ui->thread_profiling_table->resizeColumnToContents(1);
+
+    QTimer* timer = new QTimer(this);
+    timer->setInterval(1000);
+    timer->start();
+
+    connect(timer, &QTimer::timeout, model, &ThreadGroupProfilingModel::refresh);
+
+    QObject::connect(model, &ThreadGroupProfilingModel::rowsInserted,
+                     [this](const QModelIndex &parent, int first, int last)
+    {
+        ui->thread_profiling_table->resizeRowsToContents();
+        ui->thread_profiling_table->resizeColumnToContents(0);
+        ui->thread_profiling_table->resizeColumnToContents(1);
+    });
+
+    QObject::connect(ui->thread_profiling_record, &QPushButton::toggled, [this, timer](bool toggled) {
+        if(ThreadPoolPtr thread_pool = view_core_.getThreadPool()) {
+            thread_pool->getProfiler()->setEnabled(toggled);
+            ui->thread_profiling_reset->setEnabled(toggled);
+            if(toggled) {
+                thread_pool->getProfiler()->reset();
+                timer->start();
+            } else {
+                timer->stop();
+            }
+        }
+    });
+    QObject::connect(ui->thread_profiling_reset, &QPushButton::pressed, [this]() {
+        if(ThreadPoolPtr thread_pool = view_core_.getThreadPool()) {
+            thread_pool->getProfiler()->reset();
+        }
+    });
 }
 
 void CsApexWindow::updateSelectionActions()

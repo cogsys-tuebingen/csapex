@@ -70,6 +70,7 @@ add_library(${PROJECT_NAME} SHARED
     src/view/gui_exception_handler.cpp
 
     src/view/model/thread_group_table_model.cpp
+    src/view/model/thread_group_profiling_model.cpp
 
     src/view/designer/designer.cpp
     src/view/designer/designer_options.cpp
@@ -112,18 +113,19 @@ add_library(${PROJECT_NAME} SHARED
     src/view/param/output_progress_param_adapter.cpp
     src/view/param/output_text_param_adapter.cpp
 
-    src/view/utility/node_list_generator.cpp
-    src/view/utility/snippet_list_generator.cpp
     src/view/utility/context_menu_handler.cpp
+    src/view/utility/clipboard.cpp
     src/view/utility/cpu_affinity_delegate.cpp
     src/view/utility/html_delegate.cpp
+    src/view/utility/node_list_generator.cpp
     src/view/utility/qobserver.cpp
     src/view/utility/qsignal_bridges.cpp
     src/view/utility/qsignal_relay.cpp
     src/view/utility/qt_helper.cpp
     src/view/utility/qwrapper.cpp
+    src/view/utility/snippet_list_generator.cpp
+    src/view/utility/thread_group_profiling_delegate.cpp
     src/view/utility/widget_picker.cpp
-    src/view/utility/clipboard.cpp
 
     src/view/widgets/activity_legend.cpp
     src/view/widgets/activity_timeline.cpp
@@ -143,6 +145,7 @@ add_library(${PROJECT_NAME} SHARED
     src/view/widgets/qint_slider.cpp
     src/view/widgets/screenshot_dialog.cpp
     src/view/widgets/movable_graphics_proxy_widget.cpp
+    src/view/widgets/thread_group_profiling_widget.cpp
     src/view/widgets/message_preview_widget.cpp
     src/view/widgets/notification_widget.cpp
     src/view/widgets/cpu_affinity_widget.cpp

@@ -18,6 +18,8 @@ Profile::Profile(const std::string& key, int timer_history_length, bool enabled)
 
 void Profile::reset()
 {
+    timer->restart();
+
     for(auto& pair : steps_acc_) {
         accumulator& acc = pair.second;
         acc = accumulator();

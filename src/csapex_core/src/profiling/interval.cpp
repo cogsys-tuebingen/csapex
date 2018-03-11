@@ -7,7 +7,7 @@
 using namespace csapex;
 
 Interval::Interval(const std::string &name)
-    : name_(name), length_micro_seconds_(0), active_(false)
+    : name_(name), length_micro_seconds_(0), active_(false), stopped_(false)
 {
     start();
 }
@@ -26,6 +26,11 @@ bool Interval::isActive() const
 void Interval::setActive(bool active)
 {
     active_ = active;
+}
+
+bool Interval::isStopped() const
+{
+    return stopped_;
 }
 
 void Interval::entries(std::vector<std::pair<std::string, double> > &out) const
@@ -78,11 +83,13 @@ long Interval::getEndMicro() const
 
 void Interval::start()
 {
+    stopped_ = false;
     start_ = std::chrono::high_resolution_clock::now();
 }
 
 void Interval::stop()
 {
+    stopped_ = true;
     end_ = std::chrono::high_resolution_clock::now();
     length_micro_seconds_ += std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
 }

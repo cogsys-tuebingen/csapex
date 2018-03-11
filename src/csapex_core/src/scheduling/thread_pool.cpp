@@ -40,6 +40,7 @@ void ThreadPool::setup()
     default_group_ = std::make_shared<ThreadGroup>(timed_queue_,
                                                    handler_,
                                                    ThreadGroup::DEFAULT_GROUP_ID, "default");
+    default_group_->useProfiler(getProfiler());
 
     groups_.push_back(default_group_);
 
@@ -263,6 +264,7 @@ void ThreadPool::usePrivateThreadFor(TaskGenerator *task)
         group->getCpuAffinity()->set(private_group_cpu_affinity_->get());
 
         group->setPause(isPaused());
+        group->useProfiler(getProfiler());
 
         groups_.push_back(group);
         group->end_step.connect([this]() {
@@ -343,6 +345,7 @@ ThreadGroup* ThreadPool::createGroup(const std::string &name, int id)
         group = std::make_shared<ThreadGroup>(timed_queue_, handler_, name);
     }
     group->setPause(isPaused());
+    group->useProfiler(getProfiler());
 
     groups_.push_back(group);
     group->end_step.connect([this]() {
@@ -473,6 +476,7 @@ void ThreadPool::loadSettings(YAML::Node& node)
 
                     auto g = std::make_shared<ThreadGroup>(timed_queue_, handler_, group_id, group_name);
                     g->setPause(isPaused());
+                    g->useProfiler(getProfiler());
 
                     groups_.push_back(g);
                     g->end_step.connect([this]() {
@@ -533,5 +537,14 @@ void ThreadPool::setSuppressExceptions(bool suppress_exceptions)
                 task->setSuppressExceptions(suppress_exceptions);
             }
         }
+    }
+}
+
+void ThreadPool::useProfiler(std::shared_ptr<Profiler> profiler)
+{
+    Profilable::useProfiler(profiler);
+
+    for(const ThreadGroupPtr& group : groups_) {
+        group->useProfiler(profiler);
     }
 }

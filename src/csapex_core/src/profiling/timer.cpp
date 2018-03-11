@@ -17,8 +17,6 @@ Timer::~Timer()
 
 std::vector<std::pair<std::string, double> > Timer::entries() const
 {
-    assert(active.empty());
-
     std::vector<std::pair<std::string, double> > result;
     root->entries(result);
     return result;
@@ -46,8 +44,11 @@ bool Timer::isFinished() const
 
 void Timer::restart()
 {
+    if(!finished_) {
+        finish();
+    }
+
     root.reset(new Interval(timer_name_));
-    active.clear();
     active.push_back(root);
 
     finished_ = false;

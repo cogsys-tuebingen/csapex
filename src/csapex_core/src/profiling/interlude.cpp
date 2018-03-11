@@ -40,6 +40,8 @@ Interlude::~Interlude()
 {
     // stop interval
 //    Interval::Ptr i = parent_->active.back();
-    interval_->stop();
-    parent_->active.pop_back();
+    if(!interval_->isStopped()) {
+        interval_->stop();
+        parent_->active.pop_back();
+    }
 }

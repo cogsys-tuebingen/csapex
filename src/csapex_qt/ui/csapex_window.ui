@@ -14,7 +14,7 @@
    <string>cs::APEX</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../res/csapex_resources.qrc">
+   <iconset resource="../../csapex/res/csapex_resources.qrc">
     <normaloff>:/apex_logo.png</normaloff>:/apex_logo.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -131,7 +131,7 @@
       <string>&amp;Available Plugins</string>
      </property>
      <property name="icon">
-      <iconset resource="../res/csapex_resources.qrc">
+      <iconset resource="../res/csapex_qt_resources.qrc">
        <normaloff>:/plugin.png</normaloff>:/plugin.png</iconset>
      </property>
      <addaction name="actionDeselect_plugins_to_ignore_them"/>
@@ -330,11 +330,11 @@
           <x>0</x>
           <y>0</y>
           <width>274</width>
-          <height>136</height>
+          <height>133</height>
          </rect>
         </property>
         <attribute name="icon">
-         <iconset resource="../res/csapex_resources.qrc">
+         <iconset resource="../res/csapex_qt_resources.qrc">
           <normaloff>:/keyboard.png</normaloff>:/keyboard.png</iconset>
         </attribute>
         <attribute name="label">
@@ -415,7 +415,7 @@ p, li { white-space: pre-wrap; }
          </rect>
         </property>
         <attribute name="icon">
-         <iconset resource="../res/csapex_resources.qrc">
+         <iconset resource="../res/csapex_qt_resources.qrc">
           <normaloff>:/plugin.png</normaloff>:/plugin.png</iconset>
         </attribute>
         <attribute name="label">
@@ -475,11 +475,11 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>0</y>
           <width>274</width>
-          <height>136</height>
+          <height>133</height>
          </rect>
         </property>
         <attribute name="icon">
-         <iconset resource="../res/csapex_resources.qrc">
+         <iconset resource="../res/csapex_qt_resources.qrc">
           <normaloff>:/add_node.png</normaloff>:/add_node.png</iconset>
         </attribute>
         <attribute name="label">
@@ -525,11 +525,11 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>0</y>
           <width>256</width>
-          <height>136</height>
+          <height>133</height>
          </rect>
         </property>
         <attribute name="icon">
-         <iconset resource="../res/csapex_resources.qrc">
+         <iconset resource="../res/csapex_qt_resources.qrc">
           <normaloff>:/help.png</normaloff>:/help.png</iconset>
         </attribute>
         <attribute name="label">
@@ -608,7 +608,7 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>0</y>
           <width>500</width>
-          <height>117</height>
+          <height>123</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -645,7 +645,7 @@ p, li { white-space: pre-wrap; }
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="../res/csapex_resources.qrc">
+          <iconset resource="../res/csapex_qt_resources.qrc">
            <normaloff>:/timeline_record.png</normaloff>
            <normalon>:/timeline_pause.png</normalon>:/timeline_record.png</iconset>
          </property>
@@ -697,13 +697,92 @@ p, li { white-space: pre-wrap; }
         <attribute name="title">
          <string>Thread Profiling</string>
         </attribute>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <layout class="QVBoxLayout" name="verticalLayout_14">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
          <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Not yet implemented</string>
+          <widget class="QScrollArea" name="scrollArea_2">
+           <property name="widgetResizable">
+            <bool>true</bool>
            </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>596</width>
+              <height>90</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <item>
+              <widget class="QTableView" name="thread_profiling_table">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::AdjustToContents</enum>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectRows</enum>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="thread_profiling_record">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../res/csapex_qt_resources.qrc">
+               <normaloff>:/timeline_record.png</normaloff>
+               <normalon>:/timeline_pause.png</normalon>:/timeline_record.png</iconset>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="thread_profiling_reset">
+             <property name="text">
+              <string>reset</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -723,7 +802,7 @@ p, li { white-space: pre-wrap; }
               <x>0</x>
               <y>0</y>
               <width>596</width>
-              <height>70</height>
+              <height>76</height>
              </rect>
             </property>
            </widget>
@@ -791,7 +870,7 @@ p, li { white-space: pre-wrap; }
              <string>delete selected</string>
             </property>
             <property name="icon">
-             <iconset resource="../res/csapex_resources.qrc">
+             <iconset resource="../res/csapex_qt_resources.qrc">
               <normaloff>:/thread_group_delete.png</normaloff>:/thread_group_delete.png</iconset>
             </property>
            </widget>
@@ -802,7 +881,7 @@ p, li { white-space: pre-wrap; }
              <string>create new group</string>
             </property>
             <property name="icon">
-             <iconset resource="../res/csapex_resources.qrc">
+             <iconset resource="../res/csapex_qt_resources.qrc">
               <normaloff>:/thread_group_add.png</normaloff>:/thread_group_add.png</iconset>
             </property>
            </widget>
@@ -815,7 +894,7 @@ p, li { white-space: pre-wrap; }
            <string>assign nodes to group</string>
           </property>
           <property name="icon">
-           <iconset resource="../res/csapex_resources.qrc">
+           <iconset resource="../res/csapex_qt_resources.qrc">
             <normaloff>:/thread_group.png</normaloff>:/thread_group.png</iconset>
           </property>
          </widget>
@@ -831,7 +910,7 @@ p, li { white-space: pre-wrap; }
           <string>assign default thread</string>
          </property>
          <property name="icon">
-          <iconset resource="../res/csapex_resources.qrc">
+          <iconset resource="../res/csapex_qt_resources.qrc">
            <normaloff>:/thread_group.png</normaloff>:/thread_group.png</iconset>
          </property>
         </widget>
@@ -842,7 +921,7 @@ p, li { white-space: pre-wrap; }
           <string>assign private thread</string>
          </property>
          <property name="icon">
-          <iconset resource="../res/csapex_resources.qrc">
+          <iconset resource="../res/csapex_qt_resources.qrc">
            <normaloff>:/thread_group_none.png</normaloff>:/thread_group_none.png</iconset>
          </property>
         </widget>
@@ -887,7 +966,7 @@ p, li { white-space: pre-wrap; }
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/save.png</normaloff>:/save.png</iconset>
    </property>
    <property name="text">
@@ -899,7 +978,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionLoad">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/open.png</normaloff>:/open.png</iconset>
    </property>
    <property name="text">
@@ -911,7 +990,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/arrow_undo.png</normaloff>:/arrow_undo.png</iconset>
    </property>
    <property name="text">
@@ -923,7 +1002,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/arrow_redo.png</normaloff>:/arrow_redo.png</iconset>
    </property>
    <property name="text">
@@ -943,7 +1022,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSaveAs">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/save_as.png</normaloff>:/save_as.png</iconset>
    </property>
    <property name="text">
@@ -995,7 +1074,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/grid.png</normaloff>:/grid.png</iconset>
    </property>
    <property name="text">
@@ -1007,7 +1086,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionHelp_Center">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/help.png</normaloff>:/help.png</iconset>
    </property>
    <property name="text">
@@ -1022,7 +1101,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionAbout_CS_APEX">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../../csapex/res/csapex_resources.qrc">
      <normaloff>:/apex_logo.png</normaloff>:/apex_logo.png</iconset>
    </property>
    <property name="text">
@@ -1045,7 +1124,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/pause.png</normaloff>
      <normalon>:/play.png</normalon>:/pause.png</iconset>
    </property>
@@ -1072,7 +1151,7 @@ p, li { white-space: pre-wrap; }
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/close.png</normaloff>:/close.png</iconset>
    </property>
    <property name="text">
@@ -1084,7 +1163,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionClearBlock">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/stop.png</normaloff>:/stop.png</iconset>
    </property>
    <property name="text">
@@ -1096,7 +1175,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/schema.png</normaloff>:/schema.png</iconset>
    </property>
    <property name="text">
@@ -1108,7 +1187,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/components.png</normaloff>:/components.png</iconset>
    </property>
    <property name="text">
@@ -1120,7 +1199,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/threads.png</normaloff>:/threads.png</iconset>
    </property>
    <property name="text">
@@ -1129,7 +1208,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="action_How_to_install">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/help.png</normaloff>:/help.png</iconset>
    </property>
    <property name="text">
@@ -1149,7 +1228,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/map.png</normaloff>:/map.png</iconset>
    </property>
    <property name="text">
@@ -1163,7 +1242,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionMake_Screenshot">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/image.png</normaloff>:/image.png</iconset>
    </property>
    <property name="text">
@@ -1178,7 +1257,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/port_input.png</normaloff>:/port_input.png</iconset>
    </property>
    <property name="text">
@@ -1196,7 +1275,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/port_slot.png</normaloff>:/port_slot.png</iconset>
    </property>
    <property name="text">
@@ -1211,7 +1290,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/step.png</normaloff>:/step.png</iconset>
    </property>
    <property name="text">
@@ -1226,7 +1305,7 @@ p, li { white-space: pre-wrap; }
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/step_next.png</normaloff>:/step_next.png</iconset>
    </property>
    <property name="text">
@@ -1241,7 +1320,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/bug.png</normaloff>:/bug.png</iconset>
    </property>
    <property name="text">
@@ -1253,7 +1332,7 @@ p, li { white-space: pre-wrap; }
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
    </property>
    <property name="text">
@@ -1268,7 +1347,7 @@ p, li { white-space: pre-wrap; }
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/paste.png</normaloff>:/paste.png</iconset>
    </property>
    <property name="text">
@@ -1283,7 +1362,7 @@ p, li { white-space: pre-wrap; }
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/group.png</normaloff>:/group.png</iconset>
    </property>
    <property name="text">
@@ -1298,7 +1377,7 @@ p, li { white-space: pre-wrap; }
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/ungroup.png</normaloff>:/ungroup.png</iconset>
    </property>
    <property name="text">
@@ -1307,7 +1386,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionReset_Activity">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/port_slot.png</normaloff>:/port_slot.png</iconset>
    </property>
    <property name="text">
@@ -1316,7 +1395,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionFind_Node">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/magnifier.png</normaloff>:/magnifier.png</iconset>
    </property>
    <property name="text">
@@ -1328,7 +1407,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionCreate_Node">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/add_node.png</normaloff>:/add_node.png</iconset>
    </property>
    <property name="text">
@@ -1343,7 +1422,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/clock_red.png</normaloff>:/clock_red.png</iconset>
    </property>
    <property name="text">
@@ -1358,7 +1437,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/activity_add.png</normaloff>:/activity_add.png</iconset>
    </property>
    <property name="text">
@@ -1376,7 +1455,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/activity_remove.png</normaloff>:/activity_remove.png</iconset>
    </property>
    <property name="text">
@@ -1391,7 +1470,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/remote.png</normaloff>
      <normalon>:/remote_go.png</normalon>:/remote.png</iconset>
    </property>
@@ -1401,7 +1480,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionServer_Options">
    <property name="icon">
-    <iconset resource="../res/csapex_resources.qrc">
+    <iconset resource="../res/csapex_qt_resources.qrc">
      <normaloff>:/remote_edit.png</normaloff>:/remote_edit.png</iconset>
    </property>
    <property name="text">
@@ -1410,7 +1489,8 @@ p, li { white-space: pre-wrap; }
   </action>
  </widget>
  <resources>
-  <include location="../res/csapex_resources.qrc"/>
+  <include location="../../csapex/res/csapex_resources.qrc"/>
+  <include location="../res/csapex_qt_resources.qrc"/>
  </resources>
  <connections>
   <connection>

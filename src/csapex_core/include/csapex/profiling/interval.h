@@ -34,6 +34,8 @@ public:
     void start();
     void stop();
 
+    bool isStopped() const;
+
     std::string name() const;
 
     double lengthMs() const;
@@ -63,6 +65,7 @@ private:
     long length_micro_seconds_;
 
     bool active_;
+    bool stopped_;
 };
 
 }

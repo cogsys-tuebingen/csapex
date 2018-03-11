@@ -19,7 +19,7 @@ public:
     Profilable(std::shared_ptr<Profiler> profiler);
 
     virtual void useProfiler(std::shared_ptr<Profiler> profiler);
-    std::shared_ptr<Profiler> getProfiler();
+    std::shared_ptr<Profiler> getProfiler() const;
 
 protected:
     std::shared_ptr<Profiler> profiler_;

@@ -133,6 +133,7 @@ private:
     void loadStyleSheet();
 
     void setupTimeline();
+    void setupProfiling();
     void setupThreadManagement();
 
     std::string getConfigFile();
