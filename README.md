@@ -43,7 +43,7 @@ or contact the maintainers via email.
 
 ## Dependencies
 
-Currently we rely on the [catkin](http://wiki.ros.org/catkin) build system
+We rely on the [catkin](http://wiki.ros.org/catkin) build system
 developed in the [ROS](http://wiki.ros.org/) ecosystem. The core framework
 is independent of ROS, however.
 
@@ -56,6 +56,33 @@ Required for a build are:
     - [classloader](https://github.com/ros/class_loader)
     - TinyXML (on Ubuntu: libtinyxml-dev)
     - yaml-cpp (on Ubuntu: libyaml-cpp-dev)
+
+
+## Basic Installation
+
+To get the cs::APEX framework and a set of core plugins, perform the following:
+
+    cd ~
+    mkdir -p ws/csapex/src
+    cd ws/csapex/src
+
+    git clone https://github.com/cogsys-tuebingen/csapex.git
+
+    cd csapex/plugins
+    git clone https://github.com/cogsys-tuebingen/csapex_core_plugins.git
+
+    cd ../..
+    mkdir libs
+    cd libs
+
+    git clone https://github.com/cogsys-tuebingen/cslibs_vision.git
+    git clone https://github.com/cogsys-tuebingen/cslibs_laser_processing.git
+    git clone https://github.com/cogsys-tuebingen/cslibs_arff.git
+    git clone https://github.com/cogsys-tuebingen/cslibs_indexed_storage.git
+
+    cd ../..
+    rosdep install -y -r -i --from-paths src
+    catkin_make
 
 
 ## Contributions
