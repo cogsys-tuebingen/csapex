@@ -16,6 +16,25 @@ namespace connection_types
 class CSAPEX_CORE_EXPORT Message : public TokenData
 {
 public:
+    struct Version
+    {
+        int major_v = -1;
+        int minor_v = -1;
+        int patch_v = -1;
+
+        Version(int major, int minor, int patch);
+
+        Version() = default;
+
+        bool operator < (const Version& other);
+        bool operator == (const Version& other);
+        bool operator > (const Version& other);
+
+        bool valid() const;
+        operator bool() const;
+    };
+
+public:
     typedef std::shared_ptr<Message> Ptr;
     typedef std::shared_ptr<Message const> ConstPtr;
     typedef std::uint64_t Stamp;
@@ -40,8 +59,9 @@ struct convert;
 
 template<>
 struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::Message> {
-  static Node encode(const csapex::connection_types::Message& rhs);
-  static bool decode(const Node& node, csapex::connection_types::Message& rhs);
+    static Node encode(const csapex::connection_types::Message& rhs,
+                       const csapex::connection_types::Message::Version& version = csapex::connection_types::Message::Version(0,0,0));
+    static csapex::connection_types::Message::Version decode(const Node& node, csapex::connection_types::Message& rhs);
 };
 }
 
