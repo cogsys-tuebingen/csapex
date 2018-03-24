@@ -80,8 +80,6 @@ void runSyncTest(NodeFacadeImplementationPtr node_facade, int value = 23)
     TokenDataConstPtr data_out = token_out->getTokenData();
     ASSERT_NE(nullptr, data_out);
 
-    output->notifyMessageProcessed();
-
     auto msg_out = std::dynamic_pointer_cast<connection_types::GenericValueMessage<int> const>(data_out);
     ASSERT_NE(nullptr, msg_out);
 

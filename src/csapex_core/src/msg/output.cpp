@@ -46,8 +46,11 @@ void Output::removeConnection(Connectable *other_side)
 void Output::notifyMessageProcessed()
 {
     //TRACE std::cout << getUUID() << " notified" << std::endl;
-    setState(State::IDLE);
-    message_processed(shared_from_this());
+    if(isProcessing()) {
+        setProcessing(false);
+        setState(State::IDLE);
+        message_processed(shared_from_this());
+    }
 }
 
 void Output::notifyMessageProcessed(Connection* connection)
@@ -147,6 +150,8 @@ void Output::publish()
     apex_assert_hard(isEnabled());
     auto msg = getToken();
     apex_assert_hard(msg);
+
+    setProcessing(true);
 
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     for(auto connection : connections_) {

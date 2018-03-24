@@ -98,6 +98,10 @@ public:
 
     virtual std::string makeStatusString() const override;
 
+protected:
+    void setProcessing(bool processing);
+    bool isProcessing() const;
+
 public:
     slim_signal::Signal<void(ConnectablePtr)> connectionStart;
     slim_signal::Signal<void(ConnectablePtr)> disconnected;
@@ -139,6 +143,7 @@ protected:
 
 private:
     std::atomic<bool> enabled_;
+    std::atomic<bool> processing_;
 };
 
 }

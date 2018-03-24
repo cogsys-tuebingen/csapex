@@ -151,6 +151,9 @@ void Connection::setTokenProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
+        if(getState() == State::DONE) {
+            return;
+        }
         setState(State::DONE);
     }
 

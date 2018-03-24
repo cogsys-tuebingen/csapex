@@ -27,7 +27,8 @@ Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
       variadic_(false),
       graph_port_(false),
       essential_(false),
-      enabled_(true)
+      enabled_(true),
+      processing_(false)
 {
     init();
 }
@@ -89,19 +90,22 @@ void Connectable::setEssential(bool essential)
 
 void Connectable::notifyMessageProcessed()
 {
-    message_processed(shared_from_this());
+    if(processing_) {
+        setProcessing(false);
 
-    APEX_DEBUG_CERR <<"connectable " << getUUID() << " notified" << std::endl;
+        message_processed(shared_from_this());
 
-    for(const ConnectionPtr& c : connections_) {
-        c->setTokenProcessed();
+        APEX_DEBUG_CERR <<"connectable " << getUUID() << " notified" << std::endl;
+
+        for(const ConnectionPtr& c : connections_) {
+            c->setTokenProcessed();
+        }
     }
 }
 
 void Connectable::reset()
 {
-    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    message_processed(shared_from_this());
+//    notifyMessageProcessed();
 }
 
 void Connectable::stop()
@@ -372,4 +376,15 @@ ConnectorDescription Connectable::getDescription() const
         }
     }
     return res;
+}
+
+void Connectable::setProcessing(bool processing)
+{
+    apex_assert_hard(processing_ != processing);
+    processing_ = processing;
+}
+
+bool Connectable::isProcessing() const
+{
+    return processing_;
 }

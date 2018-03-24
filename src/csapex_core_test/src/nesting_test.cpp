@@ -439,91 +439,98 @@ TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
 
 
 TEST_F(NestingTest, SubgraphCanBeDeserialized) {
-    YAML::Node store;
+    for(int i = 0; i < 2; ++i) {
+        graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
+        graph = graph_node->getLocalGraph();
 
-    UUID sink_id;
+        YAML::Node store;
 
-    {
-        GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
+        UUID sink_id;
 
-        // MAIN GRAPH
-        NodeFacadeImplementationPtr src1 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src1"), graph);
-        ASSERT_NE(nullptr, src1);
-        main_graph_facade.addNode(src1);
+        {
+            GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
-        NodeFacadeImplementationPtr src2 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src2"), graph);
-        ASSERT_NE(nullptr, src2);
-        main_graph_facade.addNode(src2);
+            // MAIN GRAPH
+            NodeFacadeImplementationPtr src1 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src1"), graph);
+            ASSERT_NE(nullptr, src1);
+            main_graph_facade.addNode(src1);
 
-
-        NodeFacadeImplementationPtr combiner = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph);
-        ASSERT_NE(nullptr, combiner);
-        main_graph_facade.addNode(combiner);
-
-        sink_id = UUIDProvider::makeUUID_without_parent("Sink");
-        NodeFacadeImplementationPtr sink_p = factory.makeNode("MockupSink", sink_id, graph);
-        main_graph_facade.addNode(sink_p);
-        std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
-        ASSERT_NE(nullptr, sink);
+            NodeFacadeImplementationPtr src2 = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src2"), graph);
+            ASSERT_NE(nullptr, src2);
+            main_graph_facade.addNode(src2);
 
 
-        // NESTED GRAPH
-        NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
-        SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
-        apex_assert_hard(sub_graph);
+            NodeFacadeImplementationPtr combiner = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph);
+            ASSERT_NE(nullptr, combiner);
+            main_graph_facade.addNode(combiner);
 
-        GraphFacadeImplementation sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
+            sink_id = UUIDProvider::makeUUID_without_parent("Sink");
+            NodeFacadeImplementationPtr sink_p = factory.makeNode("MockupSink", sink_id, graph);
+            main_graph_facade.addNode(sink_p);
+            std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
+            ASSERT_NE(nullptr, sink);
 
-        NodeFacadeImplementationPtr m = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("m"), sub_graph->getLocalGraph());
-        ASSERT_NE(nullptr, m);
-        sub_graph_facade.addNode(m);
 
-        apex_assert_hard(sub_graph_node_facade);
-        graph->addNode(sub_graph_node_facade);
+            // NESTED GRAPH
+            NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
+            SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
+            apex_assert_hard(sub_graph);
 
-        auto type = connection_types::makeEmptyMessage<connection_types::GenericValueMessage<int> >();
+            GraphFacadeImplementation sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
-        auto in1_map = sub_graph->addForwardingInput(type, "forwarding", false);
-        auto in2_map = sub_graph->addForwardingInput(type, "forwarding", false);
-        auto out_map = sub_graph->addForwardingOutput(type, "forwarding");
+            NodeFacadeImplementationPtr m = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("m"), sub_graph->getLocalGraph());
+            ASSERT_NE(nullptr, m);
+            sub_graph_facade.addNode(m);
 
-        // forwarding connections
-        sub_graph_facade.connect(in1_map.internal, m, "input_a");
-        sub_graph_facade.connect(in2_map.internal, m, "input_b");
-        sub_graph_facade.connect(m, "output", out_map.internal);
+            apex_assert_hard(sub_graph_node_facade);
+            graph->addNode(sub_graph_node_facade);
 
-        // top level connections
-        main_graph_facade.connect(combiner, "output", sink_p, "input");
+            auto type = connection_types::makeEmptyMessage<connection_types::GenericValueMessage<int> >();
 
-        // crossing connections
-        main_graph_facade.connect(src1, "output", in1_map.external);
-        main_graph_facade.connect(src2, "output", in2_map.external);
-        main_graph_facade.connect(out_map.external, combiner, "input_a");
-        main_graph_facade.connect(out_map.external, combiner, "input_b");
+            auto in1_map = sub_graph->addForwardingInput(type, "forwarding", false);
+            auto in2_map = sub_graph->addForwardingInput(type, "forwarding", false);
+            auto out_map = sub_graph->addForwardingOutput(type, "forwarding");
 
-        GraphIO io(main_graph_facade, &factory, true);
-        ASSERT_NO_THROW(io.saveGraphTo(store));
-    }
+            // forwarding connections
+            sub_graph_facade.connect(in1_map.internal, m, "input_a");
+            sub_graph_facade.connect(in2_map.internal, m, "input_b");
+            sub_graph_facade.connect(m, "output", out_map.internal);
 
-    {
-        auto graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
-        auto graph = graph_node->getLocalGraph();
-        GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
+            // top level connections
+            main_graph_facade.connect(combiner, "output", sink_p, "input");
 
-        GraphIO io(main_graph_facade, &factory, true);
-        ASSERT_NO_THROW(io.loadGraphFrom(store));
+            // crossing connections
+            main_graph_facade.connect(src1, "output", in1_map.external);
+            main_graph_facade.connect(src2, "output", in2_map.external);
+            main_graph_facade.connect(out_map.external, combiner, "input_a");
+            main_graph_facade.connect(out_map.external, combiner, "input_b");
 
-        NodeFacadeImplementationPtr sink_p = std::dynamic_pointer_cast<NodeFacadeImplementation>(main_graph_facade.findNodeFacade(sink_id));
-        std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
-        ASSERT_NE(nullptr, sink);
-        executor.start();
+            GraphIO io(main_graph_facade, &factory, true);
+            ASSERT_NO_THROW(io.saveGraphTo(store));
+        }
 
-        // execution
-        ASSERT_EQ(-1, sink->getValue());
-        for(int iter = 0; iter < 23; ++iter) {
-            ASSERT_NO_FATAL_FAILURE(step());
+        {
+            auto graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
+            auto graph = graph_node->getLocalGraph();
+            GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
-            ASSERT_EQ(std::pow(iter * iter, 2) , sink->getValue());
+            GraphIO io(main_graph_facade, &factory, true);
+            ASSERT_NO_THROW(io.loadGraphFrom(store));
+
+            NodeFacadeImplementationPtr sink_p = std::dynamic_pointer_cast<NodeFacadeImplementation>(main_graph_facade.findNodeFacade(sink_id));
+            std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
+            ASSERT_NE(nullptr, sink);
+            executor.start();
+
+            // execution
+            ASSERT_EQ(-1, sink->getValue());
+            for(int iter = 0; iter < 23; ++iter) {
+                ASSERT_NO_FATAL_FAILURE(step());
+
+                ASSERT_EQ(std::pow(iter * iter, 2) , sink->getValue());
+            }
+
+            executor.stop();
         }
     }
 }
