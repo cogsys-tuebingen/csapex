@@ -60,7 +60,10 @@ Subprocess::Subprocess(const std::string& name_space)
 Subprocess::~Subprocess()
 {
     if(isParent()) {
-        if(!is_shutdown) {
+        while(ctrl_out.hasMessage()) {
+            readCtrlOut();
+        }
+        if(!isChildShutdown()) {
             ctrl_in.write({SubprocessChannel::MessageType::SHUTDOWN, "shutdown"});
         }
 
@@ -104,9 +107,9 @@ pid_t Subprocess::fork(std::function<int()> child)
         close(pipe_out[0]);
         close(pipe_err[0]);
 
-        dup2(pipe_in[0], 0);
-        dup2(pipe_out[1], 1);
-        dup2(pipe_err[1], 2);
+        //        dup2(pipe_in[0], 0);
+        //        dup2(pipe_out[1], 1);
+        //        dup2(pipe_err[1], 2);
 
         detail::g_sp_instance = this;
         std::signal(SIGHUP	 , detail::sp_signal_handler);
@@ -147,11 +150,18 @@ pid_t Subprocess::fork(std::function<int()> child)
 
         subprocess_worker_ = std::thread([this](){
             while(active_) {
-                SubprocessChannel::Message m = ctrl_in.read();
-                if(m.type == SubprocessChannel::MessageType::SHUTDOWN) {
+                try {
+                    SubprocessChannel::Message m = ctrl_in.read();
+                    switch(m.type)
+                    {
+                    case SubprocessChannel::MessageType::SHUTDOWN:
+                        active_ = false;
+                        in.shutdown();
+                        out.shutdown();
+                        break;
+                    }
+                } catch(const SubprocessChannel::ShutdownException& e) {
                     active_ = false;
-                    in.shutdown();
-                    out.shutdown();
                 }
             }
         });
@@ -192,7 +202,7 @@ pid_t Subprocess::fork(std::function<int()> child)
         close(pipe_out[1]);
         close(pipe_err[1]);
 
-        const std::size_t N = 1;
+        const std::size_t N = 32;
 
         // TODO: extract "pipe" class
         parent_worker_cout_ = std::thread([&]() {
@@ -241,6 +251,11 @@ std::string Subprocess::getChildStdErr() const
     return child_cerr.str();
 }
 
+bool Subprocess::isChildShutdown() const
+{
+    return is_shutdown;
+}
+
 void Subprocess::readCtrlOut()
 {
     SubprocessChannel::Message message = ctrl_out.read();
@@ -267,7 +282,7 @@ int Subprocess::join()
 {
     apex_assert_hard(isParent());
 
-    while(!is_shutdown) {
+    while(!isChildShutdown()) {
         readCtrlOut();
     }
 

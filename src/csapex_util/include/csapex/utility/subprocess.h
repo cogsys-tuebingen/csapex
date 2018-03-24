@@ -62,6 +62,7 @@ public:
 
 private:
     void readCtrlOut();
+    bool isChildShutdown() const;
 
 private:
     SubprocessChannel ctrl_in;

@@ -108,7 +108,7 @@ SubprocessChannel::Message::Message(SubprocessChannel* parent)
 
 SubprocessChannel::SubprocessChannel(const std::string& name_space, bool is_control_channel, int32_t size)
     : name_space_(std::to_string(getpid()) + "_" + name_space), size_(size), is_control_channel_(is_control_channel),
-      is_locked_(false)
+      is_locked_(false), is_shutdown_(false)
 {
     allocate();
 }
@@ -151,12 +151,20 @@ SubprocessChannel::Message SubprocessChannel::read()
 
     scoped_lock<interprocess_mutex> lock(shm_block_->m);
 
+    if(is_shutdown_) {
+        throw ShutdownException();
+    }
+
     while(is_locked_) {
         shm_block_->message_read.wait(lock);
     }
 
     while(!shm_block_->is_full) {
         shm_block_->message_available.wait(lock);
+
+        if(is_shutdown_) {
+            throw ShutdownException();
+        }
     }
 
     if(!is_control_channel_) {
@@ -188,8 +196,16 @@ void SubprocessChannel::write(const Message& message)
 
     scoped_lock<interprocess_mutex> lock(shm_block_->m);
 
+    if(is_shutdown_) {
+        return;
+    }
+
     while(shm_block_->is_full) {
         shm_block_->message_read.wait(lock);
+
+        if(is_shutdown_) {
+            return;
+        }
     }
 
     apex_assert_hard(!is_locked_);
@@ -206,13 +222,9 @@ void SubprocessChannel::write(const Message& message)
 
 void SubprocessChannel::shutdown()
 {
-    if(channel_mutex_.try_lock()) {
-        // nothing blocked, so nothing to do
-    } else {
-        scoped_lock<interprocess_mutex> lock(shm_block_->m);
+    is_shutdown_ = true;
+    shm_block_->active = true;
 
-        shm_block_->is_full = true;
-        shm_block_->message_type = MessageType::SHUTDOWN;
-        shm_block_->message_available.notify_all();
-    }
+    scoped_lock<interprocess_mutex> lock(shm_block_->m);
+    shm_block_->message_available.notify_all();
 }

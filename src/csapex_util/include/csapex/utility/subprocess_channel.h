@@ -97,6 +97,7 @@ private:
     bool is_control_channel_;
 
     bool is_locked_;
+    bool is_shutdown_;
 
     impl::ShmBlock* shm_block_;
 };
