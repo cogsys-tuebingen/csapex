@@ -3,9 +3,11 @@
 
 /// PROJECT
 #include <csapex/utility/assert.h>
+#include <csapex/utility/exceptions.h>
 
 /// SYSTEM
 #include <algorithm>
+#include <iostream>
 
 using namespace csapex;
 using namespace slim_signal;
@@ -156,7 +158,11 @@ ScopedConnection::ScopedConnection()
 ScopedConnection::~ScopedConnection()
 {
     if(parent_) {
-        disconnect();
+        try {
+            disconnect();
+        } catch(const csapex::Failure& e) {
+            std::cerr << "Failure in ~ScopedConnection: " << e.what() << std::endl;
+        }
     }
 }
 
