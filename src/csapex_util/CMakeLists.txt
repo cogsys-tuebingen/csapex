@@ -139,7 +139,7 @@ add_executable(${PROJECT_NAME}_tests
 )
 
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME}_tests)
-
+set_tests_properties(${PROJECT_NAME}_test PROPERTIES TIMEOUT 60)
 target_link_libraries(${PROJECT_NAME}_tests
     csapex_util
     gtest gtest_main)

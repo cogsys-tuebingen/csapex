@@ -44,6 +44,7 @@ add_executable(${PROJECT_NAME}
     ${tests_SRC}
 )
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+set_tests_properties(${PROJECT_NAME} PROPERTIES TIMEOUT 60)
 target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
     gtest gtest_main)

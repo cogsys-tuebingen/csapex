@@ -64,6 +64,7 @@ add_executable(csapex_regression_tester
     src/regression_tester.cpp
 )
 add_test(NAME csapex_regression_test COMMAND csapex_regression_tester)
+set_tests_properties(csapex_regression_test PROPERTIES TIMEOUT 60)
 target_link_libraries(csapex_regression_tester
     ${catkin_LIBRARIES})
 
