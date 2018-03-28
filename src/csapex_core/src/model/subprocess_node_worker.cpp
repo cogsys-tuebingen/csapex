@@ -163,7 +163,6 @@ void SubprocessNodeWorker::runSubprocessLoop()
             }
         }
 
-        std::quick_exit(0);
 
     } catch(const SubprocessChannel::ShutdownException& e) {
         // ignore

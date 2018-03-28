@@ -151,6 +151,10 @@ SubprocessChannel::Message SubprocessChannel::read()
 
     scoped_lock<interprocess_mutex> lock(shm_block_->m);
 
+    if(!shm_block_->active) {
+        throw ShutdownException();
+    }
+
     if(is_shutdown_) {
         throw ShutdownException();
     }
@@ -223,8 +227,8 @@ void SubprocessChannel::write(const Message& message)
 void SubprocessChannel::shutdown()
 {
     is_shutdown_ = true;
-    shm_block_->active = true;
 
     scoped_lock<interprocess_mutex> lock(shm_block_->m);
+    shm_block_->active = false;
     shm_block_->message_available.notify_all();
 }
