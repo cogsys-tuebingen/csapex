@@ -107,9 +107,9 @@ pid_t Subprocess::fork(std::function<int()> child)
         close(pipe_out[0]);
         close(pipe_err[0]);
 
-        //        dup2(pipe_in[0], 0);
-        //        dup2(pipe_out[1], 1);
-        //        dup2(pipe_err[1], 2);
+        dup2(pipe_in[0], 0);
+        dup2(pipe_out[1], 1);
+        dup2(pipe_err[1], 2);
 
         detail::g_sp_instance = this;
         std::signal(SIGHUP	 , detail::sp_signal_handler);
