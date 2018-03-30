@@ -114,7 +114,7 @@ Connection Signal<Signature>::connect(Signal<Signature>& signal)
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     addChild(&signal);
-    return Connection(this, makeSignalDeleter(this, &signal));
+    return Connection(this, makeSignalDeleter(this, &signal), &signal);
 }
 
 template <typename Signature>
@@ -266,12 +266,21 @@ void Signal<Signature>::removeChild(Signal<Signature>* child)
 
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         for(auto it = children_.begin(); it != children_.end();) {
-            Signal<Signature>* c = *it;
+            Signal<Signature>* child_it = *it;
             // if the child exists, it has to be valid, otherwise the pointer may point to a destructed object
-            apex_assert_hard(c->guard_ == -1);
-            if(c == child) {
-                it =  children_.erase(it);
-                c->removeParent(this);
+            apex_assert_hard(child_it->guard_ == -1);
+            if(child_it == child) {
+                std::vector<Connection*> to_remove;
+                for(Connection* connection : connections_) {
+                    if(connection->getChild() == child) {
+                        to_remove.push_back(connection);
+                    }
+                }
+                for(Connection* connection : to_remove) {
+                    connection->detach();
+                }
+                it = children_.erase(it);
+                child_it->removeParent(this);
             } else {
                 ++it;
             }
@@ -597,6 +606,7 @@ Connection::Deleter Signal<Signature>::makeSignalDeleter(Signal<Signature>* pare
     apex_assert_hard(sig->guard_ == -1);
     return [parent, sig] {
         apex_assert_hard(parent->guard_ == -1);
+        apex_assert_hard(sig->guard_ == -1);
         parent->removeChild(sig);
     };
 }

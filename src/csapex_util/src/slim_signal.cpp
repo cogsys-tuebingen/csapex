@@ -24,7 +24,7 @@ SignalBase::~SignalBase()
 
     while(!connections_.empty()) {
         Connection* c = connections_.front();
-        apex_assert_hard(c->parent_ == this);
+//        apex_assert_hard(c->parent_ == this);
         c->detach();
     }
 
@@ -88,15 +88,15 @@ void SignalBase::onDisconnect()
 
 
 
-Connection::Connection(SignalBase* parent, const Deleter& del)
-    : parent_(parent), deleter_(del)
+Connection::Connection(SignalBase* parent, const Deleter& del, SignalBase *child)
+    : parent_(parent), deleter_(del), child_(child)
 {
     apex_assert_hard(parent);
     parent_->addConnection(this);
 }
 
 Connection::Connection(const Connection& other)
-    : parent_(other.parent_), deleter_(other.deleter_)
+    : parent_(other.parent_), deleter_(other.deleter_), child_(other.child_)
 {
     if(parent_) {
         apex_assert_hard(parent_->guard_ == -1);
@@ -105,7 +105,7 @@ Connection::Connection(const Connection& other)
 }
 
 Connection::Connection()
-    : parent_(nullptr)
+    : parent_(nullptr), child_(nullptr)
 {
 }
 
@@ -118,21 +118,36 @@ Connection::~Connection()
 
 void Connection::detach() const
 {
+    apex_assert_hard(!detached_);
     detached_ = true;
     parent_->removeConnection(this);
     parent_ = nullptr;
+}
+
+bool Connection::isDetached() const
+{
+    return detached_;
+}
+
+SignalBase* Connection::getParent() const
+{
+    return parent_;
+}
+
+SignalBase* Connection::getChild() const
+{
+    return child_;
 }
 
 void Connection::disconnect() const
 {
     if(parent_) {
         apex_assert_hard(parent_->guard_ == -1);
-        if(deleter_) {
-            deleter_();
-        }
-        if(parent_) {
-            parent_->removeConnection(this);
-            parent_ = nullptr;
+        if(!isDetached()) {
+            detach();
+            if(deleter_) {
+                deleter_();
+            }
         }
     }
 }

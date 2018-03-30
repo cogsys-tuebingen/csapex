@@ -54,7 +54,7 @@ protected:
 protected:
     mutable std::recursive_mutex mutex_;
 
-private:
+protected:
     std::vector<Connection*> connections_;
 
 protected:
@@ -74,17 +74,23 @@ class CSAPEX_UTILS_EXPORT Connection
 public:
     typedef std::function<void()> Deleter;
 
-    Connection(SignalBase* parent, const Deleter& del);
+    Connection(SignalBase* parent, const Deleter& del, SignalBase* child = nullptr);
     Connection(const Connection& c);
     Connection();
 
     virtual ~Connection();
 
-    void detach() const;
+    SignalBase* getParent() const;
+    SignalBase* getChild() const;
+
     void disconnect() const;
+
+    void detach() const;
+    bool isDetached() const;
 
 private:
     mutable SignalBase* parent_;
+    SignalBase* child_;
     mutable bool detached_ = false;
     Deleter deleter_;
 };

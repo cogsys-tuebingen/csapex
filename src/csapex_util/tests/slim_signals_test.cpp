@@ -471,6 +471,8 @@ TEST_F(SlimSignalsTest, ScopedConnections)
     }
 }
 
+
+
 TEST_F(SlimSignalsTest, Chaining)
 {
     int i = 0;
@@ -566,12 +568,19 @@ TEST_F(SlimSignalsTest, Chaining)
         ASSERT_FALSE(first_connected); first_connected = false;
         ASSERT_FALSE(last_disconnected); last_disconnected = false;
 
+        ASSERT_FALSE(c1.isDetached());
+        ASSERT_FALSE(c2.isDetached());
         c2.disconnect();
 
         ASSERT_FALSE(first_connected); first_connected = false;
         ASSERT_FALSE(last_disconnected); last_disconnected = false;
 
+        ASSERT_FALSE(c1.isDetached());
+        ASSERT_TRUE(c2.isDetached());
         c1.disconnect();
+
+        ASSERT_TRUE(c1.isDetached());
+        ASSERT_TRUE(c2.isDetached());
 
         ASSERT_FALSE(first_connected); first_connected = false;
         ASSERT_TRUE(last_disconnected); last_disconnected = false;
@@ -699,6 +708,48 @@ TEST_F(SlimSignalsTest, Deletion)
 //    }
 //}
 
+
+
+
+TEST_F(SlimSignalsTest, ScopedConnectionDeletedAfterSignals)
+{
+    int i = 0;
+    Base foo;
+    /// SLIM
+    slim_signal::Signal<void(int, Base*)> slim_sig1;
+    std::shared_ptr<slim_signal::Signal<void(int, Base*)>> slim_sig2 = std::make_shared<slim_signal::Signal<void(int, Base*)>>();
+
+    {
+        bool called = false;
+        {
+            slim_signal::ScopedConnection c1 = slim_sig1.connect(*slim_sig2);
+            slim_signal::ScopedConnection c2 = slim_sig2->connect([&](int, Base*) {
+                called = true;
+            });
+
+            slim_sig1(i, &foo);
+            ASSERT_TRUE(called);
+
+            EXPECT_FALSE(c1.isDetached());
+            EXPECT_FALSE(c2.isDetached());
+            EXPECT_EQ(1, slim_sig1.countAllConnections());
+            EXPECT_EQ(1, slim_sig2->countAllConnections());
+
+            slim_sig2.reset();
+            EXPECT_TRUE(c1.isDetached());
+            EXPECT_TRUE(c2.isDetached());
+
+            EXPECT_EQ(0, slim_sig1.countAllConnections());
+
+            called = false;
+            slim_sig1(i, &foo);
+            ASSERT_FALSE(called);
+        }
+
+        called = false;
+        slim_sig1(i, &foo);
+        ASSERT_FALSE(called);
+    }
 }
 
-
+}
