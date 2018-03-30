@@ -276,6 +276,7 @@ file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYM
 )
 
 add_library(${PROJECT_NAME} SHARED
+    src/model/io.cpp
     src/model/node_facade.cpp
     src/model/node_facade_impl.cpp
 

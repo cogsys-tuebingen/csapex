@@ -8,6 +8,7 @@
 #include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/node_facade_impl.h>
 #include <csapex/model/subgraph_node.h>
+#include <csapex_testing/io.h>
 
 namespace csapex
 {
