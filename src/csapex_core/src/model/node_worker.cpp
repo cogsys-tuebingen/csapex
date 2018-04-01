@@ -790,8 +790,6 @@ void NodeWorker::updateState()
 {
     if(isEnabled()) {
         triggerTryProcess();
-    } else {
-        setProcessing(false);
     }
 }
 
