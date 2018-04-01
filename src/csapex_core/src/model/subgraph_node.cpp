@@ -145,7 +145,12 @@ bool SubgraphNode::canProcess() const
         //TRACE ainfo << "cannot process, out relay cannot send" << std::endl;
         return false;
     }
-    return true;
+    if(transition_relay_in_->hasConnection() ||
+            transition_relay_out_->hasConnection()) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
