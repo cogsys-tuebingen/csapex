@@ -11,6 +11,7 @@
 #include <boost/functional/hash.hpp>
 #include <ostream>
 #include <sstream>
+#include <algorithm>
 
 using namespace csapex;
 
@@ -230,6 +231,22 @@ UUID UUID::reshapeSoft(std::size_t max_depth) const
                      representation_.begin(),
                      representation_.begin() + static_cast<long>(std::min(depth(), max_depth))
                      ));
+}
+
+UUID UUID::makeRelativeTo(const UUID& prefix) const
+{
+    auto prefix_it = prefix.representation_.rbegin();
+    auto this_it = representation_.rbegin();
+    while(prefix_it != prefix.representation_.rend() &&
+          this_it != representation_.rend() &&
+          *this_it == *prefix_it) {
+        ++prefix_it;
+        ++this_it;
+    }
+
+    auto reversed = std::vector<std::string>(this_it, representation_.rend());
+    std::reverse(reversed.begin(), reversed.end());
+    return UUID (parent_, reversed);
 }
 
 UUID UUID::id() const

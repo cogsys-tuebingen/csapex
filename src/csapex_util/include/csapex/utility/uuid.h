@@ -71,6 +71,8 @@ public:
     UUID reshape(std::size_t depth) const;
     UUID reshapeSoft(std::size_t max_depth) const;
 
+    UUID makeRelativeTo(const UUID& prefix) const;
+
     bool contains(const std::string& sub) const;
 
     UUID parentUUID() const;

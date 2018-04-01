@@ -105,6 +105,37 @@ TEST_F(UUIDTest, UUIDsCanBeNested)
 }
 
 
+TEST_F(UUIDTest, MakingAUUIDSRelative)
+{
+    UUID foo = uuid_provider->generateUUID("foo");
+    UUID bar = uuid_provider->generateDerivedUUID(foo, "bar");
+    UUID baz = uuid_provider->generateDerivedUUID(bar, "baz");
+
+    ASSERT_EQ("foo_0:|:bar_0:|:baz_0", baz.getFullName());
+
+    UUID full = UUIDProvider::makeUUID_without_parent("foo_0:|:bar_0:|:baz_0");
+
+    EXPECT_EQ("bar_0:|:baz_0", full.makeRelativeTo(foo));
+    EXPECT_EQ("baz_0", full.makeRelativeTo(bar));
+}
+
+
+
+TEST_F(UUIDTest, MakingAUUIDSRelativeWithNoCommonPrefix)
+{
+    UUID foo = uuid_provider->generateUUID("foo");
+    UUID bar = uuid_provider->generateDerivedUUID(foo, "bar");
+    UUID baz = uuid_provider->generateDerivedUUID(bar, "baz");
+
+    ASSERT_EQ("foo_0:|:bar_0:|:baz_0", baz.getFullName());
+
+    UUID full = UUIDProvider::makeUUID_without_parent("xfoo_0:|:bar_0:|:baz_0");
+
+    EXPECT_EQ("xfoo_0:|:bar_0:|:baz_0", full.makeRelativeTo(foo));
+    EXPECT_EQ("xfoo_0:|:bar_0:|:baz_0", full.makeRelativeTo(bar));
+}
+
+
 TEST_F(UUIDTest, UUIDsCanBeDeconstructed)
 {
     UUID foo = uuid_provider->generateUUID("foo");
