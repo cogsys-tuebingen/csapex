@@ -456,7 +456,7 @@ template <typename Signature,
 struct MatchingConnector
 {
     template <typename ActualResult, typename... ActualParameters>
-    static constexpr Connection connect(
+    static Connection connect(
             Signal<Signature>* signal,
             const std::function<ActualResult(ActualParameters...)>& fn)
     {
@@ -466,7 +466,7 @@ struct MatchingConnector
     }
 
     template <typename ActualResult, typename... ActualParameters>
-    static constexpr Connection connect(
+    static Connection connect(
             Signal<Signature>* signal,
             const Signal<ActualResult(ActualParameters...)>& fn)
     {
@@ -483,7 +483,7 @@ template <typename Signature,
 struct MatchingConnector<Signature, pos, 0, AdditionalParameters...>
 {
     template <typename ActualResult, typename... ActualParameters>
-    static constexpr Connection connect(
+    static Connection connect(
             Signal<Signature>* signal,
             const std::function<ActualResult(ActualParameters...)>& fn,
             typename std::enable_if<sizeof...(ActualParameters) == function_traits<Signature>::arity, int>::type* = 0)
@@ -493,7 +493,7 @@ struct MatchingConnector<Signature, pos, 0, AdditionalParameters...>
 
 
     template <typename ActualResult, typename... ActualParameters>
-    static constexpr Connection connect(
+    static Connection connect(
             Signal<Signature>* signal,
             const std::function<ActualResult(ActualParameters...)>& fn,
             typename std::enable_if<sizeof...(ActualParameters) < function_traits<Signature>::arity, int>::type* = 0)
@@ -508,7 +508,7 @@ struct MatchingConnector<Signature, pos, 0, AdditionalParameters...>
 
 
     template <typename ActualResult, typename... ActualParameters>
-    static constexpr Connection connect(
+    static Connection connect(
             Signal<Signature>* signal,
             Signal<ActualResult(ActualParameters...)>& sig,
             typename std::enable_if<is_signature_equal<Signature, ActualResult, ActualParameters...>::value, int>::type* = 0)
@@ -519,7 +519,7 @@ struct MatchingConnector<Signature, pos, 0, AdditionalParameters...>
 
 
     template <typename ActualResult, typename... ActualParameters>
-    static constexpr Connection connect(
+    static Connection connect(
             Signal<Signature>* signal,
             Signal<ActualResult(ActualParameters...)>& sig,
             typename std::enable_if<!is_signature_equal<Signature, ActualResult, ActualParameters...>::value, int>::type* = 0)
