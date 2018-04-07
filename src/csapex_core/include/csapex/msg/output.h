@@ -6,12 +6,13 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/model/connectable.h>
 #include <csapex/msg/token_traits.h>
+#include <csapex/msg/message_allocator.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
 
 namespace csapex
 {
 
-class CSAPEX_CORE_EXPORT Output : public Connectable
+class CSAPEX_CORE_EXPORT Output : public Connectable, public MessageAllocator
 {
     friend class Graph;
     friend class DesignerIO;

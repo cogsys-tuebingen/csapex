@@ -22,6 +22,7 @@ FWD(InputTransition)
 FWD(OutputTransition)
 FWD(MessageProvider)
 FWD(MessageRenderer)
+FWD(MessageAllocator)
 
 
 namespace connection_types

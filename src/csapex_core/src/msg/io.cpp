@@ -91,6 +91,11 @@ void csapex::msg::throwError(const TokenDataConstPtr &msg, const std::type_info 
     }
 }
 
+MessageAllocator& csapex::msg::getMessageAllocator(Output* output)
+{
+    return *output;
+}
+
 void csapex::msg::publish(Output *output, TokenDataConstPtr message)
 {
     output->addMessage(std::make_shared<Token>(message));

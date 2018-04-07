@@ -368,6 +368,7 @@ add_library(${PROJECT_NAME} SHARED
     src/msg/direct_connection.cpp
     src/msg/generic_vector_message.cpp
     src/msg/message_renderer.cpp
+    src/msg/message_allocator.cpp
 
     src/plugin/plugin_locator.cpp
 

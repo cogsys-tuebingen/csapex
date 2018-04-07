@@ -6,6 +6,7 @@
 #include <csapex/msg/msg_fwd.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/msg/message_allocator.h>
 
 namespace boost
 {
@@ -224,6 +225,15 @@ bool isExactValue(Input* input) {
 
 
 /// OUTPUT
+MessageAllocator& getMessageAllocator(Output* output);
+
+template <typename T, typename... Args>
+std::shared_ptr<T> allocate(Output* output, Args&&... args)
+{
+    MessageAllocator& allocator = getMessageAllocator(output);
+    return allocator.allocate<T>(std::forward<Args>(args)...);
+}
+
 CSAPEX_CORE_EXPORT void publish(Output* output, TokenDataConstPtr message);
 
 template <typename T,
