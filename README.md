@@ -3,6 +3,9 @@
 CS::APEX is a framework based on synchronous dataflow and event-based message passing that
 aims to speed up prototyping of new robotic algorithms using visual programming aspects.
 
+Example workflow: (click for better quality)
+[![Graph Construction Video](https://media.giphy.com/media/aFtp2izVp2xMzLAqC2/giphy.gif)](https://youtu.be/sNkHnQhNXuU)
+
 
 ## Dataflow Graph and Core Features
 
