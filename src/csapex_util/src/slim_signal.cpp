@@ -25,7 +25,11 @@ SignalBase::~SignalBase()
     while(!connections_.empty()) {
         Connection* c = connections_.front();
 //        apex_assert_hard(c->parent_ == this);
-        c->detach();
+        if(c->isDetached()) {
+            connections_.erase(connections_.begin());
+        } else {
+            c->detach();
+        }
     }
 
     guard_ = 0xDEADBEEF;
@@ -118,10 +122,11 @@ Connection::~Connection()
 
 void Connection::detach() const
 {
-    apex_assert_hard(!detached_);
-    detached_ = true;
-    parent_->removeConnection(this);
-    parent_ = nullptr;
+    if(!detached_) {
+        detached_ = true;
+        parent_->removeConnection(this);
+        parent_ = nullptr;
+    }
 }
 
 bool Connection::isDetached() const
