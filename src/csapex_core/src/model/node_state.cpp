@@ -6,7 +6,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/yaml_io.hpp>
 #include <csapex/model/generic_state.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <iostream>

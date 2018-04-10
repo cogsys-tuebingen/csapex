@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/utility/assert.h>
 #include <csapex/serialization/packet_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 using namespace csapex;
 

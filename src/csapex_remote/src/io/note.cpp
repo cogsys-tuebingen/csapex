@@ -2,7 +2,7 @@
 #include <csapex/io/note.h>
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 using namespace csapex;
 using namespace csapex::io;

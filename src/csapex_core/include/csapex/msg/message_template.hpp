@@ -5,6 +5,7 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/msg/io.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <type_traits>
@@ -157,10 +158,22 @@ public:
         return new_msg;
     }
 
-
     bool acceptsConnectionFrom(const TokenData* other_side) const override
     {
         return ValueContainer::acceptsConnectionFrom(other_side);
+    }    
+
+    std::shared_ptr<Clonable> makeEmptyClone() const override
+    {
+        return std::shared_ptr<Clonable>(new Self);
+    }
+    void serialize(SerializationBuffer &data) const override
+    {
+        data << ValueContainer::value;
+    }
+    void deserialize(const SerializationBuffer& data) override
+    {
+        data >> ValueContainer::value;
     }
 
 protected:

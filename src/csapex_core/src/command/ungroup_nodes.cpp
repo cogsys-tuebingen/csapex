@@ -20,7 +20,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/utility/assert.h>

@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/request_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/io/feedback.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/graph_facade_impl.h>

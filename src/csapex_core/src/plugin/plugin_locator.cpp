@@ -31,11 +31,14 @@ PluginLocator::PluginLocator(Settings &settings)
     ignored_libraries_.insert(tmp.begin(), tmp.end());
 
 #if WIN32
-	std::string ld_lib = getenv("PATH");
+    const auto ld_lib_path = getenv("PATH");
 #else
-	std::string ld_lib = getenv("LD_LIBRARY_PATH");
+    const auto ld_lib_path = getenv("LD_LIBRARY_PATH");
 #endif
-    boost::algorithm::split(library_paths_, ld_lib, boost::is_any_of(":"));
+    if(ld_lib_path != nullptr) {
+        std::string ld_lib(ld_lib_path);
+        boost::algorithm::split(library_paths_, ld_lib, boost::is_any_of(":"));
+    }
 }
 
 PluginLocator::~PluginLocator()

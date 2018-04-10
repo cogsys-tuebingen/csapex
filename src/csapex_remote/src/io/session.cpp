@@ -8,7 +8,7 @@
 #include <csapex/io/response.h>
 #include <csapex/io/feedback.h>
 #include <csapex/io/note.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/raw_message.h>

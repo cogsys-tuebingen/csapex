@@ -5,59 +5,11 @@
 #include <yaml-cpp/yaml.h>
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/msg/io.h>
+#include <csapex_testing/mockup_msgs.h>
 
 using namespace csapex;
 using namespace connection_types;
 
-namespace csapex
-{
-namespace connection_types
-{
-
-class Mock
-{
-public:
-    std::string payload;
-};
-
-class MockMessage : public MessageTemplate<Mock, MockMessage> {};
-
-template <>
-struct type<MockMessage> {
-    static std::string name() {
-        return "MockMessage";
-    }
-};
-
-}
-}
-
-
-/// YAML
-namespace YAML {
-template<>
-struct convert<csapex::connection_types::MockMessage>
-{
-    static Node encode(const csapex::connection_types::MockMessage& rhs)
-    {
-        Node n;
-        n["payload"] = rhs.value.payload;
-        return n;
-    }
-
-    static bool decode(const Node& node, csapex::connection_types::MockMessage& rhs)
-    {
-        if(node["payload"].IsDefined()) {
-            rhs.value.payload = node["payload"].as<std::string>();
-        } else {
-            return false;
-        }
-        return true;
-    }
-};
-}
-
-CSAPEX_REGISTER_MESSAGE(csapex::connection_types::MockMessage)
 
 class YAMLSerializationTest : public ::testing::Test
 {

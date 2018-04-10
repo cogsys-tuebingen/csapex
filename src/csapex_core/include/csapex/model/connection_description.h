@@ -33,6 +33,8 @@ struct CSAPEX_CORE_EXPORT ConnectionDescription : public Serializable
 
     ConnectionDescription& operator = (const ConnectionDescription& other);
 
+    ConnectionDescription();
+
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
 
@@ -40,10 +42,6 @@ struct CSAPEX_CORE_EXPORT ConnectionDescription : public Serializable
 
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
-
-private:
-    friend class SerializationBuffer;
-    ConnectionDescription();
 };
 
 }

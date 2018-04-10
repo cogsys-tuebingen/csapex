@@ -2,7 +2,7 @@
 #include <csapex/io/protcol/node_notes.h>
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/note_serializer.h>
 
 CSAPEX_REGISTER_NOTE_SERIALIZER(NodeNote)

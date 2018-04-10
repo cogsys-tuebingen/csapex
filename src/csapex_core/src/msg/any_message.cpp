@@ -35,7 +35,12 @@ bool AnyMessage::acceptsConnectionFrom(const TokenData*) const
     return true;
 }
 
-
+void AnyMessage::serialize(SerializationBuffer &data) const
+{
+}
+void AnyMessage::deserialize(const SerializationBuffer& data)
+{
+}
 
 
 /// YAML

@@ -20,3 +20,10 @@ TokenData::Ptr NoMessage::toType() const
     return new_msg;
 }
 
+
+void NoMessage::serialize(SerializationBuffer &data) const
+{
+}
+void NoMessage::deserialize(const SerializationBuffer& data)
+{
+}

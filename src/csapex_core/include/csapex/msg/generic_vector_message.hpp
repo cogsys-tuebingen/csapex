@@ -155,6 +155,19 @@ private:
             *value = node["values"].as< std::vector<Payload> >();
         }
 
+        std::shared_ptr<Clonable> makeEmptyClone() const override
+        {
+            return std::shared_ptr<Clonable>(new Implementation<T>);
+        }
+        void serialize(SerializationBuffer &data) const override
+        {
+            throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+        }
+        void deserialize(const SerializationBuffer& data) override
+        {
+            throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+        }
+
         TokenData::Ptr nestedType() const override
         {
             return makeTypeSwitch(Tag<Payload>());
@@ -376,18 +389,37 @@ private:
                 value->push_back(*msg);
             }
         }
+
+        std::shared_ptr<Clonable> makeEmptyClone() const override
+        {
+            return make();
+        }
+        void serialize(SerializationBuffer &data) const override
+        {
+            throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+        }
+        void deserialize(const SerializationBuffer& data) override
+        {
+            throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+        }
     };
 
     struct CSAPEX_CORE_EXPORT AnythingImplementation : public EntryInterface
     {
         AnythingImplementation();
 
-        virtual EntryInterface::Ptr cloneEntry() const override;
-        virtual TokenData::Ptr toType() const override;
-        virtual bool canConnectTo(const TokenData* other_side) const override;
-        virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
-        virtual void encode(YAML::Node& node) const override;
-        virtual void decode(const YAML::Node& node) override;
+        EntryInterface::Ptr cloneEntry() const override;
+        TokenData::Ptr toType() const override;
+        bool canConnectTo(const TokenData* other_side) const override;
+        bool acceptsConnectionFrom(const TokenData *other_side) const override;
+        void encode(YAML::Node& node) const override;
+        void decode(const YAML::Node& node) override;
+        std::shared_ptr<Clonable> makeEmptyClone() const override
+        {
+            return std::shared_ptr<Clonable>(new AnythingImplementation);
+        }
+        void serialize(SerializationBuffer &data) const override;
+        void deserialize(const SerializationBuffer& data) override;
     };
 
     struct CSAPEX_CORE_EXPORT InstancedImplementation : public EntryInterface
@@ -396,18 +428,24 @@ private:
 
         InstancedImplementation(TokenData::ConstPtr type);
 
-        virtual EntryInterface::Ptr cloneEntry() const override;
-        virtual TokenData::Ptr toType() const override;
-        virtual bool canConnectTo(const TokenData* other_side) const override;
-        virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
-        virtual void encode(YAML::Node& node) const override;
-        virtual void decode(const YAML::Node& node) override;
+        EntryInterface::Ptr cloneEntry() const override;
+        TokenData::Ptr toType() const override;
+        bool canConnectTo(const TokenData* other_side) const override;
+        bool acceptsConnectionFrom(const TokenData *other_side) const override;
+        void encode(YAML::Node& node) const override;
+        void decode(const YAML::Node& node) override;
 
         TokenData::Ptr nestedType() const override;
 
-        virtual void addNestedValue(const TokenData::ConstPtr &msg) override;
-        virtual TokenData::ConstPtr nestedValue(std::size_t i) const override;
-        virtual std::size_t nestedValueCount() const override;
+        void addNestedValue(const TokenData::ConstPtr &msg) override;
+        TokenData::ConstPtr nestedValue(std::size_t i) const override;
+        std::size_t nestedValueCount() const override;
+        std::shared_ptr<Clonable> makeEmptyClone() const override
+        {
+            return std::shared_ptr<Clonable>(new InstancedImplementation(type_));
+        }
+        void serialize(SerializationBuffer &data) const override;
+        void deserialize(const SerializationBuffer& data) override;
 
     private:
         TokenData::ConstPtr type_;
@@ -690,6 +728,19 @@ public:
     virtual std::size_t nestedValueCount() const override
     {
         return impl->nestedValueCount();
+    }
+
+    std::shared_ptr<Clonable> makeEmptyClone() const override
+    {
+        return std::shared_ptr<Clonable>(new GenericVectorMessage);
+    }
+    void serialize(SerializationBuffer &data) const override
+    {
+        impl->serialize(data);
+    }
+    void deserialize(const SerializationBuffer& data) override
+    {
+        impl->deserialize(data);
     }
 
 private:

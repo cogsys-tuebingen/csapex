@@ -18,6 +18,11 @@ std::string toString(const std::vector<TokenData::Ptr>& types) {
 }
 }
 
+MultiTokenData::MultiTokenData()
+{
+
+}
+
 MultiTokenData::MultiTokenData(const std::vector<TokenData::Ptr>& types)
     : TokenData("one of {" + toString(types) + "}"), types_(types)
 {
@@ -56,4 +61,19 @@ TokenData::Ptr MultiTokenData::toType() const
 {
     Ptr new_msg(new MultiTokenData(types_));
     return new_msg;
+}
+
+std::shared_ptr<Clonable> MultiTokenData::makeEmptyClone() const
+{
+    return std::shared_ptr<Clonable>(new MultiTokenData);
+}
+void MultiTokenData::serialize(SerializationBuffer &data) const
+{
+    TokenData::serialize(data);
+    throw std::runtime_error("Serialization of MultiTokenData is not implemented yet");
+}
+void MultiTokenData::deserialize(const SerializationBuffer& data)
+{
+    TokenData::deserialize(data);
+    throw std::runtime_error("Serialization of MultiTokenData is not implemented yet");
 }

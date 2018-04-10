@@ -5,11 +5,16 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/utility/assert.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <iostream>
 
 using namespace csapex;
+
+TokenData::TokenData()
+{
+}
 
 TokenData::TokenData(const std::string& type_name)
     : type_name_(type_name)
@@ -54,6 +59,20 @@ std::string TokenData::typeName() const
 TokenData::Ptr TokenData::clone() const
 {
     return std::make_shared<TokenData>(*this);
+}
+std::shared_ptr<Clonable> TokenData::makeEmptyClone() const
+{
+    return makeEmpty();
+}
+void TokenData::serialize(SerializationBuffer &data) const
+{
+    data << type_name_;
+    data << descriptive_name_;
+}
+void TokenData::deserialize(const SerializationBuffer& data)
+{
+    data >> type_name_;
+    data >> descriptive_name_;
 }
 
 TokenData::Ptr TokenData::toType() const

@@ -8,7 +8,7 @@
 #include <csapex/model/tag.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/delegate_bind.h>
 #include <csapex/utility/uuid_provider.h>
 

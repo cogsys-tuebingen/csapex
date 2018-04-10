@@ -10,7 +10,7 @@
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM

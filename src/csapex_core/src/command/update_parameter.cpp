@@ -11,7 +11,7 @@
 #include <csapex/core/settings.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <sstream>

@@ -34,6 +34,7 @@ public:
     typedef std::shared_ptr<NodeConstructor> Ptr;
 
 public:
+    NodeConstructor();
     NodeConstructor(const std::string& type, std::function<NodePtr()> c);
 
     virtual ~NodeConstructor();
@@ -69,7 +70,6 @@ protected:
 
 protected:
     NodeConstructor(const std::string& type);
-    NodeConstructor();
 
 protected:
     std::string type_;

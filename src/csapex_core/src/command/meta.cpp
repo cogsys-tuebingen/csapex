@@ -7,7 +7,7 @@
 #include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <iostream>

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex_core/csapex_core_export.h>
+#include <csapex/serialization/serializable.h>
 
 /// SYSTEM
 #include <memory>
@@ -10,7 +11,7 @@
 
 namespace csapex {
 
-class CSAPEX_CORE_EXPORT TokenData
+class CSAPEX_CORE_EXPORT TokenData : public Serializable
 {
 public:
     typedef std::shared_ptr<TokenData> Ptr;
@@ -21,7 +22,10 @@ public:
     TokenData(const std::string &type_name, const std::string& descriptive_name);
     virtual ~TokenData();
 
-    virtual TokenData::Ptr clone() const;
+    static TokenData::Ptr makeEmpty() {
+        return std::shared_ptr<TokenData>(new TokenData);
+    }
+
     virtual TokenData::Ptr toType() const;
 
     template <typename R>
@@ -47,8 +51,14 @@ public:
 
     virtual void writeRaw(const std::string& file,  const std::string &base, const std::string &suffix) const;
 
+    virtual TokenData::Ptr clone() const;
+    std::shared_ptr<Clonable> makeEmptyClone() const override;
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(const SerializationBuffer& data) override;
+
 
 protected:
+    TokenData();
     void setDescriptiveName(const std::string& descriptiveName);
 
 private:

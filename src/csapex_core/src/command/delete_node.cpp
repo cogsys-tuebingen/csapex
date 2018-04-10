@@ -16,7 +16,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/core/graphio.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/model/graph_facade_impl.h>
 
 /// SYSTEM

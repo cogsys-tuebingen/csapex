@@ -26,7 +26,7 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/debug.h>
 #include <csapex/utility/delegate_bind.h>
 #include <csapex/utility/exceptions.h>

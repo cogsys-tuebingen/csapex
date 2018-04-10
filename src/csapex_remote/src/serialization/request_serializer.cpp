@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/packet_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/assert.h>
 #include <csapex/io/request.h>
 #include <csapex/io/response.h>

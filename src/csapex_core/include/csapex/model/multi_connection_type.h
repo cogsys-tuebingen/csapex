@@ -30,6 +30,14 @@ public:
     virtual TokenData::Ptr clone() const override;
     virtual TokenData::Ptr toType() const override;
 
+
+    std::shared_ptr<Clonable> makeEmptyClone() const override;
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(const SerializationBuffer& data) override;
+
+private:
+    MultiTokenData();
+
 private:
     std::vector<TokenData::Ptr> types_;
 };

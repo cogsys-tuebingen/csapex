@@ -2,7 +2,7 @@
 #include <csapex/io/raw_message.h>
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <iostream>

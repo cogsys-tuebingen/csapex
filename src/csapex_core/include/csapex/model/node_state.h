@@ -22,9 +22,9 @@ class CSAPEX_CORE_EXPORT NodeState : public Memento, public Serializable
 
 public:
     typedef std::shared_ptr<NodeState> Ptr;
-    typedef slim_signal::Signal<void()> Signal;//Impl;
-//    typedef std::shared_ptr< SignalImpl > Signal;
+    typedef slim_signal::Signal<void()> Signal;
 
+    NodeState();
     NodeState(const NodeHandle *parent);
     ~NodeState();
 
@@ -121,11 +121,8 @@ public:
     template <typename T>
     void setDictionaryEntry(const std::string& key, const T& value);
 
-
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
-
-    NodeState();
 
 private:
     const NodeHandle* parent_;

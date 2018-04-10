@@ -7,7 +7,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/factory/node_factory_impl.h>
 #include <csapex/core/csapex_core.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 using namespace csapex;
 

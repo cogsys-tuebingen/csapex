@@ -5,6 +5,7 @@
 #include <csapex/msg/message.h>
 #include <csapex/utility/register_msg.h>
 #include <csapex/serialization/message_serializer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/msg/io.h>
 #include <csapex/utility/string.hpp>
 
@@ -126,6 +127,18 @@ struct GenericValueMessage : public Message, public ValueMessageBase
         return universal_to_string(value);
     }
 
+    std::shared_ptr<Clonable> makeEmptyClone() const override
+    {
+        return std::shared_ptr<Clonable>(new GenericValueMessage<Type>);
+    }
+    void serialize(SerializationBuffer &data) const override
+    {
+        data << value;
+    }
+    void deserialize(const SerializationBuffer& data) override
+    {
+        data >> value;
+    }
 
     Type value;
 };

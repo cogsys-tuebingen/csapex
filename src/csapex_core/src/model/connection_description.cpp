@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/model/connectable.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/model/fulcrum.h>
 
 using namespace csapex;
@@ -28,7 +28,6 @@ ConnectionDescription::ConnectionDescription(const ConnectionDescription& other)
 ConnectionDescription::ConnectionDescription()
 {
 }
-
 
 ConnectionDescription& ConnectionDescription::operator = (const ConnectionDescription& other)
 {

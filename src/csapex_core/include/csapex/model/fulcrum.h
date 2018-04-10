@@ -35,6 +35,7 @@ public:
     };
 
 public:
+    Fulcrum();
     Fulcrum(int connection_id, const Point& p, int type, const Point& handle_in, const Point& handle_out);
     Fulcrum(const Fulcrum& copy);
     Fulcrum(Fulcrum&& moved);
@@ -70,10 +71,6 @@ public:
 
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
-
-private:
-    friend class SerializationBuffer;
-    Fulcrum();
 
 private:
     int connection_id_;

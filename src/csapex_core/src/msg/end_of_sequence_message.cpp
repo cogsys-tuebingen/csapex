@@ -22,3 +22,10 @@ TokenData::Ptr EndOfSequenceMessage::toType() const
     Ptr new_msg(new EndOfSequenceMessage);
     return new_msg;
 }
+
+void EndOfSequenceMessage::serialize(SerializationBuffer &data) const
+{
+}
+void EndOfSequenceMessage::deserialize(const SerializationBuffer& data)
+{
+}

@@ -18,7 +18,6 @@ class Timer;
 class CSAPEX_PROFILING_EXPORT Interval : public Serializable
 {
     friend class Timer;
-    friend class SerializationBuffer;
 
 public:
     typedef std::shared_ptr<Interval> Ptr;
@@ -48,6 +47,8 @@ public:
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
+
+    static Ptr makeEmpty();
 
 protected:
     virtual std::shared_ptr<Clonable> makeEmptyClone() const override;

@@ -3,7 +3,7 @@
 #include <csapex/msg/message_template.hpp>
 #include <csapex/utility/register_msg.h>
 #include <yaml-cpp/yaml.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/msg/io.h>
 
 #include <bitset>
@@ -252,6 +252,27 @@ TEST_F(BinarySerializationTest, TestBoolFalse)
     ASSERT_EQ(false, value);
 }
 
+
+TEST_F(BinarySerializationTest, TestMulitpleBool)
+{
+    SerializationBuffer buffer;
+    buffer << false;
+    buffer << true;
+    buffer << false;
+    buffer << true;
+
+    bool value;
+
+    buffer >> value;
+    ASSERT_EQ(false, value);
+    buffer >> value;
+    ASSERT_EQ(true, value);
+    buffer >> value;
+    ASSERT_EQ(false, value);
+    buffer >> value;
+    ASSERT_EQ(true, value);
+}
+
 TEST_F(BinarySerializationTest, TestString)
 {
     std::string str("foo bar baz");
@@ -274,4 +295,44 @@ TEST_F(BinarySerializationTest, TestEmptyString)
     buffer >> value;
 
     ASSERT_EQ(str, value);
+}
+
+
+TEST_F(BinarySerializationTest, TestMap)
+{
+    std::map<std::string, int> map {
+        {"a", 1},
+        {"b", 2},
+        {"c", 3},
+        {"d", 4}
+    };
+
+    SerializationBuffer buffer;
+    buffer << map;
+
+    std::map<std::string, int> restored_map;
+    buffer >> restored_map;
+
+    ASSERT_EQ(4, restored_map.size());
+
+    ASSERT_EQ(1, restored_map.at("a"));
+    ASSERT_EQ(2, restored_map.at("b"));
+    ASSERT_EQ(3, restored_map.at("c"));
+    ASSERT_EQ(4, restored_map.at("d"));
+}
+
+TEST_F(BinarySerializationTest, TestUUID)
+{
+    UUID uuid1 = UUIDProvider::makeUUID_without_parent("test:|:1");
+    UUID uuid2 = UUIDProvider::makeUUID_without_parent("test:|:2");
+
+    SerializationBuffer buffer;
+    buffer << uuid1;
+    buffer << uuid2;
+
+    UUID value;
+    buffer >> value;
+    ASSERT_EQ(uuid1.getFullName(), value.getFullName());
+    buffer >> value;
+    ASSERT_EQ(uuid2.getFullName(), value.getFullName());
 }

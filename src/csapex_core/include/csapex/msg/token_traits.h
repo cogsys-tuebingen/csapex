@@ -27,16 +27,18 @@ inline std::string serializationName()
 
 TokenPtr makeToken(const TokenDataConstPtr& data);
 
-template <typename T>
+HAS_MEM_FUNC(makeEmpty, has_make_empty);
+
+template <typename T, typename std::enable_if<has_make_empty<T, std::shared_ptr<T>(*)()>::value, int>::type = 0>
+inline std::shared_ptr<T> makeEmpty()
+{
+    return T::makeEmpty();
+}
+
+template <typename T, typename std::enable_if<!has_make_empty<T, std::shared_ptr<T>(*)()>::value, int>::type = 0>
 inline std::shared_ptr<T> makeEmpty()
 {
     return std::make_shared<T>();
-}
-
-template <>
-inline std::shared_ptr<TokenData> makeEmpty<TokenData>()
-{
-    return std::shared_ptr<TokenData>(new TokenData("empty"));
 }
 
 

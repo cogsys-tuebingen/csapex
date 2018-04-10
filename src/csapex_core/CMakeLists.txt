@@ -164,6 +164,9 @@ add_library(csapex_serialization SHARED
     src/serialization/packet_serializer.cpp
     src/serialization/serialization_buffer.cpp
 
+    src/serialization/io/std_io.cpp
+    src/serialization/io/boost_io.cpp
+
     ${csapex_serialization_HEADERS}
 )
 generate_export_header( csapex_serialization

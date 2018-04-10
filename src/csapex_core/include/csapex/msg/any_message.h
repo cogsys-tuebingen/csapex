@@ -24,6 +24,14 @@ public:
 
     bool canConnectTo(const TokenData* other_side) const override;
     bool acceptsConnectionFrom(const TokenData* other_side) const override;
+
+
+    std::shared_ptr<Clonable> makeEmptyClone() const override
+    {
+        return std::shared_ptr<Clonable>(new AnyMessage);
+    }
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(const SerializationBuffer& data) override;
 };
 
 template <>
