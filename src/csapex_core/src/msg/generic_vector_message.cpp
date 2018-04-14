@@ -107,11 +107,11 @@ bool GenericVectorMessage::AnythingImplementation::acceptsConnectionFrom(const T
 
 void GenericVectorMessage::AnythingImplementation::serialize(SerializationBuffer &data) const
 {
-    throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+    TokenData::serialize(data);
 }
 void GenericVectorMessage::AnythingImplementation::deserialize(const SerializationBuffer& data)
 {
-    throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+    TokenData::deserialize(data);
 }
 
 
@@ -197,11 +197,11 @@ std::size_t GenericVectorMessage::InstancedImplementation::nestedValueCount() co
 
 void GenericVectorMessage::InstancedImplementation::serialize(SerializationBuffer &data) const
 {
-    throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+    data << value;
 }
 void GenericVectorMessage::InstancedImplementation::deserialize(const SerializationBuffer& data)
 {
-    throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+    data >> value;
 }
 
 /// YAML

@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex_core/csapex_core_export.h>
-#include <csapex/serialization/serializable.h>
+#include <csapex/serialization/streamable.h>
 
 /// SYSTEM
 #include <memory>
@@ -11,9 +11,11 @@
 
 namespace csapex {
 
-class CSAPEX_CORE_EXPORT TokenData : public Serializable
+class CSAPEX_CORE_EXPORT TokenData : public Streamable
 {
-public:
+public:    
+    static const uint8_t PACKET_TYPE_ID = 8;
+
     typedef std::shared_ptr<TokenData> Ptr;
     typedef std::shared_ptr<const TokenData> ConstPtr;
 
@@ -50,6 +52,8 @@ public:
     std::string typeName() const;
 
     virtual void writeRaw(const std::string& file,  const std::string &base, const std::string &suffix) const;
+
+    uint8_t getPacketType() const final override;
 
     virtual TokenData::Ptr clone() const;
     std::shared_ptr<Clonable> makeEmptyClone() const override;

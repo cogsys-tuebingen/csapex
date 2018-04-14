@@ -3,6 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/model/activity_type.h>
 #include <csapex/model/connection_description.h>
 #include <csapex/model/connector_description.h>
@@ -266,18 +267,6 @@ void SerializationBuffer::readRaw(uint8_t* data, const std::size_t length) const
     pos += length;
 }
 
-SerializationBuffer& SerializationBuffer::operator << (const Serializable& s)
-{
-    s.serialize(*this);
-    return *this;
-}
-
-const SerializationBuffer& SerializationBuffer::operator >> (Serializable& s) const
-{
-    s.deserialize(*this);
-    return *this;
-}
-
 SerializationBuffer& SerializationBuffer::writeAny (const boost::any& any)
 {
     auto fn = any_serializer.find(any.type());
@@ -466,33 +455,6 @@ const SerializationBuffer& SerializationBuffer::operator >> (double& d) const
 
 
 
-// UUID
-SerializationBuffer& SerializationBuffer::operator << (const UUID& s)
-{
-    *this << s.getFullName();
-    return *this;
-}
-
-const SerializationBuffer& SerializationBuffer::operator >> (UUID& s) const
-{
-    std::string full_name;
-    *this >> full_name;
-    s = UUIDProvider::makeUUID_without_parent(full_name);
-    return *this;
-}
-
-// TokenData
-SerializationBuffer& SerializationBuffer::operator << (const TokenData& s)
-{
-    s.serialize(*this);
-    return *this;
-}
-
-const SerializationBuffer& SerializationBuffer::operator >> (TokenData& s) const
-{
-    s.deserialize(*this);
-    return *this;
-}
 
 // YAML
 SerializationBuffer& SerializationBuffer::operator << (const YAML::Node& node)

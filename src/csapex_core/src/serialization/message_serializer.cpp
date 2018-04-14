@@ -5,12 +5,15 @@
 #include <csapex/utility/assert.h>
 #include <csapex/utility/yaml_node_builder.h>
 #include <csapex/factory/message_factory.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <fstream>
 #include <iostream>
 
 using namespace csapex;
+
+SerializerRegistered<MessageSerializer> g_register_msg_serializer_(TokenData::PACKET_TYPE_ID, &MessageSerializer::instance());
 
 MessageSerializer::MessageSerializer()
 {
@@ -24,6 +27,27 @@ MessageSerializer::~MessageSerializer()
 void MessageSerializer::shutdown()
 {
 	type_to_converter.clear();
+}
+void MessageSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
+{
+    if(const TokenData* message = dynamic_cast<const TokenData*>(&packet)) {
+        std::string type = message->typeName();
+        data << type;
+
+        message->serialize(data);
+    }
+}
+
+StreamablePtr MessageSerializer::deserialize(const SerializationBuffer& data)
+{
+    std::string type;
+    data >> type;
+
+    TokenData::Ptr result = MessageFactory::createMessage(type);
+    apex_assert_hard(result);
+    result->deserialize(data);
+
+    return result;
 }
 
 TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
@@ -49,7 +73,7 @@ TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
     }
 
     if(i.type_to_converter.find(converter_type) == i.type_to_converter.end()) {
-            throw DeserializationError(std::string("cannot deserialize, no such type (") + type + ")");
+        throw DeserializationError(std::string("cannot deserialize, no such type (") + type + ")");
     }
 
     TokenData::Ptr msg = MessageFactory::createMessage(converter_type);

@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/serializable.h>
 
 namespace csapex
 {
@@ -16,18 +17,23 @@ SerializationBuffer& operator << (SerializationBuffer& data, const std::stringst
 const SerializationBuffer& operator >> (const SerializationBuffer& data, std::stringstream& s);
 
 // VECTOR
-template <typename S>
+template <typename S,
+          typename std::enable_if<!std::is_base_of<Serializable, S>::value,
+                                  int>::type = 0>
 SerializationBuffer& operator << (SerializationBuffer& data, const std::vector<S>& s)
 {
     apex_assert_lt_hard(s.size(), std::numeric_limits<uint8_t>::max());
     data << (static_cast<uint8_t>(s.size()));
-    for(const auto& elem : s) {
+    for(const S& elem : s) {
         data << elem;
     }
     return data;
 }
 
-template <typename S>
+template <typename S,
+          typename std::enable_if<std::is_integral<S>::value &&
+                                  !std::is_base_of<Serializable, S>::value,
+                                  int>::type = 0>
 const SerializationBuffer& operator >> (const SerializationBuffer& data, std::vector<S>& s)
 {
     uint8_t len;
@@ -35,9 +41,46 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::ve
     s.reserve(len);
     s.clear();
     for(uint8_t i = 0; i < len; ++i) {
-        S elem;
-        data >> elem;
-        s.push_back(elem);
+        S integral;
+        data >> integral;
+        s.push_back(integral);
+    }
+    return data;
+}
+
+template <typename S,
+          typename std::enable_if<!std::is_integral<S>::value &&
+                                  !std::is_base_of<Serializable, S>::value &&
+                                  std::is_default_constructible<S>::value,
+                                  int>::type = 0>
+const SerializationBuffer& operator >> (const SerializationBuffer& data, std::vector<S>& s)
+{
+    uint8_t len;
+    data >> len;
+    s.reserve(len);
+    s.clear();
+    for(uint8_t i = 0; i < len; ++i) {
+        s.emplace_back();
+        data >> s.back();
+    }
+    return data;
+}
+
+template <typename S,
+          typename std::enable_if<!std::is_integral<S>::value &&
+                                  !std::is_base_of<Serializable, S>::value &&
+                                  !std::is_default_constructible<S>::value,
+                                  int>::type = 0>
+const SerializationBuffer& operator >> (const SerializationBuffer& data, std::vector<S>& s)
+{
+    uint8_t len;
+    data >> len;
+    s.reserve(len);
+    s.clear();
+    for(uint8_t i = 0; i < len; ++i) {
+        std::shared_ptr<S> object = connection_types::makeEmpty<S>();
+        data >> object;
+        s.push_back(*object);
     }
     return data;
 }

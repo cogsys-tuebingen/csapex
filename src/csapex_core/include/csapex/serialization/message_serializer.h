@@ -8,6 +8,7 @@
 #include <csapex/utility/tmp.hpp>
 #include <csapex/utility/type.h>
 #include <csapex_core/csapex_core_export.h>
+#include <csapex/serialization/packet_serializer.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -42,7 +43,7 @@ bool decodeMessage(const YAML::Node& node, csapex::TokenData& msg) {
 
 }
 
-class CSAPEX_CORE_EXPORT MessageSerializer : public Singleton<MessageSerializer>
+class CSAPEX_CORE_EXPORT MessageSerializer : public Singleton<MessageSerializer>, public Serializer
 {
     friend class Singleton<MessageSerializer>;
 
@@ -64,6 +65,9 @@ public:
     typedef std::runtime_error DeserializationError;
 
 public:
+    void serialize(const Streamable& packet, SerializationBuffer &data) override;
+    StreamablePtr deserialize(const SerializationBuffer &data) override;
+
     static TokenData::Ptr deserializeMessage(const YAML::Node &node);
     static YAML::Node serializeMessage(const TokenData& msg);
 

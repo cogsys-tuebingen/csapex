@@ -8,6 +8,7 @@
 #include <csapex/factory/node_factory_impl.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 

@@ -4,7 +4,9 @@
 #include <csapex/utility/register_msg.h>
 #include <yaml-cpp/yaml.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/msg/io.h>
+#include <csapex_testing/mockup_msgs.h>
 
 #include <bitset>
 
@@ -335,4 +337,119 @@ TEST_F(BinarySerializationTest, TestUUID)
     ASSERT_EQ(uuid1.getFullName(), value.getFullName());
     buffer >> value;
     ASSERT_EQ(uuid2.getFullName(), value.getFullName());
+}
+
+
+TEST_F(BinarySerializationTest, SpecificTokenSerialization)
+{
+    SerializationBuffer data;
+    {
+        auto message = std::make_shared<MockMessage>();
+        message->value.payload = "foobar";
+
+        message->serialize(data);
+    }
+
+    {
+        MockMessage::Ptr specific(new MockMessage);
+        specific->deserialize(data);
+
+        ASSERT_NE(nullptr, specific);
+
+        ASSERT_STREQ("foobar", specific->payload.c_str());
+    }
+}
+
+TEST_F(BinarySerializationTest, SpecificTokenSerializationStream)
+{
+    SerializationBuffer data;
+    {
+        auto message = std::make_shared<MockMessage>();
+        message->value.payload = "foobar";
+
+        data << message;
+    }
+
+    {
+        MockMessage::Ptr specific;
+        data >> specific;
+
+        ASSERT_NE(nullptr, specific);
+
+        ASSERT_STREQ("foobar", specific->payload.c_str());
+    }
+}
+
+TEST_F(BinarySerializationTest, GenericTokenSerialization)
+{
+    SerializationBuffer data;
+    {
+        auto message = std::make_shared<MockMessage>();
+        message->value.payload = "foobar";
+
+        TokenData::Ptr generic = message;
+        data << generic;
+    }
+
+    {
+        TokenData::Ptr generic;
+        data >> generic;
+
+        ASSERT_NE(nullptr, generic);
+
+        MockMessage::Ptr specific = std::dynamic_pointer_cast<MockMessage>(generic);
+
+        ASSERT_STREQ("foobar", specific->payload.c_str());
+    }
+}
+TEST_F(BinarySerializationTest, EmptyVectorTest)
+{
+    SerializationBuffer data;
+    {
+        GenericVectorMessage::Ptr message = GenericVectorMessage::make<MockMessage>();
+
+        TokenData::Ptr generic = message;
+        data << generic;
+    }
+
+    {
+        TokenData::Ptr generic;
+        data >> generic;
+        ASSERT_NE(nullptr, generic);
+
+        GenericVectorMessage::Ptr vector = std::dynamic_pointer_cast<GenericVectorMessage>(generic);
+        ASSERT_NE(nullptr, vector);
+    }
+}
+
+TEST_F(BinarySerializationTest, VectorTest)
+{
+    SerializationBuffer data;
+    {
+        GenericVectorMessage::Ptr message = GenericVectorMessage::make<MockMessage>();
+
+        std::shared_ptr<std::vector<MockMessage>> vector = std::make_shared<std::vector<MockMessage>>();
+        for(int i = 0; i < 10; ++i) {
+            vector->emplace_back();
+            vector->back().payload = std::to_string(i);
+        }
+        message->set(vector);
+
+        TokenData::Ptr generic = message;
+        data << generic;
+    }
+
+    {
+        TokenData::Ptr generic;
+        data >> generic;
+        ASSERT_NE(nullptr, generic);
+
+        GenericVectorMessage::Ptr vector_msg = std::dynamic_pointer_cast<GenericVectorMessage>(generic);
+        ASSERT_NE(nullptr, vector_msg);
+
+        std::shared_ptr<const std::vector<MockMessage>> vector = vector_msg->makeShared<MockMessage>();
+        ASSERT_NE(nullptr, vector);
+
+        ASSERT_EQ(10, vector->size());
+    }
 }

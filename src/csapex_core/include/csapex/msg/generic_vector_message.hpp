@@ -10,6 +10,7 @@
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/serialization/yaml.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -18,9 +19,6 @@
 #include <vector>
 #undef NDEBUG
 #include <assert.h>
-
-// TODO REMOVE
-#include <iostream>
 
 namespace YAML
 {
@@ -60,6 +58,8 @@ private:
         }
 
         virtual EntryInterface::Ptr cloneEntry() const = 0;
+
+        virtual std::string nestedName() const = 0;
 
         virtual void encode(YAML::Node& node) const = 0;
         virtual void decode(const YAML::Node& node) = 0;
@@ -139,10 +139,13 @@ private:
             }
         }
 
+        std::string nestedName() const override
+        {
+            return type2name(typeid(T));
+        }
+
         void encode(YAML::Node& node) const override
         {
-            std::cout << "vector<"<< typeid(Payload).name() <<" < impl" << std::endl;
-            node["value_type"] = type2name(typeid(T));
             node["values"] = *value;
         }
 
@@ -150,7 +153,6 @@ private:
         {
             YAML::Emitter emitter;
             emitter << node;
-            std::cout << "vector<"<< typeid(Payload).name() <<" > impl: " << emitter.c_str() << std::endl;
             value.reset(new std::vector<Payload>);
             *value = node["values"].as< std::vector<Payload> >();
         }
@@ -161,11 +163,13 @@ private:
         }
         void serialize(SerializationBuffer &data) const override
         {
-            throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+            TokenData::serialize(data);
+            data << value;
         }
         void deserialize(const SerializationBuffer& data) override
         {
-            throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+            TokenData::deserialize(data);
+            data >> value;
         }
 
         TokenData::Ptr nestedType() const override
@@ -365,6 +369,10 @@ private:
             return r;
         }
 
+        std::string nestedName() const override
+        {
+            return type2name(typeid(T));
+        }
 
         void encode(YAML::Node& node) const override
         {
@@ -396,11 +404,13 @@ private:
         }
         void serialize(SerializationBuffer &data) const override
         {
-            throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+            TokenData::serialize(data);
+            data << value;
         }
         void deserialize(const SerializationBuffer& data) override
         {
-            throw std::runtime_error("Serialization of GenericVector is not implemented yet");
+            TokenData::deserialize(data);
+            data >> value;
         }
     };
 
@@ -420,6 +430,12 @@ private:
         }
         void serialize(SerializationBuffer &data) const override;
         void deserialize(const SerializationBuffer& data) override;
+
+        std::string nestedName() const override
+        {
+            return "::anything::";
+        }
+
     };
 
     struct CSAPEX_CORE_EXPORT InstancedImplementation : public EntryInterface
@@ -446,6 +462,11 @@ private:
         }
         void serialize(SerializationBuffer &data) const override;
         void deserialize(const SerializationBuffer& data) override;
+
+        std::string nestedName() const override
+        {
+            return "::instanced::";
+        }
 
     private:
         TokenData::ConstPtr type_;
@@ -510,12 +531,8 @@ public:
             }
             auto pos = instance().map_.find(ns_type);
             if(pos == instance().map_.end()) {
-                for(auto pair : instance().map_) {
-                    std::cout << "supported: " << pair.first << std::endl;
-                }
                 throw std::runtime_error(std::string("cannot make vector of type ") + type);
             }
-            //            std::cout << "!!!! make vector of type " << type << ": " << pos->second->typeName() << std::endl;;
             return pos->second->cloneEntry();
         }
 
@@ -585,7 +602,6 @@ public:
             }
             return res;
         } else {
-            std::cout << "type is " << type2name<T>() << std::endl;
             throw std::runtime_error("cannot make the msg vector shared");
         }
     }
@@ -605,8 +621,6 @@ public:
             }
             return res;
         } else {
-            std::cout << "instance is " << type2name(typeid(*impl)) << std::endl;
-            std::cout << "type is " << type2name<T>() << std::endl;
             throw std::runtime_error("cannot make the direct vector shared");
         }
     }
@@ -686,6 +700,7 @@ public:
 
     void encode(YAML::Node& node) const
     {
+        node["value_type"] = impl->nestedName();
         impl->encode(node);
     }
 
@@ -693,7 +708,7 @@ public:
     {
         std::string type = node["value_type"].as<std::string>();
         impl = SupportedTypes::make(type);
-        assert(impl);
+        apex_assert_hard(impl);
 
         impl->decode(node);
     }
@@ -736,10 +751,17 @@ public:
     }
     void serialize(SerializationBuffer &data) const override
     {
+        data << impl->nestedName();
+
         impl->serialize(data);
     }
     void deserialize(const SerializationBuffer& data) override
     {
+        std::string type;
+        data >> type;
+        impl = SupportedTypes::make(type);
+        apex_assert_hard(impl);
+
         impl->deserialize(data);
     }
 

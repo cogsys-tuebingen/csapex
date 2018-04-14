@@ -126,7 +126,9 @@ CsApexCore::CsApexCore(Settings& settings, ExceptionHandler &handler, PluginLoca
 
 CsApexCore::~CsApexCore()
 {
-    root_->stop();
+    if(root_) {
+        root_->stop();
+    }
 
     std::unique_lock<std::mutex> lock(running_mutex_);
     if(is_root_) {

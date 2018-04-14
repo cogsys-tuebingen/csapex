@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/model/connectable.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/model/fulcrum.h>
 
 using namespace csapex;

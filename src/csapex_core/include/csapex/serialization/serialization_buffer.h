@@ -57,10 +57,6 @@ public:
     void readRaw(char* data, const std::size_t length) const;
     void readRaw(uint8_t* data, const std::size_t length) const;
 
-
-    SerializationBuffer& operator << (const Serializable& s);
-    const SerializationBuffer& operator >> (Serializable& s) const;
-
     template <typename T,
               typename std::enable_if<std::is_base_of<Streamable, T>::value,
                                       int>::type = 0>
@@ -133,14 +129,6 @@ public:
         i = static_cast<T>(at(pos++));
         return *this;
     }
-
-    // UUID
-    SerializationBuffer& operator << (const UUID& s);
-    const SerializationBuffer& operator >> (UUID& s) const;
-
-    // Token Data
-    SerializationBuffer& operator << (const TokenData& s);
-    const SerializationBuffer& operator >> (TokenData& s) const;
 
 
     // BOOST ANY

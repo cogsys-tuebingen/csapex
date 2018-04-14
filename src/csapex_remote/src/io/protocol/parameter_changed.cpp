@@ -5,6 +5,7 @@
 #include <csapex/serialization/broadcast_message_serializer.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <iostream>

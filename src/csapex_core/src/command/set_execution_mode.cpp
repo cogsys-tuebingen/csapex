@@ -8,6 +8,7 @@
 #include <csapex/model/node_state.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <sstream>

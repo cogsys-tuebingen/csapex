@@ -6,6 +6,7 @@
 #include <csapex/utility/register_msg.h>
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/msg/io.h>
 #include <csapex/utility/string.hpp>
 
@@ -31,7 +32,7 @@ struct GenericValueMessage : public Message, public ValueMessageBase
     typedef std::shared_ptr<GenericValueMessage<Type> > Ptr;
     typedef std::shared_ptr<GenericValueMessage<Type> const> ConstPtr;
 
-    GenericValueMessage(const Type& value = Type(), const std::string& frame_id = "/", Message::Stamp stamp = 0)
+    explicit GenericValueMessage(const Type& value = Type(), const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp),
           value(value)
     {
@@ -132,11 +133,13 @@ struct GenericValueMessage : public Message, public ValueMessageBase
         return std::shared_ptr<Clonable>(new GenericValueMessage<Type>);
     }
     void serialize(SerializationBuffer &data) const override
-    {
+    {        
+        TokenData::serialize(data);
         data << value;
     }
     void deserialize(const SerializationBuffer& data) override
-    {
+    {        
+        TokenData::deserialize(data);
         data >> value;
     }
 

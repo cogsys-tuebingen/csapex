@@ -13,6 +13,7 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/factory/message_factory.h>

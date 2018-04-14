@@ -6,6 +6,7 @@
 #include <csapex/msg/token_traits.h>
 #include <csapex/msg/io.h>
 #include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <type_traits>
@@ -121,7 +122,7 @@ public:
     typedef MessageTemplateContainer<Type, std::is_integral<Type>::value> ValueContainer;
     typedef MessageTemplate<Type,Instance> Self;
 
-    MessageTemplate( const std::string& frame_id = "/", Message::Stamp stamp = 0)
+    explicit MessageTemplate( const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type<Instance>::name(), frame_id, stamp)
     {}
 

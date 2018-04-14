@@ -14,6 +14,7 @@
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 using namespace command;

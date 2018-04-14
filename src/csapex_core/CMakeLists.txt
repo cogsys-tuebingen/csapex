@@ -166,6 +166,7 @@ add_library(csapex_serialization SHARED
 
     src/serialization/io/std_io.cpp
     src/serialization/io/boost_io.cpp
+    src/serialization/io/csapex_io.cpp
 
     ${csapex_serialization_HEADERS}
 )

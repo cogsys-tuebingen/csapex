@@ -111,3 +111,8 @@ void TokenData::writeRaw(const std::string &/*file*/, const std::string &/*base*
 {
     std::cerr << "error: writeRaw not implemented for message type " << descriptiveName() << std::endl;
 }
+
+uint8_t TokenData::getPacketType() const
+{
+    return PACKET_TYPE_ID;
+}

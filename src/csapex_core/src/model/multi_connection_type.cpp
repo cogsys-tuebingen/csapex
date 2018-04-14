@@ -69,11 +69,9 @@ std::shared_ptr<Clonable> MultiTokenData::makeEmptyClone() const
 }
 void MultiTokenData::serialize(SerializationBuffer &data) const
 {
-    TokenData::serialize(data);
-    throw std::runtime_error("Serialization of MultiTokenData is not implemented yet");
+    throw std::runtime_error("MultiTokenData is a meta type and cannot be serialized");
 }
 void MultiTokenData::deserialize(const SerializationBuffer& data)
 {
-    TokenData::deserialize(data);
-    throw std::runtime_error("Serialization of MultiTokenData is not implemented yet");
+    throw std::runtime_error("MultiTokenData is a meta type and cannot be serialized");
 }
