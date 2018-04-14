@@ -161,16 +161,6 @@ private:
         {
             return std::shared_ptr<Clonable>(new Implementation<T>);
         }
-        void serialize(SerializationBuffer &data) const override
-        {
-            TokenData::serialize(data);
-            data << value;
-        }
-        void deserialize(const SerializationBuffer& data) override
-        {
-            TokenData::deserialize(data);
-            data >> value;
-        }
 
         TokenData::Ptr nestedType() const override
         {

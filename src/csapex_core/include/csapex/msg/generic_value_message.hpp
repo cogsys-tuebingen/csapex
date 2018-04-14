@@ -5,8 +5,6 @@
 #include <csapex/msg/message.h>
 #include <csapex/utility/register_msg.h>
 #include <csapex/serialization/message_serializer.h>
-#include <csapex/serialization/io/std_io.h>
-#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/msg/io.h>
 #include <csapex/utility/string.hpp>
 

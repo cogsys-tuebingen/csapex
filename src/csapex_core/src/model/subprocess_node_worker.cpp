@@ -53,9 +53,6 @@ SubprocessNodeWorker::SubprocessNodeWorker(NodeHandlePtr node_handle)
 
 void SubprocessNodeWorker::initialize()
 {
-    // ... generalize.......
-    connection_types::GenericVectorMessage::registerType<connection_types::GenericValueMessage<int>>();
-    connection_types::GenericVectorMessage::registerType<connection_types::GenericValueMessage<int>>(connection_types::type<connection_types::GenericValueMessage<int>>::name());
 
     pid_ = subprocess_->fork([this](){
         runSubprocessLoop();
