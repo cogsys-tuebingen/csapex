@@ -596,7 +596,10 @@ public:
         }
     }
     template <typename T>
-    std::shared_ptr<std::vector<T> const>  makeShared(typename std::enable_if<!std::is_base_of<TokenData, T>::value>::type* = 0) const
+    std::shared_ptr<std::vector<T> const>  makeShared(typename std::enable_if<!
+                                                      std::is_base_of<TokenData, T>::value &&
+                                                      !should_use_value_message<T>::value
+                                                      >::type* = 0) const
     {
         if(auto i = std::dynamic_pointer_cast< Implementation<T> > (impl)) {
             return i->value;
@@ -604,7 +607,17 @@ public:
             auto res = std::make_shared<std::vector<T>>();
             makeSharedValue(i.get(), res);
             return res;
-        } else if(auto i = std::dynamic_pointer_cast< MessageImplementation<GenericValueMessage<T>> >  (impl)) {
+        } else {
+            throw std::runtime_error("cannot make the direct vector shared");
+        }
+    }
+    template <typename T>
+    std::shared_ptr<std::vector<T> const>  makeShared(typename std::enable_if<
+                                                      !std::is_base_of<TokenData, T>::value &&
+                                                      should_use_value_message<T>::value
+                                                      >::type* = 0) const
+    {
+        if(auto i = std::dynamic_pointer_cast< MessageImplementation<GenericValueMessage<T>> >  (impl)) {
             auto res = std::make_shared<std::vector<T>>();
             for(auto entry : *i->value) {
                 res->push_back(entry.value);

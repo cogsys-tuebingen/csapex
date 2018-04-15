@@ -34,6 +34,7 @@ struct GenericValueMessage : public Message, public ValueMessageBase
         : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp),
           value(value)
     {
+        static_assert(should_use_value_message<Type>::value, "The type should not use a value message");
         static csapex::DirectMessageConstructorRegistered<connection_types::GenericValueMessage, Type> reg_c;
         static csapex::DirectMessageSerializerRegistered<connection_types::GenericValueMessage, Type> reg_s;
     }
