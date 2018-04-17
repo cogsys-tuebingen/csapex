@@ -6,6 +6,7 @@
 
 /// PROJECT
 #include <csapex/utility/uuid.h>
+#include <csapex/utility/uuid_provider.h>
 
 using namespace csapex;
 

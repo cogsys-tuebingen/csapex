@@ -264,17 +264,17 @@ void CsApexCore::init()
 
 
         if(is_root_) {
-            root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(),
                                                          root_->getLocalGraph()->makeUUID("slot_save"), "save",
                                                          [this](const TokenPtr&) {
                 saveAs(getSettings().get<std::string>("config"));
             });
-            root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(),
                                                          root_->getLocalGraph()->makeUUID("slot_exit"), "exit",
                                                          [this](const TokenPtr&) {
                 shutdown();
             });
-            root_->getSubgraphNode()->createInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(),
+            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(),
                                                          root_->getLocalGraph()->makeUUID("slot_abort"), "abort",
                                                          [this](const TokenPtr&) {
                 abort();

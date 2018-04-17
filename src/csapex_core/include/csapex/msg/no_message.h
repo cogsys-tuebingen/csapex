@@ -35,16 +35,16 @@ struct type<NoMessage> {
         return "Nothing";
     }
 };
+}
+
 
 template <>
-inline std::shared_ptr<NoMessage> makeEmpty<NoMessage>()
+inline std::shared_ptr<connection_types::NoMessage> makeEmpty<connection_types::NoMessage>()
 {
-    static std::shared_ptr<NoMessage> instance(new NoMessage);
+    static std::shared_ptr<connection_types::NoMessage> instance(new connection_types::NoMessage);
     return instance;
 }
 
-
-}
 }
 
 #endif // NO_MESSAGE_H

@@ -67,7 +67,7 @@ protected:
         apex_assert_hard(sub_graph_node_facade);
         graph->addNode(sub_graph_node_facade);
 
-        auto type = connection_types::makeEmptyMessage<connection_types::GenericValueMessage<int> >();
+        auto type = makeEmpty<connection_types::GenericValueMessage<int> >();
 
         auto in1_map = sub_graph->addForwardingInput(type, "forwarding", false);
         auto in2_map = sub_graph->addForwardingInput(type, "forwarding", false);

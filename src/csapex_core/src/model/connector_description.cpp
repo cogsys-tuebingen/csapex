@@ -5,6 +5,7 @@
 #include <csapex/msg/any_message.h>
 #include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/io/csapex_io.h>
+#include <csapex/utility/uuid_provider.h>
 
 using namespace csapex;
 
@@ -41,7 +42,7 @@ ConnectorDescription::ConnectorDescription(const AUUID& owner,
       optional(false),
       is_parameter(false),
       is_variadic(false),
-      token_type(connection_types::makeEmpty<connection_types::AnyMessage>()),
+      token_type(makeEmpty<connection_types::AnyMessage>()),
       id(UUID::NONE),
       valid(true)
 {

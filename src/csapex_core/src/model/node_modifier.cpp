@@ -37,17 +37,17 @@ void NodeModifier::setVariadic(bool variadic)
 
 Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback, bool active, bool blocking)
 {
-    return addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, active, blocking);
+    return addSlot(makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, active, blocking);
 }
 Slot* NodeModifier::addActiveSlot(const std::string& label, std::function<void()> callback, bool blocking)
 {
-    return addSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, true, blocking);
+    return addSlot(makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, true, blocking);
 }
 
 
 Event* NodeModifier::addEvent(const std::string &label)
 {
-    return addEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), label);
+    return addEvent(makeEmpty<connection_types::AnyMessage>(), label);
 }
 
 

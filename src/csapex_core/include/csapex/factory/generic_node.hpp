@@ -189,7 +189,7 @@ private:
 
         template<typename U>
         void operator()(GenericOutput<U>) {
-            typename U::Ptr out(connection_types::makeEmptyMessage<U>());
+            typename U::Ptr out(makeEmpty<U>());
             instance_->out_msg_[id] = out;
             ++id;
         }

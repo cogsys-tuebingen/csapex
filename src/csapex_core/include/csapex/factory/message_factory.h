@@ -34,11 +34,11 @@ public:
 
     template <typename M>
     static TokenData::Ptr createMessage() {
-        return connection_types::makeEmpty<M>();
+        return makeEmpty<M>();
     }
     template <template <typename> class Wrapper,typename M>
     static TokenData::Ptr createDirectMessage() {
-        return connection_types::makeEmptyMessage< Wrapper<M> >();
+        return makeEmpty< Wrapper<M> >();
     }
 
     static TokenData::Ptr createMessage(const std::string& type);

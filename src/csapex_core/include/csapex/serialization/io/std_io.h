@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/serialization/serialization_buffer.h>
 #include <csapex/serialization/serializable.h>
+#include <csapex/msg/token_traits.h>
 
 namespace csapex
 {
@@ -78,7 +79,7 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::ve
     s.reserve(len);
     s.clear();
     for(uint8_t i = 0; i < len; ++i) {
-        std::shared_ptr<S> object = connection_types::makeEmpty<S>();
+        std::shared_ptr<S> object = makeEmpty<S>();
         data >> object;
         s.push_back(*object);
     }
@@ -160,7 +161,7 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::sh
 
     // in case T is const, we need to strip that, otherwise we cannot deserialize
     using TT = typename std::remove_const<T>::type;
-    std::shared_ptr<TT> res = connection_types::makeEmpty<TT>();
+    std::shared_ptr<TT> res = makeEmpty<TT>();
     data >> *res;
     s = res;
     return data;
@@ -202,7 +203,7 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::sh
 
     // in case T is const, we need to strip that, otherwise we cannot deserialize
     using TT = typename std::remove_const<T>::type;
-    std::shared_ptr<TT> res(connection_types::makeEmpty<TT>());
+    std::shared_ptr<TT> res(makeEmpty<TT>());
     data >> *res;
     s = res;
     return data;

@@ -252,12 +252,12 @@ CommandPtr CommandFactory::createVariadicOutput(const AUUID& node_uuid, TokenDat
 
 CommandPtr CommandFactory::createVariadicEvent(const AUUID& node_uuid, const std::string& label)
 {
-    return createVariadicPort(node_uuid, ConnectorType::EVENT, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
+    return createVariadicPort(node_uuid, ConnectorType::EVENT, makeEmpty<connection_types::AnyMessage>(), label, false);
 }
 
 CommandPtr CommandFactory::createVariadicSlot(const AUUID& node_uuid, const std::string& label)
 {
-    return createVariadicPort(node_uuid, ConnectorType::SLOT_T, connection_types::makeEmpty<connection_types::AnyMessage>(), label, false);
+    return createVariadicPort(node_uuid, ConnectorType::SLOT_T, makeEmpty<connection_types::AnyMessage>(), label, false);
 }
 
 CommandPtr CommandFactory::createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string& label)

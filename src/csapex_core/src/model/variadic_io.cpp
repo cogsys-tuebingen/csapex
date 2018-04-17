@@ -24,7 +24,7 @@ VariadicBase::VariadicBase(TokenDataConstPtr type)
 
 }
 VariadicBase::VariadicBase()
-    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
@@ -55,7 +55,7 @@ VariadicInputs::VariadicInputs(TokenDataConstPtr type)
 
 }
 VariadicInputs::VariadicInputs()
-    : VariadicInputs(connection_types::makeEmpty<connection_types::AnyMessage>())
+    : VariadicInputs(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
@@ -185,7 +185,7 @@ VariadicOutputs::VariadicOutputs(TokenDataConstPtr type)
 
 }
 VariadicOutputs::VariadicOutputs()
-    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
@@ -314,7 +314,7 @@ VariadicEvents::VariadicEvents(TokenDataConstPtr type)
 
 }
 VariadicEvents::VariadicEvents()
-    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
@@ -423,7 +423,7 @@ void VariadicEvents::updateEvents(int count)
             } else {
                 label = "Event";
             }
-            createVariadicEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), label);
+            createVariadicEvent(makeEmpty<connection_types::AnyMessage>(), label);
         }
     }
 
@@ -443,7 +443,7 @@ VariadicSlots::VariadicSlots(TokenDataConstPtr type)
 
 }
 VariadicSlots::VariadicSlots()
-    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
@@ -573,7 +573,7 @@ void VariadicSlots::updateSlots(int count)
             } else {
                 label = "Slot";
             }
-            createVariadicSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), label, [](const TokenPtr&){});
+            createVariadicSlot(makeEmpty<connection_types::AnyMessage>(), label, [](const TokenPtr&){});
         }
     }
 
@@ -595,7 +595,7 @@ VariadicIO::VariadicIO(TokenDataConstPtr type)
 
 }
 VariadicIO::VariadicIO()
-    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
@@ -632,7 +632,7 @@ Variadic::Variadic(TokenDataConstPtr type)
 
 }
 Variadic::Variadic()
-    : VariadicBase(connection_types::makeEmpty<connection_types::AnyMessage>())
+    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 

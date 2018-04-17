@@ -221,13 +221,13 @@ TEST_F(PolymorphicValuesTest, ExactValueDoesNotUseMessageConversion) {
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
     i->setType(std::make_shared<connection_types::GenericValueMessage<int>>());
-    i->setToken(std::make_shared<Token>(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<int>>()));
+    i->setToken(std::make_shared<Token>(makeEmpty<connection_types::GenericValueMessage<int>>()));
     ASSERT_TRUE(msg::isValue<int>(i.get()));
     ASSERT_TRUE(msg::isValue<double>(i.get()));
     ASSERT_TRUE(msg::isExactValue<int>(i.get()));
     ASSERT_FALSE(msg::isExactValue<double>(i.get()));
     i->setType(std::make_shared<connection_types::GenericValueMessage<double>>());
-    i->setToken(std::make_shared<Token>(connection_types::makeEmptyMessage<connection_types::GenericValueMessage<double>>()));
+    i->setToken(std::make_shared<Token>(makeEmpty<connection_types::GenericValueMessage<double>>()));
     ASSERT_TRUE(msg::isValue<int>(i.get()));
     ASSERT_TRUE(msg::isValue<double>(i.get()));
     ASSERT_FALSE(msg::isExactValue<int>(i.get()));

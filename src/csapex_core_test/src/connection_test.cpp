@@ -51,8 +51,8 @@ TEST_F(ConnectionTest, DirectConnectionCompatibility) {
     // non typed should always be connectable!
     ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 
-    o.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
-    i.setType(connection_types::makeEmpty<GenericValueMessage<int>>());
+    o.setType(makeEmpty<GenericValueMessage<int>>());
+    i.setType(makeEmpty<GenericValueMessage<int>>());
     ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 }
 

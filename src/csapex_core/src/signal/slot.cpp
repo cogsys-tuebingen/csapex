@@ -18,18 +18,18 @@ using namespace csapex;
 Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
     : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr&){callback();}), active_(active), blocking_(blocking), guard_(-1)
 {
-    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
+    setType(makeEmpty<connection_types::AnyMessage>());
 }
 Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
     : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr& token){callback(token);}), active_(active), blocking_(blocking), guard_(-1)
 {
-    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
+    setType(makeEmpty<connection_types::AnyMessage>());
 }
 
 Slot::Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
     : Input(uuid, owner), callback_(callback), active_(active), blocking_(blocking), guard_(-1)
 {
-    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
+    setType(makeEmpty<connection_types::AnyMessage>());
 }
 
 Slot::~Slot()

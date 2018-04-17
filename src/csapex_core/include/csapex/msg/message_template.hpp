@@ -213,7 +213,7 @@ struct MessageCaster<Instance, S, typename std::enable_if<std::is_base_of<connec
 
         // if we can cast the message to the value type, create a new message of that type
         if(auto* casted = dynamic_cast<V const*>(msg.get())) {
-            auto res = connection_types::makeEmptyMessage<Instance>();
+            auto res = makeEmpty<Instance>();
 
             // copy specific data
             res->value = *casted;
@@ -237,7 +237,7 @@ struct MessageCaster<Instance, S, typename std::enable_if<std::is_base_of<connec
 
         // if we can cast the message to the value type, create a new message of that type
         if(auto* casted = dynamic_cast<V*>(msg.get())) {
-            auto res = connection_types::makeEmptyMessage<Instance>();
+            auto res = makeEmpty<Instance>();
 
             // copy specific data
             res->value = *casted;

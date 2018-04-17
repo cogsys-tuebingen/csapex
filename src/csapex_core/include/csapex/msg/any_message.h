@@ -41,14 +41,15 @@ struct type<AnyMessage> {
     }
 };
 
+}
+
 template <>
-inline std::shared_ptr<AnyMessage> makeEmpty<AnyMessage>()
+inline std::shared_ptr<connection_types::AnyMessage> makeEmpty<connection_types::AnyMessage>()
 {
-    static std::shared_ptr<AnyMessage> instance(new AnyMessage);
+    static std::shared_ptr<connection_types::AnyMessage> instance(new connection_types::AnyMessage);
     return instance;
 }
 
-}
 }
 
 /// YAML

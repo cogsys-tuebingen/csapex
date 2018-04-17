@@ -3,10 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/assert.h>
-#include <csapex/utility/uuid_provider.h>
 #include <csapex/serialization/serialization_fwd.h>
-#include <csapex/model/model_fwd.h>
-#include <csapex/msg/token_traits.h>
 
 /// SYSTEM
 #include <vector>
@@ -16,6 +13,7 @@
 #include <limits>
 #include <typeindex>
 #include <boost/any.hpp>
+#include <map>
 
 namespace YAML
 {

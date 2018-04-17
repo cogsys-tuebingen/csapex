@@ -111,8 +111,8 @@ void SubgraphNode::setup(NodeModifier &modifier)
 {
     setupVariadic(modifier);
 
-    activation_event_ = createInternalEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), graph_->makeUUID("event_activation"), "activation");
-    deactivation_event_ = createInternalEvent(connection_types::makeEmpty<connection_types::AnyMessage>(), graph_->makeUUID("event_deactivation"), "deactivation");
+    activation_event_ = createInternalEvent(makeEmpty<connection_types::AnyMessage>(), graph_->makeUUID("event_activation"), "activation");
+    deactivation_event_ = createInternalEvent(makeEmpty<connection_types::AnyMessage>(), graph_->makeUUID("event_deactivation"), "deactivation");
 }
 
 void SubgraphNode::activation()
@@ -413,7 +413,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
 
 SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
 {
-    SlotPtr slot = node_handle_->addInternalSlot(connection_types::makeEmpty<connection_types::AnyMessage>(), internal_uuid, label, callback);
+    SlotPtr slot = node_handle_->addInternalSlot(makeEmpty<connection_types::AnyMessage>(), internal_uuid, label, callback);
     slot->setGraphPort(true);
     slot->setEssential(true);
 

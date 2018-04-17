@@ -273,7 +273,7 @@ private:
         static TokenData::ConstPtr convertToken(const MsgType& val,
                                                 typename std::enable_if<connection_types::should_use_pointer_message<MsgType>::value >::type* = 0)
         {
-            auto res = connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<MsgType> >();
+            auto res = csapex::makeEmpty<connection_types::GenericPointerMessage<MsgType> >();
             res->value = std::make_shared<MsgType>(val);
             return res;
         }
@@ -282,7 +282,7 @@ private:
         static TokenData::ConstPtr convertToken(const std::shared_ptr<MsgType>& val,
                                                 typename std::enable_if<connection_types::should_use_pointer_message<MsgType>::value >::type* = 0)
         {
-            auto res = connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<MsgType> >();
+            auto res = csapex::makeEmpty<connection_types::GenericPointerMessage<MsgType> >();
             res->value = val;
             return res;
         }
@@ -291,7 +291,7 @@ private:
         static TokenData::ConstPtr convertToken(const MsgType& val,
                                                 typename std::enable_if<connection_types::should_use_value_message<MsgType>::value >::type* = 0)
         {
-            auto res = connection_types::makeEmptyMessage<connection_types::GenericValueMessage<MsgType> >();
+            auto res = csapex::makeEmpty<connection_types::GenericValueMessage<MsgType> >();
             res->value = val;
             return res;
         }
@@ -315,13 +315,13 @@ private:
         template <typename MsgType>
         static TokenData::Ptr makeTypeImpl(typename std::enable_if<connection_types::should_use_pointer_message<MsgType>::value >::type* = 0)
         {
-            return connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<MsgType> >();
+            return csapex::makeEmpty<connection_types::GenericPointerMessage<MsgType> >();
         }
 
         template <typename MsgType>
         static TokenData::Ptr makeTypeImpl(typename std::enable_if<connection_types::should_use_value_message<MsgType>::value >::type* = 0)
         {
-            return connection_types::makeEmptyMessage<connection_types::GenericValueMessage<MsgType> >();
+            return csapex::makeEmpty<connection_types::GenericValueMessage<MsgType> >();
         }
 
         template <typename MsgType>
@@ -330,7 +330,7 @@ private:
                                            !connection_types::should_use_value_message<MsgType>::value>::type* = 0)
         {
             static_assert(std::is_base_of<TokenData, MsgType>::value, "message has to be derived from TokenData");
-            return connection_types::makeEmptyMessage<MsgType>();
+            return csapex::makeEmpty<typename std::remove_const<MsgType>::type>();
         }
 
     public:
@@ -623,6 +623,12 @@ public:
                 res->push_back(entry.value);
             }
             return res;
+        } else  if(auto i = std::dynamic_pointer_cast< Implementation<T> > (impl)) {
+            return i->value;
+        } else if(auto i = std::dynamic_pointer_cast< InstancedImplementation > (impl)) {
+            auto res = std::make_shared<std::vector<T>>();
+            makeSharedValue(i.get(), res);
+            return res;
         } else {
             throw std::runtime_error("cannot make the direct vector shared");
         }
@@ -784,14 +790,14 @@ struct type<GenericVectorMessage> {
         return "Vector";
     }
 };
+}
 
 template <>
-inline std::shared_ptr<GenericVectorMessage> makeEmpty<GenericVectorMessage>()
+inline std::shared_ptr<connection_types::GenericVectorMessage> makeEmpty<connection_types::GenericVectorMessage>()
 {
-    return GenericVectorMessage::make<GenericVectorMessage::Anything>();
+    return connection_types::GenericVectorMessage::make<connection_types::GenericVectorMessage::Anything>();
 }
 
-}
 }
 
 template <typename T>

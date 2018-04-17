@@ -4,6 +4,11 @@
 /// COMPONENT
 #include <csapex/serialization/serialization_buffer.h>
 
+/// PROJECT
+#include <csapex/utility/utility_fwd.h>
+#include <csapex/model/model_fwd.h>
+#include <csapex/utility/data_traits.hpp>
+
 namespace csapex
 {
 
@@ -79,7 +84,7 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::ve
     s.reserve(len);
     s.clear();
     for(uint8_t i = 0; i < len; ++i) {
-        std::shared_ptr<S> object = connection_types::makeEmpty<S>();
+        std::shared_ptr<S> object = makeEmpty<S>();
         data >> static_cast<Serializable&>(*object);
         s.push_back(*object);
     }

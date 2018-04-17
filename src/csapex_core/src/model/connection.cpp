@@ -292,7 +292,7 @@ int Connection::id() const
 
 ConnectionDescription Connection::getDescription() const
 {
-    TokenDataConstPtr type = message_ ? message_->getTokenData() : connection_types::makeEmpty<connection_types::AnyMessage>();
+    TokenDataConstPtr type = message_ ? message_->getTokenData() : makeEmpty<connection_types::AnyMessage>();
     return ConnectionDescription(from_->getUUID(), to_->getUUID(),
                                  type, id_, isActive(),
                                  getFulcrumsCopy());
