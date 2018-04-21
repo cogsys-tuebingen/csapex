@@ -43,6 +43,8 @@ protected:
     Message(const std::string& name, const std::string& frame_id, Stamp stamp_micro_seconds);
     virtual ~Message();
 
+    void cloneDataFrom(const Clonable& other);
+
 public:
     std::string frame_id;
     Stamp stamp_micro_seconds;

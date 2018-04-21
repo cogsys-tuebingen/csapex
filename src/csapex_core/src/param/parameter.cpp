@@ -249,7 +249,7 @@ void Parameter::setValueFrom(const Parameter &other)
 
 std::shared_ptr<Clonable> Parameter::cloneRaw() const
 {
-    auto res = std::dynamic_pointer_cast<Parameter>(makeEmptyClone());
+    auto res = std::dynamic_pointer_cast<Parameter>(makeEmptyInstance());
     res->cloneFrom(*this);
     return res;
 }

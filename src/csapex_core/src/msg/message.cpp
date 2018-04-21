@@ -69,6 +69,12 @@ Message::~Message()
 
 }
 
+void Message::cloneDataFrom(const Clonable& other)
+{
+    const Message& rhs = dynamic_cast<const Message&>(other);
+    frame_id = rhs.frame_id;
+    stamp_micro_seconds = rhs.stamp_micro_seconds;
+}
 
 /// YAML
 namespace YAML {

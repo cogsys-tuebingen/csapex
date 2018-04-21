@@ -96,11 +96,6 @@ void Interval::stop()
 }
 
 
-std::shared_ptr<Clonable> Interval::makeEmptyClone() const
-{
-    return makeEmpty();
-}
-
 std::shared_ptr<Interval> Interval::makeEmpty()
 {
     return std::shared_ptr<Interval>(new Interval);

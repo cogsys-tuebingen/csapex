@@ -11,6 +11,9 @@ namespace connection_types
 
 struct CSAPEX_CORE_EXPORT EndOfSequenceMessage : public MarkerMessage
 {
+protected:
+    CLONABLE_IMPLEMENTATION(EndOfSequenceMessage);
+
 public:
     typedef std::shared_ptr<EndOfSequenceMessage> Ptr;
 
@@ -21,13 +24,6 @@ protected:
     EndOfSequenceMessage(const std::string& name);
 
 public:
-    TokenData::Ptr clone() const override;
-    TokenData::Ptr toType() const override;
-
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::shared_ptr<Clonable>(new EndOfSequenceMessage);
-    }
     void serialize(SerializationBuffer &data) const override;
     void deserialize(const SerializationBuffer& data) override;
 };

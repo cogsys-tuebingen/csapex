@@ -37,6 +37,9 @@ struct GenericValueMessage;
 
 class CSAPEX_CORE_EXPORT GenericVectorMessage : public Message
 {
+protected:
+    CLONABLE_IMPLEMENTATION(GenericVectorMessage);
+
     friend class YAML::as_if<GenericVectorMessage, void>;
 
 public:
@@ -52,13 +55,6 @@ private:
         {
         }
 
-        virtual TokenData::Ptr clone() const override
-        {
-            return cloneEntry();
-        }
-
-        virtual EntryInterface::Ptr cloneEntry() const = 0;
-
         virtual std::string nestedName() const = 0;
 
         virtual void encode(YAML::Node& node) const = 0;
@@ -68,6 +64,9 @@ private:
     template <typename T>
     struct Implementation : public EntryInterface
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(Implementation<T>);
+
     private:
         template <typename Type, typename Enable = void>
         struct ExtractPayload
@@ -100,19 +99,6 @@ private:
         {
             static_assert(!std::is_same<T, void*>::value, "void* not allowed");
             value.reset(new std::vector<Payload>);
-        }
-
-        virtual EntryInterface::Ptr cloneEntry() const override
-        {
-            Self::Ptr r(new Self);
-            r->value = std::make_shared<std::vector<Payload>>(*value);
-            return r;
-        }
-
-        virtual TokenData::Ptr toType() const override
-        {
-            Self::Ptr r(new Self);
-            return r;
         }
 
         virtual bool canConnectTo(const TokenData* other_side) const override
@@ -155,11 +141,6 @@ private:
             emitter << node;
             value.reset(new std::vector<Payload>);
             *value = node["values"].as< std::vector<Payload> >();
-        }
-
-        std::shared_ptr<Clonable> makeEmptyClone() const override
-        {
-            return std::shared_ptr<Clonable>(new Implementation<T>);
         }
 
         TokenData::Ptr nestedType() const override
@@ -340,6 +321,10 @@ private:
     template <typename T>
     struct MessageImplementation : public Implementation<T>
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(MessageImplementation<T>);
+
+    public:
         typedef Implementation<T> Parent;
         typedef MessageImplementation<T> Self;
 
@@ -350,13 +335,6 @@ private:
 
         static typename Self::Ptr make() {
             return Self::Ptr (new Self);
-        }
-
-        virtual EntryInterface::Ptr cloneEntry() const override
-        {
-            auto r = std::make_shared<MessageImplementation<T>>();
-            *r->value = *value;
-            return r;
         }
 
         std::string nestedName() const override
@@ -388,10 +366,6 @@ private:
             }
         }
 
-        std::shared_ptr<Clonable> makeEmptyClone() const override
-        {
-            return make();
-        }
         void serialize(SerializationBuffer &data) const override
         {
             TokenData::serialize(data);
@@ -406,18 +380,17 @@ private:
 
     struct CSAPEX_CORE_EXPORT AnythingImplementation : public EntryInterface
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(AnythingImplementation);
+
+    public:
         AnythingImplementation();
 
-        EntryInterface::Ptr cloneEntry() const override;
-        TokenData::Ptr toType() const override;
         bool canConnectTo(const TokenData* other_side) const override;
         bool acceptsConnectionFrom(const TokenData *other_side) const override;
         void encode(YAML::Node& node) const override;
         void decode(const YAML::Node& node) override;
-        std::shared_ptr<Clonable> makeEmptyClone() const override
-        {
-            return std::shared_ptr<Clonable>(new AnythingImplementation);
-        }
+
         void serialize(SerializationBuffer &data) const override;
         void deserialize(const SerializationBuffer& data) override;
 
@@ -430,12 +403,14 @@ private:
 
     struct CSAPEX_CORE_EXPORT InstancedImplementation : public EntryInterface
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(InstancedImplementation);
+
         friend class GenericVectorMessage;
 
+    public:
         InstancedImplementation(TokenData::ConstPtr type);
 
-        EntryInterface::Ptr cloneEntry() const override;
-        TokenData::Ptr toType() const override;
         bool canConnectTo(const TokenData* other_side) const override;
         bool acceptsConnectionFrom(const TokenData *other_side) const override;
         void encode(YAML::Node& node) const override;
@@ -446,10 +421,7 @@ private:
         void addNestedValue(const TokenData::ConstPtr &msg) override;
         TokenData::ConstPtr nestedValue(std::size_t i) const override;
         std::size_t nestedValueCount() const override;
-        std::shared_ptr<Clonable> makeEmptyClone() const override
-        {
-            return std::shared_ptr<Clonable>(new InstancedImplementation(type_));
-        }
+
         void serialize(SerializationBuffer &data) const override;
         void deserialize(const SerializationBuffer& data) override;
 
@@ -457,6 +429,9 @@ private:
         {
             return "::instanced::";
         }
+
+    private:
+        InstancedImplementation();
 
     private:
         TokenData::ConstPtr type_;
@@ -523,7 +498,7 @@ public:
             if(pos == instance().map_.end()) {
                 throw std::runtime_error(std::string("cannot make vector of type ") + type);
             }
-            return pos->second->cloneEntry();
+            return pos->second->cloneAs<EntryInterface>();
         }
 
         template <typename T>
@@ -723,9 +698,6 @@ public:
     }
 
 
-    virtual TokenData::Ptr clone() const override;
-    virtual TokenData::Ptr toType() const override;
-
     virtual bool canConnectTo(const TokenData* other_side) const override;
     virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
 
@@ -754,10 +726,6 @@ public:
         return impl->nestedValueCount();
     }
 
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::shared_ptr<Clonable>(new GenericVectorMessage);
-    }
     void serialize(SerializationBuffer &data) const override
     {
         data << impl->nestedName();
@@ -773,6 +741,11 @@ public:
 
         impl->deserialize(data);
     }
+
+    static GenericVectorMessage::Ptr makeEmpty() {
+        return std::shared_ptr<GenericVectorMessage>(new GenericVectorMessage);
+    }
+
 
 private:
     GenericVectorMessage(EntryInterface::Ptr impl, const std::string &frame_id, Message::Stamp stamp_micro_seconds);

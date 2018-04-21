@@ -22,6 +22,9 @@ class CSAPEX_PROFILING_EXPORT Interval : public Serializable
 public:
     typedef std::shared_ptr<Interval> Ptr;
 
+protected:
+    CLONABLE_IMPLEMENTATION(Interval);
+
 public:
     Interval(const std::string& name);
 
@@ -49,9 +52,6 @@ public:
     virtual void deserialize(const SerializationBuffer& data) override;
 
     static Ptr makeEmpty();
-
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
 
 private:
     Interval();

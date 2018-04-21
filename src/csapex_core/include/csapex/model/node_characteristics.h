@@ -9,6 +9,9 @@ namespace csapex
 
 class NodeCharacteristics : public Serializable
 {
+protected:
+    CLONABLE_IMPLEMENTATION(NodeCharacteristics);
+
 public:
     NodeCharacteristics();
 
@@ -24,11 +27,8 @@ public:
 
     bool is_leading_to_essential_vertex;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
-
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+    void serialize(SerializationBuffer &data) const override;
+    void deserialize(const SerializationBuffer& data) override;
 };
 
 }

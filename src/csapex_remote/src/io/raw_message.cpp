@@ -66,9 +66,3 @@ void RawMessage::deserialize(const SerializationBuffer& data)
         data >> *dst;
     }
 }
-
-
-std::shared_ptr<Clonable> RawMessage::makeEmptyClone() const
-{
-    return std::make_shared<RawMessage>();
-}

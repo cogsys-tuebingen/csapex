@@ -15,6 +15,9 @@ namespace csapex
 
 class CSAPEX_CORE_EXPORT Tag : public Streamable
 {
+protected:
+    CLONABLE_IMPLEMENTATION(Tag);
+
 public:
     typedef std::shared_ptr<Tag> Ptr;
 
@@ -54,7 +57,6 @@ public:
 
     virtual uint8_t getPacketType() const;
 
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const;
     virtual void serialize(SerializationBuffer &data) const;
     virtual void deserialize(const SerializationBuffer& data);
 

@@ -49,11 +49,6 @@ bool ConnectionDescription:: operator == (const ConnectionDescription& other) co
     return from == other.from && to_label == other.to_label;
 }
 
-std::shared_ptr<Clonable> ConnectionDescription::makeEmptyClone() const
-{
-    return std::shared_ptr<Clonable>( new ConnectionDescription );
-}
-
 void ConnectionDescription::serialize(SerializationBuffer &data) const
 {
     data << from;

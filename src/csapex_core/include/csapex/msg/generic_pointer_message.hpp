@@ -13,6 +13,10 @@ namespace connection_types {
 template <typename Type>
 struct GenericPointerMessage : public Message
 {
+protected:
+    CLONABLE_IMPLEMENTATION(GenericPointerMessage<Type>);
+
+public:
     typedef std::shared_ptr<GenericPointerMessage<Type> > Ptr;
     typedef std::shared_ptr<GenericPointerMessage<Type> const> ConstPtr;
 
@@ -28,19 +32,6 @@ struct GenericPointerMessage : public Message
         : GenericPointerMessage(frame_id, stamp)
     {
         value = ptr;
-    }
-
-    virtual TokenData::Ptr clone() const override
-    {
-        Ptr new_msg(new GenericPointerMessage<Type>(frame_id, stamp_micro_seconds));
-        new_msg->value = value;
-        return new_msg;
-    }
-
-    virtual TokenData::Ptr toType() const override
-    {
-        Ptr new_msg(new GenericPointerMessage<Type>(frame_id, 0));
-        return new_msg;
     }
 
     bool acceptsConnectionFrom(const TokenData* other_side) const override

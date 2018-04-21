@@ -140,11 +140,6 @@ void Fulcrum::setType(int type)
     typeChanged(this, type);
 }
 
-std::shared_ptr<Clonable> Fulcrum::makeEmptyClone() const
-{
-    return std::shared_ptr<Clonable>(new Fulcrum);
-}
-
 void Fulcrum::serialize(SerializationBuffer &data) const
 {
     data << connection_id_;

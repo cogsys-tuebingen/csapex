@@ -12,13 +12,11 @@ template <typename I>
 class BroadcastImplementation : public BroadcastMessage
 {
 protected:
+    CLONABLE_IMPLEMENTATION(I);
+
+protected:
     BroadcastImplementation()
     {
-    }
-
-    std::shared_ptr<Clonable> makeEmptyClone() const
-    {
-        return std::make_shared<I>();
     }
 
     std::string getType() const override

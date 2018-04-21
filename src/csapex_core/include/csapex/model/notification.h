@@ -13,6 +13,9 @@ namespace csapex {
 
 class Notification : public Serializable
 {
+protected:
+    CLONABLE_IMPLEMENTATION(Notification);
+
 public:
     AUUID auuid;
     std::stringstream message;
@@ -41,9 +44,6 @@ public:
 
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
-
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
 
 private:
     mutable bool msg_dirty_;

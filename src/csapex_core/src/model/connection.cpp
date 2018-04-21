@@ -164,7 +164,7 @@ void Connection::setTokenProcessed()
 void Connection::setToken(const TokenPtr &token)
 {
     {
-        TokenPtr msg = token->clone();
+        TokenPtr msg = token->cloneAs<Token>();
 
         std::unique_lock<std::recursive_mutex> lock(sync);
         apex_assert_hard(msg != nullptr);

@@ -115,6 +115,9 @@ struct MessageTemplateBase
 template <typename Type, class Instance>
 class MessageTemplate : public Message, public MessageTemplateContainer<Type, std::is_integral<Type>::value>, public MessageTemplateBase
 {
+protected:
+    CLONABLE_IMPLEMENTATION(Instance);
+
 public:
     typedef std::shared_ptr<Instance> Ptr;
     typedef std::shared_ptr<const Instance> ConstPtr;
@@ -148,26 +151,11 @@ public:
         return *this;
     }
 
-    virtual TokenData::Ptr clone() const override
-    {
-        return cloneInstance();
-    }
-
-    virtual TokenData::Ptr toType() const override
-    {
-        Ptr new_msg(new Instance);
-        return new_msg;
-    }
-
     bool acceptsConnectionFrom(const TokenData* other_side) const override
     {
         return ValueContainer::acceptsConnectionFrom(other_side);
     }    
 
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::shared_ptr<Clonable>(new Self);
-    }
     void serialize(SerializationBuffer &data) const override
     {
         data << ValueContainer::value;
@@ -176,17 +164,6 @@ public:
     {
         data >> ValueContainer::value;
     }
-
-protected:
-    Ptr cloneInstance() const
-    {
-        Ptr new_msg(new Instance);
-        new_msg->frame_id = frame_id;
-        new_msg->stamp_micro_seconds = stamp_micro_seconds;
-        new_msg->value = ValueContainer::value;
-        return new_msg;
-    }
-
 };
 
 

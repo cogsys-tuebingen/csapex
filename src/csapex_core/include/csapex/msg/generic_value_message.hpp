@@ -25,8 +25,12 @@ struct ValueMessageBase
 };
 
 template <typename Type>
-struct GenericValueMessage : public Message, public ValueMessageBase
+class GenericValueMessage : public Message, public ValueMessageBase
 {
+protected:
+    CLONABLE_IMPLEMENTATION(GenericValueMessage<Type>);
+
+public:
     typedef std::shared_ptr<GenericValueMessage<Type> > Ptr;
     typedef std::shared_ptr<GenericValueMessage<Type> const> ConstPtr;
 
@@ -37,16 +41,6 @@ struct GenericValueMessage : public Message, public ValueMessageBase
         static_assert(should_use_value_message<Type>::value, "The type should not use a value message");
         static csapex::DirectMessageConstructorRegistered<connection_types::GenericValueMessage, Type> reg_c;
         static csapex::DirectMessageSerializerRegistered<connection_types::GenericValueMessage, Type> reg_s;
-    }
-
-    virtual TokenData::Ptr clone() const override
-    {
-        return std::make_shared<GenericValueMessage<Type>>(value, frame_id, stamp_micro_seconds);
-    }
-
-    virtual TokenData::Ptr toType() const override
-    {
-        return std::make_shared<GenericValueMessage<Type>>();
     }
 
     bool acceptsConnectionFrom(const TokenData* other_side) const override
@@ -73,7 +67,7 @@ struct GenericValueMessage : public Message, public ValueMessageBase
         return value;
     }
 
-    bool isArithmetic() const override
+    constexpr bool isArithmetic() const override
     {
         return std::is_arithmetic<Type>::value;
     }
@@ -127,10 +121,6 @@ struct GenericValueMessage : public Message, public ValueMessageBase
         return universal_to_string(value);
     }
 
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::shared_ptr<Clonable>(new GenericValueMessage<Type>);
-    }
     void serialize(SerializationBuffer &data) const override
     {        
         TokenData::serialize(data);

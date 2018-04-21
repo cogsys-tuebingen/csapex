@@ -108,11 +108,6 @@ void Tag::deserialize(const SerializationBuffer& data)
     data >> name_;
 }
 
-std::shared_ptr<Clonable> Tag::makeEmptyClone() const
-{
-    return makeEmpty();
-}
-
 Tag::Ptr Tag::makeEmpty()
 {
     return Ptr{new Tag};

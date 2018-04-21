@@ -183,7 +183,7 @@ void Command::deserialize(const SerializationBuffer& data)
 
 std::shared_ptr<Clonable> Command::cloneRaw() const
 {
-    auto res = std::dynamic_pointer_cast<Command>(makeEmptyClone());
+    auto res = std::dynamic_pointer_cast<Command>(makeEmptyInstance());
     res->cloneFrom(*this);
     return res;
 }

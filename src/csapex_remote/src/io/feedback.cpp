@@ -6,6 +6,12 @@
 
 using namespace csapex;
 
+Feedback::Feedback()
+    : Response(0)
+{
+
+}
+
 Feedback::Feedback(const std::string &message)
     : Response(0), message_(message)
 {
@@ -44,9 +50,3 @@ void Feedback::deserialize(const SerializationBuffer& data)
     data >> request_id_;
     data >> message_;
 }
-
-std::shared_ptr<Clonable> Feedback::makeEmptyClone() const
-{
-    return std::make_shared<Feedback>("");
-}
-

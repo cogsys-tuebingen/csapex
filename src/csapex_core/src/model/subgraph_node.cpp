@@ -385,7 +385,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
                 if(!external_output->hasMessage()) {
                     vector = connection_types::GenericVectorMessage::make(token->getTokenData());
                 } else {
-                    auto collected = external_output->getAddedToken()->getTokenData()->clone();
+                    auto collected = external_output->getAddedToken()->getTokenData()->cloneAs<TokenData>();
                     vector = std::dynamic_pointer_cast<connection_types::GenericVectorMessage>(collected);
                 }
                 apex_assert(vector);

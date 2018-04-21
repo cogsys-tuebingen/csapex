@@ -17,6 +17,9 @@ namespace csapex
 
 class CSAPEX_CORE_EXPORT MultiTokenData : public TokenData
 {
+protected:
+    CLONABLE_IMPLEMENTATION(MultiTokenData);
+
 public:
     typedef std::shared_ptr<MultiTokenData> Ptr;
 
@@ -27,13 +30,12 @@ public:
     virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
 
 public:
-    virtual TokenData::Ptr clone() const override;
-    virtual TokenData::Ptr toType() const override;
-
-
-    std::shared_ptr<Clonable> makeEmptyClone() const override;
     void serialize(SerializationBuffer &data) const override;
     void deserialize(const SerializationBuffer& data) override;
+
+    static MultiTokenData::Ptr makeEmpty() {
+        return std::shared_ptr<MultiTokenData>(new MultiTokenData);
+    }
 
 private:
     MultiTokenData();

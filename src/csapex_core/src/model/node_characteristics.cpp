@@ -20,12 +20,6 @@ NodeCharacteristics::NodeCharacteristics()
 
 }
 
-
-std::shared_ptr<Clonable> NodeCharacteristics::makeEmptyClone() const
-{
-    return std::make_shared<NodeCharacteristics>();
-}
-
 void NodeCharacteristics::serialize(SerializationBuffer &data) const
 {
     data << depth;

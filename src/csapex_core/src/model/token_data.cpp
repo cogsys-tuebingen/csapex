@@ -56,14 +56,6 @@ std::string TokenData::typeName() const
     return type_name_;
 }
 
-TokenData::Ptr TokenData::clone() const
-{
-    return std::make_shared<TokenData>(*this);
-}
-std::shared_ptr<Clonable> TokenData::makeEmptyClone() const
-{
-    return makeEmpty();
-}
 void TokenData::serialize(SerializationBuffer &data) const
 {
     data << type_name_;
@@ -77,7 +69,7 @@ void TokenData::deserialize(const SerializationBuffer& data)
 
 TokenData::Ptr TokenData::toType() const
 {
-    return std::make_shared<TokenData>(type_name_);
+    return cloneAs<TokenData>();
 }
 
 bool TokenData::isValid() const

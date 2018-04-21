@@ -11,15 +11,14 @@ namespace connection_types
 
 struct CSAPEX_CORE_EXPORT EndOfProgramMessage : public EndOfSequenceMessage
 {
+protected:
+    CLONABLE_IMPLEMENTATION(EndOfProgramMessage);
+
 public:
     typedef std::shared_ptr<EndOfProgramMessage> Ptr;
 
 public:
     EndOfProgramMessage();
-
-public:
-    virtual TokenData::Ptr clone() const override;
-    virtual TokenData::Ptr toType() const override;
 };
 
 template <>

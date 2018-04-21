@@ -51,22 +51,6 @@ bool MultiTokenData::acceptsConnectionFrom(const TokenData *other_side) const
     return false;
 }
 
-TokenData::Ptr MultiTokenData::clone() const
-{
-    Ptr new_msg(new MultiTokenData(types_));
-    return new_msg;
-}
-
-TokenData::Ptr MultiTokenData::toType() const
-{
-    Ptr new_msg(new MultiTokenData(types_));
-    return new_msg;
-}
-
-std::shared_ptr<Clonable> MultiTokenData::makeEmptyClone() const
-{
-    return std::shared_ptr<Clonable>(new MultiTokenData);
-}
 void MultiTokenData::serialize(SerializationBuffer &data) const
 {
     throw std::runtime_error("MultiTokenData is a meta type and cannot be serialized");

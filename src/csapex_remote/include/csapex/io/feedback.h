@@ -13,6 +13,9 @@ namespace csapex
 
 class Feedback : public Response
 {
+protected:
+    CLONABLE_IMPLEMENTATION(Feedback);
+
 public:
     Feedback(const std::string& message, uint8_t request_id);
     Feedback(const std::string& message);
@@ -27,8 +30,8 @@ public:
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
 
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const;
+private:
+    Feedback();
 
 private:
     std::string message_;

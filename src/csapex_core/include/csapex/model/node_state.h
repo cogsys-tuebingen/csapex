@@ -18,6 +18,9 @@ namespace csapex
 
 class CSAPEX_CORE_EXPORT NodeState : public Memento, public Serializable
 {
+private:
+    CLONABLE_IMPLEMENTATION(NodeState);
+
     friend class SerializationBuffer;
 
 public:
@@ -120,9 +123,6 @@ public:
 
     template <typename T>
     void setDictionaryEntry(const std::string& key, const T& value);
-
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
 
 private:
     const NodeHandle* parent_;

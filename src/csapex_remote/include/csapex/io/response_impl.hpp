@@ -12,14 +12,12 @@ template <typename I>
 class ResponseImplementation : public Response
 {
 protected:
+    CLONABLE_IMPLEMENTATION_CONSTRUCTOR(I, 0);
+
+protected:
     ResponseImplementation(uint8_t id)
         : Response(id)
     {
-    }
-
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::make_shared<I>(0);
     }
 };
 

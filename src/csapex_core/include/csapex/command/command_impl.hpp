@@ -12,6 +12,9 @@ template <typename I>
 class CommandImplementation : public Command
 {
 protected:
+    CLONABLE_IMPLEMENTATION(I);
+
+protected:
     CommandImplementation(const AUUID& graph_uuid)
         : Command(graph_uuid)
     {
@@ -20,11 +23,6 @@ protected:
 
     CommandImplementation()
     {
-    }
-
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::shared_ptr<Clonable>(new I);
     }
 
     std::string getType() const override

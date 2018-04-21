@@ -12,6 +12,9 @@ namespace connection_types
 
 struct CSAPEX_CORE_EXPORT AnyMessage : public Message
 {
+protected:
+    CLONABLE_IMPLEMENTATION(AnyMessage);
+
 public:
     typedef std::shared_ptr<AnyMessage> Ptr;
 
@@ -19,17 +22,9 @@ public:
     AnyMessage();
 
 public:
-    virtual TokenData::Ptr clone() const override;
-    virtual TokenData::Ptr toType() const override;
-
     bool canConnectTo(const TokenData* other_side) const override;
     bool acceptsConnectionFrom(const TokenData* other_side) const override;
 
-
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::shared_ptr<Clonable>(new AnyMessage);
-    }
     void serialize(SerializationBuffer &data) const override;
     void deserialize(const SerializationBuffer& data) override;
 };

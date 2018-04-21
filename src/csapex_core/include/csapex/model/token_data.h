@@ -24,18 +24,7 @@ public:
     TokenData(const std::string &type_name, const std::string& descriptive_name);
     virtual ~TokenData();
 
-    static TokenData::Ptr makeEmpty() {
-        return std::shared_ptr<TokenData>(new TokenData);
-    }
-
-    virtual TokenData::Ptr toType() const;
-
-    template <typename R>
-    std::shared_ptr<R> cloneAs() const
-    {
-        return std::dynamic_pointer_cast<R>(clone());
-    }
-
+    TokenData::Ptr toType() const;
 
     virtual bool isValid() const;
 
@@ -55,8 +44,6 @@ public:
 
     uint8_t getPacketType() const final override;
 
-    virtual TokenData::Ptr clone() const;
-    std::shared_ptr<Clonable> makeEmptyClone() const override;
     void serialize(SerializationBuffer &data) const override;
     void deserialize(const SerializationBuffer& data) override;
 

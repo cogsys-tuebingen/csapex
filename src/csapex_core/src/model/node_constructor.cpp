@@ -197,8 +197,3 @@ void NodeConstructor::deserialize(const SerializationBuffer& data)
     data >> properties_;
     data >> properties_loaded_;
 }
-
-std::shared_ptr<Clonable> NodeConstructor::makeEmptyClone() const
-{
-    return std::shared_ptr<Clonable>(new NodeConstructor(""));
-}

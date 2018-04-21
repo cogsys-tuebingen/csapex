@@ -150,7 +150,7 @@ void Meta::cloneFrom(const Command& other)
         nested.clear();
         nested.reserve(instance->nested.size());
         for(const CommandPtr& cmd : instance->nested) {
-            nested.emplace_back(cmd->clone<Command>());
+            nested.emplace_back(cmd->cloneAs<Command>());
         }
 
         locked = instance->locked;

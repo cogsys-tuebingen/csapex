@@ -14,6 +14,9 @@ namespace csapex
 
 class RawMessage : public Streamable
 {
+protected:
+    CLONABLE_IMPLEMENTATION(RawMessage);
+
 public:
     RawMessage();
     RawMessage(const std::vector<uint8_t>& data, const AUUID& target);
@@ -28,9 +31,6 @@ public:
 
     virtual void serialize(SerializationBuffer &data) const;
     virtual void deserialize(const SerializationBuffer& data);
-
-private:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const;
 
 private:
     mutable std::vector<uint8_t> data_;

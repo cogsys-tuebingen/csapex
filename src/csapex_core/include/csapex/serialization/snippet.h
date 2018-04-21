@@ -22,6 +22,9 @@ namespace csapex
 
 class Snippet : public Streamable
 {
+protected:
+    CLONABLE_IMPLEMENTATION(Snippet);
+
 public:
     static const uint8_t PACKET_TYPE_ID = 128;
 
@@ -46,9 +49,8 @@ public:
 
     virtual uint8_t getPacketType() const;
 
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const;
-    virtual void serialize(SerializationBuffer &data) const;
-    virtual void deserialize(const SerializationBuffer& data);
+    virtual void serialize(SerializationBuffer &data) const override;
+    virtual void deserialize(const SerializationBuffer& data) override;
 
     static std::shared_ptr<Snippet>  makeEmpty();
 

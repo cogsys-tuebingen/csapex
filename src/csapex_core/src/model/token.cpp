@@ -4,7 +4,13 @@
 using namespace csapex;
 
 Token::Token(const TokenDataConstPtr &token)
-    : token_(token), activity_modifier_(ActivityModifier::NONE), seq_no_(-1)
+    : data_(token), activity_modifier_(ActivityModifier::NONE), seq_no_(-1)
+{
+
+}
+
+Token::Token()
+    : activity_modifier_(ActivityModifier::NONE), seq_no_(-1)
 {
 
 }
@@ -26,7 +32,7 @@ ActivityModifier Token::getActivityModifier() const
 
 TokenDataConstPtr Token::getTokenData() const
 {
-    return token_;
+    return data_;
 }
 
 
@@ -40,9 +46,15 @@ void Token::setSequenceNumber(int seq_no) const
     seq_no_ = seq_no;
 }
 
-TokenPtr Token::clone() const
+void Token::cloneData(const Token& other)
 {
-    TokenPtr token = std::make_shared<Token>(*this);
-    token->token_ = token_->clone();
-    return token;
+    data_ = other.data_->cloneAs<TokenData>();
+    activity_modifier_ = other.activity_modifier_;
+    seq_no_ = other.seq_no_;
 }
+
+Token::Ptr Token::makeEmpty()
+{
+    return Ptr{new Token};
+}
+

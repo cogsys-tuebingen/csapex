@@ -145,11 +145,6 @@ void Snippet::deserialize(const SerializationBuffer& data)
     data >> tags_;
 }
 
-std::shared_ptr<Clonable> Snippet::makeEmptyClone() const
-{
-    return makeEmpty();
-}
-
 std::shared_ptr<Snippet> Snippet::makeEmpty()
 {
     return std::make_shared<Snippet>();

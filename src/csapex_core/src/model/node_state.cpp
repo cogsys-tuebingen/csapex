@@ -568,8 +568,3 @@ template bool NodeState::getDictionaryEntry<bool>(const std::string&) const;
 template std::string NodeState::getDictionaryEntry<std::string>(const std::string&) const;
 template std::vector<std::string> NodeState::getDictionaryEntry<std::vector<std::string>>(const std::string&) const;
 }
-
-std::shared_ptr<Clonable> NodeState::makeEmptyClone() const
-{
-    return std::shared_ptr<NodeState>(new NodeState(nullptr));
-}

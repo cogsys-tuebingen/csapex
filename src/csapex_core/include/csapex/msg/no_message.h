@@ -11,6 +11,9 @@ namespace connection_types
 
 struct CSAPEX_CORE_EXPORT NoMessage : public MarkerMessage
 {
+protected:
+    CLONABLE_IMPLEMENTATION(NoMessage);
+
 public:
     typedef std::shared_ptr<NoMessage> Ptr;
 
@@ -18,13 +21,6 @@ public:
     NoMessage();
 
 public:
-    virtual TokenData::Ptr clone() const override;
-    virtual TokenData::Ptr toType() const override;
-
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::shared_ptr<Clonable>(new NoMessage);
-    }
     void serialize(SerializationBuffer &data) const override;
     void deserialize(const SerializationBuffer& data) override;
 };

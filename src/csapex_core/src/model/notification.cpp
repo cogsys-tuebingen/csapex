@@ -44,11 +44,6 @@ void Notification::deserialize(const SerializationBuffer& data)
     data >> error;
 }
 
-std::shared_ptr<Clonable> Notification::makeEmptyClone() const
-{
-    return std::shared_ptr<Notification>(new Notification);
-}
-
 bool Notification::operator == (const Notification& other) const
 {
     return auuid == other.auuid &&
