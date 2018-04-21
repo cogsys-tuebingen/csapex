@@ -80,6 +80,8 @@ protected:
     mutable std::vector<std::string> properties_;
     mutable bool properties_loaded_;
 
+    mutable std::shared_ptr<UUIDProvider> tmp_uuid_provider_;
+
     std::function<NodePtr()> c;
 };
 

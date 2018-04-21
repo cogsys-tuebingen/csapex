@@ -140,7 +140,8 @@ std::string NodeConstructor::getDescription() const
 
 NodeHandlePtr NodeConstructor::makePrototype() const
 {
-    return makeNodeHandle(UUIDProvider::makeUUID_without_parent("prototype"), nullptr);
+    tmp_uuid_provider_ = std::make_shared<UUIDProvider>();
+    return makeNodeHandle(tmp_uuid_provider_->makeUUID("prototype"), tmp_uuid_provider_);
 }
 
 NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, const UUIDProviderPtr& uuid_provider) const
