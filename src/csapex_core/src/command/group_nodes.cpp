@@ -280,13 +280,3 @@ void GroupNodes::deserialize(const SerializationBuffer& data)
     data >> uuids;
     data >> sub_graph_uuid_;
 }
-
-
-void GroupNodes::cloneFrom(const Command& other)
-{
-    const GroupNodes* instance = dynamic_cast<const GroupNodes*>(&other);
-    if(instance) {
-        uuids = instance->uuids;
-        sub_graph_uuid_ = instance->sub_graph_uuid_;
-    }
-}

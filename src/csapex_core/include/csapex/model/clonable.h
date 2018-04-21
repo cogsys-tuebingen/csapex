@@ -28,9 +28,8 @@ public:
         return std::dynamic_pointer_cast<Implementation>(cloneRaw());
     }
 
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyInstance() const = 0;
     virtual void cloneDataFrom(const Clonable& other) = 0;
+    virtual std::shared_ptr<Clonable> makeEmptyInstance() const = 0;
 };
 
 }

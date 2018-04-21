@@ -30,15 +30,6 @@ protected:
         return typeName();
     }
 
-protected:
-    void cloneFrom(const Command& other) override
-    {
-        const I* instance = dynamic_cast<const I*>(&other);
-        if(instance) {
-            *this = *instance;
-        }
-    }
-
 public:
     static std::string typeName()
     {

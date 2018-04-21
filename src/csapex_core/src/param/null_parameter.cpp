@@ -50,17 +50,6 @@ bool NullParameter::set_unsafe(const boost::any& /*v*/)
     throw std::runtime_error("cannot use null parameters");
 }
 
-
-void NullParameter::doSetValueFrom(const Parameter &/*other*/)
-{
-    throw std::runtime_error("cannot use null parameters");
-}
-
-void NullParameter::doClone(const Parameter &/*other*/)
-{
-    throw std::runtime_error("cannot use null parameters");
-}
-
 void NullParameter::doSerialize(YAML::Node& /*n*/) const
 {
 }

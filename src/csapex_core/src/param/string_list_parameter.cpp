@@ -68,24 +68,13 @@ bool StringListParameter::set_unsafe(const boost::any &v)
 }
 
 
-void StringListParameter::doSetValueFrom(const Parameter &other)
+void StringListParameter::cloneDataFrom(const Clonable &other)
 {
-    const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other);
-    if(list) {
-        list_ = list->list_;
+    if(const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other)) {
+        *this = *list;
         triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-void StringListParameter::doClone(const Parameter &other)
-{
-    const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other);
-    if(list) {
-        list_ = list->list_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

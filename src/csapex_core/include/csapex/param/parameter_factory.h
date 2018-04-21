@@ -355,7 +355,10 @@ public:
     {
         return declareValue(name, ParameterDescription(), def);
     }
-
+    static ParameterBuilder declareValue(const std::string& name, const char* def)
+    {
+        return declareValue(name, ParameterDescription(), std::string(def));
+    }
 
 
     /**

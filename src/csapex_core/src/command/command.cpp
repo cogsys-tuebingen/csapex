@@ -180,10 +180,3 @@ void Command::deserialize(const SerializationBuffer& data)
 {
     data >> graph_uuid;
 }
-
-std::shared_ptr<Clonable> Command::cloneRaw() const
-{
-    auto res = std::dynamic_pointer_cast<Command>(makeEmptyInstance());
-    res->cloneFrom(*this);
-    return res;
-}

@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/param/value_parameter.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -67,30 +68,20 @@ double AngleParameter::max() const
     return max_;
 }
 
-void AngleParameter::doSetValueFrom(const Parameter &other)
+void AngleParameter::cloneDataFrom(const Clonable &other)
 {
-    const AngleParameter* angle = dynamic_cast<const AngleParameter*>(&other);
-    if(angle) {
+    if(const AngleParameter* angle = dynamic_cast<const AngleParameter*>(&other)) {
         if(angle_ != angle->angle_) {
-            angle_ = angle->angle_;
-            min_ = angle->min_;
-            max_ = angle->max_;
+            *this = *angle;
+            triggerChange();
+        }
+    } else if(const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other)) {
+        if(angle_ != value->as<double>()) {
+            angle_ = value->as<double>();
             triggerChange();
         }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-void AngleParameter::doClone(const Parameter &other)
-{
-    const AngleParameter* angle = dynamic_cast<const AngleParameter*>(&other);
-    if(angle) {
-        angle_ = angle->angle_;
-        min_ = angle->min_;
-        max_ = angle->max_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

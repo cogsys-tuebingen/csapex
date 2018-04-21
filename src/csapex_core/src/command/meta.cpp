@@ -143,18 +143,15 @@ void Meta::deserialize(const SerializationBuffer& data)
     data >> transaction;
 }
 
-void Meta::cloneFrom(const Command& other)
+void Meta::cloneData(const Meta& other)
 {
-    const Meta* instance = dynamic_cast<const Meta*>(&other);
-    if(instance) {
-        nested.clear();
-        nested.reserve(instance->nested.size());
-        for(const CommandPtr& cmd : instance->nested) {
-            nested.emplace_back(cmd->cloneAs<Command>());
-        }
-
-        locked = instance->locked;
-        transaction = instance->transaction;
-        type = instance->type;
+    nested.clear();
+    nested.reserve(other.nested.size());
+    for(const CommandPtr& cmd : other.nested) {
+        nested.emplace_back(cmd->cloneAs<Command>());
     }
+
+    locked = other.locked;
+    transaction = other.transaction;
+    type = other.type;
 }

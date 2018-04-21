@@ -30,8 +30,7 @@ public:
 
     virtual std::string toStringImpl() const override;
 
-    void doSetValueFrom(const Parameter& other) override;
-    void doClone(const Parameter& other) override;
+    void cloneDataFrom(const Clonable &other) override;
 
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;

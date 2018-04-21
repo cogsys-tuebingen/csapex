@@ -82,27 +82,15 @@ std::vector<int> ColorParameter::value() const
 }
 
 
-void ColorParameter::doSetValueFrom(const Parameter &other)
+void ColorParameter::cloneDataFrom(const Clonable &other)
 {
-    const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other);
-    if(color) {
+    if(const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other)) {
         if(colors_ != color->colors_) {
-            colors_ = color->colors_;
+            *this = *color;
             triggerChange();
         }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-void ColorParameter::doClone(const Parameter &other)
-{
-    const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other);
-    if(color) {
-        colors_ = color->colors_;
-        def_ = color->def_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

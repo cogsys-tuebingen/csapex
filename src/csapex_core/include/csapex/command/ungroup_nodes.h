@@ -23,7 +23,6 @@ public:
 
     void serialize(SerializationBuffer &data) const override;
     void deserialize(const SerializationBuffer& data) override;
-    void cloneFrom(const Command& other) override;
 
     std::string getType() const override
     {

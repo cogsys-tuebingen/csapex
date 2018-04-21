@@ -36,6 +36,18 @@ Parameter::~Parameter()
     destroyed(this);
 }
 
+Parameter& Parameter::operator = (const Parameter& other)
+{
+    name_ = other.name_;
+    interactive_ = other.interactive_;
+    enabled_ = other.enabled_;
+    dict_ = other.dict_;
+    description_ = other.description_;
+
+    //    cloneDataFrom(other);
+    return *this;
+}
+
 uint8_t Parameter::getPacketType() const
 {
     return PACKET_TYPE_ID;
@@ -232,39 +244,6 @@ void Parameter::deserialize_yaml(const YAML::Node &n)
     }
 }
 
-Parameter& Parameter::operator = (const Parameter& p)
-{
-    setValueFrom(p);
-    return *this;
-}
-
-void Parameter::setValueFrom(const Parameter &other)
-{
-    name_ = other.name_;
-    interactive_ = other.interactive_;
-    enabled_ = other.enabled_;
-    dict_ = other.dict_;
-    doSetValueFrom(other);
-}
-
-std::shared_ptr<Clonable> Parameter::cloneRaw() const
-{
-    auto res = std::dynamic_pointer_cast<Parameter>(makeEmptyInstance());
-    res->cloneFrom(*this);
-    return res;
-}
-
-void Parameter::cloneFrom(const Parameter &other)
-{
-    name_ = other.name_;
-    description_ = other.description_;
-    interactive_ = other.interactive_;
-    enabled_ = other.enabled_;
-    dict_ = other.dict_;
-    uuid_ = other.uuid_;
-    doClone(other);
-}
-
 void Parameter::access_unsafe(const Parameter &p, boost::any& out) const
 {
     p.get_unsafe(out);
@@ -318,6 +297,11 @@ T Parameter::as() const
         get_unsafe(v);
         return boost::any_cast<T> (v);
     }
+}
+template<>
+float Parameter::as<float>() const
+{
+    return static_cast<float>(as<double>());
 }
 
 template <typename T>

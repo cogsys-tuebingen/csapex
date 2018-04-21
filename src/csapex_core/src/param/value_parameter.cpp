@@ -90,10 +90,9 @@ bool ValueParameter::set_unsafe(const boost::any &v)
 }
 
 
-void ValueParameter::doSetValueFrom(const Parameter &other)
+void ValueParameter::cloneDataFrom(const Clonable &other)
 {
-    const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other);
-    if(value) {
+    if(const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other)) {
         bool change = false;
         if(value_.type() == typeid(int)) {
             change = boost::any_cast<int>(value_) != boost::any_cast<int>(value->value_);
@@ -109,28 +108,17 @@ void ValueParameter::doSetValueFrom(const Parameter &other)
             change = true;
         }
         if(change) {
-            value_ = value->value_;
+            *this = *value;
             triggerChange();
         }
-    } else {
+    } else if(const Parameter* param = dynamic_cast<const Parameter*>(&other)) {
         try {
-            access_unsafe(other, value_);
+            access_unsafe(*param, value_);
             triggerChange();
 
         } catch(const std::exception& e) {
             throw std::runtime_error("bad setFrom, invalid types");
         }
-    }
-}
-
-void ValueParameter::doClone(const Parameter &other)
-{
-    const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other);
-    if(value) {
-        value_ = value->value_;
-        def_ = value->def_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

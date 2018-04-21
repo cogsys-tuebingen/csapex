@@ -202,14 +202,6 @@ void UngroupNodes::deserialize(const SerializationBuffer& data)
     data >> uuid;
 }
 
-void UngroupNodes::cloneFrom(const Command& other)
-{
-    const UngroupNodes* instance = dynamic_cast<const UngroupNodes*>(&other);
-    if(instance) {
-        uuid = instance->uuid;
-    }
-}
-
 void UngroupNodes::clear()
 {
     GroupBase::clear();

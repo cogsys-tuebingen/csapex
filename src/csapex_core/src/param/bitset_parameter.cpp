@@ -189,28 +189,15 @@ bool BitSetParameter::set_unsafe(const boost::any &v)
 }
 
 
-void BitSetParameter::doSetValueFrom(const Parameter &other)
+void BitSetParameter::cloneDataFrom(const Clonable &other)
 {
-    const BitSetParameter* range = dynamic_cast<const BitSetParameter*>(&other);
-    if(range) {
+    if(const BitSetParameter* range = dynamic_cast<const BitSetParameter*>(&other)) {
         if(value_ != range->value_) {
-            value_ = range->value_;
+            *this = *range;
             triggerChange();
         }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-void BitSetParameter::doClone(const Parameter &other)
-{
-    const BitSetParameter* range = dynamic_cast<const BitSetParameter*>(&other);
-    if(range) {
-        value_ = range->value_;
-        set_ = range->set_;
-        def_ = range->def_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 

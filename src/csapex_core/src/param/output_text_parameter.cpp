@@ -69,32 +69,20 @@ void OutputTextParameter::doDeserialize(const YAML::Node& n)
     text_ = n["text"].as<std::string>();
 }
 
-void OutputTextParameter::doSetValueFrom(const Parameter& other)
+void OutputTextParameter::cloneDataFrom(const Clonable& other)
 {
-    const OutputTextParameter* text = dynamic_cast<const OutputTextParameter*>(&other);
-    if(text) {
+    if(const OutputTextParameter* text = dynamic_cast<const OutputTextParameter*>(&other)) {
         if(text_ != text->text_) {
-            text_ = text->text_;
+            *this = *text;
             triggerChange();
         }
-    } else {
-        if(text_ != other.toString()) {
-            text_ = other.toString();
+    } else if(const Parameter* param = dynamic_cast<const Parameter*>(&other)) {
+        if(text_ != param->toString()) {
+            text_ = param->toString();
             triggerChange();
         }
     }
 }
-
-void OutputTextParameter::doClone(const Parameter& other)
-{
-    const OutputTextParameter* text = dynamic_cast<const OutputTextParameter*>(&other);
-    if(text) {
-        text_ = text->text_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
-    }
-}
-
 
 
 void OutputTextParameter::serialize(SerializationBuffer &data) const

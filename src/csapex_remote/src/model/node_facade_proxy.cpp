@@ -105,7 +105,7 @@ NodeFacadeProxy::NodeFacadeProxy(const SessionPtr &session, AUUID uuid)
 
                 } else {
                     param::ParameterPtr proxy = pos->second;
-                    proxy->setValueFrom(*p);
+                    proxy->cloneDataFrom(*p);
                     parameter_changed(proxy);
                 }
 

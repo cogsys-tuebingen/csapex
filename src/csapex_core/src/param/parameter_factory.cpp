@@ -56,11 +56,7 @@ ParameterBuilder ParameterFactory::makeEmpty(const std::string &type)
 
 ParameterBuilder ParameterFactory::clone(const Parameter* param)
 {
-    std::string type = param->TYPE();
-    ParameterBuilder r = makeEmpty(type);
-    ParameterPtr p = r.build();
-    p->cloneFrom(*param);
-    return r;
+    return param->cloneAs<Parameter>();
 }
 ParameterBuilder ParameterFactory::clone(const Parameter& param)
 {

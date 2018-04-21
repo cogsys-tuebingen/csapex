@@ -329,7 +329,7 @@ void SubprocessNodeWorker::handleParameterUpdate(const SubprocessChannel::Messag
         param::ParameterPtr p = std::dynamic_pointer_cast<param::Parameter>(PacketSerializer::deserializePacket(buffer));
 
         param::ParameterPtr existing = node->getParameter(p->name());
-        existing->setValueFrom(*p);
+        existing->cloneDataFrom(*p);
     }
 }
 

@@ -78,7 +78,7 @@ void GenericState::readYaml(const YAML::Node& node) {
                 params[pair.first] = pair.second;
             } else {
                 param::ParameterPtr p = pos->second;
-                p->setValueFrom(*pair.second);
+                p->cloneDataFrom(*pair.second);
             }
             legacy.insert(pair.first);
         }
@@ -110,7 +110,7 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
         if(legacy_pos == legacy.end()) {
             throw std::logic_error(std::string("a parameter with the name ") + param_name + " has already been added.");
         }
-        *param = *param_pos->second;
+        param->cloneDataFrom(*param_pos->second);
     }
     registerParameter(param);
 
@@ -178,7 +178,7 @@ void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &pa
                                      "of an existing parameter '" + name + "'");
         }
         param::Parameter::Ptr p = param_pos->second;
-        *entry = *p;
+        entry->cloneDataFrom(*p);
         removeParameter(p);
     }
     temporary[entry->name()] = true;
@@ -275,7 +275,7 @@ void GenericState::setFrom(const GenericState &rhs)
         csapex::param::Parameter::Ptr p = it->second;
         std::string name = p->name();
         if(params.find(name) != params.end()) {
-            params[name]->setValueFrom(*p);
+            params[name]->cloneDataFrom(*p);
         } else {
             params[name] = csapex::param::ParameterFactory::clone(p);
             legacy.insert(name);

@@ -59,17 +59,9 @@ public:
     virtual void serialize(SerializationBuffer &data) const override;
     virtual void deserialize(const SerializationBuffer& data) override;
 
-    void setValueFrom(const Parameter& other);
-    void cloneFrom(const Parameter& other);
-
-    virtual std::shared_ptr<Clonable> cloneRaw() const override;
-
 protected:
     virtual void doSerialize(YAML::Node& n) const = 0;
     virtual void doDeserialize(const YAML::Node& n) = 0;
-
-    virtual void doSetValueFrom(const Parameter& other) = 0;
-    virtual void doClone(const Parameter& other) = 0;
 
 public:
     std::string name() const;
@@ -122,8 +114,10 @@ public:
         return operator = (std::string(cstr));
     }
 
+protected:
     Parameter& operator = (const Parameter& p);
 
+public:
     virtual const std::type_info &type() const;
     std::string toString() const;
 
