@@ -7,6 +7,8 @@
 #include <csapex/command/dispatcher_proxy.h>
 #include <csapex/core/bootstrap.h>
 #include <csapex/core/csapex_core.h>
+#include <csapex/core/core_plugin.h>
+#include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/info.h>
 #include <csapex/factory/node_factory_proxy.h>
 #include <csapex/io/broadcast_message.h>
@@ -113,14 +115,38 @@ CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
         }
     });
 
-    // make the proxys only _after_ the session is started
-    NodeFacadeProxyPtr remote_facade = std::make_shared<NodeFacadeProxy>(session_, AUUID::NONE);
-    remote_root_ = std::make_shared<GraphFacadeProxy>(session_, remote_facade);
+
     settings_ = std::make_shared<SettingsProxy>(session_);
     remote_plugin_locator_ = std::make_shared<PluginLocator>(*settings_);
 
     bootstrap_->bootFrom(csapex::info::CSAPEX_BOOT_PLUGIN_DIR,
                          remote_plugin_locator_.get());
+
+    // init core plugins
+    core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
+
+    core_plugin_manager->load(remote_plugin_locator_.get());
+
+    for(const auto& cp : core_plugin_manager->getConstructors()) {
+        const std::string& plugin_name = cp.first;
+        assert(core_plugins_.find(plugin_name) == core_plugins_.end());
+
+        const PluginConstructor<CorePlugin>& constructor = core_plugin_manager->getConstructor(plugin_name);
+
+        CorePlugin::Ptr plugin = constructor();
+        plugin->setName(plugin_name);
+
+        core_plugins_[plugin_name] = plugin;
+    }
+
+    for(auto plugin : core_plugins_) {
+        plugin.second->prepare(getSettings());
+    }
+
+    // make the proxys only _after_ the session is started
+    NodeFacadeProxyPtr remote_facade = std::make_shared<NodeFacadeProxy>(session_, AUUID::NONE);
+    remote_root_ = std::make_shared<GraphFacadeProxy>(session_, remote_facade);
+
 
     node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, remote_plugin_locator_.get());
     dispatcher_ = std::make_shared<CommandDispatcherProxy>(session_);

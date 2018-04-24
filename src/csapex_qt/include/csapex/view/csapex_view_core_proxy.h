@@ -85,6 +85,9 @@ private:
 private:
     BootstrapPtr bootstrap_;
 
+    std::shared_ptr<PluginManager<CorePlugin>> core_plugin_manager;
+    std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
+
     io::ChannelPtr core_channel_;
 
     PluginLocatorPtr remote_plugin_locator_;
