@@ -38,4 +38,13 @@ struct type<EndOfSequenceMessage> {
 }
 }
 
+/// YAML
+namespace YAML {
+template<>
+struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::EndOfSequenceMessage> {
+  static Node encode(const csapex::connection_types::EndOfSequenceMessage& rhs);
+  static bool decode(const Node& node, csapex::connection_types::EndOfSequenceMessage& rhs);
+};
+}
+
 #endif // END_OF_SEQUENCE_MESSAGE_H

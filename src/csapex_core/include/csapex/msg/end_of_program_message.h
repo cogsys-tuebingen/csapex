@@ -31,4 +31,14 @@ struct type<EndOfProgramMessage> {
 }
 }
 
+/// YAML
+namespace YAML {
+template<>
+struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::EndOfProgramMessage> {
+  static Node encode(const csapex::connection_types::EndOfProgramMessage& rhs);
+  static bool decode(const Node& node, csapex::connection_types::EndOfProgramMessage& rhs);
+};
+}
+
+
 #endif // END_OF_PROGRAM_MESSAGE_H

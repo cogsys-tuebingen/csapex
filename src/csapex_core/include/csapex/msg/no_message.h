@@ -43,5 +43,16 @@ inline std::shared_ptr<connection_types::NoMessage> makeEmpty<connection_types::
 
 }
 
+/// YAML
+namespace YAML {
+template<>
+struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::NoMessage> {
+  static Node encode(const csapex::connection_types::NoMessage& rhs);
+  static bool decode(const Node& node, csapex::connection_types::NoMessage& rhs);
+};
+
+
+}
+
 #endif // NO_MESSAGE_H
 
