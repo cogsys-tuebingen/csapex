@@ -83,8 +83,17 @@ public:
 
     Lock lock() const;
 
-    template <typename T>
-    T as() const;
+    template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
+    T as() const
+    {
+        return as_impl<T>();
+    }
+
+    template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    T as() const
+    {
+        return static_cast<T>(as_impl<int>());
+    }
 
     template <typename T>
     void set(const T& v)
@@ -115,6 +124,9 @@ public:
     }
 
 protected:
+    template <typename T>
+    T as_impl() const;
+
     Parameter& operator = (const Parameter& p);
 
 public:

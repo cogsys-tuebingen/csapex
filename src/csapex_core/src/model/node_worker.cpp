@@ -891,7 +891,6 @@ void NodeWorker::handleChangedParameters()
     Parameterizable::ChangedParameterList changed_params = node->getChangedParameters();
     if(!changed_params.empty()) {
         handleChangedParametersImpl(changed_params);
-
     }
 
     node->checkConditions(false);

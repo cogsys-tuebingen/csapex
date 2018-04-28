@@ -20,24 +20,24 @@ namespace YAML {
 
 Node convert<csapex::TokenDataPtr>::encode(const csapex::TokenDataPtr& rhs)
 {
-    return MessageSerializer::serializeMessage(*rhs);
+    return MessageSerializer::serializeYamlMessage(*rhs);
 }
 
 bool convert<csapex::TokenDataPtr>::decode(const Node& node, csapex::TokenDataPtr& rhs)
 {
-    TokenDataPtr ptr = MessageSerializer::deserializeMessage(node);
+    TokenDataPtr ptr = MessageSerializer::deserializeYamlMessage(node);
     rhs.swap(ptr);
     return true;
 }
 
 Node convert<csapex::TokenDataConstPtr>::encode(const csapex::TokenDataConstPtr& rhs)
 {
-    return MessageSerializer::serializeMessage(*rhs);
+    return MessageSerializer::serializeYamlMessage(*rhs);
 }
 
 bool convert<csapex::TokenDataConstPtr>::decode(const Node& node, csapex::TokenDataConstPtr& rhs)
 {
-    TokenDataConstPtr ptr = MessageSerializer::deserializeMessage(node);
+    TokenDataConstPtr ptr = MessageSerializer::deserializeYamlMessage(node);
     rhs.swap(ptr);
     return true;
 }

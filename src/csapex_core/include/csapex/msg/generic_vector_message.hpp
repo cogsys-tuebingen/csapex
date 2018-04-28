@@ -346,7 +346,7 @@ private:
         {
             node["values"] = YAML::Node(YAML::NodeType::Sequence);
             for(const auto& entry : *value) {
-                node["values"].push_back(MessageSerializer::serializeMessage(entry));
+                node["values"].push_back(MessageSerializer::serializeYamlMessage(entry));
             }
         }
         void decode(const YAML::Node& node) override
@@ -358,9 +358,9 @@ private:
                     YAML::Node entry = centry;
                     entry["type"] = node["value_type"];
                     entry["data"] = centry;
-                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeMessage(entry));
+                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeYamlMessage(entry));
                 } else {
-                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeMessage(centry));
+                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeYamlMessage(centry));
                 }
                 value->push_back(*msg);
             }

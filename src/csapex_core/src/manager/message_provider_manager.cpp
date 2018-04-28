@@ -42,6 +42,7 @@ void MessageProviderManager::loadPlugins()
     supported_types_ = std::string("*") + Settings::message_extension + " ";
     registerMessageProvider(Settings::message_extension, std::bind(&ApexMessageProvider::make));
     registerMessageProvider(Settings::message_extension_compressed, std::bind(&ApexMessageProvider::make));
+    registerMessageProvider(Settings::message_extension_binary, std::bind(&ApexMessageProvider::make));
 
     for(const auto& pair : manager_->getConstructors()) {
         try {

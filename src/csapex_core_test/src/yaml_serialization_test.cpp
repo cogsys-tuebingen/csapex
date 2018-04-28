@@ -42,7 +42,7 @@ TEST_F(YAMLSerializationTest, YamlSerializationWorks)
     MockMessage msg;
     msg.value.payload = "foo";
 
-    YAML::Node node = MessageSerializer::serializeMessage(msg);
+    YAML::Node node = MessageSerializer::serializeYamlMessage(msg);
 
     ASSERT_TRUE(node["data"].IsDefined());
     ASSERT_TRUE(node["data"]["payload"].IsDefined());
@@ -55,7 +55,7 @@ TEST_F(YAMLSerializationTest, YamlDeserializationWorks)
     node["type"] = "MockMessage";
     node["data"]["payload"] = "bar";
 
-    TokenData::Ptr msg = csapex::MessageSerializer::deserializeMessage(node);
+    TokenData::Ptr msg = csapex::MessageSerializer::deserializeYamlMessage(node);
     ASSERT_NE(nullptr, msg);
 
     MockMessage::Ptr mockmsg = msg::message_cast<MockMessage>(msg);

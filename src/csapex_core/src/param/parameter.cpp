@@ -285,7 +285,7 @@ namespace csapex {
 namespace param {
 
 template <typename T>
-T Parameter::as() const
+T Parameter::as_impl() const
 {
     if(!is<T>() || is<void>()) {
         throwTypeError(typeid(T), type(), "get failed: ");
@@ -299,7 +299,7 @@ T Parameter::as() const
     }
 }
 template<>
-float Parameter::as<float>() const
+float Parameter::as_impl<float>() const
 {
     return static_cast<float>(as<double>());
 }
@@ -330,7 +330,7 @@ template<typename T> struct argument_type;
 template<typename T, typename U> struct argument_type<T(U)> { typedef U type; };
 }
 #define INSTANTIATE_AS(T) \
-template CSAPEX_PARAM_EXPORT argument_type<void(T)>::type Parameter::as<argument_type<void(T)>::type>() const;
+template CSAPEX_PARAM_EXPORT argument_type<void(T)>::type Parameter::as_impl<argument_type<void(T)>::type>() const;
 #define INSTANTIATE_SILENT(T) \
 template CSAPEX_PARAM_EXPORT bool Parameter::setSilent<argument_type<void(T)>::type>(const argument_type<void(T)>::type& value);
 

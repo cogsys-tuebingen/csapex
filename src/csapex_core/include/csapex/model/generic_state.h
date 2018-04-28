@@ -81,6 +81,7 @@ public:
     bool silent_;
 
     slim_signal::Signal<void()> parameter_set_changed;
+    slim_signal::Signal<void(csapex::param::ParameterPtr)> legacy_parameter_added;
     slim_signal::Signal<void(param::ParameterPtr)> parameter_added;
     slim_signal::Signal<void(param::Parameter*)> parameter_changed;
     slim_signal::Signal<void(param::ParameterPtr)> parameter_removed;

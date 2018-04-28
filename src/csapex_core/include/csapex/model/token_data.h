@@ -40,7 +40,7 @@ public:
     virtual std::string descriptiveName() const;
     std::string typeName() const;
 
-    virtual void writeRaw(const std::string& file,  const std::string &base, const std::string &suffix) const;
+    virtual void writeNative(const std::string& file,  const std::string &base, const std::string &suffix) const;
 
     uint8_t getPacketType() const final override;
 

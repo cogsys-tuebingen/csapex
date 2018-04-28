@@ -26,7 +26,7 @@ MessageSerializer::~MessageSerializer()
 
 void MessageSerializer::shutdown()
 {
-	type_to_converter.clear();
+    type_to_yaml_converter.clear();
 }
 void MessageSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
@@ -50,7 +50,7 @@ StreamablePtr MessageSerializer::deserialize(const SerializationBuffer& data)
     return result;
 }
 
-TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
+TokenData::Ptr MessageSerializer::deserializeYamlMessage(const YAML::Node &node)
 {
     MessageSerializer& i = instance();
 
@@ -62,7 +62,7 @@ TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
         throw DeserializationError("cannot get type");
     }
 
-    if(i.type_to_converter.empty()) {
+    if(i.type_to_yaml_converter.empty()) {
         throw DeserializationError("no connection types registered!");
     }
 
@@ -72,13 +72,13 @@ TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
         converter_type.erase(0,ns.size());
     }
 
-    if(i.type_to_converter.find(converter_type) == i.type_to_converter.end()) {
+    if(i.type_to_yaml_converter.find(converter_type) == i.type_to_yaml_converter.end()) {
         throw DeserializationError(std::string("cannot deserialize, no such type (") + type + ")");
     }
 
     TokenData::Ptr msg = MessageFactory::createMessage(converter_type);
     try {
-        i.type_to_converter.at(converter_type).decoder(node["data"], *msg);
+        i.type_to_yaml_converter.at(converter_type).decoder(node["data"], *msg);
     } catch(const YAML::Exception& e) {
         throw DeserializationError(std::string("error while deserializing: ") + e.msg);
     }
@@ -86,7 +86,7 @@ TokenData::Ptr MessageSerializer::deserializeMessage(const YAML::Node &node)
     return msg;
 }
 
-YAML::Node MessageSerializer::serializeMessage(const TokenData &msg)
+YAML::Node MessageSerializer::serializeYamlMessage(const TokenData &msg)
 {
     try {
         MessageSerializer& i = instance();
@@ -94,13 +94,13 @@ YAML::Node MessageSerializer::serializeMessage(const TokenData &msg)
         std::string type = msg.typeName();
 
         YAML::Node node;
-        auto pos = i.type_to_converter.find(type);
-        if(pos == i.type_to_converter.end()) {
+        auto pos = i.type_to_yaml_converter.find(type);
+        if(pos == i.type_to_yaml_converter.end()) {
             return node;
         }
 
-        Converter& converter = i.type_to_converter.at(type);
-        Converter::Encoder& encoder = converter.encoder;
+        YamlConverter& converter = i.type_to_yaml_converter.at(type);
+        YamlConverter::Encoder& encoder = converter.encoder;
 
         node["type"] = type;
         node["data"] = encoder(msg);
@@ -116,7 +116,7 @@ YAML::Node MessageSerializer::serializeMessage(const TokenData &msg)
 
 TokenData::Ptr MessageSerializer::readYaml(const YAML::Node &node)
 {
-    TokenData::Ptr msg = MessageSerializer::deserializeMessage(node);
+    TokenData::Ptr msg = MessageSerializer::deserializeYamlMessage(node);
     if(!msg) {
         std::string type = node["type"].as<std::string>();
         throw DeserializationError(std::string("message type '") + type + "' unknown");
@@ -125,17 +125,27 @@ TokenData::Ptr MessageSerializer::readYaml(const YAML::Node &node)
     return msg;
 }
 
-void MessageSerializer::registerMessage(std::string type, Converter converter)
+
+TokenData::Ptr MessageSerializer::deserializeBinaryMessage(const SerializationBuffer& buffer)
+{
+    return std::dynamic_pointer_cast<TokenData>(instance().deserialize(buffer));
+}
+void MessageSerializer::serializeBinaryMessage(const TokenData& msg, SerializationBuffer& buffer)
+{
+    instance().serialize(msg, buffer);
+}
+
+void MessageSerializer::registerMessage(std::string type, YamlConverter converter)
 {
     MessageSerializer& i = instance();
 
-    std::map<std::string, Converter>::const_iterator it = i.type_to_converter.find(type);
+    std::map<std::string, YamlConverter>::const_iterator it = i.type_to_yaml_converter.find(type);
 
-    if(it != i.type_to_converter.end()) {
+    if(it != i.type_to_yaml_converter.end()) {
         return;
     }
 
-    apex_assert_hard(it == i.type_to_converter.end());
+    apex_assert_hard(it == i.type_to_yaml_converter.end());
 
-    i.type_to_converter.insert(std::make_pair(type, converter));
+    i.type_to_yaml_converter.insert(std::make_pair(type, converter));
 }

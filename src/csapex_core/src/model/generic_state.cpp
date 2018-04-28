@@ -76,6 +76,7 @@ void GenericState::readYaml(const YAML::Node& node) {
             auto pos = params.find(pair.first);
             if(pos == params.end()) {
                 params[pair.first] = pair.second;
+                legacy_parameter_added(params[pair.first]);
             } else {
                 param::ParameterPtr p = pos->second;
                 p->cloneDataFrom(*pair.second);

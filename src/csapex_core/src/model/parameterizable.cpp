@@ -27,14 +27,14 @@ void Parameterizable::setSilent(bool silent)
     silent_ = silent;
 }
 
-template <typename T>
+template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type>
 T Parameterizable::doReadParameter(const std::string& name) const
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     return parameter_state_->getParameter(name)->as<T>();
 }
 
-template <typename T>
+template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type>
 void Parameterizable::doSetParameter(const std::string& name, const T& value)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);

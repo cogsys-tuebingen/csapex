@@ -99,7 +99,7 @@ void TokenData::addNestedValue(const ConstPtr &msg)
     throw std::logic_error("cannot add nested value to non-container messages");
 }
 
-void TokenData::writeRaw(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
+void TokenData::writeNative(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
 {
     std::cerr << "error: writeRaw not implemented for message type " << descriptiveName() << std::endl;
 }
