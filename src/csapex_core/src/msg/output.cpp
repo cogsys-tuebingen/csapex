@@ -142,7 +142,7 @@ bool Output::canSendMessages() const
             return false;
         }
     }
-    return true;
+    return !isProcessing();
 }
 
 void Output::publish()
@@ -154,10 +154,16 @@ void Output::publish()
     setProcessing(true);
 
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
+    bool sent = false;
     for(auto connection : connections_) {
         if(connection->isEnabled()) {
             connection->setToken(msg);
+            sent = true;
         }
+    }
+
+    if(!sent) {
+        setProcessing(false);
     }
 }
 

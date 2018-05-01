@@ -200,6 +200,11 @@ bool Slot::isActive() const
     return active_;
 }
 
+bool Slot::isEnabled() const
+{
+    return Input::isEnabled() || isActive();
+}
+
 bool Slot::isBlocking() const
 {
     return blocking_;

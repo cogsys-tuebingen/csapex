@@ -213,18 +213,24 @@ void NodeRunner::execute()
         } catch(const std::exception& e) {
             if(!suppress_exceptions_)
                 throw;
-            else
-                NOTIFICATION(std::string("Node could not be executed: ") + e.what());
+            else {
+                AUUID auuid = nh_->getAUUID();
+                NOTIFICATION_AUUID(auuid, std::string("Node could not be executed: ") + e.what());
+            }
         } catch(const Failure& e) {
             if(!suppress_exceptions_)
                 throw;
-            else
-                NOTIFICATION(std::string("Node experienced failure: ") + e.what());
+            else {
+                AUUID auuid = nh_->getAUUID();
+                NOTIFICATION_AUUID(auuid, std::string("Node experienced failure: ") + e.what());
+            }
         } catch(...) {
             if(!suppress_exceptions_)
                 throw;
-            else
-                NOTIFICATION("Node could not be executed: Unknown exception");
+            else {
+                AUUID auuid = nh_->getAUUID();
+                NOTIFICATION_AUUID(auuid, "Node could not be executed: Unknown exception");
+            }
         }
     } else {
         can_step_++;

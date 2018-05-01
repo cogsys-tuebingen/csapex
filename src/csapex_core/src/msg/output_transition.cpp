@@ -221,7 +221,13 @@ int OutputTransition::getPortCount() const
 void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(outputs_.empty() || !areOutputsIdle());
+    if(outputs_.empty()) {
+        return;
+    }
+    if(areOutputsIdle()) {
+        // no output has a message
+        return;
+    }
 
     apex_assert_hard(areAllConnections(Connection::State::NOT_INITIALIZED));
 

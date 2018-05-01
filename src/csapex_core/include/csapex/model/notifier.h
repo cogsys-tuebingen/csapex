@@ -15,6 +15,13 @@ namespace csapex
 #define NOTIFICATION_INFO(args) \
 { Notification n; n.error = ErrorState::ErrorLevel::NONE; n << args; notification(n); }
 
+#define NOTIFICATION_AUUID(auuid, args) \
+{ Notification n; n.error = ErrorState::ErrorLevel::ERROR; n << args; n.auuid = auuid; notification(n); }
+#define NOTIFICATION_WARN_AUUID(auuid, args) \
+{ Notification n; n.error = ErrorState::ErrorLevel::WARNING; n << args; n.auuid = auuid; notification(n); }
+#define NOTIFICATION_INFO_AUUID(auuid, args) \
+{ Notification n; n.error = ErrorState::ErrorLevel::NONE; n << args; n.auuid = auuid; notification(n); }
+
 class Notifier
 {
 public:

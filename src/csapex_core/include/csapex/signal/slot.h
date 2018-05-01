@@ -42,6 +42,7 @@ public:
 
     bool isActive() const;
     bool isBlocking() const;
+    bool isEnabled() const override;
 
     virtual bool isSynchronous() const;
 
