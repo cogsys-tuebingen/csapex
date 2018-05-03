@@ -433,6 +433,8 @@ TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
 
         ASSERT_NO_FATAL_FAILURE(step());
 
+        sleep(1);
+
         ASSERT_EQ(iter + 1, source->getValue());
     }
 }
