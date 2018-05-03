@@ -105,6 +105,7 @@ void Connectable::notifyMessageProcessed()
 
 void Connectable::reset()
 {
+    processing_ = false;
 //    notifyMessageProcessed();
 }
 
