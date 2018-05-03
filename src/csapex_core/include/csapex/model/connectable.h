@@ -6,12 +6,12 @@
 #include <csapex/model/token_data.h>
 #include <csapex/model/connector.h>
 #include <csapex_core/csapex_core_export.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <mutex>
 #include <vector>
 #include <atomic>
-#include <csapex/utility/slim_signal.hpp>
 #include <memory>
 
 namespace csapex

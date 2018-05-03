@@ -88,6 +88,16 @@ void OutputTransition::addOutput(OutputPtr output)
     });
     output_signal_connections_[output.get()].push_back(cp);
 
+    auto ce = output->connectionEnabled.connect([this](bool enabled) {
+        if(enabled) {
+            for(const auto& pair : outputs_) {
+                OutputPtr output = pair.second;
+                output->republish();
+            }
+        }
+    });
+    output_signal_connections_[output.get()].push_back(ce);
+
 //    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
 //        if(output->isEnabled()) {
 //            publishNextMessage();

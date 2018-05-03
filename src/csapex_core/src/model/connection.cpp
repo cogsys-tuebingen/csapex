@@ -141,6 +141,11 @@ TokenPtr Connection::readToken()
     return message_;
 }
 
+bool Connection::holdsToken() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return message_ != nullptr;
+}
 bool Connection::holdsActiveToken() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);

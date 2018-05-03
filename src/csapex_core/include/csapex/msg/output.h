@@ -8,11 +8,12 @@
 #include <csapex/msg/token_traits.h>
 #include <csapex/msg/message_allocator.h>
 #include <csapex/utility/shared_ptr_tools.hpp>
+#include <csapex/model/observer.h>
 
 namespace csapex
 {
 
-class CSAPEX_CORE_EXPORT Output : public Connectable, public MessageAllocator
+class CSAPEX_CORE_EXPORT Output : public Connectable, public MessageAllocator, public Observer
 {
     friend class Graph;
     friend class DesignerIO;
@@ -30,7 +31,8 @@ public:
     void setOutputTransition(OutputTransition* ot);
     void removeOutputTransition();
 
-    virtual void removeConnection(Connectable* other_side) override;
+    void addConnection(ConnectionPtr connection) override;
+    void removeConnection(Connectable* other_side) override;
 
     void notifyMessageProcessed();
     void notifyMessageProcessed(Connection *connection);
@@ -50,7 +52,8 @@ public:
     State getState() const;
     void setState(State s);
 
-    virtual void disable() override;
+    void enable() override;
+    void disable() override;
 
     virtual void addMessage(TokenPtr message) = 0;
 
@@ -58,6 +61,7 @@ public:
     virtual bool canSendMessages() const;
     virtual bool commitMessages(bool is_activated) = 0;
     virtual void publish();
+    virtual void republish();
     virtual TokenPtr getToken() const = 0;
     virtual TokenPtr getAddedToken() = 0;
 

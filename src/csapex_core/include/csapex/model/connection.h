@@ -82,6 +82,7 @@ public:
      */
     TokenPtr readToken();
 
+    bool holdsToken() const;
     bool holdsActiveToken() const;
 
     bool isActive() const;
