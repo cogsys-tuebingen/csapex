@@ -163,7 +163,7 @@ void Output::publish()
     }
 
     if(!sent) {
-        setProcessing(false);
+        notifyMessageProcessed();
     }
 }
 

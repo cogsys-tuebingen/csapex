@@ -429,11 +429,9 @@ TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
 
     // execution
     for(int iter = 0; iter < 10; ++iter) {
-//        ASSERT_EQ(iter, source->getValue());
+        ASSERT_EQ(iter, source->getValue());
 
         ASSERT_NO_FATAL_FAILURE(step());
-
-        sleep(1);
 
         ASSERT_EQ(iter + 1, source->getValue());
     }
