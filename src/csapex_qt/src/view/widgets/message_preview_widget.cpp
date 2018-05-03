@@ -32,33 +32,31 @@ void PreviewInput::setToken(TokenPtr token)
     Input::setToken(token);
 
     if(isConnected()) {
-        TokenDataConstPtr msg = token->getTokenData();
+        TokenDataConstPtr message = token->getTokenData();
 
         if(!parent_) {
             return;
         }
         try {
-            if(auto m = msg::message_cast<connection_types::GenericValueMessage<int>>(msg)) {
-                parent_->displayTextRequest(QString::number(m->value));
-                return;
+            if(msg::isExactValue<std::string>(this)) {
+                parent_->displayTextRequest(QString::fromStdString(msg::getValue<std::string>(this)));
 
-            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<float>>(msg)) {
-                parent_->displayTextRequest(QString::number(m->value));
-                return;
+            } else if(msg::isExactValue<int>(this)) {
+                parent_->displayTextRequest(QString::number(msg::getValue<int>(this)));
 
-            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<double>>(msg)) {
-                parent_->displayTextRequest(QString::number(m->value));
-                return;
+            } else if(msg::isExactValue<float>(this)) {
+                parent_->displayTextRequest(QString::number(msg::getValue<float>(this)));
 
-            } else if(auto m = msg::message_cast<connection_types::GenericValueMessage<std::string>>(msg)) {
-                parent_->displayTextRequest(QString::fromStdString(m->value));
-                return;
-            }
-            MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(msg);
-            if(renderer) {
-                std::unique_ptr<QImage> img = renderer->render(msg);
-                if(parent_) {
-                    parent_->displayImageRequest(*img);
+            } else if(msg::isExactValue<double>(this)) {
+                parent_->displayTextRequest(QString::number(msg::getValue<float>(this)));
+
+            } else {
+                MessageRenderer::Ptr renderer = MessageRendererManager::instance().createMessageRenderer(message);
+                if(renderer) {
+                    std::unique_ptr<QImage> img = renderer->render(message);
+                    if(parent_) {
+                        parent_->displayImageRequest(*img);
+                    }
                 }
             }
         } catch(const std::exception& e) {
