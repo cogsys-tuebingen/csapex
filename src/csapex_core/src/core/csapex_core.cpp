@@ -550,10 +550,11 @@ void CsApexCore::load(const std::string &file)
 {
     settings_.set("config", file);
 
-    bool running = thread_pool_->isRunning();
-    if(running) {
-        thread_pool_->stop();
-    }
+    bool was_running = thread_pool_->isRunning();
+
+    // stop all processing
+    // NOTE: this also removes the main node runner from the thread pool
+    thread_pool_->stop();
 
     if(load_needs_reset_) {
         reset();
@@ -586,7 +587,10 @@ void CsApexCore::load(const std::string &file)
 
     loaded();
 
-    if(running) {
+    // add the main node runner back to the thread pool
+    thread_pool_->add(root_facade_->getNodeRunner().get());
+
+    if(was_running) {
         thread_pool_->start();
     }
 }
