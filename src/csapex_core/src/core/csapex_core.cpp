@@ -500,6 +500,9 @@ void CsApexCore::settingsChanged()
 
 void CsApexCore::saveAs(const std::string &file, bool quiet)
 {
+    TimerPtr timer = getProfiler()->getTimer("save graph");
+    timer->restart();
+
     std::string dir = file.substr(0, file.find_last_of('/')+1);
 
     if(!dir.empty()) {
@@ -517,6 +520,7 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     YAML::Node node_map(YAML::NodeType::Map);
 
     GraphIO graphio(*root_,  node_factory_.get());
+    graphio.useProfiler(getProfiler());
     slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(save_detail_request);
 
     settings_.saveTemporary(node_map);
@@ -526,13 +530,21 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
     graphio.saveGraphTo(node_map);
 
     YAML::Emitter yaml;
-    yaml << node_map;
+
+    {
+        auto interlude = timer->step("emit yaml");
+        yaml << node_map;
+    }
 
     //    std::cerr << yaml.c_str() << std::endl;
+    {
+        auto interlude = timer->step("write yaml");
+        std::ofstream ofs(file.c_str());
+        ofs << "#!" << settings_.get<std::string>("path_to_bin") << '\n';
+        ofs << yaml.c_str();
+    }
 
-    std::ofstream ofs(file.c_str());
-    ofs << "#!" << settings_.get<std::string>("path_to_bin") << '\n';
-    ofs << yaml.c_str();
+    timer->finish();
 
     if(!quiet) {
         saved();

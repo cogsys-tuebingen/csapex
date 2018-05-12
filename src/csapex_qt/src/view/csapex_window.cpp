@@ -300,6 +300,7 @@ void CsApexWindow::setupDesigner()
     setupThreadManagement();
 
     ui->startup->layout()->addWidget(new ProfilingWidget(view_core_.getProfiler(), "load graph"));
+    ui->startup->layout()->addWidget(new ProfilingWidget(view_core_.getProfiler(), "save graph"));
 
 
     for(auto dw : findChildren<QDockWidget*>()) {

@@ -8,6 +8,7 @@
 #include <csapex/model/observer.h>
 #include <csapex/plugin/plugin_fwd.h>
 #include <csapex/model/notifier.h>
+#include <csapex/profiling/profilable.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/utility/utility_fwd.h>
 #include <csapex/utility/uuid.h>
@@ -27,7 +28,7 @@ namespace csapex
 
 class Profiler;
 
-class CSAPEX_CORE_EXPORT CsApexCore : public Observer, public Notifier
+class CSAPEX_CORE_EXPORT CsApexCore : public Observer, public Notifier, public Profilable
 {
 public:
     CsApexCore(Settings& settings_,
