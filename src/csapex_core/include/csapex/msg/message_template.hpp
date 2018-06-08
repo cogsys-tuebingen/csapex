@@ -143,11 +143,15 @@ public:
     Self& operator = (const Self& other)
     {
         ValueContainer::operator=(other);
+        frame_id = other.frame_id;
+        stamp_micro_seconds = other.stamp_micro_seconds;
         return *this;
     }
     Self& operator = (Self&& other)
     {
         ValueContainer::operator=(std::move(other));
+        frame_id = std::move(other.frame_id);
+        stamp_micro_seconds = std::move(stamp_micro_seconds);
         return *this;
     }
 
