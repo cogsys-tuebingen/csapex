@@ -59,6 +59,7 @@ QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& disp
         }
 
         int flags = QFileDialog::DontUseNativeDialog;
+        bool is_output = path_p_->isOutput();
         bool is_file = path_p_->isFile();
 
         QString dir(path_p_->as<std::string>().c_str());
@@ -67,17 +68,21 @@ QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& disp
         }
 
         QString path;
-        if(path_p_->isOutput()) {
+        QString title_prefix = is_file ? "File" : "Directory";
+        QString mode_prefix = is_output ? "Output" : "Input";
+        QString title = mode_prefix + " " + title_prefix + ": " + QString::fromStdString(path_p_->name());
+
+        if(is_output) {
             if(is_file) {
-                path = QFileDialog::getSaveFileName((QWidget*) 0, path_p_->name().c_str(), dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags);
+                path = QFileDialog::getSaveFileName((QWidget*) 0, title, dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags);
             } else {
-                path = QFileDialog::getExistingDirectory((QWidget*) 0, path_p_->name().c_str(), dir, (QFlags<QFileDialog::Option>) flags);
+                path = QFileDialog::getExistingDirectory((QWidget*) 0, title, dir, (QFlags<QFileDialog::Option>) flags);
             }
         } else {
             if(is_file) {
-                path = QFileDialog::getOpenFileName((QWidget*) 0, path_p_->name().c_str(), dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags);
+                path = QFileDialog::getOpenFileName((QWidget*) 0, title, dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags);
             } else {
-                path = QFileDialog::getExistingDirectory((QWidget*) 0, path_p_->name().c_str(), dir, (QFlags<QFileDialog::Option>) flags);
+                path = QFileDialog::getExistingDirectory((QWidget*) 0, title, dir, (QFlags<QFileDialog::Option>) flags);
             }
         }
 
