@@ -72,12 +72,31 @@ void PathParameter::cloneDataFrom(const Clonable &other)
 
 void PathParameter::doSerialize(YAML::Node& n) const
 {
+    n["version"] = 2;
+
     n["value"] = value_;
+    n["def"] = def_;
+
+    n["filter"] = filter_;
+    n["is_file"] = is_file_;
+    n["is_input"] = input_;
+    n["is_output"] = output_;
 }
 
 void PathParameter::doDeserialize(const YAML::Node& n)
 {
+    int version = n["version"].IsDefined() ? n["version"].as<int>() : 1;
+
     value_ = n["value"].as<std::string>();
+
+    if(version > 1) {
+        def_= n["def"].as<std::string>();
+
+        filter_= n["filter"].as<std::string>();
+        is_file_= n["is_file"].as<bool>();
+        input_= n["is_input"].as<bool>();
+        output_= n["is_output"].as<bool>();
+    }
 }
 
 std::string PathParameter::def() const
