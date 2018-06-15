@@ -10,6 +10,7 @@
 #include <csignal>
 #include <thread>
 #include <sstream>
+#include <functional>
 
 namespace csapex
 {

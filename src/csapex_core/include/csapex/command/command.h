@@ -16,6 +16,7 @@
 /// SYSTEM
 #include <memory>
 #include <vector>
+#include <functional>
 
 namespace csapex
 {

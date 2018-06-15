@@ -9,6 +9,7 @@
 #include <vector>
 #include <inttypes.h>
 #include <string>
+#include <functional>
 #include <sstream>
 #include <limits>
 #include <typeindex>

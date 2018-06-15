@@ -146,7 +146,7 @@ pid_t Subprocess::fork(std::function<int()> child)
         std::signal(SIGIO	 , detail::sp_signal_handler);
         std::signal(SIGPWR	 , detail::sp_signal_handler);
         std::signal(SIGSYS	 , detail::sp_signal_handler);
-        std::signal(SIGUNUSED, detail::sp_signal_handler);
+        //std::signal(SIGUNUSED, detail::sp_signal_handler);
 
         subprocess_worker_ = std::thread([this](){
             while(active_) {

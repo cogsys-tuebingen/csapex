@@ -11,6 +11,8 @@
 #include <csapex/model/token.h>
 #include <csapex/utility/uuid.h>
 
+/// SYSTEM
+#include <functional>
 
 namespace csapex
 {

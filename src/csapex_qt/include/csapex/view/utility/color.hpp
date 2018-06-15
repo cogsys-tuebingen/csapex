@@ -1,11 +1,14 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
+/// SYSTEM
+#include <cmath>
+
 namespace color {
 #define __HSV2RGB__(H, S, V, R, G, B) \
     { \
     double _h = H/60.; \
-    int _hf = (int)floor(_h); \
+    int _hf = (int) std::floor(_h); \
     int _hi = ((int)_h)%6; \
     double _f = _h - _hf; \
     \

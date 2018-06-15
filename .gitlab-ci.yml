@@ -53,3 +53,11 @@ lunar:
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
+melodic:
+  stage: build_and_test
+  image: ros:melodic-perception
+  script:
+    - catkin_make
+    - source devel/setup.bash
+    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
+
