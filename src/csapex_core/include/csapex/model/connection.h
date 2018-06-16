@@ -149,6 +149,9 @@ protected:
     mutable std::recursive_mutex sync;
 };
 
+
+std::ostream& operator << (std::ostream& out, const Connection& c);
+
 }
 
 #endif // CONNECTION_H
