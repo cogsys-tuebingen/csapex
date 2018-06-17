@@ -152,9 +152,9 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
 }
 
 
-void RangeParameter::serialize(SerializationBuffer &data) const
+void RangeParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value_;
     data << min_;
@@ -165,9 +165,9 @@ void RangeParameter::serialize(SerializationBuffer &data) const
     data << step_;
 }
 
-void RangeParameter::deserialize(const SerializationBuffer& data)
+void RangeParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value_;
     data >> min_;

@@ -125,9 +125,9 @@ bool PathParameter::isOutput() const
 }
 
 
-void PathParameter::serialize(SerializationBuffer &data) const
+void PathParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value_;
     data << def_;
@@ -138,9 +138,9 @@ void PathParameter::serialize(SerializationBuffer &data) const
     data << output_;
 }
 
-void PathParameter::deserialize(const SerializationBuffer& data)
+void PathParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value_;
     data >> def_;

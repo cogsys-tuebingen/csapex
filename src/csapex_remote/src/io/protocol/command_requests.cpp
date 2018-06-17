@@ -76,13 +76,13 @@ ResponsePtr CommandRequests::CommandRequest::execute(const SessionPtr &session, 
     return std::make_shared<CommandResponse>(request_type_, getRequestID());
 }
 
-void CommandRequests::CommandRequest::serialize(SerializationBuffer &data) const
+void CommandRequests::CommandRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << command_;
 }
 
-void CommandRequests::CommandRequest::deserialize(const SerializationBuffer& data)
+void CommandRequests::CommandRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> command_;
@@ -113,13 +113,13 @@ CommandRequests::CommandResponse::CommandResponse(uint8_t request_id)
 
 }
 
-void CommandRequests::CommandResponse::serialize(SerializationBuffer &data) const
+void CommandRequests::CommandResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << result_;
 }
 
-void CommandRequests::CommandResponse::deserialize(const SerializationBuffer& data)
+void CommandRequests::CommandResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> result_;

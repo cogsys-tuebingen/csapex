@@ -99,11 +99,11 @@ uint8_t Tag::getPacketType() const
 }
 
 
-void Tag::serialize(SerializationBuffer &data) const
+void Tag::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << name_;
 }
-void Tag::deserialize(const SerializationBuffer& data)
+void Tag::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> name_;
 }

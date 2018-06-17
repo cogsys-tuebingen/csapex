@@ -28,17 +28,17 @@ ConnectorNote::ConnectorNote(ConnectorNoteType request_type, const AUUID &uuid, 
 
 }
 
-void ConnectorNote::serialize(SerializationBuffer &data) const
+void ConnectorNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Note::serialize(data);
+    Note::serialize(data, version);
 
     data << note_type_;
     data << payload_;
 }
 
-void ConnectorNote::deserialize(const SerializationBuffer& data)
+void ConnectorNote::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Note::deserialize(data);
+    Note::deserialize(data, version);
 
     data >> note_type_;
     data >> payload_;

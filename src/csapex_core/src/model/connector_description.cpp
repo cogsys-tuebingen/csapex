@@ -87,7 +87,7 @@ bool ConnectorDescription::isOutput() const
     return connector_type == ConnectorType::OUTPUT || connector_type == ConnectorType::EVENT;
 }
 
-void ConnectorDescription::serialize(SerializationBuffer &data) const
+void ConnectorDescription::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << owner;
     data << connector_type;
@@ -103,7 +103,7 @@ void ConnectorDescription::serialize(SerializationBuffer &data) const
     data << targets;
     data << valid;
 }
-void ConnectorDescription::deserialize(const SerializationBuffer& data)
+void ConnectorDescription::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> owner;
     data >> connector_type;
@@ -122,13 +122,13 @@ void ConnectorDescription::deserialize(const SerializationBuffer& data)
 
 
 
-void ConnectorDescription::Target::serialize(SerializationBuffer &data) const
+void ConnectorDescription::Target::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << auuid;
     data << active;
 }
 
-void ConnectorDescription::Target::deserialize(const SerializationBuffer& data)
+void ConnectorDescription::Target::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> auuid;
     data >> active;

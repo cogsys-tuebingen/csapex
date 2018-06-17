@@ -15,7 +15,7 @@
 #include <csapex/msg/static_output.h>
 #include <csapex/utility/uuid_provider.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 #include <csapex_testing/mockup_nodes.h>
 #include <csapex_testing/test_exception_handler.h>
 
@@ -37,9 +37,7 @@ TEST_F(ProcessingTest, DirectCallToProcess)
     Node& node = *times_4->getNode();
     NodeHandle& nh = *times_4->getNodeHandle();
 
-    // no inputs are sent yet -> expect an assertion failure
     ASSERT_TRUE(node.canProcess());
-    ASSERT_THROW(node.process(nh, node), csapex::HardAssertionFailure);
 
     // set the input message
     TokenPtr token_in = msg::createToken(23);
@@ -74,11 +72,9 @@ TEST_F(ProcessingTest, CallToProcessViaNodeWorker)
     Node& node = *times_4->getNode();
     NodeHandle& nh = *times_4->getNodeHandle();
 
-    // no inputs are sent yet -> expect an assertion failure
     ASSERT_TRUE(node.canProcess());
     ASSERT_FALSE(times_4->isProcessing());
     ASSERT_FALSE(times_4->canProcess());
-    ASSERT_THROW(times_4->startProcessingMessages(), csapex::HardAssertionFailure);
 
     // create a temporary output and connect it to the input
     OutputPtr tmp_out = std::make_shared<StaticOutput>(UUIDProvider::makeUUID_without_parent("tmp_out"));

@@ -60,12 +60,12 @@ bool ClearGraph::doRedo()
 }
 
 
-void ClearGraph::serialize(SerializationBuffer &data) const
+void ClearGraph::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Meta::serialize(data);
+    Meta::serialize(data, version);
 }
 
-void ClearGraph::deserialize(const SerializationBuffer& data)
+void ClearGraph::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Meta::deserialize(data);
+    Meta::deserialize(data, version);
 }

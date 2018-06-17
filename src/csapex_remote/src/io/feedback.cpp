@@ -40,12 +40,12 @@ std::string Feedback::getMessage() const
 }
 
 
-void Feedback::serialize(SerializationBuffer &data) const
+void Feedback::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_id_;
     data << message_;
 }
-void Feedback::deserialize(const SerializationBuffer& data)
+void Feedback::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_id_;
     data >> message_;

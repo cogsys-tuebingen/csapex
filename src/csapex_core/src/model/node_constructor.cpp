@@ -180,7 +180,7 @@ Node::Ptr NodeConstructor::makeNode() const
 }
 
 
-void NodeConstructor::serialize(SerializationBuffer &data) const
+void NodeConstructor::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << type_;
     data << descr_;
@@ -189,7 +189,7 @@ void NodeConstructor::serialize(SerializationBuffer &data) const
     data << properties_;
     data << true;
 }
-void NodeConstructor::deserialize(const SerializationBuffer& data)
+void NodeConstructor::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> type_;
     data >> descr_;

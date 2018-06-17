@@ -60,18 +60,18 @@ bool MoveBox::doRedo()
     return doExecute();
 }
 
-void MoveBox::serialize(SerializationBuffer &data) const
+void MoveBox::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << from.x << from.y;
     data << to.x << to.y;
     data << box_uuid;
 }
 
-void MoveBox::deserialize(const SerializationBuffer& data)
+void MoveBox::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> from.x >> from.y;
     data >> to.x >> to.y;

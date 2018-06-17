@@ -69,18 +69,18 @@ bool SetIsolatedExecution::doRedo()
 
 
 
-void SetIsolatedExecution::serialize(SerializationBuffer &data) const
+void SetIsolatedExecution::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << type_;
     data << was_type_;
 }
 
-void SetIsolatedExecution::deserialize(const SerializationBuffer& data)
+void SetIsolatedExecution::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> type_;

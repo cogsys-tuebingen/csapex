@@ -224,18 +224,18 @@ void BitSetParameter::doDeserialize(const YAML::Node& n)
 }
 
 
-void BitSetParameter::serialize(SerializationBuffer &data) const
+void BitSetParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value_;
     data << set_;
     data << def_;
 }
 
-void BitSetParameter::deserialize(const SerializationBuffer& data)
+void BitSetParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value_;
     data >> set_;

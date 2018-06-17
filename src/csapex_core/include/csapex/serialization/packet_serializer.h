@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/utility/singleton.hpp>
 #include <csapex/serialization/serialization_fwd.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <vector>
@@ -70,13 +71,13 @@ public: \
     void serialize(const Streamable& packet, SerializationBuffer &data) override \
     { \
         if(auto* res = dynamic_cast<const Name*>(&packet)) { \
-            res->serialize(data); \
+            res->serializeVersioned(data); \
         } \
     } \
     StreamablePtr deserialize(const SerializationBuffer &data) override \
     { \
         std::shared_ptr<Name> res = Name::makeEmpty(); \
-        res->deserialize(data); \
+        res->deserializeVersioned(data); \
         return res; \
     } \
 }; \

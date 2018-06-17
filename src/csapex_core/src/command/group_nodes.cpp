@@ -265,17 +265,17 @@ bool GroupNodes::doRedo()
 
 
 
-void GroupNodes::serialize(SerializationBuffer &data) const
+void GroupNodes::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    GroupBase::serialize(data);
+    GroupBase::serialize(data, version);
 
     data << uuids;
     data << sub_graph_uuid_;
 }
 
-void GroupNodes::deserialize(const SerializationBuffer& data)
+void GroupNodes::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    GroupBase::deserialize(data);
+    GroupBase::deserialize(data, version);
 
     data >> uuids;
     data >> sub_graph_uuid_;

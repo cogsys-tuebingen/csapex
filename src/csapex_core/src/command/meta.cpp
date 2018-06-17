@@ -123,9 +123,9 @@ bool Meta::doRedo()
 }
 
 
-void Meta::serialize(SerializationBuffer &data) const
+void Meta::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << nested;
     data << type;
@@ -133,9 +133,9 @@ void Meta::serialize(SerializationBuffer &data) const
     data << transaction;
 }
 
-void Meta::deserialize(const SerializationBuffer& data)
+void Meta::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> nested;
     data >> type;

@@ -32,8 +32,8 @@ public:
             arguments_ = { args... };
         }
 
-        virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(const SerializationBuffer& data) override;
+        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
@@ -62,8 +62,8 @@ public:
         ProfilerResponse(ProfilerRequestType request_type, const AUUID& uuid, uint8_t request_id);
         ProfilerResponse(ProfilerRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(const SerializationBuffer& data) override;
+        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::string getType() const override
         {

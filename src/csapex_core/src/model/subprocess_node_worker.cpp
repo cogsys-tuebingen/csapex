@@ -62,7 +62,7 @@ void SubprocessNodeWorker::initialize()
         if(!internal) {
             node_handle_->execution_requested([this, c](){
                 SerializationBuffer msg;
-                c->getDescription().serialize(msg);
+                c->getDescription().serializeVersioned(msg);
                 subprocess_->in.write({SubprocessChannel::MessageType::PORT_ADD, msg.data(), msg.size()});
             });
         }
@@ -70,7 +70,7 @@ void SubprocessNodeWorker::initialize()
     observe(node_handle_->node_state_changed, [this](){
         node_handle_->execution_requested([this](){
             SerializationBuffer msg;
-            getNodeHandle()->getNodeState()->serialize(msg);
+            getNodeHandle()->getNodeState()->serializeVersioned(msg);
             subprocess_->in.write({SubprocessChannel::MessageType::NODE_STATE_CHANGED, msg.data(), msg.size()});
         });
     });
@@ -120,7 +120,7 @@ void SubprocessNodeWorker::runSubprocessLoop()
             {
                 ConnectorDescription des;
                 SerializationBuffer buffer(msg.data, msg.length);
-                des.deserialize(buffer);
+                des.deserializeVersioned(buffer);
                 if(des.is_variadic) {
                     switch(des.connector_type) {
                     case ConnectorType::INPUT:

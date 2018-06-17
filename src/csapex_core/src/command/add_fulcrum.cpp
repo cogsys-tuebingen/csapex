@@ -52,9 +52,9 @@ bool AddFulcrum::doRedo()
 
 
 
-void AddFulcrum::serialize(SerializationBuffer &data) const
+void AddFulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << connection_id;
     data << sub_section_to_split;
@@ -62,9 +62,9 @@ void AddFulcrum::serialize(SerializationBuffer &data) const
     data << type;
 }
 
-void AddFulcrum::deserialize(const SerializationBuffer& data)
+void AddFulcrum::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> connection_id;
     data >> sub_section_to_split;

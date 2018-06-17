@@ -158,14 +158,20 @@ public:
     bool acceptsConnectionFrom(const TokenData* other_side) const override
     {
         return ValueContainer::acceptsConnectionFrom(other_side);
-    }    
+    }
 
-    void serialize(SerializationBuffer &data) const override
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
     {
+        // TODO: ValueContainer should provide a version here!
+        Message::serialize(data, version);
+
         data << ValueContainer::value;
     }
-    void deserialize(const SerializationBuffer& data) override
+
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
     {
+        Message::deserialize(data, version);
+
         data >> ValueContainer::value;
     }
 };

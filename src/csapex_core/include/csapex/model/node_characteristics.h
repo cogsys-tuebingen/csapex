@@ -27,8 +27,8 @@ public:
 
     bool is_leading_to_essential_vertex;
 
-    void serialize(SerializationBuffer &data) const override;
-    void deserialize(const SerializationBuffer& data) override;
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 };
 
 }

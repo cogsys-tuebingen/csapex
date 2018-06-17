@@ -100,17 +100,17 @@ double OutputProgressParameter::getProgressMaximum() const
 }
 
 
-void OutputProgressParameter::serialize(SerializationBuffer &data) const
+void OutputProgressParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value;
     data << maximum;
 }
 
-void OutputProgressParameter::deserialize(const SerializationBuffer& data)
+void OutputProgressParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value;
     data >> maximum;

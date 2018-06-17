@@ -464,7 +464,7 @@ void NodeState::readYaml(const YAML::Node &node)
 }
 
 
-void NodeState::serialize(SerializationBuffer &data) const
+void NodeState::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << max_frequency_;
 
@@ -497,7 +497,7 @@ void NodeState::serialize(SerializationBuffer &data) const
     data << yaml;
 }
 
-void NodeState::deserialize(const SerializationBuffer& data)
+void NodeState::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> max_frequency_;
 

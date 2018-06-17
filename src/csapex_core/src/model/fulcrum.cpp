@@ -140,7 +140,7 @@ void Fulcrum::setType(int type)
     typeChanged(this, type);
 }
 
-void Fulcrum::serialize(SerializationBuffer &data) const
+void Fulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << connection_id_;
     data << id_;
@@ -149,7 +149,7 @@ void Fulcrum::serialize(SerializationBuffer &data) const
     data << handle_in_.x << handle_in_.y;
     data << handle_out_.x << handle_out_.y;
 }
-void Fulcrum::deserialize(const SerializationBuffer& data)
+void Fulcrum::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> connection_id_;
     data >> id_;

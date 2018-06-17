@@ -18,10 +18,10 @@ EndOfSequenceMessage::EndOfSequenceMessage(const std::string& name)
 {}
 
 
-void EndOfSequenceMessage::serialize(SerializationBuffer &data) const
+void EndOfSequenceMessage::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
 }
-void EndOfSequenceMessage::deserialize(const SerializationBuffer& data)
+void EndOfSequenceMessage::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
 }
 

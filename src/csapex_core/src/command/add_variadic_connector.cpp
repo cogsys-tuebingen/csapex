@@ -178,9 +178,9 @@ RelayMapping AddVariadicConnector::getMap() const
 }
 
 
-void AddVariadicConnector::serialize(SerializationBuffer &data) const
+void AddVariadicConnector::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << connector_type;
     data << token_type->typeName();
@@ -192,9 +192,9 @@ void AddVariadicConnector::serialize(SerializationBuffer &data) const
     data << connector_id;
 }
 
-void AddVariadicConnector::deserialize(const SerializationBuffer& data)
+void AddVariadicConnector::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> connector_type;
 

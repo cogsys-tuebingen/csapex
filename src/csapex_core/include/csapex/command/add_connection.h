@@ -21,8 +21,8 @@ class CSAPEX_COMMAND_EXPORT AddConnection : public CommandImplementation<AddConn
 public:
     AddConnection(const AUUID& graph_uuid, const UUID &from_uuid, const UUID &to_uuid, bool active);
 
-    void serialize(SerializationBuffer &data) const override;
-    void deserialize(const SerializationBuffer& data) override;
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     bool doUndo() override;

@@ -56,22 +56,22 @@ struct RequestSerializerRegistered
     { \
         virtual void serializeRequest(const Request& packet, SerializationBuffer &data) override \
         { \
-            packet.serialize(data); \
+            packet.serializeVersioned(data); \
         } \
         virtual RequestPtr deserializeRequest(const SerializationBuffer& data, uint8_t request_id) override \
         { \
             auto result = std::make_shared<typename Name::RequestT>(request_id); \
-            result->deserialize(data); \
+            result->deserializeVersioned(data); \
             return result; \
         } \
         virtual void serializeResponse(const Response& packet, SerializationBuffer &data) override \
         { \
-            packet.serialize(data); \
+            packet.serializeVersioned(data); \
         } \
         virtual ResponsePtr deserializeResponse(const SerializationBuffer& data, uint8_t request_id) override \
         { \
             auto result = std::make_shared<typename Name::ResponseT>(request_id); \
-            result->deserialize(data); \
+            result->deserializeVersioned(data); \
             return result; \
         } \
     }; \

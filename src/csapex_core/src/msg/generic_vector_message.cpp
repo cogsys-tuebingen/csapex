@@ -83,13 +83,13 @@ bool GenericVectorMessage::AnythingImplementation::acceptsConnectionFrom(const T
     }
 }
 
-void GenericVectorMessage::AnythingImplementation::serialize(SerializationBuffer &data) const
+void GenericVectorMessage::AnythingImplementation::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    TokenData::serialize(data);
+    Message::serialize(data, version);
 }
-void GenericVectorMessage::AnythingImplementation::deserialize(const SerializationBuffer& data)
+void GenericVectorMessage::AnythingImplementation::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    TokenData::deserialize(data);
+    Message::deserialize(data, version);
 }
 
 
@@ -167,11 +167,11 @@ std::size_t GenericVectorMessage::InstancedImplementation::nestedValueCount() co
     return value.size();
 }
 
-void GenericVectorMessage::InstancedImplementation::serialize(SerializationBuffer &data) const
+void GenericVectorMessage::InstancedImplementation::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << value;
 }
-void GenericVectorMessage::InstancedImplementation::deserialize(const SerializationBuffer& data)
+void GenericVectorMessage::InstancedImplementation::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> value;
 }

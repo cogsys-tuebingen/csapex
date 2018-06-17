@@ -188,16 +188,16 @@ bool UngroupNodes::doRedo()
 }
 
 
-void UngroupNodes::serialize(SerializationBuffer &data) const
+void UngroupNodes::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    GroupBase::serialize(data);
+    GroupBase::serialize(data, version);
 
     data << uuid;
 }
 
-void UngroupNodes::deserialize(const SerializationBuffer& data)
+void UngroupNodes::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    GroupBase::deserialize(data);
+    GroupBase::deserialize(data, version);
 
     data >> uuid;
 }

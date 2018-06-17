@@ -13,15 +13,36 @@ using namespace csapex;
 // base
 SerializationBuffer& csapex::operator << (SerializationBuffer& data, const Serializable& s)
 {
-    s.serialize(data);
+    s.serializeVersioned(data);
+
     return data;
 }
 
 const SerializationBuffer& csapex::operator >> (const SerializationBuffer& data, Serializable& s)
 {
-    s.deserialize(data);
+    s.deserializeVersioned(data);
+
     return data;
 }
+
+
+SerializationBuffer& csapex::operator << (SerializationBuffer& data, const SemanticVersion& version)
+{
+    data << version.major_v;
+    data << version.minor_v;
+    data << version.patch_v;
+
+    return data;
+}
+const SerializationBuffer& csapex::operator >> (const SerializationBuffer& data, SemanticVersion& version)
+{
+    data >> version.major_v;
+    data >> version.minor_v;
+    data >> version.patch_v;
+
+    return data;
+}
+
 
 // UUID
 SerializationBuffer& csapex::operator << (SerializationBuffer& data, const UUID& s)

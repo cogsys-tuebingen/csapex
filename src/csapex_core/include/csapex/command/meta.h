@@ -28,8 +28,8 @@ public:
 
     virtual void init(GraphFacadeImplementation* root, CsApexCore& core) override;
 
-    void serialize(SerializationBuffer &data) const override;
-    void deserialize(const SerializationBuffer& data) override;
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
     void cloneData(const Meta& other) override;
 
 protected:

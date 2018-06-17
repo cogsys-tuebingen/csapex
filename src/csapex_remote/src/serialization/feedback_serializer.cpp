@@ -17,12 +17,12 @@ SerializerRegistered<FeedbackSerializer> g_register_Feedback_serializer_(Feedbac
 
 void FeedbackSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    packet.serialize(data);
+    packet.serializeVersioned(data);
 }
 
 StreamablePtr FeedbackSerializer::deserialize(const SerializationBuffer& data)
 {
     FeedbackPtr res = std::make_shared<Feedback>("");
-    res->deserialize(data);
+    res->deserializeVersioned(data);
     return res;
 }

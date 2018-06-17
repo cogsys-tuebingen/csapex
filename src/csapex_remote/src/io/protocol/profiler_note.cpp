@@ -28,17 +28,17 @@ ProfilerNote::ProfilerNote(ProfilerNoteType request_type, const AUUID &uuid, con
 
 }
 
-void ProfilerNote::serialize(SerializationBuffer &data) const
+void ProfilerNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Note::serialize(data);
+    Note::serialize(data, version);
 
     data << note_type_;
     data << payload_;
 }
 
-void ProfilerNote::deserialize(const SerializationBuffer& data)
+void ProfilerNote::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Note::deserialize(data);
+    Note::deserialize(data, version);
 
     data >> note_type_;
     data >> payload_;

@@ -64,8 +64,8 @@ public:
 
     bool operator == (const Fulcrum& other) const;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 public:
     slim_signal::Signal<void (Fulcrum*, bool dropped)> moved;

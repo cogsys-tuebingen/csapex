@@ -84,18 +84,18 @@ bool AddNode::doRedo()
 }
 
 
-void AddNode::serialize(SerializationBuffer &data) const
+void AddNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << type_;
     data << pos_.x << pos_.y;
     data << uuid_;
 }
 
-void AddNode::deserialize(const SerializationBuffer& data)
+void AddNode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> type_;
     data >> pos_.x >> pos_.y;

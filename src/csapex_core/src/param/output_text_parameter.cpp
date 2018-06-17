@@ -85,16 +85,16 @@ void OutputTextParameter::cloneDataFrom(const Clonable& other)
 }
 
 
-void OutputTextParameter::serialize(SerializationBuffer &data) const
+void OutputTextParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << text_;
 }
 
-void OutputTextParameter::deserialize(const SerializationBuffer& data)
+void OutputTextParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> text_;
 }

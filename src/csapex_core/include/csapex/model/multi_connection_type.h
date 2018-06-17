@@ -30,8 +30,8 @@ public:
     virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
 
 public:
-    void serialize(SerializationBuffer &data) const override;
-    void deserialize(const SerializationBuffer& data) override;
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     static MultiTokenData::Ptr makeEmpty() {
         return std::shared_ptr<MultiTokenData>(new MultiTokenData);

@@ -11,13 +11,13 @@
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/exceptions.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 using namespace csapex;
 using namespace connection_types;
 
 
-class ConnectionTest : public ::testing::Test {
+class ConnectionTest : public CsApexTestCase {
 protected:
     ConnectionTest()
         : uuid_provider(std::make_shared<UUIDProvider>())

@@ -7,12 +7,12 @@
 #include <unordered_map>
 #include <typeindex>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 using namespace csapex;
 using namespace csapex::param;
 
-class ParameterTest : public ::testing::Test
+class ParameterTest : public CsApexTestCase
 {
 protected:
     ParameterTest()

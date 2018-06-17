@@ -22,7 +22,7 @@
 #include <csapex/model/subgraph_node.h>
 #include <csapex/model/graph/graph_impl.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 #include <csapex_testing/test_exception_handler.h>
 #include <csapex_testing/stepping_test.h>
 

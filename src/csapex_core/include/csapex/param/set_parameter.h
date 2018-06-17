@@ -34,8 +34,8 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     virtual bool accepts(const std::type_info& type) const override;
 

@@ -81,9 +81,9 @@ bool DeleteConnection::doRedo()
 }
 
 
-void DeleteConnection::serialize(SerializationBuffer &data) const
+void DeleteConnection::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Meta::serialize(data);
+    Meta::serialize(data, version);
 
     data << connection_id;
     data << active_;
@@ -92,9 +92,9 @@ void DeleteConnection::serialize(SerializationBuffer &data) const
     data << to_uuid;
 }
 
-void DeleteConnection::deserialize(const SerializationBuffer& data)
+void DeleteConnection::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Meta::deserialize(data);
+    Meta::deserialize(data, version);
 
     data >> connection_id;
     data >>active_;

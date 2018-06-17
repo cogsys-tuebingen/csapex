@@ -37,13 +37,13 @@ CommandBroadcasts::CommandBroadcasts(CommandBroadcastType broadcast_type, bool f
 
 }
 
-void CommandBroadcasts::serialize(SerializationBuffer &data) const
+void CommandBroadcasts::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << broadcast_type_;
     data << flag_;
 }
 
-void CommandBroadcasts::deserialize(const SerializationBuffer& data)
+void CommandBroadcasts::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> broadcast_type_;
     data >> flag_;

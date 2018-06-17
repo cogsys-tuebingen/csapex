@@ -146,17 +146,17 @@ bool UpdateParameter::doRedo()
 }
 
 
-void UpdateParameter::serialize(SerializationBuffer &data) const
+void UpdateParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << value;
 }
 
-void UpdateParameter::deserialize(const SerializationBuffer& data)
+void UpdateParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> value;

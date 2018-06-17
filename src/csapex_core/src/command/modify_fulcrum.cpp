@@ -53,9 +53,9 @@ bool ModifyFulcrum::doRedo()
 
 
 
-void ModifyFulcrum::serialize(SerializationBuffer &data) const
+void ModifyFulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << connection_id;
     data <<fulcrum_id;
@@ -69,9 +69,9 @@ void ModifyFulcrum::serialize(SerializationBuffer &data) const
     data << t_out.x << t_out.y;
 }
 
-void ModifyFulcrum::deserialize(const SerializationBuffer& data)
+void ModifyFulcrum::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> connection_id;
     data >>fulcrum_id;

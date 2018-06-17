@@ -25,13 +25,13 @@ ParameterChanged::ParameterChanged()
 
 }
 
-void ParameterChanged::serialize(SerializationBuffer &data) const
+void ParameterChanged::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << uuid;
     data << value;
 }
 
-void ParameterChanged::deserialize(const SerializationBuffer& data)
+void ParameterChanged::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> uuid;
     data >> value;

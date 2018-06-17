@@ -64,17 +64,17 @@ bool DisableNode::doRedo()
 }
 
 
-void DisableNode::serialize(SerializationBuffer &data) const
+void DisableNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << disable_;
 }
 
-void DisableNode::deserialize(const SerializationBuffer& data)
+void DisableNode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> disable_;

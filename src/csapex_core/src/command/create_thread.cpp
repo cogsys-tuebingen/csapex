@@ -94,9 +94,9 @@ bool CreateThread::doRedo()
 
 
 
-void CreateThread::serialize(SerializationBuffer &data) const
+void CreateThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << name;
@@ -104,9 +104,9 @@ void CreateThread::serialize(SerializationBuffer &data) const
     data << new_id;
 }
 
-void CreateThread::deserialize(const SerializationBuffer& data)
+void CreateThread::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> name;

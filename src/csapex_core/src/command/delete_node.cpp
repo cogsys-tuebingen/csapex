@@ -108,17 +108,17 @@ bool DeleteNode::doRedo()
 }
 
 
-void DeleteNode::serialize(SerializationBuffer &data) const
+void DeleteNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Meta::serialize(data);
+    Meta::serialize(data, version);
 
     data << uuid;
     data << type;
 }
 
-void DeleteNode::deserialize(const SerializationBuffer& data)
+void DeleteNode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Meta::deserialize(data);
+    Meta::deserialize(data, version);
 
     data >> uuid;
     data >> type;

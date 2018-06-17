@@ -43,7 +43,7 @@ AUUID RawMessage::getUUID() const
     return uuid_;
 }
 
-void RawMessage::serialize(SerializationBuffer &data) const
+void RawMessage::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << uuid_;
     std::size_t n = data_.size();
@@ -54,7 +54,7 @@ void RawMessage::serialize(SerializationBuffer &data) const
         data << *src;
     }
 }
-void RawMessage::deserialize(const SerializationBuffer& data)
+void RawMessage::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> uuid_;
     std::size_t n;

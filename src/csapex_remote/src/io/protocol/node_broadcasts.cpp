@@ -38,13 +38,13 @@ NodeBroadcasts::NodeBroadcasts(NodeBroadcastType broadcast_type, AUUID uuid)
 
 }
 
-void NodeBroadcasts::serialize(SerializationBuffer &data) const
+void NodeBroadcasts::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << broadcast_type_;
     data << uuid_;
 }
 
-void NodeBroadcasts::deserialize(const SerializationBuffer& data)
+void NodeBroadcasts::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> broadcast_type_;
     data >> uuid_;

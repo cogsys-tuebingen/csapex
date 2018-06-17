@@ -29,8 +29,8 @@ public:
     std::vector<uint8_t> getData() const;
     AUUID getUUID() const;
 
-    virtual void serialize(SerializationBuffer &data) const;
-    virtual void deserialize(const SerializationBuffer& data);
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version);
 
 private:
     mutable std::vector<uint8_t> data_;

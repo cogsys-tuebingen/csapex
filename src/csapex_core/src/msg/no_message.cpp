@@ -14,10 +14,10 @@ NoMessage::NoMessage()
     : MarkerMessage(type<NoMessage>::name(), 0)
 {}
 
-void NoMessage::serialize(SerializationBuffer &data) const
+void NoMessage::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
 }
-void NoMessage::deserialize(const SerializationBuffer& data)
+void NoMessage::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
 }
 

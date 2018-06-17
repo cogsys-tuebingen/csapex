@@ -171,12 +171,12 @@ uint8_t Command::getPacketType() const
 }
 
 
-void Command::serialize(SerializationBuffer &data) const
+void Command::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << graph_uuid;
 }
 
-void Command::deserialize(const SerializationBuffer& data)
+void Command::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> graph_uuid;
 }

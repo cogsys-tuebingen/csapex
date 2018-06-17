@@ -19,7 +19,7 @@
 
 #include <csapex_testing/stepping_test.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 #include <yaml-cpp/yaml.h>
 

@@ -20,7 +20,7 @@ NodeCharacteristics::NodeCharacteristics()
 
 }
 
-void NodeCharacteristics::serialize(SerializationBuffer &data) const
+void NodeCharacteristics::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << depth;
     data << component;
@@ -30,7 +30,7 @@ void NodeCharacteristics::serialize(SerializationBuffer &data) const
     data << is_leading_to_joining_vertex;
     data << is_leading_to_essential_vertex;
 }
-void NodeCharacteristics::deserialize(const SerializationBuffer& data)
+void NodeCharacteristics::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> depth;
     data >> component;

@@ -56,16 +56,16 @@ bool FlipSides::doRedo()
 
 
 
-void FlipSides::serialize(SerializationBuffer &data) const
+void FlipSides::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
 }
 
-void FlipSides::deserialize(const SerializationBuffer& data)
+void FlipSides::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
 }

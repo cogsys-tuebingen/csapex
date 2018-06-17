@@ -68,18 +68,18 @@ bool Minimize::doRedo()
 
 
 
-void Minimize::serialize(SerializationBuffer &data) const
+void Minimize::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << mini;
     data << executed;
 }
 
-void Minimize::deserialize(const SerializationBuffer& data)
+void Minimize::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> mini;

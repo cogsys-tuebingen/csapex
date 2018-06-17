@@ -54,7 +54,7 @@ uint8_t Parameter::getPacketType() const
 }
 
 
-void Parameter::serialize(SerializationBuffer &data) const
+void Parameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << name_;
     data << uuid_;
@@ -69,7 +69,7 @@ void Parameter::serialize(SerializationBuffer &data) const
 
 }
 
-void Parameter::deserialize(const SerializationBuffer& data)
+void Parameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> name_;
     data >> uuid_;

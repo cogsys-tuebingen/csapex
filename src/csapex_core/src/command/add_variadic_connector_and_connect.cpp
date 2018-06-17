@@ -70,9 +70,9 @@ bool AddVariadicConnectorAndConnect::doRedo()
 
 
 
-void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data) const
+void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    AddVariadicConnector::serialize(data);
+    AddVariadicConnector::serialize(data, version);
 
     data << target_;
     data << move_;
@@ -81,9 +81,9 @@ void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data) const
     data << additional_work_;
 }
 
-void AddVariadicConnectorAndConnect::deserialize(const SerializationBuffer& data)
+void AddVariadicConnectorAndConnect::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    AddVariadicConnector::deserialize(data);
+    AddVariadicConnector::deserialize(data, version);
 
     data >> target_;
     data >> move_;

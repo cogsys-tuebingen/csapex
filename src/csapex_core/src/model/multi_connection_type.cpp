@@ -51,11 +51,11 @@ bool MultiTokenData::acceptsConnectionFrom(const TokenData *other_side) const
     return false;
 }
 
-void MultiTokenData::serialize(SerializationBuffer &data) const
+void MultiTokenData::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     throw std::runtime_error("MultiTokenData is a meta type and cannot be serialized");
 }
-void MultiTokenData::deserialize(const SerializationBuffer& data)
+void MultiTokenData::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     throw std::runtime_error("MultiTokenData is a meta type and cannot be serialized");
 }

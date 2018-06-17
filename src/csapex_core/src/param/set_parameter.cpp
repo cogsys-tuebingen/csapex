@@ -315,9 +315,9 @@ bool SetParameter::accepts(const std::type_info& type) const
 
 
 
-void SetParameter::serialize(SerializationBuffer &data) const
+void SetParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value_;
     data << txt_;
@@ -325,9 +325,9 @@ void SetParameter::serialize(SerializationBuffer &data) const
     data << def_;
 }
 
-void SetParameter::deserialize(const SerializationBuffer& data)
+void SetParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value_;
     data >> txt_;

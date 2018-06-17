@@ -366,14 +366,14 @@ private:
             }
         }
 
-        void serialize(SerializationBuffer &data) const override
+        void serialize(SerializationBuffer &data, SemanticVersion& version) const override
         {
-            TokenData::serialize(data);
+            TokenData::serialize(data, version);
             data << value;
         }
-        void deserialize(const SerializationBuffer& data) override
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
         {
-            TokenData::deserialize(data);
+            TokenData::deserialize(data, version);
             data >> value;
         }
     };
@@ -391,8 +391,8 @@ private:
         void encode(YAML::Node& node) const override;
         void decode(const YAML::Node& node) override;
 
-        void serialize(SerializationBuffer &data) const override;
-        void deserialize(const SerializationBuffer& data) override;
+        void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::string nestedName() const override
         {
@@ -422,8 +422,8 @@ private:
         TokenData::ConstPtr nestedValue(std::size_t i) const override;
         std::size_t nestedValueCount() const override;
 
-        void serialize(SerializationBuffer &data) const override;
-        void deserialize(const SerializationBuffer& data) override;
+        void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::string nestedName() const override
         {
@@ -726,20 +726,20 @@ public:
         return impl->nestedValueCount();
     }
 
-    void serialize(SerializationBuffer &data) const override
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
     {
         data << impl->nestedName();
 
-        impl->serialize(data);
+        impl->serialize(data, version);
     }
-    void deserialize(const SerializationBuffer& data) override
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
     {
         std::string type;
         data >> type;
         impl = SupportedTypes::make(type);
         apex_assert_hard(impl);
 
-        impl->deserialize(data);
+        impl->deserialize(data, version);
     }
 
     static GenericVectorMessage::Ptr makeEmpty() {

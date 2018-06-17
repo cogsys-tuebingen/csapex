@@ -34,7 +34,7 @@ void MessageSerializer::serialize(const Streamable& packet, SerializationBuffer&
         std::string type = message->typeName();
         data << type;
 
-        message->serialize(data);
+        message->serializeVersioned(data);
     }
 }
 
@@ -45,7 +45,8 @@ StreamablePtr MessageSerializer::deserialize(const SerializationBuffer& data)
 
     TokenData::Ptr result = MessageFactory::createMessage(type);
     apex_assert_hard(result);
-    result->deserialize(data);
+
+    result->deserializeVersioned(data);
 
     return result;
 }

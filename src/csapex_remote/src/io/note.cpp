@@ -24,12 +24,12 @@ AUUID Note::getAUUID() const
     return uuid_;
 }
 
-void Note::serialize(SerializationBuffer &data) const
+void Note::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << uuid_;
 }
 
-void Note::deserialize(const SerializationBuffer& data)
+void Note::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> uuid_;
 }

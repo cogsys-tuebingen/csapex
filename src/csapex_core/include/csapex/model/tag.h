@@ -57,8 +57,8 @@ public:
 
     virtual uint8_t getPacketType() const;
 
-    virtual void serialize(SerializationBuffer &data) const;
-    virtual void deserialize(const SerializationBuffer& data);
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version);
 
     static Ptr makeEmpty();
 

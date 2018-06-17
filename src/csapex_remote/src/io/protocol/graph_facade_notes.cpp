@@ -28,17 +28,17 @@ GraphFacadeNote::GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID &
 
 }
 
-void GraphFacadeNote::serialize(SerializationBuffer &data) const
+void GraphFacadeNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Note::serialize(data);
+    Note::serialize(data, version);
 
     data << note_type_;
     data << payload_;
 }
 
-void GraphFacadeNote::deserialize(const SerializationBuffer& data)
+void GraphFacadeNote::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Note::deserialize(data);
+    Note::deserialize(data, version);
 
     data >> note_type_;
     data >> payload_;

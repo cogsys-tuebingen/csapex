@@ -65,8 +65,8 @@ public:
 
     NodePtr makeNode() const;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     NodeConstructor(const std::string& type);

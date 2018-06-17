@@ -65,17 +65,17 @@ bool SetMaximumExecutionFrequency::doRedo()
 
 
 
-void SetMaximumExecutionFrequency::serialize(SerializationBuffer &data) const
+void SetMaximumExecutionFrequency::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << frequency;
 }
 
-void SetMaximumExecutionFrequency::deserialize(const SerializationBuffer& data)
+void SetMaximumExecutionFrequency::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> frequency;

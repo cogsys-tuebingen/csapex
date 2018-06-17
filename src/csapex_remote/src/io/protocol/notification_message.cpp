@@ -25,12 +25,12 @@ NotificationMessage::NotificationMessage()
 
 }
 
-void NotificationMessage::serialize(SerializationBuffer &data) const
+void NotificationMessage::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << notification;
 }
 
-void NotificationMessage::deserialize(const SerializationBuffer& data)
+void NotificationMessage::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> notification;
 }

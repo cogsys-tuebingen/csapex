@@ -67,17 +67,17 @@ bool DeleteThread::doRedo()
 
 
 
-void DeleteThread::serialize(SerializationBuffer &data) const
+void DeleteThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << id;
     data << name;
 }
 
-void DeleteThread::deserialize(const SerializationBuffer& data)
+void DeleteThread::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> id;
     data >> name;

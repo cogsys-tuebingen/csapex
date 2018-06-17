@@ -47,9 +47,9 @@ bool MoveFulcrum::doRedo()
 }
 
 
-void MoveFulcrum::serialize(SerializationBuffer &data) const
+void MoveFulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << connection_id;
     data << fulcrum_id;
@@ -57,9 +57,9 @@ void MoveFulcrum::serialize(SerializationBuffer &data) const
     data << to.x << to.y;
 }
 
-void MoveFulcrum::deserialize(const SerializationBuffer& data)
+void MoveFulcrum::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> connection_id;
     data >> fulcrum_id;

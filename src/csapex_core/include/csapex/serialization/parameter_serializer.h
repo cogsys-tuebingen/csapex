@@ -55,12 +55,12 @@ struct ParameterSerializerRegistered
     { \
         virtual void serialize(const Parameter& packet, SerializationBuffer &data) const override \
         { \
-            packet.serialize(data); \
+            packet.serializeVersioned(data); \
         } \
         virtual ParameterPtr deserialize(const SerializationBuffer& data) override \
         { \
             auto result = std::make_shared<Name>(); \
-            result->deserialize(data); \
+            result->deserializeVersioned(data); \
             return result; \
         } \
     }; \

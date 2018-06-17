@@ -61,9 +61,9 @@ bool SetColor::doRedo()
 
 
 
-void SetColor::serialize(SerializationBuffer &data) const
+void SetColor::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
 
@@ -71,9 +71,9 @@ void SetColor::serialize(SerializationBuffer &data) const
     data << r_orig << g_orig << b_orig;
 }
 
-void SetColor::deserialize(const SerializationBuffer& data)
+void SetColor::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> r >> g >> b;

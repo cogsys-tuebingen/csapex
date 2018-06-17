@@ -163,6 +163,7 @@ add_library(csapex_serialization SHARED
     src/serialization/snippet.cpp
     src/serialization/packet_serializer.cpp
     src/serialization/serialization_buffer.cpp
+    src/serialization/semantic_version.cpp
 
     src/serialization/io/std_io.cpp
     src/serialization/io/boost_io.cpp

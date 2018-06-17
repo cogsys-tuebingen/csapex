@@ -66,18 +66,18 @@ bool MuteNode::doRedo()
 
 
 
-void MuteNode::serialize(SerializationBuffer &data) const
+void MuteNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << muted;
     data << executed;
 }
 
-void MuteNode::deserialize(const SerializationBuffer& data)
+void MuteNode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> muted;

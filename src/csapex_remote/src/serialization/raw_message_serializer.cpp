@@ -17,12 +17,12 @@ SerializerRegistered<RawMessageSerializer> g_register_RawMessage_serializer_(Raw
 
 void RawMessageSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    packet.serialize(data);
+    packet.serializeVersioned(data);
 }
 
 StreamablePtr RawMessageSerializer::deserialize(const SerializationBuffer& data)
 {
     RawMessagePtr res = std::make_shared<RawMessage>();
-    res->deserialize(data);
+    res->deserializeVersioned(data);
     return res;
 }

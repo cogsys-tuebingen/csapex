@@ -44,8 +44,8 @@ public:
 
     uint8_t getPacketType() const final override;
 
-    void serialize(SerializationBuffer &data) const override;
-    void deserialize(const SerializationBuffer& data) override;
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 
 protected:

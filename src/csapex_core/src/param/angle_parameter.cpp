@@ -105,18 +105,18 @@ void AngleParameter::doDeserialize(const YAML::Node& n)
 }
 
 
-void AngleParameter::serialize(SerializationBuffer &data) const
+void AngleParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << angle_;
     data << min_;
     data << max_;
 }
 
-void AngleParameter::deserialize(const SerializationBuffer& data)
+void AngleParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> angle_;
     data >> min_;

@@ -171,17 +171,17 @@ void ValueParameter::doSerialize(YAML::Node& n) const
 
 
 
-void ValueParameter::serialize(SerializationBuffer &data) const
+void ValueParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value_;
     data << def_;
 }
 
-void ValueParameter::deserialize(const SerializationBuffer& data)
+void ValueParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value_;
     data >> def_;

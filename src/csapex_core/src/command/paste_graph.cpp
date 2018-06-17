@@ -71,13 +71,13 @@ std::unordered_map<UUID, UUID, UUID::Hasher> PasteGraph::getMapping() const
 }
 
 
-void PasteGraph::serialize(SerializationBuffer &data) const
+void PasteGraph::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << blueprint_;
     data << pos_.x << pos_.y;
 }
 
-void PasteGraph::deserialize(const SerializationBuffer& data)
+void PasteGraph::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> blueprint_;
     data >> pos_.x >> pos_.y;

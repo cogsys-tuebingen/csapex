@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/serialization/serialization_fwd.h>
 #include <csapex/model/clonable.h>
+#include <csapex/serialization/semantic_version.h>
 
 /// SYSTEM
 #include <inttypes.h>
@@ -17,8 +18,13 @@ class Serializable : public Clonable
 public:
     virtual ~Serializable();
 
-    virtual void serialize(SerializationBuffer &data) const = 0;
-    virtual void deserialize(const SerializationBuffer& data) = 0;
+    virtual SemanticVersion getVersion() const;
+
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const = 0;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) = 0;
+
+    void serializeVersioned(SerializationBuffer &data) const;
+    void deserializeVersioned(const SerializationBuffer& data);
 };
 
 }

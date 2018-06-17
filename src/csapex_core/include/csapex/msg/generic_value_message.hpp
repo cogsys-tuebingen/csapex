@@ -121,14 +121,15 @@ public:
         return universal_to_string(value);
     }
 
-    void serialize(SerializationBuffer &data) const override
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
     {        
-        TokenData::serialize(data);
+        Message::serialize(data, version);
+        // TODO: Version of value here
         data << value;
     }
-    void deserialize(const SerializationBuffer& data) override
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
     {        
-        TokenData::deserialize(data);
+        Message::deserialize(data, version);
         data >> value;
     }
 

@@ -80,18 +80,18 @@ bool SetLoggerLevel::doRedo()
 
 
 
-void SetLoggerLevel::serialize(SerializationBuffer &data) const
+void SetLoggerLevel::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << was_level;
     data << level;
 }
 
-void SetLoggerLevel::deserialize(const SerializationBuffer& data)
+void SetLoggerLevel::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> was_level;

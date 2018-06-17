@@ -56,12 +56,12 @@ std::string TokenData::typeName() const
     return type_name_;
 }
 
-void TokenData::serialize(SerializationBuffer &data) const
+void TokenData::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << type_name_;
     data << descriptive_name_;
 }
-void TokenData::deserialize(const SerializationBuffer& data)
+void TokenData::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> type_name_;
     data >> descriptive_name_;

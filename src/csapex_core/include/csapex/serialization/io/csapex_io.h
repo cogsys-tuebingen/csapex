@@ -16,6 +16,9 @@ namespace csapex
 SerializationBuffer& operator << (SerializationBuffer& data, const Serializable& s);
 const SerializationBuffer& operator >> (const SerializationBuffer& data, Serializable& s);
 
+SerializationBuffer& operator << (SerializationBuffer& data, const SemanticVersion& s);
+const SerializationBuffer& operator >> (const SerializationBuffer& data, SemanticVersion& s);
+
 // UUID
 SerializationBuffer& operator << (SerializationBuffer& data, const UUID& s);
 const SerializationBuffer& operator >> (const SerializationBuffer& data, UUID& s);

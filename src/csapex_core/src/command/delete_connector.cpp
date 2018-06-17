@@ -74,18 +74,18 @@ bool DeleteConnector::doRedo()
 
 
 
-void DeleteConnector::serialize(SerializationBuffer &data) const
+void DeleteConnector::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << in;
     data << delete_connections;
     data << c_uuid;
 }
 
-void DeleteConnector::deserialize(const SerializationBuffer& data)
+void DeleteConnector::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> in;
     data >> delete_connections;

@@ -19,7 +19,7 @@
 #include <csapex/msg/static_output.h>
 #include <csapex/utility/uuid_provider.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 #include <csapex_testing/mockup_nodes.h>
 #include <csapex_testing/test_exception_handler.h>
 
@@ -45,9 +45,6 @@ void runSyncTest(NodeFacadeImplementationPtr node_facade, int value = 23)
     ASSERT_TRUE(node.canProcess());
     ASSERT_FALSE(node_facade->isProcessing());
     ASSERT_FALSE(node_facade->canProcess());
-
-    // no inputs are sent yet -> expect an assertion failure
-    ASSERT_THROW(node_facade->startProcessingMessages(), csapex::HardAssertionFailure);
 
     // create a temporary output and connect it to the input
     OutputPtr tmp_out = std::make_shared<StaticOutput>(UUIDProvider::makeUUID_without_parent("tmp_out"));

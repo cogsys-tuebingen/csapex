@@ -101,7 +101,7 @@ std::shared_ptr<Interval> Interval::makeEmpty()
     return std::shared_ptr<Interval>(new Interval);
 }
 
-void Interval::serialize(SerializationBuffer &data) const
+void Interval::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << name_;
 
@@ -115,7 +115,7 @@ void Interval::serialize(SerializationBuffer &data) const
 
     data << sub;
 }
-void Interval::deserialize(const SerializationBuffer& data)
+void Interval::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> name_;
 

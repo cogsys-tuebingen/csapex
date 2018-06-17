@@ -106,17 +106,17 @@ void ColorParameter::doDeserialize(const YAML::Node& n)
     }
 }
 
-void ColorParameter::serialize(SerializationBuffer &data) const
+void ColorParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << colors_;
     data << def_;
 }
 
-void ColorParameter::deserialize(const SerializationBuffer& data)
+void ColorParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> colors_;
     data >> def_;

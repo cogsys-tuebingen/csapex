@@ -19,8 +19,8 @@ public:
         ParameterRequest(const AUUID& id);
         ParameterRequest(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(const SerializationBuffer& data) override;
+        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
@@ -40,8 +40,8 @@ public:
         ParameterResponse(const param::ParameterConstPtr &parameter, uint8_t request_id);
         ParameterResponse(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(const SerializationBuffer& data) override;
+        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         param::ParameterConstPtr getParameter() const;
 

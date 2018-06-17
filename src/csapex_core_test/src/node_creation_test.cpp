@@ -13,7 +13,7 @@
 #include <csapex/model/token.h>
 #include <csapex/core/settings/settings_impl.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 using namespace csapex;
 using namespace connection_types;
@@ -40,7 +40,7 @@ void functionToBeWrappedIntoANode(const GenericValueMessage<int>& input, const G
 }
 
 
-class NodeCreationTest : public ::testing::Test {
+class NodeCreationTest : public CsApexTestCase {
 protected:
     NodeFactoryImplementation factory;
 

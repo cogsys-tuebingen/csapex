@@ -49,7 +49,7 @@ bool ConnectionDescription:: operator == (const ConnectionDescription& other) co
     return from == other.from && to_label == other.to_label;
 }
 
-void ConnectionDescription::serialize(SerializationBuffer &data) const
+void ConnectionDescription::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << from;
     data << to;
@@ -60,7 +60,7 @@ void ConnectionDescription::serialize(SerializationBuffer &data) const
     data << active;
     data << fulcrums;
 }
-void ConnectionDescription::deserialize(const SerializationBuffer& data)
+void ConnectionDescription::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> from;
     data >> to;

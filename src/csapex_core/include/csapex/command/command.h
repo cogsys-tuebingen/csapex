@@ -66,8 +66,8 @@ public:
 
     virtual uint8_t getPacketType() const override;
 
-    virtual void serialize(SerializationBuffer &data) const override = 0;
-    virtual void deserialize(const SerializationBuffer& data) override = 0;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override = 0;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override = 0;
 
 protected:
     Command();

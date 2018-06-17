@@ -112,13 +112,13 @@ ResponsePtr CoreRequests::CoreRequest::execute(const SessionPtr &session, CsApex
     return std::make_shared<CoreResponse>(request_type_, getRequestID());
 }
 
-void CoreRequests::CoreRequest::serialize(SerializationBuffer &data) const
+void CoreRequests::CoreRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << parameters_;
 }
 
-void CoreRequests::CoreRequest::deserialize(const SerializationBuffer& data)
+void CoreRequests::CoreRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> parameters_;
@@ -147,13 +147,13 @@ CoreRequests::CoreResponse::CoreResponse(uint8_t request_id)
 
 }
 
-void CoreRequests::CoreResponse::serialize(SerializationBuffer &data) const
+void CoreRequests::CoreResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << result_;
 }
 
-void CoreRequests::CoreResponse::deserialize(const SerializationBuffer& data)
+void CoreRequests::CoreResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> result_;

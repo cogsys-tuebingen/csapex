@@ -60,18 +60,18 @@ bool RenameConnector::doRedo()
 
 
 
-void RenameConnector::serialize(SerializationBuffer &data) const
+void RenameConnector::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << new_name_;
     data << old_name_;
 }
 
-void RenameConnector::deserialize(const SerializationBuffer& data)
+void RenameConnector::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> new_name_;

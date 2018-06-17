@@ -71,9 +71,9 @@ bool SwitchThread::doRedo()
 }
 
 
-void SwitchThread::serialize(SerializationBuffer &data) const
+void SwitchThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << old_id;
@@ -81,9 +81,9 @@ void SwitchThread::serialize(SerializationBuffer &data) const
     data << name;
 }
 
-void SwitchThread::deserialize(const SerializationBuffer& data)
+void SwitchThread::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> old_id;

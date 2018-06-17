@@ -65,18 +65,18 @@ bool RenameNode::doRedo()
 
 
 
-void RenameNode::serialize(SerializationBuffer &data) const
+void RenameNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << new_name_;
     data << old_name_;
 }
 
-void RenameNode::deserialize(const SerializationBuffer& data)
+void RenameNode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> new_name_;

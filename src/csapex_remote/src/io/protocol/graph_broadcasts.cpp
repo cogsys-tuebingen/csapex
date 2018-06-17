@@ -43,14 +43,14 @@ GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid, 
 
 }
 
-void GraphBroadcasts::serialize(SerializationBuffer &data) const
+void GraphBroadcasts::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << broadcast_type_;
     data << graph_uuid_;
     data << payload_;
 }
 
-void GraphBroadcasts::deserialize(const SerializationBuffer& data)
+void GraphBroadcasts::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> broadcast_type_;
     data >> graph_uuid_;

@@ -9,8 +9,6 @@ CSAPEX_REGISTER_NOTE_SERIALIZER(NodeNote)
 
 using namespace csapex;
 
-//why are nodenotes not getting through at all?????!?!?!?!?
-//are any notes getting through?????
 NodeNote::NodeNote()
 {
 }
@@ -30,17 +28,17 @@ NodeNote::NodeNote(NodeNoteType request_type, const AUUID &uuid, const std::vect
 
 }
 
-void NodeNote::serialize(SerializationBuffer &data) const
+void NodeNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Note::serialize(data);
+    Note::serialize(data, version);
 
     data << note_type_;
     data << payload_;
 }
 
-void NodeNote::deserialize(const SerializationBuffer& data)
+void NodeNote::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Note::deserialize(data);
+    Note::deserialize(data, version);
 
     data >> note_type_;
     data >> payload_;

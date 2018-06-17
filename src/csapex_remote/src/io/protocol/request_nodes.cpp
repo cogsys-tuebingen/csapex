@@ -39,12 +39,12 @@ ResponsePtr RequestNodes::NodeRequest::execute(const SessionPtr &session, CsApex
     return response;
 }
 
-void RequestNodes::NodeRequest::serialize(SerializationBuffer &data) const
+void RequestNodes::NodeRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     (void) data;
 }
 
-void RequestNodes::NodeRequest::deserialize(const SerializationBuffer& data)
+void RequestNodes::NodeRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     (void) data;
 }
@@ -66,12 +66,12 @@ RequestNodes::NodeResponse::NodeResponse(uint8_t request_id)
 
 }
 
-void RequestNodes::NodeResponse::serialize(SerializationBuffer &data) const
+void RequestNodes::NodeResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << tag_map_;
 }
 
-void RequestNodes::NodeResponse::deserialize(const SerializationBuffer& data)
+void RequestNodes::NodeResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> tag_map_;
 }

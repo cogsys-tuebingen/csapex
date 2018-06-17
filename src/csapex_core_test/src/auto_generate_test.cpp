@@ -13,7 +13,7 @@
 #include <csapex/model/token.h>
 #include <csapex/core/settings/settings_impl.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 #include <type_traits>
 
@@ -40,7 +40,7 @@ void f3(int parameter1,
 }
 
 
-class AutoGenerateTest : public ::testing::Test {
+class AutoGenerateTest : public CsApexTestCase {
 protected:
     NodeFactoryImplementation factory;
 

@@ -209,9 +209,9 @@ void IntervalParameter::doDeserialize(const YAML::Node& n)
     }
 }
 
-void IntervalParameter::serialize(SerializationBuffer &data) const
+void IntervalParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << values_;
     data << min_;
@@ -220,9 +220,9 @@ void IntervalParameter::serialize(SerializationBuffer &data) const
     data << step_;
 }
 
-void IntervalParameter::deserialize(const SerializationBuffer& data)
+void IntervalParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> values_;
     data >> min_;

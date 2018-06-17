@@ -74,18 +74,18 @@ bool SetExecutionMode::doRedo()
 
 
 
-void SetExecutionMode::serialize(SerializationBuffer &data) const
+void SetExecutionMode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << was_mode;
     data << mode;
 }
 
-void SetExecutionMode::deserialize(const SerializationBuffer& data)
+void SetExecutionMode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> was_mode;

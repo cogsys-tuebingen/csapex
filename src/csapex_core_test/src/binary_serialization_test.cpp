@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 #include <csapex/msg/message_template.hpp>
 #include <csapex/utility/register_msg.h>
@@ -13,7 +13,7 @@
 using namespace csapex;
 using namespace connection_types;
 
-class BinarySerializationTest : public ::testing::Test
+class BinarySerializationTest : public CsApexTestCase
 {
 protected:
     BinarySerializationTest()
@@ -347,12 +347,12 @@ TEST_F(BinarySerializationTest, SpecificTokenSerialization)
         auto message = std::make_shared<MockMessage>();
         message->value.payload = "foobar";
 
-        message->serialize(data);
+        message->serializeVersioned(data);
     }
 
     {
         MockMessage::Ptr specific(new MockMessage);
-        specific->deserialize(data);
+        specific->deserializeVersioned(data);
 
         ASSERT_NE(nullptr, specific);
 

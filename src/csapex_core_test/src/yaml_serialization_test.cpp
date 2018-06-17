@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 #include <csapex/msg/message_template.hpp>
 #include <csapex/utility/register_msg.h>
@@ -11,7 +11,7 @@ using namespace csapex;
 using namespace connection_types;
 
 
-class YAMLSerializationTest : public ::testing::Test
+class YAMLSerializationTest : public CsApexTestCase
 {
 protected:
     YAMLSerializationTest()
