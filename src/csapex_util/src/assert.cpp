@@ -20,7 +20,8 @@
 #elif defined(__powerpc64__)
 # define TRIGGER_BREAKPOINT() asm volatile ("tw 31,1,1");
 #elif defined(__i386__) || defined(__ia64__) || defined(__x86_64__)
-# define TRIGGER_BREAKPOINT() asm("int $3");
+# include <signal.h>
+# define TRIGGER_BREAKPOINT() raise(SIGTRAP);
 #else
 # include <stdlib.h>
 # define TRIGGER_BREAKPOINT() abort();

@@ -35,6 +35,7 @@ typedef struct _sig_ucontext {
 void csapex::error_handling::init()
 {
     signal(SIGINT, csapex::error_handling::siginthandler);
+    signal(SIGTRAP, csapex::error_handling::sigtraphandler);
 
 #ifdef WIN32
 	SetUnhandledExceptionFilter(csapex::error_handling::sigsegvhandler);
@@ -78,6 +79,10 @@ void csapex::error_handling::stop()
 void csapex::error_handling::siginthandler(int)
 {
     stop();
+}
+void csapex::error_handling::sigtraphandler(int)
+{
+    std::cout << "SIGTRAP signal handled and ignored." << std::endl;
 }
 
 #ifdef WIN32
