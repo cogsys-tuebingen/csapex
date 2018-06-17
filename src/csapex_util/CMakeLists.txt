@@ -37,6 +37,7 @@ catkin_package(
       ${CMAKE_CURRENT_BINARY_DIR}
    LIBRARIES
       ${PROJECT_NAME}
+      rt
    DEPENDS
       Boost
 )
