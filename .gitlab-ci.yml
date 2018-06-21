@@ -1,7 +1,7 @@
 before_script:
   # Install ssh-agent if not already installed, it is required by Docker.
   # (change apt-get to yum if you use a CentOS-based image)
-  - 'apt-get -qq update -y && apt-get -qq install build-essential openssh-client sudo -y'
+  - 'apt-get -qq update -y && apt-get -qq install build-essential openssh-client sudo ccache -y'
 
   # Run ssh-agent (inside the build environment)
   - eval $(ssh-agent -s)
@@ -18,46 +18,136 @@ before_script:
   - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
   - apt-get install -y $(rosdep install --from-paths -i -y -s src | grep 'apt-get install' | rev | cut -f1 -d' ' | rev | paste -s)
 
+  # ccache
+  - mkdir -p ccache
+  - export CCACHE_BASEDIR=${PWD}
+  - export CCACHE_DIR=${PWD}/ccache
+  - export PATH=/usr/lib/ccache:$PATH
+
+
 stages:
-  - build_and_test
+  - build
+  - test
 
-indigo:
-  stage: build_and_test
+cache:
+  paths:
+    - ccache/
+
+
+
+indigo-build:
+  stage: build
   image: ros:indigo-perception
+  artifacts:
+    paths:
+      - build.tar
+    expire_in: 1 day
   script:
     - catkin_make
+    - tar cf build.tar build devel
+
+indigo-test:
+  stage: test
+  image: ros:indigo-perception
+  dependencies:
+    - indigo-build
+  script:
+    - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
-jade:
-  stage: build_and_test
+
+
+
+jade-build:
+  stage: build
   image: ros:jade-perception
+  artifacts:
+    paths:
+      - build.tar
+    expire_in: 1 day
   script:
     - catkin_make
+    - tar cf build.tar build devel
+
+jade-test:
+  stage: test
+  image: ros:jade-perception
+  dependencies:
+    - jade-build
+  script:
+    - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
-kinetic:
-  stage: build_and_test
+
+
+
+kinetic-build:
+  stage: build
   image: ros:kinetic-perception
+  artifacts:
+    paths:
+      - build.tar
+    expire_in: 1 day
   script:
     - catkin_make
+    - tar cf build.tar build devel
+
+kinetic-test:
+  stage: test
+  image: ros:kinetic-perception
+  dependencies:
+    - kinetic-build
+  script:
+    - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
-lunar:
-  stage: build_and_test
+
+
+
+lunar-build:
+  stage: build
   image: ros:lunar-perception
+  artifacts:
+    paths:
+      - build.tar
+    expire_in: 1 day
   script:
     - catkin_make
+    - tar cf build.tar build devel
+
+lunar-test:
+  stage: test
+  image: ros:lunar-perception
+  dependencies:
+    - lunar-build
+  script:
+    - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
 
-melodic:
-  stage: build_and_test
+
+
+
+melodic-build:
+  stage: build
   image: ros:melodic-perception
+  artifacts:
+    paths:
+      - build.tar
+    expire_in: 1 day
   script:
     - catkin_make
+    - tar cf build.tar build devel
+
+melodic-test:
+  stage: test
+  image: ros:melodic-perception
+  dependencies:
+    - melodic-build
+  script:
+    - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
-
