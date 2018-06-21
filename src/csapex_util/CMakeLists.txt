@@ -65,6 +65,7 @@ add_library(${PROJECT_NAME} SHARED
     src/cpu_affinity.cpp
     src/subprocess_channel.cpp
     src/subprocess.cpp
+    src/semantic_version.cpp
 
     ${csapex_util_HEADERS}
 )

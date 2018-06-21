@@ -1,14 +1,8 @@
 /// HEADAER
-#include <csapex/serialization/semantic_version.h>
+#include <csapex/utility/semantic_version.h>
 
 using namespace csapex;
 
-
-SemanticVersion::SemanticVersion(int major, int minor, int patch)
-    : major_v(major),
-      minor_v(minor),
-      patch_v(patch)
-{}
 
 bool SemanticVersion::operator < (const SemanticVersion& other)
 {

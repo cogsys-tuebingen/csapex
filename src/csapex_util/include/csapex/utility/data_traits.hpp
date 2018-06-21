@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/utility/tmp.hpp>
+#include <csapex/utility/semantic_version.h>
 
 /// SYSTEM
 #include <memory>
@@ -23,6 +24,17 @@ inline std::shared_ptr<T> makeEmpty()
 {
     return std::make_shared<T>();
 }
+
+
+
+// semantic version of token data
+template <typename T>
+struct semantic_version
+{
+    // default
+    static constexpr SemanticVersion value { 0, 0, 0 };
+};
+
 
 }
 

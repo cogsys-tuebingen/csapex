@@ -127,14 +127,15 @@ public:
 
     explicit MessageTemplate( const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type<Instance>::name(), frame_id, stamp)
-    {}
+    {
+    }
 
-    MessageTemplate( const Self& copy )
+    MessageTemplate(const Self& copy)
         : Message(type<Instance>::name(), copy.frame_id, copy.stamp_micro_seconds),
           ValueContainer(static_cast<const ValueContainer&>(copy))
     {}
 
-    MessageTemplate( Self&& moved )
+    MessageTemplate(Self&& moved)
         : Message(type<Instance>::name(), moved.frame_id, moved.stamp_micro_seconds),
           ValueContainer(static_cast<ValueContainer&&>(moved))
     {}
@@ -173,6 +174,11 @@ public:
         Message::deserialize(data, version);
 
         data >> ValueContainer::value;
+    }
+
+    SemanticVersion getVersion() const override
+    {
+        return semantic_version<Type>::value;
     }
 };
 

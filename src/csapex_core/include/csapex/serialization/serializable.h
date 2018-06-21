@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/serialization/serialization_fwd.h>
 #include <csapex/model/clonable.h>
-#include <csapex/serialization/semantic_version.h>
+#include <csapex/utility/semantic_version.h>
 
 /// SYSTEM
 #include <inttypes.h>

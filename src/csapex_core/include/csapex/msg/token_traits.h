@@ -95,7 +95,6 @@ struct should_use_no_generic_message {
 };
 
 
-
 }
 }
 

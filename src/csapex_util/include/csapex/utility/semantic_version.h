@@ -20,9 +20,13 @@ struct SemanticVersion
     int minor_v = 0;
     int patch_v = 0;
 
-    SemanticVersion(int major, int minor, int patch);
+    constexpr SemanticVersion(int major, int minor, int patch)
+        : major_v(major),
+          minor_v(minor),
+          patch_v(patch)
+    {}
 
-    SemanticVersion() = default;
+    constexpr SemanticVersion() = default;
 
     bool operator != (const SemanticVersion& other);
     bool operator == (const SemanticVersion& other);
