@@ -47,7 +47,6 @@ void SignalBase::addConnection(Connection *connection)
 
 void SignalBase::removeConnection(const Connection *connection)
 {
-    apex_assert_hard(connection->parent_ == this);
     apex_assert_hard(guard_ == -1);
 
     std::unique_lock<std::recursive_mutex> lock(mutex_);
@@ -124,8 +123,9 @@ void Connection::detach() const
 {
     if(!detached_) {
         detached_ = true;
-        parent_->removeConnection(this);
+        auto* tmp = parent_;
         parent_ = nullptr;
+        tmp->removeConnection(this);
     }
 }
 
@@ -147,8 +147,8 @@ SignalBase* Connection::getChild() const
 void Connection::disconnect() const
 {
     if(parent_) {
-        apex_assert_hard(parent_->guard_ == -1);
         if(!isDetached()) {
+            apex_assert_hard(parent_->guard_ == -1);
             detach();
             if(deleter_) {
                 deleter_();
