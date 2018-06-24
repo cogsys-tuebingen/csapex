@@ -469,7 +469,7 @@ Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
 GenericState::Ptr Parameterizable::getParameterStateClone() const
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    return parameter_state_->clone();
+    return parameter_state_->cloneAs<GenericState>();
 }
 
 GenericState::Ptr Parameterizable::getParameterState()
@@ -478,11 +478,8 @@ GenericState::Ptr Parameterizable::getParameterState()
     return parameter_state_;
 }
 
-void Parameterizable::setParameterState(Memento::Ptr memento)
+void Parameterizable::setParameterState(GenericStatePtr m)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    std::shared_ptr<GenericState> m = std::dynamic_pointer_cast<GenericState> (memento);
-    apex_assert_hard(m.get());
-
     parameter_state_->setFrom(*m);
 }

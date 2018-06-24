@@ -752,4 +752,5 @@ TEST_F(SlimSignalsTest, ScopedConnectionDeletedAfterSignals)
     }
 }
 
+
 }

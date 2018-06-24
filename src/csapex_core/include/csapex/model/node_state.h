@@ -2,7 +2,7 @@
 #define NODE_STATE_H
 
 /// COMPNENT
-#include <csapex/model/memento.h>
+#include <csapex/serialization/serializable.h>
 #include <csapex/data/point.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/execution_mode.h>
@@ -12,11 +12,12 @@
 
 /// SYSTEM
 #include <boost/any.hpp>
+#include <yaml-cpp/yaml.h>
 
 namespace csapex
 {
 
-class CSAPEX_CORE_EXPORT NodeState : public Memento, public Serializable
+class CSAPEX_CORE_EXPORT NodeState : public Serializable
 {
 private:
     CLONABLE_IMPLEMENTATION(NodeState);
@@ -33,8 +34,8 @@ public:
 
     NodeState& operator = (const NodeState& rhs);
 
-    virtual void writeYaml(YAML::Node& out) const override;
-    virtual void readYaml(const YAML::Node& node) override;
+    void writeYaml(YAML::Node& out) const;
+    void readYaml(const YAML::Node& node);
 
     virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -157,5 +158,15 @@ private:
 };
 
 }
+
+/// YAML
+namespace YAML {
+template<>
+struct CSAPEX_CORE_EXPORT convert<csapex::NodeState> {
+  static Node encode(const csapex::NodeState& rhs);
+  static bool decode(const Node& node, csapex::NodeState& rhs);
+};
+}
+
 
 #endif // NODE_STATE_H

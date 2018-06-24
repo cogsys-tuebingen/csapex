@@ -37,8 +37,8 @@ public:
 
     virtual void stop();
 
-    virtual MementoPtr getState() const;
-    virtual void setParameterState(MementoPtr memento);
+    virtual GenericStatePtr getState() const;
+    virtual void setParameterState(GenericStatePtr memento);
 
     virtual void readLegacyYaml(const YAML::Node& node);
 

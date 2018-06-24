@@ -490,7 +490,7 @@ public:
      * @brief setParameterState replace the underlying Memento
      * @param memento the state to use
      */
-    virtual void setParameterState(MementoPtr memento);
+    virtual void setParameterState(GenericStatePtr memento);
 
 private:
     template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>

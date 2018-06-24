@@ -62,6 +62,7 @@ void SignalBase::removeConnection(const Connection *connection)
 
 bool SignalBase::isConnected() const
 {
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
     return !connections_.empty();
 }
 

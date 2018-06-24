@@ -334,7 +334,6 @@ add_library(${PROJECT_NAME} SHARED
     src/model/subgraph_node.cpp
     src/model/graph_facade.cpp
     src/model/graph_facade_impl.cpp
-    src/model/memento.cpp
     src/model/notification.cpp
     src/model/notifier.cpp
     src/model/multi_connection_type.cpp

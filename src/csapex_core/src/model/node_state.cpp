@@ -568,3 +568,17 @@ template bool NodeState::getDictionaryEntry<bool>(const std::string&) const;
 template std::string NodeState::getDictionaryEntry<std::string>(const std::string&) const;
 template std::vector<std::string> NodeState::getDictionaryEntry<std::vector<std::string>>(const std::string&) const;
 }
+
+/// YAML
+namespace YAML {
+Node convert<csapex::NodeState>::encode(const csapex::NodeState& rhs) {
+    Node n;
+    rhs.writeYaml(n);
+    return n;
+}
+
+bool convert<csapex::NodeState>::decode(const Node& node, csapex::NodeState& rhs) {
+    rhs.readYaml(node);
+    return true;
+}
+}

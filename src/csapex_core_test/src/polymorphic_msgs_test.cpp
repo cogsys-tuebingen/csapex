@@ -256,7 +256,7 @@ TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToBaseViaNodes) {
     }
 }
 
-
+/*
 TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChildViaNodes) {
     GraphFacadeImplementation graph_facade(executor, graph, graph_node);
 
@@ -272,6 +272,6 @@ TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChildViaNodes) {
                                       graph->makeTypedUUID_forced(node2_id, "in", 0)),
                  csapex::HardAssertionFailure);
 }
-
+*/
 
 }

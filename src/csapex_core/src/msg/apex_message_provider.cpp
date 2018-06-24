@@ -47,13 +47,13 @@ std::vector<std::string> ApexMessageProvider::getExtensions() const
 }
 
 
-Memento::Ptr ApexMessageProvider::getState() const
+GenericStatePtr ApexMessageProvider::getState() const
 {
-    Memento::Ptr r(new Memento);
+    GenericStatePtr r(new GenericState);
     return r;
 }
 
-void ApexMessageProvider::setParameterState(Memento::Ptr /*memento*/)
+void ApexMessageProvider::setParameterState(GenericStatePtr /*memento*/)
 {
 
 }

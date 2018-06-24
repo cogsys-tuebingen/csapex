@@ -7,7 +7,7 @@
 /// PROJECT
 #include <csapex/param/param_fwd.h>
 #include <csapex/view/view_fwd.h>
-#include <csapex/model/memento.h>
+#include <csapex/serialization/serializable.h>
 
 /// SYSTEM
 #include <QObject>

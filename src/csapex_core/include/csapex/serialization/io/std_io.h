@@ -6,6 +6,11 @@
 #include <csapex/serialization/serializable.h>
 #include <csapex/msg/token_traits.h>
 
+/// SYSTEM
+#include <map>
+#include <vector>
+#include <set>
+
 namespace csapex
 {
 
@@ -128,6 +133,31 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::ma
         Value val;
         data >> val;
         m.insert(std::make_pair(key, val));
+    }
+    return data;
+}
+
+// SET
+template <typename Value>
+SerializationBuffer& operator << (SerializationBuffer& data, const std::set<Value>& m)
+{
+    uint64_t size = m.size();
+    data << size;
+    for(const auto& entry : m) {
+        data << entry;
+    }
+    return data;
+}
+
+template <typename Value>
+const SerializationBuffer& operator >> (const SerializationBuffer& data, std::set<Value>& m)
+{
+    uint64_t size;
+    data >> size;
+    for(uint64_t i = 0; i < size; ++i) {
+        Value val;
+        data >> val;
+        m.insert(val);
     }
     return data;
 }

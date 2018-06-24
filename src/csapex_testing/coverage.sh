@@ -1,6 +1,8 @@
 #!/bin/bash
 echo "running test coverage"
 
+set -x
+
 THISDIR=$(pwd)
 SRCDIR=$(cd ..; pwd)
 ROOT=$(cd ../../../../; pwd)
@@ -38,7 +40,10 @@ mkdir $DIR
 #find $ROOT/build_coverage -iname *.gcno | xargs cp -t $DIR
 
 cd $ROOT/build_coverage
-make test
+#make test
+devel/setup.bash
+rosrun csapex_util csapex_util_test
+rosrun csapex_core_test csapex_core_test
 
 cd $THISDIR
 #find $ROOT/build_coverage -iname *.gcda | xargs mv -t $DIR
@@ -58,3 +63,5 @@ genhtml --output-directory $THISDIR/coverage \
   --function-coverage --legend \
   test_extracted.info
 gnome-open coverage/index.html
+
+set +x

@@ -22,8 +22,8 @@ public:
 
     virtual std::vector<std::string> getExtensions() const override;
 
-    virtual Memento::Ptr getState() const override;
-    virtual void setParameterState(Memento::Ptr memento) override;
+    virtual GenericStatePtr getState() const override;
+    virtual void setParameterState(GenericStatePtr memento) override;
 
 private:
     std::string file_;
