@@ -219,3 +219,22 @@ void Slot::addStatusInformation(std::stringstream &status_stream) const
 {
     status_stream << ", blocking: " << isBlocking();
 }
+
+void Slot::removeConnection(Connectable *other_side)
+{
+    {
+        // first remove queued input connections
+        std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
+        for(auto it = available_connections_.begin();
+            it != available_connections_.end();)
+        {
+            Connection* c = *it;
+            if(c->from().get() == other_side) {
+                it = available_connections_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    Input::removeConnection(other_side);
+}
