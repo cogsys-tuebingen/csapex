@@ -23,6 +23,9 @@ public:
     void bootFrom(const std::string& directory, PluginLocator *plugin_locator);
 
 private:
+    bool tryBootFrom(const std::string& directory, PluginLocator *plugin_locator);
+
+private:
     std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
     std::vector<BootstrapPluginPtr> boot_plugins_;
 };

@@ -119,7 +119,7 @@ CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
     settings_ = std::make_shared<SettingsProxy>(session_);
     remote_plugin_locator_ = std::make_shared<PluginLocator>(*settings_);
 
-    bootstrap_->bootFrom(csapex::info::CSAPEX_BOOT_PLUGIN_DIR,
+    bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR,
                          remote_plugin_locator_.get());
 
     // init core plugins
