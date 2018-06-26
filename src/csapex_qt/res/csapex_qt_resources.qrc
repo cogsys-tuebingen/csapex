@@ -77,5 +77,6 @@
         <file>remote_edit.png</file>
         <file>remote.png</file>
         <file>subprocess.png</file>
+        <file>prototype.png</file>
     </qresource>
 </RCC>

@@ -760,9 +760,9 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
     box->construct();
     box->setObjectName(handle->getType().c_str());
 
-    if(!is_note) {
-        box->setLabel(type);
-    }
+//    if(!is_note) {
+//        box->setLabel(type);
+//    }
 
     drag->setPixmap(box->grab());
     drag->setHotSpot(-offset);

@@ -52,6 +52,10 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
     add_subgraph.setIcon(QIcon(":/group.png"));
     menu.addAction(&add_subgraph);
 
+    QAction add_prototype("create prototype node", &menu);
+    add_prototype.setIcon(QIcon(":/prototype.png"));
+    menu.addAction(&add_prototype);
+
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
     NodeListGenerator node_generator(*view_.getViewCore().getNodeFactory(), *view_.getViewCore().getNodeAdapterFactory());
@@ -83,6 +87,11 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
 
         } else if(selectedItem == &add_subgraph) {
             view_.startPlacingBox("csapex::Graph", nullptr);
+
+        } else if(selectedItem == &add_prototype) {
+            NodeStatePtr state = std::make_shared<NodeState>();
+            state->setLabel("Prototype");
+            view_.startPlacingBox("csapex::Graph", state);
 
         } else {
             // else it must be an insertion
