@@ -116,10 +116,10 @@ file(WRITE ${INFO} "namespace csapex {\nnamespace info {\n")
 
 file(APPEND ${INFO} "static const std::string GIT_COMMIT_HASH { \"${GIT_COMMIT_HASH}\" };\n")
 file(APPEND ${INFO} "static const std::string GIT_BRANCH { \"${GIT_BRANCH}\" };\n")
-file(APPEND ${INFO} "static const std::string MAINTAINER { \"${csapex_MAINTAINER}\" };\n")
-file(APPEND ${INFO} "static const std::string VERSION { \"${csapex_VERSION}\" };\n")
-file(APPEND ${INFO} "static const std::string CSAPEX_BOOT_PLUGIN_DIR { \"${CSAPEX_BOOT_PLUGIN_DIR}\" };\n")
-file(APPEND ${INFO} "static const std::string CSAPEX_VERSION { \"${csapex_VERSION}\" };\n")
+file(APPEND ${INFO} "static const std::string MAINTAINER { \"${csapex_core_MAINTAINER}\" };\n")
+file(APPEND ${INFO} "static const std::string VERSION { \"${csapex_core_VERSION}\" };\n")
+file(APPEND ${INFO} "static const std::string CSAPEX_DEFAULT_BOOT_PLUGIN_DIR { \"${CSAPEX_BOOT_PLUGIN_DIR}\" };\n")
+file(APPEND ${INFO} "static const std::string CSAPEX_VERSION { \"${csapex_core_VERSION}\" };\n")
 
 file(APPEND ${INFO} "}\n}\n\n")
 
