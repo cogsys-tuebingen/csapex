@@ -4,6 +4,7 @@ CS::APEX is a framework based on synchronous dataflow and event-based message pa
 aims to speed up prototyping of new robotic algorithms using visual programming aspects.
 
 Example workflow: (click for better quality)
+
 [![Graph Construction Video](https://media.giphy.com/media/aFtp2izVp2xMzLAqC2/giphy.gif)](https://youtu.be/sNkHnQhNXuU)
 
 
@@ -59,6 +60,9 @@ Required for a build are:
     - [classloader](https://github.com/ros/class_loader)
     - TinyXML (on Ubuntu: libtinyxml-dev)
     - yaml-cpp (on Ubuntu: libyaml-cpp-dev)
+
+
+These dependencies can be installed via rosdep (see below.)
 
 
 ## Basic Installation
