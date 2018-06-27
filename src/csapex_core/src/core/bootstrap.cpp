@@ -30,23 +30,21 @@ Bootstrap::~Bootstrap()
     }
 }
 
-void Bootstrap::bootFrom(const std::string& default_dir_name,
-                         PluginLocator* plugin_locator)
+bool Bootstrap::bootFrom(const std::string& default_dir_name,
+                         PluginLocator* plugin_locator,
+                         bool require_boot_plugin)
 {
     const char* env = getenv("CSAPEX_BOOT_DIRECTORY");
     if(env != nullptr) {
-        if(!tryBootFrom(env, plugin_locator)) {
-            std::abort();
-        }
+        return tryBootFrom(env, plugin_locator, require_boot_plugin);
     } else {
-        if(!tryBootFrom(default_dir_name, plugin_locator)) {
-            std::abort();
-        }
+        return tryBootFrom(default_dir_name, plugin_locator, require_boot_plugin);
     }
 }
 
 bool Bootstrap::tryBootFrom(const std::string& dir_name,
-                            PluginLocator* plugin_locator)
+                            PluginLocator* plugin_locator,
+                            bool require_boot_plugin)
 {
     boost::filesystem::path directory(dir_name);
 
@@ -99,7 +97,6 @@ bool Bootstrap::tryBootFrom(const std::string& dir_name,
 
                     plugin_loaded = true;
 
-                    std::cout << "booting " << classes[c] << " from " << loader->getLibraryPath() << std::endl;
                     plugin->boot(plugin_locator);
                 }
             } catch(const std::exception& e) {
@@ -110,17 +107,17 @@ bool Bootstrap::tryBootFrom(const std::string& dir_name,
             if(plugin_loaded) {
                 Bootstrap::boot_plugin_loaders_.push_back(loader);
             } else {
-                std::cout << "Library " << path << " does not contain any boot plugins" << std::endl;
+                std::cerr << "Library " << path << " does not contain any boot plugins" << std::endl;
                 delete loader;
             }
         }
-    } else {
+    } else if(require_boot_plugin) {
         std::cerr << "SEVERE ERROR: Boot directory " << dir_name << " does not exist" << std::endl;
         std::cerr << "Set the environment variable CSAPEX_BOOT_DIRECTORY to a directory containing a boot plugin" << '\n';
         return false;
     }
 
-    if (Bootstrap::boot_plugins_.empty()) {
+    if (require_boot_plugin && Bootstrap::boot_plugins_.empty()) {
         std::cerr << "SEVERE ERROR: No boot plugins have been detected in directory " << dir_name << '\n';
         std::cerr << "Please make at least one build plugin available, by either:" << '\n';
         std::cerr << "a) running the following command:" << '\n';
@@ -134,8 +131,6 @@ bool Bootstrap::tryBootFrom(const std::string& dir_name,
         std::cerr << std::flush;
         return false;
     }
-
-    std::cout << "Successfully booted " << dir_name << " " << std::endl;
 
     return true;
 }
