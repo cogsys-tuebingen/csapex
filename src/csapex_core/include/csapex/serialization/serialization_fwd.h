@@ -18,6 +18,7 @@ FWD(Snippet)
 FWD(Serializable)
 FWD(Streamable)
 FWD(SerializationBuffer)
+class SemanticVersion;
 }
 
 

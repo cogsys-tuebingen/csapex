@@ -2,7 +2,8 @@
 #include <csapex/model/notification.h>
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 
@@ -29,23 +30,18 @@ Notification::Notification(AUUID uuid, const std::string& message, ErrorState::E
     : auuid(uuid), message(message), error(error), msg_dirty_(false), msg_cache_(message)
 {}
 
-void Notification::serialize(SerializationBuffer &data) const
+void Notification::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << auuid;
     data << message;
     data << error;
 }
 
-void Notification::deserialize(const SerializationBuffer& data)
+void Notification::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> auuid;
     data >> message;
     data >> error;
-}
-
-std::shared_ptr<Clonable> Notification::makeEmptyClone() const
-{
-    return std::shared_ptr<Notification>(new Notification);
 }
 
 bool Notification::operator == (const Notification& other) const

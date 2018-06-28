@@ -5,6 +5,7 @@
 #include <csapex/model/graph_facade.h>
 #include <csapex/model/graph.h>
 #include <csapex/model/graph/vertex.h>
+#include <csapex/model/generic_state.h>
 #include <csapex/utility/assert.h>
 #include <csapex/utility/yaml_io.hpp>
 #include <csapex/view/designer/designer.h>
@@ -40,7 +41,7 @@ void DesignerIO::saveBox(const UUID& node_uuid, GraphView *view, YAML::Node &yam
 {
     NodeBox* box = view->getBox(node_uuid);
     NodeAdapter::Ptr na = box->getNodeAdapter();
-    Memento::Ptr m = na->getState();
+    GenericStatePtr m = na->getState();
     if(m) {
         YAML::Node doc;
         doc["uuid"] = node_uuid.getFullName();
@@ -71,7 +72,7 @@ void DesignerIO::loadBoxes(const YAML::Node &doc, GraphView *view)
                 na->readLegacyYaml(e["state"]);
 
                 /// deprecated:
-                Memento::Ptr m = na->getState();
+                GenericStatePtr m = na->getState();
                 if(m) {
                     m->readYaml(e["state"]);
                     box->getNodeAdapter()->setParameterState(m);

@@ -3,7 +3,9 @@
 
 /// PROJECT
 #include <csapex/msg/any_message.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
+#include <csapex/utility/uuid_provider.h>
 
 using namespace csapex;
 
@@ -40,7 +42,7 @@ ConnectorDescription::ConnectorDescription(const AUUID& owner,
       optional(false),
       is_parameter(false),
       is_variadic(false),
-      token_type(connection_types::makeEmpty<connection_types::AnyMessage>()),
+      token_type(makeEmpty<connection_types::AnyMessage>()),
       id(UUID::NONE),
       valid(true)
 {
@@ -85,12 +87,7 @@ bool ConnectorDescription::isOutput() const
     return connector_type == ConnectorType::OUTPUT || connector_type == ConnectorType::EVENT;
 }
 
-std::shared_ptr<Clonable> ConnectorDescription::makeEmptyClone() const
-{
-    return std::make_shared<ConnectorDescription>();
-}
-
-void ConnectorDescription::serialize(SerializationBuffer &data) const
+void ConnectorDescription::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << owner;
     data << connector_type;
@@ -106,7 +103,7 @@ void ConnectorDescription::serialize(SerializationBuffer &data) const
     data << targets;
     data << valid;
 }
-void ConnectorDescription::deserialize(const SerializationBuffer& data)
+void ConnectorDescription::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> owner;
     data >> connector_type;
@@ -125,22 +122,18 @@ void ConnectorDescription::deserialize(const SerializationBuffer& data)
 
 
 
-void ConnectorDescription::Target::serialize(SerializationBuffer &data) const
+void ConnectorDescription::Target::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << auuid;
     data << active;
 }
 
-void ConnectorDescription::Target::deserialize(const SerializationBuffer& data)
+void ConnectorDescription::Target::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> auuid;
     data >> active;
 }
 
-std::shared_ptr<Clonable> ConnectorDescription::Target::makeEmptyClone() const
-{
-    return std::make_shared<Target>();
-}
 
 AUUID ConnectorDescription::getAUUID() const
 {

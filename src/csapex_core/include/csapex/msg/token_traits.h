@@ -5,6 +5,7 @@
 #include <csapex/model/token_data.h>
 #include <csapex/utility/tmp.hpp>
 #include <csapex/model/model_fwd.h>
+#include <csapex/utility/data_traits.hpp>
 
 /// SYSTEM
 #include <string>
@@ -27,23 +28,12 @@ inline std::string serializationName()
 
 TokenPtr makeToken(const TokenDataConstPtr& data);
 
-template <typename T>
-inline std::shared_ptr<T> makeEmpty()
-{
-    return std::make_shared<T>();
-}
-
-template <>
-inline std::shared_ptr<TokenData> makeEmpty<TokenData>()
-{
-    return std::shared_ptr<TokenData>(new TokenData("empty"));
-}
 
 
 template <typename T>
 inline TokenPtr makeEmptyToken()
 {
-    return makeToken(connection_types::makeEmpty<T>());
+    return makeToken(makeEmpty<T>());
 }
 
 
@@ -74,22 +64,6 @@ public:
     }
 };
 
-
-template <typename T>
-std::shared_ptr<T> makeEmptyMessage(
-        typename std::enable_if<!std::is_const<T>::value >::type* = 0)
-{
-    return makeEmpty<T>();
-}
-template <typename T>
-std::shared_ptr<typename std::remove_const<T>::type > makeEmptyMessage(
-        typename std::enable_if<std::is_const<T>::value >::type* = 0)
-{
-    typedef typename std::remove_const<T>::type TT;
-    return makeEmpty<TT>();
-}
-
-
 HAS_MEM_TYPE(Ptr, has_ptr_member);
 HAS_MEM_TYPE(element_type, has_elem_type_member);
 
@@ -119,7 +93,6 @@ struct should_use_no_generic_message {
             !should_use_pointer_message<M>::value &&
             !should_use_value_message<M>::value;
 };
-
 
 
 }

@@ -16,7 +16,7 @@ public:
 public:
     virtual ~CorePlugin();
     virtual void prepare(Settings& settings);
-    virtual void init(CsApexCore& core) = 0;
+    virtual void init(CsApexCore& core);
     virtual void setupGraph(SubgraphNode* graph);
     virtual void shutdown();
 

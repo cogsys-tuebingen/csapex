@@ -6,7 +6,7 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/utility/yaml_io.hpp>
 #include <csapex/model/generic_state.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <iostream>
@@ -464,7 +464,7 @@ void NodeState::readYaml(const YAML::Node &node)
 }
 
 
-void NodeState::serialize(SerializationBuffer &data) const
+void NodeState::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << max_frequency_;
 
@@ -497,7 +497,7 @@ void NodeState::serialize(SerializationBuffer &data) const
     data << yaml;
 }
 
-void NodeState::deserialize(const SerializationBuffer& data)
+void NodeState::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> max_frequency_;
 
@@ -569,7 +569,16 @@ template std::string NodeState::getDictionaryEntry<std::string>(const std::strin
 template std::vector<std::string> NodeState::getDictionaryEntry<std::vector<std::string>>(const std::string&) const;
 }
 
-std::shared_ptr<Clonable> NodeState::makeEmptyClone() const
-{
-    return std::shared_ptr<NodeState>(new NodeState(nullptr));
+/// YAML
+namespace YAML {
+Node convert<csapex::NodeState>::encode(const csapex::NodeState& rhs) {
+    Node n;
+    rhs.writeYaml(n);
+    return n;
+}
+
+bool convert<csapex::NodeState>::decode(const Node& node, csapex::NodeState& rhs) {
+    rhs.readYaml(node);
+    return true;
+}
 }

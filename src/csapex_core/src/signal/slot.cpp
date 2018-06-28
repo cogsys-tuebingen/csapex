@@ -18,18 +18,18 @@ using namespace csapex;
 Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
     : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr&){callback();}), active_(active), blocking_(blocking), guard_(-1)
 {
-    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
+    setType(makeEmpty<connection_types::AnyMessage>());
 }
 Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
     : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr& token){callback(token);}), active_(active), blocking_(blocking), guard_(-1)
 {
-    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
+    setType(makeEmpty<connection_types::AnyMessage>());
 }
 
 Slot::Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
     : Input(uuid, owner), callback_(callback), active_(active), blocking_(blocking), guard_(-1)
 {
-    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
+    setType(makeEmpty<connection_types::AnyMessage>());
 }
 
 Slot::~Slot()
@@ -200,6 +200,11 @@ bool Slot::isActive() const
     return active_;
 }
 
+bool Slot::isEnabled() const
+{
+    return Input::isEnabled() || isActive();
+}
+
 bool Slot::isBlocking() const
 {
     return blocking_;
@@ -213,4 +218,23 @@ bool Slot::isSynchronous() const
 void Slot::addStatusInformation(std::stringstream &status_stream) const
 {
     status_stream << ", blocking: " << isBlocking();
+}
+
+void Slot::removeConnection(Connectable *other_side)
+{
+    {
+        // first remove queued input connections
+        std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
+        for(auto it = available_connections_.begin();
+            it != available_connections_.end();)
+        {
+            Connection* c = *it;
+            if(c->from().get() == other_side) {
+                it = available_connections_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    Input::removeConnection(other_side);
 }

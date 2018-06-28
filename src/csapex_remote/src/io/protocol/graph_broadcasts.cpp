@@ -3,7 +3,8 @@
 
 /// PROJECT
 #include <csapex/serialization/broadcast_message_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/io/feedback.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/model/graph_facade.h>
@@ -42,14 +43,14 @@ GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid, 
 
 }
 
-void GraphBroadcasts::serialize(SerializationBuffer &data) const
+void GraphBroadcasts::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << broadcast_type_;
     data << graph_uuid_;
     data << payload_;
 }
 
-void GraphBroadcasts::deserialize(const SerializationBuffer& data)
+void GraphBroadcasts::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> broadcast_type_;
     data >> graph_uuid_;

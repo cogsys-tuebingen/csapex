@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -58,12 +58,11 @@ bool PathParameter::set_unsafe(const boost::any &v)
 }
 
 
-void PathParameter::doSetValueFrom(const Parameter &other)
+void PathParameter::cloneDataFrom(const Clonable &other)
 {
-    const PathParameter* path = dynamic_cast<const PathParameter*>(&other);
-    if(path) {
+    if(const PathParameter* path = dynamic_cast<const PathParameter*>(&other)) {
         if(value_ != path->value_) {
-            value_ = path->value_;
+            *this = *path;
             triggerChange();
         }
     } else {
@@ -71,25 +70,33 @@ void PathParameter::doSetValueFrom(const Parameter &other)
     }
 }
 
-void PathParameter::doClone(const Parameter &other)
-{
-    const PathParameter* path = dynamic_cast<const PathParameter*>(&other);
-    if(path) {
-        value_ = path->value_;
-        def_ = path->def_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
-    }
-}
-
 void PathParameter::doSerialize(YAML::Node& n) const
 {
+    n["version"] = 2;
+
     n["value"] = value_;
+    n["def"] = def_;
+
+    n["filter"] = filter_;
+    n["is_file"] = is_file_;
+    n["is_input"] = input_;
+    n["is_output"] = output_;
 }
 
 void PathParameter::doDeserialize(const YAML::Node& n)
 {
+    int version = n["version"].IsDefined() ? n["version"].as<int>() : 1;
+
     value_ = n["value"].as<std::string>();
+
+    if(version > 1) {
+        def_= n["def"].as<std::string>();
+
+        filter_= n["filter"].as<std::string>();
+        is_file_= n["is_file"].as<bool>();
+        input_= n["is_input"].as<bool>();
+        output_= n["is_output"].as<bool>();
+    }
 }
 
 std::string PathParameter::def() const
@@ -118,9 +125,9 @@ bool PathParameter::isOutput() const
 }
 
 
-void PathParameter::serialize(SerializationBuffer &data) const
+void PathParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value_;
     data << def_;
@@ -131,9 +138,9 @@ void PathParameter::serialize(SerializationBuffer &data) const
     data << output_;
 }
 
-void PathParameter::deserialize(const SerializationBuffer& data)
+void PathParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value_;
     data >> def_;

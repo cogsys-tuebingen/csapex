@@ -48,13 +48,13 @@ void NodeAdapter::stop()
 {
 }
 
-Memento::Ptr NodeAdapter::getState() const
+GenericStatePtr NodeAdapter::getState() const
 {
-    Memento::Ptr state;
+    GenericStatePtr state;
     return state;
 }
 
-void NodeAdapter::setParameterState(Memento::Ptr)
+void NodeAdapter::setParameterState(GenericStatePtr)
 {
 
 }

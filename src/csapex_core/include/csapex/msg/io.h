@@ -174,7 +174,7 @@ getClonedMessage(Input* input)
     if(msg == nullptr) {
         return nullptr;
     }
-    return message_cast<R>(msg->clone());
+    return message_cast<R>(msg->cloneRaw());
 }
 
 

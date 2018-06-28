@@ -55,12 +55,12 @@ struct NoteSerializerRegistered
     { \
         virtual void serialize(const io::Note& packet, SerializationBuffer &data) override \
         { \
-            packet.serialize(data); \
+            packet.serializeVersioned(data); \
         } \
         virtual io::NotePtr deserialize(const SerializationBuffer& data) override \
         { \
             auto result = std::make_shared<Name>(); \
-            result->deserialize(data); \
+            result->deserializeVersioned(data); \
             return result; \
         } \
     }; \

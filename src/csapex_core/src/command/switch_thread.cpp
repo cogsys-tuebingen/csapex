@@ -11,7 +11,8 @@
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <sstream>
@@ -70,9 +71,9 @@ bool SwitchThread::doRedo()
 }
 
 
-void SwitchThread::serialize(SerializationBuffer &data) const
+void SwitchThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << old_id;
@@ -80,9 +81,9 @@ void SwitchThread::serialize(SerializationBuffer &data) const
     data << name;
 }
 
-void SwitchThread::deserialize(const SerializationBuffer& data)
+void SwitchThread::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> old_id;

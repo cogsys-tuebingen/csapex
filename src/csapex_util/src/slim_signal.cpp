@@ -25,7 +25,11 @@ SignalBase::~SignalBase()
     while(!connections_.empty()) {
         Connection* c = connections_.front();
 //        apex_assert_hard(c->parent_ == this);
-        c->detach();
+        if(c->isDetached()) {
+            connections_.erase(connections_.begin());
+        } else {
+            c->detach();
+        }
     }
 
     guard_ = 0xDEADBEEF;
@@ -43,7 +47,6 @@ void SignalBase::addConnection(Connection *connection)
 
 void SignalBase::removeConnection(const Connection *connection)
 {
-    apex_assert_hard(connection->parent_ == this);
     apex_assert_hard(guard_ == -1);
 
     std::unique_lock<std::recursive_mutex> lock(mutex_);
@@ -59,6 +62,7 @@ void SignalBase::removeConnection(const Connection *connection)
 
 bool SignalBase::isConnected() const
 {
+    std::unique_lock<std::recursive_mutex> lock(mutex_);
     return !connections_.empty();
 }
 
@@ -118,10 +122,12 @@ Connection::~Connection()
 
 void Connection::detach() const
 {
-    apex_assert_hard(!detached_);
-    detached_ = true;
-    parent_->removeConnection(this);
-    parent_ = nullptr;
+    if(!detached_) {
+        detached_ = true;
+        auto* tmp = parent_;
+        parent_ = nullptr;
+        tmp->removeConnection(this);
+    }
 }
 
 bool Connection::isDetached() const
@@ -142,8 +148,8 @@ SignalBase* Connection::getChild() const
 void Connection::disconnect() const
 {
     if(parent_) {
-        apex_assert_hard(parent_->guard_ == -1);
         if(!isDetached()) {
+            apex_assert_hard(parent_->guard_ == -1);
             detach();
             if(deleter_) {
                 deleter_();

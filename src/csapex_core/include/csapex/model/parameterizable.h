@@ -490,13 +490,24 @@ public:
      * @brief setParameterState replace the underlying Memento
      * @param memento the state to use
      */
-    virtual void setParameterState(MementoPtr memento);
+    virtual void setParameterState(GenericStatePtr memento);
 
 private:
-    template <typename T>
+    template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     T doReadParameter(const std::string& name) const;
-    template <typename T>
+    template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    T doReadParameter(const std::string& name) const
+    {
+        return static_cast<T>(doReadParameter<int>(name));
+    }
+
+    template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     void doSetParameter(const std::string& name, const T& value);
+    template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    void doSetParameter(const std::string& name, const T& value)
+    {
+        doSetParameter(name, static_cast<int>(value));
+    }
 
     template <typename T>
     void doSetParameterLater(const std::string& name, const T& value)

@@ -8,7 +8,7 @@
 #include <csapex/model/tag.h>
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/output_transition.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/delegate_bind.h>
 #include <csapex/utility/uuid_provider.h>
 
@@ -140,7 +140,8 @@ std::string NodeConstructor::getDescription() const
 
 NodeHandlePtr NodeConstructor::makePrototype() const
 {
-    return makeNodeHandle(UUIDProvider::makeUUID_without_parent("prototype"), nullptr);
+    tmp_uuid_provider_ = std::make_shared<UUIDProvider>();
+    return makeNodeHandle(tmp_uuid_provider_->makeUUID("prototype"), tmp_uuid_provider_);
 }
 
 NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, const UUIDProviderPtr& uuid_provider) const
@@ -179,7 +180,7 @@ Node::Ptr NodeConstructor::makeNode() const
 }
 
 
-void NodeConstructor::serialize(SerializationBuffer &data) const
+void NodeConstructor::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << type_;
     data << descr_;
@@ -188,7 +189,7 @@ void NodeConstructor::serialize(SerializationBuffer &data) const
     data << properties_;
     data << true;
 }
-void NodeConstructor::deserialize(const SerializationBuffer& data)
+void NodeConstructor::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> type_;
     data >> descr_;
@@ -196,9 +197,4 @@ void NodeConstructor::deserialize(const SerializationBuffer& data)
     data >> tags_;
     data >> properties_;
     data >> properties_loaded_;
-}
-
-std::shared_ptr<Clonable> NodeConstructor::makeEmptyClone() const
-{
-    return std::shared_ptr<Clonable>(new NodeConstructor(""));
 }

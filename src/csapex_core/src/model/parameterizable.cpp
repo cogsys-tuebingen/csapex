@@ -27,14 +27,14 @@ void Parameterizable::setSilent(bool silent)
     silent_ = silent;
 }
 
-template <typename T>
+template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type>
 T Parameterizable::doReadParameter(const std::string& name) const
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     return parameter_state_->getParameter(name)->as<T>();
 }
 
-template <typename T>
+template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type>
 void Parameterizable::doSetParameter(const std::string& name, const T& value)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
@@ -469,7 +469,7 @@ Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
 GenericState::Ptr Parameterizable::getParameterStateClone() const
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    return parameter_state_->clone();
+    return parameter_state_->cloneAs<GenericState>();
 }
 
 GenericState::Ptr Parameterizable::getParameterState()
@@ -478,11 +478,8 @@ GenericState::Ptr Parameterizable::getParameterState()
     return parameter_state_;
 }
 
-void Parameterizable::setParameterState(Memento::Ptr memento)
+void Parameterizable::setParameterState(GenericStatePtr m)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    std::shared_ptr<GenericState> m = std::dynamic_pointer_cast<GenericState> (memento);
-    apex_assert_hard(m.get());
-
     parameter_state_->setFrom(*m);
 }

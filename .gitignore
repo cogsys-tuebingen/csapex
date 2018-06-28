@@ -3,6 +3,12 @@
 src/csapex_core/include/csapex/info.h
 *export.h
 src/csapex_core/reports
+include/
+
+# TOOLS #
+#########
+.sonar
+.scannerwork
 
 # TESTS #
 #########
@@ -65,5 +71,4 @@ install/
 # RANDOM #
 ##########
 .svn/
-
-
+*.swp

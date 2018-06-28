@@ -102,12 +102,19 @@ int main(int argc, char *argv[])
 
     std::string path_to_bin(argv[0]);
     settings.set("path_to_bin", path_to_bin);
+    settings.set("require_boot_plugin", false);
 
     CsApexCore core(settings, eh);
     PluginLocatorPtr locator = core.getPluginLocator();
 
     std::vector<bf3::path> reg_test_files;
-    for(const std::string& dir_string : locator->getPluginPaths("regression_tests")) {
+    auto test_dirs = locator->getPluginPaths("regression_tests");
+    if(test_dirs.empty()) {
+        std::cout << "No regression tests found" << std::endl;
+        return 0;
+    }
+
+    for(const std::string& dir_string : test_dirs) {
 
         boost::filesystem::path directory(dir_string);
 

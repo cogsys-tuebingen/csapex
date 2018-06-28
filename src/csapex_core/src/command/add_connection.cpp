@@ -11,7 +11,8 @@
 #include <csapex/utility/assert.h>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -66,18 +67,18 @@ bool AddConnection::doExecute()
 }
 
 
-void AddConnection::serialize(SerializationBuffer &data) const
+void AddConnection::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << from_uuid;
     data << to_uuid;
     data << active;
 }
 
-void AddConnection::deserialize(const SerializationBuffer& data)
+void AddConnection::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> from_uuid;
     data >> to_uuid;

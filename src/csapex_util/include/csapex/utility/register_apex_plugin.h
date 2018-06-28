@@ -3,7 +3,7 @@
 
 /// SYSTEM
 #include <csapex/utility/suppress_warnings_start.h>
-#include <class_loader/class_loader_register_macro.h>
+#include <class_loader/class_loader.h>
 #include <csapex/utility/suppress_warnings_end.h>
 
 #define CSAPEX_REGISTER_CLASS(name, parent) \

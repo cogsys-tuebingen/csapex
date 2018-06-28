@@ -38,18 +38,6 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
     });
     max_frequency_ = nh_->getNodeState()->getMaximumFrequency();
     nh_->getRate().setFrequency(max_frequency_);
-
-    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + nh_->getUUID().getFullName(),
-                                               [this]()
-    {
-        checkParameters();
-    }, 0,
-    this);
-    execute_ = std::make_shared<Task>(std::string("process ") + nh_->getUUID().getFullName(),
-                                      [this]()
-    {
-        execute();
-    }, 0, this);
 }
 
 NodeRunner::~NodeRunner()
@@ -84,6 +72,24 @@ void NodeRunner::reset()
 
 void NodeRunner::connectNodeWorker()
 {
+    NodeRunnerWeakPtr this_weak = std::dynamic_pointer_cast<NodeRunner>(shared_from_this());
+    apex_assert_hard(this_weak.lock() != nullptr);
+
+    check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + nh_->getUUID().getFullName(),
+                                               [this_weak]()
+    {
+        if(auto self = this_weak.lock()) {
+            self->checkParameters();
+        }
+    }, 0, this);
+    execute_ = std::make_shared<Task>(std::string("process ") + nh_->getUUID().getFullName(),
+                                      [this_weak]()
+    {
+        if(auto self = this_weak.lock()) {
+            self->execute();
+        }
+    }, 0, this);
+
     observe(worker_->try_process_changed, [this]() {
         scheduleProcess();
     });
@@ -213,18 +219,24 @@ void NodeRunner::execute()
         } catch(const std::exception& e) {
             if(!suppress_exceptions_)
                 throw;
-            else
-                NOTIFICATION(std::string("Node could not be executed: ") + e.what());
+            else {
+                AUUID auuid = nh_->getAUUID();
+                NOTIFICATION_AUUID(auuid, std::string("Node could not be executed: ") + e.what());
+            }
         } catch(const Failure& e) {
             if(!suppress_exceptions_)
                 throw;
-            else
-                NOTIFICATION(std::string("Node experienced failure: ") + e.what());
+            else {
+                AUUID auuid = nh_->getAUUID();
+                NOTIFICATION_AUUID(auuid, std::string("Node experienced failure: ") + e.what());
+            }
         } catch(...) {
             if(!suppress_exceptions_)
                 throw;
-            else
-                NOTIFICATION("Node could not be executed: Unknown exception");
+            else {
+                AUUID auuid = nh_->getAUUID();
+                NOTIFICATION_AUUID(auuid, "Node could not be executed: Unknown exception");
+            }
         }
     } else {
         can_step_++;

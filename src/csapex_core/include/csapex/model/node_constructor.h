@@ -20,6 +20,9 @@ namespace csapex
 
 class CSAPEX_CORE_EXPORT NodeConstructor : public Serializable
 {
+protected:
+    CLONABLE_IMPLEMENTATION(NodeConstructor);
+
     friend class command::AddNode;
     friend class NodeFactory;
     friend class SerializationBuffer;
@@ -34,6 +37,7 @@ public:
     typedef std::shared_ptr<NodeConstructor> Ptr;
 
 public:
+    NodeConstructor();
     NodeConstructor(const std::string& type, std::function<NodePtr()> c);
 
     virtual ~NodeConstructor();
@@ -61,15 +65,11 @@ public:
 
     NodePtr makeNode() const;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
-
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     NodeConstructor(const std::string& type);
-    NodeConstructor();
 
 protected:
     std::string type_;
@@ -79,6 +79,8 @@ protected:
 
     mutable std::vector<std::string> properties_;
     mutable bool properties_loaded_;
+
+    mutable std::shared_ptr<UUIDProvider> tmp_uuid_provider_;
 
     std::function<NodePtr()> c;
 };

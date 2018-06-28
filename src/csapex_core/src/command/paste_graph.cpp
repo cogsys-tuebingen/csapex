@@ -8,7 +8,7 @@
 #include <csapex/model/graph_facade_impl.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/snippet.h>
 
 using namespace csapex;
@@ -71,13 +71,13 @@ std::unordered_map<UUID, UUID, UUID::Hasher> PasteGraph::getMapping() const
 }
 
 
-void PasteGraph::serialize(SerializationBuffer &data) const
+void PasteGraph::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << blueprint_;
     data << pos_.x << pos_.y;
 }
 
-void PasteGraph::deserialize(const SerializationBuffer& data)
+void PasteGraph::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> blueprint_;
     data >> pos_.x >> pos_.y;

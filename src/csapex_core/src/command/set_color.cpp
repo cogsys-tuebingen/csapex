@@ -7,7 +7,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <sstream>
@@ -60,9 +61,9 @@ bool SetColor::doRedo()
 
 
 
-void SetColor::serialize(SerializationBuffer &data) const
+void SetColor::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
 
@@ -70,9 +71,9 @@ void SetColor::serialize(SerializationBuffer &data) const
     data << r_orig << g_orig << b_orig;
 }
 
-void SetColor::deserialize(const SerializationBuffer& data)
+void SetColor::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> r >> g >> b;

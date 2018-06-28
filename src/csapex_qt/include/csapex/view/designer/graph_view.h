@@ -194,8 +194,11 @@ public Q_SLOTS:
 
     void makeSnippetFromSelected();
 
-    void showPreview(Port* port);
+    void showDelayedPreview(Port* port);
     void stopPreview();
+
+private Q_SLOTS:
+    void showPreview();
 
 private:
     void createNodes(const QPoint& global_pos, const std::string &type, const std::string &mime);
@@ -213,7 +216,6 @@ private:
     void muteBox(bool muted);
     void morphNode();
     void createNewThreadGroupFor();
-
     void showProfiling(bool visible);
 
     SnippetPtr serializeSelection() const;
@@ -262,6 +264,8 @@ private:
     std::unordered_map<UUID, NodeBox*, UUID::Hasher> box_map_;
     std::unordered_map<UUID, MovableGraphicsProxyWidget*, UUID::Hasher> proxy_map_;
 
+    QTimer* preview_timer_;
+    Port* preview_port_;
     MessagePreviewWidget* preview_widget_;
 };
 }

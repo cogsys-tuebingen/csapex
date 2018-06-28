@@ -5,11 +5,16 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/utility/assert.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <iostream>
 
 using namespace csapex;
+
+TokenData::TokenData()
+{
+}
 
 TokenData::TokenData(const std::string& type_name)
     : type_name_(type_name)
@@ -51,14 +56,20 @@ std::string TokenData::typeName() const
     return type_name_;
 }
 
-TokenData::Ptr TokenData::clone() const
+void TokenData::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    return std::make_shared<TokenData>(*this);
+    data << type_name_;
+    data << descriptive_name_;
+}
+void TokenData::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
+{
+    data >> type_name_;
+    data >> descriptive_name_;
 }
 
 TokenData::Ptr TokenData::toType() const
 {
-    return std::make_shared<TokenData>(type_name_);
+    return cloneAs<TokenData>();
 }
 
 bool TokenData::isValid() const
@@ -88,7 +99,12 @@ void TokenData::addNestedValue(const ConstPtr &msg)
     throw std::logic_error("cannot add nested value to non-container messages");
 }
 
-void TokenData::writeRaw(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
+void TokenData::writeNative(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
 {
     std::cerr << "error: writeRaw not implemented for message type " << descriptiveName() << std::endl;
+}
+
+uint8_t TokenData::getPacketType() const
+{
+    return PACKET_TYPE_ID;
 }

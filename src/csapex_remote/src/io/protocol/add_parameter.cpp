@@ -3,7 +3,8 @@
 
 /// PROJECT
 #include <csapex/serialization/request_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/serialization/parameter_serializer.h>
 
@@ -50,7 +51,7 @@ ResponsePtr AddParameter::ParameterRequest::execute(const SessionPtr &session, C
     return response;
 }
 
-void AddParameter::ParameterRequest::serialize(SerializationBuffer &data) const
+void AddParameter::ParameterRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << id_;
     data << name_;
@@ -59,7 +60,7 @@ void AddParameter::ParameterRequest::serialize(SerializationBuffer &data) const
     data << persistent_;
 }
 
-void AddParameter::ParameterRequest::deserialize(const SerializationBuffer& data)
+void AddParameter::ParameterRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> id_;
     data >> name_;
@@ -83,12 +84,12 @@ AddParameter::ParameterResponse::ParameterResponse(uint8_t request_id)
 
 }
 
-void AddParameter::ParameterResponse::serialize(SerializationBuffer &data) const
+void AddParameter::ParameterResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     ParameterSerializer::instance().serialize(*param_, data);
 }
 
-void AddParameter::ParameterResponse::deserialize(const SerializationBuffer& data)
+void AddParameter::ParameterResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     param_ = std::dynamic_pointer_cast<param::Parameter>(ParameterSerializer::instance().deserialize(data));
 }

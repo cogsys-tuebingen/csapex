@@ -105,6 +105,7 @@ void Connectable::notifyMessageProcessed()
 
 void Connectable::reset()
 {
+    processing_ = false;
 //    notifyMessageProcessed();
 }
 
@@ -115,7 +116,7 @@ void Connectable::stop()
 
 void Connectable::init()
 {
-    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
+    setType(makeEmpty<connection_types::AnyMessage>());
 }
 
 

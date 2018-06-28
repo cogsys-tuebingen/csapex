@@ -2,7 +2,8 @@
 #include <csapex/io/raw_message.h>
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <iostream>
@@ -42,7 +43,7 @@ AUUID RawMessage::getUUID() const
     return uuid_;
 }
 
-void RawMessage::serialize(SerializationBuffer &data) const
+void RawMessage::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << uuid_;
     std::size_t n = data_.size();
@@ -53,7 +54,7 @@ void RawMessage::serialize(SerializationBuffer &data) const
         data << *src;
     }
 }
-void RawMessage::deserialize(const SerializationBuffer& data)
+void RawMessage::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> uuid_;
     std::size_t n;
@@ -64,10 +65,4 @@ void RawMessage::deserialize(const SerializationBuffer& data)
     for(std::size_t i = 0; i < n; ++i, ++dst) {
         data >> *dst;
     }
-}
-
-
-std::shared_ptr<Clonable> RawMessage::makeEmptyClone() const
-{
-    return std::make_shared<RawMessage>();
 }

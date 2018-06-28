@@ -2,7 +2,8 @@
 #include <csapex/io/note.h>
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 using namespace csapex::io;
@@ -23,12 +24,12 @@ AUUID Note::getAUUID() const
     return uuid_;
 }
 
-void Note::serialize(SerializationBuffer &data) const
+void Note::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << uuid_;
 }
 
-void Note::deserialize(const SerializationBuffer& data)
+void Note::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> uuid_;
 }

@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -82,27 +82,15 @@ std::vector<int> ColorParameter::value() const
 }
 
 
-void ColorParameter::doSetValueFrom(const Parameter &other)
+void ColorParameter::cloneDataFrom(const Clonable &other)
 {
-    const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other);
-    if(color) {
+    if(const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other)) {
         if(colors_ != color->colors_) {
-            colors_ = color->colors_;
+            *this = *color;
             triggerChange();
         }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-void ColorParameter::doClone(const Parameter &other)
-{
-    const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other);
-    if(color) {
-        colors_ = color->colors_;
-        def_ = color->def_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 
@@ -118,17 +106,17 @@ void ColorParameter::doDeserialize(const YAML::Node& n)
     }
 }
 
-void ColorParameter::serialize(SerializationBuffer &data) const
+void ColorParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << colors_;
     data << def_;
 }
 
-void ColorParameter::deserialize(const SerializationBuffer& data)
+void ColorParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> colors_;
     data >> def_;

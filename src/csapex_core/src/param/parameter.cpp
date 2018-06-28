@@ -4,7 +4,8 @@
 /// PROJECT
 #include <csapex/param/io.h>
 #include <csapex/param/value_parameter.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -35,13 +36,25 @@ Parameter::~Parameter()
     destroyed(this);
 }
 
+Parameter& Parameter::operator = (const Parameter& other)
+{
+    name_ = other.name_;
+    interactive_ = other.interactive_;
+    enabled_ = other.enabled_;
+    dict_ = other.dict_;
+    description_ = other.description_;
+
+    //    cloneDataFrom(other);
+    return *this;
+}
+
 uint8_t Parameter::getPacketType() const
 {
     return PACKET_TYPE_ID;
 }
 
 
-void Parameter::serialize(SerializationBuffer &data) const
+void Parameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << name_;
     data << uuid_;
@@ -56,7 +69,7 @@ void Parameter::serialize(SerializationBuffer &data) const
 
 }
 
-void Parameter::deserialize(const SerializationBuffer& data)
+void Parameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> name_;
     data >> uuid_;
@@ -231,39 +244,6 @@ void Parameter::deserialize_yaml(const YAML::Node &n)
     }
 }
 
-Parameter& Parameter::operator = (const Parameter& p)
-{
-    setValueFrom(p);
-    return *this;
-}
-
-void Parameter::setValueFrom(const Parameter &other)
-{
-    name_ = other.name_;
-    interactive_ = other.interactive_;
-    enabled_ = other.enabled_;
-    dict_ = other.dict_;
-    doSetValueFrom(other);
-}
-
-std::shared_ptr<Clonable> Parameter::cloneRaw() const
-{
-    auto res = std::dynamic_pointer_cast<Parameter>(makeEmptyClone());
-    res->cloneFrom(*this);
-    return res;
-}
-
-void Parameter::cloneFrom(const Parameter &other)
-{
-    name_ = other.name_;
-    description_ = other.description_;
-    interactive_ = other.interactive_;
-    enabled_ = other.enabled_;
-    dict_ = other.dict_;
-    uuid_ = other.uuid_;
-    doClone(other);
-}
-
 void Parameter::access_unsafe(const Parameter &p, boost::any& out) const
 {
     p.get_unsafe(out);
@@ -305,7 +285,7 @@ namespace csapex {
 namespace param {
 
 template <typename T>
-T Parameter::as() const
+T Parameter::as_impl() const
 {
     if(!is<T>() || is<void>()) {
         throwTypeError(typeid(T), type(), "get failed: ");
@@ -317,6 +297,11 @@ T Parameter::as() const
         get_unsafe(v);
         return boost::any_cast<T> (v);
     }
+}
+template<>
+float Parameter::as_impl<float>() const
+{
+    return static_cast<float>(as<double>());
 }
 
 template <typename T>
@@ -345,7 +330,7 @@ template<typename T> struct argument_type;
 template<typename T, typename U> struct argument_type<T(U)> { typedef U type; };
 }
 #define INSTANTIATE_AS(T) \
-template CSAPEX_PARAM_EXPORT argument_type<void(T)>::type Parameter::as<argument_type<void(T)>::type>() const;
+template CSAPEX_PARAM_EXPORT argument_type<void(T)>::type Parameter::as_impl<argument_type<void(T)>::type>() const;
 #define INSTANTIATE_SILENT(T) \
 template CSAPEX_PARAM_EXPORT bool Parameter::setSilent<argument_type<void(T)>::type>(const argument_type<void(T)>::type& value);
 

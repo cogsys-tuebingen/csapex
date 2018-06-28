@@ -162,6 +162,8 @@ private:
 
     QPointF offset(const QPointF& vector, Position position, double offset);
 
+    void showPreview();
+
 private:
     CsApexViewCore& view_core_;
 
@@ -174,6 +176,7 @@ private:
     QPainter* schematics_painter;
     QImage schematics;
 
+    QTimer* preview_timer_;
     MessagePreviewWidget* preview_;
 
     std::vector<TempConnection> temp_;

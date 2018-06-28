@@ -10,7 +10,7 @@
 #include <csapex/msg/any_message.h>
 #include <csapex/msg/input.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 namespace csapex {
 
@@ -29,7 +29,7 @@ public:
     Input* test_input;
 };
 
-class GraphTest : public ::testing::Test {
+class GraphTest : public CsApexTestCase {
 protected:
     NodeFactoryImplementation factory;
 

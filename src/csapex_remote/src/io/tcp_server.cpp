@@ -213,7 +213,7 @@ void TcpServer::handlePacket(const SessionPtr& session, const StreamableConstPtr
             StreamableConstPtr response = std::make_shared<Feedback>("unknown command received: ");
             session->write(response);
         } else {
-            core_.getCommandDispatcher()->execute(cmd->clone<Command>());
+            core_.getCommandDispatcher()->execute(cmd->cloneAs<Command>());
         }
 
     } else if(RequestConstPtr request = std::dynamic_pointer_cast<Request const>(packet)) {

@@ -2,30 +2,33 @@
 #define GENERIC_STATE_H
 
 /// COMPONENT
-#include <csapex/model/memento.h>
+#include <csapex/serialization/serializable.h>
 #include <csapex/utility/uuid.h>
 #include <csapex_core/csapex_core_export.h>
+#include <csapex/model/model_fwd.h>
 
 /// PROJECT
 #include <csapex/param/param_fwd.h>
+#include <csapex/utility/slim_signal.h>
 
 /// SYSTEM
-#include <csapex/utility/slim_signal.h>
 #include <set>
+#include <yaml-cpp/yaml.h>
 
 namespace csapex
 {
 
-class CSAPEX_CORE_EXPORT GenericState : public Memento
+class CSAPEX_CORE_EXPORT GenericState : public Serializable
 {
 public:
     typedef std::shared_ptr<GenericState> Ptr;
 
 public:
     GenericState();
-    GenericState(const GenericState& move);
+    GenericState(const GenericState& copy);
     GenericState(GenericState&& move);
-    GenericState::Ptr clone() const;
+
+    void operator = (const GenericState& copy);
 
     void setParentUUID(const UUID& parent_uuid);
 
@@ -56,10 +59,16 @@ public:
     template <typename T>
     T readParameter (const std::string& name) const;
 
+    ClonablePtr makeEmptyInstance() const override;
+    void cloneDataFrom(const Clonable& other) override;
+
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+
     void setFrom(const GenericState& rhs);
 
-    virtual void writeYaml(YAML::Node& out) const override;
-    virtual void readYaml(const YAML::Node& node) override;
+    void writeYaml(YAML::Node& out) const;
+    void readYaml(const YAML::Node& node);
 
     void initializePersistentParameters();
 
@@ -81,11 +90,22 @@ public:
     bool silent_;
 
     slim_signal::Signal<void()> parameter_set_changed;
+    slim_signal::Signal<void(csapex::param::ParameterPtr)> legacy_parameter_added;
     slim_signal::Signal<void(param::ParameterPtr)> parameter_added;
     slim_signal::Signal<void(param::Parameter*)> parameter_changed;
     slim_signal::Signal<void(param::ParameterPtr)> parameter_removed;
 };
 
 }
+
+/// YAML
+namespace YAML {
+template<>
+struct CSAPEX_CORE_EXPORT convert<csapex::GenericState> {
+  static Node encode(const csapex::GenericState& rhs);
+  static bool decode(const Node& node, csapex::GenericState& rhs);
+};
+}
+
 
 #endif // GENERIC_STATE_H

@@ -2,7 +2,8 @@
 #include <csapex/profiling/interval.h>
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 
@@ -95,12 +96,12 @@ void Interval::stop()
 }
 
 
-std::shared_ptr<Clonable> Interval::makeEmptyClone() const
+std::shared_ptr<Interval> Interval::makeEmpty()
 {
     return std::shared_ptr<Interval>(new Interval);
 }
 
-void Interval::serialize(SerializationBuffer &data) const
+void Interval::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << name_;
 
@@ -114,7 +115,7 @@ void Interval::serialize(SerializationBuffer &data) const
 
     data << sub;
 }
-void Interval::deserialize(const SerializationBuffer& data)
+void Interval::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> name_;
 

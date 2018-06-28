@@ -24,18 +24,6 @@ GenericVectorMessage::GenericVectorMessage()
 
 }
 
-TokenData::Ptr GenericVectorMessage::clone() const
-{
-    Ptr new_msg(new GenericVectorMessage(impl->cloneEntry(), frame_id, impl->stamp_micro_seconds));
-    return new_msg;
-}
-
-TokenData::Ptr GenericVectorMessage::toType() const
-{
-    Ptr new_msg(new GenericVectorMessage(impl->cloneEntry(), frame_id, 0));
-    return new_msg;
-}
-
 bool GenericVectorMessage::canConnectTo(const TokenData *other_side) const
 {
     return impl->canConnectTo(other_side);
@@ -60,11 +48,6 @@ GenericVectorMessage::AnythingImplementation::AnythingImplementation()
 
 }
 
-GenericVectorMessage::EntryInterface::Ptr GenericVectorMessage::AnythingImplementation::cloneEntry() const
-{
-    return std::make_shared<GenericVectorMessage::AnythingImplementation>();
-}
-
 void GenericVectorMessage::AnythingImplementation::encode(YAML::Node& node) const
 {
     std::cout << "encode any" << std::endl;
@@ -76,11 +59,6 @@ void GenericVectorMessage::AnythingImplementation::decode(const YAML::Node& node
 }
 
 
-
-TokenData::Ptr GenericVectorMessage::AnythingImplementation::toType() const
-{
-    return std::make_shared<AnyMessage>();
-}
 
 bool GenericVectorMessage::AnythingImplementation::canConnectTo(const TokenData* other_side) const
 {
@@ -105,6 +83,15 @@ bool GenericVectorMessage::AnythingImplementation::acceptsConnectionFrom(const T
     }
 }
 
+void GenericVectorMessage::AnythingImplementation::serialize(SerializationBuffer &data, SemanticVersion& version) const
+{
+    Message::serialize(data, version);
+}
+void GenericVectorMessage::AnythingImplementation::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
+{
+    Message::deserialize(data, version);
+}
+
 
 // INSTANCED
 
@@ -115,18 +102,12 @@ GenericVectorMessage::InstancedImplementation::InstancedImplementation(TokenData
 
 }
 
-GenericVectorMessage::EntryInterface::Ptr GenericVectorMessage::InstancedImplementation::cloneEntry() const
+
+GenericVectorMessage::InstancedImplementation::InstancedImplementation()
+    : EntryInterface("Anything")
 {
-    auto res = std::make_shared<GenericVectorMessage::InstancedImplementation>(type_);
-    res->value = value;
-    return res;
 }
 
-
-TokenData::Ptr GenericVectorMessage::InstancedImplementation::toType() const
-{
-    return type_->clone();
-}
 
 bool GenericVectorMessage::InstancedImplementation::canConnectTo(const TokenData* other_side) const
 {
@@ -170,12 +151,12 @@ void GenericVectorMessage::InstancedImplementation::decode(const YAML::Node& nod
 
 TokenData::Ptr GenericVectorMessage::InstancedImplementation::nestedType() const
 {
-    return type_->clone();
+    return type_->cloneAs<TokenData>();
 }
 
 void GenericVectorMessage::InstancedImplementation::addNestedValue(const TokenData::ConstPtr &msg)
 {
-    value.push_back(msg->clone());
+    value.push_back(msg->cloneAs<TokenData>());
 }
 TokenData::ConstPtr GenericVectorMessage::InstancedImplementation::nestedValue(std::size_t i) const
 {
@@ -184,6 +165,15 @@ TokenData::ConstPtr GenericVectorMessage::InstancedImplementation::nestedValue(s
 std::size_t GenericVectorMessage::InstancedImplementation::nestedValueCount() const
 {
     return value.size();
+}
+
+void GenericVectorMessage::InstancedImplementation::serialize(SerializationBuffer &data, SemanticVersion& version) const
+{
+    data << value;
+}
+void GenericVectorMessage::InstancedImplementation::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
+{
+    data >> value;
 }
 
 /// YAML

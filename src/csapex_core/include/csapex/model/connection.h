@@ -82,6 +82,7 @@ public:
      */
     TokenPtr readToken();
 
+    bool holdsToken() const;
     bool holdsActiveToken() const;
 
     bool isActive() const;
@@ -147,6 +148,9 @@ protected:
 
     mutable std::recursive_mutex sync;
 };
+
+
+std::ostream& operator << (std::ostream& out, const Connection& c);
 
 }
 

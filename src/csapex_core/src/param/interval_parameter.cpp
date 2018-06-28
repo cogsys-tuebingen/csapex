@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -30,6 +30,42 @@ IntervalParameter::~IntervalParameter()
 
 }
 
+
+IntervalParameter& IntervalParameter::operator = (const IntervalParameter& interval)
+{
+    bool change = false;
+    if(values_.first.empty() || values_.second.empty()) {
+        change = true;
+
+    } else {
+        if(type() == typeid(std::pair<int, int>)) {
+            change = boost::any_cast<int>(values_.first) != boost::any_cast<int>(interval.values_.first) ||
+                    boost::any_cast<int>(values_.second) != boost::any_cast<int>(interval.values_.second);
+        } else if(type() == typeid(std::pair<double, double>)) {
+            change = boost::any_cast<double>(values_.first) != boost::any_cast<double>(interval.values_.first) ||
+                    boost::any_cast<double>(values_.second) != boost::any_cast<double>(interval.values_.second);
+        }
+    }
+    values_ = interval.values_;
+
+    def_ = interval.def_;
+
+    if(!interval.max_.empty()) {
+        max_ = interval.max_;
+    }
+    if(!interval.min_.empty()) {
+        min_ = interval.min_;
+    }
+    if(!interval.step_.empty()) {
+        step_ = interval.step_;
+    }
+
+    if(change) {
+        triggerChange();
+    }
+
+    return *this;
+}
 
 const std::type_info& IntervalParameter::type() const
 {
@@ -102,50 +138,13 @@ bool IntervalParameter::set_unsafe(const boost::any &v)
 }
 
 
-void IntervalParameter::doSetValueFrom(const Parameter &other)
+void IntervalParameter::cloneDataFrom(const Clonable &other)
 {
     Lock l = lock();
-    const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other);
-    if(interval) {
-        bool change = false;
-        if(type() == typeid(std::pair<int, int>)) {
-            change = boost::any_cast<int>(values_.first) != boost::any_cast<int>(interval->values_.first) ||
-                    boost::any_cast<int>(values_.second) != boost::any_cast<int>(interval->values_.second);
-        } else if(type() == typeid(std::pair<double, double>)) {
-            change = boost::any_cast<double>(values_.first) != boost::any_cast<double>(interval->values_.first) ||
-                    boost::any_cast<double>(values_.second) != boost::any_cast<double>(interval->values_.second);
-        }
-        values_ = interval->values_;
-        if(!interval->max_.empty()) {
-            max_ = interval->max_;
-        }
-        if(!interval->min_.empty()) {
-            min_ = interval->min_;
-        }
-        if(!interval->step_.empty()) {
-            step_ = interval->step_;
-        }
-
-        if(change) {
-            triggerChange();
-        }
+    if(const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other)) {
+        *this = *interval;
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-void IntervalParameter::doClone(const Parameter &other)
-{
-    Lock l = lock();
-    const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other);
-    if(interval) {
-        values_ = interval->values_;
-        min_ = interval->min_;
-        max_ = interval->max_;
-        def_ = interval->def_;
-        step_ = interval->step_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 
@@ -210,9 +209,9 @@ void IntervalParameter::doDeserialize(const YAML::Node& n)
     }
 }
 
-void IntervalParameter::serialize(SerializationBuffer &data) const
+void IntervalParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << values_;
     data << min_;
@@ -221,9 +220,9 @@ void IntervalParameter::serialize(SerializationBuffer &data) const
     data << step_;
 }
 
-void IntervalParameter::deserialize(const SerializationBuffer& data)
+void IntervalParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> values_;
     data >> min_;

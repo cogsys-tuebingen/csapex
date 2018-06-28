@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -29,6 +29,25 @@ RangeParameter::~RangeParameter()
 
 }
 
+RangeParameter& RangeParameter::operator = (const RangeParameter& range)
+{
+    bool value_change = false;
+    if(value_.type() == typeid(int)) {
+        value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(range.value_);
+        step_ = range::limitStep(boost::any_cast<int>(range.min_), boost::any_cast<int>(range.max_), boost::any_cast<int>(range.step_));
+    } else if(value_.type() == typeid(double)) {
+        value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(range.value_);
+        step_ = range::limitStep(boost::any_cast<double>(range.min_), boost::any_cast<double>(range.max_), boost::any_cast<double>(range.step_));
+    }
+    value_ = range.value_;
+    min_ = range.min_;
+    max_ = range.max_;
+    if(value_change) {
+        triggerChange();
+    }
+
+    return *this;
+}
 
 const std::type_info& RangeParameter::type() const
 {
@@ -76,47 +95,12 @@ bool RangeParameter::set_unsafe(const boost::any &v)
 }
 
 
-void RangeParameter::doSetValueFrom(const Parameter &other)
+void RangeParameter::cloneDataFrom(const Clonable &other)
 {
-    const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other);
-    if(range) {
-        bool value_change = false;
-        if(value_.type() == typeid(int)) {
-            value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(range->value_);
-            step_ = range::limitStep(boost::any_cast<int>(range->min_), boost::any_cast<int>(range->max_), boost::any_cast<int>(range->step_));
-        } else if(value_.type() == typeid(double)) {
-            value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(range->value_);
-            step_ = range::limitStep(boost::any_cast<double>(range->min_), boost::any_cast<double>(range->max_), boost::any_cast<double>(range->step_));
-        }
-        value_ = range->value_;
-        min_ = range->min_;
-        max_ = range->max_;
-        if(value_change) {
-            triggerChange();
-        }
+    if(const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other)) {
+        *this = *range;
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-
-void RangeParameter::doClone(const Parameter &other)
-{
-    const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other);
-    if(range) {
-        value_ = range->value_;
-        min_ = range->min_;
-        max_ = range->max_;
-        def_min_ = range->def_min_;
-        def_max_ = range->def_max_;
-        def_value_ = range->def_value_;
-        if(value_.type() == typeid(int)) {
-            step_ = range::limitStep(boost::any_cast<int>(range->min_), boost::any_cast<int>(range->max_), boost::any_cast<int>(range->step_));
-        } else if(value_.type() == typeid(double)) {
-            step_ = range::limitStep(boost::any_cast<double>(range->min_), boost::any_cast<double>(range->max_), boost::any_cast<double>(range->step_));
-        }
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 
@@ -168,9 +152,9 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
 }
 
 
-void RangeParameter::serialize(SerializationBuffer &data) const
+void RangeParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value_;
     data << min_;
@@ -181,9 +165,9 @@ void RangeParameter::serialize(SerializationBuffer &data) const
     data << step_;
 }
 
-void RangeParameter::deserialize(const SerializationBuffer& data)
+void RangeParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value_;
     data >> min_;

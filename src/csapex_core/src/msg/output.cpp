@@ -8,6 +8,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/utility/debug.h>
+#include <csapex/msg/output_transition.h>
 
 /// SYSTEM
 #include <iostream>
@@ -33,6 +34,11 @@ void Output::setOutputTransition(OutputTransition *ot)
 void Output::removeOutputTransition()
 {
     transition_ = nullptr;
+}
+
+void Output::addConnection(ConnectionPtr connection)
+{
+    Connectable::addConnection(connection);
 }
 
 void Output::removeConnection(Connectable *other_side)
@@ -115,9 +121,25 @@ void Output::removeAllConnectionsNotUndoable()
     disconnected(shared_from_this());
 }
 
+void Output::enable()
+{
+    Connectable::enable();
+}
+
 void Output::disable()
 {
     Connectable::disable();
+
+    if(isProcessing()) {
+        for(auto connection : connections_) {
+            if(connection->getState() == Connection::State::UNREAD) {
+                connection->readToken();
+            }
+            if(connection->getState() == Connection::State::READ) {
+                connection->setTokenProcessed();
+            }
+        }
+    }
 }
 
 bool Output::isConnected() const
@@ -142,7 +164,7 @@ bool Output::canSendMessages() const
             return false;
         }
     }
-    return true;
+    return !isProcessing();
 }
 
 void Output::publish()
@@ -154,9 +176,30 @@ void Output::publish()
     setProcessing(true);
 
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
+    bool sent = false;
     for(auto connection : connections_) {
         if(connection->isEnabled()) {
             connection->setToken(msg);
+            sent = true;
+        }
+    }
+
+    if(!sent) {
+        notifyMessageProcessed();
+    }
+}
+
+void Output::republish()
+{
+    std::unique_lock<std::recursive_mutex> lock(sync_mutex);
+    if(isProcessing()) {
+        auto msg = getToken();
+        apex_assert_hard(msg);
+
+        for(auto connection : connections_) {
+            if(connection->isEnabled() && connection->getState() == Connection::State::DONE) {
+                connection->setToken(msg);
+            }
         }
     }
 }

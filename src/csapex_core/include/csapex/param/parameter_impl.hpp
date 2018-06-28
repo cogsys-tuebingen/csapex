@@ -14,23 +14,24 @@ namespace param
 template <typename I, int _NUMERICAL_ID>
 class ParameterImplementation : public Parameter
 {
+    CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(I);
+
 protected:
     explicit ParameterImplementation(const std::string& name, const ParameterDescription& description)
         : Parameter(name, description)
     {
-
     }
 
     ParameterImplementation(const Parameter& other)
         : Parameter(other)
     {
-
     }
 
-    std::shared_ptr<Clonable> makeEmptyClone() const override
+    virtual void cloneData(const I &other)
     {
-        return std::make_shared<I>();
+        dynamic_cast<I&>(*this) = other;
     }
+
 
 public:
     static std::string typeName()

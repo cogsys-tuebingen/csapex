@@ -16,6 +16,7 @@
 /// SYSTEM
 #include <memory>
 #include <vector>
+#include <functional>
 
 namespace csapex
 {
@@ -65,11 +66,8 @@ public:
 
     virtual uint8_t getPacketType() const override;
 
-    std::shared_ptr<Clonable> cloneRaw() const override;
-    virtual void cloneFrom(const Command& other) = 0;
-
-    virtual void serialize(SerializationBuffer &data) const override = 0;
-    virtual void deserialize(const SerializationBuffer& data) override = 0;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override = 0;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override = 0;
 
 protected:
     Command();

@@ -56,20 +56,12 @@ public:
 
     virtual uint8_t getPacketType() const override;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
-
-    void setValueFrom(const Parameter& other);
-    void cloneFrom(const Parameter& other);
-
-    virtual std::shared_ptr<Clonable> cloneRaw() const override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     virtual void doSerialize(YAML::Node& n) const = 0;
     virtual void doDeserialize(const YAML::Node& n) = 0;
-
-    virtual void doSetValueFrom(const Parameter& other) = 0;
-    virtual void doClone(const Parameter& other) = 0;
 
 public:
     std::string name() const;
@@ -91,8 +83,17 @@ public:
 
     Lock lock() const;
 
-    template <typename T>
-    T as() const;
+    template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
+    T as() const
+    {
+        return as_impl<T>();
+    }
+
+    template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    T as() const
+    {
+        return static_cast<T>(as_impl<int>());
+    }
 
     template <typename T>
     void set(const T& v)
@@ -122,8 +123,13 @@ public:
         return operator = (std::string(cstr));
     }
 
+protected:
+    template <typename T>
+    T as_impl() const;
+
     Parameter& operator = (const Parameter& p);
 
+public:
     virtual const std::type_info &type() const;
     std::string toString() const;
 

@@ -4,7 +4,8 @@
 /// PROJECT
 #include <csapex/model/tag.h>
 #include <csapex/serialization/packet_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -128,25 +129,20 @@ uint8_t Snippet::getPacketType() const
 }
 
 
-void Snippet::serialize(SerializationBuffer &data) const
+void Snippet::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << *yaml_;
     data << name_;
     data << description_;
     data << tags_;
 }
-void Snippet::deserialize(const SerializationBuffer& data)
+void Snippet::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     yaml_.reset(new YAML::Node);
     data >> *yaml_;
     data >> name_;
     data >> description_;
     data >> tags_;
-}
-
-std::shared_ptr<Clonable> Snippet::makeEmptyClone() const
-{
-    return makeEmpty();
 }
 
 std::shared_ptr<Snippet> Snippet::makeEmpty()

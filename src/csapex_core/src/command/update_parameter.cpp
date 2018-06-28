@@ -11,7 +11,8 @@
 #include <csapex/core/settings.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <sstream>
@@ -145,17 +146,17 @@ bool UpdateParameter::doRedo()
 }
 
 
-void UpdateParameter::serialize(SerializationBuffer &data) const
+void UpdateParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << value;
 }
 
-void UpdateParameter::deserialize(const SerializationBuffer& data)
+void UpdateParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> value;

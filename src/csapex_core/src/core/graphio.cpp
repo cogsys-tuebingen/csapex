@@ -76,10 +76,18 @@ Snippet GraphIO::saveGraph()
 
 void GraphIO::saveGraphTo(YAML::Node &yaml)
 {
+    TimerPtr timer = getProfiler()->getTimer("save graph");
+    timer->restart();
+
     saveNodes(yaml);
     saveConnections(yaml);
 
-    saveViewRequest(graph_, yaml);
+    {
+        auto interlude = timer->step("save view");
+        saveViewRequest(graph_, yaml);
+    }
+
+    timer->finish();
 }
 
 void GraphIO::loadGraph(const Snippet& doc)
@@ -300,6 +308,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
 
 void GraphIO::saveConnections(YAML::Node &yaml)
 {
+    auto interlude = getProfiler()->getTimer("save graph")->step("save connections");
     saveConnections(yaml, graph_.enumerateAllConnections());
 }
 
@@ -526,6 +535,8 @@ void GraphIO::loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::
 
 void GraphIO::serializeNode(YAML::Node& doc, NodeFacadeImplementationConstPtr node_facade)
 {
+    auto interlude = getProfiler()->getTimer("save graph")->step("serialize node");
+
     node_facade->getNodeState()->writeYaml(doc);
 
     auto node = node_facade->getNode();

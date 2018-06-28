@@ -20,7 +20,8 @@
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
 #include <csapex/scheduling/thread_pool.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/utility/assert.h>
@@ -187,26 +188,18 @@ bool UngroupNodes::doRedo()
 }
 
 
-void UngroupNodes::serialize(SerializationBuffer &data) const
+void UngroupNodes::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    GroupBase::serialize(data);
+    GroupBase::serialize(data, version);
 
     data << uuid;
 }
 
-void UngroupNodes::deserialize(const SerializationBuffer& data)
+void UngroupNodes::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    GroupBase::deserialize(data);
+    GroupBase::deserialize(data, version);
 
     data >> uuid;
-}
-
-void UngroupNodes::cloneFrom(const Command& other)
-{
-    const UngroupNodes* instance = dynamic_cast<const UngroupNodes*>(&other);
-    if(instance) {
-        uuid = instance->uuid;
-    }
 }
 
 void UngroupNodes::clear()

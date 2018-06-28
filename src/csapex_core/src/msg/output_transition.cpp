@@ -88,6 +88,16 @@ void OutputTransition::addOutput(OutputPtr output)
     });
     output_signal_connections_[output.get()].push_back(cp);
 
+    auto ce = output->connectionEnabled.connect([this](bool enabled) {
+        if(enabled) {
+            for(const auto& pair : outputs_) {
+                OutputPtr output = pair.second;
+                output->republish();
+            }
+        }
+    });
+    output_signal_connections_[output.get()].push_back(ce);
+
 //    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
 //        if(output->isEnabled()) {
 //            publishNextMessage();
@@ -221,7 +231,13 @@ int OutputTransition::getPortCount() const
 void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    apex_assert_hard(outputs_.empty() || !areOutputsIdle());
+    if(outputs_.empty()) {
+        return;
+    }
+    if(areOutputsIdle()) {
+        // no output has a message
+        return;
+    }
 
     apex_assert_hard(areAllConnections(Connection::State::NOT_INITIALIZED));
 

@@ -18,6 +18,11 @@ std::string toString(const std::vector<TokenData::Ptr>& types) {
 }
 }
 
+MultiTokenData::MultiTokenData()
+{
+
+}
+
 MultiTokenData::MultiTokenData(const std::vector<TokenData::Ptr>& types)
     : TokenData("one of {" + toString(types) + "}"), types_(types)
 {
@@ -46,14 +51,11 @@ bool MultiTokenData::acceptsConnectionFrom(const TokenData *other_side) const
     return false;
 }
 
-TokenData::Ptr MultiTokenData::clone() const
+void MultiTokenData::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Ptr new_msg(new MultiTokenData(types_));
-    return new_msg;
+    throw std::runtime_error("MultiTokenData is a meta type and cannot be serialized");
 }
-
-TokenData::Ptr MultiTokenData::toType() const
+void MultiTokenData::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Ptr new_msg(new MultiTokenData(types_));
-    return new_msg;
+    throw std::runtime_error("MultiTokenData is a meta type and cannot be serialized");
 }

@@ -85,7 +85,7 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
       scene_(new DesignerScene(graph_facade, view_core)),
       graph_facade_(graph_facade),
       scalings_to_perform_(0), middle_mouse_dragging_(false), move_event_(nullptr),
-      preview_widget_(nullptr)
+      preview_timer_(nullptr), preview_port_(nullptr), preview_widget_(nullptr)
 {
     setCacheMode(QGraphicsView::CacheBackground);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
@@ -760,9 +760,9 @@ void GraphView::startPlacingBox(const std::string &type, NodeStatePtr state, con
     box->construct();
     box->setObjectName(handle->getType().c_str());
 
-    if(!is_note) {
-        box->setLabel(type);
-    }
+//    if(!is_note) {
+//        box->setLabel(type);
+//    }
 
     drag->setPixmap(box->grab());
     drag->setHotSpot(-offset);
@@ -1074,7 +1074,7 @@ void GraphView::addPort(Port *port)
     scene_->addPort(port);
 
     if(!dynamic_cast<MetaPort*>(port)) {
-        QObject::connect(port, SIGNAL(mouseOver(Port*)), this, SLOT(showPreview(Port*)));
+        QObject::connect(port, SIGNAL(mouseOver(Port*)), this, SLOT(showDelayedPreview(Port*)));
         QObject::connect(port, SIGNAL(mouseOut(Port*)), this, SLOT(stopPreview()));
     }
 
@@ -1745,7 +1745,21 @@ void GraphView::selectAll()
     }
 }
 
-void GraphView::showPreview(Port* port)
+void GraphView::showDelayedPreview(Port* port)
+{
+    preview_port_ = port;
+
+    if(!preview_timer_) {
+        preview_timer_ = new QTimer(this);
+        connect(preview_timer_, &QTimer::timeout, this, &GraphView::showPreview);
+
+    } else if(preview_timer_->isActive()) {
+        preview_timer_->stop();
+    }
+    preview_timer_->start(500);
+}
+
+void GraphView::showPreview()
 {
     QPointF pos = QCursor::pos() + QPointF(20, 20);
 
@@ -1758,12 +1772,16 @@ void GraphView::showPreview(Port* port)
     preview_widget_->move(pos.toPoint());
 
     if(!preview_widget_->isConnected()) {
-        preview_widget_->connectTo(port->getAdaptee());
+        preview_widget_->connectTo(preview_port_->getAdaptee());
     }
 }
 
 void GraphView::stopPreview()
 {
+    if(preview_timer_ && preview_timer_->isActive()) {
+        preview_timer_->stop();
+    }
+
     if(preview_widget_) {
         preview_widget_->disconnect();
         preview_widget_->hide();

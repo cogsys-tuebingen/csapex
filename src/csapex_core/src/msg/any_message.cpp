@@ -13,18 +13,6 @@ AnyMessage::AnyMessage()
     : Message(type<AnyMessage>::name(), "/", 0)
 {}
 
-TokenData::Ptr AnyMessage::clone() const
-{
-    AnyMessage::Ptr new_msg(new AnyMessage);
-    return new_msg;
-}
-
-TokenData::Ptr AnyMessage::toType() const
-{
-    Ptr new_msg(new AnyMessage);
-    return new_msg;
-}
-
 bool AnyMessage::canConnectTo(const TokenData*) const
 {
     return true;
@@ -35,8 +23,12 @@ bool AnyMessage::acceptsConnectionFrom(const TokenData*) const
     return true;
 }
 
-
-
+void AnyMessage::serialize(SerializationBuffer &data, SemanticVersion& version) const
+{
+}
+void AnyMessage::deserialize(const SerializationBuffer& data, const SemanticVersion &version)
+{
+}
 
 /// YAML
 namespace YAML {

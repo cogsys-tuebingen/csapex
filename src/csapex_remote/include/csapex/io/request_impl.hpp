@@ -12,14 +12,12 @@ template <typename I>
 class RequestImplementation : public Request
 {
 protected:
+    CLONABLE_IMPLEMENTATION_CONSTRUCTOR(I, 0);
+
+protected:
     RequestImplementation(uint8_t id)
         : Request(id)
     {
-    }
-
-    std::shared_ptr<Clonable> makeEmptyClone() const
-    {
-        return std::make_shared<I>(0);
     }
 };
 

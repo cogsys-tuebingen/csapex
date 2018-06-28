@@ -2,9 +2,15 @@
 #include <csapex/io/feedback.h>
 
 /// SYSTEM
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 using namespace csapex;
+
+Feedback::Feedback()
+    : Response(0)
+{
+
+}
 
 Feedback::Feedback(const std::string &message)
     : Response(0), message_(message)
@@ -34,19 +40,13 @@ std::string Feedback::getMessage() const
 }
 
 
-void Feedback::serialize(SerializationBuffer &data) const
+void Feedback::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_id_;
     data << message_;
 }
-void Feedback::deserialize(const SerializationBuffer& data)
+void Feedback::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_id_;
     data >> message_;
 }
-
-std::shared_ptr<Clonable> Feedback::makeEmptyClone() const
-{
-    return std::make_shared<Feedback>("");
-}
-

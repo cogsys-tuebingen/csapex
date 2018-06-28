@@ -7,7 +7,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <sstream>
@@ -64,18 +65,18 @@ bool RenameNode::doRedo()
 
 
 
-void RenameNode::serialize(SerializationBuffer &data) const
+void RenameNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << new_name_;
     data << old_name_;
 }
 
-void RenameNode::deserialize(const SerializationBuffer& data)
+void RenameNode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> new_name_;

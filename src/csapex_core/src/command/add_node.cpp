@@ -14,7 +14,8 @@
 #include <csapex/model/node.h>
 #include <csapex/utility/assert.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 using namespace csapex::command;
@@ -83,18 +84,18 @@ bool AddNode::doRedo()
 }
 
 
-void AddNode::serialize(SerializationBuffer &data) const
+void AddNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << type_;
     data << pos_.x << pos_.y;
     data << uuid_;
 }
 
-void AddNode::deserialize(const SerializationBuffer& data)
+void AddNode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> type_;
     data >> pos_.x >> pos_.y;

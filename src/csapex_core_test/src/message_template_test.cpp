@@ -16,74 +16,11 @@
 #include <csapex/utility/register_msg.h>
 
 #include <csapex_testing/stepping_test.h>
+#include <csapex_testing/mockup_msgs.h>
 
-#include "gtest/gtest.h"
-
-#include <yaml-cpp/yaml.h>
-
-namespace csapex {
-
-struct Foo
-{
-    Foo()
-        : value(-1)
-    {}
-    Foo(int v)
-        : value(v)
-    {}
-
-    int value;
-};
-
-namespace connection_types {
-
-struct VectorMessage : public MessageTemplate<std::vector<Foo>, VectorMessage>
-{
-
-};
-
-template <>
-struct type<VectorMessage> {
-    static std::string name() {
-        return "TestVector";
-    }
-};
+#include <csapex_testing/csapex_test_case.h>
 
 
-}
-}
-
-CSAPEX_REGISTER_MESSAGE(VectorMessage)
-
-
-/// YAML
-namespace YAML {
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::Foo> {
-  static Node encode(const csapex::Foo& rhs){
-      Node node;
-      node["value"] = rhs.value;
-      return node;
-  }
-  static bool decode(const Node& node, csapex::Foo& rhs){
-      rhs.value = node["value"].as<int>();
-      return true;
-  }
-};
-
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::VectorMessage> {
-  static Node encode(const csapex::connection_types::VectorMessage& rhs){
-      Node node;
-      node["value"] = rhs.value;
-      return node;
-  }
-  static bool decode(const Node& node, csapex::connection_types::VectorMessage& rhs){
-      rhs.value = node["value"].as<std::vector<csapex::Foo>>();
-      return true;
-  }
-};
-}
 namespace csapex
 {
 

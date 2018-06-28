@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -28,6 +28,11 @@ TriggerParameter::~TriggerParameter()
 
 }
 
+TriggerParameter& TriggerParameter::operator = (const TriggerParameter& p)
+{
+    // do nothing
+    return *this;
+}
 
 const std::type_info& TriggerParameter::type() const
 {
@@ -51,15 +56,6 @@ bool TriggerParameter::set_unsafe(const boost::any &/*v*/)
 {
     trigger();
     return true;
-}
-
-
-void TriggerParameter::doSetValueFrom(const Parameter &/*other*/)
-{
-}
-
-void TriggerParameter::doClone(const Parameter &/*other*/)
-{
 }
 
 void TriggerParameter::doSerialize(YAML::Node&) const

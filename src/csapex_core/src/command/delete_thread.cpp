@@ -11,7 +11,7 @@
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/model/node_runner.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <sstream>
@@ -67,17 +67,17 @@ bool DeleteThread::doRedo()
 
 
 
-void DeleteThread::serialize(SerializationBuffer &data) const
+void DeleteThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << id;
     data << name;
 }
 
-void DeleteThread::deserialize(const SerializationBuffer& data)
+void DeleteThread::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> id;
     data >> name;

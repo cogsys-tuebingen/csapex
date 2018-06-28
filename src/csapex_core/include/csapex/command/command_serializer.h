@@ -55,13 +55,13 @@ struct CommandSerializerRegistered
         virtual void serialize(const Command& packet, SerializationBuffer &data) override\
         {\
             if(auto impl = dynamic_cast<const Name*>(&packet)) {\
-                impl->serialize(data);\
+                impl->serializeVersioned(data);\
             }\
         }\
         virtual CommandPtr deserialize(const SerializationBuffer& data) override\
         {\
             CommandPtr res = std::make_shared<Name>();\
-            res->deserialize(data);\
+            res->deserializeVersioned(data);\
             return res;\
         }\
     };\

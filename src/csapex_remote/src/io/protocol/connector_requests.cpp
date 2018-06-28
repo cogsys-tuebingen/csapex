@@ -12,7 +12,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
@@ -106,14 +107,14 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr &sessi
     return std::make_shared<ConnectorResponse>(request_type_, getRequestID(), uuid_);
 }
 
-void ConnectorRequests::ConnectorRequest::serialize(SerializationBuffer &data) const
+void ConnectorRequests::ConnectorRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << payload_;
 }
 
-void ConnectorRequests::ConnectorRequest::deserialize(const SerializationBuffer& data)
+void ConnectorRequests::ConnectorRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;
@@ -146,14 +147,14 @@ ConnectorRequests::ConnectorResponse::ConnectorResponse(uint8_t request_id)
 
 }
 
-void ConnectorRequests::ConnectorResponse::serialize(SerializationBuffer &data) const
+void ConnectorRequests::ConnectorResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << result_;
 }
 
-void ConnectorRequests::ConnectorResponse::deserialize(const SerializationBuffer& data)
+void ConnectorRequests::ConnectorResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;

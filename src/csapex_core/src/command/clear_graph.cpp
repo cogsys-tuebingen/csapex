@@ -11,7 +11,7 @@
 #include <csapex/factory/node_factory_impl.h>
 #include <csapex/model/subgraph_node.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/model/graph_facade_impl.h>
 
 /// SYSTEM
@@ -60,12 +60,12 @@ bool ClearGraph::doRedo()
 }
 
 
-void ClearGraph::serialize(SerializationBuffer &data) const
+void ClearGraph::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Meta::serialize(data);
+    Meta::serialize(data, version);
 }
 
-void ClearGraph::deserialize(const SerializationBuffer& data)
+void ClearGraph::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Meta::deserialize(data);
+    Meta::deserialize(data, version);
 }

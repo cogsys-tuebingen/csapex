@@ -26,7 +26,7 @@
 #include <csapex/profiling/timer.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/debug.h>
 #include <csapex/utility/delegate_bind.h>
 #include <csapex/utility/exceptions.h>
@@ -53,9 +53,6 @@ SubprocessNodeWorker::SubprocessNodeWorker(NodeHandlePtr node_handle)
 
 void SubprocessNodeWorker::initialize()
 {
-    // ... generalize.......
-    connection_types::GenericVectorMessage::registerType<connection_types::GenericValueMessage<int>>();
-    connection_types::GenericVectorMessage::registerType<connection_types::GenericValueMessage<int>>(connection_types::type<connection_types::GenericValueMessage<int>>::name());
 
     pid_ = subprocess_->fork([this](){
         runSubprocessLoop();
@@ -65,7 +62,7 @@ void SubprocessNodeWorker::initialize()
         if(!internal) {
             node_handle_->execution_requested([this, c](){
                 SerializationBuffer msg;
-                c->getDescription().serialize(msg);
+                c->getDescription().serializeVersioned(msg);
                 subprocess_->in.write({SubprocessChannel::MessageType::PORT_ADD, msg.data(), msg.size()});
             });
         }
@@ -73,7 +70,7 @@ void SubprocessNodeWorker::initialize()
     observe(node_handle_->node_state_changed, [this](){
         node_handle_->execution_requested([this](){
             SerializationBuffer msg;
-            getNodeHandle()->getNodeState()->serialize(msg);
+            getNodeHandle()->getNodeState()->serializeVersioned(msg);
             subprocess_->in.write({SubprocessChannel::MessageType::NODE_STATE_CHANGED, msg.data(), msg.size()});
         });
     });
@@ -123,7 +120,7 @@ void SubprocessNodeWorker::runSubprocessLoop()
             {
                 ConnectorDescription des;
                 SerializationBuffer buffer(msg.data, msg.length);
-                des.deserialize(buffer);
+                des.deserializeVersioned(buffer);
                 if(des.is_variadic) {
                     switch(des.connector_type) {
                     case ConnectorType::INPUT:
@@ -190,7 +187,7 @@ void SubprocessNodeWorker::handleProcessChild(const SubprocessChannel::Message& 
             YAML::Node yaml = YAML::Load(msg.toString());
             for(const YAML::Node& node : yaml) {
                 UUID uuid = node["uuid"].as<UUID>();
-                auto msg = MessageSerializer::deserializeMessage(node["data"]);
+                auto msg = MessageSerializer::deserializeYamlMessage(node["data"]);
 
                 InputPtr input = node_handle_->getInput(uuid);
                 apex_assert_hard_msg(input, std::string("could not get input ") + uuid.getFullName());
@@ -233,7 +230,7 @@ void SubprocessNodeWorker::handleProcessSlotChild(const SubprocessChannel::Messa
         if(msg.data) {
             YAML::Node yaml = YAML::Load(msg.toString());
             UUID uuid = yaml["uuid"].as<UUID>();
-            auto msg = MessageSerializer::deserializeMessage(yaml["data"]);
+            auto msg = MessageSerializer::deserializeYamlMessage(yaml["data"]);
 
             SlotPtr slot = node_handle_->getSlot(uuid);
             apex_assert_hard_msg(slot, std::string("could not get slot ") + uuid.getFullName());
@@ -276,7 +273,7 @@ void SubprocessNodeWorker::finishHandleProcessChild()
                 YAML::Node node(YAML::NodeType::Map);
                 node["uuid"] = output->getUUID();
                 // TODO serialize token! (+ activity, ...)
-                node["data"] = MessageSerializer::serializeMessage(*msg->getTokenData());
+                node["data"] = MessageSerializer::serializeYamlMessage(*msg->getTokenData());
 
                 YAML::Emitter emitter;
                 emitter << node;
@@ -292,7 +289,7 @@ void SubprocessNodeWorker::finishHandleProcessChild()
                 YAML::Node node(YAML::NodeType::Map);
                 node["uuid"] = event->getUUID();
                 // TODO serialize token! (+ activity, ...)
-                node["data"] = MessageSerializer::serializeMessage(*msg->getTokenData());
+                node["data"] = MessageSerializer::serializeYamlMessage(*msg->getTokenData());
 
                 YAML::Emitter emitter;
                 emitter << node;
@@ -332,7 +329,7 @@ void SubprocessNodeWorker::handleParameterUpdate(const SubprocessChannel::Messag
         param::ParameterPtr p = std::dynamic_pointer_cast<param::Parameter>(PacketSerializer::deserializePacket(buffer));
 
         param::ParameterPtr existing = node->getParameter(p->name());
-        existing->setValueFrom(*p);
+        existing->cloneDataFrom(*p);
     }
 }
 
@@ -343,7 +340,7 @@ void SubprocessNodeWorker::handleProcessParent(const SubprocessChannel::Message&
 
         for(const YAML::Node& node : yaml) {
             UUID uuid = node["uuid"].as<UUID>();
-            auto msg = MessageSerializer::deserializeMessage(node["data"]);
+            auto msg = MessageSerializer::deserializeYamlMessage(node["data"]);
 
             ConnectorPtr connector = node_handle_->getConnector(uuid);
             if(OutputPtr output = std::dynamic_pointer_cast<Output>(connector)) {
@@ -410,7 +407,7 @@ void SubprocessNodeWorker::startSubprocess(const SubprocessChannel::MessageType 
                 YAML::Node node(YAML::NodeType::Map);
                 node["uuid"] = input->getUUID();
                 // TODO serialize token! (+ activity, ...)
-                node["data"] = MessageSerializer::serializeMessage(*msg);
+                node["data"] = MessageSerializer::serializeYamlMessage(*msg);
                 yaml.push_back(node);
             }
         }
@@ -452,7 +449,7 @@ void SubprocessNodeWorker::startSubprocessSlot(const SlotPtr& slot)
         YAML::Node yaml(YAML::NodeType::Map);
         yaml["uuid"] = slot->getUUID();
         // TODO serialize token! (+ activity, ...)
-        yaml["data"] = MessageSerializer::serializeMessage(*msg);
+        yaml["data"] = MessageSerializer::serializeYamlMessage(*msg);
 
         YAML::Emitter emitter;
         emitter << yaml;

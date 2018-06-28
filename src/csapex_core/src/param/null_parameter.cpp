@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -46,17 +46,6 @@ void NullParameter::get_unsafe(boost::any& out) const
 
 
 bool NullParameter::set_unsafe(const boost::any& /*v*/)
-{
-    throw std::runtime_error("cannot use null parameters");
-}
-
-
-void NullParameter::doSetValueFrom(const Parameter &/*other*/)
-{
-    throw std::runtime_error("cannot use null parameters");
-}
-
-void NullParameter::doClone(const Parameter &/*other*/)
 {
     throw std::runtime_error("cannot use null parameters");
 }

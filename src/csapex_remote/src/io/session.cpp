@@ -8,7 +8,7 @@
 #include <csapex/io/response.h>
 #include <csapex/io/feedback.h>
 #include <csapex/io/note.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/io/broadcast_message.h>
 #include <csapex/io/raw_message.h>
@@ -60,7 +60,7 @@ Session::~Session()
         boost::system::error_code ec;
         socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
         if (ec && ec != boost::asio::error::not_connected) {
-            throw std::runtime_error(std::string("cannot shutdown server connection: ") + ec.message());
+            std::cerr << "ERROR: cannot shutdown server connection: " << ec.message() << std::endl;
         } else if(socket_->is_open()) {
             socket_->close();
         }

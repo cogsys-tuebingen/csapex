@@ -12,13 +12,13 @@
 #include <csapex/msg/direct_connection.h>
 #include <csapex/msg/direct_connection.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 using namespace csapex;
 using namespace connection_types;
 
 
-class SignalTest : public ::testing::Test {
+class SignalTest : public CsApexTestCase {
 protected:
     SignalTest()
         : uuid_provider(std::make_shared<UUIDProvider>())

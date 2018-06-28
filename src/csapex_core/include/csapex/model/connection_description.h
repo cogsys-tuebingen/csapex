@@ -13,6 +13,10 @@ namespace csapex
 
 struct CSAPEX_CORE_EXPORT ConnectionDescription : public Serializable
 {
+protected:
+    CLONABLE_IMPLEMENTATION(ConnectionDescription);
+
+public:
     UUID from;
     UUID to;
     std::string from_label;
@@ -33,17 +37,12 @@ struct CSAPEX_CORE_EXPORT ConnectionDescription : public Serializable
 
     ConnectionDescription& operator = (const ConnectionDescription& other);
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
+    ConnectionDescription();
+
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     bool operator == (const ConnectionDescription& other) const;
-
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
-
-private:
-    friend class SerializationBuffer;
-    ConnectionDescription();
 };
 
 }

@@ -19,6 +19,7 @@ namespace error_handling
 CSAPEX_UTILS_EXPORT void init();
 
 CSAPEX_UTILS_EXPORT void siginthandler(int);
+CSAPEX_UTILS_EXPORT void sigtraphandler(int);
 #if WIN32
 CSAPEX_UTILS_EXPORT LONG WINAPI sigsegvhandler(EXCEPTION_POINTERS * ExceptionInfo);
 #else

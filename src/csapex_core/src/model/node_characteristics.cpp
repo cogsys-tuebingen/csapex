@@ -2,7 +2,7 @@
 #include <csapex/model/node_characteristics.h>
 
 /// PROJECT
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 using namespace csapex;
 
@@ -20,13 +20,7 @@ NodeCharacteristics::NodeCharacteristics()
 
 }
 
-
-std::shared_ptr<Clonable> NodeCharacteristics::makeEmptyClone() const
-{
-    return std::make_shared<NodeCharacteristics>();
-}
-
-void NodeCharacteristics::serialize(SerializationBuffer &data) const
+void NodeCharacteristics::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << depth;
     data << component;
@@ -36,7 +30,7 @@ void NodeCharacteristics::serialize(SerializationBuffer &data) const
     data << is_leading_to_joining_vertex;
     data << is_leading_to_essential_vertex;
 }
-void NodeCharacteristics::deserialize(const SerializationBuffer& data)
+void NodeCharacteristics::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> depth;
     data >> component;

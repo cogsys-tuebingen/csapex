@@ -12,6 +12,9 @@ namespace connection_types
 
 struct CSAPEX_CORE_EXPORT AnyMessage : public Message
 {
+protected:
+    CLONABLE_IMPLEMENTATION(AnyMessage);
+
 public:
     typedef std::shared_ptr<AnyMessage> Ptr;
 
@@ -19,11 +22,11 @@ public:
     AnyMessage();
 
 public:
-    virtual TokenData::Ptr clone() const override;
-    virtual TokenData::Ptr toType() const override;
-
     bool canConnectTo(const TokenData* other_side) const override;
     bool acceptsConnectionFrom(const TokenData* other_side) const override;
+
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 };
 
 template <>
@@ -33,14 +36,15 @@ struct type<AnyMessage> {
     }
 };
 
+}
+
 template <>
-inline std::shared_ptr<AnyMessage> makeEmpty<AnyMessage>()
+inline std::shared_ptr<connection_types::AnyMessage> makeEmpty<connection_types::AnyMessage>()
 {
-    static std::shared_ptr<AnyMessage> instance(new AnyMessage);
+    static std::shared_ptr<connection_types::AnyMessage> instance(new connection_types::AnyMessage);
     return instance;
 }
 
-}
 }
 
 /// YAML

@@ -10,7 +10,8 @@
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
@@ -79,14 +80,14 @@ ResponsePtr GraphRequests::GraphRequest::execute(const SessionPtr &session, CsAp
     return std::make_shared<GraphResponse>(request_type_, uuid_, getRequestID());
 }
 
-void GraphRequests::GraphRequest::serialize(SerializationBuffer &data) const
+void GraphRequests::GraphRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << arguments_;
 }
 
-void GraphRequests::GraphRequest::deserialize(const SerializationBuffer& data)
+void GraphRequests::GraphRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;
@@ -119,14 +120,14 @@ GraphRequests::GraphResponse::GraphResponse(uint8_t request_id)
 
 }
 
-void GraphRequests::GraphResponse::serialize(SerializationBuffer &data) const
+void GraphRequests::GraphResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << result_;
 }
 
-void GraphRequests::GraphResponse::deserialize(const SerializationBuffer& data)
+void GraphRequests::GraphResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;

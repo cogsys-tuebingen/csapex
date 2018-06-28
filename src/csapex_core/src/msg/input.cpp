@@ -94,8 +94,19 @@ void Input::disable()
 {
     Connectable::disable();
 
+    bool needs_notify = false;
+    for(ConnectionPtr& connection : connections_) {
+        if(connection->holdsToken()) {
+            needs_notify = true;
+        }
+    }
+
     if(message_ != nullptr) {
         free();
+        needs_notify = true;
+    }
+
+    if(needs_notify) {
         notifyMessageProcessed();
     }
 }

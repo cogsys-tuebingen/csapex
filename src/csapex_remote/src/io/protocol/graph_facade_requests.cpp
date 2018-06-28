@@ -10,7 +10,8 @@
 #include <csapex/model/graph.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
@@ -91,14 +92,14 @@ ResponsePtr GraphFacadeRequests::GraphFacadeRequest::execute(const SessionPtr &s
     return std::make_shared<GraphFacadeResponse>(request_type_, uuid_, getRequestID());
 }
 
-void GraphFacadeRequests::GraphFacadeRequest::serialize(SerializationBuffer &data) const
+void GraphFacadeRequests::GraphFacadeRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << arguments_;
 }
 
-void GraphFacadeRequests::GraphFacadeRequest::deserialize(const SerializationBuffer& data)
+void GraphFacadeRequests::GraphFacadeRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;
@@ -131,14 +132,14 @@ GraphFacadeRequests::GraphFacadeResponse::GraphFacadeResponse(uint8_t request_id
 
 }
 
-void GraphFacadeRequests::GraphFacadeResponse::serialize(SerializationBuffer &data) const
+void GraphFacadeRequests::GraphFacadeResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << result_;
 }
 
-void GraphFacadeRequests::GraphFacadeResponse::deserialize(const SerializationBuffer& data)
+void GraphFacadeRequests::GraphFacadeResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;

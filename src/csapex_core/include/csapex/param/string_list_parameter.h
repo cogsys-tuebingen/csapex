@@ -36,14 +36,13 @@ public:
     virtual const std::type_info &type() const override;
     virtual std::string toStringImpl() const override;
 
-    void doSetValueFrom(const Parameter& other) override;
-    void doClone(const Parameter& other) override;
+    void cloneDataFrom(const Clonable& other) override;
 
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     virtual void get_unsafe(boost::any& out) const override;

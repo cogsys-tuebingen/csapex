@@ -132,7 +132,7 @@ void SettingsImplementation::loadTemporary(YAML::Node& node)
 
             if(knows(p->name())) {
                 Entry& entry = settings_[p->name()];
-                entry.parameter->setValueFrom(*p);
+                entry.parameter->cloneDataFrom(*p);
             } else {
                 Entry& entry = settings_[p->name()];
                 entry.parameter = p;

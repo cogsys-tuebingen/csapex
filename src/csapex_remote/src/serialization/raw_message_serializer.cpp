@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/utility/assert.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/io/raw_message.h>
 
 /// SYSTEM
@@ -17,12 +17,12 @@ SerializerRegistered<RawMessageSerializer> g_register_RawMessage_serializer_(Raw
 
 void RawMessageSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    packet.serialize(data);
+    packet.serializeVersioned(data);
 }
 
 StreamablePtr RawMessageSerializer::deserialize(const SerializationBuffer& data)
 {
     RawMessagePtr res = std::make_shared<RawMessage>();
-    res->deserialize(data);
+    res->deserializeVersioned(data);
     return res;
 }

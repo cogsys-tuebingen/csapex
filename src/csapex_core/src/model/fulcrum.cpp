@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connection.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 using namespace csapex;
 
@@ -140,12 +140,7 @@ void Fulcrum::setType(int type)
     typeChanged(this, type);
 }
 
-std::shared_ptr<Clonable> Fulcrum::makeEmptyClone() const
-{
-    return std::shared_ptr<Clonable>(new Fulcrum);
-}
-
-void Fulcrum::serialize(SerializationBuffer &data) const
+void Fulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << connection_id_;
     data << id_;
@@ -154,7 +149,7 @@ void Fulcrum::serialize(SerializationBuffer &data) const
     data << handle_in_.x << handle_in_.y;
     data << handle_out_.x << handle_out_.y;
 }
-void Fulcrum::deserialize(const SerializationBuffer& data)
+void Fulcrum::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> connection_id_;
     data >> id_;

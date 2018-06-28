@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/utility/assert.h>
 #include <csapex/serialization/packet_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 using namespace csapex;
 
@@ -99,18 +99,13 @@ uint8_t Tag::getPacketType() const
 }
 
 
-void Tag::serialize(SerializationBuffer &data) const
+void Tag::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << name_;
 }
-void Tag::deserialize(const SerializationBuffer& data)
+void Tag::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> name_;
-}
-
-std::shared_ptr<Clonable> Tag::makeEmptyClone() const
-{
-    return makeEmpty();
 }
 
 Tag::Ptr Tag::makeEmpty()

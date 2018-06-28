@@ -5,6 +5,8 @@
 #include <csapex/msg/message.h>
 #include <csapex/msg/token_traits.h>
 #include <csapex/msg/io.h>
+#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <type_traits>
@@ -113,6 +115,9 @@ struct MessageTemplateBase
 template <typename Type, class Instance>
 class MessageTemplate : public Message, public MessageTemplateContainer<Type, std::is_integral<Type>::value>, public MessageTemplateBase
 {
+protected:
+    CLONABLE_IMPLEMENTATION(Instance);
+
 public:
     typedef std::shared_ptr<Instance> Ptr;
     typedef std::shared_ptr<const Instance> ConstPtr;
@@ -120,16 +125,17 @@ public:
     typedef MessageTemplateContainer<Type, std::is_integral<Type>::value> ValueContainer;
     typedef MessageTemplate<Type,Instance> Self;
 
-    MessageTemplate( const std::string& frame_id = "/", Message::Stamp stamp = 0)
+    explicit MessageTemplate( const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type<Instance>::name(), frame_id, stamp)
-    {}
+    {
+    }
 
-    MessageTemplate( const Self& copy )
+    MessageTemplate(const Self& copy)
         : Message(type<Instance>::name(), copy.frame_id, copy.stamp_micro_seconds),
           ValueContainer(static_cast<const ValueContainer&>(copy))
     {}
 
-    MessageTemplate( Self&& moved )
+    MessageTemplate(Self&& moved)
         : Message(type<Instance>::name(), moved.frame_id, moved.stamp_micro_seconds),
           ValueContainer(static_cast<ValueContainer&&>(moved))
     {}
@@ -138,41 +144,42 @@ public:
     Self& operator = (const Self& other)
     {
         ValueContainer::operator=(other);
+        frame_id = other.frame_id;
+        stamp_micro_seconds = other.stamp_micro_seconds;
         return *this;
     }
     Self& operator = (Self&& other)
     {
         ValueContainer::operator=(std::move(other));
+        frame_id = std::move(other.frame_id);
+        stamp_micro_seconds = std::move(stamp_micro_seconds);
         return *this;
     }
-
-    virtual TokenData::Ptr clone() const override
-    {
-        return cloneInstance();
-    }
-
-    virtual TokenData::Ptr toType() const override
-    {
-        Ptr new_msg(new Instance);
-        return new_msg;
-    }
-
 
     bool acceptsConnectionFrom(const TokenData* other_side) const override
     {
         return ValueContainer::acceptsConnectionFrom(other_side);
     }
 
-protected:
-    Ptr cloneInstance() const
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
     {
-        Ptr new_msg(new Instance);
-        new_msg->frame_id = frame_id;
-        new_msg->stamp_micro_seconds = stamp_micro_seconds;
-        new_msg->value = ValueContainer::value;
-        return new_msg;
+        // TODO: ValueContainer should provide a version here!
+        Message::serialize(data, version);
+
+        data << ValueContainer::value;
     }
 
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
+    {
+        Message::deserialize(data, version);
+
+        data >> ValueContainer::value;
+    }
+
+    SemanticVersion getVersion() const override
+    {
+        return semantic_version<Type>::value;
+    }
 };
 
 
@@ -199,7 +206,7 @@ struct MessageCaster<Instance, S, typename std::enable_if<std::is_base_of<connec
 
         // if we can cast the message to the value type, create a new message of that type
         if(auto* casted = dynamic_cast<V const*>(msg.get())) {
-            auto res = connection_types::makeEmptyMessage<Instance>();
+            auto res = makeEmpty<Instance>();
 
             // copy specific data
             res->value = *casted;
@@ -223,7 +230,7 @@ struct MessageCaster<Instance, S, typename std::enable_if<std::is_base_of<connec
 
         // if we can cast the message to the value type, create a new message of that type
         if(auto* casted = dynamic_cast<V*>(msg.get())) {
-            auto res = connection_types::makeEmptyMessage<Instance>();
+            auto res = makeEmpty<Instance>();
 
             // copy specific data
             res->value = *casted;

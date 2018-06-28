@@ -2,7 +2,7 @@
 #define MESSAGE_PROVIDER_H
 
 /// COMPONENT
-#include <csapex/model/memento.h>
+#include <csapex/serialization/serializable.h>
 #include <csapex/msg/message.h>
 #include <csapex/model/generic_state.h>
 
@@ -39,8 +39,8 @@ public:
 
     virtual std::vector<std::string> getExtensions() const = 0;
 
-    virtual Memento::Ptr getState() const = 0;
-    virtual void setParameterState(Memento::Ptr memento) = 0;
+    virtual GenericStatePtr getState() const = 0;
+    virtual void setParameterState(GenericStatePtr memento) = 0;
 
     std::vector<csapex::param::ParameterPtr> getParameters() const;
 

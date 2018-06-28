@@ -55,12 +55,12 @@ struct BroadcastMessageSerializerRegistered
     { \
         virtual void serialize(const BroadcastMessage& packet, SerializationBuffer &data) override \
         { \
-            packet.serialize(data); \
+            packet.serializeVersioned(data); \
         } \
         virtual BroadcastMessagePtr deserialize(const SerializationBuffer& data) override \
         { \
             auto result = std::make_shared<Name>(); \
-            result->deserialize(data); \
+            result->deserializeVersioned(data); \
             return result; \
         } \
     }; \

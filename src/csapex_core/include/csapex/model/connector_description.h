@@ -12,6 +12,10 @@ namespace csapex
 
 struct ConnectorDescription : public Serializable
 {
+protected:
+    CLONABLE_IMPLEMENTATION(ConnectorDescription);
+
+public:
     AUUID owner;
     ConnectorType connector_type;
     std::string label;
@@ -26,6 +30,10 @@ struct ConnectorDescription : public Serializable
     // connected connectors (UUID, is_active)
     struct Target : public Serializable
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(Target);
+
+    public:
         AUUID auuid;
         bool active;
 
@@ -36,11 +44,8 @@ struct ConnectorDescription : public Serializable
             : auuid(id), active(active)
         {}
 
-        virtual void serialize(SerializationBuffer &data) const override;
-        virtual void deserialize(const SerializationBuffer& data) override;
-
-    protected:
-        virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
     };
 
     std::vector<Target> targets;
@@ -73,11 +78,8 @@ struct ConnectorDescription : public Serializable
 
     AUUID getAUUID() const;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
-
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 };
 
 }

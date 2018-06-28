@@ -13,7 +13,8 @@
 #include <csapex/msg/output.h>
 #include <csapex/model/node_state.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 
@@ -63,17 +64,17 @@ bool DisableNode::doRedo()
 }
 
 
-void DisableNode::serialize(SerializationBuffer &data) const
+void DisableNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << uuid;
     data << disable_;
 }
 
-void DisableNode::deserialize(const SerializationBuffer& data)
+void DisableNode::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> uuid;
     data >> disable_;

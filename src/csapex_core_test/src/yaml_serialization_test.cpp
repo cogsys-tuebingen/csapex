@@ -1,65 +1,17 @@
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 #include <csapex/msg/message_template.hpp>
 #include <csapex/utility/register_msg.h>
 #include <yaml-cpp/yaml.h>
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/msg/io.h>
+#include <csapex_testing/mockup_msgs.h>
 
 using namespace csapex;
 using namespace connection_types;
 
-namespace csapex
-{
-namespace connection_types
-{
 
-class Mock
-{
-public:
-    std::string payload;
-};
-
-class MockMessage : public MessageTemplate<Mock, MockMessage> {};
-
-template <>
-struct type<MockMessage> {
-    static std::string name() {
-        return "MockMessage";
-    }
-};
-
-}
-}
-
-
-/// YAML
-namespace YAML {
-template<>
-struct convert<csapex::connection_types::MockMessage>
-{
-    static Node encode(const csapex::connection_types::MockMessage& rhs)
-    {
-        Node n;
-        n["payload"] = rhs.value.payload;
-        return n;
-    }
-
-    static bool decode(const Node& node, csapex::connection_types::MockMessage& rhs)
-    {
-        if(node["payload"].IsDefined()) {
-            rhs.value.payload = node["payload"].as<std::string>();
-        } else {
-            return false;
-        }
-        return true;
-    }
-};
-}
-
-CSAPEX_REGISTER_MESSAGE(csapex::connection_types::MockMessage)
-
-class YAMLSerializationTest : public ::testing::Test
+class YAMLSerializationTest : public CsApexTestCase
 {
 protected:
     YAMLSerializationTest()
@@ -90,7 +42,7 @@ TEST_F(YAMLSerializationTest, YamlSerializationWorks)
     MockMessage msg;
     msg.value.payload = "foo";
 
-    YAML::Node node = MessageSerializer::serializeMessage(msg);
+    YAML::Node node = MessageSerializer::serializeYamlMessage(msg);
 
     ASSERT_TRUE(node["data"].IsDefined());
     ASSERT_TRUE(node["data"]["payload"].IsDefined());
@@ -103,7 +55,7 @@ TEST_F(YAMLSerializationTest, YamlDeserializationWorks)
     node["type"] = "MockMessage";
     node["data"]["payload"] = "bar";
 
-    TokenData::Ptr msg = csapex::MessageSerializer::deserializeMessage(node);
+    TokenData::Ptr msg = csapex::MessageSerializer::deserializeYamlMessage(node);
     ASSERT_NE(nullptr, msg);
 
     MockMessage::Ptr mockmsg = msg::message_cast<MockMessage>(msg);

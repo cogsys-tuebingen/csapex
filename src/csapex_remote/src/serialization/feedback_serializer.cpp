@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/utility/assert.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/io/feedback.h>
 
 /// SYSTEM
@@ -17,12 +17,12 @@ SerializerRegistered<FeedbackSerializer> g_register_Feedback_serializer_(Feedbac
 
 void FeedbackSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    packet.serialize(data);
+    packet.serializeVersioned(data);
 }
 
 StreamablePtr FeedbackSerializer::deserialize(const SerializationBuffer& data)
 {
     FeedbackPtr res = std::make_shared<Feedback>("");
-    res->deserialize(data);
+    res->deserializeVersioned(data);
     return res;
 }

@@ -11,15 +11,14 @@ namespace connection_types
 
 struct CSAPEX_CORE_EXPORT EndOfProgramMessage : public EndOfSequenceMessage
 {
+protected:
+    CLONABLE_IMPLEMENTATION(EndOfProgramMessage);
+
 public:
     typedef std::shared_ptr<EndOfProgramMessage> Ptr;
 
 public:
     EndOfProgramMessage();
-
-public:
-    virtual TokenData::Ptr clone() const override;
-    virtual TokenData::Ptr toType() const override;
 };
 
 template <>
@@ -31,5 +30,15 @@ struct type<EndOfProgramMessage> {
 
 }
 }
+
+/// YAML
+namespace YAML {
+template<>
+struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::EndOfProgramMessage> {
+  static Node encode(const csapex::connection_types::EndOfProgramMessage& rhs);
+  static bool decode(const Node& node, csapex::connection_types::EndOfProgramMessage& rhs);
+};
+}
+
 
 #endif // END_OF_PROGRAM_MESSAGE_H

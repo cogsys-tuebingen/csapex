@@ -89,7 +89,7 @@ NodeFacadeProxy::NodeFacadeProxy(const SessionPtr &session, AUUID uuid)
             {
                 param::ParameterPtr p = cn->getPayload<param::ParameterPtr>(0);
                 apex_assert_hard(p);
-                param::ParameterPtr proxy = p->clone<param::Parameter>();
+                param::ParameterPtr proxy = p->cloneAs<param::Parameter>();
                 createParameterProxy(proxy);
                 parameter_added(proxy);
             }
@@ -105,7 +105,7 @@ NodeFacadeProxy::NodeFacadeProxy(const SessionPtr &session, AUUID uuid)
 
                 } else {
                     param::ParameterPtr proxy = pos->second;
-                    proxy->setValueFrom(*p);
+                    proxy->cloneDataFrom(*p);
                     parameter_changed(proxy);
                 }
 
@@ -360,7 +360,7 @@ NodeStatePtr NodeFacadeProxy::getNodeState() const
 
 NodeStatePtr NodeFacadeProxy::getNodeStateCopy() const
 {
-    return state_proxy_->clone<NodeState>();
+    return state_proxy_->cloneAs<NodeState>();
 }
 
 ProfilerPtr NodeFacadeProxy::getProfiler()

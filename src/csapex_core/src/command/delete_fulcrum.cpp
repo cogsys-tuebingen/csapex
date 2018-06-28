@@ -7,7 +7,7 @@
 #include <csapex/model/connection.h>
 #include <csapex/model/fulcrum.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <sstream>
@@ -51,9 +51,9 @@ bool DeleteFulcrum::doRedo()
     return doExecute();
 }
 
-void DeleteFulcrum::serialize(SerializationBuffer &data) const
+void DeleteFulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << connection_id;
     data << fulcrum_id;
@@ -63,9 +63,9 @@ void DeleteFulcrum::serialize(SerializationBuffer &data) const
     data << type;
 }
 
-void DeleteFulcrum::deserialize(const SerializationBuffer& data)
+void DeleteFulcrum::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> connection_id;
     data >> fulcrum_id;

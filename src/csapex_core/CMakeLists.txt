@@ -116,10 +116,10 @@ file(WRITE ${INFO} "namespace csapex {\nnamespace info {\n")
 
 file(APPEND ${INFO} "static const std::string GIT_COMMIT_HASH { \"${GIT_COMMIT_HASH}\" };\n")
 file(APPEND ${INFO} "static const std::string GIT_BRANCH { \"${GIT_BRANCH}\" };\n")
-file(APPEND ${INFO} "static const std::string MAINTAINER { \"${csapex_MAINTAINER}\" };\n")
-file(APPEND ${INFO} "static const std::string VERSION { \"${csapex_VERSION}\" };\n")
-file(APPEND ${INFO} "static const std::string CSAPEX_BOOT_PLUGIN_DIR { \"${CSAPEX_BOOT_PLUGIN_DIR}\" };\n")
-file(APPEND ${INFO} "static const std::string CSAPEX_VERSION { \"${csapex_VERSION}\" };\n")
+file(APPEND ${INFO} "static const std::string MAINTAINER { \"${csapex_core_MAINTAINER}\" };\n")
+file(APPEND ${INFO} "static const std::string VERSION { \"${csapex_core_VERSION}\" };\n")
+file(APPEND ${INFO} "static const std::string CSAPEX_DEFAULT_BOOT_PLUGIN_DIR { \"${CSAPEX_BOOT_PLUGIN_DIR}\" };\n")
+file(APPEND ${INFO} "static const std::string CSAPEX_VERSION { \"${csapex_core_VERSION}\" };\n")
 
 file(APPEND ${INFO} "}\n}\n\n")
 
@@ -163,6 +163,10 @@ add_library(csapex_serialization SHARED
     src/serialization/snippet.cpp
     src/serialization/packet_serializer.cpp
     src/serialization/serialization_buffer.cpp
+
+    src/serialization/io/std_io.cpp
+    src/serialization/io/boost_io.cpp
+    src/serialization/io/csapex_io.cpp
 
     ${csapex_serialization_HEADERS}
 )
@@ -330,7 +334,6 @@ add_library(${PROJECT_NAME} SHARED
     src/model/subgraph_node.cpp
     src/model/graph_facade.cpp
     src/model/graph_facade_impl.cpp
-    src/model/memento.cpp
     src/model/notification.cpp
     src/model/notifier.cpp
     src/model/multi_connection_type.cpp

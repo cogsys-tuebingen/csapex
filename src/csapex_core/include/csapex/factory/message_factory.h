@@ -5,6 +5,7 @@
 #include <csapex/model/token_data.h>
 #include <csapex/msg/message.h>
 #include <csapex/msg/token_traits.h>
+#include <csapex/msg/serialization_format.h>
 
 /// PROJECT
 #include <csapex/utility/singleton.hpp>
@@ -34,19 +35,24 @@ public:
 
     template <typename M>
     static TokenData::Ptr createMessage() {
-        return connection_types::makeEmpty<M>();
+        return makeEmpty<M>();
     }
     template <template <typename> class Wrapper,typename M>
     static TokenData::Ptr createDirectMessage() {
-        return connection_types::makeEmptyMessage< Wrapper<M> >();
+        return makeEmpty< Wrapper<M> >();
     }
 
     static TokenData::Ptr createMessage(const std::string& type);
 
-    static TokenData::Ptr readMessage(const std::string& path);
-    static void writeMessage(const std::string& path, const TokenData &msg);
-    static void writeMessage(YAML::Emitter &yaml,
-                             const TokenData &msg);
+    static TokenData::Ptr readFile(const std::string& path);
+    static int writeFile(const std::string &path, const std::string &base, const int suffix,
+                         const TokenData &msg, serialization::Format format);
+
+    static TokenData::Ptr readYamlFile(const std::string& path);
+    static void writeYamlFile(const std::string& path, const TokenData &msg);
+
+    static TokenData::Ptr readBinaryFile(const std::string& path);
+    static void writeBinaryFile(const std::string& path, const TokenData &msg);
 
     void shutdown() override;
 

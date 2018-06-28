@@ -13,7 +13,8 @@
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/command_factory.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 using namespace command;
@@ -69,9 +70,9 @@ bool AddVariadicConnectorAndConnect::doRedo()
 
 
 
-void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data) const
+void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    AddVariadicConnector::serialize(data);
+    AddVariadicConnector::serialize(data, version);
 
     data << target_;
     data << move_;
@@ -80,9 +81,9 @@ void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data) const
     data << additional_work_;
 }
 
-void AddVariadicConnectorAndConnect::deserialize(const SerializationBuffer& data)
+void AddVariadicConnectorAndConnect::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    AddVariadicConnector::deserialize(data);
+    AddVariadicConnector::deserialize(data, version);
 
     data >> target_;
     data >> move_;

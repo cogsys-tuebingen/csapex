@@ -25,27 +25,22 @@ struct ValueMessageBase
 };
 
 template <typename Type>
-struct GenericValueMessage : public Message, public ValueMessageBase
+class GenericValueMessage : public Message, public ValueMessageBase
 {
+protected:
+    CLONABLE_IMPLEMENTATION(GenericValueMessage<Type>);
+
+public:
     typedef std::shared_ptr<GenericValueMessage<Type> > Ptr;
     typedef std::shared_ptr<GenericValueMessage<Type> const> ConstPtr;
 
-    GenericValueMessage(const Type& value = Type(), const std::string& frame_id = "/", Message::Stamp stamp = 0)
+    explicit GenericValueMessage(const Type& value = Type(), const std::string& frame_id = "/", Message::Stamp stamp = 0)
         : Message(type< GenericValueMessage<Type> >::name(), frame_id, stamp),
           value(value)
     {
+        static_assert(should_use_value_message<Type>::value, "The type should not use a value message");
         static csapex::DirectMessageConstructorRegistered<connection_types::GenericValueMessage, Type> reg_c;
         static csapex::DirectMessageSerializerRegistered<connection_types::GenericValueMessage, Type> reg_s;
-    }
-
-    virtual TokenData::Ptr clone() const override
-    {
-        return std::make_shared<GenericValueMessage<Type>>(value, frame_id, stamp_micro_seconds);
-    }
-
-    virtual TokenData::Ptr toType() const override
-    {
-        return std::make_shared<GenericValueMessage<Type>>();
     }
 
     bool acceptsConnectionFrom(const TokenData* other_side) const override
@@ -72,7 +67,7 @@ struct GenericValueMessage : public Message, public ValueMessageBase
         return value;
     }
 
-    bool isArithmetic() const override
+    constexpr bool isArithmetic() const override
     {
         return std::is_arithmetic<Type>::value;
     }
@@ -126,6 +121,17 @@ struct GenericValueMessage : public Message, public ValueMessageBase
         return universal_to_string(value);
     }
 
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
+    {        
+        Message::serialize(data, version);
+        // TODO: Version of value here
+        data << value;
+    }
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
+    {        
+        Message::deserialize(data, version);
+        data >> value;
+    }
 
     Type value;
 };

@@ -141,6 +141,11 @@ TokenPtr Connection::readToken()
     return message_;
 }
 
+bool Connection::holdsToken() const
+{
+    std::unique_lock<std::recursive_mutex> lock(sync);
+    return message_ != nullptr;
+}
 bool Connection::holdsActiveToken() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
@@ -164,7 +169,7 @@ void Connection::setTokenProcessed()
 void Connection::setToken(const TokenPtr &token)
 {
     {
-        TokenPtr msg = token->clone();
+        TokenPtr msg = token->cloneAs<Token>();
 
         std::unique_lock<std::recursive_mutex> lock(sync);
         apex_assert_hard(msg != nullptr);
@@ -292,7 +297,7 @@ int Connection::id() const
 
 ConnectionDescription Connection::getDescription() const
 {
-    TokenDataConstPtr type = message_ ? message_->getTokenData() : connection_types::makeEmpty<connection_types::AnyMessage>();
+    TokenDataConstPtr type = message_ ? message_->getTokenData() : makeEmpty<connection_types::AnyMessage>();
     return ConnectionDescription(from_->getUUID(), to_->getUUID(),
                                  type, id_, isActive(),
                                  getFulcrumsCopy());

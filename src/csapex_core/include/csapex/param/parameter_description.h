@@ -13,8 +13,8 @@ namespace param
 class CSAPEX_PARAM_EXPORT ParameterDescription
 {
 public:
-    explicit ParameterDescription(const std::string& toString);
-    explicit ParameterDescription();
+    ParameterDescription(const std::string& toString);
+    ParameterDescription();
 
     std::string toString() const;
     bool empty() const;

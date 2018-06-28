@@ -7,7 +7,7 @@
 #include <csapex/model/graph_facade_impl.h>
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <iostream>
@@ -123,9 +123,9 @@ bool Meta::doRedo()
 }
 
 
-void Meta::serialize(SerializationBuffer &data) const
+void Meta::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << nested;
     data << type;
@@ -133,9 +133,9 @@ void Meta::serialize(SerializationBuffer &data) const
     data << transaction;
 }
 
-void Meta::deserialize(const SerializationBuffer& data)
+void Meta::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> nested;
     data >> type;
@@ -143,18 +143,15 @@ void Meta::deserialize(const SerializationBuffer& data)
     data >> transaction;
 }
 
-void Meta::cloneFrom(const Command& other)
+void Meta::cloneData(const Meta& other)
 {
-    const Meta* instance = dynamic_cast<const Meta*>(&other);
-    if(instance) {
-        nested.clear();
-        nested.reserve(instance->nested.size());
-        for(const CommandPtr& cmd : instance->nested) {
-            nested.emplace_back(cmd->clone<Command>());
-        }
-
-        locked = instance->locked;
-        transaction = instance->transaction;
-        type = instance->type;
+    nested.clear();
+    nested.reserve(other.nested.size());
+    for(const CommandPtr& cmd : other.nested) {
+        nested.emplace_back(cmd->cloneAs<Command>());
     }
+
+    locked = other.locked;
+    transaction = other.transaction;
+    type = other.type;
 }

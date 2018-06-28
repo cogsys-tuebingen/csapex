@@ -12,13 +12,13 @@
 #include <csapex/msg/output_transition.h>
 #include <csapex/msg/input_transition.h>
 
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 using namespace csapex;
 using namespace connection_types;
 
 
-class TransitionTest : public ::testing::Test {
+class TransitionTest : public CsApexTestCase {
 protected:
     TransitionTest()
         : uuid_provider(std::make_shared<UUIDProvider>())

@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -59,28 +59,15 @@ void OutputProgressParameter::doDeserialize(const YAML::Node& n)
 {
 }
 
-void OutputProgressParameter::doSetValueFrom(const Parameter& other)
+void OutputProgressParameter::cloneDataFrom(const Clonable& other)
 {
-    const OutputProgressParameter* progress = dynamic_cast<const OutputProgressParameter*>(&other);
-    if(progress) {
+    if(const OutputProgressParameter* progress = dynamic_cast<const OutputProgressParameter*>(&other)) {
         if(value != progress->value || maximum != progress->maximum) {
-            value = progress->value;
-            maximum = progress->maximum;
+            *this = *progress;
             triggerChange();
         }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-void OutputProgressParameter::doClone(const Parameter& other)
-{
-    const OutputProgressParameter* progress = dynamic_cast<const OutputProgressParameter*>(&other);
-    if(progress) {
-        value = progress->value;
-        maximum = progress->maximum;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 
@@ -113,17 +100,17 @@ double OutputProgressParameter::getProgressMaximum() const
 }
 
 
-void OutputProgressParameter::serialize(SerializationBuffer &data) const
+void OutputProgressParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value;
     data << maximum;
 }
 
-void OutputProgressParameter::deserialize(const SerializationBuffer& data)
+void OutputProgressParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value;
     data >> maximum;

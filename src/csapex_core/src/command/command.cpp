@@ -7,7 +7,8 @@
 #include <csapex/utility/assert.h>
 #include <csapex/factory/node_factory_impl.h>
 #include <csapex/core/csapex_core.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 using namespace csapex;
 
@@ -170,19 +171,12 @@ uint8_t Command::getPacketType() const
 }
 
 
-void Command::serialize(SerializationBuffer &data) const
+void Command::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << graph_uuid;
 }
 
-void Command::deserialize(const SerializationBuffer& data)
+void Command::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> graph_uuid;
-}
-
-std::shared_ptr<Clonable> Command::cloneRaw() const
-{
-    auto res = std::dynamic_pointer_cast<Command>(makeEmptyClone());
-    res->cloneFrom(*this);
-    return res;
 }

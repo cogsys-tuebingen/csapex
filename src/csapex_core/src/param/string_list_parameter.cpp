@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -68,24 +68,13 @@ bool StringListParameter::set_unsafe(const boost::any &v)
 }
 
 
-void StringListParameter::doSetValueFrom(const Parameter &other)
+void StringListParameter::cloneDataFrom(const Clonable &other)
 {
-    const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other);
-    if(list) {
-        list_ = list->list_;
+    if(const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other)) {
+        *this = *list;
         triggerChange();
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-void StringListParameter::doClone(const Parameter &other)
-{
-    const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other);
-    if(list) {
-        list_ = list->list_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 
@@ -131,16 +120,16 @@ std::vector<std::string> StringListParameter::getValues() const
     return list_;
 }
 
-void StringListParameter::serialize(SerializationBuffer &data) const
+void StringListParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << list_;
 }
 
-void StringListParameter::deserialize(const SerializationBuffer& data)
+void StringListParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> list_;
 }

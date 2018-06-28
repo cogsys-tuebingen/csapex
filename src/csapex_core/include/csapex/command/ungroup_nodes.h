@@ -21,9 +21,8 @@ public:
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data) const override;
-    void deserialize(const SerializationBuffer& data) override;
-    void cloneFrom(const Command& other) override;
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::string getType() const override
     {

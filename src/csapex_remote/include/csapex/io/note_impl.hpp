@@ -12,6 +12,9 @@ template <typename I>
 class NoteImplementation : public io::Note
 {
 protected:
+    CLONABLE_IMPLEMENTATION(I);
+
+protected:
     NoteImplementation()
         : Note(AUUID::NONE)
     {
@@ -19,11 +22,6 @@ protected:
     NoteImplementation(const AUUID& auuid)
         : Note(auuid)
     {
-    }
-
-    std::shared_ptr<Clonable> makeEmptyClone() const
-    {
-        return std::make_shared<I>();
     }
 
     std::string getType() const override

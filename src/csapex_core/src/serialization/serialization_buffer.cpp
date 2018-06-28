@@ -1,7 +1,9 @@
 /// HEADER
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// PROJECT
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/model/activity_type.h>
 #include <csapex/model/connection_description.h>
 #include <csapex/model/connector_description.h>
@@ -139,7 +141,7 @@ void SerializationBuffer::init()
         ADD_ANY_TYPE(std::pair<double,double>);
         ADD_ANY_TYPE(ConnectorType);
         ADD_ANY_TYPE(YAML::Node);
-        ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
+//        ADD_ANY_TYPE_1(std::string, typeName(), TokenData);
         ADD_ANY_TYPE(TokenDataConstPtr);
         ADD_ANY_TYPE(SnippetPtr);
         ADD_ANY_TYPE(NodeCharacteristics);
@@ -170,9 +172,26 @@ void SerializationBuffer::finalize()
     }
 }
 
-void SerializationBuffer::seek(uint32_t p)
+void SerializationBuffer::seek(uint32_t p) const
 {
     pos = p;
+    apex_assert_lte(pos, size());
+}
+void SerializationBuffer::advance(uint32_t p) const
+{
+    pos += p;
+    apex_assert_lte(pos, size());
+}
+
+void SerializationBuffer::rewind() const
+{
+    pos = HEADER_LENGTH;
+}
+
+
+uint32_t SerializationBuffer::getPos() const
+{
+    return pos;
 }
 
 std::string SerializationBuffer::toString() const
@@ -221,16 +240,31 @@ StreamablePtr SerializationBuffer::read() const
 }
 
 
-SerializationBuffer& SerializationBuffer::operator << (const Serializable& s)
+void SerializationBuffer::writeRaw(const char* data, const std::size_t length)
 {
-    s.serialize(*this);
-    return *this;
+    reserve(size() + length);
+    std::copy (data, data+length, std::back_inserter(*this));
 }
 
-const SerializationBuffer& SerializationBuffer::operator >> (Serializable& s) const
+void SerializationBuffer::writeRaw(const uint8_t* data, const std::size_t length)
 {
-    s.deserialize(*this);
-    return *this;
+    reserve(size() + length);
+    std::copy (data, data+length, std::back_inserter(*this));
+}
+
+
+void SerializationBuffer::readRaw(char* data, const std::size_t length) const
+{
+    const char* start = reinterpret_cast<const char*>(&at(pos));
+    std::copy(start, start+length, data);
+    pos += length;
+}
+
+void SerializationBuffer::readRaw(uint8_t* data, const std::size_t length) const
+{
+    const uint8_t* start = &at(pos);
+    std::copy(start, start+length, data);
+    pos += length;
 }
 
 SerializationBuffer& SerializationBuffer::writeAny (const boost::any& any)
@@ -420,94 +454,21 @@ const SerializationBuffer& SerializationBuffer::operator >> (double& d) const
 }
 
 
-// STRINGS
-SerializationBuffer& SerializationBuffer::operator << (const std::string& s)
-{
-    apex_assert_lt_hard(s.size(), std::numeric_limits<uint16_t>::max());
-    operator << (static_cast<uint16_t>(s.size()));
-    for(const char& ch : s) {
-        push_back(ch);
-    }
-    return *this;
-}
 
-const SerializationBuffer& SerializationBuffer::operator >> (std::string& s) const
-{
-    uint16_t str_len;
-    operator >> (str_len);
-    apex_assert_lte_hard(pos + str_len, size());
-
-    s.resize(str_len, ' ');
-    for(std::size_t i = 0; i < str_len; ++i) {
-        s[i] = at(pos++);
-    }
-    return *this;
-}
-
-
-// STRING STREAMS
-SerializationBuffer& SerializationBuffer::operator << (const std::stringstream& s)
-{
-    operator << (s.str());
-    return *this;
-}
-
-const SerializationBuffer& SerializationBuffer::operator >> (std::stringstream& s) const
-{
-    std::string str;
-    operator >> (str);
-    s.str(str);
-    return *this;
-}
-
-// UUID
-SerializationBuffer& SerializationBuffer::operator << (const UUID& s)
-{
-    operator << (s.getFullName());
-    return *this;
-}
-
-const SerializationBuffer& SerializationBuffer::operator >> (UUID& s) const
-{
-    std::string full_name;
-    operator >> (full_name);
-    s = UUIDProvider::makeUUID_without_parent(full_name);
-    return *this;
-}
-
-// TokenData
-SerializationBuffer& SerializationBuffer::operator << (const TokenData& s)
-{
-    operator << (s.typeName());
-    operator << (s.descriptiveName());
-    // TODO: implement fully!
-    return *this;
-}
-
-const SerializationBuffer& SerializationBuffer::operator >> (TokenData& s) const
-{
-    std::string name;
-    operator >> (name);
-    std::string descriptive_name;
-    operator >> (descriptive_name);
-    // TODO: implement fully!
-    s = TokenData(name, descriptive_name);
-    return *this;
-}
 
 // YAML
 SerializationBuffer& SerializationBuffer::operator << (const YAML::Node& node)
 {
     std::stringstream ss;
     ss << node;
-    operator << (ss);
+    *this << ss;
     return *this;
 }
 
 const SerializationBuffer& SerializationBuffer::operator >> (YAML::Node& node) const
 {
     std::stringstream ss;
-    operator >> (ss);
+    *this >> ss;
     node = YAML::Load(ss);
     return *this;
 }

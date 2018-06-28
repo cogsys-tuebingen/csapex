@@ -5,13 +5,12 @@
 #include <csapex/factory/node_factory_impl.h>
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex_testing/test_exception_handler.h>
-
-#include "gtest/gtest.h"
+#include <csapex_testing/csapex_test_case.h>
 
 namespace csapex
 {
 
-class NodeConstructingTest : public ::testing::Test {
+class NodeConstructingTest : public CsApexTestCase {
 protected:
     NodeConstructingTest();
 

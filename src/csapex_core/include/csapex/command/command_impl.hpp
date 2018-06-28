@@ -12,6 +12,9 @@ template <typename I>
 class CommandImplementation : public Command
 {
 protected:
+    CLONABLE_IMPLEMENTATION(I);
+
+protected:
     CommandImplementation(const AUUID& graph_uuid)
         : Command(graph_uuid)
     {
@@ -22,23 +25,9 @@ protected:
     {
     }
 
-    std::shared_ptr<Clonable> makeEmptyClone() const override
-    {
-        return std::shared_ptr<Clonable>(new I);
-    }
-
     std::string getType() const override
     {
         return typeName();
-    }
-
-protected:
-    void cloneFrom(const Command& other) override
-    {
-        const I* instance = dynamic_cast<const I*>(&other);
-        if(instance) {
-            *this = *instance;
-        }
     }
 
 public:

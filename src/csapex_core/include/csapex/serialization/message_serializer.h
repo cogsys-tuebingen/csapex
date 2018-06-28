@@ -8,6 +8,8 @@
 #include <csapex/utility/tmp.hpp>
 #include <csapex/utility/type.h>
 #include <csapex_core/csapex_core_export.h>
+#include <csapex/serialization/packet_serializer.h>
+#include <csapex/msg/serialization_format.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -17,17 +19,18 @@ HAS_MEM_FUNC(encode, has_yaml_implementation);
 
 namespace csapex
 {
-namespace serial {
+namespace serial
+{
 
 template <typename Message, typename Selector = void>
 struct Serializer
 {
-static YAML::Node encode(const Message& msg) {
-    return YAML::convert<Message>::encode(msg);
-}
-static bool decode(const YAML::Node& node, Message& msg) {
-    return YAML::convert<Message>::decode(node, msg);
-}
+    static YAML::Node encode(const Message& msg) {
+        return YAML::convert<Message>::encode(msg);
+    }
+    static bool decode(const YAML::Node& node, Message& msg) {
+        return YAML::convert<Message>::decode(node, msg);
+    }
 };
 
 
@@ -42,17 +45,17 @@ bool decodeMessage(const YAML::Node& node, csapex::TokenData& msg) {
 
 }
 
-class CSAPEX_CORE_EXPORT MessageSerializer : public Singleton<MessageSerializer>
+class CSAPEX_CORE_EXPORT MessageSerializer : public Singleton<MessageSerializer>, public Serializer
 {
     friend class Singleton<MessageSerializer>;
 
 public:
-    struct Converter
+    struct YamlConverter
     {
         typedef std::function<YAML::Node(const csapex::TokenData&)> Encoder;
         typedef std::function<bool(const YAML::Node&, csapex::TokenData&)> Decoder;
 
-        Converter(Encoder encode, Decoder decode)
+        YamlConverter(Encoder encode, Decoder decode)
             : encoder(encode), decoder(decode)
         {}
 
@@ -64,8 +67,11 @@ public:
     typedef std::runtime_error DeserializationError;
 
 public:
-    static TokenData::Ptr deserializeMessage(const YAML::Node &node);
-    static YAML::Node serializeMessage(const TokenData& msg);
+    static TokenData::Ptr deserializeYamlMessage(const YAML::Node &node);
+    static YAML::Node serializeYamlMessage(const TokenData& msg);
+
+    static TokenData::Ptr deserializeBinaryMessage(const SerializationBuffer& buffer);
+    static void serializeBinaryMessage(const TokenData& msg, SerializationBuffer& buffer);
 
     static TokenData::Ptr readYaml(const YAML::Node& node);
 
@@ -81,9 +87,13 @@ public:
     template <typename M>
     static void registerMessage() {
         MessageSerializer::instance().registerMessage(connection_types::serializationName<M>(),
-                                                   Converter(std::bind(&serial::encodeMessage<M>, std::placeholders::_1),
-                                                             std::bind(&serial::decodeMessage<M>, std::placeholders::_1, std::placeholders::_2)));
+                                                      YamlConverter(std::bind(&serial::encodeMessage<M>, std::placeholders::_1),
+                                                                    std::bind(&serial::decodeMessage<M>, std::placeholders::_1, std::placeholders::_2)));
     }
+
+private:
+    void serialize(const Streamable& packet, SerializationBuffer &data) override;
+    StreamablePtr deserialize(const SerializationBuffer &data) override;
 
 private:
     template <template <typename> class Wrapper, typename M>
@@ -97,16 +107,16 @@ private:
     static void registerDirectMessageImpl(typename std::enable_if< !HasYaml<Wrapper,M>::type::value >::type* = 0)
     {
         MessageSerializer::instance().registerMessage(connection_types::serializationName< Wrapper<M> >(),
-                                                   Converter(std::bind(&serial::encodeMessage<Wrapper<M>>, std::placeholders::_1),
-                                                             std::bind(&serial::decodeMessage<Wrapper<M>>, std::placeholders::_1, std::placeholders::_2)));
+                                                      YamlConverter(std::bind(&serial::encodeMessage<Wrapper<M>>, std::placeholders::_1),
+                                                                    std::bind(&serial::decodeMessage<Wrapper<M>>, std::placeholders::_1, std::placeholders::_2)));
 
     }
     template <template <typename> class Wrapper, typename M>
     static void registerDirectMessageImpl(typename std::enable_if< HasYaml<Wrapper,M>::type::value >::type* = 0)
     {
         MessageSerializer::instance().registerMessage(connection_types::serializationName< Wrapper<M> >(),
-                                                   Converter(std::bind(&MessageSerializer::encodeDirectMessage<Wrapper, M>, std::placeholders::_1),
-                                                             std::bind(&MessageSerializer::decodeDirectMessage<Wrapper, M>, std::placeholders::_1, std::placeholders::_2)));
+                                                      YamlConverter(std::bind(&MessageSerializer::encodeDirectMessage<Wrapper, M>, std::placeholders::_1),
+                                                                    std::bind(&MessageSerializer::decodeDirectMessage<Wrapper, M>, std::placeholders::_1, std::placeholders::_2)));
     }
 
 
@@ -127,12 +137,12 @@ private:
 
 private:
     MessageSerializer();
-	~MessageSerializer();
+    ~MessageSerializer();
 
-    static void registerMessage(std::string type, Converter converter);
+    static void registerMessage(std::string type, YamlConverter converter);
 
 private:
-    std::map<std::string, Converter> type_to_converter;
+    std::map<std::string, YamlConverter> type_to_yaml_converter;
 };
 
 

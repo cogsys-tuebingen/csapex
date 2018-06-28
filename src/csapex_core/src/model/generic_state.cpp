@@ -6,6 +6,7 @@
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/assert.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <boost/regex.hpp>
@@ -18,16 +19,10 @@ GenericState::GenericState()
 
 }
 
-GenericState::GenericState(const GenericState& move)
+GenericState::GenericState(const GenericState& copy)
     : GenericState()
 {
-    params = move.params;
-    param_valid_name_cache = move.param_valid_name_cache;
-    temporary = move.temporary;
-    cached_parameter = move.cached_parameter;
-    persistent = move.persistent;
-    legacy = move.legacy;
-    order = move.order;
+    operator = (copy);
 }
 
 
@@ -43,6 +38,19 @@ GenericState::GenericState(GenericState&& move)
     order = std::move(move.order);
 }
 
+
+void GenericState::operator = (const GenericState& copy)
+{
+    params = copy.params;
+    param_valid_name_cache = copy.param_valid_name_cache;
+    temporary = copy.temporary;
+    cached_parameter = copy.cached_parameter;
+    persistent = copy.persistent;
+    legacy = copy.legacy;
+    order = copy.order;
+}
+
+
 void GenericState::setParentUUID(const UUID &parent_uuid)
 {
     apex_assert_hard(!parent_uuid.composite());
@@ -54,11 +62,16 @@ void GenericState::setParentUUID(const UUID &parent_uuid)
     }
 }
 
-GenericState::Ptr GenericState::clone() const
+ClonablePtr GenericState::makeEmptyInstance() const
 {
-    GenericState::Ptr r(new GenericState(*this));
+    return Ptr{new GenericState};
+}
 
-    return r;
+void GenericState::cloneDataFrom(const Clonable& other)
+{
+    if(const GenericState* other_state = dynamic_cast<const GenericState*>(&other)) {
+        setFrom(*other_state);
+    }
 }
 
 void GenericState::writeYaml(YAML::Node& out) const {
@@ -76,9 +89,10 @@ void GenericState::readYaml(const YAML::Node& node) {
             auto pos = params.find(pair.first);
             if(pos == params.end()) {
                 params[pair.first] = pair.second;
+                legacy_parameter_added(params[pair.first]);
             } else {
                 param::ParameterPtr p = pos->second;
-                p->setValueFrom(*pair.second);
+                p->cloneDataFrom(*pair.second);
             }
             legacy.insert(pair.first);
         }
@@ -88,6 +102,20 @@ void GenericState::readYaml(const YAML::Node& node) {
         persistent.clear();
         persistent.insert(persistent_v.begin(), persistent_v.end());
     }
+}
+
+
+void GenericState::serialize(SerializationBuffer &data, SemanticVersion& version) const
+{
+    version = {0,0,0};
+
+    data << params;
+    data << persistent;
+}
+void GenericState::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
+{
+    data >> params;
+    data >> persistent;
 }
 
 void GenericState::initializePersistentParameters()
@@ -110,7 +138,7 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
         if(legacy_pos == legacy.end()) {
             throw std::logic_error(std::string("a parameter with the name ") + param_name + " has already been added.");
         }
-        *param = *param_pos->second;
+        param->cloneDataFrom(*param_pos->second);
     }
     registerParameter(param);
 
@@ -178,7 +206,7 @@ void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &pa
                                      "of an existing parameter '" + name + "'");
         }
         param::Parameter::Ptr p = param_pos->second;
-        *entry = *p;
+        entry->cloneDataFrom(*p);
         removeParameter(p);
     }
     temporary[entry->name()] = true;
@@ -275,7 +303,7 @@ void GenericState::setFrom(const GenericState &rhs)
         csapex::param::Parameter::Ptr p = it->second;
         std::string name = p->name();
         if(params.find(name) != params.end()) {
-            params[name]->setValueFrom(*p);
+            params[name]->cloneDataFrom(*p);
         } else {
             params[name] = csapex::param::ParameterFactory::clone(p);
             legacy.insert(name);
@@ -389,3 +417,18 @@ template CSAPEX_CORE_EXPORT std::pair<int,int> GenericState::readParameter<std::
 template CSAPEX_CORE_EXPORT std::pair<double,double> GenericState::readParameter<std::pair<double,double> >(const std::string& name) const;
 template CSAPEX_CORE_EXPORT std::vector<int> GenericState::readParameter<std::vector<int> >(const std::string& name) const;
 template CSAPEX_CORE_EXPORT std::vector<double> GenericState::readParameter<std::vector<double> >(const std::string& name) const;
+
+/// YAML
+namespace YAML {
+Node convert<csapex::GenericState>::encode(const csapex::GenericState& rhs) {
+    Node n;
+    rhs.writeYaml(n);
+    return n;
+}
+
+bool convert<csapex::GenericState>::decode(const Node& node, csapex::GenericState& rhs) {
+    rhs.readYaml(node);
+    return true;
+}
+}
+

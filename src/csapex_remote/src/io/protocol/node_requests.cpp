@@ -13,7 +13,8 @@
 #include <csapex/model/node_handle.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
@@ -132,14 +133,14 @@ ResponsePtr NodeRequests::NodeRequest::execute(const SessionPtr &session, CsApex
     return std::make_shared<NodeResponse>(request_type_, uuid_, getRequestID());
 }
 
-void NodeRequests::NodeRequest::serialize(SerializationBuffer &data) const
+void NodeRequests::NodeRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << arguments_;
 }
 
-void NodeRequests::NodeRequest::deserialize(const SerializationBuffer& data)
+void NodeRequests::NodeRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;
@@ -172,14 +173,14 @@ NodeRequests::NodeResponse::NodeResponse(uint8_t request_id)
 
 }
 
-void NodeRequests::NodeResponse::serialize(SerializationBuffer &data) const
+void NodeRequests::NodeResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << result_;
 }
 
-void NodeRequests::NodeResponse::deserialize(const SerializationBuffer& data)
+void NodeRequests::NodeResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;

@@ -4,7 +4,8 @@
 /// PROJECT
 #include <csapex/serialization/broadcast_message_serializer.h>
 #include <csapex/utility/uuid_provider.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 
 /// SYSTEM
 #include <iostream>
@@ -24,13 +25,13 @@ ParameterChanged::ParameterChanged()
 
 }
 
-void ParameterChanged::serialize(SerializationBuffer &data) const
+void ParameterChanged::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << uuid;
     data << value;
 }
 
-void ParameterChanged::deserialize(const SerializationBuffer& data)
+void ParameterChanged::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> uuid;
     data >> value;

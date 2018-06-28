@@ -12,7 +12,8 @@
 #include <csapex/model/subgraph_node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/factory/message_factory.h>
@@ -177,9 +178,9 @@ RelayMapping AddVariadicConnector::getMap() const
 }
 
 
-void AddVariadicConnector::serialize(SerializationBuffer &data) const
+void AddVariadicConnector::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << connector_type;
     data << token_type->typeName();
@@ -191,9 +192,9 @@ void AddVariadicConnector::serialize(SerializationBuffer &data) const
     data << connector_id;
 }
 
-void AddVariadicConnector::deserialize(const SerializationBuffer& data)
+void AddVariadicConnector::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> connector_type;
 

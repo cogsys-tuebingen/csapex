@@ -15,6 +15,9 @@ namespace csapex
 {
 class CSAPEX_CORE_EXPORT Fulcrum : public Serializable
 {
+private:
+    CLONABLE_IMPLEMENTATION(Fulcrum);
+
 public:
     typedef std::shared_ptr<Fulcrum> Ptr;
 
@@ -35,6 +38,7 @@ public:
     };
 
 public:
+    Fulcrum();
     Fulcrum(int connection_id, const Point& p, int type, const Point& handle_in, const Point& handle_out);
     Fulcrum(const Fulcrum& copy);
     Fulcrum(Fulcrum&& moved);
@@ -60,20 +64,13 @@ public:
 
     bool operator == (const Fulcrum& other) const;
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 public:
     slim_signal::Signal<void (Fulcrum*, bool dropped)> moved;
     slim_signal::Signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
     slim_signal::Signal<void (Fulcrum*, int type)> typeChanged;
-
-protected:
-    virtual std::shared_ptr<Clonable> makeEmptyClone() const override;
-
-private:
-    friend class SerializationBuffer;
-    Fulcrum();
 
 private:
     int connection_id_;

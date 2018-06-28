@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/utility/assert.h>
 #include <csapex/serialization/streamable.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <iostream>

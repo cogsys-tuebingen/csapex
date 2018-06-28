@@ -3,6 +3,8 @@
 
 /// SYSTEM
 #include <csapex/factory/message_factory.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/msg/io.h>

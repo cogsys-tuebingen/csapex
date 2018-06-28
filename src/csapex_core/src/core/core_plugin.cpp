@@ -28,6 +28,11 @@ void CorePlugin::prepare(Settings&)
 
 }
 
+void CorePlugin::init(CsApexCore&)
+{
+
+}
+
 void CorePlugin::setupGraph(SubgraphNode *graph)
 {
 

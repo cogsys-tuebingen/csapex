@@ -23,8 +23,8 @@ public:
     ParameterChanged(const UUID& id, const boost::any& value);
     ParameterChanged();
 
-    virtual void serialize(SerializationBuffer &data) const override;
-    virtual void deserialize(const SerializationBuffer& data) override;
+    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     AUUID getUUID() const;
     boost::any getValue() const;

@@ -10,6 +10,7 @@
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/msg/generic_pointer_message.hpp>
 #include <csapex/serialization/yaml.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
@@ -18,9 +19,6 @@
 #include <vector>
 #undef NDEBUG
 #include <assert.h>
-
-// TODO REMOVE
-#include <iostream>
 
 namespace YAML
 {
@@ -39,6 +37,9 @@ struct GenericValueMessage;
 
 class CSAPEX_CORE_EXPORT GenericVectorMessage : public Message
 {
+protected:
+    CLONABLE_IMPLEMENTATION(GenericVectorMessage);
+
     friend class YAML::as_if<GenericVectorMessage, void>;
 
 public:
@@ -54,12 +55,7 @@ private:
         {
         }
 
-        virtual TokenData::Ptr clone() const override
-        {
-            return cloneEntry();
-        }
-
-        virtual EntryInterface::Ptr cloneEntry() const = 0;
+        virtual std::string nestedName() const = 0;
 
         virtual void encode(YAML::Node& node) const = 0;
         virtual void decode(const YAML::Node& node) = 0;
@@ -68,6 +64,9 @@ private:
     template <typename T>
     struct Implementation : public EntryInterface
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(Implementation<T>);
+
     private:
         template <typename Type, typename Enable = void>
         struct ExtractPayload
@@ -102,19 +101,6 @@ private:
             value.reset(new std::vector<Payload>);
         }
 
-        virtual EntryInterface::Ptr cloneEntry() const override
-        {
-            Self::Ptr r(new Self);
-            r->value = std::make_shared<std::vector<Payload>>(*value);
-            return r;
-        }
-
-        virtual TokenData::Ptr toType() const override
-        {
-            Self::Ptr r(new Self);
-            return r;
-        }
-
         virtual bool canConnectTo(const TokenData* other_side) const override
         {
             if(const EntryInterface* ei = dynamic_cast<const EntryInterface*> (other_side)) {
@@ -139,10 +125,13 @@ private:
             }
         }
 
+        std::string nestedName() const override
+        {
+            return type2name(typeid(T));
+        }
+
         void encode(YAML::Node& node) const override
         {
-            std::cout << "vector<"<< typeid(Payload).name() <<" < impl" << std::endl;
-            node["value_type"] = type2name(typeid(T));
             node["values"] = *value;
         }
 
@@ -150,7 +139,6 @@ private:
         {
             YAML::Emitter emitter;
             emitter << node;
-            std::cout << "vector<"<< typeid(Payload).name() <<" > impl: " << emitter.c_str() << std::endl;
             value.reset(new std::vector<Payload>);
             *value = node["values"].as< std::vector<Payload> >();
         }
@@ -266,7 +254,7 @@ private:
         static TokenData::ConstPtr convertToken(const MsgType& val,
                                                 typename std::enable_if<connection_types::should_use_pointer_message<MsgType>::value >::type* = 0)
         {
-            auto res = connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<MsgType> >();
+            auto res = csapex::makeEmpty<connection_types::GenericPointerMessage<MsgType> >();
             res->value = std::make_shared<MsgType>(val);
             return res;
         }
@@ -275,7 +263,7 @@ private:
         static TokenData::ConstPtr convertToken(const std::shared_ptr<MsgType>& val,
                                                 typename std::enable_if<connection_types::should_use_pointer_message<MsgType>::value >::type* = 0)
         {
-            auto res = connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<MsgType> >();
+            auto res = csapex::makeEmpty<connection_types::GenericPointerMessage<MsgType> >();
             res->value = val;
             return res;
         }
@@ -284,7 +272,7 @@ private:
         static TokenData::ConstPtr convertToken(const MsgType& val,
                                                 typename std::enable_if<connection_types::should_use_value_message<MsgType>::value >::type* = 0)
         {
-            auto res = connection_types::makeEmptyMessage<connection_types::GenericValueMessage<MsgType> >();
+            auto res = csapex::makeEmpty<connection_types::GenericValueMessage<MsgType> >();
             res->value = val;
             return res;
         }
@@ -308,13 +296,13 @@ private:
         template <typename MsgType>
         static TokenData::Ptr makeTypeImpl(typename std::enable_if<connection_types::should_use_pointer_message<MsgType>::value >::type* = 0)
         {
-            return connection_types::makeEmptyMessage<connection_types::GenericPointerMessage<MsgType> >();
+            return csapex::makeEmpty<connection_types::GenericPointerMessage<MsgType> >();
         }
 
         template <typename MsgType>
         static TokenData::Ptr makeTypeImpl(typename std::enable_if<connection_types::should_use_value_message<MsgType>::value >::type* = 0)
         {
-            return connection_types::makeEmptyMessage<connection_types::GenericValueMessage<MsgType> >();
+            return csapex::makeEmpty<connection_types::GenericValueMessage<MsgType> >();
         }
 
         template <typename MsgType>
@@ -323,7 +311,7 @@ private:
                                            !connection_types::should_use_value_message<MsgType>::value>::type* = 0)
         {
             static_assert(std::is_base_of<TokenData, MsgType>::value, "message has to be derived from TokenData");
-            return connection_types::makeEmptyMessage<MsgType>();
+            return csapex::makeEmpty<typename std::remove_const<MsgType>::type>();
         }
 
     public:
@@ -333,6 +321,10 @@ private:
     template <typename T>
     struct MessageImplementation : public Implementation<T>
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(MessageImplementation<T>);
+
+    public:
         typedef Implementation<T> Parent;
         typedef MessageImplementation<T> Self;
 
@@ -345,19 +337,16 @@ private:
             return Self::Ptr (new Self);
         }
 
-        virtual EntryInterface::Ptr cloneEntry() const override
+        std::string nestedName() const override
         {
-            auto r = std::make_shared<MessageImplementation<T>>();
-            *r->value = *value;
-            return r;
+            return type2name(typeid(T));
         }
-
 
         void encode(YAML::Node& node) const override
         {
             node["values"] = YAML::Node(YAML::NodeType::Sequence);
             for(const auto& entry : *value) {
-                node["values"].push_back(MessageSerializer::serializeMessage(entry));
+                node["values"].push_back(MessageSerializer::serializeYamlMessage(entry));
             }
         }
         void decode(const YAML::Node& node) override
@@ -369,45 +358,80 @@ private:
                     YAML::Node entry = centry;
                     entry["type"] = node["value_type"];
                     entry["data"] = centry;
-                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeMessage(entry));
+                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeYamlMessage(entry));
                 } else {
-                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeMessage(centry));
+                    msg = std::dynamic_pointer_cast<T>(MessageSerializer::deserializeYamlMessage(centry));
                 }
                 value->push_back(*msg);
             }
+        }
+
+        void serialize(SerializationBuffer &data, SemanticVersion& version) const override
+        {
+            TokenData::serialize(data, version);
+            data << value;
+        }
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
+        {
+            TokenData::deserialize(data, version);
+            data >> value;
         }
     };
 
     struct CSAPEX_CORE_EXPORT AnythingImplementation : public EntryInterface
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(AnythingImplementation);
+
+    public:
         AnythingImplementation();
 
-        virtual EntryInterface::Ptr cloneEntry() const override;
-        virtual TokenData::Ptr toType() const override;
-        virtual bool canConnectTo(const TokenData* other_side) const override;
-        virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
-        virtual void encode(YAML::Node& node) const override;
-        virtual void decode(const YAML::Node& node) override;
+        bool canConnectTo(const TokenData* other_side) const override;
+        bool acceptsConnectionFrom(const TokenData *other_side) const override;
+        void encode(YAML::Node& node) const override;
+        void decode(const YAML::Node& node) override;
+
+        void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+
+        std::string nestedName() const override
+        {
+            return "::anything::";
+        }
+
     };
 
     struct CSAPEX_CORE_EXPORT InstancedImplementation : public EntryInterface
     {
+    protected:
+        CLONABLE_IMPLEMENTATION(InstancedImplementation);
+
         friend class GenericVectorMessage;
 
+    public:
         InstancedImplementation(TokenData::ConstPtr type);
 
-        virtual EntryInterface::Ptr cloneEntry() const override;
-        virtual TokenData::Ptr toType() const override;
-        virtual bool canConnectTo(const TokenData* other_side) const override;
-        virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
-        virtual void encode(YAML::Node& node) const override;
-        virtual void decode(const YAML::Node& node) override;
+        bool canConnectTo(const TokenData* other_side) const override;
+        bool acceptsConnectionFrom(const TokenData *other_side) const override;
+        void encode(YAML::Node& node) const override;
+        void decode(const YAML::Node& node) override;
 
         TokenData::Ptr nestedType() const override;
 
-        virtual void addNestedValue(const TokenData::ConstPtr &msg) override;
-        virtual TokenData::ConstPtr nestedValue(std::size_t i) const override;
-        virtual std::size_t nestedValueCount() const override;
+        void addNestedValue(const TokenData::ConstPtr &msg) override;
+        TokenData::ConstPtr nestedValue(std::size_t i) const override;
+        std::size_t nestedValueCount() const override;
+
+        void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+
+        std::string nestedName() const override
+        {
+            return "::instanced::";
+        }
+
+    private:
+        InstancedImplementation();
 
     private:
         TokenData::ConstPtr type_;
@@ -472,13 +496,9 @@ public:
             }
             auto pos = instance().map_.find(ns_type);
             if(pos == instance().map_.end()) {
-                for(auto pair : instance().map_) {
-                    std::cout << "supported: " << pair.first << std::endl;
-                }
                 throw std::runtime_error(std::string("cannot make vector of type ") + type);
             }
-            //            std::cout << "!!!! make vector of type " << type << ": " << pos->second->typeName() << std::endl;;
-            return pos->second->cloneEntry();
+            return pos->second->cloneAs<EntryInterface>();
         }
 
         template <typename T>
@@ -547,12 +567,14 @@ public:
             }
             return res;
         } else {
-            std::cout << "type is " << type2name<T>() << std::endl;
             throw std::runtime_error("cannot make the msg vector shared");
         }
     }
     template <typename T>
-    std::shared_ptr<std::vector<T> const>  makeShared(typename std::enable_if<!std::is_base_of<TokenData, T>::value>::type* = 0) const
+    std::shared_ptr<std::vector<T> const>  makeShared(typename std::enable_if<!
+                                                      std::is_base_of<TokenData, T>::value &&
+                                                      !should_use_value_message<T>::value
+                                                      >::type* = 0) const
     {
         if(auto i = std::dynamic_pointer_cast< Implementation<T> > (impl)) {
             return i->value;
@@ -560,15 +582,29 @@ public:
             auto res = std::make_shared<std::vector<T>>();
             makeSharedValue(i.get(), res);
             return res;
-        } else if(auto i = std::dynamic_pointer_cast< MessageImplementation<GenericValueMessage<T>> >  (impl)) {
+        } else {
+            throw std::runtime_error("cannot make the direct vector shared");
+        }
+    }
+    template <typename T>
+    std::shared_ptr<std::vector<T> const>  makeShared(typename std::enable_if<
+                                                      !std::is_base_of<TokenData, T>::value &&
+                                                      should_use_value_message<T>::value
+                                                      >::type* = 0) const
+    {
+        if(auto i = std::dynamic_pointer_cast< MessageImplementation<GenericValueMessage<T>> >  (impl)) {
             auto res = std::make_shared<std::vector<T>>();
             for(auto entry : *i->value) {
                 res->push_back(entry.value);
             }
             return res;
+        } else  if(auto i = std::dynamic_pointer_cast< Implementation<T> > (impl)) {
+            return i->value;
+        } else if(auto i = std::dynamic_pointer_cast< InstancedImplementation > (impl)) {
+            auto res = std::make_shared<std::vector<T>>();
+            makeSharedValue(i.get(), res);
+            return res;
         } else {
-            std::cout << "instance is " << type2name(typeid(*impl)) << std::endl;
-            std::cout << "type is " << type2name<T>() << std::endl;
             throw std::runtime_error("cannot make the direct vector shared");
         }
     }
@@ -648,6 +684,7 @@ public:
 
     void encode(YAML::Node& node) const
     {
+        node["value_type"] = impl->nestedName();
         impl->encode(node);
     }
 
@@ -655,14 +692,11 @@ public:
     {
         std::string type = node["value_type"].as<std::string>();
         impl = SupportedTypes::make(type);
-        assert(impl);
+        apex_assert_hard(impl);
 
         impl->decode(node);
     }
 
-
-    virtual TokenData::Ptr clone() const override;
-    virtual TokenData::Ptr toType() const override;
 
     virtual bool canConnectTo(const TokenData* other_side) const override;
     virtual bool acceptsConnectionFrom(const TokenData *other_side) const override;
@@ -692,6 +726,27 @@ public:
         return impl->nestedValueCount();
     }
 
+    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
+    {
+        data << impl->nestedName();
+
+        impl->serialize(data, version);
+    }
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
+    {
+        std::string type;
+        data >> type;
+        impl = SupportedTypes::make(type);
+        apex_assert_hard(impl);
+
+        impl->deserialize(data, version);
+    }
+
+    static GenericVectorMessage::Ptr makeEmpty() {
+        return std::shared_ptr<GenericVectorMessage>(new GenericVectorMessage);
+    }
+
+
 private:
     GenericVectorMessage(EntryInterface::Ptr impl, const std::string &frame_id, Message::Stamp stamp_micro_seconds);
 
@@ -708,14 +763,14 @@ struct type<GenericVectorMessage> {
         return "Vector";
     }
 };
+}
 
 template <>
-inline std::shared_ptr<GenericVectorMessage> makeEmpty<GenericVectorMessage>()
+inline std::shared_ptr<connection_types::GenericVectorMessage> makeEmpty<connection_types::GenericVectorMessage>()
 {
-    return GenericVectorMessage::make<GenericVectorMessage::Anything>();
+    return connection_types::GenericVectorMessage::make<connection_types::GenericVectorMessage::Anything>();
 }
 
-}
 }
 
 template <typename T>

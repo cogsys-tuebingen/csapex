@@ -15,77 +15,12 @@
 #include <csapex/msg/input.h>
 #include <csapex/utility/register_msg.h>
 
+#include <csapex_testing/mockup_msgs.h>
 #include <csapex_testing/stepping_test.h>
 
-#include "gtest/gtest.h"
-
-#include <yaml-cpp/yaml.h>
-
-namespace csapex {
+#include <csapex_testing/csapex_test_case.h>
 
 
-struct Base {};
-struct Child : public Base {};
-
-namespace connection_types {
-
-struct BaseMessage : public MessageTemplate<Base, BaseMessage>
-{
-
-};
-
-template <>
-struct type<BaseMessage> {
-    static std::string name() {
-        return "Base";
-    }
-};
-
-
-
-
-struct ChildMessage : public MessageTemplate<Child, ChildMessage>
-{
-public:
-    int child_value;
-};
-
-template <>
-struct type<ChildMessage> {
-    static std::string name() {
-        return "Child";
-    }
-};
-
-
-}
-}
-
-CSAPEX_REGISTER_MESSAGE(BaseMessage)
-CSAPEX_REGISTER_MESSAGE(ChildMessage)
-
-
-/// YAML
-namespace YAML {
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::BaseMessage> {
-  static Node encode(const csapex::connection_types::BaseMessage& rhs){
-      return {};
-  }
-  static bool decode(const Node& node, csapex::connection_types::BaseMessage& rhs){
-      return true;
-  }
-};
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::ChildMessage> {
-  static Node encode(const csapex::connection_types::ChildMessage& rhs){
-      return {};
-  }
-  static bool decode(const Node& node, csapex::connection_types::ChildMessage& rhs) {
-      return true;
-  }
-};
-}
 namespace csapex
 {
 
@@ -321,7 +256,7 @@ TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToBaseViaNodes) {
     }
 }
 
-
+/*
 TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChildViaNodes) {
     GraphFacadeImplementation graph_facade(executor, graph, graph_node);
 
@@ -337,6 +272,6 @@ TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChildViaNodes) {
                                       graph->makeTypedUUID_forced(node2_id, "in", 0)),
                  csapex::HardAssertionFailure);
 }
-
+*/
 
 }

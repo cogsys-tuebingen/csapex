@@ -42,8 +42,11 @@ public:
 
     bool isActive() const;
     bool isBlocking() const;
+    bool isEnabled() const override;
 
-    virtual bool isSynchronous() const;
+    bool isSynchronous() const override;
+
+    void removeConnection(Connectable* connection) override;
 
     void notifyMessageAvailable(Connection* connection) override;
     void notifyMessageProcessed() override;
@@ -62,7 +65,7 @@ public:
     slim_signal::Signal<void()> triggered;
 
 protected:
-    virtual void addStatusInformation(std::stringstream& status_stream) const override;
+    void addStatusInformation(std::stringstream& status_stream) const override;
 
 private:
     void tryNextToken();

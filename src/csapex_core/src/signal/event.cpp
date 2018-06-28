@@ -18,7 +18,7 @@ using namespace csapex;
 Event::Event(const UUID& uuid, ConnectableOwnerWeakPtr owner)
     : StaticOutput(uuid, owner)
 {
-    setType(connection_types::makeEmpty<connection_types::AnyMessage>());
+    setType(makeEmpty<connection_types::AnyMessage>());
 }
 
 Event::~Event()

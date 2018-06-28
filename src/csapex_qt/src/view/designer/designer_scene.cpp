@@ -30,6 +30,7 @@
 /// SYSTEM
 #include <QtGui>
 #include <QtOpenGL>
+#include <QTimer>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -103,7 +104,7 @@ Point convert(const QPointF& p) {
 
 DesignerScene::DesignerScene(GraphFacadePtr graph_facade, CsApexViewCore& view_core)
     : view_core_(view_core), graph_facade_(graph_facade),
-      preview_(nullptr),
+      preview_timer_(nullptr), preview_(nullptr),
       draw_grid_(false), draw_schema_(false),
       display_messages_(true), display_signals_(true),
       display_active_(true), display_inactive_(true),
@@ -618,19 +619,15 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
                 }
             }
 
-            QPointF preview_pos = QCursor::pos() + QPointF(20, 20);
 
-            if(!preview_) {
-                preview_ = new MessagePreviewWidget;
-                preview_->hide();
+            if(!preview_timer_) {
+                preview_timer_ = new QTimer(this);
+                connect(preview_timer_, &QTimer::timeout, this, &DesignerScene::showPreview);
+
+            } else if(preview_timer_->isActive()) {
+                preview_timer_->stop();
             }
-
-            preview_->setWindowTitle(QString::fromStdString("Output"));
-            preview_->move(preview_pos.toPoint());
-
-            if(!preview_->isConnected()) {
-                preview_->connectTo(graph_facade_->findConnector(c.from));
-            }
+            preview_timer_->start(500);
 
             update();
 
@@ -640,6 +637,11 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
     } else if(highlight_connection_id_ >= 0)  {
         highlight_connection_id_ = -1;
+
+        if(preview_timer_ && preview_timer_->isActive()) {
+            preview_timer_->stop();
+        }
+
         for(auto v : views()) {
             v->setToolTip("");
         }
@@ -651,6 +653,28 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
             preview_ = nullptr;
         }
         update();
+    }
+}
+
+void DesignerScene::showPreview()
+{
+    if(highlight_connection_id_ < 0) {
+        return;
+    }
+
+    QPointF preview_pos = QCursor::pos() + QPointF(20, 20);
+
+    if(!preview_) {
+        preview_ = new MessagePreviewWidget;
+        preview_->hide();
+    }
+
+    preview_->setWindowTitle(QString::fromStdString("Output"));
+    preview_->move(preview_pos.toPoint());
+
+    if(!preview_->isConnected()) {
+        const ConnectionDescription& c = graph_facade_->getConnectionWithId(highlight_connection_id_);
+        preview_->connectTo(graph_facade_->findConnector(c.from));
     }
 }
 

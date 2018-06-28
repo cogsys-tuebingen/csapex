@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/serialization/parameter_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
@@ -189,10 +189,9 @@ bool SetParameter::set_unsafe(const boost::any &v)
 }
 
 
-void SetParameter::doSetValueFrom(const Parameter &other)
+void SetParameter::cloneDataFrom(const Clonable &other)
 {
-    const SetParameter* set = dynamic_cast<const SetParameter*>(&other);
-    if(set) {
+    if(const SetParameter* set = dynamic_cast<const SetParameter*>(&other)) {
         txt_ = set->txt_;
         bool change = false;
         if(set_.find(txt_) == set_.end()) {
@@ -209,25 +208,11 @@ void SetParameter::doSetValueFrom(const Parameter &other)
             change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(set->value_);
         }
         if(change) {
-            value_ = set->value_;
+            *this = *set;
             triggerChange();
         }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
-    }
-}
-
-
-void SetParameter::doClone(const Parameter &other)
-{
-    const SetParameter* set = dynamic_cast<const SetParameter*>(&other);
-    if(set) {
-        value_ = set->value_;
-        txt_ = set->txt_;
-        set_ = set->set_;
-        def_ = set->def_;
-    } else {
-        throw std::runtime_error("bad clone, invalid types");
     }
 }
 
@@ -330,9 +315,9 @@ bool SetParameter::accepts(const std::type_info& type) const
 
 
 
-void SetParameter::serialize(SerializationBuffer &data) const
+void SetParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Parameter::serialize(data);
+    Parameter::serialize(data, version);
 
     data << value_;
     data << txt_;
@@ -340,9 +325,9 @@ void SetParameter::serialize(SerializationBuffer &data) const
     data << def_;
 }
 
-void SetParameter::deserialize(const SerializationBuffer& data)
+void SetParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Parameter::deserialize(data);
+    Parameter::deserialize(data, version);
 
     data >> value_;
     data >> txt_;

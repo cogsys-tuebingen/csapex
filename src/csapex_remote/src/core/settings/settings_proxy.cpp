@@ -73,7 +73,7 @@ void SettingsProxy::add(csapex::param::Parameter::Ptr p, bool persistent)
             //std::cerr << "created parameter " << response->getParameter()->getUUID() << std::endl;
 
             // make a new parameter, when it gets changed relay the change to the remote server
-            param::ParameterPtr proxy = response->getParameter()->clone<param::Parameter>();
+            param::ParameterPtr proxy = response->getParameter()->cloneAs<param::Parameter>();
 
             createParameterProxy(p->name(), proxy);
         }
@@ -107,7 +107,7 @@ csapex::param::Parameter::Ptr SettingsProxy::getNoThrow(const std::string &name)
         //std::cerr << response->getParameter()->getUUID() << std::endl;
 
         // make a new parameter, when it gets changed relay the change to the remote server
-        param::ParameterPtr proxy = response->getParameter()->clone<param::Parameter>();
+        param::ParameterPtr proxy = response->getParameter()->cloneAs<param::Parameter>();
 
         createParameterProxy(name, proxy);
 

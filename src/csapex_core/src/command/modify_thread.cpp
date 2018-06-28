@@ -8,7 +8,7 @@
 #include <csapex/scheduling/thread_pool.h>
 #include <csapex/scheduling/thread_group.h>
 #include <csapex/command/command_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/cpu_affinity.h>
 
 /// SYSTEM
@@ -108,18 +108,18 @@ bool ModifyThread::doRedo()
 
 
 
-void ModifyThread::serialize(SerializationBuffer &data) const
+void ModifyThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
-    Command::serialize(data);
+    Command::serialize(data, version);
 
     data << id;
     data << name;
     data << affinity;
 }
 
-void ModifyThread::deserialize(const SerializationBuffer& data)
+void ModifyThread::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
-    Command::deserialize(data);
+    Command::deserialize(data, version);
 
     data >> id;
     data >> name;

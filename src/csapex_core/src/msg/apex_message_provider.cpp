@@ -5,6 +5,9 @@
 #include <csapex/core/settings.h>
 #include <csapex/factory/message_factory.h>
 
+/// SYSTEM
+#include <iostream>
+
 using namespace csapex;
 
 std::shared_ptr<MessageProvider> ApexMessageProvider::make()
@@ -15,13 +18,8 @@ std::shared_ptr<MessageProvider> ApexMessageProvider::make()
 void ApexMessageProvider::load(const std::string& file)
 {
     file_ = file;
-    if(cache_msg_) {
-        msg_ = cache_msg_;
 
-    } else {
-        msg_ = std::dynamic_pointer_cast<connection_types::Message>(MessageFactory::readMessage(file));
-        cache_msg_ = msg_;
-    }
+    msg_ = std::dynamic_pointer_cast<connection_types::Message>(MessageFactory::readFile(file));
 
     setSlotCount(1);
 }
@@ -33,11 +31,8 @@ bool ApexMessageProvider::hasNext()
 
 connection_types::Message::Ptr ApexMessageProvider::next(std::size_t /*slot*/)
 {
-    connection_types::Message::Ptr r = msg_;
-    if(!r) {
-        r = cache_msg_;
-    }
-    msg_.reset();
+    connection_types::Message::Ptr r;
+    std::swap(r, msg_);
     return r;
 }
 
@@ -48,17 +43,17 @@ std::string ApexMessageProvider::getLabel(std::size_t /*slot*/) const
 
 std::vector<std::string> ApexMessageProvider::getExtensions() const
 {
-    return { Settings::message_extension, Settings::message_extension_compressed };
+    return { Settings::message_extension, Settings::message_extension_compressed, Settings::message_extension_binary };
 }
 
 
-Memento::Ptr ApexMessageProvider::getState() const
+GenericStatePtr ApexMessageProvider::getState() const
 {
-    Memento::Ptr r(new Memento);
+    GenericStatePtr r(new GenericState);
     return r;
 }
 
-void ApexMessageProvider::setParameterState(Memento::Ptr /*memento*/)
+void ApexMessageProvider::setParameterState(GenericStatePtr /*memento*/)
 {
 
 }

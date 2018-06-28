@@ -14,7 +14,8 @@
 #include <csapex/profiling/profiler.h>
 #include <csapex/serialization/parameter_serializer.h>
 #include <csapex/serialization/request_serializer.h>
-#include <csapex/serialization/serialization_buffer.h>
+#include <csapex/serialization/io/std_io.h>
+#include <csapex/serialization/io/csapex_io.h>
 #include <csapex/utility/uuid_provider.h>
 
 /// SYSTEM
@@ -64,14 +65,14 @@ ResponsePtr ProfilerRequests::ProfilerRequest::execute(const SessionPtr &session
     return std::make_shared<ProfilerResponse>(request_type_, uuid_, getRequestID());
 }
 
-void ProfilerRequests::ProfilerRequest::serialize(SerializationBuffer &data) const
+void ProfilerRequests::ProfilerRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << arguments_;
 }
 
-void ProfilerRequests::ProfilerRequest::deserialize(const SerializationBuffer& data)
+void ProfilerRequests::ProfilerRequest::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;
@@ -104,14 +105,14 @@ ProfilerRequests::ProfilerResponse::ProfilerResponse(uint8_t request_id)
 
 }
 
-void ProfilerRequests::ProfilerResponse::serialize(SerializationBuffer &data) const
+void ProfilerRequests::ProfilerResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
     data << result_;
 }
 
-void ProfilerRequests::ProfilerResponse::deserialize(const SerializationBuffer& data)
+void ProfilerRequests::ProfilerResponse::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
     data >> request_type_;
     data >> uuid_;
