@@ -55,6 +55,7 @@ indigo-test:
     - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
+    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
 
 
 
@@ -79,6 +80,7 @@ jade-test:
     - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
+    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
 
 
 
@@ -103,6 +105,7 @@ kinetic-test:
     - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
+    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
 
 
 
@@ -127,6 +130,7 @@ lunar-test:
     - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
+    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
 
 
 
@@ -150,4 +154,5 @@ melodic-test:
   script:
     - tar xf build.tar
     - source devel/setup.bash
-    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
+    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test && cd -
+    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -

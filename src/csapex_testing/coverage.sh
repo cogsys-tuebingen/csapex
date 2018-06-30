@@ -2,6 +2,7 @@
 echo "running test coverage"
 
 set -x
+set -e
 
 THISDIR=$(pwd)
 SRCDIR=$(cd ..; pwd)
@@ -10,10 +11,11 @@ DIR=$THISDIR/traces
 
 # build
 cd $ROOT
+rm -fr build_coverage
 if ! [[ -d build_coverage ]]; then
 	mkdir -p build_coverage
 	cd $ROOT/build_coverage
-	cmake ../src -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=1
+	cmake ../src -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=True
 else
 	cd $ROOT/build_coverage
 fi
@@ -40,10 +42,11 @@ mkdir $DIR
 #find $ROOT/build_coverage -iname *.gcno | xargs cp -t $DIR
 
 cd $ROOT/build_coverage
-#make test
-devel/setup.bash
-rosrun csapex_util csapex_util_test
-rosrun csapex_core_test csapex_core_test
+make test
+#source devel/setup.bash
+#cd $THISDIR
+#rosrun csapex_util csapex_util_test
+#rosrun csapex_core_test csapex_core_test
 
 cd $THISDIR
 #find $ROOT/build_coverage -iname *.gcda | xargs mv -t $DIR
