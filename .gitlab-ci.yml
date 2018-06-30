@@ -1,7 +1,7 @@
 before_script:
   # Install ssh-agent if not already installed, it is required by Docker.
   # (change apt-get to yum if you use a CentOS-based image)
-  - 'apt-get -qq update -y && apt-get -qq install build-essential openssh-client sudo ccache -y'
+  - 'apt-get -qq update -y && apt-get -qq install build-essential openssh-client sudo ccache lcov -y'
 
   # Run ssh-agent (inside the build environment)
   - eval $(ssh-agent -s)
@@ -28,11 +28,11 @@ before_script:
 stages:
   - build
   - test
+  - documentation
 
 cache:
   paths:
     - ccache/
-
 
 
 indigo-build:
@@ -55,7 +55,6 @@ indigo-test:
     - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
-    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
 
 
 
@@ -80,7 +79,7 @@ jade-test:
     - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
-    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
+
 
 
 
@@ -105,8 +104,6 @@ kinetic-test:
     - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
-    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
-
 
 
 
@@ -130,7 +127,7 @@ lunar-test:
     - tar xf build.tar
     - source devel/setup.bash
     - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
-    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
+
 
 
 
@@ -154,5 +151,19 @@ melodic-test:
   script:
     - tar xf build.tar
     - source devel/setup.bash
-    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test && cd -
-    - cd src/csapex/src/csapex_testing && ./coverage.sh && cd -
+    - env BUILD_DIR=build IS_CI=1 src/csapex_testing/coverage.sh
+    - mkdir -p public && mv /builds/csapex/csapex/coverage public/coverage
+
+
+
+
+documentation:
+  stage: documentation
+  image: alpine
+  before_script:
+    - apk add --update doxygen ttf-freefont graphviz
+  script:
+    - mkdir -p public && doxygen doc/Doxyfile && mv doc/html/ public/doc/
+  artifacts:
+    paths:
+      - public/

@@ -92,6 +92,17 @@ To get the cs::APEX framework and a set of core plugins, perform the following:
     catkin_make
 
 
+## Creating Documenation
+
+To create the documentation, run
+
+    doxygen doc/Doxyfile
+
+This will generate the documentation at
+
+    doc/html/index.html
+
+
 ## Contributions
 
 All contributions are welcome, please refer to the CONTRIBUTING.md file.
