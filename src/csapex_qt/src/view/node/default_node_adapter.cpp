@@ -379,12 +379,12 @@ void DefaultNodeAdapter::setupParameter(std::shared_ptr<Parameter> p)
 
     adapter->doSetup(current_layout_, current_display_name_);
 
-    parameter_connections_[p.get()].push_back(p->removed.connect([this, adapter](param::ParameterPtr p) {
+    parameter_connections_[p.get()].push_back(p->destroyed.connect([this, adapter](param::Parameter* p) {
         auto pos = std::find(adapters_.begin(), adapters_.end(), adapter);
         if(pos != adapters_.end()) {
             adapters_.erase(pos);
         }
-        parameter_connections_.erase(p.get());
+        parameter_connections_.erase(p);
     }));
 }
 

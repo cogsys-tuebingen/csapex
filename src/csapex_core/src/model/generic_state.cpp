@@ -260,7 +260,6 @@ void GenericState::removePersistentParameters()
 
         removePersistentParameter(p);
 
-        p->removed(p);
         (parameter_removed)(p);
     }
 
