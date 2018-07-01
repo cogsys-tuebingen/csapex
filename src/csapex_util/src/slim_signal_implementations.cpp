@@ -17,5 +17,5 @@ template class Signal<void(long)>;
 template class Signal<void(unsigned long)>;
 template class Signal<void(const UUID&)>;
 template class Signal<void(const YAML::Node&)>;
-}
-}
+}  // namespace slim_signal
+}  // namespace csapex

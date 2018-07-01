@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class Request : public Streamable
 {
 public:
@@ -31,6 +30,6 @@ private:
     mutable uint8_t request_id_;
 };
 
-}
+}  // namespace csapex
 
-#endif // REQUEST_H
+#endif  // REQUEST_H

@@ -20,35 +20,33 @@ protected:
     {
     }
 
-    virtual ~BinarySerializationTest() {
+    virtual ~BinarySerializationTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         // Code here will be called immediately after the constructor (right
         // before each test).
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
-
 };
 
 TEST_F(BinarySerializationTest, TestUInt8)
 {
     std::size_t STEPS = 64;
 
-    for(uint8_t step = 0;
-        step < STEPS;
-        ++step)
-    {
-        uint8_t i = std::numeric_limits<uint8_t>::min() +
-                (step  / (double) STEPS) * (std::numeric_limits<uint8_t>::max() - std::numeric_limits<uint8_t>::min());
+    for (uint8_t step = 0; step < STEPS; ++step) {
+        uint8_t i = std::numeric_limits<uint8_t>::min() + (step / (double)STEPS) * (std::numeric_limits<uint8_t>::max() - std::numeric_limits<uint8_t>::min());
         SerializationBuffer buffer;
         buffer << i;
         uint8_t value;
@@ -58,17 +56,12 @@ TEST_F(BinarySerializationTest, TestUInt8)
     }
 }
 
-
 TEST_F(BinarySerializationTest, TestInt32)
 {
     std::size_t STEPS = 64;
 
-    for(uint8_t step = 0;
-        step < STEPS;
-        ++step)
-    {
-        uint32_t i = std::numeric_limits<int32_t>::min() +
-                (step  / (double) STEPS) * (std::numeric_limits<int32_t>::max() - std::numeric_limits<int32_t>::min());
+    for (uint8_t step = 0; step < STEPS; ++step) {
+        uint32_t i = std::numeric_limits<int32_t>::min() + (step / (double)STEPS) * (std::numeric_limits<int32_t>::max() - std::numeric_limits<int32_t>::min());
         SerializationBuffer buffer;
         buffer << i;
         int32_t value;
@@ -78,17 +71,12 @@ TEST_F(BinarySerializationTest, TestInt32)
     }
 }
 
-
 TEST_F(BinarySerializationTest, TestUInt16)
 {
     std::size_t STEPS = 64;
 
-    for(uint8_t step = 0;
-        step < STEPS;
-        ++step)
-    {
-        uint16_t i = std::numeric_limits<uint16_t>::min() +
-                (step  / (double) STEPS) * (std::numeric_limits<uint16_t>::max() - std::numeric_limits<uint16_t>::min());
+    for (uint8_t step = 0; step < STEPS; ++step) {
+        uint16_t i = std::numeric_limits<uint16_t>::min() + (step / (double)STEPS) * (std::numeric_limits<uint16_t>::max() - std::numeric_limits<uint16_t>::min());
         SerializationBuffer buffer;
         buffer << i;
         uint16_t value;
@@ -98,19 +86,12 @@ TEST_F(BinarySerializationTest, TestUInt16)
     }
 }
 
-
-
-
 TEST_F(BinarySerializationTest, TestUInt32)
 {
     std::size_t STEPS = 64;
 
-    for(uint8_t step = 0;
-        step < STEPS;
-        ++step)
-    {
-        uint32_t i = std::numeric_limits<uint32_t>::min() +
-                (step  / (double) STEPS) * (std::numeric_limits<uint32_t>::max() - std::numeric_limits<uint32_t>::min());
+    for (uint8_t step = 0; step < STEPS; ++step) {
+        uint32_t i = std::numeric_limits<uint32_t>::min() + (step / (double)STEPS) * (std::numeric_limits<uint32_t>::max() - std::numeric_limits<uint32_t>::min());
         SerializationBuffer buffer;
         buffer << i;
         uint32_t value;
@@ -120,17 +101,12 @@ TEST_F(BinarySerializationTest, TestUInt32)
     }
 }
 
-
 TEST_F(BinarySerializationTest, TestFloat)
 {
     std::size_t STEPS = 64;
 
-    for(uint8_t step = 0;
-        step < STEPS;
-        ++step)
-    {
-        float f = std::numeric_limits<float>::min() +
-                (step  / (double) STEPS) * (std::numeric_limits<float>::max() - std::numeric_limits<float>::min());
+    for (uint8_t step = 0; step < STEPS; ++step) {
+        float f = std::numeric_limits<float>::min() + (step / (double)STEPS) * (std::numeric_limits<float>::max() - std::numeric_limits<float>::min());
         SerializationBuffer buffer;
         buffer << f;
         float value;
@@ -149,12 +125,8 @@ TEST_F(BinarySerializationTest, TestDouble)
 {
     std::size_t STEPS = 64;
 
-    for(uint8_t step = 0;
-        step < STEPS;
-        ++step)
-    {
-        double d = std::numeric_limits<double>::min() +
-                (step  / (double) STEPS) * (std::numeric_limits<double>::max() - std::numeric_limits<double>::min());
+    for (uint8_t step = 0; step < STEPS; ++step) {
+        double d = std::numeric_limits<double>::min() + (step / (double)STEPS) * (std::numeric_limits<double>::max() - std::numeric_limits<double>::min());
         SerializationBuffer buffer;
         buffer << d;
         double value;
@@ -189,7 +161,6 @@ TEST_F(BinarySerializationTest, TestFloatNAN)
     ASSERT_TRUE(std::isnan(value));
 }
 
-
 TEST_F(BinarySerializationTest, TestDoubleINF)
 {
     SerializationBuffer buffer;
@@ -209,7 +180,6 @@ TEST_F(BinarySerializationTest, TestFloatINF)
 
     ASSERT_TRUE(std::isinf(value));
 }
-
 
 TEST_F(BinarySerializationTest, TestDoubleNegINF)
 {
@@ -243,7 +213,6 @@ TEST_F(BinarySerializationTest, TestBoolTrue)
     ASSERT_EQ(true, value);
 }
 
-
 TEST_F(BinarySerializationTest, TestBoolFalse)
 {
     SerializationBuffer buffer;
@@ -253,7 +222,6 @@ TEST_F(BinarySerializationTest, TestBoolFalse)
 
     ASSERT_EQ(false, value);
 }
-
 
 TEST_F(BinarySerializationTest, TestMulitpleBool)
 {
@@ -299,15 +267,9 @@ TEST_F(BinarySerializationTest, TestEmptyString)
     ASSERT_EQ(str, value);
 }
 
-
 TEST_F(BinarySerializationTest, TestMap)
 {
-    std::map<std::string, int> map {
-        {"a", 1},
-        {"b", 2},
-        {"c", 3},
-        {"d", 4}
-    };
+    std::map<std::string, int> map{ { "a", 1 }, { "b", 2 }, { "c", 3 }, { "d", 4 } };
 
     SerializationBuffer buffer;
     buffer << map;
@@ -338,7 +300,6 @@ TEST_F(BinarySerializationTest, TestUUID)
     buffer >> value;
     ASSERT_EQ(uuid2.getFullName(), value.getFullName());
 }
-
 
 TEST_F(BinarySerializationTest, SpecificTokenSerialization)
 {
@@ -429,7 +390,7 @@ TEST_F(BinarySerializationTest, VectorTest)
         GenericVectorMessage::Ptr message = GenericVectorMessage::make<MockMessage>();
 
         std::shared_ptr<std::vector<MockMessage>> vector = std::make_shared<std::vector<MockMessage>>();
-        for(int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 10; ++i) {
             vector->emplace_back();
             vector->back().payload = std::to_string(i);
         }

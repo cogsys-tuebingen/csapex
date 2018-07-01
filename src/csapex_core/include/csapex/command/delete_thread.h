@@ -9,7 +9,6 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT DeleteThread : public CommandImplementation<DeleteThread>
 {
     COMMAND_HEADER(DeleteThread);
@@ -19,7 +18,7 @@ public:
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -32,8 +31,8 @@ private:
     std::string name;
 };
 
-}
+}  // namespace command
 
-}
+}  // namespace csapex
 
-#endif // DELETE_THREAD_H
+#endif  // DELETE_THREAD_H

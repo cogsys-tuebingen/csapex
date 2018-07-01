@@ -18,7 +18,6 @@
 
 namespace csapex
 {
-
 class TcpServer : public Server
 {
 public:
@@ -32,13 +31,13 @@ public:
 
 protected:
     void startSession(SessionPtr session);
-    void stopSession(Session *session);
+    void stopSession(Session* session);
 
 private:
     void spin();
     void do_accept();
 
-    void handlePacket(const SessionPtr &session, const StreamableConstPtr &packet);
+    void handlePacket(const SessionPtr& session, const StreamableConstPtr& packet);
 
     boost::asio::io_service io_service_;
     boost::asio::ip::tcp::acceptor acceptor_;
@@ -55,6 +54,6 @@ private:
     std::map<Session*, GraphServerPtr> graph_servers_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TCP_SERVER_H
+#endif  // TCP_SERVER_H

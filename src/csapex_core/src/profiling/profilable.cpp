@@ -6,16 +6,12 @@
 
 using namespace csapex;
 
-Profilable::Profilable()
-    : profiler_(std::make_shared<ProfilerImplementation>())
+Profilable::Profilable() : profiler_(std::make_shared<ProfilerImplementation>())
 {
-
 }
 
-Profilable::Profilable(std::shared_ptr<Profiler> profiler)
-    : profiler_(profiler)
+Profilable::Profilable(std::shared_ptr<Profiler> profiler) : profiler_(profiler)
 {
-
 }
 
 void Profilable::useProfiler(std::shared_ptr<Profiler> profiler)

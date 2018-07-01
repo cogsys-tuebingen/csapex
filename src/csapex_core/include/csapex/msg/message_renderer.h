@@ -19,7 +19,6 @@ class QImage;
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT MessageRenderer
 {
 public:
@@ -44,7 +43,7 @@ public:
     virtual std::unique_ptr<QImage> render(const TokenDataConstPtr& msg) final override
     {
         const auto& real_msg = std::dynamic_pointer_cast<Message const>(msg);
-        if(real_msg) {
+        if (real_msg) {
             return doRender(*real_msg);
         } else {
             throw std::runtime_error(std::string("cannot render message of type ") + typeid(Message).name());
@@ -59,7 +58,6 @@ public:
     virtual std::unique_ptr<QImage> doRender(const Message& msg) = 0;
 };
 
-}
+}  // namespace csapex
 
-#endif // MESSAGE_RENDERER_H
-
+#endif  // MESSAGE_RENDERER_H

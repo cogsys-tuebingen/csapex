@@ -15,10 +15,8 @@
 
 using namespace csapex;
 
-WidgetPicker::WidgetPicker()
-    : designer_scene_(nullptr), widget_(nullptr)
+WidgetPicker::WidgetPicker() : designer_scene_(nullptr), widget_(nullptr)
 {
-
 }
 
 void WidgetPicker::startPicking(DesignerScene* designer_scene)
@@ -40,51 +38,49 @@ QWidget* WidgetPicker::getWidget()
     return widget_;
 }
 
-bool WidgetPicker::eventFilter(QObject*, QEvent * e)
+bool WidgetPicker::eventFilter(QObject*, QEvent* e)
 {
-    switch(e->type()) {
-    case QEvent::KeyPress: {
-        QKeyEvent* ke = dynamic_cast<QKeyEvent*>(e);
-        int key = ke->key();
+    switch (e->type()) {
+        case QEvent::KeyPress: {
+            QKeyEvent* ke = dynamic_cast<QKeyEvent*>(e);
+            int key = ke->key();
 
-        if(key == Qt::Key_Escape) {
-            e->accept();
-            widget_ = nullptr;
-
-            Q_EMIT widgetPicked();
-            return true;
-        }
-    }
-        break;
-
-    case QEvent::GraphicsSceneMousePress: {
-        QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*> (e);
-        if(me->button() == Qt::LeftButton) {
-            QGraphicsItem* item = designer_scene_->itemAt(me->scenePos(), QTransform());
-
-            if(item && item->type() == QGraphicsProxyWidget::Type) {
-                QGraphicsProxyWidget* proxy = static_cast<QGraphicsProxyWidget*>(item);
-                QWidget* widget = proxy->widget();
-                QPointF p = proxy->mapFromScene(me->scenePos());
-                QWidget* child = widget->childAt(p.toPoint());
-
-                widget_ = child;
-            } else {
+            if (key == Qt::Key_Escape) {
+                e->accept();
                 widget_ = nullptr;
+
+                Q_EMIT widgetPicked();
+                return true;
             }
+        } break;
 
-            Q_EMIT widgetPicked();
+        case QEvent::GraphicsSceneMousePress: {
+            QGraphicsSceneMouseEvent* me = dynamic_cast<QGraphicsSceneMouseEvent*>(e);
+            if (me->button() == Qt::LeftButton) {
+                QGraphicsItem* item = designer_scene_->itemAt(me->scenePos(), QTransform());
 
-            e->accept();
+                if (item && item->type() == QGraphicsProxyWidget::Type) {
+                    QGraphicsProxyWidget* proxy = static_cast<QGraphicsProxyWidget*>(item);
+                    QWidget* widget = proxy->widget();
+                    QPointF p = proxy->mapFromScene(me->scenePos());
+                    QWidget* child = widget->childAt(p.toPoint());
+
+                    widget_ = child;
+                } else {
+                    widget_ = nullptr;
+                }
+
+                Q_EMIT widgetPicked();
+
+                e->accept();
+                return true;
+            }
+        } break;
+
+        default:
+            e->ignore();
             return true;
-        }
-    }
-        break;
-
-    default:
-        e->ignore();
-        return true;
-        break;
+            break;
     }
 
     return false;

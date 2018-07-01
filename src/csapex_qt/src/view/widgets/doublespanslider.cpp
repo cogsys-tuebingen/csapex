@@ -8,14 +8,10 @@
 #include <iostream>
 #include <cmath>
 
-DoubleSpanSlider::DoubleSpanSlider(Qt::Orientation orientation, double step_size, QWidget* parent)
-    : QxtSpanSlider(orientation, parent),
-      step_(step_size),
-      min_(0.0),
-      max_(1.0)
+DoubleSpanSlider::DoubleSpanSlider(Qt::Orientation orientation, double step_size, QWidget* parent) : QxtSpanSlider(orientation, parent), step_(step_size), min_(0.0), max_(1.0)
 {
-    connect(this, SIGNAL(spanChanged(int,int)), this, SLOT(scaleSpan(int,int)));
-    connect(this, SIGNAL(rangeChanged(int,int)), this, SLOT(scaleRange(int,int)));
+    connect(this, SIGNAL(spanChanged(int, int)), this, SLOT(scaleSpan(int, int)));
+    connect(this, SIGNAL(rangeChanged(int, int)), this, SLOT(scaleRange(int, int)));
 }
 
 void DoubleSpanSlider::setSpan(double lower, double upper)
@@ -75,7 +71,7 @@ void DoubleSpanSlider::update(double min, double max)
     int mini = double2int(min, min);
     int maxi = double2int(max, min);
 
-    if(minimum() != mini || maximum() != maxi) {
+    if (minimum() != mini || maximum() != maxi) {
         double low = int2double(lowerValue());
         double up = int2double(upperValue());
 
@@ -89,19 +85,18 @@ void DoubleSpanSlider::update(double min, double max)
 
         setLowerValue(double2int(low));
         setUpperValue(double2int(up));
-   }
+    }
 }
-
 
 void DoubleSpanSlider::scaleSpan(int l, int u)
 {
     double low = int2double(l);
     double up = int2double(u);
 
-    if(low != lowerDoubleValue()){
+    if (low != lowerDoubleValue()) {
         setLowerDoubleValue(low);
     }
-    if(up != upperDoubleValue()){
+    if (up != upperDoubleValue()) {
         setUpperDoubleValue(up);
     }
 
@@ -129,7 +124,6 @@ int DoubleSpanSlider::double2int(double val) const
 {
     return double2int(val, min_);
 }
-
 
 double DoubleSpanSlider::int2double(int val, double min) const
 {

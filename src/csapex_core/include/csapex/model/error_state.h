@@ -13,17 +13,16 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT ErrorState
 {
 public:
-    enum class ErrorLevel {
+    enum class ErrorLevel
+    {
         NONE = 0,
         INFO = 1,
         ERROR = 2,
         WARNING = 3
     };
-
 
 public:
     void setError(bool e, const std::string& msg = "", ErrorLevel level = ErrorLevel::ERROR);
@@ -50,6 +49,6 @@ private:
     ErrorLevel level_;
 };
 
-}
+}  // namespace csapex
 
-#endif // DISPLAYABLE_H
+#endif  // DISPLAYABLE_H

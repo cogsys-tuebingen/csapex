@@ -13,22 +13,15 @@ ProfilerNote::ProfilerNote()
 {
 }
 
-ProfilerNote::ProfilerNote(ProfilerNoteType request_type, const AUUID &uuid)
-    : NoteImplementation(uuid),
-      note_type_(request_type)
+ProfilerNote::ProfilerNote(ProfilerNoteType request_type, const AUUID& uuid) : NoteImplementation(uuid), note_type_(request_type)
 {
-
 }
 
-ProfilerNote::ProfilerNote(ProfilerNoteType request_type, const AUUID &uuid, const std::vector<boost::any> &payload)
-    : NoteImplementation(uuid),
-      note_type_(request_type),
-      payload_(payload)
+ProfilerNote::ProfilerNote(ProfilerNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload) : NoteImplementation(uuid), note_type_(request_type), payload_(payload)
 {
-
 }
 
-void ProfilerNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ProfilerNote::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Note::serialize(data, version);
 

@@ -29,10 +29,8 @@ using namespace csapex;
 
 Q_DECLARE_METATYPE(ConnectorPtr)
 
-
-DragIO::DragIO(PluginLocatorPtr locator, CommandExecutor *dispatcher)
-    : loaded_(false), plugin_locator_(locator), manager_(new PluginManager<DragIOHandler>("csapex::DragIOHandler")),
-      dispatcher_(dispatcher)
+DragIO::DragIO(PluginLocatorPtr locator, CommandExecutor* dispatcher)
+  : loaded_(false), plugin_locator_(locator), manager_(new PluginManager<DragIOHandler>("csapex::DragIOHandler")), dispatcher_(dispatcher)
 {
 }
 
@@ -44,18 +42,18 @@ DragIO::~DragIO()
 
 void DragIO::load()
 {
-    if(loaded_) {
+    if (loaded_) {
         return;
     }
 
     manager_->load(plugin_locator_.get());
 
-    for(const auto& pair : manager_->getConstructors()) {
+    for (const auto& pair : manager_->getConstructors()) {
         try {
             DragIOHandler::Ptr handler(pair.second());
             registerHandler(handler);
 
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             std::cerr << "cannot load DragIOHandler " << pair.first << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
         }
     }
@@ -70,27 +68,27 @@ void DragIO::registerHandler(DragIOHandler::Ptr h)
 
 void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
 {
-    if(!loaded_) {
+    if (!loaded_) {
         load();
     }
 
-    if(e->mimeData()->hasFormat("xcsapex/node-list")) {
+    if (e->mimeData()->hasFormat("xcsapex/node-list")) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::node))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::node))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::snippet))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::snippet))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         e->acceptProposedAction();
 
     } else {
-        if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+        if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
             QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
             QDataStream stream(&itemData, QIODevice::ReadOnly);
 
@@ -100,20 +98,19 @@ void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
 
             std::string cmd = v[Qt::UserRole].toString().toStdString();
 
-            if(cmd == csapex::mime::node || cmd == csapex::mime::snippet) {
+            if (cmd == csapex::mime::node || cmd == csapex::mime::snippet) {
                 e->accept();
             }
         }
     }
 
-
-    for(auto h : handler_) {
-        if(h->handleEnter(src, dispatcher_, e)) {
+    for (auto h : handler_) {
+        if (h->handleEnter(src, dispatcher_, e)) {
             return;
         }
     }
 
-    if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+    if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
         QDataStream stream(&itemData, QIODevice::ReadOnly);
 
@@ -123,36 +120,34 @@ void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
 
         std::string cmd = v[Qt::UserRole].toString().toStdString();
 
-        if(cmd != csapex::mime::node && cmd != csapex::mime::snippet) {
+        if (cmd != csapex::mime::node && cmd != csapex::mime::snippet) {
             std::cout << "warning: data is ";
             typedef const std::pair<int, QVariant> PAIR;
-            for(PAIR& pair : v.toStdMap()) {
+            for (PAIR& pair : v.toStdMap()) {
                 std::cout << pair.first << ":\t" << pair.second.toString().toStdString() << '\n';
             }
             std::cout << std::endl;
         }
     }
-
 }
 
-void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
+void DragIO::dragMoveEvent(GraphView* src, QDragMoveEvent* e)
 {
-    if(!loaded_) {
+    if (!loaded_) {
         load();
     }
 
-    if(e->mimeData()->hasFormat("xcsapex/node-list")) {
+    if (e->mimeData()->hasFormat("xcsapex/node-list")) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::node))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::node))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::snippet))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::snippet))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
-
-        if(!e->isAccepted()) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+        if (!e->isAccepted()) {
             ConnectorPtr c = e->mimeData()->property("Connector").value<ConnectorPtr>();
             e->acceptProposedAction();
 
@@ -164,8 +159,8 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
             scene->update();
         }
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
-        if(!e->isAccepted()) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+        if (!e->isAccepted()) {
             ConnectorPtr c = e->mimeData()->property("Connector").value<ConnectorPtr>();
             e->acceptProposedAction();
 
@@ -173,9 +168,9 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
             GraphFacade* graph_facade = src->getGraphFacade();
 
             scene->deleteTemporaryConnections();
-            for(const UUID& other_id : c->getConnectedPorts()) {
-                if(ConnectorPtr p = graph_facade->findConnectorNoThrow(other_id)) {
-                    if(c->isOutput()) {
+            for (const UUID& other_id : c->getConnectedPorts()) {
+                if (ConnectorPtr p = graph_facade->findConnectorNoThrow(other_id)) {
+                    if (c->isOutput()) {
                         scene->addTemporaryConnection(p, src->mapToScene(e->pos()));
                     } else {
                         scene->addTemporaryConnection(p, src->mapToScene(e->pos()));
@@ -185,7 +180,7 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
             scene->update();
         }
 
-    }  else if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+    } else if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
         QDataStream stream(&itemData, QIODevice::ReadOnly);
 
@@ -195,32 +190,31 @@ void DragIO::dragMoveEvent(GraphView *src, QDragMoveEvent* e)
 
         std::string cmd = v[Qt::UserRole].toString().toStdString();
 
-        if(cmd == csapex::mime::node || cmd == csapex::mime::snippet) {
+        if (cmd == csapex::mime::node || cmd == csapex::mime::snippet) {
             e->accept();
         }
-    }
-    else {
-        for(auto h : handler_) {
-            if(h->handleMove(src, dispatcher_, e)) {
+    } else {
+        for (auto h : handler_) {
+            if (h->handleMove(src, dispatcher_, e)) {
                 return;
             }
         }
     }
 }
 
-void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
+void DragIO::dropEvent(GraphView* src, QDropEvent* e, const QPointF& scene_pos)
 {
-    if(!loaded_) {
+    if (!loaded_) {
         load();
     }
 
     std::cout << "warning: drop event: " << e->mimeData()->formats().join(", ").toStdString() << std::endl;
 
-    if(e->mimeData()->hasFormat("xcsapex/node-list")) {
+    if (e->mimeData()->hasFormat("xcsapex/node-list")) {
         e->setDropAction(Qt::CopyAction);
         e->accept();
 
-        QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
+        QPoint offset(e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
         QByteArray itemData = e->mimeData()->data("xcsapex/node-list");
@@ -228,41 +222,40 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
         YAML::Node doc = YAML::Load(serialized.toStdString());
 
         pasteGraph(src, pos, doc);
-
-
-    } if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::node))) {
+    }
+    if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::node))) {
         std::string type = QString(e->mimeData()->data(QString::fromStdString(csapex::mime::node))).toStdString();
 
         e->setDropAction(Qt::CopyAction);
         e->accept();
 
-        QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
+        QPoint offset(e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
         NodeStatePtr state;
-        if(!e->mimeData()->property("state").isNull()) {
-            NodeStatePtr* state_ptr = (NodeStatePtr *) e->mimeData()->property("state").value<void *>();
+        if (!e->mimeData()->property("state").isNull()) {
+            NodeStatePtr* state_ptr = (NodeStatePtr*)e->mimeData()->property("state").value<void*>();
             state = *state_ptr;
         }
 
         createNode(src, type, pos, state);
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::snippet))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::snippet))) {
         std::string type = QString(e->mimeData()->data(QString::fromStdString(csapex::mime::snippet))).toStdString();
 
         e->setDropAction(Qt::CopyAction);
         e->accept();
 
-        QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
+        QPoint offset(e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
         QPointF pos = src->mapToScene(e->pos()) + offset;
 
-        if(SnippetFactoryPtr sf = src->getViewCore().getSnippetFactory()) {
+        if (SnippetFactoryPtr sf = src->getViewCore().getSnippetFactory()) {
             SnippetPtr snippet = sf->getSnippet(type);
 
             pasteGraph(src, pos, *snippet);
         }
 
-    } else if(e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+    } else if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         QByteArray itemData = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
         QDataStream stream(&itemData, QIODevice::ReadOnly);
 
@@ -272,62 +265,59 @@ void DragIO::dropEvent(GraphView *src, QDropEvent* e, const QPointF& scene_pos)
 
         std::string cmd = v[Qt::UserRole].toString().toStdString();
 
-        if(cmd == csapex::mime::node) {
+        if (cmd == csapex::mime::node) {
             std::string type = v[Qt::UserRole + 1].toString().toStdString();
 
             e->setDropAction(Qt::CopyAction);
             e->accept();
 
-            QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
+            QPoint offset(e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
             QPointF pos = src->mapToScene(e->pos()) + offset;
 
             NodeStatePtr state;
-            if(!e->mimeData()->property("state").isNull()) {
-                NodeStatePtr* state_ptr = (NodeStatePtr *) e->mimeData()->property("state").value<void *>();
+            if (!e->mimeData()->property("state").isNull()) {
+                NodeStatePtr* state_ptr = (NodeStatePtr*)e->mimeData()->property("state").value<void*>();
                 state = *state_ptr;
             }
 
             createNode(src, type, pos, state);
 
-        } else if(cmd == csapex::mime::snippet) {
+        } else if (cmd == csapex::mime::snippet) {
             std::string type = v[Qt::UserRole + 1].toString().toStdString();
 
             e->setDropAction(Qt::CopyAction);
             e->accept();
 
-            QPoint offset (e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
+            QPoint offset(e->mimeData()->property("ox").toInt(), e->mimeData()->property("oy").toInt());
             QPointF pos = src->mapToScene(e->pos()) + offset;
 
-            if(SnippetFactoryPtr sf = src->getViewCore().getSnippetFactory()) {
+            if (SnippetFactoryPtr sf = src->getViewCore().getSnippetFactory()) {
                 SnippetPtr snippet = sf->getSnippet(type);
 
                 pasteGraph(src, pos, *snippet);
             }
         }
 
-
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         e->ignore();
         DesignerScene* scene = src->designerScene();
         scene->deleteTemporaryConnections();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         e->ignore();
         DesignerScene* scene = src->designerScene();
         scene->deleteTemporaryConnections();
 
     } else {
-        for(auto h : handler_) {
-            if(h->handleDrop(src, dispatcher_, e, scene_pos)) {
+        for (auto h : handler_) {
+            if (h->handleDrop(src, dispatcher_, e, scene_pos)) {
                 return;
             }
         }
     }
 }
 
-
-void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
-                        NodeStatePtr state)
+void DragIO::createNode(GraphView* src, std::string type, const QPointF& pos, NodeStatePtr state)
 {
     GraphFacade* gf = src->getGraphFacade();
     UUID uuid = gf->generateUUID(type);
@@ -335,10 +325,10 @@ void DragIO::createNode(GraphView *src, std::string type, const QPointF &pos,
     dispatcher_->executeLater(Command::Ptr(new command::AddNode(gf->getAbsoluteUUID(), type, Point(pos.x(), pos.y()), uuid, state)));
 }
 
-void DragIO::pasteGraph(GraphView *src, const QPointF &pos, const Snippet &blueprint)
+void DragIO::pasteGraph(GraphView* src, const QPointF& pos, const Snippet& blueprint)
 {
     GraphFacade* gf = src->getGraphFacade();
-    CommandPtr cmd(new command::PasteGraph(gf->getAbsoluteUUID(), blueprint, Point (pos.x(), pos.y())));
+    CommandPtr cmd(new command::PasteGraph(gf->getAbsoluteUUID(), blueprint, Point(pos.x(), pos.y())));
 
     dispatcher_->executeLater(cmd);
 }

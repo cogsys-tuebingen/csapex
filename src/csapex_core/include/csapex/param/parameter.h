@@ -14,7 +14,8 @@
 #include <mutex>
 
 /// FORWARD DECLARATIONS
-namespace YAML {
+namespace YAML
+{
 class Node;
 }
 
@@ -23,9 +24,10 @@ namespace boost
 class any;
 }
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT Parameter : public Streamable
 {
 public:
@@ -55,7 +57,7 @@ public:
 
     virtual uint8_t getPacketType() const override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -70,7 +72,6 @@ public:
 
     virtual int ID() const = 0;
     virtual std::string TYPE() const = 0;
-
 
     template <typename T>
     bool is() const
@@ -97,12 +98,12 @@ public:
     template <typename T>
     void set(const T& v)
     {
-        if(!is<T>() && !is<void>()) {
-            throwTypeError(typeid(T), type(),"set failed: ");
+        if (!is<T>() && !is<void>()) {
+            throwTypeError(typeid(T), type(), "set failed: ");
         }
         bool changed = setSilent(v);
 
-        if(changed) {
+        if (changed) {
             triggerChange();
         }
     }
@@ -111,25 +112,25 @@ public:
     bool setSilent(const T& v);
 
     template <typename T>
-    Parameter& operator = (const T& value)
+    Parameter& operator=(const T& value)
     {
         set(value);
         return *this;
     }
 
-    Parameter& operator = (const char* cstr)
+    Parameter& operator=(const char* cstr)
     {
-        return operator = (std::string(cstr));
+        return operator=(std::string(cstr));
     }
 
 protected:
     template <typename T>
     T as_impl() const;
 
-    Parameter& operator = (const Parameter& p);
+    Parameter& operator=(const Parameter& p);
 
 public:
-    virtual const std::type_info &type() const;
+    virtual const std::type_info& type() const;
     std::string toString() const;
 
     const ParameterDescription& description() const;
@@ -150,8 +151,7 @@ public:
 
     void triggerChange();
 
-
-    void setDictionaryEntry(const std::string& key, const ParameterPtr &param);
+    void setDictionaryEntry(const std::string& key, const ParameterPtr& param);
     ParameterPtr getDictionaryEntry(const std::string& key) const;
 
     template <typename T>
@@ -165,7 +165,7 @@ public:
     T getDictionaryValue(const std::string& key, const T& def_value)
     {
         auto pos = dict_.find(key);
-        if(pos == dict_.end()) {
+        if (pos == dict_.end()) {
             return def_value;
         } else {
             return pos->second->as<T>();
@@ -186,7 +186,7 @@ protected:
     explicit Parameter(const std::string& name, const ParameterDescription& description);
     Parameter(const Parameter& other);
 
-    void access_unsafe(const Parameter &p, boost::any& out) const;
+    void access_unsafe(const Parameter& p, boost::any& out) const;
 
 private:
     void setName(const std::string& name);
@@ -207,7 +207,7 @@ protected:
     mutable std::recursive_mutex mutex_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // PARAMETER_H
+#endif  // PARAMETER_H

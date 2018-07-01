@@ -20,10 +20,8 @@
 
 using namespace csapex;
 
-PathParameterAdapter::PathParameterAdapter(param::PathParameter::Ptr p)
-    : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), path_p_(p)
+PathParameterAdapter::PathParameterAdapter(param::PathParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), path_p_(p)
 {
-
 }
 
 QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
@@ -40,7 +38,7 @@ QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& disp
 
     // ui change -> model
     QObject::connect(path.data(), &QLineEdit::returnPressed, [this, path]() {
-        if(!path_p_ || !path) {
+        if (!path_p_ || !path) {
             return;
         }
         auto path_str = path->text().toStdString();
@@ -48,13 +46,13 @@ QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& disp
         executeCommand(update_parameter);
     });
 
-    QObject::connect(select.data(), &QPushButton::clicked, [this, path](){
-        if(!path_p_) {
+    QObject::connect(select.data(), &QPushButton::clicked, [this, path]() {
+        if (!path_p_) {
             return;
         }
 
         QString filter = QString::fromStdString(path_p_->filter());
-        if(filter.isEmpty()) {
+        if (filter.isEmpty()) {
             filter = "All files (*.*)";
         }
 
@@ -63,7 +61,7 @@ QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& disp
         bool is_file = path_p_->isFile();
 
         QString dir(path_p_->as<std::string>().c_str());
-        if(dir.startsWith("file://", Qt::CaseInsensitive)) {
+        if (dir.startsWith("file://", Qt::CaseInsensitive)) {
             dir = dir.replace("file://", "", Qt::CaseInsensitive);
         }
 
@@ -72,28 +70,28 @@ QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& disp
         QString mode_prefix = is_output ? "Output" : "Input";
         QString title = mode_prefix + " " + title_prefix + ": " + QString::fromStdString(path_p_->name());
 
-        if(is_output) {
-            if(is_file) {
-                path = QFileDialog::getSaveFileName((QWidget*) 0, title, dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags);
+        if (is_output) {
+            if (is_file) {
+                path = QFileDialog::getSaveFileName((QWidget*)0, title, dir, filter, (QString*)0, (QFlags<QFileDialog::Option>)flags);
             } else {
-                path = QFileDialog::getExistingDirectory((QWidget*) 0, title, dir, (QFlags<QFileDialog::Option>) flags);
+                path = QFileDialog::getExistingDirectory((QWidget*)0, title, dir, (QFlags<QFileDialog::Option>)flags);
             }
         } else {
-            if(is_file) {
-                path = QFileDialog::getOpenFileName((QWidget*) 0, title, dir, filter, (QString*) 0, (QFlags<QFileDialog::Option>) flags);
+            if (is_file) {
+                path = QFileDialog::getOpenFileName((QWidget*)0, title, dir, filter, (QString*)0, (QFlags<QFileDialog::Option>)flags);
             } else {
-                path = QFileDialog::getExistingDirectory((QWidget*) 0, title, dir, (QFlags<QFileDialog::Option>) flags);
+                path = QFileDialog::getExistingDirectory((QWidget*)0, title, dir, (QFlags<QFileDialog::Option>)flags);
             }
         }
 
-        if(!path.isEmpty()) {
+        if (!path.isEmpty()) {
             path_p_->set(path.toStdString());
         }
     });
 
     // model change -> ui
-    connectInGuiThread(p_->parameter_changed, [this, path](param::Parameter*){
-        if(!path_p_ || !path) {
+    connectInGuiThread(p_->parameter_changed, [this, path](param::Parameter*) {
+        if (!path_p_ || !path) {
             return;
         }
         path->setText(QString::fromStdString(path_p_->as<std::string>()));

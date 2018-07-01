@@ -10,16 +10,17 @@
 #include <vector>
 #include <map>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT ParameterProvider
 {
 public:
     ParameterProvider();
 
-    const Parameter::Ptr operator() (const std::string& name) const;
-    Parameter& operator[] (const std::string& name);
+    const Parameter::Ptr operator()(const std::string& name) const;
+    Parameter& operator[](const std::string& name);
 
     virtual Parameter::Ptr getParameter(const std::string& name) = 0;
     virtual const Parameter::Ptr getConstParameter(const std::string& name) const = 0;
@@ -36,11 +37,12 @@ public:
 
     virtual Parameter::Ptr getParameter(const std::string& name) override;
     virtual const Parameter::Ptr getConstParameter(const std::string& name) const override;
+
 private:
     Map params_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // PARAMETER_PROVIDER_H
+#endif  // PARAMETER_PROVIDER_H

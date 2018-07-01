@@ -5,11 +5,8 @@ using namespace csapex;
 
 Notifier::Notifier()
 {
-
 }
 
 Notifier::~Notifier()
 {
-
 }
-

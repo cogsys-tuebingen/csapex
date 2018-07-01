@@ -10,22 +10,20 @@
 
 namespace csapex
 {
-
 class NoteSerializerInterface
 {
 public:
     virtual ~NoteSerializerInterface();
 
-    virtual void serialize(const io::Note& packet, SerializationBuffer &data) = 0;
+    virtual void serialize(const io::Note& packet, SerializationBuffer& data) = 0;
     virtual io::NotePtr deserialize(const SerializationBuffer& data) = 0;
 };
-
 
 class NoteSerializer : public Singleton<NoteSerializer>, public Serializer
 {
 public:
-    void serialize(const Streamable& packet, SerializationBuffer &data) override;
-    StreamablePtr deserialize(const SerializationBuffer &data) override;
+    void serialize(const Streamable& packet, SerializationBuffer& data) override;
+    StreamablePtr deserialize(const SerializationBuffer& data) override;
 
     static void registerSerializer(const std::string& type, std::shared_ptr<NoteSerializerInterface> serializer);
 
@@ -33,40 +31,38 @@ private:
     std::map<std::string, std::shared_ptr<NoteSerializerInterface>> serializers_;
 };
 
-
 /// REGISTRATION
 
 template <typename S>
 struct NoteSerializerRegistered
 {
-    NoteSerializerRegistered(const std::string& type) {
+    NoteSerializerRegistered(const std::string& type)
+    {
         NoteSerializer::registerSerializer(type, std::make_shared<S>());
     }
 };
-}
+}  // namespace csapex
 
-
-#define CSAPEX_REGISTER_NOTE_SERIALIZER(Name) \
-    namespace csapex \
-    { \
-    namespace io \
-    { \
-    class Name##Serializer : public NoteSerializerInterface \
-    { \
-        virtual void serialize(const io::Note& packet, SerializationBuffer &data) override \
-        { \
-            packet.serializeVersioned(data); \
-        } \
-        virtual io::NotePtr deserialize(const SerializationBuffer& data) override \
-        { \
-            auto result = std::make_shared<Name>(); \
-            result->deserializeVersioned(data); \
-            return result; \
-        } \
-    }; \
-    } \
-    NoteSerializerRegistered<io::Name##Serializer> g_register_note_##Name##_(Name::typeName()); \
+#define CSAPEX_REGISTER_NOTE_SERIALIZER(Name)                                                                                                                                                          \
+    namespace csapex                                                                                                                                                                                   \
+    {                                                                                                                                                                                                  \
+    namespace io                                                                                                                                                                                       \
+    {                                                                                                                                                                                                  \
+    class Name##Serializer : public NoteSerializerInterface                                                                                                                                            \
+    {                                                                                                                                                                                                  \
+        virtual void serialize(const io::Note& packet, SerializationBuffer& data) override                                                                                                             \
+        {                                                                                                                                                                                              \
+            packet.serializeVersioned(data);                                                                                                                                                           \
+        }                                                                                                                                                                                              \
+        virtual io::NotePtr deserialize(const SerializationBuffer& data) override                                                                                                                      \
+        {                                                                                                                                                                                              \
+            auto result = std::make_shared<Name>();                                                                                                                                                    \
+            result->deserializeVersioned(data);                                                                                                                                                        \
+            return result;                                                                                                                                                                             \
+        }                                                                                                                                                                                              \
+    };                                                                                                                                                                                                 \
+    }                                                                                                                                                                                                  \
+    NoteSerializerRegistered<io::Name##Serializer> g_register_note_##Name##_(Name::typeName());                                                                                                        \
     }
 
-
-#endif // NOTE_SERIALIZER_H
+#endif  // NOTE_SERIALIZER_H

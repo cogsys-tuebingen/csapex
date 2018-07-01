@@ -20,22 +20,21 @@ Subprocess* g_sp_instance = nullptr;
 
 void sp_signal_handler(int signal)
 {
-    if(g_sp_instance) {
+    if (g_sp_instance) {
         g_sp_instance->handleSignal(signal);
     }
     std::quick_exit(0);
 }
-}
+}  // namespace detail
 
 Subprocess::Subprocess(const std::string& name_space)
-    : in(name_space + "_in", false, 65536),
-      out(name_space + "_out", false, 65536),
-      ctrl_in(name_space + "_ctrl", true, 1024),
-      ctrl_out(name_space + "_ctrl", true, 1024),
-      pid_(-1),
-      is_shutdown(false),
-      return_code(0)
-
+  : in(name_space + "_in", false, 65536)
+  , out(name_space + "_out", false, 65536)
+  , ctrl_in(name_space + "_ctrl", true, 1024)
+  , ctrl_out(name_space + "_ctrl", true, 1024)
+  , pid_(-1)
+  , is_shutdown(false)
+  , return_code(0)
 
 {
     if (pipe(pipe_in)) {
@@ -59,12 +58,12 @@ Subprocess::Subprocess(const std::string& name_space)
 
 Subprocess::~Subprocess()
 {
-    if(isParent()) {
-        while(ctrl_out.hasMessage()) {
+    if (isParent()) {
+        while (ctrl_out.hasMessage()) {
             readCtrlOut();
         }
-        if(!isChildShutdown()) {
-            ctrl_in.write({SubprocessChannel::MessageType::SHUTDOWN, "shutdown"});
+        if (!isChildShutdown()) {
+            ctrl_in.write({ SubprocessChannel::MessageType::SHUTDOWN, "shutdown" });
         }
 
         close(pipe_err[1]);
@@ -87,22 +86,22 @@ bool Subprocess::isParent() const
 
 void Subprocess::handleSignal(int signal)
 {
-    if(active_) {
+    if (active_) {
         flush();
 
         close(pipe_in[0]);
         close(pipe_out[1]);
         close(pipe_err[1]);
 
-        out.write({SubprocessChannel::MessageType::CHILD_SIGNAL, std::to_string(signal)});
-        ctrl_out.write({SubprocessChannel::MessageType::CHILD_SIGNAL, std::to_string(signal)});
+        out.write({ SubprocessChannel::MessageType::CHILD_SIGNAL, std::to_string(signal) });
+        ctrl_out.write({ SubprocessChannel::MessageType::CHILD_SIGNAL, std::to_string(signal) });
     }
 }
 
 pid_t Subprocess::fork(std::function<int()> child)
 {
     pid_ = ::fork();
-    if(pid_ == 0) {
+    if (pid_ == 0) {
         close(pipe_in[1]);
         close(pipe_out[0]);
         close(pipe_err[0]);
@@ -112,55 +111,54 @@ pid_t Subprocess::fork(std::function<int()> child)
         dup2(pipe_err[1], 2);
 
         detail::g_sp_instance = this;
-        std::signal(SIGHUP	 , detail::sp_signal_handler);
-        std::signal(SIGINT	 , detail::sp_signal_handler);
-        std::signal(SIGQUIT	 , detail::sp_signal_handler);
-        std::signal(SIGILL	 , detail::sp_signal_handler);
-        std::signal(SIGTRAP	 , detail::sp_signal_handler);
-        std::signal(SIGABRT	 , detail::sp_signal_handler);
-        std::signal(SIGIOT	 , detail::sp_signal_handler);
-        std::signal(SIGBUS	 , detail::sp_signal_handler);
-        std::signal(SIGFPE	 , detail::sp_signal_handler);
-        std::signal(SIGKILL	 , detail::sp_signal_handler);
-        std::signal(SIGUSR1	 , detail::sp_signal_handler);
-        std::signal(SIGSEGV	 , detail::sp_signal_handler);
-        std::signal(SIGUSR2	 , detail::sp_signal_handler);
-        std::signal(SIGPIPE	 , detail::sp_signal_handler);
-        std::signal(SIGALRM	 , detail::sp_signal_handler);
-        std::signal(SIGTERM	 , detail::sp_signal_handler);
+        std::signal(SIGHUP, detail::sp_signal_handler);
+        std::signal(SIGINT, detail::sp_signal_handler);
+        std::signal(SIGQUIT, detail::sp_signal_handler);
+        std::signal(SIGILL, detail::sp_signal_handler);
+        std::signal(SIGTRAP, detail::sp_signal_handler);
+        std::signal(SIGABRT, detail::sp_signal_handler);
+        std::signal(SIGIOT, detail::sp_signal_handler);
+        std::signal(SIGBUS, detail::sp_signal_handler);
+        std::signal(SIGFPE, detail::sp_signal_handler);
+        std::signal(SIGKILL, detail::sp_signal_handler);
+        std::signal(SIGUSR1, detail::sp_signal_handler);
+        std::signal(SIGSEGV, detail::sp_signal_handler);
+        std::signal(SIGUSR2, detail::sp_signal_handler);
+        std::signal(SIGPIPE, detail::sp_signal_handler);
+        std::signal(SIGALRM, detail::sp_signal_handler);
+        std::signal(SIGTERM, detail::sp_signal_handler);
         std::signal(SIGSTKFLT, detail::sp_signal_handler);
-        //std::signal(SIGCLD	 , detail::sp_signal_handler);
-        //std::signal(SIGCHLD	 , detail::sp_signal_handler);
-        //std::signal(SIGCONT	 , detail::sp_signal_handler);
-        //std::signal(SIGSTOP	 , detail::sp_signal_handler);
-        //std::signal(SIGTSTP	 , detail::sp_signal_handler);
-        //std::signal(SIGTTIN	 , detail::sp_signal_handler);
-        //std::signal(SIGTTOU	 , detail::sp_signal_handler);
-        //std::signal(SIGURG	 , detail::sp_signal_handler);
-        std::signal(SIGXCPU	 , detail::sp_signal_handler);
-        std::signal(SIGXFSZ	 , detail::sp_signal_handler);
+        // std::signal(SIGCLD	 , detail::sp_signal_handler);
+        // std::signal(SIGCHLD	 , detail::sp_signal_handler);
+        // std::signal(SIGCONT	 , detail::sp_signal_handler);
+        // std::signal(SIGSTOP	 , detail::sp_signal_handler);
+        // std::signal(SIGTSTP	 , detail::sp_signal_handler);
+        // std::signal(SIGTTIN	 , detail::sp_signal_handler);
+        // std::signal(SIGTTOU	 , detail::sp_signal_handler);
+        // std::signal(SIGURG	 , detail::sp_signal_handler);
+        std::signal(SIGXCPU, detail::sp_signal_handler);
+        std::signal(SIGXFSZ, detail::sp_signal_handler);
         std::signal(SIGVTALRM, detail::sp_signal_handler);
-        std::signal(SIGPROF	 , detail::sp_signal_handler);
-        //std::signal(SIGWINCH , detail::sp_signal_handler);
-        std::signal(SIGPOLL	 , detail::sp_signal_handler);
-        std::signal(SIGIO	 , detail::sp_signal_handler);
-        std::signal(SIGPWR	 , detail::sp_signal_handler);
-        std::signal(SIGSYS	 , detail::sp_signal_handler);
-        //std::signal(SIGUNUSED, detail::sp_signal_handler);
+        std::signal(SIGPROF, detail::sp_signal_handler);
+        // std::signal(SIGWINCH , detail::sp_signal_handler);
+        std::signal(SIGPOLL, detail::sp_signal_handler);
+        std::signal(SIGIO, detail::sp_signal_handler);
+        std::signal(SIGPWR, detail::sp_signal_handler);
+        std::signal(SIGSYS, detail::sp_signal_handler);
+        // std::signal(SIGUNUSED, detail::sp_signal_handler);
 
-        subprocess_worker_ = std::thread([this](){
-            while(active_) {
+        subprocess_worker_ = std::thread([this]() {
+            while (active_) {
                 try {
                     SubprocessChannel::Message m = ctrl_in.read();
-                    switch(m.type)
-                    {
-                    case SubprocessChannel::MessageType::SHUTDOWN:
-                        active_ = false;
-                        in.shutdown();
-                        out.shutdown();
-                        break;
+                    switch (m.type) {
+                        case SubprocessChannel::MessageType::SHUTDOWN:
+                            active_ = false;
+                            in.shutdown();
+                            out.shutdown();
+                            break;
                     }
-                } catch(const SubprocessChannel::ShutdownException& e) {
+                } catch (const SubprocessChannel::ShutdownException& e) {
                     active_ = false;
                 }
             }
@@ -170,15 +168,15 @@ pid_t Subprocess::fork(std::function<int()> child)
         try {
             return_code = child();
 
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             if (active_) {
-                out.write({SubprocessChannel::MessageType::CHILD_ERROR, e.what()});
+                out.write({ SubprocessChannel::MessageType::CHILD_ERROR, e.what() });
             }
             return_code = -1;
 
-        } catch(...) {
+        } catch (...) {
             if (active_) {
-                out.write({SubprocessChannel::MessageType::CHILD_ERROR, "unknown error"});
+                out.write({ SubprocessChannel::MessageType::CHILD_ERROR, "unknown error" });
             }
 
             return_code = -2;
@@ -193,7 +191,7 @@ pid_t Subprocess::fork(std::function<int()> child)
         close(pipe_err[1]);
 
         // then send the end of program signal
-        ctrl_out.write({SubprocessChannel::MessageType::CHILD_EXIT, std::to_string(return_code)});
+        ctrl_out.write({ SubprocessChannel::MessageType::CHILD_EXIT, std::to_string(return_code) });
 
         std::quick_exit(0);
 
@@ -206,10 +204,10 @@ pid_t Subprocess::fork(std::function<int()> child)
 
         // TODO: extract "pipe" class
         parent_worker_cout_ = std::thread([&]() {
-            while(active_) {
-                char buf[N+1];
+            while (active_) {
+                char buf[N + 1];
                 int r;
-                while((r = read(pipe_out[0], &buf, N)) > 0) {
+                while ((r = read(pipe_out[0], &buf, N)) > 0) {
                     buf[r] = 0;
                     child_cout << buf;
                 }
@@ -217,10 +215,10 @@ pid_t Subprocess::fork(std::function<int()> child)
         });
 
         parent_worker_cerr_ = std::thread([&]() {
-            while(active_) {
-                char buf[N+1];
+            while (active_) {
+                char buf[N + 1];
                 int r;
-                while((r = read(pipe_err[0], &buf, N)) > 0) {
+                while ((r = read(pipe_err[0], &buf, N)) > 0) {
                     buf[r] = 0;
                     child_cerr << buf;
                 }
@@ -228,13 +226,12 @@ pid_t Subprocess::fork(std::function<int()> child)
         });
     }
 
-
     return pid_;
 }
 
 void Subprocess::flush()
 {
-    if(isChild()) {
+    if (isChild()) {
         fflush(stdout);
         fflush(stderr);
     } else {
@@ -259,22 +256,20 @@ bool Subprocess::isChildShutdown() const
 void Subprocess::readCtrlOut()
 {
     SubprocessChannel::Message message = ctrl_out.read();
-    switch(message.type) {
-    case SubprocessChannel::MessageType::CHILD_EXIT:
-    case SubprocessChannel::MessageType::CHILD_SIGNAL:
-    {
-        is_shutdown = true;
-        std::stringstream ss(message.toString());
-        ss >> return_code;
-    }
-        break;
-    case SubprocessChannel::MessageType::CHILD_ERROR:
-        is_shutdown = true;
-        return_code = 64;
-        break;
-    default:
-        std::cout << "read an unknown message: " << message.toString() << std::endl;
-        break;
+    switch (message.type) {
+        case SubprocessChannel::MessageType::CHILD_EXIT:
+        case SubprocessChannel::MessageType::CHILD_SIGNAL: {
+            is_shutdown = true;
+            std::stringstream ss(message.toString());
+            ss >> return_code;
+        } break;
+        case SubprocessChannel::MessageType::CHILD_ERROR:
+            is_shutdown = true;
+            return_code = 64;
+            break;
+        default:
+            std::cout << "read an unknown message: " << message.toString() << std::endl;
+            break;
     }
 }
 
@@ -282,7 +277,7 @@ int Subprocess::join()
 {
     apex_assert_hard(isParent());
 
-    while(!isChildShutdown()) {
+    while (!isChildShutdown()) {
         readCtrlOut();
     }
 
@@ -290,10 +285,10 @@ int Subprocess::join()
     close(pipe_err[0]);
 
     active_ = false;
-    if(parent_worker_cerr_.joinable()) {
+    if (parent_worker_cerr_.joinable()) {
         parent_worker_cerr_.join();
     }
-    if(parent_worker_cout_.joinable()) {
+    if (parent_worker_cout_.joinable()) {
         parent_worker_cout_.join();
     }
 

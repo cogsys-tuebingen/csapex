@@ -13,7 +13,6 @@
 
 namespace csapex
 {
-
 class TimedQueue
 {
 public:
@@ -36,7 +35,8 @@ private:
     std::atomic<bool> scheduling_running_;
     std::atomic<bool> sleeping_running_;
 
-    struct Unit {
+    struct Unit
+    {
         SchedulerPtr scheduler;
         TaskPtr schedulable;
         std::chrono::system_clock::time_point time;
@@ -44,7 +44,7 @@ private:
 
     struct UnitCompare
     {
-        bool operator() (const Unit& a, const Unit& b) const
+        bool operator()(const Unit& a, const Unit& b) const
         {
             return a.time < b.time;
         }
@@ -59,6 +59,6 @@ private:
     std::chrono::system_clock::time_point next_wake_up_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TIMED_QUEUE_H
+#endif  // TIMED_QUEUE_H

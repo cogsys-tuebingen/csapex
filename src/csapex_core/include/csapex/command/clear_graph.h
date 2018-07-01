@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 namespace command
 {
 class CSAPEX_COMMAND_EXPORT ClearGraph : public Meta
@@ -19,11 +18,10 @@ class CSAPEX_COMMAND_EXPORT ClearGraph : public Meta
     COMMAND_HEADER(ClearGraph);
 
 public:
-    ClearGraph(const AUUID &graph_uuid);
+    ClearGraph(const AUUID& graph_uuid);
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
-
 
     std::string getType() const override
     {
@@ -42,7 +40,7 @@ protected:
     virtual std::string getDescription() const override;
 };
 
-}
-}
+}  // namespace command
+}  // namespace csapex
 
-#endif // CLEAR_GRAPH_H
+#endif  // CLEAR_GRAPH_H

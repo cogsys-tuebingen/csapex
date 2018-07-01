@@ -9,15 +9,14 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT DeleteFulcrum : public CommandImplementation<DeleteFulcrum>
 {
     COMMAND_HEADER(DeleteFulcrum);
 
 public:
-    DeleteFulcrum(const AUUID &graph_uuid, int connection_id, int fulcrum_id);
+    DeleteFulcrum(const AUUID& graph_uuid, int connection_id, int fulcrum_id);
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -36,8 +35,8 @@ private:
     int type;
 };
 
-}
+}  // namespace command
 
-}
+}  // namespace csapex
 
-#endif // COMMAND_DELETE_FULCRUM_H
+#endif  // COMMAND_DELETE_FULCRUM_H

@@ -12,7 +12,6 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT Meta : public CommandImplementation<Meta>
 {
     COMMAND_HEADER(Meta);
@@ -28,17 +27,16 @@ public:
 
     virtual void init(GraphFacadeImplementation* root, CsApexCore& core) override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
     void cloneData(const Meta& other) override;
 
 protected:
-
     bool doExecute() override;
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual void accept(int level, std::function<void (int, const Command &)> callback) const override;
+    virtual void accept(int level, std::function<void(int, const Command&)> callback) const override;
 
     virtual std::string getDescription() const override;
 
@@ -48,8 +46,7 @@ protected:
     bool transaction;
     std::string type;
 };
-}
-}
+}  // namespace command
+}  // namespace csapex
 
-
-#endif // COMMAND_META_H
+#endif  // COMMAND_META_H

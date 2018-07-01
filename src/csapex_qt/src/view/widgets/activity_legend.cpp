@@ -30,12 +30,12 @@ void ActivityLegend::resizeToFit()
 
     QRect rect = geometry();
     int tableWidth = 2 + verticalHeader()->width();
-    for(int i = 0; i < columnCount(); i++){
+    for (int i = 0; i < columnCount(); i++) {
         tableWidth += columnWidth(i);
     }
     rect.setWidth(tableWidth);
     int tableHeight = 2 + horizontalHeader()->height();
-    for(int i = 0; i < rowCount(); i++){
+    for (int i = 0; i < rowCount(); i++) {
         tableHeight += rowHeight(i);
     }
     rect.setHeight(tableHeight);
@@ -72,18 +72,18 @@ void ActivityLegend::removeNode(NodeFacade* node)
 {
     bool found = false;
     int row = 0;
-    for(std::size_t r = 0; r < rows_.size(); ++r) {
-        if(found) {
+    for (std::size_t r = 0; r < rows_.size(); ++r) {
+        if (found) {
             // deleted -> move one up
-            rows_[r-1] = rows_[r];
+            rows_[r - 1] = rows_[r];
         }
-        if(rows_[r] == node) {
+        if (rows_[r] == node) {
             row = r;
             found = true;
         }
     }
 
-    if(found) {
+    if (found) {
         removeRow(row);
         rows_.pop_back();
 
@@ -97,7 +97,7 @@ void ActivityLegend::emitSelection()
 {
     QList<NodeFacade*> list;
 
-    for(QModelIndex i : selectedIndexes()) {
+    for (QModelIndex i : selectedIndexes()) {
         list.push_back(rows_[i.row()]);
     }
 

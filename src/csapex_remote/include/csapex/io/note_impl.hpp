@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 template <typename I>
 class NoteImplementation : public io::Note
 {
@@ -15,12 +14,10 @@ protected:
     CLONABLE_IMPLEMENTATION(I);
 
 protected:
-    NoteImplementation()
-        : Note(AUUID::NONE)
+    NoteImplementation() : Note(AUUID::NONE)
     {
     }
-    NoteImplementation(const AUUID& auuid)
-        : Note(auuid)
+    NoteImplementation(const AUUID& auuid) : Note(auuid)
     {
     }
 
@@ -36,6 +33,6 @@ public:
     }
 };
 
-}
+}  // namespace csapex
 
-#endif // NOTE_IMPL_HPP
+#endif  // NOTE_IMPL_HPP

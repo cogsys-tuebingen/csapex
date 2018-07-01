@@ -19,8 +19,7 @@ using namespace command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteConnector)
 
-DeleteConnector::DeleteConnector(const AUUID& parent_uuid, Connectable *_c)
-    : CommandImplementation(parent_uuid), in(_c->isInput()), c_uuid(_c->getUUID())
+DeleteConnector::DeleteConnector(const AUUID& parent_uuid, Connectable* _c) : CommandImplementation(parent_uuid), in(_c->isInput()), c_uuid(_c->getUUID())
 {
 }
 
@@ -29,30 +28,29 @@ std::string DeleteConnector::getDescription() const
     return std::string("deleted connector with UUID ") + c_uuid.getFullName();
 }
 
-
 bool DeleteConnector::doExecute()
 {
     NodeHandle* node_handle = getGraph()->findNodeHandleForConnector(c_uuid);
 
-    if(!node_handle) {
+    if (!node_handle) {
         return false;
     }
 
     ConnectablePtr c;
-    if(in) {
+    if (in) {
         c = node_handle->getInput(c_uuid);
     } else {
         c = node_handle->getOutput(c_uuid);
     }
 
     apex_assert_hard(c);
-    if(c->isConnected()) {
+    if (c->isConnected()) {
         delete_connections = CommandFactory(getRoot(), graph_uuid).removeAllConnectionsCmd(c);
 
         Command::executeCommand(delete_connections);
     }
 
-    if(in) {
+    if (in) {
         node_handle->removeInput(c->getUUID());
     } else {
         node_handle->removeOutput(c->getUUID());
@@ -71,10 +69,7 @@ bool DeleteConnector::doRedo()
     return false;
 }
 
-
-
-
-void DeleteConnector::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void DeleteConnector::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

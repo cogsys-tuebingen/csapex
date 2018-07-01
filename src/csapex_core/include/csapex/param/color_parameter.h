@@ -5,9 +5,10 @@
 #include <csapex/param/parameter_impl.hpp>
 #include <csapex_param_export.h>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT ColorParameter : public ParameterImplementation<ColorParameter, 0x002>
 {
     friend class ParameterFactory;
@@ -19,19 +20,22 @@ public:
     ColorParameter();
     explicit ColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b);
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
 
-    virtual std::string TYPE() const override { return "color"; }
+    virtual std::string TYPE() const override
+    {
+        return "color";
+    }
 
     virtual std::string toStringImpl() const override;
 
     void cloneDataFrom(const Clonable& other) override;
-    void set(const std::vector<int> &v);
+    void set(const std::vector<int>& v);
 
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::vector<int> def() const;
@@ -46,7 +50,7 @@ private:
     std::vector<int> def_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // COLOR_PARAMETER_H
+#endif  // COLOR_PARAMETER_H

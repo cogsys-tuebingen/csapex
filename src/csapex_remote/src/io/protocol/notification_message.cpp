@@ -14,18 +14,15 @@ CSAPEX_REGISTER_BROADCAST_SERIALIZER(NotificationMessage)
 
 using namespace csapex;
 
-NotificationMessage::NotificationMessage(const Notification &notification)
-    : notification(notification)
+NotificationMessage::NotificationMessage(const Notification& notification) : notification(notification)
 {
-
 }
 
 NotificationMessage::NotificationMessage()
 {
-
 }
 
-void NotificationMessage::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void NotificationMessage::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << notification;
 }

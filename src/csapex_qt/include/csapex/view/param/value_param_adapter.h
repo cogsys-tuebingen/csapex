@@ -17,7 +17,7 @@ public:
     ValueParameterAdapter(param::ValueParameter::Ptr p);
 
     virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
-    virtual void setupContextMenu(ParameterContextMenu *context_handler) override;
+    virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
     param::ValueParameterPtr value_p_;
@@ -27,7 +27,6 @@ private:
     static const double DEFAULT_DOUBLE_STEP_SIZE;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // VALUE_PARAM_ADAPTER_H
+#endif  // VALUE_PARAM_ADAPTER_H

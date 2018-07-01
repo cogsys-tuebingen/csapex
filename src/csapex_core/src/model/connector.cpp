@@ -10,11 +10,8 @@
 
 using namespace csapex;
 
-Connector::Connector(const UUID &uuid, ConnectableOwnerWeakPtr owner)
-    : Unique(uuid),
-      owner_(owner)
+Connector::Connector(const UUID& uuid, ConnectableOwnerWeakPtr owner) : Unique(uuid), owner_(owner)
 {
-
 }
 
 bool Connector::isSynchronous() const
@@ -25,7 +22,6 @@ bool Connector::isAsynchronous() const
 {
     return !isSynchronous();
 }
-
 
 ConnectableOwnerPtr Connector::getOwner() const
 {

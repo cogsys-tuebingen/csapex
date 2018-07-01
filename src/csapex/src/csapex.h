@@ -18,10 +18,8 @@
 
 namespace csapex
 {
-
 class CsApexViewCore;
 class CsApexWindow;
-
 
 struct CsApexCoreApp : public QCoreApplication
 {
@@ -50,7 +48,7 @@ struct Main : public QObject, public Observer
     Q_OBJECT
 
 public:
-    Main(std::unique_ptr<QCoreApplication> &&app, Settings &settings, ExceptionHandler &handler);
+    Main(std::unique_ptr<QCoreApplication>&& app, Settings& settings, ExceptionHandler& handler);
     ~Main();
 
     int run();
@@ -64,7 +62,7 @@ private:
     int runImpl();
 
     void checkRecoveryFile(CsApexViewCore& view_core, CsApexWindow& w);
-    void askForRecoveryConfig(const std::string &config_to_load);
+    void askForRecoveryConfig(const std::string& config_to_load);
     void deleteRecoveryConfig();
 
 private:
@@ -79,6 +77,6 @@ private:
     bool recover_needed;
 };
 
-}
+}  // namespace csapex
 
-#endif // CSAPEX_H
+#endif  // CSAPEX_H

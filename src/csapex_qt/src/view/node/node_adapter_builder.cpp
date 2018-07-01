@@ -10,13 +10,12 @@ using namespace csapex;
 NodePtr csapex::impl::getNode(const NodeFacadePtr& facade)
 {
     auto lf = castToImplementation(facade);
-    if(lf) {
+    if (lf) {
         return lf->getNode();
     } else {
         return nullptr;
     }
 }
-
 
 NodeFacadeProxyPtr csapex::impl::castToProxy(const NodeFacadePtr& facade)
 {
@@ -27,13 +26,11 @@ NodeFacadeImplementationPtr csapex::impl::castToImplementation(const NodeFacadeP
     return std::dynamic_pointer_cast<csapex::NodeFacadeImplementation>(facade);
 }
 
-
 NodeAdapterBuilder::~NodeAdapterBuilder()
 {
-
 }
 
-void NodeAdapterBuilder::setType(const std::string &type)
+void NodeAdapterBuilder::setType(const std::string& type)
 {
     type_ = type;
 }

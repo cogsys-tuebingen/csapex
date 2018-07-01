@@ -13,7 +13,6 @@
 
 namespace csapex
 {
-
 /**
  * @brief The Parameterizable class represents an object that has parameters.
  */
@@ -23,7 +22,7 @@ public:
     /**
      * @brief ChangedParameterList A list of parameters and their callback functions
      */
-    typedef std::vector<std::pair<param::ParameterWeakPtr, std::vector<std::function<void(param::Parameter *)>>>> ChangedParameterList;
+    typedef std::vector<std::pair<param::ParameterWeakPtr, std::vector<std::function<void(param::Parameter*)>>>> ChangedParameterList;
 
 public:
     /**
@@ -41,7 +40,6 @@ public:
      * @brief ~Parameterizable
      */
     virtual ~Parameterizable();
-
 
     /***
      *  ADDING PARAMETERS
@@ -61,7 +59,7 @@ public:
      * @warning The name of the parameter has to be unique for the node.
      * @see addParameterCallback
      */
-    void addParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
+    void addParameter(const param::ParameterPtr& param, std::function<void(param::Parameter*)> cb);
 
     /**
      * @brief addParameter adds a new parameter to the object and synchronizes its value to a memory location.
@@ -103,7 +101,7 @@ public:
      * @see addParameterCondition
      * @see addParameterCallback
      */
-    void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition, std::function<void(param::Parameter *)> cb);
+    void addConditionalParameter(const param::ParameterPtr& param, std::function<bool()> enable_condition, std::function<void(param::Parameter*)> cb);
 
     /**
      * @brief addConditionalParameter adds a new parameter to the object, that is only
@@ -143,7 +141,7 @@ public:
      * @see addParameterCondition
      * @see addParameterCallback
      */
-    void addConditionalParameter(const param::ParameterPtr& param, bool& condition_variable, std::function<void(param::Parameter *)> cb);
+    void addConditionalParameter(const param::ParameterPtr& param, bool& condition_variable, std::function<void(param::Parameter*)> cb);
 
     /**
      * @brief addConditionalParameter adds a new parameter to the object, that is only
@@ -162,7 +160,6 @@ public:
         addConditionalParameter(param, condition_variable, [&](param::Parameter* p) { target = p->as<R>(); });
     }
 
-
     /**
      * @brief addHiddenParameter adds a new parameter to the object that is not shown to users.
      * @param[in] param The new hidden parameter
@@ -177,8 +174,7 @@ public:
      * @warning The name of the parameter has to be unique for the node.
      * @see addParameterCallback
      */
-    void addHiddenParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
-
+    void addHiddenParameter(const param::ParameterPtr& param, std::function<void(param::Parameter*)> cb);
 
     /**
      * @brief addHiddenParameter adds a new parameter to the object that is not shown to users.
@@ -236,7 +232,7 @@ public:
      * @see removeTemporaryParameter, removeTemporaryParameters, setTemporaryParameters
      * @see addParameterCallback
      */
-    void addTemporaryParameter(const param::ParameterPtr& param, std::function<void(param::Parameter *)> cb);
+    void addTemporaryParameter(const param::ParameterPtr& param, std::function<void(param::Parameter*)> cb);
 
     /**
      * @brief addTemporaryParameter adds a new parameter to the object that can be
@@ -251,7 +247,6 @@ public:
     {
         addTemporaryParameter(param, [&](param::Parameter* p) { target = p->as<R>(); });
     }
-
 
     /**
      * @brief removeTemporaryParameter removes a temporary parameter
@@ -281,7 +276,7 @@ public:
      * @see addTemporaryParameter, removeTemporaryParameter, removeTemporaryParameters
      * @see addParameterCallback
      */
-    void setTemporaryParameters(const std::vector<param::ParameterPtr>& param, std::function<void(param::Parameter *)> cb);
+    void setTemporaryParameters(const std::vector<param::ParameterPtr>& param, std::function<void(param::Parameter*)> cb);
 
     /***
      *  GETTING PARAMETERS
@@ -333,7 +328,7 @@ public:
      * @param [in] param the parameter to observe
      * @param [in] cb the callback to call
      */
-    void addParameterCallback(param::ParameterPtr param, std::function<void(param::Parameter *)> cb);
+    void addParameterCallback(param::ParameterPtr param, std::function<void(param::Parameter*)> cb);
 
     /**
      * @brief addParameterCondition adds a condition which has to be satisfied for the parameter
@@ -392,7 +387,7 @@ public:
     template <typename T>
     typename T::Ptr getParameter(const std::string& name) const
     {
-        return std::dynamic_pointer_cast<T> (getParameter(name));
+        return std::dynamic_pointer_cast<T>(getParameter(name));
     }
 
     /**
@@ -515,10 +510,8 @@ private:
         {
             std::unique_lock<std::recursive_mutex> lock(changed_params_mutex_);
             bool change = getParameter(name)->setSilent(value);
-            if(change) {
-                param_updates_[name] = [this, name, value](){
-                    getParameter(name)->triggerChange();
-                };
+            if (change) {
+                param_updates_[name] = [this, name, value]() { getParameter(name)->triggerChange(); };
             }
         }
         parameters_changed();
@@ -529,7 +522,7 @@ private:
     void parameterEnabled(param::Parameter* param, bool enabled);
 
 private:
-    std::map<param::Parameter*, std::vector<slim_signal::Connection> > parameter_connections_;
+    std::map<param::Parameter*, std::vector<slim_signal::Connection>> parameter_connections_;
     std::map<param::ParameterWeakPtr, std::function<bool()>, std::owner_less<param::ParameterWeakPtr>> conditions_;
 
     mutable std::recursive_mutex mutex_;
@@ -540,12 +533,12 @@ private:
     std::map<param::Parameter*, std::vector<std::function<void(param::Parameter*)>>> param_callbacks_;
 
 protected:
-    GenericStatePtr parameter_state_; ///< the underlying memento
+    GenericStatePtr parameter_state_;  ///< the underlying memento
 
 private:
     bool silent_;
 };
 
-}
+}  // namespace csapex
 
-#endif // PARAMETERIZABLE_H
+#endif  // PARAMETERIZABLE_H

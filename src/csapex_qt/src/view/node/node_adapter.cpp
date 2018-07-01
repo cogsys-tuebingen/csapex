@@ -13,8 +13,7 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter(NodeFacadePtr adaptee, NodeBox* parent)
-    : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent)
+NodeAdapter::NodeAdapter(NodeFacadePtr adaptee, NodeBox* parent) : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent)
 {
 }
 
@@ -23,17 +22,15 @@ NodeAdapter::~NodeAdapter()
     stopObserving();
 }
 
-
-void NodeAdapter::doSetupUi(QBoxLayout *layout)
+void NodeAdapter::doSetupUi(QBoxLayout* layout)
 {
     layout_ = layout;
-    if(!is_gui_setup_) {
-
+    if (!is_gui_setup_) {
         try {
             setupUi(layout_);
 
             is_gui_setup_ = true;
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             std::cerr << "setting up ui for node " << node_.lock()->getUUID().getFullName() << " failed: " << e.what() << std::endl;
         }
     }
@@ -56,17 +53,14 @@ GenericStatePtr NodeAdapter::getState() const
 
 void NodeAdapter::setParameterState(GenericStatePtr)
 {
-
 }
 
-void NodeAdapter::readLegacyYaml(const YAML::Node & )
+void NodeAdapter::readLegacyYaml(const YAML::Node&)
 {
-
 }
 
 void NodeAdapter::setManualResize(bool manual)
 {
-
 }
 
 bool NodeAdapter::isResizable() const

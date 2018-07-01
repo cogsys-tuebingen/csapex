@@ -14,17 +14,15 @@
 
 using namespace csapex;
 
-StaticOutput::StaticOutput(const UUID &uuid, ConnectableOwnerWeakPtr owner)
-    : Output(uuid, owner)
+StaticOutput::StaticOutput(const UUID& uuid, ConnectableOwnerWeakPtr owner) : Output(uuid, owner)
 {
-
 }
 
 void StaticOutput::addMessage(TokenPtr message)
 {
     apex_assert_hard(message);
     const auto& data = message->getTokenData();
-    if(!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(data)) {
+    if (!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(data)) {
         setType(data->toType());
     }
 
@@ -38,18 +36,17 @@ void StaticOutput::addMessage(TokenPtr message)
 bool StaticOutput::hasMessage()
 {
     std::unique_lock<std::recursive_mutex> lock(message_mutex_);
-    return (bool) message_to_send_;
+    return (bool)message_to_send_;
 }
-
 
 bool StaticOutput::hasMarkerMessage()
 {
     std::unique_lock<std::recursive_mutex> lock(message_mutex_);
-    if(!message_to_send_) {
+    if (!message_to_send_) {
         return false;
     }
-    if(auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_to_send_->getTokenData())) {
-        if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
+    if (auto m = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message_to_send_->getTokenData())) {
+        if (!std::dynamic_pointer_cast<connection_types::NoMessage const>(m)) {
             return true;
         }
     }
@@ -57,12 +54,11 @@ bool StaticOutput::hasMarkerMessage()
     return false;
 }
 
-
 TokenPtr StaticOutput::getToken() const
 {
     std::unique_lock<std::recursive_mutex> lock(message_mutex_);
 
-    if(!committed_message_) {
+    if (!committed_message_) {
         return connection_types::makeEmptyToken<connection_types::NoMessage>();
     } else {
         return committed_message_;
@@ -71,7 +67,7 @@ TokenPtr StaticOutput::getToken() const
 
 bool StaticOutput::commitMessages(bool is_activated)
 {
-    //TRACE std::cout << getUUID() << " commit / activate" << std::endl;
+    // TRACE std::cout << getUUID() << " commit / activate" << std::endl;
     apex_assert_hard(isEnabled());
     activate();
 
@@ -82,20 +78,20 @@ bool StaticOutput::commitMessages(bool is_activated)
 
     {
         std::unique_lock<std::recursive_mutex> lock(message_mutex_);
-        if(message_to_send_) {
+        if (message_to_send_) {
             apex_assert_hard(message_to_send_.get() != committed_message_.get());
 
             send_activator |= message_to_send_->getActivityModifier() == ActivityModifier::ACTIVATE;
             send_deactivator |= message_to_send_->getActivityModifier() == ActivityModifier::DEACTIVATE;
 
-            //committed_message_ = message_to_send_;
+            // committed_message_ = message_to_send_;
             committed_message_.reset();
             committed_message_ = message_to_send_;
             message_to_send_.reset();
             clearBuffer();
 
         } else {
-            if(!connections_.empty()) {
+            if (!connections_.empty()) {
                 //            std::cout << getUUID() << " sends empty message" << std::endl;
             }
             committed_message_ = connection_types::makeEmptyToken<connection_types::NoMessage>();
@@ -104,9 +100,9 @@ bool StaticOutput::commitMessages(bool is_activated)
         ++seq_no_;
 
         committed_message_->setSequenceNumber(seq_no_);
-        if(hasActiveConnection() && (send_activator || send_deactivator) && !std::dynamic_pointer_cast<connection_types::NoMessage const>(committed_message_->getTokenData())) {
+        if (hasActiveConnection() && (send_activator || send_deactivator) && !std::dynamic_pointer_cast<connection_types::NoMessage const>(committed_message_->getTokenData())) {
             sent_activator_message = true;
-            if(send_activator) {
+            if (send_activator) {
                 committed_message_->setActivityModifier(ActivityModifier::ACTIVATE);
             } else {
                 committed_message_->setActivityModifier(ActivityModifier::DEACTIVATE);

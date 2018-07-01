@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_PROFILING_EXPORT Profiler : public Observer
 {
 public:
@@ -40,6 +39,6 @@ protected:
     std::size_t history_length_;
 };
 
-}
+}  // namespace csapex
 
-#endif // PROFILER_H
+#endif  // PROFILER_H

@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 namespace command
 {
 class CSAPEX_COMMAND_EXPORT DeleteNode : public Meta
@@ -19,11 +18,10 @@ class CSAPEX_COMMAND_EXPORT DeleteNode : public Meta
     COMMAND_HEADER(DeleteNode);
 
 public:
-    DeleteNode(const AUUID &graph_uuid, const UUID &uuid);
+    DeleteNode(const AUUID& graph_uuid, const UUID& uuid);
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
-
 
     std::string getType() const override
     {
@@ -49,6 +47,6 @@ protected:
     Snippet saved_graph;
 };
 
-}
-}
-#endif // COMMAND_DELETE_NODE_H
+}  // namespace command
+}  // namespace csapex
+#endif  // COMMAND_DELETE_NODE_H

@@ -41,5 +41,5 @@ TokenDataConstPtr getAddedMessage(const OutputPtr& output)
     return model::getTokenData(output->getAddedToken());
 }
 
-}
-}
+}  // namespace testing
+}  // namespace csapex

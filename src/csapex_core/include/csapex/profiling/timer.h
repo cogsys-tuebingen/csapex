@@ -16,7 +16,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_PROFILING_EXPORT Timer
 {
 public:
@@ -26,7 +25,7 @@ public:
     slim_signal::Signal<void(Interval::Ptr)> finished;
 
 public:
-    Timer(const std::string &name, bool enabled = true);
+    Timer(const std::string& name, bool enabled = true);
     ~Timer();
 
     void setEnabled(bool enabled);
@@ -56,6 +55,6 @@ public:
     bool finished_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TIMER_H
+#endif  // TIMER_H

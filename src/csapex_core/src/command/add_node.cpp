@@ -22,13 +22,12 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(AddNode)
 
-AddNode::AddNode(const AUUID &parent_uuid, const std::string &type, Point pos, const UUID& uuid, NodeState::Ptr state)
-    : CommandImplementation(parent_uuid), type_(type), pos_(pos), uuid_(uuid)
+AddNode::AddNode(const AUUID& parent_uuid, const std::string& type, Point pos, const UUID& uuid, NodeState::Ptr state) : CommandImplementation(parent_uuid), type_(type), pos_(pos), uuid_(uuid)
 {
     apex_assert_hard(!uuid.empty());
 
-    if(state != nullptr) {
-        NodeState::Ptr bs = std::dynamic_pointer_cast<NodeState> (state);
+    if (state != nullptr) {
+        NodeState::Ptr bs = std::dynamic_pointer_cast<NodeState>(state);
         saved_state_ = bs;
     }
 }
@@ -38,18 +37,17 @@ std::string AddNode::getDescription() const
     return std::string("added a node of type ") + type_ + " and UUID " + uuid_.getFullName();
 }
 
-
 bool AddNode::doExecute()
 {
     GraphImplementationPtr graph = getGraph();
 
-    if(uuid_.empty()) {
+    if (uuid_.empty()) {
         uuid_ = graph->generateUUID(type_);
     }
 
     NodeFacadeImplementationPtr node = getNodeFactory()->makeNode(type_, uuid_, graph, saved_state_);
 
-    if(!node) {
+    if (!node) {
         return false;
     }
 
@@ -75,7 +73,7 @@ bool AddNode::doUndo()
 
 bool AddNode::doRedo()
 {
-    if(doExecute()) {
+    if (doExecute()) {
         getGraph()->findNodeHandle(uuid_)->setNodeState(saved_state_);
         return true;
     }
@@ -83,8 +81,7 @@ bool AddNode::doRedo()
     return false;
 }
 
-
-void AddNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void AddNode::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

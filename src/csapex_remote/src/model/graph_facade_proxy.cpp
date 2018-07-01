@@ -22,31 +22,30 @@
 using namespace csapex;
 
 GraphFacadeProxy::GraphFacadeProxy(const SessionPtr& session, NodeFacadeProxyPtr remote_facade, GraphFacadeProxy* parent)
-    : Proxy(session),
-      parent_(parent),
-      graph_channel_(session->openChannel(remote_facade->getAUUID())),
-      graph_handle_(remote_facade),
-      graph_(std::make_shared<GraphProxy>(graph_channel_, remote_facade)),
-      uuid_(remote_facade->getAUUID()),
+  : Proxy(session)
+  , parent_(parent)
+  , graph_channel_(session->openChannel(remote_facade->getAUUID()))
+  , graph_handle_(remote_facade)
+  , graph_(std::make_shared<GraphProxy>(graph_channel_, remote_facade))
+  , uuid_(remote_facade->getAUUID())
+  ,
 
-      /**
-       * begin: initialize caches
-       **/
-      #define HANDLE_ACCESSOR(_enum, type, function)
-      #define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
-      has_##function##_(false),
-      #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-      has_##function##_(false),
-      #define HANDLE_SIGNAL(_enum, signal)
+/**
+ * begin: initialize caches
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function) has_##function##_(false),
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) has_##function##_(false),
+#define HANDLE_SIGNAL(_enum, signal)
 
-      #include <csapex/model/graph_facade_proxy_accessors.hpp>
-      /**
-       * end: initialize caches
-       **/
+#include <csapex/model/graph_facade_proxy_accessors.hpp>
+  /**
+   * end: initialize caches
+   **/
 
-      guard_(-1)
+  guard_(-1)
 {
-    if(parent_) {
+    if (parent_) {
         graph_->setParent(parent_->graph_, remote_facade->getAUUID());
     }
 
@@ -55,70 +54,56 @@ GraphFacadeProxy::GraphFacadeProxy(const SessionPtr& session, NodeFacadeProxyPtr
 
     observe(graph_->notification, notification);
 
-    observe(graph_channel_->note_received, [this](const io::NoteConstPtr& note){
-        if(const std::shared_ptr<GraphFacadeNote const>& cn = std::dynamic_pointer_cast<GraphFacadeNote const>(note)) {
-            switch(cn->getNoteType())
-            {
-            case GraphFacadeNoteType::ChildAdded:
-                break;
-            case GraphFacadeNoteType::ChildRemoved:
-                break;
-            case GraphFacadeNoteType::ChildNodeFacadeAdded:
-                break;
-            case GraphFacadeNoteType::ChildNodeFacadeRemoved:
-                break;
-            case GraphFacadeNoteType::ForwardingConnectorAdded:
-            {
-                ConnectorDescription cd = cn->getPayload<ConnectorDescription>(0);
-                createInternalConnector(cd);
-            }
-                break;
-            case GraphFacadeNoteType::ForwardingConnectorRemoved:
-            {
-                ConnectorDescription cd = cn->getPayload<ConnectorDescription>(0);
-                removeInternalConnector(cd);
-            }
-                break;
-            case GraphFacadeNoteType::PauseChanged:
-            {
-                paused(cn->getPayload<bool>(0));
-            }
-                break;
-            case GraphFacadeNoteType::Notification:
-            {
-                notification(cn->getPayload<Notification>(0));
-            }
-                break;
+    observe(graph_channel_->note_received, [this](const io::NoteConstPtr& note) {
+        if (const std::shared_ptr<GraphFacadeNote const>& cn = std::dynamic_pointer_cast<GraphFacadeNote const>(note)) {
+            switch (cn->getNoteType()) {
+                case GraphFacadeNoteType::ChildAdded:
+                    break;
+                case GraphFacadeNoteType::ChildRemoved:
+                    break;
+                case GraphFacadeNoteType::ChildNodeFacadeAdded:
+                    break;
+                case GraphFacadeNoteType::ChildNodeFacadeRemoved:
+                    break;
+                case GraphFacadeNoteType::ForwardingConnectorAdded: {
+                    ConnectorDescription cd = cn->getPayload<ConnectorDescription>(0);
+                    createInternalConnector(cd);
+                } break;
+                case GraphFacadeNoteType::ForwardingConnectorRemoved: {
+                    ConnectorDescription cd = cn->getPayload<ConnectorDescription>(0);
+                    removeInternalConnector(cd);
+                } break;
+                case GraphFacadeNoteType::PauseChanged: {
+                    paused(cn->getPayload<bool>(0));
+                } break;
+                case GraphFacadeNoteType::Notification: {
+                    notification(cn->getPayload<Notification>(0));
+                } break;
 
-            /**
-             * begin: connect signals
-             **/
-            #define HANDLE_ACCESSOR(_enum, type, function)
-            #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
-            #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-                case GraphFacadeNoteType::function##Changed: \
-                { \
-                    value_##function##_ = cn->getPayload<type>(0);\
-                    signal(value_##function##_); \
-                } \
-                break;
-            #define HANDLE_SIGNAL(_enum, signal) \
-                case GraphFacadeNoteType::_enum##Triggered: \
-                { \
-                    invokeSignal(signal, *cn); \
-                } \
-                break;
+/**
+ * begin: connect signals
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function)
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function)                                                                                                                                         \
+    case GraphFacadeNoteType::function##Changed: {                                                                                                                                                     \
+        value_##function##_ = cn->getPayload<type>(0);                                                                                                                                                 \
+        signal(value_##function##_);                                                                                                                                                                   \
+    } break;
+#define HANDLE_SIGNAL(_enum, signal)                                                                                                                                                                   \
+    case GraphFacadeNoteType::_enum##Triggered: {                                                                                                                                                      \
+        invokeSignal(signal, *cn);                                                                                                                                                                     \
+    } break;
 
-                #include <csapex/model/graph_facade_proxy_accessors.hpp>
-            /**
-             * end: connect signals
-             **/
+#include <csapex/model/graph_facade_proxy_accessors.hpp>
+                    /**
+                     * end: connect signals
+                     **/
             }
         }
     });
 
-
-    for(const ConnectorDescription& c : graph_handle_->getInternalConnectors()){
+    for (const ConnectorDescription& c : graph_handle_->getInternalConnectors()) {
         createInternalConnector(c);
     }
 
@@ -142,10 +127,10 @@ NodeFacadePtr GraphFacadeProxy::getNodeFacade() const
 
 void GraphFacadeProxy::handleBroadcast(const BroadcastMessageConstPtr& message)
 {
-    if(auto graph_msg = std::dynamic_pointer_cast<GraphBroadcasts const>(message)) {
-        switch(graph_msg->getBroadcastType()) {
-        case GraphBroadcasts::GraphBroadcastType::None:
-            break;
+    if (auto graph_msg = std::dynamic_pointer_cast<GraphBroadcasts const>(message)) {
+        switch (graph_msg->getBroadcastType()) {
+            case GraphBroadcasts::GraphBroadcastType::None:
+                break;
         }
     }
 }
@@ -155,7 +140,6 @@ void GraphFacadeProxy::createInternalConnector(const ConnectorDescription& cd)
     graph_handle_->createConnectorProxy(cd);
     ConnectorPtr connector = graph_handle_->getConnector(cd.id);
     forwarding_connector_added(connector);
-
 }
 void GraphFacadeProxy::removeInternalConnector(const ConnectorDescription& cd)
 {
@@ -184,7 +168,7 @@ void GraphFacadeProxy::createSubgraphFacade(NodeFacadePtr nf)
 void GraphFacadeProxy::destroySubgraphFacade(NodeFacadePtr nf)
 {
     auto pos = children_.find(nf->getUUID());
-    if(pos != children_.end()) {
+    if (pos != children_.end()) {
         std::shared_ptr<GraphFacadeProxy> subgraph = pos->second;
         children_.erase(pos);
         child_removed(subgraph);
@@ -206,13 +190,13 @@ GraphFacade* GraphFacadeProxy::getParent() const
     return parent_;
 }
 
-GraphFacadePtr GraphFacadeProxy::getSubGraph(const UUID &uuid)
+GraphFacadePtr GraphFacadeProxy::getSubGraph(const UUID& uuid)
 {
-    if(uuid.empty()) {
+    if (uuid.empty()) {
         throw std::logic_error("cannot get subgraph for empty UUID");
     }
 
-    if(uuid.composite()) {
+    if (uuid.composite()) {
         GraphFacadePtr facade = children_[uuid.rootUUID()];
         return facade->getSubGraph(uuid.nestedUUID());
     } else {
@@ -220,7 +204,6 @@ GraphFacadePtr GraphFacadeProxy::getSubGraph(const UUID &uuid)
         return facade;
     }
 }
-
 
 NodeFacadePtr GraphFacadeProxy::findNodeFacade(const UUID& uuid) const
 {
@@ -230,11 +213,11 @@ NodeFacadePtr GraphFacadeProxy::findNodeFacadeNoThrow(const UUID& uuid) const no
 {
     return graph_->findNodeFacadeNoThrow(uuid);
 }
-NodeFacadePtr GraphFacadeProxy::findNodeFacadeForConnector(const UUID &uuid) const
+NodeFacadePtr GraphFacadeProxy::findNodeFacadeForConnector(const UUID& uuid) const
 {
     return graph_->findNodeFacadeForConnector(uuid);
 }
-NodeFacadePtr GraphFacadeProxy::findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept
+NodeFacadePtr GraphFacadeProxy::findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept
 {
     return graph_->findNodeFacadeForConnectorNoThrow(uuid);
 }
@@ -243,11 +226,11 @@ NodeFacadePtr GraphFacadeProxy::findNodeFacadeWithLabel(const std::string& label
     return graph_->findNodeFacadeWithLabel(label);
 }
 
-ConnectorPtr GraphFacadeProxy::findConnector(const UUID &uuid)
+ConnectorPtr GraphFacadeProxy::findConnector(const UUID& uuid)
 {
     return graph_->findConnector(uuid);
 }
-ConnectorPtr GraphFacadeProxy::findConnectorNoThrow(const UUID &uuid) noexcept
+ConnectorPtr GraphFacadeProxy::findConnectorNoThrow(const UUID& uuid) noexcept
 {
     return graph_->findConnectorNoThrow(uuid);
 }
@@ -290,7 +273,7 @@ void GraphFacadeProxy::nodeAddedHandler(graph::VertexPtr vertex)
     NodeFacadePtr facade = vertex->getNodeFacade();
     facade->notification.connect(notification);
 
-    if(facade->isGraph()) {
+    if (facade->isGraph()) {
         createSubgraphFacade(facade);
     }
 
@@ -300,13 +283,12 @@ void GraphFacadeProxy::nodeAddedHandler(graph::VertexPtr vertex)
 void GraphFacadeProxy::nodeRemovedHandler(graph::VertexPtr vertex)
 {
     NodeFacadePtr facade = vertex->getNodeFacade();
-    if(facade->isGraph()) {
+    if (facade->isGraph()) {
         destroySubgraphFacade(facade);
     }
 
     node_facade_removed(facade);
 }
-
 
 void GraphFacadeProxy::clearBlock()
 {
@@ -323,7 +305,6 @@ void GraphFacadeProxy::pauseRequest(bool pause)
     graph_channel_->sendRequest<GraphFacadeRequests>(GraphFacadeRequests::GraphFacadeRequestType::SetPause, pause);
 }
 
-
 std::vector<UUID> GraphFacadeProxy::enumerateAllNodes() const
 {
     return graph_->getAllNodeUUIDs();
@@ -333,37 +314,35 @@ std::vector<ConnectionDescription> GraphFacadeProxy::enumerateAllConnections() c
     return graph_->enumerateAllConnections();
 }
 
-
 /**
  * begin: generate getters
  **/
-#define HANDLE_ACCESSOR(_enum, type, function) \
-type GraphFacadeProxy::function() const\
-{\
-    return request<type, GraphFacadeRequests>(GraphFacadeRequests::GraphFacadeRequestType::_enum, uuid_.getAbsoluteUUID());\
-}
-#define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
-type GraphFacadeProxy::function() const\
-{\
-    if(!has_##function##_) { \
-        cache_##function##_ = request<type, GraphFacadeRequests>(GraphFacadeRequests::GraphFacadeRequestType::_enum, uuid_.getAbsoluteUUID());\
-        has_##function##_ = true; \
-    } \
-    return cache_##function##_; \
-}
-#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-type GraphFacadeProxy::function() const\
-{\
-    if(!has_##function##_) { \
-        value_##function##_ = request<type, GraphFacadeRequests>(GraphFacadeRequests::GraphFacadeRequestType::_enum, uuid_.getAbsoluteUUID());\
-        has_##function##_ = true; \
-    } \
-    return value_##function##_; \
-}
+#define HANDLE_ACCESSOR(_enum, type, function)                                                                                                                                                         \
+    type GraphFacadeProxy::function() const                                                                                                                                                            \
+    {                                                                                                                                                                                                  \
+        return request<type, GraphFacadeRequests>(GraphFacadeRequests::GraphFacadeRequestType::_enum, uuid_.getAbsoluteUUID());                                                                        \
+    }
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function)                                                                                                                                                  \
+    type GraphFacadeProxy::function() const                                                                                                                                                            \
+    {                                                                                                                                                                                                  \
+        if (!has_##function##_) {                                                                                                                                                                      \
+            cache_##function##_ = request<type, GraphFacadeRequests>(GraphFacadeRequests::GraphFacadeRequestType::_enum, uuid_.getAbsoluteUUID());                                                     \
+            has_##function##_ = true;                                                                                                                                                                  \
+        }                                                                                                                                                                                              \
+        return cache_##function##_;                                                                                                                                                                    \
+    }
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function)                                                                                                                                         \
+    type GraphFacadeProxy::function() const                                                                                                                                                            \
+    {                                                                                                                                                                                                  \
+        if (!has_##function##_) {                                                                                                                                                                      \
+            value_##function##_ = request<type, GraphFacadeRequests>(GraphFacadeRequests::GraphFacadeRequestType::_enum, uuid_.getAbsoluteUUID());                                                     \
+            has_##function##_ = true;                                                                                                                                                                  \
+        }                                                                                                                                                                                              \
+        return value_##function##_;                                                                                                                                                                    \
+    }
 #define HANDLE_SIGNAL(_enum, signal)
 
 #include <csapex/model/graph_facade_proxy_accessors.hpp>
 /**
  * end: generate getters
  **/
-

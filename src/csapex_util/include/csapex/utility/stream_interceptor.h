@@ -13,7 +13,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_UTILS_EXPORT StreamInterceptor : public Singleton<StreamInterceptor>
 {
     friend class Singleton<StreamInterceptor>;
@@ -32,7 +31,6 @@ public:
     std::ostream cerr;
     std::ostream clog;
 
-
 private:
     StreamInterceptor();
     ~StreamInterceptor();
@@ -40,8 +38,8 @@ private:
     void run();
 
 private:
-    std::streambuf *clog_global_;
-    std::streambuf *cout_global_;
+    std::streambuf* clog_global_;
+    std::streambuf* cout_global_;
 
     std::stringstream fake_cout_;
     std::stringstream fake_cerr_;
@@ -58,6 +56,6 @@ private:
     std::stringstream cin_;
 };
 
-}
+}  // namespace csapex
 
-#endif // STREAM_INTERCEPTOR_H
+#endif  // STREAM_INTERCEPTOR_H

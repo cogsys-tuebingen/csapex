@@ -17,13 +17,12 @@ class QVBoxLayout;
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT ProfilingWidget : public QWidget, public Observer
 {
     Q_OBJECT
 
 public:
-    ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string &profile, QWidget* parent=0);
+    ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string& profile, QWidget* parent = 0);
     ~ProfilingWidget();
 
 public Q_SLOTS:
@@ -35,9 +34,9 @@ protected:
     void mouseMoveEvent(QMouseEvent* me);
     void leaveEvent(QEvent* e);
 
-    void paintEvent(QPaintEvent *);
-    void paintInterval(QPainter &p, const Interval &interval);
-    float paintInterval(QPainter &p, const Interval &interval, float height_offset, int depth);
+    void paintEvent(QPaintEvent*);
+    void paintInterval(QPainter& p, const Interval& interval);
+    float paintInterval(QPainter& p, const Interval& interval, float height_offset, int depth);
 
 private:
     std::shared_ptr<Profiler> profiler_;
@@ -46,12 +45,11 @@ private:
     QVBoxLayout* layout_;
     QSpacerItem* space_for_painting_;
     float bar_height_;
-    float content_height_ ;
+    float content_height_;
 
     float left_space;
     float padding;
     float line_height;
-
 
     float left;
     float right;
@@ -72,6 +70,6 @@ private:
     const Interval* selected_interval_;
 };
 
-}
+}  // namespace csapex
 
-#endif // PROFILING_WIDGET_H
+#endif  // PROFILING_WIDGET_H

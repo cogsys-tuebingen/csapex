@@ -30,7 +30,6 @@ private:
     param::SetParameterPtr set_p_;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // SET_PARAM_ADAPTER_H
+#endif  // SET_PARAM_ADAPTER_H

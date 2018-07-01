@@ -35,8 +35,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(UngroupNodes)
 
-UngroupNodes::UngroupNodes(const AUUID& parent_uuid, const UUID &uuid)
-    : GroupBase(parent_uuid, "UngroupNodes"), uuid(uuid)
+UngroupNodes::UngroupNodes(const AUUID& parent_uuid, const UUID& uuid) : GroupBase(parent_uuid, "UngroupNodes"), uuid(uuid)
 {
 }
 
@@ -65,30 +64,29 @@ bool UngroupNodes::doExecute()
         serialized_snippet_ = io.saveGraph();
     }
 
-    for(const InputPtr& in : nh->getExternalInputs()) {
+    for (const InputPtr& in : nh->getExternalInputs()) {
         auto source = in->getSource();
-        if(source) {
+        if (source) {
             old_connections_in[in->getUUID()] = source->getUUID();
         }
     }
-    for(const OutputPtr& out : nh->getExternalOutputs()) {
+    for (const OutputPtr& out : nh->getExternalOutputs()) {
         auto& vec = old_connections_out[out->getUUID()];
-        for(const ConnectionPtr& c : out->getConnections()) {
+        for (const ConnectionPtr& c : out->getConnections()) {
             vec.push_back(c->to()->getUUID());
         }
     }
 
-
-    for(const SlotPtr& slot : nh->getExternalSlots()) {
+    for (const SlotPtr& slot : nh->getExternalSlots()) {
         auto& vec = old_signals_in[slot->getUUID()];
-        for(const ConnectionPtr& c : slot->getConnections()) {
+        for (const ConnectionPtr& c : slot->getConnections()) {
             vec.push_back(c->from()->getUUID());
         }
     }
 
-    for(const EventPtr& trigger : nh->getExternalEvents()) {
+    for (const EventPtr& trigger : nh->getExternalEvents()) {
         auto& vec = old_signals_out[trigger->getUUID()];
-        for(const ConnectionPtr& c : trigger->getConnections()) {
+        for (const ConnectionPtr& c : trigger->getConnections()) {
             vec.push_back(c->to()->getUUID());
         }
     }
@@ -97,10 +95,9 @@ bool UngroupNodes::doExecute()
 
     insert_pos = nh->getNodeState()->getPos();
 
-    CommandPtr del = cf.deleteAllNodes({uuid});
+    CommandPtr del = cf.deleteAllNodes({ uuid });
     executeCommand(del);
     add(del);
-
 
     pasteSelection(graph_uuid);
 
@@ -111,10 +108,9 @@ bool UngroupNodes::doExecute()
     return true;
 }
 
-
 void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
 {
-    for(const ConnectionDescription& ci : connections_going_in) {
+    for (const ConnectionDescription& ci : connections_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id().getFullName();
         UUID to = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -127,7 +123,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         add(add_connection);
     }
 
-    for(const ConnectionDescription& ci : connections_going_out) {
+    for (const ConnectionDescription& ci : connections_going_out) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
         std::string child = ci.from.id().getFullName();
         UUID from = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -135,15 +131,14 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         UUID graph_out = subgraph->getForwardedInputExternal(ci.to);
         const std::vector<UUID>& targets = old_connections_out[graph_out];
 
-
-        for(const UUID& to : targets) {
+        for (const UUID& to : targets) {
             CommandPtr add_connection = std::make_shared<command::AddConnection>(parent_auuid, from, to, ci.active);
             executeCommand(add_connection);
             add(add_connection);
         }
     }
 
-    for(const ConnectionDescription& ci : signals_going_in) {
+    for (const ConnectionDescription& ci : signals_going_in) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.to.parentUUID());
         std::string child = ci.to.id().getFullName();
         UUID to = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -151,15 +146,14 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         UUID graph_out = subgraph->getForwardedSlotExternal(ci.from);
         const std::vector<UUID>& targets = old_signals_in[graph_out];
 
-
-        for(const UUID& from : targets) {
+        for (const UUID& from : targets) {
             CommandPtr add_connection = std::make_shared<command::AddConnection>(parent_auuid, from, to, ci.active);
             executeCommand(add_connection);
             add(add_connection);
         }
     }
 
-    for(const ConnectionDescription& ci : signals_going_out) {
+    for (const ConnectionDescription& ci : signals_going_out) {
         UUID nested_node_parent_id = old_uuid_to_new.at(ci.from.parentUUID());
         std::string child = ci.from.id().getFullName();
         UUID from = UUIDProvider::makeDerivedUUID_forced(nested_node_parent_id, child);
@@ -167,8 +161,7 @@ void UngroupNodes::unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid)
         UUID graph_out = subgraph->getForwardedEventExternal(ci.to);
         const std::vector<UUID>& targets = old_signals_out[graph_out];
 
-
-        for(const UUID& to : targets) {
+        for (const UUID& to : targets) {
             CommandPtr add_connection = std::make_shared<command::AddConnection>(parent_auuid, from, to, ci.active);
             executeCommand(add_connection);
             add(add_connection);
@@ -187,8 +180,7 @@ bool UngroupNodes::doRedo()
     return doExecute();
 }
 
-
-void UngroupNodes::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void UngroupNodes::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     GroupBase::serialize(data, version);
 

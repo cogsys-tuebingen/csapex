@@ -8,7 +8,6 @@ namespace csapex
 {
 namespace connection_types
 {
-
 struct CSAPEX_CORE_EXPORT NoMessage : public MarkerMessage
 {
 protected:
@@ -21,18 +20,19 @@ public:
     NoMessage();
 
 public:
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 };
 
 template <>
-struct type<NoMessage> {
-    static std::string name() {
+struct type<NoMessage>
+{
+    static std::string name()
+    {
         return "Nothing";
     }
 };
-}
-
+}  // namespace connection_types
 
 template <>
 inline std::shared_ptr<connection_types::NoMessage> makeEmpty<connection_types::NoMessage>()
@@ -41,18 +41,18 @@ inline std::shared_ptr<connection_types::NoMessage> makeEmpty<connection_types::
     return instance;
 }
 
-}
+}  // namespace csapex
 
 /// YAML
-namespace YAML {
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::NoMessage> {
-  static Node encode(const csapex::connection_types::NoMessage& rhs);
-  static bool decode(const Node& node, csapex::connection_types::NoMessage& rhs);
+namespace YAML
+{
+template <>
+struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::NoMessage>
+{
+    static Node encode(const csapex::connection_types::NoMessage& rhs);
+    static bool decode(const Node& node, csapex::connection_types::NoMessage& rhs);
 };
 
+}  // namespace YAML
 
-}
-
-#endif // NO_MESSAGE_H
-
+#endif  // NO_MESSAGE_H

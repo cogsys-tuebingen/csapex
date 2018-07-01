@@ -3,12 +3,12 @@
 
 namespace csapex
 {
-enum class ActivityType {
+enum class ActivityType
+{
     PROCESS,
     SLOT_CALLBACK,
     OTHER
 };
-
 }
 
-#endif // ACTIVITY_TYPE_H
+#endif  // ACTIVITY_TYPE_H

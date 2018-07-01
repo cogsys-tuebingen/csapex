@@ -7,16 +7,13 @@
 
 using namespace csapex;
 
-Interval::Interval(const std::string &name)
-    : name_(name), length_micro_seconds_(0), active_(false), stopped_(false)
+Interval::Interval(const std::string& name) : name_(name), length_micro_seconds_(0), active_(false), stopped_(false)
 {
     start();
 }
 
-Interval::Interval()
-    : Interval("empty")
+Interval::Interval() : Interval("empty")
 {
-
 }
 
 bool Interval::isActive() const
@@ -34,10 +31,10 @@ bool Interval::isStopped() const
     return stopped_;
 }
 
-void Interval::entries(std::vector<std::pair<std::string, double> > &out) const
+void Interval::entries(std::vector<std::pair<std::string, double> >& out) const
 {
     out.push_back(std::make_pair(name_, lengthMs()));
-    for(auto it = sub.begin(); it != sub.end(); ++it) {
+    for (auto it = sub.begin(); it != sub.end(); ++it) {
         it->second->entries(out);
     }
 }
@@ -50,7 +47,7 @@ double Interval::lengthMs() const
 double Interval::lengthSubMs() const
 {
     int sum = 0;
-    for(std::map<std::string, Interval::Ptr>::const_iterator it = sub.begin(); it != sub.end(); ++it) {
+    for (std::map<std::string, Interval::Ptr>::const_iterator it = sub.begin(); it != sub.end(); ++it) {
         const Interval& i = *it->second;
         sum += i.lengthMs();
     }
@@ -95,13 +92,12 @@ void Interval::stop()
     length_micro_seconds_ += std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
 }
 
-
 std::shared_ptr<Interval> Interval::makeEmpty()
 {
     return std::shared_ptr<Interval>(new Interval);
 }
 
-void Interval::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Interval::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << name_;
 

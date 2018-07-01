@@ -14,7 +14,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT NodeFactory : public Notifier
 {
 public:
@@ -37,6 +36,6 @@ protected:
     std::vector<NodeConstructorPtr> constructors_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_FACTORY_H
+#endif  // NODE_FACTORY_H

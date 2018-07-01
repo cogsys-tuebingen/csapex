@@ -14,7 +14,6 @@
 #include <unistd.h>
 #endif
 
-
 using namespace csapex;
 
 std::string StreamInterceptor::getCout()
@@ -49,7 +48,8 @@ std::string StreamInterceptor::getCin()
     return in;
 }
 
-namespace {
+namespace
+{
 bool inputAvailable()
 {
 #ifdef WIN32
@@ -60,18 +60,19 @@ bool inputAvailable()
     tv.tv_usec = 0;
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
-    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
     return (FD_ISSET(0, &fds));
 #endif
-	return false;
+    return false;
 }
-}
+}  // namespace
 
-void StreamInterceptor::run() {
+void StreamInterceptor::run()
+{
     csapex::thread::set_name("stream_interceptor");
 
 #ifdef WIN32
-	if(false) {
+    if (false) {
 #else
     if (isatty(fileno(stdin))) {
 #endif
@@ -81,22 +82,22 @@ void StreamInterceptor::run() {
 
     running_ = true;
     std::string line;
-    while(!stop_) {
-        if(!std::cin.good()) {
+    while (!stop_) {
+        if (!std::cin.good()) {
             stop_ = true;
             continue;
         }
 
-        if(inputAvailable()) {
+        if (inputAvailable()) {
             in_getline_ = true;
-            std::getline(std::cin,line);
+            std::getline(std::cin, line);
             in_getline_ = false;
 
-            if(stop_) {
+            if (stop_) {
                 continue;
             }
 
-            if(line[0] != '\0') {
+            if (line[0] != '\0') {
                 had_input_ = true;
 
                 std::unique_lock<std::mutex> lock(cin_mutex_);
@@ -114,15 +115,12 @@ StreamInterceptor::~StreamInterceptor()
 {
     shutdown();
 
-    if(thread_.joinable()) {
+    if (thread_.joinable()) {
         thread_.join();
     }
 }
 
-
-StreamInterceptor::StreamInterceptor()
-    : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()),
-      running_(false),  in_getline_(false), had_input_(false)
+StreamInterceptor::StreamInterceptor() : cout(std::cout.rdbuf()), cerr(std::cerr.rdbuf()), clog(std::clog.rdbuf()), running_(false), in_getline_(false), had_input_(false)
 {
     clog_global_ = std::clog.rdbuf();
     cout_global_ = std::cout.rdbuf();
@@ -141,16 +139,14 @@ bool StreamInterceptor::isRunning() const
 
 void StreamInterceptor::start()
 {
-    if(!isRunning()) {
-        thread_ = std::thread([this]() {
-            run();
-        });
+    if (!isRunning()) {
+        thread_ = std::thread([this]() { run(); });
     }
 }
 
 void StreamInterceptor::shutdown()
 {
-    if(running_) {
+    if (running_) {
         stop_ = true;
         thread_.join();
         running_ = false;

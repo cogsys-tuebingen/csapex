@@ -11,22 +11,21 @@
 using namespace csapex;
 
 // base
-SerializationBuffer& csapex::operator << (SerializationBuffer& data, const Serializable& s)
+SerializationBuffer& csapex::operator<<(SerializationBuffer& data, const Serializable& s)
 {
     s.serializeVersioned(data);
 
     return data;
 }
 
-const SerializationBuffer& csapex::operator >> (const SerializationBuffer& data, Serializable& s)
+const SerializationBuffer& csapex::operator>>(const SerializationBuffer& data, Serializable& s)
 {
     s.deserializeVersioned(data);
 
     return data;
 }
 
-
-SerializationBuffer& csapex::operator << (SerializationBuffer& data, const SemanticVersion& version)
+SerializationBuffer& csapex::operator<<(SerializationBuffer& data, const SemanticVersion& version)
 {
     data << version.major_v;
     data << version.minor_v;
@@ -34,7 +33,7 @@ SerializationBuffer& csapex::operator << (SerializationBuffer& data, const Seman
 
     return data;
 }
-const SerializationBuffer& csapex::operator >> (const SerializationBuffer& data, SemanticVersion& version)
+const SerializationBuffer& csapex::operator>>(const SerializationBuffer& data, SemanticVersion& version)
 {
     data >> version.major_v;
     data >> version.minor_v;
@@ -43,15 +42,14 @@ const SerializationBuffer& csapex::operator >> (const SerializationBuffer& data,
     return data;
 }
 
-
 // UUID
-SerializationBuffer& csapex::operator << (SerializationBuffer& data, const UUID& s)
+SerializationBuffer& csapex::operator<<(SerializationBuffer& data, const UUID& s)
 {
     data << s.getFullName();
     return data;
 }
 
-const SerializationBuffer& csapex::operator >> (const SerializationBuffer& data, UUID& s)
+const SerializationBuffer& csapex::operator>>(const SerializationBuffer& data, UUID& s)
 {
     std::string full_name;
     data >> full_name;

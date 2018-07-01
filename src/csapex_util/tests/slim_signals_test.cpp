@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 struct Base
 {
 };
@@ -36,17 +35,20 @@ protected:
     {
     }
 
-    virtual ~SlimSignalsTest() {
+    virtual ~SlimSignalsTest()
+    {
     }
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         member_called_1 = false;
         member_called_2 = false;
         member_called_child = false;
         member_called_fewer = false;
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
     }
 
 public:
@@ -93,9 +95,7 @@ TEST_F(SlimSignalsTest, Connecting)
     {
         boost::signals2::signal<void(int, Base*)> boost_sig;
         bool boost_called = false;
-        boost_sig.connect([&](int, Base*) {
-            boost_called = true;
-        });
+        boost_sig.connect([&](int, Base*) { boost_called = true; });
 
         boost_sig(i, &foo);
         ASSERT_TRUE(boost_called);
@@ -130,9 +130,7 @@ TEST_F(SlimSignalsTest, Connecting)
 
     {
         bool slim_called = false;
-        auto cb = [&](int, Base*) {
-            slim_called = true;
-        };
+        auto cb = [&](int, Base*) { slim_called = true; };
         std::function<void(int, Base*)> d = cb;
 
         slim_sig.connect(d);
@@ -143,9 +141,7 @@ TEST_F(SlimSignalsTest, Connecting)
 
     {
         bool slim_called = false;
-        slim_sig.connect([&](int, Base*) {
-            slim_called = true;
-        });
+        slim_sig.connect([&](int, Base*) { slim_called = true; });
 
         slim_sig(i, &foo);
         ASSERT_TRUE(slim_called);
@@ -186,9 +182,7 @@ TEST_F(SlimSignalsTest, UpcastingWorks)
 
     {
         bool slim_called = false;
-        auto cb = [&](int, Base*) {
-            slim_called = true;
-        };
+        auto cb = [&](int, Base*) { slim_called = true; };
         std::function<void(int, Base*)> d = cb;
 
         slim_sig.connect(d);
@@ -199,16 +193,12 @@ TEST_F(SlimSignalsTest, UpcastingWorks)
 
     {
         bool slim_called = false;
-        slim_sig.connect([&](int, Base*) {
-            slim_called = true;
-        });
+        slim_sig.connect([&](int, Base*) { slim_called = true; });
 
         slim_sig(i, &foo);
         ASSERT_TRUE(slim_called);
     }
 }
-
-
 
 TEST_F(SlimSignalsTest, ConnectionToFewerArguments)
 {
@@ -243,13 +233,11 @@ TEST_F(SlimSignalsTest, ConnectionToFewerArguments)
         ASSERT_TRUE(member_called_fewer);
     }
 #endif
-    //test all here
-    //also test connection to observable signal!
+    // test all here
+    // also test connection to observable signal!
     {
         bool slim_called = false;
-        slim_sig.connect([&](int) {
-            slim_called = true;
-        });
+        slim_sig.connect([&](int) { slim_called = true; });
 
         slim_sig(i, &foo);
         ASSERT_TRUE(slim_called);
@@ -257,9 +245,7 @@ TEST_F(SlimSignalsTest, ConnectionToFewerArguments)
 
     {
         bool slim_called = false;
-        auto cb = [&](int) {
-            slim_called = true;
-        };
+        auto cb = [&](int) { slim_called = true; };
         std::function<void(int)> d = cb;
 
         slim_sig.connect(d);
@@ -270,9 +256,7 @@ TEST_F(SlimSignalsTest, ConnectionToFewerArguments)
 
     {
         bool slim_called = false;
-        auto cb = [&]() {
-            slim_called = true;
-        };
+        auto cb = [&]() { slim_called = true; };
         std::function<void()> d = cb;
 
         slim_sig.connect(d);
@@ -280,7 +264,6 @@ TEST_F(SlimSignalsTest, ConnectionToFewerArguments)
         slim_sig(i, &foo);
         ASSERT_TRUE(slim_called);
     }
-
 }
 
 TEST_F(SlimSignalsTest, MultipleConnections)
@@ -294,12 +277,8 @@ TEST_F(SlimSignalsTest, MultipleConnections)
 
         bool boost_called_1 = false;
         bool boost_called_2 = false;
-        boost_sig.connect([&](int, Base*) {
-            boost_called_1 = true;
-        });
-        boost_sig.connect([&](int, Base*) {
-            boost_called_2 = true;
-        });
+        boost_sig.connect([&](int, Base*) { boost_called_1 = true; });
+        boost_sig.connect([&](int, Base*) { boost_called_2 = true; });
 
         boost_sig(i, &foo);
         ASSERT_TRUE(boost_called_1);
@@ -312,12 +291,8 @@ TEST_F(SlimSignalsTest, MultipleConnections)
 
         bool slim_called_1 = false;
         bool slim_called_2 = false;
-        slim_sig.connect([&](int, Base*) {
-            slim_called_1 = true;
-        });
-        slim_sig.connect([&](int, Base*) {
-            slim_called_2 = true;
-        });
+        slim_sig.connect([&](int, Base*) { slim_called_1 = true; });
+        slim_sig.connect([&](int, Base*) { slim_called_2 = true; });
 
         slim_sig(i, &foo);
         ASSERT_TRUE(slim_called_1);
@@ -336,12 +311,8 @@ TEST_F(SlimSignalsTest, Disconnections)
 
         bool called_1 = false;
         bool called_2 = false;
-        auto c = boost_sig.connect([&](int, Base*) {
-            called_1 = true;
-        });
-        boost_sig.connect([&](int, Base*) {
-            called_2 = true;
-        });
+        auto c = boost_sig.connect([&](int, Base*) { called_1 = true; });
+        boost_sig.connect([&](int, Base*) { called_2 = true; });
 
         boost_sig(i, &foo);
         ASSERT_TRUE(called_1);
@@ -364,12 +335,8 @@ TEST_F(SlimSignalsTest, Disconnections)
 
         bool called_1 = false;
         bool called_2 = false;
-        slim_signal::Connection c = slim_sig.connect([&](int, Base*) {
-            called_1 = true;
-        });
-        slim_sig.connect([&](int, Base*) {
-            called_2 = true;
-        });
+        slim_signal::Connection c = slim_sig.connect([&](int, Base*) { called_1 = true; });
+        slim_sig.connect([&](int, Base*) { called_2 = true; });
 
         slim_sig(i, &foo);
         ASSERT_TRUE(called_1);
@@ -421,14 +388,10 @@ TEST_F(SlimSignalsTest, ScopedConnections)
         bool called_1 = false;
         bool called_2 = false;
         {
-            boost::signals2::scoped_connection c(boost_sig.connect([&](int, Base*) {
-                called_1 = true;
-            }));
+            boost::signals2::scoped_connection c(boost_sig.connect([&](int, Base*) { called_1 = true; }));
         }
 
-        boost::signals2::scoped_connection c(boost_sig.connect([&](int, Base*) {
-            called_2 = true;
-        }));
+        boost::signals2::scoped_connection c(boost_sig.connect([&](int, Base*) { called_2 = true; }));
 
         boost_sig(i, &foo);
 
@@ -443,13 +406,9 @@ TEST_F(SlimSignalsTest, ScopedConnections)
         bool called_1 = false;
         bool called_2 = false;
         {
-            slim_signal::ScopedConnection c = slim_sig.connect([&](int, Base*) {
-                called_1 = true;
-            });
+            slim_signal::ScopedConnection c = slim_sig.connect([&](int, Base*) { called_1 = true; });
         }
-        slim_signal::ScopedConnection c = slim_sig.connect([&](int, Base*) {
-            called_2 = true;
-        });
+        slim_signal::ScopedConnection c = slim_sig.connect([&](int, Base*) { called_2 = true; });
 
         slim_sig(i, &foo);
 
@@ -471,8 +430,6 @@ TEST_F(SlimSignalsTest, ScopedConnections)
     }
 }
 
-
-
 TEST_F(SlimSignalsTest, Chaining)
 {
     int i = 0;
@@ -486,9 +443,7 @@ TEST_F(SlimSignalsTest, Chaining)
         bool called = false;
 
         boost_sig2.connect(boost_sig1);
-        boost_sig1.connect([&](int, Base*) {
-            called = true;
-        });
+        boost_sig1.connect([&](int, Base*) { called = true; });
 
         boost_sig2(i, &foo);
 
@@ -504,9 +459,7 @@ TEST_F(SlimSignalsTest, Chaining)
         bool called = false;
 
         slim_sig2.connect(slim_sig1);
-        slim_sig1.connect([&](int, Base*) {
-            called = true;
-        });
+        slim_sig1.connect([&](int, Base*) { called = true; });
 
         slim_sig2(i, &foo);
 
@@ -527,53 +480,59 @@ TEST_F(SlimSignalsTest, Chaining)
         bool last_disconnected = false;
         bool called = false;
 
-        slim_sig1.first_connected.connect([&](){
-            first_connected = true;
-        });
-        slim_sig1.last_disconnected.connect([&](){
-            last_disconnected = true;
-        });
+        slim_sig1.first_connected.connect([&]() { first_connected = true; });
+        slim_sig1.last_disconnected.connect([&]() { last_disconnected = true; });
 
         ASSERT_FALSE(first_connected);
         ASSERT_FALSE(last_disconnected);
 
         auto c1 = slim_sig1.connect(slim_sig2);
 
-        ASSERT_TRUE(first_connected); first_connected = false;
-        ASSERT_FALSE(last_disconnected); last_disconnected = false;
+        ASSERT_TRUE(first_connected);
+        first_connected = false;
+        ASSERT_FALSE(last_disconnected);
+        last_disconnected = false;
 
         auto c2 = slim_sig1.connect(slim_sig_last);
 
-        ASSERT_FALSE(first_connected); first_connected = false;
-        ASSERT_FALSE(last_disconnected); last_disconnected = false;
+        ASSERT_FALSE(first_connected);
+        first_connected = false;
+        ASSERT_FALSE(last_disconnected);
+        last_disconnected = false;
 
         slim_sig2.connect(slim_sig3);
 
-        ASSERT_FALSE(first_connected); first_connected = false;
-        ASSERT_FALSE(last_disconnected); last_disconnected = false;
+        ASSERT_FALSE(first_connected);
+        first_connected = false;
+        ASSERT_FALSE(last_disconnected);
+        last_disconnected = false;
 
         slim_sig3.connect(slim_sig4);
 
-        ASSERT_FALSE(first_connected); first_connected = false;
-        ASSERT_FALSE(last_disconnected); last_disconnected = false;
+        ASSERT_FALSE(first_connected);
+        first_connected = false;
+        ASSERT_FALSE(last_disconnected);
+        last_disconnected = false;
 
-        slim_sig4.connect([&](int, Child*) {
-            called = true;
-        });
+        slim_sig4.connect([&](int, Child*) { called = true; });
 
         slim_sig1(i, &foo);
 
         ASSERT_TRUE(called);
 
-        ASSERT_FALSE(first_connected); first_connected = false;
-        ASSERT_FALSE(last_disconnected); last_disconnected = false;
+        ASSERT_FALSE(first_connected);
+        first_connected = false;
+        ASSERT_FALSE(last_disconnected);
+        last_disconnected = false;
 
         ASSERT_FALSE(c1.isDetached());
         ASSERT_FALSE(c2.isDetached());
         c2.disconnect();
 
-        ASSERT_FALSE(first_connected); first_connected = false;
-        ASSERT_FALSE(last_disconnected); last_disconnected = false;
+        ASSERT_FALSE(first_connected);
+        first_connected = false;
+        ASSERT_FALSE(last_disconnected);
+        last_disconnected = false;
 
         ASSERT_FALSE(c1.isDetached());
         ASSERT_TRUE(c2.isDetached());
@@ -582,8 +541,10 @@ TEST_F(SlimSignalsTest, Chaining)
         ASSERT_TRUE(c1.isDetached());
         ASSERT_TRUE(c2.isDetached());
 
-        ASSERT_FALSE(first_connected); first_connected = false;
-        ASSERT_TRUE(last_disconnected); last_disconnected = false;
+        ASSERT_FALSE(first_connected);
+        first_connected = false;
+        ASSERT_TRUE(last_disconnected);
+        last_disconnected = false;
     }
 }
 
@@ -598,9 +559,7 @@ TEST_F(SlimSignalsTest, ChainingUpcast)
     bool called = false;
 
     slim_sig1.connect(slim_sig2);
-    slim_sig2.connect([&](int, Base*) {
-        called = true;
-    });
+    slim_sig2.connect([&](int, Base*) { called = true; });
 
     slim_sig1(i, &foo);
 
@@ -614,13 +573,11 @@ TEST_F(SlimSignalsTest, Deletion)
 
     /// BOOST
     {
-        auto boost_sig = std::make_shared<boost::signals2::signal<void(int, Base*)> >();
+        auto boost_sig = std::make_shared<boost::signals2::signal<void(int, Base*)>>();
 
         bool called = false;
 
-        boost::signals2::scoped_connection sc(boost_sig->connect([&](int, Base*) {
-            called = true;
-        }));
+        boost::signals2::scoped_connection sc(boost_sig->connect([&](int, Base*) { called = true; }));
 
         (*boost_sig)(i, &foo);
 
@@ -635,13 +592,11 @@ TEST_F(SlimSignalsTest, Deletion)
     /// SLIM
 
     {
-        auto slim_sig = std::make_shared<slim_signal::Signal<void(int, Base*)> >();
+        auto slim_sig = std::make_shared<slim_signal::Signal<void(int, Base*)>>();
 
         bool called = false;
 
-        slim_signal::ScopedConnection sc(slim_sig->connect([&](int, Base*) {
-            called = true;
-        }));
+        slim_signal::ScopedConnection sc(slim_sig->connect([&](int, Base*) { called = true; }));
 
         (*slim_sig)(i, &foo);
 
@@ -654,7 +609,7 @@ TEST_F(SlimSignalsTest, Deletion)
     }
 }
 
-//TEST_F(SlimSignalsTest, RecursiveDeletion)
+// TEST_F(SlimSignalsTest, RecursiveDeletion)
 //{
 //    int i = 0;
 //    Foo foo;
@@ -708,9 +663,6 @@ TEST_F(SlimSignalsTest, Deletion)
 //    }
 //}
 
-
-
-
 TEST_F(SlimSignalsTest, ScopedConnectionDeletedAfterSignals)
 {
     int i = 0;
@@ -723,9 +675,7 @@ TEST_F(SlimSignalsTest, ScopedConnectionDeletedAfterSignals)
         bool called = false;
         {
             slim_signal::ScopedConnection c1 = slim_sig1.connect(*slim_sig2);
-            slim_signal::ScopedConnection c2 = slim_sig2->connect([&](int, Base*) {
-                called = true;
-            });
+            slim_signal::ScopedConnection c2 = slim_sig2->connect([&](int, Base*) { called = true; });
 
             slim_sig1(i, &foo);
             ASSERT_TRUE(called);
@@ -752,5 +702,4 @@ TEST_F(SlimSignalsTest, ScopedConnectionDeletedAfterSignals)
     }
 }
 
-
-}
+}  // namespace csapex

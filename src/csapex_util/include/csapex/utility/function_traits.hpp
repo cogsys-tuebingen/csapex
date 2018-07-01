@@ -6,16 +6,18 @@
 
 namespace csapex
 {
-
 template <typename T>
-struct function_traits
-    : public function_traits<decltype(&T::operator())>
-{};
+struct function_traits : public function_traits<decltype(&T::operator())>
+{
+};
 
 template <typename ClassType, typename ReturnType, typename... Args>
-struct function_traits<ReturnType(ClassType::*)(Args...) const>
+struct function_traits<ReturnType (ClassType::*)(Args...) const>
 {
-    enum { arity = sizeof...(Args) };
+    enum
+    {
+        arity = sizeof...(Args)
+    };
 
     using result_type = ReturnType;
     using signature = ReturnType(Args...);
@@ -26,12 +28,14 @@ struct function_traits<ReturnType(ClassType::*)(Args...) const>
         using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
     };
 };
-
 
 template <typename ReturnType, typename... Args>
 struct function_traits<ReturnType(Args...)>
 {
-    enum { arity = sizeof...(Args) };
+    enum
+    {
+        arity = sizeof...(Args)
+    };
 
     using result_type = ReturnType;
     using signature = ReturnType(Args...);
@@ -43,6 +47,6 @@ struct function_traits<ReturnType(Args...)>
     };
 };
 
-}
+}  // namespace csapex
 
-#endif // FUNCTION_TRAITS_HPP
+#endif  // FUNCTION_TRAITS_HPP

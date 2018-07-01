@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(SetColor)
 
-SetColor::SetColor(const AUUID& parent_uuid, const UUID &node, int r, int g, int b)
-    : CommandImplementation(parent_uuid), uuid(node), r(r), g(g), b(b)
+SetColor::SetColor(const AUUID& parent_uuid, const UUID& node, int r, int g, int b) : CommandImplementation(parent_uuid), uuid(node), r(r), g(g), b(b)
 {
 }
 
@@ -59,9 +58,7 @@ bool SetColor::doRedo()
     return doExecute();
 }
 
-
-
-void SetColor::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void SetColor::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

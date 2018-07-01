@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class ProfilerProxy;
 
 class CSAPEX_CORE_EXPORT NodeFacadeProxy : public NodeFacade, public Proxy
@@ -40,7 +39,6 @@ public:
     ConnectorPtr getParameterInput(const std::string& name) const override;
     ConnectorPtr getParameterOutput(const std::string& name) const override;
 
-
     // Parameterizable
     virtual std::vector<param::ParameterPtr> getParameters() const override;
     param::ParameterPtr getParameter(const std::string& name) const override;
@@ -54,27 +52,25 @@ public:
     NodeStatePtr getNodeState() const override;
     NodeStatePtr getNodeStateCopy() const override;
 
-    /**
-     * begin: generate getters
-     **/
-    #define HANDLE_ACCESSOR(_enum, type, function) \
-    virtual type function() const override;
+/**
+ * begin: generate getters
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function) virtual type function() const override;
 
-    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_SIGNAL(_enum, signal)
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_SIGNAL(_enum, signal)
 
-    #include <csapex/model/node_facade_proxy_accessors.hpp>
+#include <csapex/model/node_facade_proxy_accessors.hpp>
     /**
      * end: generate getters
      **/
 
-    void createConnectorProxy(const ConnectorDescription &cd);
-    void removeConnectorProxy(const ConnectorDescription &cd);
+    void createConnectorProxy(const ConnectorDescription& cd);
+    void removeConnectorProxy(const ConnectorDescription& cd);
 
 private:
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
-
 
     void createParameterProxy(param::ParameterPtr proxy) const;
 
@@ -83,23 +79,22 @@ private:
 
     io::ChannelPtr node_channel_;
 
-    /**
-     * begin: generate caches
-     **/
-    #define HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
-    mutable bool has_##function##_; \
+/**
+ * begin: generate caches
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function)                                                                                                                                                  \
+    mutable bool has_##function##_;                                                                                                                                                                    \
     mutable type cache_##function##_;
-    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-    mutable bool has_##function##_; \
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function)                                                                                                                                         \
+    mutable bool has_##function##_;                                                                                                                                                                    \
     mutable type value_##function##_;
-    #define HANDLE_SIGNAL(_enum, signal)
+#define HANDLE_SIGNAL(_enum, signal)
 
-    #include <csapex/model/node_facade_proxy_accessors.hpp>
+#include <csapex/model/node_facade_proxy_accessors.hpp>
     /**
      * end: generate caches
      **/
-
 
     long guard_;
 
@@ -116,6 +111,6 @@ private:
     std::unordered_map<UUID, bool, UUID::Hasher> is_parameter_input_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_FACADE_PROXY_H
+#endif  // NODE_FACADE_PROXY_H

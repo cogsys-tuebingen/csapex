@@ -10,7 +10,6 @@
 
 namespace csapex
 {
-
 /**
  * @brief type2name convertes a type into is demangled C++ name
  * @param info typeinfo of the type to convert
@@ -25,8 +24,7 @@ std::string type2name(const std::type_info& info);
  * @return the converted type
  */
 template <typename T>
-CSAPEX_UTILS_EXPORT
-std::string type2name()
+CSAPEX_UTILS_EXPORT std::string type2name()
 {
     return type2name(typeid(T));
 }
@@ -45,12 +43,11 @@ std::string type2nameWithoutNamespace(const std::type_info& info);
  * @return the converted type
  */
 template <typename T>
-CSAPEX_UTILS_EXPORT
-std::string type2nameWithoutNamespace()
+CSAPEX_UTILS_EXPORT std::string type2nameWithoutNamespace()
 {
     return type2nameWithoutNamespace(typeid(T));
 }
 
-}
+}  // namespace csapex
 
-#endif // TYPE_H
+#endif  // TYPE_H

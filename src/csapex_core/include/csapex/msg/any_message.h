@@ -9,7 +9,6 @@ namespace csapex
 {
 namespace connection_types
 {
-
 struct CSAPEX_CORE_EXPORT AnyMessage : public Message
 {
 protected:
@@ -25,18 +24,20 @@ public:
     bool canConnectTo(const TokenData* other_side) const override;
     bool acceptsConnectionFrom(const TokenData* other_side) const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 };
 
 template <>
-struct type<AnyMessage> {
-    static std::string name() {
+struct type<AnyMessage>
+{
+    static std::string name()
+    {
         return "Anything";
     }
 };
 
-}
+}  // namespace connection_types
 
 template <>
 inline std::shared_ptr<connection_types::AnyMessage> makeEmpty<connection_types::AnyMessage>()
@@ -45,18 +46,18 @@ inline std::shared_ptr<connection_types::AnyMessage> makeEmpty<connection_types:
     return instance;
 }
 
-}
+}  // namespace csapex
 
 /// YAML
-namespace YAML {
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::AnyMessage> {
-  static Node encode(const csapex::connection_types::AnyMessage& rhs);
-  static bool decode(const Node& node, csapex::connection_types::AnyMessage& rhs);
+namespace YAML
+{
+template <>
+struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::AnyMessage>
+{
+    static Node encode(const csapex::connection_types::AnyMessage& rhs);
+    static bool decode(const Node& node, csapex::connection_types::AnyMessage& rhs);
 };
 
+}  // namespace YAML
 
-}
-
-#endif // ANY_MESSAGE_H
-
+#endif  // ANY_MESSAGE_H

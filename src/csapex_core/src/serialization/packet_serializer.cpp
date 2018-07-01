@@ -14,7 +14,6 @@ using namespace csapex;
 
 Serializer::~Serializer()
 {
-
 }
 SerializationBuffer PacketSerializer::serializePacket(const Streamable& packet)
 {
@@ -23,7 +22,7 @@ SerializationBuffer PacketSerializer::serializePacket(const Streamable& packet)
     data.finalize();
     return data;
 }
-SerializationBuffer PacketSerializer::serializePacket(const StreamableConstPtr &packet)
+SerializationBuffer PacketSerializer::serializePacket(const StreamableConstPtr& packet)
 {
     return serializePacket(*packet);
 }
@@ -33,17 +32,17 @@ StreamablePtr PacketSerializer::deserializePacket(SerializationBuffer& serial)
     return instance().deserialize(serial);
 }
 
-void PacketSerializer::registerSerializer(uint8_t type, Serializer *serializer)
+void PacketSerializer::registerSerializer(uint8_t type, Serializer* serializer)
 {
     instance().serializers_[type] = serializer;
 }
 
-void PacketSerializer::serialize(const Streamable& packet, SerializationBuffer &data)
+void PacketSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
     // determine packet type
     uint8_t type = packet.getPacketType();
     auto it = serializers_.find(type);
-    if(it != serializers_.end()) {
+    if (it != serializers_.end()) {
         data << type;
 
         // defer serialization to the corresponding serializer
@@ -59,13 +58,13 @@ StreamablePtr PacketSerializer::deserialize(const SerializationBuffer& data)
     data >> type;
 
     auto it = serializers_.find(type);
-    if(it != serializers_.end()) {
+    if (it != serializers_.end()) {
         // defer deserialization to the corresponding serializer
         Serializer* serializer = it->second;
         return serializer->deserialize(data);
 
     } else {
-        std::cerr << "cannot deserialize packet of type: " << (int) type << std::endl;
+        std::cerr << "cannot deserialize packet of type: " << (int)type << std::endl;
     }
 
     return StreamablePtr();

@@ -8,19 +8,19 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Input : public Connectable
 {
     friend class Output;
 
 public:
-    Input(const UUID &uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Input(const UUID& uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
     virtual ~Input();
 
     void setInputTransition(InputTransition* it);
     void removeInputTransition();
 
-    virtual bool isInput() const override {
+    virtual bool isInput() const override
+    {
         return true;
     }
 
@@ -50,13 +50,13 @@ public:
     virtual void enable() override;
     virtual void disable() override;
 
-    virtual void notifyMessageAvailable(Connection *connection);
+    virtual void notifyMessageAvailable(Connection* connection);
 
     virtual void reset() override;
 
 public:
     slim_signal::Signal<void(Connectable*)> message_set;
-    slim_signal::Signal<void(Connection* )> message_available;
+    slim_signal::Signal<void(Connection*)> message_available;
 
 protected:
     virtual void addStatusInformation(std::stringstream& status_stream) const override;
@@ -70,6 +70,6 @@ protected:
     bool optional_;
 };
 
-}
+}  // namespace csapex
 
-#endif // INPUT_H
+#endif  // INPUT_H

@@ -8,13 +8,11 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT ExceptionHandler
 {
 public:
     ExceptionHandler(bool fatal_exceptions);
     virtual ~ExceptionHandler();
-
 
     virtual bool handleException(std::exception_ptr eptr);
     virtual void handleAssertionFailure(const csapex::Failure& assertion);
@@ -28,6 +26,6 @@ protected:
 protected:
     bool fatal_exceptions_;
 };
-}
+}  // namespace csapex
 
-#endif // EXCEPTION_HANDLER_H
+#endif  // EXCEPTION_HANDLER_H

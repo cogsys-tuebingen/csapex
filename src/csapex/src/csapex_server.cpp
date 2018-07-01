@@ -32,9 +32,7 @@ namespace po = boost::program_options;
 
 using namespace csapex;
 
-
-CsApexServer::CsApexServer(Settings& settings, ExceptionHandler& handler)
-    : settings(settings), handler(handler)
+CsApexServer::CsApexServer(Settings& settings, ExceptionHandler& handler) : settings(settings), handler(handler)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -47,59 +45,55 @@ int CsApexServer::run()
 {
     core = std::make_shared<CsApexCore>(settings, handler);
 
-    csapex::error_handling::stop_request().connect([this](){
+    csapex::error_handling::stop_request().connect([this]() {
         static int request = 0;
-        if(request == 0) {
+        if (request == 0) {
             std::cout << "request shutdown" << std::endl;
             core->shutdown();
             std::cout << "shutdown request" << std::endl;
-        } else if(request >= 3) {
+        } else if (request >= 3) {
             raise(SIGTERM);
         }
 
         ++request;
     });
 
-
     GraphFacadePtr root = core->getRoot();
     csapex::error_handling::init();
 
     core->startup();
 
-    core->setServerFactory([this]() {
-        return std::make_shared<TcpServer>(*core, false);
-    });
-    if(!core->startServer()) {
-        std::cerr << "Server could not be started, shutting down." << '\n'
-                  << "Is there another instance of cs::APEX server with the same settings (TCP port, ...)?" << std::endl;
+    core->setServerFactory([this]() { return std::make_shared<TcpServer>(*core, false); });
+    if (!core->startServer()) {
+        std::cerr << "Server could not be started, shutting down." << '\n' << "Is there another instance of cs::APEX server with the same settings (TCP port, ...)?" << std::endl;
         return 23;
     }
 
     return core->getReturnCode();
 }
 
-void csapex_terminate () {
-    if( auto e = std::current_exception() ) {
+void csapex_terminate()
+{
+    if (auto e = std::current_exception()) {
         try {
             std::rethrow_exception(e);
 
-        } catch(const csapex::HardAssertionFailure& e ) {
+        } catch (const csapex::HardAssertionFailure& e) {
             std::cerr << "CS::APEX terminated with a failed assertion: " << e.what() << std::endl;
 
-        } catch(const std::exception& e ) {
+        } catch (const std::exception& e) {
             std::cerr << "CS::APEX terminated with an exception: " << e.what() << std::endl;
 
-        } catch( ... ) {
+        } catch (...) {
             std::cerr << "CS::APEX terminated with an unknown cause." << std::endl;
         }
     }
     abort();  // forces abnormal termination
 }
 
-
 int main(int argc, char** argv)
 {
-    std::set_terminate (csapex_terminate);
+    std::set_terminate(csapex_terminate);
 
     SettingsImplementation settings;
 
@@ -107,18 +101,9 @@ int main(int argc, char** argv)
     std::string path_to_bin(argv[0]);
 
     po::options_description desc("Allowed options");
-    desc.add_options()
-            ("help", "show help message")
-            ("port", po::value<int>()->default_value(42123), "tcp server port")
-            ("debug", "enable debug output")
-            ("dump", "show variables")
-            ("paused", "start paused")
-            ("headless", "run without gui")
-            ("threadless", "run without threading")
-            ("fatal_exceptions", "abort execution on exception")
-            ("disable_thread_grouping", "by default create one thread per node")
-            ("input", "config file to load")
-            ;
+    desc.add_options()("help", "show help message")("port", po::value<int>()->default_value(42123),
+                                                    "tcp server port")("debug", "enable debug output")("dump", "show variables")("paused", "start paused")("headless", "run without gui")(
+        "threadless", "run without threading")("fatal_exceptions", "abort execution on exception")("disable_thread_grouping", "by default create one thread per node")("input", "config file to load");
 
     po::positional_options_description p;
     p.add("input", 1);
@@ -128,16 +113,16 @@ int main(int argc, char** argv)
     // has to be done before parameters can be read.
     bool headless = false;
     bool fatal_exceptions = false;
-    for(int i = 1; i < effective_argc; ++i) {
+    for (int i = 1; i < effective_argc; ++i) {
         std::string arg(argv[i]);
-        if(arg == "--headless") {
+        if (arg == "--headless") {
             headless = true;
-        } else if(arg == "--fatal_exceptions") {
+        } else if (arg == "--fatal_exceptions") {
             fatal_exceptions = true;
         }
     }
 
-    if(!headless) {
+    if (!headless) {
         // if headless not requested, check if there is a display
         // if not, we enforce headless mode
 #if WIN32
@@ -150,15 +135,14 @@ int main(int argc, char** argv)
         }
     }
 
-
     std::shared_ptr<ExceptionHandler> handler(new ExceptionHandler(fatal_exceptions));
 
     // filters ros remappings
     std::vector<std::string> remapping_args;
     std::vector<std::string> rest_args;
-    for(int i = 1; i < effective_argc; ++i) {
+    for (int i = 1; i < effective_argc; ++i) {
         std::string arg(argv[i]);
-        if(arg.find(":=") != std::string::npos)  {
+        if (arg.find(":=") != std::string::npos) {
             remapping_args.push_back(arg);
         } else {
             rest_args.push_back(arg);
@@ -178,7 +162,7 @@ int main(int argc, char** argv)
 
         additional_args = po::collect_unrecognized(parsed.options, po::include_positional);
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << "cannot parse parameters: " << e.what() << std::endl;
         return 4;
     }
@@ -186,15 +170,14 @@ int main(int argc, char** argv)
     // add ros remappings
     additional_args.insert(additional_args.end(), remapping_args.begin(), remapping_args.end());
 
-
     // display help?
-    if(vm.count("help")) {
+    if (vm.count("help")) {
         std::cerr << desc << std::endl;
         return 1;
     }
-    if(vm.count("dump")) {
+    if (vm.count("dump")) {
         std::cout << "to be passed on:\n";
-        for(std::size_t i = 0; i < additional_args.size(); ++i) {
+        for (std::size_t i = 0; i < additional_args.size(); ++i) {
             std::cout << additional_args[i] << '\n';
         }
         std::cout << std::flush;
@@ -203,12 +186,12 @@ int main(int argc, char** argv)
 
     // which file to use?
     if (vm.count("input")) {
-        settings.set("config",vm["input"].as<std::string>());
+        settings.set("config", vm["input"].as<std::string>());
     } else {
-        settings.set("config",Settings::default_config);
+        settings.set("config", Settings::default_config);
     }
 
-    if(!settings.knows("path_to_bin")) {
+    if (!settings.knows("path_to_bin")) {
         settings.addTemporary(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
     } else {
         settings.set("path_to_bin", path_to_bin);
@@ -227,7 +210,7 @@ int main(int argc, char** argv)
     try {
         return m.run();
 
-    } catch(const csapex::Failure& af) {
+    } catch (const csapex::Failure& af) {
         std::cerr << af.what() << std::endl;
         return 42;
     }

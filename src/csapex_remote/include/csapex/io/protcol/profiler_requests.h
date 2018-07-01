@@ -9,11 +9,9 @@
 
 namespace csapex
 {
-
 class ProfilerRequests
 {
 public:
-
     enum class ProfilerRequestType
     {
         SetEnabled
@@ -26,13 +24,12 @@ public:
         ProfilerRequest(ProfilerRequestType request_type, const AUUID& uuid);
 
         template <typename... Args>
-        ProfilerRequest(ProfilerRequestType request_type, const AUUID& uuid, Args&&... args)
-            : ProfilerRequest(request_type, uuid)
+        ProfilerRequest(ProfilerRequestType request_type, const AUUID& uuid, Args&&... args) : ProfilerRequest(request_type, uuid)
         {
             arguments_ = { args... };
         }
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
@@ -54,7 +51,6 @@ public:
         std::vector<boost::any> arguments_;
     };
 
-
     class ProfilerResponse : public ResponseImplementation<ProfilerResponse>
     {
     public:
@@ -62,7 +58,7 @@ public:
         ProfilerResponse(ProfilerRequestType request_type, const AUUID& uuid, uint8_t request_id);
         ProfilerResponse(ProfilerRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::string getType() const override
@@ -76,7 +72,6 @@ public:
             return boost::any_cast<R>(result_);
         }
 
-
     private:
         ProfilerRequestType request_type_;
         AUUID uuid_;
@@ -84,11 +79,10 @@ public:
         boost::any result_;
     };
 
-
 public:
     using RequestT = ProfilerRequest;
     using ResponseT = ProfilerResponse;
 };
 
-}
-#endif // PROFILER_REQUESTS_H
+}  // namespace csapex
+#endif  // PROFILER_REQUESTS_H

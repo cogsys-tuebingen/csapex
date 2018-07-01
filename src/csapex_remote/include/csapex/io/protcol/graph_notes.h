@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 enum class GraphNoteType
 {
     ConnectionAdded,
@@ -20,21 +19,18 @@ enum class GraphNoteType
     VertexAdded,
     VertexRemoved,
 
-    /**
-     * begin: connect signals
-     **/
-    #define HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
-    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-        function##Changed,
-    #define HANDLE_SIGNAL(_enum, signal) \
-        _enum##Triggered,
-    #include <csapex/model/graph_proxy_accessors.hpp>
+/**
+ * begin: connect signals
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function)
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) function##Changed,
+#define HANDLE_SIGNAL(_enum, signal) _enum##Triggered,
+#include <csapex/model/graph_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/
 };
-
 
 class GraphNote : public NoteImplementation<GraphNote>
 {
@@ -44,12 +40,11 @@ public:
     GraphNote(GraphNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
 
     template <typename... Args>
-    GraphNote(GraphNoteType request_type, const AUUID& uuid, Args... args)
-        : GraphNote(request_type, uuid, {std::forward<Args>(args)...})
+    GraphNote(GraphNoteType request_type, const AUUID& uuid, Args... args) : GraphNote(request_type, uuid, { std::forward<Args>(args)... })
     {
     }
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     GraphNoteType getNoteType() const
@@ -73,6 +68,6 @@ private:
     std::vector<boost::any> payload_;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_NOTES_H
+#endif  // GRAPH_NOTES_H

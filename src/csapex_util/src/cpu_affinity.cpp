@@ -7,9 +7,7 @@
 
 using namespace csapex;
 
-
-CpuAffinity::CpuAffinity(std::vector<bool> affinity)
-    : affinity_(affinity)
+CpuAffinity::CpuAffinity(std::vector<bool> affinity) : affinity_(affinity)
 {
     resize();
 
@@ -23,17 +21,15 @@ CpuAffinity::CpuAffinity()
     update();
 }
 
-CpuAffinity::CpuAffinity(const CpuAffinity& other)
-    : affinity_(other.affinity_)
+CpuAffinity::CpuAffinity(const CpuAffinity& other) : affinity_(other.affinity_)
 {
 }
 
-CpuAffinity::CpuAffinity(CpuAffinity&& other)
-    : affinity_(other.affinity_)
+CpuAffinity::CpuAffinity(CpuAffinity&& other) : affinity_(other.affinity_)
 {
 }
 
-CpuAffinity& CpuAffinity::operator = (const CpuAffinity& other)
+CpuAffinity& CpuAffinity::operator=(const CpuAffinity& other)
 {
     set(other.get());
 
@@ -47,7 +43,6 @@ unsigned CpuAffinity::getNumCpus() const
     return std::thread::hardware_concurrency();
 }
 
-
 std::vector<bool> CpuAffinity::get() const
 {
     return affinity_;
@@ -58,9 +53,9 @@ void CpuAffinity::update()
     affinity_changed(this);
 }
 
-void CpuAffinity::set(const std::vector<bool> &affinity)
+void CpuAffinity::set(const std::vector<bool>& affinity)
 {
-    if(affinity != affinity_) {
+    if (affinity != affinity_) {
         affinity_ = affinity;
         resize();
 
@@ -82,7 +77,7 @@ void CpuAffinity::toggleCpu(unsigned cpu)
 
 void CpuAffinity::resize()
 {
-    if(isValid()) {
+    if (isValid()) {
         // if the current affinity contains at least one cpu, fill with false
         affinity_.resize(getNumCpus(), false);
     } else {
@@ -90,7 +85,6 @@ void CpuAffinity::resize()
         setToDefault();
     }
 }
-
 
 void CpuAffinity::setToDefault()
 {
@@ -102,12 +96,11 @@ void CpuAffinity::setToDefault()
 bool CpuAffinity::isValid()
 {
     std::size_t n = std::min<unsigned int>(affinity_.size(), getNumCpus());
-    for(std::size_t i = 0; i < n; ++i) {
-        if(affinity_[i]) {
+    for (std::size_t i = 0; i < n; ++i) {
+        if (affinity_[i]) {
             return true;
         }
     }
 
     return false;
 }
-

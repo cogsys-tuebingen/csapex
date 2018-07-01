@@ -15,13 +15,11 @@
 using namespace csapex;
 using namespace csapex::command;
 
-GroupBase::GroupBase(const AUUID &graph_uuid, const std::string& type)
-    : Meta(graph_uuid, type)
+GroupBase::GroupBase(const AUUID& graph_uuid, const std::string& type) : Meta(graph_uuid, type)
 {
-
 }
 
-void GroupBase::setNodes(const std::vector<NodeHandle *> &n)
+void GroupBase::setNodes(const std::vector<NodeHandle*>& n)
 {
     nodes = n;
 
@@ -32,20 +30,18 @@ void GroupBase::setNodes(const std::vector<NodeHandle *> &n)
 Point GroupBase::findTopLeftPoint() const
 {
     Point insert_pos = nodes[0]->getNodeState()->getPos();
-    for(NodeHandle* nh : nodes) {
+    for (NodeHandle* nh : nodes) {
         Point pos = nh->getNodeState()->getPos();
-        if(pos.x < insert_pos.x) {
+        if (pos.x < insert_pos.x) {
             insert_pos.x = pos.x;
         }
-        if(pos.y < insert_pos.y) {
+        if (pos.y < insert_pos.y) {
             insert_pos.y = pos.y;
         }
     }
 
     return insert_pos;
 }
-
-
 
 void GroupBase::analyzeConnections(Graph* graph_i)
 {
@@ -57,9 +53,9 @@ void GroupBase::analyzeConnections(Graph* graph_i)
     signals_going_in.clear();
     signals_going_out.clear();
 
-    for(NodeHandle* nh : nodes) {
-        for(const InputPtr& input : nh->getExternalInputs()) {
-            for(const ConnectionPtr& connection : input->getConnections()) {
+    for (NodeHandle* nh : nodes) {
+        for (const InputPtr& input : nh->getExternalInputs()) {
+            for (const ConnectionPtr& connection : input->getConnections()) {
                 OutputPtr output = connection->from();
                 apex_assert_hard(output);
 
@@ -67,21 +63,21 @@ void GroupBase::analyzeConnections(Graph* graph_i)
                 apex_assert_hard(source);
 
                 ConnectionDescription c = connection->getDescription();
-                if(node_set.find(source) == node_set.end()) {
+                if (node_set.find(source) == node_set.end()) {
                     // coming in
                     connections_going_in.push_back(c);
                 }
             }
         }
-        for(const OutputPtr& output : nh->getExternalOutputs()) {
-            for(const ConnectionPtr& connection : output->getConnections()) {
+        for (const OutputPtr& output : nh->getExternalOutputs()) {
+            for (const ConnectionPtr& connection : output->getConnections()) {
                 InputPtr input = connection->to();
                 apex_assert_hard(input);
 
                 NodeHandle* target = graph->findNodeHandleForConnector(input->getUUID());
                 apex_assert_hard(target);
 
-                if(node_set.find(target) == node_set.end()) {
+                if (node_set.find(target) == node_set.end()) {
                     // going out
                     ConnectionDescription c = connection->getDescription();
                     connections_going_out.push_back(c);
@@ -89,23 +85,23 @@ void GroupBase::analyzeConnections(Graph* graph_i)
             }
         }
 
-        for(const SlotPtr& slot : nh->getExternalSlots()) {
-            for(const ConnectionPtr& connection : slot->getConnections()) {
+        for (const SlotPtr& slot : nh->getExternalSlots()) {
+            for (const ConnectionPtr& connection : slot->getConnections()) {
                 OutputPtr output = connection->from();
                 apex_assert_hard(output);
 
                 NodeHandle* target = graph->findNodeHandleForConnector(output->getUUID());
                 apex_assert_hard(target);
 
-                if(node_set.find(target) == node_set.end()) {
+                if (node_set.find(target) == node_set.end()) {
                     // going out
                     ConnectionDescription c = connection->getDescription();
                     signals_going_in.push_back(c);
                 }
             }
         }
-        for(const EventPtr& trigger : nh->getExternalEvents()) {
-            for(const ConnectionPtr& connection : trigger->getConnections()) {
+        for (const EventPtr& trigger : nh->getExternalEvents()) {
+            for (const ConnectionPtr& connection : trigger->getConnections()) {
                 InputPtr input = connection->to();
                 apex_assert_hard(input);
 
@@ -113,7 +109,7 @@ void GroupBase::analyzeConnections(Graph* graph_i)
                 apex_assert_hard(source);
 
                 ConnectionDescription c = connection->getDescription();
-                if(node_set.find(source) == node_set.end()) {
+                if (node_set.find(source) == node_set.end()) {
                     // coming in
                     signals_going_out.push_back(c);
                 }

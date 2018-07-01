@@ -13,8 +13,8 @@
 #include <functional>
 #include <set>
 
-namespace csapex {
-
+namespace csapex
+{
 class CSAPEX_CORE_EXPORT Graph : public UUIDProvider, public Notifier
 {
     friend class GraphIO;
@@ -25,23 +25,23 @@ public:
 
     struct NodeNotFoundException : public std::logic_error
     {
-        NodeNotFoundException(const std::string& name)
-            : std::logic_error("node " + name + " cannot be found")
-        {}
+        NodeNotFoundException(const std::string& name) : std::logic_error("node " + name + " cannot be found")
+        {
+        }
     };
 
     struct NodeHandleNotFoundException : public std::logic_error
     {
-        NodeHandleNotFoundException(const std::string& name)
-            : std::logic_error("node handle for node " + name + " cannot be found")
-        {}
+        NodeHandleNotFoundException(const std::string& name) : std::logic_error("node handle for node " + name + " cannot be found")
+        {
+        }
     };
 
     struct NodeFacadeNotFoundException : public std::logic_error
     {
-        NodeFacadeNotFoundException(const std::string& name)
-            : std::logic_error("node facade for node " + name + " cannot be found")
-        {}
+        NodeFacadeNotFoundException(const std::string& name) : std::logic_error("node facade for node " + name + " cannot be found")
+        {
+        }
     };
 
     typedef std::vector<graph::VertexPtr>::iterator vertex_iterator;
@@ -57,24 +57,23 @@ public:
 
     virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const = 0;
     virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept = 0;
-    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const = 0;
-    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept = 0;
     virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const = 0;
 
-    virtual ConnectorPtr findConnector(const UUID &uuid) = 0;
-    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
+    virtual ConnectorPtr findConnector(const UUID& uuid) = 0;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept = 0;
 
     virtual std::vector<UUID> getAllNodeUUIDs() const = 0;
     virtual std::vector<NodeFacadePtr> getAllNodeFacades() = 0;
 
-
     template <typename T>
-    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
+    std::shared_ptr<T> findTypedConnector(const UUID& uuid)
     {
         return std::dynamic_pointer_cast<T>(findConnector(uuid));
     }
     template <typename T>
-    std::shared_ptr<T> findTypedConnectorNoThrow(const UUID &uuid) noexcept
+    std::shared_ptr<T> findTypedConnectorNoThrow(const UUID& uuid) noexcept
     {
         return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
     }
@@ -98,6 +97,6 @@ public:
     slim_signal::Signal<void(graph::VertexPtr)> vertex_removed;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_H
+#endif  // GRAPH_H

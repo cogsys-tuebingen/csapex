@@ -9,8 +9,8 @@
 #include <csapex_core/csapex_core_export.h>
 #include <csapex/model/activity_modifier.h>
 
-namespace csapex {
-
+namespace csapex
+{
 class CSAPEX_CORE_EXPORT Token : public Clonable
 {
 protected:
@@ -46,6 +46,6 @@ private:
     mutable int seq_no_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TOKEN_CONTAINER_H
+#endif  // TOKEN_CONTAINER_H

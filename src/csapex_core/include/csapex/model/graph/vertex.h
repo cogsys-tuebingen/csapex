@@ -11,10 +11,8 @@
 
 namespace csapex
 {
-
 namespace graph
 {
-
 class Vertex
 {
 public:
@@ -29,11 +27,11 @@ public:
 
     std::vector<VertexPtr> getParents() const;
     void addParent(VertexPtr parent);
-    void removeParent(Vertex *parent);
+    void removeParent(Vertex* parent);
 
     std::vector<VertexPtr> getChildren() const;
     void addChild(VertexPtr child);
-    void removeChild(Vertex *child);
+    void removeChild(Vertex* child);
 
     void detach();
 
@@ -46,8 +44,8 @@ private:
     std::vector<VertexWeakPtr> parents_;
 };
 
-}
+}  // namespace graph
 
-}
+}  // namespace csapex
 
 #endif

@@ -5,14 +5,14 @@
 #include <csapex_testing/mockup_nodes.h>
 #include <csapex_testing/stepping_test.h>
 
-namespace csapex {
-
+namespace csapex
+{
 class NestingTest : public SteppingTest
 {
-
 };
 
-TEST_F(NestingTest, InternalGraphPortsCanBeFound) {
+TEST_F(NestingTest, InternalGraphPortsCanBeFound)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     UUID subgraph_id = graph->generateUUID("subgraph");
@@ -63,7 +63,8 @@ TEST_F(NestingTest, InternalGraphPortsCanBeFound) {
     }
 }
 
-TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
+TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
@@ -75,7 +76,6 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
-
 
     // NESTED GRAPH
     NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
@@ -95,7 +95,6 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
     NodeFacadeImplementationPtr n4 = factory.makeNode("StaticMultiplier", UUIDProvider::makeUUID_without_parent("n4"), sub_graph->getLocalGraph());
     ASSERT_NE(nullptr, n4);
     sub_graph_facade.addNode(n4);
-
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -122,14 +121,15 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithOneExecutor) {
 
     // execution
     ASSERT_EQ(-1, sink->getValue());
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
 
-        ASSERT_EQ(iter * std::pow(2, 2) * iter , sink->getValue());
+        ASSERT_EQ(iter * std::pow(2, 2) * iter, sink->getValue());
     }
 }
 
-TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
+TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
@@ -141,7 +141,6 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
-
 
     // NESTED GRAPH
     NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
@@ -190,14 +189,15 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors) {
 
     // execution
     ASSERT_EQ(-1, sink->getValue());
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
 
-        ASSERT_EQ(iter * std::pow(2, 2) * iter , sink->getValue());
+        ASSERT_EQ(iter * std::pow(2, 2) * iter, sink->getValue());
     }
 }
 
-TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
+TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
@@ -209,7 +209,6 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
     ASSERT_NE(nullptr, src2);
     main_graph_facade.addNode(src2);
 
-
     NodeFacadeImplementationPtr combiner = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph);
     ASSERT_NE(nullptr, combiner);
     main_graph_facade.addNode(combiner);
@@ -218,7 +217,6 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
-
 
     // NESTED GRAPH
     NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
@@ -258,16 +256,15 @@ TEST_F(NestingTest, SubgraphWithMultipleInputsAndOutputs) {
 
     // execution
     ASSERT_EQ(-1, sink->getValue());
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
 
-        ASSERT_EQ(std::pow(iter * iter, 2) , sink->getValue());
+        ASSERT_EQ(std::pow(iter * iter, 2), sink->getValue());
     }
 }
 
-
-
-TEST_F(NestingTest, NestedUUIDs) {
+TEST_F(NestingTest, NestedUUIDs)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
@@ -296,11 +293,9 @@ TEST_F(NestingTest, NestedUUIDs) {
 
     GraphImplementationPtr sub_graph_2 = sub_graph_2_facade_ptr->getLocalGraph();
 
-
     NodeFacadeImplementationPtr m2 = factory.makeNode("StaticMultiplier", sub_graph_2->generateUUID("src"), sub_graph_2);
     ASSERT_NE(nullptr, m2);
     sub_graph_2_facade.addNode(m2);
-
 
     // FURTHER LEVEL
     UUID sub_graph_3_uuid = sub_graph_2->generateUUID("subgraph");
@@ -314,11 +309,9 @@ TEST_F(NestingTest, NestedUUIDs) {
 
     GraphPtr sub_graph_3 = sub_graph_3_facade_ptr->getLocalGraph();
 
-
     NodeFacadeImplementationPtr m3 = factory.makeNode("StaticMultiplier", sub_graph_3->generateUUID("src"), sub_graph_3);
     ASSERT_NE(nullptr, m3);
     sub_graph_3_facade.addNode(m3);
-
 
     // SEARCH IN SUB GRAPH
     NodeHandle* m2_found = sub_graph_2->findNodeHandleNoThrow(UUIDProvider::makeUUID_without_parent("src_0"));
@@ -337,17 +330,17 @@ TEST_F(NestingTest, NestedUUIDs) {
     // SEARCH LEVEL 3 FROM TOP WITH NAMESPACE
     ASSERT_EQ("subgraph_0", sub_graph_1_uuid.getFullName());
     ASSERT_EQ("subgraph_1", sub_graph_2_uuid.getFullName());
-    ASSERT_EQ("subgraph_0", sub_graph_3_uuid.getFullName()); // IDs are generated for each graph in dependently!
+    ASSERT_EQ("subgraph_0", sub_graph_3_uuid.getFullName());  // IDs are generated for each graph in dependently!
     UUID nested_3_id = UUIDProvider::makeDerivedUUID_forced(UUIDProvider::makeUUID_without_parent("subgraph_1:|:subgraph_0"), "src_0");
     ASSERT_EQ("subgraph_1:|:subgraph_0:|:src_0", nested_3_id.getFullName());
 
     NodeHandle* m3_found_top = graph->findNodeHandleNoThrow(nested_3_id);
     ASSERT_NE(nullptr, m3_found_top);
     ASSERT_EQ(m3->getNodeHandle().get(), m3_found_top);
-
 }
 
-TEST_F(NestingTest, GroupCanBeSource) {
+TEST_F(NestingTest, GroupCanBeSource)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
@@ -355,7 +348,6 @@ TEST_F(NestingTest, GroupCanBeSource) {
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
-
 
     // NESTED GRAPH
     NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
@@ -367,7 +359,6 @@ TEST_F(NestingTest, GroupCanBeSource) {
     NodeFacadeImplementationPtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src);
-
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -389,15 +380,16 @@ TEST_F(NestingTest, GroupCanBeSource) {
 
     // execution
     ASSERT_EQ(-1, sink->getValue());
-    for(int iter = 0; iter < 10; ++iter) {
+    for (int iter = 0; iter < 10; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
 
         ASSERT_EQ(iter + 1, source->getValue());
-        ASSERT_EQ(iter , sink->getValue());
+        ASSERT_EQ(iter, sink->getValue());
     }
 }
 
-TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
+TEST_F(NestingTest, GroupCanBeUnconnectedSource)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // NESTED GRAPH
@@ -410,7 +402,6 @@ TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
     NodeFacadeImplementationPtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src);
-
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -428,7 +419,7 @@ TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
     apex_assert_hard(source);
 
     // execution
-    for(int iter = 0; iter < 10; ++iter) {
+    for (int iter = 0; iter < 10; ++iter) {
         ASSERT_EQ(iter, source->getValue());
 
         ASSERT_NO_FATAL_FAILURE(step());
@@ -437,9 +428,9 @@ TEST_F(NestingTest, GroupCanBeUnconnectedSource) {
     }
 }
 
-
-TEST_F(NestingTest, SubgraphCanBeDeserialized) {
-    for(int i = 0; i < 2; ++i) {
+TEST_F(NestingTest, SubgraphCanBeDeserialized)
+{
+    for (int i = 0; i < 2; ++i) {
         graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
         graph = graph_node->getLocalGraph();
 
@@ -459,7 +450,6 @@ TEST_F(NestingTest, SubgraphCanBeDeserialized) {
             ASSERT_NE(nullptr, src2);
             main_graph_facade.addNode(src2);
 
-
             NodeFacadeImplementationPtr combiner = factory.makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph);
             ASSERT_NE(nullptr, combiner);
             main_graph_facade.addNode(combiner);
@@ -469,7 +459,6 @@ TEST_F(NestingTest, SubgraphCanBeDeserialized) {
             main_graph_facade.addNode(sink_p);
             std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
             ASSERT_NE(nullptr, sink);
-
 
             // NESTED GRAPH
             NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
@@ -524,10 +513,10 @@ TEST_F(NestingTest, SubgraphCanBeDeserialized) {
 
             // execution
             ASSERT_EQ(-1, sink->getValue());
-            for(int iter = 0; iter < 23; ++iter) {
+            for (int iter = 0; iter < 23; ++iter) {
                 ASSERT_NO_FATAL_FAILURE(step());
 
-                ASSERT_EQ(std::pow(iter * iter, 2) , sink->getValue());
+                ASSERT_EQ(std::pow(iter * iter, 2), sink->getValue());
             }
 
             executor.stop();
@@ -535,4 +524,4 @@ TEST_F(NestingTest, SubgraphCanBeDeserialized) {
     }
 }
 
-}
+}  // namespace csapex

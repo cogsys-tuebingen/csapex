@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(MuteNode)
 
-MuteNode::MuteNode(const AUUID& parent_uuid, const UUID &node, bool muted)
-    : CommandImplementation(parent_uuid), uuid(node), muted(muted), executed(false)
+MuteNode::MuteNode(const AUUID& parent_uuid, const UUID& node, bool muted) : CommandImplementation(parent_uuid), uuid(node), muted(muted), executed(false)
 {
 }
 
@@ -38,7 +37,7 @@ bool MuteNode::doExecute()
 
     bool is_muted = node_handle->getNodeState()->isMuted();
 
-    if(muted != is_muted) {
+    if (muted != is_muted) {
         node_handle->getNodeState()->setMuted(muted);
         executed = true;
     } else {
@@ -50,7 +49,7 @@ bool MuteNode::doExecute()
 
 bool MuteNode::doUndo()
 {
-    if(executed) {
+    if (executed) {
         NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
         apex_assert_hard(node_handle);
 
@@ -64,9 +63,7 @@ bool MuteNode::doRedo()
     return doExecute();
 }
 
-
-
-void MuteNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void MuteNode::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

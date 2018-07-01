@@ -10,11 +10,10 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Task
 {
 public:
-    Task(const std::string &name, std::function<void()> callback, long priority = 0, TaskGenerator* parent = nullptr);
+    Task(const std::string& name, std::function<void()> callback, long priority = 0, TaskGenerator* parent = nullptr);
     virtual ~Task();
 
     virtual void execute();
@@ -37,6 +36,6 @@ private:
     bool scheduled_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TASK_H
+#endif  // TASK_H

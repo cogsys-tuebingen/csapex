@@ -15,4 +15,4 @@
 // TODO: extract
 #include <csapex/view/view_fwd.h>
 
-#endif // CSAPEX_FWD_H
+#endif  // CSAPEX_FWD_H

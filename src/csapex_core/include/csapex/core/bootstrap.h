@@ -13,24 +13,22 @@ class ClassLoader;
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Bootstrap
 {
 public:
     Bootstrap();
     ~Bootstrap();
 
-    bool bootFrom(const std::string& directory, PluginLocator *plugin_locator, bool require_boot_plugin = true);
+    bool bootFrom(const std::string& directory, PluginLocator* plugin_locator, bool require_boot_plugin = true);
 
 private:
-    bool tryBootFrom(const std::string& directory, PluginLocator *plugin_locator, bool require_boot_plugin);
+    bool tryBootFrom(const std::string& directory, PluginLocator* plugin_locator, bool require_boot_plugin);
 
 private:
     std::vector<class_loader::ClassLoader*> boot_plugin_loaders_;
     std::vector<BootstrapPluginPtr> boot_plugins_;
 };
 
-}
+}  // namespace csapex
 
-
-#endif //BOOTSTRAP_H
+#endif  // BOOTSTRAP_H

@@ -12,7 +12,6 @@ namespace csapex
 {
 namespace connection_types
 {
-
 class CSAPEX_CORE_EXPORT Message : public TokenData
 {
 public:
@@ -21,7 +20,7 @@ public:
     typedef std::uint64_t Stamp;
 
 public:
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -35,21 +34,22 @@ public:
     Stamp stamp_micro_seconds;
 };
 
-}
-}
+}  // namespace connection_types
+}  // namespace csapex
 
 /// YAML
-namespace YAML {
+namespace YAML
+{
 class Node;
-template<class T>
+template <class T>
 struct convert;
 
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::Message> {
-    static Node encode(const csapex::connection_types::Message& rhs,
-                       const csapex::SemanticVersion& version = csapex::SemanticVersion(0,0,0));
+template <>
+struct CSAPEX_CORE_EXPORT convert<csapex::connection_types::Message>
+{
+    static Node encode(const csapex::connection_types::Message& rhs, const csapex::SemanticVersion& version = csapex::SemanticVersion(0, 0, 0));
     static csapex::SemanticVersion decode(const Node& node, csapex::connection_types::Message& rhs);
 };
-}
+}  // namespace YAML
 
-#endif // MESSAGE_H
+#endif  // MESSAGE_H

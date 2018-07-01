@@ -7,26 +7,17 @@
 
 using namespace csapex;
 
+Fulcrum::Fulcrum(int connection_id, const Point& p, int type, const Point& handle_in, const Point& handle_out)
+  : connection_id_(connection_id), type_(type), pos_(p), handle_in_(handle_in), handle_out_(handle_out)
+{
+}
 
-Fulcrum::Fulcrum(int connection_id, const Point& p, int type, const Point &handle_in, const Point &handle_out)
-    : connection_id_(connection_id), type_(type), pos_(p), handle_in_(handle_in), handle_out_(handle_out)
-{}
-
-Fulcrum::Fulcrum(const Fulcrum& moved)
-    : connection_id_(moved.connection_id_),
-      type_(moved.type_),
-      pos_(moved.pos_),
-      handle_in_(moved.handle_in_),
-      handle_out_(moved.handle_out_)
+Fulcrum::Fulcrum(const Fulcrum& moved) : connection_id_(moved.connection_id_), type_(moved.type_), pos_(moved.pos_), handle_in_(moved.handle_in_), handle_out_(moved.handle_out_)
 {
 }
 
 Fulcrum::Fulcrum(Fulcrum&& copy)
-    : connection_id_(std::move(copy.connection_id_)),
-      type_(std::move(copy.type_)),
-      pos_(std::move(copy.pos_)),
-      handle_in_(std::move(copy.handle_in_)),
-      handle_out_(std::move(copy.handle_out_))
+  : connection_id_(std::move(copy.connection_id_)), type_(std::move(copy.type_)), pos_(std::move(copy.pos_)), handle_in_(std::move(copy.handle_in_)), handle_out_(std::move(copy.handle_out_))
 {
 }
 
@@ -55,17 +46,11 @@ Fulcrum::Fulcrum()
 
 bool Fulcrum::operator==(const Fulcrum& other) const
 {
-    if(connection_id_ == other.connection_id_ &&
-            type_ == other.type_ &&
-            pos_ == other.pos_ &&
-            handle_in_ == other.handle_in_ &&
-            handle_out_ == other.handle_out_)
-    {
+    if (connection_id_ == other.connection_id_ && type_ == other.type_ && pos_ == other.pos_ && handle_in_ == other.handle_in_ && handle_out_ == other.handle_out_) {
         return true;
     }
     return false;
 }
-
 
 void Fulcrum::move(const Point& pos, bool dropped)
 {
@@ -80,17 +65,16 @@ Point Fulcrum::pos() const
 
 void Fulcrum::moveHandles(const Point& in, const Point& out, bool dropped)
 {
-    if(in != handle_in_ || out != handle_out_ || dropped) {
+    if (in != handle_in_ || out != handle_out_ || dropped) {
         handle_in_ = in;
         handle_out_ = out;
         movedHandle(this, dropped, Fulcrum::HANDLE_BOTH);
     }
 }
 
-
 void Fulcrum::moveHandleIn(const Point& pos, bool dropped)
 {
-    if(pos != handle_in_ || dropped) {
+    if (pos != handle_in_ || dropped) {
         handle_in_ = pos;
         movedHandle(this, dropped, Fulcrum::HANDLE_IN);
     }
@@ -103,7 +87,7 @@ Point Fulcrum::handleIn() const
 
 void Fulcrum::moveHandleOut(const Point& pos, bool dropped)
 {
-    if(pos != handle_out_ || dropped) {
+    if (pos != handle_out_ || dropped) {
         handle_out_ = pos;
         movedHandle(this, dropped, Fulcrum::HANDLE_OUT);
     }
@@ -140,7 +124,7 @@ void Fulcrum::setType(int type)
     typeChanged(this, type);
 }
 
-void Fulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Fulcrum::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << connection_id_;
     data << id_;

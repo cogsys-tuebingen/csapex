@@ -9,17 +9,16 @@ namespace csapex
 {
 namespace command
 {
-
 struct CSAPEX_COMMAND_EXPORT FlipSides : public CommandImplementation<FlipSides>
 {
     COMMAND_HEADER(FlipSides);
 
 public:
-    FlipSides(const AUUID &graph_uuid, const UUID& node);
+    FlipSides(const AUUID& graph_uuid, const UUID& node);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -31,8 +30,7 @@ private:
     UUID uuid;
 };
 
-}
+}  // namespace command
 
-}
-#endif // FLIP_SIDES_H
-
+}  // namespace csapex
+#endif  // FLIP_SIDES_H

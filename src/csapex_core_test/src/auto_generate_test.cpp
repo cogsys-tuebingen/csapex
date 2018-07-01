@@ -20,9 +20,8 @@
 using namespace csapex;
 using namespace connection_types;
 
-namespace csapex {
-
-
+namespace csapex
+{
 void f1(const GenericValueMessage<int>& input, const GenericValueMessage<int>& input2, int parameter, GenericValueMessage<int>& output)
 {
     output.value = input.value + input2.value + parameter;
@@ -31,37 +30,37 @@ void f2(const int& input, const int& input2, int parameter, int& output)
 {
     output = input + input2 + parameter;
 }
-void f3(int parameter1,
-        std::string& output,
-        const int& input, const double& input2, int parameter2, int parameter3 )
+void f3(int parameter1, std::string& output, const int& input, const double& input2, int parameter2, int parameter3)
 {
     output = std::to_string(static_cast<int>(input + input2 + parameter1 + parameter2 + parameter3));
 }
-}
+}  // namespace csapex
 
-
-class AutoGenerateTest : public CsApexTestCase {
+class AutoGenerateTest : public CsApexTestCase
+{
 protected:
     NodeFactoryImplementation factory;
 
-    AutoGenerateTest()
-        : factory(SettingsImplementation::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
+    AutoGenerateTest() : factory(SettingsImplementation::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
     {
     }
 
-    virtual ~AutoGenerateTest() {
+    virtual ~AutoGenerateTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         // Code here will be called immediately after the constructor (right
         // before each test).
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
@@ -69,7 +68,8 @@ protected:
     UUIDProviderPtr uuid_provider;
 };
 
-TEST_F(AutoGenerateTest, ExplicitTypesAreDetected) {
+TEST_F(AutoGenerateTest, ExplicitTypesAreDetected)
+{
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f1, "f1"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
@@ -127,8 +127,8 @@ TEST_F(AutoGenerateTest, ExplicitTypesAreDetected) {
     ASSERT_EQ((a->value + b->value + vp->as<int>()), result->value);
 }
 
-
-TEST_F(AutoGenerateTest, ImplicitTypesAreDetected) {
+TEST_F(AutoGenerateTest, ImplicitTypesAreDetected)
+{
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f2, "f2"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
@@ -186,8 +186,8 @@ TEST_F(AutoGenerateTest, ImplicitTypesAreDetected) {
     ASSERT_EQ((a->value + b->value + vp->as<int>()), result->value);
 }
 
-
-TEST_F(AutoGenerateTest, OrderDoesNotMatterTypesAreDetected) {
+TEST_F(AutoGenerateTest, OrderDoesNotMatterTypesAreDetected)
+{
     factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(f3, "f3"));
 
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");

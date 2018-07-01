@@ -15,13 +15,11 @@
 
 using namespace csapex;
 
-InputTransition::InputTransition(delegate::Delegate0<> activation_fn)
-    : Transition(activation_fn), forwarded_(false), processed_(false)
+InputTransition::InputTransition(delegate::Delegate0<> activation_fn) : Transition(activation_fn), forwarded_(false), processed_(false)
 {
 }
 
-InputTransition::InputTransition()
-    : Transition(), forwarded_(false), processed_(false)
+InputTransition::InputTransition() : Transition(), forwarded_(false), processed_(false)
 {
 }
 
@@ -33,7 +31,7 @@ InputPtr InputTransition::getInput(const UUID& id) const
 InputPtr InputTransition::getInputNoThrow(const UUID& id) const noexcept
 {
     auto pos = inputs_.find(id);
-    if(pos == inputs_.end()) {
+    if (pos == inputs_.end()) {
         return nullptr;
     }
     return pos->second;
@@ -42,7 +40,7 @@ InputPtr InputTransition::getInputNoThrow(const UUID& id) const noexcept
 std::vector<UUID> InputTransition::getInputs() const
 {
     std::vector<UUID> res;
-    for(const auto& pair : inputs_) {
+    for (const auto& pair : inputs_) {
         res.push_back(pair.second->getUUID());
     }
     std::sort(res.begin(), res.end());
@@ -57,19 +55,13 @@ void InputTransition::addInput(InputPtr input)
     inputs_[input->getUUID()] = input;
 
     // connect signals
-    auto cm = input->message_available.connect([this](Connection*) {
-            checkIfEnabled();
-});
+    auto cm = input->message_available.connect([this](Connection*) { checkIfEnabled(); });
     input_signal_connections_[input].push_back(cm);
 
-    auto ca = input->connection_added.connect([this](ConnectionPtr connection) {
-            addConnection(connection);
-});
+    auto ca = input->connection_added.connect([this](ConnectionPtr connection) { addConnection(connection); });
     input_signal_connections_[input].push_back(ca);
 
-    auto cf = input->connection_faded.connect([this](ConnectionPtr connection) {
-            removeConnection(connection);
-});
+    auto cf = input->connection_faded.connect([this](ConnectionPtr connection) { removeConnection(connection); });
     input_signal_connections_[input].push_back(cf);
 }
 
@@ -78,7 +70,7 @@ void InputTransition::removeInput(InputPtr input)
     input->removeInputTransition();
 
     // disconnect signals
-    for(auto f : input_signal_connections_[input]) {
+    for (auto f : input_signal_connections_[input]) {
         f.disconnect();
     }
     input_signal_connections_.erase(input);
@@ -87,18 +79,18 @@ void InputTransition::removeInput(InputPtr input)
     inputs_.erase(input->getUUID());
 }
 
-void InputTransition::connectionRemoved(Connection *connection)
+void InputTransition::connectionRemoved(Connection* connection)
 {
     Transition::connectionRemoved(connection);
 }
 
 void InputTransition::reset()
 {
-    for(auto pair : inputs_) {
+    for (auto pair : inputs_) {
         InputPtr input = pair.second;
         input->reset();
     }
-    for(const ConnectionPtr& connection : connections_) {
+    for (const ConnectionPtr& connection : connections_) {
         connection->reset();
     }
 
@@ -108,7 +100,7 @@ void InputTransition::reset()
     Transition::reset();
 }
 
-void InputTransition::connectionAdded(Connection *connection)
+void InputTransition::connectionAdded(Connection* connection)
 {
     Transition::connectionAdded(connection);
 
@@ -118,9 +110,9 @@ void InputTransition::connectionAdded(Connection *connection)
     bool has_read_or_unread = unread || read;
     bool needs_message = has_read_or_unread && connection->getState() == Connection::State::NOT_INITIALIZED;
 
-    if(needs_message) {
+    if (needs_message) {
         connection->setToken(connection_types::makeEmptyToken<connection_types::NoMessage>());
-        if(!unread) {
+        if (!unread) {
             connection->setState(Connection::State::READ);
         }
     }
@@ -128,46 +120,46 @@ void InputTransition::connectionAdded(Connection *connection)
 
 bool InputTransition::isEnabled() const
 {
-    if(inputs_.empty()) {
+    if (inputs_.empty()) {
         return true;
     }
 
-    if(forwarded_) {
-        APEX_DEBUG_CERR <<"not enabled because already forwarded" << std::endl;
+    if (forwarded_) {
+        APEX_DEBUG_CERR << "not enabled because already forwarded" << std::endl;
         return false;
     }
 
-//    for(const auto& pair: inputs_) {
-//        InputPtr input = pair.second;
-//        if(input->isOptional()) {
-//            if(input->isConnected() && !input->hasEnabledConnection()) {
-//                return false;
-//            }
-//        } else {
-//            if(!input->isConnected() || !input->hasEnabledConnection()) {
-//                return false;
-//            }
-//        }
-//    }
+    //    for(const auto& pair: inputs_) {
+    //        InputPtr input = pair.second;
+    //        if(input->isOptional()) {
+    //            if(input->isConnected() && !input->hasEnabledConnection()) {
+    //                return false;
+    //            }
+    //        } else {
+    //            if(!input->isConnected() || !input->hasEnabledConnection()) {
+    //                return false;
+    //            }
+    //        }
+    //    }
 
-    if(!areAllConnections(Connection::State::UNREAD, Connection::State::READ/*, Connection::State::DONE*/)) {
-        APEX_DEBUG_CERR <<"not enabled because not all connections read or unread" << std::endl;
+    if (!areAllConnections(Connection::State::UNREAD, Connection::State::READ /*, Connection::State::DONE*/)) {
+        APEX_DEBUG_CERR << "not enabled because not all connections read or unread" << std::endl;
         return false;
     }
 
     // TODO: is this necessary?
-    for(const ConnectionPtr& connection : connections_) {
-        if(connection->isEnabled() && connection->getState() == Connection::State::NOT_INITIALIZED) {
-            APEX_DEBUG_CERR <<"not enabled because a connection is not initialized" << std::endl;
+    for (const ConnectionPtr& connection : connections_) {
+        if (connection->isEnabled() && connection->getState() == Connection::State::NOT_INITIALIZED) {
+            APEX_DEBUG_CERR << "not enabled because a connection is not initialized" << std::endl;
             return false;
         }
     }
 
-   //if(!areAllConnections(Connection::State::READ)) {
-    if(areAllConnections(Connection::State::UNREAD)) {
+    // if(!areAllConnections(Connection::State::READ)) {
+    if (areAllConnections(Connection::State::UNREAD)) {
         return true;
     } else {
-        APEX_DEBUG_CERR <<"not enabled because a connection is read" << std::endl;
+        APEX_DEBUG_CERR << "not enabled because a connection is read" << std::endl;
         return false;
     }
 }
@@ -177,25 +169,25 @@ int InputTransition::findHighestDeviantSequenceNumber() const
     int highest_deviant_seq = -1;
 
     bool a_connection_deviates = false;
-    for(auto pair : inputs_) {
+    for (auto pair : inputs_) {
         InputPtr input = pair.second;
 
-        if(input->isConnected()) {
+        if (input->isConnected()) {
             auto connections = input->getConnections();
             apex_assert_hard(connections.size() == 1);
             ConnectionPtr connection = connections.front();
             TokenConstPtr token = connection->getToken();
 
             int s = token->getSequenceNumber();
-            if(highest_deviant_seq != -1 && highest_deviant_seq != s) {
+            if (highest_deviant_seq != -1 && highest_deviant_seq != s) {
                 a_connection_deviates = true;
             }
-            if(s > highest_deviant_seq) {
+            if (s > highest_deviant_seq) {
                 highest_deviant_seq = s;
             }
         }
     }
-    if(a_connection_deviates) {
+    if (a_connection_deviates) {
         return highest_deviant_seq;
     } else {
         return -1;
@@ -204,7 +196,7 @@ int InputTransition::findHighestDeviantSequenceNumber() const
 
 void InputTransition::notifyMessageRead()
 {
-    if(!forwarded_) {
+    if (!forwarded_) {
         return;
     }
     //    apex_assert_hard(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED));
@@ -217,30 +209,29 @@ void InputTransition::notifyMessageRead()
 
 void InputTransition::notifyMessageProcessed()
 {
-    if(processed_) {
-        APEX_DEBUG_CERR <<"input transition not notified, is processed" << std::endl;
+    if (processed_) {
+        APEX_DEBUG_CERR << "input transition not notified, is processed" << std::endl;
         return;
     }
 
-    if(areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED)) {
-        APEX_DEBUG_CERR <<"input transition notified" << std::endl;
+    if (areAllConnections(Connection::State::READ, Connection::State::NOT_INITIALIZED)) {
+        APEX_DEBUG_CERR << "input transition notified" << std::endl;
         forwarded_ = false;
         processed_ = true;
-        for(const ConnectionPtr& c : connections_) {
+        for (const ConnectionPtr& c : connections_) {
             c->setTokenProcessed();
         }
 
     } else {
-        APEX_DEBUG_CERR <<"input transition not notified, some connection is not read" << std::endl;
+        APEX_DEBUG_CERR << "input transition not notified, some connection is not read" << std::endl;
     }
-
 }
 
 bool InputTransition::areMessagesComplete() const
 {
-    for(auto pair : inputs_) {
+    for (auto pair : inputs_) {
         InputPtr input = pair.second;
-        if(input->isConnected() && !input->hasReceived()) {
+        if (input->isConnected() && !input->hasReceived()) {
             return false;
         }
     }
@@ -251,30 +242,28 @@ void InputTransition::forwardMessages()
 {
     processed_ = false;
 
-    if(forwarded_) {
+    if (forwarded_) {
         return;
     }
 
-    if(hasConnection()) {
+    if (hasConnection()) {
         apex_assert_hard(!forwarded_);
 
         apex_assert_hard(!isOneConnection(Connection::State::DONE));
-        //apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
+        // apex_assert_hard(areAllConnections(Connection::State::UNREAD, Connection::State::READ));
         apex_assert_hard(areAllConnections(Connection::State::UNREAD));
-
 
         apex_assert_hard(connections_.empty() || !areAllConnections(Connection::State::READ));
 
-        for(auto pair : inputs_) {
+        for (auto pair : inputs_) {
             InputPtr input = pair.second;
 
-            if(input->hasEnabledConnection()) {
+            if (input->hasEnabledConnection()) {
                 auto connections = input->getConnections();
                 apex_assert_hard(connections.size() == 1);
                 ConnectionPtr connection = connections.front();
                 auto s = connection->getState();
-                apex_assert_hard(s == Connection::State::READ ||
-                                 s == Connection::State::UNREAD);
+                apex_assert_hard(s == Connection::State::READ || s == Connection::State::UNREAD);
                 TokenPtr token = connection->getToken();
                 apex_assert_hard(token != nullptr);
                 input->setToken(token);
@@ -283,19 +272,18 @@ void InputTransition::forwardMessages()
             }
         }
 
-        for(auto& c : connections_) {
-            if(c->isEnabled()) {
+        for (auto& c : connections_) {
+            if (c->isEnabled()) {
                 auto s = c->getState();
                 //        apex_assert_hard(c->isEstablished());
                 apex_assert_hard(s != Connection::State::NOT_INITIALIZED);
-                apex_assert_hard(s == Connection::State::UNREAD ||
-                                 s == Connection::State::READ);
+                apex_assert_hard(s == Connection::State::UNREAD || s == Connection::State::READ);
             }
         }
 
         apex_assert_hard(!areAllConnections(Connection::State::DONE));
-        for(auto& c : connections_) {
-            if(c->isEnabled()) {
+        for (auto& c : connections_) {
+            if (c->isEnabled()) {
                 c->setState(Connection::State::READ);
             }
         }

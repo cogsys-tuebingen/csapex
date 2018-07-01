@@ -7,13 +7,12 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Event : public StaticOutput
 {
     friend class Graph;
 
 public:
-    Event(const UUID &uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Event(const UUID& uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
     ~Event();
 
     virtual ConnectorType getConnectorType() const override
@@ -32,17 +31,14 @@ public:
      */
     void triggerWith(TokenPtr token);
 
-
     virtual bool isSynchronous() const override;
 
     void reset();
 
-
 public:
     slim_signal::Signal<void()> triggered;
-
 };
 
-}
+}  // namespace csapex
 
-#endif // TRIGGER_H
+#endif  // TRIGGER_H

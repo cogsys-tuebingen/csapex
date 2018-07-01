@@ -9,7 +9,6 @@
 
 namespace csapex
 {
-
 class Timer;
 
 class CSAPEX_PROFILING_EXPORT Timable
@@ -25,6 +24,6 @@ protected:
     std::shared_ptr<Timer> profiling_timer_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TIMABLE_H
+#endif  // TIMABLE_H

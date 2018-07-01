@@ -10,13 +10,12 @@
 using namespace csapex;
 using namespace csapex::io;
 
-Channel::Channel(Session &session, const AUUID &name)
-    : session_(session), name_(name)
+Channel::Channel(Session& session, const AUUID& name) : session_(session), name_(name)
 {
     observe(session_.raw_packet_received(name), raw_packet_received);
 }
 
-void Channel::handleNote(const io::NoteConstPtr &note)
+void Channel::handleNote(const io::NoteConstPtr& note)
 {
     note_received(note);
 }

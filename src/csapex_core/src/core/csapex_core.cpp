@@ -38,23 +38,23 @@
 
 using namespace csapex;
 
-CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::PluginLocatorPtr plugin_locator)
-    : bootstrap_(std::make_shared<Bootstrap>()),
-      settings_(settings),
-      plugin_locator_(plugin_locator),
-      exception_handler_(handler),
-      node_factory_(nullptr),
-      root_uuid_provider_(std::make_shared<UUIDProvider>()),
-      dispatcher_(std::make_shared<CommandDispatcher>(*this)),
-      profiler_(std::make_shared<ProfilerImplementation>()),
-      core_plugin_manager(nullptr),
-      init_(false), load_needs_reset_(false), return_code_(0)
+CsApexCore::CsApexCore(Settings& settings, ExceptionHandler& handler, csapex::PluginLocatorPtr plugin_locator)
+  : bootstrap_(std::make_shared<Bootstrap>())
+  , settings_(settings)
+  , plugin_locator_(plugin_locator)
+  , exception_handler_(handler)
+  , node_factory_(nullptr)
+  , root_uuid_provider_(std::make_shared<UUIDProvider>())
+  , dispatcher_(std::make_shared<CommandDispatcher>(*this))
+  , profiler_(std::make_shared<ProfilerImplementation>())
+  , core_plugin_manager(nullptr)
+  , init_(false)
+  , load_needs_reset_(false)
+  , return_code_(0)
 {
     is_root_ = true;
 
-    thread_pool_ = std::make_shared<ThreadPool>(exception_handler_,
-                                                !settings_.get<bool>("threadless", false),
-                                                settings_.get<bool>("thread_grouping", true));
+    thread_pool_ = std::make_shared<ThreadPool>(exception_handler_, !settings_.get<bool>("threadless", false), settings_.get<bool>("thread_grouping", true));
     thread_pool_->setPause(settings_.get<bool>("initially_paused", false));
 
     observe(thread_pool_->paused, paused);
@@ -63,41 +63,38 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler, csapex::Pl
     observe(thread_pool_->begin_step, begin_step);
     observe(thread_pool_->end_step, end_step);
 
-    observe(saved, [this](){
+    observe(saved, [this]() {
         dispatcher_->setClean();
         dispatcher_->resetDirtyPoint();
 
         bool recovery = settings_.getTemporary<bool>("config_recovery", false);
-        if(recovery) {
+        if (recovery) {
             // delete recovery file
             bf3::path recov_file = settings_.get<std::string>("config_recovery_file");
-            bf3::path current_config  = settings_.get<std::string>("config");
-            if(recov_file != current_config) {
+            bf3::path current_config = settings_.get<std::string>("config");
+            if (recov_file != current_config) {
                 bf3::remove(recov_file);
                 settings_.set("config_recovery", false);
             }
         }
     });
-    observe(loaded, [this](){
+    observe(loaded, [this]() {
         dispatcher_->setClean();
         dispatcher_->resetDirtyPoint();
     });
-    observe(reset_requested, [this](){
+    observe(reset_requested, [this]() {
         dispatcher_->reset();
         settings_.set("config_recovery", false);
     });
 }
 
-CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
-    : CsApexCore(settings, handler, std::make_shared<PluginLocator>(settings))
+CsApexCore::CsApexCore(Settings& settings, ExceptionHandler& handler) : CsApexCore(settings, handler, std::make_shared<PluginLocator>(settings))
 {
     is_root_ = true;
 
     observe(settings.settings_changed, this, &CsApexCore::settingsChanged);
 
-    observe(exception_handler_.assertion_failed, [this](){
-        setPause(true);
-    });
+    observe(exception_handler_.assertion_failed, [this]() { setPause(true); });
 
     StreamInterceptor::instance().start();
     MessageProviderManager::instance().setPluginLocator(plugin_locator_);
@@ -110,29 +107,28 @@ CsApexCore::CsApexCore(Settings &settings, ExceptionHandler& handler)
     boot();
 }
 
-CsApexCore::CsApexCore(Settings& settings, ExceptionHandler &handler, PluginLocatorPtr plugin_locator,
-                       NodeFactoryPtr node_factory, SnippetFactoryPtr snippet_factory, bool is_root)
-    : CsApexCore(settings, handler, plugin_locator)
+CsApexCore::CsApexCore(Settings& settings, ExceptionHandler& handler, PluginLocatorPtr plugin_locator, NodeFactoryPtr node_factory, SnippetFactoryPtr snippet_factory, bool is_root)
+  : CsApexCore(settings, handler, plugin_locator)
 {
     is_root_ = is_root;
 
-    if(plugin_locator) {
+    if (plugin_locator) {
         core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
     }
-    node_factory_ =  std::dynamic_pointer_cast<NodeFactoryImplementation>(node_factory);
+    node_factory_ = std::dynamic_pointer_cast<NodeFactoryImplementation>(node_factory);
     apex_assert_hard(node_factory);
-    snippet_factory_ =  snippet_factory;
+    snippet_factory_ = snippet_factory;
 }
 
 CsApexCore::~CsApexCore()
 {
-    if(root_) {
+    if (root_) {
         root_->stop();
     }
 
     std::unique_lock<std::mutex> lock(running_mutex_);
-    if(is_root_) {
-        if(root_) {
+    if (is_root_) {
+        if (root_) {
             root_->clear();
         }
         plugin_locator_->shutdown();
@@ -142,14 +138,13 @@ CsApexCore::~CsApexCore()
         MessageRendererManager::instance().shutdown();
     }
 
-
-    for(std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it){
+    for (std::map<std::string, CorePlugin::Ptr>::iterator it = core_plugins_.begin(); it != core_plugins_.end(); ++it) {
         it->second->shutdown();
     }
     core_plugins_.clear();
     core_plugin_manager.reset();
 
-    if(is_root_) {
+    if (is_root_) {
         bootstrap_.reset();
     }
 
@@ -162,7 +157,7 @@ CsApexCore::~CsApexCore()
 
 void CsApexCore::setPause(bool pause)
 {
-    if(pause != thread_pool_->isPaused()) {
+    if (pause != thread_pool_->isPaused()) {
         thread_pool_->setPause(pause);
     }
 }
@@ -179,7 +174,7 @@ bool CsApexCore::isSteppingMode() const
 
 void CsApexCore::setSteppingMode(bool stepping)
 {
-    if(stepping) {
+    if (stepping) {
         drainPipeline();
     }
     thread_pool_->setSteppingMode(stepping);
@@ -199,7 +194,7 @@ void CsApexCore::drainPipeline()
     //  backtrack all done connections and allow the sources to tick once
 }
 
-void CsApexCore::setStatusMessage(const std::string &msg)
+void CsApexCore::setStatusMessage(const std::string& msg)
 {
     status_changed(msg);
 }
@@ -213,21 +208,21 @@ void CsApexCore::sendNotification(const std::string& msg, ErrorState::ErrorLevel
 
 void CsApexCore::init()
 {
-    if(!init_) {
+    if (!init_) {
         init_ = true;
 
-        if(is_root_) {
+        if (is_root_) {
             status_changed("loading core plugins");
             core_plugin_manager->load(plugin_locator_.get());
 
-            for(const auto& cp : core_plugin_manager->getConstructors()) {
+            for (const auto& cp : core_plugin_manager->getConstructors()) {
                 makeCorePlugin(cp.first);
             }
 
-            for(auto plugin : core_plugins_) {
+            for (auto plugin : core_plugins_) {
                 plugin.second->prepare(getSettings());
             }
-            for(auto plugin : core_plugins_) {
+            for (auto plugin : core_plugins_) {
                 plugin.second->init(*this);
             }
         }
@@ -237,14 +232,12 @@ void CsApexCore::init()
         observe(node_factory_->loaded, status_changed);
         observe(node_factory_->notification, notification);
 
-        if(is_root_) {
+        if (is_root_) {
             node_factory_->loadPlugins();
         }
 
         observe(node_factory_->new_node_type, new_node_type);
-        observe(node_factory_->node_constructed, [this](NodeFacadePtr n) {
-            n->getNodeState()->setMaximumFrequency(settings_.getPersistent("default_frequency", 60));
-        });
+        observe(node_factory_->node_constructed, [this](NodeFacadePtr n) { n->getNodeState()->setMaximumFrequency(settings_.getPersistent("default_frequency", 60)); });
 
         status_changed("make graph");
 
@@ -261,38 +254,24 @@ void CsApexCore::init()
         root_ = std::make_shared<GraphFacadeImplementation>(*thread_pool_, graph_local, graph, root_facade_);
         root_->notification.connect(notification);
 
-
-
-        if(is_root_) {
-            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(),
-                                                         root_->getLocalGraph()->makeUUID("slot_save"), "save",
-                                                         [this](const TokenPtr&) {
-                saveAs(getSettings().get<std::string>("config"));
-            });
-            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(),
-                                                         root_->getLocalGraph()->makeUUID("slot_exit"), "exit",
-                                                         [this](const TokenPtr&) {
-                shutdown();
-            });
-            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(),
-                                                         root_->getLocalGraph()->makeUUID("slot_abort"), "abort",
-                                                         [this](const TokenPtr&) {
-                abort();
-            });
+        if (is_root_) {
+            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(), root_->getLocalGraph()->makeUUID("slot_save"), "save",
+                                                         [this](const TokenPtr&) { saveAs(getSettings().get<std::string>("config")); });
+            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(), root_->getLocalGraph()->makeUUID("slot_exit"), "exit", [this](const TokenPtr&) { shutdown(); });
+            root_->getSubgraphNode()->createInternalSlot(makeEmpty<connection_types::AnyMessage>(), root_->getLocalGraph()->makeUUID("slot_abort"), "abort", [this](const TokenPtr&) { abort(); });
         }
 
-        if(is_root_) {
-            for(auto plugin : core_plugins_) {
+        if (is_root_) {
+            for (auto plugin : core_plugins_) {
                 plugin.second->setupGraph(root_->getSubgraphNode().get());
             }
 
-            if(snippet_factory_) {
+            if (snippet_factory_) {
                 status_changed("loading snippets");
                 snippet_factory_->loadSnippets();
                 observe(snippet_factory_->snippet_set_changed, new_snippet_type);
             }
         }
-
     }
 }
 
@@ -307,7 +286,7 @@ CorePlugin::Ptr CsApexCore::makeCorePlugin(const std::string& plugin_name)
 
     core_plugins_[plugin_name] = plugin;
 
-    if(!core_plugins_connected_[plugin_name]) {
+    if (!core_plugins_connected_[plugin_name]) {
         core_plugins_connected_[plugin_name] = true;
     }
 
@@ -318,9 +297,7 @@ void CsApexCore::boot()
 {
     status_changed("booting up");
 
-    bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR,
-                         plugin_locator_.get(),
-                         settings_.get("require_boot_plugin", true));
+    bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR, plugin_locator_.get(), settings_.get("require_boot_plugin", true));
 
     init();
 }
@@ -332,7 +309,7 @@ void CsApexCore::startup()
         std::string cfg = settings_.getTemporary<std::string>("config", Settings::defaultConfigFile());
 
         bool recovery = settings_.getTemporary<bool>("config_recovery", false);
-        if(!recovery) {
+        if (!recovery) {
             load(cfg);
 
         } else {
@@ -340,10 +317,9 @@ void CsApexCore::startup()
             settings_.set("config", cfg);
         }
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << "error loading the config: " << e.what() << std::endl;
     }
-
 
     status_changed("painting user interface");
 }
@@ -360,7 +336,7 @@ void CsApexCore::startMainLoop()
         root_->getSubgraphNode()->activation();
         thread_pool_->start();
 
-        while(running_) {
+        while (running_) {
             getCommandDispatcher()->executeLater();
 
             running_changed_.wait_for(lock, std::chrono::milliseconds(10));
@@ -377,7 +353,7 @@ bool CsApexCore::isMainLoopRunning() const
 
 void CsApexCore::joinMainLoop()
 {
-    if(main_thread_.joinable()) {
+    if (main_thread_.joinable()) {
         main_thread_.join();
     }
 }
@@ -443,7 +419,7 @@ void CsApexCore::reset()
     reset_done();
 }
 
-Settings &CsApexCore::getSettings() const
+Settings& CsApexCore::getSettings() const
 {
     return settings_;
 }
@@ -499,28 +475,27 @@ void CsApexCore::settingsChanged()
     config_changed();
 }
 
-void CsApexCore::saveAs(const std::string &file, bool quiet)
+void CsApexCore::saveAs(const std::string& file, bool quiet)
 {
     TimerPtr timer = getProfiler()->getTimer("save graph");
     timer->restart();
 
-    std::string dir = file.substr(0, file.find_last_of('/')+1);
+    std::string dir = file.substr(0, file.find_last_of('/') + 1);
 
-    if(!dir.empty()) {
+    if (!dir.empty()) {
 #ifdef WIN32
         int chdir_result = _chdir(dir.c_str());
 #else
         int chdir_result = chdir(dir.c_str());
 #endif
-        if(chdir_result != 0) {
+        if (chdir_result != 0) {
             throw std::runtime_error(std::string("cannot change into directory ") + dir);
         }
     }
 
-
     YAML::Node node_map(YAML::NodeType::Map);
 
-    GraphIO graphio(*root_,  node_factory_.get());
+    GraphIO graphio(*root_, node_factory_.get());
     graphio.useProfiler(getProfiler());
     slim_signal::ScopedConnection connection = graphio.saveViewRequest.connect(save_detail_request);
 
@@ -547,19 +522,19 @@ void CsApexCore::saveAs(const std::string &file, bool quiet)
 
     timer->finish();
 
-    if(!quiet) {
+    if (!quiet) {
         saved();
     }
 }
 
-SnippetPtr CsApexCore::serializeNodes(const AUUID& graph_id, const std::vector<UUID> &nodes) const
+SnippetPtr CsApexCore::serializeNodes(const AUUID& graph_id, const std::vector<UUID>& nodes) const
 {
     GraphFacadeImplementationPtr gf = graph_id.empty() ? root_ : root_->getLocalSubGraph(graph_id);
     GraphIO io(*gf, getNodeFactory().get());
     return std::make_shared<Snippet>(io.saveSelectedGraph(nodes));
 }
 
-void CsApexCore::load(const std::string &file)
+void CsApexCore::load(const std::string& file)
 {
     settings_.set("config", file);
 
@@ -569,7 +544,7 @@ void CsApexCore::load(const std::string &file)
     // NOTE: this also removes the main node runner from the thread pool
     thread_pool_->stop();
 
-    if(load_needs_reset_) {
+    if (load_needs_reset_) {
         reset();
     }
 
@@ -580,7 +555,7 @@ void CsApexCore::load(const std::string &file)
 
     graphio.useProfiler(profiler_);
 
-    if(bf3::exists(file)) {
+    if (bf3::exists(file)) {
         YAML::Node node_map = YAML::LoadFile(file.c_str());
 
         // first load settings
@@ -603,7 +578,7 @@ void CsApexCore::load(const std::string &file)
     // add the main node runner back to the thread pool
     thread_pool_->add(root_facade_->getNodeRunner().get());
 
-    if(was_running) {
+    if (was_running) {
         thread_pool_->start();
     }
 }

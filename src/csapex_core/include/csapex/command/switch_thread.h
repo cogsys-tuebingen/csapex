@@ -9,7 +9,6 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT SwitchThread : public CommandImplementation<SwitchThread>
 {
     COMMAND_HEADER(SwitchThread);
@@ -19,7 +18,7 @@ public:
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -34,8 +33,7 @@ private:
     std::string name;
 };
 
-}
+}  // namespace command
 
-}
-#endif // SWITCH_THREAD_H
-
+}  // namespace csapex
+#endif  // SWITCH_THREAD_H

@@ -13,16 +13,28 @@
 
 using namespace csapex;
 
-NodeState::NodeState(const NodeHandle *parent)
-    : parent_(parent),
+NodeState::NodeState(const NodeHandle* parent)
+  : parent_(parent)
+  ,
 
-      max_frequency_(0.0), z_(0), minimized_(false), muted_(false), enabled_(true), active_(false), flipped_(false),
-      logger_level_(1), thread_id_(-1),
-      r_(-1), g_(-1), b_(-1), exec_mode_(ExecutionMode::SEQUENTIAL), exec_type_(ExecutionType::AUTO)
+  max_frequency_(0.0)
+  , z_(0)
+  , minimized_(false)
+  , muted_(false)
+  , enabled_(true)
+  , active_(false)
+  , flipped_(false)
+  , logger_level_(1)
+  , thread_id_(-1)
+  , r_(-1)
+  , g_(-1)
+  , b_(-1)
+  , exec_mode_(ExecutionMode::SEQUENTIAL)
+  , exec_type_(ExecutionType::AUTO)
 {
-    if(parent) {
+    if (parent) {
         label_ = parent->getUUID().getFullName();
-        if(NodePtr node = parent->getNode().lock()) {
+        if (NodePtr node = parent->getNode().lock()) {
             parameter_state = node->getParameterState();
         } else {
             apex_fail("cannot get node in node state");
@@ -31,20 +43,17 @@ NodeState::NodeState(const NodeHandle *parent)
     } else {
         parameter_state = std::make_shared<GenericState>();
     }
-
 }
 
-NodeState::NodeState()
-    : NodeState(nullptr)
+NodeState::NodeState() : NodeState(nullptr)
 {
-
 }
 
 NodeState::~NodeState()
 {
 }
 
-NodeState& NodeState::operator = (const NodeState& rhs)
+NodeState& NodeState::operator=(const NodeState& rhs)
 {
     // first change all values
     max_frequency_ = rhs.max_frequency_;
@@ -90,7 +99,7 @@ NodeState& NodeState::operator = (const NodeState& rhs)
 
 void NodeState::setMaximumFrequency(double f)
 {
-    if(max_frequency_ != f) {
+    if (max_frequency_ != f) {
         max_frequency_ = f;
         (max_frequency_changed)();
     }
@@ -106,16 +115,15 @@ Point NodeState::getPos() const
     return pos_;
 }
 
-void NodeState::setPos(const Point &value, bool quiet)
+void NodeState::setPos(const Point& value, bool quiet)
 {
-    if(pos_ != value) {
+    if (pos_ != value) {
         pos_ = value;
-        if(!quiet) {
+        if (!quiet) {
             (pos_changed)();
         }
     }
 }
-
 
 long NodeState::getZ() const
 {
@@ -124,13 +132,13 @@ long NodeState::getZ() const
 
 void NodeState::setZ(long value)
 {
-    if(z_ != value) {
+    if (z_ != value) {
         z_ = value;
         (z_changed)();
     }
 }
 
-void NodeState::getColor(int& r, int& g, int &b) const
+void NodeState::getColor(int& r, int& g, int& b) const
 {
     r = r_;
     g = g_;
@@ -139,7 +147,7 @@ void NodeState::getColor(int& r, int& g, int &b) const
 
 void NodeState::setColor(int r, int g, int b)
 {
-    if(r != r_ || b != b_ || g != g_) {
+    if (r != r_ || b != b_ || g != g_) {
         r_ = r;
         g_ = g;
         b_ = b;
@@ -147,15 +155,14 @@ void NodeState::setColor(int r, int g, int b)
     }
 }
 
-
 std::string NodeState::getLabel() const
 {
     return label_;
 }
 
-void NodeState::setLabel(const std::string &label)
+void NodeState::setLabel(const std::string& label)
 {
-    if(label_ != label) {
+    if (label_ != label) {
         label_ = label;
         (label_changed)();
     }
@@ -168,7 +175,7 @@ bool NodeState::isMinimized() const
 
 void NodeState::setMinimized(bool value)
 {
-    if(minimized_ != value) {
+    if (minimized_ != value) {
         minimized_ = value;
         (minimized_changed)();
     }
@@ -181,7 +188,7 @@ bool NodeState::isMuted() const
 
 void NodeState::setMuted(bool value)
 {
-    if(muted_ != value) {
+    if (muted_ != value) {
         muted_ = value;
         (muted_changed)();
     }
@@ -193,7 +200,7 @@ bool NodeState::isEnabled() const
 
 void NodeState::setEnabled(bool value)
 {
-    if(enabled_ != value) {
+    if (enabled_ != value) {
         enabled_ = value;
         (enabled_changed)();
     }
@@ -206,7 +213,7 @@ bool NodeState::isActive() const
 
 void NodeState::setActive(bool value)
 {
-    if(active_ != value) {
+    if (active_ != value) {
         active_ = value;
         (active_changed)();
     }
@@ -219,7 +226,7 @@ bool NodeState::isFlipped() const
 
 void NodeState::setFlipped(bool value)
 {
-    if(flipped_ != value) {
+    if (flipped_ != value) {
         flipped_ = value;
         (flipped_changed)();
     }
@@ -229,19 +236,19 @@ GenericStatePtr NodeState::getParameterState() const
     return parameter_state;
 }
 
-void NodeState::setParameterState(const GenericStatePtr &value)
+void NodeState::setParameterState(const GenericStatePtr& value)
 {
     parameter_state->setFrom(*value);
 }
 
-const NodeHandle *NodeState::getParent() const
+const NodeHandle* NodeState::getParent() const
 {
     return parent_;
 }
 
-void NodeState::setParent(const NodeHandle *value)
+void NodeState::setParent(const NodeHandle* value)
 {
-    if(parent_ != value) {
+    if (parent_ != value) {
         parent_ = value;
         (parent_changed)();
     }
@@ -259,7 +266,7 @@ std::string NodeState::getThreadName() const
 
 void NodeState::setThread(const std::string& name, int id)
 {
-    if(thread_id_ != id || name != thread_name_) {
+    if (thread_id_ != id || name != thread_name_) {
         thread_id_ = id;
         thread_name_ = name;
 
@@ -267,14 +274,13 @@ void NodeState::setThread(const std::string& name, int id)
     }
 }
 
-
 ExecutionMode NodeState::getExecutionMode() const
 {
     return exec_mode_;
 }
 void NodeState::setExecutionMode(ExecutionMode mode)
 {
-    if(exec_mode_ != mode) {
+    if (exec_mode_ != mode) {
         exec_mode_ = mode;
 
         (execution_mode_changed)();
@@ -287,8 +293,8 @@ ExecutionType NodeState::getExecutionType() const
 }
 void NodeState::setExecutionType(ExecutionType type)
 {
-    if(exec_type_!= type) {
-        exec_type_= type;
+    if (exec_type_ != type) {
+        exec_type_ = type;
 
         (execution_type_changed)();
     }
@@ -300,16 +306,16 @@ int NodeState::getLoggerLevel() const
 }
 void NodeState::setLoggerLevel(int level)
 {
-    if(logger_level_ != level) {
+    if (logger_level_ != level) {
         logger_level_ = level;
 
         (logger_level_changed)();
     }
 }
 
-void NodeState::writeYaml(YAML::Node &out) const
+void NodeState::writeYaml(YAML::Node& out) const
 {
-    if(parent_) {
+    if (parent_) {
         out["type"] = parent_->getType();
         out["uuid"] = parent_->getUUID().getFullName();
     }
@@ -325,31 +331,31 @@ void NodeState::writeYaml(YAML::Node &out) const
     out["muted"] = muted_;
     out["enabled"] = enabled_;
     out["flipped"] = flipped_;
-    out["exec_mode"] = (int) exec_mode_;
-    out["exec_type"] = (int) exec_type_;
+    out["exec_mode"] = (int)exec_mode_;
+    out["exec_type"] = (int)exec_type_;
     out["logger_level"] = logger_level_;
 
-    if(!dictionary.empty()) {
+    if (!dictionary.empty()) {
         YAML::Node dict(YAML::NodeType::Sequence);
-        for(const auto& pair : dictionary) {
+        for (const auto& pair : dictionary) {
             YAML::Node n(YAML::NodeType::Map);
 
             n["key"] = pair.first;
 
-            if(pair.second.type() == typeid(int)) {
-                n["int"] = boost::any_cast<int> (pair.second);
+            if (pair.second.type() == typeid(int)) {
+                n["int"] = boost::any_cast<int>(pair.second);
 
-            } else if(pair.second.type() == typeid(double)) {
-                n["double"] = boost::any_cast<double> (pair.second);
+            } else if (pair.second.type() == typeid(double)) {
+                n["double"] = boost::any_cast<double>(pair.second);
 
-            } else if(pair.second.type() == typeid(bool)) {
-                n["bool"] = boost::any_cast<bool> (pair.second);
+            } else if (pair.second.type() == typeid(bool)) {
+                n["bool"] = boost::any_cast<bool>(pair.second);
 
-            } else if(pair.second.type() == typeid(std::string)) {
-                n["string"] = boost::any_cast<std::string> (pair.second);
+            } else if (pair.second.type() == typeid(std::string)) {
+                n["string"] = boost::any_cast<std::string>(pair.second);
 
-            } else if(pair.second.type() == typeid(std::vector<std::string>)) {
-                n["stringv"] = boost::any_cast<std::vector<std::string>> (pair.second);
+            } else if (pair.second.type() == typeid(std::vector<std::string>)) {
+                n["stringv"] = boost::any_cast<std::vector<std::string>>(pair.second);
             }
 
             dict.push_back(n);
@@ -361,101 +367,98 @@ void NodeState::writeYaml(YAML::Node &out) const
         YAML::Node sub_node;
         parameter_state->writeYaml(sub_node);
         out["state"] = sub_node;
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << "cannot save child state for node " << parent_->getUUID() << ": " << e.what() << std::endl;
         throw e;
     }
 }
 
-
-void NodeState::readYaml(const YAML::Node &node)
+void NodeState::readYaml(const YAML::Node& node)
 {
-    if(node["max_frequency"].IsDefined()) {
+    if (node["max_frequency"].IsDefined()) {
         setMaximumFrequency(node["max_frequency"].as<double>());
     }
 
-    if(node["minimized"].IsDefined()) {
+    if (node["minimized"].IsDefined()) {
         setMinimized(node["minimized"].as<bool>());
     }
 
-    if(node["muted"].IsDefined()) {
+    if (node["muted"].IsDefined()) {
         setMuted(node["muted"].as<bool>());
     }
 
-    if(node["enabled"].IsDefined()) {
+    if (node["enabled"].IsDefined()) {
         setEnabled(node["enabled"].as<bool>());
     }
 
-    if(node["flipped"].IsDefined()) {
+    if (node["flipped"].IsDefined()) {
         setFlipped(node["flipped"].as<bool>());
     }
 
-    if(node["exec_mode"].IsDefined()) {
+    if (node["exec_mode"].IsDefined()) {
         setExecutionMode(static_cast<ExecutionMode>(node["exec_mode"].as<int>()));
     }
-    if(node["exec_type"].IsDefined()) {
+    if (node["exec_type"].IsDefined()) {
         setExecutionType(static_cast<ExecutionType>(node["exec_type"].as<int>()));
     }
 
-    if(node["label"].IsDefined()) {
+    if (node["label"].IsDefined()) {
         setLabel(node["label"].as<std::string>());
-        if(label_.empty()) {
+        if (label_.empty()) {
             setLabel(parent_->getUUID().getFullName());
         }
     }
 
-    if(node["logger_level"].IsDefined()) {
+    if (node["logger_level"].IsDefined()) {
         setLoggerLevel(node["logger_level"].as<int>());
     }
 
-
-    if(node["pos"].IsDefined()) {
+    if (node["pos"].IsDefined()) {
         double x = node["pos"][0].as<double>();
         double y = node["pos"][1].as<double>();
-        Point p(x,y);
+        Point p(x, y);
         setPos(p);
     }
-    if(node["color"].IsDefined()) {
+    if (node["color"].IsDefined()) {
         int r = node["color"][0].as<int>();
         int g = node["color"][1].as<int>();
         int b = node["color"][2].as<int>();
         setColor(r, g, b);
     }
-    if(node["z"].IsDefined()) {
+    if (node["z"].IsDefined()) {
         setZ(node["z"].as<long>());
     }
 
-    if(node["dict"].IsDefined()) {
+    if (node["dict"].IsDefined()) {
         const YAML::Node& dict = node["dict"];
-        if(dict.Type() == YAML::NodeType::Sequence) {
-
-            for(auto it = dict.begin(); it != dict.end(); ++it) {
+        if (dict.Type() == YAML::NodeType::Sequence) {
+            for (auto it = dict.begin(); it != dict.end(); ++it) {
                 YAML::Node entry = *it;
                 std::string key = entry["key"].as<std::string>();
 
-                if(entry["int"].IsDefined()) {
+                if (entry["int"].IsDefined()) {
                     dictionary[key] = entry["int"].as<int>();
 
-                } else if(entry["double"].IsDefined()) {
+                } else if (entry["double"].IsDefined()) {
                     dictionary[key] = entry["double"].as<double>();
 
-                } else if(entry["bool"].IsDefined()) {
+                } else if (entry["bool"].IsDefined()) {
                     dictionary[key] = entry["bool"].as<bool>();
 
-                } else if(entry["string"].IsDefined()) {
+                } else if (entry["string"].IsDefined()) {
                     dictionary[key] = entry["string"].as<std::string>();
 
-                } else if(entry["stringv"].IsDefined()) {
+                } else if (entry["stringv"].IsDefined()) {
                     dictionary[key] = entry["stringv"].as<std::vector<std::string>>();
                 }
             }
         }
     }
 
-    if(node["state"].IsDefined()) {
+    if (node["state"].IsDefined()) {
         const YAML::Node& state_map = node["state"];
         auto node = parent_->getNode().lock();
-        if(!node) {
+        if (!node) {
             return;
         }
 
@@ -463,8 +466,7 @@ void NodeState::readYaml(const YAML::Node &node)
     }
 }
 
-
-void NodeState::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void NodeState::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << max_frequency_;
 
@@ -528,7 +530,7 @@ void NodeState::deserialize(const SerializationBuffer& data, const SemanticVersi
     YAML::Node yaml;
     data >> yaml;
 
-    if(yaml.IsDefined()) {
+    if (yaml.IsDefined()) {
         parameter_state->readYaml(yaml);
     }
 }
@@ -538,7 +540,7 @@ bool NodeState::hasDictionaryEntry(const std::string& key) const
     return dictionary.find(key) != dictionary.end();
 }
 
-void NodeState::deleteDictionaryEntry(const std::string &key)
+void NodeState::deleteDictionaryEntry(const std::string& key)
 {
     dictionary.erase(key);
 }
@@ -567,18 +569,21 @@ template double NodeState::getDictionaryEntry<double>(const std::string&) const;
 template bool NodeState::getDictionaryEntry<bool>(const std::string&) const;
 template std::string NodeState::getDictionaryEntry<std::string>(const std::string&) const;
 template std::vector<std::string> NodeState::getDictionaryEntry<std::vector<std::string>>(const std::string&) const;
-}
+}  // namespace csapex
 
 /// YAML
-namespace YAML {
-Node convert<csapex::NodeState>::encode(const csapex::NodeState& rhs) {
+namespace YAML
+{
+Node convert<csapex::NodeState>::encode(const csapex::NodeState& rhs)
+{
     Node n;
     rhs.writeYaml(n);
     return n;
 }
 
-bool convert<csapex::NodeState>::decode(const Node& node, csapex::NodeState& rhs) {
+bool convert<csapex::NodeState>::decode(const Node& node, csapex::NodeState& rhs)
+{
     rhs.readYaml(node);
     return true;
 }
-}
+}  // namespace YAML

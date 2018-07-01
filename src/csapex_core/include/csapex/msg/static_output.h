@@ -9,7 +9,7 @@ namespace csapex
 class CSAPEX_CORE_EXPORT StaticOutput : public Output
 {
 public:
-    StaticOutput(const UUID &uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    StaticOutput(const UUID& uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
 
     virtual void addMessage(TokenPtr message) override;
 
@@ -32,7 +32,6 @@ private:
     mutable std::recursive_mutex message_mutex_;
     TokenPtr committed_message_;
 };
-}
+}  // namespace csapex
 
-#endif // STATIC_OUTPUT_H
-
+#endif  // STATIC_OUTPUT_H

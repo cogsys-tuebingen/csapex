@@ -18,8 +18,8 @@
 using namespace csapex;
 using namespace connection_types;
 
-namespace csapex {
-
+namespace csapex
+{
 class MockupNode : public Node
 {
 public:
@@ -29,7 +29,6 @@ public:
 
     virtual void setup(csapex::NodeModifier& node_modifier) override
     {
-
     }
 };
 
@@ -37,15 +36,14 @@ void functionToBeWrappedIntoANode(const GenericValueMessage<int>& input, const G
 {
     output.value = input.value + input2.value + parameter;
 }
-}
+}  // namespace csapex
 
-
-class NodeCreationTest : public CsApexTestCase {
+class NodeCreationTest : public CsApexTestCase
+{
 protected:
     NodeFactoryImplementation factory;
 
-    NodeCreationTest()
-        : factory(SettingsImplementation::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
+    NodeCreationTest() : factory(SettingsImplementation::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
     {
         csapex::NodeConstructor::Ptr mockup_constructor(new csapex::NodeConstructor("MockupNode", std::bind(&NodeCreationTest::makeMockup)));
         factory.registerNodeType(mockup_constructor);
@@ -53,31 +51,36 @@ protected:
         factory.registerNodeType(GenericNodeFactory::createConstructorFromFunction(functionToBeWrappedIntoANode, "WrappedFunctionNode"));
     }
 
-    virtual ~NodeCreationTest() {
+    virtual ~NodeCreationTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         // Code here will be called immediately after the constructor (right
         // before each test).
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
 
-    static NodePtr makeMockup() {
+    static NodePtr makeMockup()
+    {
         return NodePtr(new MockupNode);
     }
 
     UUIDProviderPtr uuid_provider;
 };
 
-TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
+TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory)
+{
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     NodeFacadeImplementationPtr node = factory.makeNode("MockupNode", node_id, uuid_provider);
 
@@ -85,7 +88,8 @@ TEST_F(NodeCreationTest, NodeCanBeMadeInAFactory) {
     ASSERT_EQ(node_id, node->getUUID());
 }
 
-TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
+TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory)
+{
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     NodeFacadeImplementationPtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
     ASSERT_TRUE(node_facade != nullptr);
@@ -105,7 +109,8 @@ TEST_F(NodeCreationTest, GenericNodeCanBeMadeInAFactory) {
     ASSERT_EQ(1, params.size());
 }
 
-TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
+TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly)
+{
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz2");
 
     NodeFacadeImplementationPtr node_facade = factory.makeNode("WrappedFunctionNode", node_id, uuid_provider);
@@ -132,7 +137,7 @@ TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
     csapex::param::Parameter::Ptr param = params[0];
     param->set(2);
 
-    //InputPtr param_in = inputs[0];
+    // InputPtr param_in = inputs[0];
 
     InputPtr in = inputs[1];
     in->setToken(std::make_shared<Token>(msg));
@@ -144,10 +149,10 @@ TEST_F(NodeCreationTest, GenericNodeCallsFunctionCorrectly) {
 
     node->process(*node_facade->getNodeHandle(), *node);
 
-    //OutputPtr param_out = outputs[0];
+    // OutputPtr param_out = outputs[0];
 
     OutputPtr out = outputs[1];
-    out->commitMessages(false); // this smells a little..
+    out->commitMessages(false);  // this smells a little..
 
     TokenConstPtr out_msg = out->getToken();
     ASSERT_TRUE(out_msg != nullptr);

@@ -20,7 +20,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Connection
 {
     friend class GraphIO;
@@ -30,7 +29,8 @@ class CSAPEX_CORE_EXPORT Connection
 public:
     typedef std::shared_ptr<Connection> Ptr;
 
-    enum class State {
+    enum class State
+    {
         NOT_INITIALIZED,
         UNREAD,
         READ,
@@ -38,18 +38,17 @@ public:
     };
 
 public:
-    friend std::ostream& operator << (std::ostream& out, const Connection& c);
+    friend std::ostream& operator<<(std::ostream& out, const Connection& c);
 
 protected:
     Connection(OutputPtr from, InputPtr to);
     Connection(OutputPtr from, InputPtr to, int id);
 
 public:
-    static bool isCompatibleWith(Connector *from, Connector* to);
+    static bool isCompatibleWith(Connector* from, Connector* to);
 
     static bool canBeConnectedTo(Connector* from, Connector* to);
     static bool targetsCanBeMovedTo(Connector* from, Connector* to);
-
 
     static bool areConnectorsConnected(Connector* from, Connector* to);
 
@@ -71,7 +70,7 @@ public:
 
     bool contains(Connector* c) const;
 
-    virtual void setToken(const TokenPtr &msg);
+    virtual void setToken(const TokenPtr& msg);
 
     TokenPtr getToken() const;
     void setTokenProcessed();
@@ -107,13 +106,13 @@ public:
     slim_signal::Signal<void()> connection_changed;
 
     slim_signal::Signal<void(Fulcrum*)> fulcrum_added;
-    slim_signal::Signal<void(Fulcrum*,bool dropped)> fulcrum_moved;
-    slim_signal::Signal<void(Fulcrum*,bool dropped, int which)> fulcrum_moved_handle;
-    slim_signal::Signal<void(Fulcrum*,int type)> fulcrum_type_changed;
+    slim_signal::Signal<void(Fulcrum*, bool dropped)> fulcrum_moved;
+    slim_signal::Signal<void(Fulcrum*, bool dropped, int which)> fulcrum_moved_handle;
+    slim_signal::Signal<void(Fulcrum*, int type)> fulcrum_type_changed;
     slim_signal::Signal<void(Fulcrum*)> fulcrum_deleted;
 
 public:
-    bool operator == (const Connection& c) const;
+    bool operator==(const Connection& c) const;
 
     std::vector<FulcrumPtr> getFulcrums() const;
     std::vector<Fulcrum> getFulcrumsCopy() const;
@@ -121,9 +120,9 @@ public:
     int getFulcrumCount() const;
     FulcrumPtr getFulcrum(int fulcrum_id);
 
-    void addFulcrum(int fulcrum_id, const Point& pos, int type, const Point& handle_in=Point(-10.0, 0.0), const Point& handle_out=Point(10.0, 0.0));
-    void modifyFulcrum(int fulcrum_id, int type, const Point& handle_in=Point(-10.0, 0.0), const Point& handle_out=Point(10.0, 0.0));
-    void moveFulcrum(int fulcrum_id, const Point &pos, bool dropped);
+    void addFulcrum(int fulcrum_id, const Point& pos, int type, const Point& handle_in = Point(-10.0, 0.0), const Point& handle_out = Point(10.0, 0.0));
+    void modifyFulcrum(int fulcrum_id, int type, const Point& handle_in = Point(-10.0, 0.0), const Point& handle_out = Point(10.0, 0.0));
+    void moveFulcrum(int fulcrum_id, const Point& pos, bool dropped);
     void deleteFulcrum(int fulcrum_id);
 
 protected:
@@ -149,9 +148,8 @@ protected:
     mutable std::recursive_mutex sync;
 };
 
+std::ostream& operator<<(std::ostream& out, const Connection& c);
 
-std::ostream& operator << (std::ostream& out, const Connection& c);
+}  // namespace csapex
 
-}
-
-#endif // CONNECTION_H
+#endif  // CONNECTION_H

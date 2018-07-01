@@ -16,7 +16,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Connectable : public Connector, public std::enable_shared_from_this<Connectable>
 {
     friend class Graph;
@@ -31,11 +30,12 @@ public:
     {
         return false;
     }
-    virtual bool isInput() const  override
+    virtual bool isInput() const override
     {
         return false;
-    }    
-    virtual bool isOptional() const {
+    }
+    virtual bool isOptional() const
+    {
         return false;
     }
 
@@ -119,7 +119,7 @@ protected:
     virtual void removeAllConnectionsNotUndoable() = 0;
 
 protected:
-    Connectable(const UUID &uuid, ConnectableOwnerWeakPtr owner);
+    Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner);
 
     void init();
 
@@ -146,6 +146,6 @@ private:
     std::atomic<bool> processing_;
 };
 
-}
+}  // namespace csapex
 
-#endif // CONNECTABLE_H
+#endif  // CONNECTABLE_H

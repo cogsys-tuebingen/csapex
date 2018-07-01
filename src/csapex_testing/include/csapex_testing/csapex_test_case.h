@@ -6,13 +6,13 @@
 
 namespace csapex
 {
-
-class CsApexTestCase : public ::testing::Test {
+class CsApexTestCase : public ::testing::Test
+{
 protected:
     CsApexTestCase();
 
     virtual ~CsApexTestCase();
 };
-}
+}  // namespace csapex
 
-#endif // CSAPEX_TEST_CASE_H
+#endif  // CSAPEX_TEST_CASE_H

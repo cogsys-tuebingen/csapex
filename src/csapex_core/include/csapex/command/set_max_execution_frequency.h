@@ -10,17 +10,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT SetMaximumExecutionFrequency : public CommandImplementation<SetMaximumExecutionFrequency>
 {
     COMMAND_HEADER(SetMaximumExecutionFrequency);
 
 public:
-    SetMaximumExecutionFrequency(const AUUID &graph_uuid, const UUID& node, double frequency);
+    SetMaximumExecutionFrequency(const AUUID& graph_uuid, const UUID& node, double frequency);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -34,8 +33,8 @@ private:
     double frequency;
 };
 
-}
+}  // namespace command
 
-}
+}  // namespace csapex
 
-#endif // SET_MAX_EXECUTION_FREQUENCY_H
+#endif  // SET_MAX_EXECUTION_FREQUENCY_H

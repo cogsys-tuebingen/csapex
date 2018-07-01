@@ -25,26 +25,26 @@ namespace csapex
 {
 namespace detail
 {
-
 template <int factor>
-NodePtr makeStaticMultiplier() {
+NodePtr makeStaticMultiplier()
+{
     return NodePtr(new NodeWrapper<MockupStaticMultiplierNode<factor>>());
 }
 template <int factor>
-NodePtr makeAsyncStaticMultiplier() {
+NodePtr makeAsyncStaticMultiplier()
+{
     return NodePtr(new NodeWrapper<MockupAsyncStaticMultiplierNode<factor>>());
 }
 template <typename T>
-NodePtr makeNode() {
+NodePtr makeNode()
+{
     return NodePtr(new T());
 }
-}
-}
+}  // namespace detail
+}  // namespace csapex
 
 NodeConstructingTest::NodeConstructingTest()
-    : node_factory(std::make_shared<NodeFactoryImplementation>(SettingsImplementation::NoSettings, nullptr)),
-      factory(*node_factory),
-      executor(eh, false, false)
+  : node_factory(std::make_shared<NodeFactoryImplementation>(SettingsImplementation::NoSettings, nullptr)), factory(*node_factory), executor(eh, false, false)
 {
     factory.registerNodeType(std::make_shared<NodeConstructor>("StaticMultiplier", std::bind(&detail::makeStaticMultiplier<2>)));
     factory.registerNodeType(std::make_shared<NodeConstructor>("StaticMultiplier4", std::bind(&detail::makeStaticMultiplier<4>)));
@@ -56,25 +56,27 @@ NodeConstructingTest::NodeConstructingTest()
     factory.registerNodeType(std::make_shared<NodeConstructor>("AnySink", std::bind(&detail::makeNode<AnySink>)));
 }
 
-NodeConstructingTest::~NodeConstructingTest() {
+NodeConstructingTest::~NodeConstructingTest()
+{
 }
 
-void NodeConstructingTest::SetUp() {
+void NodeConstructingTest::SetUp()
+{
     graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
     graph = graph_node->getLocalGraph();
 
-    abort_connection = error_handling::stop_request().connect([this](){
-        for(graph::VertexPtr vtx : *graph) {
+    abort_connection = error_handling::stop_request().connect([this]() {
+        for (graph::VertexPtr vtx : *graph) {
             NodeFacadeImplementationPtr nf = std::dynamic_pointer_cast<NodeFacadeImplementation>(vtx->getNodeFacade());
             apex_assert_hard(nf);
-            if(std::shared_ptr<MockupSink> mp = std::dynamic_pointer_cast<MockupSink>(nf->getNode())) {
+            if (std::shared_ptr<MockupSink> mp = std::dynamic_pointer_cast<MockupSink>(nf->getNode())) {
                 mp->abort();
             }
         }
     });
 }
 
-void NodeConstructingTest::TearDown() {
+void NodeConstructingTest::TearDown()
+{
     abort_connection.disconnect();
 }
-

@@ -8,7 +8,6 @@
 
 using namespace csapex;
 
-
 SteppingTest::SteppingTest()
 {
     step_called_only_once = true;
@@ -29,9 +28,9 @@ void SteppingTest::SetUp()
     end_step_called = false;
     executor.end_step.connect([&]() {
         {
-            //TRACE std::cerr << ">> step done" << std::endl;
+            // TRACE std::cerr << ">> step done" << std::endl;
             std::unique_lock<std::recursive_mutex> lock(end_step_called_mutex);
-            if(end_step_called) {
+            if (end_step_called) {
                 end_step_called_more_than_once = true;
             }
             end_step_called = true;
@@ -48,10 +47,9 @@ void SteppingTest::TearDown()
     NodeConstructingTest::TearDown();
 }
 
-
 void SteppingTest::step()
 {
-    //TRACEstd::cerr << "\n\nSTEP\n\n";
+    // TRACEstd::cerr << "\n\nSTEP\n\n";
     ASSERT_TRUE(step_called_only_once);
     step_called_only_once = false;
 
@@ -64,17 +62,16 @@ void SteppingTest::step()
     ASSERT_NO_FATAL_FAILURE(waitForEndOfStep());
 }
 
-
 void SteppingTest::waitForEndOfStep()
 {
     std::unique_lock<std::recursive_mutex> lock(end_step_called_mutex);
 
     auto wait_start = std::chrono::system_clock::now();
-    while(!end_step_called) {
+    while (!end_step_called) {
         step_done.wait_for(lock, std::chrono::milliseconds(10));
 
         auto waited_for = std::chrono::system_clock::now() - wait_start;
-        if(waited_for > std::chrono::milliseconds(10000)) {
+        if (waited_for > std::chrono::milliseconds(10000)) {
             GTEST_FATAL_FAILURE_("waiting for end of step timed out");
         }
     }

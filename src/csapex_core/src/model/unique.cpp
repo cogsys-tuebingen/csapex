@@ -3,10 +3,8 @@
 
 using namespace csapex;
 
-Unique::Unique(const UUID &uuid)
-    : uuid_(uuid)
+Unique::Unique(const UUID& uuid) : uuid_(uuid)
 {
-
 }
 
 Unique::~Unique()
@@ -14,7 +12,7 @@ Unique::~Unique()
     uuid_.free();
 }
 
-void Unique::setUUID(const UUID &uuid)
+void Unique::setUUID(const UUID& uuid)
 {
     uuid_ = uuid;
 }

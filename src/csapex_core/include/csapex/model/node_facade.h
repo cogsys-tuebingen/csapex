@@ -15,7 +15,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT NodeFacade : public Observer, public Notifier, public ErrorState
 {
 protected:
@@ -106,7 +105,6 @@ public:
     virtual NodeStatePtr getNodeState() const = 0;
     virtual NodeStatePtr getNodeStateCopy() const = 0;
 
-
     template <typename T>
     T readParameter(const std::string& name) const;
     template <typename T>
@@ -119,15 +117,14 @@ public:
     slim_signal::Signal<void(NodeFacade* facade)> start_profiling;
     slim_signal::Signal<void(NodeFacade* facade)> stop_profiling;
 
+    slim_signal::Signal<void(ConnectorDescription)> connector_created;
+    slim_signal::Signal<void(ConnectorDescription)> connector_removed;
 
-    slim_signal::Signal<void (ConnectorDescription)> connector_created;
-    slim_signal::Signal<void (ConnectorDescription)> connector_removed;
+    slim_signal::Signal<void(ConnectorDescription)> connection_added;
+    slim_signal::Signal<void(ConnectorDescription)> connection_removed;
+    slim_signal::Signal<void(ConnectorDescription)> connection_start;
 
-    slim_signal::Signal<void (ConnectorDescription)> connection_added;
-    slim_signal::Signal<void (ConnectorDescription)> connection_removed;
-    slim_signal::Signal<void (ConnectorDescription)> connection_start;
-
-    slim_signal::Signal<void ()> messages_processed;
+    slim_signal::Signal<void()> messages_processed;
 
     slim_signal::Signal<void(std::string)> label_changed;
     slim_signal::Signal<void(int)> scheduler_changed;
@@ -141,15 +138,15 @@ public:
     slim_signal::Signal<void(param::ParameterPtr)> parameter_changed;
     slim_signal::Signal<void(param::ParameterPtr)> parameter_removed;
 
-    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_inputs_changed;
-    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_outputs_changed;
-    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_events_changed;
-    slim_signal::Signal<void (std::vector<ConnectorDescription>)> external_slots_changed;
+    slim_signal::Signal<void(std::vector<ConnectorDescription>)> external_inputs_changed;
+    slim_signal::Signal<void(std::vector<ConnectorDescription>)> external_outputs_changed;
+    slim_signal::Signal<void(std::vector<ConnectorDescription>)> external_events_changed;
+    slim_signal::Signal<void(std::vector<ConnectorDescription>)> external_slots_changed;
 
-    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_inputs_changed;
-    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_outputs_changed;
-    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_events_changed;
-    slim_signal::Signal<void (std::vector<ConnectorDescription>)> internal_slots_changed;
+    slim_signal::Signal<void(std::vector<ConnectorDescription>)> internal_inputs_changed;
+    slim_signal::Signal<void(std::vector<ConnectorDescription>)> internal_outputs_changed;
+    slim_signal::Signal<void(std::vector<ConnectorDescription>)> internal_events_changed;
+    slim_signal::Signal<void(std::vector<ConnectorDescription>)> internal_slots_changed;
 
     slim_signal::Signal<void()> destroyed;
 
@@ -157,6 +154,6 @@ public:
     slim_signal::Signal<void(NodeFacade* facade, std::shared_ptr<const Interval> stamp)> interval_end;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_FACADE_H
+#endif  // NODE_FACADE_H

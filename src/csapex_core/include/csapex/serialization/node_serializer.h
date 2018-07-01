@@ -11,14 +11,15 @@
 #include <functional>
 #include <typeindex>
 
-#define CSAPEX_REGISTER_SERIALIZER_NS(Node, Serializer,instancename) \
-namespace csapex { \
-namespace serializion { \
-    static SerializationRegistered<Node, Serializer> instancename; \
-} \
-}
-#define CSAPEX_REGISTER_SERIALIZER(Node, Serializer)\
-    CSAPEX_REGISTER_SERIALIZER_NS(Node, Serializer,g_instance_)
+#define CSAPEX_REGISTER_SERIALIZER_NS(Node, Serializer, instancename)                                                                                                                                  \
+    namespace csapex                                                                                                                                                                                   \
+    {                                                                                                                                                                                                  \
+    namespace serializion                                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+    static SerializationRegistered<Node, Serializer> instancename;                                                                                                                                     \
+    }                                                                                                                                                                                                  \
+    }
+#define CSAPEX_REGISTER_SERIALIZER(Node, Serializer) CSAPEX_REGISTER_SERIALIZER_NS(Node, Serializer, g_instance_)
 
 namespace YAML
 {
@@ -33,12 +34,8 @@ public:
     template <typename N, typename Instance>
     static void registerInstance()
     {
-        instance().serializers[std::type_index(typeid(const N))] = [](const csapex::Node& node, YAML::Node& doc) {
-            Instance::serialize(static_cast<const N&>(node), doc);
-        };
-        instance().deserializers[std::type_index(typeid(const N))] = [](csapex::Node& node, const YAML::Node& doc) {
-            Instance::deserialize(static_cast<N&>(node), doc);
-        };
+        instance().serializers[std::type_index(typeid(const N))] = [](const csapex::Node& node, YAML::Node& doc) { Instance::serialize(static_cast<const N&>(node), doc); };
+        instance().deserializers[std::type_index(typeid(const N))] = [](csapex::Node& node, const YAML::Node& doc) { Instance::deserialize(static_cast<N&>(node), doc); };
     }
 
     void shutdown() override;
@@ -50,12 +47,12 @@ private:
     std::map<std::type_index, std::function<void(const csapex::Node&, YAML::Node&)>> serializers;
     std::map<std::type_index, std::function<void(csapex::Node&, const YAML::Node&)>> deserializers;
 };
-}
+}  // namespace csapex
 
-
-namespace csapex {
-namespace serializion {
-
+namespace csapex
+{
+namespace serializion
+{
 template <typename N, typename Instance>
 struct SerializationRegistered
 {
@@ -65,8 +62,7 @@ struct SerializationRegistered
     }
 };
 
-}
-}
+}  // namespace serializion
+}  // namespace csapex
 
-#endif // NODE_SERIALIZER_H
-
+#endif  // NODE_SERIALIZER_H

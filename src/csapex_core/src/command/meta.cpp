@@ -17,24 +17,23 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(Meta)
 
-Meta::Meta(const AUUID &parent_uuid, const std::string &type, bool transaction)
-    : CommandImplementation(parent_uuid), locked(false), transaction(transaction), type(type)
+Meta::Meta(const AUUID& parent_uuid, const std::string& type, bool transaction) : CommandImplementation(parent_uuid), locked(false), transaction(transaction), type(type)
 {
 }
 
-void Meta::init(GraphFacadeImplementation *root, CsApexCore& core)
+void Meta::init(GraphFacadeImplementation* root, CsApexCore& core)
 {
     Command::init(root, core);
-    for(Command::Ptr cmd : nested) {
+    for (Command::Ptr cmd : nested) {
         cmd->init(root, core);
     }
 }
 
-void Meta::accept(int level, std::function<void (int level, const Command &)> callback) const
+void Meta::accept(int level, std::function<void(int level, const Command&)> callback) const
 {
     callback(level, *this);
-    for(Command::Ptr cmd : nested) {
-        cmd->accept(level+1, callback);
+    for (Command::Ptr cmd : nested) {
+        cmd->accept(level + 1, callback);
     }
 }
 
@@ -54,7 +53,7 @@ void Meta::add(Command::Ptr cmd)
     apex_assert_hard(!locked);
     apex_assert_hard(cmd);
 
-    if(initialized_) {
+    if (initialized_) {
         cmd->init(core_->getRoot().get(), *core_);
     }
 
@@ -70,21 +69,21 @@ bool Meta::doExecute()
 {
     locked = true;
 
-    if(transaction) {
+    if (transaction) {
         root_graph_facade_->getLocalGraph()->beginTransaction();
     }
 
     bool success = true;
-    for(Command::Ptr cmd : nested) {
+    for (Command::Ptr cmd : nested) {
         bool s = Access::executeCommand(cmd);
-        if(!s) {
+        if (!s) {
             auto& command = *cmd;
             std::cerr << "command failed to execute! (" << typeid(command).name() << ")" << std::endl;
         }
         success &= s;
     }
 
-    if(transaction) {
+    if (transaction) {
         root_graph_facade_->getLocalGraph()->finalizeTransaction();
     }
 
@@ -93,21 +92,20 @@ bool Meta::doExecute()
 
 bool Meta::doUndo()
 {
-    if(transaction) {
+    if (transaction) {
         root_graph_facade_->getLocalGraph()->beginTransaction();
     }
 
-    for(auto it = nested.rbegin(); it != nested.rend(); ++it) {
+    for (auto it = nested.rbegin(); it != nested.rend(); ++it) {
         bool s = Access::undoCommand(*it);
-        if(!s) {
+        if (!s) {
             undo_later.push_back(*it);
         }
     }
 
-    if(transaction) {
+    if (transaction) {
         root_graph_facade_->getLocalGraph()->finalizeTransaction();
     }
-
 
     return true;
 }
@@ -115,15 +113,14 @@ bool Meta::doUndo()
 bool Meta::doRedo()
 {
     bool success = true;
-    for(Command::Ptr cmd : nested) {
+    for (Command::Ptr cmd : nested) {
         bool s = Access::redoCommand(cmd);
         success &= s;
     }
     return success;
 }
 
-
-void Meta::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Meta::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 
@@ -147,7 +144,7 @@ void Meta::cloneData(const Meta& other)
 {
     nested.clear();
     nested.reserve(other.nested.size());
-    for(const CommandPtr& cmd : other.nested) {
+    for (const CommandPtr& cmd : other.nested) {
         nested.emplace_back(cmd->cloneAs<Command>());
     }
 

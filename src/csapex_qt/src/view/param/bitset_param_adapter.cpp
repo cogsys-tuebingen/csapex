@@ -21,10 +21,8 @@
 
 using namespace csapex;
 
-BitSetParameterAdapter::BitSetParameterAdapter(param::BitSetParameter::Ptr p)
-    : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), bitset_p_(p)
+BitSetParameterAdapter::BitSetParameterAdapter(param::BitSetParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), bitset_p_(p)
 {
-
 }
 
 QWidget* BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
@@ -38,7 +36,7 @@ QWidget* BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& di
     layout->addWidget(group);
 
     connectInGuiThread(bitset_p_->scope_changed, [this](param::Parameter*) {
-        if(!bitset_p_ || !group) {
+        if (!bitset_p_ || !group) {
             return;
         }
 
@@ -51,17 +49,17 @@ QWidget* BitSetParameterAdapter::setup(QBoxLayout* layout, const std::string& di
 
 void BitSetParameterAdapter::setupAgain()
 {
-    for(int i = 0; i < bitset_p_->noParameters(); ++i) {
+    for (int i = 0; i < bitset_p_->noParameters(); ++i) {
         std::string str = bitset_p_->getName(i);
         QCheckBox* item = new QCheckBox(QString::fromStdString(str));
         group->layout()->addWidget(item);
-        if(bitset_p_->isSet(str)) {
+        if (bitset_p_->isSet(str)) {
             item->setChecked(true);
         }
 
         // ui change -> model
         QObject::connect(item, &QCheckBox::toggled, [this, item, str](bool checked) {
-            if(!bitset_p_ || !item) {
+            if (!bitset_p_ || !item) {
                 return;
             }
             auto v = std::make_pair(str, checked);
@@ -71,7 +69,7 @@ void BitSetParameterAdapter::setupAgain()
 
         // model change -> ui
         connectInGuiThread(bitset_p_->parameter_changed, [this, item, str](param::Parameter*) {
-            if(!bitset_p_ || !item) {
+            if (!bitset_p_ || !item) {
                 return;
             }
             item->blockSignals(true);
@@ -79,13 +77,9 @@ void BitSetParameterAdapter::setupAgain()
             item->blockSignals(false);
         });
     }
-
 }
 
-
-void BitSetParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+void BitSetParameterAdapter::setupContextMenu(ParameterContextMenu* context_handler)
 {
-    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
-        bitset_p_->set(bitset_p_->def());
-    });
+    context_handler->addAction(new QAction("reset to default", context_handler), [this]() { bitset_p_->set(bitset_p_->def()); });
 }

@@ -13,22 +13,15 @@ CoreNote::CoreNote()
 {
 }
 
-CoreNote::CoreNote(CoreNoteType request_type)
-    : NoteImplementation(AUUID::NONE),
-      note_type_(request_type)
+CoreNote::CoreNote(CoreNoteType request_type) : NoteImplementation(AUUID::NONE), note_type_(request_type)
 {
-
 }
 
-CoreNote::CoreNote(CoreNoteType request_type, const std::vector<boost::any> &payload)
-    : NoteImplementation(AUUID::NONE),
-      note_type_(request_type),
-      payload_(payload)
+CoreNote::CoreNote(CoreNoteType request_type, const std::vector<boost::any>& payload) : NoteImplementation(AUUID::NONE), note_type_(request_type), payload_(payload)
 {
-
 }
 
-void CoreNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void CoreNote::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Note::serialize(data, version);
 

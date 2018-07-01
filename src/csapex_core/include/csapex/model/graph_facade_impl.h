@@ -8,8 +8,7 @@ namespace csapex
 class GraphFacadeImplementation : public GraphFacade
 {
 public:
-    GraphFacadeImplementation(ThreadPool& executor, GraphImplementationPtr graph, SubgraphNodePtr graph_node,
-                     NodeFacadeImplementationPtr nh = nullptr, GraphFacadeImplementation* parent = nullptr);
+    GraphFacadeImplementation(ThreadPool& executor, GraphImplementationPtr graph, SubgraphNodePtr graph_node, NodeFacadeImplementationPtr nh = nullptr, GraphFacadeImplementation* parent = nullptr);
 
     virtual AUUID getAbsoluteUUID() const override;
 
@@ -23,12 +22,12 @@ public:
 
     virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
     virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
-    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const override;
-    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept override;
+    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const override;
+    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept override;
     virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
 
-    virtual ConnectorPtr findConnector(const UUID &uuid) override;
-    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept override;
+    virtual ConnectorPtr findConnector(const UUID& uuid) override;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept override;
 
     virtual bool isConnected(const UUID& from, const UUID& to) const override;
     virtual ConnectionDescription getConnection(const UUID& from, const UUID& to) const override;
@@ -87,7 +86,6 @@ public:
     ConnectionPtr connect(NodeFacade* output, int output_id, NodeFacade* input, int input_id);
     ConnectionPtr connect(NodeFacadePtr output, int output_id, NodeFacadePtr input, int input_id);
 
-
     virtual std::string makeStatusString() const override;
 
 protected:
@@ -127,9 +125,8 @@ private:
     std::unordered_map<UUID, GraphFacadeImplementationPtr, UUID::Hasher> children_;
 
     std::unordered_map<UUID, NodeFacadePtr, UUID::Hasher> node_facades_;
-
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_FACADE_IMPL_H
+#endif  // GRAPH_FACADE_IMPL_H

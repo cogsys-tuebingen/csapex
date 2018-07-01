@@ -6,7 +6,6 @@
 
 namespace csapex
 {
-
 template <class Impl>
 class NodeWrapper : public Node, public Impl
 {
@@ -26,6 +25,6 @@ class NodeWrapper : public Node, public Impl
     }
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_WRAPPER_HPP
+#endif  // NODE_WRAPPER_HPP

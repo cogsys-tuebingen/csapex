@@ -6,12 +6,11 @@
 
 using namespace csapex;
 
-NodeFilterProxyModel::NodeFilterProxyModel(QObject *parent)
-    : QSortFilterProxyModel(parent)
+NodeFilterProxyModel::NodeFilterProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
 }
 
-bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) const
+bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex&) const
 {
     QString descr = sourceModel()->index(sourceRow, 0).data(Qt::UserRole + 1).toString();
     QString name = sourceModel()->index(sourceRow, 0).data(Qt::UserRole + 2).toString();
@@ -21,16 +20,16 @@ bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) 
     QStringList qrys = filterRegExp().pattern().split(" ", QString::SkipEmptyParts);
 
     bool contains_all = true;
-    for(const QString& qry : qrys) {
+    for (const QString& qry : qrys) {
         bool tagged = false;
-        for(const QString& t : tags) {
-            if(t.contains(qry, Qt::CaseInsensitive)) {
+        for (const QString& t : tags) {
+            if (t.contains(qry, Qt::CaseInsensitive)) {
                 tagged = true;
             }
         }
         bool prop = false;
-        for(const QString& p : properties) {
-            if(p.contains(qry, Qt::CaseInsensitive)) {
+        for (const QString& p : properties) {
+            if (p.contains(qry, Qt::CaseInsensitive)) {
                 prop = true;
             }
         }
@@ -40,7 +39,7 @@ bool NodeFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) 
     return contains_all;
 }
 
-bool NodeFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+bool NodeFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
     return QSortFilterProxyModel::lessThan(left, right);
 }

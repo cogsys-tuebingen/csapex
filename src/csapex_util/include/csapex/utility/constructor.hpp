@@ -7,42 +7,54 @@
 #include <vector>
 #include <type_traits>
 
-struct ConstructorInterface {
-    ConstructorInterface() : valid_(false), has_constructor(false) {}
+struct ConstructorInterface
+{
+    ConstructorInterface() : valid_(false), has_constructor(false)
+    {
+    }
 
-    virtual bool valid() const {
+    virtual bool valid() const
+    {
         return valid_ && has_constructor;
     }
 
-    std::string getType() const {
+    std::string getType() const
+    {
         return type;
     }
 
-    void setType(const std::string& n) {
+    void setType(const std::string& n)
+    {
         type = n;
     }
 
-    std::string getDescription() const {
+    std::string getDescription() const
+    {
         return descr;
     }
 
-    void setDescription(const std::string& n) {
+    void setDescription(const std::string& n)
+    {
         descr = n;
     }
 
-    std::string getTags() const {
+    std::string getTags() const
+    {
         return tags;
     }
 
-    void setTags(const std::string& t) {
+    void setTags(const std::string& t)
+    {
         tags = t;
     }
 
-    std::string getIcon() const {
+    std::string getIcon() const
+    {
         return icon;
     }
 
-    void setIcon(const std::string& i) {
+    void setIcon(const std::string& i)
+    {
         icon = i;
     }
 
@@ -55,10 +67,8 @@ protected:
     bool has_constructor;
 };
 
-
-
-//template <typename Any>
-//class HasName
+// template <typename Any>
+// class HasName
 //{
 //    typedef char Small;
 //    class Big { char dummy[2]; };
@@ -66,39 +76,40 @@ protected:
 //    template <typename Class> static Small test(typeof(&Class::setName)) ;
 //    template <typename Class> static Big test(...);
 
-//public:
+// public:
 //    enum { value = sizeof(test<Any>(0)) == sizeof(Small) };
 //};
 
-template<typename> struct Void { typedef void type; };
+template <typename>
+struct Void
+{
+    typedef void type;
+};
 
-template<typename T, typename Sfinae = void>
-struct HasName: std::false_type {};
+template <typename T, typename Sfinae = void>
+struct HasName : std::false_type
+{
+};
 
-template<typename T>
-struct HasName<
-    T
-    , typename Void<
-        decltype( std::declval<T&>().setName(0) )
-    >::type
->: std::true_type {};
+template <typename T>
+struct HasName<T, typename Void<decltype(std::declval<T&>().setName(0))>::type> : std::true_type
+{
+};
 
-
-namespace impl {
+namespace impl
+{
 template <typename M>
-typename std::enable_if<HasName<M>::value, void>::type
-setType(std::shared_ptr<M> res, const std::string& type)
+typename std::enable_if<HasName<M>::value, void>::type setType(std::shared_ptr<M> res, const std::string& type)
 {
     res->setName(type);
 }
 
 template <typename M>
-typename std::enable_if<!HasName<M>::value, void>::type
-setType(std::shared_ptr<M> res, const std::string& type)
+typename std::enable_if<!HasName<M>::value, void>::type setType(std::shared_ptr<M> res, const std::string& type)
 {
     res->setType(type);
 }
 
-}
+}  // namespace impl
 
-#endif // CONSTRUCTOR_HPP
+#endif  // CONSTRUCTOR_HPP

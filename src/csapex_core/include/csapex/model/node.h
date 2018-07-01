@@ -12,13 +12,13 @@
 #include <csapex/utility/export_plugin.h>
 #include <csapex/model/observer.h>
 
-namespace csapex {
-
+namespace csapex
+{
 /**
  * @typedef ProcessingFunction
  * @brief Represents a call to a process-like function, having the same  signature as Node::process.
  */
-using ProcessingFunction = std::function<void (csapex::NodeModifier&, Parameterizable &)>;
+using ProcessingFunction = std::function<void(csapex::NodeModifier&, Parameterizable&)>;
 
 /**
  * @typedef Continuation
@@ -112,7 +112,6 @@ public:
      */
     virtual void setup(csapex::NodeModifier& node_modifier) = 0;
 
-
     /**
      * @brief finishSetup is called after the node is completely set up.
      *
@@ -205,7 +204,7 @@ public:
      *
      * @see Node::processMessageMarkers
      */
-    virtual void processMarker(const connection_types::MessageConstPtr &marker);
+    virtual void processMarker(const connection_types::MessageConstPtr& marker);
 
     /**
      * @brief activation is called when the node gets activated by receiving a
@@ -286,19 +285,19 @@ protected:
     void yield() const;
 
 public:
-    mutable StreamRelay adebug; ///< Debug output stream
-    mutable StreamRelay ainfo; ///< Log output stream
-    mutable StreamRelay awarn; ///< Warning output stream
-    mutable StreamRelay aerr; ///< Error output stream
+    mutable StreamRelay adebug;  ///< Debug output stream
+    mutable StreamRelay ainfo;   ///< Log output stream
+    mutable StreamRelay awarn;   ///< Warning output stream
+    mutable StreamRelay aerr;    ///< Error output stream
 
 protected:
     csapex::NodeModifier* node_modifier_;
     csapex::Parameterizable* parameters_;
     csapex::NodeHandlePtr node_handle_;
 
-    long guard_; ///< Memory corruption indicator
+    long guard_;  ///< Memory corruption indicator
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_H_
+#endif  // NODE_H_

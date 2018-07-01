@@ -20,17 +20,22 @@
 using namespace csapex;
 
 NodeRunner::NodeRunner(NodeWorkerPtr worker)
-    : worker_(worker), nh_(worker->getNodeHandle()), scheduler_(nullptr),
-      paused_(false), stepping_(false), can_step_(0), step_done_(false),
-      guard_(-1),
-      waiting_for_execution_(false),
-      waiting_for_step_(false),
-      suppress_exceptions_(true)
+  : worker_(worker)
+  , nh_(worker->getNodeHandle())
+  , scheduler_(nullptr)
+  , paused_(false)
+  , stepping_(false)
+  , can_step_(0)
+  , step_done_(false)
+  , guard_(-1)
+  , waiting_for_execution_(false)
+  , waiting_for_step_(false)
+  , suppress_exceptions_(true)
 {
-    nh_->getNodeState()->max_frequency_changed.connect([this](){
+    nh_->getNodeState()->max_frequency_changed.connect([this]() {
         max_frequency_ = nh_->getNodeState()->getMaximumFrequency();
 
-        if(max_frequency_ > 0.0) {
+        if (max_frequency_ > 0.0) {
             nh_->getRate().setFrequency(max_frequency_);
         } else {
             nh_->getRate().setFrequency(0.0);
@@ -44,7 +49,7 @@ NodeRunner::~NodeRunner()
 {
     stopObserving();
 
-    if(scheduler_) {
+    if (scheduler_) {
         detach();
     }
 
@@ -53,7 +58,7 @@ NodeRunner::~NodeRunner()
 
 void NodeRunner::measureFrequency()
 {
-    if(worker_->isProcessingEnabled()) {
+    if (worker_->isProcessingEnabled()) {
         nh_->getRate().tick();
     }
 }
@@ -76,34 +81,31 @@ void NodeRunner::connectNodeWorker()
     apex_assert_hard(this_weak.lock() != nullptr);
 
     check_parameters_ = std::make_shared<Task>(std::string("check parameters for ") + nh_->getUUID().getFullName(),
-                                               [this_weak]()
-    {
-        if(auto self = this_weak.lock()) {
-            self->checkParameters();
-        }
-    }, 0, this);
+                                               [this_weak]() {
+                                                   if (auto self = this_weak.lock()) {
+                                                       self->checkParameters();
+                                                   }
+                                               },
+                                               0, this);
     execute_ = std::make_shared<Task>(std::string("process ") + nh_->getUUID().getFullName(),
-                                      [this_weak]()
-    {
-        if(auto self = this_weak.lock()) {
-            self->execute();
-        }
-    }, 0, this);
+                                      [this_weak]() {
+                                          if (auto self = this_weak.lock()) {
+                                              self->execute();
+                                          }
+                                      },
+                                      0, this);
 
-    observe(worker_->try_process_changed, [this]() {
-        scheduleProcess();
-    });
+    observe(worker_->try_process_changed, [this]() { scheduleProcess(); });
 
-
-    observe(worker_->messages_processed, [this](){
+    observe(worker_->messages_processed, [this]() {
         measureFrequency();
         step_done_ = true;
-        //TRACE worker_->getNode()->ainfo << "end step" << std::endl;
+        // TRACE worker_->getNode()->ainfo << "end step" << std::endl;
         end_step();
     });
 }
 
-void NodeRunner::assignToScheduler(Scheduler *scheduler)
+void NodeRunner::assignToScheduler(Scheduler* scheduler)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
@@ -120,7 +122,7 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     stopObserving();
 
     // signals
-    observe(scheduler->scheduler_changed, [this](){
+    observe(scheduler->scheduler_changed, [this]() {
         NodeHandlePtr nh = nh_;
         nh->getNodeState()->setThread(scheduler_->getName(), scheduler_->id());
     });
@@ -129,26 +131,20 @@ void NodeRunner::assignToScheduler(Scheduler *scheduler)
     connectNodeWorker();
 
     // parameter change
-    observe(nh_->parameters_changed, [this]() {
-        schedule(check_parameters_);
-    });
+    observe(nh_->parameters_changed, [this]() { schedule(check_parameters_); });
 
     // processing enabled change
     observe(nh_->getNodeState()->enabled_changed, [this]() {
-        if(!nh_->getNodeState()->isEnabled()) {
+        if (!nh_->getNodeState()->isEnabled()) {
             waiting_for_execution_ = false;
         }
     });
 
     schedule(check_parameters_);
 
-
     // generic task
-    observe(nh_->execution_requested, [this](std::function<void()> cb) {
-        schedule(std::make_shared<Task>("anonymous", cb, 0, this));
-    });
+    observe(nh_->execution_requested, [this](std::function<void()> cb) { schedule(std::make_shared<Task>("anonymous", cb, 0, this)); });
 }
-
 
 Scheduler* NodeRunner::getScheduler() const
 {
@@ -158,12 +154,12 @@ Scheduler* NodeRunner::getScheduler() const
 void NodeRunner::scheduleProcess()
 {
     apex_assert_hard(guard_ == -1);
-    if(!paused_) {
+    if (!paused_) {
         bool source = nh_->isSource();
-        if(!source || !stepping_ || can_step_) {
-            //execute_->setPriority(std::max<long>(0, worker_->getSequenceNumber()));
-            //if(worker_->canExecute()) {
-            if(!waiting_for_execution_) {
+        if (!source || !stepping_ || can_step_) {
+            // execute_->setPriority(std::max<long>(0, worker_->getSequenceNumber()));
+            // if(worker_->canExecute()) {
+            if (!waiting_for_execution_) {
                 schedule(execute_);
             }
             //}
@@ -178,21 +174,21 @@ void NodeRunner::checkParameters()
 
 void NodeRunner::execute()
 {
-    if(stepping_ && can_step_ <= 0) {
+    if (stepping_ && can_step_ <= 0) {
         return;
     }
 
     apex_assert_hard(guard_ == -1);
-    if(worker_->canExecute()) {
-        if(max_frequency_ > 0.0) {
+    if (worker_->canExecute()) {
+        if (max_frequency_ > 0.0) {
             const Rate& rate = nh_->getRate();
             double f = rate.getEffectiveFrequency();
-            if(f > max_frequency_) {
+            if (f > max_frequency_) {
                 auto next_process = rate.endOfCycle();
 
                 auto now = std::chrono::system_clock::now();
 
-                if(next_process > now) {
+                if (next_process > now) {
                     scheduleDelayed(execute_, next_process);
                     waiting_for_execution_ = true;
                     return;
@@ -204,34 +200,34 @@ void NodeRunner::execute()
 
         nh_->getRate().startCycle();
 
-        if(stepping_) {
+        if (stepping_) {
             apex_assert_hard(can_step_);
         }
         can_step_--;
 
         try {
-            if(worker_->canExecute()) {
-                if(!worker_->startProcessingMessages()) {
-                    //TRACE worker_->getNode()->ainfo << "execute failed" << std::endl;
+            if (worker_->canExecute()) {
+                if (!worker_->startProcessingMessages()) {
+                    // TRACE worker_->getNode()->ainfo << "execute failed" << std::endl;
                     can_step_++;
                 }
             }
-        } catch(const std::exception& e) {
-            if(!suppress_exceptions_)
+        } catch (const std::exception& e) {
+            if (!suppress_exceptions_)
                 throw;
             else {
                 AUUID auuid = nh_->getAUUID();
                 NOTIFICATION_AUUID(auuid, std::string("Node could not be executed: ") + e.what());
             }
-        } catch(const Failure& e) {
-            if(!suppress_exceptions_)
+        } catch (const Failure& e) {
+            if (!suppress_exceptions_)
                 throw;
             else {
                 AUUID auuid = nh_->getAUUID();
                 NOTIFICATION_AUUID(auuid, std::string("Node experienced failure: ") + e.what());
             }
-        } catch(...) {
-            if(!suppress_exceptions_)
+        } catch (...) {
+            if (!suppress_exceptions_)
                 throw;
             else {
                 AUUID auuid = nh_->getAUUID();
@@ -249,8 +245,8 @@ void NodeRunner::schedule(TaskPtr task)
     std::unique_lock<std::recursive_mutex> lock(mutex_);
     remaining_tasks_.push_back(task);
 
-    if(scheduler_) {
-        for(const TaskPtr& t : remaining_tasks_) {
+    if (scheduler_) {
+        for (const TaskPtr& t : remaining_tasks_) {
             scheduler_->schedule(t);
         }
         remaining_tasks_.clear();
@@ -267,7 +263,7 @@ void NodeRunner::detach()
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
-    if(scheduler_) {
+    if (scheduler_) {
         auto t = scheduler_->remove(this);
         remaining_tasks_.insert(remaining_tasks_.end(), t.begin(), t.end());
         scheduler_ = nullptr;
@@ -282,14 +278,14 @@ bool NodeRunner::isPaused() const
 void NodeRunner::setPause(bool pause)
 {
     paused_ = pause;
-    if(!paused_) {
+    if (!paused_) {
         scheduleProcess();
     }
 }
 
 bool NodeRunner::canStartStepping() const
 {
-    if(auto subgraph = std::dynamic_pointer_cast<SubgraphNode>(worker_->getNode())) {
+    if (auto subgraph = std::dynamic_pointer_cast<SubgraphNode>(worker_->getNode())) {
         // if the node is an iterating sub graph, we need to wait until the current iteration is done...
         return !subgraph->isIterating();
     }
@@ -299,21 +295,19 @@ bool NodeRunner::canStartStepping() const
 void NodeRunner::setSteppingMode(bool stepping)
 {
     bool can_start_stepping = true;
-    if(stepping) {
-        if(!canStartStepping()){
+    if (stepping) {
+        if (!canStartStepping()) {
             can_start_stepping = false;
             waiting_for_step_ = true;
-            wait_for_step_connection_ = worker_->messages_processed.connect([this]() {
-                stepping_enabled();
-            });
+            wait_for_step_connection_ = worker_->messages_processed.connect([this]() { stepping_enabled(); });
         }
     }
 
     stepping_ = stepping;
     can_step_ = 0;
 
-    if(stepping_) {
-        if(can_start_stepping) {
+    if (stepping_) {
+        if (can_start_stepping) {
             stepping_enabled();
         }
 
@@ -324,13 +318,13 @@ void NodeRunner::setSteppingMode(bool stepping)
 
 void NodeRunner::step()
 {
-    if(waiting_for_step_) {
+    if (waiting_for_step_) {
         wait_for_step_connection_.disconnect();
     }
 
     bool is_enabled = worker_->isProcessingEnabled();
 
-    if(is_enabled) {
+    if (is_enabled) {
         can_step_++;
     }
 
@@ -339,19 +333,19 @@ void NodeRunner::step()
 
     bool can_perform_step = is_enabled && worker_->canProcess();
 
-    if(!can_perform_step) {
-        //TRACE worker_->getNode()->ainfo << "cannot step: "
-        //TRACE                           << (worker_->canProcess() ? "can" : "cannot") << " process,"
-        //TRACE                           << (worker_->canSend() ? "can" : "cannot") << " send,"
-        //TRACE                           << (worker_->canReceive() ? "can" : "cannot") << " receive,"
-        //TRACE                           << "processing " << (worker_->isProcessingEnabled() ? "is" : "is not") << " enabled"
-        //TRACE                           << std::endl;
+    if (!can_perform_step) {
+        // TRACE worker_->getNode()->ainfo << "cannot step: "
+        // TRACE                           << (worker_->canProcess() ? "can" : "cannot") << " process,"
+        // TRACE                           << (worker_->canSend() ? "can" : "cannot") << " send,"
+        // TRACE                           << (worker_->canReceive() ? "can" : "cannot") << " receive,"
+        // TRACE                           << "processing " << (worker_->isProcessingEnabled() ? "is" : "is not") << " enabled"
+        // TRACE                           << std::endl;
         step_done_ = true;
         end_step();
         return;
     }
 
-    //TRACE worker_->getNode()->ainfo << "step" << std::endl;
+    // TRACE worker_->getNode()->ainfo << "step" << std::endl;
     //    if(source) {
     scheduleProcess();
     //    }
@@ -372,7 +366,7 @@ UUID NodeRunner::getUUID() const
     return worker_->getUUID();
 }
 
-void NodeRunner::setError(const std::string &msg)
+void NodeRunner::setError(const std::string& msg)
 {
     std::cerr << "error happened: " << msg << std::endl;
     worker_->setError(true, msg);

@@ -22,33 +22,23 @@ class TiXmlElement;
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT NodeFactoryImplementation : public NodeFactory
 {
 public:
-    NodeFactoryImplementation(Settings& settings, PluginLocator *locator);
+    NodeFactoryImplementation(Settings& settings, PluginLocator* locator);
 
-    void setPluginLocator(PluginLocator *locator);
+    void setPluginLocator(PluginLocator* locator);
 
     void loadPlugins();
     void shutdown();
 
     void registerNodeType(NodeConstructor::Ptr provider, bool suppress_signals = false);
 
-    NodeFacadeImplementationPtr makeNode(const std::string& type,
-                                         const UUID& uuid,
-                                         const UUIDProviderPtr &uuid_provider);
-    NodeFacadeImplementationPtr makeNode(const std::string& type,
-                                         const UUID& uuid,
-                                         const UUIDProviderPtr &uuid_provider,
-                                         NodeStatePtr state);
+    NodeFacadeImplementationPtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr& uuid_provider);
+    NodeFacadeImplementationPtr makeNode(const std::string& type, const UUID& uuid, const UUIDProviderPtr& uuid_provider, NodeStatePtr state);
 
-    NodeFacadeImplementationPtr makeGraph(const UUID& uuid,
-                                          const UUIDProviderPtr &uuid_provider);
-    NodeFacadeImplementationPtr makeGraph(const UUID& uuid,
-                                          const UUIDProviderPtr &uuid_provider,
-                                          NodeStatePtr state);
-
+    NodeFacadeImplementationPtr makeGraph(const UUID& uuid, const UUIDProviderPtr& uuid_provider);
+    NodeFacadeImplementationPtr makeGraph(const UUID& uuid, const UUIDProviderPtr& uuid_provider, NodeStatePtr state);
 
 public:
     slim_signal::Signal<void(const std::string&)> loaded;
@@ -62,7 +52,7 @@ protected:
     void rebuildMap();
 
 protected:
-    Settings &settings_;
+    Settings& settings_;
     csapex::PluginLocator* plugin_locator_;
 
     std::shared_ptr<PluginManager<Node>> node_manager_;
@@ -70,6 +60,6 @@ protected:
     bool tag_map_has_to_be_rebuilt_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_FACTORY_IMPL_H
+#endif  // NODE_FACTORY_IMPL_H

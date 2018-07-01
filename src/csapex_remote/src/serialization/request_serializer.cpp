@@ -16,23 +16,20 @@ using namespace csapex;
 SerializerRegistered<RequestSerializer> g_register_request_serializer_(Request::PACKET_TYPE_ID, &RequestSerializer::instance());
 SerializerRegistered<RequestSerializer> g_register_response_serializer_(Response::PACKET_TYPE_ID, &RequestSerializer::instance());
 
-
 RequestSerializerInterface::~RequestSerializerInterface()
 {
-
 }
 
 void RequestSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    if(const Request* request = dynamic_cast<const Request*>(&packet)) {
+    if (const Request* request = dynamic_cast<const Request*>(&packet)) {
         std::string type = request->getType();
         auto it = serializers_.find(type);
-        if(it != serializers_.end()) {
-
-           // std::cerr << "serializing Request (type=" << type << ")" << std::endl;
+        if (it != serializers_.end()) {
+            // std::cerr << "serializing Request (type=" << type << ")" << std::endl;
             data << type;
 
-            data << (uint8_t) 0;
+            data << (uint8_t)0;
 
             data << request->getRequestID();
 
@@ -44,15 +41,14 @@ void RequestSerializer::serialize(const Streamable& packet, SerializationBuffer&
             std::cerr << "cannot serialize Request of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
         }
 
-    } else if(const Response* response = dynamic_cast<const Response*>(&packet)) {
+    } else if (const Response* response = dynamic_cast<const Response*>(&packet)) {
         std::string type = response->getType();
         auto it = serializers_.find(type);
-        if(it != serializers_.end()) {
-
-            //std::cerr << "serializing Response (type=" << type << ")" << std::endl;
+        if (it != serializers_.end()) {
+            // std::cerr << "serializing Response (type=" << type << ")" << std::endl;
             data << type;
 
-            data << (uint8_t) 1;
+            data << (uint8_t)1;
 
             data << response->getRequestID();
 
@@ -68,44 +64,41 @@ void RequestSerializer::serialize(const Streamable& packet, SerializationBuffer&
 
 StreamablePtr RequestSerializer::deserialize(const SerializationBuffer& data)
 {
-//    std::cerr << "deserializing Request" << std::endl;
+    //    std::cerr << "deserializing Request" << std::endl;
 
     std::string type;
     data >> type;
 
     auto it = serializers_.find(type);
-    if(it != serializers_.end()) {
-
+    if (it != serializers_.end()) {
         uint8_t direction;
         data >> direction;
 
         uint8_t id;
         data >> id;
 
-        if(direction == 0) {
-            //std::cerr << "deserializing Request (type=" << type << ")" << std::endl;
+        if (direction == 0) {
+            // std::cerr << "deserializing Request (type=" << type << ")" << std::endl;
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
             return serializer->deserializeRequest(data, id);
 
-        } else if(direction == 1) {
-            //std::cerr << "deserializing Response (type=" << type << ")" << std::endl;
+        } else if (direction == 1) {
+            // std::cerr << "deserializing Response (type=" << type << ")" << std::endl;
 
             // defer serialization to the corresponding serializer
             std::shared_ptr<RequestSerializerInterface> serializer = it->second;
             return serializer->deserializeResponse(data, id);
-
         }
     }
     std::cerr << "cannot deserialize Request of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
 
-
     return RequestPtr();
 }
 
-void RequestSerializer::registerSerializer(const std::string &type, std::shared_ptr<RequestSerializerInterface> serializer)
+void RequestSerializer::registerSerializer(const std::string& type, std::shared_ptr<RequestSerializerInterface> serializer)
 {
-//    std::cout << "registering serializer of type " << type << std::endl;
+    //    std::cout << "registering serializer of type " << type << std::endl;
     instance().serializers_[type] = serializer;
 }

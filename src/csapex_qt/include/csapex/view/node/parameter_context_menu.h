@@ -14,7 +14,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT ParameterContextMenu : public ContextMenuHandler
 {
 public:
@@ -29,6 +28,6 @@ private:
 
     std::map<QAction*, std::function<void()>> actions_;
 };
-}
+}  // namespace csapex
 
-#endif // PARAMETER_CONTEXT_MENU_H
+#endif  // PARAMETER_CONTEXT_MENU_H

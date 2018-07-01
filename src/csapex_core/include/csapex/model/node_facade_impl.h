@@ -6,7 +6,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT NodeFacadeImplementation : public NodeFacade, public std::enable_shared_from_this<NodeFacadeImplementation>
 {
 public:
@@ -27,7 +26,7 @@ public:
     GraphPtr getSubgraph() const override;
 
     bool isSource() const override;
-    bool isSink() const override;    
+    bool isSink() const override;
     bool isProcessingNothingMessages() const override;
 
     bool isParameterInput(const UUID& id) override;
@@ -55,7 +54,6 @@ public:
     ConnectorPtr getParameterInput(const std::string& name) const override;
     ConnectorPtr getParameterOutput(const std::string& name) const override;
 
-
     NodeCharacteristics getNodeCharacteristics() const override;
 
     bool canStartStepping() const override;
@@ -78,15 +76,15 @@ public:
     double getExecutionFrequency() const override;
     double getMaximumFrequency() const override;
 
-    // Parameterizable    
+    // Parameterizable
     virtual std::vector<param::ParameterPtr> getParameters() const override;
     param::ParameterPtr getParameter(const std::string& name) const override;
     bool hasParameter(const std::string& name) const override;
 
-//    template <typename T>
-//    T readParameter(const std::string& name) const;
-//    template <typename T>
-//    void setParameter(const std::string& name, const T& value);
+    //    template <typename T>
+    //    T readParameter(const std::string& name) const;
+    //    template <typename T>
+    //    void setParameter(const std::string& name, const T& value);
 
     // Debug Access
     std::string getDebugDescription() const override;
@@ -124,6 +122,6 @@ private:
     NodeRunnerPtr nr_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_FACADE_IMPL_H
+#endif  // NODE_FACADE_IMPL_H

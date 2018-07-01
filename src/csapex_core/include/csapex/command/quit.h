@@ -13,7 +13,6 @@ namespace csapex
 {
 namespace command
 {
-
 struct CSAPEX_COMMAND_EXPORT Quit : public CommandImplementation<Quit>
 {
     COMMAND_HEADER_NO_DEFAULT(Quit);
@@ -29,7 +28,7 @@ public:
     virtual bool isHidden() const override;
     virtual bool isUndoable() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -43,8 +42,8 @@ private:
     boost::any value;
 };
 
-}
+}  // namespace command
 
-}
+}  // namespace csapex
 
-#endif // QUIT_H
+#endif  // QUIT_H

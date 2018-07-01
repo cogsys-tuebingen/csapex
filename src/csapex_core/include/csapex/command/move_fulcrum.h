@@ -9,7 +9,6 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT MoveFulcrum : public CommandImplementation<MoveFulcrum>
 {
     COMMAND_HEADER(MoveFulcrum);
@@ -19,7 +18,7 @@ public:
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -34,8 +33,8 @@ private:
     Point to;
 };
 
-}
+}  // namespace command
 
-}
+}  // namespace csapex
 
-#endif // COMMAND_MOVE_FULCRUM_H
+#endif  // COMMAND_MOVE_FULCRUM_H

@@ -22,8 +22,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(ModifyThread)
 
-ModifyThread::ModifyThread(int thread_id, const std::string &name, std::vector<bool> cpu_affinity)
-    : id(thread_id), name(name), affinity(cpu_affinity)
+ModifyThread::ModifyThread(int thread_id, const std::string& name, std::vector<bool> cpu_affinity) : id(thread_id), name(name), affinity(cpu_affinity)
 {
 }
 
@@ -31,14 +30,14 @@ std::string ModifyThread::getDescription() const
 {
     std::stringstream ss;
     ss << "Modifiy thread " << id;
-    if(!name.empty()) {
-        ss<< ", (name=" << name << ")";
+    if (!name.empty()) {
+        ss << ", (name=" << name << ")";
     }
 
-    if(!affinity.empty()) {
+    if (!affinity.empty()) {
         ss << ", (affinity=";
-        for(bool cpu : affinity) {
-            ss << (int) cpu;
+        for (bool cpu : affinity) {
+            ss << (int)cpu;
         }
         ss << ")";
     }
@@ -47,19 +46,17 @@ std::string ModifyThread::getDescription() const
 
 ThreadGroup* ModifyThread::getGroup()
 {
-    switch(id)
-    {
-    case ThreadGroup::PRIVATE_THREAD:
-        throw std::runtime_error("cannot get private groups");
-    default:
-        return getRootThreadPool()->getGroup(id);
+    switch (id) {
+        case ThreadGroup::PRIVATE_THREAD:
+            throw std::runtime_error("cannot get private groups");
+        default:
+            return getRootThreadPool()->getGroup(id);
     }
-
 }
 
 bool ModifyThread::doExecute()
 {
-    if(id == ThreadGroup::PRIVATE_THREAD)  {
+    if (id == ThreadGroup::PRIVATE_THREAD) {
         // name cannot be changed
         old_affinity = getRootThreadPool()->getPrivateThreadGroupCpuAffinity();
         getRootThreadPool()->setPrivateThreadGroupCpuAffinity(affinity);
@@ -68,12 +65,12 @@ bool ModifyThread::doExecute()
         ThreadGroup* group = getGroup();
 
         old_name = group->getName();
-        if(!name.empty()) {
+        if (!name.empty()) {
             group->setName(name);
         }
 
         old_affinity = group->getCpuAffinity()->get();
-        if(!affinity.empty()) {
+        if (!affinity.empty()) {
             group->getCpuAffinity()->set(affinity);
         }
     }
@@ -83,18 +80,18 @@ bool ModifyThread::doExecute()
 
 bool ModifyThread::doUndo()
 {
-    if(id == ThreadGroup::PRIVATE_THREAD)  {
+    if (id == ThreadGroup::PRIVATE_THREAD) {
         // name cannot be changed
         getRootThreadPool()->setPrivateThreadGroupCpuAffinity(old_affinity);
 
     } else {
         ThreadGroup* group = getGroup();
 
-        if(!name.empty()) {
+        if (!name.empty()) {
             group->setName(old_name);
         }
 
-        if(!affinity.empty()) {
+        if (!affinity.empty()) {
             group->getCpuAffinity()->set(old_affinity);
         }
     }
@@ -106,9 +103,7 @@ bool ModifyThread::doRedo()
     return doExecute();
 }
 
-
-
-void ModifyThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ModifyThread::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

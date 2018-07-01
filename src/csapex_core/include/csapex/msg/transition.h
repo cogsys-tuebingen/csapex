@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Transition
 {
 public:
@@ -34,7 +33,6 @@ public:
 
     virtual void reset();
 
-
     virtual bool isEnabled() const = 0;
     /*TODO: find better name*/ void checkIfEnabled();
 
@@ -43,7 +41,7 @@ public:
     bool areAllConnections(Connection::State a, /*or*/ Connection::State b, /*or*/ Connection::State c) const;
     bool isOneConnection(Connection::State state) const;
 
-    std::vector<ConnectionPtr> getConnections() const;    
+    std::vector<ConnectionPtr> getConnections() const;
 
 public:
     slim_signal::Signal<void()> enabled_changed;
@@ -64,7 +62,6 @@ protected:
     mutable std::recursive_mutex sync;
 };
 
-}
+}  // namespace csapex
 
-#endif // TRANSITION_H
-
+#endif  // TRANSITION_H

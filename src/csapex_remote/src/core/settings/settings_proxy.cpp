@@ -34,11 +34,9 @@ namespace bf3 = boost::filesystem;
 namespace bf3 = boost::filesystem3;
 #endif
 
-
 using namespace csapex;
 
-SettingsProxy::SettingsProxy(const SessionPtr& session)
-    : Proxy(session)
+SettingsProxy::SettingsProxy(const SessionPtr& session) : Proxy(session)
 {
 }
 
@@ -67,10 +65,9 @@ void SettingsProxy::add(csapex::param::Parameter::Ptr p, bool persistent)
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
     boost::any value;
     p->get_unsafe(value);
-    if(const auto& response = session_->sendRequest<AddParameter>(param_id, p->name(), p->description().toString(), value, persistent))
-    {
-        if(response->getParameter()) {
-            //std::cerr << "created parameter " << response->getParameter()->getUUID() << std::endl;
+    if (const auto& response = session_->sendRequest<AddParameter>(param_id, p->name(), p->description().toString(), value, persistent)) {
+        if (response->getParameter()) {
+            // std::cerr << "created parameter " << response->getParameter()->getUUID() << std::endl;
 
             // make a new parameter, when it gets changed relay the change to the remote server
             param::ParameterPtr proxy = response->getParameter()->cloneAs<param::Parameter>();
@@ -80,31 +77,31 @@ void SettingsProxy::add(csapex::param::Parameter::Ptr p, bool persistent)
     }
 }
 
-csapex::param::Parameter::Ptr SettingsProxy::get(const std::string &name) const
+csapex::param::Parameter::Ptr SettingsProxy::get(const std::string& name) const
 {
     auto res = getNoThrow(name);
-    if(!res) {
+    if (!res) {
         throw std::out_of_range(std::string("parameter ") + name + " does not exist.");
     }
 
     return res;
 }
-csapex::param::Parameter::Ptr SettingsProxy::getNoThrow(const std::string &name) const
+csapex::param::Parameter::Ptr SettingsProxy::getNoThrow(const std::string& name) const
 {
     auto it = cache_.find(name);
-    if(it != cache_.end()) {
+    if (it != cache_.end()) {
         return it->second;
     }
 
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + name));
-    if(const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
+    if (const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
         apex_assert_hard(response->getParameter());
 
-        if(response->getParameter()->ID() == param::NullParameter::NUMERICAL_ID) {
+        if (response->getParameter()->ID() == param::NullParameter::NUMERICAL_ID) {
             return nullptr;
         }
 
-        //std::cerr << response->getParameter()->getUUID() << std::endl;
+        // std::cerr << response->getParameter()->getUUID() << std::endl;
 
         // make a new parameter, when it gets changed relay the change to the remote server
         param::ParameterPtr proxy = response->getParameter()->cloneAs<param::Parameter>();
@@ -117,10 +114,10 @@ csapex::param::Parameter::Ptr SettingsProxy::getNoThrow(const std::string &name)
     return nullptr;
 }
 
-void SettingsProxy::createParameterProxy(const std::string &name, param::ParameterPtr proxy) const
+void SettingsProxy::createParameterProxy(const std::string& name, param::ParameterPtr proxy) const
 {
     SettingsProxy* self = const_cast<SettingsProxy*>(this);
-    proxy->parameter_changed.connect([self](param::Parameter* param){
+    proxy->parameter_changed.connect([self](param::Parameter* param) {
         // request to set the parameter
         boost::any raw;
         param->get_unsafe(raw);
@@ -133,21 +130,20 @@ void SettingsProxy::createParameterProxy(const std::string &name, param::Paramet
     cache_[name] = proxy;
 }
 
-bool SettingsProxy::knows(const std::string &name) const
+bool SettingsProxy::knows(const std::string& name) const
 {
     auto res = getNoThrow(name);
     return res != nullptr;
 }
 
-
 void SettingsProxy::handleBroadcast(const BroadcastMessageConstPtr& message)
 {
-    if(auto parameter_change = std::dynamic_pointer_cast<ParameterChanged const>(message)) {
-        if(parameter_change->getUUID().global()) {
+    if (auto parameter_change = std::dynamic_pointer_cast<ParameterChanged const>(message)) {
+        if (parameter_change->getUUID().global()) {
             auto pos = cache_.find(parameter_change->getUUID().globalName());
-            if(pos != cache_.end()) {
+            if (pos != cache_.end()) {
                 param::ParameterPtr p = pos->second;
-                if(p->set_unsafe(parameter_change->getValue())) {
+                if (p->set_unsafe(parameter_change->getValue())) {
                     p->triggerChange();
                 }
             }

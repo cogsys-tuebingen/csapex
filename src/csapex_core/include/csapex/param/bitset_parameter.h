@@ -8,9 +8,10 @@
 /// SYSTEM
 #include <vector>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT BitSetParameter : public ParameterImplementation<BitSetParameter, 0x001>
 {
     friend class ParameterFactory;
@@ -23,9 +24,12 @@ public:
     explicit BitSetParameter(const std::string& name, const ParameterDescription& description);
     virtual ~BitSetParameter();
 
-    virtual std::string TYPE() const override { return "bitset"; }
+    virtual std::string TYPE() const override
+    {
+        return "bitset";
+    }
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
     void cloneDataFrom(const Clonable& other) override;
@@ -33,18 +37,21 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     virtual bool accepts(const std::type_info& type) const override;
 
-    int def() const { return def_; }
+    int def() const
+    {
+        return def_;
+    }
 
     void setBitSet(const std::map<std::string, int>& set);
     std::map<std::string, int> getBitSet() const;
 
     void clear();
-    void setBits(const std::vector<std::string> &elements, bool silent = false);
+    void setBits(const std::vector<std::string>& elements, bool silent = false);
 
     void setBitTo(const std::string& element, bool set, bool silent = false);
     void setBit(const std::string& element, bool silent = false);
@@ -66,14 +73,13 @@ protected:
     virtual void get_unsafe(boost::any& out) const override;
     virtual bool set_unsafe(const boost::any& v) override;
 
-
 private:
     int value_;
     std::map<std::string, int> set_;
     int def_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // BITSET_PARAMETER_H
+#endif  // BITSET_PARAMETER_H

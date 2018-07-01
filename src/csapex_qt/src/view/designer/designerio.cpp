@@ -28,21 +28,21 @@ DesignerIO::DesignerIO()
 {
 }
 
-void DesignerIO::saveBoxes(YAML::Node& yaml, const GraphFacade* graph, GraphView *view)
+void DesignerIO::saveBoxes(YAML::Node& yaml, const GraphFacade* graph, GraphView* view)
 {
     YAML::Node adapters(YAML::NodeType::Sequence);
-    for(const UUID& uuid : graph->enumerateAllNodes()) {
+    for (const UUID& uuid : graph->enumerateAllNodes()) {
         saveBox(uuid, view, adapters);
     }
     yaml["adapters"] = adapters;
 }
 
-void DesignerIO::saveBox(const UUID& node_uuid, GraphView *view, YAML::Node &yaml)
+void DesignerIO::saveBox(const UUID& node_uuid, GraphView* view, YAML::Node& yaml)
 {
     NodeBox* box = view->getBox(node_uuid);
     NodeAdapter::Ptr na = box->getNodeAdapter();
     GenericStatePtr m = na->getState();
-    if(m) {
+    if (m) {
         YAML::Node doc;
         doc["uuid"] = node_uuid.getFullName();
 
@@ -54,11 +54,11 @@ void DesignerIO::saveBox(const UUID& node_uuid, GraphView *view, YAML::Node &yam
     }
 }
 
-void DesignerIO::loadBoxes(const YAML::Node &doc, GraphView *view)
+void DesignerIO::loadBoxes(const YAML::Node& doc, GraphView* view)
 {
-    if(doc["adapters"].IsDefined()) {
+    if (doc["adapters"].IsDefined()) {
         const YAML::Node& adapters = doc["adapters"];
-        for(std::size_t i = 0; i < adapters.size(); ++i) {
+        for (std::size_t i = 0; i < adapters.size(); ++i) {
             const YAML::Node& e = adapters[i];
 
             YAML::Node x = e["uuid"];
@@ -67,13 +67,13 @@ void DesignerIO::loadBoxes(const YAML::Node &doc, GraphView *view)
             UUID uuid = UUIDProvider::makeUUID_without_parent(e["uuid"].as<std::string>());
 
             NodeBox* box = view->getBox(uuid);
-            if(box) {
+            if (box) {
                 NodeAdapter::Ptr na = box->getNodeAdapter();
                 na->readLegacyYaml(e["state"]);
 
                 /// deprecated:
                 GenericStatePtr m = na->getState();
-                if(m) {
+                if (m) {
                     m->readYaml(e["state"]);
                     box->getNodeAdapter()->setParameterState(m);
                 }

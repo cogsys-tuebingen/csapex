@@ -16,15 +16,15 @@ namespace csapex
 class CSAPEX_QT_EXPORT NodeStatistics
 {
 public:
-    NodeStatistics(NodeFacade *node);
-    QTreeWidgetItem* createDebugInformation(NodeFactory *node_factory) const;
+    NodeStatistics(NodeFacade* node);
+    QTreeWidgetItem* createDebugInformation(NodeFactory* node_factory) const;
 
 private:
-    QTreeWidgetItem * createDebugInformationConnector(const csapex::ConnectorDescription &connector) const;
+    QTreeWidgetItem* createDebugInformationConnector(const csapex::ConnectorDescription& connector) const;
 
 private:
     NodeFacade* node_facade_;
 };
-}
+}  // namespace csapex
 
-#endif // NODE_STATISTICS_H
+#endif  // NODE_STATISTICS_H

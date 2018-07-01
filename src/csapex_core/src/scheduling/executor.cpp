@@ -7,18 +7,15 @@
 
 using namespace csapex;
 
-Executor::Executor()
-    : paused_(false), stepping_(false), step_done_(true)
+Executor::Executor() : paused_(false), stepping_(false), step_done_(true)
 {
-
 }
 
 Executor::~Executor()
 {
-
 }
 
-void Executor::addChild(Executor *e)
+void Executor::addChild(Executor* e)
 {
     children_.push_back(e);
 
@@ -30,12 +27,12 @@ void Executor::addChild(Executor *e)
 
 void Executor::setPause(bool pause)
 {
-    if(pause == paused_) {
+    if (pause == paused_) {
         return;
     }
     paused_ = pause;
 
-    for(Executor* child : children_) {
+    for (Executor* child : children_) {
         child->setPause(pause);
     }
 
@@ -51,26 +48,26 @@ bool Executor::isPaused() const
 
 void Executor::setSteppingMode(bool stepping)
 {
-    if(stepping == stepping_) {
+    if (stepping == stepping_) {
         return;
     }
 
     stepping_ = stepping;
 
-    for(Executor* child : children_) {
+    for (Executor* child : children_) {
         child->setSteppingMode(stepping);
     }
 
     steppingChanged(stepping);
 
-    if(stepping) {
+    if (stepping) {
         setPause(false);
     }
 }
 
 void Executor::step()
 {
-    if(!step_done_) {
+    if (!step_done_) {
         throw std::logic_error("cannot step, last step is not done!");
     }
 
@@ -78,7 +75,7 @@ void Executor::step()
 
     performStep();
 
-    for(Executor* child : children_) {
+    for (Executor* child : children_) {
         child->step();
     }
 
@@ -89,18 +86,18 @@ void Executor::step()
 
 void Executor::checkIfStepIsDone()
 {
-    //TRACE std::cerr << " E CHECK =========== " << step_done_ << std::endl;
-    if(step_done_ || !isStepDone()) {
+    // TRACE std::cerr << " E CHECK =========== " << step_done_ << std::endl;
+    if (step_done_ || !isStepDone()) {
         return;
     }
 
-    for(Executor* child : children_) {
-        if(!child->isStepDone()) {
+    for (Executor* child : children_) {
+        if (!child->isStepDone()) {
             return;
         }
     }
 
-    //TRACE std::cerr << ">>> done!" << std::endl;
+    // TRACE std::cerr << ">>> done!" << std::endl;
 
     step_done_ = true;
     end_step();

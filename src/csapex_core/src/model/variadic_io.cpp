@@ -18,19 +18,15 @@
 
 using namespace csapex;
 
-VariadicBase::VariadicBase(TokenDataConstPtr type)
-    : variadic_type_(type), variadic_modifier_(nullptr)
+VariadicBase::VariadicBase(TokenDataConstPtr type) : variadic_type_(type), variadic_modifier_(nullptr)
 {
-
 }
-VariadicBase::VariadicBase()
-    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
+VariadicBase::VariadicBase() : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
 VariadicBase::~VariadicBase()
 {
-
 }
 
 void VariadicBase::setupVariadic(NodeModifier& modifier)
@@ -41,25 +37,20 @@ void VariadicBase::setupVariadic(NodeModifier& modifier)
 
 void VariadicBase::portCountChanged()
 {
-
 }
-
 
 ///
 /// INPUTS
 ///
 
-VariadicInputs::VariadicInputs(TokenDataConstPtr type)
-    : VariadicBase(type)
+VariadicInputs::VariadicInputs(TokenDataConstPtr type) : VariadicBase(type)
 {
-
 }
-VariadicInputs::VariadicInputs()
-    : VariadicInputs(makeEmpty<connection_types::AnyMessage>())
+VariadicInputs::VariadicInputs() : VariadicInputs(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
-Connectable* VariadicInputs::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicInputs::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::INPUT);
     return createVariadicInput(type, label, optional);
@@ -78,9 +69,9 @@ void VariadicInputs::removeVariadicInput(InputPtr input)
 
 void VariadicInputs::removeVariadicInputById(const UUID& input)
 {
-    for(auto it = variadic_inputs_.begin(); it != variadic_inputs_.end(); ) {
+    for (auto it = variadic_inputs_.begin(); it != variadic_inputs_.end();) {
         InputPtr i = *it;
-        if(i->getUUID() == input) {
+        if (i->getUUID() == input) {
             removeVariadicInput(i);
             return;
         } else {
@@ -89,21 +80,19 @@ void VariadicInputs::removeVariadicInputById(const UUID& input)
     }
 }
 
-Input *VariadicInputs::createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional)
+Input* VariadicInputs::createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(variadic_modifier_);
     Input* result = variadic_modifier_->addInput(type, label.empty() ? std::string("Input") : label, optional);
-    if(result) {
+    if (result) {
         variadic_inputs_.push_back(std::dynamic_pointer_cast<Input>(result->shared_from_this()));
-        input_count_->set((int) variadic_inputs_.size());
+        input_count_->set((int)variadic_inputs_.size());
 
-        if(variadic_inputs_.size() > input_names_->count()) {
+        if (variadic_inputs_.size() > input_names_->count()) {
             input_names_->add(label);
         }
         int index = variadic_inputs_.size() - 1;
-        result->labelChanged.connect([this, index](const std::string& label){
-            input_names_->setAt(index, label);
-        });
+        result->labelChanged.connect([this, index](const std::string& label) { input_names_->setAt(index, label); });
     }
     return result;
 }
@@ -113,13 +102,12 @@ InputPtr VariadicInputs::getVariadicInput(std::size_t index)
     return variadic_inputs_.at(index);
 }
 
-
-void VariadicInputs::setupVariadicParameters(Parameterizable &parameters)
+void VariadicInputs::setupVariadicParameters(Parameterizable& parameters)
 {
     input_count_ = csapex::param::ParameterFactory::declareValue("input count", 0);
     parameters.addHiddenParameter(input_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
-        if(count >= 0) {
+        if (count >= 0) {
             updateInputs(p->as<int>());
         } else {
             p->set(0);
@@ -130,10 +118,9 @@ void VariadicInputs::setupVariadicParameters(Parameterizable &parameters)
     parameters.addHiddenParameter(input_names_);
 }
 
-
 void VariadicInputs::updateInputs(int count)
 {
-    if(count < 0) {
+    if (count < 0) {
         return;
     }
 
@@ -143,11 +130,11 @@ void VariadicInputs::updateInputs(int count)
 
     std::vector<std::string> variadic_names = input_names_->getValues();
 
-    if(current_amount > count) {
+    if (current_amount > count) {
         bool connected = false;
-        for(int i = current_amount; i > count ; i--) {
+        for (int i = current_amount; i > count; i--) {
             InputPtr in = variadic_inputs_.at(i - 1);
-            if(connected || in->isConnected()) {
+            if (connected || in->isConnected()) {
                 in->disable();
                 connected = true;
             } else {
@@ -156,12 +143,12 @@ void VariadicInputs::updateInputs(int count)
         }
     } else {
         int to_add = count - current_amount;
-        for(int i = 0 ; i < current_amount; i++) {
+        for (int i = 0; i < current_amount; i++) {
             variadic_inputs_.at(i)->enable();
         }
-        for(int i = 0 ; i < to_add ; i++) {
+        for (int i = 0; i < to_add; i++) {
             std::string label;
-            if(variadic_inputs_.size() < variadic_names.size()) {
+            if (variadic_inputs_.size() < variadic_names.size()) {
                 label = variadic_names.at(variadic_inputs_.size());
             } else {
                 label = "Input";
@@ -173,23 +160,18 @@ void VariadicInputs::updateInputs(int count)
     portCountChanged();
 }
 
-
 ///
 /// OUTPUTS
 ///
 
-
-VariadicOutputs::VariadicOutputs(TokenDataConstPtr type)
-    : VariadicBase(type)
+VariadicOutputs::VariadicOutputs(TokenDataConstPtr type) : VariadicBase(type)
 {
-
 }
-VariadicOutputs::VariadicOutputs()
-    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
+VariadicOutputs::VariadicOutputs() : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
-Connectable* VariadicOutputs::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicOutputs::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::OUTPUT);
     return createVariadicOutput(type, label);
@@ -200,21 +182,19 @@ int VariadicOutputs::getVariadicOutputCount() const
     return variadic_outputs_.size();
 }
 
-Output *VariadicOutputs::createVariadicOutput(TokenDataConstPtr type, const std::string& label)
+Output* VariadicOutputs::createVariadicOutput(TokenDataConstPtr type, const std::string& label)
 {
     apex_assert_hard(variadic_modifier_);
     auto result = variadic_modifier_->addOutput(type, label.empty() ? std::string("Output") : label);
-    if(result) {
+    if (result) {
         variadic_outputs_.emplace_back(std::dynamic_pointer_cast<Output>(result->shared_from_this()));
-        output_count_->set((int) variadic_outputs_.size());
+        output_count_->set((int)variadic_outputs_.size());
 
-        if(variadic_outputs_.size() > output_names_->count()) {
+        if (variadic_outputs_.size() > output_names_->count()) {
             output_names_->add(label);
         }
         int index = variadic_outputs_.size() - 1;
-        result->labelChanged.connect([this, index](const std::string& label){
-            output_names_->setAt(index, label);
-        });
+        result->labelChanged.connect([this, index](const std::string& label) { output_names_->setAt(index, label); });
     }
     return result;
 }
@@ -227,9 +207,9 @@ void VariadicOutputs::removeVariadicOutput(OutputPtr output)
 
 void VariadicOutputs::removeVariadicOutputById(const UUID& output)
 {
-    for(auto it = variadic_outputs_.begin(); it != variadic_outputs_.end(); ) {
+    for (auto it = variadic_outputs_.begin(); it != variadic_outputs_.end();) {
         OutputPtr o = *it;
-        if(o->getUUID() == output) {
+        if (o->getUUID() == output) {
             removeVariadicOutput(o);
             return;
         } else {
@@ -238,12 +218,12 @@ void VariadicOutputs::removeVariadicOutputById(const UUID& output)
     }
 }
 
-void VariadicOutputs::setupVariadicParameters(Parameterizable &parameters)
+void VariadicOutputs::setupVariadicParameters(Parameterizable& parameters)
 {
     output_count_ = csapex::param::ParameterFactory::declareValue("output count", 0);
     parameters.addHiddenParameter(output_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
-        if(count >= 0) {
+        if (count >= 0) {
             updateOutputs(p->as<int>());
         } else {
             p->set(0);
@@ -259,10 +239,9 @@ OutputPtr VariadicOutputs::getVariadicOutput(std::size_t index)
     return variadic_outputs_.at(index);
 }
 
-
 void VariadicOutputs::updateOutputs(int count)
 {
-    if(count < 0) {
+    if (count < 0) {
         return;
     }
 
@@ -272,11 +251,11 @@ void VariadicOutputs::updateOutputs(int count)
 
     std::vector<std::string> variadic_names = output_names_->getValues();
 
-    if(current_amount > count) {
+    if (current_amount > count) {
         bool connected = false;
-        for(int i = current_amount; i > count ; i--) {
+        for (int i = current_amount; i > count; i--) {
             OutputPtr out = variadic_outputs_[i - 1];
-            if(connected || out->isConnected()) {
+            if (connected || out->isConnected()) {
                 out->disable();
                 connected = true;
             } else {
@@ -285,12 +264,12 @@ void VariadicOutputs::updateOutputs(int count)
         }
     } else {
         int to_add = count - current_amount;
-        for(int i = 0 ; i < current_amount; i++) {
+        for (int i = 0; i < current_amount; i++) {
             variadic_outputs_.at(i)->enable();
         }
-        for(int i = 0 ; i < to_add ; i++) {
+        for (int i = 0; i < to_add; i++) {
             std::string label;
-            if(variadic_outputs_.size() < variadic_names.size()) {
+            if (variadic_outputs_.size() < variadic_names.size()) {
                 label = variadic_names.at(variadic_outputs_.size());
             } else {
                 label = "Output";
@@ -302,23 +281,18 @@ void VariadicOutputs::updateOutputs(int count)
     portCountChanged();
 }
 
-
 ///
 /// EVENTS
 ///
 
-
-VariadicEvents::VariadicEvents(TokenDataConstPtr type)
-    : VariadicBase(type)
+VariadicEvents::VariadicEvents(TokenDataConstPtr type) : VariadicBase(type)
 {
-
 }
-VariadicEvents::VariadicEvents()
-    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
+VariadicEvents::VariadicEvents() : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
-Connectable* VariadicEvents::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicEvents::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::EVENT);
     return createVariadicEvent(type, label);
@@ -329,22 +303,19 @@ int VariadicEvents::getVariadicEventCount() const
     return variadic_events_.size();
 }
 
-
-Event *VariadicEvents::createVariadicEvent(TokenDataConstPtr type, const std::string& label)
+Event* VariadicEvents::createVariadicEvent(TokenDataConstPtr type, const std::string& label)
 {
     apex_assert_hard(variadic_modifier_);
     auto result = variadic_modifier_->addEvent(type, label.empty() ? std::string("Event") : label);
-    if(result) {
+    if (result) {
         variadic_events_.emplace_back(std::dynamic_pointer_cast<Event>(result->shared_from_this()));
-        event_count_->set((int) variadic_events_.size());
+        event_count_->set((int)variadic_events_.size());
 
-        if(variadic_events_.size() > event_names_->count()) {
+        if (variadic_events_.size() > event_names_->count()) {
             event_names_->add(label);
         }
         int index = variadic_events_.size() - 1;
-        result->labelChanged.connect([this, index](const std::string& label){
-            event_names_->setAt(index, label);
-        });
+        result->labelChanged.connect([this, index](const std::string& label) { event_names_->setAt(index, label); });
     }
     return result;
 }
@@ -356,9 +327,9 @@ void VariadicEvents::removeVariadicEvent(EventPtr event)
 void VariadicEvents::removeVariadicEventById(const UUID& event)
 {
     variadic_modifier_->removeEvent(event);
-    for(auto it = variadic_events_.begin(); it != variadic_events_.end(); ) {
+    for (auto it = variadic_events_.begin(); it != variadic_events_.end();) {
         EventPtr t = *it;
-        if(t->getUUID() == event) {
+        if (t->getUUID() == event) {
             removeVariadicEvent(t);
             return;
         } else {
@@ -367,12 +338,12 @@ void VariadicEvents::removeVariadicEventById(const UUID& event)
     }
 }
 
-void VariadicEvents::setupVariadicParameters(Parameterizable &parameters)
+void VariadicEvents::setupVariadicParameters(Parameterizable& parameters)
 {
     event_count_ = csapex::param::ParameterFactory::declareValue("event count", 0);
     parameters.addHiddenParameter(event_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
-        if(count >= 0) {
+        if (count >= 0) {
             updateEvents(p->as<int>());
         } else {
             p->set(0);
@@ -390,7 +361,7 @@ EventPtr VariadicEvents::getVariadicEvent(std::size_t index)
 
 void VariadicEvents::updateEvents(int count)
 {
-    if(count < 0) {
+    if (count < 0) {
         return;
     }
 
@@ -400,11 +371,11 @@ void VariadicEvents::updateEvents(int count)
 
     std::vector<std::string> variadic_names = event_names_->getValues();
 
-    if(current_amount > count) {
+    if (current_amount > count) {
         bool connected = false;
-        for(int i = current_amount; i > count ; i--) {
+        for (int i = current_amount; i > count; i--) {
             EventPtr t = variadic_events_[i - 1];
-            if(connected || t->isConnected()) {
+            if (connected || t->isConnected()) {
                 t->disable();
                 connected = true;
             } else {
@@ -413,12 +384,12 @@ void VariadicEvents::updateEvents(int count)
         }
     } else {
         int to_add = count - current_amount;
-        for(int i = 0 ; i < current_amount; i++) {
+        for (int i = 0; i < current_amount; i++) {
             variadic_events_[i]->enable();
         }
-        for(int i = 0 ; i < to_add ; i++) {
+        for (int i = 0; i < to_add; i++) {
             std::string label;
-            if(variadic_events_.size() < variadic_names.size()) {
+            if (variadic_events_.size() < variadic_names.size()) {
                 label = variadic_names.at(variadic_events_.size());
             } else {
                 label = "Event";
@@ -430,38 +401,28 @@ void VariadicEvents::updateEvents(int count)
     portCountChanged();
 }
 
-
-
 ///
 /// SLOTS
 ///
 
-
-VariadicSlots::VariadicSlots(TokenDataConstPtr type)
-    : VariadicBase(type)
+VariadicSlots::VariadicSlots(TokenDataConstPtr type) : VariadicBase(type)
 {
-
 }
-VariadicSlots::VariadicSlots()
-    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
+VariadicSlots::VariadicSlots() : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
-Connectable* VariadicSlots::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string &label, bool optional)
+Connectable* VariadicSlots::createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional)
 {
     apex_assert_hard(port_type == ConnectorType::SLOT_T);
-    return createVariadicSlot(type, label, [](const TokenPtr&){});
+    return createVariadicSlot(type, label, [](const TokenPtr&) {});
 }
 int VariadicSlots::getVariadicSlotCount() const
 {
     return variadic_slots_.size();
 }
 
-Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type,
-                                        const std::string& label,
-                                        std::function<void (const TokenPtr &)> callback,
-                                        bool active,
-                                        bool blocking)
+Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active, bool blocking)
 {
     apex_assert_hard(variadic_modifier_);
 
@@ -470,7 +431,7 @@ Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type,
     return result;
 }
 
-Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void (Slot* slot, const TokenPtr &)> callback, bool active, bool blocking)
+Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(Slot* slot, const TokenPtr&)> callback, bool active, bool blocking)
 {
     apex_assert_hard(variadic_modifier_);
 
@@ -481,18 +442,16 @@ Slot* VariadicSlots::createVariadicSlot(TokenDataConstPtr type, const std::strin
 
 void VariadicSlots::registerSlot(Slot* slot)
 {
-    if(slot) {
+    if (slot) {
         variadic_slots_.emplace_back(std::dynamic_pointer_cast<Slot>(slot->shared_from_this()));
-        slot_count_->set((int) variadic_slots_.size());
+        slot_count_->set((int)variadic_slots_.size());
 
-        if(variadic_slots_.size() > slot_names_->count()) {
+        if (variadic_slots_.size() > slot_names_->count()) {
             slot_names_->add(slot->getLabel());
         }
 
         int index = variadic_slots_.size() - 1;
-        slot->labelChanged.connect([this, index](const std::string& label){
-            slot_names_->setAt(index, label);
-        });
+        slot->labelChanged.connect([this, index](const std::string& label) { slot_names_->setAt(index, label); });
     }
 }
 
@@ -504,9 +463,9 @@ void VariadicSlots::removeVariadicSlot(SlotPtr slot)
 
 void VariadicSlots::removeVariadicSlotById(const UUID& slot)
 {
-    for(auto it = variadic_slots_.begin(); it != variadic_slots_.end(); ) {
+    for (auto it = variadic_slots_.begin(); it != variadic_slots_.end();) {
         SlotPtr s = *it;
-        if(s->getUUID() == slot) {
+        if (s->getUUID() == slot) {
             removeVariadicSlot(s);
             return;
         } else {
@@ -515,19 +474,17 @@ void VariadicSlots::removeVariadicSlotById(const UUID& slot)
     }
 }
 
-
 SlotPtr VariadicSlots::getVariadicSlot(std::size_t index)
 {
     return variadic_slots_.at(index);
 }
 
-
-void VariadicSlots::setupVariadicParameters(Parameterizable &parameters)
+void VariadicSlots::setupVariadicParameters(Parameterizable& parameters)
 {
     slot_count_ = csapex::param::ParameterFactory::declareValue("slot count", 0);
     parameters.addHiddenParameter(slot_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
-        if(count >= 0) {
+        if (count >= 0) {
             updateSlots(p->as<int>());
         } else {
             p->set(0);
@@ -540,7 +497,7 @@ void VariadicSlots::setupVariadicParameters(Parameterizable &parameters)
 
 void VariadicSlots::updateSlots(int count)
 {
-    if(count < 0) {
+    if (count < 0) {
         return;
     }
 
@@ -550,11 +507,11 @@ void VariadicSlots::updateSlots(int count)
 
     std::vector<std::string> variadic_names = slot_names_->getValues();
 
-    if(current_amount > count) {
+    if (current_amount > count) {
         bool connected = false;
-        for(int i = current_amount; i > count ; i--) {
+        for (int i = current_amount; i > count; i--) {
             SlotPtr s = variadic_slots_[i - 1];
-            if(connected || s->isConnected()) {
+            if (connected || s->isConnected()) {
                 s->disable();
                 connected = true;
             } else {
@@ -563,39 +520,31 @@ void VariadicSlots::updateSlots(int count)
         }
     } else {
         int to_add = count - current_amount;
-        for(int i = 0 ; i < current_amount; i++) {
+        for (int i = 0; i < current_amount; i++) {
             variadic_slots_[i]->enable();
         }
-        for(int i = 0 ; i < to_add ; i++) {
+        for (int i = 0; i < to_add; i++) {
             std::string label;
-            if(variadic_slots_.size() < variadic_names.size()) {
+            if (variadic_slots_.size() < variadic_names.size()) {
                 label = variadic_names.at(variadic_slots_.size());
             } else {
                 label = "Slot";
             }
-            createVariadicSlot(makeEmpty<connection_types::AnyMessage>(), label, [](const TokenPtr&){});
+            createVariadicSlot(makeEmpty<connection_types::AnyMessage>(), label, [](const TokenPtr&) {});
         }
     }
 
     portCountChanged();
 }
 
-
-
-
-
 ///
 /// IO
 ///
 
-
-VariadicIO::VariadicIO(TokenDataConstPtr type)
-    : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type)
+VariadicIO::VariadicIO(TokenDataConstPtr type) : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type)
 {
-
 }
-VariadicIO::VariadicIO()
-    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
+VariadicIO::VariadicIO() : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
@@ -603,36 +552,29 @@ Connectable* VariadicIO::createVariadicPort(ConnectorType port_type, TokenDataCo
 {
     apex_assert_hard(variadic_modifier_);
     switch (port_type) {
-    case ConnectorType::OUTPUT:
-        return createVariadicOutput(type, label);
-    case ConnectorType::INPUT:
-        return createVariadicInput(type, label, optional);
-    default:
-        throw std::logic_error(std::string("Variadic port of type ") + port_type::name(port_type) + " is not supported.");
+        case ConnectorType::OUTPUT:
+            return createVariadicOutput(type, label);
+        case ConnectorType::INPUT:
+            return createVariadicInput(type, label, optional);
+        default:
+            throw std::logic_error(std::string("Variadic port of type ") + port_type::name(port_type) + " is not supported.");
     }
 }
 
-void VariadicIO::setupVariadicParameters(Parameterizable &parameters)
+void VariadicIO::setupVariadicParameters(Parameterizable& parameters)
 {
     VariadicInputs::setupVariadicParameters(parameters);
     VariadicOutputs::setupVariadicParameters(parameters);
 }
 
-
-
-
 ///
 /// VARIADIC
 ///
 
-
-Variadic::Variadic(TokenDataConstPtr type)
-    : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type), VariadicEvents(type), VariadicSlots(type)
+Variadic::Variadic(TokenDataConstPtr type) : VariadicBase(type), VariadicInputs(type), VariadicOutputs(type), VariadicEvents(type), VariadicSlots(type)
 {
-
 }
-Variadic::Variadic()
-    : VariadicBase(makeEmpty<connection_types::AnyMessage>())
+Variadic::Variadic() : VariadicBase(makeEmpty<connection_types::AnyMessage>())
 {
 }
 
@@ -640,20 +582,20 @@ Connectable* Variadic::createVariadicPort(ConnectorType port_type, TokenDataCons
 {
     apex_assert_hard(variadic_modifier_);
     switch (port_type) {
-    case ConnectorType::OUTPUT:
-        return createVariadicOutput(type, label);
-    case ConnectorType::INPUT:
-        return createVariadicInput(type, label, optional);
-    case ConnectorType::SLOT_T:
-        return createVariadicSlot(type, label, [](const TokenPtr&){});
-    case ConnectorType::EVENT:
-        return createVariadicEvent(type, label);
-    default:
-        throw std::logic_error(std::string("Variadic port of type ") + port_type::name(port_type) + " is not supported.");
+        case ConnectorType::OUTPUT:
+            return createVariadicOutput(type, label);
+        case ConnectorType::INPUT:
+            return createVariadicInput(type, label, optional);
+        case ConnectorType::SLOT_T:
+            return createVariadicSlot(type, label, [](const TokenPtr&) {});
+        case ConnectorType::EVENT:
+            return createVariadicEvent(type, label);
+        default:
+            throw std::logic_error(std::string("Variadic port of type ") + port_type::name(port_type) + " is not supported.");
     }
 }
 
-void Variadic::setupVariadicParameters(Parameterizable &parameters)
+void Variadic::setupVariadicParameters(Parameterizable& parameters)
 {
     VariadicInputs::setupVariadicParameters(parameters);
     VariadicOutputs::setupVariadicParameters(parameters);

@@ -28,7 +28,6 @@
 
 namespace csapex
 {
-
 class NodeFactory;
 class GraphViewContextMenu;
 
@@ -38,30 +37,66 @@ class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable, publ
 
     Q_OBJECT
 
-    Q_PROPERTY(QColor lineColor         READ lineColor         WRITE setLineColor)
-    Q_PROPERTY(QColor lineColorError    READ lineColorError    WRITE setLineColorError)
-    Q_PROPERTY(QColor lineColorBlocked  READ lineColorBlocked  WRITE setLineColorBlocked)
+    Q_PROPERTY(QColor lineColor READ lineColor WRITE setLineColor)
+    Q_PROPERTY(QColor lineColorError READ lineColorError WRITE setLineColorError)
+    Q_PROPERTY(QColor lineColorBlocked READ lineColorBlocked WRITE setLineColorBlocked)
     Q_PROPERTY(QColor lineColorDisabled READ lineColorDisabled WRITE setLineColorDisabled)
-    Q_PROPERTY(int lineWidth            READ lineWidth         WRITE setLineWidth)
+    Q_PROPERTY(int lineWidth READ lineWidth WRITE setLineWidth)
 
-    Q_PROPERTY(QColor balloonColor         READ balloonColor         WRITE setBalloonColor)
+    Q_PROPERTY(QColor balloonColor READ balloonColor WRITE setBalloonColor)
 
-    void setLineColor(const QColor& c) { view_core_.getStyle().setLineColor(c); }
-    void setLineColorError(const QColor& c) { view_core_.getStyle().setLineColorError(c); }
-    void setLineColorBlocked(const QColor& c) { view_core_.getStyle().setLineColorBlocked(c); }
-    void setLineColorDisabled(const QColor& c) { view_core_.getStyle().setLineColorDisabled(c);}
-    void setLineWidth(int width) { view_core_.getStyle().setLineWidth(width); }
-    void setBalloonColor(const QColor& c) { view_core_.getStyle().setBalloonColor(c); }
+    void setLineColor(const QColor& c)
+    {
+        view_core_.getStyle().setLineColor(c);
+    }
+    void setLineColorError(const QColor& c)
+    {
+        view_core_.getStyle().setLineColorError(c);
+    }
+    void setLineColorBlocked(const QColor& c)
+    {
+        view_core_.getStyle().setLineColorBlocked(c);
+    }
+    void setLineColorDisabled(const QColor& c)
+    {
+        view_core_.getStyle().setLineColorDisabled(c);
+    }
+    void setLineWidth(int width)
+    {
+        view_core_.getStyle().setLineWidth(width);
+    }
+    void setBalloonColor(const QColor& c)
+    {
+        view_core_.getStyle().setBalloonColor(c);
+    }
 
-    QColor lineColor() const { return view_core_.getStyle().lineColor(); }
-    QColor lineColorError() const { return view_core_.getStyle().lineColorError(); }
-    QColor lineColorBlocked() const { return view_core_.getStyle().lineColorBlocked(); }
-    QColor lineColorDisabled() const { return view_core_.getStyle().lineColorDisabled();}
-    int lineWidth() const { return view_core_.getStyle().lineWidth(); }
-    QColor balloonColor() const { return view_core_.getStyle().balloonColor(); }
+    QColor lineColor() const
+    {
+        return view_core_.getStyle().lineColor();
+    }
+    QColor lineColorError() const
+    {
+        return view_core_.getStyle().lineColorError();
+    }
+    QColor lineColorBlocked() const
+    {
+        return view_core_.getStyle().lineColorBlocked();
+    }
+    QColor lineColorDisabled() const
+    {
+        return view_core_.getStyle().lineColorDisabled();
+    }
+    int lineWidth() const
+    {
+        return view_core_.getStyle().lineWidth();
+    }
+    QColor balloonColor() const
+    {
+        return view_core_.getStyle().balloonColor();
+    }
 
 public:
-    GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_core, QWidget *parent = nullptr);
+    GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_core, QWidget* parent = nullptr);
     ~GraphView();
 
     DesignerScene* designerScene();
@@ -78,7 +113,7 @@ public:
 
     void focusOnNode(const csapex::UUID& uuid);
 
-    void resizeEvent(QResizeEvent *event);
+    void resizeEvent(QResizeEvent* event);
     void scrollContentsBy(int dx, int dy);
 
     void keyPressEvent(QKeyEvent* e);
@@ -93,14 +128,13 @@ public:
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);
     void dropEvent(QDropEvent* e);
-    void dragLeaveEvent(QDragLeaveEvent * e);
+    void dragLeaveEvent(QDragLeaveEvent* e);
 
     void drawForeground(QPainter* painter, const QRectF& rect);
     void paintEvent(QPaintEvent* e);
 
-
-    void startPlacingBox(const std::string& type, NodeStatePtr state, const QPoint &offset = QPoint(0,0));
-    void startCloningSelection(NodeBox *handle, const QPoint &offset = QPoint(0,0));
+    void startPlacingBox(const std::string& type, NodeStatePtr state, const QPoint& offset = QPoint(0, 0));
+    void startCloningSelection(NodeBox* handle, const QPoint& offset = QPoint(0, 0));
 
     virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
 
@@ -122,7 +156,7 @@ Q_SIGNALS:
     void childNodeFacadeRemoved(NodeFacadePtr facade);
 
     void startProfilingRequest(NodeFacade* box);
-    void stopProfilingRequest(NodeFacade *box);
+    void stopProfilingRequest(NodeFacade* box);
 
     void triggerConnectorCreated(const ConnectorDescription& connector);
     void triggerConnectorRemoved(const ConnectorDescription& connector);
@@ -153,7 +187,6 @@ public Q_SLOTS:
     void addConnector(const ConnectorDescription& connector);
     void removeConnector(const ConnectorDescription& connector);
 
-
     void centerOnPoint(QPointF point);
 
     void movedBoxes(double dx, double dy);
@@ -163,10 +196,10 @@ public Q_SLOTS:
 
     void contextMenuEvent(QContextMenuEvent* e);
     void showContextMenuGlobal(const QPoint& pos);
-    void showContextMenuForSelectedNodes(NodeBox *box, const QPoint& pos);
+    void showContextMenuForSelectedNodes(NodeBox* box, const QPoint& pos);
 
     void startProfiling(NodeFacade* box);
-    void stopProfiling(NodeFacade *box);
+    void stopProfiling(NodeFacade* box);
 
     void reset();
 
@@ -201,7 +234,7 @@ private Q_SLOTS:
     void showPreview();
 
 private:
-    void createNodes(const QPoint& global_pos, const std::string &type, const std::string &mime);
+    void createNodes(const QPoint& global_pos, const std::string& type, const std::string& mime);
 
     void setupWidgets();
 
@@ -268,6 +301,6 @@ private:
     Port* preview_port_;
     MessagePreviewWidget* preview_widget_;
 };
-}
+}  // namespace csapex
 
-#endif // GRAPH_VIEW_H
+#endif  // GRAPH_VIEW_H

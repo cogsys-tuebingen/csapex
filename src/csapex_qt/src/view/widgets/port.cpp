@@ -32,10 +32,7 @@ using namespace csapex;
 
 Q_DECLARE_METATYPE(ConnectorPtr)
 
-Port::Port(QWidget *parent)
-    : QFrame(parent),
-      refresh_style_sheet_(false), minimized_(false), flipped_(false), hovered_(false),
-      buttons_down_(0)
+Port::Port(QWidget* parent) : QFrame(parent), refresh_style_sheet_(false), minimized_(false), flipped_(false), hovered_(false), buttons_down_(0)
 {
     setFlipped(flipped_);
 
@@ -55,8 +52,7 @@ Port::Port(QWidget *parent)
     double_click_timer_->setInterval(200);
 }
 
-Port::Port(ConnectorPtr adaptee, QWidget *parent)
-    : Port(parent)
+Port::Port(ConnectorPtr adaptee, QWidget* parent) : Port(parent)
 {
     adaptee_ = adaptee;
 
@@ -69,15 +65,14 @@ Port::Port(ConnectorPtr adaptee, QWidget *parent)
     setProperty("type", QString::fromStdString(port_type::name(adaptee_->getConnectorType())));
 }
 
-
 Port::~Port()
 {
-    for(auto& c : connections_) {
+    for (auto& c : connections_) {
         c.disconnect();
     }
 }
 
-bool Port::event(QEvent *e)
+bool Port::event(QEvent* e)
 {
     if (e->type() == QEvent::ToolTip) {
         createToolTip();
@@ -101,10 +96,9 @@ ConnectorPtr Port::getAdaptee() const
     return adaptee_;
 }
 
-
-void Port::paintEvent(QPaintEvent *e)
+void Port::paintEvent(QPaintEvent* e)
 {
-    if(refresh_style_sheet_) {
+    if (refresh_style_sheet_) {
         refresh_style_sheet_ = false;
         setStyleSheet(styleSheet());
     }
@@ -120,10 +114,10 @@ void Port::setMinimizedSize(bool mini)
 {
     minimized_ = mini;
 
-    if(mini) {
-        setFixedSize(8,8);
+    if (mini) {
+        setFixedSize(8, 8);
     } else {
-        setFixedSize(16,16);
+        setFixedSize(16, 16);
     }
 }
 
@@ -150,8 +144,8 @@ bool Port::isHovered() const
 void Port::setEnabledFlag(bool processing_enabled)
 {
     bool enabled = processing_enabled;
-    if(SlotPtr slot = std::dynamic_pointer_cast<Slot>(adaptee_)) {
-        if(slot->isActive()) {
+    if (SlotPtr slot = std::dynamic_pointer_cast<Slot>(adaptee_)) {
+        if (slot->isActive()) {
             enabled = true;
         }
     }
@@ -175,7 +169,7 @@ void Port::createToolTip()
 
 void Port::startDrag()
 {
-    if(!adaptee_) {
+    if (!adaptee_) {
         return;
     }
 
@@ -188,11 +182,11 @@ void Port::startDrag()
     bool create = left && !full_input;
     bool move = (right && adaptee_->isConnected()) || (left && full_input);
 
-    if(create || move) {
+    if (create || move) {
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
 
-        if(move) {
+        if (move) {
             mimeData->setData(QString::fromStdString(csapex::mime::connection_move), QByteArray());
             mimeData->setProperty("Connector", qVariantFromValue(adaptee_));
 
@@ -209,14 +203,14 @@ void Port::startDrag()
             drag->exec();
         }
 
-//        adaptee_->connection_added_to(adaptee_);
+        //        adaptee_->connection_added_to(adaptee_);
         buttons_down_ = Qt::NoButton;
     }
 }
 
 void Port::mouseMoveEvent(QMouseEvent* e)
 {
-    if(buttons_down_ == Qt::NoButton) {
+    if (buttons_down_ == Qt::NoButton) {
         return;
     }
 
@@ -225,9 +219,9 @@ void Port::mouseMoveEvent(QMouseEvent* e)
     e->accept();
 }
 
-void Port::mouseDoubleClickEvent(QMouseEvent *e)
+void Port::mouseDoubleClickEvent(QMouseEvent* e)
 {
-    if(!adaptee_) {
+    if (!adaptee_) {
         return;
     }
 
@@ -236,9 +230,8 @@ void Port::mouseDoubleClickEvent(QMouseEvent *e)
     double_click_timer_->stop();
 
     bool ok = false;
-    QString label = QInputDialog::getText(QApplication::activeWindow(), "Rename Port", "Enter a new name",
-                                          QLineEdit::Normal, QString::fromStdString(adaptee_->getLabel()), &ok);
-    if(ok) {
+    QString label = QInputDialog::getText(QApplication::activeWindow(), "Rename Port", "Enter a new name", QLineEdit::Normal, QString::fromStdString(adaptee_->getLabel()), &ok);
+    if (ok) {
         changePortRequest(label);
     }
     buttons_down_ = e->buttons();
@@ -256,8 +249,7 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
     double_click_timer_->setSingleShot(true);
     double_click_timer_->start();
 
-
-    if(e->button() == Qt::MiddleButton) {
+    if (e->button() == Qt::MiddleButton) {
         Q_EMIT removeConnectionsRequest();
     }
 
@@ -266,24 +258,23 @@ void Port::mouseReleaseEvent(QMouseEvent* e)
 
 void Port::dragEnterEvent(QDragEnterEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+    if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-        if(from == adaptee_) {
+        if (from == adaptee_) {
             return;
         }
 
-        bool compatible = Connection::isCompatibleWith(from.get(), adaptee_.get()) &&
-                Connection::isCompatibleWith(adaptee_.get(), from.get());
+        bool compatible = Connection::isCompatibleWith(from.get(), adaptee_.get()) && Connection::isCompatibleWith(adaptee_.get(), from.get());
 
         bool shift = Qt::ShiftModifier & QApplication::keyboardModifiers();
-        if(compatible || shift) {
+        if (compatible || shift) {
             addConnectionPreview(from);
             e->acceptProposedAction();
         }
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
 
-        if(Connection::targetsCanBeMovedTo(from.get(), adaptee_.get())) {
+        if (Connection::targetsCanBeMovedTo(from.get(), adaptee_.get())) {
             moveConnectionPreview(from);
             e->acceptProposedAction();
         }
@@ -292,37 +283,37 @@ void Port::dragEnterEvent(QDragEnterEvent* e)
 
 void Port::dragMoveEvent(QDragMoveEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+    if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         e->acceptProposedAction();
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         e->acceptProposedAction();
     }
 }
 
 void Port::dropEvent(QDropEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+    if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-        if(from && from != adaptee_) {
+        if (from && from != adaptee_) {
             addConnectionRequest(from);
         }
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-        if(from) {
+        if (from) {
             moveConnectionRequest(from);
             e->setDropAction(Qt::MoveAction);
         }
     }
 }
 
-void Port::enterEvent(QEvent */*e*/)
+void Port::enterEvent(QEvent* /*e*/)
 {
     hovered_ = true;
     Q_EMIT mouseOver(this);
 }
 
-void Port::leaveEvent(QEvent */*e*/)
+void Port::leaveEvent(QEvent* /*e*/)
 {
     hovered_ = false;
     Q_EMIT mouseOut(this);

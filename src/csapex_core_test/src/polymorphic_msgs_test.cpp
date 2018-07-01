@@ -20,12 +20,10 @@
 
 #include <csapex_testing/csapex_test_case.h>
 
-
 namespace csapex
 {
-
-namespace {
-
+namespace
+{
 template <typename M>
 class MSourceNode : public Node
 {
@@ -69,7 +67,7 @@ public:
         auto msg = msg::getMessage(input);
         ASSERT_NE(nullptr, msg);
 
-        ASSERT_NE(nullptr, csapex::msg::message_cast<M const> (msg));
+        ASSERT_NE(nullptr, csapex::msg::message_cast<M const>(msg));
 
         auto base_msg = msg::getMessage<M>(input);
         ASSERT_NE(nullptr, base_msg);
@@ -79,68 +77,67 @@ private:
     Input* input;
 };
 
-}
+}  // namespace
 
-class PolymorphicMsgsTest : public SteppingTest {
+class PolymorphicMsgsTest : public SteppingTest
+{
 protected:
     NodeFactoryImplementation factory;
 
-    PolymorphicMsgsTest() :
-        factory(SettingsImplementation::NoSettings, nullptr),
-        uuid_provider(std::make_shared<UUIDProvider>())
+    PolymorphicMsgsTest() : factory(SettingsImplementation::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
     {
         std::vector<TagPtr> tags;
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("BaseSourceNode",
-                                                                                 std::bind(&PolymorphicMsgsTest::makeBaseSource)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("BaseSourceNode", std::bind(&PolymorphicMsgsTest::makeBaseSource)));
             factory.registerNodeType(constructor);
         }
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("BaseSinkNode",
-                                                                                 std::bind(&PolymorphicMsgsTest::makeBaseSink)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("BaseSinkNode", std::bind(&PolymorphicMsgsTest::makeBaseSink)));
             factory.registerNodeType(constructor);
         }
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("ChildSourceNode",
-                                                                                 std::bind(&PolymorphicMsgsTest::makeChildSource)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("ChildSourceNode", std::bind(&PolymorphicMsgsTest::makeChildSource)));
             factory.registerNodeType(constructor);
         }
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("ChildSinkNode",
-                                                                                 std::bind(&PolymorphicMsgsTest::makeChildSink)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("ChildSinkNode", std::bind(&PolymorphicMsgsTest::makeChildSink)));
             factory.registerNodeType(constructor);
         }
     }
 
-    virtual ~PolymorphicMsgsTest() {
+    virtual ~PolymorphicMsgsTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
-
-    static NodePtr makeBaseSource() {
+    static NodePtr makeBaseSource()
+    {
         return NodePtr(new MSourceNode<connection_types::BaseMessage>);
     }
-    static NodePtr makeBaseSink() {
+    static NodePtr makeBaseSink()
+    {
         return NodePtr(new MSinkNode<connection_types::BaseMessage>);
     }
-    static NodePtr makeChildSource() {
+    static NodePtr makeChildSource()
+    {
         return NodePtr(new MSourceNode<connection_types::ChildMessage>);
     }
-    static NodePtr makeChildSink() {
+    static NodePtr makeChildSink()
+    {
         return NodePtr(new MSinkNode<connection_types::ChildMessage>);
     }
 
     UUIDProviderPtr uuid_provider;
 };
 
-TEST_F(PolymorphicMsgsTest, BaseCanBeConnectedToBase) {
+TEST_F(PolymorphicMsgsTest, BaseCanBeConnectedToBase)
+{
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o1"));
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
     o->setType(std::make_shared<connection_types::BaseMessage>());
     i->setType(std::make_shared<connection_types::BaseMessage>());
 
-
     // is compatible
     ASSERT_TRUE(Connection::isCompatibleWith(o.get(), i.get()));
     ASSERT_TRUE(Connection::isCompatibleWith(i.get(), o.get()));
@@ -152,15 +149,14 @@ TEST_F(PolymorphicMsgsTest, BaseCanBeConnectedToBase) {
     ASSERT_NE(nullptr, c);
 }
 
-
-TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToChild) {
+TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToChild)
+{
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o1"));
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
     o->setType(std::make_shared<connection_types::ChildMessage>());
     i->setType(std::make_shared<connection_types::ChildMessage>());
 
-
     // is compatible
     ASSERT_TRUE(Connection::isCompatibleWith(o.get(), i.get()));
     ASSERT_TRUE(Connection::isCompatibleWith(i.get(), o.get()));
@@ -172,7 +168,8 @@ TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToChild) {
     ASSERT_NE(nullptr, c);
 }
 
-TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChild) {
+TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChild)
+{
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o1"));
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
@@ -183,13 +180,14 @@ TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChild) {
     ASSERT_FALSE(Connection::isCompatibleWith(o.get(), i.get()));
     ASSERT_TRUE(Connection::isCompatibleWith(i.get(), o.get()));
     // cannot be connected in both directions
-    ASSERT_FALSE(Connection::canBeConnectedTo(o.get(), i.get())); // would involve down-cast
-    ASSERT_TRUE(Connection::canBeConnectedTo(i.get(), o.get())); // needs upcast (ok)
+    ASSERT_FALSE(Connection::canBeConnectedTo(o.get(), i.get()));  // would involve down-cast
+    ASSERT_TRUE(Connection::canBeConnectedTo(i.get(), o.get()));   // needs upcast (ok)
 
     ASSERT_EQ(nullptr, DirectConnection::connect(o, i));
 }
 
-TEST_F(PolymorphicMsgsTest, BaseCanBeConnectedToBaseViaNodes) {
+TEST_F(PolymorphicMsgsTest, BaseCanBeConnectedToBaseViaNodes)
+{
     GraphFacadeImplementation graph_facade(executor, graph, graph_node);
 
     UUID node1_id = UUIDProvider::makeUUID_without_parent("node1");
@@ -200,19 +198,17 @@ TEST_F(PolymorphicMsgsTest, BaseCanBeConnectedToBaseViaNodes) {
     NodeFacadeImplementationPtr node_b = factory.makeNode("BaseSinkNode", node2_id, graph);
     graph_facade.addNode(node_b);
 
-    graph_facade.connect(graph->makeTypedUUID_forced(node1_id, "out", 0),
-                         graph->makeTypedUUID_forced(node2_id, "in", 0));
-
+    graph_facade.connect(graph->makeTypedUUID_forced(node1_id, "out", 0), graph->makeTypedUUID_forced(node2_id, "in", 0));
 
     executor.start();
 
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
     }
 }
 
-
-TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToChildViaNodes) {
+TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToChildViaNodes)
+{
     GraphFacadeImplementation graph_facade(executor, graph, graph_node);
 
     UUID node1_id = UUIDProvider::makeUUID_without_parent("node1");
@@ -223,19 +219,17 @@ TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToChildViaNodes) {
     NodeFacadeImplementationPtr node_b = factory.makeNode("ChildSinkNode", node2_id, graph);
     graph_facade.addNode(node_b);
 
-    graph_facade.connect(graph->makeTypedUUID_forced(node1_id, "out", 0),
-                         graph->makeTypedUUID_forced(node2_id, "in", 0));
+    graph_facade.connect(graph->makeTypedUUID_forced(node1_id, "out", 0), graph->makeTypedUUID_forced(node2_id, "in", 0));
 
     executor.start();
 
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
     }
 }
 
-
-
-TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToBaseViaNodes) {
+TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToBaseViaNodes)
+{
     GraphFacadeImplementation graph_facade(executor, graph, graph_node);
 
     UUID node1_id = UUIDProvider::makeUUID_without_parent("node1");
@@ -246,12 +240,11 @@ TEST_F(PolymorphicMsgsTest, ChildCanBeConnectedToBaseViaNodes) {
     NodeFacadeImplementationPtr node_b = factory.makeNode("BaseSinkNode", node2_id, graph);
     graph_facade.addNode(node_b);
 
-    graph_facade.connect(graph->makeTypedUUID_forced(node1_id, "out", 0),
-                         graph->makeTypedUUID_forced(node2_id, "in", 0));
+    graph_facade.connect(graph->makeTypedUUID_forced(node1_id, "out", 0), graph->makeTypedUUID_forced(node2_id, "in", 0));
 
     executor.start();
 
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
     }
 }
@@ -274,4 +267,4 @@ TEST_F(PolymorphicMsgsTest, BaseCannotBeConnectedToChildViaNodes) {
 }
 */
 
-}
+}  // namespace csapex

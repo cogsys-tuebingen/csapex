@@ -39,39 +39,39 @@ namespace po = boost::program_options;
 
 using namespace csapex;
 
-CsApexGuiApp::CsApexGuiApp(int& argc, char** argv, ExceptionHandler &handler)
-    : QApplication(argc, argv), handler(handler)
-{}
+CsApexGuiApp::CsApexGuiApp(int& argc, char** argv, ExceptionHandler& handler) : QApplication(argc, argv), handler(handler)
+{
+}
 
-CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, ExceptionHandler &handler)
-    : QCoreApplication(argc, argv), handler(handler)
-{}
+CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, ExceptionHandler& handler) : QCoreApplication(argc, argv), handler(handler)
+{
+}
 
-bool CsApexCoreApp::notify(QObject* receiver, QEvent* event) {
+bool CsApexCoreApp::notify(QObject* receiver, QEvent* event)
+{
     try {
         return QCoreApplication::notify(receiver, event);
 
-    } catch(...) {
+    } catch (...) {
         std::exception_ptr eptr = std::current_exception();
         handler.handleException(eptr);
         return true;
     }
 }
 
-bool CsApexGuiApp::notify(QObject* receiver, QEvent* event) {
+bool CsApexGuiApp::notify(QObject* receiver, QEvent* event)
+{
     try {
         return QApplication::notify(receiver, event);
 
-    } catch(...) {
+    } catch (...) {
         std::exception_ptr eptr = std::current_exception();
         handler.handleException(eptr);
         return true;
     }
 }
 
-
-Main::Main(std::unique_ptr<QCoreApplication> &&a, Settings& settings, ExceptionHandler& handler)
-    : app(std::move(a)), settings(settings), handler(handler), splash(nullptr), recover_needed(false)
+Main::Main(std::unique_ptr<QCoreApplication>&& a, Settings& settings, ExceptionHandler& handler) : app(std::move(a)), settings(settings), handler(handler), splash(nullptr), recover_needed(false)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -94,7 +94,7 @@ int Main::runWithGui()
 {
     app->processEvents();
 
-    std::unique_ptr<CsApexViewCore> main(new CsApexViewCoreImplementation (core));
+    std::unique_ptr<CsApexViewCore> main(new CsApexViewCoreImplementation(core));
 
     CsApexViewCore& view_core = *main;
 
@@ -102,34 +102,32 @@ int Main::runWithGui()
     QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
     app->connect(&w, &CsApexWindow::closed, [&]() {
-        if(core->isServerActive()) {
+        if (core->isServerActive()) {
             try {
                 bool headless = settings.get<bool>("headless");
-                if(!headless) {
-                    int r = QMessageBox::warning(&w, tr("cs::APEX"),
-                                                 tr("Do you want to stop the server?"),
-                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-                    if(r == QMessageBox::No) {
+                if (!headless) {
+                    int r = QMessageBox::warning(&w, tr("cs::APEX"), tr("Do you want to stop the server?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                    if (r == QMessageBox::No) {
                         return;
                     }
                 }
-            } catch(const std::exception& e) {
+            } catch (const std::exception& e) {
                 std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
-            } catch(...) {
+            } catch (...) {
                 throw;
             }
         }
         view_core.shutdown();
         app->quit();
     });
-//    app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
+    //    app->connect(app.get(), SIGNAL(lastWindowClosed()), app.get(), SLOT(quit()));
 
-    csapex::error_handling::stop_request().connect([this](){
+    csapex::error_handling::stop_request().connect([this]() {
         static int request = 0;
-        if(request == 0) {
+        if (request == 0) {
             core->shutdown();
             std::cout << "shutdown request" << std::endl;
-        } else if(request >= 3) {
+        } else if (request >= 3) {
             raise(SIGTERM);
         }
 
@@ -152,7 +150,7 @@ int Main::runWithGui()
 
     core->joinMainLoop();
 
-    if(qt_res != 0) {
+    if (qt_res != 0) {
         return qt_res;
 
     } else {
@@ -164,7 +162,7 @@ int Main::runHeadless()
 {
     GraphFacadePtr root = core->getRoot();
 
-    csapex::error_handling::stop_request().connect([this, root](){
+    csapex::error_handling::stop_request().connect([this, root]() {
         core->shutdown();
         app->quit();
     });
@@ -173,7 +171,7 @@ int Main::runHeadless()
     core->startMainLoop();
 
     auto qt_res = runImpl();
-    if(qt_res != 0) {
+    if (qt_res != 0) {
         return qt_res;
 
     } else {
@@ -187,7 +185,7 @@ int Main::run()
 
     std::string config_to_load = settings.get<std::string>("config");
 
-    if(!headless) {
+    if (!headless) {
         splash = new CsApexSplashScreen;
         splash->show();
 
@@ -199,32 +197,29 @@ int Main::run()
 
     core = std::make_shared<CsApexCore>(settings, handler);
 
-    core->setServerFactory([this](){
-        return std::make_shared<TcpServer>(*core, true);
-    });
+    core->setServerFactory([this]() { return std::make_shared<TcpServer>(*core, true); });
 
-    if(settings.getTemporary("start-server", false)) {
+    if (settings.getTemporary("start-server", false)) {
         core->startServer();
     }
 
-    core->shutdown_requested.connect([this](){
+    core->shutdown_requested.connect([this]() {
         QCoreApplication::postEvent(app.get(), new QCloseEvent);
         app->quit();
     });
 
-
-    if(headless) {
+    if (headless) {
         return runHeadless();
     } else {
         return runWithGui();
     }
 }
 
-void Main::checkRecoveryFile(CsApexViewCore &view_core, CsApexWindow &w)
+void Main::checkRecoveryFile(CsApexViewCore& view_core, CsApexWindow& w)
 {
-    QTimer *timer = new QTimer(this);
-    QObject::connect(timer, &QTimer::timeout, [&](){
-        if(recover_needed) {
+    QTimer* timer = new QTimer(this);
+    QObject::connect(timer, &QTimer::timeout, [&]() {
+        if (recover_needed) {
             recover_needed = false;
             std::string temp_file_name = settings.get("config")->as<std::string>() + ".recover";
             core->saveAs(temp_file_name, true);
@@ -232,15 +227,13 @@ void Main::checkRecoveryFile(CsApexViewCore &view_core, CsApexWindow &w)
         }
     });
     timer->start(settings.getPersistent("config_recovery_save_interval", 1000));
-    observe(view_core.undo_state_changed, [&](){
-        recover_needed = true;
-    });
+    observe(view_core.undo_state_changed, [&]() { recover_needed = true; });
 }
 
 void Main::askForRecoveryConfig(const std::string& config_to_load)
 {
     bf3::path temp_file = config_to_load + ".recover";
-    if(bf3::exists(temp_file)) {
+    if (bf3::exists(temp_file)) {
         showMessage("handling recovery file");
 
         std::time_t mod_time_t = bf3::last_write_time(temp_file);
@@ -249,12 +242,9 @@ void Main::askForRecoveryConfig(const std::string& config_to_load)
 
         std::string question = "The application did not exit correctly. "
                                "Do you want to recover<br /><b>" +
-                temp_file.filename().string() +
-                "</b>?<br />(last modified: " + mod_time + ")";
+                               temp_file.filename().string() + "</b>?<br />(last modified: " + mod_time + ")";
 
-        QMessageBox::StandardButton reply = QMessageBox::question(nullptr, "Configuration Recovery",
-                                                                  QString::fromStdString(question),
-                                                                  QMessageBox::Yes | QMessageBox::No);
+        QMessageBox::StandardButton reply = QMessageBox::question(nullptr, "Configuration Recovery", QString::fromStdString(question), QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes) {
             settings.set("config_recovery", true);
             settings.set("config_recovery_file", temp_file.string());
@@ -266,9 +256,9 @@ void Main::askForRecoveryConfig(const std::string& config_to_load)
 void Main::deleteRecoveryConfig()
 {
     bool recovery = settings.getTemporary("config_recovery", false);
-    if(!recovery) {
+    if (!recovery) {
         bf3::path temp_file = settings.get("config")->as<std::string>() + ".recover";
-        if(bf3::exists(temp_file)) {
+        if (bf3::exists(temp_file)) {
             bf3::remove(temp_file);
         }
     }
@@ -276,12 +266,11 @@ void Main::deleteRecoveryConfig()
 
 void Main::showMessage(const QString& msg)
 {
-    if(splash->isVisible()) {
+    if (splash->isVisible()) {
         splash->showMessage(msg);
     }
     app->processEvents();
 }
-
 
 int main(int argc, char** argv)
 {
@@ -291,19 +280,9 @@ int main(int argc, char** argv)
     std::string path_to_bin(argv[0]);
 
     po::options_description desc("Allowed options");
-    desc.add_options()
-            ("help", "show help message")
-            ("debug", "enable debug output")
-            ("dump", "show variables")
-            ("paused", "start paused")
-            ("headless", "run without gui")
-            ("threadless", "run without threading")
-            ("fatal_exceptions", "abort execution on exception")
-            ("disable_thread_grouping", "by default create one thread per node")
-            ("input", "config file to load")
-            ("start-server", "start tcp server")
-            ("port", po::value<int>()->default_value(42123), "tcp server port")
-            ;
+    desc.add_options()("help", "show help message")("debug", "enable debug output")("dump", "show variables")("paused", "start paused")("headless", "run without gui")(
+        "threadless", "run without threading")("fatal_exceptions", "abort execution on exception")("disable_thread_grouping", "by default create one thread per node")("input", "config file to load")(
+        "start-server", "start tcp server")("port", po::value<int>()->default_value(42123), "tcp server port");
 
     po::positional_options_description p;
     p.add("input", 1);
@@ -313,16 +292,16 @@ int main(int argc, char** argv)
     // has to be done before parameters can be read.
     bool headless = false;
     bool fatal_exceptions = false;
-    for(int i = 1; i < effective_argc; ++i) {
+    for (int i = 1; i < effective_argc; ++i) {
         std::string arg(argv[i]);
-        if(arg == "--headless") {
+        if (arg == "--headless") {
             headless = true;
-        } else if(arg == "--fatal_exceptions") {
+        } else if (arg == "--fatal_exceptions") {
             fatal_exceptions = true;
         }
     }
 
-    if(!headless) {
+    if (!headless) {
         // if headless not requested, check if there is a display
         // if not, we enforce headless mode
 #if WIN32
@@ -335,12 +314,11 @@ int main(int argc, char** argv)
         }
     }
 
-
     std::shared_ptr<ExceptionHandler> handler;
 
     // filters all qt parameters from argv
     std::unique_ptr<QCoreApplication> app;
-    if(headless) {
+    if (headless) {
         handler.reset(new ExceptionHandler(fatal_exceptions));
         app.reset(new CsApexCoreApp(effective_argc, argv, *handler));
     } else {
@@ -355,9 +333,9 @@ int main(int argc, char** argv)
     // filters ros remappings
     std::vector<std::string> remapping_args;
     std::vector<std::string> rest_args;
-    for(int i = 1; i < effective_argc; ++i) {
+    for (int i = 1; i < effective_argc; ++i) {
         std::string arg(argv[i]);
-        if(arg.find(":=") != std::string::npos)  {
+        if (arg.find(":=") != std::string::npos) {
             remapping_args.push_back(arg);
         } else {
             rest_args.push_back(arg);
@@ -377,7 +355,7 @@ int main(int argc, char** argv)
 
         additional_args = po::collect_unrecognized(parsed.options, po::include_positional);
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << "cannot parse parameters: " << e.what() << std::endl;
         return 4;
     }
@@ -385,15 +363,14 @@ int main(int argc, char** argv)
     // add ros remappings
     additional_args.insert(additional_args.end(), remapping_args.begin(), remapping_args.end());
 
-
     // display help?
-    if(vm.count("help")) {
+    if (vm.count("help")) {
         std::cerr << desc << std::endl;
         return 1;
     }
-    if(vm.count("dump")) {
+    if (vm.count("dump")) {
         std::cout << "to be passed on:\n";
-        for(std::size_t i = 0; i < additional_args.size(); ++i) {
+        for (std::size_t i = 0; i < additional_args.size(); ++i) {
             std::cout << additional_args[i] << '\n';
         }
         std::cout << std::flush;
@@ -402,12 +379,12 @@ int main(int argc, char** argv)
 
     // which file to use?
     if (vm.count("input")) {
-        settings.set("config",vm["input"].as<std::string>());
+        settings.set("config", vm["input"].as<std::string>());
     } else {
-        settings.set("config",Settings::default_config);
+        settings.set("config", Settings::default_config);
     }
 
-    if(!settings.knows("path_to_bin")) {
+    if (!settings.knows("path_to_bin")) {
         settings.addTemporary(csapex::param::ParameterFactory::declareFileInputPath("path_to_bin", path_to_bin));
     } else {
         settings.set("path_to_bin", path_to_bin);
@@ -427,7 +404,7 @@ int main(int argc, char** argv)
     try {
         return m.run();
 
-    } catch(const csapex::Failure& af) {
+    } catch (const csapex::Failure& af) {
         std::cerr << af.what() << std::endl;
         return 42;
     }

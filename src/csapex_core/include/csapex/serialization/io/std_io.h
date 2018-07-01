@@ -13,40 +13,34 @@
 
 namespace csapex
 {
-
 // STRINGS
-SerializationBuffer& operator << (SerializationBuffer& data, const std::string& s);
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::string& s);
+SerializationBuffer& operator<<(SerializationBuffer& data, const std::string& s);
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::string& s);
 
 // STRING STREAMS
-SerializationBuffer& operator << (SerializationBuffer& data, const std::stringstream& s);
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::stringstream& s);
+SerializationBuffer& operator<<(SerializationBuffer& data, const std::stringstream& s);
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::stringstream& s);
 
 // VECTOR
-template <typename S,
-          typename std::enable_if<!std::is_base_of<Serializable, S>::value,
-                                  int>::type = 0>
-SerializationBuffer& operator << (SerializationBuffer& data, const std::vector<S>& s)
+template <typename S, typename std::enable_if<!std::is_base_of<Serializable, S>::value, int>::type = 0>
+SerializationBuffer& operator<<(SerializationBuffer& data, const std::vector<S>& s)
 {
     apex_assert_lt_hard(s.size(), std::numeric_limits<uint8_t>::max());
     data << (static_cast<uint8_t>(s.size()));
-    for(const S& elem : s) {
+    for (const S& elem : s) {
         data << elem;
     }
     return data;
 }
 
-template <typename S,
-          typename std::enable_if<std::is_integral<S>::value &&
-                                  !std::is_base_of<Serializable, S>::value,
-                                  int>::type = 0>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::vector<S>& s)
+template <typename S, typename std::enable_if<std::is_integral<S>::value && !std::is_base_of<Serializable, S>::value, int>::type = 0>
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::vector<S>& s)
 {
     uint8_t len;
     data >> len;
     s.reserve(len);
     s.clear();
-    for(uint8_t i = 0; i < len; ++i) {
+    for (uint8_t i = 0; i < len; ++i) {
         S integral;
         data >> integral;
         s.push_back(integral);
@@ -54,36 +48,28 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::ve
     return data;
 }
 
-template <typename S,
-          typename std::enable_if<!std::is_integral<S>::value &&
-                                  !std::is_base_of<Serializable, S>::value &&
-                                  std::is_default_constructible<S>::value,
-                                  int>::type = 0>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::vector<S>& s)
+template <typename S, typename std::enable_if<!std::is_integral<S>::value && !std::is_base_of<Serializable, S>::value && std::is_default_constructible<S>::value, int>::type = 0>
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::vector<S>& s)
 {
     uint8_t len;
     data >> len;
     s.reserve(len);
     s.clear();
-    for(uint8_t i = 0; i < len; ++i) {
+    for (uint8_t i = 0; i < len; ++i) {
         s.emplace_back();
         data >> s.back();
     }
     return data;
 }
 
-template <typename S,
-          typename std::enable_if<!std::is_integral<S>::value &&
-                                  !std::is_base_of<Serializable, S>::value &&
-                                  !std::is_default_constructible<S>::value,
-                                  int>::type = 0>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::vector<S>& s)
+template <typename S, typename std::enable_if<!std::is_integral<S>::value && !std::is_base_of<Serializable, S>::value && !std::is_default_constructible<S>::value, int>::type = 0>
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::vector<S>& s)
 {
     uint8_t len;
     data >> len;
     s.reserve(len);
     s.clear();
-    for(uint8_t i = 0; i < len; ++i) {
+    for (uint8_t i = 0; i < len; ++i) {
         std::shared_ptr<S> object = makeEmpty<S>();
         data >> object;
         s.push_back(*object);
@@ -91,10 +77,9 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::ve
     return data;
 }
 
-
 // PAIR
 template <typename S, typename T>
-SerializationBuffer& operator << (SerializationBuffer& data, const std::pair<S, T>& s)
+SerializationBuffer& operator<<(SerializationBuffer& data, const std::pair<S, T>& s)
 {
     data << s.first;
     data << s.second;
@@ -102,7 +87,7 @@ SerializationBuffer& operator << (SerializationBuffer& data, const std::pair<S, 
 }
 
 template <typename S, typename T>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::pair<S, T>& s)
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::pair<S, T>& s)
 {
     data >> s.first;
     data >> s.second;
@@ -111,11 +96,11 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::pa
 
 // MAP
 template <typename Key, typename Value>
-SerializationBuffer& operator << (SerializationBuffer& data, const std::map<Key, Value>& m)
+SerializationBuffer& operator<<(SerializationBuffer& data, const std::map<Key, Value>& m)
 {
     uint64_t size = m.size();
     data << size;
-    for(const auto& pair : m) {
+    for (const auto& pair : m) {
         data << pair.first;
         data << pair.second;
     }
@@ -123,11 +108,11 @@ SerializationBuffer& operator << (SerializationBuffer& data, const std::map<Key,
 }
 
 template <typename Key, typename Value>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::map<Key, Value>& m)
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::map<Key, Value>& m)
 {
     uint64_t size;
     data >> size;
-    for(uint64_t i = 0; i < size; ++i) {
+    for (uint64_t i = 0; i < size; ++i) {
         Key key;
         data >> key;
         Value val;
@@ -139,22 +124,22 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::ma
 
 // SET
 template <typename Value>
-SerializationBuffer& operator << (SerializationBuffer& data, const std::set<Value>& m)
+SerializationBuffer& operator<<(SerializationBuffer& data, const std::set<Value>& m)
 {
     uint64_t size = m.size();
     data << size;
-    for(const auto& entry : m) {
+    for (const auto& entry : m) {
         data << entry;
     }
     return data;
 }
 
 template <typename Value>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::set<Value>& m)
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::set<Value>& m)
 {
     uint64_t size;
     data >> size;
-    for(uint64_t i = 0; i < size; ++i) {
+    for (uint64_t i = 0; i < size; ++i) {
         Value val;
         data >> val;
         m.insert(val);
@@ -163,12 +148,10 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::se
 }
 
 // SHARED POINTER (of non-serializable type)
-template <typename T,
-          typename std::enable_if<!std::is_base_of<Streamable, T>::value,
-                                  int>::type = 0>
-SerializationBuffer& operator << (SerializationBuffer& data, const std::shared_ptr<T>& s)
+template <typename T, typename std::enable_if<!std::is_base_of<Streamable, T>::value, int>::type = 0>
+SerializationBuffer& operator<<(SerializationBuffer& data, const std::shared_ptr<T>& s)
 {
-    if(s) {
+    if (s) {
         data << true;
         data << *s;
     } else {
@@ -177,15 +160,12 @@ SerializationBuffer& operator << (SerializationBuffer& data, const std::shared_p
     return data;
 }
 
-template <typename T,
-          typename std::enable_if<!std::is_base_of<Streamable, T>::value &&
-                                  std::is_base_of<TokenData, T>::value,
-                                  int>::type = 0>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::shared_ptr<T>& s)
+template <typename T, typename std::enable_if<!std::is_base_of<Streamable, T>::value && std::is_base_of<TokenData, T>::value, int>::type = 0>
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::shared_ptr<T>& s)
 {
     bool valid;
     data >> valid;
-    if(!valid) {
+    if (!valid) {
         return data;
     }
 
@@ -197,16 +177,12 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::sh
     return data;
 }
 
-template <typename T,
-          typename std::enable_if<!std::is_base_of<Streamable, T>::value &&
-                                  !std::is_base_of<TokenData, T>::value &&
-                                  std::is_default_constructible<T>::value,
-                                  int>::type = 0>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::shared_ptr<T>& s)
+template <typename T, typename std::enable_if<!std::is_base_of<Streamable, T>::value && !std::is_base_of<TokenData, T>::value && std::is_default_constructible<T>::value, int>::type = 0>
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::shared_ptr<T>& s)
 {
     bool valid;
     data >> valid;
-    if(!valid) {
+    if (!valid) {
         return data;
     }
 
@@ -218,16 +194,12 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::sh
     return data;
 }
 
-template <typename T,
-          typename std::enable_if<!std::is_base_of<Streamable, T>::value &&
-                                  !std::is_base_of<TokenData, T>::value &&
-                                  !std::is_default_constructible<T>::value,
-                                  int>::type = 0>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, std::shared_ptr<T>& s)
+template <typename T, typename std::enable_if<!std::is_base_of<Streamable, T>::value && !std::is_base_of<TokenData, T>::value && !std::is_default_constructible<T>::value, int>::type = 0>
+const SerializationBuffer& operator>>(const SerializationBuffer& data, std::shared_ptr<T>& s)
 {
     bool valid;
     data >> valid;
-    if(!valid) {
+    if (!valid) {
         return data;
     }
 
@@ -239,6 +211,6 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, std::sh
     return data;
 }
 
-}
+}  // namespace csapex
 
-#endif // SERIALIZATION_STD_IO_H
+#endif  // SERIALIZATION_STD_IO_H

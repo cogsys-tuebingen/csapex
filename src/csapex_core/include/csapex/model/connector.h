@@ -14,7 +14,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Connector : public Unique
 {
 public:
@@ -60,7 +59,7 @@ public:
     slim_signal::Signal<void(std::string)> labelChanged;
 
 protected:
-    Connector(const UUID &uuid, ConnectableOwnerWeakPtr owner);
+    Connector(const UUID& uuid, ConnectableOwnerWeakPtr owner);
 
     virtual void addStatusInformation(std::stringstream& status_stream) const;
 
@@ -68,5 +67,5 @@ protected:
     ConnectableOwnerWeakPtr owner_;
 };
 
-}
-#endif // CONNECTOR_H
+}  // namespace csapex
+#endif  // CONNECTOR_H

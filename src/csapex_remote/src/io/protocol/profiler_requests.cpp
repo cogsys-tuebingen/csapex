@@ -28,21 +28,15 @@ using namespace csapex;
 ///
 /// REQUEST
 ///
-ProfilerRequests::ProfilerRequest::ProfilerRequest(ProfilerRequestType request_type, const AUUID &uuid)
-    : RequestImplementation(0),
-      request_type_(request_type),
-      uuid_(uuid)
+ProfilerRequests::ProfilerRequest::ProfilerRequest(ProfilerRequestType request_type, const AUUID& uuid) : RequestImplementation(0), request_type_(request_type), uuid_(uuid)
 {
-
 }
 
-ProfilerRequests::ProfilerRequest::ProfilerRequest(uint8_t request_id)
-    : RequestImplementation(request_id)
+ProfilerRequests::ProfilerRequest::ProfilerRequest(uint8_t request_id) : RequestImplementation(request_id)
 {
-
 }
 
-ResponsePtr ProfilerRequests::ProfilerRequest::execute(const SessionPtr &session, CsApexCore &core) const
+ResponsePtr ProfilerRequests::ProfilerRequest::execute(const SessionPtr& session, CsApexCore& core) const
 {
     NodeFacadePtr nf = core.getRoot()->getLocalGraph()->findNodeFacade(uuid_);
     NodeFacadeImplementationPtr nf_local = std::dynamic_pointer_cast<NodeFacadeImplementation>(nf);
@@ -51,21 +45,19 @@ ResponsePtr ProfilerRequests::ProfilerRequest::execute(const SessionPtr &session
 
     ProfilerPtr pf = nf->getProfiler();
 
-    switch(request_type_)
-    {
-    case ProfilerRequestType::SetEnabled:
-        pf->setEnabled(getArgument<bool>(0));
-        break;
+    switch (request_type_) {
+        case ProfilerRequestType::SetEnabled:
+            pf->setEnabled(getArgument<bool>(0));
+            break;
 
-    default:
-        return std::make_shared<Feedback>(std::string("unknown profiler request type ") + std::to_string((int)request_type_),
-                                          getRequestID());
+        default:
+            return std::make_shared<Feedback>(std::string("unknown profiler request type ") + std::to_string((int)request_type_), getRequestID());
     }
 
     return std::make_shared<ProfilerResponse>(request_type_, uuid_, getRequestID());
 }
 
-void ProfilerRequests::ProfilerRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ProfilerRequests::ProfilerRequest::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;
@@ -84,28 +76,19 @@ void ProfilerRequests::ProfilerRequest::deserialize(const SerializationBuffer& d
 ///
 
 ProfilerRequests::ProfilerResponse::ProfilerResponse(ProfilerRequestType request_type, const AUUID& uuid, uint8_t request_id)
-    : ResponseImplementation(request_id),
-      request_type_(request_type),
-      uuid_(uuid)
+  : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid)
 {
-
 }
 ProfilerRequests::ProfilerResponse::ProfilerResponse(ProfilerRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id)
-    : ResponseImplementation(request_id),
-      request_type_(request_type),
-      uuid_(uuid),
-      result_(result)
+  : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid), result_(result)
 {
-
 }
 
-ProfilerRequests::ProfilerResponse::ProfilerResponse(uint8_t request_id)
-    : ResponseImplementation(request_id)
+ProfilerRequests::ProfilerResponse::ProfilerResponse(uint8_t request_id) : ResponseImplementation(request_id)
 {
-
 }
 
-void ProfilerRequests::ProfilerResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ProfilerRequests::ProfilerResponse::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << request_type_;
     data << uuid_;

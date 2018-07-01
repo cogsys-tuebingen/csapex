@@ -6,8 +6,7 @@
 
 using namespace csapex;
 
-Timer::Timer(const std::string& name, bool enabled)
-    : timer_name_(name), root(new Interval(name)), enabled_(enabled), dirty_(false), finished_(true)
+Timer::Timer(const std::string& name, bool enabled) : timer_name_(name), root(new Interval(name)), enabled_(enabled), dirty_(false), finished_(true)
 {
     restart();
 }
@@ -24,10 +23,10 @@ std::vector<std::pair<std::string, double> > Timer::entries() const
 
 void Timer::setEnabled(bool enabled)
 {
-    if(enabled_ != enabled) {
+    if (enabled_ != enabled) {
         enabled_ = enabled;
-        if(!finished_) {
-            dirty_  = true;
+        if (!finished_) {
+            dirty_ = true;
         }
     }
 }
@@ -44,7 +43,7 @@ bool Timer::isFinished() const
 
 void Timer::restart()
 {
-    if(!finished_) {
+    if (!finished_) {
         finish();
     }
 
@@ -57,15 +56,15 @@ void Timer::restart()
 void Timer::finish()
 {
     finished_ = true;
-    while(!active.empty()) {
+    while (!active.empty()) {
         active.back()->stop();
         active.pop_back();
     }
 
-    if(dirty_) {
+    if (dirty_) {
         dirty_ = false;
     } else {
-        if(enabled_) {
+        if (enabled_) {
             finished(root);
         }
     }
@@ -81,11 +80,9 @@ long Timer::stopTimeMs() const
     return std::chrono::duration_cast<std::chrono::milliseconds>(root->end_.time_since_epoch()).count();
 }
 
-
 long Timer::elapsedMs() const
 {
     auto now = std::chrono::high_resolution_clock::now();
     auto start = root->start_;
     return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
 }
-

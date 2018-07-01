@@ -11,25 +11,25 @@
 #include <map>
 #include <string>
 
-namespace YAML {
+namespace YAML
+{
 class Node;
 }
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT DesignerIO
 {
 public:
     DesignerIO();
 
-    void saveBoxes(YAML::Node &yaml, const GraphFacade *graph, GraphView *view);
-    void loadBoxes(const YAML::Node &doc, GraphView *view);
+    void saveBoxes(YAML::Node& yaml, const GraphFacade* graph, GraphView* view);
+    void loadBoxes(const YAML::Node& doc, GraphView* view);
 
 private:
-    void saveBox(const UUID &node_uuid, GraphView *view, YAML::Node &yaml);
+    void saveBox(const UUID& node_uuid, GraphView* view, YAML::Node& yaml);
 };
 
-}
+}  // namespace csapex
 
-#endif // DESIGNERIO_H
+#endif  // DESIGNERIO_H

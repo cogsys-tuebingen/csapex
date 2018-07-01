@@ -30,7 +30,6 @@ private:
     QHBoxLayout* internal_layout;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // INTERVAL_PARAM_ADAPTER_H
+#endif  // INTERVAL_PARAM_ADAPTER_H

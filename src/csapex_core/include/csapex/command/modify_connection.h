@@ -9,17 +9,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT ModifyConnection : public CommandImplementation<ModifyConnection>
 {
     COMMAND_HEADER(ModifyConnection);
 
 public:
-    ModifyConnection(const AUUID &graph_uuid, int connection_id, bool active);
+    ModifyConnection(const AUUID& graph_uuid, int connection_id, bool active);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -34,7 +33,7 @@ private:
     bool active;
 };
 
-}
-}
+}  // namespace command
+}  // namespace csapex
 
-#endif // MODIFY_CONNECTION_H
+#endif  // MODIFY_CONNECTION_H

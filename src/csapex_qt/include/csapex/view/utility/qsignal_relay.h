@@ -8,8 +8,8 @@
 #include <QObject>
 #include <functional>
 
-namespace qt_helper {
-
+namespace qt_helper
+{
 class CSAPEX_QT_EXPORT Call : public QObject
 {
     Q_OBJECT
@@ -17,18 +17,20 @@ class CSAPEX_QT_EXPORT Call : public QObject
     typedef std::function<void()> CB;
 
 public:
-    Call(CB cb)
-        : cb_(cb), valid_(true)
-    {}
+    Call(CB cb) : cb_(cb), valid_(true)
+    {
+    }
 
 public Q_SLOTS:
-    void call() {
-        if(valid_) {
+    void call()
+    {
+        if (valid_) {
             cb_();
         }
     }
 
-    void invalidate() {
+    void invalidate()
+    {
         valid_ = false;
     }
 
@@ -37,5 +39,5 @@ private:
     bool valid_;
 };
 
-}
-#endif // qsignal_relay_H
+}  // namespace qt_helper
+#endif  // qsignal_relay_H

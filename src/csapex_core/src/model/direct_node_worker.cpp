@@ -3,13 +3,10 @@
 
 using namespace csapex;
 
-DirectNodeWorker::DirectNodeWorker(NodeHandlePtr node_handle)
-    : NodeWorker(node_handle)
+DirectNodeWorker::DirectNodeWorker(NodeHandlePtr node_handle) : NodeWorker(node_handle)
 {
-
 }
 
 DirectNodeWorker::~DirectNodeWorker()
 {
-
 }

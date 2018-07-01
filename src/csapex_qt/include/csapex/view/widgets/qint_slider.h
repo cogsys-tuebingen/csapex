@@ -12,7 +12,7 @@ class CSAPEX_QT_EXPORT QIntSlider : public QSlider
     Q_OBJECT
 
 public:
-    QIntSlider(Qt::Orientation orientation, double step_size, QWidget *parent = 0);
+    QIntSlider(Qt::Orientation orientation, double step_size, QWidget* parent = 0);
     virtual ~QIntSlider();
 
     void setStepSize(int step);
@@ -47,5 +47,4 @@ private Q_SLOTS:
     void emitRangeChanged(int min, int max);
 };
 
-
-#endif // QINT_SLIDER_H
+#endif  // QINT_SLIDER_H

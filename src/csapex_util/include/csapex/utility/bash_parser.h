@@ -10,7 +10,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_UTILS_EXPORT BashParser
 {
 public:
@@ -23,6 +22,6 @@ private:
     static std::string color(int code);
 };
 
-}
+}  // namespace csapex
 
-#endif // BASE_PARSER_H
+#endif  // BASE_PARSER_H

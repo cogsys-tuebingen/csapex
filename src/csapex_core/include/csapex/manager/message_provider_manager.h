@@ -13,16 +13,16 @@
 #include <string>
 #include <functional>
 
-namespace csapex {
-
+namespace csapex
+{
 class CSAPEX_CORE_EXPORT MessageProviderManager : public Singleton<MessageProviderManager>
 {
     friend class Singleton<MessageProviderManager>;
 
 public:
-    typedef std::function<MessageProvider::Ptr()>  Constructor;
+    typedef std::function<MessageProvider::Ptr()> Constructor;
 
-public:    
+public:
     static void registerMessageProvider(const std::string& type, Constructor constructor);
     static MessageProvider::Ptr createMessageProvider(const std::string& path);
 
@@ -49,6 +49,6 @@ private:
     std::unique_ptr<PluginManager<MessageProvider>> manager_;
 };
 
-}
+}  // namespace csapex
 
-#endif // MESSAGE_PROVIDER_MANAGER_H
+#endif  // MESSAGE_PROVIDER_MANAGER_H

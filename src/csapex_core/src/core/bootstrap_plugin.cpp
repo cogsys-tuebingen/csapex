@@ -5,5 +5,4 @@ using namespace csapex;
 
 BootstrapPlugin::~BootstrapPlugin()
 {
-
 }

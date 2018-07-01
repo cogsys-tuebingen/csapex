@@ -17,10 +17,8 @@
 
 using namespace csapex;
 
-OutputProgressParameterAdapter::OutputProgressParameterAdapter(param::OutputProgressParameter::Ptr p)
-    : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), op_p_(p)
+OutputProgressParameterAdapter::OutputProgressParameterAdapter(param::OutputProgressParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), op_p_(p)
 {
-
 }
 
 QWidget* OutputProgressParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
@@ -33,7 +31,7 @@ QWidget* OutputProgressParameterAdapter::setup(QBoxLayout* layout, const std::st
 
     // model change -> ui
     connectInGuiThread(op_p_->parameter_changed, [this, bar](param::Parameter*) {
-        if(op_p_ && bar) {
+        if (op_p_ && bar) {
             bar->setValue(op_p_->getProgress());
             bar->setMaximum(op_p_->getProgressMaximum());
         }
@@ -41,7 +39,7 @@ QWidget* OutputProgressParameterAdapter::setup(QBoxLayout* layout, const std::st
 
     // parameter scope changed -> update slider interval
     connectInGuiThread(op_p_->scope_changed, [this, bar](param::Parameter*) {
-        if(op_p_ && bar) {
+        if (op_p_ && bar) {
             bar->setValue(op_p_->getProgress());
             bar->setMaximum(op_p_->getProgressMaximum());
         }

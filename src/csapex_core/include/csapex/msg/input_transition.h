@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT InputTransition : public Transition
 {
 public:
@@ -47,7 +46,6 @@ protected:
     virtual void connectionAdded(Connection* connection) override;
 
 private:
-
     bool areConnectionsReady() const;
 
 private:
@@ -59,7 +57,6 @@ private:
     bool processed_;
 };
 
-}
+}  // namespace csapex
 
-#endif // INPUT_TRANSITION_H
-
+#endif  // INPUT_TRANSITION_H

@@ -10,20 +10,17 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT CsApexSplashScreen : public QSplashScreen
 {
     Q_OBJECT
 
 public:
-    explicit CsApexSplashScreen(QWidget *parent = 0);
+    explicit CsApexSplashScreen(QWidget* parent = 0);
 
 protected:
-    void drawContents(QPainter *painter);
-
+    void drawContents(QPainter* painter);
 };
 
-}
+}  // namespace csapex
 
-#endif // CSAPEX_SPLASHSCREEN_H
-
+#endif  // CSAPEX_SPLASHSCREEN_H

@@ -8,9 +8,10 @@
 /// SYSTEM
 #include <boost/any.hpp>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT ValueParameter : public ParameterImplementation<ValueParameter, 0x008>
 {
     friend class ParameterFactory;
@@ -20,12 +21,15 @@ public:
 
 public:
     ValueParameter();
-    explicit ValueParameter(const std::string& name, const ParameterDescription &description);
+    explicit ValueParameter(const std::string& name, const ParameterDescription& description);
     virtual ~ValueParameter();
 
-    virtual std::string TYPE() const override { return "value"; }
+    virtual std::string TYPE() const override
+    {
+        return "value";
+    }
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
     void cloneDataFrom(const Clonable& other) override;
@@ -33,11 +37,14 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     template <typename T>
-    T def() const { return read<T>(def_); }
+    T def() const
+    {
+        return read<T>(def_);
+    }
 
 protected:
     virtual void get_unsafe(boost::any& out) const override;
@@ -48,9 +55,9 @@ private:
     T read(const boost::any& var) const
     {
         try {
-            return boost::any_cast<T> (var);
+            return boost::any_cast<T>(var);
 
-        } catch(const boost::bad_any_cast& e) {
+        } catch (const boost::bad_any_cast& e) {
             throw std::logic_error(std::string("typeof ValueParameter is not ") + typeid(T).name() + ": " + e.what());
         }
     }
@@ -60,7 +67,7 @@ private:
     boost::any def_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // VALUE_PARAMETER_H
+#endif  // VALUE_PARAMETER_H

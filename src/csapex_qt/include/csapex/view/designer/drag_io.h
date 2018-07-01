@@ -14,30 +14,29 @@
 #include <vector>
 #include <boost/type_traits.hpp>
 
-namespace YAML {
+namespace YAML
+{
 class Node;
 }
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT DragIO
 {
 public:
     DragIO(PluginLocatorPtr locator, CommandExecutor* dispatcher);
     ~DragIO();
 
-    void dragEnterEvent(GraphView *src, QDragEnterEvent* e);
-    void dragMoveEvent(GraphView *src, QDragMoveEvent* e);
-    void dropEvent(GraphView *src, QDropEvent* e, const QPointF &scene_pos);
+    void dragEnterEvent(GraphView* src, QDragEnterEvent* e);
+    void dragMoveEvent(GraphView* src, QDragMoveEvent* e);
+    void dropEvent(GraphView* src, QDropEvent* e, const QPointF& scene_pos);
 
 public:
     void registerHandler(DragIOHandler::Ptr h);
 
 private:
-    void createNode(GraphView *src, std::string type, const QPointF &pos,
-                    NodeStatePtr state);
-    void pasteGraph(GraphView *src, const QPointF &pos, const Snippet& blueprint);
+    void createNode(GraphView* src, std::string type, const QPointF& pos, NodeStatePtr state);
+    void pasteGraph(GraphView* src, const QPointF& pos, const Snippet& blueprint);
     void load();
 
 private:
@@ -50,6 +49,6 @@ private:
     CommandExecutor* dispatcher_;
 };
 
-}
+}  // namespace csapex
 
-#endif // DRAG_IO_H
+#endif  // DRAG_IO_H

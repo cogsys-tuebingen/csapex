@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT MinimapWidget : public QWidget
 {
     Q_OBJECT
@@ -41,7 +40,7 @@ protected:
     void paintEvent(QPaintEvent* e);
 
 private:
-    void emitPositionRequest(QMouseEvent *me);
+    void emitPositionRequest(QMouseEvent* me);
 
 private:
     GraphView* view_;
@@ -55,7 +54,6 @@ private:
     QTransform scene_to_minimap_;
 };
 
-}
+}  // namespace csapex
 
-#endif // MINIMAP_WIDGET_H
-
+#endif  // MINIMAP_WIDGET_H

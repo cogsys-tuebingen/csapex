@@ -14,19 +14,16 @@ CSAPEX_REGISTER_PARAMETER_SERIALIZER(OutputTextParameter)
 using namespace csapex;
 using namespace param;
 
-OutputTextParameter::OutputTextParameter()
-    : ParameterImplementation("noname", ParameterDescription())
+OutputTextParameter::OutputTextParameter() : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
-OutputTextParameter::OutputTextParameter(const std::string &name, const ParameterDescription& description)
-    : ParameterImplementation(name, description)
+OutputTextParameter::OutputTextParameter(const std::string& name, const ParameterDescription& description) : ParameterImplementation(name, description)
 {
 }
 
 OutputTextParameter::~OutputTextParameter()
 {
-
 }
 
 std::string OutputTextParameter::toStringImpl() const
@@ -36,7 +33,7 @@ std::string OutputTextParameter::toStringImpl() const
     return v.str();
 }
 
-const std::type_info &OutputTextParameter::type() const
+const std::type_info& OutputTextParameter::type() const
 {
     Lock l = lock();
     return typeid(std::string);
@@ -49,7 +46,7 @@ void OutputTextParameter::get_unsafe(boost::any& out) const
 bool OutputTextParameter::set_unsafe(const boost::any& v)
 {
     auto val = boost::any_cast<std::string>(v);
-    if(val != text_) {
+    if (val != text_) {
         text_ = val;
         return true;
     }
@@ -62,7 +59,7 @@ void OutputTextParameter::doSerialize(YAML::Node& n) const
 }
 void OutputTextParameter::doDeserialize(const YAML::Node& n)
 {
-    if(!n["text"].IsDefined()) {
+    if (!n["text"].IsDefined()) {
         return;
     }
 
@@ -71,21 +68,20 @@ void OutputTextParameter::doDeserialize(const YAML::Node& n)
 
 void OutputTextParameter::cloneDataFrom(const Clonable& other)
 {
-    if(const OutputTextParameter* text = dynamic_cast<const OutputTextParameter*>(&other)) {
-        if(text_ != text->text_) {
+    if (const OutputTextParameter* text = dynamic_cast<const OutputTextParameter*>(&other)) {
+        if (text_ != text->text_) {
             *this = *text;
             triggerChange();
         }
-    } else if(const Parameter* param = dynamic_cast<const Parameter*>(&other)) {
-        if(text_ != param->toString()) {
+    } else if (const Parameter* param = dynamic_cast<const Parameter*>(&other)) {
+        if (text_ != param->toString()) {
             text_ = param->toString();
             triggerChange();
         }
     }
 }
 
-
-void OutputTextParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void OutputTextParameter::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Parameter::serialize(data, version);
 
@@ -98,4 +94,3 @@ void OutputTextParameter::deserialize(const SerializationBuffer& data, const Sem
 
     data >> text_;
 }
-

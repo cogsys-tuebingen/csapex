@@ -18,47 +18,41 @@
 
 using namespace csapex;
 
-NodeConstructor::NodeConstructionException::NodeConstructionException(const std::string& what)
-    : std::runtime_error(what)
+NodeConstructor::NodeConstructionException::NodeConstructionException(const std::string& what) : std::runtime_error(what)
 {
 }
 
-NodeConstructor::NodeConstructor(const std::string &type, std::function<NodePtr()> c)
-    : type_(type), icon_(":/no_icon.png"), properties_loaded_(false), c(c)
+NodeConstructor::NodeConstructor(const std::string& type, std::function<NodePtr()> c) : type_(type), icon_(":/no_icon.png"), properties_loaded_(false), c(c)
 {
 }
 
-NodeConstructor::NodeConstructor(const std::string &type)
-    : type_(type), icon_(":/no_icon.png"), properties_loaded_(false)
+NodeConstructor::NodeConstructor(const std::string& type) : type_(type), icon_(":/no_icon.png"), properties_loaded_(false)
 {
 }
 
-NodeConstructor::NodeConstructor()
-    : type_("unnamed"), icon_(":/no_icon.png"), properties_loaded_(false)
+NodeConstructor::NodeConstructor() : type_("unnamed"), icon_(":/no_icon.png"), properties_loaded_(false)
 {
 }
-
 
 NodeConstructor::~NodeConstructor()
 {
 }
-
 
 std::string NodeConstructor::getType() const
 {
     return type_;
 }
 
-NodeConstructor& NodeConstructor::setTags(const std::string &taglist)
+NodeConstructor& NodeConstructor::setTags(const std::string& taglist)
 {
     // convert tag list into vector
     std::vector<std::string> tokens;
 
     boost::algorithm::split(tokens, taglist, boost::is_any_of(",;"));
 
-    for(std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    for (std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
         std::string str = boost::algorithm::trim_copy(*it);
-        if(!str.empty()) {
+        if (!str.empty()) {
             tags_.push_back(Tag::get(str));
         }
     }
@@ -66,16 +60,15 @@ NodeConstructor& NodeConstructor::setTags(const std::string &taglist)
     return *this;
 }
 
-NodeConstructor& NodeConstructor::setTags(const std::vector<std::string> &strings)
+NodeConstructor& NodeConstructor::setTags(const std::vector<std::string>& strings)
 {
-    for(const std::string& name : strings) {
+    for (const std::string& name : strings) {
         tags_.push_back(Tag::get(name));
     }
     return *this;
 }
 
-
-NodeConstructor& NodeConstructor::setTags(const std::vector<TagPtr> &tags)
+NodeConstructor& NodeConstructor::setTags(const std::vector<TagPtr>& tags)
 {
     tags_ = tags;
     return *this;
@@ -83,13 +76,13 @@ NodeConstructor& NodeConstructor::setTags(const std::vector<TagPtr> &tags)
 
 std::vector<TagPtr> NodeConstructor::getTags() const
 {
-    if(tags_.empty()) {
-        return std::vector<TagPtr> { Tag::get("General") };
+    if (tags_.empty()) {
+        return std::vector<TagPtr>{ Tag::get("General") };
     }
     return tags_;
 }
 
-NodeConstructor& NodeConstructor::setProperties(const std::vector<std::string> &properties)
+NodeConstructor& NodeConstructor::setProperties(const std::vector<std::string>& properties)
 {
     properties_ = properties;
     properties_loaded_ = true;
@@ -99,12 +92,12 @@ NodeConstructor& NodeConstructor::setProperties(const std::vector<std::string> &
 
 std::vector<std::string> NodeConstructor::getProperties() const
 {
-    if(!properties_loaded_) {
+    if (!properties_loaded_) {
         try {
             NodePtr node = makeNode();
             node->getProperties(properties_);
 
-        } catch(...) {
+        } catch (...) {
             // ignore error and mark the node as invalid
             properties_.push_back("invalid");
         }
@@ -114,7 +107,6 @@ std::vector<std::string> NodeConstructor::getProperties() const
     return properties_;
 }
 
-
 NodeConstructor& NodeConstructor::setIcon(const std::string& icon)
 {
     icon_ = icon;
@@ -123,9 +115,8 @@ NodeConstructor& NodeConstructor::setIcon(const std::string& icon)
 
 std::string NodeConstructor::getIcon() const
 {
-    return icon_.empty() ?  ":/plugin.png" : icon_;
+    return icon_.empty() ? ":/plugin.png" : icon_;
 }
-
 
 NodeConstructor& NodeConstructor::setDescription(const std::string& description)
 {
@@ -153,12 +144,12 @@ NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, const UUIDProvid
         NodeHandlePtr node_handle = std::make_shared<NodeHandle>(type_, uuid, node, uuid_provider, it, ot);
         node->initialize(node_handle);
 
-        if(!uuid.empty() && uuid_provider) {
+        if (!uuid.empty() && uuid_provider) {
             uuid_provider->registerUUID(uuid);
         }
         return node_handle;
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << "cannot construct node with UUID " << uuid.getFullName() << ": " << e.what() << std::endl;
         return nullptr;
     }
@@ -166,7 +157,7 @@ NodeHandlePtr NodeConstructor::makeNodeHandle(const UUID& uuid, const UUIDProvid
 
 std::vector<csapex::param::ParameterPtr> NodeConstructor::getParameters() const
 {
-    if(auto node = makePrototype()->getNode().lock()) {
+    if (auto node = makePrototype()->getNode().lock()) {
         node->setupParameters(*node);
         return node->getParameters();
     }
@@ -179,8 +170,7 @@ Node::Ptr NodeConstructor::makeNode() const
     return c();
 }
 
-
-void NodeConstructor::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void NodeConstructor::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << type_;
     data << descr_;

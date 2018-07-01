@@ -14,21 +14,17 @@ using namespace param;
 
 CSAPEX_REGISTER_PARAMETER_SERIALIZER(StringListParameter)
 
-StringListParameter::StringListParameter()
-    : ParameterImplementation("noname", ParameterDescription())
+StringListParameter::StringListParameter() : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
-StringListParameter::StringListParameter(const std::string &name, const ParameterDescription &description)
-    : ParameterImplementation(name, description)
+StringListParameter::StringListParameter(const std::string& name, const ParameterDescription& description) : ParameterImplementation(name, description)
 {
 }
 
 StringListParameter::~StringListParameter()
 {
-
 }
-
 
 const std::type_info& StringListParameter::type() const
 {
@@ -40,14 +36,14 @@ std::string StringListParameter::toStringImpl() const
 {
     std::stringstream v;
 
-    for(std::size_t i = 0, n = list_.size(); i < n; ++i) {
-        if(i > 0) {
+    for (std::size_t i = 0, n = list_.size(); i < n; ++i) {
+        if (i > 0) {
             v << ", ";
         }
         v << list_[i];
     }
 
-    return std::string("[string_list: ") + v.str()  + "]";
+    return std::string("[string_list: ") + v.str() + "]";
 }
 
 void StringListParameter::get_unsafe(boost::any& out) const
@@ -55,11 +51,10 @@ void StringListParameter::get_unsafe(boost::any& out) const
     out = list_;
 }
 
-
-bool StringListParameter::set_unsafe(const boost::any &v)
+bool StringListParameter::set_unsafe(const boost::any& v)
 {
     auto l = boost::any_cast<std::vector<std::string> >(v);
-    if(list_ != l) {
+    if (list_ != l) {
         list_ = l;
         return true;
     }
@@ -67,10 +62,9 @@ bool StringListParameter::set_unsafe(const boost::any &v)
     return false;
 }
 
-
-void StringListParameter::cloneDataFrom(const Clonable &other)
+void StringListParameter::cloneDataFrom(const Clonable& other)
 {
-    if(const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other)) {
+    if (const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other)) {
         *this = *list;
         triggerChange();
     } else {
@@ -85,18 +79,17 @@ void StringListParameter::doSerialize(YAML::Node& n) const
 
 void StringListParameter::doDeserialize(const YAML::Node& n)
 {
-    if(n["list"].IsDefined()) {
+    if (n["list"].IsDefined()) {
         list_ = n["list"].as<std::vector<std::string> >();
     }
 }
-
 
 void StringListParameter::add(const std::string& value)
 {
     list_.push_back(value);
 }
 
-void StringListParameter::setAt(std::size_t i, const std::string &value)
+void StringListParameter::setAt(std::size_t i, const std::string& value)
 {
     list_.at(i) = value;
 }
@@ -106,7 +99,7 @@ void StringListParameter::remove(std::size_t i)
     list_.erase(list_.begin() + i);
 }
 
-void StringListParameter::removeAll(const std::string &value)
+void StringListParameter::removeAll(const std::string& value)
 {
     list_.erase(std::remove(list_.begin(), list_.end(), value), list_.end());
 }
@@ -120,7 +113,7 @@ std::vector<std::string> StringListParameter::getValues() const
     return list_;
 }
 
-void StringListParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void StringListParameter::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Parameter::serialize(data, version);
 
@@ -133,4 +126,3 @@ void StringListParameter::deserialize(const SerializationBuffer& data, const Sem
 
     data >> list_;
 }
-

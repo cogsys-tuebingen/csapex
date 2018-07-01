@@ -19,17 +19,16 @@ using namespace csapex;
 
 bool run_tests(CsApexCore& core, const std::vector<bf3::path>& reg_test_files)
 {
-
     bool error_happened = false;
 
-    for(const bf3::path& reg_test : reg_test_files) {
-
-        std::string filename = reg_test.filename().string();;
+    for (const bf3::path& reg_test : reg_test_files) {
+        std::string filename = reg_test.filename().string();
+        ;
         int expected_return_code = 0;
 
         // The files must be named <return code>_<file name>.apex
         std::size_t split = filename.find_first_of("_");
-        if(split == std::string::npos) {
+        if (split == std::string::npos) {
             std::cout << "Warning: Do not know the expected return code of test file '" << filename << "'\n";
             std::cout << "         The file does not follow the convention <return code>_<file name>.apex" << '\n';
             std::cout << "         Assuming return code 0" << std::endl;
@@ -50,15 +49,13 @@ bool run_tests(CsApexCore& core, const std::vector<bf3::path>& reg_test_files)
 
                 std::mutex running_mutex;
                 std::condition_variable shutdown;
-                auto connection = core.shutdown_requested.connect([&](){
-                    shutdown.notify_all();
-                });
+                auto connection = core.shutdown_requested.connect([&]() { shutdown.notify_all(); });
 
                 core.startMainLoop();
                 auto lock = std::unique_lock<std::mutex>(running_mutex);
                 shutdown.wait_for(lock, std::chrono::seconds(5));
 
-                if(core.isMainLoopRunning()) {
+                if (core.isMainLoopRunning()) {
                     std::cerr << "Test timed out!" << std::endl;
                     core.abort();
                 }
@@ -69,7 +66,7 @@ bool run_tests(CsApexCore& core, const std::vector<bf3::path>& reg_test_files)
             });
 
             int return_code = sp.join();
-            if(return_code == expected_return_code) {
+            if (return_code == expected_return_code) {
                 std::cout << "[                       OK ] " << std::endl;
 
             } else {
@@ -78,13 +75,13 @@ bool run_tests(CsApexCore& core, const std::vector<bf3::path>& reg_test_files)
                 std::cout << "[                   FAILED ] Error code: " << return_code << ", exepected: " << expected_return_code << std::endl;
 
                 std::string out = sp.getChildStdOut();
-                if(!out.empty()) {
+                if (!out.empty()) {
                     std::cout << "Ouput was: \n";
                     std::cout << out << std::endl;
                 }
 
                 std::string err = sp.getChildStdErr();
-                if(!err.empty()) {
+                if (!err.empty()) {
                     std::cout << "Error Ouput was: \n";
                     std::cout << err << std::endl;
                 }
@@ -92,10 +89,10 @@ bool run_tests(CsApexCore& core, const std::vector<bf3::path>& reg_test_files)
         }
     }
 
-   return error_happened;
+    return error_happened;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     ExceptionHandler eh(false);
     SettingsImplementation settings;
@@ -109,19 +106,18 @@ int main(int argc, char *argv[])
 
     std::vector<bf3::path> reg_test_files;
     auto test_dirs = locator->getPluginPaths("regression_tests");
-    if(test_dirs.empty()) {
+    if (test_dirs.empty()) {
         std::cout << "No regression tests found" << std::endl;
         return 0;
     }
 
-    for(const std::string& dir_string : test_dirs) {
-
+    for (const std::string& dir_string : test_dirs) {
         boost::filesystem::path directory(dir_string);
 
         boost::filesystem::directory_iterator dir(directory);
         boost::filesystem::directory_iterator end;
 
-        for(; dir != end; ++dir) {
+        for (; dir != end; ++dir) {
             boost::filesystem::path path = dir->path();
             reg_test_files.push_back(path);
         }

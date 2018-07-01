@@ -19,17 +19,21 @@
 #define USE_YAML_EMITTER_STYLE 0
 #endif
 
-namespace YAML {
-namespace detail {
+namespace YAML
+{
+namespace detail
+{
 class node;
 }  // namespace detail
 struct Mark;
 }  // namespace YAML
 
-namespace YAML {
+namespace YAML
+{
 class Node;
 
-class NodeBuilder : public EventHandler {
+class NodeBuilder : public EventHandler
+{
 public:
     NodeBuilder();
     virtual ~NodeBuilder();
@@ -41,23 +45,24 @@ public:
 
     virtual void OnNull(const Mark& mark, anchor_t anchor);
     virtual void OnAlias(const Mark& mark, anchor_t anchor);
-    virtual void OnScalar(const Mark& mark, const std::string& tag,
-                          anchor_t anchor, const std::string& value);
+    virtual void OnScalar(const Mark& mark, const std::string& tag, anchor_t anchor, const std::string& value);
 
     virtual void OnSequenceStart(const Mark& mark, const std::string& tag, anchor_t anchor
 #if USE_YAML_EMITTER_STYLE
-                                 , EmitterStyle::value style);
+                                 ,
+                                 EmitterStyle::value style);
 #else
-                                 );
+    );
 #endif
 
     virtual void OnSequenceEnd();
 
     virtual void OnMapStart(const Mark& mark, const std::string& tag, anchor_t anchor
 #if USE_YAML_EMITTER_STYLEs
-                            , EmitterStyle::value style);
+                            ,
+                            EmitterStyle::value style);
 #else
-                            );
+    );
 #endif
     virtual void OnMapEnd();
 
@@ -79,5 +84,5 @@ private:
     std::vector<PushedKey> m_keys;
     std::size_t m_mapDepth;
 };
-}
-#endif // YAML_NODE_BUILDER_H
+}  // namespace YAML
+#endif  // YAML_NODE_BUILDER_H

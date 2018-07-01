@@ -3,8 +3,6 @@
 
 using namespace csapex;
 
-ProfilerImplementation::ProfilerImplementation(bool enabled, int history)
-    : Profiler(enabled, history)
+ProfilerImplementation::ProfilerImplementation(bool enabled, int history) : Profiler(enabled, history)
 {
-
 }

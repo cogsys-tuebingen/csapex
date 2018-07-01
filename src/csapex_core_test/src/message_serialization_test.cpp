@@ -20,7 +20,6 @@
 
 #include <csapex_testing/csapex_test_case.h>
 
-
 namespace csapex
 {
 class VersionedMockV1
@@ -32,21 +31,19 @@ public:
 template <>
 struct semantic_version<VersionedMockV1>
 {
-    static constexpr SemanticVersion value { 1, 0, 0 };
+    static constexpr SemanticVersion value{ 1, 0, 0 };
 };
 
-SerializationBuffer& operator << (SerializationBuffer& data, VersionedMockV1& t)
+SerializationBuffer& operator<<(SerializationBuffer& data, VersionedMockV1& t)
 {
     data << t.payload;
     return data;
 }
-const SerializationBuffer& operator >> (const SerializationBuffer& data, VersionedMockV1 &t)
+const SerializationBuffer& operator>>(const SerializationBuffer& data, VersionedMockV1& t)
 {
     data >> t.payload;
     return data;
 }
-
-
 
 class VersionedMockV2
 {
@@ -57,15 +54,15 @@ public:
 template <>
 struct semantic_version<VersionedMockV2>
 {
-    static constexpr SemanticVersion value { 2, 0, 0 };
+    static constexpr SemanticVersion value{ 2, 0, 0 };
 };
 
-SerializationBuffer& operator << (SerializationBuffer& data, VersionedMockV2& t)
+SerializationBuffer& operator<<(SerializationBuffer& data, VersionedMockV2& t)
 {
     data << t.payload;
     return data;
 }
-const SerializationBuffer& operator >> (const SerializationBuffer& data, VersionedMockV2 &t)
+const SerializationBuffer& operator>>(const SerializationBuffer& data, VersionedMockV2& t)
 {
     data >> t.payload;
     return data;
@@ -76,13 +73,13 @@ namespace connection_types
 class VersionedMockSerializationMessage1 : public MessageTemplate<VersionedMockV1, VersionedMockSerializationMessage1>
 {
 public:
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override
     {
         MessageTemplate<VersionedMockV1, VersionedMockSerializationMessage1>::serialize(data, version);
     }
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
     {
-        if(version.major_v == 123) {
+        if (version.major_v == 123) {
             value.payload = 123;
         } else {
             MessageTemplate<VersionedMockV1, VersionedMockSerializationMessage1>::deserialize(data, version);
@@ -93,7 +90,7 @@ public:
 class VersionedMockSerializationMessage2 : public MessageTemplate<VersionedMockV2, VersionedMockSerializationMessage2>
 {
 public:
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override
     {
         version = version_;
 
@@ -101,7 +98,7 @@ public:
     }
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
     {
-        if(version.major_v == 1) {
+        if (version.major_v == 1) {
             // this was a VersionedMockSerializationMessage1
 
             // read header
@@ -112,7 +109,7 @@ public:
             data >> tmp;
             value.payload = std::to_string(tmp);
 
-        } else if(version.major_v == 123) {
+        } else if (version.major_v == 123) {
             // special case for testing
             value.payload = "this is version 123";
 
@@ -126,46 +123,48 @@ public:
     SemanticVersion version_;
 };
 
-
-}
+}  // namespace connection_types
 
 class MessageSerializationTest : public CsApexTestCase
 {
 public:
     MessageSerializationTest()
     {
-
     }
 
-    virtual ~MessageSerializationTest() {
+    virtual ~MessageSerializationTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
-
 };
 
 namespace connection_types
 {
-
 template <>
-struct type<VersionedMockSerializationMessage1> {
-    static std::string name() {
+struct type<VersionedMockSerializationMessage1>
+{
+    static std::string name()
+    {
         return "VersionedMockSerializationMessage1";
     }
 };
 
 template <>
-struct type<VersionedMockSerializationMessage2> {
-    static std::string name() {
+struct type<VersionedMockSerializationMessage2>
+{
+    static std::string name()
+    {
         return "VersionedMockSerializationMessage2";
     }
 };
 
-}
+}  // namespace connection_types
 
-}
+}  // namespace csapex
 
-namespace YAML {
-template<>
+namespace YAML
+{
+template <>
 struct convert<csapex::connection_types::VersionedMockSerializationMessage1>
 {
     static Node encode(const csapex::connection_types::VersionedMockSerializationMessage1& rhs)
@@ -179,7 +178,7 @@ struct convert<csapex::connection_types::VersionedMockSerializationMessage1>
         return true;
     }
 };
-template<>
+template <>
 struct convert<csapex::connection_types::VersionedMockSerializationMessage2>
 {
     static Node encode(const csapex::connection_types::VersionedMockSerializationMessage2& rhs)
@@ -193,15 +192,13 @@ struct convert<csapex::connection_types::VersionedMockSerializationMessage2>
         return true;
     }
 };
-}
+}  // namespace YAML
 
 CSAPEX_REGISTER_MESSAGE(csapex::connection_types::VersionedMockSerializationMessage1)
 CSAPEX_REGISTER_MESSAGE(csapex::connection_types::VersionedMockSerializationMessage2)
 
 namespace csapex
 {
-
-
 TEST_F(MessageSerializationTest, TemplateMessageGetsSemanticVersionFromWrappedClassV1)
 {
     connection_types::VersionedMockSerializationMessage1::Ptr message(new connection_types::VersionedMockSerializationMessage1);
@@ -210,7 +207,6 @@ TEST_F(MessageSerializationTest, TemplateMessageGetsSemanticVersionFromWrappedCl
     ASSERT_EQ(0, message->getVersion().patch_v);
 }
 
-
 TEST_F(MessageSerializationTest, TemplateMessageGetsSemanticVersionFromWrappedClassV2)
 {
     connection_types::VersionedMockSerializationMessage2::Ptr message(new connection_types::VersionedMockSerializationMessage2);
@@ -218,7 +214,6 @@ TEST_F(MessageSerializationTest, TemplateMessageGetsSemanticVersionFromWrappedCl
     ASSERT_EQ(0, message->getVersion().minor_v);
     ASSERT_EQ(0, message->getVersion().patch_v);
 }
-
 
 TEST_F(MessageSerializationTest, LoadAnyVersion)
 {
@@ -240,8 +235,6 @@ TEST_F(MessageSerializationTest, LoadAnyVersion)
         ASSERT_STREQ("will not be ignored", message->value.payload.c_str());
     }
 }
-
-
 
 TEST_F(MessageSerializationTest, LoadSpecificVersion)
 {
@@ -286,7 +279,4 @@ TEST_F(MessageSerializationTest, LoadOldVersion)
     }
 }
 
-
-
-
-}
+}  // namespace csapex

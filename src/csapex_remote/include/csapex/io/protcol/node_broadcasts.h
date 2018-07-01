@@ -9,11 +9,9 @@
 
 namespace csapex
 {
-
 class NodeBroadcasts : public BroadcastImplementation<NodeBroadcasts>
 {
 public:
-
     enum class NodeBroadcastType
     {
         None
@@ -23,7 +21,7 @@ public:
     NodeBroadcasts(NodeBroadcastType Broadcast_type);
     NodeBroadcasts(NodeBroadcastType Broadcast_type, AUUID uuid);
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::string getType() const override
@@ -38,9 +36,8 @@ private:
     NodeBroadcastType broadcast_type_;
 
     AUUID uuid_;
-
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_BROADCASTS_H
+#endif  // NODE_BROADCASTS_H

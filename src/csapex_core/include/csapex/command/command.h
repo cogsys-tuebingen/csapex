@@ -20,13 +20,13 @@
 
 namespace csapex
 {
-
 class Designer;
 
 class CSAPEX_COMMAND_EXPORT Command : public Streamable
 {
 public:
-    class CSAPEX_COMMAND_EXPORT Access {
+    class CSAPEX_COMMAND_EXPORT Access
+    {
         friend class Group;
         friend class CommandDispatcher;
         friend class CommandDispatcherProxy;
@@ -58,15 +58,14 @@ public:
     void setBeforeSavepoint(bool save);
     bool isBeforeSavepoint();
 
-    virtual void accept(int level, std::function<void (int level, const Command &)> callback) const;
+    virtual void accept(int level, std::function<void(int level, const Command&)> callback) const;
 
     virtual std::string getType() const = 0;
     virtual std::string getDescription() const = 0;
 
-
     virtual uint8_t getPacketType() const override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override = 0;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override = 0;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override = 0;
 
 protected:
@@ -80,13 +79,13 @@ protected:
     virtual bool doUndo() = 0;
     virtual bool doRedo() = 0;
 
-    GraphFacadeImplementation *getRoot();
+    GraphFacadeImplementation* getRoot();
 
-    GraphFacadeImplementation *getGraphFacade();
+    GraphFacadeImplementation* getGraphFacade();
     GraphImplementationPtr getGraph();
     SubgraphNodePtr getSubgraphNode();
 
-    NodeFactoryImplementation *getNodeFactory();
+    NodeFactoryImplementation* getNodeFactory();
 
     GraphFacade* getSubGraph(const UUID& graph_id);
     ThreadPool* getRootThreadPool();
@@ -106,6 +105,6 @@ private:
     bool initialized_;
 };
 
-}
+}  // namespace csapex
 
-#endif // COMMAND_H
+#endif  // COMMAND_H

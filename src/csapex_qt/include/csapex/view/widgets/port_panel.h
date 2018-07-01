@@ -18,7 +18,6 @@ class QBoxLayout;
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT PortPanel : public QFrame
 {
     Q_OBJECT
@@ -26,15 +25,15 @@ class CSAPEX_QT_EXPORT PortPanel : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-
 public:
-    PortPanel(ConnectorType type, DesignerScene *parent);
+    PortPanel(ConnectorType type, DesignerScene* parent);
 
     void setup(GraphFacadePtr graph_facade);
 
     void enableMetaPort(const AUUID& target);
 
-    QString cssClass() {
+    QString cssClass()
+    {
         return QString("PortPanel");
     }
 
@@ -67,11 +66,11 @@ private:
 private:
     GraphFacadePtr graph_facade_;
     ConnectorType type_;
-    DesignerScene *parent_;
+    DesignerScene* parent_;
 
     QBoxLayout* mainlayout;
     QLayout* layout;
 };
 
-}
-#endif // PORT_PANEL_H
+}  // namespace csapex
+#endif  // PORT_PANEL_H

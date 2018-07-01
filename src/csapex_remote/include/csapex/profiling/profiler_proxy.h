@@ -9,8 +9,7 @@
 
 namespace csapex
 {
-
-class CSAPEX_PROFILING_EXPORT ProfilerProxy: public Profiler
+class CSAPEX_PROFILING_EXPORT ProfilerProxy : public Profiler
 {
 public:
     ProfilerProxy(io::ChannelPtr node_channel);
@@ -23,6 +22,6 @@ private:
     io::ChannelPtr node_channel_;
 };
 
-}
+}  // namespace csapex
 
-#endif // PROFILER_PROXY_H
+#endif  // PROFILER_PROXY_H

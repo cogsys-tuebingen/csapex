@@ -11,9 +11,9 @@ namespace csapex
 {
 // SHARED POINTER (of non-serializable type)
 template <typename T>
-SerializationBuffer& operator << (SerializationBuffer& data, const boost::shared_ptr<T>& s)
+SerializationBuffer& operator<<(SerializationBuffer& data, const boost::shared_ptr<T>& s)
 {
-    if(s) {
+    if (s) {
         data << true;
         data << *s;
     } else {
@@ -22,13 +22,12 @@ SerializationBuffer& operator << (SerializationBuffer& data, const boost::shared
     return data;
 }
 
-
 template <typename T>
-const SerializationBuffer& operator >> (const SerializationBuffer& data, boost::shared_ptr<T>& s)
+const SerializationBuffer& operator>>(const SerializationBuffer& data, boost::shared_ptr<T>& s)
 {
     bool valid;
     data >> valid;
-    if(!valid) {
+    if (!valid) {
         return data;
     }
 
@@ -39,6 +38,6 @@ const SerializationBuffer& operator >> (const SerializationBuffer& data, boost::
     s = res;
     return data;
 }
-}
+}  // namespace csapex
 
-#endif // BOOST_IO_H
+#endif  // BOOST_IO_H

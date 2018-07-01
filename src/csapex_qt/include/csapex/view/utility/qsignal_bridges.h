@@ -11,8 +11,8 @@
 
 namespace QSignalBridges
 {
-class CSAPEX_QT_EXPORT QAbstractSliderLimiter : public QObject {
-
+class CSAPEX_QT_EXPORT QAbstractSliderLimiter : public QObject
+{
     Q_OBJECT
 
 public:
@@ -26,11 +26,8 @@ private Q_SLOTS:
     void limitMax(int limit);
 
 private:
-    QAbstractSlider *limitMin_;
-    QAbstractSlider *limitMax_;
+    QAbstractSlider* limitMin_;
+    QAbstractSlider* limitMax_;
 };
-}
-#endif // QSIGNAL_BRIDGES_H
-
-
-
+}  // namespace QSignalBridges
+#endif  // QSIGNAL_BRIDGES_H

@@ -18,7 +18,7 @@ public:
     NodeServer(SessionPtr session);
     ~NodeServer();
 
-    void startObservingNode(const NodeFacadeImplementationPtr &graph);
+    void startObservingNode(const NodeFacadeImplementationPtr& graph);
     void stopObservingNode(const NodeFacadeImplementationPtr& graph);
 
 private:
@@ -26,8 +26,7 @@ private:
     ConnectorServerPtr connector_server_;
 
     std::unordered_map<AUUID, io::ChannelPtr, AUUID::Hasher> channels_;
-
 };
-}
+}  // namespace csapex
 
-#endif // NODE_SERVER_H
+#endif  // NODE_SERVER_H

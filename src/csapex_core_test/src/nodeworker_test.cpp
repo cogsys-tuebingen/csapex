@@ -32,7 +32,6 @@ namespace csapex
 {
 class NodeWorkerTest : public SteppingTest
 {
-
 };
 
 void runSyncTest(NodeFacadeImplementationPtr node_facade, int value = 23)
@@ -85,45 +84,33 @@ void runSyncTest(NodeFacadeImplementationPtr node_facade, int value = 23)
     input->removeConnection(tmp_out.get());
 }
 
-
 TEST_F(NodeWorkerTest, NodeWorkerProcessing)
 {
-    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
-                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                           graph);
+    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
 
     runSyncTest(times_4, 23);
     runSyncTest(times_4, 42);
 }
-
 
 TEST_F(NodeWorkerTest, NodeWorkerCanBeSetOnInitialization)
 {
     {
         NodeStatePtr state = std::make_shared<NodeState>(nullptr);
         state->setExecutionType(ExecutionType::DIRECT);
-        NodeFacadeImplementationPtr direct_times_4 = factory.makeNode("StaticMultiplier4",
-                                                                      UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                                      graph,
-                                                                      state);
+        NodeFacadeImplementationPtr direct_times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph, state);
         ASSERT_EQ(ExecutionType::DIRECT, direct_times_4->getNodeState()->getExecutionType());
     }
     {
         NodeStatePtr state = std::make_shared<NodeState>(nullptr);
         state->setExecutionType(ExecutionType::SUBPROCESS);
-        NodeFacadeImplementationPtr sp_times_4 = factory.makeNode("StaticMultiplier4",
-                                                                  UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                                  graph,
-                                                                  state);
+        NodeFacadeImplementationPtr sp_times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph, state);
         ASSERT_EQ(ExecutionType::SUBPROCESS, sp_times_4->getNodeState()->getExecutionType());
     }
 }
 
 TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedAfterConstruction)
 {
-    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
-                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                           graph);
+    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
 
     times_4->replaceNodeWorker(std::make_shared<DirectNodeWorker>(times_4->getNodeHandle()));
 
@@ -135,24 +122,17 @@ TEST_F(NodeWorkerTest, DirectNodeWorkerWorks)
 {
     NodeStatePtr state = std::make_shared<NodeState>(nullptr);
     state->setExecutionType(ExecutionType::DIRECT);
-    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
-                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                           graph,
-                                                           state);
+    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph, state);
 
     runSyncTest(times_4, 23);
     runSyncTest(times_4, 42);
 }
 
-
 TEST_F(NodeWorkerTest, SubprocessNodeWorkerWorks)
 {
     NodeStatePtr state = std::make_shared<NodeState>(nullptr);
     state->setExecutionType(ExecutionType::SUBPROCESS);
-    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
-                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                           graph,
-                                                           state);
+    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph, state);
 
     runSyncTest(times_4, 23);
     runSyncTest(times_4, 42);
@@ -160,9 +140,7 @@ TEST_F(NodeWorkerTest, SubprocessNodeWorkerWorks)
 
 TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedOnTheFly)
 {
-    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
-                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                           graph);
+    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
 
     runSyncTest(times_4, 23);
 
@@ -173,31 +151,29 @@ TEST_F(NodeWorkerTest, NodeWorkerCanBeSwappedOnTheFly)
 
 TEST_F(NodeWorkerTest, ChangingNodeWorkerDoesNotChangePorts)
 {
-    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4",
-                                                           UUIDProvider::makeUUID_without_parent("StaticMultiplier4"),
-                                                           graph);
+    NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
 
     int inputs = times_4->getInputs().size();
     int outputs = times_4->getOutputs().size();
     int events = times_4->getEvents().size();
     int slots_ = times_4->getSlots().size();
 
-    ASSERT_EQ(inputs , times_4->getNodeHandle()->getExternalInputs().size());
+    ASSERT_EQ(inputs, times_4->getNodeHandle()->getExternalInputs().size());
     ASSERT_EQ(outputs, times_4->getNodeHandle()->getExternalOutputs().size());
-    ASSERT_EQ(events , times_4->getNodeHandle()->getExternalEvents().size());
-    ASSERT_EQ(slots_ , times_4->getNodeHandle()->getExternalSlots().size());
+    ASSERT_EQ(events, times_4->getNodeHandle()->getExternalEvents().size());
+    ASSERT_EQ(slots_, times_4->getNodeHandle()->getExternalSlots().size());
 
     times_4->replaceNodeWorker(std::make_shared<SubprocessNodeWorker>(times_4->getNodeHandle()));
 
-    ASSERT_EQ(inputs , times_4->getNodeHandle()->getExternalInputs().size());
+    ASSERT_EQ(inputs, times_4->getNodeHandle()->getExternalInputs().size());
     ASSERT_EQ(outputs, times_4->getNodeHandle()->getExternalOutputs().size());
-    ASSERT_EQ(events , times_4->getNodeHandle()->getExternalEvents().size());
-    ASSERT_EQ(slots_ , times_4->getNodeHandle()->getExternalSlots().size());
+    ASSERT_EQ(events, times_4->getNodeHandle()->getExternalEvents().size());
+    ASSERT_EQ(slots_, times_4->getNodeHandle()->getExternalSlots().size());
 
-    ASSERT_EQ(inputs , times_4->getInputs().size());
+    ASSERT_EQ(inputs, times_4->getInputs().size());
     ASSERT_EQ(outputs, times_4->getOutputs().size());
-    ASSERT_EQ(events , times_4->getEvents().size());
-    ASSERT_EQ(slots_ , times_4->getSlots().size());
+    ASSERT_EQ(events, times_4->getEvents().size());
+    ASSERT_EQ(slots_, times_4->getSlots().size());
 }
 
 TEST_F(NodeWorkerTest, SubprocessNodeWorkerCanHandleSegmentationFault)
@@ -212,9 +188,7 @@ TEST_F(NodeWorkerTest, SubprocessNodeWorkerReceivesErrorMessagesFromSubprocess)
 
 TEST_F(NodeWorkerTest, SubprocessHandlesSynchronousPorts)
 {
-    NodeFacadeImplementationPtr node_facade = factory.makeNode("AsyncStaticMultiplier4",
-                                                               UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4"),
-                                                               graph);
+    NodeFacadeImplementationPtr node_facade = factory.makeNode("AsyncStaticMultiplier4", UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4"), graph);
 
     NodeHandle& nh = *node_facade->getNodeHandle();
     NodeWorkerPtr nw = node_facade->getNodeWorker().lock();
@@ -263,9 +237,7 @@ TEST_F(NodeWorkerTest, SubprocessHandlesSynchronousPorts)
 
 TEST_F(NodeWorkerTest, SubprocessHandlesAsynchronousPorts)
 {
-    NodeFacadeImplementationPtr node_facade = factory.makeNode("AsyncStaticMultiplier4",
-                                                               UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4"),
-                                                               graph);
+    NodeFacadeImplementationPtr node_facade = factory.makeNode("AsyncStaticMultiplier4", UUIDProvider::makeUUID_without_parent("AsyncStaticMultiplier4"), graph);
 
     node_facade->replaceNodeWorker(std::make_shared<SubprocessNodeWorker>(node_facade->getNodeHandle()));
 
@@ -313,5 +285,4 @@ TEST_F(NodeWorkerTest, SubprocessHandlesAsynchronousPorts)
 
     slot->removeConnection(tmp_out.get());
 }
-}
-
+}  // namespace csapex

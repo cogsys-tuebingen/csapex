@@ -10,8 +10,8 @@
 #include <vector>
 #include <memory>
 
-namespace csapex {
-
+namespace csapex
+{
 class UUIDProvider;
 class AUUID;
 
@@ -30,32 +30,32 @@ class CSAPEX_UTILS_EXPORT UUID
     friend class UUIDProvider;
 
 public:
-	static std::string stripNamespace(const std::string& name);
+    static std::string stripNamespace(const std::string& name);
 
-	static const std::string namespace_separator;
+    static const std::string namespace_separator;
 
-	static UUID NONE;
+    static UUID NONE;
 
 public:
-    friend bool CSAPEX_UTILS_EXPORT operator == (const std::string& str, const UUID& uuid_);
-    friend bool CSAPEX_UTILS_EXPORT operator == (const UUID& uuid_, const std::string& str);
+    friend bool CSAPEX_UTILS_EXPORT operator==(const std::string& str, const UUID& uuid_);
+    friend bool CSAPEX_UTILS_EXPORT operator==(const UUID& uuid_, const std::string& str);
 
-    friend bool CSAPEX_UTILS_EXPORT operator == (const UUID& a, const UUID& b);
-    friend bool CSAPEX_UTILS_EXPORT operator != (const UUID& a, const UUID& b);
+    friend bool CSAPEX_UTILS_EXPORT operator==(const UUID& a, const UUID& b);
+    friend bool CSAPEX_UTILS_EXPORT operator!=(const UUID& a, const UUID& b);
 
-    bool operator < (const UUID& rhs) const;
+    bool operator<(const UUID& rhs) const;
 
-	struct CSAPEX_UTILS_EXPORT Hasher {
-      std::size_t operator()(const UUID& k) const;
+    struct CSAPEX_UTILS_EXPORT Hasher
+    {
+        std::size_t operator()(const UUID& k) const;
     };
-
 
 public:
     UUID();
     UUID(const UUID& other);
     virtual ~UUID();
 
-    UUID& operator = (const UUID& other);
+    UUID& operator=(const UUID& other);
 
     void free();
 
@@ -117,22 +117,20 @@ public:
 
     AUUID parentAUUID() const;
 
-    AUUID& operator = (const AUUID& uuid) = default;
-    AUUID& operator = (const UUID& uuid);
-
+    AUUID& operator=(const AUUID& uuid) = default;
+    AUUID& operator=(const UUID& uuid);
 
     virtual AUUID getAbsoluteUUID() const;
 
-    bool operator < (const AUUID& rhs) const;
+    bool operator<(const AUUID& rhs) const;
 
-    struct Hasher {
-      std::size_t operator()(const AUUID& k) const;
+    struct Hasher
+    {
+        std::size_t operator()(const AUUID& k) const;
     };
-
 };
 
+CSAPEX_UTILS_EXPORT std::ostream& operator<<(std::ostream& out, const UUID& uuid_);
 
-CSAPEX_UTILS_EXPORT std::ostream& operator << (std::ostream& out, const UUID& uuid_);
-
-}
-#endif // UUID_H
+}  // namespace csapex
+#endif  // UUID_H

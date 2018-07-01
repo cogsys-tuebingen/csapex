@@ -19,10 +19,8 @@
 
 namespace csapex
 {
-
 class CsApexViewCore;
 class CsApexWindow;
-
 
 struct CsApexCoreApp : public QCoreApplication
 {
@@ -51,7 +49,7 @@ struct Main : public QObject, public Observer
     Q_OBJECT
 
 public:
-    Main(QCoreApplication *app, Settings &settings, ExceptionHandler &handler);
+    Main(QCoreApplication* app, Settings& settings, ExceptionHandler& handler);
     ~Main();
 
     int run();
@@ -71,6 +69,6 @@ private:
     CsApexSplashScreen* splash;
 };
 
-}
+}  // namespace csapex
 
-#endif // CSAPEX_CLIEHT_H
+#endif  // CSAPEX_CLIEHT_H

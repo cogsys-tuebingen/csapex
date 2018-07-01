@@ -34,8 +34,6 @@ class QSizeGrip;
 
 namespace csapex
 {
-
-
 class CSAPEX_QT_EXPORT NodeBox : public QWidget, public Observer
 {
     Q_OBJECT
@@ -45,7 +43,8 @@ class CSAPEX_QT_EXPORT NodeBox : public QWidget, public Observer
 public:
     typedef std::shared_ptr<NodeBox> Ptr;
 
-    QString cssClass() {
+    QString cssClass()
+    {
         return QString("NodeBox");
     }
 
@@ -61,7 +60,7 @@ public:
     virtual void init();
 
     /// MODIFIER
-    Port* createPort(ConnectorPtr connector, QBoxLayout *layout);
+    Port* createPort(ConnectorPtr connector, QBoxLayout* layout);
     void removePort(ConnectorWeakPtr connector);
 
     bool isGraph() const;
@@ -94,7 +93,7 @@ public:
     bool isSelected() const;
     virtual void setSelected(bool selected);
 
-    void keyPressEvent(QKeyEvent * e);
+    void keyPressEvent(QKeyEvent* e);
 
     void stop();
 
@@ -104,7 +103,7 @@ protected:
     bool eventFilter(QObject*, QEvent*);
 
 public:
-    void updateBoxInformation(GraphFacade *graph);
+    void updateBoxInformation(GraphFacade* graph);
 
 public Q_SLOTS:
     void getInformation();
@@ -147,16 +146,16 @@ Q_SIGNALS:
     void nodeStateChanged();
     void enabledChange(bool val);
 
-
     void portAdded(Port*);
     void portRemoved(Port*);
 
     void createPortRequest(ConnectorDescription request);
     void createPortAndConnectRequest(ConnectorDescription request, ConnectorPtr);
-    void createPortAndMoveRequest(ConnectorDescription request,  ConnectorPtr);
+    void createPortAndMoveRequest(ConnectorDescription request, ConnectorPtr);
+
 protected:
     void setStyleForId(QLabel* label, int id);
-    void resizeEvent(QResizeEvent * e);
+    void resizeEvent(QResizeEvent* e);
 
     QString getNodeState();
 
@@ -202,5 +201,5 @@ protected:
     stamp_t last_state_request_;
 };
 
-}
-#endif // BOX_H
+}  // namespace csapex
+#endif  // BOX_H

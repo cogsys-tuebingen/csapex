@@ -21,7 +21,6 @@ MessageSerializer::MessageSerializer()
 
 MessageSerializer::~MessageSerializer()
 {
-
 }
 
 void MessageSerializer::shutdown()
@@ -30,7 +29,7 @@ void MessageSerializer::shutdown()
 }
 void MessageSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    if(const TokenData* message = dynamic_cast<const TokenData*>(&packet)) {
+    if (const TokenData* message = dynamic_cast<const TokenData*>(&packet)) {
         std::string type = message->typeName();
         data << type;
 
@@ -51,7 +50,7 @@ StreamablePtr MessageSerializer::deserialize(const SerializationBuffer& data)
     return result;
 }
 
-TokenData::Ptr MessageSerializer::deserializeYamlMessage(const YAML::Node &node)
+TokenData::Ptr MessageSerializer::deserializeYamlMessage(const YAML::Node& node)
 {
     MessageSerializer& i = instance();
 
@@ -59,35 +58,35 @@ TokenData::Ptr MessageSerializer::deserializeYamlMessage(const YAML::Node &node)
     try {
         type = node["type"].as<std::string>();
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         throw DeserializationError("cannot get type");
     }
 
-    if(i.type_to_yaml_converter.empty()) {
+    if (i.type_to_yaml_converter.empty()) {
         throw DeserializationError("no connection types registered!");
     }
 
     std::string converter_type = type;
     const std::string ns = "csapex::connection_types::";
-    if(type.find(ns) != std::string::npos){
-        converter_type.erase(0,ns.size());
+    if (type.find(ns) != std::string::npos) {
+        converter_type.erase(0, ns.size());
     }
 
-    if(i.type_to_yaml_converter.find(converter_type) == i.type_to_yaml_converter.end()) {
+    if (i.type_to_yaml_converter.find(converter_type) == i.type_to_yaml_converter.end()) {
         throw DeserializationError(std::string("cannot deserialize, no such type (") + type + ")");
     }
 
     TokenData::Ptr msg = MessageFactory::createMessage(converter_type);
     try {
         i.type_to_yaml_converter.at(converter_type).decoder(node["data"], *msg);
-    } catch(const YAML::Exception& e) {
+    } catch (const YAML::Exception& e) {
         throw DeserializationError(std::string("error while deserializing: ") + e.msg);
     }
 
     return msg;
 }
 
-YAML::Node MessageSerializer::serializeYamlMessage(const TokenData &msg)
+YAML::Node MessageSerializer::serializeYamlMessage(const TokenData& msg)
 {
     try {
         MessageSerializer& i = instance();
@@ -96,7 +95,7 @@ YAML::Node MessageSerializer::serializeYamlMessage(const TokenData &msg)
 
         YAML::Node node;
         auto pos = i.type_to_yaml_converter.find(type);
-        if(pos == i.type_to_yaml_converter.end()) {
+        if (pos == i.type_to_yaml_converter.end()) {
             return node;
         }
 
@@ -108,24 +107,21 @@ YAML::Node MessageSerializer::serializeYamlMessage(const TokenData &msg)
 
         return node;
 
-    } catch(const std::out_of_range& e) {
-        throw SerializationError(std::string("cannot serialize message of type ")
-                                 + msg.descriptiveName() + ", no YAML converter registered for " + msg.typeName());
+    } catch (const std::out_of_range& e) {
+        throw SerializationError(std::string("cannot serialize message of type ") + msg.descriptiveName() + ", no YAML converter registered for " + msg.typeName());
     }
 }
 
-
-TokenData::Ptr MessageSerializer::readYaml(const YAML::Node &node)
+TokenData::Ptr MessageSerializer::readYaml(const YAML::Node& node)
 {
     TokenData::Ptr msg = MessageSerializer::deserializeYamlMessage(node);
-    if(!msg) {
+    if (!msg) {
         std::string type = node["type"].as<std::string>();
         throw DeserializationError(std::string("message type '") + type + "' unknown");
     }
 
     return msg;
 }
-
 
 TokenData::Ptr MessageSerializer::deserializeBinaryMessage(const SerializationBuffer& buffer)
 {
@@ -142,7 +138,7 @@ void MessageSerializer::registerMessage(std::string type, YamlConverter converte
 
     std::map<std::string, YamlConverter>::const_iterator it = i.type_to_yaml_converter.find(type);
 
-    if(it != i.type_to_yaml_converter.end()) {
+    if (it != i.type_to_yaml_converter.end()) {
         return;
     }
 

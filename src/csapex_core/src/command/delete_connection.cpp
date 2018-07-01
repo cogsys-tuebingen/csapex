@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteConnection)
 
-DeleteConnection::DeleteConnection(const AUUID &parent_uuid, const UUID& from, const UUID&  to)
-    : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(from), to_uuid(to)
+DeleteConnection::DeleteConnection(const AUUID& parent_uuid, const UUID& from, const UUID& to) : Meta(parent_uuid, "delete connection and fulcrums"), active_(false), from_uuid(from), to_uuid(to)
 {
 }
 
@@ -30,7 +29,6 @@ std::string DeleteConnection::getDescription() const
 {
     return std::string("deleted connection between ") + from_uuid.getFullName() + " and " + to_uuid.getFullName();
 }
-
 
 bool DeleteConnection::doExecute()
 {
@@ -49,7 +47,7 @@ bool DeleteConnection::doExecute()
     add(CommandFactory(getRoot(), graph_uuid).deleteAllConnectionFulcrumsCommand(connection));
     locked = true;
 
-    if(Meta::doExecute()) {
+    if (Meta::doExecute()) {
         graph->deleteConnection(connection);
     }
 
@@ -73,15 +71,12 @@ bool DeleteConnection::doUndo()
     return Meta::doUndo();
 }
 
-
-
 bool DeleteConnection::doRedo()
 {
     return doExecute();
 }
 
-
-void DeleteConnection::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void DeleteConnection::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Meta::serialize(data, version);
 
@@ -97,7 +92,7 @@ void DeleteConnection::deserialize(const SerializationBuffer& data, const Semant
     Meta::deserialize(data, version);
 
     data >> connection_id;
-    data >>active_;
+    data >> active_;
 
     data >> from_uuid;
     data >> to_uuid;

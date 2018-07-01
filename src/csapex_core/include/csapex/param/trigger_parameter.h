@@ -5,9 +5,10 @@
 #include <csapex/param/parameter_impl.hpp>
 #include <csapex_param_export.h>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT TriggerParameter : public ParameterImplementation<TriggerParameter, 0x007>
 {
     friend class ParameterFactory;
@@ -24,14 +25,17 @@ public:
     explicit TriggerParameter(const std::string& name, const ParameterDescription& description);
     virtual ~TriggerParameter();
 
-    TriggerParameter& operator = (const TriggerParameter& p);
+    TriggerParameter& operator=(const TriggerParameter& p);
 
-    virtual std::string TYPE() const override { return "trigger"; }
+    virtual std::string TYPE() const override
+    {
+        return "trigger";
+    }
 
     void trigger();
     virtual bool hasState() const override;
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
     void doSerialize(YAML::Node& e) const override;
@@ -44,6 +48,6 @@ protected:
 private:
 };
 
-}
-}
-#endif // TRIGGER_PARAM_H
+}  // namespace param
+}  // namespace csapex
+#endif  // TRIGGER_PARAM_H

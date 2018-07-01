@@ -12,20 +12,20 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Output : public Connectable, public MessageAllocator, public Observer
 {
     friend class Graph;
     friend class DesignerIO;
 
 public:
-    enum class State {
+    enum class State
+    {
         ACTIVE,
         IDLE
     };
 
 public:
-    Output(const UUID &uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Output(const UUID& uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
     ~Output();
 
     void setOutputTransition(OutputTransition* ot);
@@ -35,7 +35,7 @@ public:
     void removeConnection(Connectable* other_side) override;
 
     void notifyMessageProcessed();
-    void notifyMessageProcessed(Connection *connection);
+    void notifyMessageProcessed(Connection* connection);
 
     virtual bool isOutput() const override
     {
@@ -89,6 +89,6 @@ protected:
     State state_;
 };
 
-}
+}  // namespace csapex
 
-#endif // FOR_OUT_H
+#endif  // FOR_OUT_H

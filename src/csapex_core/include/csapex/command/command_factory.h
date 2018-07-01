@@ -13,12 +13,11 @@
 
 namespace csapex
 {
-
 class CSAPEX_COMMAND_EXPORT CommandFactory
 {
 public:
-    CommandFactory(GraphFacade *root, const AUUID& graph_id);
-    CommandFactory(GraphFacade *root);
+    CommandFactory(GraphFacade* root, const AUUID& graph_id);
+    CommandFactory(GraphFacade* root);
 
 public:
     CommandPtr deleteAllNodes(const std::vector<UUID>& uuids);
@@ -31,10 +30,8 @@ public:
 
     CommandPtr removeConnectionCmd(Connector* output, Connection* connection);
 
-
     CommandPtr moveConnections(const UUID& from, const UUID& to);
     CommandPtr moveConnections(Connector* from, Connector* to);
-
 
     CommandPtr setConnectionActive(int connection, bool active);
 
@@ -44,32 +41,29 @@ public:
     CommandPtr deleteConnectionByIdCommand(int id);
     CommandPtr clearCommand();
 
-    CommandPtr switchThreadRecursively(const std::vector<UUID> &node_uuids, int id);
-    CommandPtr muteRecursively(const std::vector<UUID> &node_uuids, bool muted);
-    CommandPtr setMaximumFrequencyRecursively(const std::vector<UUID> &node_uuids, double frequency);
-    CommandPtr setLoggerLevelRecursively(const std::vector<UUID> &node_uuids, int level);
-
+    CommandPtr switchThreadRecursively(const std::vector<UUID>& node_uuids, int id);
+    CommandPtr muteRecursively(const std::vector<UUID>& node_uuids, bool muted);
+    CommandPtr setMaximumFrequencyRecursively(const std::vector<UUID>& node_uuids, double frequency);
+    CommandPtr setLoggerLevelRecursively(const std::vector<UUID>& node_uuids, int level);
 
     CommandPtr createVariadicInput(const AUUID& node_uuid, TokenDataConstPtr connection_type, const std::string& label, bool optional);
     CommandPtr createVariadicOutput(const AUUID& node_uuid, TokenDataConstPtr connection_type, const std::string& label);
     CommandPtr createVariadicEvent(const AUUID& node_uuid, const std::string& label);
     CommandPtr createVariadicSlot(const AUUID& node_uuid, const std::string& label);
 
-    CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string &label);
+    CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string& label);
     CommandPtr createVariadicPort(const AUUID& node_uuid, ConnectorType port_type, TokenDataConstPtr connection_type, const std::string& label, bool optional);
 
-    CommandPtr deleteThreadGroup(csapex::ThreadGroup * group);
+    CommandPtr deleteThreadGroup(csapex::ThreadGroup* group);
 
 private:
     GraphFacade* getGraphFacade() const;
-
 
 private:
     GraphFacade* root_;
     AUUID graph_uuid;
 };
 
-}
+}  // namespace csapex
 
-#endif // COMMAND_FACTORY_H
-
+#endif  // COMMAND_FACTORY_H

@@ -87,4 +87,4 @@ protected:
     virtual void paintEvent(QPaintEvent* event);
 };
 
-#endif // QXTSPANSLIDER_H
+#endif  // QXTSPANSLIDER_H

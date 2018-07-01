@@ -29,9 +29,9 @@
 #include "qxtglobal.h"
 //#include <QObject>
 
-class QXT_CORE_EXPORT Qxt  : public QObject
+class QXT_CORE_EXPORT Qxt : public QObject
 {
-    //Q_OBJECT
+    // Q_OBJECT
     Q_ENUMS(Rotation)
     Q_ENUMS(DecorationStyle)
     Q_ENUMS(ErrorCode)
@@ -39,9 +39,9 @@ class QXT_CORE_EXPORT Qxt  : public QObject
 public:
     enum Rotation
     {
-        NoRotation  = 0,
-        UpsideDown  = 180,
-        Clockwise  = 90,
+        NoRotation = 0,
+        UpsideDown = 180,
+        Clockwise = 90,
         CounterClockwise = 270
     };
 
@@ -80,9 +80,9 @@ public:
 
     enum QxtItemDataRole
     {
-        ItemStartTimeRole  = Qt::UserRole + 1,
-        ItemDurationRole   = ItemStartTimeRole + 1,
-        UserRole           = ItemDurationRole + 23
+        ItemStartTimeRole = Qt::UserRole + 1,
+        ItemDurationRole = ItemStartTimeRole + 1,
+        UserRole = ItemDurationRole + 23
     };
 
     enum Timeunit
@@ -97,4 +97,4 @@ public:
     };
 };
 
-#endif // QXTNAMESPACE_H
+#endif  // QXTNAMESPACE_H

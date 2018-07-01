@@ -17,7 +17,6 @@ class QGraphicsOpacityEffect;
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT NotificationWidget : public QWidget
 {
     Q_OBJECT
@@ -29,7 +28,7 @@ public:
     void setNotification(const Notification& notification);
     const Notification& getNotification();
 
-    bool eventFilter(QObject *, QEvent *);
+    bool eventFilter(QObject*, QEvent*);
 
     bool isFading() const;
 
@@ -52,7 +51,7 @@ protected:
 
 private:
     QTimer* timer_;
-    QGraphicsOpacityEffect *eff;
+    QGraphicsOpacityEffect* eff;
 
     Notification notification_;
     std::string notification_msg_;
@@ -63,5 +62,5 @@ private:
     bool fading_;
 };
 
-}
-#endif // NOTIFICATION_WIDGET_H
+}  // namespace csapex
+#endif  // NOTIFICATION_WIDGET_H

@@ -3,13 +3,11 @@
 
 namespace csapex
 {
-
 enum class ExecutionMode
 {
     PIPELINING,
     SEQUENTIAL
 };
-
 }
 
-#endif // EXECUTION_MODE_H
+#endif  // EXECUTION_MODE_H

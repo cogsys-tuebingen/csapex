@@ -11,10 +11,8 @@
 using namespace csapex;
 using namespace csapex::graph;
 
-Vertex::Vertex(NodeFacadePtr node)
-    : node_(node)
+Vertex::Vertex(NodeFacadePtr node) : node_(node)
 {
-
 }
 
 Vertex::~Vertex()
@@ -33,15 +31,15 @@ AUUID Vertex::getAUUID() const
 
 void Vertex::detach()
 {
-    for(const VertexWeakPtr& w_parent : parents_) {
-        if(VertexPtr parent = w_parent.lock()) {
+    for (const VertexWeakPtr& w_parent : parents_) {
+        if (VertexPtr parent = w_parent.lock()) {
             parent->removeChild(this);
         }
     }
     parents_.clear();
 
-    for(const VertexWeakPtr& w_child : children_) {
-        if(VertexPtr child = w_child.lock()) {
+    for (const VertexWeakPtr& w_child : children_) {
+        if (VertexPtr child = w_child.lock()) {
             child->removeParent(this);
         }
     }
@@ -58,11 +56,10 @@ NodeCharacteristics& Vertex::getNodeCharacteristics() const
     return characteristics_;
 }
 
-
 std::vector<VertexPtr> Vertex::getParents() const
 {
     std::vector<VertexPtr> res;
-    for(const VertexWeakPtr& parent : parents_) {
+    for (const VertexWeakPtr& parent : parents_) {
         res.push_back(parent.lock());
     }
     return res;
@@ -71,7 +68,7 @@ std::vector<VertexPtr> Vertex::getParents() const
 std::vector<VertexPtr> Vertex::getChildren() const
 {
     std::vector<VertexPtr> res;
-    for(const VertexWeakPtr& child : children_) {
+    for (const VertexWeakPtr& child : children_) {
         res.push_back(child.lock());
     }
     return res;
@@ -84,9 +81,9 @@ void Vertex::addParent(VertexPtr parent)
 
 void Vertex::removeParent(Vertex* parent)
 {
-    for(auto it = parents_.begin(); it != parents_.end();) {
-        if(VertexPtr p = it->lock()) {
-            if(p.get() == parent) {
+    for (auto it = parents_.begin(); it != parents_.end();) {
+        if (VertexPtr p = it->lock()) {
+            if (p.get() == parent) {
                 it = parents_.erase(it);
             } else {
                 ++it;
@@ -104,9 +101,9 @@ void Vertex::addChild(VertexPtr child)
 
 void Vertex::removeChild(Vertex* child)
 {
-    for(auto it = children_.begin(); it != children_.end();) {
-        if(VertexPtr p = it->lock()) {
-            if(p.get() == child) {
+    for (auto it = children_.begin(); it != children_.end();) {
+        if (VertexPtr p = it->lock()) {
+            if (p.get() == child) {
                 it = children_.erase(it);
             } else {
                 ++it;

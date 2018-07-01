@@ -10,10 +10,10 @@
 
 namespace csapex
 {
-
 class Timer;
 
-class CSAPEX_PROFILING_EXPORT Interlude {
+class CSAPEX_PROFILING_EXPORT Interlude
+{
 public:
     typedef std::shared_ptr<Interlude> Ptr;
 
@@ -24,14 +24,13 @@ public:
 
 private:
     Interlude(const Interlude& copy) = delete;
-    Interlude& operator = (const Interlude& copy) = delete;
+    Interlude& operator=(const Interlude& copy) = delete;
 
 private:
     Timer* parent_;
     Interval::Ptr interval_;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // INTERLUDE_H
+#endif  // INTERLUDE_H

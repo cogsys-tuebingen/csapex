@@ -9,27 +9,31 @@
 #define MAKE_NS_CLASS(NS, C) NS::MAKE_CLASS(C)
 
 /// LocalNodeAdapter registration
-#define CSAPEX_REGISTER_LOCAL_NODE_ADAPTER_NS(Namespace, Adapter, Adaptee) \
-namespace Namespace { \
-class MAKE_CLASS(Adapter) : public impl::LocalAdapterBuilder<Adapter, Adaptee> {}; \
-} \
-CSAPEX_REGISTER_CLASS(MAKE_NS_CLASS(Namespace,Adapter),csapex::NodeAdapterBuilder)
+#define CSAPEX_REGISTER_LOCAL_NODE_ADAPTER_NS(Namespace, Adapter, Adaptee)                                                                                                                             \
+    namespace Namespace                                                                                                                                                                                \
+    {                                                                                                                                                                                                  \
+    class MAKE_CLASS(Adapter) : public impl::LocalAdapterBuilder<Adapter, Adaptee>                                                                                                                     \
+    {                                                                                                                                                                                                  \
+    };                                                                                                                                                                                                 \
+    }                                                                                                                                                                                                  \
+    CSAPEX_REGISTER_CLASS(MAKE_NS_CLASS(Namespace, Adapter), csapex::NodeAdapterBuilder)
 
-#define CSAPEX_REGISTER_LOCAL_NODE_ADAPTER(Adapter, Adaptee) \
-CSAPEX_REGISTER_LOCAL_NODE_ADAPTER_NS(csapex,Adapter,Adaptee)
-
+#define CSAPEX_REGISTER_LOCAL_NODE_ADAPTER(Adapter, Adaptee) CSAPEX_REGISTER_LOCAL_NODE_ADAPTER_NS(csapex, Adapter, Adaptee)
 
 /// ProxyNodeAdapter registration
-#define CSAPEX_REGISTER_NODE_ADAPTER_NS(Namespace, Adapter, Adaptee) \
-namespace Namespace { \
-class MAKE_CLASS(Adapter) : public impl::ProxyAdapterBuilder<Adapter> {\
-    public: MAKE_CLASS(Adapter)() : impl::ProxyAdapterBuilder<Adapter>(#Adaptee) {} \
-}; \
-} \
-CSAPEX_REGISTER_CLASS(MAKE_NS_CLASS(Namespace,Adapter),csapex::NodeAdapterBuilder)
+#define CSAPEX_REGISTER_NODE_ADAPTER_NS(Namespace, Adapter, Adaptee)                                                                                                                                   \
+    namespace Namespace                                                                                                                                                                                \
+    {                                                                                                                                                                                                  \
+    class MAKE_CLASS(Adapter) : public impl::ProxyAdapterBuilder<Adapter>                                                                                                                              \
+    {                                                                                                                                                                                                  \
+    public:                                                                                                                                                                                            \
+        MAKE_CLASS(Adapter)() : impl::ProxyAdapterBuilder<Adapter>(#Adaptee)                                                                                                                           \
+        {                                                                                                                                                                                              \
+        }                                                                                                                                                                                              \
+    };                                                                                                                                                                                                 \
+    }                                                                                                                                                                                                  \
+    CSAPEX_REGISTER_CLASS(MAKE_NS_CLASS(Namespace, Adapter), csapex::NodeAdapterBuilder)
 
-#define CSAPEX_REGISTER_NODE_ADAPTER(Adapter, Adaptee) \
-CSAPEX_REGISTER_NODE_ADAPTER_NS(csapex,Adapter,Adaptee)
+#define CSAPEX_REGISTER_NODE_ADAPTER(Adapter, Adaptee) CSAPEX_REGISTER_NODE_ADAPTER_NS(csapex, Adapter, Adaptee)
 
-
-#endif // REGISTER_NODE_ADAPTER_H
+#endif  // REGISTER_NODE_ADAPTER_H

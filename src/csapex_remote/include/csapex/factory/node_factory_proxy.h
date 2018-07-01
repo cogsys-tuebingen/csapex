@@ -8,16 +8,15 @@
 
 namespace csapex
 {
-
-class CSAPEX_CORE_EXPORT NodeFactoryProxy: public NodeFactory, public Proxy
+class CSAPEX_CORE_EXPORT NodeFactoryProxy : public NodeFactory, public Proxy
 {
 public:
-    NodeFactoryProxy(const SessionPtr &session);
+    NodeFactoryProxy(const SessionPtr& session);
 
 protected:
     void ensureLoaded() override;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_FACTORY_PROXY_H
+#endif  // NODE_FACTORY_PROXY_H

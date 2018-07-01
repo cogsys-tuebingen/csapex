@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_UTILS_EXPORT Failure
 {
 public:
@@ -62,6 +61,6 @@ public:
     std::string thread;
 };
 
-}
+}  // namespace csapex
 
-#endif // EXECPTIONS_H
+#endif  // EXECPTIONS_H

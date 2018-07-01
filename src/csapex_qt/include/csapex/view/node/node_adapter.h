@@ -16,7 +16,8 @@
 
 class QListView;
 
-namespace YAML {
+namespace YAML
+{
 class Node;
 }
 
@@ -53,7 +54,7 @@ protected:
     void invalidate();
 
 protected:
-    QBoxLayout *layout_;
+    QBoxLayout* layout_;
     bool is_gui_setup_;
 
     std::string current_name_;
@@ -64,6 +65,6 @@ protected:
     NodeBox* parent_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_ADAPTER_H
+#endif  // NODE_ADAPTER_H

@@ -13,21 +13,16 @@
 
 using namespace csapex;
 
-GenericState::GenericState()
-    : silent_(false)
+GenericState::GenericState() : silent_(false)
 {
-
 }
 
-GenericState::GenericState(const GenericState& copy)
-    : GenericState()
+GenericState::GenericState(const GenericState& copy) : GenericState()
 {
-    operator = (copy);
+    operator=(copy);
 }
 
-
-GenericState::GenericState(GenericState&& move)
-    : GenericState()
+GenericState::GenericState(GenericState&& move) : GenericState()
 {
     params = std::move(move.params);
     param_valid_name_cache = std::move(move.param_valid_name_cache);
@@ -38,8 +33,7 @@ GenericState::GenericState(GenericState&& move)
     order = std::move(move.order);
 }
 
-
-void GenericState::operator = (const GenericState& copy)
+void GenericState::operator=(const GenericState& copy)
 {
     params = copy.params;
     param_valid_name_cache = copy.param_valid_name_cache;
@@ -50,44 +44,45 @@ void GenericState::operator = (const GenericState& copy)
     order = copy.order;
 }
 
-
-void GenericState::setParentUUID(const UUID &parent_uuid)
+void GenericState::setParentUUID(const UUID& parent_uuid)
 {
     apex_assert_hard(!parent_uuid.composite());
 
     parent_uuid_ = parent_uuid;
 
-    for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = params.begin(); it != params.end(); ++it) {
+    for (std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = params.begin(); it != params.end(); ++it) {
         it->second->setUUID(parent_uuid_);
     }
 }
 
 ClonablePtr GenericState::makeEmptyInstance() const
 {
-    return Ptr{new GenericState};
+    return Ptr{ new GenericState };
 }
 
 void GenericState::cloneDataFrom(const Clonable& other)
 {
-    if(const GenericState* other_state = dynamic_cast<const GenericState*>(&other)) {
+    if (const GenericState* other_state = dynamic_cast<const GenericState*>(&other)) {
         setFrom(*other_state);
     }
 }
 
-void GenericState::writeYaml(YAML::Node& out) const {
+void GenericState::writeYaml(YAML::Node& out) const
+{
     out["params"] = params;
 
     std::vector<std::string> persistent_v(persistent.begin(), persistent.end());
     out["persistent_params"] = persistent_v;
 }
 
-void GenericState::readYaml(const YAML::Node& node) {
-    if(node["params"].IsDefined()) {
+void GenericState::readYaml(const YAML::Node& node)
+{
+    if (node["params"].IsDefined()) {
         auto serialized_params = node["params"].as<std::map<std::string, csapex::param::Parameter::Ptr> >();
-        for(auto pair : serialized_params) {
+        for (auto pair : serialized_params) {
             apex_assert_hard(pair.first == pair.second->name());
             auto pos = params.find(pair.first);
-            if(pos == params.end()) {
+            if (pos == params.end()) {
                 params[pair.first] = pair.second;
                 legacy_parameter_added(params[pair.first]);
             } else {
@@ -97,17 +92,16 @@ void GenericState::readYaml(const YAML::Node& node) {
             legacy.insert(pair.first);
         }
     }
-    if(node["persistent_params"].IsDefined()) {
+    if (node["persistent_params"].IsDefined()) {
         std::vector<std::string> persistent_v = node["persistent_params"].as<std::vector<std::string> >();
         persistent.clear();
         persistent.insert(persistent_v.begin(), persistent_v.end());
     }
 }
 
-
-void GenericState::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void GenericState::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
-    version = {0,0,0};
+    version = { 0, 0, 0 };
 
     data << params;
     data << persistent;
@@ -120,7 +114,7 @@ void GenericState::deserialize(const SerializationBuffer& data, const SemanticVe
 
 void GenericState::initializePersistentParameters()
 {
-    for(const std::string& name : persistent) {
+    for (const std::string& name : persistent) {
         param::ParameterPtr param = params[name];
         param->setUUID(UUIDProvider::makeTypedUUID_forced(parent_uuid_, "param", param->name()));
         (parameter_added)(param);
@@ -134,20 +128,20 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
     apex_assert_hard(param_name != "noname");
     auto legacy_pos = legacy.find(param_name);
     auto param_pos = params.find(param_name);
-    if(param_pos != params.end()) {
-        if(legacy_pos == legacy.end()) {
+    if (param_pos != params.end()) {
+        if (legacy_pos == legacy.end()) {
             throw std::logic_error(std::string("a parameter with the name ") + param_name + " has already been added.");
         }
         param->cloneDataFrom(*param_pos->second);
     }
     registerParameter(param);
 
-    if(legacy_pos != legacy.end()) {
+    if (legacy_pos != legacy.end()) {
         legacy.erase(legacy_pos);
     }
-    if(std::find(order.begin(), order.end(), param_name) == order.end()) {
+    if (std::find(order.begin(), order.end(), param_name) == order.end()) {
         order.push_back(param_name);
-    }    
+    }
 
     std::string valid_name = param_name;
 
@@ -170,7 +164,7 @@ void GenericState::removeParameter(csapex::param::ParameterPtr param)
     params.erase(param->name());
 
     auto pos = std::find(order.begin(), order.end(), param->name());
-    if(pos != order.end()) {
+    if (pos != order.end()) {
         order.erase(pos);
     }
 
@@ -184,12 +178,12 @@ void GenericState::setParameterSetSilence(bool silent)
 
 void GenericState::triggerParameterSetChanged()
 {
-    if(!silent_) {
+    if (!silent_) {
         (parameter_set_changed)();
     }
 }
 
-void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &param)
+void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr& param)
 {
     param->setTemporary(true);
 
@@ -197,13 +191,12 @@ void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &pa
     csapex::param::Parameter::Ptr entry = param;
     std::string name = param->name();
     auto param_pos = params.find(name);
-    if(param_pos != params.end()) {
+    if (param_pos != params.end()) {
         // the existing parameter should be temporary or legacy
-        if(temporary.find(name) == temporary.end() &&
-                cached_parameter.find(name) == cached_parameter.end() &&
-                legacy.find(name) == legacy.end()) {
+        if (temporary.find(name) == temporary.end() && cached_parameter.find(name) == cached_parameter.end() && legacy.find(name) == legacy.end()) {
             throw std::runtime_error("trying to add a temporary parameter with the name "
-                                     "of an existing parameter '" + name + "'");
+                                     "of an existing parameter '" +
+                                     name + "'");
         }
         param::Parameter::Ptr p = param_pos->second;
         entry->cloneDataFrom(*p);
@@ -213,19 +206,19 @@ void GenericState::addTemporaryParameter(const csapex::param::Parameter::Ptr &pa
     addParameter(entry);
 }
 
-void GenericState::removeTemporaryParameter(const csapex::param::Parameter::Ptr &param)
+void GenericState::removeTemporaryParameter(const csapex::param::Parameter::Ptr& param)
 {
     removeParameter(param);
 
     auto pos = temporary.find(param->name());
-    if(pos != temporary.end()) {
+    if (pos != temporary.end()) {
         temporary.erase(pos);
     }
 }
 
 void GenericState::removeTemporaryParameters()
 {
-    for(auto it = temporary.begin(); it != temporary.end(); ++it) {
+    for (auto it = temporary.begin(); it != temporary.end(); ++it) {
         std::string name(it->first);
         csapex::param::Parameter::Ptr p = getParameter(name);
 
@@ -243,19 +236,19 @@ void GenericState::removeTemporaryParameters()
     triggerParameterSetChanged();
 }
 
-void GenericState::removePersistentParameter(const csapex::param::Parameter::Ptr &param)
+void GenericState::removePersistentParameter(const csapex::param::Parameter::Ptr& param)
 {
     removeParameter(param);
 
     auto pos = persistent.find(param->name());
-    if(pos != persistent.end()) {
+    if (pos != persistent.end()) {
         persistent.erase(pos);
     }
 }
 
 void GenericState::removePersistentParameters()
 {
-    for(const std::string& name : persistent) {
+    for (const std::string& name : persistent) {
         csapex::param::Parameter::Ptr p = getParameter(name);
 
         removePersistentParameter(p);
@@ -268,15 +261,14 @@ void GenericState::removePersistentParameters()
     triggerParameterSetChanged();
 }
 
-
-void GenericState::addPersistentParameter(const csapex::param::Parameter::Ptr &param)
+void GenericState::addPersistentParameter(const csapex::param::Parameter::Ptr& param)
 {
     persistent.insert(param->name());
 
     registerParameter(param);
 }
 
-void GenericState::registerParameter(const csapex::param::Parameter::Ptr &param)
+void GenericState::registerParameter(const csapex::param::Parameter::Ptr& param)
 {
     params[param->name()] = param;
 
@@ -286,7 +278,7 @@ void GenericState::registerParameter(const csapex::param::Parameter::Ptr &param)
     triggerParameterSetChanged();
 }
 
-void GenericState::unregisterParameter(const csapex::param::Parameter::Ptr &param)
+void GenericState::unregisterParameter(const csapex::param::Parameter::Ptr& param)
 {
     params.erase(param->name());
 
@@ -294,14 +286,14 @@ void GenericState::unregisterParameter(const csapex::param::Parameter::Ptr &para
     triggerParameterSetChanged();
 }
 
-void GenericState::setFrom(const GenericState &rhs)
+void GenericState::setFrom(const GenericState& rhs)
 {
     persistent = rhs.persistent;
 
-    for(std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = rhs.params.begin(); it != rhs.params.end(); ++it) {
+    for (std::map<std::string, csapex::param::Parameter::Ptr>::const_iterator it = rhs.params.begin(); it != rhs.params.end(); ++it) {
         csapex::param::Parameter::Ptr p = it->second;
         std::string name = p->name();
-        if(params.find(name) != params.end()) {
+        if (params.find(name) != params.end()) {
             params[name]->cloneDataFrom(*p);
         } else {
             params[name] = csapex::param::ParameterFactory::clone(p);
@@ -312,29 +304,29 @@ void GenericState::setFrom(const GenericState &rhs)
     initializePersistentParameters();
 }
 
-csapex::param::Parameter &GenericState::operator [](const std::string& name) const
+csapex::param::Parameter& GenericState::operator[](const std::string& name) const
 {
     try {
         return *params.at(name);
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         throw std::runtime_error("cannot get parameter '" + name + "', doesn't exist: " + e.what());
     }
 }
 
-csapex::param::Parameter::Ptr GenericState::getParameter(const std::string &name) const
+csapex::param::Parameter::Ptr GenericState::getParameter(const std::string& name) const
 {
     try {
         return params.at(name);
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         throw std::runtime_error("cannot get parameter '" + name + "', doesn't exist: " + e.what());
     }
 }
-csapex::param::Parameter::Ptr GenericState::getMappedParameter(const std::string &name) const
+csapex::param::Parameter::Ptr GenericState::getMappedParameter(const std::string& name) const
 {
     try {
         auto pos = param_valid_name_cache.find(name);
         return params.at(pos->second);
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         throw std::runtime_error("cannot get parameter '" + name + "', doesn't exist: " + e.what());
     }
 }
@@ -342,10 +334,10 @@ csapex::param::Parameter::Ptr GenericState::getMappedParameter(const std::string
 std::vector<csapex::param::Parameter::Ptr> GenericState::getParameters() const
 {
     std::vector<csapex::param::Parameter::Ptr> result;
-    for(std::vector<std::string>::const_iterator n = order.begin(); n != order.end(); ++n) {
+    for (std::vector<std::string>::const_iterator n = order.begin(); n != order.end(); ++n) {
         result.push_back(params.at(*n));
     }
-    for(const std::string& p : persistent) {
+    for (const std::string& p : persistent) {
         result.push_back(params.at(p));
     }
 
@@ -355,9 +347,9 @@ std::vector<csapex::param::Parameter::Ptr> GenericState::getParameters() const
 std::vector<csapex::param::Parameter::Ptr> GenericState::getTemporaryParameters() const
 {
     std::vector<csapex::param::Parameter::Ptr> result;
-    for(const auto& pair : temporary) {
+    for (const auto& pair : temporary) {
         auto pos = params.find(pair.first);
-        if(pos != params.end()) {
+        if (pos != params.end()) {
             result.push_back(pos->second);
         }
     }
@@ -368,9 +360,9 @@ std::vector<csapex::param::Parameter::Ptr> GenericState::getTemporaryParameters(
 std::vector<csapex::param::Parameter::Ptr> GenericState::getPersistentParameters() const
 {
     std::vector<csapex::param::Parameter::Ptr> result;
-    for(const auto& name : persistent) {
+    for (const auto& name : persistent) {
         auto pos = params.find(name);
-        if(pos != params.end()) {
+        if (pos != params.end()) {
             result.push_back(pos->second);
         }
     }
@@ -386,9 +378,9 @@ std::size_t GenericState::getParameterCount() const
 bool GenericState::hasParameter(const std::string& name) const
 {
     auto pos = param_valid_name_cache.find(name);
-    if(pos == param_valid_name_cache.end()) {
+    if (pos == param_valid_name_cache.end()) {
         auto persistent_pos = persistent.find(name);
-        if(persistent_pos != persistent.end()) {
+        if (persistent_pos != persistent.end()) {
             return true;
         }
 
@@ -403,7 +395,7 @@ T GenericState::readParameter(const std::string& name) const
 {
     try {
         return getParameter(name)->as<T>();
-    } catch(const std::out_of_range& e) {
+    } catch (const std::out_of_range& e) {
         throw std::runtime_error(std::string("unknown parameter '") + name + "'");
     }
 }
@@ -412,22 +404,24 @@ template CSAPEX_CORE_EXPORT bool GenericState::readParameter<bool>(const std::st
 template CSAPEX_CORE_EXPORT double GenericState::readParameter<double>(const std::string& name) const;
 template CSAPEX_CORE_EXPORT int GenericState::readParameter<int>(const std::string& name) const;
 template CSAPEX_CORE_EXPORT std::string GenericState::readParameter<std::string>(const std::string& name) const;
-template CSAPEX_CORE_EXPORT std::pair<int,int> GenericState::readParameter<std::pair<int,int> >(const std::string& name) const;
-template CSAPEX_CORE_EXPORT std::pair<double,double> GenericState::readParameter<std::pair<double,double> >(const std::string& name) const;
+template CSAPEX_CORE_EXPORT std::pair<int, int> GenericState::readParameter<std::pair<int, int> >(const std::string& name) const;
+template CSAPEX_CORE_EXPORT std::pair<double, double> GenericState::readParameter<std::pair<double, double> >(const std::string& name) const;
 template CSAPEX_CORE_EXPORT std::vector<int> GenericState::readParameter<std::vector<int> >(const std::string& name) const;
 template CSAPEX_CORE_EXPORT std::vector<double> GenericState::readParameter<std::vector<double> >(const std::string& name) const;
 
 /// YAML
-namespace YAML {
-Node convert<csapex::GenericState>::encode(const csapex::GenericState& rhs) {
+namespace YAML
+{
+Node convert<csapex::GenericState>::encode(const csapex::GenericState& rhs)
+{
     Node n;
     rhs.writeYaml(n);
     return n;
 }
 
-bool convert<csapex::GenericState>::decode(const Node& node, csapex::GenericState& rhs) {
+bool convert<csapex::GenericState>::decode(const Node& node, csapex::GenericState& rhs)
+{
     rhs.readYaml(node);
     return true;
 }
-}
-
+}  // namespace YAML

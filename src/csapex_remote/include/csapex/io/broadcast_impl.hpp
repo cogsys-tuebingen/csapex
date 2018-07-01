@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 template <typename I>
 class BroadcastImplementation : public BroadcastMessage
 {
@@ -31,6 +30,6 @@ public:
     }
 };
 
-}
+}  // namespace csapex
 
-#endif // BROADCAST_IMPL_HPP
+#endif  // BROADCAST_IMPL_HPP

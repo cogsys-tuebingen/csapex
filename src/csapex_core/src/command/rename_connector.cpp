@@ -20,8 +20,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(RenameConnector)
 
-RenameConnector::RenameConnector(const AUUID& parent_uuid, const UUID &connector, const std::string& new_name)
-    : CommandImplementation(parent_uuid), uuid(connector), new_name_(new_name)
+RenameConnector::RenameConnector(const AUUID& parent_uuid, const UUID& connector, const std::string& new_name) : CommandImplementation(parent_uuid), uuid(connector), new_name_(new_name)
 {
 }
 
@@ -58,9 +57,7 @@ bool RenameConnector::doRedo()
     return doExecute();
 }
 
-
-
-void RenameConnector::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void RenameConnector::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

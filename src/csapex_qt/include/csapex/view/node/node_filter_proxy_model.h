@@ -10,21 +10,21 @@
 #include <vector>
 #include <QSortFilterProxyModel>
 
-namespace csapex {
-
+namespace csapex
+{
 class CSAPEX_QT_EXPORT NodeFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 
 public:
-    NodeFilterProxyModel(QObject *parent = 0);
+    NodeFilterProxyModel(QObject* parent = 0);
 
 protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
 
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_COMPLETER_H
+#endif  // NODE_COMPLETER_H

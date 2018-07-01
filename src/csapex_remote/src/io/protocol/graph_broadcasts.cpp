@@ -21,29 +21,21 @@ using namespace csapex;
 ///
 /// Broadcast
 ///
-GraphBroadcasts::GraphBroadcasts()
-    : broadcast_type_(GraphBroadcastType::None)
+GraphBroadcasts::GraphBroadcasts() : broadcast_type_(GraphBroadcastType::None)
 {
-
 }
 
-GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type)
-    : broadcast_type_(broadcast_type)
+GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type) : broadcast_type_(broadcast_type)
 {
-
 }
-GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid)
-    : broadcast_type_(broadcast_type), graph_uuid_(uuid)
+GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid) : broadcast_type_(broadcast_type), graph_uuid_(uuid)
 {
-
 }
-GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid, boost::any payload)
-    : broadcast_type_(broadcast_type), graph_uuid_(uuid), payload_(payload)
+GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid, boost::any payload) : broadcast_type_(broadcast_type), graph_uuid_(uuid), payload_(payload)
 {
-
 }
 
-void GraphBroadcasts::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void GraphBroadcasts::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << broadcast_type_;
     data << graph_uuid_;

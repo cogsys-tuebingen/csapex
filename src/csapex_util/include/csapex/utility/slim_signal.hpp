@@ -14,10 +14,8 @@ namespace csapex
 {
 namespace slim_signal
 {
-
 template <typename Signature>
-Signal<Signature>::Signal()
-    : dirty_(false)
+Signal<Signature>::Signal() : dirty_(false)
 {
     children_.reserve(4);
 }
@@ -31,14 +29,12 @@ Signal<Signature>::~Signal()
     clear();
 }
 
-
-
 template <typename Signature>
 Connection Signal<Signature>::connect(const delegate::Delegate<Signature>& delegate)
 {
     apex_assert_hard(guard_ == -1);
 
-    if(execution_mutex_.try_lock()) {
+    if (execution_mutex_.try_lock()) {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         int id = next_del_id_++;
         delegates_.emplace(id, delegate);
@@ -56,14 +52,13 @@ Connection Signal<Signature>::connect(const delegate::Delegate<Signature>& deleg
 
         return Connection(this, makeDelegateDeleter(this, id));
     }
-
 }
 template <typename Signature>
 Connection Signal<Signature>::connect(delegate::Delegate<Signature>&& delegate)
 {
     apex_assert_hard(guard_ == -1);
 
-    if(execution_mutex_.try_lock()) {
+    if (execution_mutex_.try_lock()) {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         int id = next_del_id_++;
         delegates_.emplace(id, std::move(delegate));
@@ -87,7 +82,7 @@ Connection Signal<Signature>::connect(const std::function<Signature>& fn)
 {
     apex_assert_hard(guard_ == -1);
 
-    if(execution_mutex_.try_lock()) {
+    if (execution_mutex_.try_lock()) {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         int id = next_fn_id_++;
         functions_.emplace(id, fn);
@@ -120,7 +115,7 @@ Connection Signal<Signature>::connect(Signal<Signature>& signal)
 template <typename Signature>
 bool Signal<Signature>::isConnected() const
 {
-    if(SignalBase::isConnected()) {
+    if (SignalBase::isConnected()) {
         return true;
     }
 
@@ -133,7 +128,6 @@ int Signal<Signature>::countAllConnections() const
     return functions_.size() + delegates_.size() + children_.size();
 }
 
-
 template <typename Signature>
 void Signal<Signature>::removeParent(Signal<Signature>* parent)
 {
@@ -143,11 +137,11 @@ void Signal<Signature>::removeParent(Signal<Signature>* parent)
 
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
-    for(auto it = parents_.begin(); it != parents_.end();) {
+    for (auto it = parents_.begin(); it != parents_.end();) {
         Signal<Signature>* c = *it;
         apex_assert_hard(c->guard_ == -1);
-        if(c == parent) {
-            it =  parents_.erase(it);
+        if (c == parent) {
+            it = parents_.erase(it);
             c->removeChild(this);
 
         } else {
@@ -161,7 +155,7 @@ void Signal<Signature>::removeDelegate(int id)
 {
     apex_assert_hard(guard_ == -1);
 
-    if(execution_mutex_.try_lock()) {
+    if (execution_mutex_.try_lock()) {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         delegates_.erase(id);
         execution_mutex_.unlock();
@@ -175,13 +169,12 @@ void Signal<Signature>::removeDelegate(int id)
     }
 }
 
-
 template <typename Signature>
 void Signal<Signature>::removeFunction(int id)
 {
     apex_assert_hard(guard_ == -1);
 
-    if(execution_mutex_.try_lock()) {
+    if (execution_mutex_.try_lock()) {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         functions_.erase(id);
         execution_mutex_.unlock();
@@ -209,15 +202,15 @@ void Signal<Signature>::disconnectAll()
 template <typename Signature>
 void Signal<Signature>::clear()
 {
-    while(!parents_.empty()) {
+    while (!parents_.empty()) {
         removeParent(parents_.front());
     }
 
-    if(execution_mutex_.try_lock()) {
-        while(!children_to_remove_.empty()) {
+    if (execution_mutex_.try_lock()) {
+        while (!children_to_remove_.empty()) {
             removeChild(children_to_remove_.front());
         }
-        while(!children_.empty()) {
+        while (!children_.empty()) {
             removeChild(children_.front());
         }
         execution_mutex_.unlock();
@@ -236,13 +229,12 @@ void Signal<Signature>::clear()
 }
 
 template <typename Signature>
-void Signal<Signature>::addChild(Signal *child)
+void Signal<Signature>::addChild(Signal* child)
 {
     apex_assert_hard(guard_ == -1);
     apex_assert_hard(child->guard_ == -1);
 
-    if(execution_mutex_.try_lock()) {
-
+    if (execution_mutex_.try_lock()) {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
         children_.push_back(child);
         child->parents_.push_back(this);
@@ -262,21 +254,20 @@ void Signal<Signature>::removeChild(Signal<Signature>* child)
     apex_assert_hard(guard_ == -1);
     apex_assert_hard(child != nullptr);
 
-    if(execution_mutex_.try_lock()) {
-
+    if (execution_mutex_.try_lock()) {
         std::unique_lock<std::recursive_mutex> lock(mutex_);
-        for(auto it = children_.begin(); it != children_.end();) {
+        for (auto it = children_.begin(); it != children_.end();) {
             Signal<Signature>* child_it = *it;
             // if the child exists, it has to be valid, otherwise the pointer may point to a destructed object
             apex_assert_hard(child_it->guard_ == -1);
-            if(child_it == child) {
+            if (child_it == child) {
                 std::vector<Connection*> to_remove;
-                for(Connection* connection : connections_) {
-                    if(connection->getChild() == child) {
+                for (Connection* connection : connections_) {
+                    if (connection->getChild() == child) {
                         to_remove.push_back(connection);
                     }
                 }
-                for(Connection* connection : to_remove) {
+                for (Connection* connection : to_remove) {
                     connection->detach();
                 }
                 it = children_.erase(it);
@@ -297,11 +288,9 @@ void Signal<Signature>::removeChild(Signal<Signature>* child)
     }
 }
 
-
-
 template <typename Signature>
 template <typename... Args>
-Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
+Signal<Signature>& Signal<Signature>::operator()(Args&&... args)
 {
     std::lock(execution_mutex_, mutex_);
 
@@ -309,41 +298,41 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
 
     std::unique_lock<std::recursive_mutex> data_lock(mutex_, std::adopt_lock);
 
-    for(auto& s : children_) {
+    for (auto& s : children_) {
         try {
             (*s)(std::forward<Args>(args)...);
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             printf("signal forwarding has thrown an error: %s\n", e.what());
-        } catch(const csapex::Failure& e) {
+        } catch (const csapex::Failure& e) {
             printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
             throw e;
-        } catch(...) {
+        } catch (...) {
             printf("signal forwarding has thrown an unknown error\n");
             throw;
         }
     }
-    for(auto& callback : delegates_) {
+    for (auto& callback : delegates_) {
         try {
             callback.second(std::forward<Args>(args)...);
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             printf("signal processing delegate has thrown an error: %s\n", e.what());
-        } catch(const csapex::Failure& e) {
+        } catch (const csapex::Failure& e) {
             printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
             throw e;
-        } catch(...) {
+        } catch (...) {
             printf("signal processing delegate has thrown an unknown error\n");
             throw;
         }
     }
-    for(auto& fn : functions_) {
+    for (auto& fn : functions_) {
         try {
             fn.second(std::forward<Args>(args)...);
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             printf("signal processing function has thrown an error: %s\n", e.what());
-        } catch(const csapex::Failure& e) {
+        } catch (const csapex::Failure& e) {
             printf("signal processing function has thrown a failure: %s\n", e.what().c_str());
             throw e;
-        } catch(...) {
+        } catch (...) {
             printf("signal processing function has thrown an unknown error\n");
             throw;
         }
@@ -359,15 +348,15 @@ Signal<Signature>& Signal<Signature>::operator () (Args&&... args)
 template <typename Signature>
 void Signal<Signature>::applyModifications()
 {
-    if(!dirty_) {
+    if (!dirty_) {
         return;
     }
 
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
     // SIGNALS
-    if(!children_to_add_.empty()) {
-        for(auto& s : children_to_add_) {
+    if (!children_to_add_.empty()) {
+        for (auto& s : children_to_add_) {
             children_.push_back(s);
             s->parents_.push_back(this);
 
@@ -378,10 +367,10 @@ void Signal<Signature>::applyModifications()
         children_to_add_.clear();
     }
 
-    if(!children_to_remove_.empty()) {
-        for(auto& child : children_to_remove_) {
-            for(auto it = children_.begin(); it != children_.end();) {
-                if(*it == child) {
+    if (!children_to_remove_.empty()) {
+        for (auto& child : children_to_remove_) {
+            for (auto it = children_.begin(); it != children_.end();) {
+                if (*it == child) {
                     it = children_.erase(it);
 
                     lock.unlock();
@@ -396,8 +385,8 @@ void Signal<Signature>::applyModifications()
     }
 
     // FUNCTIONS
-    if(!functions_to_add_.empty()) {
-        for(auto& s : functions_to_add_) {
+    if (!functions_to_add_.empty()) {
+        for (auto& s : functions_to_add_) {
             functions_[s.first] = std::move(s.second);
 
             lock.unlock();
@@ -407,8 +396,8 @@ void Signal<Signature>::applyModifications()
         functions_to_add_.clear();
     }
 
-    if(!functions_to_remove_.empty()) {
-        for(int id : functions_to_remove_) {
+    if (!functions_to_remove_.empty()) {
+        for (int id : functions_to_remove_) {
             functions_.erase(id);
 
             lock.unlock();
@@ -419,8 +408,8 @@ void Signal<Signature>::applyModifications()
     }
 
     // DELEGATES
-    if(!delegates_to_add_.empty()) {
-        for(auto& s : delegates_to_add_) {
+    if (!delegates_to_add_.empty()) {
+        for (auto& s : delegates_to_add_) {
             delegates_.emplace(s);
 
             lock.unlock();
@@ -430,8 +419,8 @@ void Signal<Signature>::applyModifications()
         delegates_to_add_.clear();
     }
 
-    if(!delegates_to_remove_.empty()) {
-        for(int id : delegates_to_remove_) {
+    if (!delegates_to_remove_.empty()) {
+        for (int id : delegates_to_remove_) {
             delegates_.erase(id);
 
             lock.unlock();
@@ -444,102 +433,74 @@ void Signal<Signature>::applyModifications()
     dirty_ = false;
 }
 
-
 /**
  * @brief Helper class
  */
 namespace detail
 {
-template <typename Signature,
-          std::size_t pos, std::size_t max,
-          typename... AdditionalParameters>
+template <typename Signature, std::size_t pos, std::size_t max, typename... AdditionalParameters>
 struct MatchingConnector
 {
     template <typename ActualResult, typename... ActualParameters>
-    static Connection connect(
-            Signal<Signature>* signal,
-            const std::function<ActualResult(ActualParameters...)>& fn)
+    static Connection connect(Signal<Signature>* signal, const std::function<ActualResult(ActualParameters...)>& fn)
     {
         const std::size_t end = csapex::function_traits<Signature>::arity;
-        using Type = typename csapex::function_traits<Signature>:: template arg<end-pos-1>::type;
-        return MatchingConnector<Signature, pos+1, max-1, Type, AdditionalParameters...>::connect(signal, fn);
+        using Type = typename csapex::function_traits<Signature>::template arg<end - pos - 1>::type;
+        return MatchingConnector<Signature, pos + 1, max - 1, Type, AdditionalParameters...>::connect(signal, fn);
     }
 
     template <typename ActualResult, typename... ActualParameters>
-    static Connection connect(
-            Signal<Signature>* signal,
-            const Signal<ActualResult(ActualParameters...)>& fn)
+    static Connection connect(Signal<Signature>* signal, const Signal<ActualResult(ActualParameters...)>& fn)
     {
         const std::size_t end = csapex::function_traits<Signature>::arity;
-        using Type = typename csapex::function_traits<Signature>:: template arg<end-pos-1>::type;
-        return MatchingConnector<Signature, pos+1, max-1, Type, AdditionalParameters...>::connect(signal, fn);
+        using Type = typename csapex::function_traits<Signature>::template arg<end - pos - 1>::type;
+        return MatchingConnector<Signature, pos + 1, max - 1, Type, AdditionalParameters...>::connect(signal, fn);
     }
 };
 
-
-template <typename Signature,
-          std::size_t pos,
-          typename... AdditionalParameters>
+template <typename Signature, std::size_t pos, typename... AdditionalParameters>
 struct MatchingConnector<Signature, pos, 0, AdditionalParameters...>
 {
     template <typename ActualResult, typename... ActualParameters>
-    static Connection connect(
-            Signal<Signature>* signal,
-            const std::function<ActualResult(ActualParameters...)>& fn,
-            typename std::enable_if<sizeof...(ActualParameters) == function_traits<Signature>::arity, int>::type* = 0)
+    static Connection connect(Signal<Signature>* signal, const std::function<ActualResult(ActualParameters...)>& fn,
+                              typename std::enable_if<sizeof...(ActualParameters) == function_traits<Signature>::arity, int>::type* = 0)
     {
         return signal->connect(static_cast<std::function<Signature>>(fn));
     }
 
-
     template <typename ActualResult, typename... ActualParameters>
-    static Connection connect(
-            Signal<Signature>* signal,
-            const std::function<ActualResult(ActualParameters...)>& fn,
-            typename std::enable_if<sizeof...(ActualParameters) < function_traits<Signature>::arity, int>::type* = 0)
+    static Connection connect(Signal<Signature>* signal, const std::function<ActualResult(ActualParameters...)>& fn,
+                              typename std::enable_if<sizeof...(ActualParameters) < function_traits<Signature>::arity, int>::type* = 0)
     {
         using ReturnType = typename csapex::function_traits<Signature>::result_type;
-        std::function<Signature> callback = [fn](ActualParameters... params, AdditionalParameters... /*drop*/) -> ReturnType
-        {
-            fn(params...);
-        };
+        std::function<Signature> callback = [fn](ActualParameters... params, AdditionalParameters... /*drop*/) -> ReturnType { fn(params...); };
         return signal->connect(callback);
     }
 
-
     template <typename ActualResult, typename... ActualParameters>
-    static Connection connect(
-            Signal<Signature>* signal,
-            Signal<ActualResult(ActualParameters...)>& sig,
-            typename std::enable_if<is_signature_equal<Signature, ActualResult, ActualParameters...>::value, int>::type* = 0)
+    static Connection connect(Signal<Signature>* signal, Signal<ActualResult(ActualParameters...)>& sig,
+                              typename std::enable_if<is_signature_equal<Signature, ActualResult, ActualParameters...>::value, int>::type* = 0)
     {
         static_assert(is_signature_equal<Signature, ActualResult, ActualParameters...>::value, "Signals match");
         return signal->connect(sig);
     }
 
-
     template <typename ActualResult, typename... ActualParameters>
-    static Connection connect(
-            Signal<Signature>* signal,
-            Signal<ActualResult(ActualParameters...)>& sig,
-            typename std::enable_if<!is_signature_equal<Signature, ActualResult, ActualParameters...>::value, int>::type* = 0)
+    static Connection connect(Signal<Signature>* signal, Signal<ActualResult(ActualParameters...)>& sig,
+                              typename std::enable_if<!is_signature_equal<Signature, ActualResult, ActualParameters...>::value, int>::type* = 0)
     {
         static_assert(!is_signature_equal<Signature, ActualResult, ActualParameters...>::value, "Signals don't match");
 
         using ReturnType = typename csapex::function_traits<Signature>::result_type;
-        std::function<Signature> callback = [&sig](ActualParameters... params, AdditionalParameters... /*drop*/) -> ReturnType
-        {
-            sig(params...);
-        };
+        std::function<Signature> callback = [&sig](ActualParameters... params, AdditionalParameters... /*drop*/) -> ReturnType { sig(params...); };
         return signal->connect(callback);
     }
 };
-}
+}  // namespace detail
 
 template <typename Signature>
 template <typename Callable>
-Connection Signal<Signature>::connectAny(Callable &function,
-                                         tag_is_function<false, false>)
+Connection Signal<Signature>::connectAny(Callable& function, tag_is_function<false, false>)
 {
     static_assert(!std::is_base_of<SignalBase, Callable>::value, "SignalBase assert");
     static_assert(!std::is_bind_expression<Callable>::value, "Bind assert");
@@ -549,13 +510,12 @@ Connection Signal<Signature>::connectAny(Callable &function,
     const std::size_t needed = csapex::function_traits<FunctionType>::arity;
 
     std::function<typename function_traits<FunctionType>::signature> fn = function;
-    return std::move(detail::MatchingConnector<Signature, 0, available-needed>::connect(this, fn));
+    return std::move(detail::MatchingConnector<Signature, 0, available - needed>::connect(this, fn));
 }
 
 template <typename Signature>
 template <typename Callable>
-Connection Signal<Signature>::connectAny(Callable &function,
-                                         tag_is_function<false, true>)
+Connection Signal<Signature>::connectAny(Callable& function, tag_is_function<false, true>)
 {
     std::function<Signature> fn = function;
     return std::move(connect(fn));
@@ -563,8 +523,7 @@ Connection Signal<Signature>::connectAny(Callable &function,
 
 template <typename Signature>
 template <typename Callable>
-Connection Signal<Signature>::connectAny(Callable &signal,
-                                         tag_is_function<true, false>)
+Connection Signal<Signature>::connectAny(Callable& signal, tag_is_function<true, false>)
 {
     static_assert(std::is_base_of<SignalBase, Callable>::value, "SignalBase assert");
     static_assert(!std::is_bind_expression<Callable>::value, "Bind assert");
@@ -573,7 +532,7 @@ Connection Signal<Signature>::connectAny(Callable &signal,
     const std::size_t available = csapex::function_traits<Signature>::arity;
     const std::size_t needed = csapex::function_traits<FunctionType>::arity;
 
-    return std::move(detail::MatchingConnector<Signature, 0, available-needed>::connect(this, signal));
+    return std::move(detail::MatchingConnector<Signature, 0, available - needed>::connect(this, signal));
 }
 
 template <typename Signature>
@@ -588,7 +547,7 @@ Connection::Deleter Signal<Signature>::makeFunctionDeleter(Signal<Signature>* pa
 }
 
 template <typename Signature>
-Connection::Deleter Signal<Signature>::makeDelegateDeleter(Signal<Signature>* parent,int id)
+Connection::Deleter Signal<Signature>::makeDelegateDeleter(Signal<Signature>* parent, int id)
 {
     apex_assert_hard(guard_ == -1);
     apex_assert_hard(parent->guard_ == -1);
@@ -611,13 +570,10 @@ Connection::Deleter Signal<Signature>::makeSignalDeleter(Signal<Signature>* pare
     };
 }
 
-
-
-
 template <typename Signature>
 void ObservableSignal<Signature>::onConnect()
 {
-    if(Signal<Signature>::countAllConnections() == 1) {
+    if (Signal<Signature>::countAllConnections() == 1) {
         first_connected();
     }
 
@@ -629,13 +585,12 @@ void ObservableSignal<Signature>::onDisconnect()
 {
     disconnected();
 
-    if(Signal<Signature>::countAllConnections() == 0)  {
+    if (Signal<Signature>::countAllConnections() == 0) {
         last_disconnected();
     }
 }
 
-}
-}
+}  // namespace slim_signal
+}  // namespace csapex
 
-#endif // SLIM_SIGNAL_HPP
-
+#endif  // SLIM_SIGNAL_HPP

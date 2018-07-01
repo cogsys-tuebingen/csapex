@@ -11,33 +11,31 @@
 
 using namespace csapex;
 
-
-DesignerOptions::DesignerOptions(Settings &settings, Designer *designer)
-    : settings_(settings), designer_(designer)
+DesignerOptions::DesignerOptions(Settings& settings, Designer* designer) : settings_(settings), designer_(designer)
 {
 }
 
-void DesignerOptions::setup(GraphView *view)
+void DesignerOptions::setup(GraphView* view)
 {
     DesignerScene* designer_scene = view->designerScene();
 
-    if(settings_.knows("grid-lock")) {
+    if (settings_.knows("grid-lock")) {
         enableGridLock(settings_.get<bool>("grid-lock"));
     }
-    if(settings_.knows("grid")) {
+    if (settings_.knows("grid")) {
         enableGrid(settings_.get<bool>("grid"));
     }
 
-    if(settings_.knows("schematics")) {
+    if (settings_.knows("schematics")) {
         enableSchematics(settings_.get<bool>("schematics"));
     }
-    if(settings_.knows("debug")) {
+    if (settings_.knows("debug")) {
         designer_scene->enableDebug(settings_.get<bool>("debug"));
     }
 
-    for(const std::string& type : {"messages", "signals", "active", "inactive"}) {
+    for (const std::string& type : { "messages", "signals", "active", "inactive" }) {
         std::string key = "display-" + type;
-        if(settings_.knows(key)) {
+        if (settings_.knows(key)) {
             designer_scene->displayConnections(QString::fromStdString(type), settings_.get<bool>(key));
         } else {
             designer_scene->displayConnections(QString::fromStdString(type), true);
@@ -81,16 +79,15 @@ bool DesignerOptions::isDebug() const
     return settings_.getTemporary<bool>("debug", false);
 }
 
-
 void DesignerOptions::enableGrid(bool grid)
 {
-    if(!settings_.knows("grid")) {
+    if (!settings_.knows("grid")) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool("grid", grid));
     }
 
     settings_.set("grid", grid);
 
-    for(const auto& pair : designer_->graph_views_) {
+    for (const auto& pair : designer_->graph_views_) {
         GraphView* view = pair.second;
         view->designerScene()->enableGrid(grid);
 
@@ -99,11 +96,10 @@ void DesignerOptions::enableGrid(bool grid)
     }
 
     Q_EMIT gridEnabled(grid);
-
 }
 void DesignerOptions::enableGridLock(bool enabled)
 {
-    if(!settings_.knows("grid-lock")) {
+    if (!settings_.knows("grid-lock")) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool("grid-lock", enabled));
     }
 
@@ -114,30 +110,29 @@ void DesignerOptions::enableGridLock(bool enabled)
 
 void DesignerOptions::enableSchematics(bool schema)
 {
-    if(!settings_.knows("schematics")) {
+    if (!settings_.knows("schematics")) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool("schematics", schema));
     }
 
     settings_.set("schematics", schema);
 
-    for(const auto& pair : designer_->graph_views_) {
+    for (const auto& pair : designer_->graph_views_) {
         GraphView* view = pair.second;
         view->designerScene()->enableSchema(schema);
     }
 
     Q_EMIT schematicsEnabled(schema);
-
 }
 
 void DesignerOptions::displayGraphComponents(bool display)
 {
-    if(!settings_.knows("display-graph-components")) {
+    if (!settings_.knows("display-graph-components")) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool("display-graph-components", display));
     }
 
     settings_.set("display-graph-components", display);
 
-    for(const auto& pair : designer_->graph_views_) {
+    for (const auto& pair : designer_->graph_views_) {
         GraphView* view = pair.second;
         view->updateBoxInformation();
     }
@@ -147,13 +142,13 @@ void DesignerOptions::displayGraphComponents(bool display)
 
 void DesignerOptions::displayThreads(bool display)
 {
-    if(!settings_.knows("display-threads")) {
+    if (!settings_.knows("display-threads")) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool("display-threads", display));
     }
 
     settings_.set("display-threads", display);
 
-    for(const auto& pair : designer_->graph_views_) {
+    for (const auto& pair : designer_->graph_views_) {
         GraphView* view = pair.second;
         view->updateBoxInformation();
     }
@@ -163,13 +158,13 @@ void DesignerOptions::displayThreads(bool display)
 
 void DesignerOptions::displayFrequency(bool display)
 {
-    if(!settings_.knows("display-frequencies")) {
+    if (!settings_.knows("display-frequencies")) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool("display-frequencies", display));
     }
 
     settings_.set("display-frequencies", display);
 
-    for(const auto& pair : designer_->graph_views_) {
+    for (const auto& pair : designer_->graph_views_) {
         GraphView* view = pair.second;
         view->updateBoxInformation();
     }
@@ -177,10 +172,9 @@ void DesignerOptions::displayFrequency(bool display)
     Q_EMIT frequencyEnabled(display);
 }
 
-
 void DesignerOptions::displayMinimap(bool display)
 {
-    if(!settings_.knows("display-minimap")) {
+    if (!settings_.knows("display-minimap")) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool("display-minimap", display));
     }
 
@@ -192,22 +186,19 @@ void DesignerOptions::displayMinimap(bool display)
 }
 void DesignerOptions::enableDebug(bool debug)
 {
-    if(!settings_.knows("debug")) {
+    if (!settings_.knows("debug")) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool("debug", debug));
     }
 
     settings_.set("debug", debug);
 
-    for(const auto& pair : designer_->graph_views_) {
+    for (const auto& pair : designer_->graph_views_) {
         GraphView* view = pair.second;
         view->designerScene()->enableDebug(debug);
     }
 
     Q_EMIT debugEnabled(debug);
 }
-
-
-
 
 bool DesignerOptions::areMessageConnectionsVisibile() const
 {
@@ -248,28 +239,27 @@ void DesignerOptions::displayConnections(const std::string& type, bool display)
     QString q_type = QString::fromStdString(type);
     std::string key = std::string("display-") + type;
 
-    if(!settings_.knows(key)) {
+    if (!settings_.knows(key)) {
         settings_.addPersistent(csapex::param::ParameterFactory::declareBool(key, display));
     }
 
     settings_.set(key, display);
 
-    for(const auto& pair : designer_->graph_views_) {
+    for (const auto& pair : designer_->graph_views_) {
         GraphView* view = pair.second;
         view->designerScene()->displayConnections(q_type, display);
     }
 
-    if(type == "messages") {
+    if (type == "messages") {
         messagesEnabled(display);
-    } else if(type == "signals") {
+    } else if (type == "signals") {
         signalsEnabled(display);
-    } else if(type == "active") {
+    } else if (type == "active") {
         activeEnabled(display);
-    } else if(type == "inactive") {
+    } else if (type == "inactive") {
         inactiveEnabled(display);
     }
 }
-
 
 /// MOC
 #include "../../../include/csapex/view/designer/moc_designer_options.cpp"

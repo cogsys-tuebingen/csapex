@@ -11,13 +11,11 @@ class ThreadGroupProfilingDelegate : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    ThreadGroupProfilingDelegate(QWidget *parent = 0);
+    ThreadGroupProfilingDelegate(QWidget* parent = 0);
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const override;
-    QSize sizeHint(const QStyleOptionViewItem &option,
-                   const QModelIndex &index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };
-}
+}  // namespace csapex
 
-#endif // THREAD_GROUP_PROFILING_DELEGATE_H
+#endif  // THREAD_GROUP_PROFILING_DELEGATE_H

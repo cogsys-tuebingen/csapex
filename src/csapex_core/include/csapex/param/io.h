@@ -8,22 +8,24 @@
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 
-namespace YAML {
-
-template<>
-struct CSAPEX_PARAM_EXPORT convert<csapex::param::ParameterPtr> {
+namespace YAML
+{
+template <>
+struct CSAPEX_PARAM_EXPORT convert<csapex::param::ParameterPtr>
+{
     static Node encode(const csapex::param::ParameterPtr& rhs);
 
     static bool decode(const Node& node, csapex::param::ParameterPtr& rhs);
 };
 
-template<>
-struct CSAPEX_PARAM_EXPORT convert<csapex::param::ParameterConstPtr> {
+template <>
+struct CSAPEX_PARAM_EXPORT convert<csapex::param::ParameterConstPtr>
+{
     static Node encode(const csapex::param::ParameterConstPtr& rhs);
 
     static bool decode(const Node& node, csapex::param::ParameterConstPtr& rhs);
 };
 
-}
+}  // namespace YAML
 
-#endif // IO_H
+#endif  // IO_H

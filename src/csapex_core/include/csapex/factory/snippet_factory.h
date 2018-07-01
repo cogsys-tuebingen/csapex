@@ -14,13 +14,12 @@
 
 namespace csapex
 {
-
 class PluginLocator;
 
 class SnippetFactory
 {
 public:
-    SnippetFactory(PluginLocator *locator);
+    SnippetFactory(PluginLocator* locator);
     ~SnippetFactory();
 
     void loadSnippets();
@@ -46,6 +45,6 @@ private:
     std::map<std::string, std::vector<SnippetPtr>> tag_map_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SNIPPET_FACTORY_H
+#endif  // SNIPPET_FACTORY_H

@@ -8,10 +8,9 @@
 
 namespace csapex
 {
-
 namespace io
 {
-    class NotificationMessageSerializer;
+class NotificationMessageSerializer;
 }
 
 class NotificationMessage : public BroadcastImplementation<NotificationMessage>
@@ -20,7 +19,7 @@ public:
     NotificationMessage(const Notification& notification);
     NotificationMessage();
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     const Notification& getNotification() const;
@@ -29,6 +28,6 @@ private:
     Notification notification;
 };
 
-}
+}  // namespace csapex
 
-#endif // NOTIFICATION_MESSAGE_H
+#endif  // NOTIFICATION_MESSAGE_H

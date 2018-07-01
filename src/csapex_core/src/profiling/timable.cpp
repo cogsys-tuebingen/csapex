@@ -6,16 +6,12 @@
 
 using namespace csapex;
 
-Timable::Timable()
-    : profiling_timer_(std::make_shared<Timer>("null"))
+Timable::Timable() : profiling_timer_(std::make_shared<Timer>("null"))
 {
-
 }
 
-Timable::Timable(std::shared_ptr<Timer> timer)
-    : profiling_timer_(timer)
+Timable::Timable(std::shared_ptr<Timer> timer) : profiling_timer_(timer)
 {
-
 }
 
 void Timable::useTimer(std::shared_ptr<Timer> timer)

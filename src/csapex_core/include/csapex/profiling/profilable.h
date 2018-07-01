@@ -9,7 +9,6 @@
 
 namespace csapex
 {
-
 class Profiler;
 
 class CSAPEX_PROFILING_EXPORT Profilable
@@ -25,6 +24,6 @@ protected:
     std::shared_ptr<Profiler> profiler_;
 };
 
-}
+}  // namespace csapex
 
-#endif // PROFILABLE_H
+#endif  // PROFILABLE_H

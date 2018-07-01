@@ -20,7 +20,7 @@ using namespace csapex::command;
 CSAPEX_REGISTER_COMMAND_SERIALIZER(AddConnection)
 
 AddConnection::AddConnection(const AUUID& parent_uuid, const UUID& from_uuid, const UUID& to_uuid, bool active)
-    : CommandImplementation(parent_uuid), from_uuid(from_uuid), to_uuid(to_uuid), active(active)
+  : CommandImplementation(parent_uuid), from_uuid(from_uuid), to_uuid(to_uuid), active(active)
 {
 }
 
@@ -48,7 +48,6 @@ bool AddConnection::doRedo()
     return doExecute();
 }
 
-
 bool AddConnection::doExecute()
 {
     GraphImplementationPtr graph = getGraph();
@@ -66,8 +65,7 @@ bool AddConnection::doExecute()
     return graph->addConnection(c);
 }
 
-
-void AddConnection::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void AddConnection::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

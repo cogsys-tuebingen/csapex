@@ -12,8 +12,8 @@
 
 #include <csapex_testing/csapex_test_case.h>
 
-namespace csapex {
-
+namespace csapex
+{
 class MockupNode : public Node
 {
 public:
@@ -29,43 +29,46 @@ public:
     Input* test_input;
 };
 
-class GraphTest : public CsApexTestCase {
+class GraphTest : public CsApexTestCase
+{
 protected:
     NodeFactoryImplementation factory;
 
-    GraphTest()
-        : factory(SettingsImplementation::NoSettings, nullptr)
+    GraphTest() : factory(SettingsImplementation::NoSettings, nullptr)
     {
         std::vector<TagPtr> tags;
-        csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("MockupNode",
-                                                     std::bind(&GraphTest::makeMockup)));
+        csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("MockupNode", std::bind(&GraphTest::makeMockup)));
         factory.registerNodeType(constructor);
     }
 
-    virtual ~GraphTest() {
+    virtual ~GraphTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         // Code here will be called immediately after the constructor (right
         // before each test).
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
 
-    static NodePtr makeMockup() {
+    static NodePtr makeMockup()
+    {
         return NodePtr(new MockupNode);
     }
-
 };
 
-TEST_F(GraphTest, NodeCanBeFound) {
+TEST_F(GraphTest, NodeCanBeFound)
+{
     SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
     GraphImplementationPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
@@ -87,14 +90,15 @@ TEST_F(GraphTest, NodeCanBeFound) {
     ASSERT_EQ(node, node_facade_found);
 }
 
-TEST_F(GraphTest, NodeCanBeFoundWithAConnector) {
+TEST_F(GraphTest, NodeCanBeFoundWithAConnector)
+{
     SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
     GraphImplementationPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     NodeFacadeImplementationPtr node = factory.makeNode("MockupNode", node_id, graph);
     graph->addNode(node);
 
-    //UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
+    // UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
     MockupNode* mnode = dynamic_cast<MockupNode*>(node->getNode().get());
     ASSERT_NE(nullptr, mnode);
 
@@ -116,7 +120,8 @@ TEST_F(GraphTest, NodeCanBeFoundWithAConnector) {
     ASSERT_EQ(node, node_facade_found);
 }
 
-TEST_F(GraphTest, NodeCanBeDeleted) {
+TEST_F(GraphTest, NodeCanBeDeleted)
+{
     SubgraphNodePtr graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
     GraphImplementationPtr graph = graph_node->getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
@@ -128,7 +133,8 @@ TEST_F(GraphTest, NodeCanBeDeleted) {
     ASSERT_THROW(graph->findNode(node_id), Graph::NodeNotFoundException);
 }
 
-TEST_F(GraphTest, UnknownNodeCannotBeFound) {
+TEST_F(GraphTest, UnknownNodeCannotBeFound)
+{
     SubgraphNode graph_node(std::make_shared<GraphImplementation>());
     GraphPtr graph = graph_node.getGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
@@ -136,7 +142,8 @@ TEST_F(GraphTest, UnknownNodeCannotBeFound) {
     ASSERT_THROW(graph->findNodeFacade(node_id), Graph::NodeFacadeNotFoundException);
 }
 
-TEST_F(GraphTest, NullPtr) {
+TEST_F(GraphTest, NullPtr)
+{
     SubgraphNode graph_node(std::make_shared<GraphImplementation>());
     GraphImplementationPtr graph = graph_node.getLocalGraph();
     UUID node_id = UUIDProvider::makeUUID_without_parent("foobarbaz");
@@ -151,9 +158,8 @@ TEST_F(GraphTest, NullPtr) {
     ASSERT_EQ(nullptr, node_found);
 }
 
-
-
-TEST_F(GraphTest, NestedNodeCanBeFound) {
+TEST_F(GraphTest, NestedNodeCanBeFound)
+{
     SubgraphNodePtr main_graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
     GraphImplementationPtr graph = main_graph_node->getLocalGraph();
 
@@ -171,7 +177,6 @@ TEST_F(GraphTest, NestedNodeCanBeFound) {
     node_handle_found = sub_graph->getLocalGraph()->findNodeHandle(node_id);
     ASSERT_NE(nullptr, node_handle_found);
 
-
     UUID nested_id = UUIDProvider::makeUUID_without_parent("subgraph_0" + UUID::namespace_separator + "foobarbaz");
 
     Node* node_found = graph->findNode(nested_id);
@@ -180,13 +185,11 @@ TEST_F(GraphTest, NestedNodeCanBeFound) {
     ASSERT_EQ(node_id, node_found->getUUID());
     ASSERT_EQ(node_found, node_facade->getNode().get());
 
-
     node_handle_found = graph->findNodeHandle(nested_id);
     ASSERT_NE(nullptr, node_handle_found);
 
     ASSERT_EQ(node_id, node_handle_found->getUUID());
     ASSERT_EQ(node_handle_found, node_facade->getNodeHandle().get());
-
 
     NodeFacadePtr node_facade_found = graph->findNodeFacade(nested_id);
     ASSERT_NE(nullptr, node_facade_found);
@@ -195,7 +198,8 @@ TEST_F(GraphTest, NestedNodeCanBeFound) {
     ASSERT_EQ(node_facade_found, node_facade);
 }
 
-TEST_F(GraphTest, RootCanBeFound) {
+TEST_F(GraphTest, RootCanBeFound)
+{
     UUIDProviderPtr root_provider(new UUIDProvider);
     NodeFacadeImplementationPtr main_facade = factory.makeGraph(root_provider->generateUUID("graph"), root_provider);
 
@@ -216,12 +220,10 @@ TEST_F(GraphTest, RootCanBeFound) {
     ASSERT_EQ(graph_node->getUUID(), nodehandle_found->getUUID());
     ASSERT_EQ(graph_node->getNodeHandle(), nodehandle_found);
 
-    NodeFacadePtr  nodefacade_found = graph->findNodeFacade(node_id);
+    NodeFacadePtr nodefacade_found = graph->findNodeFacade(node_id);
     ASSERT_NE(nullptr, nodefacade_found);
     ASSERT_EQ(main_facade->getUUID(), nodefacade_found->getUUID());
     ASSERT_EQ(main_facade, nodefacade_found);
-
 }
 
-
-}
+}  // namespace csapex

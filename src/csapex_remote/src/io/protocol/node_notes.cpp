@@ -13,22 +13,15 @@ NodeNote::NodeNote()
 {
 }
 
-NodeNote::NodeNote(NodeNoteType request_type, const AUUID &uuid)
-    : NoteImplementation(uuid),
-      note_type_(request_type)
+NodeNote::NodeNote(NodeNoteType request_type, const AUUID& uuid) : NoteImplementation(uuid), note_type_(request_type)
 {
-
 }
 
-NodeNote::NodeNote(NodeNoteType request_type, const AUUID &uuid, const std::vector<boost::any> &payload)
-    : NoteImplementation(uuid),
-      note_type_(request_type),
-      payload_(payload)
+NodeNote::NodeNote(NodeNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload) : NoteImplementation(uuid), note_type_(request_type), payload_(payload)
 {
-
 }
 
-void NodeNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void NodeNote::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Note::serialize(data, version);
 

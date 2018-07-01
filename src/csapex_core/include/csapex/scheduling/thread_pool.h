@@ -18,14 +18,13 @@
 
 namespace csapex
 {
-
 class CsApexCore;
 
 class CSAPEX_CORE_EXPORT ThreadPool : public Executor, public Observer, public Profilable
 {
 public:
-    ThreadPool(csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
-    ThreadPool(Executor* parent, csapex::ExceptionHandler &handler, bool enable_threading, bool grouping);
+    ThreadPool(csapex::ExceptionHandler& handler, bool enable_threading, bool grouping);
+    ThreadPool(Executor* parent, csapex::ExceptionHandler& handler, bool enable_threading, bool grouping);
     ~ThreadPool();
 
     bool isThreadingEnabled() const;
@@ -50,16 +49,16 @@ public:
     std::string nextName();
 
     virtual void add(TaskGenerator*) override;
-    virtual void remove(TaskGenerator *) override;
+    virtual void remove(TaskGenerator*) override;
 
     void usePrivateThreadFor(TaskGenerator* task);
     void addToGroup(TaskGenerator* task, int group_id);
 
-    ThreadGroup *createGroup(const std::string &name, int id = -1);
-    int createNewGroupFor(TaskGenerator *task, const std::string &name);
+    ThreadGroup* createGroup(const std::string& name, int id = -1);
+    int createNewGroupFor(TaskGenerator* task, const std::string& name);
     void removeGroup(int id);
 
-    void useDefaultThreadFor(TaskGenerator *task);
+    void useDefaultThreadFor(TaskGenerator* task);
 
     void saveSettings(YAML::Node&);
     void loadSettings(YAML::Node&);
@@ -72,11 +71,11 @@ public:
     void useProfiler(std::shared_ptr<Profiler> profiler) override;
 
 public:
-    slim_signal::Signal<void (ThreadGroupPtr)> group_created;
-    slim_signal::Signal<void (ThreadGroupPtr)> group_removed;
+    slim_signal::Signal<void(ThreadGroupPtr)> group_created;
+    slim_signal::Signal<void(ThreadGroupPtr)> group_removed;
 
 private:
-    slim_signal::Signal<void ()> private_group_cpu_affinity_changed;
+    slim_signal::Signal<void()> private_group_cpu_affinity_changed;
 
 protected:
     void pauseChanged(bool pause) override;
@@ -93,8 +92,8 @@ private:
     bool isInPrivateThread(TaskGenerator* task) const;
     bool isInGroup(TaskGenerator* task, int id) const;
 
-//    void clearGroup(ThreadGroup *group);
-    void removeGroup(ThreadGroup *group);
+    //    void clearGroup(ThreadGroup *group);
+    void removeGroup(ThreadGroup* group);
 
 private:
     ExceptionHandler& handler_;
@@ -116,6 +115,6 @@ private:
     bool suppress_exceptions_;
 };
 
-}
+}  // namespace csapex
 
-#endif // THREAD_POOL_H
+#endif  // THREAD_POOL_H

@@ -9,10 +9,10 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-namespace csapex {
-namespace param {
-
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT AngleParameter : public ParameterImplementation<AngleParameter, 0x00B>
 {
     friend class ParameterFactory;
@@ -24,18 +24,21 @@ public:
     AngleParameter();
     explicit AngleParameter(const std::string& name, const ParameterDescription& description, double angle, double min = -M_PI, double max = M_PI);
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
 
-    virtual std::string TYPE() const override { return "angle"; }
+    virtual std::string TYPE() const override
+    {
+        return "angle";
+    }
 
     virtual std::string toStringImpl() const override;
 
-    void cloneDataFrom(const Clonable &other) override;
+    void cloneDataFrom(const Clonable& other) override;
 
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     double min() const;
@@ -51,8 +54,7 @@ private:
     double max_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // ANGLE_PARAMETER_H
-
+#endif  // ANGLE_PARAMETER_H

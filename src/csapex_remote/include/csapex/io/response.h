@@ -9,7 +9,6 @@
 
 namespace csapex
 {
-
 class Response : public Streamable
 {
 public:
@@ -26,6 +25,6 @@ protected:
     uint8_t request_id_;
 };
 
-}
+}  // namespace csapex
 
-#endif // RESPONSE_H
+#endif  // RESPONSE_H

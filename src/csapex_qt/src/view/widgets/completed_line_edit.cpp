@@ -11,8 +11,7 @@
 
 using namespace csapex;
 
-CompletedLineEdit::CompletedLineEdit(QWidget *parent)
-    : QLineEdit(parent), was_hidden(false)
+CompletedLineEdit::CompletedLineEdit(QWidget* parent) : QLineEdit(parent), was_hidden(false)
 {
     line_height = 20;
 
@@ -26,21 +25,23 @@ CompletedLineEdit::CompletedLineEdit(QWidget *parent)
     connect(this, SIGNAL(textChanged(QString)), delegate, SLOT(setKeyWords(const QString&)));
 }
 
-
-void CompletedLineEdit::focusOutEvent(QFocusEvent */*e*/) {
+void CompletedLineEdit::focusOutEvent(QFocusEvent* /*e*/)
+{
     list_view->hide();
     was_hidden = true;
 }
 
-void CompletedLineEdit::focusInEvent(QFocusEvent */*e*/) {
+void CompletedLineEdit::focusInEvent(QFocusEvent* /*e*/)
+{
     // only show the view, if it has been visible before and then has been hidden!
-    if(was_hidden) {
+    if (was_hidden) {
         list_view->show();
         update();
     }
 }
 
-void CompletedLineEdit::keyPressEvent(QKeyEvent *e) {
+void CompletedLineEdit::keyPressEvent(QKeyEvent* e)
+{
     if (!list_view->isHidden()) {
         int key = e->key();
         int count = list_view->model()->rowCount();
@@ -86,15 +87,16 @@ void CompletedLineEdit::keyPressEvent(QKeyEvent *e) {
     }
 }
 
-
-void CompletedLineEdit::setModel(QAbstractItemModel *model) {
+void CompletedLineEdit::setModel(QAbstractItemModel* model)
+{
     list_view->setModel(model);
 
-    QObject::connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(update()));
+    QObject::connect(model, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this, SLOT(update()));
     QObject::connect(model, SIGNAL(layoutChanged()), this, SLOT(update()));
 }
 
-void CompletedLineEdit::update() {
+void CompletedLineEdit::update()
+{
     list_view->setMinimumWidth(width());
     list_view->setMaximumWidth(width());
 
@@ -105,11 +107,11 @@ void CompletedLineEdit::update() {
     int hits = list_view->model()->rowCount();
     int h = std::min(6, hits) * line_height * 2 + 4;
 
-    if(hits == 0) {
+    if (hits == 0) {
         list_view->hide();
 
     } else {
-        list_view->setCurrentIndex(list_view->model()->index(0,0));
+        list_view->setCurrentIndex(list_view->model()->index(0, 0));
 
         list_view->move(x, y);
         list_view->setFixedHeight(h);
@@ -118,7 +120,7 @@ void CompletedLineEdit::update() {
     }
 }
 
-void CompletedLineEdit::completeText(const QModelIndex &index)
+void CompletedLineEdit::completeText(const QModelIndex& index)
 {
     mime_ = index.data(Qt::UserRole + 5).toString().toStdString();
 

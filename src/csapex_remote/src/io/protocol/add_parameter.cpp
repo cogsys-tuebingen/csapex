@@ -18,22 +18,17 @@ using namespace csapex;
 ///
 /// REQUEST
 ///
-AddParameter::ParameterRequest::ParameterRequest(const AUUID &id, const std::string& name, const std::string& description,
-                                                 boost::any value, bool persistent)
-    : RequestImplementation(0),
-      id_(id), name_(name), description_(description),
-      value_(value), persistent_(persistent)
+AddParameter::ParameterRequest::ParameterRequest(const AUUID& id, const std::string& name, const std::string& description, boost::any value, bool persistent)
+  : RequestImplementation(0), id_(id), name_(name), description_(description), value_(value), persistent_(persistent)
 {
     apex_assert_hard(!name_.empty());
 }
 
-AddParameter::ParameterRequest::ParameterRequest(uint8_t request_id)
-    : RequestImplementation(request_id)
+AddParameter::ParameterRequest::ParameterRequest(uint8_t request_id) : RequestImplementation(request_id)
 {
-
 }
 
-ResponsePtr AddParameter::ParameterRequest::execute(const SessionPtr &session, CsApexCore &core) const
+ResponsePtr AddParameter::ParameterRequest::execute(const SessionPtr& session, CsApexCore& core) const
 {
     std::shared_ptr<ParameterResponse> response;
 
@@ -41,7 +36,7 @@ ResponsePtr AddParameter::ParameterRequest::execute(const SessionPtr &session, C
     param::Parameter::Ptr param = std::make_shared<param::ValueParameter>(name_, param::ParameterDescription(description_));
     param->set_unsafe(value_);
 
-    if(id_.global()) {
+    if (id_.global()) {
         core.getSettings().add(param, persistent_);
         response = std::make_shared<ParameterResponse>(param, getRequestID());
     } else {
@@ -51,7 +46,7 @@ ResponsePtr AddParameter::ParameterRequest::execute(const SessionPtr &session, C
     return response;
 }
 
-void AddParameter::ParameterRequest::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void AddParameter::ParameterRequest::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << id_;
     data << name_;
@@ -73,18 +68,14 @@ void AddParameter::ParameterRequest::deserialize(const SerializationBuffer& data
 /// RESPONSE
 ///
 
-AddParameter::ParameterResponse::ParameterResponse(const param::ParameterConstPtr &parameter, uint8_t request_id)
-    : ResponseImplementation(request_id), param_(parameter)
+AddParameter::ParameterResponse::ParameterResponse(const param::ParameterConstPtr& parameter, uint8_t request_id) : ResponseImplementation(request_id), param_(parameter)
 {
-
 }
-AddParameter::ParameterResponse::ParameterResponse(uint8_t request_id)
-    : ResponseImplementation(request_id)
+AddParameter::ParameterResponse::ParameterResponse(uint8_t request_id) : ResponseImplementation(request_id)
 {
-
 }
 
-void AddParameter::ParameterResponse::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void AddParameter::ParameterResponse::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     ParameterSerializer::instance().serialize(*param_, data);
 }

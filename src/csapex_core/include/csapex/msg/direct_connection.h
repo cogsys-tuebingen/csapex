@@ -6,7 +6,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT DirectConnection : public Connection
 {
 public:
@@ -21,10 +20,8 @@ public:
 protected:
     DirectConnection(OutputPtr from, InputPtr to);
     DirectConnection(OutputPtr from, InputPtr to, int id);
-
 };
 
-}
+}  // namespace csapex
 
-#endif // DIRECT_CONNECTION_H
-
+#endif  // DIRECT_CONNECTION_H

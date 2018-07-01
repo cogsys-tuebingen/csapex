@@ -10,25 +10,24 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT MovableGraphicsProxyWidget : public QGraphicsProxyWidget
 {
     Q_OBJECT
 
 public:
-    MovableGraphicsProxyWidget(NodeBox* box, GraphView* view, CsApexViewCore& view_core, QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    MovableGraphicsProxyWidget(NodeBox* box, GraphView* view, CsApexViewCore& view_core, QGraphicsItem* parent = 0, Qt::WindowFlags wFlags = 0);
     ~MovableGraphicsProxyWidget();
 
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value);
 
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
 
-    void dragEnterEvent(QGraphicsSceneDragDropEvent *event);
-    void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
-    void dropEvent(QGraphicsSceneDragDropEvent *event);
-    void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
+    void dragEnterEvent(QGraphicsSceneDragDropEvent* event);
+    void dragMoveEvent(QGraphicsSceneDragDropEvent* event);
+    void dropEvent(QGraphicsSceneDragDropEvent* event);
+    void dragLeaveEvent(QGraphicsSceneDragDropEvent* event);
 
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
 
@@ -58,6 +57,6 @@ private:
     static long next_note_z;
 };
 
-}
+}  // namespace csapex
 
-#endif // MOVABLE_GRAPHICS_PROXY_WIDGET_H
+#endif  // MOVABLE_GRAPHICS_PROXY_WIDGET_H

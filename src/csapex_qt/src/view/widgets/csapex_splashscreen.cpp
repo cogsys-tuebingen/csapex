@@ -10,14 +10,13 @@
 
 using namespace csapex;
 
-CsApexSplashScreen::CsApexSplashScreen(QWidget */*parent*/) :
-    QSplashScreen(QPixmap(":/apex_splash.png"))
+CsApexSplashScreen::CsApexSplashScreen(QWidget* /*parent*/) : QSplashScreen(QPixmap(":/apex_splash.png"))
 
 {
     this->setCursor(Qt::BusyCursor);
 }
 
-void CsApexSplashScreen::drawContents(QPainter *painter)
+void CsApexSplashScreen::drawContents(QPainter* painter)
 {
     painter->translate(width() - 320, 50);
 
@@ -70,7 +69,7 @@ void CsApexSplashScreen::drawContents(QPainter *painter)
 
     painter->drawText(pos, message());
 
-//    QSplashScreen::drawContents(painter);
+    //    QSplashScreen::drawContents(painter);
 }
 
 /// MOC

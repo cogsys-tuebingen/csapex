@@ -18,8 +18,7 @@ using namespace csapex;
 
 Q_DECLARE_METATYPE(ConnectorPtr)
 
-MetaPort::MetaPort(ConnectorType port_type, const AUUID& target, QWidget *parent)
-    : Port(parent), port_type_(port_type), target(target)
+MetaPort::MetaPort(ConnectorType port_type, const AUUID& target, QWidget* parent) : Port(parent), port_type_(port_type), target(target)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -41,9 +40,8 @@ void MetaPort::showContextMenu(const QPoint& pos)
 void MetaPort::triggerCreatePort()
 {
     bool ok = false;
-    QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label",
-                                         QLineEdit::Normal, "", &ok);
-    if(!ok) {
+    QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label", QLineEdit::Normal, "", &ok);
+    if (!ok) {
         return;
     }
 
@@ -55,57 +53,51 @@ void MetaPort::triggerCreatePort()
 
 void MetaPort::dragEnterEvent(QDragEnterEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+    if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         e->acceptProposedAction();
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         e->acceptProposedAction();
     }
 }
 
 void MetaPort::dragMoveEvent(QDragMoveEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create)) ||
-            e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+    if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create)) || e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         e->acceptProposedAction();
     }
 }
 
 void MetaPort::dropEvent(QDropEvent* e)
 {
-    if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
+    if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_create))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-        if(from) {
+        if (from) {
             auto type = from->getType();
 
             bool ok = false;
-            QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label",
-                                                 QLineEdit::Normal, QString::fromStdString(from->getLabel()), &ok);
-            if(!ok) {
+            QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label", QLineEdit::Normal, QString::fromStdString(from->getLabel()), &ok);
+            if (!ok) {
                 return;
             }
 
             Q_EMIT createPortAndConnectRequest(ConnectorDescription(target, port_type_, type, label.toStdString()), from);
         }
 
-    } else if(e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
+    } else if (e->mimeData()->hasFormat(QString::fromStdString(csapex::mime::connection_move))) {
         ConnectorPtr from = e->mimeData()->property("Connector").value<ConnectorPtr>();
-        if(from) {
+        if (from) {
             auto type = from->getType();
 
             bool ok = false;
-            QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label",
-                                                 QLineEdit::Normal, QString::fromStdString(from->getLabel()), &ok);
-            if(!ok) {
+            QString label = QInputDialog::getText(QApplication::activeWindow(), "Label", "Enter a new label", QLineEdit::Normal, QString::fromStdString(from->getLabel()), &ok);
+            if (!ok) {
                 return;
             }
 
-
             Q_EMIT createPortAndMoveRequest(ConnectorDescription(target, port_type_, type, label.toStdString()), from);
         }
-
     }
 }
 
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_meta_port.cpp"
-

@@ -76,53 +76,50 @@ public:
 
     virtual std::shared_ptr<NodeAdapterFactory> getNodeAdapterFactory() = 0;
 
-
-
     DesignerStyleable& getStyle();
-
 
     bool isDebug() const;
     bool isGridLockEnabled() const;
 
 public:
-    slim_signal::Signal<void ()> config_changed;
-    slim_signal::Signal<void (const std::string& msg)> status_changed;
-    slim_signal::Signal<void ()> new_node_type;
-    slim_signal::Signal<void ()> new_snippet_type;
+    slim_signal::Signal<void()> config_changed;
+    slim_signal::Signal<void(const std::string& msg)> status_changed;
+    slim_signal::Signal<void()> new_node_type;
+    slim_signal::Signal<void()> new_snippet_type;
 
-    slim_signal::Signal<void ()> reset_requested;
-    slim_signal::Signal<void ()> reset_done;
+    slim_signal::Signal<void()> reset_requested;
+    slim_signal::Signal<void()> reset_done;
 
-    slim_signal::Signal<void ()> saved;
-    slim_signal::Signal<void ()> loaded;
+    slim_signal::Signal<void()> saved;
+    slim_signal::Signal<void()> loaded;
 
-    slim_signal::Signal<void (bool)> paused;
+    slim_signal::Signal<void(bool)> paused;
 
-    slim_signal::Signal<void ()> stepping_enabled;
-    slim_signal::Signal<void ()> begin_step;
-    slim_signal::Signal<void ()> end_step;
+    slim_signal::Signal<void()> stepping_enabled;
+    slim_signal::Signal<void()> begin_step;
+    slim_signal::Signal<void()> end_step;
 
-    slim_signal::Signal<void ()> server_shutdown;
+    slim_signal::Signal<void()> server_shutdown;
 
-    csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> save_detail_request;
-    csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> load_detail_request;
+    csapex::slim_signal::Signal<void(const GraphFacade&, YAML::Node& e)> save_detail_request;
+    csapex::slim_signal::Signal<void(GraphFacade&, const YAML::Node& n)> load_detail_request;
 
     /// GRAPH
     slim_signal::Signal<void(NodeFacadePtr)> node_facade_added;
     slim_signal::Signal<void(NodeFacadePtr)> node_facade_removed;
 
     /// THREAD POOL
-    slim_signal::Signal<void (ThreadGroupPtr)> group_created;
-    slim_signal::Signal<void (ThreadGroupPtr)> group_removed;
+    slim_signal::Signal<void(ThreadGroupPtr)> group_created;
+    slim_signal::Signal<void(ThreadGroupPtr)> group_removed;
 
     /// COMMANDS
-    slim_signal::Signal<void ()> undo_state_changed;
-    slim_signal::Signal<void (bool)> undo_dirty_changed;
+    slim_signal::Signal<void()> undo_state_changed;
+    slim_signal::Signal<void(bool)> undo_dirty_changed;
 
 private:
     DesignerStyleable style;
 };
 
-}
+}  // namespace csapex
 
-#endif // CSAPEX_VIEW_CORE_H
+#endif  // CSAPEX_VIEW_CORE_H

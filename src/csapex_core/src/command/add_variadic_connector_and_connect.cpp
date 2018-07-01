@@ -21,13 +21,9 @@ using namespace command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(AddVariadicConnectorAndConnect)
 
-AddVariadicConnectorAndConnect::AddVariadicConnectorAndConnect(const AUUID& graph_id, const AUUID& node,
-                                                               const ConnectorType& connector_type,
-                                                               const TokenDataConstPtr& type, const std::string &label,
-                                                               const UUID& target, bool move,
-                                                               bool external)
-    : AddVariadicConnector(graph_id, node, connector_type, type, label),
-      target_(target), move_(move), external_(external)
+AddVariadicConnectorAndConnect::AddVariadicConnectorAndConnect(const AUUID& graph_id, const AUUID& node, const ConnectorType& connector_type, const TokenDataConstPtr& type, const std::string& label,
+                                                               const UUID& target, bool move, bool external)
+  : AddVariadicConnector(graph_id, node, connector_type, type, label), target_(target), move_(move), external_(external)
 {
 }
 
@@ -36,14 +32,13 @@ std::string AddVariadicConnectorAndConnect::getDescription() const
     return AddVariadicConnector::getDescription() + " and connect it";
 }
 
-
 bool AddVariadicConnectorAndConnect::doExecute()
 {
-    if(AddVariadicConnector::doExecute()) {
+    if (AddVariadicConnector::doExecute()) {
         RelayMapping ports = getMap();
         CommandFactory factory(getGraphFacade());
 
-        if(move_) {
+        if (move_) {
             additional_work_ = factory.moveConnections(target_, external_ ? ports.external : ports.internal);
         } else {
             additional_work_ = factory.addConnection(external_ ? ports.external : ports.internal, target_, false);
@@ -56,7 +51,7 @@ bool AddVariadicConnectorAndConnect::doExecute()
 
 bool AddVariadicConnectorAndConnect::doUndo()
 {
-    if(undoCommand(additional_work_)) {
+    if (undoCommand(additional_work_)) {
         return AddVariadicConnector::doUndo();
     }
 
@@ -68,9 +63,7 @@ bool AddVariadicConnectorAndConnect::doRedo()
     return doExecute();
 }
 
-
-
-void AddVariadicConnectorAndConnect::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void AddVariadicConnectorAndConnect::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     AddVariadicConnector::serialize(data, version);
 

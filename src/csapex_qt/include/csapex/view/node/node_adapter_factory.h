@@ -13,7 +13,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT NodeAdapterFactory
 {
 public:
@@ -30,7 +29,7 @@ public:
 
 private:
     void ensureLoaded();
-//    void rebuildPrototypes();
+    //    void rebuildPrototypes();
 
 protected:
     Settings& settings_;
@@ -40,6 +39,6 @@ protected:
     std::map<std::string, NodeAdapterBuilder::Ptr> node_adapter_builders_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_ADAPTER_FACTORY_H
+#endif  // NODE_ADAPTER_FACTORY_H

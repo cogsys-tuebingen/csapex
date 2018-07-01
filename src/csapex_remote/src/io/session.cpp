@@ -24,24 +24,11 @@
 using namespace csapex;
 using boost::asio::ip::tcp;
 
-Session::Session(Socket socket, const std::string &name)
-    : socket_(new Socket(std::move(socket))),
-      next_request_id_(1),
-      running_(false),
-      is_live_(false),
-      was_live_(false),
-      name_(name),
-      is_valid_(true)
+Session::Session(Socket socket, const std::string& name) : socket_(new Socket(std::move(socket))), next_request_id_(1), running_(false), is_live_(false), was_live_(false), name_(name), is_valid_(true)
 {
 }
 
-Session::Session(const std::string& name)
-    : next_request_id_(1),
-      running_(false),
-      is_live_(false),
-      was_live_(false),
-      name_(name),
-      is_valid_(true)
+Session::Session(const std::string& name) : next_request_id_(1), running_(false), is_live_(false), was_live_(false), name_(name), is_valid_(true)
 {
 }
 
@@ -50,18 +37,18 @@ Session::~Session()
     is_valid_ = false;
     {
         std::unique_lock<std::recursive_mutex> running_lock(running_mutex_);
-        if(running_) {
+        if (running_) {
             running_ = false;
             packet_handler_thread_.join();
         }
     }
 
-    if(socket_) {
+    if (socket_) {
         boost::system::error_code ec;
         socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
         if (ec && ec != boost::asio::error::not_connected) {
             std::cerr << "ERROR: cannot shutdown server connection: " << ec.message() << std::endl;
-        } else if(socket_->is_open()) {
+        } else if (socket_->is_open()) {
             socket_->close();
         }
     }
@@ -69,7 +56,6 @@ Session::~Session()
 
 void Session::run()
 {
-
 }
 
 bool Session::isRunning() const
@@ -79,7 +65,6 @@ bool Session::isRunning() const
 
 void Session::shutdown()
 {
-
 }
 
 void Session::start()
@@ -91,21 +76,18 @@ void Session::start()
     }
     started(this);
 
-    packet_handler_thread_ = std::thread([this](){
+    packet_handler_thread_ = std::thread([this]() {
         csapex::thread::set_name(name_.c_str());
         is_live_ = true;
         was_live_ = true;
 
         try {
             mainLoop();
-        }
-        catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             std::cerr << "there was an error in the session: " << e.what() << std::endl;
-        }
-        catch(const csapex::Failure& e) {
+        } catch (const csapex::Failure& e) {
             std::cerr << "there was a failure in the session: " << e.what() << std::endl;
-        }
-        catch(...) {
+        } catch (...) {
             std::cerr << "there was an unknown error in the session" << std::endl;
         }
 
@@ -117,19 +99,16 @@ void Session::start()
 
 void Session::mainLoop()
 {
-    while(running_) {
+    while (running_) {
         std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
-        while(running_ && (packets_received_.empty() && packets_to_send_.empty())) {
+        while (running_ && (packets_received_.empty() && packets_to_send_.empty())) {
             packets_available_.wait_for(packet_lock, std::chrono::milliseconds(100));
         }
 
         // so as not to starve the clients, we limit the max amount of packets to send
         // before receiving other packets
         const int max_operations_per_iteration = 32;
-        for(int i = 0;
-            i < max_operations_per_iteration && running_ && !packets_to_send_.empty();
-            ++i)
-        {
+        for (int i = 0; i < max_operations_per_iteration && running_ && !packets_to_send_.empty(); ++i) {
             StreamableConstPtr packet = packets_to_send_.front();
             packets_to_send_.pop_front();
             packet_lock.unlock();
@@ -140,43 +119,39 @@ void Session::mainLoop()
             packet_lock.lock();
         }
 
-        for(int i = 0;
-            i < max_operations_per_iteration && running_ && !packets_received_.empty();
-            ++i)
-        {
+        for (int i = 0; i < max_operations_per_iteration && running_ && !packets_received_.empty(); ++i) {
             StreamableConstPtr packet = packets_received_.front();
             packets_received_.pop_front();
             packet_lock.unlock();
 
             try {
-
-                switch(packet->getPacketType()) {
-                case BroadcastMessage::PACKET_TYPE_ID:
-                    if(BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
-                        broadcast_received(broadcast);
-                    }
-                    break;
-                case RawMessage::PACKET_TYPE_ID:
-                    if(RawMessageConstPtr raw_message = std::dynamic_pointer_cast<RawMessage const>(packet)) {
-                        auto& signal = raw_packet_received(raw_message->getUUID()); // move this to node server
-                        signal(raw_message);
-                    }
-                    break;
-                case io::Note::PACKET_TYPE_ID:
-                    if(io::NoteConstPtr note = std::dynamic_pointer_cast<io::Note const>(packet)) {
-                        auto pos = channels_.find(note->getAUUID());
-                        if(pos != channels_.end()) {
-                            io::ChannelPtr channel = pos->second;
-                            channel->handleNote(note);
+                switch (packet->getPacketType()) {
+                    case BroadcastMessage::PACKET_TYPE_ID:
+                        if (BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
+                            broadcast_received(broadcast);
                         }
-                    }
-                    break;
-                default:
-                    packet_received(packet);
-                    break;
+                        break;
+                    case RawMessage::PACKET_TYPE_ID:
+                        if (RawMessageConstPtr raw_message = std::dynamic_pointer_cast<RawMessage const>(packet)) {
+                            auto& signal = raw_packet_received(raw_message->getUUID());  // move this to node server
+                            signal(raw_message);
+                        }
+                        break;
+                    case io::Note::PACKET_TYPE_ID:
+                        if (io::NoteConstPtr note = std::dynamic_pointer_cast<io::Note const>(packet)) {
+                            auto pos = channels_.find(note->getAUUID());
+                            if (pos != channels_.end()) {
+                                io::ChannelPtr channel = pos->second;
+                                channel->handleNote(note);
+                            }
+                        }
+                        break;
+                    default:
+                        packet_received(packet);
+                        break;
                 }
 
-            } catch(...) {
+            } catch (...) {
                 // silent death
             }
 
@@ -189,26 +164,26 @@ void Session::stop()
 {
     apex_assert_hard(packet_handler_thread_.get_id() != std::this_thread::get_id());
 
-    if(is_valid_) {
+    if (is_valid_) {
         stopped(this);
     }
 
     std::unique_lock<std::recursive_mutex> running_lock(running_mutex_);
 
-//    if(!live_) {
-//        return;
-//    }
+    //    if(!live_) {
+    //        return;
+    //    }
     running_ = false;
 
     std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
-    for(auto pair : open_requests_) {
+    for (auto pair : open_requests_) {
         std::promise<ResponseConstPtr>* open_requests = pair.second;
         open_requests->set_value(nullptr);
     }
 
     running_lock.unlock();
 
-    if(is_live_) {
+    if (is_live_) {
         packet_handler_thread_.join();
     }
     apex_assert_hard(!is_live_);
@@ -216,17 +191,16 @@ void Session::stop()
 
 void Session::stopForced()
 {
-    if(packet_handler_thread_.get_id() != std::this_thread::get_id()) {
+    if (packet_handler_thread_.get_id() != std::this_thread::get_id()) {
         stop();
     } else {
         throw std::runtime_error("stopping in an active session");
     }
 }
 
-
 ResponseConstPtr Session::sendRequest(RequestConstPtr request)
 {
-    if(is_live_) {
+    if (is_live_) {
         request->overwriteRequestID(next_request_id_++);
 
         std::promise<ResponseConstPtr> promise;
@@ -242,15 +216,14 @@ ResponseConstPtr Session::sendRequest(RequestConstPtr request)
 
         future.wait();
 
-        if(ResponseConstPtr response = future.get()) {
+        if (ResponseConstPtr response = future.get()) {
             apex_assert_hard(response);
             return response;
         }
         apex_fail(std::string("The request ") + std::to_string(request->getRequestID()) + " failed to produce a response");
 
-
     } else {
-        if(was_live_) {
+        if (was_live_) {
             throw NoConnectionException();
         }
     }
@@ -262,19 +235,17 @@ void Session::sendNote(io::NoteConstPtr note)
 {
     try {
         write(note);
-    } catch(const NoConnectionException& nce) {
+    } catch (const NoConnectionException& nce) {
         // ignore notes sent
-        std::cerr << "cannot send note " <<
-                     note->getType() <<
-                     " via a closed session" << std::endl;
+        std::cerr << "cannot send note " << note->getType() << " via a closed session" << std::endl;
     }
 }
 
-void Session::write(const StreamableConstPtr &packet)
+void Session::write(const StreamableConstPtr& packet)
 {
-    if(is_live_) {
+    if (is_live_) {
         {
-            if(packet_handler_thread_.get_id() != std::this_thread::get_id()) {
+            if (packet_handler_thread_.get_id() != std::this_thread::get_id()) {
                 std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
                 packets_to_send_.push_back(packet);
             } else {
@@ -286,13 +257,13 @@ void Session::write(const StreamableConstPtr &packet)
         packets_available_.notify_all();
 
     } else {
-        if(was_live_) {
+        if (was_live_) {
             throw NoConnectionException();
         }
     }
 }
 
-void Session::write(const std::string &message)
+void Session::write(const std::string& message)
 {
     write(std::make_shared<Feedback>(message));
 }
@@ -300,7 +271,7 @@ void Session::write(const std::string &message)
 void Session::read_async()
 {
     {
-        if(!running_) {
+        if (!running_) {
             return;
         }
     }
@@ -308,130 +279,129 @@ void Session::read_async()
     SessionWeakPtr self = shared_from_this();
 
     std::shared_ptr<SerializationBuffer> message_data = std::make_shared<SerializationBuffer>();
-    boost::asio::async_read(*socket_, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH),
-                            [this, message_data, self](boost::system::error_code ec, std::size_t reply_length){
-        if (ec  == boost::asio::error::eof) {
-            // do nothing
-            return;
+    boost::asio::async_read(
+        *socket_, boost::asio::buffer(&message_data->at(0), SerializationBuffer::HEADER_LENGTH), [this, message_data, self](boost::system::error_code ec, std::size_t reply_length) {
+            if (ec == boost::asio::error::eof) {
+                // do nothing
+                return;
 
-        } else if (ec == boost::asio::error::connection_reset) {
-            // disconnect
-            if(SessionPtr session = self.lock()) {
-                stop();
-            }
-            return;
+            } else if (ec == boost::asio::error::connection_reset) {
+                // disconnect
+                if (SessionPtr session = self.lock()) {
+                    stop();
+                }
+                return;
 
-        } else if(reply_length > 0) {
-            // payload received
-            if(reply_length == SerializationBuffer::HEADER_LENGTH) {
-                message_data->seek(0);
-                uint32_t message_length;
-                *message_data >> message_length;
+            } else if (reply_length > 0) {
+                // payload received
+                if (reply_length == SerializationBuffer::HEADER_LENGTH) {
+                    message_data->seek(0);
+                    uint32_t message_length;
+                    *message_data >> message_length;
 
-                if(message_length > SerializationBuffer::HEADER_LENGTH) {
-                    message_data->resize(message_length, ' ');
-                    reply_length = boost::asio::read(*socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
-                    apex_assert_equal_hard((int) reply_length, ((int) (message_length - SerializationBuffer::HEADER_LENGTH)));
+                    if (message_length > SerializationBuffer::HEADER_LENGTH) {
+                        message_data->resize(message_length, ' ');
+                        reply_length = boost::asio::read(*socket_, boost::asio::buffer(&message_data->at(SerializationBuffer::HEADER_LENGTH), message_length - SerializationBuffer::HEADER_LENGTH));
+                        apex_assert_equal_hard((int)reply_length, ((int)(message_length - SerializationBuffer::HEADER_LENGTH)));
 
+                        StreamablePtr serial = PacketSerializer::deserializePacket(*message_data);
 
-                    StreamablePtr serial = PacketSerializer::deserializePacket(*message_data);
+                        if (serial) {
+                            if (FeedbackConstPtr feedback = std::dynamic_pointer_cast<Feedback const>(serial)) {
+                                std::cerr << feedback->getMessage() << std::endl;
+                                if (feedback->getRequestID() != 0) {
+                                    std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
+                                    auto it = open_requests_.find(feedback->getRequestID());
+                                    if (it != open_requests_.end()) {
+                                        std::promise<ResponseConstPtr>* promise = it->second;
+                                        promise->set_value(feedback);
+                                        open_requests_.erase(it);
 
-                    if(serial) {
-                        if(FeedbackConstPtr feedback = std::dynamic_pointer_cast<Feedback const>(serial)) {
-                            std::cerr << feedback->getMessage() << std::endl;
-                            if(feedback->getRequestID() != 0) {
+                                    } else {
+                                        std::cerr << "got feedback for unknown request " << (int)feedback->getRequestID() << std::endl;
+                                    }
+                                }
+
+                            } else if (ResponseConstPtr response = std::dynamic_pointer_cast<Response const>(serial)) {
+                                // std::cerr << "got response #" << (int) response->getRequestID() << std::endl;
+
                                 std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
-                                auto it = open_requests_.find(feedback->getRequestID());
-                                if(it != open_requests_.end()) {
+                                auto it = open_requests_.find(response->getRequestID());
+                                if (it != open_requests_.end()) {
                                     std::promise<ResponseConstPtr>* promise = it->second;
-                                    promise->set_value(feedback);
+                                    apex_assert_hard(response);
+                                    promise->set_value(response);
                                     open_requests_.erase(it);
 
                                 } else {
-                                    std::cerr << "got feedback for unknown request " << (int) feedback->getRequestID() << std::endl;
+                                    std::cerr << "got response for unknown request " << (int)response->getRequestID() << std::endl;
                                 }
-                            }
-
-                        } else if(ResponseConstPtr response = std::dynamic_pointer_cast<Response const>(serial)) {
-                            //std::cerr << "got response #" << (int) response->getRequestID() << std::endl;
-
-                            std::unique_lock<std::recursive_mutex> lock(open_requests_mutex_);
-                            auto it = open_requests_.find(response->getRequestID());
-                            if(it != open_requests_.end()) {
-                                std::promise<ResponseConstPtr>* promise = it->second;
-                                apex_assert_hard(response);
-                                promise->set_value(response);
-                                open_requests_.erase(it);
 
                             } else {
-                                std::cerr << "got response for unknown request " << (int) response->getRequestID() << std::endl;
+                                std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
+                                packets_received_.push_back(serial);
+                                packets_available_.notify_all();
                             }
-
                         } else {
-                            std::unique_lock<std::recursive_mutex> packet_lock(packets_mutex_);
-                            packets_received_.push_back(serial);
-                            packets_available_.notify_all();
+                            std::cerr << "could not deserialize message of length " << (int)message_length << std::endl;
                         }
                     } else {
-                        std::cerr << "could not deserialize message of length " << (int) message_length << std::endl;
+                        std::cerr << "got illegal message of length " << (int)message_length << std::endl;
                     }
                 } else {
-                    std::cerr << "got illegal message of length " << (int) message_length << std::endl;
+                    std::cerr << "got illegal header of length " << (int)reply_length << std::endl;
                 }
             } else {
-                std::cerr << "got illegal header of length " << (int) reply_length << std::endl;
+                std::cerr << "got an illegal reply of length " << (int)reply_length << std::endl;
             }
-        } else {
-            std::cerr << "got an illegal reply of length " << (int) reply_length << std::endl;
-        }
 
-        read_async();
-    });
+            read_async();
+        });
 }
 
-void Session::write_packet(SerializationBuffer &buffer)
+void Session::write_packet(SerializationBuffer& buffer)
 {
     try {
         buffer.finalize();
 
         apex_assert_hard(socket_->is_open());
-        //std::cerr << (long) this << " is sending:\n" << buffer.toString() << std::endl;
+        // std::cerr << (long) this << " is sending:\n" << buffer.toString() << std::endl;
 
         std::size_t written_bytes = boost::asio::write(*socket_, boost::asio::buffer(buffer, buffer.size()));
 
         apex_assert_eq_hard(buffer.size(), written_bytes);
 
-        //std::cerr << (long) this << " has sent " << written_bytes << " bytes" << std::endl;
+        // std::cerr << (long) this << " has sent " << written_bytes << " bytes" << std::endl;
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << "the session has thrown an exception: " << e.what() << std::endl;
         stopForced();
-    } catch(...) {
+    } catch (...) {
         std::cerr << "the session has crashed with an unknown cause." << std::endl;
         stopForced();
     }
 }
 
-void Session::handleFeedback(const ResponseConstPtr &res)
+void Session::handleFeedback(const ResponseConstPtr& res)
 {
-    if(auto feedback = std::dynamic_pointer_cast<Feedback const>(res)) {
+    if (auto feedback = std::dynamic_pointer_cast<Feedback const>(res)) {
         throw Failure(feedback->getMessage());
     }
 }
 
-slim_signal::Signal<void (const StreamableConstPtr &)> &Session::raw_packet_received(const AUUID& uuid)
+slim_signal::Signal<void(const StreamableConstPtr&)>& Session::raw_packet_received(const AUUID& uuid)
 {
     auto& res = auuid_to_signal_[uuid];
-    if(res == nullptr) {
+    if (res == nullptr) {
         res.reset(new slim_signal::Signal<void(const StreamableConstPtr&)>);
     }
     return *res;
 }
 
-io::ChannelPtr Session::openChannel(const AUUID &name)
+io::ChannelPtr Session::openChannel(const AUUID& name)
 {
     auto pos = channels_.find(name);
-    if(pos != channels_.end()) {
+    if (pos != channels_.end()) {
         return pos->second;
     }
 

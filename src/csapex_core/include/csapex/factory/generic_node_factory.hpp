@@ -9,8 +9,8 @@
 #include <boost/type_traits.hpp>
 #include <boost/mpl/transform.hpp>
 
-namespace csapex {
-
+namespace csapex
+{
 class CSAPEX_CORE_EXPORT GenericNodeFactory
 {
 public:
@@ -23,13 +23,12 @@ public:
      * @param f is a pointer to the function that should be converted
      * @return an instance of the wrapped Node
      */
-    template<typename F, typename Info = generic_node::DefaultInfo>
+    template <typename F, typename Info = generic_node::DefaultInfo>
     static Node::Ptr wrapFunction(F f)
     {
         typedef typename boost::function_types::parameter_types<F>::type params;
         return std::make_shared<GenericNode<params, Info>>(f);
     }
-
 
     /**
      * @brief createConstructorFromFunction creates a NodeConstructor instance from a function pointer
@@ -41,16 +40,16 @@ public:
      * @param icon
      * @return the generated NodeConstructor
      */
-    template<typename Info, typename F>
+    template <typename Info, typename F>
     static NodeConstructor::Ptr createConstructorFromFunction(F f, const std::string& name)
     {
         return std::make_shared<csapex::NodeConstructor>(name, std::bind(&GenericNodeFactory::wrapFunction<F, Info>, f));
     }
-    template<typename F>
+    template <typename F>
     static NodeConstructor::Ptr createConstructorFromFunction(F f, const std::string& name)
     {
         return createConstructorFromFunction<generic_node::DefaultInfo, F>(f, name);
     }
 };
 
-}
+}  // namespace csapex

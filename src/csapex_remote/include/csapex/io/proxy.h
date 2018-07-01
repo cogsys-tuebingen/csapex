@@ -8,11 +8,10 @@
 
 namespace csapex
 {
-
 class Proxy
 {
 public:
-    Proxy(const SessionPtr &session);
+    Proxy(const SessionPtr& session);
     virtual ~Proxy();
 
 protected:
@@ -33,6 +32,6 @@ protected:
     slim_signal::ScopedConnection broadcast_connection_;
 };
 
-}
+}  // namespace csapex
 
-#endif // PROXY_H
+#endif  // PROXY_H

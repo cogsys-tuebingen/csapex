@@ -21,24 +21,18 @@ using namespace csapex;
 ///
 /// Broadcast
 ///
-NodeBroadcasts::NodeBroadcasts()
-    : broadcast_type_(NodeBroadcastType::None)
+NodeBroadcasts::NodeBroadcasts() : broadcast_type_(NodeBroadcastType::None)
 {
-
 }
 
-NodeBroadcasts::NodeBroadcasts(NodeBroadcastType broadcast_type)
-    : broadcast_type_(broadcast_type)
+NodeBroadcasts::NodeBroadcasts(NodeBroadcastType broadcast_type) : broadcast_type_(broadcast_type)
 {
-
 }
-NodeBroadcasts::NodeBroadcasts(NodeBroadcastType broadcast_type, AUUID uuid)
-    : broadcast_type_(broadcast_type), uuid_(uuid)
+NodeBroadcasts::NodeBroadcasts(NodeBroadcastType broadcast_type, AUUID uuid) : broadcast_type_(broadcast_type), uuid_(uuid)
 {
-
 }
 
-void NodeBroadcasts::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void NodeBroadcasts::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << broadcast_type_;
     data << uuid_;

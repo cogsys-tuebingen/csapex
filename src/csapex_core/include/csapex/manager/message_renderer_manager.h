@@ -17,21 +17,21 @@
 #include <mutex>
 #include <typeindex>
 
-namespace csapex {
-
+namespace csapex
+{
 class CSAPEX_CORE_EXPORT MessageRendererManager : public Singleton<MessageRendererManager>
 {
     friend class Singleton<MessageRendererManager>;
 
 public:
-    typedef std::function<MessageRenderer::Ptr()>  Constructor;
+    typedef std::function<MessageRenderer::Ptr()> Constructor;
 
 public:
     // TODO: remove singleton -> put this in constructor
     void setPluginLocator(PluginLocatorPtr locator);
     void shutdown();
 
-    MessageRendererPtr createMessageRenderer(const TokenDataConstPtr &message);
+    MessageRendererPtr createMessageRenderer(const TokenDataConstPtr& message);
 
 private:
     MessageRendererManager();
@@ -49,7 +49,6 @@ private:
     std::unique_ptr<PluginManager<MessageRenderer>> manager_;
 };
 
-}
+}  // namespace csapex
 
-#endif // MESSAGE_RENDERER_MANAGER_H
-
+#endif  // MESSAGE_RENDERER_MANAGER_H

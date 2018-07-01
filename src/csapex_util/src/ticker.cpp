@@ -6,12 +6,8 @@
 
 using namespace csapex;
 
-Ticker::Ticker()
-    : tick_thread_running_(false),
-      tick_enabled_(true),
-      tick_rate_(30.0, false)
+Ticker::Ticker() : tick_thread_running_(false), tick_enabled_(true), tick_rate_(30.0, false)
 {
-
 }
 
 Ticker::~Ticker()
@@ -21,7 +17,7 @@ Ticker::~Ticker()
 
 void Ticker::tickLoop()
 {
-    while(!tick_thread_stop_) {
+    while (!tick_thread_stop_) {
         tickEvent();
         tick_rate_.keepUp();
     }
@@ -29,7 +25,7 @@ void Ticker::tickLoop()
 
 void Ticker::startTickThread()
 {
-    if(!tick_thread_running_) {
+    if (!tick_thread_running_) {
         ticking_thread_ = std::thread([this]() {
             csapex::thread::set_name("ticker");
 
@@ -45,14 +41,13 @@ void Ticker::startTickThread()
 
 void Ticker::stopTickThread()
 {
-    if(tick_thread_running_) {
+    if (tick_thread_running_) {
         tick_thread_stop_ = true;
-        if(ticking_thread_.joinable()) {
+        if (ticking_thread_.joinable()) {
             ticking_thread_.join();
         }
     }
 }
-
 
 bool Ticker::isTickEnabled() const
 {

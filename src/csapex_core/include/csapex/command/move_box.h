@@ -8,7 +8,6 @@
 
 namespace csapex
 {
-
 namespace command
 {
 class CSAPEX_COMMAND_EXPORT MoveBox : public CommandImplementation<MoveBox>
@@ -16,9 +15,9 @@ class CSAPEX_COMMAND_EXPORT MoveBox : public CommandImplementation<MoveBox>
     COMMAND_HEADER(MoveBox);
 
 public:
-    MoveBox(const AUUID &graph_uuid, const UUID& node_uuid, Point from, Point to);
+    MoveBox(const AUUID& graph_uuid, const UUID& node_uuid, Point from, Point to);
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -35,7 +34,7 @@ protected:
     UUID box_uuid;
 };
 
-}
-}
+}  // namespace command
+}  // namespace csapex
 
-#endif // COMMAND_MOVE_BOX_H
+#endif  // COMMAND_MOVE_BOX_H

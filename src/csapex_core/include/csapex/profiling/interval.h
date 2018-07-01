@@ -43,12 +43,12 @@ public:
     double lengthMs() const;
     double lengthSubMs() const;
 
-    void entries(std::vector<std::pair<std::string, double> > &out) const;
+    void entries(std::vector<std::pair<std::string, double> >& out) const;
 
     void setActive(bool active);
     bool isActive() const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     static Ptr makeEmpty();
@@ -69,6 +69,6 @@ private:
     bool stopped_;
 };
 
-}
+}  // namespace csapex
 
-#endif // INTERVAL_H
+#endif  // INTERVAL_H

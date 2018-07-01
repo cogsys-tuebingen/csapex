@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 namespace command
 {
 class CSAPEX_COMMAND_EXPORT DisableNode : public CommandImplementation<DisableNode>
@@ -15,7 +14,7 @@ class CSAPEX_COMMAND_EXPORT DisableNode : public CommandImplementation<DisableNo
     COMMAND_HEADER(DisableNode);
 
 public:
-    DisableNode(const AUUID &graph_uuid, const UUID &uuid, bool disable = true);
+    DisableNode(const AUUID& graph_uuid, const UUID& uuid, bool disable = true);
 
 public:
     bool doExecute() override;
@@ -24,7 +23,7 @@ public:
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -32,6 +31,6 @@ protected:
     bool disable_;
 };
 
-}
-}
-#endif // COMMAND_DISABLE_NODE_H
+}  // namespace command
+}  // namespace csapex
+#endif  // COMMAND_DISABLE_NODE_H

@@ -8,10 +8,8 @@ uint8_t Request::getPacketType() const
     return PACKET_TYPE_ID;
 }
 
-Request::Request(uint8_t id)
-    : request_id_(id)
+Request::Request(uint8_t id) : request_id_(id)
 {
-
 }
 
 void Request::overwriteRequestID(uint8_t id) const
@@ -23,4 +21,3 @@ uint8_t Request::getRequestID() const
 {
     return request_id_;
 }
-

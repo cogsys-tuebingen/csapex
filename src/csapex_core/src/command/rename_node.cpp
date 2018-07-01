@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(RenameNode)
 
-RenameNode::RenameNode(const AUUID& parent_uuid, const UUID &node, const std::string& new_name)
-    : CommandImplementation(parent_uuid), uuid(node), new_name_(new_name)
+RenameNode::RenameNode(const AUUID& parent_uuid, const UUID& node, const std::string& new_name) : CommandImplementation(parent_uuid), uuid(node), new_name_(new_name)
 {
 }
 
@@ -62,10 +61,7 @@ bool RenameNode::doRedo()
     return doExecute();
 }
 
-
-
-
-void RenameNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void RenameNode::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

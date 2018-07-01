@@ -3,15 +3,14 @@
 
 namespace csapex
 {
-
-enum class ExecutionState {
+enum class ExecutionState
+{
     IDLE,
     ENABLED,
     FIRED,
     PROCESSING,
     UNKNOWN
 };
-
 }
 
-#endif // EXECUTION_STATE_H
+#endif  // EXECUTION_STATE_H

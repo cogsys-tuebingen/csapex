@@ -9,17 +9,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT MuteNode : public CommandImplementation<MuteNode>
 {
     COMMAND_HEADER(MuteNode);
 
 public:
-    MuteNode(const AUUID &graph_uuid, const UUID& node, bool muted);
+    MuteNode(const AUUID& graph_uuid, const UUID& node, bool muted);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -33,8 +32,7 @@ private:
     bool executed;
 };
 
-}
+}  // namespace command
 
-}
-#endif // MUTE_NODE_H
-
+}  // namespace csapex
+#endif  // MUTE_NODE_H

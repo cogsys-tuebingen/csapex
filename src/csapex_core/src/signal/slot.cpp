@@ -15,19 +15,19 @@
 
 using namespace csapex;
 
-Slot::Slot(std::function<void()> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr&){callback();}), active_(active), blocking_(blocking), guard_(-1)
+Slot::Slot(std::function<void()> callback, const UUID& uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
+  : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr&) { callback(); }), active_(active), blocking_(blocking), guard_(-1)
 {
     setType(makeEmpty<connection_types::AnyMessage>());
 }
-Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr& token){callback(token);}), active_(active), blocking_(blocking), guard_(-1)
+Slot::Slot(std::function<void(const TokenPtr&)> callback, const UUID& uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
+  : Input(uuid, owner), callback_([callback](Slot*, const TokenPtr& token) { callback(token); }), active_(active), blocking_(blocking), guard_(-1)
 {
     setType(makeEmpty<connection_types::AnyMessage>());
 }
 
-Slot::Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
-    : Input(uuid, owner), callback_(callback), active_(active), blocking_(blocking), guard_(-1)
+Slot::Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID& uuid, bool active, bool blocking, ConnectableOwnerWeakPtr owner)
+  : Input(uuid, owner), callback_(callback), active_(active), blocking_(blocking), guard_(-1)
 {
     setType(makeEmpty<connection_types::AnyMessage>());
 }
@@ -61,16 +61,15 @@ void Slot::disable()
     notifyMessageProcessed();
 }
 
-
 void Slot::setToken(TokenPtr token)
 {
     apex_assert_hard(getType()->canConnectTo(token->getTokenData().get()));
 
-//    Input::setToken(token);
+    //    Input::setToken(token);
 
     {
         std::unique_lock<std::mutex> lock(message_mutex_);
-        if(!message_) {
+        if (!message_) {
             message_ = token;
         }
     }
@@ -102,42 +101,39 @@ void Slot::notifyMessageProcessed()
     Connection* front = nullptr;
     {
         std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
-        if(!available_connections_.empty()) {
+        if (!available_connections_.empty()) {
             front = available_connections_.front();
             available_connections_.pop_front();
         }
     }
-    if(front) {
+    if (front) {
         front->setTokenProcessed();
     }
 
     tryNextToken();
 }
 
-
 void Slot::tryNextToken()
 {
-    if(!isEnabled() && !isActive()) {
+    if (!isEnabled() && !isActive()) {
         std::vector<Connection*> connections;
         std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
-        while(!available_connections_.empty()) {
+        while (!available_connections_.empty()) {
             Connection* c = available_connections_.front();
             connections.push_back(c);
             available_connections_.pop_front();
         }
         lock.unlock();
 
-        for(Connection* c : connections) {
+        for (Connection* c : connections) {
             c->setState(Connection::State::READ);
             c->setTokenProcessed();
         }
-
-
     }
 
-    if(isEnabled() || isActive()) {
+    if (isEnabled() || isActive()) {
         std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
-        if(!message_ && !available_connections_.empty()) {
+        if (!message_ && !available_connections_.empty()) {
             auto* current_connection = available_connections_.front();
             TokenPtr token = current_connection->readToken();
             lock.unlock();
@@ -154,18 +150,18 @@ void Slot::handleEvent()
         apex_assert_hard(message_);
 
         // do the work
-        if(isEnabled() || isActive()) {
+        if (isEnabled() || isActive()) {
             auto msg_copy = message_;
             lock.unlock();
 
-            if(!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
+            if (!std::dynamic_pointer_cast<connection_types::NoMessage const>(message_->getTokenData())) {
                 apex_assert_hard(guard_ == -1);
                 try {
                     callback_(this, msg_copy);
-                } catch(const std::exception& e) {
+                } catch (const std::exception& e) {
                     std::cerr << "slot " << getUUID() << " has thrown an exception: " << e.what() << std::endl;
 
-                    if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(getOwner())) {
+                    if (NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(getOwner())) {
                         node->setError(e.what());
                     }
                 }
@@ -176,7 +172,7 @@ void Slot::handleEvent()
         }
     }
 
-    if(blocking_) {
+    if (blocking_) {
         notifyEventHandled();
     }
 }
@@ -187,11 +183,11 @@ void Slot::notifyEventHandled()
         std::unique_lock<std::mutex> lock(message_mutex_);
         message_.reset();
     }
-//    for(auto connection : connections_) {
-//        if(connection->getState() == Connection::State::UNREAD) {
-//            return;
-//        }
-//    }
+    //    for(auto connection : connections_) {
+    //        if(connection->getState() == Connection::State::UNREAD) {
+    //            return;
+    //        }
+    //    }
     notifyMessageProcessed();
 }
 
@@ -215,21 +211,19 @@ bool Slot::isSynchronous() const
     return false;
 }
 
-void Slot::addStatusInformation(std::stringstream &status_stream) const
+void Slot::addStatusInformation(std::stringstream& status_stream) const
 {
     status_stream << ", blocking: " << isBlocking();
 }
 
-void Slot::removeConnection(Connectable *other_side)
+void Slot::removeConnection(Connectable* other_side)
 {
     {
         // first remove queued input connections
         std::unique_lock<std::recursive_mutex> lock(available_connections_mutex_);
-        for(auto it = available_connections_.begin();
-            it != available_connections_.end();)
-        {
+        for (auto it = available_connections_.begin(); it != available_connections_.end();) {
             Connection* c = *it;
-            if(c->from().get() == other_side) {
+            if (c->from().get() == other_side) {
                 it = available_connections_.erase(it);
             } else {
                 ++it;

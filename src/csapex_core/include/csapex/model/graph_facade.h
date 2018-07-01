@@ -18,7 +18,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT GraphFacade : public Observer, public Notifier
 {
 public:
@@ -31,16 +30,16 @@ public:
     virtual ~GraphFacade();
 
     virtual GraphFacadePtr getSubGraph(const UUID& uuid) = 0;
-    virtual GraphFacade* getParent() const = 0;    
+    virtual GraphFacade* getParent() const = 0;
 
     virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const = 0;
     virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept = 0;
-    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const = 0;
-    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const = 0;
+    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept = 0;
     virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const = 0;
 
-    virtual ConnectorPtr findConnector(const UUID &uuid) = 0;
-    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept = 0;
+    virtual ConnectorPtr findConnector(const UUID& uuid) = 0;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept = 0;
 
     virtual bool isConnected(const UUID& from, const UUID& to) const = 0;
     virtual ConnectionDescription getConnection(const UUID& from, const UUID& to) const = 0;
@@ -69,8 +68,8 @@ public:
     virtual std::string makeStatusString() const = 0;
 
 public:
-    slim_signal::Signal<void (bool)> paused;
-    slim_signal::Signal<void ()> stopped;
+    slim_signal::Signal<void(bool)> paused;
+    slim_signal::Signal<void()> stopped;
 
     slim_signal::Signal<void(GraphFacadePtr)> child_added;
     slim_signal::Signal<void(GraphFacadePtr)> child_removed;
@@ -88,12 +87,12 @@ public:
 
     slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_added;
     slim_signal::Signal<void(ConnectorPtr)> forwarding_connector_removed;
-    
+
 protected:
     virtual void nodeAddedHandler(graph::VertexPtr node) = 0;
     virtual void nodeRemovedHandler(graph::VertexPtr node) = 0;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_WORKER_H
+#endif  // GRAPH_WORKER_H

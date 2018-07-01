@@ -13,10 +13,8 @@ uint8_t Note::getPacketType() const
     return PACKET_TYPE_ID;
 }
 
-Note::Note(AUUID uuid)
-    : uuid_(uuid)
+Note::Note(AUUID uuid) : uuid_(uuid)
 {
-
 }
 
 AUUID Note::getAUUID() const
@@ -24,7 +22,7 @@ AUUID Note::getAUUID() const
     return uuid_;
 }
 
-void Note::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Note::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << uuid_;
 }

@@ -9,17 +9,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT CreateThread : public CommandImplementation<CreateThread>
 {
     COMMAND_HEADER(CreateThread);
 
 public:
-    CreateThread(const AUUID &graph_uuid, const UUID& node, const std::string &name);
+    CreateThread(const AUUID& graph_uuid, const UUID& node, const std::string& name);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -35,8 +34,7 @@ private:
     int new_id;
 };
 
-}
+}  // namespace command
 
-}
-#endif // CREATE_THREAD_H
-
+}  // namespace csapex
+#endif  // CREATE_THREAD_H

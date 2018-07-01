@@ -9,11 +9,9 @@
 
 namespace csapex
 {
-
 class CoreRequests
 {
 public:
-
     enum class CoreRequestType
     {
         SettingsSavePersistent,
@@ -42,13 +40,12 @@ public:
         CoreRequest(CoreRequestType request_type);
 
         template <typename... Args>
-        CoreRequest(CoreRequestType request_type, Args&&... args)
-            : CoreRequest(request_type)
+        CoreRequest(CoreRequestType request_type, Args&&... args) : CoreRequest(request_type)
         {
-            parameters_ = {args...};
+            parameters_ = { args... };
         }
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
@@ -64,7 +61,6 @@ public:
         std::vector<boost::any> parameters_;
     };
 
-
     class CoreResponse : public ResponseImplementation<CoreResponse>
     {
     public:
@@ -72,7 +68,7 @@ public:
         CoreResponse(CoreRequestType request_type, uint8_t request_id);
         CoreResponse(CoreRequestType request_type, boost::any result, uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         template <typename R>
@@ -92,12 +88,11 @@ public:
         boost::any result_;
     };
 
-
 public:
     using RequestT = CoreRequest;
     using ResponseT = CoreResponse;
 };
 
-}
+}  // namespace csapex
 
-#endif // CORE_REQUESTS_H
+#endif  // CORE_REQUESTS_H

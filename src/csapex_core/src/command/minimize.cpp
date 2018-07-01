@@ -21,15 +21,14 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(Minimize)
 
-Minimize::Minimize(const AUUID& parent_uuid, const UUID &node, bool mini)
-    : CommandImplementation(parent_uuid), uuid(node), mini(mini), executed(false)
+Minimize::Minimize(const AUUID& parent_uuid, const UUID& node, bool mini) : CommandImplementation(parent_uuid), uuid(node), mini(mini), executed(false)
 {
 }
 
 std::string Minimize::getDescription() const
 {
     std::stringstream ss;
-    ss << ( mini ? "min" : "max" ) << "imized" << uuid;
+    ss << (mini ? "min" : "max") << "imized" << uuid;
     return ss.str();
 }
 
@@ -40,7 +39,7 @@ bool Minimize::doExecute()
 
     bool is_mini = node_handle->getNodeState()->isMinimized();
 
-    if(is_mini != mini) {
+    if (is_mini != mini) {
         node_handle->getNodeState()->setMinimized(mini);
         executed = true;
     } else {
@@ -52,7 +51,7 @@ bool Minimize::doExecute()
 
 bool Minimize::doUndo()
 {
-    if(executed) {
+    if (executed) {
         NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
         apex_assert_hard(node_handle);
 
@@ -66,9 +65,7 @@ bool Minimize::doRedo()
     return doExecute();
 }
 
-
-
-void Minimize::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Minimize::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

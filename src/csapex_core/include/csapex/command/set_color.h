@@ -9,18 +9,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT SetColor : public CommandImplementation<SetColor>
 {
     COMMAND_HEADER(SetColor);
 
 public:
-    SetColor(const AUUID &graph_uuid, const UUID& node,
-             int r, int g, int b);
+    SetColor(const AUUID& graph_uuid, const UUID& node, int r, int g, int b);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -40,7 +38,7 @@ private:
     int b_orig;
 };
 
-}
+}  // namespace command
 
-}
-#endif // SET_COLOR_H
+}  // namespace csapex
+#endif  // SET_COLOR_H

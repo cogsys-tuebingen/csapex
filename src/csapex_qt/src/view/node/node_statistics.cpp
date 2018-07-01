@@ -13,13 +13,11 @@
 
 using namespace csapex;
 
-NodeStatistics::NodeStatistics(NodeFacade *node)
-    : node_facade_(node)
+NodeStatistics::NodeStatistics(NodeFacade* node) : node_facade_(node)
 {
-
 }
 
-QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(const ConnectorDescription& connector) const
+QTreeWidgetItem* NodeStatistics::createDebugInformationConnector(const ConnectorDescription& connector) const
 {
     QTreeWidgetItem* connector_widget = new QTreeWidgetItem;
     connector_widget->setText(0, QString::fromStdString(connector.id.getShortName()));
@@ -34,7 +32,6 @@ QTreeWidgetItem * NodeStatistics::createDebugInformationConnector(const Connecto
     label->setText(0, "Label");
     label->setText(1, QString::fromStdString(connector.label));
     connector_widget->addChild(label);
-
 
     QTreeWidgetItem* type = new QTreeWidgetItem;
     type->setText(0, "Type");
@@ -57,14 +54,14 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Inputs");
 
-        for(const ConnectorDescription& input : node_facade_->getInputs()) {
+        for (const ConnectorDescription& input : node_facade_->getInputs()) {
             QTreeWidgetItem* connector_widget = createDebugInformationConnector(input);
 
             QTreeWidgetItem* input_widget = new QTreeWidgetItem;
             input_widget->setText(0, "Input");
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
-            for(const ConnectorDescription::Target& output: input.targets) {
+            for (const ConnectorDescription::Target& output : input.targets) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
                 target_widget->setText(0, QString::fromStdString(output.auuid.getFullName()));
                 target_widget->setIcon(1, QIcon(":/connector.png"));
@@ -82,12 +79,12 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* connectors = new QTreeWidgetItem;
         connectors->setText(0, "Outputs");
 
-        for(const ConnectorDescription& output : node_facade_->getExternalOutputs()){
+        for (const ConnectorDescription& output : node_facade_->getExternalOutputs()) {
             QTreeWidgetItem* output_widget = createDebugInformationConnector(output);
 
             QTreeWidgetItem* targets = new QTreeWidgetItem;
             targets->setText(0, "Target");
-            for(const ConnectorDescription::Target& input : output.targets) {
+            for (const ConnectorDescription::Target& input : output.targets) {
                 QTreeWidgetItem* target_widget = new QTreeWidgetItem;
                 target_widget->setText(0, QString::fromStdString(input.auuid.getFullName()));
                 target_widget->setIcon(1, QIcon(":/connector.png"));
@@ -103,11 +100,9 @@ QTreeWidgetItem* NodeStatistics::createDebugInformation(NodeFactory* node_factor
         QTreeWidgetItem* parameters = new QTreeWidgetItem;
         parameters->setText(0, "Parameters");
 
-        for(param::ParameterPtr p : node_facade_->getParameters()) {
-
+        for (param::ParameterPtr p : node_facade_->getParameters()) {
             QTreeWidgetItem* param = new QTreeWidgetItem;
             param->setText(0, p->name().c_str());
-
 
             QTreeWidgetItem* params_descr_widget = new QTreeWidgetItem;
             params_descr_widget->setText(0, "Description");

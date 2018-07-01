@@ -10,11 +10,10 @@
 #include <cxxabi.h>
 #endif
 
-
 std::string csapex::type2name(const std::type_info& info)
 {
 #ifdef WIN32
-	return info.name();
+    return info.name();
 #else
     int status;
     char* demangled = abi::__cxa_demangle(info.name(), 0, 0, &status);
@@ -27,9 +26,9 @@ std::string csapex::type2name(const std::type_info& info)
 
 std::string csapex::type2nameWithoutNamespace(const std::type_info& info)
 {
-	std::string full_name;
+    std::string full_name;
 #ifdef WIN32
-	full_name = info.name();
+    full_name = info.name();
 #else
     int status;
     char* demangled = abi::__cxa_demangle(info.name(), 0, 0, &status);
@@ -40,10 +39,9 @@ std::string csapex::type2nameWithoutNamespace(const std::type_info& info)
     //    return replace(replace(full_name, "connection_types::", ""), "csapex::", "");
     std::size_t split_point = full_name.find("::");
 
-    if(split_point == full_name.npos) {
+    if (split_point == full_name.npos) {
         return full_name;
     } else {
-        return full_name.substr(split_point+2);
+        return full_name.substr(split_point + 2);
     }
 }
-

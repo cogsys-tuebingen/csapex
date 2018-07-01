@@ -32,10 +32,21 @@ using namespace csapex;
 const std::chrono::milliseconds NodeBox::cache_update_rate_(500);
 
 NodeBox::NodeBox(Settings& settings, NodeFacadePtr node_facade, QIcon icon, GraphView* parent)
-    : parent_(parent), ui(nullptr), grip_(nullptr), settings_(settings), node_facade_(node_facade), adapter_(nullptr), icon_(icon),
-      info_exec(nullptr), info_compo(nullptr), info_thread(nullptr), info_frequency(nullptr), info_error(nullptr), initialized_(false),
-      frequency_timer_(nullptr),
-      last_state_request_(std::chrono::milliseconds(0))
+  : parent_(parent)
+  , ui(nullptr)
+  , grip_(nullptr)
+  , settings_(settings)
+  , node_facade_(node_facade)
+  , adapter_(nullptr)
+  , icon_(icon)
+  , info_exec(nullptr)
+  , info_compo(nullptr)
+  , info_thread(nullptr)
+  , info_frequency(nullptr)
+  , info_error(nullptr)
+  , initialized_(false)
+  , frequency_timer_(nullptr)
+  , last_state_request_(std::chrono::milliseconds(0))
 {
     QObject::connect(this, &NodeBox::updateVisualsRequest, this, &NodeBox::updateVisuals);
 
@@ -46,7 +57,7 @@ void NodeBox::setAdapter(NodeAdapter::Ptr adapter)
 {
     adapter_ = adapter;
 
-    if(adapter->isResizable()) {
+    if (adapter->isResizable()) {
         grip_ = new QSizeGrip(this);
     }
 }
@@ -57,7 +68,7 @@ NodeBox::~NodeBox()
 
     adapter_.reset();
 
-    for(QObject* child : children()) {
+    for (QObject* child : children()) {
         delete child;
     }
 
@@ -74,30 +85,30 @@ void NodeBox::destruct()
 
 void NodeBox::setupUi()
 {
-    if(!info_exec) {
+    if (!info_exec) {
         info_exec = new QLabel;
         info_exec->setProperty("exec", true);
         ui->infos->addWidget(info_exec);
     }
-    if(!info_compo) {
+    if (!info_compo) {
         info_compo = new QLabel;
         info_compo->setProperty("component", true);
         ui->infos->addWidget(info_compo);
     }
 
-    if(!info_thread) {
+    if (!info_thread) {
         info_thread = new QLabel;
         info_thread->setProperty("threadgroup", true);
         ui->infos->addWidget(info_thread);
     }
 
-    if(!info_frequency) {
+    if (!info_frequency) {
         info_frequency = new QLabel;
         info_frequency->setProperty("frequency", true);
         ui->infos->addWidget(info_frequency);
     }
 
-    if(!info_error) {
+    if (!info_error) {
         info_error = new QLabel;
         info_error->setText("<img src=':/error.png' />");
         info_error->setProperty("error", true);
@@ -105,30 +116,30 @@ void NodeBox::setupUi()
         ui->infos->addWidget(info_error);
     }
 
-    if(node_facade_->isVariadic()) {
+    if (node_facade_->isVariadic()) {
         AUUID parent = node_facade_->getUUID().getAbsoluteUUID();
-        if(node_facade_->hasVariadicInputs()) {
+        if (node_facade_->hasVariadicInputs()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::INPUT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->input_panel->layout()->addWidget(meta_port);
         }
-        if(node_facade_->hasVariadicOutputs()) {
+        if (node_facade_->hasVariadicOutputs()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::OUTPUT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->output_panel->layout()->addWidget(meta_port);
         }
-        if(node_facade_->hasVariadicSlots()) {
+        if (node_facade_->hasVariadicSlots()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::SLOT_T, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndMoveRequest, this, &NodeBox::createPortAndMoveRequest);
             ui->slot_panel->layout()->addWidget(meta_port);
         }
-        if(node_facade_->hasVariadicEvents()) {
+        if (node_facade_->hasVariadicEvents()) {
             MetaPort* meta_port = new MetaPort(ConnectorType::EVENT, parent);
             QObject::connect(meta_port, &MetaPort::createPortRequest, this, &NodeBox::createPortRequest);
             QObject::connect(meta_port, &MetaPort::createPortAndConnectRequest, this, &NodeBox::createPortAndConnectRequest);
@@ -137,12 +148,11 @@ void NodeBox::setupUi()
         }
     }
 
-
     NodeState* state = node_facade_->getNodeState().get();
     observer_.observeQueued(state->flipped_changed, this, &NodeBox::triggerFlipSides);
     observer_.observeQueued(state->minimized_changed, this, &NodeBox::triggerMinimized);
     observer_.observeQueued(state->enabled_changed, this, &NodeBox::triggerEnabledChanged);
-    observer_.observeQueued(state->active_changed, [this, state](){
+    observer_.observeQueued(state->active_changed, [this, state]() {
         setProperty("active", state->isActive());
         updateVisualsRequest();
     });
@@ -152,7 +162,7 @@ void NodeBox::setupUi()
     observer_.observeQueued(state->pos_changed, this, &NodeBox::updatePosition);
 
     observer_.observeQueued(settings_.setting_changed, [this](const std::string& name) {
-        if(name == "debug") {
+        if (name == "debug") {
             changeColor();
         }
     });
@@ -162,12 +172,12 @@ void NodeBox::setupUi()
     ui->header->setAlignment(Qt::AlignTop);
     ui->content->setAlignment(Qt::AlignTop);
 
-    if(adapter_) {
+    if (adapter_) {
         adapter_->doSetupUi(ui->content);
     }
     setAutoFillBackground(false);
 
-    setAttribute( Qt::WA_TranslucentBackground, true );
+    setAttribute(Qt::WA_TranslucentBackground, true);
     setAttribute(Qt::WA_NoSystemBackground, true);
     //    setBackgroundMode (Qt::NoBackground, true);
 
@@ -198,7 +208,7 @@ void NodeBox::construct()
     ui->content->installEventFilter(this);
     ui->label->installEventFilter(this);
 
-    if(grip_) {
+    if (grip_) {
         grip_->installEventFilter(this);
     }
 
@@ -206,13 +216,10 @@ void NodeBox::construct()
 
     QObject::connect(ui->enablebtn, &QCheckBox::toggled, this, &NodeBox::toggled);
 
-
-    observer_.observeQueued(node_facade_->node_state_changed, [this](NodeStatePtr state) {
-        nodeStateChanged();
-    });
+    observer_.observeQueued(node_facade_->node_state_changed, [this](NodeStatePtr state) { nodeStateChanged(); });
     QObject::connect(this, &NodeBox::nodeStateChanged, this, &NodeBox::nodeStateChangedEvent, Qt::QueuedConnection);
 
-    observer_.observeQueued(node_facade_->destroyed, [this](){ destruct(); });
+    observer_.observeQueued(node_facade_->destroyed, [this]() { destruct(); });
 
     enabledChangeEvent(node_facade_->isProcessingEnabled());
 
@@ -243,7 +250,6 @@ GraphView* NodeBox::getGraphView() const
     return parent_;
 }
 
-
 void NodeBox::updateBoxInformation(GraphFacade* graph)
 {
     updateComponentInformation(graph);
@@ -254,21 +260,20 @@ void NodeBox::updateBoxInformation(GraphFacade* graph)
 void NodeBox::setStyleForId(QLabel* label, int id)
 {
     // set color using HSV rotation
-    double hue =  (id * 77) % 360;
+    double hue = (id * 77) % 360;
     double r = 0, g = 0, b = 0;
     __HSV2RGB__(hue, 1., 1., r, g, b);
     double fr = 0, fb = 0, fg = 0;
     double min = std::min(b, std::min(g, r));
     double max = std::max(b, std::max(g, r));
-    if(min < 100 && max < 100) {
+    if (min < 100 && max < 100) {
         fr = fb = fg = 255;
     }
     std::stringstream ss;
 
-
-    if(settings_.getTemporary("debug", false)) {
+    if (settings_.getTemporary("debug", false)) {
         r = b = g = 128;
-        if(node_facade_->canStartStepping()) {
+        if (node_facade_->canStartStepping()) {
             g = 255;
         } else {
             r = 255;
@@ -280,18 +285,18 @@ void NodeBox::setStyleForId(QLabel* label, int id)
 
 void NodeBox::updateComponentInformation(GraphFacade* graph)
 {
-    if(settings_.getTemporary("debug", false)) {
+    if (settings_.getTemporary("debug", false)) {
         changeColor();
     }
 
-    if(!settings_.getPersistent<bool>("display-graph-components", false)) {
+    if (!settings_.getPersistent<bool>("display-graph-components", false)) {
         info_compo->setVisible(false);
         return;
     } else {
         info_compo->setVisible(true);
     }
 
-    if(info_compo->isVisible()) {
+    if (info_compo->isVisible()) {
         int compo = graph->getComponent(node_facade_->getUUID());
         int depth = graph->getDepth(node_facade_->getUUID());
         std::stringstream info;
@@ -314,24 +319,24 @@ void NodeBox::updateComponentInformation(GraphFacade* graph)
 
 void NodeBox::updateThreadInformation()
 {
-    if(!settings_.getPersistent("display-threads", false)) {
+    if (!settings_.getPersistent("display-threads", false)) {
         info_thread->setVisible(false);
         return;
     } else {
         info_thread->setVisible(true);
     }
 
-    if(info_thread->isVisible()) {
+    if (info_thread->isVisible()) {
         NodeStatePtr state = node_facade_->getNodeState();
         int id = state->getThreadId();
         std::stringstream info;
-        if(settings_.get<bool>("threadless")) {
+        if (settings_.get<bool>("threadless")) {
             info << "<i><b><small>threadless</small></b></i>";
             info_thread->setStyleSheet("QLabel { background-color : rgb(0,0,0); color: rgb(255,255,255);}");
-        } else if(id < 0) {
+        } else if (id < 0) {
             info << "T:" << -id;
             setStyleForId(info_thread, id);
-        } else if(id == 0) {
+        } else if (id == 0) {
             info << "<i><b><small>private</small></b></i>";
             info_thread->setStyleSheet("QLabel { background-color : rgb(255,255,255); color: rgb(0,0,0);}");
         } else {
@@ -342,35 +347,34 @@ void NodeBox::updateThreadInformation()
     }
 }
 
-
 void NodeBox::updateFrequencyInformation()
 {
-    if(!settings_.getPersistent("display-frequencies", false)) {
+    if (!settings_.getPersistent("display-frequencies", false)) {
         info_frequency->setVisible(false);
 
-        if(frequency_timer_ && frequency_timer_->isActive()) {
+        if (frequency_timer_ && frequency_timer_->isActive()) {
             frequency_timer_->stop();
         }
         return;
     } else {
         info_frequency->setVisible(true);
-        if(!frequency_timer_) {
+        if (!frequency_timer_) {
             frequency_timer_ = new QTimer;
             QObject::connect(frequency_timer_, &QTimer::timeout, this, &NodeBox::updateFrequencyInformation);
         }
 
-        if(!frequency_timer_->isActive()){
+        if (!frequency_timer_->isActive()) {
             frequency_timer_->start(1000);
         }
     }
 
-    if(info_frequency->isVisible()) {
+    if (info_frequency->isVisible()) {
         double max_f = node_facade_->getMaximumFrequency();
         double f = node_facade_->getExecutionFrequency();
         std::stringstream info;
         info << "<i><b>";
         info << std::setprecision(4) << f;
-        if(max_f > 0.0) {
+        if (max_f > 0.0) {
             info << " / " << max_f;
         }
         info << "Hz</b></i>";
@@ -426,7 +430,7 @@ void NodeBox::setLabel(const std::string& label)
     ui->label->setToolTip(label.c_str());
 }
 
-void NodeBox::setLabel(const QString &label)
+void NodeBox::setLabel(const QString& label)
 {
     NodeStatePtr state = node_facade_->getNodeState();
     state->setLabel(label.toStdString());
@@ -439,7 +443,7 @@ std::string NodeBox::getLabel() const
     return state->getLabel();
 }
 
-void NodeBox::resizeEvent(QResizeEvent */*e*/)
+void NodeBox::resizeEvent(QResizeEvent* /*e*/)
 {
 }
 
@@ -452,7 +456,7 @@ void NodeBox::init()
     setVisible(true);
 }
 
-Port* NodeBox::createPort(ConnectorPtr connector, QBoxLayout *layout)
+Port* NodeBox::createPort(ConnectorPtr connector, QBoxLayout* layout)
 {
     apex_assert_hard(QApplication::instance()->thread() == QThread::currentThread());
 
@@ -467,11 +471,11 @@ Port* NodeBox::createPort(ConnectorPtr connector, QBoxLayout *layout)
     ConnectorPtr adaptee = port->getAdaptee();
     apex_assert_hard(adaptee == connector);
 
-    if(node_facade_->isVariadic()) {
+    if (node_facade_->isVariadic()) {
         std::vector<MetaPort*> metas;
-        for(int i = 0; i < layout->count();) {
+        for (int i = 0; i < layout->count();) {
             MetaPort* meta = dynamic_cast<MetaPort*>(layout->itemAt(i)->widget());
-            if(meta) {
+            if (meta) {
                 metas.push_back(meta);
                 layout->removeWidget(meta);
             } else {
@@ -481,7 +485,7 @@ Port* NodeBox::createPort(ConnectorPtr connector, QBoxLayout *layout)
 
         layout->addWidget(port);
 
-        for(MetaPort* meta : metas) {
+        for (MetaPort* meta : metas) {
             layout->addWidget(meta);
         }
     } else {
@@ -501,7 +505,7 @@ void NodeBox::removePort(ConnectorWeakPtr connector)
     apex_assert_hard(adaptee);
 
     Port* port = port_map_.at(adaptee->getUUID());
-    if(port) {
+    if (port) {
         port->deleteLater();
     }
 
@@ -512,9 +516,9 @@ void NodeBox::removePort(ConnectorWeakPtr connector)
 
 bool NodeBox::eventFilter(QObject* o, QEvent* e)
 {
-    if(o == this) {
-        if(e->type() == QEvent::MouseButtonDblClick) {
-            if(isGraph()) {
+    if (o == this) {
+        if (e->type() == QEvent::MouseButtonDblClick) {
+            if (isGraph()) {
                 Q_EMIT showSubGraphRequest(node_facade_->getSubgraphAUUID());
                 return true;
             }
@@ -522,18 +526,18 @@ bool NodeBox::eventFilter(QObject* o, QEvent* e)
         return false;
     }
 
-    if(ui && o == ui->label) {
+    if (ui && o == ui->label) {
         QMouseEvent* em = dynamic_cast<QMouseEvent*>(e);
-        if(e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
+        if (e->type() == QEvent::MouseButtonDblClick && em->button() == Qt::LeftButton) {
             Q_EMIT renameRequest(this);
             e->accept();
 
             return true;
         }
-    } else if(grip_ && o == grip_) {
-        if(e->type() == QEvent::MouseButtonPress) {
+    } else if (grip_ && o == grip_) {
+        if (e->type() == QEvent::MouseButtonPress) {
             startResize();
-        } else if(e->type() == QEvent::MouseButtonRelease) {
+        } else if (e->type() == QEvent::MouseButtonRelease) {
             stopResize();
         }
     }
@@ -566,22 +570,27 @@ QString NodeBox::getNodeState()
     QString state;
 
     auto now = std::chrono::high_resolution_clock::now();
-    if(now - last_state_request_ > cache_update_rate_) {
+    if (now - last_state_request_ > cache_update_rate_) {
         cached_state_ = node_facade_->getExecutionState();
         last_state_request_ = now;
     }
 
-    switch(cached_state_) {
-    case ExecutionState::IDLE:
-        state = "idle"; break;
-    case ExecutionState::ENABLED:
-        state = "enabled"; break;
-    case ExecutionState::FIRED:
-        state = "fired"; break;
-    case ExecutionState::PROCESSING:
-        state = "processing"; break;
-    default:
-        state = "unknown"; break;
+    switch (cached_state_) {
+        case ExecutionState::IDLE:
+            state = "idle";
+            break;
+        case ExecutionState::ENABLED:
+            state = "enabled";
+            break;
+        case ExecutionState::FIRED:
+            state = "fired";
+            break;
+        case ExecutionState::PROCESSING:
+            state = "processing";
+            break;
+        default:
+            state = "unknown";
+            break;
     }
 
     return state;
@@ -589,20 +598,18 @@ QString NodeBox::getNodeState()
 
 void NodeBox::paintEvent(QPaintEvent* /*e*/)
 {
-    if(!adapter_) {
+    if (!adapter_) {
         return;
     }
     QString state = getNodeState();
-    QString transition_state = settings_.getTemporary("debug", false)
-            ? QString::fromStdString(node_facade_->getDebugDescription()) : QString();
+    QString transition_state = settings_.getTemporary("debug", false) ? QString::fromStdString(node_facade_->getDebugDescription()) : QString();
 
     QString state_text;
     state_text = "<img src=\":/node_";
     state_text += state + ".png\" />";
-    if(node_facade_->getNodeState()->isMuted()) {
+    if (node_facade_->getNodeState()->isMuted()) {
         state_text += "<img src=\":/muted.png\" />";
     }
-
 
     info_exec->setText(state_text);
     info_exec->setToolTip(state + transition_state);
@@ -610,20 +617,19 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
     bool is_error = node_facade_->isError() && node_facade_->errorLevel() == ErrorState::ErrorLevel::ERROR;
     bool is_warn = node_facade_->isError() && node_facade_->errorLevel() == ErrorState::ErrorLevel::WARNING;
 
-
     bool error_change = ui->boxframe->property("error").toBool() != is_error;
     bool warning_change = ui->boxframe->property("warning").toBool() != is_warn;
 
     setProperty("error", is_error);
     setProperty("warning", is_warn);
 
-    if(error_change || warning_change) {
-        if(is_error) {
+    if (error_change || warning_change) {
+        if (is_error) {
             QString msg = QString::fromStdString(node_facade_->errorMessage());
             setToolTip(msg);
             info_error->setToolTip(msg);
             info_error->setVisible(true);
-        } else if(is_warn) {
+        } else if (is_warn) {
             QString msg = QString::fromStdString(node_facade_->errorMessage());
             setToolTip(msg);
             info_error->setToolTip(msg);
@@ -636,7 +642,7 @@ void NodeBox::paintEvent(QPaintEvent* /*e*/)
         refreshTopLevelStylesheet();
     }
 
-    if(!initialized_) {
+    if (!initialized_) {
         adjustSize();
         initialized_ = true;
     }
@@ -654,22 +660,21 @@ bool NodeBox::isSelected() const
 
 void NodeBox::setSelected(bool selected)
 {
-    setProperty("focused",selected);
-    for(Port* port : findChildren<Port*>()) {
-        port->setProperty("focused",selected);
+    setProperty("focused", selected);
+    for (Port* port : findChildren<Port*>()) {
+        port->setProperty("focused", selected);
     }
     refreshTopLevelStylesheet();
 }
 
-void NodeBox::keyPressEvent(QKeyEvent *)
+void NodeBox::keyPressEvent(QKeyEvent*)
 {
-
 }
 
 void NodeBox::stop()
 {
     QObject::disconnect(this);
-    if(adapter_) {
+    if (adapter_) {
         adapter_->stop();
     }
 }
@@ -682,8 +687,8 @@ void NodeBox::getInformation()
 void NodeBox::refreshStylesheet()
 {
     apex_assert_hard(QThread::currentThread() == QApplication::instance()->thread());
-    for(auto* child : children()) {
-        if(QWidget* widget = dynamic_cast<QWidget*>(child)) {
+    for (auto* child : children()) {
+        if (QWidget* widget = dynamic_cast<QWidget*>(child)) {
             widget->style()->polish(widget);
         }
     }
@@ -724,7 +729,7 @@ void NodeBox::triggerEnabledChanged()
 
     bool state_enabled = state->isEnabled();
     bool box_enabled = !property("disabled").toBool();
-    if(state_enabled != box_enabled) {
+    if (state_enabled != box_enabled) {
         ui->label->setEnabled(state_enabled);
         enabledChange(state_enabled);
     }
@@ -737,19 +742,21 @@ void NodeBox::updateStylesheetColor()
     QColor text_color = Qt::black;
 
     int r, g, b;
-    if(settings_.getTemporary("debug", false)) {
-        r = 0; g = 0; b = 0;
+    if (settings_.getTemporary("debug", false)) {
+        r = 0;
+        g = 0;
+        b = 0;
         const NodeCharacteristics& characteristics = node_facade_->getNodeCharacteristics();
-        if(characteristics.is_joining_vertex) {
+        if (characteristics.is_joining_vertex) {
             r = 255;
         }
-        if(characteristics.is_joining_vertex_counterpart) {
+        if (characteristics.is_joining_vertex_counterpart) {
             g = 255;
         }
-        if(characteristics.is_leading_to_joining_vertex) {
+        if (characteristics.is_leading_to_joining_vertex) {
             b = 128;
         }
-        if(characteristics.is_combined_by_joining_vertex) {
+        if (characteristics.is_combined_by_joining_vertex) {
             b = 255;
         }
     } else {
@@ -758,38 +765,28 @@ void NodeBox::updateStylesheetColor()
 
     QString style = parent_ ? parent_->styleSheet() : styleSheet();
 
-    if(r >= 0 && g >= 0 && b >= 0) {
-        QColor background(r,g,b);
+    if (r >= 0 && g >= 0 && b >= 0) {
+        QColor background(r, g, b);
 
         bool light = (background.lightness() > 128);
 
         QColor border = light ? background.darker(160) : background.lighter(160);
         QColor background_selected = light ? background.darker(140) : background.lighter(140);
         QColor border_selected = light ? border.darker(140) : border.lighter(140);
-        text_color = light ? Qt::black: Qt::white;
+        text_color = light ? Qt::black : Qt::white;
 
         style += "csapex--NodeBox QFrame#boxframe { ";
-        style += "background-color: rgb(" + QString::number(background.red()) + ", " +
-                QString::number(background.green()) + ", " +
-                QString::number(background.blue()) + ");";
-        style += "border-color: rgb(" + QString::number(border.red()) + ", " +
-                QString::number(border.green()) + ", " +
-                QString::number(border.blue()) + ");";
+        style += "background-color: rgb(" + QString::number(background.red()) + ", " + QString::number(background.green()) + ", " + QString::number(background.blue()) + ");";
+        style += "border-color: rgb(" + QString::number(border.red()) + ", " + QString::number(border.green()) + ", " + QString::number(border.blue()) + ");";
         style += "}";
         style += "csapex--NodeBox[focused=\"true\"] QFrame#boxframe { ";
-        style += "background-color: rgb(" + QString::number(background.red()) + ", " +
-                QString::number(background_selected.green()) + ", " +
-                QString::number(background_selected.blue()) + ");";
-        style += "border-color: rgb(" + QString::number(border.red()) + ", " +
-                QString::number(border_selected.green()) + ", " +
-                QString::number(border_selected.blue()) + ");";
+        style += "background-color: rgb(" + QString::number(background.red()) + ", " + QString::number(background_selected.green()) + ", " + QString::number(background_selected.blue()) + ");";
+        style += "border-color: rgb(" + QString::number(border.red()) + ", " + QString::number(border_selected.green()) + ", " + QString::number(border_selected.blue()) + ");";
         style += "}";
     }
 
     style += "csapex--NodeBox QLabel, csapex--NodeBox QGroupBox { ";
-    style += "color: rgb(" + QString::number(text_color.red()) + ", " +
-            QString::number(text_color.green()) + ", " +
-            QString::number(text_color.blue()) + ") !important;";
+    style += "color: rgb(" + QString::number(text_color.red()) + ", " + QString::number(text_color.green()) + ", " + QString::number(text_color.blue()) + ") !important;";
     style += "}";
 
     setStyleSheet(style);
@@ -803,7 +800,7 @@ void NodeBox::changeColor()
 
 void NodeBox::updateVisuals()
 {
-    if(!ui || !ui->boxframe) {
+    if (!ui || !ui->boxframe) {
         return;
     }
 
@@ -814,11 +811,11 @@ void NodeBox::updateVisuals()
     bool flip = state->isFlipped();
     setProperty("flipped", flip);
 
-    if(ui && ui->boxframe) {
-        if(grip_) {
+    if (ui && ui->boxframe) {
+        if (grip_) {
             auto* layout = dynamic_cast<QGridLayout*>(ui->boxframe->layout());
-            if(layout) {
-                if(flip) {
+            if (layout) {
+                if (flip) {
                     layout->addWidget(grip_, 3, 0, Qt::AlignBottom | Qt::AlignLeft);
                 } else {
                     layout->addWidget(grip_, 3, 2, Qt::AlignBottom | Qt::AlignRight);
@@ -832,10 +829,10 @@ void NodeBox::updateVisuals()
         bool flag_set = ui->boxframe->property("content_minimized").toBool();
         bool minimized = isMinimizedSize();
 
-        if(minimized != flag_set) {
+        if (minimized != flag_set) {
             ui->boxframe->setProperty("content_minimized", minimized);
 
-            if(minimized) {
+            if (minimized) {
                 ui->frame->hide();
                 info_exec->hide();
                 ui->input_panel->hide();
@@ -843,7 +840,7 @@ void NodeBox::updateVisuals()
                 ui->slot_panel->hide();
                 ui->event_panel->hide();
 
-                if(grip_) {
+                if (grip_) {
                     grip_->hide();
                 }
 
@@ -867,10 +864,9 @@ void NodeBox::updateVisuals()
                 ui->slot_panel->show();
                 ui->event_panel->show();
 
-                if(grip_) {
+                if (grip_) {
                     grip_->show();
                 }
-
             }
             layout()->invalidate();
         }

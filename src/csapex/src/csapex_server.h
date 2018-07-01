@@ -15,11 +15,10 @@
 
 namespace csapex
 {
-
 struct CsApexServer : public Observer
 {
 public:
-    CsApexServer(Settings &settings, ExceptionHandler &handler);
+    CsApexServer(Settings& settings, ExceptionHandler& handler);
     ~CsApexServer();
 
     int run();
@@ -32,6 +31,6 @@ private:
     CsApexCorePtr core;
 };
 
-}
+}  // namespace csapex
 
-#endif // CSAPEX_H
+#endif  // CSAPEX_H

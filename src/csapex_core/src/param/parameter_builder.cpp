@@ -7,8 +7,7 @@
 using namespace csapex;
 using namespace param;
 
-ParameterBuilder::ParameterBuilder(const std::shared_ptr<Parameter>& param)
-    : param_(param)
+ParameterBuilder::ParameterBuilder(const std::shared_ptr<Parameter>& param) : param_(param)
 {
 }
 
@@ -19,7 +18,6 @@ ParameterBuilder& ParameterBuilder::name(const std::string& name)
 
     return *this;
 }
-
 
 ParameterBuilder& ParameterBuilder::description(const std::string& description)
 {

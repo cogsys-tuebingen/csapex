@@ -17,18 +17,19 @@
 using namespace csapex;
 using namespace connection_types;
 
-
-class TransitionTest : public CsApexTestCase {
+class TransitionTest : public CsApexTestCase
+{
 protected:
-    TransitionTest()
-        : uuid_provider(std::make_shared<UUIDProvider>())
+    TransitionTest() : uuid_provider(std::make_shared<UUIDProvider>())
     {
     }
 
-    virtual ~TransitionTest() {
+    virtual ~TransitionTest()
+    {
     }
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         o1 = std::make_shared<StaticOutput>(uuid_provider->makeUUID("out1"));
         o2 = std::make_shared<StaticOutput>(uuid_provider->makeUUID("out2"));
         o3 = std::make_shared<StaticOutput>(uuid_provider->makeUUID("out3"));
@@ -40,7 +41,8 @@ protected:
         i5 = std::make_shared<Input>(uuid_provider->makeUUID("in5"));
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         o1.reset();
         o2.reset();
         o3.reset();
@@ -66,7 +68,8 @@ protected:
     UUIDProviderPtr uuid_provider;
 
 protected:
-    void ASSERT_RECEIVED (Input& i, int expected) {
+    void ASSERT_RECEIVED(Input& i, int expected)
+    {
         auto raw_message = i.getToken();
         ASSERT_TRUE(raw_message != nullptr);
 
@@ -76,8 +79,8 @@ protected:
         ASSERT_EQ(value_message->value, expected);
     }
 
-
-    void ASSERT_IN_CONNECTION(const Connection& c, int expected) {
+    void ASSERT_IN_CONNECTION(const Connection& c, int expected)
+    {
         auto raw_message = c.getToken();
         ASSERT_TRUE(raw_message != nullptr);
 
@@ -87,7 +90,8 @@ protected:
         ASSERT_EQ(value_message->value, expected);
     }
 
-    void sendMessage (Output& o, int i) {
+    void sendMessage(Output& o, int i)
+    {
         GenericValueMessage<int>::Ptr msg(new GenericValueMessage<int>);
         msg->value = i;
         o.addMessage(std::make_shared<Token>(msg));
@@ -109,23 +113,22 @@ TEST_F(TransitionTest, TestOutputTransitionSequenceIds)
     // initial
     ASSERT_SEQ_NO(-1);
 
-    sendMessage(*o1,1);
-    sendMessage(*o2,1);
+    sendMessage(*o1, 1);
+    sendMessage(*o2, 1);
 
     ot.sendMessages(false);
 
     ASSERT_SEQ_NO(0);
 
-    sendMessage(*o1,2);
-    sendMessage(*o2,2);
+    sendMessage(*o1, 2);
+    sendMessage(*o2, 2);
 
     ot.sendMessages(false);
 
     ASSERT_SEQ_NO(1);
 
-
-    sendMessage(*o1,3);
-    sendMessage(*o2,3);
+    sendMessage(*o1, 3);
+    sendMessage(*o2, 3);
 
     // set all outputs sequence number
     ot.setSequenceNumber(41);
@@ -134,7 +137,6 @@ TEST_F(TransitionTest, TestOutputTransitionSequenceIds)
 
     ASSERT_SEQ_NO(42);
 }
-
 
 TEST_F(TransitionTest, TestOutputTransitionSequenceIdsConnected)
 {
@@ -156,23 +158,22 @@ TEST_F(TransitionTest, TestOutputTransitionSequenceIdsConnected)
     // initial
     ASSERT_SEQ_NO(-1);
 
-    sendMessage(*o1,1);
-    sendMessage(*o2,1);
+    sendMessage(*o1, 1);
+    sendMessage(*o2, 1);
 
     ot.sendMessages(false);
 
     ASSERT_SEQ_NO(0);
 
-    sendMessage(*o1,2);
-    sendMessage(*o2,2);
+    sendMessage(*o1, 2);
+    sendMessage(*o2, 2);
 
     ot.sendMessages(false);
 
     ASSERT_SEQ_NO(1);
 
-
-    sendMessage(*o1,3);
-    sendMessage(*o2,3);
+    sendMessage(*o1, 3);
+    sendMessage(*o2, 3);
 
     // set all outputs seq no
     ot.setSequenceNumber(41);
@@ -212,10 +213,10 @@ TEST_F(TransitionTest, TestOutputTransition)
     ConnectionPtr c_1b_3 = DirectConnection::connect(o2, i3);
     ConnectionPtr c_1c_5 = DirectConnection::connect(o3, i5);
 
-    for(int iter = 0; iter < 4; ++iter) {
-        sendMessage(*o1,1);
-        sendMessage(*o2,2);
-        sendMessage(*o3,3);
+    for (int iter = 0; iter < 4; ++iter) {
+        sendMessage(*o1, 1);
+        sendMessage(*o2, 2);
+        sendMessage(*o3, 3);
 
         ot.sendMessages(false);
 
@@ -272,20 +273,19 @@ TEST_F(TransitionTest, TestInputTransition)
         o.publish();
     };
 
-
-    for(int iter = 0; iter < 4; ++iter) {
+    for (int iter = 0; iter < 4; ++iter) {
         // send the first two messages -> should not be enabled
         ASSERT_FALSE(it.isEnabled());
-        sendMessage(*o1,1);
+        sendMessage(*o1, 1);
         publish(*o1);
         ASSERT_FALSE(it.isEnabled());
 
-        sendMessage(*o2,2);
+        sendMessage(*o2, 2);
         publish(*o2);
         ASSERT_FALSE(it.isEnabled());
 
         // send the final message -> should be enabled
-        sendMessage(*o3,3);
+        sendMessage(*o3, 3);
         publish(*o3);
         ASSERT_TRUE(it.isEnabled());
 
@@ -341,24 +341,22 @@ TEST_F(TransitionTest, TestFullTransitions)
     ConnectionPtr c_1b_1c = DirectConnection::connect(o2, i3);
     ConnectionPtr c_1c_1e = DirectConnection::connect(o3, i5);
 
-    for(int iter = 0; iter < 4; ++iter) {
+    for (int iter = 0; iter < 4; ++iter) {
         // send the first two messages -> should not be enabled
-        sendMessage(*o1,1);
+        sendMessage(*o1, 1);
 
-        sendMessage(*o2,2);
+        sendMessage(*o2, 2);
 
         // send the final message -> should be enabled
-        sendMessage(*o3,3);
+        sendMessage(*o3, 3);
 
         ot.sendMessages(false);
-
 
         ASSERT_IN_CONNECTION(*c_1a_1a, 1);
         ASSERT_IN_CONNECTION(*c_1a_1b, 1);
         ASSERT_IN_CONNECTION(*c_1a_1d, 1);
         ASSERT_IN_CONNECTION(*c_1b_1c, 2);
         ASSERT_IN_CONNECTION(*c_1c_1e, 3);
-
 
         ASSERT_TRUE(it.isEnabled());
         it.forwardMessages();
@@ -398,8 +396,8 @@ TEST_F(TransitionTest, TestBundledAndDirectConnectionsCanBeMixed)
     ConnectionPtr c_1a_1 = DirectConnection::connect(o1, i1);
     ConnectionPtr c_1a_2 = DirectConnection::connect(o1, i2);
 
-    for(int iter = 0; iter < 4; ++iter) {
-        sendMessage(*o1,iter);
+    for (int iter = 0; iter < 4; ++iter) {
+        sendMessage(*o1, iter);
 
         ot.sendMessages(false);
 

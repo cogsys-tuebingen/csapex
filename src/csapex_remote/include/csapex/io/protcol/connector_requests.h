@@ -9,11 +9,9 @@
 
 namespace csapex
 {
-
 class ConnectorRequests
 {
 public:
-
     enum class ConnectorRequestType
     {
 #define HANDLE_ACCESSOR(_enum, type, function) _enum,
@@ -32,7 +30,7 @@ public:
         ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid);
         ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid, const boost::any& payload);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
@@ -53,7 +51,6 @@ public:
         boost::any payload_;
     };
 
-
     class ConnectorResponse : public ResponseImplementation<ConnectorResponse>
     {
     public:
@@ -61,20 +58,19 @@ public:
         ConnectorResponse(ConnectorRequestType request_type, uint8_t request_id, const AUUID& uuid);
         ConnectorResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::string getType() const override
         {
             return "ConnectorRequests";
-        }        
+        }
 
         template <typename R>
         R getResult() const
         {
             return boost::any_cast<R>(result_);
         }
-
 
     private:
         ConnectorRequestType request_type_;
@@ -83,11 +79,10 @@ public:
         boost::any result_;
     };
 
-
 public:
     using RequestT = ConnectorRequest;
     using ResponseT = ConnectorResponse;
 };
 
-}
-#endif // CONNECTOR_REQUESTS_H
+}  // namespace csapex
+#endif  // CONNECTOR_REQUESTS_H

@@ -18,12 +18,10 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(AddFulcrum)
 
-AddFulcrum::AddFulcrum(const AUUID& parent_uuid, int connection_id, int sub_section_to_split, const Point &pos, int type)
-    : CommandImplementation(parent_uuid), connection_id(connection_id), sub_section_to_split(sub_section_to_split), pos(pos), type(type)
+AddFulcrum::AddFulcrum(const AUUID& parent_uuid, int connection_id, int sub_section_to_split, const Point& pos, int type)
+  : CommandImplementation(parent_uuid), connection_id(connection_id), sub_section_to_split(sub_section_to_split), pos(pos), type(type)
 {
-
 }
-
 
 std::string AddFulcrum::getDescription() const
 {
@@ -31,7 +29,6 @@ std::string AddFulcrum::getDescription() const
     ss << "added a fulcrum to connection " << connection_id;
     return ss.str();
 }
-
 
 bool AddFulcrum::doExecute()
 {
@@ -50,9 +47,7 @@ bool AddFulcrum::doRedo()
     return doExecute();
 }
 
-
-
-void AddFulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void AddFulcrum::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

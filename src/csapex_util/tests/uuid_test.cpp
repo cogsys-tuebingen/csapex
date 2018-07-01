@@ -7,24 +7,26 @@ using namespace csapex;
 class UUIDTest : public ::testing::Test
 {
 protected:
-    UUIDTest()
-        : uuid_provider(std::make_shared<UUIDProvider>())
+    UUIDTest() : uuid_provider(std::make_shared<UUIDProvider>())
     {
     }
 
-    virtual ~UUIDTest() {
+    virtual ~UUIDTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         // Code here will be called immediately after the constructor (right
         // before each test).
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
@@ -41,7 +43,7 @@ TEST_F(UUIDTest, UUIDsAreGeneratedCorrectly)
         uuid_provider->makeUUID("foo");
         FAIL();
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         SUCCEED();
     }
 
@@ -60,7 +62,6 @@ TEST_F(UUIDTest, UUIDsAreUnique)
     ASSERT_EQ("foo_1", uuid2.getFullName());
 }
 
-
 TEST_F(UUIDTest, UUIDsAreOnlyUniqueAcrossProviders)
 {
     auto uuid_provider = std::make_shared<UUIDProvider>();
@@ -78,7 +79,6 @@ TEST_F(UUIDTest, UUIDsAreOnlyUniqueAcrossProviders)
     UUID uuid2_2 = uuid_provider_2->generateUUID("foo");
     ASSERT_EQ("foo_1", uuid2_2.getFullName());
 }
-
 
 TEST_F(UUIDTest, UUIDsCanBeChildren)
 {
@@ -104,7 +104,6 @@ TEST_F(UUIDTest, UUIDsCanBeNested)
     ASSERT_EQ("bar_0:|:baz_0", full.nestedUUID().getFullName());
 }
 
-
 TEST_F(UUIDTest, MakingAUUIDSRelative)
 {
     UUID foo = uuid_provider->generateUUID("foo");
@@ -119,8 +118,6 @@ TEST_F(UUIDTest, MakingAUUIDSRelative)
     EXPECT_EQ("baz_0", full.makeRelativeTo(bar));
 }
 
-
-
 TEST_F(UUIDTest, MakingAUUIDSRelativeWithNoCommonPrefix)
 {
     UUID foo = uuid_provider->generateUUID("foo");
@@ -134,7 +131,6 @@ TEST_F(UUIDTest, MakingAUUIDSRelativeWithNoCommonPrefix)
     EXPECT_EQ("xfoo_0:|:bar_0:|:baz_0", full.makeRelativeTo(foo));
     EXPECT_EQ("xfoo_0:|:bar_0:|:baz_0", full.makeRelativeTo(bar));
 }
-
 
 TEST_F(UUIDTest, UUIDsCanBeDeconstructed)
 {
@@ -171,7 +167,6 @@ TEST_F(UUIDTest, MakeTypedUUIDWithStringId)
     ASSERT_EQ("foo_0:|:bar_baz", bar.getFullName());
 }
 
-
 TEST_F(UUIDTest, MakeTypedUUIDWithoutParent)
 {
     UUID bar = uuid_provider->makeTypedUUID(UUID::NONE, "bar", 23);
@@ -179,14 +174,12 @@ TEST_F(UUIDTest, MakeTypedUUIDWithoutParent)
     ASSERT_EQ(UUID::NONE, bar);
 }
 
-
 TEST_F(UUIDTest, MakeForcedTypedUUIDWithoutParent)
 {
     UUID bar = uuid_provider->makeTypedUUID_forced(UUID::NONE, "bar", 23);
 
     ASSERT_EQ(UUID::NONE, bar);
 }
-
 
 TEST_F(UUIDTest, GenerateTypedUUID)
 {
@@ -254,7 +247,6 @@ TEST_F(UUIDTest, UUIDsCanBeReshaped)
     ASSERT_THROW(baz.reshape(1000), std::invalid_argument);
 }
 
-
-//test reshaping thoroughly
-//refactor other methods to use reshape
-//implement reshape more efficiently
+// test reshaping thoroughly
+// refactor other methods to use reshape
+// implement reshape more efficiently

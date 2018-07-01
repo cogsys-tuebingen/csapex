@@ -9,7 +9,6 @@
 
 namespace csapex
 {
-
 class RequestParameter
 {
 public:
@@ -19,7 +18,7 @@ public:
         ParameterRequest(const AUUID& id);
         ParameterRequest(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
@@ -33,14 +32,13 @@ public:
         AUUID id_;
     };
 
-
     class ParameterResponse : public ResponseImplementation<ParameterResponse>
     {
     public:
-        ParameterResponse(const param::ParameterConstPtr &parameter, uint8_t request_id);
+        ParameterResponse(const param::ParameterConstPtr& parameter, uint8_t request_id);
         ParameterResponse(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         param::ParameterConstPtr getParameter() const;
@@ -50,17 +48,15 @@ public:
             return "RequestParameter";
         }
 
-
     private:
         param::ParameterConstPtr param_;
     };
-
 
 public:
     using RequestT = ParameterRequest;
     using ResponseT = ParameterResponse;
 };
 
-}
+}  // namespace csapex
 
-#endif // REQUEST_PARAMETER_H
+#endif  // REQUEST_PARAMETER_H

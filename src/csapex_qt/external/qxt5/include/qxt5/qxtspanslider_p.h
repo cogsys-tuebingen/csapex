@@ -79,4 +79,4 @@ public Q_SLOTS:
     void movePressedHandle();
 };
 
-#endif // QXTSPANSLIDER_P_H
+#endif  // QXTSPANSLIDER_P_H

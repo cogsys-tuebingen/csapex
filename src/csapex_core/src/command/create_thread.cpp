@@ -25,16 +25,14 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(CreateThread)
 
-
-CreateThread::CreateThread(const AUUID& parent_uuid, const UUID &node, const std::string& name)
-    : CommandImplementation(parent_uuid), uuid(node), name(name), old_id(-1), new_id(-1)
+CreateThread::CreateThread(const AUUID& parent_uuid, const UUID& node, const std::string& name) : CommandImplementation(parent_uuid), uuid(node), name(name), old_id(-1), new_id(-1)
 {
 }
 
 std::string CreateThread::getDescription() const
 {
     std::stringstream ss;
-    if(uuid.empty()) {
+    if (uuid.empty()) {
         ss << "created thread with name " << name;
 
     } else {
@@ -45,7 +43,7 @@ std::string CreateThread::getDescription() const
 
 bool CreateThread::doExecute()
 {
-    if(uuid.empty()) {
+    if (uuid.empty()) {
         ThreadPool* thread_pool = getRootThreadPool();
 
         new_id = thread_pool->createGroup(name)->id();
@@ -59,7 +57,6 @@ bool CreateThread::doExecute()
 
         old_id = group->id();
         new_id = thread_pool->createNewGroupFor(tg, name);
-
     }
 
     return true;
@@ -67,7 +64,7 @@ bool CreateThread::doExecute()
 
 bool CreateThread::doUndo()
 {
-    if(uuid.empty()) {
+    if (uuid.empty()) {
         getRootThreadPool()->removeGroup(new_id);
 
     } else {
@@ -81,7 +78,7 @@ bool CreateThread::doUndo()
 
 bool CreateThread::doRedo()
 {
-    if(uuid.empty()) {
+    if (uuid.empty()) {
         ThreadPool* thread_pool = getRootThreadPool();
 
         thread_pool->createGroup(name, new_id);
@@ -92,9 +89,7 @@ bool CreateThread::doRedo()
     }
 }
 
-
-
-void CreateThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void CreateThread::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

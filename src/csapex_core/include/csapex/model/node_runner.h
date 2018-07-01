@@ -16,7 +16,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT NodeRunner : public TaskGenerator, public Observer, public Notifier
 {
 public:
@@ -85,6 +84,6 @@ private:
     bool suppress_exceptions_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_RUNNER_H
+#endif  // NODE_RUNNER_H

@@ -20,24 +20,18 @@ using namespace csapex;
 ///
 /// Broadcast
 ///
-CommandBroadcasts::CommandBroadcasts()
-    : broadcast_type_(CommandBroadcastType::None)
+CommandBroadcasts::CommandBroadcasts() : broadcast_type_(CommandBroadcastType::None)
 {
-
 }
 
-CommandBroadcasts::CommandBroadcasts(CommandBroadcastType broadcast_type)
-    : broadcast_type_(broadcast_type), flag_(false)
+CommandBroadcasts::CommandBroadcasts(CommandBroadcastType broadcast_type) : broadcast_type_(broadcast_type), flag_(false)
 {
-
 }
-CommandBroadcasts::CommandBroadcasts(CommandBroadcastType broadcast_type, bool flag)
-    : broadcast_type_(broadcast_type), flag_(flag)
+CommandBroadcasts::CommandBroadcasts(CommandBroadcastType broadcast_type, bool flag) : broadcast_type_(broadcast_type), flag_(flag)
 {
-
 }
 
-void CommandBroadcasts::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void CommandBroadcasts::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << broadcast_type_;
     data << flag_;

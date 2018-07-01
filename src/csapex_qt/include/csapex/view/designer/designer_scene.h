@@ -22,7 +22,6 @@
 
 namespace csapex
 {
-
 class ConnectionDescription;
 class Timer;
 
@@ -37,8 +36,8 @@ public:
     DesignerScene(csapex::GraphFacadePtr graph, CsApexViewCore& view_core);
     ~DesignerScene();
 
-    void drawBackground(QPainter *painter, const QRectF &rect);
-    void drawForeground(QPainter *painter, const QRectF &rect);
+    void drawBackground(QPainter* painter, const QRectF& rect);
+    void drawForeground(QPainter* painter, const QRectF& rect);
 
     void mousePressEvent(QGraphicsSceneMouseEvent* e);
     void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
@@ -51,23 +50,22 @@ public:
     std::vector<NodeBox*> getSelectedBoxes() const;
 
     void addPort(Port* port);
-    Port* getPort(const UUID &connector_uuid);
+    Port* getPort(const UUID& connector_uuid);
     void removePort(Port* port);
 
     std::string makeStatusString() const;
 
 public Q_SLOTS:
-    void fulcrumAdded(Fulcrum *f);
-    void fulcrumMoved(void *f, bool dropped);
-    void fulcrumTypeChanged(void *f, int type);
-    void fulcrumHandleMoved(void *f, bool dropped, int which);
-    void fulcrumDeleted(void *);
-
+    void fulcrumAdded(Fulcrum* f);
+    void fulcrumMoved(void* f, bool dropped);
+    void fulcrumTypeChanged(void* f, int type);
+    void fulcrumHandleMoved(void* f, bool dropped, int which);
+    void fulcrumDeleted(void*);
 
 public Q_SLOTS:
     void addTemporaryConnection(ConnectorPtr from, ConnectorPtr to);
     void previewConnection(ConnectorPtr from, ConnectorPtr to);
-    void addTemporaryConnection(ConnectorPtr from, const QPointF &end);
+    void addTemporaryConnection(ConnectorPtr from, const QPointF& end);
     void deleteTemporaryConnections();
     void deleteTemporaryConnectionsAndRepaint();
 
@@ -94,15 +92,16 @@ public Q_SLOTS:
     void setScale(double scale);
 
 private:
-    void drawGrid(const QRectF &rect, QPainter *painter, double dimension);
+    void drawGrid(const QRectF& rect, QPainter* painter, double dimension);
 
-    void displayConnections(bool &member, bool show);
+    void displayConnections(bool& member, bool show);
 
 private:
-    struct TempConnection {
-        TempConnection(bool is_connected)
-            : is_connected(is_connected)
-        {}
+    struct TempConnection
+    {
+        TempConnection(bool is_connected) : is_connected(is_connected)
+        {
+        }
 
         bool is_connected;
 
@@ -112,7 +111,8 @@ private:
         ConnectorWeakPtr to_c;
     };
 
-    enum Position {
+    enum Position
+    {
         LEFT = 0,
         RIGHT = 1,
         TOP = 2,
@@ -121,11 +121,14 @@ private:
         UNDEFINED = 99
     };
 
-    enum class TokenType {
-        SIG, MSG
+    enum class TokenType
+    {
+        SIG,
+        MSG
     };
 
-    struct CurrentConnectionState {
+    struct CurrentConnectionState
+    {
         bool highlighted;
         bool error;
         bool disabled;
@@ -154,11 +157,11 @@ private:
     };
 
 private:
-    void drawConnection(QPainter *painter, const ConnectionDescription &connection);
-    std::vector<QRectF> drawConnection(QPainter *painter, Connector* from, Connector* to, int id);
-    std::vector<QRectF> drawConnection(QPainter *painter, const QPointF &from, const QPointF &to, int id);
+    void drawConnection(QPainter* painter, const ConnectionDescription& connection);
+    std::vector<QRectF> drawConnection(QPainter* painter, Connector* from, Connector* to, int id);
+    std::vector<QRectF> drawConnection(QPainter* painter, const QPointF& from, const QPointF& to, int id);
 
-    void drawPort(QPainter *painter, bool selected, Port* p, int pos = -1);
+    void drawPort(QPainter* painter, bool selected, Port* p, int pos = -1);
 
     QPointF offset(const QPointF& vector, Position position, double offset);
 
@@ -182,14 +185,14 @@ private:
     std::vector<TempConnection> temp_;
 
     std::vector<csapex::slim_signal::Connection> connections_;
-    std::map<int ,std::vector<QRectF> > connection_bb_;
+    std::map<int, std::vector<QRectF>> connection_bb_;
 
     std::map<int, std::vector<Fulcrum>> connection_2_fulcrum_;
-    std::map<Fulcrum*,FulcrumWidget*> fulcrum_2_widget_;
-    std::map<Fulcrum*,Point> fulcrum_last_pos_;
-    std::map<Fulcrum*,int> fulcrum_last_type_;
-    std::map<Fulcrum*,Point> fulcrum_last_hin_;
-    std::map<Fulcrum*,Point> fulcrum_last_hout_;
+    std::map<Fulcrum*, FulcrumWidget*> fulcrum_2_widget_;
+    std::map<Fulcrum*, Point> fulcrum_last_pos_;
+    std::map<Fulcrum*, int> fulcrum_last_type_;
+    std::map<Fulcrum*, Point> fulcrum_last_hin_;
+    std::map<Fulcrum*, Point> fulcrum_last_hout_;
 
     bool draw_grid_;
     bool draw_schema_;
@@ -219,5 +222,5 @@ private:
     std::shared_ptr<Timer> profiling_timer_;
 };
 
-}
-#endif // DESIGNER_SCENE_H
+}  // namespace csapex
+#endif  // DESIGNER_SCENE_H

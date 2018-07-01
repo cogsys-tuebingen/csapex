@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Scheduler
 {
 public:
@@ -43,13 +42,13 @@ public:
     virtual void scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time) = 0;
 
 public:
-    slim_signal::Signal<void ()> stepping_enabled;
-    slim_signal::Signal<void ()> begin_step;
-    slim_signal::Signal<void ()> end_step;
+    slim_signal::Signal<void()> stepping_enabled;
+    slim_signal::Signal<void()> begin_step;
+    slim_signal::Signal<void()> end_step;
 
-    slim_signal::Signal<void ()> scheduler_changed;
+    slim_signal::Signal<void()> scheduler_changed;
 };
 
-}
+}  // namespace csapex
 
-#endif // SCHEDULER_H
+#endif  // SCHEDULER_H

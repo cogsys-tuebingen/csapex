@@ -20,14 +20,12 @@
 
 using namespace csapex;
 
-RangeParameterAdapter::RangeParameterAdapter(param::RangeParameter::Ptr p)
-    : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), range_p_(p),
-      internal_layout(new QHBoxLayout)
+RangeParameterAdapter::RangeParameterAdapter(param::RangeParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), range_p_(p), internal_layout(new QHBoxLayout)
 {
-
 }
 
-namespace {
+namespace
+{
 void setDecimals(QSpinBox*, int)
 {
     // do nothing
@@ -37,32 +35,31 @@ void setDecimals(QDoubleSpinBox* box, double step)
 {
     int decimals = 0;
     double v = step;
-    while(v < 1.0) {
+    while (v < 1.0) {
         v *= 10;
         ++decimals;
     }
     box->setDecimals(decimals);
 }
-}
+}  // namespace
 
 QWidget* RangeParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QLabel* label = new QLabel(QString::fromStdString(display_name));
     label->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(label, &QLabel::customContextMenuRequested,
-                     [=](const QPoint& point){ customContextMenuRequested(label, point); });
+    QObject::connect(label, &QLabel::customContextMenuRequested, [=](const QPoint& point) { customContextMenuRequested(label, point); });
 
     internal_layout->addWidget(label);
 
-    if(range_p_->is<int>()) {
+    if (range_p_->is<int>()) {
         genericSetup<int, QIntSlider, QWrapper::QSpinBoxExt>();
-    } else if(range_p_->is<double>()) {
+    } else if (range_p_->is<double>()) {
         genericSetup<double, QDoubleSlider, QWrapper::QDoubleSpinBoxExt>();
     } else {
         layout->addWidget(new QLabel((display_name + "'s type is not yet implemented (range: " + type2name(p_->type()) + ")").c_str()));
     }
 
-    for(int i = 0; i < internal_layout->count(); ++i) {
+    for (int i = 0; i < internal_layout->count(); ++i) {
         QWidget* child = internal_layout->itemAt(i)->widget();
         child->setProperty("parameter", QVariant::fromValue(static_cast<void*>(static_cast<csapex::param::Parameter*>(p_.get()))));
     }
@@ -81,13 +78,13 @@ void RangeParameterAdapter::genericSetup()
 
     T def = range_p_->def<T>();
 
-    if(((def - min) / step) * step != (def - min)) {
+    if (((def - min) / step) * step != (def - min)) {
         std::cerr << "default " << def << " is not a multiple of minimum " << min << " with a step size of " << step << std::endl;
         def = min;
         std::cerr << "set default to " << def << std::endl;
     }
 
-    if(((max - min) / step) * step != (max - min)) {
+    if (((max - min) / step) * step != (max - min)) {
         std::cerr << "maximum " << max << " is not a multiple of minimum " << min << " with a step size of " << step << std::endl;
         max = ((max - min) / step) * step + min;
         std::cerr << "set maximum to " << max << std::endl;
@@ -112,22 +109,17 @@ void RangeParameterAdapter::genericSetup()
     internal_layout->addWidget(display);
 
     slider->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(slider.data(), &QLabel::customContextMenuRequested,
-                     [=](const QPoint& point){ customContextMenuRequested(slider, point); });
+    QObject::connect(slider.data(), &QLabel::customContextMenuRequested, [=](const QPoint& point) { customContextMenuRequested(slider, point); });
 
-    QObject::connect(slider.data(), &Slider::scaledValueChanged,
-                     display.data(), &Spinbox::setValue);
-    QObject::connect(slider.data(), &Slider::scaledRangeChanged,
-                     display.data(), &Spinbox::setRange);
-    QObject::connect(display.data(), static_cast<void(Spinbox::*)(T)>(&Spinbox::valueChanged),
-                     slider.data(), &Slider::setScaledValue);
-
+    QObject::connect(slider.data(), &Slider::scaledValueChanged, display.data(), &Spinbox::setValue);
+    QObject::connect(slider.data(), &Slider::scaledRangeChanged, display.data(), &Spinbox::setRange);
+    QObject::connect(display.data(), static_cast<void (Spinbox::*)(T)>(&Spinbox::valueChanged), slider.data(), &Slider::setScaledValue);
 
     slider->setScaledValue(p_->as<T>());
 
     // ui change -> model
-    QObject::connect(slider.data(), &Slider::scaledValueChanged, [this, slider](T value){
-        if(!p_ || !slider) {
+    QObject::connect(slider.data(), &Slider::scaledValueChanged, [this, slider](T value) {
+        if (!p_ || !slider) {
             return;
         }
 
@@ -135,10 +127,9 @@ void RangeParameterAdapter::genericSetup()
         executeCommand(update_parameter);
     });
 
-
     // model change -> ui
-    connectInGuiThread(p_->parameter_changed, [this, slider, display](param::Parameter*){
-        if(!p_ || !slider || !display) {
+    connectInGuiThread(p_->parameter_changed, [this, slider, display](param::Parameter*) {
+        if (!p_ || !slider || !display) {
             return;
         }
         auto v = p_->as<T>();
@@ -151,8 +142,8 @@ void RangeParameterAdapter::genericSetup()
         display->blockSignals(false);
         slider->blockSignals(false);
     });
-    connectInGuiThread(range_p_->step_changed, [this, slider, display](param::Parameter*){
-        if(!range_p_ || !slider || !display) {
+    connectInGuiThread(range_p_->step_changed, [this, slider, display](param::Parameter*) {
+        if (!range_p_ || !slider || !display) {
             return;
         }
         slider->blockSignals(true);
@@ -167,10 +158,9 @@ void RangeParameterAdapter::genericSetup()
         slider->blockSignals(false);
     });
 
-
     // parameter scope changed -> update slider interval
     connectInGuiThread(p_->scope_changed, [this, slider, display](param::Parameter*) {
-        if(!p_ || !slider || !display) {
+        if (!p_ || !slider || !display) {
             return;
         }
         slider->blockSignals(true);
@@ -189,52 +179,40 @@ void RangeParameterAdapter::genericSetup()
     });
 }
 
-void RangeParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+void RangeParameterAdapter::setupContextMenu(ParameterContextMenu* context_handler)
 {
-    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
-        if(range_p_->is<int>()) {
+    context_handler->addAction(new QAction("reset to default", context_handler), [this]() {
+        if (range_p_->is<int>()) {
             range_p_->set(range_p_->def<int>());
-        } else if(range_p_->is<double>()) {
+        } else if (range_p_->is<double>()) {
             range_p_->set(range_p_->def<double>());
         }
     });
 
-    context_handler->addAction(new QAction("set step size", context_handler), [this](){
-        if(range_p_->is<int>()) {
-            int s = QInputDialog::getInt(QApplication::activeWindow(), "Step size", "Please enter the new step size",
-                                         range_p_->step<int>());
+    context_handler->addAction(new QAction("set step size", context_handler), [this]() {
+        if (range_p_->is<int>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Step size", "Please enter the new step size", range_p_->step<int>());
             range_p_->setStep(s);
-        } else if(range_p_->is<double>()) {
-            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Step size", "Please enter the new step size",
-                                               range_p_->step<double>(),
-                                               -1000., 1000.,
-                                               8);
+        } else if (range_p_->is<double>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Step size", "Please enter the new step size", range_p_->step<double>(), -1000., 1000., 8);
             range_p_->setStep(s);
         }
     });
-    context_handler->addAction(new QAction("set minimum", context_handler), [this](){
-        if(range_p_->is<int>()) {
-            int s = QInputDialog::getInt(QApplication::activeWindow(), "Minimum", "Please enter the new minimum value",
-                                         range_p_->min<int>());
+    context_handler->addAction(new QAction("set minimum", context_handler), [this]() {
+        if (range_p_->is<int>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Minimum", "Please enter the new minimum value", range_p_->min<int>());
             range_p_->setMin(s);
-        } else if(range_p_->is<double>()) {
-            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Minimum", "Please enter the new minimum value",
-                                               range_p_->min<double>(),
-                                               -10000000., 10000000.,
-                                               8);
+        } else if (range_p_->is<double>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Minimum", "Please enter the new minimum value", range_p_->min<double>(), -10000000., 10000000., 8);
             range_p_->setMin(s);
         }
     });
-    context_handler->addAction(new QAction("set maximum", context_handler), [this](){
-        if(range_p_->is<int>()) {
-            int s = QInputDialog::getInt(QApplication::activeWindow(), "Maximum", "Please enter the new maximum value",
-                                         range_p_->max<int>());
+    context_handler->addAction(new QAction("set maximum", context_handler), [this]() {
+        if (range_p_->is<int>()) {
+            int s = QInputDialog::getInt(QApplication::activeWindow(), "Maximum", "Please enter the new maximum value", range_p_->max<int>());
             range_p_->setMax(s);
-        } else if(range_p_->is<double>()) {
-            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Maximum", "Please enter the new maximum value",
-                                               range_p_->max<double>(),
-                                               -10000000., 10000000.,
-                                               8);
+        } else if (range_p_->is<double>()) {
+            double s = QInputDialog::getDouble(QApplication::activeWindow(), "Maximum", "Please enter the new maximum value", range_p_->max<double>(), -10000000., 10000000., 8);
             range_p_->setMax(s);
         }
     });

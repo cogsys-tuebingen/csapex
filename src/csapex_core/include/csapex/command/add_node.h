@@ -8,18 +8,16 @@
 
 namespace csapex
 {
-
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT AddNode : public CommandImplementation<AddNode>
 {
     COMMAND_HEADER(AddNode);
 
 public:
-    AddNode(const AUUID &graph_uuid, const std::string& type, Point pos, const UUID& uuid_, NodeStatePtr state);
+    AddNode(const AUUID& graph_uuid, const std::string& type, Point pos, const UUID& uuid_, NodeStatePtr state);
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -37,7 +35,7 @@ private:
 
     NodeStatePtr saved_state_;
 };
-}
-}
+}  // namespace command
+}  // namespace csapex
 
-#endif // COMMAND_ADD_NODE_HPP
+#endif  // COMMAND_ADD_NODE_HPP

@@ -12,15 +12,12 @@
 
 using namespace csapex;
 
-
-ThreadGroupProfilingRenderer::ThreadGroupProfilingRenderer(const ThreadGroup *thread_group)
-    : thread_group_(thread_group)
+ThreadGroupProfilingRenderer::ThreadGroupProfilingRenderer(const ThreadGroup* thread_group) : thread_group_(thread_group)
 {
 }
 
 ThreadGroupProfilingRenderer::ThreadGroupProfilingRenderer()
 {
-
 }
 
 const ThreadGroup* ThreadGroupProfilingRenderer::getThreadGroup()
@@ -33,8 +30,7 @@ QSize ThreadGroupProfilingRenderer::sizeHint() const
     return QSize(256, 96);
 }
 
-void ThreadGroupProfilingRenderer::paint(QPainter *painter, const QRect &rect,
-                                         const QPalette &palette, const QPoint cursor) const
+void ThreadGroupProfilingRenderer::paint(QPainter* painter, const QRect& rect, const QPalette& palette, const QPoint cursor) const
 {
     painter->save();
 
@@ -49,7 +45,8 @@ void ThreadGroupProfilingRenderer::paint(QPainter *painter, const QRect &rect,
     double full_width = rect.width();
     double full_duration_ms = timer->elapsedMs();
 
-    struct Entry {
+    struct Entry
+    {
         std::string name;
         int idx;
         double duration_ms;
@@ -58,7 +55,7 @@ void ThreadGroupProfilingRenderer::paint(QPainter *painter, const QRect &rect,
 
     int idx = 0;
     std::vector<Entry> segments;
-    for(const auto& pair : timer->entries()) {
+    for (const auto& pair : timer->entries()) {
         Entry e;
         e.name = pair.first;
         e.idx = idx;
@@ -68,9 +65,7 @@ void ThreadGroupProfilingRenderer::paint(QPainter *painter, const QRect &rect,
         segments.push_back(e);
     }
 
-    std::sort(segments.begin(), segments.end(),[](const Entry& a, const Entry& b){
-        return a.duration_ms < b.duration_ms;
-    });
+    std::sort(segments.begin(), segments.end(), [](const Entry& a, const Entry& b) { return a.duration_ms < b.duration_ms; });
 
     QTextOption text_top(Qt::AlignTop | Qt::AlignHCenter);
     text_top.setWrapMode(QTextOption::NoWrap);
@@ -78,21 +73,20 @@ void ThreadGroupProfilingRenderer::paint(QPainter *painter, const QRect &rect,
     QTextOption text_bottom(Qt::AlignBottom | Qt::AlignHCenter);
 
     double next_segment_start = 0;
-    for(const Entry& e : segments) {
+    for (const Entry& e : segments) {
         double rel_width = e.duration_ms / full_duration_ms * full_width;
 
-        QRect segment_rect(rect.x() + next_segment_start, rect.y(),
-                           rel_width, rect.height());
+        QRect segment_rect(rect.x() + next_segment_start, rect.y(), rel_width, rect.height());
 
         bool is_selected = segment_rect.contains(cursor);
-        if(is_selected) {
-            painter->setPen(QPen (QColor(20, 20, 20), 5, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin));
+        if (is_selected) {
+            painter->setPen(QPen(QColor(20, 20, 20), 5, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin));
 
             std::string highlight = e.name;
             ThreadGroupProfilingRendererGlobalState::instance().highlight[thread_group_] = highlight;
 
         } else {
-            painter->setPen(QPen (QColor(20, 20, 20)));
+            painter->setPen(QPen(QColor(20, 20, 20)));
         }
 
         QColor col = color::fromCount<QColor>(e.idx);
@@ -110,8 +104,7 @@ void ThreadGroupProfilingRenderer::paint(QPainter *painter, const QRect &rect,
         next_segment_start += rel_width;
     }
 
-    QRect segment_rect(rect.x() + next_segment_start, rect.y(),
-                       full_width - next_segment_start, rect.height());
+    QRect segment_rect(rect.x() + next_segment_start, rect.y(), full_width - next_segment_start, rect.height());
     QColor col(Qt::gray);
     painter->setPen(Qt::NoPen);
     painter->setBrush(QBrush(col, Qt::BDiagPattern));
@@ -120,23 +113,12 @@ void ThreadGroupProfilingRenderer::paint(QPainter *painter, const QRect &rect,
     painter->restore();
 }
 
-
-
-
-
-
-
-ThreadGroupProfilingWidget::ThreadGroupProfilingWidget(const ThreadGroup* thread_group, QWidget *parent)
-    : QWidget(parent),
-      thread_group_(thread_group),
-      renderer_(thread_group_)
+ThreadGroupProfilingWidget::ThreadGroupProfilingWidget(const ThreadGroup* thread_group, QWidget* parent) : QWidget(parent), thread_group_(thread_group), renderer_(thread_group_)
 {
     setMouseTracking(true);
     setAutoFillBackground(true);
 
-    observe(thread_group_->getProfiler()->updated, [this](){
-       update();
-    });
+    observe(thread_group_->getProfiler()->updated, [this]() { update(); });
 }
 
 QSize ThreadGroupProfilingWidget::sizeHint() const
@@ -144,13 +126,12 @@ QSize ThreadGroupProfilingWidget::sizeHint() const
     return renderer_.sizeHint();
 }
 
-void ThreadGroupProfilingWidget::paintEvent(QPaintEvent *)
+void ThreadGroupProfilingWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     QPoint pos = cursor().pos();
     renderer_.paint(&painter, rect(), this->palette(), pos);
 }
-
 
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_thread_group_profiling_widget.cpp"

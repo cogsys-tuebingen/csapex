@@ -9,8 +9,8 @@
 
 namespace csapex
 {
-
-class NodeConstructingTest : public CsApexTestCase {
+class NodeConstructingTest : public CsApexTestCase
+{
 protected:
     NodeConstructingTest();
 
@@ -32,6 +32,6 @@ protected:
 
     slim_signal::Connection abort_connection;
 };
-}
+}  // namespace csapex
 
-#endif // NODE_CONSTRUCTING_TEST_H
+#endif  // NODE_CONSTRUCTING_TEST_H

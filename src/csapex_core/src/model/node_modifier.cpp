@@ -11,22 +11,17 @@
 
 using namespace csapex;
 
-NodeModifier::NodeModifier()
-    : variadic_(false),
-      node_worker_(nullptr)
+NodeModifier::NodeModifier() : variadic_(false), node_worker_(nullptr)
 {
 }
 NodeModifier::~NodeModifier()
 {
-
 }
 
-void NodeModifier::setNodeWorker(NodeWorker *worker)
+void NodeModifier::setNodeWorker(NodeWorker* worker)
 {
     node_worker_ = worker;
-    node_worker_->destroyed.connect([this]() {
-        node_worker_ = nullptr;
-    });
+    node_worker_->destroyed.connect([this]() { node_worker_ = nullptr; });
 }
 
 void NodeModifier::setVariadic(bool variadic)
@@ -34,32 +29,27 @@ void NodeModifier::setVariadic(bool variadic)
     variadic_ = variadic;
 }
 
-
 Slot* NodeModifier::addSlot(const std::string& label, std::function<void()> callback, bool active, bool blocking)
 {
-    return addSlot(makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, active, blocking);
+    return addSlot(makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) { callback(); }, active, blocking);
 }
 Slot* NodeModifier::addActiveSlot(const std::string& label, std::function<void()> callback, bool blocking)
 {
-    return addSlot(makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) {callback();}, true, blocking);
+    return addSlot(makeEmpty<connection_types::AnyMessage>(), label, [callback](const TokenPtr&) { callback(); }, true, blocking);
 }
 
-
-Event* NodeModifier::addEvent(const std::string &label)
+Event* NodeModifier::addEvent(const std::string& label)
 {
     return addEvent(makeEmpty<connection_types::AnyMessage>(), label);
 }
-
-
-
 
 std::vector<InputPtr> NodeModifier::getMessageInputs() const
 {
     // hide parameter inputs from the nodes
     auto vec = getExternalInputs();
     std::vector<InputPtr> result;
-    for(auto entry : vec) {
-        if(!isParameterInput(entry->getUUID()))  {
+    for (auto entry : vec) {
+        if (!isParameterInput(entry->getUUID())) {
             result.push_back(entry);
         }
     }
@@ -70,8 +60,8 @@ std::vector<OutputPtr> NodeModifier::getMessageOutputs() const
     // hide parameter outputs from the nodes
     auto vec = getExternalOutputs();
     std::vector<OutputPtr> result;
-    for(auto entry : vec) {
-        if(!isParameterOutput(entry->getUUID()))  {
+    for (auto entry : vec) {
+        if (!isParameterOutput(entry->getUUID())) {
             result.push_back(entry);
         }
     }
@@ -88,47 +78,46 @@ std::vector<EventPtr> NodeModifier::getEvents() const
 
 bool NodeModifier::isProcessingEnabled() const
 {
-    if(!node_worker_) {
+    if (!node_worker_) {
         return false;
     }
     return node_worker_->isProcessingEnabled();
 }
 void NodeModifier::setProcessingEnabled(bool enabled)
 {
-    if(node_worker_) {
+    if (node_worker_) {
         node_worker_->setProcessingEnabled(enabled);
     }
 }
 
-
 bool NodeModifier::isError() const
 {
-    if(!node_worker_) {
+    if (!node_worker_) {
         return false;
     }
     return node_worker_->isError();
 }
 void NodeModifier::setNoError()
 {
-    if(node_worker_) {
+    if (node_worker_) {
         node_worker_->setError(false);
     }
 }
-void NodeModifier::setInfo(const std::string &msg)
+void NodeModifier::setInfo(const std::string& msg)
 {
-    if(node_worker_) {
+    if (node_worker_) {
         node_worker_->setError(true, msg, ErrorState::ErrorLevel::INFO);
     }
 }
-void NodeModifier::setWarning(const std::string &msg)
+void NodeModifier::setWarning(const std::string& msg)
 {
-    if(node_worker_) {
+    if (node_worker_) {
         node_worker_->setError(true, msg, ErrorState::ErrorLevel::WARNING);
     }
 }
-void NodeModifier::setError(const std::string &msg)
+void NodeModifier::setError(const std::string& msg)
 {
-    if(node_worker_) {
+    if (node_worker_) {
         node_worker_->setError(true, msg, ErrorState::ErrorLevel::ERROR);
     }
 }

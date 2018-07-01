@@ -19,10 +19,7 @@
 
 using namespace csapex;
 
-Node::Node()
-    : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""),
-      node_handle_(nullptr),
-      guard_(-1)
+Node::Node() : adebug(std::cout, ""), ainfo(std::cout, ""), awarn(std::cout, ""), aerr(std::cerr, ""), node_handle_(nullptr), guard_(-1)
 {
 }
 
@@ -60,10 +57,10 @@ void Node::initialize(NodeHandlePtr node_handle)
 void Node::detach()
 {
     stopObserving();
-    if(node_handle_) {
+    if (node_handle_) {
         apex_assert_hard(node_handle_->guard_ == -1);
     }
-    //node_handle_.reset();
+    // node_handle_.reset();
 }
 
 UUID Node::getUUID() const
@@ -71,14 +68,12 @@ UUID Node::getUUID() const
     return node_handle_ ? node_handle_->getUUID() : UUID::NONE;
 }
 
-void Node::setupParameters(Parameterizable& )
+void Node::setupParameters(Parameterizable&)
 {
-
 }
 
 void Node::stateChanged()
 {
-
 }
 
 bool Node::isAsynchronous() const
@@ -96,10 +91,10 @@ bool Node::canRunInSeparateProcess() const
 
 bool Node::canProcess() const
 {
-    if(!node_handle_) {
+    if (!node_handle_) {
         return false;
 
-    } else if(node_handle_->getOutputTransition()->getPortCount() == 0 && node_handle_->getInputTransition()->getPortCount() == 0) {
+    } else if (node_handle_->getOutputTransition()->getPortCount() == 0 && node_handle_->getInputTransition()->getPortCount() == 0) {
         // by default, nodes without any synchronous ports should not be processed.
         return false;
 
@@ -117,14 +112,13 @@ void Node::yield() const
 void Node::process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& parameters, Continuation continuation)
 {
     process(node_modifier, parameters);
-    continuation([](csapex::NodeModifier&, csapex::Parameterizable&){});
+    continuation([](csapex::NodeModifier&, csapex::Parameterizable&) {});
 }
 
 void Node::process(csapex::NodeModifier& /*node_modifier*/, csapex::Parameterizable& /*parameters*/)
 {
     process();
 }
-
 
 void Node::process()
 {
@@ -133,12 +127,10 @@ void Node::process()
 
 void Node::finishSetup()
 {
-
 }
 
 void Node::tearDown()
 {
-
 }
 
 void Node::reset()
@@ -150,21 +142,18 @@ bool Node::processNothingMarkers() const
     return false;
 }
 
-void Node::processMarker(const csapex::connection_types::MessageConstPtr &marker)
+void Node::processMarker(const csapex::connection_types::MessageConstPtr& marker)
 {
-
 }
 
 void Node::activation()
 {
-
 }
 
 void Node::deactivation()
 {
-
 }
 
-void Node::getProperties(std::vector<std::string> &/*properties*/) const
+void Node::getProperties(std::vector<std::string>& /*properties*/) const
 {
 }

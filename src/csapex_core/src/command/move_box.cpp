@@ -17,8 +17,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(MoveBox)
 
-MoveBox::MoveBox(const AUUID& graph_uuid, const UUID& node_uuid, Point from, Point to)
-    : CommandImplementation(graph_uuid), from(from), to(to), box_uuid(node_uuid)
+MoveBox::MoveBox(const AUUID& graph_uuid, const UUID& node_uuid, Point from, Point to) : CommandImplementation(graph_uuid), from(from), to(to), box_uuid(node_uuid)
 {
 }
 
@@ -29,7 +28,6 @@ std::string MoveBox::getDescription() const
     ss << "(" << to.x << ", " << to.y << ")";
     return ss.str();
 }
-
 
 bool MoveBox::doExecute()
 {
@@ -60,7 +58,7 @@ bool MoveBox::doRedo()
     return doExecute();
 }
 
-void MoveBox::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void MoveBox::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 
@@ -77,4 +75,3 @@ void MoveBox::deserialize(const SerializationBuffer& data, const SemanticVersion
     data >> to.x >> to.y;
     data >> box_uuid;
 }
-

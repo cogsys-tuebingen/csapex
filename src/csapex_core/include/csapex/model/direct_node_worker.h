@@ -13,6 +13,6 @@ public:
     ~DirectNodeWorker();
 };
 
-}
+}  // namespace csapex
 
-#endif // DIRECT_NODE_WORKER_H
+#endif  // DIRECT_NODE_WORKER_H

@@ -18,7 +18,6 @@
 
 namespace csapex
 {
-
 class Session : public Observer, public std::enable_shared_from_this<Session>
 {
 public:
@@ -27,9 +26,9 @@ public:
     class NoConnectionException : public std::runtime_error
     {
     public:
-        NoConnectionException()
-            : std::runtime_error("No active connection.")
-        {}
+        NoConnectionException() : std::runtime_error("No active connection.")
+        {
+        }
     };
 
 public:
@@ -46,8 +45,8 @@ public:
 
     void stopForced();
 
-    void write(const StreamableConstPtr &packet);
-    void write(const std::string &message);
+    void write(const StreamableConstPtr& packet);
+    void write(const std::string& message);
 
     //
     // REQUEST
@@ -55,26 +54,23 @@ public:
     ResponseConstPtr sendRequest(RequestConstPtr request);
 
     template <typename RequestWrapper>
-    std::shared_ptr<typename RequestWrapper::ResponseT const>
-    sendRequest(std::shared_ptr<typename RequestWrapper::RequestT const> request)
+    std::shared_ptr<typename RequestWrapper::ResponseT const> sendRequest(std::shared_ptr<typename RequestWrapper::RequestT const> request)
     {
         return std::dynamic_pointer_cast<typename RequestWrapper::RequestT const>(sendRequest(request));
     }
 
     template <typename RequestWrapper, typename... Args>
-    std::shared_ptr<typename RequestWrapper::ResponseT const>
-    sendRequest(Args&&... args)
+    std::shared_ptr<typename RequestWrapper::ResponseT const> sendRequest(Args&&... args)
     {
         auto res = sendRequest(std::make_shared<typename RequestWrapper::RequestT>(std::forward<Args>(args)...));
         apex_assert_hard(res);
-        if(auto casted = std::dynamic_pointer_cast<typename RequestWrapper::ResponseT const>(res)) {
+        if (auto casted = std::dynamic_pointer_cast<typename RequestWrapper::ResponseT const>(res)) {
             return casted;
         } else {
             handleFeedback(res);
         }
         return nullptr;
     }
-
 
     //
     // NOTE
@@ -113,21 +109,20 @@ public:
     slim_signal::Signal<void(const StreamableConstPtr&)> packet_received;
     slim_signal::Signal<void(const BroadcastMessageConstPtr&)> broadcast_received;
 
-    slim_signal::Signal<void(const StreamableConstPtr&)> &raw_packet_received(const AUUID& uuid);
+    slim_signal::Signal<void(const StreamableConstPtr&)>& raw_packet_received(const AUUID& uuid);
 
 protected:
     void mainLoop();
 
     void read_async();
 
-    void write_packet(SerializationBuffer &buffer);
+    void write_packet(SerializationBuffer& buffer);
 
 protected:
     std::thread packet_handler_thread_;
     std::unique_ptr<Socket> socket_;
 
     uint8_t next_request_id_;
-
 
     std::recursive_mutex packets_mutex_;
     std::condition_variable_any packets_available_;
@@ -152,6 +147,6 @@ private:
     bool is_valid_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SESSION_H
+#endif  // SESSION_H

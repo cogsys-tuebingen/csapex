@@ -14,28 +14,26 @@
 
 using namespace csapex;
 
-NodeListGenerator::NodeListGenerator(NodeFactory &node_factory, NodeAdapterFactory &adapter_factory)
-    : node_factory_(node_factory), adapter_factory_(adapter_factory)
+NodeListGenerator::NodeListGenerator(NodeFactory& node_factory, NodeAdapterFactory& adapter_factory) : node_factory_(node_factory), adapter_factory_(adapter_factory)
 {
-
 }
 
 void NodeListGenerator::insertAvailableNodeTypes(QMenu* menu)
 {
     auto tags = node_factory_.getTagMap();
 
-    for(const auto& pair : tags) {
+    for (const auto& pair : tags) {
         const std::string& tag = pair.first;
         const std::vector<NodeConstructor::Ptr>& constructors = pair.second;
 
         QMenu* submenu = new QMenu(QString::fromStdString(tag));
         menu->addMenu(submenu);
 
-        for(const NodeConstructor::Ptr& proxy : constructors) {
+        for (const NodeConstructor::Ptr& proxy : constructors) {
             QIcon icon = QIcon(QString::fromStdString(proxy->getIcon()));
             QAction* action = new QAction(UUID::stripNamespace(proxy->getType()).c_str(), submenu);
             action->setData(QString(proxy->getType().c_str()));
-            if(!icon.isNull()) {
+            if (!icon.isNull()) {
                 action->setIcon(icon);
                 action->setIconVisibleInMenu(true);
             }
@@ -46,9 +44,7 @@ void NodeListGenerator::insertAvailableNodeTypes(QMenu* menu)
     }
 
     menu->menuAction()->setIconVisibleInMenu(true);
-
 }
-
 
 void NodeListGenerator::insertAvailableNodeTypes(QTreeWidget* tree)
 {
@@ -56,7 +52,7 @@ void NodeListGenerator::insertAvailableNodeTypes(QTreeWidget* tree)
 
     tree->setDragEnabled(true);
 
-    for(const auto& pair : tags) {
+    for (const auto& pair : tags) {
         const std::string& tag = pair.first;
         const std::vector<NodeConstructor::Ptr>& constructors = pair.second;
 
@@ -64,7 +60,7 @@ void NodeListGenerator::insertAvailableNodeTypes(QTreeWidget* tree)
         submenu->setText(0, QString::fromStdString(tag));
         tree->addTopLevelItem(submenu);
 
-        for(const NodeConstructor::Ptr& proxy : constructors) {
+        for (const NodeConstructor::Ptr& proxy : constructors) {
             QIcon icon = QIcon(QString::fromStdString(proxy->getIcon()));
             std::string name = UUID::stripNamespace(proxy->getType());
 
@@ -82,24 +78,24 @@ void NodeListGenerator::insertAvailableNodeTypes(QTreeWidget* tree)
 
 void NodeListGenerator::listAvailableNodeTypes(QStandardItemModel* model)
 {
-    for(const NodeConstructor::Ptr& proxy : node_factory_.getConstructors()) {
+    for (const NodeConstructor::Ptr& proxy : node_factory_.getConstructors()) {
         QString name = QString::fromStdString(UUID::stripNamespace(proxy->getType()));
         QString descr(proxy->getDescription().c_str());
         QString type(proxy->getType().c_str());
 
         QStringList tags;
-        for(const Tag::Ptr& tag : proxy->getTags()) {
+        for (const Tag::Ptr& tag : proxy->getTags()) {
             tags << tag->getName().c_str();
         }
 
         QStringList properties;
-        for(const std::string& s : proxy->getProperties()) {
+        for (const std::string& s : proxy->getProperties()) {
             properties.append(QString::fromStdString(s));
         }
 
-//        if(adapter_factory_.hasAdapter(proxy->getType())) {
-//            properties.push_back("QT");
-//        }
+        //        if(adapter_factory_.hasAdapter(proxy->getType())) {
+        //            properties.push_back("QT");
+        //        }
 
         QStandardItem* item = new QStandardItem(QIcon(QString::fromStdString(proxy->getIcon())), type);
         item->setData(type, Qt::UserRole);

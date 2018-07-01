@@ -13,22 +13,19 @@ CSAPEX_REGISTER_PARAMETER_SERIALIZER(TriggerParameter)
 using namespace csapex;
 using namespace param;
 
-TriggerParameter::TriggerParameter()
-    : ParameterImplementation("noname", ParameterDescription())
+TriggerParameter::TriggerParameter() : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
-TriggerParameter::TriggerParameter(const std::string &name, const ParameterDescription& description)
-    : ParameterImplementation(name, description)
+TriggerParameter::TriggerParameter(const std::string& name, const ParameterDescription& description) : ParameterImplementation(name, description)
 {
 }
 
 TriggerParameter::~TriggerParameter()
 {
-
 }
 
-TriggerParameter& TriggerParameter::operator = (const TriggerParameter& p)
+TriggerParameter& TriggerParameter::operator=(const TriggerParameter& p)
 {
     // do nothing
     return *this;
@@ -51,8 +48,7 @@ void TriggerParameter::get_unsafe(boost::any& out) const
     throw std::runtime_error("cannot read TriggerParameter");
 }
 
-
-bool TriggerParameter::set_unsafe(const boost::any &/*v*/)
+bool TriggerParameter::set_unsafe(const boost::any& /*v*/)
 {
     trigger();
     return true;

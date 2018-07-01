@@ -14,21 +14,18 @@ CSAPEX_REGISTER_PARAMETER_SERIALIZER(PathParameter)
 using namespace csapex;
 using namespace param;
 
-PathParameter::PathParameter()
-    : ParameterImplementation("noname", ParameterDescription())
+PathParameter::PathParameter() : ParameterImplementation("noname", ParameterDescription())
 {
 }
 
-PathParameter::PathParameter(const std::string &name, const ParameterDescription& description, const std::string &filter, bool is_file, bool input, bool output)
-    : ParameterImplementation(name, description), filter_(filter), is_file_(is_file), input_(input), output_(output)
+PathParameter::PathParameter(const std::string& name, const ParameterDescription& description, const std::string& filter, bool is_file, bool input, bool output)
+  : ParameterImplementation(name, description), filter_(filter), is_file_(is_file), input_(input), output_(output)
 {
 }
 
 PathParameter::~PathParameter()
 {
-
 }
-
 
 const std::type_info& PathParameter::type() const
 {
@@ -37,7 +34,7 @@ const std::type_info& PathParameter::type() const
 
 std::string PathParameter::toStringImpl() const
 {
-    return std::string("[path: ") + value_  + "]";
+    return std::string("[path: ") + value_ + "]";
 }
 
 void PathParameter::get_unsafe(boost::any& out) const
@@ -45,11 +42,10 @@ void PathParameter::get_unsafe(boost::any& out) const
     out = value_;
 }
 
-
-bool PathParameter::set_unsafe(const boost::any &v)
+bool PathParameter::set_unsafe(const boost::any& v)
 {
     auto val = boost::any_cast<std::string>(v);
-    if(value_ != val) {
+    if (value_ != val) {
         value_ = val;
         return true;
     }
@@ -57,11 +53,10 @@ bool PathParameter::set_unsafe(const boost::any &v)
     return false;
 }
 
-
-void PathParameter::cloneDataFrom(const Clonable &other)
+void PathParameter::cloneDataFrom(const Clonable& other)
 {
-    if(const PathParameter* path = dynamic_cast<const PathParameter*>(&other)) {
-        if(value_ != path->value_) {
+    if (const PathParameter* path = dynamic_cast<const PathParameter*>(&other)) {
+        if (value_ != path->value_) {
             *this = *path;
             triggerChange();
         }
@@ -89,13 +84,13 @@ void PathParameter::doDeserialize(const YAML::Node& n)
 
     value_ = n["value"].as<std::string>();
 
-    if(version > 1) {
-        def_= n["def"].as<std::string>();
+    if (version > 1) {
+        def_ = n["def"].as<std::string>();
 
-        filter_= n["filter"].as<std::string>();
-        is_file_= n["is_file"].as<bool>();
-        input_= n["is_input"].as<bool>();
-        output_= n["is_output"].as<bool>();
+        filter_ = n["filter"].as<std::string>();
+        is_file_ = n["is_file"].as<bool>();
+        input_ = n["is_input"].as<bool>();
+        output_ = n["is_output"].as<bool>();
     }
 }
 
@@ -124,8 +119,7 @@ bool PathParameter::isOutput() const
     return output_;
 }
 
-
-void PathParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void PathParameter::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Parameter::serialize(data, version);
 

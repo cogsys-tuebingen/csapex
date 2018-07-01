@@ -22,7 +22,7 @@ class CSAPEX_QT_EXPORT ScreenshotDialog : public QDialog
     Q_OBJECT
 
 public:
-    ScreenshotDialog(GraphFacadePtr graph, QWidget *widget, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ScreenshotDialog(GraphFacadePtr graph, QWidget* widget, QWidget* parent = 0, Qt::WindowFlags f = 0);
 
 private Q_SLOTS:
     void refreshScreenshot();
@@ -40,6 +40,5 @@ private:
     QRadioButton* rect_scene_;
 };
 
-}
-#endif // SCREENSHOT_DIALOG_H
-
+}  // namespace csapex
+#endif  // SCREENSHOT_DIALOG_H

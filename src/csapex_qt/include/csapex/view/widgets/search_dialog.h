@@ -30,7 +30,7 @@ class CSAPEX_QT_EXPORT SearchDialog : public QDialog
     Q_OBJECT
 
 public:
-    SearchDialog(GraphFacade* root, csapex::NodeFactory &node_factory, QString message, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SearchDialog(GraphFacade* root, csapex::NodeFactory& node_factory, QString message, QWidget* parent = 0, Qt::WindowFlags f = 0);
 
     AUUID getAUUID();
 
@@ -51,9 +51,9 @@ private:
 
 private:
     GraphFacade* root_;
-    csapex::NodeFactory &node_factory_;
+    csapex::NodeFactory& node_factory_;
 
-    CompletedLineEdit * name_edit_;
+    CompletedLineEdit* name_edit_;
 
     QString message_;
 
@@ -61,6 +61,6 @@ private:
     QAbstractItemModel* model_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SEARCH_DIALOG_H
+#endif  // SEARCH_DIALOG_H

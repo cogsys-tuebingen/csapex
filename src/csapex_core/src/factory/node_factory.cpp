@@ -3,20 +3,20 @@
 
 using namespace csapex;
 
-NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
+NodeConstructor::Ptr NodeFactory::getConstructor(const std::string& target_type)
 {
     ensureLoaded();
 
     std::string type = target_type;
-    if(type.find_first_of(" ") != type.npos) {
+    if (type.find_first_of(" ") != type.npos) {
         NOTIFICATION_WARN("type '" << type << "' contains spaces, stripping them!");
-        while(type.find(" ") != type.npos) {
+        while (type.find(" ") != type.npos) {
             type.replace(type.find(" "), 1, "");
         }
     }
 
-    for(NodeConstructor::Ptr p : constructors_) {
-        if(p->getType() == type) {
+    for (NodeConstructor::Ptr p : constructors_) {
+        if (p->getType() == type) {
             return p;
         }
     }
@@ -24,17 +24,16 @@ NodeConstructor::Ptr NodeFactory::getConstructor(const std::string &target_type)
     // cannot make box, type is unknown, trying different namespace
     std::string type_wo_ns = UUID::stripNamespace(type);
 
-    for(NodeConstructor::Ptr p : constructors_) {
+    for (NodeConstructor::Ptr p : constructors_) {
         std::string p_type_wo_ns = UUID::stripNamespace(p->getType());
 
-        if(p_type_wo_ns == type_wo_ns) {
+        if (p_type_wo_ns == type_wo_ns) {
             return p;
         }
     }
 
     return nullptr;
 }
-
 
 std::vector<NodeConstructorPtr> NodeFactory::getConstructors()
 {
@@ -49,13 +48,12 @@ std::map<std::string, std::vector<NodeConstructorPtr> > NodeFactory::getTagMap()
     return tag_map_;
 }
 
-
-bool NodeFactory::isValidType(const std::string &type)
+bool NodeFactory::isValidType(const std::string& type)
 {
     ensureLoaded();
 
-    for(NodeConstructor::Ptr p : constructors_) {
-        if(p->getType() == type) {
+    for (NodeConstructor::Ptr p : constructors_) {
+        if (p->getType() == type) {
             return true;
         }
     }

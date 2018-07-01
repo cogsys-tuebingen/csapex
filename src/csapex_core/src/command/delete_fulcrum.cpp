@@ -17,8 +17,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteFulcrum)
 
-DeleteFulcrum::DeleteFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id)
-    : CommandImplementation(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id)
+DeleteFulcrum::DeleteFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id) : CommandImplementation(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id)
 {
 }
 
@@ -51,7 +50,7 @@ bool DeleteFulcrum::doRedo()
     return doExecute();
 }
 
-void DeleteFulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void DeleteFulcrum::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

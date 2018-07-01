@@ -18,17 +18,13 @@ uint8_t RawMessage::getPacketType() const
 
 RawMessage::RawMessage()
 {
-
 }
 
-RawMessage::RawMessage(const std::vector<uint8_t>& data, const AUUID& target)
-    : data_(data), uuid_(target)
+RawMessage::RawMessage(const std::vector<uint8_t>& data, const AUUID& target) : data_(data), uuid_(target)
 {
-
 }
 
-RawMessage::RawMessage(const char* data, std::size_t len, const AUUID& target)
-    : data_(len), uuid_(target)
+RawMessage::RawMessage(const char* data, std::size_t len, const AUUID& target) : data_(len), uuid_(target)
 {
     std::memcpy(data_.data(), data, len);
 }
@@ -43,14 +39,14 @@ AUUID RawMessage::getUUID() const
     return uuid_;
 }
 
-void RawMessage::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void RawMessage::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << uuid_;
     std::size_t n = data_.size();
     data << n;
 
     uint8_t* src = data_.data();
-    for(std::size_t i = 0; i < n; ++i, ++src) {
+    for (std::size_t i = 0; i < n; ++i, ++src) {
         data << *src;
     }
 }
@@ -62,7 +58,7 @@ void RawMessage::deserialize(const SerializationBuffer& data, const SemanticVers
 
     data_.resize(n, 0);
     uint8_t* dst = data_.data();
-    for(std::size_t i = 0; i < n; ++i, ++dst) {
+    for (std::size_t i = 0; i < n; ++i, ++dst) {
         data >> *dst;
     }
 }

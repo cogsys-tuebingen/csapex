@@ -9,7 +9,6 @@
 
 namespace csapex
 {
-
 class CpuAffinity
 {
 public:
@@ -18,7 +17,7 @@ public:
     CpuAffinity(CpuAffinity&& other);
     CpuAffinity(std::vector<bool> affinity);
 
-    CpuAffinity& operator = (const CpuAffinity& other);
+    CpuAffinity& operator=(const CpuAffinity& other);
 
     std::vector<bool> get() const;
     void set(const std::vector<bool>& affinity);
@@ -42,6 +41,6 @@ private:
     std::vector<bool> affinity_;
 };
 
-}
+}  // namespace csapex
 
-#endif // CPU_AFFINITY_H
+#endif  // CPU_AFFINITY_H

@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT ActivityLegend : public QTableWidget, public Observer
 {
     Q_OBJECT
@@ -37,12 +36,10 @@ Q_SIGNALS:
     void nodeAdded(NodeFacade*);
     void nodeRemoved(NodeFacade*);
 
-
 private:
     std::vector<NodeFacade*> rows_;
 };
 
-}
+}  // namespace csapex
 
-#endif // ACTIVITY_LEGEND_H
-
+#endif  // ACTIVITY_LEGEND_H

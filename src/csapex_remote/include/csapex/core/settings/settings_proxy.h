@@ -9,11 +9,10 @@
 
 namespace csapex
 {
-
 class CSAPEX_REMOTE_EXPORT SettingsProxy : public Settings, public Proxy
 {
 public:
-    SettingsProxy(const SessionPtr &session);
+    SettingsProxy(const SessionPtr& session);
 
     bool knows(const std::string& name) const override;
 
@@ -28,7 +27,7 @@ public:
     void loadTemporary(YAML::Node& node) override;
 
 private:
-    void createParameterProxy(const std::string &name, param::ParameterPtr proxy) const;
+    void createParameterProxy(const std::string& name, param::ParameterPtr proxy) const;
 
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 
@@ -36,6 +35,6 @@ private:
     mutable std::map<std::string, param::ParameterPtr> cache_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SETTINGS_PROXY_H
+#endif  // SETTINGS_PROXY_H

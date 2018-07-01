@@ -5,9 +5,10 @@
 #include <csapex/param/parameter_impl.hpp>
 #include <csapex_param_export.h>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT PathParameter : public ParameterImplementation<PathParameter, 0x004>
 {
     friend class ParameterFactory;
@@ -20,9 +21,12 @@ public:
     explicit PathParameter(const std::string& name, const ParameterDescription& description, const std::string& filter, bool is_file, bool input, bool output);
     virtual ~PathParameter();
 
-    virtual std::string TYPE() const override { return "path"; }
+    virtual std::string TYPE() const override
+    {
+        return "path";
+    }
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
     void cloneDataFrom(const Clonable& other) override;
@@ -30,7 +34,7 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::string def() const;
@@ -54,7 +58,7 @@ private:
     bool output_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // PATH_PARAMETER_H
+#endif  // PATH_PARAMETER_H

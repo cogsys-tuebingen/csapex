@@ -9,9 +9,9 @@ namespace csapex
 class ConnectableOwner : public Unique
 {
 protected:
-    ConnectableOwner(const UUID &uuid);
+    ConnectableOwner(const UUID& uuid);
     virtual ~ConnectableOwner();
 };
-}
+}  // namespace csapex
 
-#endif // CONNECTABLE_OWNER_H
+#endif  // CONNECTABLE_OWNER_H

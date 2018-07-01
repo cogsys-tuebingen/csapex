@@ -26,8 +26,8 @@
 #include <csapex_testing/test_exception_handler.h>
 #include <csapex_testing/stepping_test.h>
 
-namespace csapex {
-
+namespace csapex
+{
 class IterationCombiner
 {
 public:
@@ -44,14 +44,13 @@ public:
 
     void setupParameters(Parameterizable& /*parameters*/)
     {
-
     }
 
     void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
     {
         int a = msg::getValue<int>(input_a_);
         int b = msg::getValue<int>(input_b_);
-        //TRACEstd::cerr << " < multiply " << a << " by " << b << std::endl;
+        // TRACEstd::cerr << " < multiply " << a << " by " << b << std::endl;
         msg::publish(output_, a * b);
     }
 
@@ -61,14 +60,11 @@ private:
     Output* output_;
 };
 
-
 class IterationSource : public Node
 {
 public:
-    IterationSource()
-        : i(0)
+    IterationSource() : i(0)
     {
-
     }
 
     void setup(NodeModifier& node_modifier) override
@@ -78,15 +74,13 @@ public:
 
     void setupParameters(Parameterizable& /*parameters*/) override
     {
-
     }
-
 
     void process() override
     {
-        //TRACEstd::cerr << " < publish " << i << std::endl;
+        // TRACEstd::cerr << " < publish " << i << std::endl;
         auto vector = std::make_shared<std::vector<int>>();
-        for(int j = 0; j < 8; ++j) {
+        for (int j = 0; j < 8; ++j) {
             vector->push_back(j * i);
         }
 
@@ -104,10 +98,8 @@ private:
 class IterationConstant : public Node
 {
 public:
-    IterationConstant()
-        : i(0)
+    IterationConstant() : i(0)
     {
-
     }
 
     void setup(NodeModifier& node_modifier) override
@@ -117,13 +109,11 @@ public:
 
     void setupParameters(Parameterizable& /*parameters*/) override
     {
-
     }
-
 
     void process() override
     {
-        //TRACEstd::cerr << " < publish contant " << i << std::endl;
+        // TRACEstd::cerr << " < publish contant " << i << std::endl;
         msg::publish(out, i);
 
         ++i;
@@ -135,13 +125,11 @@ private:
     int i;
 };
 
-
 class IterationSink
 {
 public:
     IterationSink()
     {
-
     }
 
     void setup(NodeModifier& node_modifier)
@@ -151,7 +139,6 @@ public:
 
     void setupParameters(Parameterizable& /*parameters*/)
     {
-
     }
 
     void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
@@ -159,7 +146,7 @@ public:
         auto i = msg::getMessage<connection_types::GenericVectorMessage, int>(in);
         value = *i;
 
-        //TRACEstd::cerr << "got vector of size " << value.size() << std::endl;
+        // TRACEstd::cerr << "got vector of size " << value.size() << std::endl;
     }
 
     std::vector<int> getValue() const
@@ -173,61 +160,61 @@ private:
     std::vector<int> value;
 };
 
-
 class ContainerIterationTest : public SteppingTest
 {
-
 protected:
     ContainerIterationTest()
     {
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationCombiner",
-                                                                                 std::bind(&ContainerIterationTest::makeCombiner)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationCombiner", std::bind(&ContainerIterationTest::makeCombiner)));
             factory.registerNodeType(constructor);
         }
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationSource",
-                                                                                 std::bind(&ContainerIterationTest::makeSource)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationSource", std::bind(&ContainerIterationTest::makeSource)));
             factory.registerNodeType(constructor);
         }
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationConstant",
-                                                                                 std::bind(&ContainerIterationTest::makeConstant)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationConstant", std::bind(&ContainerIterationTest::makeConstant)));
             factory.registerNodeType(constructor);
         }
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationSink",
-                                                                                 std::bind(&ContainerIterationTest::makeSink)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("IterationSink", std::bind(&ContainerIterationTest::makeSink)));
             factory.registerNodeType(constructor);
         }
     }
 
-    virtual ~ContainerIterationTest() {
+    virtual ~ContainerIterationTest()
+    {
     }
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         SteppingTest::SetUp();
 
         graph_node = std::make_shared<SubgraphNode>(std::make_shared<GraphImplementation>());
         graph = graph_node->getLocalGraph();
     }
 
-
-    static NodePtr makeCombiner() {
+    static NodePtr makeCombiner()
+    {
         return NodePtr(new NodeWrapper<IterationCombiner>());
     }
-    static NodePtr makeSource() {
+    static NodePtr makeSource()
+    {
         return NodePtr(new IterationSource());
     }
-    static NodePtr makeConstant() {
+    static NodePtr makeConstant()
+    {
         return NodePtr(new IterationConstant());
     }
-    static NodePtr makeSink() {
+    static NodePtr makeSink()
+    {
         return NodePtr(new NodeWrapper<IterationSink>());
     }
 };
 
-TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
+TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
@@ -243,7 +230,6 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<IterationSink> sink = std::dynamic_pointer_cast<IterationSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
-
 
     // NESTED GRAPH
     NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
@@ -293,7 +279,7 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
 
     // execution
     ASSERT_TRUE(sink->getValue().empty());
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         step();
 
         std::vector<int> res = sink->getValue();
@@ -302,13 +288,14 @@ TEST_F(ContainerIterationTest, VectorCanBeIteratedInSubGraph) {
 
         int constant = iter;
 
-        for(std::size_t j = 0; j < res.size(); ++j) {
+        for (std::size_t j = 0; j < res.size(); ++j) {
             ASSERT_EQ(iter * j * constant, res[j]);
         }
     }
 }
 
-TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
+TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
@@ -319,7 +306,6 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<IterationSink> sink = std::dynamic_pointer_cast<IterationSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
-
 
     // NESTED GRAPH
     NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
@@ -339,7 +325,7 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
     sub_graph->setIterationEnabled(in_vec_map.external, true);
 
     // forwarding connections
-    sub_graph_facade.connect(in_vec_map.internal,out_map.internal);
+    sub_graph_facade.connect(in_vec_map.internal, out_map.internal);
 
     // crossing connections
     main_graph_facade.connect(src, "output", in_vec_map.external);
@@ -349,20 +335,21 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedInSubGraph) {
 
     // execution
     ASSERT_TRUE(sink->getValue().empty());
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         step();
 
         std::vector<int> res = sink->getValue();
 
         ASSERT_EQ(8, res.size());
 
-        for(std::size_t j = 0; j < res.size(); ++j) {
+        for (std::size_t j = 0; j < res.size(); ++j) {
             ASSERT_EQ(iter * j, res[j]);
         }
     }
 }
 
-TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
+TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph)
+{
     GraphFacadeImplementation main_graph_facade(executor, graph, graph_node);
 
     // MAIN GRAPH
@@ -378,7 +365,6 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
     main_graph_facade.addNode(sink_p);
     std::shared_ptr<IterationSink> sink = std::dynamic_pointer_cast<IterationSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
-
 
     // NESTED GRAPH
     NodeFacadeImplementationPtr sub_graph_node_facade = factory.makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph);
@@ -403,9 +389,9 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
     sub_graph->setIterationEnabled(in_vec_map.external, true);
 
     // forwarding connections
-    sub_graph_facade.connect(in_vec_map.internal, n2, "input_a"); //   these
-    sub_graph_facade.connect(in_const_map.internal, n2, "input_b"); // two
-//                                                                       make problems... need one more step than necessary...
+    sub_graph_facade.connect(in_vec_map.internal, n2, "input_a");    //   these
+    sub_graph_facade.connect(in_const_map.internal, n2, "input_b");  // two
+                                                                     //                                                                       make problems... need one more step than necessary...
     sub_graph_facade.connect(in_vec_map.internal, out_map.internal);
 
     // crossing connections
@@ -417,16 +403,16 @@ TEST_F(ContainerIterationTest, VectorCanBeForwardedAndIteratedInSubGraph) {
 
     // execution
     ASSERT_TRUE(sink->getValue().empty());
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         step();
 
         std::vector<int> res = sink->getValue();
 
         ASSERT_EQ(8, res.size());
 
-        for(std::size_t j = 0; j < res.size(); ++j) {
+        for (std::size_t j = 0; j < res.size(); ++j) {
             ASSERT_EQ(iter * j, res[j]);
         }
     }
 }
-}
+}  // namespace csapex

@@ -35,11 +35,7 @@
 using namespace csapex;
 
 Designer::Designer(CsApexViewCore& view_core, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Designer),
-      options_(view_core.getSettings(), this),
-      minimap_(new MinimapWidget),
-      view_core_(view_core), is_init_(false),
-      notification_animation_(nullptr)
+  : QWidget(parent), ui(new Ui::Designer), options_(view_core.getSettings(), this), minimap_(new MinimapWidget), view_core_(view_core), is_init_(false), notification_animation_(nullptr)
 {
     observeGraph(view_core_.getRoot());
 }
@@ -60,7 +56,7 @@ MinimapWidget* Designer::getMinimap()
     return minimap_;
 }
 
-void Designer::resizeEvent(QResizeEvent *re)
+void Designer::resizeEvent(QResizeEvent* re)
 {
     QWidget::resizeEvent(re);
 }
@@ -75,32 +71,22 @@ void Designer::setup()
     minimap_->setParent(this);
     minimap_->move(10, 10);
 
-    QObject::connect(ui->tabWidget, &QTabWidget::currentChanged,
-                     [this](int) {
-        updateMinimap();
-    });
-    QObject::connect(ui->tabWidget, &QTabWidget::tabCloseRequested,
-                     [this](int tab) {
-        closeView(tab);
-    });
-    QObject::connect(ui->tabWidget, &QTabWidget::tabBarDoubleClicked,
-                     [this](int tab) {
+    QObject::connect(ui->tabWidget, &QTabWidget::currentChanged, [this](int) { updateMinimap(); });
+    QObject::connect(ui->tabWidget, &QTabWidget::tabCloseRequested, [this](int tab) { closeView(tab); });
+    QObject::connect(ui->tabWidget, &QTabWidget::tabBarDoubleClicked, [this](int tab) {
         bool ok = false;
         GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(tab));
-        if(view) {
+        if (view) {
             GraphFacade* graph = view->getGraphFacade();
             GraphFacade* parent = graph->getParent();
-            if(parent) {
+            if (parent) {
                 NodeFacadePtr node = graph->getNodeFacade();
                 NodeStatePtr state = node->getNodeState();
                 QString old_name = QString::fromStdString(state->getLabel());
-                QString text = QInputDialog::getText(this, "Graph Label", "Enter new name",
-                                                     QLineEdit::Normal, old_name, &ok);
-                if(ok) {
-                    if(old_name != text && !text.isEmpty()) {
-                        command::RenameNode::Ptr cmd(new command::RenameNode(parent->getAbsoluteUUID(),
-                                                                             node->getUUID(),
-                                                                             text.toStdString()));
+                QString text = QInputDialog::getText(this, "Graph Label", "Enter new name", QLineEdit::Normal, old_name, &ok);
+                if (ok) {
+                    if (old_name != text && !text.isEmpty()) {
+                        command::RenameNode::Ptr cmd(new command::RenameNode(parent->getAbsoluteUUID(), node->getUUID(), text.toStdString()));
                         view_core_.getCommandDispatcher()->execute(cmd);
                     }
                 }
@@ -114,15 +100,11 @@ void Designer::setup()
 void Designer::observeGraph(GraphFacadePtr graph)
 {
     apex_assert_hard(graph);
-    graph_connections_[graph.get()].emplace_back(
-                graph->child_added.connect([this](GraphFacadePtr child){
-                    addGraph(child);
-                    observeGraph(child);
-                }));
-    graph_connections_[graph.get()].emplace_back(
-                graph->child_removed.connect([this](GraphFacadePtr child){
-                    removeGraph(child.get());
-                }));
+    graph_connections_[graph.get()].emplace_back(graph->child_added.connect([this](GraphFacadePtr child) {
+        addGraph(child);
+        observeGraph(child);
+    }));
+    graph_connections_[graph.get()].emplace_back(graph->child_removed.connect([this](GraphFacadePtr child) { removeGraph(child.get()); }));
 }
 
 void Designer::showGraph(UUID uuid)
@@ -132,25 +114,23 @@ void Designer::showGraph(UUID uuid)
 
 void Designer::showNodeDialog()
 {
-    if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
+    if (GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
         current_view->showNodeInsertDialog();
     }
 }
 
 void Designer::showNodeSearchDialog()
 {
-    if(GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
-        SearchDialog diag(current_view->getGraphFacade(), *view_core_.getNodeFactory(),
-                          "Please enter the UUID, the label or the type of the node");
+    if (GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget())) {
+        SearchDialog diag(current_view->getGraphFacade(), *view_core_.getNodeFactory(), "Please enter the UUID, the label or the type of the node");
 
         int r = diag.exec();
 
-        if(r) {
+        if (r) {
             Q_EMIT focusOnNode(diag.getAUUID());
         }
     }
 }
-
 
 void Designer::addGraph(GraphFacadePtr graph_facade)
 {
@@ -158,29 +138,31 @@ void Designer::addGraph(GraphFacadePtr graph_facade)
 
     graphs_[uuid] = graph_facade;
 
-    for(const UUID& child : graph_facade->enumerateAllNodes()) {
+    for (const UUID& child : graph_facade->enumerateAllNodes()) {
         NodeFacadePtr nf = graph_facade->findNodeFacade(child);
-        if(nf->isGraph()) {
+        if (nf->isGraph()) {
             GraphFacadePtr subgraph = graph_facade->getSubGraph(child);
             addGraph(subgraph);
         }
     }
 
-    if(graph_facade == view_core_.getRoot()) {
+    if (graph_facade == view_core_.getRoot()) {
         showGraph(graph_facade);
     }
 }
 
-namespace {
+namespace
+{
 QString generateTitle(GraphFacade* graph_facade)
 {
     QString title;
-    for(GraphFacade* parent = graph_facade; parent != nullptr; parent = parent->getParent()) {
+    for (GraphFacade* parent = graph_facade; parent != nullptr; parent = parent->getParent()) {
         NodeFacadePtr nf = parent->getNodeFacade();
-        if(!nf) break;
+        if (!nf)
+            break;
 
         QString label = QString::fromStdString(nf->getLabel());
-        if(!title.isEmpty()) {
+        if (!title.isEmpty()) {
             title = label + " / " + title;
 
         } else {
@@ -188,20 +170,19 @@ QString generateTitle(GraphFacade* graph_facade)
         }
     }
 
-    if(title.isEmpty()) {
+    if (title.isEmpty()) {
         return "Main";
     } else {
         return title;
     }
 }
-}
-
+}  // namespace
 
 void Designer::showGraph(GraphFacadePtr graph_facade)
 {
     // check if it is already displayed
     auto pos = visible_graphs_.find(graph_facade.get());
-    if(pos != visible_graphs_.end()) {
+    if (pos != visible_graphs_.end()) {
         // switch to view
         GraphView* view = graph_views_.at(graph_facade.get());
         ui->tabWidget->setCurrentWidget(view);
@@ -215,7 +196,7 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     auuid_views_[graph_facade->getAbsoluteUUID()] = graph_view;
 
     int tab = 0;
-    if(visible_graphs_.empty()) {
+    if (visible_graphs_.empty()) {
         // root
         QTabWidget* tabs = ui->tabWidget;
         QIcon icon(":/step_next.png");
@@ -225,9 +206,9 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
         tab = ui->tabWidget->addTab(graph_view, generateTitle(graph_facade.get()));
 
         view_connections_[graph_view].emplace_back(graph_facade->getNodeFacade()->getNodeState()->label_changed.connect([this]() {
-            for(int i = 0; i < ui->tabWidget->count(); ++i) {
+            for (int i = 0; i < ui->tabWidget->count(); ++i) {
                 GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(i));
-                if(view) {
+                if (view) {
                     ui->tabWidget->setTabText(i, generateTitle(view->getGraphFacade()));
                 }
             }
@@ -236,7 +217,6 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
 
     graph_view->overwriteStyleSheet(styleSheet());
 
-
     visible_graphs_.insert(graph_facade.get());
 
     ui->tabWidget->setCurrentIndex(tab);
@@ -244,18 +224,17 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     QObject::connect(graph_view, &GraphView::boxAdded, this, &Designer::addBox);
     QObject::connect(graph_view, &GraphView::boxRemoved, this, &Designer::removeBox);
 
-    for(const UUID& uuid : graph_facade->enumerateAllNodes()){
+    for (const UUID& uuid : graph_facade->enumerateAllNodes()) {
         NodeBox* box = graph_view->getBox(uuid);
         addBox(box);
     }
 
     // main graph tab is not closable
-    if(tab == 0) {
-        QTabBar *tabBar = ui->tabWidget->findChild<QTabBar *>();
+    if (tab == 0) {
+        QTabBar* tabBar = ui->tabWidget->findChild<QTabBar*>();
         tabBar->setTabButton(0, QTabBar::RightSide, 0);
         tabBar->setTabButton(0, QTabBar::LeftSide, 0);
     }
-
 
     QObject::connect(graph_view, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged()));
 
@@ -264,11 +243,10 @@ void Designer::showGraph(GraphFacadePtr graph_facade)
     setFocusPolicy(Qt::NoFocus);
 }
 
-
 void Designer::closeView(int page)
 {
     GraphView* view = dynamic_cast<GraphView*>(ui->tabWidget->widget(page));
-    if(view) {
+    if (view) {
         GraphFacade* graph_facade = view_graphs_.at(view);
 
         DesignerIO designerio;
@@ -289,8 +267,8 @@ void Designer::closeView(int page)
 
 void Designer::removeGraph(GraphFacade* graph_facade)
 {
-    for(auto it = graphs_.begin(); it != graphs_.end(); ++it) {
-        if(it->second.get() == graph_facade) {
+    for (auto it = graphs_.begin(); it != graphs_.end(); ++it) {
+        if (it->second.get() == graph_facade) {
             graph_connections_.erase(graph_facade);
             GraphView* view = graph_views_[graph_facade];
             graph_views_.erase(graph_facade);
@@ -300,7 +278,6 @@ void Designer::removeGraph(GraphFacade* graph_facade)
             return;
         }
     }
-
 }
 
 void Designer::updateMinimap()
@@ -309,19 +286,19 @@ void Designer::updateMinimap()
     minimap_->display(view);
 }
 
-void Designer::showNotification(const Notification &notification)
+void Designer::showNotification(const Notification& notification)
 {
     std::unordered_map<UUID, NotificationWidget*, UUID::Hasher>::iterator pos;
-    if(notification.error == ErrorState::ErrorLevel::NONE) {
+    if (notification.error == ErrorState::ErrorLevel::NONE) {
         // for now we only show error messages
         return;
     }
 
-    for(QPointer<NotificationWidget> nw : sorted_notifications_) {
-        if(nw.isNull() || nw->isHidden() || nw->isFading()) {
+    for (QPointer<NotificationWidget> nw : sorted_notifications_) {
+        if (nw.isNull() || nw->isHidden() || nw->isFading()) {
             // nothing
         } else {
-            if(nw->getNotification() == notification) {
+            if (nw->getNotification() == notification) {
                 // do nothing but reset notification
                 nw->setNotification(notification);
                 return;
@@ -331,11 +308,9 @@ void Designer::showNotification(const Notification &notification)
     NotificationWidget* widget = new NotificationWidget(notification, this);
 
     QObject::connect(widget, &NotificationWidget::activated, this, &Designer::focusOnNode);
-    QObject::connect(widget, &NotificationWidget::fade_start, [this, notification](){
-        removeNotification(notification);
-    });
+    QObject::connect(widget, &NotificationWidget::fade_start, [this, notification]() { removeNotification(notification); });
     int y = 0;
-    for(NotificationWidget* nw : sorted_notifications_) {
+    for (NotificationWidget* nw : sorted_notifications_) {
         y += nw->height();
     }
 
@@ -346,11 +321,11 @@ void Designer::showNotification(const Notification &notification)
     widget->show();
 }
 
-void Designer::removeNotification(const Notification &notification)
+void Designer::removeNotification(const Notification& notification)
 {
     int offset_y = 0;
 
-    if(notification_animation_) {
+    if (notification_animation_) {
         notification_animation_->stop();
         delete notification_animation_;
     }
@@ -358,8 +333,8 @@ void Designer::removeNotification(const Notification &notification)
 
     std::vector<NotificationWidget*> to_remove;
 
-    for(QPointer<NotificationWidget> nw : sorted_notifications_) {
-        if(nw.isNull() || nw->isHidden() || nw->isFading()) {
+    for (QPointer<NotificationWidget> nw : sorted_notifications_) {
+        if (nw.isNull() || nw->isHidden() || nw->isFading()) {
             to_remove.push_back(nw);
         } else {
             QRect rect = nw->geometry();
@@ -368,7 +343,7 @@ void Designer::removeNotification(const Notification &notification)
             rect_to.setY(std::max(0, offset_y));
             rect_to.setHeight(rect.height());
 
-            QPropertyAnimation *animation = new QPropertyAnimation(nw, "geometry");
+            QPropertyAnimation* animation = new QPropertyAnimation(nw, "geometry");
             animation->setDuration(500);
             animation->setStartValue(rect);
             animation->setEndValue(rect_to);
@@ -380,12 +355,12 @@ void Designer::removeNotification(const Notification &notification)
         }
     }
 
-    for(NotificationWidget* nw : to_remove) {
+    for (NotificationWidget* nw : to_remove) {
         auto pos = std::find(sorted_notifications_.begin(), sorted_notifications_.end(), nw);
         sorted_notifications_.erase(pos);
     }
 
-    if(notification_animation_->animationCount() == 0) {
+    if (notification_animation_->animationCount() == 0) {
         delete notification_animation_;
         notification_animation_ = nullptr;
     } else {
@@ -396,7 +371,7 @@ void Designer::removeNotification(const Notification &notification)
 std::vector<NodeBox*> Designer::getSelectedBoxes() const
 {
     DesignerScene* scene = getVisibleDesignerScene();
-    if(!scene) {
+    if (!scene) {
         return {};
     }
     return scene->getSelectedBoxes();
@@ -405,7 +380,7 @@ std::vector<NodeBox*> Designer::getSelectedBoxes() const
 bool Designer::hasSelection() const
 {
     DesignerScene* scene = getVisibleDesignerScene();
-    if(!scene) {
+    if (!scene) {
         return false;
     }
 
@@ -415,7 +390,7 @@ bool Designer::hasSelection() const
 void Designer::clearSelection()
 {
     DesignerScene* scene = getVisibleDesignerScene();
-    if(scene) {
+    if (scene) {
         scene->clearSelection();
     }
 }
@@ -423,7 +398,7 @@ void Designer::clearSelection()
 void Designer::selectAll()
 {
     GraphView* view = getVisibleGraphView();
-    if(!view) {
+    if (!view) {
         return;
     }
     view->selectAll();
@@ -432,7 +407,7 @@ void Designer::selectAll()
 void Designer::deleteSelected()
 {
     GraphView* view = getVisibleGraphView();
-    if(!view) {
+    if (!view) {
         return;
     }
 
@@ -441,7 +416,7 @@ void Designer::deleteSelected()
 void Designer::copySelected()
 {
     GraphView* view = getVisibleGraphView();
-    if(!view) {
+    if (!view) {
         return;
     }
 
@@ -450,7 +425,7 @@ void Designer::copySelected()
 void Designer::groupSelected()
 {
     GraphView* view = getVisibleGraphView();
-    if(!view) {
+    if (!view) {
         return;
     }
 
@@ -460,7 +435,7 @@ void Designer::groupSelected()
 void Designer::ungroupSelected()
 {
     GraphView* view = getVisibleGraphView();
-    if(!view) {
+    if (!view) {
         return;
     }
 
@@ -470,17 +445,17 @@ void Designer::ungroupSelected()
 void Designer::paste()
 {
     GraphView* view = getVisibleGraphView();
-    if(!view) {
+    if (!view) {
         return;
     }
 
     view->paste();
 }
 
-void Designer::overwriteStyleSheet(QString &stylesheet)
+void Designer::overwriteStyleSheet(QString& stylesheet)
 {
     setStyleSheet(stylesheet);
-    for(const auto& pair : graph_views_) {
+    for (const auto& pair : graph_views_) {
         GraphView* view = pair.second;
         view->overwriteStyleSheet(stylesheet);
     }
@@ -488,13 +463,13 @@ void Designer::overwriteStyleSheet(QString &stylesheet)
 
 void Designer::setView(int /*sx*/, int /*sy*/)
 {
-    //designer_board->setView(sx, sy);
+    // designer_board->setView(sx, sy);
 }
 
 GraphFacade* Designer::getVisibleGraphFacade() const
 {
     GraphView* view = getVisibleGraphView();
-    if(!view) {
+    if (!view) {
         return nullptr;
     }
     return view_graphs_.at(view);
@@ -503,13 +478,13 @@ GraphFacade* Designer::getVisibleGraphFacade() const
 GraphView* Designer::getVisibleGraphView() const
 {
     GraphView* current_view = dynamic_cast<GraphView*>(ui->tabWidget->currentWidget());
-    if(!current_view) {
+    if (!current_view) {
         return graph_views_.at(view_core_.getRoot().get());
     }
     return current_view;
 }
 
-GraphView* Designer::getGraphView(const AUUID &uuid) const
+GraphView* Designer::getGraphView(const AUUID& uuid) const
 {
     return auuid_views_.at(uuid);
 }
@@ -517,7 +492,7 @@ GraphView* Designer::getGraphView(const AUUID &uuid) const
 DesignerScene* Designer::getVisibleDesignerScene() const
 {
     GraphView* view = getVisibleGraphView();
-    if(!view) {
+    if (!view) {
         return nullptr;
     }
     return view->designerScene();
@@ -531,7 +506,7 @@ NodeAdapterFactory* Designer::getNodeAdapterFactory() const
 void Designer::refresh()
 {
     DesignerScene* scene = getVisibleDesignerScene();
-    if(scene) {
+    if (scene) {
         scene->invalidateSchema();
     }
 }
@@ -541,7 +516,7 @@ void Designer::reset()
     ui->tabWidget->blockSignals(true);
 
     auto graphs = graphs_;
-    for(auto& pair : graphs) {
+    for (auto& pair : graphs) {
         removeGraph(pair.second.get());
     }
 
@@ -565,7 +540,7 @@ void Designer::reinitialize()
     addGraph(view_core_.getRoot());
 }
 
-void Designer::addBox(NodeBox *box)
+void Designer::addBox(NodeBox* box)
 {
     QObject::connect(box, SIGNAL(helpRequest(NodeBox*)), this, SIGNAL(helpRequest(NodeBox*)));
     QObject::connect(box, SIGNAL(showSubGraphRequest(UUID)), this, SLOT(showGraph(UUID)));
@@ -573,12 +548,12 @@ void Designer::addBox(NodeBox *box)
     minimap_->update();
 }
 
-void Designer::removeBox(NodeBox *box)
+void Designer::removeBox(NodeBox* box)
 {
     minimap_->update();
 }
 
-void Designer::focusOnNode(const AUUID &id)
+void Designer::focusOnNode(const AUUID& id)
 {
     AUUID graph_id = id.parentAUUID();
 
@@ -591,13 +566,12 @@ void Designer::focusOnNode(const AUUID &id)
     view->focusOnNode(id.id());
 }
 
-
-void Designer::saveView(const GraphFacade& graph, YAML::Node &doc)
+void Designer::saveView(const GraphFacade& graph, YAML::Node& doc)
 {
     DesignerIO designerio;
 
     auto pos = graph_views_.find(&graph);
-    if(pos != graph_views_.end()) {
+    if (pos != graph_views_.end()) {
         designerio.saveBoxes(doc, &graph, pos->second);
         states_for_invisible_graphs_[graph.getAbsoluteUUID()] = doc["adapters"];
     } else {
@@ -605,17 +579,17 @@ void Designer::saveView(const GraphFacade& graph, YAML::Node &doc)
     }
 }
 
-void Designer::loadView(GraphFacade &graph, const YAML::Node &doc)
+void Designer::loadView(GraphFacade& graph, const YAML::Node& doc)
 {
     DesignerIO designerio;
 
     auto pos = graph_views_.find(&graph);
-    if(pos != graph_views_.end()) {
+    if (pos != graph_views_.end()) {
         designerio.loadBoxes(doc, pos->second);
     }
 
     const YAML::Node& adapters = doc["adapters"];
-    if(adapters.IsDefined()) {
+    if (adapters.IsDefined()) {
         states_for_invisible_graphs_[graph.getAbsoluteUUID()] = doc["adapters"];
     } else {
         NOTIFICATION("cannot load adapters, none are specified");
@@ -626,7 +600,7 @@ void Designer::useProfiler(std::shared_ptr<Profiler> profiler)
 {
     Profilable::useProfiler(profiler);
 
-    for(const auto& pair : graph_views_) {
+    for (const auto& pair : graph_views_) {
         GraphView* view = pair.second;
         view->useProfiler(profiler);
     }

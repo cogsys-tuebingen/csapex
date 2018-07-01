@@ -11,10 +11,8 @@
 
 namespace csapex
 {
-
 namespace io
 {
-
 class Note : public Streamable
 {
 public:
@@ -27,14 +25,14 @@ public:
 
     AUUID getAUUID() const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     AUUID uuid_;
 };
 
-}
-}
+}  // namespace io
+}  // namespace csapex
 
-#endif // NOTE_H
+#endif  // NOTE_H

@@ -17,31 +17,35 @@
 
 using namespace csapex;
 
-OutputTextParameterAdapter::OutputTextParameterAdapter(param::OutputTextParameter::Ptr p)
-    : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), op_p_(p)
+OutputTextParameterAdapter::OutputTextParameterAdapter(param::OutputTextParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), op_p_(p)
 {
-
 }
 
-namespace {
-static bool isFixedPitch(const QFont & font) {
+namespace
+{
+static bool isFixedPitch(const QFont& font)
+{
     const QFontInfo fi(font);
     return fi.fixedPitch();
 }
 
-static QFont getMonospaceFont(){
+static QFont getMonospaceFont()
+{
     QFont font("monospace");
-    if (isFixedPitch(font)) return font;
+    if (isFixedPitch(font))
+        return font;
     font.setStyleHint(QFont::Monospace);
-    if (isFixedPitch(font)) return font;
+    if (isFixedPitch(font))
+        return font;
     font.setStyleHint(QFont::TypeWriter);
-    if (isFixedPitch(font)) return font;
+    if (isFixedPitch(font))
+        return font;
     font.setFamily("courier");
-    if (isFixedPitch(font)) return font;
+    if (isFixedPitch(font))
+        return font;
     return font;
 }
-}
-
+}  // namespace
 
 QWidget* OutputTextParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
@@ -52,7 +56,7 @@ QWidget* OutputTextParameterAdapter::setup(QBoxLayout* layout, const std::string
 
     // model change -> ui
     connectInGuiThread(op_p_->parameter_changed, [this, label](param::Parameter*) {
-        if(op_p_ && label) {
+        if (op_p_ && label) {
             label->setMaximumWidth(label->parentWidget()->width());
             label->setText(QString::fromStdString(op_p_->as<std::string>()));
         }

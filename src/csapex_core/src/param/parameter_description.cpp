@@ -4,20 +4,16 @@
 using namespace csapex;
 using namespace param;
 
-ParameterDescription::ParameterDescription(const std::string &description)
-    : description_(description)
+ParameterDescription::ParameterDescription(const std::string& description) : description_(description)
 {
-
 }
-ParameterDescription::ParameterDescription()
-    : description_("")
+ParameterDescription::ParameterDescription() : description_("")
 {
-
 }
 
 std::string ParameterDescription::toString() const
 {
-    if(description_.empty()) {
+    if (description_.empty()) {
         return "<i>no description</i>";
     } else {
         return description_;

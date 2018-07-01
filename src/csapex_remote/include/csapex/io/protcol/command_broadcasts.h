@@ -9,11 +9,9 @@
 
 namespace csapex
 {
-
 class CommandBroadcasts : public BroadcastImplementation<CommandBroadcasts>
 {
 public:
-
     enum class CommandBroadcastType
     {
         None,
@@ -26,7 +24,7 @@ public:
     CommandBroadcasts(CommandBroadcastType Broadcast_type);
     CommandBroadcasts(CommandBroadcastType Broadcast_type, bool flag_);
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::string getType() const override
@@ -41,9 +39,8 @@ private:
     CommandBroadcastType broadcast_type_;
 
     bool flag_;
-
 };
 
-}
+}  // namespace csapex
 
-#endif // COMMAND_BROADCASTS_H
+#endif  // COMMAND_BROADCASTS_H

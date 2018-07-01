@@ -35,7 +35,6 @@ class QLabel;
 
 namespace csapex
 {
-
 /**
  * @brief The CsApexWindow class provides the window for the evaluator program
  */
@@ -48,7 +47,7 @@ public:
      * @brief CsApexWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexViewCore &core, QWidget* parent = 0);
+    explicit CsApexWindow(CsApexViewCore& core, QWidget* parent = 0);
     virtual ~CsApexWindow();
 
     void closeEvent(QCloseEvent* event) override;
@@ -71,7 +70,7 @@ private Q_SLOTS:
     void updateSelectionActions();
     void updateClipboardActions();
 
-    void updatePluginIgnored(const QObject *&action);
+    void updatePluginIgnored(const QObject*& action);
 
     void addStateToSettings();
     void restoreWindowState();
@@ -164,9 +163,8 @@ private:
 
     QFileSystemWatcher* style_sheet_watcher_;
     PluginLocatorPtr plugin_locator_;
-
 };
 
-} /// NAMESPACE
+}  // namespace csapex
 
-#endif // CSAPEX_WINDOW_H
+#endif  // CSAPEX_WINDOW_H

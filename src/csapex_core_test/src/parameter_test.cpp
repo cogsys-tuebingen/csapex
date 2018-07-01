@@ -20,7 +20,6 @@ protected:
     }
 };
 
-
 TEST_F(ParameterTest, TestSpecificSetFrom)
 {
     ValueParameterPtr a = ParameterFactory::declareValue("foo", 42).build<ValueParameter>();
@@ -135,7 +134,6 @@ TEST_F(ParameterTest, IntervalAssigment)
     ASSERT_EQ(100, b->def<int>().second);
 }
 
-
 TEST_F(ParameterTest, IntervalDataCloning)
 {
     IntervalParameterPtr a = ParameterFactory::declareInterval("a", 10, 100, 10, 100, 1).build<IntervalParameter>();
@@ -173,24 +171,27 @@ TEST_F(ParameterTest, IntervalCloning)
 
 TEST_F(ParameterTest, CloningWorksForSet)
 {
-    enum ColorSpace {YUV, RGB, BGR, HSL, HSV, MONO, LAB, LCh, LUV};
-
-    std::map<std::string, int> encodings = {
-        {"YUV", (int) YUV},
-        {"RGB", (int) RGB},
-        {"BGR", (int) BGR},
-        {"HSL", (int) HSL},
-        {"HSV", (int) HSV},
-        {"MONO",(int) MONO},
-        {"LAB", (int) LAB},
-        {"LUV" ,(int) LUV}
+    enum ColorSpace
+    {
+        YUV,
+        RGB,
+        BGR,
+        HSL,
+        HSV,
+        MONO,
+        LAB,
+        LCh,
+        LUV
     };
 
-    ParameterPtr a = csapex::param::ParameterFactory::declareParameterSet("input", encodings, (int) MONO);
-    ASSERT_EQ((int) MONO, a->as<int>());
+    std::map<std::string, int> encodings = { { "YUV", (int)YUV }, { "RGB", (int)RGB },   { "BGR", (int)BGR }, { "HSL", (int)HSL },
+                                             { "HSV", (int)HSV }, { "MONO", (int)MONO }, { "LAB", (int)LAB }, { "LUV", (int)LUV } };
+
+    ParameterPtr a = csapex::param::ParameterFactory::declareParameterSet("input", encodings, (int)MONO);
+    ASSERT_EQ((int)MONO, a->as<int>());
 
     ParameterPtr a_clone = a->cloneAs<Parameter>();
-    ASSERT_EQ((int) MONO, a_clone->as<int>());
+    ASSERT_EQ((int)MONO, a_clone->as<int>());
 }
 
 TEST_F(ParameterTest, SetValueFromAnotherType)
@@ -211,9 +212,7 @@ TEST_F(ParameterTest, ValueChangedIsTriggered)
     ParameterPtr value = ParameterFactory::declareValue("foo", 42.0);
 
     bool called = false;
-    value->parameter_changed.connect([&](param::Parameter* p) {
-       called = (p == value.get());
-    });
+    value->parameter_changed.connect([&](param::Parameter* p) { called = (p == value.get()); });
 
     ASSERT_NEAR(42.0, value->as<double>(), 1e-5);
 

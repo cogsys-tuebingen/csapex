@@ -9,7 +9,6 @@
 
 namespace csapex
 {
-
 class Observer
 {
 public:
@@ -49,23 +48,16 @@ protected:
 
     // MEMBER FUNCTIONS
     template <typename Receiver, typename Result, typename... Args>
-    void observe(slim_signal::Signal<Result(Args...)>& signal,
-                 Receiver* instance,
-                 Result (Receiver::*function)(Args...))
+    void observe(slim_signal::Signal<Result(Args...)>& signal, Receiver* instance, Result (Receiver::*function)(Args...))
     {
-        manageConnection(signal.connect(std::move(delegate::Delegate<Result(Args... args)>(
-                                                      instance, function))));
+        manageConnection(signal.connect(std::move(delegate::Delegate<Result(Args... args)>(instance, function))));
     }
 
     template <typename Receiver, typename Result, typename... Args>
-    void observe(std::shared_ptr<slim_signal::Signal<Result(Args...)>>& signal,
-                 Receiver* instance,
-                 Result (Receiver::*function)(Args...))
+    void observe(std::shared_ptr<slim_signal::Signal<Result(Args...)>>& signal, Receiver* instance, Result (Receiver::*function)(Args...))
     {
-        manageConnection(signal->connect(std::move(delegate::Delegate<Result(Args... args)>(
-                                                       instance, function))));
+        manageConnection(signal->connect(std::move(delegate::Delegate<Result(Args... args)>(instance, function))));
     }
-
 
     // RELAYING
     template <typename Signature>
@@ -88,6 +80,6 @@ private:
     std::vector<slim_signal::ScopedConnection> observed_connections_;
 };
 
-}
+}  // namespace csapex
 
-#endif // OBSERVER_H_
+#endif  // OBSERVER_H_

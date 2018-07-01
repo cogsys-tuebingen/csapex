@@ -24,9 +24,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteThread)
 
-
-DeleteThread::DeleteThread(int thread_id)
-    : id(thread_id)
+DeleteThread::DeleteThread(int thread_id) : id(thread_id)
 {
 }
 
@@ -65,9 +63,7 @@ bool DeleteThread::doRedo()
     return doExecute();
 }
 
-
-
-void DeleteThread::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void DeleteThread::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

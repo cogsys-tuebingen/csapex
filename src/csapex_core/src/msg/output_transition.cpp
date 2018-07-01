@@ -15,25 +15,23 @@
 
 using namespace csapex;
 
-OutputTransition::OutputTransition(delegate::Delegate0<> activation_fn)
-    : Transition(activation_fn), sequence_number_(-1)
+OutputTransition::OutputTransition(delegate::Delegate0<> activation_fn) : Transition(activation_fn), sequence_number_(-1)
 {
 }
-OutputTransition::OutputTransition()
-    : Transition(), sequence_number_(-1)
+OutputTransition::OutputTransition() : Transition(), sequence_number_(-1)
 {
 }
 
 void OutputTransition::reset()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(const ConnectionPtr& connection : connections_) {
+    for (const ConnectionPtr& connection : connections_) {
         connection->reset();
     }
     auto outputs_copy = outputs_;
     lock.unlock();
 
-    for(const auto& pair : outputs_copy) {
+    for (const auto& pair : outputs_copy) {
         OutputPtr output = pair.second;
         output->reset();
     }
@@ -42,7 +40,7 @@ void OutputTransition::reset()
 std::vector<UUID> OutputTransition::getOutputs() const
 {
     std::vector<UUID> res;
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         res.push_back(pair.second->getUUID());
     }
     std::sort(res.begin(), res.end());
@@ -57,14 +55,14 @@ OutputPtr OutputTransition::getOutput(const UUID& id) const
 OutputPtr OutputTransition::getOutputNoThrow(const UUID& id) const noexcept
 {
     auto pos = outputs_.find(id);
-    if(pos == outputs_.end()) {
+    if (pos == outputs_.end()) {
         return nullptr;
     }
     return pos->second;
 }
 
 void OutputTransition::addOutput(OutputPtr output)
-{    
+{
     output->setOutputTransition(this);
 
     output->setSequenceNumber(sequence_number_);
@@ -73,24 +71,18 @@ void OutputTransition::addOutput(OutputPtr output)
     outputs_[output->getUUID()] = output;
 
     // connect signals
-    auto ca = output->connection_added.connect([this](const ConnectionPtr& connection) {
-        addConnection(connection);
-    });
+    auto ca = output->connection_added.connect([this](const ConnectionPtr& connection) { addConnection(connection); });
     output_signal_connections_[output.get()].push_back(ca);
 
-    auto cf = output->connection_faded.connect([this](const ConnectionPtr& connection) {
-        removeConnection(connection);
-    });
+    auto cf = output->connection_faded.connect([this](const ConnectionPtr& connection) { removeConnection(connection); });
     output_signal_connections_[output.get()].push_back(cf);
 
-    auto cp = output->message_processed.connect([this](const ConnectorPtr&) {
-        tokenProcessed();
-    });
+    auto cp = output->message_processed.connect([this](const ConnectorPtr&) { tokenProcessed(); });
     output_signal_connections_[output.get()].push_back(cp);
 
     auto ce = output->connectionEnabled.connect([this](bool enabled) {
-        if(enabled) {
-            for(const auto& pair : outputs_) {
+        if (enabled) {
+            for (const auto& pair : outputs_) {
                 OutputPtr output = pair.second;
                 output->republish();
             }
@@ -98,12 +90,12 @@ void OutputTransition::addOutput(OutputPtr output)
     });
     output_signal_connections_[output.get()].push_back(ce);
 
-//    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
-//        if(output->isEnabled()) {
-//            publishNextMessage();
-//        }
-//    });
-//    output_signal_connections_[output].push_back(cr);
+    //    auto cr = output->connection_removed_to.connect([this](Connectable* output) {
+    //        if(output->isEnabled()) {
+    //            publishNextMessage();
+    //        }
+    //    });
+    //    output_signal_connections_[output].push_back(cr);
 }
 
 void OutputTransition::removeOutput(OutputPtr output)
@@ -121,7 +113,7 @@ void OutputTransition::setSequenceNumber(long seq_no)
 {
     sequence_number_ = seq_no;
 
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         OutputPtr output = pair.second;
         output->setSequenceNumber(sequence_number_);
     }
@@ -139,16 +131,16 @@ bool OutputTransition::isEnabled() const
 
 bool OutputTransition::canStartSendingMessages() const
 {
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         const OutputPtr& output = pair.second;
-        if(output->isEnabled() && output->isConnected()) {
-            if(output->getState() != Output::State::IDLE) {
-                //TRACE for(const auto& pair : outputs_) {
-                    //TRACE OutputPtr output = pair.second;
-                    //TRACE if(output->isEnabled() && output->isConnected()) {
-                        //TRACE std::cout << "output " << output->getUUID() << " is not idle" << std::endl;
-                    //TRACE }
-                //TRACE }
+        if (output->isEnabled() && output->isConnected()) {
+            if (output->getState() != Output::State::IDLE) {
+                // TRACE for(const auto& pair : outputs_) {
+                // TRACE OutputPtr output = pair.second;
+                // TRACE if(output->isEnabled() && output->isConnected()) {
+                // TRACE std::cout << "output " << output->getUUID() << " is not idle" << std::endl;
+                // TRACE }
+                // TRACE }
                 return false;
             }
         }
@@ -164,18 +156,18 @@ bool OutputTransition::sendMessages(bool is_active)
 
     bool has_sent_activator_message = false;
 
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         const OutputPtr& output = pair.second;
-        if(output->isEnabled()) {
+        if (output->isEnabled()) {
             has_sent_activator_message |= output->commitMessages(is_active);
         }
     }
 
     long seq_no = -1;
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         const OutputPtr& output = pair.second;
         long s = output->sequenceNumber();
-        if(seq_no == -1) {
+        if (seq_no == -1) {
             seq_no = s;
         } else {
             apex_assert_soft(seq_no == s);
@@ -186,7 +178,7 @@ bool OutputTransition::sendMessages(bool is_active)
 
     fillConnections();
 
-    if(!hasConnection()) {
+    if (!hasConnection()) {
         setOutputsIdle();
     }
 
@@ -196,14 +188,14 @@ bool OutputTransition::sendMessages(bool is_active)
 void OutputTransition::tokenProcessed()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    if(!areAllConnections(Connection::State::DONE)) {
-        APEX_DEBUG_CERR <<"cannot publish next, not all connections are done" << std::endl;
+    if (!areAllConnections(Connection::State::DONE)) {
+        APEX_DEBUG_CERR << "cannot publish next, not all connections are done" << std::endl;
         return;
     }
 
     apex_assert_hard(areAllConnections(Connection::State::DONE));
 
-    APEX_DEBUG_CERR <<"all outputs are done" << std::endl;
+    APEX_DEBUG_CERR << "all outputs are done" << std::endl;
 
     lock.unlock();
 
@@ -214,9 +206,9 @@ void OutputTransition::tokenProcessed()
 bool OutputTransition::areOutputsIdle() const
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         OutputPtr output = pair.second;
-        if(output->getState() != Output::State::IDLE) {
+        if (output->getState() != Output::State::IDLE) {
             return false;
         }
     }
@@ -231,29 +223,29 @@ int OutputTransition::getPortCount() const
 void OutputTransition::fillConnections()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    if(outputs_.empty()) {
+    if (outputs_.empty()) {
         return;
     }
-    if(areOutputsIdle()) {
+    if (areOutputsIdle()) {
         // no output has a message
         return;
     }
 
     apex_assert_hard(areAllConnections(Connection::State::NOT_INITIALIZED));
 
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         OutputPtr out = pair.second;
         apex_assert_hard(out);
-        if(out->isEnabled()) {
+        if (out->isEnabled()) {
             out->publish();
         }
     }
 
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         OutputPtr out = pair.second;
         apex_assert_hard(out);
-        if(out->isEnabled()) {
-            if(!out->isConnected()) {
+        if (out->isEnabled()) {
+            if (!out->isConnected()) {
                 out->notifyMessageProcessed();
             }
         }
@@ -263,7 +255,7 @@ void OutputTransition::fillConnections()
 void OutputTransition::clearBuffer()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         OutputPtr output = pair.second;
         output->clearBuffer();
     }
@@ -271,9 +263,9 @@ void OutputTransition::clearBuffer()
 
 void OutputTransition::setOutputsIdle()
 {
-    //TRACE std::cout << "set outputs idle" << std::endl;
+    // TRACE std::cout << "set outputs idle" << std::endl;
     std::unique_lock<std::recursive_mutex> lock(sync);
-    for(const auto& pair : outputs_) {
+    for (const auto& pair : outputs_) {
         OutputPtr output = pair.second;
         output->setState(Output::State::IDLE);
     }

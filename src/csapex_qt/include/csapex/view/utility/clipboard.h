@@ -14,10 +14,8 @@ class Node;
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT ClipBoard
 {
-
 public:
     static bool canPaste();
 
@@ -25,6 +23,6 @@ public:
     static std::string get();
 };
 
-}
+}  // namespace csapex
 
-#endif // CLIPBOARD_H
+#endif  // CLIPBOARD_H

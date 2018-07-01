@@ -9,19 +9,19 @@
 #include <memory>
 #include <string>
 
-namespace csapex {
-
+namespace csapex
+{
 class CSAPEX_CORE_EXPORT TokenData : public Streamable
 {
-public:    
+public:
     static const uint8_t PACKET_TYPE_ID = 8;
 
     typedef std::shared_ptr<TokenData> Ptr;
     typedef std::shared_ptr<const TokenData> ConstPtr;
 
 public:
-    TokenData(const std::string &type_name);
-    TokenData(const std::string &type_name, const std::string& descriptive_name);
+    TokenData(const std::string& type_name);
+    TokenData(const std::string& type_name, const std::string& descriptive_name);
     virtual ~TokenData();
 
     TokenData::Ptr toType() const;
@@ -35,18 +35,17 @@ public:
     virtual std::size_t nestedValueCount() const;
 
     virtual bool canConnectTo(const TokenData* other_side) const;
-    virtual bool acceptsConnectionFrom(const TokenData *other_side) const;
+    virtual bool acceptsConnectionFrom(const TokenData* other_side) const;
 
     virtual std::string descriptiveName() const;
     std::string typeName() const;
 
-    virtual void writeNative(const std::string& file,  const std::string &base, const std::string &suffix) const;
+    virtual void writeNative(const std::string& file, const std::string& base, const std::string& suffix) const;
 
     uint8_t getPacketType() const final override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
-
 
 protected:
     TokenData();
@@ -57,6 +56,6 @@ private:
     std::string descriptive_name_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TOKEN_H
+#endif  // TOKEN_H

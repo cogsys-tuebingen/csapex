@@ -20,9 +20,10 @@
 
 using namespace csapex;
 
-namespace {
-
-QString toColorSS(const std::vector<int>& v) {
+namespace
+{
+QString toColorSS(const std::vector<int>& v)
+{
     std::stringstream ss;
     ss << "QPushButton {";
     ss << "background-color: #" << std::hex << std::setfill('0');
@@ -35,12 +36,10 @@ QString toColorSS(const std::vector<int>& v) {
     return QString::fromStdString(ss.str());
 }
 
-}
+}  // namespace
 
-ColorParameterAdapter::ColorParameterAdapter(param::ColorParameter::Ptr p)
-    : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), color_p_(p)
+ColorParameterAdapter::ColorParameterAdapter(param::ColorParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), color_p_(p)
 {
-
 }
 
 QWidget* ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
@@ -50,17 +49,15 @@ QWidget* ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     btn->setStyleSheet(toColorSS(color_p_->value()));
 
     btn->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(btn.data(), &QPushButton::customContextMenuRequested,
-                     [=](const QPoint& point){ customContextMenuRequested(btn, point); });
-
+    QObject::connect(btn.data(), &QPushButton::customContextMenuRequested, [=](const QPoint& point) { customContextMenuRequested(btn, point); });
 
     QHBoxLayout* sub = new QHBoxLayout;
     sub->addWidget(btn);
     layout->addLayout(QtHelper::wrap(display_name, sub, context_handler));
 
     // ui callback
-    QObject::connect(btn.data(), &QPushButton::pressed, [this, btn](){
-        if(!color_p_ || !btn) {
+    QObject::connect(btn.data(), &QPushButton::pressed, [this, btn]() {
+        if (!color_p_ || !btn) {
             return;
         }
 
@@ -71,16 +68,16 @@ QWidget* ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
         diag.setCurrentColor(init);
         diag.setModal(true);
 
-//        diag.setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::ShowAlphaChannel);
-//        diag.setVisible(true);
-//        diag.setOptions(QColorDialog::DontUseNativeDialog);
+        //        diag.setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::ShowAlphaChannel);
+        //        diag.setVisible(true);
+        //        diag.setOptions(QColorDialog::DontUseNativeDialog);
 
-//        diag.setAttribute(Qt::WA_WState_Visible, true);
-//        diag.setAttribute(Qt::WA_WState_Hidden, false);
+        //        diag.setAttribute(Qt::WA_WState_Visible, true);
+        //        diag.setAttribute(Qt::WA_WState_Hidden, false);
 
         //        diag.setAttribute(Qt::WA_WState_ExplicitShowHide);
 
-        if(!diag.exec()) {
+        if (!diag.exec()) {
             return;
         }
 
@@ -99,8 +96,8 @@ QWidget* ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     });
 
     // model change -> ui
-    connectInGuiThread(p_->parameter_changed, [this, btn](param::Parameter*){
-        if(!color_p_ || !btn) {
+    connectInGuiThread(p_->parameter_changed, [this, btn](param::Parameter*) {
+        if (!color_p_ || !btn) {
             return;
         }
         btn->setStyleSheet(toColorSS(color_p_->value()));
@@ -109,12 +106,7 @@ QWidget* ColorParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     return btn;
 }
 
-
-
-void ColorParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+void ColorParameterAdapter::setupContextMenu(ParameterContextMenu* context_handler)
 {
-    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
-        color_p_->set(color_p_->def());
-    });
+    context_handler->addAction(new QAction("reset to default", context_handler), [this]() { color_p_->set(color_p_->def()); });
 }
-

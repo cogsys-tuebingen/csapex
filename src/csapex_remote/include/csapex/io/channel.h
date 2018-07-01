@@ -9,10 +9,8 @@
 
 namespace csapex
 {
-
 namespace io
 {
-
 class Channel : public Observer
 {
 public:
@@ -31,8 +29,6 @@ public:
         session_.sendRequest<Request>(type, name_, std::forward<Args>(args)...);
     }
 
-
-
     //
     // NOTE
     //
@@ -44,7 +40,7 @@ public:
 
     void handleNote(const io::NoteConstPtr& note);
 
-    Session &getSession();
+    Session& getSession();
 
 public:
     slim_signal::Signal<void(const StreamableConstPtr&)> raw_packet_received;
@@ -55,8 +51,8 @@ private:
     AUUID name_;
 };
 
-}
+}  // namespace io
 
-}
+}  // namespace csapex
 
-#endif // CHANNEL_H
+#endif  // CHANNEL_H

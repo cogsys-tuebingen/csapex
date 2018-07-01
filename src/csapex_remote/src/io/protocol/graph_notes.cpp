@@ -13,22 +13,15 @@ GraphNote::GraphNote()
 {
 }
 
-GraphNote::GraphNote(GraphNoteType request_type, const AUUID &uuid)
-    : NoteImplementation(uuid),
-      note_type_(request_type)
+GraphNote::GraphNote(GraphNoteType request_type, const AUUID& uuid) : NoteImplementation(uuid), note_type_(request_type)
 {
-
 }
 
-GraphNote::GraphNote(GraphNoteType request_type, const AUUID &uuid, const std::vector<boost::any> &payload)
-    : NoteImplementation(uuid),
-      note_type_(request_type),
-      payload_(payload)
+GraphNote::GraphNote(GraphNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload) : NoteImplementation(uuid), note_type_(request_type), payload_(payload)
 {
-
 }
 
-void GraphNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void GraphNote::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Note::serialize(data, version);
 

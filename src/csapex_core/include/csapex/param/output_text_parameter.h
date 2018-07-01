@@ -5,9 +5,10 @@
 #include <csapex/param/parameter_impl.hpp>
 #include <csapex_param_export.h>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT OutputTextParameter : public ParameterImplementation<OutputTextParameter, 0x00C>
 {
     friend class ParameterFactory;
@@ -20,11 +21,14 @@ public:
     explicit OutputTextParameter(const std::string& name, const ParameterDescription& description);
     virtual ~OutputTextParameter();
 
-    virtual std::string TYPE() const override { return "outtext"; }
+    virtual std::string TYPE() const override
+    {
+        return "outtext";
+    }
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -41,6 +45,6 @@ private:
     std::string text_;
 };
 
-}
-}
-#endif // OUTPUT_TEXT_PARAMETER_H
+}  // namespace param
+}  // namespace csapex
+#endif  // OUTPUT_TEXT_PARAMETER_H

@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT MessageProvider
 {
 public:
@@ -47,7 +46,6 @@ public:
 public:
     slim_signal::Signal<void(std::size_t)> slot_count_changed;
 
-
     slim_signal::Signal<void()> begin;
 
 protected:
@@ -65,6 +63,6 @@ private:
     std::size_t slot_count_;
 };
 
-}
+}  // namespace csapex
 
-#endif // MESSAGE_PROVIDER_H
+#endif  // MESSAGE_PROVIDER_H

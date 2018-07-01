@@ -17,12 +17,10 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT GraphIO : public Profilable
 {
 public:
-    GraphIO(GraphFacadeImplementation& graph, NodeFactoryImplementation* node_factory,
-            bool throw_on_error = false);
+    GraphIO(GraphFacadeImplementation& graph, NodeFactoryImplementation* node_factory, bool throw_on_error = false);
 
 public:
     // options
@@ -33,44 +31,41 @@ public:
     void loadSettings(const YAML::Node& doc);
 
     Snippet saveGraph();
-    void saveGraphTo(YAML::Node &yaml);
+    void saveGraphTo(YAML::Node& yaml);
 
-    void loadGraph(const Snippet &doc);
-    void loadGraphFrom(const YAML::Node &doc);
+    void loadGraph(const Snippet& doc);
+    void loadGraphFrom(const YAML::Node& doc);
 
     Snippet saveSelectedGraph(const std::vector<UUID>& nodes);
 
-    std::unordered_map<UUID, UUID, UUID::Hasher>
-    loadIntoGraph(const Snippet &blueprint, const csapex::Point &position);
+    std::unordered_map<UUID, UUID, UUID::Hasher> loadIntoGraph(const Snippet& blueprint, const csapex::Point& position);
 
 public:
-    csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> saveViewRequest;
-    csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> loadViewRequest;
+    csapex::slim_signal::Signal<void(const GraphFacade&, YAML::Node& e)> saveViewRequest;
+    csapex::slim_signal::Signal<void(GraphFacade&, const YAML::Node& n)> loadViewRequest;
 
 private:
-
-    void saveNodes(YAML::Node &yaml);
+    void saveNodes(YAML::Node& yaml);
     void loadNodes(const YAML::Node& doc);
-    void loadNode(const YAML::Node &doc);
+    void loadNode(const YAML::Node& doc);
 
-
-    void saveConnections(YAML::Node &yaml);
+    void saveConnections(YAML::Node& yaml);
     void loadConnections(const YAML::Node& doc);
     void loadConnection(const YAML::Node& connection);
 
-    void saveFulcrums(YAML::Node& fulcrum, const ConnectionDescription &connection);
+    void saveFulcrums(YAML::Node& fulcrum, const ConnectionDescription& connection);
     void loadFulcrum(const YAML::Node& fulcrum);
 
     void sendNotification(const std::string& notification);
 
 protected:
-    void saveNodes(YAML::Node &yaml, const std::vector<NodeFacadeImplementationPtr> &nodes);
-    void saveConnections(YAML::Node &yaml, const std::vector<ConnectionDescription> &connections);
+    void saveNodes(YAML::Node& yaml, const std::vector<NodeFacadeImplementationPtr>& nodes);
+    void saveConnections(YAML::Node& yaml, const std::vector<ConnectionDescription>& connections);
 
     void serializeNode(YAML::Node& doc, NodeFacadeImplementationConstPtr node_handle);
     void deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr node_handle);
 
-    void loadConnection(ConnectorPtr from, const UUID &to_uuid, const std::string& connection_type);
+    void loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::string& connection_type);
 
     UUID readNodeUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
     UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
@@ -87,6 +82,6 @@ private:
     bool throw_on_error_;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPHIO_H
+#endif  // GRAPHIO_H

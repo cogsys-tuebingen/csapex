@@ -21,33 +21,33 @@
 using namespace csapex;
 using namespace param;
 
-ParameterBuilder ParameterFactory::makeEmpty(const std::string &type)
+ParameterBuilder ParameterFactory::makeEmpty(const std::string& type)
 {
     std::string t = type;
     std::transform(t.begin(), t.end(), t.begin(), tolower);
-    if(t == "range") {
+    if (t == "range") {
         return std::shared_ptr<Parameter>(new RangeParameter);
-    } else if(t == "interval") {
+    } else if (t == "interval") {
         return std::shared_ptr<Parameter>(new IntervalParameter);
-    } else if(t == "value") {
+    } else if (t == "value") {
         return std::shared_ptr<Parameter>(new ValueParameter);
-    } else if(t == "set") {
+    } else if (t == "set") {
         return std::shared_ptr<Parameter>(new SetParameter);
-    } else if(t == "bitset") {
+    } else if (t == "bitset") {
         return std::shared_ptr<Parameter>(new BitSetParameter);
-    } else if(t == "path") {
+    } else if (t == "path") {
         return std::shared_ptr<Parameter>(new PathParameter);
-    } else if(t == "trigger") {
+    } else if (t == "trigger") {
         return std::shared_ptr<Parameter>(new TriggerParameter);
-    } else if(t == "string_list") {
+    } else if (t == "string_list") {
         return std::shared_ptr<Parameter>(new StringListParameter);
-    } else if(t == "color") {
+    } else if (t == "color") {
         return std::shared_ptr<Parameter>(new ColorParameter);
-    } else if(t == "angle") {
+    } else if (t == "angle") {
         return std::shared_ptr<Parameter>(new AngleParameter);
-    } else if(t == "progress") {
+    } else if (t == "progress") {
         return std::shared_ptr<Parameter>(new OutputProgressParameter);
-    } else if(t == "outtext") {
+    } else if (t == "outtext") {
         return std::shared_ptr<Parameter>(new OutputTextParameter);
     } else {
         throw std::runtime_error(std::string("illegal parameter type: ") + t);
@@ -67,8 +67,7 @@ ParameterBuilder ParameterFactory::clone(const std::shared_ptr<Parameter>& param
     return clone(param.get());
 }
 
-
-ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, int> &set, int def)
+ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, int>& set, int def)
 {
     std::shared_ptr<BitSetParameter> result(new BitSetParameter(name, description));
     result->setBitSet(set);
@@ -78,29 +77,26 @@ ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string &nam
     return ParameterBuilder(std::move(result));
 }
 
-ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, int> &set, int def)
+ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string& name, const std::map<std::string, int>& set, int def)
 {
     return declareParameterBitSet(name, ParameterDescription(), set, def);
 }
 
-ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string &name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> > &set)
+ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> >& set)
 {
     std::map<std::string, int> raw_set;
     int def = 0;
 
-    for(std::map<std::string, std::pair<int, bool> >::const_iterator it = set.begin();
-        it != set.end();
-        ++it)
-    {
+    for (std::map<std::string, std::pair<int, bool> >::const_iterator it = set.begin(); it != set.end(); ++it) {
         raw_set[it->first] = it->second.first;
-        if(it->second.second) {
+        if (it->second.second) {
             def += it->second.first;
         }
     }
     return declareParameterBitSet(name, description, raw_set, def);
 }
 
-ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string &name, const std::map<std::string, std::pair<int, bool> > &set)
+ParameterBuilder ParameterFactory::declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool> >& set)
 {
     return ParameterFactory::declareParameterBitSet(name, ParameterDescription(), set);
 }
@@ -114,7 +110,7 @@ ParameterBuilder ParameterFactory::declareBool(const std::string& name, const Pa
     return ParameterBuilder(std::move(result));
 }
 
-ParameterBuilder ParameterFactory::declareBool(const std::string &name, bool def)
+ParameterBuilder ParameterFactory::declareBool(const std::string& name, bool def)
 {
     return declareBool(name, ParameterDescription(), def);
 }
@@ -138,7 +134,7 @@ ParameterBuilder ParameterFactory::declareColorParameter(const std::string& name
 
 ParameterBuilder ParameterFactory::declareColorParameter(const std::string& name, int r, int g, int b)
 {
-    return declareColorParameter(name, ParameterDescription(), r,g,b);
+    return declareColorParameter(name, ParameterDescription(), r, g, b);
 }
 
 ParameterBuilder ParameterFactory::declareTrigger(const std::string& name, const ParameterDescription& description)
@@ -147,13 +143,13 @@ ParameterBuilder ParameterFactory::declareTrigger(const std::string& name, const
     return ParameterBuilder(std::move(result));
 }
 
-ParameterBuilder ParameterFactory::declareTrigger(const std::string &name)
+ParameterBuilder ParameterFactory::declareTrigger(const std::string& name)
 {
     return declareTrigger(name, ParameterDescription());
 }
 
-ParameterBuilder ParameterFactory::declarePath(const std::string& name, const ParameterDescription& description,
-                                             bool is_file, const std::string& def, const std::string& filter, bool input, bool output)
+ParameterBuilder ParameterFactory::declarePath(const std::string& name, const ParameterDescription& description, bool is_file, const std::string& def, const std::string& filter, bool input,
+                                               bool output)
 {
     std::shared_ptr<PathParameter> result(new PathParameter(name, description, filter, is_file, input, output));
     result->set(def);
@@ -189,7 +185,6 @@ ParameterBuilder ParameterFactory::declareFileInputOutputPath(const std::string&
     return declareFileInputOutputPath(name, ParameterDescription(), def, filter);
 }
 
-
 ParameterBuilder ParameterFactory::declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter)
 {
     return declarePath(name, description, false, def, filter, true, false);
@@ -218,7 +213,6 @@ ParameterBuilder ParameterFactory::declareDirectoryInputOutputPath(const std::st
     return declareDirectoryInputOutputPath(name, ParameterDescription(), def, filter);
 }
 
-
 ParameterBuilder ParameterFactory::declareText(const std::string& name, const ParameterDescription& description, const std::string& def)
 {
     std::shared_ptr<ValueParameter> result(new ValueParameter(name, description));
@@ -227,21 +221,19 @@ ParameterBuilder ParameterFactory::declareText(const std::string& name, const Pa
     return ParameterBuilder(std::move(result));
 }
 
-ParameterBuilder ParameterFactory::declareText(const std::string &name, const std::string &def)
+ParameterBuilder ParameterFactory::declareText(const std::string& name, const std::string& def)
 {
     return declareText(name, ParameterDescription(""), def);
 }
 
-ParameterBuilder ParameterFactory::declareParameterStringSet(const std::string& name, const ParameterDescription& description,
-                                                           const std::vector<std::string> & set,
-                                                           const std::string &def)
+ParameterBuilder ParameterFactory::declareParameterStringSet(const std::string& name, const ParameterDescription& description, const std::vector<std::string>& set, const std::string& def)
 {
     std::shared_ptr<SetParameter> result(new SetParameter(name, description));
     result->setSet(set);
 
     std::string v = def;
-    if(!set.empty()) {
-        if(v.empty()) {
+    if (!set.empty()) {
+        if (v.empty()) {
             v = set[0];
         }
         result->def_ = v;
@@ -251,35 +243,29 @@ ParameterBuilder ParameterFactory::declareParameterStringSet(const std::string& 
     return ParameterBuilder(std::move(result));
 }
 
-ParameterBuilder ParameterFactory::declareParameterStringSet(const std::string& name, const std::vector<std::string> & set, const std::string& def)
+ParameterBuilder ParameterFactory::declareParameterStringSet(const std::string& name, const std::vector<std::string>& set, const std::string& def)
 {
     return declareParameterStringSet(name, ParameterDescription(), set, def);
 }
 
-
-
-ParameterBuilder ParameterFactory::declareOutputProgress(const std::string &name, const ParameterDescription &description)
+ParameterBuilder ParameterFactory::declareOutputProgress(const std::string& name, const ParameterDescription& description)
 {
     std::shared_ptr<OutputProgressParameter> result(new OutputProgressParameter(name, description));
     return ParameterBuilder(std::move(result));
 }
 
-ParameterBuilder ParameterFactory::declareOutputText(const std::string &name, const ParameterDescription &description)
+ParameterBuilder ParameterFactory::declareOutputText(const std::string& name, const ParameterDescription& description)
 {
     std::shared_ptr<OutputTextParameter> result(new OutputTextParameter(name, description));
     return ParameterBuilder(std::move(result));
 }
 
-
 namespace csapex
 {
 namespace param
 {
-
 template <typename T>
-ParameterBuilder ParameterFactory::declareRange(const std::string& name,
-                                   const ParameterDescription& description,
-                                   T min, T max, T def, T step)
+ParameterBuilder ParameterFactory::declareRange(const std::string& name, const ParameterDescription& description, T min, T max, T def, T step)
 {
     BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
 
@@ -298,9 +284,7 @@ ParameterBuilder ParameterFactory::declareRange(const std::string& name,
 }
 
 template <typename T>
-ParameterBuilder ParameterFactory::declareInterval(const std::string& name,
-                                                 const ParameterDescription& description,
-                                                 T min, T max, T def_min, T def_max, T step)
+ParameterBuilder ParameterFactory::declareInterval(const std::string& name, const ParameterDescription& description, T min, T max, T def_min, T def_max, T step)
 {
     BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
 
@@ -311,20 +295,17 @@ ParameterBuilder ParameterFactory::declareInterval(const std::string& name,
     result->step_ = step;
     result->values_ = std::make_pair(def_min, def_max);
 
-    result->set<std::pair<T,T> >(std::make_pair(def_min, def_max));
+    result->set<std::pair<T, T> >(std::make_pair(def_min, def_max));
 
     return ParameterBuilder(std::move(result));
 }
 
-
 template <typename T>
-ParameterBuilder ParameterFactory::declareParameterSetImpl(const std::string& name, const ParameterDescription& description,
-                                          const std::map<std::string, T> & set_values,
-                                          const T& def)
+ParameterBuilder ParameterFactory::declareParameterSetImpl(const std::string& name, const ParameterDescription& description, const std::map<std::string, T>& set_values, const T& def)
 {
     std::unique_ptr<SetParameter> result(new SetParameter(name, description));
     result->setSet(set_values);
-    if(!set_values.empty()) {
+    if (!set_values.empty()) {
         result->def_ = def;
         result->set<T>(def);
     }
@@ -343,44 +324,39 @@ ParameterBuilder ParameterFactory::declareValue(const std::string& name, const P
 
 /// EXPLICIT INSTANTIATON
 
-namespace {
-template<typename T> struct argument_type;
-template<typename T, typename U> struct argument_type<T(U)> { typedef U type; };
-}
+namespace
+{
+template <typename T>
+struct argument_type;
+template <typename T, typename U>
+struct argument_type<T(U)>
+{
+    typedef U type;
+};
+}  // namespace
 
-#define INSTANTIATE(T) \
-    template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareParameterSetImpl(const std::string&, const ParameterDescription&, const std::map<std::string, argument_type<void(T)>::type> &, const argument_type<void(T)>::type&); \
+#define INSTANTIATE(T)                                                                                                                                                                                 \
+    template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareParameterSetImpl(const std::string&, const ParameterDescription&,                                                           \
+                                                                                            const std::map<std::string, argument_type<void(T)>::type>&, const argument_type<void(T)>::type&);          \
     template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareValue(const std::string&, const ParameterDescription&, const argument_type<void(T)>::type&);
-
 
 INSTANTIATE(bool)
 INSTANTIATE(int)
 INSTANTIATE(double)
 INSTANTIATE(std::string)
-INSTANTIATE((std::pair<int,int>))
-INSTANTIATE((std::pair<double,double>))
-INSTANTIATE((std::pair<std::string,bool>))
+INSTANTIATE((std::pair<int, int>))
+INSTANTIATE((std::pair<double, double>))
+INSTANTIATE((std::pair<std::string, bool>))
 INSTANTIATE((std::vector<int>))
 INSTANTIATE((std::vector<double>))
 INSTANTIATE((std::vector<std::string>))
 
+template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<double>(const std::string& name, const ParameterDescription& description, double min, double max, double def, double step);
+template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<int>(const std::string& name, const ParameterDescription& description, int min, int max, int def, int step);
 
-template
-CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<double>(const std::string& name,
-                                                      const ParameterDescription& description,
-                                                      double min, double max, double def, double step);
-template
-CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareRange<int>(const std::string& name,
-                                                   const ParameterDescription& description,
-                                                   int min, int max, int def, int step);
-
-template
-CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<double>(const std::string& name,
-                                                      const ParameterDescription& description,
-                                                      double min, double max, double def_min, double def_max, double step);
-template
-CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<int>(const std::string& name,
-                                                   const ParameterDescription& description,
-                                                   int min, int max, int def_min, int def_max, int step);
-}
-}
+template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<double>(const std::string& name, const ParameterDescription& description, double min, double max, double def_min,
+                                                                                        double def_max, double step);
+template CSAPEX_PARAM_EXPORT ParameterBuilder ParameterFactory::declareInterval<int>(const std::string& name, const ParameterDescription& description, int min, int max, int def_min, int def_max,
+                                                                                     int step);
+}  // namespace param
+}  // namespace csapex

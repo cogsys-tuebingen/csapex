@@ -9,8 +9,7 @@
 
 using namespace csapex;
 
-MessageRendererManager::MessageRendererManager()
-    : manager_(new PluginManager<MessageRenderer>("csapex::MessageRenderer"))
+MessageRendererManager::MessageRendererManager() : manager_(new PluginManager<MessageRenderer>("csapex::MessageRenderer"))
 {
 }
 
@@ -27,7 +26,7 @@ void MessageRendererManager::setPluginLocator(PluginLocatorPtr locator)
 void MessageRendererManager::shutdown()
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-	plugin_locator_.reset();
+    plugin_locator_.reset();
     renderers.clear();
     manager_.reset();
 }
@@ -39,18 +38,18 @@ void MessageRendererManager::loadPlugins()
     apex_assert_hard(manager_);
     apex_assert_hard(plugin_locator_);
 
-    if(!manager_->pluginsLoaded()) {
+    if (!manager_->pluginsLoaded()) {
         manager_->load(plugin_locator_.get());
     }
 
     renderers.clear();
 
-    for(const auto& pair : manager_->getConstructors()) {
+    for (const auto& pair : manager_->getConstructors()) {
         try {
             MessageRenderer::Ptr renderer(pair.second());
             renderers[renderer->messageType()] = renderer;
 
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             std::cerr << "cannot load message renderer " << pair.first << ": " << typeid(e).name() << ", what=" << e.what() << std::endl;
         }
     }
@@ -59,26 +58,26 @@ void MessageRendererManager::loadPlugins()
 MessageRendererPtr MessageRendererManager::createMessageRenderer(const TokenDataConstPtr& message)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    if(!manager_) {
+    if (!manager_) {
         return nullptr;
     }
 
-    if(!manager_->pluginsLoaded() || renderers.empty()) {
+    if (!manager_->pluginsLoaded() || renderers.empty()) {
         loadPlugins();
     }
-    if(renderers.empty()) {
+    if (renderers.empty()) {
         throw std::runtime_error("no message renderers registered!");
     }
 
     const TokenData& m = *message;
     try {
         auto pos = renderers.find(std::type_index(typeid(m)));
-        if(pos != renderers.end()) {
+        if (pos != renderers.end()) {
             return pos->second;
         } else {
             return nullptr;
         }
-    } catch(const std::exception& /*e*/) {
+    } catch (const std::exception& /*e*/) {
         throw std::runtime_error(std::string("cannot create message renderer for ") + type2name(typeid(m)));
     }
 }

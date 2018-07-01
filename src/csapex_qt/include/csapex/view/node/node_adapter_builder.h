@@ -17,7 +17,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT NodeAdapterBuilder
 {
 public:
@@ -41,7 +40,6 @@ private:
 
 namespace impl
 {
-
 NodePtr getNode(const NodeFacadePtr& nf);
 NodeFacadeProxyPtr castToProxy(const NodeFacadePtr& facade);
 NodeFacadeImplementationPtr castToImplementation(const NodeFacadePtr& facade);
@@ -60,20 +58,19 @@ public:
     }
     virtual csapex::NodeAdapterPtr build(csapex::NodeFacadePtr facade, csapex::NodeBox* parent) const
     {
-        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee> (getNode(facade));
-        apex_assert_hard_msg(adaptee.lock(), std::string("The adapter ") + getWrappedType() +" is used in a remote setting");
+        std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee>(getNode(facade));
+        apex_assert_hard_msg(adaptee.lock(), std::string("The adapter ") + getWrappedType() + " is used in a remote setting");
         return std::make_shared<Adapter>(castToImplementation(facade), parent, adaptee);
     }
 };
-
 
 template <typename Adapter>
 class ProxyAdapterBuilder : public csapex::NodeAdapterBuilder
 {
 public:
-    ProxyAdapterBuilder(const std::string& wrapped_type)
-        : wrapped_type_(wrapped_type)
-    {}
+    ProxyAdapterBuilder(const std::string& wrapped_type) : wrapped_type_(wrapped_type)
+    {
+    }
 
     virtual bool isProxy() const override
     {
@@ -91,8 +88,8 @@ public:
 private:
     std::string wrapped_type_;
 };
-}
+}  // namespace impl
 
-}
+}  // namespace csapex
 
-#endif // NODE_ADAPTER_BUILDER_H
+#endif  // NODE_ADAPTER_BUILDER_H

@@ -8,16 +8,18 @@ using namespace csapex;
 using namespace param;
 using namespace YAML;
 
-Node YAML::convert<csapex::param::ParameterPtr>::encode(const csapex::param::ParameterPtr& rhs) {
+Node YAML::convert<csapex::param::ParameterPtr>::encode(const csapex::param::ParameterPtr& rhs)
+{
     YAML::Node n;
     rhs->serialize_yaml(n);
     return n;
 }
 
-bool YAML::convert<csapex::param::ParameterPtr>::decode(const Node& node, csapex::param::ParameterPtr& rhs) {
+bool YAML::convert<csapex::param::ParameterPtr>::decode(const Node& node, csapex::param::ParameterPtr& rhs)
+{
     std::string type;
 
-    if(node["type"].IsDefined()) {
+    if (node["type"].IsDefined()) {
         type = node["type"].as<std::string>();
     } else {
         type = "range";
@@ -28,18 +30,18 @@ bool YAML::convert<csapex::param::ParameterPtr>::decode(const Node& node, csapex
     return true;
 }
 
-
-
-Node YAML::convert<csapex::param::ParameterConstPtr>::encode(const csapex::param::ParameterConstPtr& rhs) {
+Node YAML::convert<csapex::param::ParameterConstPtr>::encode(const csapex::param::ParameterConstPtr& rhs)
+{
     YAML::Node n;
     rhs->serialize_yaml(n);
     return n;
 }
 
-bool YAML::convert<csapex::param::ParameterConstPtr>::decode(const Node& node, csapex::param::ParameterConstPtr& rhs) {
+bool YAML::convert<csapex::param::ParameterConstPtr>::decode(const Node& node, csapex::param::ParameterConstPtr& rhs)
+{
     std::string type;
 
-    if(node["type"].IsDefined()) {
+    if (node["type"].IsDefined()) {
         type = node["type"].as<std::string>();
     } else {
         type = "range";
@@ -50,4 +52,3 @@ bool YAML::convert<csapex::param::ParameterConstPtr>::decode(const Node& node, c
     rhs = res;
     return true;
 }
-

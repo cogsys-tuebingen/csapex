@@ -14,19 +14,16 @@ CSAPEX_REGISTER_PARAMETER_SERIALIZER(OutputProgressParameter)
 using namespace csapex;
 using namespace param;
 
-OutputProgressParameter::OutputProgressParameter()
-    : ParameterImplementation("noname", ParameterDescription()), value(0), maximum(100)
+OutputProgressParameter::OutputProgressParameter() : ParameterImplementation("noname", ParameterDescription()), value(0), maximum(100)
 {
 }
 
-OutputProgressParameter::OutputProgressParameter(const std::string &name, const ParameterDescription& description)
-    : ParameterImplementation(name, description), value(0), maximum(100)
+OutputProgressParameter::OutputProgressParameter(const std::string& name, const ParameterDescription& description) : ParameterImplementation(name, description), value(0), maximum(100)
 {
 }
 
 OutputProgressParameter::~OutputProgressParameter()
 {
-
 }
 
 std::string OutputProgressParameter::toStringImpl() const
@@ -43,7 +40,7 @@ void OutputProgressParameter::get_unsafe(boost::any& out) const
 bool OutputProgressParameter::set_unsafe(const boost::any& v)
 {
     auto val = boost::any_cast<int>(v);
-    if(val != value) {
+    if (val != value) {
         value = val;
         return true;
     }
@@ -53,7 +50,6 @@ bool OutputProgressParameter::set_unsafe(const boost::any& v)
 
 void OutputProgressParameter::doSerialize(YAML::Node& /*n*/) const
 {
-
 }
 void OutputProgressParameter::doDeserialize(const YAML::Node& n)
 {
@@ -61,8 +57,8 @@ void OutputProgressParameter::doDeserialize(const YAML::Node& n)
 
 void OutputProgressParameter::cloneDataFrom(const Clonable& other)
 {
-    if(const OutputProgressParameter* progress = dynamic_cast<const OutputProgressParameter*>(&other)) {
-        if(value != progress->value || maximum != progress->maximum) {
+    if (const OutputProgressParameter* progress = dynamic_cast<const OutputProgressParameter*>(&other)) {
+        if (value != progress->value || maximum != progress->maximum) {
             *this = *progress;
             triggerChange();
         }
@@ -78,12 +74,12 @@ void OutputProgressParameter::advanceProgress(int step)
 
 void OutputProgressParameter::setProgress(int progress, int m)
 {
-    if(value != progress) {
+    if (value != progress) {
         value = progress;
         triggerChange();
     }
 
-    if(maximum != m) {
+    if (maximum != m) {
         maximum = m;
         scope_changed(this);
     }
@@ -99,8 +95,7 @@ double OutputProgressParameter::getProgressMaximum() const
     return maximum;
 }
 
-
-void OutputProgressParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void OutputProgressParameter::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Parameter::serialize(data, version);
 

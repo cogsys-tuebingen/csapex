@@ -6,7 +6,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Note : public Node
 {
 public:
@@ -17,6 +16,6 @@ protected:
     bool isIsolated() const override;
 };
 
-}
+}  // namespace csapex
 
-#endif // NOTE_H
+#endif  // NOTE_H

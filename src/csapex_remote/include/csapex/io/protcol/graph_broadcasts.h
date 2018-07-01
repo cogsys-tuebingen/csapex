@@ -12,11 +12,9 @@
 
 namespace csapex
 {
-
 class GraphBroadcasts : public BroadcastImplementation<GraphBroadcasts>
 {
 public:
-
     enum class GraphBroadcastType
     {
         None
@@ -27,7 +25,7 @@ public:
     GraphBroadcasts(GraphBroadcastType Broadcast_type, AUUID uuid);
     GraphBroadcasts(GraphBroadcastType Broadcast_type, AUUID uuid, boost::any payload);
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::string getType() const override
@@ -44,7 +42,6 @@ public:
         return boost::any_cast<R>(payload_);
     }
 
-
 private:
     GraphBroadcastType broadcast_type_;
 
@@ -53,6 +50,6 @@ private:
     boost::any payload_;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_BROADCASTS_H
+#endif  // GRAPH_BROADCASTS_H

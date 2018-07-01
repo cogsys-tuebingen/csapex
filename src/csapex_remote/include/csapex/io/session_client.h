@@ -12,7 +12,7 @@ namespace csapex
 class SessionClient : public Session
 {
 public:
-    SessionClient(const std::string &ip, int port);
+    SessionClient(const std::string& ip, int port);
     ~SessionClient();
 
     void run() override;
@@ -29,6 +29,6 @@ private:
     bool io_service_running_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SESSION_CLIENT_H
+#endif  // SESSION_CLIENT_H

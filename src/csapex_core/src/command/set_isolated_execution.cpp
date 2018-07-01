@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(SetIsolatedExecution)
 
-SetIsolatedExecution::SetIsolatedExecution(const AUUID& parent_uuid, const UUID &node, ExecutionType type)
-    : CommandImplementation(parent_uuid), uuid(node), type_(type)
+SetIsolatedExecution::SetIsolatedExecution(const AUUID& parent_uuid, const UUID& node, ExecutionType type) : CommandImplementation(parent_uuid), uuid(node), type_(type)
 {
 }
 
@@ -30,7 +29,7 @@ std::string SetIsolatedExecution::getDescription() const
 {
     std::stringstream ss;
     ss << "switch processing of " << uuid << " to ";
-    if(type_ == ExecutionType::DIRECT) {
+    if (type_ == ExecutionType::DIRECT) {
         ss << "not ";
     }
     ss << "isolated";
@@ -67,9 +66,7 @@ bool SetIsolatedExecution::doRedo()
     return doExecute();
 }
 
-
-
-void SetIsolatedExecution::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void SetIsolatedExecution::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

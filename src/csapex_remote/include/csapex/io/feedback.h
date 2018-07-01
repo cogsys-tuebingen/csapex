@@ -10,7 +10,6 @@
 
 namespace csapex
 {
-
 class Feedback : public Response
 {
 protected:
@@ -27,7 +26,7 @@ public:
 
     std::string getMessage() const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 private:
@@ -37,6 +36,6 @@ private:
     std::string message_;
 };
 
-}
+}  // namespace csapex
 
-#endif // FEEDBACK_H
+#endif  // FEEDBACK_H

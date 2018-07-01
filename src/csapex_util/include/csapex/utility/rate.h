@@ -10,7 +10,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_UTILS_EXPORT Rate
 {
 public:
@@ -40,6 +39,6 @@ public:
     std::deque<std::chrono::system_clock::time_point> real_ticks_;
 };
 
-}
+}  // namespace csapex
 
-#endif // RATE_H
+#endif  // RATE_H

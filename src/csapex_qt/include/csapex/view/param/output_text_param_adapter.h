@@ -22,6 +22,5 @@ private:
     param::OutputTextParameterPtr op_p_;
 };
 
-
-}
-#endif // OUTPUT_TEXT_ADAPTER_H
+}  // namespace csapex
+#endif  // OUTPUT_TEXT_ADAPTER_H

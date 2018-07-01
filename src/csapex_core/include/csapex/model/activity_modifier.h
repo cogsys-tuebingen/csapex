@@ -3,7 +3,6 @@
 
 namespace csapex
 {
-
 enum class ActivityModifier
 {
     NONE,
@@ -11,7 +10,6 @@ enum class ActivityModifier
     DEACTIVATE,
     INHIBIT
 };
-
 }
 
-#endif // ACTIVITY_MODIFIER_H
+#endif  // ACTIVITY_MODIFIER_H

@@ -5,9 +5,10 @@
 #include <csapex/param/parameter_impl.hpp>
 #include <csapex_param_export.h>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT OutputProgressParameter : public ParameterImplementation<OutputProgressParameter, 0x009>
 {
     friend class ParameterFactory;
@@ -20,10 +21,13 @@ public:
     explicit OutputProgressParameter(const std::string& name, const ParameterDescription& description);
     virtual ~OutputProgressParameter();
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
-    virtual std::string TYPE() const override { return "progress"; }
+    virtual std::string TYPE() const override
+    {
+        return "progress";
+    }
 
     void advanceProgress(int step = 1);
     void setProgress(int progress, int maximum);
@@ -45,8 +49,7 @@ private:
     int maximum;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // OUTPUT_PROGRESS_PARAMETER_H
-
+#endif  // OUTPUT_PROGRESS_PARAMETER_H

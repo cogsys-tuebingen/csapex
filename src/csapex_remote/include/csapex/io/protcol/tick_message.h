@@ -6,12 +6,10 @@
 
 namespace csapex
 {
-
 class Tick : public BroadcastMessage
 {
-
 };
 
-}
+}  // namespace csapex
 
-#endif // TICK_MESSAGE_H
+#endif  // TICK_MESSAGE_H

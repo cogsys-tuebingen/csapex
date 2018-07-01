@@ -24,16 +24,11 @@ using namespace csapex;
 
 int Connection::next_connection_id_ = 0;
 
-Connection::Connection(OutputPtr from, InputPtr to)
-    : Connection(from, to, next_connection_id_++)
+Connection::Connection(OutputPtr from, InputPtr to) : Connection(from, to, next_connection_id_++)
 {
 }
 
-Connection::Connection(OutputPtr from, InputPtr to, int id)
-    : from_(from), to_(to), id_(id),
-      active_(false),
-      detached_(false),
-      state_(State::NOT_INITIALIZED)
+Connection::Connection(OutputPtr from, InputPtr to, int id) : from_(from), to_(to), id_(id), active_(false), detached_(false), state_(State::NOT_INITIALIZED)
 {
     from->enabled_changed.connect(source_enable_changed);
     to->enabled_changed.connect(sink_enabled_changed);
@@ -47,70 +42,66 @@ Connection::Connection(OutputPtr from, InputPtr to, int id)
 
 Connection::~Connection()
 {
-    if(from_) {
-        if(state_ != Connection::State::DONE) {
+    if (from_) {
+        if (state_ != Connection::State::DONE) {
             notifyMessageProcessed();
         }
     }
 }
 
-bool Connection::isCompatibleWith(Connector *from, Connector *to)
+bool Connection::isCompatibleWith(Connector* from, Connector* to)
 {
     return from->getType()->canConnectTo(to->getType().get());
 }
 
-bool Connection::canBeConnectedTo(Connector *from, Connector *to)
+bool Connection::canBeConnectedTo(Connector* from, Connector* to)
 {
-    if(!isCompatibleWith(from, to)) {
+    if (!isCompatibleWith(from, to)) {
         return false;
     }
 
-    bool in_out = (from->isOutput() && to->isInput()) ||
-            (from->isInput() && to->isOutput());
+    bool in_out = (from->isOutput() && to->isInput()) || (from->isInput() && to->isOutput());
 
-    if(!in_out) {
+    if (!in_out) {
         return false;
     }
 
-    if(from->maxConnectionCount() >= 0 && from->countConnections() >= from->maxConnectionCount()) {
+    if (from->maxConnectionCount() >= 0 && from->countConnections() >= from->maxConnectionCount()) {
         return false;
     }
-    if(to->maxConnectionCount() >= 0 && to->countConnections() >= to->maxConnectionCount()) {
+    if (to->maxConnectionCount() >= 0 && to->countConnections() >= to->maxConnectionCount()) {
         return false;
     }
-
 
     return !Connection::areConnectorsConnected(from, to);
 }
 
-bool Connection::areConnectorsConnected(Connector *from, Connector *to)
+bool Connection::areConnectorsConnected(Connector* from, Connector* to)
 {
     return from->isConnectedTo(to->getUUID().getAbsoluteUUID());
 }
 
-bool Connection::targetsCanBeMovedTo(Connector *from, Connector *to)
+bool Connection::targetsCanBeMovedTo(Connector* from, Connector* to)
 {
-    if(from == to) {
+    if (from == to) {
         return false;
     }
-    if(from->isOutput() != to->isOutput()) {
+    if (from->isOutput() != to->isOutput()) {
         return false;
     }
-    if(to->maxConnectionCount() >= 0 &&
-            to->countConnections() >= to->maxConnectionCount()) {
+    if (to->maxConnectionCount() >= 0 && to->countConnections() >= to->maxConnectionCount()) {
         return false;
     }
     return from->getType()->canConnectTo(to->getType().get());
 }
 
-
-void Connection::detach(Connector *c)
+void Connection::detach(Connector* c)
 {
-    if(c == from_.get()) {
+    if (c == from_.get()) {
         from_.reset();
         detached_ = true;
 
-    } else if(c == to_.get()) {
+    } else if (c == to_.get()) {
         to_.reset();
         detached_ = true;
     }
@@ -156,17 +147,17 @@ void Connection::setTokenProcessed()
 {
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
-        if(getState() == State::DONE) {
+        if (getState() == State::DONE) {
             return;
         }
         setState(State::DONE);
     }
 
-    //TRACE std::cout << *this << " is done" << std::endl;
+    // TRACE std::cout << *this << " is done" << std::endl;
     notifyMessageProcessed();
 }
 
-void Connection::setToken(const TokenPtr &token)
+void Connection::setToken(const TokenPtr& token)
 {
     {
         TokenPtr msg = token->cloneAs<Token>();
@@ -175,7 +166,7 @@ void Connection::setToken(const TokenPtr &token)
         apex_assert_hard(msg != nullptr);
         apex_assert_hard(state_ == State::NOT_INITIALIZED);
 
-        if(!isActive() && msg->hasActivityModifier()) {
+        if (!isActive() && msg->hasActivityModifier()) {
             // remove active flag if the connection is inactive
             msg->setActivityModifier(ActivityModifier::NONE);
         }
@@ -189,21 +180,19 @@ void Connection::setToken(const TokenPtr &token)
 
 void Connection::notifyMessageSet()
 {
-    if(detached_) {
+    if (detached_) {
         return;
     }
     to_->notifyMessageAvailable(this);
 }
 
-
 void Connection::notifyMessageProcessed()
 {
-    if(detached_) {
+    if (detached_) {
         return;
     }
     from_->notifyMessageProcessed(this);
 }
-
 
 bool Connection::isActive() const
 {
@@ -212,7 +201,7 @@ bool Connection::isActive() const
 
 void Connection::setActive(bool active)
 {
-    if(active != active_) {
+    if (active != active_) {
         active_ = active;
     }
 }
@@ -234,7 +223,7 @@ bool Connection::isSinkEnabled() const
 
 bool Connection::isPipelining() const
 {
-    if(NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to_->getOwner())) {
+    if (NodeHandlePtr node = std::dynamic_pointer_cast<NodeHandle>(to_->getOwner())) {
         return node->getNodeState()->getExecutionMode() == ExecutionMode::PIPELINING;
     }
     return false;
@@ -250,22 +239,22 @@ void Connection::setState(State s)
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
 
-        switch (s) {
+    switch (s) {
         case State::UNREAD:
             apex_assert_hard(state_ == State::NOT_INITIALIZED);
-//            apex_assert_hard(message_ != nullptr);
+            //            apex_assert_hard(message_ != nullptr);
             break;
         case State::READ:
             apex_assert_hard(state_ == State::UNREAD || state_ == State::READ);
-//            apex_assert_hard(message_ != nullptr);
+            //            apex_assert_hard(message_ != nullptr);
             break;
         case State::DONE:
             apex_assert_hard(state_ == State::DONE || state_ == State::READ);
-//            apex_assert_hard(message_ != nullptr);
+            //            apex_assert_hard(message_ != nullptr);
             break;
         default:
             break;
-        }
+    }
 
     state_ = s;
 }
@@ -284,7 +273,7 @@ ConnectorPtr Connection::source() const
     return from_;
 }
 
-ConnectorPtr  Connection::target() const
+ConnectorPtr Connection::target() const
 {
     return to_;
 }
@@ -294,21 +283,18 @@ int Connection::id() const
     return id_;
 }
 
-
 ConnectionDescription Connection::getDescription() const
 {
     TokenDataConstPtr type = message_ ? message_->getTokenData() : makeEmpty<connection_types::AnyMessage>();
-    return ConnectionDescription(from_->getUUID(), to_->getUUID(),
-                                 type, id_, isActive(),
-                                 getFulcrumsCopy());
+    return ConnectionDescription(from_->getUUID(), to_->getUUID(), type, id_, isActive(), getFulcrumsCopy());
 }
 
-bool Connection::contains(Connector *c) const
+bool Connection::contains(Connector* c) const
 {
     return from_.get() == c || to_.get() == c;
 }
 
-bool Connection::operator == (const Connection& c) const
+bool Connection::operator==(const Connection& c) const
 {
     return from_ == c.from() && to_ == c.to();
 }
@@ -322,7 +308,7 @@ std::vector<Fulcrum> Connection::getFulcrumsCopy() const
 {
     std::vector<Fulcrum> result;
     result.reserve(fulcrums_.size());
-    for(const FulcrumPtr& f : fulcrums_) {
+    for (const FulcrumPtr& f : fulcrums_) {
         result.push_back(*f);
     }
     return result;
@@ -338,7 +324,7 @@ Fulcrum::Ptr Connection::getFulcrum(int fulcrum_id)
     return fulcrums_[fulcrum_id];
 }
 
-void Connection::addFulcrum(int fulcrum_id, const Point &pos, int type, const Point &handle_in, const Point &handle_out)
+void Connection::addFulcrum(int fulcrum_id, const Point& pos, int type, const Point& handle_in, const Point& handle_out)
 {
     // create the new fulcrum
     Fulcrum::Ptr fulcrum(new Fulcrum(id(), pos, type, handle_in, handle_out));
@@ -347,9 +333,9 @@ void Connection::addFulcrum(int fulcrum_id, const Point &pos, int type, const Po
     f->setId(fulcrum_id);
 
     // update the ids of the later fulcrums
-    if(fulcrum_id < (int) fulcrums_.size()) {
+    if (fulcrum_id < (int)fulcrums_.size()) {
         std::vector<Fulcrum::Ptr>::iterator index = fulcrums_.begin() + fulcrum_id;
-        for(std::vector<Fulcrum::Ptr>::iterator it = index; it != fulcrums_.end(); ++it) {
+        for (std::vector<Fulcrum::Ptr>::iterator it = index; it != fulcrums_.end(); ++it) {
             (*it)->setId((*it)->id() + 1);
         }
         fulcrums_.insert(index, fulcrum);
@@ -358,7 +344,6 @@ void Connection::addFulcrum(int fulcrum_id, const Point &pos, int type, const Po
         fulcrums_.push_back(fulcrum);
     }
 
-
     f->moved.connect(fulcrum_moved);
     f->movedHandle.connect(fulcrum_moved_handle);
     f->typeChanged.connect(fulcrum_type_changed);
@@ -366,33 +351,34 @@ void Connection::addFulcrum(int fulcrum_id, const Point &pos, int type, const Po
     fulcrum_added(f);
 }
 
-void Connection::modifyFulcrum(int fulcrum_id, int type, const Point &handle_in, const Point &handle_out)
+void Connection::modifyFulcrum(int fulcrum_id, int type, const Point& handle_in, const Point& handle_out)
 {
     Fulcrum::Ptr f = fulcrums_[fulcrum_id];
     f->setType(type);
     f->moveHandles(handle_in, handle_out, false);
 }
 
-void Connection::moveFulcrum(int fulcrum_id, const Point &pos, bool dropped)
+void Connection::moveFulcrum(int fulcrum_id, const Point& pos, bool dropped)
 {
     fulcrums_[fulcrum_id]->move(pos, dropped);
 }
 
 void Connection::deleteFulcrum(int fulcrum_id)
 {
-    apex_assert_hard(fulcrum_id >= 0 && fulcrum_id < (int) fulcrums_.size());
+    apex_assert_hard(fulcrum_id >= 0 && fulcrum_id < (int)fulcrums_.size());
     fulcrum_deleted((fulcrums_[fulcrum_id]).get());
 
     // update the ids of the later fulcrums
     std::vector<Fulcrum::Ptr>::iterator index = fulcrums_.begin() + fulcrum_id;
-    for(std::vector<Fulcrum::Ptr>::iterator it = index; it != fulcrums_.end(); ++it) {
+    for (std::vector<Fulcrum::Ptr>::iterator it = index; it != fulcrums_.end(); ++it) {
         (*it)->setId((*it)->id() - 1);
     }
 
     fulcrums_.erase(index);
 }
 
-std::ostream& csapex::operator << (std::ostream& out, const Connection& c) {
+std::ostream& csapex::operator<<(std::ostream& out, const Connection& c)
+{
     out << "Connection: [" << c.from()->getUUID() << " / " << c.to()->getUUID() << "]";
     return out;
 }

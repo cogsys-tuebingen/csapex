@@ -16,8 +16,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(PasteGraph)
 
-PasteGraph::PasteGraph(const AUUID &graph_id, const Snippet &blueprint, const Point& pos)
-    : CommandImplementation(graph_id), blueprint_(std::make_shared<Snippet>(blueprint)), pos_(pos)
+PasteGraph::PasteGraph(const AUUID& graph_id, const Snippet& blueprint, const Point& pos) : CommandImplementation(graph_id), blueprint_(std::make_shared<Snippet>(blueprint)), pos_(pos)
 {
 }
 std::string PasteGraph::getDescription() const
@@ -42,12 +41,11 @@ bool PasteGraph::doExecute()
 
 bool PasteGraph::doUndo()
 {
-    if(!delete_command_) {
-
+    if (!delete_command_) {
         std::vector<UUID> uuids;
 
         GraphFacade* graph_facade = graph_uuid.empty() ? getRoot() : getGraphFacade();
-        for(const auto& pair : id_mapping_) {
+        for (const auto& pair : id_mapping_) {
             uuids.push_back(pair.second);
         }
 
@@ -55,7 +53,6 @@ bool PasteGraph::doUndo()
     }
 
     executeCommand(delete_command_);
-
 
     return true;
 }
@@ -70,8 +67,7 @@ std::unordered_map<UUID, UUID, UUID::Hasher> PasteGraph::getMapping() const
     return id_mapping_;
 }
 
-
-void PasteGraph::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void PasteGraph::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << blueprint_;
     data << pos_.x << pos_.y;

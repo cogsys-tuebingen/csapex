@@ -9,19 +9,17 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT ModifyFulcrum : public CommandImplementation<ModifyFulcrum>
 {
     COMMAND_HEADER(ModifyFulcrum);
 
 public:
-    ModifyFulcrum(const AUUID &graph_uuid, int connection_id, int fulcrum_id,
-                  int f_type, const Point& f_handle_in, const Point& f_handle_out,
-                  int t_type, const Point &t_handle_in, const Point &t_handle_out);
+    ModifyFulcrum(const AUUID& graph_uuid, int connection_id, int fulcrum_id, int f_type, const Point& f_handle_in, const Point& f_handle_out, int t_type, const Point& t_handle_in,
+                  const Point& t_handle_out);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -42,8 +40,8 @@ private:
     Point t_out;
 };
 
-}
+}  // namespace command
 
-}
+}  // namespace csapex
 
-#endif // MODIFY_FULCRUM_H
+#endif  // MODIFY_FULCRUM_H

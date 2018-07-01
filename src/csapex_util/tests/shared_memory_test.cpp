@@ -33,7 +33,7 @@ protected:
     {
         // Code here will be called immediately after each test (right
         // before the destructor).
-        if(worker_thread.joinable()) {
+        if (worker_thread.joinable()) {
             worker_thread.join();
         }
     }
@@ -44,10 +44,8 @@ protected:
 
 struct Foo
 {
-    Foo()
-        : value(0)
+    Foo() : value(0)
     {
-
     }
     int value;
 };
@@ -55,13 +53,13 @@ struct Foo
 TEST_F(SharedMemoryTest, EmptySubprocess)
 {
     Subprocess sp("test");
-    sp.fork([](){});
+    sp.fork([]() {});
 }
 
 TEST_F(SharedMemoryTest, EmptySubprocessCanBeJoined)
 {
     Subprocess sp("test");
-    sp.fork([](){});
+    sp.fork([]() {});
 
     ASSERT_EQ(0, sp.join());
 }
@@ -84,18 +82,15 @@ TEST_F(SharedMemoryTest, OutputCanBeGrabbed)
     }
 }*/
 
-
 TEST_F(SharedMemoryTest, ReturnCode)
 {
     Subprocess empty("test");
-    empty.fork([](){});
+    empty.fork([]() {});
 
     EXPECT_EQ(0, empty.join());
 
     Subprocess ret1("test");
-    ret1.fork([]() -> int {
-                  return 123;
-              });
+    ret1.fork([]() -> int { return 123; });
 
     EXPECT_EQ(123, ret1.join());
 }
@@ -106,9 +101,7 @@ TEST_F(SharedMemoryTest, SubprocessChannelSendsMessage)
 
     ASSERT_FALSE(sp.out.hasMessage());
 
-    sp.fork([&sp](){
-        sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "done"});
-    });
+    sp.fork([&sp]() { sp.out.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "done" }); });
 
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
     ASSERT_TRUE(sp.out.hasMessage());
@@ -119,11 +112,11 @@ TEST_F(SharedMemoryTest, SubprocessChannelSendsMessage)
 TEST_F(SharedMemoryTest, WritingAndReadingIsSynchronizedInChild)
 {
     Subprocess sp("test");
-    sp.fork([&sp](){
+    sp.fork([&sp]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "done"});
+        sp.out.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "done" });
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
+        sp.out.write({ SubprocessChannel::MessageType::PROCESS_SYNC, "done" });
     });
 
     ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.out.read().type);
@@ -133,9 +126,9 @@ TEST_F(SharedMemoryTest, WritingAndReadingIsSynchronizedInChild)
 TEST_F(SharedMemoryTest, WritingAndReadingIsSynchronizedInParent)
 {
     Subprocess sp("test");
-    sp.fork([&sp](){
-        sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "done"});
-        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
+    sp.fork([&sp]() {
+        sp.out.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "done" });
+        sp.out.write({ SubprocessChannel::MessageType::PROCESS_SYNC, "done" });
     });
 
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -144,14 +137,13 @@ TEST_F(SharedMemoryTest, WritingAndReadingIsSynchronizedInParent)
     ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, sp.out.read().type);
 }
 
-
 TEST_F(SharedMemoryTest, ReadingTwiceBlocks)
 {
     Subprocess sp("test");
 
-    sp.fork([&sp](){
-        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
-        sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "param1"});
+    sp.fork([&sp]() {
+        sp.out.write({ SubprocessChannel::MessageType::PROCESS_SYNC, "done" });
+        sp.out.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "param1" });
     });
 
     std::mutex m;
@@ -164,12 +156,12 @@ TEST_F(SharedMemoryTest, ReadingTwiceBlocks)
     bool thread_has_read_from_channel = false;
     SubprocessChannel::MessageType thread_result = SubprocessChannel::MessageType::NONE;
 
-    worker_thread = std::thread([&](){
+    worker_thread = std::thread([&]() {
         std::unique_lock<std::mutex> lock(m);
         worker_waiting = true;
         worker_waiting_changed.notify_all();
 
-        while(!message_read) {
+        while (!message_read) {
             message_read_changed.wait(lock);
         }
 
@@ -179,7 +171,7 @@ TEST_F(SharedMemoryTest, ReadingTwiceBlocks)
 
     {
         std::unique_lock<std::mutex> lock(m);
-        while(!worker_waiting) {
+        while (!worker_waiting) {
             worker_waiting_changed.wait(lock);
         }
 
@@ -205,13 +197,11 @@ TEST_F(SharedMemoryTest, ReadingTwiceBlocks)
     ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, thread_result);
 }
 
-
-
 TEST_F(SharedMemoryTest, SubprocessChannelCommunication)
 {
     Subprocess sp("test");
 
-    sp.fork([&sp](){
+    sp.fork([&sp]() {
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.in.read().type);
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.in.read().type);
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.in.read().type);
@@ -221,17 +211,17 @@ TEST_F(SharedMemoryTest, SubprocessChannelCommunication)
         ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, msg.type);
         ASSERT_EQ("process", msg.toString());
 
-        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
-        sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "param1"});
-        sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "param2"});
-        sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "param3"});
+        sp.out.write({ SubprocessChannel::MessageType::PROCESS_SYNC, "done" });
+        sp.out.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "param1" });
+        sp.out.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "param2" });
+        sp.out.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "param3" });
     });
 
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg2"});
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg3"});
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg4"});
-    sp.in.write({SubprocessChannel::MessageType::PROCESS_SYNC, "process"});
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1" });
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg2" });
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg3" });
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg4" });
+    sp.in.write({ SubprocessChannel::MessageType::PROCESS_SYNC, "process" });
 
     {
         auto msg = sp.out.read();
@@ -243,14 +233,12 @@ TEST_F(SharedMemoryTest, SubprocessChannelCommunication)
     ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.out.read().type);
     ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.out.read().type);
 }
-
-
 
 TEST_F(SharedMemoryTest, SequentialWriteIn)
 {
     Subprocess sp("test");
 
-    sp.fork([&sp](){
+    sp.fork([&sp]() {
         {
             SubprocessChannel::Message m = sp.in.read();
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -272,13 +260,13 @@ TEST_F(SharedMemoryTest, SequentialWriteIn)
             ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, m.type);
         }
 
-        sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
+        sp.out.write({ SubprocessChannel::MessageType::PROCESS_SYNC, "done" });
     });
 
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg2"});
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg3"});
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg4"});
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1" });
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg2" });
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg3" });
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg4" });
 
     {
         auto msg = sp.out.read();
@@ -287,37 +275,35 @@ TEST_F(SharedMemoryTest, SequentialWriteIn)
     }
 }
 
-
 TEST_F(SharedMemoryTest, ExceptionDoesNotStopSubprocessChannelCommunication)
 {
     Subprocess sp("test");
 
-    sp.fork([&sp](){
+    sp.fork([&sp]() {
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.in.read().type);
         throw std::runtime_error("foo");
     });
 
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1" });
     ASSERT_EQ(SubprocessChannel::MessageType::CHILD_ERROR, sp.out.read().type);
 }
-
 
 TEST_F(SharedMemoryTest, SubprocessLoopTerminates)
 {
     {
         Subprocess sp("test");
-        sp.fork([&sp](){
-            while(sp.isActive()) {
+        sp.fork([&sp]() {
+            while (sp.isActive()) {
                 sp.in.read();
-                sp.out.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "answer"});
+                sp.out.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "answer" });
             }
         });
 
-        sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
+        sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1" });
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.out.read().type);
-        sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
+        sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1" });
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.out.read().type);
-        sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
+        sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1" });
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.out.read().type);
     }
 }
@@ -326,12 +312,12 @@ TEST_F(SharedMemoryTest, SigtermInChildDoesNotStopSubprocessChannelCommunication
 {
     Subprocess sp("test");
 
-    sp.fork([&sp](){
+    sp.fork([&sp]() {
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.in.read().type);
         raise(SIGTERM);
     });
 
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1" });
 
     auto msg = sp.out.read();
     ASSERT_EQ(SubprocessChannel::MessageType::CHILD_SIGNAL, msg.type);
@@ -339,16 +325,15 @@ TEST_F(SharedMemoryTest, SigtermInChildDoesNotStopSubprocessChannelCommunication
     ASSERT_EQ(str.c_str(), msg.toString());
 }
 
-
 TEST_F(SharedMemoryTest, SegfaultInChildDoesNotStopSubprocessChannelCommunication)
 {
     Subprocess sp("test");
-    sp.fork([&sp](){
+    sp.fork([&sp]() {
         ASSERT_EQ(SubprocessChannel::MessageType::PARAMETER_UPDATE, sp.in.read().type);
         raise(SIGSEGV);
     });
 
-    sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1"});
+    sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, "msg1" });
 
     auto msg = sp.out.read();
     ASSERT_EQ(SubprocessChannel::MessageType::CHILD_SIGNAL, msg.type);
@@ -362,33 +347,32 @@ TEST_F(SharedMemoryTest, MessageHandleActsAsRAII)
 
     ASSERT_FALSE(sp.out.hasMessage());
 
-    sp.fork([&sp](){
+    sp.fork([&sp]() {
         bool as_expected = true;
-        for(std::size_t i = 0; i < 5; ++i){
+        for (std::size_t i = 0; i < 5; ++i) {
             SubprocessChannel::Message message = sp.in.read();
 
             // sleep a little after reading, expect that message's data does not change
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
             std::string expected_msg(std::to_string(i));
-            if(expected_msg != message.toString()) {
+            if (expected_msg != message.toString()) {
                 as_expected = false;
                 std::cerr << "not equal: " << i << " " << message.data << std::endl;
             }
         }
 
-        if(as_expected) {
-            sp.out.write({SubprocessChannel::MessageType::PROCESS_SYNC, "done"});
+        if (as_expected) {
+            sp.out.write({ SubprocessChannel::MessageType::PROCESS_SYNC, "done" });
         } else {
-            sp.out.write({SubprocessChannel::MessageType::SHUTDOWN, "done"});
+            sp.out.write({ SubprocessChannel::MessageType::SHUTDOWN, "done" });
         }
     });
 
-    for(std::size_t i = 0; i < 5; ++i){
+    for (std::size_t i = 0; i < 5; ++i) {
         std::string msg(std::to_string(i));
-        sp.in.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, msg});
+        sp.in.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, msg });
     }
 
     ASSERT_EQ(SubprocessChannel::MessageType::PROCESS_SYNC, sp.out.read().type);
 }
-

@@ -26,7 +26,6 @@ private:
     param::AngleParameterPtr angle_p_;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // ANGLE_PARAM_ADAPTER_H
+#endif  // ANGLE_PARAM_ADAPTER_H

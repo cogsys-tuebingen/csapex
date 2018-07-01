@@ -17,42 +17,44 @@
 #include <boost/type_traits.hpp>
 #include <typeindex>
 
-namespace YAML {
+namespace YAML
+{
 class Emitter;
 }
 
-namespace csapex {
-
+namespace csapex
+{
 class CSAPEX_CORE_EXPORT MessageFactory : public Singleton<MessageFactory>
 {
     friend class Singleton<MessageFactory>;
 
 public:
-    typedef std::function<TokenData::Ptr()>  Constructor;
+    typedef std::function<TokenData::Ptr()> Constructor;
 
 public:
     bool isMessageRegistered(const std::string& type) const;
 
     template <typename M>
-    static TokenData::Ptr createMessage() {
+    static TokenData::Ptr createMessage()
+    {
         return makeEmpty<M>();
     }
-    template <template <typename> class Wrapper,typename M>
-    static TokenData::Ptr createDirectMessage() {
-        return makeEmpty< Wrapper<M> >();
+    template <template <typename> class Wrapper, typename M>
+    static TokenData::Ptr createDirectMessage()
+    {
+        return makeEmpty<Wrapper<M> >();
     }
 
     static TokenData::Ptr createMessage(const std::string& type);
 
     static TokenData::Ptr readFile(const std::string& path);
-    static int writeFile(const std::string &path, const std::string &base, const int suffix,
-                         const TokenData &msg, serialization::Format format);
+    static int writeFile(const std::string& path, const std::string& base, const int suffix, const TokenData& msg, serialization::Format format);
 
     static TokenData::Ptr readYamlFile(const std::string& path);
-    static void writeYamlFile(const std::string& path, const TokenData &msg);
+    static void writeYamlFile(const std::string& path, const TokenData& msg);
 
     static TokenData::Ptr readBinaryFile(const std::string& path);
-    static void writeBinaryFile(const std::string& path, const TokenData &msg);
+    static void writeBinaryFile(const std::string& path, const TokenData& msg);
 
     void shutdown() override;
 
@@ -61,19 +63,16 @@ public:
     static void registerDirectMessage()
     {
         MessageFactory& instance = MessageFactory::instance();
-        std::string type = connection_types::serializationName< Wrapper<M> >();
-        if(!instance.isMessageRegistered(type)) {
-            instance.registerMessage(type,
-                                     std::type_index(typeid(Wrapper<M>)),
-                                     std::bind(&MessageFactory::createDirectMessage<Wrapper, M>));
+        std::string type = connection_types::serializationName<Wrapper<M> >();
+        if (!instance.isMessageRegistered(type)) {
+            instance.registerMessage(type, std::type_index(typeid(Wrapper<M>)), std::bind(&MessageFactory::createDirectMessage<Wrapper, M>));
         }
     }
 
     template <typename M>
-    static void registerMessage() {
-        MessageFactory::instance().registerMessage(connection_types::serializationName<M>(),
-                                                   std::type_index(typeid(M)),
-                                                   std::bind(&MessageFactory::createMessage<M>));
+    static void registerMessage()
+    {
+        MessageFactory::instance().registerMessage(connection_types::serializationName<M>(), std::type_index(typeid(M)), std::bind(&MessageFactory::createMessage<M>));
     }
 
 private:
@@ -86,12 +85,11 @@ private:
     std::map<std::string, std::type_index> type_to_type_index;
 };
 
-
-
 template <typename T>
 struct MessageConstructorRegistered
 {
-    MessageConstructorRegistered() {
+    MessageConstructorRegistered()
+    {
         csapex::MessageFactory::registerMessage<T>();
     }
 };
@@ -99,11 +97,12 @@ struct MessageConstructorRegistered
 template <template <typename> class Wrapper, typename T>
 struct DirectMessageConstructorRegistered
 {
-    DirectMessageConstructorRegistered() {
+    DirectMessageConstructorRegistered()
+    {
         csapex::MessageFactory::registerDirectMessage<Wrapper, T>();
     }
 };
 
-}
+}  // namespace csapex
 
-#endif // MESSAGE_FACTORY_H
+#endif  // MESSAGE_FACTORY_H

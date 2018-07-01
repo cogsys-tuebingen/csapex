@@ -17,7 +17,6 @@ public:
     double doubleMinimum() const;
     double doubleMaximum() const;
 
-
 public Q_SLOTS:
     void setSpan(double lower, double upper);
 
@@ -52,4 +51,4 @@ private:
     double max_;
 };
 
-#endif // DOUBLESPANSLIDER_H
+#endif  // DOUBLESPANSLIDER_H

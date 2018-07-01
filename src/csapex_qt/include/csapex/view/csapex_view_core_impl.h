@@ -10,7 +10,7 @@ class CSAPEX_QT_EXPORT CsApexViewCoreImplementation : public CsApexViewCore
 {
 public:
     CsApexViewCoreImplementation(CsApexCorePtr core);
-    CsApexViewCoreImplementation(CsApexViewCore &parent, ExceptionHandler &exception_handler);
+    CsApexViewCoreImplementation(CsApexViewCore& parent, ExceptionHandler& exception_handler);
 
     void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR) override;
 
@@ -19,7 +19,7 @@ public:
     void load(const std::string& file) override;
     void saveAs(const std::string& file, bool quiet = false) override;
 
-    SnippetPtr serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const override;
+    SnippetPtr serializeNodes(const AUUID& graph_id, const std::vector<UUID>& nodes) const override;
 
     void setPause(bool paused) override;
     bool isPaused() const override;
@@ -64,9 +64,9 @@ private:
 
     std::shared_ptr<DragIO> drag_io;
 
-    ExceptionHandler &exception_handler_;
+    ExceptionHandler& exception_handler_;
 };
 
-}
+}  // namespace csapex
 
-#endif // CSAPEX_VIEW_CORE_IMPL_H
+#endif  // CSAPEX_VIEW_CORE_IMPL_H

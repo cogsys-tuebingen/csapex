@@ -13,5 +13,4 @@ CsApexTestCase::CsApexTestCase()
 
 CsApexTestCase::~CsApexTestCase()
 {
-
 }

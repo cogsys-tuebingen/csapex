@@ -14,7 +14,6 @@ using namespace csapex;
 
 SerializerRegistered<RawMessageSerializer> g_register_RawMessage_serializer_(RawMessage::PACKET_TYPE_ID, &RawMessageSerializer::instance());
 
-
 void RawMessageSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
     packet.serializeVersioned(data);

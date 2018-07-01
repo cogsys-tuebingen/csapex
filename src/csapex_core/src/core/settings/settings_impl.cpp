@@ -28,14 +28,13 @@ namespace bf3 = boost::filesystem;
 namespace bf3 = boost::filesystem3;
 #endif
 
-
 using namespace csapex;
 
 SettingsImplementation SettingsImplementation::NoSettings(false);
 
 SettingsImplementation::SettingsImplementation(bool load_from_config)
 {
-    if(load_from_config) {
+    if (load_from_config) {
         loadPersistent();
     }
 }
@@ -45,9 +44,9 @@ void SettingsImplementation::savePersistent()
     YAML::Emitter yaml;
     yaml << YAML::BeginSeq;
 
-    for(auto it = settings_.begin(); it != settings_.end(); ++it) {
+    for (auto it = settings_.begin(); it != settings_.end(); ++it) {
         Entry& entry = it->second;
-        if(entry.persistent) {
+        if (entry.persistent) {
             csapex::param::Parameter::Ptr p = entry.parameter;
             YAML::Node n;
             p->serialize_yaml(n);
@@ -76,18 +75,18 @@ void SettingsImplementation::savePersistent()
 
 void SettingsImplementation::loadPersistent()
 {
-    if(!bf3::exists(settings_file)) {
+    if (!bf3::exists(settings_file)) {
         return;
     }
 
     YAML::Node doc = YAML::LoadFile(settings_file.c_str());
 
-    if(doc.Type() != YAML::NodeType::Sequence) {
+    if (doc.Type() != YAML::NodeType::Sequence) {
         std::cerr << "cannot read the settings" << std::endl;
         return;
     }
 
-    for(std::size_t i = 0, n = doc.size(); i < n; ++i) {
+    for (std::size_t i = 0, n = doc.size(); i < n; ++i) {
         csapex::param::Parameter::Ptr p = doc[i].as<csapex::param::Parameter::Ptr>();
         p->setUUID(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
 
@@ -101,9 +100,9 @@ void SettingsImplementation::saveTemporary(YAML::Node& node)
 {
     YAML::Node yaml(YAML::NodeType::Sequence);
 
-    for(auto it = settings_.begin(); it != settings_.end(); ++it) {
+    for (auto it = settings_.begin(); it != settings_.end(); ++it) {
         Entry& entry = it->second;
-        if(!entry.persistent) {
+        if (!entry.persistent) {
             YAML::Node n;
             csapex::param::Parameter::Ptr p = entry.parameter;
             p->serialize_yaml(n);
@@ -120,17 +119,17 @@ void SettingsImplementation::saveTemporary(YAML::Node& node)
 void SettingsImplementation::loadTemporary(YAML::Node& node)
 {
     YAML::Node doc = node["settings"];
-    if(doc.IsDefined()) {
-        if(doc.Type() != YAML::NodeType::Sequence) {
+    if (doc.IsDefined()) {
+        if (doc.Type() != YAML::NodeType::Sequence) {
             std::cerr << "cannot read the temporary settings" << std::endl;
             return;
         }
 
-        for(std::size_t i = 0, n = doc.size(); i < n; ++i) {
+        for (std::size_t i = 0, n = doc.size(); i < n; ++i) {
             csapex::param::Parameter::Ptr p = doc[i].as<csapex::param::Parameter::Ptr>();
             p->setUUID(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
 
-            if(knows(p->name())) {
+            if (knows(p->name())) {
                 Entry& entry = settings_[p->name()];
                 entry.parameter->cloneDataFrom(*p);
             } else {
@@ -144,7 +143,6 @@ void SettingsImplementation::loadTemporary(YAML::Node& node)
     dirty_ = false;
 }
 
-
 void SettingsImplementation::add(csapex::param::Parameter::Ptr p, bool persistent)
 {
     p->setUUID(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
@@ -153,22 +151,20 @@ void SettingsImplementation::add(csapex::param::Parameter::Ptr p, bool persisten
     entry.parameter = p;
     entry.persistent = persistent;
 
-    observe(p->parameter_changed, [this](param::Parameter* p) {
-        settingsChanged(p->name());
-    });
+    observe(p->parameter_changed, [this](param::Parameter* p) { settingsChanged(p->name()); });
 
     settingsChanged(p->name());
 }
 
-csapex::param::Parameter::Ptr SettingsImplementation::get(const std::string &name) const
+csapex::param::Parameter::Ptr SettingsImplementation::get(const std::string& name) const
 {
     const Entry& entry = settings_.at(name);
     return entry.parameter;
 }
-csapex::param::Parameter::Ptr SettingsImplementation::getNoThrow(const std::string &name) const
+csapex::param::Parameter::Ptr SettingsImplementation::getNoThrow(const std::string& name) const
 {
     auto it = settings_.find(name);
-    if(it != settings_.end()) {
+    if (it != settings_.end()) {
         const Entry& entry = it->second;
         return entry.parameter;
     } else {
@@ -176,7 +172,7 @@ csapex::param::Parameter::Ptr SettingsImplementation::getNoThrow(const std::stri
     }
 }
 
-bool SettingsImplementation::knows(const std::string &name) const
+bool SettingsImplementation::knows(const std::string& name) const
 {
     return settings_.find(name) != settings_.end();
 }

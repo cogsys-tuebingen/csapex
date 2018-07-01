@@ -13,30 +13,27 @@
 
 using namespace csapex;
 
-SnippetListGenerator::SnippetListGenerator(SnippetFactory &snippet_factory)
-    : snippet_factory_(snippet_factory)
+SnippetListGenerator::SnippetListGenerator(SnippetFactory& snippet_factory) : snippet_factory_(snippet_factory)
 {
-
 }
 
 void SnippetListGenerator::insertAvailableSnippets(QMenu* menu)
 {
     auto tags = snippet_factory_.getTagMap();
 
-    for(const auto& pair : tags) {
+    for (const auto& pair : tags) {
         const std::string& tag = pair.first;
         const std::vector<SnippetPtr>& constructors = pair.second;
 
         QMenu* submenu = new QMenu(QString::fromStdString(tag));
         menu->addMenu(submenu);
 
-        for(const SnippetPtr& snippet : constructors) {
+        for (const SnippetPtr& snippet : constructors) {
             QIcon icon = QIcon(":/snippet.png");
-
 
             QAction* action = new QAction(snippet->getName().c_str(), submenu);
             action->setData(QString(snippet->getName().c_str()));
-            if(!icon.isNull()) {
+            if (!icon.isNull()) {
                 action->setIcon(icon);
                 action->setIconVisibleInMenu(true);
             }
@@ -47,9 +44,7 @@ void SnippetListGenerator::insertAvailableSnippets(QMenu* menu)
     }
 
     menu->menuAction()->setIconVisibleInMenu(true);
-
 }
-
 
 void SnippetListGenerator::insertAvailableSnippets(QTreeWidget* tree)
 {
@@ -57,7 +52,7 @@ void SnippetListGenerator::insertAvailableSnippets(QTreeWidget* tree)
 
     tree->setDragEnabled(true);
 
-    for(const auto& pair : tags) {
+    for (const auto& pair : tags) {
         const std::string& tag = pair.first;
         const std::vector<SnippetPtr>& constructors = pair.second;
 
@@ -65,7 +60,7 @@ void SnippetListGenerator::insertAvailableSnippets(QTreeWidget* tree)
         submenu->setText(0, QString::fromStdString(tag));
         tree->addTopLevelItem(submenu);
 
-        for(const SnippetPtr& snippet : constructors) {
+        for (const SnippetPtr& snippet : constructors) {
             QIcon icon = QIcon(":/snippet.png");
             std::string name = snippet->getName();
 
@@ -83,7 +78,7 @@ void SnippetListGenerator::insertAvailableSnippets(QTreeWidget* tree)
 
 void SnippetListGenerator::listAvailableSnippets(QStandardItemModel* model)
 {
-    for(const auto& pair: snippet_factory_.getSnippets()) {
+    for (const auto& pair : snippet_factory_.getSnippets()) {
         const SnippetPtr& snippet = pair.second;
 
         QString name = QString::fromStdString(snippet->getName());
@@ -91,7 +86,7 @@ void SnippetListGenerator::listAvailableSnippets(QStandardItemModel* model)
         QString type(snippet->getName().c_str());
 
         QStringList tags;
-        for(const TagConstPtr& tag : snippet->getTags()) {
+        for (const TagConstPtr& tag : snippet->getTags()) {
             tags << tag->getName().c_str();
         }
 

@@ -23,26 +23,24 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DisableNode)
 
-DisableNode::DisableNode(const AUUID& parent_uuid, const UUID& uuid, bool disable)
-    : CommandImplementation(parent_uuid), uuid(uuid), disable_(disable)
+DisableNode::DisableNode(const AUUID& parent_uuid, const UUID& uuid, bool disable) : CommandImplementation(parent_uuid), uuid(uuid), disable_(disable)
 {
 }
 
 std::string DisableNode::getDescription() const
 {
-    if(disable_) {
+    if (disable_) {
         return std::string("disable node ") + uuid.getFullName();
     } else {
         return std::string("enable node ") + uuid.getFullName();
     }
 }
 
-
 bool DisableNode::doExecute()
 {
     NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
 
-//    node_handle->setProcessingEnabled(!disable_);
+    //    node_handle->setProcessingEnabled(!disable_);
     node_handle->getNodeState()->setEnabled(!disable_);
 
     return true;
@@ -52,7 +50,7 @@ bool DisableNode::doUndo()
 {
     NodeHandle* node_handle = getGraph()->findNodeHandle(uuid);
 
-//    node_handle->setProcessingEnabled(disable_);
+    //    node_handle->setProcessingEnabled(disable_);
     node_handle->getNodeState()->setEnabled(disable_);
 
     return true;
@@ -63,8 +61,7 @@ bool DisableNode::doRedo()
     return doExecute();
 }
 
-
-void DisableNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void DisableNode::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

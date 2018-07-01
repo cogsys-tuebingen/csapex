@@ -24,7 +24,6 @@ CSAPEX_REGISTER_COMMAND_SERIALIZER(Quit)
 
 Quit::Quit()
 {
-
 }
 
 bool Quit::isUndoable() const
@@ -58,10 +57,9 @@ bool Quit::doRedo()
     return doExecute();
 }
 
-void Quit::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Quit::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
-
 }
 void Quit::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {

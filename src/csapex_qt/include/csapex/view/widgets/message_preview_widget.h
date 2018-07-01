@@ -12,10 +12,10 @@
 
 namespace csapex
 {
-
 class MessagePreviewWidget;
 
-namespace impl {
+namespace impl
+{
 class CSAPEX_QT_EXPORT PreviewInput : public Input
 {
 public:
@@ -28,8 +28,7 @@ public:
 private:
     QPointer<MessagePreviewWidget> parent_;
 };
-}
-
+}  // namespace impl
 
 class CSAPEX_QT_EXPORT MessagePreviewWidget : public QGraphicsView
 {
@@ -45,17 +44,16 @@ public:
 
     void setCallback(std::function<void(TokenData::ConstPtr)> cb);
 
-
     bool isConnected() const;
 
 Q_SIGNALS:
     void displayImageRequest(const QImage& msg);
-    void displayTextRequest(const QString &txt);
+    void displayTextRequest(const QString& txt);
 
 public Q_SLOTS:
     void displayImage(const QImage& msg);
-    void displayText(const QString &txt);
-    
+    void displayText(const QString& txt);
+
 private:
     void connectToImpl(OutputPtr out);
     void connectToImpl(InputPtr out);
@@ -70,6 +68,6 @@ private:
     QGraphicsTextItem* txt_item_;
 };
 
-}
+}  // namespace csapex
 
-#endif // MESSAGE_PREVIEW_WIDGET_H
+#endif  // MESSAGE_PREVIEW_WIDGET_H

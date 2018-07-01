@@ -13,19 +13,24 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Slot : public Input
 {
     friend class Event;
 
 public:
-    Slot(std::function<void()> callback, const UUID &uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    Slot(std::function<void(const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    Slot(std::function<void(Slot*,const TokenPtr&)> callback, const UUID &uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void()> callback, const UUID& uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void(const TokenPtr&)> callback, const UUID& uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
+    Slot(std::function<void(Slot*, const TokenPtr&)> callback, const UUID& uuid, bool active, bool blocking = true, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
 
     template <typename TokenType>
-    Slot(std::function<void(const std::shared_ptr<TokenType const>&)> callback, const UUID &uuid, bool active)
-        : Slot([callback](const TokenPtr& token){ auto t = std::dynamic_pointer_cast<TokenType const>(token->getTokenData()); apex_assert_hard(t); callback(t); }, uuid, active)
+    Slot(std::function<void(const std::shared_ptr<TokenType const>&)> callback, const UUID& uuid, bool active)
+      : Slot(
+            [callback](const TokenPtr& token) {
+                auto t = std::dynamic_pointer_cast<TokenType const>(token->getTokenData());
+                apex_assert_hard(t);
+                callback(t);
+            },
+            uuid, active)
     {
     }
 
@@ -71,7 +76,7 @@ private:
     void tryNextToken();
 
 protected:
-    std::function<void(Slot*,const TokenPtr&)> callback_;
+    std::function<void(Slot*, const TokenPtr&)> callback_;
 
     bool active_;
     bool blocking_;
@@ -84,5 +89,5 @@ private:
     std::recursive_mutex available_connections_mutex_;
 };
 
-}
-#endif // SLOT_H
+}  // namespace csapex
+#endif  // SLOT_H

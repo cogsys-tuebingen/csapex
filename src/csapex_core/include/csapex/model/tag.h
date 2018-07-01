@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Tag : public Streamable
 {
 protected:
@@ -24,9 +23,11 @@ public:
     static const uint8_t PACKET_TYPE_ID = 129;
 
 private:
-    class Manager {
+    class Manager
+    {
     public:
-        static Manager& instance() {
+        static Manager& instance()
+        {
             static Manager inst;
             return inst;
         }
@@ -34,7 +35,7 @@ private:
     public:
         const Tag::Ptr get(const std::string& name);
         bool exists(const std::string& name) const;
-        void create(const std::string &name);
+        void create(const std::string& name);
 
     private:
         Manager();
@@ -52,12 +53,12 @@ public:
 
     std::string getName() const;
 
-    int compare (const Tag& tag) const;
-    bool operator < (const Tag& tag) const;
+    int compare(const Tag& tag) const;
+    bool operator<(const Tag& tag) const;
 
     virtual uint8_t getPacketType() const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version);
 
     static Ptr makeEmpty();
@@ -70,6 +71,6 @@ private:
     std::string name_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TAG_H
+#endif  // TAG_H

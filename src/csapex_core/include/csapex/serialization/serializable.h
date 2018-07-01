@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class Serializable : public Clonable
 {
 public:
@@ -20,13 +19,13 @@ public:
 
     virtual SemanticVersion getVersion() const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const = 0;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const = 0;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) = 0;
 
-    void serializeVersioned(SerializationBuffer &data) const;
+    void serializeVersioned(SerializationBuffer& data) const;
     void deserializeVersioned(const SerializationBuffer& data);
 };
 
-}
+}  // namespace csapex
 
 #endif

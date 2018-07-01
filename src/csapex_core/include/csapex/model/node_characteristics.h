@@ -6,7 +6,6 @@
 
 namespace csapex
 {
-
 class NodeCharacteristics : public Serializable
 {
 protected:
@@ -27,10 +26,10 @@ public:
 
     bool is_leading_to_essential_vertex;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_CHARACTERISTICS_H
+#endif  // NODE_CHARACTERISTICS_H

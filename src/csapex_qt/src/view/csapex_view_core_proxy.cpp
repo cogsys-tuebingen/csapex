@@ -1,7 +1,6 @@
 /// HEADER
 #include <csapex/view/csapex_view_core_proxy.h>
 
-
 /// COMPONENT
 #include <csapex/command/dispatcher.h>
 #include <csapex/command/dispatcher_proxy.h>
@@ -31,16 +30,12 @@
 
 using namespace csapex;
 
-
 CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
-    : Proxy(session),
-      bootstrap_(std::make_shared<Bootstrap>()),
-      thread_active_(false),
-      exception_handler_(std::make_shared<GuiExceptionHandler>(false))
+  : Proxy(session), bootstrap_(std::make_shared<Bootstrap>()), thread_active_(false), exception_handler_(std::make_shared<GuiExceptionHandler>(false))
 {
     session_->start();
 
-    spinner = std::thread([&](){
+    spinner = std::thread([&]() {
         thread_active_ = true;
 
         session_->run();
@@ -51,7 +46,7 @@ CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
     });
 
     // busy waiting for the spinning thread
-    while(!session_->isRunning()) {
+    while (!session_->isRunning()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
@@ -59,75 +54,73 @@ CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
 
     profiler_proxy_ = std::make_shared<ProfilerProxy>(core_channel_);
 
-    observe(core_channel_->note_received, [this](const io::NoteConstPtr& note){
-        if(const std::shared_ptr<CoreNote const>& cn = std::dynamic_pointer_cast<CoreNote const>(note)) {
-            switch(cn->getNoteType()) {
-            case CoreNoteType::ConfigChanged:
-                config_changed();
-                break;
-            case CoreNoteType::StepBegin:
-                begin_step();
-                break;
-            case CoreNoteType::StepEnd:
-                end_step();
-                break;
+    observe(core_channel_->note_received, [this](const io::NoteConstPtr& note) {
+        if (const std::shared_ptr<CoreNote const>& cn = std::dynamic_pointer_cast<CoreNote const>(note)) {
+            switch (cn->getNoteType()) {
+                case CoreNoteType::ConfigChanged:
+                    config_changed();
+                    break;
+                case CoreNoteType::StepBegin:
+                    begin_step();
+                    break;
+                case CoreNoteType::StepEnd:
+                    end_step();
+                    break;
 
-            case CoreNoteType::StatusChanged:
-                status_changed(cn->getPayload<std::string>(0));
-                break;
-            case CoreNoteType::NewNodeType:
-                new_node_type();
-                break;
-            case CoreNoteType::NewSnippetType:
-                new_snippet_type();
-                break;
-            case CoreNoteType::ResetRequested:
-                reset_requested();
-                break;
-            case CoreNoteType::ResetDone:
-                reset_done();
-                break;
-            case CoreNoteType::Saved:
-                saved();
-                break;
-            case CoreNoteType::Loaded:
-                loaded();
-                break;
-            case CoreNoteType::Paused:
-                paused(cn->getPayload<bool>(0));
-                break;
-            case CoreNoteType::SteppingEnabled:
-                stepping_enabled();
-                break;
+                case CoreNoteType::StatusChanged:
+                    status_changed(cn->getPayload<std::string>(0));
+                    break;
+                case CoreNoteType::NewNodeType:
+                    new_node_type();
+                    break;
+                case CoreNoteType::NewSnippetType:
+                    new_snippet_type();
+                    break;
+                case CoreNoteType::ResetRequested:
+                    reset_requested();
+                    break;
+                case CoreNoteType::ResetDone:
+                    reset_done();
+                    break;
+                case CoreNoteType::Saved:
+                    saved();
+                    break;
+                case CoreNoteType::Loaded:
+                    loaded();
+                    break;
+                case CoreNoteType::Paused:
+                    paused(cn->getPayload<bool>(0));
+                    break;
+                case CoreNoteType::SteppingEnabled:
+                    stepping_enabled();
+                    break;
 
-                // TODO: support this
-//            case CoreNoteType::SaveDetailRequest:
-//                save_detail_request();
-//                break;
-//            case CoreNoteType::LoadDetailRequest:
-//                load_detail_request();
-//                break;
+                    // TODO: support this
+                    //            case CoreNoteType::SaveDetailRequest:
+                    //                save_detail_request();
+                    //                break;
+                    //            case CoreNoteType::LoadDetailRequest:
+                    //                load_detail_request();
+                    //                break;
 
-            case CoreNoteType::Notification:
-                notification(cn->getPayload<Notification>(0));
-                break;
+                case CoreNoteType::Notification:
+                    notification(cn->getPayload<Notification>(0));
+                    break;
             }
         }
     });
 
-
     settings_ = std::make_shared<SettingsProxy>(session_);
     remote_plugin_locator_ = std::make_shared<PluginLocator>(*settings_);
 
-    bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR,
-                         remote_plugin_locator_.get());
+    bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR, remote_plugin_locator_.get());
 
     // init core plugins
     core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
 
     core_plugin_manager->load(remote_plugin_locator_.get());
 
-    for(const auto& cp : core_plugin_manager->getConstructors()) {
+    for (const auto& cp : core_plugin_manager->getConstructors()) {
         const std::string& plugin_name = cp.first;
         assert(core_plugins_.find(plugin_name) == core_plugins_.end());
 
@@ -139,14 +132,13 @@ CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
         core_plugins_[plugin_name] = plugin;
     }
 
-    for(auto plugin : core_plugins_) {
+    for (auto plugin : core_plugins_) {
         plugin.second->prepare(getSettings());
     }
 
     // make the proxys only _after_ the session is started
     NodeFacadeProxyPtr remote_facade = std::make_shared<NodeFacadeProxy>(session_, AUUID::NONE);
     remote_root_ = std::make_shared<GraphFacadeProxy>(session_, remote_facade);
-
 
     node_adapter_factory_ = std::make_shared<NodeAdapterFactory>(*settings_, remote_plugin_locator_.get());
     dispatcher_ = std::make_shared<CommandDispatcherProxy>(session_);
@@ -158,16 +150,11 @@ CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
     // thread_pool_ = ...
     // snippet_factory_ = ...
 
-    observe(session_->packet_received, [this](StreamableConstPtr packet){
-        handlePacket(packet);
-    });
-    observe(session_->broadcast_received, [this](BroadcastMessageConstPtr packet){
-        handleBroadcast(packet);
-    });
+    observe(session_->packet_received, [this](StreamableConstPtr packet) { handlePacket(packet); });
+    observe(session_->broadcast_received, [this](BroadcastMessageConstPtr packet) { handleBroadcast(packet); });
 
     MessageRendererManager::instance().setPluginLocator(remote_plugin_locator_);
     node_adapter_factory_->loadPlugins();
-
 
     observe(dispatcher_->state_changed, undo_state_changed);
     observe(dispatcher_->dirty_changed, undo_dirty_changed);
@@ -179,12 +166,11 @@ CsApexViewCoreProxy::~CsApexViewCoreProxy()
 
     session_->shutdown();
 
-    if(spinner.joinable()) {
+    if (spinner.joinable()) {
         spinner.join();
     }
     remote_plugin_locator_->shutdown();
 }
-
 
 bool CsApexViewCoreProxy::isProxy() const
 {
@@ -193,26 +179,25 @@ bool CsApexViewCoreProxy::isProxy() const
 
 void CsApexViewCoreProxy::handlePacket(StreamableConstPtr packet)
 {
-    (void) packet;
+    (void)packet;
 }
 
 void CsApexViewCoreProxy::handleBroadcast(BroadcastMessageConstPtr packet)
 {
-    if(packet) {
+    if (packet) {
         //                std::cout << "type=" << (int) serial->getPacketType() << std::endl;
 
-        switch(packet->getPacketType()) {
-        case BroadcastMessage::PACKET_TYPE_ID:
-            if(BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
-                if(auto notification_msg = std::dynamic_pointer_cast<NotificationMessage const>(broadcast)) {
-                    Notification n = notification_msg->getNotification();
-                    notification(n);
+        switch (packet->getPacketType()) {
+            case BroadcastMessage::PACKET_TYPE_ID:
+                if (BroadcastMessageConstPtr broadcast = std::dynamic_pointer_cast<BroadcastMessage const>(packet)) {
+                    if (auto notification_msg = std::dynamic_pointer_cast<NotificationMessage const>(broadcast)) {
+                        Notification n = notification_msg->getNotification();
+                        notification(n);
+                    }
                 }
-            }
         }
     }
 }
-
 
 NodeAdapterFactoryPtr CsApexViewCoreProxy::getNodeAdapterFactory()
 {
@@ -230,7 +215,6 @@ ExceptionHandler& CsApexViewCoreProxy::getExceptionHandler() const
     return *exception_handler_;
 }
 
-
 PluginLocatorPtr CsApexViewCoreProxy::getPluginLocator() const
 {
     return remote_plugin_locator_;
@@ -245,7 +229,6 @@ Settings& CsApexViewCoreProxy::getSettings() const
 {
     return *settings_;
 }
-
 
 GraphFacadePtr CsApexViewCoreProxy::getRoot()
 {
@@ -276,15 +259,12 @@ void CsApexViewCoreProxy::sendNotification(const std::string& notification, Erro
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSendNotification, notification, static_cast<uint8_t>(error_level));
 }
 
-
-
 /// RELAYS
 
 void CsApexViewCoreProxy::reset()
 {
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreReset);
 }
-
 
 void CsApexViewCoreProxy::load(const std::string& file)
 {
@@ -296,7 +276,7 @@ void CsApexViewCoreProxy::saveAs(const std::string& file, bool quiet)
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSave, file, quiet);
 }
 
-SnippetPtr CsApexViewCoreProxy::serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const
+SnippetPtr CsApexViewCoreProxy::serializeNodes(const AUUID& graph_id, const std::vector<UUID>& nodes) const
 {
     return request<SnippetPtr, CoreRequests>(CoreRequests::CoreRequestType::CoreSerialize, graph_id, nodes);
 }
@@ -310,7 +290,6 @@ void CsApexViewCoreProxy::setPause(bool paused)
 {
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreSetPause, paused);
 }
-
 
 bool CsApexViewCoreProxy::isSteppingMode() const
 {
@@ -326,7 +305,6 @@ void CsApexViewCoreProxy::step()
 {
     session_->sendRequest<CoreRequests>(CoreRequests::CoreRequestType::CoreStep);
 }
-
 
 void CsApexViewCoreProxy::shutdown()
 {

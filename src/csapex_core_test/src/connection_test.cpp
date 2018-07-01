@@ -16,27 +16,29 @@
 using namespace csapex;
 using namespace connection_types;
 
-
-class ConnectionTest : public CsApexTestCase {
+class ConnectionTest : public CsApexTestCase
+{
 protected:
-    ConnectionTest()
-        : uuid_provider(std::make_shared<UUIDProvider>())
+    ConnectionTest() : uuid_provider(std::make_shared<UUIDProvider>())
     {
     }
 
-    virtual ~ConnectionTest() {
+    virtual ~ConnectionTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         // Code here will be called immediately after the constructor (right
         // before each test).
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
@@ -44,7 +46,8 @@ protected:
     UUIDProviderPtr uuid_provider;
 };
 
-TEST_F(ConnectionTest, DirectConnectionCompatibility) {
+TEST_F(ConnectionTest, DirectConnectionCompatibility)
+{
     StaticOutput o(uuid_provider->makeUUID("out"));
     Input i(uuid_provider->makeUUID("in"));
 
@@ -56,7 +59,8 @@ TEST_F(ConnectionTest, DirectConnectionCompatibility) {
     ASSERT_TRUE(Connection::isCompatibleWith(&o, &i));
 }
 
-TEST_F(ConnectionTest, DirectConnectionIsPossible) {
+TEST_F(ConnectionTest, DirectConnectionIsPossible)
+{
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("out"));
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
@@ -78,8 +82,8 @@ TEST_F(ConnectionTest, DirectConnectionIsPossible) {
     ASSERT_EQ(msg->value, value_message->value);
 }
 
-
-TEST_F(ConnectionTest, DirectConnectionCanBeRepeated) {
+TEST_F(ConnectionTest, DirectConnectionCanBeRepeated)
+{
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("out"));
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
@@ -111,7 +115,8 @@ TEST_F(ConnectionTest, DirectConnectionCanBeRepeated) {
     recv(23);
 }
 
-TEST_F(ConnectionTest, InputsCanBeConnectedToOnlyOneOutput) {
+TEST_F(ConnectionTest, InputsCanBeConnectedToOnlyOneOutput)
+{
     OutputPtr o1 = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o1"));
     OutputPtr o2 = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o2"));
 
@@ -138,9 +143,10 @@ TEST_F(ConnectionTest, InputsCanBeConnectedToOnlyOneOutput) {
     ASSERT_EQ(nullptr, DirectConnection::connect(o1, i));
 }
 
-//test moving connections as well...
+// test moving connections as well...
 
-TEST_F(ConnectionTest, OutputsCanHaveManyConnections) {
+TEST_F(ConnectionTest, OutputsCanHaveManyConnections)
+{
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o"));
 
     InputPtr i1 = std::make_shared<Input>(uuid_provider->makeUUID("i1"));
@@ -181,11 +187,12 @@ TEST_F(ConnectionTest, OutputsCanHaveManyConnections) {
     ASSERT_EQ(nullptr, DirectConnection::connect(o, i2));
 }
 
-TEST_F(ConnectionTest, EventsCanHaveManyConnections) {
+TEST_F(ConnectionTest, EventsCanHaveManyConnections)
+{
     EventPtr e = std::make_shared<Event>(uuid_provider->makeUUID("e"));
 
-    SlotPtr s1 = std::make_shared<Slot>([](const TokenConstPtr& ){}, uuid_provider->makeUUID("s1"), false);
-    SlotPtr s2 = std::make_shared<Slot>([](const TokenConstPtr& ){}, uuid_provider->makeUUID("s2"), false);
+    SlotPtr s1 = std::make_shared<Slot>([](const TokenConstPtr&) {}, uuid_provider->makeUUID("s1"), false);
+    SlotPtr s2 = std::make_shared<Slot>([](const TokenConstPtr&) {}, uuid_provider->makeUUID("s2"), false);
 
     // is compatible
     ASSERT_TRUE(Connection::isCompatibleWith(e.get(), s1.get()));
@@ -222,11 +229,12 @@ TEST_F(ConnectionTest, EventsCanHaveManyConnections) {
     ASSERT_EQ(nullptr, DirectConnection::connect(e, s2));
 }
 
-TEST_F(ConnectionTest, SlotsCanHaveManyConnections) {
+TEST_F(ConnectionTest, SlotsCanHaveManyConnections)
+{
     EventPtr e1 = std::make_shared<Event>(uuid_provider->makeUUID("e1"));
     EventPtr e2 = std::make_shared<Event>(uuid_provider->makeUUID("e2"));
 
-    SlotPtr s = std::make_shared<Slot>([](const TokenConstPtr& ){}, uuid_provider->makeUUID("s"), false);
+    SlotPtr s = std::make_shared<Slot>([](const TokenConstPtr&) {}, uuid_provider->makeUUID("s"), false);
 
     // is compatible
     ASSERT_TRUE(Connection::isCompatibleWith(e1.get(), s.get()));
@@ -263,8 +271,8 @@ TEST_F(ConnectionTest, SlotsCanHaveManyConnections) {
     ASSERT_EQ(nullptr, DirectConnection::connect(e2, s));
 }
 
-
-TEST_F(ConnectionTest, DirectConnectionCanBeDeleted) {
+TEST_F(ConnectionTest, DirectConnectionCanBeDeleted)
+{
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("out"));
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
@@ -283,5 +291,3 @@ TEST_F(ConnectionTest, DirectConnectionCanBeDeleted) {
     auto raw_message = i->getToken();
     ASSERT_TRUE(raw_message == nullptr);
 }
-
-

@@ -14,15 +14,13 @@ CSAPEX_REGISTER_PARAMETER_SERIALIZER(ColorParameter)
 using namespace csapex;
 using namespace param;
 
-ColorParameter::ColorParameter()
-    : ParameterImplementation("color", ParameterDescription())
+ColorParameter::ColorParameter() : ParameterImplementation("color", ParameterDescription())
 {
     def_.resize(3);
     colors_.resize(3);
 }
 
-ColorParameter::ColorParameter(const std::string &name, const ParameterDescription& description, int r, int g, int b)
-    : ParameterImplementation(name, description)
+ColorParameter::ColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b) : ParameterImplementation(name, description)
 {
     def_.resize(3);
     def_[0] = r;
@@ -32,7 +30,7 @@ ColorParameter::ColorParameter(const std::string &name, const ParameterDescripti
     set(def_);
 }
 
-void ColorParameter::set(const std::vector<int> &v)
+void ColorParameter::set(const std::vector<int>& v)
 {
     colors_ = v;
     triggerChange();
@@ -47,11 +45,11 @@ const std::type_info& ColorParameter::type() const
 std::string ColorParameter::toStringImpl() const
 {
     std::stringstream v;
-    for(std::vector<int>::const_iterator c = colors_.begin(); c != colors_.end(); ++c) {
+    for (std::vector<int>::const_iterator c = colors_.begin(); c != colors_.end(); ++c) {
         v << std::hex << *c << std::dec << " ";
     }
 
-    return std::string("[color: ") + v.str()  + "]";
+    return std::string("[color: ") + v.str() + "]";
 }
 
 void ColorParameter::get_unsafe(boost::any& out) const
@@ -59,12 +57,11 @@ void ColorParameter::get_unsafe(boost::any& out) const
     out = colors_;
 }
 
-
-bool ColorParameter::set_unsafe(const boost::any &v)
+bool ColorParameter::set_unsafe(const boost::any& v)
 {
-    auto col = boost::any_cast<std::vector<int> > (v);
-    if(colors_  != col) {
-        colors_  = col;
+    auto col = boost::any_cast<std::vector<int> >(v);
+    if (colors_ != col) {
+        colors_ = col;
         return true;
     }
 
@@ -81,11 +78,10 @@ std::vector<int> ColorParameter::value() const
     return colors_;
 }
 
-
-void ColorParameter::cloneDataFrom(const Clonable &other)
+void ColorParameter::cloneDataFrom(const Clonable& other)
 {
-    if(const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other)) {
-        if(colors_ != color->colors_) {
+    if (const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other)) {
+        if (colors_ != color->colors_) {
             *this = *color;
             triggerChange();
         }
@@ -101,12 +97,12 @@ void ColorParameter::doSerialize(YAML::Node& n) const
 
 void ColorParameter::doDeserialize(const YAML::Node& n)
 {
-    if(n["values"].IsDefined()) {
-        colors_ = n["values"].as< std::vector<int> >();
+    if (n["values"].IsDefined()) {
+        colors_ = n["values"].as<std::vector<int> >();
     }
 }
 
-void ColorParameter::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ColorParameter::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Parameter::serialize(data, version);
 

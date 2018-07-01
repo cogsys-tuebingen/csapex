@@ -16,13 +16,13 @@
 class QComboBox;
 class QGroupBox;
 
-namespace qt_helper{
+namespace qt_helper
+{
 class Call;
 }
 
 namespace csapex
 {
-
 typedef std::function<void()> Function;
 
 class DefaultNodeAdapter;
@@ -37,8 +37,7 @@ public:
     DefaultNodeAdapterBridge(DefaultNodeAdapter* parent);
     ~DefaultNodeAdapterBridge();
 
-    void connectInGuiThread(csapex::slim_signal::Signal<void(csapex::param::Parameter*)>& signal,
-                 std::function<void()> cb);
+    void connectInGuiThread(csapex::slim_signal::Signal<void(csapex::param::Parameter*)>& signal, std::function<void()> cb);
     void disconnect();
 
 public Q_SLOTS:
@@ -75,7 +74,6 @@ public:
     template <typename Parameter, typename Adapter>
     void setupParameter(std::shared_ptr<Parameter> adapter);
 
-
 protected:
     virtual void setupAdaptiveUi();
     virtual void setupUi(QBoxLayout* layout);
@@ -100,6 +98,6 @@ private:
     QBoxLayout* wrapper_layout_;
 };
 
-}
+}  // namespace csapex
 
-#endif // DEFAULT_NODE_ADAPTER_H
+#endif  // DEFAULT_NODE_ADAPTER_H

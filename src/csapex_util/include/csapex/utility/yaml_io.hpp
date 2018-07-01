@@ -9,14 +9,14 @@
 #include <memory>
 #include <yaml-cpp/yaml.h>
 
-namespace YAML {
-
-template<typename T, typename Enable = void>
+namespace YAML
+{
+template <typename T, typename Enable = void>
 struct convertPtr
 {
     static Node encode(const std::shared_ptr<T> rhs)
     {
-        return Node (*rhs);
+        return Node(*rhs);
     }
 
     static bool decode(const Node& node, std::shared_ptr<T>& rhs)
@@ -26,12 +26,12 @@ struct convertPtr
     }
 };
 
-template<typename T, typename Enable = void>
+template <typename T, typename Enable = void>
 struct convertConstPtr
 {
     static Node encode(const std::shared_ptr<T const> rhs)
     {
-        return Node (*rhs);
+        return Node(*rhs);
     }
 
     static bool decode(const Node& node, std::shared_ptr<T const>& rhs)
@@ -41,47 +41,51 @@ struct convertConstPtr
         rhs = tmp;
         return res;
     }
-
 };
 
-template<typename T>
-struct convert< std::shared_ptr<T> > {
-  static Node encode(const std::shared_ptr<T> rhs)
-  {
-      return YAML::convertPtr<T>::encode(rhs);
-  }
-
-  static bool decode(const Node& node, std::shared_ptr<T>& rhs)
-  {
-      return YAML::convertPtr<T>::decode(node, rhs);
-  }
-};
-
-template<typename T>
-struct convert< std::shared_ptr<T const> > {
-  static Node encode(const std::shared_ptr<T const> rhs)
-  {
-      return YAML::convertConstPtr<T>::encode(rhs);
-  }
-
-  static bool decode(const Node& node, std::shared_ptr<T const>& rhs)
-  {
-      return YAML::convertConstPtr<T>::decode(node, rhs);
-  }
-};
-
-template<>
-struct convert<csapex::UUID> {
-    static Node encode(const csapex::UUID& rhs) {
-        return Node (rhs.getFullName());
+template <typename T>
+struct convert<std::shared_ptr<T> >
+{
+    static Node encode(const std::shared_ptr<T> rhs)
+    {
+        return YAML::convertPtr<T>::encode(rhs);
     }
 
-    static bool decode(const Node& node, csapex::UUID& rhs) {
+    static bool decode(const Node& node, std::shared_ptr<T>& rhs)
+    {
+        return YAML::convertPtr<T>::decode(node, rhs);
+    }
+};
+
+template <typename T>
+struct convert<std::shared_ptr<T const> >
+{
+    static Node encode(const std::shared_ptr<T const> rhs)
+    {
+        return YAML::convertConstPtr<T>::encode(rhs);
+    }
+
+    static bool decode(const Node& node, std::shared_ptr<T const>& rhs)
+    {
+        return YAML::convertConstPtr<T>::decode(node, rhs);
+    }
+};
+
+template <>
+struct convert<csapex::UUID>
+{
+    static Node encode(const csapex::UUID& rhs)
+    {
+        return Node(rhs.getFullName());
+    }
+
+    static bool decode(const Node& node, csapex::UUID& rhs)
+    {
         rhs = csapex::UUIDProvider::makeUUID_forced(std::weak_ptr<csapex::UUIDProvider>(), node.as<std::string>());
         return true;
     }
 };
 
-}
+}  // namespace YAML
 
-#endif // CSAPEX_YAML_IO_HPP
+#endif  // CSAPEX_YAML_IO_HPP

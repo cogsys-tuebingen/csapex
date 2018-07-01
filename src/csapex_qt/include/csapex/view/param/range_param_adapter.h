@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT RangeParameterAdapter : public ParameterAdapter
 {
 public:
@@ -27,7 +26,6 @@ private:
     QHBoxLayout* internal_layout;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // RANGE_PARAM_ADAPTER_H
+#endif  // RANGE_PARAM_ADAPTER_H

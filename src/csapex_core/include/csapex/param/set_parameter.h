@@ -9,9 +9,10 @@
 #include <vector>
 #include <boost/any.hpp>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT SetParameter : public ParameterImplementation<SetParameter, 0x006>
 {
     friend class ParameterFactory;
@@ -21,12 +22,15 @@ public:
 
 public:
     SetParameter();
-    explicit SetParameter(const std::string& name, const ParameterDescription &description);
+    explicit SetParameter(const std::string& name, const ParameterDescription& description);
     virtual ~SetParameter();
 
-    virtual std::string TYPE() const override { return "set"; }
+    virtual std::string TYPE() const override
+    {
+        return "set";
+    }
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
     void cloneDataFrom(const Clonable& other) override;
@@ -34,7 +38,7 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     virtual bool accepts(const std::type_info& type) const override;
@@ -42,17 +46,19 @@ public:
     std::string defText() const;
 
     template <typename T>
-    void setSet(const std::vector< std::pair<std::string, T> >& set) {
+    void setSet(const std::vector<std::pair<std::string, T> >& set)
+    {
         set_.clear();
-        for(typename std::vector< std::pair<std::string, T> >::const_iterator it = set.begin(); it != set.end(); ++it) {
+        for (typename std::vector<std::pair<std::string, T> >::const_iterator it = set.begin(); it != set.end(); ++it) {
             set_[it->first] = it->second;
         }
     }
 
     template <typename T>
-    void setSet(const std::map<std::string, T>& set) {
+    void setSet(const std::map<std::string, T>& set)
+    {
         set_.clear();
-        for(typename std::map<std::string, T>::const_iterator it = set.begin(); it != set.end(); ++it) {
+        for (typename std::map<std::string, T>::const_iterator it = set.begin(); it != set.end(); ++it) {
             set_[it->first] = it->second;
         }
         scope_changed(this);
@@ -68,11 +74,9 @@ public:
 
     int noParameters() const;
 
-
 protected:
     virtual void get_unsafe(boost::any& out) const override;
     virtual bool set_unsafe(const boost::any& v) override;
-
 
     template <typename T>
     void doSerializeImplementation(const std::string& type_name, YAML::Node& e) const;
@@ -86,9 +90,9 @@ private:
     T read(const boost::any& var) const
     {
         try {
-            return boost::any_cast<T> (var);
+            return boost::any_cast<T>(var);
 
-        } catch(const boost::bad_any_cast& e) {
+        } catch (const boost::bad_any_cast& e) {
             throw std::logic_error(std::string("typeof SetParameter is not ") + typeid(T).name() + ": " + e.what());
         }
     }
@@ -100,7 +104,7 @@ private:
     boost::any def_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // SET_PARAMETER_H
+#endif  // SET_PARAMETER_H

@@ -9,16 +9,14 @@
 
 namespace csapex
 {
-
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT AddVariadicConnector : public CommandImplementation<AddVariadicConnector>
 {
     COMMAND_HEADER(AddVariadicConnector);
 
 public:
-    AddVariadicConnector(const AUUID &graph_id, const AUUID &node, const ConnectorType &connector_type, const TokenDataConstPtr& type, const std::string& label);
+    AddVariadicConnector(const AUUID& graph_id, const AUUID& node, const ConnectorType& connector_type, const TokenDataConstPtr& type, const std::string& label);
     RelayMapping getMap() const;
 
     void setLabel(const std::string& label);
@@ -26,7 +24,7 @@ public:
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -45,7 +43,7 @@ private:
     AUUID node_id;
     UUID connector_id;
 };
-}
-}
+}  // namespace command
+}  // namespace csapex
 
-#endif // add_variadic_connector_H
+#endif  // add_variadic_connector_H

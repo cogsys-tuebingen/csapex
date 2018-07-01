@@ -5,7 +5,6 @@ using namespace csapex;
 
 Observer::~Observer()
 {
-
 }
 
 void Observer::stopObserving()

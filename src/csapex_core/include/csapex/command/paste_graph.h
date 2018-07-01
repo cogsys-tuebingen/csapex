@@ -13,23 +13,20 @@
 
 namespace csapex
 {
-
-
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT PasteGraph : public CommandImplementation<PasteGraph>
 {
     COMMAND_HEADER(PasteGraph);
 
 public:
-    PasteGraph(const AUUID &graph_id, const Snippet& blueprint, const Point &pos);
+    PasteGraph(const AUUID& graph_id, const Snippet& blueprint, const Point& pos);
 
     std::unordered_map<UUID, UUID, UUID::Hasher> getMapping() const;
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::string getType() const override
@@ -54,7 +51,7 @@ protected:
 
     std::unordered_map<UUID, UUID, UUID::Hasher> id_mapping_;
 };
-}
-}
+}  // namespace command
+}  // namespace csapex
 
-#endif // PASTE_GRAPH_H
+#endif  // PASTE_GRAPH_H

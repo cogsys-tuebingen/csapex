@@ -15,8 +15,7 @@
 
 using namespace csapex;
 
-Event::Event(const UUID& uuid, ConnectableOwnerWeakPtr owner)
-    : StaticOutput(uuid, owner)
+Event::Event(const UUID& uuid, ConnectableOwnerWeakPtr owner) : StaticOutput(uuid, owner)
 {
     setType(makeEmpty<connection_types::AnyMessage>());
 }
@@ -39,8 +38,6 @@ void Event::trigger()
 void Event::triggerWith(TokenPtr token)
 {
     addMessage(token);
-//    commitMessages();
-//    publish();
     ++count_;
 
     triggered();

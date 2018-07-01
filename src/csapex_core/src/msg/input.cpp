@@ -14,8 +14,7 @@
 
 using namespace csapex;
 
-Input::Input(const UUID &uuid, ConnectableOwnerWeakPtr owner)
-    : Connectable(uuid, owner), transition_(nullptr), optional_(false)
+Input::Input(const UUID& uuid, ConnectableOwnerWeakPtr owner) : Connectable(uuid, owner), transition_(nullptr), optional_(false)
 {
 }
 
@@ -29,7 +28,7 @@ int Input::maxConnectionCount() const
     return 1;
 }
 
-void Input::setInputTransition(InputTransition *it)
+void Input::setInputTransition(InputTransition* it)
 {
     transition_ = it;
 }
@@ -65,7 +64,7 @@ bool Input::hasReceived() const
 
 bool Input::hasMessage() const
 {
-    if(!hasReceived()) {
+    if (!hasReceived()) {
         return false;
     }
 
@@ -81,7 +80,7 @@ void Input::stop()
 void Input::free()
 {
     std::unique_lock<std::mutex> lock(message_mutex_);
-//    std::cerr << "clear input " << getUUID() << std::endl;
+    //    std::cerr << "clear input " << getUUID() << std::endl;
     message_.reset();
 }
 
@@ -95,25 +94,25 @@ void Input::disable()
     Connectable::disable();
 
     bool needs_notify = false;
-    for(ConnectionPtr& connection : connections_) {
-        if(connection->holdsToken()) {
+    for (ConnectionPtr& connection : connections_) {
+        if (connection->holdsToken()) {
             needs_notify = true;
         }
     }
 
-    if(message_ != nullptr) {
+    if (message_ != nullptr) {
         free();
         needs_notify = true;
     }
 
-    if(needs_notify) {
+    if (needs_notify) {
         notifyMessageProcessed();
     }
 }
 
 void Input::removeAllConnectionsNotUndoable()
 {
-    if(!connections_.empty()) {
+    if (!connections_.empty()) {
         getSource()->removeConnection(this);
         connections_.clear();
         disconnected(shared_from_this());
@@ -122,7 +121,7 @@ void Input::removeAllConnectionsNotUndoable()
 
 OutputPtr Input::getSource() const
 {
-    if(connections_.empty()) {
+    if (connections_.empty()) {
         return nullptr;
     } else {
         return connections_.front()->from();
@@ -139,7 +138,7 @@ void Input::setToken(TokenPtr message)
 {
     apex_assert_hard(message != nullptr);
 
-    if(!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message->getTokenData())){
+    if (!std::dynamic_pointer_cast<connection_types::MarkerMessage const>(message->getTokenData())) {
         int s = message->getSequenceNumber();
 
         //    if(s < sequenceNumber()) {
@@ -165,15 +164,15 @@ void Input::notifyMessageAvailable(Connection* connection)
 {
     message_available(connection);
 
-    if(!transition_) {
+    if (!transition_) {
         setToken(connection->readToken());
         connection->setTokenProcessed();
     }
 }
 
-void Input::addStatusInformation(std::stringstream &status_stream) const
+void Input::addStatusInformation(std::stringstream& status_stream) const
 {
-    if(TokenPtr token = getToken()) {
+    if (TokenPtr token = getToken()) {
         status_stream << ", Last Message Type: " << token->getTokenData()->descriptiveName();
     }
     status_stream << ", optional: " << isOptional();

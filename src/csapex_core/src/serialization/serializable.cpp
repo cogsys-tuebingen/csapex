@@ -13,7 +13,6 @@ using namespace csapex;
 
 Serializable::~Serializable()
 {
-
 }
 
 SemanticVersion Serializable::getVersion() const
@@ -21,7 +20,7 @@ SemanticVersion Serializable::getVersion() const
     return SemanticVersion();
 }
 
-void Serializable::serializeVersioned(SerializationBuffer &data) const
+void Serializable::serializeVersioned(SerializationBuffer& data) const
 {
     SemanticVersion version = getVersion();
     SemanticVersion v = version;
@@ -31,11 +30,11 @@ void Serializable::serializeVersioned(SerializationBuffer &data) const
 
     serialize(data, version);
 
-    if(v != version) {
+    if (v != version) {
         // if an implementation overwrites the version, update the serialized result
         SerializationBuffer tmp;
         tmp << version;
-        for(auto it = tmp.begin() + SerializationBuffer::HEADER_LENGTH; it != tmp.end(); ++it, ++start_pos) {
+        for (auto it = tmp.begin() + SerializationBuffer::HEADER_LENGTH; it != tmp.end(); ++it, ++start_pos) {
             data.at(start_pos) = *it;
         }
     }

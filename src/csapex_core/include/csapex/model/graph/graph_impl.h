@@ -6,8 +6,7 @@
 
 namespace csapex
 {
-
-class GraphImplementation  : public Graph
+class GraphImplementation : public Graph
 {
 public:
     GraphImplementation();
@@ -24,20 +23,19 @@ public:
 
     Node* findNode(const UUID& uuid) const;
     Node* findNodeNoThrow(const UUID& uuid) const noexcept;
-    Node* findNodeForConnector(const UUID &uuid) const;
+    Node* findNodeForConnector(const UUID& uuid) const;
 
     NodeHandle* findNodeHandle(const UUID& uuid) const;
     NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept;
-    NodeHandle* findNodeHandleForConnector(const UUID &uuid) const;
-    NodeHandle* findNodeHandleForConnectorNoThrow(const UUID &uuid) const noexcept;
+    NodeHandle* findNodeHandleForConnector(const UUID& uuid) const;
+    NodeHandle* findNodeHandleForConnectorNoThrow(const UUID& uuid) const noexcept;
     NodeHandle* findNodeHandleWithLabel(const std::string& label) const;
 
     NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
     NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
-    NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const override;
-    NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const override;
+    NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept override;
     NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
-
 
     Graph* findSubgraph(const UUID& uuid) const;
 
@@ -46,10 +44,10 @@ public:
     std::vector<NodeHandle*> getAllNodeHandles();
     std::vector<NodeFacadeImplementationPtr> getAllLocalNodeFacades();
 
-    ConnectablePtr findConnectable(const UUID &uuid);
+    ConnectablePtr findConnectable(const UUID& uuid);
 
-    ConnectorPtr findConnector(const UUID &uuid) override;
-    ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept override;
+    ConnectorPtr findConnector(const UUID& uuid) override;
+    ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept override;
 
     bool isConnected(const UUID& from, const UUID& to) const override;
     ConnectionPtr getConnectionWithId(int id);
@@ -61,7 +59,7 @@ public:
     std::size_t countNodes() override;
 
     void addNode(NodeFacadeImplementationPtr node);
-    void deleteNode(const UUID &uuid);
+    void deleteNode(const UUID& uuid);
 
     bool addConnection(ConnectionPtr connection);
     void deleteConnection(ConnectionPtr connection);
@@ -71,7 +69,7 @@ public:
 
     void analyzeGraph();
 
-    void setNodeFacade(NodeFacadeImplementation *nf);
+    void setNodeFacade(NodeFacadeImplementation* nf);
 
     // iterators
     vertex_iterator begin();
@@ -86,8 +84,8 @@ private:
     void buildConnectedComponents();
     void calculateDepths();
 
-    std::set<graph::Vertex *> findVerticesThatNeedMessages();
-    std::set<graph::Vertex *> findVerticesThatJoinStreams();
+    std::set<graph::Vertex*> findVerticesThatNeedMessages();
+    std::set<graph::Vertex*> findVerticesThatJoinStreams();
 
 protected:
     std::vector<graph::VertexPtr> vertices_;
@@ -103,6 +101,6 @@ protected:
     NodeFacadeImplementation* nf_;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_IMPL_H
+#endif  // GRAPH_IMPL_H

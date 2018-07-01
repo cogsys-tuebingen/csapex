@@ -12,17 +12,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT GroupNodes : public GroupBase
 {
     COMMAND_HEADER(GroupNodes);
 
 public:
-    GroupNodes(const AUUID &graph_uuid, const std::vector<UUID>& nodes);
+    GroupNodes(const AUUID& graph_uuid, const std::vector<UUID>& nodes);
 
-    virtual std::string getDescription() const override;    
+    virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::string getType() const override
@@ -40,7 +39,7 @@ protected:
     bool doRedo() override;
 
 private:
-    void findNodes(SubgraphNode *graph);
+    void findNodes(SubgraphNode* graph);
     void mapConnections(AUUID parent_auuid, AUUID sub_graph_auuid);
 
     void mapMessageGoingIn(AUUID parent_auuid, AUUID sub_graph_auuid);
@@ -54,7 +53,7 @@ private:
     UUID sub_graph_uuid_;
 };
 
-}
+}  // namespace command
 
-}
-#endif // GROUP_NODES_H
+}  // namespace csapex
+#endif  // GROUP_NODES_H

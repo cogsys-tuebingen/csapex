@@ -15,18 +15,16 @@ using namespace csapex::param;
 
 SerializerRegistered<ParameterSerializer> g_register_parameter_serializer_(Parameter::PACKET_TYPE_ID, &ParameterSerializer::instance());
 
-
 ParameterSerializerInterface::~ParameterSerializerInterface()
 {
-
 }
 
 void ParameterSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
-    if(const Parameter* parameter = dynamic_cast<const Parameter*>(&packet)) {
+    if (const Parameter* parameter = dynamic_cast<const Parameter*>(&packet)) {
         uint8_t type = parameter->ID();
         auto it = serializers_.find(type);
-        if(it != serializers_.end()) {
+        if (it != serializers_.end()) {
             data << type;
 
             // defer serialization to the corresponding serializer
@@ -34,9 +32,8 @@ void ParameterSerializer::serialize(const Streamable& packet, SerializationBuffe
             serializer->serialize(*parameter, data);
 
         } else {
-            std::cerr << "cannot serialize Parameter of type " << (int) type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
+            std::cerr << "cannot serialize Parameter of type " << (int)type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
         }
-
     }
 }
 
@@ -45,20 +42,19 @@ StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
     uint8_t type;
     data >> type;
 
-    if(type == param::NullParameter::NUMERICAL_ID) {
+    if (type == param::NullParameter::NUMERICAL_ID) {
         return std::make_shared<param::NullParameter>();
     }
 
     auto it = serializers_.find(type);
-    if(it != serializers_.end()) {
+    if (it != serializers_.end()) {
         // defer serialization to the corresponding serializer
         std::shared_ptr<ParameterSerializerInterface> serializer = it->second;
         return serializer->deserialize(data);
 
     } else {
-        std::cerr << "cannot deserialize Parameter of type " << (int) type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
+        std::cerr << "cannot deserialize Parameter of type " << (int)type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
     }
-
 
     return ParameterPtr();
 }

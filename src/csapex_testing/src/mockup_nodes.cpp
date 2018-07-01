@@ -8,7 +8,6 @@
 #include <csapex/param/parameter_factory.h>
 #include <csapex/msg/generic_value_message.hpp>
 
-
 using namespace csapex;
 
 MockupDynamicMultiplierNode::MockupDynamicMultiplierNode()
@@ -24,7 +23,6 @@ void MockupDynamicMultiplierNode::setup(csapex::NodeModifier& node_modifier)
 
 void MockupDynamicMultiplierNode::setupParameters(Parameterizable& /*parameters*/)
 {
-
 }
 
 void MockupDynamicMultiplierNode::process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
@@ -33,7 +31,6 @@ void MockupDynamicMultiplierNode::process(NodeModifier& node_modifier, Parameter
     int b = msg::getValue<int>(input_b_);
     msg::publish(output_, a * b);
 }
-
 
 MockupSource::MockupSource()
 {
@@ -54,7 +51,7 @@ void MockupSource::process()
     int i = readParameter<int>("value");
     //        ainfo << "publish " << i << std::endl;
     msg::publish(out, i);
-    setParameter("value", i+1);
+    setParameter("value", i + 1);
 }
 
 int MockupSource::getValue() const
@@ -62,13 +59,8 @@ int MockupSource::getValue() const
     return readParameter<int>("value");
 }
 
-
-
-MockupSink::MockupSink()
-    : aborted(false),
-      value(-1)
+MockupSink::MockupSink() : aborted(false), value(-1)
 {
-
 }
 
 void MockupSink::setup(NodeModifier& node_modifier)
@@ -93,18 +85,13 @@ int MockupSink::getValue() const
     return readParameter<int>("value");
 }
 
-
 void MockupSink::abort()
 {
     aborted = true;
 }
 
-
-
-
 AnySink::AnySink()
 {
-
 }
 
 void AnySink::setup(NodeModifier& node_modifier)
@@ -115,4 +102,3 @@ void AnySink::setup(NodeModifier& node_modifier)
 void AnySink::process(NodeModifier& node_modifier, Parameterizable& parameters)
 {
 }
-

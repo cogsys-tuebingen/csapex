@@ -3,8 +3,7 @@
 
 using namespace csapex;
 
-ErrorState::ErrorState()
-    : error_(false)
+ErrorState::ErrorState() : error_(false)
 {
 }
 
@@ -15,14 +14,13 @@ ErrorState::~ErrorState()
 void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
 {
     {
-        std::unique_lock<std::recursive_mutex> lock (error_mutex_);
+        std::unique_lock<std::recursive_mutex> lock(error_mutex_);
 
-        if(!isError() && !e) {
+        if (!isError() && !e) {
             return;
         }
 
         setErrorSilent(e, msg, level);
-
     }
 
     errorEvent(error_, msg, level_);
@@ -30,21 +28,21 @@ void ErrorState::setError(bool e, const std::string& msg, ErrorLevel level)
     error_event(error_, msg, level_);
 }
 
-void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level)
+void ErrorState::setErrorSilent(bool e, const std::string& msg, ErrorLevel level)
 {
     {
-        std::unique_lock<std::recursive_mutex> lock (error_mutex_);
+        std::unique_lock<std::recursive_mutex> lock(error_mutex_);
 
-        if(!error_ && !e) {
+        if (!error_ && !e) {
             return;
         }
 
         std::string err;
-        if(e) {
+        if (e) {
             unsigned line = 60;
-            for(unsigned i = 0; i < msg.size(); ++i) {
+            for (unsigned i = 0; i < msg.size(); ++i) {
                 err += msg[i];
-                if((i%line) == 0 && i != 0) {
+                if ((i % line) == 0 && i != 0) {
                     err += '\n';
                 }
             }
@@ -59,28 +57,26 @@ void ErrorState::setErrorSilent(bool e, const std::string &msg, ErrorLevel level
 
 void ErrorState::errorChanged(bool)
 {
-
 }
 
 bool ErrorState::isError() const
 {
-    std::unique_lock<std::recursive_mutex> lock (error_mutex_);
+    std::unique_lock<std::recursive_mutex> lock(error_mutex_);
     return error_;
 }
 
 ErrorState::ErrorLevel ErrorState::errorLevel() const
 {
-    std::unique_lock<std::recursive_mutex> lock (error_mutex_);
+    std::unique_lock<std::recursive_mutex> lock(error_mutex_);
     return level_;
 }
 
 std::string ErrorState::errorMessage() const
 {
-    std::unique_lock<std::recursive_mutex> lock (error_mutex_);
+    std::unique_lock<std::recursive_mutex> lock(error_mutex_);
     return error_msg_;
 }
 
-void ErrorState::errorEvent(bool, const std::string &, ErrorLevel)
+void ErrorState::errorEvent(bool, const std::string&, ErrorLevel)
 {
-
 }

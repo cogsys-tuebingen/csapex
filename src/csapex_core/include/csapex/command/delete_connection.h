@@ -7,10 +7,8 @@
 
 namespace csapex
 {
-
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT DeleteConnection : public Meta
 {
     COMMAND_HEADER(DeleteConnection);
@@ -18,7 +16,7 @@ class CSAPEX_COMMAND_EXPORT DeleteConnection : public Meta
 public:
     DeleteConnection(const AUUID& graph_uuid, const UUID& from, const UUID& to);
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     std::string getType() const override
@@ -44,7 +42,7 @@ protected:
     UUID from_uuid;
     UUID to_uuid;
 };
-}
-}
+}  // namespace command
+}  // namespace csapex
 
-#endif // COMMAND_DELETE_CONNECTION_H
+#endif  // COMMAND_DELETE_CONNECTION_H

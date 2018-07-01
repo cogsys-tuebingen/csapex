@@ -6,16 +6,11 @@
 
 using namespace csapex;
 
-Server::Server(CsApexCore &core)
-    : core_(core)
+Server::Server(CsApexCore& core) : core_(core)
 {
-    observe(core_.shutdown_requested, [this](){
-        stop();
-    });
+    observe(core_.shutdown_requested, [this]() { stop(); });
 }
 
 Server::~Server()
 {
 }
-
-

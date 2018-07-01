@@ -20,15 +20,16 @@ public:
     void setPrefix(const std::string& prefix);
 
     template <class Type>
-    StreamRelay& operator << (const Type &x) {
-        if(is_enabled_) {
-            if(has_prefix_) {
+    StreamRelay& operator<<(const Type& x)
+    {
+        if (is_enabled_) {
+            if (has_prefix_) {
                 writePrefix();
             }
             *history_ << x;
             s_ << x;
         }
-        if(continued_) {
+        if (continued_) {
             return *continued_;
         } else {
             return *this;
@@ -43,7 +44,6 @@ public:
     StreamRelay& operator<<(std::ostream& (*pf)(std::ostream&));
 
     std::stringstream& history() const;
-
 
 private:
     StreamRelay(std::ostream& stream, std::shared_ptr<std::stringstream> history);
@@ -60,6 +60,6 @@ private:
     mutable std::shared_ptr<std::stringstream> history_;
     std::unique_ptr<StreamRelay> continued_;
 };
-}
+}  // namespace csapex
 
-#endif // STREAM_RELAY_H
+#endif  // STREAM_RELAY_H

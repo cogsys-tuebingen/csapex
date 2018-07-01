@@ -13,21 +13,20 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT NodeListGenerator
 {
 public:
-    NodeListGenerator(NodeFactory &node_factory, NodeAdapterFactory& adapter_factory);
+    NodeListGenerator(NodeFactory& node_factory, NodeAdapterFactory& adapter_factory);
 
     void insertAvailableNodeTypes(QMenu* menu);
-    void insertAvailableNodeTypes(QTreeWidget *tree);
-    void listAvailableNodeTypes(QStandardItemModel *model);
+    void insertAvailableNodeTypes(QTreeWidget* tree);
+    void listAvailableNodeTypes(QStandardItemModel* model);
 
 private:
     NodeFactory& node_factory_;
     NodeAdapterFactory& adapter_factory_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_LIST_GENERATOR_H
+#endif  // NODE_LIST_GENERATOR_H

@@ -9,17 +9,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT Minimize : public CommandImplementation<Minimize>
 {
     COMMAND_HEADER(Minimize);
 
 public:
-    Minimize(const AUUID &graph_uuid, const UUID& node, bool mini);
+    Minimize(const AUUID& graph_uuid, const UUID& node, bool mini);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -33,8 +32,7 @@ private:
     bool executed;
 };
 
-}
+}  // namespace command
 
-}
-#endif // MINIMIZE_H
-
+}  // namespace csapex
+#endif  // MINIMIZE_H

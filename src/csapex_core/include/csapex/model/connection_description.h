@@ -10,7 +10,6 @@
 
 namespace csapex
 {
-
 struct CSAPEX_CORE_EXPORT ConnectionDescription : public Serializable
 {
 protected:
@@ -29,22 +28,20 @@ public:
 
     std::vector<Fulcrum> fulcrums;
 
-    ConnectionDescription(const UUID& from, const UUID& to,
-                          const TokenDataConstPtr &type, int id,
-                          bool active, const std::vector<Fulcrum>& fulcrums);
+    ConnectionDescription(const UUID& from, const UUID& to, const TokenDataConstPtr& type, int id, bool active, const std::vector<Fulcrum>& fulcrums);
 
     ConnectionDescription(const ConnectionDescription& other);
 
-    ConnectionDescription& operator = (const ConnectionDescription& other);
+    ConnectionDescription& operator=(const ConnectionDescription& other);
 
     ConnectionDescription();
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
-    bool operator == (const ConnectionDescription& other) const;
+    bool operator==(const ConnectionDescription& other) const;
 };
 
-}
+}  // namespace csapex
 
-#endif // CONNECTION_DESCRIPTION_H
+#endif  // CONNECTION_DESCRIPTION_H

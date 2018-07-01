@@ -14,10 +14,8 @@
 class QBoxLayout;
 class QHBoxLayout;
 
-
 namespace csapex
 {
-
 class ParameterContextMenu;
 
 class CSAPEX_QT_EXPORT ParameterAdapter : public QObject
@@ -48,14 +46,9 @@ public Q_SLOTS:
 
 protected:
     template <typename Callback, typename T>
-    void connectInGuiThread(csapex::slim_signal::Signal<void(T)>& signal,
-                            Callback cb)
+    void connectInGuiThread(csapex::slim_signal::Signal<void(T)>& signal, Callback cb)
     {
-        connections.push_back(signal.connect([=](T v) {
-            modelCallback([=]() {
-                cb(v);
-            });
-        }));
+        connections.push_back(signal.connect([=](T v) { modelCallback([=]() { cb(v); }); }));
     }
 
 protected:
@@ -65,10 +58,8 @@ protected:
 
 private:
     std::vector<csapex::slim_signal::ScopedConnection> connections;
-
 };
 
+}  // namespace csapex
 
-}
-
-#endif // PARAM_ADAPTER_H
+#endif  // PARAM_ADAPTER_H

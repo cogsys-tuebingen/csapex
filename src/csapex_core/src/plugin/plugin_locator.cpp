@@ -15,10 +15,9 @@
 
 using namespace csapex;
 
-PluginLocator::PluginLocator(Settings &settings)
-    : settings_(settings)
+PluginLocator::PluginLocator(Settings& settings) : settings_(settings)
 {
-    if(settings_.knows("ignored_libraries")) {
+    if (settings_.knows("ignored_libraries")) {
         ignored_persistent_ = std::dynamic_pointer_cast<param::StringListParameter>(settings_.get("ignored_libraries"));
 
     } else {
@@ -35,7 +34,7 @@ PluginLocator::PluginLocator(Settings &settings)
 #else
     const auto ld_lib_path = getenv("LD_LIBRARY_PATH");
 #endif
-    if(ld_lib_path != nullptr) {
+    if (ld_lib_path != nullptr) {
         std::string ld_lib(ld_lib_path);
         boost::algorithm::split(library_paths_, ld_lib, boost::is_any_of(":"));
     }
@@ -43,12 +42,12 @@ PluginLocator::PluginLocator(Settings &settings)
 
 PluginLocator::~PluginLocator()
 {
-	shutdown();
+    shutdown();
 }
 
 void PluginLocator::shutdown()
 {
-	locators_.clear();
+    locators_.clear();
 }
 
 std::vector<std::string> PluginLocator::enumerateLibraryPaths()
@@ -56,10 +55,9 @@ std::vector<std::string> PluginLocator::enumerateLibraryPaths()
     return library_paths_;
 }
 
-
-void PluginLocator::ignoreLibrary(const std::string &name, bool ignore)
+void PluginLocator::ignoreLibrary(const std::string& name, bool ignore)
 {
-    if(ignore) {
+    if (ignore) {
         ignored_libraries_.insert(name);
         ignored_persistent_->add(name);
     } else {
@@ -68,34 +66,33 @@ void PluginLocator::ignoreLibrary(const std::string &name, bool ignore)
     }
 }
 
-bool PluginLocator::isLibraryIgnored(const std::string &name) const
+bool PluginLocator::isLibraryIgnored(const std::string& name) const
 {
     return ignored_libraries_.find(name) != ignored_libraries_.end();
 }
 
-void PluginLocator::setLibraryLoaded(const std::string &name, const std::string& file)
+void PluginLocator::setLibraryLoaded(const std::string& name, const std::string& file)
 {
     loaded_libraries_.insert(name);
     library_file_[name] = file;
 }
 
-bool PluginLocator::isLibraryLoaded(const std::string &name) const
+bool PluginLocator::isLibraryLoaded(const std::string& name) const
 {
     return loaded_libraries_.find(name) != loaded_libraries_.end();
 }
-
 
 void PluginLocator::setLibraryError(const std::string& name, const std::string& error)
 {
     error_libraries_[name] = error;
 }
 
-bool PluginLocator::hasLibraryError(const std::string &name) const
+bool PluginLocator::hasLibraryError(const std::string& name) const
 {
     return error_libraries_.find(name) != error_libraries_.end();
 }
 
-std::string PluginLocator::getLibraryError(const std::string &name) const
+std::string PluginLocator::getLibraryError(const std::string& name) const
 {
     return error_libraries_.at(name);
 }
@@ -103,8 +100,7 @@ std::string PluginLocator::getLibraryError(const std::string &name) const
 std::vector<std::string> PluginLocator::getAllLibraries() const
 {
     std::vector<std::string> result(loaded_libraries_.begin(), loaded_libraries_.end());
-    for(std::map<std::string, std::string>::const_iterator it = error_libraries_.begin();
-        it != error_libraries_.end(); ++it) {
+    for (std::map<std::string, std::string>::const_iterator it = error_libraries_.begin(); it != error_libraries_.end(); ++it) {
         result.push_back(it->first);
     }
 
@@ -115,15 +111,15 @@ std::vector<std::string> PluginLocator::getAllLibraries() const
     return result;
 }
 
-void PluginLocator::setPluginPaths(const std::string &type, const std::vector<std::string> &paths)
+void PluginLocator::setPluginPaths(const std::string& type, const std::vector<std::string>& paths)
 {
     plugin_paths_[type] = paths;
 }
 
-std::vector<std::string> PluginLocator::getPluginPaths(const std::string &type) const
+std::vector<std::string> PluginLocator::getPluginPaths(const std::string& type) const
 {
     auto pos = plugin_paths_.find(type);
-    if(pos != plugin_paths_.end()) {
+    if (pos != plugin_paths_.end()) {
         return pos->second;
     } else {
         return {};

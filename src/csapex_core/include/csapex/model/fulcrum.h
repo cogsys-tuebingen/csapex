@@ -21,16 +21,18 @@ private:
 public:
     typedef std::shared_ptr<Fulcrum> Ptr;
 
-    enum Type {
-		FULCRUM_CURVE = 0,
-		FULCRUM_LINEAR = 1,
-		FULCRUM_OUT = 10,
-		FULCRUM_IN = 11,
-		FULCRUM_HANDLE = FULCRUM_IN
+    enum Type
+    {
+        FULCRUM_CURVE = 0,
+        FULCRUM_LINEAR = 1,
+        FULCRUM_OUT = 10,
+        FULCRUM_IN = 11,
+        FULCRUM_HANDLE = FULCRUM_IN
     };
 
 public:
-    enum Handle {
+    enum Handle
+    {
         HANDLE_NONE = 0,
         HANDLE_IN = 1,
         HANDLE_OUT = 2,
@@ -62,15 +64,15 @@ public:
     int type() const;
     void setType(int type);
 
-    bool operator == (const Fulcrum& other) const;
+    bool operator==(const Fulcrum& other) const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 public:
-    slim_signal::Signal<void (Fulcrum*, bool dropped)> moved;
-    slim_signal::Signal<void (Fulcrum*, bool dropped, int no)> movedHandle;
-    slim_signal::Signal<void (Fulcrum*, int type)> typeChanged;
+    slim_signal::Signal<void(Fulcrum*, bool dropped)> moved;
+    slim_signal::Signal<void(Fulcrum*, bool dropped, int no)> movedHandle;
+    slim_signal::Signal<void(Fulcrum*, int type)> typeChanged;
 
 private:
     int connection_id_;
@@ -81,5 +83,5 @@ private:
     Point handle_in_;
     Point handle_out_;
 };
-}
-#endif // FULCRUM_H
+}  // namespace csapex
+#endif  // FULCRUM_H

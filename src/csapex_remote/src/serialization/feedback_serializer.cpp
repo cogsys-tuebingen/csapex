@@ -14,7 +14,6 @@ using namespace csapex;
 
 SerializerRegistered<FeedbackSerializer> g_register_Feedback_serializer_(Feedback::PACKET_TYPE_ID, &FeedbackSerializer::instance());
 
-
 void FeedbackSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
     packet.serializeVersioned(data);

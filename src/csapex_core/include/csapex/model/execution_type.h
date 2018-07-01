@@ -3,14 +3,12 @@
 
 namespace csapex
 {
-
 enum class ExecutionType
 {
     AUTO = 0,
     DIRECT,
     SUBPROCESS
 };
-
 }
 
-#endif // EXECUTION_TYPE_H
+#endif  // EXECUTION_TYPE_H

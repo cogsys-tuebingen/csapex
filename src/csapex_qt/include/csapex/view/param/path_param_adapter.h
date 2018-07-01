@@ -22,7 +22,6 @@ private:
     param::PathParameterPtr path_p_;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // PATH_PARAM_ADAPTER_H
+#endif  // PATH_PARAM_ADAPTER_H

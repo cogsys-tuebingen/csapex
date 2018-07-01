@@ -10,7 +10,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT MetaPort : public Port
 {
     Q_OBJECT
@@ -18,13 +17,14 @@ class CSAPEX_QT_EXPORT MetaPort : public Port
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    MetaPort(ConnectorType port_type, const AUUID &target, QWidget *parent = nullptr);
+    MetaPort(ConnectorType port_type, const AUUID& target, QWidget* parent = nullptr);
 
-    QString cssClass() {
+    QString cssClass()
+    {
         return QString("MetaPort");
     }
 
-    void showContextMenu(const QPoint &pt);
+    void showContextMenu(const QPoint& pt);
 
     void dragEnterEvent(QDragEnterEvent* e);
     void dragMoveEvent(QDragMoveEvent* e);
@@ -43,6 +43,6 @@ private:
     AUUID target;
 };
 
-}
+}  // namespace csapex
 
-#endif // META_PORT_H
+#endif  // META_PORT_H

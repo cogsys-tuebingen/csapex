@@ -3,7 +3,6 @@
 
 namespace csapex
 {
-
 namespace serialization
 {
 enum class Format
@@ -14,6 +13,6 @@ enum class Format
 };
 }
 
-}
+}  // namespace csapex
 
-#endif // SERIALIZATION_FORMAT_H
+#endif  // SERIALIZATION_FORMAT_H

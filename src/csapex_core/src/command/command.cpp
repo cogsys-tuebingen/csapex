@@ -14,18 +14,13 @@ using namespace csapex;
 
 std::vector<Command::Ptr> Command::undo_later;
 
-Command::Command(const AUUID &parent_uuid)
-    : Command()
+Command::Command(const AUUID& parent_uuid) : Command()
 {
     graph_uuid = parent_uuid;
 }
 
-Command::Command()
-    : core_(nullptr), root_graph_facade_(nullptr),
-      before_save_point_(false), after_save_point_(false),
-      initialized_(false)
+Command::Command() : core_(nullptr), root_graph_facade_(nullptr), before_save_point_(false), after_save_point_(false), initialized_(false)
 {
-
 }
 
 bool Command::Access::executeCommand(Command::Ptr cmd)
@@ -43,7 +38,7 @@ bool Command::Access::redoCommand(Command::Ptr cmd)
     return cmd->redoCommand(cmd);
 }
 
-void Command::init(GraphFacadeImplementation *graph_facade, CsApexCore& core)
+void Command::init(GraphFacadeImplementation* graph_facade, CsApexCore& core)
 {
     apex_assert_hard(graph_facade);
 
@@ -72,7 +67,7 @@ bool Command::executeCommand(Command::Ptr cmd)
 
 bool Command::undoCommand(Command::Ptr cmd)
 {
-    if(!cmd->doUndo()) {
+    if (!cmd->doUndo()) {
         undo_later.push_back(cmd);
         return false;
     }
@@ -105,7 +100,7 @@ bool Command::isBeforeSavepoint()
     return before_save_point_;
 }
 
-void Command::accept(int level, std::function<void (int level, const Command &)> callback) const
+void Command::accept(int level, std::function<void(int level, const Command&)> callback) const
 {
     callback(level, *this);
 }
@@ -121,11 +116,11 @@ GraphFacadeImplementation* Command::getGraphFacade()
 {
     GraphFacade* gf = nullptr;
 
-    if(graph_uuid.empty()) {
+    if (graph_uuid.empty()) {
         gf = getRoot();
         apex_assert_hard(gf);
 
-    } else if(getRoot()->getAbsoluteUUID() == graph_uuid) {
+    } else if (getRoot()->getAbsoluteUUID() == graph_uuid) {
         gf = getRoot();
         apex_assert_hard(gf);
 
@@ -170,8 +165,7 @@ uint8_t Command::getPacketType() const
     return PACKET_TYPE_ID;
 }
 
-
-void Command::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Command::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << graph_uuid;
 }

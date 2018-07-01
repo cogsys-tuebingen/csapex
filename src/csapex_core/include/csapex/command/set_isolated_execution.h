@@ -10,17 +10,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT SetIsolatedExecution : public CommandImplementation<SetIsolatedExecution>
 {
     COMMAND_HEADER(SetIsolatedExecution);
 
 public:
-    SetIsolatedExecution(const AUUID &graph_uuid, const UUID& node, ExecutionType type);
+    SetIsolatedExecution(const AUUID& graph_uuid, const UUID& node, ExecutionType type);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -34,8 +33,7 @@ private:
     ExecutionType was_type_;
 };
 
-}
+}  // namespace command
 
-}
-#endif // SET_ISOLATED_EXECUTION_H
-
+}  // namespace csapex
+#endif  // SET_ISOLATED_EXECUTION_H

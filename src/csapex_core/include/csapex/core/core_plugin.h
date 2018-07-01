@@ -8,8 +8,10 @@
 /// SYSTEM
 #include <memory>
 
-namespace csapex {
-class CSAPEX_CORE_EXPORT CorePlugin {
+namespace csapex
+{
+class CSAPEX_CORE_EXPORT CorePlugin
+{
 public:
     typedef std::shared_ptr<CorePlugin> Ptr;
 
@@ -26,6 +28,6 @@ public:
 private:
     std::string name_;
 };
-}
+}  // namespace csapex
 
-#endif // CORE_PLUGIN_H
+#endif  // CORE_PLUGIN_H

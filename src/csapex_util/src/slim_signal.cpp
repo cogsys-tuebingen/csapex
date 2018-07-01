@@ -12,20 +12,18 @@
 using namespace csapex;
 using namespace slim_signal;
 
-SignalBase::SignalBase()
-    : guard_(-1)
+SignalBase::SignalBase() : guard_(-1)
 {
-
 }
 
 SignalBase::~SignalBase()
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
-    while(!connections_.empty()) {
+    while (!connections_.empty()) {
         Connection* c = connections_.front();
-//        apex_assert_hard(c->parent_ == this);
-        if(c->isDetached()) {
+        //        apex_assert_hard(c->parent_ == this);
+        if (c->isDetached()) {
             connections_.erase(connections_.begin());
         } else {
             c->detach();
@@ -35,7 +33,7 @@ SignalBase::~SignalBase()
     guard_ = 0xDEADBEEF;
 }
 
-void SignalBase::addConnection(Connection *connection)
+void SignalBase::addConnection(Connection* connection)
 {
     apex_assert_hard(connection->parent_ == this);
     apex_assert_hard(guard_ == -1);
@@ -45,14 +43,14 @@ void SignalBase::addConnection(Connection *connection)
     connections_.push_back(connection);
 }
 
-void SignalBase::removeConnection(const Connection *connection)
+void SignalBase::removeConnection(const Connection* connection)
 {
     apex_assert_hard(guard_ == -1);
 
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
-    for(auto it = connections_.begin(); it != connections_.end();) {
-        if(*it == connection) {
+    for (auto it = connections_.begin(); it != connections_.end();) {
+        if (*it == connection) {
             it = connections_.erase(it);
         } else {
             ++it;
@@ -71,7 +69,7 @@ void SignalBase::disconnectAll()
     apex_assert_hard(guard_ == -1);
     std::unique_lock<std::recursive_mutex> lock(mutex_);
 
-    for(Connection* c : connections_) {
+    for (Connection* c : connections_) {
         c->disconnect();
     }
     connections_.clear();
@@ -89,40 +87,34 @@ void SignalBase::onDisconnect()
 {
 }
 
-
-
-
-Connection::Connection(SignalBase* parent, const Deleter& del, SignalBase *child)
-    : parent_(parent), deleter_(del), child_(child)
+Connection::Connection(SignalBase* parent, const Deleter& del, SignalBase* child) : parent_(parent), deleter_(del), child_(child)
 {
     apex_assert_hard(parent);
     parent_->addConnection(this);
 }
 
-Connection::Connection(const Connection& other)
-    : parent_(other.parent_), deleter_(other.deleter_), child_(other.child_)
+Connection::Connection(const Connection& other) : parent_(other.parent_), deleter_(other.deleter_), child_(other.child_)
 {
-    if(parent_) {
+    if (parent_) {
         apex_assert_hard(parent_->guard_ == -1);
         parent_->addConnection(this);
     }
 }
 
-Connection::Connection()
-    : parent_(nullptr), child_(nullptr)
+Connection::Connection() : parent_(nullptr), child_(nullptr)
 {
 }
 
 Connection::~Connection()
 {
-    if(parent_) {
+    if (parent_) {
         detach();
     }
 }
 
 void Connection::detach() const
 {
-    if(!detached_) {
+    if (!detached_) {
         detached_ = true;
         auto* tmp = parent_;
         parent_ = nullptr;
@@ -147,27 +139,23 @@ SignalBase* Connection::getChild() const
 
 void Connection::disconnect() const
 {
-    if(parent_) {
-        if(!isDetached()) {
+    if (parent_) {
+        if (!isDetached()) {
             apex_assert_hard(parent_->guard_ == -1);
             detach();
-            if(deleter_) {
+            if (deleter_) {
                 deleter_();
             }
         }
     }
 }
 
-
-
-ScopedConnection::ScopedConnection(const Connection& c)
-    : Connection(c)
+ScopedConnection::ScopedConnection(const Connection& c) : Connection(c)
 {
 }
-ScopedConnection::ScopedConnection(ScopedConnection&& c) noexcept
-    : Connection(c)
+ScopedConnection::ScopedConnection(ScopedConnection&& c) noexcept : Connection(c)
 {
-    if(c.parent_) {
+    if (c.parent_) {
         c.parent_->removeConnection(&c);
         c.parent_ = nullptr;
     }
@@ -178,17 +166,16 @@ ScopedConnection::ScopedConnection()
 
 ScopedConnection::~ScopedConnection()
 {
-    if(parent_) {
+    if (parent_) {
         try {
             disconnect();
-        } catch(const csapex::Failure& e) {
+        } catch (const csapex::Failure& e) {
             std::cerr << "Failure in ~ScopedConnection: " << e.what() << std::endl;
         }
     }
 }
 
-
-void ScopedConnection::operator = (const Connection& c)
+void ScopedConnection::operator=(const Connection& c)
 {
     apex_assert_hard(c.parent_ != nullptr);
     disconnect();
@@ -197,7 +184,7 @@ void ScopedConnection::operator = (const Connection& c)
     parent_->addConnection(this);
 }
 
-void ScopedConnection::operator = (ScopedConnection&& c) noexcept
+void ScopedConnection::operator=(ScopedConnection&& c) noexcept
 {
     apex_assert_hard(c.parent_ != nullptr);
     disconnect();

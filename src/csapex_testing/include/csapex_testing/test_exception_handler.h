@@ -7,14 +7,12 @@
 
 namespace csapex
 {
-
 class TestExceptionHandler : public ExceptionHandler
 {
 public:
-    TestExceptionHandler()
-        : ExceptionHandler(false)
-    {}
-
+    TestExceptionHandler() : ExceptionHandler(false)
+    {
+    }
 
     virtual void handleAssertionFailure(const csapex::Failure& assertion)
     {
@@ -23,6 +21,6 @@ public:
     }
 };
 
-}
+}  // namespace csapex
 
-#endif // TEST_EXCEPTION_HANDLER_H
+#endif  // TEST_EXCEPTION_HANDLER_H

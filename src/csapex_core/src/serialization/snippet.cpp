@@ -15,30 +15,23 @@ using namespace csapex;
 
 CREATE_DEFAULT_SERIALIZER(Snippet);
 
-Snippet::Snippet(const std::string &serialized)
-    : yaml_(std::make_shared<YAML::Node>(YAML::Load(serialized)))
+Snippet::Snippet(const std::string& serialized) : yaml_(std::make_shared<YAML::Node>(YAML::Load(serialized)))
 {
-
 }
 
-Snippet::Snippet(const YAML::Node &yaml)
-    : yaml_(std::make_shared<YAML::Node>(yaml))
+Snippet::Snippet(const YAML::Node& yaml) : yaml_(std::make_shared<YAML::Node>(yaml))
 {
-
 }
 
-Snippet::Snippet(YAML::Node &&yaml)
-    : yaml_(std::make_shared<YAML::Node>(std::move(yaml)))
+Snippet::Snippet(YAML::Node&& yaml) : yaml_(std::make_shared<YAML::Node>(std::move(yaml)))
 {
-
 }
 
 Snippet::Snippet()
 {
-
 }
 
-void Snippet::toYAML(YAML::Node &out) const
+void Snippet::toYAML(YAML::Node& out) const
 {
     out = *yaml_;
 }
@@ -70,22 +63,21 @@ void Snippet::setTags(const std::vector<TagConstPtr>& tags)
 
 std::vector<TagConstPtr> Snippet::getTags() const
 {
-    if(!tags_.empty()) {
+    if (!tags_.empty()) {
         return tags_;
     } else {
         return { Tag::get("General") };
     }
 }
 
-
-void Snippet::save(const std::string &file) const
+void Snippet::save(const std::string& file) const
 {
     YAML::Node exported;
     exported["name"] = name_;
     exported["description"] = description_;
 
     std::vector<std::string> tag_str(tags_.size());
-    for(const TagConstPtr& tag : tags_) {
+    for (const TagConstPtr& tag : tags_) {
         tag_str.push_back(tag->getName());
     }
     exported["tags"] = tag_str;
@@ -98,23 +90,23 @@ void Snippet::save(const std::string &file) const
     of << exported;
 }
 
-Snippet Snippet::load(const std::string &file)
+Snippet Snippet::load(const std::string& file)
 {
     YAML::Node node = YAML::LoadFile(file);
     Snippet res(node["yaml"]);
 
-    if(node["name"].IsDefined()) {
+    if (node["name"].IsDefined()) {
         res.setName(node["name"].as<std::string>());
     }
 
-    if(node["description"].IsDefined()) {
+    if (node["description"].IsDefined()) {
         res.setDescription(node["description"].as<std::string>());
     }
 
-    if(node["tags"].IsDefined()) {
+    if (node["tags"].IsDefined()) {
         std::vector<std::string> tags_str = node["tags"].as<std::vector<std::string>>();
         res.tags_.reserve(tags_str.size());
-        for(const std::string& tag_s : tags_str) {
+        for (const std::string& tag_s : tags_str) {
             Tag::createIfNotExists(tag_s);
             res.tags_.push_back(Tag::get(tag_s));
         }
@@ -128,8 +120,7 @@ uint8_t Snippet::getPacketType() const
     return PACKET_TYPE_ID;
 }
 
-
-void Snippet::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Snippet::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << *yaml_;
     data << name_;

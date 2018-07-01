@@ -3,14 +3,13 @@
 
 using namespace csapex;
 
-Profiler::Profiler(bool enabled, int history)
-    : enabled_(false), history_length_(history)
+Profiler::Profiler(bool enabled, int history) : enabled_(false), history_length_(history)
 {
     apex_assert_hard(history > 0);
     setEnabled(enabled);
 }
 
-Timer::Ptr Profiler::getTimer(const std::string &key)
+Timer::Ptr Profiler::getTimer(const std::string& key)
 {
     const Profile& prof = getProfile(key);
     return prof.timer;
@@ -19,15 +18,13 @@ Timer::Ptr Profiler::getTimer(const std::string &key)
 const Profile& Profiler::getProfile(const std::string& key)
 {
     auto pos = profiles_.find(key);
-    if(pos == profiles_.end()) {
+    if (pos == profiles_.end()) {
         profiles_.emplace(key, Profile(key, history_length_, enabled_));
         Profile& profile = profiles_.at(key);
 
         profile.timer->finished.connect([this](Interval::Ptr) { updated(); });
 
-        observe(profile.timer->finished, [this, &profile](Interval::Ptr interval){
-            profile.addInterval(interval);
-        });
+        observe(profile.timer->finished, [this, &profile](Interval::Ptr interval) { profile.addInterval(interval); });
 
         return profile;
     }
@@ -37,12 +34,12 @@ const Profile& Profiler::getProfile(const std::string& key)
 
 void Profiler::setEnabled(bool enabled)
 {
-    if(enabled == enabled_) {
+    if (enabled == enabled_) {
         return;
     }
 
     enabled_ = enabled;
-    for(auto& pair : profiles_) {
+    for (auto& pair : profiles_) {
         Profile& profile = pair.second;
         Timer::Ptr timer = profile.timer;
         timer->setEnabled(enabled_);
@@ -58,7 +55,7 @@ bool Profiler::isEnabled() const
 
 void Profiler::reset()
 {
-    for(auto& pair : profiles_) {
+    for (auto& pair : profiles_) {
         Profile& profile = pair.second;
         profile.reset();
     }

@@ -15,47 +15,51 @@
 
 namespace csapex
 {
-
-
 class CpuAffinityRenderer
 {
 public:
-    enum EditMode { Editable, ReadOnly };
+    enum EditMode
+    {
+        Editable,
+        ReadOnly
+    };
 
     CpuAffinityRenderer();
-    CpuAffinityRenderer(const CpuAffinity &cpu_affinity);
+    CpuAffinityRenderer(const CpuAffinity& cpu_affinity);
 
-    void paint(QPainter *painter, const QRect &rect,
-               const QPalette &palette, EditMode mode) const;
+    void paint(QPainter* painter, const QRect& rect, const QPalette& palette, EditMode mode) const;
     QSize sizeHint() const;
-    CpuAffinity &getCpuAffinity();
+    CpuAffinity& getCpuAffinity();
 
 private:
     CpuAffinity cpu_affinity_;
 };
-
 
 class CpuAffinityWidget : public QWidget, public Observer
 {
     Q_OBJECT
 
 public:
-    CpuAffinityWidget(const CpuAffinityPtr &affinity, QWidget *parent = 0);
+    CpuAffinityWidget(const CpuAffinityPtr& affinity, QWidget* parent = 0);
 
     QSize sizeHint() const override;
-    void setRenderer(const CpuAffinityRenderer &renderer) {
+    void setRenderer(const CpuAffinityRenderer& renderer)
+    {
         renderer_ = renderer;
     }
-    CpuAffinityRenderer getWidget() { return renderer_; }
+    CpuAffinityRenderer getWidget()
+    {
+        return renderer_;
+    }
 
-//signals:
-//    void editingFinished();
+    // signals:
+    //    void editingFinished();
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
 private:
     int cpuAtPosition(int x);
@@ -67,8 +71,8 @@ private:
     bool modify_enabled_;
 };
 
-}
+}  // namespace csapex
 
 Q_DECLARE_METATYPE(csapex::CpuAffinityRenderer)
 
-#endif // CPU_AFFINITY_WIDGET_H
+#endif  // CPU_AFFINITY_WIDGET_H

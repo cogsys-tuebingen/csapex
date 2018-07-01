@@ -16,9 +16,8 @@
 /// SYSTEM
 #include <boost/interprocess/managed_shared_memory.hpp>
 
-namespace csapex {
-
-
+namespace csapex
+{
 class OutputAllocationTest : public SteppingTest
 {
 protected:
@@ -42,7 +41,6 @@ protected:
         ASSERT_NE(nullptr, src2);
         main_graph_facade->addNode(src2);
 
-
         NodeFacadeImplementationPtr combiner = makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph, exec_type);
         ASSERT_NE(nullptr, combiner);
         main_graph_facade->addNode(combiner);
@@ -51,7 +49,6 @@ protected:
         main_graph_facade->addNode(sink_p);
         std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
         ASSERT_NE(nullptr, sink);
-
 
         // NESTED GRAPH
         NodeFacadeImplementationPtr sub_graph_node_facade = makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph, exec_type);
@@ -67,7 +64,7 @@ protected:
         apex_assert_hard(sub_graph_node_facade);
         graph->addNode(sub_graph_node_facade);
 
-        auto type = makeEmpty<connection_types::GenericValueMessage<int> >();
+        auto type = makeEmpty<connection_types::GenericValueMessage<int>>();
 
         auto in1_map = sub_graph->addForwardingInput(type, "forwarding", false);
         auto in2_map = sub_graph->addForwardingInput(type, "forwarding", false);
@@ -91,14 +88,13 @@ protected:
 
         // execution
         ASSERT_EQ(-1, sink->getValue());
-        for(int iter = 0; iter < 100; ++iter) {
+        for (int iter = 0; iter < 100; ++iter) {
             ASSERT_NO_FATAL_FAILURE(step());
 
             int v = (iter * iter) * (iter * iter);
             ASSERT_EQ(v, sink->getValue());
         }
     }
-
 };
 
 TEST_F(OutputAllocationTest, DefaultMessageAllocator)
@@ -111,7 +107,6 @@ TEST_F(OutputAllocationTest, DefaultMessageAllocator)
     EXPECT_EQ(42, msgptr->value);
     EXPECT_STREQ("frame", msgptr->frame_id.c_str());
 }
-
 
 TEST_F(OutputAllocationTest, OutputCanBeUsedToAllocateMessages)
 {
@@ -127,7 +122,6 @@ TEST_F(OutputAllocationTest, OutputCanBeUsedToAllocateMessages)
     EXPECT_EQ(42, msgptr->value);
     EXPECT_STREQ("frame", msgptr->frame_id.c_str());
 }
-
 
 TEST_F(OutputAllocationTest, OutputCanBeUsedToAllocateMessagesWithForwardDeclaration)
 {
@@ -163,7 +157,6 @@ TEST_F(OutputAllocationTest, AllocatorCanBeSet)
     EXPECT_STREQ("frame", msgptr->frame_id.c_str());
 }
 
-
 using namespace boost::interprocess;
 
 template <typename T>
@@ -179,12 +172,18 @@ TEST_F(OutputAllocationTest, ShmAllocatorCanBeSet)
 
     using M = connection_types::GenericValueMessage<int>;
 
-    managed_shared_memory segment(open_or_create, "unit_test", 1024*1024);
+    managed_shared_memory segment(open_or_create, "unit_test", 1024 * 1024);
 
     struct shm_remove
     {
-        shm_remove() { shared_memory_object::remove("unit_test"); }
-        ~shm_remove(){ shared_memory_object::remove("unit_test"); }
+        shm_remove()
+        {
+            shared_memory_object::remove("unit_test");
+        }
+        ~shm_remove()
+        {
+            shared_memory_object::remove("unit_test");
+        }
     } remover;
 
     try {
@@ -197,11 +196,10 @@ TEST_F(OutputAllocationTest, ShmAllocatorCanBeSet)
 
         EXPECT_EQ(42, msgptr->value);
         EXPECT_STREQ("frame", msgptr->frame_id.c_str());
-    } catch(...) {
+    } catch (...) {
         FAIL();
     }
 }
-
 
 TEST_F(OutputAllocationTest, SteppingWorksForProcessingGraphsInSubprocess)
 {
@@ -209,4 +207,4 @@ TEST_F(OutputAllocationTest, SteppingWorksForProcessingGraphsInSubprocess)
     testStepping(ExecutionType::SUBPROCESS);
 }
 
-}
+}  // namespace csapex

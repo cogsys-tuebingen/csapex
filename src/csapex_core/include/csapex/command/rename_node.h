@@ -9,17 +9,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT RenameNode : public CommandImplementation<RenameNode>
 {
     COMMAND_HEADER(RenameNode);
 
 public:
-    RenameNode(const AUUID &graph_uuid, const UUID& node, const std::string &new_name);
+    RenameNode(const AUUID& graph_uuid, const UUID& node, const std::string& new_name);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -33,7 +32,7 @@ private:
     std::string old_name_;
 };
 
-}
+}  // namespace command
 
-}
-#endif // RENAME_NODE_H
+}  // namespace csapex
+#endif  // RENAME_NODE_H

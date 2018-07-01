@@ -3,9 +3,7 @@
 
 using namespace QSignalBridges;
 
-QAbstractSliderLimiter::QAbstractSliderLimiter(QAbstractSlider *limitMin, QAbstractSlider *limitMax) :
-    limitMin_(limitMin),
-    limitMax_(limitMax)
+QAbstractSliderLimiter::QAbstractSliderLimiter(QAbstractSlider* limitMin, QAbstractSlider* limitMax) : limitMin_(limitMin), limitMax_(limitMax)
 {
     QObject::connect(limitMin_, SIGNAL(valueChanged(int)), this, SLOT(limitMin(int)));
     QObject::connect(limitMax_, SIGNAL(valueChanged(int)), this, SLOT(limitMax(int)));

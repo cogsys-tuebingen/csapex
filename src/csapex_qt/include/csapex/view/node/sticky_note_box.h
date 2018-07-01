@@ -9,7 +9,6 @@ class QTextEdit;
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT StickyNoteBox : public NodeBox
 {
     Q_OBJECT
@@ -17,15 +16,13 @@ class CSAPEX_QT_EXPORT StickyNoteBox : public NodeBox
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    QString cssClass() {
+    QString cssClass()
+    {
         return QString("NoteBox");
     }
 
-
 public:
-    StickyNoteBox(Settings& settings,
-            NodeFacadePtr node_facade_,
-            QIcon icon, GraphView* parent = 0);
+    StickyNoteBox(Settings& settings, NodeFacadePtr node_facade_, QIcon icon, GraphView* parent = 0);
 
     ~StickyNoteBox();
 
@@ -58,6 +55,6 @@ private:
     QTextEdit* edit_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NOTE_BOX_H
+#endif  // NOTE_BOX_H

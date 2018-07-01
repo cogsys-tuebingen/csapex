@@ -10,7 +10,6 @@
 
 namespace csapex
 {
-
 class BroadcastMessage : public Streamable
 {
 public:
@@ -20,6 +19,6 @@ public:
     virtual std::string getType() const = 0;
 };
 
-}
+}  // namespace csapex
 
-#endif // BROADCAST_MESSAGE_H
+#endif  // BROADCAST_MESSAGE_H

@@ -6,13 +6,14 @@
 
 using namespace csapex;
 
-namespace YAML {
-//Node convert<csapex::TokenData>::encode(const csapex::TokenData& rhs)
+namespace YAML
+{
+// Node convert<csapex::TokenData>::encode(const csapex::TokenData& rhs)
 //{
 //    return MessageSerializer::serializeMessage(rhs);
 //}
 
-//bool convert<csapex::TokenData>::decode(const Node& node, csapex::TokenData& rhs)
+// bool convert<csapex::TokenData>::decode(const Node& node, csapex::TokenData& rhs)
 //{
 //    rhs = *MessageSerializer::deserializeMessage(node);
 //    return true;
@@ -41,4 +42,4 @@ bool convert<csapex::TokenDataConstPtr>::decode(const Node& node, csapex::TokenD
     rhs.swap(ptr);
     return true;
 }
-}
+}  // namespace YAML

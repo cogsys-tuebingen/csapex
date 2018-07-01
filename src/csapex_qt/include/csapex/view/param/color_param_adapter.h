@@ -24,7 +24,6 @@ private:
     param::ColorParameterPtr color_p_;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // COLOR_PARAM_ADAPTER_H
+#endif  // COLOR_PARAM_ADAPTER_H

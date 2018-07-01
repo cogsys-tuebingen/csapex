@@ -14,7 +14,6 @@
 
 namespace csapex
 {
-
 class Subprocess
 {
 public:
@@ -25,18 +24,14 @@ public:
     pid_t fork(std::function<int()> child);
 
     template <typename Callable>
-    typename std::enable_if<std::is_arithmetic< typename csapex::function_traits<Callable>::result_type >::value, pid_t >::type
-    fork(Callable child)
+    typename std::enable_if<std::is_arithmetic<typename csapex::function_traits<Callable>::result_type>::value, pid_t>::type fork(Callable child)
     {
-        std::function<int()> wrapper = [child]() -> int {
-            return child();
-        };
+        std::function<int()> wrapper = [child]() -> int { return child(); };
         return fork(wrapper);
     }
 
     template <typename Callable>
-    typename std::enable_if<!std::is_arithmetic< typename csapex::function_traits<Callable>::result_type >::value, pid_t >::type
-    fork(Callable child)
+    typename std::enable_if<!std::is_arithmetic<typename csapex::function_traits<Callable>::result_type>::value, pid_t>::type fork(Callable child)
     {
         std::function<int()> wrapper = [child]() -> int {
             child();
@@ -88,7 +83,6 @@ private:
     int return_code;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // SUBPROCESS_H
+#endif  // SUBPROCESS_H

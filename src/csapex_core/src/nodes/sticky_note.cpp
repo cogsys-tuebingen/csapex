@@ -9,12 +9,11 @@
 
 using namespace csapex;
 
-void Note::setup(NodeModifier &node_modifier)
+void Note::setup(NodeModifier& node_modifier)
 {
-
 }
 
-void Note::setupParameters(Parameterizable &parameters)
+void Note::setupParameters(Parameterizable& parameters)
 {
     parameters.addParameter(param::ParameterFactory::declareText("text", ""));
     parameters.addParameter(param::ParameterFactory::declareValue<int>("w", 16));

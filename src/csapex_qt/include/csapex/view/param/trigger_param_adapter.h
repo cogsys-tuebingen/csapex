@@ -17,13 +17,12 @@ public:
     TriggerParameterAdapter(param::TriggerParameter::Ptr p);
 
     virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
-    virtual void setupContextMenu(ParameterContextMenu *context_handler) override;
+    virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
     param::TriggerParameterPtr value_p_;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // TRIGGER_PARAM_ADAPTER_H
+#endif  // TRIGGER_PARAM_ADAPTER_H

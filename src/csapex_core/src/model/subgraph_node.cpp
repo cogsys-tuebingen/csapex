@@ -23,17 +23,20 @@
 using namespace csapex;
 
 SubgraphNode::SubgraphNode(GraphImplementationPtr graph)
-    : graph_(graph),
-      transition_relay_in_(new InputTransition),
-      transition_relay_out_(new OutputTransition),
-      is_subgraph_finished_(false),
-      is_iterating_(false), has_sent_current_iteration_(false),
-      is_initialized_(false),
+  : graph_(graph)
+  , transition_relay_in_(new InputTransition)
+  , transition_relay_out_(new OutputTransition)
+  , is_subgraph_finished_(false)
+  , is_iterating_(false)
+  , has_sent_current_iteration_(false)
+  , is_initialized_(false)
+  ,
 
-      activation_event_(nullptr),
-      deactivation_event_(nullptr),
+  activation_event_(nullptr)
+  , deactivation_event_(nullptr)
+  ,
 
-      guard_(-1)
+  guard_(-1)
 {
     transition_relay_in_->setActivationFunction(delegate::Delegate0<>(this, &SubgraphNode::subgraphHasProducedAllMessages));
     observe(transition_relay_out_->messages_processed, delegate::Delegate0<>(this, &SubgraphNode::currentIterationIsProcessed));
@@ -63,7 +66,7 @@ void SubgraphNode::initialize(NodeHandlePtr node_handle)
 {
     Node::initialize(node_handle);
 
-    if(node_handle->getUUIDProvider()) {
+    if (node_handle->getUUIDProvider()) {
         graph_->setParent(node_handle->getUUIDProvider()->shared_from_this(), node_handle->getUUID().getAbsoluteUUID());
     }
 }
@@ -103,11 +106,11 @@ void SubgraphNode::stateChanged()
 {
     Node::stateChanged();
 
-    if(!is_initialized_) {
+    if (!is_initialized_) {
         is_initialized_ = true;
     }
 }
-void SubgraphNode::setup(NodeModifier &modifier)
+void SubgraphNode::setup(NodeModifier& modifier)
 {
     setupVariadic(modifier);
 
@@ -117,7 +120,7 @@ void SubgraphNode::setup(NodeModifier &modifier)
 
 void SubgraphNode::activation()
 {
-    if(activation_event_) {
+    if (activation_event_) {
         TokenDataConstPtr data(new connection_types::AnyMessage);
         TokenPtr token = std::make_shared<Token>(data);
         token->setActivityModifier(ActivityModifier::ACTIVATE);
@@ -127,7 +130,7 @@ void SubgraphNode::activation()
 
 void SubgraphNode::deactivation()
 {
-    if(deactivation_event_) {
+    if (deactivation_event_) {
         TokenDataConstPtr data(new connection_types::AnyMessage);
         TokenPtr token = std::make_shared<Token>(data);
         token->setActivityModifier(ActivityModifier::DEACTIVATE);
@@ -137,59 +140,51 @@ void SubgraphNode::deactivation()
 
 bool SubgraphNode::canProcess() const
 {
-    if(!is_initialized_) {
-        //TRACE ainfo << "cannot process: not initialized" << std::endl;
+    if (!is_initialized_) {
+        // TRACE ainfo << "cannot process: not initialized" << std::endl;
         return false;
     }
-    if(!transition_relay_out_->canStartSendingMessages()) {
-        //TRACE ainfo << "cannot process, out relay cannot send" << std::endl;
+    if (!transition_relay_out_->canStartSendingMessages()) {
+        // TRACE ainfo << "cannot process, out relay cannot send" << std::endl;
         return false;
     }
-    if(transition_relay_in_->hasConnection() ||
-            transition_relay_out_->hasConnection()) {
+    if (transition_relay_in_->hasConnection() || transition_relay_out_->hasConnection()) {
         return true;
     } else {
         return false;
     }
 }
 
-
-void SubgraphNode::setupParameters(Parameterizable &params)
+void SubgraphNode::setupParameters(Parameterizable& params)
 {
     setupVariadicParameters(params);
 
-    params.addParameter(param::ParameterFactory::declareBool("iterate_containers",
-                                                             param::ParameterDescription("When true, input vectors will be iterated internally"),
-                                                             false));
-
+    params.addParameter(param::ParameterFactory::declareBool("iterate_containers", param::ParameterDescription("When true, input vectors will be iterated internally"), false));
 
     std::map<std::string, std::pair<int, bool> > flags;
 
     iterated_inputs_param_ = std::dynamic_pointer_cast<param::BitSetParameter>(param::ParameterFactory::declareParameterBitSet("iterated_containers", flags).build());
 
-    params.addConditionalParameter(iterated_inputs_param_,
-                                   [this](){
-        return readParameter<bool>("iterate_containers");
-    },
-    [this](param::Parameter* p) {
-        for(auto& pair : relay_to_external_input_) {
-            UUID id = pair.second;
-            InputPtr i = node_handle_->getInput(id);
-            apex_assert_hard(i);
+    params.addConditionalParameter(iterated_inputs_param_, [this]() { return readParameter<bool>("iterate_containers"); },
+                                   [this](param::Parameter* p) {
+                                       for (auto& pair : relay_to_external_input_) {
+                                           UUID id = pair.second;
+                                           InputPtr i = node_handle_->getInput(id);
+                                           apex_assert_hard(i);
 
-            bool iterate = iterated_inputs_param_->isSet(id.getFullName());
-            setIterationEnabled(id, iterate);
-        }
-    });
+                                           bool iterate = iterated_inputs_param_->isSet(id.getFullName());
+                                           setIterationEnabled(id, iterate);
+                                       }
+                                   });
 }
 
-void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params, Continuation continuation)
+void SubgraphNode::process(NodeModifier& node_modifier, Parameterizable& params, Continuation continuation)
 {
     {
         std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
         continuation_ = continuation;
     }
-    //TRACE ainfo << "start process with continuation" << std::endl;
+    // TRACE ainfo << "start process with continuation" << std::endl;
 
     apex_assert_hard(is_initialized_);
 
@@ -201,17 +196,17 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
     has_sent_current_iteration_ = false;
     is_subgraph_finished_ = false;
 
-    for(const InputPtr& i : node_modifier.getMessageInputs()) {
-        if(msg::hasMessage(i.get())) {
+    for (const InputPtr& i : node_modifier.getMessageInputs()) {
+        if (msg::hasMessage(i.get())) {
             TokenDataConstPtr m = msg::getMessage(i.get());
             OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
-            if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
+            if (m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
                 is_iterating_ = true;
                 iteration_count_ = m->nestedValueCount();
                 iteration_index_ = 1;
 
-                if(iteration_count_ > 0)  {
+                if (iteration_count_ > 0) {
                     msg::publish(o.get(), m->nestedValue(0));
                 }
 
@@ -221,14 +216,14 @@ void SubgraphNode::process(NodeModifier &node_modifier, Parameterizable &params,
         }
     }
 
-    if(transition_relay_out_->hasConnection()) {
-        //TRACE ainfo << "send internal output messages" << std::endl;
+    if (transition_relay_out_->hasConnection()) {
+        // TRACE ainfo << "send internal output messages" << std::endl;
         transition_relay_out_->sendMessages(node_handle_->isActive());
     }
 
     tryFinishSubgraph();
-    if(transition_relay_in_->areMessagesForwarded()) {
-        //TRACE ainfo << "process: all messages forwarded -> finish subgraph" << std::endl;
+    if (transition_relay_in_->areMessagesForwarded()) {
+        // TRACE ainfo << "process: all messages forwarded -> finish subgraph" << std::endl;
         finishSubgraph();
     }
 }
@@ -243,17 +238,14 @@ bool SubgraphNode::isIterating() const
     return is_iterating_;
 }
 
-namespace {
+namespace
+{
 void crossConnectLabelChange(Connectable* a, Connectable* b)
 {
-    a->labelChanged.connect([b](const std::string& label) {
-        b->setLabel(label);
-    });
-    b->labelChanged.connect([a](const std::string& label) {
-        a->setLabel(label);
-    });
+    a->labelChanged.connect([b](const std::string& label) { b->setLabel(label); });
+    b->labelChanged.connect([a](const std::string& label) { a->setLabel(label); });
 }
-}
+}  // namespace
 
 Input* SubgraphNode::createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional)
 {
@@ -261,7 +253,7 @@ Input* SubgraphNode::createVariadicInput(TokenDataConstPtr type, const std::stri
     return node_handle_->getInput(pair.external).get();
 }
 
-InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const UUID &internal_uuid, const std::string& label, bool optional)
+InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool optional)
 {
     InputPtr input = node_handle_->addInternalInput(type, internal_uuid, label, optional);
     input->setGraphPort(true);
@@ -271,7 +263,6 @@ InputPtr SubgraphNode::createInternalInput(const TokenDataConstPtr& type, const 
 
     return input;
 }
-
 
 void SubgraphNode::removeVariadicInput(InputPtr input)
 {
@@ -286,16 +277,15 @@ void SubgraphNode::removeVariadicInput(InputPtr input)
     transition_relay_out_->removeOutput(relay);
 }
 
-RelayMapping SubgraphNode::addForwardingInput(const TokenDataConstPtr& type,
-                                              const std::string& label, bool optional)
+RelayMapping SubgraphNode::addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional)
 {
-    UUID internal_uuid = graph_->generateDerivedUUID(UUID(),"relayout");
+    UUID internal_uuid = graph_->generateDerivedUUID(UUID(), "relayout");
     UUID external_uuid = addForwardingInput(internal_uuid, type, label, optional);
 
-    return {external_uuid, internal_uuid};
+    return { external_uuid, internal_uuid };
 }
 
-UUID  SubgraphNode::addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional)
+UUID SubgraphNode::addForwardingInput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label, bool optional)
 {
     graph_->registerUUID(internal_uuid);
 
@@ -312,9 +302,8 @@ UUID  SubgraphNode::addForwardingInput(const UUID& internal_uuid, const TokenDat
     forwarding_connector_added(relay);
 
     std::map<std::string, int> possibly_iterated_inputs;
-    for(auto& pair : iterated_inputs_param_->getBitSet()) {
+    for (auto& pair : iterated_inputs_param_->getBitSet()) {
         possibly_iterated_inputs[pair.first] = pair.second;
-
     }
     possibly_iterated_inputs[external_input->getUUID().getFullName()] = possibly_iterated_inputs.size();
 
@@ -323,13 +312,11 @@ UUID  SubgraphNode::addForwardingInput(const UUID& internal_uuid, const TokenDat
     return external_input->getUUID();
 }
 
-
 Output* SubgraphNode::createVariadicOutput(TokenDataConstPtr type, const std::string& label)
 {
     auto pair = addForwardingOutput(type, label);
     return node_handle_->getOutput(pair.external).get();
 }
-
 
 OutputPtr SubgraphNode::createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label)
 {
@@ -357,16 +344,15 @@ void SubgraphNode::removeVariadicOutput(OutputPtr output)
     transition_relay_in_->removeInput(relay);
 }
 
-RelayMapping SubgraphNode::addForwardingOutput(const TokenDataConstPtr& type,
-                                               const std::string& label)
+RelayMapping SubgraphNode::addForwardingOutput(const TokenDataConstPtr& type, const std::string& label)
 {
-    UUID internal_uuid = graph_->generateDerivedUUID(UUID(),"relayin");
+    UUID internal_uuid = graph_->generateDerivedUUID(UUID(), "relayin");
     UUID external_uuid = addForwardingOutput(internal_uuid, type, label);
 
-    return {external_uuid, internal_uuid};
+    return { external_uuid, internal_uuid };
 }
 
-UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type,  const std::string& label)
+UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label)
 {
     graph_->registerUUID(internal_uuid);
 
@@ -378,11 +364,11 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
 
     std::weak_ptr<Output> external_output_weak = std::dynamic_pointer_cast<Output>(external_output->shared_from_this());
     relay->message_set.connect([this, external_output_weak, relay](Connectable*) {
-        if(auto external_output = external_output_weak.lock()) {
+        if (auto external_output = external_output_weak.lock()) {
             TokenPtr token = relay->getToken();
-            if(is_iterating_) {
+            if (is_iterating_) {
                 connection_types::GenericVectorMessage::Ptr vector;
-                if(!external_output->hasMessage()) {
+                if (!external_output->hasMessage()) {
                     vector = connection_types::GenericVectorMessage::make(token->getTokenData());
                 } else {
                     auto collected = external_output->getAddedToken()->getTokenData()->cloneAs<TokenData>();
@@ -409,9 +395,7 @@ UUID SubgraphNode::addForwardingOutput(const UUID& internal_uuid, const TokenDat
     return external_output->getUUID();
 }
 
-
-
-SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void (const TokenPtr& )> callback)
+SlotPtr SubgraphNode::createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void(const TokenPtr&)> callback)
 {
     SlotPtr slot = node_handle_->addInternalSlot(makeEmpty<connection_types::AnyMessage>(), internal_uuid, label, callback);
     slot->setGraphPort(true);
@@ -437,7 +421,7 @@ void SubgraphNode::removeVariadicSlot(SlotPtr slot)
     internal_events_.erase(relay->getUUID());
 
     auto it = std::find(internal_event_ids_.begin(), internal_event_ids_.end(), relay->getUUID());
-    if(it != internal_event_ids_.end()) {
+    if (it != internal_event_ids_.end()) {
         internal_event_ids_.erase(it);
     }
 
@@ -450,10 +434,10 @@ void SubgraphNode::removeVariadicSlot(SlotPtr slot)
 
 RelayMapping SubgraphNode::addForwardingSlot(const TokenDataConstPtr& type, const std::string& label)
 {
-    UUID internal_uuid = graph_->generateDerivedUUID(UUID(),"relayevent");
+    UUID internal_uuid = graph_->generateDerivedUUID(UUID(), "relayevent");
     UUID external_uuid = addForwardingSlot(internal_uuid, type, label);
 
-    return {external_uuid, internal_uuid};
+    return { external_uuid, internal_uuid };
 }
 
 UUID SubgraphNode::addForwardingSlot(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label)
@@ -513,7 +497,7 @@ void SubgraphNode::removeVariadicEvent(EventPtr event)
     internal_slots_.erase(relay->getUUID());
 
     auto it = std::find(internal_slot_ids_.begin(), internal_slot_ids_.end(), relay->getUUID());
-    if(it != internal_slot_ids_.end()) {
+    if (it != internal_slot_ids_.end()) {
         internal_slot_ids_.erase(it);
     }
 
@@ -526,10 +510,10 @@ void SubgraphNode::removeVariadicEvent(EventPtr event)
 
 RelayMapping SubgraphNode::addForwardingEvent(const TokenDataConstPtr& type, const std::string& label)
 {
-    UUID internal_uuid = graph_->generateDerivedUUID(UUID(),"relayslot");
+    UUID internal_uuid = graph_->generateDerivedUUID(UUID(), "relayslot");
     UUID external_uuid = addForwardingEvent(internal_uuid, type, label);
 
-    return {external_uuid, internal_uuid};
+    return { external_uuid, internal_uuid };
 }
 
 UUID SubgraphNode::addForwardingEvent(const UUID& internal_uuid, const TokenDataConstPtr& type, const std::string& label)
@@ -538,10 +522,10 @@ UUID SubgraphNode::addForwardingEvent(const UUID& internal_uuid, const TokenData
 
     Event* external_event = VariadicEvents::createVariadicEvent(type, label);
 
-    auto cb = [this, external_event](const TokenPtr& token){
-        if(external_event->isConnected()) {
+    auto cb = [this, external_event](const TokenPtr& token) {
+        if (external_event->isConnected()) {
             external_event->triggerWith(token);
-//            node_handle_->getNodeWorker()->trySendEvents();
+            //            node_handle_->getNodeWorker()->trySendEvents();
         } else {
             external_event->notifyMessageProcessed();
         }
@@ -578,72 +562,72 @@ SlotPtr SubgraphNode::getRelayForEvent(const UUID& external_uuid) const
     return external_to_internal_slots_.at(external_uuid);
 }
 
-InputPtr SubgraphNode::getForwardedInputInternal(const UUID &internal_uuid) const
+InputPtr SubgraphNode::getForwardedInputInternal(const UUID& internal_uuid) const
 {
     return transition_relay_in_->getInput(internal_uuid);
 }
 
-OutputPtr SubgraphNode::getForwardedOutputInternal(const UUID &internal_uuid) const
+OutputPtr SubgraphNode::getForwardedOutputInternal(const UUID& internal_uuid) const
 {
     return transition_relay_out_->getOutput(internal_uuid);
 }
 
-SlotPtr SubgraphNode::getForwardedSlotInternal(const UUID &internal_uuid) const
+SlotPtr SubgraphNode::getForwardedSlotInternal(const UUID& internal_uuid) const
 {
     return internal_slots_.at(internal_uuid);
 }
 
-EventPtr SubgraphNode::getForwardedEventInternal(const UUID &internal_uuid) const
+EventPtr SubgraphNode::getForwardedEventInternal(const UUID& internal_uuid) const
 {
     return internal_events_.at(internal_uuid);
 }
 
-InputPtr SubgraphNode::getForwardedInputInternalNoThrow(const UUID &internal_uuid) const noexcept
+InputPtr SubgraphNode::getForwardedInputInternalNoThrow(const UUID& internal_uuid) const noexcept
 {
     return transition_relay_in_->getInputNoThrow(internal_uuid);
 }
 
-OutputPtr SubgraphNode::getForwardedOutputInternalNoThrow(const UUID &internal_uuid) const noexcept
+OutputPtr SubgraphNode::getForwardedOutputInternalNoThrow(const UUID& internal_uuid) const noexcept
 {
     return transition_relay_out_->getOutputNoThrow(internal_uuid);
 }
 
-SlotPtr SubgraphNode::getForwardedSlotInternalNoThrow(const UUID &internal_uuid) const noexcept
+SlotPtr SubgraphNode::getForwardedSlotInternalNoThrow(const UUID& internal_uuid) const noexcept
 {
     auto pos = internal_slots_.find(internal_uuid);
-    if(pos == internal_slots_.end()) {
+    if (pos == internal_slots_.end()) {
         return nullptr;
     }
 
     return pos->second;
 }
 
-EventPtr SubgraphNode::getForwardedEventInternalNoThrow(const UUID &internal_uuid) const noexcept
+EventPtr SubgraphNode::getForwardedEventInternalNoThrow(const UUID& internal_uuid) const noexcept
 {
     auto pos = internal_events_.find(internal_uuid);
-    if(pos == internal_events_.end()) {
+    if (pos == internal_events_.end()) {
         return nullptr;
     }
 
     return pos->second;
 }
 
-UUID SubgraphNode::getForwardedInputExternal(const UUID &internal_uuid) const
+UUID SubgraphNode::getForwardedInputExternal(const UUID& internal_uuid) const
 {
     return relay_to_external_output_.at(internal_uuid);
 }
 
-UUID SubgraphNode::getForwardedOutputExternal(const UUID &internal_uuid) const
+UUID SubgraphNode::getForwardedOutputExternal(const UUID& internal_uuid) const
 {
     return relay_to_external_input_.at(internal_uuid);
 }
 
-UUID SubgraphNode::getForwardedSlotExternal(const UUID &internal_uuid) const
+UUID SubgraphNode::getForwardedSlotExternal(const UUID& internal_uuid) const
 {
     return relay_to_external_slot_.at(internal_uuid);
 }
 
-UUID SubgraphNode::getForwardedEventExternal(const UUID &internal_uuid) const
+UUID SubgraphNode::getForwardedEventExternal(const UUID& internal_uuid) const
 {
     return relay_to_external_event_.at(internal_uuid);
 }
@@ -667,7 +651,7 @@ std::vector<UUID> SubgraphNode::getInternalEvents() const
 
 void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool enabled)
 {
-    if(enabled) {
+    if (enabled) {
         // only one iteration is allowed for now
         apex_assert_eq(0, iterated_inputs_.size());
 
@@ -678,19 +662,19 @@ void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool ena
 
         // change the output type of the subgraph
         TokenDataConstPtr vector_type = i->getType();
-        if(vector_type->isContainer()) {
+        if (vector_type->isContainer()) {
             o->setType(vector_type->nestedType());
         }
 
         // change the input type of the subgraph
-        for(const UUID& id: transition_relay_in_->getInputs()) {
+        for (const UUID& id : transition_relay_in_->getInputs()) {
             InputPtr i = transition_relay_in_->getInput(id);
 
             TokenDataConstPtr type = i->getType();
 
             original_types_[id] = type;
 
-            if(auto vector = std::dynamic_pointer_cast<const connection_types::GenericVectorMessage>(type)) {
+            if (auto vector = std::dynamic_pointer_cast<const connection_types::GenericVectorMessage>(type)) {
                 i->setType(vector->nestedType());
             }
         }
@@ -699,7 +683,7 @@ void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool ena
         iterated_inputs_.erase(external_input_uuid);
 
         // change back the input type of the subgraph
-        for(const UUID& id: transition_relay_in_->getInputs()) {
+        for (const UUID& id : transition_relay_in_->getInputs()) {
             InputPtr i = transition_relay_in_->getInput(id);
             i->setType(original_types_[id]);
         }
@@ -708,14 +692,14 @@ void SubgraphNode::setIterationEnabled(const UUID& external_input_uuid, bool ena
 
 void SubgraphNode::notifyMessagesProcessed()
 {
-    //TRACE ainfo << "messages processed" << std::endl;
+    // TRACE ainfo << "messages processed" << std::endl;
     //    tryFinishProcessing();
     transition_relay_in_->notifyMessageProcessed();
 }
 
 void SubgraphNode::currentIterationIsProcessed()
 {
-    //TRACE ainfo << "current iteration processed" << std::endl;
+    // TRACE ainfo << "current iteration processed" << std::endl;
     apex_assert(node_handle_);
 
     tryFinishSubgraph();
@@ -725,7 +709,7 @@ void SubgraphNode::currentIterationIsProcessed()
 
 void SubgraphNode::subgraphHasProducedAllMessages()
 {
-    if(transition_relay_in_->isEnabled()) { // TODO: check this in checkIfEnabled
+    if (transition_relay_in_->isEnabled()) {  // TODO: check this in checkIfEnabled
 
         apex_assert_hard(!has_sent_current_iteration_);
         sendCurrentIteration();
@@ -736,93 +720,89 @@ void SubgraphNode::subgraphHasProducedAllMessages()
 
 void SubgraphNode::tryFinishSubgraph()
 {
-    //TRACE ainfo << "try finish" << std::endl;
+    // TRACE ainfo << "try finish" << std::endl;
     bool can_start_next_iteration = node_handle_->isSink() || has_sent_current_iteration_;
-    if(can_start_next_iteration) {
+    if (can_start_next_iteration) {
         bool last_iteration = !is_iterating_ || iteration_index_ >= iteration_count_;
-        if(last_iteration) {
-            //TRACE ainfo << "last iteration -> finish subgraph: " << is_iterating_ << ", " << iteration_index_ << " >= " << iteration_count_ << std::endl;
+        if (last_iteration) {
+            // TRACE ainfo << "last iteration -> finish subgraph: " << is_iterating_ << ", " << iteration_index_ << " >= " << iteration_count_ << std::endl;
             finishSubgraph();
         } else {
-            if(transition_relay_out_->canStartSendingMessages()) {
+            if (transition_relay_out_->canStartSendingMessages()) {
                 startNextIteration();
             }
         }
     }
-
 }
 
 void SubgraphNode::finishSubgraph()
 {
-    //TRACE ainfo << "called finish" << std::endl;
-    if(is_subgraph_finished_) {
+    // TRACE ainfo << "called finish" << std::endl;
+    if (is_subgraph_finished_) {
         return;
     }
 
     // if transition_relay_in is connected, we need to make sure all connections have received...
-    if(transition_relay_in_->hasConnection()) {
-        if(!transition_relay_in_->areMessagesForwarded()) {
+    if (transition_relay_in_->hasConnection()) {
+        if (!transition_relay_in_->areMessagesForwarded()) {
             return;
         }
     }
 
-    //TRACE ainfo << "finish" << std::endl;
-    if(!is_subgraph_finished_) {
+    // TRACE ainfo << "finish" << std::endl;
+    if (!is_subgraph_finished_) {
         is_subgraph_finished_ = true;
-        //is_iterating_ = false;
+        // is_iterating_ = false;
         has_sent_current_iteration_ = false;
 
         notifySubgraphProcessed();
     }
 }
 
-
 void SubgraphNode::notifySubgraphProcessed()
 {
-//    if(node_handle_->isSource() && node_handle_->isSink()) {
-//        notifyMessagesProcessed();
+    //    if(node_handle_->isSource() && node_handle_->isSink()) {
+    //        notifyMessagesProcessed();
 
-//    } else {
-        std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
-        if(continuation_) {
-            auto cnt = continuation_;
-            continuation_ = Continuation();
-            lock.unlock();
+    //    } else {
+    std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
+    if (continuation_) {
+        auto cnt = continuation_;
+        continuation_ = Continuation();
+        lock.unlock();
 
-            //TRACEainfo << "continuation" << std::endl;
-            cnt([](csapex::NodeModifier& node_modifier, Parameterizable &parameters){});
-        }
-//    }
+        // TRACEainfo << "continuation" << std::endl;
+        cnt([](csapex::NodeModifier& node_modifier, Parameterizable& parameters) {});
+    }
+    //    }
 }
 
 void SubgraphNode::sendCurrentIteration()
 {
-//    ainfo << "send current iteration " << iteration_index_ << " < " << iteration_count_<< std::endl;
+    //    ainfo << "send current iteration " << iteration_index_ << " < " << iteration_count_<< std::endl;
     transition_relay_in_->forwardMessages();
 
     has_sent_current_iteration_ = true;
-    if(is_iterating_ && iteration_index_ < iteration_count_) {
-        //TRACE ainfo << "mark read" << std::endl;
+    if (is_iterating_ && iteration_index_ < iteration_count_) {
+        // TRACE ainfo << "mark read" << std::endl;
         transition_relay_in_->notifyMessageRead();
         transition_relay_in_->notifyMessageProcessed();
         // allow another step for all nested nodes...
         // only do this once ALL NODES are done stepping
-        for(NodeHandle* nh : graph_->getAllNodeHandles()){
+        for (NodeHandle* nh : graph_->getAllNodeHandles()) {
             nh->getNodeRunner()->step();
         }
     }
-
-
 }
 
 void SubgraphNode::startNextIteration()
 {
-//    ainfo << "start iteration " << iteration_index_ << std::endl;
-    for(const InputPtr& i : node_modifier_->getMessageInputs()) {
+    //    ainfo << "start iteration " << iteration_index_ << std::endl;
+    for (const InputPtr& i : node_modifier_->getMessageInputs()) {
         TokenDataConstPtr m = msg::getMessage(i.get());
         OutputPtr o = external_to_internal_outputs_.at(i->getUUID());
 
-        if(m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
+        if (m->isContainer() && iterated_inputs_.find(i->getUUID()) != iterated_inputs_.end()) {
             has_sent_current_iteration_ = false;
             msg::publish(o.get(), m->nestedValue(iteration_index_));
 
@@ -833,7 +813,7 @@ void SubgraphNode::startNextIteration()
 
     ++iteration_index_;
     apex_assert_hard(transition_relay_out_->canStartSendingMessages());
-    //TRACE ainfo << "send internal output messages in next iteration" << std::endl;
+    // TRACE ainfo << "send internal output messages in next iteration" << std::endl;
     transition_relay_out_->sendMessages(node_handle_->isActive());
 }
 
@@ -844,41 +824,39 @@ std::string SubgraphNode::makeStatusString() const
     ss << "AUUID: " << getUUID().getAbsoluteUUID() << '\n';
     {
         std::unique_lock<std::recursive_mutex> lock(continuation_mutex_);
-        ss << "continuation_: " << ((bool) continuation_) << '\n';
+        ss << "continuation_: " << ((bool)continuation_) << '\n';
     }
-    if(node_handle_) {
+    if (node_handle_) {
         ss << "output transiton:\n";
         ss << " - " << (node_handle_->getOutputTransition()->canStartSendingMessages() ? "can send" : "can't send") << '\n';
     }
 
-
-
     auto printStatus = [&ss](const ConnectionPtr& c) {
-        switch(c->getState()) {
-        case Connection::State::DONE:
-            //        case Connection::State::NOT_INITIALIZED:
-            ss << "DONE  ";
-            break;
-        case Connection::State::READ:
-            ss << "READ  ";
-            break;
-        case Connection::State::UNREAD:
-            ss << "UNREAD";
-            break;
-        default:
-            ss << "???";
+        switch (c->getState()) {
+            case Connection::State::DONE:
+                //        case Connection::State::NOT_INITIALIZED:
+                ss << "DONE  ";
+                break;
+            case Connection::State::READ:
+                ss << "READ  ";
+                break;
+            case Connection::State::UNREAD:
+                ss << "UNREAD";
+                break;
+            default:
+                ss << "???";
         }
     };
 
     ss << "(left) transition_relay_out:\n";
     ss << " - " << (transition_relay_out_->isEnabled() ? "enabled" : "disabled") << '\n';
     ss << " - " << (transition_relay_out_->canStartSendingMessages() ? "can" : "can't") << " send\n";
-    ss << " - " << (transition_relay_out_->hasConnection() ? "has" : "doesn't have") <<  " established connection\n";
+    ss << " - " << (transition_relay_out_->hasConnection() ? "has" : "doesn't have") << " established connection\n";
     ss << " - outputs are " << (transition_relay_out_->areOutputsIdle() ? "idle" : "busy") << '\n';
     ss << "(right) transition_relay_in:\n";
     ss << " - " << (transition_relay_in_->isEnabled() ? "enabled" : "disabled") << '\n';
     ss << " - established connections: ";
-    for(const ConnectionPtr& c : transition_relay_in_->getConnections()) {
+    for (const ConnectionPtr& c : transition_relay_in_->getConnections()) {
         printStatus(c);
         ss << '\t';
     }

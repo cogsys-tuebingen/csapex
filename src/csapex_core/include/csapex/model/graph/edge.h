@@ -3,17 +3,14 @@
 
 namespace csapex
 {
-
 namespace graph
 {
-
 class Edge
 {
-
 };
 
-}
+}  // namespace graph
 
-}
+}  // namespace csapex
 
 #endif

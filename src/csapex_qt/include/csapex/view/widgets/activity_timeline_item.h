@@ -8,7 +8,6 @@
 
 namespace csapex
 {
-
 class Interval;
 
 class ActivityTimelineItem : public QGraphicsRectItem
@@ -16,20 +15,17 @@ class ActivityTimelineItem : public QGraphicsRectItem
 public:
     explicit ActivityTimelineItem(std::shared_ptr<Interval const> interval);
 
-
     void refresh();
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0) override;
 
-
-    virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
-    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
-    virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
-
+    virtual void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
+    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
+    virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
 
 protected:
-    void paintInterval(QPainter &p, const QRectF &valid_rect, const Interval &interval);
-    void paintInterval(QPainter &p, const Interval &interval, int depth);
+    void paintInterval(QPainter& p, const QRectF& valid_rect, const Interval& interval);
+    void paintInterval(QPainter& p, const Interval& interval, int depth);
 
 private:
     std::shared_ptr<Interval const> interval_;
@@ -37,7 +33,6 @@ private:
     QPointF cursor_;
 
     int count_;
-
 
     QRectF rect;
 
@@ -49,6 +44,6 @@ private:
     const Interval* selected_interval_;
 };
 
-}
+}  // namespace csapex
 
-#endif // ACTIVITY_TIMELINE_ITEM_H
+#endif  // ACTIVITY_TIMELINE_ITEM_H

@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 class SingletonInterface
 {
 public:
@@ -21,7 +20,7 @@ protected:
 private:
     SingletonInterface(const SingletonInterface& other) = delete;
     SingletonInterface(SingletonInterface&& other) = delete;
-    SingletonInterface& operator =(const SingletonInterface& other) = delete;
+    SingletonInterface& operator=(const SingletonInterface& other) = delete;
 
 private:
     static std::mutex instances_mutex_;
@@ -32,16 +31,17 @@ template <class T>
 class Singleton : public SingletonInterface
 {
 public:
-    virtual ~Singleton() {
-
+    virtual ~Singleton()
+    {
     }
 
-    static T& instance() {
+    static T& instance()
+    {
         static T inst;
         return inst;
     }
 };
 
-}
+}  // namespace csapex
 
-#endif // SINGLETON_HPP
+#endif  // SINGLETON_HPP

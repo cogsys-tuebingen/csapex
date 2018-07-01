@@ -44,135 +44,115 @@
 
 using namespace csapex;
 
-SubprocessNodeWorker::SubprocessNodeWorker(NodeHandlePtr node_handle)
-    : NodeWorker(node_handle),
-      pid_(-1),
-      subprocess_(new Subprocess(node_handle->getUUID().getFullName()))
+SubprocessNodeWorker::SubprocessNodeWorker(NodeHandlePtr node_handle) : NodeWorker(node_handle), pid_(-1), subprocess_(new Subprocess(node_handle->getUUID().getFullName()))
 {
 }
 
 void SubprocessNodeWorker::initialize()
 {
+    pid_ = subprocess_->fork([this]() { runSubprocessLoop(); });
 
-    pid_ = subprocess_->fork([this](){
-        runSubprocessLoop();
-    });
-
-    observe(node_handle_->connector_created, [this](ConnectablePtr c, bool internal){
-        if(!internal) {
-            node_handle_->execution_requested([this, c](){
+    observe(node_handle_->connector_created, [this](ConnectablePtr c, bool internal) {
+        if (!internal) {
+            node_handle_->execution_requested([this, c]() {
                 SerializationBuffer msg;
                 c->getDescription().serializeVersioned(msg);
-                subprocess_->in.write({SubprocessChannel::MessageType::PORT_ADD, msg.data(), msg.size()});
+                subprocess_->in.write({ SubprocessChannel::MessageType::PORT_ADD, msg.data(), msg.size() });
             });
         }
     });
-    observe(node_handle_->node_state_changed, [this](){
-        node_handle_->execution_requested([this](){
+    observe(node_handle_->node_state_changed, [this]() {
+        node_handle_->execution_requested([this]() {
             SerializationBuffer msg;
             getNodeHandle()->getNodeState()->serializeVersioned(msg);
-            subprocess_->in.write({SubprocessChannel::MessageType::NODE_STATE_CHANGED, msg.data(), msg.size()});
+            subprocess_->in.write({ SubprocessChannel::MessageType::NODE_STATE_CHANGED, msg.data(), msg.size() });
         });
     });
 
     NodeWorker::initialize();
 }
 
-
 void SubprocessNodeWorker::runSubprocessLoop()
 {
     NodePtr node = getNode();
 
     try {
-        observe(node->getParameterState()->parameter_changed, [&](param::Parameter* p){
-            changed_parameters_.push_back(p);
-        });
+        observe(node->getParameterState()->parameter_changed, [&](param::Parameter* p) { changed_parameters_.push_back(p); });
 
-        while(subprocess_->isActive()) {
-
+        while (subprocess_->isActive()) {
             // wait for a message
             SubprocessChannel::Message msg = subprocess_->in.read();
-            if(msg.type == SubprocessChannel::MessageType::SHUTDOWN) {
+            if (msg.type == SubprocessChannel::MessageType::SHUTDOWN) {
                 return;
             }
 
-            switch(msg.type)
-            {
-            case SubprocessChannel::MessageType::PARAMETER_UPDATE:
-                handleParameterUpdate(msg);
-                break;
+            switch (msg.type) {
+                case SubprocessChannel::MessageType::PARAMETER_UPDATE:
+                    handleParameterUpdate(msg);
+                    break;
 
-            case SubprocessChannel::MessageType::PROCESS_SYNC:
-            case SubprocessChannel::MessageType::PROCESS_ASYNC:
-                handleProcessChild(msg);
-                break;
+                case SubprocessChannel::MessageType::PROCESS_SYNC:
+                case SubprocessChannel::MessageType::PROCESS_ASYNC:
+                    handleProcessChild(msg);
+                    break;
 
+                case SubprocessChannel::MessageType::PROCESS_SLOT:
+                    handleProcessSlotChild(msg);
+                    break;
 
-            case SubprocessChannel::MessageType::PROCESS_SLOT:
-                handleProcessSlotChild(msg);
-                break;
+                case SubprocessChannel::MessageType::NODE_STATE_CHANGED:
+                    node->stateChanged();
+                    break;
 
-            case SubprocessChannel::MessageType::NODE_STATE_CHANGED:
-                node->stateChanged();
-                break;
-
-            case SubprocessChannel::MessageType::PORT_ADD:
-            {
-                ConnectorDescription des;
-                SerializationBuffer buffer(msg.data, msg.length);
-                des.deserializeVersioned(buffer);
-                if(des.is_variadic) {
-                    switch(des.connector_type) {
-                    case ConnectorType::INPUT:
-                    {
-                        auto vi = std::dynamic_pointer_cast<VariadicInputs>(getNode());
-                        vi->createVariadicInput(des.token_type, des.label, des.optional);
+                case SubprocessChannel::MessageType::PORT_ADD: {
+                    ConnectorDescription des;
+                    SerializationBuffer buffer(msg.data, msg.length);
+                    des.deserializeVersioned(buffer);
+                    if (des.is_variadic) {
+                        switch (des.connector_type) {
+                            case ConnectorType::INPUT: {
+                                auto vi = std::dynamic_pointer_cast<VariadicInputs>(getNode());
+                                vi->createVariadicInput(des.token_type, des.label, des.optional);
+                            } break;
+                            case ConnectorType::OUTPUT: {
+                                auto vo = std::dynamic_pointer_cast<VariadicOutputs>(getNode());
+                                vo->createVariadicOutput(des.token_type, des.label);
+                            } break;
+                            default:
+                                break;
+                        }
+                    } else {
+                        switch (des.connector_type) {
+                            case ConnectorType::INPUT:
+                                getNodeHandle()->addInput(des.token_type, des.label, des.optional);
+                                break;
+                            case ConnectorType::OUTPUT:
+                                getNodeHandle()->addOutput(des.token_type, des.label);
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                        break;
-                    case ConnectorType::OUTPUT:
-                    {
-                        auto vo = std::dynamic_pointer_cast<VariadicOutputs>(getNode());
-                        vo->createVariadicOutput(des.token_type, des.label);
-                    }
-                        break;
-                    default:
-                        break;
-                    }
-                } else {
-                    switch(des.connector_type) {
-                    case ConnectorType::INPUT:
-                        getNodeHandle()->addInput(des.token_type, des.label, des.optional);
-                        break;
-                    case ConnectorType::OUTPUT:
-                        getNodeHandle()->addOutput(des.token_type, des.label);
-                        break;
-                    default:
-                        break;
-                    }
-                }
 
-            }
-                break;
+                } break;
 
-            default:
-                node->aerr << "subprocess received unknown message: " << (int) msg.type << std::endl;
-                break;
+                default:
+                    node->aerr << "subprocess received unknown message: " << (int)msg.type << std::endl;
+                    break;
             }
         }
 
-
-    } catch(const SubprocessChannel::ShutdownException& e) {
+    } catch (const SubprocessChannel::ShutdownException& e) {
         // ignore
 
-    } catch(const boost::interprocess::interprocess_exception& e) {
+    } catch (const boost::interprocess::interprocess_exception& e) {
         std::cout << "interprocess exception " << getUUID() << " >> error: " << e.what() << std::endl;
         std::cout << "native error: " << e.get_native_error() << std::endl;
         std::cout << "error code:   " << e.get_error_code() << std::endl;
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cout << "subprocess " << getUUID() << " >> error: " << e.what() << std::endl;
     }
 }
-
 
 void SubprocessNodeWorker::handleProcessChild(const SubprocessChannel::Message& msg)
 {
@@ -183,9 +163,9 @@ void SubprocessNodeWorker::handleProcessChild(const SubprocessChannel::Message& 
     apex_assert_hard(node->canRunInSeparateProcess());
 
     try {
-        if(msg.data) {
+        if (msg.data) {
             YAML::Node yaml = YAML::Load(msg.toString());
-            for(const YAML::Node& node : yaml) {
+            for (const YAML::Node& node : yaml) {
                 UUID uuid = node["uuid"].as<UUID>();
                 auto msg = MessageSerializer::deserializeYamlMessage(node["data"]);
 
@@ -196,28 +176,25 @@ void SubprocessNodeWorker::handleProcessChild(const SubprocessChannel::Message& 
             };
         }
 
-        if(msg.type == SubprocessChannel::MessageType::PROCESS_SYNC) {
+        if (msg.type == SubprocessChannel::MessageType::PROCESS_SYNC) {
             node->process(*node_handle_, *node);
             finishHandleProcessChild();
 
-        } else if(msg.type == SubprocessChannel::MessageType::PROCESS_ASYNC) {
-            node->process(*node_handle_, *node, [this, node](ProcessingFunction f) {
-                finishHandleProcessChild();
-            });
+        } else if (msg.type == SubprocessChannel::MessageType::PROCESS_ASYNC) {
+            node->process(*node_handle_, *node, [this, node](ProcessingFunction f) { finishHandleProcessChild(); });
         }
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         node->aerr << "subprocess: " << e.what() << std::endl;
         finishHandleProcessChild();
-    } catch(const Failure& f) {
+    } catch (const Failure& f) {
         node->aerr << "subprocess failure: " << f.what() << std::endl;
         finishHandleProcessChild();
-    } catch(...) {
+    } catch (...) {
         node->aerr << "unknown error in subprocess" << std::endl;
         finishHandleProcessChild();
     }
 }
-
 
 void SubprocessNodeWorker::handleProcessSlotChild(const SubprocessChannel::Message& msg)
 {
@@ -227,7 +204,7 @@ void SubprocessNodeWorker::handleProcessSlotChild(const SubprocessChannel::Messa
     apex_assert_hard(node->canRunInSeparateProcess());
 
     try {
-        if(msg.data) {
+        if (msg.data) {
             YAML::Node yaml = YAML::Load(msg.toString());
             UUID uuid = yaml["uuid"].as<UUID>();
             auto msg = MessageSerializer::deserializeYamlMessage(yaml["data"]);
@@ -239,11 +216,11 @@ void SubprocessNodeWorker::handleProcessSlotChild(const SubprocessChannel::Messa
             slot->handleEvent();
         }
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         node->aerr << "handleProcessSlotChild: " << e.what() << std::endl;
-    } catch(const Failure& f) {
+    } catch (const Failure& f) {
         node->aerr << "handleProcessSlotChild failure: " << f.what() << std::endl;
-    } catch(...) {
+    } catch (...) {
         node->aerr << "unknown error in handleProcessSlotChild" << std::endl;
     }
     finishHandleProcessChild();
@@ -256,20 +233,19 @@ void SubprocessNodeWorker::finishHandleProcessChild()
     YAML::Emitter result_emitter;
     try {
         // send parameter updates
-        for(param::Parameter* parameter : changed_parameters_) {
+        for (param::Parameter* parameter : changed_parameters_) {
             transmitParameter(getNode()->getParameter(parameter->name()));
         }
 
         changed_parameters_.clear();
 
-
         // send result
         YAML::Node yaml(YAML::NodeType::Sequence);
 
-        for(const OutputPtr& output : node_handle_->getExternalOutputs()) {
+        for (const OutputPtr& output : node_handle_->getExternalOutputs()) {
             auto msg = output->getAddedToken();
 
-            if(msg) {
+            if (msg) {
                 YAML::Node node(YAML::NodeType::Map);
                 node["uuid"] = output->getUUID();
                 // TODO serialize token! (+ activity, ...)
@@ -282,10 +258,10 @@ void SubprocessNodeWorker::finishHandleProcessChild()
             }
         }
 
-        for(const EventPtr& event: node_handle_->getExternalEvents()) {
+        for (const EventPtr& event : node_handle_->getExternalEvents()) {
             auto msg = event->getAddedToken();
 
-            if(msg) {
+            if (msg) {
                 YAML::Node node(YAML::NodeType::Map);
                 node["uuid"] = event->getUUID();
                 // TODO serialize token! (+ activity, ...)
@@ -300,17 +276,17 @@ void SubprocessNodeWorker::finishHandleProcessChild()
 
         result_emitter << yaml;
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         node->aerr << "finishHandleProcessChild: " << e.what() << std::endl;
-    } catch(const Failure& f) {
+    } catch (const Failure& f) {
         node->aerr << "finishHandleProcessChild failure: " << f.what() << std::endl;
-    } catch(...) {
+    } catch (...) {
         node->aerr << "unknown error in finishHandleProcessChild" << std::endl;
     }
 
     subprocess_->flush();
 
-    subprocess_->out.write({SubprocessChannel::MessageType::PROCESS_FINISHED, result_emitter.c_str()});
+    subprocess_->out.write({ SubprocessChannel::MessageType::PROCESS_FINISHED, result_emitter.c_str() });
 }
 
 SubprocessNodeWorker::~SubprocessNodeWorker()
@@ -318,13 +294,12 @@ SubprocessNodeWorker::~SubprocessNodeWorker()
     stopObserving();
 }
 
-
-void SubprocessNodeWorker::handleParameterUpdate(const SubprocessChannel::Message &msg)
+void SubprocessNodeWorker::handleParameterUpdate(const SubprocessChannel::Message& msg)
 {
-    if(msg.data) {
+    if (msg.data) {
         NodePtr node = getNode();
 
-        SerializationBuffer buffer((const uint8_t*) msg.data, msg.length);
+        SerializationBuffer buffer((const uint8_t*)msg.data, msg.length);
 
         param::ParameterPtr p = std::dynamic_pointer_cast<param::Parameter>(PacketSerializer::deserializePacket(buffer));
 
@@ -335,25 +310,24 @@ void SubprocessNodeWorker::handleParameterUpdate(const SubprocessChannel::Messag
 
 void SubprocessNodeWorker::handleProcessParent(const SubprocessChannel::Message& msg)
 {
-    if(msg.data) {
+    if (msg.data) {
         YAML::Node yaml = YAML::Load(msg.toString());
 
-        for(const YAML::Node& node : yaml) {
+        for (const YAML::Node& node : yaml) {
             UUID uuid = node["uuid"].as<UUID>();
             auto msg = MessageSerializer::deserializeYamlMessage(node["data"]);
 
             ConnectorPtr connector = node_handle_->getConnector(uuid);
-            if(OutputPtr output = std::dynamic_pointer_cast<Output>(connector)) {
+            if (OutputPtr output = std::dynamic_pointer_cast<Output>(connector)) {
                 msg::publish(output.get(), msg);
 
-            } else if(EventPtr event = std::dynamic_pointer_cast<Event>(connector)){
+            } else if (EventPtr event = std::dynamic_pointer_cast<Event>(connector)) {
                 TokenPtr token = std::make_shared<Token>(msg);
                 event->triggerWith(token);
             }
         };
     }
 }
-
 
 void SubprocessNodeWorker::processNode()
 {
@@ -368,26 +342,26 @@ void SubprocessNodeWorker::processNode()
 
     try {
         apex_assert_hard(node->getNodeHandle());
-        if(sync) {
+        if (sync) {
             apex_assert_msg(pid_ != 0, "processNode called in subprocess");
             startSubprocess(SubprocessChannel::MessageType::PROCESS_SYNC);
 
         } else {
-            async_future_ = std::async(std::launch::async, [this](){
+            async_future_ = std::async(std::launch::async, [this]() {
                 startSubprocess(SubprocessChannel::MessageType::PROCESS_ASYNC);
                 finishSubprocess();
                 finishProcessing();
             });
         }
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         setError(true, e.what());
-    } catch(const Failure& f) {
+    } catch (const Failure& f) {
         throw f;
-    } catch(...) {
+    } catch (...) {
         throw Failure("Unknown exception caught in SubprocessNodeWorker.");
     }
-    if(sync) {
+    if (sync) {
         lock.unlock();
 
         finishSubprocess();
@@ -399,11 +373,11 @@ void SubprocessNodeWorker::startSubprocess(const SubprocessChannel::MessageType 
 {
     YAML::Node yaml(YAML::NodeType::Sequence);
 
-    for(const InputPtr& input : node_handle_->getExternalInputs()) {
-        if(msg::hasMessage(input.get())) {
+    for (const InputPtr& input : node_handle_->getExternalInputs()) {
+        if (msg::hasMessage(input.get())) {
             auto msg = msg::getMessage(input.get());
 
-            if(msg) {
+            if (msg) {
                 YAML::Node node(YAML::NodeType::Map);
                 node["uuid"] = input->getUUID();
                 // TODO serialize token! (+ activity, ...)
@@ -416,10 +390,10 @@ void SubprocessNodeWorker::startSubprocess(const SubprocessChannel::MessageType 
     YAML::Emitter emitter;
     emitter << yaml;
 
-    subprocess_->in.write({type, emitter.c_str()});
+    subprocess_->in.write({ type, emitter.c_str() });
 }
 
-void SubprocessNodeWorker::processSlot(const SlotWeakPtr &slot_w)
+void SubprocessNodeWorker::processSlot(const SlotWeakPtr& slot_w)
 {
     apex_assert_msg(pid_ != 0, "processSlot called in subprocess");
 
@@ -429,11 +403,11 @@ void SubprocessNodeWorker::processSlot(const SlotWeakPtr &slot_w)
     try {
         startSubprocessSlot(slot);
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         setError(true, e.what());
-    } catch(const Failure& f) {
+    } catch (const Failure& f) {
         throw f;
-    } catch(...) {
+    } catch (...) {
         throw Failure("Unknown exception caught in SubprocessNodeWorker.");
     }
 }
@@ -445,7 +419,7 @@ void SubprocessNodeWorker::startSubprocessSlot(const SlotPtr& slot)
 
     auto msg = msg::getMessage(slot.get());
 
-    if(msg) {
+    if (msg) {
         YAML::Node yaml(YAML::NodeType::Map);
         yaml["uuid"] = slot->getUUID();
         // TODO serialize token! (+ activity, ...)
@@ -454,7 +428,7 @@ void SubprocessNodeWorker::startSubprocessSlot(const SlotPtr& slot)
         YAML::Emitter emitter;
         emitter << yaml;
 
-        subprocess_->in.write({SubprocessChannel::MessageType::PROCESS_SLOT, emitter.c_str()});
+        subprocess_->in.write({ SubprocessChannel::MessageType::PROCESS_SLOT, emitter.c_str() });
 
         finishSubprocess();
     }
@@ -467,48 +441,47 @@ void SubprocessNodeWorker::finishSubprocess()
 
     // wait for the end of processing
 
-    while(!done_processing) {
+    while (!done_processing) {
         SubprocessChannel::Message msg = subprocess_->out.read();
-        switch(msg.type)
-        {
-        case SubprocessChannel::MessageType::PARAMETER_UPDATE:
-            handleParameterUpdate(msg);
-            break;
+        switch (msg.type) {
+            case SubprocessChannel::MessageType::PARAMETER_UPDATE:
+                handleParameterUpdate(msg);
+                break;
 
-        case SubprocessChannel::MessageType::PROCESS_FINISHED:
-            handleProcessParent(msg);
-            done_processing = true;
-            break;
+            case SubprocessChannel::MessageType::PROCESS_FINISHED:
+                handleProcessParent(msg);
+                done_processing = true;
+                break;
 
-        case SubprocessChannel::MessageType::CHILD_SIGNAL:
-            setError(true, std::string("Child has raised signal: ") + strsignal(atoi(msg.toString().c_str())), ErrorLevel::ERROR);
-            crashed = true;
-            done_processing = true;
-            break;
+            case SubprocessChannel::MessageType::CHILD_SIGNAL:
+                setError(true, std::string("Child has raised signal: ") + strsignal(atoi(msg.toString().c_str())), ErrorLevel::ERROR);
+                crashed = true;
+                done_processing = true;
+                break;
 
-        case SubprocessChannel::MessageType::CHILD_EXIT:
-            setError(true, "Child unexpectedly quit", ErrorLevel::ERROR);
-            crashed = true;
-            done_processing = true;
-            break;
+            case SubprocessChannel::MessageType::CHILD_EXIT:
+                setError(true, "Child unexpectedly quit", ErrorLevel::ERROR);
+                crashed = true;
+                done_processing = true;
+                break;
 
-        default:
-            setError(true, std::string("Unhandled subprocess message: ") + std::to_string((int) msg.type ), ErrorLevel::WARNING);
-            break;
+            default:
+                setError(true, std::string("Unhandled subprocess message: ") + std::to_string((int)msg.type), ErrorLevel::WARNING);
+                break;
         }
     }
 
-    if(crashed) {
+    if (crashed) {
         getNode()->aerr << "*** node crashed! ***" << std::endl;
 
         std::string out = subprocess_->getChildStdOut();
-        if(!out.empty()) {
+        if (!out.empty()) {
             getNode()->aerr << "*** STDOUT: ***" << std::endl;
             getNode()->aerr << out << std::endl;
         }
 
         std::string err = subprocess_->getChildStdErr();
-        if(!err.empty()) {
+        if (!err.empty()) {
             getNode()->aerr << "*** STDERR: ***" << std::endl;
             getNode()->aerr << err << std::endl;
         }
@@ -516,18 +489,16 @@ void SubprocessNodeWorker::finishSubprocess()
         getNode()->aerr << "*** restarting subprocess ***" << std::endl;
 
         subprocess_.reset(new Subprocess(getUUID().getFullName()));
-        pid_ = subprocess_->fork([this](){
-            runSubprocessLoop();
-        });
+        pid_ = subprocess_->fork([this]() { runSubprocessLoop(); });
 
     } else {
         std::string out = subprocess_->getChildStdOut();
-        if(!out.empty()) {
+        if (!out.empty()) {
             getNode()->ainfo << out << std::endl;
         }
 
         std::string err = subprocess_->getChildStdErr();
-        if(!err.empty()) {
+        if (!err.empty()) {
             getNode()->aerr << err << std::endl;
         }
     }
@@ -540,21 +511,21 @@ void SubprocessNodeWorker::finishProcessing()
     NodeWorker::finishProcessing();
 }
 
-void SubprocessNodeWorker::transmitParameter(const param::ParameterPtr &p)
+void SubprocessNodeWorker::transmitParameter(const param::ParameterPtr& p)
 {
     SubprocessChannel& channel = subprocess_->isChild() ? subprocess_->out : subprocess_->in;
 
     SerializationBuffer buffer = PacketSerializer::serializePacket(p);
 
-    channel.write({SubprocessChannel::MessageType::PARAMETER_UPDATE, buffer.data(), buffer.size()});
+    channel.write({ SubprocessChannel::MessageType::PARAMETER_UPDATE, buffer.data(), buffer.size() });
 }
 
-void SubprocessNodeWorker::handleChangedParametersImpl(const Parameterizable::ChangedParameterList &changed_params)
+void SubprocessNodeWorker::handleChangedParametersImpl(const Parameterizable::ChangedParameterList& changed_params)
 {
     NodeWorker::handleChangedParametersImpl(changed_params);
 
-    for(auto pair : changed_params) {
-        if(param::ParameterPtr p = pair.first.lock()) {
+    for (auto pair : changed_params) {
+        if (param::ParameterPtr p = pair.first.lock()) {
             transmitParameter(p);
         }
     }

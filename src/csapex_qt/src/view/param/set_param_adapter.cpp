@@ -17,13 +17,8 @@
 
 using namespace csapex;
 
-
-
-
-SetParameterAdapter::SetParameterAdapter(param::SetParameter::Ptr p)
-    : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), set_p_(p)
+SetParameterAdapter::SetParameterAdapter(param::SetParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), set_p_(p)
 {
-
 }
 
 QWidget* SetParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
@@ -35,44 +30,39 @@ QWidget* SetParameterAdapter::setup(QBoxLayout* layout, const std::string& displ
     layout->addLayout(QtHelper::wrap(display_name, combo, context_handler));
 
     // ui change -> model
-    QObject::connect(combo.data(), static_cast<void(QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
-                     [this](const QString& val) {
-        if(!p_) {
+    QObject::connect(combo.data(), static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), [this](const QString& val) {
+        if (!p_) {
             return;
         }
 
-        if(!val.isEmpty()) {
-//            p->setByName(combo->currentText().toStdString());
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>
-                    (p_->getUUID().getAbsoluteUUID(), std::make_pair(val.toStdString(), true));
+        if (!val.isEmpty()) {
+            //            p->setByName(combo->currentText().toStdString());
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), std::make_pair(val.toStdString(), true));
             executeCommand(update_parameter);
         }
     });
 
     // model change -> ui
     connectInGuiThread(set_p_->parameter_changed, [this, combo](param::Parameter*) {
-        if(!set_p_ || !combo) {
+        if (!set_p_ || !combo) {
             return;
         }
         int index = combo->findText(QString::fromStdString(set_p_->getText()));
-        if(index >= 0) {
+        if (index >= 0) {
             combo->blockSignals(true);
             combo->setCurrentIndex(index);
             combo->blockSignals(false);
         }
     });
 
-    connectInGuiThread(set_p_->scope_changed, [this, combo](param::Parameter*) {
-        updateSetParameterScope(combo);
-    });
+    connectInGuiThread(set_p_->scope_changed, [this, combo](param::Parameter*) { updateSetParameterScope(combo); });
 
     return combo;
 }
 
-
 void SetParameterAdapter::updateSetParameterScope(QPointer<QComboBox> combo)
 {
-    if(!set_p_ || !combo) {
+    if (!set_p_ || !combo) {
         return;
     }
 
@@ -81,16 +71,16 @@ void SetParameterAdapter::updateSetParameterScope(QPointer<QComboBox> combo)
     std::string selected;
     try {
         selected = set_p_->getText();
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         selected = "";
     }
 
     combo->blockSignals(true);
-    for(int i = 0; i < set_p_->noParameters(); ++i) {
+    for (int i = 0; i < set_p_->noParameters(); ++i) {
         std::string str = set_p_->getText(i);
         combo->addItem(QString::fromStdString(str));
 
-        if(str == selected) {
+        if (str == selected) {
             current = i;
         }
     }
@@ -99,10 +89,7 @@ void SetParameterAdapter::updateSetParameterScope(QPointer<QComboBox> combo)
     combo->update();
 }
 
-
-void SetParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+void SetParameterAdapter::setupContextMenu(ParameterContextMenu* context_handler)
 {
-    context_handler->addAction(new QAction("reset to default", context_handler), [this](){
-        set_p_->setByName(set_p_->defText());
-    });
+    context_handler->addAction(new QAction("reset to default", context_handler), [this]() { set_p_->setByName(set_p_->defText()); });
 }

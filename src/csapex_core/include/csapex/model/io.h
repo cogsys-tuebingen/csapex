@@ -9,7 +9,6 @@ namespace csapex
 {
 namespace model
 {
-
 TokenDataConstPtr getTokenData(const TokenPtr& token);
 
 template <typename M>
@@ -19,7 +18,7 @@ std::shared_ptr<const M> getTokenData(const TokenPtr& token)
     return std::dynamic_pointer_cast<const M>(data);
 }
 
-}
-}
+}  // namespace model
+}  // namespace csapex
 
-#endif // CSAPEX_MODEL_IO_H
+#endif  // CSAPEX_MODEL_IO_H

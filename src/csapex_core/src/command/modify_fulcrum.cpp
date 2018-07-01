@@ -17,12 +17,17 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(ModifyFulcrum)
 
-ModifyFulcrum::ModifyFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id,
-                             int f_type, const Point &f_handle_in, const Point &f_handle_out,
-                             int t_type, const Point &t_handle_in, const Point &t_handle_out)
-    : CommandImplementation(parent_uuid), connection_id(connection_id), fulcrum_id(fulcrum_id),
-      f_type(f_type), f_in(f_handle_in), f_out(f_handle_out),
-      t_type(t_type), t_in(t_handle_in), t_out(t_handle_out)
+ModifyFulcrum::ModifyFulcrum(const AUUID& parent_uuid, int connection_id, int fulcrum_id, int f_type, const Point& f_handle_in, const Point& f_handle_out, int t_type, const Point& t_handle_in,
+                             const Point& t_handle_out)
+  : CommandImplementation(parent_uuid)
+  , connection_id(connection_id)
+  , fulcrum_id(fulcrum_id)
+  , f_type(f_type)
+  , f_in(f_handle_in)
+  , f_out(f_handle_out)
+  , t_type(t_type)
+  , t_in(t_handle_in)
+  , t_out(t_handle_out)
 {
 }
 
@@ -51,14 +56,12 @@ bool ModifyFulcrum::doRedo()
     return doExecute();
 }
 
-
-
-void ModifyFulcrum::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ModifyFulcrum::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 
     data << connection_id;
-    data <<fulcrum_id;
+    data << fulcrum_id;
 
     data << f_type;
     data << f_in.x << f_in.y;
@@ -74,7 +77,7 @@ void ModifyFulcrum::deserialize(const SerializationBuffer& data, const SemanticV
     Command::deserialize(data, version);
 
     data >> connection_id;
-    data >>fulcrum_id;
+    data >> fulcrum_id;
 
     data >> f_type;
     data >> f_in.x >> f_in.y;

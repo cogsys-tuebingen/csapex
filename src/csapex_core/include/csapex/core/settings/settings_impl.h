@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 class SettingsImplementation : public Settings, public Observer
 {
 public:
@@ -38,6 +37,6 @@ private:
     std::map<std::string, Entry> settings_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SETTINGS_IMPL_H
+#endif  // SETTINGS_IMPL_H

@@ -23,7 +23,7 @@ public:
 
     QWidget* getWidget();
 
-    bool eventFilter(QObject *, QEvent *);
+    bool eventFilter(QObject*, QEvent*);
 
 Q_SIGNALS:
     void widgetPicked();
@@ -33,6 +33,6 @@ private:
 
     QWidget* widget_;
 };
-}
+}  // namespace csapex
 
-#endif // WIDGET_PICKER_H
+#endif  // WIDGET_PICKER_H

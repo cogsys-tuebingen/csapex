@@ -5,7 +5,6 @@ class QPoint;
 
 namespace csapex
 {
-
 class GraphView;
 
 class GraphViewContextMenu
@@ -13,13 +12,13 @@ class GraphViewContextMenu
 public:
     GraphViewContextMenu(GraphView& view);
 
-    void showGlobalMenu(const QPoint &global_pos);
-    void showSelectionMenu(const QPoint &global_pos);
+    void showGlobalMenu(const QPoint& global_pos);
+    void showSelectionMenu(const QPoint& global_pos);
 
 private:
     GraphView& view_;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_VIEW_CONTEXT_MENU_H
+#endif  // GRAPH_VIEW_CONTEXT_MENU_H

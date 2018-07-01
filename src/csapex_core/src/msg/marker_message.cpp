@@ -4,9 +4,9 @@
 using namespace csapex;
 using namespace connection_types;
 
-MarkerMessage::MarkerMessage(const std::string& name, Stamp stamp)
-    : Message(name, "/", stamp)
-{}
+MarkerMessage::MarkerMessage(const std::string& name, Stamp stamp) : Message(name, "/", stamp)
+{
+}
 
 bool MarkerMessage::canConnectTo(const TokenData*) const
 {

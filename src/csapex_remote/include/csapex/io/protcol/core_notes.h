@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 enum class CoreNoteType
 {
     ConfigChanged,
@@ -29,12 +28,11 @@ enum class CoreNoteType
     Paused,
     SteppingEnabled,
 
-//    SaveDetailRequest,
-//    LoadDetailRequest,
+    //    SaveDetailRequest,
+    //    LoadDetailRequest,
 
     Notification
 };
-
 
 class CoreNote : public NoteImplementation<CoreNote>
 {
@@ -44,12 +42,11 @@ public:
     CoreNote(CoreNoteType request_type, const std::vector<boost::any>& payload);
 
     template <typename... Args>
-    CoreNote(CoreNoteType request_type, Args... args)
-        : CoreNote(request_type, {std::forward<Args>(args)...})
+    CoreNote(CoreNoteType request_type, Args... args) : CoreNote(request_type, { std::forward<Args>(args)... })
     {
     }
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     CoreNoteType getNoteType() const
@@ -73,6 +70,6 @@ private:
     std::vector<boost::any> payload_;
 };
 
-}
+}  // namespace csapex
 
-#endif // CORE_NOTES_H
+#endif  // CORE_NOTES_H

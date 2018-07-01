@@ -27,13 +27,13 @@ namespace bf3 = boost::filesystem3;
 using namespace csapex;
 
 CsApexViewCoreImplementation::CsApexViewCoreImplementation(CsApexCorePtr core)
-    : core_(core),
-      node_adapter_factory_(std::make_shared<NodeAdapterFactory>(core_->getSettings(), core_->getPluginLocator().get())),
-      dispatcher_(core_->getCommandDispatcher()),
-      node_factory_(core_->getNodeFactory()),
-      snippet_factory_(core_->getSnippetFactory()),
-      drag_io(std::make_shared<DragIO>(core_->getPluginLocator(), dispatcher_.get())),
-      exception_handler_(core_->getExceptionHandler())
+  : core_(core)
+  , node_adapter_factory_(std::make_shared<NodeAdapterFactory>(core_->getSettings(), core_->getPluginLocator().get()))
+  , dispatcher_(core_->getCommandDispatcher())
+  , node_factory_(core_->getNodeFactory())
+  , snippet_factory_(core_->getSnippetFactory())
+  , drag_io(std::make_shared<DragIO>(core_->getPluginLocator(), dispatcher_.get()))
+  , exception_handler_(core_->getExceptionHandler())
 {
     node_adapter_factory_->loadPlugins();
 
@@ -55,7 +55,6 @@ CsApexViewCoreImplementation::CsApexViewCoreImplementation(CsApexCorePtr core)
 
     observe(core_->notification, notification);
 
-
     observe(core_->getRoot()->node_facade_added, node_facade_added);
     observe(core_->getRoot()->node_facade_removed, node_facade_removed);
     observe(core_->getRoot()->child_node_facade_added, node_facade_added);
@@ -64,16 +63,14 @@ CsApexViewCoreImplementation::CsApexViewCoreImplementation(CsApexCorePtr core)
     observe(core_->getThreadPool()->group_created, group_created);
     observe(core_->getThreadPool()->group_removed, group_removed);
 
-
     observe(dispatcher_->state_changed, undo_state_changed);
     observe(dispatcher_->dirty_changed, undo_dirty_changed);
 }
 
-CsApexViewCoreImplementation::CsApexViewCoreImplementation(CsApexViewCore &parent, ExceptionHandler &exception_handler)
-    : core_(new CsApexCore(parent.getSettings(), parent.getExceptionHandler(), parent.getPluginLocator(),
-                           parent.getNodeFactory(), parent.getSnippetFactory())),
-      dispatcher_(std::make_shared<CommandDispatcher>(*core_)),
-      exception_handler_(exception_handler)
+CsApexViewCoreImplementation::CsApexViewCoreImplementation(CsApexViewCore& parent, ExceptionHandler& exception_handler)
+  : core_(new CsApexCore(parent.getSettings(), parent.getExceptionHandler(), parent.getPluginLocator(), parent.getNodeFactory(), parent.getSnippetFactory()))
+  , dispatcher_(std::make_shared<CommandDispatcher>(*core_))
+  , exception_handler_(exception_handler)
 {
     node_factory_ = parent.getNodeFactory();
     snippet_factory_ = parent.getSnippetFactory();
@@ -104,7 +101,6 @@ ExceptionHandler& CsApexViewCoreImplementation::getExceptionHandler() const
     return exception_handler_;
 }
 
-
 PluginLocatorPtr CsApexViewCoreImplementation::getPluginLocator() const
 {
     return core_->getPluginLocator();
@@ -119,7 +115,6 @@ Settings& CsApexViewCoreImplementation::getSettings() const
 {
     return core_->getSettings();
 }
-
 
 GraphFacadePtr CsApexViewCoreImplementation::getRoot()
 {
@@ -158,15 +153,12 @@ void CsApexViewCoreImplementation::sendNotification(const std::string& notificat
     core_->sendNotification(notification, error_level);
 }
 
-
-
 /// RELAYS
 
 void CsApexViewCoreImplementation::reset()
 {
     core_->reset();
 }
-
 
 void CsApexViewCoreImplementation::load(const std::string& file)
 {
@@ -193,7 +185,6 @@ void CsApexViewCoreImplementation::setPause(bool paused)
     core_->setPause(paused);
 }
 
-
 bool CsApexViewCoreImplementation::isSteppingMode() const
 {
     return core_->isSteppingMode();
@@ -208,7 +199,6 @@ void CsApexViewCoreImplementation::step()
 {
     core_->step();
 }
-
 
 void CsApexViewCoreImplementation::shutdown()
 {

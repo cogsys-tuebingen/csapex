@@ -8,9 +8,10 @@
 /// SYSTEM
 #include <boost/any.hpp>
 
-namespace csapex {
-namespace param {
-
+namespace csapex
+{
+namespace param
+{
 class CSAPEX_PARAM_EXPORT StringListParameter : public ParameterImplementation<StringListParameter, 0x00A>
 {
     friend class ParameterFactory;
@@ -20,7 +21,7 @@ public:
 
 public:
     StringListParameter();
-    explicit StringListParameter(const std::string& name, const ParameterDescription &description);
+    explicit StringListParameter(const std::string& name, const ParameterDescription& description);
     virtual ~StringListParameter();
 
     void add(const std::string& value);
@@ -31,9 +32,12 @@ public:
     std::size_t count() const;
     std::vector<std::string> getValues() const;
 
-    virtual std::string TYPE() const override { return "string_list"; }
+    virtual std::string TYPE() const override
+    {
+        return "string_list";
+    }
 
-    virtual const std::type_info &type() const override;
+    virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
     void cloneDataFrom(const Clonable& other) override;
@@ -41,7 +45,7 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -53,9 +57,9 @@ private:
     T read(const boost::any& var) const
     {
         try {
-            return boost::any_cast<T> (var);
+            return boost::any_cast<T>(var);
 
-        } catch(const boost::bad_any_cast& e) {
+        } catch (const boost::bad_any_cast& e) {
             throw std::logic_error(std::string("typeof StringListParameter is not ") + typeid(T).name() + ": " + e.what());
         }
     }
@@ -64,7 +68,7 @@ private:
     std::vector<std::string> list_;
 };
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // STRING_LIST_PARAMETER_H
+#endif  // STRING_LIST_PARAMETER_H

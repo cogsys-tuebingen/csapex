@@ -12,12 +12,10 @@
 
 using namespace csapex;
 
-NodeAdapterFactory::NodeAdapterFactory(Settings &settings, PluginLocator *locator)
-    : settings_(settings), plugin_locator_(locator),
-      node_adapter_manager_(new PluginManager<NodeAdapterBuilder> ("csapex::NodeAdapterBuilder"))
+NodeAdapterFactory::NodeAdapterFactory(Settings& settings, PluginLocator* locator)
+  : settings_(settings), plugin_locator_(locator), node_adapter_manager_(new PluginManager<NodeAdapterBuilder>("csapex::NodeAdapterBuilder"))
 {
 }
-
 
 NodeAdapterFactory::~NodeAdapterFactory()
 {
@@ -27,22 +25,22 @@ NodeAdapterFactory::~NodeAdapterFactory()
     node_adapter_manager_ = nullptr;
 }
 
-bool NodeAdapterFactory::hasAdapter(const std::string &type) const
+bool NodeAdapterFactory::hasAdapter(const std::string& type) const
 {
     auto pos = node_adapter_builders_.find(type);
-    if(pos != node_adapter_builders_.end()) {
+    if (pos != node_adapter_builders_.end()) {
         return pos->second != nullptr;
     } else {
         try {
             const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(type + "AdapterBuilder");
-            if(constructor) {
+            if (constructor) {
                 auto builder = constructor->construct();
-                if(builder->getWrappedType() == type) {
+                if (builder->getWrappedType() == type) {
                     return true;
                 }
             }
 
-        } catch(const std::exception&) {
+        } catch (const std::exception&) {
             return false;
         }
     }
@@ -53,35 +51,34 @@ bool NodeAdapterFactory::hasAdapter(const std::string &type) const
 NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node_facade, NodeBox* parent)
 {
     std::string type = node_facade->getType();
-    if(node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
+    if (node_adapter_builders_.find(type) != node_adapter_builders_.end()) {
         auto& builder = node_adapter_builders_[type];
-        if(builder) {
+        if (builder) {
             return builder->build(node_facade, parent);
         }
 
     } else {
         try {
             std::string name = type + "AdapterBuilder";
-            if(!node_facade->isProxy()) {
+            if (!node_facade->isProxy()) {
                 std::string direct_name = type + "DirectAdapterBuilder";
-                if(node_adapter_manager_->hasConstructor(direct_name)) {
+                if (node_adapter_manager_->hasConstructor(direct_name)) {
                     name = direct_name;
                 }
             }
 
-
-            if(node_adapter_manager_->hasConstructor(name)) {
+            if (node_adapter_manager_->hasConstructor(name)) {
                 const PluginConstructor<NodeAdapterBuilder>* constructor = node_adapter_manager_->getConstructorNoThrow(name);
 
                 auto builder = constructor->construct();
-                if(builder->getWrappedType() == type) {
+                if (builder->getWrappedType() == type) {
                     node_adapter_builders_[type] = builder;
                     return builder->build(node_facade, parent);
                 }
             }
             node_adapter_builders_[type] = nullptr;
 
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             std::cerr << "adapter " << type << " cannot be built: " << e.what() << std::endl;
         }
     }
@@ -91,14 +88,14 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node_facade, 
 
 void NodeAdapterFactory::loadPlugins()
 {
-    if(node_adapter_builders_.empty()) {
+    if (node_adapter_builders_.empty()) {
         ensureLoaded();
     }
 }
 
 void NodeAdapterFactory::ensureLoaded()
 {
-    if(!node_adapter_manager_->pluginsLoaded()) {
+    if (!node_adapter_manager_->pluginsLoaded()) {
         node_adapter_manager_->load(plugin_locator_);
     }
 }

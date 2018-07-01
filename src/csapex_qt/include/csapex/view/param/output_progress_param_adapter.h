@@ -22,7 +22,6 @@ private:
     param::OutputProgressParameterPtr op_p_;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // OUTPUT_PROGRESS_PARAM_ADAPTER_H
+#endif  // OUTPUT_PROGRESS_PARAM_ADAPTER_H

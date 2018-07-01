@@ -4,17 +4,17 @@
 /// SYSTEM
 #include <memory>
 
-#define FWD(name) \
-    class name;\
-    typedef std::shared_ptr<name> name##Ptr;\
-    typedef std::unique_ptr<name> name##UniquePtr;\
-    typedef std::weak_ptr<name> name##WeakPtr;\
+#define FWD(name)                                                                                                                                                                                      \
+    class name;                                                                                                                                                                                        \
+    typedef std::shared_ptr<name> name##Ptr;                                                                                                                                                           \
+    typedef std::unique_ptr<name> name##UniquePtr;                                                                                                                                                     \
+    typedef std::weak_ptr<name> name##WeakPtr;                                                                                                                                                         \
     typedef std::shared_ptr<const name> name##ConstPtr;
 
-namespace csapex {
+namespace csapex
+{
 namespace param
 {
-
 FWD(Parameter)
 FWD(BitSetParameter)
 FWD(SetParameter)
@@ -30,9 +30,9 @@ FWD(StringListParameter)
 FWD(OutputProgressParameter)
 FWD(OutputTextParameter)
 
-}
-}
+}  // namespace param
+}  // namespace csapex
 
 #undef FWD
 
-#endif // PARAM_FWD_H
+#endif  // PARAM_FWD_H

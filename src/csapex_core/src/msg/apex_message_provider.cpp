@@ -12,7 +12,7 @@ using namespace csapex;
 
 std::shared_ptr<MessageProvider> ApexMessageProvider::make()
 {
-    return std::shared_ptr<MessageProvider> (new ApexMessageProvider);
+    return std::shared_ptr<MessageProvider>(new ApexMessageProvider);
 }
 
 void ApexMessageProvider::load(const std::string& file)
@@ -26,7 +26,7 @@ void ApexMessageProvider::load(const std::string& file)
 
 bool ApexMessageProvider::hasNext()
 {
-    return (bool) msg_ || state.readParameter<bool>("playback/resend");
+    return (bool)msg_ || state.readParameter<bool>("playback/resend");
 }
 
 connection_types::Message::Ptr ApexMessageProvider::next(std::size_t /*slot*/)
@@ -46,7 +46,6 @@ std::vector<std::string> ApexMessageProvider::getExtensions() const
     return { Settings::message_extension, Settings::message_extension_compressed, Settings::message_extension_binary };
 }
 
-
 GenericStatePtr ApexMessageProvider::getState() const
 {
     GenericStatePtr r(new GenericState);
@@ -55,5 +54,4 @@ GenericStatePtr ApexMessageProvider::getState() const
 
 void ApexMessageProvider::setParameterState(GenericStatePtr /*memento*/)
 {
-
 }

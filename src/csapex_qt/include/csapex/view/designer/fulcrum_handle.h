@@ -9,20 +9,19 @@
 
 namespace csapex
 {
-
-class CSAPEX_QT_EXPORT FulcrumHandle: public QObject, public QGraphicsEllipseItem
+class CSAPEX_QT_EXPORT FulcrumHandle : public QObject, public QGraphicsEllipseItem
 {
     Q_OBJECT
 
 public:
-    FulcrumHandle(const QPointF &pos, QGraphicsItem *parent = 0);
+    FulcrumHandle(const QPointF& pos, QGraphicsItem* parent = 0);
 
-    bool sceneEvent(QEvent *event);
+    bool sceneEvent(QEvent* event);
 
 Q_SIGNALS:
     void moved(bool dropped);
 };
 
-}
+}  // namespace csapex
 
-#endif // FULCRUM_HANDLE_H
+#endif  // FULCRUM_HANDLE_H

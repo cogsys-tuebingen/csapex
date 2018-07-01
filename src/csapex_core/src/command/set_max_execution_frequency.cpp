@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(SetMaximumExecutionFrequency)
 
-SetMaximumExecutionFrequency::SetMaximumExecutionFrequency(const AUUID& parent_uuid, const UUID &node, double frequency)
-    : CommandImplementation(parent_uuid), uuid(node), frequency(frequency)
+SetMaximumExecutionFrequency::SetMaximumExecutionFrequency(const AUUID& parent_uuid, const UUID& node, double frequency) : CommandImplementation(parent_uuid), uuid(node), frequency(frequency)
 {
 }
 
@@ -63,9 +62,7 @@ bool SetMaximumExecutionFrequency::doRedo()
     return doExecute();
 }
 
-
-
-void SetMaximumExecutionFrequency::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void SetMaximumExecutionFrequency::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

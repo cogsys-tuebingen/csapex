@@ -10,17 +10,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT SetLoggerLevel : public CommandImplementation<SetLoggerLevel>
 {
     COMMAND_HEADER(SetLoggerLevel);
 
 public:
-    SetLoggerLevel(const AUUID &graph_uuid, const UUID& node, int level);
+    SetLoggerLevel(const AUUID& graph_uuid, const UUID& node, int level);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -34,8 +33,7 @@ private:
     int level;
 };
 
-}
+}  // namespace command
 
-}
-#endif // SET_LOGGER_LEVEL_H
-
+}  // namespace csapex
+#endif  // SET_LOGGER_LEVEL_H

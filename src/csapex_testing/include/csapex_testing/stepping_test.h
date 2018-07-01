@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class SteppingTest : public NodeConstructingTest
 {
 protected:
@@ -26,6 +25,7 @@ public:
 
 protected:
     void step();
+
 private:
     void waitForEndOfStep();
 
@@ -40,6 +40,6 @@ protected:
     GraphFacadeImplementationPtr main_graph_facade;
 };
 
-}
+}  // namespace csapex
 
-#endif // STEPPING_TEST_H
+#endif  // STEPPING_TEST_H

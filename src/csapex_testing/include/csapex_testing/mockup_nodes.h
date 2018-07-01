@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 template <int factor>
 class MockupStaticMultiplierNode
 {
@@ -24,14 +23,12 @@ public:
 
     void setupParameters(Parameterizable& /*parameters*/)
     {
-
     }
 
     void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
     {
         int val = msg::getValue<int>(in);
         val *= factor;
-
 
         msg::publish(out, val);
     }
@@ -58,7 +55,6 @@ public:
 
     void setupParameters(Parameterizable& /*parameters*/)
     {
-
     }
 
     void process(NodeModifier& /*node_modifier*/, Parameterizable& /*parameters*/)
@@ -70,7 +66,6 @@ private:
     Slot* in2;
     Event* out;
 };
-
 
 class MockupDynamicMultiplierNode
 {
@@ -88,7 +83,6 @@ private:
     Input* input_b_;
     Output* output_;
 };
-
 
 class MockupSource : public Node
 {
@@ -129,7 +123,6 @@ private:
     int value;
 };
 
-
 class AnySink : public Node
 {
 public:
@@ -143,6 +136,6 @@ private:
     Input* in;
 };
 
-}
+}  // namespace csapex
 
-#endif // MOCKUP_NODES_H
+#endif  // MOCKUP_NODES_H

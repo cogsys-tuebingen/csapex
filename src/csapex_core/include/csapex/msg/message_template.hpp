@@ -15,8 +15,6 @@ namespace csapex
 {
 namespace connection_types
 {
-
-
 /**
  * @brief The MessageTemplateContainer struct wraps non integral types.
  *        The class derives from the data type so that it can be dynamically casted to and from it.
@@ -29,42 +27,39 @@ struct MessageTemplateContainer : public Type
 {
     using value_type = Type;
 
-    MessageTemplateContainer()
-        : value(*this)
-    {}
-    MessageTemplateContainer(const MessageTemplateContainer& other)
-        : Type(other), value(*this)
+    MessageTemplateContainer() : value(*this)
+    {
+    }
+    MessageTemplateContainer(const MessageTemplateContainer& other) : Type(other), value(*this)
     {
         *this = other.value;
     }
-    MessageTemplateContainer(const Type& v)
-        : value(*this)
+    MessageTemplateContainer(const Type& v) : value(*this)
     {
         value = v;
     }
-    MessageTemplateContainer(Type&& v)
-        : value(*this)
+    MessageTemplateContainer(Type&& v) : value(*this)
     {
         value = std::move(v);
     }
 
-    MessageTemplateContainer& operator = (const MessageTemplateContainer & copy)
+    MessageTemplateContainer& operator=(const MessageTemplateContainer& copy)
     {
         value = copy.value;
         return *this;
     }
-    MessageTemplateContainer& operator = (MessageTemplateContainer&& copy)
+    MessageTemplateContainer& operator=(MessageTemplateContainer&& copy)
     {
         value = std::move(copy.value);
         return *this;
     }
 
-    MessageTemplateContainer& operator = (const Type & other_value)
+    MessageTemplateContainer& operator=(const Type& other_value)
     {
         value = other_value;
         return *this;
     }
-    MessageTemplateContainer& operator = (Type && other_value)
+    MessageTemplateContainer& operator=(Type&& other_value)
     {
         value = std::move(other_value);
         return *this;
@@ -103,7 +98,8 @@ public:
  * @brief The MessageTemplateBase struct is a marker for RTTI
  */
 struct MessageTemplateBase
-{};
+{
+};
 
 /**
  * @brief The MessageTemplate class generates a message from any datatype
@@ -123,32 +119,28 @@ public:
     typedef std::shared_ptr<const Instance> ConstPtr;
 
     typedef MessageTemplateContainer<Type, std::is_integral<Type>::value> ValueContainer;
-    typedef MessageTemplate<Type,Instance> Self;
+    typedef MessageTemplate<Type, Instance> Self;
 
-    explicit MessageTemplate( const std::string& frame_id = "/", Message::Stamp stamp = 0)
-        : Message(type<Instance>::name(), frame_id, stamp)
+    explicit MessageTemplate(const std::string& frame_id = "/", Message::Stamp stamp = 0) : Message(type<Instance>::name(), frame_id, stamp)
     {
     }
 
-    MessageTemplate(const Self& copy)
-        : Message(type<Instance>::name(), copy.frame_id, copy.stamp_micro_seconds),
-          ValueContainer(static_cast<const ValueContainer&>(copy))
-    {}
+    MessageTemplate(const Self& copy) : Message(type<Instance>::name(), copy.frame_id, copy.stamp_micro_seconds), ValueContainer(static_cast<const ValueContainer&>(copy))
+    {
+    }
 
-    MessageTemplate(Self&& moved)
-        : Message(type<Instance>::name(), moved.frame_id, moved.stamp_micro_seconds),
-          ValueContainer(static_cast<ValueContainer&&>(moved))
-    {}
+    MessageTemplate(Self&& moved) : Message(type<Instance>::name(), moved.frame_id, moved.stamp_micro_seconds), ValueContainer(static_cast<ValueContainer&&>(moved))
+    {
+    }
 
-
-    Self& operator = (const Self& other)
+    Self& operator=(const Self& other)
     {
         ValueContainer::operator=(other);
         frame_id = other.frame_id;
         stamp_micro_seconds = other.stamp_micro_seconds;
         return *this;
     }
-    Self& operator = (Self&& other)
+    Self& operator=(Self&& other)
     {
         ValueContainer::operator=(std::move(other));
         frame_id = std::move(other.frame_id);
@@ -161,7 +153,7 @@ public:
         return ValueContainer::acceptsConnectionFrom(other_side);
     }
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override
     {
         // TODO: ValueContainer should provide a version here!
         Message::serialize(data, version);
@@ -182,17 +174,13 @@ public:
     }
 };
 
-
-}
-
-
+}  // namespace connection_types
 
 /// CASTING
 ///
 
 namespace msg
 {
-
 template <typename Instance, typename S>
 struct MessageCaster<Instance, S, typename std::enable_if<std::is_base_of<connection_types::MessageTemplateBase, Instance>::value>::type>
 {
@@ -200,18 +188,18 @@ struct MessageCaster<Instance, S, typename std::enable_if<std::is_base_of<connec
     static std::shared_ptr<Instance const> constcast(const std::shared_ptr<S const>& msg)
     {
         // if we can dynamic cast directly, use that
-        if(auto direct = std::dynamic_pointer_cast<Instance const>(msg)) {
+        if (auto direct = std::dynamic_pointer_cast<Instance const>(msg)) {
             return direct;
         }
 
         // if we can cast the message to the value type, create a new message of that type
-        if(auto* casted = dynamic_cast<V const*>(msg.get())) {
+        if (auto* casted = dynamic_cast<V const*>(msg.get())) {
             auto res = makeEmpty<Instance>();
 
             // copy specific data
             res->value = *casted;
 
-            if(auto other_base = dynamic_cast<connection_types::Message const*>(msg.get())) {
+            if (auto other_base = dynamic_cast<connection_types::Message const*>(msg.get())) {
                 // copy generic data
                 dynamic_cast<connection_types::Message&>(*res) = *other_base;
             }
@@ -224,18 +212,18 @@ struct MessageCaster<Instance, S, typename std::enable_if<std::is_base_of<connec
     static std::shared_ptr<Instance> cast(const std::shared_ptr<S>& msg)
     {
         // if we can dynamic cast directly, use that
-        if(auto direct = std::dynamic_pointer_cast<Instance>(msg)) {
+        if (auto direct = std::dynamic_pointer_cast<Instance>(msg)) {
             return direct;
         }
 
         // if we can cast the message to the value type, create a new message of that type
-        if(auto* casted = dynamic_cast<V*>(msg.get())) {
+        if (auto* casted = dynamic_cast<V*>(msg.get())) {
             auto res = makeEmpty<Instance>();
 
             // copy specific data
             res->value = *casted;
 
-            if(auto other_base = dynamic_cast<connection_types::Message*>(msg.get())) {
+            if (auto other_base = dynamic_cast<connection_types::Message*>(msg.get())) {
                 // copy generic data
                 dynamic_cast<connection_types::Message&>(*res) = *other_base;
             }
@@ -247,7 +235,7 @@ struct MessageCaster<Instance, S, typename std::enable_if<std::is_base_of<connec
     }
 };
 
-}
-}
+}  // namespace msg
+}  // namespace csapex
 
-#endif // MESSAGE_TEMPLATE_H
+#endif  // MESSAGE_TEMPLATE_H

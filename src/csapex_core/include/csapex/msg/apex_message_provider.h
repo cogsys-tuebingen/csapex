@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT ApexMessageProvider : public MessageProvider
 {
 public:
@@ -30,6 +29,6 @@ private:
     connection_types::Message::Ptr msg_;
 };
 
-}
+}  // namespace csapex
 
-#endif // APEX_MESSAGE_PROVIDER_H
+#endif  // APEX_MESSAGE_PROVIDER_H

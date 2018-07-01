@@ -25,12 +25,13 @@ public:
     void shutdown();
 
     template <typename PluginType>
-    std::vector<std::string> enumerateXmlFiles() {
+    std::vector<std::string> enumerateXmlFiles()
+    {
         std::vector<std::string> files;
         auto index = std::type_index(typeid(PluginType));
         auto locators_it = locators_.find(index);
-        if(locators_it != locators_.end()) {
-            for(auto function : locators_it->second) {
+        if (locators_it != locators_.end()) {
+            for (auto function : locators_it->second) {
                 function(files);
             }
         }
@@ -52,7 +53,7 @@ public:
     bool hasLibraryError(const std::string& name) const;
     std::string getLibraryError(const std::string& name) const;
 
-    void setLibraryLoaded(const std::string& name, const std::string &file);
+    void setLibraryLoaded(const std::string& name, const std::string& file);
     bool isLibraryLoaded(const std::string& name) const;
 
     std::vector<std::string> getAllLibraries() const;
@@ -62,12 +63,12 @@ public:
 
 private:
     PluginLocator(const PluginLocator& copy) = delete;
-    PluginLocator& operator = (const PluginLocator& copy) = delete;
+    PluginLocator& operator=(const PluginLocator& copy) = delete;
 
 private:
-    Settings &settings_;
+    Settings& settings_;
 
-    std::map<std::type_index, std::vector<std::function<void(std::vector<std::string>&)> > > locators_;
+    std::map<std::type_index, std::vector<std::function<void(std::vector<std::string>&)>>> locators_;
 
     std::vector<std::string> library_paths_;
 
@@ -80,6 +81,6 @@ private:
 
     std::map<std::string, std::vector<std::string>> plugin_paths_;
 };
-}
+}  // namespace csapex
 
-#endif // PLUGIN_LOCATOR_H
+#endif  // PLUGIN_LOCATOR_H

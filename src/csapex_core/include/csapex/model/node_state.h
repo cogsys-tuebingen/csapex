@@ -16,7 +16,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT NodeState : public Serializable
 {
 private:
@@ -29,15 +28,15 @@ public:
     typedef slim_signal::Signal<void()> Signal;
 
     NodeState();
-    NodeState(const NodeHandle *parent);
+    NodeState(const NodeHandle* parent);
     ~NodeState();
 
-    NodeState& operator = (const NodeState& rhs);
+    NodeState& operator=(const NodeState& rhs);
 
     void writeYaml(YAML::Node& out) const;
     void readYaml(const YAML::Node& node);
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 public:
@@ -46,19 +45,19 @@ public:
     Signal max_frequency_changed;
 
     Point getPos() const;
-    void setPos(const Point &value, bool quiet = false);
+    void setPos(const Point& value, bool quiet = false);
     Signal pos_changed;
 
     long getZ() const;
     void setZ(long value);
     Signal z_changed;
 
-    void getColor(int& r, int& g, int &b) const;
+    void getColor(int& r, int& g, int& b) const;
     void setColor(int r, int g, int b);
     Signal color_changed;
 
     std::string getLabel() const;
-    void setLabel(const std::string &label);
+    void setLabel(const std::string& label);
     Signal label_changed;
 
     bool isMinimized() const;
@@ -98,13 +97,12 @@ public:
     void setLoggerLevel(int level);
     Signal logger_level_changed;
 
-
     const NodeHandle* getParent() const;
-    void setParent(const NodeHandle *value);
+    void setParent(const NodeHandle* value);
     Signal parent_changed;
 
     GenericStatePtr getParameterState() const;
-    void setParameterState(const GenericStatePtr &value);
+    void setParameterState(const GenericStatePtr& value);
 
     bool hasDictionaryEntry(const std::string& key) const;
     void deleteDictionaryEntry(const std::string& key);
@@ -114,7 +112,7 @@ public:
     template <typename T>
     T getDictionaryEntry(const std::string& key, const T& default_value) const
     {
-        if(hasDictionaryEntry(key)) {
+        if (hasDictionaryEntry(key)) {
             return getDictionaryEntry<T>(key);
 
         } else {
@@ -157,16 +155,17 @@ private:
     ExecutionType exec_type_;
 };
 
-}
+}  // namespace csapex
 
 /// YAML
-namespace YAML {
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::NodeState> {
-  static Node encode(const csapex::NodeState& rhs);
-  static bool decode(const Node& node, csapex::NodeState& rhs);
+namespace YAML
+{
+template <>
+struct CSAPEX_CORE_EXPORT convert<csapex::NodeState>
+{
+    static Node encode(const csapex::NodeState& rhs);
+    static bool decode(const Node& node, csapex::NodeState& rhs);
 };
-}
+}  // namespace YAML
 
-
-#endif // NODE_STATE_H
+#endif  // NODE_STATE_H

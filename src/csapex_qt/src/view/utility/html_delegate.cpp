@@ -8,15 +8,11 @@
 
 using namespace csapex;
 
-HTMLDelegate::HTMLDelegate(int line_height)
-    : line_height(line_height)
+HTMLDelegate::HTMLDelegate(int line_height) : line_height(line_height)
 {
-
 }
 
-
-
-QSize HTMLDelegate::sizeHint ( const QStyleOptionViewItem & option, const QModelIndex & index ) const
+QSize HTMLDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyleOptionViewItemV4 options = option;
     initStyleOption(&options, index);
@@ -32,8 +28,7 @@ QSize HTMLDelegate::sizeHint ( const QStyleOptionViewItem & option, const QModel
     return doc.size().toSize();
 }
 
-
-void HTMLDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
+void HTMLDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyleOptionViewItemV4 options = option;
     initStyleOption(&options, index);
@@ -63,17 +58,15 @@ void HTMLDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & opti
     painter->restore();
 }
 
-
-HTMLBoxDelegate::HTMLBoxDelegate(int line_height)
-    : HTMLDelegate(line_height)
+HTMLBoxDelegate::HTMLBoxDelegate(int line_height) : HTMLDelegate(line_height)
 {
 }
 
-void HTMLBoxDelegate::setKeyWords (const QString& words)
+void HTMLBoxDelegate::setKeyWords(const QString& words)
 {
     key_words = words.split(QRegExp("(\\s+|::)"));
 }
-void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
+void HTMLBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyleOptionViewItemV4 options = option;
     initStyleOption(&options, index);
@@ -86,37 +79,35 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
     QStringList properties = index.data(Qt::UserRole + 4).toStringList();
 
     QString tag;
-    if(!tags.empty()) {
-        tag =  tags.at(0);
-        for(const QString& t : tags) {
-            for(const QString& s : key_words) {
-                if(s.length() > 0) {
-                    if(t.contains(s, Qt::CaseInsensitive)) {
+    if (!tags.empty()) {
+        tag = tags.at(0);
+        for (const QString& t : tags) {
+            for (const QString& s : key_words) {
+                if (s.length() > 0) {
+                    if (t.contains(s, Qt::CaseInsensitive)) {
                         tag = t;
                     }
                 }
             }
         }
-
     }
 
-    for(const QString& s : key_words) {
-        if(s.length() > 0 && s != ".") {
+    for (const QString& s : key_words) {
+        if (s.length() > 0 && s != ".") {
             descr.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
             name.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
             tag.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<b><u>\\1</u></b>");
         }
     }
 
-
     QString properties_str;
     bool invalid = false;
-    for(QString property : properties) {
-        if(property == "invalid") {
+    for (QString property : properties) {
+        if (property == "invalid") {
             invalid = true;
         }
-        for(const QString& s : key_words) {
-            if(property.contains(s, Qt::CaseInsensitive)) {
+        for (const QString& s : key_words) {
+            if (property.contains(s, Qt::CaseInsensitive)) {
                 property.replace(QRegExp(QString("(") + s + ")", Qt::CaseInsensitive), "<span style='color: #000'><u>\\1</u></span>");
             }
         }
@@ -126,16 +117,12 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
 
     QTextDocument doc;
     QString html;
-    html += "<table><tr><th" +
-            (invalid ? QString(" style='color: #f00'") : QString("") ) +
-            ">";
-    if(!tag.isEmpty()) {
-        html += "<small>" + tag + " :: </small>" ;
+    html += "<table><tr><th" + (invalid ? QString(" style='color: #f00'") : QString("")) + ">";
+    if (!tag.isEmpty()) {
+        html += "<small>" + tag + " :: </small>";
     }
     html += name + "</th>";
-    html += "<th style='font-size: 10px; color: " +
-            (invalid ? QString("#f00") : QString("#888") ) +
-            "; padding-left: 6px' valign='middle'>";
+    html += "<th style='font-size: 10px; color: " + (invalid ? QString("#f00") : QString("#888")) + "; padding-left: 6px' valign='middle'>";
     html += properties_str;
     html += "</th>";
     html += "</tr></table>";
@@ -153,10 +140,7 @@ void HTMLBoxDelegate::paint ( QPainter * painter, const QStyleOptionViewItem & o
     painter->restore();
 }
 
-
-
-
-QSize HTMLBoxDelegate::sizeHint ( const QStyleOptionViewItem & option, const QModelIndex & index ) const
+QSize HTMLBoxDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyleOptionViewItemV4 options = option;
     initStyleOption(&options, index);

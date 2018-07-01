@@ -12,13 +12,11 @@
 
 namespace csapex
 {
-
 struct RelayMapping
 {
     UUID external;
     UUID internal;
 };
-
 
 class CSAPEX_CORE_EXPORT SubgraphNode : public Node, public Variadic
 {
@@ -31,24 +29,23 @@ public:
     GraphPtr getGraph() const;
     GraphImplementationPtr getLocalGraph() const;
 
-//    template <typename T = Connectable>
-//    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
-//    {
-//        return std::dynamic_pointer_cast<T>(findConnector(uuid));
-//    }
-//    template <typename T = Connectable>
-//    std::shared_ptr<T> findTypedConnectorNoThrow(const UUID &uuid) noexcept
-//    {
-//        return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
-//    }
+    //    template <typename T = Connectable>
+    //    std::shared_ptr<T> findTypedConnector(const UUID &uuid)
+    //    {
+    //        return std::dynamic_pointer_cast<T>(findConnector(uuid));
+    //    }
+    //    template <typename T = Connectable>
+    //    std::shared_ptr<T> findTypedConnectorNoThrow(const UUID &uuid) noexcept
+    //    {
+    //        return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
+    //    }
 
-//    virtual NodeHandle*findNodeHandle(const UUID& uuid) const override;
-//    virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
-//    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
+    //    virtual NodeHandle*findNodeHandle(const UUID& uuid) const override;
+    //    virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
+    //    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
     virtual void initialize(csapex::NodeHandlePtr node_handle) override;
-    void setNodeFacade(NodeFacadeImplementation *graph_node_facade);
-
+    void setNodeFacade(NodeFacadeImplementation* graph_node_facade);
 
     virtual void detach() override;
     virtual void reset() override;
@@ -66,48 +63,25 @@ public:
 
     virtual bool isAsynchronous() const override;
 
-    InputPtr createInternalInput(const TokenDataConstPtr& type,
-                                 const UUID& internal_uuid,
-                                 const std::string& label,
-                                 bool optional);
-    OutputPtr createInternalOutput(const TokenDataConstPtr& type,
-                                   const UUID& internal_uuid,
-                                   const std::string& label);
-    EventPtr createInternalEvent(const TokenDataConstPtr& type,
-                                 const UUID& internal_uuid,
-                                 const std::string& label);
-    SlotPtr createInternalSlot(const TokenDataConstPtr& type,
-                               const UUID& internal_uuid,
-                               const std::string& label,
-                               std::function<void (const TokenPtr &)> callback);
+    InputPtr createInternalInput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool optional);
+    OutputPtr createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
+    EventPtr createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
+    SlotPtr createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void(const TokenPtr&)> callback);
 
-    virtual Input* createVariadicInput(TokenDataConstPtr type,
-                                       const std::string& label,
-                                       bool optional) override;
-    virtual Output* createVariadicOutput(TokenDataConstPtr type,
-                                         const std::string& label) override;
-    virtual Event* createVariadicEvent(TokenDataConstPtr type,
-                                       const std::string& label) override;
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type,
-                                     const std::string& label,
-                                     std::function<void(const TokenPtr&)> callback,
-                                     bool active,
-                                     bool blocking) override;
+    virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
+    virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
+    virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label) override;
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active, bool blocking) override;
 
     virtual void removeVariadicInput(InputPtr input) override;
     virtual void removeVariadicOutput(OutputPtr input) override;
     virtual void removeVariadicEvent(EventPtr input) override;
     virtual void removeVariadicSlot(SlotPtr input) override;
 
-    RelayMapping addForwardingInput(const TokenDataConstPtr& type,
-                                    const std::string& label,
-                                    bool optional);
-    RelayMapping addForwardingOutput(const TokenDataConstPtr& type,
-                                     const std::string& label);
-    RelayMapping addForwardingSlot(const TokenDataConstPtr& type,
-                                   const std::string& label);
-    RelayMapping addForwardingEvent(const TokenDataConstPtr& type,
-                                    const std::string& label);
+    RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
+    RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);
+    RelayMapping addForwardingSlot(const TokenDataConstPtr& type, const std::string& label);
+    RelayMapping addForwardingEvent(const TokenDataConstPtr& type, const std::string& label);
 
     InputPtr getForwardedInputInternal(const UUID& internal_uuid) const;
     OutputPtr getForwardedOutputInternal(const UUID& internal_uuid) const;
@@ -133,7 +107,6 @@ public:
     std::vector<UUID> getInternalInputs() const;
     std::vector<UUID> getInternalSlots() const;
     std::vector<UUID> getInternalEvents() const;
-
 
     void setIterationEnabled(const UUID& external_input_uuid, bool enabled);
 
@@ -207,6 +180,6 @@ protected:
     long guard_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SUBGRAPH_NODE_H
+#endif  // SUBGRAPH_NODE_H

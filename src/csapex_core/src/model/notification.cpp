@@ -7,10 +7,10 @@
 
 using namespace csapex;
 
-Notification::Notification(const Notification& copy)
-    : auuid(copy.auuid), message(copy.message.str()), error(copy.error), msg_dirty_(true)
-{}
-void Notification::operator = (const Notification& copy)
+Notification::Notification(const Notification& copy) : auuid(copy.auuid), message(copy.message.str()), error(copy.error), msg_dirty_(true)
+{
+}
+void Notification::operator=(const Notification& copy)
 {
     auuid = copy.auuid;
     error = copy.error;
@@ -20,17 +20,17 @@ void Notification::operator = (const Notification& copy)
     msg_dirty_ = false;
 }
 
-Notification::Notification(const std::string& message)
-    : Notification(AUUID(), message, ErrorState::ErrorLevel::ERROR)
-{}
-Notification::Notification(AUUID uuid, const std::string& message)
-    : Notification(uuid, message, ErrorState::ErrorLevel::ERROR)
-{}
-Notification::Notification(AUUID uuid, const std::string& message, ErrorState::ErrorLevel error)
-    : auuid(uuid), message(message), error(error), msg_dirty_(false), msg_cache_(message)
-{}
+Notification::Notification(const std::string& message) : Notification(AUUID(), message, ErrorState::ErrorLevel::ERROR)
+{
+}
+Notification::Notification(AUUID uuid, const std::string& message) : Notification(uuid, message, ErrorState::ErrorLevel::ERROR)
+{
+}
+Notification::Notification(AUUID uuid, const std::string& message, ErrorState::ErrorLevel error) : auuid(uuid), message(message), error(error), msg_dirty_(false), msg_cache_(message)
+{
+}
 
-void Notification::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Notification::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << auuid;
     data << message;
@@ -44,16 +44,14 @@ void Notification::deserialize(const SerializationBuffer& data, const SemanticVe
     data >> error;
 }
 
-bool Notification::operator == (const Notification& other) const
+bool Notification::operator==(const Notification& other) const
 {
-    return auuid == other.auuid &&
-            error == other.error &&
-            getMessage() == other.getMessage();
+    return auuid == other.auuid && error == other.error && getMessage() == other.getMessage();
 }
 
 std::string Notification::getMessage() const
 {
-    if(msg_dirty_) {
+    if (msg_dirty_) {
         msg_cache_ = message.str();
         msg_dirty_ = false;
     }

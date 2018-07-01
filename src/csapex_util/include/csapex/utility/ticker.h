@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class Ticker
 {
 public:
@@ -31,7 +30,6 @@ protected:
     void setTickImmediate(bool immediate);
     bool isImmediate() const;
 
-
 protected:
     virtual void tickEvent() = 0;
 
@@ -48,6 +46,6 @@ private:
     Rate tick_rate_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TICKER_H
+#endif  // TICKER_H

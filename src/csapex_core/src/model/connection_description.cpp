@@ -9,20 +9,13 @@
 
 using namespace csapex;
 
-ConnectionDescription::ConnectionDescription(const UUID& from, const UUID& to,
-                                             const TokenDataConstPtr& type,
-                                             int id, bool active,
-                                             const std::vector<Fulcrum> &fulcrums)
-    : from(from), to(to), from_label(""), to_label(""), type(type),
-      id(id), active(active),
-      fulcrums(fulcrums)
+ConnectionDescription::ConnectionDescription(const UUID& from, const UUID& to, const TokenDataConstPtr& type, int id, bool active, const std::vector<Fulcrum>& fulcrums)
+  : from(from), to(to), from_label(""), to_label(""), type(type), id(id), active(active), fulcrums(fulcrums)
 {
 }
 
 ConnectionDescription::ConnectionDescription(const ConnectionDescription& other)
-    : from(other.from), to(other.to), from_label(other.from_label), to_label(other.to_label), type(other.type),
-      id(other.id), active(other.active),
-      fulcrums(other.fulcrums)
+  : from(other.from), to(other.to), from_label(other.from_label), to_label(other.to_label), type(other.type), id(other.id), active(other.active), fulcrums(other.fulcrums)
 {
 }
 
@@ -30,7 +23,7 @@ ConnectionDescription::ConnectionDescription()
 {
 }
 
-ConnectionDescription& ConnectionDescription::operator = (const ConnectionDescription& other)
+ConnectionDescription& ConnectionDescription::operator=(const ConnectionDescription& other)
 {
     from = other.from;
     to = other.to;
@@ -44,12 +37,12 @@ ConnectionDescription& ConnectionDescription::operator = (const ConnectionDescri
     return *this;
 }
 
-bool ConnectionDescription:: operator == (const ConnectionDescription& other) const
+bool ConnectionDescription::operator==(const ConnectionDescription& other) const
 {
     return from == other.from && to_label == other.to_label;
 }
 
-void ConnectionDescription::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ConnectionDescription::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << from;
     data << to;

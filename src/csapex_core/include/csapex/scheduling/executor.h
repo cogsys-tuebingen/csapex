@@ -17,7 +17,7 @@ public:
     virtual ~Executor();
 
     virtual void add(TaskGenerator*) = 0;
-    virtual void remove(TaskGenerator *) = 0;
+    virtual void remove(TaskGenerator*) = 0;
 
     void addChild(Executor* e);
 
@@ -46,12 +46,11 @@ protected:
     void checkIfStepIsDone();
 
 public:
-    slim_signal::Signal<void (bool)> paused;
+    slim_signal::Signal<void(bool)> paused;
 
-
-    slim_signal::Signal<void ()> stepping_enabled;
-    slim_signal::Signal<void ()> begin_step;
-    slim_signal::Signal<void ()> end_step;
+    slim_signal::Signal<void()> stepping_enabled;
+    slim_signal::Signal<void()> begin_step;
+    slim_signal::Signal<void()> end_step;
 
 private:
     bool paused_;
@@ -60,7 +59,6 @@ private:
 
     std::vector<Executor*> children_;
 };
-}
+}  // namespace csapex
 
-#endif // EXECUTOR_H
-
+#endif  // EXECUTOR_H

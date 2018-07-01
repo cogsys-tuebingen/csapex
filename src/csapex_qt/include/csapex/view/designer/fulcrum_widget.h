@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class FulcrumHandle;
 
 class CSAPEX_QT_EXPORT FulcrumWidget : public QObject, public QGraphicsEllipseItem
@@ -20,12 +19,12 @@ class CSAPEX_QT_EXPORT FulcrumWidget : public QObject, public QGraphicsEllipseIt
     Q_OBJECT
 
 public:
-    FulcrumWidget(Fulcrum* fulcrum, QGraphicsItem *parent = 0);
+    FulcrumWidget(Fulcrum* fulcrum, QGraphicsItem* parent = 0);
 
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* e);
-    bool sceneEvent(QEvent *event);
+    bool sceneEvent(QEvent* event);
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0);
 
 Q_SIGNALS:
     void movedEvent();
@@ -41,9 +40,8 @@ public Q_SLOTS:
     void updateHandleIn(bool dropped);
     void updateHandleOut(bool dropped);
 
-
 private:
-    void updateHandlesHelper(FulcrumHandle& a, QGraphicsLineItem *linea, FulcrumHandle& b, QGraphicsLineItem *lineb, bool dropped);
+    void updateHandlesHelper(FulcrumHandle& a, QGraphicsLineItem* linea, FulcrumHandle& b, QGraphicsLineItem* lineb, bool dropped);
 
 private:
     Fulcrum* fulcrum_;
@@ -54,6 +52,6 @@ private:
     QGraphicsLineItem *line_in, *line_out;
 };
 
-}
+}  // namespace csapex
 
-#endif // FULCRUM_WIDGET_H
+#endif  // FULCRUM_WIDGET_H

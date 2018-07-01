@@ -18,7 +18,7 @@ public:
     ConnectorServer(SessionPtr session);
     ~ConnectorServer();
 
-    void startObserving(const ConnectablePtr &connector);
+    void startObserving(const ConnectablePtr& connector);
     void stopObserving(const ConnectablePtr& connector);
 
 private:
@@ -26,6 +26,6 @@ private:
 
     std::unordered_map<AUUID, io::ChannelPtr, AUUID::Hasher> channels_;
 };
-}
+}  // namespace csapex
 
-#endif // CONNECTOR_SERVER_H
+#endif  // CONNECTOR_SERVER_H

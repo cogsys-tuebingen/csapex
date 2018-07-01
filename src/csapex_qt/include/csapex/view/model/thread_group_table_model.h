@@ -12,22 +12,21 @@
 
 namespace csapex
 {
-
 class ThreadGroupTableModel : public QAbstractTableModel, public Observer
 {
 public:
-    ThreadGroupTableModel(Settings &settings, ThreadPoolPtr thread_pool, CommandExecutor& dispatcher);
+    ThreadGroupTableModel(Settings& settings, ThreadPoolPtr thread_pool, CommandExecutor& dispatcher);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    ThreadGroup * getThreadGroup(int row) const;
+    ThreadGroup* getThreadGroup(int row) const;
 
 private:
     void refresh();
@@ -38,6 +37,6 @@ private:
     CommandExecutor& cmd_executor_;
 };
 
-}
+}  // namespace csapex
 
-#endif // THREAD_GROUP_TABLE_MODEL_H
+#endif  // THREAD_GROUP_TABLE_MODEL_H

@@ -16,14 +16,12 @@ TokenData::TokenData()
 {
 }
 
-TokenData::TokenData(const std::string& type_name)
-    : type_name_(type_name)
+TokenData::TokenData(const std::string& type_name) : type_name_(type_name)
 {
     setDescriptiveName(type_name);
 }
 
-TokenData::TokenData(const std::string& type_name, const std::string& descriptive_name)
-    : type_name_(type_name), descriptive_name_(descriptive_name)
+TokenData::TokenData(const std::string& type_name, const std::string& descriptive_name) : type_name_(type_name), descriptive_name_(descriptive_name)
 {
 }
 
@@ -31,17 +29,17 @@ TokenData::~TokenData()
 {
 }
 
-void TokenData::setDescriptiveName(const std::string &name)
+void TokenData::setDescriptiveName(const std::string& name)
 {
     descriptive_name_ = name;
 }
 
-bool TokenData::canConnectTo(const TokenData *other_side) const
+bool TokenData::canConnectTo(const TokenData* other_side) const
 {
     return other_side->acceptsConnectionFrom(this);
 }
 
-bool TokenData::acceptsConnectionFrom(const TokenData *other_side) const
+bool TokenData::acceptsConnectionFrom(const TokenData* other_side) const
 {
     return type_name_ == other_side->typeName();
 }
@@ -56,7 +54,7 @@ std::string TokenData::typeName() const
     return type_name_;
 }
 
-void TokenData::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void TokenData::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << type_name_;
     data << descriptive_name_;
@@ -94,12 +92,12 @@ std::size_t TokenData::nestedValueCount() const
 {
     throw std::logic_error("cannot get nested count for non-container messages");
 }
-void TokenData::addNestedValue(const ConstPtr &msg)
+void TokenData::addNestedValue(const ConstPtr& msg)
 {
     throw std::logic_error("cannot add nested value to non-container messages");
 }
 
-void TokenData::writeNative(const std::string &/*file*/, const std::string &/*base*/, const std::string& /*suffix*/) const
+void TokenData::writeNative(const std::string& /*file*/, const std::string& /*base*/, const std::string& /*suffix*/) const
 {
     std::cerr << "error: writeRaw not implemented for message type " << descriptiveName() << std::endl;
 }

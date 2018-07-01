@@ -45,8 +45,8 @@
 using namespace csapex;
 using namespace csapex::param;
 
-namespace {
-
+namespace
+{
 /// THREADING
 void assertGuiThread()
 {
@@ -57,13 +57,12 @@ void assertNotGuiThread()
 {
     apex_assert_hard(QThread::currentThread() != QApplication::instance()->thread());
 }
-}
+}  // namespace
 
 /// BRIDGE
-DefaultNodeAdapterBridge::DefaultNodeAdapterBridge(DefaultNodeAdapter *parent)
-    : parent_(parent)
+DefaultNodeAdapterBridge::DefaultNodeAdapterBridge(DefaultNodeAdapter* parent) : parent_(parent)
 {
-    qRegisterMetaType < Function > ("Function");
+    qRegisterMetaType<Function>("Function");
 
     assertGuiThread();
     apex_assert_hard(thread() == QApplication::instance()->thread());
@@ -77,8 +76,7 @@ DefaultNodeAdapterBridge::~DefaultNodeAdapterBridge()
     disconnect();
 }
 
-void DefaultNodeAdapterBridge::connectInGuiThread(slim_signal::Signal<void (Parameter *)> &signal,
-                                                  std::function<void ()> cb)
+void DefaultNodeAdapterBridge::connectInGuiThread(slim_signal::Signal<void(Parameter*)>& signal, std::function<void()> cb)
 {
     // cb should be executed in the gui thread
     connections.push_back(signal.connect(std::bind(&DefaultNodeAdapterBridge::modelCallback, this, cb)));
@@ -86,7 +84,7 @@ void DefaultNodeAdapterBridge::connectInGuiThread(slim_signal::Signal<void (Para
 
 void DefaultNodeAdapterBridge::disconnect()
 {
-    for(slim_signal::Connection& c : connections) {
+    for (slim_signal::Connection& c : connections) {
         c.disconnect();
     }
 
@@ -103,7 +101,7 @@ void DefaultNodeAdapterBridge::setupAdaptiveUi()
 {
     //    Timer timer("setup");
     NodeFacadePtr node_handle = parent_->node_.lock();
-    if(!node_handle) {
+    if (!node_handle) {
         return;
     }
     parent_->setupAdaptiveUi();
@@ -111,10 +109,9 @@ void DefaultNodeAdapterBridge::setupAdaptiveUi()
     //    for(auto pair : timer.entries()) {
     //        std::cerr << pair.second << " ms" << std::endl;
     //    }
-
 }
 
-void DefaultNodeAdapterBridge::enableGroup(bool enable, const std::string &group)
+void DefaultNodeAdapterBridge::enableGroup(bool enable, const std::string& group)
 {
     parent_->groups_enabled[group] = enable;
     parent_->groupsboxes[group]->setProperty("hidden", !enable);
@@ -127,10 +124,8 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
     Q_EMIT setupAdaptiveUiRequest();
 }
 
-
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent)
-    : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent) : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
 {
 }
 
@@ -145,26 +140,25 @@ void DefaultNodeAdapter::clear()
 {
     bridge.disconnect();
 
-    if(wrapper_layout_) {
+    if (wrapper_layout_) {
         QtHelper::clearLayout(wrapper_layout_);
     }
 
-    for(QObject* cb : callbacks) {
+    for (QObject* cb : callbacks) {
         qt_helper::Call* call = dynamic_cast<qt_helper::Call*>(cb);
-        if(call) {
+        if (call) {
             call->disconnect();
         }
         delete call;
-        //cb->deleteLater();
+        // cb->deleteLater();
     }
     callbacks.clear();
     groups.clear();
 }
 
-
-void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
+void DefaultNodeAdapter::setupUi(QBoxLayout* outer_layout)
 {
-    if(!wrapper_layout_) {
+    if (!wrapper_layout_) {
         wrapper_layout_ = new QVBoxLayout;
         outer_layout->addLayout(wrapper_layout_);
     }
@@ -172,17 +166,18 @@ void DefaultNodeAdapter::setupUi(QBoxLayout * outer_layout)
     setupAdaptiveUi();
 }
 
-namespace {
+namespace
+{
 void setTooltip(QLayout* l, const QString& tooltip)
 {
-    for(int i = 0; i < l->count(); ++i) {
+    for (int i = 0; i < l->count(); ++i) {
         QLayoutItem* o = l->itemAt(i);
         QWidgetItem* w = dynamic_cast<QWidgetItem*>(o);
-        if(w) {
+        if (w) {
             w->widget()->setToolTip(tooltip);
         } else {
             QLayout* l = dynamic_cast<QLayout*>(o);
-            if(l) {
+            if (l) {
                 setTooltip(l, tooltip);
             }
         }
@@ -199,23 +194,21 @@ struct install
 {
     static void execute(std::map<int, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> >& map)
     {
-        map[P().ID()] = [](DefaultNodeAdapter* a, Parameter::Ptr p) {
-            a->setupParameter<P, Adapter>(std::dynamic_pointer_cast<P>(p));
-        };
+        map[P().ID()] = [](DefaultNodeAdapter* a, Parameter::Ptr p) { a->setupParameter<P, Adapter>(std::dynamic_pointer_cast<P>(p)); };
     }
 };
 
-}
+}  // namespace
 
 void DefaultNodeAdapter::setupAdaptiveUi()
 {
     NodeFacadePtr node_facade = node_.lock();
-    if(!node_facade) {
+    if (!node_facade) {
         return;
     }
 
     static std::map<int, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> > mapping_;
-    if(mapping_.empty()) {
+    if (mapping_.empty()) {
         install<TriggerParameter, TriggerParameterAdapter>::execute(mapping_);
 
         install<ColorParameter, ColorParameterAdapter>::execute(mapping_);
@@ -240,30 +233,30 @@ void DefaultNodeAdapter::setupAdaptiveUi()
     node_facade->parameter_set_changed.disconnectAll();
     node_facade->parameter_set_changed.connect(std::bind(&DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest, &bridge));
 
-    for(Parameter::Ptr p : params) {
+    for (Parameter::Ptr p : params) {
         Parameter* parameter = p.get();
 
-        if(!parameter->isEnabled() || parameter->isHidden()) {
+        if (!parameter->isEnabled() || parameter->isHidden()) {
             continue;
         }
 
-        current_name_= parameter->name();
+        current_name_ = parameter->name();
         current_display_name_ = current_name_;
         std::size_t separator_pos = current_name_.find_first_of('/');
 
         QBoxLayout* group_layout = nullptr;
 
-        if(separator_pos != std::string::npos) {
+        if (separator_pos != std::string::npos) {
             std::string group = current_name_.substr(0, separator_pos);
-            current_display_name_ = current_name_.substr(separator_pos+1);
+            current_display_name_ = current_name_.substr(separator_pos + 1);
 
-            if(groups.find(group) != groups.end()) {
+            if (groups.find(group) != groups.end()) {
                 group_layout = groups[group];
             } else {
                 bool hidden = group.size() > 0 && group.at(0) == '~';
 
                 QGroupBox* gb;
-                if(hidden) {
+                if (hidden) {
                     gb = new QGroupBox(QString::fromStdString(group.substr(1)));
                 } else {
                     gb = new QGroupBox(QString::fromStdString(group));
@@ -271,32 +264,30 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
                 groupsboxes[group] = gb;
 
-                if(groups_enabled.find(group) != groups_enabled.end()) {
+                if (groups_enabled.find(group) != groups_enabled.end()) {
                     hidden = !groups_enabled[group];
                 }
 
-                gb->setContentsMargins(0,0,0,0);
+                gb->setContentsMargins(0, 0, 0, 0);
 
                 QVBoxLayout* gb_layout = new QVBoxLayout;
                 gb->setLayout(gb_layout);
                 gb->setCheckable(true);
                 gb->setChecked(!hidden);
-                gb_layout->setContentsMargins(0,0,0,0);
+                gb_layout->setContentsMargins(0, 0, 0, 0);
 
                 group_layout = new QVBoxLayout;
                 groups.insert(std::make_pair(group, group_layout));
-                group_layout->setContentsMargins(0,0,0,0);
+                group_layout->setContentsMargins(0, 0, 0, 0);
 
                 QFrame* hider = new QFrame;
                 hider->setLayout(group_layout);
-                hider->setContentsMargins(0,0,0,0);
+                hider->setContentsMargins(0, 0, 0, 0);
                 hider->setHidden(hidden);
 
                 gb_layout->addWidget(hider);
 
                 wrapper_layout_->addWidget(gb);
-
-
 
                 qt_helper::Call* call_trigger = new qt_helper::Call(std::bind(&DefaultNodeAdapterBridge::enableGroup, &bridge, std::bind(&QGroupBox::isChecked, gb), group));
                 callbacks.push_back(call_trigger);
@@ -309,9 +300,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         QPointer<QHBoxLayout> layout_ptr(new QHBoxLayout);
         current_layout_ = layout_ptr;
         setDirection(current_layout_, node_facade);
-        node_facade->getNodeState()->flipped_changed.connect([this, layout_ptr](){
-            if(!layout_ptr.isNull()) {
-                if(auto node = node_.lock()) {
+        node_facade->getNodeState()->flipped_changed.connect([this, layout_ptr]() {
+            if (!layout_ptr.isNull()) {
+                if (auto node = node_.lock()) {
                     setDirection(layout_ptr, node);
                 }
             }
@@ -319,20 +310,20 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         // connect parameter input, if available
         ConnectorPtr param_in = node_facade->getParameterInput(current_name_);
-        if(param_in) {
+        if (param_in) {
             QPointer<Port> port = parent_->createPort(param_in, current_layout_);
 
             port->setVisible(p->isInteractive());
             parameter_connections_[p.get()].push_back(p->interactive_changed.connect([port](Parameter*, bool i) {
-                                                          if(port.isNull()) {
-                                                              return;
-                                                          }
-                                                          return port->setVisible(i);
-                                                      }));
+                if (port.isNull()) {
+                    return;
+                }
+                return port->setVisible(i);
+            }));
         }
 
         // generate UI element
-        if(mapping_.find(p->ID()) != mapping_.end()) {
+        if (mapping_.find(p->ID()) != mapping_.end()) {
             mapping_[p->ID()](this, p);
 
         } else {
@@ -341,34 +332,33 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         // connect parameter output, if available
         ConnectorPtr param_out = node_facade->getParameterOutput(current_name_);
-        if(param_out) {
+        if (param_out) {
             QPointer<Port> port = parent_->createPort(param_out, current_layout_);
 
             port->setVisible(p->isInteractive());
             parameter_connections_[p.get()].push_back(p->interactive_changed.connect([port](Parameter*, bool i) {
-                                                          if(port.isNull()) {
-                                                              return;
-                                                          }
-                                                          return port->setVisible(i);
-                                                      }));
+                if (port.isNull()) {
+                    return;
+                }
+                return port->setVisible(i);
+            }));
         }
 
         QString tooltip = QString::fromStdString(p->description().toString());
-        if(tooltip.isEmpty()){
+        if (tooltip.isEmpty()) {
             setTooltip(current_layout_, QString::fromStdString(p->getUUID().getAbsoluteUUID().getFullName()));
         } else {
             setTooltip(current_layout_, tooltip);
         }
 
         // put into layout
-        if(group_layout) {
+        if (group_layout) {
             group_layout->addLayout(current_layout_);
         } else {
             wrapper_layout_->addLayout(current_layout_);
         }
     }
 }
-
 
 template <typename Parameter, typename Adapter>
 void DefaultNodeAdapter::setupParameter(std::shared_ptr<Parameter> p)
@@ -381,13 +371,12 @@ void DefaultNodeAdapter::setupParameter(std::shared_ptr<Parameter> p)
 
     parameter_connections_[p.get()].push_back(p->destroyed.connect([this, adapter](param::Parameter* p) {
         auto pos = std::find(adapters_.begin(), adapters_.end(), adapter);
-        if(pos != adapters_.end()) {
+        if (pos != adapters_.end()) {
             adapters_.erase(pos);
         }
         parameter_connections_.erase(p);
     }));
 }
-
 
 void DefaultNodeAdapter::stop()
 {

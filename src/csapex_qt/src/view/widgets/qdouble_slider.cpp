@@ -6,14 +6,10 @@
 #include <limits>
 #include <cmath>
 
-QDoubleSlider::QDoubleSlider(Qt::Orientation orientation, double step_size, QWidget *parent) :
-    QSlider(orientation, parent),
-    step_(step_size),
-    min_(0.0),
-    max_(1.0)
+QDoubleSlider::QDoubleSlider(Qt::Orientation orientation, double step_size, QWidget* parent) : QSlider(orientation, parent), step_(step_size), min_(0.0), max_(1.0)
 {
     connect(this, SIGNAL(valueChanged(int)), this, SLOT(scaleValue(int)));
-    connect(this, SIGNAL(rangeChanged(int,int)), this, SLOT(emitRangeChanged(int,int)));
+    connect(this, SIGNAL(rangeChanged(int, int)), this, SLOT(emitRangeChanged(int, int)));
 
     update();
 }
@@ -30,7 +26,7 @@ void QDoubleSlider::setStepSize(double step)
 
 void QDoubleSlider::update()
 {
-    if(min_ > max_) {
+    if (min_ > max_) {
         max_ = min_;
     }
     setSingleStep(step_);
@@ -47,11 +43,10 @@ int QDoubleSlider::double2int(double val)
     return round((val - min_) / step_);
 }
 
-
 void QDoubleSlider::scaleValue(int value)
 {
     double val = int2double(value);
-    if(val != scaledValue()){
+    if (val != scaledValue()) {
         setScaledValue(val);
     }
 
@@ -62,7 +57,7 @@ void QDoubleSlider::setScaledMinimum(double min)
 {
     bool change = min != min_;
 
-    if(change) {
+    if (change) {
         min_ = min;
         update();
     }
@@ -72,7 +67,7 @@ void QDoubleSlider::setScaledMaximum(double max)
 {
     bool change = max != max_;
 
-    if(change) {
+    if (change) {
         max_ = max;
         update();
     }
@@ -82,7 +77,7 @@ void QDoubleSlider::setScaledRange(double min, double max)
 {
     bool change = max != max_ || min != min_;
 
-    if(change) {
+    if (change) {
         max_ = max;
         min_ = min;
         update();
@@ -91,16 +86,16 @@ void QDoubleSlider::setScaledRange(double min, double max)
 
 void QDoubleSlider::setScaledValue(double val)
 {
-    int intval= double2int(val);
-    if(value() != intval) {
+    int intval = double2int(val);
+    if (value() != intval) {
         setValue(intval);
     }
 }
 
 void QDoubleSlider::setNearestDoubleValue(double val)
 {
-    int intval= double2int(val);
-    if(value() != intval) {
+    int intval = double2int(val);
+    if (value() != intval) {
         blockSignals(true);
         setValue(intval);
         blockSignals(false);
@@ -121,7 +116,6 @@ void QDoubleSlider::limitMax(double limit)
     setScaledValue(limited);
 }
 
-
 double QDoubleSlider::scaledValue()
 {
     return int2double(value());
@@ -139,9 +133,9 @@ double QDoubleSlider::scaledMinimum()
 
 void QDoubleSlider::emitRangeChanged(int min, int max)
 {
-    if(int2double(min) != min_)
+    if (int2double(min) != min_)
         setScaledMinimum(int2double(min));
-    if(int2double(max) != max_)
+    if (int2double(max) != max_)
         setScaledMaximum(int2double(max));
 
     Q_EMIT scaledRangeChanged(min_, max_);

@@ -20,12 +20,13 @@ using namespace csapex;
 
 namespace
 {
-
 double normalizeAngle(double a)
 {
     double r = a;
-    while(r < -M_PI) r += 2*M_PI;
-    while(r >= M_PI) r -= 2*M_PI;
+    while (r < -M_PI)
+        r += 2 * M_PI;
+    while (r >= M_PI)
+        r -= 2 * M_PI;
     return r;
 }
 
@@ -36,26 +37,21 @@ double angleToDial(double angle)
 
 double dialToAngle(double dial)
 {
-    return normalizeAngle(dial  / 4.0 / 180.0 * M_PI - M_PI);
+    return normalizeAngle(dial / 4.0 / 180.0 * M_PI - M_PI);
 }
 
-}
+}  // namespace
 
-
-
-AngleParameterAdapter::AngleParameterAdapter(param::AngleParameter::Ptr p)
-    : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), angle_p_(p)
+AngleParameterAdapter::AngleParameterAdapter(param::AngleParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), angle_p_(p)
 {
-
 }
 
-QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
+QWidget* AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& display_name)
 {
     QLabel* label = new QLabel(angle_p_->name().c_str());
 
     label->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(label, &QLabel::customContextMenuRequested,
-                     [=](const QPoint& point){ customContextMenuRequested(label, point); });
+    QObject::connect(label, &QLabel::customContextMenuRequested, [=](const QPoint& point) { customContextMenuRequested(label, point); });
 
     layout->addWidget(label);
 
@@ -65,8 +61,7 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     dial->setWrapping(true);
     dial->setValue(angleToDial(angle_p_->as<double>()));
     dial->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(dial.data(), &QDial::customContextMenuRequested,
-                     [=](const QPoint& point){ customContextMenuRequested(dial, point); });
+    QObject::connect(dial.data(), &QDial::customContextMenuRequested, [=](const QPoint& point) { customContextMenuRequested(dial, point); });
     layout->addWidget(dial);
 
     QPointer<QDoubleSpinBox> spin = new QDoubleSpinBox;
@@ -80,8 +75,8 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     layout->addWidget(spin);
 
     // ui change -> model
-    QObject::connect(dial.data(), &QDial::valueChanged, [this, dial, spin](int value){
-        if(!angle_p_ || !dial  || !spin) {
+    QObject::connect(dial.data(), &QDial::valueChanged, [this, dial, spin](int value) {
+        if (!angle_p_ || !dial || !spin) {
             return;
         }
 
@@ -89,9 +84,9 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
         double min = angle_p_->min();
         double max = angle_p_->max();
 
-        if(angle < min) {
+        if (angle < min) {
             angle = min;
-        } else if(angle > max) {
+        } else if (angle > max) {
             angle = max;
         }
 
@@ -102,8 +97,8 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
         spin->blockSignals(false);
     });
 
-    QObject::connect(spin.data(), static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this, dial, spin](double value){
-        if(!angle_p_ || !dial  || !spin) {
+    QObject::connect(spin.data(), static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this, dial, spin](double value) {
+        if (!angle_p_ || !dial || !spin) {
             return;
         }
 
@@ -111,9 +106,9 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
         double min = angle_p_->min();
         double max = angle_p_->max();
 
-        if(angle < min) {
+        if (angle < min) {
             angle = min;
-        } else if(angle > max) {
+        } else if (angle > max) {
             angle = max;
         }
 
@@ -125,8 +120,8 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     });
 
     // model change -> ui
-    connectInGuiThread(angle_p_->parameter_changed, [this, dial, spin](param::Parameter*){
-        if(!angle_p_ || !dial  || !spin) {
+    connectInGuiThread(angle_p_->parameter_changed, [this, dial, spin](param::Parameter*) {
+        if (!angle_p_ || !dial || !spin) {
             return;
         }
 
@@ -134,9 +129,9 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
         double min = angle_p_->min();
         double max = angle_p_->max();
 
-        if(angle < min) {
+        if (angle < min) {
             angle = min;
-        } else if(angle > max) {
+        } else if (angle > max) {
             angle = max;
         }
         double val = angleToDial(angle);
@@ -154,23 +149,13 @@ QWidget *AngleParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
     return label;
 }
 
-void AngleParameterAdapter::setupContextMenu(ParameterContextMenu *context_handler)
+void AngleParameterAdapter::setupContextMenu(ParameterContextMenu* context_handler)
 {
-    context_handler->addAction(new QAction("set -π", context_handler), [this](){
-        set(-M_PI);
-    });
-    context_handler->addAction(new QAction("set -π/2", context_handler), [this](){
-        set(-M_PI_2);
-    });
-    context_handler->addAction(new QAction("set 0", context_handler), [this](){
-        set(0.0);
-    });
-    context_handler->addAction(new QAction("set +π/2", context_handler), [this](){
-        set(M_PI_2);
-    });
-    context_handler->addAction(new QAction("set +π", context_handler), [this](){
-        set(M_PI-1e-9);
-    });
+    context_handler->addAction(new QAction("set -π", context_handler), [this]() { set(-M_PI); });
+    context_handler->addAction(new QAction("set -π/2", context_handler), [this]() { set(-M_PI_2); });
+    context_handler->addAction(new QAction("set 0", context_handler), [this]() { set(0.0); });
+    context_handler->addAction(new QAction("set +π/2", context_handler), [this]() { set(M_PI_2); });
+    context_handler->addAction(new QAction("set +π", context_handler), [this]() { set(M_PI - 1e-9); });
 }
 
 void AngleParameterAdapter::set(double angle)

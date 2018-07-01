@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 template <typename I>
 class ResponseImplementation : public Response
 {
@@ -15,12 +14,11 @@ protected:
     CLONABLE_IMPLEMENTATION_CONSTRUCTOR(I, 0);
 
 protected:
-    ResponseImplementation(uint8_t id)
-        : Response(id)
+    ResponseImplementation(uint8_t id) : Response(id)
     {
     }
 };
 
-}
+}  // namespace csapex
 
-#endif // RESPONSE_IMPL_HPP
+#endif  // RESPONSE_IMPL_HPP

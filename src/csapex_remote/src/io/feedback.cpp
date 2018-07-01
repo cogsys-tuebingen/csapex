@@ -6,22 +6,16 @@
 
 using namespace csapex;
 
-Feedback::Feedback()
-    : Response(0)
+Feedback::Feedback() : Response(0)
 {
-
 }
 
-Feedback::Feedback(const std::string &message)
-    : Response(0), message_(message)
+Feedback::Feedback(const std::string& message) : Response(0), message_(message)
 {
-
 }
 
-Feedback::Feedback(const std::string &message, uint8_t request_id)
-    : Response(request_id), message_(message)
+Feedback::Feedback(const std::string& message, uint8_t request_id) : Response(request_id), message_(message)
 {
-
 }
 
 uint8_t Feedback::getPacketType() const
@@ -39,8 +33,7 @@ std::string Feedback::getMessage() const
     return message_;
 }
 
-
-void Feedback::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void Feedback::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     data << request_id_;
     data << message_;

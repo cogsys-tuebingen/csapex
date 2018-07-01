@@ -12,14 +12,11 @@
 
 using namespace csapex;
 
-ThreadGroupProfilingDelegate::ThreadGroupProfilingDelegate(QWidget *parent)
-    : QStyledItemDelegate(parent)
+ThreadGroupProfilingDelegate::ThreadGroupProfilingDelegate(QWidget* parent) : QStyledItemDelegate(parent)
 {
-
 }
 
-void ThreadGroupProfilingDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-                         const QModelIndex &index) const
+void ThreadGroupProfilingDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     if (index.data().canConvert<ThreadGroupProfilingRenderer>()) {
         ThreadGroupProfilingRenderer thread_group_profiler = qvariant_cast<ThreadGroupProfilingRenderer>(index.data());
@@ -27,12 +24,11 @@ void ThreadGroupProfilingDelegate::paint(QPainter *painter, const QStyleOptionVi
         if (option.state & QStyle::State_Selected)
             painter->fillRect(option.rect, option.palette.highlight());
 
-
         QWidget* parentw = dynamic_cast<QWidget*>(parent());
         QTableView* tv = dynamic_cast<QTableView*>(parentw);
         int dx = 0;
         int dy = 0;
-        if(tv) {
+        if (tv) {
             dx = -tv->verticalHeader()->width();
             dy = -tv->horizontalHeader()->height();
         }
@@ -49,7 +45,7 @@ void ThreadGroupProfilingDelegate::paint(QPainter *painter, const QStyleOptionVi
         ThreadGroup* group = model->getThreadGroup(index.row());
         apex_assert_hard(group);
 
-        if(group->id() == ThreadGroup::PRIVATE_THREAD) {
+        if (group->id() == ThreadGroup::PRIVATE_THREAD) {
             opt.font.setItalic(true);
         } else {
             opt.font.setBold(true);
@@ -58,8 +54,7 @@ void ThreadGroupProfilingDelegate::paint(QPainter *painter, const QStyleOptionVi
     }
 }
 
-QSize ThreadGroupProfilingDelegate::sizeHint(const QStyleOptionViewItem &option,
-                             const QModelIndex &index) const
+QSize ThreadGroupProfilingDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     if (index.data().canConvert<ThreadGroupProfilingRenderer>()) {
         ThreadGroupProfilingRenderer profiling_renderer = qvariant_cast<ThreadGroupProfilingRenderer>(index.data());
@@ -68,7 +63,6 @@ QSize ThreadGroupProfilingDelegate::sizeHint(const QStyleOptionViewItem &option,
         return QStyledItemDelegate::sizeHint(option, index);
     }
 }
-
 
 /// MOC
 #include "../../../include/csapex/view/utility/moc_thread_group_profiling_delegate.cpp"

@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 enum class GraphFacadeNoteType
 {
     ChildAdded,
@@ -26,21 +25,18 @@ enum class GraphFacadeNoteType
     PauseChanged,
     Notification,
 
-    /**
-     * begin: connect signals
-     **/
-    #define HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
-    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-        function##Changed,
-    #define HANDLE_SIGNAL(_enum, signal) \
-        _enum##Triggered,
-    #include <csapex/model/graph_facade_proxy_accessors.hpp>
+/**
+ * begin: connect signals
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function)
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) function##Changed,
+#define HANDLE_SIGNAL(_enum, signal) _enum##Triggered,
+#include <csapex/model/graph_facade_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/
 };
-
 
 class GraphFacadeNote : public NoteImplementation<GraphFacadeNote>
 {
@@ -50,12 +46,11 @@ public:
     GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
 
     template <typename... Args>
-    GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, Args... args)
-        : GraphFacadeNote(request_type, uuid, {std::forward<Args>(args)...})
+    GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, Args... args) : GraphFacadeNote(request_type, uuid, { std::forward<Args>(args)... })
     {
     }
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     GraphFacadeNoteType getNoteType() const
@@ -79,6 +74,6 @@ private:
     std::vector<boost::any> payload_;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_FACADE_NOTES_H
+#endif  // GRAPH_FACADE_NOTES_H

@@ -27,8 +27,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(DeleteNode)
 
-DeleteNode::DeleteNode(const AUUID& parent_uuid, const UUID& uuid)
-    : Meta(parent_uuid, "delete node and connections"), uuid(uuid)
+DeleteNode::DeleteNode(const AUUID& parent_uuid, const UUID& uuid) : Meta(parent_uuid, "delete node and connections"), uuid(uuid)
 {
 }
 
@@ -36,7 +35,6 @@ std::string DeleteNode::getDescription() const
 {
     return std::string("deleted node ") + uuid.getFullName();
 }
-
 
 bool DeleteNode::doExecute()
 {
@@ -48,12 +46,12 @@ bool DeleteNode::doExecute()
     locked = false;
     clear();
 
-    for(const ConnectablePtr& connectable : node_handle->getExternalConnectors()) {
+    for (const ConnectablePtr& connectable : node_handle->getExternalConnectors()) {
         apex_assert(!connectable->isConnected());
     }
 
     // serialize sub graph
-    if(node_handle->isGraph()) {
+    if (node_handle->isGraph()) {
         GraphFacadeImplementationPtr g = root_graph_facade_->getLocalSubGraph(node_handle->getUUID());
         apex_assert_hard(g);
 
@@ -63,7 +61,7 @@ bool DeleteNode::doExecute()
 
     locked = true;
 
-    if(Meta::doExecute()) {
+    if (Meta::doExecute()) {
         saved_state = node_handle->getNodeStateCopy();
 
         graph->deleteNode(node_handle->getUUID());
@@ -81,8 +79,8 @@ bool DeleteNode::doUndo()
 
     graph->addNode(node_facade);
 
-    //deserialize subgraph
-    if(node_facade->isGraph()) {
+    // deserialize subgraph
+    if (node_facade->isGraph()) {
         GraphFacadeImplementationPtr g = root_graph_facade_->getLocalSubGraph(node_facade->getUUID());
         apex_assert_hard(g);
 
@@ -95,7 +93,7 @@ bool DeleteNode::doUndo()
 
 bool DeleteNode::doRedo()
 {
-    if(Meta::doRedo()) {
+    if (Meta::doRedo()) {
         GraphImplementationPtr graph = getGraph();
         NodeHandle* node_handle = graph->findNodeHandle(uuid);
         saved_state = node_handle->getNodeStateCopy();
@@ -107,8 +105,7 @@ bool DeleteNode::doRedo()
     return false;
 }
 
-
-void DeleteNode::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void DeleteNode::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Meta::serialize(data, version);
 

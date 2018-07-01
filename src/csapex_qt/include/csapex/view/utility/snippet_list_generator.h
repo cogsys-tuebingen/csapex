@@ -13,20 +13,19 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT SnippetListGenerator
 {
 public:
-    SnippetListGenerator(SnippetFactory &snippet_factory);
+    SnippetListGenerator(SnippetFactory& snippet_factory);
 
     void insertAvailableSnippets(QMenu* menu);
-    void insertAvailableSnippets(QTreeWidget *tree);
-    void listAvailableSnippets(QStandardItemModel *model);
+    void insertAvailableSnippets(QTreeWidget* tree);
+    void listAvailableSnippets(QStandardItemModel* model);
 
 private:
-    SnippetFactory &snippet_factory_;
+    SnippetFactory& snippet_factory_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SNIPPET_LIST_GENERATOR_H
+#endif  // SNIPPET_LIST_GENERATOR_H

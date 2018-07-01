@@ -10,8 +10,7 @@
 
 using namespace csapex;
 
-FulcrumHandle::FulcrumHandle(const QPointF& pos, QGraphicsItem *parent)
-    : QGraphicsEllipseItem(parent)
+FulcrumHandle::FulcrumHandle(const QPointF& pos, QGraphicsItem* parent) : QGraphicsEllipseItem(parent)
 {
     QPointF half_size_(5, 5);
 
@@ -22,21 +21,21 @@ FulcrumHandle::FulcrumHandle(const QPointF& pos, QGraphicsItem *parent)
     setBrush(Qt::black);
 }
 
-bool FulcrumHandle::sceneEvent(QEvent *event)
+bool FulcrumHandle::sceneEvent(QEvent* event)
 {
-    bool r =  QGraphicsEllipseItem::sceneEvent(event);
+    bool r = QGraphicsEllipseItem::sceneEvent(event);
 
-    switch(event->type()) {
-    case QEvent::GraphicsSceneMouseMove:
-        Q_EMIT moved(false);
-        break;
+    switch (event->type()) {
+        case QEvent::GraphicsSceneMouseMove:
+            Q_EMIT moved(false);
+            break;
 
-    case QEvent::GraphicsSceneMouseRelease:
-        Q_EMIT moved(true);
-        break;
+        case QEvent::GraphicsSceneMouseRelease:
+            Q_EMIT moved(true);
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return r;

@@ -12,7 +12,6 @@ namespace QWrapper
 {
 class CSAPEX_QT_EXPORT QSpinBoxExt : public QSpinBox
 {
-
     Q_OBJECT
 
 public Q_SLOTS:
@@ -24,7 +23,6 @@ public Q_SLOTS:
 
 class CSAPEX_QT_EXPORT QDoubleSpinBoxExt : public QDoubleSpinBox
 {
-
     Q_OBJECT
 
 public Q_SLOTS:
@@ -33,6 +31,6 @@ public Q_SLOTS:
         QDoubleSpinBox::setRange(min, max);
     }
 };
-}
+}  // namespace QWrapper
 
-#endif // QWRAPPER_H
+#endif  // QWRAPPER_H

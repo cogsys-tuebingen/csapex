@@ -19,26 +19,20 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace class_loader {
+namespace class_loader
+{
 class ClassLoader;
 }
 
 namespace csapex
 {
-
 class Profiler;
 
 class CSAPEX_CORE_EXPORT CsApexCore : public Observer, public Notifier, public Profilable
 {
 public:
-    CsApexCore(Settings& settings_,
-               ExceptionHandler &handler);
-    CsApexCore(Settings& settings_,
-               ExceptionHandler &handler,
-               PluginLocatorPtr plugin_locator,
-               NodeFactoryPtr node_factory,
-               SnippetFactoryPtr snippet_factory,
-               bool is_root = false);
+    CsApexCore(Settings& settings_, ExceptionHandler& handler);
+    CsApexCore(Settings& settings_, ExceptionHandler& handler, PluginLocatorPtr plugin_locator, NodeFactoryPtr node_factory, SnippetFactoryPtr snippet_factory, bool is_root = false);
 
     virtual ~CsApexCore();
 
@@ -60,7 +54,7 @@ public:
     void load(const std::string& file);
     void saveAs(const std::string& file, bool quiet = false);
 
-    SnippetPtr serializeNodes(const AUUID &graph_id, const std::vector<UUID>& nodes) const;
+    SnippetPtr serializeNodes(const AUUID& graph_id, const std::vector<UUID>& nodes) const;
 
     void reset();
 
@@ -96,33 +90,33 @@ public:
     void sendNotification(const std::string& notification, ErrorState::ErrorLevel error_level = ErrorState::ErrorLevel::ERROR);
 
 public:
-    slim_signal::Signal<void ()> config_changed;
-    slim_signal::Signal<void (const std::string& msg)> status_changed;
-    slim_signal::Signal<void ()> new_node_type;
-    slim_signal::Signal<void ()> new_snippet_type;
+    slim_signal::Signal<void()> config_changed;
+    slim_signal::Signal<void(const std::string& msg)> status_changed;
+    slim_signal::Signal<void()> new_node_type;
+    slim_signal::Signal<void()> new_snippet_type;
 
-    slim_signal::Signal<void ()> reset_requested;
-    slim_signal::Signal<void ()> reset_done;
+    slim_signal::Signal<void()> reset_requested;
+    slim_signal::Signal<void()> reset_done;
 
-    slim_signal::Signal<void ()> saved;
-    slim_signal::Signal<void ()> loaded;
+    slim_signal::Signal<void()> saved;
+    slim_signal::Signal<void()> loaded;
 
-    slim_signal::Signal<void (bool)> paused;
+    slim_signal::Signal<void(bool)> paused;
 
-    slim_signal::Signal<void ()> stepping_enabled;
-    slim_signal::Signal<void ()> begin_step;
-    slim_signal::Signal<void ()> end_step;
+    slim_signal::Signal<void()> stepping_enabled;
+    slim_signal::Signal<void()> begin_step;
+    slim_signal::Signal<void()> end_step;
 
-    slim_signal::Signal<void ()> startup_requested;
-    slim_signal::Signal<void ()> shutdown_requested;
-    slim_signal::Signal<void ()> shutdown_complete;
+    slim_signal::Signal<void()> startup_requested;
+    slim_signal::Signal<void()> shutdown_requested;
+    slim_signal::Signal<void()> shutdown_complete;
 
     // TODO: refactor this to support remote clients
-    csapex::slim_signal::Signal<void (const GraphFacade&, YAML::Node& e)> save_detail_request;
-    csapex::slim_signal::Signal<void (GraphFacade&, const YAML::Node& n)> load_detail_request;
-    
+    csapex::slim_signal::Signal<void(const GraphFacade&, YAML::Node& e)> save_detail_request;
+    csapex::slim_signal::Signal<void(GraphFacade&, const YAML::Node& n)> load_detail_request;
+
 private:
-    CsApexCore(Settings& settings_, ExceptionHandler &handler, PluginLocatorPtr plugin_locator);
+    CsApexCore(Settings& settings_, ExceptionHandler& handler, PluginLocatorPtr plugin_locator);
     CorePluginPtr makeCorePlugin(const std::string& name);
 
 private:
@@ -132,7 +126,7 @@ private:
 
     Settings& settings_;
     PluginLocatorPtr plugin_locator_;
-    ExceptionHandler &exception_handler_;
+    ExceptionHandler& exception_handler_;
 
     NodeFactoryImplementationPtr node_factory_;
     SnippetFactoryPtr snippet_factory_;
@@ -151,7 +145,7 @@ private:
     std::shared_ptr<Profiler> profiler_;
 
     std::shared_ptr<PluginManager<CorePlugin>> core_plugin_manager;
-    std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
+    std::map<std::string, std::shared_ptr<CorePlugin>> core_plugins_;
     std::map<std::string, bool> core_plugins_connected_;
 
     std::thread main_thread_;
@@ -164,6 +158,6 @@ private:
     int return_code_;
 };
 
-}
+}  // namespace csapex
 
-#endif // CSAPEX_CORE_H
+#endif  // CSAPEX_CORE_H

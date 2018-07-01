@@ -10,7 +10,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT VariadicBase
 {
 public:
@@ -23,7 +22,7 @@ protected:
     VariadicBase();
 
     void setupVariadic(csapex::NodeModifier& node_modifier);
-    virtual void setupVariadicParameters(Parameterizable &parameters) = 0;
+    virtual void setupVariadicParameters(Parameterizable& parameters) = 0;
 
     virtual void portCountChanged();
 
@@ -31,7 +30,6 @@ protected:
     TokenDataConstPtr variadic_type_;
     csapex::NodeModifier* variadic_modifier_;
 };
-
 
 class CSAPEX_CORE_EXPORT VariadicInputs : public virtual VariadicBase
 {
@@ -49,7 +47,7 @@ protected:
     VariadicInputs(TokenDataConstPtr type);
     VariadicInputs();
 
-    virtual void setupVariadicParameters(Parameterizable &parameters) override;
+    virtual void setupVariadicParameters(Parameterizable& parameters) override;
 
 private:
     void updateInputs(int input_count);
@@ -61,8 +59,6 @@ private:
 protected:
     std::vector<InputPtr> variadic_inputs_;
 };
-
-
 
 class CSAPEX_CORE_EXPORT VariadicOutputs : public virtual VariadicBase
 {
@@ -78,7 +74,7 @@ protected:
     VariadicOutputs(TokenDataConstPtr type);
     VariadicOutputs();
 
-    virtual void setupVariadicParameters(Parameterizable &parameters) override;
+    virtual void setupVariadicParameters(Parameterizable& parameters) override;
 
     OutputPtr getVariadicOutput(std::size_t index);
 
@@ -92,9 +88,6 @@ private:
 protected:
     std::vector<OutputPtr> variadic_outputs_;
 };
-
-
-
 
 class CSAPEX_CORE_EXPORT VariadicEvents : public virtual VariadicBase
 {
@@ -110,7 +103,7 @@ protected:
     VariadicEvents(TokenDataConstPtr type);
     VariadicEvents();
 
-    virtual void setupVariadicParameters(Parameterizable &parameters) override;
+    virtual void setupVariadicParameters(Parameterizable& parameters) override;
 
     EventPtr getVariadicEvent(std::size_t index);
 
@@ -125,31 +118,18 @@ protected:
     std::vector<EventPtr> variadic_events_;
 };
 
-
-
-class CSAPEX_CORE_EXPORT VariadicSlots: public virtual VariadicBase
+class CSAPEX_CORE_EXPORT VariadicSlots : public virtual VariadicBase
 {
 public:
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type,
-                                     const std::string& label,
-                                     std::function<void (Slot* slot, const TokenPtr&)> callback,
-                                     bool active = false,
-                                     bool blocking = true);
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(Slot* slot, const TokenPtr&)> callback, bool active = false, bool blocking = true);
 
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type,
-                                     const std::string& label,
-                                     std::function<void (const TokenPtr&)> callback,
-                                     bool active = false,
-                                     bool blocking = true);
+    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active = false, bool blocking = true);
 
     virtual void removeVariadicSlot(SlotPtr slot);
 
     void removeVariadicSlotById(const UUID& slot);
 
-    virtual Connectable* createVariadicPort(ConnectorType port_type,
-                                            TokenDataConstPtr type,
-                                            const std::string& label,
-                                            bool optional) override;
+    virtual Connectable* createVariadicPort(ConnectorType port_type, TokenDataConstPtr type, const std::string& label, bool optional) override;
 
     int getVariadicSlotCount() const;
 
@@ -159,22 +139,19 @@ protected:
     VariadicSlots(TokenDataConstPtr type);
     VariadicSlots();
 
-    virtual void setupVariadicParameters(Parameterizable &parameters) override;
+    virtual void setupVariadicParameters(Parameterizable& parameters) override;
 
 private:
     void updateSlots(int slot_count);
-    void registerSlot(Slot *result);
+    void registerSlot(Slot* result);
 
 private:
     param::ParameterPtr slot_count_;
     param::StringListParameterPtr slot_names_;
 
-
 protected:
     std::vector<SlotPtr> variadic_slots_;
 };
-
-
 
 class CSAPEX_CORE_EXPORT VariadicIO : public VariadicInputs, public VariadicOutputs
 {
@@ -185,9 +162,8 @@ protected:
     VariadicIO(TokenDataConstPtr type);
     VariadicIO();
 
-    virtual void setupVariadicParameters(Parameterizable &parameters) final override;
+    virtual void setupVariadicParameters(Parameterizable& parameters) final override;
 };
-
 
 class CSAPEX_CORE_EXPORT Variadic : public VariadicInputs, public VariadicOutputs, public VariadicEvents, public VariadicSlots
 {
@@ -198,8 +174,8 @@ protected:
     Variadic(TokenDataConstPtr type);
     Variadic();
 
-    virtual void setupVariadicParameters(Parameterizable &parameters) final override;
+    virtual void setupVariadicParameters(Parameterizable& parameters) final override;
 };
-}
+}  // namespace csapex
 
-#endif // VARIADIC_IO_H
+#endif  // VARIADIC_IO_H

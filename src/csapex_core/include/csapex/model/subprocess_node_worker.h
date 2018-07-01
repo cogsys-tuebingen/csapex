@@ -30,12 +30,10 @@
 #include <future>
 #include <csapex/utility/slim_signal.hpp>
 
-
-namespace csapex {
-
+namespace csapex
+{
 class ProfilerImplementation;
 class Interval;
-
 
 class CSAPEX_CORE_EXPORT SubprocessNodeWorker : public NodeWorker
 {
@@ -53,7 +51,7 @@ protected:
     void processSlot(const SlotWeakPtr& slot) override;
 
     void startSubprocess(const SubprocessChannel::MessageType type);
-    void startSubprocessSlot(const SlotPtr &slot);
+    void startSubprocessSlot(const SlotPtr& slot);
     void finishSubprocess();
 
     void finishProcessing() override;
@@ -64,7 +62,7 @@ private:
 
     void handleParameterUpdate(const SubprocessChannel::Message& msg);
 
-    void handleProcessParent(const SubprocessChannel::Message &msg);
+    void handleProcessParent(const SubprocessChannel::Message& msg);
     void handleProcessChild(const SubprocessChannel::Message& msg);
     void handleProcessSlotChild(const SubprocessChannel::Message& msg);
     void finishHandleProcessChild();
@@ -81,6 +79,6 @@ private:
     std::future<void> async_future_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SUBPROCESS_NODE_WORKER_H
+#endif  // SUBPROCESS_NODE_WORKER_H

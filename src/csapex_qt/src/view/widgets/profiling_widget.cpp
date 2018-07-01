@@ -18,10 +18,8 @@
 
 using namespace csapex;
 
-ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string& profile_name, QWidget *parent)
-    : QWidget(parent),
-      profiler_(profiler), profile_(profile_name),
-      space_for_painting_(nullptr)
+ProfilingWidget::ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string& profile_name, QWidget* parent)
+  : QWidget(parent), profiler_(profiler), profile_(profile_name), space_for_painting_(nullptr)
 {
     apex_assert_hard(!profile_.empty());
 
@@ -72,12 +70,12 @@ void ProfilingWidget::exportCsv()
 {
     QString filename = QFileDialog::getSaveFileName(0, "Save CSV File", "", "*.csv", 0, QFileDialog::DontUseNativeDialog);
 
-    if(!filename.isEmpty()) {
+    if (!filename.isEmpty()) {
         std::ofstream of(filename.toStdString());
 
         const Profile& profile = profiler_->getProfile(profile_);
 
-        for(std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
+        for (std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
             const std::string& name = it->first;
 
             ProfilerStats stats = profile.getStats(name);
@@ -87,23 +85,23 @@ void ProfilingWidget::exportCsv()
     }
 }
 
-void ProfilingWidget::enterEvent(QEvent *e)
+void ProfilingWidget::enterEvent(QEvent* e)
 {
     cursor_ = QPointF();
 }
-void ProfilingWidget::leaveEvent(QEvent *e)
+void ProfilingWidget::leaveEvent(QEvent* e)
 {
     cursor_ = QPointF();
     selected_interval_ = nullptr;
     update();
 }
 
-void ProfilingWidget::mouseMoveEvent(QMouseEvent *me)
+void ProfilingWidget::mouseMoveEvent(QMouseEvent* me)
 {
     cursor_ = me->pos();
 }
 
-void ProfilingWidget::paintEvent(QPaintEvent *)
+void ProfilingWidget::paintEvent(QPaintEvent*)
 {
     apex_assert_hard(!profile_.empty());
 
@@ -112,7 +110,6 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     int w = width();
     int h = space_for_painting_->geometry().height();
-
 
     left = padding + left_space;
     right = w - padding;
@@ -133,8 +130,8 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     double max_time_ms = 1;
 
-    for(const auto& interval : profile.getIntervals()) {
-        if(!interval) {
+    for (const auto& interval : profile.getIntervals()) {
+        if (!interval) {
             continue;
         }
 
@@ -142,17 +139,17 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
         std::vector<std::pair<std::string, double> > names;
         interval->entries(names);
-        for(auto it = names.begin(); it != names.end(); ++it) {
+        for (auto it = names.begin(); it != names.end(); ++it) {
             const std::string& name = it->first;
             std::map<std::string, QColor>::iterator pos = steps_.find(name);
-            if(pos == steps_.end()) {
+            if (pos == steps_.end()) {
                 steps_[name] = color::fromCount<QColor>(steps_.size()).light();
             }
         }
     }
 
     // background
-    QRect rect = contentsRect().adjusted(0,0,-1,-1);
+    QRect rect = contentsRect().adjusted(0, 0, -1, -1);
 
     p.setBrush(QBrush(QColor(20, 20, 20)));
     p.setPen(QPen(Qt::white));
@@ -168,9 +165,8 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     // y-axis
     p.drawLine(left, bottom, left, up);
 
-
     int current_index = profile.getCurrentIndex();
-    if(history_length == 0) {
+    if (history_length == 0) {
         // no entries
         QFont font = p.font();
         font.setPixelSize(line_height * 2);
@@ -183,8 +179,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     selected_interval_ = nullptr;
 
     // bars
-    if(n > 0) {
-
+    if (n > 0) {
         std::stringstream txt;
         txt << max_time_ms << " ms";
 
@@ -199,27 +194,26 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         QTextOption opt(Qt::AlignRight);
 
         p.setPen(QPen(QColor(20, 20, 20)));
-        p.drawText(QRect(0, up, left -padding, dy), txt.str().c_str(), opt);
+        p.drawText(QRect(0, up, left - padding, dy), txt.str().c_str(), opt);
         p.drawText(QRect(0, bottom - dy, left - padding, dy), "0 ms", opt);
 
         max_time_ms_ = std::max(1.0, max_time_ms);
 
         current_draw_x = left + padding + (history_length - n) * indiv_width_;
-        for(int time = 0; time < n; ++time) {
-
+        for (int time = 0; time < n; ++time) {
             static const float min_opacity = 0.25f;
 
-            float op = ((time - current_index + n - 1) % n) / (float) n;
+            float op = ((time - current_index + n - 1) % n) / (float)n;
             p.setOpacity(min_opacity + op * (1.0f - min_opacity));
 
             const Interval::Ptr& interval = profile.getInterval(time);
 
-            if(interval) {
+            if (interval) {
                 paintInterval(p, *interval);
             }
         }
 
-        if(selected_interval_) {
+        if (selected_interval_) {
             std::string name = selected_interval_->name();
             ProfilerStats stats = profile.getStats(name);
             setToolTip(QString("<b>") + QString::fromStdString(name) + "</b>:<br /> " + QString::number(stats.mean) + " &plusmn; " + QString::number(stats.stddev) + " ms");
@@ -228,7 +222,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
 
     // time line
     p.setOpacity(0.8);
-    float pos = left + padding + (current_index+1) * indiv_width_;
+    float pos = left + padding + (current_index + 1) * indiv_width_;
     QPen pen(QColor(255, 20, 20));
     pen.setWidth(3);
     p.setPen(pen);
@@ -237,7 +231,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     // legend
     p.setOpacity(1.0);
     float y = bottom;
-    float text_x = left_space + 2*padding;
+    float text_x = left_space + 2 * padding;
     float text_w = (w - text_x) / 2.0f - padding;
     float info_w = w - text_w - text_x;
     float info_x = text_x + text_w + padding;
@@ -248,7 +242,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     p.setFont(font);
     p.setPen(QColor(0, 0, 0));
     p.drawText(QRectF(text_x, y, text_w, line_height), "name");
-    p.drawText(QRectF(info_x , y, info_w / 2.0f, line_height), "mean");
+    p.drawText(QRectF(info_x, y, info_w / 2.0f, line_height), "mean");
     p.drawText(QRectF(info_x + info_w / 2.0f, y, info_w / 2.0f, line_height), "stddev");
     y += line_height;
     std::stringstream ss;
@@ -257,11 +251,11 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     y += line_height;
 
     // stats
-    for(std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
+    for (std::map<std::string, QColor>::const_iterator it = steps_.begin(); it != steps_.end(); ++it) {
         const std::string& name = it->first;
         QColor color;
-        if(selected_interval_) {
-            if(name == selected_interval_->name()) {
+        if (selected_interval_) {
+            if (name == selected_interval_->name()) {
                 color = it->second;
             } else {
                 color = Qt::gray;
@@ -272,7 +266,7 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
         QBrush brush(color);
         QPen pen(brush, 2);
         p.setPen(pen);
-        p.fillRect(QRectF(text_x - 2*padding - line_height, y, line_height, line_height), it->second);
+        p.fillRect(QRectF(text_x - 2 * padding - line_height, y, line_height, line_height), it->second);
         p.drawText(QRectF(text_x, y, text_w, line_height), QString::fromStdString(name));
 
         ProfilerStats stats = profile.getStats(name);
@@ -283,8 +277,8 @@ void ProfilingWidget::paintEvent(QPaintEvent *)
     }
 
     // resize to fit content
-    if(space_for_painting_->geometry().height() != y) {
-        space_for_painting_->changeSize(0, y, QSizePolicy::MinimumExpanding,  QSizePolicy::MinimumExpanding);
+    if (space_for_painting_->geometry().height() != y) {
+        space_for_painting_->changeSize(0, y, QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
         layout()->invalidate();
     }
 }
@@ -304,28 +298,28 @@ float ProfilingWidget::paintInterval(QPainter& p, const Interval& interval, floa
     f = std::max(0.0f, std::min(1.0f, f));
     float height = f * content_height_;
 
-    float w = indiv_width_ / (depth+1);
+    float w = indiv_width_ / (depth + 1);
 
     QRectF rect(current_draw_x + indiv_width_ - w, bottom - height - height_offset, w, height);
     bool is_selected = rect.contains(cursor_);
 
-    if(is_selected) {
+    if (is_selected) {
         p.setBrush(QBrush(steps_[interval.name()].lighter(110)));
-        p.setPen(QPen (QColor(20, 20, 20), 5, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin));
+        p.setPen(QPen(QColor(20, 20, 20), 5, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin));
 
     } else {
         p.setBrush(QBrush(steps_[interval.name()]));
-        p.setPen(QPen (QColor(20, 20, 20)));
+        p.setPen(QPen(QColor(20, 20, 20)));
     }
 
     p.drawRect(rect);
 
-    if(is_selected) {
+    if (is_selected) {
         selected_interval_ = &interval;
     }
 
     float h = height_offset;
-    for(auto sub = interval.sub.begin(); sub != interval.sub.end(); ++sub) {
+    for (auto sub = interval.sub.begin(); sub != interval.sub.end(); ++sub) {
         const Interval::Ptr& sub_interval = sub->second;
         h += paintInterval(p, *sub_interval, h, depth + 1);
     }

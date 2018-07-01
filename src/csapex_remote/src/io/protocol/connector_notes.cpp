@@ -13,22 +13,15 @@ ConnectorNote::ConnectorNote()
 {
 }
 
-ConnectorNote::ConnectorNote(ConnectorNoteType request_type, const AUUID &uuid)
-    : NoteImplementation(uuid),
-      note_type_(request_type)
+ConnectorNote::ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid) : NoteImplementation(uuid), note_type_(request_type)
 {
-
 }
 
-ConnectorNote::ConnectorNote(ConnectorNoteType request_type, const AUUID &uuid, const boost::any &payload)
-    : NoteImplementation(uuid),
-      note_type_(request_type),
-      payload_(payload)
+ConnectorNote::ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid, const boost::any& payload) : NoteImplementation(uuid), note_type_(request_type), payload_(payload)
 {
-
 }
 
-void ConnectorNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ConnectorNote::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Note::serialize(data, version);
 

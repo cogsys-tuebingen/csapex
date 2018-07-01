@@ -9,11 +9,9 @@
 
 namespace csapex
 {
-
 class NodeRequests
 {
 public:
-
     enum class NodeRequestType
     {
         AddClient,
@@ -42,13 +40,12 @@ public:
         NodeRequest(NodeRequestType request_type, const AUUID& uuid);
 
         template <typename... Args>
-        NodeRequest(NodeRequestType request_type, const AUUID& uuid, Args&&... args)
-            : NodeRequest(request_type, uuid)
+        NodeRequest(NodeRequestType request_type, const AUUID& uuid, Args&&... args) : NodeRequest(request_type, uuid)
         {
             arguments_ = { args... };
         }
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
@@ -70,7 +67,6 @@ public:
         std::vector<boost::any> arguments_;
     };
 
-
     class NodeResponse : public ResponseImplementation<NodeResponse>
     {
     public:
@@ -78,20 +74,19 @@ public:
         NodeResponse(NodeRequestType request_type, const AUUID& uuid, uint8_t request_id);
         NodeResponse(NodeRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::string getType() const override
         {
             return "NodeRequests";
-        }        
+        }
 
         template <typename R>
         R getResult() const
         {
             return boost::any_cast<R>(result_);
         }
-
 
     private:
         NodeRequestType request_type_;
@@ -100,11 +95,10 @@ public:
         boost::any result_;
     };
 
-
 public:
     using RequestT = NodeRequest;
     using ResponseT = NodeResponse;
 };
 
-}
-#endif // NODE_REQUESTS_H
+}  // namespace csapex
+#endif  // NODE_REQUESTS_H

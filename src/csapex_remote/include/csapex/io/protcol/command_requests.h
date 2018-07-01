@@ -9,11 +9,9 @@
 
 namespace csapex
 {
-
 class CommandRequests
 {
 public:
-
     enum class CommandRequestType
     {
         Execute,
@@ -33,13 +31,12 @@ public:
         CommandRequest(uint8_t request_id);
         CommandRequest(CommandRequestType request_type);
 
-        CommandRequest(CommandRequestType request_type, const CommandPtr& param)
-            : CommandRequest(request_type)
+        CommandRequest(CommandRequestType request_type, const CommandPtr& param) : CommandRequest(request_type)
         {
             command_ = param;
         }
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
@@ -55,7 +52,6 @@ public:
         CommandPtr command_;
     };
 
-
     class CommandResponse : public ResponseImplementation<CommandResponse>
     {
     public:
@@ -63,7 +59,7 @@ public:
         CommandResponse(CommandRequestType request_type, uint8_t request_id);
         CommandResponse(CommandRequestType request_type, bool result, uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         template <typename R>
@@ -83,12 +79,11 @@ public:
         bool result_;
     };
 
-
 public:
     using RequestT = CommandRequest;
     using ResponseT = CommandResponse;
 };
 
-}
+}  // namespace csapex
 
-#endif // COMMAND_REQUESTS_H
+#endif  // COMMAND_REQUESTS_H

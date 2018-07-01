@@ -24,14 +24,13 @@ public:
     virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
-    void setupAgain() ;
+    void setupAgain();
 
 private:
     param::BitSetParameterPtr bitset_p_;
     QPointer<QGroupBox> group;
 };
 
+}  // namespace csapex
 
-}
-
-#endif // BITSET_PARAM_ADAPTER_H
+#endif  // BITSET_PARAM_ADAPTER_H

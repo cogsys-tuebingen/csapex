@@ -40,7 +40,7 @@ protected:
     SignalBase();
 
     SignalBase(const SignalBase&) = delete;
-    SignalBase& operator= (const SignalBase&) = delete;
+    SignalBase& operator=(const SignalBase&) = delete;
 
     void addConnection(Connection* connection);
     void removeConnection(const Connection* connection);
@@ -60,8 +60,6 @@ protected:
 protected:
     long guard_ = -1;
 };
-
-
 
 /**
  * @brief The Connection class is a handle for a signal connection
@@ -95,8 +93,6 @@ private:
     Deleter deleter_;
 };
 
-
-
 /**
  * @brief The ScopedConnection class is a handle for a signal connection
  * that automatically disconnects on deletion
@@ -114,11 +110,10 @@ public:
 
     ~ScopedConnection();
 
-    void operator = (const Connection& c);
-    void operator = (const ScopedConnection& c) = delete;
-    void operator = (ScopedConnection&& c) noexcept;
+    void operator=(const Connection& c);
+    void operator=(const ScopedConnection& c) = delete;
+    void operator=(ScopedConnection&& c) noexcept;
 };
-
 
 /**
  * @brief The Signal template is the class implementing a signal for a specific function type
@@ -133,7 +128,7 @@ public:
     Signal();
 
     Signal(const Signal&) = delete;
-    Signal& operator= (const Signal&) = delete;
+    Signal& operator=(const Signal&) = delete;
 
     ~Signal();
 
@@ -142,27 +137,23 @@ public:
     Connection connect(delegate::Delegate<Signature>&& delegate);
     Connection connect(const std::function<Signature>& fn);
 
-    Connection connect(Signal<Signature> &signal);
+    Connection connect(Signal<Signature>& signal);
 
     template <typename Class>
-    Connection connect(Class* that, Signature Class::*mem) {
+    Connection connect(Class* that, Signature Class::*mem)
+    {
         return connect(std::move(delegate::Delegate<Signature>(that, mem)));
     }
 
     // generic connections with fewer parameters than available
     template <typename Callable>
-    Connection connect(Callable function,
-                       typename std::enable_if<!std::is_base_of<SignalBase, Callable>::value>::type* = 0)
+    Connection connect(Callable function, typename std::enable_if<!std::is_base_of<SignalBase, Callable>::value>::type* = 0)
     {
-        return connectAny(function, tag_is_function<
-                          std::is_base_of<SignalBase, Callable>::value,
-                          std::is_bind_expression<Callable>::value
-                          >());
+        return connectAny(function, tag_is_function<std::is_base_of<SignalBase, Callable>::value, std::is_bind_expression<Callable>::value>());
     }
 
     template <typename MatchingSignature>
-    Connection connect(Signal<MatchingSignature>& signal,
-                       typename std::enable_if<!std::is_same<Signature, MatchingSignature>::value>::type* = 0)
+    Connection connect(Signal<MatchingSignature>& signal, typename std::enable_if<!std::is_same<Signature, MatchingSignature>::value>::type* = 0)
     {
         return connectAny(signal, tag_is_function<true, false>());
     }
@@ -171,13 +162,15 @@ public:
     virtual int countAllConnections() const override;
 
     template <typename... Args>
-    Signal& operator () (Args&&... args);
+    Signal& operator()(Args&&... args);
 
     virtual void disconnectAll() override;
 
 private:
     template <bool signal, bool bind>
-    struct tag_is_function {};
+    struct tag_is_function
+    {
+    };
 
     template <typename Callable>
     Connection connectAny(Callable& function, tag_is_function<false, false>);
@@ -244,8 +237,8 @@ private:
     virtual void onDisconnect() override;
 };
 
-}
+}  // namespace slim_signal
 
-}
+}  // namespace csapex
 
-#endif // SLIM_SIGNAL_H
+#endif  // SLIM_SIGNAL_H

@@ -28,7 +28,6 @@ namespace csapex
 {
 class ProcessingTest : public NodeConstructingTest
 {
-
 };
 
 TEST_F(ProcessingTest, DirectCallToProcess)
@@ -44,7 +43,6 @@ TEST_F(ProcessingTest, DirectCallToProcess)
     InputPtr input = nh.getInput(UUIDProvider::makeUUID_without_parent("StaticMultiplier4:|:in_0"));
     ASSERT_NE(nullptr, input);
     input->setToken(token_in);
-
 
     // no inputs are sent now -> node should multiply the input by 4
     ASSERT_TRUE(node.canProcess());
@@ -112,5 +110,4 @@ TEST_F(ProcessingTest, CallToProcessViaNodeWorker)
 
     ASSERT_EQ(23 * 4, msg_out->value);
 }
-}
-
+}  // namespace csapex

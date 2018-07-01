@@ -13,22 +13,15 @@ GraphFacadeNote::GraphFacadeNote()
 {
 }
 
-GraphFacadeNote::GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID &uuid)
-    : NoteImplementation(uuid),
-      note_type_(request_type)
+GraphFacadeNote::GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid) : NoteImplementation(uuid), note_type_(request_type)
 {
-
 }
 
-GraphFacadeNote::GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID &uuid, const std::vector<boost::any> &payload)
-    : NoteImplementation(uuid),
-      note_type_(request_type),
-      payload_(payload)
+GraphFacadeNote::GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload) : NoteImplementation(uuid), note_type_(request_type), payload_(payload)
 {
-
 }
 
-void GraphFacadeNote::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void GraphFacadeNote::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Note::serialize(data, version);
 

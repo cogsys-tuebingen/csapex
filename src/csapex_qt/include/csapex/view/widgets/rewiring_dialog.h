@@ -18,7 +18,6 @@
 
 namespace csapex
 {
-
 class CsApexViewCore;
 class CsApexViewCoreImplementation;
 class CommandExecutor;
@@ -29,27 +28,24 @@ class CSAPEX_QT_EXPORT RewiringDialog : public QDialog
     Q_OBJECT
 
 public:
-    RewiringDialog(NodeFacade *node, CsApexViewCore &view_core, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    RewiringDialog(NodeFacade* node, CsApexViewCore& view_core, QWidget* parent = 0, Qt::WindowFlags f = 0);
     ~RewiringDialog();
 
-    void makeUI(const QString &stylesheet);
+    void makeUI(const QString& stylesheet);
 
     std::string getType() const;
 
-    std::vector<ConnectionDescription> getConnections(const UUID &new_node_uuid);
-
-
+    std::vector<ConnectionDescription> getConnections(const UUID& new_node_uuid);
 
 private Q_SLOTS:
     void finish();
 
-
 private:
-    void createGraphs(const std::string &type);
+    void createGraphs(const std::string& type);
 
     void createConnections();
-    void updateConnection(InputPtr input, const ConnectorDescription &connector, const AUUID &connected, bool active);
-    void updateConnection(OutputPtr output, const ConnectorDescription &connector, const AUUID& connected, bool active);
+    void updateConnection(InputPtr input, const ConnectorDescription& connector, const AUUID& connected, bool active);
+    void updateConnection(OutputPtr output, const ConnectorDescription& connector, const AUUID& connected, bool active);
 
     void createUI(const QString& stylesheet);
 
@@ -81,7 +77,6 @@ private:
     std::unordered_map<UUID, UUID, UUID::Hasher> uuid_cache_;
 };
 
-}
+}  // namespace csapex
 
-
-#endif // REWIRING_DIALOG_H
+#endif  // REWIRING_DIALOG_H

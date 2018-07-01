@@ -13,7 +13,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT Settings
 {
 public:
@@ -30,7 +29,6 @@ public:
 
     static std::string defaultConfigFile();
     static std::string defaultConfigPath();
-
 
 public:
     Settings();
@@ -60,7 +58,7 @@ public:
     T get(const std::string& name) const
     {
         auto param = getNoThrow(name);
-        if(!param) {
+        if (!param) {
             throw std::runtime_error(std::string("settings.get: unknown parameter '") + name + "'");
         }
 
@@ -71,7 +69,7 @@ public:
     T get(const std::string& name, const T default_value) const
     {
         auto param = getNoThrow(name);
-        if(!param) {
+        if (!param) {
             return default_value;
         }
 
@@ -82,7 +80,7 @@ public:
     T getPersistent(const std::string& name, T def)
     {
         auto param = getNoThrow(name);
-        if(!param) {
+        if (!param) {
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(def);
             addPersistent(p);
@@ -96,7 +94,7 @@ public:
     T getTemporary(const std::string& name, T def)
     {
         auto param = getNoThrow(name);
-        if(!param) {
+        if (!param) {
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(def);
             addTemporary(p);
@@ -110,7 +108,7 @@ public:
     void set(const std::string& name, const T& val)
     {
         auto param = getNoThrow(name);
-        if(!param) {
+        if (!param) {
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(val);
             addTemporary(p);
@@ -122,12 +120,11 @@ public:
         settingsChanged(name);
     }
 
-
     template <typename T>
     void setPersistent(const std::string& name, const T& val)
     {
         auto param = getNoThrow(name);
-        if(!param) {
+        if (!param) {
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(val);
             addPersistent(p);
@@ -156,6 +153,6 @@ protected:
     std::vector<std::string> changes_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SETTINGS_H
+#endif  // SETTINGS_H

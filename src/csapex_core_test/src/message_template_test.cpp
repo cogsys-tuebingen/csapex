@@ -20,12 +20,10 @@
 
 #include <csapex_testing/csapex_test_case.h>
 
-
 namespace csapex
 {
-
-namespace {
-
+namespace
+{
 template <typename M>
 class MSourceNode : public Node
 {
@@ -70,7 +68,7 @@ public:
         auto msg = msg::getMessage(input);
         ASSERT_NE(nullptr, msg);
 
-        ASSERT_NE(nullptr, csapex::msg::message_cast<M const> (msg));
+        ASSERT_NE(nullptr, csapex::msg::message_cast<M const>(msg));
 
         auto vector_msg = msg::getMessage<M>(input);
         ASSERT_NE(nullptr, vector_msg);
@@ -82,51 +80,50 @@ private:
     Input* input;
 };
 
-}
+}  // namespace
 
-class MessageTemplateTest : public SteppingTest {
+class MessageTemplateTest : public SteppingTest
+{
 protected:
     NodeFactoryImplementation factory;
 
-    MessageTemplateTest() :
-        factory(SettingsImplementation::NoSettings, nullptr),
-        uuid_provider(std::make_shared<UUIDProvider>())
+    MessageTemplateTest() : factory(SettingsImplementation::NoSettings, nullptr), uuid_provider(std::make_shared<UUIDProvider>())
     {
         std::vector<TagPtr> tags;
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("VectorSourceNode",
-                                                                                 std::bind(&MessageTemplateTest::makeVectorSource)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("VectorSourceNode", std::bind(&MessageTemplateTest::makeVectorSource)));
             factory.registerNodeType(constructor);
         }
         {
-            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("VectorSinkNode",
-                                                                                 std::bind(&MessageTemplateTest::makeVectorSink)));
+            csapex::NodeConstructor::Ptr constructor(new csapex::NodeConstructor("VectorSinkNode", std::bind(&MessageTemplateTest::makeVectorSink)));
             factory.registerNodeType(constructor);
         }
     }
 
-    virtual ~MessageTemplateTest() {
+    virtual ~MessageTemplateTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
-
-    static NodePtr makeVectorSource() {
+    static NodePtr makeVectorSource()
+    {
         return NodePtr(new MSourceNode<connection_types::VectorMessage>);
     }
-    static NodePtr makeVectorSink() {
+    static NodePtr makeVectorSink()
+    {
         return NodePtr(new MSinkNode<connection_types::VectorMessage>);
     }
 
     UUIDProviderPtr uuid_provider;
 };
 
-TEST_F(MessageTemplateTest, VectorCanBeConnectedToVector) {
+TEST_F(MessageTemplateTest, VectorCanBeConnectedToVector)
+{
     OutputPtr o = std::make_shared<StaticOutput>(uuid_provider->makeUUID("o1"));
     InputPtr i = std::make_shared<Input>(uuid_provider->makeUUID("in"));
 
     o->setType(std::make_shared<connection_types::VectorMessage>());
     i->setType(std::make_shared<connection_types::VectorMessage>());
-
 
     // is compatible
     ASSERT_TRUE(Connection::isCompatibleWith(o.get(), i.get()));
@@ -139,9 +136,8 @@ TEST_F(MessageTemplateTest, VectorCanBeConnectedToVector) {
     ASSERT_NE(nullptr, c);
 }
 
-
-
-TEST_F(MessageTemplateTest, ChildCanBeConnectedToVectorViaNodes) {
+TEST_F(MessageTemplateTest, ChildCanBeConnectedToVectorViaNodes)
+{
     GraphFacadeImplementation graph_facade(executor, graph, graph_node);
 
     UUID node1_id = UUIDProvider::makeUUID_without_parent("source");
@@ -154,14 +150,13 @@ TEST_F(MessageTemplateTest, ChildCanBeConnectedToVectorViaNodes) {
         NodeFacadeImplementationPtr node_b = factory.makeNode("VectorSinkNode", nodei_id, graph);
         graph_facade.addNode(node_b);
 
-        graph_facade.connect(graph->makeTypedUUID_forced(node1_id, "out", 0),
-                             graph->makeTypedUUID_forced(nodei_id, "in", 0));
+        graph_facade.connect(graph->makeTypedUUID_forced(node1_id, "out", 0), graph->makeTypedUUID_forced(nodei_id, "in", 0));
     }
     executor.start();
 
-    for(int iter = 0; iter < 23; ++iter) {
+    for (int iter = 0; iter < 23; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
     }
 }
 
-}
+}  // namespace csapex

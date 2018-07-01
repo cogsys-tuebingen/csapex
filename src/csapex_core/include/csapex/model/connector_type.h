@@ -9,9 +9,13 @@
 
 namespace csapex
 {
-enum class ConnectorType {
+enum class ConnectorType
+{
     NONE,
-    OUTPUT, INPUT, SLOT_T, EVENT
+    OUTPUT,
+    INPUT,
+    SLOT_T,
+    EVENT
 };
 
 namespace port_type
@@ -19,7 +23,7 @@ namespace port_type
 CSAPEX_CORE_EXPORT std::string name(ConnectorType type);
 
 CSAPEX_CORE_EXPORT ConnectorType opposite(ConnectorType type);
-}
-}
+}  // namespace port_type
+}  // namespace csapex
 
-#endif // PORT_TYPE_H
+#endif  // PORT_TYPE_H

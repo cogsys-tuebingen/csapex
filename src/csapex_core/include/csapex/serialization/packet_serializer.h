@@ -12,13 +12,12 @@
 
 namespace csapex
 {
-
 class Serializer
 {
 public:
     virtual ~Serializer();
 
-    virtual void serialize(const Streamable& packet, SerializationBuffer &data) = 0;
+    virtual void serialize(const Streamable& packet, SerializationBuffer& data) = 0;
     virtual StreamablePtr deserialize(const SerializationBuffer& data) = 0;
 };
 
@@ -37,12 +36,12 @@ class PacketSerializer : public Singleton<PacketSerializer>, public Serializer
 public:
     static SerializationBuffer serializePacket(const Streamable& packet);
     static SerializationBuffer serializePacket(const StreamableConstPtr& packet);
-    static StreamablePtr deserializePacket(SerializationBuffer &serial);
+    static StreamablePtr deserializePacket(SerializationBuffer& serial);
     static void registerSerializer(uint8_t type, Serializer* serializer);
 
 public:
-    void serialize(const Streamable& packet, SerializationBuffer &data) override;
-    StreamablePtr deserialize(const SerializationBuffer &data) override;
+    void serialize(const Streamable& packet, SerializationBuffer& data) override;
+    StreamablePtr deserialize(const SerializationBuffer& data) override;
 
 private:
     std::map<uint8_t, Serializer*> serializers_;
@@ -54,33 +53,31 @@ private:
 template <typename S>
 struct SerializerRegistered
 {
-    SerializerRegistered(uint8_t type, S* instance) {
+    SerializerRegistered(uint8_t type, S* instance)
+    {
         PacketSerializer::registerSerializer(type, instance);
     }
 };
 
-}
+}  // namespace csapex
 
+#define CREATE_DEFAULT_SERIALIZER(Name)                                                                                                                                                                \
+    class Name##Serializer : public Singleton<Name##Serializer>, public Serializer                                                                                                                     \
+    {                                                                                                                                                                                                  \
+    public:                                                                                                                                                                                            \
+        void serialize(const Streamable& packet, SerializationBuffer& data) override                                                                                                                   \
+        {                                                                                                                                                                                              \
+            if (auto* res = dynamic_cast<const Name*>(&packet)) {                                                                                                                                      \
+                res->serializeVersioned(data);                                                                                                                                                         \
+            }                                                                                                                                                                                          \
+        }                                                                                                                                                                                              \
+        StreamablePtr deserialize(const SerializationBuffer& data) override                                                                                                                            \
+        {                                                                                                                                                                                              \
+            std::shared_ptr<Name> res = Name::makeEmpty();                                                                                                                                             \
+            res->deserializeVersioned(data);                                                                                                                                                           \
+            return res;                                                                                                                                                                                \
+        }                                                                                                                                                                                              \
+    };                                                                                                                                                                                                 \
+    SerializerRegistered<Name##Serializer> g_CSAPEX_REGISTER_##NAME##_SERIALIZER_(Name::PACKET_TYPE_ID, &Name##Serializer::instance())
 
-
-
-#define CREATE_DEFAULT_SERIALIZER(Name) \
-class Name##Serializer : public Singleton<Name##Serializer>, public Serializer \
-{ \
-public: \
-    void serialize(const Streamable& packet, SerializationBuffer &data) override \
-    { \
-        if(auto* res = dynamic_cast<const Name*>(&packet)) { \
-            res->serializeVersioned(data); \
-        } \
-    } \
-    StreamablePtr deserialize(const SerializationBuffer &data) override \
-    { \
-        std::shared_ptr<Name> res = Name::makeEmpty(); \
-        res->deserializeVersioned(data); \
-        return res; \
-    } \
-}; \
-SerializerRegistered<Name##Serializer> g_CSAPEX_REGISTER_##NAME##_SERIALIZER_(Name::PACKET_TYPE_ID, &Name##Serializer::instance())
-
-#endif // PACKET_SERIALIZER_H
+#endif  // PACKET_SERIALIZER_H

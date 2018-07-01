@@ -9,11 +9,9 @@
 
 namespace csapex
 {
-
 class GraphFacadeRequests
 {
 public:
-
     enum class GraphFacadeRequestType
     {
         SetPause,
@@ -36,13 +34,12 @@ public:
         GraphFacadeRequest(GraphFacadeRequestType request_type, const AUUID& uuid);
 
         template <typename... Args>
-        GraphFacadeRequest(GraphFacadeRequestType request_type, const AUUID& uuid, Args&&... args)
-            : GraphFacadeRequest(request_type, uuid)
+        GraphFacadeRequest(GraphFacadeRequestType request_type, const AUUID& uuid, Args&&... args) : GraphFacadeRequest(request_type, uuid)
         {
             arguments_ = { args... };
         }
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
@@ -64,7 +61,6 @@ public:
         std::vector<boost::any> arguments_;
     };
 
-
     class GraphFacadeResponse : public ResponseImplementation<GraphFacadeResponse>
     {
     public:
@@ -72,7 +68,7 @@ public:
         GraphFacadeResponse(GraphFacadeRequestType request_type, const AUUID& uuid, uint8_t request_id);
         GraphFacadeResponse(GraphFacadeRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::string getType() const override
@@ -86,7 +82,6 @@ public:
             return boost::any_cast<R>(result_);
         }
 
-
     private:
         GraphFacadeRequestType request_type_;
         AUUID uuid_;
@@ -94,11 +89,10 @@ public:
         boost::any result_;
     };
 
-
 public:
     using RequestT = GraphFacadeRequest;
     using ResponseT = GraphFacadeResponse;
 };
 
-}
-#endif // GRAPH_FACADE_REQUESTS_H
+}  // namespace csapex
+#endif  // GRAPH_FACADE_REQUESTS_H

@@ -21,8 +21,7 @@
 
 using namespace csapex;
 
-NotificationWidget::NotificationWidget(const Notification &notification, QWidget *parent)
-    : QWidget(parent), timer_(nullptr), notification_(notification), fading_(false)
+NotificationWidget::NotificationWidget(const Notification& notification, QWidget* parent) : QWidget(parent), timer_(nullptr), notification_(notification), fading_(false)
 {
     timer_ = new QTimer;
     timer_->setSingleShot(true);
@@ -31,11 +30,9 @@ NotificationWidget::NotificationWidget(const Notification &notification, QWidget
 
     setCursor(Qt::PointingHandCursor);
 
-
     eff = new QGraphicsOpacityEffect(this);
     eff->setOpacity(0.9);
     this->setGraphicsEffect(eff);
-
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -53,23 +50,18 @@ NotificationWidget::NotificationWidget(const Notification &notification, QWidget
     label_ = new QLabel;
     layout->addWidget(label_, 0, 1);
 
-    if(notification.error != ErrorState::ErrorLevel::NONE &&
-            notification.error != ErrorState::ErrorLevel::INFO) {
+    if (notification.error != ErrorState::ErrorLevel::NONE && notification.error != ErrorState::ErrorLevel::INFO) {
         QPushButton* report_btn = new QPushButton;
         report_btn->setIcon(QIcon(":/pencil.png"));
         layout->addWidget(report_btn, 0, 2);
-        QObject::connect(report_btn, &QPushButton::clicked, [this](){
-            GuiExceptionHandler::reportIssue("Notification Issue", getRawText().toStdString());
-        });
+        QObject::connect(report_btn, &QPushButton::clicked, [this]() { GuiExceptionHandler::reportIssue("Notification Issue", getRawText().toStdString()); });
     }
 
     QPushButton* close_btn = new QPushButton;
     close_btn->setIcon(QIcon(":/hide.png"));
     layout->addWidget(close_btn, 0, 3);
 
-    QObject::connect(close_btn, &QPushButton::clicked, [this](){
-        fadeout();
-    });
+    QObject::connect(close_btn, &QPushButton::clicked, [this]() { fadeout(); });
 
     icon_->installEventFilter(this);
     label_->installEventFilter(this);
@@ -100,7 +92,7 @@ void NotificationWidget::fadeout()
     delete timer_;
     timer_ = nullptr;
 
-    QPropertyAnimation *a = new QPropertyAnimation(graphicsEffect(),"opacity");
+    QPropertyAnimation* a = new QPropertyAnimation(graphicsEffect(), "opacity");
     a->setDuration(1000);
     a->setStartValue(eff->opacity());
     a->setEndValue(0);
@@ -109,9 +101,9 @@ void NotificationWidget::fadeout()
     connect(a, &QPropertyAnimation::finished, this, &NotificationWidget::shutdown);
 }
 
-bool NotificationWidget::eventFilter(QObject *, QEvent * e)
+bool NotificationWidget::eventFilter(QObject*, QEvent* e)
 {
-    if(e->type() == QEvent::MouseButtonRelease) {
+    if (e->type() == QEvent::MouseButtonRelease) {
         e->ignore();
         return true;
 
@@ -120,7 +112,7 @@ bool NotificationWidget::eventFilter(QObject *, QEvent * e)
     }
 }
 
-void NotificationWidget::mouseReleaseEvent(QMouseEvent *)
+void NotificationWidget::mouseReleaseEvent(QMouseEvent*)
 {
     activated(notification_.auuid);
 }
@@ -139,7 +131,7 @@ QString NotificationWidget::getText()
     QString s;
     QTextStream ss(&s);
     ss << "<b>";
-    if(!notification_.auuid.empty()) {
+    if (!notification_.auuid.empty()) {
         ss << QString::fromStdString(notification_.auuid.getFullName()) << "</b>:<br /> ";
     }
     ss << QString::fromStdString(notification_msg_);
@@ -150,7 +142,7 @@ QString NotificationWidget::getRawText()
 {
     QString s;
     QTextStream ss(&s);
-    if(!notification_.auuid.empty()) {
+    if (!notification_.auuid.empty()) {
         ss << QString::fromStdString(notification_.auuid.getFullName()) << ": ";
     }
     ss << QString::fromStdString(notification_msg_);
@@ -158,7 +150,7 @@ QString NotificationWidget::getRawText()
     return s;
 }
 
-void NotificationWidget::setNotification(const Notification &notification)
+void NotificationWidget::setNotification(const Notification& notification)
 {
     bool is_error = notification.error != ErrorState::ErrorLevel::NONE;
     bool was_error = notification_.error != ErrorState::ErrorLevel::NONE;
@@ -166,16 +158,16 @@ void NotificationWidget::setNotification(const Notification &notification)
     notification_ = notification;
     {
         std::string msg = notification.getMessage();
-        if(!msg.empty()) {
+        if (!msg.empty()) {
             notification_msg_ = msg;
         }
     }
 
-    if(is_error) {
+    if (is_error) {
         QString s = getText();
         label_->setText(s);
 
-        if(notification.error == ErrorState::ErrorLevel::ERROR) {
+        if (notification.error == ErrorState::ErrorLevel::ERROR) {
             icon_->setText("<img src=':error.png' />");
         } else {
             icon_->setText("<img src=':help.png' />");
@@ -183,7 +175,7 @@ void NotificationWidget::setNotification(const Notification &notification)
 
         setToolTip(s);
 
-    } else if(!was_error) {
+    } else if (!was_error) {
         icon_->setText("<img src=':error.png' />");
     }
 
@@ -191,7 +183,7 @@ void NotificationWidget::setNotification(const Notification &notification)
     adjustSize();
 
     timer_->stop();
-    if(notification_.error == ErrorState::ErrorLevel::NONE) {
+    if (notification_.error == ErrorState::ErrorLevel::NONE) {
         timer_->start(1 * 1000);
     }
 }

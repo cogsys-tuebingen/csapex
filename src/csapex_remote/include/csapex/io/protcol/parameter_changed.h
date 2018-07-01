@@ -11,10 +11,9 @@
 
 namespace csapex
 {
-
 namespace io
 {
-    class ParameterChangedSerializer;
+class ParameterChangedSerializer;
 }
 
 class ParameterChanged : public BroadcastImplementation<ParameterChanged>
@@ -23,7 +22,7 @@ public:
     ParameterChanged(const UUID& id, const boost::any& value);
     ParameterChanged();
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     AUUID getUUID() const;
@@ -35,6 +34,6 @@ private:
     boost::any value;
 };
 
-}
+}  // namespace csapex
 
-#endif // PARAMETER_CHANGED_H
+#endif  // PARAMETER_CHANGED_H

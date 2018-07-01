@@ -15,7 +15,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_QT_EXPORT Port : public QFrame
 {
     Q_OBJECT
@@ -23,12 +22,13 @@ class CSAPEX_QT_EXPORT Port : public QFrame
     Q_PROPERTY(QString class READ cssClass)
 
 public:
-    Port(ConnectorPtr adaptee, QWidget *parent = nullptr);
+    Port(ConnectorPtr adaptee, QWidget* parent = nullptr);
     virtual ~Port();
 
-    bool event(QEvent *e);
+    bool event(QEvent* e);
 
-    QString cssClass() {
+    QString cssClass()
+    {
         return QString("Port");
     }
 
@@ -39,7 +39,7 @@ public:
     void setPortProperty(const std::string& name, bool b);
 
     virtual void mousePressEvent(QMouseEvent* e);
-    virtual void mouseMoveEvent(QMouseEvent * e);
+    virtual void mouseMoveEvent(QMouseEvent* e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
     virtual void mouseDoubleClickEvent(QMouseEvent* e);
     void mouseClickEvent();
@@ -71,18 +71,17 @@ Q_SIGNALS:
 
     void changePortRequest(QString label);
 
-
 public Q_SLOTS:
     void setMinimizedSize(bool mini);
     void setFlipped(bool flipped);
     void setEnabledFlag(bool disabled);
 
 protected:
-    Port(QWidget *parent = nullptr);
+    Port(QWidget* parent = nullptr);
 
     void startDrag();
     void createToolTip();
-    void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent*);
 
 protected:
     ConnectorPtr adaptee_;
@@ -99,6 +98,6 @@ protected:
     QTimer* double_click_timer_;
 };
 
-}
+}  // namespace csapex
 
-#endif // PORT_H
+#endif  // PORT_H

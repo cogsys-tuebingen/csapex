@@ -14,9 +14,7 @@ class QTreeWidgetItem;
 
 namespace csapex
 {
-
 class Settings;
-
 
 class CSAPEX_QT_EXPORT TutorialTreeModel
 {
@@ -28,7 +26,7 @@ public:
     };
 
 public:
-    TutorialTreeModel(Settings &settings, PluginLocator& plugin_locator);
+    TutorialTreeModel(Settings& settings, PluginLocator& plugin_locator);
     ~TutorialTreeModel();
 
     void fill(QTreeWidget* tree);
@@ -40,13 +38,13 @@ private:
     ReadMe parseReadMe(QFile& file);
 
 private:
-    Settings &settings_;
+    Settings& settings_;
     PluginLocator& plugin_locator_;
-    QTreeWidget *tree_;
+    QTreeWidget* tree_;
 
     QMap<QString, QTreeWidgetItem*> top_level_;
 };
 
-}
+}  // namespace csapex
 
-#endif // TUTORIAL_TREE_MODEL_H
+#endif  // TUTORIAL_TREE_MODEL_H

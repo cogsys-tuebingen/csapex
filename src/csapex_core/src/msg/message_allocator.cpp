@@ -3,10 +3,8 @@
 
 using namespace csapex;
 
-MessageAllocator::MessageAllocator()
-    : allocator_(nullptr)
+MessageAllocator::MessageAllocator() : allocator_(nullptr)
 {
-
 }
 
 MessageAllocator::~MessageAllocator()

@@ -10,7 +10,6 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT AddFulcrum : public CommandImplementation<AddFulcrum>
 {
     COMMAND_HEADER(AddFulcrum);
@@ -18,8 +17,9 @@ class CSAPEX_COMMAND_EXPORT AddFulcrum : public CommandImplementation<AddFulcrum
 public:
     AddFulcrum(const AUUID& graph_uuid, int connection_id, int sub_section_to_split, const Point& pos, int type);
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+
 protected:
     bool doExecute() override;
     bool doUndo() override;
@@ -34,8 +34,8 @@ private:
     int type;
 };
 
-}
+}  // namespace command
 
-}
+}  // namespace csapex
 
-#endif // COMMAND_ADD_FULCRUM_H
+#endif  // COMMAND_ADD_FULCRUM_H

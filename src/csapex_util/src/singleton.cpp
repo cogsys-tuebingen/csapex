@@ -15,12 +15,11 @@ SingletonInterface::SingletonInterface()
 void SingletonInterface::shutdownAll()
 {
     std::unique_lock<std::mutex> lock(instances_mutex_);
-    for(SingletonInterface* si : instances_) {
+    for (SingletonInterface* si : instances_) {
         si->shutdown();
     }
 }
 
 void SingletonInterface::shutdown()
 {
-
 }

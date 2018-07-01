@@ -13,18 +13,18 @@ namespace csapex
 class CSAPEX_CORE_EXPORT Unique
 {
 public:
-    Unique(const UUID &uuid);
+    Unique(const UUID& uuid);
     virtual ~Unique();
 
     UUID getUUID() const;
     AUUID getAUUID() const;
 
 protected:
-    virtual void setUUID(const UUID &uuid);
+    virtual void setUUID(const UUID& uuid);
 
 private:
     UUID uuid_;
 };
-}
+}  // namespace csapex
 
-#endif // UNIQUE_H
+#endif  // UNIQUE_H

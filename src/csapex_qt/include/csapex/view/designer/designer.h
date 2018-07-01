@@ -31,7 +31,6 @@ class QParallelAnimationGroup;
 
 namespace csapex
 {
-
 class NodeFactory;
 class NotificationWidget;
 
@@ -46,7 +45,7 @@ public:
     Designer(CsApexViewCore& view_core, QWidget* parent = 0);
     virtual ~Designer();
 
-    DesignerOptions *options();
+    DesignerOptions* options();
     MinimapWidget* getMinimap();
 
     void setup();
@@ -54,10 +53,10 @@ public:
     void setView(int x, int y);
 
     void addGraph(GraphFacadePtr graph);
-    void removeGraph(GraphFacade *graph);
+    void removeGraph(GraphFacade* graph);
 
     GraphView* getVisibleGraphView() const;
-    GraphView* getGraphView(const AUUID &uuid) const;
+    GraphView* getGraphView(const AUUID& uuid) const;
 
     GraphFacade* getVisibleGraphFacade() const;
     DesignerScene* getVisibleDesignerScene() const;
@@ -66,9 +65,8 @@ public:
 
     bool hasSelection() const;
 
-    void saveView(const GraphFacade &graph, YAML::Node &e);
+    void saveView(const GraphFacade& graph, YAML::Node& e);
     void loadView(GraphFacade& graph, const YAML::Node& doc);
-
 
     virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
 
@@ -144,5 +142,5 @@ private:
     std::deque<QPointer<NotificationWidget>> sorted_notifications_;
 };
 
-}
-#endif // DESIGNER_H
+}  // namespace csapex
+#endif  // DESIGNER_H

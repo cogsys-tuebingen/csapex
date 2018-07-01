@@ -10,17 +10,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT SetExecutionMode : public CommandImplementation<SetExecutionMode>
 {
     COMMAND_HEADER(SetExecutionMode);
 
 public:
-    SetExecutionMode(const AUUID &graph_uuid, const UUID& node, ExecutionMode mode);
+    SetExecutionMode(const AUUID& graph_uuid, const UUID& node, ExecutionMode mode);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -34,8 +33,7 @@ private:
     ExecutionMode mode;
 };
 
-}
+}  // namespace command
 
-}
-#endif // SET_EXECUTION_MODE_H
-
+}  // namespace csapex
+#endif  // SET_EXECUTION_MODE_H

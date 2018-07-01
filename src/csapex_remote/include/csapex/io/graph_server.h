@@ -18,13 +18,13 @@ public:
     GraphServer(SessionPtr session);
     ~GraphServer();
 
-    void startObservingGraph(const GraphFacadeImplementationPtr &graph);
+    void startObservingGraph(const GraphFacadeImplementationPtr& graph);
     void stopObservingGraph(const GraphFacadeImplementationPtr& graph);
 
 private:
     SessionPtr session_;
     NodeServerPtr node_server_;
 };
-}
+}  // namespace csapex
 
-#endif // GRAPH_SERVER_H
+#endif  // GRAPH_SERVER_H

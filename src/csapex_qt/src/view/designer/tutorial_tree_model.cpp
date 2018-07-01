@@ -20,8 +20,7 @@ namespace bfs = boost::filesystem3;
 
 using namespace csapex;
 
-TutorialTreeModel::TutorialTreeModel(Settings& settings, PluginLocator& plugin_locator)
-    : settings_(settings), plugin_locator_(plugin_locator), tree_(nullptr)
+TutorialTreeModel::TutorialTreeModel(Settings& settings, PluginLocator& plugin_locator) : settings_(settings), plugin_locator_(plugin_locator), tree_(nullptr)
 {
 }
 
@@ -29,23 +28,23 @@ TutorialTreeModel::~TutorialTreeModel()
 {
 }
 
-void TutorialTreeModel::fill(QTreeWidget *tree)
+void TutorialTreeModel::fill(QTreeWidget* tree)
 {
     tree_ = tree;
 
     std::string cfg_dir = settings_.defaultConfigPath();
     bfs::path tutorial_dir(cfg_dir + "cfg/tutorials/");
-    if(bfs::exists(tutorial_dir)) {
+    if (bfs::exists(tutorial_dir)) {
         importDirectory(nullptr, tutorial_dir);
     }
 
-    for(const std::string& path : plugin_locator_.getPluginPaths("tutorials")) {
+    for (const std::string& path : plugin_locator_.getPluginPaths("tutorials")) {
         importDirectory(nullptr, path);
     }
 }
 
-template<typename Path>
-void TutorialTreeModel::importDirectory(QTreeWidgetItem *parent, const Path& p)
+template <typename Path>
+void TutorialTreeModel::importDirectory(QTreeWidgetItem* parent, const Path& p)
 {
     bfs::path path = p;
 
@@ -57,16 +56,16 @@ void TutorialTreeModel::importDirectory(QTreeWidgetItem *parent, const Path& p)
     std::vector<bfs::path> subpaths;
 
     bfs::directory_iterator end;
-    for(auto it = bfs::directory_iterator(path); it != end; ++it) {
+    for (auto it = bfs::directory_iterator(path); it != end; ++it) {
         bfs::path sub_path = *it;
-        if(bfs::is_directory(sub_path)) {
+        if (bfs::is_directory(sub_path)) {
             subpaths.push_back(sub_path);
         } else {
-            if(sub_path.filename() == "README") {
+            if (sub_path.filename() == "README") {
                 contains_readme = true;
                 readme = sub_path;
 
-            } else if(sub_path.extension() == ".apex") {
+            } else if (sub_path.extension() == ".apex") {
                 contains_apex_file = true;
                 apex_file = sub_path;
             }
@@ -75,18 +74,18 @@ void TutorialTreeModel::importDirectory(QTreeWidgetItem *parent, const Path& p)
 
     std::sort(subpaths.begin(), subpaths.end());
 
-    if(contains_readme) {
+    if (contains_readme) {
         QFile rmfile(QString::fromStdString(readme.string()));
         ReadMe rm = parseReadMe(rmfile);
 
         QString id(QString::fromStdString(path.filename().string()));
-        if(id == ".") {
+        if (id == ".") {
             id = "tutorial_id";
         }
 
         QTreeWidgetItem* item = nullptr;
         auto pos = top_level_.find(rm.title);
-        if(pos == top_level_.end()) {
+        if (pos == top_level_.end()) {
             item = new QTreeWidgetItem;
             item->setText(0, rm.title);
             top_level_[rm.title] = item;
@@ -95,43 +94,40 @@ void TutorialTreeModel::importDirectory(QTreeWidgetItem *parent, const Path& p)
             item = *pos;
         }
 
-        if(contains_apex_file) {
+        if (contains_apex_file) {
             item->setIcon(0, QIcon(":/play.png"));
         } else {
             item->setIcon(0, QIcon(":/folder.png"));
         }
 
-        if(contains_apex_file) {
+        if (contains_apex_file) {
             item->setData(0, Qt::UserRole, QString::fromStdString(apex_file.string()));
         }
 
-        if(!rm.description.isEmpty()) {
+        if (!rm.description.isEmpty()) {
             QTreeWidgetItem* descr = new QTreeWidgetItem();
             descr->setText(0, rm.description);
-            if(contains_apex_file) {
+            if (contains_apex_file) {
                 descr->setData(0, Qt::UserRole, QString::fromStdString(apex_file.string()));
             }
             item->addChild(descr);
         }
 
-
-
-        if(parent) {
+        if (parent) {
             parent->addChild(item);
         } else {
             tree_->addTopLevelItem(item);
         }
 
-
-        for(const bfs::path& sub_path : subpaths) {
+        for (const bfs::path& sub_path : subpaths) {
             importDirectory(item, sub_path);
         }
     }
 }
 
-TutorialTreeModel::ReadMe TutorialTreeModel::parseReadMe(QFile &file)
+TutorialTreeModel::ReadMe TutorialTreeModel::parseReadMe(QFile& file)
 {
-    if(!file.open(QIODevice::ReadOnly)) {
+    if (!file.open(QIODevice::ReadOnly)) {
         throw std::runtime_error(std::string("cannot open the file ") + file.fileName().toStdString());
     }
 
@@ -140,14 +136,14 @@ TutorialTreeModel::ReadMe TutorialTreeModel::parseReadMe(QFile &file)
     ReadMe res;
 
     QString first_line = in.readLine();
-    while(first_line.isEmpty()) {
+    while (first_line.isEmpty()) {
         first_line = in.readLine();
     }
     res.title = first_line;
 
-    while(!in.atEnd()) {
+    while (!in.atEnd()) {
         QString next_line = in.readLine();
-        if(!next_line.isEmpty()) {
+        if (!next_line.isEmpty()) {
             res.description += next_line;
         }
     }
@@ -156,5 +152,3 @@ TutorialTreeModel::ReadMe TutorialTreeModel::parseReadMe(QFile &file)
 
     return res;
 }
-
-

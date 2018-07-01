@@ -19,7 +19,6 @@ class Node;
 
 namespace csapex
 {
-
 class Snippet : public Streamable
 {
 protected:
@@ -49,10 +48,10 @@ public:
 
     virtual uint8_t getPacketType() const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
-    static std::shared_ptr<Snippet>  makeEmpty();
+    static std::shared_ptr<Snippet> makeEmpty();
 
 private:
     mutable std::shared_ptr<YAML::Node> yaml_;
@@ -62,6 +61,6 @@ private:
     std::vector<TagConstPtr> tags_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SNIPPET_H
+#endif  // SNIPPET_H

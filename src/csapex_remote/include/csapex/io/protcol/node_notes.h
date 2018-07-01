@@ -11,19 +11,16 @@
 
 namespace csapex
 {
-
 enum class NodeNoteType
 {
-    /**
-     * begin: connect signals
-     **/
-    #define HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
-    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-        function##Changed,
-    #define HANDLE_SIGNAL(_enum, signal) \
-        _enum##Triggered,
-    #include <csapex/model/node_facade_proxy_accessors.hpp>
+/**
+ * begin: connect signals
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function)
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) function##Changed,
+#define HANDLE_SIGNAL(_enum, signal) _enum##Triggered,
+#include <csapex/model/node_facade_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/
@@ -51,7 +48,6 @@ enum class NodeNoteType
     Notification
 };
 
-
 class NodeNote : public NoteImplementation<NodeNote>
 {
 public:
@@ -60,12 +56,11 @@ public:
     NodeNote(NodeNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
 
     template <typename... Args>
-    NodeNote(NodeNoteType request_type, const AUUID& uuid, Args... args)
-        : NodeNote(request_type, uuid, {std::forward<Args>(args)...})
+    NodeNote(NodeNoteType request_type, const AUUID& uuid, Args... args) : NodeNote(request_type, uuid, { std::forward<Args>(args)... })
     {
     }
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     NodeNoteType getNoteType() const
@@ -89,6 +84,6 @@ private:
     std::vector<boost::any> payload_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_NOTES_H
+#endif  // NODE_NOTES_H

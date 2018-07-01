@@ -20,19 +20,8 @@
 
 using namespace csapex;
 
-
-
-BoxDialog::BoxDialog(QString message,
-                     NodeFactory& node_factory,
-                     NodeAdapterFactory &adapter_factory,
-                     SnippetFactoryPtr snippet_factory,
-                     QWidget *parent,
-                     Qt::WindowFlags f)
-    : QDialog(parent, f),
-      node_factory_(node_factory),
-      adapter_factory_(adapter_factory),
-      snippet_factory_(snippet_factory),
-      message_(message)
+BoxDialog::BoxDialog(QString message, NodeFactory& node_factory, NodeAdapterFactory& adapter_factory, SnippetFactoryPtr snippet_factory, QWidget* parent, Qt::WindowFlags f)
+  : QDialog(parent, f), node_factory_(node_factory), adapter_factory_(adapter_factory), snippet_factory_(snippet_factory), message_(message)
 {
     makeUI();
 }
@@ -49,14 +38,14 @@ void BoxDialog::makeUI()
     QVBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    QLabel *lbl = new QLabel(QString("<img src=\":/add_node.png\"> ") + message_ + " (<em>Autocompleted</em>)");
+    QLabel* lbl = new QLabel(QString("<img src=\":/add_node.png\"> ") + message_ + " (<em>Autocompleted</em>)");
 
     layout->addWidget(lbl);
 
     loading_ = new QProgressBar;
     loading_->setTextVisible(true);
     loading_->setValue(-1);
-    loading_->setRange(0,0);
+    loading_->setRange(0, 0);
     loading_->setFormat("Loading plugins..");
 
     layout->addWidget(loading_);
@@ -64,18 +53,18 @@ void BoxDialog::makeUI()
     QObject::connect(this, &BoxDialog::pluginsLoaded, this, &BoxDialog::setupTextBox);
 }
 
-void BoxDialog::showEvent(QShowEvent * e)
+void BoxDialog::showEvent(QShowEvent* e)
 {
     QDialog::showEvent(e);
 
-    if(!load_nodes.isRunning()) {
-        load_nodes = QtConcurrent::run([this](){
+    if (!load_nodes.isRunning()) {
+        load_nodes = QtConcurrent::run([this]() {
             model_ = new QStandardItemModel;
 
             NodeListGenerator node_generator(node_factory_, adapter_factory_);
             node_generator.listAvailableNodeTypes(model_);
 
-            if(snippet_factory_) {
+            if (snippet_factory_) {
                 SnippetListGenerator snippet_generator(*snippet_factory_);
                 snippet_generator.listAvailableSnippets(model_);
             }
@@ -105,7 +94,6 @@ void BoxDialog::setupTextBox()
     delete loading_;
     layout()->addWidget(name_edit_);
 
-
     filter->setSourceModel(model_);
 
     QObject::connect(name_edit_, SIGNAL(editingFinished()), this, SLOT(finish()));
@@ -115,10 +103,10 @@ void BoxDialog::setupTextBox()
 
 void BoxDialog::finish()
 {
-    if(load_nodes.isRunning()) {
+    if (load_nodes.isRunning()) {
         load_nodes.waitForFinished();
     }
-    if(getName().empty()) {
+    if (getName().empty()) {
         Q_EMIT reject();
     } else {
         Q_EMIT accept();

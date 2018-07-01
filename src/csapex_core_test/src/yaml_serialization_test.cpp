@@ -10,7 +10,6 @@
 using namespace csapex;
 using namespace connection_types;
 
-
 class YAMLSerializationTest : public CsApexTestCase
 {
 protected:
@@ -18,23 +17,25 @@ protected:
     {
     }
 
-    virtual ~YAMLSerializationTest() {
+    virtual ~YAMLSerializationTest()
+    {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         // Code here will be called immediately after the constructor (right
         // before each test).
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
-
 };
 
 TEST_F(YAMLSerializationTest, YamlSerializationWorks)

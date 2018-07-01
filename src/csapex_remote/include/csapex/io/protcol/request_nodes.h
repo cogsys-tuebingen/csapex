@@ -9,7 +9,6 @@
 
 namespace csapex
 {
-
 class RequestNodes
 {
 public:
@@ -19,7 +18,7 @@ public:
         NodeRequest();
         NodeRequest(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
@@ -30,15 +29,13 @@ public:
         }
     };
 
-
     class NodeResponse : public ResponseImplementation<NodeResponse>
     {
     public:
-        NodeResponse(const std::map<std::string, std::vector<NodeConstructorPtr>>& tag_map,
-                     uint8_t request_id);
+        NodeResponse(const std::map<std::string, std::vector<NodeConstructorPtr>>& tag_map, uint8_t request_id);
         NodeResponse(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::map<std::string, std::vector<NodeConstructorPtr>> getTagMap() const;
@@ -48,17 +45,15 @@ public:
             return "RequestNodes";
         }
 
-
     private:
         std::map<std::string, std::vector<NodeConstructorPtr>> tag_map_;
     };
-
 
 public:
     using RequestT = NodeRequest;
     using ResponseT = NodeResponse;
 };
 
-}
+}  // namespace csapex
 
-#endif // REQUEST_NODES_H
+#endif  // REQUEST_NODES_H

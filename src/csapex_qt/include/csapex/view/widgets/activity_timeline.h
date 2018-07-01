@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class ActivityTimelineItem;
 class Interval;
 
@@ -24,8 +23,8 @@ public:
     ActivityTimeline();
     ~ActivityTimeline();
 
-    virtual void drawBackground(QPainter *painter, const QRectF &rect);
-    virtual void drawForeground(QPainter *painter, const QRectF &rect);
+    virtual void drawBackground(QPainter* painter, const QRectF& rect);
+    virtual void drawForeground(QPainter* painter, const QRectF& rect);
 
 public Q_SLOTS:
     void addNode(NodeFacade* node);
@@ -45,12 +44,11 @@ public Q_SLOTS:
     void updateRowStart(NodeFacade* worker, ActivityType type, std::shared_ptr<const Interval> profile);
     void updateRowStop(NodeFacade* worker, std::shared_ptr<const Interval> profile);
 
-    void wheelEvent(QWheelEvent *we);
+    void wheelEvent(QWheelEvent* we);
 
     void resizeToFit();
 
     void addItem(QGraphicsItem* item);
-
 
 Q_SIGNALS:
     void recordingChanged(bool);
@@ -131,7 +129,6 @@ private:
     std::map<NodeFacade*, std::vector<csapex::slim_signal::ScopedConnection>> node2connections_;
 };
 
-}
+}  // namespace csapex
 
-#endif // ACTIVITY_TIMELINE_H
-
+#endif  // ACTIVITY_TIMELINE_H

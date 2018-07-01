@@ -22,21 +22,13 @@ using namespace csapex;
 int ThreadGroup::next_id_ = ThreadGroup::MINIMUM_THREAD_ID;
 
 ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler& handler, int id, std::string name)
-    : handler_(handler), destroyed_(false),
-      id_(id), name_(name),
-      cpu_affinity_(new CpuAffinity),
-      timed_queue_(timed_queue),
-      running_(false), pause_(false), stepping_(false)
+  : handler_(handler), destroyed_(false), id_(id), name_(name), cpu_affinity_(new CpuAffinity), timed_queue_(timed_queue), running_(false), pause_(false), stepping_(false)
 {
     next_id_ = std::max(next_id_, id + 1);
     setup();
 }
-ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler &handler, std::string name)
-    : handler_(handler), destroyed_(false),
-      id_(next_id_++), name_(name),
-      cpu_affinity_(new CpuAffinity),
-      timed_queue_(timed_queue),
-      running_(false), pause_(false), stepping_(false)
+ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler& handler, std::string name)
+  : handler_(handler), destroyed_(false), id_(next_id_++), name_(name), cpu_affinity_(new CpuAffinity), timed_queue_(timed_queue), running_(false), pause_(false), stepping_(false)
 {
     setup();
 }
@@ -44,10 +36,10 @@ ThreadGroup::ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler &handler, s
 ThreadGroup::~ThreadGroup()
 {
     std::vector<TaskGeneratorPtr> generators_copy = generators_;
-    for(const TaskGeneratorPtr& tg : generators_copy) {
+    for (const TaskGeneratorPtr& tg : generators_copy) {
         tg->detach();
     }
-    if(running_ || scheduler_thread_.joinable()) {
+    if (running_ || scheduler_thread_.joinable()) {
         stop();
     }
     destroyed_ = true;
@@ -55,14 +47,12 @@ ThreadGroup::~ThreadGroup()
 
 void ThreadGroup::setup()
 {
-    cpu_affinity_->affinity_changed.connect([this](const CpuAffinity*){
-        updateAffinity();
-    });
+    cpu_affinity_->affinity_changed.connect([this](const CpuAffinity*) { updateAffinity(); });
 }
 
 void ThreadGroup::updateAffinity()
 {
-    if(!scheduler_thread_.joinable()) {
+    if (!scheduler_thread_.joinable()) {
         return;
     }
 
@@ -72,13 +62,13 @@ void ThreadGroup::updateAffinity()
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     const std::vector<bool>& cpus = getCpuAffinity()->get();
-    for(std::size_t cpu = 0, n = cpus.size(); cpu < n; ++cpu) {
-        if(cpus[cpu]) {
+    for (std::size_t cpu = 0, n = cpus.size(); cpu < n; ++cpu) {
+        if (cpus[cpu]) {
             CPU_SET(cpu, &cpuset);
         }
     }
     int rc = pthread_setaffinity_np(scheduler_thread_.native_handle(), sizeof(cpu_set_t), &cpuset);
-    if(rc != 0) {
+    if (rc != 0) {
         std::cerr << "failed to set cpu affinity in thread " << name_ << std::endl;
     }
 #endif
@@ -98,9 +88,9 @@ std::string ThreadGroup::getName() const
 {
     return name_;
 }
-void ThreadGroup::setName(const std::string &name)
+void ThreadGroup::setName(const std::string& name)
 {
-    if(name != name_) {
+    if (name != name_) {
         name_ = name;
         scheduler_changed();
     }
@@ -126,14 +116,12 @@ bool ThreadGroup::isEmpty() const
     return generators_.empty();
 }
 
-
-
 void ThreadGroup::setPause(bool pause)
 {
-    if(pause != pause_) {
+    if (pause != pause_) {
         pause_ = pause;
 
-        for(auto generator : generators_) {
+        for (auto generator : generators_) {
             generator->setPause(pause);
         }
 
@@ -144,18 +132,18 @@ void ThreadGroup::setPause(bool pause)
 
 void ThreadGroup::setSteppingMode(bool stepping)
 {
-    if(stepping != stepping_) {
+    if (stepping != stepping_) {
         stepping_ = stepping;
     }
-    for(auto generator : generators_) {
+    for (auto generator : generators_) {
         generator->setSteppingMode(stepping_);
     }
 }
 
 bool ThreadGroup::canStartStepping() const
 {
-    for(auto generator : generators_) {
-        if(!generator->canStartStepping()) {
+    for (auto generator : generators_) {
+        if (!generator->canStartStepping()) {
             return false;
         }
     }
@@ -167,7 +155,7 @@ void ThreadGroup::step()
     begin_step();
 
     std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
-    for(auto generator : generators_) {
+    for (auto generator : generators_) {
         generator->step();
     }
 }
@@ -177,8 +165,8 @@ bool ThreadGroup::isStepping() const
     // this is only consistency checking...
     int stepping = 0;
     int not_stepping = 0;
-    for(auto generator : generators_) {
-        if(generator->isStepping()) {
+    for (auto generator : generators_) {
+        if (generator->isStepping()) {
             ++stepping;
         } else {
             ++not_stepping;
@@ -192,15 +180,15 @@ bool ThreadGroup::isStepping() const
 
 bool ThreadGroup::isStepDone() const
 {
-    //TRACE std::cerr << " TG =========== " << std::endl;
-    for(auto generator : generators_) {
-        if(!generator->isStepDone()) {
-            //TRACE std::cerr << "++++ " << std::endl;
-            //TRACE for(const TaskGeneratorConstPtr& g : generators_) {
-                //TRACE if(!g->isStepDone()) {
-                    //TRACE std::cerr << g->getUUID() << " is not done" << std::endl;
-                //TRACE }
-            //TRACE }
+    // TRACE std::cerr << " TG =========== " << std::endl;
+    for (auto generator : generators_) {
+        if (!generator->isStepDone()) {
+            // TRACE std::cerr << "++++ " << std::endl;
+            // TRACE for(const TaskGeneratorConstPtr& g : generators_) {
+            // TRACE if(!g->isStepDone()) {
+            // TRACE std::cerr << g->getUUID() << " is not done" << std::endl;
+            // TRACE }
+            // TRACE }
             return false;
         }
     }
@@ -211,7 +199,7 @@ bool ThreadGroup::isStepDone() const
 void ThreadGroup::start()
 {
     std::unique_lock<std::recursive_mutex> lock(state_mtx_);
-    if(scheduler_thread_.joinable()) {
+    if (scheduler_thread_.joinable()) {
         running_ = false;
         pause_changed_.notify_all();
         lock.unlock();
@@ -221,7 +209,7 @@ void ThreadGroup::start()
 
     running_ = true;
 
-    scheduler_thread_ = std::thread ([this]() {
+    scheduler_thread_ = std::thread([this]() {
         csapex::thread::set_name((name_).c_str());
         updateAffinity();
 
@@ -243,14 +231,14 @@ void ThreadGroup::stop()
     {
         std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
         work_available_.notify_all();
-        if(scheduler_thread_.joinable()) {
+        if (scheduler_thread_.joinable()) {
             lock.unlock();
 
             scheduler_thread_.join();
         }
 
         auto gen = generators_;
-        for(const TaskGeneratorPtr& tg : gen) {
+        for (const TaskGeneratorPtr& tg : gen) {
             tg->detach();
         }
 
@@ -260,7 +248,6 @@ void ThreadGroup::stop()
 
         clear();
     }
-
 }
 
 bool ThreadGroup::isRunning() const
@@ -276,7 +263,7 @@ void ThreadGroup::clear()
     }
 
     std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
-    for(auto generator : generators_) {
+    for (auto generator : generators_) {
         generator->reset();
     }
 }
@@ -296,12 +283,12 @@ void ThreadGroup::add(TaskGeneratorPtr generator)
     generator_added(generator);
 }
 
-void ThreadGroup::add(TaskGeneratorPtr generator, const std::vector<TaskPtr> &initial_tasks)
+void ThreadGroup::add(TaskGeneratorPtr generator, const std::vector<TaskPtr>& initial_tasks)
 {
     add(generator);
 
     std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
-    for(const TaskPtr& t: initial_tasks) {
+    for (const TaskPtr& t : initial_tasks) {
         schedule(t);
     }
 
@@ -310,9 +297,9 @@ void ThreadGroup::add(TaskGeneratorPtr generator, const std::vector<TaskPtr> &in
 
 void ThreadGroup::checkIfStepIsDone()
 {
-    //TRACE std::cerr << " TG CHECK =========== " << getName() << std::endl;
-    if(isStepDone()) {
-        //TRACE std::cerr << " TG END STEP " << getName() << std::endl;
+    // TRACE std::cerr << " TG CHECK =========== " << getName() << std::endl;
+    if (isStepDone()) {
+        // TRACE std::cerr << " TG END STEP " << getName() << std::endl;
         end_step();
     }
 }
@@ -325,9 +312,9 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
 
     TaskGeneratorPtr removed;
 
-    for(auto it = tasks_.begin(); it != tasks_.end();) {
+    for (auto it = tasks_.begin(); it != tasks_.end();) {
         TaskPtr task = *it;
-        if(task->getParent() == generator) {
+        if (task->getParent() == generator) {
             remaining_tasks.push_back(task);
             it = tasks_.erase(it);
         } else {
@@ -335,8 +322,8 @@ std::vector<TaskPtr> ThreadGroup::remove(TaskGenerator* generator)
         }
     }
 
-    for(auto it = generators_.begin(); it != generators_.end();) {
-        if(it->get() == generator) {
+    for (auto it = generators_.begin(); it != generators_.end();) {
+        if (it->get() == generator) {
             removed = *it;
             it = generators_.erase(it);
         } else {
@@ -359,11 +346,11 @@ void ThreadGroup::schedule(TaskPtr task)
 
     std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
 
-    if(!tasks_.empty()) {
-//        for(const TaskPtr& t : tasks_) {
-        for(auto it = tasks_.begin(); it != tasks_.end(); ++it) {
+    if (!tasks_.empty()) {
+        //        for(const TaskPtr& t : tasks_) {
+        for (auto it = tasks_.begin(); it != tasks_.end(); ++it) {
             const TaskPtr& t = *it;
-            if(t.get() == task.get()) {
+            if (t.get() == task.get()) {
                 return;
             }
         }
@@ -383,9 +370,9 @@ void ThreadGroup::scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock
 
 void ThreadGroup::schedulingLoop()
 {
-    while(running_) {
+    while (running_) {
         bool keep_executing = waitForTasks();
-        while(running_ && keep_executing) {
+        while (running_ && keep_executing) {
             handlePause();
 
             keep_executing = executeNextTask();
@@ -396,10 +383,10 @@ void ThreadGroup::schedulingLoop()
 bool ThreadGroup::waitForTasks()
 {
     std::unique_lock<std::recursive_mutex> lock(tasks_mtx_);
-    while(tasks_.empty()) {
+    while (tasks_.empty()) {
         work_available_.wait_for(lock, std::chrono::seconds(1));
 
-        if(!running_) {
+        if (!running_) {
             return false;
         }
     }
@@ -410,7 +397,7 @@ bool ThreadGroup::waitForTasks()
 void ThreadGroup::handlePause()
 {
     std::unique_lock<std::recursive_mutex> state_lock(state_mtx_);
-    while(running_ && pause_) {
+    while (running_ && pause_) {
         pause_changed_.wait(state_lock);
     }
 }
@@ -418,7 +405,7 @@ void ThreadGroup::handlePause()
 bool ThreadGroup::executeNextTask()
 {
     std::unique_lock<std::recursive_mutex> tasks_lock(tasks_mtx_);
-    if(!tasks_.empty()) {
+    if (!tasks_.empty()) {
         TaskPtr task = *tasks_.begin();
         tasks_.erase(tasks_.begin());
 
@@ -428,7 +415,7 @@ bool ThreadGroup::executeNextTask()
 
         {
             std::unique_lock<std::recursive_mutex> state_lock(state_mtx_);
-            if(running_) {
+            if (running_) {
                 state_lock.unlock();
 
                 executeTask(task);
@@ -446,25 +433,25 @@ void ThreadGroup::executeTask(const TaskPtr& task)
         std::unique_lock<std::recursive_mutex> state_lock(execution_mtx_);
         ProfilerPtr profiler = getProfiler();
         Interlude::Ptr interlude;
-        if(profiler && profiler->isEnabled()) {
+        if (profiler && profiler->isEnabled()) {
             TimerPtr timer = profiler->getTimer(getName());
             interlude = std::make_shared<Interlude>(timer, task->getName());
         }
 
         task->execute();
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         TaskGenerator* gen = task->getParent();
-        if(gen) {
+        if (gen) {
             gen->setError(e.what());
         }
-    } catch(const std::string& s) {
+    } catch (const std::string& s) {
         std::cerr << "Uncaught exception (string) exception: " << s << std::endl;
 
-    } catch(const csapex::Failure& assertion) {
+    } catch (const csapex::Failure& assertion) {
         handler_.handleAssertionFailure(assertion);
 
-    } catch(...) {
+    } catch (...) {
         std::cerr << "Uncaught exception of unknown type and origin in execution of task " << task->getName() << "!" << std::endl;
         throw;
     }
@@ -490,16 +477,14 @@ std::vector<TaskGeneratorPtr>::const_iterator ThreadGroup::end() const
     return generators_.end();
 }
 
-
 void ThreadGroup::saveSettings(YAML::Node& node)
 {
     node["affinity"] = cpu_affinity_->get();
 }
 
-
 void ThreadGroup::loadSettings(const YAML::Node& node)
 {
-    if(node["affinity"].IsDefined()) {
+    if (node["affinity"].IsDefined()) {
         std::vector<bool> affinity = node["affinity"].as<std::vector<bool>>();
         cpu_affinity_->set(affinity);
     }

@@ -22,16 +22,8 @@
 
 using namespace csapex;
 
-
-SearchDialog::SearchDialog(GraphFacade *root,
-                           csapex::NodeFactory &node_factory,
-                           QString message,
-                           QWidget *parent,
-                           Qt::WindowFlags f)
-    : QDialog(parent, f),
-      root_(root),
-      node_factory_(node_factory),
-      message_(message)
+SearchDialog::SearchDialog(GraphFacade* root, csapex::NodeFactory& node_factory, QString message, QWidget* parent, Qt::WindowFlags f)
+  : QDialog(parent, f), root_(root), node_factory_(node_factory), message_(message)
 {
     makeUI();
 }
@@ -48,17 +40,16 @@ void SearchDialog::makeUI()
     QVBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
 
-    QLabel *lbl = new QLabel(QString("<img src=\":/magnifier.png\"> ") + message_ + " (<em>Autocompleted</em>)");
+    QLabel* lbl = new QLabel(QString("<img src=\":/magnifier.png\"> ") + message_ + " (<em>Autocompleted</em>)");
 
     layout->addWidget(lbl);
 
     setupTextBox();
 }
 
-void SearchDialog::showEvent(QShowEvent * e)
+void SearchDialog::showEvent(QShowEvent* e)
 {
     QDialog::showEvent(e);
-
 }
 
 void SearchDialog::setupTextBox()
@@ -69,7 +60,7 @@ void SearchDialog::setupTextBox()
     filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    QObject::connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString &)));
+    QObject::connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(setFilterFixedString(const QString&)));
     QObject::connect(name_edit_, SIGNAL(textChanged(QString)), filter, SLOT(invalidate()));
 
     name_edit_->setModel(filter);
@@ -86,7 +77,7 @@ void SearchDialog::setupTextBox()
 
 void SearchDialog::finish()
 {
-    if(getAUUID().empty()) {
+    if (getAUUID().empty()) {
         Q_EMIT reject();
     } else {
         Q_EMIT accept();
@@ -110,16 +101,16 @@ QAbstractItemModel* SearchDialog::listNodes()
     return model;
 }
 
-void SearchDialog::addNodes(GraphFacade *graph, QStandardItemModel *model)
+void SearchDialog::addNodes(GraphFacade* graph, QStandardItemModel* model)
 {
-    for(const UUID& uuid : graph->enumerateAllNodes()) {
+    for (const UUID& uuid : graph->enumerateAllNodes()) {
         NodeFacadePtr nf = graph->findNodeFacade(uuid);
 
         AUUID auuid = nf->getAUUID();
         std::string type = nf->getType();
         std::string label = nf->getLabel();
 
-        if(nf->isGraph()) {
+        if (nf->isGraph()) {
             GraphFacadePtr subgraph = graph->getSubGraph(nf->getUUID());
             addNodes(subgraph.get(), model);
         }
@@ -132,8 +123,7 @@ void SearchDialog::addNodes(GraphFacade *graph, QStandardItemModel *model)
         QString type_s = QString::fromStdString(type);
 
         QString auuid_html = auuid_s;
-        auuid_html.replace(QString::fromStdString(UUID::namespace_separator),  " <b>&gt;</b> ");
-
+        auuid_html.replace(QString::fromStdString(UUID::namespace_separator), " <b>&gt;</b> ");
 
         QStandardItem* item = new QStandardItem(icon, auuid_s);
         item->setData(auuid_html, Qt::UserRole);
@@ -143,7 +133,6 @@ void SearchDialog::addNodes(GraphFacade *graph, QStandardItemModel *model)
         model->appendRow(item);
     }
 }
-
 
 /// MOC
 #include "../../../include/csapex/view/widgets/moc_search_dialog.cpp"

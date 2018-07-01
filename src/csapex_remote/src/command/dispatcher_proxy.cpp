@@ -9,19 +9,18 @@
 
 using namespace csapex;
 
-CommandDispatcherProxy::CommandDispatcherProxy(const SessionPtr& session)
-    : Proxy(session)
+CommandDispatcherProxy::CommandDispatcherProxy(const SessionPtr& session) : Proxy(session)
 {
     dirty_ = false;
     init_ = false;
 }
 
-void CommandDispatcherProxy::execute(const CommandPtr &command)
+void CommandDispatcherProxy::execute(const CommandPtr& command)
 {
     session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Execute, command);
 }
 
-void CommandDispatcherProxy::executeLater(const CommandPtr &command)
+void CommandDispatcherProxy::executeLater(const CommandPtr& command)
 {
     session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::ExecuteLater, command);
 }
@@ -33,7 +32,7 @@ void CommandDispatcherProxy::executeLater()
 
 bool CommandDispatcherProxy::isDirty() const
 {
-    if(!init_) {
+    if (!init_) {
         dirty_ = request<bool, CommandRequests>(CommandRequests::CommandRequestType::IsDirty);
         init_ = true;
     }
@@ -53,7 +52,7 @@ bool CommandDispatcherProxy::canRedo() const
 
 void CommandDispatcherProxy::undo()
 {
-    if(!canUndo()) {
+    if (!canUndo()) {
         return;
     }
     session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Undo);
@@ -61,7 +60,7 @@ void CommandDispatcherProxy::undo()
 
 void CommandDispatcherProxy::redo()
 {
-    if(!canRedo()) {
+    if (!canRedo()) {
         return;
     }
     session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Redo);
@@ -69,18 +68,18 @@ void CommandDispatcherProxy::redo()
 
 void CommandDispatcherProxy::handleBroadcast(const BroadcastMessageConstPtr& message)
 {
-    if(auto command_msg = std::dynamic_pointer_cast<CommandBroadcasts const>(message)) {
-        switch(command_msg->getBroadcastType()) {
-        case CommandBroadcasts::CommandBroadcastType::StateChanged:
-            state_changed();
-            break;
+    if (auto command_msg = std::dynamic_pointer_cast<CommandBroadcasts const>(message)) {
+        switch (command_msg->getBroadcastType()) {
+            case CommandBroadcasts::CommandBroadcastType::StateChanged:
+                state_changed();
+                break;
 
-        case CommandBroadcasts::CommandBroadcastType::DirtyChanged:
-            dirty_ = command_msg->getFlag();
-            dirty_changed(dirty_);
-            break;
-        default:
-            break;
+            case CommandBroadcasts::CommandBroadcastType::DirtyChanged:
+                dirty_ = command_msg->getFlag();
+                dirty_changed(dirty_);
+                break;
+            default:
+                break;
         }
     }
 }

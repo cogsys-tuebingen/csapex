@@ -15,20 +15,10 @@
 
 using namespace csapex;
 
-
-//bool Connectable::allow_processing = true;
-
+// bool Connectable::allow_processing = true;
 
 Connectable::Connectable(const UUID& uuid, ConnectableOwnerWeakPtr owner)
-    : Connector(uuid, owner),
-      count_(0), seq_no_(-1),
-      virtual_(false),
-      parameter_(false),
-      variadic_(false),
-      graph_port_(false),
-      essential_(false),
-      enabled_(true),
-      processing_(false)
+  : Connector(uuid, owner), count_(0), seq_no_(-1), virtual_(false), parameter_(false), variadic_(false), graph_port_(false), essential_(false), enabled_(true), processing_(false)
 {
     init();
 }
@@ -42,7 +32,6 @@ void Connectable::setVirtual(bool _virtual)
 {
     virtual_ = _virtual;
 }
-
 
 bool Connectable::isVariadic() const
 {
@@ -64,7 +53,6 @@ void Connectable::setParameter(bool parameter)
     parameter_ = parameter;
 }
 
-
 bool Connectable::isGraphPort() const
 {
     return graph_port_;
@@ -82,7 +70,7 @@ bool Connectable::isEssential() const
 
 void Connectable::setEssential(bool essential)
 {
-    if(essential != essential_) {
+    if (essential != essential_) {
         essential_ = essential;
         essential_changed(essential_);
     }
@@ -90,14 +78,14 @@ void Connectable::setEssential(bool essential)
 
 void Connectable::notifyMessageProcessed()
 {
-    if(processing_) {
+    if (processing_) {
         setProcessing(false);
 
         message_processed(shared_from_this());
 
-        APEX_DEBUG_CERR <<"connectable " << getUUID() << " notified" << std::endl;
+        APEX_DEBUG_CERR << "connectable " << getUUID() << " notified" << std::endl;
 
-        for(const ConnectionPtr& c : connections_) {
+        for (const ConnectionPtr& c : connections_) {
             c->setTokenProcessed();
         }
     }
@@ -106,12 +94,12 @@ void Connectable::notifyMessageProcessed()
 void Connectable::reset()
 {
     processing_ = false;
-//    notifyMessageProcessed();
+    //    notifyMessageProcessed();
 }
 
 void Connectable::stop()
 {
-    //notifyMessageProcessed();
+    // notifyMessageProcessed();
 }
 
 void Connectable::init()
@@ -119,33 +107,32 @@ void Connectable::init()
     setType(makeEmpty<connection_types::AnyMessage>());
 }
 
-
 Connectable::~Connectable()
 {
-    for(const ConnectionPtr& c : connections_) {
+    for (const ConnectionPtr& c : connections_) {
         c->detach(this);
     }
 }
 
 void Connectable::disable()
 {
-    if(enabled_) {
+    if (enabled_) {
         enabled_ = false;
-        enabled_changed((bool) enabled_);
+        enabled_changed((bool)enabled_);
     }
 }
 
 void Connectable::enable()
 {
-    if(!enabled_) {
+    if (!enabled_) {
         enabled_ = true;
-        enabled_changed((bool) enabled_);
+        enabled_changed((bool)enabled_);
     }
 }
 
 void Connectable::setEnabled(bool enabled)
 {
-    if(enabled) {
+    if (enabled) {
         enable();
     } else {
         disable();
@@ -163,10 +150,10 @@ std::string Connectable::getLabel() const
     return label_;
 }
 
-void Connectable::setLabel(const std::string &label)
+void Connectable::setLabel(const std::string& label)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    if(label != label_) {
+    if (label != label_) {
         label_ = label;
         labelChanged(label_);
     }
@@ -180,7 +167,7 @@ void Connectable::setType(TokenData::ConstPtr type)
     bool is_any = std::dynamic_pointer_cast<connection_types::AnyMessage const>(type_) != nullptr;
     bool will_be_any = std::dynamic_pointer_cast<connection_types::AnyMessage const>(type) != nullptr;
 
-    if(!compatible || (is_any != will_be_any)) {
+    if (!compatible || (is_any != will_be_any)) {
         type_ = type;
         lock.unlock();
 
@@ -192,7 +179,6 @@ TokenData::ConstPtr Connectable::getType() const
 {
     return type_;
 }
-
 
 int Connectable::getCount() const
 {
@@ -212,11 +198,11 @@ void Connectable::setSequenceNumber(int seq_no)
 void Connectable::removeConnection(Connectable* other_side)
 {
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
-    for(std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
+    for (std::vector<ConnectionPtr>::iterator i = connections_.begin(); i != connections_.end();) {
         ConnectionPtr c = *i;
         Connector* f = c->source().get();
         Connector* t = c->target().get();
-        if((t == other_side) || (f == other_side)) {
+        if ((t == other_side) || (f == other_side)) {
             apex_assert_hard((this == t) ^ (this == f));
 
             lock.unlock();
@@ -232,7 +218,6 @@ void Connectable::removeConnection(Connectable* other_side)
     }
 }
 
-
 void Connectable::addConnection(ConnectionPtr connection)
 {
     connections_.push_back(connection);
@@ -245,14 +230,13 @@ void Connectable::addConnection(ConnectionPtr connection)
 
 void Connectable::fadeConnection(ConnectionPtr connection)
 {
-    for(auto it = connections_.begin(); it != connections_.end(); ) {
-        if(*it == connection) {
+    for (auto it = connections_.begin(); it != connections_.end();) {
+        if (*it == connection) {
             it = connections_.erase(it);
         } else {
             ++it;
         }
     }
-
 
     connection_removed_to(shared_from_this());
 
@@ -275,8 +259,8 @@ std::vector<ConnectionPtr> Connectable::getConnections() const
 
 bool Connectable::hasActiveConnection() const
 {
-    for(const ConnectionPtr& c : connections_) {
-        if(c->isActive()) {
+    for (const ConnectionPtr& c : connections_) {
+        if (c->isActive()) {
             return true;
         }
     }
@@ -286,8 +270,8 @@ bool Connectable::hasActiveConnection() const
 
 bool Connectable::hasEnabledConnection() const
 {
-    for(const ConnectionPtr& c : connections_) {
-        if(c->isEnabled()) {
+    for (const ConnectionPtr& c : connections_) {
+        if (c->isEnabled()) {
             return true;
         }
     }
@@ -302,9 +286,9 @@ bool Connectable::isConnected() const
 
 bool Connectable::isConnectedTo(const UUID& other) const
 {
-    for(const ConnectionPtr& c : connections_) {
+    for (const ConnectionPtr& c : connections_) {
         ConnectorPtr other_port = isInput() ? c->source() : c->target();
-        if(other_port->getUUID() == other) {
+        if (other_port->getUUID() == other) {
             return true;
         }
     }
@@ -313,31 +297,29 @@ bool Connectable::isConnectedTo(const UUID& other) const
 
 bool Connectable::isActivelyConnectedTo(const UUID& other) const
 {
-    for(const ConnectionPtr& c : connections_) {
+    for (const ConnectionPtr& c : connections_) {
         ConnectorPtr other_port = isInput() ? c->source() : c->target();
-        if(other_port->getUUID() == other) {
+        if (other_port->getUUID() == other) {
             return c->isActive();
         }
     }
     return false;
 }
 
-
 std::vector<UUID> Connectable::getConnectedPorts() const
 {
     std::vector<UUID> res;
     res.reserve(connections_.size());
-    for(const ConnectionPtr& c : connections_) {
+    for (const ConnectionPtr& c : connections_) {
         ConnectorPtr other_port = isInput() ? c->source() : c->target();
         UUID uuid = other_port->getUUID();
-        if(!uuid.empty()) {
+        if (!uuid.empty()) {
             res.push_back(uuid);
         }
     }
 
     return res;
 }
-
 
 std::string Connectable::makeStatusString() const
 {
@@ -357,20 +339,14 @@ std::string Connectable::makeStatusString() const
 ConnectorDescription Connectable::getDescription() const
 {
     auto owner = getOwner();
-    if(!owner) {
+    if (!owner) {
         return {};
     }
-    ConnectorDescription res(owner->getUUID().getAbsoluteUUID(),
-                             getUUID(),
-                             getConnectorType(),
-                             getType(),
-                             getLabel());
-    res.setParameter(isParameter())
-            .setOptional(isOptional())
-            .setVariadic(isVariadic());
+    ConnectorDescription res(owner->getUUID().getAbsoluteUUID(), getUUID(), getConnectorType(), getType(), getLabel());
+    res.setParameter(isParameter()).setOptional(isOptional()).setVariadic(isVariadic());
 
-    for(const ConnectionPtr& c : getConnections()) {
-        if(isOutput()) {
+    for (const ConnectionPtr& c : getConnections()) {
+        if (isOutput()) {
             res.targets.emplace_back(c->target()->getUUID().getAbsoluteUUID(), c->isActive());
         } else {
             res.targets.emplace_back(c->source()->getUUID().getAbsoluteUUID(), c->isActive());

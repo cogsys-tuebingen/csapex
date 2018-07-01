@@ -17,7 +17,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT NodeConstructor : public Serializable
 {
 protected:
@@ -45,27 +44,27 @@ public:
     std::string getType() const;
 
     NodeConstructor& setTags(const std::string& tags);
-    NodeConstructor& setTags(const std::vector<std::string> &tags);
-    NodeConstructor& setTags(const std::vector<TagPtr> &tags);
+    NodeConstructor& setTags(const std::vector<std::string>& tags);
+    NodeConstructor& setTags(const std::vector<TagPtr>& tags);
     std::vector<TagPtr> getTags() const;
 
-    NodeConstructor& setProperties(const std::vector<std::string> &properties);
+    NodeConstructor& setProperties(const std::vector<std::string>& properties);
     std::vector<std::string> getProperties() const;
 
-    NodeConstructor& setIcon(const std::string &icon);
+    NodeConstructor& setIcon(const std::string& icon);
     std::string getIcon() const;
 
-    NodeConstructor& setDescription(const std::string &description);
+    NodeConstructor& setDescription(const std::string& description);
     std::string getDescription() const;
 
     NodeHandlePtr makePrototype() const;
-    NodeHandlePtr makeNodeHandle(const UUID& uuid, const UUIDProviderPtr &uuid_provider) const;
+    NodeHandlePtr makeNodeHandle(const UUID& uuid, const UUIDProviderPtr& uuid_provider) const;
 
     std::vector<param::ParameterPtr> getParameters() const;
 
     NodePtr makeNode() const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -85,5 +84,5 @@ protected:
     std::function<NodePtr()> c;
 };
 
-}
-#endif // NODE_CONSTRUCTOR_H
+}  // namespace csapex
+#endif  // NODE_CONSTRUCTOR_H

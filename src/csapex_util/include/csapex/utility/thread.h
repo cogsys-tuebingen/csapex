@@ -4,13 +4,14 @@
 /// PROJECT
 #include <csapex_util_export.h>
 
-namespace csapex {
-
-namespace thread {
+namespace csapex
+{
+namespace thread
+{
 CSAPEX_UTILS_EXPORT void set_name(const char* name);
 CSAPEX_UTILS_EXPORT const char* get_name();
-}
+}  // namespace thread
 
-}
+}  // namespace csapex
 
-#endif // THREAD_H
+#endif  // THREAD_H

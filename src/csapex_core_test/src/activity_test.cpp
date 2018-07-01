@@ -22,8 +22,8 @@
 #include <csapex_testing/test_exception_handler.h>
 #include <csapex_testing/stepping_test.h>
 
-namespace csapex {
-
+namespace csapex
+{
 class MockupState
 {
 public:
@@ -33,14 +33,11 @@ public:
         out = node_modifier.addOutput<int>("output");
 
         e = node_modifier.addEvent("event");
-        s = node_modifier.addSlot<connection_types::AnyMessage>("slot", [this](const TokenPtr& token) {
-            e->triggerWith(token);
-        });
+        s = node_modifier.addSlot<connection_types::AnyMessage>("slot", [this](const TokenPtr& token) { e->triggerWith(token); });
     }
 
     void setupParameters(Parameterizable& /*parameters*/)
     {
-
     }
 
     void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
@@ -61,8 +58,7 @@ private:
 class MockupActivitySource : public Node
 {
 public:
-    MockupActivitySource()
-        : i(0), can_process_(false)
+    MockupActivitySource() : i(0), can_process_(false)
     {
     }
 
@@ -74,7 +70,6 @@ public:
 
     void setupParameters(Parameterizable& /*parameters*/) override
     {
-
     }
 
     bool canProcess() const override
@@ -108,16 +103,13 @@ private:
     int i;
 
     bool can_process_;
-
 };
 
 class MockupActivitySink
 {
 public:
-    MockupActivitySink()
-        : waiting(false), value(-1)
+    MockupActivitySink() : waiting(false), value(-1)
     {
-
     }
 
     void setup(NodeModifier& node_modifier)
@@ -132,7 +124,6 @@ public:
 
     void setupParameters(Parameterizable& /*parameters*/)
     {
-
     }
 
     void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
@@ -157,14 +148,14 @@ public:
 
     bool wait()
     {
-//        TODO: implement activity support for subprocesses!
+        //        TODO: implement activity support for subprocesses!
         std::unique_lock<std::recursive_mutex> lock(wait_mutex);
         auto wait_start = std::chrono::system_clock::now();
-        while(waiting) {
+        while (waiting) {
             stepping_done.wait_for(lock, std::chrono::milliseconds(10));
 
             auto waited_for = std::chrono::system_clock::now() - wait_start;
-            if(waited_for > std::chrono::milliseconds(50)) {
+            if (waited_for > std::chrono::milliseconds(50)) {
                 std::cerr << "waiting for activity sink timed out" << std::endl;
                 return false;
             }
@@ -185,11 +176,9 @@ private:
     int value;
 };
 
-
 class ActivityTest : public SteppingTest
 {
 protected:
-
     ActivityTest()
     {
         factory.registerNodeType(std::make_shared<NodeConstructor>("ActivitySource", std::bind(&ActivityTest::makeSource)));
@@ -198,7 +187,8 @@ protected:
         factory.registerNodeType(std::make_shared<NodeConstructor>("ActivityState", std::bind(&ActivityTest::makeState)));
     }
 
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         SteppingTest::SetUp();
 
         source_p = factory.makeNode("ActivitySource", UUIDProvider::makeUUID_without_parent("ActivitySource"), graph);
@@ -209,42 +199,40 @@ protected:
 
         sink_p = factory.makeNode("ActivitySink", UUIDProvider::makeUUID_without_parent("ActivitySink"), graph);
         main_graph_facade->addNode(sink_p);
-
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
     }
 
-    static NodePtr makeState() {
+    static NodePtr makeState()
+    {
         return NodePtr(new NodeWrapper<MockupState>());
     }
 
-    static NodePtr makeSource() {
+    static NodePtr makeSource()
+    {
         return NodePtr(new MockupActivitySource());
     }
-    static NodePtr makeSink() {
+    static NodePtr makeSink()
+    {
         return NodePtr(new NodeWrapper<MockupActivitySink>());
     }
-
 
     NodeFacadeImplementationPtr source_p;
     NodeFacadeImplementationPtr state;
     NodeFacadeImplementationPtr sink_p;
-
 };
 
-
-TEST_F(ActivityTest, ActivityIsConveyedViaMessages) {
-
+TEST_F(ActivityTest, ActivityIsConveyedViaMessages)
+{
     std::shared_ptr<MockupActivitySource> source = std::dynamic_pointer_cast<MockupActivitySource>(source_p->getNode());
     ASSERT_NE(nullptr, source);
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "output",
-                                             state->getNodeHandle().get(), "input");
-    ConnectionPtr c2 = main_graph_facade->connect(state->getNodeHandle().get(), "output",
-                                             sink_p->getNodeHandle().get(), "input");
+    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "output", state->getNodeHandle().get(), "input");
+    ConnectionPtr c2 = main_graph_facade->connect(state->getNodeHandle().get(), "output", sink_p->getNodeHandle().get(), "input");
 
     c1->setActive(true);
     c2->setActive(true);
@@ -253,12 +241,12 @@ TEST_F(ActivityTest, ActivityIsConveyedViaMessages) {
 
     executor.start();
 
-    for(int iter = 0; iter < 5; ++iter) {
-        if(iter == 2) {
+    for (int iter = 0; iter < 5; ++iter) {
+        if (iter == 2) {
             // send activation token in this iteration
             source_p->setActive(true);
         }
-        if(iter == 2) {
+        if (iter == 2) {
             ASSERT_TRUE(source_p->isActive());
         } else {
             ASSERT_TRUE(!source_p->isActive());
@@ -273,7 +261,7 @@ TEST_F(ActivityTest, ActivityIsConveyedViaMessages) {
 
         ASSERT_EQ(iter, sink->getValue());
 
-        if(iter >= 2) {
+        if (iter >= 2) {
             // the sink is never deactivated
             ASSERT_TRUE(sink_p->isActive());
 
@@ -283,16 +271,15 @@ TEST_F(ActivityTest, ActivityIsConveyedViaMessages) {
     }
 }
 
-TEST_F(ActivityTest, ActivityIsConveyedViaMessagesOnlyForActiveConnections) {
+TEST_F(ActivityTest, ActivityIsConveyedViaMessagesOnlyForActiveConnections)
+{
     std::shared_ptr<MockupActivitySource> source = std::dynamic_pointer_cast<MockupActivitySource>(source_p->getNode());
     ASSERT_NE(nullptr, source);
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "output",
-                                             state->getNodeHandle().get(), "input");
-    main_graph_facade->connect(state->getNodeHandle().get(), "output",
-                          sink_p->getNodeHandle().get(), "input");
+    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "output", state->getNodeHandle().get(), "input");
+    main_graph_facade->connect(state->getNodeHandle().get(), "output", sink_p->getNodeHandle().get(), "input");
 
     c1->setActive(true);
 
@@ -300,12 +287,12 @@ TEST_F(ActivityTest, ActivityIsConveyedViaMessagesOnlyForActiveConnections) {
 
     executor.start();
 
-    for(int iter = 0; iter < 5; ++iter) {
-        if(iter == 2) {
+    for (int iter = 0; iter < 5; ++iter) {
+        if (iter == 2) {
             // send activation token in this iteration
             source_p->setActive(true);
         }
-        if(iter == 2) {
+        if (iter == 2) {
             ASSERT_TRUE(source_p->isActive());
         } else {
             ASSERT_TRUE(!source_p->isActive());
@@ -320,7 +307,7 @@ TEST_F(ActivityTest, ActivityIsConveyedViaMessagesOnlyForActiveConnections) {
 
         ASSERT_EQ(iter, sink->getValue());
 
-        if(iter >= 2) {
+        if (iter >= 2) {
             // the intermediate state is never deactivated
             ASSERT_TRUE(state->isActive());
 
@@ -332,30 +319,27 @@ TEST_F(ActivityTest, ActivityIsConveyedViaMessagesOnlyForActiveConnections) {
     }
 }
 
-
-TEST_F(ActivityTest, ActivityIsConveyedViaEvents) {
-
+TEST_F(ActivityTest, ActivityIsConveyedViaEvents)
+{
     std::shared_ptr<MockupActivitySource> source = std::dynamic_pointer_cast<MockupActivitySource>(source_p->getNode());
     ASSERT_NE(nullptr, source);
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "event",
-                                             state->getNodeHandle().get(), "slot");
-    ConnectionPtr c2 = main_graph_facade->connect(state->getNodeHandle().get(), "event",
-                                             sink_p->getNodeHandle().get(), "slot");
+    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "event", state->getNodeHandle().get(), "slot");
+    ConnectionPtr c2 = main_graph_facade->connect(state->getNodeHandle().get(), "event", sink_p->getNodeHandle().get(), "slot");
 
     c1->setActive(true);
     c2->setActive(true);
 
     executor.start();
 
-    for(int iter = 0; iter < 5; ++iter) {
-        if(iter == 2) {
+    for (int iter = 0; iter < 5; ++iter) {
+        if (iter == 2) {
             // send activation token in this iteration
             source_p->setActive(true);
         }
-        if(iter == 2) {
+        if (iter == 2) {
             ASSERT_TRUE(source_p->isActive());
         } else {
             ASSERT_TRUE(!source_p->isActive());
@@ -365,12 +349,12 @@ TEST_F(ActivityTest, ActivityIsConveyedViaEvents) {
 
         source->triggerEvent();
 
-//        ASSERT_NO_FATAL_FAILURE(step());
+        //        ASSERT_NO_FATAL_FAILURE(step());
         ASSERT_TRUE(sink->wait());
 
         ASSERT_TRUE(!state->isActive());
 
-        if(iter >= 2) {
+        if (iter >= 2) {
             // the sink is never deactivated
             ASSERT_TRUE(sink_p->isActive());
 
@@ -380,28 +364,26 @@ TEST_F(ActivityTest, ActivityIsConveyedViaEvents) {
     }
 }
 
-TEST_F(ActivityTest, ActivityIsConveyedViaEventsOnlyForActiveConnections) {
-
+TEST_F(ActivityTest, ActivityIsConveyedViaEventsOnlyForActiveConnections)
+{
     std::shared_ptr<MockupActivitySource> source = std::dynamic_pointer_cast<MockupActivitySource>(source_p->getNode());
     ASSERT_NE(nullptr, source);
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "event",
-                                             state->getNodeHandle().get(), "slot");
-    main_graph_facade->connect(state->getNodeHandle().get(), "event",
-                          sink_p->getNodeHandle().get(), "slot");
+    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "event", state->getNodeHandle().get(), "slot");
+    main_graph_facade->connect(state->getNodeHandle().get(), "event", sink_p->getNodeHandle().get(), "slot");
 
     c1->setActive(true);
 
     executor.start();
 
-    for(int iter = 0; iter < 5; ++iter) {
-        if(iter == 2) {
+    for (int iter = 0; iter < 5; ++iter) {
+        if (iter == 2) {
             // send activation token in this iteration
             source_p->setActive(true);
         }
-        if(iter == 2) {
+        if (iter == 2) {
             ASSERT_TRUE(source_p->isActive());
         } else {
             ASSERT_TRUE(!source_p->isActive());
@@ -410,10 +392,10 @@ TEST_F(ActivityTest, ActivityIsConveyedViaEventsOnlyForActiveConnections) {
         sink->setWaiting(true);
 
         source->triggerEvent();
-//        ASSERT_NO_FATAL_FAILURE(step());
+        //        ASSERT_NO_FATAL_FAILURE(step());
         ASSERT_TRUE(sink->wait());
 
-        if(iter >= 2) {
+        if (iter >= 2) {
             // the sink is never deactivated
             ASSERT_TRUE(state->isActive());
 
@@ -425,29 +407,27 @@ TEST_F(ActivityTest, ActivityIsConveyedViaEventsOnlyForActiveConnections) {
     }
 }
 
-TEST_F(ActivityTest, ActivityIsConveyedViaEventsAndMessages) {
-
+TEST_F(ActivityTest, ActivityIsConveyedViaEventsAndMessages)
+{
     std::shared_ptr<MockupActivitySource> source = std::dynamic_pointer_cast<MockupActivitySource>(source_p->getNode());
     ASSERT_NE(nullptr, source);
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "output",
-                                             state->getNodeHandle().get(), "input");
-    ConnectionPtr c2 = main_graph_facade->connect(state->getNodeHandle().get(), "event",
-                                             sink_p->getNodeHandle().get(), "slot");
+    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "output", state->getNodeHandle().get(), "input");
+    ConnectionPtr c2 = main_graph_facade->connect(state->getNodeHandle().get(), "event", sink_p->getNodeHandle().get(), "slot");
 
     c1->setActive(true);
     c2->setActive(true);
 
     executor.start();
 
-    for(int iter = 0; iter < 5; ++iter) {
-        if(iter == 2) {
+    for (int iter = 0; iter < 5; ++iter) {
+        if (iter == 2) {
             // send activation token in this iteration
             source_p->setActive(true);
         }
-        if(iter == 2) {
+        if (iter == 2) {
             ASSERT_TRUE(source_p->isActive());
         } else {
             ASSERT_TRUE(!source_p->isActive());
@@ -462,7 +442,7 @@ TEST_F(ActivityTest, ActivityIsConveyedViaEventsAndMessages) {
 
         ASSERT_TRUE(!state->isActive());
 
-        if(iter >= 2) {
+        if (iter >= 2) {
             // the sink is never deactivated
             ASSERT_TRUE(sink_p->isActive());
 
@@ -472,29 +452,27 @@ TEST_F(ActivityTest, ActivityIsConveyedViaEventsAndMessages) {
     }
 }
 
-TEST_F(ActivityTest, ActivityTriggersEvents) {
-
+TEST_F(ActivityTest, ActivityTriggersEvents)
+{
     std::shared_ptr<MockupActivitySource> source = std::dynamic_pointer_cast<MockupActivitySource>(source_p->getNode());
     ASSERT_NE(nullptr, source);
     std::shared_ptr<MockupActivitySink> sink = std::dynamic_pointer_cast<MockupActivitySink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "output",
-                                             state->getNodeHandle().get(), "input");
-    ConnectionPtr c2 = main_graph_facade->connect(state->getNodeHandle().get(), "event",
-                                             sink_p->getNodeHandle().get(), "slot");
+    ConnectionPtr c1 = main_graph_facade->connect(source_p->getNodeHandle().get(), "output", state->getNodeHandle().get(), "input");
+    ConnectionPtr c2 = main_graph_facade->connect(state->getNodeHandle().get(), "event", sink_p->getNodeHandle().get(), "slot");
 
     c1->setActive(true);
     c2->setActive(true);
 
     executor.start();
 
-    for(int iter = 0; iter < 5; ++iter) {
-        if(iter == 2) {
+    for (int iter = 0; iter < 5; ++iter) {
+        if (iter == 2) {
             // send activation token in this iteration
             source_p->setActive(true);
         }
-        if(iter == 2) {
+        if (iter == 2) {
             ASSERT_TRUE(source_p->isActive());
         } else {
             ASSERT_TRUE(!source_p->isActive());
@@ -508,7 +486,7 @@ TEST_F(ActivityTest, ActivityTriggersEvents) {
 
         ASSERT_TRUE(!state->isActive());
 
-        if(iter >= 2) {
+        if (iter >= 2) {
             // the sink is never deactivated
             ASSERT_TRUE(sink_p->isActive());
 
@@ -518,5 +496,4 @@ TEST_F(ActivityTest, ActivityTriggersEvents) {
     }
 }
 
-
-}
+}  // namespace csapex

@@ -13,18 +13,15 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT UpdateParameter : public CommandImplementation<UpdateParameter>
 {
     COMMAND_HEADER(UpdateParameter);
 
 public:
     template <typename T>
-    explicit UpdateParameter(const UUID &parameter_uuid, const T& value)
-        : CommandImplementation(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()),
-          value(value)
+    explicit UpdateParameter(const UUID& parameter_uuid, const T& value) : CommandImplementation(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()), value(value)
     {
-        if(parameter_uuid.global()) {
+        if (parameter_uuid.global()) {
             apex_assert_hard(!parameter_uuid.globalName().empty());
         } else {
             apex_assert(!parameter_uuid.empty());
@@ -35,7 +32,7 @@ public:
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -53,7 +50,7 @@ private:
     boost::any value;
 };
 
-}
+}  // namespace command
 
-}
-#endif // UPDATE_PARAMETER_H
+}  // namespace csapex
+#endif  // UPDATE_PARAMETER_H

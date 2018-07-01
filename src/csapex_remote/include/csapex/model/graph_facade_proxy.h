@@ -13,7 +13,7 @@ class GraphProxy;
 class GraphFacadeProxy : public GraphFacade, public Proxy
 {
 public:
-    GraphFacadeProxy(const SessionPtr &session, NodeFacadeProxyPtr remote_facade, GraphFacadeProxy *parent = nullptr);
+    GraphFacadeProxy(const SessionPtr& session, NodeFacadeProxyPtr remote_facade, GraphFacadeProxy* parent = nullptr);
     ~GraphFacadeProxy();
 
     virtual AUUID getAbsoluteUUID() const override;
@@ -27,12 +27,12 @@ public:
 
     virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
     virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
-    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID &uuid) const override;
-    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID &uuid) const noexcept override;
+    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const override;
+    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept override;
     virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
 
-    virtual ConnectorPtr findConnector(const UUID &uuid) override;
-    virtual ConnectorPtr findConnectorNoThrow(const UUID &uuid) noexcept override;
+    virtual ConnectorPtr findConnector(const UUID& uuid) override;
+    virtual ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept override;
 
     virtual bool isConnected(const UUID& from, const UUID& to) const override;
     virtual ConnectionDescription getConnection(const UUID& from, const UUID& to) const override;
@@ -53,18 +53,16 @@ public:
 
     virtual void pauseRequest(bool pause) override;
 
+/**
+ * begin: generate getters
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function) virtual type function() const override;
 
-    /**
-     * begin: generate getters
-     **/
-    #define HANDLE_ACCESSOR(_enum, type, function) \
-    virtual type function() const override;
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_SIGNAL(_enum, signal)
 
-    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_SIGNAL(_enum, signal)
-
-    #include <csapex/model/graph_facade_proxy_accessors.hpp>
+#include <csapex/model/graph_facade_proxy_accessors.hpp>
     /**
      * end: generate getters
      **/
@@ -91,19 +89,19 @@ private:
 
     AUUID uuid_;
 
-    /**
-     * begin: generate caches
-     **/
-    #define HANDLE_ACCESSOR(_enum, type, function)
-    #define HANDLE_STATIC_ACCESSOR(_enum, type, function) \
-    mutable bool has_##function##_; \
+/**
+ * begin: generate caches
+ **/
+#define HANDLE_ACCESSOR(_enum, type, function)
+#define HANDLE_STATIC_ACCESSOR(_enum, type, function)                                                                                                                                                  \
+    mutable bool has_##function##_;                                                                                                                                                                    \
     mutable type cache_##function##_;
-    #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) \
-    mutable bool has_##function##_; \
+#define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function)                                                                                                                                         \
+    mutable bool has_##function##_;                                                                                                                                                                    \
     mutable type value_##function##_;
-    #define HANDLE_SIGNAL(_enum, signal)
+#define HANDLE_SIGNAL(_enum, signal)
 
-    #include <csapex/model/graph_facade_proxy_accessors.hpp>
+#include <csapex/model/graph_facade_proxy_accessors.hpp>
     /**
      * end: generate caches
      **/
@@ -113,6 +111,6 @@ private:
     long guard_;
 };
 
-}
+}  // namespace csapex
 
-#endif // GRAPH_FACADE_PROXY_H
+#endif  // GRAPH_FACADE_PROXY_H

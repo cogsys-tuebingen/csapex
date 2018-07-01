@@ -17,15 +17,14 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(ModifyConnection)
 
-ModifyConnection::ModifyConnection(const AUUID& parent_uuid, int connection_id, bool active)
-    : CommandImplementation(parent_uuid), connection_id(connection_id), active(active)
+ModifyConnection::ModifyConnection(const AUUID& parent_uuid, int connection_id, bool active) : CommandImplementation(parent_uuid), connection_id(connection_id), active(active)
 {
 }
 
 std::string ModifyConnection::getDescription() const
 {
     std::stringstream ss;
-    ss << "modified connection " << connection_id << " -> set active: " << active << " (was " << was_active <<  ")";
+    ss << "modified connection " << connection_id << " -> set active: " << active << " (was " << was_active << ")";
     return ss.str();
 }
 
@@ -48,9 +47,7 @@ bool ModifyConnection::doRedo()
     return doExecute();
 }
 
-
-
-void ModifyConnection::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ModifyConnection::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

@@ -9,22 +9,22 @@
 
 namespace csapex
 {
-
 class MessageAllocatorImplementationInterface
 {
 public:
     class Deleter
     {
     public:
-        Deleter(MessageAllocatorImplementationInterface* alloc)
-            : alloc_(alloc)
-        {}
+        Deleter(MessageAllocatorImplementationInterface* alloc) : alloc_(alloc)
+        {
+        }
 
         template <typename T>
-        void operator() (T* ptr) noexcept
+        void operator()(T* ptr) noexcept
         {
             alloc_->deallocate(reinterpret_cast<uint8_t*>(ptr));
         }
+
     private:
         MessageAllocatorImplementationInterface* alloc_;
     };
@@ -48,15 +48,15 @@ static uint8_t* getPointer(const Wrapper& ptr)
 {
     return ptr.get();
 }
-}
+}  // namespace detail
 
 template <typename T, typename Alloc>
 class MessageAllocatorImplementation : public MessageAllocatorImplementationInterface
 {
 public:
-    MessageAllocatorImplementation(const Alloc& alloc)
-        : alloc_(alloc)
-    {}
+    MessageAllocatorImplementation(const Alloc& alloc) : alloc_(alloc)
+    {
+    }
 
     uint8_t* allocate() override
     {
@@ -81,14 +81,14 @@ public:
     template <typename T, typename... Args>
     std::shared_ptr<T> allocate(Args&&... args)
     {
-        if(allocator_) {
+        if (allocator_) {
             uint8_t* raw = allocator_->allocate();
             try {
                 T* data = new (raw) T(std::forward<Args>(args)...);
                 std::shared_ptr<T> res(data, MessageAllocatorImplementationInterface::Deleter(allocator_));
                 return res;
 
-            } catch(...) {
+            } catch (...) {
                 // if anything happens, deallocate
                 allocator_->deallocate(raw);
                 return nullptr;
@@ -104,10 +104,11 @@ public:
         delete allocator_;
         allocator_ = new MessageAllocatorImplementation<T, Alloc>(alloc);
     }
+
 private:
     MessageAllocatorImplementationInterface* allocator_;
 };
 
-}
+}  // namespace csapex
 
-#endif // MESSAGE_ALLOCATOR_H
+#endif  // MESSAGE_ALLOCATOR_H

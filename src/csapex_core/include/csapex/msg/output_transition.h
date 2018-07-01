@@ -52,7 +52,6 @@ private:
 
     long sequence_number_;
 };
-}
+}  // namespace csapex
 
-#endif // OUTPUT_TRANSITION_H
-
+#endif  // OUTPUT_TRANSITION_H

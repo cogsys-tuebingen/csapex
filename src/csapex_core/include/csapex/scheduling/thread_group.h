@@ -25,19 +25,17 @@ class Node;
 
 namespace csapex
 {
-
-class CSAPEX_CORE_EXPORT ThreadGroup :
-        public Scheduler,
-        public Profilable,
-        public std::enable_shared_from_this<ThreadGroup>
+class CSAPEX_CORE_EXPORT ThreadGroup : public Scheduler, public Profilable, public std::enable_shared_from_this<ThreadGroup>
 {
 public:
-    enum {
+    enum
+    {
         UNDEFINED_THREAD = -1,
         PRIVATE_THREAD = 0,
         DEFAULT_GROUP_ID = 1,
         MINIMUM_THREAD_ID = 2
     };
+
 public:
     static int nextId();
 
@@ -53,7 +51,7 @@ public:
 
     CpuAffinityPtr getCpuAffinity() const;
 
-    const std::thread &thread() const;
+    const std::thread& thread() const;
 
     std::size_t size() const;
     virtual bool isEmpty() const override;
@@ -77,7 +75,7 @@ public:
 
     virtual std::vector<TaskPtr> remove(TaskGenerator* generator) override;
 
-    virtual void schedule(TaskPtr schedulable) override;    
+    virtual void schedule(TaskPtr schedulable) override;
     virtual void scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time) override;
 
     std::vector<TaskGeneratorPtr>::iterator begin();
@@ -86,11 +84,11 @@ public:
     std::vector<TaskGeneratorPtr>::const_iterator end() const;
 
     void saveSettings(YAML::Node&);
-    void loadSettings(const YAML::Node &);
+    void loadSettings(const YAML::Node&);
 
 public:
-    slim_signal::Signal<void (TaskGeneratorPtr)> generator_added;
-    slim_signal::Signal<void (TaskGeneratorPtr)> generator_removed;
+    slim_signal::Signal<void(TaskGeneratorPtr)> generator_added;
+    slim_signal::Signal<void(TaskGeneratorPtr)> generator_removed;
 
 private:
     void setup();
@@ -130,7 +128,8 @@ private:
     std::recursive_mutex tasks_mtx_;
     struct greater
     {
-        bool operator () (const TaskPtr& a, const TaskPtr& b) {
+        bool operator()(const TaskPtr& a, const TaskPtr& b)
+        {
             return a->getPriority() > b->getPriority();
         }
     };
@@ -143,10 +142,8 @@ private:
     std::atomic<bool> stepping_;
 
     mutable std::recursive_mutex execution_mtx_;
-
 };
 
-}
+}  // namespace csapex
 
-#endif // THREAD_GROUP_H
-
+#endif  // THREAD_GROUP_H

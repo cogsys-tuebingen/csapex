@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class GraphView;
 
 class CSAPEX_QT_EXPORT DragIOHandler
@@ -29,7 +28,6 @@ protected:
     DragIOHandler();
 };
 
-}
+}  // namespace csapex
 
-#endif // DRAG_IO_HANDLER_H
-
+#endif  // DRAG_IO_HANDLER_H

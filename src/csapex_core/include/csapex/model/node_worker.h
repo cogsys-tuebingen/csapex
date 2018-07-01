@@ -27,11 +27,10 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <boost/optional.hpp>
 
-namespace csapex {
-
+namespace csapex
+{
 class ProfilerImplementation;
 class Interval;
-
 
 class CSAPEX_CORE_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
 {
@@ -41,13 +40,12 @@ public:
 public:
     ~NodeWorker();
 
-
     virtual void initialize();
     void reset();
     void handleChangedParameters();
 
     bool startProcessingMessages();
-    bool startProcessingSlot(const SlotWeakPtr &slot);
+    bool startProcessingSlot(const SlotWeakPtr& slot);
 
     NodeHandlePtr getNodeHandle() const;
     NodePtr getNode() const;
@@ -72,7 +70,6 @@ public:
     bool canReceive() const;
     bool canSend() const;
 
-
 public:
     slim_signal::Signal<void()> destroyed;
 
@@ -96,7 +93,7 @@ protected:
     virtual void processNode();
     virtual void finishProcessing();
 
-    virtual void processSlot(const SlotWeakPtr &slot);
+    virtual void processSlot(const SlotWeakPtr& slot);
 
 private:
     void triggerTryProcess();
@@ -107,8 +104,8 @@ private:
     void updateParameterValues();
 
     void publishParameters();
-    void publishParameter(csapex::param::Parameter *p);
-    void publishParameterOn(const csapex::param::Parameter &p, Output *out);
+    void publishParameter(csapex::param::Parameter* p);
+    void publishParameterOn(const csapex::param::Parameter& p, Output* out);
 
     void finishTimer(TimerPtr t);
 
@@ -122,13 +119,13 @@ private:
 
     void setProcessing(bool processing);
 
-    void errorEvent(bool error, const std::string &msg, ErrorLevel level) override;
+    void errorEvent(bool error, const std::string& msg, ErrorLevel level) override;
 
     void forwardMessages();
     void sendEvents(bool active);
 
     void connectConnector(ConnectablePtr c);
-    void disconnectConnector(Connector *c);
+    void disconnectConnector(Connector* c);
 
     bool allInputsArePresent();
 
@@ -168,12 +165,12 @@ private:
 
     std::recursive_mutex timer_mutex_;
 
-    //TimerPtr profiling_timer_;
+    // TimerPtr profiling_timer_;
     std::shared_ptr<ProfilerImplementation> profiler_;
 
     long guard_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NODE_WORKER_H
+#endif  // NODE_WORKER_H

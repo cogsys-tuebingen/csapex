@@ -38,16 +38,15 @@ const std::string Settings::config_selector = "Configs(*" + Settings::config_ext
 
 const std::string Settings::namespace_separator = ":/:";
 
-
 std::string Settings::defaultConfigPath()
 {
 #ifdef WIN32
-	CHAR path[MAX_PATH];
-	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
-		return std::string(path) + "/.csapex/";
-	}
+    CHAR path[MAX_PATH];
+    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+        return std::string(path) + "/.csapex/";
+    }
 #else
-    struct passwd *pw = getpwuid(getuid());
+    struct passwd* pw = getpwuid(getuid());
     return std::string(pw->pw_dir) + "/.csapex/";
 #endif
 }
@@ -56,28 +55,25 @@ std::string Settings::defaultConfigFile()
 {
     std::string dir = Settings::defaultConfigPath();
 
-    if(!bf3::exists(dir)) {
+    if (!bf3::exists(dir)) {
         bf3::create_directories(dir);
     }
 
     std::string file = dir + "default" + Settings::config_extension;
 
-    if(!bf3::exists(file)) {
+    if (!bf3::exists(file)) {
         //        createDefaultConfig(file);
     }
 
     return file;
 }
 
-Settings::Settings()
-    : dirty_(false),
-      quiet_(false)
+Settings::Settings() : dirty_(false), quiet_(false)
 {
 }
 
 Settings::~Settings()
 {
-
 }
 
 void Settings::addPersistent(csapex::param::Parameter::Ptr p)
@@ -106,11 +102,11 @@ bool Settings::isQuiet() const
 
 void Settings::setQuiet(bool quiet)
 {
-    if(quiet != quiet_) {
+    if (quiet != quiet_) {
         quiet_ = quiet;
 
-        if(!quiet && !changes_.empty()) {
-            for(const std::string& key : changes_) {
+        if (!quiet && !changes_.empty()) {
+            for (const std::string& key : changes_) {
                 setting_changed(key);
             }
             changes_.clear();
@@ -119,9 +115,9 @@ void Settings::setQuiet(bool quiet)
     }
 }
 
-void Settings::settingsChanged(const std::string &key)
+void Settings::settingsChanged(const std::string& key)
 {
-    if(quiet_) {
+    if (quiet_) {
         changes_.push_back(key);
 
     } else {

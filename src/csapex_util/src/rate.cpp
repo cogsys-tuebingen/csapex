@@ -6,22 +6,18 @@
 
 using namespace csapex;
 
-Rate::Rate(double frequency, bool immediate)
-    : frequency_(frequency),
-      immediate_(immediate)
+Rate::Rate(double frequency, bool immediate) : frequency_(frequency), immediate_(immediate)
 {
     last_scheduled_tick_ = std::chrono::system_clock::now();
 }
 
-Rate::Rate()
-    : Rate(-1, 0)
+Rate::Rate() : Rate(-1, 0)
 {
 }
 
-
 double Rate::getEffectiveFrequency() const
 {
-    if(real_ticks_.size() <= 1) {
+    if (real_ticks_.size() <= 1) {
         return 0.0;
     }
 
@@ -37,7 +33,7 @@ double Rate::getFrequency() const
 }
 void Rate::setFrequency(double f)
 {
-    if(f < 0.0) {
+    if (f < 0.0) {
         setImmediate(true);
     } else {
         immediate_ = false;
@@ -52,7 +48,7 @@ bool Rate::isImmediate() const
 
 void Rate::setImmediate(bool immediate)
 {
-    if(immediate) {
+    if (immediate) {
         frequency_ = 10.0;
     }
     immediate_ = immediate;
@@ -66,7 +62,7 @@ void Rate::keepUp()
     last_scheduled_tick_ = end_of_cycle;
 
     auto now = std::chrono::system_clock::now();
-    if(end_of_cycle > now) {
+    if (end_of_cycle > now) {
         std::this_thread::sleep_until(end_of_cycle);
     }
 }
@@ -89,10 +85,10 @@ void Rate::tick()
     real_ticks_.emplace_back(now);
 
     const std::size_t N = 4;
-    while(real_ticks_.size() > N) {
+    while (real_ticks_.size() > N) {
         auto duration = now - real_ticks_.front();
         double sec = std::chrono::duration_cast<std::chrono::microseconds>(duration).count() * 1e-6;
-        if(sec < 2.0) {
+        if (sec < 2.0) {
             // a least amount of history should be kept for smoothing
             return;
         } else {

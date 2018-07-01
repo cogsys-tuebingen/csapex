@@ -5,12 +5,10 @@ using namespace csapex;
 
 CorePlugin::~CorePlugin()
 {
-
 }
 
 void CorePlugin::shutdown()
 {
-
 }
 
 void CorePlugin::setName(const std::string& name)
@@ -25,15 +23,12 @@ std::string CorePlugin::getName()
 
 void CorePlugin::prepare(Settings&)
 {
-
 }
 
 void CorePlugin::init(CsApexCore&)
 {
-
 }
 
-void CorePlugin::setupGraph(SubgraphNode *graph)
+void CorePlugin::setupGraph(SubgraphNode* graph)
 {
-
 }

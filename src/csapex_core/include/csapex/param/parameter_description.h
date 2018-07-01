@@ -7,7 +7,8 @@
 /// SYSTEM
 #include <string>
 
-namespace csapex {
+namespace csapex
+{
 namespace param
 {
 class CSAPEX_PARAM_EXPORT ParameterDescription
@@ -22,7 +23,7 @@ public:
 private:
     std::string description_;
 };
-}
-}
+}  // namespace param
+}  // namespace csapex
 
-#endif // PARAMETER_DESCRIPTION_H
+#endif  // PARAMETER_DESCRIPTION_H

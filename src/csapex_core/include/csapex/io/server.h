@@ -8,7 +8,6 @@
 
 namespace csapex
 {
-
 class Server : public Observer
 {
 protected:
@@ -26,6 +25,6 @@ protected:
     CsApexCore& core_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SERVER_H
+#endif  // SERVER_H

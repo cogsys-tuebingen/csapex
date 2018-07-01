@@ -12,21 +12,20 @@
 
 namespace csapex
 {
-
 class ThreadGroupProfilingModel : public QAbstractTableModel, public Observer
 {
 public:
-    ThreadGroupProfilingModel(Settings &settings, ThreadPoolPtr thread_pool);
+    ThreadGroupProfilingModel(Settings& settings, ThreadPoolPtr thread_pool);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    ThreadGroup * getThreadGroup(int row) const;
+    ThreadGroup* getThreadGroup(int row) const;
 
     void refresh();
 
@@ -35,6 +34,6 @@ private:
     ThreadPoolPtr thread_pool_;
 };
 
-}
+}  // namespace csapex
 
-#endif // THREAD_GROUP_PROFILING_MODEL_H
+#endif  // THREAD_GROUP_PROFILING_MODEL_H

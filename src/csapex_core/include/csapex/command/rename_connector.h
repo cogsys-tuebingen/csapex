@@ -9,17 +9,16 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT RenameConnector : public CommandImplementation<RenameConnector>
 {
     COMMAND_HEADER(RenameConnector);
 
 public:
-    RenameConnector(const AUUID &graph_uuid, const UUID& connector, const std::string &new_name);
+    RenameConnector(const AUUID& graph_uuid, const UUID& connector, const std::string& new_name);
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
@@ -33,7 +32,7 @@ private:
     std::string old_name_;
 };
 
-}
+}  // namespace command
 
-}
-#endif // RENAME_CONNECTOR_H
+}  // namespace csapex
+#endif  // RENAME_CONNECTOR_H

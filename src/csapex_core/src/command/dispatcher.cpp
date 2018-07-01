@@ -13,9 +13,7 @@
 
 using namespace csapex;
 
-CommandDispatcher::CommandDispatcher(CsApexCore& core)
-    : core_(core),
-      dirty_(false)
+CommandDispatcher::CommandDispatcher(CsApexCore& core) : core_(core), dirty_(false)
 {
 }
 
@@ -27,9 +25,9 @@ void CommandDispatcher::reset()
     dirty_ = false;
 }
 
-void CommandDispatcher::execute(const CommandPtr &command)
+void CommandDispatcher::execute(const CommandPtr& command)
 {
-    if(!command) {
+    if (!command) {
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
@@ -37,9 +35,9 @@ void CommandDispatcher::execute(const CommandPtr &command)
     doExecute(command);
 }
 
-void CommandDispatcher::executeLater(const CommandPtr &command)
+void CommandDispatcher::executeLater(const CommandPtr& command)
 {
-    if(!command) {
+    if (!command) {
         std::cerr << "trying to execute null command" << std::endl;
         return;
     }
@@ -49,7 +47,7 @@ void CommandDispatcher::executeLater(const CommandPtr &command)
 
 void CommandDispatcher::executeLater()
 {
-    for(Command::Ptr cmd : later) {
+    for (Command::Ptr cmd : later) {
         doExecute(cmd);
     }
     later.clear();
@@ -57,26 +55,26 @@ void CommandDispatcher::executeLater()
 
 void CommandDispatcher::doExecute(Command::Ptr command)
 {
-    if(!command) {
+    if (!command) {
         return;
     }
 
-    if(!isDirty()) {
+    if (!isDirty()) {
         command->setAfterSavepoint(true);
     }
 
     bool success = Command::Access::executeCommand(command);
 
-    if(command->isUndoable()) {
+    if (command->isUndoable()) {
         done.push_back(command);
 
-        while(!undone.empty()) {
+        while (!undone.empty()) {
             undone.pop_back();
         }
     }
 
-    if(success) {
-        if(!command->isHidden()) {
+    if (success) {
+        if (!command->isHidden()) {
             setDirty();
         }
         state_changed();
@@ -94,10 +92,10 @@ void CommandDispatcher::resetDirtyPoint()
 
     clearSavepoints();
 
-    if(!done.empty()) {
+    if (!done.empty()) {
         done.back()->setBeforeSavepoint(true);
     }
-    if(!undone.empty()) {
+    if (!undone.empty()) {
         undone.back()->setAfterSavepoint(true);
     }
 
@@ -106,11 +104,11 @@ void CommandDispatcher::resetDirtyPoint()
 
 void CommandDispatcher::clearSavepoints()
 {
-    for(Command::Ptr cmd : done) {
+    for (Command::Ptr cmd : done) {
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
-    for(Command::Ptr cmd : undone) {
+    for (Command::Ptr cmd : undone) {
         cmd->setAfterSavepoint(false);
         cmd->setBeforeSavepoint(false);
     }
@@ -133,11 +131,10 @@ void CommandDispatcher::setDirty(bool dirty)
 
     dirty_ = dirty;
 
-    if(change) {
+    if (change) {
         dirty_changed(dirty_);
     }
 }
-
 
 bool CommandDispatcher::canUndo() const
 {
@@ -151,7 +148,7 @@ bool CommandDispatcher::canRedo() const
 
 void CommandDispatcher::undo()
 {
-    if(!canUndo()) {
+    if (!canUndo()) {
         return;
     }
 
@@ -170,7 +167,7 @@ void CommandDispatcher::undo()
 
 void CommandDispatcher::redo()
 {
-    if(!canRedo()) {
+    if (!canRedo()) {
         return;
     }
 
@@ -188,7 +185,7 @@ void CommandDispatcher::redo()
 
 CommandConstPtr CommandDispatcher::getNextUndoCommand() const
 {
-    if(canUndo()) {
+    if (canUndo()) {
         return done.back();
     } else {
         return nullptr;
@@ -197,23 +194,23 @@ CommandConstPtr CommandDispatcher::getNextUndoCommand() const
 
 CommandConstPtr CommandDispatcher::getNextRedoCommand() const
 {
-    if(canRedo()) {
+    if (canRedo()) {
         return undone.back();
     } else {
         return nullptr;
     }
 }
 
-void CommandDispatcher::visitUndoCommands(std::function<void (int level, const Command &)> callback) const
+void CommandDispatcher::visitUndoCommands(std::function<void(int level, const Command&)> callback) const
 {
-    for(const Command::Ptr& c : done) {
+    for (const Command::Ptr& c : done) {
         c->accept(0, callback);
     }
 }
 
-void CommandDispatcher::visitRedoCommands(std::function<void (int level, const Command &)> callback) const
+void CommandDispatcher::visitRedoCommands(std::function<void(int level, const Command&)> callback) const
 {
-    for(const Command::Ptr& c : undone) {
+    for (const Command::Ptr& c : undone) {
         c->accept(0, callback);
     }
 }

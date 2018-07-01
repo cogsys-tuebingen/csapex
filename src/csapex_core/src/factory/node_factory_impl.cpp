@@ -20,33 +20,29 @@
 
 using namespace csapex;
 
-
 namespace csapex
 {
 template <>
 struct PluginManagerGroup<Node>
 {
-    enum Group {
+    enum Group
+    {
         value = 0
     };
 };
-}
+}  // namespace csapex
 
 NodeFactoryImplementation::NodeFactoryImplementation(Settings& settings, PluginLocator* locator)
-    : settings_(settings), plugin_locator_(locator),
-      node_manager_(std::make_shared<PluginManager<Node>> ("csapex::Node")),
-      tag_map_has_to_be_rebuilt_(false)
+  : settings_(settings), plugin_locator_(locator), node_manager_(std::make_shared<PluginManager<Node>>("csapex::Node")), tag_map_has_to_be_rebuilt_(false)
 {
-    NodeConstructorPtr provider = std::make_shared<NodeConstructor>("csapex::Graph", []{
+    NodeConstructorPtr provider = std::make_shared<NodeConstructor>("csapex::Graph", [] {
         GraphImplementationPtr graph = std::make_shared<GraphImplementation>();
         return std::make_shared<SubgraphNode>(graph);
     });
     provider->setIcon(":/group.png");
     registerNodeType(provider, true);
 
-    NodeConstructorPtr note = std::make_shared<NodeConstructor>("csapex::Note", []{
-        return std::make_shared<Note>();
-    });
+    NodeConstructorPtr note = std::make_shared<NodeConstructor>("csapex::Note", [] { return std::make_shared<Note>(); });
     note->setIcon(":/note.png");
     note->setDescription("A sticky note to keep information.");
     registerNodeType(note, true);
@@ -54,19 +50,20 @@ NodeFactoryImplementation::NodeFactoryImplementation(Settings& settings, PluginL
     node_manager_->manifest_loaded.connect(manifest_loaded);
 }
 
-void NodeFactoryImplementation::setPluginLocator(PluginLocator *locator)
+void NodeFactoryImplementation::setPluginLocator(PluginLocator* locator)
 {
     plugin_locator_ = locator;
 }
 
-namespace {
-bool compare (NodeConstructor::Ptr a, NodeConstructor::Ptr b) {
+namespace
+{
+bool compare(NodeConstructor::Ptr a, NodeConstructor::Ptr b)
+{
     const std::string& as = UUID::stripNamespace(a->getType());
     const std::string& bs = UUID::stripNamespace(b->getType());
     return as.compare(bs) < 0;
 }
-}
-
+}  // namespace
 
 void NodeFactoryImplementation::loadPlugins()
 {
@@ -88,7 +85,7 @@ void NodeFactoryImplementation::rebuildPrototypes()
     bool dirty = false;
 
     int plugin_count = 0;
-    for(const auto& p : node_manager_->getConstructors()) {
+    for (const auto& p : node_manager_->getConstructors()) {
         const PluginConstructor<Node>& plugin_constructor = p.second;
 
         // make the constructor
@@ -102,18 +99,18 @@ void NodeFactoryImplementation::rebuildPrototypes()
         std::string mod = std::string("__last_mod_") + type;
         std::string key = std::string("__cached_properties_") + type;
         bool loaded = false;
-        if(settings_.knows(mod)) {
+        if (settings_.knows(mod)) {
             long last_mod = settings_.get<long>(mod);
-            if(last_mod == node_manager_->getLastModification(type)) {
+            if (last_mod == node_manager_->getLastModification(type)) {
                 param::StringListParameter::Ptr properties = std::dynamic_pointer_cast<param::StringListParameter>(settings_.get(key));
-                if(properties) {
+                if (properties) {
                     constructor->setProperties(properties->getValues());
                     loaded = true;
                 }
             }
         }
 
-        if(!loaded) {
+        if (!loaded) {
             NOTIFICATION_INFO("reloading properties for node type " << type);
             dirty = true;
             try {
@@ -124,7 +121,7 @@ void NodeFactoryImplementation::rebuildPrototypes()
                 settings_.addPersistent(properties);
                 settings_.setPersistent(mod, last_modification);
 
-            } catch(const std::exception& e) {
+            } catch (const std::exception& e) {
                 NOTIFICATION("plugin '" << type << "' cannot be loaded");
             }
         }
@@ -137,7 +134,7 @@ void NodeFactoryImplementation::rebuildPrototypes()
 
     settings_.setQuiet(false);
 
-    if(dirty) {
+    if (dirty) {
         settings_.savePersistent();
     }
 }
@@ -149,34 +146,30 @@ void NodeFactoryImplementation::rebuildMap()
 
     tag_map_.clear();
 
-    for(std::vector<NodeConstructor::Ptr>::iterator
-        it = constructors_.begin();
-        it != constructors_.end();) {
-
+    for (std::vector<NodeConstructor::Ptr>::iterator it = constructors_.begin(); it != constructors_.end();) {
         const NodeConstructor::Ptr& p = *it;
 
         try {
             bool has_tag = false;
-            for(const Tag::Ptr& tag : p->getTags()) {
+            for (const Tag::Ptr& tag : p->getTags()) {
                 tag_map_[tag->getName()].push_back(p);
                 has_tag = true;
             }
 
-            if(!has_tag) {
+            if (!has_tag) {
                 tag_map_[general->getName()].push_back(p);
             }
 
             ++it;
 
-        } catch(const NodeConstructor::NodeConstructionException& e) {
+        } catch (const NodeConstructor::NodeConstructionException& e) {
             NOTIFICATION("cannot load node: " << e.what());
             it = constructors_.erase(it);
         }
     }
 
-
-    typedef std::map<std::string, std::vector<NodeConstructor::Ptr> > map;
-    for(map::iterator it = tag_map_.begin(); it != tag_map_.end(); ++it) {
+    typedef std::map<std::string, std::vector<NodeConstructor::Ptr>> map;
+    for (map::iterator it = tag_map_.begin(); it != tag_map_.end(); ++it) {
         std::sort(it->second.begin(), it->second.end(), compare);
     }
 
@@ -185,8 +178,8 @@ void NodeFactoryImplementation::rebuildMap()
 
 void NodeFactoryImplementation::ensureLoaded()
 {
-    if(plugin_locator_) {
-        if(!node_manager_->pluginsLoaded()) {
+    if (plugin_locator_) {
+        if (!node_manager_->pluginsLoaded()) {
             node_manager_->load(plugin_locator_);
 
             rebuildPrototypes();
@@ -194,46 +187,38 @@ void NodeFactoryImplementation::ensureLoaded()
             tag_map_has_to_be_rebuilt_ = true;
         }
 
-        if(tag_map_has_to_be_rebuilt_) {
+        if (tag_map_has_to_be_rebuilt_) {
             rebuildMap();
         }
     }
 }
-
 
 void NodeFactoryImplementation::registerNodeType(NodeConstructor::Ptr provider, bool suppress_signals)
 {
     constructors_.push_back(provider);
     tag_map_has_to_be_rebuilt_ = true;
 
-    if(!suppress_signals) {
+    if (!suppress_signals) {
         new_node_type();
     }
 }
 
-
-
-NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type,
-                                                                const UUID& uuid,
-                                                                const UUIDProviderPtr& uuid_provider)
+NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider)
 {
     return makeNode(target_type, uuid, uuid_provider, nullptr);
 }
 
-NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type,
-                                                                const UUID& uuid,
-                                                                const UUIDProviderPtr& uuid_provider,
-                                                                NodeStatePtr state)
+NodeFacadeImplementationPtr NodeFactoryImplementation::makeNode(const std::string& target_type, const UUID& uuid, const UUIDProviderPtr& uuid_provider, NodeStatePtr state)
 {
     NodeConstructorPtr p = getConstructor(target_type);
-    if(p) {
+    if (p) {
         NodeHandlePtr nh = p->makeNodeHandle(uuid, uuid_provider);
-        if(!nh) {
+        if (!nh) {
             NOTIFICATION("error: cannot make node of type '" << target_type);
             return nullptr;
         }
 
-        if(state) {
+        if (state) {
             nh->setNodeState(state);
         }
 

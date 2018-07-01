@@ -12,7 +12,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_COMMAND_EXPORT CommandDispatcher : public CommandExecutor
 {
 public:
@@ -22,7 +21,7 @@ public:
     CommandDispatcher(CsApexCore& core);
 
     void execute(const CommandPtr& command);
-    void executeLater(const CommandPtr&  command);
+    void executeLater(const CommandPtr& command);
     void executeLater();
 
     bool isDirty() const;
@@ -51,7 +50,7 @@ private:
 
 protected:
     CommandDispatcher(const CommandDispatcher& copy);
-    CommandDispatcher& operator = (const CommandDispatcher& assign);
+    CommandDispatcher& operator=(const CommandDispatcher& assign);
 
 private:
     CsApexCore& core_;
@@ -63,6 +62,6 @@ private:
     bool dirty_;
 };
 
-}
+}  // namespace csapex
 
-#endif // COMMAND_DISPATCHER_H
+#endif  // COMMAND_DISPATCHER_H

@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(SetLoggerLevel)
 
-SetLoggerLevel::SetLoggerLevel(const AUUID& parent_uuid, const UUID &node, int level)
-    : CommandImplementation(parent_uuid), uuid(node), level(level)
+SetLoggerLevel::SetLoggerLevel(const AUUID& parent_uuid, const UUID& node, int level) : CommandImplementation(parent_uuid), uuid(node), level(level)
 {
 }
 
@@ -30,19 +29,19 @@ std::string SetLoggerLevel::getDescription() const
 {
     std::stringstream ss;
     ss << "set the logger level of " << uuid << " to ";
-    switch(level) {
-    case 0:
-        ss << "DEBUG";
-        break;
-    case 1:
-        ss << "INFO";
-        break;
-    case 2:
-        ss << "WARNING";
-        break;
-    case 3:
-        ss << "ERROR";
-        break;
+    switch (level) {
+        case 0:
+            ss << "DEBUG";
+            break;
+        case 1:
+            ss << "INFO";
+            break;
+        case 2:
+            ss << "WARNING";
+            break;
+        case 3:
+            ss << "ERROR";
+            break;
     }
 
     return ss.str();
@@ -78,9 +77,7 @@ bool SetLoggerLevel::doRedo()
     return doExecute();
 }
 
-
-
-void SetLoggerLevel::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void SetLoggerLevel::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

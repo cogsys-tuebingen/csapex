@@ -3,7 +3,6 @@
 
 namespace csapex
 {
-
 /**
  * @brief The SemanticVersion struct represents a semantic version
  *
@@ -20,28 +19,25 @@ struct SemanticVersion
     int minor_v = 0;
     int patch_v = 0;
 
-    constexpr SemanticVersion(int major, int minor, int patch)
-        : major_v(major),
-          minor_v(minor),
-          patch_v(patch)
-    {}
+    constexpr SemanticVersion(int major, int minor, int patch) : major_v(major), minor_v(minor), patch_v(patch)
+    {
+    }
 
     constexpr SemanticVersion() = default;
 
-    bool operator != (const SemanticVersion& other);
-    bool operator == (const SemanticVersion& other);
+    bool operator!=(const SemanticVersion& other);
+    bool operator==(const SemanticVersion& other);
 
-    bool operator < (const SemanticVersion& other);
-    bool operator <= (const SemanticVersion& other);
+    bool operator<(const SemanticVersion& other);
+    bool operator<=(const SemanticVersion& other);
 
-    bool operator > (const SemanticVersion& other);
-    bool operator >= (const SemanticVersion& other);
-
+    bool operator>(const SemanticVersion& other);
+    bool operator>=(const SemanticVersion& other);
 
     bool valid() const;
     operator bool() const;
 };
 
-}
+}  // namespace csapex
 
-#endif // SEMANTIC_VERSION_H
+#endif  // SEMANTIC_VERSION_H

@@ -14,17 +14,16 @@
 
 namespace csapex
 {
-
 class CSAPEX_COMMAND_EXPORT CommandDispatcherProxy : public CommandExecutor, public Proxy
 {
 public:
     typedef std::shared_ptr<CommandDispatcherProxy> Ptr;
 
 public:
-    CommandDispatcherProxy(const SessionPtr &session);
+    CommandDispatcherProxy(const SessionPtr& session);
 
     void execute(const CommandPtr& command);
-    void executeLater(const CommandPtr&  command);
+    void executeLater(const CommandPtr& command);
     void executeLater();
 
     bool isDirty() const;
@@ -43,6 +42,6 @@ private:
     mutable bool dirty_;
 };
 
-}
+}  // namespace csapex
 
-#endif // DISPATCHER_PROXY_H
+#endif  // DISPATCHER_PROXY_H

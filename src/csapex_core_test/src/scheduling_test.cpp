@@ -8,9 +8,8 @@
 #include <csapex_testing/mockup_nodes.h>
 #include <csapex_testing/stepping_test.h>
 
-namespace csapex {
-
-
+namespace csapex
+{
 class SchedulingTest : public SteppingTest
 {
 protected:
@@ -34,7 +33,6 @@ protected:
         ASSERT_NE(nullptr, src2);
         main_graph_facade->addNode(src2);
 
-
         NodeFacadeImplementationPtr combiner = makeNode("DynamicMultiplier", UUIDProvider::makeUUID_without_parent("combiner"), graph, exec_type);
         ASSERT_NE(nullptr, combiner);
         main_graph_facade->addNode(combiner);
@@ -43,7 +41,6 @@ protected:
         main_graph_facade->addNode(sink_p);
         std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
         ASSERT_NE(nullptr, sink);
-
 
         // NESTED GRAPH
         NodeFacadeImplementationPtr sub_graph_node_facade = makeNode("csapex::Graph", graph->generateUUID("subgraph"), graph, exec_type);
@@ -83,14 +80,13 @@ protected:
 
         // execution
         ASSERT_EQ(-1, sink->getValue());
-        for(int iter = 0; iter < 100; ++iter) {
+        for (int iter = 0; iter < 100; ++iter) {
             ASSERT_NO_FATAL_FAILURE(step());
 
             int v = (iter * iter) * (iter * iter);
             ASSERT_EQ(v, sink->getValue());
         }
     }
-
 };
 
 TEST_F(SchedulingTest, SteppingWorksForProcessingGraphsDirect)
@@ -117,13 +113,11 @@ TEST_F(SchedulingTest, SteppingWorksForSourceGraphs)
     std::shared_ptr<MockupSink> sink = std::dynamic_pointer_cast<MockupSink>(sink_p->getNode());
     ASSERT_NE(nullptr, sink);
 
-
     GraphFacadeImplementation sub_graph_facade(executor, sub_graph->getLocalGraph(), sub_graph);
 
     NodeFacadeImplementationPtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src);
-
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -144,7 +138,7 @@ TEST_F(SchedulingTest, SteppingWorksForSourceGraphs)
     apex_assert_hard(source);
 
     // execution
-    for(int iter = 0; iter < 100; ++iter) {
+    for (int iter = 0; iter < 100; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
 
         ASSERT_TRUE(end_step_called);
@@ -152,7 +146,6 @@ TEST_F(SchedulingTest, SteppingWorksForSourceGraphs)
         ASSERT_EQ(iter + 1, source->getValue());
     }
 }
-
 
 TEST_F(SchedulingTest, SteppingWorksForUnconnectedSourceGraphs)
 {
@@ -166,7 +159,6 @@ TEST_F(SchedulingTest, SteppingWorksForUnconnectedSourceGraphs)
     NodeFacadeImplementationPtr src = factory.makeNode("MockupSource", UUIDProvider::makeUUID_without_parent("src"), graph);
     ASSERT_NE(nullptr, src);
     sub_graph_facade.addNode(src);
-
 
     apex_assert_hard(sub_graph_node_facade);
     graph->addNode(sub_graph_node_facade);
@@ -184,7 +176,7 @@ TEST_F(SchedulingTest, SteppingWorksForUnconnectedSourceGraphs)
     apex_assert_hard(source);
 
     // execution
-    for(int iter = 0; iter < 100; ++iter) {
+    for (int iter = 0; iter < 100; ++iter) {
         ASSERT_NO_FATAL_FAILURE(step());
 
         ASSERT_TRUE(end_step_called);
@@ -195,11 +187,9 @@ TEST_F(SchedulingTest, SteppingWorksForUnconnectedSourceGraphs)
 
 TEST_F(SchedulingTest, SteppingWorksForOutputToSlot)
 {
-
 }
 
 TEST_F(SchedulingTest, SteppingWorksForEventToInput)
 {
-
 }
-}
+}  // namespace csapex

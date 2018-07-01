@@ -12,14 +12,11 @@
 
 using namespace csapex;
 
-CpuAffinityDelegate::CpuAffinityDelegate(QWidget *parent)
-    : QStyledItemDelegate(parent)
+CpuAffinityDelegate::CpuAffinityDelegate(QWidget* parent) : QStyledItemDelegate(parent)
 {
-
 }
 
-void CpuAffinityDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-                         const QModelIndex &index) const
+void CpuAffinityDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     if (index.data().canConvert<CpuAffinityRenderer>()) {
         CpuAffinityRenderer cpu_affinity = qvariant_cast<CpuAffinityRenderer>(index.data());
@@ -27,8 +24,7 @@ void CpuAffinityDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
         if (option.state & QStyle::State_Selected)
             painter->fillRect(option.rect, option.palette.highlight());
 
-        cpu_affinity.paint(painter, option.rect, option.palette,
-                         CpuAffinityRenderer::ReadOnly);
+        cpu_affinity.paint(painter, option.rect, option.palette, CpuAffinityRenderer::ReadOnly);
     } else {
         QStyleOptionViewItem opt = option;
 
@@ -38,7 +34,7 @@ void CpuAffinityDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
         ThreadGroup* group = model->getThreadGroup(index.row());
         apex_assert_hard(group);
 
-        if(group->id() == ThreadGroup::PRIVATE_THREAD) {
+        if (group->id() == ThreadGroup::PRIVATE_THREAD) {
             opt.font.setItalic(true);
         } else {
             opt.font.setBold(true);
@@ -47,8 +43,7 @@ void CpuAffinityDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     }
 }
 
-QSize CpuAffinityDelegate::sizeHint(const QStyleOptionViewItem &option,
-                             const QModelIndex &index) const
+QSize CpuAffinityDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     if (index.data().canConvert<CpuAffinityRenderer>()) {
         CpuAffinityRenderer cpu_affinity = qvariant_cast<CpuAffinityRenderer>(index.data());
@@ -58,9 +53,7 @@ QSize CpuAffinityDelegate::sizeHint(const QStyleOptionViewItem &option,
     }
 }
 
-QWidget *CpuAffinityDelegate::createEditor(QWidget *parent,
-                                    const QStyleOptionViewItem &option,
-                                    const QModelIndex &index) const
+QWidget* CpuAffinityDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 
 {
     if (index.data().canConvert<CpuAffinityRenderer>()) {
@@ -70,34 +63,31 @@ QWidget *CpuAffinityDelegate::createEditor(QWidget *parent,
         ThreadGroup* group = model->getThreadGroup(index.row());
         apex_assert_hard(group);
 
-        CpuAffinityWidget *editor = new CpuAffinityWidget(group->getCpuAffinity(), parent);
-//        connect(editor, &CpuAffinityWidget::editingFinished,
-//                this, &CpuAffinityDelegate::commitAndCloseEditor);
-        connect(editor, &CpuAffinityWidget::destroyed,
-                this, &CpuAffinityDelegate::commitAndCloseEditor);
+        CpuAffinityWidget* editor = new CpuAffinityWidget(group->getCpuAffinity(), parent);
+        //        connect(editor, &CpuAffinityWidget::editingFinished,
+        //                this, &CpuAffinityDelegate::commitAndCloseEditor);
+        connect(editor, &CpuAffinityWidget::destroyed, this, &CpuAffinityDelegate::commitAndCloseEditor);
         return editor;
     } else {
         return QStyledItemDelegate::createEditor(parent, option, index);
     }
 }
 
-void CpuAffinityDelegate::setEditorData(QWidget *editor,
-                                 const QModelIndex &index) const
+void CpuAffinityDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
     if (index.data().canConvert<CpuAffinityRenderer>()) {
         CpuAffinityRenderer cpu_affinity = qvariant_cast<CpuAffinityRenderer>(index.data());
-        CpuAffinityWidget *starEditor = qobject_cast<CpuAffinityWidget *>(editor);
+        CpuAffinityWidget* starEditor = qobject_cast<CpuAffinityWidget*>(editor);
         starEditor->setRenderer(cpu_affinity);
     } else {
         QStyledItemDelegate::setEditorData(editor, index);
     }
 }
 
-void CpuAffinityDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
-                                const QModelIndex &index) const
+void CpuAffinityDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
     if (index.data().canConvert<CpuAffinityRenderer>()) {
-        CpuAffinityWidget *starEditor = qobject_cast<CpuAffinityWidget *>(editor);
+        CpuAffinityWidget* starEditor = qobject_cast<CpuAffinityWidget*>(editor);
         model->setData(index, QVariant::fromValue(starEditor->getWidget()));
     } else {
         QStyledItemDelegate::setModelData(editor, model, index);
@@ -106,7 +96,7 @@ void CpuAffinityDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
 
 void CpuAffinityDelegate::commitAndCloseEditor()
 {
-    CpuAffinityWidget *editor = qobject_cast<CpuAffinityWidget *>(sender());
+    CpuAffinityWidget* editor = qobject_cast<CpuAffinityWidget*>(sender());
     emit commitData(editor);
     emit closeEditor(editor);
 }

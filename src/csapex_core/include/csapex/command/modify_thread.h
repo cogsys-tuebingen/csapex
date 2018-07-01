@@ -9,7 +9,6 @@ namespace csapex
 {
 namespace command
 {
-
 class CSAPEX_COMMAND_EXPORT ModifyThread : public CommandImplementation<ModifyThread>
 {
     COMMAND_HEADER(ModifyThread);
@@ -19,16 +18,15 @@ public:
 
     virtual std::string getDescription() const override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
-
 
 protected:
     bool doExecute() override;
     bool doUndo() override;
     bool doRedo() override;
 
-    ThreadGroup *getGroup();
+    ThreadGroup* getGroup();
 
 private:
     int id;
@@ -41,8 +39,8 @@ private:
     std::vector<bool> old_affinity;
 };
 
-}
+}  // namespace command
 
-}
+}  // namespace csapex
 
-#endif // MODIFY_THREAD_H
+#endif  // MODIFY_THREAD_H

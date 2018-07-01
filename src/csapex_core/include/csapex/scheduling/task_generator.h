@@ -11,7 +11,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT TaskGenerator : public std::enable_shared_from_this<TaskGenerator>
 {
 public:
@@ -37,12 +36,13 @@ public:
     virtual void reset() = 0;
 
     virtual void setSuppressExceptions(bool suppress_exceptions) = 0;
+
 public:
     slim_signal::Signal<void()> stepping_enabled;
     slim_signal::Signal<void()> begin_step;
     slim_signal::Signal<void()> end_step;
 };
 
-}
+}  // namespace csapex
 
-#endif // TASK_GENERATOR_H
+#endif  // TASK_GENERATOR_H

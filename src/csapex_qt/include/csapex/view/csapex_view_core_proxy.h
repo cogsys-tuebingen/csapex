@@ -25,7 +25,7 @@ class ProfilerProxy;
 class CSAPEX_QT_EXPORT CsApexViewCoreProxy : public CsApexViewCore, public Proxy
 {
 public:
-    CsApexViewCoreProxy(const SessionPtr &session);
+    CsApexViewCoreProxy(const SessionPtr& session);
     ~CsApexViewCoreProxy();
 
     bool isProxy() const override;
@@ -46,7 +46,7 @@ public:
     void setSteppingMode(bool stepping) override;
     void step() override;
 
-    Settings& getSettings() const override;    
+    Settings& getSettings() const override;
     CommandExecutorPtr getCommandDispatcher() override;
     ExceptionHandler& getExceptionHandler() const override;
 
@@ -86,7 +86,7 @@ private:
     BootstrapPtr bootstrap_;
 
     std::shared_ptr<PluginManager<CorePlugin>> core_plugin_manager;
-    std::map<std::string, std::shared_ptr<CorePlugin> > core_plugins_;
+    std::map<std::string, std::shared_ptr<CorePlugin>> core_plugins_;
 
     io::ChannelPtr core_channel_;
 
@@ -113,6 +113,6 @@ private:
     GraphFacadePtr remote_root_;
 };
 
-}
+}  // namespace csapex
 
-#endif // CSAPEX_VIEW_CORE_PROXY_H
+#endif  // CSAPEX_VIEW_CORE_PROXY_H

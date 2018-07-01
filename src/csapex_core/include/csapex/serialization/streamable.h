@@ -6,13 +6,12 @@
 
 namespace csapex
 {
-
 class Streamable : public Serializable
 {
 public:
     virtual uint8_t getPacketType() const = 0;
 };
 
-}
+}  // namespace csapex
 
-#endif // STREAMABLE_H
+#endif  // STREAMABLE_H

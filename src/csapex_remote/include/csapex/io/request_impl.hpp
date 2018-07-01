@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 template <typename I>
 class RequestImplementation : public Request
 {
@@ -15,12 +14,11 @@ protected:
     CLONABLE_IMPLEMENTATION_CONSTRUCTOR(I, 0);
 
 protected:
-    RequestImplementation(uint8_t id)
-        : Request(id)
+    RequestImplementation(uint8_t id) : Request(id)
     {
     }
 };
 
-}
+}  // namespace csapex
 
-#endif // REQUEST_IMPL_HPP
+#endif  // REQUEST_IMPL_HPP

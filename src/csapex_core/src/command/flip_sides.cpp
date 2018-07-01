@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(FlipSides)
 
-FlipSides::FlipSides(const AUUID& parent_uuid, const UUID &node)
-    : CommandImplementation(parent_uuid), uuid(node)
+FlipSides::FlipSides(const AUUID& parent_uuid, const UUID& node) : CommandImplementation(parent_uuid), uuid(node)
 {
 }
 
@@ -54,9 +53,7 @@ bool FlipSides::doRedo()
     return doExecute();
 }
 
-
-
-void FlipSides::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void FlipSides::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

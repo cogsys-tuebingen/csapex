@@ -28,39 +28,39 @@ namespace po = boost::program_options;
 
 using namespace csapex;
 
-CsApexGuiApp::CsApexGuiApp(int& argc, char** argv, ExceptionHandler &handler)
-    : QApplication(argc, argv), handler(handler)
-{}
+CsApexGuiApp::CsApexGuiApp(int& argc, char** argv, ExceptionHandler& handler) : QApplication(argc, argv), handler(handler)
+{
+}
 
-CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, ExceptionHandler &handler)
-    : QCoreApplication(argc, argv), handler(handler)
-{}
+CsApexCoreApp::CsApexCoreApp(int& argc, char** argv, ExceptionHandler& handler) : QCoreApplication(argc, argv), handler(handler)
+{
+}
 
-bool CsApexCoreApp::notify(QObject* receiver, QEvent* event) {
+bool CsApexCoreApp::notify(QObject* receiver, QEvent* event)
+{
     try {
         return QCoreApplication::notify(receiver, event);
 
-    } catch(...) {
+    } catch (...) {
         std::exception_ptr eptr = std::current_exception();
         handler.handleException(eptr);
         return true;
     }
 }
 
-bool CsApexGuiApp::notify(QObject* receiver, QEvent* event) {
+bool CsApexGuiApp::notify(QObject* receiver, QEvent* event)
+{
     try {
         return QApplication::notify(receiver, event);
 
-    } catch(...) {
+    } catch (...) {
         std::exception_ptr eptr = std::current_exception();
         handler.handleException(eptr);
         return true;
     }
 }
 
-
-Main::Main(QCoreApplication* a, Settings& settings, ExceptionHandler& handler)
-    : app(a), settings(settings), handler(handler), splash(nullptr)
+Main::Main(QCoreApplication* a, Settings& settings, ExceptionHandler& handler) : app(a), settings(settings), handler(handler), splash(nullptr)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -89,7 +89,7 @@ int Main::runWithGui()
         int port = settings.get<int>("port");
         session = std::make_shared<SessionClient>(host, port);
 
-    } catch(const boost::system::system_error& se) {
+    } catch (const boost::system::system_error& se) {
         std::cerr << "Connection to server failed:\n" << se.what() << std::endl;
         return 1;
     }
@@ -108,36 +108,34 @@ int Main::runWithGui()
         QObject::connect(&w, SIGNAL(statusChanged(QString)), this, SLOT(showMessage(QString)));
 
         app->connect(&w, &CsApexWindow::closed, [&]() {
-            if(!server_has_been_shutdown) {
+            if (!server_has_been_shutdown) {
                 // we have closed the window -> avoid notification of server shutdown
                 view_core.server_shutdown.disconnectAll();
 
                 try {
-                    int r = QMessageBox::warning(&w, tr("cs::APEX"),
-                                                 tr("Do you want to stop the server?"),
-                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-                    if(r == QMessageBox::Yes) {
+                    int r = QMessageBox::warning(&w, tr("cs::APEX"), tr("Do you want to stop the server?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                    if (r == QMessageBox::Yes) {
                         shutdown_server_on_exit = true;
                     }
-                } catch(const std::exception& e) {
+                } catch (const std::exception& e) {
                     std::cerr << "exception while stopping graph worker: " << e.what() << std::endl;
-                } catch(...) {
+                } catch (...) {
                     throw;
                 }
             }
             app->quit();
         });
 
-        csapex::error_handling::stop_request().connect([this](){
+        csapex::error_handling::stop_request().connect([this]() {
             static int request = 0;
-            if(request == 0) {
+            if (request == 0) {
                 raise(SIGTERM);
             }
 
             ++request;
         });
 
-        view_core.server_shutdown.connect([&](){
+        view_core.server_shutdown.connect([&]() {
             std::cerr << "the server has been shut down." << std::endl;
             server_has_been_shutdown = true;
             w.triggerDisconnectEvent();
@@ -149,10 +147,9 @@ int Main::runWithGui()
         splash->finish(&w);
 
         return_status = runImpl();
-
     }
 
-    if(shutdown_server_on_exit) {
+    if (shutdown_server_on_exit) {
         main.shutdown();
     }
 
@@ -171,12 +168,11 @@ int Main::run()
 
 void Main::showMessage(const QString& msg)
 {
-    if(splash->isVisible()) {
+    if (splash->isVisible()) {
         splash->showMessage(msg);
     }
     app->processEvents();
 }
-
 
 int main(int argc, char** argv)
 {
@@ -186,11 +182,7 @@ int main(int argc, char** argv)
     std::string path_to_bin(argv[0]);
 
     po::options_description desc("Allowed options");
-    desc.add_options()
-            ("help", "show help message")
-            ("host", po::value<std::string>()->default_value("localhost"), "Host")
-            ("port", po::value<int>()->default_value(42123), "Port")
-            ;
+    desc.add_options()("help", "show help message")("host", po::value<std::string>()->default_value("localhost"), "Host")("port", po::value<int>()->default_value(42123), "Port");
     po::positional_options_description p;
 
     std::shared_ptr<ExceptionHandler> handler;
@@ -206,9 +198,9 @@ int main(int argc, char** argv)
     // filters ros remappings
     std::vector<std::string> remapping_args;
     std::vector<std::string> rest_args;
-    for(int i = 1; i < effective_argc; ++i) {
+    for (int i = 1; i < effective_argc; ++i) {
         std::string arg(argv[i]);
-        if(arg.find(":=") != std::string::npos)  {
+        if (arg.find(":=") != std::string::npos) {
             remapping_args.push_back(arg);
         } else {
             rest_args.push_back(arg);
@@ -228,7 +220,7 @@ int main(int argc, char** argv)
 
         additional_args = po::collect_unrecognized(parsed.options, po::include_positional);
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << "cannot parse parameters: " << e.what() << std::endl;
         return 4;
     }
@@ -236,9 +228,8 @@ int main(int argc, char** argv)
     // add ros remappings
     additional_args.insert(additional_args.end(), remapping_args.begin(), remapping_args.end());
 
-
     // display help?
-    if(vm.count("help")) {
+    if (vm.count("help")) {
         std::cerr << desc << std::endl;
         return 1;
     }
@@ -252,7 +243,7 @@ int main(int argc, char** argv)
     try {
         return m.run();
 
-    } catch(const csapex::Failure& af) {
+    } catch (const csapex::Failure& af) {
         std::cerr << af.what() << std::endl;
         return 42;
     }

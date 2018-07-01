@@ -17,7 +17,6 @@ class ShmBlock;
 class SubprocessChannel
 {
 public:
-
     enum class MessageType
     {
         NONE,
@@ -39,9 +38,9 @@ public:
     class ShutdownException : public std::runtime_error
     {
     public:
-        ShutdownException()
-            : std::runtime_error("shutdown")
-        {}
+        ShutdownException() : std::runtime_error("shutdown")
+        {
+        }
     };
 
     struct Message
@@ -53,8 +52,8 @@ public:
         Message(const Message& copy) = delete;
         Message(Message&& move);
 
-        Message& operator = (const Message& copy) = delete;
-        Message& operator = (Message&& move);
+        Message& operator=(const Message& copy) = delete;
+        Message& operator=(Message&& move);
 
         ~Message();
 
@@ -80,7 +79,6 @@ public:
     void write(const Message& message);
     bool hasMessage() const;
 
-
     void shutdown();
 
 private:
@@ -102,6 +100,6 @@ private:
     impl::ShmBlock* shm_block_;
 };
 
-}
+}  // namespace csapex
 
-#endif // SUBPROCESS_CHANNEL_H
+#endif  // SUBPROCESS_CHANNEL_H

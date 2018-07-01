@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(ClearGraph)
 
-ClearGraph::ClearGraph(const AUUID& parent_uuid)
-    : Meta(parent_uuid, "clear graph")
+ClearGraph::ClearGraph(const AUUID& parent_uuid) : Meta(parent_uuid, "clear graph")
 {
 }
 
@@ -30,7 +29,6 @@ std::string ClearGraph::getDescription() const
 {
     return std::string("clear graph ") + graph_uuid.getFullName();
 }
-
 
 bool ClearGraph::doExecute()
 {
@@ -40,11 +38,10 @@ bool ClearGraph::doExecute()
 
     add(CommandFactory(graph_facade).deleteAllNodes(graph_facade->enumerateAllNodes()));
 
-    if(Meta::doExecute()) {
+    if (Meta::doExecute()) {
         graph_facade->pauseRequest(paused);
         return true;
     }
-
 
     return false;
 }
@@ -59,8 +56,7 @@ bool ClearGraph::doRedo()
     return Meta::doRedo();
 }
 
-
-void ClearGraph::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void ClearGraph::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Meta::serialize(data, version);
 }

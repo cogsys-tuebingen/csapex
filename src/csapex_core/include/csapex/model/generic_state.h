@@ -17,7 +17,6 @@
 
 namespace csapex
 {
-
 class CSAPEX_CORE_EXPORT GenericState : public Serializable
 {
 public:
@@ -28,7 +27,7 @@ public:
     GenericState(const GenericState& copy);
     GenericState(GenericState&& move);
 
-    void operator = (const GenericState& copy);
+    void operator=(const GenericState& copy);
 
     void setParentUUID(const UUID& parent_uuid);
 
@@ -46,7 +45,7 @@ public:
     void setParameterSetSilence(bool silent);
     void triggerParameterSetChanged();
 
-    csapex::param::Parameter& operator [] (const std::string& name) const;
+    csapex::param::Parameter& operator[](const std::string& name) const;
     csapex::param::ParameterPtr getParameter(const std::string& name) const;
     csapex::param::ParameterPtr getMappedParameter(const std::string& name) const;
     std::vector<csapex::param::ParameterPtr> getParameters() const;
@@ -57,12 +56,12 @@ public:
     bool hasParameter(const std::string& name) const;
 
     template <typename T>
-    T readParameter (const std::string& name) const;
+    T readParameter(const std::string& name) const;
 
     ClonablePtr makeEmptyInstance() const override;
     void cloneDataFrom(const Clonable& other) override;
 
-    void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     void setFrom(const GenericState& rhs);
@@ -73,8 +72,8 @@ public:
     void initializePersistentParameters();
 
 private:
-    void registerParameter(const csapex::param::ParameterPtr &param);
-    void unregisterParameter(const csapex::param::ParameterPtr &param);
+    void registerParameter(const csapex::param::ParameterPtr& param);
+    void unregisterParameter(const csapex::param::ParameterPtr& param);
 
 public:
     UUID parent_uuid_;
@@ -96,16 +95,17 @@ public:
     slim_signal::Signal<void(param::ParameterPtr)> parameter_removed;
 };
 
-}
+}  // namespace csapex
 
 /// YAML
-namespace YAML {
-template<>
-struct CSAPEX_CORE_EXPORT convert<csapex::GenericState> {
-  static Node encode(const csapex::GenericState& rhs);
-  static bool decode(const Node& node, csapex::GenericState& rhs);
+namespace YAML
+{
+template <>
+struct CSAPEX_CORE_EXPORT convert<csapex::GenericState>
+{
+    static Node encode(const csapex::GenericState& rhs);
+    static bool decode(const Node& node, csapex::GenericState& rhs);
 };
-}
+}  // namespace YAML
 
-
-#endif // GENERIC_STATE_H
+#endif  // GENERIC_STATE_H

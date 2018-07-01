@@ -7,7 +7,6 @@
 
 namespace csapex
 {
-
 template <typename I>
 class CommandImplementation : public Command
 {
@@ -15,10 +14,8 @@ protected:
     CLONABLE_IMPLEMENTATION(I);
 
 protected:
-    CommandImplementation(const AUUID& graph_uuid)
-        : Command(graph_uuid)
+    CommandImplementation(const AUUID& graph_uuid) : Command(graph_uuid)
     {
-
     }
 
     CommandImplementation()
@@ -37,16 +34,19 @@ public:
     }
 };
 
-}
+}  // namespace csapex
 
-#define COMMAND_HEADER_NO_DEFAULT(Instance)\
-protected: \
+#define COMMAND_HEADER_NO_DEFAULT(Instance)                                                                                                                                                            \
+protected:                                                                                                                                                                                             \
     friend class CommandImplementation<Instance>
 
-#define COMMAND_HEADER(Instance)\
-public: \
-    Instance() {} \
-protected: \
+#define COMMAND_HEADER(Instance)                                                                                                                                                                       \
+public:                                                                                                                                                                                                \
+    Instance()                                                                                                                                                                                         \
+    {                                                                                                                                                                                                  \
+    }                                                                                                                                                                                                  \
+                                                                                                                                                                                                       \
+protected:                                                                                                                                                                                             \
     COMMAND_HEADER_NO_DEFAULT(Instance)
 
-#endif // COMMAND_IMPL_HPP
+#endif  // COMMAND_IMPL_HPP

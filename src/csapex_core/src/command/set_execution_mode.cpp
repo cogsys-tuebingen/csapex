@@ -21,8 +21,7 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(SetExecutionMode)
 
-SetExecutionMode::SetExecutionMode(const AUUID& parent_uuid, const UUID &node, ExecutionMode mode)
-    : CommandImplementation(parent_uuid), uuid(node), mode(mode)
+SetExecutionMode::SetExecutionMode(const AUUID& parent_uuid, const UUID& node, ExecutionMode mode) : CommandImplementation(parent_uuid), uuid(node), mode(mode)
 {
 }
 
@@ -30,13 +29,13 @@ std::string SetExecutionMode::getDescription() const
 {
     std::stringstream ss;
     ss << "set the execution mode of " << uuid << " to ";
-    switch(mode) {
-    case ExecutionMode::PIPELINING:
-        ss << "PIPELINING";
-        break;
-    case ExecutionMode::SEQUENTIAL:
-        ss << "SEQUENTIAL";
-        break;
+    switch (mode) {
+        case ExecutionMode::PIPELINING:
+            ss << "PIPELINING";
+            break;
+        case ExecutionMode::SEQUENTIAL:
+            ss << "SEQUENTIAL";
+            break;
     }
 
     return ss.str();
@@ -72,9 +71,7 @@ bool SetExecutionMode::doRedo()
     return doExecute();
 }
 
-
-
-void SetExecutionMode::serialize(SerializationBuffer &data, SemanticVersion& version) const
+void SetExecutionMode::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
     Command::serialize(data, version);
 

@@ -22,10 +22,8 @@
 
 using namespace csapex;
 
-GraphViewContextMenu::GraphViewContextMenu(GraphView &view)
-    : view_(view)
+GraphViewContextMenu::GraphViewContextMenu(GraphView& view) : view_(view)
 {
-
 }
 
 void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
@@ -63,7 +61,7 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
     menu.addMenu(&add_node);
 
     QMenu add_snippet("add snippet");
-    if(SnippetFactoryPtr snippet_factory = view_.getViewCore().getSnippetFactory()) {
+    if (SnippetFactoryPtr snippet_factory = view_.getViewCore().getSnippetFactory()) {
         add_snippet.setIcon(QIcon(":/snippet.png"));
         SnippetListGenerator snippet_generator(*snippet_factory);
         snippet_generator.insertAvailableSnippets(&add_snippet);
@@ -75,20 +73,20 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
 
     QAction* selectedItem = menu.exec(global_pos);
 
-    if(selectedItem) {
-        if(selectedItem == &q_copy) {
+    if (selectedItem) {
+        if (selectedItem == &q_copy) {
             view_.copySelected();
 
-        } else if(selectedItem == &q_paste) {
+        } else if (selectedItem == &q_paste) {
             view_.paste();
 
-        } else if(selectedItem == &add_note) {
+        } else if (selectedItem == &add_note) {
             view_.startPlacingBox("csapex::Note", nullptr);
 
-        } else if(selectedItem == &add_subgraph) {
+        } else if (selectedItem == &add_subgraph) {
             view_.startPlacingBox("csapex::Graph", nullptr);
 
-        } else if(selectedItem == &add_prototype) {
+        } else if (selectedItem == &add_prototype) {
             NodeStatePtr state = std::make_shared<NodeState>();
             state->setLabel("Prototype");
             view_.startPlacingBox("csapex::Graph", state);
@@ -104,21 +102,19 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
     }
 }
 
-
 void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 {
     std::stringstream title;
-    if(view_.selected_boxes_.size() == 1) {
+    if (view_.selected_boxes_.size() == 1) {
         title << "Node: " << view_.selected_boxes_.front()->getNodeFacade()->getUUID().getShortName();
     } else {
         title << view_.selected_boxes_.size() << " selected nodes";
     }
 
     QMenu menu;
-    std::map<QAction*, std::function<void()> > handler;
+    std::map<QAction*, std::function<void()>> handler;
 
     ContextMenuHandler::addHeader(menu, title.str());
-
 
     QAction* copy = new QAction("copy", &menu);
     copy->setIcon(QIcon(":/copy.png"));
@@ -147,11 +143,11 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
     bool has_unbounded = false;
 
     std::map<int, bool> has_log_level;
-    for(int i = 0; i <=3; ++i) {
+    for (int i = 0; i <= 3; ++i) {
         has_log_level[i] = false;
     }
 
-    for(NodeBox* box : view_.selected_boxes_) {
+    for (NodeBox* box : view_.selected_boxes_) {
         bool minimized = box->isMinimizedSize();
         has_minimized |= minimized;
         has_maximized |= !minimized;
@@ -169,7 +165,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         has_bounded |= max_f > 0.0;
 
         bool enabled = box->getNodeFacade()->isProcessingEnabled();
-        has_enabled|= enabled;
+        has_enabled |= enabled;
         has_disabled |= !enabled;
 
         bool note = dynamic_cast<StickyNoteBox*>(box);
@@ -181,16 +177,15 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         has_sequential |= mode == ExecutionMode::SEQUENTIAL;
     }
 
-
-    if(has_box) {
-        if(has_disabled){
+    if (has_box) {
+        if (has_disabled) {
             QAction* enable = new QAction("enable", &menu);
             enable->setIcon(QIcon(":/checkbox_checked.png"));
             enable->setIconVisibleInMenu(true);
             handler[enable] = std::bind(&GraphView::enableSelection, &view_, true);
             menu.addAction(enable);
         }
-        if(has_enabled) {
+        if (has_enabled) {
             QAction* disable = new QAction("disable", &menu);
             disable->setIcon(QIcon(":/checkbox_unchecked.png"));
             disable->setIconVisibleInMenu(true);
@@ -217,14 +212,14 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
         menu.addSeparator();
 
-        if(has_unmuted) {
+        if (has_unmuted) {
             QAction* max = new QAction("mute", &menu);
             max->setIcon(QIcon(":/muted.png"));
             max->setIconVisibleInMenu(true);
             handler[max] = std::bind(&GraphView::muteBox, &view_, true);
             menu.addAction(max);
         }
-        if(has_muted){
+        if (has_muted) {
             QAction* min = new QAction("unmute", &menu);
             min->setIcon(QIcon(":/unmuted.png"));
             min->setIconVisibleInMenu(true);
@@ -234,14 +229,14 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
         menu.addSeparator();
 
-        if(has_minimized) {
+        if (has_minimized) {
             QAction* max = new QAction("maximize", &menu);
             max->setIcon(QIcon(":/maximize.png"));
             max->setIconVisibleInMenu(true);
             handler[max] = std::bind(&GraphView::minimizeBox, &view_, false);
             menu.addAction(max);
         }
-        if(has_maximized){
+        if (has_maximized) {
             QAction* min = new QAction("minimize", &menu);
             min->setIcon(QIcon(":/minimize.png"));
             min->setIconVisibleInMenu(true);
@@ -255,9 +250,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         handler[flip] = std::bind(&GraphView::flipBox, &view_);
         menu.addAction(flip);
 
-
         menu.addSeparator();
-
 
         QAction* type_pipeline = new QAction("pipeline", &menu);
         type_pipeline->setCheckable(true);
@@ -295,7 +288,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         QMenu* thread_menu = menu.addMenu(QIcon(":/thread_group.png"), "thread grouping");
         thread_menu->setEnabled(threading);
 
-        if(thread_menu->isEnabled()) {
+        if (thread_menu->isEnabled()) {
             QAction* private_thread = new QAction("private thread", &menu);
             private_thread->setIcon(QIcon(":/thread_group_none.png"));
             private_thread->setIconVisibleInMenu(true);
@@ -312,17 +305,16 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
             QMenu* choose_group_menu = new QMenu("thread group", &menu);
 
-
             // TODO: implement for client server
             GraphFacadeImplementation* local_facade = dynamic_cast<GraphFacadeImplementation*>(view_.graph_facade_.get());
-            if(local_facade) {
+            if (local_facade) {
                 ThreadPool* thread_pool = local_facade->getThreadPool();
 
                 std::vector<ThreadGroupPtr> thread_groups = thread_pool->getGroups();
-                for(std::size_t i = 0; i < thread_groups.size(); ++i) {
+                for (std::size_t i = 0; i < thread_groups.size(); ++i) {
                     const ThreadGroup& group = *thread_groups[i];
 
-                    if(group.id() == ThreadGroup::PRIVATE_THREAD) {
+                    if (group.id() == ThreadGroup::PRIVATE_THREAD) {
                         continue;
                     }
 
@@ -360,22 +352,21 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
         menu.addSeparator();
 
-
         bool has_profiling = false;
         bool has_not_profiling = false;
-        for(NodeBox* box : view_.selected_boxes_) {
+        for (NodeBox* box : view_.selected_boxes_) {
             bool p = box->getNodeFacade()->isProfiling();
             has_profiling |= p;
             has_not_profiling |= !p;
         }
-        if(has_profiling) {
+        if (has_profiling) {
             QAction* prof = new QAction("stop profiling", &menu);
             prof->setIcon(QIcon(":/stop_profiling.png"));
             prof->setIconVisibleInMenu(true);
             handler[prof] = std::bind(&GraphView::showProfiling, &view_, false);
             menu.addAction(prof);
         }
-        if(has_not_profiling){
+        if (has_not_profiling) {
             QAction* prof = new QAction("start profiling", &menu);
             prof->setIcon(QIcon(":/profiling.png"));
             prof->setIconVisibleInMenu(true);
@@ -383,7 +374,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
             menu.addAction(prof);
         }
 
-        if(view_.selected_boxes_.size() == 1) {
+        if (view_.selected_boxes_.size() == 1) {
             QAction* info = new QAction("get information", &menu);
             info->setIcon(QIcon(":/help.png"));
             info->setIconVisibleInMenu(true);
@@ -392,7 +383,6 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
         }
 
         menu.addSeparator();
-
     }
 
     QAction* set_color = new QAction("set color", &menu);
@@ -413,7 +403,7 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
     ungrp->setIconVisibleInMenu(true);
 
     bool is_graph = false;
-    if(view_.selected_boxes_.size() == 1) {
+    if (view_.selected_boxes_.size() == 1) {
         NodeBox* box = view_.selected_boxes_.front();
         is_graph = box->isGraph();
     }
@@ -445,14 +435,14 @@ void GraphViewContextMenu::showSelectionMenu(const QPoint& global_pos)
 
     QAction* selectedItem = menu.exec(global_pos);
 
-    if(selectedItem) {
+    if (selectedItem) {
         try {
             handler[selectedItem]();
 
-        } catch(const csapex::Failure& af) {
+        } catch (const csapex::Failure& af) {
             view_.getViewCore().getExceptionHandler().handleAssertionFailure(af);
 
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             std::stringstream ss;
             ss << "Context menu failed: " << e.what();
             view_.getViewCore().sendNotification(ss.str());

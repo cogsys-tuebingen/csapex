@@ -72,7 +72,6 @@ protected:
 
     QColor balloon_color_;
 };
-}
+}  // namespace csapex
 
-#endif // DESIGNER_STYLEABLE_H
-
+#endif  // DESIGNER_STYLEABLE_H

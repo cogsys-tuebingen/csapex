@@ -9,8 +9,8 @@
 /// SYSTEM
 #include <sstream>
 
-namespace csapex {
-
+namespace csapex
+{
 class Notification : public Serializable
 {
 protected:
@@ -24,25 +24,25 @@ public:
     Notification() = default;
 
     Notification(const Notification& copy);
-    void operator = (const Notification& copy);
+    void operator=(const Notification& copy);
 
     Notification(const std::string& message);
     Notification(AUUID uuid, const std::string& message);
     Notification(AUUID uuid, const std::string& message, ErrorState::ErrorLevel error);
 
     template <typename T>
-    Notification& operator << (const T& val)
+    Notification& operator<<(const T& val)
     {
         message << val;
         msg_dirty_ = true;
         return *this;
     }
 
-    bool operator == (const Notification& other) const;
+    bool operator==(const Notification& other) const;
 
     std::string getMessage() const;
 
-    virtual void serialize(SerializationBuffer &data, SemanticVersion& version) const override;
+    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 private:
@@ -50,6 +50,6 @@ private:
     mutable std::string msg_cache_;
 };
 
-}
+}  // namespace csapex
 
-#endif // NOTIFICATION_H
+#endif  // NOTIFICATION_H
