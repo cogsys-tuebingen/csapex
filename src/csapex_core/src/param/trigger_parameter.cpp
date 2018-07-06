@@ -27,6 +27,8 @@ TriggerParameter::~TriggerParameter()
 
 TriggerParameter& TriggerParameter::operator=(const TriggerParameter& p)
 {
+    Parameter::operator =(static_cast<const Parameter&>(p));
+
     // do nothing
     return *this;
 }

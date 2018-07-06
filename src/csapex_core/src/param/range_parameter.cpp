@@ -28,13 +28,20 @@ RangeParameter::~RangeParameter()
 
 RangeParameter& RangeParameter::operator=(const RangeParameter& range)
 {
+    Parameter::operator =(static_cast<const Parameter&>(range));
+
     bool value_change = false;
-    if (value_.type() == typeid(int)) {
-        value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(range.value_);
-        step_ = range::limitStep(boost::any_cast<int>(range.min_), boost::any_cast<int>(range.max_), boost::any_cast<int>(range.step_));
-    } else if (value_.type() == typeid(double)) {
-        value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(range.value_);
-        step_ = range::limitStep(boost::any_cast<double>(range.min_), boost::any_cast<double>(range.max_), boost::any_cast<double>(range.step_));
+    if(value_.empty() || value_.type() != range.value_.type()) {
+        value_change = true;
+        step_ = range.step_;
+    } else {
+        if (value_.type() == typeid(int)) {
+            value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(range.value_);
+            step_ = range::limitStep(boost::any_cast<int>(range.min_), boost::any_cast<int>(range.max_), boost::any_cast<int>(range.step_));
+        } else if (value_.type() == typeid(double)) {
+            value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(range.value_);
+            step_ = range::limitStep(boost::any_cast<double>(range.min_), boost::any_cast<double>(range.max_), boost::any_cast<double>(range.step_));
+        }
     }
     value_ = range.value_;
     min_ = range.min_;

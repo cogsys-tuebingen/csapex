@@ -29,6 +29,8 @@ IntervalParameter::~IntervalParameter()
 
 IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interval)
 {
+    Parameter::operator =(static_cast<const Parameter&>(interval));
+
     bool change = false;
     if (values_.first.empty() || values_.second.empty()) {
         change = true;
