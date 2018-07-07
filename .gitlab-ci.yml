@@ -28,11 +28,14 @@ before_script:
 stages:
   - build
   - test
+  - coverage
   - documentation
 
 cache:
   paths:
     - ccache/
+
+
 
 
 indigo-build:
@@ -107,6 +110,7 @@ kinetic-test:
 
 
 
+
 lunar-build:
   stage: build
   image: ros:lunar-perception
@@ -131,7 +135,6 @@ lunar-test:
 
 
 
-
 melodic-build:
   stage: build
   image: ros:melodic-perception
@@ -151,8 +154,19 @@ melodic-test:
   script:
     - tar xf build.tar
     - source devel/setup.bash
+    - cd build && env CTEST_OUTPUT_ON_FAILURE=1 make test
+
+
+
+
+coverage:
+  stage: coverage
+  image: ros:melodic-perception
+  script:
+    - catkin_make -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=True
+    - find / -name ui_box.h
+    - source devel/setup.bash
     - env BUILD_DIR=build IS_CI=1 src/csapex_testing/coverage.sh
-    - mkdir -p public && mv /builds/csapex/csapex/coverage public/coverage
 
 
 

@@ -76,15 +76,14 @@ echo "calculating coverage"
 lcov -a test_base_clean.info -a test_clean.info -o test_extracted.info
 
 # output
-cd $THISDIR
-genhtml --output-directory $THISDIR/coverage \
-  --demangle-cpp --num-spaces 2 --sort \
-  --title "CS::APEX - Test Coverage" \
-  --function-coverage --legend \
-  test_extracted.info  > /dev/null
-
-
 if ! [[ $IS_CI ]]; then
+    cd $THISDIR
+    genhtml --output-directory $THISDIR/coverage \
+      --demangle-cpp --num-spaces 2 --sort \
+      --title "CS::APEX - Test Coverage" \
+      --function-coverage --legend \
+      test_extracted.info  > /dev/null
+
     gnome-open coverage/index.html
 fi
 
