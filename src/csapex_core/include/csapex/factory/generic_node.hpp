@@ -176,7 +176,7 @@ private:
             }
             csapex::param::Parameter::Ptr p = Info::template declareParameter<U>(id);
             if (p == nullptr) {
-                p = csapex::param::ParameterFactory::declareValue<U>(name, 0);
+                p = csapex::param::factory::declareValue<U>(name, 0);
             }
             instance_->addParameter(p);
             instance_->params_[id] = name;

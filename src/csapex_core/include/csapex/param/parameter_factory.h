@@ -14,24 +14,23 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT ParameterFactory
+namespace factory
 {
-public:
     /**
      * @brief makeEmpty creates an empty parameter pointer
      * @param type
      * @return
      */
-    static ParameterBuilder makeEmpty(const std::string& type);
+    ParameterBuilder makeEmpty(const std::string& type);
 
     /**
      * @brief clone duplicates a parameter deeply
      * @param param
      * @return
      */
-    static ParameterBuilder clone(const Parameter* param);
-    static ParameterBuilder clone(const Parameter& param);
-    static ParameterBuilder clone(const std::shared_ptr<Parameter>& param);
+    ParameterBuilder clone(const Parameter* param);
+    ParameterBuilder clone(const Parameter& param);
+    ParameterBuilder clone(const std::shared_ptr<Parameter>& param);
 
     /**
      * @brief declareRange
@@ -44,10 +43,10 @@ public:
      * @return
      */
     template <typename T>
-    static ParameterBuilder declareRange(const std::string& name, const ParameterDescription& description, T min, T max, T def, T step);
+    ParameterBuilder declareRange(const std::string& name, const ParameterDescription& description, T min, T max, T def, T step);
 
     template <typename T>
-    static ParameterBuilder declareRange(const std::string& name, T min, T max, T def, T step)
+    ParameterBuilder declareRange(const std::string& name, T min, T max, T def, T step)
     {
         return declareRange(name, ParameterDescription(), min, max, def, step);
     }
@@ -64,10 +63,10 @@ public:
      * @return
      */
     template <typename T>
-    static ParameterBuilder declareInterval(const std::string& name, const ParameterDescription& description, T min, T max, T def_min, T def_max, T step);
+    ParameterBuilder declareInterval(const std::string& name, const ParameterDescription& description, T min, T max, T def_min, T def_max, T step);
 
     template <typename T>
-    static ParameterBuilder declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
+    ParameterBuilder declareInterval(const std::string& name, T min, T max, T def_min, T def_max, T step)
     {
         return declareInterval(name, ParameterDescription(), min, max, def_min, def_max, step);
     }
@@ -78,8 +77,8 @@ public:
      * @param def
      * @return
      */
-    static ParameterBuilder declareBool(const std::string& name, bool def);
-    static ParameterBuilder declareBool(const std::string& name, const ParameterDescription& description, bool def);
+    ParameterBuilder declareBool(const std::string& name, bool def);
+    ParameterBuilder declareBool(const std::string& name, const ParameterDescription& description, bool def);
 
     /**
      * @brief declareText
@@ -88,8 +87,8 @@ public:
      * @param def
      * @return
      */
-    static ParameterBuilder declareText(const std::string& name, const ParameterDescription& description, const std::string& def);
-    static ParameterBuilder declareText(const std::string& name, const std::string& def);
+    ParameterBuilder declareText(const std::string& name, const ParameterDescription& description, const std::string& def);
+    ParameterBuilder declareText(const std::string& name, const std::string& def);
 
     /**
      * @brief declarePath
@@ -102,7 +101,7 @@ public:
      * @param output
      * @return
      */
-    static ParameterBuilder declarePath(const std::string& name, const ParameterDescription& description, bool is_file, const std::string& def, const std::string& filter = "", bool input = false,
+    ParameterBuilder declarePath(const std::string& name, const ParameterDescription& description, bool is_file, const std::string& def, const std::string& filter = "", bool input = false,
                                         bool output = false);
 
     /**
@@ -113,8 +112,8 @@ public:
      * @param filter
      * @return
      */
-    static ParameterBuilder declareFileInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static ParameterBuilder declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareFileInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareFileInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     /**
      * @brief declareFileOutputPath
@@ -124,8 +123,8 @@ public:
      * @param filter
      * @return
      */
-    static ParameterBuilder declareFileOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static ParameterBuilder declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareFileOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareFileOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     /**
      * @brief declareFileInputOutputPath
@@ -135,8 +134,8 @@ public:
      * @param filter
      * @return
      */
-    static ParameterBuilder declareFileInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static ParameterBuilder declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareFileInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareFileInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     /**
      * @brief declareDirectoryInputPath
@@ -146,8 +145,8 @@ public:
      * @param filter
      * @return
      */
-    static ParameterBuilder declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static ParameterBuilder declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareDirectoryInputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareDirectoryInputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     /**
      * @brief declareDirectoryOutputPath
@@ -157,8 +156,8 @@ public:
      * @param filter
      * @return
      */
-    static ParameterBuilder declareDirectoryOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static ParameterBuilder declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareDirectoryOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareDirectoryOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     /**
      * @brief declareDirectoryInputOutputPath
@@ -168,8 +167,8 @@ public:
      * @param filter
      * @return
      */
-    static ParameterBuilder declareDirectoryInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
-    static ParameterBuilder declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareDirectoryInputOutputPath(const std::string& name, const ParameterDescription& description, const std::string& def, const std::string& filter = "");
+    ParameterBuilder declareDirectoryInputOutputPath(const std::string& name, const std::string& def, const std::string& filter = "");
 
     /**
      * @brief declareTrigger
@@ -177,8 +176,8 @@ public:
      * @param description
      * @return
      */
-    static ParameterBuilder declareTrigger(const std::string& name, const ParameterDescription& description);
-    static ParameterBuilder declareTrigger(const std::string& name);
+    ParameterBuilder declareTrigger(const std::string& name, const ParameterDescription& description);
+    ParameterBuilder declareTrigger(const std::string& name);
 
     /**
      * @brief declareAngleParameter
@@ -187,8 +186,8 @@ public:
      * @param angle default value
      * @return
      */
-    static ParameterBuilder declareAngle(const std::string& name, const ParameterDescription& description, double angle);
-    static ParameterBuilder declareAngle(const std::string& name, double angle);
+    ParameterBuilder declareAngle(const std::string& name, const ParameterDescription& description, double angle);
+    ParameterBuilder declareAngle(const std::string& name, double angle);
 
     /**
      * @brief declareColorParameter
@@ -199,8 +198,29 @@ public:
      * @param b
      * @return
      */
-    static ParameterBuilder declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b);
-    static ParameterBuilder declareColorParameter(const std::string& name, int r, int g, int b);
+    ParameterBuilder declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b);
+    ParameterBuilder declareColorParameter(const std::string& name, int r, int g, int b);
+
+    /**
+     * @brief declareStringList
+     * @param name
+     * @param description
+     * @return
+     */
+    ParameterBuilder declareStringList(const std::string& name, const ParameterDescription& description, const std::vector<std::string>& list);
+    ParameterBuilder declareStringList(const std::string& name, const std::vector<std::string>& list);
+
+
+    namespace detail
+    {
+    template <typename T>
+    ParameterBuilder declareParameterSetImpl(const std::string& name, const ParameterDescription& description, const std::map<std::string, T>& set_values, const T& def);
+    template <typename T>
+    ParameterBuilder declareParameterSetImpl(const std::string& name, const std::map<std::string, T>& set, const T& def)
+    {
+        return declareParameterSetImpl(name, ParameterDescription(), set, def);
+    }
+    }
 
     /**
      * @brief declareParameterSet
@@ -211,29 +231,29 @@ public:
      * @return
      */
     template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
-    static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, T>& set_values, const T& def)
+    ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, T>& set_values, const T& def)
     {
-        return declareParameterSetImpl(name, description, set_values, def);
+        return detail::declareParameterSetImpl(name, description, set_values, def);
     }
 
     template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-    static ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, T>& set_values, const T& def)
+    ParameterBuilder declareParameterSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, T>& set_values, const T& def)
     {
         std::map<std::string, int> int_map;
         for (const auto& entry : set_values) {
             int_map[entry.first] = static_cast<int>(entry.second);
         }
-        return declareParameterSetImpl(name, description, int_map, static_cast<int>(def));
+        return detail::declareParameterSetImpl(name, description, int_map, static_cast<int>(def));
     }
 
     template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
-    static ParameterBuilder declareParameterSet(const std::string& name, const std::map<std::string, T>& set, const T& def)
+    ParameterBuilder declareParameterSet(const std::string& name, const std::map<std::string, T>& set, const T& def)
     {
         return declareParameterSet(name, ParameterDescription(), set, def);
     }
 
     template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-    static ParameterBuilder declareParameterSet(const std::string& name, const std::map<std::string, T>& set, const T& def)
+    ParameterBuilder declareParameterSet(const std::string& name, const std::map<std::string, T>& set, const T& def)
     {
         return declareParameterSet(name, ParameterDescription(), set, def);
     }
@@ -246,8 +266,8 @@ public:
      * @param def default value
      * @return
      */
-    static ParameterBuilder declareParameterStringSet(const std::string& name, const ParameterDescription& description, const std::vector<std::string>& set, const std::string& def = "");
-    static ParameterBuilder declareParameterStringSet(const std::string& name, const std::vector<std::string>& set, const std::string& def = "");
+    ParameterBuilder declareParameterStringSet(const std::string& name, const ParameterDescription& description, const std::vector<std::string>& set, const std::string& def = "");
+    ParameterBuilder declareParameterStringSet(const std::string& name, const std::vector<std::string>& set, const std::string& def = "");
 
     /**
      * @brief declareParameterBitSet
@@ -257,8 +277,8 @@ public:
      * @param def
      * @return
      */
-    static ParameterBuilder declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, int>& set, int def = 0);
-    static ParameterBuilder declareParameterBitSet(const std::string& name, const std::map<std::string, int>& set, int def = 0);
+    ParameterBuilder declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, int>& set, int def = 0);
+    ParameterBuilder declareParameterBitSet(const std::string& name, const std::map<std::string, int>& set, int def = 0);
 
     /**
      * @brief declareParameterBitSet
@@ -267,8 +287,8 @@ public:
      * @param set
      * @return
      */
-    static ParameterBuilder declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> >& set);
-    static ParameterBuilder declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool> >& set);
+    ParameterBuilder declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> >& set);
+    ParameterBuilder declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool> >& set);
 
     /**
      * @brief declareValue
@@ -278,14 +298,14 @@ public:
      * @return
      */
     template <typename T>
-    static ParameterBuilder declareValue(const std::string& name, const ParameterDescription& description, const T& def);
+    ParameterBuilder declareValue(const std::string& name, const ParameterDescription& description, const T& def);
 
     template <typename T>
-    static ParameterBuilder declareValue(const std::string& name, const T& def)
+    ParameterBuilder declareValue(const std::string& name, const T& def)
     {
         return declareValue(name, ParameterDescription(), def);
     }
-    static ParameterBuilder declareValue(const std::string& name, const char* def)
+    inline ParameterBuilder declareValue(const std::string& name, const char* def)
     {
         return declareValue(name, ParameterDescription(), std::string(def));
     }
@@ -296,7 +316,7 @@ public:
      * @param description
      * @return
      */
-    static ParameterBuilder declareOutputProgress(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
+    ParameterBuilder declareOutputProgress(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
 
     /**
      * @brief declareOutputText
@@ -304,17 +324,11 @@ public:
      * @param description
      * @return
      */
-    static ParameterBuilder declareOutputText(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
+    ParameterBuilder declareOutputText(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
+}
 
-private:
-    template <typename T>
-    static ParameterBuilder declareParameterSetImpl(const std::string& name, const ParameterDescription& description, const std::map<std::string, T>& set_values, const T& def);
-    template <typename T>
-    static ParameterBuilder declareParameterSetImpl(const std::string& name, const std::map<std::string, T>& set, const T& def)
-    {
-        return declareParameterSetImpl(name, ParameterDescription(), set, def);
-    }
-};
+// backwards compatibility
+namespace ParameterFactory = factory;
 
 }  // namespace param
 }  // namespace csapex

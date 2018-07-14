@@ -104,7 +104,7 @@ InputPtr VariadicInputs::getVariadicInput(std::size_t index)
 
 void VariadicInputs::setupVariadicParameters(Parameterizable& parameters)
 {
-    input_count_ = csapex::param::ParameterFactory::declareValue("input count", 0);
+    input_count_ = csapex::param::factory::declareValue("input count", 0);
     parameters.addHiddenParameter(input_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
         if (count >= 0) {
@@ -220,7 +220,7 @@ void VariadicOutputs::removeVariadicOutputById(const UUID& output)
 
 void VariadicOutputs::setupVariadicParameters(Parameterizable& parameters)
 {
-    output_count_ = csapex::param::ParameterFactory::declareValue("output count", 0);
+    output_count_ = csapex::param::factory::declareValue("output count", 0);
     parameters.addHiddenParameter(output_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
         if (count >= 0) {
@@ -340,7 +340,7 @@ void VariadicEvents::removeVariadicEventById(const UUID& event)
 
 void VariadicEvents::setupVariadicParameters(Parameterizable& parameters)
 {
-    event_count_ = csapex::param::ParameterFactory::declareValue("event count", 0);
+    event_count_ = csapex::param::factory::declareValue("event count", 0);
     parameters.addHiddenParameter(event_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
         if (count >= 0) {
@@ -481,7 +481,7 @@ SlotPtr VariadicSlots::getVariadicSlot(std::size_t index)
 
 void VariadicSlots::setupVariadicParameters(Parameterizable& parameters)
 {
-    slot_count_ = csapex::param::ParameterFactory::declareValue("slot count", 0);
+    slot_count_ = csapex::param::factory::declareValue("slot count", 0);
     parameters.addHiddenParameter(slot_count_, [this](param::Parameter* p) {
         int count = p->as<int>();
         if (count >= 0) {

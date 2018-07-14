@@ -11,8 +11,6 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT PathParameter : public ParameterImplementation<PathParameter, 0x004>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<PathParameter> Ptr;
 

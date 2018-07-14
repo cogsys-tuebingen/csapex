@@ -31,7 +31,6 @@ namespace param
 class CSAPEX_PARAM_EXPORT Parameter : public Streamable
 {
 public:
-    friend class ParameterFactory;
     friend class ParameterBuilder;
 
     typedef std::shared_ptr<Parameter> Ptr;

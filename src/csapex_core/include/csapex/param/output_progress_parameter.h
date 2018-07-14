@@ -11,8 +11,6 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT OutputProgressParameter : public ParameterImplementation<OutputProgressParameter, 0x009>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<OutputProgressParameter> Ptr;
 

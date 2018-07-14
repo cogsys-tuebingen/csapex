@@ -159,11 +159,11 @@ void SubgraphNode::setupParameters(Parameterizable& params)
 {
     setupVariadicParameters(params);
 
-    params.addParameter(param::ParameterFactory::declareBool("iterate_containers", param::ParameterDescription("When true, input vectors will be iterated internally"), false));
+    params.addParameter(param::factory::declareBool("iterate_containers", param::ParameterDescription("When true, input vectors will be iterated internally"), false));
 
     std::map<std::string, std::pair<int, bool> > flags;
 
-    iterated_inputs_param_ = std::dynamic_pointer_cast<param::BitSetParameter>(param::ParameterFactory::declareParameterBitSet("iterated_containers", flags).build());
+    iterated_inputs_param_ = std::dynamic_pointer_cast<param::BitSetParameter>(param::factory::declareParameterBitSet("iterated_containers", flags).build());
 
     params.addConditionalParameter(iterated_inputs_param_, [this]() { return readParameter<bool>("iterate_containers"); },
                                    [this](param::Parameter* p) {

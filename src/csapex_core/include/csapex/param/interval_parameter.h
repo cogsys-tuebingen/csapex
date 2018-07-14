@@ -18,8 +18,6 @@ typedef boost::mpl::vector<double, int> IntervalParameterTypes;
 
 class CSAPEX_PARAM_EXPORT IntervalParameter : public ParameterImplementation<IntervalParameter, 0x003>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<IntervalParameter> Ptr;
 
@@ -29,6 +27,19 @@ public:
 public:
     IntervalParameter();
     explicit IntervalParameter(const std::string& name, const ParameterDescription& description);
+
+    template <typename T>
+    IntervalParameter(const std::string& name, const ParameterDescription& description,
+                   std::pair<T, T> def_value, T min, T max, T step)
+        : IntervalParameter(name, description)
+    {
+        def_ = def_value;
+        values_ = def_value;
+        min_ = min;
+        max_ = max;
+        step_ = step;
+    }
+
     virtual ~IntervalParameter();
 
     IntervalParameter& operator=(const IntervalParameter& p);

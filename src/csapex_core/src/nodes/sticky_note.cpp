@@ -15,9 +15,9 @@ void Note::setup(NodeModifier& node_modifier)
 
 void Note::setupParameters(Parameterizable& parameters)
 {
-    parameters.addParameter(param::ParameterFactory::declareText("text", ""));
-    parameters.addParameter(param::ParameterFactory::declareValue<int>("w", 16));
-    parameters.addParameter(param::ParameterFactory::declareValue<int>("h", 16));
+    parameters.addParameter(param::factory::declareText("text", ""));
+    parameters.addParameter(param::factory::declareValue<int>("w", 16));
+    parameters.addParameter(param::factory::declareValue<int>("h", 16));
 }
 
 bool Note::isIsolated() const

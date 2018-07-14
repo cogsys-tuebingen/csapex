@@ -11,8 +11,7 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT NullParameter : public ParameterImplementation<NullParameter, 0x000>
 {
-    friend class ParameterFactory;
-
+public:
     typedef std::shared_ptr<NullParameter> Ptr;
 
 public:

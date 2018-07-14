@@ -37,7 +37,7 @@ public:
 
     void setupParameters(Parameterizable& params) override
     {
-        params.addHiddenParameter(param::ParameterFactory::declareValue<M>("value", {}));
+        params.addHiddenParameter(param::factory::declareValue<M>("value", {}));
     }
 
     void setup(csapex::NodeModifier& node_modifier) override
@@ -79,7 +79,7 @@ public:
 
     void setupParameters(Parameterizable& params) override
     {
-        params.addHiddenParameter(param::ParameterFactory::declareValue<M>("value", {}));
+        params.addHiddenParameter(param::factory::declareValue<M>("value", {}));
     }
 
     void setup(csapex::NodeModifier& node_modifier) override

@@ -15,14 +15,20 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT SetParameter : public ParameterImplementation<SetParameter, 0x006>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<SetParameter> Ptr;
 
 public:
     SetParameter();
     explicit SetParameter(const std::string& name, const ParameterDescription& description);
+
+    template <typename T>
+    SetParameter(const std::string& name, const ParameterDescription& description, T def)
+        : SetParameter(name, description)
+    {
+        def_ = def;
+    }
+
     virtual ~SetParameter();
 
     virtual std::string TYPE() const override

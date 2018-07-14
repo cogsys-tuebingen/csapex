@@ -14,7 +14,7 @@ ParameterDescription::ParameterDescription() : description_("")
 std::string ParameterDescription::toString() const
 {
     if (description_.empty()) {
-        return "<i>no description</i>";
+        return "no description";
     } else {
         return description_;
     }

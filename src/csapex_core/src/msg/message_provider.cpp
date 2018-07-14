@@ -8,7 +8,7 @@ using namespace csapex;
 
 MessageProvider::MessageProvider() : slot_count_(1)
 {
-    state.addParameter(csapex::param::ParameterFactory::declareBool("playback/resend", false));
+    state.addParameter(csapex::param::factory::declareBool("playback/resend", false));
 }
 
 MessageProvider::~MessageProvider()

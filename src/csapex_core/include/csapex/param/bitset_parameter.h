@@ -14,14 +14,12 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT BitSetParameter : public ParameterImplementation<BitSetParameter, 0x001>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<BitSetParameter> Ptr;
 
 public:
     BitSetParameter();
-    explicit BitSetParameter(const std::string& name, const ParameterDescription& description);
+    explicit BitSetParameter(const std::string& name, const ParameterDescription& description, int def = 0);
     virtual ~BitSetParameter();
 
     virtual std::string TYPE() const override

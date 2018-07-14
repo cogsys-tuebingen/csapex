@@ -15,8 +15,6 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT AngleParameter : public ParameterImplementation<AngleParameter, 0x00B>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<AngleParameter> Ptr;
 

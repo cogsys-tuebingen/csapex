@@ -966,10 +966,10 @@ void CsApexWindow::addStateToSettings()
 
         Settings& settings = view_core_.getSettings();
         if (!settings.knows("uistate")) {
-            settings.addTemporary(csapex::param::ParameterFactory::declareText("uistate", ""));
+            settings.addTemporary(csapex::param::factory::declareText("uistate", ""));
         }
         if (!settings.knows("geometry")) {
-            settings.addTemporary(csapex::param::ParameterFactory::declareText("geometry", geometry.toStdString()));
+            settings.addTemporary(csapex::param::factory::declareText("geometry", geometry.toStdString()));
         }
 
         settings.set("uistate", uistate.toStdString());

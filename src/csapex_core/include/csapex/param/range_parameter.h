@@ -32,8 +32,6 @@ int limitStep(const int min, const int max, const int step);
 
 class CSAPEX_PARAM_EXPORT RangeParameter : public ParameterImplementation<RangeParameter, 0x005>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<RangeParameter> Ptr;
 
@@ -43,6 +41,20 @@ public:
 public:
     RangeParameter();
     explicit RangeParameter(const std::string& name, const ParameterDescription& description);
+
+    template <typename T>
+    RangeParameter(const std::string& name, const ParameterDescription& description,
+                   T def_value, T def_min, T def_max, T step)
+        : RangeParameter(name, description)
+    {
+        def_value_ = def_value;
+        def_min_ = def_min;
+        max_ = def_max;
+        min_ = def_min;
+        def_max_ = def_max;
+        step_ = step;
+    }
+
     virtual ~RangeParameter();
 
     RangeParameter& operator=(const RangeParameter& p);

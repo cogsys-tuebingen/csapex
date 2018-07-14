@@ -11,8 +11,6 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT ColorParameter : public ParameterImplementation<ColorParameter, 0x002>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<ColorParameter> Ptr;
 

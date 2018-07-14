@@ -11,8 +11,6 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT TriggerParameter : public ParameterImplementation<TriggerParameter, 0x007>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<TriggerParameter> Ptr;
 

@@ -14,14 +14,20 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT ValueParameter : public ParameterImplementation<ValueParameter, 0x008>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<ValueParameter> Ptr;
 
 public:
     ValueParameter();
     explicit ValueParameter(const std::string& name, const ParameterDescription& description);
+
+    template <typename T>
+    ValueParameter(const std::string& name, const ParameterDescription& description, T def)
+        : ValueParameter(name, description)
+    {
+        def_ = def;
+    }
+
     virtual ~ValueParameter();
 
     virtual std::string TYPE() const override

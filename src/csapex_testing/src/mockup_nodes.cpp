@@ -43,7 +43,7 @@ void MockupSource::setup(NodeModifier& node_modifier)
 
 void MockupSource::setupParameters(Parameterizable& parameters)
 {
-    parameters.addHiddenParameter(param::ParameterFactory::declareValue<int>("value", 0));
+    parameters.addHiddenParameter(param::factory::declareValue<int>("value", 0));
 }
 
 void MockupSource::process()
@@ -71,7 +71,7 @@ void MockupSink::setup(NodeModifier& node_modifier)
 
 void MockupSink::setupParameters(Parameterizable& parameters)
 {
-    parameters.addHiddenParameter(param::ParameterFactory::declareValue<int>("value", -1));
+    parameters.addHiddenParameter(param::factory::declareValue<int>("value", -1));
 }
 
 void MockupSink::process(NodeModifier& node_modifier, Parameterizable& parameters)

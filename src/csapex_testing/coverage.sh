@@ -19,6 +19,7 @@ if ! [[ $IS_CI ]]; then
     # build
     ROOT=$(cd $THISDIR/../../../../; pwd)
     BUILD_PATH=$ROOT/$BUILD_DIR
+    DEVEL_PATH=$ROOT/devel_coverage
 
     cd $ROOT
     rm -fr $BUILD_DIR
@@ -26,10 +27,10 @@ if ! [[ $IS_CI ]]; then
         mkdir -p $BUILD_DIR
         cd $BUILD_PATH
         if [[ -d ../src ]]; then
-            cmake ../src -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=True
+            cmake ../src -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=True -DCATKIN_DEVEL_PREFIX=$DEVEL_PATH
         else
             find .. | grep CMakeLists.txt
-            cmake .. -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=True
+            cmake .. -DCMAKE_BUILD_TYPE:=Debug -DENABLE_COVERAGE:=True -DCATKIN_DEVEL_PREFIX=$DEVEL_PATH
         fi
     else
         cd $BUILD_PATH
@@ -61,7 +62,7 @@ mkdir $THISDIR/coverage
 cd $BUILD_PATH
 env CTEST_OUTPUT_ON_FAILURE=1 make test
 
-#source devel/setup.bash
+#source $DEVEL_PATH/setup.bash
 #cd $THISDIR
 #rosrun csapex_util csapex_util_test
 #rosrun csapex_core_test csapex_core_test

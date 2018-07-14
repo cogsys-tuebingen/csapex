@@ -11,8 +11,6 @@ namespace param
 {
 class CSAPEX_PARAM_EXPORT OutputTextParameter : public ParameterImplementation<OutputTextParameter, 0x00C>
 {
-    friend class ParameterFactory;
-
 public:
     typedef std::shared_ptr<OutputTextParameter> Ptr;
 

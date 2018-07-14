@@ -8,6 +8,7 @@
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <iostream>
+#include <iomanip>
 
 CSAPEX_REGISTER_PARAMETER_SERIALIZER(ValueParameter)
 
@@ -40,10 +41,10 @@ std::string ValueParameter::toStringImpl() const
         v << boost::any_cast<int>(value_);
 
     } else if (value_.type() == typeid(double)) {
-        v << boost::any_cast<double>(value_);
+        v << std::showpoint << std::setprecision(5) << boost::any_cast<double>(value_);
 
     } else if (value_.type() == typeid(bool)) {
-        v << boost::any_cast<bool>(value_);
+        v << (boost::any_cast<bool>(value_) ? "true" : "false");
 
     } else if (value_.type() == typeid(std::string)) {
         v << boost::any_cast<std::string>(value_);
@@ -87,19 +88,19 @@ bool ValueParameter::set_unsafe(const boost::any& v)
 void ValueParameter::cloneDataFrom(const Clonable& other)
 {
     if (const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other)) {
-        bool change = false;
-        if (value_.type() == typeid(int)) {
-            change = boost::any_cast<int>(value_) != boost::any_cast<int>(value->value_);
-        } else if (value_.type() == typeid(double)) {
-            change = boost::any_cast<double>(value_) != boost::any_cast<double>(value->value_);
-        } else if (value_.type() == typeid(bool)) {
-            change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(value->value_);
-        } else if (value_.type() == typeid(std::string)) {
-            change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(value->value_);
-        } else if (value_.type() == typeid(long)) {
-            change = boost::any_cast<long>(value_) != boost::any_cast<long>(value->value_);
-        } else {
-            change = true;
+        bool change = true;
+        if (value_.type() == value->value_.type()) {
+            if (value_.type() == typeid(int)) {
+                change = boost::any_cast<int>(value_) != boost::any_cast<int>(value->value_);
+            } else if (value_.type() == typeid(double)) {
+                change = boost::any_cast<double>(value_) != boost::any_cast<double>(value->value_);
+            } else if (value_.type() == typeid(bool)) {
+                change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(value->value_);
+            } else if (value_.type() == typeid(std::string)) {
+                change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(value->value_);
+            } else if (value_.type() == typeid(long)) {
+                change = boost::any_cast<long>(value_) != boost::any_cast<long>(value->value_);
+            }
         }
         if (change) {
             *this = *value;

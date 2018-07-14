@@ -296,7 +296,7 @@ void GenericState::setFrom(const GenericState& rhs)
         if (params.find(name) != params.end()) {
             params[name]->cloneDataFrom(*p);
         } else {
-            params[name] = csapex::param::ParameterFactory::clone(p);
+            params[name] = csapex::param::factory::clone(p);
             legacy.insert(name);
         }
     }

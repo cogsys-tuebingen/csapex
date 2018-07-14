@@ -25,7 +25,7 @@ bool YAML::convert<csapex::param::ParameterPtr>::decode(const Node& node, csapex
         type = "range";
     }
 
-    rhs = ParameterFactory::makeEmpty(type);
+    rhs = factory::makeEmpty(type);
     rhs->deserialize_yaml(node);
     return true;
 }
@@ -47,7 +47,7 @@ bool YAML::convert<csapex::param::ParameterConstPtr>::decode(const Node& node, c
         type = "range";
     }
 
-    param::ParameterPtr res = ParameterFactory::makeEmpty(type);
+    param::ParameterPtr res = factory::makeEmpty(type);
     res->deserialize_yaml(node);
     rhs = res;
     return true;

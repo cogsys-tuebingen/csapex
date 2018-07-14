@@ -18,7 +18,9 @@ BitSetParameter::BitSetParameter() : ParameterImplementation("noname", Parameter
 {
 }
 
-BitSetParameter::BitSetParameter(const std::string& name, const ParameterDescription& description) : ParameterImplementation(name, description), value_(0)
+BitSetParameter::BitSetParameter(const std::string& name, const ParameterDescription& description, int def)
+    : ParameterImplementation(name, description),
+    value_(def)
 {
 }
 
