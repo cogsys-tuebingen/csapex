@@ -32,11 +32,10 @@ csapex_package()
 
 include_directories(${catkin_INCLUDE_DIRS})
 
-#find_package(GTest REQUIRED)
 include( CTest )
 
 # tests that are not yet distributed across the project
-file(GLOB tests_SRC
+file(GLOB_RECURSE tests_SRC
     "src/*.cpp"
 )
 
