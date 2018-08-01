@@ -22,7 +22,7 @@ ParameterSerializerInterface::~ParameterSerializerInterface()
 void ParameterSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
     if (const Parameter* parameter = dynamic_cast<const Parameter*>(&packet)) {
-        uint8_t type = parameter->ID();
+        std::string type = parameter->getParameterType();
         auto it = serializers_.find(type);
         if (it != serializers_.end()) {
             data << type;
@@ -32,17 +32,19 @@ void ParameterSerializer::serialize(const Streamable& packet, SerializationBuffe
             serializer->serialize(*parameter, data);
 
         } else {
-            std::cerr << "cannot serialize Parameter of type " << (int)type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
+            data << serializationName<NullParameter>();
+            std::cerr << "cannot serialize Parameter of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
         }
     }
 }
 
 StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
 {
-    uint8_t type;
+    std::string type;
     data >> type;
 
-    if (type == param::NullParameter::NUMERICAL_ID) {
+    if (type == param::serializationName<NullParameter>()) {
+        std::cerr << "Received null parameter" << std::endl;
         return std::make_shared<param::NullParameter>();
     }
 
@@ -53,13 +55,13 @@ StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
         return serializer->deserialize(data);
 
     } else {
-        std::cerr << "cannot deserialize Parameter of type " << (int)type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
+        std::cerr << "cannot deserialize Parameter of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
     }
 
     return ParameterPtr();
 }
 
-void ParameterSerializer::registerSerializer(uint8_t type, std::shared_ptr<ParameterSerializerInterface> serializer)
+void ParameterSerializer::registerSerializer(const std::string& type, std::shared_ptr<ParameterSerializerInterface> serializer)
 {
     instance().serializers_[type] = serializer;
 }

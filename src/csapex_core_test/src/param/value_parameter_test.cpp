@@ -57,7 +57,7 @@ void testSerialization(T value, const std::string& expected_type)
         ParameterPtr p = factory::declareValue("foo", value);
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
-        EXPECT_STREQ(p->TYPE().c_str(), node["type"].as<std::string>().c_str());
+        EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
         ASSERT_TRUE(node[expected_type].IsDefined());
         EXPECT_EQ(value, node[expected_type].as<T>());
     }

@@ -12,7 +12,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT StringListParameter : public ParameterImplementation<StringListParameter, 0x00A>
+class CSAPEX_PARAM_EXPORT StringListParameter : public ParameterImplementation<StringListParameter>
 {
 public:
     typedef std::shared_ptr<StringListParameter> Ptr;

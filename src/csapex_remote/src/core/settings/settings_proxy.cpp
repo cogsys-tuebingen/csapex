@@ -97,7 +97,7 @@ csapex::param::Parameter::Ptr SettingsProxy::getNoThrow(const std::string& name)
     if (const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
         apex_assert_hard(response->getParameter());
 
-        if (response->getParameter()->ID() == param::NullParameter::NUMERICAL_ID) {
+        if (typeid(*response->getParameter()) == typeid(param::NullParameter)) {
             return nullptr;
         }
 
@@ -121,8 +121,10 @@ void SettingsProxy::createParameterProxy(const std::string& name, param::Paramet
         // request to set the parameter
         boost::any raw;
         param->get_unsafe(raw);
-        CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
-        self->session_->write(change);
+        if(!param->getUUID().empty()) {
+            CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
+            self->session_->write(change);
+        }
 
         self->settingsChanged(param->name());
     });

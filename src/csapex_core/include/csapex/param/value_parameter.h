@@ -12,7 +12,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT ValueParameter : public ParameterImplementation<ValueParameter, 0x008>
+class CSAPEX_PARAM_EXPORT ValueParameter : public ParameterImplementation<ValueParameter>
 {
 public:
     typedef std::shared_ptr<ValueParameter> Ptr;

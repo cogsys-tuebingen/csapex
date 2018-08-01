@@ -13,7 +13,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT SetParameter : public ParameterImplementation<SetParameter, 0x006>
+class CSAPEX_PARAM_EXPORT SetParameter : public ParameterImplementation<SetParameter>
 {
 public:
     typedef std::shared_ptr<SetParameter> Ptr;

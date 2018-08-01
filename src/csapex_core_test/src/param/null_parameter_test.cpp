@@ -70,7 +70,7 @@ TEST_F(NullParameterTest, Serialization)
         ParameterPtr p = factory::declareNull("foo");
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
-        EXPECT_STREQ(p->TYPE().c_str(), node["type"].as<std::string>().c_str());
+        EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
     }
 
     {
@@ -107,7 +107,7 @@ TEST_F(NullParameterTest, BinarySerialization)
         ParameterPtr p = factory::declareNull("foo");
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
-        EXPECT_STREQ(p->TYPE().c_str(), node["type"].as<std::string>().c_str());
+        EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
     }
 
     {

@@ -41,6 +41,7 @@
 #include <QApplication>
 #include <QGroupBox>
 #include <QPushButton>
+#include <typeindex>
 
 using namespace csapex;
 using namespace csapex::param;
@@ -192,9 +193,9 @@ void setDirection(QBoxLayout* layout, NodeFacadePtr node)
 template <typename P, typename Adapter = void>
 struct install
 {
-    static void execute(std::map<int, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> >& map)
+    static void execute(std::map<std::type_index, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> >& map)
     {
-        map[P().ID()] = [](DefaultNodeAdapter* a, Parameter::Ptr p) { a->setupParameter<P, Adapter>(std::dynamic_pointer_cast<P>(p)); };
+        map[typeid(P)] = [](DefaultNodeAdapter* a, Parameter::Ptr p) { a->setupParameter<P, Adapter>(std::dynamic_pointer_cast<P>(p)); };
     }
 };
 
@@ -207,7 +208,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         return;
     }
 
-    static std::map<int, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> > mapping_;
+    static std::map<std::type_index, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> > mapping_;
     if (mapping_.empty()) {
         install<TriggerParameter, TriggerParameterAdapter>::execute(mapping_);
 
@@ -323,11 +324,12 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // generate UI element
-        if (mapping_.find(p->ID()) != mapping_.end()) {
-            mapping_[p->ID()](this, p);
+        const auto& type = typeid(*p);
+        if (mapping_.find(type) != mapping_.end()) {
+            mapping_[type](this, p);
 
         } else {
-            current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet registered (value: " + type2name(p->type()) + ")").c_str()));
+            current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet registered (value: " + type2name(type) + ")").c_str()));
         }
 
         // connect parameter output, if available

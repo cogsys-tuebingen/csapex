@@ -9,7 +9,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT ColorParameter : public ParameterImplementation<ColorParameter, 0x002>
+class CSAPEX_PARAM_EXPORT ColorParameter : public ParameterImplementation<ColorParameter>
 {
 public:
     typedef std::shared_ptr<ColorParameter> Ptr;

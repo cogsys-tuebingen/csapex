@@ -44,7 +44,7 @@ void testSerialization(T min, T max)
         ParameterPtr p = factory::declareRange<T>("foo", min, max, min, 1);
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
-        EXPECT_STREQ(p->TYPE().c_str(), node["type"].as<std::string>().c_str());
+        EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
     }
 
     {

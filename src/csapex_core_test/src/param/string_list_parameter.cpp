@@ -45,7 +45,7 @@ TEST_F(StringListParameterTest, SerializationStringList)
         ParameterPtr p = factory::declareStringList("foo", {"a", "b", "c"});
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
-        EXPECT_STREQ(p->TYPE().c_str(), node["type"].as<std::string>().c_str());
+        EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
     }
 
     {

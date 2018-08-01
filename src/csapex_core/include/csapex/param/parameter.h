@@ -70,8 +70,7 @@ public:
     void setUUID(const UUID& uuid);
     UUID getUUID() const;
 
-    virtual int ID() const = 0;
-    virtual std::string TYPE() const = 0;
+    virtual std::string getParameterType() const = 0;
 
     template <typename T>
     bool is() const

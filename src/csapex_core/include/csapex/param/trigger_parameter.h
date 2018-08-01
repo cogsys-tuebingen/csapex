@@ -9,7 +9,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT TriggerParameter : public ParameterImplementation<TriggerParameter, 0x007>
+class CSAPEX_PARAM_EXPORT TriggerParameter : public ParameterImplementation<TriggerParameter>
 {
 public:
     typedef std::shared_ptr<TriggerParameter> Ptr;

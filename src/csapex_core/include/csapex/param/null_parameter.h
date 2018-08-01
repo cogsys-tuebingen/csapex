@@ -9,7 +9,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT NullParameter : public ParameterImplementation<NullParameter, 0x000>
+class CSAPEX_PARAM_EXPORT NullParameter : public ParameterImplementation<NullParameter>
 {
 public:
     typedef std::shared_ptr<NullParameter> Ptr;

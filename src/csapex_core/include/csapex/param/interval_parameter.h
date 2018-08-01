@@ -16,7 +16,7 @@ namespace param
 {
 typedef boost::mpl::vector<double, int> IntervalParameterTypes;
 
-class CSAPEX_PARAM_EXPORT IntervalParameter : public ParameterImplementation<IntervalParameter, 0x003>
+class CSAPEX_PARAM_EXPORT IntervalParameter : public ParameterImplementation<IntervalParameter>
 {
 public:
     typedef std::shared_ptr<IntervalParameter> Ptr;

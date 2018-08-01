@@ -30,7 +30,7 @@ template <>
 int limitStep(const int min, const int max, const int step);
 }  // namespace range
 
-class CSAPEX_PARAM_EXPORT RangeParameter : public ParameterImplementation<RangeParameter, 0x005>
+class CSAPEX_PARAM_EXPORT RangeParameter : public ParameterImplementation<RangeParameter>
 {
 public:
     typedef std::shared_ptr<RangeParameter> Ptr;

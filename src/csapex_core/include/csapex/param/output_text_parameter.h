@@ -9,7 +9,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT OutputTextParameter : public ParameterImplementation<OutputTextParameter, 0x00C>
+class CSAPEX_PARAM_EXPORT OutputTextParameter : public ParameterImplementation<OutputTextParameter>
 {
 public:
     typedef std::shared_ptr<OutputTextParameter> Ptr;
@@ -18,11 +18,6 @@ public:
     OutputTextParameter();
     explicit OutputTextParameter(const std::string& name, const ParameterDescription& description);
     virtual ~OutputTextParameter();
-
-    virtual std::string TYPE() const override
-    {
-        return "outtext";
-    }
 
     virtual const std::type_info& type() const override;
 

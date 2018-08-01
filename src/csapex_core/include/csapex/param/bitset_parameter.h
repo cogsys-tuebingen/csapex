@@ -12,7 +12,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT BitSetParameter : public ParameterImplementation<BitSetParameter, 0x001>
+class CSAPEX_PARAM_EXPORT BitSetParameter : public ParameterImplementation<BitSetParameter>
 {
 public:
     typedef std::shared_ptr<BitSetParameter> Ptr;

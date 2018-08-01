@@ -9,7 +9,7 @@ namespace csapex
 {
 namespace param
 {
-class CSAPEX_PARAM_EXPORT OutputProgressParameter : public ParameterImplementation<OutputProgressParameter, 0x009>
+class CSAPEX_PARAM_EXPORT OutputProgressParameter : public ParameterImplementation<OutputProgressParameter>
 {
 public:
     typedef std::shared_ptr<OutputProgressParameter> Ptr;

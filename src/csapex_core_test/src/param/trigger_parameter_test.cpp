@@ -43,7 +43,7 @@ TEST_F(TriggerParameterTest, Serialization)
         ParameterPtr p = factory::declareTrigger("foo");
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
-        EXPECT_STREQ(p->TYPE().c_str(), node["type"].as<std::string>().c_str());
+        EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
     }
 
     {
@@ -80,7 +80,7 @@ TEST_F(TriggerParameterTest, BinarySerialization)
         ParameterPtr p = factory::declareTrigger("foo");
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
-        EXPECT_STREQ(p->TYPE().c_str(), node["type"].as<std::string>().c_str());
+        EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
     }
 
     {

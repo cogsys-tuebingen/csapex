@@ -203,7 +203,7 @@ std::string Parameter::toStringImpl() const
 
 void Parameter::serialize_yaml(YAML::Node& n) const
 {
-    n["type"] = TYPE();
+    n["type"] = getParameterType();
     n["name"] = name();
 
     if (interactive_) {

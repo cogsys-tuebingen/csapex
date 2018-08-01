@@ -9,7 +9,7 @@ namespace csapex
 {
 namespace param
 {
-template <typename I, int _NUMERICAL_ID>
+template <typename I>
 class ParameterImplementation : public Parameter
 {
     CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(I);
@@ -34,14 +34,7 @@ public:
         return type2nameWithoutNamespace(typeid(I));
     }
 
-    static const int NUMERICAL_ID = _NUMERICAL_ID;
-
-    virtual int ID() const override
-    {
-        return NUMERICAL_ID;
-    }
-
-    virtual std::string TYPE() const override
+    virtual std::string getParameterType() const override
     {
         return serializationName<I>();
     }
