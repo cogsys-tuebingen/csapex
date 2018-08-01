@@ -2,13 +2,13 @@
 #include <csapex/param/set_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(SetParameter)
+CSAPEX_REGISTER_PARAM(SetParameter)
 
 using namespace csapex;
 using namespace param;
@@ -149,12 +149,44 @@ void SetParameter::get_unsafe(boost::any& out) const
     }
 }
 
+template <typename T>
+bool SetParameter::contains(const T& value)
+{
+    bool valid = false;
+    for(const auto& pair : set_) {
+        if(boost::any_cast<T>(pair.second) == value) {
+            valid = true;
+            break;
+        }
+    }
+    return valid;
+}
+
+bool SetParameter::contains(const boost::any& value)
+{
+    if (value.type() == typeid(int)) {
+        return contains(boost::any_cast<int>(value));
+    } else if (value.type() == typeid(double)) {
+        return contains(boost::any_cast<double>(value));
+    } else if (value.type() == typeid(bool)) {
+        return contains(boost::any_cast<bool>(value));
+    } else if (value.type() == typeid(std::string)) {
+        return contains(boost::any_cast<std::string>(value));
+    } else {
+        return false;
+    }
+}
+
 bool SetParameter::set_unsafe(const boost::any& v)
 {
     if (v.type() == typeid(std::pair<std::string, bool>)) {
         auto pair = boost::any_cast<std::pair<std::string, bool>>(v);
         setByName(pair.first);
         return true;
+    }
+
+    if(!contains(v)) {
+        throw std::logic_error("Value not in set");
     }
 
     bool change = true;

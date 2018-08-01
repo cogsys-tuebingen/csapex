@@ -191,6 +191,7 @@ add_library(csapex_param SHARED
     src/param/io.cpp
     src/param/parameter.cpp
     src/param/parameter_builder.cpp
+    src/param/parameter_provider.cpp
     src/param/parameter_description.cpp
 
     src/param/range_parameter.cpp
@@ -209,8 +210,6 @@ add_library(csapex_param SHARED
     src/param/output_progress_parameter.cpp
 
     src/param/parameter_factory.cpp
-    src/param/parameter_map.cpp
-    src/param/parameter_provider.cpp
 
     src/serialization/parameter_serializer.cpp
 

@@ -22,11 +22,6 @@ public:
     explicit BitSetParameter(const std::string& name, const ParameterDescription& description, int def = 0);
     virtual ~BitSetParameter();
 
-    virtual std::string TYPE() const override
-    {
-        return "bitset";
-    }
-
     virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
@@ -76,6 +71,13 @@ private:
     std::map<std::string, int> set_;
     int def_;
 };
+
+
+template <>
+inline std::string serializationName<BitSetParameter>()
+{
+    return "bitset";
+}
 
 }  // namespace param
 }  // namespace csapex

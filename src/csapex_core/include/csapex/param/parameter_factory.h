@@ -7,6 +7,9 @@
 #include <csapex/param/parameter_description.h>
 #include <csapex_param_export.h>
 
+/// PROJECT
+#include <csapex/utility/singleton.hpp>
+
 /// SYSTEM
 #include <type_traits>
 
@@ -22,6 +25,14 @@ namespace factory
      * @return
      */
     ParameterBuilder makeEmpty(const std::string& type);
+
+    /**
+     * @brief registerMessage
+     * @param type
+     * @param constructor
+     */
+    void registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor);
+
 
     /**
      * @brief clone duplicates a parameter deeply
@@ -325,6 +336,31 @@ namespace factory
      * @return
      */
     ParameterBuilder declareOutputText(const std::string& name, const ParameterDescription& description = ParameterDescription(""));
+
+
+    class ParameterFactory : public Singleton<ParameterFactory>
+    {
+    public:
+        template <typename T>
+        struct ParameterConstructorRegistered
+        {
+            ParameterConstructorRegistered()
+            {
+                factory::registerParameterType(param::serializationName<T>(), [](){
+                    return ParameterBuilder(std::move(std::make_shared<T>()));
+                });
+            }
+        };
+
+    public:
+        ParameterBuilder makeEmpty(const std::string &type);
+        void registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor);
+
+    private:
+        std::map<std::string, std::function<ParameterBuilder()>> type_to_constructor;
+    };
+
+
 }
 
 // backwards compatibility

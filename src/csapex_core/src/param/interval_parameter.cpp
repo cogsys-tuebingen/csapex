@@ -2,7 +2,7 @@
 #include <csapex/param/interval_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
@@ -10,7 +10,7 @@
 #undef NDEBUG
 #include <assert.h>
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(IntervalParameter)
+CSAPEX_REGISTER_PARAM(IntervalParameter)
 
 using namespace csapex;
 using namespace param;
@@ -62,6 +62,15 @@ IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interva
     }
 
     return *this;
+}
+
+bool IntervalParameter::accepts(const std::type_info& type) const
+{
+    if(values_.first.empty()) {
+        return type == typeid(std::pair<int, int>) || type == typeid(std::pair<double, double>);
+    } else {
+        return Parameter::accepts(type);
+    }
 }
 
 const std::type_info& IntervalParameter::type() const

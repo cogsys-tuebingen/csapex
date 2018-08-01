@@ -25,11 +25,6 @@ public:
 
     TriggerParameter& operator=(const TriggerParameter& p);
 
-    virtual std::string TYPE() const override
-    {
-        return "trigger";
-    }
-
     void trigger();
     virtual bool hasState() const override;
 
@@ -45,6 +40,14 @@ protected:
 
 private:
 };
+
+
+template <>
+inline std::string serializationName<TriggerParameter>()
+{
+    return "trigger";
+}
+
 
 }  // namespace param
 }  // namespace csapex

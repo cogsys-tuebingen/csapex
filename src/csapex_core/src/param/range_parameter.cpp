@@ -2,14 +2,14 @@
 #include <csapex/param/range_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(RangeParameter)
+CSAPEX_REGISTER_PARAM(RangeParameter)
 
 using namespace csapex;
 using namespace param;
@@ -46,6 +46,9 @@ RangeParameter& RangeParameter::operator=(const RangeParameter& range)
     value_ = range.value_;
     min_ = range.min_;
     max_ = range.max_;
+    def_value_ = range.def_value_;
+    def_min_ = range.def_min_;
+    def_max_ = range.def_max_;
     if (value_change) {
         triggerChange();
     }

@@ -30,11 +30,6 @@ public:
 
     virtual ~ValueParameter();
 
-    virtual std::string TYPE() const override
-    {
-        return "value";
-    }
-
     virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
@@ -72,6 +67,13 @@ private:
     boost::any value_;
     boost::any def_;
 };
+
+
+template <>
+inline std::string serializationName<ValueParameter>()
+{
+    return "value";
+}
 
 }  // namespace param
 }  // namespace csapex

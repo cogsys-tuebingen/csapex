@@ -21,37 +21,34 @@
 using namespace csapex;
 using namespace param;
 
+void factory::registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor)
+{
+    ParameterFactory& i = ParameterFactory::instance();
+    i.registerParameterType(type, constructor);
+}
+
+void factory::ParameterFactory::registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor)
+{
+    std::map<std::string, std::function<ParameterBuilder()>>::const_iterator it = type_to_constructor.find(type);
+
+    type_to_constructor.insert(std::make_pair(type, constructor));
+}
+
+
+ParameterBuilder factory::ParameterFactory::makeEmpty(const std::string& type)
+{
+    if (type_to_constructor.find(type) == type_to_constructor.end()) {
+        throw std::runtime_error(std::string("cannot create parameter, no such type (") + type + ")");
+    }
+
+    return type_to_constructor[type]();
+}
+
 ParameterBuilder factory::makeEmpty(const std::string& type)
 {
     std::string t = type;
     std::transform(t.begin(), t.end(), t.begin(), tolower);
-    if (t == "range") {
-        return std::shared_ptr<Parameter>(new RangeParameter);
-    } else if (t == "interval") {
-        return std::shared_ptr<Parameter>(new IntervalParameter);
-    } else if (t == "value") {
-        return std::shared_ptr<Parameter>(new ValueParameter);
-    } else if (t == "set") {
-        return std::shared_ptr<Parameter>(new SetParameter);
-    } else if (t == "bitset") {
-        return std::shared_ptr<Parameter>(new BitSetParameter);
-    } else if (t == "path") {
-        return std::shared_ptr<Parameter>(new PathParameter);
-    } else if (t == "trigger") {
-        return std::shared_ptr<Parameter>(new TriggerParameter);
-    } else if (t == "string_list") {
-        return std::shared_ptr<Parameter>(new StringListParameter);
-    } else if (t == "color") {
-        return std::shared_ptr<Parameter>(new ColorParameter);
-    } else if (t == "angle") {
-        return std::shared_ptr<Parameter>(new AngleParameter);
-    } else if (t == "progress") {
-        return std::shared_ptr<Parameter>(new OutputProgressParameter);
-    } else if (t == "outtext") {
-        return std::shared_ptr<Parameter>(new OutputTextParameter);
-    } else {
-        throw std::runtime_error(std::string("illegal parameter type: ") + t);
-    }
+    return ParameterFactory::instance().makeEmpty(type);
 }
 
 ParameterBuilder factory::clone(const Parameter* param)

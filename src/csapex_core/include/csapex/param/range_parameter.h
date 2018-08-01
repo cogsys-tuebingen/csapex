@@ -59,11 +59,6 @@ public:
 
     RangeParameter& operator=(const RangeParameter& p);
 
-    virtual std::string TYPE() const override
-    {
-        return "range";
-    }
-
     virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
@@ -183,6 +178,13 @@ private:
     boost::any def_max_;
     boost::any step_;
 };
+
+
+template <>
+inline std::string serializationName<RangeParameter>()
+{
+    return "range";
+}
 
 }  // namespace param
 }  // namespace csapex

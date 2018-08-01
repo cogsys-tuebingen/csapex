@@ -49,7 +49,7 @@ TEST_F(ValueParameterTest, StringConversion)
 }
 
 template <typename T>
-void testValueSerialization(T value, const std::string& expected_type)
+void testSerialization(T value, const std::string& expected_type)
 {
     YAML::Node node;
 
@@ -74,15 +74,15 @@ void testValueSerialization(T value, const std::string& expected_type)
 
 TEST_F(ValueParameterTest, YamlSerializationValue)
 {
-    testValueSerialization<long>(420000000000, "long");
-    testValueSerialization<int>(42, "int");
-    testValueSerialization<double>(42.0, "double");
+    testSerialization<long>(420000000000, "long");
+    testSerialization<int>(42, "int");
+    testSerialization<double>(42.0, "double");
 
-    testValueSerialization<bool>(true, "bool");
-    testValueSerialization<bool>(false, "bool");
+    testSerialization<bool>(true, "bool");
+    testSerialization<bool>(false, "bool");
 
-    testValueSerialization<std::string>("foobarbaz", "string");
-    testValueSerialization<std::string>("", "string");
+    testSerialization<std::string>("foobarbaz", "string");
+    testSerialization<std::string>("", "string");
 }
 
 template <typename T>

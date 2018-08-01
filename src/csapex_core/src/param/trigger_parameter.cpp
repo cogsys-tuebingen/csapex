@@ -2,13 +2,13 @@
 #include <csapex/param/trigger_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(TriggerParameter)
+CSAPEX_REGISTER_PARAM(TriggerParameter)
 
 using namespace csapex;
 using namespace param;

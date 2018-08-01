@@ -2,7 +2,7 @@
 #include <csapex/param/angle_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 #include <csapex/param/value_parameter.h>
 
@@ -10,7 +10,7 @@
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(AngleParameter)
+CSAPEX_REGISTER_PARAM(AngleParameter)
 
 using namespace csapex;
 using namespace param;

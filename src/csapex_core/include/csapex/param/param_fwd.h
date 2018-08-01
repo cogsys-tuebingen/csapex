@@ -13,6 +13,8 @@
 
 namespace csapex
 {
+FWD(Parameterizable)
+
 namespace param
 {
 FWD(Parameter)

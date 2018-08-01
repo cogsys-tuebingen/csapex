@@ -4,6 +4,7 @@
 /// COMPONENT
 #include <csapex/param/param_fwd.h>
 #include <csapex/param/parameter_description.h>
+#include <csapex/param/parameter_traits.h>
 #include <csapex/utility/uuid.h>
 #include <csapex_param_export.h>
 #include <csapex/serialization/streamable.h>

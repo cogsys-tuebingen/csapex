@@ -31,11 +31,6 @@ public:
 
     virtual ~SetParameter();
 
-    virtual std::string TYPE() const override
-    {
-        return "set";
-    }
-
     virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
@@ -78,6 +73,10 @@ public:
     std::string getText(int idx) const;
     std::string getText() const;
 
+    template <typename T>
+    bool contains(const T& value);
+    bool contains(const boost::any& value);
+
     int noParameters() const;
 
 protected:
@@ -109,6 +108,13 @@ private:
     std::map<std::string, boost::any> set_;
     boost::any def_;
 };
+
+
+template <>
+inline std::string serializationName<SetParameter>()
+{
+    return "set";
+}
 
 }  // namespace param
 }  // namespace csapex

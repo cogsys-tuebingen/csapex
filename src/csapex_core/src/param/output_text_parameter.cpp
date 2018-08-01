@@ -2,14 +2,14 @@
 #include <csapex/param/output_text_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(OutputTextParameter)
+CSAPEX_REGISTER_PARAM(OutputTextParameter)
 
 using namespace csapex;
 using namespace param;

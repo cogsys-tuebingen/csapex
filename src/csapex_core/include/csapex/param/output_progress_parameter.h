@@ -22,11 +22,6 @@ public:
     virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
-    virtual std::string TYPE() const override
-    {
-        return "progress";
-    }
-
     void advanceProgress(int step = 1);
     void setProgress(int progress, int maximum);
     double getProgress() const;
@@ -46,6 +41,13 @@ private:
     int value;
     int maximum;
 };
+
+
+template <>
+inline std::string serializationName<OutputProgressParameter>()
+{
+    return "progress";
+}
 
 }  // namespace param
 }  // namespace csapex

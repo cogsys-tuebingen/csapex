@@ -19,11 +19,6 @@ public:
     explicit PathParameter(const std::string& name, const ParameterDescription& description, const std::string& filter, bool is_file, bool input, bool output);
     virtual ~PathParameter();
 
-    virtual std::string TYPE() const override
-    {
-        return "path";
-    }
-
     virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
@@ -55,6 +50,12 @@ private:
     bool input_;
     bool output_;
 };
+
+template <>
+inline std::string serializationName<PathParameter>()
+{
+    return "path";
+}
 
 }  // namespace param
 }  // namespace csapex

@@ -43,6 +43,13 @@ private:
     std::string text_;
 };
 
+
+template <>
+inline std::string serializationName<OutputTextParameter>()
+{
+    return "outtext";
+}
+
 }  // namespace param
 }  // namespace csapex
 #endif  // OUTPUT_TEXT_PARAMETER_H

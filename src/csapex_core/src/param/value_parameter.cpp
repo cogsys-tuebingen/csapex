@@ -2,7 +2,7 @@
 #include <csapex/param/value_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <iomanip>
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(ValueParameter)
+CSAPEX_REGISTER_PARAM(ValueParameter)
 
 using namespace csapex;
 using namespace param;

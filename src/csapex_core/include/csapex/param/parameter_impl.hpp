@@ -40,6 +40,11 @@ public:
     {
         return NUMERICAL_ID;
     }
+
+    virtual std::string TYPE() const override
+    {
+        return serializationName<I>();
+    }
 };
 
 }  // namespace param

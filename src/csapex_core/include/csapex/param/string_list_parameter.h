@@ -30,11 +30,6 @@ public:
     std::size_t count() const;
     std::vector<std::string> getValues() const;
 
-    virtual std::string TYPE() const override
-    {
-        return "string_list";
-    }
-
     virtual const std::type_info& type() const override;
     virtual std::string toStringImpl() const override;
 
@@ -65,6 +60,13 @@ private:
 private:
     std::vector<std::string> list_;
 };
+
+
+template <>
+inline std::string serializationName<StringListParameter>()
+{
+    return "string_list";
+}
 
 }  // namespace param
 }  // namespace csapex

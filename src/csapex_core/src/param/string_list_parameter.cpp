@@ -2,7 +2,7 @@
 #include <csapex/param/string_list_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
@@ -12,7 +12,7 @@
 using namespace csapex;
 using namespace param;
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(StringListParameter)
+CSAPEX_REGISTER_PARAM(StringListParameter)
 
 StringListParameter::StringListParameter() : ParameterImplementation("noname", ParameterDescription())
 {

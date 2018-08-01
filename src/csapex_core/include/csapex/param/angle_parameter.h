@@ -24,11 +24,6 @@ public:
 
     virtual const std::type_info& type() const override;
 
-    virtual std::string TYPE() const override
-    {
-        return "angle";
-    }
-
     virtual std::string toStringImpl() const override;
 
     void cloneDataFrom(const Clonable& other) override;
@@ -51,6 +46,13 @@ private:
     double min_;
     double max_;
 };
+
+
+template <>
+inline std::string serializationName<AngleParameter>()
+{
+    return "angle";
+}
 
 }  // namespace param
 }  // namespace csapex

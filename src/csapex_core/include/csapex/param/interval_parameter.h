@@ -44,13 +44,10 @@ public:
 
     IntervalParameter& operator=(const IntervalParameter& p);
 
-    virtual std::string TYPE() const override
-    {
-        return "interval";
-    }
+    bool accepts(const std::type_info& type) const override;
 
-    virtual const std::type_info& type() const override;
-    virtual std::string toStringImpl() const override;
+    const std::type_info& type() const override;
+    std::string toStringImpl() const override;
 
     void cloneDataFrom(const Clonable& other) override;
 
@@ -185,6 +182,13 @@ private:
     std::pair<boost::any, boost::any> def_;
     boost::any step_;
 };
+
+
+template <>
+inline std::string serializationName<IntervalParameter>()
+{
+    return "interval";
+}
 
 }  // namespace param
 }  // namespace csapex

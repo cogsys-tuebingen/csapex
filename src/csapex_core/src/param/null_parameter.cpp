@@ -2,13 +2,13 @@
 #include <csapex/param/null_parameter.h>
 
 /// PROJECT
-#include <csapex/serialization/parameter_serializer.h>
+#include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
 #include <yaml-cpp/yaml.h>
 
-CSAPEX_REGISTER_PARAMETER_SERIALIZER(NullParameter)
+CSAPEX_REGISTER_PARAM(NullParameter)
 
 using namespace csapex;
 using namespace param;
@@ -25,6 +25,11 @@ NullParameter::~NullParameter()
 {
 }
 
+bool NullParameter::hasState() const
+{
+    return false;
+}
+
 const std::type_info& NullParameter::type() const
 {
     return typeid(void);
@@ -37,12 +42,12 @@ std::string NullParameter::toStringImpl() const
 
 void NullParameter::get_unsafe(boost::any& out) const
 {
-    throw std::runtime_error("cannot use null parameters");
+    throw std::logic_error("cannot use null parameters");
 }
 
 bool NullParameter::set_unsafe(const boost::any& /*v*/)
 {
-    throw std::runtime_error("cannot use null parameters");
+    throw std::logic_error("cannot use null parameters");
 }
 
 void NullParameter::doSerialize(YAML::Node& /*n*/) const
