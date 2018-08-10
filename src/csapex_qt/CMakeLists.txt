@@ -110,7 +110,6 @@ add_library(${PROJECT_NAME} SHARED
     src/view/param/value_param_adapter.cpp
     src/view/param/path_param_adapter.cpp
     src/view/param/color_param_adapter.cpp
-    src/view/param/angle_param_adapter.cpp
 
     src/view/param/output_progress_param_adapter.cpp
     src/view/param/output_text_param_adapter.cpp

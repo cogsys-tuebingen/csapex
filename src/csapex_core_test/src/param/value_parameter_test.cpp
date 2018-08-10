@@ -142,11 +142,11 @@ TEST_F(ValueParameterTest, SetValueFromAnotherType)
 
     ASSERT_NEAR(42.0, value->as<double>(), 1e-5);
 
-    ParameterPtr angle = factory::declareAngle("foo_angle", 0.0);
-    ASSERT_NEAR(0.0, angle->as<double>(), 1e-5);
-    angle->cloneDataFrom(*value);
+    ParameterPtr range = factory::declareRange("foo_range", 0.0, 10.0, 0.0, 1e-5);
+    ASSERT_NEAR(0.0, range->as<double>(), 1e-5);
+    value->cloneDataFrom(*range);
 
-    ASSERT_NEAR(42.0, angle->as<double>(), 1e-5);
+    ASSERT_NEAR(0.0, value->as<double>(), 1e-5);
 }
 
 TEST_F(ValueParameterTest, ValueChangedIsTriggered)

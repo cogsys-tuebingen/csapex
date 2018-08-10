@@ -202,7 +202,6 @@ add_library(csapex_param SHARED
     src/param/path_parameter.cpp
     src/param/trigger_parameter.cpp
     src/param/color_parameter.cpp
-    src/param/angle_parameter.cpp
     src/param/null_parameter.cpp
     src/param/string_list_parameter.cpp
 

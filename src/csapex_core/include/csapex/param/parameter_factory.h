@@ -189,15 +189,6 @@ ParameterBuilder declareDirectoryInputOutputPath(const std::string& name, const 
 ParameterBuilder declareTrigger(const std::string& name, const ParameterDescription& description);
 ParameterBuilder declareTrigger(const std::string& name);
 
-/**
- * @brief declareAngleParameter
- * @param name
- * @param description
- * @param angle default value
- * @return
- */
-ParameterBuilder declareAngle(const std::string& name, const ParameterDescription& description, double angle);
-ParameterBuilder declareAngle(const std::string& name, double angle);
 
 /**
  * @brief declareColorParameter

@@ -2,7 +2,6 @@
 #include <csapex/param/parameter_factory.h>
 
 /// COMPONENT
-#include <csapex/param/angle_parameter.h>
 #include <csapex/param/color_parameter.h>
 #include <csapex/param/path_parameter.h>
 #include <csapex/param/interval_parameter.h>
@@ -107,17 +106,6 @@ ParameterBuilder factory::declareBool(const std::string& name, const ParameterDe
 ParameterBuilder factory::declareBool(const std::string& name, bool def)
 {
     return declareBool(name, ParameterDescription(), def);
-}
-
-ParameterBuilder factory::declareAngle(const std::string& name, const ParameterDescription& description, double angle)
-{
-    std::shared_ptr<AngleParameter> result(new AngleParameter(name, description, angle));
-    return ParameterBuilder(std::move(result));
-}
-
-ParameterBuilder factory::declareAngle(const std::string& name, double angle)
-{
-    return declareAngle(name, ParameterDescription(), angle);
 }
 
 ParameterBuilder factory::declareColorParameter(const std::string& name, const ParameterDescription& description, int r, int g, int b)
