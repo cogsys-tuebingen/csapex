@@ -3,7 +3,7 @@
 src/csapex_core/include/csapex/info.h
 *export.h
 src/csapex_core/reports
-include/
+moc_*.cpp
 doc/doxy*
 doc/html
 doc/latex
