@@ -138,6 +138,7 @@ add_executable(${PROJECT_NAME}_tests
     tests/slim_signals_test.cpp
     tests/uuid_test.cpp
     tests/shared_memory_test.cpp
+    tests/type_test.cpp
 )
 
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME}_tests)

@@ -37,7 +37,7 @@ std::string csapex::type2nameWithoutNamespace(const std::type_info& info)
 #endif
 
     //    return replace(replace(full_name, "connection_types::", ""), "csapex::", "");
-    std::size_t split_point = full_name.find("::");
+    std::size_t split_point = full_name.rfind("::");
 
     if (split_point == full_name.npos) {
         return full_name;
