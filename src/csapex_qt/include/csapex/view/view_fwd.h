@@ -18,10 +18,13 @@ FWD(ActivityLegend)
 FWD(NodeBox)
 FWD(MessageRenderer)
 FWD(NodeAdapter)
+FWD(DefaultNodeAdapter)
 FWD(NodeAdapterBuilder)
 FWD(NodeAdapterFactory)
 FWD(Port)
 FWD(ParameterAdapter)
+FWD(ParameterAdapterBuilder)
+FWD(ParameterAdapterFactory)
 
 class CsApexViewCore;
 

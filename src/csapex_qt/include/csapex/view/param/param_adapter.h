@@ -23,6 +23,9 @@ class CSAPEX_QT_EXPORT ParameterAdapter : public QObject
     Q_OBJECT
 
 public:
+    typedef std::shared_ptr<ParameterAdapter> Ptr;
+
+public:
     ParameterAdapter(param::Parameter::Ptr p);
     virtual ~ParameterAdapter();
 

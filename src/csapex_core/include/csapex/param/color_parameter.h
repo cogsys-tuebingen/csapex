@@ -43,7 +43,6 @@ private:
     std::vector<int> def_;
 };
 
-
 template <>
 inline std::string serializationName<ColorParameter>()
 {

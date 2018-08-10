@@ -43,9 +43,7 @@ public:
     explicit RangeParameter(const std::string& name, const ParameterDescription& description);
 
     template <typename T>
-    RangeParameter(const std::string& name, const ParameterDescription& description,
-                   T def_value, T def_min, T def_max, T step)
-        : RangeParameter(name, description)
+    RangeParameter(const std::string& name, const ParameterDescription& description, T def_value, T def_min, T def_max, T step) : RangeParameter(name, description)
     {
         def_value_ = def_value;
         def_min_ = def_min;
@@ -178,7 +176,6 @@ private:
     boost::any def_max_;
     boost::any step_;
 };
-
 
 template <>
 inline std::string serializationName<RangeParameter>()

@@ -34,7 +34,6 @@ void factory::ParameterFactory::registerParameterType(const std::string& type, s
     type_to_constructor.insert(std::make_pair(type, constructor));
 }
 
-
 ParameterBuilder factory::ParameterFactory::makeEmpty(const std::string& type)
 {
     if (type_to_constructor.find(type) == type_to_constructor.end()) {
@@ -78,12 +77,12 @@ ParameterBuilder factory::declareParameterBitSet(const std::string& name, const 
     return declareParameterBitSet(name, ParameterDescription(), set, def);
 }
 
-ParameterBuilder factory::declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool> >& set)
+ParameterBuilder factory::declareParameterBitSet(const std::string& name, const ParameterDescription& description, const std::map<std::string, std::pair<int, bool>>& set)
 {
     std::map<std::string, int> raw_set;
     int def = 0;
 
-    for (std::map<std::string, std::pair<int, bool> >::const_iterator it = set.begin(); it != set.end(); ++it) {
+    for (std::map<std::string, std::pair<int, bool>>::const_iterator it = set.begin(); it != set.end(); ++it) {
         raw_set[it->first] = it->second.first;
         if (it->second.second) {
             def += it->second.first;
@@ -92,7 +91,7 @@ ParameterBuilder factory::declareParameterBitSet(const std::string& name, const 
     return declareParameterBitSet(name, description, raw_set, def);
 }
 
-ParameterBuilder factory::declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool> >& set)
+ParameterBuilder factory::declareParameterBitSet(const std::string& name, const std::map<std::string, std::pair<int, bool>>& set)
 {
     return factory::declareParameterBitSet(name, ParameterDescription(), set);
 }
@@ -138,7 +137,6 @@ ParameterBuilder factory::declareTrigger(const std::string& name, const Paramete
     return ParameterBuilder(std::move(result));
 }
 
-
 ParameterBuilder factory::declareStringList(const std::string& name, const ParameterDescription& description, const std::vector<std::string>& list)
 {
     std::shared_ptr<StringListParameter> result(new StringListParameter(name, description));
@@ -155,8 +153,7 @@ ParameterBuilder factory::declareTrigger(const std::string& name)
     return declareTrigger(name, ParameterDescription());
 }
 
-ParameterBuilder factory::declarePath(const std::string& name, const ParameterDescription& description, bool is_file, const std::string& def, const std::string& filter, bool input,
-                                               bool output)
+ParameterBuilder factory::declarePath(const std::string& name, const ParameterDescription& description, bool is_file, const std::string& def, const std::string& filter, bool input, bool output)
 {
     std::shared_ptr<PathParameter> result(new PathParameter(name, description, filter, is_file, input, output));
     result->set(def);
@@ -296,7 +293,7 @@ ParameterBuilder factory::declareInterval(const std::string& name, const Paramet
 
     std::shared_ptr<IntervalParameter> result(new IntervalParameter(name, description, std::make_pair(def_min, def_max), min, max, step));
 
-    result->set<std::pair<T, T> >(std::make_pair(def_min, def_max));
+    result->set<std::pair<T, T>>(std::make_pair(def_min, def_max));
 
     return ParameterBuilder(std::move(result));
 }
@@ -334,9 +331,9 @@ struct argument_type<T(U)>
 };
 }  // namespace
 
-#define INSTANTIATE(T)                                                                                                                                                                        \
-    template ParameterBuilder factory::detail::declareParameterSetImpl(const std::string&, const ParameterDescription&,                                                              \
-                                                                                            const std::map<std::string, argument_type<void(T)>::type>&, const argument_type<void(T)>::type&); \
+#define INSTANTIATE(T)                                                                                                                                                                                 \
+    template ParameterBuilder factory::detail::declareParameterSetImpl(const std::string&, const ParameterDescription&, const std::map<std::string, argument_type<void(T)>::type>&,                    \
+                                                                       const argument_type<void(T)>::type&);                                                                                           \
     template ParameterBuilder factory::declareValue(const std::string&, const ParameterDescription&, const argument_type<void(T)>::type&);
 
 INSTANTIATE(bool)
@@ -354,9 +351,7 @@ INSTANTIATE((std::vector<std::string>))
 template ParameterBuilder factory::declareRange<double>(const std::string& name, const ParameterDescription& description, double min, double max, double def, double step);
 template ParameterBuilder factory::declareRange<int>(const std::string& name, const ParameterDescription& description, int min, int max, int def, int step);
 
-template ParameterBuilder factory::declareInterval<double>(const std::string& name, const ParameterDescription& description, double min, double max, double def_min,
-                                                                                        double def_max, double step);
-template ParameterBuilder factory::declareInterval<int>(const std::string& name, const ParameterDescription& description, int min, int max, int def_min, int def_max,
-                                                                                     int step);
+template ParameterBuilder factory::declareInterval<double>(const std::string& name, const ParameterDescription& description, double min, double max, double def_min, double def_max, double step);
+template ParameterBuilder factory::declareInterval<int>(const std::string& name, const ParameterDescription& description, int min, int max, int def_min, int def_max, int step);
 }  // namespace param
 }  // namespace csapex

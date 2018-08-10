@@ -24,7 +24,6 @@ protected:
     }
 };
 
-
 TEST_F(StringListParameterTest, HasState)
 {
     EXPECT_TRUE(factory::declareStringList("foo", {}).build()->hasState());
@@ -33,8 +32,8 @@ TEST_F(StringListParameterTest, HasState)
 TEST_F(StringListParameterTest, StringConversion)
 {
     EXPECT_STREQ("[foo: [string_list: ]]", factory::declareStringList("foo", {}).build()->toString().c_str());
-    EXPECT_STREQ("[foo: [string_list: a]]", factory::declareStringList("foo", {"a"}).build()->toString().c_str());
-    EXPECT_STREQ("[foo: [string_list: a, b, c]]", factory::declareStringList("foo", {"a", "b", "c"}).build()->toString().c_str());
+    EXPECT_STREQ("[foo: [string_list: a]]", factory::declareStringList("foo", { "a" }).build()->toString().c_str());
+    EXPECT_STREQ("[foo: [string_list: a, b, c]]", factory::declareStringList("foo", { "a", "b", "c" }).build()->toString().c_str());
 }
 
 TEST_F(StringListParameterTest, SerializationStringList)
@@ -42,7 +41,7 @@ TEST_F(StringListParameterTest, SerializationStringList)
     YAML::Node node;
 
     {
-        ParameterPtr p = factory::declareStringList("foo", {"a", "b", "c"});
+        ParameterPtr p = factory::declareStringList("foo", { "a", "b", "c" });
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
         EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
@@ -68,7 +67,7 @@ TEST_F(StringListParameterTest, SerializationStringList)
     SerializationBuffer buffer;
 
     {
-        ParameterPtr p = factory::declareStringList("foo", {"a", "b", "c"});
+        ParameterPtr p = factory::declareStringList("foo", { "a", "b", "c" });
         ParameterSerializer::instance().serialize(*p, buffer);
     }
 
@@ -94,7 +93,7 @@ TEST_F(StringListParameterTest, SerializationStringList)
 
 TEST_F(StringListParameterTest, StringListAccess)
 {
-    StringListParameterPtr list =  factory::declareStringList("foo", {"a", "b", "c"}).build<StringListParameter>();
+    StringListParameterPtr list = factory::declareStringList("foo", { "a", "b", "c" }).build<StringListParameter>();
 
     EXPECT_EQ(3, list->count());
     EXPECT_STREQ("c", list->getValues()[2].c_str());
@@ -105,7 +104,6 @@ TEST_F(StringListParameterTest, StringListAccess)
     EXPECT_STREQ("a", list->getValues()[0].c_str());
     list->remove(0);
     EXPECT_STREQ("b", list->getValues()[0].c_str());
-
 
     EXPECT_EQ(2, list->count());
     list->add("R");

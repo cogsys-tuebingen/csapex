@@ -61,7 +61,6 @@ private:
     std::vector<std::string> list_;
 };
 
-
 template <>
 inline std::string serializationName<StringListParameter>()
 {

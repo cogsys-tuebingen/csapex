@@ -37,7 +37,6 @@ TEST_F(RangeParameterTest, StringConversion)
 template <typename T>
 void testSerialization(T min, T max)
 {
-
     YAML::Node node;
 
     {
@@ -59,7 +58,7 @@ void testSerialization(T min, T max)
         EXPECT_EQ(min, range->min<T>());
         EXPECT_EQ(max, range->max<T>());
 
-        auto val = range->as<std::pair<T,T>>();
+        auto val = range->as<std::pair<T, T>>();
         EXPECT_EQ(min, val.first);
         EXPECT_EQ(max, val.second);
     }
@@ -98,18 +97,18 @@ void testSet(T min, T max)
 {
     {
         RangeParameterPtr a = std::make_shared<RangeParameter>();
-        ASSERT_ANY_THROW((a->as<std::pair<T,T>>()));
+        ASSERT_ANY_THROW((a->as<std::pair<T, T>>()));
     }
 
     {
         RangeParameterPtr a = std::make_shared<RangeParameter>();
-        a->set(min+1);
+        a->set(min + 1);
 
-        ASSERT_EQ(min+1, a->as<T>());
+        ASSERT_EQ(min + 1, a->as<T>());
 
-        a->set(min+2);
+        a->set(min + 2);
 
-        ASSERT_EQ(min+2, a->as<T>());
+        ASSERT_EQ(min + 2, a->as<T>());
     }
 }
 
@@ -186,7 +185,6 @@ void testCloning(T min, T max)
     ASSERT_EQ(max, c->max<T>());
     ASSERT_EQ(min, c->def<T>());
 }
-
 
 TEST_F(RangeParameterTest, rangeCloning)
 {

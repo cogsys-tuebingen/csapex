@@ -29,7 +29,7 @@ IntervalParameter::~IntervalParameter()
 
 IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interval)
 {
-    Parameter::operator =(static_cast<const Parameter&>(interval));
+    Parameter::operator=(static_cast<const Parameter&>(interval));
 
     bool change = false;
     if (values_.first.empty() || values_.second.empty()) {
@@ -66,7 +66,7 @@ IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interva
 
 bool IntervalParameter::accepts(const std::type_info& type) const
 {
-    if(values_.first.empty()) {
+    if (values_.first.empty()) {
         return type == typeid(std::pair<int, int>) || type == typeid(std::pair<double, double>);
     } else {
         return Parameter::accepts(type);

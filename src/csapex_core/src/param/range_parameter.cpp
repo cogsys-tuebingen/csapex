@@ -28,10 +28,10 @@ RangeParameter::~RangeParameter()
 
 RangeParameter& RangeParameter::operator=(const RangeParameter& range)
 {
-    Parameter::operator =(static_cast<const Parameter&>(range));
+    Parameter::operator=(static_cast<const Parameter&>(range));
 
     bool value_change = false;
-    if(value_.empty() || value_.type() != range.value_.type()) {
+    if (value_.empty() || value_.type() != range.value_.type()) {
         value_change = true;
         step_ = range.step_;
     } else {

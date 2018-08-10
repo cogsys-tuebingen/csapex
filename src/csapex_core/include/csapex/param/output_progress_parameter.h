@@ -42,7 +42,6 @@ private:
     int maximum;
 };
 
-
 template <>
 inline std::string serializationName<OutputProgressParameter>()
 {

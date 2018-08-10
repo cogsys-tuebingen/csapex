@@ -100,6 +100,8 @@ add_library(${PROJECT_NAME} SHARED
     src/view/param/range_param_adapter.cpp
     src/view/param/value_param_adapter.cpp
 
+    src/view/param/param_adapter_builder.cpp
+    src/view/param/param_adapter_factory.cpp
     src/view/param/trigger_param_adapter.cpp
     src/view/param/range_param_adapter.cpp
     src/view/param/interval_param_adapter.cpp

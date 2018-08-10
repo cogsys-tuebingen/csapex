@@ -5,6 +5,7 @@
 #include <csapex/model/node_facade.h>
 #include <csapex/param/parameter.h>
 #include <csapex/view/node/box.h>
+#include <csapex/view/param/param_adapter_factory.h>
 
 /// SYSTEM
 #include <QLayout>
@@ -13,7 +14,8 @@
 
 using namespace csapex;
 
-NodeAdapter::NodeAdapter(NodeFacadePtr adaptee, NodeBox* parent) : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent)
+NodeAdapter::NodeAdapter(NodeFacadePtr adaptee, NodeBox* parent)
+  : layout_(nullptr), is_gui_setup_(false), node_(adaptee), parent_(parent)
 {
 }
 

@@ -22,8 +22,7 @@ public:
     explicit ValueParameter(const std::string& name, const ParameterDescription& description);
 
     template <typename T>
-    ValueParameter(const std::string& name, const ParameterDescription& description, T def)
-        : ValueParameter(name, description)
+    ValueParameter(const std::string& name, const ParameterDescription& description, T def) : ValueParameter(name, description)
     {
         def_ = def;
     }
@@ -67,7 +66,6 @@ private:
     boost::any value_;
     boost::any def_;
 };
-
 
 template <>
 inline std::string serializationName<ValueParameter>()

@@ -38,7 +38,6 @@ private:
     std::string text_;
 };
 
-
 template <>
 inline std::string serializationName<OutputTextParameter>()
 {

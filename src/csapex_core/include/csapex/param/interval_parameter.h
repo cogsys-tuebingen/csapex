@@ -29,9 +29,7 @@ public:
     explicit IntervalParameter(const std::string& name, const ParameterDescription& description);
 
     template <typename T>
-    IntervalParameter(const std::string& name, const ParameterDescription& description,
-                   std::pair<T, T> def_value, T min, T max, T step)
-        : IntervalParameter(name, description)
+    IntervalParameter(const std::string& name, const ParameterDescription& description, std::pair<T, T> def_value, T min, T max, T step) : IntervalParameter(name, description)
     {
         def_ = def_value;
         values_ = def_value;
@@ -182,7 +180,6 @@ private:
     std::pair<boost::any, boost::any> def_;
     boost::any step_;
 };
-
 
 template <>
 inline std::string serializationName<IntervalParameter>()

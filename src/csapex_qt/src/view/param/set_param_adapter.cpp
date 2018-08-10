@@ -8,6 +8,7 @@
 #include <csapex/utility/assert.h>
 #include <csapex/utility/type.h>
 #include <csapex/command/update_parameter.h>
+#include <csapex/view/utility/register_param_adapter.h>
 
 /// SYSTEM
 #include <QPointer>
@@ -16,6 +17,8 @@
 #include <iostream>
 
 using namespace csapex;
+
+CSAPEX_REGISTER_PARAM_ADAPTER(csapex, SetParameterAdapter, csapex::param::SetParameter)
 
 SetParameterAdapter::SetParameterAdapter(param::SetParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), set_p_(p)
 {

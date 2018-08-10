@@ -19,7 +19,6 @@ public:
     explicit NullParameter(const std::string& name, const ParameterDescription& description);
     virtual ~NullParameter();
 
-
     bool hasState() const override;
 
     const std::type_info& type() const override;
@@ -32,7 +31,6 @@ protected:
     void get_unsafe(boost::any& out) const override;
     bool set_unsafe(const boost::any& v) override;
 };
-
 
 template <>
 inline std::string serializationName<NullParameter>()

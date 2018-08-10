@@ -153,8 +153,8 @@ template <typename T>
 bool SetParameter::contains(const T& value)
 {
     bool valid = false;
-    for(const auto& pair : set_) {
-        if(boost::any_cast<T>(pair.second) == value) {
+    for (const auto& pair : set_) {
+        if (boost::any_cast<T>(pair.second) == value) {
             valid = true;
             break;
         }
@@ -185,7 +185,7 @@ bool SetParameter::set_unsafe(const boost::any& v)
         return true;
     }
 
-    if(!contains(v)) {
+    if (!contains(v)) {
         throw std::logic_error("Value not in set");
     }
 

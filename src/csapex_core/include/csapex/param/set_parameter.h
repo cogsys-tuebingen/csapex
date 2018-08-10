@@ -23,8 +23,7 @@ public:
     explicit SetParameter(const std::string& name, const ParameterDescription& description);
 
     template <typename T>
-    SetParameter(const std::string& name, const ParameterDescription& description, T def)
-        : SetParameter(name, description)
+    SetParameter(const std::string& name, const ParameterDescription& description, T def) : SetParameter(name, description)
     {
         def_ = def;
     }
@@ -108,7 +107,6 @@ private:
     std::map<std::string, boost::any> set_;
     boost::any def_;
 };
-
 
 template <>
 inline std::string serializationName<SetParameter>()

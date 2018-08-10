@@ -72,7 +72,6 @@ private:
     int def_;
 };
 
-
 template <>
 inline std::string serializationName<BitSetParameter>()
 {

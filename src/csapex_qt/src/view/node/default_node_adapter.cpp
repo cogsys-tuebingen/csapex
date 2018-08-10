@@ -8,32 +8,13 @@
 #include <csapex/model/node.h>
 #include <csapex/msg/input.h>
 #include <csapex/msg/output.h>
-#include <csapex/param/angle_parameter.h>
-#include <csapex/param/bitset_parameter.h>
-#include <csapex/param/color_parameter.h>
-#include <csapex/param/interval_parameter.h>
-#include <csapex/param/output_progress_parameter.h>
-#include <csapex/param/path_parameter.h>
-#include <csapex/param/range_parameter.h>
-#include <csapex/param/set_parameter.h>
-#include <csapex/param/trigger_parameter.h>
-#include <csapex/param/value_parameter.h>
+#include <csapex/view/param/param_adapter.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/parameter_context_menu.h>
-#include <csapex/view/param/angle_param_adapter.h>
-#include <csapex/view/param/bitset_param_adapter.h>
-#include <csapex/view/param/color_param_adapter.h>
-#include <csapex/view/param/interval_param_adapter.h>
-#include <csapex/view/param/output_progress_param_adapter.h>
-#include <csapex/view/param/output_text_param_adapter.h>
-#include <csapex/view/param/path_param_adapter.h>
-#include <csapex/view/param/range_param_adapter.h>
-#include <csapex/view/param/set_param_adapter.h>
-#include <csapex/view/param/value_param_adapter.h>
-#include <csapex/view/param/trigger_param_adapter.h>
 #include <csapex/view/utility/qsignal_relay.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/widgets/port.h>
+#include <csapex/view/param/param_adapter_factory.h>
 
 /// SYSTEM
 #include <functional>
@@ -126,7 +107,8 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 }
 
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent) : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent)
+  : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
 {
 }
 
@@ -206,23 +188,6 @@ void DefaultNodeAdapter::setupAdaptiveUi()
     NodeFacadePtr node_facade = node_.lock();
     if (!node_facade) {
         return;
-    }
-
-    static std::map<std::type_index, std::function<void(DefaultNodeAdapter*, Parameter::Ptr)> > mapping_;
-    if (mapping_.empty()) {
-        install<TriggerParameter, TriggerParameterAdapter>::execute(mapping_);
-
-        install<ColorParameter, ColorParameterAdapter>::execute(mapping_);
-        install<PathParameter, PathParameterAdapter>::execute(mapping_);
-        install<ValueParameter, ValueParameterAdapter>::execute(mapping_);
-        install<RangeParameter, RangeParameterAdapter>::execute(mapping_);
-        install<IntervalParameter, IntervalParameterAdapter>::execute(mapping_);
-        install<SetParameter, SetParameterAdapter>::execute(mapping_);
-        install<BitSetParameter, BitSetParameterAdapter>::execute(mapping_);
-        install<AngleParameter, AngleParameterAdapter>::execute(mapping_);
-
-        install<OutputTextParameter, OutputTextParameterAdapter>::execute(mapping_);
-        install<OutputProgressParameter, OutputProgressParameterAdapter>::execute(mapping_);
     }
 
     clear();
@@ -325,9 +290,9 @@ void DefaultNodeAdapter::setupAdaptiveUi()
 
         // generate UI element
         const auto& type = typeid(*p);
-        if (mapping_.find(type) != mapping_.end()) {
-            mapping_[type](this, p);
-
+        // check if it is a plugin, while there are non-plugin adapters
+        if(ParameterAdapterFactory::instance().hasAdapter(type)) {
+            ParameterAdapterFactory::instance().makeParameterAdapter(this, p);
         } else {
             current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet registered (value: " + type2name(type) + ")").c_str()));
         }
@@ -366,6 +331,11 @@ template <typename Parameter, typename Adapter>
 void DefaultNodeAdapter::setupParameter(std::shared_ptr<Parameter> p)
 {
     ParameterAdapterPtr adapter(std::make_shared<Adapter>(p));
+    addParameterAdapter(p, adapter);
+}
+
+void DefaultNodeAdapter::addParameterAdapter(const std::shared_ptr<Parameter>& p, ParameterAdapterPtr adapter)
+{
     adapters_.push_back(adapter);
     adapter->executeCommand.connect(executeCommand);
 

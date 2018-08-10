@@ -43,26 +43,26 @@ struct ParameterSerializerRegistered
 };
 }  // namespace csapex
 
-#define CSAPEX_REGISTER_PARAMETER_SERIALIZER(Name)                                                                                   \
-    namespace csapex                                                                                                                 \
-    {                                                                                                                                \
-    namespace param                                                                                                                  \
-    {                                                                                                                                \
-    class Name##Serializer : public ParameterSerializerInterface                                                                     \
-    {                                                                                                                                \
-        virtual void serialize(const Parameter& packet, SerializationBuffer& data) const override                                    \
-        {                                                                                                                            \
-            packet.serializeVersioned(data);                                                                                         \
-        }                                                                                                                            \
-        virtual ParameterPtr deserialize(const SerializationBuffer& data) override                                                   \
-        {                                                                                                                            \
-            auto result = std::make_shared<Name>();                                                                                  \
-            result->deserializeVersioned(data);                                                                                      \
-            return result;                                                                                                           \
-        }                                                                                                                            \
-    };                                                                                                                               \
-    }                                                                                                                                \
-    ParameterSerializerRegistered<param::Name##Serializer> g_register_##Name##_serializer(param::serializationName<param::Name>());  \
+#define CSAPEX_REGISTER_PARAMETER_SERIALIZER(Name)                                                                                                                                                     \
+    namespace csapex                                                                                                                                                                                   \
+    {                                                                                                                                                                                                  \
+    namespace param                                                                                                                                                                                    \
+    {                                                                                                                                                                                                  \
+    class Name##Serializer : public ParameterSerializerInterface                                                                                                                                       \
+    {                                                                                                                                                                                                  \
+        virtual void serialize(const Parameter& packet, SerializationBuffer& data) const override                                                                                                      \
+        {                                                                                                                                                                                              \
+            packet.serializeVersioned(data);                                                                                                                                                           \
+        }                                                                                                                                                                                              \
+        virtual ParameterPtr deserialize(const SerializationBuffer& data) override                                                                                                                     \
+        {                                                                                                                                                                                              \
+            auto result = std::make_shared<Name>();                                                                                                                                                    \
+            result->deserializeVersioned(data);                                                                                                                                                        \
+            return result;                                                                                                                                                                             \
+        }                                                                                                                                                                                              \
+    };                                                                                                                                                                                                 \
+    }                                                                                                                                                                                                  \
+    ParameterSerializerRegistered<param::Name##Serializer> g_register_##Name##_serializer(param::serializationName<param::Name>());                                                                    \
     }
 
 #endif  // PARAMETER_SERIALIZER_H

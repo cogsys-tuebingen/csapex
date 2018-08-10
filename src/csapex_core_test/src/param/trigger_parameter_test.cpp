@@ -34,7 +34,6 @@ TEST_F(TriggerParameterTest, StringConversion)
     EXPECT_STREQ("[foo: [trigger]]", factory::declareTrigger("foo").build()->toString().c_str());
 }
 
-
 TEST_F(TriggerParameterTest, Serialization)
 {
     YAML::Node node;
@@ -70,7 +69,6 @@ TEST_F(TriggerParameterTest, Serialization)
         ASSERT_NE(nullptr, sp);
     }
 }
-
 
 TEST_F(TriggerParameterTest, BinarySerialization)
 {
@@ -116,14 +114,11 @@ TEST_F(TriggerParameterTest, SetValueFromTriggerThrows)
     ASSERT_ANY_THROW(value->cloneDataFrom(*trigger));
 }
 
-
 TEST_F(TriggerParameterTest, SettingTriggerCausesTrigger)
 {
     ParameterPtr trigger = factory::declareTrigger("range");
     bool called = false;
-    trigger->parameter_changed.connect([&called](){
-        called = true;
-    });
+    trigger->parameter_changed.connect([&called]() { called = true; });
 
     trigger->set(42);
     ASSERT_TRUE(called);

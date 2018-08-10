@@ -24,7 +24,6 @@ protected:
     }
 };
 
-
 TEST_F(ValueParameterTest, HasState)
 {
     EXPECT_TRUE(factory::declareValue("foo", 42).build()->hasState());
@@ -100,9 +99,7 @@ void testSetValue(T def, T value, const std::string& expected_type)
 
     // check if parameter_changed will be called
     bool called = false;
-    pclone->parameter_changed.connect([&called](){
-        called = true;
-    });
+    pclone->parameter_changed.connect([&called]() { called = true; });
 
     // clone identical parameter -> parameter_changed should not be called
     pclone->cloneDataFrom(*p);
@@ -138,9 +135,6 @@ TEST_F(ValueParameterTest, SetValueFromRange)
 
     ASSERT_EQ(50, value->as<int>());
 }
-
-
-
 
 TEST_F(ValueParameterTest, SetValueFromAnotherType)
 {
@@ -178,4 +172,3 @@ TEST_F(ValueParameterTest, NumberConversion)
 
     ASSERT_THROW(value->as<int>(), std::runtime_error);
 }
-

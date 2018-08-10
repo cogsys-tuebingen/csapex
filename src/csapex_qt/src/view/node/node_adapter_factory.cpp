@@ -6,6 +6,7 @@
 #include <csapex/view/node/node_adapter.h>
 #include <csapex/view/node/default_node_adapter.h>
 #include <csapex/plugin/plugin_manager.hpp>
+#include <csapex/view/param/param_adapter_factory.h>
 
 /// SYSTEM
 #include <qglobal.h>
@@ -15,6 +16,7 @@ using namespace csapex;
 NodeAdapterFactory::NodeAdapterFactory(Settings& settings, PluginLocator* locator)
   : settings_(settings), plugin_locator_(locator), node_adapter_manager_(new PluginManager<NodeAdapterBuilder>("csapex::NodeAdapterBuilder"))
 {
+    ParameterAdapterFactory::instance().loadPlugins(locator);
 }
 
 NodeAdapterFactory::~NodeAdapterFactory()
@@ -83,7 +85,7 @@ NodeAdapter::Ptr NodeAdapterFactory::makeNodeAdapter(NodeFacadePtr node_facade, 
         }
     }
 
-    return NodeAdapter::Ptr(new DefaultNodeAdapter(node_facade, parent));
+    return std::make_shared<DefaultNodeAdapter>(node_facade, parent);
 }
 
 void NodeAdapterFactory::loadPlugins()

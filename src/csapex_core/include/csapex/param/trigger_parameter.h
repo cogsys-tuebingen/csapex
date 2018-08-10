@@ -41,13 +41,11 @@ protected:
 private:
 };
 
-
 template <>
 inline std::string serializationName<TriggerParameter>()
 {
     return "trigger";
 }
-
 
 }  // namespace param
 }  // namespace csapex

@@ -37,7 +37,6 @@ TEST_F(IntervalParameterTest, StringConversion)
 template <typename T>
 void testSerialization(T min, T max)
 {
-
     YAML::Node node;
 
     {
@@ -59,7 +58,7 @@ void testSerialization(T min, T max)
         EXPECT_EQ(min, interval->min<T>());
         EXPECT_EQ(max, interval->max<T>());
 
-        auto val = interval->as<std::pair<T,T>>();
+        auto val = interval->as<std::pair<T, T>>();
         EXPECT_EQ(min, val.first);
         EXPECT_EQ(max, val.second);
     }
@@ -98,20 +97,20 @@ void testSet(T min, T max)
 {
     {
         IntervalParameterPtr a = std::make_shared<IntervalParameter>();
-        ASSERT_ANY_THROW((a->as<std::pair<T,T>>()));
+        ASSERT_ANY_THROW((a->as<std::pair<T, T>>()));
     }
 
     {
         IntervalParameterPtr a = std::make_shared<IntervalParameter>();
-        a->set(std::make_pair(min+1, max-1));
+        a->set(std::make_pair(min + 1, max - 1));
 
-        ASSERT_EQ(min+1, a->lower<T>());
-        ASSERT_EQ(max-1, a->upper<T>());
+        ASSERT_EQ(min + 1, a->lower<T>());
+        ASSERT_EQ(max - 1, a->upper<T>());
 
-        a->set(std::make_pair(min+2, max-2));
+        a->set(std::make_pair(min + 2, max - 2));
 
-        ASSERT_EQ(min+2, a->lower<T>());
-        ASSERT_EQ(max-2, a->upper<T>());
+        ASSERT_EQ(min + 2, a->lower<T>());
+        ASSERT_EQ(max - 2, a->upper<T>());
     }
 }
 
@@ -188,7 +187,6 @@ void testCloning(T min, T max)
     ASSERT_EQ(min, b->def<T>().first);
     ASSERT_EQ(max, b->def<T>().second);
 }
-
 
 TEST_F(IntervalParameterTest, IntervalCloning)
 {

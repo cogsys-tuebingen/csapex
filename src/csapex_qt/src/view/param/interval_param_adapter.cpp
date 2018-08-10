@@ -9,6 +9,7 @@
 #include <csapex/utility/type.h>
 #include <csapex/command/update_parameter.h>
 #include <csapex/view/widgets/doublespanslider.h>
+#include <csapex/view/utility/register_param_adapter.h>
 
 /// SYSTEM
 #include <QPointer>
@@ -23,6 +24,8 @@
 #include <qxt5/qxtspanslider.h>
 
 using namespace csapex;
+
+CSAPEX_REGISTER_PARAM_ADAPTER(csapex, IntervalParameterAdapter, csapex::param::IntervalParameter)
 
 IntervalParameterAdapter::IntervalParameterAdapter(param::IntervalParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), interval_p_(p), internal_layout(new QHBoxLayout)
 {

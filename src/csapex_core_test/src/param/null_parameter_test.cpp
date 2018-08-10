@@ -28,7 +28,6 @@ namespace csapex
 {
 namespace param
 {
-
 namespace factory
 {
 // nulls must never be used intenionally, declare the factory here
@@ -37,12 +36,9 @@ ParameterBuilder declareNull(const std::string& name)
     std::shared_ptr<NullParameter> result(new NullParameter(name, ParameterDescription()));
     return ParameterBuilder(std::move(result));
 }
-}
-}
-}
-
-
-
+}  // namespace factory
+}  // namespace param
+}  // namespace csapex
 
 TEST_F(NullParameterTest, HasState)
 {
@@ -54,13 +50,11 @@ TEST_F(NullParameterTest, StringConversion)
     EXPECT_STREQ("[foo: [null]]", factory::declareNull("foo").build()->toString().c_str());
 }
 
-
 TEST_F(NullParameterTest, GetThrows)
 {
     ParameterPtr p = factory::declareNull("foo").build();
     EXPECT_ANY_THROW(p->as<int>());
 }
-
 
 TEST_F(NullParameterTest, Serialization)
 {
@@ -97,7 +91,6 @@ TEST_F(NullParameterTest, Serialization)
         ASSERT_NE(nullptr, sp);
     }
 }
-
 
 TEST_F(NullParameterTest, BinarySerialization)
 {

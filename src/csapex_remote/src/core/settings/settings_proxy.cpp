@@ -121,7 +121,7 @@ void SettingsProxy::createParameterProxy(const std::string& name, param::Paramet
         // request to set the parameter
         boost::any raw;
         param->get_unsafe(raw);
-        if(!param->getUUID().empty()) {
+        if (!param->getUUID().empty()) {
             CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
             self->session_->write(change);
         }

@@ -22,7 +22,6 @@ protected:
     }
 };
 
-
 enum ColorSpace
 {
     YUV,
@@ -41,7 +40,6 @@ std::map<std::string, int> encodings_i = { { "YUV", (int)YUV }, { "RGB", (int)RG
 std::map<std::string, double> double_set = { { "1.5", 1.5 }, { "3.5", 3.5 } };
 std::map<std::string, std::string> string_set = { { "1.5", "1.5" }, { "3.5", "3.5" } };
 
-
 TEST_F(SetParameterTest, HasState)
 {
     EXPECT_TRUE(factory::declareParameterSet("foo", encodings_i, (int)MONO).build()->hasState());
@@ -56,7 +54,7 @@ TEST_F(SetParameterTest, GetTexts)
     ASSERT_EQ(encodings_i.size(), texts.size());
 
     auto it = encodings_i.begin();
-    for(std::size_t i = 0, n = encodings_i.size(); i < n; ++i, ++it) {
+    for (std::size_t i = 0, n = encodings_i.size(); i < n; ++i, ++it) {
         ASSERT_STREQ(it->first.c_str(), texts.at(i).c_str());
         ASSERT_STREQ(it->first.c_str(), a->getText(i).c_str());
     }
@@ -72,19 +70,23 @@ TEST_F(SetParameterTest, InvalidDefaultOptionThrows)
 TEST_F(SetParameterTest, StringConversion)
 {
     {
-        std::stringstream expected; expected << "[foo: [set: " << (int) MONO << "]]";
+        std::stringstream expected;
+        expected << "[foo: [set: " << (int)MONO << "]]";
         EXPECT_STREQ(expected.str().c_str(), factory::declareParameterSet("foo", encodings_i, (int)MONO).build()->toString().c_str());
     }
     {
-        std::stringstream expected; expected << "[foo: [set: " << 1.5 << "]]";
+        std::stringstream expected;
+        expected << "[foo: [set: " << 1.5 << "]]";
         EXPECT_STREQ(expected.str().c_str(), factory::declareParameterSet("foo", double_set, 1.5).build()->toString().c_str());
     }
     {
-        std::stringstream expected; expected << "[foo: [set: " << "1.5" << "]]";
+        std::stringstream expected;
+        expected << "[foo: [set: "
+                 << "1.5"
+                 << "]]";
         EXPECT_STREQ(expected.str().c_str(), factory::declareParameterSet("foo", string_set, std::string("1.5")).build()->toString().c_str());
     }
 }
-
 
 TEST_F(SetParameterTest, CloningWorksForSet)
 {
@@ -117,7 +119,6 @@ TEST_F(SetParameterTest, CloningWorksForSet)
     }
 }
 
-
 TEST_F(SetParameterTest, StringSet)
 {
     {
@@ -134,4 +135,3 @@ TEST_F(SetParameterTest, StringSet)
         ASSERT_STREQ("3.5", a_set->as<std::string>().c_str());
     }
 }
-

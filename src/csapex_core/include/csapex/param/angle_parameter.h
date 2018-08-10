@@ -47,7 +47,6 @@ private:
     double max_;
 };
 
-
 template <>
 inline std::string serializationName<AngleParameter>()
 {

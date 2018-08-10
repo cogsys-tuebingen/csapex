@@ -28,7 +28,6 @@ TEST_F(ParameterTest, DescriptionTest)
     EXPECT_FALSE(a->description().empty());
     EXPECT_STREQ("abc", a->description().toString().c_str());
 
-
     ParameterPtr empty = factory::declareValue("foo", 42);
     EXPECT_TRUE(empty->description().empty());
     EXPECT_STREQ("no description", empty->description().toString().c_str());
