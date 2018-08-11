@@ -39,11 +39,13 @@ void testSerialization(T min, T max)
 {
     YAML::Node node;
 
+    T def = min;
+
     {
-        ParameterPtr p = factory::declareRange<T>("foo", min, max, min, 1);
+        ParameterPtr p = factory::declareRange<T>("foo", min, max, def, 1);
         p->serialize_yaml(node);
         EXPECT_STREQ(p->name().c_str(), node["name"].as<std::string>().c_str());
-        EXPECT_STREQ(p->getParameterType().c_str(), node["type"].as<std::string>().c_str());
+        EXPECT_STREQ("range", node["type"].as<std::string>().c_str());
     }
 
     {
@@ -58,15 +60,14 @@ void testSerialization(T min, T max)
         EXPECT_EQ(min, range->min<T>());
         EXPECT_EQ(max, range->max<T>());
 
-        auto val = range->as<std::pair<T, T>>();
-        EXPECT_EQ(min, val.first);
-        EXPECT_EQ(max, val.second);
+        auto val = range->as<T>();
+        EXPECT_EQ(def, val);
     }
 
     SerializationBuffer buffer;
 
     {
-        ParameterPtr p = factory::declareRange<T>("foo", min, max, min, 1);
+        ParameterPtr p = factory::declareRange<T>("foo", min, max, def, 1);
         ParameterSerializer::instance().serialize(*p, buffer);
     }
 
@@ -83,6 +84,9 @@ void testSerialization(T min, T max)
         EXPECT_STREQ("foo", range->name().c_str());
         EXPECT_EQ(min, range->min<T>());
         EXPECT_EQ(max, range->max<T>());
+
+        auto val = range->as<T>();
+        EXPECT_EQ(def, val);
     }
 }
 
