@@ -107,10 +107,20 @@ private:
             } else {
                 const GenericVectorMessage* vec = dynamic_cast<const GenericVectorMessage*>(other_side);
                 if (vec != 0) {
+                    // if the other side is a vector too, try if they are compatible
                     return vec->canConnectTo(this);
                 } else {
+                    // the other side is not a vector
+                    // try if the nested type is compatible
                     auto type = nestedType();
-                    return other_side->canConnectTo(type.get());
+                    bool nested_is_compatible = other_side->canConnectTo(type.get());
+                    if (nested_is_compatible) {
+                        // connectable via iteration
+                        return true;
+                    } else {
+                        // no iteration possible, default to asking
+                        return other_side->acceptsConnectionFrom(this);
+                    }
                     // return dynamic_cast<const AnyMessage*> (other_side) != nullptr;
                 }
             }

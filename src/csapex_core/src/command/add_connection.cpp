@@ -60,6 +60,7 @@ bool AddConnection::doExecute()
     apex_assert_hard((f->isOutput() && t->isInput()));
 
     ConnectionPtr c = DirectConnection::connect(f, t);
+    apex_assert_hard(c);
     c->setActive(active);
 
     return graph->addConnection(c);

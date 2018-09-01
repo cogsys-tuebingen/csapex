@@ -7,11 +7,14 @@
 #include <csapex/signal/event.h>
 #include <csapex/signal/slot.h>
 #include <csapex/msg/generic_value_message.hpp>
+#include <csapex/msg/generic_vector_message.hpp>
 #include <csapex/msg/direct_connection.h>
 #include <csapex/utility/uuid_provider.h>
 #include <csapex/utility/exceptions.h>
+#include <csapex/model/multi_connection_type.h>
 
 #include <csapex_testing/csapex_test_case.h>
+#include <csapex_testing/mockup_msgs.h>
 
 using namespace csapex;
 using namespace connection_types;
@@ -290,4 +293,55 @@ TEST_F(ConnectionTest, DirectConnectionCanBeDeleted)
 
     auto raw_message = i->getToken();
     ASSERT_TRUE(raw_message == nullptr);
+}
+
+TEST_F(ConnectionTest, ConnectionTestIsSymmetricalForGenericValue)
+{
+    TokenDataPtr o_type = std::make_shared<GenericValueMessage<int>>();
+    TokenDataPtr i_type = std::make_shared<GenericValueMessage<int>>();
+
+    ASSERT_TRUE(o_type->canConnectTo(i_type.get()));
+    ASSERT_TRUE(i_type->canConnectTo(o_type.get()));
+    ASSERT_TRUE(o_type->acceptsConnectionFrom(i_type.get()));
+    ASSERT_TRUE(i_type->acceptsConnectionFrom(o_type.get()));
+}
+
+TEST_F(ConnectionTest, ConnectionTestIsSymmetricalForMessage)
+{
+    TokenDataPtr o_type = std::make_shared<MockMessage>();
+    TokenDataPtr i_type = std::make_shared<MockMessage>();
+
+    ASSERT_TRUE(o_type->canConnectTo(i_type.get()));
+    ASSERT_TRUE(i_type->canConnectTo(o_type.get()));
+    ASSERT_TRUE(o_type->acceptsConnectionFrom(i_type.get()));
+    ASSERT_TRUE(i_type->acceptsConnectionFrom(o_type.get()));
+}
+
+TEST_F(ConnectionTest, ConnectionTestIsSymmetricalForNonMatchingGenericValue)
+{
+    TokenDataPtr o_type = std::make_shared<GenericValueMessage<int>>();
+    TokenDataPtr i_type = std::make_shared<MockMessage>();
+
+    ASSERT_FALSE(o_type->canConnectTo(i_type.get()));
+    ASSERT_FALSE(i_type->canConnectTo(o_type.get()));
+    ASSERT_FALSE(o_type->acceptsConnectionFrom(i_type.get()));
+    ASSERT_FALSE(i_type->acceptsConnectionFrom(o_type.get()));
+}
+
+TEST_F(ConnectionTest, MultiTokenDataAcceptsIfOneMatches)
+{
+    TokenDataPtr o_type = std::make_shared<GenericValueMessage<int>>();
+    TokenDataPtr i_type = multi_type::make<MockMessage, GenericValueMessage<int>>();
+
+    ASSERT_TRUE(o_type->canConnectTo(i_type.get()));
+    ASSERT_TRUE(i_type->canConnectTo(o_type.get()));
+}
+
+TEST_F(ConnectionTest, MultiTokenDataAcceptsVector)
+{
+    TokenDataPtr o_type = GenericVectorMessage::make<MockMessage>();
+    TokenDataPtr i_type = multi_type::make<GenericVectorMessage, GenericValueMessage<int>>();
+
+    ASSERT_TRUE(o_type->canConnectTo(i_type.get()));
+    ASSERT_TRUE(i_type->canConnectTo(o_type.get()));
 }
