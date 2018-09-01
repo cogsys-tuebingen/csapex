@@ -13,8 +13,7 @@
 
 using namespace csapex;
 
-ParameterAdapterFactory::ParameterAdapterFactory()
-    : locator_(nullptr)
+ParameterAdapterFactory::ParameterAdapterFactory() : locator_(nullptr)
 {
     manager_ = std::make_shared<PluginManager<ParameterAdapterBuilder>>("csapex::ParameterAdapterBuilder");
 }
@@ -58,7 +57,7 @@ bool ParameterAdapterFactory::hasAdapter(const std::type_index& type) const
 ParameterAdapter::Ptr ParameterAdapterFactory::makeParameterAdapter(NodeAdapter* adapter, const param::ParameterPtr& parameter)
 {
     DefaultNodeAdapter* def_adapter = dynamic_cast<DefaultNodeAdapter*>(adapter);
-    if(!def_adapter) {
+    if (!def_adapter) {
         throw std::logic_error("Parameter adapters are currently only supported for default node adapters and their descendants.");
     }
 
@@ -71,4 +70,3 @@ ParameterAdapter::Ptr ParameterAdapterFactory::makeParameterAdapter(NodeAdapter*
         throw std::logic_error("Tried to instantiate an unsupported parameter adapter.");
     }
 }
-

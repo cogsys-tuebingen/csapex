@@ -26,7 +26,6 @@ FWD(TriggerParameter)
 FWD(ValueParameter)
 FWD(IntervalParameter)
 FWD(ColorParameter)
-FWD(AngleParameter)
 FWD(StringListParameter)
 
 FWD(OutputProgressParameter)

@@ -74,7 +74,7 @@ public:
     template <typename Parameter, typename Adapter>
     void setupParameter(std::shared_ptr<Parameter> adapter);
 
-    void addParameterAdapter(const std::shared_ptr<param::Parameter> &p, ParameterAdapterPtr adapter);
+    void addParameterAdapter(const std::shared_ptr<param::Parameter>& p, ParameterAdapterPtr adapter);
 
 protected:
     virtual void setupAdaptiveUi();

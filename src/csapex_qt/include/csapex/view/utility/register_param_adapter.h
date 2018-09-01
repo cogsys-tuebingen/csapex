@@ -12,19 +12,21 @@
 #define PARAM_CONCATENATE(x, y) PARAM_CONCATENATE_DETAIL(x, y)
 #define PARAM_MAKE_UNIQUE(x) PARAM_CONCATENATE(x, __LINE__)
 
-
 /// ParamAdapter registration
-#define CSAPEX_REGISTER_PARAM_ADAPTER(Namespace, Adapter, Adaptee)                                      \
-    namespace Namespace                                                                                 \
-    {                                                                                                   \
-    class MAKE_PA_CLASS(Adapter) : public impl::ParameterAdapterBuilderImplementation<Adapter, Adaptee> \
-    {                                                                                                   \
-    public:                                                                                             \
-        MAKE_PA_CLASS(Adapter)() = default;                                                             \
-        const std::type_info& getWrappedTypeId() const override { return typeid(Adaptee); }             \
-    };                                                                                                  \
-    }                                                                                                   \
-    CSAPEX_REGISTER_CLASS(MAKE_NS_PA_CLASS(Namespace, Adapter), csapex::ParameterAdapterBuilder)        \
+#define CSAPEX_REGISTER_PARAM_ADAPTER(Namespace, Adapter, Adaptee)                                                                                                                                     \
+    namespace Namespace                                                                                                                                                                                \
+    {                                                                                                                                                                                                  \
+    class MAKE_PA_CLASS(Adapter) : public impl::ParameterAdapterBuilderImplementation<Adapter, Adaptee>                                                                                                \
+    {                                                                                                                                                                                                  \
+    public:                                                                                                                                                                                            \
+        MAKE_PA_CLASS(Adapter)() = default;                                                                                                                                                            \
+        const std::type_info& getWrappedTypeId() const override                                                                                                                                        \
+        {                                                                                                                                                                                              \
+            return typeid(Adaptee);                                                                                                                                                                    \
+        }                                                                                                                                                                                              \
+    };                                                                                                                                                                                                 \
+    }                                                                                                                                                                                                  \
+    CSAPEX_REGISTER_CLASS(MAKE_NS_PA_CLASS(Namespace, Adapter), csapex::ParameterAdapterBuilder)                                                                                                       \
     static ParameterAdapterRegistered<MAKE_NS_PA_CLASS(Namespace, Adapter), Adaptee> PARAM_CONCATENATE(c_, PARAM_MAKE_UNIQUE(g_instance));
 
 #endif  // REGISTER_PARAM_ADAPTER_H

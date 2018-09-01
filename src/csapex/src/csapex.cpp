@@ -279,10 +279,21 @@ int main(int argc, char** argv)
     int effective_argc = argc;
     std::string path_to_bin(argv[0]);
 
+    // clang-format off
     po::options_description desc("Allowed options");
-    desc.add_options()("help", "show help message")("debug", "enable debug output")("dump", "show variables")("paused", "start paused")("headless", "run without gui")(
-        "threadless", "run without threading")("fatal_exceptions", "abort execution on exception")("disable_thread_grouping", "by default create one thread per node")("input", "config file to load")(
-        "start-server", "start tcp server")("port", po::value<int>()->default_value(42123), "tcp server port");
+    desc.add_options()
+            ("help", "show help message")
+            ("debug", "enable debug output")
+            ("dump", "show variables")
+            ("paused", "start paused")
+            ("headless", "run without gui")
+            ("threadless", "run without threading")
+            ("fatal_exceptions", "abort execution on exception")
+            ("disable_thread_grouping", "by default create one thread per node")
+            ("input", "config file to load")
+            ("start-server", "start tcp server")
+            ("port", po::value<int>()->default_value(42123), "tcp server port");
+    // clang-format on
 
     po::positional_options_description p;
     p.add("input", 1);

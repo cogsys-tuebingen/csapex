@@ -30,21 +30,24 @@ protected:
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
-
 };
 
-namespace A {
-namespace B {
-namespace C {
-class Test {};
-}
-}
-}
+namespace A
+{
+namespace B
+{
+namespace C
+{
+class Test
+{
+};
+}  // namespace C
+}  // namespace B
+}  // namespace A
 
 TEST_F(TypeTest, FullNamespaceWorks)
 {
     ASSERT_STREQ("A::B::C::Test", type2name(typeid(A::B::C::Test)).c_str());
-
 
     using A::B::C::Test;
     ASSERT_STREQ("A::B::C::Test", type2name(typeid(Test)).c_str());

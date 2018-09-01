@@ -10,8 +10,7 @@
 
 using namespace csapex;
 
-ResizableNodeAdapter::ResizableNodeAdapter(NodeFacadePtr worker, NodeBox* parent) :
-    DefaultNodeAdapter(worker, parent), initialized_(false)
+ResizableNodeAdapter::ResizableNodeAdapter(NodeFacadePtr worker, NodeBox* parent) : DefaultNodeAdapter(worker, parent), initialized_(false)
 {
     size_.setWidth(100);
     size_.setHeight(100);

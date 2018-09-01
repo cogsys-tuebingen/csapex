@@ -107,8 +107,7 @@ void DefaultNodeAdapterBridge::triggerSetupAdaptiveUiRequest()
 }
 
 /// ADAPTER
-DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent)
-  : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
+DefaultNodeAdapter::DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent) : NodeAdapter(adaptee, parent), bridge(this), wrapper_layout_(nullptr)
 {
 }
 
@@ -291,7 +290,7 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         // generate UI element
         const auto& type = typeid(*p);
         // check if it is a plugin, while there are non-plugin adapters
-        if(ParameterAdapterFactory::instance().hasAdapter(type)) {
+        if (ParameterAdapterFactory::instance().hasAdapter(type)) {
             ParameterAdapterFactory::instance().makeParameterAdapter(this, p);
         } else {
             current_layout_->addWidget(new QLabel((current_name_ + "'s type is not yet registered (value: " + type2name(type) + ")").c_str()));

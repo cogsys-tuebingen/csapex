@@ -189,7 +189,6 @@ ParameterBuilder declareDirectoryInputOutputPath(const std::string& name, const 
 ParameterBuilder declareTrigger(const std::string& name, const ParameterDescription& description);
 ParameterBuilder declareTrigger(const std::string& name);
 
-
 /**
  * @brief declareColorParameter
  * @param name
