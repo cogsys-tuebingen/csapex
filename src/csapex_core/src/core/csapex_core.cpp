@@ -54,8 +54,8 @@ CsApexCore::CsApexCore(Settings& settings, ExceptionHandler& handler, csapex::Pl
 {
     is_root_ = true;
 
-    thread_pool_ = std::make_shared<ThreadPool>(exception_handler_, !settings_.get<bool>("threadless", false), settings_.get<bool>("thread_grouping", true));
-    thread_pool_->setPause(settings_.get<bool>("initially_paused", false));
+    thread_pool_ =
+        std::make_shared<ThreadPool>(exception_handler_, !settings_.get<bool>("threadless", false), settings_.get<bool>("thread_grouping", true), settings_.get<bool>("initially_paused", false));
 
     observe(thread_pool_->paused, paused);
 
@@ -539,10 +539,14 @@ void CsApexCore::load(const std::string& file)
     settings_.set("config", file);
 
     bool was_running = thread_pool_->isRunning();
+    bool was_paused = thread_pool_->isPaused();
 
     // stop all processing
     // NOTE: this also removes the main node runner from the thread pool
     thread_pool_->stop();
+
+    // restore pause flag
+    thread_pool_->setPause(was_paused);
 
     if (load_needs_reset_) {
         reset();

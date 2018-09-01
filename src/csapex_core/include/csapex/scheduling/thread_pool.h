@@ -23,8 +23,8 @@ class CsApexCore;
 class CSAPEX_CORE_EXPORT ThreadPool : public Executor, public Observer, public Profilable
 {
 public:
-    ThreadPool(csapex::ExceptionHandler& handler, bool enable_threading, bool grouping);
-    ThreadPool(Executor* parent, csapex::ExceptionHandler& handler, bool enable_threading, bool grouping);
+    ThreadPool(csapex::ExceptionHandler& handler, bool enable_threading, bool grouping, bool initially_paused);
+    ThreadPool(Executor* parent, csapex::ExceptionHandler& handler, bool enable_threading, bool grouping, bool initially_paused);
     ~ThreadPool();
 
     bool isThreadingEnabled() const;

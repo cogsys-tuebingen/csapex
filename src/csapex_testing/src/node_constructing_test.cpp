@@ -44,7 +44,7 @@ NodePtr makeNode()
 }  // namespace csapex
 
 NodeConstructingTest::NodeConstructingTest()
-  : node_factory(std::make_shared<NodeFactoryImplementation>(SettingsImplementation::NoSettings, nullptr)), factory(*node_factory), executor(eh, false, false)
+  : node_factory(std::make_shared<NodeFactoryImplementation>(SettingsImplementation::NoSettings, nullptr)), factory(*node_factory), executor(eh, false, false, false)
 {
     factory.registerNodeType(std::make_shared<NodeConstructor>("StaticMultiplier", std::bind(&detail::makeStaticMultiplier<2>)));
     factory.registerNodeType(std::make_shared<NodeConstructor>("StaticMultiplier4", std::bind(&detail::makeStaticMultiplier<4>)));

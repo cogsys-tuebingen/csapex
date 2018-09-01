@@ -27,18 +27,19 @@ void Executor::addChild(Executor* e)
 
 void Executor::setPause(bool pause)
 {
-    if (pause == paused_) {
-        return;
-    }
+    bool top_level_change = pause != paused_;
     paused_ = pause;
 
+    // always call setPause on children to make sure they are in sync
     for (Executor* child : children_) {
         child->setPause(pause);
     }
 
-    pauseChanged(paused_);
-
-    paused(paused_);
+    if (top_level_change) {
+        // only call these if pause really changed
+        pauseChanged(paused_);
+        paused(paused_);
+    }
 }
 
 bool Executor::isPaused() const

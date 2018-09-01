@@ -147,7 +147,7 @@ TEST_F(NestingTest, NodesCanBeGroupedIntoSubgraphWithSeparateExecutors)
     SubgraphNodePtr sub_graph = std::dynamic_pointer_cast<SubgraphNode>(sub_graph_node_facade->getNode());
     apex_assert_hard(sub_graph);
 
-    ThreadPool sub_executor(&executor, eh, executor.isThreadingEnabled(), executor.isGroupingEnabled());
+    ThreadPool sub_executor(&executor, eh, executor.isThreadingEnabled(), executor.isGroupingEnabled(), executor.isPaused());
     GraphFacadeImplementation sub_graph_facade(sub_executor, sub_graph->getLocalGraph(), sub_graph);
 
     NodeFacadeImplementationPtr n2 = factory.makeNode("StaticMultiplier", UUIDProvider::makeUUID_without_parent("n2"), sub_graph->getLocalGraph());

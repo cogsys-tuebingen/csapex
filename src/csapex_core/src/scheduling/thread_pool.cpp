@@ -17,15 +17,17 @@
 
 using namespace csapex;
 
-ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool grouping)
+ThreadPool::ThreadPool(ExceptionHandler& handler, bool enable_threading, bool grouping, bool initially_paused)
   : handler_(handler), timed_queue_(new TimedQueue), enable_threading_(enable_threading), grouping_(grouping), private_group_cpu_affinity_(new CpuAffinity), suppress_exceptions_(true)
 {
+    setPause(initially_paused);
     setup();
 }
 
-ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_threading, bool grouping)
+ThreadPool::ThreadPool(Executor* parent, ExceptionHandler& handler, bool enable_threading, bool grouping, bool initially_paused)
   : handler_(handler), enable_threading_(enable_threading), grouping_(grouping), private_group_cpu_affinity_(new CpuAffinity), suppress_exceptions_(true)
 {
+    setPause(initially_paused);
     setup();
     parent->addChild(this);
 }
@@ -33,6 +35,7 @@ void ThreadPool::setup()
 {
     default_group_ = std::make_shared<ThreadGroup>(timed_queue_, handler_, ThreadGroup::DEFAULT_GROUP_ID, "default");
     default_group_->useProfiler(getProfiler());
+    default_group_->setPause(isPaused());
 
     groups_.push_back(default_group_);
 
@@ -40,7 +43,6 @@ void ThreadPool::setup()
 
     observe(private_group_cpu_affinity_->affinity_changed, [this](const CpuAffinity*) { private_group_cpu_affinity_changed(); });
 
-    setPause(false);
     setSteppingMode(false);
 }
 
@@ -79,6 +81,9 @@ void ThreadPool::start()
 
 void ThreadPool::stop()
 {
+    // resume, otherwise nothing will stop here
+    setPause(false);
+
     if (timed_queue_) {
         timed_queue_->stop();
     }

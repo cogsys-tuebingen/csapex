@@ -280,7 +280,7 @@ int main(int argc, char** argv)
     std::string path_to_bin(argv[0]);
 
     // clang-format off
-    po::options_description desc("Allowed options");
+    po::options_description desc("Allowed options, others are assumed to be ROS related.");
     desc.add_options()
             ("help", "show help message")
             ("debug", "enable debug output")

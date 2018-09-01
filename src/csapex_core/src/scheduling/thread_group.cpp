@@ -222,7 +222,6 @@ void ThreadGroup::stop()
     {
         std::unique_lock<std::recursive_mutex> lock(state_mtx_);
         running_ = false;
-        pause_ = false;
         pause_changed_.notify_all();
     }
     {
