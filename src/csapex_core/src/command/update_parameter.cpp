@@ -51,6 +51,12 @@ std::string UpdateParameter::getDescription() const
             ss << e << " ";
         }
 
+    } else if (value.type() == typeid(std::vector<double>)) {
+        auto v = boost::any_cast<std::vector<double>>(value);
+        for (const auto& e : v) {
+            ss << e << " ";
+        }
+
     } else if (value.type() == typeid(const char*)) {
         ss << boost::any_cast<const char*>(value);
 
@@ -95,6 +101,9 @@ bool UpdateParameter::doExecute()
 
     } else if (value.type() == typeid(std::vector<int>)) {
         setParameter(boost::any_cast<std::vector<int>>(value));
+
+    } else if (value.type() == typeid(std::vector<double>)) {
+        setParameter(boost::any_cast<std::vector<double>>(value));
 
     } else if (value.type() == typeid(std::pair<int, int>)) {
         setParameter(boost::any_cast<std::pair<int, int>>(value));
