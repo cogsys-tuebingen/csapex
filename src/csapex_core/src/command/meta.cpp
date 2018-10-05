@@ -140,7 +140,7 @@ void Meta::deserialize(const SerializationBuffer& data, const SemanticVersion& v
     data >> transaction;
 }
 
-void Meta::cloneData(const Meta& other)
+bool Meta::cloneData(const Meta& other)
 {
     nested.clear();
     nested.reserve(other.nested.size());
@@ -151,4 +151,6 @@ void Meta::cloneData(const Meta& other)
     locked = other.locked;
     transaction = other.transaction;
     type = other.type;
+
+    return true;
 }

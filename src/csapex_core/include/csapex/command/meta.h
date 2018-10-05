@@ -29,7 +29,7 @@ public:
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
-    void cloneData(const Meta& other) override;
+    bool cloneData(const Meta& other) override;
 
 protected:
     bool doExecute() override;

@@ -21,11 +21,19 @@ public:
 
 class ParameterSerializer : public Singleton<ParameterSerializer>, public Serializer
 {
+    friend class Singleton<ParameterSerializer>;
+
 public:
+    ~ParameterSerializer() override;
+
     void serialize(const Streamable& packet, SerializationBuffer& data) override;
     StreamablePtr deserialize(const SerializationBuffer& data) override;
 
     static void registerSerializer(const std::string& type, std::shared_ptr<ParameterSerializerInterface> serializer);
+    static void deregisterSerializer(const std::string& type);
+
+protected:
+    ParameterSerializer();
 
 private:
     std::map<std::string, std::shared_ptr<ParameterSerializerInterface>> serializers_;
@@ -33,12 +41,16 @@ private:
 
 /// REGISTRATION
 
-template <typename S>
+template <typename S, typename ParameterType>
 struct ParameterSerializerRegistered
 {
-    ParameterSerializerRegistered(const std::string& type)
+    ParameterSerializerRegistered()
     {
-        ParameterSerializer::registerSerializer(type, std::make_shared<S>());
+        ParameterSerializer::registerSerializer(param::serializationName<ParameterType>(), std::make_shared<S>());
+    }
+    ~ParameterSerializerRegistered()
+    {
+        ParameterSerializer::deregisterSerializer(param::serializationName<ParameterType>());
     }
 };
 }  // namespace csapex
@@ -62,7 +74,7 @@ struct ParameterSerializerRegistered
         }                                                                                                                                                                                              \
     };                                                                                                                                                                                                 \
     }                                                                                                                                                                                                  \
-    ParameterSerializerRegistered<param::Name##Serializer> g_register_##Name##_serializer(param::serializationName<param::Name>());                                                                    \
+    ParameterSerializerRegistered<param::Name##Serializer, param::Name> g_register_##Name##_serializer;                                                                                                \
     }
 
 #endif  // PARAMETER_SERIALIZER_H

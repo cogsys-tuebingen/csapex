@@ -55,16 +55,20 @@ void OutputProgressParameter::doDeserialize(const YAML::Node& n)
 {
 }
 
-void OutputProgressParameter::cloneDataFrom(const Clonable& other)
+bool OutputProgressParameter::cloneDataFrom(const Clonable& other)
 {
     if (const OutputProgressParameter* progress = dynamic_cast<const OutputProgressParameter*>(&other)) {
         if (value != progress->value || maximum != progress->maximum) {
             *this = *progress;
             triggerChange();
         }
+        return true;
+
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
+
+    return false;
 }
 
 void OutputProgressParameter::advanceProgress(int step)

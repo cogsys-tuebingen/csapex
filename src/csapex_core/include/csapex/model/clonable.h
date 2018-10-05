@@ -3,6 +3,8 @@
 
 /// PROJECT
 #include <csapex/utility/data_traits.hpp>
+#include <csapex/utility/type.h>
+#include <csapex/utility/assert.h>
 
 /// SYSTEM
 #include <memory>
@@ -26,8 +28,30 @@ public:
         return std::dynamic_pointer_cast<Implementation>(cloneRaw());
     }
 
-    virtual void cloneDataFrom(const Clonable& other) = 0;
+    virtual bool cloneDataFrom(const Clonable& other) = 0;
     virtual std::shared_ptr<Clonable> makeEmptyInstance() const = 0;
+
+    virtual bool hasData(const std::type_info& type) const
+    {
+        return false;
+    }
+    template <typename T>
+    const T* getDataPtr() const
+    {
+        const std::type_info& type = typeid(T);
+        apex_assert_hard(hasData(type));
+        auto ptr = getDataPtrUnsafe(type);
+        if (ptr == nullptr) {
+            throw std::logic_error(std::string("access to data of type ") + type2name(type) + std::string(" is not possible"));
+        }
+        return static_cast<const T*>(ptr);
+    }
+
+protected:
+    virtual const void* getDataPtrUnsafe(const std::type_info& type) const
+    {
+        throw std::logic_error(std::string("access to data of type ") + type2name(type) + std::string(" is not implemented"));
+    }
 };
 
 }  // namespace csapex
@@ -51,22 +75,26 @@ protected:                                                                      
         return std::shared_ptr<Instance>(new Instance(__VA_ARGS__));                                                                                                                                   \
     }
 #define _CLONABLE_BLOCK_CLONE_DATA_FROM(Instance)                                                                                                                                                      \
-protected:                                                                                                                                                                                             \
-    void cloneDataFrom(const Clonable& other) override                                                                                                                                                 \
+public:                                                                                                                                                                                                \
+    bool cloneDataFrom(const Clonable& other) override                                                                                                                                                 \
     {                                                                                                                                                                                                  \
-        cloneData(dynamic_cast<const Instance&>(other));                                                                                                                                               \
+        return cloneData(dynamic_cast<const Instance&>(other));                                                                                                                                        \
     }
 #define _CLONABLE_BLOCK_CLONE_DATA(Instance)                                                                                                                                                           \
 protected:                                                                                                                                                                                             \
-    virtual void cloneData(const Instance& other)                                                                                                                                                      \
+    virtual bool cloneData(const Instance& other)                                                                                                                                                      \
     {                                                                                                                                                                                                  \
         *this = other;                                                                                                                                                                                 \
+        return true;                                                                                                                                                                                   \
     }
 
-#define CLONABLE_IMPLEMENTATION(Instance)                                                                                                                                                              \
+#define CLONABLE_IMPLEMENTATION_NO_CLONE_DATA_FROM(Instance)                                                                                                                                           \
     _CLONABLE_BLOCK_CLONE_DATA(Instance)                                                                                                                                                               \
     _CLONABLE_BLOCK_CLONE(Instance)                                                                                                                                                                    \
-    _CLONABLE_BLOCK_MAKE_DEFAULT_EMPTY(Instance)                                                                                                                                                       \
+    _CLONABLE_BLOCK_MAKE_DEFAULT_EMPTY(Instance)
+
+#define CLONABLE_IMPLEMENTATION(Instance)                                                                                                                                                              \
+    CLONABLE_IMPLEMENTATION_NO_CLONE_DATA_FROM(Instance)                                                                                                                                               \
     _CLONABLE_BLOCK_CLONE_DATA_FROM(Instance)
 
 #define CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(Instance)                                                                                                                                                \

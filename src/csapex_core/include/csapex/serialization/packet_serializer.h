@@ -37,7 +37,10 @@ public:
     static SerializationBuffer serializePacket(const Streamable& packet);
     static SerializationBuffer serializePacket(const StreamableConstPtr& packet);
     static StreamablePtr deserializePacket(SerializationBuffer& serial);
+
     static void registerSerializer(uint8_t type, Serializer* serializer);
+    static void deregisterSerializer(uint8_t type);
+    static Serializer* getSerializer(uint8_t type);
 
 public:
     void serialize(const Streamable& packet, SerializationBuffer& data) override;

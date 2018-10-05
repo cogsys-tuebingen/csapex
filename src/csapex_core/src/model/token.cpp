@@ -41,11 +41,13 @@ void Token::setSequenceNumber(int seq_no) const
     seq_no_ = seq_no;
 }
 
-void Token::cloneData(const Token& other)
+bool Token::cloneData(const Token& other)
 {
     data_ = other.data_->cloneAs<TokenData>();
     activity_modifier_ = other.activity_modifier_;
     seq_no_ = other.seq_no_;
+
+    return true;
 }
 
 Token::Ptr Token::makeEmpty()

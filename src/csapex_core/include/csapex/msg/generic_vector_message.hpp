@@ -498,6 +498,17 @@ public:
             }
         }
 
+        template <typename T>
+        static void deregisterType(const std::string& type_name = "")
+        {
+            std::string type = type_name.empty() ? type2name(typeid(T)) : type_name;
+            std::map<std::string, EntryInterface::Ptr>& map = instance().map_;
+            auto pos = map.find(type);
+            if (pos != map.end()) {
+                map.erase(pos);
+            }
+        }
+
         void shutdown() override
         {
             map_.clear();
@@ -511,6 +522,15 @@ public:
     static void registerType(const std::string& type_name = "")
     {
         SupportedTypes::registerType<T>(type_name);
+    }
+
+    template <typename T>
+    static void deregisterType(const std::string& type_name = "")
+    {
+        // TODO: support deregistering
+        // For that, this singleton must be initialized somewhere else...
+        // Alternative: Get rid of the singleton!
+        // SupportedTypes::deregisterType<T>(type_name);
     }
 
     template <typename T>
@@ -752,6 +772,11 @@ struct GenericVectorRegistered
     GenericVectorRegistered()
     {
         csapex::connection_types::GenericVectorMessage::registerType<T>();
+    }
+
+    ~GenericVectorRegistered()
+    {
+        csapex::connection_types::GenericVectorMessage::deregisterType<T>();
     }
 };
 

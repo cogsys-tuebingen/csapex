@@ -66,12 +66,13 @@ void OutputTextParameter::doDeserialize(const YAML::Node& n)
     text_ = n["text"].as<std::string>();
 }
 
-void OutputTextParameter::cloneDataFrom(const Clonable& other)
+bool OutputTextParameter::cloneDataFrom(const Clonable& other)
 {
     if (const OutputTextParameter* text = dynamic_cast<const OutputTextParameter*>(&other)) {
         if (text_ != text->text_) {
             *this = *text;
             triggerChange();
+            return true;
         }
     } else if (const Parameter* param = dynamic_cast<const Parameter*>(&other)) {
         if (text_ != param->toString()) {
@@ -79,6 +80,7 @@ void OutputTextParameter::cloneDataFrom(const Clonable& other)
             triggerChange();
         }
     }
+    return false;
 }
 
 void OutputTextParameter::serialize(SerializationBuffer& data, SemanticVersion& version) const

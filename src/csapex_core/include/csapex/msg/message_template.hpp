@@ -70,6 +70,11 @@ struct MessageTemplateContainer : public Type
         return dynamic_cast<const Type*>(other_side);
     }
 
+    const Type* getDataPtr() const
+    {
+        return &value;
+    }
+
 public:
     Type& value;
 };
@@ -88,6 +93,11 @@ struct MessageTemplateContainer<Type, true>
     static bool acceptsConnectionFrom(const TokenData* other_side)
     {
         return dynamic_cast<const MessageTemplateContainer<Type, true>*>(other_side);
+    }
+
+    const Type* getDataPtr() const
+    {
+        return &value;
     }
 
 public:
@@ -112,7 +122,7 @@ template <typename Type, class Instance>
 class MessageTemplate : public Message, public MessageTemplateContainer<Type, std::is_integral<Type>::value>, public MessageTemplateBase
 {
 protected:
-    CLONABLE_IMPLEMENTATION(Instance);
+    CLONABLE_IMPLEMENTATION_NO_CLONE_DATA_FROM(Instance);
 
 public:
     typedef std::shared_ptr<Instance> Ptr;
@@ -171,6 +181,34 @@ public:
     SemanticVersion getVersion() const override
     {
         return semantic_version<Type>::value;
+    }
+
+    bool cloneDataFrom(const Clonable& other) override
+    {
+        if (const Instance* other_msg = dynamic_cast<const Instance*>(&other)) {
+            return cloneData(*other_msg);
+
+        } else if (other.hasData(typeid(Type))) {
+            ValueContainer::value = *other.getDataPtr<Type>();
+            return true;
+        }
+        return false;
+    }
+
+    bool hasData(const std::type_info& type) const override
+    {
+        return type == typeid(Type);
+    }
+
+protected:
+    const void* getDataPtrUnsafe(const std::type_info& type) const override
+    {
+        if (type == typeid(ValueContainer::value)) {
+            const Type* data_ptr = ValueContainer::getDataPtr();
+            return static_cast<const void*>(data_ptr);
+        }
+
+        throw std::logic_error(std::string("invalid access to data of type ") + type2name(type));
     }
 };
 

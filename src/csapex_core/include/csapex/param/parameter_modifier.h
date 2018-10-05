@@ -19,6 +19,7 @@ class ParameterModifier
 public:
     static void set(const ParameterPtr& p, T value)
     {
+        static_assert(std::is_same<T, int>::value || std::is_same<T, bool>::value || !std::is_integral<T>::value, "invalid call to ParameterModifier with integer type");
         p->set<T>(value);
     }
     static bool setSilent(const ParameterPtr& p, T value)
@@ -32,9 +33,8 @@ public:
     }
 };
 
-
 template <typename T>
-class CSAPEX_PARAM_EXPORT ParameterModifier<T, typename std::enable_if<std::is_floating_point<T>::value, int>::type>
+class CSAPEX_PARAM_EXPORT ParameterModifier<T, typename std::enable_if<std::is_floating_point<T>::value>::type>
 {
 public:
     static void set(const ParameterPtr& p, T value)
@@ -53,7 +53,7 @@ public:
 };
 
 template <typename T>
-class CSAPEX_PARAM_EXPORT ParameterModifier<T, typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value, int>::type>
+class CSAPEX_PARAM_EXPORT ParameterModifier<T, typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value>::type>
 {
 public:
     static void set(const ParameterPtr& p, T value)

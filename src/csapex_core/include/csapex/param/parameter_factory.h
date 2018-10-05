@@ -27,11 +27,17 @@ namespace factory
 ParameterBuilder makeEmpty(const std::string& type);
 
 /**
- * @brief registerMessage
- * @param type
- * @param constructor
+ * @brief registerParameterType registers a new parameter type for registration
+ * @param type the type name
+ * @param constructor construction function
  */
 void registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor);
+
+/**
+ * @brief registerParameterType deregisters a new parameter type for registration
+ * @param type the type name
+ */
+void deregisterParameterType(const std::string& type);
 
 /**
  * @brief clone duplicates a parameter deeply
@@ -335,11 +341,17 @@ public:
         {
             factory::registerParameterType(param::serializationName<T>(), []() { return ParameterBuilder(std::move(std::make_shared<T>())); });
         }
+
+        ~ParameterConstructorRegistered()
+        {
+            factory::deregisterParameterType(param::serializationName<T>());
+        }
     };
 
 public:
     ParameterBuilder makeEmpty(const std::string& type);
     void registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor);
+    void deregisterParameterType(const std::string& type);
 
 private:
     std::map<std::string, std::function<ParameterBuilder()>> type_to_constructor;

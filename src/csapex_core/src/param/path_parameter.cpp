@@ -53,16 +53,19 @@ bool PathParameter::set_unsafe(const boost::any& v)
     return false;
 }
 
-void PathParameter::cloneDataFrom(const Clonable& other)
+bool PathParameter::cloneDataFrom(const Clonable& other)
 {
     if (const PathParameter* path = dynamic_cast<const PathParameter*>(&other)) {
         if (value_ != path->value_) {
             *this = *path;
             triggerChange();
+            return true;
         }
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
+
+    return false;
 }
 
 void PathParameter::doSerialize(YAML::Node& n) const

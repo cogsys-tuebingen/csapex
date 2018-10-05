@@ -31,9 +31,16 @@ MessageFactory::MessageFactory()
 {
 }
 
+MessageFactory::~MessageFactory()
+{
+    type_to_constructor.clear();
+    type_to_type_index.clear();
+}
+
 void MessageFactory::shutdown()
 {
     type_to_constructor.clear();
+    type_to_type_index.clear();
 }
 
 TokenData::Ptr MessageFactory::createMessage(const std::string& type)
@@ -189,4 +196,22 @@ void MessageFactory::registerMessage(std::string type, std::type_index typeindex
 
     i.type_to_constructor.insert(std::make_pair(type, constructor));
     i.type_to_type_index.insert(std::make_pair(type, typeindex));
+}
+
+void MessageFactory::deregisterMessage(std::string type)
+{
+    MessageFactory& i = instance();
+
+    {
+        auto it = i.type_to_constructor.find(type);
+        if (it != i.type_to_constructor.end()) {
+            i.type_to_constructor.erase(it);
+        }
+    }
+    {
+        auto it = i.type_to_type_index.find(type);
+        if (it != i.type_to_type_index.end()) {
+            i.type_to_type_index.erase(it);
+        }
+    }
 }

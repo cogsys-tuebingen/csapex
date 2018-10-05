@@ -59,7 +59,7 @@ public:
     T readParameter(const std::string& name) const;
 
     ClonablePtr makeEmptyInstance() const override;
-    void cloneDataFrom(const Clonable& other) override;
+    bool cloneDataFrom(const Clonable& other) override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

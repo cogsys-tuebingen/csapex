@@ -14,20 +14,6 @@ class ParameterImplementation : public Parameter
 {
     CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(I);
 
-protected:
-    explicit ParameterImplementation(const std::string& name, const ParameterDescription& description) : Parameter(name, description)
-    {
-    }
-
-    ParameterImplementation(const Parameter& other) : Parameter(other)
-    {
-    }
-
-    virtual void cloneData(const I& other)
-    {
-        dynamic_cast<I&>(*this) = other;
-    }
-
 public:
     static std::string typeName()
     {
@@ -37,6 +23,21 @@ public:
     virtual std::string getParameterType() const override
     {
         return serializationName<I>();
+    }
+
+protected:
+    explicit ParameterImplementation(const std::string& name, const ParameterDescription& description) : Parameter(name, description)
+    {
+    }
+
+    ParameterImplementation(const Parameter& other) : Parameter(other)
+    {
+    }
+
+    virtual bool cloneData(const I& other)
+    {
+        dynamic_cast<I&>(*this) = other;
+        return true;
     }
 };
 

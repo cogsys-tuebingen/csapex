@@ -212,7 +212,7 @@ bool SetParameter::set_unsafe(const boost::any& v)
     return false;
 }
 
-void SetParameter::cloneDataFrom(const Clonable& other)
+bool SetParameter::cloneDataFrom(const Clonable& other)
 {
     if (const SetParameter* set = dynamic_cast<const SetParameter*>(&other)) {
         txt_ = set->txt_;
@@ -234,9 +234,13 @@ void SetParameter::cloneDataFrom(const Clonable& other)
             *this = *set;
             triggerChange();
         }
+        return true;
+
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
+
+    return false;
 }
 
 void SetParameter::doSerialize(YAML::Node& n) const

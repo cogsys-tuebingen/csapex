@@ -99,13 +99,17 @@ bool RangeParameter::set_unsafe(const boost::any& v)
     return false;
 }
 
-void RangeParameter::cloneDataFrom(const Clonable& other)
+bool RangeParameter::cloneDataFrom(const Clonable& other)
 {
     if (const RangeParameter* range = dynamic_cast<const RangeParameter*>(&other)) {
         *this = *range;
+        return true;
+
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
+
+    return false;
 }
 
 void RangeParameter::doSerialize(YAML::Node& n) const

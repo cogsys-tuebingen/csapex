@@ -85,7 +85,7 @@ bool ValueParameter::set_unsafe(const boost::any& v)
     return false;
 }
 
-void ValueParameter::cloneDataFrom(const Clonable& other)
+bool ValueParameter::cloneDataFrom(const Clonable& other)
 {
     if (const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other)) {
         bool change = true;
@@ -106,15 +106,20 @@ void ValueParameter::cloneDataFrom(const Clonable& other)
             *this = *value;
             triggerChange();
         }
+        return true;
+
     } else if (const Parameter* param = dynamic_cast<const Parameter*>(&other)) {
         try {
             access_unsafe(*param, value_);
             triggerChange();
+            return true;
 
         } catch (const std::exception& e) {
             throw std::runtime_error("bad setFrom, invalid types");
         }
     }
+
+    return false;
 }
 
 namespace

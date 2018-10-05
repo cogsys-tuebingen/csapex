@@ -13,10 +13,11 @@
 
 namespace csapex
 {
-FWD(Parameterizable)
-
 namespace param
 {
+template <typename T, class>
+class ParameterModifier;
+
 FWD(Parameter)
 FWD(BitSetParameter)
 FWD(SetParameter)

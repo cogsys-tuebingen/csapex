@@ -78,16 +78,20 @@ std::vector<int> ColorParameter::value() const
     return colors_;
 }
 
-void ColorParameter::cloneDataFrom(const Clonable& other)
+bool ColorParameter::cloneDataFrom(const Clonable& other)
 {
     if (const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other)) {
         if (colors_ != color->colors_) {
             *this = *color;
             triggerChange();
         }
+        return true;
+
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
+
+    return false;
 }
 
 void ColorParameter::doSerialize(YAML::Node& n) const

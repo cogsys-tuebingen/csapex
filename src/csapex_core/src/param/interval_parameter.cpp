@@ -141,14 +141,18 @@ bool IntervalParameter::set_unsafe(const boost::any& v)
     return false;
 }
 
-void IntervalParameter::cloneDataFrom(const Clonable& other)
+bool IntervalParameter::cloneDataFrom(const Clonable& other)
 {
     Lock l = lock();
     if (const IntervalParameter* interval = dynamic_cast<const IntervalParameter*>(&other)) {
         *this = *interval;
+        return true;
+
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
+
+    return false;
 }
 
 void IntervalParameter::doSerialize(YAML::Node& n) const

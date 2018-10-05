@@ -305,17 +305,6 @@ float Parameter::as_impl<float>() const
 }
 
 template <typename T>
-bool Parameter::setSilent(const T& v)
-{
-    if (!is<T>() && !is<void>()) {
-        throwTypeError(typeid(T), type(), "set failed: ");
-    }
-
-    Lock l = lock();
-    return set_unsafe(v);
-}
-
-template <typename T>
 void Parameter::setDictionaryValue(const std::string& key, const T& value)
 {
     param::ValueParameterPtr p = std::make_shared<param::ValueParameter>();

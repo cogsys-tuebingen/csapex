@@ -37,6 +37,20 @@ void PacketSerializer::registerSerializer(uint8_t type, Serializer* serializer)
     instance().serializers_[type] = serializer;
 }
 
+void PacketSerializer::deregisterSerializer(uint8_t type)
+{
+    instance().serializers_.erase(type);
+}
+Serializer* PacketSerializer::getSerializer(uint8_t type)
+{
+    auto it = instance().serializers_.find(type);
+    if (it != instance().serializers_.end()) {
+        return it->second;
+    } else {
+        return nullptr;
+    }
+}
+
 void PacketSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
     // determine packet type

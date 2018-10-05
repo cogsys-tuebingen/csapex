@@ -31,7 +31,7 @@ public:
     int getSequenceNumber() const;
     void setSequenceNumber(int seq_no_) const;
 
-    virtual void cloneData(const Token& other);
+    virtual bool cloneData(const Token& other);
 
     static Ptr makeEmpty();
 

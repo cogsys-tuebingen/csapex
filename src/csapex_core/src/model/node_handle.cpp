@@ -14,6 +14,7 @@
 #include <csapex/msg/input_transition.h>
 #include <csapex/msg/io.h>
 #include <csapex/msg/generic_value_message.hpp>
+#include <csapex/msg/message_template.hpp>
 #include <csapex/msg/marker_message.h>
 #include <csapex/msg/output_transition.h>
 #include <csapex/msg/static_output.h>
@@ -361,8 +362,7 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
         makeParameterConnectableTyped<connection_types::AnyMessage>(p);
     }
 
-    param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p);
-    if (t) {
+    if (param::TriggerParameterPtr t = std::dynamic_pointer_cast<param::TriggerParameter>(p)) {
         Event* trigger = NodeModifier::addEvent(t->name());
         Slot* slot = NodeModifier::addSlot(t->name(), [t]() { t->trigger(); }, false);
         node_->addParameterCallback(t, [slot, trigger](param::Parameter*) {
@@ -444,13 +444,47 @@ bool NodeHandle::updateParameterValues()
 namespace
 {
 template <typename V>
-void updateParameterValueFrom(csapex::param::Parameter* p, Input* source)
+bool updateParameterValueFrom(csapex::param::Parameter& p, const TokenDataConstPtr& msg)
 {
-    auto current = p->as<V>();
-    auto next = msg::getValue<V>(source);
-    if (current != next) {
-        p->set<V>(next);
+    auto current = p.as<V>();
+    auto next = std::dynamic_pointer_cast<connection_types::GenericValueMessage<V> const>(msg);
+    if (current != next->value) {
+        p.set<V>(next->value);
     }
+    return true;
+}
+
+/**
+ * @brief updateParameterFromInput reads the message from an input and tries to write it into a parameter
+ * @param p the parameter
+ * @param input the input
+ * @return true, iff the parameter could be written to
+ */
+bool updateParameterFromInput(csapex::param::Parameter& p, Input* input)
+{
+    auto msg = msg::getMessage(input);
+
+    if (std::dynamic_pointer_cast<connection_types::MessageTemplateBase const>(msg)) {
+        // TODO: make this return success or failure
+        p.cloneDataFrom(*msg);
+        return true;
+    }
+
+    if (msg::isExactValue<int>(input)) {
+        return updateParameterValueFrom<int>(p, msg);
+    } else if (msg::isExactValue<bool>(input)) {
+        return updateParameterValueFrom<bool>(p, msg);
+    } else if (msg::isExactValue<double>(input)) {
+        return updateParameterValueFrom<double>(p, msg);
+    } else if (msg::isExactValue<std::string>(input)) {
+        return updateParameterValueFrom<std::string>(p, msg);
+    } else if (msg::isExactValue<std::pair<int, int>>(input)) {
+        return updateParameterValueFrom<std::pair<int, int>>(p, msg);
+    } else if (msg::isExactValue<std::pair<double, double>>(input)) {
+        return updateParameterValueFrom<std::pair<double, double>>(p, msg);
+    }
+
+    return false;
 }
 }  // namespace
 
@@ -461,19 +495,7 @@ void NodeHandle::updateParameterValue(Connectable* s)
 
     csapex::param::Parameter* p = input_2_param_.at(source->getUUID());
 
-    if (msg::isExactValue<int>(source)) {
-        updateParameterValueFrom<int>(p, source);
-    } else if (msg::isExactValue<bool>(source)) {
-        updateParameterValueFrom<bool>(p, source);
-    } else if (msg::isExactValue<double>(source)) {
-        updateParameterValueFrom<double>(p, source);
-    } else if (msg::isExactValue<std::string>(source)) {
-        updateParameterValueFrom<std::string>(p, source);
-    } else if (msg::isExactValue<std::pair<int, int>>(source)) {
-        updateParameterValueFrom<std::pair<int, int>>(p, source);
-    } else if (msg::isExactValue<std::pair<double, double>>(source)) {
-        updateParameterValueFrom<std::pair<double, double>>(p, source);
-    } else if (msg::hasMessage(source) && !msg::isMessage<connection_types::MarkerMessage>(source)) {
+    if (!updateParameterFromInput(*p, source)) {
         node_->ainfo << "parameter " << p->name() << " got a message of unsupported type" << std::endl;
     }
 }

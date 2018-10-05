@@ -19,6 +19,16 @@ ParameterSerializerInterface::~ParameterSerializerInterface()
 {
 }
 
+ParameterSerializer::ParameterSerializer()
+{
+    // std::cout << "create ParameterSerializer" << std::endl;
+}
+
+ParameterSerializer::~ParameterSerializer()
+{
+    // std::cout << "destroy ParameterSerializer" << std::endl;
+}
+
 void ParameterSerializer::serialize(const Streamable& packet, SerializationBuffer& data)
 {
     if (const Parameter* parameter = dynamic_cast<const Parameter*>(&packet)) {
@@ -63,5 +73,17 @@ StreamablePtr ParameterSerializer::deserialize(const SerializationBuffer& data)
 
 void ParameterSerializer::registerSerializer(const std::string& type, std::shared_ptr<ParameterSerializerInterface> serializer)
 {
-    instance().serializers_[type] = serializer;
+    if (auto* ps = dynamic_cast<ParameterSerializer*>(PacketSerializer::instance().getSerializer(Parameter::PACKET_TYPE_ID))) {
+        // std::cout << "register " << type << std::endl;
+        ps->serializers_[type] = serializer;
+    } else {
+        throw std::runtime_error(std::string("Cannot register ") + type + std::string(" serializer, the parameter serializer is not registered yet."));
+    }
+}
+void ParameterSerializer::deregisterSerializer(const std::string& type)
+{
+    if (auto* ps = dynamic_cast<ParameterSerializer*>(PacketSerializer::instance().getSerializer(Parameter::PACKET_TYPE_ID))) {
+        // std::cout << "deregister " << type << std::endl;
+        ps->serializers_.erase(type);
+    }
 }

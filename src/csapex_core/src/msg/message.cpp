@@ -19,11 +19,13 @@ Message::~Message()
 {
 }
 
-void Message::cloneDataFrom(const Clonable& other)
+bool Message::cloneDataFrom(const Clonable& other)
 {
     const Message& rhs = dynamic_cast<const Message&>(other);
     frame_id = rhs.frame_id;
     stamp_micro_seconds = rhs.stamp_micro_seconds;
+
+    return true;
 }
 
 void Message::serialize(SerializationBuffer& data, SemanticVersion& version) const

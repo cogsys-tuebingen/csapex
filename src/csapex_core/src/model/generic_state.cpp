@@ -60,11 +60,14 @@ ClonablePtr GenericState::makeEmptyInstance() const
     return Ptr{ new GenericState };
 }
 
-void GenericState::cloneDataFrom(const Clonable& other)
+bool GenericState::cloneDataFrom(const Clonable& other)
 {
     if (const GenericState* other_state = dynamic_cast<const GenericState*>(&other)) {
         setFrom(*other_state);
+        return true;
     }
+
+    return false;
 }
 
 void GenericState::writeYaml(YAML::Node& out) const

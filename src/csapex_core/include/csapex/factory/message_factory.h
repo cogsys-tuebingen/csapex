@@ -69,16 +69,31 @@ public:
         }
     }
 
+    template <template <typename> class Wrapper, typename M>
+    static void deregisterDirectMessage()
+    {
+        MessageFactory& instance = MessageFactory::instance();
+        std::string type = connection_types::serializationName<Wrapper<M> >();
+        instance.deregisterMessage(type);
+    }
+
     template <typename M>
     static void registerMessage()
     {
         MessageFactory::instance().registerMessage(connection_types::serializationName<M>(), std::type_index(typeid(M)), std::bind(&MessageFactory::createMessage<M>));
     }
+    template <typename M>
+    static void deregisterMessage()
+    {
+        MessageFactory::instance().deregisterMessage(connection_types::serializationName<M>());
+    }
 
 private:
     MessageFactory();
+    ~MessageFactory() override;
 
     static void registerMessage(std::string type, std::type_index typeindex, Constructor constructor);
+    static void deregisterMessage(std::string type);
 
 private:
     std::map<std::string, Constructor> type_to_constructor;
@@ -92,6 +107,10 @@ struct MessageConstructorRegistered
     {
         csapex::MessageFactory::registerMessage<T>();
     }
+    ~MessageConstructorRegistered()
+    {
+        csapex::MessageFactory::deregisterMessage<T>();
+    }
 };
 
 template <template <typename> class Wrapper, typename T>
@@ -100,6 +119,10 @@ struct DirectMessageConstructorRegistered
     DirectMessageConstructorRegistered()
     {
         csapex::MessageFactory::registerDirectMessage<Wrapper, T>();
+    }
+    ~DirectMessageConstructorRegistered()
+    {
+        csapex::MessageFactory::deregisterDirectMessage<Wrapper, T>();
     }
 };
 

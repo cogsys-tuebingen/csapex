@@ -62,14 +62,18 @@ bool StringListParameter::set_unsafe(const boost::any& v)
     return false;
 }
 
-void StringListParameter::cloneDataFrom(const Clonable& other)
+bool StringListParameter::cloneDataFrom(const Clonable& other)
 {
     if (const StringListParameter* list = dynamic_cast<const StringListParameter*>(&other)) {
         *this = *list;
         triggerChange();
+        return true;
+
     } else {
         throw std::runtime_error("bad setFrom, invalid types");
     }
+
+    return false;
 }
 
 void StringListParameter::doSerialize(YAML::Node& n) const

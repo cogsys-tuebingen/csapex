@@ -22,7 +22,7 @@ public:
 
     virtual std::string toStringImpl() const override;
 
-    void cloneDataFrom(const Clonable& other) override;
+    bool cloneDataFrom(const Clonable& other) override;
     void set(const std::vector<int>& v);
 
     void doSerialize(YAML::Node& e) const override;

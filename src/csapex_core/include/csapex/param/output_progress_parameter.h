@@ -35,7 +35,7 @@ protected:
     virtual void doSerialize(YAML::Node& n) const override;
     virtual void doDeserialize(const YAML::Node& n) override;
 
-    virtual void cloneDataFrom(const Clonable& other) override;
+    virtual bool cloneDataFrom(const Clonable& other) override;
 
 private:
     int value;

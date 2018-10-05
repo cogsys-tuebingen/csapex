@@ -13,16 +13,12 @@
 #include <memory>
 #include <csapex/utility/slim_signal.hpp>
 #include <mutex>
+#include <boost/any.hpp>
 
 /// FORWARD DECLARATIONS
 namespace YAML
 {
 class Node;
-}
-
-namespace boost
-{
-class any;
 }
 
 namespace csapex
@@ -33,6 +29,8 @@ class CSAPEX_PARAM_EXPORT Parameter : public Streamable
 {
 public:
     friend class ParameterBuilder;
+    template <typename T, class>
+    friend class ParameterModifier;
 
     typedef std::shared_ptr<Parameter> Ptr;
 
@@ -97,18 +95,10 @@ public:
     template <typename T>
     void set(const T& v)
     {
-        if (!is<T>() && !is<void>()) {
-            throwTypeError(typeid(T), type(), "set failed: ");
-        }
-        bool changed = setSilent(v);
-
-        if (changed) {
+        if (setSilent(v)) {
             triggerChange();
         }
     }
-
-    template <typename T>
-    bool setSilent(const T& v);
 
     template <typename T>
     Parameter& operator=(const T& value)
@@ -123,6 +113,17 @@ public:
     }
 
 protected:
+    template <typename T>
+    bool setSilent(const T& v)
+    {
+        if (!is<T>() && !is<void>()) {
+            throwTypeError(typeid(T), type(), "set failed: ");
+        }
+
+        Lock l = lock();
+        return set_unsafe(v);
+    }
+
     template <typename T>
     T as_impl() const;
 

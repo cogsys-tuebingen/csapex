@@ -19,6 +19,6 @@
     }                                                                                                                                                                                                  \
     }
 
-#define CSAPEX_REGISTER_PARAM(name) CSAPEX_REGISTER_PARAM_WITH_NAME(name, PARAM_MAKE_UNIQUE(g_instance))
+#define CSAPEX_REGISTER_PARAM(name) CSAPEX_REGISTER_PARAM_WITH_NAME(name, PARAM_MAKE_UNIQUE(g_param_instance))
 
 #endif  // REGISTER_PARAMETER_H

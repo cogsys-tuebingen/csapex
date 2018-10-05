@@ -22,8 +22,15 @@ using namespace param;
 
 void factory::registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor)
 {
+    // std::cout << "register constructor " << type << std::endl;
     ParameterFactory& i = ParameterFactory::instance();
     i.registerParameterType(type, constructor);
+}
+void factory::deregisterParameterType(const std::string& type)
+{
+    // std::cout << "deregister constructor " << type << std::endl;
+    ParameterFactory& i = ParameterFactory::instance();
+    i.deregisterParameterType(type);
 }
 
 void factory::ParameterFactory::registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor)
@@ -31,6 +38,13 @@ void factory::ParameterFactory::registerParameterType(const std::string& type, s
     std::map<std::string, std::function<ParameterBuilder()>>::const_iterator it = type_to_constructor.find(type);
 
     type_to_constructor.insert(std::make_pair(type, constructor));
+}
+void factory::ParameterFactory::deregisterParameterType(const std::string& type)
+{
+    auto pos = type_to_constructor.find(type);
+    if (pos != type_to_constructor.end()) {
+        type_to_constructor.erase(pos);
+    }
 }
 
 ParameterBuilder factory::ParameterFactory::makeEmpty(const std::string& type)
