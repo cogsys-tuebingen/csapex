@@ -80,16 +80,20 @@ public:
 
     Lock lock() const;
 
-    template <typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
+    template <typename T, typename std::enable_if<!std::is_enum<T>::value && !std::is_floating_point<T>::value, int>::type = 0>
     T as() const
     {
         return as_impl<T>();
     }
-
     template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
     T as() const
     {
         return static_cast<T>(as_impl<int>());
+    }
+    template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+    T as() const
+    {
+        return static_cast<T>(as_impl<double>());
     }
 
     template <typename T>
@@ -125,7 +129,19 @@ protected:
     }
 
     template <typename T>
-    T as_impl() const;
+    T as_impl() const
+    {
+        if (!is<T>() || is<void>()) {
+            throwTypeError(typeid(T), type(), "get failed: ");
+        }
+
+        {
+            Lock l = lock();
+            boost::any v;
+            get_unsafe(v);
+            return boost::any_cast<T>(v);
+        }
+    }
 
     Parameter& operator=(const Parameter& p);
 

@@ -284,25 +284,6 @@ namespace csapex
 {
 namespace param
 {
-template <typename T>
-T Parameter::as_impl() const
-{
-    if (!is<T>() || is<void>()) {
-        throwTypeError(typeid(T), type(), "get failed: ");
-    }
-
-    {
-        Lock l = lock();
-        boost::any v;
-        get_unsafe(v);
-        return boost::any_cast<T>(v);
-    }
-}
-template <>
-float Parameter::as_impl<float>() const
-{
-    return static_cast<float>(as<double>());
-}
 
 template <typename T>
 void Parameter::setDictionaryValue(const std::string& key, const T& value)
