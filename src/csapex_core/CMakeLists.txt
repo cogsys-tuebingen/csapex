@@ -168,6 +168,8 @@ add_library(csapex_serialization SHARED
     src/serialization/io/boost_io.cpp
     src/serialization/io/csapex_io.cpp
 
+    src/serialization/parameter_serializer.cpp
+
     ${csapex_serialization_HEADERS}
 )
 generate_export_header( csapex_serialization
@@ -209,8 +211,6 @@ add_library(csapex_param SHARED
     src/param/output_progress_parameter.cpp
 
     src/param/parameter_factory.cpp
-
-    src/serialization/parameter_serializer.cpp
 
     ${csapex_param_HEADERS}
 )
