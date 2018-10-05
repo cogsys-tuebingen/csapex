@@ -20,7 +20,7 @@ public:
     virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
-    param::TriggerParameterPtr value_p_;
+    param::TriggerParameterPtr trigger_p_;
 };
 
 }  // namespace csapex

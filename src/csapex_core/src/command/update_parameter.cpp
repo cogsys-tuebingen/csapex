@@ -13,6 +13,7 @@
 #include <csapex/command/command_serializer.h>
 #include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/io/csapex_io.h>
+#include <csapex/serialization/parameter_serializer.h>
 
 /// SYSTEM
 #include <sstream>
@@ -26,6 +27,16 @@ using namespace csapex::command;
 
 CSAPEX_REGISTER_COMMAND_SERIALIZER(UpdateParameter)
 
+UpdateParameter::UpdateParameter(const UUID& parameter_uuid, const param::Parameter& param)
+  : CommandImplementation(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()), parameter_(param.cloneAs<param::Parameter>())
+{
+    if (parameter_uuid.global()) {
+        apex_assert_hard(!parameter_uuid.globalName().empty());
+    } else {
+        apex_assert(!parameter_uuid.empty());
+    }
+}
+
 bool UpdateParameter::isUndoable() const
 {
     return false;
@@ -34,100 +45,16 @@ bool UpdateParameter::isUndoable() const
 std::string UpdateParameter::getDescription() const
 {
     std::stringstream ss;
-    ss << "set parameter " << uuid << " to ";
-
-    if (value.type() == typeid(int)) {
-        ss << boost::any_cast<int>(value);
-
-    } else if (value.type() == typeid(double)) {
-        ss << boost::any_cast<double>(value);
-
-    } else if (value.type() == typeid(bool)) {
-        ss << boost::any_cast<bool>(value);
-
-    } else if (value.type() == typeid(std::vector<int>)) {
-        auto v = boost::any_cast<std::vector<int>>(value);
-        for (const auto& e : v) {
-            ss << e << " ";
-        }
-
-    } else if (value.type() == typeid(std::vector<double>)) {
-        auto v = boost::any_cast<std::vector<double>>(value);
-        for (const auto& e : v) {
-            ss << e << " ";
-        }
-
-    } else if (value.type() == typeid(const char*)) {
-        ss << boost::any_cast<const char*>(value);
-
-    } else if (value.type() == typeid(std::string)) {
-        ss << boost::any_cast<std::string>(value);
-
-    } else if (value.type() == typeid(std::pair<int, int>)) {
-        auto p = boost::any_cast<std::pair<int, int>>(value);
-        ss << "[" << p.first << ", " << p.second << "]";
-
-    } else if (value.type() == typeid(std::pair<double, double>)) {
-        auto p = boost::any_cast<std::pair<double, double>>(value);
-        ss << "[" << p.first << ", " << p.second << "]";
-
-    } else if (value.type() == typeid(std::pair<std::string, bool>)) {
-        auto p = boost::any_cast<std::pair<std::string, bool>>(value);
-        ss << "[" << p.first << ": " << p.second << "]";
-
-    } else {
-        throw std::runtime_error(std::string("unsupported type: ") + value.type().name());
-    }
-
+    ss << "set parameter " << uuid << " to " << parameter_->toString();
     return ss.str();
 }
 
 bool UpdateParameter::doExecute()
 {
-    if (value.type() == typeid(int)) {
-        setParameter(boost::any_cast<int>(value));
-
-    } else if (value.type() == typeid(double)) {
-        setParameter(boost::any_cast<double>(value));
-
-    } else if (value.type() == typeid(bool)) {
-        setParameter(boost::any_cast<bool>(value));
-
-    } else if (value.type() == typeid(std::string)) {
-        setParameter(boost::any_cast<std::string>(value));
-
-    } else if (value.type() == typeid(const char*)) {
-        setParameter(std::string(boost::any_cast<const char*>(value)));
-
-    } else if (value.type() == typeid(std::vector<int>)) {
-        setParameter(boost::any_cast<std::vector<int>>(value));
-
-    } else if (value.type() == typeid(std::vector<double>)) {
-        setParameter(boost::any_cast<std::vector<double>>(value));
-
-    } else if (value.type() == typeid(std::pair<int, int>)) {
-        setParameter(boost::any_cast<std::pair<int, int>>(value));
-
-    } else if (value.type() == typeid(std::pair<double, double>)) {
-        setParameter(boost::any_cast<std::pair<double, double>>(value));
-
-    } else if (value.type() == typeid(std::pair<std::string, bool>)) {
-        setParameter(boost::any_cast<std::pair<std::string, bool>>(value));
-
-    } else if (!value.empty()) {
-        throw std::runtime_error(std::string("unsupported type: ") + value.type().name());
-    }
-
-    return true;
-}
-
-template <typename T>
-void UpdateParameter::setParameter(const T& value)
-{
     if (uuid.global()) {
         // setting
         apex_assert_hard(!uuid.globalName().empty());
-        core_->getSettings().set(uuid.globalName(), value);
+        core_->getSettings().get(uuid.globalName())->cloneDataFrom(*parameter_);
 
     } else {
         UUID node_uuid = uuid.parentUUID();
@@ -138,8 +65,9 @@ void UpdateParameter::setParameter(const T& value)
         NodePtr node = node_handle->getNode().lock();
         apex_assert_hard(node);
 
-        node->setParameterLater(uuid.name(), value);
+        node->setParameterLater(uuid.name(), parameter_);
     }
+    return true;
 }
 
 bool UpdateParameter::doUndo()
@@ -157,7 +85,7 @@ void UpdateParameter::serialize(SerializationBuffer& data, SemanticVersion& vers
     Command::serialize(data, version);
 
     data << uuid;
-    data << value;
+    data << parameter_;
 }
 
 void UpdateParameter::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
@@ -165,5 +93,5 @@ void UpdateParameter::deserialize(const SerializationBuffer& data, const Semanti
     Command::deserialize(data, version);
 
     data >> uuid;
-    data >> value;
+    data >> parameter_;
 }

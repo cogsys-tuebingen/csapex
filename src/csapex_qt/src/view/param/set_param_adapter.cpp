@@ -39,7 +39,9 @@ QWidget* SetParameterAdapter::setup(QBoxLayout* layout, const std::string& displ
         }
 
         if (!val.isEmpty()) {
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), std::make_pair(val.toStdString(), true));
+            auto p = set_p_->cloneAs<param::SetParameter>();
+            p->set(std::make_pair(val.toStdString(), true));
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), *p);
             executeCommand(update_parameter);
         }
     });

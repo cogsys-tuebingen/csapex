@@ -3,8 +3,10 @@
 
 /// COMPONENT
 #include "command_impl.hpp"
+#include <csapex/param/param_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/assert.h>
+#include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
 #include <boost/any.hpp>
@@ -18,15 +20,7 @@ class CSAPEX_COMMAND_EXPORT UpdateParameter : public CommandImplementation<Updat
     COMMAND_HEADER(UpdateParameter);
 
 public:
-    template <typename T>
-    explicit UpdateParameter(const UUID& parameter_uuid, const T& value) : CommandImplementation(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()), value(value)
-    {
-        if (parameter_uuid.global()) {
-            apex_assert_hard(!parameter_uuid.globalName().empty());
-        } else {
-            apex_assert(!parameter_uuid.empty());
-        }
-    }
+    explicit UpdateParameter(const UUID& parameter_uuid, const param::Parameter& param);
 
     virtual bool isUndoable() const override;
 
@@ -46,8 +40,7 @@ private:
 
 private:
     AUUID uuid;
-
-    boost::any value;
+    param::ParameterPtr parameter_;
 };
 
 }  // namespace command

@@ -48,7 +48,9 @@ QWidget* ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
 
         // ui change -> model
         auto cb = [this, txt]() {
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), txt->text().toStdString());
+            auto p = value_p_->cloneAs<param::ValueParameter>();
+            p->set(txt->text().toStdString());
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), *p);
             executeCommand(update_parameter);
         };
 
@@ -79,7 +81,9 @@ QWidget* ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
             if (!p_ || !box) {
                 return;
             }
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), box->isChecked());
+            auto p = value_p_->cloneAs<param::ValueParameter>();
+            p->set(box->isChecked());
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), *p);
             executeCommand(update_parameter);
         });
 
@@ -112,7 +116,9 @@ QWidget* ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
             if (!p_ || !box) {
                 return;
             }
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), value);
+            auto p = value_p_->cloneAs<param::ValueParameter>();
+            p->set(value);
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), *p);
             executeCommand(update_parameter);
         });
 
@@ -151,7 +157,9 @@ QWidget* ValueParameterAdapter::setup(QBoxLayout* layout, const std::string& dis
             if (!p_ || !box) {
                 return;
             }
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), value);
+            auto p = value_p_->cloneAs<param::ValueParameter>();
+            p->set(value);
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), *p);
             executeCommand(update_parameter);
         });
 

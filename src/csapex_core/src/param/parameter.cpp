@@ -284,7 +284,6 @@ namespace csapex
 {
 namespace param
 {
-
 template <typename T>
 void Parameter::setDictionaryValue(const std::string& key, const T& value)
 {

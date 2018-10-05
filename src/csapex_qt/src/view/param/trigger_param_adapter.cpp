@@ -25,7 +25,7 @@ using namespace csapex;
 
 CSAPEX_REGISTER_PARAM_ADAPTER(csapex, TriggerParameterAdapter, csapex::param::TriggerParameter)
 
-TriggerParameterAdapter::TriggerParameterAdapter(param::TriggerParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), value_p_(p)
+TriggerParameterAdapter::TriggerParameterAdapter(param::TriggerParameter::Ptr p) : ParameterAdapter(std::dynamic_pointer_cast<param::Parameter>(p)), trigger_p_(p)
 {
 }
 
@@ -38,7 +38,7 @@ QWidget* TriggerParameterAdapter::setup(QBoxLayout* layout, const std::string& d
     layout->addLayout(QtHelper::wrap(display_name, sub, context_handler));
 
     auto cb = [this]() {
-        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), std::string(""));
+        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), *trigger_p_);
         executeCommand(update_parameter);
     };
 

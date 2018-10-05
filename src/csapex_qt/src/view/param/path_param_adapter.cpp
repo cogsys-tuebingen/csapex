@@ -44,8 +44,9 @@ QWidget* PathParameterAdapter::setup(QBoxLayout* layout, const std::string& disp
         if (!path_p_ || !path) {
             return;
         }
-        auto path_str = path->text().toStdString();
-        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), path_str);
+        auto p = path_p_->cloneAs<param::PathParameter>();
+        p->set(path->text().toStdString());
+        command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), *p);
         executeCommand(update_parameter);
     });
 

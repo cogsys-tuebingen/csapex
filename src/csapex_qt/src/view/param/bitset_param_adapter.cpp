@@ -66,7 +66,9 @@ void BitSetParameterAdapter::setupAgain()
                 return;
             }
             auto v = std::make_pair(str, checked);
-            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), v);
+            auto p = bitset_p_->cloneAs<param::BitSetParameter>();
+            p->set(v);
+            command::UpdateParameter::Ptr update_parameter = std::make_shared<command::UpdateParameter>(p_->getUUID().getAbsoluteUUID(), *p);
             executeCommand(update_parameter);
         });
 

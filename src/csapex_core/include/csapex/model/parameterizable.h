@@ -309,12 +309,11 @@ public:
      * @brief setParameter updates the value of a parameter the next time processing
      *        power is available
      * @param name unique name of the parameter for which to get the value
-     * @param value the value to use
+     * @param copy_of_parameter a parameter object to take the value from (must be immutable)
      */
-    template <typename T>
-    void setParameterLater(const std::string& name, const T& value)
+    void setParameterLater(const std::string& name, const param::ParameterConstPtr& copy_of_parameter)
     {
-        doSetParameterLater(name, value);
+        doSetParameterLater(name, copy_of_parameter);
     }
 
     /**
@@ -491,12 +490,11 @@ public:
     virtual void setParameterState(GenericStatePtr memento);
 
 private:
-    template <typename T>
-    void doSetParameterLater(const std::string& name, const T& value)
+    void doSetParameterLater(const std::string& name, const param::ParameterConstPtr& value)
     {
         {
             std::unique_lock<std::recursive_mutex> lock(changed_params_mutex_);
-            if (param::ParameterModifier<T>::setSilent(getParameter(name), value)) {
+            if (getParameter(name)->cloneDataFrom(*value)) {
                 param_updates_[name] = [this, name, value]() { getParameter(name)->triggerChange(); };
             }
         }

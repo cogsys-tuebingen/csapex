@@ -338,9 +338,7 @@ void NodeFacadeProxy::createParameterProxy(param::ParameterPtr proxy) const
     NodeFacadeProxy* self = const_cast<NodeFacadeProxy*>(this);
     proxy->parameter_changed.connect([self](param::Parameter* param) {
         // request to set the parameter
-        boost::any raw;
-        param->get_unsafe(raw);
-        CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), raw);
+        CommandPtr change = std::make_shared<command::UpdateParameter>(param->getUUID(), *param);
         self->session_->write(change);
     });
 

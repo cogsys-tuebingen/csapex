@@ -24,7 +24,7 @@ public:
         return value_;
     }
 
-    const std::type_info &type() const override
+    const std::type_info& type() const override
     {
         auto l = Parameter::lock();
         return typeid(value_);
@@ -70,7 +70,7 @@ public:
             }
             return true;
 
-        } else if(other.hasData(typeid(Type))) {
+        } else if (other.hasData(typeid(Type))) {
             value_ = *other.getDataPtr<Type>();
             return true;
         }
@@ -79,22 +79,16 @@ public:
     }
 
 protected:
-    ParameterTemplate()
-        : Parent("noname", ParameterDescription())
+    ParameterTemplate() : Parent("noname", ParameterDescription())
     {
-
     }
-    explicit ParameterTemplate(const std::string &name,
-                               const ParameterDescription &description,
-                               Type value)
-        : Parent(name, description), value_(value)
+    explicit ParameterTemplate(const std::string& name, const ParameterDescription& description, Type value) : Parent(name, description), value_(value)
     {
-
     }
 
     const void* getDataPtrUnsafe(const std::type_info& type) const override
     {
-        if(type == typeid(Type)) {
+        if (type == typeid(Type)) {
             const auto* data_ptr = &value_;
             return static_cast<const void*>(data_ptr);
         }
@@ -119,14 +113,12 @@ protected:
         return false;
     }
 
-
     std::string toStringImpl() const override
     {
         std::stringstream ss;
-        ss << "[" << serializationName<Instance>() << ": " << value_ <<  "]";
+        ss << "[" << serializationName<Instance>() << ": " << value_ << "]";
         return ss.str();
     }
-
 
 protected:
     Type value_;
