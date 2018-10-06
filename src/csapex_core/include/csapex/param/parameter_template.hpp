@@ -103,9 +103,9 @@ protected:
 
     bool set_unsafe(const boost::any& v) override
     {
-        Type a = boost::any_cast<Type>(v).getData();
+        Type a = boost::any_cast<Type>(v);
 
-        if (a != value_.getDataRef()) {
+        if (a != value_) {
             value_ = a;
             return true;
         }
