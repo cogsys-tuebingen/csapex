@@ -55,6 +55,7 @@ private:
     void scheduleProcess();
     void checkParameters();
     void execute();
+    void notify();
 
 private:
     NodeWorkerPtr worker_;
@@ -70,6 +71,7 @@ private:
 
     TaskPtr check_parameters_;
     TaskPtr execute_;
+    TaskPtr notify_processed_;
 
     std::vector<TaskPtr> remaining_tasks_;
 

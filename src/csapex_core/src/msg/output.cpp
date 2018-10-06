@@ -49,10 +49,22 @@ void Output::removeConnection(Connectable* other_side)
 
 void Output::notifyMessageProcessed()
 {
-    // TRACE std::cout << getUUID() << " notified" << std::endl;
+    std::unique_lock<std::recursive_mutex> processing_lock(processing_mutex_);
+
+    // Multiple connections can send this signal concurrently.
+    // The first of them can be handled *after* all connections are already done, so
+    // we need to make sure to only forward this once to the owner
+
     if (isProcessing()) {
         setProcessing(false);
         setState(State::IDLE);
+
+        processing_lock.unlock();
+
+
+        for (const ConnectionPtr& connection : connections_) {
+            apex_assert_hard(connection->getState() == Connection::State::DONE);
+        }
         message_processed(shared_from_this());
     }
 }
@@ -167,11 +179,15 @@ bool Output::canSendMessages() const
 
 void Output::publish()
 {
+    std::unique_lock<std::recursive_mutex> processing_lock(processing_mutex_);
+    apex_assert_hard(!isProcessing());
     apex_assert_hard(isEnabled());
     auto msg = getToken();
     apex_assert_hard(msg);
 
     setProcessing(true);
+
+    processing_lock.unlock();
 
     std::unique_lock<std::recursive_mutex> lock(sync_mutex);
     bool sent = false;

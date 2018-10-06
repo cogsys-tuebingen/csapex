@@ -78,10 +78,13 @@ void Connectable::setEssential(bool essential)
 
 void Connectable::notifyMessageProcessed()
 {
+    std::unique_lock<std::recursive_mutex> lock(processing_mutex_);
     if (processing_) {
         setProcessing(false);
 
         message_processed(shared_from_this());
+
+        lock.unlock();
 
         APEX_DEBUG_CERR << "connectable " << getUUID() << " notified" << std::endl;
 
@@ -93,6 +96,7 @@ void Connectable::notifyMessageProcessed()
 
 void Connectable::reset()
 {
+    std::unique_lock<std::recursive_mutex> lock(processing_mutex_);
     processing_ = false;
     //    notifyMessageProcessed();
 }
@@ -357,11 +361,14 @@ ConnectorDescription Connectable::getDescription() const
 
 void Connectable::setProcessing(bool processing)
 {
+    std::unique_lock<std::recursive_mutex> lock(processing_mutex_);
+
     apex_assert_hard(processing_ != processing);
     processing_ = processing;
 }
 
 bool Connectable::isProcessing() const
 {
+    std::unique_lock<std::recursive_mutex> lock(processing_mutex_);
     return processing_;
 }

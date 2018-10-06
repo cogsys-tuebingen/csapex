@@ -74,7 +74,8 @@ NodeWorker::NodeWorker(NodeHandlePtr node_handle)
     observe(node_handle_->getInputTransition()->enabled_changed, [this]() { updateState(); });
     observe(node_handle_->getOutputTransition()->enabled_changed, [this]() { updateState(); });
 
-    observe(node_handle_->getOutputTransition()->messages_processed, [this]() { outgoingMessagesProcessed(); });
+    observe(node_handle_->getOutputTransition()->messages_processed, outgoing_messages_processed);
+
 
     for (const EventPtr& e : node_handle->getEvents()) {
         const std::string& label = e->getLabel();
@@ -566,6 +567,8 @@ bool NodeWorker::startProcessingMessages()
     NodePtr node = node_handle_->getNode().lock();
     apex_assert_hard(node);
 
+    //rememberThreadId();
+
     if (node->hasChangedParameters()) {
         handleChangedParameters();
     }
@@ -658,6 +661,7 @@ void NodeWorker::skipExecution()
 void NodeWorker::finishProcessing()
 {
     // TRACE getNode()->ainfo << "finish processing" << std::endl;
+    apex_assert_hard(isProcessing());
     if (isProcessing()) {
         signalExecutionFinished();
 
@@ -735,8 +739,10 @@ void NodeWorker::finishTimer(Timer::Ptr t)
     }
 }
 
-void NodeWorker::outgoingMessagesProcessed()
+void NodeWorker::notifyMessagesProcessedDownstream()
 {
+    //assertSameThreadId();
+
     if (auto subgraph = std::dynamic_pointer_cast<SubgraphNode>(node_handle_->getNode().lock())) {
         subgraph->notifyMessagesProcessed();
     }
@@ -751,11 +757,13 @@ void NodeWorker::outgoingMessagesProcessed()
         }
 
         // TRACE APEX_DEBUG_TRACE getNode()->ainfo << "notify, try process" << std::endl;
-        triggerTryProcess();
+        //triggerTryProcess();
 
     } else {
         // TRACE APEX_DEBUG_TRACE getNode()->aerr << "cannot notify, no current exec mode" << std::endl;
     }
+
+    triggerTryProcess();
 }
 
 void NodeWorker::updateState()

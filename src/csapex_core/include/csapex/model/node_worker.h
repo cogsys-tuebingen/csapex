@@ -9,6 +9,7 @@
 #include <csapex/param/parameter.h>
 #include <csapex/model/error_state.h>
 #include <csapex/utility/uuid.h>
+#include <csapex/utility/thread_debug_helper.hpp>
 #include <csapex/model/notification.h>
 #include <csapex/model/execution_mode.h>
 #include <csapex/model/observer.h>
@@ -26,13 +27,14 @@
 #include <atomic>
 #include <csapex/utility/slim_signal.hpp>
 #include <boost/optional.hpp>
+#include <thread>
 
 namespace csapex
 {
 class ProfilerImplementation;
 class Interval;
 
-class CSAPEX_CORE_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier
+class CSAPEX_CORE_EXPORT NodeWorker : public ErrorState, public Observer, public Notifier, private ThreadDebugHelper
 {
 public:
     typedef std::shared_ptr<NodeWorker> Ptr;
@@ -70,6 +72,8 @@ public:
     bool canReceive() const;
     bool canSend() const;
 
+    void notifyMessagesProcessedDownstream();
+
 public:
     slim_signal::Signal<void()> destroyed;
 
@@ -81,6 +85,7 @@ public:
     slim_signal::Signal<void(NodeWorker* worker)> start_profiling;
     slim_signal::Signal<void(NodeWorker* worker)> stop_profiling;
 
+    slim_signal::Signal<void()> outgoing_messages_processed;
     slim_signal::Signal<void()> messages_processed;
     slim_signal::Signal<void()> processRequested;
     slim_signal::Signal<void()> try_process_changed;
@@ -98,7 +103,6 @@ protected:
 private:
     void triggerTryProcess();
 
-    void outgoingMessagesProcessed();
     void ioChanged();
 
     void updateParameterValues();

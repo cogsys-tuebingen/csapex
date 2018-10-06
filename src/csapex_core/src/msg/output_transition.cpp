@@ -240,16 +240,6 @@ void OutputTransition::fillConnections()
             out->publish();
         }
     }
-
-    for (const auto& pair : outputs_) {
-        OutputPtr out = pair.second;
-        apex_assert_hard(out);
-        if (out->isEnabled()) {
-            if (!out->isConnected()) {
-                out->notifyMessageProcessed();
-            }
-        }
-    }
 }
 
 void OutputTransition::clearBuffer()

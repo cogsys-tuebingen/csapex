@@ -95,7 +95,19 @@ void NodeRunner::connectNodeWorker()
                                       },
                                       0, this);
 
+    notify_processed_ = std::make_shared<Task>(std::string("notify ") + nh_->getUUID().getFullName(),
+                                      [this_weak]() {
+                                          if (auto self = this_weak.lock()) {
+                                              self->notify();
+                                          }
+                                      },
+                                      0, this);
+
     observe(worker_->try_process_changed, [this]() { scheduleProcess(); });
+
+    observe(worker_->outgoing_messages_processed, [this]() {
+        schedule(notify_processed_);
+    });
 
     observe(worker_->messages_processed, [this]() {
         measureFrequency();
@@ -119,7 +131,11 @@ void NodeRunner::assignToScheduler(Scheduler* scheduler)
 
     remaining_tasks_.clear();
 
+    lock.unlock();
+
     stopObserving();
+
+    lock.lock();
 
     // signals
     observe(scheduler->scheduler_changed, [this]() {
@@ -170,6 +186,11 @@ void NodeRunner::scheduleProcess()
 void NodeRunner::checkParameters()
 {
     worker_->handleChangedParameters();
+}
+
+void NodeRunner::notify()
+{
+    worker_->notifyMessagesProcessedDownstream();
 }
 
 void NodeRunner::execute()

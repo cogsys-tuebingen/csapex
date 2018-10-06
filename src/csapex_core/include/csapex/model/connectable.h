@@ -7,6 +7,7 @@
 #include <csapex/model/connector.h>
 #include <csapex_core/csapex_core_export.h>
 #include <csapex/utility/slim_signal.hpp>
+#include <csapex/utility/thread_debug_helper.hpp>
 
 /// SYSTEM
 #include <mutex>
@@ -16,7 +17,7 @@
 
 namespace csapex
 {
-class CSAPEX_CORE_EXPORT Connectable : public Connector, public std::enable_shared_from_this<Connectable>
+class CSAPEX_CORE_EXPORT Connectable : public Connector, public std::enable_shared_from_this<Connectable>, private ThreadDebugHelper
 {
     friend class Graph;
     friend class Connection;
@@ -141,9 +142,11 @@ protected:
     bool graph_port_;
     bool essential_;
 
+    mutable std::recursive_mutex processing_mutex_;
+
 private:
     std::atomic<bool> enabled_;
-    std::atomic<bool> processing_;
+    bool processing_;
 };
 
 }  // namespace csapex
