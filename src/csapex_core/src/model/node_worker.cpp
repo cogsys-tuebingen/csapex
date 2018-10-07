@@ -181,6 +181,7 @@ long NodeWorker::getSequenceNumber() const
 
 NodePtr NodeWorker::getNode() const
 {
+    apex_assert_hard(!node_handle_->getNode().expired());
     return node_handle_->getNode().lock();
 }
 

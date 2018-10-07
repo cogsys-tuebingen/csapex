@@ -66,7 +66,7 @@ private:
 
     bool paused_;
     bool stepping_;
-    int can_step_;
+    int possible_steps_;
     bool step_done_;
 
     TaskPtr check_parameters_;

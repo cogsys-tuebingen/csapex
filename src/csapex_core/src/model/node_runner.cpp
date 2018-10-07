@@ -25,7 +25,7 @@ NodeRunner::NodeRunner(NodeWorkerPtr worker)
   , scheduler_(nullptr)
   , paused_(false)
   , stepping_(false)
-  , can_step_(0)
+  , possible_steps_(0)
   , step_done_(false)
   , guard_(-1)
   , waiting_for_execution_(false)
@@ -172,11 +172,13 @@ void NodeRunner::scheduleProcess()
     apex_assert_hard(guard_ == -1);
     if (!paused_) {
         bool source = nh_->isSource();
-        if (!source || !stepping_ || can_step_) {
+        if (!source || !stepping_ || possible_steps_) {
             // execute_->setPriority(std::max<long>(0, worker_->getSequenceNumber()));
             // if(worker_->canExecute()) {
             if (!waiting_for_execution_) {
-                schedule(execute_);
+                if(!execute_->isScheduled()) {
+                    schedule(execute_);
+                }
             }
             //}
         }
@@ -195,7 +197,7 @@ void NodeRunner::notify()
 
 void NodeRunner::execute()
 {
-    if (stepping_ && can_step_ <= 0) {
+    if (stepping_ && possible_steps_ <= 0) {
         return;
     }
 
@@ -222,15 +224,15 @@ void NodeRunner::execute()
         nh_->getRate().startCycle();
 
         if (stepping_) {
-            apex_assert_hard(can_step_);
+            apex_assert_hard(possible_steps_);
         }
-        can_step_--;
+
+        possible_steps_--;
 
         try {
             if (worker_->canExecute()) {
                 if (!worker_->startProcessingMessages()) {
-                    // TRACE worker_->getNode()->ainfo << "execute failed" << std::endl;
-                    can_step_++;
+                    possible_steps_++;
                 }
             }
         } catch (const std::exception& e) {
@@ -256,7 +258,7 @@ void NodeRunner::execute()
             }
         }
     } else {
-        can_step_++;
+        //can_step_++;
         waiting_for_execution_ = false;
     }
 }
@@ -325,7 +327,7 @@ void NodeRunner::setSteppingMode(bool stepping)
     }
 
     stepping_ = stepping;
-    can_step_ = 0;
+    possible_steps_ = 0;
 
     if (stepping_) {
         if (can_start_stepping) {
@@ -346,7 +348,7 @@ void NodeRunner::step()
     bool is_enabled = worker_->isProcessingEnabled();
 
     if (is_enabled) {
-        can_step_++;
+        possible_steps_++;
     }
 
     step_done_ = false;
