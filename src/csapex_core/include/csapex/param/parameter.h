@@ -63,6 +63,7 @@ protected:
     virtual void doDeserialize(const YAML::Node& n) = 0;
 
 public:
+    void setName(const std::string& name);
     std::string name() const;
 
     void setUUID(const UUID& uuid);
@@ -205,7 +206,6 @@ protected:
     void access_unsafe(const Parameter& p, boost::any& out) const;
 
 private:
-    void setName(const std::string& name);
     void setDescription(const ParameterDescription& desc);
 
 protected:

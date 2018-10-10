@@ -83,7 +83,10 @@ void GenericState::readYaml(const YAML::Node& node)
     if (node["params"].IsDefined()) {
         auto serialized_params = node["params"].as<std::map<std::string, csapex::param::Parameter::Ptr> >();
         for (auto pair : serialized_params) {
-            apex_assert_hard(pair.first == pair.second->name());
+            if(pair.first != pair.second->name()) {
+                // backwards compatibility: if the key of a parameter is not equal to its name, rename the parameter
+                pair.second->setName(pair.first);
+            }
             auto pos = params.find(pair.first);
             if (pos == params.end()) {
                 params[pair.first] = pair.second;
