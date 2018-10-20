@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/widgets/activity_legend.h>
+#include <csapex/view/widgets/tracing_legend.h>
 
 /// COMPONENT
 #include <csapex/model/node_facade.h>
@@ -9,7 +9,7 @@
 
 using namespace csapex;
 
-ActivityLegend::ActivityLegend()
+TracingLegend::TracingLegend()
 {
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -24,7 +24,7 @@ ActivityLegend::ActivityLegend()
     QObject::connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(emitSelection()));
 }
 
-void ActivityLegend::resizeToFit()
+void TracingLegend::resizeToFit()
 {
     resizeColumnsToContents();
 
@@ -44,17 +44,17 @@ void ActivityLegend::resizeToFit()
     setFixedHeight(rect.height());
 }
 
-void ActivityLegend::startTrackingNode(NodeFacadePtr node)
+void TracingLegend::startTrackingNode(NodeFacadePtr node)
 {
     observe(node->start_profiling, [this](NodeFacade* nw) { addNode(nw); });
     observe(node->stop_profiling, [this](NodeFacade* nw) { removeNode(nw); });
 }
 
-void ActivityLegend::stopTrackingNode(NodeFacadePtr /*node*/)
+void TracingLegend::stopTrackingNode(NodeFacadePtr /*node*/)
 {
 }
 
-void ActivityLegend::addNode(NodeFacade* node)
+void TracingLegend::addNode(NodeFacade* node)
 {
     int row = rows_.size();
     rows_.push_back(node);
@@ -68,7 +68,7 @@ void ActivityLegend::addNode(NodeFacade* node)
     Q_EMIT nodeAdded(node);
 }
 
-void ActivityLegend::removeNode(NodeFacade* node)
+void TracingLegend::removeNode(NodeFacade* node)
 {
     bool found = false;
     int row = 0;
@@ -93,7 +93,7 @@ void ActivityLegend::removeNode(NodeFacade* node)
     }
 }
 
-void ActivityLegend::emitSelection()
+void TracingLegend::emitSelection()
 {
     QList<NodeFacade*> list;
 
@@ -104,4 +104,4 @@ void ActivityLegend::emitSelection()
     Q_EMIT nodeSelectionChanged(list);
 }
 /// MOC
-#include "../../../include/csapex/view/widgets/moc_activity_legend.cpp"
+#include "../../../include/csapex/view/widgets/moc_tracing_legend.cpp"

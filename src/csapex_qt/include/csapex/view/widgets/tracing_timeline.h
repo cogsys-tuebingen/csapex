@@ -1,8 +1,8 @@
-#ifndef ACTIVITY_TIMELINE_H
-#define ACTIVITY_TIMELINE_H
+#ifndef TRACING_TIMELINE_H
+#define TRACING_TIMELINE_H
 
 /// COMPONENT
-#include <csapex/model/activity_type.h>
+#include <csapex/model/tracing_type.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex_qt_export.h>
 #include <csapex/utility/slim_signal.hpp>
@@ -12,16 +12,16 @@
 
 namespace csapex
 {
-class ActivityTimelineItem;
+class TracingTimelineItem;
 class Interval;
 
-class CSAPEX_QT_EXPORT ActivityTimeline : public QGraphicsView
+class CSAPEX_QT_EXPORT TracingTimeline : public QGraphicsView
 {
     Q_OBJECT
 
 public:
-    ActivityTimeline();
-    ~ActivityTimeline();
+    TracingTimeline();
+    ~TracingTimeline();
 
     virtual void drawBackground(QPainter* painter, const QRectF& rect);
     virtual void drawForeground(QPainter* painter, const QRectF& rect);
@@ -41,7 +41,7 @@ public Q_SLOTS:
     void update();
     void updateTime();
     void updateTime(long stamp);
-    void updateRowStart(NodeFacade* worker, ActivityType type, std::shared_ptr<const Interval> profile);
+    void updateRowStart(NodeFacade* worker, TracingType type, std::shared_ptr<const Interval> profile);
     void updateRowStop(NodeFacade* worker, std::shared_ptr<const Interval> profile);
 
     void wheelEvent(QWheelEvent* we);
@@ -53,7 +53,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void recordingChanged(bool);
 
-    void updateRowStartRequest(NodeFacade* worker, ActivityType type, std::shared_ptr<const Interval> profile);
+    void updateRowStartRequest(NodeFacade* worker, TracingType type, std::shared_ptr<const Interval> profile);
     void updateRowStopRequest(NodeFacade* worker, std::shared_ptr<const Interval> profile);
 
 private:
@@ -73,10 +73,10 @@ private:
         long time;
     };
 
-    struct Activity
+    struct Trace
     {
-        Activity(Parameters* params, Row* row, int start_time, ActivityType type, std::shared_ptr<Interval const> interval);
-        ~Activity();
+        Trace(Parameters* params, Row* row, int start_time, TracingType type, std::shared_ptr<Interval const> interval);
+        ~Trace();
 
         void step(int time);
         void stop(int stop_time);
@@ -85,13 +85,13 @@ private:
         Parameters* params_;
         Row* row;
 
-        ActivityType type_;
+        TracingType type_;
         std::shared_ptr<Interval const> interval_;
 
         int start_;
         int stop_;
 
-        ActivityTimelineItem* rect;
+        TracingTimelineItem* rect;
     };
 
     struct Row
@@ -110,8 +110,8 @@ private:
         int top;
         int bottom;
 
-        std::vector<Activity*> activities_;
-        Activity* active_activity_;
+        std::vector<Trace*> traces_;
+        Trace* active_trace_;
 
         bool selected;
     };
@@ -131,4 +131,4 @@ private:
 
 }  // namespace csapex
 
-#endif  // ACTIVITY_TIMELINE_H
+#endif  // TRACING_TIMELINE_H

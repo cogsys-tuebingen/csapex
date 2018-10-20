@@ -481,7 +481,7 @@ void NodeWorker::processSlot(const SlotWeakPtr& slot_w)
             Timer::Ptr timer;
             Trace::Ptr interlude;
 
-            startProfilerInterval(ActivityType::SLOT_CALLBACK);
+            startProfilerInterval(TracingType::SLOT_CALLBACK);
             if (profiler_->isEnabled()) {
                 interlude = timer->step(std::string("slot ") + slot->getLabel());
             }
@@ -502,7 +502,7 @@ void NodeWorker::rememberExecutionMode()
     apex_assert_hard(current_exec_mode_);
 }
 
-void NodeWorker::startProfilerInterval(ActivityType type)
+void NodeWorker::startProfilerInterval(TracingType type)
 {
     if (profiler_->isEnabled()) {
         Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
@@ -634,7 +634,7 @@ bool NodeWorker::startProcessingMessages()
     } else {
         std::unique_lock<std::recursive_mutex> lock(sync);
 
-        startProfilerInterval(ActivityType::PROCESS);
+        startProfilerInterval(TracingType::PROCESS);
 
         // actually call the process function
         processNode();

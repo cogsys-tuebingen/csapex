@@ -13,8 +13,8 @@
 
 namespace csapex
 {
-FWD(ActivityTimeline)
-FWD(ActivityLegend)
+FWD(TracingTimeline)
+FWD(TracingLegend)
 FWD(NodeBox)
 FWD(MessageRenderer)
 FWD(NodeAdapter)

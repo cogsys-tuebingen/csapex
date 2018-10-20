@@ -1,5 +1,5 @@
-#ifndef ACTIVITY_TIMELINE_ITEM_H
-#define ACTIVITY_TIMELINE_ITEM_H
+#ifndef TRACING_TIMELINE_ITEM_H
+#define TRACING_TIMELINE_ITEM_H
 
 /// SYSTEM
 #include <QGraphicsRectItem>
@@ -10,10 +10,10 @@ namespace csapex
 {
 class Interval;
 
-class ActivityTimelineItem : public QGraphicsRectItem
+class TracingTimelineItem : public QGraphicsRectItem
 {
 public:
-    explicit ActivityTimelineItem(std::shared_ptr<Interval const> interval);
+    explicit TracingTimelineItem(std::shared_ptr<Interval const> interval);
 
     void refresh();
 
@@ -46,4 +46,4 @@ private:
 
 }  // namespace csapex
 
-#endif  // ACTIVITY_TIMELINE_ITEM_H
+#endif  // TRACING_TIMELINE_ITEM_H

@@ -8,7 +8,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/profiling/profiling_fwd.h>
-#include <csapex/model/activity_type.h>
+#include <csapex/model/tracing_type.h>
 #include <csapex/model/execution_state.h>
 #include <csapex/model/connector_description.h>
 #include <csapex/param/param_fwd.h>
@@ -150,7 +150,7 @@ public:
 
     slim_signal::Signal<void()> destroyed;
 
-    slim_signal::Signal<void(NodeFacade* facade, ActivityType type, std::shared_ptr<const Interval> stamp)> interval_start;
+    slim_signal::Signal<void(NodeFacade* facade, TracingType type, std::shared_ptr<const Interval> stamp)> interval_start;
     slim_signal::Signal<void(NodeFacade* facade, std::shared_ptr<const Interval> stamp)> interval_end;
 };
 

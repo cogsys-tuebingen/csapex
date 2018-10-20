@@ -175,7 +175,7 @@ void NodeFacadeImplementation::connectNodeWorker()
 
     observe(nw_->messages_processed, messages_processed);
 
-    observe(nw_->interval_start, [this](NodeWorker*, ActivityType type, std::shared_ptr<const Interval> stamp) { interval_start(this, type, stamp); });
+    observe(nw_->interval_start, [this](NodeWorker*, TracingType type, std::shared_ptr<const Interval> stamp) { interval_start(this, type, stamp); });
     observe(nw_->interval_end, [this](NodeWorker*, std::shared_ptr<const Interval> stamp) { interval_end(this, stamp); });
 
     observe(nw_->error_event, [this](bool error, const std::string& msg, ErrorLevel level) { setError(error, msg, level); });

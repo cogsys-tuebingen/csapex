@@ -1,5 +1,5 @@
 /// HEADER
-#include <csapex/view/widgets/activity_timeline_item.h>
+#include <csapex/view/widgets/tracing_timeline_item.h>
 
 /// PROJECT
 #include <csapex/profiling/interval.h>
@@ -16,23 +16,23 @@
 
 using namespace csapex;
 
-ActivityTimelineItem::ActivityTimelineItem(std::shared_ptr<Interval const> interval) : QGraphicsRectItem(nullptr), interval_(interval), selected_interval_(nullptr)
+TracingTimelineItem::TracingTimelineItem(std::shared_ptr<Interval const> interval) : QGraphicsRectItem(nullptr), interval_(interval), selected_interval_(nullptr)
 {
     setAcceptHoverEvents(true);
 }
 
-void ActivityTimelineItem::refresh()
+void TracingTimelineItem::refresh()
 
 {
 }
 
-void ActivityTimelineItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+void TracingTimelineItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     cursor_ = event->pos();
     update();
 }
 
-void ActivityTimelineItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
+void TracingTimelineItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {
     cursor_ = event->pos();
     update();
@@ -58,14 +58,14 @@ void ActivityTimelineItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
     }
 }
 
-void ActivityTimelineItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+void TracingTimelineItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     cursor_ = QPointF();
     selected_interval_ = nullptr;
     update();
 }
 
-void ActivityTimelineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void TracingTimelineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     QGraphicsRectItem::paint(painter, option, widget);
 
@@ -78,7 +78,7 @@ void ActivityTimelineItem::paint(QPainter* painter, const QStyleOptionGraphicsIt
     paintInterval(*painter, valid_rect, *interval_);
 }
 
-void ActivityTimelineItem::paintInterval(QPainter& p, const QRectF& valid_rect, const Interval& interval)
+void TracingTimelineItem::paintInterval(QPainter& p, const QRectF& valid_rect, const Interval& interval)
 {
     rect = valid_rect;
 
@@ -92,7 +92,7 @@ void ActivityTimelineItem::paintInterval(QPainter& p, const QRectF& valid_rect, 
     paintInterval(p, interval, 0);
 }
 
-void ActivityTimelineItem::paintInterval(QPainter& p, const Interval& interval, int depth)
+void TracingTimelineItem::paintInterval(QPainter& p, const Interval& interval, int depth)
 {
     double h = rect.height() / (depth + 1);
 

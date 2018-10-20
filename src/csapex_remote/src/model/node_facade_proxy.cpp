@@ -142,7 +142,7 @@ NodeFacadeProxy::NodeFacadeProxy(const SessionPtr& session, AUUID uuid)
                     stop_profiling(this);
                 } break;
                 case NodeNoteType::IntervalStartTriggered: {
-                    interval_start(this, cn->getPayload<ActivityType>(0), cn->getPayload<std::shared_ptr<const Interval>>(1));
+                    interval_start(this, cn->getPayload<TracingType>(0), cn->getPayload<std::shared_ptr<const Interval>>(1));
                 } break;
                 case NodeNoteType::IntervalEndTriggered: {
                     std::shared_ptr<const Interval> interval = cn->getPayload<std::shared_ptr<const Interval>>(0);

@@ -67,7 +67,7 @@ void NodeServer::startObservingNode(const NodeFacadeImplementationPtr& node)
     observe(node->connection_removed, [this, channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectionRemovedTriggered, c); });
 
     observe(node->interval_start,
-            [this, channel](NodeFacade* facade, ActivityType type, std::shared_ptr<const Interval> stamp) { channel->sendNote<NodeNote>(NodeNoteType::IntervalStartTriggered, type, stamp); });
+            [this, channel](NodeFacade* facade, TracingType type, std::shared_ptr<const Interval> stamp) { channel->sendNote<NodeNote>(NodeNoteType::IntervalStartTriggered, type, stamp); });
 
     observe(node->interval_end, [this, channel](NodeFacade* facade, std::shared_ptr<const Interval> stamp) { channel->sendNote<NodeNote>(NodeNoteType::IntervalEndTriggered, stamp); });
     observe(node->error_event, [this, channel](bool e, const std::string& msg, ErrorState::ErrorLevel level) { channel->sendNote<NodeNote>(NodeNoteType::ErrorEvent, e, msg, level); });

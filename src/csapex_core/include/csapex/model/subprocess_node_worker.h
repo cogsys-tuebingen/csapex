@@ -16,7 +16,7 @@
 #include <csapex/model/execution_mode.h>
 #include <csapex/model/observer.h>
 #include <csapex/model/notifier.h>
-#include <csapex/model/activity_type.h>
+#include <csapex/model/tracing_type.h>
 #include <csapex/model/execution_state.h>
 #include <csapex/model/activity_modifier.h>
 #include <csapex/utility/subprocess.h>

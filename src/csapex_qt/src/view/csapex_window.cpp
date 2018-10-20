@@ -42,8 +42,8 @@
 #include <csapex/view/utility/node_list_generator.h>
 #include <csapex/view/utility/qt_helper.hpp>
 #include <csapex/view/utility/snippet_list_generator.h>
-#include <csapex/view/widgets/activity_legend.h>
-#include <csapex/view/widgets/activity_timeline.h>
+#include <csapex/view/widgets/tracing_legend.h>
+#include <csapex/view/widgets/tracing_timeline.h>
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/profiling_widget.h>
 #include <csapex/view/widgets/screenshot_dialog.h>
@@ -73,15 +73,15 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget* parent)
   , ui(new Ui::CsApexWindow)
   , designer_(new Designer(view_core))
   , minimap_(designer_->getMinimap())
-  , activity_legend_(new ActivityLegend)
-  , activity_timeline_(new ActivityTimeline)
+  , tracing_legend_(new TracingLegend)
+  , tracing_timeline_(new TracingTimeline)
   , init_(false)
   , state_changed_(false)
   , disconnected_(false)
   , style_sheet_watcher_(nullptr)
   , plugin_locator_(view_core_.getPluginLocator())
 {
-    qRegisterMetaType<ActivityType>("ActivityType");
+    qRegisterMetaType<TracingType>("TracingType");
     qRegisterMetaType<QImage>("QImage");
     qRegisterMetaType<TokenPtr>("Token::Ptr");
     qRegisterMetaType<TokenConstPtr>("Token::ConstPtr");
@@ -91,13 +91,13 @@ CsApexWindow::CsApexWindow(CsApexViewCore& view_core, QWidget* parent)
     qRegisterMetaType<std::shared_ptr<const Interval> >("std::shared_ptr<const Interval>");
     qRegisterMetaType<Notification>("Notification");
 
-    QObject::connect(activity_legend_, &ActivityLegend::nodeSelectionChanged, activity_timeline_, &ActivityTimeline::setSelection);
+    QObject::connect(tracing_legend_, &TracingLegend::nodeSelectionChanged, tracing_timeline_, &TracingTimeline::setSelection);
 
-    observe(view_core_.node_facade_added, [this](NodeFacadePtr n) { activity_legend_->startTrackingNode(n); });
-    observe(view_core_.node_facade_removed, [this](NodeFacadePtr n) { activity_legend_->stopTrackingNode(n); });
+    observe(view_core_.node_facade_added, [this](NodeFacadePtr n) { tracing_legend_->startTrackingNode(n); });
+    observe(view_core_.node_facade_removed, [this](NodeFacadePtr n) { tracing_legend_->stopTrackingNode(n); });
 
-    QObject::connect(activity_legend_, &ActivityLegend::nodeAdded, activity_timeline_, &ActivityTimeline::addNode);
-    QObject::connect(activity_legend_, &ActivityLegend::nodeRemoved, activity_timeline_, &ActivityTimeline::removeNode);
+    QObject::connect(tracing_legend_, &TracingLegend::nodeAdded, tracing_timeline_, &TracingTimeline::addNode);
+    QObject::connect(tracing_legend_, &TracingLegend::nodeRemoved, tracing_timeline_, &TracingTimeline::removeNode);
 
     QTextCodec* utfCodec = QTextCodec::codecForName("UTF-8");
     QTextCodec::setCodecForLocale(utfCodec);
@@ -435,13 +435,13 @@ void CsApexWindow::setupTimeline()
 
     QHBoxLayout* layout = dynamic_cast<QHBoxLayout*>(ui->timeline->layout());
 
-    layout->addWidget(activity_legend_, 0, Qt::AlignTop);
-    layout->addWidget(activity_timeline_, 0, Qt::AlignTop);
+    layout->addWidget(tracing_legend_, 0, Qt::AlignTop);
+    layout->addWidget(tracing_timeline_, 0, Qt::AlignTop);
 
-    QObject::connect(ui->timeline_reset, SIGNAL(pressed()), activity_timeline_, SLOT(reset()));
+    QObject::connect(ui->timeline_reset, SIGNAL(pressed()), tracing_timeline_, SLOT(reset()));
 
-    QObject::connect(ui->timeline_record, SIGNAL(toggled(bool)), activity_timeline_, SLOT(setRecording(bool)));
-    QObject::connect(activity_timeline_, SIGNAL(recordingChanged(bool)), ui->timeline_record, SLOT(setChecked(bool)));
+    QObject::connect(ui->timeline_record, SIGNAL(toggled(bool)), tracing_timeline_, SLOT(setRecording(bool)));
+    QObject::connect(tracing_timeline_, SIGNAL(recordingChanged(bool)), ui->timeline_record, SLOT(setChecked(bool)));
 }
 
 void CsApexWindow::setupProfiling()

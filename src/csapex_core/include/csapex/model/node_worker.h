@@ -14,7 +14,7 @@
 #include <csapex/model/execution_mode.h>
 #include <csapex/model/observer.h>
 #include <csapex/model/notifier.h>
-#include <csapex/model/activity_type.h>
+#include <csapex/model/tracing_type.h>
 #include <csapex/model/execution_state.h>
 #include <csapex/model/activity_modifier.h>
 #include <csapex/model/parameterizable.h>
@@ -79,7 +79,7 @@ public:
 
     slim_signal::Signal<void(bool)> enabled;
 
-    slim_signal::Signal<void(NodeWorker* worker, ActivityType type, std::shared_ptr<const Interval> stamp)> interval_start;
+    slim_signal::Signal<void(NodeWorker* worker, TracingType type, std::shared_ptr<const Interval> stamp)> interval_start;
     slim_signal::Signal<void(NodeWorker* worker, std::shared_ptr<const Interval> stamp)> interval_end;
 
     slim_signal::Signal<void(NodeWorker* worker)> start_profiling;
@@ -141,7 +141,7 @@ private:
 
     void rememberExecutionMode();
 
-    void startProfilerInterval(ActivityType type);
+    void startProfilerInterval(TracingType type);
     void stopActiveProfilerInterval();
 
 protected:

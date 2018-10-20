@@ -1,5 +1,5 @@
-#ifndef ACTIVITY_LEGEND_H
-#define ACTIVITY_LEGEND_H
+#ifndef TRACING_LEGEND_H
+#define TRACING_LEGEND_H
 
 /// COMPONENT
 #include <csapex/model/model_fwd.h>
@@ -12,12 +12,12 @@
 
 namespace csapex
 {
-class CSAPEX_QT_EXPORT ActivityLegend : public QTableWidget, public Observer
+class CSAPEX_QT_EXPORT TracingLegend : public QTableWidget, public Observer
 {
     Q_OBJECT
 
 public:
-    ActivityLegend();
+    TracingLegend();
 
     void resizeToFit();
 
@@ -42,4 +42,4 @@ private:
 
 }  // namespace csapex
 
-#endif  // ACTIVITY_LEGEND_H
+#endif  // TRACING_LEGEND_H

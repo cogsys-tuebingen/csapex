@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/io/csapex_io.h>
-#include <csapex/model/activity_type.h>
+#include <csapex/model/tracing_type.h>
 #include <csapex/model/connection_description.h>
 #include <csapex/model/connector_description.h>
 #include <csapex/model/connector_type.h>
@@ -150,7 +150,7 @@ void SerializationBuffer::init()
         ADD_ANY_TYPE(Fulcrum);
         ADD_ANY_TYPE(NodeStatePtr);
         ADD_ANY_TYPE(param::ParameterPtr);
-        ADD_ANY_TYPE(ActivityType);
+        ADD_ANY_TYPE(TracingType);
         ADD_ANY_TYPE(ErrorState::ErrorLevel);
         ADD_ANY_TYPE_1PC(std::string, name(), Interval);
 

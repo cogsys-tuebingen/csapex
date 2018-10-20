@@ -149,8 +149,8 @@ private:
 
     Designer* designer_;
     MinimapWidget* minimap_;
-    ActivityLegend* activity_legend_;
-    ActivityTimeline* activity_timeline_;
+    TracingLegend* tracing_legend_;
+    TracingTimeline* tracing_timeline_;
     QLabel* server_options_label_;
 
     QTimer timer;

@@ -1,10 +1,10 @@
 /// HEADER
-#include <csapex/view/widgets/activity_timeline.h>
+#include <csapex/view/widgets/tracing_timeline.h>
 
 /// COMPONENT
 #include <csapex/model/node_facade.h>
 #include <csapex/profiling/interval.h>
-#include <csapex/view/widgets/activity_timeline_item.h>
+#include <csapex/view/widgets/tracing_timeline_item.h>
 
 /// SYSTEM
 #include <QPainter>
@@ -21,7 +21,7 @@ namespace
 static const int row_height = 30;
 }
 
-ActivityTimeline::ActivityTimeline() : scene_(new QGraphicsScene), recording_(true)
+TracingTimeline::TracingTimeline() : scene_(new QGraphicsScene), recording_(true)
 {
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
@@ -47,12 +47,12 @@ ActivityTimeline::ActivityTimeline() : scene_(new QGraphicsScene), recording_(tr
 
     setVisible(false);
 
-    QObject::connect(horizontalScrollBar(), &QScrollBar::sliderMoved, this, &ActivityTimeline::updateRecording);
-    QObject::connect(this, &ActivityTimeline::updateRowStartRequest, this, &ActivityTimeline::updateRowStart);
-    QObject::connect(this, &ActivityTimeline::updateRowStopRequest, this, &ActivityTimeline::updateRowStop);
+    QObject::connect(horizontalScrollBar(), &QScrollBar::sliderMoved, this, &TracingTimeline::updateRecording);
+    QObject::connect(this, &TracingTimeline::updateRowStartRequest, this, &TracingTimeline::updateRowStart);
+    QObject::connect(this, &TracingTimeline::updateRowStopRequest, this, &TracingTimeline::updateRowStop);
 }
 
-ActivityTimeline::~ActivityTimeline()
+TracingTimeline::~TracingTimeline()
 {
     for (Row* r : rows_) {
         delete r;
@@ -60,7 +60,7 @@ ActivityTimeline::~ActivityTimeline()
     }
 }
 
-void ActivityTimeline::resizeToFit()
+void TracingTimeline::resizeToFit()
 {
     // adjust resolution to fit the width
     double duration = std::max<double>(100, params_.time - params_.start_time);
@@ -78,12 +78,12 @@ void ActivityTimeline::resizeToFit()
     setFixedHeight(scene_->sceneRect().height() + horizontalScrollBar()->height() + 5);
 }
 
-void ActivityTimeline::addItem(QGraphicsItem* item)
+void TracingTimeline::addItem(QGraphicsItem* item)
 {
     scene_->addItem(item);
 }
 
-void ActivityTimeline::drawBackground(QPainter* painter, const QRectF& rect)
+void TracingTimeline::drawBackground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsView::drawBackground(painter, rect);
 
@@ -139,12 +139,12 @@ void ActivityTimeline::drawBackground(QPainter* painter, const QRectF& rect)
     }
 }
 
-void ActivityTimeline::drawForeground(QPainter* painter, const QRectF& rect)
+void TracingTimeline::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsView::drawForeground(painter, rect);
 }
 
-void ActivityTimeline::startTimer()
+void TracingTimeline::startTimer()
 {
     timer_ = new QTimer;
     timer_->setSingleShot(false);
@@ -158,7 +158,7 @@ void ActivityTimeline::startTimer()
     reset();
 }
 
-void ActivityTimeline::stopTimer()
+void TracingTimeline::stopTimer()
 {
     timer_->stop();
     QObject::disconnect(timer_);
@@ -168,7 +168,7 @@ void ActivityTimeline::stopTimer()
     setVisible(false);
 }
 
-void ActivityTimeline::addNode(NodeFacade* node)
+void TracingTimeline::addNode(NodeFacade* node)
 {
     if (rows_.empty()) {
         startTimer();
@@ -182,11 +182,11 @@ void ActivityTimeline::addNode(NodeFacade* node)
 
     resizeToFit();
 
-    node2connections_[node].emplace_back(node->interval_start.connect(this, &ActivityTimeline::updateRowStartRequest));
-    node2connections_[node].emplace_back(node->interval_end.connect(this, &ActivityTimeline::updateRowStopRequest));
+    node2connections_[node].emplace_back(node->interval_start.connect(this, &TracingTimeline::updateRowStartRequest));
+    node2connections_[node].emplace_back(node->interval_end.connect(this, &TracingTimeline::updateRowStopRequest));
 }
 
-void ActivityTimeline::removeNode(NodeFacade* node)
+void TracingTimeline::removeNode(NodeFacade* node)
 {
     bool found = false;
     for (std::size_t r = 0; r < rows_.size(); ++r) {
@@ -222,7 +222,7 @@ void ActivityTimeline::removeNode(NodeFacade* node)
     }
 }
 
-void ActivityTimeline::setSelection(QList<NodeFacade*> nodes)
+void TracingTimeline::setSelection(QList<NodeFacade*> nodes)
 {
     for (std::map<NodeFacade*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         it->second->selected = false;
@@ -233,11 +233,11 @@ void ActivityTimeline::setSelection(QList<NodeFacade*> nodes)
     refresh();
 }
 
-void ActivityTimeline::updateRecording()
+void TracingTimeline::updateRecording()
 {
 }
 
-void ActivityTimeline::setRecording(bool recording)
+void TracingTimeline::setRecording(bool recording)
 {
     if (recording != recording_) {
         recording_ = recording;
@@ -249,7 +249,7 @@ void ActivityTimeline::setRecording(bool recording)
     }
 }
 
-void ActivityTimeline::wheelEvent(QWheelEvent* we)
+void TracingTimeline::wheelEvent(QWheelEvent* we)
 {
     bool ctrl = Qt::ControlModifier & QApplication::keyboardModifiers();
 
@@ -291,7 +291,7 @@ void ActivityTimeline::wheelEvent(QWheelEvent* we)
     }
 }
 
-void ActivityTimeline::updateRowStart(NodeFacade* node, ActivityType type, std::shared_ptr<const Interval> interval)
+void TracingTimeline::updateRowStart(NodeFacade* node, TracingType type, std::shared_ptr<const Interval> interval)
 {
     if (!recording_) {
         return;
@@ -301,17 +301,17 @@ void ActivityTimeline::updateRowStart(NodeFacade* node, ActivityType type, std::
         Row* row = node2row.at(node);
 
         updateTime(interval->getStartMs());
-        row->activities_.push_back(new Activity(&params_, row, params_.time, type, interval));
-        row->active_activity_ = row->activities_.back();
+        row->traces_.push_back(new Trace(&params_, row, params_.time, type, interval));
+        row->active_trace_ = row->traces_.back();
 
-        addItem(row->active_activity_->rect);
+        addItem(row->active_trace_->rect);
 
     } catch (const std::out_of_range& e) {
         // ignore
     }
 }
 
-void ActivityTimeline::updateRowStop(NodeFacade* node, std::shared_ptr<const Interval> interval)
+void TracingTimeline::updateRowStop(NodeFacade* node, std::shared_ptr<const Interval> interval)
 {
     if (!recording_) {
         return;
@@ -319,32 +319,32 @@ void ActivityTimeline::updateRowStop(NodeFacade* node, std::shared_ptr<const Int
 
     try {
         Row* row = node2row.at(node);
-        if (!row->active_activity_) {
+        if (!row->active_trace_) {
             return;
         }
 
         updateTime(interval->getEndMs());
-        row->active_activity_->stop(params_.time);
-        row->active_activity_ = nullptr;
+        row->active_trace_->stop(params_.time);
+        row->active_trace_ = nullptr;
 
     } catch (const std::out_of_range& e) {
         // ignore
     }
 }
 
-void ActivityTimeline::updateTime()
+void TracingTimeline::updateTime()
 {
     updateTime(QDateTime::currentMSecsSinceEpoch());
 }
 
-void ActivityTimeline::updateTime(long stamp)
+void TracingTimeline::updateTime(long stamp)
 {
     if (recording_) {
         params_.time = (stamp - params_.start_time_stamp);
     }
 }
 
-void ActivityTimeline::update()
+void TracingTimeline::update()
 {
     updateTime();
 
@@ -353,8 +353,8 @@ void ActivityTimeline::update()
     for (std::map<NodeFacade*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
         Row* row = it->second;
 
-        if (row->active_activity_) {
-            row->active_activity_->step(params_.time);
+        if (row->active_trace_) {
+            row->active_trace_->step(params_.time);
         }
 
         ++i;
@@ -367,7 +367,7 @@ void ActivityTimeline::update()
     }
 }
 
-void ActivityTimeline::reset()
+void TracingTimeline::reset()
 {
     scene()->clear();
 
@@ -377,7 +377,7 @@ void ActivityTimeline::reset()
     refresh();
 }
 
-void ActivityTimeline::refresh()
+void TracingTimeline::refresh()
 {
     int i = 0;
     for (std::map<NodeFacade*, Row*>::iterator it = node2row.begin(); it != node2row.end(); ++it) {
@@ -387,25 +387,25 @@ void ActivityTimeline::refresh()
     }
 }
 
-ActivityTimeline::Row::Row(Parameters& params, QGraphicsScene* /*scene*/, int row, NodeFacade* worker) : params_(params), node_(worker), row(row), active_activity_(nullptr), selected(false)
+TracingTimeline::Row::Row(Parameters& params, QGraphicsScene* /*scene*/, int row, NodeFacade* worker) : params_(params), node_(worker), row(row), active_trace_(nullptr), selected(false)
 {
     top = row * row_height;
     bottom = (row + 1) * row_height;
 }
 
-ActivityTimeline::Row::~Row()
+TracingTimeline::Row::~Row()
 {
     clear();
 }
 
-void ActivityTimeline::Row::refresh()
+void TracingTimeline::Row::refresh()
 {
-    for (std::size_t j = 0; j < activities_.size();) {
-        Activity* activity = activities_[j];
+    for (std::size_t j = 0; j < traces_.size();) {
+        Trace* activity = traces_[j];
         if (activity->stop_ < params_.start_time) {
-            activities_.erase(activities_.begin() + j);
-            if (active_activity_ == activity) {
-                active_activity_ = nullptr;
+            traces_.erase(traces_.begin() + j);
+            if (active_trace_ == activity) {
+                active_trace_ = nullptr;
             }
             delete activity;
         } else {
@@ -415,52 +415,52 @@ void ActivityTimeline::Row::refresh()
     }
 }
 
-void ActivityTimeline::Row::clear()
+void TracingTimeline::Row::clear()
 {
-    for (Activity* a : activities_) {
+    for (Trace* a : traces_) {
         delete a;
         a = nullptr;
     }
-    activities_.clear();
-    active_activity_ = nullptr;
+    traces_.clear();
+    active_trace_ = nullptr;
 }
 
-ActivityTimeline::Activity::Activity(Parameters* params, Row* row, int start_time, ActivityType type, std::shared_ptr<const Interval> interval)
+TracingTimeline::Trace::Trace(Parameters* params, Row* row, int start_time, TracingType type, std::shared_ptr<const Interval> interval)
   : params_(params), row(row), type_(type), interval_(interval), start_(start_time), stop_(start_time + 10)
 {
-    rect = new ActivityTimelineItem(interval);
+    rect = new TracingTimelineItem(interval);
 
     update();
 }
 
-ActivityTimeline::Activity::~Activity()
+TracingTimeline::Trace::~Trace()
 {
 }
 
-void ActivityTimeline::Activity::stop(int stop_time)
+void TracingTimeline::Trace::stop(int stop_time)
 {
     stop_ = stop_time;
     update();
 }
 
-void ActivityTimeline::Activity::step(int time)
+void TracingTimeline::Trace::step(int time)
 {
     stop_ = time;
     update();
 }
 
-void ActivityTimeline::Activity::update()
+void TracingTimeline::Trace::update()
 {
     QColor color;
 
     switch (type_) {
-        case ActivityType::PROCESS:
+        case TracingType::PROCESS:
             color = QColor::fromRgbF(1.0, 0.15, 0.15, 1.0);
             break;
-        case ActivityType::SLOT_CALLBACK:
+        case TracingType::SLOT_CALLBACK:
             color = QColor::fromRgbF(0.15, 0.15, 1.0, 1.0);
             break;
-        case ActivityType::OTHER:
+        case TracingType::OTHER:
             color = QColor::fromRgbF(0.15, 0.5, 0.5, 1.0);
             break;
     }
@@ -487,4 +487,4 @@ void ActivityTimeline::Activity::update()
     rect->refresh();
 }
 /// MOC
-#include "../../../include/csapex/view/widgets/moc_activity_timeline.cpp"
+#include "../../../include/csapex/view/widgets/moc_tracing_timeline.cpp"

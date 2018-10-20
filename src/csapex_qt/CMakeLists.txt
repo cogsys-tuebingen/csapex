@@ -128,9 +128,9 @@ add_library(${PROJECT_NAME} SHARED
     src/view/utility/thread_group_profiling_delegate.cpp
     src/view/utility/widget_picker.cpp
 
-    src/view/widgets/activity_legend.cpp
-    src/view/widgets/activity_timeline.cpp
-    src/view/widgets/activity_timeline_item.cpp
+    src/view/widgets/tracing_legend.cpp
+    src/view/widgets/tracing_timeline.cpp
+    src/view/widgets/tracing_timeline_item.cpp
     src/view/widgets/completed_line_edit.cpp
     src/view/widgets/box_dialog.cpp
     src/view/widgets/search_dialog.cpp
