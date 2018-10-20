@@ -28,7 +28,7 @@ void CsApexSplashScreen::drawContents(QPainter* painter)
 
     QPointF pos(0, 0);
 
-    painter->drawText(pos, QString("cs::APEX ") + csapex::info::CSAPEX_VERSION.c_str());
+    painter->drawText(pos, QString("cs::APEX ") + QString::fromStdString(csapex::info::CSAPEX_VERSION.toString()));
     pos.setY(pos.y() + 20);
 
     font.setPixelSize(10);

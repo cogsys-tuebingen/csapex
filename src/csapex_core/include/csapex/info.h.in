@@ -1,0 +1,12 @@
+/// PROJECT
+#include <csapex/utility/semantic_version.h>
+
+namespace csapex {
+namespace info {
+static const std::string GIT_COMMIT_HASH { "@GIT_COMMIT_HASH@" };
+static const std::string GIT_BRANCH { "@GIT_BRANCH@" };
+static const std::string MAINTAINER { "@csapex_core_MAINTAINER@" };
+static const SemanticVersion CSAPEX_VERSION { "@csapex_core_VERSION@" };
+static const std::string CSAPEX_DEFAULT_BOOT_PLUGIN_DIR { "@CSAPEX_BOOT_PLUGIN_DIR@" };
+}
+}

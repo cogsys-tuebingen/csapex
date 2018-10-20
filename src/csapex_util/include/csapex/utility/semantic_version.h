@@ -1,6 +1,9 @@
 #ifndef SEMANTIC_VERSION_H
 #define SEMANTIC_VERSION_H
 
+/// SYSTEM
+#include <string>
+
 namespace csapex
 {
 /**
@@ -22,6 +25,9 @@ struct SemanticVersion
     constexpr SemanticVersion(int major, int minor, int patch) : major_v(major), minor_v(minor), patch_v(patch)
     {
     }
+    SemanticVersion(const std::string& version_str);
+
+    std::string toString() const;
 
     constexpr SemanticVersion() = default;
 

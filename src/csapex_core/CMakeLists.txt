@@ -109,27 +109,11 @@ execute_process(
 )
 
 # generate meta infos
+set(INFO_IN ${CMAKE_CURRENT_LIST_DIR}/include/csapex/info.h.in)
 set(INFO_H ${CMAKE_CURRENT_LIST_DIR}/include/csapex/info.h)
 set(INFO ${INFO_H}.tmp)
 
-file(WRITE ${INFO} "namespace csapex {\nnamespace info {\n")
-
-file(APPEND ${INFO} "static const std::string GIT_COMMIT_HASH { \"${GIT_COMMIT_HASH}\" };\n")
-file(APPEND ${INFO} "static const std::string GIT_BRANCH { \"${GIT_BRANCH}\" };\n")
-file(APPEND ${INFO} "static const std::string MAINTAINER { \"${csapex_core_MAINTAINER}\" };\n")
-file(APPEND ${INFO} "static const std::string VERSION { \"${csapex_core_VERSION}\" };\n")
-file(APPEND ${INFO} "static const std::string CSAPEX_DEFAULT_BOOT_PLUGIN_DIR { \"${CSAPEX_BOOT_PLUGIN_DIR}\" };\n")
-file(APPEND ${INFO} "static const std::string CSAPEX_VERSION { \"${csapex_core_VERSION}\" };\n")
-
-file(APPEND ${INFO} "}\n}\n\n")
-
-if(WIN32) 
-	message(STATUS ${INFO} " -> " ${INFO_H})
-	file(RENAME ${INFO} ${INFO_H})
-else()
-	execute_process(COMMAND bash -c "if [[ ! -f info.h  ]] || [[ `diff info.h.tmp info.h` ]]; then mv info.h.tmp info.h; else rm info.h.tmp; fi"
-				    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
-endif()	
+configure_file(${INFO_IN} ${INFO_H})
 
 
 ###########

@@ -86,6 +86,30 @@ struct convert<csapex::UUID>
     }
 };
 
+template <>
+struct convert<csapex::SemanticVersion>
+{
+    static Node encode(const csapex::SemanticVersion& rhs)
+    {
+        Node node;
+        node["major"] = rhs.major_v;
+        node["minor"] = rhs.minor_v;
+        node["patch"] = rhs.patch_v;
+        return node;
+    }
+
+    static bool decode(const Node& node, csapex::SemanticVersion& rhs)
+    {
+        auto major = node["major"];
+        rhs.major_v = major.IsDefined() ? major.as<int>() : 0;
+        auto minor = node["minor"];
+        rhs.minor_v = minor.IsDefined() ? minor.as<int>() : 0;
+        auto patch = node["patch"];
+        rhs.major_v = patch.IsDefined() ? patch.as<int>() : 0;
+        return true;
+    }
+};
+
 }  // namespace YAML
 
 #endif  // CSAPEX_YAML_IO_HPP

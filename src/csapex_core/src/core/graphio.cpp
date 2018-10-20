@@ -2,6 +2,7 @@
 #include <csapex/core/graphio.h>
 
 /// PROJECT
+#include <csapex/info.h>
 #include <csapex/model/node.h>
 #include <csapex/model/node_handle.h>
 #include <csapex/model/node_facade_impl.h>
@@ -79,6 +80,8 @@ void GraphIO::saveGraphTo(YAML::Node& yaml)
     TimerPtr timer = getProfiler()->getTimer("save graph");
     timer->restart();
 
+    yaml["version"] = csapex::info::CSAPEX_VERSION;
+
     saveNodes(yaml);
     saveConnections(yaml);
 
@@ -103,15 +106,23 @@ void GraphIO::loadGraphFrom(const YAML::Node& doc)
     TimerPtr timer = getProfiler()->getTimer("load graph");
     timer->restart();
 
+    SemanticVersion version;
+    if(doc["version"].IsDefined()) {
+        version = doc["version"].as<SemanticVersion>();
+    } else {
+        // with 0.9.7 versioning was introduced, so assume that the version was 0.9.6
+        version = SemanticVersion(0, 9, 6);
+    }
+
     graph_.getLocalGraph()->beginTransaction();
     {
         auto interlude = timer->step("load nodes");
-        loadNodes(doc);
+        loadNodes(doc, version);
     }
 
     {
         auto interlude = timer->step("load connections");
-        loadConnections(doc);
+        loadConnections(doc, version);
     }
     graph_.getLocalGraph()->finalizeTransaction();
 
@@ -156,7 +167,7 @@ Snippet GraphIO::saveSelectedGraph(const std::vector<UUID>& uuids)
     return Snippet(yaml);
 }
 
-std::unordered_map<UUID, UUID, UUID::Hasher> GraphIO::loadIntoGraph(const Snippet& snippet, const Point& position)
+std::unordered_map<UUID, UUID, UUID::Hasher> GraphIO::loadIntoGraph(const Snippet& snippet, const Point& position, SemanticVersion version)
 {
     double min_x = std::numeric_limits<double>::infinity();
     double min_y = std::numeric_limits<double>::infinity();
@@ -194,8 +205,8 @@ std::unordered_map<UUID, UUID, UUID::Hasher> GraphIO::loadIntoGraph(const Snippe
         position_offset_y_ = position.y - min_y;
     }
 
-    loadNodes(blueprint);
-    loadConnections(blueprint);
+    loadNodes(blueprint, version);
+    loadConnections(blueprint, version);
 
     auto res = old_node_uuid_to_new_;
 
@@ -226,7 +237,7 @@ void GraphIO::saveNodes(YAML::Node& yaml, const std::vector<NodeFacadeImplementa
     }
 }
 
-void GraphIO::loadNodes(const YAML::Node& doc)
+void GraphIO::loadNodes(const YAML::Node& doc, SemanticVersion version)
 {
     TimerPtr timer = getProfiler()->getTimer("load graph");
 
@@ -236,7 +247,7 @@ void GraphIO::loadNodes(const YAML::Node& doc)
             const YAML::Node& n = nodes[i];
 
             auto interlude = timer->step(n["uuid"].as<std::string>());
-            loadNode(n);
+            loadNode(n, version);
         }
     }
 }
@@ -283,7 +294,7 @@ UUID GraphIO::readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::
     return uuid;
 }
 
-void GraphIO::loadNode(const YAML::Node& doc)
+void GraphIO::loadNode(const YAML::Node& doc, SemanticVersion version)
 {
     UUID uuid = readNodeUUID(graph_.getLocalGraph()->shared_from_this(), doc["uuid"]);
 
@@ -295,7 +306,7 @@ void GraphIO::loadNode(const YAML::Node& doc)
     }
 
     try {
-        deserializeNode(doc, node_facade);
+        deserializeNode(doc, node_facade, version);
 
     } catch (const std::exception& e) {
         sendNotificationStreamGraphio("cannot load state for box " << uuid << ": " << type2name(typeid(e)) << ", what=" << e.what());
@@ -342,7 +353,7 @@ void GraphIO::saveConnections(YAML::Node& yaml, const std::vector<ConnectionDesc
     }
 }
 
-void GraphIO::loadConnections(const YAML::Node& doc)
+void GraphIO::loadConnections(const YAML::Node& doc, SemanticVersion version)
 {
     if (doc["connections"].IsDefined()) {
         const YAML::Node& connections = doc["connections"];
@@ -353,7 +364,7 @@ void GraphIO::loadConnections(const YAML::Node& doc)
             apex_assert_hard(connection.Type() == YAML::NodeType::Map);
 
             try {
-                loadConnection(connection);
+                loadConnection(connection, version);
             } catch (const std::exception& e) {
                 sendNotificationStreamGraphio("cannot load connection: " << e.what());
             }
@@ -369,7 +380,7 @@ void GraphIO::loadConnections(const YAML::Node& doc)
             apex_assert_hard(fulcrum.Type() == YAML::NodeType::Map);
 
             try {
-                loadFulcrum(fulcrum);
+                loadFulcrum(fulcrum, version);
             } catch (const std::exception& e) {
                 sendNotificationStreamGraphio("cannot load fulcrum: " << e.what());
             }
@@ -377,7 +388,7 @@ void GraphIO::loadConnections(const YAML::Node& doc)
     }
 }
 
-void GraphIO::loadConnection(const YAML::Node& connection)
+void GraphIO::loadConnection(const YAML::Node& connection, SemanticVersion version)
 {
     UUID from_uuid = readConnectorUUID(graph_.getLocalGraph()->shared_from_this(), connection["uuid"]);
 
@@ -399,7 +410,7 @@ void GraphIO::loadConnection(const YAML::Node& connection)
 
         ConnectorPtr from = graph_.findConnectorNoThrow(from_uuid);
         if (from) {
-            loadConnection(from, to_uuid, connection_type);
+            loadConnection(from, to_uuid, connection_type, version);
         } else {
             sendNotificationStreamGraphio("cannot load connection from '" << from_uuid << "' to '" << to_uuid << "', '" << from_uuid << "' doesn't exist.");
         }
@@ -434,7 +445,7 @@ void GraphIO::saveFulcrums(YAML::Node& fulcrum, const ConnectionDescription& con
     }
 }
 
-void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
+void GraphIO::loadFulcrum(const YAML::Node& fulcrum, SemanticVersion version)
 {
     YAML::Node from_node = fulcrum["from"];
     if (!from_node.IsDefined()) {
@@ -492,7 +503,7 @@ void GraphIO::loadFulcrum(const YAML::Node& fulcrum)
     }
 }
 
-void GraphIO::loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::string& connection_type)
+void GraphIO::loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::string& connection_type, SemanticVersion version)
 {
     try {
         NodeHandle* target = graph_.getLocalGraph()->findNodeHandleForConnector(to_uuid);
@@ -546,7 +557,7 @@ void GraphIO::serializeNode(YAML::Node& doc, NodeFacadeImplementationConstPtr no
     }
 }
 
-void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr node_facade)
+void GraphIO::deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr node_facade, SemanticVersion version)
 {
     NodeState::Ptr s = node_facade->getNodeState();
     s->readYaml(doc);

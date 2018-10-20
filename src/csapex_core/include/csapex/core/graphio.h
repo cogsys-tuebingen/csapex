@@ -38,7 +38,7 @@ public:
 
     Snippet saveSelectedGraph(const std::vector<UUID>& nodes);
 
-    std::unordered_map<UUID, UUID, UUID::Hasher> loadIntoGraph(const Snippet& blueprint, const csapex::Point& position);
+    std::unordered_map<UUID, UUID, UUID::Hasher> loadIntoGraph(const Snippet& blueprint, const csapex::Point& position, SemanticVersion version={});
 
 public:
     csapex::slim_signal::Signal<void(const GraphFacade&, YAML::Node& e)> saveViewRequest;
@@ -46,15 +46,15 @@ public:
 
 private:
     void saveNodes(YAML::Node& yaml);
-    void loadNodes(const YAML::Node& doc);
-    void loadNode(const YAML::Node& doc);
+    void loadNodes(const YAML::Node& doc, SemanticVersion version);
+    void loadNode(const YAML::Node& doc, SemanticVersion version);
 
     void saveConnections(YAML::Node& yaml);
-    void loadConnections(const YAML::Node& doc);
-    void loadConnection(const YAML::Node& connection);
+    void loadConnections(const YAML::Node& doc, SemanticVersion version);
+    void loadConnection(const YAML::Node& connection, SemanticVersion version);
 
     void saveFulcrums(YAML::Node& fulcrum, const ConnectionDescription& connection);
-    void loadFulcrum(const YAML::Node& fulcrum);
+    void loadFulcrum(const YAML::Node& fulcrum, SemanticVersion version);
 
     void sendNotification(const std::string& notification);
 
@@ -63,9 +63,9 @@ protected:
     void saveConnections(YAML::Node& yaml, const std::vector<ConnectionDescription>& connections);
 
     void serializeNode(YAML::Node& doc, NodeFacadeImplementationConstPtr node_handle);
-    void deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr node_handle);
+    void deserializeNode(const YAML::Node& doc, NodeFacadeImplementationPtr node_handle, SemanticVersion version);
 
-    void loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::string& connection_type);
+    void loadConnection(ConnectorPtr from, const UUID& to_uuid, const std::string& connection_type, SemanticVersion version);
 
     UUID readNodeUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
     UUID readConnectorUUID(std::weak_ptr<UUIDProvider> parent, const YAML::Node& doc);
