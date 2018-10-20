@@ -237,7 +237,7 @@ file(GLOB_RECURSE csapex_profiling_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
 add_library(csapex_profiling SHARED
     src/profiling/timer.cpp
     src/profiling/interval.cpp
-    src/profiling/interlude.cpp
+    src/profiling/trace.cpp
     src/profiling/profile.cpp
     src/profiling/timer.cpp
     src/profiling/profiler.cpp

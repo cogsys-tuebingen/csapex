@@ -1,20 +1,20 @@
 /// HEADER
-#include <csapex/profiling/interlude.h>
+#include <csapex/profiling/trace.h>
 
 /// COMPONENT
 #include <csapex/profiling/timer.h>
 
 using namespace csapex;
 
-Interlude::Ptr Timer::step(const std::string& name)
+Trace::Ptr Timer::step(const std::string& name)
 {
-    return Interlude::Ptr(new Interlude(this, name));
+    return Trace::Ptr(new Trace(this, name));
 }
-Interlude::Interlude(const std::shared_ptr<Timer>& parent, const std::string& name) : Interlude(parent.get(), name)
+Trace::Trace(const std::shared_ptr<Timer>& parent, const std::string& name) : Trace(parent.get(), name)
 {
 }
 
-Interlude::Interlude(Timer* parent, const std::string& name) : parent_(parent)
+Trace::Trace(Timer* parent, const std::string& name) : parent_(parent)
 {
     // start new interval in timer
     if (parent_->active.empty()) {
@@ -32,7 +32,7 @@ Interlude::Interlude(Timer* parent, const std::string& name) : parent_(parent)
     parent_->active.push_back(interval_);
 }
 
-Interlude::~Interlude()
+Trace::~Trace()
 {
     // stop interval
     //    Interval::Ptr i = parent_->active.back();

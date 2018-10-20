@@ -17,7 +17,7 @@
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/graph.h>
 #include <csapex/msg/marker_message.h>
-#include <csapex/profiling/interlude.hpp>
+#include <csapex/profiling/trace.hpp>
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/timer.h>
 #include <csapex/utility/assert.h>
@@ -339,7 +339,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
     painter->setPen(QPen(Qt::black, 3));
 
     {
-        INTERLUDE("connections");
+        TRACE("connections");
 
         // check if we have temporary connections
         if (!temp_.empty()) {
@@ -395,7 +395,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
     // augment nodes
 
     {
-        INTERLUDE("node augmentations");
+        TRACE("node augmentations");
         for (QGraphicsItem* item : items()) {
             MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
             if (!proxy) {
@@ -454,7 +454,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 
     // augment graph ports
     {
-        INTERLUDE("port augmentations");
+        TRACE("port augmentations");
         NodeFacadePtr nf = graph_facade_->getNodeFacade();
         if (nf) {
             {
@@ -1207,7 +1207,7 @@ Port* DesignerScene::getPort(const UUID& connector_uuid)
 
 void DesignerScene::drawPort(QPainter* painter, bool selected, Port* p, int pos)
 {
-    INTERLUDE("drawPort");
+    TRACE("drawPort");
     auto* item = itemAt(centerPoint(p), QTransform());
     if (!item || item->type() != QGraphicsProxyWidget::Type) {
         return;
@@ -1233,7 +1233,7 @@ void DesignerScene::drawPort(QPainter* painter, bool selected, Port* p, int pos)
     bool is_message = c->isSynchronous();
 
     if (!p->isMinimizedSize()) {
-        INTERLUDE("overlays");
+        TRACE("overlays");
 
         int font_size = debug_ ? 10 : 8;
         int lines = 1;
@@ -1308,7 +1308,7 @@ void DesignerScene::drawPort(QPainter* painter, bool selected, Port* p, int pos)
             }
         }
 
-        INTERLUDE("overlay drawing");
+        TRACE("overlay drawing");
         // drawing
         QColor box_color = view_core_.getStyle().balloonColor();
         QColor text_color = view_core_.getStyle().lineColor();

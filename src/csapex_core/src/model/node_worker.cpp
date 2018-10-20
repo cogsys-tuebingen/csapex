@@ -479,7 +479,7 @@ void NodeWorker::processSlot(const SlotWeakPtr& slot_w)
             }
 
             Timer::Ptr timer;
-            Interlude::Ptr interlude;
+            Trace::Ptr interlude;
 
             startProfilerInterval(ActivityType::SLOT_CALLBACK);
             if (profiler_->isEnabled()) {

@@ -4,7 +4,7 @@
 /// PROJECT
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/profiling/interval.h>
-#include <csapex/profiling/interlude.h>
+#include <csapex/profiling/trace.h>
 #include <csapex_profiling_export.h>
 
 /// SYSTEM
@@ -37,7 +37,7 @@ public:
     void finish();
     std::vector<std::pair<std::string, double> > entries() const;
 
-    Interlude::Ptr step(const std::string& name);
+    Trace::Ptr step(const std::string& name);
 
     long startTimeMs() const;
     long stopTimeMs() const;
