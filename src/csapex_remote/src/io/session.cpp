@@ -54,6 +54,11 @@ Session::~Session()
     }
 }
 
+std::string Session::getDescription() const
+{
+    return "unknown";
+}
+
 void Session::run()
 {
 }

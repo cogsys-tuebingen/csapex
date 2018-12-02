@@ -47,6 +47,7 @@
 #include <csapex/view/widgets/minimap_widget.h>
 #include <csapex/view/widgets/profiling_widget.h>
 #include <csapex/view/widgets/screenshot_dialog.h>
+#include <csapex/io/proxy.h>
 #include "ui_csapex_window.h"
 
 /// SYSTEM
@@ -281,8 +282,17 @@ void CsApexWindow::setupDesigner()
     QObject::connect(opt, SIGNAL(gridLockEnabled(bool)), ui->actionLock_to_Grid, SLOT(setChecked(bool)));
 
     // server
-    server_options_label_ = new QLabel("Server not running");
-    ui->Tools->insertWidget(ui->actionServer_Options, server_options_label_);
+    if (view_core_.isProxy()) {
+        auto session = dynamic_cast<Proxy&>(view_core_).getSession();
+        client_server_state_label_ = new QLabel(QString("Connected @") + QString::fromStdString(session->getDescription()));
+        ui->Tools->insertWidget(ui->actionServer_Options, client_server_state_label_);
+
+        ui->Tools->removeAction(ui->actionServer_Options);
+        ui->Tools->removeAction(ui->actionServer_StartStop);
+    } else {
+        client_server_state_label_ = new QLabel("Server not running");
+        ui->Tools->insertWidget(ui->actionServer_Options, client_server_state_label_);
+    }
 
     // filters
     ui->Filters->insertWidget(ui->actionMessage_Connections, new QLabel("Show connections: "));
@@ -1064,9 +1074,9 @@ void CsApexWindow::startStopServer()
 
     bool running = core.isServerActive();
     if (running) {
-        server_options_label_->setText(QString("Server running at port ") + QString::number(view_core_.getSettings().get("port", 42123)));
+        client_server_state_label_->setText(QString("Server running at port ") + QString::number(view_core_.getSettings().get("port", 42123)));
     } else {
-        server_options_label_->setText("Server not running");
+        client_server_state_label_->setText("Server not running");
     }
     ui->actionServer_StartStop->setChecked(running);
 }
