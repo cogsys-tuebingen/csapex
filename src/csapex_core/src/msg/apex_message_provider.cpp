@@ -31,9 +31,19 @@ bool ApexMessageProvider::hasNext()
 
 connection_types::Message::Ptr ApexMessageProvider::next(std::size_t /*slot*/)
 {
-    connection_types::Message::Ptr r;
-    std::swap(r, msg_);
-    return r;
+    if (state.readParameter<bool>("playback/resend")) {
+        if(!msg_) {
+            // resend, but the message is not cached -> load it
+            load(file_);
+        }
+        // resend -> keep the message
+        return msg_->cloneAs<connection_types::Message>();
+    } else {
+        // not resend -> move the message
+        connection_types::Message::Ptr r;
+        std::swap(r, msg_);
+        return r;
+    }
 }
 
 std::string ApexMessageProvider::getLabel(std::size_t /*slot*/) const
