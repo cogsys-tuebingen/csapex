@@ -48,7 +48,7 @@ TEST_F(ValueParameterTest, StringConversion)
 }
 
 template <typename T>
-void testSerialization(T value, const std::string& expected_type)
+void testYamlSerialization(T value, const std::string& expected_type)
 {
     YAML::Node node;
 
@@ -71,9 +71,38 @@ void testSerialization(T value, const std::string& expected_type)
     }
 }
 
-TEST_F(ValueParameterTest, YamlSerializationValue)
+template <typename T>
+void testBinarySerialization(T value, const std::string& expected_type)
 {
-    testSerialization<long>(420000000000, "long");
+    SerializationBuffer buffer;
+
+    {
+        ParameterPtr p = factory::declareValue("foo", value);
+        ParameterSerializer::instance().serialize(*p, buffer);
+    }
+
+    {
+        StreamablePtr s = ParameterSerializer::instance().deserialize(buffer);
+        ASSERT_NE(nullptr, s);
+
+        ParameterPtr p = std::dynamic_pointer_cast<Parameter>(s);
+        ASSERT_NE(nullptr, p);
+
+        EXPECT_STREQ("foo", p->name().c_str());
+        EXPECT_EQ(value, p->as<T>());
+    }
+}
+
+
+template <typename T>
+void testSerialization(T value, const std::string& expected_type)
+{
+    testYamlSerialization(value, expected_type);
+    testBinarySerialization(value, expected_type);
+}
+
+TEST_F(ValueParameterTest, SerializationValue)
+{
     testSerialization<int>(42, "int");
     testSerialization<double>(42.0, "double");
 
