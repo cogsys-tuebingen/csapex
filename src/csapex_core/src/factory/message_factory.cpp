@@ -178,6 +178,7 @@ void MessageFactory::writeBinaryFile(const std::string& path, const TokenData& m
     buffer.finalize();
 
     std::fwrite(buffer.data(), sizeof(uint8_t), buffer.size(), file);
+    std::fclose(file);
 }
 
 bool MessageFactory::isMessageRegistered(const std::string& type) const
