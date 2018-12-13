@@ -485,7 +485,7 @@ public:
             if (pos == instance().map_.end()) {
                 throw std::runtime_error(std::string("cannot make vector of type ") + type);
             }
-            return pos->second->cloneAs<EntryInterface>();
+            return std::dynamic_pointer_cast<EntryInterface>(pos->second->makeEmptyInstance());
         }
 
         template <typename T>

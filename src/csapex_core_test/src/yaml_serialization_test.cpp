@@ -64,3 +64,38 @@ TEST_F(YAMLSerializationTest, YamlDeserializationWorks)
 
     ASSERT_EQ("bar", mockmsg->value.payload);
 }
+
+TEST_F(YAMLSerializationTest, YamlDeserializationWorksWithGenericVector)
+{
+    for (int i = 0; i < 10; i++) {
+        YAML::Node node;
+
+        {
+            GenericVectorMessage::Ptr message = GenericVectorMessage::make<MockMessage>();
+
+
+            std::shared_ptr<std::vector<MockMessage>> vector = std::make_shared<std::vector<MockMessage>>();
+            for (int i = 0; i < 10; ++i) {
+                vector->emplace_back();
+                vector->back().payload = std::to_string(i);
+            }
+            message->set(vector);
+
+            TokenData::Ptr generic = message;
+            node = csapex::MessageSerializer::serializeYamlMessage(*generic);
+        }
+
+        {
+            TokenData::Ptr generic = csapex::MessageSerializer::deserializeYamlMessage(node);
+            ASSERT_NE(nullptr, generic);
+
+            GenericVectorMessage::Ptr vector_msg = std::dynamic_pointer_cast<GenericVectorMessage>(generic);
+            ASSERT_NE(nullptr, vector_msg);
+
+            std::shared_ptr<const std::vector<MockMessage>> vector = vector_msg->makeShared<MockMessage>();
+            ASSERT_NE(nullptr, vector);
+
+            ASSERT_EQ(10, vector->size());
+        }
+    }
+}
