@@ -144,6 +144,7 @@ public:
 
 Q_SIGNALS:
     void selectionChanged();
+    void graphModelChanged();
     void viewChanged();
 
     void boxAdded(NodeBox* box);
@@ -171,6 +172,7 @@ public Q_SLOTS:
 
     void addBox(NodeBox* box);
     void removeBox(NodeBox* box);
+    void updateBoxInformation();
 
     void createPort(ConnectorDescription request);
     void createPortAndConnect(ConnectorDescription request, ConnectorPtr from);
@@ -192,7 +194,6 @@ public Q_SLOTS:
     void movedBoxes(double dx, double dy);
 
     void overwriteStyleSheet(const QString& stylesheet);
-    void updateBoxInformation();
 
     void contextMenuEvent(QContextMenuEvent* e);
     void showContextMenuGlobal(const QPoint& pos);

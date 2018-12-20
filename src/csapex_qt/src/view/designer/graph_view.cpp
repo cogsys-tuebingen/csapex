@@ -143,14 +143,15 @@ GraphView::GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_c
     QObject::connect(this, &GraphView::childNodeFacadeAdded, this, &GraphView::childNodeAdded, Qt::QueuedConnection);
     QObject::connect(this, &GraphView::childNodeFacadeRemoved, this, &GraphView::childNodeRemoved, Qt::QueuedConnection);
 
-    observe(graph_facade_->state_changed, [this]() { updateBoxInformation(); });
+    observe(graph_facade_->state_changed, [this]() { Q_EMIT graphModelChanged(); });
+    QObject::connect(this, &GraphView::graphModelChanged, this, &GraphView::updateBoxInformation, Qt::QueuedConnection);
 
     for (const UUID& uuid : graph_facade_->enumerateAllNodes()) {
         const NodeFacadePtr& facade = graph_facade->findNodeFacade(uuid);
         apex_assert_hard(facade);
         nodeAdded(facade);
     }
-
+    
     setupWidgets();
 }
 
@@ -1234,7 +1235,9 @@ void GraphView::updateBoxInformation()
         MovableGraphicsProxyWidget* proxy = dynamic_cast<MovableGraphicsProxyWidget*>(item);
         if (proxy) {
             NodeBox* b = proxy->getBox();
-            b->updateBoxInformation(graph_facade_.get());
+            if(b->isVisible()) {
+                b->updateBoxInformation(graph_facade_.get());
+            }
         }
     }
 }

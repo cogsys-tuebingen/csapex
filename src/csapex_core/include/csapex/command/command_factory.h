@@ -21,7 +21,7 @@ public:
 
 public:
     CommandPtr deleteAllNodes(const std::vector<UUID>& uuids);
-    CommandPtr deleteAllConnectionsFromNodes(const std::vector<UUID>& uuids);
+    CommandPtr deleteAllConnectionsFromNodes(const std::vector<UUID>& uuids, bool is_transaction=true);
 
     CommandPtr addConnection(const UUID& from, const UUID& to, bool active);
 

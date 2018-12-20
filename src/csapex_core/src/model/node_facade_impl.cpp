@@ -336,7 +336,11 @@ ConnectorPtr NodeFacadeImplementation::getConnectorNoThrow(const UUID& id) const
 
 NodeCharacteristics NodeFacadeImplementation::getNodeCharacteristics() const
 {
-    return nh_->getVertex()->getNodeCharacteristics();
+    auto vertex = nh_->getVertex();
+    if(!vertex) {
+        return {};
+    }
+    return vertex->getNodeCharacteristics();
 }
 
 ConnectorPtr NodeFacadeImplementation::getParameterInput(const std::string& name) const

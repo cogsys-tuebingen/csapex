@@ -48,7 +48,7 @@ CommandPtr CommandFactory::deleteAllNodes(const std::vector<UUID>& uuids)
 {
     command::Meta::Ptr meta(new command::Meta(root_->getAbsoluteUUID(), "delete selected boxes", true));
 
-    meta->add(deleteAllConnectionsFromNodes(uuids));
+    meta->add(deleteAllConnectionsFromNodes(uuids, false));
 
     for (const UUID& uuid : uuids) {
         meta->add(Command::Ptr(new command::DeleteNode(root_->getAbsoluteUUID(), uuid)));
@@ -56,9 +56,9 @@ CommandPtr CommandFactory::deleteAllNodes(const std::vector<UUID>& uuids)
     return meta;
 }
 
-CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>& uuids)
+CommandPtr CommandFactory::deleteAllConnectionsFromNodes(const std::vector<UUID>& uuids, bool is_transaction)
 {
-    command::Meta::Ptr meta(new command::Meta(root_->getAbsoluteUUID(), "delete connections from boxes", true));
+    command::Meta::Ptr meta(new command::Meta(root_->getAbsoluteUUID(), "delete connections from boxes", is_transaction));
 
     std::set<std::pair<UUID, UUID>> connections;
 
