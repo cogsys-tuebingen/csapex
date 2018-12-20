@@ -151,7 +151,7 @@ private:
     MinimapWidget* minimap_;
     TracingLegend* tracing_legend_;
     TracingTimeline* tracing_timeline_;
-    QLabel* server_options_label_;
+    QLabel* client_server_state_label_;
 
     QTimer timer;
     QTimer auto_save_state_timer;

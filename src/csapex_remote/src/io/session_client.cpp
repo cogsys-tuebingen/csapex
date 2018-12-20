@@ -8,7 +8,13 @@ using namespace csapex;
 using boost::asio::ip::tcp;
 
 SessionClient::SessionClient(const std::string& ip, int port)
-  : Session("client"), socket_impl(io_service), resolver(io_service), resolver_iterator(boost::asio::connect(socket_impl, resolver.resolve({ ip, std::to_string(port) }))), io_service_running_(false)
+  : Session("client")
+  , socket_impl(io_service)
+  , resolver(io_service)
+  , resolver_iterator(boost::asio::connect(socket_impl, resolver.resolve({ ip, std::to_string(port) })))
+  , io_service_running_(false)
+  , ip_(ip)
+  , port_(port)
 {
     socket_.reset(new Socket(std::move(socket_impl)));
 }
@@ -16,6 +22,11 @@ SessionClient::SessionClient(const std::string& ip, int port)
 SessionClient::~SessionClient()
 {
     socket_.reset();
+}
+
+std::string SessionClient::getDescription() const
+{
+    return ip_ + ":" + std::to_string(port_);
 }
 
 void SessionClient::run()
