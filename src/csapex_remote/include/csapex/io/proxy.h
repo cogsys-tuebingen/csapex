@@ -14,6 +14,8 @@ public:
     Proxy(const SessionPtr& session);
     virtual ~Proxy();
 
+    SessionPtr getSession() const;
+
 protected:
     virtual void handleBroadcast(const BroadcastMessageConstPtr& message);
 

@@ -12,6 +12,11 @@ Proxy::~Proxy()
 {
 }
 
+SessionPtr Proxy::getSession() const 
+{
+    return session_;
+}
+
 void Proxy::handleBroadcast(const BroadcastMessageConstPtr& message)
 {
 }

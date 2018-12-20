@@ -15,6 +15,8 @@ public:
     SessionClient(const std::string& ip, int port);
     ~SessionClient();
 
+    std::string getDescription() const override;
+
     void run() override;
     void shutdown() override;
 
@@ -27,6 +29,9 @@ private:
     boost::asio::ip::tcp::resolver::iterator resolver_iterator;
 
     bool io_service_running_;
+
+    std::string ip_;
+    int port_;
 };
 
 }  // namespace csapex

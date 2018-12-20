@@ -45,8 +45,11 @@ public:
 
     void stopForced();
 
+    virtual std::string getDescription() const;
+
     void write(const StreamableConstPtr& packet);
     void write(const std::string& message);
+
 
     //
     // REQUEST
