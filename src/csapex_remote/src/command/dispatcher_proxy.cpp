@@ -15,9 +15,11 @@ CommandDispatcherProxy::CommandDispatcherProxy(const SessionPtr& session) : Prox
     init_ = false;
 }
 
-void CommandDispatcherProxy::execute(const CommandPtr& command)
+bool CommandDispatcherProxy::execute(const CommandPtr& command)
 {
-    session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Execute, command);
+    auto result = session_->sendRequest<CommandRequests>(CommandRequests::CommandRequestType::Execute, command);
+    apex_assert_hard(result);
+    return result->template getResult<bool>();
 }
 
 void CommandDispatcherProxy::executeLater(const CommandPtr& command)

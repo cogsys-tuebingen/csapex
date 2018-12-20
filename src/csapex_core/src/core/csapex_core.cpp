@@ -297,7 +297,10 @@ void CsApexCore::boot()
 {
     status_changed("booting up");
 
-    bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR, plugin_locator_.get(), settings_.get("require_boot_plugin", true));
+    if(settings_.get("use_boot_plugins", true)) {
+        bool require_boot_plugin = settings_.get("require_boot_plugin", true);
+        bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR, plugin_locator_.get(), require_boot_plugin);
+    }
 
     init();
 }

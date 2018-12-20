@@ -20,7 +20,7 @@ public:
 public:
     CommandDispatcher(CsApexCore& core);
 
-    void execute(const CommandPtr& command);
+    bool execute(const CommandPtr& command);
     void executeLater(const CommandPtr& command);
     void executeLater();
 
@@ -45,7 +45,7 @@ public:
     void clearSavepoints();
 
 private:
-    void doExecute(Command::Ptr command);
+    bool doExecute(Command::Ptr command);
     void setDirty(bool dirty);
 
 protected:

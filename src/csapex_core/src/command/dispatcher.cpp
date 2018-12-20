@@ -25,14 +25,14 @@ void CommandDispatcher::reset()
     dirty_ = false;
 }
 
-void CommandDispatcher::execute(const CommandPtr& command)
+bool CommandDispatcher::execute(const CommandPtr& command)
 {
     if (!command) {
         std::cerr << "trying to execute null command" << std::endl;
-        return;
+        return false;
     }
     command->init(core_.getRoot().get(), core_);
-    doExecute(command);
+    return doExecute(command);
 }
 
 void CommandDispatcher::executeLater(const CommandPtr& command)
@@ -53,10 +53,10 @@ void CommandDispatcher::executeLater()
     later.clear();
 }
 
-void CommandDispatcher::doExecute(Command::Ptr command)
+bool CommandDispatcher::doExecute(Command::Ptr command)
 {
     if (!command) {
-        return;
+        return false;
     }
 
     if (!isDirty()) {
@@ -65,20 +65,23 @@ void CommandDispatcher::doExecute(Command::Ptr command)
 
     bool success = Command::Access::executeCommand(command);
 
-    if (command->isUndoable()) {
-        done.push_back(command);
-
-        while (!undone.empty()) {
-            undone.pop_back();
-        }
-    }
-
     if (success) {
+
+        if (command->isUndoable()) {
+            done.push_back(command);
+
+            while (!undone.empty()) {
+                undone.pop_back();
+            }
+        }
+
         if (!command->isHidden()) {
             setDirty();
         }
         state_changed();
     }
+
+    return success;
 }
 
 bool CommandDispatcher::isDirty() const

@@ -80,7 +80,6 @@ void StreamInterceptor::run()
         return;
     }
 
-    running_ = true;
     std::string line;
     while (!stop_) {
         if (!std::cin.good()) {
@@ -140,6 +139,7 @@ bool StreamInterceptor::isRunning() const
 void StreamInterceptor::start()
 {
     if (!isRunning()) {
+        running_ = true;
         thread_ = std::thread([this]() { run(); });
     }
 }

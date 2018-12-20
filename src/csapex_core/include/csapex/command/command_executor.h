@@ -16,7 +16,7 @@ class CSAPEX_COMMAND_EXPORT CommandExecutor
 public:
     virtual ~CommandExecutor() = default;
 
-    virtual void execute(const CommandPtr& command) = 0;
+    virtual bool execute(const CommandPtr& command) = 0;
     virtual void executeLater(const CommandPtr& command) = 0;
     virtual void executeLater() = 0;
 

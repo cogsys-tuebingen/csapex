@@ -22,7 +22,7 @@ public:
 public:
     CommandDispatcherProxy(const SessionPtr& session);
 
-    void execute(const CommandPtr& command);
+    bool execute(const CommandPtr& command);
     void executeLater(const CommandPtr& command);
     void executeLater();
 

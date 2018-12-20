@@ -780,7 +780,7 @@ void GraphView::nodeAdded(NodeFacadePtr node_facade)
     QObject::connect(box, &NodeBox::portRemoved, this, &GraphView::removePort);
 
     NodeAdapter::Ptr adapter = view_core_.getNodeAdapterFactory()->makeNodeAdapter(node_facade, box);
-    adapter->executeCommand.connect(delegate::Delegate<void(const CommandPtr&)>(view_core_.getCommandDispatcher().get(), &CommandExecutor::execute));
+    adapter->executeCommand.connect(delegate::Delegate<bool(const CommandPtr&)>(view_core_.getCommandDispatcher().get(), &CommandExecutor::execute));
     box->setAdapter(adapter);
 
     box_map_[node_facade->getUUID()] = box;
