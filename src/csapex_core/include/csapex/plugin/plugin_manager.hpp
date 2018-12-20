@@ -8,7 +8,7 @@
 
 /// SYSTEM
 #include <csapex/utility/slim_signal.hpp>
-#include <class_loader/class_loader.h>
+#include <class_loader/class_loader.hpp>
 #include <set>
 #if WIN32
 #define TIXML_USE_STL
