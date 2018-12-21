@@ -216,22 +216,22 @@ bool SetParameter::cloneDataFrom(const Clonable& other)
 {
     if (const SetParameter* set = dynamic_cast<const SetParameter*>(&other)) {
         txt_ = set->txt_;
-        bool change = false;
+        bool value_changed = false;
         if (set_.find(txt_) == set_.end()) {
             set_[txt_] = set->value_;
-            change = true;
+            value_changed = true;
         }
         if (value_.type() == typeid(int)) {
-            change = boost::any_cast<int>(value_) != boost::any_cast<int>(set->value_);
+            value_changed = boost::any_cast<int>(value_) != boost::any_cast<int>(set->value_);
         } else if (value_.type() == typeid(double)) {
-            change = boost::any_cast<double>(value_) != boost::any_cast<double>(set->value_);
+            value_changed = boost::any_cast<double>(value_) != boost::any_cast<double>(set->value_);
         } else if (value_.type() == typeid(bool)) {
-            change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(set->value_);
+            value_changed = boost::any_cast<bool>(value_) != boost::any_cast<bool>(set->value_);
         } else if (value_.type() == typeid(std::string)) {
-            change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(set->value_);
+            value_changed = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(set->value_);
         }
-        if (change) {
-            *this = *set;
+        *this = *set;
+        if (value_changed) {
             triggerChange();
         }
         return true;

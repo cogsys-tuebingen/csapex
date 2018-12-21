@@ -88,22 +88,22 @@ bool ValueParameter::set_unsafe(const boost::any& v)
 bool ValueParameter::cloneDataFrom(const Clonable& other)
 {
     if (const ValueParameter* value = dynamic_cast<const ValueParameter*>(&other)) {
-        bool change = true;
+        bool value_change = true;
         if (value_.type() == value->value_.type()) {
             if (value_.type() == typeid(int)) {
-                change = boost::any_cast<int>(value_) != boost::any_cast<int>(value->value_);
+                value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(value->value_);
             } else if (value_.type() == typeid(double)) {
-                change = boost::any_cast<double>(value_) != boost::any_cast<double>(value->value_);
+                value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(value->value_);
             } else if (value_.type() == typeid(bool)) {
-                change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(value->value_);
+                value_change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(value->value_);
             } else if (value_.type() == typeid(std::string)) {
-                change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(value->value_);
+                value_change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(value->value_);
             } else if (value_.type() == typeid(long)) {
-                change = boost::any_cast<long>(value_) != boost::any_cast<long>(value->value_);
+                value_change = boost::any_cast<long>(value_) != boost::any_cast<long>(value->value_);
             }
         }
-        if (change) {
-            *this = *value;
+        *this = *value;
+        if (value_change) {
             triggerChange();
         }
         return true;

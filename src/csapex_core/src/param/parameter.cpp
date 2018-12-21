@@ -121,6 +121,7 @@ void Parameter::setInteractive(bool interactive)
 {
     if (interactive != interactive_) {
         interactive_ = interactive;
+        std::cout << "Param " << name_ << ":  interactive = " << interactive_ << std::endl;
 
         interactive_changed(this, interactive_);
     }
@@ -231,6 +232,7 @@ void Parameter::deserialize_yaml(const YAML::Node& n)
 
     if (n["interactive"].IsDefined()) {
         interactive_ = n["interactive"].as<bool>();
+        std::cout << "Param " << name_ << " is interactive" << std::endl;
     }
     if (n["dict"].IsDefined()) {
         dict_ = n["dict"].as<std::map<std::string, param::ParameterPtr>>();

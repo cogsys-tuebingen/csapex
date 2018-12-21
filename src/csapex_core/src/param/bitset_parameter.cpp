@@ -184,8 +184,9 @@ bool BitSetParameter::set_unsafe(const boost::any& v)
 bool BitSetParameter::cloneDataFrom(const Clonable& other)
 {
     if (const BitSetParameter* range = dynamic_cast<const BitSetParameter*>(&other)) {
-        if (value_ != range->value_) {
-            *this = *range;
+        bool value_changed = value_ != range->value_;
+        *this = *range;
+        if (value_changed) {
             triggerChange();
         }
         return true;

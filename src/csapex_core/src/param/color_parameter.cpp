@@ -81,8 +81,9 @@ std::vector<int> ColorParameter::value() const
 bool ColorParameter::cloneDataFrom(const Clonable& other)
 {
     if (const ColorParameter* color = dynamic_cast<const ColorParameter*>(&other)) {
-        if (colors_ != color->colors_) {
-            *this = *color;
+        bool value_changed = colors_ != color->colors_;
+        *this = *color;
+        if (value_changed) {
             triggerChange();
         }
         return true;

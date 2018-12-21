@@ -56,8 +56,9 @@ bool PathParameter::set_unsafe(const boost::any& v)
 bool PathParameter::cloneDataFrom(const Clonable& other)
 {
     if (const PathParameter* path = dynamic_cast<const PathParameter*>(&other)) {
-        if (value_ != path->value_) {
-            *this = *path;
+        bool value_changed = value_ != path->value_;
+        *this = *path;
+        if (value_changed) {
             triggerChange();
             return true;
         }

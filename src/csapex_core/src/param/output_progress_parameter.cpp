@@ -58,8 +58,9 @@ void OutputProgressParameter::doDeserialize(const YAML::Node& n)
 bool OutputProgressParameter::cloneDataFrom(const Clonable& other)
 {
     if (const OutputProgressParameter* progress = dynamic_cast<const OutputProgressParameter*>(&other)) {
-        if (value != progress->value || maximum != progress->maximum) {
-            *this = *progress;
+        bool value_changed = value != progress->value || maximum != progress->maximum;
+        *this = *progress;
+        if (value_changed) {
             triggerChange();
         }
         return true;

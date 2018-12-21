@@ -69,8 +69,9 @@ void OutputTextParameter::doDeserialize(const YAML::Node& n)
 bool OutputTextParameter::cloneDataFrom(const Clonable& other)
 {
     if (const OutputTextParameter* text = dynamic_cast<const OutputTextParameter*>(&other)) {
-        if (text_ != text->text_) {
-            *this = *text;
+        bool value_changed = text_ != text->text_;
+        *this = *text;
+        if (value_changed) {
             triggerChange();
             return true;
         }
