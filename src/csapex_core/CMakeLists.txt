@@ -110,11 +110,25 @@ execute_process(
 
 # generate meta infos
 set(INFO_IN ${CMAKE_CURRENT_LIST_DIR}/include/csapex/info.h.in)
-set(INFO_H ${CMAKE_CURRENT_LIST_DIR}/include/csapex/info.h)
-set(INFO ${INFO_H}.tmp)
+set(INFO_H ${CMAKE_CURRENT_BINARY_DIR}/csapex/info.h)
 
 configure_file(${INFO_IN} ${INFO_H})
 
+## Check class loader version
+find_file (CLASS_LOADER_HPP
+    class_loader.hpp
+    HINTS ${class_loader_PREFIX}
+    PATH_SUFFIXES include/class_loader)
+
+if(EXISTS ${CLASS_LOADER_HPP})
+    set(CLASS_LOADER_USES_HPP 1)
+else()
+    set(CLASS_LOADER_USES_HPP 0)
+endif()
+
+set(CLASS_LOADER_IN ${CMAKE_CURRENT_LIST_DIR}/include/csapex/plugin/class_loader.hpp.in)
+set(CLASS_LOADER_H ${CMAKE_CURRENT_BINARY_DIR}/csapex/plugin/class_loader.hpp)
+configure_file(${CLASS_LOADER_IN} ${CLASS_LOADER_H})
 
 ###########
 ## Build ##

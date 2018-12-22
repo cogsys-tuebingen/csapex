@@ -2,9 +2,7 @@
 #define REGISTER_APEX_PLUGIN_H
 
 /// SYSTEM
-#include <csapex/utility/suppress_warnings_start.h>
-#include <class_loader/class_loader.hpp>
-#include <csapex/utility/suppress_warnings_end.h>
+#include <csapex/plugin/class_loader.hpp>
 
 #define CSAPEX_REGISTER_CLASS(name, parent) CLASS_LOADER_REGISTER_CLASS(name, parent)
 

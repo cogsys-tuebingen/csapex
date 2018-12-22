@@ -1,0 +1,15 @@
+#ifndef CSAPEX_PLUGIN_LOADER_HPP
+#define CSAPEX_PLUGIN_LOADER_HPP
+
+// clang-format off
+#include <csapex/utility/suppress_warnings_start.h>
+#define CLASS_LOADER_USES_HPP @CLASS_LOADER_USES_HPP@
+#if CLASS_LOADER_USES_HPP
+#include <class_loader/class_loader.hpp>
+#else
+#include <class_loader/class_loader.h>
+#endif
+#include <csapex/utility/suppress_warnings_end.h>
+// clang-format on
+
+#endif // CSAPEX_PLUGIN_LOADER_HPP
