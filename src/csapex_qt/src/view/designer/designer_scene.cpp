@@ -17,6 +17,7 @@
 #include <csapex/model/graph/graph_impl.h>
 #include <csapex/model/graph.h>
 #include <csapex/msg/marker_message.h>
+#include <csapex/msg/no_message.h>
 #include <csapex/profiling/trace.hpp>
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/timer.h>
@@ -858,11 +859,11 @@ void DesignerScene::drawConnection(QPainter* painter, const ConnectionDescriptio
 
     ccs = CurrentConnectionState();
 
-    //    bool marker = false;
-    //    TokenPtr token = connection.getToken();
-    //    if(token) {
-    //        marker = std::dynamic_pointer_cast<connection_types::MarkerMessage const>(token->getTokenData()) != nullptr;
-    //    }
+    if(std::dynamic_pointer_cast<const connection_types::NoMessage>(ci.type)) {
+        ccs.marker_token = true;
+    } else {
+        ccs.marker_token = false;
+    }
 
     if (GraphFacadeImplementationPtr gfl = std::dynamic_pointer_cast<GraphFacadeImplementation>(graph_facade_)) {
         ConnectionPtr connection = gfl->getLocalGraph()->getConnection(ci.from, ci.to);
@@ -1113,7 +1114,12 @@ std::vector<QRectF> DesignerScene::drawConnection(QPainter* painter, const QPoin
     } else if (ccs.disabled) {
         color_start = view_core_.getStyle().lineColorDisabled();
         color_end = view_core_.getStyle().lineColorDisabled();
+
+    } else if (ccs.marker_token) {
+        color_start = view_core_.getStyle().lineColorMarker();
+        color_end = view_core_.getStyle().lineColorMarker();
     }
+    
     if (ccs.selected_from) {
         color_start.setAlpha(255);
     } else {

@@ -28,6 +28,10 @@ public:
     {
         return line_disabled_color_;
     }
+    QColor lineColorMarker() const
+    {
+        return line_marker_color_;
+    }
     int lineWidth() const
     {
         return line_width_;
@@ -53,6 +57,10 @@ public:
     {
         line_disabled_color_ = c;
     }
+    void setLineColorMarker(const QColor& c)
+    {
+        line_marker_color_ = c;
+    }
     void setLineWidth(int width)
     {
         line_width_ = width;
@@ -68,6 +76,7 @@ protected:
     QColor line_error_color_;
     QColor line_blocked_color_;
     QColor line_disabled_color_;
+    QColor line_marker_color_;
     int line_width_;
 
     QColor balloon_color_;

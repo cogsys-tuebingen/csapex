@@ -41,6 +41,7 @@ class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable, publ
     Q_PROPERTY(QColor lineColorError READ lineColorError WRITE setLineColorError)
     Q_PROPERTY(QColor lineColorBlocked READ lineColorBlocked WRITE setLineColorBlocked)
     Q_PROPERTY(QColor lineColorDisabled READ lineColorDisabled WRITE setLineColorDisabled)
+    Q_PROPERTY(QColor lineColorMarker READ lineColorMarker WRITE setLineColorMarker)
     Q_PROPERTY(int lineWidth READ lineWidth WRITE setLineWidth)
 
     Q_PROPERTY(QColor balloonColor READ balloonColor WRITE setBalloonColor)
@@ -60,6 +61,10 @@ class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable, publ
     void setLineColorDisabled(const QColor& c)
     {
         view_core_.getStyle().setLineColorDisabled(c);
+    }
+    void setLineColorMarker(const QColor& c)
+    {
+        view_core_.getStyle().setLineColorMarker(c);
     }
     void setLineWidth(int width)
     {
@@ -85,6 +90,10 @@ class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable, publ
     QColor lineColorDisabled() const
     {
         return view_core_.getStyle().lineColorDisabled();
+    }
+    QColor lineColorMarker() const
+    {
+        return view_core_.getStyle().lineColorMarker();
     }
     int lineWidth() const
     {

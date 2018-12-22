@@ -132,6 +132,7 @@ private:
         bool highlighted;
         bool error;
         bool disabled;
+        bool marker_token;
         bool full_read;
         bool full_unread;
         bool minimized_from;
