@@ -48,7 +48,7 @@ TokenData::Ptr MessageFactory::createMessage(const std::string& type)
     MessageFactory& i = instance();
 
     if (i.type_to_constructor.empty()) {
-        throw std::runtime_error("no connection types registered!");
+        throw std::runtime_error("MessageFactory: no connection types registered!");
     }
 
     if (i.type_to_constructor.find(type) == i.type_to_constructor.end()) {

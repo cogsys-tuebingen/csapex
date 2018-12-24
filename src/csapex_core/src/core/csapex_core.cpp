@@ -132,7 +132,6 @@ CsApexCore::~CsApexCore()
             root_->clear();
         }
         plugin_locator_->shutdown();
-        SingletonInterface::shutdownAll();
         thread_pool_->clear();
 
         MessageRendererManager::instance().shutdown();

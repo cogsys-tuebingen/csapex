@@ -63,7 +63,7 @@ TokenData::Ptr MessageSerializer::deserializeYamlMessage(const YAML::Node& node)
     }
 
     if (i.type_to_yaml_converter.empty()) {
-        throw DeserializationError("no connection types registered!");
+        throw DeserializationError("MessageSerializer: no connection types registered!");
     }
 
     std::string converter_type = type;
