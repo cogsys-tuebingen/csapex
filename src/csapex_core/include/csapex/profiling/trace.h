@@ -27,7 +27,7 @@ private:
     Trace& operator=(const Trace& copy) = delete;
 
 private:
-    Timer* parent_;
+    Timer* timer_;
     Interval::Ptr interval_;
 };
 

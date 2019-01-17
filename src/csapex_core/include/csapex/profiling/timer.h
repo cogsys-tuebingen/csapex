@@ -44,11 +44,20 @@ public:
 
     long elapsedMs() const;
 
-public:
+    Interval::Ptr pushInterval(const std::string& name);
+    void popInterval();
+
+    void setActivity(bool active);
+
+    Interval::Ptr getRoot() const;
+
+private:
     std::string timer_name_;
 
-    Interval::Ptr root;
-    std::deque<Interval::Ptr> active;
+    Interval::Ptr root_;
+
+    std::mutex active_intervals_mutex_;
+    std::deque<Interval::Ptr> active_intervals_;
 
     bool enabled_;
     bool dirty_;

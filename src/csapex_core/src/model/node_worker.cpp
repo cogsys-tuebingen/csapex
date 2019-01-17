@@ -512,8 +512,8 @@ void NodeWorker::startProfilerInterval(TracingType type)
     if (profiler_->isEnabled()) {
         Timer::Ptr timer = profiler_->getTimer(node_handle_->getUUID().getFullName());
         timer->restart();
-        timer->root->setActive(node_handle_->isActive());
-        interval_start(this, type, timer->root);
+        timer->setActivity(node_handle_->isActive());
+        interval_start(this, type, timer->getRoot());
     }
 }
 
@@ -741,7 +741,7 @@ void NodeWorker::finishTimer(Timer::Ptr t)
 
     t->finish();
     if (t->isEnabled()) {
-        interval_end(this, t->root);
+        interval_end(this, t->getRoot());
     }
 }
 
