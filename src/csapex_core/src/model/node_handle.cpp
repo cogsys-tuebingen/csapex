@@ -270,7 +270,9 @@ void NodeHandle::setNodeState(NodeStatePtr memento)
 void NodeHandle::triggerNodeStateChanged()
 {
     node_state_changed();
-    node_->stateChanged();
+    if(node_) {
+        node_->stateChanged();
+    }
 }
 
 NodeState::Ptr NodeHandle::getNodeStateCopy() const

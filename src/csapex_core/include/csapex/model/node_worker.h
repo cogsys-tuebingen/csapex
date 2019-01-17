@@ -101,6 +101,7 @@ protected:
     virtual void processSlot(const SlotWeakPtr& slot);
 
 private:
+    bool hasNode() const;
     void triggerTryProcess();
 
     void ioChanged();

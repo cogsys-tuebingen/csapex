@@ -181,8 +181,13 @@ long NodeWorker::getSequenceNumber() const
 
 NodePtr NodeWorker::getNode() const
 {
-    apex_assert_hard(!node_handle_->getNode().expired());
+    apex_assert_hard(hasNode());
     return node_handle_->getNode().lock();
+}
+
+bool NodeWorker::hasNode() const
+{
+    return !node_handle_->getNode().expired();
 }
 
 ExecutionState NodeWorker::getExecutionState() const
@@ -231,10 +236,10 @@ bool NodeWorker::canProcess() const
     if (isProcessing()) {
         return false;
     }
-    NodePtr node = getNode();
-    if (!node) {
+    if (!hasNode()) {
         return false;
     }
+    NodePtr node = getNode();
     if (!node->canProcess()) {
         return false;
     }
