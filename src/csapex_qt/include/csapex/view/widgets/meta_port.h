@@ -35,6 +35,9 @@ Q_SIGNALS:
     void createPortAndConnectRequest(ConnectorDescription request, ConnectorPtr);
     void createPortAndMoveRequest(ConnectorDescription request, ConnectorPtr);
 
+protected:
+    void createToolTip() override;
+
 private Q_SLOTS:
     void triggerCreatePort();
 

@@ -80,7 +80,7 @@ protected:
     Port(QWidget* parent = nullptr);
 
     void startDrag();
-    void createToolTip();
+    virtual void createToolTip();
     void paintEvent(QPaintEvent*);
 
 protected:

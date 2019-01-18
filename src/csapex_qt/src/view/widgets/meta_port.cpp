@@ -3,6 +3,7 @@
 
 /// COMPONENT
 #include <csapex/model/connector.h>
+#include <csapex/model/connector_type.h>
 #include <csapex/msg/any_message.h>
 #include <csapex/csapex_mime.h>
 
@@ -36,6 +37,13 @@ void MetaPort::showContextMenu(const QPoint& pos)
 
     menu.exec(QCursor::pos());
 }
+
+void MetaPort::createToolTip()
+{
+    auto message = std::string("Variadic port that allows to add new ") + port_type::name(port_type_) + "s to the parent structure.";
+    setToolTip(QString::fromStdString(message));
+}
+
 
 void MetaPort::triggerCreatePort()
 {
