@@ -83,11 +83,17 @@ bool Port::event(QEvent* e)
 
 bool Port::isOutput() const
 {
+    if (!adaptee_) {
+        return false;
+    }
     return adaptee_->isOutput();
 }
 
 bool Port::isInput() const
 {
+    if (!adaptee_) {
+        return false;
+    }
     return adaptee_->isInput();
 }
 
@@ -162,6 +168,10 @@ void Port::setPortProperty(const std::string& name, bool b)
 
 void Port::createToolTip()
 {
+    if (!adaptee_) {
+        return;
+    }
+
     std::string tooltip = adaptee_->makeStatusString();
 
     setToolTip(QString::fromStdString(tooltip));
