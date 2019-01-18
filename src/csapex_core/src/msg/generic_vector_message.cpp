@@ -92,6 +92,16 @@ GenericVectorMessage::InstancedImplementation::InstancedImplementation() : Entry
 {
 }
 
+bool GenericVectorMessage::InstancedImplementation::cloneData(const GenericVectorMessage::InstancedImplementation& other)
+{
+    value.clear();
+    value.reserve(other.value.size());
+    for(const auto& v : other.value) {
+        value.push_back(v->cloneAs<TokenData>());
+    }
+    return true;
+}
+
 bool GenericVectorMessage::InstancedImplementation::canConnectTo(const TokenData* other_side) const
 {
     if (const EntryInterface* ei = dynamic_cast<const EntryInterface*>(other_side)) {

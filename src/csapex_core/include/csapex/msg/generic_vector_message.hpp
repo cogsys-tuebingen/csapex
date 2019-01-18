@@ -37,7 +37,7 @@ struct GenericValueMessage;
 class CSAPEX_CORE_EXPORT GenericVectorMessage : public Message
 {
 protected:
-    CLONABLE_IMPLEMENTATION(GenericVectorMessage);
+    CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(GenericVectorMessage);
 
     friend class YAML::as_if<GenericVectorMessage, void>;
 
@@ -65,7 +65,7 @@ private:
     struct Implementation : public EntryInterface
     {
     protected:
-        CLONABLE_IMPLEMENTATION(Implementation<T>);
+        CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(Implementation<T>);
 
     private:
         template <typename Type, typename Enable = void>
@@ -89,15 +89,22 @@ private:
         typedef std::shared_ptr<Self> Ptr;
 
     public:
+        Implementation() : EntryInterface(std::string("std::vector<") + type2nameWithoutNamespace(typeid(T)) + ">")
+        {
+            static_assert(!std::is_same<T, void*>::value, "void* not allowed");
+            value.reset(new std::vector<Payload>);
+        }
+
         static typename Self::Ptr make()
         {
             return Self::Ptr(new Self);
         }
 
-        Implementation() : EntryInterface(std::string("std::vector<") + type2nameWithoutNamespace(typeid(T)) + ">")
+        bool cloneData(const Implementation<T>& other)
         {
-            static_assert(!std::is_same<T, void*>::value, "void* not allowed");
             value.reset(new std::vector<Payload>);
+            *value = *other.value;
+            return true;
         }
 
         virtual bool canConnectTo(const TokenData* other_side) const override
@@ -308,7 +315,7 @@ private:
     struct MessageImplementation : public Implementation<T>
     {
     protected:
-        CLONABLE_IMPLEMENTATION(MessageImplementation<T>);
+        CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(MessageImplementation<T>);
 
     public:
         typedef Implementation<T> Parent;
@@ -323,6 +330,11 @@ private:
         {
             return Self::Ptr(new Self);
         }
+        bool cloneData(const MessageImplementation<T>& other)
+        {
+            return Parent::cloneData(other);
+        }
+
 
         std::string nestedName() const override
         {
@@ -390,7 +402,7 @@ private:
     struct CSAPEX_CORE_EXPORT InstancedImplementation : public EntryInterface
     {
     protected:
-        CLONABLE_IMPLEMENTATION(InstancedImplementation);
+        CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(InstancedImplementation);
 
         friend class GenericVectorMessage;
 
@@ -416,6 +428,8 @@ private:
             return "::instanced::";
         }
 
+        bool cloneData(const InstancedImplementation& other);
+
     private:
         InstancedImplementation();
 
@@ -427,6 +441,12 @@ private:
 public:
     typedef std::shared_ptr<GenericVectorMessage> Ptr;
     typedef std::shared_ptr<const GenericVectorMessage> ConstPtr;
+
+    bool cloneData(const GenericVectorMessage& other)
+    {
+        impl = other.impl->cloneAs<EntryInterface>();
+        return true;
+    }
 
     template <typename T>
     struct TypeMap
