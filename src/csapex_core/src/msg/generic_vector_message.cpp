@@ -86,10 +86,12 @@ void GenericVectorMessage::AnythingImplementation::deserialize(const Serializati
 
 GenericVectorMessage::InstancedImplementation::InstancedImplementation(TokenData::ConstPtr type) : EntryInterface("Anything"), type_(type)
 {
+    apex_assert_hard(type_);
 }
 
-GenericVectorMessage::InstancedImplementation::InstancedImplementation() : EntryInterface("Anything")
+GenericVectorMessage::InstancedImplementation::InstancedImplementation() : EntryInterface("Anything"), type_(new AnyMessage)
 {
+    apex_assert_hard(type_);
 }
 
 bool GenericVectorMessage::InstancedImplementation::cloneData(const GenericVectorMessage::InstancedImplementation& other)
@@ -129,6 +131,7 @@ bool GenericVectorMessage::InstancedImplementation::acceptsConnectionFrom(const 
 
 void GenericVectorMessage::InstancedImplementation::encode(YAML::Node& node) const
 {
+    apex_assert_hard(type_);
     std::cout << "vector instance: encode" << std::endl;
     node["value_type"] = type_->typeName();
     node["values"] = value;
@@ -144,6 +147,7 @@ void GenericVectorMessage::InstancedImplementation::decode(const YAML::Node& nod
 
 TokenData::Ptr GenericVectorMessage::InstancedImplementation::nestedType() const
 {
+    apex_assert_hard(type_);
     return type_->cloneAs<TokenData>();
 }
 
