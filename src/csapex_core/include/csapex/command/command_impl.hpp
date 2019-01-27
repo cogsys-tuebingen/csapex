@@ -11,7 +11,13 @@ template <typename I>
 class CommandImplementation : public Command
 {
 protected:
-    CLONABLE_IMPLEMENTATION(I);
+    CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(I);
+
+public:
+    static std::string typeName()
+    {
+        return type2nameWithoutNamespace(typeid(I));
+    }
 
 protected:
     CommandImplementation(const AUUID& graph_uuid) : Command(graph_uuid)
@@ -27,10 +33,10 @@ protected:
         return typeName();
     }
 
-public:
-    static std::string typeName()
+    virtual bool cloneData(const I& other)
     {
-        return type2nameWithoutNamespace(typeid(I));
+        dynamic_cast<I&>(*this) = other;
+        return true;
     }
 };
 

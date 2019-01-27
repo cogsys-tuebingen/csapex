@@ -30,6 +30,7 @@ CSAPEX_REGISTER_COMMAND_SERIALIZER(UpdateParameter)
 UpdateParameter::UpdateParameter(const UUID& parameter_uuid, const param::Parameter& param)
   : CommandImplementation(parameter_uuid.getAbsoluteUUID()), uuid(parameter_uuid.getAbsoluteUUID()), parameter_(param.cloneAs<param::Parameter>())
 {
+    apex_assert_hard(!uuid.empty());
     if (parameter_uuid.global()) {
         apex_assert_hard(!parameter_uuid.globalName().empty());
     } else {
@@ -51,6 +52,8 @@ std::string UpdateParameter::getDescription() const
 
 bool UpdateParameter::doExecute()
 {
+    apex_assert_hard(!uuid.empty());
+
     if (uuid.global()) {
         // setting
         apex_assert_hard(!uuid.globalName().empty());
@@ -82,6 +85,8 @@ bool UpdateParameter::doRedo()
 
 void UpdateParameter::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
+    apex_assert_hard(!uuid.empty());
+
     Command::serialize(data, version);
 
     data << uuid;
@@ -94,4 +99,6 @@ void UpdateParameter::deserialize(const SerializationBuffer& data, const Semanti
 
     data >> uuid;
     data >> parameter_;
+    
+    apex_assert_hard(!uuid.empty());
 }

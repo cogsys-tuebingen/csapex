@@ -20,7 +20,7 @@ public:
         return type2nameWithoutNamespace(typeid(I));
     }
 
-    virtual std::string getParameterType() const override
+    std::string getParameterType() const override
     {
         return serializationName<I>();
     }
