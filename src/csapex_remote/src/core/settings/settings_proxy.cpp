@@ -94,21 +94,27 @@ csapex::param::Parameter::Ptr SettingsProxy::getNoThrow(const std::string& name)
     }
 
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + name));
-    if (const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
-        apex_assert_hard(response->getParameter());
+    try {
+        if (const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
+            apex_assert_hard(response->getParameter());
 
-        if (typeid(*response->getParameter()) == typeid(param::NullParameter)) {
-            return nullptr;
+            if (typeid(*response->getParameter()) == typeid(param::NullParameter)) {
+                return nullptr;
+            }
+
+            // std::cerr << response->getParameter()->getUUID() << std::endl;
+
+            // make a new parameter, when it gets changed relay the change to the remote server
+            param::ParameterPtr proxy = response->getParameter()->cloneAs<param::Parameter>();
+
+            createParameterProxy(name, proxy);
+
+            return proxy;
         }
-
-        // std::cerr << response->getParameter()->getUUID() << std::endl;
-
-        // make a new parameter, when it gets changed relay the change to the remote server
-        param::ParameterPtr proxy = response->getParameter()->cloneAs<param::Parameter>();
-
-        createParameterProxy(name, proxy);
-
-        return proxy;
+    } catch (const Failure& f) {
+        std::cerr << "Failed to get parameter " << name << ": " << f.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to get parameter " << name << ": " << e.what() << std::endl;
     }
 
     return nullptr;

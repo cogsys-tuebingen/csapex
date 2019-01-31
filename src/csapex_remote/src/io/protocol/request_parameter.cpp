@@ -33,7 +33,9 @@ ResponsePtr RequestParameter::ParameterRequest::execute(const SessionPtr& sessio
     if (id_.global()) {
         apex_assert_hard(!id_.globalName().empty());
         auto param = core.getSettings().getNoThrow(id_.globalName());
-        response = std::make_shared<ParameterResponse>(param, getRequestID());
+        if(param) {
+            response = std::make_shared<ParameterResponse>(param, getRequestID());
+        }
     } else {
         // TODO: get the parameter from the node
     }
@@ -57,6 +59,7 @@ void RequestParameter::ParameterRequest::deserialize(const SerializationBuffer& 
 
 RequestParameter::ParameterResponse::ParameterResponse(const param::ParameterConstPtr& parameter, uint8_t request_id) : ResponseImplementation(request_id), param_(parameter)
 {
+    apex_assert_hard(param_ != nullptr);
 }
 RequestParameter::ParameterResponse::ParameterResponse(uint8_t request_id) : ResponseImplementation(request_id)
 {
@@ -64,6 +67,7 @@ RequestParameter::ParameterResponse::ParameterResponse(uint8_t request_id) : Res
 
 void RequestParameter::ParameterResponse::serialize(SerializationBuffer& data, SemanticVersion& version) const
 {
+    apex_assert_hard(param_ != nullptr);
     ParameterSerializer::instance().serialize(*param_, data);
 }
 

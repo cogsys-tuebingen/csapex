@@ -496,6 +496,8 @@ void NodeWorker::processSlot(const SlotWeakPtr& slot_w)
             interlude.reset();
 
             finishTimer(timer);
+
+            node_handle_->might_be_enabled();
         }
     }
 }

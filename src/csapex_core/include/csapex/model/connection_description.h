@@ -23,12 +23,13 @@ public:
     TokenDataConstPtr type;
 
     int id;
+    int seq;
 
     bool active;
 
     std::vector<Fulcrum> fulcrums;
 
-    ConnectionDescription(const UUID& from, const UUID& to, const TokenDataConstPtr& type, int id, bool active, const std::vector<Fulcrum>& fulcrums);
+    ConnectionDescription(const UUID& from, const UUID& to, const TokenDataConstPtr& type, int id, int seq, bool active, const std::vector<Fulcrum>& fulcrums);
 
     ConnectionDescription(const ConnectionDescription& other);
 

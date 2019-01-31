@@ -189,7 +189,24 @@ void OutputTransition::tokenProcessed()
 {
     std::unique_lock<std::recursive_mutex> lock(sync);
     if (!areAllConnections(Connection::State::DONE)) {
-        APEX_DEBUG_CERR << "cannot publish next, not all connections are done" << std::endl;
+        // if (!outputs_.empty()) {
+        //     std::cerr << outputs_.begin()->second->getUUID() << ": cannot publish next, not all connections are done:" << std::endl;
+        //     for (const ConnectionPtr& connection : connections_) {
+        //         std::string s;
+        //         switch (connection->getState()) {
+        //             case Connection::State::DONE:
+        //                 s = "DONE / NOT_INITIALIZED";
+        //                 break;
+        //             case Connection::State::UNREAD:
+        //                 s = "UNREAD";
+        //                 break;
+        //             case Connection::State::READ:
+        //                 s = "READ";
+        //                 break;
+        //         }
+        //         std::cerr << outputs_.begin()->second->getUUID() << ": " << *connection << "-> " << s << std::endl;
+        //     }
+        // }
         return;
     }
 
@@ -198,6 +215,10 @@ void OutputTransition::tokenProcessed()
     APEX_DEBUG_CERR << "all outputs are done" << std::endl;
 
     lock.unlock();
+
+    // if (!outputs_.empty()) {
+    //     std::cerr << outputs_.begin()->second->getUUID() << ": notify messages processed" << std::endl;
+    // }
 
     messages_processed();
     checkIfEnabled();

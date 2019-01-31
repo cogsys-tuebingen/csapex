@@ -148,16 +148,17 @@ void Connection::setTokenProcessed()
     {
         std::unique_lock<std::recursive_mutex> lock(sync);
         if (getState() == State::DONE) {
+            // std::cerr << *this << " is already done!" << std::endl;
             return;
         }
         setState(State::DONE);
     }
 
-    // TRACE std::cout << *this << " is done" << std::endl;
+    // std::cerr << *this << " is done" << std::endl;
     notifyMessageProcessed();
 }
 
-void Connection::setToken(const TokenPtr& token)
+void Connection::setToken(const TokenPtr& token, const bool silent)
 {
     {
         TokenPtr msg = token->cloneAs<Token>();
@@ -172,10 +173,18 @@ void Connection::setToken(const TokenPtr& token)
         }
 
         message_ = msg;
+        ++seq_;
         setState(State::UNREAD);
     }
 
-    notifyMessageSet();
+    if(!silent) {
+        notifyMessageSet();
+    }
+}
+
+int Connection::getSeq() const
+{
+    return seq_;
 }
 
 void Connection::notifyMessageSet()
@@ -189,8 +198,11 @@ void Connection::notifyMessageSet()
 void Connection::notifyMessageProcessed()
 {
     if (detached_) {
+        // std::cerr << *this << "-> cannot notifyProcessed, detached " << std::endl;
         return;
     }
+    // std::cerr << *this << "-> notifyProcessed " << std::endl;
+
     from_->notifyMessageProcessed(this);
 }
 
@@ -256,6 +268,20 @@ void Connection::setState(State s)
             break;
     }
 
+    // std::string str;
+    // switch (s) {
+    //     case Connection::State::DONE:
+    //         str = "DONE / NOT_INITIALIZED";
+    //         break;
+    //     case Connection::State::UNREAD:
+    //         str = "UNREAD";
+    //         break;
+    //     case Connection::State::READ:
+    //         str = "READ";
+    //         break;
+    // }
+    // std::cerr << *this << "-> set state to " << str << std::endl;
+
     state_ = s;
 }
 
@@ -286,7 +312,7 @@ int Connection::id() const
 ConnectionDescription Connection::getDescription() const
 {
     TokenDataConstPtr type = message_ ? message_->getTokenData() : makeEmpty<connection_types::AnyMessage>();
-    return ConnectionDescription(from_->getUUID(), to_->getUUID(), type, id_, isActive(), getFulcrumsCopy());
+    return ConnectionDescription(from_->getUUID(), to_->getUUID(), type, id_, seq_, isActive(), getFulcrumsCopy());
 }
 
 bool Connection::contains(Connector* c) const

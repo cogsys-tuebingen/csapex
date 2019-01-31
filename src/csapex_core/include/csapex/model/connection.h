@@ -70,7 +70,7 @@ public:
 
     bool contains(Connector* c) const;
 
-    virtual void setToken(const TokenPtr& msg);
+    virtual void setToken(const TokenPtr& msg, const bool silent = false);
 
     TokenPtr getToken() const;
     void setTokenProcessed();
@@ -96,7 +96,12 @@ public:
     State getState() const;
     void setState(State s);
 
+    int getSeq() const;
+
     void reset();
+
+    void notifyMessageSet();
+    void notifyMessageProcessed();
 
 public:
     slim_signal::Signal<void()> deleted;
@@ -126,10 +131,6 @@ public:
     void deleteFulcrum(int fulcrum_id);
 
 protected:
-    void notifyMessageSet();
-    void notifyMessageProcessed();
-
-protected:
     OutputPtr from_;
     InputPtr to_;
     int id_;
@@ -144,6 +145,8 @@ protected:
     TokenPtr message_;
 
     static int next_connection_id_;
+
+    int seq_ = 0;
 
     mutable std::recursive_mutex sync;
 };

@@ -599,6 +599,8 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                 descr += QString::fromStdString(c.to.getShortName());
                 descr += ") ";
 
+                descr += ", seq: " + QString::number(c.seq);
+
                 TokenDataConstPtr m = c.type;
                 if (m) {
                     descr += ", Message: ";

@@ -9,13 +9,13 @@
 
 using namespace csapex;
 
-ConnectionDescription::ConnectionDescription(const UUID& from, const UUID& to, const TokenDataConstPtr& type, int id, bool active, const std::vector<Fulcrum>& fulcrums)
-  : from(from), to(to), from_label(""), to_label(""), type(type), id(id), active(active), fulcrums(fulcrums)
+ConnectionDescription::ConnectionDescription(const UUID& from, const UUID& to, const TokenDataConstPtr& type, int id, int seq, bool active, const std::vector<Fulcrum>& fulcrums)
+  : from(from), to(to), from_label(""), to_label(""), type(type), id(id), seq(seq), active(active), fulcrums(fulcrums)
 {
 }
 
 ConnectionDescription::ConnectionDescription(const ConnectionDescription& other)
-  : from(other.from), to(other.to), from_label(other.from_label), to_label(other.to_label), type(other.type), id(other.id), active(other.active), fulcrums(other.fulcrums)
+  : from(other.from), to(other.to), from_label(other.from_label), to_label(other.to_label), type(other.type), id(other.id), active(other.active), fulcrums(other.fulcrums), seq(other.seq)
 {
 }
 
@@ -33,6 +33,7 @@ ConnectionDescription& ConnectionDescription::operator=(const ConnectionDescript
     id = other.id;
     active = other.active;
     fulcrums = other.fulcrums;
+    seq = other.seq;
 
     return *this;
 }
@@ -52,6 +53,7 @@ void ConnectionDescription::serialize(SerializationBuffer& data, SemanticVersion
     data << id;
     data << active;
     data << fulcrums;
+    data << seq;
 }
 void ConnectionDescription::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
 {
@@ -63,4 +65,5 @@ void ConnectionDescription::deserialize(const SerializationBuffer& data, const S
     data >> id;
     data >> active;
     data >> fulcrums;
+    data >> seq;
 }

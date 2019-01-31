@@ -390,6 +390,7 @@ void Session::write_packet(SerializationBuffer& buffer)
 void Session::handleFeedback(const ResponseConstPtr& res)
 {
     if (auto feedback = std::dynamic_pointer_cast<Feedback const>(res)) {
+        std::cerr << "Failure: " << feedback->getMessage() << std::endl;
         throw Failure(feedback->getMessage());
     }
 }

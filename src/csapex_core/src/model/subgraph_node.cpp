@@ -772,7 +772,7 @@ void SubgraphNode::notifySubgraphProcessed()
         lock.unlock();
 
         // TRACEainfo << "continuation" << std::endl;
-        cnt([](csapex::NodeModifier& node_modifier, Parameterizable& parameters) {});
+        cnt([this](csapex::NodeModifier& node_modifier, Parameterizable& parameters) { yield(); });
     }
     //    }
 }

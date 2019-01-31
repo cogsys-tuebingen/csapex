@@ -55,14 +55,14 @@ std::vector<ConnectionDescription> RewiringDialog::getConnections(const UUID& ne
     for (const SlotPtr& slot_new : nf_new->getNodeHandle()->getSlots()) {
         for (const ConnectionPtr& connection : slot_new->getConnections()) {
             UUID to_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, slot_new->getUUID().id().getFullName());
-            connections_.push_back(ConnectionDescription(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()), to_uuid, slot_new->getType(), connection->id(), connection->isActive(),
+            connections_.push_back(ConnectionDescription(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()), to_uuid, slot_new->getType(), connection->getSeq(), connection->id(), connection->isActive(),
                                                          connection->getFulcrumsCopy()));
         }
     }
     for (const InputPtr& input_new : nf_new->getNodeHandle()->getExternalInputs()) {
         for (const ConnectionPtr& connection : input_new->getConnections()) {
             UUID to_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, input_new->getUUID().id().getFullName());
-            connections_.push_back(ConnectionDescription(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()), to_uuid, input_new->getType(), connection->id(), connection->isActive(),
+            connections_.push_back(ConnectionDescription(new_target_uuid_to_old_uuid_.at(connection->from()->getUUID()), to_uuid, input_new->getType(), connection->getSeq(), connection->id(), connection->isActive(),
                                                          connection->getFulcrumsCopy()));
         }
     }
@@ -70,14 +70,14 @@ std::vector<ConnectionDescription> RewiringDialog::getConnections(const UUID& ne
     for (const EventPtr& event_new : nf_new->getNodeHandle()->getEvents()) {
         for (const ConnectionPtr& connection : event_new->getConnections()) {
             UUID from_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, event_new->getUUID().id().getFullName());
-            connections_.push_back(ConnectionDescription(from_uuid, new_target_uuid_to_old_uuid_.at(connection->to()->getUUID()), event_new->getType(), connection->id(), connection->isActive(),
+            connections_.push_back(ConnectionDescription(from_uuid, new_target_uuid_to_old_uuid_.at(connection->to()->getUUID()), event_new->getType(), connection->getSeq(), connection->id(), connection->isActive(),
                                                          connection->getFulcrumsCopy()));
         }
     }
     for (const OutputPtr& output_new : nf_new->getNodeHandle()->getExternalOutputs()) {
         for (const ConnectionPtr& connection : output_new->getConnections()) {
             UUID from_uuid = UUIDProvider::makeDerivedUUID_forced(new_node_uuid, output_new->getUUID().id().getFullName());
-            connections_.push_back(ConnectionDescription(from_uuid, new_target_uuid_to_old_uuid_.at(connection->to()->getUUID()), output_new->getType(), connection->id(), connection->isActive(),
+            connections_.push_back(ConnectionDescription(from_uuid, new_target_uuid_to_old_uuid_.at(connection->to()->getUUID()), output_new->getType(), connection->getSeq(), connection->id(), connection->isActive(),
                                                          connection->getFulcrumsCopy()));
         }
     }

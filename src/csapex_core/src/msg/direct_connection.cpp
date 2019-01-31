@@ -47,8 +47,3 @@ DirectConnection::DirectConnection(OutputPtr from, InputPtr to) : Connection(fro
 DirectConnection::DirectConnection(OutputPtr from, InputPtr to, int id) : Connection(from, to, id)
 {
 }
-
-void DirectConnection::setToken(const TokenPtr& msg)
-{
-    Connection::setToken(msg);
-}

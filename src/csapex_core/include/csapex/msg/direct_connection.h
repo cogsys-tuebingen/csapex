@@ -15,8 +15,6 @@ public:
 public:
     ~DirectConnection();
 
-    virtual void setToken(const TokenPtr& msg) override;
-
 protected:
     DirectConnection(OutputPtr from, InputPtr to);
     DirectConnection(OutputPtr from, InputPtr to, int id);

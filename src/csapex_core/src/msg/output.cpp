@@ -56,29 +56,50 @@ void Output::notifyMessageProcessed()
     // we need to make sure to only forward this once to the owner
 
     if (isProcessing()) {
+        // std::cerr << getUUID() << " :::: "
+        //           << "-> notifyMessageProcesed " << std::endl;
         setProcessing(false);
         setState(State::IDLE);
 
         processing_lock.unlock();
 
-
         for (const ConnectionPtr& connection : connections_) {
             apex_assert_hard(connection->getState() == Connection::State::DONE);
         }
         message_processed(shared_from_this());
+    } else {
+        // std::cerr << getUUID() << " :::: "
+        //           << "-> cannot notifyMessageProcesed, not processing " << std::endl;
     }
 }
 
 void Output::notifyMessageProcessed(Connection* connection)
 {
+//     std::cerr << getUUID() << " :::: " << *connection << "-> sent notifyProcessed " << std::endl;
+//     for (auto connection : connections_) {
+//         std::string s;
+//         switch (connection->getState()) {
+//             case Connection::State::DONE:
+//                 s = "DONE / NOT_INITIALIZED";
+//                 break;
+//             case Connection::State::UNREAD:
+//                 s = "UNREAD";
+//                 break;
+//             case Connection::State::READ:
+//                 s = "READ";
+//                 break;
+//         }
+//         std::cerr << getUUID() << " :::: " << *connection << "-> state: " << s << std::endl;
+//     }
+
     for (auto connection : connections_) {
         if (connection->getState() != Connection::State::DONE) {
+            // std::cerr << getUUID() << " :::: " << *connection << "-> is not yet done " << std::endl;
             return;
         }
     }
 
     // TRACE std::cout << getUUID() << " is processed" << std::endl;
-
     notifyMessageProcessed();
 }
 
@@ -193,12 +214,23 @@ void Output::publish()
     bool sent = false;
     for (auto connection : connections_) {
         if (connection->isEnabled()) {
-            connection->setToken(msg);
+            // std::cerr << getUUID() << " :::: " << *connection << "-> set token to: " << msg->getTokenData()->descriptiveName() << std::endl;
+            connection->setToken(msg, true);
             sent = true;
+        // } else {
+        //     std::cerr << getUUID() << " :::: " << *connection << "-> set no token, connection is not enabled" << std::endl;
+        }
+    }
+
+    for (auto connection : connections_) {
+        if (connection->isEnabled()) {
+            connection->notifyMessageSet();
         }
     }
 
     if (!sent) {
+        // std::cerr << getUUID() << " :::: "
+        //           << "is notified processed in publish because no message is sent" << std::endl;
         notifyMessageProcessed();
     }
 }
