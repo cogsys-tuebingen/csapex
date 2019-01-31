@@ -45,6 +45,10 @@ void ParameterSerializer::serialize(const Streamable& packet, SerializationBuffe
             data << serializationName<NullParameter>();
             std::cerr << "cannot serialize Parameter of type " << type << ", none of the " << serializers_.size() << " serializers matches." << std::endl;
         }
+
+    } else {
+        data << serializationName<NullParameter>();
+        std::cerr << "cannot serialize object of type " << type2name(typeid(packet)) << ", not a parameter object." << std::endl;
     }
 }
 

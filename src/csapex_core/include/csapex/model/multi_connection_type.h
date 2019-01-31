@@ -36,6 +36,8 @@ public:
         return std::shared_ptr<MultiTokenData>(new MultiTokenData);
     }
 
+    std::vector<TokenData::Ptr> getTypes() const;
+
 private:
     MultiTokenData();
 
@@ -100,6 +102,34 @@ static TokenData::Ptr make()
     return MultiTokenData::Ptr(new MultiTokenData(types));
 }
 }  // namespace multi_type
+
+namespace connection_types
+{
+/// TRAITS
+template <>
+struct type<MultiTokenData>
+{
+    static std::string name()
+    {
+        return "MultiTokenData";
+    }
+};
+}  // namespace connection_types
 }  // namespace csapex
+
+/// YAML
+namespace YAML
+{
+class Node;
+template <class T>
+struct convert;
+
+template <>
+struct convert<csapex::MultiTokenData>
+{
+    static Node encode(const csapex::MultiTokenData& rhs);
+    static bool decode(const Node& node, csapex::MultiTokenData& rhs);
+};
+}  // namespace YAML
 
 #endif  // MULTI_CONNECTION_TYPE_H

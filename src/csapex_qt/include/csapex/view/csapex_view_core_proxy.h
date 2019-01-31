@@ -25,7 +25,7 @@ class ProfilerProxy;
 class CSAPEX_QT_EXPORT CsApexViewCoreProxy : public CsApexViewCore, public Proxy
 {
 public:
-    CsApexViewCoreProxy(const SessionPtr& session);
+    CsApexViewCoreProxy(Settings& local_settings, const SessionPtr& session);
     ~CsApexViewCoreProxy();
 
     bool isProxy() const override;

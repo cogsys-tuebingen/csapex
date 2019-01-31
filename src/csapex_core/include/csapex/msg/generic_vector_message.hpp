@@ -335,7 +335,6 @@ private:
             return Parent::cloneData(other);
         }
 
-
         std::string nestedName() const override
         {
             return type2name(typeid(T));
@@ -496,6 +495,10 @@ public:
     {
         static EntryInterface::Ptr make(const std::string& type)
         {
+            if (type == "::anything::") {
+                return std::make_shared<AnythingImplementation>();
+            }
+
             const std::string ns = "csapex::connection_types::";
             std::string ns_type = type;
             if (type.find(ns) == std::string::npos) {

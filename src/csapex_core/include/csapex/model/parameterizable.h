@@ -490,17 +490,8 @@ public:
     virtual void setParameterState(GenericStatePtr memento);
 
 private:
-    void doSetParameterLater(const std::string& name, const param::ParameterConstPtr& value)
-    {
-        {
-            std::unique_lock<std::recursive_mutex> lock(changed_params_mutex_);
-            if (getParameter(name)->cloneDataFrom(*value)) {
-                param_updates_[name] = [this, name, value]() { getParameter(name)->triggerChange(); };
-            }
-        }
-        parameters_changed();
-    }
-
+    void doSetParameterLater(const std::string& name, const param::ParameterConstPtr& value);
+    
 private:
     void parameterChanged(param::ParameterPtr param);
     void parameterEnabled(param::Parameter* param, bool enabled);

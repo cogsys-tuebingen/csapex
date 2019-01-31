@@ -342,6 +342,17 @@ void Parameterizable::setParameterSetSilence(bool silent)
     parameter_state_->setParameterSetSilence(silent);
 }
 
+void Parameterizable::doSetParameterLater(const std::string& name, const param::ParameterConstPtr& value)
+{
+    {
+        if (getParameter(name)->cloneDataFrom(*value)) {
+            std::unique_lock<std::recursive_mutex> lock(changed_params_mutex_);
+            param_updates_[name] = [this, name, value]() { getParameter(name)->triggerChange(); };
+        }
+    }
+    parameters_changed();
+}
+
 void Parameterizable::triggerParameterSetChanged()
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
@@ -362,12 +373,17 @@ Parameterizable::ChangedParameterList Parameterizable::getChangedParameters()
 
     if (!param_updates_.empty()) {
         //        setSilent(true);
-        while (!param_updates_.empty()) {
-            for (auto& entry : param_updates_) {
-                entry.second();
-            }
-            param_updates_.clear();
+        auto param_updates = param_updates_;
+        param_updates_.clear();
+        clock.unlock();
+        lock.unlock();
+
+        for (auto& entry : param_updates) {
+            entry.second();
         }
+
+        lock.lock();
+        clock.lock();
         //        setSilent(false);
     }
 

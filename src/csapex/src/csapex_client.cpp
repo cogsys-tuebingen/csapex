@@ -98,7 +98,7 @@ int Main::runWithGui()
     bool shutdown_server_on_exit = false;
     bool server_has_been_shutdown = false;
 
-    CsApexViewCoreProxy main(session);
+    CsApexViewCoreProxy main(settings, session);
 
     {
         CsApexViewCore& view_core = main;
@@ -180,6 +180,12 @@ int main(int argc, char** argv)
 
     int effective_argc = argc;
     std::string path_to_bin(argv[0]);
+    
+    if (!settings.knows("path_to_bin")) {
+        settings.addTemporary(csapex::param::factory::declareFileInputPath("path_to_bin", path_to_bin));
+    } else {
+        settings.set("path_to_bin", path_to_bin);
+    }
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "show help message")("host", po::value<std::string>()->default_value("localhost"), "Host")("port", po::value<int>()->default_value(42123), "Port");

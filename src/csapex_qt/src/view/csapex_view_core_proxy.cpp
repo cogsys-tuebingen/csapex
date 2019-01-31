@@ -7,6 +7,7 @@
 #include <csapex/core/bootstrap.h>
 #include <csapex/core/csapex_core.h>
 #include <csapex/core/core_plugin.h>
+#include <csapex/core/settings/settings_impl.h>
 #include <csapex/plugin/plugin_manager.hpp>
 #include <csapex/info.h>
 #include <csapex/factory/node_factory_proxy.h>
@@ -30,9 +31,34 @@
 
 using namespace csapex;
 
-CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
+CsApexViewCoreProxy::CsApexViewCoreProxy(Settings& local_settings, const SessionPtr& session)
   : Proxy(session), bootstrap_(std::make_shared<Bootstrap>()), thread_active_(false), exception_handler_(std::make_shared<GuiExceptionHandler>(false))
 {
+    // Load local plugins
+    remote_plugin_locator_ = std::make_shared<PluginLocator>(local_settings);
+    core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
+
+    bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR, remote_plugin_locator_.get());
+    core_plugin_manager->load(remote_plugin_locator_.get());
+
+    for (const auto& cp : core_plugin_manager->getConstructors()) {
+        const std::string& plugin_name = cp.first;
+        assert(core_plugins_.find(plugin_name) == core_plugins_.end());
+
+        const PluginConstructor<CorePlugin>& constructor = core_plugin_manager->getConstructor(plugin_name);
+
+        CorePlugin::Ptr plugin = constructor();
+        plugin->setName(plugin_name);
+
+        core_plugins_[plugin_name] = plugin;
+    }
+
+    // init core plugins
+    for (auto plugin : core_plugins_) {
+        plugin.second->prepare(local_settings);
+    }
+
+    // Then connect to the server
     session_->start();
 
     spinner = std::thread([&]() {
@@ -111,30 +137,6 @@ CsApexViewCoreProxy::CsApexViewCoreProxy(const SessionPtr& session)
     });
 
     settings_ = std::make_shared<SettingsProxy>(session_);
-    remote_plugin_locator_ = std::make_shared<PluginLocator>(*settings_);
-
-    bootstrap_->bootFrom(csapex::info::CSAPEX_DEFAULT_BOOT_PLUGIN_DIR, remote_plugin_locator_.get());
-
-    // init core plugins
-    core_plugin_manager = std::make_shared<PluginManager<csapex::CorePlugin>>("csapex::CorePlugin");
-
-    core_plugin_manager->load(remote_plugin_locator_.get());
-
-    for (const auto& cp : core_plugin_manager->getConstructors()) {
-        const std::string& plugin_name = cp.first;
-        assert(core_plugins_.find(plugin_name) == core_plugins_.end());
-
-        const PluginConstructor<CorePlugin>& constructor = core_plugin_manager->getConstructor(plugin_name);
-
-        CorePlugin::Ptr plugin = constructor();
-        plugin->setName(plugin_name);
-
-        core_plugins_[plugin_name] = plugin;
-    }
-
-    for (auto plugin : core_plugins_) {
-        plugin.second->prepare(getSettings());
-    }
 
     // make the proxys only _after_ the session is started
     NodeFacadeProxyPtr remote_facade = std::make_shared<NodeFacadeProxy>(session_, AUUID::NONE);
