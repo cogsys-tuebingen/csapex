@@ -290,9 +290,11 @@ void CsApexWindow::setupDesigner()
         ui->Tools->removeAction(ui->actionServer_Options);
         ui->Tools->removeAction(ui->actionServer_StartStop);
     } else {
-        client_server_state_label_ = new QLabel("Server not running");
+        client_server_state_label_ = new QLabel("Server status not known");
         ui->Tools->insertWidget(ui->actionServer_Options, client_server_state_label_);
     }
+
+    updateServerStateLabel();
 
     // filters
     ui->Filters->insertWidget(ui->actionMessage_Connections, new QLabel("Show connections: "));
@@ -1071,7 +1073,15 @@ void CsApexWindow::startStopServer()
                                           "Is there another instance of cs::APEX server with the same settings (TCP port, ...)?)"));
         }
     }
+    updateServerStateLabel();
+}
 
+void CsApexWindow::updateServerStateLabel()
+{
+    apex_assert_hard(!view_core_.isProxy());
+    
+    CsApexViewCoreImplementation& local_view_core = dynamic_cast<CsApexViewCoreImplementation&>(view_core_);
+    CsApexCore& core = *local_view_core.getCore();
     bool running = core.isServerActive();
     if (running) {
         client_server_state_label_->setText(QString("Server running at port ") + QString::number(view_core_.getSettings().get("port", 42123)));

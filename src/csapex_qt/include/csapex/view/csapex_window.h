@@ -124,6 +124,7 @@ Q_SIGNALS:
 private:
     void construct();
     void setupDesigner();
+    void updateServerStateLabel();
 
     bool eventFilter(QObject*, QEvent*);
 
