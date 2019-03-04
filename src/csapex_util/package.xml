@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>csapex_util</name>
-  <version>0.9.7</version>
+  <version>1.0.0</version>
   <description>The csapex_utility package provides basic utilities of the cs::APEX framework</description>
 
   <maintainer email="mail@betwo.eu">Sebastian Buck</maintainer>

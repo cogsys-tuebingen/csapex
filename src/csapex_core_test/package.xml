@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>csapex_core_test</name>
-  <version>0.9.7</version>
+  <version>1.0.0</version>
   <description>The csapex package provides main tests of cs::APEX</description>
 
   <maintainer email="mail@betwo.eu">Sebastian Buck</maintainer>
