@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/profiling/timer.h>
 #include <csapex/profiling/profile.h>
-#include <csapex_profiling_export.h>
+#include <csapex_core/csapex_profiling_export.h>
 #include <csapex/model/observer.h>
 
 /// SYSTEM

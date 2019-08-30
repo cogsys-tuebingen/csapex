@@ -2,7 +2,7 @@
 #define PARAMETER_CONTEXT_MENU_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/utility/context_menu_handler.h>
 
 /// PROJECT

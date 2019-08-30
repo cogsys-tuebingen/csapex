@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/model_fwd.h>
 #include <csapex/scheduling/scheduling_fwd.h>
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/designer/designer_styleable.h>
 #include <csapex/view/designer/designer_options.h>
 #include <csapex/command/command_fwd.h>

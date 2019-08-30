@@ -2,7 +2,7 @@
 #define NODE_COMPLETER_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/model/tag.h>
 
 /// SYSTEM

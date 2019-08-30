@@ -2,7 +2,7 @@
 #define NODE_LIST_GENERATOR_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/factory/factory_fwd.h>
 #include <csapex/view/node/node_adapter_factory.h>
 

@@ -2,7 +2,7 @@
 #define FULCRUM_HANDLE_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// SYSTEM
 #include <QGraphicsItem>

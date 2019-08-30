@@ -11,7 +11,7 @@
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/observer.h>
 #include <csapex/profiling/profilable.h>
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 #include <csapex/serialization/snippet.h>
 #include <csapex/utility/slim_signal.hpp>

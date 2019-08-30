@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/profiling/timer.h>
-#include <csapex_profiling_export.h>
+#include <csapex_core/csapex_profiling_export.h>
 
 /// SYSTEM
 #define BOOST_PARAMETER_MAX_ARITY 7

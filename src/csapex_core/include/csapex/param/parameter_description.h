@@ -2,7 +2,7 @@
 #define PARAMETER_DESCRIPTION_H
 
 /// COMPONENT
-#include <csapex_param_export.h>
+#include <csapex_core/csapex_param_export.h>
 
 /// SYSTEM
 #include <string>

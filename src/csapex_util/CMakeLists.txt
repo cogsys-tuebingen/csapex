@@ -80,49 +80,38 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     PRIVATE src)
-
-
-generate_export_header( ${PROJECT_NAME}
-             BASE_NAME ${PROJECT_NAME}
-             EXPORT_MACRO_NAME CSAPEX_UTILS_EXPORT
-             EXPORT_FILE_NAME ${PROJECT_NAME}_export.h
-             STATIC_DEFINE ${PROJECT_NAME}_BUILT_AS_STATIC)
-
 target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
 )
 
 
+generate_export_header( ${PROJECT_NAME}
+             BASE_NAME ${PROJECT_NAME}
+             EXPORT_MACRO_NAME CSAPEX_UTILS_EXPORT
+             EXPORT_FILE_NAME ${PROJECT_NAME}/export.h
+             STATIC_DEFINE ${PROJECT_NAME}_BUILT_AS_STATIC)
+
 #
 # INSTALL
 #
 
-if(WIN32)
-    file(COPY ${CMAKE_CURRENT_BINARY_DIR}/csapex_util_export.h
-         DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
-            install(FILES ${PROJECT_BINARY_DIR}/csapex_util_export.h
-                            DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
-else()
-    file(COPY ${CMAKE_CURRENT_BINARY_DIR}/csapex_util_export.h
-         DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/csapex/)
-            install(FILES ${PROJECT_BINARY_DIR}/csapex_util_export.h
-                            DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-endif()
+set(${PROJECT_NAME}_EXPORT_DIR ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+set(${PROJECT_NAME}_EXPORT_FILE ${${PROJECT_NAME}_EXPORT_DIR}/export.h)
+
+file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/export.h
+    DESTINATION ${${PROJECT_NAME}_EXPORT_DIR})
+    
+install(FILES ${${PROJECT_NAME}_EXPORT_FILE}
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(TARGETS csapex_util
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-if(WIN32)
-        install(DIRECTORY include/csapex/utility/
-                DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/csapex/utility//)
-else()
-        install(DIRECTORY include/csapex/utility/
-                #LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-                DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-endif()
+install(DIRECTORY include/csapex/utility/
+        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/csapex/utility)
 
 export(TARGETS csapex_util FILE CsApexUtil.cmake)
 

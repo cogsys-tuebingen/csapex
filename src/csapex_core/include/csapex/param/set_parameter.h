@@ -3,7 +3,7 @@
 
 /// COMPONENT
 #include <csapex/param/parameter_impl.hpp>
-#include <csapex_param_export.h>
+#include <csapex_core/csapex_param_export.h>
 
 /// SYSTEM
 #include <vector>

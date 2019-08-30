@@ -5,7 +5,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/observer.h>
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/view_fwd.h>
 
 /// SYSTEM

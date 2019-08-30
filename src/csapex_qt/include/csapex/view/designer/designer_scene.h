@@ -2,7 +2,7 @@
 #define DESIGNER_SCENE_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/data/point.h>
 #include <csapex/command/command_fwd.h>
 #include <csapex/view/view_fwd.h>

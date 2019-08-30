@@ -5,7 +5,7 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/param/parameter.h>
 #include <csapex/command/command_fwd.h>
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// SYSTEM
 #include <string>

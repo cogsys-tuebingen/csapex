@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/model_fwd.h>
 #include <csapex/model/observer.h>
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// SYSTEM
 #include <QFrame>

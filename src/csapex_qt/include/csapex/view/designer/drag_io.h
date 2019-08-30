@@ -2,7 +2,7 @@
 #define DRAG_IO_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/designer/drag_io_handler.h>
 #include <csapex/plugin/plugin_fwd.h>
 #include <csapex/view/view_fwd.h>

@@ -43,7 +43,10 @@ bool run_tests(CsApexCore& core, const std::vector<bf3::path>& reg_test_files)
         {
             Subprocess sp(reg_test.filename().string());
             sp.fork([&]() {
-                chdir(reg_test.parent_path().string().c_str());
+                if(chdir(reg_test.parent_path().string().c_str()) != 0) {
+                    std::cerr << "Cannot change into directory " << reg_test.parent_path().string() << std::endl;
+                    return -1;
+                }
 
                 core.load(reg_test.string());
 

@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/view/view_fwd.h>
 #include <csapex/view/widgets/completed_line_edit.h>
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// SYSTEM
 #include <QDialog>

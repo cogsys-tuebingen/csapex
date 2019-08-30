@@ -9,7 +9,7 @@
 #define QT_HELPER_HPP
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/widgets/qdouble_slider.h>
 #include <csapex/view/widgets/qint_slider.h>
 #include <csapex/view/utility/qwrapper.h>

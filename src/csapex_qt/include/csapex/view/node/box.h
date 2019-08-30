@@ -12,7 +12,7 @@
 #include <csapex/model/node_facade.h>
 #include <csapex/model/connector_type.h>
 #include <csapex/model/connector_description.h>
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/utility/qobserver.h>
 
 /// SYSTEM

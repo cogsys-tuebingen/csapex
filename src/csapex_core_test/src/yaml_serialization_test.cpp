@@ -95,7 +95,7 @@ TEST_F(YAMLSerializationTest, YamlDeserializationWorksWithGenericVector)
             std::shared_ptr<const std::vector<MockMessage>> vector = vector_msg->makeShared<MockMessage>();
             ASSERT_NE(nullptr, vector);
 
-            ASSERT_EQ(10, vector->size());
+            ASSERT_EQ(10u, vector->size());
         }
     }
 }

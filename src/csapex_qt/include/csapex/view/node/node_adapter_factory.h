@@ -2,7 +2,7 @@
 #define NODE_ADAPTER_FACTORY_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/core/core_fwd.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/plugin/plugin_fwd.h>

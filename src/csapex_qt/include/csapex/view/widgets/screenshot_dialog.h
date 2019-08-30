@@ -2,7 +2,7 @@
 #define SCREENSHOT_DIALOG_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// PROJECT
 #include <csapex/model/model_fwd.h>

@@ -2,7 +2,7 @@
 #define SETTINGS_PROXY_H
 
 /// COMPONENT
-#include <csapex_remote_export.h>
+#include <csapex_remote/export.h>
 #include <csapex/core/settings.h>
 #include <csapex/io/remote_io_fwd.h>
 #include <csapex/io/proxy.h>

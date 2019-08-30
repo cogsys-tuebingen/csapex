@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/model/tracing_type.h>
 #include <csapex/model/model_fwd.h>
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM

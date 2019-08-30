@@ -4,7 +4,7 @@
 /// COMPONENT
 #include <csapex/utility/utility_fwd.h>
 #include <csapex/utility/uuid.h>
-#include <csapex_util_export.h>
+#include <csapex_util/export.h>
 
 /// SYSTEM
 #include <unordered_map>

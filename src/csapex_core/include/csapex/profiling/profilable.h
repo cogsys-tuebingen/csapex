@@ -2,7 +2,7 @@
 #define PROFILABLE_H
 
 /// COMPONENT
-#include <csapex_profiling_export.h>
+#include <csapex_core/csapex_profiling_export.h>
 
 /// SYSTEM
 #include <memory>

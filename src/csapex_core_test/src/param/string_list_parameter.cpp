@@ -57,7 +57,7 @@ TEST_F(StringListParameterTest, SerializationStringList)
         StringListParameterConstPtr sp = std::dynamic_pointer_cast<StringListParameter>(p);
         ASSERT_NE(nullptr, sp);
 
-        EXPECT_EQ(3, sp->count());
+        EXPECT_EQ(3u, sp->count());
         EXPECT_STREQ("foo", p->name().c_str());
         EXPECT_STREQ("a", sp->getValues()[0].c_str());
         EXPECT_STREQ("b", sp->getValues()[1].c_str());

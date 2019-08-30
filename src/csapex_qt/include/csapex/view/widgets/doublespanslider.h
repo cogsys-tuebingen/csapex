@@ -2,7 +2,7 @@
 #define DOUBLESPANSLIDER_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <qxt5/qxtspanslider.h>
 
 class CSAPEX_QT_EXPORT DoubleSpanSlider : public QxtSpanSlider

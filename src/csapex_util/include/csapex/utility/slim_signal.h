@@ -2,7 +2,7 @@
 #define SLIM_SIGNAL_H
 
 /// PROJECT
-#include <csapex_util_export.h>
+#include <csapex_util/export.h>
 #include <csapex/utility/delegate.h>
 #include <csapex/utility/function_traits.hpp>
 

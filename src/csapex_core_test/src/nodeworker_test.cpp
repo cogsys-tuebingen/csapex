@@ -153,10 +153,10 @@ TEST_F(NodeWorkerTest, ChangingNodeWorkerDoesNotChangePorts)
 {
     NodeFacadeImplementationPtr times_4 = factory.makeNode("StaticMultiplier4", UUIDProvider::makeUUID_without_parent("StaticMultiplier4"), graph);
 
-    int inputs = times_4->getInputs().size();
-    int outputs = times_4->getOutputs().size();
-    int events = times_4->getEvents().size();
-    int slots_ = times_4->getSlots().size();
+    std::size_t inputs = times_4->getInputs().size();
+    std::size_t outputs = times_4->getOutputs().size();
+    std::size_t events = times_4->getEvents().size();
+    std::size_t slots_ = times_4->getSlots().size();
 
     ASSERT_EQ(inputs, times_4->getNodeHandle()->getExternalInputs().size());
     ASSERT_EQ(outputs, times_4->getNodeHandle()->getExternalOutputs().size());

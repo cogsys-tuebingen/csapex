@@ -391,8 +391,7 @@ generate_export_header( ${PROJECT_NAME}
              BASE_NAME ${PROJECT_NAME}
              EXPORT_MACRO_NAME CSAPEX_CORE_EXPORT
              EXPORT_FILE_NAME ${PROJECT_NAME}_export.h
-             STATIC_DEFINE ${PROJECT_NAME}_BUILT_AS_STATIC
-			 )
+             STATIC_DEFINE ${PROJECT_NAME}_BUILT_AS_STATIC)
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     ${csapex_util_LIBRARIES}
@@ -517,28 +516,32 @@ add_custom_command(TARGET ${PROJECT_NAME}_cfg POST_BUILD
 #
 # INSTALL
 #
-foreach(lib ${csapex_LIBRARIES})
-    if(WIN32)
-        file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${lib}_export.h
-             DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/${PROJECT_NAME}/)
-		install(FILES ${PROJECT_BINARY_DIR}/${lib}_export.h
-				DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
-    else()
-        file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${lib}_export.h
-             DESTINATION ${CMAKE_CURRENT_LIST_DIR}/include/${PROJECT_NAME}/)
-		install(FILES ${PROJECT_BINARY_DIR}/${lib}_export.h
-				DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-    endif()
+install(FILES ${CLASS_LOADER_H}
+    DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/csapex/plugin/)
+install(FILES ${INFO_H}
+    DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/csapex/)
 
+foreach(lib ${csapex_LIBRARIES})
+    message(STATUS "Installing ${lib}")
+    set(${lib}_EXPORT_DIR ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+    set(${lib}_EXPORT_FILE ${${lib}_EXPORT_DIR}/${lib}_export.h)
+    
+    file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${lib}_export.h
+        DESTINATION ${${lib}_EXPORT_DIR})
+    install(FILES ${${lib}_EXPORT_FILE}
+            DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
+    install(TARGETS ${lib}
+            ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 endforeach()
 
 if(WIN32)
 	install(DIRECTORY include/${PROJECT_NAME}/
-                DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
+            DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/)
 else()
-	install(DIRECTORY include/${PROJECT_NAME}/
-                #LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-                DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+	install(DIRECTORY include/csapex
+            DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
 endif()
 		
 if(NOT ${catkin_FOUND})

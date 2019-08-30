@@ -5,7 +5,7 @@
 #include <csapex/utility/slim_signal.hpp>
 #include <csapex/profiling/interval.h>
 #include <csapex/profiling/trace.h>
-#include <csapex_profiling_export.h>
+#include <csapex_core/csapex_profiling_export.h>
 
 /// SYSTEM
 #include <chrono>

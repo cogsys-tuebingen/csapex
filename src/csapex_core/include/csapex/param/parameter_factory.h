@@ -5,7 +5,7 @@
 #include <csapex/param/parameter.h>
 #include <csapex/param/parameter_builder.h>
 #include <csapex/param/parameter_description.h>
-#include <csapex_param_export.h>
+#include <csapex_core/csapex_param_export.h>
 
 /// PROJECT
 #include <csapex/utility/singleton.hpp>

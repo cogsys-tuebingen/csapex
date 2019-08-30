@@ -2,7 +2,7 @@
 #define NODE_ADAPTER_BUILDER_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// PROJECT
 #include <csapex/view/view_fwd.h>

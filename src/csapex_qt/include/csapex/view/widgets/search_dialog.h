@@ -2,7 +2,7 @@
 #define SEARCH_DIALOG_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/view/widgets/completed_line_edit.h>
 

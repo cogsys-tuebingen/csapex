@@ -2,7 +2,7 @@
 #define MOVABLE_GRAPHICS_PROXY_WIDGET_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/view_fwd.h>
 
 /// SYSTEM

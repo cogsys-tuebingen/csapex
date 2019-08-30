@@ -2,7 +2,7 @@
 #define PROFILING_WIDGET_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// PROJECT
 #include <csapex/profiling/profiler.h>

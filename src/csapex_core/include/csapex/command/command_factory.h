@@ -8,7 +8,7 @@
 #include <csapex/command/command_fwd.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connector_type.h>
-#include <csapex_command_export.h>
+#include <csapex_core/csapex_command_export.h>
 #include <csapex/scheduling/scheduling_fwd.h>
 
 namespace csapex

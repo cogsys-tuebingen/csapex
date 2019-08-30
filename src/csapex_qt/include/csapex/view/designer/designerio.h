@@ -2,7 +2,7 @@
 #define DESIGNERIO_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/model/model_fwd.h>
 #include <csapex/view/view_fwd.h>
 #include <csapex/utility/utility_fwd.h>

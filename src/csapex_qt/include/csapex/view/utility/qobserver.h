@@ -2,7 +2,7 @@
 #define QOBSERVER_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/model/observer.h>
 
 /// SYSTEM

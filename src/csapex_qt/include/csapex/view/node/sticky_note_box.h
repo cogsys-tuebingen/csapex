@@ -2,7 +2,7 @@
 #define NOTE_BOX_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 #include <csapex/view/node/box.h>
 
 class QTextEdit;

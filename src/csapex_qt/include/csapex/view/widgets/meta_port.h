@@ -2,7 +2,7 @@
 #define META_PORT_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// PROJECT
 #include <csapex/view/widgets/port.h>

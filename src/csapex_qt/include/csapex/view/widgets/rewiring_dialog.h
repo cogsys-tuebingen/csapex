@@ -2,7 +2,7 @@
 #define REWIRING_DIALOG_H
 
 /// COMPONENT
-#include <csapex_qt_export.h>
+#include <csapex_qt/export.h>
 
 /// PROJECT
 #include <csapex/scheduling/scheduling_fwd.h>
