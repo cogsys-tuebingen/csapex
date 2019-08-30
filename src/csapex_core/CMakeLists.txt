@@ -25,10 +25,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ## CATKIN
 if(${catkin_FOUND})
+
+    # make sure the devel include exists, there we will generate the export headers
+    file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
+    include_directories(${CATKIN_DEVEL_PREFIX}/include)
+
     catkin_package(
        INCLUDE_DIRS
           include
-          ${CMAKE_CURRENT_BINARY_DIR}
+          ${CATKIN_DEVEL_PREFIX}/include
           ${YAML-CPP_INCLUDE_DIR}
        LIBRARIES
           ${PROJECT_NAME}
@@ -60,10 +65,10 @@ else()
 
     set(CSAPEX_BOOT_PLUGIN_DIR ${CATKIN_GLOBAL_BIN_DESTINATION}/csapex_plugins)
 
-	
+
     FILE(READ ${CMAKE_CURRENT_LIST_DIR}/package.xml package)
 
-    string(REGEX MATCH "^.*<version>([^<]*)</version>.*$" match ${package})	
+    string(REGEX MATCH "^.*<version>([^<]*)</version>.*$" match ${package})
     if(match)
         set(csapex_VERSION ${CMAKE_MATCH_1})
     endif()
@@ -72,8 +77,8 @@ else()
     if(match)
         set(csapex_MAINTAINER ${CMAKE_MATCH_1})
     endif()
-	
-    if(WIN32)	
+
+    if(WIN32)
         # disable min and max macros
         add_definitions(/D NOMINMAX)
     endif()
@@ -110,8 +115,9 @@ execute_process(
 
 # generate meta infos
 set(INFO_IN ${CMAKE_CURRENT_LIST_DIR}/include/csapex/info.h.in)
-set(INFO_H ${CMAKE_CURRENT_BINARY_DIR}/csapex/info.h)
-
+set(INFO_DIR ${CATKIN_DEVEL_PREFIX}/include/csapex)
+set(INFO_H ${INFO_DIR}/info.h)
+file(MAKE_DIRECTORY ${INFO_DIR})
 configure_file(${INFO_IN} ${INFO_H})
 
 ## Check class loader version
@@ -127,7 +133,9 @@ else()
 endif()
 
 set(CLASS_LOADER_IN ${CMAKE_CURRENT_LIST_DIR}/include/csapex/plugin/class_loader.hpp.in)
-set(CLASS_LOADER_H ${CMAKE_CURRENT_BINARY_DIR}/csapex/plugin/class_loader.hpp)
+set(CLASS_LOADER_DIR ${CATKIN_DEVEL_PREFIX}/include/csapex/plugin)
+set(CLASS_LOADER_H ${CLASS_LOADER_DIR}/class_loader.hpp)
+file(MAKE_DIRECTORY ${CLASS_LOADER_DIR})
 configure_file(${CLASS_LOADER_IN} ${CLASS_LOADER_H})
 
 ###########
@@ -262,7 +270,7 @@ list(APPEND csapex_LIBRARIES csapex_profiling)
 
 
 
-file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS 
+file(GLOB_RECURSE csapex_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS
         include/csapex/model/*.h*
         include/csapex/core/*.h*
         include/csapex/data/*.h*
@@ -404,7 +412,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
     ${TinyXML_LIBRARIES}
     ${class_loader_LIBRARIES}
-    ${console_bridge_LIBRARIES} 
+    ${console_bridge_LIBRARIES}
     ${Poco_LIBRARIES}
 )
 
@@ -525,7 +533,7 @@ foreach(lib ${csapex_LIBRARIES})
     message(STATUS "Installing ${lib}")
     set(${lib}_EXPORT_DIR ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION})
     set(${lib}_EXPORT_FILE ${${lib}_EXPORT_DIR}/${lib}_export.h)
-    
+
     file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${lib}_export.h
         DESTINATION ${${lib}_EXPORT_DIR})
     install(FILES ${${lib}_EXPORT_FILE}
@@ -543,7 +551,7 @@ else()
 	install(DIRECTORY include/csapex
             DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
 endif()
-		
+
 if(NOT ${catkin_FOUND})
 	install(FILES cmake/csapex-config.cmake
 			DESTINATION ${CSAPEX_MODULE_DESTINATION})

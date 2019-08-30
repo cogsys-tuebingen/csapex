@@ -4,10 +4,13 @@ project(csapex_remote)
 
 find_package(catkin REQUIRED COMPONENTS csapex_core)
 
+# make sure the devel include exists, there we will generate the export headers
+file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
+
 catkin_package(
    INCLUDE_DIRS
       include
-      ${CMAKE_CURRENT_BINARY_DIR}
+      ${CATKIN_DEVEL_PREFIX}/include
    LIBRARIES
       csapex_remote
    CATKIN_DEPENDS

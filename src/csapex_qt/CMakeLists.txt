@@ -10,11 +10,14 @@ find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED)
 
 find_package(OpenGL REQUIRED)
 
+# make sure the devel include exists, there we will generate the export headers
+file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
+
 catkin_package(
    INCLUDE_DIRS
       include
       external/qxt5/include
-      ${CMAKE_CURRENT_BINARY_DIR}
+      ${CATKIN_DEVEL_PREFIX}/include
       ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS}
    LIBRARIES
       ${PROJECT_NAME}

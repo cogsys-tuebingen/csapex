@@ -30,11 +30,13 @@ endif ()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# make sure the devel include exists, there we will generate the export headers
+file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
 
 catkin_package(
    INCLUDE_DIRS
       include
-      ${CMAKE_CURRENT_BINARY_DIR}
+      ${CATKIN_DEVEL_PREFIX}/include
    LIBRARIES
       ${PROJECT_NAME}
       rt
@@ -70,6 +72,8 @@ add_library(${PROJECT_NAME} SHARED
     ${csapex_util_HEADERS}
 )
 
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${CURRENT_BINARY_DIR})
+
 # link rt library for shared memory
 target_link_libraries(${PROJECT_NAME} -lrt)
 
@@ -101,7 +105,7 @@ set(${PROJECT_NAME}_EXPORT_FILE ${${PROJECT_NAME}_EXPORT_DIR}/export.h)
 
 file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/export.h
     DESTINATION ${${PROJECT_NAME}_EXPORT_DIR})
-    
+
 install(FILES ${${PROJECT_NAME}_EXPORT_FILE}
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
