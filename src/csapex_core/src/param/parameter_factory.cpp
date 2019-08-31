@@ -35,8 +35,6 @@ void factory::deregisterParameterType(const std::string& type)
 
 void factory::ParameterFactory::registerParameterType(const std::string& type, std::function<ParameterBuilder()> constructor)
 {
-    std::map<std::string, std::function<ParameterBuilder()>>::const_iterator it = type_to_constructor.find(type);
-
     type_to_constructor.insert(std::make_pair(type, constructor));
 }
 void factory::ParameterFactory::deregisterParameterType(const std::string& type)
