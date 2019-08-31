@@ -4,17 +4,19 @@
 /// SYSTEM
 #include <QPainter>
 #include <QTextDocument>
+#include <QApplication>
+#include <QAbstractTextDocumentLayout>
 #include <iostream>
 
 using namespace csapex;
 
-HTMLDelegate::HTMLDelegate(int line_height) : line_height(line_height)
+HTMLDelegate::HTMLDelegate()
 {
 }
 
 QSize HTMLDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    QStyleOptionViewItemV4 options = option;
+    QStyleOptionViewItem options = option;
     initStyleOption(&options, index);
 
     options.rect.setSize(QStyledItemDelegate::sizeHint(option, index));
@@ -30,7 +32,7 @@ QSize HTMLDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelInd
 
 void HTMLDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    QStyleOptionViewItemV4 options = option;
+    QStyleOptionViewItem options = option;
     initStyleOption(&options, index);
 
     painter->save();
@@ -58,7 +60,7 @@ void HTMLDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, 
     painter->restore();
 }
 
-HTMLBoxDelegate::HTMLBoxDelegate(int line_height) : HTMLDelegate(line_height)
+HTMLBoxDelegate::HTMLBoxDelegate() : HTMLDelegate()
 {
 }
 
@@ -66,13 +68,9 @@ void HTMLBoxDelegate::setKeyWords(const QString& words)
 {
     key_words = words.split(QRegExp("(\\s+|::)"));
 }
-void HTMLBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+
+QString HTMLBoxDelegate::createText(const QModelIndex& index) const
 {
-    QStyleOptionViewItemV4 options = option;
-    initStyleOption(&options, index);
-
-    painter->save();
-
     QString descr = index.data(Qt::UserRole + 1).toString();
     QString name = index.data(Qt::UserRole + 2).toString();
     QStringList tags = index.data(Qt::UserRole + 3).toStringList();
@@ -115,20 +113,31 @@ void HTMLBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
         properties_str += property + " &nbsp; ";
     }
 
-    QTextDocument doc;
     QString html;
-    html += "<table><tr><th" + (invalid ? QString(" style='color: #f00'") : QString("")) + ">";
+    html += "<span style='" + (invalid ? QString("color: #f00") : QString("")) + "'><b>";
     if (!tag.isEmpty()) {
         html += "<small>" + tag + " :: </small>";
     }
-    html += name + "</th>";
-    html += "<th style='font-size: 10px; color: " + (invalid ? QString("#f00") : QString("#888")) + "; padding-left: 6px' valign='middle'>";
+    html += name + "</b></span> &nbsp; ";
+    html += "<small><span style='color: " + (invalid ? QString("#f00") : QString("#888")) + "'>";
     html += properties_str;
-    html += "</th>";
-    html += "</tr></table>";
+    html += "</span></small>";
     html += "<br /><small><i>" + descr + "</i></small>";
+    return html;
+}
 
-    doc.setHtml(html);
+void HTMLBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QStyleOptionViewItem options = option;
+    initStyleOption(&options, index);
+
+    painter->save();
+
+    QTextDocument doc;
+    // Set the text width so large to effectively disable wrapping
+    doc.setTextWidth(options.rect.width() * 30);
+    doc.setDefaultFont(options.font);
+    doc.setHtml(createText(index));
 
     options.text = "";
     options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
@@ -142,13 +151,19 @@ void HTMLBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
 
 QSize HTMLBoxDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    QStyleOptionViewItemV4 options = option;
+    QStyleOptionViewItem options = option;
     initStyleOption(&options, index);
 
     QTextDocument doc;
-    doc.setHtml(options.text);
     doc.setTextWidth(options.rect.width());
-    return QSize(doc.idealWidth(), 2 * line_height);
+    doc.setDefaultFont(options.font);
+    doc.setHtml(option.text);
+    doc.adjustSize();
+
+    // We are rendering two lines of text
+    auto height = option.fontMetrics.height() * 2;
+
+    return QSize(doc.idealWidth(), height);
 }
 /// MOC
 #include "../../../include/csapex/view/utility/moc_html_delegate.cpp"

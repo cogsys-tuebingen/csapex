@@ -130,6 +130,8 @@ void SearchDialog::addNodes(GraphFacade* graph, QStandardItemModel* model)
         item->setData(type_s, Qt::UserRole + 1);
         item->setData(label_s, Qt::UserRole + 2);
 
+        item->setToolTip(label_s);
+
         model->appendRow(item);
     }
 }

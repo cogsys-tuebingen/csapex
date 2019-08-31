@@ -93,17 +93,15 @@ void NodeListGenerator::listAvailableNodeTypes(QStandardItemModel* model)
             properties.append(QString::fromStdString(s));
         }
 
-        //        if(adapter_factory_.hasAdapter(proxy->getType())) {
-        //            properties.push_back("QT");
-        //        }
-
         QStandardItem* item = new QStandardItem(QIcon(QString::fromStdString(proxy->getIcon())), type);
+        item->setToolTip(descr);
         item->setData(type, Qt::UserRole);
         item->setData(descr, Qt::UserRole + 1);
         item->setData(name, Qt::UserRole + 2);
         item->setData(tags, Qt::UserRole + 3);
         item->setData(properties, Qt::UserRole + 4);
         item->setData(QString::fromStdString(csapex::mime::node), Qt::UserRole + 5);
+
 
         model->appendRow(item);
     }

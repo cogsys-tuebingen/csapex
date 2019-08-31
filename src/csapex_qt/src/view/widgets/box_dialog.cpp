@@ -81,7 +81,7 @@ void BoxDialog::showEvent(QShowEvent* e)
 void BoxDialog::setupTextBox()
 {
     name_edit_ = new CompletedLineEdit;
-    name_edit_->setFixedWidth(350);
+    name_edit_->setMaximumWidth(600);
 
     filter = new NodeFilterProxyModel;
     filter->setFilterCaseSensitivity(Qt::CaseInsensitive);

@@ -14,14 +14,12 @@ class CSAPEX_QT_EXPORT HTMLDelegate : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    HTMLDelegate(int line_height = -1);
+    HTMLDelegate();
 
 protected:
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
-
-    int line_height;
 };
 
 class CSAPEX_QT_EXPORT HTMLBoxDelegate : public HTMLDelegate
@@ -29,7 +27,7 @@ class CSAPEX_QT_EXPORT HTMLBoxDelegate : public HTMLDelegate
     Q_OBJECT
 
 public:
-    HTMLBoxDelegate(int line_height = -1);
+    HTMLBoxDelegate();
 
 public Q_SLOTS:
     void setKeyWords(const QString& words);
@@ -37,6 +35,8 @@ public Q_SLOTS:
 protected:
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+
+    QString createText(const QModelIndex& index) const;
 
     QStringList key_words;
 };
