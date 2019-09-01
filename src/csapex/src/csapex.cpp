@@ -136,8 +136,8 @@ int Main::runWithGui()
 
     checkRecoveryFile(view_core, w);
 
-    w.start();
     core->startup();
+    w.start();
 
     w.show();
     splash->finish(&w);
