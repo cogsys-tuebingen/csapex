@@ -107,6 +107,10 @@ void Settings::setQuiet(bool quiet)
 
         if (!quiet && !changes_.empty()) {
             for (const std::string& key : changes_) {
+                auto param = get(key);
+                if (!param->isTemporary()) {
+                    dirty_ = true;
+                }
                 setting_changed(key);
             }
             changes_.clear();
@@ -115,19 +119,21 @@ void Settings::setQuiet(bool quiet)
     }
 }
 
-void Settings::settingsChanged(const std::string& key)
+void Settings::settingsChanged(const param::Parameter* parameter)
 {
     if (quiet_) {
-        changes_.push_back(key);
+        changes_.push_back(parameter->name());
 
     } else {
-        setting_changed(key);
+        setting_changed(parameter->name());
+        if (!parameter->isTemporary()) {
+            dirty_ = true;
+        }
         triggerSettingsChanged();
     }
 }
 
 void Settings::triggerSettingsChanged()
 {
-    dirty_ = true;
     settings_changed();
 }

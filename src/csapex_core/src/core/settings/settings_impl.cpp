@@ -151,9 +151,9 @@ void SettingsImplementation::add(csapex::param::Parameter::Ptr p, bool persisten
     entry.parameter = p;
     entry.persistent = persistent;
 
-    observe(p->parameter_changed, [this](param::Parameter* p) { settingsChanged(p->name()); });
+    observe(p->parameter_changed, [this](param::Parameter* p) { settingsChanged(p); });
 
-    settingsChanged(p->name());
+    settingsChanged(p.get());
 }
 
 csapex::param::Parameter::Ptr SettingsImplementation::get(const std::string& name) const

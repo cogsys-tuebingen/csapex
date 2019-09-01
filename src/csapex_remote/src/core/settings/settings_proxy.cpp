@@ -130,7 +130,7 @@ void SettingsProxy::createParameterProxy(const std::string& name, param::Paramet
             self->session_->write(change);
         }
 
-        self->settingsChanged(param->name());
+        self->settingsChanged(param);
     });
 
     cache_[name] = proxy;

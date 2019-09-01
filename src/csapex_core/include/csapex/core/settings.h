@@ -112,12 +112,13 @@ public:
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(val);
             addTemporary(p);
+            param = p;
 
         } else {
             param->set<T>(val);
         }
 
-        settingsChanged(name);
+        settingsChanged(param.get());
     }
 
     template <typename T>
@@ -128,17 +129,18 @@ public:
             param::ValueParameter::Ptr p(new param::ValueParameter(name, csapex::param::ParameterDescription()));
             p->set(val);
             addPersistent(p);
+            param = p;
 
         } else {
             param->set<T>(val);
         }
 
-        settingsChanged(name);
+        settingsChanged(param.get());
     }
 
 protected:
     void setNotDirty();
-    void settingsChanged(const std::string& key);
+    void settingsChanged(const param::Parameter* parameter);
 
     virtual void triggerSettingsChanged();
 
