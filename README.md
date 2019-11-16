@@ -3,10 +3,9 @@
 CS::APEX is a framework based on synchronous dataflow and event-based message passing that
 aims to speed up prototyping of new robotic algorithms using visual programming aspects.
 
-Example workflow: (click for better quality)
+Example workflow: (click to show the video)
 
-[![Graph Construction Video](https://media.giphy.com/media/aFtp2izVp2xMzLAqC2/giphy.gif)](https://youtu.be/sNkHnQhNXuU)
-
+[![Graph Construction Video](http://img.youtube.com/vi/sNkHnQhNXuU/0.jpg)](http://www.youtube.com/watch?v=sNkHnQhNXuU)
 
 ## Dataflow Graph and Core Features
 
@@ -18,7 +17,6 @@ other features like undo/redo mechanisms and profiling are implemented as well.
 Finally there exists an easy to use parameter system that generates UI controls
 for each block and allows parameter tuning and optimization.
 
-
 ## Functionality via Plug-ins
 
 The framework itself does not provide any predefined computation nodes and does
@@ -26,24 +24,21 @@ not depend on specific message definitions or node types.
 These details are instead implemented in plug-in libraries that extend
 the functionality of the whole system.
 
-
 ## Application to Robotics
 
 The framework is targeted toward use in robotics and is fully compatible with
 [ROS](http://wiki.ros.org/). Configurations generated using the GUI can
 directly be deployed on any ROS-based robotic system.
 
-
 ## Tutorials and more Information
 
 For more information, please refer to the Wiki at
-    https://github.com/cogsys-tuebingen/csapex/wiki
+    [(https://github.com/cogsys-tuebingen/csapex/wiki](https://github.com/cogsys-tuebingen/csapex/wiki)
 
 the official website at
-    http://www.ra.cs.uni-tuebingen.de/forschung/apex/
+    [(http://www.ra.cs.uni-tuebingen.de/forschung/apex](http://www.ra.cs.uni-tuebingen.de/forschung/apex)
 
 or contact the maintainers via email.
-
 
 ## Dependencies
 
@@ -52,18 +47,17 @@ developed in the [ROS](http://wiki.ros.org/) ecosystem. The core framework
 is independent of ROS, however.
 
 Required for a build are:
+
 - Linux system (tested with Ubuntu)
 - C++11 compatible compiler (g++, clang++)
 - Qt5 (on Ubuntu: qt5-default libqt5svg5-dev)
 - libraries:
-    - boost (program_options, filesystem, system, regex)
-    - [classloader](https://github.com/ros/class_loader)
-    - TinyXML (on Ubuntu: libtinyxml-dev)
-    - yaml-cpp (on Ubuntu: libyaml-cpp-dev)
-
+  - boost (program_options, filesystem, system, regex)
+  - [classloader](https://github.com/ros/class_loader)
+  - TinyXML (on Ubuntu: libtinyxml-dev)
+  - yaml-cpp (on Ubuntu: libyaml-cpp-dev)
 
 These dependencies can be installed via rosdep (see below.)
-
 
 ## Basic Installation
 
@@ -91,7 +85,6 @@ To get the cs::APEX framework and a set of core plugins, perform the following:
     rosdep install -y -r -i --from-paths src
     catkin_make
 
-
 ## Creating Documenation
 
 To create the documentation, run
@@ -101,7 +94,6 @@ To create the documentation, run
 This will generate the documentation at
 
     doc/html/index.html
-
 
 ## Contributions
 
