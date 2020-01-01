@@ -75,7 +75,7 @@ public:
     {
         std::size_t nbytes = sizeof(T);
         for (std::size_t byte = 0; byte < nbytes; ++byte) {
-            uint8_t part = (i >> (byte * 8)) & 0xFF;
+            const uint8_t part = static_cast<uint8_t>((i >> (byte * 8)) & 0xFF);
             push_back(part);
         }
         return *this;
@@ -86,8 +86,9 @@ public:
         std::size_t nbytes = sizeof(T);
         T res = 0;
         for (std::size_t byte = 0; byte < nbytes; ++byte) {
-            uint8_t part = static_cast<T>(at(pos++));
-            res |= (part << (byte * 8));
+            const uint8_t part = static_cast<uint8_t>(at(pos++));
+            const auto raw = part << (byte * 8);
+            res |= static_cast<T>(raw);
         }
         i = res;
         return *this;

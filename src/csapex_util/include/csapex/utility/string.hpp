@@ -5,7 +5,7 @@
 #include <csapex/utility/type.h>
 
 /// SYSTEM
-#include <string>
+#include <sstream>
 #include <memory>
 #include <type_traits>
 #include <vector>
@@ -45,13 +45,17 @@ inline std::string universal_to_string(const std::pair<V, V>& value)
 template <typename V>
 inline std::string universal_to_string(const V* value)
 {
-    return std::string("<") + csapex::type2name(typeid(V)) + "* = " + std::to_string((long)value) + ">";
+    std::stringstream ss;
+    ss << "<" << csapex::type2name(typeid(V)) << "* = " << static_cast<const void*>(value) << ">";
+    return ss.str();
 }
 
 template <typename V>
 inline std::string universal_to_string(const V& value, typename std::enable_if<!std::is_arithmetic<V>::value>::type* = 0)
 {
-    return std::string("<") + csapex::type2name(typeid(V)) + "& = " + std::to_string((long)&value) + ">";
+    std::stringstream ss;
+    ss << "<" << csapex::type2name(typeid(V)) << "& = " << static_cast<const void*>(&value) << ">";
+    return ss.str();
 }
 
 template <typename V>

@@ -12,27 +12,27 @@ CSAPEX_REGISTER_MESSAGE_WITH_NAME(csapex::connection_types::GenericVectorMessage
 using namespace csapex;
 using namespace connection_types;
 
-GenericVectorMessage::GenericVectorMessage(EntryInterface::Ptr impl, const std::string& frame_id, Message::Stamp stamp) : Message(type<GenericVectorMessage>::name(), frame_id, stamp), impl(impl)
+GenericVectorMessage::GenericVectorMessage(EntryInterface::Ptr pimpl, const std::string& frame_id, Message::Stamp stamp) : Message(type<GenericVectorMessage>::name(), frame_id, stamp), pimpl(pimpl)
 {
 }
 
-GenericVectorMessage::GenericVectorMessage() : Message(type<GenericVectorMessage>::name(), "/", 0), impl(std::make_shared<InstancedImplementation>(std::make_shared<AnyMessage>()))
+GenericVectorMessage::GenericVectorMessage() : Message(type<GenericVectorMessage>::name(), "/", 0), pimpl(std::make_shared<InstancedImplementation>(std::make_shared<AnyMessage>()))
 {
 }
 
 bool GenericVectorMessage::canConnectTo(const TokenData* other_side) const
 {
-    return impl->canConnectTo(other_side);
+    return pimpl->canConnectTo(other_side);
 }
 
 bool GenericVectorMessage::acceptsConnectionFrom(const TokenData* other_side) const
 {
-    return impl->acceptsConnectionFrom(other_side);
+    return pimpl->acceptsConnectionFrom(other_side);
 }
 
 std::string GenericVectorMessage::descriptiveName() const
 {
-    return impl->descriptiveName();
+    return pimpl->descriptiveName();
 }
 
 /// ANYTHING

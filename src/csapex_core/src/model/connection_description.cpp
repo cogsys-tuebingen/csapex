@@ -15,15 +15,7 @@ ConnectionDescription::ConnectionDescription(const UUID& from, const UUID& to, c
 }
 
 ConnectionDescription::ConnectionDescription(const ConnectionDescription& other)
-  : from(other.from)
-  , to(other.to)
-  , from_label(other.from_label)
-  , to_label(other.to_label)
-  , type(other.type)
-  , id(other.id)
-  , seq(other.seq)
-  , active(other.active)
-  , fulcrums(other.fulcrums)
+  : from(other.from), to(other.to), from_label(other.from_label), to_label(other.to_label), type(other.type), id(other.id), seq(other.seq), active(other.active), fulcrums(other.fulcrums)
 {
 }
 

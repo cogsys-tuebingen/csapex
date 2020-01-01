@@ -17,6 +17,8 @@ namespace connection_types
 {
 struct ValueMessageBase
 {
+    virtual ~ValueMessageBase() = default;
+
     virtual bool isArithmetic() const = 0;
 
     virtual int64_t asInteger() const = 0;
@@ -34,8 +36,8 @@ public:
     typedef std::shared_ptr<GenericValueMessage<Type>> Ptr;
     typedef std::shared_ptr<GenericValueMessage<Type> const> ConstPtr;
 
-    explicit GenericValueMessage(const Type& value = Type(), const std::string& frame_id = "/", Message::Stamp stamp = 0)
-      : Message(type<GenericValueMessage<Type>>::name(), frame_id, stamp), value(value)
+    explicit GenericValueMessage(const Type& _value = Type(), const std::string& _frame_id = "/", Message::Stamp stamp = 0)
+      : Message(type<GenericValueMessage<Type>>::name(), _frame_id, stamp), value(_value)
     {
         static_assert(should_use_value_message<Type>::value, "The type should not use a value message");
         static csapex::DirectMessageConstructorRegistered<connection_types::GenericValueMessage, Type> reg_c;

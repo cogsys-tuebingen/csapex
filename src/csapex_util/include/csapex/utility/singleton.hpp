@@ -10,6 +10,8 @@ namespace csapex
 class SingletonInterface
 {
 public:
+    virtual ~SingletonInterface() = default;
+
     static void shutdownAll();
 
     virtual void shutdown();
@@ -31,10 +33,6 @@ template <class T>
 class Singleton : public SingletonInterface
 {
 public:
-    virtual ~Singleton()
-    {
-    }
-
     static T& instance()
     {
         static T inst;

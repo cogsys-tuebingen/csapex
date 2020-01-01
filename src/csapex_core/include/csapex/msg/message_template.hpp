@@ -131,7 +131,7 @@ public:
     typedef MessageTemplateContainer<Type, std::is_integral<Type>::value> ValueContainer;
     typedef MessageTemplate<Type, Instance> Self;
 
-    explicit MessageTemplate(const std::string& frame_id = "/", Message::Stamp stamp = 0) : Message(type<Instance>::name(), frame_id, stamp)
+    explicit MessageTemplate(const std::string& _frame_id = "/", Message::Stamp stamp = 0) : Message(type<Instance>::name(), _frame_id, stamp)
     {
     }
 
@@ -163,19 +163,19 @@ public:
         return ValueContainer::acceptsConnectionFrom(other_side);
     }
 
-    void serialize(SerializationBuffer& data, SemanticVersion& version) const override
+    void serialize(SerializationBuffer& buffer, SemanticVersion& version) const override
     {
         // TODO: ValueContainer should provide a version here!
-        Message::serialize(data, version);
+        Message::serialize(buffer, version);
 
-        data << ValueContainer::value;
+        buffer << ValueContainer::value;
     }
 
-    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
+    void deserialize(const SerializationBuffer& buffer, const SemanticVersion& version) override
     {
-        Message::deserialize(data, version);
+        Message::deserialize(buffer, version);
 
-        data >> ValueContainer::value;
+        buffer >> ValueContainer::value;
     }
 
     SemanticVersion getVersion() const override

@@ -21,14 +21,14 @@ public:
     typedef std::shared_ptr<GenericPointerMessage<Type>> Ptr;
     typedef std::shared_ptr<GenericPointerMessage<Type> const> ConstPtr;
 
-    GenericPointerMessage(const std::string& frame_id = "/", Message::Stamp stamp = 0) : Message(type<GenericPointerMessage<Type>>::name(), frame_id, stamp)
+    GenericPointerMessage(const std::string& _frame_id = "/", Message::Stamp stamp = 0) : Message(type<GenericPointerMessage<Type>>::name(), _frame_id, stamp)
     {
         static csapex::DirectMessageConstructorRegistered<connection_types::GenericPointerMessage, Type> reg_c;
         static csapex::DirectMessageSerializerRegistered<connection_types::GenericPointerMessage, Type> reg_s;
 
         setDescriptiveName(type2name(typeid(Type)));
     }
-    GenericPointerMessage(const std::shared_ptr<Type>& ptr, const std::string& frame_id = "/", Message::Stamp stamp = 0) : GenericPointerMessage(frame_id, stamp)
+    GenericPointerMessage(const std::shared_ptr<Type>& ptr, const std::string& _frame_id = "/", Message::Stamp stamp = 0) : GenericPointerMessage(_frame_id, stamp)
     {
         value = ptr;
     }

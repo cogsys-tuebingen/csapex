@@ -13,7 +13,7 @@ struct Holder
 {
     SharedPointer p;
 
-    Holder(const SharedPointer& p) : p(p)
+    Holder(const SharedPointer& _p) : p(_p)
     {
     }
     Holder(const Holder& other) : p(other.p)

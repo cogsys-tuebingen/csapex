@@ -443,7 +443,7 @@ public:
 
     bool cloneData(const GenericVectorMessage& other)
     {
-        impl = other.impl->cloneAs<EntryInterface>();
+        pimpl = other.pimpl->cloneAs<EntryInterface>();
         return true;
     }
 
@@ -584,11 +584,11 @@ public:
     template <typename T>
     std::shared_ptr<std::vector<T> const> makeShared(typename std::enable_if<std::is_base_of<TokenData, T>::value>::type* = 0) const
     {
-        if (auto i = std::dynamic_pointer_cast<Implementation<T>>(impl)) {
-            return i->value;
-        } else if (auto i = std::dynamic_pointer_cast<InstancedImplementation>(impl)) {
+        if (auto impl = std::dynamic_pointer_cast<Implementation<T>>(pimpl)) {
+            return impl->value;
+        } else if (auto instance = std::dynamic_pointer_cast<InstancedImplementation>(pimpl)) {
             auto res = std::make_shared<std::vector<T>>();
-            for (const TokenDataConstPtr& td : i->value) {
+            for (const TokenDataConstPtr& td : instance->value) {
                 if (auto v = std::dynamic_pointer_cast<T const>(td)) {
                     res->push_back(*v);
                 }
@@ -601,11 +601,11 @@ public:
     template <typename T>
     std::shared_ptr<std::vector<T> const> makeShared(typename std::enable_if<!std::is_base_of<TokenData, T>::value && !should_use_value_message<T>::value>::type* = 0) const
     {
-        if (auto i = std::dynamic_pointer_cast<Implementation<T>>(impl)) {
-            return i->value;
-        } else if (auto i = std::dynamic_pointer_cast<InstancedImplementation>(impl)) {
+        if (auto impl = std::dynamic_pointer_cast<Implementation<T>>(pimpl)) {
+            return impl->value;
+        } else if (auto instance = std::dynamic_pointer_cast<InstancedImplementation>(pimpl)) {
             auto res = std::make_shared<std::vector<T>>();
-            makeSharedValue(i.get(), res);
+            makeSharedValue(instance.get(), res);
             return res;
         } else {
             throw std::runtime_error("cannot make the direct vector shared");
@@ -614,17 +614,17 @@ public:
     template <typename T>
     std::shared_ptr<std::vector<T> const> makeShared(typename std::enable_if<!std::is_base_of<TokenData, T>::value && should_use_value_message<T>::value>::type* = 0) const
     {
-        if (auto i = std::dynamic_pointer_cast<MessageImplementation<GenericValueMessage<T>>>(impl)) {
+        if (auto message = std::dynamic_pointer_cast<MessageImplementation<GenericValueMessage<T>>>(pimpl)) {
             auto res = std::make_shared<std::vector<T>>();
-            for (auto entry : *i->value) {
+            for (auto entry : *message->value) {
                 res->push_back(entry.value);
             }
             return res;
-        } else if (auto i = std::dynamic_pointer_cast<Implementation<T>>(impl)) {
-            return i->value;
-        } else if (auto i = std::dynamic_pointer_cast<InstancedImplementation>(impl)) {
+        } else if (auto impl = std::dynamic_pointer_cast<Implementation<T>>(pimpl)) {
+            return impl->value;
+        } else if (auto instance = std::dynamic_pointer_cast<InstancedImplementation>(pimpl)) {
             auto res = std::make_shared<std::vector<T>>();
-            makeSharedValue(i.get(), res);
+            makeSharedValue(instance.get(), res);
             return res;
         } else {
             throw std::runtime_error("cannot make the direct vector shared");
@@ -692,8 +692,8 @@ public:
     template <typename T>
     void set(const std::shared_ptr<std::vector<T>>& v)
     {
-        if (auto i = std::dynamic_pointer_cast<Implementation<T>>(impl)) {
-            i->value = v;
+        if (auto impl = std::dynamic_pointer_cast<Implementation<T>>(pimpl)) {
+            impl->value = v;
         } else {
             throw std::runtime_error("cannot set the vector");
         }
@@ -701,17 +701,17 @@ public:
 
     void encode(YAML::Node& node) const
     {
-        node["value_type"] = impl->nestedName();
-        impl->encode(node);
+        node["value_type"] = pimpl->nestedName();
+        pimpl->encode(node);
     }
 
     void decode(const YAML::Node& node)
     {
         std::string type = node["value_type"].as<std::string>();
-        impl = SupportedTypes::make(type);
-        apex_assert_hard(impl);
+        pimpl = SupportedTypes::make(type);
+        apex_assert_hard(pimpl);
 
-        impl->decode(node);
+        pimpl->decode(node);
     }
 
     virtual bool canConnectTo(const TokenData* other_side) const override;
@@ -725,36 +725,36 @@ public:
     }
     TokenData::Ptr nestedType() const override
     {
-        return impl->nestedType();
+        return pimpl->nestedType();
     }
 
     virtual void addNestedValue(const TokenData::ConstPtr& msg) override
     {
-        impl->addNestedValue(msg);
+        pimpl->addNestedValue(msg);
     }
     virtual TokenData::ConstPtr nestedValue(std::size_t i) const override
     {
-        return impl->nestedValue(i);
+        return pimpl->nestedValue(i);
     }
     virtual std::size_t nestedValueCount() const override
     {
-        return impl->nestedValueCount();
+        return pimpl->nestedValueCount();
     }
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override
     {
-        data << impl->nestedName();
+        data << pimpl->nestedName();
 
-        impl->serialize(data, version);
+        pimpl->serialize(data, version);
     }
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
     {
         std::string type;
         data >> type;
-        impl = SupportedTypes::make(type);
-        apex_assert_hard(impl);
+        pimpl = SupportedTypes::make(type);
+        apex_assert_hard(pimpl);
 
-        impl->deserialize(data, version);
+        pimpl->deserialize(data, version);
     }
 
     static GenericVectorMessage::Ptr makeEmpty()
@@ -763,12 +763,12 @@ public:
     }
 
 private:
-    GenericVectorMessage(EntryInterface::Ptr impl, const std::string& frame_id, Message::Stamp stamp_micro_seconds);
+    GenericVectorMessage(EntryInterface::Ptr pimpl, const std::string& frame_id, Message::Stamp stamp_micro_seconds);
 
     GenericVectorMessage();
 
 private:
-    EntryInterface::Ptr impl;
+    EntryInterface::Ptr pimpl;
 };
 
 template <>
