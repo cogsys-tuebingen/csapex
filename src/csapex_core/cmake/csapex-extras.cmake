@@ -1,9 +1,7 @@
 if(WIN32)
 #add_definitions(-Wall)
 else()
-add_definitions(-W -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function
-    -Wno-deprecated-register -Wno-deprecated-register
-    -pedantic)
+add_definitions(-W -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasing -Wno-unused-function -pedantic)
 endif()
 
 
