@@ -75,10 +75,18 @@ struct is_std_vector<std::vector<T, Allocator>> : std::true_type
 {
 };
 
+constexpr std::size_t getMaxValueMessageSize() {
+    return 1024 * 1024;
+}
+
 template <typename M>
 struct should_use_pointer_message
 {
-    static constexpr bool value = std::is_class<M>::value && has_ptr_member<M>::value && !std::is_same<std::string, M>::value && !std::is_base_of<TokenData, M>::value;
+    static constexpr bool value = 
+        std::is_class<M>::value 
+        && (has_ptr_member<M>::value || sizeof(M) >= getMaxValueMessageSize())
+        && !std::is_same<std::string, M>::value 
+        && !std::is_base_of<TokenData, M>::value;
 };
 
 template <typename M>
