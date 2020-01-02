@@ -1,5 +1,9 @@
 # CS::APEX (Algorithm Prototyper and EXperimentor for Cognitive Systems)
 
+<p align="left">
+  <a href="https://github.com/betwo/csapex"><img alt="GitHub Actions status" src="https://github.com/betwo/csapex/workflows/catkin_make_isolated/badge.svg"></a>
+</p>
+
 CS::APEX is a framework based on synchronous dataflow and event-based message passing that
 aims to speed up prototyping of new robotic algorithms using visual programming aspects.
 
