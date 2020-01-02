@@ -47,8 +47,8 @@ public:
      * @brief CsApexWindow
      * @param parent
      */
-    explicit CsApexWindow(CsApexViewCore& core, QWidget* parent = 0);
-    virtual ~CsApexWindow();
+    explicit CsApexWindow(CsApexViewCore& core, QWidget* parent = nullptr);
+    ~CsApexWindow() override;
 
     void closeEvent(QCloseEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
@@ -126,7 +126,7 @@ private:
     void setupDesigner();
     void updateServerStateLabel();
 
-    bool eventFilter(QObject*, QEvent*);
+    bool eventFilter(QObject*, QEvent*) override;
 
     void createPluginsMenu();
     void createTutorialsMenu();

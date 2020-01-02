@@ -44,7 +44,7 @@ void _apex_fail(const std::string& msg, const std::string& code, const std::stri
 void _apex_assert(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig)
 {
     if (!assertion) {
-        TRIGGER_BREAKPOINT();
+        // TRIGGER_BREAKPOINT();
         _apex_fail(msg, code, file, line, sig);
     }
 }
@@ -52,7 +52,7 @@ void _apex_assert(bool assertion, const std::string& msg, const std::string& cod
 void _apex_assert_hard(bool assertion, const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& sig)
 {
     if (!assertion) {
-        TRIGGER_BREAKPOINT();
+        // TRIGGER_BREAKPOINT();
         throw csapex::HardAssertionFailure(msg, code, file, line, sig);
     }
 }
@@ -66,6 +66,6 @@ void _apex_assert_soft(bool assertion, const std::string& msg, const std::string
         }
         std::cerr << "\"" << code << "\" [file " << file << ", line " << line << ", function: " << sig << ", thread \"" << csapex::thread::get_name() << "]" << std::endl;
 
-        TRIGGER_BREAKPOINT();
+        // TRIGGER_BREAKPOINT();
     }
 }

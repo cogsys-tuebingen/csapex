@@ -22,29 +22,29 @@ public:
     NodeRunner(NodeWorkerPtr worker);
     ~NodeRunner();
 
-    virtual void assignToScheduler(Scheduler* scheduler) override;
-    virtual Scheduler* getScheduler() const override;
-    virtual void detach() override;
+    void assignToScheduler(Scheduler* scheduler) override;
+    Scheduler* getScheduler() const override;
+    void detach() override;
 
-    virtual bool isPaused() const override;
-    virtual void setPause(bool pause) override;
+    bool isPaused() const override;
+    void setPause(bool pause) override;
 
-    virtual bool canStartStepping() const override;
-    virtual void setSteppingMode(bool stepping) override;
-    virtual void step() override;
-    virtual bool isStepping() const override;
-    virtual bool isStepDone() const override;
+    bool canStartStepping() const override;
+    void setSteppingMode(bool stepping) override;
+    void step() override;
+    bool isStepping() const override;
+    bool isStepDone() const override;
 
-    virtual UUID getUUID() const override;
+    UUID getUUID() const override;
 
-    virtual void setError(const std::string& msg) override;
+    void setError(const std::string& msg) override;
 
-    virtual void reset() override;
+    void reset() override;
 
     void schedule(TaskPtr task);
     void scheduleDelayed(TaskPtr task, std::chrono::system_clock::time_point time);
 
-    void setSuppressExceptions(bool suppress_exceptions);
+    void setSuppressExceptions(bool suppress_exceptions) override;
 
     void setNodeWorker(NodeWorkerPtr worker);
 

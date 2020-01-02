@@ -34,7 +34,7 @@ public:
     CsApexCore(Settings& settings_, ExceptionHandler& handler);
     CsApexCore(Settings& settings_, ExceptionHandler& handler, PluginLocatorPtr plugin_locator, NodeFactoryPtr node_factory, SnippetFactoryPtr snippet_factory, bool is_root = false);
 
-    virtual ~CsApexCore();
+    ~CsApexCore() override;
 
     void init();
     void boot();

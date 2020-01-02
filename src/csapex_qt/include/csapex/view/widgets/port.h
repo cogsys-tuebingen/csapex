@@ -23,9 +23,9 @@ class CSAPEX_QT_EXPORT Port : public QFrame
 
 public:
     Port(ConnectorPtr adaptee, QWidget* parent = nullptr);
-    virtual ~Port();
+    ~Port() override;
 
-    bool event(QEvent* e);
+    bool event(QEvent* e) override;
 
     QString cssClass()
     {
@@ -38,18 +38,18 @@ public:
 
     void setPortProperty(const std::string& name, bool b);
 
-    virtual void mousePressEvent(QMouseEvent* e);
-    virtual void mouseMoveEvent(QMouseEvent* e);
-    virtual void mouseReleaseEvent(QMouseEvent* e);
-    virtual void mouseDoubleClickEvent(QMouseEvent* e);
+    void mousePressEvent(QMouseEvent* e) override;
+    void mouseMoveEvent(QMouseEvent* e) override;
+    void mouseReleaseEvent(QMouseEvent* e) override;
+    void mouseDoubleClickEvent(QMouseEvent* e) override;
     void mouseClickEvent();
 
-    virtual void enterEvent(QEvent* e);
-    virtual void leaveEvent(QEvent* e);
+    void enterEvent(QEvent* e) override;
+    void leaveEvent(QEvent* e) override;
 
-    void dragEnterEvent(QDragEnterEvent* e);
-    void dragMoveEvent(QDragMoveEvent* e);
-    void dropEvent(QDropEvent* e);
+    void dragEnterEvent(QDragEnterEvent* e) override;
+    void dragMoveEvent(QDragMoveEvent* e) override;
+    void dropEvent(QDropEvent* e) override;
 
     bool isOutput() const;
     bool isInput() const;
@@ -81,7 +81,7 @@ protected:
 
     void startDrag();
     virtual void createToolTip();
-    void paintEvent(QPaintEvent*);
+    void paintEvent(QPaintEvent*) override;
 
 protected:
     ConnectorPtr adaptee_;

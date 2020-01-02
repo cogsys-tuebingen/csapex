@@ -16,7 +16,7 @@ namespace csapex
 class CSAPEX_QT_EXPORT NodeListGenerator
 {
 public:
-    NodeListGenerator(NodeFactory& node_factory, NodeAdapterFactory& adapter_factory);
+    NodeListGenerator(NodeFactory& node_factory);
 
     void insertAvailableNodeTypes(QMenu* menu);
     void insertAvailableNodeTypes(QTreeWidget* tree);
@@ -24,7 +24,6 @@ public:
 
 private:
     NodeFactory& node_factory_;
-    NodeAdapterFactory& adapter_factory_;
 };
 
 }  // namespace csapex

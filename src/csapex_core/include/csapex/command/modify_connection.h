@@ -16,7 +16,7 @@ class CSAPEX_COMMAND_EXPORT ModifyConnection : public CommandImplementation<Modi
 public:
     ModifyConnection(const AUUID& graph_uuid, int connection_id, bool active);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

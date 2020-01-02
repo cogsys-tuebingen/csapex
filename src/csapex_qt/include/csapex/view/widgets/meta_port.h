@@ -26,9 +26,9 @@ public:
 
     void showContextMenu(const QPoint& pt);
 
-    void dragEnterEvent(QDragEnterEvent* e);
-    void dragMoveEvent(QDragMoveEvent* e);
-    void dropEvent(QDropEvent* e);
+    void dragEnterEvent(QDragEnterEvent* e) override;
+    void dragMoveEvent(QDragMoveEvent* e) override;
+    void dropEvent(QDropEvent* e) override;
 
 Q_SIGNALS:
     void createPortRequest(ConnectorDescription request);

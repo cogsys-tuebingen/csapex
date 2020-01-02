@@ -9,7 +9,7 @@
 
 namespace csapex
 {
-struct ConnectorDescription : public Serializable
+class ConnectorDescription : public Serializable
 {
 protected:
     CLONABLE_IMPLEMENTATION(ConnectorDescription);
@@ -43,8 +43,8 @@ public:
         {
         }
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
     };
 
     std::vector<Target> targets;
@@ -67,8 +67,8 @@ public:
 
     AUUID getAUUID() const;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 };
 
 }  // namespace csapex

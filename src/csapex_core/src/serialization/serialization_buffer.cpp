@@ -80,7 +80,7 @@ void SerializationBuffer::init()
             buffer << ((uint8_t)id);                                                                                                                                                                   \
             buffer << (boost::any_cast<__VA_ARGS__>(any));                                                                                                                                             \
         };                                                                                                                                                                                             \
-        auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
+        auto deserializer = [](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
             __VA_ARGS__ v;                                                                                                                                                                             \
             buffer >> (v);                                                                                                                                                                             \
             any = v;                                                                                                                                                                                   \
@@ -98,7 +98,7 @@ void SerializationBuffer::init()
             buffer << (boost::any_cast<__VA_ARGS__>(any)).GET_P1;                                                                                                                                      \
             buffer << (boost::any_cast<__VA_ARGS__>(any));                                                                                                                                             \
         };                                                                                                                                                                                             \
-        auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
+        auto deserializer = [](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
             P1 p1;                                                                                                                                                                                     \
             buffer >> (p1);                                                                                                                                                                            \
             __VA_ARGS__ v(p1);                                                                                                                                                                         \
@@ -114,7 +114,7 @@ void SerializationBuffer::init()
             buffer << (boost::any_cast<std::shared_ptr<__VA_ARGS__ const>>(any))->GET_P1;                                                                                                              \
             buffer << *(boost::any_cast<std::shared_ptr<__VA_ARGS__ const>>(any));                                                                                                                     \
         };                                                                                                                                                                                             \
-        auto deserializer = [id](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
+        auto deserializer = [](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
             P1 p1;                                                                                                                                                                                     \
             buffer >> (p1);                                                                                                                                                                            \
             auto v = std::make_shared<__VA_ARGS__>(p1);                                                                                                                                                \

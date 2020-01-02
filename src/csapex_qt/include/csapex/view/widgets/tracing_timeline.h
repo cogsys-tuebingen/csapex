@@ -21,10 +21,10 @@ class CSAPEX_QT_EXPORT TracingTimeline : public QGraphicsView
 
 public:
     TracingTimeline();
-    ~TracingTimeline();
+    ~TracingTimeline() override;
 
-    virtual void drawBackground(QPainter* painter, const QRectF& rect);
-    virtual void drawForeground(QPainter* painter, const QRectF& rect);
+    void drawBackground(QPainter* painter, const QRectF& rect) override;
+    void drawForeground(QPainter* painter, const QRectF& rect) override;
 
 public Q_SLOTS:
     void addNode(NodeFacade* node);
@@ -44,7 +44,7 @@ public Q_SLOTS:
     void updateRowStart(NodeFacade* worker, TracingType type, std::shared_ptr<const Interval> profile);
     void updateRowStop(NodeFacade* worker, std::shared_ptr<const Interval> profile);
 
-    void wheelEvent(QWheelEvent* we);
+    void wheelEvent(QWheelEvent* we) override;
 
     void resizeToFit();
 

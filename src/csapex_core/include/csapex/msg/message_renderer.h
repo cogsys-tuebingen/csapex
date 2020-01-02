@@ -50,7 +50,7 @@ public:
         }
     }
 
-    virtual std::type_index messageType() const
+    std::type_index messageType() const override
     {
         return std::type_index(typeid(Message));
     }

@@ -23,10 +23,10 @@ public:
 public:
     Quit();
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
-    virtual bool isHidden() const override;
-    virtual bool isUndoable() const override;
+    bool isHidden() const override;
+    bool isUndoable() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

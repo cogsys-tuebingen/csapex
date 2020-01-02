@@ -43,7 +43,7 @@ class CSAPEX_QT_EXPORT Designer : public QWidget, public Profilable, public Obse
 
 public:
     Designer(CsApexViewCore& view_core, QWidget* parent = 0);
-    virtual ~Designer();
+    ~Designer() override;
 
     DesignerOptions* options();
     MinimapWidget* getMinimap();
@@ -68,7 +68,7 @@ public:
     void saveView(const GraphFacade& graph, YAML::Node& e);
     void loadView(GraphFacade& graph, const YAML::Node& doc);
 
-    virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
+    void useProfiler(std::shared_ptr<Profiler> profiler) override;
 
 Q_SIGNALS:
     void selectionChanged();
@@ -107,7 +107,7 @@ public Q_SLOTS:
     void ungroupSelected();
 
 private:
-    void resizeEvent(QResizeEvent* re);
+    void resizeEvent(QResizeEvent* re) override;
 
     void observeGraph(GraphFacadePtr graph);
     void showGraph(GraphFacadePtr graph);

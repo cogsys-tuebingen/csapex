@@ -44,7 +44,7 @@ private:
     };
 
 public:
-    ~Tag();
+    ~Tag() override;
 
     static const Tag::Ptr get(const std::string& name);
     static bool exists(const std::string& name);
@@ -56,10 +56,10 @@ public:
     int compare(const Tag& tag) const;
     bool operator<(const Tag& tag) const;
 
-    virtual uint8_t getPacketType() const;
+    uint8_t getPacketType() const override;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version);
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     static Ptr makeEmpty();
 

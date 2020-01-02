@@ -179,12 +179,12 @@ bool CsApexViewCoreProxy::isProxy() const
     return true;
 }
 
-void CsApexViewCoreProxy::handlePacket(StreamableConstPtr packet)
+void CsApexViewCoreProxy::handlePacket(const StreamableConstPtr& packet)
 {
     (void)packet;
 }
 
-void CsApexViewCoreProxy::handleBroadcast(BroadcastMessageConstPtr packet)
+void CsApexViewCoreProxy::handleBroadcast(const BroadcastMessageConstPtr&  packet)
 {
     if (packet) {
         //                std::cout << "type=" << (int) serial->getPacketType() << std::endl;

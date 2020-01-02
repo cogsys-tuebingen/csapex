@@ -29,7 +29,7 @@ class CSAPEX_QT_EXPORT RewiringDialog : public QDialog
 
 public:
     RewiringDialog(NodeFacade* node, CsApexViewCore& view_core, QWidget* parent = 0, Qt::WindowFlags f = 0);
-    ~RewiringDialog();
+    ~RewiringDialog() override;
 
     void makeUI(const QString& stylesheet);
 

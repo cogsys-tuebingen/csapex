@@ -17,7 +17,7 @@ class CSAPEX_QT_EXPORT QAbstractSliderLimiter : public QObject
 
 public:
     QAbstractSliderLimiter(QAbstractSlider* limitMin, QAbstractSlider* limitMax);
-    virtual ~QAbstractSliderLimiter();
+    ~QAbstractSliderLimiter() override;
 
     typedef std::shared_ptr<QAbstractSliderLimiter> Ptr;
 

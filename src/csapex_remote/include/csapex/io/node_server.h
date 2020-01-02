@@ -16,7 +16,7 @@ class NodeServer : public Observer
 {
 public:
     NodeServer(SessionPtr session);
-    ~NodeServer();
+    ~NodeServer() override;
 
     void startObservingNode(const NodeFacadeImplementationPtr& graph);
     void stopObservingNode(const NodeFacadeImplementationPtr& graph);

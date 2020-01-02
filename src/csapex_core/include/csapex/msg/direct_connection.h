@@ -13,7 +13,7 @@ public:
     static ConnectionPtr connect(OutputPtr from, InputPtr to, int id);
 
 public:
-    ~DirectConnection();
+    ~DirectConnection() override;
 
 protected:
     DirectConnection(OutputPtr from, InputPtr to);

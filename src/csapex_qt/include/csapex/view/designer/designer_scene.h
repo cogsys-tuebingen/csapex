@@ -34,14 +34,14 @@ private:
 
 public:
     DesignerScene(csapex::GraphFacadePtr graph, CsApexViewCore& view_core);
-    ~DesignerScene();
+    ~DesignerScene() override;
 
-    void drawBackground(QPainter* painter, const QRectF& rect);
-    void drawForeground(QPainter* painter, const QRectF& rect);
+    void drawBackground(QPainter* painter, const QRectF& rect) override;
+    void drawForeground(QPainter* painter, const QRectF& rect) override;
 
-    void mousePressEvent(QGraphicsSceneMouseEvent* e);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
+    void mousePressEvent(QGraphicsSceneMouseEvent* e) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* e) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* e) override;
 
     int getHighlightedConnectionId() const;
     bool isEmpty() const;

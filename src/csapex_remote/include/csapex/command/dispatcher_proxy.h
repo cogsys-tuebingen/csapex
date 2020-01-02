@@ -22,17 +22,17 @@ public:
 public:
     CommandDispatcherProxy(const SessionPtr& session);
 
-    bool execute(const CommandPtr& command);
-    void executeLater(const CommandPtr& command);
-    void executeLater();
+    bool execute(const CommandPtr& command) override;
+    void executeLater(const CommandPtr& command) override;
+    void executeLater() override;
 
-    bool isDirty() const;
+    bool isDirty() const override;
 
-    bool canUndo() const;
-    bool canRedo() const;
+    bool canUndo() const override;
+    bool canRedo() const override;
 
-    void undo();
-    void redo();
+    void undo() override;
+    void redo() override;
 
 private:
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;

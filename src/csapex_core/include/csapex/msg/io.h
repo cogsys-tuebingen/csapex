@@ -107,14 +107,14 @@ std::shared_ptr<R> message_cast(const std::shared_ptr<S>& msg)
 template <typename T>
 TokenPtr createToken(T&& v, typename std::enable_if<connection_types::should_use_value_message<T>::value>::type* = 0)
 {
-    auto msg = std::make_shared<connection_types::GenericValueMessage<T>>(v);
+    const auto& msg = std::make_shared<connection_types::GenericValueMessage<T>>(v);
     return std::make_shared<Token>(msg);
 }
 
 template <typename T>
 TokenPtr createToken(T&& v, typename std::enable_if<connection_types::should_use_pointer_message<T>::value>::type* = 0)
 {
-    auto msg = std::make_shared<connection_types::GenericPointerMessage<T>>();
+    const auto& msg = std::make_shared<connection_types::GenericPointerMessage<T>>();
     msg->value = std::make_shared<T>(std::move(v));
     return std::make_shared<Token>(msg);
 }
@@ -125,7 +125,7 @@ CSAPEX_CORE_EXPORT TokenDataConstPtr getMessage(Input* input);
 template <typename R>
 std::shared_ptr<R const> getMessage(Input* input, typename std::enable_if<std::is_base_of<TokenData, R>::value>::type* /*dummy*/ = 0)
 {
-    auto msg = getMessage(input);
+    const auto& msg = getMessage(input);
     typename std::shared_ptr<R const> result = message_cast<R const>(msg);
     if (!result) {
         throwError(msg, typeid(R));
@@ -136,7 +136,7 @@ std::shared_ptr<R const> getMessage(Input* input, typename std::enable_if<std::i
 template <typename R>
 std::shared_ptr<R const> getMessage(Input* input, typename std::enable_if<!std::is_base_of<TokenData, R>::value>::type* /*dummy*/ = 0)
 {
-    auto msg = getMessage(input);
+    const auto& msg = getMessage(input);
     auto result = message_cast<connection_types::GenericPointerMessage<R> const>(msg);
     if (!result) {
         throwError(msg, typeid(R));
@@ -147,7 +147,7 @@ std::shared_ptr<R const> getMessage(Input* input, typename std::enable_if<!std::
 template <typename Container, typename R>
 std::shared_ptr<typename Container::template TypeMap<R>::type const> getMessage(Input* input)
 {
-    auto msg = getMessage(input);
+    const auto& msg = getMessage(input);
     typename std::shared_ptr<Container const> result = message_cast<Container const>(msg);
     if (!result) {
         throwError(msg, typeid(Container));
@@ -178,7 +178,7 @@ R getValue(Input* input)
 template <typename R>
 bool isMessage(Input* input, typename std::enable_if<std::is_base_of<TokenData, R>::value>::type* /*dummy*/ = 0)
 {
-    auto msg = getMessage(input);
+    const auto& msg = getMessage(input);
     auto test = message_cast<R const>(msg);
     return test != nullptr;
 }
@@ -186,7 +186,7 @@ bool isMessage(Input* input, typename std::enable_if<std::is_base_of<TokenData, 
 template <typename R>
 bool isMessage(Input* input, typename std::enable_if<!std::is_base_of<TokenData, R>::value>::type* /*dummy*/ = 0)
 {
-    auto msg = getMessage(input);
+    const auto& msg = getMessage(input);
     auto test = message_cast<connection_types::GenericPointerMessage<R> const>(msg);
     return test != nullptr;
 }
@@ -194,8 +194,9 @@ bool isMessage(Input* input, typename std::enable_if<!std::is_base_of<TokenData,
 template <typename R>
 bool isExactMessage(Input* input)
 {
-    auto msg = getMessage(input);
-    return typeid(*msg) == typeid(R);
+    const auto& msg_ptr = getMessage(input);
+    const auto& msg = *msg_ptr;
+    return typeid(msg) == typeid(R);
 }
 
 template <typename R>

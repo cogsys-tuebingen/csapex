@@ -26,7 +26,7 @@ class CSAPEX_CORE_EXPORT NodeHandle : public NodeModifier, public ConnectableOwn
 {
 public:
     NodeHandle(const std::string& type, const UUID& uuid, NodePtr node, UUIDProviderPtr uuid_provider, InputTransitionPtr transition_in, OutputTransitionPtr transition_out);
-    virtual ~NodeHandle();
+    ~NodeHandle() override;
 
     void stop();
 

@@ -25,7 +25,7 @@ struct CsApexCoreApp : public QCoreApplication
 {
     CsApexCoreApp(int& argc, char** argv, ExceptionHandler& handler);
 
-    virtual bool notify(QObject* receiver, QEvent* event) override;
+    bool notify(QObject* receiver, QEvent* event) override;
 
 private:
     ExceptionHandler& handler;
@@ -35,7 +35,7 @@ struct CsApexGuiApp : public QApplication
 {
     CsApexGuiApp(int& argc, char** argv, ExceptionHandler& handler);
 
-    virtual bool notify(QObject* receiver, QEvent* event) override;
+    bool notify(QObject* receiver, QEvent* event) override;
 
     void handleAssertionFailure(const csapex::Failure& assertion);
 
@@ -49,7 +49,7 @@ struct Main : public QObject, public Observer
 
 public:
     Main(std::unique_ptr<QCoreApplication>&& app, Settings& settings, ExceptionHandler& handler);
-    ~Main();
+    ~Main() override;
 
     int run();
 

@@ -16,9 +16,9 @@ protected:
 
     virtual ~NodeConstructingTest();
 
-    virtual void SetUp() override;
+    void SetUp() override;
 
-    virtual void TearDown() override;
+    void TearDown() override;
 
     std::shared_ptr<NodeFactoryImplementation> node_factory;
     NodeFactoryImplementation& factory;

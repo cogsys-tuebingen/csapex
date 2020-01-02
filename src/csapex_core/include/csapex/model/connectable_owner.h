@@ -10,7 +10,7 @@ class ConnectableOwner : public Unique
 {
 protected:
     ConnectableOwner(const UUID& uuid);
-    virtual ~ConnectableOwner();
+    ~ConnectableOwner() override;
 };
 }  // namespace csapex
 

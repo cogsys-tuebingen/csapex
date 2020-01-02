@@ -16,9 +16,9 @@ class CSAPEX_QT_EXPORT ColorParameterAdapter : public ParameterAdapter
 public:
     ColorParameterAdapter(param::ColorParameter::Ptr p);
 
-    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+    QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
 
-    virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
+    void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
     param::ColorParameterPtr color_p_;

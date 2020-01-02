@@ -377,14 +377,14 @@ void NodeHandle::makeParameterConnectable(csapex::param::ParameterPtr p)
         });
 
         param::TriggerParameterWeakPtr t_weak = t;
-        slot->connection_added.connect([this, slot, t_weak](ConnectionPtr) {
+        slot->connection_added.connect([slot, t_weak](ConnectionPtr) {
             if (slot->getConnections().size() == 1) {
                 if (param::TriggerParameterPtr t = t_weak.lock()) {
                     t->first_connect(t.get());
                 }
             }
         });
-        slot->connection_faded.connect([this, slot, t_weak](ConnectionPtr) {
+        slot->connection_faded.connect([slot, t_weak](ConnectionPtr) {
             if (slot->getConnections().empty()) {
                 if (param::TriggerParameterPtr t = t_weak.lock()) {
                     t->last_disconnect(t.get());

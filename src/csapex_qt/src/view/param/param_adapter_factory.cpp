@@ -54,17 +54,17 @@ bool ParameterAdapterFactory::hasAdapter(const std::type_index& type) const
     }
 }
 
-ParameterAdapter::Ptr ParameterAdapterFactory::makeParameterAdapter(NodeAdapter* adapter, const param::ParameterPtr& parameter)
+ParameterAdapter::Ptr ParameterAdapterFactory::makeParameterAdapter(NodeAdapter* adapter, const param::ParameterPtr& parameter_ptr)
 {
     DefaultNodeAdapter* def_adapter = dynamic_cast<DefaultNodeAdapter*>(adapter);
     if (!def_adapter) {
         throw std::logic_error("Parameter adapters are currently only supported for default node adapters and their descendants.");
     }
-
-    auto pos = param_adapter_builders_.find(typeid(*parameter));
+    const auto& parameter = *parameter_ptr;
+    auto pos = param_adapter_builders_.find(typeid(parameter));
     if (pos != param_adapter_builders_.end()) {
         ParameterAdapterBuilder& builder = *pos->second;
-        return builder.build(def_adapter, parameter);
+        return builder.build(def_adapter, parameter_ptr);
 
     } else {
         throw std::logic_error("Tried to instantiate an unsupported parameter adapter.");

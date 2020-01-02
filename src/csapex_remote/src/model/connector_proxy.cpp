@@ -50,6 +50,8 @@ ConnectorProxy::ConnectorProxy(const SessionPtr& session, UUID uuid, Connectable
             }
         }
     });
+
+    connected_ = true;
 }
 
 ConnectorProxy::ConnectorProxy(const SessionPtr& session, UUID uuid, ConnectableOwnerPtr owner, const ConnectorDescription& cd) : ConnectorProxy(session, uuid, owner)

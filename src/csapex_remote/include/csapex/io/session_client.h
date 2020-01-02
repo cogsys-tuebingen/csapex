@@ -13,7 +13,7 @@ class SessionClient : public Session
 {
 public:
     SessionClient(const std::string& ip, int port);
-    ~SessionClient();
+    ~SessionClient() override;
 
     std::string getDescription() const override;
 

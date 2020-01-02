@@ -14,7 +14,7 @@ class CSAPEX_PROFILING_EXPORT ProfilerProxy : public Profiler
 public:
     ProfilerProxy(io::ChannelPtr node_channel);
 
-    virtual void setEnabled(bool enabled);
+    void setEnabled(bool enabled) override;
 
     void updateInterval(std::shared_ptr<const Interval>& interval);
 

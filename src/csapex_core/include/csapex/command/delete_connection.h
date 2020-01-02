@@ -29,11 +29,11 @@ public:
     }
 
 protected:
-    virtual bool doExecute() override;
-    virtual bool doRedo() override;
-    virtual bool doUndo() override;
+    bool doExecute() override;
+    bool doRedo() override;
+    bool doUndo() override;
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
 protected:
     int connection_id;

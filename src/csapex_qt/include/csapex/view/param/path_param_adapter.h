@@ -16,7 +16,7 @@ class CSAPEX_QT_EXPORT PathParameterAdapter : public ParameterAdapter
 public:
     PathParameterAdapter(param::PathParameter::Ptr p);
 
-    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+    QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
 
 private:
     param::PathParameterPtr path_p_;

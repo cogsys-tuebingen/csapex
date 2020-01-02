@@ -13,9 +13,9 @@ class CSAPEX_CORE_EXPORT Event : public StaticOutput
 
 public:
     Event(const UUID& uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    ~Event();
+    ~Event() override;
 
-    virtual ConnectorType getConnectorType() const override
+    ConnectorType getConnectorType() const override
     {
         return ConnectorType::EVENT;
     }
@@ -31,9 +31,9 @@ public:
      */
     void triggerWith(TokenPtr token);
 
-    virtual bool isSynchronous() const override;
+    bool isSynchronous() const override;
 
-    void reset();
+    void reset() override;
 
 public:
     slim_signal::Signal<void()> triggered;

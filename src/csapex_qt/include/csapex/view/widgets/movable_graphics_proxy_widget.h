@@ -16,20 +16,20 @@ class CSAPEX_QT_EXPORT MovableGraphicsProxyWidget : public QGraphicsProxyWidget
 
 public:
     MovableGraphicsProxyWidget(NodeBox* box, GraphView* view, CsApexViewCore& view_core, QGraphicsItem* parent = 0, Qt::WindowFlags wFlags = 0);
-    ~MovableGraphicsProxyWidget();
+    ~MovableGraphicsProxyWidget() override;
 
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value);
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
-    void mousePressEvent(QGraphicsSceneMouseEvent* event);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 
-    void dragEnterEvent(QGraphicsSceneDragDropEvent* event);
-    void dragMoveEvent(QGraphicsSceneDragDropEvent* event);
-    void dropEvent(QGraphicsSceneDragDropEvent* event);
-    void dragLeaveEvent(QGraphicsSceneDragDropEvent* event);
+    void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
+    void dragMoveEvent(QGraphicsSceneDragDropEvent* event) override;
+    void dropEvent(QGraphicsSceneDragDropEvent* event) override;
+    void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;
 
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
     NodeBox* getBox();
 

@@ -40,7 +40,7 @@ public:
     {
     }
 
-    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
+    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/) override
     {
         int val = msg::getValue<int>(in);
         msg::publish(out, val);
@@ -126,7 +126,7 @@ public:
     {
     }
 
-    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
+    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/) override
     {
         int i = msg::getValue<int>(in);
         value = i;

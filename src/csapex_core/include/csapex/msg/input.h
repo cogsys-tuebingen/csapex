@@ -14,19 +14,19 @@ class CSAPEX_CORE_EXPORT Input : public Connectable
 
 public:
     Input(const UUID& uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    virtual ~Input();
+    ~Input() override;
 
     void setInputTransition(InputTransition* it);
     void removeInputTransition();
 
-    virtual bool isInput() const override
+    bool isInput() const override
     {
         return true;
     }
 
     int maxConnectionCount() const override;
 
-    virtual ConnectorType getConnectorType() const override
+    ConnectorType getConnectorType() const override
     {
         return ConnectorType::INPUT;
     }
@@ -36,9 +36,9 @@ public:
 
     OutputPtr getSource() const;
 
-    virtual void removeAllConnectionsNotUndoable() override;
+    void removeAllConnectionsNotUndoable() override;
 
-    virtual bool isOptional() const override;
+    bool isOptional() const override;
     void setOptional(bool optional);
 
     virtual bool hasMessage() const;
@@ -47,19 +47,19 @@ public:
     void free();
     void stop() override;
 
-    virtual void enable() override;
-    virtual void disable() override;
+    void enable() override;
+    void disable() override;
 
     virtual void notifyMessageAvailable(Connection* connection);
 
-    virtual void reset() override;
+    void reset() override;
 
 public:
     slim_signal::Signal<void(Connectable*)> message_set;
     slim_signal::Signal<void(Connection*)> message_available;
 
 protected:
-    virtual void addStatusInformation(std::stringstream& status_stream) const override;
+    void addStatusInformation(std::stringstream& status_stream) const override;
 
 protected:
     InputTransition* transition_;

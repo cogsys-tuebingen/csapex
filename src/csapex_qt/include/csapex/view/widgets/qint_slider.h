@@ -13,7 +13,7 @@ class CSAPEX_QT_EXPORT QIntSlider : public QSlider
 
 public:
     QIntSlider(Qt::Orientation orientation, double step_size, QWidget* parent = 0);
-    virtual ~QIntSlider();
+    ~QIntSlider() override;
 
     void setStepSize(int step);
 

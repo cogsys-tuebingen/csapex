@@ -36,35 +36,35 @@ class NodeBuilder : public EventHandler
 {
 public:
     NodeBuilder();
-    virtual ~NodeBuilder();
+    ~NodeBuilder() override;
 
     Node Root();
 
-    virtual void OnDocumentStart(const Mark& mark);
-    virtual void OnDocumentEnd();
+    void OnDocumentStart(const Mark& mark) override;
+    void OnDocumentEnd() override;
 
-    virtual void OnNull(const Mark& mark, anchor_t anchor);
-    virtual void OnAlias(const Mark& mark, anchor_t anchor);
-    virtual void OnScalar(const Mark& mark, const std::string& tag, anchor_t anchor, const std::string& value);
+    void OnNull(const Mark& mark, anchor_t anchor) override;
+    void OnAlias(const Mark& mark, anchor_t anchor) override;
+    void OnScalar(const Mark& mark, const std::string& tag, anchor_t anchor, const std::string& value) override;
 
-    virtual void OnSequenceStart(const Mark& mark, const std::string& tag, anchor_t anchor
+    void OnSequenceStart(const Mark& mark, const std::string& tag, anchor_t anchor
 #if USE_YAML_EMITTER_STYLE
-                                 ,
-                                 EmitterStyle::value style);
+                         ,
+                         EmitterStyle::value style) override;
 #else
-    );
+                         ) override;
 #endif
 
-    virtual void OnSequenceEnd();
+    void OnSequenceEnd() override;
 
-    virtual void OnMapStart(const Mark& mark, const std::string& tag, anchor_t anchor
-#if USE_YAML_EMITTER_STYLEs
-                            ,
-                            EmitterStyle::value style);
+    void OnMapStart(const Mark& mark, const std::string& tag, anchor_t anchor
+#if USE_YAML_EMITTER_STYLE
+                    ,
+                    EmitterStyle::value style) override;
 #else
-    );
+                    ) override;
 #endif
-    virtual void OnMapEnd();
+    void OnMapEnd() override;
 
 private:
     detail::node& Push(const Mark& mark, anchor_t anchor);

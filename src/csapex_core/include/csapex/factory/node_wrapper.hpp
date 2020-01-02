@@ -14,7 +14,7 @@ class NodeWrapper : public Node, public Impl
         Impl::setup(node_modifier);
     }
 
-    virtual void setupParameters(Parameterizable& parameters) override
+    void setupParameters(Parameterizable& parameters) override
     {
         Impl::setupParameters(parameters);
     }

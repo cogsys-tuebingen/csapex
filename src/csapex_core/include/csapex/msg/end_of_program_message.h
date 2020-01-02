@@ -8,7 +8,7 @@ namespace csapex
 {
 namespace connection_types
 {
-struct CSAPEX_CORE_EXPORT EndOfProgramMessage : public EndOfSequenceMessage
+struct CSAPEX_CORE_EXPORT EndOfProgramMessage : public MarkerMessage
 {
 protected:
     CLONABLE_IMPLEMENTATION(EndOfProgramMessage);
@@ -18,6 +18,8 @@ public:
 
 public:
     EndOfProgramMessage();
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 };
 
 template <>

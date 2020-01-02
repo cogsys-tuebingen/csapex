@@ -61,7 +61,7 @@ public:
     /**
      * @brief ~Node
      */
-    virtual ~Node();
+    ~Node() override;
 
     /**
      * @brief initialize has to be called before the node is used.

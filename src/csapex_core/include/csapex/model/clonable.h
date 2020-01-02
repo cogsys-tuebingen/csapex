@@ -31,7 +31,7 @@ public:
     virtual bool cloneDataFrom(const Clonable& other) = 0;
     virtual std::shared_ptr<Clonable> makeEmptyInstance() const = 0;
 
-    virtual bool hasData(const std::type_info& type) const
+    virtual bool hasData(const std::type_info& /* type */) const
     {
         return false;
     }
@@ -82,7 +82,7 @@ public:                                                                         
     }
 #define _CLONABLE_BLOCK_CLONE_DATA(Instance)                                                                                                                                                           \
 protected:                                                                                                                                                                                             \
-    virtual bool cloneData(const Instance& other)                                                                                                                                                      \
+    virtual bool cloneData(const Instance& other)                                                                                                                                            \
     {                                                                                                                                                                                                  \
         *this = other;                                                                                                                                                                                 \
         return true;                                                                                                                                                                                   \

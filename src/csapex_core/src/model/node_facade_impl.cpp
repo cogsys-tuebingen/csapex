@@ -80,6 +80,8 @@ NodeWorkerPtr NodeFacadeImplementation::createNodeWorker()
     } else {
         if (state) {
             exec_type = state->getExecutionType();
+        } else {
+            exec_type = ExecutionType::AUTO;
         }
     }
 

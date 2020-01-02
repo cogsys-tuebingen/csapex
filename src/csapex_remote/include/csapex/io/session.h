@@ -33,7 +33,7 @@ public:
 
 public:
     Session(Socket socket, const std::string& name);
-    ~Session();
+    ~Session() override;
 
     virtual void run();
     virtual void shutdown();

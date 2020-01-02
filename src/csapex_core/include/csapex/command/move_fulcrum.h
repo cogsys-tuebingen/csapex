@@ -16,7 +16,7 @@ class CSAPEX_COMMAND_EXPORT MoveFulcrum : public CommandImplementation<MoveFulcr
 public:
     MoveFulcrum(const AUUID& graph_uuid, int connection_id, int fulcrum_id, const Point& from, const Point& to);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

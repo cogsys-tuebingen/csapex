@@ -21,7 +21,7 @@ protected:
     NodeFacade();
 
 public:
-    ~NodeFacade();
+    ~NodeFacade() override;
 
     virtual std::string getType() const = 0;
     virtual UUID getUUID() const = 0;

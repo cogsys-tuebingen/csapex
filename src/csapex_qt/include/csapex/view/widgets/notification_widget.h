@@ -23,12 +23,12 @@ class CSAPEX_QT_EXPORT NotificationWidget : public QWidget
 
 public:
     NotificationWidget(const Notification& notification, QWidget* parent = nullptr);
-    ~NotificationWidget();
+    ~NotificationWidget() override;
 
     void setNotification(const Notification& notification);
     const Notification& getNotification();
 
-    bool eventFilter(QObject*, QEvent*);
+    bool eventFilter(QObject*, QEvent*) override;
 
     bool isFading() const;
 
@@ -42,8 +42,8 @@ private Q_SLOTS:
     void shutdown();
 
 protected:
-    void paintEvent(QPaintEvent* e);
-    void mouseReleaseEvent(QMouseEvent* me);
+    void paintEvent(QPaintEvent* e) override;
+    void mouseReleaseEvent(QMouseEvent* me) override;
 
     void updateNotification();
     QString getText();

@@ -52,8 +52,8 @@ public:
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     template <typename T>
     void setLower(T v)
@@ -156,8 +156,8 @@ public:
     }
 
 protected:
-    virtual void get_unsafe(boost::any& out) const override;
-    virtual bool set_unsafe(const boost::any& v) override;
+    void get_unsafe(boost::any& out) const override;
+    bool set_unsafe(const boost::any& v) override;
 
 private:
     template <typename T>

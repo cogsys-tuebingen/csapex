@@ -23,13 +23,13 @@ public:
 
     static const uint8_t PACKET_TYPE_ID = 10;
 
-    virtual uint8_t getPacketType() const override;
+    uint8_t getPacketType() const override;
 
     std::vector<uint8_t> getData() const;
     AUUID getUUID() const;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version);
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 private:
     mutable std::vector<uint8_t> data_;

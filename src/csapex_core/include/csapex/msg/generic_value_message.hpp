@@ -65,7 +65,7 @@ public:
         return value;
     }
 
-    constexpr bool isArithmetic() const override
+    bool isArithmetic() const override
     {
         return std::is_arithmetic<Type>::value;
     }
@@ -230,7 +230,7 @@ private:
         return res;
     }
     template <typename T>
-    static std::shared_ptr<connection_types::GenericValueMessage<V>> convert(const connection_types::ValueMessageBase& in,
+    static std::shared_ptr<connection_types::GenericValueMessage<V>> convert(const connection_types::ValueMessageBase& /* in */,
                                                                              typename std::enable_if<!std::is_base_of<std::string, T>::value && !std::is_arithmetic<T>::value>::type* = 0)
     {
         return nullptr;

@@ -29,7 +29,7 @@ protected:
     void analyzeConnections(Graph* graph);
     void pasteSelection(AUUID sub_graph_auuid);
 
-    virtual void clear() override;
+    void clear() override;
 
 protected:
     std::set<NodeHandle*> node_set;

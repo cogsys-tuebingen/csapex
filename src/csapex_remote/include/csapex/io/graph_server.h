@@ -16,7 +16,7 @@ class GraphServer : public Observer
 {
 public:
     GraphServer(SessionPtr session);
-    ~GraphServer();
+    ~GraphServer() override;
 
     void startObservingGraph(const GraphFacadeImplementationPtr& graph);
     void stopObservingGraph(const GraphFacadeImplementationPtr& graph);

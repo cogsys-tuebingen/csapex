@@ -18,10 +18,10 @@ public:
         ParameterRequest(const AUUID& id, const std::string& name, const std::string& description, boost::any value, bool persistent);
         ParameterRequest(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
-        virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
+        ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
         std::string getType() const override
         {
@@ -42,8 +42,8 @@ public:
         ParameterResponse(const param::ParameterConstPtr& parameter, uint8_t request_id);
         ParameterResponse(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         param::ParameterConstPtr getParameter() const;
 

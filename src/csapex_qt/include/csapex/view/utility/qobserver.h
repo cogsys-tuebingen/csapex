@@ -65,7 +65,7 @@ class CSAPEX_QT_EXPORT QObserver : public QObject, public Observer
 public:
     QObserver();
 
-    ~QObserver();
+    ~QObserver() override;
 
     template <typename Lambda, typename Result, typename... Args>
     void observeQueued(slim_signal::Signal<Result(Args...)>& signal, Lambda callback)

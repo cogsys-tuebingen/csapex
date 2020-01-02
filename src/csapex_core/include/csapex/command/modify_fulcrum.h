@@ -17,7 +17,7 @@ public:
     ModifyFulcrum(const AUUID& graph_uuid, int connection_id, int fulcrum_id, int f_type, const Point& f_handle_in, const Point& f_handle_out, int t_type, const Point& t_handle_in,
                   const Point& t_handle_out);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

@@ -16,7 +16,7 @@ class CSAPEX_COMMAND_EXPORT SetColor : public CommandImplementation<SetColor>
 public:
     SetColor(const AUUID& graph_uuid, const UUID& node, int r, int g, int b);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

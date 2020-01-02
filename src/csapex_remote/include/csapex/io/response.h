@@ -16,7 +16,7 @@ public:
 
     static const uint8_t PACKET_TYPE_ID = 3;
 
-    virtual uint8_t getPacketType() const override;
+    uint8_t getPacketType() const override;
     virtual std::string getType() const = 0;
 
     uint8_t getRequestID() const;

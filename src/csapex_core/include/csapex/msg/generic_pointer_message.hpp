@@ -13,7 +13,7 @@ namespace csapex
 namespace connection_types
 {
 template <typename Type>
-struct GenericPointerMessage : public Message
+class GenericPointerMessage : public Message
 {
 protected:
     CLONABLE_IMPLEMENTATION(GenericPointerMessage<Type>);

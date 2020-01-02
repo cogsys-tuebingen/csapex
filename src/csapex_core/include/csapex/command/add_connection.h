@@ -27,7 +27,7 @@ protected:
 
     bool doExecute() override;
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
 protected:
     UUID from_uuid;

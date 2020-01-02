@@ -36,14 +36,14 @@ public:
 
     int findHighestDeviantSequenceNumber() const;
 
-    virtual bool isEnabled() const override;
+    bool isEnabled() const override;
 
-    virtual void connectionRemoved(Connection* connection) override;
+    void connectionRemoved(Connection* connection) override;
 
-    virtual void reset() override;
+    void reset() override;
 
 protected:
-    virtual void connectionAdded(Connection* connection) override;
+    void connectionAdded(Connection* connection) override;
 
 private:
     bool areConnectionsReady() const;

@@ -20,13 +20,13 @@ public:
 
     static const uint8_t PACKET_TYPE_ID = 7;
 
-    virtual uint8_t getPacketType() const override;
+    uint8_t getPacketType() const override;
     virtual std::string getType() const = 0;
 
     AUUID getAUUID() const;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     AUUID uuid_;

@@ -23,18 +23,18 @@ class CSAPEX_QT_EXPORT ProfilingWidget : public QWidget, public Observer
 
 public:
     ProfilingWidget(std::shared_ptr<Profiler> profiler, const std::string& profile, QWidget* parent = 0);
-    ~ProfilingWidget();
+    ~ProfilingWidget() override;
 
 public Q_SLOTS:
     void reset();
     void exportCsv();
 
 protected:
-    void enterEvent(QEvent* e);
-    void mouseMoveEvent(QMouseEvent* me);
-    void leaveEvent(QEvent* e);
+    void enterEvent(QEvent* e) override;
+    void mouseMoveEvent(QMouseEvent* me) override;
+    void leaveEvent(QEvent* e) override;
 
-    void paintEvent(QPaintEvent*);
+    void paintEvent(QPaintEvent*) override;
     void paintInterval(QPainter& p, const Interval& interval);
     float paintInterval(QPainter& p, const Interval& interval, float height_offset, int depth);
 

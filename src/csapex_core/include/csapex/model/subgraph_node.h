@@ -22,7 +22,7 @@ class CSAPEX_CORE_EXPORT SubgraphNode : public Node, public Variadic
 {
 public:
     SubgraphNode(GraphImplementationPtr graph);
-    ~SubgraphNode();
+    ~SubgraphNode() override;
 
     bool canRunInSeparateProcess() const override;
 
@@ -40,43 +40,43 @@ public:
     //        return std::dynamic_pointer_cast<T>(findConnectorNoThrow(uuid));
     //    }
 
-    //    virtual NodeHandle*findNodeHandle(const UUID& uuid) const override;
-    //    virtual NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
-    //    virtual ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
+    //    NodeHandle*findNodeHandle(const UUID& uuid) const override;
+    //    NodeHandle* findNodeHandleNoThrow(const UUID& uuid) const noexcept override;
+    //    ConnectablePtr findConnectorNoThrow(const UUID &uuid) noexcept override;
 
-    virtual void initialize(csapex::NodeHandlePtr node_handle) override;
+    void initialize(csapex::NodeHandlePtr node_handle) override;
     void setNodeFacade(NodeFacadeImplementation* graph_node_facade);
 
-    virtual void detach() override;
-    virtual void reset() override;
-    virtual void stateChanged() override;
-    virtual void tearDown() override;
+    void detach() override;
+    void reset() override;
+    void stateChanged() override;
+    void tearDown() override;
 
-    virtual void activation() override;
-    virtual void deactivation() override;
+    void activation() override;
+    void deactivation() override;
 
-    virtual bool canProcess() const override;
+    bool canProcess() const override;
     // Node interface
-    virtual void setup(csapex::NodeModifier& modifier) override;
-    virtual void setupParameters(Parameterizable& params) override;
-    virtual void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& params, Continuation continuation) override;
+    void setup(csapex::NodeModifier& modifier) override;
+    void setupParameters(Parameterizable& params) override;
+    void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& params, Continuation continuation) override;
 
-    virtual bool isAsynchronous() const override;
+    bool isAsynchronous() const override;
 
     InputPtr createInternalInput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, bool optional);
     OutputPtr createInternalOutput(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
     EventPtr createInternalEvent(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label);
     SlotPtr createInternalSlot(const TokenDataConstPtr& type, const UUID& internal_uuid, const std::string& label, std::function<void(const TokenPtr&)> callback);
 
-    virtual Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
-    virtual Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
-    virtual Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label) override;
-    virtual Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active, bool blocking) override;
+    Input* createVariadicInput(TokenDataConstPtr type, const std::string& label, bool optional) override;
+    Output* createVariadicOutput(TokenDataConstPtr type, const std::string& label) override;
+    Event* createVariadicEvent(TokenDataConstPtr type, const std::string& label) override;
+    Slot* createVariadicSlot(TokenDataConstPtr type, const std::string& label, std::function<void(const TokenPtr&)> callback, bool active, bool blocking) override;
 
-    virtual void removeVariadicInput(InputPtr input) override;
-    virtual void removeVariadicOutput(OutputPtr input) override;
-    virtual void removeVariadicEvent(EventPtr input) override;
-    virtual void removeVariadicSlot(SlotPtr input) override;
+    void removeVariadicInput(InputPtr input) override;
+    void removeVariadicOutput(OutputPtr input) override;
+    void removeVariadicEvent(EventPtr input) override;
+    void removeVariadicSlot(SlotPtr input) override;
 
     RelayMapping addForwardingInput(const TokenDataConstPtr& type, const std::string& label, bool optional);
     RelayMapping addForwardingOutput(const TokenDataConstPtr& type, const std::string& label);

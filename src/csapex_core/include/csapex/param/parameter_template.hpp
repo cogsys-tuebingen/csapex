@@ -96,7 +96,7 @@ protected:
         throw std::logic_error(std::string("invalid access to data of type ") + type2name(type));
     }
 
-    void get_unsafe(boost::any& out) const
+    void get_unsafe(boost::any& out) const override
     {
         out = value_;
     }

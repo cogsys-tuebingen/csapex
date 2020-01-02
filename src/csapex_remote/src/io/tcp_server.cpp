@@ -79,95 +79,95 @@ void TcpServer::startSession(SessionPtr session)
     });
 
     // core
-    observe(core_.getCommandDispatcher()->state_changed, [this, w_session]() {
+    observe(core_.getCommandDispatcher()->state_changed, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendBroadcast<CommandBroadcasts>(CommandBroadcasts::CommandBroadcastType::StateChanged);
         }
     });
-    observe(core_.getCommandDispatcher()->dirty_changed, [this, w_session](bool dirty) {
+    observe(core_.getCommandDispatcher()->dirty_changed, [w_session](bool dirty) {
         if (SessionPtr session = w_session.lock()) {
             session->sendBroadcast<CommandBroadcasts>(CommandBroadcasts::CommandBroadcastType::DirtyChanged, dirty);
         }
     });
-    observe(core_.getCommandDispatcher()->dirty_changed, [this, w_session](bool dirty) {
+    observe(core_.getCommandDispatcher()->dirty_changed, [w_session](bool dirty) {
         if (SessionPtr session = w_session.lock()) {
             session->sendBroadcast<CommandBroadcasts>(CommandBroadcasts::CommandBroadcastType::DirtyChanged, dirty);
         }
     });
 
-    observe(core_.config_changed, [this, w_session]() {
+    observe(core_.config_changed, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::ConfigChanged);
         }
     });
-    observe(core_.begin_step, [this, w_session]() {
+    observe(core_.begin_step, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::StepBegin);
         }
     });
-    observe(core_.end_step, [this, w_session]() {
+    observe(core_.end_step, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::StepEnd);
         }
     });
 
-    observe(core_.status_changed, [this, w_session](const std::string& msg) {
+    observe(core_.status_changed, [w_session](const std::string& msg) {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::StatusChanged, msg);
         }
     });
 
-    observe(core_.new_node_type, [this, w_session]() {
+    observe(core_.new_node_type, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::NewNodeType);
         }
     });
-    observe(core_.new_snippet_type, [this, w_session]() {
+    observe(core_.new_snippet_type, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::NewSnippetType);
         }
     });
-    observe(core_.reset_requested, [this, w_session]() {
+    observe(core_.reset_requested, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::ResetRequested);
         }
     });
-    observe(core_.reset_done, [this, w_session]() {
+    observe(core_.reset_done, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::ResetDone);
         }
     });
-    observe(core_.saved, [this, w_session]() {
+    observe(core_.saved, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::Saved);
         }
     });
-    observe(core_.loaded, [this, w_session]() {
+    observe(core_.loaded, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::Loaded);
         }
     });
-    observe(core_.paused, [this, w_session](bool paused) {
+    observe(core_.paused, [w_session](bool paused) {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::Paused, paused);
         }
     });
-    observe(core_.stepping_enabled, [this, w_session]() {
+    observe(core_.stepping_enabled, [w_session]() {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::SteppingEnabled);
         }
     });
-    //            observe(core_.save_detail_request, [this, w_session]() {
+    //            observe(core_.save_detail_request, [w_session]() {
     //                if(SessionPtr session = w_session.lock()) {
     //                    session->sendNote<CoreNote>(CoreNoteType::SaveDetailRequest);
     //                }
     //            });
-    //            observe(core_.load_detail_request, [this, w_session]() {
+    //            observe(core_.load_detail_request, [w_session]() {
     //                if(SessionPtr session = w_session.lock()) {
     //                    session->sendNote<CoreNote>(CoreNoteType::LoadDetailRequest);
     //                }
     //            });
-    observe(core_.notification, [this, w_session](const Notification& n) {
+    observe(core_.notification, [w_session](const Notification& n) {
         if (SessionPtr session = w_session.lock()) {
             session->sendNote<CoreNote>(CoreNoteType::Notification, n);
         }

@@ -16,7 +16,7 @@ class ConnectorServer : public Observer
 {
 public:
     ConnectorServer(SessionPtr session);
-    ~ConnectorServer();
+    ~ConnectorServer() override;
 
     void startObserving(const ConnectablePtr& connector);
     void stopObserving(const ConnectablePtr& connector);

@@ -23,36 +23,36 @@ class CSAPEX_CORE_EXPORT Connectable : public Connector, public std::enable_shar
     friend class Connection;
 
 public:
-    virtual ~Connectable();
+    ~Connectable() override;
 
     int getCount() const override;
 
-    virtual bool isOutput() const override
+    bool isOutput() const override
     {
         return false;
     }
-    virtual bool isInput() const override
+    bool isInput() const override
     {
         return false;
     }
-    virtual bool isOptional() const
+    bool isOptional() const override
     {
         return false;
     }
 
-    bool isVirtual() const;
+    bool isVirtual() const override;
     void setVirtual(bool _virtual);
 
     bool isVariadic() const;
     void setVariadic(bool variadic);
 
-    bool isParameter() const;
+    bool isParameter() const override;
     void setParameter(bool parameter);
 
-    bool isGraphPort() const;
+    bool isGraphPort() const override;
     void setGraphPort(bool graph);
 
-    bool isEssential() const;
+    bool isEssential() const override;
     void setEssential(bool essential);
 
     virtual void addConnection(ConnectionPtr connection);
@@ -60,34 +60,34 @@ public:
     virtual void fadeConnection(ConnectionPtr connection);
 
     void setLabel(const std::string& label);
-    std::string getLabel() const;
+    std::string getLabel() const override;
 
     void setType(TokenData::ConstPtr type);
-    TokenData::ConstPtr getType() const;
+    TokenData::ConstPtr getType() const override;
 
-    virtual ConnectorType getConnectorType() const = 0;
+    ConnectorType getConnectorType() const override = 0;
 
-    bool isEnabled() const;
+    bool isEnabled() const override;
     void setEnabled(bool enabled);
 
-    int sequenceNumber() const;
+    int sequenceNumber() const override;
     void setSequenceNumber(int seq_no_);
 
     int countConnections() const override;
-    virtual int maxConnectionCount() const override;
+    int maxConnectionCount() const override;
 
     virtual std::vector<ConnectionPtr> getConnections() const;
 
-    virtual ConnectorDescription getDescription() const override;
+    ConnectorDescription getDescription() const override;
 
     bool hasEnabledConnection() const;
-    bool hasActiveConnection() const;
+    bool hasActiveConnection() const override;
 
-    virtual bool isConnected() const;
-    virtual bool isConnectedTo(const UUID& other) const override;
-    virtual bool isActivelyConnectedTo(const UUID& other) const override;
+    bool isConnected() const override;
+    bool isConnectedTo(const UUID& other) const override;
+    bool isActivelyConnectedTo(const UUID& other) const override;
 
-    virtual std::vector<UUID> getConnectedPorts() const override;
+    std::vector<UUID> getConnectedPorts() const override;
 
     virtual void disable();
     virtual void enable();
@@ -97,7 +97,7 @@ public:
 
     virtual void notifyMessageProcessed();
 
-    virtual std::string makeStatusString() const override;
+    std::string makeStatusString() const override;
 
 protected:
     void setProcessing(bool processing);

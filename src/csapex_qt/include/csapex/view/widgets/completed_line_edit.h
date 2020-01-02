@@ -28,15 +28,14 @@ public Q_SLOTS:
     void completeText(const QModelIndex& index);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent* e);
-    virtual void focusOutEvent(QFocusEvent* e);
-    virtual void focusInEvent(QFocusEvent* e);
+    void keyPressEvent(QKeyEvent* e) override;
+    void focusOutEvent(QFocusEvent* e) override;
+    void focusInEvent(QFocusEvent* e) override;
 
 private:
     QListView* list_view;
 
     bool was_hidden;
-    int line_height;
 
     std::string mime_;
 };

@@ -108,7 +108,7 @@ public:
     ScopedConnection(ScopedConnection&& c) noexcept;
     ScopedConnection(const ScopedConnection& c) = delete;
 
-    ~ScopedConnection();
+    ~ScopedConnection() override;
 
     void operator=(const Connection& c);
     void operator=(const ScopedConnection& c) = delete;
@@ -130,7 +130,7 @@ public:
     Signal(const Signal&) = delete;
     Signal& operator=(const Signal&) = delete;
 
-    ~Signal();
+    ~Signal() override;
 
     // connections with matching signatures
     Connection connect(const delegate::Delegate<Signature>& delegate);
@@ -158,13 +158,13 @@ public:
         return connectAny(signal, tag_is_function<true, false>());
     }
 
-    virtual bool isConnected() const override;
-    virtual int countAllConnections() const override;
+    bool isConnected() const override;
+    int countAllConnections() const override;
 
     template <typename... Args>
     Signal& operator()(Args&&... args);
 
-    virtual void disconnectAll() override;
+    void disconnectAll() override;
 
 private:
     template <bool signal, bool bind>
@@ -233,8 +233,8 @@ public:
     Signal<void()> last_disconnected;
 
 private:
-    virtual void onConnect() override;
-    virtual void onDisconnect() override;
+    void onConnect() override;
+    void onDisconnect() override;
 };
 
 }  // namespace slim_signal

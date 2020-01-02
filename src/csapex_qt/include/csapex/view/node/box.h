@@ -54,7 +54,7 @@ public:
 
     void setAdapter(NodeAdapterPtr adapter);
 
-    virtual ~NodeBox();
+    ~NodeBox() override;
     virtual void construct();
     void destruct();
     virtual void init();
@@ -88,19 +88,19 @@ public:
     QBoxLayout* getEventLayout();
 
     /// UI CALLBACKS
-    void moveEvent(QMoveEvent*);
+    void moveEvent(QMoveEvent*) override;
 
     bool isSelected() const;
     virtual void setSelected(bool selected);
 
-    void keyPressEvent(QKeyEvent* e);
+    void keyPressEvent(QKeyEvent* e) override;
 
     void stop();
 
 protected:
     void setupUi();
-    void paintEvent(QPaintEvent* e);
-    bool eventFilter(QObject*, QEvent*);
+    void paintEvent(QPaintEvent* e) override;
+    bool eventFilter(QObject*, QEvent*) override;
 
 public:
     void updateBoxInformation(GraphFacade* graph);
@@ -118,7 +118,7 @@ public Q_SLOTS:
     virtual void updateComponentInformation(GraphFacade* graph);
     virtual void updateThreadInformation();
     virtual void updateFrequencyInformation();
-    void contextMenuEvent(QContextMenuEvent* e);
+    void contextMenuEvent(QContextMenuEvent* e) override;
 
     void nodeStateChangedEvent();
     void enabledChangeEvent(bool val);
@@ -155,7 +155,7 @@ Q_SIGNALS:
 
 protected:
     void setStyleForId(QLabel* label, int id);
-    void resizeEvent(QResizeEvent* e);
+    void resizeEvent(QResizeEvent* e) override;
 
     QString getNodeState();
 

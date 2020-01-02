@@ -137,7 +137,7 @@ private:
 
 private:
     MessageSerializer();
-    ~MessageSerializer();
+    ~MessageSerializer() override;
 
     static void registerMessage(std::string type, YamlConverter converter);
 

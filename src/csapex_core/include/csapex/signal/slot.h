@@ -34,13 +34,13 @@ public:
     {
     }
 
-    virtual ~Slot();
+    ~Slot() override;
 
-    virtual void setToken(TokenPtr message) override;
+    void setToken(TokenPtr message) override;
 
     int maxConnectionCount() const override;
 
-    virtual ConnectorType getConnectorType() const override
+    ConnectorType getConnectorType() const override
     {
         return ConnectorType::SLOT_T;
     }
@@ -56,10 +56,10 @@ public:
     void notifyMessageAvailable(Connection* connection) override;
     void notifyMessageProcessed() override;
 
-    virtual void enable() override;
-    virtual void disable() override;
+    void enable() override;
+    void disable() override;
 
-    void reset();
+    void reset() override;
 
     void handleEvent();
 

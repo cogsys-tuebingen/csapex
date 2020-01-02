@@ -31,13 +31,13 @@ public Q_SLOTS:
     void disconnectView();
 
 protected:
-    void mousePressEvent(QMouseEvent* me);
-    void mouseReleaseEvent(QMouseEvent* me);
-    void mouseMoveEvent(QMouseEvent* me);
+    void mousePressEvent(QMouseEvent* me) override;
+    void mouseReleaseEvent(QMouseEvent* me) override;
+    void mouseMoveEvent(QMouseEvent* me) override;
 
-    void wheelEvent(QWheelEvent* e);
+    void wheelEvent(QWheelEvent* e) override;
 
-    void paintEvent(QPaintEvent* e);
+    void paintEvent(QPaintEvent* e) override;
 
 private:
     void emitPositionRequest(QMouseEvent* me);

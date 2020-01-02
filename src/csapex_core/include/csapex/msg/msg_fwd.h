@@ -28,9 +28,9 @@ namespace connection_types
 FWD(Message)
 FWD(MarkerMessage)
 template <typename Type>
-struct GenericPointerMessage;
+class GenericPointerMessage;
 template <typename Type>
-struct GenericValueMessage;
+class GenericValueMessage;
 FWD(GenericVectorMessage)
 }  // namespace connection_types
 }  // namespace csapex

@@ -28,7 +28,7 @@ class CSAPEX_QT_EXPORT BoxDialog : public QDialog
     Q_OBJECT
 
 public:
-    BoxDialog(QString message, csapex::NodeFactory& node_factory, NodeAdapterFactory& adapter_factory, SnippetFactoryPtr snippet_factory, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    BoxDialog(QString message, csapex::NodeFactory& node_factory, SnippetFactoryPtr snippet_factory, QWidget* parent = 0, Qt::WindowFlags f = 0);
 
     std::string getMIME();
     std::string getName();
@@ -49,7 +49,6 @@ private:
     CompletedLineEdit* name_edit_;
 
     NodeFactory& node_factory_;
-    NodeAdapterFactory& adapter_factory_;
 
     SnippetFactoryPtr snippet_factory_;
 

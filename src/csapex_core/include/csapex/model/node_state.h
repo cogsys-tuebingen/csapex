@@ -29,15 +29,15 @@ public:
 
     NodeState();
     NodeState(const NodeHandle* parent);
-    ~NodeState();
+    ~NodeState() override;
 
     NodeState& operator=(const NodeState& rhs);
 
     void writeYaml(YAML::Node& out) const;
     void readYaml(const YAML::Node& node);
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 public:
     double getMaximumFrequency() const;

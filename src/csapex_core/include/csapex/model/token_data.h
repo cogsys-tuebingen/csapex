@@ -22,7 +22,7 @@ public:
 public:
     TokenData(const std::string& type_name);
     TokenData(const std::string& type_name, const std::string& descriptive_name);
-    virtual ~TokenData();
+    ~TokenData() override;
 
     TokenData::Ptr toType() const;
 
@@ -42,7 +42,7 @@ public:
 
     virtual void writeNative(const std::string& file, const std::string& base, const std::string& suffix) const;
 
-    uint8_t getPacketType() const final override;
+    uint8_t getPacketType() const final ;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

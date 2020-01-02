@@ -27,7 +27,7 @@ public:
 
 public:
     ParameterAdapter(param::Parameter::Ptr p);
-    virtual ~ParameterAdapter();
+    ~ParameterAdapter() override;
 
     void doSetup(QBoxLayout* layout, const std::string& display_name);
 

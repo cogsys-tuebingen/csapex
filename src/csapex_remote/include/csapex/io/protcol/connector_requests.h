@@ -30,10 +30,10 @@ public:
         ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid);
         ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid, const boost::any& payload);
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
-        virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
+        ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
         std::string getType() const override
         {
@@ -58,8 +58,8 @@ public:
         ConnectorResponse(ConnectorRequestType request_type, uint8_t request_id, const AUUID& uuid);
         ConnectorResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid);
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::string getType() const override
         {

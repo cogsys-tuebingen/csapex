@@ -35,7 +35,7 @@ class CSAPEX_QT_EXPORT DefaultNodeAdapterBridge : public QObject
 
 public:
     DefaultNodeAdapterBridge(DefaultNodeAdapter* parent);
-    ~DefaultNodeAdapterBridge();
+    ~DefaultNodeAdapterBridge() override;
 
     void connectInGuiThread(csapex::slim_signal::Signal<void(csapex::param::Parameter*)>& signal, std::function<void()> cb);
     void disconnect();
@@ -66,9 +66,9 @@ class CSAPEX_QT_EXPORT DefaultNodeAdapter : public NodeAdapter
 
 public:
     DefaultNodeAdapter(NodeFacadePtr adaptee, NodeBox* parent);
-    virtual ~DefaultNodeAdapter();
+    ~DefaultNodeAdapter() override;
 
-    virtual void stop();
+    void stop() override;
 
 public:
     template <typename Parameter, typename Adapter>
@@ -78,7 +78,7 @@ public:
 
 protected:
     virtual void setupAdaptiveUi();
-    virtual void setupUi(QBoxLayout* layout);
+    void setupUi(QBoxLayout* layout) override;
 
     void clear();
 

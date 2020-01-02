@@ -306,7 +306,7 @@ struct SimplifyMemFunc
     {
         // Unsupported member function type -- force a compile failure.
         static_assert(N >= 100, "Unsupported member function type");
-        return 0;
+        return nullptr;
     }
 };
 
@@ -597,11 +597,11 @@ public:
         m_pStaticFunction = 0;
     }
 #else
-    DelegateMemento() : m_pthis(0), m_pFunction(0){};
+    DelegateMemento() : m_pthis(nullptr), m_pFunction(nullptr){};
     void clear()
     {
-        m_pthis = 0;
-        m_pFunction = 0;
+        m_pthis = nullptr;
+        m_pFunction = nullptr;
     }
 #endif
 public:
@@ -645,11 +645,11 @@ public:
     // m_pFunction can be zero even if the delegate is not empty!
     inline bool operator!() const  // Is it bound to anything?
     {
-        return m_pthis == 0 && m_pFunction == 0;
+        return m_pthis == nullptr && m_pFunction == nullptr;
     }
     inline bool empty() const  // Is it bound to anything?
     {
-        return m_pthis == 0 && m_pFunction == 0;
+        return m_pthis == nullptr && m_pFunction == nullptr;
     }
 
 public:

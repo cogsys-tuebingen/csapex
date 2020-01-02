@@ -36,9 +36,9 @@ public:
     void setOutputsIdle();
     bool areOutputsIdle() const;
 
-    virtual bool isEnabled() const override;
+    bool isEnabled() const override;
 
-    virtual void reset() override;
+    void reset() override;
 
 public:
     slim_signal::Signal<void()> messages_processed;

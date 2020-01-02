@@ -44,13 +44,13 @@ public:
     HardAssertionFailure();
     HardAssertionFailure(const char* msg, const char* code, const char* file, int line, const char* signature);
     HardAssertionFailure(const std::string& msg, const std::string& code, const std::string& file, int line, const std::string& signature);
-    ~HardAssertionFailure();
+    ~HardAssertionFailure() override;
 
-    virtual std::ostream& reason(std::ostream& ss) const override;
-    virtual std::string what() const override;
-    virtual std::string type() const override;
+    std::ostream& reason(std::ostream& ss) const override;
+    std::string what() const override;
+    std::string type() const override;
 
-    virtual Failure* clone() const override;
+    Failure* clone() const override;
 
 public:
     std::string code;

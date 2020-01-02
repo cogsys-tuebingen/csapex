@@ -21,10 +21,10 @@ class CSAPEX_QT_EXPORT FulcrumWidget : public QObject, public QGraphicsEllipseIt
 public:
     FulcrumWidget(Fulcrum* fulcrum, QGraphicsItem* parent = 0);
 
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent* e);
-    bool sceneEvent(QEvent* event);
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* e) override;
+    bool sceneEvent(QEvent* event) override;
 
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0);
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0) override;
 
 Q_SIGNALS:
     void movedEvent();

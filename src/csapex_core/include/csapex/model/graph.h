@@ -48,7 +48,7 @@ public:
     typedef std::vector<graph::VertexPtr>::const_iterator vertex_const_iterator;
 
 public:
-    virtual ~Graph();
+    ~Graph() override;
 
     virtual AUUID getAbsoluteUUID() const = 0;
 

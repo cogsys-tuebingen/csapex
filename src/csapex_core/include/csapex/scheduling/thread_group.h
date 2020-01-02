@@ -42,7 +42,7 @@ public:
 public:
     ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler& handler, int id, std::string name);
     ThreadGroup(TimedQueuePtr timed_queue, ExceptionHandler& handler, std::string name);
-    ~ThreadGroup();
+    ~ThreadGroup() override;
 
     int id() const override;
 
@@ -54,29 +54,29 @@ public:
     const std::thread& thread() const;
 
     std::size_t size() const;
-    virtual bool isEmpty() const override;
+    bool isEmpty() const override;
 
-    virtual void setPause(bool pause) override;
-    virtual void setSteppingMode(bool stepping) override;
+    void setPause(bool pause) override;
+    void setSteppingMode(bool stepping) override;
 
-    virtual bool canStartStepping() const override;
-    virtual void step() override;
-    virtual bool isStepping() const override;
-    virtual bool isStepDone() const override;
+    bool canStartStepping() const override;
+    void step() override;
+    bool isStepping() const override;
+    bool isStepDone() const override;
 
-    virtual void start() override;
-    virtual void stop() override;
-    virtual void clear() override;
+    void start() override;
+    void stop() override;
+    void clear() override;
 
     bool isRunning() const;
 
-    virtual void add(TaskGeneratorPtr generator) override;
-    virtual void add(TaskGeneratorPtr generator, const std::vector<TaskPtr>& initial_tasks) override;
+    void add(TaskGeneratorPtr generator) override;
+    void add(TaskGeneratorPtr generator, const std::vector<TaskPtr>& initial_tasks) override;
 
-    virtual std::vector<TaskPtr> remove(TaskGenerator* generator) override;
+    std::vector<TaskPtr> remove(TaskGenerator* generator) override;
 
-    virtual void schedule(TaskPtr schedulable) override;
-    virtual void scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time) override;
+    void schedule(TaskPtr schedulable) override;
+    void scheduleDelayed(TaskPtr schedulable, std::chrono::system_clock::time_point time) override;
 
     std::vector<TaskGeneratorPtr>::iterator begin();
     std::vector<TaskGeneratorPtr>::const_iterator begin() const;

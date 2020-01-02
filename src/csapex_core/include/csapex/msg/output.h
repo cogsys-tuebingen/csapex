@@ -26,7 +26,7 @@ public:
 
 public:
     Output(const UUID& uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
-    ~Output();
+    ~Output() override;
 
     void setOutputTransition(OutputTransition* ot);
     void removeOutputTransition();
@@ -34,15 +34,15 @@ public:
     void addConnection(ConnectionPtr connection) override;
     void removeConnection(Connectable* other_side) override;
 
-    void notifyMessageProcessed();
+    void notifyMessageProcessed() override;
     void notifyMessageProcessed(Connection* connection);
 
-    virtual bool isOutput() const override
+    bool isOutput() const override
     {
         return true;
     }
 
-    virtual ConnectorType getConnectorType() const override
+    ConnectorType getConnectorType() const override
     {
         return ConnectorType::OUTPUT;
     }
@@ -65,23 +65,23 @@ public:
     virtual TokenPtr getToken() const = 0;
     virtual TokenPtr getAddedToken() = 0;
 
-    virtual bool isConnected() const override;
+    bool isConnected() const override;
 
-    std::vector<ConnectionPtr> getConnections() const;
+    std::vector<ConnectionPtr> getConnections() const override;
 
     virtual bool hasMessage() = 0;
     virtual bool hasMarkerMessage() = 0;
 
-    virtual void reset() override;
+    void reset() override;
     virtual void clearBuffer() = 0;
 
-    virtual void removeAllConnectionsNotUndoable() override;
+    void removeAllConnectionsNotUndoable() override;
 
 public:
     slim_signal::Signal<void(Connectable*)> messageSent;
 
 protected:
-    virtual void addStatusInformation(std::stringstream& status_stream) const override;
+    void addStatusInformation(std::stringstream& status_stream) const override;
 
 protected:
     OutputTransition* transition_;

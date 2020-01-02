@@ -16,7 +16,7 @@ class CSAPEX_COMMAND_EXPORT ModifyThread : public CommandImplementation<ModifyTh
 public:
     ModifyThread(int thread_id, const std::string& name, std::vector<bool> cpu_affinity);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

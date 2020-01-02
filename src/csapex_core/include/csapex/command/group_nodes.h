@@ -19,7 +19,7 @@ class CSAPEX_COMMAND_EXPORT GroupNodes : public GroupBase
 public:
     GroupNodes(const AUUID& graph_uuid, const std::vector<UUID>& nodes);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

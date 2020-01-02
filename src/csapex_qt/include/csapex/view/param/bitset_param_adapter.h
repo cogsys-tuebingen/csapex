@@ -20,8 +20,8 @@ class CSAPEX_QT_EXPORT BitSetParameterAdapter : public ParameterAdapter
 public:
     BitSetParameterAdapter(param::BitSetParameter::Ptr p);
 
-    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
-    virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
+    QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+    void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
     void setupAgain();

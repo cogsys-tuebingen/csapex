@@ -42,42 +42,42 @@ void NodeServer::startObservingNode(const NodeFacadeImplementationPtr& node)
 #define HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function)                                                                                                                                         \
-    observe(node->signal, [this, channel](const type& new_value) { channel->sendNote<NodeNote>(NodeNoteType::function##Changed, new_value); });
-#define HANDLE_SIGNAL(_enum, signal) observe(node->signal, [this, channel]() { channel->sendNote<NodeNote>(NodeNoteType::_enum##Triggered); });
+    observe(node->signal, [channel](const type& new_value) { channel->sendNote<NodeNote>(NodeNoteType::function##Changed, new_value); });
+#define HANDLE_SIGNAL(_enum, signal) observe(node->signal, [channel]() { channel->sendNote<NodeNote>(NodeNoteType::_enum##Triggered); });
 
 #include <csapex/model/node_facade_proxy_accessors.hpp>
     /**
      * end: connect signals
      **/
 
-    observe(node->node_state_changed, [this, channel](NodeStatePtr state) { channel->sendNote<NodeNote>(NodeNoteType::NodeStateChanged, state); });
+    observe(node->node_state_changed, [channel](NodeStatePtr state) { channel->sendNote<NodeNote>(NodeNoteType::NodeStateChanged, state); });
 
-    observe(node->parameter_added, [this, channel](param::ParameterPtr p) { channel->sendNote<NodeNote>(NodeNoteType::ParameterAddedTriggered, p); });
-    observe(node->parameter_changed, [this, channel](param::ParameterPtr p) { channel->sendNote<NodeNote>(NodeNoteType::ParameterChangedTriggered, p); });
-    observe(node->parameter_removed, [this, channel](param::ParameterPtr p) { channel->sendNote<NodeNote>(NodeNoteType::ParameterRemovedTriggered, p); });
+    observe(node->parameter_added, [channel](param::ParameterPtr p) { channel->sendNote<NodeNote>(NodeNoteType::ParameterAddedTriggered, p); });
+    observe(node->parameter_changed, [channel](param::ParameterPtr p) { channel->sendNote<NodeNote>(NodeNoteType::ParameterChangedTriggered, p); });
+    observe(node->parameter_removed, [channel](param::ParameterPtr p) { channel->sendNote<NodeNote>(NodeNoteType::ParameterRemovedTriggered, p); });
 
-    observe(node->connector_created, [this, channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectorCreatedTriggered, c); });
+    observe(node->connector_created, [channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectorCreatedTriggered, c); });
 
-    observe(node->connector_removed, [this, channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectorRemovedTriggered, c); });
+    observe(node->connector_removed, [channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectorRemovedTriggered, c); });
 
-    observe(node->connection_start, [this, channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectionStartTriggered, c); });
+    observe(node->connection_start, [channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectionStartTriggered, c); });
 
-    observe(node->connection_added, [this, channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectionCreatedTriggered, c); });
+    observe(node->connection_added, [channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectionCreatedTriggered, c); });
 
-    observe(node->connection_removed, [this, channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectionRemovedTriggered, c); });
+    observe(node->connection_removed, [channel](ConnectorDescription c) { channel->sendNote<NodeNote>(NodeNoteType::ConnectionRemovedTriggered, c); });
 
     observe(node->interval_start,
-            [this, channel](NodeFacade* facade, TracingType type, std::shared_ptr<const Interval> stamp) { channel->sendNote<NodeNote>(NodeNoteType::IntervalStartTriggered, type, stamp); });
+            [channel](NodeFacade* facade, TracingType type, std::shared_ptr<const Interval> stamp) { channel->sendNote<NodeNote>(NodeNoteType::IntervalStartTriggered, type, stamp); });
 
-    observe(node->interval_end, [this, channel](NodeFacade* facade, std::shared_ptr<const Interval> stamp) { channel->sendNote<NodeNote>(NodeNoteType::IntervalEndTriggered, stamp); });
-    observe(node->error_event, [this, channel](bool e, const std::string& msg, ErrorState::ErrorLevel level) { channel->sendNote<NodeNote>(NodeNoteType::ErrorEvent, e, msg, level); });
-    observe(node->notification, [this, channel](Notification n) { channel->sendNote<NodeNote>(NodeNoteType::Notification, n); });
+    observe(node->interval_end, [channel](NodeFacade* facade, std::shared_ptr<const Interval> stamp) { channel->sendNote<NodeNote>(NodeNoteType::IntervalEndTriggered, stamp); });
+    observe(node->error_event, [channel](bool e, const std::string& msg, ErrorState::ErrorLevel level) { channel->sendNote<NodeNote>(NodeNoteType::ErrorEvent, e, msg, level); });
+    observe(node->notification, [channel](Notification n) { channel->sendNote<NodeNote>(NodeNoteType::Notification, n); });
 
-    observe(node->start_profiling, [this, channel](NodeFacade*) { channel->sendNote<NodeNote>(NodeNoteType::ProfilingStartTriggered); });
-    observe(node->stop_profiling, [this, channel](NodeFacade*) { channel->sendNote<NodeNote>(NodeNoteType::ProfilingStopTriggered); });
+    observe(node->start_profiling, [channel](NodeFacade*) { channel->sendNote<NodeNote>(NodeNoteType::ProfilingStartTriggered); });
+    observe(node->stop_profiling, [channel](NodeFacade*) { channel->sendNote<NodeNote>(NodeNoteType::ProfilingStopTriggered); });
 
     ProfilerPtr profiler = node->getProfiler();
-    observe(profiler->enabled_changed, [this, channel](bool enabled) { channel->sendNote<ProfilerNote>(ProfilerNoteType::EnabledChanged, enabled); });
+    observe(profiler->enabled_changed, [channel](bool enabled) { channel->sendNote<ProfilerNote>(ProfilerNoteType::EnabledChanged, enabled); });
 
     channels_[node->getAUUID()] = channel;
 }

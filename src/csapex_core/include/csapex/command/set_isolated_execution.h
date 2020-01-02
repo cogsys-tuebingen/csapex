@@ -17,7 +17,7 @@ class CSAPEX_COMMAND_EXPORT SetIsolatedExecution : public CommandImplementation<
 public:
     SetIsolatedExecution(const AUUID& graph_uuid, const UUID& node, ExecutionType type);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

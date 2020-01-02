@@ -49,7 +49,7 @@ Q_SIGNALS:
     void connectorRemoved(ConnectorPtr c);
 
 public Q_SLOTS:
-    virtual void setVisible(bool visible);
+    void setVisible(bool visible) override;
 
 private Q_SLOTS:
     void addPortForConnector(ConnectorPtr c);

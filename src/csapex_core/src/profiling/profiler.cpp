@@ -24,7 +24,7 @@ const Profile& Profiler::getProfile(const std::string& key)
 
         profile.timer->finished.connect([this](Interval::Ptr) { updated(); });
 
-        observe(profile.timer->finished, [this, &profile](Interval::Ptr interval) { profile.addInterval(interval); });
+        observe(profile.timer->finished, [&profile](Interval::Ptr interval) { profile.addInterval(interval); });
 
         return profile;
     }

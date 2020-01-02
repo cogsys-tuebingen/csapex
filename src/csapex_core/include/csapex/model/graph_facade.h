@@ -27,7 +27,7 @@ protected:
     GraphFacade();
 
 public:
-    virtual ~GraphFacade();
+    ~GraphFacade() override;
 
     virtual GraphFacadePtr getSubGraph(const UUID& uuid) = 0;
     virtual GraphFacade* getParent() const = 0;

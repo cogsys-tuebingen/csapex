@@ -60,7 +60,7 @@ bool CsApexGuiApp::notify(QObject* receiver, QEvent* event)
     }
 }
 
-Main::Main(QCoreApplication* a, Settings& settings, ExceptionHandler& handler) : app(a), settings(settings), handler(handler), splash(nullptr)
+Main::Main(QCoreApplication* a, Settings& settings) : app(a), settings(settings), splash(nullptr)
 {
     csapex::thread::set_name("cs::APEX main");
 }
@@ -126,7 +126,7 @@ int Main::runWithGui()
             app->quit();
         });
 
-        csapex::error_handling::stop_request().connect([this]() {
+        csapex::error_handling::stop_request().connect([]() {
             static int request = 0;
             if (request == 0) {
                 raise(SIGTERM);
@@ -245,7 +245,7 @@ int main(int argc, char** argv)
     settings.set("port", vm["port"].as<int>());
 
     // start the app
-    Main m(app, settings, *handler);
+    Main m(app, settings);
     try {
         return m.run();
 

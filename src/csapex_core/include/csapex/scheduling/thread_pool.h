@@ -25,18 +25,18 @@ class CSAPEX_CORE_EXPORT ThreadPool : public Executor, public Observer, public P
 public:
     ThreadPool(csapex::ExceptionHandler& handler, bool enable_threading, bool grouping, bool initially_paused);
     ThreadPool(Executor* parent, csapex::ExceptionHandler& handler, bool enable_threading, bool grouping, bool initially_paused);
-    ~ThreadPool();
+    ~ThreadPool() override;
 
     bool isThreadingEnabled() const;
     bool isGroupingEnabled() const;
 
-    virtual void performStep() override;
+    void performStep() override;
 
-    virtual void start() override;
-    virtual void stop() override;
-    virtual void clear() override;
+    void start() override;
+    void stop() override;
+    void clear() override;
 
-    virtual bool isRunning() const override;
+    bool isRunning() const override;
 
     std::size_t getGroupCount() const;
     ThreadGroup* getGroupAt(std::size_t pos);
@@ -48,8 +48,8 @@ public:
 
     std::string nextName();
 
-    virtual void add(TaskGenerator*) override;
-    virtual void remove(TaskGenerator*) override;
+    void add(TaskGenerator*) override;
+    void remove(TaskGenerator*) override;
 
     void usePrivateThreadFor(TaskGenerator* task);
     void addToGroup(TaskGenerator* task, int group_id);

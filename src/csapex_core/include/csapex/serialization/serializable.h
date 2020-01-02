@@ -15,7 +15,7 @@ namespace csapex
 class Serializable : public Clonable
 {
 public:
-    virtual ~Serializable();
+    ~Serializable() override;
 
     virtual SemanticVersion getVersion() const;
 

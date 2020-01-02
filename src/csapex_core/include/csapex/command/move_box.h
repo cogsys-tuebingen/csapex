@@ -21,11 +21,11 @@ public:
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
-    bool doExecute();
-    bool doUndo();
-    bool doRedo();
+    bool doExecute() override;
+    bool doUndo() override;
+    bool doRedo() override;
 
-    virtual std::string getDescription() const;
+    virtual std::string getDescription() const override;
 
 protected:
     Point from;

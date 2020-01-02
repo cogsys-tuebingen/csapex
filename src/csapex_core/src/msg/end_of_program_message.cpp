@@ -9,9 +9,17 @@ CSAPEX_REGISTER_MESSAGE(csapex::connection_types::EndOfProgramMessage)
 using namespace csapex;
 using namespace connection_types;
 
-EndOfProgramMessage::EndOfProgramMessage() : EndOfSequenceMessage(type<EndOfProgramMessage>::name())
+EndOfProgramMessage::EndOfProgramMessage() : MarkerMessage(type<EndOfProgramMessage>::name(), 0)
 {
 }
+
+void EndOfProgramMessage::serialize(SerializationBuffer& data, SemanticVersion& version) const
+{
+}
+void EndOfProgramMessage::deserialize(const SerializationBuffer& data, const SemanticVersion& version)
+{
+}
+
 
 /// YAML
 namespace YAML

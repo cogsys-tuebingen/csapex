@@ -18,7 +18,7 @@ class CSAPEX_COMMAND_EXPORT UngroupNodes : public GroupBase
 public:
     UngroupNodes(const AUUID& graph_uuid, const UUID& uuid);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -32,7 +32,7 @@ public:
         return type2nameWithoutNamespace(typeid(UngroupNodes));
     }
 
-    virtual void clear() override;
+    void clear() override;
 
 protected:
     void unmapConnections(AUUID parent_auuid, AUUID sub_graph_auuid);

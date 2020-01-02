@@ -16,7 +16,7 @@ class CSAPEX_COMMAND_EXPORT RenameNode : public CommandImplementation<RenameNode
 public:
     RenameNode(const AUUID& graph_uuid, const UUID& node, const std::string& new_name);
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

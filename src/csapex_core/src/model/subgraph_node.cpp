@@ -522,7 +522,7 @@ UUID SubgraphNode::addForwardingEvent(const UUID& internal_uuid, const TokenData
 
     Event* external_event = VariadicEvents::createVariadicEvent(type, label);
 
-    auto cb = [this, external_event](const TokenPtr& token) {
+    auto cb = [external_event](const TokenPtr& token) {
         if (external_event->isConnected()) {
             external_event->triggerWith(token);
             //            node_handle_->getNodeWorker()->trySendEvents();

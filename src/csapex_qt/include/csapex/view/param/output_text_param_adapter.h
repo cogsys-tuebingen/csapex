@@ -16,7 +16,7 @@ class CSAPEX_QT_EXPORT OutputTextParameterAdapter : public ParameterAdapter
 public:
     OutputTextParameterAdapter(param::OutputTextParameter::Ptr p);
 
-    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+    QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
 
 private:
     param::OutputTextParameterPtr op_p_;

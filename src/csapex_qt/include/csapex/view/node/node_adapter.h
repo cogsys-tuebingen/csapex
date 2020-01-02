@@ -32,7 +32,7 @@ protected:
     NodeAdapter(NodeFacadePtr adaptee, NodeBox* parent);
 
 public:
-    virtual ~NodeAdapter();
+    ~NodeAdapter() override;
 
     void doSetupUi(QBoxLayout* layout);
 

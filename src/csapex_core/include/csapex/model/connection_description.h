@@ -10,7 +10,7 @@
 
 namespace csapex
 {
-struct CSAPEX_CORE_EXPORT ConnectionDescription : public Serializable
+class CSAPEX_CORE_EXPORT ConnectionDescription : public Serializable
 {
 protected:
     CLONABLE_IMPLEMENTATION(ConnectionDescription);
@@ -37,8 +37,8 @@ public:
 
     ConnectionDescription();
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     bool operator==(const ConnectionDescription& other) const;
 };

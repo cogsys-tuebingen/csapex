@@ -16,7 +16,7 @@ class CSAPEX_QT_EXPORT FulcrumHandle : public QObject, public QGraphicsEllipseIt
 public:
     FulcrumHandle(const QPointF& pos, QGraphicsItem* parent = 0);
 
-    bool sceneEvent(QEvent* event);
+    bool sceneEvent(QEvent* event) override;
 
 Q_SIGNALS:
     void moved(bool dropped);

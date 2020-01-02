@@ -48,15 +48,15 @@ public:
     static const uint8_t PACKET_TYPE_ID = 4;
 
 public:
-    virtual ~Parameter();
+    ~Parameter() override;
 
     void serialize_yaml(YAML::Node& n) const;
     void deserialize_yaml(const YAML::Node& n);
 
-    virtual uint8_t getPacketType() const override;
+    uint8_t getPacketType() const override;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     virtual void doSerialize(YAML::Node& n) const = 0;

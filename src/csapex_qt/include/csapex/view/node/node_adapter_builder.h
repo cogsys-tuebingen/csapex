@@ -48,15 +48,15 @@ template <typename Adapter, typename Adaptee>
 class LocalAdapterBuilder : public csapex::NodeAdapterBuilder
 {
 public:
-    virtual bool isProxy() const override
+    bool isProxy() const override
     {
         return false;
     }
-    virtual std::string getWrappedType() const
+    std::string getWrappedType() const override
     {
         return csapex::type2name<Adaptee>();
     }
-    virtual csapex::NodeAdapterPtr build(csapex::NodeFacadePtr facade, csapex::NodeBox* parent) const
+    csapex::NodeAdapterPtr build(csapex::NodeFacadePtr facade, csapex::NodeBox* parent) const override
     {
         std::weak_ptr<Adaptee> adaptee = std::dynamic_pointer_cast<Adaptee>(getNode(facade));
         apex_assert_hard_msg(adaptee.lock(), std::string("The adapter ") + getWrappedType() + " is used in a remote setting");
@@ -72,15 +72,15 @@ public:
     {
     }
 
-    virtual bool isProxy() const override
+    bool isProxy() const override
     {
         return true;
     }
-    virtual std::string getWrappedType() const
+    std::string getWrappedType() const override
     {
         return wrapped_type_;
     }
-    virtual csapex::NodeAdapterPtr build(csapex::NodeFacadePtr facade, csapex::NodeBox* parent) const
+    csapex::NodeAdapterPtr build(csapex::NodeFacadePtr facade, csapex::NodeBox* parent) const override
     {
         return std::make_shared<Adapter>(facade, parent);
     }

@@ -16,7 +16,7 @@ class CSAPEX_QT_EXPORT ContextMenuHandler : public QObject
     Q_OBJECT
 
 public:
-    virtual ~ContextMenuHandler();
+    ~ContextMenuHandler() override;
     static void addHeader(QMenu& menu, const std::string& title);
 
 public Q_SLOTS:

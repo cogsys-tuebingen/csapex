@@ -59,7 +59,7 @@ int MockupSource::getValue() const
     return readParameter<int>("value");
 }
 
-MockupSink::MockupSink() : aborted(false), value(-1)
+MockupSink::MockupSink() : aborted(false)
 {
 }
 

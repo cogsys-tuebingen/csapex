@@ -15,7 +15,7 @@ class GraphProxy : public Graph, public Observer
 {
 public:
     GraphProxy(io::ChannelPtr channel, NodeFacadeProxyPtr& node_facade);
-    ~GraphProxy();
+    ~GraphProxy() override;
 
     AUUID getAbsoluteUUID() const override;
 
@@ -36,7 +36,7 @@ public:
 
     bool isConnected(const UUID& from, const UUID& to) const override;
 
-    virtual std::vector<ConnectionDescription> enumerateAllConnections() const override;
+    std::vector<ConnectionDescription> enumerateAllConnections() const override;
 
     std::size_t countNodes() override;
 
@@ -48,7 +48,7 @@ public:
 /**
  * begin: generate getters
  **/
-#define HANDLE_ACCESSOR(_enum, type, function) virtual type function() const override;
+#define HANDLE_ACCESSOR(_enum, type, function) type function() const override;
 
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)

@@ -10,7 +10,7 @@ class GraphImplementation : public Graph
 {
 public:
     GraphImplementation();
-    ~GraphImplementation();
+    ~GraphImplementation() override;
 
     AUUID getAbsoluteUUID() const override;
 
@@ -54,7 +54,7 @@ public:
     ConnectionPtr getConnection(const UUID& from, const UUID& to);
 
     std::vector<ConnectionPtr> getConnections();
-    virtual std::vector<ConnectionDescription> enumerateAllConnections() const override;
+    std::vector<ConnectionDescription> enumerateAllConnections() const override;
 
     std::size_t countNodes() override;
 

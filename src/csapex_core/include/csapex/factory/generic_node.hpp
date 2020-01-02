@@ -76,7 +76,7 @@ public:
         boost::mpl::for_each<Parameters, ClassifyParameter>(GenericNodeParameterSetup(this, params));
     }
 
-    void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& /*parameters*/)
+    void process(csapex::NodeModifier& node_modifier, csapex::Parameterizable& /*parameters*/) override
     {
         createMsgs();
         call();

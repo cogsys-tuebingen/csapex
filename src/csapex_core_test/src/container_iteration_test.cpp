@@ -35,7 +35,7 @@ public:
     {
     }
 
-    void setup(csapex::NodeModifier& node_modifier)
+    void setup(csapex::NodeModifier& node_modifier) override
     {
         input_a_ = node_modifier.addInput<int>("input_a");
         input_b_ = node_modifier.addInput<int>("input_b");
@@ -46,7 +46,7 @@ public:
     {
     }
 
-    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
+    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/) override
     {
         int a = msg::getValue<int>(input_a_);
         int b = msg::getValue<int>(input_b_);
@@ -141,7 +141,7 @@ public:
     {
     }
 
-    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/)
+    void process(NodeModifier& node_modifier, Parameterizable& /*parameters*/) override
     {
         auto i = msg::getMessage<connection_types::GenericVectorMessage, int>(in);
         value = *i;

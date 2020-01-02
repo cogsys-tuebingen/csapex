@@ -688,7 +688,7 @@ void GraphView::animateScroll()
 void GraphView::showNodeInsertDialog()
 {
     //    auto window =  QApplication::activeWindow();
-    BoxDialog diag("Please enter the type of node to add.", *view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(), view_core_.getSnippetFactory());
+    BoxDialog diag("Please enter the type of node to add.", *view_core_.getNodeFactory(), view_core_.getSnippetFactory());
 
     int r = diag.exec();
 

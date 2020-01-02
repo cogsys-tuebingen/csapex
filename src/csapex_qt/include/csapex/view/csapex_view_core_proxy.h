@@ -26,7 +26,7 @@ class CSAPEX_QT_EXPORT CsApexViewCoreProxy : public CsApexViewCore, public Proxy
 {
 public:
     CsApexViewCoreProxy(Settings& local_settings, const SessionPtr& session);
-    ~CsApexViewCoreProxy();
+    ~CsApexViewCoreProxy() override;
 
     bool isProxy() const override;
 
@@ -79,8 +79,8 @@ public:
     SnippetFactoryPtr getSnippetFactory() const override;
 
 private:
-    void handlePacket(StreamableConstPtr packet);
-    void handleBroadcast(BroadcastMessageConstPtr packet);
+    void handlePacket(const StreamableConstPtr& packet);
+    void handleBroadcast(const BroadcastMessageConstPtr& packet) override;
 
 private:
     BootstrapPtr bootstrap_;

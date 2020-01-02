@@ -221,7 +221,7 @@ void CsApexWindow::construct()
     observe(designer_->notification, [this](Notification notification) { showNotificationRequest(notification); });
 
     observe(view_core_.stepping_enabled, [this]() { ui->actionStep->setEnabled(true); });
-    observe(view_core_.begin_step, [this]() {});
+    observe(view_core_.begin_step, []() {});
     observe(view_core_.end_step, [this]() { ui->actionStep->setEnabled(view_core_.isSteppingMode()); });
 
     observe(view_core_.group_created, [this](const ThreadGroupPtr& /*group*/) { updateThreadInfo(); });
@@ -418,7 +418,7 @@ void CsApexWindow::setupThreadManagement()
         }
     });
 
-    QObject::connect(ui->thread_remove, &QPushButton::clicked, [this, model](bool) {
+    QObject::connect(ui->thread_remove, &QPushButton::clicked, [this](bool) {
         QItemSelectionModel* select = ui->thread_table->selectionModel();
         if (select->hasSelection()) {
             QItemSelection selection = select->selection();
@@ -686,7 +686,9 @@ void CsApexWindow::about()
     std::stringstream ss;
     ss << "<h1>cs::APEX " << csapex::info::CSAPEX_VERSION.toString() << "</h1>";
     ss << "<p>Based on QT " << QT_VERSION_STR;
-#ifdef __GNUC__
+#if defined(__clang__)
+    ss << " (" << __VERSION__ << ")";
+#elif __GNUC__
     ss << " (GCC " << __VERSION__ << ")";
 #endif
     ss << "</p>";
@@ -758,7 +760,7 @@ void CsApexWindow::updateNodeTypes()
         ui->node_info_tree->setLayout(new QVBoxLayout);
     }
 
-    NodeListGenerator generator(*view_core_.getNodeFactory(), *designer_->getNodeAdapterFactory());
+    NodeListGenerator generator(*view_core_.getNodeFactory());
 
     generator.insertAvailableNodeTypes(ui->nodes);
     generator.insertAvailableNodeTypes(ui->node_info_tree);

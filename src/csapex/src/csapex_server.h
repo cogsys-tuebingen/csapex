@@ -19,7 +19,7 @@ struct CsApexServer : public Observer
 {
 public:
     CsApexServer(Settings& settings, ExceptionHandler& handler);
-    ~CsApexServer();
+    ~CsApexServer() override;
 
     int run();
 

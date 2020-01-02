@@ -56,7 +56,7 @@ void GraphViewContextMenu::showGlobalMenu(const QPoint& global_pos)
 
     QMenu add_node("create node");
     add_node.setIcon(QIcon(":/plugin.png"));
-    NodeListGenerator node_generator(*view_.getViewCore().getNodeFactory(), *view_.getViewCore().getNodeAdapterFactory());
+    NodeListGenerator node_generator(*view_.getViewCore().getNodeFactory());
     node_generator.insertAvailableNodeTypes(&add_node);
     menu.addMenu(&add_node);
 

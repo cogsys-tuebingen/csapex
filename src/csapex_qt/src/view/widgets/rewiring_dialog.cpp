@@ -87,7 +87,7 @@ std::vector<ConnectionDescription> RewiringDialog::getConnections(const UUID& ne
 
 void RewiringDialog::makeUI(const QString& stylesheet)
 {
-    BoxDialog diag("Please enter the new node type.", *view_core_.getNodeFactory(), *view_core_.getNodeAdapterFactory(), view_core_.getSnippetFactory());
+    BoxDialog diag("Please enter the new node type.", *view_core_.getNodeFactory(), view_core_.getSnippetFactory());
     diag.setWindowTitle("Select new node type.");
 
     int r = diag.exec();

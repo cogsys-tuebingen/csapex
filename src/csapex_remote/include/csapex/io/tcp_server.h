@@ -22,7 +22,7 @@ class TcpServer : public Server
 {
 public:
     TcpServer(CsApexCore& core, bool spin_thread = true);
-    ~TcpServer();
+    ~TcpServer() override;
 
     void start() override;
     void stop() override;

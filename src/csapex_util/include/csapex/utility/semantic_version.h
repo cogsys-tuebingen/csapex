@@ -16,12 +16,14 @@ namespace csapex
  *
  * @see https://semver.org/
  */
-struct SemanticVersion
+class SemanticVersion
 {
+public:
     int major_v = 0;
     int minor_v = 0;
     int patch_v = 0;
 
+public:
     constexpr SemanticVersion(int major, int minor, int patch) : major_v(major), minor_v(minor), patch_v(patch)
     {
     }

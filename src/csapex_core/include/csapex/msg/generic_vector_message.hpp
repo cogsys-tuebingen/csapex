@@ -30,16 +30,16 @@ namespace csapex
 namespace connection_types
 {
 template <typename Type>
-struct GenericPointerMessage;
+class GenericPointerMessage;
 template <typename Type>
-struct GenericValueMessage;
+class GenericValueMessage;
 
 class CSAPEX_CORE_EXPORT GenericVectorMessage : public Message
 {
 protected:
     CLONABLE_IMPLEMENTATION_NO_ASSIGNMENT(GenericVectorMessage);
 
-    friend class YAML::as_if<GenericVectorMessage, void>;
+    friend struct YAML::as_if<GenericVectorMessage, void>;
 
 public:
     struct Anything
@@ -107,13 +107,13 @@ private:
             return true;
         }
 
-        virtual bool canConnectTo(const TokenData* other_side) const override
+        bool canConnectTo(const TokenData* other_side) const override
         {
             if (const EntryInterface* ei = dynamic_cast<const EntryInterface*>(other_side)) {
                 return nestedType()->canConnectTo(ei->nestedType().get());
             } else {
                 const GenericVectorMessage* vec = dynamic_cast<const GenericVectorMessage*>(other_side);
-                if (vec != 0) {
+                if (vec != nullptr) {
                     // if the other side is a vector too, try if they are compatible
                     return vec->canConnectTo(this);
                 } else {
@@ -132,7 +132,7 @@ private:
                 }
             }
         }
-        virtual bool acceptsConnectionFrom(const TokenData* other_side) const override
+        bool acceptsConnectionFrom(const TokenData* other_side) const override
         {
             if (const EntryInterface* ei = dynamic_cast<const EntryInterface*>(other_side)) {
                 return nestedType()->canConnectTo(ei->nestedType().get());
@@ -164,11 +164,11 @@ private:
             return makeTypeSwitch(Tag<Payload>());
         }
 
-        virtual void addNestedValue(const TokenData::ConstPtr& msg) override
+        void addNestedValue(const TokenData::ConstPtr& msg) override
         {
             addCastedEntry(*value, msg);
         }
-        virtual TokenData::ConstPtr nestedValue(std::size_t i) const override
+        TokenData::ConstPtr nestedValue(std::size_t i) const override
         {
             return makeToken(value->at(i));
         }
@@ -277,12 +277,12 @@ private:
         };
 
         template <typename MsgType>
-        static TokenData::Ptr makeTypeSwitch(const Tag<std::shared_ptr<MsgType>>& ptr)
+        static TokenData::Ptr makeTypeSwitch(const Tag<std::shared_ptr<MsgType>>& /* ptr */)
         {
             return makeTypeImpl<MsgType>();
         }
         template <typename MsgType>
-        static TokenData::Ptr makeTypeSwitch(const Tag<MsgType>& type)
+        static TokenData::Ptr makeTypeSwitch(const Tag<MsgType>& /* type */)
         {
             return makeTypeImpl<MsgType>();
         }
@@ -548,7 +548,7 @@ public:
     }
 
     template <typename T>
-    static void deregisterType(const std::string& type_name = "")
+    static void deregisterType(const std::string& /* type_name */ = "")
     {
         // TODO: support deregistering
         // For that, this singleton must be initialized somewhere else...
@@ -557,21 +557,21 @@ public:
     }
 
     template <typename T>
-    static GenericVectorMessage::Ptr make(typename std::enable_if<std::is_base_of<TokenData, T>::value>::type* dummy = 0)
+    static GenericVectorMessage::Ptr make(typename std::enable_if<std::is_base_of<TokenData, T>::value>::type* = 0)
     {
         registerType<T>();
         return GenericVectorMessage::Ptr(new GenericVectorMessage(MessageImplementation<T>::make(), "/", 0));
     }
 
     template <typename T>
-    static GenericVectorMessage::Ptr make(typename std::enable_if<!std::is_base_of<TokenData, T>::value && !std::is_same<T, Anything>::value>::type* dummy = 0)
+    static GenericVectorMessage::Ptr make(typename std::enable_if<!std::is_base_of<TokenData, T>::value && !std::is_same<T, Anything>::value>::type* = 0)
     {
         registerType<T>();
         return GenericVectorMessage::Ptr(new GenericVectorMessage(Implementation<T>::make(), "/", 0));
     }
 
     template <typename T>
-    static GenericVectorMessage::Ptr make(typename std::enable_if<std::is_same<Anything, T>::value>::type* dummy = 0)
+    static GenericVectorMessage::Ptr make(typename std::enable_if<std::is_same<Anything, T>::value>::type* = 0)
     {
         return GenericVectorMessage::Ptr(new GenericVectorMessage(std::make_shared<AnythingImplementation>(), "/", 0));
     }
@@ -714,10 +714,10 @@ public:
         pimpl->decode(node);
     }
 
-    virtual bool canConnectTo(const TokenData* other_side) const override;
-    virtual bool acceptsConnectionFrom(const TokenData* other_side) const override;
+    bool canConnectTo(const TokenData* other_side) const override;
+    bool acceptsConnectionFrom(const TokenData* other_side) const override;
 
-    virtual std::string descriptiveName() const override;
+    std::string descriptiveName() const override;
 
     bool isContainer() const override
     {
@@ -728,11 +728,11 @@ public:
         return pimpl->nestedType();
     }
 
-    virtual void addNestedValue(const TokenData::ConstPtr& msg) override
+    void addNestedValue(const TokenData::ConstPtr& msg) override
     {
         pimpl->addNestedValue(msg);
     }
-    virtual TokenData::ConstPtr nestedValue(std::size_t i) const override
+    TokenData::ConstPtr nestedValue(std::size_t i) const override
     {
         return pimpl->nestedValue(i);
     }

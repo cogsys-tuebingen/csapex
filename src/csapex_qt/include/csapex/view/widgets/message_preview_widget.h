@@ -21,7 +21,7 @@ class CSAPEX_QT_EXPORT PreviewInput : public Input
 public:
     PreviewInput(QPointer<MessagePreviewWidget> parent);
 
-    virtual void setToken(TokenPtr message) override;
+    void setToken(TokenPtr message) override;
 
     void detach();
 
@@ -36,7 +36,7 @@ class CSAPEX_QT_EXPORT MessagePreviewWidget : public QGraphicsView
 
 public:
     MessagePreviewWidget();
-    ~MessagePreviewWidget();
+    ~MessagePreviewWidget() override;
 
 public:
     void connectTo(ConnectorPtr c);

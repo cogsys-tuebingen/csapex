@@ -11,16 +11,16 @@ class CSAPEX_CORE_EXPORT StaticOutput : public Output
 public:
     StaticOutput(const UUID& uuid, ConnectableOwnerWeakPtr owner = ConnectableOwnerWeakPtr());
 
-    virtual void addMessage(TokenPtr message) override;
+    void addMessage(TokenPtr message) override;
 
-    virtual bool commitMessages(bool is_activated) override;
-    virtual bool hasMessage() override;
-    virtual bool hasMarkerMessage() override;
-    virtual TokenPtr getToken() const override;
+    bool commitMessages(bool is_activated) override;
+    bool hasMessage() override;
+    bool hasMarkerMessage() override;
+    TokenPtr getToken() const override;
 
-    virtual void disable() override;
-    virtual void reset() override;
-    virtual void clearBuffer() override;
+    void disable() override;
+    void reset() override;
+    void clearBuffer() override;
 
     TokenPtr getToken();
 

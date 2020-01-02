@@ -18,7 +18,7 @@ class CSAPEX_QT_EXPORT GuiExceptionHandler : public QObject, public ExceptionHan
 
 public:
     GuiExceptionHandler(bool fatal_exceptions);
-    ~GuiExceptionHandler();
+    ~GuiExceptionHandler() override;
 
     static void reportEmail(const std::string& failure_type, const std::string& msg);
     static void reportIssue(const std::string& failure, const std::string& msg);
@@ -30,7 +30,7 @@ private Q_SLOTS:
     void showErrorDialog();
 
 protected:
-    virtual void handleAssertionFailure(const csapex::Failure& assertion) override;
+    void handleAssertionFailure(const csapex::Failure& assertion) override;
 
 private:
     Failure* last_failure_;

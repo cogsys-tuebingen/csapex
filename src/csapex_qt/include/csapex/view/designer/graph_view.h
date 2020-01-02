@@ -106,7 +106,7 @@ class CSAPEX_QT_EXPORT GraphView : public QGraphicsView, public Profilable, publ
 
 public:
     GraphView(csapex::GraphFacadePtr graph_facade, CsApexViewCore& view_core, QWidget* parent = nullptr);
-    ~GraphView();
+    ~GraphView() override;
 
     DesignerScene* designerScene();
     std::vector<NodeBox*> boxes();
@@ -122,30 +122,30 @@ public:
 
     void focusOnNode(const csapex::UUID& uuid);
 
-    void resizeEvent(QResizeEvent* event);
-    void scrollContentsBy(int dx, int dy);
+    void resizeEvent(QResizeEvent* event) override;
+    void scrollContentsBy(int dx, int dy) override;
 
-    void keyPressEvent(QKeyEvent* e);
-    void keyReleaseEvent(QKeyEvent* e);
+    void keyPressEvent(QKeyEvent* e) override;
+    void keyReleaseEvent(QKeyEvent* e) override;
 
-    void mousePressEvent(QMouseEvent* e);
-    void mouseReleaseEvent(QMouseEvent* e);
+    void mousePressEvent(QMouseEvent* e) override;
+    void mouseReleaseEvent(QMouseEvent* e) override;
 
-    void wheelEvent(QWheelEvent* we);
+    void wheelEvent(QWheelEvent* we) override;
 
-    void mouseMoveEvent(QMouseEvent* me);
-    void dragEnterEvent(QDragEnterEvent* e);
-    void dragMoveEvent(QDragMoveEvent* e);
-    void dropEvent(QDropEvent* e);
-    void dragLeaveEvent(QDragLeaveEvent* e);
+    void mouseMoveEvent(QMouseEvent* me) override;
+    void dragEnterEvent(QDragEnterEvent* e) override;
+    void dragMoveEvent(QDragMoveEvent* e) override;
+    void dropEvent(QDropEvent* e) override;
+    void dragLeaveEvent(QDragLeaveEvent* e) override;
 
-    void drawForeground(QPainter* painter, const QRectF& rect);
-    void paintEvent(QPaintEvent* e);
+    void drawForeground(QPainter* painter, const QRectF& rect) override;
+    void paintEvent(QPaintEvent* e) override;
 
     void startPlacingBox(const std::string& type, NodeStatePtr state, const QPoint& offset = QPoint(0, 0));
     void startCloningSelection(NodeBox* handle, const QPoint& offset = QPoint(0, 0));
 
-    virtual void useProfiler(std::shared_ptr<Profiler> profiler) override;
+    void useProfiler(std::shared_ptr<Profiler> profiler) override;
 
     void usePrivateThreadForSelectedNodes();
     void useDefaultThreadForSelectedNodes();
@@ -204,7 +204,7 @@ public Q_SLOTS:
 
     void overwriteStyleSheet(const QString& stylesheet);
 
-    void contextMenuEvent(QContextMenuEvent* e);
+    void contextMenuEvent(QContextMenuEvent* e) override;
     void showContextMenuGlobal(const QPoint& pos);
     void showContextMenuForSelectedNodes(NodeBox* box, const QPoint& pos);
 

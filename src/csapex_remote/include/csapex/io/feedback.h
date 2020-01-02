@@ -21,13 +21,13 @@ public:
 
     static const uint8_t PACKET_TYPE_ID = 6;
 
-    virtual uint8_t getPacketType() const override;
-    virtual std::string getType() const;
+    uint8_t getPacketType() const override;
+    std::string getType() const override;
 
     std::string getMessage() const;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 private:
     Feedback();

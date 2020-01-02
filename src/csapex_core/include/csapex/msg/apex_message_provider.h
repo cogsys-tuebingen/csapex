@@ -15,14 +15,14 @@ public:
 public:
     void load(const std::string& file) override;
 
-    virtual bool hasNext() override;
-    virtual connection_types::Message::Ptr next(std::size_t slot) override;
-    virtual std::string getLabel(std::size_t slot) const override;
+    bool hasNext() override;
+    connection_types::Message::Ptr next(std::size_t slot) override;
+    std::string getLabel(std::size_t slot) const override;
 
-    virtual std::vector<std::string> getExtensions() const override;
+    std::vector<std::string> getExtensions() const override;
 
-    virtual GenericStatePtr getState() const override;
-    virtual void setParameterState(GenericStatePtr memento) override;
+    GenericStatePtr getState() const override;
+    void setParameterState(GenericStatePtr memento) override;
 
 private:
     std::string file_;

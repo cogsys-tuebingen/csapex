@@ -40,7 +40,7 @@ std::string StreamInterceptor::getCerr()
 
 std::string StreamInterceptor::getCin()
 {
-    std::unique_lock<std::mutex>(cin_mutex_);
+    std::unique_lock<std::mutex> lock(cin_mutex_);
 
     std::string in = cin_.str();
     cin_.str(std::string());

@@ -14,7 +14,7 @@
 
 using namespace csapex;
 
-NodeListGenerator::NodeListGenerator(NodeFactory& node_factory, NodeAdapterFactory& adapter_factory) : node_factory_(node_factory), adapter_factory_(adapter_factory)
+NodeListGenerator::NodeListGenerator(NodeFactory& node_factory) : node_factory_(node_factory)
 {
 }
 

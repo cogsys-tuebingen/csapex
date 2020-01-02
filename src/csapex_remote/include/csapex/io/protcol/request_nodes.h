@@ -18,10 +18,10 @@ public:
         NodeRequest();
         NodeRequest(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
-        virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
+        ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
         std::string getType() const override
         {
@@ -35,8 +35,8 @@ public:
         NodeResponse(const std::map<std::string, std::vector<NodeConstructorPtr>>& tag_map, uint8_t request_id);
         NodeResponse(uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         std::map<std::string, std::vector<NodeConstructorPtr>> getTagMap() const;
 

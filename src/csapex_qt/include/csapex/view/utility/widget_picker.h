@@ -23,7 +23,7 @@ public:
 
     QWidget* getWidget();
 
-    bool eventFilter(QObject*, QEvent*);
+    bool eventFilter(QObject*, QEvent*) override;
 
 Q_SIGNALS:
     void widgetPicked();

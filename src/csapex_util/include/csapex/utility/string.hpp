@@ -59,9 +59,9 @@ inline std::string universal_to_string(const V& value, typename std::enable_if<!
 }
 
 template <typename V>
-inline std::string universal_to_string(const std::shared_ptr<V>& value)
+inline std::string universal_to_string(const std::shared_ptr<V>& /* value */)
 {
-    return universal_to_string(value.get());
+    return universal_to_string(false);
 }
 
 }  // namespace csapex

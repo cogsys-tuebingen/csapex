@@ -19,7 +19,7 @@ class CSAPEX_QT_EXPORT ParameterContextMenu : public ContextMenuHandler
 public:
     ParameterContextMenu(csapex::param::ParameterWeakPtr p);
 
-    void doShowContextMenu(const QPoint& pt);
+    void doShowContextMenu(const QPoint& pt) override;
 
     void addAction(QAction* action, const std::function<void()>& callback);
 

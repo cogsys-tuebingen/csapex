@@ -120,7 +120,7 @@ public:
     AUUID& operator=(const AUUID& uuid) = default;
     AUUID& operator=(const UUID& uuid);
 
-    virtual AUUID getAbsoluteUUID() const;
+    AUUID getAbsoluteUUID() const override;
 
     bool operator<(const AUUID& rhs) const;
 

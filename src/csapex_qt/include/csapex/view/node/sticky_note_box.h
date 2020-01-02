@@ -24,7 +24,7 @@ public:
 public:
     StickyNoteBox(Settings& settings, NodeFacadePtr node_facade_, QIcon icon, GraphView* parent = 0);
 
-    ~StickyNoteBox();
+    ~StickyNoteBox() override;
 
     void construct() override;
     void init() override;

@@ -10,41 +10,41 @@ class GraphFacadeImplementation : public GraphFacade
 public:
     GraphFacadeImplementation(ThreadPool& executor, GraphImplementationPtr graph, SubgraphNodePtr graph_node, NodeFacadeImplementationPtr nh = nullptr, GraphFacadeImplementation* parent = nullptr);
 
-    virtual AUUID getAbsoluteUUID() const override;
+    AUUID getAbsoluteUUID() const override;
 
-    virtual UUID generateUUID(const std::string& prefix) override;
+    UUID generateUUID(const std::string& prefix) override;
 
-    virtual NodeFacadePtr getNodeFacade() const override;
+    NodeFacadePtr getNodeFacade() const override;
 
-    virtual GraphFacadePtr getSubGraph(const UUID& uuid) override;
+    GraphFacadePtr getSubGraph(const UUID& uuid) override;
     GraphFacadeImplementationPtr getLocalSubGraph(const UUID& uuid);
-    virtual GraphFacade* getParent() const override;
+    GraphFacade* getParent() const override;
 
-    virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
-    virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
-    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const override;
-    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept override;
-    virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
+    NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
+    NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const override;
+    NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
 
-    virtual ConnectorPtr findConnector(const UUID& uuid) override;
-    virtual ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept override;
+    ConnectorPtr findConnector(const UUID& uuid) override;
+    ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept override;
 
-    virtual bool isConnected(const UUID& from, const UUID& to) const override;
-    virtual ConnectionDescription getConnection(const UUID& from, const UUID& to) const override;
-    virtual ConnectionDescription getConnectionWithId(int id) const override;
+    bool isConnected(const UUID& from, const UUID& to) const override;
+    ConnectionDescription getConnection(const UUID& from, const UUID& to) const override;
+    ConnectionDescription getConnectionWithId(int id) const override;
 
-    virtual std::size_t countNodes() const override;
+    std::size_t countNodes() const override;
 
-    virtual int getComponent(const UUID& node_uuid) const override;
-    virtual int getDepth(const UUID& node_uuid) const override;
+    int getComponent(const UUID& node_uuid) const override;
+    int getDepth(const UUID& node_uuid) const override;
 
     GraphImplementationPtr getLocalGraph() const;
 
     GraphFacadeImplementation* getLocalParent() const;
     NodeFacadeImplementationPtr getLocalNodeFacade() const;
 
-    virtual std::vector<UUID> enumerateAllNodes() const override;
-    virtual std::vector<ConnectionDescription> enumerateAllConnections() const override;
+    std::vector<UUID> enumerateAllNodes() const override;
+    std::vector<ConnectionDescription> enumerateAllConnections() const override;
 
     SubgraphNodePtr getSubgraphNode();
     TaskGenerator* getTaskGenerator(const UUID& uuid);
@@ -54,11 +54,11 @@ public:
 
     void clear();
     void stop();
-    virtual void clearBlock() override;
-    virtual void resetActivity() override;
+    void clearBlock() override;
+    void resetActivity() override;
 
-    virtual bool isPaused() const override;
-    virtual void pauseRequest(bool pause) override;
+    bool isPaused() const override;
+    void pauseRequest(bool pause) override;
 
     ConnectionPtr connect(OutputPtr output, InputPtr input);
 
@@ -86,11 +86,11 @@ public:
     ConnectionPtr connect(NodeFacade* output, int output_id, NodeFacade* input, int input_id);
     ConnectionPtr connect(NodeFacadePtr output, int output_id, NodeFacadePtr input, int input_id);
 
-    virtual std::string makeStatusString() const override;
+    std::string makeStatusString() const override;
 
 protected:
-    virtual void nodeAddedHandler(graph::VertexPtr node) override;
-    virtual void nodeRemovedHandler(graph::VertexPtr node) override;
+    void nodeAddedHandler(graph::VertexPtr node) override;
+    void nodeRemovedHandler(graph::VertexPtr node) override;
 
     void createSubgraphFacade(NodeFacadePtr nf);
 

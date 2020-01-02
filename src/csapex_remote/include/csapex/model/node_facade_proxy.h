@@ -19,7 +19,7 @@ class CSAPEX_CORE_EXPORT NodeFacadeProxy : public NodeFacade, public Proxy
 public:
     NodeFacadeProxy(const SessionPtr& session, AUUID uuid);
 
-    ~NodeFacadeProxy();
+    ~NodeFacadeProxy() override;
 
     bool isProxy() const override;
 
@@ -40,7 +40,7 @@ public:
     ConnectorPtr getParameterOutput(const std::string& name) const override;
 
     // Parameterizable
-    virtual std::vector<param::ParameterPtr> getParameters() const override;
+    std::vector<param::ParameterPtr> getParameters() const override;
     param::ParameterPtr getParameter(const std::string& name) const override;
     bool hasParameter(const std::string& name) const override;
 
@@ -55,7 +55,7 @@ public:
 /**
  * begin: generate getters
  **/
-#define HANDLE_ACCESSOR(_enum, type, function) virtual type function() const override;
+#define HANDLE_ACCESSOR(_enum, type, function) type function() const override;
 
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)

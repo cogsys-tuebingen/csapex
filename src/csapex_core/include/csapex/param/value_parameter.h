@@ -29,16 +29,16 @@ public:
 
     virtual ~ValueParameter();
 
-    virtual const std::type_info& type() const override;
-    virtual std::string toStringImpl() const override;
+    const std::type_info& type() const override;
+    std::string toStringImpl() const override;
 
     bool cloneDataFrom(const Clonable& other) override;
 
     void doSerialize(YAML::Node& e) const override;
     void doDeserialize(const YAML::Node& n) override;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     template <typename T>
     T def() const
@@ -47,8 +47,8 @@ public:
     }
 
 protected:
-    virtual void get_unsafe(boost::any& out) const override;
-    virtual bool set_unsafe(const boost::any& v) override;
+    void get_unsafe(boost::any& out) const override;
+    bool set_unsafe(const boost::any& v) override;
 
 private:
     template <typename T>

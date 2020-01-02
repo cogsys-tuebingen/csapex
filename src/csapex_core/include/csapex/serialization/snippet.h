@@ -46,10 +46,10 @@ public:
 
     void toYAML(YAML::Node& out) const;
 
-    virtual uint8_t getPacketType() const;
+    uint8_t getPacketType() const override;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     static std::shared_ptr<Snippet> makeEmpty();
 

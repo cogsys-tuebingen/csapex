@@ -7,11 +7,14 @@
 #include <vector>
 #include <type_traits>
 
-struct ConstructorInterface
+class ConstructorInterface
 {
+public:
     ConstructorInterface() : valid_(false), has_constructor(false)
     {
     }
+
+    virtual ~ConstructorInterface() = default;
 
     virtual bool valid() const
     {

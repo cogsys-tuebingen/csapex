@@ -45,10 +45,10 @@ public:
             parameters_ = { args... };
         }
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
-        virtual ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
+        ResponsePtr execute(const SessionPtr& session, CsApexCore& core) const override;
 
         std::string getType() const override
         {
@@ -68,8 +68,8 @@ public:
         CoreResponse(CoreRequestType request_type, uint8_t request_id);
         CoreResponse(CoreRequestType request_type, boost::any result, uint8_t request_id);
 
-        virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-        virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+        void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+        void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
         template <typename R>
         R getResult() const

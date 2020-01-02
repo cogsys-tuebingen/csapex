@@ -22,9 +22,9 @@ class CSAPEX_COMMAND_EXPORT UpdateParameter : public CommandImplementation<Updat
 public:
     explicit UpdateParameter(const UUID& parameter_uuid, const param::Parameter& param);
 
-    virtual bool isUndoable() const override;
+    bool isUndoable() const override;
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;

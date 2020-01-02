@@ -120,7 +120,6 @@ private:
     Input* in;
 
     bool aborted;
-    int value;
 };
 
 class AnySink : public Node

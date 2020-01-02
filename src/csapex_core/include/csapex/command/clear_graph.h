@@ -37,7 +37,7 @@ protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 };
 
 }  // namespace command

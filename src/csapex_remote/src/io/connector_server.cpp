@@ -31,7 +31,7 @@ void ConnectorServer::startObserving(const ConnectablePtr& connector)
 #define HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function)                                                                                                                                         \
-    observe(connector->signal, [this, channel](const type& new_value) { channel->sendNote<ConnectorNote>(ConnectorNoteType::function##Changed, new_value); });
+    observe(connector->signal, [channel](const type& new_value) { channel->sendNote<ConnectorNote>(ConnectorNoteType::function##Changed, new_value); });
 
 #include <csapex/model/connector_proxy_accessors.hpp>
     /**

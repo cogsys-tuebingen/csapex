@@ -98,14 +98,15 @@ csapex::param::Parameter::Ptr SettingsProxy::getNoThrow(const std::string& name)
         if (const auto& response = session_->sendRequest<RequestParameter>(param_id)) {
             apex_assert_hard(response->getParameter());
 
-            if (typeid(*response->getParameter()) == typeid(param::NullParameter)) {
+            auto& parameter = *response->getParameter();
+            if (typeid(parameter) == typeid(param::NullParameter)) {
                 return nullptr;
             }
 
             // std::cerr << response->getParameter()->getUUID() << std::endl;
 
             // make a new parameter, when it gets changed relay the change to the remote server
-            param::ParameterPtr proxy = response->getParameter()->cloneAs<param::Parameter>();
+            param::ParameterPtr proxy = parameter.cloneAs<param::Parameter>();
 
             createParameterProxy(name, proxy);
 

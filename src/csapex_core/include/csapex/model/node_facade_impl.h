@@ -10,7 +10,7 @@ class CSAPEX_CORE_EXPORT NodeFacadeImplementation : public NodeFacade, public st
 {
 public:
     NodeFacadeImplementation(NodeHandlePtr nh);
-    ~NodeFacadeImplementation();
+    ~NodeFacadeImplementation() override;
 
     std::string getType() const override;
     UUID getUUID() const override;
@@ -77,7 +77,7 @@ public:
     double getMaximumFrequency() const override;
 
     // Parameterizable
-    virtual std::vector<param::ParameterPtr> getParameters() const override;
+    std::vector<param::ParameterPtr> getParameters() const override;
     param::ParameterPtr getParameter(const std::string& name) const override;
     bool hasParameter(const std::string& name) const override;
 

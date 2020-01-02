@@ -157,6 +157,8 @@ pid_t Subprocess::fork(std::function<int()> child)
                             in.shutdown();
                             out.shutdown();
                             break;
+                        default:
+                            break;
                     }
                 } catch (const SubprocessChannel::ShutdownException& e) {
                     active_ = false;

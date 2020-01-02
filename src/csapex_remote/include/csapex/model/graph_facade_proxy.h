@@ -14,49 +14,49 @@ class GraphFacadeProxy : public GraphFacade, public Proxy
 {
 public:
     GraphFacadeProxy(const SessionPtr& session, NodeFacadeProxyPtr remote_facade, GraphFacadeProxy* parent = nullptr);
-    ~GraphFacadeProxy();
+    ~GraphFacadeProxy() override;
 
-    virtual AUUID getAbsoluteUUID() const override;
+    AUUID getAbsoluteUUID() const override;
 
-    virtual UUID generateUUID(const std::string& prefix) override;
+    UUID generateUUID(const std::string& prefix) override;
 
-    virtual NodeFacadePtr getNodeFacade() const override;
+    NodeFacadePtr getNodeFacade() const override;
 
-    virtual GraphFacadePtr getSubGraph(const UUID& uuid) override;
-    virtual GraphFacade* getParent() const override;
+    GraphFacadePtr getSubGraph(const UUID& uuid) override;
+    GraphFacade* getParent() const override;
 
-    virtual NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
-    virtual NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
-    virtual NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const override;
-    virtual NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept override;
-    virtual NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
+    NodeFacadePtr findNodeFacade(const UUID& uuid) const override;
+    NodeFacadePtr findNodeFacadeNoThrow(const UUID& uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeForConnector(const UUID& uuid) const override;
+    NodeFacadePtr findNodeFacadeForConnectorNoThrow(const UUID& uuid) const noexcept override;
+    NodeFacadePtr findNodeFacadeWithLabel(const std::string& label) const override;
 
-    virtual ConnectorPtr findConnector(const UUID& uuid) override;
-    virtual ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept override;
+    ConnectorPtr findConnector(const UUID& uuid) override;
+    ConnectorPtr findConnectorNoThrow(const UUID& uuid) noexcept override;
 
-    virtual bool isConnected(const UUID& from, const UUID& to) const override;
-    virtual ConnectionDescription getConnection(const UUID& from, const UUID& to) const override;
-    virtual ConnectionDescription getConnectionWithId(int id) const override;
+    bool isConnected(const UUID& from, const UUID& to) const override;
+    ConnectionDescription getConnection(const UUID& from, const UUID& to) const override;
+    ConnectionDescription getConnectionWithId(int id) const override;
 
-    virtual std::size_t countNodes() const override;
+    std::size_t countNodes() const override;
 
-    virtual int getComponent(const UUID& node_uuid) const override;
-    virtual int getDepth(const UUID& node_uuid) const override;
+    int getComponent(const UUID& node_uuid) const override;
+    int getDepth(const UUID& node_uuid) const override;
 
     GraphFacadeProxy* getProxyParent() const;
 
-    virtual std::vector<UUID> enumerateAllNodes() const override;
-    virtual std::vector<ConnectionDescription> enumerateAllConnections() const override;
+    std::vector<UUID> enumerateAllNodes() const override;
+    std::vector<ConnectionDescription> enumerateAllConnections() const override;
 
-    virtual void clearBlock() override;
-    virtual void resetActivity() override;
+    void clearBlock() override;
+    void resetActivity() override;
 
-    virtual void pauseRequest(bool pause) override;
+    void pauseRequest(bool pause) override;
 
 /**
  * begin: generate getters
  **/
-#define HANDLE_ACCESSOR(_enum, type, function) virtual type function() const override;
+#define HANDLE_ACCESSOR(_enum, type, function) type function() const override;
 
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)
@@ -68,8 +68,8 @@ public:
      **/
 
 protected:
-    virtual void nodeAddedHandler(graph::VertexPtr node) override;
-    virtual void nodeRemovedHandler(graph::VertexPtr node) override;
+    void nodeAddedHandler(graph::VertexPtr node) override;
+    void nodeRemovedHandler(graph::VertexPtr node) override;
 
     void handleBroadcast(const BroadcastMessageConstPtr& message) override;
 

@@ -39,7 +39,7 @@ public:
     NodeConstructor();
     NodeConstructor(const std::string& type, std::function<NodePtr()> c);
 
-    virtual ~NodeConstructor();
+    ~NodeConstructor() override;
 
     std::string getType() const;
 
@@ -64,8 +64,8 @@ public:
 
     NodePtr makeNode() const;
 
-    virtual void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
-    virtual void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
+    void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
+    void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
     NodeConstructor(const std::string& type);

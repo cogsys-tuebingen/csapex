@@ -25,7 +25,7 @@ public:
 
     int commands() const;
 
-    virtual void init(GraphFacadeImplementation* root, CsApexCore& core) override;
+    void init(GraphFacadeImplementation* root, CsApexCore& core) override;
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -36,9 +36,9 @@ protected:
     bool doUndo() override;
     bool doRedo() override;
 
-    virtual void accept(int level, std::function<void(int, const Command&)> callback) const override;
+    void accept(int level, std::function<void(int, const Command&)> callback) const override;
 
-    virtual std::string getDescription() const override;
+    std::string getDescription() const override;
 
 protected:
     std::vector<Command::Ptr> nested;

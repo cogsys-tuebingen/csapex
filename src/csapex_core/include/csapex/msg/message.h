@@ -25,9 +25,9 @@ public:
 
 protected:
     Message(const std::string& name, const std::string& frame_id, Stamp stamp_micro_seconds);
-    virtual ~Message();
+    ~Message() override;
 
-    bool cloneDataFrom(const Clonable& other);
+    bool cloneDataFrom(const Clonable& other) override;
 
 public:
     std::string frame_id;

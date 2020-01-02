@@ -288,7 +288,8 @@ void DefaultNodeAdapter::setupAdaptiveUi()
         }
 
         // generate UI element
-        const auto& type = typeid(*p);
+        const auto& parameter_ref = *p;
+        const auto& type = typeid(parameter_ref);
         // check if it is a plugin, while there are non-plugin adapters
         if (ParameterAdapterFactory::instance().hasAdapter(type)) {
             ParameterAdapterFactory::instance().makeParameterAdapter(this, p);

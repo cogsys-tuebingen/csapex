@@ -16,7 +16,7 @@ class CSAPEX_QT_EXPORT OutputProgressParameterAdapter : public ParameterAdapter
 public:
     OutputProgressParameterAdapter(param::OutputProgressParameter::Ptr p);
 
-    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+    QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
 
 private:
     param::OutputProgressParameterPtr op_p_;

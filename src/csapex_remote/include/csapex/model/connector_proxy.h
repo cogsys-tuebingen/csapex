@@ -14,13 +14,13 @@ public:
     ConnectorProxy(const SessionPtr& session, UUID uuid, ConnectableOwnerPtr owner);
     ConnectorProxy(const SessionPtr& session, UUID uuid, ConnectableOwnerPtr owner, const ConnectorDescription& cd);
 
-    virtual bool isConnectedTo(const UUID& other) const override;
-    virtual bool isActivelyConnectedTo(const UUID& other) const override;
+    bool isConnectedTo(const UUID& other) const override;
+    bool isActivelyConnectedTo(const UUID& other) const override;
 
 /**
  * begin: generate getters
  **/
-#define HANDLE_ACCESSOR(_enum, type, function) virtual type function() const override;
+#define HANDLE_ACCESSOR(_enum, type, function) type function() const override;
 
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function) HANDLE_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function) HANDLE_ACCESSOR(_enum, type, function)

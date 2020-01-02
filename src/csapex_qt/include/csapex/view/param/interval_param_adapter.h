@@ -16,9 +16,9 @@ class CSAPEX_QT_EXPORT IntervalParameterAdapter : public ParameterAdapter
 public:
     IntervalParameterAdapter(param::IntervalParameter::Ptr p);
 
-    virtual QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
+    QWidget* setup(QBoxLayout* layout, const std::string& display_name) override;
 
-    virtual void setupContextMenu(ParameterContextMenu* context_handler) override;
+    void setupContextMenu(ParameterContextMenu* context_handler) override;
 
 private:
     template <typename T, typename Slider, typename Spinbox>
