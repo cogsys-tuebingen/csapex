@@ -49,7 +49,8 @@ is independent of ROS, however.
 Required for a build are:
 
 - Linux system (tested with Ubuntu)
-- C++11 compatible compiler (g++, clang++)
+- CMake >= 3.8.2
+- C++17 compatible compiler (g++, clang++)
 - Qt5 (on Ubuntu: qt5-default libqt5svg5-dev)
 - libraries:
   - boost (program_options, filesystem, system, regex)

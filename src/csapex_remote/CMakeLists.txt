@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.8.2)
 
-project(csapex_remote)
+project(csapex_remote CXX)
 
 find_package(catkin REQUIRED COMPONENTS csapex_core)
 

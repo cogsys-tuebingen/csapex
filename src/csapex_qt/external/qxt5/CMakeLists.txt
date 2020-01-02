@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.8.2)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 

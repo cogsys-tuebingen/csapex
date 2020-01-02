@@ -32,7 +32,7 @@ done
 
 printf $dep_list
 
-printf "cmake_minimum_required(VERSION 2.8.3)
+printf "cmake_minimum_required(VERSION 3.8.2)
 project($pkg_name)
 
 ## Add support for C++11, supported in ROS Kinetic and newer

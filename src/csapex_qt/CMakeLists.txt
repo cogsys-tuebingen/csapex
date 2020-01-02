@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.8.2)
 
-project(csapex_qt)
+project(csapex_qt CXX)
 
 include (GenerateExportHeader)
 

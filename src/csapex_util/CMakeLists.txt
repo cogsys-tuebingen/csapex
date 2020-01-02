@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.8.2)
 
-project(csapex_util)
+project(csapex_util CXX)
 
 find_package(catkin REQUIRED)
 find_package(Boost COMPONENTS regex system REQUIRED)
@@ -9,24 +9,13 @@ enable_testing()
 
 include (GenerateExportHeader)
 
-## Enforce that we use C++11
-if (CMAKE_VERSION VERSION_LESS "3.1")
-  include(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-  CHECK_CXX_COMPILER_FLAG("-std=gnu++11" COMPILER_SUPPORTS_GNU)
-  if(COMPILER_SUPPORTS_CXX11)
-     set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
-  elseif(COMPILER_SUPPORTS_CXX0X)
-     set (CMAKE_CXX_FLAGS "--std=c++0x ${CMAKE_CXX_FLAGS}")
-  elseif(COMPILER_SUPPORTS_GNU)
-     set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
-  else()
-     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-  endif()
-else ()
-  set (CMAKE_CXX_STANDARD 11)
-endif ()
+## Enforce that we use C++17
+if(CMAKE_VERSION VERSION_LESS "3.1")
+  message(FATAL_ERROR "CMake Version < 3.1 is no longer supported.")
+else()
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
