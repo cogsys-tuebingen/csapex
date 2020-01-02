@@ -43,11 +43,9 @@ GenericVectorMessage::AnythingImplementation::AnythingImplementation() : EntryIn
 
 void GenericVectorMessage::AnythingImplementation::encode(YAML::Node& node) const
 {
-    std::cout << "encode any" << std::endl;
 }
 void GenericVectorMessage::AnythingImplementation::decode(const YAML::Node& node)
 {
-    std::cout << "decode any" << std::endl;
 }
 
 bool GenericVectorMessage::AnythingImplementation::canConnectTo(const TokenData* other_side) const
@@ -132,7 +130,6 @@ bool GenericVectorMessage::InstancedImplementation::acceptsConnectionFrom(const 
 void GenericVectorMessage::InstancedImplementation::encode(YAML::Node& node) const
 {
     apex_assert_hard(type_);
-    std::cout << "vector instance: encode" << std::endl;
     node["value_type"] = type_->typeName();
     node["values"] = value;
 }
@@ -141,7 +138,6 @@ void GenericVectorMessage::InstancedImplementation::decode(const YAML::Node& nod
 {
     YAML::Emitter emitter;
     emitter << node;
-    std::cout << "vector instance: decode " << emitter.c_str() << std::endl;
     value = node["values"].as<std::vector<TokenData::Ptr> >();
 }
 

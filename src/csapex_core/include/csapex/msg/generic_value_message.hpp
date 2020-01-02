@@ -7,9 +7,7 @@
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/msg/io.h>
 #include <csapex/utility/string.hpp>
-
-// TODO remove
-#include <iostream>
+#include <csapex/utility/type_traits.hpp>
 
 namespace csapex
 {
@@ -123,14 +121,24 @@ public:
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override
     {
-        Message::serialize(data, version);
-        // TODO: Version of value here
-        data << value;
+        if constexpr (is_left_shift_operator_defined_v<SerializationBuffer, Type>) {
+            Message::serialize(data, version);
+            // TODO: Version of value here
+            data << value;
+
+        } else {
+            throw std::runtime_error("Object not serializable");
+        }
     }
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override
     {
-        Message::deserialize(data, version);
-        data >> value;
+        if constexpr (is_right_shift_operator_defined_v<SerializationBuffer, Type>) {
+            Message::deserialize(data, version);
+            data >> value;
+
+        } else {
+            throw std::runtime_error("Object not serializable");
+        }
     }
 
     Type value;
@@ -240,19 +248,29 @@ struct convert<csapex::connection_types::GenericValueMessage<T>>
 {
     static Node encode(const csapex::connection_types::GenericValueMessage<T>& rhs)
     {
-        Node node;
-        node["value"] = rhs.value;
-        return node;
+        if constexpr (csapex::is_complete_v<YAML::convert<T>>) {
+            Node node;
+            node["value"] = rhs.value;
+            return node;
+
+        } else {
+            throw std::runtime_error("Object not serializable");
+        }
     }
 
     static bool decode(const Node& node, csapex::connection_types::GenericValueMessage<T>& rhs)
     {
-        if (!node.IsMap()) {
-            return false;
-        }
+        if constexpr (csapex::is_complete_v<YAML::convert<T>>) {
+            if (!node.IsMap()) {
+                return false;
+            }
 
-        rhs.value = node["value"].as<T>();
-        return true;
+            rhs.value = node["value"].as<T>();
+            return true;
+
+        } else {
+            throw std::runtime_error("Object not serializable");
+        }
     }
 };
 }  // namespace YAML
