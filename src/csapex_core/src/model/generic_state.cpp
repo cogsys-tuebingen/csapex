@@ -9,7 +9,7 @@
 #include <csapex/serialization/io/std_io.h>
 
 /// SYSTEM
-#include <boost/regex.hpp>
+#include <regex>
 
 using namespace csapex;
 
@@ -151,13 +151,13 @@ void GenericState::addParameter(csapex::param::Parameter::Ptr param)
 
     std::string valid_name = param_name;
 
-    boost::regex to_remove("~");
-    valid_name = boost::regex_replace(valid_name, to_remove, std::string(""));
+    std::regex to_remove("~");
+    valid_name = std::regex_replace(valid_name, to_remove, std::string(""));
 
     // generate a valid name, valid characters are a-z, A-Z, 0-9, / and _.
-    boost::regex invalid("[^0-9a-zA-Z/_]");
-    if (boost::regex_search(valid_name, invalid)) {
-        valid_name = boost::regex_replace(valid_name, invalid, std::string("_"));
+    std::regex invalid("[^0-9a-zA-Z/_]");
+    if (std::regex_search(valid_name, invalid)) {
+        valid_name = std::regex_replace(valid_name, invalid, std::string("_"));
     }
 
     param_valid_name_cache[valid_name] = param_name;

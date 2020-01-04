@@ -60,7 +60,7 @@ macro(csapex_package)
                         add_definitions(/D NOMINMAX)
                 endif()
 
-                find_package(Boost COMPONENTS program_options filesystem system regex serialization thread REQUIRED)
+                find_package(Boost COMPONENTS program_options filesystem system serialization thread REQUIRED)
                 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
                 set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX})

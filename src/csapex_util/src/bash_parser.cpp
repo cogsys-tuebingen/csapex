@@ -2,7 +2,7 @@
 #include <csapex/utility/bash_parser.h>
 
 /// SYSTEM
-#include <boost/regex.hpp>
+#include <regex>
 #include <sstream>
 
 using namespace csapex;
@@ -15,11 +15,11 @@ std::string BashParser::toHtml(const std::string& input)
 {
     std::string result = input;
 
-    static const boost::regex bash_fmt(".*(\\e\\[[^m]+m).*");
+    static const std::regex bash_fmt(".*(\\e\\[[^m]+m).*");
 
     int levels = 0;
-    boost::match_results<std::string::const_iterator> results;
-    while (boost::regex_match(result, results, bash_fmt)) {
+    std::match_results<std::string::const_iterator> results;
+    while (std::regex_match(result, results, bash_fmt)) {
         std::string bash_string = results[1];
 
         std::stringstream ss(bash_string.substr(2, bash_string.size() - 3));

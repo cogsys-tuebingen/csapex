@@ -3,19 +3,15 @@ cmake_minimum_required(VERSION 3.8.2)
 project(csapex_util CXX)
 
 find_package(catkin REQUIRED)
-find_package(Boost COMPONENTS regex system REQUIRED)
+find_package(Boost COMPONENTS system REQUIRED)
 
 enable_testing()
 
 include (GenerateExportHeader)
 
 ## Enforce that we use C++17
-if(CMAKE_VERSION VERSION_LESS "3.1")
-  message(FATAL_ERROR "CMake Version < 3.1 is no longer supported.")
-else()
-  set(CMAKE_CXX_STANDARD 17)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

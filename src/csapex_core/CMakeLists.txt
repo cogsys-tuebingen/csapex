@@ -13,7 +13,7 @@ find_package(catkin QUIET)
 find_package(class_loader REQUIRED)
 find_package(csapex_util REQUIRED)
 
-find_package(Boost COMPONENTS program_options filesystem system regex  iostreams REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem system  iostreams REQUIRED)
 
 find_package(TinyXML REQUIRED)
 find_package(YAML-CPP REQUIRED)

@@ -53,7 +53,7 @@ Required for a build are:
 - C++17 compatible compiler (g++, clang++)
 - Qt5 (on Ubuntu: qt5-default libqt5svg5-dev)
 - libraries:
-  - boost (program_options, filesystem, system, regex)
+  - boost (program_options, filesystem, system)
   - [classloader](https://github.com/ros/class_loader)
   - TinyXML (on Ubuntu: libtinyxml-dev)
   - yaml-cpp (on Ubuntu: libyaml-cpp-dev)
