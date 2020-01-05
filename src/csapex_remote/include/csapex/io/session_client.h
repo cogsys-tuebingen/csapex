@@ -6,6 +6,7 @@
 
 /// SYSTEM
 #include <boost/asio.hpp>
+#include <boost/version.hpp>
 
 namespace csapex
 {
@@ -26,7 +27,12 @@ private:
     boost::asio::io_service io_service;
     boost::asio::ip::tcp::socket socket_impl;
     boost::asio::ip::tcp::resolver resolver;
+#if (BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 66
+    boost::asio::ip::tcp::resolver::endpoint_type resolver_iterator;
+#else
+    // deprecated in boost 1.66
     boost::asio::ip::tcp::resolver::iterator resolver_iterator;
+#endif
 
     bool io_service_running_;
 
