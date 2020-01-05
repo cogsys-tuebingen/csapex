@@ -6,12 +6,13 @@
 #include <csapex/param/parameter_factory.h>
 #include <csapex/utility/delegate.h>
 #include <csapex/serialization/parameter_serializer.h>
+#include <csapex/utility/yaml.h>
+
+#include <csapex_testing/csapex_test_case.h>
 
 #include <unordered_map>
 #include <typeindex>
-#include <yaml-cpp/yaml.h>
 
-#include <csapex_testing/csapex_test_case.h>
 
 using namespace csapex;
 using namespace csapex::param;

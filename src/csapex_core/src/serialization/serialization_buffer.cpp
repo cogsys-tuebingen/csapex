@@ -19,9 +19,9 @@
 #include <csapex/serialization/snippet.h>
 #include <csapex/serialization/streamable.h>
 #include <csapex/model/notification.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <iostream>
 
 using namespace csapex;

@@ -8,13 +8,13 @@
 #include <csapex/utility/utility_fwd.h>
 #include <csapex/model/observer.h>
 #include <csapex/profiling/profilable.h>
+#include <csapex/utility/yaml.h>
+#include <csapex/utility/slim_signal.hpp>
 
 /// SYSTEM
 #include <map>
 #include <vector>
 #include <set>
-#include <yaml-cpp/yaml.h>
-#include <csapex/utility/slim_signal.hpp>
 
 namespace csapex
 {

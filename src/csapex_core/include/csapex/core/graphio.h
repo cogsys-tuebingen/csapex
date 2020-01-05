@@ -10,9 +10,9 @@
 #include <csapex/profiling/profilable.h>
 #include <csapex/serialization/serialization_fwd.h>
 #include <csapex/model/connection_description.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <unordered_map>
 
 namespace csapex

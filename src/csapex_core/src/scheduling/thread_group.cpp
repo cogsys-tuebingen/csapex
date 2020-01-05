@@ -12,10 +12,10 @@
 #include <csapex/scheduling/timed_queue.h>
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/trace.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <iostream>
-#include <yaml-cpp/yaml.h>
 
 using namespace csapex;
 

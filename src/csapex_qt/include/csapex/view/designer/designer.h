@@ -13,10 +13,10 @@
 #include <csapex/profiling/profilable.h>
 #include <csapex/model/notification.h>
 #include <csapex/model/observer.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <QWidget>
-#include <yaml-cpp/yaml.h>
 #include <unordered_map>
 #include <deque>
 

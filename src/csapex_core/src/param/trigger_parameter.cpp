@@ -4,9 +4,7 @@
 /// PROJECT
 #include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
-
-/// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 CSAPEX_REGISTER_PARAM(TriggerParameter)
 

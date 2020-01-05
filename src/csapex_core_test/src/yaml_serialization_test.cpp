@@ -2,7 +2,7 @@
 
 #include <csapex/msg/message_template.hpp>
 #include <csapex/utility/register_msg.h>
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 #include <csapex/serialization/message_serializer.h>
 #include <csapex/msg/io.h>
 #include <csapex_testing/mockup_msgs.h>

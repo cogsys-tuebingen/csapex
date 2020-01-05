@@ -5,6 +5,7 @@
 #include <csapex/param/io.h>
 #include <csapex/utility/delegate.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -12,7 +13,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <yaml-cpp/yaml.h>
 
 #ifdef WIN32
 #include <windows.h>

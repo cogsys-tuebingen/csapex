@@ -9,10 +9,10 @@
 #include <csapex/model/execution_type.h>
 #include <csapex/utility/slim_signal.h>
 #include <csapex/serialization/serializable.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <boost/any.hpp>
-#include <yaml-cpp/yaml.h>
 
 namespace csapex
 {

@@ -4,9 +4,7 @@
 /// COMPONENT
 #include <csapex/param/parameter.h>
 #include <csapex_core/csapex_param_export.h>
-
-/// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 namespace YAML
 {

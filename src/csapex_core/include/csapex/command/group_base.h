@@ -7,9 +7,9 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/model/connection_description.h>
 #include <csapex/serialization/snippet.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <unordered_map>
 
 namespace csapex

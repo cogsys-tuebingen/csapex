@@ -1,11 +1,13 @@
 /// HEADER
 #include <csapex/view/utility/clipboard.h>
 
+/// PROJECT
+#include <csapex/utility/yaml.h>
+
 /// SYSTEM
 #include <QClipboard>
 #include <QMimeData>
 #include <QApplication>
-#include <yaml-cpp/yaml.h>
 
 using namespace csapex;
 

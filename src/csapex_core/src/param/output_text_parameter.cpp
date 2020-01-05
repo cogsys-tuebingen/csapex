@@ -4,9 +4,9 @@
 /// PROJECT
 #include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <boost/any.hpp>
 
 CSAPEX_REGISTER_PARAM(OutputTextParameter)

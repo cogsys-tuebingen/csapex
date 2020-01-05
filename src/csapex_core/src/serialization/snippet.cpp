@@ -6,9 +6,9 @@
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/io/std_io.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <fstream>
 
 using namespace csapex;

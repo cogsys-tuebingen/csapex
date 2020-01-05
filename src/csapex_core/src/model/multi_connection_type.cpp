@@ -6,10 +6,10 @@
 #include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/io/csapex_io.h>
 #include <csapex/utility/register_msg.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <sstream>
-#include <yaml-cpp/yaml.h>
 
 CSAPEX_REGISTER_MESSAGE(csapex::MultiTokenData)
 

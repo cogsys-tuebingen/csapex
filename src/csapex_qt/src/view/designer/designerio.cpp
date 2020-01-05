@@ -12,13 +12,13 @@
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
 #include <csapex/view/node/node_adapter.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <QMessageBox>
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
-#include <yaml-cpp/yaml.h>
 #include <QScrollBar>
 #include <sys/types.h>
 

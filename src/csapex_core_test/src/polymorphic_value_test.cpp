@@ -16,12 +16,11 @@
 #include <csapex/utility/register_msg.h>
 #include <csapex/msg/generic_value_message.hpp>
 #include <csapex/param/parameter_factory.h>
+#include <csapex/utility/yaml.h>
 
 #include <csapex_testing/stepping_test.h>
-
 #include <csapex_testing/csapex_test_case.h>
 
-#include <yaml-cpp/yaml.h>
 
 namespace csapex
 {

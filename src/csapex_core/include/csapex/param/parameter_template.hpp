@@ -3,9 +3,7 @@
 
 /// PROJECT
 #include <csapex/param/parameter_impl.hpp>
-
-/// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 namespace csapex
 {

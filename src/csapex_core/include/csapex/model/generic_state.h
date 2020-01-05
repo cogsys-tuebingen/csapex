@@ -2,18 +2,18 @@
 #define GENERIC_STATE_H
 
 /// COMPONENT
-#include <csapex/serialization/serializable.h>
-#include <csapex/utility/uuid.h>
 #include <csapex_core/csapex_core_export.h>
-#include <csapex/model/model_fwd.h>
 
 /// PROJECT
+#include <csapex/model/model_fwd.h>
 #include <csapex/param/param_fwd.h>
+#include <csapex/serialization/serializable.h>
 #include <csapex/utility/slim_signal.h>
+#include <csapex/utility/uuid.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <set>
-#include <yaml-cpp/yaml.h>
 
 namespace csapex
 {

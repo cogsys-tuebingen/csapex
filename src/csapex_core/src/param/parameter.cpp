@@ -6,9 +6,9 @@
 #include <csapex/param/value_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 #include <csapex/serialization/io/csapex_io.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #ifdef WIN32
 #else
 #include <cxxabi.h>

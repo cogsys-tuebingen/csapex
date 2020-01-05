@@ -6,7 +6,7 @@
 #include <csapex_core/csapex_core_export.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 /// YAML
 namespace YAML

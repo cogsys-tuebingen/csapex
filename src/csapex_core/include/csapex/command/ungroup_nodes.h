@@ -3,9 +3,7 @@
 
 /// COMPONENT
 #include "group_base.h"
-
-/// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 namespace csapex
 {

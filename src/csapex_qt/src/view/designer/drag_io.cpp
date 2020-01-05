@@ -20,10 +20,10 @@
 #include <csapex/view/designer/designer_scene.h>
 #include <csapex/view/designer/graph_view.h>
 #include <csapex/view/node/box.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <QMimeData>
-#include <yaml-cpp/yaml.h>
 
 using namespace csapex;
 

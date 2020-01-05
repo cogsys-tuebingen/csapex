@@ -4,9 +4,7 @@
 /// PROJECT
 #include <csapex/model/node_facade.h>
 #include <csapex/model/node_state.h>
-
-/// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 using namespace csapex;
 

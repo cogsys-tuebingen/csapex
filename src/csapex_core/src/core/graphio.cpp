@@ -27,12 +27,12 @@
 #include <csapex/utility/exceptions.h>
 #include <csapex/profiling/profiler.h>
 #include <csapex/profiling/timer.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
-#include <yaml-cpp/yaml.h>
 #include <sys/types.h>
 
 using namespace csapex;

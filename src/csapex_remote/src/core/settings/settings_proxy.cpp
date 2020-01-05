@@ -11,6 +11,7 @@
 #include <csapex/io/protcol/core_requests.h>
 #include <csapex/param/null_parameter.h>
 #include <csapex/io/protcol/parameter_changed.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>
@@ -18,7 +19,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <yaml-cpp/yaml.h>
 
 #ifdef WIN32
 #include <windows.h>

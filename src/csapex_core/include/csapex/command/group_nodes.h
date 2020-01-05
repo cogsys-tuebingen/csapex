@@ -4,9 +4,7 @@
 /// COMPONENT
 #include "group_base.h"
 #include <csapex/utility/uuid.h>
-
-/// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 namespace csapex
 {

@@ -4,10 +4,10 @@
 /// PROJECT
 #include <csapex/msg/token_traits.h>
 #include <csapex/utility/uuid_provider.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <memory>
-#include <yaml-cpp/yaml.h>
 
 namespace YAML
 {

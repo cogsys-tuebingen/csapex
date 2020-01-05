@@ -3,9 +3,9 @@
 
 /// PROJECT
 #include <csapex_util/export.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <yaml-cpp/anchor.h>
 #include <yaml-cpp/contrib/anchordict.h>
 #include <yaml-cpp/contrib/graphbuilder.h>

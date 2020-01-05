@@ -7,9 +7,7 @@
 #include <csapex/model/generic_state.h>
 #include <csapex/model/node_facade.h>
 #include <csapex/param/parameter.h>
-
-/// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 using namespace csapex;
 

@@ -3,10 +3,10 @@
 
 /// PROJECT
 #include <csapex/msg/message_template.hpp>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
 #include <string>
-#include <yaml-cpp/yaml.h>
 
 namespace csapex
 {

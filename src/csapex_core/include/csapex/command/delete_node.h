@@ -5,9 +5,7 @@
 #include <csapex/command/meta.h>
 #include <csapex/utility/uuid.h>
 #include <csapex/serialization/snippet.h>
-
-/// SYSTEM
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 namespace csapex
 {

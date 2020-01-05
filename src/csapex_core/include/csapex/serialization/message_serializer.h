@@ -10,9 +10,9 @@
 #include <csapex_core/csapex_core_export.h>
 #include <csapex/serialization/packet_serializer.h>
 #include <csapex/msg/serialization_format.h>
+#include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <yaml-cpp/yaml.h>
 #include <functional>
 
 HAS_MEM_FUNC(encode, has_yaml_implementation);

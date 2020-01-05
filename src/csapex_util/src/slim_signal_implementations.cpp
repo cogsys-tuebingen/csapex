@@ -3,7 +3,7 @@
 
 /// PROJECT
 #include <csapex/utility/uuid.h>
-#include <yaml-cpp/yaml.h>
+#include <csapex/utility/yaml.h>
 
 namespace csapex
 {
