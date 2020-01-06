@@ -12,7 +12,7 @@
 #include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -149,7 +149,7 @@ private:
     int g_;
     int b_;
 
-    std::map<std::string, boost::any> dictionary;
+    std::map<std::string, std::any> dictionary;
 
     ExecutionMode exec_mode_;
     ExecutionType exec_type_;

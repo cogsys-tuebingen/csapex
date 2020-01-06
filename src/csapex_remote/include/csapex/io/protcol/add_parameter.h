@@ -15,7 +15,7 @@ public:
     class ParameterRequest : public RequestImplementation<ParameterRequest>
     {
     public:
-        ParameterRequest(const AUUID& id, const std::string& name, const std::string& description, boost::any value, bool persistent);
+        ParameterRequest(const AUUID& id, const std::string& name, const std::string& description, std::any value, bool persistent);
         ParameterRequest(uint8_t request_id);
 
         void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
@@ -32,7 +32,7 @@ public:
         AUUID id_;
         std::string name_;
         std::string description_;
-        boost::any value_;
+        std::any value_;
         bool persistent_;
     };
 

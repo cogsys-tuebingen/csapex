@@ -7,7 +7,7 @@
 #include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 CSAPEX_REGISTER_PARAM(OutputTextParameter)
 
@@ -39,13 +39,13 @@ const std::type_info& OutputTextParameter::type() const
     return typeid(std::string);
 }
 
-void OutputTextParameter::get_unsafe(boost::any& out) const
+void OutputTextParameter::get_unsafe(std::any& out) const
 {
     out = text_;
 }
-bool OutputTextParameter::set_unsafe(const boost::any& v)
+bool OutputTextParameter::set_unsafe(const std::any& v)
 {
-    auto val = boost::any_cast<std::string>(v);
+    auto val = std::any_cast<std::string>(v);
     if (val != text_) {
         text_ = val;
         return true;

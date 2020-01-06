@@ -7,7 +7,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -43,7 +43,7 @@ class GraphFacadeNote : public NoteImplementation<GraphFacadeNote>
 public:
     GraphFacadeNote();
     GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid);
-    GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
+    GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, const std::vector<std::any>& payload);
 
     template <typename... Args>
     GraphFacadeNote(GraphFacadeNoteType request_type, const AUUID& uuid, Args... args) : GraphFacadeNote(request_type, uuid, { std::forward<Args>(args)... })
@@ -66,12 +66,12 @@ public:
     template <typename T>
     T getPayload(const std::size_t pos) const
     {
-        return boost::any_cast<T>(payload_.at(pos));
+        return std::any_cast<T>(payload_.at(pos));
     }
 
 private:
     GraphFacadeNoteType note_type_;
-    std::vector<boost::any> payload_;
+    std::vector<std::any> payload_;
 };
 
 }  // namespace csapex

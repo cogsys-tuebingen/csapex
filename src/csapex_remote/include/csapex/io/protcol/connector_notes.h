@@ -7,7 +7,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -30,7 +30,7 @@ class ConnectorNote : public NoteImplementation<ConnectorNote>
 public:
     ConnectorNote();
     ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid);
-    ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid, const boost::any& payload);
+    ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid, const std::any& payload);
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -40,14 +40,14 @@ public:
         return note_type_;
     }
 
-    boost::any getPayload() const
+    std::any getPayload() const
     {
         return payload_;
     }
 
 private:
     ConnectorNoteType note_type_;
-    boost::any payload_;
+    std::any payload_;
 };
 
 }  // namespace csapex

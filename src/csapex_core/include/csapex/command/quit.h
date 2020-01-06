@@ -7,7 +7,7 @@
 #include <csapex/utility/assert.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -39,7 +39,7 @@ protected:
 private:
     AUUID uuid;
 
-    boost::any value;
+    std::any value;
 };
 
 }  // namespace command

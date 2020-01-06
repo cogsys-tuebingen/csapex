@@ -7,7 +7,7 @@
 #include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 CSAPEX_REGISTER_PARAM(OutputProgressParameter)
 
@@ -33,13 +33,13 @@ std::string OutputProgressParameter::toStringImpl() const
     return std::string("[progress]");
 }
 
-void OutputProgressParameter::get_unsafe(boost::any& out) const
+void OutputProgressParameter::get_unsafe(std::any& out) const
 {
     out = value;
 }
-bool OutputProgressParameter::set_unsafe(const boost::any& v)
+bool OutputProgressParameter::set_unsafe(const std::any& v)
 {
-    auto val = boost::any_cast<int>(v);
+    auto val = std::any_cast<int>(v);
     if (val != value) {
         value = val;
         return true;

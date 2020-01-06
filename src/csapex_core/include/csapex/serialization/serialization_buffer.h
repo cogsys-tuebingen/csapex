@@ -13,7 +13,7 @@
 #include <sstream>
 #include <limits>
 #include <typeindex>
-#include <boost/any.hpp>
+#include <any>
 #include <map>
 
 namespace YAML
@@ -117,20 +117,20 @@ public:
     }
 
     // BOOST ANY
-    template <typename T, typename std::enable_if<std::is_same<T, boost::any>::value, int>::type = 0>
+    template <typename T, typename std::enable_if<std::is_same<T, std::any>::value, int>::type = 0>
     SerializationBuffer& operator<<(const T& any)
     {
         return writeAny(any);
     }
 
-    template <typename T, typename std::enable_if<std::is_same<T, boost::any>::value, int>::type = 0>
+    template <typename T, typename std::enable_if<std::is_same<T, std::any>::value, int>::type = 0>
     const SerializationBuffer& operator>>(T& any) const
     {
         return readAny(any);
     }
 
-    SerializationBuffer& writeAny(const boost::any& any);
-    const SerializationBuffer& readAny(boost::any& any) const;
+    SerializationBuffer& writeAny(const std::any& any);
+    const SerializationBuffer& readAny(std::any& any) const;
 
     // YAML
     SerializationBuffer& operator<<(const YAML::Node& node);
@@ -143,8 +143,8 @@ private:
     mutable std::size_t pos;
 
     static bool initialized_;
-    static std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const boost::any& a)>> any_serializer;
-    static std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, boost::any& a)>> any_deserializer;
+    static std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const std::any& a)>> any_serializer;
+    static std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, std::any& a)>> any_deserializer;
 };
 
 }  // namespace csapex

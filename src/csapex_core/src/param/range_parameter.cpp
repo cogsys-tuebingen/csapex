@@ -31,16 +31,16 @@ RangeParameter& RangeParameter::operator=(const RangeParameter& range)
     Parameter::operator=(static_cast<const Parameter&>(range));
 
     bool value_change = false;
-    if (value_.empty() || value_.type() != range.value_.type()) {
+    if (!value_.has_value() || value_.type() != range.value_.type()) {
         value_change = true;
         step_ = range.step_;
     } else {
         if (value_.type() == typeid(int)) {
-            value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(range.value_);
-            step_ = range::limitStep(boost::any_cast<int>(range.min_), boost::any_cast<int>(range.max_), boost::any_cast<int>(range.step_));
+            value_change = std::any_cast<int>(value_) != std::any_cast<int>(range.value_);
+            step_ = range::limitStep(std::any_cast<int>(range.min_), std::any_cast<int>(range.max_), std::any_cast<int>(range.step_));
         } else if (value_.type() == typeid(double)) {
-            value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(range.value_);
-            step_ = range::limitStep(boost::any_cast<double>(range.min_), boost::any_cast<double>(range.max_), boost::any_cast<double>(range.step_));
+            value_change = std::any_cast<double>(value_) != std::any_cast<double>(range.value_);
+            step_ = range::limitStep(std::any_cast<double>(range.min_), std::any_cast<double>(range.max_), std::any_cast<double>(range.step_));
         }
     }
     value_ = range.value_;
@@ -67,28 +67,28 @@ std::string RangeParameter::toStringImpl() const
     std::stringstream v;
 
     if (value_.type() == typeid(int)) {
-        v << boost::any_cast<int>(value_);
+        v << std::any_cast<int>(value_);
 
     } else if (value_.type() == typeid(double)) {
-        v << boost::any_cast<double>(value_);
+        v << std::any_cast<double>(value_);
     }
 
     return std::string("[ranged: ") + v.str() + "]";
 }
 
-void RangeParameter::get_unsafe(boost::any& out) const
+void RangeParameter::get_unsafe(std::any& out) const
 {
     out = value_;
 }
 
-bool RangeParameter::set_unsafe(const boost::any& v)
+bool RangeParameter::set_unsafe(const std::any& v)
 {
     bool change = true;
-    if (!value_.empty()) {
+    if (value_.has_value()) {
         if (v.type() == typeid(int)) {
-            change = boost::any_cast<int>(value_) != boost::any_cast<int>(v);
+            change = std::any_cast<int>(value_) != std::any_cast<int>(v);
         } else if (v.type() == typeid(double)) {
-            change = boost::any_cast<double>(value_) != boost::any_cast<double>(v);
+            change = std::any_cast<double>(value_) != std::any_cast<double>(v);
         }
     }
     if (change) {
@@ -115,16 +115,16 @@ bool RangeParameter::cloneDataFrom(const Clonable& other)
 void RangeParameter::doSerialize(YAML::Node& n) const
 {
     if (value_.type() == typeid(int)) {
-        n["int"] = boost::any_cast<int>(value_);
-        n["min"] = boost::any_cast<int>(min_);
-        n["max"] = boost::any_cast<int>(max_);
-        n["step"] = boost::any_cast<int>(step_);
+        n["int"] = std::any_cast<int>(value_);
+        n["min"] = std::any_cast<int>(min_);
+        n["max"] = std::any_cast<int>(max_);
+        n["step"] = std::any_cast<int>(step_);
 
     } else if (value_.type() == typeid(double)) {
-        n["double"] = boost::any_cast<double>(value_);
-        n["min"] = boost::any_cast<double>(min_);
-        n["max"] = boost::any_cast<double>(max_);
-        n["step"] = boost::any_cast<double>(step_);
+        n["double"] = std::any_cast<double>(value_);
+        n["min"] = std::any_cast<double>(min_);
+        n["max"] = std::any_cast<double>(max_);
+        n["step"] = std::any_cast<double>(step_);
     }
 }
 
@@ -137,7 +137,7 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
         if (n["max"].IsDefined())
             max_ = n["max"].as<int>();
         if (n["step"].IsDefined())
-            step_ = range::limitStep(boost::any_cast<int>(min_), boost::any_cast<int>(max_), n["step"].as<int>());
+            step_ = range::limitStep(std::any_cast<int>(min_), std::any_cast<int>(max_), n["step"].as<int>());
 
     } else if (n["double"].IsDefined()) {
         value_ = n["double"].as<double>();
@@ -146,16 +146,16 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
         if (n["max"].IsDefined())
             max_ = n["max"].as<double>();
         if (n["step"].IsDefined())
-            step_ = range::limitStep(boost::any_cast<double>(min_), boost::any_cast<double>(max_), n["step"].as<double>());
+            step_ = range::limitStep(std::any_cast<double>(min_), std::any_cast<double>(max_), n["step"].as<double>());
     }
 
-    if (def_min_.empty())
+    if (!def_min_.has_value())
         def_min_ = min_;
 
-    if (def_max_.empty())
+    if (!def_max_.has_value())
         def_max_ = max_;
 
-    if (def_value_.empty())
+    if (!def_value_.has_value())
         def_value_ = value_;
 }
 

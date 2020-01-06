@@ -27,8 +27,8 @@
 using namespace csapex;
 
 bool SerializationBuffer::initialized_ = false;
-std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const boost::any& a)>> SerializationBuffer::any_serializer;
-std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, boost::any& a)>> SerializationBuffer::any_deserializer;
+std::map<std::type_index, std::function<void(SerializationBuffer& buffer, const std::any& a)>> SerializationBuffer::any_serializer;
+std::map<uint8_t, std::function<void(const SerializationBuffer& buffer, std::any& a)>> SerializationBuffer::any_deserializer;
 
 SerializationBuffer::SerializationBuffer() : pos(HEADER_LENGTH)
 {
@@ -76,11 +76,11 @@ void SerializationBuffer::init()
     ++id
 #define ADD_ANY_TYPE_IMPL(...)                                                                                                                                                                         \
     {                                                                                                                                                                                                  \
-        auto serializer = [id](SerializationBuffer& buffer, const boost::any& any) {                                                                                                                   \
+        auto serializer = [id](SerializationBuffer& buffer, const std::any& any) {                                                                                                                   \
             buffer << ((uint8_t)id);                                                                                                                                                                   \
-            buffer << (boost::any_cast<__VA_ARGS__>(any));                                                                                                                                             \
+            buffer << (std::any_cast<__VA_ARGS__>(any));                                                                                                                                             \
         };                                                                                                                                                                                             \
-        auto deserializer = [](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
+        auto deserializer = [](const SerializationBuffer& buffer, std::any& any) {                                                                                                                 \
             __VA_ARGS__ v;                                                                                                                                                                             \
             buffer >> (v);                                                                                                                                                                             \
             any = v;                                                                                                                                                                                   \
@@ -93,12 +93,12 @@ void SerializationBuffer::init()
 
 #define ADD_ANY_TYPE_1(P1, GET_P1, ...)                                                                                                                                                                \
     {                                                                                                                                                                                                  \
-        auto serializer = [id](SerializationBuffer& buffer, const boost::any& any) {                                                                                                                   \
+        auto serializer = [id](SerializationBuffer& buffer, const std::any& any) {                                                                                                                   \
             buffer << ((uint8_t)id);                                                                                                                                                                   \
-            buffer << (boost::any_cast<__VA_ARGS__>(any)).GET_P1;                                                                                                                                      \
-            buffer << (boost::any_cast<__VA_ARGS__>(any));                                                                                                                                             \
+            buffer << (std::any_cast<__VA_ARGS__>(any)).GET_P1;                                                                                                                                      \
+            buffer << (std::any_cast<__VA_ARGS__>(any));                                                                                                                                             \
         };                                                                                                                                                                                             \
-        auto deserializer = [](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
+        auto deserializer = [](const SerializationBuffer& buffer, std::any& any) {                                                                                                                 \
             P1 p1;                                                                                                                                                                                     \
             buffer >> (p1);                                                                                                                                                                            \
             __VA_ARGS__ v(p1);                                                                                                                                                                         \
@@ -109,12 +109,12 @@ void SerializationBuffer::init()
 
 #define ADD_ANY_TYPE_1PC(P1, GET_P1, ...)                                                                                                                                                              \
     {                                                                                                                                                                                                  \
-        auto serializer = [id](SerializationBuffer& buffer, const boost::any& any) {                                                                                                                   \
+        auto serializer = [id](SerializationBuffer& buffer, const std::any& any) {                                                                                                                   \
             buffer << ((uint8_t)id);                                                                                                                                                                   \
-            buffer << (boost::any_cast<std::shared_ptr<__VA_ARGS__ const>>(any))->GET_P1;                                                                                                              \
-            buffer << *(boost::any_cast<std::shared_ptr<__VA_ARGS__ const>>(any));                                                                                                                     \
+            buffer << (std::any_cast<std::shared_ptr<__VA_ARGS__ const>>(any))->GET_P1;                                                                                                              \
+            buffer << *(std::any_cast<std::shared_ptr<__VA_ARGS__ const>>(any));                                                                                                                     \
         };                                                                                                                                                                                             \
-        auto deserializer = [](const SerializationBuffer& buffer, boost::any& any) {                                                                                                                 \
+        auto deserializer = [](const SerializationBuffer& buffer, std::any& any) {                                                                                                                 \
             P1 p1;                                                                                                                                                                                     \
             buffer >> (p1);                                                                                                                                                                            \
             auto v = std::make_shared<__VA_ARGS__>(p1);                                                                                                                                                \
@@ -261,14 +261,14 @@ void SerializationBuffer::readRaw(uint8_t* data, const std::size_t length) const
     pos += length;
 }
 
-SerializationBuffer& SerializationBuffer::writeAny(const boost::any& any)
+SerializationBuffer& SerializationBuffer::writeAny(const std::any& any)
 {
     auto fn = any_serializer.find(any.type());
     if (fn != any_serializer.end()) {
         fn->second(*this, any);
     } else {
-        if (!any.empty()) {
-            std::cerr << "cannot serialize boost::any containing " << type2name(any.type()) << std::endl;
+        if (any.has_value()) {
+            std::cerr << "cannot serialize std::any containing " << type2name(any.type()) << std::endl;
         }
         operator<<((uint8_t)0);
     }
@@ -276,13 +276,13 @@ SerializationBuffer& SerializationBuffer::writeAny(const boost::any& any)
     return *this;
 }
 
-const SerializationBuffer& SerializationBuffer::readAny(boost::any& any) const
+const SerializationBuffer& SerializationBuffer::readAny(std::any& any) const
 {
     uint8_t type;
     operator>>(type);
 
     if (type == 0) {
-        // empty boost::any
+        // empty std::any
         return *this;
     }
 
@@ -290,7 +290,7 @@ const SerializationBuffer& SerializationBuffer::readAny(boost::any& any) const
     if (fn != any_deserializer.end()) {
         fn->second(*this, any);
     } else {
-        std::cerr << "cannot deserialize boost::any with type " << (int)type << std::endl;
+        std::cerr << "cannot deserialize std::any with type " << (int)type << std::endl;
     }
 
     return *this;

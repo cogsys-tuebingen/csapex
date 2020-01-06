@@ -7,7 +7,7 @@
 #include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 CSAPEX_REGISTER_PARAM(BitSetParameter)
 
@@ -159,21 +159,21 @@ std::string BitSetParameter::toStringImpl() const
     return std::string("[bitset: ") + "]";
 }
 
-void BitSetParameter::get_unsafe(boost::any& out) const
+void BitSetParameter::get_unsafe(std::any& out) const
 {
     out = value_;
 }
 
-bool BitSetParameter::set_unsafe(const boost::any& v)
+bool BitSetParameter::set_unsafe(const std::any& v)
 {
     if (v.type() == typeid(int)) {
-        int val = boost::any_cast<int>(v);
+        int val = std::any_cast<int>(v);
         if (val != value_) {
             value_ = val;
             return true;
         }
     } else if (v.type() == typeid(std::pair<std::string, bool>)) {
-        auto pair = boost::any_cast<std::pair<std::string, bool>>(v);
+        auto pair = std::any_cast<std::pair<std::string, bool>>(v);
         setBitTo(pair.first, pair.second);
         return true;
     }
@@ -200,7 +200,7 @@ bool BitSetParameter::cloneDataFrom(const Clonable& other)
 
 void BitSetParameter::doSerialize(YAML::Node& n) const
 {
-    n["int"] = boost::any_cast<int>(value_);
+    n["int"] = std::any_cast<int>(value_);
     n["values"] = set_;
 }
 

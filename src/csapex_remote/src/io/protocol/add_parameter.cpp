@@ -18,7 +18,7 @@ using namespace csapex;
 ///
 /// REQUEST
 ///
-AddParameter::ParameterRequest::ParameterRequest(const AUUID& id, const std::string& name, const std::string& description, boost::any value, bool persistent)
+AddParameter::ParameterRequest::ParameterRequest(const AUUID& id, const std::string& name, const std::string& description, std::any value, bool persistent)
   : RequestImplementation(0), id_(id), name_(name), description_(description), value_(value), persistent_(persistent)
 {
     apex_assert_hard(!name_.empty());

@@ -7,7 +7,7 @@
 #include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 using namespace csapex;
 using namespace param;
@@ -46,14 +46,14 @@ std::string StringListParameter::toStringImpl() const
     return std::string("[string_list: ") + v.str() + "]";
 }
 
-void StringListParameter::get_unsafe(boost::any& out) const
+void StringListParameter::get_unsafe(std::any& out) const
 {
     out = list_;
 }
 
-bool StringListParameter::set_unsafe(const boost::any& v)
+bool StringListParameter::set_unsafe(const std::any& v)
 {
-    auto l = boost::any_cast<std::vector<std::string> >(v);
+    auto l = std::any_cast<std::vector<std::string> >(v);
     if (list_ != l) {
         list_ = l;
         return true;

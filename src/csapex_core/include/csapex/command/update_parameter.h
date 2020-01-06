@@ -9,7 +9,7 @@
 #include <csapex/serialization/serialization_buffer.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {

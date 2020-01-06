@@ -17,7 +17,7 @@ CoreNote::CoreNote(CoreNoteType request_type) : NoteImplementation(AUUID::NONE),
 {
 }
 
-CoreNote::CoreNote(CoreNoteType request_type, const std::vector<boost::any>& payload) : NoteImplementation(AUUID::NONE), note_type_(request_type), payload_(payload)
+CoreNote::CoreNote(CoreNoteType request_type, const std::vector<std::any>& payload) : NoteImplementation(AUUID::NONE), note_type_(request_type), payload_(payload)
 {
 }
 

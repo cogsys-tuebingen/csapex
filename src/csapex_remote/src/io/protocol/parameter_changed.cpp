@@ -14,7 +14,7 @@ CSAPEX_REGISTER_BROADCAST_SERIALIZER(ParameterChanged)
 
 using namespace csapex;
 
-ParameterChanged::ParameterChanged(const UUID& id, const boost::any& value) : uuid(id), value(value)
+ParameterChanged::ParameterChanged(const UUID& id, const std::any& value) : uuid(id), value(value)
 {
 }
 
@@ -39,7 +39,7 @@ AUUID ParameterChanged::getUUID() const
     return uuid;
 }
 
-boost::any ParameterChanged::getValue() const
+std::any ParameterChanged::getValue() const
 {
     return value;
 }

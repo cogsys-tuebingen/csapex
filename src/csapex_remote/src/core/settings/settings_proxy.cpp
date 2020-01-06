@@ -63,7 +63,7 @@ void SettingsProxy::loadTemporary(YAML::Node& node)
 void SettingsProxy::add(csapex::param::Parameter::Ptr p, bool persistent)
 {
     AUUID param_id(UUIDProvider::makeUUID_without_parent(std::string(":") + p->name()));
-    boost::any value;
+    std::any value;
     p->get_unsafe(value);
     if (const auto& response = session_->sendRequest<AddParameter>(param_id, p->name(), p->description().toString(), value, persistent)) {
         if (response->getParameter()) {

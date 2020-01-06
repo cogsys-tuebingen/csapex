@@ -343,19 +343,19 @@ void NodeState::writeYaml(YAML::Node& out) const
             n["key"] = pair.first;
 
             if (pair.second.type() == typeid(int)) {
-                n["int"] = boost::any_cast<int>(pair.second);
+                n["int"] = std::any_cast<int>(pair.second);
 
             } else if (pair.second.type() == typeid(double)) {
-                n["double"] = boost::any_cast<double>(pair.second);
+                n["double"] = std::any_cast<double>(pair.second);
 
             } else if (pair.second.type() == typeid(bool)) {
-                n["bool"] = boost::any_cast<bool>(pair.second);
+                n["bool"] = std::any_cast<bool>(pair.second);
 
             } else if (pair.second.type() == typeid(std::string)) {
-                n["string"] = boost::any_cast<std::string>(pair.second);
+                n["string"] = std::any_cast<std::string>(pair.second);
 
             } else if (pair.second.type() == typeid(std::vector<std::string>)) {
-                n["stringv"] = boost::any_cast<std::vector<std::string>>(pair.second);
+                n["stringv"] = std::any_cast<std::vector<std::string>>(pair.second);
             }
 
             dict.push_back(n);
@@ -548,7 +548,7 @@ void NodeState::deleteDictionaryEntry(const std::string& key)
 template <typename T>
 T NodeState::getDictionaryEntry(const std::string& key) const
 {
-    return boost::any_cast<T>(dictionary.at(key));
+    return std::any_cast<T>(dictionary.at(key));
 }
 template <typename T>
 void NodeState::setDictionaryEntry(const std::string& key, const T& value)

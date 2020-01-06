@@ -32,28 +32,28 @@ IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interva
     Parameter::operator=(static_cast<const Parameter&>(interval));
 
     bool change = false;
-    if (values_.first.empty() || values_.second.empty()) {
+    if (!values_.first.has_value() || !values_.second.has_value()) {
         change = true;
 
     } else {
         if (type() == typeid(std::pair<int, int>)) {
-            change = boost::any_cast<int>(values_.first) != boost::any_cast<int>(interval.values_.first) || boost::any_cast<int>(values_.second) != boost::any_cast<int>(interval.values_.second);
+            change = std::any_cast<int>(values_.first) != std::any_cast<int>(interval.values_.first) || std::any_cast<int>(values_.second) != std::any_cast<int>(interval.values_.second);
         } else if (type() == typeid(std::pair<double, double>)) {
-            change = boost::any_cast<double>(values_.first) != boost::any_cast<double>(interval.values_.first) ||
-                     boost::any_cast<double>(values_.second) != boost::any_cast<double>(interval.values_.second);
+            change = std::any_cast<double>(values_.first) != std::any_cast<double>(interval.values_.first) ||
+                     std::any_cast<double>(values_.second) != std::any_cast<double>(interval.values_.second);
         }
     }
     values_ = interval.values_;
 
     def_ = interval.def_;
 
-    if (!interval.max_.empty()) {
+    if (interval.max_.has_value()) {
         max_ = interval.max_;
     }
-    if (!interval.min_.empty()) {
+    if (interval.min_.has_value()) {
         min_ = interval.min_;
     }
-    if (!interval.step_.empty()) {
+    if (interval.step_.has_value()) {
         step_ = interval.step_;
     }
 
@@ -66,7 +66,7 @@ IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interva
 
 bool IntervalParameter::accepts(const std::type_info& type) const
 {
-    if (values_.first.empty()) {
+    if (!values_.first.has_value()) {
         return type == typeid(std::pair<int, int>) || type == typeid(std::pair<double, double>);
     } else {
         return Parameter::accepts(type);
@@ -92,10 +92,10 @@ std::string IntervalParameter::toStringImpl() const
     v << "[interval: ";
 
     if (values_.first.type() == typeid(int)) {
-        v << boost::any_cast<int>(values_.first) << " : " << boost::any_cast<int>(values_.second);
+        v << std::any_cast<int>(values_.first) << " : " << std::any_cast<int>(values_.second);
 
     } else if (values_.first.type() == typeid(double)) {
-        v << boost::any_cast<double>(values_.first) << " : " << boost::any_cast<double>(values_.second);
+        v << std::any_cast<double>(values_.first) << " : " << std::any_cast<double>(values_.second);
     }
 
     v << "]";
@@ -103,36 +103,36 @@ std::string IntervalParameter::toStringImpl() const
     return v.str();
 }
 
-void IntervalParameter::get_unsafe(boost::any& out) const
+void IntervalParameter::get_unsafe(std::any& out) const
 {
     Lock l = lock();
     if (is<std::pair<int, int> >()) {
-        out = std::make_pair(boost::any_cast<int>(values_.first), boost::any_cast<int>(values_.second));
+        out = std::make_pair(std::any_cast<int>(values_.first), std::any_cast<int>(values_.second));
     } else {
-        out = std::make_pair(boost::any_cast<double>(values_.first), boost::any_cast<double>(values_.second));
+        out = std::make_pair(std::any_cast<double>(values_.first), std::any_cast<double>(values_.second));
     }
 }
 
-bool IntervalParameter::set_unsafe(const boost::any& v)
+bool IntervalParameter::set_unsafe(const std::any& v)
 {
     Lock l = lock();
     if (v.type() == typeid(std::pair<int, int>)) {
-        auto val = boost::any_cast<std::pair<int, int> >(v);
-        if (values_.first.empty()) {
+        auto val = std::any_cast<std::pair<int, int> >(v);
+        if (!values_.first.has_value()) {
             values_ = val;
             return true;
         }
-        if (boost::any_cast<int>(values_.first) != val.first || boost::any_cast<int>(values_.second) != val.second) {
+        if (std::any_cast<int>(values_.first) != val.first || std::any_cast<int>(values_.second) != val.second) {
             values_ = val;
             return true;
         }
     } else {
-        auto val = boost::any_cast<std::pair<double, double> >(v);
-        if (values_.first.empty()) {
+        auto val = std::any_cast<std::pair<double, double> >(v);
+        if (!values_.first.has_value()) {
             values_ = val;
             return true;
         }
-        if (boost::any_cast<double>(values_.first) != val.first || boost::any_cast<double>(values_.second) != val.second) {
+        if (std::any_cast<double>(values_.first) != val.first || std::any_cast<double>(values_.second) != val.second) {
             values_ = val;
             return true;
         }
@@ -159,24 +159,24 @@ void IntervalParameter::doSerialize(YAML::Node& n) const
 {
     Lock l = lock();
     if (values_.first.type() == typeid(int)) {
-        n["int"][0] = boost::any_cast<int>(values_.first);
-        n["int"][1] = boost::any_cast<int>(values_.second);
-        if (!min_.empty())
-            n["min"] = boost::any_cast<int>(min_);
-        if (!max_.empty())
-            n["max"] = boost::any_cast<int>(max_);
-        if (!step_.empty())
-            n["step"] = boost::any_cast<int>(step_);
+        n["int"][0] = std::any_cast<int>(values_.first);
+        n["int"][1] = std::any_cast<int>(values_.second);
+        if (min_.has_value())
+            n["min"] = std::any_cast<int>(min_);
+        if (max_.has_value())
+            n["max"] = std::any_cast<int>(max_);
+        if (step_.has_value())
+            n["step"] = std::any_cast<int>(step_);
 
     } else if (values_.first.type() == typeid(double)) {
-        n["double"][0] = boost::any_cast<double>(values_.first);
-        n["double"][1] = boost::any_cast<double>(values_.second);
-        if (!min_.empty())
-            n["min"] = boost::any_cast<double>(min_);
-        if (!max_.empty())
-            n["max"] = boost::any_cast<double>(max_);
-        if (!step_.empty())
-            n["step"] = boost::any_cast<double>(step_);
+        n["double"][0] = std::any_cast<double>(values_.first);
+        n["double"][1] = std::any_cast<double>(values_.second);
+        if (min_.has_value())
+            n["min"] = std::any_cast<double>(min_);
+        if (max_.has_value())
+            n["max"] = std::any_cast<double>(max_);
+        if (step_.has_value())
+            n["step"] = std::any_cast<double>(step_);
     }
 }
 

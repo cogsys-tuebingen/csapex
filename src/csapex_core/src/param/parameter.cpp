@@ -13,7 +13,7 @@
 #else
 #include <cxxabi.h>
 #endif
-#include <boost/any.hpp>
+#include <any>
 #include <iostream>
 
 using namespace csapex;
@@ -246,7 +246,7 @@ void Parameter::deserialize_yaml(const YAML::Node& n)
     }
 }
 
-void Parameter::access_unsafe(const Parameter& p, boost::any& out) const
+void Parameter::access_unsafe(const Parameter& p, std::any& out) const
 {
     p.get_unsafe(out);
 }

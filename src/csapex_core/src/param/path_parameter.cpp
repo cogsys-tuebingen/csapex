@@ -7,7 +7,7 @@
 #include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 CSAPEX_REGISTER_PARAM(PathParameter)
 
@@ -37,14 +37,14 @@ std::string PathParameter::toStringImpl() const
     return std::string("[path: ") + value_ + "]";
 }
 
-void PathParameter::get_unsafe(boost::any& out) const
+void PathParameter::get_unsafe(std::any& out) const
 {
     out = value_;
 }
 
-bool PathParameter::set_unsafe(const boost::any& v)
+bool PathParameter::set_unsafe(const std::any& v)
 {
-    auto val = boost::any_cast<std::string>(v);
+    auto val = std::any_cast<std::string>(v);
     if (value_ != val) {
         value_ = val;
         return true;

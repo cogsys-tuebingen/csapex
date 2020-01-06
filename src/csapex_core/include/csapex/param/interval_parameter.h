@@ -8,7 +8,7 @@
 /// SYSTEM
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/contains.hpp>
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -156,29 +156,29 @@ public:
     }
 
 protected:
-    void get_unsafe(boost::any& out) const override;
-    bool set_unsafe(const boost::any& v) override;
+    void get_unsafe(std::any& out) const override;
+    bool set_unsafe(const std::any& v) override;
 
 private:
     template <typename T>
-    T read(const boost::any& var) const
+    T read(const std::any& var) const
     {
-        BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
+        static_assert(boost::mpl::contains<IntervalParameterTypes, T>::value);
         try {
             Lock l = lock();
-            return boost::any_cast<T>(var);
+            return std::any_cast<T>(var);
 
-        } catch (const boost::bad_any_cast& e) {
+        } catch (const std::bad_any_cast& e) {
             throw std::logic_error(std::string("typeof IntervalParameter is not ") + typeid(T).name() + ": " + e.what());
         }
     }
 
 private:
-    std::pair<boost::any, boost::any> values_;
-    boost::any min_;
-    boost::any max_;
-    std::pair<boost::any, boost::any> def_;
-    boost::any step_;
+    std::pair<std::any, std::any> values_;
+    std::any min_;
+    std::any max_;
+    std::pair<std::any, std::any> def_;
+    std::any step_;
 };
 
 template <>

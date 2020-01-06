@@ -7,7 +7,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -21,7 +21,7 @@ class ProfilerNote : public NoteImplementation<ProfilerNote>
 public:
     ProfilerNote();
     ProfilerNote(ProfilerNoteType request_type, const AUUID& uuid);
-    ProfilerNote(ProfilerNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
+    ProfilerNote(ProfilerNoteType request_type, const AUUID& uuid, const std::vector<std::any>& payload);
 
     template <typename... Args>
     ProfilerNote(ProfilerNoteType request_type, const AUUID& uuid, Args... args) : ProfilerNote(request_type, uuid, { std::forward<Args>(args)... })
@@ -44,12 +44,12 @@ public:
     template <typename T>
     T getPayload(const std::size_t pos) const
     {
-        return boost::any_cast<T>(payload_.at(pos));
+        return std::any_cast<T>(payload_.at(pos));
     }
 
 private:
     ProfilerNoteType note_type_;
-    std::vector<boost::any> payload_;
+    std::vector<std::any> payload_;
 };
 
 }  // namespace csapex

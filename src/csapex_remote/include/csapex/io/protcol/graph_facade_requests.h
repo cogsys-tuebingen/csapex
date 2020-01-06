@@ -52,13 +52,13 @@ public:
         template <typename R>
         R getArgument(const std::size_t i) const
         {
-            return boost::any_cast<R>(arguments_.at(i));
+            return std::any_cast<R>(arguments_.at(i));
         }
 
     private:
         GraphFacadeRequestType request_type_;
         AUUID uuid_;
-        std::vector<boost::any> arguments_;
+        std::vector<std::any> arguments_;
     };
 
     class GraphFacadeResponse : public ResponseImplementation<GraphFacadeResponse>
@@ -66,7 +66,7 @@ public:
     public:
         GraphFacadeResponse(uint8_t request_id);
         GraphFacadeResponse(GraphFacadeRequestType request_type, const AUUID& uuid, uint8_t request_id);
-        GraphFacadeResponse(GraphFacadeRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id);
+        GraphFacadeResponse(GraphFacadeRequestType request_type, const AUUID& uuid, std::any result, uint8_t request_id);
 
         void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -79,14 +79,14 @@ public:
         template <typename R>
         R getResult() const
         {
-            return boost::any_cast<R>(result_);
+            return std::any_cast<R>(result_);
         }
 
     private:
         GraphFacadeRequestType request_type_;
         AUUID uuid_;
 
-        boost::any result_;
+        std::any result_;
     };
 
 public:

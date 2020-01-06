@@ -28,8 +28,8 @@ public:
     double getProgressMaximum() const;
 
 protected:
-    void get_unsafe(boost::any& out) const override;
-    bool set_unsafe(const boost::any& v) override;
+    void get_unsafe(std::any& out) const override;
+    bool set_unsafe(const std::any& v) override;
     std::string toStringImpl() const override;
 
     void doSerialize(YAML::Node& n) const override;

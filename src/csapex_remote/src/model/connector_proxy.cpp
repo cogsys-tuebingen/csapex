@@ -39,7 +39,7 @@ ConnectorProxy::ConnectorProxy(const SessionPtr& session, UUID uuid, Connectable
 #define HANDLE_STATIC_ACCESSOR(_enum, type, function)
 #define HANDLE_DYNAMIC_ACCESSOR(_enum, signal, type, function)                                                                                                                                         \
     case ConnectorNoteType::function##Changed: {                                                                                                                                                       \
-        auto new_value = boost::any_cast<type>(cn->getPayload());                                                                                                                                      \
+        auto new_value = std::any_cast<type>(cn->getPayload());                                                                                                                                      \
         value_##function##_ = new_value;                                                                                                                                                               \
         signal(new_value);                                                                                                                                                                             \
     } break;

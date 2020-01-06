@@ -72,7 +72,7 @@ void TcpServer::startSession(SessionPtr session)
             UUID id = UUIDProvider::makeUUID_without_parent(std::string(":") + name);
             param::ParameterPtr p = core_.getSettings().get(name);
 
-            boost::any any;
+            std::any any;
             p->get_unsafe(any);
             session->write(std::make_shared<ParameterChanged>(id, any));
         }

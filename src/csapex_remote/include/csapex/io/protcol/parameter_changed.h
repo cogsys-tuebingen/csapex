@@ -7,7 +7,7 @@
 #include <csapex/serialization/serialization_fwd.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -19,19 +19,19 @@ class ParameterChangedSerializer;
 class ParameterChanged : public BroadcastImplementation<ParameterChanged>
 {
 public:
-    ParameterChanged(const UUID& id, const boost::any& value);
+    ParameterChanged(const UUID& id, const std::any& value);
     ParameterChanged();
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
     AUUID getUUID() const;
-    boost::any getValue() const;
+    std::any getValue() const;
 
 private:
     AUUID uuid;
 
-    boost::any value;
+    std::any value;
 };
 
 }  // namespace csapex

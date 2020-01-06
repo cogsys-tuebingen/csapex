@@ -7,7 +7,7 @@
 
 /// SYSTEM
 #include <vector>
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -74,38 +74,38 @@ public:
 
     template <typename T>
     bool contains(const T& value);
-    bool contains(const boost::any& value);
+    bool contains(const std::any& value);
 
     int noParameters() const;
 
 protected:
-    void get_unsafe(boost::any& out) const override;
-    bool set_unsafe(const boost::any& v) override;
+    void get_unsafe(std::any& out) const override;
+    bool set_unsafe(const std::any& v) override;
 
     template <typename T>
     void doSerializeImplementation(const std::string& type_name, YAML::Node& e) const;
     template <typename T>
     void doDeserializeImplementation(const std::string& type_name, const YAML::Node& n);
 
-    std::string convertToString(const boost::any& v) const;
+    std::string convertToString(const std::any& v) const;
 
 private:
     template <typename T>
-    T read(const boost::any& var) const
+    T read(const std::any& var) const
     {
         try {
-            return boost::any_cast<T>(var);
+            return std::any_cast<T>(var);
 
-        } catch (const boost::bad_any_cast& e) {
+        } catch (const std::bad_any_cast& e) {
             throw std::logic_error(std::string("typeof SetParameter is not ") + typeid(T).name() + ": " + e.what());
         }
     }
 
 private:
-    boost::any value_;
+    std::any value_;
     std::string txt_;
-    std::map<std::string, boost::any> set_;
-    boost::any def_;
+    std::map<std::string, std::any> set_;
+    std::any def_;
 };
 
 template <>

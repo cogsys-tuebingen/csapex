@@ -31,7 +31,7 @@ ConnectorRequests::ConnectorRequest::ConnectorRequest(ConnectorRequestType reque
     apex_assert(uuid_ != UUID::NONE);
 }
 
-ConnectorRequests::ConnectorRequest::ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid, const boost::any& payload)
+ConnectorRequests::ConnectorRequest::ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid, const std::any& payload)
   : RequestImplementation(0), request_type_(request_type), uuid_(uuid), payload_(payload)
 {
     apex_assert(uuid_ != UUID::NONE);
@@ -64,11 +64,11 @@ ResponsePtr ConnectorRequests::ConnectorRequest::execute(const SessionPtr& sessi
 
     switch (request_type_) {
         case ConnectorRequests::ConnectorRequestType::IsConnectedTo: {
-            UUID other_id = boost::any_cast<UUID>(payload_);
+            UUID other_id = std::any_cast<UUID>(payload_);
             return std::make_shared<ConnectorResponse>(request_type_, c->isConnectedTo(other_id), getRequestID(), uuid_);
         }
         case ConnectorRequests::ConnectorRequestType::IsActivelyConnectedTo: {
-            UUID other_id = boost::any_cast<UUID>(payload_);
+            UUID other_id = std::any_cast<UUID>(payload_);
             return std::make_shared<ConnectorResponse>(request_type_, c->isActivelyConnectedTo(other_id), getRequestID(), uuid_);
         }
 
@@ -115,7 +115,7 @@ ConnectorRequests::ConnectorResponse::ConnectorResponse(ConnectorRequestType req
   : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid)
 {
 }
-ConnectorRequests::ConnectorResponse::ConnectorResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid)
+ConnectorRequests::ConnectorResponse::ConnectorResponse(ConnectorRequestType request_type, std::any result, uint8_t request_id, const AUUID& uuid)
   : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid), result_(result)
 {
 }

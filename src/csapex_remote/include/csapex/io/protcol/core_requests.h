@@ -58,7 +58,7 @@ public:
     private:
         CoreRequestType request_type_;
 
-        std::vector<boost::any> parameters_;
+        std::vector<std::any> parameters_;
     };
 
     class CoreResponse : public ResponseImplementation<CoreResponse>
@@ -66,7 +66,7 @@ public:
     public:
         CoreResponse(uint8_t request_id);
         CoreResponse(CoreRequestType request_type, uint8_t request_id);
-        CoreResponse(CoreRequestType request_type, boost::any result, uint8_t request_id);
+        CoreResponse(CoreRequestType request_type, std::any result, uint8_t request_id);
 
         void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -74,7 +74,7 @@ public:
         template <typename R>
         R getResult() const
         {
-            return boost::any_cast<R>(result_);
+            return std::any_cast<R>(result_);
         }
 
         std::string getType() const override
@@ -85,7 +85,7 @@ public:
     private:
         CoreRequestType request_type_;
 
-        boost::any result_;
+        std::any result_;
     };
 
 public:

@@ -31,7 +31,7 @@ GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type) : broadcast_
 GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid) : broadcast_type_(broadcast_type), graph_uuid_(uuid)
 {
 }
-GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid, boost::any payload) : broadcast_type_(broadcast_type), graph_uuid_(uuid), payload_(payload)
+GraphBroadcasts::GraphBroadcasts(GraphBroadcastType broadcast_type, AUUID uuid, std::any payload) : broadcast_type_(broadcast_type), graph_uuid_(uuid), payload_(payload)
 {
 }
 

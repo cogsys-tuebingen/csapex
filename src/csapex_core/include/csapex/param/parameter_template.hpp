@@ -94,14 +94,14 @@ protected:
         throw std::logic_error(std::string("invalid access to data of type ") + type2name(type));
     }
 
-    void get_unsafe(boost::any& out) const override
+    void get_unsafe(std::any& out) const override
     {
         out = value_;
     }
 
-    bool set_unsafe(const boost::any& v) override
+    bool set_unsafe(const std::any& v) override
     {
-        Type a = boost::any_cast<Type>(v);
+        Type a = std::any_cast<Type>(v);
 
         if (a != value_) {
             value_ = a;

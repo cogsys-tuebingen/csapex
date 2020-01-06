@@ -7,7 +7,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -37,7 +37,7 @@ class GraphNote : public NoteImplementation<GraphNote>
 public:
     GraphNote();
     GraphNote(GraphNoteType request_type, const AUUID& uuid);
-    GraphNote(GraphNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
+    GraphNote(GraphNoteType request_type, const AUUID& uuid, const std::vector<std::any>& payload);
 
     template <typename... Args>
     GraphNote(GraphNoteType request_type, const AUUID& uuid, Args... args) : GraphNote(request_type, uuid, { std::forward<Args>(args)... })
@@ -60,12 +60,12 @@ public:
     template <typename T>
     T getPayload(const std::size_t pos) const
     {
-        return boost::any_cast<T>(payload_.at(pos));
+        return std::any_cast<T>(payload_.at(pos));
     }
 
 private:
     GraphNoteType note_type_;
-    std::vector<boost::any> payload_;
+    std::vector<std::any> payload_;
 };
 
 }  // namespace csapex

@@ -13,7 +13,7 @@
 #include <memory>
 #include <csapex/utility/slim_signal.hpp>
 #include <mutex>
-#include <boost/any.hpp>
+#include <any>
 
 /// FORWARD DECLARATIONS
 namespace YAML
@@ -138,9 +138,9 @@ protected:
 
         {
             Lock l = lock();
-            boost::any v;
+            std::any v;
             get_unsafe(v);
-            return boost::any_cast<T>(v);
+            return std::any_cast<T>(v);
         }
     }
 
@@ -189,8 +189,8 @@ public:
         }
     }
 
-    virtual void get_unsafe(boost::any& out) const = 0;
-    virtual bool set_unsafe(const boost::any& v) = 0;
+    virtual void get_unsafe(std::any& out) const = 0;
+    virtual bool set_unsafe(const std::any& v) = 0;
 
 public:
     static std::string type2string(const std::type_info& type);
@@ -203,7 +203,7 @@ protected:
     explicit Parameter(const std::string& name, const ParameterDescription& description);
     Parameter(const Parameter& other);
 
-    void access_unsafe(const Parameter& p, boost::any& out) const;
+    void access_unsafe(const Parameter& p, std::any& out) const;
 
 private:
     void setDescription(const ParameterDescription& desc);

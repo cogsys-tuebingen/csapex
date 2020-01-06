@@ -8,7 +8,7 @@
 /// SYSTEM
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/contains.hpp>
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -149,30 +149,30 @@ public:
     }
 
 protected:
-    void get_unsafe(boost::any& out) const override;
-    bool set_unsafe(const boost::any& v) override;
+    void get_unsafe(std::any& out) const override;
+    bool set_unsafe(const std::any& v) override;
 
 private:
     template <typename T>
-    T read(const boost::any& var) const
+    T read(const std::any& var) const
     {
-        BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
+        static_assert(boost::mpl::contains<RangeParameterTypes, T>::value);
         try {
-            return boost::any_cast<T>(var);
+            return std::any_cast<T>(var);
 
-        } catch (const boost::bad_any_cast& e) {
+        } catch (const std::bad_any_cast& e) {
             throw std::logic_error(std::string("typeof RangeParameter is not ") + typeid(T).name() + ": " + e.what());
         }
     }
 
 private:
-    boost::any value_;
-    boost::any min_;
-    boost::any max_;
-    boost::any def_value_;
-    boost::any def_min_;
-    boost::any def_max_;
-    boost::any step_;
+    std::any value_;
+    std::any min_;
+    std::any max_;
+    std::any def_value_;
+    std::any def_min_;
+    std::any def_max_;
+    std::any step_;
 };
 
 template <>

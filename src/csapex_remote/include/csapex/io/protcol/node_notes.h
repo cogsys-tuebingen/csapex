@@ -7,7 +7,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -53,7 +53,7 @@ class NodeNote : public NoteImplementation<NodeNote>
 public:
     NodeNote();
     NodeNote(NodeNoteType request_type, const AUUID& uuid);
-    NodeNote(NodeNoteType request_type, const AUUID& uuid, const std::vector<boost::any>& payload);
+    NodeNote(NodeNoteType request_type, const AUUID& uuid, const std::vector<std::any>& payload);
 
     template <typename... Args>
     NodeNote(NodeNoteType request_type, const AUUID& uuid, Args... args) : NodeNote(request_type, uuid, { std::forward<Args>(args)... })
@@ -76,12 +76,12 @@ public:
     template <typename T>
     T getPayload(const std::size_t pos) const
     {
-        return boost::any_cast<T>(payload_.at(pos));
+        return std::any_cast<T>(payload_.at(pos));
     }
 
 private:
     NodeNoteType note_type_;
-    std::vector<boost::any> payload_;
+    std::vector<std::any> payload_;
 };
 
 }  // namespace csapex

@@ -38,43 +38,43 @@ std::string ValueParameter::toStringImpl() const
     std::stringstream v;
 
     if (value_.type() == typeid(int)) {
-        v << boost::any_cast<int>(value_);
+        v << std::any_cast<int>(value_);
 
     } else if (value_.type() == typeid(double)) {
-        v << std::showpoint << std::setprecision(5) << boost::any_cast<double>(value_);
+        v << std::showpoint << std::setprecision(5) << std::any_cast<double>(value_);
 
     } else if (value_.type() == typeid(bool)) {
-        v << (boost::any_cast<bool>(value_) ? "true" : "false");
+        v << (std::any_cast<bool>(value_) ? "true" : "false");
 
     } else if (value_.type() == typeid(std::string)) {
-        v << boost::any_cast<std::string>(value_);
+        v << std::any_cast<std::string>(value_);
 
     } else if (value_.type() == typeid(long)) {
-        v << boost::any_cast<long>(value_);
+        v << std::any_cast<long>(value_);
     }
 
     return std::string("[value: ") + v.str() + "]";
 }
 
-void ValueParameter::get_unsafe(boost::any& out) const
+void ValueParameter::get_unsafe(std::any& out) const
 {
     out = value_;
 }
 
-bool ValueParameter::set_unsafe(const boost::any& v)
+bool ValueParameter::set_unsafe(const std::any& v)
 {
     bool change = true;
-    if (!value_.empty()) {
+    if (value_.has_value()) {
         if (v.type() == typeid(int)) {
-            change = boost::any_cast<int>(value_) != boost::any_cast<int>(v);
+            change = std::any_cast<int>(value_) != std::any_cast<int>(v);
         } else if (v.type() == typeid(double)) {
-            change = boost::any_cast<double>(value_) != boost::any_cast<double>(v);
+            change = std::any_cast<double>(value_) != std::any_cast<double>(v);
         } else if (v.type() == typeid(bool)) {
-            change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(v);
+            change = std::any_cast<bool>(value_) != std::any_cast<bool>(v);
         } else if (v.type() == typeid(std::string)) {
-            change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(v);
+            change = std::any_cast<std::string>(value_) != std::any_cast<std::string>(v);
         } else if (v.type() == typeid(long)) {
-            change = boost::any_cast<long>(value_) != boost::any_cast<long>(v);
+            change = std::any_cast<long>(value_) != std::any_cast<long>(v);
         }
     }
     if (change) {
@@ -91,15 +91,15 @@ bool ValueParameter::cloneDataFrom(const Clonable& other)
         bool value_change = true;
         if (value_.type() == value->value_.type()) {
             if (value_.type() == typeid(int)) {
-                value_change = boost::any_cast<int>(value_) != boost::any_cast<int>(value->value_);
+                value_change = std::any_cast<int>(value_) != std::any_cast<int>(value->value_);
             } else if (value_.type() == typeid(double)) {
-                value_change = boost::any_cast<double>(value_) != boost::any_cast<double>(value->value_);
+                value_change = std::any_cast<double>(value_) != std::any_cast<double>(value->value_);
             } else if (value_.type() == typeid(bool)) {
-                value_change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(value->value_);
+                value_change = std::any_cast<bool>(value_) != std::any_cast<bool>(value->value_);
             } else if (value_.type() == typeid(std::string)) {
-                value_change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(value->value_);
+                value_change = std::any_cast<std::string>(value_) != std::any_cast<std::string>(value->value_);
             } else if (value_.type() == typeid(long)) {
-                value_change = boost::any_cast<long>(value_) != boost::any_cast<long>(value->value_);
+                value_change = std::any_cast<long>(value_) != std::any_cast<long>(value->value_);
             }
         }
         *this = *value;
@@ -153,19 +153,19 @@ void ValueParameter::doDeserialize(const YAML::Node& n)
 void ValueParameter::doSerialize(YAML::Node& n) const
 {
     if (value_.type() == typeid(int)) {
-        n["int"] = boost::any_cast<int>(value_);
+        n["int"] = std::any_cast<int>(value_);
 
     } else if (value_.type() == typeid(double)) {
-        n["double"] = boost::any_cast<double>(value_);
+        n["double"] = std::any_cast<double>(value_);
 
     } else if (value_.type() == typeid(bool)) {
-        n["bool"] = boost::any_cast<bool>(value_);
+        n["bool"] = std::any_cast<bool>(value_);
 
     } else if (value_.type() == typeid(std::string)) {
-        n["string"] = boost::any_cast<std::string>(value_);
+        n["string"] = std::any_cast<std::string>(value_);
 
     } else if (value_.type() == typeid(long)) {
-        n["long"] = boost::any_cast<long>(value_);
+        n["long"] = std::any_cast<long>(value_);
     }
 }
 

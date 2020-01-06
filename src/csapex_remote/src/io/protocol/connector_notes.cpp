@@ -17,7 +17,7 @@ ConnectorNote::ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid) 
 {
 }
 
-ConnectorNote::ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid, const boost::any& payload) : NoteImplementation(uuid), note_type_(request_type), payload_(payload)
+ConnectorNote::ConnectorNote(ConnectorNoteType request_type, const AUUID& uuid, const std::any& payload) : NoteImplementation(uuid), note_type_(request_type), payload_(payload)
 {
 }
 

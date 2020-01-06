@@ -39,11 +39,11 @@ void SetParameter::setSet(const std::vector<std::string>& set)
     }
 
     if (!set.empty()) {
-        if (def_.empty()) {
+        if (!def_.has_value()) {
             def_ = set.front();
         }
 
-        if (value_.empty()) {
+        if (!value_.has_value()) {
             value_ = def_;
         }
     }
@@ -53,7 +53,7 @@ void SetParameter::setSet(const std::vector<std::string>& set)
 
 void SetParameter::setByName(const std::string& name)
 {
-    std::map<std::string, boost::any>::iterator pos = set_.find(name);
+    std::map<std::string, std::any>::iterator pos = set_.find(name);
     if (pos == set_.end()) {
         throw std::runtime_error(std::string("no such parameter: ") + name);
     }
@@ -68,21 +68,21 @@ int SetParameter::noParameters() const
     return set_.size();
 }
 
-std::string SetParameter::convertToString(const boost::any& v) const
+std::string SetParameter::convertToString(const std::any& v) const
 {
     if (v.type() == typeid(std::string)) {
-        return boost::any_cast<std::string>(v);
+        return std::any_cast<std::string>(v);
     }
 
     std::stringstream ss;
     if (v.type() == typeid(int)) {
-        ss << boost::any_cast<int>(v);
+        ss << std::any_cast<int>(v);
 
     } else if (v.type() == typeid(double)) {
-        ss << boost::any_cast<double>(v);
+        ss << std::any_cast<double>(v);
 
     } else if (v.type() == typeid(bool)) {
-        ss << boost::any_cast<bool>(v);
+        ss << std::any_cast<bool>(v);
 
     } else {
         throw std::runtime_error(std::string("unsupported type: ") + v.type().name());
@@ -102,7 +102,7 @@ std::vector<std::string> SetParameter::getSetTexts() const
 
 std::string SetParameter::getText(int idx) const
 {
-    std::map<std::string, boost::any>::const_iterator i = set_.begin();
+    std::map<std::string, std::any>::const_iterator i = set_.begin();
     std::advance(i, idx);
     return i->first;
 }
@@ -110,7 +110,7 @@ std::string SetParameter::getText(int idx) const
 std::string SetParameter::getText() const
 {
     std::string str = convertToString(value_);
-    for (std::map<std::string, boost::any>::const_iterator it = set_.begin(); it != set_.end(); ++it) {
+    for (std::map<std::string, std::any>::const_iterator it = set_.begin(); it != set_.end(); ++it) {
         if (convertToString(it->second) == str) {
             return it->first;
         }
@@ -139,9 +139,9 @@ std::string SetParameter::toStringImpl() const
     return std::string("[set: ") + convertToString(value_) + "]";
 }
 
-void SetParameter::get_unsafe(boost::any& out) const
+void SetParameter::get_unsafe(std::any& out) const
 {
-    if (value_.empty()) {
+    if (!value_.has_value()) {
         out = def_;
     } else {
         out = value_;
@@ -153,7 +153,7 @@ bool SetParameter::contains(const T& value)
 {
     bool valid = false;
     for (const auto& pair : set_) {
-        if (boost::any_cast<T>(pair.second) == value) {
+        if (std::any_cast<T>(pair.second) == value) {
             valid = true;
             break;
         }
@@ -161,25 +161,25 @@ bool SetParameter::contains(const T& value)
     return valid;
 }
 
-bool SetParameter::contains(const boost::any& value)
+bool SetParameter::contains(const std::any& value)
 {
     if (value.type() == typeid(int)) {
-        return contains(boost::any_cast<int>(value));
+        return contains(std::any_cast<int>(value));
     } else if (value.type() == typeid(double)) {
-        return contains(boost::any_cast<double>(value));
+        return contains(std::any_cast<double>(value));
     } else if (value.type() == typeid(bool)) {
-        return contains(boost::any_cast<bool>(value));
+        return contains(std::any_cast<bool>(value));
     } else if (value.type() == typeid(std::string)) {
-        return contains(boost::any_cast<std::string>(value));
+        return contains(std::any_cast<std::string>(value));
     } else {
         return false;
     }
 }
 
-bool SetParameter::set_unsafe(const boost::any& v)
+bool SetParameter::set_unsafe(const std::any& v)
 {
     if (v.type() == typeid(std::pair<std::string, bool>)) {
-        auto pair = boost::any_cast<std::pair<std::string, bool>>(v);
+        auto pair = std::any_cast<std::pair<std::string, bool>>(v);
         setByName(pair.first);
         return true;
     }
@@ -189,15 +189,15 @@ bool SetParameter::set_unsafe(const boost::any& v)
     }
 
     bool change = true;
-    if (!value_.empty()) {
+    if (value_.has_value()) {
         if (v.type() == typeid(int)) {
-            change = boost::any_cast<int>(value_) != boost::any_cast<int>(v);
+            change = std::any_cast<int>(value_) != std::any_cast<int>(v);
         } else if (v.type() == typeid(double)) {
-            change = boost::any_cast<double>(value_) != boost::any_cast<double>(v);
+            change = std::any_cast<double>(value_) != std::any_cast<double>(v);
         } else if (v.type() == typeid(bool)) {
-            change = boost::any_cast<bool>(value_) != boost::any_cast<bool>(v);
+            change = std::any_cast<bool>(value_) != std::any_cast<bool>(v);
         } else if (v.type() == typeid(std::string)) {
-            change = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(v);
+            change = std::any_cast<std::string>(value_) != std::any_cast<std::string>(v);
         }
     }
 
@@ -221,13 +221,13 @@ bool SetParameter::cloneDataFrom(const Clonable& other)
             value_changed = true;
         }
         if (value_.type() == typeid(int)) {
-            value_changed = boost::any_cast<int>(value_) != boost::any_cast<int>(set->value_);
+            value_changed = std::any_cast<int>(value_) != std::any_cast<int>(set->value_);
         } else if (value_.type() == typeid(double)) {
-            value_changed = boost::any_cast<double>(value_) != boost::any_cast<double>(set->value_);
+            value_changed = std::any_cast<double>(value_) != std::any_cast<double>(set->value_);
         } else if (value_.type() == typeid(bool)) {
-            value_changed = boost::any_cast<bool>(value_) != boost::any_cast<bool>(set->value_);
+            value_changed = std::any_cast<bool>(value_) != std::any_cast<bool>(set->value_);
         } else if (value_.type() == typeid(std::string)) {
-            value_changed = boost::any_cast<std::string>(value_) != boost::any_cast<std::string>(set->value_);
+            value_changed = std::any_cast<std::string>(value_) != std::any_cast<std::string>(set->value_);
         }
         *this = *set;
         if (value_changed) {
@@ -297,11 +297,11 @@ void SetParameter::doSerializeImplementation(const std::string& type_name, YAML:
 {
     n["txt"] = getText();
 
-    n[type_name] = boost::any_cast<T>(value_);
+    n[type_name] = std::any_cast<T>(value_);
 
     std::vector<std::pair<std::string, T>> values;
-    for (const std::pair<std::string, boost::any>& pair : set_) {
-        values.push_back(std::make_pair(pair.first, boost::any_cast<T>(pair.second)));
+    for (const std::pair<std::string, std::any>& pair : set_) {
+        values.push_back(std::make_pair(pair.first, std::any_cast<T>(pair.second)));
     }
 
     n["values"] = values;

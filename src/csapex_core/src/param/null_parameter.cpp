@@ -38,12 +38,12 @@ std::string NullParameter::toStringImpl() const
     return std::string("[null]");
 }
 
-void NullParameter::get_unsafe(boost::any& out) const
+void NullParameter::get_unsafe(std::any& out) const
 {
     throw std::logic_error("cannot use null parameters");
 }
 
-bool NullParameter::set_unsafe(const boost::any& /*v*/)
+bool NullParameter::set_unsafe(const std::any& /*v*/)
 {
     throw std::logic_error("cannot use null parameters");
 }

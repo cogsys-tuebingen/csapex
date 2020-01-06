@@ -6,7 +6,7 @@
 #include <csapex_core/csapex_param_export.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -42,17 +42,17 @@ public:
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
 
 protected:
-    void get_unsafe(boost::any& out) const override;
-    bool set_unsafe(const boost::any& v) override;
+    void get_unsafe(std::any& out) const override;
+    bool set_unsafe(const std::any& v) override;
 
 private:
     template <typename T>
-    T read(const boost::any& var) const
+    T read(const std::any& var) const
     {
         try {
-            return boost::any_cast<T>(var);
+            return std::any_cast<T>(var);
 
-        } catch (const boost::bad_any_cast& e) {
+        } catch (const std::bad_any_cast& e) {
             throw std::logic_error(std::string("typeof StringListParameter is not ") + typeid(T).name() + ": " + e.what());
         }
     }

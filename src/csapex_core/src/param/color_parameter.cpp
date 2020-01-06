@@ -7,7 +7,7 @@
 #include <csapex/utility/yaml.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 CSAPEX_REGISTER_PARAM(ColorParameter)
 
@@ -52,14 +52,14 @@ std::string ColorParameter::toStringImpl() const
     return std::string("[color: ") + v.str() + "]";
 }
 
-void ColorParameter::get_unsafe(boost::any& out) const
+void ColorParameter::get_unsafe(std::any& out) const
 {
     out = colors_;
 }
 
-bool ColorParameter::set_unsafe(const boost::any& v)
+bool ColorParameter::set_unsafe(const std::any& v)
 {
-    auto col = boost::any_cast<std::vector<int> >(v);
+    auto col = std::any_cast<std::vector<int> >(v);
     if (colors_ != col) {
         colors_ = col;
         return true;

@@ -43,9 +43,9 @@ ResponsePtr CoreRequests::CoreRequest::execute(const SessionPtr& session, CsApex
                 core.saveAs(core.getSettings().get<std::string>("config"));
 
             } else if (args == 1) {
-                core.saveAs(boost::any_cast<std::string>(parameters_.at(0)));
+                core.saveAs(std::any_cast<std::string>(parameters_.at(0)));
             } else {
-                core.saveAs(boost::any_cast<std::string>(parameters_.at(0)), boost::any_cast<bool>(parameters_.at(1)));
+                core.saveAs(std::any_cast<std::string>(parameters_.at(0)), std::any_cast<bool>(parameters_.at(1)));
             }
         } break;
         case CoreRequestType::CoreLoad: {
@@ -54,13 +54,13 @@ ResponsePtr CoreRequests::CoreRequest::execute(const SessionPtr& session, CsApex
                 core.load(core.getSettings().get<std::string>("config"));
 
             } else {
-                core.load(boost::any_cast<std::string>(parameters_.at(0)));
+                core.load(std::any_cast<std::string>(parameters_.at(0)));
             }
         } break;
         case CoreRequestType::CoreSerialize: {
             int args = parameters_.size();
             if (args == 2) {
-                SnippetPtr snippet = core.serializeNodes(boost::any_cast<AUUID>(parameters_.at(0)), boost::any_cast<std::vector<UUID>>(parameters_.at(1)));
+                SnippetPtr snippet = core.serializeNodes(std::any_cast<AUUID>(parameters_.at(0)), std::any_cast<std::vector<UUID>>(parameters_.at(1)));
                 return std::make_shared<CoreResponse>(request_type_, snippet, getRequestID());
             }
         } break;
@@ -80,13 +80,13 @@ ResponsePtr CoreRequests::CoreRequest::execute(const SessionPtr& session, CsApex
             core.reset();
             break;
         case CoreRequestType::CoreSetSteppingMode:
-            core.setSteppingMode(boost::any_cast<bool>(parameters_.at(0)));
+            core.setSteppingMode(std::any_cast<bool>(parameters_.at(0)));
             break;
         case CoreRequestType::CoreSetPause:
-            core.setPause(boost::any_cast<bool>(parameters_.at(0)));
+            core.setPause(std::any_cast<bool>(parameters_.at(0)));
             break;
         case CoreRequestType::CoreSendNotification:
-            core.sendNotification(boost::any_cast<std::string>(parameters_.at(0)), static_cast<ErrorState::ErrorLevel>(boost::any_cast<uint8_t>(parameters_.at(1))));
+            core.sendNotification(std::any_cast<std::string>(parameters_.at(0)), static_cast<ErrorState::ErrorLevel>(std::any_cast<uint8_t>(parameters_.at(1))));
             break;
 
         case CoreRequestType::CoreGetSteppingMode:
@@ -120,7 +120,7 @@ void CoreRequests::CoreRequest::deserialize(const SerializationBuffer& data, con
 CoreRequests::CoreResponse::CoreResponse(CoreRequestType request_type, uint8_t request_id) : ResponseImplementation(request_id), request_type_(request_type)
 {
 }
-CoreRequests::CoreResponse::CoreResponse(CoreRequestType request_type, boost::any result, uint8_t request_id) : ResponseImplementation(request_id), request_type_(request_type), result_(result)
+CoreRequests::CoreResponse::CoreResponse(CoreRequestType request_type, std::any result, uint8_t request_id) : ResponseImplementation(request_id), request_type_(request_type), result_(result)
 {
 }
 CoreRequests::CoreResponse::CoreResponse(uint8_t request_id) : ResponseImplementation(request_id)

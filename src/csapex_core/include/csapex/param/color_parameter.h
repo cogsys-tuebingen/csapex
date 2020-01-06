@@ -35,8 +35,8 @@ public:
     std::vector<int> value() const;
 
 protected:
-    void get_unsafe(boost::any& out) const override;
-    bool set_unsafe(const boost::any& v) override;
+    void get_unsafe(std::any& out) const override;
+    bool set_unsafe(const std::any& v) override;
 
 private:
     std::vector<int> colors_;

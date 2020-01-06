@@ -134,7 +134,7 @@ void NodeRequests::NodeRequest::deserialize(const SerializationBuffer& data, con
 NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, const AUUID& uuid, uint8_t request_id) : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid)
 {
 }
-NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id)
+NodeRequests::NodeResponse::NodeResponse(NodeRequestType request_type, const AUUID& uuid, std::any result, uint8_t request_id)
   : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid), result_(result)
 {
 }

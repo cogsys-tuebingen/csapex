@@ -7,7 +7,7 @@
 #include <csapex/utility/uuid.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -39,7 +39,7 @@ class CoreNote : public NoteImplementation<CoreNote>
 public:
     CoreNote();
     CoreNote(CoreNoteType request_type);
-    CoreNote(CoreNoteType request_type, const std::vector<boost::any>& payload);
+    CoreNote(CoreNoteType request_type, const std::vector<std::any>& payload);
 
     template <typename... Args>
     CoreNote(CoreNoteType request_type, Args... args) : CoreNote(request_type, { std::forward<Args>(args)... })
@@ -62,12 +62,12 @@ public:
     template <typename T>
     T getPayload(const std::size_t pos) const
     {
-        return boost::any_cast<T>(payload_.at(pos));
+        return std::any_cast<T>(payload_.at(pos));
     }
 
 private:
     CoreNoteType note_type_;
-    std::vector<boost::any> payload_;
+    std::vector<std::any> payload_;
 };
 
 }  // namespace csapex

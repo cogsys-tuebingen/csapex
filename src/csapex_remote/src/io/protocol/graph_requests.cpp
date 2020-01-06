@@ -90,7 +90,7 @@ void GraphRequests::GraphRequest::deserialize(const SerializationBuffer& data, c
 GraphRequests::GraphResponse::GraphResponse(GraphRequestType request_type, const AUUID& uuid, uint8_t request_id) : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid)
 {
 }
-GraphRequests::GraphResponse::GraphResponse(GraphRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id)
+GraphRequests::GraphResponse::GraphResponse(GraphRequestType request_type, const AUUID& uuid, std::any result, uint8_t request_id)
   : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid), result_(result)
 {
 }

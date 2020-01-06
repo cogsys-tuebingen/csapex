@@ -276,7 +276,7 @@ namespace param
 template <typename T>
 ParameterBuilder factory::declareRange(const std::string& name, const ParameterDescription& description, T min, T max, T def, T step)
 {
-    BOOST_STATIC_ASSERT((boost::mpl::contains<RangeParameterTypes, T>::value));
+    static_assert(boost::mpl::contains<RangeParameterTypes, T>::value);
 
     step = param::range::limitStep<T>(min, max, step);
 
@@ -289,7 +289,7 @@ ParameterBuilder factory::declareRange(const std::string& name, const ParameterD
 template <typename T>
 ParameterBuilder factory::declareInterval(const std::string& name, const ParameterDescription& description, T min, T max, T def_min, T def_max, T step)
 {
-    BOOST_STATIC_ASSERT((boost::mpl::contains<IntervalParameterTypes, T>::value));
+    static_assert(boost::mpl::contains<IntervalParameterTypes, T>::value);
 
     std::shared_ptr<IntervalParameter> result(new IntervalParameter(name, description, std::make_pair(def_min, def_max), min, max, step));
 

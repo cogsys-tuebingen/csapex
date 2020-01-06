@@ -8,7 +8,7 @@
 #include <csapex/serialization/serialization_fwd.h>
 
 /// SYSTEM
-#include <boost/any.hpp>
+#include <any>
 
 namespace csapex
 {
@@ -23,7 +23,7 @@ public:
     GraphBroadcasts();
     GraphBroadcasts(GraphBroadcastType Broadcast_type);
     GraphBroadcasts(GraphBroadcastType Broadcast_type, AUUID uuid);
-    GraphBroadcasts(GraphBroadcastType Broadcast_type, AUUID uuid, boost::any payload);
+    GraphBroadcasts(GraphBroadcastType Broadcast_type, AUUID uuid, std::any payload);
 
     void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
     void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -39,7 +39,7 @@ public:
     template <typename R>
     R getPayload() const
     {
-        return boost::any_cast<R>(payload_);
+        return std::any_cast<R>(payload_);
     }
 
 private:
@@ -47,7 +47,7 @@ private:
 
     AUUID graph_uuid_;
 
-    boost::any payload_;
+    std::any payload_;
 };
 
 }  // namespace csapex

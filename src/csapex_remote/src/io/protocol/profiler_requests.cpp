@@ -79,7 +79,7 @@ ProfilerRequests::ProfilerResponse::ProfilerResponse(ProfilerRequestType request
   : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid)
 {
 }
-ProfilerRequests::ProfilerResponse::ProfilerResponse(ProfilerRequestType request_type, const AUUID& uuid, boost::any result, uint8_t request_id)
+ProfilerRequests::ProfilerResponse::ProfilerResponse(ProfilerRequestType request_type, const AUUID& uuid, std::any result, uint8_t request_id)
   : ResponseImplementation(request_id), request_type_(request_type), uuid_(uuid), result_(result)
 {
 }

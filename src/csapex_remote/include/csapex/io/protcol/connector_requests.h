@@ -28,7 +28,7 @@ public:
     public:
         ConnectorRequest(uint8_t request_id);
         ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid);
-        ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid, const boost::any& payload);
+        ConnectorRequest(ConnectorRequestType request_type, const AUUID& uuid, const std::any& payload);
 
         void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -40,7 +40,7 @@ public:
             return "ConnectorRequests";
         }
 
-        boost::any getPayload() const
+        std::any getPayload() const
         {
             return payload_;
         }
@@ -48,7 +48,7 @@ public:
     private:
         ConnectorRequestType request_type_;
         AUUID uuid_;
-        boost::any payload_;
+        std::any payload_;
     };
 
     class ConnectorResponse : public ResponseImplementation<ConnectorResponse>
@@ -56,7 +56,7 @@ public:
     public:
         ConnectorResponse(uint8_t request_id);
         ConnectorResponse(ConnectorRequestType request_type, uint8_t request_id, const AUUID& uuid);
-        ConnectorResponse(ConnectorRequestType request_type, boost::any result, uint8_t request_id, const AUUID& uuid);
+        ConnectorResponse(ConnectorRequestType request_type, std::any result, uint8_t request_id, const AUUID& uuid);
 
         void serialize(SerializationBuffer& data, SemanticVersion& version) const override;
         void deserialize(const SerializationBuffer& data, const SemanticVersion& version) override;
@@ -69,14 +69,14 @@ public:
         template <typename R>
         R getResult() const
         {
-            return boost::any_cast<R>(result_);
+            return std::any_cast<R>(result_);
         }
 
     private:
         ConnectorRequestType request_type_;
         AUUID uuid_;
 
-        boost::any result_;
+        std::any result_;
     };
 
 public:
