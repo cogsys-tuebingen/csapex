@@ -3,7 +3,7 @@ name: catkin_make_isolated
 on: [push]
 
 jobs:
-  build-16-melodic:
+  build-16-kinetic:
     runs-on: [ubuntu-16.04]
     strategy:
       fail-fast: false
@@ -12,7 +12,7 @@ jobs:
         compiler: ["-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"]
     steps:
     - uses: actions/checkout@v1
-    - uses: betwo/github-setup-catkin@v1.0.0
+    - uses: betwo/github-setup-catkin@v1.1.1
       with:
         ros-version: 'kinetic'
         workspace: '$GITHUB_WORKSPACE'
@@ -25,7 +25,7 @@ jobs:
         sudo update-alternatives --set gcc "/usr/bin/gcc-7"
     - name: build
       run: catkin_make_isolated ${{ matrix.build_type }} ${{ matrix.compiler }}
-      
+
   build-18-melodic:
     runs-on: [ubuntu-18.04]
     strategy:
@@ -35,9 +35,27 @@ jobs:
         compiler: ["-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++", "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"]
     steps:
     - uses: actions/checkout@v1
-    - uses: betwo/github-setup-catkin@v1.0.0
+    - uses: betwo/github-setup-catkin@v1.1.1
       with:
         ros-version: 'melodic'
+        workspace: '$GITHUB_WORKSPACE'
+    - name: install_compiler
+      run: sudo apt-get install -y gcc clang
+    - name: build
+      run: catkin_make_isolated ${{ matrix.build_type }} ${{ matrix.compiler }}
+
+  build-20-noetic:
+    runs-on: [ubuntu-20.04]
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: ["-DCMAKE_BUILD_TYPE=Debug", "-DCMAKE_BUILD_TYPE=Release"]
+        compiler: ["-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++", "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"]
+    steps:
+    - uses: actions/checkout@v1
+    - uses: betwo/github-setup-catkin@v1.1.1
+      with:
+        ros-version: 'noetic'
         workspace: '$GITHUB_WORKSPACE'
     - name: install_compiler
       run: sudo apt-get install -y gcc clang
