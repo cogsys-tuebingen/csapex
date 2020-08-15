@@ -6,7 +6,7 @@ project(csapex)
 find_package(catkin QUIET)
 find_package(Threads)
 
-find_package(Qt5 COMPONENTS Core REQUIRED)
+find_package(Qt5 5.0 REQUIRED COMPONENTS Core)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 qt5_add_resources(QT_RESOURCES res/csapex_resources.qrc)
@@ -36,10 +36,10 @@ else()
 
     set(CSAPEX_BOOT_PLUGIN_DIR ${CATKIN_GLOBAL_BIN_DESTINATION}/csapex_plugins)
 
-	
+
     FILE(READ ${CMAKE_CURRENT_LIST_DIR}/package.xml package)
 
-    string(REGEX MATCH "^.*<version>([^<]*)</version>.*$" match ${package})	
+    string(REGEX MATCH "^.*<version>([^<]*)</version>.*$" match ${package})
     if(match)
         set(csapex_VERSION ${CMAKE_MATCH_1})
     endif()
@@ -48,8 +48,8 @@ else()
     if(match)
         set(csapex_MAINTAINER ${CMAKE_MATCH_1})
     endif()
-	
-    if(WIN32)	
+
+    if(WIN32)
         # disable min and max macros
         add_definitions(/D NOMINMAX)
     endif()
@@ -74,7 +74,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(WIN32)
         add_executable(csapex_main
                 src/csapex.cpp
-                res/csapex.rc                
+                res/csapex.rc
                 ${QT_RESOURCES}
         )
 else()
