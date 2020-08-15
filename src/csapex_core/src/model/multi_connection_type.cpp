@@ -70,29 +70,32 @@ void MultiTokenData::deserialize(const SerializationBuffer& data, const Semantic
     data >> types_;
 }
 
-std::vector<TokenData::Ptr> MultiTokenData::getTypes() const {
+std::vector<TokenData::Ptr> MultiTokenData::getTypes() const
+{
     return types_;
 }
 
-
-
 /// YAML
-namespace YAML {
-
+namespace YAML
+{
 template <>
-struct as_if<csapex::MultiTokenData, void> {
-  explicit as_if(const Node& node_) : node(node_) {}
-  const Node& node;
+struct as_if<csapex::MultiTokenData, void>
+{
+    explicit as_if(const Node& node_) : node(node_)
+    {
+    }
+    const Node& node;
 
-  const csapex::MultiTokenData operator()() const {
-    if (!node.m_pNode)
-      throw TypedBadConversion<csapex::MultiTokenData>();
+    const csapex::MultiTokenData operator()() const
+    {
+        if (!node.m_pNode)
+            throw RepresentationException(Mark::null_mark(), "Invalid node");
 
-    csapex::MultiTokenData t(std::vector<TokenData::Ptr>{});
-    if (convert<csapex::MultiTokenData>::decode(node, t))
-      return t;
-    throw TypedBadConversion<csapex::MultiTokenData>();
-  }
+        csapex::MultiTokenData t(std::vector<TokenData::Ptr>{});
+        if (convert<csapex::MultiTokenData>::decode(node, t))
+            return t;
+        throw RepresentationException(Mark::null_mark(), "Could not decode multi token");
+    }
 };
 
 Node convert<csapex::MultiTokenData>::encode(const csapex::MultiTokenData& rhs)
@@ -107,4 +110,4 @@ bool convert<csapex::MultiTokenData>::decode(const Node& node, csapex::MultiToke
     rhs = csapex::MultiTokenData(node["types"].as<std::vector<TokenData::Ptr>>());
     return true;
 }
-}
+}  // namespace YAML

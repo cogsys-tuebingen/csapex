@@ -122,8 +122,7 @@ void DragIO::dragEnterEvent(GraphView* src, QDragEnterEvent* e)
 
         if (cmd != csapex::mime::node && cmd != csapex::mime::snippet) {
             std::cout << "warning: data is ";
-            typedef const std::pair<int, QVariant> PAIR;
-            for (PAIR& pair : v.toStdMap()) {
+            for (auto& pair : v.toStdMap()) {
                 std::cout << pair.first << ":\t" << pair.second.toString().toStdString() << '\n';
             }
             std::cout << std::endl;

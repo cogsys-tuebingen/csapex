@@ -53,7 +53,7 @@ void GraphImplementation::resetActivity()
     }
 
     auto vertices = vertices_;
-    for (graph::VertexPtr vertex : vertices) {
+    for (auto& vertex : vertices) {
         NodeFacadeImplementationPtr node = std::dynamic_pointer_cast<NodeFacadeImplementation>(vertex->getNodeFacade());
         apex_assert_hard(node);
         node->setActive(false);
@@ -73,7 +73,7 @@ void GraphImplementation::clear()
     apex_assert_hard(edges_.empty());
 
     auto vertices = vertices_;
-    for (graph::VertexPtr vertex : vertices) {
+    for (auto& vertex : vertices) {
         NodeFacadePtr node = vertex->getNodeFacade();
         deleteNode(node->getUUID());
     }
@@ -383,12 +383,12 @@ std::set<graph::Vertex*> GraphImplementation::findVerticesThatJoinStreams()
 {
     std::set<graph::Vertex*> joins;
 
-    for (graph::VertexPtr vertex : vertices_) {
+    for (auto& vertex : vertices_) {
         vertex->getNodeCharacteristics().depth = -1;
     }
 
     // init node_depth_ and find merging nodes
-    for (const graph::VertexPtr source : sources_) {
+    for (const auto& source : sources_) {
         source->getNodeCharacteristics().depth = 0;
 
         std::deque<const graph::Vertex*> Q;
@@ -417,7 +417,7 @@ std::set<graph::Vertex*> GraphImplementation::findVerticesThatNeedMessages()
 {
     std::set<graph::Vertex*> vertices_that_need_messages;
 
-    for (const graph::VertexPtr v : vertices_) {
+    for (const auto& v : vertices_) {
         if (v->getNodeFacade()->isProcessingNothingMessages()) {
             vertices_that_need_messages.insert(v.get());
             break;
@@ -426,7 +426,7 @@ std::set<graph::Vertex*> GraphImplementation::findVerticesThatNeedMessages()
         NodeFacadeImplementationPtr local_facade = std::dynamic_pointer_cast<NodeFacadeImplementation>(v->getNodeFacade());
         apex_assert_hard(local_facade);
 
-        for (const ConnectionPtr c : local_facade->getNodeHandle()->getOutputTransition()->getConnections()) {
+        for (const auto& c : local_facade->getNodeHandle()->getOutputTransition()->getConnections()) {
             if (c->to()->isEssential()) {
                 vertices_that_need_messages.insert(v.get());
                 break;
@@ -478,7 +478,7 @@ void GraphImplementation::calculateDepths()
     std::set<graph::Vertex*> joins = findVerticesThatJoinStreams();
 
     // populate node_depth_ with minimal depths
-    for (const graph::VertexPtr source : sources_) {
+    for (const auto& source : sources_) {
         source->getNodeCharacteristics().depth = 0;
 
         std::deque<const graph::Vertex*> Q;
@@ -701,7 +701,7 @@ NodeHandle* GraphImplementation::findNodeHandleNoThrow(const UUID& uuid) const n
         }
 
     } else {
-        for (const auto vertex : vertices_) {
+        for (const auto& vertex : vertices_) {
             NodeFacadePtr facade = vertex->getNodeFacade();
             if (facade->getUUID() == uuid) {
                 NodeFacadeImplementationPtr local_facade = std::dynamic_pointer_cast<NodeFacadeImplementation>(facade);
@@ -721,7 +721,7 @@ NodeHandle* GraphImplementation::findNodeHandleForConnectorNoThrow(const UUID& u
 
 NodeHandle* GraphImplementation::findNodeHandleWithLabel(const std::string& label) const
 {
-    for (const auto vertex : vertices_) {
+    for (const auto& vertex : vertices_) {
         NodeFacadePtr facade = vertex->getNodeFacade();
         NodeStatePtr state = facade->getNodeState();
         if (state) {
@@ -776,7 +776,7 @@ NodeFacadePtr GraphImplementation::findNodeFacadeNoThrow(const UUID& uuid) const
         }
 
     } else {
-        for (const auto vertex : vertices_) {
+        for (const auto& vertex : vertices_) {
             NodeFacadePtr nf = vertex->getNodeFacade();
             if (nf->getUUID() == uuid) {
                 return nf;
@@ -794,7 +794,7 @@ NodeFacadePtr GraphImplementation::findNodeFacadeForConnectorNoThrow(const UUID&
 
 NodeFacadePtr GraphImplementation::findNodeFacadeWithLabel(const std::string& label) const
 {
-    for (const auto vertex : vertices_) {
+    for (const auto& vertex : vertices_) {
         NodeFacadePtr nf = vertex->getNodeFacade();
         if (nf->getLabel() == label) {
             return nf;
@@ -887,7 +887,7 @@ ConnectorPtr GraphImplementation::findConnectorNoThrow(const UUID& uuid) noexcep
 
 bool GraphImplementation::isConnected(const UUID& from, const UUID& to) const
 {
-    for (const ConnectionConstPtr& connection : edges_) {
+    for (const auto& connection : edges_) {
         if (connection->from()->getUUID() == from && connection->to()->getUUID() == to) {
             return true;
         }

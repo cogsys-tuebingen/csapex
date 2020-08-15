@@ -128,7 +128,7 @@ private:
     std::recursive_mutex tasks_mtx_;
     struct greater
     {
-        bool operator()(const TaskPtr& a, const TaskPtr& b)
+        bool operator()(const TaskPtr& a, const TaskPtr& b) const
         {
             return a->getPriority() > b->getPriority();
         }

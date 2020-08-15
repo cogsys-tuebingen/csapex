@@ -26,6 +26,7 @@
 
 /// SYSTEM
 #include <QTabWidget>
+#include <QTabBar>
 #include <QInputDialog>
 #include <QResizeEvent>
 #include <QPropertyAnimation>

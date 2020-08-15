@@ -23,7 +23,7 @@ StaticParameterProvider::StaticParameterProvider(const Map& params) : params_(pa
 }
 StaticParameterProvider::StaticParameterProvider(const Vec& params)
 {
-    for (const Parameter::Ptr param : params) {
+    for (const Parameter::Ptr& param : params) {
         params_.insert(std::make_pair(param->name(), param));
     }
 }

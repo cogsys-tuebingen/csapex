@@ -22,6 +22,7 @@
 #include <QContextMenuEvent>
 #include <iostream>
 #include <QSizeGrip>
+#include <QStyle>
 #include <QThread>
 #include <cmath>
 #include <sstream>
