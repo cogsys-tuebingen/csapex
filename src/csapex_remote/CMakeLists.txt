@@ -4,6 +4,9 @@ project(csapex_remote CXX)
 
 find_package(catkin REQUIRED COMPONENTS csapex_core)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 # make sure the devel include exists, there we will generate the export headers
 file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
 
@@ -97,6 +100,7 @@ add_library(${PROJECT_NAME} SHARED
 )
 target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
+    Threads::Threads
 )
 
 generate_export_header( ${PROJECT_NAME}

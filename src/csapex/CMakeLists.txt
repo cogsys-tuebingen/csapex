@@ -4,6 +4,7 @@ project(csapex)
 
 ## Find catkin macros and libraries
 find_package(catkin QUIET)
+find_package(Threads)
 
 find_package(Qt5 COMPONENTS Core REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -85,7 +86,9 @@ set_target_properties(csapex_main PROPERTIES
     AUTOMOC TRUE
     COMPILE_FLAGS "-fPIC")
 target_link_libraries(csapex_main
-    ${catkin_LIBRARIES})
+    ${catkin_LIBRARIES}
+    Threads::Threads
+)
 
 
 
@@ -93,7 +96,9 @@ add_executable(csapex_server
         src/csapex_server.cpp)
 
 target_link_libraries(csapex_server
-    ${catkin_LIBRARIES})
+    ${catkin_LIBRARIES}
+    Threads::Threads
+)
 
 
 
@@ -107,7 +112,9 @@ set_target_properties(csapex_client PROPERTIES
     AUTOMOC TRUE
     COMPILE_FLAGS "-fPIC")
 target_link_libraries(csapex_client
-    ${catkin_LIBRARIES})
+    ${catkin_LIBRARIES}
+    Threads::Threads
+)
 
 
 #
