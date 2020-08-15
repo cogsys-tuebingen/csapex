@@ -5,9 +5,7 @@
 #include <csapex/param/register_parameter.h>
 #include <csapex/serialization/io/std_io.h>
 #include <csapex/utility/yaml.h>
-
-/// SYSTEM
-#include <any>
+#include <csapex/utility/any.h>
 
 CSAPEX_REGISTER_PARAM(PathParameter)
 

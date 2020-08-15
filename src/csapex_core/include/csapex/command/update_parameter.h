@@ -7,9 +7,7 @@
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/assert.h>
 #include <csapex/serialization/serialization_buffer.h>
-
-/// SYSTEM
-#include <any>
+#include <csapex/utility/any.h>
 
 namespace csapex
 {

@@ -4,11 +4,11 @@
 /// COMPONENT
 #include <csapex/param/parameter_impl.hpp>
 #include <csapex_core/csapex_param_export.h>
+#include <csapex/utility/any.h>
 
 /// SYSTEM
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/contains.hpp>
-#include <any>
 
 namespace csapex
 {
@@ -163,7 +163,7 @@ private:
     template <typename T>
     T read(const std::any& var) const
     {
-        static_assert(boost::mpl::contains<IntervalParameterTypes, T>::value);
+        static_assert(boost::mpl::contains<IntervalParameterTypes, T>::value, "");
         try {
             Lock l = lock();
             return std::any_cast<T>(var);

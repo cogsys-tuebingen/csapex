@@ -64,7 +64,7 @@ void ValueParameter::get_unsafe(std::any& out) const
 bool ValueParameter::set_unsafe(const std::any& v)
 {
     bool change = true;
-    if (value_.has_value()) {
+    if (any_has_value(value_)) {
         if (v.type() == typeid(int)) {
             change = std::any_cast<int>(value_) != std::any_cast<int>(v);
         } else if (v.type() == typeid(double)) {

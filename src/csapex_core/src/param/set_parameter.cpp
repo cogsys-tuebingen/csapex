@@ -39,11 +39,11 @@ void SetParameter::setSet(const std::vector<std::string>& set)
     }
 
     if (!set.empty()) {
-        if (!def_.has_value()) {
+        if (!any_has_value(def_)) {
             def_ = set.front();
         }
 
-        if (!value_.has_value()) {
+        if (!any_has_value(value_)) {
             value_ = def_;
         }
     }
@@ -141,7 +141,7 @@ std::string SetParameter::toStringImpl() const
 
 void SetParameter::get_unsafe(std::any& out) const
 {
-    if (!value_.has_value()) {
+    if (!any_has_value(value_)) {
         out = def_;
     } else {
         out = value_;
@@ -189,7 +189,7 @@ bool SetParameter::set_unsafe(const std::any& v)
     }
 
     bool change = true;
-    if (value_.has_value()) {
+    if (any_has_value(value_)) {
         if (v.type() == typeid(int)) {
             change = std::any_cast<int>(value_) != std::any_cast<int>(v);
         } else if (v.type() == typeid(double)) {
@@ -300,7 +300,7 @@ void SetParameter::doSerializeImplementation(const std::string& type_name, YAML:
     n[type_name] = std::any_cast<T>(value_);
 
     std::vector<std::pair<std::string, T>> values;
-    for (const std::pair<std::string, std::any>& pair : set_) {
+    for (const auto& pair : set_) {
         values.push_back(std::make_pair(pair.first, std::any_cast<T>(pair.second)));
     }
 

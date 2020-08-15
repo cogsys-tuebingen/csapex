@@ -267,7 +267,7 @@ SerializationBuffer& SerializationBuffer::writeAny(const std::any& any)
     if (fn != any_serializer.end()) {
         fn->second(*this, any);
     } else {
-        if (any.has_value()) {
+        if (any_has_value(any)) {
             std::cerr << "cannot serialize std::any containing " << type2name(any.type()) << std::endl;
         }
         operator<<((uint8_t)0);

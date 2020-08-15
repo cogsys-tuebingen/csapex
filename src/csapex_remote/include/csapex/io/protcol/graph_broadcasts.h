@@ -6,9 +6,7 @@
 #include <csapex/io/response_impl.hpp>
 #include <csapex/param/parameter.h>
 #include <csapex/serialization/serialization_fwd.h>
-
-/// SYSTEM
-#include <any>
+#include <csapex/utility/any.h>
 
 namespace csapex
 {

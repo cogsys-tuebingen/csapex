@@ -32,7 +32,7 @@ IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interva
     Parameter::operator=(static_cast<const Parameter&>(interval));
 
     bool change = false;
-    if (!values_.first.has_value() || !values_.second.has_value()) {
+    if (!any_has_value(values_.first) || !any_has_value(values_.second)) {
         change = true;
 
     } else {
@@ -47,13 +47,13 @@ IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interva
 
     def_ = interval.def_;
 
-    if (interval.max_.has_value()) {
+    if (any_has_value(interval.max_)) {
         max_ = interval.max_;
     }
-    if (interval.min_.has_value()) {
+    if (any_has_value(interval.min_)) {
         min_ = interval.min_;
     }
-    if (interval.step_.has_value()) {
+    if (any_has_value(interval.step_)) {
         step_ = interval.step_;
     }
 
@@ -66,7 +66,7 @@ IntervalParameter& IntervalParameter::operator=(const IntervalParameter& interva
 
 bool IntervalParameter::accepts(const std::type_info& type) const
 {
-    if (!values_.first.has_value()) {
+    if (!any_has_value(values_.first)) {
         return type == typeid(std::pair<int, int>) || type == typeid(std::pair<double, double>);
     } else {
         return Parameter::accepts(type);
@@ -118,7 +118,7 @@ bool IntervalParameter::set_unsafe(const std::any& v)
     Lock l = lock();
     if (v.type() == typeid(std::pair<int, int>)) {
         auto val = std::any_cast<std::pair<int, int> >(v);
-        if (!values_.first.has_value()) {
+        if (!any_has_value(values_.first)) {
             values_ = val;
             return true;
         }
@@ -128,7 +128,7 @@ bool IntervalParameter::set_unsafe(const std::any& v)
         }
     } else {
         auto val = std::any_cast<std::pair<double, double> >(v);
-        if (!values_.first.has_value()) {
+        if (!any_has_value(values_.first)) {
             values_ = val;
             return true;
         }
@@ -161,21 +161,21 @@ void IntervalParameter::doSerialize(YAML::Node& n) const
     if (values_.first.type() == typeid(int)) {
         n["int"][0] = std::any_cast<int>(values_.first);
         n["int"][1] = std::any_cast<int>(values_.second);
-        if (min_.has_value())
+        if (any_has_value(min_))
             n["min"] = std::any_cast<int>(min_);
-        if (max_.has_value())
+        if (any_has_value(max_))
             n["max"] = std::any_cast<int>(max_);
-        if (step_.has_value())
+        if (any_has_value(step_))
             n["step"] = std::any_cast<int>(step_);
 
     } else if (values_.first.type() == typeid(double)) {
         n["double"][0] = std::any_cast<double>(values_.first);
         n["double"][1] = std::any_cast<double>(values_.second);
-        if (min_.has_value())
+        if (any_has_value(min_))
             n["min"] = std::any_cast<double>(min_);
-        if (max_.has_value())
+        if (any_has_value(max_))
             n["max"] = std::any_cast<double>(max_);
-        if (step_.has_value())
+        if (any_has_value(step_))
             n["step"] = std::any_cast<double>(step_);
     }
 }

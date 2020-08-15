@@ -10,9 +10,7 @@
 #include <csapex/utility/slim_signal.h>
 #include <csapex/serialization/serializable.h>
 #include <csapex/utility/yaml.h>
-
-/// SYSTEM
-#include <any>
+#include <csapex/utility/any.h>
 
 namespace csapex
 {

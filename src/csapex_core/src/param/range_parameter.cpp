@@ -31,7 +31,7 @@ RangeParameter& RangeParameter::operator=(const RangeParameter& range)
     Parameter::operator=(static_cast<const Parameter&>(range));
 
     bool value_change = false;
-    if (!value_.has_value() || value_.type() != range.value_.type()) {
+    if (!any_has_value(value_) || value_.type() != range.value_.type()) {
         value_change = true;
         step_ = range.step_;
     } else {
@@ -84,7 +84,7 @@ void RangeParameter::get_unsafe(std::any& out) const
 bool RangeParameter::set_unsafe(const std::any& v)
 {
     bool change = true;
-    if (value_.has_value()) {
+    if (any_has_value(value_)) {
         if (v.type() == typeid(int)) {
             change = std::any_cast<int>(value_) != std::any_cast<int>(v);
         } else if (v.type() == typeid(double)) {
@@ -149,13 +149,13 @@ void RangeParameter::doDeserialize(const YAML::Node& n)
             step_ = range::limitStep(std::any_cast<double>(min_), std::any_cast<double>(max_), n["step"].as<double>());
     }
 
-    if (!def_min_.has_value())
+    if (!any_has_value(def_min_))
         def_min_ = min_;
 
-    if (!def_max_.has_value())
+    if (!any_has_value(def_max_))
         def_max_ = max_;
 
-    if (!def_value_.has_value())
+    if (!any_has_value(def_value_))
         def_value_ = value_;
 }
 

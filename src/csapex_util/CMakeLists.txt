@@ -4,6 +4,8 @@ project(csapex_util CXX)
 
 find_package(catkin REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 enable_testing()
 
@@ -72,6 +74,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
     ${YAML-CPP_LIBRARY}
+    Threads::Threads
 )
 
 

@@ -5,9 +5,7 @@
 #include <csapex/io/note_impl.hpp>
 #include <csapex/serialization/serialization_fwd.h>
 #include <csapex/utility/uuid.h>
-
-/// SYSTEM
-#include <any>
+#include <csapex/utility/any.h>
 
 namespace csapex
 {

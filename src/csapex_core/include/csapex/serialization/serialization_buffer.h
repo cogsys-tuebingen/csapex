@@ -4,6 +4,7 @@
 /// PROJECT
 #include <csapex/utility/assert.h>
 #include <csapex/serialization/serialization_fwd.h>
+#include <csapex/utility/any.h>
 
 /// SYSTEM
 #include <vector>
@@ -13,7 +14,6 @@
 #include <sstream>
 #include <limits>
 #include <typeindex>
-#include <any>
 #include <map>
 
 namespace YAML

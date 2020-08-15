@@ -5,9 +5,7 @@
 #include "command_impl.hpp"
 #include <csapex/utility/uuid.h>
 #include <csapex/utility/assert.h>
-
-/// SYSTEM
-#include <any>
+#include <csapex/utility/any.h>
 
 namespace csapex
 {
