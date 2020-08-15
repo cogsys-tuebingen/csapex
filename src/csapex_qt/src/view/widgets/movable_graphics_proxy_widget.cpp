@@ -11,10 +11,11 @@
 #include <csapex/model/graph_facade.h>
 
 /// SYSTEM
+#include <QApplication>
 #include <QGraphicsSceneMouseEvent>
 #include <QWidget>
+#include <cmath>
 #include <iostream>
-#include <QApplication>
 
 using namespace csapex;
 
@@ -59,8 +60,8 @@ QVariant MovableGraphicsProxyWidget::itemChange(GraphicsItemChange change, const
     if (QApplication::mouseButtons() == Qt::LeftButton && change == ItemPositionChange && view_core_.isGridLockEnabled()) {
         QVariant value_p = QGraphicsProxyWidget::itemChange(change, value);
         QPointF newPos = value_p.toPointF();
-        newPos.setX(round(newPos.x() / 10.0) * 10.0);
-        newPos.setY(round(newPos.y() / 10.0) * 10.0);
+        newPos.setX(std::round(newPos.x() / 10.0) * 10.0);
+        newPos.setY(std::round(newPos.y() / 10.0) * 10.0);
         return newPos;
     } else
         return QGraphicsProxyWidget::itemChange(change, value);
