@@ -3,6 +3,7 @@
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/imgproc_c.h>
 #include <stdexcept>
 #include <QImage>
 
@@ -87,51 +88,40 @@ public:
      */
     static QImage mat2QImage(const cv::Mat& mat)
     {
-        const IplImage& i = mat;
-        return ipl2QImage(&i);
-    }
-
-    /**
-     * @brief mat2QImage converts an OpenCV image to a Qt image
-     * @param iplImg OpenCV
-     * @return Qt image image
-     */
-    static QImage ipl2QImage(const IplImage* iplImg)
-    {
-        switch (iplImg->depth) {
+        switch (mat.depth()) {
             case IPL_DEPTH_8U:
-                return ipl2QImageImpl<unsigned char>(iplImg);
+                return mat2QImageImpl<unsigned char>(mat);
             case (int)IPL_DEPTH_8S:
-                return ipl2QImageImpl<char>(iplImg);
+                return mat2QImageImpl<char>(mat);
             case IPL_DEPTH_16U:
-                return ipl2QImageImpl<unsigned short>(iplImg);
+                return mat2QImageImpl<unsigned short>(mat);
             case (int)IPL_DEPTH_16S:
-                return ipl2QImageImpl<short>(iplImg);
+                return mat2QImageImpl<short>(mat);
             case (int)IPL_DEPTH_32S:
-                return ipl2QImageImpl<int>(iplImg);
+                return mat2QImageImpl<int>(mat);
             case IPL_DEPTH_32F:
-                return ipl2QImageImpl<float>(iplImg);
+                return mat2QImageImpl<float>(mat);
             case IPL_DEPTH_64F:
-                return ipl2QImageImpl<double>(iplImg);
+                return mat2QImageImpl<double>(mat);
             default:
                 throw std::runtime_error("cannot convert image, unknown type");
         }
     }
 
     template <typename T>
-    static QImage ipl2QImageImpl(const IplImage* iplImg)
+    static QImage mat2QImageImpl(const cv::Mat& mat)
     {
-        int h = iplImg->height;
-        int w = iplImg->width;
-        int channels = iplImg->nChannels;
+        int h = mat.rows;
+        int w = mat.cols;
+        int channels = mat.channels();
         QImage qimg(w, h, QImage::Format_ARGB32);
-        T* data = (T*)(iplImg->imageData);
+        T* data = (T*)(mat.data);
 
         assert(w > 0);
         assert(h > 0);
         assert(data != NULL);
 
-        for (int y = 0; y < h; y++, data += iplImg->widthStep / sizeof(T)) {
+        for (int y = 0; y < h; y++, data += mat.step1() / sizeof(T)) {
             for (int x = 0; x < w; x++) {
                 char r = 0, g = 0, b = 0, a = 0;
                 if (channels == 1) {
