@@ -89,19 +89,19 @@ public:
     static QImage mat2QImage(const cv::Mat& mat)
     {
         switch (mat.depth()) {
-            case IPL_DEPTH_8U:
+            case CV_8U:
                 return mat2QImageImpl<unsigned char>(mat);
-            case (int)IPL_DEPTH_8S:
+            case (int)CV_8S:
                 return mat2QImageImpl<char>(mat);
-            case IPL_DEPTH_16U:
+            case CV_16U:
                 return mat2QImageImpl<unsigned short>(mat);
-            case (int)IPL_DEPTH_16S:
+            case (int)CV_16S:
                 return mat2QImageImpl<short>(mat);
-            case (int)IPL_DEPTH_32S:
+            case (int)CV_32S:
                 return mat2QImageImpl<int>(mat);
-            case IPL_DEPTH_32F:
+            case CV_32F:
                 return mat2QImageImpl<float>(mat);
-            case IPL_DEPTH_64F:
+            case CV_64F:
                 return mat2QImageImpl<double>(mat);
             default:
                 throw std::runtime_error("cannot convert image, unknown type");
