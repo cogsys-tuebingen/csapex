@@ -39,6 +39,7 @@ target_include_directories(${PROJECT_NAME}
         ${GTEST_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME}
     ${csapex_LIBRARIES}
+    pthread
 )
 
 SET(ENABLE_COVERAGE "false" CACHE BOOL "Enable Coverage")
@@ -51,7 +52,9 @@ if(NOT ${ENABLE_COVERAGE})
     add_test(NAME csapex_regression_test COMMAND csapex_regression_tester)
     set_tests_properties(csapex_regression_test PROPERTIES TIMEOUT 60)
     target_link_libraries(csapex_regression_tester
-        ${catkin_LIBRARIES})
+        ${catkin_LIBRARIES}
+        pthread
+    )
 endif()
 
 #

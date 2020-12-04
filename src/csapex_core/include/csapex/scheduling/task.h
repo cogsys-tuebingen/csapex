@@ -7,6 +7,7 @@
 
 /// SYSTEM
 #include <functional>
+#include <string>
 
 namespace csapex
 {
