@@ -1,4 +1,4 @@
-name: catkin_make_isolated
+name: catkin_build
 
 on: [push]
 
@@ -15,6 +15,7 @@ jobs:
     - uses: betwo/github-setup-catkin@master
       with:
         ros-version: 'kinetic'
+        build-tool: 'catkin_tools'
         workspace: '$GITHUB_WORKSPACE'
     - name: install_compiler
       run: |
@@ -24,7 +25,7 @@ jobs:
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 50 --slave /usr/bin/g++ g++ /usr/bin/g++-7
         sudo update-alternatives --set gcc "/usr/bin/gcc-7"
     - name: build
-      run: catkin_make_isolated ${{ matrix.build_type }} ${{ matrix.compiler }}
+      run: catkin build --no-status -cs --cmake-args ${{ matrix.build_type }} ${{ matrix.compiler }}
 
   build-18-melodic:
     runs-on: [ubuntu-18.04]
@@ -38,11 +39,12 @@ jobs:
     - uses: betwo/github-setup-catkin@master
       with:
         ros-version: 'melodic'
+        build-tool: 'catkin_tools'
         workspace: '$GITHUB_WORKSPACE'
     - name: install_compiler
       run: sudo apt-get install -y gcc clang
     - name: build
-      run: catkin_make_isolated ${{ matrix.build_type }} ${{ matrix.compiler }}
+      run: catkin build --no-status -cs --cmake-args ${{ matrix.build_type }} ${{ matrix.compiler }}
 
   build-20-noetic:
     runs-on: [ubuntu-20.04]
@@ -56,8 +58,9 @@ jobs:
     - uses: betwo/github-setup-catkin@master
       with:
         ros-version: 'noetic'
+        build-tool: 'catkin_tools'
         workspace: '$GITHUB_WORKSPACE'
     - name: install_compiler
       run: sudo apt-get install -y gcc clang
     - name: build
-      run: catkin_make_isolated ${{ matrix.build_type }} ${{ matrix.compiler }}
+      run: catkin build --no-status -cs --cmake-args ${{ matrix.build_type }} ${{ matrix.compiler }}
